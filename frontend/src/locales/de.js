@@ -7716,5 +7716,14 @@ export default {
   "who.nobody": "Noch niemand kann ihn öffnen.",
   "who.host": "In Dateien: {text} Im Netzwerk entscheidet {host}.",
   "who.change_one": "{names} kann ihn ändern.",
-  "who.view_one": "{names} kann ihn ansehen."
+  "who.view_one": "{names} kann ihn ansehen.",
+  "who.l_none": "Kein Zugriff",
+  "who.l_read": "Kann ansehen",
+  "who.l_write": "Kann ansehen und ändern",
+  "who.l_admin": "Kann ansehen und ändern (Administrator)",
+  "who.title": "Wer „{share}“ öffnen kann",
+  "who.note_host": "Das gilt für Dateien. Im Netzwerk entscheidet das Host-System.",
+  "who.note": "Eine Liste für Dateien und das Netzwerk.",
+  "who.saved": "Gespeichert. „{share}“ öffnet sich für die gewählten Personen.",
+  "who.open": "Wer ihn öffnen kann"
 };

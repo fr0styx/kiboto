@@ -7716,5 +7716,14 @@ export default {
   "who.nobody": "还没有人能打开。",
   "who.host": "在文件中：{text} 网络上由 {host} 决定。",
   "who.change_one": "{names} 可以修改。",
-  "who.view_one": "{names} 可以查看。"
+  "who.view_one": "{names} 可以查看。",
+  "who.l_none": "无权访问",
+  "who.l_read": "可以查看",
+  "who.l_write": "可以查看和修改",
+  "who.l_admin": "可以查看和修改（管理员）",
+  "who.title": "谁可以打开“{share}”",
+  "who.note_host": "这适用于文件。网络上由主机系统决定。",
+  "who.note": "文件和网络共用一个名单。",
+  "who.saved": "已保存。“{share}”对你选择的人开放。",
+  "who.open": "谁可以打开"
 };

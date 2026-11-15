@@ -18,8 +18,9 @@ describe('who can open it (SET-22, Shares 2)', () => {
     const grid = /** @type {HTMLElement} */ (document.getElementById('g'));
     get.mockResolvedValueOnce({ host: 'unraid', shares: [{ name: 'photos', people: [P('Anna', 'write')] }] });
     await sw.fillWhoLines(grid, { unraid: 'Unraid' });
-    expect(grid.querySelector('[data-share="photos"] .share-who')?.textContent).toBe('In Files: Anna can change it. Over the network: Unraid decides.');
+    expect(grid.querySelector('[data-share="photos"] .share-who-text')?.textContent).toBe('In Files: Anna can change it. Over the network: Unraid decides.');
     expect(grid.querySelector('[data-share="media"] .share-who')).toBeNull();
+    expect(grid.querySelector('[data-share="photos"] [data-who-open]')?.textContent).toBe('Who can open it');
     get.mockRejectedValueOnce(new Error('403'));
     expect(await sw.fillWhoLines(grid)).toBeNull();
     expect(await sw.fillWhoLines(null)).toBeNull();

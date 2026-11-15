@@ -336,7 +336,13 @@
 .bk-more, .bk-all-versions { margin-top: 12px; }
 .bk-more > summary, .bk-all-versions > summary { cursor: pointer; font-weight: 700; padding: 8px 0; }
 /* Shared folders: who can open it (SET-22) */
-.share-who { margin: 6px 0 0; font-size: var(--kb-fs-sm); color: var(--muted); }
+.share-who { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: 6px 0 0; font-size: var(--kb-fs-sm); color: var(--muted); }
+.who-window { max-width: min(520px, calc(100vw - 32px)); width: 100%; padding: 18px; border: 1px solid var(--kb-line-12); border-radius: 14px; background: var(--kb-glaze-6, var(--bg)); color: var(--fg); }
+.who-rows { list-style: none; margin: 10px 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.who-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; min-height: 40px; }
+.who-row + .who-row { border-top: 1px solid var(--kb-line-7); padding-top: 6px; }
+.who-fixed, .who-note { color: var(--muted); font-size: var(--kb-fs-sm); }
+.who-actions { display: flex; justify-content: flex-end; gap: 8px; }
 .net-link { color: var(--kb-text-accent); font-weight: 600; }
 /* Network: This NAS at home and one row per port (SET-24 m) */
 .net-home { margin-bottom: 14px; }

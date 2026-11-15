@@ -228,6 +228,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Shared folders say who can open them**: "Anna and Ben can change it. Mia can view it.",
   administrators included. On Unraid and TrueNAS it says the host decides over the network.
 
+#### Changes
+
+- **Who can open it**, per shared folder: every person with No access, Can view or Can view and
+  change; administrators shown as they are, guests can view at most.
+
 ## v2.0.2 (2026-11-12)
 ### 🧭 A new Settings sidebar, five themes, honest pages, and remote access cut down to what works
 

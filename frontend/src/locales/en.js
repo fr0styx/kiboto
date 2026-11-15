@@ -7716,5 +7716,14 @@ export default {
   "who.nobody": "Nobody can open it yet.",
   "who.host": "In Files: {text} Over the network: {host} decides.",
   "who.change_one": "{names} can change it.",
-  "who.view_one": "{names} can view it."
+  "who.view_one": "{names} can view it.",
+  "who.l_none": "No access",
+  "who.l_read": "Can view",
+  "who.l_write": "Can view and change",
+  "who.l_admin": "Can view and change (administrator)",
+  "who.title": "Who can open \"{share}\"",
+  "who.note_host": "This applies to Files. Over the network, the host decides.",
+  "who.note": "One list for Files and the network.",
+  "who.saved": "Saved. \"{share}\" opens for the people you chose.",
+  "who.open": "Who can open it"
 };
