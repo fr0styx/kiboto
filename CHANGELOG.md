@@ -154,6 +154,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **One sign-in for the family's apps keeps up by itself**: adding, renaming or removing a person, or
   a new role, reaches it within seconds; "Update people now" is no longer needed for that.
 
+#### Changes
+
+- **People keeps itself up to date**: someone accepting an invite, a change to a person, or a sign-in
+  or sign-out shows up on its own while the page is open.
+
 ## v2.0.2 (2026-11-12)
 ### 🧭 A new Settings sidebar, five themes, honest pages, and remote access cut down to what works
 

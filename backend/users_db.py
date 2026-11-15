@@ -781,6 +781,7 @@ def update_user_profile(
         from backend.services.samba_engine import refresh_access
 
         if status is not None:
+            _bump_people()
             _network_follows_status(user_id, status == "active")
         refresh_access()  # their SMB access follows the new role or status (SEC-28)
     if changed and (display_name is not None or email is not None or role_id is not None):
@@ -825,6 +826,19 @@ def on_status_change(hook: Any) -> None:
         _STATUS_HOOKS.append(hook)
 
 
+_people_rev = 0
+
+
+def people_rev() -> int:
+    """Goes up whenever people or their sign-ins change; the page reloads its lists (SET-19)."""
+    return _people_rev
+
+
+def _bump_people() -> None:
+    global _people_rev
+    _people_rev += 1
+
+
 _PEOPLE_HOOKS: list[Any] = []
 _people_timer: threading.Timer | None = None
 _people_lock = threading.Lock()
@@ -848,6 +862,7 @@ def _run_people_hooks() -> None:
 
 def _people_changed() -> None:
     global _people_timer
+    _bump_people()
     if not _PEOPLE_HOOKS or test_mode():
         return
     with _people_lock:
@@ -946,6 +961,7 @@ def create_user_session(
     is_remembered: bool = False,
     db_path: str | None = None,
 ) -> str:
+    _bump_people()  # the devices list follows (SET-19)
     raw_token = secrets.token_urlsafe(32)
     token_hash = hashlib.sha256(raw_token.encode("utf-8")).hexdigest()
 
@@ -1107,6 +1123,7 @@ def validate_user_session(raw_token: str, db_path: str | None = None) -> dict[st
 
 
 def revoke_user_session(raw_token: str, db_path: str | None = None) -> None:
+    _bump_people()  # the devices list follows (SET-19)
     if not raw_token:
         return
     token_hash = hashlib.sha256(raw_token.encode("utf-8")).hexdigest()
@@ -1118,6 +1135,7 @@ def revoke_user_session(raw_token: str, db_path: str | None = None) -> None:
 
 def revoke_session_by_hash(session_id_hash_prefix: str, user_id: str, db_path: str | None = None) -> bool:
     """Revokes a session by hash prefix and immediately purges it from in-memory cache."""
+    _bump_people()  # the devices list follows (SET-19)
     with users_db_session(db_path) as conn:
         res = conn.execute(
             "DELETE FROM sessions WHERE session_id_hash LIKE ? AND user_id = ?",
@@ -1134,6 +1152,7 @@ def revoke_session_by_hash(session_id_hash_prefix: str, user_id: str, db_path: s
 
 
 def revoke_all_sessions_for_user(user_id: str, except_token: str | None = None, db_path: str | None = None) -> None:
+    _bump_people()  # the devices list follows (SET-19)
     except_hash = hashlib.sha256(except_token.encode("utf-8")).hexdigest() if except_token else ""
     with users_db_session(db_path) as conn:
         if except_hash:

@@ -68,6 +68,8 @@ export function initUsersManagement() {
   fetchCurrentProfile();
   onManagementDom(bindUsersPane);
   bindUserModals();
+  // the lists update themselves while People is open (SET-19)
+  import('./people-live.js').then((m) => m.installPeopleLive({ bus: ZettEventBus, reload: () => { loadUsersList(); loadSessionsList(); }, shown: () => m.peopleShown() })).catch(() => {});
 }
 
 // The Users pane lives in Mission Control, which is inserted when first needed (FE-04)

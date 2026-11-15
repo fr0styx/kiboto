@@ -76,6 +76,13 @@ logger = logging.getLogger("Kiboto")
 _notify_executor = concurrent.futures.ThreadPoolExecutor(max_workers=2, thread_name_prefix="zett_notify")
 
 
+def _people_rev() -> int:
+    """In the live stats as security.people_rev: People reloads its lists when it moves (SET-19)."""
+    from backend.users_db import people_rev
+
+    return people_rev()
+
+
 def _text(name: str, **params) -> dict:
     """The message keys of alert.<name> with its values: the alert in the household's language and
     the activity-log entry in the reader's (NUX-3)."""
@@ -437,7 +444,7 @@ def _build_payload(
         "layout": get_current_layout(),
         "copy_status": Z_STATE.copy_status,
         "events": events_list,
-        "security": {"is_default_password": is_using_default_password()},
+        "security": {"is_default_password": is_using_default_password(), "people_rev": _people_rev()},
         "unraid": read_unraid_status(),
         "docker": docker_list,
         "ups": (ups_stat := read_ups_status()),
@@ -682,7 +689,7 @@ def collect():
             }
         )
         data["events"] = events_snapshot()
-        data["security"] = {"is_default_password": is_using_default_password()}
+        data["security"] = {"is_default_password": is_using_default_password(), "people_rev": _people_rev()}
         if "lcd" not in data:
             data["lcd"] = {"page": Z_STATE.current_lcd_page, "cycle_seconds": Z_STATE.lcd_cycle_seconds}
         if "unraid" not in data:
