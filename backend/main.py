@@ -345,6 +345,7 @@ def startup_system():
     from backend import users_db
 
     users_db.on_status_change(_family_signin_follows_status)  # sign-in to other apps follows a person's status
+    users_db.on_people_change(_family_signin_follows_people)  # ... and every other change to the people (SET-19)
     from backend.services.supervisor import install_os_thread_names
 
     install_os_thread_names()  # threads show their names in top and /proc
@@ -564,6 +565,15 @@ def _family_signin_follows_status(user: dict, active: bool) -> None:
 
     if family_signin.config().get("enabled"):
         family_signin.sync(actor="status change")
+
+
+def _family_signin_follows_people() -> None:
+    """Added, renamed, a new role, removed: sign-in to other apps follows (SET-19). It waited for
+    "Update people now"."""
+    from backend.services import family_signin
+
+    if family_signin.config().get("enabled"):
+        family_signin.sync(actor="people change")
 
 
 def _refresh_share_access() -> None:

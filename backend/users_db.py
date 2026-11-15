@@ -611,6 +611,7 @@ def create_user(
         from backend.services.samba_engine import refresh_access
 
         refresh_access()  # a new person is in, or out of, each share's network list at once (SET-01)
+    _people_changed()  # the family sign-in for other apps follows (SET-19)
     return ret
 
 
@@ -782,6 +783,8 @@ def update_user_profile(
         if status is not None:
             _network_follows_status(user_id, status == "active")
         refresh_access()  # their SMB access follows the new role or status (SEC-28)
+    if changed and (display_name is not None or email is not None or role_id is not None):
+        _people_changed()  # the family sign-in for other apps follows (SET-19)
     return changed
 
 
@@ -822,6 +825,39 @@ def on_status_change(hook: Any) -> None:
         _STATUS_HOOKS.append(hook)
 
 
+_PEOPLE_HOOKS: list[Any] = []
+_people_timer: threading.Timer | None = None
+_people_lock = threading.Lock()
+PEOPLE_SETTLE_SECS = 2.0
+
+
+def on_people_change(hook: Any) -> None:
+    """Registers hook(), called after people are added, renamed, given a new role or removed
+    (SET-19). Changes within PEOPLE_SETTLE_SECS make one call, in the background."""
+    if hook not in _PEOPLE_HOOKS:
+        _PEOPLE_HOOKS.append(hook)
+
+
+def _run_people_hooks() -> None:
+    for hook in list(_PEOPLE_HOOKS):
+        try:
+            hook()
+        except (OSError, ValueError, RuntimeError, KeyError):
+            logger.warning("[Users] a service did not follow a change to the people", exc_info=True)
+
+
+def _people_changed() -> None:
+    global _people_timer
+    if not _PEOPLE_HOOKS or test_mode():
+        return
+    with _people_lock:
+        if _people_timer is not None:
+            _people_timer.cancel()
+        _people_timer = threading.Timer(PEOPLE_SETTLE_SECS, _run_people_hooks)
+        _people_timer.daemon = True
+        _people_timer.start()
+
+
 def delete_user(user_id: str, db_path: str | None = None) -> bool:
     """Deletes a user. Prevents deleting the last superadmin."""
     target_user = get_user_by_id(user_id, db_path=db_path)
@@ -846,6 +882,7 @@ def delete_user(user_id: str, db_path: str | None = None) -> bool:
     from backend.services.samba_engine import refresh_access
 
     refresh_access()  # the network lists no longer name them (SET-01)
+    _people_changed()  # the family sign-in for other apps follows (SET-19)
     return True
 
 

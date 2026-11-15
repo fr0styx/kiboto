@@ -149,6 +149,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **A new person chooses their own password** when they first sign in (ticked by default in Add a
   person). Only someone who can set up the NAS sees the setup wizard after signing in.
 
+#### Changes
+
+- **One sign-in for the family's apps keeps up by itself**: adding, renaming or removing a person, or
+  a new role, reaches it within seconds; "Update people now" is no longer needed for that.
+
 ## v2.0.2 (2026-11-12)
 ### 🧭 A new Settings sidebar, five themes, honest pages, and remote access cut down to what works
 
