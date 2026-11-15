@@ -7512,5 +7512,19 @@ export default {
   "invite.folders": "Dossiers partagés",
   "invite.hours": "Heures de connexion",
   "invite.folders_n": "{n, plural, one {# dossier} other {# dossiers}}",
-  "invite.with_hours": "avec heures de connexion"
+  "invite.with_hours": "avec heures de connexion",
+  "users.del_title": "Que deviennent les fichiers de {name} ?",
+  "users.del_sub": "Son compte est supprimé et la personne est déconnectée partout.",
+  "users.del_keep": "Garder ses fichiers",
+  "users.del_give": "Donner ses fichiers à {name}",
+  "users.del_delete": "Supprimer aussi ses fichiers",
+  "users.del_q_keep": "Supprimer @{username} ? Ses fichiers sont gardés dans un dossier renommé, pour que le nom puisse resservir.",
+  "users.del_q_give": "Supprimer @{username} ? Ses fichiers vont à {to}, dans un dossier nommé « From {username} ».",
+  "users.del_q_delete": "Supprimer @{username} et tous ses fichiers ? C'est définitif.",
+  "users.del_done_kept": "Ses fichiers sont dans {folder}.",
+  "users.del_done_given": "Ses fichiers sont maintenant chez {to}.",
+  "users.del_done_deleted": "Ses fichiers ont été supprimés.",
+  "users.del_done_error": "Ses fichiers n'ont pas pu être traités : {error}",
+  "confirm.users_delete_files.title": "Supprimer le compte et les fichiers",
+  "confirm.users_delete_files.msg": "Supprimer le compte {target} et tous ses fichiers ? C'est définitif."
 };

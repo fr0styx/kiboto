@@ -7512,5 +7512,19 @@ export default {
   "invite.folders": "Freigegebene Ordner",
   "invite.hours": "Anmeldezeiten",
   "invite.folders_n": "{n, plural, one {# Ordner} other {# Ordner}}",
-  "invite.with_hours": "mit Anmeldezeiten"
+  "invite.with_hours": "mit Anmeldezeiten",
+  "users.del_title": "Was passiert mit den Dateien von {name}?",
+  "users.del_sub": "Das Konto wird gelöscht und die Person überall abgemeldet.",
+  "users.del_keep": "Dateien behalten",
+  "users.del_give": "Dateien an {name} geben",
+  "users.del_delete": "Dateien ebenfalls löschen",
+  "users.del_q_keep": "@{username} löschen? Die Dateien bleiben in einem umbenannten Ordner, damit der Name wieder vergeben werden kann.",
+  "users.del_q_give": "@{username} löschen? Die Dateien gehen an {to}, in einen Ordner namens „From {username}“.",
+  "users.del_q_delete": "@{username} und alle Dateien löschen? Das lässt sich nicht rückgängig machen.",
+  "users.del_done_kept": "Die Dateien liegen in {folder}.",
+  "users.del_done_given": "Die Dateien hat jetzt {to}.",
+  "users.del_done_deleted": "Die Dateien wurden gelöscht.",
+  "users.del_done_error": "Die Dateien konnten nicht verarbeitet werden: {error}",
+  "confirm.users_delete_files.title": "Konto und Dateien löschen",
+  "confirm.users_delete_files.msg": "Das Konto {target} und alle Dateien löschen? Das lässt sich nicht rückgängig machen."
 };

@@ -1379,15 +1379,42 @@ async def change_user_password(user_id: str, data: UserPasswordChangeRequest, re
     return {"status": "ok", "message": "Password updated successfully."}
 
 
+async def _confirm_person_delete(
+    request: Request,
+    user_id: str,
+    files: str = "keep",
+    principal: AuthenticatedPrincipal = Depends(get_current_principal),  # noqa: B008
+) -> None:
+    """Deleting someone is confirmed; deleting their files with them asks the sharper question."""
+    from backend.confirmations import confirm_or_raise
+
+    confirm_or_raise(request, principal, "users.delete_files" if files == "delete" else "users.delete", user_id)
+
+
+def _retire_files(target: dict[str, Any], files: str, give_to: str, home: str) -> dict[str, Any]:
+    from backend.services.user_spaces import retire_home
+
+    try:
+        return retire_home(target["username"], files, give_to, home)
+    except OSError as e:
+        logger.warning("[Users] the files of %s could not be handled", target.get("username"), exc_info=True)
+        return {"files": "error", "error": str(e)}
+
+
 @router.delete(
     "/users/{user_id}",
-    dependencies=[Depends(require_scope("users:delete")), Depends(require_confirmation("users.delete"))],
+    dependencies=[Depends(require_scope("users:delete")), Depends(_confirm_person_delete)],
 )
 def delete_user_endpoint(
     user_id: str,
     request: Request,
     principal: AuthenticatedPrincipal = Depends(require_scope("users:delete")),  # noqa: B008
+    files: Literal["keep", "give", "delete"] = "keep",
+    give_to: str = "",
 ):
+    """Deletes the account; their files are kept in a renamed folder, given to someone or deleted
+    (Users decision 7). Confirmed first (_confirm_person_delete): deleting the files with them asks
+    the sharper question."""
     if principal.user_id == user_id:
         return error_response(400, "Cannot delete your own active account.")
 
@@ -1395,6 +1422,13 @@ def delete_user_endpoint(
     if target and not _role_within(list(principal.scopes or []), target.get("role_id")):
         # SEC-26: nobody deletes an account that can do more than they can
         return error_response(403, "You can't delete someone with more rights than you.", error="role_too_high")
+    recipient = get_user_by_username(give_to) if files == "give" and give_to else None
+    if files == "give" and (not recipient or recipient["id"] == user_id):
+        return error_response(400, "Choose who gets the files.", error="no_recipient")
+    from backend.services.user_spaces import home_of
+
+    home = home_of(target["username"]) if target else ""
+    files_done: dict[str, Any] = {"files": "none"}
     try:
         ok = delete_user(user_id)
         if not ok:
@@ -1403,15 +1437,16 @@ def delete_user_endpoint(
             from backend.services.user_data import erase_user_data
 
             erase_user_data(target)
+            files_done = _retire_files(target, files, give_to, home)
         log_security_event(
             "user.deleted",
             "success",
             actor_id=principal.user_id,
             actor_username=principal.username,
             actor_ip=_client_ip(request),
-            details={"deleted_user_id": user_id},
+            details={"deleted_user_id": user_id, **files_done},
         )
-        return {"status": "ok"}
+        return {"status": "ok", "files": files_done}
     except ValueError as e:
         return error_response(400, str(e))
 

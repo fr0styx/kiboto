@@ -8,6 +8,7 @@ it on uploads it receives, and says so.
 """
 
 import os
+import shutil
 import subprocess
 import threading
 import time
@@ -60,6 +61,82 @@ def _btrfs(args: list[str]) -> bool:
         return subprocess.run(["btrfs", *args], capture_output=True, timeout=20).returncode == 0
     except (OSError, subprocess.TimeoutExpired):
         return False
+
+
+FILE_CHOICES = ("keep", "give", "delete")
+
+
+def _zfs(args: list[str]) -> bool:
+    try:
+        return subprocess.run(["zfs", *args], capture_output=True, timeout=60).returncode == 0
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+
+
+def _inside_homes(path: str) -> bool:
+    root = os.path.realpath(homes_root())
+    real = os.path.realpath(path)
+    return real != root and real.startswith(root + os.sep)
+
+
+def _own_dataset(path: str) -> str | None:
+    """The ZFS dataset mounted exactly at path (a home made by zfs_child_dataset), else None."""
+    m = fs_quota.mount_for(path)
+    if m and m.get("fstype") == "zfs" and os.path.realpath(path).rstrip("/") == (m.get("mountpoint") or "").rstrip("/"):
+        return m["device"]
+    return None
+
+
+def _free_name(base: str) -> str:
+    dest, n = base, 2
+    while os.path.exists(dest):
+        dest, n = f"{base}-{n}", n + 1
+    return dest
+
+
+def _rename(src: str, dest: str) -> None:
+    dataset = _own_dataset(src)
+    if dataset:  # renaming the dataset keeps it mounted, under the new name
+        if not _zfs(["rename", dataset, f"{dataset.rsplit('/', 1)[0]}/{os.path.basename(dest)}"]):
+            raise OSError(f"Could not rename {src}")
+        return
+    os.rename(src, dest)
+
+
+def _remove(path: str) -> None:
+    dataset = _own_dataset(path)
+    if dataset:
+        if not _zfs(["destroy", "-r", dataset]):
+            raise OSError(f"Could not delete {path}")
+    elif not _btrfs(["subvolume", "delete", path]):
+        shutil.rmtree(path)
+
+
+def retire_home(username: str, files: str, give_to: str = "", home: str | None = None) -> dict[str, Any]:
+    """What happens to a removed person's folder (Users decision 7): "keep" renames it to
+    <name>-former-<date>, so the name starts empty if it is used again; "give" moves what is in it
+    into the other person's folder as "From <name>"; "delete" removes it. Nothing outside the homes
+    folder is moved or deleted. Raises OSError when the folder can't be handled."""
+    if files not in FILE_CHOICES:
+        raise ValueError(f"files must be one of {', '.join(FILE_CHOICES)}")
+    home = home or home_of(username)
+    if not os.path.isdir(home):
+        return {"files": "none"}
+    if not _inside_homes(home):
+        return {"files": "kept", "where": home}  # a folder chosen by hand stays where it is
+    if files == "delete":
+        _remove(home)
+        return {"files": "deleted"}
+    if files == "give":
+        dest = _free_name(os.path.join(ensure_home(give_to)["home"], f"From {username}"))
+        os.makedirs(dest)
+        for entry in os.listdir(home):
+            shutil.move(os.path.join(home, entry), dest)
+        _remove(home)  # empty now
+        return {"files": "given", "to": give_to, "where": dest}
+    dest = _free_name(os.path.join(homes_root(), f"{username.lower()}-former-{time.strftime('%Y-%m-%d')}"))
+    _rename(home, dest)
+    return {"files": "kept", "where": dest}
 
 
 def ensure_home(username: str, quota_bytes: int = 0) -> dict[str, Any]:

@@ -7512,5 +7512,19 @@ export default {
   "invite.folders": "Carpetas compartidas",
   "invite.hours": "Horario de acceso",
   "invite.folders_n": "{n, plural, one {# carpeta} other {# carpetas}}",
-  "invite.with_hours": "con horario de acceso"
+  "invite.with_hours": "con horario de acceso",
+  "users.del_title": "¿Qué pasa con los archivos de {name}?",
+  "users.del_sub": "Su cuenta se elimina y se cierra su sesión en todas partes.",
+  "users.del_keep": "Conservar sus archivos",
+  "users.del_give": "Dar sus archivos a {name}",
+  "users.del_delete": "Eliminar también sus archivos",
+  "users.del_q_keep": "¿Eliminar a @{username}? Sus archivos se guardan en una carpeta renombrada, para que el nombre pueda volver a usarse.",
+  "users.del_q_give": "¿Eliminar a @{username}? Sus archivos van a {to}, en una carpeta llamada «From {username}».",
+  "users.del_q_delete": "¿Eliminar a @{username} y todos sus archivos? No se puede deshacer.",
+  "users.del_done_kept": "Sus archivos están en {folder}.",
+  "users.del_done_given": "Ahora {to} tiene sus archivos.",
+  "users.del_done_deleted": "Sus archivos se eliminaron.",
+  "users.del_done_error": "No se pudieron procesar sus archivos: {error}",
+  "confirm.users_delete_files.title": "Eliminar cuenta y archivos",
+  "confirm.users_delete_files.msg": "¿Eliminar la cuenta {target} y todos sus archivos? No se puede deshacer."
 };

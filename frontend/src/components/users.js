@@ -539,30 +539,27 @@ async function toggleUserStatus(userId, newStatus) {
 }
 
 export function confirmDeleteUser(userId, username) {
-  showConfirmToast(
-    t('users.delete_title', 'Delete this person?'),
-    t('users.delete_msg', '@{username} loses their account and is signed out everywhere. Their files stay where they are.', { username }),
-    async () => {
-      try {
-        const res = await apiFetch(`/api/users/${userId}`, {
-          method: 'DELETE',
-          confirmed: true,
-          credentials: 'include'
-        });
-        if (res.ok) {
-          loadUsersList();
-          showToast(t('toast.user_deleted_2', 'User @{username} deleted.', { username: username }), 'success');
-        } else {
-          const err = await res.json();
-          showToast(t('toast.could_not_delete_user', 'Could not delete user: {detail}', { detail: err.detail || 'Error' }), 'error');
-        }
-      } catch (err) {
-        showToast(t('toast.request_failed', 'Request failed: {error}', { error: err.message }), 'error');
-      }
-    },
-    null,
-    { okText: t('users.delete_user', 'Delete User'), destructive: true, typeToConfirm: username }
-  );
+  // what happens to their files first (Users decision 7, SET-19)
+  return import('./management/delete-person.js').then((m) => m.askDeletePerson({ id: userId, username }, (choice) => deletePerson(userId, username, choice, m)));
+}
+
+/** Deletes the account with the files choice; the toast says what happened to the files. */
+export async function deletePerson(userId, username, choice, m) {
+  try {
+    const res = await apiFetch(`/api/users/${userId}${m.deleteQuery(choice)}`, { method: 'DELETE', confirmed: true, credentials: 'include' });
+    if (res.ok) {
+      const body = await res.json().catch(() => ({}));
+      loadUsersList();
+      const files = m.filesDoneText(body.files);
+      const said = [t('toast.user_deleted_2', 'User @{username} deleted.', { username }), files].filter(Boolean).join(' ');
+      showToast(said, body.files?.files === 'error' ? 'warning' : 'success');
+    } else {
+      const err = await res.json();
+      showToast(t('toast.could_not_delete_user', 'Could not delete user: {detail}', { detail: err.detail || 'Error' }), 'error');
+    }
+  } catch (err) {
+    showToast(t('toast.request_failed', 'Request failed: {error}', { error: err.message }), 'error');
+  }
 }
 
 export async function loadSessionsList() {

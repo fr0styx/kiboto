@@ -38,6 +38,7 @@ ACTIONS: dict[str, str] = {
     "storage.snapshot.delete": "Delete snapshot {target}",
     "share.delete": "Delete share {target}",
     "users.delete": "Delete user {target}",
+    "users.delete_files": "Delete user {target} and all their files. This can't be undone",
     "users.erase_data": "Erase the chats, Kib log and search data of user {target}",
     "users.export_data": "Download the chats, Kib log and search data of user {target}. They are told",
     "docker.container.delete": "Delete container {target}",

@@ -12,6 +12,7 @@ const ACTIONS = {
   'storage.snapshot.delete': ['Delete the snapshot', 'Delete the snapshot {target}?', true],
   'share.delete': ['Delete the share', 'Delete the share {target}?', true],
   'users.delete': ['Delete the account', 'Delete the account {target}?', true],
+  'users.delete_files': ['Delete account and files', 'Delete the account {target} and all their files? This can\'t be undone.', true],
   'users.erase_data': ['Erase their data', 'Erase the chats, Kib log and search data of {target}?', true],
   'users.export_data': ['Download their data', 'Download the chats, Kib log and search data of {target}? They are told.', false],
   'docker.container.delete': ['Delete the app', 'Delete the container {target}?', true],

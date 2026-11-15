@@ -69070,6 +69070,7 @@
   },
   "/api/v1/users/{user_id}": {
    "delete": {
+    "description": "Deletes the account; their files are kept in a renamed folder, given to someone or deleted\n(Users decision 7). Confirmed first (_confirm_person_delete): deleting the files with them asks\nthe sharper question.",
     "operationId": "delete_user_endpoint_api_v1_users__user_id__delete",
     "parameters": [
      {
@@ -69078,6 +69079,26 @@
       "required": true,
       "schema": {
        "title": "User Id",
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "files",
+      "required": false,
+      "schema": {
+       "default": "keep",
+       "title": "Files",
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "give_to",
+      "required": false,
+      "schema": {
+       "default": "",
+       "title": "Give To",
        "type": "string"
       }
      }

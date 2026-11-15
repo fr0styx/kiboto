@@ -7512,5 +7512,19 @@ export default {
   "invite.folders": "共享文件夹",
   "invite.hours": "登录时段",
   "invite.folders_n": "{n, plural, other {# 个文件夹}}",
-  "invite.with_hours": "设有登录时段"
+  "invite.with_hours": "设有登录时段",
+  "users.del_title": "{name} 的文件怎么处理？",
+  "users.del_sub": "此账户会被删除，并在所有设备上退出登录。",
+  "users.del_keep": "保留其文件",
+  "users.del_give": "把文件交给 {name}",
+  "users.del_delete": "同时删除其文件",
+  "users.del_q_keep": "删除 @{username}？其文件会保留在一个改名的文件夹中，这个名字以后可以再次使用。",
+  "users.del_q_give": "删除 @{username}？其文件会交给 {to}，放在名为“From {username}”的文件夹中。",
+  "users.del_q_delete": "删除 @{username} 及其全部文件？此操作无法撤销。",
+  "users.del_done_kept": "其文件在 {folder} 中。",
+  "users.del_done_given": "其文件现在归 {to}。",
+  "users.del_done_deleted": "其文件已删除。",
+  "users.del_done_error": "无法处理其文件：{error}",
+  "confirm.users_delete_files.title": "删除账户和文件",
+  "confirm.users_delete_files.msg": "删除账户 {target} 及其全部文件？此操作无法撤销。"
 };

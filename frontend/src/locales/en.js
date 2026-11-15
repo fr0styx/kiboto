@@ -7512,5 +7512,19 @@ export default {
   "invite.folders": "Shared folders",
   "invite.hours": "Sign-in hours",
   "invite.folders_n": "{n, plural, one {# folder} other {# folders}}",
-  "invite.with_hours": "with sign-in hours"
+  "invite.with_hours": "with sign-in hours",
+  "users.del_title": "What happens to the files of {name}?",
+  "users.del_sub": "Their account is deleted and they are signed out everywhere.",
+  "users.del_keep": "Keep their files",
+  "users.del_give": "Give their files to {name}",
+  "users.del_delete": "Delete their files too",
+  "users.del_q_keep": "Delete @{username}? Their files are kept in a folder renamed for them, so the name can be used again.",
+  "users.del_q_give": "Delete @{username}? Their files go to {to}, in a folder named \"From {username}\".",
+  "users.del_q_delete": "Delete @{username} and all their files? This can't be undone.",
+  "users.del_done_kept": "Their files are in {folder}.",
+  "users.del_done_given": "Their files are with {to} now.",
+  "users.del_done_deleted": "Their files were deleted.",
+  "users.del_done_error": "Their files could not be handled: {error}",
+  "confirm.users_delete_files.title": "Delete account and files",
+  "confirm.users_delete_files.msg": "Delete the account {target} and all their files? This can't be undone."
 };

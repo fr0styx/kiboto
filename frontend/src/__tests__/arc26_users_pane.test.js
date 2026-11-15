@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 const me = { current: { id: 'u1', username: 'alice' } };
 vi.mock('../api.js', () => ({ api: { get: vi.fn() }, auth: {}, apiFetch: vi.fn() }));
-vi.mock('../toast.js', () => ({ showToast: vi.fn(), showConfirmToast: vi.fn(), showPromptToast: vi.fn() }));
+vi.mock('../toast.js', () => ({ showToast: vi.fn(), showConfirmToast: vi.fn(), showPromptToast: vi.fn(), showBottomSheet: vi.fn() }));
 vi.mock('../components/session.js', () => ({
   setCurrentUser: vi.fn(),
   getCurrentUser: () => me.current,
@@ -22,7 +22,7 @@ vi.mock('../management-dom.js', () => ({ onManagementDom: (fn) => fn() }));
 vi.mock('../utils.js', async (orig) => ({ ...(await orig()), copyText: vi.fn() }));
 
 const { api, apiFetch } = await import('../api.js');
-const { showToast, showConfirmToast, showPromptToast } = await import('../toast.js');
+const { showToast, showConfirmToast, showPromptToast, showBottomSheet } = await import('../toast.js');
 const { grantShares } = await import('../components/share-access.js');
 const { copyText } = await import('../utils.js');
 const users = await import('../components/users.js');
@@ -130,12 +130,21 @@ describe('People pane (users.js)', () => {
     await vi.waitFor(() => expect(showToast).toHaveBeenCalledWith('Request failed: offline', 'error'));
 
     byId('users-table-body').querySelectorAll('tr')[1].querySelector('.btn-delete-user').click();
+    await vi.waitFor(() => expect(showBottomSheet).toHaveBeenCalled()); // what happens to the files first (SET-19)
+    showBottomSheet.mock.calls.at(-1)[0].items[0].onClick(); // keep them
     const [, msg, onOk, , opts] = showConfirmToast.mock.calls.at(-1);
     expect(msg).toContain('@bob');
     expect(opts).toMatchObject({ destructive: true, typeToConfirm: 'bob' });
+    apiFetch.mockResolvedValueOnce(reply({ files: { files: 'kept', where: '/p/homes/bob-former-2026-11-13' } }));
+    await onOk();
+    await vi.waitFor(() => expect(showToast).toHaveBeenCalledWith('User @bob deleted. Their files are in bob-former-2026-11-13.', 'success'));
+    expect(apiFetch.mock.calls.find((c) => c[1]?.method === 'DELETE')[0]).toMatch(/\?files=keep$/);
+    apiFetch.mockResolvedValueOnce(reply({ files: { files: 'error', error: 'busy' } }));
+    await onOk();
+    await vi.waitFor(() => expect(showToast).toHaveBeenCalledWith('User @bob deleted. Their files could not be handled: busy', 'warning'));
     apiFetch.mockResolvedValueOnce(reply({}));
     await onOk();
-    expect(showToast).toHaveBeenCalledWith('User @bob deleted.', 'success');
+    await vi.waitFor(() => expect(showToast).toHaveBeenCalledWith('User @bob deleted.', 'success'));
     apiFetch.mockResolvedValueOnce(reply({ detail: 'last admin' }, false));
     await onOk();
     expect(showToast).toHaveBeenCalledWith('Could not delete user: last admin', 'error');

@@ -129,7 +129,7 @@ request and response schemas.
 | `GET` | `/api/v1/users` | `users:read` | Get Users List |
 | `POST` | `/api/v1/users` | `users:write` | Create New User |
 | `POST` | `/api/v1/users/admin/disable` | any of `users:manage`, `users:write` | 1-click action to disable the default admin account |
-| `DELETE` | `/api/v1/users/{user_id}` | `users:delete` | Delete User Endpoint |
+| `DELETE` | `/api/v1/users/{user_id}` | `users:delete` | Deletes the account; their files are kept in a renamed folder, given to someone or deleted (Users decision 7) |
 | `GET` | `/api/v1/users/{user_id}` | signed in | Get User Detail |
 | `PUT` | `/api/v1/users/{user_id}` | signed in | Update User Endpoint |
 | `POST` | `/api/v1/users/{user_id}/lost-device` | `users:write` ⏱ | A lost phone or tablet (Users decision 8): sign the person out everywhere and, if asked, turn off their two-step code |

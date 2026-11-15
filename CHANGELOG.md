@@ -139,6 +139,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **An invite can carry shared folders and sign-in hours**: choose what the person may open or change
   and when they may be signed in; they get it when they accept the invite.
 
+#### Changes
+
+- **Deleting a person asks what happens to their files**: keep them in a renamed folder, give them to
+  someone else, or delete them. A name used again starts with an empty folder.
+
 ## v2.0.2 (2026-11-12)
 ### 🧭 A new Settings sidebar, five themes, honest pages, and remote access cut down to what works
 
