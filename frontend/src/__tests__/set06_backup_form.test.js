@@ -14,15 +14,11 @@ describe('the "Add a backup job" form (SET-06)', () => {
     document.body.innerHTML = `<form>${form}"></form>`;
   });
 
-  it('a folder job starts on "Snapshots on this server only", the one choice the server takes', () => {
+  it('the form is for the settings only: no folder kind, the passphrase from the first look (SET-21)', () => {
+    expect([...byId('backup-job-kind').options].map((o) => o.value)).toEqual(['config']);
     syncBackupJobForm();
-    const dest = byId('backup-job-dest-type');
-    expect(dest.value).toBe('local_snapshot');
-    expect(dest.querySelector('option[value="remote"]').hidden).toBe(true);
-    expect(dest.querySelector('option[value="local_folder"]').hidden).toBe(true);
-    expect(byId('backup-dest-cloud-hint').hidden).toBe(false);
-    expect(byId('backup-dest-cloud-hint').textContent).toContain('add an off-site backup instead');
-    expect(byId('backup-config-fields').hidden).toBe(true); // no passphrase field for a folder
+    expect(byId('backup-job-dest-type').value).toBe('local_folder');
+    expect(byId('backup-config-fields').hidden).toBe(false);
   });
 
   it('a settings job offers a folder or a cloud, with its passphrase', () => {
@@ -37,10 +33,6 @@ describe('the "Add a backup job" form (SET-06)', () => {
     dest.value = 'remote';
     syncBackupJobForm();
     expect(dest.value).toBe('remote');
-    // and back to a folder: the cloud choice does not stay behind
-    byId('backup-job-kind').value = 'data';
-    syncBackupJobForm();
-    expect(dest.value).toBe('local_snapshot');
   });
 
   it('the markup itself starts on that choice', () => {

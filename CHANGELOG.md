@@ -207,6 +207,17 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **The family set-ups are in Apps** (For the family): the device filter, calendar and contacts, and
   one sign-in for apps. People shows each one's state with Open in Apps.
 
+#### Changes
+
+- **Add a copy** on Backup opens the same guide as "Protect this Kiboto", which can now back up to
+  another Kiboto you paired, and has More options (the time, versions kept, somewhere else).
+- **Paused backup jobs** say Paused and can be switched back on.
+
+#### Changes
+
+- **The backup job dialog backs up Kiboto's settings** on a schedule, nothing else; copies of your
+  files are made with Add a copy. Existing jobs keep running.
+
 ## v2.0.2 (2026-11-12)
 ### 🧭 A new Settings sidebar, five themes, honest pages, and remote access cut down to what works
 

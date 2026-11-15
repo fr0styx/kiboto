@@ -664,16 +664,15 @@ def test_add_a_backup_job_opens_on_a_choice_that_works():
         page.evaluate("() => window.openManagementWindow && window.openManagementWindow('mgmt-pane-backups')")
         page.click("#btn-open-create-backup-job", timeout=15000)
         page.wait_for_selector("#create-backup-job-form", state="visible")
-        assert page.input_value("#backup-job-dest-type") == "local_snapshot"
-        assert not page.is_visible("#backup-job-passphrase")
-        assert page.is_visible("#backup-dest-cloud-hint")
+        # one purpose since SET-21 (decision 2 A): Kiboto's settings, to a folder or a cloud account
+        assert page.input_value("#backup-job-kind") == "config"
+        assert not page.is_visible("#backup-job-kind")
+        assert page.is_visible("#backup-job-passphrase")
+        assert page.input_value("#backup-job-dest-type") == "local_folder"
         shown = page.evaluate(
             "() => [...document.querySelectorAll('#backup-job-dest-type option')].filter((o) => !o.hidden).map((o) => o.value)"
         )
-        assert shown == ["local_snapshot"], shown
-        page.select_option("#backup-job-kind", "config")
-        assert page.is_visible("#backup-job-passphrase")
-        assert page.input_value("#backup-job-dest-type") == "local_folder"
+        assert shown == ["remote", "local_folder"], shown
         browser.close()
 
 

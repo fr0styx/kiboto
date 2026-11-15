@@ -326,6 +326,12 @@
 .rd-item { width: 100%; min-height: 44px; padding: 8px 12px; text-align: start; border: 1px solid var(--kb-line-7); border-radius: 10px; background: transparent; color: var(--fg); font: inherit; cursor: pointer; }
 .rd-item-meta { font-size: var(--kb-fs-sm); color: var(--muted); }
 .rd-none { margin: 0; font-size: var(--kb-fs-sm); }
+/* Backup: Add a copy; the guide's More options (SET-21 stage 3) */
+.bk-copies-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.protect-more { margin: 8px 0; }
+.protect-more > summary { cursor: pointer; font-weight: 700; }
+.protect-keep { display: flex; flex-wrap: wrap; align-items: end; gap: 8px; margin: 8px 0; }
+.protect-keep input { width: 6em; }
 .net-link { color: var(--kb-text-accent); font-weight: 600; }
 /* Network: This NAS at home and one row per port (SET-24 m) */
 .net-home { margin-bottom: 14px; }

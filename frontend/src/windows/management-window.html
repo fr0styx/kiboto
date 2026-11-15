@@ -3172,7 +3172,7 @@
                 <div class="bk-actions">
                   <button class="btn-pill-toggle" id="btn-refresh-backup-jobs" title="Refresh Backup Tasks" data-i18n-title="ui.refresh_backup_tasks"><span aria-hidden="true">🔄</span> <span data-i18n="mgmt.refresh">Refresh</span></button>
                   <button class="btn-pill-toggle" id="btn-open-create-backup-job" style="color: var(--lt-ink-brand, var(--brand, #4fd8c4)); border-color: rgba(79,216,196,0.35); background: rgba(79,216,196,0.12);">
-                    <svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg> <span data-i18n="backup.add_job">Add a backup job</span>
+                    <svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg> <span data-i18n="backup.add_settings_job">Back up the settings on a schedule</span>
                   </button>
                 </div>
               </div>
@@ -3210,7 +3210,9 @@
 
             <!-- Offsite backup with restic (Batch 6) -->
             <section class="drawer-card offsite-card" aria-labelledby="offsite-title">
-              <h3 id="offsite-title" class="offsite-title" data-i18n="offsite.title">Offsite backup</h3>
+              <div class="bk-copies-head"><h3 id="offsite-title" class="offsite-title" data-i18n="offsite.title">Offsite backup</h3>
+                <!-- One way to add a copy: the guide (SET-21 stage 3) -->
+                <button type="button" class="btn-pill-toggle is-primary" id="btn-add-copy" data-i18n="bk.add_copy">Add a copy</button></div>
               <p class="offsite-note" data-i18n="offsite.desc">Versioned, deduplicated and encrypted copies of your folders on a USB disk, another NAS or any cloud rclone can reach.</p>
               <div id="offsite-backup-mount"></div>
             </section>
@@ -5050,7 +5052,7 @@
     <div class="smart-modal-header bjob-x">
       <span class="smart-modal-title bjob-row" id="modal-backup-job-title">
         <span class="bjob-fs15">🛡️</span>
-        <span data-i18n="mw.add_backup_job">Add backup job</span>
+        <span data-i18n="backup.settings_job_title">Back up Kiboto's settings on a schedule</span>
       </span>
       <div class="os-window-controls">
         <button class="win-btn close-btn" id="modal-backup-job-close-btn" title="Close" data-i18n-title="diagnostics.close_btn" aria-label="Close" data-i18n-aria-label="diagnostics.close_btn"></button>
@@ -5063,13 +5065,11 @@
         <input type="text" id="backup-job-name" class="tz-select-input bjob-xs-strong-box" placeholder="e.g. Daily Documents & Photos Sync" data-i18n-placeholder="ui.e_g_daily_documents_photos" required />
       </div>
 
-      <div>
-        <label class="bjob-xs-bold-muted" for="backup-job-kind" data-i18n="backup.f_kind">What to back up</label>
-        <select id="backup-job-kind" class="tz-select-input bjob-xs-strong-box">
-          <option value="data" selected data-i18n="backup.kind_folder">A folder in the pool</option>
-          <option value="config" data-i18n="backup.kind_config">Kiboto settings (people, shares, apps; encrypted)</option>
-        </select>
-      </div>
+      <!-- One purpose (SET-21, decision 2 A): copies of folders are off-site backups, earlier versions are schedules per folder -->
+      <p class="bjob-xs-muted" data-i18n="backup.settings_job_desc">People, shared folders, apps and their settings, encrypted with a passphrase. Your files are copied by an off-site backup (Add a copy).</p>
+      <select id="backup-job-kind" hidden aria-hidden="true" tabindex="-1">
+        <option value="config" selected data-i18n="backup.kind_config">Kiboto settings (people, shares, apps; encrypted)</option>
+      </select>
 
       <div class="bjob-col-2" id="backup-config-fields" hidden>
         <label class="bjob-xs-bold-muted" for="backup-job-passphrase" data-i18n="backup.f_passphrase">Backup passphrase</label>

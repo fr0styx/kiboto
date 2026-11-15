@@ -45,9 +45,9 @@ export async function fetchAndRenderBackupJobs(mountEl) {
     if (jobs.length === 0) {
       mount.innerHTML = emptyStateHtml({
         icon: '🛡️',
-        title: t('backup.none_title', 'No backups scheduled'),
-        body: t('backup.none_desc', 'A backup copies your files somewhere else on a schedule, so a failed disk, ransomware or a mistaken delete is not the end of them.'),
-        action: { target: 'btn-open-create-backup-job', label: t('backup.none_action', 'Schedule a backup') },
+        title: t('backup.none_settings_title', 'No settings backups scheduled'),
+        body: t('backup.none_settings_desc', "A settings backup keeps people, shared folders and apps, so a new Kiboto can start where this one was. Your files are copied by Add a copy."),
+        action: { target: 'btn-open-create-backup-job', label: t('backup.add_settings_job', 'Back up the settings on a schedule') },
       });
       return;
     }
@@ -64,7 +64,12 @@ export async function fetchAndRenderBackupJobs(mountEl) {
       const schedBadge = `<span class="badge kb-tag kb-tag--plain">${escapeHtml(job.schedule || 'daily')}</span>`;
       
       let statusHtml;
-      if (job.last_status === 'running') {
+      const paused = job.enabled === false && !job.migrated_to; // looked like an active job (Backup A11)
+      if (job.enabled === false && job.migrated_to) {
+        statusHtml = `<span class="kb-state kb-state--idle">${escapeHtml(t('backup.state_moved', 'Moved to an off-site backup'))}</span>`;
+      } else if (paused) {
+        statusHtml = `<span class="kb-state kb-state--idle"><span aria-hidden="true">⏸</span> ${escapeHtml(t('backup.state_paused', 'Paused'))}</span>`;
+      } else if (job.last_status === 'running') {
         statusHtml = `<span class="kb-state kb-state--busy"><span class="spinner-inline kb-spinner-sm"></span> ${escapeHtml(t('backup.state_running', 'Running…'))}</span>`;
       } else if (job.last_status === 'success') {
         statusHtml = `<span class="kb-state kb-state--ok">${escapeHtml(t('backup.state_ok', '✓ Done'))}</span>`;
@@ -100,6 +105,7 @@ export async function fetchAndRenderBackupJobs(mountEl) {
           <td class="is-end">
             <div class="kb-actions">
               ${isRemote && !isSettings && !job.migrated_to ? `<button class="btn-rect btn-migrate-backup-job" data-job-id="${escapeHtml(job.id)}" title="${escapeHtml(t('backup.migrate_help', 'Make this an off-site backup: versions of every file, encrypted. The copy so far stays where it is.'))}">${escapeHtml(t('backup.migrate', 'Move to off-site backup'))}</button>` : ''}
+              ${paused ? `<button class="btn-rect btn-resume-backup-job" data-job-id="${escapeHtml(job.id)}">${escapeHtml(t('backup.resume', 'Switch on'))}</button>` : ''}
               <button class="btn-rect primary btn-run-backup-job" data-job-id="${escapeHtml(job.id)}" title="${t('ui.run_backup_job_now', 'Run Backup Job Now')}">
                 <span aria-hidden="true">▶</span> ${escapeHtml(t('backup.run', 'Run'))}
               </button>
@@ -145,6 +151,20 @@ export async function fetchAndRenderBackupJobs(mountEl) {
         } finally {
           btn.disabled = false;
           btn.innerHTML = origText;
+        }
+      });
+    });
+
+    mount.querySelectorAll('.btn-resume-backup-job').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const job = jobs.find((j) => j.id === btn.dataset.jobId);
+        if (!job) return;
+        try {
+          await api.post('/api/backup/schedule', { ...job, enabled: true, encryption_password: null }); // an empty passphrase keeps the stored one
+          showToast(t('backup.resumed', '"{name}" runs on its schedule again.', { name: job.name || job.id }), 'success');
+          fetchAndRenderBackupJobs(mount);
+        } catch (err) {
+          showToast(/** @type {Error} */ (err).message, 'error');
         }
       });
     });

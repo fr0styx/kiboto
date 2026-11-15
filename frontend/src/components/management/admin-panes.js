@@ -45,6 +45,8 @@ export function loadBackupExtras(doc = document) {
   import('./fleet.js').then((m) => m.loadFleetCard()).catch(() => {});
   import('../backup-verdict.js').then((m) => m.renderVerdict(doc.getElementById('backup-verdict-mount'))).catch(() => {}); // SET-21
   import('../restore-door.js').then((m) => m.installRestoreDoor(doc.getElementById('backup-restore-mount'))).catch(() => {}); // SET-21 stage 2
+  const add = doc.getElementById('btn-add-copy');
+  if (add) add.onclick = () => import('../protect-nas.js').then((m) => m.openProtectGuide()).catch(() => {}); // SET-21 stage 3
   return true;
 }
 
