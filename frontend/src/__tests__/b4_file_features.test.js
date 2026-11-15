@@ -25,7 +25,7 @@ describe('Previous versions (missing feature 7)', () => {
   });
 
   it('lists versions or explains how to get them', () => {
-    expect(versionsHtml('plan.txt', [])).toContain('snapshots');
+    expect(versionsHtml('plan.txt', [])).toContain('Get something back'); // points to Backup's one door (SET-21)
     const html = versionsHtml('plan.txt', V);
     expect((html.match(/data-version=/g) || []).length).toBe(2);
     expect(versionUrl('/mnt/user/a b.txt', 'zfs:x')).toBe('/api/fs/versions/download?path=%2Fmnt%2Fuser%2Fa%20b.txt&version=zfs%3Ax');

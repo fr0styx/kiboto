@@ -303,6 +303,29 @@
 :is(.invite-shares, .invite-hours) { flex: 1 1 100%; }
 .invite-form .invite-share { flex-direction: row; align-items: center; justify-content: space-between; gap: 10px; margin: 4px 0; color: var(--c-text); font-size: var(--kb-fs-sm, 13px); }
 .udg-check { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: var(--kb-fs-xs); color: var(--muted); }
+/* Backup: Are your files safe? (SET-21) */
+.bk-verdict { margin-bottom: 16px; padding: 14px 16px; border: 1px solid var(--kb-line-7); border-radius: 14px; background: var(--kb-glaze-3); display: flex; flex-direction: column; gap: 8px; }
+.bk-verdict-line { margin: 0; font-size: var(--kb-fs-md, 15px); }
+.bk-verdict-icon { display: inline-flex; width: 1.4em; justify-content: center; font-weight: 800; }
+.bk-verdict-line.is-fine .bk-verdict-icon { color: var(--kb-text-accent); }
+.bk-verdict-line.is-failed .bk-verdict-icon { color: var(--kb-text-crit); }
+.bk-verdict-line.is-look .bk-verdict-icon { color: var(--kb-text-warn); }
+.bk-issues { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.bk-issue { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; font-size: var(--kb-fs-sm); }
+.bk-issue + .bk-issue { padding-top: 6px; border-top: 1px solid var(--kb-line-7); }
+/* Backup: Get something back (SET-21 stage 2) */
+.rd-bin { margin: 0; font-size: var(--kb-fs-sm); color: var(--muted); }
+.rd-link { background: none; border: 0; padding: 0; font: inherit; color: var(--kb-text-accent); text-decoration: underline; cursor: pointer; }
+.rd-choices { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; }
+.rd-choice { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-height: 44px; padding: 10px 12px; text-align: start; border: 1px solid var(--kb-line-7); border-radius: 12px; background: var(--kb-glaze-4); color: var(--fg); font: inherit; cursor: pointer; }
+.rd-choice[aria-pressed="true"] { border-color: var(--brand); }
+.rd-choice-name { font-weight: 700; }
+.rd-choice-line { font-size: var(--kb-fs-sm); color: var(--muted); }
+.rd-step { margin: 4px 0; font-weight: 700; }
+.rd-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.rd-item { width: 100%; min-height: 44px; padding: 8px 12px; text-align: start; border: 1px solid var(--kb-line-7); border-radius: 10px; background: transparent; color: var(--fg); font: inherit; cursor: pointer; }
+.rd-item-meta { font-size: var(--kb-fs-sm); color: var(--muted); }
+.rd-none { margin: 0; font-size: var(--kb-fs-sm); }
 .net-link { color: var(--kb-text-accent); font-weight: 600; }
 /* Network: This NAS at home and one row per port (SET-24 m) */
 .net-home { margin-bottom: 14px; }

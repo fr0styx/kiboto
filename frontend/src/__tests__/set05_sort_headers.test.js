@@ -73,9 +73,9 @@ describe('small truths (SET-05)', () => {
     document.removeEventListener('keydown', bubbled);
   });
 
-  it('"no earlier versions" points to the page that has the Snapshots card', () => {
+  it('"no earlier versions" points to Backup\'s one door for restore (SET-21)', () => {
     const html = versionsHtml('letter.txt', []);
-    expect(html).toContain('Backup → Snapshots');
+    expect(html).toContain('Backup → Get something back');
     expect(html).not.toContain('Storage → Snapshots');
   });
 });

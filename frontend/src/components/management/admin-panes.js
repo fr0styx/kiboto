@@ -43,6 +43,8 @@ export function loadNotificationsPane() {
 export function loadBackupExtras(doc = document) {
   if (!doc.getElementById('backup-fleet-grid')) return false;
   import('./fleet.js').then((m) => m.loadFleetCard()).catch(() => {});
+  import('../backup-verdict.js').then((m) => m.renderVerdict(doc.getElementById('backup-verdict-mount'))).catch(() => {}); // SET-21
+  import('../restore-door.js').then((m) => m.installRestoreDoor(doc.getElementById('backup-restore-mount'))).catch(() => {}); // SET-21 stage 2
   return true;
 }
 

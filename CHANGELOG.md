@@ -187,6 +187,17 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   "For the family", and the all-folders grid, per-role two-step sign-in and company sign-in under a
   closed Advanced.
 
+#### Changes
+
+- **Backup opens with "Are your files safe?"**: one word with an icon (Fine, Needs a look, Failed),
+  when the newest copy outside this Kiboto was made, and only what needs a look, each with one button
+  (Back up now, Save the recovery kit, Open).
+
+#### Changes
+
+- **Get something back**: one place on Backup to restore. The Recycle Bin first, then a file or folder
+  (pick the folder and the day), a whole folder as it was, or everything from an off-site backup.
+
 ## v2.0.2 (2026-11-12)
 ### 🧭 A new Settings sidebar, five themes, honest pages, and remote access cut down to what works
 

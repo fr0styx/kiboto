@@ -3149,6 +3149,16 @@
           </div>
         </div>
             <div id="mgmt-pane-backups" class="mgmt-tab-pane" style="display: none;">
+              <!-- Are your files safe? First on Backup (SET-21, Backup report section 4) -->
+              <section id="backup-verdict" class="bk-verdict" aria-labelledby="bk-verdict-title" hidden>
+                <h2 id="bk-verdict-title" class="account-h" data-i18n="bk.v_title">Are your files safe?</h2>
+                <div id="backup-verdict-mount" aria-live="polite"></div>
+              </section>
+              <!-- Get something back: one door for restore (SET-21 stage 2, Backup report section 4.2) -->
+              <section id="backup-restore" class="bk-verdict" aria-labelledby="bk-restore-title">
+                <h2 id="bk-restore-title" class="account-h" data-i18n="rd.title">Get something back</h2>
+                <div id="backup-restore-mount" aria-live="polite"></div>
+              </section>
               <!-- Your Kiboto boxes: a buddy backup to another Kiboto (moved from Network, SET-24) -->
               <div class="nsv-grid" id="backup-fleet-grid"></div>
           <div class="mgmt-card-intro">

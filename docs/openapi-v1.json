@@ -67562,6 +67562,35 @@
     ]
    }
   },
+  "/api/v1/system/protection/verdict": {
+   "get": {
+    "description": "Are your files safe? One answer for the top of Backup, with what needs a look (SET-21).",
+    "operationId": "get_protection_verdict_api_v1_system_protection_verdict_get",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Get Protection Verdict",
+    "tags": [
+     "System & Storage"
+    ],
+    "x-required-scopes": [
+     "system:view"
+    ]
+   }
+  },
   "/api/v1/system/reboot": {
    "post": {
     "description": "Trigger system reboot (requires system:power scope).",

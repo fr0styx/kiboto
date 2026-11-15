@@ -1168,6 +1168,14 @@ def get_protection_status():
     return status()
 
 
+@router.get("/system/protection/verdict", dependencies=[Depends(require_scope("system:view"))])
+def get_protection_verdict():
+    """Are your files safe? One answer for the top of Backup, with what needs a look (SET-21)."""
+    from backend.services.backup_verdict import verdict
+
+    return verdict()
+
+
 @router.get("/system/status-summary", dependencies=[Depends(require_scope("system:view"))])
 def get_status_summary(principal: AuthenticatedPrincipal = Depends(get_current_principal)):
     """What needs attention, for the Overview (UX-1), as this person can act on it (NUX-5)."""

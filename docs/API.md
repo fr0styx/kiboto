@@ -38,7 +38,7 @@ request and response schemas.
 
 <!-- BEGIN generated endpoints: python scripts/api_reference.py --update -->
 
-718 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
+719 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
 
 ### AI Conversation History
 
@@ -857,6 +857,7 @@ request and response schemas.
 | `GET` | `/api/v1/system/network-topology` | any of `system:view`, `system:config` | Expose complete host networking topology, physical NIC carrier states, link negotiation speeds (10GbE / 2.5GbE / 1GbE / 100M), duplex, MT… |
 | `POST` | `/api/v1/system/profile` | `system:config` | The Host tab's cooling mode |
 | `GET` | `/api/v1/system/protection` | `system:view` | The copies outside this NAS, for the Overview (FEAT-01) |
+| `GET` | `/api/v1/system/protection/verdict` | `system:view` | Are your files safe? One answer for the top of Backup, with what needs a look (SET-21) |
 | `POST` | `/api/v1/system/reboot` | `system:power` | Trigger system reboot (requires system:power scope) |
 | `GET` | `/api/v1/system/redfish` | `system:config` | Whether the Redfish interface for monitoring tools answers (off by default, SET-01) |
 | `PUT` | `/api/v1/system/redfish` | `system:config` | Put Redfish Switch |
