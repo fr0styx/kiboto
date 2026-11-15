@@ -66,3 +66,15 @@
 .people-advanced > summary { cursor: pointer; font-weight: 700; }
 .people-advanced-body { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
 
+/* Sign-in hours as two rows (SET-19 stage 5) */
+.kb-hours-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding: 6px 0; }
+.kb-hours-row + .kb-hours-row { border-top: 1px solid var(--kb-line-7); }
+.kb-hours-row-name { display: inline-flex; align-items: center; gap: 8px; min-width: 190px; font-weight: 600; }
+
+/* People: the family set-ups as link rows; their cards in Apps (SET-19 stage 5) */
+.pf-rows { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.pf-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.pf-row + .pf-row { padding-top: 8px; border-top: 1px solid var(--kb-line-7); }
+.pf-text { display: flex; flex-direction: column; gap: 2px; }
+.apps-family-card { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--kb-line-7); }
+

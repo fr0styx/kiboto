@@ -375,15 +375,16 @@ def verify_mfa_token(token: str) -> dict | None:
 
 def _outside_signin_hours(user: dict[str, Any]) -> JSONResponse | None:
     """403 when the account may not be signed in now (COMP-13)."""
-    from backend.signin_hours import allowed, describe, from_json
+    from backend.signin_hours import allowed, describe, from_json, row_for
 
     hours = from_json(user.get("signin_hours_json"))
     if hours is None or allowed(hours):
         return None
+    today = row_for(hours)  # two rows (school days, weekends): the person is told today's
     log_security_event(
         "auth.login.outside_hours", "failure", actor_id=user.get("id"), actor_username=user.get("username")
     )
-    every_day = list(hours["days"]) == list(range(7))
+    every_day = list(today["days"]) == list(range(7))
     return error_response(
         403,
         f"This account can be signed in {describe(hours)} (server time).",
@@ -392,9 +393,9 @@ def _outside_signin_hours(user: dict[str, Any]) -> JSONResponse | None:
         # in the person's language: a kid read an English server sentence here (SET-11)
         text=said(
             "outside_hours_daily" if every_day else "outside_hours_days",
-            start=hours["start"],
-            end=hours["end"],
-            days={"weekdays": list(hours["days"])},
+            start=today["start"],
+            end=today["end"],
+            days={"weekdays": list(today["days"])},
         ),
     )
 

@@ -52,7 +52,7 @@ describe('an invite carries folders and sign-in hours (SET-19, Users decision 11
     await vi.waitFor(() => expect(post).toHaveBeenCalled());
     const body = post.mock.calls[0][1];
     expect(body.shares).toEqual({ family: 'write' });
-    expect(body.signin_hours?.days?.length).toBeGreaterThan(0);
+    expect(body.signin_hours?.rows?.length || body.signin_hours?.days?.length).toBeGreaterThan(0); // school days and weekends (SET-19 stage 5)
   });
 
   it('without the right to manage folders, the form has none and still works', async () => {

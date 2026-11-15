@@ -158,12 +158,8 @@ export async function loadUsersPane(focusPart = 'users-pane-list') {
   initUsersManagement();
   await fetchCurrentProfile();
   loadUsersList();
-  const ff = document.getElementById('family-filter-mount');
-  if (ff) import('./family-filter.js').then((m) => m.renderFamilyFilter(ff)); // COMP-13
-  const fc = document.getElementById('family-calendar-mount');
-  if (fc) import('./family-calendar.js').then((m) => m.renderFamilyCalendar(fc)); // NFEAT-7
-  const fsm = document.getElementById('family-signin-mount');
-  if (fsm) import('./family-signin.js').then((m) => m.renderFamilySignin(fsm)); // NFEAT-6
+  const links = document.getElementById('people-family-links');
+  if (links) import('./apps-family.js').then((m) => m.renderFamilyLinks(links)).catch(() => {}); // the set-ups live in Apps (SET-19)
   switchUsersSubtab(focusPart);
 }
 

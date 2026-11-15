@@ -12,7 +12,8 @@ describe("People's layout (SET-19, Users report section 5)", () => {
     expect(document.getElementById('btn-refresh-users')).toBeNull();
     const order = [...list.querySelectorAll('h3, h4, details')].map((e) => e.getAttribute('data-i18n') || e.className);
     expect(order.indexOf('hh.title')).toBeLessThan(order.indexOf('people.for_family'));
-    expect(order.indexOf('people.for_family')).toBeLessThan(order.indexOf('ff.title'));
+    expect(list.querySelector('#people-family-links')).not.toBeNull(); // the set-ups live in Apps; People keeps link rows (SET-19 stage 5)
+    expect(order.indexOf('ff.title')).toBe(-1);
     expect(order.indexOf('users.away_title')).toBeGreaterThan(order.indexOf('fs.title'));
     expect(order.at(-1)).toBe('people-advanced');
     const advanced = /** @type {HTMLDetailsElement} */ (list.querySelector('.people-advanced'));

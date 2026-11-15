@@ -70,19 +70,17 @@ describe('renderKidsRules', () => {
 
   it('opens the person and the filter from its buttons', async () => {
     const mount = document.createElement('div');
-    const ff = document.createElement('h4');
-    ff.id = 'ff-title';
-    ff.scrollIntoView = vi.fn();
-    document.body.append(mount, ff);
+    const open = vi.fn();
+    window.openContainersManager = open;
+    document.body.append(mount);
     const onEdit = vi.fn();
     await renderKidsRules(mount, USERS, { onEdit });
     mount.querySelector('[data-kids-edit="2"]').click();
     expect(onEdit).toHaveBeenCalledWith('2');
     expect(mount.querySelector('[data-kids-shares], [data-kids-ai]')).toBeNull(); // the person page and Household rules have them (SET-19)
     mount.querySelector('[data-kids-filter]').click();
-    expect(ff.scrollIntoView).toHaveBeenCalled();
+    expect(open).toHaveBeenCalledWith({ view: 'family', part: 'filter' }); // the filter lives in Apps (SET-19)
     mount.remove();
-    ff.remove();
   });
 
   it('still shows the accounts when the other lists fail to load', async () => {

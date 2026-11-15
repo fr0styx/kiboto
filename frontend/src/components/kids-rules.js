@@ -12,8 +12,9 @@ import { formatRole } from './role-names.js';
 
 export const KID_ROLES = ['kid', 'guest'];
 
-/** "Mon–Fri 07:00–20:00", or "Any time" without a limit. */
+/** "Mon–Fri 07:00–20:00", two rows joined ("Mon–Fri 07:00–20:00 · Sat–Sun 09:00–21:00"), or "Any time". */
 export function hoursText(hours, names = dayNames()) {
+  if (hours && Array.isArray(hours.rows)) return hours.rows.map((r) => hoursText(r, names)).join(' · ');
   if (!hours || !Array.isArray(hours.days)) return t('kids.any_time', 'Any time');
   const days = [...hours.days].sort((a, b) => a - b);
   let when;
@@ -79,6 +80,6 @@ export async function renderKidsRules(mount, users, { onEdit } = {}) {
     const b = /** @type {HTMLElement} */ (e.target).closest('button');
     if (!b) return;
     if (b.dataset.kidsEdit && onEdit) onEdit(b.dataset.kidsEdit);
-    else if ('kidsFilter' in b.dataset) document.getElementById('ff-title')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    else if ('kidsFilter' in b.dataset) /** @type {any} */ (window).openContainersManager?.({ view: 'family', part: 'filter' }); // the filter lives in Apps (SET-19)
   };
 }

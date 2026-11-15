@@ -8,15 +8,15 @@ import { showToast } from '../toast.js';
 import { shareChoicesHtml, grantShares } from './share-access.js';
 
 export const MAIN_ROLES = () => [
-  ['superadmin', t('ap.role_admin', 'Administrator'), t('ap.role_admin_d', 'Everything, including people and settings')],
+  ['superadmin', t('ap.role_admin', 'Administrator'), t('ap.role_admin_d', 'Everything: people, settings, and every private folder')],
   ['share_user', t('ap.role_member', 'Family member'), t('ap.role_member_d', 'Their own folder and the shared folders you choose')],
   ['kid', t('ap.role_kid', 'Kid'), t('ap.role_kid_d', 'Their own folder, the folders you choose, and limits')],
   ['guest', t('ap.role_guest', 'Guest'), t('ap.role_guest_d', 'Can look at the shared folders you choose')],
 ];
 export const MORE_ROLES = () => [
-  ['app_operator', t('ap.role_apps', 'App manager'), t('ap.role_apps_d', 'Installs and runs apps')],
-  ['storage_admin', t('ap.role_storage', 'Storage admin'), t('ap.role_storage_d', 'Drives, pools and shares')],
-  ['backup_operator', t('ap.role_backup', 'Backup manager'), t('ap.role_backup_d', 'Backups and cloud copies')],
+  ['app_operator', t('ap.role_apps', 'App manager'), t('ap.role_apps_d', 'Installs and runs apps, and can give an app most data folders')],
+  ['storage_admin', t('ap.role_storage', 'Storage admin'), t('ap.role_storage_d', 'Drives, pools and shares, and can open every private folder')],
+  ['backup_operator', t('ap.role_backup', 'Backup manager'), t('ap.role_backup_d', "Backups and cloud copies; can bring back anyone's files and save the recovery kit")],
   ['auditor', t('ap.role_viewer', 'Viewer'), t('ap.role_viewer_d', "Can look, can't change")],
 ];
 const INVITABLE = ['share_user', 'kid', 'guest', 'backup_operator', 'app_operator', 'auditor'];

@@ -19,6 +19,7 @@ import { openContainerInspector, openContainerDeleteModal } from './container-mo
 import { openStackModal, openStackPickerModal } from './stack-modal.js';
 import { openNetworkMap } from './container-network-map.js';
 import { appsDockerNetsHtml, installAppsDockerNets } from './apps-docker-nets.js';
+import { appsFamilyHtml, installAppsFamily, openFamily } from './apps-family.js';
 import {
   createContainerRow as createSharedContainerRow,
   updateContainerRow as updateSharedContainerRow,
@@ -197,6 +198,7 @@ export function initContainersManager() {
               <button class="btn-bulk-action btn-bulk-cancel" data-bulk="cancel" title="${t('ui.deselect_all', 'Deselect all')}">✕</button>
             </div>
           </div>
+          ${appsFamilyHtml()}
           ${appsDockerNetsHtml()}
           <div class="cwm-x-4" id="cw-docker-catalog-wrap" style="display: none;">
             <div class="cwm-row-box">
@@ -346,6 +348,7 @@ export function initContainersManager() {
   const btnNetmap = document.getElementById('btn-cw-netmap');
   if (btnNetmap) btnNetmap.onclick = () => openNetworkMap();
   installAppsDockerNets(containersWindow);
+  installAppsFamily(containersWindow);
 
   const btnStacks = document.getElementById('btn-cw-stacks');
   if (btnStacks) {
@@ -383,6 +386,7 @@ export function initContainersManager() {
 
       _cwInCatalogView = !_cwInCatalogView;
       document.getElementById('apps-docker-nets')?.toggleAttribute('hidden', _cwInCatalogView); // installed apps only
+      document.getElementById('apps-family')?.toggleAttribute('hidden', _cwInCatalogView);
       const hBar = document.getElementById('cw-docker-table-sticky-scroll');
       if (_cwInCatalogView) {
         if (tableWrap) tableWrap.style.display = 'none';
@@ -655,7 +659,7 @@ export function openContainersManager(opts = {}) {
   }
   if (!containersWindow) return;
   const wantCatalog = opts && opts.view === 'catalog';
-  const wantInstalled = opts && opts.view === 'installed';
+  const wantInstalled = opts && (opts.view === 'installed' || opts.view === 'family');
   if ((wantCatalog && !_cwInCatalogView) || (wantInstalled && _cwInCatalogView)) {
     document.getElementById('btn-cw-catalog')?.click();
   }
@@ -674,6 +678,7 @@ export function openContainersManager(opts = {}) {
   ZettEventBus.emit('window:open', { id: 'containers-manager-window' });
   startCwAutoRefresh();
   loadContainersData();
+  if (opts && opts.view === 'family') openFamily(containersWindow, opts.part); // from People's link rows (SET-19)
 }
 
 /** The sentence above the list: what is true of the apps and of the list itself (SET-14). It was
