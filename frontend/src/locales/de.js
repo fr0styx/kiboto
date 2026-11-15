@@ -7734,5 +7734,8 @@ export default {
   "sc.mac": "Mac: im Finder Gehe zu → Mit Server verbinden",
   "sc.make": "Passwort für freigegebene Ordner erstellen",
   "sc.copy_failed": "Kopieren wurde nicht erlaubt; markieren Sie die Adresse und kopieren Sie sie.",
-  "sc.open": "Verbinden"
+  "sc.open": "Verbinden",
+  "shares.page_title": "Freigegebene Ordner",
+  "shares.page_desc": "Ordner, die die Personen zu Hause von ihren Computern und Telefonen öffnen. Jeder sagt, wer ihn öffnen kann und wie man sich verbindet.",
+  "shares.advanced": "Weitere Verbindungswege: SFTP und der Zustand jedes Dienstes"
 };

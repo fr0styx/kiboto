@@ -7734,5 +7734,8 @@ export default {
   "sc.mac": "Mac：在访达中选择 前往 → 连接服务器",
   "sc.make": "创建共享文件夹密码",
   "sc.copy_failed": "不允许复制；请选中地址后复制。",
-  "sc.open": "如何连接"
+  "sc.open": "如何连接",
+  "shares.page_title": "共享文件夹",
+  "shares.page_desc": "家里的人从电脑和手机打开的文件夹。每个文件夹都写明谁能打开以及如何连接。",
+  "shares.advanced": "其他连接方式：SFTP，以及各项服务的状态"
 };

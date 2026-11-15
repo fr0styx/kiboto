@@ -7734,5 +7734,8 @@ export default {
   "sc.mac": "Mac : dans le Finder, Aller → Se connecter au serveur",
   "sc.make": "Créer un mot de passe pour les dossiers partagés",
   "sc.copy_failed": "La copie n'a pas été autorisée ; sélectionnez l'adresse et copiez-la.",
-  "sc.open": "Comment se connecter"
+  "sc.open": "Comment se connecter",
+  "shares.page_title": "Dossiers partagés",
+  "shares.page_desc": "Les dossiers que les personnes de la maison ouvrent depuis leurs ordinateurs et téléphones. Chacun dit qui peut l'ouvrir et comment s'y connecter.",
+  "shares.advanced": "Autres façons de se connecter : SFTP, et l'état de chaque service"
 };

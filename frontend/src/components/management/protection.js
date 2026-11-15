@@ -53,6 +53,7 @@ export async function renderProtectionJobs(card) {
     return;
   }
   card.innerHTML = html`<h4 class="my-alerts-title" aria-level="3">${t('prot.title', 'What protects your data')}</h4>${jobsHtml(data.jobs || [])}`;
+  import('../backup-needs.js').then((m) => m.applyNeeds(card)).catch(() => {}); // the switch needs storage:admin (SET-21, B9)
   card.querySelectorAll('[data-scrub-pool]').forEach((sw) => {
     sw.addEventListener('change', async () => {
       sw.disabled = true;

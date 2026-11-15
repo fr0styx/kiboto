@@ -2426,22 +2426,12 @@
             <div id="mgmt-pane-storage-shares" class="mgmt-tab-pane" style="display: none;">
               <div class="mgmt-card-intro sshr-row">
                 <div>
-                  <div class="mgmt-card-intro-title"><svg class="ic"><use href="#i-storage"/></svg> <span data-i18n="mgmt.shares_title">Network Shares & Protocols</span></div>
-                  <div class="mgmt-card-intro-desc" data-i18n="mgmt.shares_desc">Host Samba (SMB), NFS, and Universal WebDAV network shares, security levels, and live storage usage.</div>
+                  <div class="mgmt-card-intro-title"><svg class="ic"><use href="#i-storage"/></svg> <span data-i18n="shares.page_title">Shared folders</span></div>
+                  <div class="mgmt-card-intro-desc" data-i18n="shares.page_desc">Folders the people at home open from their computers and phones. Each one says who can open it and how to connect.</div>
                 </div>
                 <div class="sshr-row-2">
                   <span class="mgmt-app-pill" id="mgmt-shares-platform-badge" style="background:var(--lt-b-3bf58b1f, rgba(59,245,139,0.12)); color:var(--lt-t-3bf58bff, #3bf58b);"></span>
                   <button class="btn-pill-toggle is-primary" id="btn-create-network-share" style="display: none;" title="Create Network Share" data-i18n-title="ui.create_network_share"><span aria-hidden="true">+</span> <span data-i18n="shares.create">Create Share</span></button>
-                  <button class="btn-pill-toggle" id="btn-refresh-shares" title="Refresh Network Shares" data-i18n-title="ui.refresh_network_shares"><span aria-hidden="true">🔄</span> <span data-i18n="mgmt.refresh">Refresh</span></button>
-                </div>
-              </div>
-              <!-- Sharing Protocols Quickbar -->
-              <div class="mgmt-protocol-quickbar sshr-row-box">
-                <div class="sshr-row-3">
-                  <span style="font-size: var(--kb-fs-sm); font-weight: 600; color: var(--muted, #95a8ab);" data-i18n="mgmt.protocols_status_title">File Sharing Protocols:</span>
-                  <span class="mgmt-app-pill proto-pill" id="proto-pill-smb" data-state="unknown">SMB</span>
-                  <span class="mgmt-app-pill proto-pill" id="proto-pill-sftp" data-state="unknown">SFTP</span>
-                  <span class="mgmt-app-pill proto-pill" id="proto-pill-webdav" data-state="unknown">WebDAV</span>
                 </div>
               </div>
               <div class="mgmt-detail-body" id="mgmt-storage-shares-mount">
@@ -2462,6 +2452,20 @@
                 <p class="invite-meta" data-i18n="shares.away_desc">Open these folders from your phone or laptop anywhere, without opening your router.</p>
                 <a class="btn-pill-toggle" id="btn-shares-away" href="#/away" data-i18n="shares.away_open">Set up Away from home</a>
               </section>
+              <!-- Other ways to connect, folded at the end (SET-22, Shares 5): SFTP and each service's state -->
+              <details class="shares-advanced" id="shares-advanced">
+                <summary data-i18n="shares.advanced">Other ways to connect: SFTP, and each service's state</summary>
+                <!-- Sharing Protocols Quickbar -->
+                <div class="mgmt-protocol-quickbar sshr-row-box">
+                  <div class="sshr-row-3">
+                    <span style="font-size: var(--kb-fs-sm); font-weight: 600; color: var(--muted, #95a8ab);" data-i18n="mgmt.protocols_status_title">File Sharing Protocols:</span>
+                    <span class="mgmt-app-pill proto-pill" id="proto-pill-smb" data-state="unknown">SMB</span>
+                    <span class="mgmt-app-pill proto-pill" id="proto-pill-sftp" data-state="unknown">SFTP</span>
+                    <span class="mgmt-app-pill proto-pill" id="proto-pill-webdav" data-state="unknown">WebDAV</span>
+                  </div>
+                </div>
+                <div id="shares-sftp-mount"></div>
+              </details>
             </div>
 
             <!-- Sub-tab 4: Remote & Cloud Storage -->

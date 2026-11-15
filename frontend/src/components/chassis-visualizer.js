@@ -1189,22 +1189,29 @@ export async function fetchAndRenderNetworkShares(container) {
       }
     }
 
-    let sftpCard = container.querySelector('#mgmt-sftp-subsystem-card');
+    // the folders first; SFTP folded under "Other ways to connect" when the page has that place (SET-22)
+    const sftpHost = document.getElementById('shares-sftp-mount') || container;
+    let sftpCard = sftpHost.querySelector('#mgmt-sftp-subsystem-card');
     let grid = container.querySelector('.storage-shares-grid');
     if (!grid || !sftpCard) {
-      container.innerHTML = `
+      if (sftpHost === container) {
+        container.innerHTML = `
         ${buildSftpCardHtml(sftpStatus, sftpUsers.length, sampleUser)}
         <div class="storage-shares-grid"></div>
       `;
+      } else {
+        container.innerHTML = '<div class="storage-shares-grid"></div>';
+        sftpHost.innerHTML = buildSftpCardHtml(sftpStatus, sftpUsers.length, sampleUser);
+      }
       grid = container.querySelector('.storage-shares-grid');
-      bindSftpCardEvents(container, () => fetchAndRenderNetworkShares(container));
+      bindSftpCardEvents(sftpHost, () => fetchAndRenderNetworkShares(container));
     } else {
       const tempWrapper = document.createElement('div');
       tempWrapper.innerHTML = buildSftpCardHtml(sftpStatus, sftpUsers.length, sampleUser);
       const newCard = tempWrapper.firstElementChild;
       if (newCard && sftpCard.parentNode) {
         sftpCard.parentNode.replaceChild(newCard, sftpCard);
-        bindSftpCardEvents(container, () => fetchAndRenderNetworkShares(container));
+        bindSftpCardEvents(sftpHost, () => fetchAndRenderNetworkShares(container));
       }
     }
 

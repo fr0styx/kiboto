@@ -347,6 +347,9 @@
 .sc-label { flex-basis: 100%; font-size: var(--kb-fs-sm); color: var(--muted); }
 .sc-value { flex: 1; min-width: 0; overflow-wrap: anywhere; padding: 6px 8px; border-radius: 8px; background: var(--kb-glaze-4); }
 .sc-note { font-size: var(--kb-fs-sm); }
+/* Shared folders: other ways to connect, folded (SET-22) */
+.shares-advanced { margin-top: 14px; }
+.shares-advanced > summary { cursor: pointer; font-weight: 700; padding: 8px 0; }
 .net-link { color: var(--kb-text-accent); font-weight: 600; }
 /* Network: This NAS at home and one row per port (SET-24 m) */
 .net-home { margin-bottom: 14px; }

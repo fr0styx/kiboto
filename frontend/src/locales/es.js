@@ -7734,5 +7734,8 @@ export default {
   "sc.mac": "Mac: en el Finder, Ir → Conectarse al servidor",
   "sc.make": "Crear una contraseña para carpetas compartidas",
   "sc.copy_failed": "No se permitió copiar; selecciona la dirección y cópiala.",
-  "sc.open": "Cómo conectarse"
+  "sc.open": "Cómo conectarse",
+  "shares.page_title": "Carpetas compartidas",
+  "shares.page_desc": "Las carpetas que las personas de casa abren desde sus ordenadores y teléfonos. Cada una dice quién puede abrirla y cómo conectarse.",
+  "shares.advanced": "Otras formas de conectarse: SFTP, y el estado de cada servicio"
 };

@@ -238,6 +238,17 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **How to connect**, per shared folder: the address for Windows and for a Mac with Copy, which name
   and password to use, and the separate password for people with two-step sign-in, made in place.
 
+#### Changes
+
+- **Shared folders** is the page's name; the folders come first, and SFTP with each service's state
+  is folded at the end under "Other ways to connect".
+
+#### Changes
+
+- **Backup's buttons follow your rights**: a backup manager no longer sees controls that only answer
+  "not allowed" (bring back everything, the recovery-kit connect, the USB ticks, the settings file,
+  the monthly disk check).
+
 ## v2.0.2 (2026-11-12)
 ### 🧭 A new Settings sidebar, five themes, honest pages, and remote access cut down to what works
 

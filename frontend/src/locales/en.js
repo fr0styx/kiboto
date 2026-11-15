@@ -7734,5 +7734,8 @@ export default {
   "sc.mac": "Mac: in Finder, Go → Connect to Server",
   "sc.make": "Make a password for shared folders",
   "sc.copy_failed": "Copying was not allowed; select the address and copy it.",
-  "sc.open": "How to connect"
+  "sc.open": "How to connect",
+  "shares.page_title": "Shared folders",
+  "shares.page_desc": "Folders the people at home open from their computers and phones. Each one says who can open it and how to connect.",
+  "shares.advanced": "Other ways to connect: SFTP, and each service's state"
 };

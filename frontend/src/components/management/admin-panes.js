@@ -44,7 +44,11 @@ export function loadBackupExtras(doc = document) {
   if (!doc.getElementById('backup-fleet-grid')) return false;
   import('./fleet.js').then((m) => m.loadFleetCard()).catch(() => {});
   import('../backup-verdict.js').then((m) => m.renderVerdict(doc.getElementById('backup-verdict-mount'))).catch(() => {}); // SET-21
-  import('../restore-door.js').then((m) => m.installRestoreDoor(doc.getElementById('backup-restore-mount'))).catch(() => {}); // SET-21 stage 2
+  import('../restore-door.js')
+    .then((m) => m.installRestoreDoor(doc.getElementById('backup-restore-mount'))) // SET-21 stage 2
+    .then(() => import('../backup-needs.js'))
+    .then((m) => m.applyNeeds(doc.getElementById('mgmt-pane-backups'))) // rights (B9): the door and the settings file
+    .catch(() => {});
   const add = doc.getElementById('btn-add-copy');
   if (add) add.onclick = () => import('../protect-nas.js').then((m) => m.openProtectGuide()).catch(() => {}); // SET-21 stage 3
   return true;

@@ -218,6 +218,7 @@ export async function renderOffsite(mount) {
     return;
   }
   mount.innerHTML = reposHtml(data) + (data.available ? connectKitHtml() + formHtml(shares) + usbSettingsHtml(usb && usb.settings) : '');
+  import('./backup-needs.js').then((m) => m.applyNeeds(mount)).catch(() => {}); // rights (SET-21, B9)
   mount.querySelector('[data-off-usb]')?.addEventListener('change', async (e) => {
     const box = /** @type {HTMLInputElement} */ (e.target);
     const key = box.name === 'usb_auto_backup' ? 'auto_backup' : 'offer';
