@@ -7725,5 +7725,14 @@ export default {
   "who.note_host": "Ceci s'applique à Fichiers. Sur le réseau, c'est le système hôte qui décide.",
   "who.note": "Une seule liste pour Fichiers et le réseau.",
   "who.saved": "Enregistré. « {share} » s'ouvre pour les personnes choisies.",
-  "who.open": "Qui peut l'ouvrir"
+  "who.open": "Qui peut l'ouvrir",
+  "sc.host_sign_in": "Utilisez le nom et le mot de passe que vous utilisez pour {host}.",
+  "sc.two_step": "Vous avez la connexion en deux étapes : il vous faut un mot de passe à part pour les dossiers partagés. Connectez-vous avec votre nom Kiboto et ce mot de passe.",
+  "sc.sign_in": "Connectez-vous avec votre nom et votre mot de passe Kiboto.",
+  "sc.title": "Se connecter à « {share} »",
+  "sc.windows": "Windows : dans l'Explorateur de fichiers, tapez",
+  "sc.mac": "Mac : dans le Finder, Aller → Se connecter au serveur",
+  "sc.make": "Créer un mot de passe pour les dossiers partagés",
+  "sc.copy_failed": "La copie n'a pas été autorisée ; sélectionnez l'adresse et copiez-la.",
+  "sc.open": "Comment se connecter"
 };

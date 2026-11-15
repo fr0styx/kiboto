@@ -7725,5 +7725,14 @@ export default {
   "who.note_host": "Das gilt für Dateien. Im Netzwerk entscheidet das Host-System.",
   "who.note": "Eine Liste für Dateien und das Netzwerk.",
   "who.saved": "Gespeichert. „{share}“ öffnet sich für die gewählten Personen.",
-  "who.open": "Wer ihn öffnen kann"
+  "who.open": "Wer ihn öffnen kann",
+  "sc.host_sign_in": "Verwenden Sie den Namen und das Passwort, die Sie für {host} verwenden.",
+  "sc.two_step": "Sie haben die zweistufige Anmeldung, daher brauchen Sie ein eigenes Passwort für freigegebene Ordner. Melden Sie sich mit Ihrem Kiboto-Namen und diesem Passwort an.",
+  "sc.sign_in": "Melden Sie sich mit Ihrem Kiboto-Namen und Passwort an.",
+  "sc.title": "Mit „{share}“ verbinden",
+  "sc.windows": "Windows: im Explorer eingeben",
+  "sc.mac": "Mac: im Finder Gehe zu → Mit Server verbinden",
+  "sc.make": "Passwort für freigegebene Ordner erstellen",
+  "sc.copy_failed": "Kopieren wurde nicht erlaubt; markieren Sie die Adresse und kopieren Sie sie.",
+  "sc.open": "Verbinden"
 };

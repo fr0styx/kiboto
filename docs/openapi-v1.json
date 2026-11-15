@@ -65105,6 +65105,36 @@
     ]
    }
   },
+  "/api/v1/storage/connect": {
+   "get": {
+    "description": "The address a computer at home opens the shared folders with (SET-22, Shares 3): the NAS's\nown address on the home network, not the one this page happens to be reached through.",
+    "operationId": "get_connect_address_api_v1_storage_connect_get",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Get Connect Address Api V1 Storage Connect Get",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Get Connect Address",
+    "tags": [
+     "Storage Subsystem & PAL"
+    ]
+   }
+  },
   "/api/v1/storage/disks": {
    "get": {
     "description": "Returns detected physical disks discovered via DiskDiscoveryHAL.",

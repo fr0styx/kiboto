@@ -1243,6 +1243,7 @@ export async function fetchAndRenderNetworkShares(container) {
       }
     );
     import('./share-who.js').then((m) => m.fillWhoLines(grid, PLATFORM_NAMES)).catch(() => {}); // who can open it (SET-22)
+    import('./share-connect.js').then((m) => m.addConnectButtons(grid, canManageShares ? '' : platformName(platform))).catch(() => {}); // how to connect (SET-22)
   } catch (err) {
     console.error('[Kiboto] Failed to fetch network shares:', err);
     container.innerHTML = `

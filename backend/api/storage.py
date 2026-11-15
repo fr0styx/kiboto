@@ -416,6 +416,19 @@ def get_share_access() -> dict[str, Any]:
     }
 
 
+@router.get("/connect")
+def get_connect_address(principal: AuthenticatedPrincipal = Depends(get_current_principal)) -> dict[str, Any]:
+    """The address a computer at home opens the shared folders with (SET-22, Shares 3): the NAS's
+    own address on the home network, not the one this page happens to be reached through."""
+    from backend.hardware.net.topology import read_ip
+
+    try:
+        ip = str(read_ip() or "")
+    except (OSError, ValueError, RuntimeError):
+        ip = ""
+    return {"address": ip}
+
+
 @router.get("/share-access/who", dependencies=[Depends(require_scope("shares:manage"))])
 def get_share_who() -> dict[str, Any]:
     """Who can really open each shared folder: administrators and role defaults included (SET-22)."""

@@ -233,6 +233,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Who can open it**, per shared folder: every person with No access, Can view or Can view and
   change; administrators shown as they are, guests can view at most.
 
+#### Changes
+
+- **How to connect**, per shared folder: the address for Windows and for a Mac with Copy, which name
+  and password to use, and the separate password for people with two-step sign-in, made in place.
+
 ## v2.0.2 (2026-11-12)
 ### 🧭 A new Settings sidebar, five themes, honest pages, and remote access cut down to what works
 

@@ -193,7 +193,12 @@ def test_e2e_live_desktop_session_and_badge():
         page.goto("http://127.0.0.1:8082/", wait_until="domcontentloaded", timeout=12000)
         # the login form settles first (it can swap the quick sign-in for the full form)
         page.wait_for_selector("#login-password", state="visible", timeout=12000)
-        page.wait_for_load_state("networkidle")
+        # settled: the full form or its toggle shows (a live page never goes network-idle; that wait flaked)
+        page.wait_for_function(
+            "() => !!(document.querySelector('#login-username')?.offsetParent"
+            " || document.querySelector('#login-toggle-manual')?.offsetParent)",
+            timeout=12000,
+        )
         if page.is_visible("#login-toggle-manual"):
             page.click("#login-toggle-manual", timeout=5000)
         if page.is_visible("#login-username"):

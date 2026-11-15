@@ -342,7 +342,11 @@
 .who-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; min-height: 40px; }
 .who-row + .who-row { border-top: 1px solid var(--kb-line-7); padding-top: 6px; }
 .who-fixed, .who-note { color: var(--muted); font-size: var(--kb-fs-sm); }
-.who-actions { display: flex; justify-content: flex-end; gap: 8px; }
+.who-actions, .sc-actions { display: flex; justify-content: flex-end; gap: 8px; }
+.sc-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: 8px 0; }
+.sc-label { flex-basis: 100%; font-size: var(--kb-fs-sm); color: var(--muted); }
+.sc-value { flex: 1; min-width: 0; overflow-wrap: anywhere; padding: 6px 8px; border-radius: 8px; background: var(--kb-glaze-4); }
+.sc-note { font-size: var(--kb-fs-sm); }
 .net-link { color: var(--kb-text-accent); font-weight: 600; }
 /* Network: This NAS at home and one row per port (SET-24 m) */
 .net-home { margin-bottom: 14px; }

@@ -7725,5 +7725,14 @@ export default {
   "who.note_host": "This applies to Files. Over the network, the host decides.",
   "who.note": "One list for Files and the network.",
   "who.saved": "Saved. \"{share}\" opens for the people you chose.",
-  "who.open": "Who can open it"
+  "who.open": "Who can open it",
+  "sc.host_sign_in": "Use the name and password you use for {host}.",
+  "sc.two_step": "You have two-step sign-in, so you need a separate password for shared folders. Sign in with your Kiboto name and that password.",
+  "sc.sign_in": "Sign in with your Kiboto name and password.",
+  "sc.title": "Connect to \"{share}\"",
+  "sc.windows": "Windows: in File Explorer, type",
+  "sc.mac": "Mac: in Finder, Go → Connect to Server",
+  "sc.make": "Make a password for shared folders",
+  "sc.copy_failed": "Copying was not allowed; select the address and copy it.",
+  "sc.open": "How to connect"
 };

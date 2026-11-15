@@ -7725,5 +7725,14 @@ export default {
   "who.note_host": "这适用于文件。网络上由主机系统决定。",
   "who.note": "文件和网络共用一个名单。",
   "who.saved": "已保存。“{share}”对你选择的人开放。",
-  "who.open": "谁可以打开"
+  "who.open": "谁可以打开",
+  "sc.host_sign_in": "使用你在 {host} 上使用的名称和密码。",
+  "sc.two_step": "你开启了两步登录，因此共享文件夹需要单独的密码。请用你的 Kiboto 名称和这个密码登录。",
+  "sc.sign_in": "使用你的 Kiboto 名称和密码登录。",
+  "sc.title": "连接到“{share}”",
+  "sc.windows": "Windows：在文件资源管理器中输入",
+  "sc.mac": "Mac：在访达中选择 前往 → 连接服务器",
+  "sc.make": "创建共享文件夹密码",
+  "sc.copy_failed": "不允许复制；请选中地址后复制。",
+  "sc.open": "如何连接"
 };
