@@ -78,9 +78,6 @@ function bindUsersPane() {
   const btnAddUser = document.getElementById('btn-add-user');
   if (btnAddUser) btnAddUser.onclick = () => import('./add-person.js').then((m) => m.openAddPerson({ onDone: loadUsersList })); // three steps (SET-19)
 
-  const btnRefreshUsers = document.getElementById('btn-refresh-users');
-  if (btnRefreshUsers) btnRefreshUsers.onclick = loadUsersList;
-
   const btnShareAccess = document.getElementById('btn-share-access');
   if (btnShareAccess) btnShareAccess.onclick = openShareAccessModal;
 

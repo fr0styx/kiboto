@@ -36,7 +36,7 @@ const submit = async (form) => {
 };
 
 const DOM = `
-  <button id="btn-add-user"></button><button id="btn-refresh-users"></button><button id="btn-share-access"></button>
+  <button id="btn-add-user"></button><button id="btn-share-access"></button>
   <button id="btn-refresh-sessions"></button><button id="btn-revoke-all-sessions"></button>
   <button id="btn-enable-2fa"></button><button id="btn-disable-2fa"></button>
   <button id="btn-jump-to-security"></button><button id="btn-jump-to-2fa"></button>

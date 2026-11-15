@@ -7619,5 +7619,10 @@ export default {
   "hh.smb_note": "使用两步登录的人访问网络文件夹时使用单独的密码，开启时设置。",
   "hh.saved": "已保存。",
   "hh.failed": "未能保存。",
-  "hh.q": "{n, plural, other {还有 # 位成年人未设置。在设置之前，他们登录后只能进行设置。}}"
+  "hh.q": "{n, plural, other {还有 # 位成年人未设置。在设置之前，他们登录后只能进行设置。}}",
+  "people.for_family": "家庭功能",
+  "people.advanced": "高级",
+  "people.all_folders": "一览所有共享文件夹",
+  "people.per_role": "按角色设置两步登录",
+  "people.company": "企业登录（OpenID Connect、LDAP）"
 };

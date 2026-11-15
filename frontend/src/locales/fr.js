@@ -7619,5 +7619,10 @@ export default {
   "hh.smb_note": "Les personnes avec la connexion en deux étapes utilisent un mot de passe à part pour les dossiers réseau, choisi en l'activant.",
   "hh.saved": "Enregistré.",
   "hh.failed": "Ce n'a pas été enregistré.",
-  "hh.q": "{n, plural, one {# adulte ne l'a pas configurée. D'ici là, il ne peut se connecter que pour la configurer.} other {# adultes ne l'ont pas configurée. D'ici là, ils ne peuvent se connecter que pour la configurer.}}"
+  "hh.q": "{n, plural, one {# adulte ne l'a pas configurée. D'ici là, il ne peut se connecter que pour la configurer.} other {# adultes ne l'ont pas configurée. D'ici là, ils ne peuvent se connecter que pour la configurer.}}",
+  "people.for_family": "Pour la famille",
+  "people.advanced": "Avancé",
+  "people.all_folders": "Tous les dossiers partagés d'un coup d'œil",
+  "people.per_role": "Connexion en deux étapes par rôle",
+  "people.company": "Connexion d'entreprise (OpenID Connect, LDAP)"
 };

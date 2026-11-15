@@ -60,3 +60,9 @@
 .hh-label { font-weight: 600; color: var(--kb-text-strong); }
 .hh-note { margin: 4px 0 0; font-size: var(--kb-fs-xs); color: var(--muted); }
 
+/* For the family, Advanced (SET-19) */
+.people-group-h { margin-top: 18px; }
+.people-advanced { margin-top: 14px; padding: 10px 14px; border: 1px solid var(--kb-line-7); border-radius: 12px; }
+.people-advanced > summary { cursor: pointer; font-weight: 700; }
+.people-advanced-body { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+

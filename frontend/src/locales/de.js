@@ -7619,5 +7619,10 @@ export default {
   "hh.smb_note": "Wer die zweistufige Anmeldung nutzt, hat für Netzwerkordner ein eigenes Passwort, das beim Einschalten gewählt wird.",
   "hh.saved": "Gespeichert.",
   "hh.failed": "Das wurde nicht gespeichert.",
-  "hh.q": "{n, plural, one {# erwachsene Person hat sie nicht eingerichtet. Bis dahin kann sie sich nur anmelden, um sie einzurichten.} other {# Erwachsene haben sie nicht eingerichtet. Bis dahin können sie sich nur anmelden, um sie einzurichten.}}"
+  "hh.q": "{n, plural, one {# erwachsene Person hat sie nicht eingerichtet. Bis dahin kann sie sich nur anmelden, um sie einzurichten.} other {# Erwachsene haben sie nicht eingerichtet. Bis dahin können sie sich nur anmelden, um sie einzurichten.}}",
+  "people.for_family": "Für die Familie",
+  "people.advanced": "Erweitert",
+  "people.all_folders": "Alle freigegebenen Ordner auf einen Blick",
+  "people.per_role": "Zweistufige Anmeldung pro Rolle",
+  "people.company": "Firmenanmeldung (OpenID Connect, LDAP)"
 };

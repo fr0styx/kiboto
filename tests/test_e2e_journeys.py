@@ -61,6 +61,16 @@ def _tab_to(page, element_id, limit=40, back=False):
     assert page.evaluate(FOCUS_ID) == element_id, f"#{element_id} can't be reached with Tab"
 
 
+def _tab_to_sel(page, selector, limit=40):
+    """Tab until the element the selector names has focus."""
+    check = f"() => document.activeElement && document.activeElement.matches({selector!r})"
+    for _ in range(limit):
+        if page.evaluate(check):
+            return
+        page.keyboard.press("Tab")
+    assert page.evaluate(check), f"{selector} can't be reached with Tab"
+
+
 ORIGIN = {"Origin": BASE}  # a cookie session's writes must come from the server's own pages (SEC-17)
 
 
@@ -120,28 +130,34 @@ def test_add_a_person_by_keyboard():
         page.wait_for_selector("#btn-add-user", state="visible", timeout=8000)
         page.focus("#btn-add-user")
         page.keyboard.press("Enter")
-        page.wait_for_selector("#modal-add-user", state="visible", timeout=5000)
-        # the dialog moves focus inside itself a moment after it opens; Tab before that wanders the page
+        page.wait_for_selector(".ap-dialog", state="visible", timeout=5000)
+        # the flow moves focus inside itself a moment after it opens; Tab before that wanders the page
         page.wait_for_function(
-            "() => document.getElementById('modal-add-user').contains(document.activeElement)", timeout=5000
+            "() => document.querySelector('.ap-dialog')?.contains(document.activeElement)", timeout=5000
         )
-        _tab_to(page, "add-user-username")
-        page.keyboard.type("kbjourney")
-        _tab_to(page, "add-user-display")
+        # 1. Who: the name, then the role with the arrow keys (Family member -> Kid)
+        _tab_to_sel(page, ".ap-dialog [data-ap-name]")
         page.keyboard.type("Keyboard Journey")
-        _tab_to(page, "add-user-password")
-        page.keyboard.type("journey-Pass-1")
-        _tab_to(page, "add-user-role")
-        page.keyboard.press("ArrowDown")  # family member -> app manager
-        for _ in range(20):  # on to the Add button (Enter on a list doesn't submit a form)
-            if page.evaluate(
-                "() => document.activeElement && document.activeElement.matches('#form-add-user button[type=submit]')"
-            ):
-                break
-            page.keyboard.press("Tab")
-        else:
-            raise AssertionError("the Add button can't be reached with Tab")
+        _tab_to_sel(page, '.ap-dialog input[name="ap-role"]:checked')
+        page.keyboard.press("ArrowDown")
+        assert page.evaluate("() => document.querySelector('input[name=\"ap-role\"]:checked').value") == "kid"
+        _tab_to_sel(page, ".ap-dialog [data-ap-next]")
         page.keyboard.press("Enter")
+        # 2. What they can use: the defaults
+        page.wait_for_selector(".ap-dialog >> text=Step 2 of 3", timeout=5000)
+        _tab_to_sel(page, ".ap-dialog [data-ap-next]")
+        page.keyboard.press("Enter")
+        # 3. How they get in: the account now, with a sign-in name and a first password
+        page.wait_for_selector(".ap-dialog [data-ap-username]", state="visible", timeout=5000)
+        _tab_to_sel(page, ".ap-dialog [data-ap-username]")
+        page.keyboard.press("Control+A")
+        page.keyboard.type("kbjourney")
+        _tab_to_sel(page, ".ap-dialog [data-ap-password]")
+        page.keyboard.type("journey-Pass-1")
+        _tab_to_sel(page, ".ap-dialog [data-ap-next]")
+        page.keyboard.press("Enter")
+        page.wait_for_selector(".ap-dialog >> text=Keyboard Journey was added", timeout=8000)
+        page.keyboard.press("Escape")
         try:
             page.wait_for_selector("#users-table-body >> text=@kbjourney", timeout=8000)
         finally:

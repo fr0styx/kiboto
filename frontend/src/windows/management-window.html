@@ -2858,12 +2858,6 @@
               <div class="users-bar">
                 <div class="users-bar-title" id="users-list-title" data-i18n="users.list_title">People with an account</div>
                 <div class="users-bar-actions">
-                  <button type="button" id="btn-refresh-users" class="btn-pill-toggle" data-i18n="common.refresh">
-                    🔄 Refresh
-                  </button>
-                  <button type="button" id="btn-share-access" class="btn-pill-toggle" title="Choose which users can use which shares" data-i18n-title="ui.choose_which_users_can_use" data-i18n="users.share_access">
-                    Shared folders
-                  </button>
                   <button type="button" id="btn-add-user" class="btn-save-preset users-bar-btn" data-i18n="users.add">
                     Add a person
                   </button>
@@ -2884,6 +2878,7 @@
                 <p class="invite-meta" data-i18n="invite.desc">A one-time link: they choose their own username and password, and get their own private folder.</p>
                 <div id="invites-mount"></div>
               </section>
+              <h3 class="account-h people-group-h" data-i18n="people.for_family">For the family</h3>
               <section class="invite-card" aria-labelledby="ff-title">
                 <h4 id="ff-title" class="invite-title" data-i18n="ff.title">Filter the kids' devices</h4>
                 <p class="invite-meta" data-i18n="ff.desc">With AdGuard Home from the App Catalog answering your network's DNS, a family account's phones and tablets get parental control, safe search and safe browsing, and the services you pick are blocked. Everyone else is unchanged.</p>
@@ -2898,14 +2893,21 @@
                 <h4 id="fs-title" class="invite-title" data-i18n="fs.title">One sign-in for the family's apps</h4>
                 <div id="family-signin-mount"></div>
               </section>
+              <section class="invite-card" aria-labelledby="users-away-title">
+                <h4 id="users-away-title" class="invite-title" data-i18n="users.away_title">Family from anywhere</h4>
+                <p class="invite-meta" data-i18n="users.away_desc">Let the people in your home open Kiboto and their photos when they are out, through Tailscale.</p>
+                <a class="btn-pill-toggle" id="btn-users-away" href="#/sharing" data-i18n="users.away_open">Set up family access</a>
+              </section>
+              <details class="people-advanced">
+                <summary data-i18n="people.advanced">Advanced</summary>
+                <div class="people-advanced-body">
+                  <button type="button" id="btn-share-access" class="btn-pill-toggle" data-i18n="people.all_folders">All shared folders at a glance</button>
+                  <a class="btn-pill-toggle" href="#/security" data-i18n="people.per_role">Two-step sign-in per role</a>
+                  <a class="btn-pill-toggle" href="#/security" data-i18n="people.company">Company sign-in (OpenID Connect, LDAP)</a>
+                </div>
+              </details>
             </div>
 
-            <!-- Subpane 2: Active Sessions -->
-            <section class="invite-card" aria-labelledby="users-away-title">
-              <h4 id="users-away-title" class="invite-title" data-i18n="users.away_title">Family from anywhere</h4>
-              <p class="invite-meta" data-i18n="users.away_desc">Let the people in your home open Kiboto and their photos when they are out, through Tailscale.</p>
-              <a class="btn-pill-toggle" id="btn-users-away" href="#/sharing" data-i18n="users.away_open">Set up family access</a>
-            </section>
           </div>
         </div>
 

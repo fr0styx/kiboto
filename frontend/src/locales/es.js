@@ -7619,5 +7619,10 @@ export default {
   "hh.smb_note": "Quienes usan el inicio de sesión en dos pasos tienen una contraseña aparte para las carpetas de red, que eligen al activarlo.",
   "hh.saved": "Guardado.",
   "hh.failed": "No se guardó.",
-  "hh.q": "{n, plural, one {# adulto no lo ha configurado. Hasta entonces solo puede iniciar sesión para configurarlo.} other {# adultos no lo han configurado. Hasta entonces solo pueden iniciar sesión para configurarlo.}}"
+  "hh.q": "{n, plural, one {# adulto no lo ha configurado. Hasta entonces solo puede iniciar sesión para configurarlo.} other {# adultos no lo han configurado. Hasta entonces solo pueden iniciar sesión para configurarlo.}}",
+  "people.for_family": "Para la familia",
+  "people.advanced": "Avanzado",
+  "people.all_folders": "Todas las carpetas compartidas de un vistazo",
+  "people.per_role": "Inicio de sesión en dos pasos por rol",
+  "people.company": "Inicio de sesión de empresa (OpenID Connect, LDAP)"
 };

@@ -7619,5 +7619,10 @@ export default {
   "hh.smb_note": "People with two-step sign-in use a separate password for network folders, which they choose when they turn it on.",
   "hh.saved": "Saved.",
   "hh.failed": "That didn't save.",
-  "hh.q": "{n, plural, one {# adult has not set it up. Until they do, they can sign in only to set it up.} other {# adults have not set it up. Until they do, they can sign in only to set it up.}}"
+  "hh.q": "{n, plural, one {# adult has not set it up. Until they do, they can sign in only to set it up.} other {# adults have not set it up. Until they do, they can sign in only to set it up.}}",
+  "people.for_family": "For the family",
+  "people.advanced": "Advanced",
+  "people.all_folders": "All shared folders at a glance",
+  "people.per_role": "Two-step sign-in per role",
+  "people.company": "Company sign-in (OpenID Connect, LDAP)"
 };
