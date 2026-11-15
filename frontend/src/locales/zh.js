@@ -7526,5 +7526,7 @@ export default {
   "users.del_done_deleted": "其文件已删除。",
   "users.del_done_error": "无法处理其文件：{error}",
   "confirm.users_delete_files.title": "删除账户和文件",
-  "confirm.users_delete_files.msg": "删除账户 {target} 及其全部文件？此操作无法撤销。"
+  "confirm.users_delete_files.msg": "删除账户 {target} 及其全部文件？此操作无法撤销。",
+  "users.f_must_change": "对方首次登录时自行设置密码",
+  "auth.choose_own_pw": "请设置你自己的密码以继续。"
 };

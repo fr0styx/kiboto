@@ -144,6 +144,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Deleting a person asks what happens to their files**: keep them in a renamed folder, give them to
   someone else, or delete them. A name used again starts with an empty folder.
 
+#### Changes
+
+- **A new person chooses their own password** when they first sign in (ticked by default in Add a
+  person). Only someone who can set up the NAS sees the setup wizard after signing in.
+
 ## v2.0.2 (2026-11-12)
 ### 🧭 A new Settings sidebar, five themes, honest pages, and remote access cut down to what works
 

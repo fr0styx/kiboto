@@ -127,15 +127,15 @@ describe('sign-in and lock screen (auth.js)', () => {
     byId('login-toggle-manual').click();
     byId('login-username').value = ' carol ';
     byId('login-password').value = 'pw';
-    fetchMock.mockResolvedValueOnce(res({ status: 'ok', token: 'T', user: { id: 'u3' }, must_change_password: true }));
+    fetchMock.mockResolvedValueOnce(res({ status: 'ok', token: 'T', user: { id: 'u3', scopes: ['*'] }, must_change_password: true, is_default_password: true }));
     byId('login-btn').click();
     await vi.advanceTimersByTimeAsync(400);
     expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({ username: 'carol', password: 'pw', remember_me: true });
     expect(auth.setToken).toHaveBeenCalledWith('T');
-    expect(setCurrentUser).toHaveBeenCalledWith({ id: 'u3' });
+    expect(setCurrentUser).toHaveBeenCalledWith({ id: 'u3', scopes: ['*'] });
     expect(shown('login-overlay')).toBe('none');
     expect(document.documentElement.classList.contains('has-auth-session')).toBe(true);
-    expect(openSetupWizard).toHaveBeenCalled();
+    await vi.waitFor(() => expect(openSetupWizard).toHaveBeenCalled()); // the owner, default password (SET-19)
     expect(byId('login-password').value).toBe('');
   });
 

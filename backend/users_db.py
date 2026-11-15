@@ -554,6 +554,7 @@ def create_user(
     idp_sub: str = "",
     db_path: str | None = None,
     home_directory: str | None = None,
+    must_change_password: bool = False,
 ) -> dict[str, Any]:
     username_clean = username.strip().lower()
     if len(username_clean) < 2 or len(username_clean) > 32:
@@ -589,7 +590,7 @@ def create_user(
                 pwd_hash,
                 role_id,
                 "active",
-                0,
+                1 if must_change_password else 0,
                 resolved_home,
                 storage_quota_bytes,
                 idp_type,

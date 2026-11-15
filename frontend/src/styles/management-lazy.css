@@ -302,6 +302,7 @@
 :is(.invite-shares, .invite-hours) > legend { font-size: var(--kb-fs-xs); color: var(--muted); padding: 0 4px; }
 :is(.invite-shares, .invite-hours) { flex: 1 1 100%; }
 .invite-form .invite-share { flex-direction: row; align-items: center; justify-content: space-between; gap: 10px; margin: 4px 0; color: var(--c-text); font-size: var(--kb-fs-sm, 13px); }
+.udg-check { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: var(--kb-fs-xs); color: var(--muted); }
 .net-link { color: var(--kb-text-accent); font-weight: 600; }
 /* Network: This NAS at home and one row per port (SET-24 m) */
 .net-home { margin-bottom: 14px; }

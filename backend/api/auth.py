@@ -442,6 +442,8 @@ def _build_session_response(
         },
         "must_change_password": must_change,
         "is_default_password": is_def_pwd,
+        # the person's own "choose your password" (SET-19), apart from the built-in account's default
+        "choose_own_password": bool(user.get("must_change_password")),
         "mfa_setup_required": mfa_policy.account_needs_setup(user),
     }
     response = JSONResponse(content=response_data)
@@ -1142,6 +1144,7 @@ def create_new_user(
             email=data.email or "",
             role_id=data.role_id,
             storage_quota_bytes=data.storage_quota_bytes,
+            must_change_password=data.must_change_password,
         )
         try:
             from backend.services.user_spaces import ensure_home

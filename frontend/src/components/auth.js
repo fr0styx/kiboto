@@ -11,6 +11,7 @@ import { escapeHtml } from '../utils.js';
 import { showToast } from '../toast.js';
 import { fetchCurrentProfile, getCurrentUser, setCurrentUser, promptRequiredMfa } from './session.js';
 import { openSetupWizard } from './setup-wizard-gate.js';
+import { afterSignIn } from './first-password.js';
 import { passkeysAvailable } from '../passkeys-check.js';
 
 import { formatDate, formatTime } from '../format.js';
@@ -460,11 +461,8 @@ export function finishSignIn(data) {
     }, 250);
   }
   ZettEventBus.emit('auth:login');
-  if (data.must_change_password || data.is_default_password || data.user?.must_change_password) {
-    setTimeout(() => openSetupWizard(null, false), 350);
-  } else if (data.mfa_setup_required) {
-    setTimeout(() => promptRequiredMfa(data), 350);
-  }
+  // the setup wizard, the own-password dialog or two-step setup (SET-19)
+  setTimeout(() => afterSignIn(data, { wizard: () => openSetupWizard(null, false), mfa: (d) => promptRequiredMfa(d) }), 350);
 }
 
 /** Signs in with a passkey (RES-3): alone, or as the second step with the password step's token. */

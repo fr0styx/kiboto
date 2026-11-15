@@ -7526,5 +7526,7 @@ export default {
   "users.del_done_deleted": "Die Dateien wurden gelöscht.",
   "users.del_done_error": "Die Dateien konnten nicht verarbeitet werden: {error}",
   "confirm.users_delete_files.title": "Konto und Dateien löschen",
-  "confirm.users_delete_files.msg": "Das Konto {target} und alle Dateien löschen? Das lässt sich nicht rückgängig machen."
+  "confirm.users_delete_files.msg": "Das Konto {target} und alle Dateien löschen? Das lässt sich nicht rückgängig machen.",
+  "users.f_must_change": "Die Person wählt bei der ersten Anmeldung ein eigenes Passwort",
+  "auth.choose_own_pw": "Wählen Sie ein eigenes Passwort, um fortzufahren."
 };

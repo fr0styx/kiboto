@@ -7526,5 +7526,7 @@ export default {
   "users.del_done_deleted": "Their files were deleted.",
   "users.del_done_error": "Their files could not be handled: {error}",
   "confirm.users_delete_files.title": "Delete account and files",
-  "confirm.users_delete_files.msg": "Delete the account {target} and all their files? This can't be undone."
+  "confirm.users_delete_files.msg": "Delete the account {target} and all their files? This can't be undone.",
+  "users.f_must_change": "They choose their own password when they first sign in",
+  "auth.choose_own_pw": "Choose your own password to go on."
 };

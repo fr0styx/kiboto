@@ -25,15 +25,16 @@ describe('signing in with a passkey (RES-3)', () => {
     document.documentElement.classList.add('auth-required');
   });
 
-  it('finishes a sign-in and opens what the account still needs', () => {
-    finishSignIn({ token: 't', user: { id: 'u' }, must_change_password: true });
+  it('finishes a sign-in and opens what the account still needs', async () => {
+    const owner = { id: 'u', scopes: ['*'] };
+    finishSignIn({ token: 't', user: owner, must_change_password: true, is_default_password: true });
     expect(document.documentElement.classList.contains('has-auth-session')).toBe(true);
-    expect(session.setCurrentUser).toHaveBeenCalledWith({ id: 'u' });
-    vi.advanceTimersByTime(400);
-    expect(wizard.openSetupWizard).toHaveBeenCalled();
+    expect(session.setCurrentUser).toHaveBeenCalledWith(owner);
+    await vi.advanceTimersByTimeAsync(400);
+    await vi.waitFor(() => expect(wizard.openSetupWizard).toHaveBeenCalled()); // the owner, default password (SET-19)
     finishSignIn({ mfa_setup_required: true });
-    vi.advanceTimersByTime(400);
-    expect(session.promptRequiredMfa).toHaveBeenCalled();
+    await vi.advanceTimersByTimeAsync(400);
+    await vi.waitFor(() => expect(session.promptRequiredMfa).toHaveBeenCalled());
     vi.useRealTimers();
   });
 

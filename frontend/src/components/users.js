@@ -364,7 +364,8 @@ export function showAddUserModal() {
             email,
             password,
             role_id: roleId,
-            storage_quota_bytes: quotaGb > 0 ? quotaGb * 1024 * 1024 * 1024 : 0
+            storage_quota_bytes: quotaGb > 0 ? quotaGb * 1024 * 1024 * 1024 : 0,
+            must_change_password: Boolean(/** @type {HTMLInputElement | null} */ (document.getElementById('add-user-must-change'))?.checked), // SET-19
           })
         });
         const result = await res.json();

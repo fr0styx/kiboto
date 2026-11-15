@@ -38,6 +38,8 @@ class UserCreateRequest(BaseModel):
     email: str | None = None
     role_id: str = "share_user"
     storage_quota_bytes: int = 0
+    # SET-19: the person chooses their own password when they first sign in
+    must_change_password: bool = False
 
 
 class UserUpdateRequest(BaseModel):

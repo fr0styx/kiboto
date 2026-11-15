@@ -40396,6 +40396,11 @@
       ],
       "title": "Email"
      },
+     "must_change_password": {
+      "default": false,
+      "title": "Must Change Password",
+      "type": "boolean"
+     },
      "password": {
       "minLength": 8,
       "title": "Password",

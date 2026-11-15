@@ -7526,5 +7526,7 @@ export default {
   "users.del_done_deleted": "Sus archivos se eliminaron.",
   "users.del_done_error": "No se pudieron procesar sus archivos: {error}",
   "confirm.users_delete_files.title": "Eliminar cuenta y archivos",
-  "confirm.users_delete_files.msg": "¿Eliminar la cuenta {target} y todos sus archivos? No se puede deshacer."
+  "confirm.users_delete_files.msg": "¿Eliminar la cuenta {target} y todos sus archivos? No se puede deshacer.",
+  "users.f_must_change": "Elige su propia contraseña al iniciar sesión por primera vez",
+  "auth.choose_own_pw": "Elige tu propia contraseña para continuar."
 };
