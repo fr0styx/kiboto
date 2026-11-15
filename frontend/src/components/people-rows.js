@@ -1,5 +1,6 @@
 // People as rows (SET-19, Users report section 5): one row per person with one status line and
-// marks for two-step sign-in and a storage limit; invited people are rows too. On a phone the rows
+// marks for two-step sign-in and a storage limit; invited people are rows too. The row opens the
+// person's page (person-page.js), which has every action. On a phone the rows
 // wrap instead of scrolling sideways.
 import { escapeHtml } from '../utils.js';
 import { t } from '../i18n.js';
@@ -28,10 +29,6 @@ export function personRowHtml(u, { me, roleName, quotaText }) {
   const marks = personMarks(u, quotaText)
     .map((m) => `<span class="person-mark">${escapeHtml(m)}</span>`)
     .join('');
-  const others = isSelf
-    ? ''
-    : `<button type="button" class="suite-toolkit-btn sm btn-toggle-user" data-id="${escapeHtml(u.id)}" data-status="${escapeHtml(u.status)}" title="${escapeHtml(active ? t('users.turn_off', 'Turn off this account') : t('users.turn_on', 'Turn on this account'))}">${active ? '🚫' : '✅'}</button>
-      <button type="button" class="suite-toolkit-btn sm danger btn-delete-user" data-id="${escapeHtml(u.id)}" data-user="${escapeHtml(u.username)}" title="${escapeHtml(t('ui.delete_user', 'Delete User'))}">🗑️</button>`;
   return `<li class="person-row${active ? '' : ' is-off'}" data-id="${escapeHtml(u.id)}">
     <button type="button" class="person-open btn-edit-user" data-id="${escapeHtml(u.id)}">
       <span class="person-avatar" aria-hidden="true">${escapeHtml((name[0] || 'U').toUpperCase())}</span>
@@ -42,10 +39,6 @@ export function personRowHtml(u, { me, roleName, quotaText }) {
       </span>
       ${marks ? `<span class="person-marks">${marks}</span>` : ''}
     </button>
-    <span class="person-actions">
-      <button type="button" class="suite-toolkit-btn sm btn-pwd-user" data-id="${escapeHtml(u.id)}" data-user="${escapeHtml(u.username)}" title="${escapeHtml(t('ui.reset_password', 'Reset Password'))}">🔑</button>
-      ${others}
-    </span>
   </li>`;
 }
 

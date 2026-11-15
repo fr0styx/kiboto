@@ -40,7 +40,7 @@ const DOM = `
   <button id="btn-refresh-sessions"></button><button id="btn-revoke-all-sessions"></button>
   <button id="btn-enable-2fa"></button><button id="btn-disable-2fa"></button>
   <button id="btn-jump-to-security"></button><button id="btn-jump-to-2fa"></button>
-  <ul id="users-table-body"></ul><div id="invites-mount"></div>
+  <div id="users-pane-list"><ul id="users-table-body"></ul></div><div id="invites-mount"></div>
   <table><tbody id="sessions-table-body"></tbody></table>
   <div id="mfa-status-card"><span id="mfa-status-badge"></span><p id="mfa-status-desc"></p></div>
   <div id="modal-add-user" class="os-modal"><div class="modal-window">
@@ -90,7 +90,7 @@ describe('People pane (users.js)', () => {
     const rows = byId('users-table-body').querySelectorAll('.person-row');
     expect(rows).toHaveLength(2);
     expect(rows[0].textContent).toContain('You');
-    expect(rows[0].querySelector('.btn-delete-user')).toBeNull();
+    expect(rows[0].querySelector('.btn-delete-user')).toBeNull(); // the actions are on the person's page (SET-19)
     expect(rows[1].textContent).toContain('5 GB · held by the disk');
     expect(rows[1].textContent).toContain('Turned off');
   });
@@ -122,29 +122,35 @@ describe('People pane (users.js)', () => {
     expect(byId('users-table-body').textContent).toContain('Only you so far');
   });
 
-  it('row buttons: edit, reset password, turn on, delete', async () => {
+  it('a row opens the person; its page: new password, turn on, remove (SET-19)', async () => {
     apiFetch.mockResolvedValue(reply({ users: PEOPLE }));
     await users.loadUsersList();
-    const row = byId('users-table-body').querySelectorAll('.person-row')[1];
-    row.querySelector('.btn-edit-user').click();
-    expect(byId('modal-edit-user').classList.contains('open')).toBe(true);
-    expect(byId('edit-user-quota').value).toBe('5');
-    row.querySelector('.btn-pwd-user').click();
+    const openBob = async () => {
+      byId('users-table-body').querySelectorAll('.person-row')[1].querySelector('.btn-edit-user').click();
+      await vi.waitFor(() => expect(byId('person-page')?.hidden).toBe(false));
+      return byId('person-page');
+    };
+    let page = await openBob();
+    expect(byId('users-pane-list').hidden).toBe(true);
+    expect(page.querySelector('[data-pp-quota]').value).toBe('5');
+    page.querySelector('[data-pp-reset]').click();
     expect(byId('reset-pwd-username').textContent).toBe('@bob');
     expect(byId('reset-pwd-current-wrap').style.display).toBe('none');
 
-    row.querySelector('.btn-toggle-user').click();
+    page.querySelector('[data-pp-status]').click();
     await vi.waitFor(() => expect(showToast).toHaveBeenCalledWith('User status updated.', 'success'));
     expect(JSON.parse(apiFetch.mock.calls.find((c) => c[1]?.method === 'PUT')[1].body)).toEqual({ status: 'active' });
+    expect(byId('users-pane-list').hidden).toBe(false); // back to the list
 
     apiFetch.mockResolvedValueOnce(reply({ detail: 'nope' }, false));
-    byId('users-table-body').querySelectorAll('.person-row')[1].querySelector('.btn-toggle-user').click();
+    (await openBob()).querySelector('[data-pp-status]').click();
     await vi.waitFor(() => expect(showToast).toHaveBeenCalledWith('Could not change status: nope', 'error'));
     apiFetch.mockRejectedValueOnce(new Error('offline'));
-    byId('users-table-body').querySelectorAll('.person-row')[1].querySelector('.btn-toggle-user').click();
+    (await openBob()).querySelector('[data-pp-status]').click();
     await vi.waitFor(() => expect(showToast).toHaveBeenCalledWith('Request failed: offline', 'error'));
 
-    byId('users-table-body').querySelectorAll('.person-row')[1].querySelector('.btn-delete-user').click();
+    page = await openBob();
+    page.querySelector('[data-pp-remove]').click();
     await vi.waitFor(() => expect(showBottomSheet).toHaveBeenCalled()); // what happens to the files first (SET-19)
     showBottomSheet.mock.calls.at(-1)[0].items[0].onClick(); // keep them
     const [, msg, onOk, , opts] = showConfirmToast.mock.calls.at(-1);

@@ -26,3 +26,16 @@
   .person-marks { margin-left: 0; }
 }
 
+/* A person's page (SET-19) */
+.person-page { display: flex; flex-direction: column; gap: 14px; }
+.pp-head { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+.pp-sub, .pp-line { margin: 0; font-size: var(--kb-fs-xs); color: var(--muted); }
+.pp-section { display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; border: 1px solid var(--kb-line-7); border-radius: 12px; background: var(--kb-glaze-3); }
+.pp-h { margin: 6px 0 0; font-size: var(--kb-fs-sm); color: var(--kb-text-strong); }
+.pp-h5 { margin: 6px 0 0; font-size: var(--kb-fs-xs); color: var(--kb-text-strong); }
+.pp-field { display: flex; flex-direction: column; gap: 4px; font-size: var(--kb-fs-xs); color: var(--muted); max-width: 420px; }
+.pp-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.pp-devices { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.pp-device { display: flex; flex-direction: column; font-size: var(--kb-fs-sm); overflow-wrap: anywhere; }
+.pp-section > form { display: contents; }
+

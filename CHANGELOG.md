@@ -164,6 +164,12 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **People shows one row per person**: role, where they are signed in, two-step sign-in and storage
   limit at a glance; people you invited show up as rows too, with Cancel invite.
 
+#### Changes
+
+- **Each person has their own page**: open someone in People to change their name, role, limit and
+  hours, see where they are signed in, reset their password, handle a lost phone, download their data,
+  or turn them off or remove them, all in one place.
+
 ## v2.0.2 (2026-11-12)
 ### 🧭 A new Settings sidebar, five themes, honest pages, and remote access cut down to what works
 

@@ -22,7 +22,7 @@ describe('People as rows (SET-19)', () => {
     document.body.innerHTML = `<ul>${personRowHtml(lea, opts)}${personRowHtml({ ...lea, id: 'u1', username: 'mum', display_name: '', mfa_enabled: false, storage_quota_bytes: 0 }, opts)}</ul>`;
     const [row, mine] = document.querySelectorAll('.person-row');
     expect(row.querySelector('.person-open')?.textContent).toContain('@lea · Kid');
-    expect(row.querySelector('.btn-delete-user')).not.toBeNull();
+    expect(row.querySelector('.btn-delete-user, .btn-toggle-user, .btn-pwd-user')).toBeNull(); // on the person's page now
     expect(mine.textContent).toContain('You');
     expect(mine.querySelector('.person-name')?.textContent).toContain('mum');
     expect(mine.querySelector('.btn-delete-user, .btn-toggle-user')).toBeNull();

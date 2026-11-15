@@ -208,7 +208,7 @@ export async function loadUsersList() {
     const kids = document.getElementById('kids-rules-mount'); // NUX-18: kids' rules in one place
     if (kids) {
       import('./kids-rules.js').then((m) => m.renderKidsRules(kids, users, {
-        onEdit: (id) => _usersCache[id] && showEditUserModal(_usersCache[id]),
+        onEdit: (id) => _usersCache[id] && openPerson(_usersCache[id]),
         onShares: openShareAccessModal,
       }));
     }
@@ -247,7 +247,7 @@ export async function loadUsersList() {
     container.querySelectorAll('.btn-edit-user').forEach((btn) => {
       btn.onclick = () => {
         const u = _usersCache[btn.dataset.id];
-        if (u) showEditUserModal(u);
+        if (u) openPerson(u); // their page (SET-19)
       };
     });
 
@@ -359,6 +359,21 @@ export function showAddUserModal() {
       }
     };
   }
+}
+
+/** Opens a person's page in place of the list (SET-19). */
+export function openPerson(user) {
+  return import('./person-page.js').then((m) =>
+    m.openPersonPage(user, {
+      me: getCurrentUser(),
+      roleName: formatRole,
+      roleOptionsHtml: document.getElementById('edit-user-role')?.innerHTML || '',
+      reload: loadUsersList,
+      resetPassword: showResetPasswordModal,
+      setStatus: toggleUserStatus,
+      remove: confirmDeleteUser,
+    }),
+  );
 }
 
 export function showEditUserModal(user) {
