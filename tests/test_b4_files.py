@@ -1,6 +1,7 @@
 """Missing features 6 and 7: Previous versions from snapshots, and Ask Kib about a file."""
 
 import os
+import shutil
 import uuid
 
 import pytest
@@ -34,7 +35,10 @@ def zfs_share(pool_tree):
     os.makedirs(os.path.join(snaps, "auto-0"))  # the file didn't exist yet
     for i, name in enumerate(("auto-0", "auto-1", "auto-2", "auto-3")):
         os.utime(os.path.join(snaps, name), (500 + i * 1000, 500 + i * 1000))
-    return share
+    yield share
+    # the shared test pool stays as it was: a restore in place left a Recycle Bin here, which showed up
+    # in the file-API recording test whenever it ran later (nightly random order, 12-15 Nov 2026)
+    shutil.rmtree(share, ignore_errors=True)
 
 
 def test_versions_are_the_differing_snapshot_copies(client, auth_headers, zfs_share):
