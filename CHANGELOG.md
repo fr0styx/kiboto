@@ -223,6 +223,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Backup reads top to bottom**: are your files safe, get something back, copies outside this
   Kiboto, earlier versions on this Kiboto, phones and computers; the rest is folded under More.
 
+#### Changes
+
+- **Shared folders say who can open them**: "Anna and Ben can change it. Mia can view it.",
+  administrators included. On Unraid and TrueNAS it says the host decides over the network.
+
 ## v2.0.2 (2026-11-12)
 ### 🧭 A new Settings sidebar, five themes, honest pages, and remote access cut down to what works
 

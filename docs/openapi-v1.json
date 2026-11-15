@@ -66374,6 +66374,39 @@
     ]
    }
   },
+  "/api/v1/storage/share-access/who": {
+   "get": {
+    "description": "Who can really open each shared folder: administrators and role defaults included (SET-22).",
+    "operationId": "get_share_who_api_v1_storage_share_access_who_get",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Get Share Who Api V1 Storage Share Access Who Get",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Get Share Who",
+    "tags": [
+     "Storage Subsystem & PAL"
+    ],
+    "x-required-scopes": [
+     "shares:manage"
+    ]
+   }
+  },
   "/api/v1/storage/shares": {
    "get": {
     "description": "Returns network shares (Samba, NFS, WebDAV) with comment, security level,\ncache tiering settings, and live disk usage statistics.",

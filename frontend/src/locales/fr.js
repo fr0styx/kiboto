@@ -7708,5 +7708,13 @@ export default {
   "bk.devices_pc_link": "Dossiers partagés",
   "bk.settings_title": "Les réglages de Kiboto, régulièrement",
   "bk.settings_desc": "Des copies chiffrées des personnes, des dossiers partagés et des apps, pour qu'un nouveau Kiboto reprenne là où celui-ci en était.",
-  "bk.more": "Plus : réglages de Kiboto, sauvegardes d'apps, synchro bidirectionnelle, vérification des disques"
+  "bk.more": "Plus : réglages de Kiboto, sauvegardes d'apps, synchro bidirectionnelle, vérification des disques",
+  "who.change": "{names} peuvent le modifier.",
+  "who.change_many": "{n} personnes peuvent le modifier.",
+  "who.view": "{names} peuvent le consulter.",
+  "who.view_many": "{n} personnes peuvent le consulter.",
+  "who.nobody": "Personne ne peut encore l'ouvrir.",
+  "who.host": "Dans Fichiers : {text} Sur le réseau : {host} décide.",
+  "who.change_one": "{names} peut le modifier.",
+  "who.view_one": "{names} peut le consulter."
 };

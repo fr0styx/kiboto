@@ -416,6 +416,20 @@ def get_share_access() -> dict[str, Any]:
     }
 
 
+@router.get("/share-access/who", dependencies=[Depends(require_scope("shares:manage"))])
+def get_share_who() -> dict[str, Any]:
+    """Who can really open each shared folder: administrators and role defaults included (SET-22)."""
+    from backend.hardware.pal_storage import get_storage_platform
+    from backend.services.share_access import who_can_open
+    from backend.users_db import list_users
+
+    try:
+        platform = str(get_storage_platform().get_platform_type().value)
+    except (AttributeError, ValueError, OSError, RuntimeError):
+        platform = ""
+    return who_can_open(list_users(), platform)
+
+
 @router.put("/share-access", dependencies=[Depends(require_scope("shares:manage"))])
 def put_share_access(req: ShareAccessUpdate) -> dict[str, Any]:
     from backend.services.share_access import load_config, save_config

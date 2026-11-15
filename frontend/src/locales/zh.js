@@ -7708,5 +7708,13 @@ export default {
   "bk.devices_pc_link": "共享文件夹",
   "bk.settings_title": "定期备份 Kiboto 的设置",
   "bk.settings_desc": "人员、共享文件夹和应用的加密副本，让一台新的 Kiboto 能从这台的状态继续。",
-  "bk.more": "更多：Kiboto 的设置、应用备份、双向同步、磁盘检查"
+  "bk.more": "更多：Kiboto 的设置、应用备份、双向同步、磁盘检查",
+  "who.change": "{names} 可以修改。",
+  "who.change_many": "{n} 人可以修改。",
+  "who.view": "{names} 可以查看。",
+  "who.view_many": "{n} 人可以查看。",
+  "who.nobody": "还没有人能打开。",
+  "who.host": "在文件中：{text} 网络上由 {host} 决定。",
+  "who.change_one": "{names} 可以修改。",
+  "who.view_one": "{names} 可以查看。"
 };

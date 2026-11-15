@@ -7708,5 +7708,13 @@ export default {
   "bk.devices_pc_link": "Shared folders",
   "bk.settings_title": "Kiboto's settings on a schedule",
   "bk.settings_desc": "Encrypted copies of people, shared folders and apps, so a new Kiboto can start where this one was.",
-  "bk.more": "More: Kiboto's settings, app backups, two-way sync, disk check"
+  "bk.more": "More: Kiboto's settings, app backups, two-way sync, disk check",
+  "who.change": "{names} can change it.",
+  "who.change_many": "{n} people can change it.",
+  "who.view": "{names} can view it.",
+  "who.view_many": "{n} people can view it.",
+  "who.nobody": "Nobody can open it yet.",
+  "who.host": "In Files: {text} Over the network: {host} decides.",
+  "who.change_one": "{names} can change it.",
+  "who.view_one": "{names} can view it."
 };

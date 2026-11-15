@@ -38,7 +38,7 @@ request and response schemas.
 
 <!-- BEGIN generated endpoints: python scripts/api_reference.py --update -->
 
-719 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
+720 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
 
 ### AI Conversation History
 
@@ -806,6 +806,7 @@ request and response schemas.
 | `POST` | `/api/v1/storage/scrub` | `storage:admin` | Initiates or monitors non-destructive array parity check or filesystem scrub |
 | `GET` | `/api/v1/storage/share-access` | `shares:manage` | Who can use which share in the file manager (SEC-10) |
 | `PUT` | `/api/v1/storage/share-access` | `shares:manage` | Put Share Access |
+| `GET` | `/api/v1/storage/share-access/who` | `shares:manage` | Who can really open each shared folder: administrators and role defaults included (SET-22) |
 | `GET` | `/api/v1/storage/shares` | any of `storage:read`, `shares:read`, `system:view` | Returns network shares (Samba, NFS, WebDAV) with comment, security level, cache tiering settings, and live disk usage statistics |
 | `POST` | `/api/v1/storage/shares` | `shares:manage` | Creates a new network share |
 | `DELETE` | `/api/v1/storage/shares/{name}` | `shares:manage` | Deletes a network share configuration |

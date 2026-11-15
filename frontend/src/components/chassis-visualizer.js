@@ -1242,6 +1242,7 @@ export async function fetchAndRenderNetworkShares(container) {
         updateShareCard(card, s, canManageShares);
       }
     );
+    import('./share-who.js').then((m) => m.fillWhoLines(grid, PLATFORM_NAMES)).catch(() => {}); // who can open it (SET-22)
   } catch (err) {
     console.error('[Kiboto] Failed to fetch network shares:', err);
     container.innerHTML = `

@@ -7708,5 +7708,13 @@ export default {
   "bk.devices_pc_link": "Freigegebene Ordner",
   "bk.settings_title": "Die Einstellungen von Kiboto regelmäßig",
   "bk.settings_desc": "Verschlüsselte Kopien von Personen, freigegebenen Ordnern und Apps, damit ein neues Kiboto dort weitermachen kann, wo dieses war.",
-  "bk.more": "Mehr: Einstellungen von Kiboto, App-Sicherungen, Zwei-Wege-Sync, Laufwerksprüfung"
+  "bk.more": "Mehr: Einstellungen von Kiboto, App-Sicherungen, Zwei-Wege-Sync, Laufwerksprüfung",
+  "who.change": "{names} können ihn ändern.",
+  "who.change_many": "{n} Personen können ihn ändern.",
+  "who.view": "{names} können ihn ansehen.",
+  "who.view_many": "{n} Personen können ihn ansehen.",
+  "who.nobody": "Noch niemand kann ihn öffnen.",
+  "who.host": "In Dateien: {text} Im Netzwerk entscheidet {host}.",
+  "who.change_one": "{names} kann ihn ändern.",
+  "who.view_one": "{names} kann ihn ansehen."
 };

@@ -335,6 +335,8 @@
 /* Backup in the report's order (SET-21 stage 4) */
 .bk-more, .bk-all-versions { margin-top: 12px; }
 .bk-more > summary, .bk-all-versions > summary { cursor: pointer; font-weight: 700; padding: 8px 0; }
+/* Shared folders: who can open it (SET-22) */
+.share-who { margin: 6px 0 0; font-size: var(--kb-fs-sm); color: var(--muted); }
 .net-link { color: var(--kb-text-accent); font-weight: 600; }
 /* Network: This NAS at home and one row per port (SET-24 m) */
 .net-home { margin-bottom: 14px; }

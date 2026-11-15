@@ -103,6 +103,60 @@ def share_level(cfg: dict[str, Any], share: str, username: str, role_id: str) ->
     )
 
 
+# Roles that open every folder: administrators and storage admins (Users A12, SET-19)
+ADMIN_ROLES = ("superadmin", "storage_admin")
+# Hosts that run the network shares themselves (Unraid, TrueNAS...): Kiboto decides Files only
+OWN_NETWORK = ("zettos", "generic_linux")
+
+
+def levels_for_person(user: dict[str, Any], shares: list[dict[str, Any]], cfg: dict[str, Any]) -> dict[str, str]:
+    """{share name: level} for one person, in the order grants_for() uses; administrators "write"."""
+    name = str(user.get("username") or "").lower()
+    role = str(user.get("role_id") or "")
+    if role in ADMIN_ROLES:
+        return {s["name"]: "write" for s in shares}
+    role_default = cfg["role_defaults"].get(role)
+    out = {}
+    for share in shares:
+        entry = cfg["shares"].get(share["name"], {})
+        out[share["name"]] = (
+            (entry.get("users") or {}).get(name)
+            or _samba_level(share["samba"], name)
+            or entry.get("default")
+            or role_default
+            or cfg["default_level"]
+        )
+    return out
+
+
+def who_can_open(users: list[dict[str, Any]], platform: str = "") -> dict[str, Any]:
+    """Each shared folder with every active person's level (SET-22, Shares 2). "host" names the
+    system that decides the network side when that is not Kiboto."""
+    cfg = load_config()
+    shares = known_shares()
+    people = [u for u in users if (u.get("status") or "active") == "active"]
+    levels = {str(u.get("username")): levels_for_person(u, shares, cfg) for u in people}
+    return {
+        "host": "" if not platform or platform in OWN_NETWORK else platform,
+        "shares": [
+            {
+                "name": sh["name"],
+                "people": [
+                    {
+                        "username": u.get("username"),
+                        "name": u.get("display_name") or u.get("username"),
+                        "role": u.get("role_id"),
+                        "admin": str(u.get("role_id") or "") in ADMIN_ROLES,
+                        "level": levels[str(u.get("username"))][sh["name"]],
+                    }
+                    for u in people
+                ],
+            }
+            for sh in shares
+        ],
+    }
+
+
 def invalidate() -> None:
     with _lock:
         _cache["ts"] = 0.0

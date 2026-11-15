@@ -7708,5 +7708,13 @@ export default {
   "bk.devices_pc_link": "Carpetas compartidas",
   "bk.settings_title": "Los ajustes de Kiboto con horario",
   "bk.settings_desc": "Copias cifradas de personas, carpetas compartidas y apps, para que un Kiboto nuevo empiece donde estaba este.",
-  "bk.more": "Más: ajustes de Kiboto, copias de apps, sincronización en dos sentidos, revisión de discos"
+  "bk.more": "Más: ajustes de Kiboto, copias de apps, sincronización en dos sentidos, revisión de discos",
+  "who.change": "{names} pueden cambiarla.",
+  "who.change_many": "{n} personas pueden cambiarla.",
+  "who.view": "{names} pueden verla.",
+  "who.view_many": "{n} personas pueden verla.",
+  "who.nobody": "Aún nadie puede abrirla.",
+  "who.host": "En Archivos: {text} En la red: decide {host}.",
+  "who.change_one": "{names} puede cambiarla.",
+  "who.view_one": "{names} puede verla."
 };
