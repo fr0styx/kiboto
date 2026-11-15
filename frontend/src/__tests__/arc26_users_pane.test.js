@@ -2,7 +2,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 const me = { current: { id: 'u1', username: 'alice' } };
-vi.mock('../api.js', () => ({ api: { get: vi.fn() }, auth: {}, apiFetch: vi.fn() }));
+vi.mock('../api.js', () => ({ api: { get: vi.fn(), delete: vi.fn() }, auth: {}, apiFetch: vi.fn() }));
 vi.mock('../toast.js', () => ({ showToast: vi.fn(), showConfirmToast: vi.fn(), showPromptToast: vi.fn(), showBottomSheet: vi.fn() }));
 vi.mock('../components/session.js', () => ({
   setCurrentUser: vi.fn(),
@@ -40,7 +40,7 @@ const DOM = `
   <button id="btn-refresh-sessions"></button><button id="btn-revoke-all-sessions"></button>
   <button id="btn-enable-2fa"></button><button id="btn-disable-2fa"></button>
   <button id="btn-jump-to-security"></button><button id="btn-jump-to-2fa"></button>
-  <table><tbody id="users-table-body"></tbody></table><div id="invites-mount"></div>
+  <ul id="users-table-body"></ul><div id="invites-mount"></div>
   <table><tbody id="sessions-table-body"></tbody></table>
   <div id="mfa-status-card"><span id="mfa-status-badge"></span><p id="mfa-status-desc"></p></div>
   <div id="modal-add-user" class="os-modal"><div class="modal-window">
@@ -87,12 +87,27 @@ describe('People pane (users.js)', () => {
   it('lists people, with no actions against yourself', async () => {
     apiFetch.mockResolvedValue(reply({ users: PEOPLE }));
     await users.loadUsersList();
-    const rows = byId('users-table-body').querySelectorAll('tr');
+    const rows = byId('users-table-body').querySelectorAll('.person-row');
     expect(rows).toHaveLength(2);
     expect(rows[0].textContent).toContain('You');
     expect(rows[0].querySelector('.btn-delete-user')).toBeNull();
     expect(rows[1].textContent).toContain('5 GB · held by the disk');
     expect(rows[1].textContent).toContain('Turned off');
+  });
+
+  it('invited people are rows too, and an invite can be cancelled (SET-19)', async () => {
+    apiFetch.mockResolvedValue(reply({ users: PEOPLE }));
+    api.get.mockResolvedValueOnce({ invites: [{ id: 'i9', role_id: 'kid', note: 'Grandma', expires_at: 2000000000, active: true }] });
+    api.delete.mockResolvedValue({});
+    await users.loadUsersList();
+    const rows = byId('users-table-body').querySelectorAll('.person-row');
+    expect(rows).toHaveLength(3);
+    expect(rows[2].textContent).toContain('Grandma');
+    expect(rows[2].textContent).toContain('Invited, link works until');
+    rows[2].querySelector('[data-invite-cancel]').click();
+    await vi.waitFor(() => expect(api.delete).toHaveBeenCalledWith('/api/invites/i9'));
+    api.get.mockRejectedValueOnce(new Error('403'));
+    expect(await users.waitingInvites()).toEqual([]);
   });
 
   it('shows the admin-only note, a failure and the empty state', async () => {
@@ -110,7 +125,7 @@ describe('People pane (users.js)', () => {
   it('row buttons: edit, reset password, turn on, delete', async () => {
     apiFetch.mockResolvedValue(reply({ users: PEOPLE }));
     await users.loadUsersList();
-    const row = byId('users-table-body').querySelectorAll('tr')[1];
+    const row = byId('users-table-body').querySelectorAll('.person-row')[1];
     row.querySelector('.btn-edit-user').click();
     expect(byId('modal-edit-user').classList.contains('open')).toBe(true);
     expect(byId('edit-user-quota').value).toBe('5');
@@ -123,13 +138,13 @@ describe('People pane (users.js)', () => {
     expect(JSON.parse(apiFetch.mock.calls.find((c) => c[1]?.method === 'PUT')[1].body)).toEqual({ status: 'active' });
 
     apiFetch.mockResolvedValueOnce(reply({ detail: 'nope' }, false));
-    byId('users-table-body').querySelectorAll('tr')[1].querySelector('.btn-toggle-user').click();
+    byId('users-table-body').querySelectorAll('.person-row')[1].querySelector('.btn-toggle-user').click();
     await vi.waitFor(() => expect(showToast).toHaveBeenCalledWith('Could not change status: nope', 'error'));
     apiFetch.mockRejectedValueOnce(new Error('offline'));
-    byId('users-table-body').querySelectorAll('tr')[1].querySelector('.btn-toggle-user').click();
+    byId('users-table-body').querySelectorAll('.person-row')[1].querySelector('.btn-toggle-user').click();
     await vi.waitFor(() => expect(showToast).toHaveBeenCalledWith('Request failed: offline', 'error'));
 
-    byId('users-table-body').querySelectorAll('tr')[1].querySelector('.btn-delete-user').click();
+    byId('users-table-body').querySelectorAll('.person-row')[1].querySelector('.btn-delete-user').click();
     await vi.waitFor(() => expect(showBottomSheet).toHaveBeenCalled()); // what happens to the files first (SET-19)
     showBottomSheet.mock.calls.at(-1)[0].items[0].onClick(); // keep them
     const [, msg, onOk, , opts] = showConfirmToast.mock.calls.at(-1);

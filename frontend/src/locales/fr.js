@@ -7528,5 +7528,11 @@ export default {
   "confirm.users_delete_files.title": "Supprimer le compte et les fichiers",
   "confirm.users_delete_files.msg": "Supprimer le compte {target} et tous ses fichiers ? C'est définitif.",
   "users.f_must_change": "La personne choisit son propre mot de passe à la première connexion",
-  "auth.choose_own_pw": "Choisissez votre propre mot de passe pour continuer."
+  "auth.choose_own_pw": "Choisissez votre propre mot de passe pour continuer.",
+  "people.signed_in_n": "{n, plural, one {Connecté sur # appareil} other {Connecté sur # appareils}}",
+  "people.not_signed_in": "Pas connecté en ce moment",
+  "people.mark_two_step": "Deux étapes",
+  "people.mark_limit": "Limite {size}",
+  "people.invited_until": "Invité, lien valable jusqu'au {date}",
+  "people.cancel_invite": "Annuler l'invitation"
 };

@@ -3,3 +3,26 @@
    here; tests/test_lazy_css.py checks that (lazy CSS lands after every global sheet). */
 @import './72-user-dialogs.css';
 @import './76-share-access.css';
+
+/* People as rows (SET-19) */
+.people-rows { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.person-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--kb-line-7); border-radius: 12px; background: var(--kb-glaze-3); }
+.person-row.is-off { opacity: 0.8; }
+.person-row.is-invited { border-style: dashed; }
+.person-open { flex: 1; display: flex; align-items: center; gap: 12px; min-width: 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.person-avatar { flex: none; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; background: var(--kb-glaze-8); color: var(--kb-text-strong); border: 1px solid var(--kb-line-12); }
+.person-main { display: flex; flex-direction: column; min-width: 0; }
+.person-name { font-weight: 700; color: var(--kb-text-strong); overflow-wrap: anywhere; }
+:is(.person-sub, .person-status) { font-size: var(--kb-fs-xs); color: var(--muted); }
+.person-you { font-size: var(--kb-fs-xs); font-weight: 600; color: var(--kb-text-accent); }
+.person-marks { display: flex; flex-wrap: wrap; gap: 6px; margin-left: auto; }
+.person-mark { font-size: var(--kb-fs-xs); padding: 2px 8px; border-radius: 999px; border: 1px solid var(--kb-line-12); color: var(--kb-text-strong); }
+.person-actions { flex: none; display: flex; gap: 6px; align-items: center; margin-left: auto; }
+.people-msg { padding: 12px; font-size: var(--kb-fs-sm); color: var(--muted); }
+.people-msg.is-crit { color: var(--crit); }
+@media (max-width: 600px) {
+  .person-row { flex-wrap: wrap; }
+  .person-open { flex-wrap: wrap; }
+  .person-marks { margin-left: 0; }
+}
+

@@ -2855,7 +2855,7 @@
             <!-- Subpane 1: User Inventory -->
             <div id="users-pane-list" class="users-subpane">
               <div class="users-bar">
-                <div class="users-bar-title" data-i18n="users.list_title">People with an account</div>
+                <div class="users-bar-title" id="users-list-title" data-i18n="users.list_title">People with an account</div>
                 <div class="users-bar-actions">
                   <button type="button" id="btn-refresh-users" class="btn-pill-toggle" data-i18n="common.refresh">
                     🔄 Refresh
@@ -2868,24 +2868,7 @@
                   </button>
                 </div>
               </div>
-              <div class="table-container users-table-wrap" tabindex="0">
-                <table class="kb-datatable kb-datatable--roomy users-table">
-                  <thead>
-                    <tr class="users-thead">
-                      <th data-i18n="users.col_person">Person</th>
-                      <th data-i18n="users.col_email">Email</th>
-                      <th data-i18n="users.col_role">Role</th>
-                      <th data-i18n="common.status">Status</th>
-                      <th data-i18n="users.col_2fa">Two-step</th>
-                      <th data-i18n="users.col_quota">Storage limit</th>
-                      <th class="is-end" data-i18n="users.col_actions">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody id="users-table-body">
-                    <!-- Populated via users.js -->
-                  </tbody>
-                </table>
-              </div>
+              <ul id="users-table-body" class="people-rows" aria-labelledby="users-list-title"></ul>
               <section class="invite-card" aria-labelledby="kids-title">
                 <h4 id="kids-title" class="invite-title" data-i18n="kids.title">Kids' rules</h4>
                 <p class="invite-meta" data-i18n="kids.desc">When each kid or guest may sign in, whether their devices are filtered, and whether they may use Kib. Each rule can also be changed where it lives.</p>

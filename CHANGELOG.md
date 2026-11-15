@@ -159,6 +159,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **People keeps itself up to date**: someone accepting an invite, a change to a person, or a sign-in
   or sign-out shows up on its own while the page is open.
 
+#### Changes
+
+- **People shows one row per person**: role, where they are signed in, two-step sign-in and storage
+  limit at a glance; people you invited show up as rows too, with Cancel invite.
+
 ## v2.0.2 (2026-11-12)
 ### 🧭 A new Settings sidebar, five themes, honest pages, and remote access cut down to what works
 

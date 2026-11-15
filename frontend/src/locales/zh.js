@@ -7528,5 +7528,11 @@ export default {
   "confirm.users_delete_files.title": "删除账户和文件",
   "confirm.users_delete_files.msg": "删除账户 {target} 及其全部文件？此操作无法撤销。",
   "users.f_must_change": "对方首次登录时自行设置密码",
-  "auth.choose_own_pw": "请设置你自己的密码以继续。"
+  "auth.choose_own_pw": "请设置你自己的密码以继续。",
+  "people.signed_in_n": "{n, plural, other {已在 # 台设备上登录}}",
+  "people.not_signed_in": "当前未登录",
+  "people.mark_two_step": "两步登录",
+  "people.mark_limit": "上限 {size}",
+  "people.invited_until": "已邀请，链接有效期至 {date}",
+  "people.cancel_invite": "取消邀请"
 };

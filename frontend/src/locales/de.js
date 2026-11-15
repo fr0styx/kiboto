@@ -7528,5 +7528,11 @@ export default {
   "confirm.users_delete_files.title": "Konto und Dateien löschen",
   "confirm.users_delete_files.msg": "Das Konto {target} und alle Dateien löschen? Das lässt sich nicht rückgängig machen.",
   "users.f_must_change": "Die Person wählt bei der ersten Anmeldung ein eigenes Passwort",
-  "auth.choose_own_pw": "Wählen Sie ein eigenes Passwort, um fortzufahren."
+  "auth.choose_own_pw": "Wählen Sie ein eigenes Passwort, um fortzufahren.",
+  "people.signed_in_n": "{n, plural, one {Auf # Gerät angemeldet} other {Auf # Geräten angemeldet}}",
+  "people.not_signed_in": "Gerade nicht angemeldet",
+  "people.mark_two_step": "Zweistufig",
+  "people.mark_limit": "Grenze {size}",
+  "people.invited_until": "Eingeladen, Link gültig bis {date}",
+  "people.cancel_invite": "Einladung zurückziehen"
 };

@@ -7528,5 +7528,11 @@ export default {
   "confirm.users_delete_files.title": "Eliminar cuenta y archivos",
   "confirm.users_delete_files.msg": "¿Eliminar la cuenta {target} y todos sus archivos? No se puede deshacer.",
   "users.f_must_change": "Elige su propia contraseña al iniciar sesión por primera vez",
-  "auth.choose_own_pw": "Elige tu propia contraseña para continuar."
+  "auth.choose_own_pw": "Elige tu propia contraseña para continuar.",
+  "people.signed_in_n": "{n, plural, one {Con sesión en # dispositivo} other {Con sesión en # dispositivos}}",
+  "people.not_signed_in": "Sin sesión ahora",
+  "people.mark_two_step": "Dos pasos",
+  "people.mark_limit": "Límite {size}",
+  "people.invited_until": "Invitado, el enlace sirve hasta el {date}",
+  "people.cancel_invite": "Cancelar la invitación"
 };

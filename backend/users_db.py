@@ -515,15 +515,19 @@ def set_user_idp(user_id: str, idp_type: str, idp_sub: str, db_path: str | None 
 
 def list_users(db_path: str | None = None) -> list[dict[str, Any]]:
     with users_db_session(db_path, readonly=True) as conn:
-        rows = conn.execute("""
+        rows = conn.execute(
+            """
             SELECT u.id, u.username, u.display_name, u.email, u.role_id, r.name AS role_name,
                    u.status, u.must_change_password, u.avatar_url, u.home_directory,
                    u.storage_quota_bytes, u.mfa_enabled, u.idp_type, u.created_at, u.last_login_at, u.last_login_ip,
-                   u.signin_hours_json
+                   u.signin_hours_json,
+                   (SELECT COUNT(*) FROM sessions s WHERE s.user_id = u.id AND s.expires_at > ?) AS signed_in
             FROM users u
             JOIN roles r ON u.role_id = r.id
             ORDER BY u.created_at ASC
-        """).fetchall()
+        """,
+            (time.time(),),
+        ).fetchall()
         from backend.signin_hours import from_json
 
         res = []

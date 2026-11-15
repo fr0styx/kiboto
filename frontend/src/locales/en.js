@@ -7528,5 +7528,11 @@ export default {
   "confirm.users_delete_files.title": "Delete account and files",
   "confirm.users_delete_files.msg": "Delete the account {target} and all their files? This can't be undone.",
   "users.f_must_change": "They choose their own password when they first sign in",
-  "auth.choose_own_pw": "Choose your own password to go on."
+  "auth.choose_own_pw": "Choose your own password to go on.",
+  "people.signed_in_n": "{n, plural, one {Signed in on # device} other {Signed in on # devices}}",
+  "people.not_signed_in": "Not signed in now",
+  "people.mark_two_step": "Two-step",
+  "people.mark_limit": "Limit {size}",
+  "people.invited_until": "Invited, link works until {date}",
+  "people.cancel_invite": "Cancel invite"
 };

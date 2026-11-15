@@ -24,7 +24,8 @@ import { grantShares, openShareAccessModal, shareChoicesHtml } from './share-acc
 import { formatDateTime } from '../format.js';
 import { setServerAdvanced } from '../advanced.js';
 import { renderInvites } from './invites-admin.js';
-import { emptyRowHtml } from './empty-state.js';
+import { emptyStateHtml } from './empty-state.js';
+import { peopleRowsHtml, peopleMessageHtml } from './people-rows.js';
 // The signed-in person's state lives in session.js (PERF-9); re-exported for older imports
 export { setCurrentUser, getCurrentUser, fetchCurrentProfile, updateUserInterfaceElements, formatRole };
 
@@ -179,16 +180,25 @@ export async function loadAccountParts() {
   load2FAStatus();
 }
 
+/** The invites still waiting, for their rows; none when they can't be read. */
+export async function waitingInvites() {
+  try {
+    return (await api.get('/api/invites'))?.invites || [];
+  } catch {
+    return [];
+  }
+}
+
 export async function loadUsersList() {
   const container = document.getElementById('users-table-body');
   if (!container) return;
-  container.innerHTML = '<tr><td colspan="7" class="kb-datatable-msg">' + escapeHtml(t('users.loading', 'Loading people…')) + '</td></tr>';
+  container.innerHTML = peopleMessageHtml(t('users.loading', 'Loading people…'));
 
   try {
     const res = await apiFetch('/api/users', { credentials: 'include' });
     if (!res.ok) {
       if (res.status === 403) {
-        container.innerHTML = '<tr><td colspan="7" class="kb-datatable-msg is-crit">' + escapeHtml(t('users.admin_only', 'Only administrators can see the list of people.')) + '</td></tr>';
+        container.innerHTML = peopleMessageHtml(t('users.admin_only', 'Only administrators can see the list of people.'), true);
         return;
       }
       throw new Error(`Server returned ${res.status}`);
@@ -204,12 +214,14 @@ export async function loadUsersList() {
     }
 
     renderInvites(document.getElementById('invites-mount'));
-    if (users.length === 0) {
-      container.innerHTML = emptyRowHtml(7, {
+    const invites = await waitingInvites(); // invited people are rows too (SET-19)
+    if (users.length === 0 && !invites.some((i) => i.active)) {
+      container.innerHTML = `<li class="people-msg">${emptyStateHtml(/** @type {any} */ ({
+        compact: true,
         title: t('users.none_title', 'Only you so far'),
         body: t('users.none_desc', 'Give each person in the house their own sign-in, so their files and access are their own.'),
         action: { target: 'btn-add-user', label: t('users.add', 'Add a person') },
-      });
+      }))}</li>`;
       return;
     }
 
@@ -218,58 +230,18 @@ export async function loadUsersList() {
       _usersCache[u.id] = u;
     });
 
-    container.innerHTML = users.map((u) => {
-      const letter = (u.display_name?.[0] || u.username?.[0] || 'U').toUpperCase();
-      const isActive = u.status === 'active';
-      const isMfa = !!u.mfa_enabled;
-      const isSelf = getCurrentUser()?.id === u.id;
-      const quotaStr = u.storage_quota_bytes > 0
-        ? `${Math.round(u.storage_quota_bytes / (1024 * 1024 * 1024))} GB${quotaHow(u.quota_enforcement)}`
-        : t('users.no_limit', 'No limit');
-
-      return `
-        <tr class="kb-row-hover">
-          <td class="kb-inline" style="gap: 10px;">
-            <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #0a7a70, #08695f); display:flex; align-items:center; justify-content:center; font-weight:800; color:#fff; font-size: var(--kb-fs-sm); border: 1px solid var(--kb-line-20);">
-              ${escapeHtml(letter)}
-            </div>
-            <div>
-              <div style="font-weight:700; color:var(--kb-text-strong); font-size: var(--kb-fs-sm);">${escapeHtml(u.display_name || u.username)} ${isSelf ? '<span style="font-size: var(--kb-fs-xs); background:rgba(51,205,184,0.2); color:var(--kb-text-accent); padding:2px 6px; border-radius:4px; margin-left:4px;">' + escapeHtml(t('users.you', 'You')) + '</span>' : ''}</div>
-              <div class="kb-sub">@${escapeHtml(u.username)}</div>
-            </div>
-          </td>
-          <td class="is-soft">${escapeHtml(u.email || '--')}</td>
-          <td>
-            <span style="font-size: var(--kb-fs-xs); font-weight: 700; padding: 3px 8px; border-radius: 6px; background: var(--kb-glaze-8); border: 1px solid var(--kb-line-12); color:var(--kb-text-strong);">
-              ${escapeHtml(formatRole(u.role_id))}
-            </span>
-          </td>
-          <td>
-            <span style="font-size: var(--kb-fs-xs); font-weight: 700; padding: 2px 7px; border-radius: 4px; background: ${isActive ? 'rgba(51,205,184,0.15)' : 'rgba(239,68,68,0.15)'}; color: ${isActive ? 'var(--ok2)' : 'var(--crit)'}; border: 1px solid ${isActive ? 'rgba(51,205,184,0.3)' : 'rgba(239,68,68,0.3)'};">
-              ${escapeHtml(isActive ? t('users.status_active', 'Active') : t('users.status_disabled', 'Turned off'))}
-            </span>
-          </td>
-          <td>
-            <span style="font-size: var(--kb-fs-xs); display:inline-flex; align-items:center; gap: 4px; color: ${isMfa ? 'var(--ok2)' : 'var(--muted)'};">
-              <span aria-hidden="true">${isMfa ? '🛡️' : '⚪'}</span> ${escapeHtml(isMfa ? t('users.mfa_on', 'On') : t('users.mfa_off', 'Off'))}
-            </span>
-          </td>
-          <td class="is-dim">${quotaStr}</td>
-          <td class="is-end">
-            <div class="kb-actions">
-              <button class="suite-toolkit-btn sm btn-edit-user" data-id="${u.id}" title="${t('ui.edit_user', 'Edit User')}">✏️</button>
-              <button class="suite-toolkit-btn sm btn-pwd-user" data-id="${u.id}" data-user="${escapeHtml(u.username)}" title="${t('ui.reset_password', 'Reset Password')}">🔑</button>
-              ${!isSelf ? `
-                <button class="suite-toolkit-btn sm btn-toggle-user" data-id="${u.id}" data-status="${u.status}" title="${escapeHtml(isActive ? t('users.turn_off', 'Turn off this account') : t('users.turn_on', 'Turn on this account'))}">
-                  ${isActive ? '🚫' : '✅'}
-                </button>
-                <button class="suite-toolkit-btn sm danger btn-delete-user" data-id="${u.id}" data-user="${escapeHtml(u.username)}" title="${t('ui.delete_user', 'Delete User')}">🗑️</button>
-              ` : ''}
-            </div>
-          </td>
-        </tr>
-      `;
-    }).join('');
+    container.innerHTML = peopleRowsHtml(users, invites, {
+      me: getCurrentUser(),
+      roleName: formatRole,
+      quotaText: (u) => `${Math.round(u.storage_quota_bytes / (1024 * 1024 * 1024))} GB${quotaHow(u.quota_enforcement)}`,
+    });
+    container.querySelectorAll('[data-invite-cancel]').forEach((el) => {
+      const btn = /** @type {HTMLElement} */ (el);
+      btn.onclick = async () => {
+        await api.delete(`/api/invites/${encodeURIComponent(btn.dataset.inviteCancel || '')}`);
+        loadUsersList();
+      };
+    });
 
     // Attach row events
     container.querySelectorAll('.btn-edit-user').forEach((btn) => {
@@ -301,7 +273,7 @@ export async function loadUsersList() {
     });
 
   } catch (err) {
-    container.innerHTML = '<tr><td colspan="7" class="kb-datatable-msg is-crit">' + escapeHtml(t('users.load_failed', 'The list of people couldn\'t be loaded: {error}', { error: err.message })) + '</td></tr>';
+    container.innerHTML = peopleMessageHtml(t('users.load_failed', 'The list of people couldn\'t be loaded: {error}', { error: err.message }), true);
   }
 }
 

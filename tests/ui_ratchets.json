@@ -398,8 +398,8 @@
  "frontend/src/components/users.js": {
   "buttons": 0,
   "globals": 0,
-  "styles": 11,
-  "templates": 0
+  "styles": 4,
+  "templates": 1
  },
  "frontend/src/components/vm-manager.js": {
   "buttons": 0,
