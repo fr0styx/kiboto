@@ -39,3 +39,19 @@
 .pp-device { display: flex; flex-direction: column; font-size: var(--kb-fs-sm); overflow-wrap: anywhere; }
 .pp-section > form { display: contents; }
 
+/* Add a person, in three steps (SET-19) */
+.ap-backdrop { position: fixed; inset: 0; z-index: 10050; display: flex; align-items: center; justify-content: center; padding: 16px; background: var(--lt-b-0000008c, rgba(0, 0, 0, 0.55)); }
+.ap-dialog { width: min(560px, 100%); max-height: calc(100vh - 32px); overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 18px 20px; border-radius: 16px; border: 1px solid var(--kb-line-12); background: var(--kb-surface-2, var(--bg-2, var(--lt-b-101a1cff, #101a1c))); color: var(--c-text); }
+.ap-step, .ap-line, .ap-sub { margin: 0; font-size: var(--kb-fs-xs); color: var(--muted); }
+.ap-body { display: flex; flex-direction: column; gap: 10px; }
+.ap-field { display: flex; flex-direction: column; gap: 4px; font-size: var(--kb-fs-xs); color: var(--muted); }
+.ap-roles, .ap-shares, .ap-how { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 0; border: 0; }
+.ap-roles > legend, .ap-shares > legend, .ap-how > legend { font-size: var(--kb-fs-xs); color: var(--muted); margin-bottom: 4px; }
+.ap-role { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; align-items: center; padding: 8px 10px; border: 1px solid var(--kb-line-7); border-radius: 10px; cursor: pointer; }
+.ap-role > input { grid-row: span 2; }
+.ap-role-name { font-weight: 700; color: var(--kb-text-strong); }
+.ap-role-line { font-size: var(--kb-fs-xs); color: var(--muted); }
+.ap-more > summary { cursor: pointer; font-size: var(--kb-fs-xs); color: var(--muted); margin: 4px 0; }
+.ap-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.ap-link { display: block; padding: 8px; border-radius: 8px; background: var(--kb-glaze-6); overflow-wrap: anywhere; font-size: var(--kb-fs-xs); }
+

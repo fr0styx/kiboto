@@ -176,7 +176,7 @@ describe('People pane (users.js)', () => {
 
   it('adds a person and gives them the chosen shared folders', async () => {
     api.get.mockResolvedValue({ shares: [{ name: 'Photos' }] });
-    byId('btn-add-user').click();
+    users.showAddUserModal(); // the old dialog; the button opens the three steps now (SET-19)
     await vi.waitFor(() => expect(byId('add-user-shares-wrap').hidden).toBe(false));
     byId('add-user-username').value = 'carol';
     byId('add-user-password').value = 'pw';
@@ -192,7 +192,7 @@ describe('People pane (users.js)', () => {
     await users.grantChosenShares('dan');
     expect(showToast.mock.calls.at(-1)[0]).toContain('dan was added');
 
-    byId('btn-add-user').click();
+    users.showAddUserModal(); // the old dialog; the button opens the three steps now (SET-19)
     apiFetch.mockResolvedValueOnce(reply({ detail: 'taken' }, false));
     await submit(byId('form-add-user'));
     expect(showToast).toHaveBeenCalledWith('Error: taken', 'error');

@@ -170,6 +170,12 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   hours, see where they are signed in, reset their password, handle a lost phone, download their data,
   or turn them off or remove them, all in one place.
 
+#### Changes
+
+- **Add a person in three steps**: who they are, what they can use, and how they get in (an account
+  now, or an invite link with a message to copy). "Add another like Mia" keeps the same role, folders
+  and limits.
+
 ## v2.0.2 (2026-11-12)
 ### 🧭 A new Settings sidebar, five themes, honest pages, and remote access cut down to what works
 

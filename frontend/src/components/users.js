@@ -77,7 +77,7 @@ export function initUsersManagement() {
 function bindUsersPane() {
   // Modal triggers
   const btnAddUser = document.getElementById('btn-add-user');
-  if (btnAddUser) btnAddUser.onclick = showAddUserModal;
+  if (btnAddUser) btnAddUser.onclick = () => import('./add-person.js').then((m) => m.openAddPerson({ onDone: loadUsersList })); // three steps (SET-19)
 
   const btnRefreshUsers = document.getElementById('btn-refresh-users');
   if (btnRefreshUsers) btnRefreshUsers.onclick = loadUsersList;
