@@ -679,6 +679,16 @@ export function openContainersManager(opts = {}) {
   startCwAutoRefresh();
   loadContainersData();
   if (opts && opts.view === 'family') openFamily(containersWindow, opts.part); // from People's link rows (SET-19)
+  if (opts && opts.view === 'catalog' && opts.search) presetCwCatalogSearch(opts.search); // the HTTPS guide (SET-25)
+}
+
+/** Opens the catalog with this search typed in (the HTTPS guide asks for "reverse proxy"). */
+export function presetCwCatalogSearch(query) {
+  const input = /** @type {HTMLInputElement | null} */ (document.getElementById('cw-catalog-search-input'));
+  if (!input) return false;
+  input.value = String(query || '');
+  input.dispatchEvent(new Event('input', { bubbles: true }));
+  return true;
 }
 
 /** The sentence above the list: what is true of the apps and of the list itself (SET-14). It was

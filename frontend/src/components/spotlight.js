@@ -195,12 +195,7 @@ function _buildDefaultSpotlightItems() {
       icon: '📦',
       category: 'app',
       keywords: ['docker', 'store', 'templates', 'jellyfin', 'plex', 'immich'],
-      run: () => {
-        const mcIcon = document.getElementById('management-desktop-icon');
-        if (mcIcon) mcIcon.click();
-        const catalogBtn = document.getElementById('btn-view-docker-catalog');
-        if (catalogBtn) catalogBtn.click();
-      },
+      run: () => /** @type {any} */ (window).openContainersManager?.({ view: 'catalog' }), // the Apps window (SET-25)
     },
     {
       id: 'app-recycle',

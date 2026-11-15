@@ -249,6 +249,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   "not allowed" (bring back everything, the recovery-kit connect, the USB ticks, the settings file,
   the monthly disk check).
 
+#### Fixes
+
+- **Spotlight's App Catalog** and the HTTPS guide's apps button open the Apps window's catalog; they
+  opened a hidden page.
+
 ## v2.0.2 (2026-11-12)
 ### 🧭 A new Settings sidebar, five themes, honest pages, and remote access cut down to what works
 

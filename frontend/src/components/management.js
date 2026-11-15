@@ -19,7 +19,7 @@ import '../styles/management-lazy.css'; // Mission Control's own sheet loads wit
 import { wireTablists, markCurrent } from './tab-a11y.js';
 import { highlightEntry, mayNotOpen } from './management/sidebar-current.js';
 import { openFilePreviewModal } from './file-preview-modal.js';
-import { fetchAndRenderAppCatalog, fetchAndRenderDockerContainers, presetCatalogSearch, refreshCatalogCountBadges, startDockerAutoRefresh, stopDockerAutoRefresh } from './management/docker.js';
+import { fetchAndRenderAppCatalog, fetchAndRenderDockerContainers, refreshCatalogCountBadges, startDockerAutoRefresh, stopDockerAutoRefresh } from './management/docker.js';
 import { fetchAndRenderUpsTelemetry, initUpsDrawerControls, loadUpsConfigToDrawer, renderUpsTelemetry } from './management/ups.js';
 import { fetchAndRenderCopyHistory, fetchAndRenderNetworkTopology, fetchAndRenderReplication, fetchAndRenderTailscaleDetails, initNetworkControls, loadNetworkPage } from './management/network.js';
 import { fetchAndRenderDisksInventory } from './management/disks.js';
@@ -1868,8 +1868,7 @@ export function initManagement() {
   if (btnHttpsApps) {
     btnHttpsApps.addEventListener('click', () => {
       closeHttpsGuideModal();
-      window.openManagementWindow('mgmt-sec-docker', 'mgmt-pane-docker-catalog');
-      presetCatalogSearch('reverse proxy');
+      window.openContainersManager?.({ view: 'catalog', search: 'reverse proxy' }); // the Apps window's catalog (SET-25)
     });
   }
   const btnHttpsPorts = document.getElementById('btn-https-guide-ports');
