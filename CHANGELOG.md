@@ -218,6 +218,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **The backup job dialog backs up Kiboto's settings** on a schedule, nothing else; copies of your
   files are made with Add a copy. Existing jobs keep running.
 
+#### Changes
+
+- **Backup reads top to bottom**: are your files safe, get something back, copies outside this
+  Kiboto, earlier versions on this Kiboto, phones and computers; the rest is folded under More.
+
 ## v2.0.2 (2026-11-12)
 ### 🧭 A new Settings sidebar, five themes, honest pages, and remote access cut down to what works
 

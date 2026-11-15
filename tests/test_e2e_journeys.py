@@ -662,6 +662,7 @@ def test_add_a_backup_job_opens_on_a_choice_that_works():
         _sign_in(page)
         _close_wizard(page)
         page.evaluate("() => window.openManagementWindow && window.openManagementWindow('mgmt-pane-backups')")
+        page.click(".bk-more > summary", timeout=15000)  # the settings backups are folded under More (SET-21)
         page.click("#btn-open-create-backup-job", timeout=15000)
         page.wait_for_selector("#create-backup-job-form", state="visible")
         # one purpose since SET-21 (decision 2 A): Kiboto's settings, to a folder or a cloud account

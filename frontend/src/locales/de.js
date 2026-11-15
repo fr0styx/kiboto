@@ -7699,5 +7699,14 @@ export default {
   "backup.settings_job_title": "Die Einstellungen von Kiboto regelmäßig sichern",
   "backup.settings_job_desc": "Personen, freigegebene Ordner, Apps und ihre Einstellungen, verschlüsselt mit einer Passphrase. Ihre Dateien kopiert eine externe Sicherung (Kopie hinzufügen).",
   "backup.none_settings_title": "Keine Sicherung der Einstellungen geplant",
-  "backup.none_settings_desc": "Eine Sicherung der Einstellungen bewahrt Personen, freigegebene Ordner und Apps, damit ein neues Kiboto dort weitermachen kann, wo dieses war. Ihre Dateien kopiert „Kopie hinzufügen“."
+  "backup.none_settings_desc": "Eine Sicherung der Einstellungen bewahrt Personen, freigegebene Ordner und Apps, damit ein neues Kiboto dort weitermachen kann, wo dieses war. Ihre Dateien kopiert „Kopie hinzufügen“.",
+  "bk.versions_title": "Frühere Versionen auf diesem Kiboto",
+  "bk.versions_desc": "Sie liegen auf denselben Laufwerken. Sie machen Fehler rückgängig, überstehen aber nicht den Verlust dieses Kiboto.",
+  "bk.all_versions": "Alle früheren Versionen",
+  "bk.devices_title": "Telefone und Computer",
+  "bk.devices_pc": "Ein Mac sichert mit Time Machine und ein PC mit dem Dateiversionsverlauf in einen freigegebenen Ordner hier.",
+  "bk.devices_pc_link": "Freigegebene Ordner",
+  "bk.settings_title": "Die Einstellungen von Kiboto regelmäßig",
+  "bk.settings_desc": "Verschlüsselte Kopien von Personen, freigegebenen Ordnern und Apps, damit ein neues Kiboto dort weitermachen kann, wo dieses war.",
+  "bk.more": "Mehr: Einstellungen von Kiboto, App-Sicherungen, Zwei-Wege-Sync, Laufwerksprüfung"
 };

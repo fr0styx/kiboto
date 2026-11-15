@@ -7699,5 +7699,14 @@ export default {
   "backup.settings_job_title": "Sauvegarder les réglages de Kiboto régulièrement",
   "backup.settings_job_desc": "Personnes, dossiers partagés, apps et leurs réglages, chiffrés avec une phrase secrète. Vos fichiers sont copiés par une sauvegarde hors site (Ajouter une copie).",
   "backup.none_settings_title": "Aucune sauvegarde des réglages planifiée",
-  "backup.none_settings_desc": "Une sauvegarde des réglages garde les personnes, les dossiers partagés et les apps, pour qu'un nouveau Kiboto reprenne là où celui-ci en était. Vos fichiers sont copiés par Ajouter une copie."
+  "backup.none_settings_desc": "Une sauvegarde des réglages garde les personnes, les dossiers partagés et les apps, pour qu'un nouveau Kiboto reprenne là où celui-ci en était. Vos fichiers sont copiés par Ajouter une copie.",
+  "bk.versions_title": "Versions précédentes sur ce Kiboto",
+  "bk.versions_desc": "Elles sont sur les mêmes disques. Elles annulent les erreurs ; elles ne survivent pas à la perte de ce Kiboto.",
+  "bk.all_versions": "Toutes les versions précédentes",
+  "bk.devices_title": "Téléphones et ordinateurs",
+  "bk.devices_pc": "Un Mac sauvegarde avec Time Machine et un PC avec l'Historique des fichiers vers un dossier partagé ici.",
+  "bk.devices_pc_link": "Dossiers partagés",
+  "bk.settings_title": "Les réglages de Kiboto, régulièrement",
+  "bk.settings_desc": "Des copies chiffrées des personnes, des dossiers partagés et des apps, pour qu'un nouveau Kiboto reprenne là où celui-ci en était.",
+  "bk.more": "Plus : réglages de Kiboto, sauvegardes d'apps, synchro bidirectionnelle, vérification des disques"
 };

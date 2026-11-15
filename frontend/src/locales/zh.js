@@ -7699,5 +7699,14 @@ export default {
   "backup.settings_job_title": "定期备份 Kiboto 的设置",
   "backup.settings_job_desc": "人员、共享文件夹、应用及其设置，用密码短语加密。你的文件由异地备份复制（添加副本）。",
   "backup.none_settings_title": "没有计划的设置备份",
-  "backup.none_settings_desc": "设置备份会保存人员、共享文件夹和应用，让一台新的 Kiboto 能从这台的状态继续。你的文件由“添加副本”复制。"
+  "backup.none_settings_desc": "设置备份会保存人员、共享文件夹和应用，让一台新的 Kiboto 能从这台的状态继续。你的文件由“添加副本”复制。",
+  "bk.versions_title": "这台 Kiboto 上的早期版本",
+  "bk.versions_desc": "它们和文件在同一组硬盘上。可以撤销误操作，但这台 Kiboto 丢失时它们也会丢失。",
+  "bk.all_versions": "所有早期版本",
+  "bk.devices_title": "手机和电脑",
+  "bk.devices_pc": "Mac 用时间机器、PC 用文件历史记录备份到这里的共享文件夹。",
+  "bk.devices_pc_link": "共享文件夹",
+  "bk.settings_title": "定期备份 Kiboto 的设置",
+  "bk.settings_desc": "人员、共享文件夹和应用的加密副本，让一台新的 Kiboto 能从这台的状态继续。",
+  "bk.more": "更多：Kiboto 的设置、应用备份、双向同步、磁盘检查"
 };

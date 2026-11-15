@@ -3147,54 +3147,30 @@
                 <h2 id="bk-restore-title" class="account-h" data-i18n="rd.title">Get something back</h2>
                 <div id="backup-restore-mount" aria-live="polite"></div>
               </section>
-              <!-- Your Kiboto boxes: a buddy backup to another Kiboto (moved from Network, SET-24) -->
-              <div class="nsv-grid" id="backup-fleet-grid"></div>
-          <div class="mgmt-card-intro">
-            <div class="mgmt-card-intro-title" role="heading" aria-level="2"><svg class="ic"><use href="#i-storage"/></svg> <span data-i18n="mgmt.backups_title">Backups, Snapshots & Disaster Recovery</span></div>
-            <div class="mgmt-card-intro-desc" data-i18n="mgmt.backups_desc">Automated 3-2-1 backup pipelines, point-in-time storage snapshots, application state archives, and system configuration restoration.</div>
-          </div>
-          <div id="phone-backup-mount"></div>
-          <div id="protection-jobs-mount"></div>
           
           <div class="mgmt-detail-body">
-            <!-- Backup jobs (3-2-1) -->
-            <div class="drawer-card bk-section">
-              <div class="bk-head">
-                <div>
-                  <span class="card-head-title bk-title" role="heading" aria-level="3">
-                    <span aria-hidden="true">🛡️</span>
-                    <span data-i18n="backup.jobs_title">Backup jobs</span>
-                  </span>
-                  <div class="bk-desc" data-i18n="backup.jobs_desc">
-                    Copies of your folders on a schedule: as snapshots on this server, to a folder or disk, or to a cloud.
-                  </div>
-                </div>
-                <div class="bk-actions">
-                  <button class="btn-pill-toggle" id="btn-refresh-backup-jobs" title="Refresh Backup Tasks" data-i18n-title="ui.refresh_backup_tasks"><span aria-hidden="true">🔄</span> <span data-i18n="mgmt.refresh">Refresh</span></button>
-                  <button class="btn-pill-toggle" id="btn-open-create-backup-job" style="color: var(--lt-ink-brand, var(--brand, #4fd8c4)); border-color: rgba(79,216,196,0.35); background: rgba(79,216,196,0.12);">
-                    <svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg> <span data-i18n="backup.add_settings_job">Back up the settings on a schedule</span>
-                  </button>
-                </div>
-              </div>
-              <div id="backup-jobs-mount">
-                <div class="bk-empty" data-i18n="backup.jobs_loading">Loading backup jobs…</div>
-              </div>
-            </div>
+            <!-- 3. Copies outside this Kiboto (SET-21 stage 4): off-site backups, then the paired boxes -->
+            <section class="drawer-card offsite-card" aria-labelledby="offsite-title">
+              <div class="bk-copies-head"><h3 id="offsite-title" class="offsite-title" data-i18n="offsite.title">Offsite backup</h3>
+                <!-- One way to add a copy: the guide (SET-21 stage 3) -->
+                <button type="button" class="btn-pill-toggle is-primary" id="btn-add-copy" data-i18n="bk.add_copy">Add a copy</button></div>
+              <p class="offsite-note" data-i18n="offsite.desc">Versioned, deduplicated and encrypted copies of your folders on a USB disk, another NAS or any cloud rclone can reach.</p>
+              <div id="offsite-backup-mount"></div>
+              <!-- Your Kiboto boxes: a buddy backup to another Kiboto (moved from Network, SET-24) -->
+                            <div class="nsv-grid" id="backup-fleet-grid"></div>
+            </section>
 
-            <!-- Storage Pool Snapshots & Revert -->
+            <!-- 4. Earlier versions on this Kiboto (SET-21 stage 4) -->
             <div class="drawer-card bk-section">
               <div class="bk-head">
                 <div>
                   <span class="card-head-title bk-title" role="heading" aria-level="3">
                     <span aria-hidden="true">📸</span>
-                    <span data-i18n="backup.snaps_title">Snapshots</span>
+                    <span data-i18n="bk.versions_title">Earlier versions on this Kiboto</span>
                   </span>
-                  <div class="bk-desc" data-i18n="backup.snaps_desc">
-                    A snapshot freezes a folder in seconds; you can open it or go back to it later.
-                  </div>
+                  <div class="bk-desc" data-i18n="bk.versions_desc">These live on the same disks. They undo mistakes; they do not survive the loss of this Kiboto.</div>
                 </div>
                 <div class="bk-actions">
-                  <button class="btn-pill-toggle" id="btn-refresh-snapshots" title="Refresh Snapshots" data-i18n-title="ui.refresh_snapshots"><span aria-hidden="true">🔄</span> <span data-i18n="mgmt.refresh">Refresh</span></button>
                   <button class="btn-pill-toggle" id="btn-open-create-snapshot" style="color: var(--lt-ink-brand, var(--brand, #4fd8c4)); border-color: rgba(79,216,196,0.35); background: rgba(79,216,196,0.12);">
                     <svg class="ic" aria-hidden="true"><use href="#i-camera"/></svg> <span data-i18n="backup.snaps_take">Take a snapshot</span>
                   </button>
@@ -3202,49 +3178,43 @@
               </div>
               <h4 class="snap-subhead" data-i18n="snap.schedules_title">Scheduled snapshots per share</h4>
               <div id="snapshot-schedules-mount"></div>
-              <h4 class="snap-subhead" data-i18n="snap.all_title">All snapshots</h4>
-              <div id="system-snapshots-mount">
-                <div class="bk-empty" data-i18n="backup.snaps_loading">Loading snapshots…</div>
-              </div>
+              <details class="bk-all-versions">
+                <summary data-i18n="bk.all_versions">All earlier versions</summary>
+                <h4 class="snap-subhead" data-i18n="snap.all_title">All snapshots</h4>
+                <div id="system-snapshots-mount">
+                  <div class="bk-empty" data-i18n="backup.snaps_loading">Loading snapshots…</div>
+                </div>
+              </details>
             </div>
 
-            <!-- Offsite backup with restic (Batch 6) -->
-            <section class="drawer-card offsite-card" aria-labelledby="offsite-title">
-              <div class="bk-copies-head"><h3 id="offsite-title" class="offsite-title" data-i18n="offsite.title">Offsite backup</h3>
-                <!-- One way to add a copy: the guide (SET-21 stage 3) -->
-                <button type="button" class="btn-pill-toggle is-primary" id="btn-add-copy" data-i18n="bk.add_copy">Add a copy</button></div>
-              <p class="offsite-note" data-i18n="offsite.desc">Versioned, deduplicated and encrypted copies of your folders on a USB disk, another NAS or any cloud rclone can reach.</p>
-              <div id="offsite-backup-mount"></div>
+            <!-- 5. Phones and computers (SET-21 stage 4) -->
+            <section class="drawer-card bk-section" aria-labelledby="bk-devices-title">
+              <h3 id="bk-devices-title" class="offsite-title" data-i18n="bk.devices_title">Phones and computers</h3>
+              <div id="phone-backup-mount"></div>
+              <p class="bk-desc"><span data-i18n="bk.devices_pc">A Mac backs up with Time Machine and a PC with File History to a shared folder here.</span> <a class="net-link" href="#/shares" data-i18n="bk.devices_pc_link">Shared folders</a></p>
             </section>
 
-            <!-- Two-way sync with a cloud folder (FEAT-06) -->
-            <section class="drawer-card offsite-card" aria-labelledby="two-way-sync-title">
-              <h3 id="two-way-sync-title" class="offsite-title" data-i18n="sync2.title">Two-way sync with the cloud</h3>
-              <p class="offsite-note" data-i18n="sync2.desc">Keeps a folder here and a cloud folder the same both ways. A file changed on both sides is kept twice. Nothing runs until you have seen a preview.</p>
-              <div id="two-way-sync-mount"></div>
-            </section>
-
-            <!-- Application Backups & Disaster Recovery (Per-App & Box-Wide) -->
+            <!-- 6. More (folded, SET-21 stage 4): Kiboto's settings, app backups, two-way sync, the monthly disk check -->
+            <details class="bk-more">
+              <summary data-i18n="bk.more">More: Kiboto's settings, app backups, two-way sync, disk check</summary>
+            <!-- Kiboto's settings on a schedule (the job dialog's one purpose since stage 3) -->
             <div class="drawer-card bk-section">
               <div class="bk-head">
                 <div>
-                  <span class="card-head-title bk-title">
-                    <span aria-hidden="true">📦</span>
-                    <span data-i18n="mgmt.app_backups_title">Application Backups & Recovery</span>
+                  <span class="card-head-title bk-title" role="heading" aria-level="3">
+                    <span aria-hidden="true">🛡️</span>
+                    <span data-i18n="bk.settings_title">Kiboto's settings on a schedule</span>
                   </span>
-                  <div class="bk-desc" data-i18n="mgmt.app_backups_desc">
-                    Point-in-time archives of container configurations, compose specs, and host appdata mounts created on uninstall (never delete) or on-demand.
-                  </div>
+                  <div class="bk-desc" data-i18n="bk.settings_desc">Encrypted copies of people, shared folders and apps, so a new Kiboto can start where this one was.</div>
                 </div>
-                <div class="bk-actions bk-actions--center">
-                  <select id="app-backups-filter-app" class="tz-select-input" style="font-size: var(--kb-fs-xs); padding: 5px 8px; min-width: 140px;" title="Filter by Application" data-i18n-title="ui.filter_by_application">
-                    <option value="" data-i18n="mgmt.app_backups_all">All Applications (Box-Wide)</option>
-                  </select>
-                  <button class="btn-pill-toggle" id="btn-refresh-app-backups" title="Refresh Application Backups" data-i18n-title="ui.refresh_application_backups"><span aria-hidden="true">🔄</span> <span data-i18n="mgmt.refresh">Refresh</span></button>
+                <div class="bk-actions">
+                  <button class="btn-pill-toggle" id="btn-open-create-backup-job" style="color: var(--lt-ink-brand, var(--brand, #4fd8c4)); border-color: rgba(79,216,196,0.35); background: rgba(79,216,196,0.12);">
+                    <svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg> <span data-i18n="backup.add_settings_job">Back up the settings on a schedule</span>
+                  </button>
                 </div>
               </div>
-              <div id="app-backups-mount">
-                <div class="bk-empty" data-i18n="backup.apps_loading">Loading app backups…</div>
+              <div id="backup-jobs-mount">
+                <div class="bk-empty" data-i18n="backup.jobs_loading">Loading backup jobs…</div>
               </div>
             </div>
 
@@ -3269,6 +3239,38 @@
               </div>
               <div id="restore-staged-card" class="kb-alert kb-alert--danger bk-staged" role="status" hidden></div>
             </div>
+            <!-- Application Backups & Disaster Recovery (Per-App & Box-Wide) -->
+            <div class="drawer-card bk-section">
+              <div class="bk-head">
+                <div>
+                  <span class="card-head-title bk-title">
+                    <span aria-hidden="true">📦</span>
+                    <span data-i18n="mgmt.app_backups_title">Application Backups & Recovery</span>
+                  </span>
+                  <div class="bk-desc" data-i18n="mgmt.app_backups_desc">
+                    Point-in-time archives of container configurations, compose specs, and host appdata mounts created on uninstall (never delete) or on-demand.
+                  </div>
+                </div>
+                <div class="bk-actions bk-actions--center">
+                  <select id="app-backups-filter-app" class="tz-select-input" style="font-size: var(--kb-fs-xs); padding: 5px 8px; min-width: 140px;" title="Filter by Application" data-i18n-title="ui.filter_by_application">
+                    <option value="" data-i18n="mgmt.app_backups_all">All Applications (Box-Wide)</option>
+                  </select>
+                </div>
+              </div>
+              <div id="app-backups-mount">
+                <div class="bk-empty" data-i18n="backup.apps_loading">Loading app backups…</div>
+              </div>
+            </div>
+
+            <!-- Two-way sync with a cloud folder (FEAT-06) -->
+            <section class="drawer-card offsite-card" aria-labelledby="two-way-sync-title">
+              <h3 id="two-way-sync-title" class="offsite-title" data-i18n="sync2.title">Two-way sync with the cloud</h3>
+              <p class="offsite-note" data-i18n="sync2.desc">Keeps a folder here and a cloud folder the same both ways. A file changed on both sides is kept twice. Nothing runs until you have seen a preview.</p>
+              <div id="two-way-sync-mount"></div>
+            </section>
+
+            <div id="protection-jobs-mount"></div>
+            </details>
           </div>
         </div>
 

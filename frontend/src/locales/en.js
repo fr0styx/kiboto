@@ -7699,5 +7699,14 @@ export default {
   "backup.settings_job_title": "Back up Kiboto's settings on a schedule",
   "backup.settings_job_desc": "People, shared folders, apps and their settings, encrypted with a passphrase. Your files are copied by an off-site backup (Add a copy).",
   "backup.none_settings_title": "No settings backups scheduled",
-  "backup.none_settings_desc": "A settings backup keeps people, shared folders and apps, so a new Kiboto can start where this one was. Your files are copied by Add a copy."
+  "backup.none_settings_desc": "A settings backup keeps people, shared folders and apps, so a new Kiboto can start where this one was. Your files are copied by Add a copy.",
+  "bk.versions_title": "Earlier versions on this Kiboto",
+  "bk.versions_desc": "These live on the same disks. They undo mistakes; they do not survive the loss of this Kiboto.",
+  "bk.all_versions": "All earlier versions",
+  "bk.devices_title": "Phones and computers",
+  "bk.devices_pc": "A Mac backs up with Time Machine and a PC with File History to a shared folder here.",
+  "bk.devices_pc_link": "Shared folders",
+  "bk.settings_title": "Kiboto's settings on a schedule",
+  "bk.settings_desc": "Encrypted copies of people, shared folders and apps, so a new Kiboto can start where this one was.",
+  "bk.more": "More: Kiboto's settings, app backups, two-way sync, disk check"
 };

@@ -7699,5 +7699,14 @@ export default {
   "backup.settings_job_title": "Hacer copia de los ajustes de Kiboto con horario",
   "backup.settings_job_desc": "Personas, carpetas compartidas, apps y sus ajustes, cifrados con una frase de contraseña. Tus archivos los copia una copia externa (Añadir una copia).",
   "backup.none_settings_title": "No hay copias de los ajustes programadas",
-  "backup.none_settings_desc": "Una copia de los ajustes guarda personas, carpetas compartidas y apps, para que un Kiboto nuevo empiece donde estaba este. Tus archivos los copia Añadir una copia."
+  "backup.none_settings_desc": "Una copia de los ajustes guarda personas, carpetas compartidas y apps, para que un Kiboto nuevo empiece donde estaba este. Tus archivos los copia Añadir una copia.",
+  "bk.versions_title": "Versiones anteriores en este Kiboto",
+  "bk.versions_desc": "Están en los mismos discos. Deshacen errores; no sobreviven a la pérdida de este Kiboto.",
+  "bk.all_versions": "Todas las versiones anteriores",
+  "bk.devices_title": "Teléfonos y ordenadores",
+  "bk.devices_pc": "Un Mac hace copia con Time Machine y un PC con el Historial de archivos en una carpeta compartida de aquí.",
+  "bk.devices_pc_link": "Carpetas compartidas",
+  "bk.settings_title": "Los ajustes de Kiboto con horario",
+  "bk.settings_desc": "Copias cifradas de personas, carpetas compartidas y apps, para que un Kiboto nuevo empiece donde estaba este.",
+  "bk.more": "Más: ajustes de Kiboto, copias de apps, sincronización en dos sentidos, revisión de discos"
 };
