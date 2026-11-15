@@ -176,6 +176,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   now, or an invite link with a message to copy). "Add another like Mia" keeps the same role, folders
   and limits.
 
+#### Changes
+
+- **Household rules on People**: "Adults must use two-step sign-in" is one choice (it says how many
+  adults still need to set it up), and what kids and guests may do with Kib sits next to it.
+
 ## v2.0.2 (2026-11-12)
 ### 🧭 A new Settings sidebar, five themes, honest pages, and remote access cut down to what works
 

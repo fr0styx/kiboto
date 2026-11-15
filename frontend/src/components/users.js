@@ -5,7 +5,7 @@
 
 import { roleChange, showRole } from './role-change.js';
 import { onManagementDom } from '../management-dom.js';
-import { api, auth, apiFetch } from '../api.js';
+import { api, apiFetch } from '../api.js';
 import {
   setCurrentUser,
   getCurrentUser,
@@ -22,7 +22,6 @@ import { initTopbarUserPill } from './dock.js';
 import { grantShares, openShareAccessModal, shareChoicesHtml } from './share-access.js';
 
 import { formatDateTime } from '../format.js';
-import { setServerAdvanced } from '../advanced.js';
 import { renderInvites } from './invites-admin.js';
 import { emptyStateHtml } from './empty-state.js';
 import { peopleRowsHtml, peopleMessageHtml } from './people-rows.js';
@@ -209,9 +208,9 @@ export async function loadUsersList() {
     if (kids) {
       import('./kids-rules.js').then((m) => m.renderKidsRules(kids, users, {
         onEdit: (id) => _usersCache[id] && openPerson(_usersCache[id]),
-        onShares: openShareAccessModal,
       }));
     }
+    import('./household-rules.js').then((m) => m.renderHousehold(document.getElementById('household-mount'))).catch(() => {}); // SET-19
 
     renderInvites(document.getElementById('invites-mount'));
     const invites = await waitingInvites(); // invited people are rows too (SET-19)

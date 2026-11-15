@@ -7609,5 +7609,15 @@ export default {
   "ap.message": "Hallo {name}, hier ist Ihre Einladung zu unserem NAS: {link} Öffnen Sie ihn, wählen Sie einen Namen und ein Passwort, und schon sind Sie drin.",
   "ap.need_name": "Schreiben Sie zuerst den Namen.",
   "ap.need_login": "Wählen Sie einen Anmeldenamen und ein Passwort mit mindestens 8 Zeichen.",
-  "ap.copied": "Kopiert."
+  "ap.copied": "Kopiert.",
+  "hh.title": "Regeln im Haushalt",
+  "hh.two_step": "Erwachsene müssen die zweistufige Anmeldung nutzen",
+  "hh.off": "Aus",
+  "hh.adults": "An, für alle außer Kindern und Gästen",
+  "hh.some": "Einige Rollen (unter Sicherheit festgelegt)",
+  "hh.without": "{n, plural, one {# erwachsene Person hat sie noch nicht eingerichtet.} other {# Erwachsene haben sie noch nicht eingerichtet.}}",
+  "hh.smb_note": "Wer die zweistufige Anmeldung nutzt, hat für Netzwerkordner ein eigenes Passwort, das beim Einschalten gewählt wird.",
+  "hh.saved": "Gespeichert.",
+  "hh.failed": "Das wurde nicht gespeichert.",
+  "hh.q": "{n, plural, one {# erwachsene Person hat sie nicht eingerichtet. Bis dahin kann sie sich nur anmelden, um sie einzurichten.} other {# Erwachsene haben sie nicht eingerichtet. Bis dahin können sie sich nur anmelden, um sie einzurichten.}}"
 };

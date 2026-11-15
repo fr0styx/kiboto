@@ -7609,5 +7609,15 @@ export default {
   "ap.message": "Hola {name}, aquí tienes tu invitación a nuestro NAS: {link} Ábrelo, elige un nombre y una contraseña, y listo.",
   "ap.need_name": "Escribe primero su nombre.",
   "ap.need_login": "Elige un nombre de usuario y una contraseña de 8 caracteres o más.",
-  "ap.copied": "Copiado."
+  "ap.copied": "Copiado.",
+  "hh.title": "Normas de la casa",
+  "hh.two_step": "Los adultos deben usar el inicio de sesión en dos pasos",
+  "hh.off": "Desactivado",
+  "hh.adults": "Activado, para todos menos niños e invitados",
+  "hh.some": "Algunos roles (en Seguridad)",
+  "hh.without": "{n, plural, one {# adulto aún no lo ha configurado.} other {# adultos aún no lo han configurado.}}",
+  "hh.smb_note": "Quienes usan el inicio de sesión en dos pasos tienen una contraseña aparte para las carpetas de red, que eligen al activarlo.",
+  "hh.saved": "Guardado.",
+  "hh.failed": "No se guardó.",
+  "hh.q": "{n, plural, one {# adulto no lo ha configurado. Hasta entonces solo puede iniciar sesión para configurarlo.} other {# adultos no lo han configurado. Hasta entonces solo pueden iniciar sesión para configurarlo.}}"
 };

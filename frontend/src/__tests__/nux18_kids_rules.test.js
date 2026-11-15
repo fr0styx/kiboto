@@ -68,41 +68,21 @@ describe('renderKidsRules', () => {
     api.get.mockImplementation((url) => Promise.resolve(url === '/api/ai/access' ? ACCESS : FILTER));
   });
 
-  it('opens the person, the shared folders and the filter from its buttons', async () => {
+  it('opens the person and the filter from its buttons', async () => {
     const mount = document.createElement('div');
     const ff = document.createElement('h4');
     ff.id = 'ff-title';
     ff.scrollIntoView = vi.fn();
     document.body.append(mount, ff);
     const onEdit = vi.fn();
-    const onShares = vi.fn();
-    await renderKidsRules(mount, USERS, { onEdit, onShares });
+    await renderKidsRules(mount, USERS, { onEdit });
     mount.querySelector('[data-kids-edit="2"]').click();
     expect(onEdit).toHaveBeenCalledWith('2');
-    mount.querySelector('[data-kids-shares]').click();
-    expect(onShares).toHaveBeenCalled();
+    expect(mount.querySelector('[data-kids-shares], [data-kids-ai]')).toBeNull(); // the person page and Household rules have them (SET-19)
     mount.querySelector('[data-kids-filter]').click();
     expect(ff.scrollIntoView).toHaveBeenCalled();
     mount.remove();
     ff.remove();
-  });
-
-  it('saves a switch, and turns it back when saving fails', async () => {
-    const mount = document.createElement('div');
-    await renderKidsRules(mount, USERS, {});
-    const ask = mount.querySelector('[data-kids-ai="roles"][data-role="kid"]');
-    api.put.mockResolvedValueOnce({});
-    ask.checked = true;
-    ask.dispatchEvent(new Event('change'));
-    await vi.waitFor(() => expect(ask.disabled).toBe(false));
-    expect(api.put).toHaveBeenCalledWith('/api/ai/access', { roles: { kid: true } });
-    expect(ask.checked).toBe(true);
-    api.put.mockRejectedValueOnce(new Error('no'));
-    ask.checked = false;
-    ask.dispatchEvent(new Event('change'));
-    await vi.waitFor(() => expect(api.put).toHaveBeenCalledTimes(2));
-    await vi.waitFor(() => expect(ask.disabled).toBe(false));
-    expect(ask.checked).toBe(true);
   });
 
   it('still shows the accounts when the other lists fail to load', async () => {

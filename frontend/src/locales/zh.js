@@ -7609,5 +7609,15 @@ export default {
   "ap.message": "{name} 你好，这是我们 NAS 的邀请链接：{link} 打开它，选择名字和密码即可进入。",
   "ap.need_name": "请先填写名字。",
   "ap.need_login": "请选择登录名和至少 8 个字符的密码。",
-  "ap.copied": "已复制。"
+  "ap.copied": "已复制。",
+  "hh.title": "家庭规则",
+  "hh.two_step": "成年人必须使用两步登录",
+  "hh.off": "关闭",
+  "hh.adults": "开启，孩子和访客除外",
+  "hh.some": "部分角色（在“安全”中设置）",
+  "hh.without": "{n, plural, other {还有 # 位成年人未设置。}}",
+  "hh.smb_note": "使用两步登录的人访问网络文件夹时使用单独的密码，开启时设置。",
+  "hh.saved": "已保存。",
+  "hh.failed": "未能保存。",
+  "hh.q": "{n, plural, other {还有 # 位成年人未设置。在设置之前，他们登录后只能进行设置。}}"
 };

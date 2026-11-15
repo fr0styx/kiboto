@@ -58,20 +58,17 @@ export function kidsRulesHtml(users, access, filter) {
             ${filter ? html`<button type="button" class="btn-pill-toggle is-small" data-kids-filter>${t('kids.change_devices', 'Filter devices')}</button>` : ''}</td></tr>`,
       )}</tbody></table>`
     : html`<p class="kb-muted">${t('kids.none', 'No kid or guest accounts yet. Add a person with the Kid role to set their rules here.')}</p>`;
-  const ai = aiSwitchesHtml(access);
-  return html`${rows}
-    ${ai ? html`<h5 class="kids-sub">${t('kids.ai', 'Kib, the AI helper')}</h5>${ai}` : ''}
-    <p class="kids-more"><button type="button" class="btn-pill-toggle is-small" data-kids-shares>${t('kids.shares', 'Which shared folders they can open')}</button></p>`;
+  void access; // the Kib switches are under Household rules (SET-19)
+  return html`${rows}`;
 }
 
 /**
  * Fills the mount for these accounts. onEdit(userId) opens the person's dialog (sign-in hours);
- * onShares() opens the shared folders dialog.
  * @param {HTMLElement | null} mount
  * @param {Array<Record<string, any>>} users
- * @param {{ onEdit?: (id: string) => void, onShares?: () => void }} [opts]
+ * @param {{ onEdit?: (id: string) => void }} [opts]
  */
-export async function renderKidsRules(mount, users, { onEdit, onShares } = {}) {
+export async function renderKidsRules(mount, users, { onEdit } = {}) {
   if (!mount) return;
   const [access, filter] = await Promise.all([
     api.get('/api/ai/access').catch(() => null),
@@ -82,19 +79,6 @@ export async function renderKidsRules(mount, users, { onEdit, onShares } = {}) {
     const b = /** @type {HTMLElement} */ (e.target).closest('button');
     if (!b) return;
     if (b.dataset.kidsEdit && onEdit) onEdit(b.dataset.kidsEdit);
-    else if ('kidsShares' in b.dataset && onShares) onShares();
     else if ('kidsFilter' in b.dataset) document.getElementById('ff-title')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
-  mount.querySelectorAll('[data-kids-ai]').forEach((sw) => {
-    const box = /** @type {HTMLInputElement} */ (sw);
-    box.addEventListener('change', async () => {
-      box.disabled = true;
-      try {
-        await api.put('/api/ai/access', { [box.dataset.kidsAi]: { [box.dataset.role]: box.checked } });
-      } catch {
-        box.checked = !box.checked;
-      }
-      box.disabled = false;
-    });
-  });
 }

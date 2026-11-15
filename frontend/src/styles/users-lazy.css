@@ -55,3 +55,8 @@
 .ap-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
 .ap-link { display: block; padding: 8px; border-radius: 8px; background: var(--kb-glaze-6); overflow-wrap: anywhere; font-size: var(--kb-fs-xs); }
 
+/* Household rules (SET-19) */
+.hh-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.hh-label { font-weight: 600; color: var(--kb-text-strong); }
+.hh-note { margin: 4px 0 0; font-size: var(--kb-fs-xs); color: var(--muted); }
+

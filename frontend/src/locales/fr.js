@@ -7609,5 +7609,15 @@ export default {
   "ap.message": "Bonjour {name}, voici votre invitation à notre NAS : {link} Ouvrez-le, choisissez un nom et un mot de passe, et c'est fait.",
   "ap.need_name": "Écrivez d'abord son nom.",
   "ap.need_login": "Choisissez un nom de connexion et un mot de passe de 8 caractères ou plus.",
-  "ap.copied": "Copié."
+  "ap.copied": "Copié.",
+  "hh.title": "Règles de la maison",
+  "hh.two_step": "Les adultes doivent utiliser la connexion en deux étapes",
+  "hh.off": "Désactivé",
+  "hh.adults": "Activé, pour tous sauf les enfants et les invités",
+  "hh.some": "Certains rôles (réglés dans Sécurité)",
+  "hh.without": "{n, plural, one {# adulte ne l'a pas encore configurée.} other {# adultes ne l'ont pas encore configurée.}}",
+  "hh.smb_note": "Les personnes avec la connexion en deux étapes utilisent un mot de passe à part pour les dossiers réseau, choisi en l'activant.",
+  "hh.saved": "Enregistré.",
+  "hh.failed": "Ce n'a pas été enregistré.",
+  "hh.q": "{n, plural, one {# adulte ne l'a pas configurée. D'ici là, il ne peut se connecter que pour la configurer.} other {# adultes ne l'ont pas configurée. D'ici là, ils ne peuvent se connecter que pour la configurer.}}"
 };

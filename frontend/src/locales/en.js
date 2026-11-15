@@ -7609,5 +7609,15 @@ export default {
   "ap.message": "Hi {name}, here is your invite to our NAS: {link} Open it, choose a name and a password, and you are in.",
   "ap.need_name": "Write their name first.",
   "ap.need_login": "Choose a sign-in name and a password of 8 characters or more.",
-  "ap.copied": "Copied."
+  "ap.copied": "Copied.",
+  "hh.title": "Household rules",
+  "hh.two_step": "Adults must use two-step sign-in",
+  "hh.off": "Off",
+  "hh.adults": "On, for everyone but kids and guests",
+  "hh.some": "Some roles (set under Security)",
+  "hh.without": "{n, plural, one {# adult has not set it up yet.} other {# adults have not set it up yet.}}",
+  "hh.smb_note": "People with two-step sign-in use a separate password for network folders, which they choose when they turn it on.",
+  "hh.saved": "Saved.",
+  "hh.failed": "That didn't save.",
+  "hh.q": "{n, plural, one {# adult has not set it up. Until they do, they can sign in only to set it up.} other {# adults have not set it up. Until they do, they can sign in only to set it up.}}"
 };
