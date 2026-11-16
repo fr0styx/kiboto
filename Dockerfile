@@ -3,7 +3,7 @@
 # =========================================================================
 # Base images are pinned by digest (OPS-19); Dependabot proposes updates.
 # Node.js 26.13.0 (26.12.1 was the October 2026 security release, Brotli decoder CVE-2026-111497). Keep in step with .nvmrc.
-FROM --platform=$BUILDPLATFORM node:26.13.0-alpine@sha256:8996bb5821d62a8fd9bb27c1cb07462f3fdce6e47d640c6a881ead0b064ce216 AS frontend-builder
+FROM --platform=$BUILDPLATFORM node:26.13.1-alpine@sha256:6bd9ab43c0ec0190ca7b2d193906cb8b7edf6e7f4afa43ddeccd6452710bffb5 AS frontend-builder
 
 WORKDIR /build
 
