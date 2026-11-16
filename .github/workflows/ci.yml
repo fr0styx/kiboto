@@ -295,7 +295,7 @@ jobs:
       # The browser download is kept between runs, keyed by the locked Playwright version; the
       # system packages are still installed every run (they live outside the cache)
       - name: Cache the Playwright browser
-        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('requirements-dev.lock') }}
