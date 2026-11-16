@@ -298,6 +298,12 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **PCI/GPU passthrough is hidden for now**: it led to a dead end because Kiboto can't yet prepare the device. A
   machine that already has a device passed through still shows it, so it can be removed.
 
+#### Changes
+
+- **Settings → Virtual machines shows status only**: one line per machine with its state, and a button that opens the
+  virtual machines window. Starting, stopping and changing machines happen in that window, so there is one set of
+  buttons and words instead of two.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

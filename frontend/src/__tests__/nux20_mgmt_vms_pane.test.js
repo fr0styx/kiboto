@@ -25,20 +25,39 @@ describe('Mission Control VM pane (NUX-20)', () => {
     const text = document.body.textContent;
     expect(document.getElementById('mgmt-hub-vms-pill').textContent).toBe('1 Running');
     expect(document.getElementById('mgmt-sidebar-vms-badge').textContent).toBe('2 VMs');
-    for (const w of ['HYPERVISOR ENGINE', 'Memory left for machines', '20.5 GB', 'Processor threads in use', '2 of 8', '⏹ Stop', '▶ Start', 'Console', 'Hardware Virtualization Extension', 'CPU Host Threads', '8 Threads', 'vhost-net Acceleration', 'Supported', 'Network bridges', 'br0']) {
+    for (const w of ['HYPERVISOR ENGINE', 'Memory left for machines', '20.5 GB', 'Processor threads in use', '2 of 8', 'Running', 'Stopped', 'Hardware Virtualization Extension', 'CPU Host Threads', '8 Threads', 'vhost-net Acceleration', 'Supported', 'Network bridges', 'br0']) {
       expect(text).toContain(w);
     }
+    // VMs decision 2: Settings shows status; the buttons are in the VM window only
+    expect(document.querySelector('.btn-vm-action-start, .btn-vm-action-stop, .btn-vm-action-console, .btn-vm-action-edit')).toBeNull();
+    const lines = [...document.querySelectorAll('.mgmt-vm-line')];
+    expect(lines.map((l) => l.querySelector('.mgmt-vm-state').textContent)).toEqual(['Running', 'Stopped']);
+    expect(lines[0].textContent).toContain('2 vCPU • 4 GB RAM');
+    const launch = document.createElement('button');
+    launch.id = 'btn-mgmt-vm-launch-window';
+    const opened = vi.fn();
+    launch.addEventListener('click', opened);
+    document.body.appendChild(launch);
+    /** @type {HTMLButtonElement} */ (document.getElementById('mgmt-vms-open-window')).click();
+    expect(opened).toHaveBeenCalledTimes(1);
   });
 
   it('still renders without the hub pill, and for a VM without a name', async () => {
     document.body.innerHTML = `
       <div id="management-modal-overlay"><div id="management-window"><div id="management-window-header"></div></div></div>
       <div id="mgmt-vms-summary-strip"></div><div id="mgmt-vms-grid"></div><div id="mgmt-vms-empty"></div><div id="mgmt-vms-kvm-body"></div>`;
-    vi.spyOn(api, 'get').mockImplementation(async (url) => (url === '/api/vms' ? [{ id: 'vm-x', state: 'running' }] : {}));
+    vi.spyOn(api, 'get').mockImplementation(async (url) => (url === '/api/vms' ? [{ id: 'vm-x', state: 'running' }, { id: 'p', state: 'paused', memory_mb: 512, os_family: 'windows' }, { id: 'g', state: 'stopped', memory_mb: 2048, os_type: 'Other' }, { id: 's', state: 'shutting_down' }] : {}));
     try { initManagement(); } catch (_) { /* as above */ }
     window.dispatchEvent(new Event('vm-updated'));
     await flush();
-    expect(document.querySelector('.btn-vm-action-console').dataset.vmName).toBe('vm-x');
+    const lines = [...document.querySelectorAll('.mgmt-vm-line')];
+    expect(lines[0].textContent).toContain('vm-x');
+    expect(lines[0].textContent).toContain('Linux • 1 vCPU • 1 GB RAM');
+    expect(lines[1].textContent).toContain('Windows • 1 vCPU • 512 MB RAM');
+    expect(lines[1].querySelector('.mgmt-vm-state').textContent).toBe('Paused');
+    expect(lines[2].textContent).toContain('Other • 1 vCPU • 2 GB RAM');
+    // without the launch button in the page the open control does nothing rather than throw
+    /** @type {HTMLButtonElement} */ (document.getElementById('mgmt-vms-open-window')).click();
   });
 
   it('leaves out what the server did not say instead of making it up (VMs report 15-17)', async () => {

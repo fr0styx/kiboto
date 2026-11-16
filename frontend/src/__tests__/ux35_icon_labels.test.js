@@ -58,28 +58,6 @@ describe('icons apart from the words', () => {
     expect(iconAndWords(save)).toEqual(['💾', '💾 Save Configuration']);
   });
 
-  it('a VM that fails to start or stop gets its button back', async () => {
-    document.body.innerHTML = `
-      <div id="management-modal-overlay"><div id="management-window"><div id="management-window-header"></div></div></div>
-      <div id="mgmt-vms-summary-strip"></div><div id="mgmt-vms-grid"></div><div id="mgmt-vms-empty"></div><div id="mgmt-vms-kvm-body"></div>`;
-    vi.spyOn(api, 'get').mockImplementation(async (url) =>
-      url === '/api/vms' ? [{ id: 'a', name: 'web', state: 'running' }, { id: 'b', name: 'db', state: 'stopped' }] : {},
-    );
-    vi.spyOn(api, 'post').mockRejectedValue(new Error('busy'));
-    const { initManagement } = await import('../components/management.js');
-    try { initManagement(); } catch (_) { /* parts of the window this test doesn't build */ }
-    window.dispatchEvent(new Event('vm-updated'));
-    await flush();
-    const start = document.querySelector('.btn-vm-action-start');
-    const stop = document.querySelector('.btn-vm-action-stop');
-    expect(iconAndWords(start)).toEqual(['▶', '▶ Start']);
-    start.click();
-    stop.click();
-    await vi.waitFor(() => expect(iconAndWords(start)).toEqual(['▶', '▶ Start']));
-    await vi.waitFor(() => expect(iconAndWords(stop)).toEqual(['⏹', '⏹ Stop']));
-    expect(start.disabled).toBe(false);
-  });
-
   it('the container backup button and the compose file read from disk', async () => {
     const cm = await import('../components/container-modal.js');
     cm._resetContainerModalForTesting();

@@ -477,3 +477,9 @@
 .ps-times { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 6px; }
 .ps-days { display: flex; flex-wrap: wrap; gap: 4px 12px; }
 .ps-day { display: inline-flex; align-items: center; gap: 4px; min-height: 32px; font-size: var(--kb-fs-sm); }
+/* Settings → Virtual machines: one line per machine; the buttons live in the VM window (VMs decision 2) */
+.mgmt-vm-lines { list-style: none; margin: 0 0 10px; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.mgmt-vm-line { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--kb-line-7); border-radius: 8px; }
+.mgmt-vm-state { font-size: var(--kb-fs-xs); font-weight: 600; color: var(--muted); white-space: nowrap; }
+.mgmt-vm-line.is-running .mgmt-vm-state { color: var(--kb-text-ok); }
+.mgmt-vm-line.is-paused .mgmt-vm-state { color: var(--kb-text-warn); }

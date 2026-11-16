@@ -8029,5 +8029,9 @@ export default {
   "vmd.usb_use_storage": "本 NAS 正在使用：USB 硬盘",
   "vmd.usb_use_ups": "本 NAS 正在使用：UPS",
   "vmd.usb_q_ups": "这是本 NAS 监控的 UPS。交给虚拟机后，断电时 NAS 将无法安全关机。仍要添加吗？",
-  "vmd.usb_q_storage": "这块 USB 硬盘正被本 NAS 使用（可能是启动盘）。交给虚拟机后，它会从 NAS 上消失。仍要添加吗？"
+  "vmd.usb_q_storage": "这块 USB 硬盘正被本 NAS 使用（可能是启动盘）。交给虚拟机后，它会从 NAS 上消失。仍要添加吗？",
+  "mvm.st_running": "运行中",
+  "mvm.st_paused": "已暂停",
+  "mvm.st_stopped": "已停止",
+  "mvm.open_window": "打开虚拟机窗口，以启动、停止或更改虚拟机"
 };

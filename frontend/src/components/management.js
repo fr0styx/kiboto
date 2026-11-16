@@ -1,10 +1,9 @@
 import { syncWidgetSettingsUI } from './widgets.js';
 import { isNvmeDrive } from './temp-rule.js';
 import { refreshAndSay } from './refresh-say.js';
-import { askPower, isShuttingDown, powerToast } from './vm/power.js';
+import { isShuttingDown } from './vm/power.js';
 import { loadAccountPane, loadBackupExtras, loadSecurityPane, loadNotificationsPane, loadConnectionsPane } from './management/admin-panes.js';
 import { kibPaneFor, loadKibExtras } from './management/kib-access.js';
-import { setIconLabel } from '../ui/primitives.js';
 import { syncDesktopThemeUI, openDrawer, restoreHardwareTabsToManagement } from './settings.js';
 import { ZettEventBus } from '../event-bus.js';
 import { fitMiniPreviewScale, syncMiniPreviewTelemetry } from './mini-preview.js';
@@ -30,7 +29,7 @@ import { installAdvancedSwitch, installSidebarGroups, renderStatusSummary } from
 import { installHealthSignal } from './management/health-signal.js';
 import { _aiSelectedColor, _aiSelectedScene, _getActiveAiSearchQuery, _renderAiRagInitialEmptyState, fetchAndRenderAiStatus, initAiKnowledgeEngine, runAiVisualSearch, setAiVisualFiltersDrawerOpen } from './management/ai.js';
 import { formatFixed } from '../format.js';
-import { slowNoteHtml, slowStartText } from './vm/slow-mode.js';
+import { slowNoteHtml } from './vm/slow-mode.js';
 import { FIXED_PCT, askFixedSpeed, modeName } from './fan-modes.js';
 
 export * from './management/docker.js';
@@ -920,110 +919,28 @@ export function initManagement() {
           if (empty) empty.style.display = 'block';
         } else {
           if (empty) empty.style.display = 'none';
-          grid.innerHTML = vmsList.map((vm) => {
-            const isRunning = vm.state === 'running';
-            const isPaused = vm.state === 'paused';
-            const statusColor = isRunning ? 'var(--ok2, #33cdb8)' : (isPaused ? 'var(--warn, #f5a623)' : 'var(--muted, #95a8ab)');
-            const statusBg = isRunning ? 'rgba(51,205,184,0.15)' : (isPaused ? 'rgba(245,166,35,0.15)' : 'rgba(255,255,255,0.06)');
-
+          // VMs decision 2 (owner, 16 Nov): Settings shows status, one line per machine; starting, stopping
+          // and changing machines happen in the VM window only (two lists with different buttons and words)
+          const stateWord = (vm) => (isShuttingDown(vm) ? t('vmp.st_shutting', 'Shutting down')
+            : vm.state === 'running' ? t('mvm.st_running', 'Running')
+            : vm.state === 'paused' ? t('mvm.st_paused', 'Paused')
+            : t('mvm.st_stopped', 'Stopped'));
+          grid.innerHTML = `<ul class="mgmt-vm-lines">${vmsList.map((vm) => {
             const ramGb = vm.ram_gb ? `${vm.ram_gb} GB` : (vm.memory_mb ? (vm.memory_mb >= 1024 ? `${formatFixed(vm.memory_mb / 1024, 0)} GB` : `${vm.memory_mb} MB`) : '1 GB');
             const cores = vm.vcpus || vm.cores || 1;
             const osType = vm.os_family ? (vm.os_family.charAt(0).toUpperCase() + vm.os_family.slice(1)) : (vm.os_type || 'Linux');
-
-            return `
-              <div class="mgmt-vm-card" data-vm-id="${escapeHtml(vm.id)}" style="background: var(--kb-glaze-3); border: 1px solid var(--kb-line-7); border-radius: 8px; padding: 14px; display: flex; flex-direction: column; gap: 10px; transition: border-color 0.2s;">
-                <div class="mgx-row">
-                  <div class="mgx-row-2">
-                    <span class="mgx-fs18">🖥️</span>
-                    <div>
-                      <div class="mgx-fs13-bold-strong-2">${escapeHtml(vm.name || vm.id)}</div>
-                      <div class="mgx-xs-muted">${escapeHtml(osType)} • ${cores} vCPU • ${ramGb} RAM</div>
-                      ${slowNoteHtml(vm, tel?.kvm?.remediation || '')}
-                    </div>
-                  </div>
-                  <span style="padding: 2px 8px; border-radius: 4px; font-size: var(--kb-fs-xs); font-weight: 700; text-transform: uppercase; background: ${statusBg}; color: ${statusColor};">
-                    ${escapeHtml(isShuttingDown(vm) ? t('vmp.st_shutting', 'Shutting down') : vm.state || 'stopped')}
-                  </span>
+            return `<li class="mgmt-vm-card mgmt-vm-line is-${escapeHtml(vm.state || 'stopped')}" data-vm-id="${escapeHtml(vm.id)}">
+                <div class="mgmt-vm-line-text">
+                  <div class="mgx-fs13-bold-strong-2">${escapeHtml(vm.name || vm.id)}</div>
+                  <div class="mgx-xs-muted">${escapeHtml(osType)} • ${cores} vCPU • ${ramGb} RAM</div>
+                  ${slowNoteHtml(vm, tel?.kvm?.remediation || '')}
                 </div>
-                <div class="mgx-row-box">
-                  ${isShuttingDown(vm)
-                    ? `<button class="btn-pill-toggle mgx-grow" disabled>${escapeHtml(t('vmp.st_shutting', 'Shutting down'))}</button>`
-                    : isPaused
-                    ? `<button class="btn-pill-toggle btn-vm-action-start mgx-ok-grow" data-vm-id="${escapeHtml(vm.id)}" data-act="resume"><span aria-hidden="true">▶</span> ${escapeHtml(t('vm.resume', 'Resume'))}</button>`
-                    : isRunning
-                    ? `<button class="btn-pill-toggle btn-vm-action-stop is-danger mgx-grow" data-vm-id="${escapeHtml(vm.id)}" title="${t('ui.stop_vm', 'Stop VM')}"><span aria-hidden="true">⏹</span> ${escapeHtml(t('ui.stop', 'Stop'))}</button>`
-                    : `<button class="btn-pill-toggle btn-vm-action-start mgx-ok-grow" data-vm-id="${escapeHtml(vm.id)}" title="${t('ui.start_vm', 'Start VM')}"><span aria-hidden="true">▶</span> ${escapeHtml(t('ui.start', 'Start'))}</button>`
-                  }
-                  <button class="btn-pill-toggle btn-vm-action-console mgx-brand-grow" data-vm-id="${escapeHtml(vm.id)}" data-vm-name="${escapeHtml(vm.name || vm.id)}" title="${t('ui.open_web_console', 'Open Web Console')}"><span aria-hidden="true">📺</span> ${t('mvm.console', 'Console')}</button>
-                  <button class="btn-pill-toggle btn-vm-action-edit" data-vm-id="${escapeHtml(vm.id)}" title="${t('ui.edit_vm_config', 'Edit VM Config')}">⚙️</button>
-                </div>
-              </div>
-            `;
-          }).join('');
-
-          grid.querySelectorAll('.btn-vm-action-start').forEach(btn => {
-            btn.addEventListener('click', async () => {
-              const id = btn.dataset.vmId;
-              try {
-                btn.disabled = true;
-                btn.textContent = '...';
-                // a paused machine is resumed: "Start" marked it running while it stayed frozen
-                const res = await api.post(`/api/vms/${id}/action`, { action: /** @type {HTMLElement} */ (btn).dataset.act === 'resume' ? 'resume' : 'start' });
-                const vmName = vmsList.find((v) => v.id === id)?.name || id;
-                const slow = slowStartText(res, vmName, tel?.kvm?.remediation || '');
-                showToast(slow || t('toast.vm_started_successfully', 'VM started successfully'), slow ? 'warning' : 'success');
-                fetchAndRenderMgmtVms();
-              } catch (err) {
-                showToast(t('toast.failed_to_start_vm', 'Failed to start VM: {error}', { error: err.message }), 'error');
-                btn.disabled = false;
-                setIconLabel(btn, '▶', t('ui.start', 'Start'));
-              }
-            });
-          });
-
-          grid.querySelectorAll('.btn-vm-action-stop').forEach(btn => {
-            btn.addEventListener('click', () => {
-              const id = btn.dataset.vmId;
-              const name = vmsList.find((v) => v.id === id)?.name || id;
-              askPower('stop', name, async () => {
-                try {
-                  btn.disabled = true;
-                  btn.textContent = '...';
-                  const res = await api.post(`/api/vms/${id}/action`, { action: 'stop' });
-                  const said = powerToast('stop', res?.state, name);
-                  showToast(said.text, said.tone);
-                  fetchAndRenderMgmtVms();
-                } catch (err) {
-                  showToast(t('toast.failed_to_stop_vm', 'Failed to stop VM: {error}', { error: err.message }), 'error');
-                  btn.disabled = false;
-                  setIconLabel(btn, '⏹', t('vmm.shutdown', 'Shut down'));
-                }
-              });
-            });
-          });
-
-          grid.querySelectorAll('.btn-vm-action-console').forEach(btn => {
-            btn.addEventListener('click', () => {
-              const id = btn.dataset.vmId;
-              const name = btn.dataset.vmName;
-              import('./vm-manager.js').then(m => {
-                if (typeof m.openVmConsole === 'function') {
-                  m.openVmConsole(id, name);
-                }
-              });
-            });
-          });
-
-          grid.querySelectorAll('.btn-vm-action-edit').forEach(btn => {
-            btn.addEventListener('click', () => {
-              const id = btn.dataset.vmId;
-              const vmObj = vmsList.find(v => v.id === id);
-              import('./vm-manager.js').then(m => {
-                if (typeof m.openVmEditModal === 'function') {
-                  m.openVmEditModal(id, vmObj);
-                }
-              });
-            });
+                <span class="mgmt-vm-state">${escapeHtml(stateWord(vm))}</span>
+              </li>`;
+          }).join('')}</ul>
+          <button type="button" class="btn-pill-toggle is-primary" id="mgmt-vms-open-window">${escapeHtml(t('mvm.open_window', 'Open the virtual machines window to start, stop or change them'))}</button>`;
+          grid.querySelector('#mgmt-vms-open-window')?.addEventListener('click', () => {
+            document.getElementById('btn-mgmt-vm-launch-window')?.click();
           });
         }
       }

@@ -8029,5 +8029,9 @@ export default {
   "vmd.usb_use_storage": "utilisé par ce NAS : un disque USB",
   "vmd.usb_use_ups": "utilisé par ce NAS : l'onduleur",
   "vmd.usb_q_ups": "C'est l'onduleur que ce NAS surveille. Donné à la machine, le NAS ne peut plus s'éteindre proprement en cas de coupure. L'ajouter quand même ?",
-  "vmd.usb_q_storage": "Ce disque USB est utilisé par ce NAS (ce peut être le disque de démarrage). Donné à la machine, il disparaît du NAS. L'ajouter quand même ?"
+  "vmd.usb_q_storage": "Ce disque USB est utilisé par ce NAS (ce peut être le disque de démarrage). Donné à la machine, il disparaît du NAS. L'ajouter quand même ?",
+  "mvm.st_running": "En marche",
+  "mvm.st_paused": "En pause",
+  "mvm.st_stopped": "Arrêtée",
+  "mvm.open_window": "Ouvrir la fenêtre des machines virtuelles pour les démarrer, les arrêter ou les modifier"
 };

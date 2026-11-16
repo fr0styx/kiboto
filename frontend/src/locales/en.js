@@ -8029,5 +8029,9 @@ export default {
   "vmd.usb_use_storage": "used by this NAS: a USB drive",
   "vmd.usb_use_ups": "used by this NAS: the UPS",
   "vmd.usb_q_ups": "This is the UPS this NAS watches. Given to the machine, the NAS can no longer shut down safely on a power cut. Add it anyway?",
-  "vmd.usb_q_storage": "This USB drive is used by this NAS (it may be the boot drive). Given to the machine, it disappears from the NAS. Add it anyway?"
+  "vmd.usb_q_storage": "This USB drive is used by this NAS (it may be the boot drive). Given to the machine, it disappears from the NAS. Add it anyway?",
+  "mvm.st_running": "Running",
+  "mvm.st_paused": "Paused",
+  "mvm.st_stopped": "Stopped",
+  "mvm.open_window": "Open the virtual machines window to start, stop or change them"
 };

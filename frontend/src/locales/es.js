@@ -8029,5 +8029,9 @@ export default {
   "vmd.usb_use_storage": "lo usa este NAS: una unidad USB",
   "vmd.usb_use_ups": "lo usa este NAS: el SAI",
   "vmd.usb_q_ups": "Es el SAI que vigila este NAS. Si se lo das a la máquina, el NAS ya no podrá apagarse de forma segura en un corte de luz. ¿Añadirlo de todos modos?",
-  "vmd.usb_q_storage": "Esta unidad USB la usa este NAS (puede ser la de arranque). Si se la das a la máquina, desaparece del NAS. ¿Añadirla de todos modos?"
+  "vmd.usb_q_storage": "Esta unidad USB la usa este NAS (puede ser la de arranque). Si se la das a la máquina, desaparece del NAS. ¿Añadirla de todos modos?",
+  "mvm.st_running": "En marcha",
+  "mvm.st_paused": "En pausa",
+  "mvm.st_stopped": "Detenida",
+  "mvm.open_window": "Abrir la ventana de máquinas virtuales para iniciarlas, detenerlas o cambiarlas"
 };

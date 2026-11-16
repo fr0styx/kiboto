@@ -8029,5 +8029,9 @@ export default {
   "vmd.usb_use_storage": "von diesem NAS genutzt: ein USB-Laufwerk",
   "vmd.usb_use_ups": "von diesem NAS genutzt: die USV",
   "vmd.usb_q_ups": "Das ist die USV, die dieses NAS überwacht. Gibt man sie der Maschine, kann das NAS bei einem Stromausfall nicht mehr sicher herunterfahren. Trotzdem hinzufügen?",
-  "vmd.usb_q_storage": "Dieses USB-Laufwerk wird von diesem NAS genutzt (es kann das Startlaufwerk sein). Gibt man es der Maschine, verschwindet es vom NAS. Trotzdem hinzufügen?"
+  "vmd.usb_q_storage": "Dieses USB-Laufwerk wird von diesem NAS genutzt (es kann das Startlaufwerk sein). Gibt man es der Maschine, verschwindet es vom NAS. Trotzdem hinzufügen?",
+  "mvm.st_running": "Läuft",
+  "mvm.st_paused": "Angehalten",
+  "mvm.st_stopped": "Gestoppt",
+  "mvm.open_window": "Fenster der virtuellen Maschinen öffnen, um sie zu starten, zu stoppen oder zu ändern"
 };

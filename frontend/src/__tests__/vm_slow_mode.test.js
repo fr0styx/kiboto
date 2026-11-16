@@ -24,7 +24,7 @@ describe('slow mode (VMs decision 4 a)', () => {
     expect(slowStartText(null, 'web')).toBe('');
   });
 
-  it('Settings marks the slow machine, shows the fix, and warns when Start falls back', async () => {
+  it('Settings marks the slow machine and shows the fix', async () => {
     document.body.innerHTML = `
       <div id="management-modal-overlay"><div id="management-window"><div id="management-window-header"></div></div></div>
       <div id="mgmt-vms-summary-strip"></div><div id="mgmt-vms-grid"></div><div id="mgmt-vms-empty"></div><div id="mgmt-vms-kvm-body"></div>`;
@@ -34,7 +34,6 @@ describe('slow mode (VMs decision 4 a)', () => {
       if (url === '/api/vms') return [{ id: 'a', name: 'web', state: 'running', acceleration: 'tcg' }, { id: 'b', name: 'db', state: 'stopped' }];
       return {};
     });
-    const post = vi.spyOn(api, 'post').mockResolvedValue({ status: 'ok', state: 'running', acceleration: 'tcg' });
     try { initManagement(); } catch (_) { /* parts of the window this test doesn't build */ }
     window.dispatchEvent(new Event('vm-updated'));
     await flush();
@@ -44,9 +43,5 @@ describe('slow mode (VMs decision 4 a)', () => {
     const cards = [...document.querySelectorAll('.mgmt-vm-card')];
     expect(cards[0].querySelector('.vm-slow-note')?.textContent).toBe('Slow: no hardware virtualization');
     expect(cards[1].querySelector('.vm-slow-note')).toBeNull();
-    /** @type {HTMLButtonElement} */ (cards[1].querySelector('.btn-vm-action-start')).click();
-    await flush();
-    expect(post).toHaveBeenCalledWith('/api/vms/b/action', { action: 'start' });
-    expect(document.body.textContent).toContain("db started in slow mode: this NAS can't use hardware virtualization. Enable VT-x in the BIOS.");
   });
 });
