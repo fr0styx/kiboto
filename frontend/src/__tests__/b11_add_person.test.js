@@ -33,35 +33,6 @@ describe('B11: a new person gets only the folders chosen for them', () => {
     expect(get).not.toHaveBeenCalled();
   });
 
-  it('the dialog lists every share, starting at no access', async () => {
-    document.body.innerHTML = '<div id="add-user-shares-wrap" hidden><div id="add-user-shares"></div></div>';
-    vi.spyOn(api, 'get').mockResolvedValue(access);
-    await loadAddUserShares();
-    const selects = [...document.querySelectorAll('#add-user-shares select')];
-    expect(selects.map((s) => [s.dataset.addUserShare, s.value])).toEqual([['Family', 'none'], ['media', 'none']]);
-    expect(document.getElementById('add-user-shares-wrap').hidden).toBe(false);
-  });
-
-  it('the dialog hides the list for someone who cannot manage share access', async () => {
-    document.body.innerHTML = '<div id="add-user-shares-wrap" hidden><div id="add-user-shares"></div></div>';
-    vi.spyOn(api, 'get').mockRejectedValue(new Error('403'));
-    await loadAddUserShares();
-    expect(document.getElementById('add-user-shares-wrap').hidden).toBe(true);
-  });
-
-  it('grantChosenShares sends what was picked and warns when it fails', async () => {
-    document.body.innerHTML = `<div id="add-user-shares">${shareChoicesHtml(access.shares)}</div>`;
-    document.querySelector('select[data-add-user-share="media"]').value = 'read';
-    vi.spyOn(api, 'get').mockResolvedValue(access);
-    const put = vi.spyOn(api, 'put').mockResolvedValue({});
-    await grantChosenShares('ann');
-    expect(put.mock.calls[0][1].shares.media.users).toEqual({ ann: 'read' });
-
-    const warn = vi.spyOn(toast, 'showToast').mockImplementation(() => {});
-    put.mockRejectedValue(new Error('offline'));
-    await grantChosenShares('ann');
-    expect(warn).toHaveBeenCalledWith(expect.stringContaining('offline'), 'warning');
-  });
 });
 
 describe('B11: guest access and NFS for every host are confirmed', () => {

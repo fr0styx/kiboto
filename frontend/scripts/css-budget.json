@@ -1,9 +1,9 @@
 {
   "important": 3352,
   "buttonClasses": 75,
-  "inlineStyles": 1275,
+  "inlineStyles": 1273,
   "emojiIcons": 3,
-  "colours": 3776,
+  "colours": 3775,
   "primitiveUses": 4,
   "importantPerFile": {
     "frontend/index.html": 64,
@@ -88,7 +88,7 @@
     "frontend/src/components/setup-wizard.js": 4,
     "frontend/src/components/stack-modal.js": 45,
     "frontend/src/components/terminal-view.js": 22,
-    "frontend/src/components/users.js": 7,
+    "frontend/src/components/users.js": 6,
     "frontend/src/components/vm-manager.js": 57,
     "frontend/src/components/vm/connect-modal.js": 15,
     "frontend/src/components/vm/console-ansi.js": 51,

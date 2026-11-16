@@ -197,13 +197,44 @@ export async function fetchAndRenderBackupJobs(mountEl) {
 // Storage Pool Snapshots & Revert
 // =========================================================================
 
-export async function fetchAndRenderSystemSnapshots(mountEl) {
+/** Runs `load` when the folded group around `el` opens (now, if it is open or there is none). */
+export function whenOpen(el, load) {
+  const fold = /** @type {HTMLDetailsElement | null} */ (el ? el.closest('details') : null);
+  if (!fold || fold.open) {
+    load();
+    return true;
+  }
+  if (!fold.dataset.lazyBound) {
+    fold.dataset.lazyBound = '1';
+    fold.addEventListener('toggle', () => {
+      if (fold.open) load();
+    });
+  }
+  return false;
+}
+
+/** Backup when it opens (SET-21, B13): the open sections now; More and All earlier versions when opened. */
+export function loadBackupPane(doc = document) {
+  const more = doc.getElementById('backup-jobs-mount');
+  whenOpen(more, () => {
+    fetchAndRenderBackupJobs();
+    fetchAndRenderAppBackups();
+    const sync2 = doc.getElementById('two-way-sync-mount');
+    if (sync2) import('../two-way-sync.js').then((m) => m.renderTwoWaySync(sync2)).catch(() => {}); // FEAT-06
+    import('./protection.js').then((p) => p.installProtectionJobs(doc.getElementById('protection-jobs-mount'))).catch(() => {});
+  });
+  fetchAndRenderSystemSnapshots(null, { lazy: true });
+}
+
+export async function fetchAndRenderSystemSnapshots(mountEl, { lazy = false } = {}) {
   const mount = mountEl || document.getElementById('system-snapshots-mount');
   if (!mount) return;
   renderSnapshotSchedules(document.getElementById('snapshot-schedules-mount'));
   renderOffsite(document.getElementById('offsite-backup-mount'));
   const sync2 = document.getElementById('two-way-sync-mount');
-  if (sync2) import('../two-way-sync.js').then((m) => m.renderTwoWaySync(sync2)); // FEAT-06
+  if (sync2 && !lazy) import('../two-way-sync.js').then((m) => m.renderTwoWaySync(sync2)); // FEAT-06
+  // the list of every earlier version reads the pool's folders: only once its fold is opened (B13)
+  if (lazy && !whenOpen(mount, () => fetchAndRenderSystemSnapshots(mount))) return;
 
   try {
     const data = await api.get('/api/backup/snapshots');

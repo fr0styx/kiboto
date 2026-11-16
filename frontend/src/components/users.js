@@ -3,7 +3,6 @@
  * Handles User inventory, Role assignment, Session revocation, and TOTP 2FA setup.
  */
 
-import { roleChange, showRole } from './role-change.js';
 import { onManagementDom } from '../management-dom.js';
 import { api, apiFetch } from '../api.js';
 import {
@@ -19,7 +18,7 @@ import { t } from '../i18n.js';
 import '../styles/users-lazy.css'; // the people dialogs' own sheet loads with this code (NUX-15)
 import { showToast, showConfirmToast, showPromptToast } from '../toast.js';
 import { initTopbarUserPill } from './dock.js';
-import { grantShares, openShareAccessModal, shareChoicesHtml } from './share-access.js';
+import { openShareAccessModal } from './share-access.js';
 
 import { formatDateTime } from '../format.js';
 import { renderInvites } from './invites-admin.js';
@@ -62,6 +61,9 @@ export function closeModal(modal) {
 
 let _usersCache = {};
 
+
+// the dialogs this page still opens (the old Add and Edit ones are gone: SET-19)
+const PERSON_DIALOGS = ['modal-setup-2fa', 'modal-reset-password'];
 
 export function initUsersManagement() {
   initTopbarUserPill();
@@ -128,7 +130,7 @@ function bindUserModals() {
   });
 
   // Close modals on clicking outer backdrop
-  ['modal-add-user', 'modal-edit-user', 'modal-reset-password', 'modal-setup-2fa'].forEach((id) => {
+  PERSON_DIALOGS.forEach((id) => {
     const el = document.getElementById(id);
     if (el) {
       el.onclick = (e) => {
@@ -140,7 +142,7 @@ function bindUserModals() {
   // Escape key closes open user modals
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
-      ['modal-add-user', 'modal-edit-user', 'modal-reset-password', 'modal-setup-2fa'].forEach((id) => {
+      PERSON_DIALOGS.forEach((id) => {
         const el = document.getElementById(id);
         if (el && el.classList.contains('open')) closeModal(el);
       });
@@ -269,174 +271,35 @@ export async function loadUsersList() {
   }
 }
 
-/** New people reach no shared folder until given one (B11, SEC-21), so the dialog asks which. */
-export async function loadAddUserShares() {
-  const wrap = document.getElementById('add-user-shares-wrap');
-  const list = document.getElementById('add-user-shares');
-  if (!wrap || !list) return;
-  wrap.hidden = true;
-  list.innerHTML = '';
-  try {
-    const data = await api.get('/api/storage/share-access');
-    if (!data?.shares?.length) return;
-    list.innerHTML = shareChoicesHtml(data.shares);
-    wrap.hidden = false;
-  } catch {
-    // no right to manage share access: the dialog works without the list
-  }
-}
-
-export async function grantChosenShares(username) {
-  const levels = {};
-  document.querySelectorAll('#add-user-shares select[data-add-user-share]').forEach((sel) => {
-    levels[sel.dataset.addUserShare] = sel.value;
-  });
-  try {
-    await grantShares(username, levels);
-  } catch (err) {
-    showToast(t('users.shares_failed', '{name} was added, but their shared folders were not set: {error}', { name: username, error: err.message }), 'warning');
-  }
-}
-
-export function showAddUserModal() {
-  const modal = document.getElementById('modal-add-user');
-  if (!modal) return;
-  openModal(modal);
-  loadAddUserShares();
-  const form = document.getElementById('form-add-user');
-  if (form) {
-    form.reset();
-    form.onsubmit = async (e) => {
-      e.preventDefault();
-      const username = document.getElementById('add-user-username').value.trim();
-      const displayName = document.getElementById('add-user-display').value.trim();
-      const email = document.getElementById('add-user-email').value.trim();
-      const password = document.getElementById('add-user-password').value;
-      const roleId = document.getElementById('add-user-role').value;
-      const quotaGb = parseInt(document.getElementById('add-user-quota').value || '0', 10);
-
-      const submitBtn = form.querySelector('button[type="submit"]');
-      submitBtn.disabled = true;
-      submitBtn.textContent = t('users.creating', 'Adding…');
-
-      try {
-        const res = await apiFetch('/api/users', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({
-            username,
-            display_name: displayName || username,
-            email,
-            password,
-            role_id: roleId,
-            storage_quota_bytes: quotaGb > 0 ? quotaGb * 1024 * 1024 * 1024 : 0,
-            must_change_password: Boolean(/** @type {HTMLInputElement | null} */ (document.getElementById('add-user-must-change'))?.checked), // SET-19
-          })
-        });
-        const result = await res.json();
-        if (res.ok) {
-          closeModal(modal);
-          await grantChosenShares(username);
-          loadUsersList();
-          showToast(t('toast.user_created_successfully', 'User created successfully.'), 'success');
-        } else {
-          showToast(t('toast.error', 'Error: {detail}', { detail: result.detail || result.error || 'Failed to create user' }), 'error');
-        }
-      } catch (err) {
-        showToast(t('toast.request_failed', 'Request failed: {error}', { error: err.message }), 'error');
-      } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = t('users.create', 'Add person');
-      }
-    };
-  }
-}
-
 /** Opens a person's page in place of the list (SET-19). */
+/** The role choices of a person's page, in the order the old edit dialog had them (SET-19). */
+export const ROLE_CHOICES = () => [
+  ['share_user', t('role.share_user_option', 'Family member: their own folder and the shared folders you choose')],
+  ['app_operator', t('role.app_operator_option', 'App manager: installs and runs apps, and can give an app most data folders')],
+  ['storage_admin', t('role.storage_admin_option', 'Storage admin: drives, pools and shares, and can open every private folder')],
+  ['backup_operator', t('role.backup_operator_option', "Backup manager: backups and cloud copies; can bring back anyone's files")],
+  ['kid', t('role.kid_option', "Kid: their own folder, the shared folders you choose, and the kids' rules")],
+  ['guest', t('role.guest_option', 'Guest: can look at the shared folders you choose')],
+  ['auditor', t('role.auditor_option', "Viewer: can look, can't change")],
+  ['superadmin', t('role.superadmin_option', 'Administrator: everything, including every private folder')],
+];
+
+export function roleOptionsHtml() {
+  return ROLE_CHOICES().map(([id, label]) => `<option value="${id}">${escapeHtml(label)}</option>`).join('');
+}
+
 export function openPerson(user) {
   return import('./person-page.js').then((m) =>
     m.openPersonPage(user, {
       me: getCurrentUser(),
       roleName: formatRole,
-      roleOptionsHtml: document.getElementById('edit-user-role')?.innerHTML || '',
+      roleOptionsHtml: roleOptionsHtml(),
       reload: loadUsersList,
       resetPassword: showResetPasswordModal,
       setStatus: toggleUserStatus,
       remove: confirmDeleteUser,
     }),
   );
-}
-
-export function showEditUserModal(user) {
-  const modal = document.getElementById('modal-edit-user');
-  if (!modal) return;
-  openModal(modal);
-
-  document.getElementById('edit-user-id').value = user.id;
-  document.getElementById('edit-user-username').value = user.username;
-  document.getElementById('edit-user-display').value = user.display_name || '';
-  document.getElementById('edit-user-email').value = user.email || '';
-  showRole(/** @type {HTMLSelectElement | null} */ (document.getElementById('edit-user-role')), user.role_id);
-  const quotaGb = user.storage_quota_bytes > 0 ? Math.round(user.storage_quota_bytes / (1024 * 1024 * 1024)) : 0;
-  document.getElementById('edit-user-quota').value = quotaGb || '';
-
-  import('./management/user-data.js').then((m) => m.installUserDataFor(modal, user)).catch(() => {}); // B8
-  import('./passkeys-card.js').then((m) => m.installPasskeyResetFor(modal, user)).catch(() => {}); // RES-3
-  import('./management/lost-device.js').then((m) => m.installLostDeviceFor(modal, user, getCurrentUser())).catch(() => {}); // SET-19
-  // COMP-13: sign-in hours, for accounts that don't manage people
-  const hoursBox = document.getElementById('edit-user-hours');
-  const limitable = (role) => !['superadmin', 'storage_admin'].includes(role);
-  let hoursChanged = () => false;
-  let readHours = null;
-  import('./signin-hours.js').then((m) => {
-    hoursChanged = m.installSigninHours(hoursBox, user, { canBeLimited: limitable(user.role_id) });
-    hoursBox?.closest('fieldset')?.toggleAttribute('hidden', !limitable(user.role_id));
-    readHours = m.readHours;
-  }).catch(() => {});
-  const form = document.getElementById('form-edit-user');
-  if (form) {
-    form.onsubmit = async (e) => {
-      e.preventDefault();
-      const displayName = document.getElementById('edit-user-display').value.trim();
-      const email = document.getElementById('edit-user-email').value.trim();
-      const roleId = document.getElementById('edit-user-role').value;
-      const qVal = parseInt(document.getElementById('edit-user-quota').value || '0', 10);
-
-      const submitBtn = form.querySelector('button[type="submit"]');
-      submitBtn.disabled = true;
-      submitBtn.textContent = t('setup.saving', 'Saving...');
-
-      try {
-        const res = await apiFetch(`/api/users/${user.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({
-            display_name: displayName,
-            email,
-            ...roleChange(roleId, user.role_id), // sent only when it was changed (SET-10)
-            storage_quota_bytes: qVal > 0 ? qVal * 1024 * 1024 * 1024 : 0,
-            ...(hoursBox && readHours && hoursChanged() ? { signin_hours: readHours(hoursBox) } : {})
-          })
-        });
-        if (res.ok) {
-          closeModal(modal);
-          loadUsersList();
-          fetchCurrentProfile();
-          showToast(t('toast.user_updated_successfully', 'User updated successfully.'), 'success');
-        } else {
-          const err = await res.json();
-          showToast(t('toast.error', 'Error: {detail}', { detail: err.detail || 'Failed to update user' }), 'error');
-        }
-      } catch (err) {
-        showToast(t('toast.request_failed', 'Request failed: {error}', { error: err.message }), 'error');
-      } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = t('users.save_changes', 'Save changes');
-      }
-    };
-  }
 }
 
 export function showResetPasswordModal(userId, username) {

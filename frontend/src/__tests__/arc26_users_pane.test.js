@@ -43,19 +43,7 @@ const DOM = `
   <div id="users-pane-list"><ul id="users-table-body"></ul></div><div id="invites-mount"></div>
   <table><tbody id="sessions-table-body"></tbody></table>
   <div id="mfa-status-card"><span id="mfa-status-badge"></span><p id="mfa-status-desc"></p></div>
-  <div id="modal-add-user" class="os-modal"><div class="modal-window">
-    <button class="modal-close-btn">x</button>
-    <form id="form-add-user">
-      <input id="add-user-username"><input id="add-user-display"><input id="add-user-email">
-      <input id="add-user-password"><select id="add-user-role"><option value="user">u</option></select>
-      <input id="add-user-quota"><div id="add-user-shares-wrap"><div id="add-user-shares"></div></div>
-      <button type="submit">Add</button>
-    </form></div></div>
-  <div id="modal-edit-user" class="os-modal"><form id="form-edit-user">
-    <input id="edit-user-id"><input id="edit-user-username"><input id="edit-user-display"><input id="edit-user-email">
-    <select id="edit-user-role"><option value="user">u</option><option value="superadmin">s</option></select>
-    <input id="edit-user-quota"><button type="submit">Save</button></form></div>
-  <div id="modal-reset-password" class="os-modal"><span id="reset-pwd-username"></span><form id="form-reset-password">
+  <div id="modal-reset-password" class="os-modal"><button class="modal-close-btn">x</button><span id="reset-pwd-username"></span><form id="form-reset-password">
     <div id="reset-pwd-current-wrap"><input id="reset-pwd-current"></div>
     <div id="reset-pwd-tokens-wrap"><input type="checkbox" id="reset-pwd-revoke-tokens"></div>
     <input id="reset-pwd-input"><input id="reset-pwd-confirm"><button type="submit">Change</button></form></div>
@@ -172,52 +160,6 @@ describe('People pane (users.js)', () => {
     apiFetch.mockRejectedValueOnce(new Error('down'));
     await onOk();
     expect(showToast).toHaveBeenCalledWith('Request failed: down', 'error');
-  });
-
-  it('adds a person and gives them the chosen shared folders', async () => {
-    api.get.mockResolvedValue({ shares: [{ name: 'Photos' }] });
-    users.showAddUserModal(); // the old dialog; the button opens the three steps now (SET-19)
-    await vi.waitFor(() => expect(byId('add-user-shares-wrap').hidden).toBe(false));
-    byId('add-user-username').value = 'carol';
-    byId('add-user-password').value = 'pw';
-    byId('add-user-quota').value = '2';
-    apiFetch.mockResolvedValueOnce(reply({ id: 'u3' })).mockResolvedValue(reply({ users: [] }));
-    await submit(byId('form-add-user'));
-    const body = JSON.parse(apiFetch.mock.calls[0][1].body);
-    expect(body).toMatchObject({ username: 'carol', display_name: 'carol', storage_quota_bytes: 2 * 1024 ** 3 });
-    expect(grantShares).toHaveBeenCalledWith('carol', { Photos: 'read' });
-    expect(showToast).toHaveBeenCalledWith('User created successfully.', 'success');
-
-    grantShares.mockRejectedValueOnce(new Error('no right'));
-    await users.grantChosenShares('dan');
-    expect(showToast.mock.calls.at(-1)[0]).toContain('dan was added');
-
-    users.showAddUserModal(); // the old dialog; the button opens the three steps now (SET-19)
-    apiFetch.mockResolvedValueOnce(reply({ detail: 'taken' }, false));
-    await submit(byId('form-add-user'));
-    expect(showToast).toHaveBeenCalledWith('Error: taken', 'error');
-    apiFetch.mockRejectedValueOnce(new Error('offline'));
-    await submit(byId('form-add-user'));
-    expect(showToast).toHaveBeenCalledWith('Request failed: offline', 'error');
-
-    api.get.mockRejectedValueOnce(new Error('403'));
-    await users.loadAddUserShares();
-    expect(byId('add-user-shares-wrap').hidden).toBe(true);
-  });
-
-  it('edits a person', async () => {
-    users.showEditUserModal(PEOPLE[1]);
-    byId('edit-user-display').value = 'Bobby';
-    apiFetch.mockResolvedValueOnce(reply({})).mockResolvedValue(reply({ users: [] }));
-    await submit(byId('form-edit-user'));
-    expect(JSON.parse(apiFetch.mock.calls[0][1].body)).toMatchObject({ display_name: 'Bobby', storage_quota_bytes: 5 * 1024 ** 3 });
-    expect(showToast).toHaveBeenCalledWith('User updated successfully.', 'success');
-    apiFetch.mockResolvedValueOnce(reply({}, false));
-    await submit(byId('form-edit-user'));
-    expect(showToast).toHaveBeenCalledWith('Error: Failed to update user', 'error');
-    apiFetch.mockRejectedValueOnce(new Error('x'));
-    await submit(byId('form-edit-user'));
-    expect(showToast).toHaveBeenCalledWith('Request failed: x', 'error');
   });
 
   it('changes a password: yours needs the current one', async () => {
@@ -341,7 +283,7 @@ describe('People pane (users.js)', () => {
   });
 
   it('closes dialogs with the close button, the backdrop and Escape', () => {
-    const modal = byId('modal-add-user');
+    const modal = byId('modal-reset-password'); // the old Add and Edit dialogs are gone (SET-19)
     users.openModal(modal);
     modal.querySelector('.modal-close-btn').click();
     expect(modal.classList.contains('open')).toBe(false);

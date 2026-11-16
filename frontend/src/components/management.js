@@ -25,7 +25,7 @@ import { fetchAndRenderDisksInventory } from './management/disks.js';
 import { closeHttpsGuideModal, handleSecurityAdvisorClick } from './management/security.js';
 import { applySystemUpdate, closeDiagnosticsPreviewModal, copySupportMarkdown, downloadDiagnosticsBundle, fetchAndRenderSystemAbout, previewDiagnosticsSummary, revertSystemUpdate, setUpdateChannel, syncBackupJobForm } from './management/system.js';
 import { openChannelConfigModal, saveCurrentChannelModal, saveNotificationsConfig, testAllNotificationChannels, testSingleChannel } from './management/notifications.js';
-import { fetchAndRenderAppBackups, fetchAndRenderBackupJobs, fetchAndRenderSystemSnapshots } from './management/backup.js';
+import { fetchAndRenderAppBackups, fetchAndRenderBackupJobs, fetchAndRenderSystemSnapshots, loadBackupPane } from './management/backup.js';
 import { installAdvancedSwitch, installSidebarGroups, renderStatusSummary } from './management/overview.js';
 import { installHealthSignal } from './management/health-signal.js';
 import { _aiSelectedColor, _aiSelectedScene, _getActiveAiSearchQuery, _renderAiRagInitialEmptyState, fetchAndRenderAiStatus, initAiKnowledgeEngine, runAiVisualSearch, setAiVisualFiltersDrawerOpen } from './management/ai.js';
@@ -791,16 +791,11 @@ export function initManagement() {
       fetchAndRenderDisksInventory();
     } else if (paneId === 'mgmt-pane-storage-replication') {
       fetchAndRenderReplication();
-    } else if (paneId === 'mgmt-pane-backups' || paneId === 'mgmt-pane-system') {
-      if (paneId === 'mgmt-pane-backups') {
-        // phone backup sits with the other backups (UX-26)
-        import('./phone-backup.js').then((p) => p.installPhoneBackup(document.getElementById('phone-backup-mount'))).catch(() => {});
-        import('./management/protection.js').then((p) => p.installProtectionJobs(document.getElementById('protection-jobs-mount'))).catch(() => {});
-        loadBackupExtras();
-      }
-      fetchAndRenderBackupJobs();
-      fetchAndRenderSystemSnapshots();
-      fetchAndRenderAppBackups();
+    } else if (paneId === 'mgmt-pane-backups') {
+      // phone backup sits with the other backups (UX-26)
+      import('./phone-backup.js').then((p) => p.installPhoneBackup(document.getElementById('phone-backup-mount'))).catch(() => {});
+      loadBackupExtras();
+      loadBackupPane(); // what is folded loads when it is opened (SET-21, B13)
     } else if (paneId === 'mgmt-pane-security') {
       loadSecurityPane(); // an administrator's set-up only for administrators (SET-03)
     } else if (paneId === 'mgmt-pane-notifications') {

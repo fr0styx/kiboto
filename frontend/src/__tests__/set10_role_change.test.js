@@ -25,14 +25,13 @@ describe('the role in the Edit dialog', () => {
     expect(select.value).toBe('house_guest');
   });
 
-  it('both role lists of the page offer Kid and Guest', async () => {
-    const { readFileSync } = await import('node:fs');
-    const html = readFileSync('frontend/index.html', 'utf8');
-    for (const id of ['add-user-role', 'edit-user-role']) {
-      const list = html.slice(html.indexOf(`id="${id}"`), html.indexOf('</select>', html.indexOf(`id="${id}"`)));
-      for (const role of ['share_user', 'kid', 'guest', 'app_operator', 'storage_admin', 'backup_operator', 'auditor', 'superadmin']) {
-        expect(list, `${id} lacks ${role}`).toContain(`value="${role}"`);
-      }
+  it("both role lists offer Kid and Guest: a person's page and Add a person (SET-19)", async () => {
+    const { roleOptionsHtml } = await import('../components/users.js');
+    const { MAIN_ROLES, MORE_ROLES } = await import('../components/add-person.js');
+    const flow = [...MAIN_ROLES(), ...MORE_ROLES()].map(([id]) => id);
+    for (const role of ['share_user', 'kid', 'guest', 'app_operator', 'storage_admin', 'backup_operator', 'auditor', 'superadmin']) {
+      expect(roleOptionsHtml(), `the person page lacks ${role}`).toContain(`value="${role}"`);
+      expect(flow, `Add a person lacks ${role}`).toContain(role);
     }
   });
 });

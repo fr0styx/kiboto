@@ -259,6 +259,16 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **The hidden Settings page for apps is gone**, with about 1,700 lines that still drew and refreshed
   it. Apps live in the Apps window, which reloads its list after an install or a clean-up.
 
+#### Changes
+
+- **The old Add and Edit person dialogs are gone**; Add a person and the person's page replaced them,
+  and the first load is a little smaller.
+
+#### Changes
+
+- **Backup opens with fewer requests**: what is folded (More, and the list of every earlier version,
+  which reads the pool's folders) loads only when you open it.
+
 ## v2.0.2 (2026-11-12)
 ### 🧭 A new Settings sidebar, five themes, honest pages, and remote access cut down to what works
 

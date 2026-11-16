@@ -71,7 +71,7 @@
  "frontend/src/components/terminal-view.js": 1,
  "frontend/src/components/time-picker.js": 11,
  "frontend/src/components/transfer-center.js": 8,
- "frontend/src/components/users.js": 53,
+ "frontend/src/components/users.js": 31,
  "frontend/src/components/vm-manager.js": 25,
  "frontend/src/components/vm/connect-modal.js": 7,
  "frontend/src/components/vm/console.js": 129,
