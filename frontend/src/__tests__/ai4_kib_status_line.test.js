@@ -1,7 +1,8 @@
 /** AI 4: Kib's status line answers "is Kib ready, and what can it read" in one line. */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { kibState, kibStatusHtml, renderKibStatusLine } from '../components/management/kib-status-line.js';
-import { kibStatusActions } from '../components/management/ai.js';
+import { kibStatusActions, bindStartOver } from '../components/management/ai.js';
+import { showConfirmToast } from '../toast.js';
 import { api } from '../api.js';
 
 vi.mock('../toast.js', () => ({ showToast: vi.fn(), showConfirmToast: vi.fn(), showPromptToast: vi.fn(), showBottomSheet: vi.fn() }));
@@ -10,7 +11,7 @@ const ready = { enabled: true, watched_paths: ['/mnt/user/docs', '/mnt/user/phot
 const line = (res) => { const s = kibState(res); return [s.key, s.icon, s.title, s.second, s.act]; };
 
 describe('Kib status line (AI 4)', () => {
-  beforeEach(() => { document.body.innerHTML = '<div id="kib-status-mount"></div>'; });
+  beforeEach(() => { document.body.innerHTML = '<div id="kib-status-mount"></div>'; vi.clearAllMocks(); });
   afterEach(() => vi.restoreAllMocks());
 
   it('says ready, with the folders and files it knows', () => {
@@ -65,10 +66,34 @@ describe('Kib status line (AI 4)', () => {
     expect(post).toHaveBeenCalledWith('/api/media/index/control', { action: 'pause' });
     await a.resume();
     expect(post).toHaveBeenCalledWith('/api/media/index/control', { action: 'resume' });
+    await a.stop();
+    expect(post).toHaveBeenCalledWith('/api/media/index/control', { action: 'stop' });
     await a.why();
     await a.on();
     expect(put).toHaveBeenCalledWith('/api/media/config', { enabled: true });
     a.folders();
     expect(Element.prototype.scrollIntoView).toHaveBeenCalled();
+  });
+
+  it('while reading or paused, Cancel reading sits next to Pause or Continue', () => {
+    const acts = { pause: vi.fn(), stop: vi.fn() };
+    const mount = document.getElementById('kib-status-mount');
+    renderKibStatusLine(mount, { ...ready, sync_progress: { state: 'running' } }, acts);
+    const btns = [...mount.querySelectorAll('button')];
+    expect(btns.map((b) => b.textContent)).toEqual(['Pause', 'Cancel reading']);
+    btns[1].click();
+    expect(acts.stop).toHaveBeenCalled();
+    expect(kibStatusHtml({ ...ready, sync_progress: { state: 'paused' } })).toContain('Cancel reading');
+    expect(kibStatusHtml(ready)).not.toContain('Cancel reading');
+  });
+
+  it('"Forget everything and start over…" asks first, with its own words', () => {
+    document.body.innerHTML = '<button data-kib-flush>Forget everything and start over…</button>';
+    bindStartOver();
+    bindStartOver();
+    document.querySelector('[data-kib-flush]').click();
+    expect(showConfirmToast).toHaveBeenCalledTimes(1);
+    expect(showConfirmToast.mock.calls[0][0]).toBe('Forget everything and start over?');
+    expect(showConfirmToast.mock.calls[0][4].okText).toBe('Forget and start over');
   });
 });

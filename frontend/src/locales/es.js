@@ -139,7 +139,7 @@ export default {
   "ai.model_removed_toast": "Modelo eliminado del catálogo.",
   "ai.enter_question": "Por favor ingrese una pregunta o búsqueda.",
   "ai.sync_shares": "Sincronizar recursos",
-  "ai.sync_watched_btn": "Sincronizar carpetas monitoreadas",
+  "ai.sync_watched_btn": "Leer ahora",
   "ai.pause_sync": "Pausar",
   "ai.resume_sync": "Reanudar",
   "ai.stop_sync": "Detener",
@@ -8125,5 +8125,11 @@ export default {
   "vmp.p_win11_2": "4 núcleos, 8 GB, disco de 64 GB, UEFI y TPM",
   "vmp.n_win11": "Windows 11 necesita UEFI y un TPM: ambos están configurados. Elige el instalador de Windows como ISO de arranque y añade el disco de controladores (virtio-win) desde el catálogo de ISO para que Windows vea su disco.",
   "vmp.n_linux": "Elige el instalador como ISO de arranque, o toma uno del catálogo de ISO.",
-  "kibw.off_for_you": "Kib está desactivado para ti. Quien administra este NAS puede activarlo en Ajustes → Kib → Quién puede usar Kib."
+  "kibw.off_for_you": "Kib está desactivado para ti. Quien administra este NAS puede activarlo en Ajustes → Kib → Quién puede usar Kib.",
+  "kib4.start_over_h": "Empezar de nuevo",
+  "kib4.start_over_note": "Kib olvida lo que sabe de tus archivos y vuelve a leer tus carpetas. Tus archivos no se tocan.",
+  "kib4.start_over_btn": "Olvidar todo y empezar de nuevo…",
+  "kib4.start_over_title": "¿Olvidar todo y empezar de nuevo?",
+  "kib4.start_over_ok": "Olvidar y empezar de nuevo",
+  "kibs.cancel": "Cancelar la lectura"
 };

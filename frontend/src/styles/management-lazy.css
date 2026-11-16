@@ -532,3 +532,7 @@
 .kibm-text > small { font-size: var(--kb-fs-xs); color: var(--muted); }
 #kib-model-choice > [data-kibm-test] { align-self: flex-start; }
 .kib-open-row { display: flex; justify-content: flex-end; margin: 0 0 8px; }
+/* AI 4: the status line does Pause / Continue / Cancel and "See why"; "Start over" lives in Advanced.
+   The old row's other buttons, the IDLE banner and the counters stay in the markup for the page code. */
+#mgmt-pane-ai-index :is(#btn-ai-index-pause, #btn-ai-index-resume, #btn-ai-index-stop, #btn-ai-learning-results, #btn-ai-in-place-reindex, #btn-ai-flush-index, #ai-sync-progress-banner, #ai-index-db-summary) { display: none !important; }
+#mgmt-pane-ai-index [data-kib-flush] { align-self: flex-start; }

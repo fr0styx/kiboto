@@ -377,6 +377,12 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **"Ask Kib" on the phone home screen for everyone**: it opens the Kib window. Someone whose role has Kib switched
   off reads "Kib is turned off for you" before typing, and the question box is disabled.
 
+#### Changes
+
+- **Kib's settings lose the row of seven buttons**: Pause, Continue and "Cancel reading" are on the status line,
+  "See why" opens the files Kib could not read, "Read now" stays with the folders, and "Forget everything and start
+  over…" has its own place under Advanced, with a dialog in the same words.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

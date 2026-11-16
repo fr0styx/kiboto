@@ -139,7 +139,7 @@ export default {
   "ai.model_removed_toast": "Modèle supprimé du catalogue.",
   "ai.enter_question": "Veuillez saisir une question ou une recherche.",
   "ai.sync_shares": "Synchroniser les partages",
-  "ai.sync_watched_btn": "Synchroniser les dossiers surveillés",
+  "ai.sync_watched_btn": "Lire maintenant",
   "ai.pause_sync": "Pause",
   "ai.resume_sync": "Reprendre",
   "ai.stop_sync": "Arrêter",
@@ -8125,5 +8125,11 @@ export default {
   "vmp.p_win11_2": "4 cœurs, 8 Go, disque de 64 Go, UEFI et TPM",
   "vmp.n_win11": "Windows 11 a besoin de l’UEFI et d’un TPM : les deux sont réglés. Choisissez l’installateur Windows comme ISO de démarrage et ajoutez le disque de pilotes (virtio-win) depuis le catalogue ISO pour que Windows voie son disque.",
   "vmp.n_linux": "Choisissez l’installateur comme ISO de démarrage, ou prenez-en un dans le catalogue ISO.",
-  "kibw.off_for_you": "Kib est désactivé pour vous. La personne qui gère ce NAS peut l’activer dans Réglages → Kib → Qui peut utiliser Kib."
+  "kibw.off_for_you": "Kib est désactivé pour vous. La personne qui gère ce NAS peut l’activer dans Réglages → Kib → Qui peut utiliser Kib.",
+  "kib4.start_over_h": "Recommencer",
+  "kib4.start_over_note": "Kib oublie ce qu’il sait de vos fichiers et relit vos dossiers. Vos fichiers ne sont pas touchés.",
+  "kib4.start_over_btn": "Tout oublier et recommencer…",
+  "kib4.start_over_title": "Tout oublier et recommencer ?",
+  "kib4.start_over_ok": "Oublier et recommencer",
+  "kibs.cancel": "Annuler la lecture"
 };

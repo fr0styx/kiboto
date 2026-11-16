@@ -62,7 +62,10 @@ export function kibState(res = {}) {
 /** The line as markup: words and an icon, never a colour alone; the button only when one fits. */
 export function kibStatusHtml(res) {
   const s = kibState(res);
-  const btn = s.act ? `<button type="button" class="btn-pill-toggle is-small" data-kibs-act="${escapeHtml(s.act)}">${escapeHtml(s.label)}</button>` : '';
+  const cancel = s.key === 'reading' || s.key === 'paused'
+    ? `<button type="button" class="btn-pill-toggle is-small" data-kibs-act="stop">${escapeHtml(t('kibs.cancel', 'Cancel reading'))}</button>`
+    : '';
+  const btn = (s.act ? `<button type="button" class="btn-pill-toggle is-small" data-kibs-act="${escapeHtml(s.act)}">${escapeHtml(s.label)}</button>` : '') + cancel;
   return `<div class="kib-status-line is-${escapeHtml(s.key)}" role="status">
     <span class="kib-status-icon" aria-hidden="true">${escapeHtml(s.icon)}</span>
     <div class="kib-status-text"><strong>${escapeHtml(s.title)}</strong><span>${escapeHtml(s.second)}</span></div>
@@ -79,7 +82,9 @@ export function kibStatusHtml(res) {
 export function renderKibStatusLine(mount, res, actions = {}) {
   if (!mount) return;
   mount.innerHTML = kibStatusHtml(res);
-  const btn = /** @type {HTMLButtonElement | null} */ (mount.querySelector('[data-kibs-act]'));
-  const act = btn?.dataset.kibsAct || '';
-  if (btn && typeof actions[act] === 'function') btn.addEventListener('click', () => actions[act]());
+  mount.querySelectorAll('[data-kibs-act]').forEach((el) => {
+    const btn = /** @type {HTMLButtonElement} */ (el);
+    const act = btn.dataset.kibsAct || '';
+    if (typeof actions[act] === 'function') btn.addEventListener('click', () => actions[act]());
+  });
 }

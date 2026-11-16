@@ -833,7 +833,7 @@ describe('Kib — Multi-Modal Local RAG & Visual Search Frontend Suite', () => {
     await flushAiIndex();
 
     expect(confirmSpy).toHaveBeenCalledWith(
-      expect.stringContaining('Rebuild the AI search index'),
+      expect.stringContaining('Forget everything and start over'), // the button's own words (AI 4)
       expect.stringContaining('deletes everything AI search has learned'),
       expect.any(Function),
       null,

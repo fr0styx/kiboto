@@ -3715,7 +3715,7 @@
                   <!-- Sync Transport Controls + Learning Results Button -->
                   <div class="aix-row-6">
                     <button type="button" id="btn-ai-sync-watched" class="btn-pill-toggle" style="background: rgba(51,205,184,0.22); border: 1px solid rgba(51,205,184,0.5); color: var(--kb-text-strong);">
-                      <span aria-hidden="true">🔄</span> <span data-i18n="ai.sync_watched_btn">Sync Watched Folders</span>
+                      <span aria-hidden="true">🔄</span> <span data-i18n="ai.sync_watched_btn">Read now</span>
                     </button>
                     <button type="button" id="btn-ai-index-pause" class="btn-pill-toggle" style="background: rgba(245,158,11,0.18); border: 1px solid rgba(245,158,11,0.45); color: var(--kb-text-warn);">
                       <span aria-hidden="true">⏸</span> <span data-i18n="ai.pause_sync">Pause</span>
@@ -3933,6 +3933,11 @@
                 </div>
               </div>
                 <section id="kib-model-choice" class="kib-section" aria-live="polite"></section>
+                <section class="kib-section" aria-labelledby="kib-start-over-h">
+                  <h4 id="kib-start-over-h" class="kib-h" data-i18n="kib4.start_over_h">Start over</h4>
+                  <p class="kib-note" data-i18n="kib4.start_over_note">Kib forgets what it knows about your files and reads your folders again. Your files are not touched.</p>
+                  <button type="button" class="btn-pill-toggle is-small is-danger" data-kib-flush data-i18n="kib4.start_over_btn">Forget everything and start over…</button>
+                </section>
                 <div id="ai-llm-recommendations-section" style="background:var(--lt-b-0e1c1e80, rgba(14,28,30,0.5)); border:1px solid rgba(99,102,241,0.35); border-radius:10px; padding:14px;">
                 <div class="aix-row-box">
                   <div>

@@ -139,7 +139,7 @@ export default {
   "ai.model_removed_toast": "Model removed from catalog.",
   "ai.enter_question": "Type a question first.",
   "ai.sync_shares": "Sync Shares",
-  "ai.sync_watched_btn": "Sync Watched Folders",
+  "ai.sync_watched_btn": "Read now",
   "ai.pause_sync": "Pause",
   "ai.resume_sync": "Resume",
   "ai.stop_sync": "Stop",
@@ -8125,5 +8125,11 @@ export default {
   "vmp.p_win11_2": "4 cores, 8 GB, 64 GB disk, UEFI and TPM",
   "vmp.n_win11": "Windows 11 needs UEFI and a TPM: both are set. Choose the Windows installer as the boot ISO, and add the driver disc (virtio-win) from the ISO catalog so Windows can see its disk.",
   "vmp.n_linux": "Choose the installer as the boot ISO, or pick one from the ISO catalog.",
-  "kibw.off_for_you": "Kib is turned off for you. The person who runs this NAS can turn it on under Settings → Kib → Who can use Kib."
+  "kibw.off_for_you": "Kib is turned off for you. The person who runs this NAS can turn it on under Settings → Kib → Who can use Kib.",
+  "kib4.start_over_h": "Start over",
+  "kib4.start_over_note": "Kib forgets what it knows about your files and reads your folders again. Your files are not touched.",
+  "kib4.start_over_btn": "Forget everything and start over…",
+  "kib4.start_over_title": "Forget everything and start over?",
+  "kib4.start_over_ok": "Forget and start over",
+  "kibs.cancel": "Cancel reading"
 };

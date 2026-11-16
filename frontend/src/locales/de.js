@@ -139,7 +139,7 @@ export default {
   "ai.model_removed_toast": "Modell aus dem Katalog entfernt.",
   "ai.enter_question": "Bitte geben Sie eine Frage oder Suchanfrage ein.",
   "ai.sync_shares": "Freigaben synchronisieren",
-  "ai.sync_watched_btn": "Überwachte Ordner synchronisieren",
+  "ai.sync_watched_btn": "Jetzt lesen",
   "ai.pause_sync": "Pause",
   "ai.resume_sync": "Fortsetzen",
   "ai.stop_sync": "Stopp",
@@ -8125,5 +8125,11 @@ export default {
   "vmp.p_win11_2": "4 Kerne, 8 GB, 64-GB-Datenträger, UEFI und TPM",
   "vmp.n_win11": "Windows 11 braucht UEFI und ein TPM: beides ist eingestellt. Wählen Sie den Windows-Installer als Boot-ISO und fügen Sie die Treiber-CD (virtio-win) aus dem ISO-Katalog hinzu, damit Windows seinen Datenträger sieht.",
   "vmp.n_linux": "Wählen Sie den Installer als Boot-ISO oder nehmen Sie einen aus dem ISO-Katalog.",
-  "kibw.off_for_you": "Kib ist für Sie ausgeschaltet. Wer dieses NAS betreut, kann es unter Einstellungen → Kib → Wer Kib nutzen darf einschalten."
+  "kibw.off_for_you": "Kib ist für Sie ausgeschaltet. Wer dieses NAS betreut, kann es unter Einstellungen → Kib → Wer Kib nutzen darf einschalten.",
+  "kib4.start_over_h": "Neu beginnen",
+  "kib4.start_over_note": "Kib vergisst, was es über Ihre Dateien weiß, und liest Ihre Ordner erneut. Ihre Dateien bleiben unberührt.",
+  "kib4.start_over_btn": "Alles vergessen und neu beginnen…",
+  "kib4.start_over_title": "Alles vergessen und neu beginnen?",
+  "kib4.start_over_ok": "Vergessen und neu beginnen",
+  "kibs.cancel": "Lesen abbrechen"
 };

@@ -1016,7 +1016,7 @@ export async function controlAiSync(action) {
 
 export async function flushAiIndex() {
   showConfirmToast(
-    t('ai.flush_index_confirm_title', 'Rebuild the AI search index?'),
+    t('kib4.start_over_title', 'Forget everything and start over?'),
     t(
       'ai.flush_index_confirm_desc',
       'This deletes everything AI search has learned about your files (documents, photos, recipes and code). Your files are not touched. AI search then reads your folders again from the start.'
@@ -1042,7 +1042,7 @@ export async function flushAiIndex() {
     },
     null,
     {
-      okText: `🗑️ ${t('ai.flush_reset', 'Flush & Reset')}`,
+      okText: t('kib4.start_over_ok', 'Forget and start over'),
       cancelText: t('common.cancel', 'Cancel'),
       isDanger: true,
     }
@@ -1176,6 +1176,15 @@ export function _getActiveAiSearchQuery() {
 }
 
 /** "Open Kib" in Settings → Kib opens the Kib window on Ask (AI decision 1). */
+export function bindStartOver(root = document) {
+  root.querySelectorAll('[data-kib-flush]').forEach((b) => {
+    const btn = /** @type {HTMLElement} */ (b);
+    if (btn.dataset.bound) return;
+    btn.dataset.bound = '1';
+    btn.addEventListener('click', () => flushAiIndex());
+  });
+}
+
 export function bindOpenKib(root = document) {
   root.querySelectorAll('[data-kib-open]').forEach((b) => {
     const btn = /** @type {HTMLElement} */ (b);
@@ -1187,6 +1196,7 @@ export function bindOpenKib(root = document) {
 
 export function initAiKnowledgeEngine() {
   bindOpenKib();
+  bindStartOver();
   import('../model-bench.js').then((m) => m.renderModelBench()).catch(() => {}); // D2
   renderAiSearchHistory();
 
@@ -1790,6 +1800,7 @@ export function kibStatusActions() {
   return {
     pause: () => controlAiSync('pause'),
     resume: () => controlAiSync('resume'),
+    stop: () => controlAiSync('stop'),
     why: () => openAiLearningResults(),
     on: () => updateAiServiceConfig({ enabled: true }),
     folders: () => document.getElementById('ai-watched-dropdown-summary')?.closest('button, [role="button"], div')?.scrollIntoView({ block: 'center' }),

@@ -139,7 +139,7 @@ export default {
   "ai.model_removed_toast": "已从目录中移除模型。",
   "ai.enter_question": "请输入问题或搜索词。",
   "ai.sync_shares": "同步共享",
-  "ai.sync_watched_btn": "同步监控文件夹",
+  "ai.sync_watched_btn": "立即读取",
   "ai.pause_sync": "暂停",
   "ai.resume_sync": "继续",
   "ai.stop_sync": "停止",
@@ -8125,5 +8125,11 @@ export default {
   "vmp.p_win11_2": "4 核，8 GB，64 GB 磁盘，UEFI 和 TPM",
   "vmp.n_win11": "Windows 11 需要 UEFI 和 TPM：两者都已设置。请选择 Windows 安装程序作为启动 ISO，并从 ISO 目录添加驱动光盘（virtio-win），让 Windows 能识别磁盘。",
   "vmp.n_linux": "选择安装程序作为启动 ISO，或从 ISO 目录中挑选一个。",
-  "kibw.off_for_you": "Kib 已为你关闭。管理这台 NAS 的人可以在 设置 → Kib → 谁可以使用 Kib 中开启。"
+  "kibw.off_for_you": "Kib 已为你关闭。管理这台 NAS 的人可以在 设置 → Kib → 谁可以使用 Kib 中开启。",
+  "kib4.start_over_h": "重新开始",
+  "kib4.start_over_note": "Kib 会忘记它对你的文件所知的一切，并重新读取文件夹。你的文件不会被改动。",
+  "kib4.start_over_btn": "忘记一切并重新开始…",
+  "kib4.start_over_title": "忘记一切并重新开始？",
+  "kib4.start_over_ok": "忘记并重新开始",
+  "kibs.cancel": "取消读取"
 };
