@@ -510,7 +510,7 @@
 .kibf-sub { margin: 10px 0 2px; font-size: var(--kb-fs-xs); }
 .kibf > [data-kibf-act="add"] { align-self: flex-start; }
 .kibf-empty { font-size: var(--kb-fs-xs); color: var(--muted); padding: 6px 2px; }
-@media (max-width: 600px) { .kibf-row { flex-wrap: wrap; } .kibf-state { order: 3; margin-left: 28px; } }
+@media (max-width: 600px) { .kibf-row { flex-wrap: wrap; } .kibf-menu { order: 2; margin-left: auto; } .kibf-state { order: 3; flex-basis: 100%; margin-left: 28px; } }
 /* Kib settings in sections (AI 4): folders, who, privacy, then Advanced folded */
 .kib-section { margin: 0 0 18px; display: flex; flex-direction: column; gap: 8px; }
 .kib-h { margin: 0; font-size: var(--kb-fs); font-weight: 700; color: var(--kb-text-strong); }

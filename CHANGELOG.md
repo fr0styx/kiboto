@@ -400,6 +400,17 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   Windows Setup sees its disk. Machines made before keep the chipset they were installed on. Not yet tried with a full
   Windows 11 installation on real hardware.
 
+#### Changes
+
+- **Settings → Kib is called "Kib" in its title**, as in the sidebar, and on a phone each folder's state sits on its
+  own line under the folder.
+
+#### Changes
+
+- **An app's details show three tabs to everyone**: Overview, Folders and Log. Ports, Environment, Compose, Terminal and
+  Edit come with "Show Docker details" (a menu item that asks for one of them still opens it), and the tabs wrap
+  instead of running off the dialog. On a phone, "Get apps" is first in the row of actions.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

@@ -9,6 +9,7 @@ import { api, auth } from '../api.js';
 import { showToast, showConfirmToast } from '../toast.js';
 import { escapeHtml, trapFocus, copyText } from '../utils.js';
 import '../styles/containers-lazy.css'; // the inspector's own sheet loads with this code (NUX-15)
+import { appsDetailsOn } from './apps-details-pref.js';
 import { t } from '../i18n.js';
 import { bringToFront, makeDraggable, DockManager } from './dock.js';
 import { ZettEventBus } from '../event-bus.js';
@@ -561,6 +562,25 @@ export function clearTerminal() {
 }
 
 
+/** The detail tabs for everyone; the others come with "Show Docker details" (SET-25, Apps 4). */
+export const EVERYDAY_TABS = ['overview', 'mounts', 'logs'];
+
+/**
+ * Hides the technical tabs (Ports, Environment, Compose, Terminal, Edit) unless Docker details are
+ * on; a tab a link asks for by name stays, so "Change settings" still opens Edit.
+ * @param {ParentNode} root
+ * @param {boolean} details
+ * @param {string} [asked]
+ */
+export function markDetailTabs(root, details, asked = '') {
+  root.querySelectorAll('.ci-tab-btn').forEach((b) => {
+    const tab = /** @type {HTMLElement} */ (b).dataset.tab || '';
+    const show = details || EVERYDAY_TABS.includes(tab) || tab === asked;
+    if (show) b.removeAttribute('hidden');
+    else b.setAttribute('hidden', '');
+  });
+}
+
 export async function openContainerInspector(cid, cname, initialTab = 'overview') {
   initContainerModal();
   const overlay = document.getElementById('container-inspector-overlay');
@@ -594,6 +614,7 @@ export async function openContainerInspector(cid, cname, initialTab = 'overview'
 
   // Activate requested tab
   const targetTab = initialTab || 'overview';
+  markDetailTabs(overlay, appsDetailsOn(), targetTab);
   const tabBtn = overlay.querySelector(`.ci-tab-btn[data-tab="${targetTab}"]`);
   if (tabBtn) tabBtn.click();
   else switchContainerTab(targetTab);

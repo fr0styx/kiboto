@@ -30,3 +30,8 @@
 .cw-has-heads .cw-stack-note { display: none !important; }
 .docker-table tbody tr.cw-stack-head, .docker-table tbody tr.cw-stack-head:hover { background: transparent !important; border: 0 !important; box-shadow: none !important; }
 .docker-table tbody tr.cw-stack-head th.cw-stack-head-cell { display: block; justify-content: flex-start !important; text-align: left !important; width: auto; }
+/* the detail tabs wrap instead of running off the dialog (SET-25, Apps finding 24) */
+.ci-nav-tabs { flex-wrap: wrap; }
+/* the phone's action row starts with "Get apps": it was the last of seven, about 690 px in (SET-25, Apps finding 20) */
+@media (max-width: 768px) { .cw-action-btns-wrap > #btn-cw-catalog { order: -1; } }
+

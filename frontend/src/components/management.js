@@ -1096,7 +1096,7 @@ export function initManagement() {
       } else if (targetId === 'mgmt-sec-system-group') {
         sectionName = t('mgmt.system_title', 'System & Identity');
       } else if (targetId === 'mgmt-sec-ai') {
-        sectionName = t('mgmt.sidebar_ai', 'AI & RAG Search');
+        sectionName = t('mgmt.sidebar_kib', 'Kib'); // the page's name (AI decision 8), as in the sidebar
         fetchAndRenderAiStatus();
       }
     }
