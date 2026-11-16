@@ -60,4 +60,54 @@ describe('Mission Control VM pane (NUX-20)', () => {
     expect(text).toContain('Not available');
     expect(text).toContain('None found');
   });
+
+  it('a failed list says so with Try again, not "No Virtual Machines Found" (VMs report 16)', async () => {
+    document.body.innerHTML = `
+      <div id="management-modal-overlay"><div id="management-window"><div id="management-window-header"></div></div></div>
+      <div id="mgmt-vms-summary-strip"></div><div id="mgmt-vms-grid"></div><div id="mgmt-vms-empty" style="display:none">No Virtual Machines Found</div><div id="mgmt-vms-kvm-body"></div>`;
+    const get = vi.spyOn(api, 'get').mockImplementation(async (url) => {
+      if (url === '/api/vms') throw new Error('403 Forbidden');
+      throw new Error('down');
+    });
+    try { initManagement(); } catch (_) { /* as above */ }
+    window.dispatchEvent(new Event('vm-updated'));
+    await flush();
+    const grid = /** @type {HTMLElement} */ (document.getElementById('mgmt-vms-grid'));
+    expect(grid.textContent).toContain('The virtual machines could not be loaded.');
+    expect(grid.textContent).toContain('403 Forbidden');
+    expect(/** @type {HTMLElement} */ (document.getElementById('mgmt-vms-empty')).style.display).toBe('none');
+    const strip = /** @type {HTMLElement} */ (document.getElementById('mgmt-vms-summary-strip'));
+    expect(strip.textContent).toContain('Could not be checked');
+    expect(strip.textContent).not.toContain('Software Emulation');
+    const calls = get.mock.calls.length;
+    /** @type {HTMLButtonElement} */ (grid.querySelector('#mgmt-vms-retry')).click();
+    await flush();
+    expect(get.mock.calls.length).toBeGreaterThan(calls);
+  });
+
+  it('names each speed-up state, and copes without an error message or an empty block', async () => {
+    const strip = () => /** @type {HTMLElement} */ (document.getElementById('mgmt-vms-summary-strip')).textContent || '';
+    const cases = [
+      [{ kvm: { state: 'active' } }, 'KVM Acceleration Active'],
+      [{ kvm: { state: 'restricted', badge: 'Docker cgroup restricted' } }, 'Docker cgroup restricted'],
+      [{ kvm: { state: 'missing' } }, 'Software Emulation'],
+      [{}, 'Could not be checked'],
+    ];
+    for (const [tel, word] of cases) {
+      vi.restoreAllMocks();
+      document.body.innerHTML = `
+        <div id="management-modal-overlay"><div id="management-window"><div id="management-window-header"></div></div></div>
+        <div id="mgmt-vms-summary-strip"></div><div id="mgmt-vms-grid"></div><div id="mgmt-vms-kvm-body"></div>`;
+      vi.spyOn(api, 'get').mockImplementation(async (url) => {
+        if (url === '/api/vms/telemetry') return tel;
+        throw null; // a rejection without an error object
+      });
+      try { initManagement(); } catch (_) { /* as above */ }
+      window.dispatchEvent(new Event('vm-updated'));
+      await flush();
+      expect(strip()).toContain(word);
+      expect(document.getElementById('mgmt-vms-grid')?.textContent).toContain('The virtual machines could not be loaded.');
+    }
+  });
 });
+

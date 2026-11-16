@@ -7907,5 +7907,9 @@ export default {
   "notif.see_all_activity": "查看全部活动",
   "notif.nothing_to_look_at": "没有需要查看的内容。发生过的一切都在“活动”里。",
   "vmd.running_locked": "这台虚拟机正在运行。要更改处理器或内存，请先关机。其他更改会在下次启动时生效。",
-  "apps.other_apps": "其他应用"
+  "apps.other_apps": "其他应用",
+  "mvm.not_checked": "无法检查",
+  "mvm.load_failed": "无法加载虚拟机。",
+  "mvm.try_again": "重试",
+  "vmd.ram_unknown": "可供虚拟机使用的内存未知；会在虚拟机启动时检查。"
 };

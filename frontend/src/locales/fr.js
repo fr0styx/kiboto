@@ -7907,5 +7907,9 @@ export default {
   "notif.see_all_activity": "Voir toute l'activité",
   "notif.nothing_to_look_at": "Rien à vérifier. Tout ce qui s'est passé est dans Activité.",
   "vmd.running_locked": "Cette machine est en marche. Arrêtez-la pour changer ses processeurs ou sa mémoire. Les autres changements s'appliquent au prochain démarrage.",
-  "apps.other_apps": "Autres apps"
+  "apps.other_apps": "Autres apps",
+  "mvm.not_checked": "Vérification impossible",
+  "mvm.load_failed": "Les machines virtuelles n'ont pas pu être chargées.",
+  "mvm.try_again": "Réessayer",
+  "vmd.ram_unknown": "La mémoire restante pour les machines est inconnue ; elle est vérifiée au démarrage de la machine."
 };

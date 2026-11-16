@@ -174,6 +174,17 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Apps grouped by stack**: in the simple Apps view a header row names each stack above its apps, and apps without
   one follow under "Other apps".
 
+#### Changes
+
+- **Virtual machines that can't be loaded say so**: when the server fails or refuses, Settings → Virtual machines
+  says "The virtual machines could not be loaded" with Try again, instead of "No Virtual Machines Found" and a red
+  "Software Emulation".
+
+#### Changes
+
+- **New virtual machine uses this NAS's numbers**: opened from Settings, the dialog no longer offers "Safe max: 28 GB"
+  and 8 threads on every NAS; it reads them first, and says the limit is not known if the server does not answer.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

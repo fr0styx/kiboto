@@ -16,7 +16,19 @@ import { openIsoManagerModal } from './iso-manager.js';
 import { vtpmBadgeHtml } from './shared.js';
 import { loadVmDashboard } from '../vm-manager.js';
 
+let _telemetryAsked = false;
+
 export function openVmCreateModal() {
+  // opened from Settings before the VM window loaded the host's numbers: fetch them first (VMs report 18)
+  if (!vmState.telemetry && !_telemetryAsked) {
+    _telemetryAsked = true;
+    return api.get('/api/vms/telemetry')
+      .then((tel) => { if (tel && typeof tel === 'object') vmState.telemetry = tel; })
+      .catch(() => {})
+      .then(() => openVmCreateModal());
+  }
+  _telemetryAsked = false;
+  const known = !!vmState.telemetry?.memory_budget;
   let modal = document.getElementById('modal-vm-create');
   if (!modal) {
     modal = document.createElement('div');
@@ -86,7 +98,7 @@ export function openVmCreateModal() {
           <input type="range" id="vm-create-ram-slider" min="0.5" max="${budget.safe_slider_max_gb}" step="0.5" value="4.0" style="width: 100%; accent-color: var(--accent-cyan, #33cdb8); cursor: pointer;" />
           <div class="vmc-row-xs-muted">
             <span>${t('vmd.ram_min', 'Min: 0.5 GB')}</span>
-            <span id="vm-slider-max-label">${t('vmd.ram_safe', 'Safe max: {gb} GB', { gb: budget.safe_slider_max_gb })}</span>
+            <span id="vm-slider-max-label">${known ? t('vmd.ram_safe', 'Safe max: {gb} GB', { gb: budget.safe_slider_max_gb }) : t('vmd.ram_unknown', 'The memory left for machines is not known; it is checked when the machine starts.')}</span>
           </div>
 
           <!-- Advanced Override Switch -->

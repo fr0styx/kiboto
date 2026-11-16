@@ -7907,5 +7907,9 @@ export default {
   "notif.see_all_activity": "See all activity",
   "notif.nothing_to_look_at": "Nothing needs a look. Everything that happened is in Activity.",
   "vmd.running_locked": "This machine is running. Shut it down to change its processors or memory. Other changes are used from its next start.",
-  "apps.other_apps": "Other apps"
+  "apps.other_apps": "Other apps",
+  "mvm.not_checked": "Could not be checked",
+  "mvm.load_failed": "The virtual machines could not be loaded.",
+  "mvm.try_again": "Try again",
+  "vmd.ram_unknown": "The memory left for machines is not known; it is checked when the machine starts."
 };

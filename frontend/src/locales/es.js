@@ -7907,5 +7907,9 @@ export default {
   "notif.see_all_activity": "Ver toda la actividad",
   "notif.nothing_to_look_at": "Nada necesita revisión. Todo lo que ha pasado está en Actividad.",
   "vmd.running_locked": "Esta máquina está en marcha. Apágala para cambiar sus procesadores o su memoria. Los demás cambios se usan desde el próximo arranque.",
-  "apps.other_apps": "Otras apps"
+  "apps.other_apps": "Otras apps",
+  "mvm.not_checked": "No se pudo comprobar",
+  "mvm.load_failed": "No se pudieron cargar las máquinas virtuales.",
+  "mvm.try_again": "Reintentar",
+  "vmd.ram_unknown": "No se sabe cuánta memoria queda para las máquinas; se comprueba al arrancar la máquina."
 };

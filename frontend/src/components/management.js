@@ -846,9 +846,10 @@ export function initManagement() {
     if (!grid && !strip) return;
 
     try {
+      let listError = '';
       const [tel, list] = await Promise.all([
         api.get('/api/vms/telemetry').catch(() => null),
-        api.get('/api/vms').catch(() => []),
+        api.get('/api/vms').catch((e) => { listError = (e && e.message) || 'error'; return []; }),
       ]);
 
       const vmsList = Array.isArray(list) ? list : [];
@@ -863,8 +864,9 @@ export function initManagement() {
 
       if (strip) {
         const kvmActive = tel?.kvm?.state === 'active';
-        const kvmColor = kvmActive ? 'var(--ok2, #33cdb8)' : (tel?.kvm?.state === 'restricted' ? 'var(--warn, #f5a623)' : 'var(--danger, #ff6b6b)');
-        const kvmBadge = tel?.kvm?.badge || (kvmActive ? 'KVM Acceleration Active' : 'Software Emulation');
+        // no answer is not "Software Emulation" in red: it was not checked (VMs report 16)
+        const kvmColor = !tel?.kvm ? 'var(--muted)' : kvmActive ? 'var(--ok2, #33cdb8)' : (tel.kvm.state === 'restricted' ? 'var(--warn, #f5a623)' : 'var(--danger, #ff6b6b)');
+        const kvmBadge = !tel?.kvm ? t('mvm.not_checked', 'Could not be checked') : tel.kvm.badge || (kvmActive ? 'KVM Acceleration Active' : 'Software Emulation');
         // the server sends memory_budget and cpu_capacity; the old keys never came, so these boxes said
         // "Dynamic" and "Optimal" on every NAS (VMs report 15-16). Unknown values are left out.
         const budget = tel?.memory_budget || {};
@@ -897,7 +899,16 @@ export function initManagement() {
       }
 
       if (grid) {
-        if (vmsList.length === 0) {
+        if (listError) {
+          // a failed or refused list is not an empty one (VMs report 16)
+          if (empty) empty.style.display = 'none';
+          grid.innerHTML = `<div class="vml-muted-box mgmt-vms-failed" role="alert">
+            <div class="vml-semi-strong">${escapeHtml(t('mvm.load_failed', 'The virtual machines could not be loaded.'))}</div>
+            <div class="vml-xs">${escapeHtml(listError)}</div>
+            <button type="button" class="btn-pill-toggle" id="mgmt-vms-retry">${escapeHtml(t('mvm.try_again', 'Try again'))}</button>
+          </div>`;
+          grid.querySelector('#mgmt-vms-retry')?.addEventListener('click', () => window.dispatchEvent(new Event('vm-updated')));
+        } else if (vmsList.length === 0) {
           grid.innerHTML = '';
           if (empty) empty.style.display = 'block';
         } else {

@@ -201,7 +201,7 @@
   "buttons": 0,
   "globals": 4,
   "styles": 6,
-  "templates": 4
+  "templates": 5
  },
  "frontend/src/components/management/ai.js": {
   "buttons": 0,
