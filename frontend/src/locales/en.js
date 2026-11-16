@@ -7899,5 +7899,9 @@ export default {
   "vm.snap_name_rule_bad": "\"{name}\" can't be used. Use letters, numbers, - and _ only, up to 64 characters.",
   "vm.delete_erases": "Delete {name}? Its disks and snapshots are erased. Backups are kept.",
   "now.jobs_title": "{n, plural, one {# job running} other {# jobs running}}",
-  "now.jobs_open": "Open the Jobs list"
+  "now.jobs_open": "Open the Jobs list",
+  "chassis.reading_clouds": "Reading cloud drives…",
+  "mgmt.remotes_desc2": "Cloud storage you connect (S3, Backblaze B2, Google Drive, OneDrive) opens in Files under /mnt/remotes.",
+  "webdav.stopped_toast": "WebDAV server stopped.",
+  "webdav.started_toast": "WebDAV server started on port {port}."
 };

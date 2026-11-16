@@ -1253,6 +1253,8 @@ export async function fetchAndRenderNetworkShares(container) {
       }
     }
 
+    renderWebdavCard(document.getElementById('shares-webdav-mount'), webdavStatus, () => fetchAndRenderNetworkShares(container));
+
     if (shares.length === 0) {
       grid.innerHTML = emptyStateHtml({
         icon: '<svg viewBox="0 0 24 24" width="32" height="32"><use href="#i-storage"/></svg>',
@@ -1630,34 +1632,151 @@ const PROVIDER_ICONS = {
 /**
  * Fetches and renders Universal WebDAV and Cloud Remote Storage Subsystem (Sprint 4)
  */
+/** The WebDAV server: state, Start/Stop, Restart, Settings and the addresses to copy. On Shared folders
+ *  -> Other ways to connect since SET-22 Storage 3 (it was on Cloud drives, beside outbound accounts). */
+export function buildWebdavCardHtml(webdavStatus) {
+  const isRunning = !!webdavStatus.running;
+  const webdavPillClass = isRunning ? 'running' : 'stopped';
+  const webdavPillText = isRunning ? t('chassis.running', 'Running') : t('chassis.stopped', 'Stopped');
+  const qc = webdavStatus.quick_connect || {};
+  const proxyUrl = `${window.location.origin}${webdavStatus.proxy_url || '/webdav/'}`;
+  return `
+    <div class="webdav-server-card" id="mgmt-webdav-card">
+      <div class="webdav-card-header">
+        <div class="webdav-header-title">
+          <svg class="ic" style="width:18px; height:18px; fill:currentColor; color:var(--lt-ink-brand, var(--brand, #33cdb8));"><use href="#i-globe"/></svg>
+          <span>${t('chassis.webdav_title', 'WebDAV file server')}</span>
+          <span class="webdav-status-pill ${webdavPillClass}">${webdavPillText}</span>
+        </div>
+        <div class="cv-row-7">
+          <button class="btn-pill-toggle" id="btn-webdav-toggle">
+            ${isRunning ? t('chassis.stop', 'Stop') : t('chassis.start', 'Start')}
+          </button>
+          <button class="btn-pill-toggle" id="btn-webdav-restart" title="${t('ui.restart_webdav_server', 'Restart WebDAV Server')}">
+            ${ico('↺')} ${t('chassis.restart', 'Restart')}
+          </button>
+          <button class="btn-pill-toggle" id="btn-webdav-config-open" title="${t('ui.configure_webdav_settings', 'Configure WebDAV settings')}">
+            ${ico('⚙️')} ${t('chassis.settings', 'Settings')}
+          </button>
+        </div>
+      </div>
+
+      <div class="cv-row-xs-muted">
+        <span>${t('chassis.port', 'Port:')} <strong class="cv-strong">${webdavStatus.port}</strong></span>
+        <span>${t('chassis.root_path', 'Root folder:')} <code class="cv-accent">${escapeHtml(webdavStatus.root_path)}</code></span>
+        <span>${t('chassis.mode', 'Mode:')} <strong class="cv-strong">${webdavStatus.read_only ? 'Read-Only' : 'Read/Write'}</strong></span>
+        <span>${t('chassis.auth', 'Sign-in:')} <strong class="cv-strong">${escapeHtml(t('webdav.auth_accounts', 'Kiboto accounts'))}</strong></span>
+      </div>
+
+      <!-- Quick Connect Grid -->
+      <div class="webdav-quickconnect-grid">
+        <div class="webdav-qc-item">
+          <div class="webdav-qc-label">
+            <span>${ico('🍏')} ${t('chassis.qc_finder', 'macOS Finder (⌘K)')}</span>
+            <button class="btn-qc-copy" data-copy="${escapeHtml(qc.macos || '')}" title="${t('ui.copy_command', 'Copy command')}">${ico('📋')} ${t('chassis.copy', 'Copy')}</button>
+          </div>
+          <div class="webdav-qc-code">
+            <span>${escapeHtml(qc.macos || '')}</span>
+          </div>
+        </div>
+
+        <div class="webdav-qc-item">
+          <div class="webdav-qc-label">
+            <span>${ico('🪟')} ${t('chassis.qc_windows', 'Windows: map network drive')}</span>
+            <button class="btn-qc-copy" data-copy="${escapeHtml(qc.windows || '')}" title="${t('ui.copy_command', 'Copy command')}">${ico('📋')} ${t('chassis.copy', 'Copy')}</button>
+          </div>
+          <div class="webdav-qc-code">
+            <span>${escapeHtml(qc.windows || '')}</span>
+          </div>
+        </div>
+
+        <div class="webdav-qc-item">
+          <div class="webdav-qc-label">
+            <span>${ico('📱')} ${t('chassis.qc_mobile', 'Files app (iOS & Android)')}</span>
+            <button class="btn-qc-copy" data-copy="${escapeHtml(qc.ios || '')}" title="${t('ui.copy_url', 'Copy URL')}">${ico('📋')} ${t('chassis.copy', 'Copy')}</button>
+          </div>
+          <div class="webdav-qc-code">
+            <span>${escapeHtml(qc.ios || '')}</span>
+          </div>
+        </div>
+
+        <div class="webdav-qc-item">
+          <div class="webdav-qc-label">
+            <span>${ico('🌐')} ${t('chassis.qc_proxy', 'Through Kiboto (reverse proxy)')}</span>
+            <button class="btn-qc-copy" data-copy="${escapeHtml(proxyUrl)}" title="${t('ui.copy_proxy_url', 'Copy Proxy URL')}">${ico('📋')} ${t('chassis.copy', 'Copy')}</button>
+          </div>
+          <div class="webdav-qc-code">
+            <span>${escapeHtml(proxyUrl)}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+export function renderWebdavCard(host, webdavStatus, onRefresh = () => {}) {
+  if (!host || !webdavStatus) return false;
+  const isRunning = !!webdavStatus.running;
+  host.innerHTML = buildWebdavCardHtml(webdavStatus);
+  const container = host;
+
+  // Event bindings
+  // WebDAV toggle
+  container.querySelector('#btn-webdav-toggle')?.addEventListener('click', async () => {
+    try {
+      await api.post('/api/webdav/toggle', { enabled: !isRunning });
+      showToast(isRunning ? t('webdav.stopped_toast', 'WebDAV server stopped.') : t('webdav.started_toast', 'WebDAV server started on port {port}.', { port: webdavStatus.port }), 'info');
+      onRefresh();
+    } catch (e) {
+      showToast(t('toast.failed_toggle_webdav', 'Failed to toggle WebDAV: {error}', { error: e.message || t('toast.unknown_error', 'Unknown error') }), 'error');
+    }
+  });
+
+  // WebDAV restart
+  container.querySelector('#btn-webdav-restart')?.addEventListener('click', async () => {
+    try {
+      await api.post('/api/webdav/restart');
+      showToast(t('toast.webdav_server_restarted', 'WebDAV server restarted.'), 'info');
+      onRefresh();
+    } catch (e) {
+      showToast(t('toast.failed_restart_webdav', 'Failed to restart WebDAV: {error}', { error: e.message || t('toast.unknown_error', 'Unknown error') }), 'error');
+    }
+  });
+
+  // WebDAV settings modal open
+  container.querySelector('#btn-webdav-config-open')?.addEventListener('click', () => {
+    openWebdavConfigModal(webdavStatus, () => onRefresh());
+  });
+
+  // Quick Connect copy buttons
+  container.querySelector('#mgmt-webdav-card')?.querySelectorAll('.btn-qc-copy').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const text = btn.dataset.copy;
+      if (text) {
+        const ok = await copyTextToClipboard(text);
+        if (ok) {
+          showToast(t('toast.copied_to_clipboard_3', 'Copied to clipboard!'), 'info');
+        } else {
+          showToast(t('toast.failed_to_copy_to_clipboard', 'Failed to copy to clipboard'), 'warn');
+        }
+      }
+    });
+  });
+  return true;
+}
+
 export async function fetchAndRenderRemoteStorage(container) {
   if (!container) return;
   container.innerHTML = `
     <div class="cv-muted-center">
       <div class="loader-spinner cv-x-6"></div>
-      ${t('chassis.reading_remotes', 'Reading cloud drives and WebDAV…')}
+      ${t('chassis.reading_clouds', 'Reading cloud drives…')}
     </div>
   `;
 
   try {
-    const [webdavStatus, remotes, sftpStatus, sftpUsersRes] = await Promise.all([
-      api.get('/api/webdav/status'),
-      api.get('/api/remotes'),
-      api.get('/api/sftp/status').catch(() => ({ running: false, port: 2222, unknown: true })),
-      api.get('/api/sftp/users').catch(() => []),
-    ]);
-
-    const sftpUsers = Array.isArray(sftpUsersRes) ? sftpUsersRes : (sftpUsersRes?.users || []);
-    const sampleUser = sftpUsers[0]?.username || '';
-
-    const isRunning = webdavStatus.running;
-    const webdavPillClass = isRunning ? 'running' : 'stopped';
-    const webdavPillText = isRunning ? t('chassis.running', 'Running') : t('chassis.stopped', 'Stopped');
-
-    const qc = webdavStatus.quick_connect || {};
-    const hostIp = window.location.hostname;
-    const directUrl = webdavStatus.direct_url || `http://${hostIp}:${webdavStatus.port || 8084}/`;
-    const proxyUrl = `${window.location.origin}${webdavStatus.proxy_url || '/webdav/'}`;
+    // WebDAV and SFTP are ways into this NAS: they are on Shared folders now (SET-22 Storage 3)
+    const remotes = await api.get('/api/remotes');
 
     let remotesHtml = '';
     if (!remotes || remotes.length === 0) {
@@ -1733,81 +1852,6 @@ export async function fetchAndRenderRemoteStorage(container) {
 
     container.innerHTML = `
       <div class="remote-storage-container">
-        <!-- Section 1: Universal WebDAV File Server -->
-        <div class="webdav-server-card">
-          <div class="webdav-card-header">
-            <div class="webdav-header-title">
-              <svg class="ic" style="width:18px; height:18px; fill:currentColor; color:var(--lt-ink-brand, var(--brand, #33cdb8));"><use href="#i-globe"/></svg>
-              <span>${t('chassis.webdav_title', 'WebDAV file server')}</span>
-              <span class="webdav-status-pill ${webdavPillClass}">${webdavPillText}</span>
-            </div>
-            <div class="cv-row-7">
-              <button class="btn-pill-toggle" id="btn-webdav-toggle">
-                ${isRunning ? t('chassis.stop', 'Stop') : t('chassis.start', 'Start')}
-              </button>
-              <button class="btn-pill-toggle" id="btn-webdav-restart" title="${t('ui.restart_webdav_server', 'Restart WebDAV Server')}">
-                ${ico('↺')} ${t('chassis.restart', 'Restart')}
-              </button>
-              <button class="btn-pill-toggle" id="btn-webdav-config-open" title="${t('ui.configure_webdav_settings', 'Configure WebDAV settings')}">
-                ${ico('⚙️')} ${t('chassis.settings', 'Settings')}
-              </button>
-            </div>
-          </div>
-
-          <div class="cv-row-xs-muted">
-            <span>${t('chassis.port', 'Port:')} <strong class="cv-strong">${webdavStatus.port}</strong></span>
-            <span>${t('chassis.root_path', 'Root folder:')} <code class="cv-accent">${escapeHtml(webdavStatus.root_path)}</code></span>
-            <span>${t('chassis.mode', 'Mode:')} <strong class="cv-strong">${webdavStatus.read_only ? 'Read-Only' : 'Read/Write'}</strong></span>
-            <span>${t('chassis.auth', 'Sign-in:')} <strong class="cv-strong">${escapeHtml(t('webdav.auth_accounts', 'Kiboto accounts'))}</strong></span>
-          </div>
-
-          <!-- Quick Connect Grid -->
-          <div class="webdav-quickconnect-grid">
-            <div class="webdav-qc-item">
-              <div class="webdav-qc-label">
-                <span>${ico('🍏')} ${t('chassis.qc_finder', 'macOS Finder (⌘K)')}</span>
-                <button class="btn-qc-copy" data-copy="${escapeHtml(qc.macos || '')}" title="${t('ui.copy_command', 'Copy command')}">${ico('📋')} ${t('chassis.copy', 'Copy')}</button>
-              </div>
-              <div class="webdav-qc-code">
-                <span>${escapeHtml(qc.macos || '')}</span>
-              </div>
-            </div>
-
-            <div class="webdav-qc-item">
-              <div class="webdav-qc-label">
-                <span>${ico('🪟')} ${t('chassis.qc_windows', 'Windows: map network drive')}</span>
-                <button class="btn-qc-copy" data-copy="${escapeHtml(qc.windows || '')}" title="${t('ui.copy_command', 'Copy command')}">${ico('📋')} ${t('chassis.copy', 'Copy')}</button>
-              </div>
-              <div class="webdav-qc-code">
-                <span>${escapeHtml(qc.windows || '')}</span>
-              </div>
-            </div>
-
-            <div class="webdav-qc-item">
-              <div class="webdav-qc-label">
-                <span>${ico('📱')} ${t('chassis.qc_mobile', 'Files app (iOS & Android)')}</span>
-                <button class="btn-qc-copy" data-copy="${escapeHtml(qc.ios || '')}" title="${t('ui.copy_url', 'Copy URL')}">${ico('📋')} ${t('chassis.copy', 'Copy')}</button>
-              </div>
-              <div class="webdav-qc-code">
-                <span>${escapeHtml(qc.ios || '')}</span>
-              </div>
-            </div>
-
-            <div class="webdav-qc-item">
-              <div class="webdav-qc-label">
-                <span>${ico('🌐')} ${t('chassis.qc_proxy', 'Through Kiboto (reverse proxy)')}</span>
-                <button class="btn-qc-copy" data-copy="${escapeHtml(proxyUrl)}" title="${t('ui.copy_proxy_url', 'Copy Proxy URL')}">${ico('📋')} ${t('chassis.copy', 'Copy')}</button>
-              </div>
-              <div class="webdav-qc-code">
-                <span>${escapeHtml(proxyUrl)}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Section 2: Inbound SFTP Subsystem -->
-        ${buildSftpCardHtml(sftpStatus, sftpUsers.length, sampleUser)}
-
         <!-- Section 3: Connected Cloud & Remote Drives -->
         <div class="cv-col-3">
           <div class="cv-row-2">
@@ -1822,51 +1866,6 @@ export async function fetchAndRenderRemoteStorage(container) {
         </div>
       </div>
     `;
-
-    bindSftpCardEvents(container, () => fetchAndRenderRemoteStorage(container));
-
-    // Event bindings
-    // WebDAV toggle
-    container.querySelector('#btn-webdav-toggle')?.addEventListener('click', async () => {
-      try {
-        await api.post('/api/webdav/toggle', { enabled: !isRunning });
-        showToast(isRunning ? 'WebDAV server stopped.' : 'WebDAV server started on port ' + webdavStatus.port, 'info');
-        fetchAndRenderRemoteStorage(container);
-      } catch (e) {
-        showToast(t('toast.failed_toggle_webdav', 'Failed to toggle WebDAV: {error}', { error: e.message || t('toast.unknown_error', 'Unknown error') }), 'error');
-      }
-    });
-
-    // WebDAV restart
-    container.querySelector('#btn-webdav-restart')?.addEventListener('click', async () => {
-      try {
-        await api.post('/api/webdav/restart');
-        showToast(t('toast.webdav_server_restarted', 'WebDAV server restarted.'), 'info');
-        fetchAndRenderRemoteStorage(container);
-      } catch (e) {
-        showToast(t('toast.failed_restart_webdav', 'Failed to restart WebDAV: {error}', { error: e.message || t('toast.unknown_error', 'Unknown error') }), 'error');
-      }
-    });
-
-    // WebDAV settings modal open
-    container.querySelector('#btn-webdav-config-open')?.addEventListener('click', () => {
-      openWebdavConfigModal(webdavStatus, () => fetchAndRenderRemoteStorage(container));
-    });
-
-    // Quick Connect copy buttons
-    container.querySelectorAll('.btn-qc-copy').forEach((btn) => {
-      btn.addEventListener('click', async () => {
-        const text = btn.dataset.copy;
-        if (text) {
-          const ok = await copyTextToClipboard(text);
-          if (ok) {
-            showToast(t('toast.copied_to_clipboard_3', 'Copied to clipboard!'), 'info');
-          } else {
-            showToast(t('toast.failed_to_copy_to_clipboard', 'Failed to copy to clipboard'), 'warn');
-          }
-        }
-      });
-    });
 
     // "+ Connect First Cloud Remote" CTA button(s)
     container.querySelectorAll('.btn-trigger-new-remote').forEach((btn) => {

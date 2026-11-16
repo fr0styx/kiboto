@@ -84,7 +84,7 @@ export const SUBPANE_MAP = {
   'mgmt-pane-copy': { section: 'mgmt-sec-hardware', pane: 'mgmt-pane-copy' },
   'mgmt-pane-storage-ingest': { section: 'mgmt-sec-hardware', pane: 'mgmt-pane-copy' },
   'mgmt-sec-ingest': { section: 'mgmt-sec-hardware', pane: 'mgmt-pane-copy' },
-  'mgmt-pane-storage-replication': { section: 'mgmt-sec-storage', pane: 'mgmt-pane-storage-replication' },
+  'mgmt-pane-storage-replication': { section: 'mgmt-sec-system-group', pane: 'mgmt-pane-backups' }, // moved to Backup (SET-22 Storage 3)
 
   // --- Pillar 3: Containers & Apps ---
   'containers': { section: 'mgmt-sec-docker', pane: 'mgmt-pane-docker' },
@@ -779,7 +779,6 @@ export function initManagement() {
       import('./storage-summary.js').then((m) => m.renderStorageSummary()).catch(() => {}); // SET-22 Storage 3
       const mount = document.getElementById('mgmt-chassis-twin-mount');
       if (mount) fetchAndRenderChassisTwin(mount);
-      import('./management/network.js').then((n) => n.revealReplicationTab()).catch(() => {});
     } else if (paneId === 'mgmt-pane-storage-topo') {
       const mount = document.getElementById('mgmt-storage-topo-mount');
       if (mount) fetchAndRenderStorageTopology(mount);
@@ -793,9 +792,9 @@ export function initManagement() {
       if (mount) fetchAndRenderRemoteStorage(mount);
     } else if (paneId === 'mgmt-pane-storage-disks') {
       fetchAndRenderDisksInventory();
-    } else if (paneId === 'mgmt-pane-storage-replication') {
-      fetchAndRenderReplication();
     } else if (paneId === 'mgmt-pane-backups') {
+      // replication sits in Backup -> More where this NAS can replicate (SET-22 Storage 3)
+      import('./management/network.js').then((n) => n.revealReplicationTab()).then((shown) => { if (shown) fetchAndRenderReplication(); }).catch(() => {});
       // phone backup sits with the other backups (UX-26)
       import('./phone-backup.js').then((p) => p.installPhoneBackup(document.getElementById('phone-backup-mount'))).catch(() => {});
       loadBackupExtras();

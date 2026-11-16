@@ -7899,5 +7899,9 @@ export default {
   "vm.snap_name_rule_bad": "« {name} » ne convient pas. Lettres, chiffres, - et _ uniquement, 64 caractères au plus.",
   "vm.delete_erases": "Supprimer {name} ? Ses disques et instantanés sont effacés. Les sauvegardes sont conservées.",
   "now.jobs_title": "{n, plural, one {# tâche en cours} other {# tâches en cours}}",
-  "now.jobs_open": "Ouvrir la liste des tâches"
+  "now.jobs_open": "Ouvrir la liste des tâches",
+  "chassis.reading_clouds": "Lecture des disques cloud…",
+  "mgmt.remotes_desc2": "Le stockage cloud que vous connectez (S3, Backblaze B2, Google Drive, OneDrive) s'ouvre dans Fichiers sous /mnt/remotes.",
+  "webdav.stopped_toast": "Serveur WebDAV arrêté.",
+  "webdav.started_toast": "Serveur WebDAV démarré sur le port {port}."
 };

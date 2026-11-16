@@ -37,7 +37,7 @@ export const TABS = [
   ['hardware', 'mgmt-pane-copy', 'hw.tab_card_copies', 'Card copies', 'sp.kw_t_card_copies', 'sd card, camera card, import, copy button'],
   ['hardware', 'mgmt-pane-hardware-led', 'settings.tab_led', 'LED Strip bar', 'sp.kw_t_led', 'led, light bar, colours'],
   ['storage', 'mgmt-pane-chassis-twin', 'mgmt.subtab_disks_chassis', 'Drives', 'sp.kw_t_bays', 'bays, drive health, smart, failing disk, locate'],
-  ['storage', 'mgmt-pane-storage-replication', 'mgmt.subtab_replication', 'Replication', 'sp.kw_t_replication', 'replicate, second nas, mirror'],
+  ['backup', 'mgmt-pane-storage-replication', 'mgmt.subtab_replication', 'Replication', 'sp.kw_t_replication', 'replicate, second nas, mirror'],
   ['storage', 'mgmt-pane-storage-remotes', 'mgmt.subtab_remotes', 'Cloud drives', 'sp.kw_t_cloud', 'cloud, google drive, dropbox, s3, onedrive'],
   ['appearance', 'mgmt-pane-dock', 'mgmt.subtab_desktop', 'Desktop', 'sp.kw_t_desktop', 'dock, widgets, screen saver'],
   ['kib', 'mgmt-pane-ai-chat', 'ai.tab_chat', 'Ask Kib', 'sp.kw_t_ask', 'chat, question, ask'],

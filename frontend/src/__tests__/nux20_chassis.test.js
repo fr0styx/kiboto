@@ -9,6 +9,7 @@ import {
   buildSftpCardHtml,
   fetchAndRenderNetworkShares,
   fetchAndRenderRemoteStorage,
+  renderWebdavCard,
   fetchAndRenderStorageTopology,
   openSftpUsersModal,
   getThermalLevel,
@@ -118,10 +119,12 @@ describe('chassis and storage text in German (NUX-20)', () => {
       '/api/webdav/status': { running: true, port: 8084, root_path: '/mnt/user', read_only: false, quick_connect: {} },
       '/api/remotes': [{ name: 'photos', type: 'drive', is_mounted: false }],
     });
+    const w = box();
+    renderWebdavCard(w, { running: true, port: 8084, root_path: '/mnt/user', read_only: false, quick_connect: {} });
+    expect(w.textContent).toContain('WebDAV-Dateiserver');
+    expect(w.textContent).toContain('Windows: Netzlaufwerk verbinden');
+    expect(w.textContent).toContain('Stammordner:');
     await fetchAndRenderRemoteStorage(c);
-    expect(c.textContent).toContain('WebDAV-Dateiserver');
-    expect(c.textContent).toContain('Windows: Netzlaufwerk verbinden');
-    expect(c.textContent).toContain('Stammordner:');
     expect(c.textContent).toContain('Verbundene Cloud-Laufwerke (1)');
     expect(c.querySelector('.btn-remote-mount').textContent).toContain('Einbinden');
 

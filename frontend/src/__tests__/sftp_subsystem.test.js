@@ -42,7 +42,7 @@ describe('Feature 4: SFTP file access Card & User Management', () => {
     expect(html).toContain('sshfs -p 2222 alice@');
   });
 
-  it('renders Inbound SFTP card in Remote & Cloud Storage subtab', async () => {
+  it('Cloud drives no longer draws a second SFTP card (it is on Shared folders, SET-22 Storage 3)', async () => {
     vi.spyOn(api, 'get').mockImplementation((url) => {
       if (url === '/api/webdav/status') {
         return Promise.resolve({
@@ -76,12 +76,8 @@ describe('Feature 4: SFTP file access Card & User Management', () => {
 
     await fetchAndRenderRemoteStorage(container);
 
-    const sftpCard = container.querySelector('#mgmt-sftp-subsystem-card');
-    expect(sftpCard).not.toBeNull();
-    expect(sftpCard.textContent).toContain('SFTP file access');
-    expect(sftpCard.textContent).toContain('Running (port 2222)');
-    expect(sftpCard.textContent).toContain('Manage users (1)');
-    expect(sftpCard.textContent).toContain('sftp://backups@');
+    expect(container.querySelector('#mgmt-sftp-subsystem-card')).toBeNull();
+    expect(container.textContent).toContain('No cloud drives connected');
   });
 
   it('renders Inbound SFTP card in Network Shares subtab', async () => {
@@ -190,6 +186,9 @@ describe('Feature 4: SFTP file access Card & User Management', () => {
     vi.spyOn(api, 'get').mockImplementation((url) => {
       if (url === '/api/webdav/status') return Promise.resolve({ running: false, port: 8084 });
       if (url === '/api/remotes') return Promise.resolve([]);
+      if (url === '/api/storage/shares') return Promise.resolve({ shares: [], platform: 'generic_linux' });
+      if (url === '/api/storage/platform') return Promise.resolve({ platform: 'generic_linux', capabilities: { can_manage_shares: true } });
+      if (url === '/api/samba/status') return Promise.resolve(null);
       if (url === '/api/sftp/status') return Promise.resolve({ running: false, port: 2222 });
       if (url === '/api/sftp/users') return Promise.resolve([]);
       return Promise.reject(new Error(`Unknown url: ${url}`));
@@ -197,7 +196,8 @@ describe('Feature 4: SFTP file access Card & User Management', () => {
 
     const postSpy = vi.spyOn(api, 'post').mockResolvedValue({ running: true, port: 2222 });
 
-    await fetchAndRenderRemoteStorage(container);
+    // the SFTP card lives on Shared folders (SET-22 Storage 3)
+    await fetchAndRenderNetworkShares(container);
 
     const toggleBtn = container.querySelector('#btn-sftp-header-toggle');
     expect(toggleBtn).not.toBeNull();

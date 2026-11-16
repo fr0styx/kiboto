@@ -3,7 +3,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   fetchAndRenderStorageTopology,
-  fetchAndRenderRemoteStorage,
+  renderWebdavCard,
   openSftpUsersModal,
   openCreateStoragePoolModal,
 } from '../components/chassis-visualizer.js';
@@ -36,12 +36,7 @@ describe('chassis-visualizer markup on classes (NUX-15)', () => {
   });
 
   it('marks a read-only WebDAV server', async () => {
-    vi.spyOn(api, 'get').mockImplementation(async (url) => {
-      if (url === '/api/webdav/status') return { enabled: true, running: true, pid: 1, port: 8084, root_path: '/srv', read_only: true, quick_connect: {} };
-      if (url === '/api/remotes') return [];
-      return url.startsWith('/api/sftp/users') ? [] : { running: false, port: 2222 };
-    });
-    await fetchAndRenderRemoteStorage(mount);
+    renderWebdavCard(mount, { enabled: true, running: true, pid: 1, port: 8084, root_path: '/srv', read_only: true, quick_connect: {} });
     expect([...mount.querySelectorAll('strong.cv-strong')].map((n) => n.textContent)).toContain('Read-Only');
   });
 

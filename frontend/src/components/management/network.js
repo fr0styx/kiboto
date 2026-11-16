@@ -61,17 +61,22 @@ export async function fetchAndRenderCopyHistory() {
 
 let replicationTabChecked = false;
 
-/** REL-5: the Replication tab shows only where this NAS can replicate its pools, or keeps jobs. */
+let replicationShown = false;
+
+/** REL-5: Replication (Backup -> More since SET-22 Storage 3) shows only where this NAS can replicate
+ *  its pools, or keeps jobs. Resolves true when it is on the page. */
 export async function revealReplicationTab() {
-  if (replicationTabChecked) return;
+  if (replicationTabChecked) return replicationShown;
   replicationTabChecked = true;
   try {
     const res = await api.get('/api/storage/replication/jobs');
-    const tab = document.querySelector('.mgmt-inner-tab[data-tab-target="mgmt-pane-storage-replication"]');
-    if (tab) tab.style.display = res.available || (res.jobs || []).length ? '' : 'none';
+    replicationShown = !!(res.available || (res.jobs || []).length);
+    const box = document.getElementById('bk-replication');
+    if (box) box.hidden = !replicationShown;
   } catch (_) {
-    replicationTabChecked = false; // try again next time the storage section opens
+    replicationTabChecked = false; // try again next time Backup opens
   }
+  return replicationShown;
 }
 
 export async function fetchAndRenderReplication() {

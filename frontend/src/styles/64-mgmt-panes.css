@@ -711,14 +711,14 @@
 #mgmt-pane-vms-list .vml-semi-strong { font-weight: 600; color: var(--kb-text-strong); margin-bottom: 4px; }
 #mgmt-pane-vms-list .vml-xs { font-size: var(--kb-fs-xs); margin-bottom: 14px; }
 
-/* The mgmt-pane-storage-replication pane: classes instead of inline styles (NUX-15), same look */
-#mgmt-pane-storage-replication .srep-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
-#mgmt-pane-storage-replication .srep-row-2 { display: flex; gap: 8px; }
-#mgmt-pane-storage-replication .srep-x { margin-top: 0; }
-#mgmt-pane-storage-replication .srep-box { overflow-x: auto; background: var(--kb-shade-25); border: 1px solid var(--kb-line-6); border-radius: 8px; margin-bottom: 24px; }
-#mgmt-pane-storage-replication .srep-x-2 { text-align: right; }
-#mgmt-pane-storage-replication .srep-muted { text-align: center; color: var(--muted); padding: 16px; }
-#mgmt-pane-storage-replication .srep-box-2 { overflow-x: auto; max-height: 260px; background: var(--kb-shade-25); border: 1px solid var(--kb-line-6); border-radius: 8px; }
+/* Replication (Backup -> More since SET-22 Storage 3): classes instead of inline styles (NUX-15), same look */
+#bk-replication .srep-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+#bk-replication .srep-row-2 { display: flex; gap: 8px; }
+#bk-replication .srep-x { margin-top: 0; }
+#bk-replication .srep-box { overflow-x: auto; background: var(--kb-shade-25); border: 1px solid var(--kb-line-6); border-radius: 8px; margin-bottom: 24px; }
+#bk-replication .srep-x-2 { text-align: right; }
+#bk-replication .srep-muted { text-align: center; color: var(--muted); padding: 16px; }
+#bk-replication .srep-box-2 { overflow-x: auto; max-height: 260px; background: var(--kb-shade-25); border: 1px solid var(--kb-line-6); border-radius: 8px; }
 
 /* The mgmt-pane-storage-shares pane: classes instead of inline styles (NUX-15), same look */
 #mgmt-pane-storage-shares .sshr-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }

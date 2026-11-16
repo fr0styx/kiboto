@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   fetchAndRenderRemoteStorage,
+  renderWebdavCard,
   openWebdavConfigModal,
   openNewCloudRemoteModal,
 } from '../components/chassis-visualizer.js';
@@ -50,7 +51,9 @@ describe('Sprint 4: Remote & Cloud Storage Subsystem (Frontend)', () => {
       return Promise.reject(new Error(`Unknown url: ${url}`));
     });
 
-    await fetchAndRenderRemoteStorage(container);
+    // the card is drawn on Shared folders now; Cloud drives keeps only the cloud drives (SET-22 Storage 3)
+    expect(renderWebdavCard(container, await api.get('/api/webdav/status'))).toBe(true);
+    expect(renderWebdavCard(null, {})).toBe(false);
 
     expect(container.textContent).toContain('WebDAV file server');
     expect(container.textContent).toContain('Running');
@@ -58,7 +61,10 @@ describe('Sprint 4: Remote & Cloud Storage Subsystem (Frontend)', () => {
     expect(container.textContent).toContain('/mnt/user');
     expect(container.textContent).toContain('macOS Finder');
     expect(container.textContent).toContain('Windows: map network drive');
+    await fetchAndRenderRemoteStorage(container);
     expect(container.textContent).toContain('No cloud drives connected');
+    expect(container.textContent).not.toContain('WebDAV file server');
+    expect(container.querySelector('#mgmt-sftp-subsystem-card')).toBeNull();
   });
 
   it('renders connected cloud remotes with mount badges and file explorer button', async () => {

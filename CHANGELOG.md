@@ -140,6 +140,17 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Right now shows the jobs running**: Activity → Right now lists backups, drive tests, copies and other jobs
   with their progress, and opens the Jobs list.
 
+#### Changes
+
+- **WebDAV is on Shared folders**: the WebDAV server card moved from Cloud drives to Shared folders → Other ways to
+  connect, beside SFTP. Cloud drives now shows only the cloud accounts you connect, and no longer draws a second
+  SFTP card.
+
+#### Changes
+
+- **Replication is part of Backup**: pool replication moved from a hidden Storage tab to Backup → More. It shows
+  where this NAS can replicate its pools or already keeps jobs; old links to the Replication tab open Backup.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

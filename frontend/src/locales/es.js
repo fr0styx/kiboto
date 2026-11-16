@@ -7899,5 +7899,9 @@ export default {
   "vm.snap_name_rule_bad": "«{name}» no sirve. Usa solo letras, números, - y _, hasta 64 caracteres.",
   "vm.delete_erases": "¿Eliminar {name}? Se borran sus discos e instantáneas. Las copias de seguridad se conservan.",
   "now.jobs_title": "{n, plural, one {# tarea en curso} other {# tareas en curso}}",
-  "now.jobs_open": "Abrir la lista de tareas"
+  "now.jobs_open": "Abrir la lista de tareas",
+  "chassis.reading_clouds": "Leyendo unidades en la nube…",
+  "mgmt.remotes_desc2": "El almacenamiento en la nube que conectes (S3, Backblaze B2, Google Drive, OneDrive) se abre en Archivos en /mnt/remotes.",
+  "webdav.stopped_toast": "Servidor WebDAV detenido.",
+  "webdav.started_toast": "Servidor WebDAV iniciado en el puerto {port}."
 };

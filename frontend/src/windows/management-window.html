@@ -2300,9 +2300,6 @@
                 <button class="mgmt-inner-tab" role="tab" aria-selected="false" data-tab-target="mgmt-pane-storage-disks" style="display:none;">
                   <span data-i18n="mgmt.subtab_disks">Physical Disks Inventory</span>
                 </button>
-                <button class="mgmt-inner-tab" role="tab" aria-selected="false" data-tab-target="mgmt-pane-storage-replication" style="display:none;">
-                  <span data-i18n="mgmt.subtab_replication">Replication</span>
-                </button>
               </div>
             </div>
 
@@ -2345,7 +2342,7 @@
               <div class="mgmt-card-intro" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
                 <div>
                   <div class="mgmt-card-intro-title"><svg class="ic"><use href="#i-globe"/></svg> <span data-i18n="mgmt.remotes_title">Remote and cloud storage</span></div>
-                  <div class="mgmt-card-intro-desc" data-i18n="mgmt.remotes_desc">Embedded Universal WebDAV server, FUSE cloud bucket mounting (/mnt/remotes), and automated offsite sync.</div>
+                  <div class="mgmt-card-intro-desc" data-i18n="mgmt.remotes_desc2">Cloud storage you connect (S3, Backblaze B2, Google Drive, OneDrive) opens in Files under /mnt/remotes.</div>
                 </div>
                 <div style="display:flex; align-items:center; gap:8px;">
                   <button class="btn-pill-toggle is-primary" id="btn-add-cloud-remote" title="Connect New Cloud Remote" data-i18n-title="ui.connect_new_cloud_remote"><span aria-hidden="true">☁️</span> <span data-i18n="mw.connect_cloud_remote">+ Connect Cloud Remote</span></button>
@@ -2391,64 +2388,6 @@
 
             <!-- Sub-tab 6: Media Ingest & Checksum History -->
 
-            <!-- Sub-tab 7: Automated Snapshot Replication Engine -->
-            <div id="mgmt-pane-storage-replication" class="mgmt-tab-pane" style="display: none;">
-              <div class="mgmt-card-intro srep-row">
-                <div>
-                  <div class="mgmt-card-intro-title"><svg class="ic"><use href="#i-refresh"/></svg> <span data-i18n="mw.automated_snapshot_replication_pipelines">Automated Snapshot Replication Pipelines</span></div>
-                  <div class="mgmt-card-intro-desc" data-i18n="mw.asynchronous_recursive_dataset_transfers_support">Asynchronous recursive dataset transfers supporting local pools and remote SSH/WireGuard endpoints with bandwidth throttling and retention.</div>
-                </div>
-                <div class="srep-row-2">
-                  <button class="btn-pill-toggle is-primary" id="btn-create-replication-job" title="Create Replication Pipeline" data-i18n-title="ui.create_replication_pipeline"><span aria-hidden="true">+</span> <span data-i18n="mw.new_replication_pipeline">New Replication Pipeline</span></button>
-                  <button class="btn-pill-toggle" id="btn-refresh-replication" title="Refresh Replication Jobs" data-i18n-title="ui.refresh_replication_jobs"><span aria-hidden="true">🔄</span> <span data-i18n="mw.refresh">Refresh</span></button>
-                </div>
-              </div>
-              <div class="mgmt-detail-body">
-                <div class="network-section-header srep-x">
-                  <span class="network-section-title" data-i18n="mw.active_replication_pipelines">ACTIVE REPLICATION PIPELINES</span>
-                </div>
-                <div class="srep-box">
-                  <table class="copy-history-table">
-                    <thead>
-                      <tr>
-                        <th data-i18n="mw.pipeline_name">Pipeline Name</th>
-                        <th data-i18n="mw.source_pool_subvol">Source Pool / Subvol</th>
-                        <th data-i18n="mw.target_destination">Target Destination</th>
-                        <th data-i18n="mw.schedule">Schedule</th>
-                        <th data-i18n="mw.rate_limit">Rate Limit</th>
-                        <th data-i18n="mw.retention">Retention</th>
-                        <th data-i18n="mw.status">Status</th>
-                        <th class="srep-x-2" data-i18n="mw.actions">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody id="replication-jobs-tbody">
-                      <tr><td class="srep-muted" colspan="8" data-i18n="mw.loading_replication_pipelines">Loading replication pipelines...</td></tr>
-                    </tbody>
-                  </table>
-                </div>
-
-                <div class="network-section-header">
-                  <span class="network-section-title" data-i18n="mw.replication_transfer_history">REPLICATION TRANSFER HISTORY</span>
-                </div>
-                <div class="srep-box-2">
-                  <table class="copy-history-table">
-                    <thead>
-                      <tr>
-                        <th data-i18n="mw.timestamp">Timestamp</th>
-                        <th data-i18n="mw.job_id">Job ID</th>
-                        <th data-i18n="mw.target">Target</th>
-                        <th data-i18n="mw.bytes_transferred">Bytes Transferred</th>
-                        <th data-i18n="mw.duration">Duration</th>
-                        <th data-i18n="mw.status_outcome">Status / Outcome</th>
-                      </tr>
-                    </thead>
-                    <tbody id="replication-history-tbody">
-                      <tr><td class="srep-muted" colspan="6" data-i18n="mw.loading_history">Loading history...</td></tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
           </div>
 
           <!-- Shared folders: a section of its own (SET-22 Storage 2) -->
@@ -2495,6 +2434,7 @@
                   </div>
                 </div>
                 <div id="shares-sftp-mount"></div>
+                <div id="shares-webdav-mount"></div>
               </details>
             </div>
           </div>
@@ -3134,6 +3074,64 @@
               <div id="two-way-sync-mount"></div>
             </section>
 
+            <!-- Replication: a backup job, here since SET-22 Storage 3; shown where this NAS can replicate (REL-5) -->
+            <section id="bk-replication" class="drawer-card offsite-card" hidden>
+              <div class="mgmt-card-intro srep-row">
+                <div>
+                  <div class="mgmt-card-intro-title"><svg class="ic"><use href="#i-refresh"/></svg> <span data-i18n="mw.automated_snapshot_replication_pipelines">Automated Snapshot Replication Pipelines</span></div>
+                  <div class="mgmt-card-intro-desc" data-i18n="mw.asynchronous_recursive_dataset_transfers_support">Asynchronous recursive dataset transfers supporting local pools and remote SSH/WireGuard endpoints with bandwidth throttling and retention.</div>
+                </div>
+                <div class="srep-row-2">
+                  <button class="btn-pill-toggle is-primary" id="btn-create-replication-job" title="Create Replication Pipeline" data-i18n-title="ui.create_replication_pipeline"><span aria-hidden="true">+</span> <span data-i18n="mw.new_replication_pipeline">New Replication Pipeline</span></button>
+                  <button class="btn-pill-toggle" id="btn-refresh-replication" title="Refresh Replication Jobs" data-i18n-title="ui.refresh_replication_jobs"><span aria-hidden="true">🔄</span> <span data-i18n="mw.refresh">Refresh</span></button>
+                </div>
+              </div>
+              <div class="mgmt-detail-body">
+                <div class="network-section-header srep-x">
+                  <span class="network-section-title" data-i18n="mw.active_replication_pipelines">ACTIVE REPLICATION PIPELINES</span>
+                </div>
+                <div class="srep-box">
+                  <table class="copy-history-table">
+                    <thead>
+                      <tr>
+                        <th data-i18n="mw.pipeline_name">Pipeline Name</th>
+                        <th data-i18n="mw.source_pool_subvol">Source Pool / Subvol</th>
+                        <th data-i18n="mw.target_destination">Target Destination</th>
+                        <th data-i18n="mw.schedule">Schedule</th>
+                        <th data-i18n="mw.rate_limit">Rate Limit</th>
+                        <th data-i18n="mw.retention">Retention</th>
+                        <th data-i18n="mw.status">Status</th>
+                        <th class="srep-x-2" data-i18n="mw.actions">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="replication-jobs-tbody">
+                      <tr><td class="srep-muted" colspan="8" data-i18n="mw.loading_replication_pipelines">Loading replication pipelines...</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div class="network-section-header">
+                  <span class="network-section-title" data-i18n="mw.replication_transfer_history">REPLICATION TRANSFER HISTORY</span>
+                </div>
+                <div class="srep-box-2">
+                  <table class="copy-history-table">
+                    <thead>
+                      <tr>
+                        <th data-i18n="mw.timestamp">Timestamp</th>
+                        <th data-i18n="mw.job_id">Job ID</th>
+                        <th data-i18n="mw.target">Target</th>
+                        <th data-i18n="mw.bytes_transferred">Bytes Transferred</th>
+                        <th data-i18n="mw.duration">Duration</th>
+                        <th data-i18n="mw.status_outcome">Status / Outcome</th>
+                      </tr>
+                    </thead>
+                    <tbody id="replication-history-tbody">
+                      <tr><td class="srep-muted" colspan="6" data-i18n="mw.loading_history">Loading history...</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </section>
             <div id="protection-jobs-mount"></div>
             </details>
           </div>

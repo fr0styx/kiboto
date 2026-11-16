@@ -7899,5 +7899,9 @@ export default {
   "vm.snap_name_rule_bad": "不能使用“{name}”。只能用字母、数字、- 和 _，最多 64 个字符。",
   "vm.delete_erases": "删除 {name}？它的磁盘和快照会被清除，备份会保留。",
   "now.jobs_title": "{n, plural, other {# 个任务正在运行}}",
-  "now.jobs_open": "打开任务列表"
+  "now.jobs_open": "打开任务列表",
+  "chassis.reading_clouds": "正在读取云盘…",
+  "mgmt.remotes_desc2": "你连接的云存储（S3、Backblaze B2、Google Drive、OneDrive）会在“文件”的 /mnt/remotes 下打开。",
+  "webdav.stopped_toast": "WebDAV 服务器已停止。",
+  "webdav.started_toast": "WebDAV 服务器已在端口 {port} 启动。"
 };
