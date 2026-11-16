@@ -172,7 +172,7 @@ def get_frigate_events() -> dict[str, Any]:
     """Frigate's detections as camera alerts (COMP-11): on or off, which objects and cameras."""
     from backend.services import frigate_events
 
-    return {**frigate_events.public(), "choices": list(frigate_events.LABELS)}
+    return {**frigate_events.public(), "choices": list(frigate_events.LABELS), "installed": frigate_events.installed()}
 
 
 @router.put("/frigate", dependencies=[Depends(require_scope("system:config"))])

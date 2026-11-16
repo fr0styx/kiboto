@@ -36,7 +36,7 @@ describe('an administrator’s set-up is not drawn for anyone else (SET-03)', ()
       const tag = html.match(new RegExp(`<div id="${id}"[^>]*>`));
       expect(tag && tag[0], id).toContain('data-admin-only');
     }
-    for (const cls of ['sec-box-3', 'sec-box-4', 'mgmt-card-intro nt-head', 'nt-topbar', 'nt-grid-fill', 'nt-box', 'digest-card']) {
+    for (const cls of ['sec-box-3', 'sec-box-4', 'nt-topbar nt-send', 'nt-rows', 'nt-box', 'digest-card']) {
       const tag = html.match(new RegExp(`<(div|section) class="${cls}"[^>]*>`));
       expect(tag && tag[0], cls).toContain('data-admin-only');
     }

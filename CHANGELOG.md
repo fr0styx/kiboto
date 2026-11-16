@@ -308,6 +308,13 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **zettnas.local no longer answers**: the NAS is found as kiboto.local, or by the name you chose in
   the settings (names you used before that still answer). A name saved before the rebrand becomes kiboto.
 
+#### Changes
+
+- **Notifications reads top to bottom**: Send alerts with its test, this device, where alerts go as rows
+  (e-mail, Telegram, Discord, ntfy; the webhook and Apprise folded under More services unless in use),
+  what to tell you about in household words, and How often with the limits folded under Fine-tune and
+  named for what they do. The Cameras card shows only when Frigate runs here.
+
 ## v2.0.2 (2026-11-12)
 ### 🧭 A new Settings sidebar, five themes, honest pages, and remote access cut down to what works
 

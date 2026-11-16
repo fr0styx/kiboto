@@ -2769,203 +2769,155 @@
 
             <!-- Notifications & Alerts Pane -->
             <div id="mgmt-pane-notifications" class="mgmt-tab-pane" style="display: none;">
-              <div id="push-device-card" class="kb-card kb-card--boxed"></div>
-              <!-- Home Assistant: alerts and sensors to your smart home (moved from Network, SET-24) -->
-              <div class="nsv-grid" id="notif-ha-grid" data-admin-only></div>
-              <div class="mgmt-card-intro nt-head" data-admin-only>
-                <div>
-                  <div class="mgmt-card-intro-title">
-                    <svg class="ic"><use href="#i-bell"/></svg>
-                    <span data-i18n="mgmt.notif_title">Alert Channels & Notification Routing</span>
-                  </div>
-                  <div class="mgmt-card-intro-desc" data-i18n="mgmt.notif_desc">
-                    Dispatch critical alerts (SMART failures, thermal warnings, UPS events, and copy jobs) to Discord, Telegram, Email, ntfy, or custom webhooks.
-                  </div>
-                </div>
-                <div class="nt-actions">
-                  <button id="btn-send-test-alert" class="btn-pill-toggle" style="background: rgba(51,205,184,0.15); border-color: rgba(51,205,184,0.35); color: var(--kb-text-accent);">
-                    ⚡ <span data-i18n="mgmt.notif_btn_test_all">Send Test Alert</span>
-                  </button>
-                  <span class="nt-saved-note" data-i18n="notif.saved_at_once">Changes here are saved as you make them.</span>
-                </div>
-              </div>
-
               <div class="mgmt-detail-body">
-                <!-- Master Toggle Card -->
-                <div class="nt-topbar" data-admin-only>
+                <!-- 1. Send alerts: the switch, one true sentence, a test (SET-23, Notifications card 1) -->
+                <section class="nt-topbar nt-send" data-admin-only>
                   <div>
                     <div class="nt-card-title" data-i18n="mgmt.notif_master_label">Send alerts</div>
                     <p class="nt-sub" id="notif-master-sentence" aria-live="polite"></p>
+                    <span class="nt-saved-note" data-i18n="notif.saved_at_once">Changes here are saved as you make them.</span>
                   </div>
                   <div class="nt-inline nt-inline--wide">
+                    <button id="btn-send-test-alert" class="btn-pill-toggle" data-i18n="mgmt.notif_btn_test_all">Send a test</button>
                     <span id="notif-master-status-badge" style="font-size: var(--kb-fs-xs); font-weight:700; padding:2px 8px; border-radius:10px; background:rgba(51,205,184,0.15); color:var(--ok2); border:1px solid rgba(51,205,184,0.4);" data-sample>—</span>
                     <label class="switch-toggle nt-switch" for="notif-master-enabled" aria-label="Toggle Master Notification Engine" data-i18n-aria-label="ui.toggle_master_notification_engine">
                       <input class="nt-switch-input" type="checkbox" id="notif-master-enabled" checked>
                       <span class="slider round" style="position:absolute; cursor:pointer; inset:0; background:var(--lt-b-ffffff33, rgba(255,255,255,0.2)); border-radius:20px; transition:.3s;"></span>
                     </label>
                   </div>
-                </div>
+                </section>
 
-                <!-- Alert Channels Header -->
+                <!-- 2. On this device (everyone) -->
+                <div id="push-device-card" class="kb-card kb-card--boxed"></div>
+
+                <!-- 3. Where alerts go: rows, the rarer two folded unless in use -->
                 <div class="nt-section-head nt-section-head--tight" data-i18n="mgmt.notif_channels_title" data-admin-only>Where alerts go</div>
-
-                <!-- Channels Grid -->
-                <div class="nt-grid-fill" data-admin-only>
-                  
-                  <!-- Discord Card -->
-                  <div class="notif-channel-card nt-card">
-                    <div class="nt-row-between">
-                      <div class="nt-inline">
-                        <span class="nt-icon">💬</span>
-                        <span class="nt-card-title">Discord</span>
-                      </div>
-                      <span class="nt-badge" id="notif-badge-discord" data-sample>—</span>
+                <div class="nt-rows" data-admin-only>
+                  <div class="notif-channel-card nt-card nt-row">
+                    <span class="nt-icon" aria-hidden="true">✉️</span>
+                    <div class="nt-row-text">
+                      <span class="nt-card-title" data-i18n="mw.email_smtp">E-mail</span>
+                      <div class="nt-desc" data-i18n="mw.standard_smtp_delivery_with_tls_encryption">An e-mail to one or more addresses.</div>
                     </div>
-                    <div class="nt-desc" data-i18n="mw.rich_embed_alerts_to_any_discord">Rich embed alerts to any Discord channel via incoming webhook.</div>
+                    <span class="nt-badge" id="notif-badge-email" data-sample>—</span>
                     <div class="nt-card-actions">
-                      <button class="notif-cfg-btn btn-pill-toggle nt-grow" data-channel="discord" data-i18n="mw.configure">Configure</button>
-                      <button class="notif-test-btn btn-pill-toggle" data-channel="discord" title="Test Discord" data-i18n-title="ui.test_discord" data-i18n="mw.test">Test</button>
-                    </div>
-                  </div>
-
-                  <!-- Telegram Card -->
-                  <div class="notif-channel-card nt-card">
-                    <div class="nt-row-between">
-                      <div class="nt-inline">
-                        <span class="nt-icon">✈️</span>
-                        <span class="nt-card-title">Telegram</span>
-                      </div>
-                      <span class="nt-badge" id="notif-badge-telegram" data-sample>—</span>
-                    </div>
-                    <div class="nt-desc" data-i18n="mw.instant_push_messages_to_your_telegram">Instant push messages to your Telegram bot or group chat.</div>
-                    <div class="nt-card-actions">
-                      <button class="notif-cfg-btn btn-pill-toggle nt-grow" data-channel="telegram" data-i18n="mw.configure">Configure</button>
-                      <button class="notif-test-btn btn-pill-toggle" data-channel="telegram" title="Test Telegram" data-i18n-title="ui.test_telegram" data-i18n="mw.test">Test</button>
-                    </div>
-                  </div>
-
-                  <!-- Email Card -->
-                  <div class="notif-channel-card nt-card">
-                    <div class="nt-row-between">
-                      <div class="nt-inline">
-                        <span class="nt-icon">✉️</span>
-                        <span class="nt-card-title" data-i18n="mw.email_smtp">Email (SMTP)</span>
-                      </div>
-                      <span class="nt-badge" id="notif-badge-email" data-sample>—</span>
-                    </div>
-                    <div class="nt-desc" data-i18n="mw.standard_smtp_delivery_with_tls_encryption">Standard SMTP delivery with TLS encryption to administrator inbox.</div>
-                    <div class="nt-card-actions">
-                      <button class="notif-cfg-btn btn-pill-toggle nt-grow" data-channel="email" data-i18n="mw.configure">Configure</button>
+                      <button class="notif-cfg-btn btn-pill-toggle" data-channel="email" data-i18n="ntf.set_up">Set up</button>
                       <button class="notif-test-btn btn-pill-toggle" data-channel="email" title="Test Email" data-i18n-title="ui.test_email" data-i18n="mw.test">Test</button>
                     </div>
                   </div>
-
-                  <!-- ntfy Card -->
-                  <div class="notif-channel-card nt-card">
-                    <div class="nt-row-between">
-                      <div class="nt-inline">
-                        <span class="nt-icon">🔔</span>
-                        <span class="nt-card-title" data-i18n="mw.ntfy_push">ntfy Push</span>
-                      </div>
-                      <span class="nt-badge" id="notif-badge-ntfy" data-sample>—</span>
+                  <div class="notif-channel-card nt-card nt-row">
+                    <span class="nt-icon" aria-hidden="true">✈️</span>
+                    <div class="nt-row-text">
+                      <span class="nt-card-title">Telegram</span>
+                      <div class="nt-desc" data-i18n="mw.instant_push_messages_to_your_telegram">A message from your Telegram bot to you or a group.</div>
                     </div>
-                    <div class="nt-desc" data-i18n="mw.lightweight_http_push_notifications_via_ntfy">Lightweight HTTP push notifications via ntfy.sh or self-hosted server.</div>
+                    <span class="nt-badge" id="notif-badge-telegram" data-sample>—</span>
                     <div class="nt-card-actions">
-                      <button class="notif-cfg-btn btn-pill-toggle nt-grow" data-channel="ntfy" data-i18n="mw.configure">Configure</button>
+                      <button class="notif-cfg-btn btn-pill-toggle" data-channel="telegram" data-i18n="ntf.set_up">Set up</button>
+                      <button class="notif-test-btn btn-pill-toggle" data-channel="telegram" title="Test Telegram" data-i18n-title="ui.test_telegram" data-i18n="mw.test">Test</button>
+                    </div>
+                  </div>
+                  <div class="notif-channel-card nt-card nt-row">
+                    <span class="nt-icon" aria-hidden="true">💬</span>
+                    <div class="nt-row-text">
+                      <span class="nt-card-title">Discord</span>
+                      <div class="nt-desc" data-i18n="mw.rich_embed_alerts_to_any_discord">A message in a Discord channel.</div>
+                    </div>
+                    <span class="nt-badge" id="notif-badge-discord" data-sample>—</span>
+                    <div class="nt-card-actions">
+                      <button class="notif-cfg-btn btn-pill-toggle" data-channel="discord" data-i18n="ntf.set_up">Set up</button>
+                      <button class="notif-test-btn btn-pill-toggle" data-channel="discord" title="Test Discord" data-i18n-title="ui.test_discord" data-i18n="mw.test">Test</button>
+                    </div>
+                  </div>
+                  <div class="notif-channel-card nt-card nt-row">
+                    <span class="nt-icon" aria-hidden="true">🔔</span>
+                    <div class="nt-row-text">
+                      <span class="nt-card-title" data-i18n="mw.ntfy_push">ntfy</span>
+                      <div class="nt-desc" data-i18n="mw.lightweight_http_push_notifications_via_ntfy">A push to the ntfy app on your phone, from ntfy.sh or your own server.</div>
+                    </div>
+                    <span class="nt-badge" id="notif-badge-ntfy" data-sample>—</span>
+                    <div class="nt-card-actions">
+                      <button class="notif-cfg-btn btn-pill-toggle" data-channel="ntfy" data-i18n="ntf.set_up">Set up</button>
                       <button class="notif-test-btn btn-pill-toggle" data-channel="ntfy" title="Test ntfy" data-i18n-title="ui.test_ntfy" data-i18n="mw.test">Test</button>
                     </div>
                   </div>
-
-                  <!-- Generic Webhook Card -->
-                  <div class="notif-channel-card nt-card">
-                    <div class="nt-row-between">
-                      <div class="nt-inline">
-                        <span class="nt-icon">🌐</span>
-                        <span class="nt-card-title" data-i18n="mw.generic_webhook">Generic Webhook</span>
-                      </div>
-                      <span class="nt-badge" id="notif-badge-webhook" data-sample>—</span>
+                  <details class="nt-more" id="notif-more-channels">
+                    <summary data-i18n="ntf.more_services">More services</summary>
+                    <div class="nt-rows">
+                  <div class="notif-channel-card nt-card nt-row">
+                    <span class="nt-icon" aria-hidden="true">🌐</span>
+                    <div class="nt-row-text">
+                      <span class="nt-card-title" data-i18n="mw.generic_webhook">Another service (webhook)</span>
+                      <div class="nt-desc" data-i18n="mw.custom_http_post_json_endpoint_for">Each alert as JSON to an address, for Home Assistant, Node-RED or your own scripts.</div>
                     </div>
-                    <div class="nt-desc" data-i18n="mw.custom_http_post_json_endpoint_for">Custom HTTP POST JSON endpoint for Home Assistant, Node-RED, or scripts.</div>
+                    <span class="nt-badge" id="notif-badge-webhook" data-sample>—</span>
                     <div class="nt-card-actions">
-                      <button class="notif-cfg-btn btn-pill-toggle nt-grow" data-channel="webhook" data-i18n="mw.configure">Configure</button>
+                      <button class="notif-cfg-btn btn-pill-toggle" data-channel="webhook" data-i18n="ntf.set_up">Set up</button>
                       <button class="notif-test-btn btn-pill-toggle" data-channel="webhook" title="Test Webhook" data-i18n-title="ui.test_webhook" data-i18n="mw.test">Test</button>
                     </div>
                   </div>
-
-                  <!-- Apprise Advanced Card -->
-                  <div class="notif-channel-card nt-card">
-                    <div class="nt-row-between">
-                      <div class="nt-inline">
-                        <span class="nt-icon">🚀</span>
-                        <span class="nt-card-title" data-i18n="mw.apprise_100_services">Apprise (100+ Services)</span>
-                      </div>
-                      <span class="nt-badge" id="notif-badge-apprise">0 URLs</span>
+                  <div class="notif-channel-card nt-card nt-row">
+                    <span class="nt-icon" aria-hidden="true">🚀</span>
+                    <div class="nt-row-text">
+                      <span class="nt-card-title" data-i18n="mw.apprise_100_services">More services (Apprise)</span>
+                      <div class="nt-desc" data-i18n="mw.power_user_multi_target_list_supporting">Pushover, Slack, Gotify, Matrix and about 100 more, one address per line.</div>
                     </div>
-                    <div class="nt-desc" data-i18n="mw.power_user_multi_target_list_supporting">Power-user multi-target list supporting Pushover, Slack, Gotify, Matrix, and more.</div>
+                    <span class="nt-badge" id="notif-badge-apprise" data-sample>—</span>
                     <div class="nt-card-actions">
-                      <button class="notif-cfg-btn btn-pill-toggle nt-grow" data-channel="apprise_raw" data-i18n="mw.configure">Configure</button>
+                      <button class="notif-cfg-btn btn-pill-toggle" data-channel="apprise_raw" data-i18n="ntf.set_up">Set up</button>
                       <button class="notif-test-btn btn-pill-toggle" data-channel="apprise_raw" title="Test Apprise" data-i18n-title="ui.test_apprise" data-i18n="mw.test">Test</button>
                     </div>
                   </div>
-
+                    </div>
+                  </details>
                 </div>
 
-                <!-- Subsystem Event Triggers & Sensitivity -->
-                <div class="nt-section-head" data-i18n="mgmt.notif_rules_title" data-admin-only>What you are alerted about</div>
-                
+                <!-- 4. What to tell me about -->
+                <div class="nt-section-head" data-i18n="mgmt.notif_rules_title" data-admin-only>What to tell me about</div>
                 <div class="nt-box" data-admin-only>
                   <div class="nt-grid">
                     
                     <label class="nt-check" for="notif-toggle-smart">
                       <input type="checkbox" id="notif-toggle-smart" checked>
-                      <span data-i18n="mw.s_m_a_r_t_drive">S.M.A.R.T. Drive Health & Sector Errors</span>
+                      <span data-i18n="mw.s_m_a_r_t_drive">A drive is failing or reports errors</span>
                     </label>
 
                     <label class="nt-check" for="notif-toggle-temp">
                       <input type="checkbox" id="notif-toggle-temp" checked>
-                      <span data-i18n="mw.thermal_overheat_warnings_cpu_hdd">Thermal Overheat Warnings (CPU / HDD)</span>
+                      <span data-i18n="mw.thermal_overheat_warnings_cpu_hdd">Something runs too hot (drives, processor)</span>
                     </label>
 
                     <label class="nt-check" for="notif-toggle-ups">
                       <input type="checkbox" id="notif-toggle-ups" checked>
-                      <span data-i18n="mw.ups_on_battery_low_battery_and">UPS On-Battery, Low-Battery & Shutdown</span>
+                      <span data-i18n="mw.ups_on_battery_low_battery_and">The power goes out (the UPS runs on battery, runs low, shuts down)</span>
                     </label>
 
                     <label class="nt-check" for="notif-toggle-fan">
                       <input type="checkbox" id="notif-toggle-fan" checked>
-                      <span data-i18n="mw.fan_stalls_and_hardware_cooling_anomalies">Fan Stalls & Hardware Cooling Anomalies</span>
+                      <span data-i18n="mw.fan_stalls_and_hardware_cooling_anomalies">A fan stops</span>
                     </label>
 
                     <label class="nt-check" for="notif-toggle-copy">
                       <input type="checkbox" id="notif-toggle-copy" checked>
-                      <span data-i18n="mw.media_card_auto_ingest_completion_errors">Media Card Auto-Ingest Completion / Errors</span>
+                      <span data-i18n="mw.media_card_auto_ingest_completion_errors">Copying from a camera or SD card finished or failed</span>
                     </label>
 
                     <label class="nt-check" for="notif-toggle-backup">
                       <input type="checkbox" id="notif-toggle-backup">
-                      <span data-i18n="mw.configuration_backup_and_snapshot_status">Configuration Backup & Snapshot Status</span>
+                      <span data-i18n="mw.configuration_backup_and_snapshot_status">A backup finished or failed</span>
                     </label>
 
                   </div>
-
-                  <div class="nt-fields">
-                    <div>
-                      <label class="nt-label" for="notif-input-hdd-temp" data-i18n="mw.hdd_temp_threshold_c">HDD TEMP THRESHOLD (°C)</label>
-                      <input type="number" id="notif-input-hdd-temp" class="tz-select-input nt-input" min="30" max="80" value="50">
-                    </div>
-                    <div>
-                      <label class="nt-label" for="notif-input-cpu-temp" data-i18n="mw.cpu_temp_threshold_c">CPU TEMP THRESHOLD (°C)</label>
-                      <input type="number" id="notif-input-cpu-temp" class="tz-select-input nt-input" min="40" max="105" value="80">
-                    </div>
-                    <div>
-                      <label class="nt-label" for="notif-input-cooldown" data-i18n="mw.alert_cooldown_minutes">ALERT COOLDOWN (MINUTES)</label>
-                      <input type="number" id="notif-input-cooldown" class="tz-select-input nt-input" min="1" max="1440" value="30">
-                    </div>
-                  </div>
                 </div>
+                <section class="my-alerts-card" aria-labelledby="my-alerts-title">
+                  <h4 id="my-alerts-title" class="my-alerts-title" data-i18n="alerts.mine_title">My alerts</h4>
+                  <p class="my-alerts-note" data-i18n="alerts.mine_desc">Alerts just for you, on your own phone or e-mail, about the things you care about.</p>
+                  <div id="my-alerts-mount"></div>
+                </section>
 
+                <!-- 5. How often, the limits folded under Fine-tune -->
                 <section class="digest-card" aria-labelledby="digest-title" data-admin-only>
-                  <h4 id="digest-title" class="my-alerts-title" data-i18n="alerts.digest_title">Daily summary</h4>
+                  <h4 id="digest-title" class="my-alerts-title" data-i18n="alerts.digest_title">How often</h4>
                   <p class="my-alerts-note" data-i18n="alerts.digest_desc">Critical alerts still go out at once; everything else arrives in one message a day.</p>
                   <div class="digest-row">
                     <label for="notif-digest-mode" data-i18n="alerts.digest_mode">Send</label>
@@ -2978,17 +2930,37 @@
                     <label for="notif-language" data-i18n="alerts.language">Write alerts in</label>
                     <select id="notif-language"></select>
                   </div>
+                  <details class="nt-fine">
+                    <summary data-i18n="ntf.fine_tune">Fine-tune</summary>
+                    <div class="nt-fields">
+                      <div>
+                        <label class="nt-label" for="notif-input-hdd-temp" data-i18n="mw.hdd_temp_threshold_c">Hard drives and SATA SSDs: warn at (°C)</label>
+                        <input type="number" id="notif-input-hdd-temp" class="tz-select-input nt-input" min="30" max="80" value="50">
+                        <div class="nt-hint" data-i18n="ntf.hdd_hint">NVMe drives, and drives given their own limit in Drive Health, use their own.</div>
+                      </div>
+                      <div>
+                        <label class="nt-label" for="notif-input-cpu-temp" data-i18n="mw.cpu_temp_threshold_c">Processor: alert at (°C)</label>
+                        <input type="number" id="notif-input-cpu-temp" class="tz-select-input nt-input" min="40" max="105" value="80">
+                        <div class="nt-hint" data-i18n="ntf.cpu_hint">A first warning comes about 10 °C earlier.</div>
+                      </div>
+                      <div>
+                        <label class="nt-label" for="notif-input-cooldown" data-i18n="mw.alert_cooldown_minutes">Wait before repeating the same alert (minutes)</label>
+                        <input type="number" id="notif-input-cooldown" class="tz-select-input nt-input" min="1" max="1440" value="30">
+                        <div class="nt-hint" data-i18n="ntf.cooldown_hint">A more serious alert about the same thing still comes at once.</div>
+                      </div>
+                    </div>
+                  </details>
                 </section>
-                <section class="my-alerts-card" aria-labelledby="my-alerts-title">
-                  <h4 id="my-alerts-title" class="my-alerts-title" data-i18n="alerts.mine_title">My alerts</h4>
-                  <p class="my-alerts-note" data-i18n="alerts.mine_desc">Alerts just for you, on your own phone or e-mail, about the things you care about.</p>
-                  <div id="my-alerts-mount"></div>
-                </section>
+
+                <!-- 6. Cameras: only when Frigate is there (frigate-events.js hides it otherwise) -->
                 <section class="my-alerts-card" aria-labelledby="frigate-title" data-admin-only>
                   <h4 id="frigate-title" class="my-alerts-title" data-i18n="frigate.title">Camera alerts (Frigate)</h4>
                   <p class="my-alerts-note" data-i18n="frigate.desc">Frigate from the App Catalog records your cameras and finds people, cars and pets on the iGPU. Kiboto can send what it sees through the alert channels above.</p>
                   <div id="frigate-events-mount"></div>
                 </section>
+
+                <!-- Home Assistant: alerts and sensors to your smart home (moved from Network, SET-24) -->
+                <div class="nsv-grid" id="notif-ha-grid" data-admin-only></div>
               </div>
             </div>
             <div id="mgmt-pane-events" class="mgmt-tab-pane" style="display: none;">

@@ -110,6 +110,9 @@ export async function renderFrigateEvents(mount) {
     showLoadError(mount, err, () => renderFrigateEvents(mount));
     return;
   }
+  // the Cameras card only when Frigate runs here, or its alerts are still on (SET-23)
+  const card = mount.closest('section');
+  if (card) card.hidden = !info.installed && !info.enabled;
   mount.replaceChildren(frigateBody(info));
   mount.onclick = async (e) => {
     const b = /** @type {HTMLElement} */ (e.target).closest('[data-frigate]');

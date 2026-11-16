@@ -126,7 +126,7 @@ describe('alert settings pane', () => {
     await run;
     expect(showToast).toHaveBeenLastCalledWith('✓ Test alerts delivered to: discord, ntfy', 'success');
     expect(btn.disabled).toBe(false);
-    expect(btn.textContent).toBe('⚡ Send Test Alert');
+    expect(btn.textContent).toBe('Send a test');
     post.mockResolvedValueOnce({ tested_channels: { email: false } });
     await n.testAllNotificationChannels();
     expect(showToast.mock.lastCall[1]).toBe('warning');
@@ -137,7 +137,7 @@ describe('alert settings pane', () => {
     await setLanguage('es');
     await n.testAllNotificationChannels();
     expect(showToast.mock.lastCall[1]).toBe('error');
-    expect(btn.textContent).toBe('⚡ Enviar alerta de prueba');
+    expect(btn.textContent).toBe('Enviar una prueba');
     document.body.innerHTML = '';
     post.mockResolvedValueOnce({ tested_channels: {} });
     await n.testAllNotificationChannels();

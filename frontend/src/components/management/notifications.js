@@ -3,7 +3,6 @@
  * Split out of management.js (ARCH-1); management.js re-exports everything here.
  */
 import { SUPPORTED_LANGUAGES } from '../../i18n.js';
-import { setIconLabel } from '../../ui/primitives.js';
 import { api } from '../../api.js';
 import { showToast } from '../../toast.js';
 import { escapeHtml } from '../../utils.js';
@@ -108,6 +107,9 @@ export function renderNotificationConfigUI() {
   updateBadge('notif-badge-webhook', !!(cfg.webhook_enabled && cfg.webhook_url));
 
   const rawCount = Array.isArray(cfg.apprise_urls) ? cfg.apprise_urls.length : 0;
+  // a service in use is always shown (SET-23): More opens when the webhook or Apprise is set up
+  const more = /** @type {HTMLDetailsElement | null} */ (document.getElementById('notif-more-channels'));
+  if (more && ((cfg.webhook_enabled && cfg.webhook_url) || rawCount > 0)) more.open = true;
   updateBadge('notif-badge-apprise', rawCount > 0 && cfg.apprise_enabled !== false, t('ntf.url_count', '{count, plural, one {# URL} other {# URLs}}', { count: rawCount }));
 
   // Event trigger checkboxes
@@ -209,7 +211,7 @@ export async function testAllNotificationChannels() {
   const btn = document.getElementById('btn-send-test-alert');
   if (btn) {
     btn.disabled = true;
-    setIconLabel(btn, '⏳', t('ui.testing_2', 'Testing...'));
+    btn.textContent = t('ui.testing_2', 'Testing...');
   }
   try {
     const res = await api.post('/api/notifications/test', {});
@@ -225,7 +227,7 @@ export async function testAllNotificationChannels() {
   } finally {
     if (btn) {
       btn.disabled = false;
-      btn.innerHTML = '⚡ <span data-i18n="mgmt.notif_btn_test_all">' + escapeHtml(t('mgmt.notif_btn_test_all', 'Send Test Alert')) + '</span>';
+      btn.textContent = t('mgmt.notif_btn_test_all', 'Send a test');
     }
   }
 }

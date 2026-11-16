@@ -356,6 +356,20 @@
 /* Notifications: the Send alerts sentence (SET-23) */
 #notif-master-sentence { margin: 0; }
 #notif-master-sentence.is-warn { color: var(--kb-text-warn); font-weight: 600; }
+/* Notifications in the report's order (SET-23): channel rows, More and Fine-tune folded */
+.nt-send .nt-inline--wide { gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+.nt-rows { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+.nt-rows .nt-row { display: grid; grid-template-columns: auto 1fr auto auto; align-items: center; gap: 12px; padding: 10px 14px; }
+.nt-rows .nt-row .nt-card-actions { margin-top: 0; }
+.nt-rows .nt-row-text { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.nt-more > summary, .nt-fine > summary { cursor: pointer; font-weight: 700; font-size: var(--kb-fs-sm); margin: 4px 0 8px; }
+.nt-more > .nt-rows { margin-bottom: 0; }
+.nt-fine { margin-top: 10px; }
+.nt-hint { font-size: var(--kb-fs-xs); color: var(--muted); margin-top: 4px; }
+@media (max-width: 600px) {
+  .nt-rows .nt-row { grid-template-columns: auto 1fr auto; }
+  .nt-rows .nt-row .nt-card-actions { grid-column: 1 / -1; }
+}
 .net-link { color: var(--kb-text-accent); font-weight: 600; }
 /* Network: This NAS at home and one row per port (SET-24 m) */
 .net-home { margin-bottom: 14px; }

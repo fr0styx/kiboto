@@ -52,6 +52,20 @@ def settings() -> dict[str, Any]:
     return {**_defaults(), **(read_json(SETTINGS_FILE, {}) or {})}
 
 
+def installed() -> bool:
+    """Frigate runs here (a container from its image), so the Cameras card is worth showing."""
+    from backend.services.docker_client import DockerError, request
+
+    try:
+        st, data = request("GET", "/containers/json?all=1")
+    except (DockerError, OSError, ValueError):
+        logger.debug("frigate_events: Docker not reachable", exc_info=True)
+        return False
+    if st != 200 or not isinstance(data, list):
+        return False
+    return any("frigate" in str(c.get("Image", "")).lower() for c in data)
+
+
 def public() -> dict[str, Any]:
     s = settings()
     return {
