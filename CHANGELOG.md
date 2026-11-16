@@ -388,6 +388,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Kib's Privacy section says whether chats and the index are encrypted on this NAS**, being encrypted, locked
   because the key is missing, or not encrypted (with how to turn it on).
 
+#### Changes
+
+- **Kib's reading progress has a total**: "Kib is reading your files: 1,234 of about 5,000", from what Kib knew of
+  those folders last time. No drive is read to count; when more is found, it says "so far".
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

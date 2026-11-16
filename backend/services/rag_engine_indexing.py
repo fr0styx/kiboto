@@ -348,6 +348,28 @@ class RagIndexingMixin:
         t.start()
         return {"status": "started", **self.get_sync_progress()}
 
+    def known_files_under(self, paths: list[str]) -> int:
+        """How many files the index knows under these folders (0 when it knows none or cannot say)."""
+        total = 0
+        try:
+            conn = self._get_conn(readonly=True)
+        except (sqlite3.Error, OSError):
+            return 0
+        try:
+            for p in paths:
+                root = os.path.normpath(str(p)).rstrip("/")
+                total += int(
+                    conn.execute(
+                        "SELECT COUNT(*) FROM indexed_files WHERE canonical_path >= ? AND canonical_path < ?",
+                        (root + "/", root + "0"),
+                    ).fetchone()[0]
+                )
+        except sqlite3.Error:
+            return 0
+        finally:
+            conn.close()
+        return total
+
     def index_paths(
         self,
         paths: list[str],
@@ -367,7 +389,12 @@ class RagIndexingMixin:
 
         is_spinup = bool(auto_spinup_devs)
         dev_label = ", ".join(f"/dev/{d}" for d in (auto_spinup_devs or []) if d) or "array disk"
+        # AI 3: a total for "1,234 of about 5,000", from what the index knew of these folders last
+        # time; it reads the index on the SSD and no folder (a count would walk every drive)
+        known_total = self.known_files_under(clean_paths)
 
+        if _from_bg_worker:
+            self._sync_progress["total_files"] = known_total
         if not _from_bg_worker:
             self._stop_requested = False
             self._pause_event.set()
@@ -381,6 +408,7 @@ class RagIndexingMixin:
                 "skipped_unchanged": 0,
                 "deferred_standby": 0,
                 "errors": 0,
+                "total_files": known_total,
                 "respect_standby": respect_standby,
                 "auto_triggered_by_spinup": is_spinup,
                 "woken_disks": list(auto_spinup_devs or []),

@@ -8050,7 +8050,7 @@ export default {
   "kibs.off": "Kib est désactivé",
   "kibs.off_2": "Kib ne lit pas vos fichiers. Le chat et la recherche répondent avec ce qu’il sait déjà.",
   "kibs.turn_on": "Activer",
-  "kibs.reading_of": "Kib lit vos fichiers : {done} sur {total}",
+  "kibs.reading_of": "Kib lit vos fichiers : {done} sur environ {total}",
   "kibs.reading_so_far": "Kib lit vos fichiers : {done} pour l’instant",
   "kibs.reading_2": "Vous pouvez continuer à poser des questions.",
   "kibs.pause": "Mettre en pause",

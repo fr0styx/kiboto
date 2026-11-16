@@ -8050,7 +8050,7 @@ export default {
   "kibs.off": "Kib 已关闭",
   "kibs.off_2": "Kib 不读取你的文件。聊天和搜索只用它已知的内容回答。",
   "kibs.turn_on": "开启",
-  "kibs.reading_of": "Kib 正在读取你的文件：{done} / {total}",
+  "kibs.reading_of": "Kib 正在读取你的文件：{done} / 约 {total}",
   "kibs.reading_so_far": "Kib 正在读取你的文件：已读 {done}",
   "kibs.reading_2": "你可以继续提问。",
   "kibs.pause": "暂停",

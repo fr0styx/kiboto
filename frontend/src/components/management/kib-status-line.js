@@ -27,8 +27,9 @@ export function kibState(res = {}) {
   if (state === 'running') {
     const done = Number(sync.indexed_files || 0) + Number(sync.skipped_unchanged || 0);
     const total = Number(sync.total_files || 0);
-    const title = total > 0
-      ? t('kibs.reading_of', 'Kib is reading your files: {done} of {total}', { done: formatNumber(done), total: formatNumber(total) })
+    // the total is what the index knew of these folders last time: "about", and only while it holds
+    const title = total > 0 && done <= total
+      ? t('kibs.reading_of', 'Kib is reading your files: {done} of about {total}', { done: formatNumber(done), total: formatNumber(total) })
       : t('kibs.reading_so_far', 'Kib is reading your files: {done} so far', { done: formatNumber(done) });
     return { key: 'reading', icon: '↻', title, second: t('kibs.reading_2', 'You can keep asking.'), act: 'pause', label: t('kibs.pause', 'Pause') };
   }

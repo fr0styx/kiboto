@@ -23,7 +23,9 @@ describe('Kib status line (AI 4)', () => {
   it('names each other state, in the report\'s order', () => {
     expect(line({ ...ready, enabled: false })).toEqual(['off', '○', 'Kib is off', 'Kib does not read your files. Chat and search answer from what it already knows.', 'on']);
     expect(line({ ...ready, sync_progress: { state: 'running', indexed_files: 1200, skipped_unchanged: 34 } }).slice(2)).toEqual(['Kib is reading your files: 1,234 so far', 'You can keep asking.', 'pause']);
-    expect(kibState({ ...ready, sync_progress: { state: 'running', indexed_files: 10, total_files: 50 } }).title).toBe('Kib is reading your files: 10 of 50');
+    expect(kibState({ ...ready, sync_progress: { state: 'running', indexed_files: 10, total_files: 50 } }).title).toBe('Kib is reading your files: 10 of about 50');
+    // more read than the index knew of: the total no longer holds
+    expect(kibState({ ...ready, sync_progress: { state: 'running', indexed_files: 60, total_files: 50 } }).title).toBe('Kib is reading your files: 60 so far');
     expect(line({ ...ready, sync_state: 'paused', sync_progress: undefined }).slice(2)).toEqual(['Reading is paused', 'Kib still answers from what it knows.', 'resume']);
     expect(line({ ...ready, watched_paths: [] }).slice(3)).toEqual(['No folder is chosen, so Kib reads nothing.', 'folders']);
     expect(kibState({ ...ready, watched_paths: undefined }).key).toBe('look');
