@@ -65,4 +65,22 @@ describe('the Apps window: a simple view, and Docker details per person (SET-25 
     stopped.innerHTML = buildContainerRowInner({ id: 'd', name: 'x', state: 'exited', status: 'Exited', webui_url: 'http://[HOST]:1/', ports: [] }, 'nas.local');
     expect(stopped.querySelector('.docker-open-cell a')).toBeNull();
   });
+
+  it("Kiboto's own containers are left out of the simple list, and come back with the details", async () => {
+    const { renderContainersWindowTable, renderAppsSummary } = await import('../components/containers-manager.js');
+    document.body.innerHTML = '<div id="containers-manager-window"><div id="cw-status-chip"><span id="cw-stat-daemon"></span></div><table><tbody id="cw-docker-containers-tbody"></tbody></table></div>';
+    const list = [
+      { id: 'k', name: 'kiboto', state: 'running', status: 'Up', kiboto_own: true, ports: [] },
+      { id: 'j', name: 'jellyfin', state: 'running', status: 'Up', ports: [] },
+    ];
+    renderContainersWindowTable(list);
+    renderAppsSummary();
+    const names = () => [...document.querySelectorAll('#cw-docker-containers-tbody .btn-docker-name-link')].map((b) => b.textContent);
+    expect(names()).toEqual(['jellyfin']);
+    expect(document.getElementById('cw-stat-daemon')?.textContent).toContain('running');
+    localStorage.setItem('kiboto_apps_details', '1');
+    renderContainersWindowTable(list);
+    expect(names().sort()).toEqual(['jellyfin', 'kiboto']);
+  });
 });
+

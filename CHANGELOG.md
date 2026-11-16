@@ -52,6 +52,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   brings back the columns, filters, search, row boxes, stacks and network map; it is saved with your account.
   With no apps yet the window says so and offers Get apps.
 
+#### Changes
+
+- **The Apps list shows your apps, not Kiboto's parts**: Kiboto itself and its name responder are left out
+  (they still show with "Show Docker details").
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

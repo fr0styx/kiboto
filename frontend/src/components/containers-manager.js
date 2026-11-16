@@ -708,7 +708,8 @@ export function renderAppsSummary(failed = '') {
   const chip = document.getElementById('cw-status-chip');
   const said = document.getElementById('cw-stat-daemon');
   if (!chip || !said) return;
-  const { look, text } = appsSummary(_cwContainersList, _cwDockerState, failed);
+  const list = appsDetailsOn() ? _cwContainersList : _cwContainersList.filter((c) => !c.kiboto_own);
+  const { look, text } = appsSummary(list, _cwDockerState, failed);
   chip.className = `cw-docker-status-chip is-${look}`;
   said.textContent = text;
 }
@@ -821,7 +822,9 @@ export function renderContainersWindowTable(containersList = null) {
   const tbody = document.getElementById('cw-docker-containers-tbody');
   if (!tbody) return;
 
-  const totalCount = _cwContainersList.length;
+  // Kiboto's own containers are not household apps: only with the Docker details (SET-25)
+  const shownList = appsDetailsOn() ? _cwContainersList : _cwContainersList.filter((c) => !c.kiboto_own);
+  const totalCount = shownList.length;
   const runningCount = _cwContainersList.filter((c) => c.state === 'running').length;
   const stoppedCount = _cwContainersList.filter((c) => c.state !== 'running').length;
   const composeCount = _cwContainersList.filter((c) => c.managed_by === 'compose' || Boolean(c.stack)).length;
@@ -867,7 +870,7 @@ export function renderContainersWindowTable(containersList = null) {
   }
 
   // Filter list
-  const filtered = _cwContainersList.filter((c) => {
+  const filtered = shownList.filter((c) => {
     if (_cwFilter === 'running' && c.state !== 'running') return false;
     if (_cwFilter === 'stopped' && c.state === 'running') return false;
     if (_cwFilter === 'updates') {

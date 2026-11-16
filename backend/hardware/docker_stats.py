@@ -161,6 +161,19 @@ WELL_KNOWN_WEB_PORTS = [
 from backend import legacy_names
 from backend.services.docker_client import UnixHTTPConnection  # noqa: E402,F401  (one client, ARCH-3)
 
+# the name responder Kiboto starts (backend/services/nas_name.CONTAINER, which a test keeps equal)
+NAME_RESPONDER = "kiboto-name"
+
+
+def is_kiboto_own(cid: str, name: str) -> bool:
+    """Kiboto's own containers: the app itself and the name responder it starts (SET-25: the Apps
+    window lists the household's apps; these are part of Kiboto)."""
+    clean = (name or "").lstrip("/").lower()
+    if clean in (NAME_RESPONDER, f"{legacy_names.OLD_NAS_NAME}-name") or legacy_names.is_app_container(clean):
+        return True
+    host = socket.gethostname()
+    return bool(host and cid and (cid.startswith(host) or host.startswith(cid)))
+
 
 def _parse_ports_and_webui(
     raw_ports: list,
@@ -624,6 +637,7 @@ def read_docker_containers(force: bool = False) -> list[dict[str, Any]]:
                     "service": service,
                     "managed_by": managed_by,
                     "kiboto_app": legacy_names.is_managed(labels),  # installed by Kiboto (REL-10)
+                    "kiboto_own": is_kiboto_own(cid_full, name),  # Kiboto itself: not a household app (SET-25)
                     "zettnas_app": legacy_names.is_managed(labels),  # the same, for clients from before (until 2.2)
                     "network_mode": net_mode,
                     "ports": ports,
