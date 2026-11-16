@@ -7878,5 +7878,6 @@ export default {
   "signin.hours_set": "{user} hat die Anmeldezeiten einer Person geändert",
   "signin.someone": "Jemand",
   "signin.unreadable": "Das Anmeldeprotokoll konnte nicht gelesen werden: {error}",
-  "signin.none": "Noch keine Anmeldungen aufgezeichnet."
+  "signin.none": "Noch keine Anmeldungen aufgezeichnet.",
+  "apps.search": "Apps suchen"
 };

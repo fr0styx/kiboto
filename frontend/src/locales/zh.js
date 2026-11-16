@@ -7878,5 +7878,6 @@ export default {
   "signin.hours_set": "{user} 更改了某人的登录时段",
   "signin.someone": "某人",
   "signin.unreadable": "无法读取登录记录：{error}",
-  "signin.none": "还没有登录记录。"
+  "signin.none": "还没有登录记录。",
+  "apps.search": "搜索应用"
 };

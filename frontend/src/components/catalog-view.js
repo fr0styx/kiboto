@@ -43,9 +43,21 @@ export function imageRepo(image) {
 
 /** True when a container on this host runs the app's image. */
 export function isInstalled(app, containers) {
+  return Boolean(installedContainer(app, containers));
+}
+
+/** The installed container made from this catalog app, or null. */
+export function installedContainer(app, containers) {
   const repo = imageRepo(app.image);
-  if (!repo) return false;
-  return (containers || []).some((c) => imageRepo(c.image || c.Image) === repo);
+  if (!repo) return null;
+  return (containers || []).find((c) => imageRepo(c.image || c.Image) === repo) || null;
+}
+
+/** The page of an installed, running app, for the card's Open (SET-25); '' when there is none. */
+export function appPageUrl(container, host = typeof window !== 'undefined' ? window.location.hostname : '') {
+  if (!container || container.state !== 'running' || !container.webui_url) return '';
+  const url = String(container.webui_url).replace('[HOST]', host);
+  return /^https?:\/\//i.test(url) ? url : '';
 }
 
 /** Apps matching a category and a search (name, description, image, tags, category, source). */
@@ -84,7 +96,7 @@ export function logoSrc(url) {
 }
 
 /** One app card. Keeps the .catalog-app-card / .btn-deploy-app hooks other code relies on. */
-export function catalogCardHtml(app, { installed = false } = {}) {
+export function catalogCardHtml(app, { installed = false, openUrl = '' } = {}) {
   const icon = categoryIcon(app.category);
   const logo = app.logo
     ? `<img src="${escapeHtml(logoSrc(app.logo))}" alt="" loading="lazy" data-img-fallback="hide-show-next:inline" /><span class="cat-card-emoji" style="display:none;">${icon}</span>`
@@ -115,7 +127,9 @@ export function catalogCardHtml(app, { installed = false } = {}) {
       <p class="cat-card-desc">${escapeHtml(app.description || '')}</p>
       <div class="cat-card-foot">
         <span class="cat-card-port" title="${escapeHtml(t('catalog.port_hint', 'Suggested web UI port'))}">:${escapeHtml(String(app.default_port || ''))}</span>
-        <button type="button" class="btn-pill-toggle btn-deploy-app catalog-deploy" data-appid="${escapeHtml(app.id)}">${escapeHtml(installed ? t('catalog.install_again', 'Install again') : t('catalog.install', 'Install'))}</button>
+        ${installed && openUrl
+          ? `<a class="btn-pill-toggle catalog-open" href="${escapeHtml(openUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('apps.open', 'Open'))}</a>`
+          : `<button type="button" class="btn-pill-toggle btn-deploy-app catalog-deploy" data-appid="${escapeHtml(app.id)}">${escapeHtml(installed ? t('catalog.install_again', 'Install again') : t('catalog.install', 'Install'))}</button>`}
       </div>
     </div>`;
 }

@@ -82,5 +82,25 @@ describe('the Apps window: a simple view, and Docker details per person (SET-25 
     renderContainersWindowTable(list);
     expect(names().sort()).toEqual(['jellyfin', 'kiboto']);
   });
+
+  it('Get apps: an installed app with a page offers Open; search comes first', async () => {
+    const { installedContainer, appPageUrl, catalogCardHtml } = await import('../components/catalog-view.js');
+    const app = { id: 'jf', name: 'Jellyfin', image: 'jellyfin/jellyfin:latest', category: 'media' };
+    const box = { name: 'jellyfin', image: 'jellyfin/jellyfin:10.9', state: 'running', webui_url: 'http://[HOST]:8096/' };
+    expect(installedContainer(app, [box])).toBe(box);
+    expect(installedContainer({ id: 'x' }, [box])).toBeNull();
+    expect(appPageUrl(box, 'nas.local')).toBe('http://nas.local:8096/');
+    expect(appPageUrl({ ...box, state: 'exited' }, 'nas.local')).toBe('');
+    expect(appPageUrl({ ...box, webui_url: 'javascript:alert(1)' }, 'nas.local')).toBe('');
+    const card = document.createElement('div');
+    card.innerHTML = catalogCardHtml(app, { installed: true, openUrl: 'http://nas.local:8096/' });
+    expect(card.querySelector('a.catalog-open')?.getAttribute('href')).toBe('http://nas.local:8096/');
+    expect(card.querySelector('.btn-deploy-app')).toBeNull();
+    card.innerHTML = catalogCardHtml(app, { installed: true });
+    expect(card.querySelector('.btn-deploy-app')?.textContent).toBe('Install again');
+    const src = (await import('fs')).readFileSync((await import('path')).resolve(__dirname, '../components/containers-manager.js'), 'utf8');
+    const head = src.slice(src.indexOf('<div class="cw-catalog-head">'));
+    expect(head.indexOf('cw-catalog-search-input')).toBeLessThan(head.indexOf('cw-catalog-filter-pills'));
+  });
 });
 

@@ -7878,5 +7878,6 @@ export default {
   "signin.hours_set": "{user} cambió el horario de inicio de sesión de alguien",
   "signin.someone": "Alguien",
   "signin.unreadable": "No se pudo leer el registro de inicios de sesión: {error}",
-  "signin.none": "Aún no hay inicios de sesión registrados."
+  "signin.none": "Aún no hay inicios de sesión registrados.",
+  "apps.search": "Buscar apps"
 };

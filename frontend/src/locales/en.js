@@ -7878,5 +7878,6 @@ export default {
   "signin.hours_set": "{user} changed someone's sign-in hours",
   "signin.someone": "Someone",
   "signin.unreadable": "The sign-in log couldn't be read: {error}",
-  "signin.none": "No sign-ins recorded yet."
+  "signin.none": "No sign-ins recorded yet.",
+  "apps.search": "Search apps"
 };

@@ -15,3 +15,11 @@
 .cw-simple #cw-docker-bulk-bar, .cw-simple .docker-status-text { display: none !important; }
 .cw-simple .docker-actions-btn-group > .btn-container-act:not(.btn-docker-more-sheet) { display: none; }
 
+/* Get apps (SET-25): search first, the categories on one row, image and port with the Docker details */
+.cw-catalog-head { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+.cw-catalog-search { width: 100%; box-sizing: border-box; min-height: 40px; font-size: var(--kb-fs-sm); }
+.cw-catalog-one-row { display: flex; flex-wrap: nowrap; gap: 6px; overflow-x: auto; padding-bottom: 4px; }
+.cw-catalog-one-row > * { flex: 0 0 auto; }
+.catalog-open { text-decoration: none; }
+.cw-simple .cat-card-image, .cw-simple .cat-card-port { display: none; }
+

@@ -93,6 +93,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Each bay shows Drive Health's verdict**: "Healthy", "Keep an eye on it", "Replace soon" or "Replace now", in its
   colour, from the last check (no drive is woken to show it).
 
+#### Changes
+
+- **Get apps starts with search**: a full-width "Search apps" box, the categories on one row, and an installed
+  app's card offers Open for its page. The image and port show with "Show Docker details".
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

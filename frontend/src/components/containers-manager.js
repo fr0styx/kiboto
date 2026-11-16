@@ -5,7 +5,7 @@
  */
 
 import { api } from '../api.js';
-import { catalogCardHtml, catalogChipsHtml, filterCatalog, isInstalled, bindCatalogChips } from './catalog-view.js';
+import { catalogCardHtml, catalogChipsHtml, filterCatalog, installedContainer, appPageUrl, bindCatalogChips } from './catalog-view.js';
 import { escapeHtml, reconcileKeyedTable } from '../utils.js';
 import { emptyStateHtml } from './empty-state.js';
 import { ZettEventBus } from '../event-bus.js';
@@ -204,8 +204,10 @@ export function initContainersManager() {
           ${appsFamilyHtml()}
           ${appsDockerNetsHtml()}
           <div class="cwm-x-4" id="cw-docker-catalog-wrap" style="display: none;">
-            <div class="cwm-row-box">
-              <div class="cw-catalog-filter-pills cwm-row-5">
+            <!-- Get apps: search first and full width, the categories on one row (SET-25) -->
+            <div class="cw-catalog-head">
+              <input type="search" id="cw-catalog-search-input" placeholder="${t('apps.search', 'Search apps')}" aria-label="${t('apps.search', 'Search apps')}" class="tz-text-input cw-catalog-search">
+              <div class="cw-catalog-filter-pills cw-catalog-one-row">
                 <button class="btn-pill-toggle cw-cat-btn active" data-cat="all">${t('cw.cat_all', 'All')}</button>
                 <button class="btn-pill-toggle cw-cat-btn" data-cat="media">${t('cw.cat_media', 'Media')}</button>
                 <button class="btn-pill-toggle cw-cat-btn" data-cat="productivity">${t('cw.cat_productivity', 'Productivity')}</button>
@@ -213,9 +215,6 @@ export function initContainersManager() {
                 <button class="btn-pill-toggle cw-cat-btn" data-cat="security">${t('cw.cat_security', 'Security')}</button>
                 <button class="btn-pill-toggle cw-cat-btn" data-cat="smart_home">${t('cw.cat_smart_home', 'Smart home')}</button>
                 <button class="btn-pill-toggle cw-cat-btn" data-cat="downloaders">${t('cw.cat_downloaders', 'Downloaders')}</button>
-              </div>
-              <div class="cwm-x-2">
-                <input type="text" id="cw-catalog-search-input" placeholder="${t('ui.search_templates_apps_images', 'Search templates, apps, images...')}" class="tz-text-input cwm-xs-box">
               </div>
             </div>
             <div class="cwm-x-5" id="cw-catalog-grid" style="display: grid;">
@@ -779,7 +778,12 @@ export function renderCwCatalogGrid() {
     });
     return;
   }
-  grid.innerHTML = filtered.map((app) => catalogCardHtml(app, { installed: isInstalled(app, _cwContainersList) })).join('');
+  grid.innerHTML = filtered
+    .map((app) => {
+      const box = installedContainer(app, _cwContainersList);
+      return catalogCardHtml(app, { installed: Boolean(box), openUrl: appPageUrl(box) });
+    })
+    .join('');
 
   grid.querySelectorAll('.btn-deploy-app').forEach((btn) => {
     btn.addEventListener('click', async (e) => {

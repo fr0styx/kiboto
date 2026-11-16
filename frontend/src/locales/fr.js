@@ -7878,5 +7878,6 @@ export default {
   "signin.hours_set": "{user} a changé les horaires de connexion de quelqu'un",
   "signin.someone": "Quelqu'un",
   "signin.unreadable": "Le journal des connexions n'a pas pu être lu : {error}",
-  "signin.none": "Aucune connexion enregistrée pour l'instant."
+  "signin.none": "Aucune connexion enregistrée pour l'instant.",
+  "apps.search": "Rechercher des apps"
 };
