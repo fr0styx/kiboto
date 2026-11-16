@@ -7848,5 +7848,10 @@ export default {
   "now.drives_awake": "{n, plural, other {全部 # 块硬盘都在运行。}}",
   "now.drives_some": "{awake} 在运行，{asleep} 块在休眠。",
   "now.n_drives": "{n, plural, other {# 块硬盘}}",
-  "now.apps_title": "按占用排序的应用"
+  "now.apps_title": "按占用排序的应用",
+  "front.title": "前面板",
+  "front.light": "前灯",
+  "front.screen": "前屏幕",
+  "front.more": "颜色、亮度和夜间时段",
+  "front.failed": "未更改：{error}"
 };

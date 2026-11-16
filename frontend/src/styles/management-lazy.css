@@ -405,6 +405,10 @@
 .right-now-apps { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; font-size: var(--kb-fs-xs); }
 .right-now-apps li { display: flex; justify-content: space-between; gap: 10px; }
 .right-now-use { color: var(--muted); font-variant-numeric: tabular-nums; }
+/* General -> Front panel (SET-30) */
+.front-panel { display: flex; flex-direction: column; gap: 6px; }
+.front-panel-row { display: flex; justify-content: space-between; align-items: center; min-height: 44px; font-weight: 600; cursor: pointer; }
+.front-panel-more { align-self: flex-start; }
 .net-link { color: var(--kb-text-accent); font-weight: 600; }
 /* Network: This NAS at home and one row per port (SET-24 m) */
 .net-home { margin-bottom: 14px; }

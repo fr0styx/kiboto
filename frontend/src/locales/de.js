@@ -7848,5 +7848,10 @@ export default {
   "now.drives_awake": "{n, plural, one {Das Laufwerk ist wach.} other {Alle # Laufwerke sind wach.}}",
   "now.drives_some": "{awake} wach, {asleep} schlafen.",
   "now.n_drives": "{n, plural, one {# Laufwerk} other {# Laufwerke}}",
-  "now.apps_title": "Apps nach Auslastung"
+  "now.apps_title": "Apps nach Auslastung",
+  "front.title": "Vorderseite",
+  "front.light": "Leuchte vorne",
+  "front.screen": "Bildschirm vorne",
+  "front.more": "Farben, Helligkeit und Nachtzeiten",
+  "front.failed": "Das wurde nicht geändert: {error}"
 };

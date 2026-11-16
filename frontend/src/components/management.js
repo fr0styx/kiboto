@@ -812,6 +812,7 @@ export function initManagement() {
       import('./users.js').then((m) => m.loadUsersPane(subTabId || 'users-pane-list'));
     } else if (paneId === 'mgmt-pane-about') {
       fetchAndRenderSystemAbout();
+      import('./front-panel.js').then((m) => m.renderFrontPanel()).catch(() => {}); // SET-30, decision 2 a
     } else if (paneId === 'mgmt-pane-vms-list' || paneId === 'mgmt-pane-vms-create' || paneId === 'mgmt-pane-vms-kvm') {
       fetchAndRenderMgmtVms();
     } else if (paneId === 'mgmt-pane-hardware-ups') {

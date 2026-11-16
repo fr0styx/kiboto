@@ -73,6 +73,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   whether the drives are awake, and the five apps using the processor most, with their memory. It updates live
   while the tab is open.
 
+#### Changes
+
+- **The front light and screen on General**: on machines that have them, General has "Front panel" with an
+  On/Off switch for each, and a link to Hardware for colours, brightness and night times.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

@@ -7848,5 +7848,10 @@ export default {
   "now.drives_awake": "{n, plural, one {Le disque est actif.} other {Les # disques sont actifs.}}",
   "now.drives_some": "{awake} actifs, {asleep} en veille.",
   "now.n_drives": "{n, plural, one {# disque} other {# disques}}",
-  "now.apps_title": "Apps par utilisation"
+  "now.apps_title": "Apps par utilisation",
+  "front.title": "Façade",
+  "front.light": "Lumière en façade",
+  "front.screen": "Écran en façade",
+  "front.more": "Couleurs, luminosité et horaires de nuit",
+  "front.failed": "Rien n'a été changé : {error}"
 };

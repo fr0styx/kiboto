@@ -7848,5 +7848,10 @@ export default {
   "now.drives_awake": "{n, plural, one {The drive is awake.} other {All # drives are awake.}}",
   "now.drives_some": "{awake} awake, {asleep} asleep.",
   "now.n_drives": "{n, plural, one {# drive} other {# drives}}",
-  "now.apps_title": "Apps by use"
+  "now.apps_title": "Apps by use",
+  "front.title": "Front panel",
+  "front.light": "Front light",
+  "front.screen": "Front screen",
+  "front.more": "Colours, brightness and night times",
+  "front.failed": "That wasn't changed: {error}"
 };
