@@ -866,8 +866,14 @@ export function initManagement() {
         const kvmActive = tel?.kvm?.state === 'active';
         const kvmColor = kvmActive ? 'var(--ok2, #33cdb8)' : (tel?.kvm?.state === 'restricted' ? 'var(--warn, #f5a623)' : 'var(--danger, #ff6b6b)');
         const kvmBadge = tel?.kvm?.badge || (kvmActive ? 'KVM Acceleration Active' : 'Software Emulation');
-        const headroom = tel?.memory?.headroom_mb ? `${formatFixed(tel.memory.headroom_mb / 1024, 1)} GB Safe Headroom` : 'Dynamic';
-        const cpuRatio = tel?.cpu?.ratio ? `${tel.cpu.ratio}:1 Allocation` : 'Optimal';
+        // the server sends memory_budget and cpu_capacity; the old keys never came, so these boxes said
+        // "Dynamic" and "Optimal" on every NAS (VMs report 15-16). Unknown values are left out.
+        const budget = tel?.memory_budget || {};
+        const cpuCap = tel?.cpu_capacity || {};
+        const headroom = typeof budget.safe_headroom_gb === 'number'
+          ? t('mvm.mem_left', '{gb} GB', { gb: formatFixed(budget.safe_headroom_gb, 1) }) : '';
+        const threadsUsed = cpuCap.host_threads
+          ? t('mvm.threads_used', '{used} of {total}', { used: cpuCap.allocated_vcpus || 0, total: cpuCap.host_threads }) : '';
 
         strip.innerHTML = `
           <div class="mgx-box">
@@ -876,18 +882,18 @@ export function initManagement() {
               <span aria-hidden="true">⚡</span> <span>${escapeHtml(kvmBadge)}</span>
             </div>
           </div>
-          <div class="mgx-box">
-            <div class="mgx-xs-bold-muted">${t('mvm.ceiling', 'MEMORY CEILING')}</div>
+          ${headroom ? `<div class="mgx-box">
+            <div class="mgx-xs-bold-muted">${t('mvm.mem_left_label', 'Memory left for machines')}</div>
             <div style="font-size: 13px; font-weight: 700; color: var(--lt-ink-brand, var(--accent-cyan, #33cdb8)); margin-top: 4px;">
               ${escapeHtml(headroom)}
             </div>
-          </div>
-          <div class="mgx-box">
-            <div class="mgx-xs-bold-muted">${t('mvm.overcommit', 'vCPU OVERCOMMIT')}</div>
+          </div>` : ''}
+          ${threadsUsed ? `<div class="mgx-box">
+            <div class="mgx-xs-bold-muted">${t('mvm.threads_used_label', 'Processor threads in use')}</div>
             <div class="mgx-fs13-bold-strong">
-              ${escapeHtml(cpuRatio)}
+              ${escapeHtml(threadsUsed)}
             </div>
-          </div>
+          </div>` : ''}
         `;
       }
 
@@ -1012,21 +1018,23 @@ export function initManagement() {
               </span>
             </div>
             <div class="mgx-xs-muted-2">
-              ${escapeHtml(tel.kvm.details || 'Linux KVM hypervisor acceleration provides near bare-metal guest performance.')}
+              ${escapeHtml(tel.kvm.details || '')}
             </div>
             <div class="mgx-grid">
-              <div class="mgx-box-2">
+              ${tel.cpu_capacity?.host_threads ? `<div class="mgx-box-2">
                 <div class="mgx-xs-muted">${t('mvm.host_threads', 'CPU Host Threads')}</div>
-                <div class="mgx-fs14-bold-strong">${t('mvm.threads', '{count, plural, one {# Thread} other {# Threads}}', { count: tel.cpu?.host_threads || 8 })}</div>
-              </div>
-              <div class="mgx-box-2">
+                <div class="mgx-fs14-bold-strong">${t('mvm.threads', '{count, plural, one {# Thread} other {# Threads}}', { count: tel.cpu_capacity.host_threads })}</div>
+              </div>` : ''}
+              ${typeof tel.vhost_net === 'boolean' ? `<div class="mgx-box-2">
                 <div class="mgx-xs-muted">${t('mvm.vhost', 'vhost-net Acceleration')}</div>
-                <div class="mgx-fs14-bold-ok">${t('mvm.supported', 'Supported')}</div>
-              </div>
-              <div class="mgx-box-2">
-                <div class="mgx-xs-muted">${t('mvm.bridge', 'Default Network Bridge')}</div>
-                <div class="mgx-fs14-bold-brand" translate="no">br0 / virbr0</div>
-              </div>
+                <div class="${tel.vhost_net ? 'mgx-fs14-bold-ok' : 'mgx-fs14-bold-strong'}">${tel.vhost_net ? t('mvm.supported', 'Supported') : t('mvm.vhost_none', 'Not available')}</div>
+              </div>` : ''}
+              ${Array.isArray(tel.bridges) ? `<div class="mgx-box-2">
+                <div class="mgx-xs-muted">${t('mvm.bridges', 'Network bridges')}</div>
+                ${tel.bridges.length
+                  ? `<div class="mgx-fs14-bold-brand" translate="no">${escapeHtml(tel.bridges.join(' / '))}</div>`
+                  : `<div class="mgx-fs14-bold-strong">${t('mvm.bridges_none', 'None found')}</div>`}
+              </div>` : ''}
             </div>
           </div>
         `;

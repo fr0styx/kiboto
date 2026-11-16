@@ -7885,5 +7885,12 @@ export default {
   "act.chip_files": "Archivos",
   "apps.in_stack": "En {stack}",
   "chassis.guess": "Posición sin confirmar",
-  "chassis.guess_hint": "Kiboto colocó este disco aquí por suposición. Compruébalo en «Qué disco está en cada bahía»."
+  "chassis.guess_hint": "Kiboto colocó este disco aquí por suposición. Compruébalo en «Qué disco está en cada bahía».",
+  "mvm.mem_left_label": "Memoria libre para máquinas",
+  "mvm.mem_left": "{gb} GB",
+  "mvm.threads_used_label": "Hilos de procesador en uso",
+  "mvm.threads_used": "{used} de {total}",
+  "mvm.vhost_none": "No disponible",
+  "mvm.bridges": "Puentes de red",
+  "mvm.bridges_none": "No se encontró ninguno"
 };

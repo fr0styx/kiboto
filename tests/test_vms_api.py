@@ -569,3 +569,23 @@ def test_vm_advanced_config_crud(client, auth_headers):
 
     # Clean up
     client.delete(f"/api/vms/{vm_id}", headers=auth_headers)
+
+
+def test_telemetry_says_what_the_host_really_has(client, auth_headers, monkeypatch):
+    """VMs report 15-17: the summary shows real values; bridges are only the ones found."""
+    from backend.services import vm_host
+
+    monkeypatch.setattr(vm_host, "scan_bridges", lambda fallback=True: [] if not fallback else ["br0", "virbr0"])
+    body = client.get("/api/vms/telemetry", headers=auth_headers).json()
+    assert body["bridges"] == []
+    assert isinstance(body["vhost_net"], bool)
+    assert body["cpu_capacity"]["host_threads"] >= 1
+    assert "safe_headroom_gb" in body["memory_budget"]
+
+
+def test_bridge_scan_falls_back_only_when_asked(monkeypatch):
+    from backend.services import vm_host
+
+    monkeypatch.setattr(vm_host.os.path, "isdir", lambda p: False)
+    assert vm_host.scan_bridges() == ["br0", "virbr0"]
+    assert vm_host.scan_bridges(fallback=False) == []

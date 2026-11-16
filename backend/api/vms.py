@@ -371,6 +371,9 @@ def get_vms_telemetry():
         "cpu_capacity": cpu_cap,
         "active_vm_count": len([v for v in vms if v.get("state") == "running"]),
         "total_vm_count": len(vms),
+        # what the host really has, for the summary in Settings (VMs report 15-17)
+        "vhost_net": any(os.path.exists(p) for p in ("/dev/vhost-net", "/host/dev/vhost-net")),
+        "bridges": vm_host.scan_bridges(fallback=False),
     }
 
 

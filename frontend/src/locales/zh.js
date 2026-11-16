@@ -7885,5 +7885,12 @@ export default {
   "act.chip_files": "文件",
   "apps.in_stack": "属于 {stack}",
   "chassis.guess": "位置未确认",
-  "chassis.guess_hint": "Kiboto 是推测把这块硬盘放在这里的。请在“哪块硬盘在哪个盘位”中确认。"
+  "chassis.guess_hint": "Kiboto 是推测把这块硬盘放在这里的。请在“哪块硬盘在哪个盘位”中确认。",
+  "mvm.mem_left_label": "可供虚拟机使用的内存",
+  "mvm.mem_left": "{gb} GB",
+  "mvm.threads_used_label": "已用处理器线程",
+  "mvm.threads_used": "{used} / {total}",
+  "mvm.vhost_none": "不可用",
+  "mvm.bridges": "网桥",
+  "mvm.bridges_none": "未找到"
 };

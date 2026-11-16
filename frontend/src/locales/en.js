@@ -7885,5 +7885,12 @@ export default {
   "act.chip_files": "Files",
   "apps.in_stack": "In {stack}",
   "chassis.guess": "Position not confirmed",
-  "chassis.guess_hint": "Kiboto put this drive here by guess. Check it in \"Which drive is in which bay\"."
+  "chassis.guess_hint": "Kiboto put this drive here by guess. Check it in \"Which drive is in which bay\".",
+  "mvm.mem_left_label": "Memory left for machines",
+  "mvm.mem_left": "{gb} GB",
+  "mvm.threads_used_label": "Processor threads in use",
+  "mvm.threads_used": "{used} of {total}",
+  "mvm.vhost_none": "Not available",
+  "mvm.bridges": "Network bridges",
+  "mvm.bridges_none": "None found"
 };

@@ -123,6 +123,12 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Guessed bays say so**: a drive Kiboto placed in a bay by guess shows "Position not confirmed" until you set it
   in "Which drive is in which bay".
 
+#### Changes
+
+- **Virtual machines summary shows real numbers**: memory left for machines, processor threads in use, whether
+  vhost-net is there and which network bridges exist come from this NAS. Before, the boxes read fields the server
+  never sent and always said "Dynamic", "Optimal", "8 Threads", "Supported" and "br0 / virbr0".
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

@@ -14,7 +14,7 @@ describe('Mission Control VM pane (NUX-20)', () => {
       <span id="mgmt-hub-vms-pill"></span><span id="mgmt-sidebar-vms-badge"></span>
       <div id="mgmt-vms-summary-strip"></div><div id="mgmt-vms-grid"></div><div id="mgmt-vms-empty"></div><div id="mgmt-vms-kvm-body"></div>`;
     vi.spyOn(api, 'get').mockImplementation(async (url) => {
-      if (url === '/api/vms/telemetry') return { kvm: { state: 'active' }, cpu: {}, memory_budget: {} };
+      if (url === '/api/vms/telemetry') return { kvm: { state: 'active' }, cpu_capacity: { host_threads: 8, allocated_vcpus: 2 }, memory_budget: { safe_headroom_gb: 20.5 }, vhost_net: true, bridges: ['br0'] };
       if (url === '/api/vms') return [{ id: 'a', name: 'web', state: 'running', vcpus: 2, ram_gb: 4 }, { id: 'b', name: 'db', state: 'stopped' }];
       return {};
     });
@@ -25,7 +25,7 @@ describe('Mission Control VM pane (NUX-20)', () => {
     const text = document.body.textContent;
     expect(document.getElementById('mgmt-hub-vms-pill').textContent).toBe('1 Running');
     expect(document.getElementById('mgmt-sidebar-vms-badge').textContent).toBe('2 VMs');
-    for (const w of ['HYPERVISOR ENGINE', 'MEMORY CEILING', 'vCPU OVERCOMMIT', '⏹ Stop', '▶ Start', 'Console', 'Hardware Virtualization Extension', 'CPU Host Threads', '8 Threads', 'vhost-net Acceleration', 'Default Network Bridge']) {
+    for (const w of ['HYPERVISOR ENGINE', 'Memory left for machines', '20.5 GB', 'Processor threads in use', '2 of 8', '⏹ Stop', '▶ Start', 'Console', 'Hardware Virtualization Extension', 'CPU Host Threads', '8 Threads', 'vhost-net Acceleration', 'Supported', 'Network bridges', 'br0']) {
       expect(text).toContain(w);
     }
   });
@@ -39,5 +39,25 @@ describe('Mission Control VM pane (NUX-20)', () => {
     window.dispatchEvent(new Event('vm-updated'));
     await flush();
     expect(document.querySelector('.btn-vm-action-console').dataset.vmName).toBe('vm-x');
+  });
+
+  it('leaves out what the server did not say instead of making it up (VMs report 15-17)', async () => {
+    document.body.innerHTML = `
+      <div id="management-modal-overlay"><div id="management-window"><div id="management-window-header"></div></div></div>
+      <div id="mgmt-vms-summary-strip"></div><div id="mgmt-vms-grid"></div><div id="mgmt-vms-empty"></div><div id="mgmt-vms-kvm-body"></div>`;
+    vi.spyOn(api, 'get').mockImplementation(async (url) => {
+      if (url === '/api/vms/telemetry') return { kvm: { state: 'active' }, vhost_net: false, bridges: [] };
+      if (url === '/api/vms') return [];
+      return {};
+    });
+    try { initManagement(); } catch (_) { /* as above */ }
+    window.dispatchEvent(new Event('vm-updated'));
+    await flush();
+    const text = document.body.textContent;
+    for (const w of ['Dynamic', 'Optimal', 'Memory left', 'Processor threads', 'Threads', 'near bare-metal', 'virbr0']) {
+      expect(text).not.toContain(w);
+    }
+    expect(text).toContain('Not available');
+    expect(text).toContain('None found');
   });
 });

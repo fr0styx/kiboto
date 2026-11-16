@@ -7885,5 +7885,12 @@ export default {
   "act.chip_files": "Dateien",
   "apps.in_stack": "In {stack}",
   "chassis.guess": "Position nicht bestätigt",
-  "chassis.guess_hint": "Kiboto hat dieses Laufwerk geschätzt hier eingeordnet. Prüfen Sie es unter „Welches Laufwerk in welchem Einschub steckt“."
+  "chassis.guess_hint": "Kiboto hat dieses Laufwerk geschätzt hier eingeordnet. Prüfen Sie es unter „Welches Laufwerk in welchem Einschub steckt“.",
+  "mvm.mem_left_label": "Freier Speicher für Maschinen",
+  "mvm.mem_left": "{gb} GB",
+  "mvm.threads_used_label": "Belegte Prozessor-Threads",
+  "mvm.threads_used": "{used} von {total}",
+  "mvm.vhost_none": "Nicht verfügbar",
+  "mvm.bridges": "Netzwerkbrücken",
+  "mvm.bridges_none": "Keine gefunden"
 };

@@ -383,8 +383,9 @@ def scan_isos() -> list[dict[str, Any]]:
     return sorted(discovered, key=lambda x: x["name"].lower())
 
 
-def scan_bridges() -> list[str]:
-    """Inspects Linux kernel network bridges for virtual machine attachment."""
+def scan_bridges(fallback: bool = True) -> list[str]:
+    """Inspects Linux kernel network bridges for virtual machine attachment. With fallback, an empty
+    scan still offers br0 and virbr0 for the create form; without it, only bridges really found."""
     net_dirs = ["/host/sys/class/net", "/sys/class/net"]
     found = []
     for nd in net_dirs:
@@ -395,7 +396,9 @@ def scan_bridges() -> list[str]:
                         found.append(iface)
             except OSError:
                 pass
-    return sorted(list(set(found or ["br0", "virbr0"])))
+    if not found and fallback:
+        found = ["br0", "virbr0"]
+    return sorted(set(found))
 
 
 def scan_host_usb_devices() -> list[dict[str, Any]]:
