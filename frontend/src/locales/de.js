@@ -7781,5 +7781,20 @@ export default {
   "sec.verdict_look": "{n, plural, one {# Sache bitte prüfen} other {# Dinge bitte prüfen}}",
   "sec.verdict_ok": "Alles in Ordnung",
   "sec.verdict_ok_tips": "Alles in Ordnung · {n, plural, one {# Vorschlag} other {# Vorschläge}}",
-  "sec.check.https_transport.home": "Unverschlüsseltes HTTP im Heimnetz: zu Hause in Ordnung. Nutzen Sie HTTPS, bevor etwas von außen dieses NAS erreicht."
+  "sec.check.https_transport.home": "Unverschlüsseltes HTTP im Heimnetz: zu Hause in Ordnung. Nutzen Sie HTTPS, bevor etwas von außen dieses NAS erreicht.",
+  "conn.desc": "Wie andere Software Kiboto erreicht: Ihr Smart Home, Skripte und Werkzeuge mit einem API-Token und die gemeinsame Anmeldung Ihrer Apps.",
+  "conn.admins_only": "Nur Administratoren richten Verbindungen ein.",
+  "conn.smart_home": "Smart Home",
+  "conn.tokens": "API-Token",
+  "conn.signin": "Anmeldung für Ihre Apps",
+  "conn.monitoring": "Überwachungswerkzeuge",
+  "conn.tokens_moved": "API-Schlüssel für Skripte und andere Werkzeuge finden Sie unter Verbindungen.",
+  "conn.open": "Verbindungen öffnen",
+  "conn.redfish_unknown": "Konnte nicht lesen, ob Redfish eingeschaltet ist.",
+  "conn.redfish_title": "Redfish für Überwachungswerkzeuge",
+  "conn.redfish_desc": "Lässt Server-Überwachungswerkzeuge Temperaturen, Lüfter und Laufwerke über Redfish lesen. Sie melden sich mit einem Kiboto-Konto oder einem API-Token an. Lassen Sie es aus, wenn Sie kein solches Werkzeug nutzen.",
+  "conn.redfish_on": "Redfish-Anfragen beantworten",
+  "conn.redfish_saved_on": "Redfish ist eingeschaltet.",
+  "conn.redfish_saved_off": "Redfish ist ausgeschaltet.",
+  "conn.redfish_fail": "Redfish wurde nicht geändert: {error}"
 };

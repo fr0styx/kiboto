@@ -370,6 +370,11 @@
   .nt-rows .nt-row { grid-template-columns: auto 1fr auto; }
   .nt-rows .nt-row .nt-card-actions { grid-column: 1 / -1; }
 }
+/* Connections (SET-23) */
+.conn-body .account-h { margin: 18px 0 8px; }
+.conn-body .account-h:first-of-type { margin-top: 4px; }
+#acc-open-connections { align-self: flex-start; width: auto; }
+.conn-switch { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; min-height: 44px; }
 .net-link { color: var(--kb-text-accent); font-weight: 600; }
 /* Network: This NAS at home and one row per port (SET-24 m) */
 .net-home { margin-bottom: 14px; }

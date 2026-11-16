@@ -7781,5 +7781,20 @@ export default {
   "sec.verdict_look": "{n, plural, one {# thing needs a look} other {# things need a look}}",
   "sec.verdict_ok": "Everything is fine",
   "sec.verdict_ok_tips": "Everything is fine · {n, plural, one {# suggestion} other {# suggestions}}",
-  "sec.check.https_transport.home": "Plain HTTP on your home network: fine at home. Use HTTPS before anything reaches this NAS from outside."
+  "sec.check.https_transport.home": "Plain HTTP on your home network: fine at home. Use HTTPS before anything reaches this NAS from outside.",
+  "conn.desc": "How other software reaches Kiboto: your smart home, scripts and tools with an API token, and the sign-in your apps share.",
+  "conn.admins_only": "Only administrators set up connections.",
+  "conn.smart_home": "Smart home",
+  "conn.tokens": "API tokens",
+  "conn.signin": "Sign-in for your apps",
+  "conn.monitoring": "Monitoring tools",
+  "conn.tokens_moved": "API keys for scripts and other tools are on Connections.",
+  "conn.open": "Open Connections",
+  "conn.redfish_unknown": "Couldn't read whether Redfish is on.",
+  "conn.redfish_title": "Redfish for monitoring tools",
+  "conn.redfish_desc": "Lets server-monitoring tools read temperatures, fans and drives over Redfish. They sign in with a Kiboto account or an API token. Leave it off unless you use such a tool.",
+  "conn.redfish_on": "Answer Redfish requests",
+  "conn.redfish_saved_on": "Redfish is on.",
+  "conn.redfish_saved_off": "Redfish is off.",
+  "conn.redfish_fail": "Redfish wasn't changed: {error}"
 };

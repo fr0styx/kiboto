@@ -1,6 +1,6 @@
 /** SET-03: the Security and Notifications tabs load an administrator's set-up for administrators only. */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { loadAccountPane, loadBackupExtras, loadSecurityPane, loadNotificationsPane } from '../components/management/admin-panes.js';
+import { loadAccountPane, loadBackupExtras, loadSecurityPane, loadNotificationsPane, loadConnectionsPane } from '../components/management/admin-panes.js';
 import '../route-access.js';
 import { ZettEventBus } from '../event-bus.js';
 import { fetchAndRenderSecurityPosture } from '../components/management/security.js';
@@ -23,9 +23,10 @@ vi.mock('../components/users.js', () => ({ loadAccountParts: vi.fn() }));
 vi.mock('../components/management/home-assistant.js', () => ({ loadHomeAssistantCard: vi.fn() }));
 vi.mock('../components/management/fleet.js', () => ({ loadFleetCard: vi.fn() }));
 vi.mock('../components/push-card.js', () => ({ renderPushCard: vi.fn() }));
+vi.mock('../components/management/connections.js', () => ({ renderRedfishCard: vi.fn() }));
 
 const flush = () => new Promise((r) => setTimeout(r, 0));
-const ADMIN_LOADERS = [fetchAndRenderSecurityPosture, renderGuardPanel, renderFileActivity, renderSsoPanel, renderLdapPanel];
+const ADMIN_LOADERS = [fetchAndRenderSecurityPosture, renderGuardPanel, renderFileActivity]; // sign-in cards moved to Connections (SET-23)
 
 describe('the Security and Notifications tabs (SET-03)', () => {
   beforeEach(() => {
@@ -81,24 +82,39 @@ describe('My account (SET-19, decision X4)', () => {
     ZettEventBus.emit('session:user', { scopes: ['*'] });
     expect(loadAccountPane()).toBe(true);
     await flush();
-    expect(renderApiTokens).toHaveBeenCalledTimes(1);
+    expect(renderApiTokens).not.toHaveBeenCalled(); // the keys live on Connections now (SET-23)
   });
 });
 
 describe('cards moved from Network (SET-24)', () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it('Home Assistant loads with Notifications for administrators only', async () => {
+  it('Home Assistant, API tokens, sign-in and Redfish load with Connections, for administrators only (SET-23)', async () => {
     const { loadHomeAssistantCard } = await import('../components/management/home-assistant.js');
-    document.body.innerHTML = '<div id="mgmt-pane-notifications"><div id="notif-ha-grid" data-admin-only></div></div>';
+    const { renderRedfishCard } = await import('../components/management/connections.js');
+    document.body.innerHTML = '<div id="mgmt-pane-connections"><p class="conn-admins"></p><div id="notif-ha-grid" data-admin-only></div></div>';
     ZettEventBus.emit('session:user', { scopes: ['system:view'] });
-    loadNotificationsPane();
+    expect(loadConnectionsPane()).toBe(false);
     await flush();
-    expect(loadHomeAssistantCard).not.toHaveBeenCalled();
+    for (const f of [loadHomeAssistantCard, renderApiTokens, renderSsoPanel, renderLdapPanel, renderRedfishCard]) expect(f).not.toHaveBeenCalled();
+    expect(/** @type {HTMLElement} */ (document.querySelector('.conn-admins')).hidden).toBe(false);
     ZettEventBus.emit('session:user', { scopes: ['*'] });
+    expect(loadConnectionsPane()).toBe(true);
+    await flush();
+    for (const f of [loadHomeAssistantCard, renderApiTokens, renderSsoPanel, renderLdapPanel, renderRedfishCard]) expect(f).toHaveBeenCalledTimes(1);
+    expect(/** @type {HTMLElement} */ (document.querySelector('.conn-admins')).hidden).toBe(true);
     loadNotificationsPane();
     await flush();
-    expect(loadHomeAssistantCard).toHaveBeenCalledTimes(1);
+    expect(loadHomeAssistantCard).toHaveBeenCalledTimes(1); // not again from Notifications
+  });
+
+  it("My account's button opens Connections", () => {
+    document.body.innerHTML = '<div id="mgmt-pane-account"><button id="acc-open-connections"></button></div>';
+    const open = vi.fn();
+    /** @type {any} */ (window).openManagementSection = open;
+    loadAccountPane();
+    /** @type {HTMLElement} */ (document.getElementById('acc-open-connections')).click();
+    expect(open).toHaveBeenCalledWith('mgmt-pane-connections');
   });
 
   it('your other Kiboto boxes load with Backup', async () => {

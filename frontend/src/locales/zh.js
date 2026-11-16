@@ -7781,5 +7781,20 @@ export default {
   "sec.verdict_look": "{n, plural, other {# 项需要查看}}",
   "sec.verdict_ok": "一切正常",
   "sec.verdict_ok_tips": "一切正常 · {n, plural, other {# 条建议}}",
-  "sec.check.https_transport.home": "家庭网络中使用未加密的 HTTP：在家里没有问题。在任何外部访问到达此 NAS 之前，请改用 HTTPS。"
+  "sec.check.https_transport.home": "家庭网络中使用未加密的 HTTP：在家里没有问题。在任何外部访问到达此 NAS 之前，请改用 HTTPS。",
+  "conn.desc": "其他软件如何连接 Kiboto：你的智能家居、使用 API 令牌的脚本和工具，以及应用共用的登录方式。",
+  "conn.admins_only": "只有管理员可以设置连接。",
+  "conn.smart_home": "智能家居",
+  "conn.tokens": "API 令牌",
+  "conn.signin": "应用的登录方式",
+  "conn.monitoring": "监控工具",
+  "conn.tokens_moved": "脚本和其他工具使用的 API 密钥在“连接”中。",
+  "conn.open": "打开“连接”",
+  "conn.redfish_unknown": "无法读取 Redfish 是否已开启。",
+  "conn.redfish_title": "供监控工具使用的 Redfish",
+  "conn.redfish_desc": "允许服务器监控工具通过 Redfish 读取温度、风扇和硬盘信息。它们使用 Kiboto 账户或 API 令牌登录。如果你不使用这类工具，请保持关闭。",
+  "conn.redfish_on": "响应 Redfish 请求",
+  "conn.redfish_saved_on": "Redfish 已开启。",
+  "conn.redfish_saved_off": "Redfish 已关闭。",
+  "conn.redfish_fail": "Redfish 未更改：{error}"
 };

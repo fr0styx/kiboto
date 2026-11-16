@@ -7781,5 +7781,20 @@ export default {
   "sec.verdict_look": "{n, plural, one {# point à vérifier} other {# points à vérifier}}",
   "sec.verdict_ok": "Tout va bien",
   "sec.verdict_ok_tips": "Tout va bien · {n, plural, one {# suggestion} other {# suggestions}}",
-  "sec.check.https_transport.home": "HTTP non chiffré sur votre réseau domestique : sans souci à la maison. Passez en HTTPS avant que quoi que ce soit n'atteigne ce NAS depuis l'extérieur."
+  "sec.check.https_transport.home": "HTTP non chiffré sur votre réseau domestique : sans souci à la maison. Passez en HTTPS avant que quoi que ce soit n'atteigne ce NAS depuis l'extérieur.",
+  "conn.desc": "Comment d'autres logiciels joignent Kiboto : votre maison connectée, les scripts et outils avec un jeton d'API, et la connexion partagée par vos apps.",
+  "conn.admins_only": "Seuls les administrateurs configurent les connexions.",
+  "conn.smart_home": "Maison connectée",
+  "conn.tokens": "Jetons d'API",
+  "conn.signin": "Connexion pour vos apps",
+  "conn.monitoring": "Outils de supervision",
+  "conn.tokens_moved": "Les clés d'API pour les scripts et autres outils sont dans Connexions.",
+  "conn.open": "Ouvrir Connexions",
+  "conn.redfish_unknown": "Impossible de savoir si Redfish est activé.",
+  "conn.redfish_title": "Redfish pour les outils de supervision",
+  "conn.redfish_desc": "Permet aux outils de supervision de lire les températures, les ventilateurs et les disques via Redfish. Ils se connectent avec un compte Kiboto ou un jeton d'API. Laissez-le désactivé si vous n'utilisez pas un tel outil.",
+  "conn.redfish_on": "Répondre aux requêtes Redfish",
+  "conn.redfish_saved_on": "Redfish est activé.",
+  "conn.redfish_saved_off": "Redfish est désactivé.",
+  "conn.redfish_fail": "Redfish n'a pas été modifié : {error}"
 };

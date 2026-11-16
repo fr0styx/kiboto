@@ -2,7 +2,7 @@ import { syncWidgetSettingsUI } from './widgets.js';
 import { isNvmeDrive } from './temp-rule.js';
 import { refreshAndSay } from './refresh-say.js';
 import { askPower, isShuttingDown, powerToast } from './vm/power.js';
-import { loadAccountPane, loadBackupExtras, loadSecurityPane, loadNotificationsPane } from './management/admin-panes.js';
+import { loadAccountPane, loadBackupExtras, loadSecurityPane, loadNotificationsPane, loadConnectionsPane } from './management/admin-panes.js';
 import { kibPaneFor, loadKibExtras } from './management/kib-access.js';
 import { setIconLabel } from '../ui/primitives.js';
 import { syncDesktopThemeUI, openDrawer, restoreHardwareTabsToManagement } from './settings.js';
@@ -154,6 +154,7 @@ export const SUBPANE_MAP = {
   'mgmt-pane-events': { section: 'mgmt-sec-system-group', pane: 'mgmt-pane-events' },
   'mgmt-sec-about': { section: 'mgmt-sec-system-group', pane: 'mgmt-pane-about' },
   'mgmt-pane-about': { section: 'mgmt-sec-system-group', pane: 'mgmt-pane-about' },
+  'mgmt-pane-connections': { section: 'mgmt-sec-system-group', pane: 'mgmt-pane-connections' }, // SET-23, decision 8
 
   // --- Appearance (Preserving Wallpaper section compatibility) ---
   'appearance': { section: 'mgmt-sec-wallpaper', pane: 'mgmt-pane-wallpaper' },
@@ -800,6 +801,8 @@ export function initManagement() {
       loadSecurityPane(); // an administrator's set-up only for administrators (SET-03)
     } else if (paneId === 'mgmt-pane-notifications') {
       loadNotificationsPane();
+    } else if (paneId === 'mgmt-pane-connections') {
+      loadConnectionsPane();
     } else if (paneId === 'mgmt-pane-account') {
       loadAccountPane();
     } else if (paneId === 'mgmt-pane-users') {

@@ -13,28 +13,43 @@ export function loadSecurityPane() {
   if (adminToo) {
     import('../guard-panel.js').then((m) => m.renderGuardPanel()).catch(() => {});
     import('../file-activity.js').then((m) => m.renderFileActivity()).catch(() => {}); // FEAT-12
-    import('../sso.js').then((m) => { m.renderSsoPanel(); m.renderLdapPanel(); }).catch(() => {});
     fetchAndRenderSecurityPosture();
   }
   return adminToo;
 }
 
 /** My account (SET-19, decision X4): password, two-step sign-in and passkeys, signed-in devices and
- *  your data for every role; API keys for administrators.
+ *  your data for every role; for administrators a way to the API keys on Connections (SET-23).
  *  @returns {boolean} true when the administrator's part was loaded too */
 export function loadAccountPane() {
   const adminToo = !hideAdminOnly(document.getElementById('mgmt-pane-account'));
   import('../users.js').then((m) => m.loadAccountParts()).catch(() => {});
   import('./user-data.js').then((m) => m.installMyData()).catch(() => {}); // your data (B8)
-  if (adminToo) import('../settings.js').then((m) => m.renderApiTokens && m.renderApiTokens()).catch(() => {});
+  const open = document.getElementById('acc-open-connections'); // API keys live on Connections (SET-23)
+  if (open) open.onclick = () => /** @type {any} */ (window).openManagementSection?.('mgmt-pane-connections');
   return adminToo;
+}
+
+/** Connections (SET-23, Settings decision 8): Home Assistant, API tokens, single sign-on and LDAP,
+ *  Redfish. An Advanced page, for administrators.
+ *  @returns {boolean} true when the administrator's part was loaded */
+export function loadConnectionsPane() {
+  const pane = document.getElementById('mgmt-pane-connections');
+  const adminToo = !hideAdminOnly(pane);
+  const note = /** @type {HTMLElement | null} */ (pane?.querySelector('.conn-admins') || null);
+  if (note) note.hidden = adminToo;
+  if (!adminToo) return false;
+  import('./home-assistant.js').then((m) => m.loadHomeAssistantCard()).catch(() => {});
+  import('../settings.js').then((m) => m.renderApiTokens && m.renderApiTokens()).catch(() => {});
+  import('../sso.js').then((m) => { m.renderSsoPanel(); m.renderLdapPanel(); }).catch(() => {});
+  import('./connections.js').then((m) => m.renderRedfishCard()).catch(() => {});
+  return true;
 }
 
 /** @returns {boolean} true when the administrator's part was loaded too */
 export function loadNotificationsPane() {
   const adminToo = !hideAdminOnly(document.getElementById('mgmt-pane-notifications'));
   if (adminToo) fetchAndRenderNotificationConfig();
-  if (adminToo) import('./home-assistant.js').then((m) => m.loadHomeAssistantCard()).catch(() => {}); // from Network (SET-24)
   import('../push-card.js').then((m) => m.renderPushCard()).catch(() => {});
   return adminToo;
 }

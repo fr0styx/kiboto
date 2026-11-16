@@ -130,8 +130,9 @@ export function handleSecurityAdvisorClick(checkId) {
     }
 
     case 'stale_api_tokens': {
+      // the tokens live on Connections, which opens even when Advanced is off (SET-23)
       if (typeof window.openManagementWindow === 'function') {
-        window.openManagementWindow('mgmt-sec-system-group', 'mgmt-pane-security');
+        window.openManagementWindow('mgmt-sec-system-group', 'mgmt-pane-connections');
       }
       setTimeout(() => {
         const tokensList = document.getElementById('api-tokens-list');
@@ -297,15 +298,17 @@ export async function fetchAndRenderSecurityPosture() {
         const state = checkState(c);
         const passIcon = { ok: '✔', tip: 'ℹ', look: '✖' }[state];
         const passColor = { ok: 'var(--lt-t-22c55eff, #22c55e)', tip: 'var(--kb-text-muted)', look: 'var(--lt-t-fca5a5ff, #fca5a5)' }[state]; // the lighter red passes 4.5:1 on the dark row
-        const badgeBg = c.passed ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)';
+        // a suggestion is neutral, not red like what needs a look (SET-23)
+        const badgeBg = { ok: 'rgba(34,197,94,0.08)', tip: 'rgba(255,255,255,0.03)', look: 'rgba(239,68,68,0.08)' }[state];
+        const rowLine = { ok: 'rgba(34,197,94,0.2)', tip: 'var(--kb-line-8, rgba(255,255,255,0.08))', look: 'rgba(239,68,68,0.3)' }[state];
         const actionText = c.passed ? t('sec.action_review', 'Review') : t('sec.action_configure', 'Set up');
         return `
-          <div class="sec-advisor-item ${c.passed ? 'passed' : 'needs-action'}" data-check-id="${escapeHtml(c.id)}" style="background:${badgeBg}; border:1px solid ${c.passed ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.3)'};">
+          <div class="sec-advisor-item ${c.passed ? 'passed' : 'needs-action'}" data-check-id="${escapeHtml(c.id)}" style="background:${badgeBg}; border:1px solid ${rowLine};">
             <div style="display:flex; align-items:center; gap:10px; flex:1; min-width:0;">
               <span class="sec-advisor-item-icon" style="color:${passColor}; font-weight:800; font-size: var(--kb-fs-sm); line-height:1;">${passIcon}</span>
               <div style="min-width:0;">
                 <div style="font-weight:600; color:var(--lt-t-f5f9f9ff, #f5f9f9); font-size: var(--kb-fs-sm); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(checkName(c))}</div>
-                <div style="font-size: var(--kb-fs-xs); color:${c.passed ? 'var(--kb-text-muted)' : 'var(--lt-t-fca5a5ff, #fca5a5)'}; margin-top:2px;">${escapeHtml(checkDetails(c))}</div>
+                <div style="font-size: var(--kb-fs-xs); color:${state === 'look' ? 'var(--lt-t-fca5a5ff, #fca5a5)' : 'var(--kb-text-muted)'}; margin-top:2px;">${escapeHtml(checkDetails(c))}</div>
               </div>
             </div>
             <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">

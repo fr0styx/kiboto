@@ -167,7 +167,7 @@ describe('Security Advisor Hardening Checklist - Interactive Configuration Routi
 
     handleSecurityAdvisorClick('stale_api_tokens');
 
-    expect(window.openManagementWindow).toHaveBeenCalledWith('mgmt-sec-system-group', 'mgmt-pane-security');
+    expect(window.openManagementWindow).toHaveBeenCalledWith('mgmt-sec-system-group', 'mgmt-pane-connections');
 
     vi.advanceTimersByTime(120);
     expect(scrollSpy).toHaveBeenCalled();

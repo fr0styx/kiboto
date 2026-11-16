@@ -107,7 +107,7 @@
             <span class="mgmt-sidebar-text" data-i18n="mgmt.sidebar_vms">Virtual machines</span>
             <span class="mgmt-sidebar-badge" id="mgmt-sidebar-vms-badge" style="display:none;">0 VMs</span>
           </button>
-          <button class="mgmt-sidebar-item" data-mgmt-target="mgmt-sec-system-group" data-mgmt-pane="mgmt-pane-security" data-route="connections" data-group="advanced" title="Connections" data-i18n-title="mgmt.sidebar_connections">
+          <button class="mgmt-sidebar-item" data-mgmt-target="mgmt-sec-system-group" data-mgmt-pane="mgmt-pane-connections" data-route="connections" data-group="advanced" title="Connections" data-i18n-title="mgmt.sidebar_connections">
             <svg class="mgmt-sidebar-svg"><use href="#i-key"/></svg>
             <span class="mgmt-sidebar-text" data-i18n="mgmt.sidebar_connections">Connections</span>
           </button>
@@ -2507,6 +2507,10 @@
                 <svg class="ic" style="width: 14px; height: 14px;"><use href="#i-globe"/></svg>
                 <span data-i18n="mgmt.subtab_language">Time, Language & Region</span>
               </button>
+                <button class="mgmt-inner-tab" role="tab" aria-selected="false" data-tab-target="mgmt-pane-connections" id="mgmt-tab-connections" data-route="connections">
+                  <svg class="ic" style="width: 14px; height: 14px;"><use href="#i-key"/></svg>
+                  <span data-i18n="mgmt.sidebar_connections">Connections</span>
+                </button>
                 <button class="mgmt-inner-tab" role="tab" aria-selected="false" data-tab-target="mgmt-pane-about" id="mgmt-tab-about">
                   <svg class="ic" style="width: 14px; height: 14px;"><use href="#i-globe"/></svg>
                   <span data-i18n="mgmt.subtab_about">About & Updates</span>
@@ -2627,32 +2631,8 @@
                 </section>
                 <section class="account-section" aria-labelledby="acc-api-title" data-admin-only>
                   <h3 id="acc-api-title" class="account-h" data-i18n="account.api_keys">API keys</h3>
-              <div class="sec-box-4" data-admin-only>
-                <div class="sec-row-4">
-                  <span class="sec-sm-bold-strong" data-i18n="settings.api_tokens">API Tokens & Automation Keys</span>
-                </div>
-                <div class="sec-xs-muted-2" data-i18n="mw.generate_scoped_api_tkns_for_third">
-                  Generate scoped API tokens for third-party integrations (e.g., Home Assistant, Prometheus, or backup automation).
-                </div>
-                <div class="sec-col-2" id="api-tokens-list">
-                  <div class="sec-xs-muted-3" data-i18n="mw.loading">Loading...</div>
-                </div>
-                <div class="sec-row-5">
-                  <input type="text" id="new-token-name" placeholder="Token Name (e.g. Home Assistant)" data-i18n-placeholder="ui.token_name_e_g_home" class="tz-select-input sec-sm-strong-box-grow" aria-label="Token Name (e.g. Home Assistant)" data-i18n-aria-label="ui.token_name_e_g_home">
-                  <button id="btn-generate-token" class="btn-pill-toggle" style="color: var(--lt-ink-brand, var(--brand, #4fd8c4)); border-color: rgba(79,216,196,0.35); background: rgba(79,216,196,0.12);" data-i18n="mw.generate">Generate</button>
-                </div>
-                <label for="new-token-kind" class="kb-sub is-spaced" data-i18n="tokens.kind_label">What it may do</label>
-                <select id="new-token-kind" class="tz-select-input kb-token-kind">
-                  <option value="files-read" data-i18n="tokens.kind_files_read">Read files</option>
-                  <option value="files-write" data-i18n="tokens.kind_files_write">Read and change files</option>
-                  <option value="monitoring" data-i18n="tokens.kind_monitoring">See how the server is doing (monitoring)</option>
-                  <option value="mcp" data-i18n="tokens.kind_mcp">An AI assistant (MCP): search and read files</option>
-                  <option value="full" data-i18n="tokens.kind_full">Everything you can do (only for a tool you trust completely)</option>
-                </select>
-                <label for="new-token-folders" class="kb-sub is-spaced" data-i18n="tokens.folders_label">Only these folders (optional, one per line)</label>
-                <textarea id="new-token-folders" class="tz-select-input kb-token-folders" rows="2" placeholder="/mnt/user/Documents" data-i18n-placeholder="tokens.folders_placeholder"></textarea>
-                <div id="api-token-created" class="kb-token-created" role="status" hidden></div>
-              </div>
+              <p class="kb-sub" data-i18n="conn.tokens_moved">API keys for scripts and other tools are on Connections.</p>
+              <button type="button" class="btn-pill-toggle" id="acc-open-connections" data-i18n="conn.open">Open Connections</button>
                 </section>
               </div>
             </div>
@@ -2692,8 +2672,6 @@
 
               <!-- Ransomware guard and blocked addresses (M4, M5) -->
               <div id="sec-guard-card" class="kb-card kb-card--divided" aria-live="polite" data-admin-only></div>
-              <div id="sec-sso-card" class="kb-card kb-card--divided" data-admin-only></div>
-              <div id="sec-ldap-card" class="kb-card kb-card--divided" data-admin-only></div>
               <div id="file-activity-mount" class="kb-card kb-card--divided" hidden data-admin-only></div>
 
               <!-- Scoped API Tokens -->
@@ -2959,8 +2937,50 @@
                   <div id="frigate-events-mount"></div>
                 </section>
 
-                <!-- Home Assistant: alerts and sensors to your smart home (moved from Network, SET-24) -->
+              </div>
+            </div>
+            <!-- Connections (SET-23, Settings decision 8): what other software uses to reach Kiboto; an Advanced page -->
+            <div id="mgmt-pane-connections" class="mgmt-tab-pane" style="display: none;">
+              <div class="mgmt-card-intro">
+                <div class="mgmt-card-intro-title"><svg class="ic"><use href="#i-key"/></svg> <span data-i18n="mgmt.sidebar_connections">Connections</span></div>
+                <div class="mgmt-card-intro-desc" data-i18n="conn.desc">How other software reaches Kiboto: your smart home, scripts and tools with an API token, and the sign-in your apps share.</div>
+              </div>
+              <div class="mgmt-detail-body conn-body">
+                <p class="kb-sub conn-admins" data-i18n="conn.admins_only">Only administrators set up connections.</p>
+                <h3 class="account-h" data-i18n="conn.smart_home" data-admin-only>Smart home</h3>
                 <div class="nsv-grid" id="notif-ha-grid" data-admin-only></div>
+                <h3 class="account-h" data-i18n="conn.tokens" data-admin-only>API tokens</h3>
+              <div class="sec-box-4" data-admin-only>
+                <div class="sec-row-4">
+                  <span class="sec-sm-bold-strong" data-i18n="settings.api_tokens">API Tokens & Automation Keys</span>
+                </div>
+                <div class="sec-xs-muted-2" data-i18n="mw.generate_scoped_api_tkns_for_third">
+                  Generate scoped API tokens for third-party integrations (e.g., Home Assistant, Prometheus, or backup automation).
+                </div>
+                <div class="sec-col-2" id="api-tokens-list">
+                  <div class="sec-xs-muted-3" data-i18n="mw.loading">Loading...</div>
+                </div>
+                <div class="sec-row-5">
+                  <input type="text" id="new-token-name" placeholder="Token Name (e.g. Home Assistant)" data-i18n-placeholder="ui.token_name_e_g_home" class="tz-select-input sec-sm-strong-box-grow" aria-label="Token Name (e.g. Home Assistant)" data-i18n-aria-label="ui.token_name_e_g_home">
+                  <button id="btn-generate-token" class="btn-pill-toggle" style="color: var(--lt-ink-brand, var(--brand, #4fd8c4)); border-color: rgba(79,216,196,0.35); background: rgba(79,216,196,0.12);" data-i18n="mw.generate">Generate</button>
+                </div>
+                <label for="new-token-kind" class="kb-sub is-spaced" data-i18n="tokens.kind_label">What it may do</label>
+                <select id="new-token-kind" class="tz-select-input kb-token-kind">
+                  <option value="files-read" data-i18n="tokens.kind_files_read">Read files</option>
+                  <option value="files-write" data-i18n="tokens.kind_files_write">Read and change files</option>
+                  <option value="monitoring" data-i18n="tokens.kind_monitoring">See how the server is doing (monitoring)</option>
+                  <option value="mcp" data-i18n="tokens.kind_mcp">An AI assistant (MCP): search and read files</option>
+                  <option value="full" data-i18n="tokens.kind_full">Everything you can do (only for a tool you trust completely)</option>
+                </select>
+                <label for="new-token-folders" class="kb-sub is-spaced" data-i18n="tokens.folders_label">Only these folders (optional, one per line)</label>
+                <textarea id="new-token-folders" class="tz-select-input kb-token-folders" rows="2" placeholder="/mnt/user/Documents" data-i18n-placeholder="tokens.folders_placeholder"></textarea>
+                <div id="api-token-created" class="kb-token-created" role="status" hidden></div>
+              </div>
+                <h3 class="account-h" data-i18n="conn.signin" data-admin-only>Sign-in for your apps</h3>
+                <div id="sec-sso-card" class="kb-card kb-card--divided" data-admin-only></div>
+                <div id="sec-ldap-card" class="kb-card kb-card--divided" data-admin-only></div>
+                <h3 class="account-h" data-i18n="conn.monitoring" data-admin-only>Monitoring tools</h3>
+                <div id="conn-redfish-card" class="kb-card kb-card--divided" data-admin-only></div>
               </div>
             </div>
             <div id="mgmt-pane-events" class="mgmt-tab-pane" style="display: none;">

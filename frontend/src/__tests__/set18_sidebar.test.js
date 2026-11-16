@@ -60,7 +60,7 @@ describe('the sidebar (SET-18)', () => {
     window.openManagementSection = open;
     for (const [route, target] of [['people', 'mgmt-pane-users'], ['folders', 'mgmt-pane-storage-shares'], ['kib', 'mgmt-sec-ai'],
       ['away', 'mgmt-pane-network-wireguard'], ['notifications', 'mgmt-pane-notifications'], ['security', 'mgmt-pane-security'],
-      ['general', 'mgmt-pane-about'], ['connections', 'mgmt-pane-security'], ['calendar', 'mgmt-sec-calendar']]) {
+      ['general', 'mgmt-pane-about'], ['connections', 'mgmt-pane-connections'], ['calendar', 'mgmt-sec-calendar']]) {
       expect(routeFromHash(`#/${route}`)).toBe(route);
       ROUTES[route]();
       expect(open).toHaveBeenLastCalledWith(target);

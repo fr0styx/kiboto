@@ -43,7 +43,7 @@ for (const [name, id] of Object.entries({
   notifications: 'pane-notifications',
   security: 'pane-security',
   general: 'pane-about',
-  connections: 'pane-security',
+  connections: 'pane-connections', // its own Advanced page (SET-23, decision 8)
   calendar: 'sec-calendar',
 })) ROUTES[name] = () => section(`mgmt-${id}`);
 

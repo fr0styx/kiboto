@@ -10,6 +10,13 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   look first, instead of "Score: 65/100 (grade C)". Plain HTTP costs nothing on your home network; it counts
   only when something on the NAS is reachable from outside. The Overview shows the same number.
 
+#### Changes
+
+- **Connections**, a new Advanced page: Home Assistant, API tokens, single sign-on and LDAP in one place,
+  plus a switch for Redfish (for server-monitoring tools), which had no screen before. My account links to
+  it for API keys, and the Security check's "unused tokens" row opens it. In the Security check,
+  suggestions are no longer drawn in red.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

@@ -14,13 +14,13 @@ const pane = () => {
 afterEach(() => vi.restoreAllMocks());
 
 describe("Notifications in the report's order (SET-23, cards 2-6)", () => {
-  it('Send alerts, this device, where, what, how often, cameras, Home Assistant', () => {
+  it('Send alerts, this device, where, what, how often, cameras', () => {
     const ids = [...pane().querySelectorAll('[id]')].map((e) => e.id);
     const at = (id) => {
       expect(ids, id).toContain(id);
       return ids.indexOf(id);
     };
-    const order = ['notif-master-enabled', 'push-device-card', 'notif-badge-email', 'notif-badge-ntfy', 'notif-more-channels', 'notif-toggle-smart', 'digest-title', 'notif-input-hdd-temp', 'frigate-events-mount', 'notif-ha-grid'];
+    const order = ['notif-master-enabled', 'push-device-card', 'notif-badge-email', 'notif-badge-ntfy', 'notif-more-channels', 'notif-toggle-smart', 'digest-title', 'notif-input-hdd-temp', 'frigate-events-mount']; // Home Assistant moved to Connections (SET-23)
     const pos = order.map(at);
     expect([...pos].sort((a, b) => a - b)).toEqual(pos);
   });
