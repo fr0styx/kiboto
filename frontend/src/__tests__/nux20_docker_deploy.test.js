@@ -2,7 +2,9 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { api } from '../api.js';
 import { DockManager } from '../components/dock.js';
-import { openAppDeployModal, openSideloadAppModal, openAppSourcesModal, fetchAndRenderDockerContainers } from '../components/management.js';
+import {
+  openAppDeployModal
+} from '../components/management.js';
 
 const wait = (ms = 320) => new Promise((r) => setTimeout(r, ms));
 let answers;
@@ -121,47 +123,3 @@ describe('install window checks (NUX-20)', () => {
   });
 });
 
-describe('template checks and load errors (NUX-20)', () => {
-  afterEach(() => vi.restoreAllMocks());
-
-  it('checks a sideloaded template and says when the check failed', async () => {
-    document.body.innerHTML = `
-      <div id="modal-sideload-app">
-        <button id="sideload-tab-url"></button><button id="sideload-tab-paste"></button>
-        <div id="sideload-input-url-wrap"><input id="sideload-url-input" value="https://example.com/app.yml"></div>
-        <div id="sideload-input-paste-wrap"><textarea id="sideload-content-input"></textarea></div>
-        <button id="btn-sideload-inspect"></button><div id="sideload-inspect-result"></div><button id="btn-sideload-confirm"></button>
-      </div>`;
-    const post = vi.spyOn(api, 'post').mockResolvedValue({ status: 'ok', app: { name: 'Demo', image: 'demo:1', type: 'standalone', default_port: 8080 }, security_rating: 'safe', security_flags: [] });
-    openSideloadAppModal();
-    const inspect = document.getElementById('btn-sideload-inspect');
-    await inspect.onclick();
-    const result = document.getElementById('sideload-inspect-result');
-    expect(result.textContent).toContain('No high-privilege risks found');
-    expect(result.textContent).toContain('Image: demo:1');
-    expect(result.textContent).toContain('Default port: 8080');
-    expect(inspect.textContent).toContain('Check the template');
-
-    post.mockRejectedValue(new Error('bad yaml'));
-    await inspect.onclick();
-    expect(result.textContent).toBe('Check failed: bad yaml');
-  });
-
-  it('says when a template source could not be added', async () => {
-    document.body.innerHTML = '';
-    vi.spyOn(api, 'get').mockResolvedValue([]);
-    vi.spyOn(api, 'post').mockRejectedValue(new Error('not JSON'));
-    await openAppSourcesModal();
-    document.getElementById('asm-input-name').value = 'Mine';
-    document.getElementById('asm-input-url').value = 'https://example.com/t.json';
-    await document.getElementById('asm-btn-add-custom').onclick();
-    expect(document.getElementById('asm-form-status').textContent).toBe('Error: not JSON');
-  });
-
-  it('says when the containers could not be loaded', async () => {
-    document.body.innerHTML = '<div id="mgmt-pane-docker"><table><tbody id="docker-containers-tbody"></tbody></table></div>';
-    vi.spyOn(api, 'get').mockRejectedValue(new Error('socket gone'));
-    await fetchAndRenderDockerContainers();
-    expect(document.getElementById('docker-containers-tbody').textContent).toBe('Could not load the containers: socket gone');
-  });
-});

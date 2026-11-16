@@ -254,6 +254,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Spotlight's App Catalog** and the HTTPS guide's apps button open the Apps window's catalog; they
   opened a hidden page.
 
+#### Changes
+
+- **The hidden Settings page for apps is gone**, with about 1,700 lines that still drew and refreshed
+  it. Apps live in the Apps window, which reloads its list after an install or a clean-up.
+
 ## v2.0.2 (2026-11-12)
 ### 🧭 A new Settings sidebar, five themes, honest pages, and remote access cut down to what works
 

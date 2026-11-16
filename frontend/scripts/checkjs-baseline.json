@@ -43,7 +43,7 @@
  "frontend/src/components/management/ai.js": 213,
  "frontend/src/components/management/backup.js": 7,
  "frontend/src/components/management/doc-filters.js": 8,
- "frontend/src/components/management/docker.js": 163,
+ "frontend/src/components/management/docker.js": 80,
  "frontend/src/components/management/duplicates.js": 7,
  "frontend/src/components/management/network.js": 87,
  "frontend/src/components/management/notifications.js": 44,

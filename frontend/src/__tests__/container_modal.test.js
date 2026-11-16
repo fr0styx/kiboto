@@ -6,10 +6,6 @@ import {
   switchContainerTab,
   _resetContainerModalForTesting
 } from '../components/container-modal.js';
-import {
-  fetchAndRenderDockerContainers,
-  _resetDockerStateForTesting
-} from '../components/management.js';
 import { api } from '../api.js';
 import { ZettEventBus } from '../event-bus.js';
 
@@ -109,7 +105,6 @@ describe('Container Inspector & Docker Compose Viewer - Phase 2', () => {
 
   beforeEach(() => {
     _resetContainerModalForTesting();
-    _resetDockerStateForTesting();
     vi.restoreAllMocks();
   });
 
@@ -274,58 +269,6 @@ describe('Container Inspector & Docker Compose Viewer - Phase 2', () => {
     closeContainerInspector();
     expect(overlay.style.display).toBe('none');
     expect(overlay.classList.contains('open')).toBe(false);
-  });
-
-  it('integrates with container table in management window to open inspector', async () => {
-    document.body.innerHTML = `
-      <div id="mgmt-pane-docker">
-        <input type="text" id="docker-search-input" value="">
-        <table>
-          <tbody id="docker-containers-tbody"></tbody>
-        </table>
-      </div>
-    `;
-
-    vi.spyOn(api, 'get').mockImplementation(async (url) => {
-      if (url.endsWith('/api/docker/containers')) {
-        return [
-          {
-            id: 'c11122233344',
-            name: 'jellyfin',
-            image: 'jellyfin/jellyfin',
-            state: 'running',
-            status: 'Up 2 hours',
-            ports: [{ public_port: 8096, private_port: 8096 }],
-            primary_port: 8096,
-            webui_url: 'http://[HOST]:8096/'
-          }
-        ];
-      }
-      if (url.includes('/details')) return mockContainerDetails;
-      return {};
-    });
-
-    await fetchAndRenderDockerContainers();
-
-    const tbody = document.getElementById('docker-containers-tbody');
-    expect(tbody).not.toBeNull();
-
-    // Verify inspect button exists
-    const inspectBtn = tbody.querySelector('.btn-docker-inspect');
-    expect(inspectBtn).not.toBeNull();
-    expect(inspectBtn.dataset.id).toBe('c11122233344');
-    expect(inspectBtn.dataset.action).toBe('inspect');
-
-    // Click inspect button
-    inspectBtn.click();
-
-    // Modal overlay should open
-    const overlay = document.getElementById('container-inspector-overlay');
-    expect(overlay).not.toBeNull();
-    expect(overlay.classList.contains('open')).toBe(true);
-
-    const titleEl = document.getElementById('ci-header-title');
-    expect(titleEl.textContent).toBe('jellyfin');
   });
 
   it('submits live resource tuning with zero downtime via API', async () => {

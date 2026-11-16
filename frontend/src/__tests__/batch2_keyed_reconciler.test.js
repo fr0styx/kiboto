@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { reconcileKeyedTable } from '../utils.js';
-import { fetchAndRenderDockerContainers, _resetDockerStateForTesting } from '../components/management.js';
 import { renderStructuredPoolsTopology } from '../components/chassis-visualizer.js';
 import { api } from '../api.js';
 
@@ -215,64 +214,6 @@ describe('Batch 2: High-Performance Keyed Table Reconciler (Zero-Flicker Telemet
       expect(container.children[0].dataset.key).toBe('new-item');
       expect(container.children[0].textContent).toBe('Newly Added');
       expect(container.children[1]).toBe(keepNode);
-    });
-  });
-
-  describe('Zero-Flicker Telemetry in Docker Containers Table', () => {
-    beforeEach(() => {
-      _resetDockerStateForTesting();
-      document.body.innerHTML = `
-        <div id="mgmt-pane-docker">
-          <input type="text" id="docker-search-input" value="">
-          <button class="docker-filter-btn active" data-filter="all"></button>
-          <span id="docker-count-all">0</span>
-          <span id="docker-count-running">0</span>
-          <span id="docker-count-stopped">0</span>
-          <span id="docker-count-compose">0</span>
-          <span id="docker-count-standalone">0</span>
-          <span id="mgmt-hub-docker-pill">0</span>
-          <span id="mgmt-sidebar-docker-badge">0</span>
-          <table>
-            <tbody id="docker-containers-tbody"></tbody>
-          </table>
-        </div>
-      `;
-    });
-
-    it('updates container CPU and Memory without re-creating <tr> elements', async () => {
-      const tbody = document.getElementById('docker-containers-tbody');
-      const c1 = {
-        id: 'cnt-1',
-        name: 'plex',
-        state: 'running',
-        status: 'Up 2 hours',
-        cpu_pct: 1.5,
-        mem_used: 104857600, // 100MB
-        ports: [{ public_port: 32400, type: 'tcp' }],
-        hardware_badges: [],
-      };
-
-      vi.spyOn(api, 'get').mockResolvedValue([c1]);
-      await fetchAndRenderDockerContainers();
-
-      expect(tbody.children.length).toBe(1);
-      const rowRef = tbody.children[0];
-      expect(rowRef.querySelector('.telem-cpu').textContent).toBe('1.5%');
-
-      // Next tick: CPU spikes to 18.2%
-      const c1Updated = {
-        ...c1,
-        cpu_pct: 18.2,
-        mem_used: 209715200, // 200MB
-      };
-
-      vi.spyOn(api, 'get').mockResolvedValue([c1Updated]);
-      await fetchAndRenderDockerContainers();
-
-      expect(tbody.children.length).toBe(1);
-      // DOM reference MUST be identical (no flicker / zero re-render)
-      expect(tbody.children[0]).toBe(rowRef);
-      expect(tbody.children[0].querySelector('.telem-cpu').textContent).toBe('18.2%');
     });
   });
 

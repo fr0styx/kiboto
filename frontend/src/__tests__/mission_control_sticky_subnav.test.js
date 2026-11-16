@@ -5,38 +5,6 @@ import fs from 'fs';
 import path from 'path';
 
 describe('Mission Control Fixated Sticky Sub-Navigation Bar', () => {
-  it('verifies that all Mission Control sections in index.html wrap .mgmt-inner-tabs in .mgmt-sticky-subnav', () => {
-    const htmlPath = path.resolve(__dirname, '../../index.html');
-    const htmlContent = readIndexHtml();
-
-    const expectedSections = [
-      'mgmt-sec-wallpaper',
-      // not Network: one page of sections since SET-24
-      'mgmt-sec-docker',
-      'mgmt-sec-vms',
-      'mgmt-sec-hardware',
-      'mgmt-sec-storage',
-      'mgmt-sec-system-group',
-      'mgmt-sec-ai'
-    ];
-
-    for (const secId of expectedSections) {
-      // Find the section block
-      const secIdx = htmlContent.indexOf(`id="${secId}"`);
-      expect(secIdx).toBeGreaterThan(-1);
-
-      // Extract a 1500-char slice following the section declaration
-      const secSlice = htmlContent.slice(secIdx, secIdx + 1500);
-
-      // Verify .mgmt-sticky-subnav exists and contains .mgmt-inner-tabs
-      expect(secSlice).toContain('class="mgmt-sticky-subnav"');
-      expect(secSlice).toContain('class="mgmt-inner-tabs"');
-
-      const stickyIdx = secSlice.indexOf('class="mgmt-sticky-subnav"');
-      const innerTabsIdx = secSlice.indexOf('class="mgmt-inner-tabs"');
-      expect(stickyIdx).toBeLessThan(innerTabsIdx);
-    }
-  });
 
   it('verifies style.css defines sticky positioning, top offset, and backdrop filters for .mgmt-sticky-subnav', () => {
     const cssContent = readStyleCss();
@@ -245,75 +213,4 @@ describe('Mission Control Fixated Sticky Sub-Navigation Bar', () => {
     expect(contentPane.classList.contains('has-subnav')).toBe(true);
   });
 
-  it('verifies opening Containers page only highlights Containers & Stacks and not App Store Catalog', () => {
-    const htmlPath = path.resolve(__dirname, '../../index.html');
-    const htmlContent = readIndexHtml();
-
-    // 1. Verify in index.html that both tabs exist and have distinct data-tab-target values
-    const containersMatch = htmlContent.match(/id="docker-inner-tab-containers"[^>]*data-tab-target="([^"]+)"/);
-    const catalogMatch = htmlContent.match(/id="docker-inner-tab-catalog"[^>]*data-tab-target="([^"]+)"/);
-
-    expect(containersMatch).not.toBeNull();
-    expect(catalogMatch).not.toBeNull();
-    expect(containersMatch[1]).toBe('mgmt-pane-docker');
-    expect(catalogMatch[1]).toBe('mgmt-pane-docker-catalog');
-    expect(containersMatch[1]).not.toBe(catalogMatch[1]);
-
-    // 2. Simulate showSection behavior on the DOM
-    document.body.innerHTML = `
-      <div id="management-modal-overlay">
-        <div class="mgmt-content-pane">
-          <div id="mgmt-sec-docker" class="mgmt-detail-card">
-            <div class="mgmt-sticky-subnav">
-              <div class="mgmt-inner-tabs" role="tablist">
-                <button class="mgmt-inner-tab active" id="docker-inner-tab-containers" role="tab" aria-selected="true" data-tab-target="mgmt-pane-docker">Containers & Stacks</button>
-                <button class="mgmt-inner-tab" id="docker-inner-tab-catalog" role="tab" aria-selected="false" data-tab-target="mgmt-pane-docker-catalog">App Store Catalog</button>
-              </div>
-            </div>
-            <div id="mgmt-pane-docker" class="mgmt-tab-pane" style="display: block;">
-              <div id="docker-view-containers-wrap" style="display: block;">Containers Table</div>
-              <div id="docker-view-catalog-wrap" style="display: none;">App Catalog</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-
-    const parentCard = document.getElementById('mgmt-sec-docker');
-    const tabContainers = document.getElementById('docker-inner-tab-containers');
-    const tabCatalog = document.getElementById('docker-inner-tab-catalog');
-    const paneDocker = document.getElementById('mgmt-pane-docker');
-
-    // Simulate showSection('mgmt-sec-docker') with desiredSubPane = 'mgmt-pane-docker'
-    const desiredSubPane = 'mgmt-pane-docker';
-    parentCard.querySelectorAll('.mgmt-inner-tab').forEach((t) => {
-      const isActive = t.dataset.tabTarget === desiredSubPane;
-      t.classList.toggle('active', isActive);
-      t.setAttribute('aria-selected', isActive ? 'true' : 'false');
-    });
-
-    expect(tabContainers.classList.contains('active')).toBe(true);
-    expect(tabContainers.getAttribute('aria-selected')).toBe('true');
-    expect(tabCatalog.classList.contains('active')).toBe(false);
-    expect(tabCatalog.getAttribute('aria-selected')).toBe('false');
-
-    // Simulate clicking App Store Catalog tab
-    const targetPaneId = tabCatalog.dataset.tabTarget;
-    parentCard.querySelectorAll('.mgmt-inner-tab').forEach((t) => {
-      t.classList.remove('active');
-      t.setAttribute('aria-selected', 'false');
-    });
-    tabCatalog.classList.add('active');
-    tabCatalog.setAttribute('aria-selected', 'true');
-
-    // Verify pane display logic retains mgmt-pane-docker when targetPaneId is mgmt-pane-docker-catalog
-    parentCard.querySelectorAll('.mgmt-tab-pane').forEach((p) => {
-      const isMatch = p.id === targetPaneId || (p.id === 'mgmt-pane-docker' && targetPaneId === 'mgmt-pane-docker-catalog');
-      p.style.display = isMatch ? 'block' : 'none';
-    });
-
-    expect(tabCatalog.classList.contains('active')).toBe(true);
-    expect(tabContainers.classList.contains('active')).toBe(false);
-    expect(paneDocker.style.display).toBe('block');
-  });
 });

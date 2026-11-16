@@ -19,7 +19,6 @@ import '../styles/management-lazy.css'; // Mission Control's own sheet loads wit
 import { wireTablists, markCurrent } from './tab-a11y.js';
 import { highlightEntry, mayNotOpen } from './management/sidebar-current.js';
 import { openFilePreviewModal } from './file-preview-modal.js';
-import { fetchAndRenderAppCatalog, fetchAndRenderDockerContainers, refreshCatalogCountBadges, startDockerAutoRefresh, stopDockerAutoRefresh } from './management/docker.js';
 import { fetchAndRenderUpsTelemetry, initUpsDrawerControls, loadUpsConfigToDrawer, renderUpsTelemetry } from './management/ups.js';
 import { fetchAndRenderCopyHistory, fetchAndRenderNetworkTopology, fetchAndRenderReplication, fetchAndRenderTailscaleDetails, initNetworkControls, loadNetworkPage } from './management/network.js';
 import { fetchAndRenderDisksInventory } from './management/disks.js';
@@ -595,7 +594,6 @@ export function initManagement() {
   if (minBtn) {
     const handleMin = (e) => {
       if (e && e.type === 'touchend') { e.preventDefault(); e.stopPropagation(); }
-      stopDockerAutoRefresh();
       DockManager.minimize('management');
     };
     minBtn.addEventListener('click', handleMin);
@@ -679,7 +677,6 @@ export function initManagement() {
   if (closeBtn) {
     const handleClose = (e) => {
       if (e && e.type === 'touchend') { e.preventDefault(); e.stopPropagation(); }
-      stopDockerAutoRefresh();
       overlay.classList.remove('open');
       overlay.style.setProperty('display', 'none', 'important');
       win.classList.remove('window-focus-pulse');
@@ -775,54 +772,6 @@ export function initManagement() {
       if (typeof restoreHardwareTabsToManagement === 'function') restoreHardwareTabsToManagement();
     } else if (paneId === 'mgmt-pane-hardware-copy') {
       if (typeof restoreHardwareTabsToManagement === 'function') restoreHardwareTabsToManagement();
-    } else if (paneId === 'mgmt-pane-docker') {
-      const wrapContainers = document.getElementById('docker-view-containers-wrap');
-      const wrapCatalog = document.getElementById('docker-view-catalog-wrap');
-      const btnContainers = document.getElementById('btn-view-docker-containers');
-      const btnCatalog = document.getElementById('btn-view-docker-catalog');
-      const tabContainers = document.getElementById('docker-inner-tab-containers');
-      const tabCatalog = document.getElementById('docker-inner-tab-catalog');
-      if (wrapContainers) wrapContainers.style.display = 'block';
-      if (wrapCatalog) wrapCatalog.style.display = 'none';
-      if (btnContainers) {
-        btnContainers.style.display = 'none';
-        btnContainers.classList.remove('active');
-      }
-      if (btnCatalog) btnCatalog.classList.remove('active');
-      if (tabContainers) {
-        tabContainers.classList.add('active');
-        tabContainers.setAttribute('aria-selected', 'true');
-      }
-      if (tabCatalog) {
-        tabCatalog.classList.remove('active');
-        tabCatalog.setAttribute('aria-selected', 'false');
-      }
-      fetchAndRenderDockerContainers();
-      refreshCatalogCountBadges();
-    } else if (paneId === 'mgmt-pane-docker-catalog') {
-      const wrapContainers = document.getElementById('docker-view-containers-wrap');
-      const wrapCatalog = document.getElementById('docker-view-catalog-wrap');
-      const btnContainers = document.getElementById('btn-view-docker-containers');
-      const btnCatalog = document.getElementById('btn-view-docker-catalog');
-      const tabContainers = document.getElementById('docker-inner-tab-containers');
-      const tabCatalog = document.getElementById('docker-inner-tab-catalog');
-      if (wrapContainers) wrapContainers.style.display = 'none';
-      if (wrapCatalog) wrapCatalog.style.display = 'block';
-      if (btnContainers) {
-        btnContainers.style.display = 'inline-flex';
-        btnContainers.textContent = t('ui.back_to_containers', '← Back to Containers');
-        btnContainers.classList.remove('active');
-      }
-      if (btnCatalog) btnCatalog.classList.add('active');
-      if (tabContainers) {
-        tabContainers.classList.remove('active');
-        tabContainers.setAttribute('aria-selected', 'false');
-      }
-      if (tabCatalog) {
-        tabCatalog.classList.add('active');
-        tabCatalog.setAttribute('aria-selected', 'true');
-      }
-      fetchAndRenderAppCatalog();
     } else if (paneId === 'mgmt-pane-chassis-twin') {
       const mount = document.getElementById('mgmt-chassis-twin-mount');
       if (mount) fetchAndRenderChassisTwin(mount);
@@ -1165,16 +1114,10 @@ export function initManagement() {
     } else if (targetId === 'mgmt-sec-network') {
       sectionName = t('mgmt.network_sec_title', 'Network & Sharing');
       fetchAndRenderNetworkTopology();
-    } else if (targetId === 'mgmt-sec-docker') {
-      sectionName = t('mgmt.docker_title', 'Containers & Apps');
-      fetchAndRenderDockerContainers();
-      startDockerAutoRefresh();
     } else if (targetId === 'mgmt-sec-vms') {
       sectionName = t('mgmt.vms_title', 'Virtual Machines');
-      stopDockerAutoRefresh();
       fetchAndRenderMgmtVms();
     } else {
-      stopDockerAutoRefresh();
       if (targetId === 'mgmt-sec-hardware' || targetId === 'mgmt-sec-services') {
         sectionName = t('mgmt.hardware_title', 'Hardware & Profiles');
         if (typeof restoreHardwareTabsToManagement === 'function') restoreHardwareTabsToManagement();
@@ -1491,14 +1434,6 @@ export function initManagement() {
   }
   initNetworkControls();
 
-  // Docker containers refresh button
-  const refreshDockerBtn = document.getElementById('btn-refresh-docker');
-  if (refreshDockerBtn) {
-    refreshDockerBtn.addEventListener('click', () => {
-      fetchAndRenderDockerContainers();
-      showToast(t('toast.docker_containers_refreshed', 'Docker containers refreshed.'), 'info');
-    });
-  }
 
   // UPS telemetry refresh button & drawer controls
   // Refresh is wired once, by initUpsDrawerControls (two handlers gave two messages, SET-15)

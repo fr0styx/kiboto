@@ -53,11 +53,6 @@ describe('Docker Stacks & Wallpaper Blur & Dock Labels', () => {
   });
 
   describe('Docker Container Updates, Action Button Styling & Header Layout', () => {
-    it('verifies Active Containers button is hidden by default in index.html', () => {
-      const htmlPath = path.resolve(__dirname, '../../../frontend/index.html');
-      const htmlContent = readIndexHtml();
-      expect(htmlContent).toMatch(/id="btn-view-docker-containers" style="display: ?none;"/);
-    });
 
     it('verifies style.css contains light yellow highlight for edit pencil and rose/crimson for delete', () => {
       const cssContent = readStyleCss();
@@ -146,7 +141,6 @@ describe('Docker Stacks & Wallpaper Blur & Dock Labels', () => {
       closeStackModal();
       expect(overlay.style.display).toBe('none');
     });
-
 
     it('saves stack configuration successfully', async () => {
       const mockStackDetails = {

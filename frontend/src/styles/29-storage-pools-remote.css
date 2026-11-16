@@ -374,7 +374,7 @@
 
 .proto-tag.proto-off {
   background: rgba(149, 168, 171, 0.1);
-  color: var(--lt-t-6c8084ff, #6c8084);
+  color: var(--muted); /* #6c8084 was 3.9:1 on a card (SET-25 a11y run) */
   border: 1px solid rgba(149, 168, 171, 0.15);
 }
 

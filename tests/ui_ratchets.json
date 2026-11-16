@@ -224,8 +224,8 @@
  "frontend/src/components/management/docker.js": {
   "buttons": 0,
   "globals": 0,
-  "styles": 60,
-  "templates": 22
+  "styles": 42,
+  "templates": 14
  },
  "frontend/src/components/management/family-access.js": {
   "buttons": 0,
@@ -530,7 +530,7 @@
  "frontend/src/windows/management-window.html": {
   "buttons": 6,
   "globals": 0,
-  "styles": 478,
+  "styles": 462,
   "templates": 0
  }
 }

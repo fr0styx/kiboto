@@ -1,7 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { api } from '../api.js';
 import { openContainerDeleteModal } from '../components/container-modal.js';
-import { openDockerPruneModal, fetchAndRenderAppCatalog } from '../components/management.js';
+import {
+  openDockerPruneModal
+} from '../components/management.js';
 
 describe('Container Deletion and Docker Prune Subsystem', () => {
   beforeEach(() => {
@@ -23,26 +25,6 @@ describe('Container Deletion and Docker Prune Subsystem', () => {
       </div>
     `;
     vi.restoreAllMocks();
-  });
-
-  it('updates Uptime Kuma to use next image tag in app catalog', async () => {
-    const mockCatalog = [
-      {
-        id: 'uptime-kuma',
-        name: 'Uptime Kuma',
-        category: 'utilities',
-        description: 'Self-hosted monitoring tool.',
-        image: 'louislam/uptime-kuma:next',
-        default_port: 3001,
-      },
-    ];
-
-    vi.spyOn(api, 'get').mockResolvedValue(mockCatalog);
-    await fetchAndRenderAppCatalog();
-
-    const grid = document.getElementById('docker-catalog-grid');
-    expect(grid.textContent).toContain('Uptime Kuma');
-    expect(grid.textContent).toContain('louislam/uptime-kuma:next');
   });
 
   it('opens container delete modal and executes container destruction with volume and image options', async () => {
