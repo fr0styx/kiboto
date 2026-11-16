@@ -57,6 +57,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **The Apps list shows your apps, not Kiboto's parts**: Kiboto itself and its name responder are left out
   (they still show with "Show Docker details").
 
+#### Changes
+
+- **Activity opens on History**: the event log moved from Settings into Activity, for everyone. The hardware
+  charts are its second tab, "Right now", shown with Advanced on. Old links to the event log open History.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

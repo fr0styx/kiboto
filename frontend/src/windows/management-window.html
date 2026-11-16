@@ -1205,7 +1205,33 @@
 
           <!-- 2. Activity Monitor & Historical Telemetry -->
           <div id="mgmt-sec-activity" class="mgmt-detail-card" style="display: none;">
-            <div id="mgmt-pane-metrics" class="mgmt-tab-pane" style="display: block;">
+            <!-- SET-27: History (what happened) first; Right now (the charts) with Advanced on -->
+            <div class="mgmt-sticky-subnav">
+              <div class="mgmt-inner-tabs" role="tablist">
+                <button class="mgmt-inner-tab active" role="tab" aria-selected="true" data-tab-target="mgmt-pane-events" id="mgmt-tab-history">
+                  <svg class="ic" style="width: 14px; height: 14px;"><use href="#i-clock"/></svg>
+                  <span data-i18n="act.tab_history">History</span>
+                </button>
+                <button class="mgmt-inner-tab" role="tab" aria-selected="false" data-tab-target="mgmt-pane-metrics" id="mgmt-tab-now" data-advanced-tab>
+                  <svg class="ic" style="width: 14px; height: 14px;"><use href="#i-cpu"/></svg>
+                  <span data-i18n="act.tab_now">Right now</span>
+                </button>
+              </div>
+            </div>
+            <div id="mgmt-pane-events" class="mgmt-tab-pane" style="display: block;">
+          <div class="mgmt-card-intro" style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div class="mgmt-card-intro-title"><svg class="ic"><use href="#i-storage"/></svg> <span data-i18n="mgmt.events_title">History</span></div>
+              <div class="mgmt-card-intro-desc" data-i18n="mgmt.events_desc">Alerts, backups, power, apps and hardware, the newest first. Entries are kept for 90 days.</div>
+            </div>
+          </div>
+          <div class="mgmt-detail-body">
+            <div id="events-list" style="max-height: 420px; overflow-y: auto; background: var(--kb-shade-25); border: 1px solid var(--kb-line-6); border-radius: 8px; padding: 8px;">
+              <div style="padding: 16px; text-align: center; color: var(--muted); font-size: var(--kb-fs-xs);" data-i18n="mw.loading_events">Loading events...</div>
+            </div>
+          </div>
+        </div>
+            <div id="mgmt-pane-metrics" class="mgmt-tab-pane" style="display: none;">
               <div class="mgmt-card-intro" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
                 <div>
                   <div class="mgmt-card-intro-title"><svg class="ic"><use href="#i-cpu"/></svg> <span data-i18n="mgmt.telemetry_title">Hardware history</span></div>
@@ -2495,10 +2521,6 @@
                   <svg class="ic" style="width: 14px; height: 14px;"><use href="#i-bell"/></svg>
                   <span data-i18n="mgmt.subtab_notifications">Notifications & Alerts</span>
                 </button>
-                <button class="mgmt-inner-tab" role="tab" aria-selected="false" data-tab-target="mgmt-pane-events" id="mgmt-tab-events">
-                  <svg class="ic" style="width: 14px; height: 14px;"><use href="#i-storage"/></svg>
-                  <span data-i18n="mgmt.subtab_events">Event Log</span>
-                </button>
                 <button class="mgmt-inner-tab" role="tab" aria-selected="false" data-tab-target="mgmt-pane-language" id="mgmt-tab-language">
                 <svg class="ic" style="width: 14px; height: 14px;"><use href="#i-globe"/></svg>
                 <span data-i18n="mgmt.subtab_language">Time, Language & Region</span>
@@ -2979,19 +3001,6 @@
                 <div id="conn-redfish-card" class="kb-card kb-card--divided" data-admin-only></div>
               </div>
             </div>
-            <div id="mgmt-pane-events" class="mgmt-tab-pane" style="display: none;">
-          <div class="mgmt-card-intro" style="display: flex; justify-content: space-between; align-items: center;">
-            <div>
-              <div class="mgmt-card-intro-title"><svg class="ic"><use href="#i-storage"/></svg> <span data-i18n="mgmt.events_title">Event Log</span></div>
-              <div class="mgmt-card-intro-desc" data-i18n="mgmt.events_desc">Alerts, backups, power, apps and hardware, the newest first. Entries are kept for 90 days.</div>
-            </div>
-          </div>
-          <div class="mgmt-detail-body">
-            <div id="events-list" style="max-height: 420px; overflow-y: auto; background: var(--kb-shade-25); border: 1px solid var(--kb-line-6); border-radius: 8px; padding: 8px;">
-              <div style="padding: 16px; text-align: center; color: var(--muted); font-size: var(--kb-fs-xs);" data-i18n="mw.loading_events">Loading events...</div>
-            </div>
-          </div>
-        </div>
             <div id="mgmt-pane-backups" class="mgmt-tab-pane" style="display: none;">
               <!-- Are your files safe? First on Backup (SET-21, Backup report section 4) -->
               <section id="backup-verdict" class="bk-verdict" aria-labelledby="bk-verdict-title" hidden>

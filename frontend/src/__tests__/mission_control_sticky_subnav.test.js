@@ -143,7 +143,7 @@ describe('Mission Control Fixated Sticky Sub-Navigation Bar', () => {
     expect(cssContent).toMatch(/#management-modal-overlay\s+\.mgmt-content-pane:not\(\.has-subnav\)[^{]*\{[^}]*padding-top:\s*12px\s*!important/);
   });
 
-  it('verifies views without subnav (HUB, Activity Monitor, UPS) do not have sticky subnav and keep 20px padding', () => {
+  it('verifies views without subnav (HUB, UPS) do not have sticky subnav and keep 20px padding; Activity has tabs now (SET-27)', () => {
     const htmlPath = path.resolve(__dirname, '../../index.html');
     const htmlContent = readIndexHtml();
 
@@ -156,7 +156,7 @@ describe('Mission Control Fixated Sticky Sub-Navigation Bar', () => {
     const activitySlice = htmlContent.slice(activityIdx, activityIdx + 2500);
     const upsSlice = htmlContent.slice(upsIdx, upsIdx + 2500);
 
-    expect(activitySlice).not.toContain('class="mgmt-sticky-subnav"');
+    expect(activitySlice).toContain('class="mgmt-sticky-subnav"'); // History and Right now (SET-27)
     expect(upsSlice).not.toContain('class="mgmt-sticky-subnav"');
 
     // 2. Simulate showSection / showHub class toggling

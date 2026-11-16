@@ -1792,7 +1792,7 @@ export default {
   "mgmt.hub_system_desc": "Gérer les identifiants, les journaux d'événements, les sauvegardes et les jetons d'API.",
   "mgmt.hub_system_action": "Gérer le système ➔",
   "mgmt.appearance_title": "Apparence",
-  "mgmt.activity_title": "Moniteur d'activité",
+  "mgmt.activity_title": "Activité",
   "mgmt.services_title": "Services",
   "mgmt.system_title": "Système",
   "mgmt.subtab_metrics": "Métriques",
@@ -1880,7 +1880,7 @@ export default {
   "mgmt.range_24h": "Dernières 24 heures",
   "mgmt.range_7d": "Derniers 7 jours",
   "mgmt.range_30d": "Derniers 30 jours",
-  "mgmt.events_title": "Journal des événements",
+  "mgmt.events_title": "Historique",
   "mgmt.events_desc": "Alertes, sauvegardes, alimentation, applications et matériel, du plus récent au plus ancien. Les entrées sont conservées 90 jours.",
   "mgmt.clear_logs": "Effacer les journaux",
   "mgmt.sec_title": "Sécurité du compte & Identifiants",
@@ -7827,5 +7827,7 @@ export default {
   "appmenu.backup": "Sauvegarder maintenant",
   "appmenu.log": "Afficher le journal",
   "appmenu.details": "Détails",
-  "appmenu.remove": "Supprimer"
+  "appmenu.remove": "Supprimer",
+  "act.tab_history": "Historique",
+  "act.tab_now": "En ce moment"
 };

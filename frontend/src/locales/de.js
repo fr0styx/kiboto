@@ -1782,7 +1782,7 @@ export default {
   "mgmt.hub_system_desc": "Zugangsdaten, Ereignisprotokolle, Konfigurations-Backups und API-Token verwalten.",
   "mgmt.hub_system_action": "System verwalten ➔",
   "mgmt.appearance_title": "Erscheinungsbild",
-  "mgmt.activity_title": "Aktivitätsanzeige",
+  "mgmt.activity_title": "Aktivität",
   "mgmt.services_title": "Dienste",
   "mgmt.system_title": "System",
   "mgmt.subtab_metrics": "Metriken",
@@ -1880,7 +1880,7 @@ export default {
   "mgmt.range_24h": "Letzte 24 Stunden",
   "mgmt.range_7d": "Letzte 7 Tage",
   "mgmt.range_30d": "Letzte 30 Tage",
-  "mgmt.events_title": "Ereignisprotokoll",
+  "mgmt.events_title": "Verlauf",
   "mgmt.events_desc": "Warnungen, Sicherungen, Strom, Apps und Hardware, das Neueste zuerst. Einträge bleiben 90 Tage erhalten.",
   "mgmt.clear_logs": "Protokoll leeren",
   "mgmt.sec_title": "Kontosicherheit & Anmeldedaten",
@@ -7827,5 +7827,7 @@ export default {
   "appmenu.backup": "Jetzt sichern",
   "appmenu.log": "Protokoll zeigen",
   "appmenu.details": "Details",
-  "appmenu.remove": "Entfernen"
+  "appmenu.remove": "Entfernen",
+  "act.tab_history": "Verlauf",
+  "act.tab_now": "Gerade jetzt"
 };

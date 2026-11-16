@@ -7,8 +7,8 @@
 import { ZettEventBus } from './event-bus.js';
 import { ADVANCED_OFF, mark } from './hide-marks.js';
 
-export const ADVANCED_SECTIONS = ['mgmt-sec-vms', 'mgmt-sec-network', 'mgmt-sec-hardware', 'mgmt-sec-ups', 'mgmt-sec-activity'];
-export const ADVANCED_ROUTES = ['network', 'power', 'vms', 'activity', 'hardware'];
+export const ADVANCED_SECTIONS = ['mgmt-sec-vms', 'mgmt-sec-network', 'mgmt-sec-hardware', 'mgmt-sec-ups']; // Activity's History is for everyone (SET-27)
+export const ADVANCED_ROUTES = ['network', 'power', 'vms', 'hardware'];
 export const ADVANCED_DOCK_APPS = ['vm'];
 export const ADVANCED_SPOTLIGHT = ['act-quiet-fans', 'act-perf-fans', 'act-fan-pct', 'act-spindown', 'act-locate-drive', 'act-isolate-container'];
 const PREF = 'kiboto_advanced';

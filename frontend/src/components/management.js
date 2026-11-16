@@ -61,9 +61,9 @@ export function setDeployButtonTone(btn, tone) {
 export const SUBPANE_MAP = {
   // --- Pillar 1: Dashboard & Telemetry ---
   'dashboard': { section: 'mgmt-sec-activity', pane: 'mgmt-pane-metrics' },
-  'activity': { section: 'mgmt-sec-activity', pane: 'mgmt-pane-metrics' },
+  'activity': { section: 'mgmt-sec-activity', pane: 'mgmt-pane-events' }, // History first (SET-27)
   'telemetry': { section: 'mgmt-sec-activity', pane: 'mgmt-pane-metrics' },
-  'mgmt-sec-activity': { section: 'mgmt-sec-activity', pane: 'mgmt-pane-metrics' },
+  'mgmt-sec-activity': { section: 'mgmt-sec-activity', pane: 'mgmt-pane-events' },
   'mgmt-sec-metrics': { section: 'mgmt-sec-activity', pane: 'mgmt-pane-metrics' },
   'mgmt-pane-metrics': { section: 'mgmt-sec-activity', pane: 'mgmt-pane-metrics' },
 
@@ -151,8 +151,8 @@ export const SUBPANE_MAP = {
   'mgmt-pane-backups': { section: 'mgmt-sec-system-group', pane: 'mgmt-pane-backups' },
   'mgmt-sec-notifications': { section: 'mgmt-sec-system-group', pane: 'mgmt-pane-notifications' },
   'mgmt-pane-notifications': { section: 'mgmt-sec-system-group', pane: 'mgmt-pane-notifications' },
-  'mgmt-sec-events': { section: 'mgmt-sec-system-group', pane: 'mgmt-pane-events' },
-  'mgmt-pane-events': { section: 'mgmt-sec-system-group', pane: 'mgmt-pane-events' },
+  'mgmt-sec-events': { section: 'mgmt-sec-activity', pane: 'mgmt-pane-events' },
+  'mgmt-pane-events': { section: 'mgmt-sec-activity', pane: 'mgmt-pane-events' },
   'mgmt-sec-about': { section: 'mgmt-sec-system-group', pane: 'mgmt-pane-about' },
   'mgmt-pane-about': { section: 'mgmt-sec-system-group', pane: 'mgmt-pane-about' },
   'mgmt-pane-connections': { section: 'mgmt-sec-system-group', pane: 'mgmt-pane-connections' }, // SET-23, decision 8
@@ -1110,7 +1110,7 @@ export function initManagement() {
     } else if (targetId === 'mgmt-sec-calendar') {
       sectionName = t('mgmt.sidebar_calendar', 'Calendar');
     } else if (targetId === 'mgmt-sec-activity') {
-      sectionName = t('mgmt.activity_title', 'Dashboard & Telemetry');
+      sectionName = t('mgmt.activity_title', 'Activity');
     } else if (targetId === 'mgmt-sec-network') {
       sectionName = t('mgmt.network_sec_title', 'Network & Sharing');
       fetchAndRenderNetworkTopology();

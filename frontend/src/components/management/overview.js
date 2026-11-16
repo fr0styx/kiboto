@@ -44,6 +44,8 @@ export function applyAdvanced(on = advancedOn(), root = document) {
     const s = el.dataset.mgmtTarget;
     if (ADVANCED_SECTIONS.includes(s)) mark(el, ADVANCED_OFF, !on && isAdvancedSection(s)); // Power while it matters (SET-15)
   });
+  // a tab that is only for Advanced (Activity's Right now, SET-27)
+  root.querySelectorAll('[data-advanced-tab]').forEach((el) => mark(el, ADVANCED_OFF, !on));
   tidyHeadings(root);
   const sw = root.getElementById ? root.getElementById('mgmt-advanced-switch') : null;
   if (sw) sw.checked = on;

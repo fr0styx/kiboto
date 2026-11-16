@@ -1782,7 +1782,7 @@ export default {
   "mgmt.hub_system_desc": "Gestione credenciales, contraseñas, registros de eventos, copias de seguridad y tokens API.",
   "mgmt.hub_system_action": "Gestionar Sistema ➔",
   "mgmt.appearance_title": "Apariencia",
-  "mgmt.activity_title": "Monitor de Actividad",
+  "mgmt.activity_title": "Actividad",
   "mgmt.services_title": "Servicios",
   "mgmt.system_title": "Sistema",
   "mgmt.subtab_metrics": "Métricas",
@@ -1880,7 +1880,7 @@ export default {
   "mgmt.range_24h": "Últimas 24 Horas",
   "mgmt.range_7d": "Últimos 7 Días",
   "mgmt.range_30d": "Últimos 30 Días",
-  "mgmt.events_title": "Registro de eventos",
+  "mgmt.events_title": "Historial",
   "mgmt.events_desc": "Alertas, copias, energía, aplicaciones y hardware, lo más reciente primero. Las entradas se guardan 90 días.",
   "mgmt.clear_logs": "Borrar Registros",
   "mgmt.sec_title": "Seguridad de la Cuenta y Credenciales",
@@ -7827,5 +7827,7 @@ export default {
   "appmenu.backup": "Hacer copia ahora",
   "appmenu.log": "Ver el registro",
   "appmenu.details": "Detalles",
-  "appmenu.remove": "Quitar"
+  "appmenu.remove": "Quitar",
+  "act.tab_history": "Historial",
+  "act.tab_now": "Ahora mismo"
 };

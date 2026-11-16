@@ -1788,7 +1788,7 @@ export default {
   "mgmt.hub_system_desc": "Manage security, master password, event logs, configuration backups, and API tokens.",
   "mgmt.hub_system_action": "Manage System ➔",
   "mgmt.appearance_title": "Appearance",
-  "mgmt.activity_title": "Activity Monitor",
+  "mgmt.activity_title": "Activity",
   "mgmt.services_title": "Services",
   "mgmt.system_title": "System",
   "mgmt.subtab_metrics": "Metrics",
@@ -1880,7 +1880,7 @@ export default {
   "mgmt.range_24h": "Last 24 Hours",
   "mgmt.range_7d": "Last 7 Days",
   "mgmt.range_30d": "Last 30 Days",
-  "mgmt.events_title": "Event Log",
+  "mgmt.events_title": "History",
   "mgmt.events_desc": "Alerts, backups, power, apps and hardware, the newest first. Entries are kept for 90 days.",
   "mgmt.clear_logs": "Clear Event Log",
   "mgmt.sec_title": "Account Security & Credentials",
@@ -7827,5 +7827,7 @@ export default {
   "appmenu.backup": "Back up now",
   "appmenu.log": "Show the log",
   "appmenu.details": "Details",
-  "appmenu.remove": "Remove"
+  "appmenu.remove": "Remove",
+  "act.tab_history": "History",
+  "act.tab_now": "Right now"
 };

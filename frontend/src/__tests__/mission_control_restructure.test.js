@@ -265,7 +265,7 @@ describe('Mission Control Navigation Restructure & Hardware Agnosticism', () => 
   it('verifies complete 7-Pillar SUBPANE_MAP coverage and subtab aliases', () => {
     // Pillar 1: Dashboard & Telemetry
     expect(SUBPANE_MAP['dashboard']).toEqual({ section: 'mgmt-sec-activity', pane: 'mgmt-pane-metrics' });
-    expect(SUBPANE_MAP['activity']).toEqual({ section: 'mgmt-sec-activity', pane: 'mgmt-pane-metrics' });
+    expect(SUBPANE_MAP['activity']).toEqual({ section: 'mgmt-sec-activity', pane: 'mgmt-pane-events' }); // History first (SET-27)
     expect(SUBPANE_MAP['telemetry']).toEqual({ section: 'mgmt-sec-activity', pane: 'mgmt-pane-metrics' });
 
     // Pillar 2: Storage & Disks
@@ -311,7 +311,7 @@ describe('Mission Control Navigation Restructure & Hardware Agnosticism', () => 
     expect(SUBPANE_MAP['mgmt-sec-users']).toEqual({ section: 'mgmt-sec-system-group', pane: 'mgmt-pane-users' });
     expect(SUBPANE_MAP['mgmt-sec-backups']).toEqual({ section: 'mgmt-sec-system-group', pane: 'mgmt-pane-backups' });
     expect(SUBPANE_MAP['mgmt-sec-notifications']).toEqual({ section: 'mgmt-sec-system-group', pane: 'mgmt-pane-notifications' });
-    expect(SUBPANE_MAP['mgmt-sec-events']).toEqual({ section: 'mgmt-sec-system-group', pane: 'mgmt-pane-events' });
+    expect(SUBPANE_MAP['mgmt-sec-events']).toEqual({ section: 'mgmt-sec-activity', pane: 'mgmt-pane-events' }); // History (SET-27)
     expect(SUBPANE_MAP['mgmt-sec-language']).toEqual({ section: 'mgmt-sec-system-group', pane: 'mgmt-pane-language' }); // Settings since APP-C
     expect(SUBPANE_MAP['mgmt-sec-about']).toEqual({ section: 'mgmt-sec-system-group', pane: 'mgmt-pane-about' });
 

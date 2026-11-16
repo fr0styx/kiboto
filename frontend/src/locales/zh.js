@@ -1782,7 +1782,7 @@ export default {
   "mgmt.hub_system_desc": "管理管理员凭据、主密码、事件日志、配置备份及 API 令牌。",
   "mgmt.hub_system_action": "管理系统 ➔",
   "mgmt.appearance_title": "外观",
-  "mgmt.activity_title": "活动监视器",
+  "mgmt.activity_title": "活动",
   "mgmt.services_title": "服务",
   "mgmt.system_title": "系统",
   "mgmt.subtab_metrics": "性能图表",
@@ -1880,7 +1880,7 @@ export default {
   "mgmt.range_24h": "最近 24 小时",
   "mgmt.range_7d": "最近 7 天",
   "mgmt.range_30d": "最近 30 天",
-  "mgmt.events_title": "事件日志",
+  "mgmt.events_title": "历史记录",
   "mgmt.events_desc": "警报、备份、电源、应用和硬件，最新的在前。条目保留 90 天。",
   "mgmt.clear_logs": "清空事件日志",
   "mgmt.sec_title": "账户安全与凭据管理",
@@ -7827,5 +7827,7 @@ export default {
   "appmenu.backup": "立即备份",
   "appmenu.log": "查看日志",
   "appmenu.details": "详情",
-  "appmenu.remove": "移除"
+  "appmenu.remove": "移除",
+  "act.tab_history": "历史记录",
+  "act.tab_now": "当前"
 };
