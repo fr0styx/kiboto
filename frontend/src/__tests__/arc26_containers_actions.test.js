@@ -30,6 +30,7 @@ function rowButton(action, name = 'web', id = 'c1') {
 
 describe('Containers window row actions', () => {
   beforeEach(() => {
+    localStorage.setItem('kiboto_apps_details', '1'); // these tests are about the Docker details view (SET-25)
     document.body.innerHTML = '<div id="os-dock-container"><div id="os-dock"></div></div>';
     window._containersManagerInitialized = false;
     window.DockManager = DockManager;

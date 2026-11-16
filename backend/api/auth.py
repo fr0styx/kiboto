@@ -996,6 +996,8 @@ class FilesView(BaseModel):
 class MyPreferences(BaseModel):
     advanced: bool | None = None
     files: FilesView | None = None
+    # the Apps window's "Show Docker details" (SET-25, Apps decision 1)
+    apps_details: bool | None = None
     look: LookPreference | None = None
     # the person's own clock, on every device: "auto" (their browser's zone) or a zone name
     timezone: str | None = Field(default=None, max_length=64)

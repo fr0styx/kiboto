@@ -51,7 +51,7 @@
   "buttons": 0,
   "globals": 4,
   "styles": 14,
-  "templates": 6
+  "templates": 7
  },
  "frontend/src/components/dashboard.js": {
   "buttons": 0,

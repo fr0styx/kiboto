@@ -7813,5 +7813,19 @@ export default {
   "sp.kw_t_card_copies": "SD 卡, 相机卡, 导入, 复制按钮",
   "fm.show_hidden": "显示隐藏文件",
   "fm.hidden_count": "{n, plural, other {# 个隐藏项目}}",
-  "fm.show": "显示"
+  "fm.show": "显示",
+  "apps.show_details": "显示 Docker 详情",
+  "apps.open": "打开",
+  "apps.open_name": "打开 {name}",
+  "apps.empty_title": "还没有应用。",
+  "apps.empty_body": "选择一个来安装。",
+  "appmenu.resume": "继续",
+  "appmenu.restart": "重启",
+  "appmenu.stop": "停止",
+  "appmenu.start": "启动",
+  "appmenu.update": "更新",
+  "appmenu.backup": "立即备份",
+  "appmenu.log": "查看日志",
+  "appmenu.details": "详情",
+  "appmenu.remove": "移除"
 };

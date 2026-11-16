@@ -11,7 +11,8 @@ import { emptyStateHtml } from './empty-state.js';
 import { ZettEventBus } from '../event-bus.js';
 import { showToast, showConfirmToast, showBottomSheet } from '../toast.js';
 import { t } from '../i18n.js';
-import { actionSaid, appsSummary } from './app-condition.js';
+import { actionSaid, appsSummary, canStop, canResume } from './app-condition.js';
+import { appsDetailsOn, saveAppsDetails } from './apps-details-pref.js';
 import { checkSaid, updateAllSaid } from './app-updates-said.js';
 import '../styles/containers-lazy.css'; // the window's own sheet loads with this code (NUX-15)
 import { makeDraggable, bringToFront } from './dock.js';
@@ -131,6 +132,7 @@ export function initContainersManager() {
               <button id="btn-cw-catalog" class="btn-pill-toggle is-primary">
                 <span aria-hidden="true">📦</span> <span>${t('apps.get_apps', 'Get apps')}</span>
               </button>
+              <label class="cw-details-switch" for="cw-details-toggle"><input type="checkbox" id="cw-details-toggle"> <span>${t('apps.show_details', 'Show Docker details')}</span></label>
             </div>
           </div>
 
@@ -175,11 +177,12 @@ export function initContainersManager() {
                   <th class="cw-sortable-th" data-sort-col="status" role="columnheader" aria-sort="none" tabindex="0" title="${t('ui.click_to_sort_by_status', 'Click to sort by Status & Uptime')}">
                     <span data-i18n="mgmt.tbl_uptime">${t('mgmt.tbl_uptime', 'Status & Uptime')}</span><span class="docker-sort-indicator" aria-hidden="true"></span>
                   </th>
+                  <th class="cw-th-open"><span class="sr-only">${t('apps.open', 'Open')}</span></th>
                   <th class="cwm-x-3" data-i18n="mgmt.tbl_actions">${t('mgmt.tbl_actions', 'Actions')}</th>
                 </tr>
               </thead>
               <tbody id="cw-docker-containers-tbody">
-                <tr><td class="cwm-muted-center" colspan="7">${t('cw.scanning', 'Looking for containers…')}</td></tr>
+                <tr><td class="cwm-muted-center" colspan="8">${t('cw.scanning', 'Looking for containers…')}</td></tr>
               </tbody>
             </table>
           </div>
@@ -349,6 +352,14 @@ export function initContainersManager() {
   if (btnNetmap) btnNetmap.onclick = () => openNetworkMap();
   installAppsDockerNets(containersWindow);
   installAppsFamily(containersWindow);
+
+  // "Show Docker details" (SET-25, Apps decision 1): the simple household view, or everything
+  applyAppsDetails(appsDetailsOn());
+  document.getElementById('cw-details-toggle')?.addEventListener('change', (e) => {
+    const on = /** @type {HTMLInputElement} */ (e.target).checked;
+    saveAppsDetails(on);
+    applyAppsDetails(on);
+  });
 
   const btnStacks = document.getElementById('btn-cw-stacks');
   if (btnStacks) {
@@ -716,7 +727,7 @@ export async function loadContainersData(isBackground = false) {
       showToast(t('toast.failed_to_load_containers', 'Failed to load containers: {error}', { error: err.message }), 'error');
       const tbody = document.getElementById('cw-docker-containers-tbody');
       if (tbody && _cwContainersList.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--crit, #ef4444); padding:24px;">${escapeHtml(t('toast.failed_to_load_containers', 'Failed to load containers: {error}', { error: err.message }))}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--crit, #ef4444); padding:24px;">${escapeHtml(t('toast.failed_to_load_containers', 'Failed to load containers: {error}', { error: err.message }))}</td></tr>`;
       }
     } else {
       console.warn('Silent cw background refresh error:', err);
@@ -843,9 +854,15 @@ export function renderContainersWindowTable(containersList = null) {
 
   if (totalCount === 0) {
     // why the list is empty is said above it (no Docker, Docker not answering, or no apps yet)
-    tbody.innerHTML = `<tr><td class="cwm-muted-center" colspan="7">${escapeHtml(appsSummary(_cwContainersList, _cwDockerState).text)}</td></tr>`;
     const cwStickyScroll = document.getElementById('cw-docker-table-sticky-scroll');
     if (cwStickyScroll) cwStickyScroll.style.display = 'none';
+    const dockerOk = !_cwDockerState || (_cwDockerState.available !== false && _cwDockerState.answering !== false);
+    if (!dockerOk) {
+      tbody.innerHTML = `<tr><td class="cwm-muted-center" colspan="8">${escapeHtml(appsSummary(_cwContainersList, _cwDockerState).text)}</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = `<tr><td colspan="8">${emptyStateHtml(/** @type {any} */ ({ title: t('apps.empty_title', 'No apps yet.'), body: t('apps.empty_body', 'Choose one to install.'), action: { id: 'cw-empty-get-apps', label: t('apps.get_apps', 'Get apps') } }))}</td></tr>`;
+    tbody.querySelector('#cw-empty-get-apps')?.addEventListener('click', () => document.getElementById('btn-cw-catalog')?.click());
     return;
   }
 
@@ -919,7 +936,7 @@ export function renderContainersWindowTable(containersList = null) {
 
   if (filtered.length === 0) {
     _cwFilteredList = [];
-    tbody.innerHTML = `<tr><td class="cwm-muted-center" colspan="7">${t('mgmt.docker_no_matching', 'No containers match your search or filter.')}</td></tr>`;
+    tbody.innerHTML = `<tr><td class="cwm-muted-center" colspan="8">${t('mgmt.docker_no_matching', 'No containers match your search or filter.')}</td></tr>`;
     const cwStickyScroll = document.getElementById('cw-docker-table-sticky-scroll');
     if (cwStickyScroll) cwStickyScroll.style.display = 'none';
     return;
@@ -988,7 +1005,7 @@ function createCwSpacerRow(item) {
   const tr = document.createElement('tr');
   tr.className = 'cw-virtual-spacer';
   tr.setAttribute('aria-hidden', 'true');
-  tr.innerHTML = '<td class="cwm-box-2" colspan="7"></td>';
+  tr.innerHTML = '<td class="cwm-box-2" colspan="8"></td>';
   updateCwSpacerRow(tr, item);
   return tr;
 }
@@ -1128,6 +1145,10 @@ function bindCwTableEvents(tbody) {
         const updateInfo = _cwUpdatesCache?.containers?.[c.name] || _cwUpdatesCache?.containers?.[c.id];
         const hasUpdate = Boolean(updateInfo?.has_update);
 
+        if (!appsDetailsOn()) {
+          showBottomSheet(/** @type {any} */ ({ title: cname, items: householdMenu(c, actBtn, hasUpdate) }));
+          return;
+        }
         const items = [
           {
             icon: '🔍',
@@ -1324,4 +1345,31 @@ export async function executeBulkContainerAction(action) {
     refresh: () => loadContainersData(),
     updateBar: updateCwBulkBar,
   });
+}
+
+/** The window in the simple view or with the Docker details (SET-25, Apps decision 1). */
+export function applyAppsDetails(on, root = document) {
+  const win = root.getElementById('containers-manager-window');
+  if (win) win.classList.toggle('cw-simple', !on);
+  const box = /** @type {HTMLInputElement | null} */ (root.getElementById('cw-details-toggle'));
+  if (box) box.checked = Boolean(on);
+}
+
+/** The "..." menu of the simple view, in the report's order (SET-25, section 4). */
+export function householdMenu(c, actBtn, hasUpdate) {
+  const press = (action) => () => actBtn.parentElement?.querySelector(`[data-action="${action}"]`)?.click();
+  const items = [];
+  if (canResume(c)) items.push({ icon: '⏵', label: t('appmenu.resume', 'Resume'), onClick: press('unpause') });
+  if (canStop(c)) {
+    items.push({ icon: '🔄', label: t('appmenu.restart', 'Restart'), onClick: press('restart') });
+    items.push({ icon: '⏹', label: t('appmenu.stop', 'Stop'), onClick: press('stop') });
+  } else {
+    items.push({ icon: '▶', label: t('appmenu.start', 'Start'), onClick: press('start') });
+  }
+  if (hasUpdate) items.push({ icon: '⬆️', label: t('appmenu.update', 'Update'), onClick: press('update-single') });
+  items.push({ icon: '💾', label: t('appmenu.backup', 'Back up now'), onClick: press('backup') });
+  items.push({ icon: '📋', label: t('appmenu.log', 'Show the log'), onClick: () => openContainerInspector(c.id, c.name, 'logs') });
+  items.push({ icon: '🔍', label: t('appmenu.details', 'Details'), onClick: () => openContainerInspector(c.id, c.name, 'overview') });
+  items.push({ icon: '🗑️', label: t('appmenu.remove', 'Remove'), destructive: true, onClick: () => openContainerDeleteModal(c.id, c.name, c.image) });
+  return items;
 }

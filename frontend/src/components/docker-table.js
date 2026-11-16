@@ -120,6 +120,15 @@ export function buildContainerRowInner(c, currentHost, updateInfo = null) {
     portsHtml = portParts.join(' ');
   }
 
+  // Open: the app's own page, while it runs (SET-25: it was a ":8096" chip under Ports & Web UI)
+  let openHtml = '';
+  if (isRunning && c.webui_url) {
+    const openUrl = c.webui_url.replace('[HOST]', currentHost);
+    if (/^https?:\/\//i.test(openUrl)) {
+      openHtml = `<a class="btn-pill-toggle cw-open-btn" href="${escapeHtml(openUrl)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(t('apps.open_name', 'Open {name}', { name: c.name }))}">${escapeHtml(t('apps.open', 'Open'))}</a>`;
+    }
+  }
+
   // Column 6: the app's condition; why, where the server knows it, else what Docker says
   const statusHtml = `
     <div class="docker-condition is-${view.look}" title="${escapeHtml(c.status || '')}">
@@ -188,6 +197,7 @@ export function buildContainerRowInner(c, currentHost, updateInfo = null) {
     <td class="docker-telemetry-cell">${telemHtml}</td>
     <td class="docker-ports-cell">${portsHtml}</td>
     <td class="docker-status-cell">${statusHtml}</td>
+    <td class="docker-open-cell">${openHtml}</td>
     <td class="docker-actions-cell" style="text-align:right; white-space:nowrap;"><div class="docker-actions-btn-group">${actions}</div></td>
   `;
 }

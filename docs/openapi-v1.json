@@ -28492,6 +28492,17 @@
       ],
       "title": "Advanced"
      },
+     "apps_details": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Apps Details"
+     },
      "clock_format": {
       "anyOf": [
        {

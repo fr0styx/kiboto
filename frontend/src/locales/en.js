@@ -7813,5 +7813,19 @@ export default {
   "sp.kw_t_card_copies": "sd card, camera card, import, copy button",
   "fm.show_hidden": "Show hidden files",
   "fm.hidden_count": "{n, plural, one {# hidden item} other {# hidden items}}",
-  "fm.show": "Show"
+  "fm.show": "Show",
+  "apps.show_details": "Show Docker details",
+  "apps.open": "Open",
+  "apps.open_name": "Open {name}",
+  "apps.empty_title": "No apps yet.",
+  "apps.empty_body": "Choose one to install.",
+  "appmenu.resume": "Resume",
+  "appmenu.restart": "Restart",
+  "appmenu.stop": "Stop",
+  "appmenu.start": "Start",
+  "appmenu.update": "Update",
+  "appmenu.backup": "Back up now",
+  "appmenu.log": "Show the log",
+  "appmenu.details": "Details",
+  "appmenu.remove": "Remove"
 };

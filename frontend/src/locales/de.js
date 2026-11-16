@@ -7813,5 +7813,19 @@ export default {
   "sp.kw_t_card_copies": "SD-Karte, Kamerakarte, Import, Kopiertaste",
   "fm.show_hidden": "Versteckte Dateien zeigen",
   "fm.hidden_count": "{n, plural, one {# verstecktes Element} other {# versteckte Elemente}}",
-  "fm.show": "Zeigen"
+  "fm.show": "Zeigen",
+  "apps.show_details": "Docker-Details zeigen",
+  "apps.open": "Öffnen",
+  "apps.open_name": "{name} öffnen",
+  "apps.empty_title": "Noch keine Apps.",
+  "apps.empty_body": "Wählen Sie eine zum Installieren.",
+  "appmenu.resume": "Fortsetzen",
+  "appmenu.restart": "Neu starten",
+  "appmenu.stop": "Stoppen",
+  "appmenu.start": "Starten",
+  "appmenu.update": "Aktualisieren",
+  "appmenu.backup": "Jetzt sichern",
+  "appmenu.log": "Protokoll zeigen",
+  "appmenu.details": "Details",
+  "appmenu.remove": "Entfernen"
 };

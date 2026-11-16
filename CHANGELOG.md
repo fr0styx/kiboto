@@ -45,6 +45,13 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   hidden files show follow your account. Hidden files (names starting with a dot) are hidden by default;
   an eye button by the view buttons shows them, and a line under the list says how many are hidden.
 
+#### Changes
+
+- **A calmer Apps window**: each app shows its name, its state, an Open button for its page, and one "⋯" menu
+  (Restart, Stop or Start, Resume, Update, Back up now, Show the log, Details, Remove). "Show Docker details"
+  brings back the columns, filters, search, row boxes, stacks and network map; it is saved with your account.
+  With no apps yet the window says so and offers Get apps.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 
