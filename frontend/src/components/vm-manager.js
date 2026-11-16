@@ -21,6 +21,7 @@ import { openQemuErrorModal, openVmEditModal } from './vm/edit-modal.js';
 import { openIsoManagerModal } from './vm/iso-manager.js';
 import { openVmSnapshotsModal } from './vm/snapshots.js';
 import { askPower, isShuttingDown, needsWatching, powerToast, shuttingDownActionsHtml } from './vm/power.js';
+import { slowNoteHtml, slowStartText } from './vm/slow-mode.js';
 import '../styles/vm-lazy.css'; // the VM windows' own sheet loads with this code (PERF-9)
 export { kvmChecks, openKvmDiagnosticsModal, openVmConnectModal, vmStateLabel } from './vm/connect-modal.js';
 import { formatFixed } from '../format.js';
@@ -496,6 +497,7 @@ function buildVmCardHtml(vm, vms) {
               <div>
                 <div class="vmm-fs13-bold-strong">${escapeHtml(vm.name)}</div>
                 <div class="vmm-xs-muted">${escapeHtml(vm.description || t('vmm.appliance', 'Virtual machine'))}</div>
+                ${slowNoteHtml(vm, vmState.telemetry?.kvm?.remediation || '')}
               </div>
             </div>
             <div class="vmm-row-6">
@@ -828,7 +830,8 @@ function bindVmGridHandlers(grid) {
         try {
           const res = await api.post(`/api/vms/${vmId}/action`, { action });
           const said = powerToast(action, res?.state, name);
-          showToast(said.text, said.tone);
+          const slow = action === 'start' || action === 'restart' ? slowStartText(res, name, vmState.telemetry?.kvm?.remediation || '') : '';
+          showToast(slow || said.text, slow ? 'warning' : said.tone);
           loadVmDashboard();
         } catch (err) {
           const errorDetail = err.detail || err.message || 'Unknown hypervisor error';

@@ -7915,5 +7915,9 @@ export default {
   "vm.tpm_available": "Security chip (vTPM) available",
   "storage.sum_watch": "{n, plural, one {All drives work. Drive Health keeps an eye on # drive.} other {All drives work. Drive Health keeps an eye on # drives.}}",
   "storage.sum_watch_item": "{model} in {place}: keep an eye on it",
-  "storage.m2_n": "M.2 slot {n}"
+  "storage.m2_n": "M.2 slot {n}",
+  "vms.slow": "Slow: no hardware virtualization",
+  "vms.slow_started": "{name} started in slow mode: this NAS can't use hardware virtualization.",
+  "mvm.slow_mode": "Slow mode: no hardware virtualization",
+  "mvm.slow_fix": "Machines still start, slowly. To fix it: {fix}"
 };

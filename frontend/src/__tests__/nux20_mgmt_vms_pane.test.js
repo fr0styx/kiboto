@@ -89,8 +89,8 @@ describe('Mission Control VM pane (NUX-20)', () => {
     const strip = () => /** @type {HTMLElement} */ (document.getElementById('mgmt-vms-summary-strip')).textContent || '';
     const cases = [
       [{ kvm: { state: 'active' } }, 'KVM Acceleration Active'],
-      [{ kvm: { state: 'restricted', badge: 'Docker cgroup restricted' } }, 'Docker cgroup restricted'],
-      [{ kvm: { state: 'missing' } }, 'Software Emulation'],
+      [{ kvm: { state: 'restricted', badge: 'Docker cgroup restricted', remediation: 'Add --device /dev/kvm.' } }, 'Slow mode: no hardware virtualization'],
+      [{ kvm: { state: 'missing' } }, 'Slow mode: no hardware virtualization'],
       [{}, 'Could not be checked'],
     ];
     for (const [tel, word] of cases) {

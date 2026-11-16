@@ -219,3 +219,5 @@
 #modal-iso-manager .vmi-box-3 { height: 6px; border-radius: 3px; background: var(--kb-glaze-10); overflow: hidden; }
 #modal-iso-manager .vmi-row-6 { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 #modal-iso-manager .vmi-row-7 { display: flex; gap: 6px; }
+/* slow mode: no hardware virtualization (VMs decision 4 a) */
+.vm-slow-note { margin-top: 3px; font-size: var(--kb-fs-xs); font-weight: 600; color: var(--kb-text-warn); }

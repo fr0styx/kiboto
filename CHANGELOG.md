@@ -200,6 +200,12 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Storage names the drives Drive Health is watching**: instead of "All drives are fine." beside a drive marked
   "Keep an eye on it", the summary says "All drives work. Drive Health keeps an eye on 1 drive." and names it.
 
+#### Changes
+
+- **Virtual machines say when they run in slow mode**: on a NAS without hardware virtualization, machines still
+  start, and now each running card says "Slow: no hardware virtualization", Start warns that it fell back to slow
+  mode, and Settings shows "Slow mode" with the fix (for example, enable VT-x in the BIOS).
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

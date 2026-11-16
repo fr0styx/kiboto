@@ -30,6 +30,7 @@ import { installAdvancedSwitch, installSidebarGroups, renderStatusSummary } from
 import { installHealthSignal } from './management/health-signal.js';
 import { _aiSelectedColor, _aiSelectedScene, _getActiveAiSearchQuery, _renderAiRagInitialEmptyState, fetchAndRenderAiStatus, initAiKnowledgeEngine, runAiVisualSearch, setAiVisualFiltersDrawerOpen } from './management/ai.js';
 import { formatFixed } from '../format.js';
+import { slowNoteHtml, slowStartText } from './vm/slow-mode.js';
 import { FIXED_PCT, askFixedSpeed, modeName } from './fan-modes.js';
 
 export * from './management/docker.js';
@@ -866,7 +867,9 @@ export function initManagement() {
         const kvmActive = tel?.kvm?.state === 'active';
         // no answer is not "Software Emulation" in red: it was not checked (VMs report 16)
         const kvmColor = !tel?.kvm ? 'var(--muted)' : kvmActive ? 'var(--ok2, #33cdb8)' : (tel.kvm.state === 'restricted' ? 'var(--warn, #f5a623)' : 'var(--danger, #ff6b6b)');
-        const kvmBadge = !tel?.kvm ? t('mvm.not_checked', 'Could not be checked') : tel.kvm.badge || (kvmActive ? 'KVM Acceleration Active' : 'Software Emulation');
+        // without KVM machines run emulated: say "slow mode", not a technical badge (VMs decision 4 a)
+        const kvmBadge = !tel?.kvm ? t('mvm.not_checked', 'Could not be checked') : kvmActive ? (tel.kvm.badge || 'KVM Acceleration Active') : t('mvm.slow_mode', 'Slow mode: no hardware virtualization');
+        const slowFix = tel?.kvm && !kvmActive && tel.kvm.remediation ? tel.kvm.remediation : '';
         // the server sends memory_budget and cpu_capacity; the old keys never came, so these boxes said
         // "Dynamic" and "Optimal" on every NAS (VMs report 15-16). Unknown values are left out.
         const budget = tel?.memory_budget || {};
@@ -882,6 +885,7 @@ export function initManagement() {
             <div style="font-size: 13px; font-weight: 700; color: ${kvmColor}; margin-top: 4px; display: flex; align-items: center; gap: 6px;">
               <span aria-hidden="true">⚡</span> <span>${escapeHtml(kvmBadge)}</span>
             </div>
+            ${slowFix ? `<div class="vm-slow-fix">${escapeHtml(t('mvm.slow_fix', 'Machines still start, slowly. To fix it: {fix}', { fix: slowFix }))}</div>` : ''}
           </div>
           ${headroom ? `<div class="mgx-box">
             <div class="mgx-xs-bold-muted">${t('mvm.mem_left_label', 'Memory left for machines')}</div>
@@ -931,6 +935,7 @@ export function initManagement() {
                     <div>
                       <div class="mgx-fs13-bold-strong-2">${escapeHtml(vm.name || vm.id)}</div>
                       <div class="mgx-xs-muted">${escapeHtml(osType)} • ${cores} vCPU • ${ramGb} RAM</div>
+                      ${slowNoteHtml(vm, tel?.kvm?.remediation || '')}
                     </div>
                   </div>
                   <span style="padding: 2px 8px; border-radius: 4px; font-size: var(--kb-fs-xs); font-weight: 700; text-transform: uppercase; background: ${statusBg}; color: ${statusColor};">
@@ -960,8 +965,10 @@ export function initManagement() {
                 btn.disabled = true;
                 btn.textContent = '...';
                 // a paused machine is resumed: "Start" marked it running while it stayed frozen
-                await api.post(`/api/vms/${id}/action`, { action: /** @type {HTMLElement} */ (btn).dataset.act === 'resume' ? 'resume' : 'start' });
-                showToast(t('toast.vm_started_successfully', 'VM started successfully'), 'success');
+                const res = await api.post(`/api/vms/${id}/action`, { action: /** @type {HTMLElement} */ (btn).dataset.act === 'resume' ? 'resume' : 'start' });
+                const vmName = vmsList.find((v) => v.id === id)?.name || id;
+                const slow = slowStartText(res, vmName, tel?.kvm?.remediation || '');
+                showToast(slow || t('toast.vm_started_successfully', 'VM started successfully'), slow ? 'warning' : 'success');
                 fetchAndRenderMgmtVms();
               } catch (err) {
                 showToast(t('toast.failed_to_start_vm', 'Failed to start VM: {error}', { error: err.message }), 'error');

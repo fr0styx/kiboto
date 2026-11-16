@@ -1281,7 +1281,8 @@ async def execute_vm_action(
         f"VM '{target_vm['name']}' action '{action}' executed.",
         event_text("vm_state", name=target_vm["name"], action=action),
     )
-    return {"status": "ok", "state": saved.get("state", "stopped")}
+    # "tcg" = started without hardware virtualization: the page says it runs slowly (VMs decision 4 a)
+    return {"status": "ok", "state": saved.get("state", "stopped"), "acceleration": saved.get("acceleration")}
 
 
 @router.post("/{vm_id}/start", dependencies=[Depends(require_scope("vms:manage", "system:config"))])

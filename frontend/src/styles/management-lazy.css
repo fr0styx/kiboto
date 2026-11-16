@@ -445,3 +445,6 @@
 
 /* SET-24: Away from home's cards */
 .away-section { display: flex; flex-direction: column; gap: 10px; margin: 14px 0; }
+/* slow mode: no hardware virtualization (VMs decision 4 a) */
+.vm-slow-note { margin-top: 3px; font-size: var(--kb-fs-xs); font-weight: 600; color: var(--kb-text-warn); }
+.vm-slow-fix { margin-top: 6px; font-size: var(--kb-fs-xs); color: var(--muted); line-height: 1.45; }

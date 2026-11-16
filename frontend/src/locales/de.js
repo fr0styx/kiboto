@@ -7915,5 +7915,9 @@ export default {
   "vm.tpm_available": "Sicherheitschip (vTPM) verfügbar",
   "storage.sum_watch": "{n, plural, one {Alle Laufwerke arbeiten. Laufwerkszustand behält # Laufwerk im Auge.} other {Alle Laufwerke arbeiten. Laufwerkszustand behält # Laufwerke im Auge.}}",
   "storage.sum_watch_item": "{model} in {place}: im Auge behalten",
-  "storage.m2_n": "M.2-Steckplatz {n}"
+  "storage.m2_n": "M.2-Steckplatz {n}",
+  "vms.slow": "Langsam: keine Hardware-Virtualisierung",
+  "vms.slow_started": "{name} wurde im langsamen Modus gestartet: Dieses NAS kann keine Hardware-Virtualisierung nutzen.",
+  "mvm.slow_mode": "Langsamer Modus: keine Hardware-Virtualisierung",
+  "mvm.slow_fix": "Maschinen starten trotzdem, aber langsam. So beheben Sie es: {fix}"
 };

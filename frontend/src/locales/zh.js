@@ -7915,5 +7915,9 @@ export default {
   "vm.tpm_available": "可用安全芯片（vTPM）",
   "storage.sum_watch": "{n, plural, other {所有硬盘都在工作。硬盘健康正在留意 # 块硬盘。}}",
   "storage.sum_watch_item": "{place} 的 {model}：请留意",
-  "storage.m2_n": "M.2 插槽 {n}"
+  "storage.m2_n": "M.2 插槽 {n}",
+  "vms.slow": "较慢：没有硬件虚拟化",
+  "vms.slow_started": "{name} 已以慢速模式启动：这台 NAS 无法使用硬件虚拟化。",
+  "mvm.slow_mode": "慢速模式：没有硬件虚拟化",
+  "mvm.slow_fix": "虚拟机仍可启动，但较慢。解决方法：{fix}"
 };

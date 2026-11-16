@@ -7915,5 +7915,9 @@ export default {
   "vm.tpm_available": "Puce de sécurité (vTPM) disponible",
   "storage.sum_watch": "{n, plural, one {Tous les disques fonctionnent. Santé des disques surveille # disque.} other {Tous les disques fonctionnent. Santé des disques surveille # disques.}}",
   "storage.sum_watch_item": "{model} dans {place} : à surveiller",
-  "storage.m2_n": "Emplacement M.2 {n}"
+  "storage.m2_n": "Emplacement M.2 {n}",
+  "vms.slow": "Lent : pas de virtualisation matérielle",
+  "vms.slow_started": "{name} a démarré en mode lent : ce NAS ne peut pas utiliser la virtualisation matérielle.",
+  "mvm.slow_mode": "Mode lent : pas de virtualisation matérielle",
+  "mvm.slow_fix": "Les machines démarrent quand même, lentement. Pour corriger : {fix}"
 };

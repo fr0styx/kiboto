@@ -7915,5 +7915,9 @@ export default {
   "vm.tpm_available": "Chip de seguridad (vTPM) disponible",
   "storage.sum_watch": "{n, plural, one {Todos los discos funcionan. Salud de discos vigila # disco.} other {Todos los discos funcionan. Salud de discos vigila # discos.}}",
   "storage.sum_watch_item": "{model} en {place}: vigílalo",
-  "storage.m2_n": "Ranura M.2 {n}"
+  "storage.m2_n": "Ranura M.2 {n}",
+  "vms.slow": "Lenta: sin virtualización por hardware",
+  "vms.slow_started": "{name} se inició en modo lento: este NAS no puede usar virtualización por hardware.",
+  "mvm.slow_mode": "Modo lento: sin virtualización por hardware",
+  "mvm.slow_fix": "Las máquinas siguen arrancando, despacio. Para arreglarlo: {fix}"
 };
