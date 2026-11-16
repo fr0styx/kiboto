@@ -941,6 +941,9 @@ export function renderContainersWindowTable(containersList = null) {
     });
   }
 
+  // the simple view keeps a stack's apps together (SET-25: rows of one stack sit together)
+  if (!_cwSortCol && !appsDetailsOn()) filtered.sort(byStackThenName);
+
   if (filtered.length === 0) {
     _cwFilteredList = [];
     tbody.innerHTML = `<tr><td class="cwm-muted-center" colspan="8">${t('mgmt.docker_no_matching', 'No containers match your search or filter.')}</td></tr>`;
@@ -1380,3 +1383,18 @@ export function householdMenu(c, actBtn, hasUpdate) {
   items.push({ icon: '🗑️', label: t('appmenu.remove', 'Remove'), destructive: true, onClick: () => openContainerDeleteModal(c.id, c.name, c.image) });
   return items;
 }
+
+/** Stacks by name, their apps by name, then the apps on their own (the simple view's order, SET-25). */
+export function byStackThenName(a, b) {
+  const sa = (a.stack || '').toLowerCase();
+  const sb = (b.stack || '').toLowerCase();
+  if (sa !== sb) {
+    if (!sa) return 1;
+    if (!sb) return -1;
+    return sa < sb ? -1 : 1;
+  }
+  const na = (a.name || '').toLowerCase();
+  const nb = (b.name || '').toLowerCase();
+  return na < nb ? -1 : na > nb ? 1 : 0;
+}
+

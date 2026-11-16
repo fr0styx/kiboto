@@ -108,6 +108,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **File activity in History**: for administrators, a "Files" chip shows who opened, changed or deleted which
   file, with its own search, beside Sign-ins.
 
+#### Changes
+
+- **Apps that belong together sit together**: the apps of one stack are listed side by side and say "In immich"
+  (or their stack's name) under their own name.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

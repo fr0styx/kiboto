@@ -7882,5 +7882,6 @@ export default {
   "apps.search": "搜索应用",
   "act.pinned": "尚未查看",
   "act.mark_seen": "标为已查看",
-  "act.chip_files": "文件"
+  "act.chip_files": "文件",
+  "apps.in_stack": "属于 {stack}"
 };

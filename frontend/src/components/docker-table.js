@@ -191,6 +191,7 @@ export function buildContainerRowInner(c, currentHost, updateInfo = null) {
         <code style="font-size:var(--kb-fs-xs); color:var(--muted); font-family:var(--font-mono, monospace);">${escapeHtml(idShort)}</code>
         ${updateBadge}
       </div>
+      ${c.stack ? `<div class="cw-stack-note">${escapeHtml(t('apps.in_stack', 'In {stack}', { stack: c.stack }))}</div>` : ''}
     </td>
     <td class="docker-stack-cell">${stackHtml}</td>
     <td class="docker-hw-cell">${hwHtml}</td>

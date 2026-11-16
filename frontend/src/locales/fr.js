@@ -7882,5 +7882,6 @@ export default {
   "apps.search": "Rechercher des apps",
   "act.pinned": "Pas encore vu",
   "act.mark_seen": "Marquer comme vu",
-  "act.chip_files": "Fichiers"
+  "act.chip_files": "Fichiers",
+  "apps.in_stack": "Dans {stack}"
 };

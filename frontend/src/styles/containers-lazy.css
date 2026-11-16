@@ -22,4 +22,7 @@
 .cw-catalog-one-row > * { flex: 0 0 auto; }
 .catalog-open { text-decoration: none; }
 .cw-simple .cat-card-image, .cw-simple .cat-card-port { display: none; }
+/* a stack's apps say which stack they belong to, in the simple view (SET-25) */
+.cw-stack-note { display: none; font-size: var(--kb-fs-xs); color: var(--muted); margin-top: 2px; }
+.cw-simple .cw-stack-note { display: block; }
 

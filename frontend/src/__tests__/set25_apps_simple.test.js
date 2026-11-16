@@ -102,5 +102,14 @@ describe('the Apps window: a simple view, and Docker details per person (SET-25 
     const head = src.slice(src.indexOf('<div class="cw-catalog-head">'));
     expect(head.indexOf('cw-catalog-search-input')).toBeLessThan(head.indexOf('cw-catalog-filter-pills'));
   });
+
+  it("a stack's apps sit together and say which stack they are in", async () => {
+    const { byStackThenName } = await import('../components/containers-manager.js');
+    const list = [{ name: 'z-app' }, { name: 'web', stack: 'immich' }, { name: 'db', stack: 'immich' }, { name: 'a-app' }, { name: 'x', stack: 'arr' }];
+    expect([...list].sort(byStackThenName).map((c) => c.name)).toEqual(['x', 'db', 'web', 'a-app', 'z-app']);
+    const tr = document.createElement('tr');
+    tr.innerHTML = buildContainerRowInner({ id: 'w', name: 'web', stack: 'immich', state: 'running', status: 'Up', ports: [] }, 'nas.local');
+    expect(tr.querySelector('.cw-stack-note')?.textContent).toBe('In immich');
+  });
 });
 

@@ -7882,5 +7882,6 @@ export default {
   "apps.search": "Search apps",
   "act.pinned": "Not seen yet",
   "act.mark_seen": "Mark as seen",
-  "act.chip_files": "Files"
+  "act.chip_files": "Files",
+  "apps.in_stack": "In {stack}"
 };
