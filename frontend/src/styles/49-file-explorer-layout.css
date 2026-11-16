@@ -22,6 +22,11 @@
 .fm-path-breadcrumbs .fm-crumb { flex-shrink: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fm-path-breadcrumbs .fm-crumb-last { flex-shrink: 0; max-width: 75%; }
 
+/* Files 4 / decision 8: how many hidden files there are, under the list */
+.fm-hidden-note { padding: 6px 14px; font-size: var(--kb-fs-xs); color: var(--muted); display: flex; gap: 8px; align-items: center; }
+.fm-hidden-note[hidden] { display: none; }
+.fm-hidden-show { background: none; border: none; padding: 0; color: var(--kb-text-accent); font: inherit; cursor: pointer; text-decoration: underline; }
+
 /* Files 2 (SET-28, finding 13): the details panel lies over the list instead of squeezing the names,
    which fell to a few pixels (or none) at 800-1000 px */
 .fm-3pane-layout { position: relative; }

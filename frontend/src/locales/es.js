@@ -7810,5 +7810,8 @@ export default {
   "storage.sum_checked": "Revisado a las {time}",
   "storage.sum_again": "Revisar de nuevo",
   "hw.tab_card_copies": "Copias de tarjetas",
-  "sp.kw_t_card_copies": "tarjeta SD, tarjeta de cámara, importar, botón de copia"
+  "sp.kw_t_card_copies": "tarjeta SD, tarjeta de cámara, importar, botón de copia",
+  "fm.show_hidden": "Mostrar archivos ocultos",
+  "fm.hidden_count": "{n, plural, one {# elemento oculto} other {# elementos ocultos}}",
+  "fm.show": "Mostrar"
 };

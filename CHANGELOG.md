@@ -39,6 +39,12 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   sit with the Copy button on Hardware. Storage keeps Drives and Cloud drives and is called "Storage".
   Old links and desktop shortcuts open the new places.
 
+#### Changes
+
+- **The File Explorer remembers your view on every device**: list, compact or icons, the sort, and whether
+  hidden files show follow your account. Hidden files (names starting with a dot) are hidden by default;
+  an eye button by the view buttons shows them, and a line under the list says how many are hidden.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

@@ -7810,5 +7810,8 @@ export default {
   "storage.sum_checked": "检查于 {time}",
   "storage.sum_again": "重新检查",
   "hw.tab_card_copies": "存储卡复制",
-  "sp.kw_t_card_copies": "SD 卡, 相机卡, 导入, 复制按钮"
+  "sp.kw_t_card_copies": "SD 卡, 相机卡, 导入, 复制按钮",
+  "fm.show_hidden": "显示隐藏文件",
+  "fm.hidden_count": "{n, plural, other {# 个隐藏项目}}",
+  "fm.show": "显示"
 };

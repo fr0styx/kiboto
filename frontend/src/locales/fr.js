@@ -7810,5 +7810,8 @@ export default {
   "storage.sum_checked": "Vérifié à {time}",
   "storage.sum_again": "Vérifier à nouveau",
   "hw.tab_card_copies": "Copies de cartes",
-  "sp.kw_t_card_copies": "carte SD, carte d'appareil photo, import, bouton de copie"
+  "sp.kw_t_card_copies": "carte SD, carte d'appareil photo, import, bouton de copie",
+  "fm.show_hidden": "Afficher les fichiers masqués",
+  "fm.hidden_count": "{n, plural, one {# élément masqué} other {# éléments masqués}}",
+  "fm.show": "Afficher"
 };

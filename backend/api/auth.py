@@ -984,8 +984,18 @@ class LookPreference(BaseModel):
     accent: str = Field(default="", pattern=r"^(#[0-9a-fA-F]{6})?$")  # '' = the theme's own colour
 
 
+class FilesView(BaseModel):
+    """How the person sees the File Explorer (SET-28 Files 4): it follows them to every device."""
+
+    view: Literal["list", "compact", "icon"] = "list"
+    sort: Literal["name", "size", "type", "mtime"] = "name"
+    sort_dir: Literal["asc", "desc"] = "asc"
+    hidden: bool = False  # show hidden files (names starting with a dot)
+
+
 class MyPreferences(BaseModel):
     advanced: bool | None = None
+    files: FilesView | None = None
     look: LookPreference | None = None
     # the person's own clock, on every device: "auto" (their browser's zone) or a zone name
     timezone: str | None = Field(default=None, max_length=64)

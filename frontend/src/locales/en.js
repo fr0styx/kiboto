@@ -7810,5 +7810,8 @@ export default {
   "storage.sum_checked": "Checked at {time}",
   "storage.sum_again": "Check again",
   "hw.tab_card_copies": "Card copies",
-  "sp.kw_t_card_copies": "sd card, camera card, import, copy button"
+  "sp.kw_t_card_copies": "sd card, camera card, import, copy button",
+  "fm.show_hidden": "Show hidden files",
+  "fm.hidden_count": "{n, plural, one {# hidden item} other {# hidden items}}",
+  "fm.show": "Show"
 };

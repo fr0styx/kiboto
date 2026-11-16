@@ -29,7 +29,9 @@ describe('sorting in the File Explorer (SET-05)', () => {
 
   it('a refresh uses the same sort as a click on a header, and no other', () => {
     const load = page.slice(page.indexOf('  async loadPath('), page.indexOf('  /** The folder wasn\'t opened because its disk is asleep'));
-    expect(load).toContain('this.applySorting();');
+    expect(load).toContain('this.applyHidden();'); // which sorts (SET-28 Files 4)
+    const hide = page.slice(page.indexOf('  applyHidden() {'), page.indexOf('  toggleHidden() {'));
+    expect(hide).toContain('this.applySorting();');
     expect(load).toContain('this.updateSortHeaderUI();');
     expect(load).not.toContain('.sort((a, b) =>');
     expect(page).not.toContain("'Type' + getArrow");

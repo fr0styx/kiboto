@@ -11,6 +11,7 @@ import { escapeHtml, copyTextToClipboard } from '../utils.js';
 import { ZettEventBus } from '../event-bus.js';
 import { showToast, showConfirmToast, showDangerConfirm, showPromptToast, showBottomSheet, showActionToast } from '../toast.js';
 import { t } from '../i18n.js';
+import { startingView, saveFilesView, visibleEntries, currentUser } from './fm-view-prefs.js';
 import { setIconLabel } from '../ui/primitives.js';
 import { binColumns, binBar, goesSoon, goesLabel } from './fm-bin-view.js';
 import { makeDraggable, bringToFront } from './dock.js';
@@ -154,14 +155,20 @@ export class FileManagerWindow {
     this.dockId = dockId;
     this.isPrimary = isPrimary;
     this.currentPath = initialPath || (isPrimary ? (localStorage.getItem('kiboto_fm_last_path') || '/mnt/user') : '/mnt/user');
-    this.viewMode = localStorage.getItem('kiboto_fm_view_mode') || 'list';
+    // view, sort and hidden files follow the person (SET-28 Files 4)
+    const start = startingView();
+    this.viewMode = start.view;
+    this.showHidden = start.hidden;
+    this.hiddenCount = 0;
+    this.allEntries = [];
     this.fileList = [];
     this.rawFileList = [];
     this.selectedPaths = new Set();
     this.lastSelectedIndex = -1;
     this.selectionAnchorIndex = -1;
-    this.currentSortBy = 'name';
-    this.currentSortDir = 'asc';
+    this.currentSortBy = start.sort;
+    this.currentSortDir = start.sort_dir;
+    if (start.seed && currentUser()) saveFilesView(start); // first sign-in: the browser's values, once
     this.isMaximized = false;
     this.preMaxBounds = null;
 
@@ -317,6 +324,9 @@ export class FileManagerWindow {
                 <button id="fm-btn-view-icon" class="fm-tool-btn fm-btn-view-icon ${this.viewMode === 'icon' ? 'active' : ''}" title="${t('fm.view_icon', 'Icon View')}" data-i18n-title="fm.view_icon" aria-label="${t('fm.view_icon', 'Icon View')}">
                   <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
                 </button>
+                <button class="fm-tool-btn fm-btn-hidden ${this.showHidden ? 'active' : ''}" aria-pressed="${this.showHidden ? 'true' : 'false'}" title="${t('fm.show_hidden', 'Show hidden files')}" data-i18n-title="fm.show_hidden" aria-label="${t('fm.show_hidden', 'Show hidden files')}">
+                  <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                </button>
               </div>
               <div class="fm-aux-tool-group fmx-row-4">
                 <button type="button" id="fm-btn-transfers" class="fm-tool-btn fm-btn-transfers-toggle" title="${t('fm.transfers', 'Transfers')}" data-i18n-title="fm.transfers" aria-label="${t('transfers.title', 'Transfers')}">
@@ -348,6 +358,7 @@ export class FileManagerWindow {
                     <div id="fm-list" class="fm-list"></div>
                     <div class="fm-marquee-box" style="display: none;"></div>
                   </div>
+                  <div class="fm-hidden-note" hidden></div>
                 </div>
                 <div class="fm-inspector-pane" style="display: none;">
                   <div class="fm-inspector-header fmx-row-box">
@@ -436,6 +447,9 @@ export class FileManagerWindow {
               <button class="fm-tool-btn fm-btn-view-icon ${this.viewMode === 'icon' ? 'active' : ''}" title="${t('fm.view_icon', 'Icon View')}" data-i18n-title="fm.view_icon" aria-label="${t('fm.view_icon', 'Icon View')}">
                 <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
               </button>
+              <button class="fm-tool-btn fm-btn-hidden ${this.showHidden ? 'active' : ''}" aria-pressed="${this.showHidden ? 'true' : 'false'}" title="${t('fm.show_hidden', 'Show hidden files')}" data-i18n-title="fm.show_hidden" aria-label="${t('fm.show_hidden', 'Show hidden files')}">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              </button>
             </div>
             <div class="fm-aux-tool-group fmx-row-4">
               <button type="button" class="fm-tool-btn fm-btn-transfers-toggle" title="${t('fm.transfers', 'Transfers')}" data-i18n-title="fm.transfers" aria-label="${t('transfers.title', 'Transfers')}">
@@ -467,6 +481,7 @@ export class FileManagerWindow {
                   <div class="fm-list"></div>
                   <div class="fm-marquee-box" style="display: none;"></div>
                 </div>
+                <div class="fm-hidden-note" hidden></div>
               </div>
               <div class="fm-inspector-pane" style="display: none;">
                 <div class="fm-inspector-header fmx-row-box">
@@ -565,6 +580,8 @@ export class FileManagerWindow {
     this.organizeBtn = this.windowEl.querySelector('.fm-organize-btn');
     this.btnViewList = this.windowEl.querySelector('.fm-btn-view-list');
     this.btnViewIcon = this.windowEl.querySelector('.fm-btn-view-icon');
+    this.btnHidden = this.windowEl.querySelector('.fm-btn-hidden');
+    this.hiddenNote = this.windowEl.querySelector('.fm-hidden-note');
     this.headerRow = this.windowEl.querySelector('.fm-header-row');
     this.colName = this.windowEl.querySelector('.fm-header-row .fm-col-name');
     this.colSize = this.windowEl.querySelector('.fm-header-row .fm-col-size');
@@ -898,6 +915,10 @@ export class FileManagerWindow {
     this.btnViewList?.addEventListener('click', () => this.setViewMode('list'));
     this.btnViewCompact?.addEventListener('click', () => this.setViewMode('compact'));
     this.btnViewIcon?.addEventListener('click', () => this.setViewMode('icon'));
+    this.btnHidden?.addEventListener('click', () => this.toggleHidden());
+    this.hiddenNote?.addEventListener('click', (e) => {
+      if (/** @type {Element} */ (e.target).closest('button')) this.toggleHidden();
+    });
 
     // Auxiliary toolbar buttons
     this.btnTransfersToggle?.addEventListener('click', () => {
@@ -1656,12 +1677,53 @@ export class FileManagerWindow {
     }
   }
 
+  /** The view, sort and hidden-files switch as the person's preference (SET-28 Files 4). */
+  filesView() {
+    return { view: this.viewMode, sort: this.currentSortBy, sort_dir: this.currentSortDir, hidden: this.showHidden };
+  }
+
+  /** Lists the folder's entries again, with or without the hidden files. */
+  applyHidden() {
+    const shown = visibleEntries(this.allEntries, this.showHidden);
+    this.hiddenCount = shown.hidden;
+    this.fileList = [...shown.list];
+    this.applySorting();
+    this.rawFileList = [...this.fileList];
+    this.renderHiddenNote();
+  }
+
+  toggleHidden() {
+    this.showHidden = !this.showHidden;
+    saveFilesView(this.filesView());
+    if (this.btnHidden) {
+      this.btnHidden.classList.toggle('active', this.showHidden);
+      this.btnHidden.setAttribute('aria-pressed', this.showHidden ? 'true' : 'false');
+    }
+    this.applyHidden();
+    const spacer = /** @type {HTMLElement | null} */ (this.spacer);
+    if (spacer) spacer.style.height = (this.fileList.length * (this.viewMode === 'compact' ? 28 : ROW_HEIGHT)) + 'px';
+    this.renderViewport();
+  }
+
+  /** "3 hidden items · Show" under the list, while hidden files are hidden (Files decision 8). */
+  renderHiddenNote() {
+    const note = /** @type {HTMLElement | null} */ (this.hiddenNote);
+    if (!note) return;
+    note.hidden = this.showHidden || !this.hiddenCount;
+    if (note.hidden) return;
+    const text = document.createElement('span');
+    text.textContent = t('fm.hidden_count', '{n, plural, one {# hidden item} other {# hidden items}}', { n: this.hiddenCount });
+    const show = document.createElement('button');
+    show.type = 'button';
+    show.className = 'fm-hidden-show';
+    show.textContent = t('fm.show', 'Show');
+    note.replaceChildren(text, show);
+  }
+
   setViewMode(mode) {
     if (this.viewMode === mode) return;
     this.viewMode = mode;
-    try {
-      localStorage.setItem('kiboto_fm_view_mode', mode);
-    } catch (_) {}
+    saveFilesView(this.filesView());
 
     if (this.windowEl) {
       this.windowEl.classList.toggle('fm-mode-icon', mode === 'icon');
@@ -2165,11 +2227,10 @@ export class FileManagerWindow {
       // of its own that did not know "Modified" and fell back to the name, and it rewrote three
       // headers, which took their arrows away and put the English word "Type" over "From" in
       // the Recycle Bin.
-      this.fileList = [...(res.dirs || [])];
-      this.applySorting();
+      this.allEntries = res.dirs || [];
+      this.applyHidden(); // hidden files only when the person asked for them (Files decision 8)
       this.updateSortHeaderUI();
 
-      this.rawFileList = [...this.fileList];
       if (this.searchInput) this.searchInput.value = '';
       this.searchQuery = '';
       this.isSearching = false;
@@ -3349,6 +3410,7 @@ export class FileManagerWindow {
   setSort(col, dir) {
     this.currentSortBy = ['name', 'size', 'type', 'mtime'].includes(col) ? col : 'name';
     this.currentSortDir = dir === 'desc' ? 'desc' : 'asc';
+    saveFilesView(this.filesView());
     this.applySorting();
     this.updateSortHeaderUI();
     this.renderViewport();
@@ -3361,6 +3423,7 @@ export class FileManagerWindow {
       this.currentSortBy = col;
       this.currentSortDir = 'asc';
     }
+    saveFilesView(this.filesView());
     this.applySorting();
     this.updateSortHeaderUI();
     this.renderViewport();

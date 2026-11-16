@@ -7736,6 +7736,48 @@
     "title": "FieldError",
     "type": "object"
    },
+   "FilesView": {
+    "description": "How the person sees the File Explorer (SET-28 Files 4): it follows them to every device.",
+    "properties": {
+     "hidden": {
+      "default": false,
+      "title": "Hidden",
+      "type": "boolean"
+     },
+     "sort": {
+      "default": "name",
+      "enum": [
+       "name",
+       "size",
+       "type",
+       "mtime"
+      ],
+      "title": "Sort",
+      "type": "string"
+     },
+     "sort_dir": {
+      "default": "asc",
+      "enum": [
+       "asc",
+       "desc"
+      ],
+      "title": "Sort Dir",
+      "type": "string"
+     },
+     "view": {
+      "default": "list",
+      "enum": [
+       "list",
+       "compact",
+       "icon"
+      ],
+      "title": "View",
+      "type": "string"
+     }
+    },
+    "title": "FilesView",
+    "type": "object"
+   },
    "FolderAuditRequest": {
     "properties": {
      "folder_path": {
@@ -28477,6 +28519,16 @@
        }
       ],
       "title": "Events Seen"
+     },
+     "files": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/FilesView"
+       },
+       {
+        "type": "null"
+       }
+      ]
      },
      "look": {
       "anyOf": [
