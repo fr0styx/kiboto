@@ -8117,5 +8117,12 @@ export default {
   "kibm.failed": "The choice was not saved: {error}",
   "kibm.test_failed": "The speed test did not start: {error}",
   "kibw.title": "Kib",
-  "kibw.open": "Open Kib"
+  "kibw.open": "Open Kib",
+  "vmp.presets": "Start from",
+  "vmp.p_linux": "Linux or another system",
+  "vmp.p_linux_2": "2 cores, 4 GB, 32 GB disk",
+  "vmp.p_win11": "Windows 11",
+  "vmp.p_win11_2": "4 cores, 8 GB, 64 GB disk, UEFI and TPM",
+  "vmp.n_win11": "Windows 11 needs UEFI and a TPM: both are set. Choose the Windows installer as the boot ISO, and add the driver disc (virtio-win) from the ISO catalog so Windows can see its disk.",
+  "vmp.n_linux": "Choose the installer as the boot ISO, or pick one from the ISO catalog."
 };

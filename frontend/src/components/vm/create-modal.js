@@ -16,6 +16,7 @@ import { usbUseNote, confirmUsbUse } from './usb-use.js';
 import { loadIsos, fillIsoSelect } from './isos.js';
 import { openIsoManagerModal } from './iso-manager.js';
 import { vtpmBadgeHtml } from './shared.js';
+import { presetsHtml, bindPresets } from './presets.js';
 import { loadVmDashboard } from '../vm-manager.js';
 
 let _telemetryAsked = false;
@@ -65,6 +66,7 @@ export function openVmCreateModal() {
       </div>
 
       <div class="smart-modal-body vmc-col-2">
+        ${presetsHtml()}
         <!-- Step 1: General -->
         <div>
           <label class="vmc-xs-bold-muted" for="vm-create-name">${t('vmd.name_label', 'VM name *')}</label>
@@ -692,6 +694,7 @@ export function openVmCreateModal() {
   }
 
   // Submit Handler
+  bindPresets(modal); // VMs decision 5: start from Linux or Windows 11
   const btnSubmit = modal.querySelector('#vm-create-submit');
   if (btnSubmit) {
     btnSubmit.onclick = async () => {

@@ -366,6 +366,12 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   about this" and from every old link; Settings → Kib holds only Kib's settings, with an "Open Kib" button. Someone who
   may use Kib but not change its settings gets the window instead of a page that is not theirs.
 
+#### Changes
+
+- **A new virtual machine starts from a preset**: "Linux or another system" (2 cores, 4 GB, 32 GB) or "Windows 11"
+  (4 cores, 8 GB, 64 GB, UEFI and TPM, with a note about the driver disc). Sizes stay inside what this NAS can give,
+  and every field can still be changed.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

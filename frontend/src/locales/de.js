@@ -8117,5 +8117,12 @@ export default {
   "kibm.failed": "Die Wahl wurde nicht gespeichert: {error}",
   "kibm.test_failed": "Der Geschwindigkeitstest ist nicht gestartet: {error}",
   "kibw.title": "Kib",
-  "kibw.open": "Kib öffnen"
+  "kibw.open": "Kib öffnen",
+  "vmp.presets": "Ausgangspunkt",
+  "vmp.p_linux": "Linux oder ein anderes System",
+  "vmp.p_linux_2": "2 Kerne, 4 GB, 32-GB-Datenträger",
+  "vmp.p_win11": "Windows 11",
+  "vmp.p_win11_2": "4 Kerne, 8 GB, 64-GB-Datenträger, UEFI und TPM",
+  "vmp.n_win11": "Windows 11 braucht UEFI und ein TPM: beides ist eingestellt. Wählen Sie den Windows-Installer als Boot-ISO und fügen Sie die Treiber-CD (virtio-win) aus dem ISO-Katalog hinzu, damit Windows seinen Datenträger sieht.",
+  "vmp.n_linux": "Wählen Sie den Installer als Boot-ISO oder nehmen Sie einen aus dem ISO-Katalog."
 };

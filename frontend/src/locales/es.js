@@ -8117,5 +8117,12 @@ export default {
   "kibm.failed": "La elección no se guardó: {error}",
   "kibm.test_failed": "La prueba de velocidad no empezó: {error}",
   "kibw.title": "Kib",
-  "kibw.open": "Abrir Kib"
+  "kibw.open": "Abrir Kib",
+  "vmp.presets": "Empezar desde",
+  "vmp.p_linux": "Linux u otro sistema",
+  "vmp.p_linux_2": "2 núcleos, 4 GB, disco de 32 GB",
+  "vmp.p_win11": "Windows 11",
+  "vmp.p_win11_2": "4 núcleos, 8 GB, disco de 64 GB, UEFI y TPM",
+  "vmp.n_win11": "Windows 11 necesita UEFI y un TPM: ambos están configurados. Elige el instalador de Windows como ISO de arranque y añade el disco de controladores (virtio-win) desde el catálogo de ISO para que Windows vea su disco.",
+  "vmp.n_linux": "Elige el instalador como ISO de arranque, o toma uno del catálogo de ISO."
 };
