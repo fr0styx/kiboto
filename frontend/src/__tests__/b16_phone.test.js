@@ -23,7 +23,8 @@ describe('UX-37: phones and tablets', () => {
     await tick();
     const page = document.getElementById('phone-alerts-page');
     expect(page.hidden).toBe(false);
-    expect(page.querySelector('[data-ov-open="storage"]')).not.toBeNull();
+    // the status box comes from a module loaded on demand: wait for it, not one tick (it failed run alone)
+    await vi.waitFor(() => expect(page.querySelector('[data-ov-open="storage"]')).not.toBeNull());
     page.querySelector('[data-phone-log]').click();
     expect(window.openManagementSection).toHaveBeenCalledWith('mgmt-pane-events');
     page.querySelector('.phone-alerts-close').click();

@@ -341,9 +341,14 @@ class TestSnippetCleaningStress:
         at the end of the sentence that crosses max_chars, never mid-sentence.
         """
         large_blob = "Kiboto automates container management, hardware telemetry, and thermal safety curves. " * 500
-        t0 = time.perf_counter()
-        res = _clean_complete_snippet(large_blob, max_chars=850)
-        elapsed_ms = (time.perf_counter() - t0) * 1000
+        # the best of five: a busy test box slows some runs, while a regular expression that blows up
+        # (what this guards against) slows every one (the gate failed on a busy box, 16 Nov 2026)
+        timings = []
+        for _ in range(5):
+            t0 = time.perf_counter()
+            res = _clean_complete_snippet(large_blob, max_chars=850)
+            timings.append((time.perf_counter() - t0) * 1000)
+        elapsed_ms = min(timings)
         # Complete sentence guarantee: bounded by max_chars plus at most one sentence length
         assert 800 <= len(res) <= 950
         assert res.endswith("."), "Expected unbroken sentence ending in period"
