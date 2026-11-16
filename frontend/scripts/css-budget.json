@@ -3,7 +3,7 @@
   "buttonClasses": 75,
   "inlineStyles": 1254,
   "emojiIcons": 3,
-  "colours": 3761,
+  "colours": 3718,
   "primitiveUses": 4,
   "importantPerFile": {
     "frontend/index.html": 64,
@@ -95,7 +95,7 @@
     "frontend/src/components/vm-manager.js": 54,
     "frontend/src/components/vm/connect-modal.js": 15,
     "frontend/src/components/vm/console-ansi.js": 51,
-    "frontend/src/components/vm/console.js": 58,
+    "frontend/src/components/vm/console.js": 15,
     "frontend/src/components/vm/create-modal.js": 19,
     "frontend/src/components/vm/edit-modal.js": 33,
     "frontend/src/components/vm/iso-manager.js": 30,

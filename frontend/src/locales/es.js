@@ -8015,5 +8015,10 @@ export default {
   "fm.m_ai": "Búsqueda con IA",
   "fm.m_view": "Vista",
   "fm.m_more": "Más",
-  "vmd.discard_q": "¿Cerrar sin guardar? Se perderán tus cambios."
+  "vmd.discard_q": "¿Cerrar sin guardar? Se perderán tus cambios.",
+  "vcon.connecting_cli": "Conectando con la consola serie de {name}…",
+  "vcon.connecting_gui": "Conectando con la pantalla de {name}…",
+  "vcon.failed_cli": "No se pudo abrir la consola serie de {name}.",
+  "vcon.failed_gui": "No se pudo abrir la pantalla de {name}.",
+  "vcon.failed_hint": "Comprueba que la máquina está en marcha y pulsa Reconectar."
 };

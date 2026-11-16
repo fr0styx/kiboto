@@ -8015,5 +8015,10 @@ export default {
   "fm.m_ai": "AI 搜索",
   "fm.m_view": "视图",
   "fm.m_more": "更多",
-  "vmd.discard_q": "不保存就关闭吗？你的更改将会丢失。"
+  "vmd.discard_q": "不保存就关闭吗？你的更改将会丢失。",
+  "vcon.connecting_cli": "正在连接 {name} 的串行控制台…",
+  "vcon.connecting_gui": "正在连接 {name} 的屏幕…",
+  "vcon.failed_cli": "无法打开 {name} 的串行控制台。",
+  "vcon.failed_gui": "无法打开 {name} 的屏幕。",
+  "vcon.failed_hint": "请确认虚拟机正在运行，然后点“重新连接”。"
 };

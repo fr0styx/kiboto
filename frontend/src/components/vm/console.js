@@ -1,4 +1,4 @@
-// The VM console: VNC and serial clients, keyboard, paste, reconnect, and the offline simulations.
+// The VM console: VNC and serial clients, keyboard, paste, reconnect, and what it says while connecting.
 // Part of vm-manager.js, split out by ARC-5.
 
 import { api } from '../../api.js';
@@ -96,314 +96,51 @@ export function setConsoleFocus(focused) {
 }
 
 /**
- * Hypervisor Graphical Video Display (Display :0 / VirtIO-GPU / VNC)
- * Renders an authentic hypervisor remote video monitor viewport.
+ * What the console shows until the real screen or serial console is there, or when it can't be
+ * opened. It drew a made-up desktop and a fake shell with invented boot lines and command answers
+ * before every connection and after a failed one; now it says what is happening (honesty fix).
  */
-function initGuiDesktopSimulation(canvas, vmName) {
+function paintConsoleNote(canvas, line1, line2 = '') {
   if (!canvas) return;
-  if (canvas._blinkInterval) {
-    clearInterval(canvas._blinkInterval);
-    canvas._blinkInterval = null;
-  }
-  if (canvas._guiInterval) {
-    clearInterval(canvas._guiInterval);
-    canvas._guiInterval = null;
-  }
-  if (canvas._guiMouseMove) {
-    canvas.removeEventListener('mousemove', canvas._guiMouseMove);
-    canvas._guiMouseMove = null;
-  }
-  if (canvas._guiMouseLeave) {
-    canvas.removeEventListener('mouseleave', canvas._guiMouseLeave);
-    canvas._guiMouseLeave = null;
-  }
-  if (canvas._guiMouseDown) {
-    canvas.removeEventListener('mousedown', canvas._guiMouseDown);
-    canvas._guiMouseDown = null;
-  }
-
-  const ctx = canvas.getContext ? canvas.getContext('2d') : null;
-
-  let mouseX = Math.floor(canvas.width / 2);
-  let mouseY = Math.floor(canvas.height / 2);
-  let mouseInCanvas = true;
-
-  const targetVm = vmState.list.find((v) => v.name === vmName) || {};
-  const vmIp = targetVm.ip_address || '192.168.1.180';
-  const vmId = targetVm.id || '1';
-  const vncPort = 5900 + ((parseInt(vmId, 10) || 1) % 10);
-
-  const onMouseMove = (e) => {
-    const rect = canvas.getBoundingClientRect();
-    if (!rect.width || !rect.height) return;
-    mouseX = Math.max(0, Math.min(canvas.width, Math.floor(((e.clientX - rect.left) / rect.width) * canvas.width)));
-    mouseY = Math.max(0, Math.min(canvas.height, Math.floor(((e.clientY - rect.top) / rect.height) * canvas.height)));
-    mouseInCanvas = true;
-    render();
-  };
-
-  const onMouseLeave = () => {
-    mouseInCanvas = false;
-    render();
-  };
-
-  const onMouseDown = async (e) => {
-    const rect = canvas.getBoundingClientRect();
-    if (!rect.width || !rect.height) return;
-    const x = Math.max(0, Math.min(canvas.width, Math.floor(((e.clientX - rect.left) / rect.width) * canvas.width)));
-    const y = Math.max(0, Math.min(canvas.height, Math.floor(((e.clientY - rect.top) / rect.height) * canvas.height)));
-
-    const cardY = 56;
-    const btnY = cardY + 252;
-    // Button 1: Switch to Serial TTY (x: 140 to 330)
-    if (y >= btnY && y <= btnY + 36 && x >= 140 && x <= 330) {
-      const consoleWin = document.getElementById('vm-console-window');
-      if (consoleWin && consoleWin._setConsoleMode) {
-        consoleWin._setConsoleMode('cli');
-      }
-    }
-    // Button 2: Native VNC Client (x: 350 to 530)
-    else if (y >= btnY && y <= btnY + 36 && x >= 350 && x <= 530) {
-      const uri = `vnc://${window.location.hostname || '127.0.0.1'}:${vncPort}`;
-      const ok = await copyToClipboard(uri);
-      if (ok) showToast(t('toast.copied_vnc_uri', 'Copied VNC URI \'{uri}\'', { uri: uri }), 'info');
-    }
-    // Button 3: Copy SSH (x: 550 to 720)
-    else if (y >= btnY && y <= btnY + 36 && x >= 550 && x <= 720) {
-      const cmd = `ssh root@${vmIp}`;
-      const ok = await copyToClipboard(cmd);
-      if (ok) showToast(t('toast.copied', 'Copied \'{cmd}\'', { cmd: cmd }), 'info');
-    }
-  };
-
-  canvas._guiMouseMove = onMouseMove;
-  canvas._guiMouseLeave = onMouseLeave;
-  canvas._guiMouseDown = onMouseDown;
-
-  canvas.addEventListener('mousemove', onMouseMove);
-  canvas.addEventListener('mouseleave', onMouseLeave);
-  canvas.addEventListener('mousedown', onMouseDown);
-
-  function render() {
-    if (!ctx) return;
-    const w = canvas.width;
-    const h = canvas.height;
-
-    // 1. Sleek deep hypervisor console background
-    ctx.fillStyle = '#071011';
-    ctx.fillRect(0, 0, w, h);
-
-    // Phosphor CRT scanlines
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.015)';
-    for (let y = 0; y < h; y += 4) {
-      ctx.fillRect(0, y, w, 1);
-    }
-
-    // 2. Hardware Video Frame Header
-    ctx.fillStyle = 'rgba(14, 28, 30, 0.85)';
-    ctx.fillRect(0, 0, w, 32);
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
-    ctx.strokeRect(0, 0, w, 32);
-
-    ctx.font = '600 11px "JetBrains Mono", monospace';
-    ctx.fillStyle = '#4fd8c4';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(`⚡ QEMU/KVM Hardware Video Display (:0) — ${vmName}`, 16, 16);
-
-    ctx.font = '500 11px "JetBrains Mono", monospace';
-    ctx.fillStyle = '#95a8ab';
-    const hdrRight = `1920 × 1080 @ 60 FPS  •  VirtIO-GPU DRM`;
-    const hdrRightW = ctx.measureText(hdrRight).width;
-    ctx.fillText(hdrRight, w - hdrRightW - 16, 16);
-
-    // 3. Central Hypervisor Display Frame
-    const cardW = Math.min(680, w - 60);
-    const cardH = 320;
-    const cardX = Math.floor((w - cardW) / 2);
-    const cardY = 56;
-
-    ctx.fillStyle = 'rgba(11, 23, 25, 0.75)';
-    ctx.strokeStyle = 'rgba(51, 205, 184, 0.25)';
-    ctx.lineWidth = 1;
-    if (ctx.roundRect) {
-      ctx.beginPath();
-      ctx.roundRect(cardX, cardY, cardW, cardH, 10);
-      ctx.fill();
-      ctx.stroke();
-    } else {
-      ctx.fillRect(cardX, cardY, cardW, cardH);
-      ctx.strokeRect(cardX, cardY, cardW, cardH);
-    }
-
-    // Monitor Icon & Header
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'top';
-
-    ctx.font = '28px sans-serif';
-    ctx.fillText('🖥️', w / 2, cardY + 16);
-
-    ctx.font = '700 15px system-ui, -apple-system, sans-serif';
-    ctx.fillStyle = '#f5f9f9';
-    ctx.fillText(`VNC REMOTE DISPLAY (:0)`, w / 2, cardY + 52);
-
-    ctx.font = '500 12px "JetBrains Mono", monospace';
-    ctx.fillStyle = '#34d399';
-    ctx.fillText(`● VNC Server Listening on 127.0.0.1:${vncPort}`, w / 2, cardY + 76);
-
-    ctx.font = '400 11px system-ui, -apple-system, sans-serif';
-    ctx.fillStyle = '#95a8ab';
-    ctx.fillText(`Guest OS video output is running on physical display :0 with hardware acceleration.`, w / 2, cardY + 96);
-
-    // Telemetry Grid Box
-    const gridY = cardY + 120;
-    const gridW = cardW - 48;
-    const gridX = cardX + 24;
-    const gridH = 92;
-
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
-    if (ctx.roundRect) {
-      ctx.beginPath();
-      ctx.roundRect(gridX, gridY, gridW, gridH, 6);
-      ctx.fill();
-      ctx.stroke();
-    } else {
-      ctx.fillRect(gridX, gridY, gridW, gridH);
-      ctx.strokeRect(gridX, gridY, gridW, gridH);
-    }
-
-    ctx.textAlign = 'left';
-    ctx.font = '11px "JetBrains Mono", monospace';
-
-    const col1X = gridX + 16;
-    const col2X = gridX + Math.floor(gridW / 2) + 16;
-
-    ctx.fillStyle = '#6c8084';
-    ctx.fillText('Host Hypervisor:', col1X, gridY + 14);
-    ctx.fillStyle = '#4fd8c4';
-    ctx.fillText('Linux KVM (VT-x Active)', col1X + 130, gridY + 14);
-
-    ctx.fillStyle = '#6c8084';
-    ctx.fillText('Graphics Driver:', col1X, gridY + 38);
-    ctx.fillStyle = '#fff';
-    ctx.fillText('VirtIO-GPU (DRM / KMS)', col1X + 130, gridY + 38);
-
-    ctx.fillStyle = '#6c8084';
-    ctx.fillText('Display Protocol:', col1X, gridY + 62);
-    ctx.fillStyle = '#a78bfa';
-    ctx.fillText('RFB 3.8 / noVNC WebSocket', col1X + 130, gridY + 62);
-
-    ctx.fillStyle = '#6c8084';
-    ctx.fillText('Guest IP Address:', col2X, gridY + 14);
-    ctx.fillStyle = '#4fd8c4';
-    ctx.fillText(vmIp, col2X + 130, gridY + 14);
-
-    ctx.fillStyle = '#6c8084';
-    ctx.fillText('Network Bridge:', col2X, gridY + 38);
-    ctx.fillStyle = '#fff';
-    ctx.fillText(targetVm.bridge || 'br0', col2X + 130, gridY + 38);
-
-    ctx.fillStyle = '#6c8084';
-    ctx.fillText('Display Port:', col2X, gridY + 62);
-    ctx.fillStyle = '#f59e0b';
-    ctx.fillText(`Port ${vncPort}`, col2X + 130, gridY + 62);
-
-    // Interactive Action Buttons inside Canvas
-    const btnY = cardY + 236;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-
-    // Button 1: Switch to Serial TTY
-    ctx.fillStyle = 'rgba(16, 185, 129, 0.2)';
-    ctx.strokeStyle = '#10b981';
-    if (ctx.roundRect) {
-      ctx.beginPath();
-      ctx.roundRect(140, btnY, 190, 34, 6);
-      ctx.fill();
-      ctx.stroke();
-    } else {
-      ctx.fillRect(140, btnY, 190, 34);
-      ctx.strokeRect(140, btnY, 190, 34);
-    }
-    ctx.font = '600 11px system-ui, -apple-system, sans-serif';
-    ctx.fillStyle = '#34d399';
-    ctx.fillText('📟 Open Serial TTY Shell', 140 + 95, btnY + 17);
-
-    // Button 2: Native VNC Client
-    ctx.fillStyle = 'rgba(51, 205, 184, 0.2)';
-    ctx.strokeStyle = '#33cdb8';
-    if (ctx.roundRect) {
-      ctx.beginPath();
-      ctx.roundRect(350, btnY, 180, 34, 6);
-      ctx.fill();
-      ctx.stroke();
-    } else {
-      ctx.fillRect(350, btnY, 180, 34);
-      ctx.strokeRect(350, btnY, 180, 34);
-    }
-    ctx.fillStyle = '#4fd8c4';
-    ctx.fillText('🔗 Copy VNC URI', 350 + 90, btnY + 17);
-
-    // Button 3: Copy SSH Command
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.06)';
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-    if (ctx.roundRect) {
-      ctx.beginPath();
-      ctx.roundRect(550, btnY, 170, 34, 6);
-      ctx.fill();
-      ctx.stroke();
-    } else {
-      ctx.fillRect(550, btnY, 170, 34);
-      ctx.strokeRect(550, btnY, 170, 34);
-    }
-    ctx.fillStyle = '#e6efef';
-    ctx.fillText('💻 Copy SSH Command', 550 + 85, btnY + 17);
-
-    // Mouse pointer
-    if (mouseInCanvas) {
-      ctx.save();
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-      ctx.shadowBlur = 4;
-      ctx.fillStyle = '#ffffff';
-      ctx.strokeStyle = '#000000';
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.moveTo(mouseX, mouseY);
-      ctx.lineTo(mouseX, mouseY + 15);
-      ctx.lineTo(mouseX + 4, mouseY + 12);
-      ctx.lineTo(mouseX + 7, mouseY + 17);
-      ctx.lineTo(mouseX + 10, mouseY + 15);
-      ctx.lineTo(mouseX + 7, mouseY + 10);
-      ctx.lineTo(mouseX + 12, mouseY + 10);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-      ctx.restore();
+  for (const k of ['_blinkInterval', '_guiInterval']) {
+    if (canvas[k]) {
+      clearInterval(canvas[k]);
+      canvas[k] = null;
     }
   }
+  canvas.dataset.note = line1;
+  canvas.setAttribute('aria-label', line2 ? `${line1} ${line2}` : line1);
+  // keys pressed here go nowhere, and must not reach the page's own shortcuts either
+  canvas.onkeydown = (e) => e.stopPropagation();
+  const ctx = typeof canvas.getContext === 'function' ? canvas.getContext('2d') : null;
+  if (!ctx) return;
+  const w = canvas.width || 800;
+  const h = canvas.height || 500;
+  ctx.fillStyle = '#0b1416';
+  ctx.fillRect(0, 0, w, h);
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#d4e2e2';
+  ctx.font = '600 16px system-ui, sans-serif';
+  ctx.fillText(line1, w / 2, h / 2 - (line2 ? 10 : 0));
+  if (line2) {
+    ctx.fillStyle = '#8aa3a4';
+    ctx.font = '13px system-ui, sans-serif';
+    ctx.fillText(line2.slice(0, 120), w / 2, h / 2 + 16);
+  }
+}
 
-  canvas.addEventListener('focus', () => setConsoleFocus(true));
-  canvas.addEventListener('blur', (e) => {
-    const cw = document.getElementById('vm-console-window');
-    if (!cw || !cw.contains(e.relatedTarget)) {
-      setConsoleFocus(false);
-    }
-  });
+function connectingNote(canvas, vmName, mode) {
+  paintConsoleNote(canvas, mode === 'cli'
+    ? t('vcon.connecting_cli', 'Connecting to the serial console of {name}…', { name: vmName })
+    : t('vcon.connecting_gui', 'Connecting to the screen of {name}…', { name: vmName }));
+}
 
-  canvas.focus();
-  canvas.addEventListener('keydown', (e) => e.stopPropagation());
-  canvas.onkeydown = (e) => {
-    e.stopPropagation();
-    // Do NOT show toasts!
-    if (e.key === 'Enter') {
-      const consoleWin = document.getElementById('vm-console-window');
-      if (consoleWin && consoleWin._setConsoleMode) {
-        consoleWin._setConsoleMode('cli');
-      }
-    }
-  };
-
-  render();
+export function failedNote(canvas, vmName, mode, reason = '') {
+  const head = mode === 'cli'
+    ? t('vcon.failed_cli', 'The serial console of {name} could not be opened.', { name: vmName })
+    : t('vcon.failed_gui', 'The screen of {name} could not be opened.', { name: vmName });
+  paintConsoleNote(canvas, head, reason || t('vcon.failed_hint', 'Check that the machine is running, then press Reconnect.'));
+  showConsoleBanner('error', head);
 }
 
 export let _activeRfb = null;
@@ -928,11 +665,11 @@ async function initRealVncClient(container, vmId, vmName) {
     console.warn('[VM Console] VNC client error:', err);
   }
 
-  // Fallback to canvas simulator
+  // the screen could not be opened: say so (it drew a made-up desktop here)
   const canvas = container ? container.querySelector('#vm-console-canvas') : null;
   if (canvas) {
     canvas.style.display = 'block';
-    initGuiDesktopSimulation(canvas, vmName);
+    failedNote(canvas, vmName, 'gui');
   }
 }
 
@@ -1011,11 +748,11 @@ async function initRealSerialTerminal(container, vmId, vmName) {
     console.warn('[VM Console] Serial terminal error:', err);
   }
 
-  // Fallback to console simulation
+  // the serial console could not be opened: say so (it ran a fake shell here)
   const canvas = document.getElementById('vm-console-canvas');
   if (canvas) {
     canvas.style.display = 'block';
-    initConsoleSimulation(canvas, vmName);
+    failedNote(canvas, vmName, 'cli');
   }
 }
 
@@ -1480,7 +1217,7 @@ export function openVmConsole(vmId, vmName = 'Virtual Machine', initialMode = 'g
         _activeSerialWs = null;
       }
       if (canvas) {
-        initGuiDesktopSimulation(canvas, consoleWin._vmName || vmName);
+        connectingNote(canvas, consoleWin._vmName || vmName, 'gui');
       }
       const isTestEnv = typeof window !== 'undefined' && (window.__VITEST__ || window.VITEST);
       if (!isTestEnv) {
@@ -1505,7 +1242,7 @@ export function openVmConsole(vmId, vmName = 'Virtual Machine', initialMode = 'g
         _activeRfb = null;
       }
       if (canvas) {
-        initConsoleSimulation(canvas, consoleWin._vmName || vmName);
+        connectingNote(canvas, consoleWin._vmName || vmName, 'cli');
       }
       const isTestEnv = typeof window !== 'undefined' && (window.__VITEST__ || window.VITEST);
       if (!isTestEnv) {
@@ -1573,287 +1310,6 @@ export function openVmConsoleSeparateWindow(vmId, vmName = 'Virtual Machine', mo
 
 if (typeof window !== 'undefined') {
   window.openVmConsoleSeparateWindow = openVmConsoleSeparateWindow;
-}
-
-/**
- * Interactive Terminal Canvas Simulator
- * Renders Linux boot framebuffer and responds to typing with blinking block cursor.
- */
-function initConsoleSimulation(canvas, vmName) {
-  if (!canvas) return;
-  if (canvas._blinkInterval) {
-    clearInterval(canvas._blinkInterval);
-    canvas._blinkInterval = null;
-  }
-  if (canvas._guiInterval) {
-    clearInterval(canvas._guiInterval);
-    canvas._guiInterval = null;
-  }
-  if (canvas._guiMouseMove) {
-    canvas.removeEventListener('mousemove', canvas._guiMouseMove);
-    canvas._guiMouseMove = null;
-  }
-  if (canvas._guiMouseLeave) {
-    canvas.removeEventListener('mouseleave', canvas._guiMouseLeave);
-    canvas._guiMouseLeave = null;
-  }
-  if (canvas._guiMouseDown) {
-    canvas.removeEventListener('mousedown', canvas._guiMouseDown);
-    canvas._guiMouseDown = null;
-  }
-  const ctx = canvas.getContext ? canvas.getContext('2d') : null;
-
-  const promptPrefix = `root@${vmName}:~# `;
-
-  let lines = [
-    `[  0.000000] Linux version 6.8.0-45-generic (buildd@lcy02-amd64-080) (gcc-13)`,
-    `[  0.012491] KVM: Hardware acceleration active (Intel VT-x / AMD-V)`,
-    `[  0.089120] ACPI: Core revision 20230628, 4 vCPUs active`,
-    `[  0.158203] virtio_net virtio0: assigned MAC 52:54:00:12:34:56 (attached to br0)`,
-    `[  0.412901] virtio_blk virtio1: 64 GB qcow2 virtual drive mounted`,
-    `[  0.892011] systemd 255.4-1ubuntu8 running in system mode`,
-    `[  1.210452] Started OpenSSH Server Daemon on port 22`,
-    `[  1.450210] IPv4 DHCP Lease: 192.168.1.180/24 via br0`,
-    ``,
-    `Ubuntu 24.04.1 LTS ${vmName} tty1`,
-    `${vmName} login: root (automatic login)`,
-    `Last login: ${new Date().toDateString()} on tty1`,
-    promptPrefix
-  ];
-
-  let currentInput = '';
-  let cursorVisible = true;
-  const commandHistory = [];
-  let historyIndex = -1;
-
-  function render() {
-    if (!ctx) return;
-    ctx.fillStyle = '#0b1517';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    ctx.font = '12px "JetBrains Mono", "Fira Code", monospace';
-    ctx.textBaseline = 'top';
-
-    const lineHeight = 18;
-    const startY = 16;
-    const startX = 16;
-
-    // Viewport auto-scrolling
-    const maxVisibleLines = Math.max(1, Math.floor((canvas.height - 32) / lineHeight));
-    const totalLines = lines.length;
-    const startIndex = Math.max(0, totalLines - maxVisibleLines);
-    const visibleSlice = lines.slice(startIndex);
-
-    for (let i = 0; i < visibleSlice.length - 1; i++) {
-      const line = visibleSlice[i];
-      if (line.startsWith('[  ')) {
-        ctx.fillStyle = '#6c8084'; // boot dmesg timestamp
-      } else if (line.startsWith('root@')) {
-        ctx.fillStyle = '#4fd8c4'; // shell prompt
-      } else if (line.includes('command not found')) {
-        ctx.fillStyle = '#f87171'; // bash error
-      } else if (line.startsWith('Ubuntu') || line.startsWith('Linux')) {
-        ctx.fillStyle = '#34d399'; // system info
-      } else {
-        ctx.fillStyle = '#95a8ab'; // standard output
-      }
-      ctx.fillText(line, startX, startY + (i * lineHeight));
-    }
-
-    // Active prompt line
-    const lastIdx = visibleSlice.length - 1;
-    const activePrompt = visibleSlice[lastIdx] || promptPrefix;
-
-    ctx.fillStyle = '#4fd8c4';
-    ctx.fillText(activePrompt, startX, startY + (lastIdx * lineHeight));
-    const promptWidth = ctx.measureText(activePrompt).width;
-
-    ctx.fillStyle = '#ffffff';
-    ctx.fillText(currentInput, startX + promptWidth, startY + (lastIdx * lineHeight));
-    const inputWidth = ctx.measureText(currentInput).width;
-
-    // Blinking cursor
-    if (cursorVisible) {
-      ctx.fillStyle = '#34d399';
-      ctx.fillRect(startX + promptWidth + inputWidth + 2, startY + (lastIdx * lineHeight) + 2, 8, 14);
-    }
-  }
-
-  if (canvas._blinkInterval) clearInterval(canvas._blinkInterval);
-  if (ctx) {
-    canvas._blinkInterval = setInterval(() => {
-      cursorVisible = !cursorVisible;
-      render();
-    }, 500);
-  }
-
-  canvas.addEventListener('click', () => {
-    canvas.focus();
-    setConsoleFocus(true);
-  });
-  canvas.addEventListener('focus', () => setConsoleFocus(true));
-  canvas.addEventListener('blur', (e) => {
-    const cw = document.getElementById('vm-console-window');
-    if (!cw || !cw.contains(e.relatedTarget)) {
-      setConsoleFocus(false);
-    }
-  });
-
-  canvas.focus();
-  canvas.addEventListener('keydown', (e) => e.stopPropagation());
-  canvas.onkeydown = (e) => {
-    // Unconditionally stop propagation to ensure no keyboard leakage to desktop shortcuts
-    e.stopPropagation();
-
-    if (e.key === 'Backspace') {
-      e.preventDefault();
-      currentInput = currentInput.slice(0, -1);
-      render();
-    } else if (e.key === 'Enter') {
-      e.preventDefault();
-      const promptLine = lines[lines.length - 1] || promptPrefix;
-      lines[lines.length - 1] = `${promptLine}${currentInput}`;
-      const trimmed = currentInput.trim();
-
-      if (trimmed.length > 0) {
-        commandHistory.push(trimmed);
-        historyIndex = -1;
-      }
-
-      if (trimmed === '') {
-        // Just empty Enter
-      } else if (trimmed === 'help') {
-        lines.push('Kiboto Virtual Machine Console v1.0 (QEMU/KVM Serial TTY)');
-        lines.push('Available guest commands: ls, cat, uname -a, ip a, df -h, free -h, uptime, whoami, id, pwd, ps, ping, date, echo, clear, help');
-      } else if (trimmed === 'clear') {
-        lines = [];
-      } else if (trimmed === 'ls' || trimmed === 'dir') {
-        lines.push('bin   dev  home  lib64  mnt  proc  run   srv  tmp  var');
-        lines.push('boot  etc  lib   media  opt  root  sbin  sys  usr');
-      } else if (trimmed === 'ls -la' || trimmed === 'ls -l' || trimmed === 'll') {
-        lines.push('total 64');
-        lines.push('drwx------  4 root root 4096 Oct 12 19:30 .');
-        lines.push('drwxr-xr-x 19 root root 4096 Oct 12 19:25 ..');
-        lines.push('-rw-r--r--  1 root root 3106 Apr 22 14:15 .bashrc');
-        lines.push('-rw-r--r--  1 root root  161 Jul  9 09:12 .profile');
-        lines.push('drwx------  2 root root 4096 Oct 12 19:28 .ssh');
-      } else if (trimmed === 'whoami') {
-        lines.push('root');
-      } else if (trimmed === 'id') {
-        lines.push('uid=0(root) gid=0(root) groups=0(root)');
-      } else if (trimmed === 'pwd') {
-        lines.push('/root');
-      } else if (trimmed === 'hostname') {
-        lines.push(vmName);
-      } else if (trimmed.startsWith('uname')) {
-        lines.push(`Linux ${vmName} 6.8.0-45-generic #45-Ubuntu SMP PREEMPT_DYNAMIC x86_64 GNU/Linux`);
-      } else if (trimmed === 'uptime') {
-        lines.push(' 19:52:04 up 2 days, 4:18,  1 user,  load average: 0.08, 0.04, 0.01');
-      } else if (trimmed === 'ip a' || trimmed === 'ip addr' || trimmed === 'ifconfig') {
-        lines.push('1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000');
-        lines.push('    inet 127.0.0.1/8 scope host lo');
-        lines.push('2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000');
-        lines.push('    inet 192.168.1.180/24 metric 100 brd 192.168.1.255 scope global dynamic eth0');
-      } else if (trimmed.startsWith('df')) {
-        lines.push('Filesystem      Size  Used Avail Use% Mounted on');
-        lines.push('/dev/vda1        62G  5.2G   54G   9% /');
-        lines.push('tmpfs            1.9G     0  1.9G   0% /dev/shm');
-        lines.push('efivarfs        128K   28K   96K  23% /sys/firmware/efi/efivars');
-      } else if (trimmed.startsWith('free')) {
-        lines.push('               total        used        free      shared  buff/cache   available');
-        lines.push('Mem:           4.0Gi       482Mi       2.8Gi        12Mi       780Mi       3.4Gi');
-        lines.push('Swap:          2.0Gi          0B       2.0Gi');
-      } else if (trimmed.startsWith('cat /etc/os-release') || trimmed.startsWith('cat /etc/issue')) {
-        lines.push('PRETTY_NAME="Ubuntu 24.04.1 LTS"');
-        lines.push('NAME="Ubuntu"');
-        lines.push('VERSION_ID="24.04"');
-        lines.push('VERSION="24.04.1 LTS (Noble Numbat)"');
-        lines.push('ID=ubuntu');
-        lines.push('ID_LIKE=debian');
-        lines.push('HOME_URL="https://www.ubuntu.com/"');
-      } else if (trimmed.startsWith('cat ')) {
-        const file = trimmed.slice(4).trim();
-        lines.push(`cat: ${file}: No such file or directory`);
-      } else if (trimmed.startsWith('ps') || trimmed === 'top') {
-        lines.push('  PID TTY          TIME CMD');
-        lines.push('    1 ?        00:00:02 systemd');
-        lines.push('  412 ?        00:00:00 systemd-journald');
-        lines.push('  890 ?        00:00:00 sshd');
-        lines.push(' 1024 tty1     00:00:00 bash');
-        lines.push(' 1045 tty1     00:00:00 ps');
-      } else if (trimmed.startsWith('ping')) {
-        const host = trimmed.split(' ')[1] || '1.1.1.1';
-        lines.push(`PING ${host} (${host}) 56(84) bytes of data.`);
-        lines.push(`64 bytes from ${host}: icmp_seq=1 ttl=58 time=11.4 ms`);
-        lines.push(`64 bytes from ${host}: icmp_seq=2 ttl=58 time=12.1 ms`);
-        lines.push(`--- ${host} ping statistics ---`);
-        lines.push('2 packets transmitted, 2 received, 0% packet loss, time 1002ms');
-      } else if (trimmed === 'date') {
-        lines.push(new Date().toUTCString());
-      } else if (trimmed.startsWith('echo ')) {
-        lines.push(trimmed.slice(5));
-      } else if (trimmed === 'exit' || trimmed === 'logout') {
-        lines.push('logout');
-        lines.push(`Ubuntu 24.04.1 LTS ${vmName} tty1`);
-        lines.push(`${vmName} login: root (automatic login)`);
-      } else {
-        lines.push(`-bash: ${trimmed.split(' ')[0]}: command not found`);
-      }
-
-      lines.push(promptPrefix);
-      currentInput = '';
-      render();
-    } else if (e.key === 'Tab') {
-      e.preventDefault();
-      currentInput += '    ';
-      render();
-    } else if (e.key === 'Escape') {
-      e.preventDefault();
-      // Swallow Escape inside console so it never closes desktop drawers or modals
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      if (commandHistory.length > 0) {
-        if (historyIndex < commandHistory.length - 1) {
-          historyIndex++;
-          currentInput = commandHistory[commandHistory.length - 1 - historyIndex];
-          render();
-        }
-      }
-    } else if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      if (historyIndex > 0) {
-        historyIndex--;
-        currentInput = commandHistory[commandHistory.length - 1 - historyIndex];
-        render();
-      } else if (historyIndex === 0) {
-        historyIndex = -1;
-        currentInput = '';
-        render();
-      }
-    } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'c') {
-      e.preventDefault();
-      const promptLine = lines[lines.length - 1] || promptPrefix;
-      lines[lines.length - 1] = `${promptLine}${currentInput}^C`;
-      lines.push(promptPrefix);
-      currentInput = '';
-      historyIndex = -1;
-      render();
-    } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'l') {
-      e.preventDefault();
-      lines = [promptPrefix];
-      render();
-    } else if (e.key === ' ' || e.code === 'Space') {
-      e.preventDefault();
-      currentInput += ' ';
-      render();
-    } else if (e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
-      e.preventDefault();
-      currentInput += e.key;
-      render();
-    }
-  };
-
-  render();
 }
 
 // Global Focus Guard for VM Console Keyboard Capture

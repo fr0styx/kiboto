@@ -8015,5 +8015,10 @@ export default {
   "fm.m_ai": "KI-Suche",
   "fm.m_view": "Ansicht",
   "fm.m_more": "Mehr",
-  "vmd.discard_q": "Ohne Speichern schließen? Ihre Änderungen gehen verloren."
+  "vmd.discard_q": "Ohne Speichern schließen? Ihre Änderungen gehen verloren.",
+  "vcon.connecting_cli": "Verbinde mit der seriellen Konsole von {name} …",
+  "vcon.connecting_gui": "Verbinde mit dem Bildschirm von {name} …",
+  "vcon.failed_cli": "Die serielle Konsole von {name} konnte nicht geöffnet werden.",
+  "vcon.failed_gui": "Der Bildschirm von {name} konnte nicht geöffnet werden.",
+  "vcon.failed_hint": "Prüfen Sie, ob die Maschine läuft, und drücken Sie dann „Neu verbinden“."
 };

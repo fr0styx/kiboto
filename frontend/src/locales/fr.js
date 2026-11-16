@@ -8015,5 +8015,10 @@ export default {
   "fm.m_ai": "Recherche IA",
   "fm.m_view": "Affichage",
   "fm.m_more": "Plus",
-  "vmd.discard_q": "Fermer sans enregistrer ? Vos modifications seront perdues."
+  "vmd.discard_q": "Fermer sans enregistrer ? Vos modifications seront perdues.",
+  "vcon.connecting_cli": "Connexion à la console série de {name}…",
+  "vcon.connecting_gui": "Connexion à l'écran de {name}…",
+  "vcon.failed_cli": "La console série de {name} n'a pas pu être ouverte.",
+  "vcon.failed_gui": "L'écran de {name} n'a pas pu être ouvert.",
+  "vcon.failed_hint": "Vérifiez que la machine est en marche, puis appuyez sur Reconnecter."
 };

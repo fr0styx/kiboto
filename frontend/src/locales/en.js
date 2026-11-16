@@ -8015,5 +8015,10 @@ export default {
   "fm.m_ai": "AI search",
   "fm.m_view": "View",
   "fm.m_more": "More",
-  "vmd.discard_q": "Close without saving? Your changes are lost."
+  "vmd.discard_q": "Close without saving? Your changes are lost.",
+  "vcon.connecting_cli": "Connecting to the serial console of {name}…",
+  "vcon.connecting_gui": "Connecting to the screen of {name}…",
+  "vcon.failed_cli": "The serial console of {name} could not be opened.",
+  "vcon.failed_gui": "The screen of {name} could not be opened.",
+  "vcon.failed_hint": "Check that the machine is running, then press Reconnect."
 };

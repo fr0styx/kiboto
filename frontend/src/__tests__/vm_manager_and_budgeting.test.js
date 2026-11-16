@@ -593,41 +593,23 @@ describe('VM Manager & Dynamic Elastic Headroom Budgeting', () => {
       expect(consoleWin.dataset.focused).toBe('false');
     });
 
-    it('executes guest CLI commands and recalls history without triggering toast notifications', () => {
+    it('says it is connecting instead of drawing a made-up screen or shell, and keys go nowhere', async () => {
       openVmConsole('vm-test-cli', 'Test Guest VM', 'cli');
-
       const consoleWin = document.getElementById('vm-console-window');
-      expect(consoleWin).not.toBeNull();
       const canvas = document.getElementById('vm-console-canvas');
-      expect(canvas).not.toBeNull();
-
-      // Type 'ls' and press Enter
-      ['l', 's'].forEach((k) => {
-        canvas.onkeydown(new KeyboardEvent('keydown', { key: k, bubbles: true, cancelable: true }));
-      });
-      canvas.onkeydown(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
-
-      // Type 'uname -a' and press Enter
-      'uname -a'.split('').forEach((k) => {
-        canvas.onkeydown(new KeyboardEvent('keydown', { key: k, bubbles: true, cancelable: true }));
-      });
-      canvas.onkeydown(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
-
-      // Press ArrowUp to recall last command ('uname -a')
-      const upEvt = new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true, cancelable: true });
-      canvas.onkeydown(upEvt);
-
-      // Press ArrowDown to clear recalled command
-      const downEvt = new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true });
-      canvas.onkeydown(downEvt);
-
-      // Verify no toast was ever called for console input
-      expect(showToast).not.toHaveBeenCalledWith(expect.stringContaining('Guest executed'));
-
-      // Switch to GUI mode and press Enter - verify no toast
-      const btnGui = consoleWin.querySelector('#btn-console-mode-gui');
-      btnGui.click();
-      canvas.onkeydown(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+      expect(canvas.dataset.note).toBe('Connecting to the serial console of Test Guest VM…');
+      const ev = new KeyboardEvent('keydown', { key: 'l', bubbles: true, cancelable: true });
+      const stop = vi.spyOn(ev, 'stopPropagation');
+      canvas.onkeydown(ev);
+      expect(stop).toHaveBeenCalled();
+      consoleWin.querySelector('#btn-console-mode-gui').click();
+      expect(canvas.dataset.note).toBe('Connecting to the screen of Test Guest VM…');
+      const { failedNote } = await import('../components/vm/console.js');
+      failedNote(canvas, 'Test Guest VM', 'gui');
+      expect(canvas.dataset.note).toBe('The screen of Test Guest VM could not be opened.');
+      expect(canvas.getAttribute('aria-label')).toContain('press Reconnect');
+      failedNote(canvas, 'Test Guest VM', 'cli', 'refused');
+      expect(canvas.getAttribute('aria-label')).toBe('The serial console of Test Guest VM could not be opened. refused');
       expect(showToast).not.toHaveBeenCalledWith(expect.stringContaining('Guest executed'));
     });
 
@@ -636,7 +618,7 @@ describe('VM Manager & Dynamic Elastic Headroom Budgeting', () => {
       const consoleWin = document.getElementById('vm-console-window');
       expect(consoleWin).not.toBeNull();
 
-      // By default in test environment, simulation canvas is visible
+      // In tests the connecting note's canvas is the visible target
       const simTarget = getActiveConsoleTarget(consoleWin);
       expect(simTarget).toBe(consoleWin.querySelector('#vm-console-canvas'));
 

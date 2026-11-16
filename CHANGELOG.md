@@ -271,6 +271,12 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   on their first field, close with Escape, and Escape on a changed New machine or Edit form asks before throwing it
   away.
 
+#### Changes
+
+- **The virtual machine console no longer shows a made-up screen**: while connecting it says "Connecting to the screen
+  of …", and when the screen or serial console can't be opened it says so, with a hint, instead of drawing a fake
+  desktop or a pretend shell with invented boot lines.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 
