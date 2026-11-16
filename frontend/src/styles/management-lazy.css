@@ -448,3 +448,12 @@
 /* slow mode: no hardware virtualization (VMs decision 4 a) */
 .vm-slow-note { margin-top: 3px; font-size: var(--kb-fs-xs); font-weight: 600; color: var(--kb-text-warn); }
 .vm-slow-fix { margin-top: 6px; font-size: var(--kb-fs-xs); color: var(--muted); line-height: 1.45; }
+/* drive replacement guide (audit A11) */
+.bay-guide-btn { min-height: 32px; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--kb-line-12); background: transparent; color: var(--kb-text-accent); font-size: var(--kb-fs-xs); font-weight: 600; cursor: pointer; }
+.bay-guide-btn:hover, .bay-guide-btn:focus-visible { border-color: var(--kb-text-accent); }
+.drive-guide { max-width: 560px; width: calc(100% - 32px); border: 1px solid var(--kb-line-10); border-radius: 12px; padding: 20px 22px; background: var(--card); color: var(--kb-text-strong); }
+.drive-guide::backdrop { background: var(--lt-b-0000008c, rgba(0, 0, 0, 0.55)); }
+.drive-guide-title { margin: 0 0 6px; font-size: 18px; }
+.drive-guide-who { margin: 0 0 12px; color: var(--muted); font-size: var(--kb-fs-sm); }
+.drive-guide-steps { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; line-height: 1.5; }
+.drive-guide-actions { display: flex; justify-content: flex-end; margin-top: 16px; }

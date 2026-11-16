@@ -125,6 +125,12 @@
   "styles": 12,
   "templates": 1
  },
+ "frontend/src/components/drive-guide.js": {
+  "buttons": 0,
+  "globals": 0,
+  "styles": 0,
+  "templates": 1
+ },
  "frontend/src/components/events.js": {
   "buttons": 0,
   "globals": 0,

@@ -206,6 +206,13 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   start, and now each running card says "Slow: no hardware virtualization", Start warns that it fell back to slow
   mode, and Settings shows "Slow mode" with the fix (for example, enable VT-x in the BIOS).
 
+#### Added
+
+- **Drive replacement guide**: a drive Drive Health says to replace now or soon gets "Replace this drive", and an
+  empty bay gets "Add a drive here". Each opens the steps for your system (Unraid, TrueNAS, or other Linux pools):
+  which drive and bay, what to buy, how to swap, and what to click after. A guide only; Kiboto changes nothing on
+  your pools.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

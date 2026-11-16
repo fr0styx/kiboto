@@ -246,7 +246,7 @@ export function renderChassisTwin(container, disks = [], options = {}) {
             </div>
           </div>
           <div class="bay-footer">
-            <span class="bay-meta cv-xs-muted">${t('chassis.no_disk', 'No drive')}</span>
+            <button type="button" class="bay-guide-btn" data-guide="add" data-bay="${slotNum}">${escapeHtml(t('dg.title_add', 'Add a drive here'))}</button>
             <span class="bay-health-tag cv-x-4">${t('chassis.empty', 'Empty')}</span>
           </div>
         </div>
@@ -290,6 +290,7 @@ export function renderChassisTwin(container, disks = [], options = {}) {
                 ? `<span class="bay-health-tag is-verdict is-${v.look}">${escapeHtml(v.word)}</span>`
                 : `<span class="bay-health-tag ${thermal.cls}">${escapeHtml(healthWord(d.health, isStandby))}</span>`;
             })()}
+            ${d.verdict === 'now' || d.verdict === 'soon' ? `<button type="button" class="bay-guide-btn" data-guide="replace" data-bay="${slotNum}">${escapeHtml(t('dg.title_replace', 'Replace this drive'))}</button>` : ''}
           </div>
         </div>
       `;
@@ -364,9 +365,21 @@ export function renderChassisTwin(container, disks = [], options = {}) {
     });
   });
 
+  // the drive replacement guide (audit A11): loaded on demand
+  container.querySelectorAll('[data-guide]').forEach((btn) => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const slotNum = Number(/** @type {HTMLElement} */ (btn).dataset.bay);
+      const bay = bays.find((b) => Number(b.slot_index) === slotNum) || {};
+      const platform = await api.get('/api/storage/platform').then((r) => r?.platform || '').catch(() => '');
+      const { openDriveGuide } = await import('./drive-guide.js');
+      openDriveGuide({ kind: /** @type {HTMLElement} */ (btn).dataset.guide, platform, drive: bay.disk || {}, place: t('chassis.bay_n', 'Bay {n}', { n: slotNum }) });
+    });
+  });
+
   container.querySelectorAll('.chassis-bay-slot.populated, .m2-slot-card').forEach((slot) => {
     slot.addEventListener('click', (e) => {
-      if (e.target.closest('.bay-locate-btn')) return;
+      if (e.target.closest('.bay-locate-btn, [data-guide]')) return;
       const dev = slot.dataset.dev;
       if (!dev) return;
       // Drive Health shows a sleeping drive from its last reading and never wakes it on open
