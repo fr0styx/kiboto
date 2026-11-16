@@ -1250,7 +1250,7 @@ export function initManagement() {
 
   installAdvancedSwitch(); // "Show advanced tools": expert details and tools; it hides no page (X1)
   installSidebarGroups();
-  installHealthSignal(); // the opt-in anonymous weekly report, under Software Updates
+  installHealthSignal(); // the opt-in anonymous weekly report, last on General (SET-23)
 
   // Hub cards click listener
   document.querySelectorAll('.mgmt-app-card').forEach((card) => {

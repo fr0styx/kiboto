@@ -42,7 +42,10 @@ export async function installHealthSignal(root = document) {
   if (!updates || root.getElementById(CARD_ID)) return;
   const card = document.createElement('div');
   card.id = CARD_ID;
-  updates.insertAdjacentElement('afterend', card);
+  // Help comes last on General, with the report for support (SET-23); next to updates where that page isn't
+  const body = updates.closest('.mgmt-detail-body');
+  if (body) body.append(card);
+  else updates.insertAdjacentElement('afterend', card);
   try {
     renderHealthSignal(card, await api.get('/api/system/health-signal'));
   } catch {

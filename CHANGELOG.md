@@ -285,6 +285,10 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Send alerts says where alerts go** ("Alerts go to e-mail and Telegram."), and says in amber when
   nobody would be told that something broke.
 
+#### Changes
+
+- **Help improve Kiboto** is at the end of General, next to the report for support.
+
 ## v2.0.2 (2026-11-12)
 ### 🧭 A new Settings sidebar, five themes, honest pages, and remote access cut down to what works
 
