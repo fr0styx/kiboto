@@ -1,5 +1,5 @@
 {
-  "important": 3358,
+  "important": 3359,
   "buttonClasses": 75,
   "inlineStyles": 1262,
   "emojiIcons": 3,
@@ -49,6 +49,7 @@
     "frontend/src/styles/47-containers-bulk.css": 11,
     "frontend/src/styles/56-phone.css": 5,
     "frontend/src/styles/containers-lazy.css": 1,
+    "frontend/src/styles/management-lazy.css": 1,
     "frontend/src/vm-console-direct.css": 47
   },
   "coloursPerFile": {

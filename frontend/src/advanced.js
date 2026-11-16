@@ -71,6 +71,8 @@ export const isAdvancedRoute = (r) => ADVANCED_ROUTES.includes(r) && !(_powerMat
 
 /** Hides or shows the advanced places that are already on screen, and tells the rest. */
 export function applyAdvancedEverywhere(on = advancedOn(), root = document) {
+  // a page-wide class, so parts drawn later can follow the switch with data-advanced-only (SET-22)
+  root.documentElement?.classList.toggle('kb-advanced-off', !on);
   // an advanced place that is shown for now (Power while it matters) loses its mark too
   root.querySelectorAll('[data-advanced-section]').forEach((el) => {
     const s = el.dataset.advancedSection;
