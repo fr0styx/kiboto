@@ -29,6 +29,15 @@ body.phone-shell .os-window,
 body.phone-shell .file-manager-window { background-color: var(--bg); backdrop-filter: none; }
 
 .phone-launcher { position: fixed; inset: 48px 0 calc(60px + env(safe-area-inset-bottom)) 0; overflow-y: auto; padding: var(--kb-space-3); z-index: 500; background: var(--bg); }
+/* Home: the person's widgets, as on the desktop; the Settings tab: every section as a tile */
+.phone-launcher[data-view="settings"] > :not(.phone-settings) { display: none; }
+.phone-launcher:not([data-view="settings"]) .phone-settings { display: none; }
+.phone-settings-title { margin: 0 0 var(--kb-space-3); font-size: var(--kb-fs-lg, 18px); }
+html.has-auth-session body.phone-shell #phone-widgets #desktop-widgets-container {
+  visibility: visible; pointer-events: auto; position: relative !important; inset: auto !important;
+  height: auto !important; max-height: none !important; margin: var(--kb-space-3) 0 0;
+  grid-template-columns: minmax(0, 1fr) !important; /* one widget per row: two cut their titles */
+}
 .phone-launcher-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--kb-space-3); }
 .phone-tile { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--kb-space-1); min-height: 92px; border-radius: var(--kb-radius); border: 1px solid var(--kb-line-strong); background: var(--card); color: var(--fg); font-size: var(--kb-fs-sm); font-weight: 600; text-align: center; }
 .phone-tile .ic { width: 28px; height: 28px; }

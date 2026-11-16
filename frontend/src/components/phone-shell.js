@@ -8,7 +8,8 @@
  *
  * The launcher opens with how the server is doing (UX-15): the same summary as the Overview
  * ("Everything is fine", or what needs attention with a button to open it), then the live
- * numbers and the tiles.
+ * numbers and the person's desktop widgets (Home). The Settings tab shows the same layer with
+ * every section as a tile instead.
  */
 import { escapeHtml } from '../utils.js';
 import { html } from '../html.js';
@@ -46,7 +47,7 @@ export const TILES = () => [
   ['hardware', t('mgmt.sidebar_hardware', 'Hardware'), '#i-fan', 'mgmt.sidebar_hardware'],
   ['vms', t('mgmt.sidebar_vms', 'Virtual machines'), '#i-vm', 'mgmt.sidebar_vms'],
   ['activity', t('mgmt.sidebar_activity', 'Activity'), '#i-clock', 'mgmt.sidebar_activity'],
-  ['settings', t('mgmt.sidebar_system', 'Settings'), '#i-shield', 'mgmt.sidebar_system'],
+  ['settings', t('mgmt.sidebar_general', 'General'), '#i-shield', 'mgmt.sidebar_general'],
 ];
 
 const TABS = () => [
@@ -57,8 +58,35 @@ const TABS = () => [
   ['settings', t('mgmt.sidebar_system', 'Settings'), '#i-shield', 'mgmt.sidebar_system'],
 ];
 
-// What each tab opens (alerts: what needs attention, with the full activity log one tap away)
-const TAB_ROUTES = { files: 'files', apps: 'apps', settings: 'settings' };
+// What each tab opens (alerts: what needs attention, with the full activity log one tap away;
+// home and settings: the launcher's two views)
+const TAB_ROUTES = { files: 'files', apps: 'apps' };
+let launcherView = 'home';
+
+/** Home (status and widgets) or Settings (every section as a tile). */
+function showView(view) {
+  launcherView = view;
+  const launcher = document.getElementById('phone-launcher');
+  if (!launcher) return;
+  launcher.dataset.view = view;
+  launcher.scrollTop = 0;
+}
+
+// The desktop's widget layer lives on Home while the phone shell is on, and goes back after
+let widgetsHome = null;
+function adoptWidgets(on) {
+  const w = document.getElementById('desktop-widgets-container');
+  const slot = document.getElementById('phone-widgets');
+  if (!w) return;
+  if (on && slot && w.parentElement !== slot) {
+    widgetsHome = { parent: w.parentElement, next: w.nextSibling };
+    slot.appendChild(w);
+  } else if (!on && widgetsHome && w.parentElement === slot) {
+    const { parent, next } = widgetsHome;
+    parent.insertBefore(w, next && next.parentNode === parent ? next : null);
+    widgetsHome = null;
+  }
+}
 
 export function statusHtml() {
   const cell = (key, label) =>
@@ -73,12 +101,13 @@ export function statusHtml() {
 
 export function launcherHtml() {
   const health = `<section class="phone-health" aria-label="${escapeHtml(t('overview.status_label', 'Status'))}" hidden></section>`;
-  return `${health}${statusHtml()}<nav class="phone-launcher-grid" data-i18n-aria-label="phone.home" aria-label="${escapeHtml(t('phone.home', 'Home'))}">${TILES()
+  const title = `<h2 id="phone-settings-title" class="phone-settings-title" data-i18n="mgmt.sidebar_system">${escapeHtml(t('mgmt.sidebar_system', 'Settings'))}</h2>`;
+  return `${health}${statusHtml()}<div class="phone-widgets" id="phone-widgets"></div><section class="phone-settings" aria-labelledby="phone-settings-title">${title}<nav class="phone-launcher-grid" data-i18n-aria-label="mgmt.sidebar_system" aria-label="${escapeHtml(t('mgmt.sidebar_system', 'Settings'))}">${TILES()
     .map(
       ([route, name, icon, key]) =>
         `<button type="button" class="phone-tile" data-phone-open="${route}"${isAdvancedRoute(route) && !advancedOn() ? ' hidden data-advanced-off' : ''}><svg class="ic" aria-hidden="true"><use href="${icon}"/></svg><span data-i18n="${key}">${escapeHtml(name)}</span></button>`,
     )
-    .join('')}</nav>`;
+    .join('')}</nav></section>`;
 }
 
 export function tabsHtml() {
@@ -123,7 +152,7 @@ function closePage(el) {
 let openedFrom = 'home';
 
 export function tabForPage(page) {
-  if (!page) return 'home';
+  if (!page) return launcherView;
   if (page.matches('.file-manager-window')) return 'files';
   if (page.id === 'containers-manager-window') return 'apps';
   if (page.id === 'notif-center-panel' || page.id === 'phone-alerts-page') return 'alerts';
@@ -146,7 +175,8 @@ function openTab(id) {
   openedFrom = id;
   closeAllPages();
   if (id === 'alerts') openAlertsPage();
-  else if (id !== 'home') ROUTES[TAB_ROUTES[id]]?.();
+  else if (id === 'home' || id === 'settings') showView(id);
+  else ROUTES[TAB_ROUTES[id]]?.();
   schedule();
 }
 
@@ -249,8 +279,9 @@ function sync() {
   // only real changes: rewriting the same value would wake the observer again
   if (back && back.hidden !== !page) back.hidden = !page;
   document.body.classList.toggle('phone-page-open', Boolean(page));
+  adoptWidgets(true); // the widget layer may be drawn after the shell
   if (!page) {
-    openedFrom = 'home';
+    openedFrom = launcherView;
     refreshHealth(); // back on the launcher: the summary is at most a minute old
   }
   const current = tabForPage(page);
@@ -341,6 +372,7 @@ export function enablePhoneShell(on) {
   document.body.classList.toggle('phone-shell', on);
   let shell = document.getElementById('phone-shell');
   if (!on) {
+    adoptWidgets(false); // before the shell goes, or the widgets would go with it
     shell?.remove();
     unwatch?.();
     unwatch = null;
@@ -351,12 +383,14 @@ export function enablePhoneShell(on) {
   }
   if (shell) return;
   window.addEventListener('popstate', onPhoneBack);
+  launcherView = 'home';
   shell = document.createElement('div');
   shell.id = 'phone-shell';
   shell.innerHTML = `<button type="button" id="phone-back" class="phone-back" hidden>‹ <span data-i18n="setup.back">${escapeHtml(t('setup.back', 'Back'))}</span></button>
-    <div id="phone-launcher" class="phone-launcher">${launcherHtml()}</div>
+    <div id="phone-launcher" class="phone-launcher" data-view="home">${launcherHtml()}</div>
     <nav id="phone-tabs" class="phone-tabs" data-i18n-aria-label="phone.tabs" aria-label="${escapeHtml(t('phone.tabs', 'Main sections'))}">${tabsHtml()}</nav>`;
   document.body.appendChild(shell);
+  adoptWidgets(true);
   import('./session.js') // the account may be known already
     .then((m) => hideUnusable(shell, m.getCurrentUser()))
     .catch(() => {});
@@ -376,7 +410,7 @@ export function enablePhoneShell(on) {
     } else if (tab) {
       openTab(tab.dataset.phoneTab);
     } else if (tile && ROUTES[tile.dataset.phoneOpen]) {
-      openedFrom = tile.dataset.phoneOpen === 'settings' ? 'settings' : 'home';
+      openedFrom = launcherView;
       ROUTES[tile.dataset.phoneOpen]();
       schedule();
     }

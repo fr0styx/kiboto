@@ -51,7 +51,12 @@ describe("phone mode: pages, tabs and status (UX-13)", () => {
       document.body.appendChild(w);
     });
     enablePhoneShell(true);
+    // the Settings tab shows every section as a tile; no page is open yet
     document.querySelector("[data-phone-tab=\"settings\"]").click();
+    await new Promise((r) => setTimeout(r, 40));
+    expect(document.getElementById("phone-back").hidden).toBe(true);
+    expect(document.querySelector(".phone-tab.is-current").dataset.phoneTab).toBe("settings");
+    document.querySelector("[data-phone-open=\"storage\"]").click();
     await new Promise((r) => setTimeout(r, 40));
     expect(document.getElementById("phone-back").hidden).toBe(false);
     expect(document.querySelector(".phone-tab.is-current").dataset.phoneTab).toBe("settings");
@@ -59,6 +64,9 @@ describe("phone mode: pages, tabs and status (UX-13)", () => {
     document.getElementById("management-window").style.display = "none";
     await new Promise((r) => setTimeout(r, 40));
     expect(document.getElementById("phone-back").hidden).toBe(true);
+    expect(document.querySelector(".phone-tab.is-current").dataset.phoneTab).toBe("settings");
+    document.querySelector("[data-phone-tab=\"home\"]").click();
+    await new Promise((r) => setTimeout(r, 40));
     expect(document.querySelector(".phone-tab.is-current").dataset.phoneTab).toBe("home");
     enablePhoneShell(false);
   });

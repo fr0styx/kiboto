@@ -321,6 +321,12 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   English capitals (BAY, VACANT, LOCATE, HEALTHY, "used / total", Mounted at, Start Server). A pool says
   "9.1 TB of 16 TB used", a drive is Healthy, Asleep, Failing or Needs a look, and Locate is "Find this drive".
 
+#### Changes
+
+- **A home screen on phones**: Home shows how the server is doing and your desktop widgets (clock,
+  weather, system, network, storage and the rest you chose), one per row. Every section as a tile now
+  lives under the Settings tab, and a page opened from there keeps Settings lit.
+
 ## v2.0.2 (2026-11-12)
 ### 🧭 A new Settings sidebar, five themes, honest pages, and remote access cut down to what works
 
