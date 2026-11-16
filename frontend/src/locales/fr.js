@@ -7906,5 +7906,6 @@ export default {
   "webdav.started_toast": "Serveur WebDAV démarré sur le port {port}.",
   "notif.see_all_activity": "Voir toute l'activité",
   "notif.nothing_to_look_at": "Rien à vérifier. Tout ce qui s'est passé est dans Activité.",
-  "vmd.running_locked": "Cette machine est en marche. Arrêtez-la pour changer ses processeurs ou sa mémoire. Les autres changements s'appliquent au prochain démarrage."
+  "vmd.running_locked": "Cette machine est en marche. Arrêtez-la pour changer ses processeurs ou sa mémoire. Les autres changements s'appliquent au prochain démarrage.",
+  "apps.other_apps": "Autres apps"
 };

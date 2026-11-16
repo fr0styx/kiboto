@@ -158,7 +158,7 @@ describe('Dedicated Containers Window & Desktop Icon Suite', () => {
     expect(countStopped.textContent).toBe('1');
 
     const tbody = document.getElementById('cw-docker-containers-tbody');
-    expect(tbody.querySelectorAll('tr').length).toBe(2);
+    expect(tbody.querySelectorAll('tr:not(.cw-stack-head)').length).toBe(2);
     expect(tbody.textContent).toContain('plex');
     expect(tbody.textContent).toContain('nextcloud');
     expect(tbody.textContent).toContain('cloud-suite');
@@ -174,30 +174,30 @@ describe('Dedicated Containers Window & Desktop Icon Suite', () => {
 
     renderContainersWindowTable(sampleContainers);
     const tbody = document.getElementById('cw-docker-containers-tbody');
-    expect(tbody.querySelectorAll('tr').length).toBe(3);
+    expect(tbody.querySelectorAll('tr:not(.cw-stack-head)').length).toBe(3);
 
     // Click 'Running' filter
     const runBtn = document.querySelector('.cw-filter-btn[data-filter="running"]');
     runBtn.click();
-    expect(tbody.querySelectorAll('tr').length).toBe(2);
+    expect(tbody.querySelectorAll('tr:not(.cw-stack-head)').length).toBe(2);
     expect(tbody.textContent).not.toContain('app-stopped');
 
     // Click 'Stopped' filter
     const stopBtn = document.querySelector('.cw-filter-btn[data-filter="stopped"]');
     stopBtn.click();
-    expect(tbody.querySelectorAll('tr').length).toBe(1);
+    expect(tbody.querySelectorAll('tr:not(.cw-stack-head)').length).toBe(1);
     expect(tbody.textContent).toContain('app-stopped');
 
     // Click 'Stacks' filter
     const stackBtn = document.querySelector('.cw-filter-btn[data-filter="compose"]');
     stackBtn.click();
-    expect(tbody.querySelectorAll('tr').length).toBe(1);
+    expect(tbody.querySelectorAll('tr:not(.cw-stack-head)').length).toBe(1);
     expect(tbody.textContent).toContain('app-compose');
 
     // Click 'All'
     const allBtn = document.querySelector('.cw-filter-btn[data-filter="all"]');
     allBtn.click();
-    expect(tbody.querySelectorAll('tr').length).toBe(3);
+    expect(tbody.querySelectorAll('tr:not(.cw-stack-head)').length).toBe(3);
   });
 
   it('searches containers via search input', () => {
@@ -214,14 +214,14 @@ describe('Dedicated Containers Window & Desktop Icon Suite', () => {
     searchInput.value = 'vault';
     searchInput.dispatchEvent(new Event('input'));
 
-    expect(tbody.querySelectorAll('tr').length).toBe(1);
+    expect(tbody.querySelectorAll('tr:not(.cw-stack-head)').length).toBe(1);
     expect(tbody.textContent).toContain('vaultwarden');
     expect(tbody.textContent).not.toContain('heimdall');
 
     // Clear search
     searchInput.value = '';
     searchInput.dispatchEvent(new Event('input'));
-    expect(tbody.querySelectorAll('tr').length).toBe(2);
+    expect(tbody.querySelectorAll('tr:not(.cw-stack-head)').length).toBe(2);
   });
 
   it('loadContainersData fetches containers from /api/docker/containers', async () => {

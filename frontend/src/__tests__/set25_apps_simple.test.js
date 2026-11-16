@@ -111,5 +111,29 @@ describe('the Apps window: a simple view, and Docker details per person (SET-25 
     tr.innerHTML = buildContainerRowInner({ id: 'w', name: 'web', stack: 'immich', state: 'running', status: 'Up', ports: [] }, 'nas.local');
     expect(tr.querySelector('.cw-stack-note')?.textContent).toBe('In immich');
   });
+
+  it('the simple view names each stack in a header row; Docker details and a chosen sort do not', async () => {
+    const { renderContainersWindowTable, withStackHeads } = await import('../components/containers-manager.js');
+    expect(withStackHeads([{ name: 'a' }])).toEqual([{ name: 'a' }]);
+    expect(withStackHeads([{ name: 'x', stack: 'arr' }, { name: 'b' }]).map((c) => c.__stack ?? c.name)).toEqual(['arr', 'x', '', 'b']);
+    document.body.innerHTML = '<div id="containers-manager-window"><table><tbody id="cw-docker-containers-tbody"></tbody></table></div>';
+    const list = [
+      { id: 'w', name: 'web', stack: 'immich', state: 'running', status: 'Up', ports: [] },
+      { id: 'd', name: 'db', stack: 'immich', state: 'running', status: 'Up', ports: [] },
+      { id: 'j', name: 'jellyfin', state: 'running', status: 'Up', ports: [] },
+    ];
+    renderContainersWindowTable(list);
+    const tbody = /** @type {HTMLElement} */ (document.getElementById('cw-docker-containers-tbody'));
+    const rows = () => [...tbody.children].map((tr) => (tr.classList.contains('cw-stack-head') ? `# ${tr.textContent}` : tr.querySelector('.btn-docker-name-link')?.textContent));
+    expect(rows()).toEqual(['# immich', 'db', 'web', '# Other apps', 'jellyfin']);
+    expect(tbody.classList.contains('cw-has-heads')).toBe(true);
+    expect(tbody.querySelector('.cw-stack-head th')?.getAttribute('scope')).toBe('colgroup');
+    renderContainersWindowTable(list); // a redraw keeps one header per stack
+    expect(rows().filter((r) => String(r).startsWith('#')).length).toBe(2);
+    localStorage.setItem('kiboto_apps_details', '1');
+    renderContainersWindowTable(list);
+    expect(tbody.querySelector('.cw-stack-head')).toBeNull();
+    expect(tbody.classList.contains('cw-has-heads')).toBe(false);
+  });
 });
 

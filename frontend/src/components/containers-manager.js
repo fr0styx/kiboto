@@ -1011,6 +1011,40 @@ function cwVirtualRange(total, tbody) {
   return { start, end, rowH };
 }
 
+/** The list with a header item before each stack's apps (the list comes sorted by stack, then name);
+ *  unchanged when no app is in a stack. Apps without a stack come last, under "Other apps". */
+export function withStackHeads(list) {
+  if (!list.some((c) => c && c.stack)) return list;
+  const out = [];
+  let last = null;
+  for (const c of list) {
+    const s = c.stack || '';
+    if (s !== last) {
+      out.push({ __stack: s });
+      last = s;
+    }
+    out.push(c);
+  }
+  return out;
+}
+
+function updateCwStackHead(tr, item) {
+  const th = tr.firstElementChild;
+  if (th) th.textContent = item.__stack || t('apps.other_apps', 'Other apps');
+}
+
+function createCwStackHead(item) {
+  const tr = document.createElement('tr');
+  tr.className = 'cw-stack-head';
+  const th = document.createElement('th');
+  th.className = 'cw-stack-head-cell';
+  th.setAttribute('colspan', '8');
+  th.setAttribute('scope', 'colgroup');
+  tr.append(th);
+  updateCwStackHead(tr, item);
+  return tr;
+}
+
 function createCwSpacerRow(item) {
   const tr = document.createElement('tr');
   tr.className = 'cw-virtual-spacer';
@@ -1062,19 +1096,22 @@ function renderCwRows(tbody, filtered, currentHost) {
     ];
   } else {
     _cwLastWindow = '';
+    // the simple view names each stack in a header row above its apps (SET-25)
+    if (!_cwSortCol && !appsDetailsOn()) items = withStackHeads(filtered);
   }
+  tbody.classList.toggle('cw-has-heads', items.some((c) => c.__stack !== undefined));
 
   reconcileKeyedTable(
     tbody,
     items,
-    (c) => (c.__spacer ? `__cw-spacer-${c.__spacer}` : c.id || c.name),
-    (c) => (c.__spacer ? createCwSpacerRow(c) : createCwContainerRow(c, currentHost)),
-    (tr, c) => (c.__spacer ? updateCwSpacerRow(tr, c) : updateCwContainerRow(tr, c, currentHost))
+    (c) => (c.__spacer ? `__cw-spacer-${c.__spacer}` : c.__stack !== undefined ? `__cw-stack-${c.__stack}` : c.id || c.name),
+    (c) => (c.__spacer ? createCwSpacerRow(c) : c.__stack !== undefined ? createCwStackHead(c) : createCwContainerRow(c, currentHost)),
+    (tr, c) => (c.__spacer ? updateCwSpacerRow(tr, c) : c.__stack !== undefined ? updateCwStackHead(tr, c) : updateCwContainerRow(tr, c, currentHost))
   );
 
   // Spacer maths uses the real row-to-row distance: it includes the gap between
   // the card rows on phones (flex layout), which a row's own height does not.
-  const rows = tbody.querySelectorAll('tr:not(.cw-virtual-spacer)');
+  const rows = tbody.querySelectorAll('tr:not(.cw-virtual-spacer):not(.cw-stack-head)');
   if (rows.length > 1) {
     const first = rows[0].getBoundingClientRect().top;
     const last = rows[rows.length - 1].getBoundingClientRect().top;

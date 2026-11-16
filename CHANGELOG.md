@@ -169,6 +169,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   down to change its processors or memory", instead of promising they apply at the next restart (the server refuses
   them while the machine runs).
 
+#### Changes
+
+- **Apps grouped by stack**: in the simple Apps view a header row names each stack above its apps, and apps without
+  one follow under "Other apps".
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 
