@@ -691,7 +691,7 @@ request and response schemas.
 | `GET` | `/api/v1/ai/manifests` | any of `shares:read`, `storage:read`, `system:read` | Lists all indexed folder manifests and tree summaries across watched storage shares |
 | `GET` | `/api/v1/ai/models/benchmark` | `ai:manage` | Last benchmark results, the recommended tiers and a running job (D2) |
 | `POST` | `/api/v1/ai/models/benchmark` | `ai:manage` | Start Model Benchmark |
-| `POST` | `/api/v1/ai/models/benchmark/apply` | `ai:manage` | Makes the recommended model of a tier Ask Kib's chat model |
+| `POST` | `/api/v1/ai/models/benchmark/apply` | `ai:manage` | AI decision 6: Kib answers with Automatic (recommended), Fast, Balanced or Best |
 | `POST` | `/api/v1/ai/models/huggingface/pull` | `ai:manage` | Pulls/registers a release model from https://huggingface.co and flags hardware fit warnings |
 | `GET` | `/api/v1/ai/models/huggingface/search` | `ai:manage` | Searches https://huggingface.co release models and evaluates hardware fit against NAS NPU/GPU/RAM |
 | `POST` | `/api/v1/ai/models/install` | `ai:manage` | Downloads a model into Ollama in the background; poll the job for progress (AI-03) |

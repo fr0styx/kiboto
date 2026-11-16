@@ -224,14 +224,41 @@ def benchmark_openai(ep: str, name: str, stream: Callable = _stream_chat) -> dic
     }
 
 
+# AI decision 6: "Best" is the largest model that still answers at a usable pace on this NAS
+USABLE_SPEED_TPS = 4.0
+TIERS = ("fast", "balanced", "best")
+
+
 def recommend(results: list[dict[str, Any]]) -> dict[str, Any]:
     ok = [r for r in results if r.get("ok")]
     if not ok:
-        return {"fast": None, "balanced": None}
+        return {"fast": None, "balanced": None, "best": None}
     fast = max(ok, key=lambda r: r["tokens_per_s"])
     readable = [r for r in ok if r["tokens_per_s"] >= READING_SPEED_TPS]
     balanced = max(readable, key=lambda r: (r["size_bytes"], r["tokens_per_s"])) if readable else fast
-    return {"fast": fast["name"], "balanced": balanced["name"]}
+    usable = [r for r in ok if r["tokens_per_s"] >= USABLE_SPEED_TPS]
+    best = max(usable, key=lambda r: (r["size_bytes"], r["tokens_per_s"])) if usable else balanced
+    return {"fast": fast["name"], "balanced": balanced["name"], "best": best["name"]}
+
+
+def model_for(choice: str, recommended: dict[str, Any]) -> str | None:
+    """The model a choice stands for: a tier's pick, or Balanced's for Automatic; None when the
+    speed test has not run (Automatic then keeps the model Kib has)."""
+    tier = "balanced" if choice == "auto" else choice
+    return (recommended or {}).get(tier) if tier in TIERS else None
+
+
+def follow_choice(
+    set_config: Callable[[dict[str, Any]], Any], cfg: dict[str, Any], recommended: dict[str, Any]
+) -> str | None:
+    """After a speed test, Automatic and a chosen tier move to the model that now fits it; a model
+    picked by name stays. Returns the model it switched to, if any."""
+    choice = str(cfg.get("model_choice") or "auto")
+    name = model_for(choice, recommended)
+    if name and name != cfg.get("active_model"):
+        set_config({"active_model": name})
+        return name
+    return None
 
 
 def load_results() -> dict[str, Any]:
@@ -239,7 +266,7 @@ def load_results() -> dict[str, Any]:
         with open(RESULTS_FILE, encoding="utf-8") as f:
             return json.load(f)
     except (OSError, ValueError):
-        return {"results": [], "finished_at": None, "recommended": {"fast": None, "balanced": None}}
+        return {"results": [], "finished_at": None, "recommended": {"fast": None, "balanced": None, "best": None}}
 
 
 def status() -> dict[str, Any]:
@@ -288,7 +315,11 @@ def start() -> dict[str, Any]:
 
     def worker() -> None:
         try:
-            run()
+            out = run()
+            from backend.services.rag_engine import get_rag_engine
+
+            rag = get_rag_engine()
+            follow_choice(rag.update_config, rag.get_config(), out["recommended"])
         except Exception as e:
             logger.warning(f"[Benchmark] Failed: {e}", exc_info=True)
             with _lock:

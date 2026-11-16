@@ -348,6 +348,18 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   "Reading", "Waiting for a drive to wake"), a menu with "Read now", "Stop reading" and "Stop reading and forget this
   folder", "Add a folder…", and a "Never read" list with Remove. No device names, no "RAG Checked".
 
+#### Changes
+
+- **Kib's settings read top to bottom**: the status line, "Kib can read these folders", "Who can use Kib", "Privacy",
+  then everything else folded under "Advanced". Privacy starts with "Kib runs on this NAS. Your files and questions
+  stay here." and lists web lookups and every server address that is not this NAS, with what it gets.
+
+#### Changes
+
+- **"Kib answers with": Automatic (recommended), Fast, Balanced or Best**: the model's name is shown small under each,
+  with how it runs here once "Test speed" has measured it. The choice is kept, so a later speed test moves it to the
+  model that now fits; a model picked by name stays put.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

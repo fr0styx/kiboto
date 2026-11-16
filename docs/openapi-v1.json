@@ -1683,7 +1683,7 @@
    "BenchmarkApplyRequest": {
     "properties": {
      "tier": {
-      "pattern": "^(fast|balanced)$",
+      "pattern": "^(auto|fast|balanced|best)$",
       "title": "Tier",
       "type": "string"
      }
@@ -43383,7 +43383,7 @@
   },
   "/api/v1/ai/models/benchmark/apply": {
    "post": {
-    "description": "Makes the recommended model of a tier Ask Kib's chat model.",
+    "description": "AI decision 6: Kib answers with Automatic (recommended), Fast, Balanced or Best. The choice is\nkept, so a later speed test moves it to the model that fits; Automatic works before any test.",
     "operationId": "apply_model_tier_api_v1_ai_models_benchmark_apply_post",
     "requestBody": {
      "content": {

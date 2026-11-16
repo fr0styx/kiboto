@@ -997,6 +997,9 @@ class RagSearchEngine(RagSearchMixin, RagManifestMixin, RagLearningMixin, RagInd
             "schedule_start": "01:00",
             "schedule_end": "06:00",
             "active_model": DEFAULT_CHAT_MODEL,
+            # AI decision 6: how Kib picks its chat model: "auto" (recommended), "fast", "balanced",
+            # "best", or "manual" once someone picked a model by name
+            "model_choice": "auto",
             "embedding_model": "embeddinggemma",
             "embedding_dim": 768,
             "embedding_provider": "ollama",
@@ -1071,6 +1074,7 @@ class RagSearchEngine(RagSearchMixin, RagManifestMixin, RagLearningMixin, RagInd
             "schedule_start",
             "schedule_end",
             "active_model",
+            "model_choice",
             "embedding_model",
             "embedding_dim",
             "embedding_provider",

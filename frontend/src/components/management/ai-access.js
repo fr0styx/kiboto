@@ -52,7 +52,9 @@ export function renderAiAccess(card, access, log) {
     <details class="ai-access-log"><summary>${t('ai.access_log', 'Who asked Kib')}</summary>
     <p class="kb-muted">${t('ai.access_log_desc', 'When, who, the model, web search and the result, for {days} days. What was asked is not kept here.', { days: access.log_days || 90 })}</p>
     ${logHtml(log || [])}</details>`;
-  card.innerHTML = uiCard({ title: t('ai.access_title', 'Who can use Kib'), body: String(body), variant: 'boxed' });
+  // inside Kib settings' own section the section heading names it (AI 4)
+  const inSection = card.parentElement?.id === 'kib-who-mount';
+  card.innerHTML = uiCard({ title: inSection ? '' : t('ai.access_title', 'Who can use Kib'), body: String(body), variant: 'boxed' });
   card.querySelectorAll('[data-ai-role]').forEach((sw) => {
     sw.addEventListener('change', async () => {
       sw.disabled = true;
@@ -69,11 +71,14 @@ export function renderAiAccess(card, access, log) {
 
 /** Adds the card under the reranker in AI settings; only for people who may change it. */
 export async function installAiAccess(root = document) {
-  const anchor = root.getElementById('ai-rerank-form');
+  // AI 4: in its own section "Who can use Kib"; it used to sit between two server-address forms
+  const mount = root.getElementById('kib-who-mount');
+  const anchor = mount || root.getElementById('ai-rerank-form');
   if (!anchor || root.getElementById(CARD_ID)) return;
   const card = document.createElement('div');
   card.id = CARD_ID;
-  anchor.insertAdjacentElement('afterend', card);
+  if (mount) mount.appendChild(card);
+  else anchor.insertAdjacentElement('afterend', card);
   try {
     const [access, log] = await Promise.all([
       api.get('/api/ai/access'),

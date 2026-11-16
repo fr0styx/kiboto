@@ -511,3 +511,23 @@
 .kibf > [data-kibf-act="add"] { align-self: flex-start; }
 .kibf-empty { font-size: var(--kb-fs-xs); color: var(--muted); padding: 6px 2px; }
 @media (max-width: 600px) { .kibf-row { flex-wrap: wrap; } .kibf-state { order: 3; margin-left: 28px; } }
+/* Kib settings in sections (AI 4): folders, who, privacy, then Advanced folded */
+.kib-section { margin: 0 0 18px; display: flex; flex-direction: column; gap: 8px; }
+.kib-h { margin: 0; font-size: var(--kb-fs); font-weight: 700; color: var(--kb-text-strong); }
+.kib-note { margin: 0; font-size: var(--kb-fs-xs); color: var(--muted); }
+.kib-privacy-list { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; font-size: var(--kb-fs-xs); color: var(--kb-text); }
+.kib-advanced { border-top: 1px solid var(--kb-line-7); padding-top: 12px; }
+.kib-advanced > summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; list-style: none; }
+.kib-advanced > summary::before { content: "›"; display: inline-block; width: 1em; margin-right: 6px; color: var(--muted); transition: transform 0.15s ease; }
+.kib-advanced[open] > summary::before { transform: rotate(90deg); }
+.kib-advanced > summary::-webkit-details-marker { display: none; }
+.kib-advanced[open] > *:not(summary) { margin-top: 12px; }
+/* "Kib answers with" (AI 6): four choices, the model's name small below */
+.kibm-list { display: flex; flex-direction: column; gap: 4px; }
+.kibm-row { display: flex; align-items: flex-start; gap: 10px; padding: 9px 10px; border: 1px solid var(--kb-line-7); border-radius: 8px; cursor: pointer; min-height: 44px; box-sizing: border-box; }
+.kibm-row input { margin-top: 3px; width: 16px; height: 16px; flex: 0 0 auto; }
+.kibm-row.is-off { opacity: 0.6; cursor: default; }
+.kibm-text { display: flex; flex-direction: column; gap: 1px; }
+.kibm-text > span { font-size: var(--kb-fs-xs); color: var(--kb-text-soft); }
+.kibm-text > small { font-size: var(--kb-fs-xs); color: var(--muted); }
+#kib-model-choice > [data-kibm-test] { align-self: flex-start; }

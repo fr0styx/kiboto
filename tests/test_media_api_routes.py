@@ -413,7 +413,8 @@ def test_benchmark_tier(client, auth_headers, rag, monkeypatch):
 
     monkeypatch.setattr(model_benchmark, "load_results", lambda: {"recommended": {"fast": "qwen3:1.7b"}})
     body = client.post("/api/ai/models/benchmark/apply", json={"tier": "fast"}, headers=auth_headers).json()
-    assert body == {"active_model": "qwen3:1.7b", "tier": "fast"} and rag.cfg["active_model"] == "qwen3:1.7b"
+    assert body == {"active_model": "qwen3:1.7b", "tier": "fast", "model_choice": "fast"}
+    assert rag.cfg["active_model"] == "qwen3:1.7b" and rag.cfg["model_choice"] == "fast"
     assert (
         client.post("/api/ai/models/benchmark/apply", json={"tier": "balanced"}, headers=auth_headers).status_code
         == 409

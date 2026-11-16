@@ -51,7 +51,8 @@ def test_benchmark_and_tiers(tmp_path, monkeypatch):
     assert by["qwen2.5:3b"]["tokens_per_s"] == 45.0 and by["qwen2.5:3b"]["placement"] == "CPU"
     assert by["gemma3:12b"]["placement"] == "GPU" and by["big:70b"]["placement"] == "split"
     assert by["gemma3:12b"]["first_token_s"] == 1.2
-    assert out["recommended"] == {"fast": "qwen2.5:3b", "balanced": "gemma3:12b"}  # 70b is below reading speed
+    # 70b is below reading speed, but still usable: it is "Best" (AI decision 6)
+    assert out["recommended"] == {"fast": "qwen2.5:3b", "balanced": "gemma3:12b", "best": "big:70b"}
     assert mb.load_results()["recommended"]["balanced"] == "gemma3:12b"
 
 

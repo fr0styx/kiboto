@@ -263,6 +263,12 @@
   "styles": 0,
   "templates": 0
  },
+ "frontend/src/components/management/kib-model-choice.js": {
+  "buttons": 0,
+  "globals": 0,
+  "styles": 0,
+  "templates": 1
+ },
  "frontend/src/components/management/malware-scan.js": {
   "buttons": 0,
   "globals": 0,

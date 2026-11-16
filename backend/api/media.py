@@ -780,7 +780,8 @@ def select_recommended_model(req: ModelSelectRequest) -> dict[str, Any]:
             "llm_recommendations": recs,
         }
 
-    updated_cfg = rag.update_config({"active_model": model_tag, "llm_model": model_tag})
+    # a model picked by name is kept: speed tests no longer move it (AI decision 6)
+    updated_cfg = rag.update_config({"active_model": model_tag, "llm_model": model_tag, "model_choice": "manual"})
     return {
         "status": "ok",
         "active_model": updated_cfg.get("active_model"),
@@ -839,7 +840,7 @@ async def list_installed_models() -> dict[str, Any]:
 
 
 class BenchmarkApplyRequest(BaseModel):
-    tier: str = Field(..., pattern="^(fast|balanced)$")
+    tier: str = Field(..., pattern="^(auto|fast|balanced|best)$")
 
 
 @router.get("/ai/models/benchmark", dependencies=[Depends(require_scope(KIB_MANAGE))])
@@ -859,16 +860,21 @@ def start_model_benchmark() -> dict[str, Any]:
 
 @router.post("/ai/models/benchmark/apply", dependencies=[Depends(require_scope(KIB_MANAGE))])
 def apply_model_tier(req: BenchmarkApplyRequest) -> dict[str, Any]:
-    """Makes the recommended model of a tier Ask Kib's chat model."""
+    """AI decision 6: Kib answers with Automatic (recommended), Fast, Balanced or Best. The choice is
+    kept, so a later speed test moves it to the model that fits; Automatic works before any test."""
     from backend.services import model_benchmark
 
-    name = (model_benchmark.load_results().get("recommended") or {}).get(req.tier)
-    if not name:
+    rag = get_rag_engine()
+    name = model_benchmark.model_for(req.tier, model_benchmark.load_results().get("recommended") or {})
+    if not name and req.tier != "auto":
         from backend.errors import ApiError
 
         raise ApiError(409, "Run a benchmark first.", "not_ready")
-    get_rag_engine().update_config({"active_model": name})
-    return {"active_model": name, "tier": req.tier}
+    updates: dict[str, Any] = {"model_choice": req.tier}
+    if name:
+        updates["active_model"] = name
+    cfg = rag.update_config(updates)
+    return {"active_model": cfg.get("active_model"), "tier": req.tier, "model_choice": req.tier}
 
 
 @router.post("/ai/models/install", dependencies=[Depends(require_scope(KIB_MANAGE))])

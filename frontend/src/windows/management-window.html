@@ -3665,7 +3665,6 @@
 
             <!-- Tab 3: Dedicated Configuration (Service Switch, Scope/Schedule/Standby Rules, Watched Shares & NPU/GPU Models) -->
             <div id="mgmt-pane-ai-index" class="mgmt-tab-pane" style="display: none;">
-              <!-- AI 4: one status line in place of the ribbon's five pills -->
               <div id="kib-status-mount"></div>
               <div class="ai-telemetry-ribbon" id="ai-telemetry-ribbon" hidden style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px; padding:10px 14px; margin-bottom:12px; background:var(--lt-b-0e1c1ea6, rgba(14,28,30,0.65)); border:1px solid rgba(51,205,184,0.3); border-radius:10px; box-sizing:border-box;">
                 <div class="aix-row">
@@ -3704,25 +3703,236 @@
                   </button>
                 </div>
               </div>
-              <div class="ai-config-group" role="group" aria-labelledby="ai-config_group_chat">
+              <section class="kib-section" aria-labelledby="kib-folders-h">
+                <h3 id="kib-folders-h" class="kib-h" data-i18n="kib4.folders_h">Kib can read these folders</h3>
+                <div style="background:var(--lt-b-0e1c1e73, rgba(14,28,30,0.45)); border:1px solid var(--kb-line-10); border-radius:10px; padding:14px; display:flex; flex-direction:column; gap:12px; margin-bottom:12px;">
+                <div class="aix-row-9">
+                  <div>
+                    <div class="aix-fs13-bold-strong-3" hidden><span aria-hidden="true">📁</span> <span data-i18n="ai.index_folder_title">Kib can read these folders</span></div>
+                    <p style="font-size:var(--kb-fs-xs); color:var(--muted,#95a8ab); margin:0;" data-i18n="ai.index_folder_desc" hidden>Choose which NAS shares Kib learns from. Files on sleeping drives are learned when the drive spins up.</p>
+                  </div>
+                  <!-- Sync Transport Controls + Learning Results Button -->
+                  <div class="aix-row-6">
+                    <button type="button" id="btn-ai-sync-watched" class="btn-pill-toggle" style="background: rgba(51,205,184,0.22); border: 1px solid rgba(51,205,184,0.5); color: var(--kb-text-strong);">
+                      <span aria-hidden="true">🔄</span> <span data-i18n="ai.sync_watched_btn">Sync Watched Folders</span>
+                    </button>
+                    <button type="button" id="btn-ai-index-pause" class="btn-pill-toggle" style="background: rgba(245,158,11,0.18); border: 1px solid rgba(245,158,11,0.45); color: var(--kb-text-warn);">
+                      <span aria-hidden="true">⏸</span> <span data-i18n="ai.pause_sync">Pause</span>
+                    </button>
+                    <button type="button" id="btn-ai-index-resume" class="btn-pill-toggle" style="background: rgba(51,205,184,0.2); border: 1px solid rgba(51,205,184,0.5); color: var(--kb-text-ok);">
+                      <span>▶</span> <span data-i18n="ai.resume_sync">Resume</span>
+                    </button>
+                    <button type="button" id="btn-ai-index-stop" class="btn-pill-toggle is-danger">
+                      <span aria-hidden="true">⏹</span> <span data-i18n="ai.stop_sync">Stop</span>
+                    </button>
+                    <button type="button" id="btn-ai-learning-results" class="btn-pill-toggle" style="background: rgba(99,102,241,0.16); border: 1px solid rgba(99,102,241,0.4); color: var(--lt-t-c7d2feff, #c7d2fe);" title="View AI Learning Results (Succeeded / Failed / Deferred files)" data-i18n-title="ui.view_ai_learning_results_succeeded">
+                      <span aria-hidden="true">📊</span> <span data-i18n="ai.learning_results_btn">Learning Results</span>
+                    </button>
+                    <button type="button" id="btn-ai-in-place-reindex" class="btn-pill-toggle" style="background: rgba(34,197,94,0.18); border: 1px solid rgba(34,197,94,0.45); color: var(--lt-t-4ade80ff, #4ade80);" title="Re-embed all existing document chunks on SSD in-place with zero disk wakeups" data-i18n-title="ui.re_embed_all_existing_document">
+                      <span aria-hidden="true">🔄</span> <span data-i18n="ai.btn_reindex">In-Place Re-index</span>
+                    </button>
+                    <button type="button" id="btn-ai-flush-index" class="btn-pill-toggle is-danger" title="Delete what AI search has learned and start again" data-i18n-title="ui.flush_existing_rag_index_vector">
+                      <span aria-hidden="true">🗑️</span> <span data-i18n="ai.flush_index_btn">Flush Index</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Live Sync Progress & Disk Standby Banner -->
+                <div id="ai-sync-progress-banner" style="padding:9px 12px; border-radius:8px; background:var(--lt-b-0e1c1ea6, rgba(14,28,30,0.65)); border:1px solid rgba(79,216,196,0.22); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; font-size:var(--kb-fs-xs);">
+                  <div class="aix-row-3">
+                    <span id="ai-index-sync-state-pill" style="padding:2px 8px; border-radius:999px; font-size:var(--kb-fs-xs); font-weight:700; background:rgba(149,168,171,0.18); color:var(--kb-text);">IDLE</span>
+                    <span class="aix-xs-soft-2" id="ai-index-current-path" data-sample>—</span>
+                  </div>
+                  <div id="ai-index-progress-counters" style="color:var(--muted,#95a8ab); font-size:var(--kb-fs-xs);">
+                    <span data-i18n="ai.stat_indexed">Indexed:</span> <strong class="aix-ok" id="ai-prog-indexed">0</strong> • <span data-i18n="ai.prog_unchanged">Unchanged:</span> <strong class="aix-soft" id="ai-prog-unchanged">0</strong> • <span data-i18n="ai.prog_deferred">Deferred (standby):</span> <strong class="aix-warn" id="ai-prog-deferred">0</strong>
+                  </div>
+                </div>
+
+                <!-- Kib Learning Results & Failed Files Panel (Toggled inline) -->
+                <div id="ai-learning-results-panel" style="display:none; background:var(--lt-b-0e1c1ebf, rgba(14,28,30,0.75)); border:1px solid rgba(99,102,241,0.45); border-radius:8px; padding:12px;">
+                  <div class="aix-row-10">
+                    <div class="aix-xs-bold-strong"><span aria-hidden="true">📊</span> <span data-i18n="mw.kib_learning_results">Kib Learning Results</span></div>
+                    <div class="aix-row-11">
+                      <button type="button" id="btn-ai-relearn-failed" class="btn-pill-toggle is-small" style="background: rgba(99,102,241,0.25); border: 1px solid rgba(99,102,241,0.55); color: var(--kb-text-strong);">
+                        <span aria-hidden="true">🔁</span> <span data-i18n="ai.relearn_failed_btn">Relearn Failed Files</span>
+                      </button>
+                      <button type="button" id="btn-ai-close-learning-results" class="btn-pill-toggle is-small">✕</button>
+                    </div>
+                  </div>
+                  <div class="aix-grid-4">
+                    <div style="padding:8px 10px; border-radius:6px; background:rgba(34,197,94,0.12); border:1px solid rgba(34,197,94,0.3); display:flex; justify-content:space-between; align-items:center;">
+                      <span style="font-size:var(--kb-fs-xs); color:var(--lt-t-86efacff, #86efac); font-weight:700;" data-i18n="mw.succeeded">✓ Succeeded</span>
+                      <strong id="ai-learn-succeeded-count" style="font-size:14px; color:var(--lt-t-4ade80ff, #4ade80);">0</strong>
+                    </div>
+                    <div style="padding:8px 10px; border-radius:6px; background:rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.3); display:flex; justify-content:space-between; align-items:center;">
+                      <span style="font-size:var(--kb-fs-xs); color:var(--lt-t-fca5a5ff, #fca5a5); font-weight:700;" data-i18n="mw.failed">✕ Failed</span>
+                      <strong class="aix-fs14" id="ai-learn-failed-count">0</strong>
+                    </div>
+                    <div style="padding:8px 10px; border-radius:6px; background:rgba(245,158,11,0.12); border:1px solid rgba(245,158,11,0.3); display:flex; justify-content:space-between; align-items:center;">
+                      <span style="font-size:var(--kb-fs-xs); color:var(--lt-t-fde68aff, #fde68a); font-weight:700;"><span aria-hidden="true">💤</span> <span data-i18n="mw.deferred_standby">Deferred (Standby)</span></span>
+                      <strong class="aix-fs14-warn" id="ai-learn-deferred-count">0</strong>
+                    </div>
+                  </div>
+                  <div class="aix-xs-soft-3" id="ai-learn-failed-list"></div>
+                </div>
+
+                <!-- Unified Watched Folders Multi-Select Dropdown Checklist -->
+                <div class="aix-col" id="ai-watched-folders-section">
+                  <!-- AI 4: the always-open folder list with words; the dropdown and chips below stay hidden -->
+                  <div id="kib-folders-mount" class="kibf"></div>
+                  <div class="aix-row-12" hidden>
+                    <span class="aix-xs-bold-accent" data-i18n="ai.watched_folders_label">Watched Folders (Click Dropdown to Check/Uncheck Shares for RAG)</span>
+                    <span style="font-size:var(--kb-fs-xs); color:var(--muted,#95a8ab);" data-i18n="ai.watched_folders_hint">Tick a folder to let AI search read it; untick it to stop.</span>
+                  </div>
+
+                  <div class="aix-row-13" hidden>
+                    <div class="aix-grow" id="ai-watched-folders-dropdown-container">
+                      <button type="button" id="btn-ai-watched-folders-dropdown" aria-expanded="false" style="width:100%; min-height:38px; padding:6px 12px; border-radius:8px; background:var(--lt-b-0e1c1ed9, rgba(14,28,30,0.85)); border:1px solid rgba(79,216,196,0.42); color:var(--lt-t-f5f9f9ff, #f5f9f9); font-size:var(--kb-fs-xs); display:flex; justify-content:space-between; align-items:center; gap:10px; cursor:pointer; text-align:left;">
+                        <div class="aix-row-14">
+                          <span aria-hidden="true">📁</span>
+                          <span class="aix-bold" id="ai-watched-dropdown-summary" data-sample>Select Watched Folders for RAG...</span>
+                        </div>
+                        <div class="aix-row-15">
+                          <span id="ai-watched-dropdown-count-badge" style="font-size:var(--kb-fs-xs); font-weight:800; padding:2px 8px; border-radius:999px; background:rgba(51,205,184,0.2); border:1px solid rgba(51,205,184,0.45); color:var(--kb-text-ok);" data-sample>—</span>
+                          <span class="aix-xs-accent" id="ai-watched-dropdown-caret">▾</span>
+                        </div>
+                      </button>
+
+                      <!-- Dropdown Menu: List of all available + watched folders with in-place check/uncheck -->
+                      <div id="ai-watched-folders-dropdown-menu" style="display:none; position:absolute; top:calc(100% + 4px); left:0; right:0; z-index:40; max-height:260px; overflow-y:auto; border-radius:9px; background:var(--lt-b-0b1a1dfa, rgba(11,26,29,0.98)); border:1px solid rgba(79,216,196,0.45); box-shadow:0 12px 28px rgba(0,0,0,0.65); padding:6px; flex-direction:column; gap:4px;">
+                        <div class="aix-col-2" id="ai-discovered-shares-list"></div>
+                      </div>
+                    </div>
+
+                    <button type="button" id="btn-ai-run-index" class="btn-pill-toggle" style="height:38px; padding:0 16px; font-size:var(--kb-fs-xs); font-weight:700; background:rgba(51,205,184,0.22); border:1px solid rgba(51,205,184,0.5); color:var(--kb-text-strong); border-radius:8px; cursor:pointer; white-space:nowrap; flex-shrink:0;" title="Index configured watched folders now (Standby Safe)" data-i18n-title="ui.index_configured_watched_folders_now">
+                      <span aria-hidden="true">🚀</span> <span data-i18n="ai.run_index_btn">Index Path Now</span>
+                    </button>
+                  </div>
+
+                  <!-- Compact active checked chips summary -->
+                  <div class="aix-row-16" id="ai-watched-folders-list" hidden></div>
+
+                  <div id="ai-index-run-feedback" style="font-size:var(--kb-fs-xs); color:var(--ok2,#33cdb8);"></div>
+                  <div id="ai-index-db-summary" style="font-size:var(--kb-fs-xs); color:var(--muted,#95a8ab); display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:4px; padding-top:6px; border-top:1px solid var(--kb-line-6);"></div>
+                </div>
+              </div>
+              </section>
+              <section class="kib-section" aria-labelledby="kib-who-h">
+                <h3 id="kib-who-h" class="kib-h" data-i18n="kib4.who_h">Who can use Kib</h3>
+                <p class="kib-note" data-i18n="kib4.who_note">The Kid and Guest roles cannot use the web.</p>
+                <div id="kib-who-mount"></div>
+              </section>
+              <section class="kib-section" aria-labelledby="kib-privacy-h">
+                <h3 id="kib-privacy-h" class="kib-h" data-i18n="kib4.privacy_h">Privacy</h3>
+                <p class="kib-note" data-i18n="kib4.privacy_first">Kib runs on this NAS. Your files and questions stay here.</p>
+                <ul id="kib-privacy-list" class="kib-privacy-list"></ul>
+                <div class="kb-card kb-card--boxed ai-config-card">
+                <div class="ai-config-card-title" data-i18n="ai.config_history_title">Conversation history</div>
+                  <!-- 4. Conversation retention (AI-20) -->
+                  <label style="display:flex; align-items:center; gap:8px; padding:9px 12px; border-radius:8px; background:var(--lt-b-0e1c1e99, rgba(14,28,30,0.6)); border:1px solid var(--kb-line-12); font-size:var(--kb-fs-xs); font-weight:600; color:var(--kb-text-soft);">
+                    <span data-i18n="ai.retention_label">Delete chats not used for</span>
+                    <select id="ai-conversation-retention-select" class="tz-select-input aix-xs-box" aria-label="Chat retention" data-i18n-aria-label="ui.chat_retention">
+                      <option value="0" data-i18n="ai.retention_forever">Keep forever</option>
+                      <option value="7">7 days</option>
+                      <option value="30">30 days</option>
+                      <option value="90">90 days</option>
+                      <option value="365">1 year</option>
+                    </select>
+                    <span class="aix-xs-muted" data-i18n="ai.retention_hint">Pinned chats are kept.</span>
+                  </label>
+
+              </div>
+              </section>
+              <details class="kib-advanced" id="kib-advanced">
+                <summary class="kib-h" data-i18n="kib4.advanced">Advanced</summary>
+                <div hidden class="ai-config-group" role="group" aria-labelledby="ai-config_group_chat">
                 <h3 class="ai-config-group-title" id="ai-config_group_chat" data-i18n="ai.config_group_chat">Ask Kib</h3>
                 <p class="ai-config-group-desc" data-i18n="ai.config_group_chat_desc">The model that answers, where it runs, and how long chats are kept.</p>
               </div>
-              <!-- How Your Selected LLM Is Leveraged (Moved from Chatbot to AI Configuration) -->
-              <div class="ai-chat-welcome-card" style="padding:12px 14px; border-radius:10px; background:rgba(51,205,184,0.08); border:1px solid rgba(51,205,184,0.28); font-size:var(--kb-fs-xs); color:var(--kb-text); line-height:1.5; margin-bottom:12px;">
-                <div class="aix-row-bold-strong">
-                  <span aria-hidden="true">🤖</span>
-                  <span data-i18n="ai.how_llm_leveraged_title">What this model is used for:</span>
-                </div>
-                <ul class="aix-xs-soft">
-                  <li><strong data-i18n="mw.each_answer_says_how_it_was">Each answer says how it was made:</strong> <span data-i18n="mw.each_answer_detail">In AI search and Ask Kib, every reply shows the model, whether the NPU or the GPU ran it, how fast it was, and which tools it used.</span></li>
-                  <li><strong><span aria-hidden="true">🛠️</span> <span data-i18n="mw.it_can_check_this_server_for">It can check this server for you:</span></strong> <span data-i18n="mw.server_check_detail">Ask how busy the processor and memory are, which drives are asleep (it never wakes them), change the fan profile (quiet, balanced, performance), list or restart apps, or find files.</span></li>
-                  <li><strong><span aria-hidden="true">🌐</span> <span data-i18n="mw.it_can_look_things_up_on">It can look things up on the web:</span></strong> <span data-i18n="mw.web_lookup_detail">Ask a general question or paste a link, and it searches Wikipedia and DuckDuckGo and links its sources.</span></li>
-                </ul>
+                <div hidden class="ai-config-group" role="group" aria-labelledby="ai-config_group_rag">
+                <h3 class="ai-config-group-title" id="ai-config_group_rag" data-i18n="ai.config_group_rag">AI search</h3>
+                <p class="ai-config-group-desc" data-i18n="ai.config_group_rag_desc">Which folders Kib learns from and when, how it reads them, and your photos in Immich.</p>
               </div>
+                <div style="background:var(--lt-b-0e1c1e80, rgba(14,28,30,0.5)); border:1px solid rgba(51,205,184,0.3); border-radius:10px; padding:14px; margin-bottom:12px;">
+                <div class="aix-row-box-2">
+                  <div>
+                    <div class="aix-fs13-bold-strong-2" data-i18n="ai.config_policy_title">What Kib reads</div>
+                    <div style="font-size:var(--kb-fs-xs); color:var(--muted,#95a8ab); margin-top:2px;" data-i18n="ai.config_policy_desc">Choose whether and what Kib reads. Switched off, Kib keeps what it knows, so chat and search still work.</div>
+                  </div>
+                  <label style="display:inline-flex; align-items:center; gap:8px; padding:5px 12px; border-radius:999px; background:rgba(99,102,241,0.18); border:1px solid rgba(99,102,241,0.45); font-size:var(--kb-fs-xs); font-weight:700; color:var(--lt-t-e0e7ffff, #e0e7ff); cursor:pointer;" title="Enable or disable Kib service globally. Turning off pauses unfinished learning tasks." data-i18n-title="ui.enable_or_disable_kib_service">
+                    <input type="checkbox" id="ai-master-enable-toggle" checked style="accent-color:#6366f1; cursor:pointer;" />
+                    <span data-i18n="ai.service_switch_label">Kib reads my files</span>
+                  </label>
+                </div>
 
-              <!-- Section 3: Onboard NPU & GPU Hardware Acceleration & Hugging Face Release Models -->
-              <div id="ai-llm-recommendations-section" style="background:var(--lt-b-0e1c1e80, rgba(14,28,30,0.5)); border:1px solid rgba(99,102,241,0.35); border-radius:10px; padding:14px;">
+                <div class="aix-grid-3">
+                  <!-- 1. Learning Scope -->
+                  <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; padding:9px 12px; border-radius:8px; background:var(--lt-b-0e1c1e99, rgba(14,28,30,0.6)); border:1px solid var(--kb-line-7);">
+                    <label class="aix-xs-bold" for="ai-learning-scope-mode" data-i18n="ai.learning_scope_label">Learning Scope:</label>
+                    <select id="ai-learning-scope-mode" class="tz-select-input aix-xs-box-2">
+                      <option value="include" data-i18n="ai.scope_mode_include">Specify Watched Folders</option>
+                      <option value="all" data-i18n="ai.scope_mode_all">Learn All Files (Auto Shares)</option>
+                      <option value="exclude" data-i18n="ai.scope_mode_exclude">Exclude Specified Folders</option>
+                    </select>
+                  </div>
+
+                  <!-- 2. Scheduled Learning Window -->
+                  <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; padding:9px 12px; border-radius:8px; background:var(--lt-b-0e1c1e99, rgba(14,28,30,0.6)); border:1px solid var(--kb-line-7);">
+                    <label class="aix-row-xs-bold">
+                      <input type="checkbox" id="ai-schedule-enabled-toggle" />
+                      <span data-i18n="ai.schedule_learning_label">Schedule Learning Period:</span>
+                    </label>
+                    <div class="aix-row-8">
+                      <input type="time" id="ai-schedule-start-input" aria-label="Learning schedule start time" data-i18n-aria-label="ui.learning_schedule_start_time" value="01:00" class="tz-select-input aix-xs-box-3" />
+                      <span class="aix-xs-muted-2">to</span>
+                      <input type="time" id="ai-schedule-end-input" aria-label="Learning schedule end time" data-i18n-aria-label="ui.learning_schedule_end_time" value="06:00" class="tz-select-input aix-xs-box-3" />
+                      <button type="button" id="btn-ai-save-schedule" class="btn-pill-toggle" data-i18n="ai.save_schedule_btn">Save</button>
+                    </div>
+                    <div id="ai-schedule-zone" class="aik-xs-muted" hidden></div>
+                  </div>
+
+                  <!-- 3. Merged Standby-Safe Auto-Learn Policy -->
+                  <label style="display:flex; align-items:center; gap:8px; padding:9px 12px; border-radius:8px; background:var(--lt-b-0e1c1e99, rgba(14,28,30,0.6)); border:1px solid rgba(51,205,184,0.28); font-size:var(--kb-fs-xs); font-weight:600; color:var(--lt-t-6ee7b7ff, #6ee7b7); cursor:pointer;" title="Never wakes sleeping drives; defers sleeping disks and automatically learns when they spin up" data-i18n-title="ui.never_wakes_sleeping_drives_defers">
+                    <input type="checkbox" id="ai-index-respect-standby" checked />
+                    <span aria-hidden="true">⚡</span> <span data-i18n="ai.respect_standby_label">Kib does not wake drives to read your files</span>
+                  </label>
+
+                  <!-- 5. Photo captions with a local vision model (AI-14) -->
+                  <label style="display:flex; align-items:center; flex-wrap:wrap; gap:8px; padding:9px 12px; border-radius:8px; background:var(--lt-b-0e1c1e99, rgba(14,28,30,0.6)); border:1px solid var(--kb-line-12); font-size:var(--kb-fs-xs); font-weight:600; color:var(--kb-text-soft);">
+                    <span data-i18n="ai.vision_label">Describe photos and read their text</span>
+                    <select id="ai-vision-captions-select" class="tz-select-input aix-xs-box" data-i18n-aria-label="ai.vision_label" aria-label="Describe photos and read their text">
+                      <option value="auto" data-i18n="ai.vision_auto">When the NAS is idle</option>
+                      <option value="off" data-i18n="ai.vision_off">Off</option>
+                    </select>
+                    <span class="aix-xs-muted" id="ai-vision-status"></span>
+                  </label>
+
+                  <!-- 6. Optional reranker (AI-13) -->
+                  <form id="ai-rerank-form" class="kb-form kb-box">
+                    <span class="aix-xs-semi-soft" data-i18n="ai.rerank_label">Reranker (optional, OVMS / TEI / Infinity)</span>
+                    <input id="ai-rerank-endpoint" class="tz-select-input" type="url" placeholder="http://kiboto-ovms:8000/v3/rerank" data-i18n-aria-label="ai.rerank_endpoint" aria-label="Reranker URL" />
+                    <input id="ai-rerank-model" class="tz-select-input" type="text" placeholder="bge-reranker-v2-m3" data-i18n-aria-label="ai.rerank_model" aria-label="Reranker model" />
+                    <button type="submit" class="btn-pill-toggle" data-i18n="sso.save">Save</button>
+                  </form>
+                  <!-- 8. Optional photo search by meaning (B14, contrib/openvino-clip) -->
+                  <form id="ai-photo-vector-form" class="kb-form kb-box">
+                    <span class="ai-form-label" data-i18n="ai.photo_vector_label">Photo search by meaning (optional, contrib/openvino-clip with SigLIP 2)</span>
+                    <input id="ai-photo-vector-host" class="tz-select-input" type="url" placeholder="http://kiboto-clip:11436" data-i18n-aria-label="ai.photo_vector_host" aria-label="Photo vector server URL" />
+                    <span id="ai-photo-vector-progress" class="ai-form-check"></span>
+                    <button type="submit" class="btn-pill-toggle" data-i18n="sso.save">Save</button>
+                  </form>
+                  <!-- 7. Optional speech to text for voice memos and videos (COMP-03) -->
+                  <form id="ai-transcribe-form" class="kb-form kb-box">
+                    <span class="ai-form-label" data-i18n="ai.transcribe_label">Speech to text (optional, a Whisper server with the OpenAI audio API)</span>
+                    <input id="ai-transcribe-endpoint" class="tz-select-input" type="url" placeholder="http://kiboto-ovms:8000/v3" data-i18n-aria-label="ai.transcribe_endpoint" aria-label="Speech server URL" />
+                    <input id="ai-transcribe-model" class="tz-select-input" type="text" placeholder="whisper-base" data-i18n-aria-label="ai.transcribe_model" aria-label="Speech model" />
+                    <label class="ai-form-check"><input id="ai-transcribe-video" type="checkbox" /> <span data-i18n="ai.transcribe_video">Videos too, not only voice memos and other audio</span></label>
+                    <button type="submit" class="btn-pill-toggle" data-i18n="sso.save">Save</button>
+                  </form>
+                </div>
+              </div>
+                <section id="kib-model-choice" class="kib-section" aria-live="polite"></section>
+                <div id="ai-llm-recommendations-section" style="background:var(--lt-b-0e1c1e80, rgba(14,28,30,0.5)); border:1px solid rgba(99,102,241,0.35); border-radius:10px; padding:14px;">
                 <div class="aix-row-box">
                   <div>
                     <div class="aix-row-fs13-bold-strong">
@@ -3835,222 +4045,7 @@
                 <!-- Compact 2-Column Hardware-Matched & Hugging Face LLM Rows -->
                 <div class="aix-grid-2" id="ai-llm-recommendations-grid"></div>
               </div>
-
-              <div class="kb-card kb-card--boxed ai-config-card">
-                <div class="ai-config-card-title" data-i18n="ai.config_history_title">Conversation history</div>
-                  <!-- 4. Conversation retention (AI-20) -->
-                  <label style="display:flex; align-items:center; gap:8px; padding:9px 12px; border-radius:8px; background:var(--lt-b-0e1c1e99, rgba(14,28,30,0.6)); border:1px solid var(--kb-line-12); font-size:var(--kb-fs-xs); font-weight:600; color:var(--kb-text-soft);">
-                    <span data-i18n="ai.retention_label">Delete chats not used for</span>
-                    <select id="ai-conversation-retention-select" class="tz-select-input aix-xs-box" aria-label="Chat retention" data-i18n-aria-label="ui.chat_retention">
-                      <option value="0" data-i18n="ai.retention_forever">Keep forever</option>
-                      <option value="7">7 days</option>
-                      <option value="30">30 days</option>
-                      <option value="90">90 days</option>
-                      <option value="365">1 year</option>
-                    </select>
-                    <span class="aix-xs-muted" data-i18n="ai.retention_hint">Pinned chats are kept.</span>
-                  </label>
-
-              </div>
-              <div class="ai-config-group" role="group" aria-labelledby="ai-config_group_rag">
-                <h3 class="ai-config-group-title" id="ai-config_group_rag" data-i18n="ai.config_group_rag">AI search</h3>
-                <p class="ai-config-group-desc" data-i18n="ai.config_group_rag_desc">Which folders Kib learns from and when, how it reads them, and your photos in Immich.</p>
-              </div>
-              <!-- Section 1 (Top Priority): Service Switch, Learning Scope, Schedule & Standby/Spin-Up Rules -->
-              <div style="background:var(--lt-b-0e1c1e80, rgba(14,28,30,0.5)); border:1px solid rgba(51,205,184,0.3); border-radius:10px; padding:14px; margin-bottom:12px;">
-                <div class="aix-row-box-2">
-                  <div>
-                    <div class="aix-fs13-bold-strong-2" data-i18n="ai.config_policy_title">What Kib reads</div>
-                    <div style="font-size:var(--kb-fs-xs); color:var(--muted,#95a8ab); margin-top:2px;" data-i18n="ai.config_policy_desc">Choose whether and what Kib reads. Switched off, Kib keeps what it knows, so chat and search still work.</div>
-                  </div>
-                  <label style="display:inline-flex; align-items:center; gap:8px; padding:5px 12px; border-radius:999px; background:rgba(99,102,241,0.18); border:1px solid rgba(99,102,241,0.45); font-size:var(--kb-fs-xs); font-weight:700; color:var(--lt-t-e0e7ffff, #e0e7ff); cursor:pointer;" title="Enable or disable Kib service globally. Turning off pauses unfinished learning tasks." data-i18n-title="ui.enable_or_disable_kib_service">
-                    <input type="checkbox" id="ai-master-enable-toggle" checked style="accent-color:#6366f1; cursor:pointer;" />
-                    <span data-i18n="ai.service_switch_label">Kib reads my files</span>
-                  </label>
-                </div>
-
-                <div class="aix-grid-3">
-                  <!-- 1. Learning Scope -->
-                  <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; padding:9px 12px; border-radius:8px; background:var(--lt-b-0e1c1e99, rgba(14,28,30,0.6)); border:1px solid var(--kb-line-7);">
-                    <label class="aix-xs-bold" for="ai-learning-scope-mode" data-i18n="ai.learning_scope_label">Learning Scope:</label>
-                    <select id="ai-learning-scope-mode" class="tz-select-input aix-xs-box-2">
-                      <option value="include" data-i18n="ai.scope_mode_include">Specify Watched Folders</option>
-                      <option value="all" data-i18n="ai.scope_mode_all">Learn All Files (Auto Shares)</option>
-                      <option value="exclude" data-i18n="ai.scope_mode_exclude">Exclude Specified Folders</option>
-                    </select>
-                  </div>
-
-                  <!-- 2. Scheduled Learning Window -->
-                  <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; padding:9px 12px; border-radius:8px; background:var(--lt-b-0e1c1e99, rgba(14,28,30,0.6)); border:1px solid var(--kb-line-7);">
-                    <label class="aix-row-xs-bold">
-                      <input type="checkbox" id="ai-schedule-enabled-toggle" />
-                      <span data-i18n="ai.schedule_learning_label">Schedule Learning Period:</span>
-                    </label>
-                    <div class="aix-row-8">
-                      <input type="time" id="ai-schedule-start-input" aria-label="Learning schedule start time" data-i18n-aria-label="ui.learning_schedule_start_time" value="01:00" class="tz-select-input aix-xs-box-3" />
-                      <span class="aix-xs-muted-2">to</span>
-                      <input type="time" id="ai-schedule-end-input" aria-label="Learning schedule end time" data-i18n-aria-label="ui.learning_schedule_end_time" value="06:00" class="tz-select-input aix-xs-box-3" />
-                      <button type="button" id="btn-ai-save-schedule" class="btn-pill-toggle" data-i18n="ai.save_schedule_btn">Save</button>
-                    </div>
-                    <div id="ai-schedule-zone" class="aik-xs-muted" hidden></div>
-                  </div>
-
-                  <!-- 3. Merged Standby-Safe Auto-Learn Policy -->
-                  <label style="display:flex; align-items:center; gap:8px; padding:9px 12px; border-radius:8px; background:var(--lt-b-0e1c1e99, rgba(14,28,30,0.6)); border:1px solid rgba(51,205,184,0.28); font-size:var(--kb-fs-xs); font-weight:600; color:var(--lt-t-6ee7b7ff, #6ee7b7); cursor:pointer;" title="Never wakes sleeping drives; defers sleeping disks and automatically learns when they spin up" data-i18n-title="ui.never_wakes_sleeping_drives_defers">
-                    <input type="checkbox" id="ai-index-respect-standby" checked />
-                    <span aria-hidden="true">⚡</span> <span data-i18n="ai.respect_standby_label">Kib does not wake drives to read your files</span>
-                  </label>
-
-                  <!-- 5. Photo captions with a local vision model (AI-14) -->
-                  <label style="display:flex; align-items:center; flex-wrap:wrap; gap:8px; padding:9px 12px; border-radius:8px; background:var(--lt-b-0e1c1e99, rgba(14,28,30,0.6)); border:1px solid var(--kb-line-12); font-size:var(--kb-fs-xs); font-weight:600; color:var(--kb-text-soft);">
-                    <span data-i18n="ai.vision_label">Describe photos and read their text</span>
-                    <select id="ai-vision-captions-select" class="tz-select-input aix-xs-box" data-i18n-aria-label="ai.vision_label" aria-label="Describe photos and read their text">
-                      <option value="auto" data-i18n="ai.vision_auto">When the NAS is idle</option>
-                      <option value="off" data-i18n="ai.vision_off">Off</option>
-                    </select>
-                    <span class="aix-xs-muted" id="ai-vision-status"></span>
-                  </label>
-
-                  <!-- 6. Optional reranker (AI-13) -->
-                  <form id="ai-rerank-form" class="kb-form kb-box">
-                    <span class="aix-xs-semi-soft" data-i18n="ai.rerank_label">Reranker (optional, OVMS / TEI / Infinity)</span>
-                    <input id="ai-rerank-endpoint" class="tz-select-input" type="url" placeholder="http://kiboto-ovms:8000/v3/rerank" data-i18n-aria-label="ai.rerank_endpoint" aria-label="Reranker URL" />
-                    <input id="ai-rerank-model" class="tz-select-input" type="text" placeholder="bge-reranker-v2-m3" data-i18n-aria-label="ai.rerank_model" aria-label="Reranker model" />
-                    <button type="submit" class="btn-pill-toggle" data-i18n="sso.save">Save</button>
-                  </form>
-                  <!-- 8. Optional photo search by meaning (B14, contrib/openvino-clip) -->
-                  <form id="ai-photo-vector-form" class="kb-form kb-box">
-                    <span class="ai-form-label" data-i18n="ai.photo_vector_label">Photo search by meaning (optional, contrib/openvino-clip with SigLIP 2)</span>
-                    <input id="ai-photo-vector-host" class="tz-select-input" type="url" placeholder="http://kiboto-clip:11436" data-i18n-aria-label="ai.photo_vector_host" aria-label="Photo vector server URL" />
-                    <span id="ai-photo-vector-progress" class="ai-form-check"></span>
-                    <button type="submit" class="btn-pill-toggle" data-i18n="sso.save">Save</button>
-                  </form>
-                  <!-- 7. Optional speech to text for voice memos and videos (COMP-03) -->
-                  <form id="ai-transcribe-form" class="kb-form kb-box">
-                    <span class="ai-form-label" data-i18n="ai.transcribe_label">Speech to text (optional, a Whisper server with the OpenAI audio API)</span>
-                    <input id="ai-transcribe-endpoint" class="tz-select-input" type="url" placeholder="http://kiboto-ovms:8000/v3" data-i18n-aria-label="ai.transcribe_endpoint" aria-label="Speech server URL" />
-                    <input id="ai-transcribe-model" class="tz-select-input" type="text" placeholder="whisper-base" data-i18n-aria-label="ai.transcribe_model" aria-label="Speech model" />
-                    <label class="ai-form-check"><input id="ai-transcribe-video" type="checkbox" /> <span data-i18n="ai.transcribe_video">Videos too, not only voice memos and other audio</span></label>
-                    <button type="submit" class="btn-pill-toggle" data-i18n="sso.save">Save</button>
-                  </form>
-                </div>
-              </div>
-
-              <!-- Section 2: Watched Folders, Discovered NAS Shares, Sync Transport & Learning Results -->
-              <div style="background:var(--lt-b-0e1c1e73, rgba(14,28,30,0.45)); border:1px solid var(--kb-line-10); border-radius:10px; padding:14px; display:flex; flex-direction:column; gap:12px; margin-bottom:12px;">
-                <div class="aix-row-9">
-                  <div>
-                    <div class="aix-fs13-bold-strong-3"><span aria-hidden="true">📁</span> <span data-i18n="ai.index_folder_title">Kib can read these folders</span></div>
-                    <p style="font-size:var(--kb-fs-xs); color:var(--muted,#95a8ab); margin:0;" data-i18n="ai.index_folder_desc" hidden>Choose which NAS shares Kib learns from. Files on sleeping drives are learned when the drive spins up.</p>
-                  </div>
-                  <!-- Sync Transport Controls + Learning Results Button -->
-                  <div class="aix-row-6">
-                    <button type="button" id="btn-ai-sync-watched" class="btn-pill-toggle" style="background: rgba(51,205,184,0.22); border: 1px solid rgba(51,205,184,0.5); color: var(--kb-text-strong);">
-                      <span aria-hidden="true">🔄</span> <span data-i18n="ai.sync_watched_btn">Sync Watched Folders</span>
-                    </button>
-                    <button type="button" id="btn-ai-index-pause" class="btn-pill-toggle" style="background: rgba(245,158,11,0.18); border: 1px solid rgba(245,158,11,0.45); color: var(--kb-text-warn);">
-                      <span aria-hidden="true">⏸</span> <span data-i18n="ai.pause_sync">Pause</span>
-                    </button>
-                    <button type="button" id="btn-ai-index-resume" class="btn-pill-toggle" style="background: rgba(51,205,184,0.2); border: 1px solid rgba(51,205,184,0.5); color: var(--kb-text-ok);">
-                      <span>▶</span> <span data-i18n="ai.resume_sync">Resume</span>
-                    </button>
-                    <button type="button" id="btn-ai-index-stop" class="btn-pill-toggle is-danger">
-                      <span aria-hidden="true">⏹</span> <span data-i18n="ai.stop_sync">Stop</span>
-                    </button>
-                    <button type="button" id="btn-ai-learning-results" class="btn-pill-toggle" style="background: rgba(99,102,241,0.16); border: 1px solid rgba(99,102,241,0.4); color: var(--lt-t-c7d2feff, #c7d2fe);" title="View AI Learning Results (Succeeded / Failed / Deferred files)" data-i18n-title="ui.view_ai_learning_results_succeeded">
-                      <span aria-hidden="true">📊</span> <span data-i18n="ai.learning_results_btn">Learning Results</span>
-                    </button>
-                    <button type="button" id="btn-ai-in-place-reindex" class="btn-pill-toggle" style="background: rgba(34,197,94,0.18); border: 1px solid rgba(34,197,94,0.45); color: var(--lt-t-4ade80ff, #4ade80);" title="Re-embed all existing document chunks on SSD in-place with zero disk wakeups" data-i18n-title="ui.re_embed_all_existing_document">
-                      <span aria-hidden="true">🔄</span> <span data-i18n="ai.btn_reindex">In-Place Re-index</span>
-                    </button>
-                    <button type="button" id="btn-ai-flush-index" class="btn-pill-toggle is-danger" title="Delete what AI search has learned and start again" data-i18n-title="ui.flush_existing_rag_index_vector">
-                      <span aria-hidden="true">🗑️</span> <span data-i18n="ai.flush_index_btn">Flush Index</span>
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Live Sync Progress & Disk Standby Banner -->
-                <div id="ai-sync-progress-banner" style="padding:9px 12px; border-radius:8px; background:var(--lt-b-0e1c1ea6, rgba(14,28,30,0.65)); border:1px solid rgba(79,216,196,0.22); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; font-size:var(--kb-fs-xs);">
-                  <div class="aix-row-3">
-                    <span id="ai-index-sync-state-pill" style="padding:2px 8px; border-radius:999px; font-size:var(--kb-fs-xs); font-weight:700; background:rgba(149,168,171,0.18); color:var(--kb-text);">IDLE</span>
-                    <span class="aix-xs-soft-2" id="ai-index-current-path" data-sample>—</span>
-                  </div>
-                  <div id="ai-index-progress-counters" style="color:var(--muted,#95a8ab); font-size:var(--kb-fs-xs);">
-                    <span data-i18n="ai.stat_indexed">Indexed:</span> <strong class="aix-ok" id="ai-prog-indexed">0</strong> • <span data-i18n="ai.prog_unchanged">Unchanged:</span> <strong class="aix-soft" id="ai-prog-unchanged">0</strong> • <span data-i18n="ai.prog_deferred">Deferred (standby):</span> <strong class="aix-warn" id="ai-prog-deferred">0</strong>
-                  </div>
-                </div>
-
-                <!-- Kib Learning Results & Failed Files Panel (Toggled inline) -->
-                <div id="ai-learning-results-panel" style="display:none; background:var(--lt-b-0e1c1ebf, rgba(14,28,30,0.75)); border:1px solid rgba(99,102,241,0.45); border-radius:8px; padding:12px;">
-                  <div class="aix-row-10">
-                    <div class="aix-xs-bold-strong"><span aria-hidden="true">📊</span> <span data-i18n="mw.kib_learning_results">Kib Learning Results</span></div>
-                    <div class="aix-row-11">
-                      <button type="button" id="btn-ai-relearn-failed" class="btn-pill-toggle is-small" style="background: rgba(99,102,241,0.25); border: 1px solid rgba(99,102,241,0.55); color: var(--kb-text-strong);">
-                        <span aria-hidden="true">🔁</span> <span data-i18n="ai.relearn_failed_btn">Relearn Failed Files</span>
-                      </button>
-                      <button type="button" id="btn-ai-close-learning-results" class="btn-pill-toggle is-small">✕</button>
-                    </div>
-                  </div>
-                  <div class="aix-grid-4">
-                    <div style="padding:8px 10px; border-radius:6px; background:rgba(34,197,94,0.12); border:1px solid rgba(34,197,94,0.3); display:flex; justify-content:space-between; align-items:center;">
-                      <span style="font-size:var(--kb-fs-xs); color:var(--lt-t-86efacff, #86efac); font-weight:700;" data-i18n="mw.succeeded">✓ Succeeded</span>
-                      <strong id="ai-learn-succeeded-count" style="font-size:14px; color:var(--lt-t-4ade80ff, #4ade80);">0</strong>
-                    </div>
-                    <div style="padding:8px 10px; border-radius:6px; background:rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.3); display:flex; justify-content:space-between; align-items:center;">
-                      <span style="font-size:var(--kb-fs-xs); color:var(--lt-t-fca5a5ff, #fca5a5); font-weight:700;" data-i18n="mw.failed">✕ Failed</span>
-                      <strong class="aix-fs14" id="ai-learn-failed-count">0</strong>
-                    </div>
-                    <div style="padding:8px 10px; border-radius:6px; background:rgba(245,158,11,0.12); border:1px solid rgba(245,158,11,0.3); display:flex; justify-content:space-between; align-items:center;">
-                      <span style="font-size:var(--kb-fs-xs); color:var(--lt-t-fde68aff, #fde68a); font-weight:700;"><span aria-hidden="true">💤</span> <span data-i18n="mw.deferred_standby">Deferred (Standby)</span></span>
-                      <strong class="aix-fs14-warn" id="ai-learn-deferred-count">0</strong>
-                    </div>
-                  </div>
-                  <div class="aix-xs-soft-3" id="ai-learn-failed-list"></div>
-                </div>
-
-                <!-- Unified Watched Folders Multi-Select Dropdown Checklist -->
-                <div class="aix-col" id="ai-watched-folders-section">
-                  <!-- AI 4: the always-open folder list with words; the dropdown and chips below stay hidden -->
-                  <div id="kib-folders-mount" class="kibf"></div>
-                  <div class="aix-row-12" hidden>
-                    <span class="aix-xs-bold-accent" data-i18n="ai.watched_folders_label">Watched Folders (Click Dropdown to Check/Uncheck Shares for RAG)</span>
-                    <span style="font-size:var(--kb-fs-xs); color:var(--muted,#95a8ab);" data-i18n="ai.watched_folders_hint">Tick a folder to let AI search read it; untick it to stop.</span>
-                  </div>
-
-                  <div class="aix-row-13" hidden>
-                    <div class="aix-grow" id="ai-watched-folders-dropdown-container">
-                      <button type="button" id="btn-ai-watched-folders-dropdown" aria-expanded="false" style="width:100%; min-height:38px; padding:6px 12px; border-radius:8px; background:var(--lt-b-0e1c1ed9, rgba(14,28,30,0.85)); border:1px solid rgba(79,216,196,0.42); color:var(--lt-t-f5f9f9ff, #f5f9f9); font-size:var(--kb-fs-xs); display:flex; justify-content:space-between; align-items:center; gap:10px; cursor:pointer; text-align:left;">
-                        <div class="aix-row-14">
-                          <span aria-hidden="true">📁</span>
-                          <span class="aix-bold" id="ai-watched-dropdown-summary" data-sample>Select Watched Folders for RAG...</span>
-                        </div>
-                        <div class="aix-row-15">
-                          <span id="ai-watched-dropdown-count-badge" style="font-size:var(--kb-fs-xs); font-weight:800; padding:2px 8px; border-radius:999px; background:rgba(51,205,184,0.2); border:1px solid rgba(51,205,184,0.45); color:var(--kb-text-ok);" data-sample>—</span>
-                          <span class="aix-xs-accent" id="ai-watched-dropdown-caret">▾</span>
-                        </div>
-                      </button>
-
-                      <!-- Dropdown Menu: List of all available + watched folders with in-place check/uncheck -->
-                      <div id="ai-watched-folders-dropdown-menu" style="display:none; position:absolute; top:calc(100% + 4px); left:0; right:0; z-index:40; max-height:260px; overflow-y:auto; border-radius:9px; background:var(--lt-b-0b1a1dfa, rgba(11,26,29,0.98)); border:1px solid rgba(79,216,196,0.45); box-shadow:0 12px 28px rgba(0,0,0,0.65); padding:6px; flex-direction:column; gap:4px;">
-                        <div class="aix-col-2" id="ai-discovered-shares-list"></div>
-                      </div>
-                    </div>
-
-                    <button type="button" id="btn-ai-run-index" class="btn-pill-toggle" style="height:38px; padding:0 16px; font-size:var(--kb-fs-xs); font-weight:700; background:rgba(51,205,184,0.22); border:1px solid rgba(51,205,184,0.5); color:var(--kb-text-strong); border-radius:8px; cursor:pointer; white-space:nowrap; flex-shrink:0;" title="Index configured watched folders now (Standby Safe)" data-i18n-title="ui.index_configured_watched_folders_now">
-                      <span aria-hidden="true">🚀</span> <span data-i18n="ai.run_index_btn">Index Path Now</span>
-                    </button>
-                  </div>
-
-                  <!-- Compact active checked chips summary -->
-                  <div class="aix-row-16" id="ai-watched-folders-list" hidden></div>
-
-                  <div id="ai-index-run-feedback" style="font-size:var(--kb-fs-xs); color:var(--ok2,#33cdb8);"></div>
-                  <div id="ai-index-db-summary" style="font-size:var(--kb-fs-xs); color:var(--muted,#95a8ab); display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:4px; padding-top:6px; border-top:1px solid var(--kb-line-6);"></div>
-                </div>
-              </div>
-
-              <!-- Section 4: Embedding Model & Matryoshka Vector Index Scaling (Google DeepMind EmbeddingGemma 2) -->
-              <div style="background:var(--card); border:1px solid rgba(51,205,184,0.3); border-radius:10px; padding:14px; margin-top:12px;">
+                <div style="background:var(--card); border:1px solid rgba(51,205,184,0.3); border-radius:10px; padding:14px; margin-top:12px;">
                 <div class="aix-row-box-2">
                   <div>
                     <div class="aix-fs13-bold-strong-2"><span aria-hidden="true">🧬</span> <span data-i18n="mw.search_index_model_and_size">Search index: model and size</span></div>
@@ -4124,14 +4119,27 @@
                   </div>
                 </div>
               </div>
-              <section class="immich-card" aria-labelledby="ai-pack-title" hidden>
+                <!-- How Your Selected LLM Is Leveraged (Moved from Chatbot to AI Configuration) -->
+                <div class="ai-chat-welcome-card" style="padding:12px 14px; border-radius:10px; background:rgba(51,205,184,0.08); border:1px solid rgba(51,205,184,0.28); font-size:var(--kb-fs-xs); color:var(--kb-text); line-height:1.5; margin-bottom:12px;">
+                <div class="aix-row-bold-strong">
+                  <span aria-hidden="true">🤖</span>
+                  <span data-i18n="ai.how_llm_leveraged_title">What this model is used for:</span>
+                </div>
+                <ul class="aix-xs-soft">
+                  <li><strong data-i18n="mw.each_answer_says_how_it_was">Each answer says how it was made:</strong> <span data-i18n="mw.each_answer_detail">In AI search and Ask Kib, every reply shows the model, whether the NPU or the GPU ran it, how fast it was, and which tools it used.</span></li>
+                  <li><strong><span aria-hidden="true">🛠️</span> <span data-i18n="mw.it_can_check_this_server_for">It can check this server for you:</span></strong> <span data-i18n="mw.server_check_detail">Ask how busy the processor and memory are, which drives are asleep (it never wakes them), change the fan profile (quiet, balanced, performance), list or restart apps, or find files.</span></li>
+                  <li><strong><span aria-hidden="true">🌐</span> <span data-i18n="mw.it_can_look_things_up_on">It can look things up on the web:</span></strong> <span data-i18n="mw.web_lookup_detail">Ask a general question or paste a link, and it searches Wikipedia and DuckDuckGo and links its sources.</span></li>
+                </ul>
+              </div>
+                <section class="immich-card" aria-labelledby="ai-pack-title" hidden>
                 <h4 id="ai-pack-title" class="immich-title" data-i18n="aipack.title">Private AI pack</h4>
                 <div id="ai-pack-mount"></div>
               </section>
-              <section class="immich-card" aria-labelledby="ai-apps-title" hidden>
+                <section class="immich-card" aria-labelledby="ai-apps-title" hidden>
                 <h4 id="ai-apps-title" class="immich-title" data-i18n="aiapps.title">AI for apps</h4>
                 <div id="ai-apps-mount"></div>
               </section>
+              </details>
             </div>
           </div>
         </div>

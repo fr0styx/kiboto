@@ -19,6 +19,8 @@ import { setIconLabel } from '../../ui/primitives.js';
 import { currentUser } from '../../route-access.js';
 import { renderKibStatusLine } from './kib-status-line.js';
 import { renderKibFolders } from './kib-folders.js';
+import { renderKibPrivacy } from './kib-privacy.js';
+import { renderModelChoice } from './kib-model-choice.js';
 
 // An icon next to translated words: screen readers skip it (UX-35)
 const ico = (e) => `<span aria-hidden="true">${e}</span>`;
@@ -1752,6 +1754,26 @@ export function initAiKnowledgeEngine() {
   }, 300);
 }
 
+/** Draws "Kib answers with" once per opening of the page (AI 6); it redraws itself after a change. */
+export function loadModelChoice() {
+  const mount = document.getElementById('kib-model-choice');
+  if (!mount || mount.dataset.loaded) return;
+  mount.dataset.loaded = '1';
+  renderModelChoice(mount);
+}
+
+/** Fills Kib's Privacy list from the settings, once per opening of the page (AI 4). */
+export async function loadKibPrivacy() {
+  const list = document.getElementById('kib-privacy-list');
+  if (!list || list.dataset.loaded) return;
+  list.dataset.loaded = '1';
+  try {
+    renderKibPrivacy(list, await api.get('/api/ai/config'));
+  } catch {
+    delete list.dataset.loaded; // the next status refresh tries again
+  }
+}
+
 /** What the status line's one button does, per state (AI 4). */
 export function kibStatusActions() {
   return {
@@ -1794,6 +1816,8 @@ export async function fetchAndRenderAiStatus() {
     if (!res) return null;
     renderKibStatusLine(document.getElementById('kib-status-mount'), res, kibStatusActions());
     renderKibFolders(document.getElementById('kib-folders-mount'), res, kibFolderActions());
+    loadKibPrivacy();
+    loadModelChoice();
 
     const hw = res.hardware || res.acceleration || {};
     const stats = res.index_stats || {};
