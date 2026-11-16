@@ -7,7 +7,7 @@ const html = fs.readFileSync(path.resolve(__dirname, '../windows/management-wind
 
 describe('Shared folders: Away from home', () => {
   it('the shares page links to Away from home, a route the router knows', () => {
-    const pane = html.slice(html.indexOf('id="mgmt-pane-storage-shares"'), html.indexOf('id="mgmt-pane-storage-remotes"'));
+    const pane = html.slice(html.indexOf('id="mgmt-pane-storage-shares"'), html.indexOf('<!-- 6. System -->'));
     expect(pane).toContain('id="btn-shares-away" href="#/away"');
     const router = fs.readFileSync(path.resolve(__dirname, '../router.js'), 'utf8');
     expect(router).toContain("away: 'pane-network-wireguard'");

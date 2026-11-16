@@ -34,6 +34,7 @@ export const TABS = [
   ['activity', 'mgmt-pane-events', 'mgmt.subtab_events', 'Event Log', 'sp.kw_t_events', 'log, audit, errors, warnings'],
   ['general', 'mgmt-pane-language', 'mgmt.subtab_language', 'Time, Language & Region', 'sp.kw_t_language', 'language, time zone, clock, date format, region'],
   ['hardware', 'mgmt-pane-hardware-fans', 'settings.tab_fans', 'Fans', 'sp.kw_t_fans', 'fan curve, noise, quiet, cooling, rpm'],
+  ['hardware', 'mgmt-pane-copy', 'hw.tab_card_copies', 'Card copies', 'sp.kw_t_card_copies', 'sd card, camera card, import, copy button'],
   ['hardware', 'mgmt-pane-hardware-led', 'settings.tab_led', 'LED Strip bar', 'sp.kw_t_led', 'led, light bar, colours'],
   ['storage', 'mgmt-pane-chassis-twin', 'mgmt.subtab_disks_chassis', 'Drives', 'sp.kw_t_bays', 'bays, drive health, smart, failing disk, locate'],
   ['storage', 'mgmt-pane-storage-replication', 'mgmt.subtab_replication', 'Replication', 'sp.kw_t_replication', 'replicate, second nas, mirror'],

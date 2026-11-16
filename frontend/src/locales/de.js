@@ -243,7 +243,7 @@ export default {
   "net.bond_mode_desc_4": "Dynamische Link-Aggregation (IEEE 802.3ad LACP): Erfordert einen Switch mit LACP-Unterstützung für hohe Bandbreite.",
   "net.bond_mode_desc_6": "Adaptives Load-Balancing (Balance-ALB): Umfasst TLB und RLB für IPv4-Verkehr ohne spezielle Switch-Unterstützung.",
   "mgmt.network_sec_title": "Netzwerk",
-  "mgmt.storage_title": "Speicher & Laufwerke",
+  "mgmt.storage_title": "Speicher",
   "notif.load_fail": "Fehler beim Laden der Benachrichtigungseinstellungen",
   "notif.badge.active": "Aktiv",
   "notif.badge.disabled": "Deaktiviert",
@@ -7808,5 +7808,7 @@ export default {
   "storage.sum_unknown": "Kiboto konnte gerade nicht jedes Laufwerk prüfen.",
   "storage.sum_ok": "Alle Laufwerke sind in Ordnung.",
   "storage.sum_checked": "Geprüft um {time}",
-  "storage.sum_again": "Erneut prüfen"
+  "storage.sum_again": "Erneut prüfen",
+  "hw.tab_card_copies": "Kartenkopien",
+  "sp.kw_t_card_copies": "SD-Karte, Kamerakarte, Import, Kopiertaste"
 };

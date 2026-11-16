@@ -243,7 +243,7 @@ export default {
   "net.bond_mode_desc_4": "动态链路聚合 (IEEE 802.3ad LACP)：需要交换机支持 LACP，将多个端口聚合为一个高带宽通道并具备自动故障转移。",
   "net.bond_mode_desc_6": "自适应负载均衡 (Balance-ALB)：包含发送与接收负载均衡，无需特定交换机支持。",
   "mgmt.network_sec_title": "网络",
-  "mgmt.storage_title": "存储与硬盘",
+  "mgmt.storage_title": "存储",
   "notif.load_fail": "加载通知设置失败",
   "notif.badge.active": "已启用",
   "notif.badge.disabled": "已禁用",
@@ -7808,5 +7808,7 @@ export default {
   "storage.sum_unknown": "Kiboto 刚才未能检查所有硬盘。",
   "storage.sum_ok": "所有硬盘都正常。",
   "storage.sum_checked": "检查于 {time}",
-  "storage.sum_again": "重新检查"
+  "storage.sum_again": "重新检查",
+  "hw.tab_card_copies": "存储卡复制",
+  "sp.kw_t_card_copies": "SD 卡, 相机卡, 导入, 复制按钮"
 };

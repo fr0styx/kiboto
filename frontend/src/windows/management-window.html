@@ -44,7 +44,7 @@
             <span class="mgmt-sidebar-text" data-i18n="mgmt.sidebar_storage">Storage</span>
             <span class="mgmt-sidebar-badge" id="mgmt-sidebar-storage-badge" style="display:none;" data-sample>Drives</span>
           </button>
-          <button class="mgmt-sidebar-item" data-mgmt-target="mgmt-sec-storage" data-mgmt-pane="mgmt-pane-storage-shares" data-route="shares" title="Shared folders" data-i18n-title="mgmt.sidebar_shared_folders">
+          <button class="mgmt-sidebar-item" data-mgmt-target="mgmt-sec-shares" data-mgmt-pane="mgmt-pane-storage-shares" data-route="shares" title="Shared folders" data-i18n-title="mgmt.sidebar_shared_folders">
             <svg class="mgmt-sidebar-svg"><use href="#i-net"/></svg>
             <span class="mgmt-sidebar-text" data-i18n="mgmt.sidebar_shared_folders">Shared folders</span>
           </button>
@@ -1610,9 +1610,9 @@
                   <svg class="ic" style="width: 14px; height: 14px;"><use href="#i-fan"/></svg>
                   <span data-i18n="settings.tab_fans">Fans</span>
                 </button>
-                <button class="mgmt-inner-tab" role="tab" aria-selected="false" data-tab-target="mgmt-pane-hardware-copy">
+                <button class="mgmt-inner-tab" role="tab" aria-selected="false" data-tab-target="mgmt-pane-hardware-copy" data-tab-panes="mgmt-pane-hardware-copy mgmt-pane-copy">
                   <svg class="ic" style="width: 14px; height: 14px;"><use href="#i-storage"/></svg>
-                  <span data-i18n="settings.tab_buttons">Copy Button</span>
+                  <span data-i18n="hw.tab_card_copies">Card copies</span>
                 </button>
               </div>
             </div>
@@ -1882,6 +1882,40 @@
               </div>
               <div class="mgmt-detail-body">
                 <div id="mgmt-pane-hardware-copy-slot" class="mgmt-hardware-tab-slot"></div>
+              </div>
+            </div>
+
+            <!-- Card copies, beside the Copy button (SET-22 Storage 2, decision ST6) -->
+            <div id="mgmt-pane-copy" class="mgmt-tab-pane" style="display: none;">
+              <div class="mgmt-card-intro" style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  <div class="mgmt-card-intro-title"><svg class="ic"><use href="#i-storage"/></svg> <span data-i18n="mgmt.copy_sec_title">SD card copies</span></div>
+                  <div class="mgmt-card-intro-desc" data-i18n="mgmt.copy_sec_desc">Persistent audit logs of card reader imports with SHA-256 integrity verification.</div>
+                </div>
+                <div style="display:flex; gap:8px;">
+                  <button class="btn-pill-toggle" id="btn-open-copy-drawer" title="Configure Front-Panel Copy Button" data-i18n-title="ui.configure_front_panel_copy_button">⚙️ <span data-i18n="settings.tab_buttons">Configure Button</span></button>
+                  <button class="btn-pill-toggle" id="btn-refresh-copy-history" title="Refresh card copies" data-i18n-title="ui.refresh_ingest_history"><span aria-hidden="true">🔄</span> <span data-i18n="mgmt.refresh">Refresh</span></button>
+                </div>
+              </div>
+              <div class="mgmt-detail-body">
+                <div style="overflow-x:auto; max-height:400px; background:var(--kb-shade-25); border:1px solid var(--kb-line-6); border-radius:8px;">
+                  <table class="copy-history-table">
+                    <thead>
+                      <tr>
+                        <th data-i18n="mgmt.tbl_datetime">Date / Time</th>
+                        <th data-i18n="mgmt.tbl_source">Source</th>
+                        <th data-i18n="mgmt.tbl_dest">Destination</th>
+                        <th data-i18n="mgmt.tbl_files">Files</th>
+                        <th data-i18n="mgmt.tbl_size">Size</th>
+                        <th data-i18n="mgmt.tbl_duration">Duration</th>
+                        <th data-i18n="mgmt.tbl_status">Status & Checksum</th>
+                      </tr>
+                    </thead>
+                    <tbody id="copy-history-tbody">
+                      <tr><td colspan="7" style="text-align:center; color:var(--muted); padding:16px;" data-i18n="mw.loading_copy_history">Loading copy history...</td></tr>
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </div>
@@ -2231,17 +2265,9 @@
                   <svg class="ic" style="width: 14px; height: 14px;"><use href="#i-disk"/></svg>
                   <span data-i18n="mgmt.subtab_disks_chassis">Drives</span>
                 </button>
-                <button class="mgmt-inner-tab" role="tab" aria-selected="false" data-tab-target="mgmt-pane-storage-shares">
-                  <svg class="ic" style="width: 14px; height: 14px;"><use href="#i-storage"/></svg>
-                  <span data-i18n="mgmt.subtab_shares_protocols">Shares & Protocols</span>
-                </button>
                 <button class="mgmt-inner-tab" role="tab" aria-selected="false" data-tab-target="mgmt-pane-storage-remotes">
                   <svg class="ic" style="width: 14px; height: 14px;"><use href="#i-globe"/></svg>
                   <span data-i18n="mgmt.subtab_remotes">Cloud drives</span>
-                </button>
-                <button class="mgmt-inner-tab" role="tab" aria-selected="false" data-tab-target="mgmt-pane-copy">
-                  <svg class="ic" style="width: 14px; height: 14px;"><use href="#i-storage"/></svg>
-                  <span data-i18n="mgmt.subtab_copy">Card copies</span>
                 </button>
                 <button class="mgmt-inner-tab" role="tab" aria-selected="false" data-tab-target="mgmt-pane-storage-disks" style="display:none;">
                   <span data-i18n="mgmt.subtab_disks">Physical Disks Inventory</span>
@@ -2285,50 +2311,6 @@
             </div>
 
             <!-- Sub-tab 3: Network Shares -->
-            <div id="mgmt-pane-storage-shares" class="mgmt-tab-pane" style="display: none;">
-              <div class="mgmt-card-intro sshr-row">
-                <div>
-                  <div class="mgmt-card-intro-title"><svg class="ic"><use href="#i-storage"/></svg> <span data-i18n="shares.page_title">Shared folders</span></div>
-                  <div class="mgmt-card-intro-desc" data-i18n="shares.page_desc">Folders the people at home open from their computers and phones. Each one says who can open it and how to connect.</div>
-                </div>
-                <div class="sshr-row-2">
-                  <span class="mgmt-app-pill" id="mgmt-shares-platform-badge" style="background:var(--lt-b-3bf58b1f, rgba(59,245,139,0.12)); color:var(--lt-t-3bf58bff, #3bf58b);"></span>
-                  <button class="btn-pill-toggle is-primary" id="btn-create-network-share" style="display: none;" title="Create Network Share" data-i18n-title="ui.create_network_share"><span aria-hidden="true">+</span> <span data-i18n="shares.create">Create Share</span></button>
-                </div>
-              </div>
-              <div class="mgmt-detail-body" id="mgmt-storage-shares-mount">
-                <!-- Mounted via fetchAndRenderNetworkShares -->
-              </div>
-              <section class="invite-card" aria-labelledby="ef-title">
-                <h4 id="ef-title" class="invite-title" data-i18n="ef.title">Encrypted folders</h4>
-                <p class="invite-meta" data-i18n="ef.desc">A folder inside a share whose files are stored encrypted. Open it with its password to use it in Files, WebDAV and SFTP; SMB, snapshots and backups only ever see the encrypted files.</p>
-                <div id="encrypted-folders-mount"></div>
-              </section>
-              <section class="invite-card" aria-labelledby="links-card-title">
-                <h4 id="links-card-title" class="invite-title" data-i18n="links.title_all">Links shared from this NAS</h4>
-                <p class="invite-meta" data-i18n="links.card_desc">Links that let people outside your home open a file or folder. Stop the ones that are no longer needed.</p>
-                <button type="button" class="btn-pill-toggle" id="btn-show-shared-links" data-i18n="links.show">Show links</button>
-              </section>
-              <section class="invite-card" aria-labelledby="shares-away-title">
-                <h4 id="shares-away-title" class="invite-title" data-i18n="shares.away_title">Away from home</h4>
-                <p class="invite-meta" data-i18n="shares.away_desc">Open these folders from your phone or laptop anywhere, without opening your router.</p>
-                <a class="btn-pill-toggle" id="btn-shares-away" href="#/away" data-i18n="shares.away_open">Set up Away from home</a>
-              </section>
-              <!-- Other ways to connect, folded at the end (SET-22, Shares 5): SFTP and each service's state -->
-              <details class="shares-advanced" id="shares-advanced">
-                <summary data-i18n="shares.advanced">Other ways to connect: SFTP, and each service's state</summary>
-                <!-- Sharing Protocols Quickbar -->
-                <div class="mgmt-protocol-quickbar sshr-row-box">
-                  <div class="sshr-row-3">
-                    <span style="font-size: var(--kb-fs-sm); font-weight: 600; color: var(--muted, #95a8ab);" data-i18n="mgmt.protocols_status_title">File Sharing Protocols:</span>
-                    <span class="mgmt-app-pill proto-pill" id="proto-pill-smb" data-state="unknown">SMB</span>
-                    <span class="mgmt-app-pill proto-pill" id="proto-pill-sftp" data-state="unknown">SFTP</span>
-                    <span class="mgmt-app-pill proto-pill" id="proto-pill-webdav" data-state="unknown">WebDAV</span>
-                  </div>
-                </div>
-                <div id="shares-sftp-mount"></div>
-              </details>
-            </div>
 
             <!-- Sub-tab 4: Remote & Cloud Storage -->
             <div id="mgmt-pane-storage-remotes" class="mgmt-tab-pane" style="display: none;">
@@ -2380,38 +2362,6 @@
             </div>
 
             <!-- Sub-tab 6: Media Ingest & Checksum History -->
-            <div id="mgmt-pane-copy" class="mgmt-tab-pane" style="display: none;">
-              <div class="mgmt-card-intro" style="display:flex; justify-content:space-between; align-items:center;">
-                <div>
-                  <div class="mgmt-card-intro-title"><svg class="ic"><use href="#i-storage"/></svg> <span data-i18n="mgmt.copy_sec_title">SD card copies</span></div>
-                  <div class="mgmt-card-intro-desc" data-i18n="mgmt.copy_sec_desc">Persistent audit logs of card reader imports with SHA-256 integrity verification.</div>
-                </div>
-                <div style="display:flex; gap:8px;">
-                  <button class="btn-pill-toggle" id="btn-open-copy-drawer" title="Configure Front-Panel Copy Button" data-i18n-title="ui.configure_front_panel_copy_button">⚙️ <span data-i18n="settings.tab_buttons">Configure Button</span></button>
-                  <button class="btn-pill-toggle" id="btn-refresh-copy-history" title="Refresh card copies" data-i18n-title="ui.refresh_ingest_history"><span aria-hidden="true">🔄</span> <span data-i18n="mgmt.refresh">Refresh</span></button>
-                </div>
-              </div>
-              <div class="mgmt-detail-body">
-                <div style="overflow-x:auto; max-height:400px; background:var(--kb-shade-25); border:1px solid var(--kb-line-6); border-radius:8px;">
-                  <table class="copy-history-table">
-                    <thead>
-                      <tr>
-                        <th data-i18n="mgmt.tbl_datetime">Date / Time</th>
-                        <th data-i18n="mgmt.tbl_source">Source</th>
-                        <th data-i18n="mgmt.tbl_dest">Destination</th>
-                        <th data-i18n="mgmt.tbl_files">Files</th>
-                        <th data-i18n="mgmt.tbl_size">Size</th>
-                        <th data-i18n="mgmt.tbl_duration">Duration</th>
-                        <th data-i18n="mgmt.tbl_status">Status & Checksum</th>
-                      </tr>
-                    </thead>
-                    <tbody id="copy-history-tbody">
-                      <tr><td colspan="7" style="text-align:center; color:var(--muted); padding:16px;" data-i18n="mw.loading_copy_history">Loading copy history...</td></tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
 
             <!-- Sub-tab 7: Automated Snapshot Replication Engine -->
             <div id="mgmt-pane-storage-replication" class="mgmt-tab-pane" style="display: none;">
@@ -2470,6 +2420,54 @@
                   </table>
                 </div>
               </div>
+            </div>
+          </div>
+
+          <!-- Shared folders: a section of its own (SET-22 Storage 2) -->
+          <div id="mgmt-sec-shares" class="mgmt-detail-card" style="display: none;">
+            <div id="mgmt-pane-storage-shares" class="mgmt-tab-pane" style="display: block;">
+              <div class="mgmt-card-intro sshr-row">
+                <div>
+                  <div class="mgmt-card-intro-title"><svg class="ic"><use href="#i-storage"/></svg> <span data-i18n="shares.page_title">Shared folders</span></div>
+                  <div class="mgmt-card-intro-desc" data-i18n="shares.page_desc">Folders the people at home open from their computers and phones. Each one says who can open it and how to connect.</div>
+                </div>
+                <div class="sshr-row-2">
+                  <span class="mgmt-app-pill" id="mgmt-shares-platform-badge" style="background:var(--lt-b-3bf58b1f, rgba(59,245,139,0.12)); color:var(--lt-t-3bf58bff, #3bf58b);"></span>
+                  <button class="btn-pill-toggle is-primary" id="btn-create-network-share" style="display: none;" title="Create Network Share" data-i18n-title="ui.create_network_share"><span aria-hidden="true">+</span> <span data-i18n="shares.create">Create Share</span></button>
+                </div>
+              </div>
+              <div class="mgmt-detail-body" id="mgmt-storage-shares-mount">
+                <!-- Mounted via fetchAndRenderNetworkShares -->
+              </div>
+              <section class="invite-card" aria-labelledby="ef-title">
+                <h4 id="ef-title" class="invite-title" data-i18n="ef.title">Encrypted folders</h4>
+                <p class="invite-meta" data-i18n="ef.desc">A folder inside a share whose files are stored encrypted. Open it with its password to use it in Files, WebDAV and SFTP; SMB, snapshots and backups only ever see the encrypted files.</p>
+                <div id="encrypted-folders-mount"></div>
+              </section>
+              <section class="invite-card" aria-labelledby="links-card-title">
+                <h4 id="links-card-title" class="invite-title" data-i18n="links.title_all">Links shared from this NAS</h4>
+                <p class="invite-meta" data-i18n="links.card_desc">Links that let people outside your home open a file or folder. Stop the ones that are no longer needed.</p>
+                <button type="button" class="btn-pill-toggle" id="btn-show-shared-links" data-i18n="links.show">Show links</button>
+              </section>
+              <section class="invite-card" aria-labelledby="shares-away-title">
+                <h4 id="shares-away-title" class="invite-title" data-i18n="shares.away_title">Away from home</h4>
+                <p class="invite-meta" data-i18n="shares.away_desc">Open these folders from your phone or laptop anywhere, without opening your router.</p>
+                <a class="btn-pill-toggle" id="btn-shares-away" href="#/away" data-i18n="shares.away_open">Set up Away from home</a>
+              </section>
+              <!-- Other ways to connect, folded at the end (SET-22, Shares 5): SFTP and each service's state -->
+              <details class="shares-advanced" id="shares-advanced">
+                <summary data-i18n="shares.advanced">Other ways to connect: SFTP, and each service's state</summary>
+                <!-- Sharing Protocols Quickbar -->
+                <div class="mgmt-protocol-quickbar sshr-row-box">
+                  <div class="sshr-row-3">
+                    <span style="font-size: var(--kb-fs-sm); font-weight: 600; color: var(--muted, #95a8ab);" data-i18n="mgmt.protocols_status_title">File Sharing Protocols:</span>
+                    <span class="mgmt-app-pill proto-pill" id="proto-pill-smb" data-state="unknown">SMB</span>
+                    <span class="mgmt-app-pill proto-pill" id="proto-pill-sftp" data-state="unknown">SFTP</span>
+                    <span class="mgmt-app-pill proto-pill" id="proto-pill-webdav" data-state="unknown">WebDAV</span>
+                  </div>
+                </div>
+                <div id="shares-sftp-mount"></div>
+              </details>
             </div>
           </div>
 

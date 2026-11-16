@@ -33,6 +33,12 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Storage opens with one Drives tab**: a sentence from the Overview's own status ("All drives are fine." or
   what needs a look, with Open), then the bays, then the pools on the same page. The cloud tab is "Cloud drives".
 
+#### Changes
+
+- **Storage is about drives**: Shared folders is a page of its own (no Storage tabs above it), and card copies
+  sit with the Copy button on Hardware. Storage keeps Drives and Cloud drives and is called "Storage".
+  Old links and desktop shortcuts open the new places.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

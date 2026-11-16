@@ -215,7 +215,7 @@ export default {
   "net.bond_mode_desc_4": "Dynamic Link Aggregation (IEEE 802.3ad LACP): Requires a switch that supports LACP to aggregate multiple ports into a single high-bandwidth channel with automatic failover.",
   "net.bond_mode_desc_6": "Adaptive Load Balancing (Balance-ALB): Includes balance-tlb plus receive load balancing (rlb) for IPV4 traffic without requiring special switch support.",
   "mgmt.network_sec_title": "Network",
-  "mgmt.storage_title": "Storage & Disks",
+  "mgmt.storage_title": "Storage",
   "notif.load_fail": "Failed to load notification settings",
   "notif.badge.active": "Active",
   "notif.badge.disabled": "Disabled",
@@ -7808,5 +7808,7 @@ export default {
   "storage.sum_unknown": "Kiboto couldn't check every drive just now.",
   "storage.sum_ok": "All drives are fine.",
   "storage.sum_checked": "Checked at {time}",
-  "storage.sum_again": "Check again"
+  "storage.sum_again": "Check again",
+  "hw.tab_card_copies": "Card copies",
+  "sp.kw_t_card_copies": "sd card, camera card, import, copy button"
 };

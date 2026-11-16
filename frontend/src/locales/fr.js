@@ -253,7 +253,7 @@ export default {
   "net.bond_mode_desc_4": "Agrégation de liens dynamique (IEEE 802.3ad LACP) : Nécessite un commutateur compatible LACP.",
   "net.bond_mode_desc_6": "Équilibrage de charge adaptatif (Balance-ALB) : Comprend l'équilibrage d'émission et de réception sans commutateur dédié.",
   "mgmt.network_sec_title": "Réseau",
-  "mgmt.storage_title": "Stockage et disques",
+  "mgmt.storage_title": "Stockage",
   "notif.load_fail": "Échec du chargement des paramètres de notification",
   "notif.badge.active": "Actif",
   "notif.badge.disabled": "Désactivé",
@@ -7808,5 +7808,7 @@ export default {
   "storage.sum_unknown": "Kiboto n'a pas pu vérifier tous les disques pour l'instant.",
   "storage.sum_ok": "Tous les disques vont bien.",
   "storage.sum_checked": "Vérifié à {time}",
-  "storage.sum_again": "Vérifier à nouveau"
+  "storage.sum_again": "Vérifier à nouveau",
+  "hw.tab_card_copies": "Copies de cartes",
+  "sp.kw_t_card_copies": "carte SD, carte d'appareil photo, import, bouton de copie"
 };

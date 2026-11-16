@@ -112,15 +112,15 @@ describe('Mission Control Navigation Restructure & Hardware Agnosticism', () => 
 
     // Media Ingest Re-homing to Storage & Chassis
     expect(SUBPANE_MAP['mgmt-sec-copy']).toEqual({
-      section: 'mgmt-sec-storage',
+      section: 'mgmt-sec-hardware', // with the Copy button (SET-22, ST6)
       pane: 'mgmt-pane-copy'
     });
     expect(SUBPANE_MAP['mgmt-pane-copy']).toEqual({
-      section: 'mgmt-sec-storage',
+      section: 'mgmt-sec-hardware',
       pane: 'mgmt-pane-copy'
     });
     expect(SUBPANE_MAP['mgmt-pane-storage-ingest']).toEqual({
-      section: 'mgmt-sec-storage',
+      section: 'mgmt-sec-hardware',
       pane: 'mgmt-pane-copy'
     });
   });
@@ -271,7 +271,7 @@ describe('Mission Control Navigation Restructure & Hardware Agnosticism', () => 
     // Pillar 2: Storage & Disks
     expect(SUBPANE_MAP['storage']).toEqual({ section: 'mgmt-sec-storage', pane: 'mgmt-pane-chassis-twin' });
     expect(SUBPANE_MAP['mgmt-sec-storage']).toEqual({ section: 'mgmt-sec-storage', pane: 'mgmt-pane-chassis-twin' });
-    expect(SUBPANE_MAP['mgmt-pane-storage-shares']).toEqual({ section: 'mgmt-sec-storage', pane: 'mgmt-pane-storage-shares' });
+    expect(SUBPANE_MAP['mgmt-pane-storage-shares']).toEqual({ section: 'mgmt-sec-shares', pane: 'mgmt-pane-storage-shares' }); // its own section (SET-22)
     expect(SUBPANE_MAP['mgmt-pane-storage-disks']).toEqual({ section: 'mgmt-sec-storage', pane: 'mgmt-pane-storage-disks' });
 
     // Pillar 3: Containers & Apps

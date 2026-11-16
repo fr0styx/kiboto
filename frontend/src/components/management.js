@@ -76,13 +76,14 @@ export const SUBPANE_MAP = {
   'mgmt-pane-pools': { section: 'mgmt-sec-storage', pane: 'mgmt-pane-storage-topo' },
   'storage-pools': { section: 'mgmt-sec-storage', pane: 'mgmt-pane-storage-topo' },
   'mgmt-pane-storage-topo': { section: 'mgmt-sec-storage', pane: 'mgmt-pane-storage-topo' },
-  'mgmt-pane-storage-shares': { section: 'mgmt-sec-storage', pane: 'mgmt-pane-storage-shares' },
+  'mgmt-pane-storage-shares': { section: 'mgmt-sec-shares', pane: 'mgmt-pane-storage-shares' },
+  'mgmt-sec-shares': { section: 'mgmt-sec-shares', pane: 'mgmt-pane-storage-shares' }, // its own section (SET-22)
   'mgmt-pane-storage-remotes': { section: 'mgmt-sec-storage', pane: 'mgmt-pane-storage-remotes' },
   'mgmt-pane-storage-disks': { section: 'mgmt-sec-storage', pane: 'mgmt-pane-storage-disks' },
-  'mgmt-sec-copy': { section: 'mgmt-sec-storage', pane: 'mgmt-pane-copy' },
-  'mgmt-pane-copy': { section: 'mgmt-sec-storage', pane: 'mgmt-pane-copy' },
-  'mgmt-pane-storage-ingest': { section: 'mgmt-sec-storage', pane: 'mgmt-pane-copy' },
-  'mgmt-sec-ingest': { section: 'mgmt-sec-storage', pane: 'mgmt-pane-copy' },
+  'mgmt-sec-copy': { section: 'mgmt-sec-hardware', pane: 'mgmt-pane-copy' },
+  'mgmt-pane-copy': { section: 'mgmt-sec-hardware', pane: 'mgmt-pane-copy' },
+  'mgmt-pane-storage-ingest': { section: 'mgmt-sec-hardware', pane: 'mgmt-pane-copy' },
+  'mgmt-sec-ingest': { section: 'mgmt-sec-hardware', pane: 'mgmt-pane-copy' },
   'mgmt-pane-storage-replication': { section: 'mgmt-sec-storage', pane: 'mgmt-pane-storage-replication' },
 
   // --- Pillar 3: Containers & Apps ---
@@ -1124,7 +1125,9 @@ export function initManagement() {
       } else if (targetId === 'mgmt-sec-away') {
         sectionName = t('mgmt.sidebar_away', 'Away from home');
       } else if (targetId === 'mgmt-sec-storage') {
-        sectionName = t('mgmt.storage_title', 'Storage & Disks');
+        sectionName = t('mgmt.storage_title', 'Storage');
+      } else if (targetId === 'mgmt-sec-shares') {
+        sectionName = t('mgmt.sidebar_shared_folders', 'Shared folders');
       } else if (targetId === 'mgmt-sec-ups') {
         sectionName = t('mgmt.sidebar_ups', 'Power & Battery');
         fetchAndRenderUpsTelemetry();
@@ -1529,7 +1532,7 @@ export function initManagement() {
   const btnGotoShares = document.getElementById('btn-goto-storage-shares');
   if (btnGotoShares) {
     btnGotoShares.addEventListener('click', () => {
-      showSection('mgmt-sec-storage', 'mgmt-pane-storage-shares');
+      showSection('mgmt-sec-shares', 'mgmt-pane-storage-shares');
     });
   }
 
