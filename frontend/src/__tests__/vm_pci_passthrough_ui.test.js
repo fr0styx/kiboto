@@ -94,4 +94,12 @@ describe('PCI / GPU passthrough card', () => {
     modal = await openEdit(baseVm(), { ...GROUPS, vfio_available: false });
     expect(modal.querySelector('#vm-edit-pci-list .vm-pci-note.warn').textContent).toContain('/dev/vfio');
   });
+
+  it('is hidden for a machine with no device, and shown for one that has a device (VMs decision 7)', async () => {
+    let modal = await openEdit(baseVm());
+    expect(/** @type {HTMLElement} */ (modal.querySelector('.vm-pci-card')).hidden).toBe(true);
+    modal = await openEdit(baseVm({ pci_passthrough: [{ slot: '00:02.0', name: 'GPU iGPU' }] }));
+    expect(/** @type {HTMLElement} */ (modal.querySelector('.vm-pci-card')).hidden).toBe(false);
+  });
 });
+

@@ -293,6 +293,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Virtual machine downloads that work**: the Windows Server trial is gone from the download list (Microsoft no longer
   serves it at a fixed address), and the VirtIO driver disc has its real size. Every other entry was checked to answer.
 
+#### Changes
+
+- **PCI/GPU passthrough is hidden for now**: it led to a dead end because Kiboto can't yet prepare the device. A
+  machine that already has a device passed through still shows it, so it can be removed.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

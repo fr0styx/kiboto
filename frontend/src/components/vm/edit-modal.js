@@ -342,8 +342,9 @@ export function openVmEditModal(vmId, vmObj = null) {
           <div class="vme-x-4" id="vm-edit-usb-list" style="display: flex;"></div>
         </div>
 
-        <!-- Host PCI / GPU Passthrough (VFIO) -->
-        <div class="vm-config-card vm-pci-card vme-box-2">
+        <!-- Host PCI / GPU Passthrough (VFIO): hidden until Kiboto can prepare the device itself (VMs
+             decision 7); shown only for a machine that already has a device, so it can be removed -->
+        <div class="vm-config-card vm-pci-card vme-box-2"${currentPciDevices.length ? '' : ' hidden'}>
           <div class="vme-x-2">
             <div class="vme-xs-bold-strong" data-i18n="vm.pci_title">${t('vm.pci_title', 'PCI / GPU Passthrough (VFIO)')}</div>
             <div class="vme-xs-muted-3" data-i18n="vm.pci_desc">${t('vm.pci_desc', 'Give the VM exclusive use of a host PCI device such as a GPU. The device must be bound to the vfio-pci driver on the host.')}</div>
