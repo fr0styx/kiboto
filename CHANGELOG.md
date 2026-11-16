@@ -219,6 +219,13 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   your home's internet address, checked every 5 minutes. Off by default; the token is stored encrypted and never
   shown again; nothing is sent while it is off (see the privacy guide).
 
+#### Added
+
+- **Firewall** on the Security page, off by default: choose who can connect (home only, or any address) and which
+  services stay reachable; this page always stays reachable from home. Kiboto loads the rules only where it manages
+  the NAS's network (its own system images); in a container on Unraid or TrueNAS the card says the NAS's own
+  firewall applies.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

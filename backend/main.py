@@ -461,6 +461,16 @@ def _start_home_assistant() -> None:
     home_assistant.start()
 
 
+def _reapply_firewall() -> None:
+    """The host firewall (audit A13) loads again after a restart, where Kiboto manages it."""
+    from backend.services import firewall
+
+    try:
+        firewall.reapply_at_start()
+    except (OSError, RuntimeError) as e:
+        logger.warning("Firewall rules not reloaded: %s", e)
+
+
 def _reapply_tailscale_options() -> None:
     """The owner's two Tailscale switches again once Tailscale is up: its container starts with
     --reset, which cleared them at every restart (SET-16, network report B7)."""
@@ -609,6 +619,7 @@ async def lifespan(app: FastAPI):
     threading.Thread(target=_refresh_share_access, name="ShareAccess", daemon=True).start()
     threading.Thread(target=_reapply_tailscale_options, name="TailscaleOptions", daemon=True).start()
     _start_home_assistant()
+    threading.Thread(target=_reapply_firewall, name="Firewall", daemon=True).start()
     from backend.api.update_watch import watch_loop
 
     update_task = asyncio.create_task(watch_loop())  # the daily update check (Settings decision 5)

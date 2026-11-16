@@ -803,6 +803,7 @@ export function initManagement() {
       loadBackupPane(); // what is folded loads when it is opened (SET-21, B13)
     } else if (paneId === 'mgmt-pane-security') {
       loadSecurityPane(); // an administrator's set-up only for administrators (SET-03)
+      import('./firewall-card.js').then((m) => m.renderFirewallCard()).catch(() => {}); // firewall (audit A13)
     } else if (paneId === 'mgmt-pane-notifications') {
       loadNotificationsPane();
     } else if (paneId === 'mgmt-pane-connections') {

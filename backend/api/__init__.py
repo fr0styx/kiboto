@@ -23,6 +23,7 @@ from backend.api.family_filter import router as family_filter_router
 from backend.api.family_signin import router as family_signin_router
 from backend.api.fans import router as fans_router
 from backend.api.file_versions import router as file_versions_router  # noqa: E402
+from backend.api.firewall import router as firewall_router
 from backend.api.fleet import router as fleet_router
 from backend.api.fs import router as fs_router
 from backend.api.home_assistant import router as home_assistant_router
@@ -163,3 +164,4 @@ __all__ = [
 ]
 api_router.include_router(update_watch_router)  # the daily update check (Settings decision 5)
 api_router.include_router(ddns_router)  # Dynamic DNS, off by default (audit A8)
+api_router.include_router(firewall_router)  # host firewall, off by default (audit A13)

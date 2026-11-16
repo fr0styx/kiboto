@@ -38,7 +38,7 @@ request and response schemas.
 
 <!-- BEGIN generated endpoints: python scripts/api_reference.py --update -->
 
-726 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
+728 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
 
 ### AI Conversation History
 
@@ -623,6 +623,8 @@ request and response schemas.
 
 | Method | Path | Access | What it does |
 | :--- | :--- | :--- | :--- |
+| `GET` | `/api/v1/security/firewall` | `system:view` | Get Firewall |
+| `PUT` | `/api/v1/security/firewall` | `system:config` | Put Firewall |
 | `GET` | `/api/v1/security/ip-blocks` | `system:config` | List Ip Blocks |
 | `POST` | `/api/v1/security/ip-blocks` | `system:config` | Add Ip Block |
 | `DELETE` | `/api/v1/security/ip-blocks/{ip}` | `system:config` | Remove Ip Block |

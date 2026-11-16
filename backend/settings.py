@@ -81,6 +81,12 @@ class Settings:
         "OS_NVME", "nvme1n1", "The NVMe device the operating system runs from, hidden from data disks.", group="Host"
     )
     show_os_disk: bool = _s("SHOW_OS_DISK", True, "Show the operating-system disk in the disk list.", group="Host")
+    owns_firewall: bool = _s(
+        "KIBOTO_OWNS_FIREWALL",
+        False,
+        "Kiboto manages the host firewall (set by Kiboto's own system images; leave off in a container).",
+        group="Host",
+    )
     remotes_path: str = _s("REMOTES_PATH", "/mnt/remotes", "Where cloud and network remotes are mounted.", group="Host")
     host_etc: str = _s("HOST_ETC", "/host/etc", "Where the host's /etc is mounted.", group="Host")
     observer_mode: bool = _s(

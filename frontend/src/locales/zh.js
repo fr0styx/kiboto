@@ -7956,5 +7956,22 @@ export default {
   "ddns.duck_help": "登录 duckdns.org 后显示的令牌。",
   "ddns.save": "保存",
   "ddns.now": "立即更新",
-  "ddns.load_failed": "无法加载动态 DNS：{error}"
+  "ddns.load_failed": "无法加载动态 DNS：{error}",
+  "fw.title": "防火墙",
+  "fw.on": "已开启：只有下面的服务可以访问。",
+  "fw.off": "已关闭：这台 NAS 上的所有服务都可以访问。",
+  "fw.why_host": "Kiboto 在这台 NAS 的容器中运行，因此生效的是 NAS 自己的防火墙（在 Unraid 或 TrueNAS 中设置）。在 Kiboto 自己的系统镜像上，防火墙由 Kiboto 管理。",
+  "fw.why_nft": "缺少 nft 工具，Kiboto 无法在这里加载防火墙规则。",
+  "fw.why_cap": "Kiboto 缺少加载防火墙规则所需的网络权限（NET_ADMIN）。",
+  "fw.who": "谁可以连接",
+  "fw.lan": "仅家中的设备（以及 Tailscale）",
+  "fw.anywhere": "任何地址",
+  "fw.services": "仍可访问的服务",
+  "fw.web_always": "从家中始终可以访问，避免把自己锁在外面",
+  "fw.show_rules": "显示规则",
+  "fw.s_web": "Kiboto（本页面）",
+  "fw.s_ssh": "SSH 登录",
+  "fw.s_smb": "共享文件夹（Windows 和 Mac）",
+  "fw.s_nfs": "共享文件夹（NFS，Linux）",
+  "fw.s_mdns": "在网络中按名称找到这台 NAS"
 };

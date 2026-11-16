@@ -7956,5 +7956,22 @@ export default {
   "ddns.duck_help": "Der Token, der auf duckdns.org nach der Anmeldung angezeigt wird.",
   "ddns.save": "Speichern",
   "ddns.now": "Jetzt aktualisieren",
-  "ddns.load_failed": "Dynamic DNS konnte nicht geladen werden: {error}"
+  "ddns.load_failed": "Dynamic DNS konnte nicht geladen werden: {error}",
+  "fw.title": "Firewall",
+  "fw.on": "An: Nur die Dienste unten sind erreichbar.",
+  "fw.off": "Aus: Jeder Dienst dieses NAS ist erreichbar.",
+  "fw.why_host": "Kiboto läuft auf diesem NAS in einem Container, daher gilt die Firewall des NAS selbst (unter Unraid oder TrueNAS dort einstellen). Auf seinen eigenen Systemabbildern verwaltet Kiboto die Firewall.",
+  "fw.why_nft": "Das Werkzeug nft fehlt, daher kann Kiboto hier keine Firewall-Regeln laden.",
+  "fw.why_cap": "Kiboto fehlt die Netzwerkberechtigung (NET_ADMIN), um Firewall-Regeln zu laden.",
+  "fw.who": "Wer sich verbinden darf",
+  "fw.lan": "Nur Geräte zu Hause (und Tailscale)",
+  "fw.anywhere": "Jede Adresse",
+  "fw.services": "Dienste, die erreichbar bleiben",
+  "fw.web_always": "von zu Hause immer erreichbar, damit Sie sich nicht aussperren",
+  "fw.show_rules": "Regeln anzeigen",
+  "fw.s_web": "Kiboto (diese Seite)",
+  "fw.s_ssh": "SSH-Anmeldung",
+  "fw.s_smb": "Freigegebene Ordner (Windows und Mac)",
+  "fw.s_nfs": "Freigegebene Ordner (NFS, Linux)",
+  "fw.s_mdns": "Dieses NAS im Netzwerk per Name finden"
 };

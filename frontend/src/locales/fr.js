@@ -7956,5 +7956,22 @@ export default {
   "ddns.duck_help": "Le jeton affiché sur duckdns.org une fois connecté.",
   "ddns.save": "Enregistrer",
   "ddns.now": "Mettre à jour",
-  "ddns.load_failed": "Le DNS dynamique n'a pas pu être chargé : {error}"
+  "ddns.load_failed": "Le DNS dynamique n'a pas pu être chargé : {error}",
+  "fw.title": "Pare-feu",
+  "fw.on": "Activé : seuls les services ci-dessous sont joignables.",
+  "fw.off": "Désactivé : tous les services de ce NAS sont joignables.",
+  "fw.why_host": "Kiboto tourne dans un conteneur sur ce NAS, c'est donc le pare-feu du NAS qui s'applique (sur Unraid ou TrueNAS, réglez-le là). Kiboto gère le pare-feu sur ses propres images système.",
+  "fw.why_nft": "L'outil nft manque, Kiboto ne peut donc pas charger de règles ici.",
+  "fw.why_cap": "Kiboto n'a pas la permission réseau (NET_ADMIN) nécessaire pour charger les règles.",
+  "fw.who": "Qui peut se connecter",
+  "fw.lan": "Seulement les appareils de la maison (et Tailscale)",
+  "fw.anywhere": "N'importe quelle adresse",
+  "fw.services": "Services qui restent joignables",
+  "fw.web_always": "toujours joignable depuis la maison, pour ne pas vous enfermer dehors",
+  "fw.show_rules": "Afficher les règles",
+  "fw.s_web": "Kiboto (cette page)",
+  "fw.s_ssh": "Connexion SSH",
+  "fw.s_smb": "Dossiers partagés (Windows et Mac)",
+  "fw.s_nfs": "Dossiers partagés (NFS, Linux)",
+  "fw.s_mdns": "Trouver ce NAS par son nom sur le réseau"
 };

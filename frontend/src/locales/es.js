@@ -7956,5 +7956,22 @@ export default {
   "ddns.duck_help": "El token que muestra duckdns.org después de iniciar sesión.",
   "ddns.save": "Guardar",
   "ddns.now": "Actualizar ahora",
-  "ddns.load_failed": "No se pudo cargar el DNS dinámico: {error}"
+  "ddns.load_failed": "No se pudo cargar el DNS dinámico: {error}",
+  "fw.title": "Cortafuegos",
+  "fw.on": "Activado: solo se puede llegar a los servicios de abajo.",
+  "fw.off": "Desactivado: se puede llegar a todos los servicios de este NAS.",
+  "fw.why_host": "Kiboto se ejecuta en un contenedor en este NAS, así que se aplica el cortafuegos del propio NAS (en Unraid o TrueNAS, configúralo allí). Kiboto gestiona el cortafuegos en sus propias imágenes del sistema.",
+  "fw.why_nft": "Falta la herramienta nft, así que Kiboto no puede cargar reglas aquí.",
+  "fw.why_cap": "A Kiboto le falta el permiso de red (NET_ADMIN) para cargar reglas.",
+  "fw.who": "Quién puede conectarse",
+  "fw.lan": "Solo los dispositivos de casa (y Tailscale)",
+  "fw.anywhere": "Cualquier dirección",
+  "fw.services": "Servicios que siguen accesibles",
+  "fw.web_always": "siempre accesible desde casa, para que no te quedes fuera",
+  "fw.show_rules": "Mostrar las reglas",
+  "fw.s_web": "Kiboto (esta página)",
+  "fw.s_ssh": "Inicio de sesión SSH",
+  "fw.s_smb": "Carpetas compartidas (Windows y Mac)",
+  "fw.s_nfs": "Carpetas compartidas (NFS, Linux)",
+  "fw.s_mdns": "Encontrar este NAS por su nombre en la red"
 };

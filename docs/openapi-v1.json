@@ -7814,6 +7814,31 @@
     "title": "FilesView",
     "type": "object"
    },
+   "FirewallIn": {
+    "properties": {
+     "allow_from": {
+      "default": "lan",
+      "pattern": "^(lan|anywhere)$",
+      "title": "Allow From",
+      "type": "string"
+     },
+     "enabled": {
+      "default": false,
+      "title": "Enabled",
+      "type": "boolean"
+     },
+     "services": {
+      "additionalProperties": {
+       "type": "boolean"
+      },
+      "default": {},
+      "title": "Services",
+      "type": "object"
+     }
+    },
+    "title": "FirewallIn",
+    "type": "object"
+   },
    "FolderAuditRequest": {
     "properties": {
      "folder_path": {
@@ -63658,6 +63683,81 @@
     "summary": "Get Security Advisor Checklist",
     "tags": [
      "Authentication & Security"
+    ],
+    "x-required-scopes": [
+     "system:config"
+    ]
+   }
+  },
+  "/api/v1/security/firewall": {
+   "get": {
+    "operationId": "get_firewall_api_v1_security_firewall_get",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Get Firewall Api V1 Security Firewall Get",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Get Firewall",
+    "tags": [
+     "Security"
+    ],
+    "x-required-scopes": [
+     "system:view"
+    ]
+   },
+   "put": {
+    "operationId": "put_firewall_api_v1_security_firewall_put",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/FirewallIn"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Put Firewall Api V1 Security Firewall Put",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Put Firewall",
+    "tags": [
+     "Security"
     ],
     "x-required-scopes": [
      "system:config"

@@ -7956,5 +7956,22 @@ export default {
   "ddns.duck_help": "The token shown on duckdns.org after you sign in.",
   "ddns.save": "Save",
   "ddns.now": "Update now",
-  "ddns.load_failed": "Dynamic DNS could not be loaded: {error}"
+  "ddns.load_failed": "Dynamic DNS could not be loaded: {error}",
+  "fw.title": "Firewall",
+  "fw.on": "On: only the services below can be reached.",
+  "fw.off": "Off: every service on this NAS can be reached.",
+  "fw.why_host": "Kiboto runs in a container on this NAS, so the NAS's own firewall applies (on Unraid or TrueNAS, set it there). Kiboto manages the firewall on its own system images.",
+  "fw.why_nft": "The nft tool is missing, so Kiboto cannot load firewall rules here.",
+  "fw.why_cap": "Kiboto lacks the network permission (NET_ADMIN) it needs to load firewall rules.",
+  "fw.who": "Who can connect",
+  "fw.lan": "Only devices at home (and Tailscale)",
+  "fw.anywhere": "Any address",
+  "fw.services": "Services that stay reachable",
+  "fw.web_always": "always reachable from home, so you can't lock yourself out",
+  "fw.show_rules": "Show the rules",
+  "fw.s_web": "Kiboto (this page)",
+  "fw.s_ssh": "SSH sign-in",
+  "fw.s_smb": "Shared folders (Windows and Mac)",
+  "fw.s_nfs": "Shared folders (NFS, Linux)",
+  "fw.s_mdns": "Finding this NAS by name on the network"
 };

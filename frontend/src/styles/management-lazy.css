@@ -463,3 +463,13 @@
 .ddns-field input, .ddns-field select { min-height: 36px; }
 .ddns-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .ddns-error { color: var(--kb-text-danger, var(--crit)); font-size: var(--kb-fs-xs); }
+/* Firewall card (audit A13) */
+.fw-card { margin-top: 12px; }
+.fw-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.fw-status, .fw-why { margin: 2px 0 8px; font-size: var(--kb-fs-xs); color: var(--muted); line-height: 1.45; }
+.fw-set { border: 0; padding: 0; margin: 8px 0 0; display: flex; flex-direction: column; gap: 4px; }
+.fw-set legend { font-size: var(--kb-fs-xs); font-weight: 600; margin-bottom: 4px; }
+.fw-row { display: flex; align-items: center; gap: 8px; min-height: 32px; font-size: var(--kb-fs-sm); }
+.fw-note { color: var(--muted); font-size: var(--kb-fs-xs); }
+.fw-rules pre { max-height: 220px; overflow: auto; font-size: var(--kb-fs-xs); }
+.fw-error { color: var(--kb-text-danger, var(--crit)); font-size: var(--kb-fs-xs); }
