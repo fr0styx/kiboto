@@ -587,8 +587,10 @@ export function openVmCreateModal() {
     .then((devs) => {
       if (!usbSelect) return;
       usbSelect.innerHTML = '<option value="">' + t('vmd.usb_pick', '— Choose a USB device —') + '</option>';
-      if (Array.isArray(devs) && devs.length > 0) {
-        devs.forEach((d) => {
+      // a root hub is the NAS's own USB controller: not something to hand to a machine (VMs report 26)
+      const usable = Array.isArray(devs) ? devs.filter((d) => d && !d.is_root_hub) : [];
+      if (usable.length > 0) {
+        usable.forEach((d) => {
           const opt = document.createElement('option');
           opt.value = JSON.stringify({
             vendor_id: d.vendor_id,
@@ -598,8 +600,7 @@ export function openVmCreateModal() {
             bus: d.bus,
             dev: d.dev,
           });
-          const hubTag = d.is_root_hub ? ' [Root Hub]' : '';
-          opt.textContent = `[${d.vendor_id}:${d.product_id}] ${d.description || d.product}${hubTag}`;
+          opt.textContent = `[${d.vendor_id}:${d.product_id}] ${d.description || d.product}`;
           usbSelect.appendChild(opt);
         });
       } else {

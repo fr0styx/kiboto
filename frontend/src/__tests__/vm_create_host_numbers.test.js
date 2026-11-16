@@ -29,4 +29,35 @@ describe('new machine from Settings (VMs report 18)', () => {
     await flush();
     expect(document.getElementById('vm-slider-max-label')?.textContent).toContain('is not known');
   });
+
+  it("the USB list leaves out the NAS's root hubs (VMs report 26)", async () => {
+    vmState.telemetry = { memory_budget: { safe_slider_max_gb: 8 }, cpu_capacity: { host_threads: 4 } };
+    vi.spyOn(api, 'get').mockImplementation(async (url) => {
+      if (url === '/api/vms/usb-devices') return [
+        { vendor_id: '1d6b', product_id: '0002', description: 'Root Hub (1)', is_root_hub: true },
+        { vendor_id: '046d', product_id: 'c52b', description: 'Logitech Receiver' },
+        null,
+        { vendor_id: '1234', product_id: '5678', product: 'Game Pad' },
+      ];
+      return [];
+    });
+    await openVmCreateModal();
+    await flush();
+    const opts = [...document.querySelectorAll('#modal-vm-create select option')].map((o) => o.textContent || '');
+    expect(opts.some((o) => o.includes('Logitech Receiver'))).toBe(true);
+    expect(opts.some((o) => o.includes('Root Hub'))).toBe(false);
+    expect(opts.some((o) => o.includes('Game Pad'))).toBe(true);
+  });
+
+  it('only root hubs means no devices to offer', async () => {
+    vmState.telemetry = { memory_budget: { safe_slider_max_gb: 8 }, cpu_capacity: { host_threads: 4 } };
+    for (const devs of [[{ vendor_id: '1d6b', product_id: '0003', is_root_hub: true }], { error: 'x' }]) {
+      vi.restoreAllMocks();
+      vi.spyOn(api, 'get').mockImplementation(async (url) => (url === '/api/vms/usb-devices' ? devs : []));
+      await openVmCreateModal();
+      await flush();
+      expect(document.getElementById('modal-vm-create')?.textContent).toContain('No USB devices found');
+    }
+  });
 });
+

@@ -191,6 +191,10 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   "Graphical desktop (display :0)" box (never read by the server) are removed, and the security-chip badge says
   "Security chip (vTPM) available" instead of "Windows 11 Ready".
 
+#### Changes
+
+- **USB for virtual machines leaves out root hubs**: the device list no longer offers the NAS's own USB root hubs.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 
