@@ -7839,5 +7839,14 @@ export default {
   "act.open": "Öffnen",
   "act.tech": "Technische Details",
   "act.copy": "Kopieren",
-  "act.none_match": "Nichts im Verlauf passt dazu."
+  "act.none_match": "Nichts im Verlauf passt dazu.",
+  "now.quiet": "Ruhig.",
+  "now.busy_app": "Der Prozessor ist ausgelastet: {app} nutzt das meiste.",
+  "now.busy": "Der Prozessor ist ausgelastet ({pct} %).",
+  "now.mem_full": "Der Arbeitsspeicher ist fast voll.",
+  "now.drives_asleep": "Die Laufwerke schlafen.",
+  "now.drives_awake": "{n, plural, one {Das Laufwerk ist wach.} other {Alle # Laufwerke sind wach.}}",
+  "now.drives_some": "{awake} wach, {asleep} schlafen.",
+  "now.n_drives": "{n, plural, one {# Laufwerk} other {# Laufwerke}}",
+  "now.apps_title": "Apps nach Auslastung"
 };

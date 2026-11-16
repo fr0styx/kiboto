@@ -7839,5 +7839,14 @@ export default {
   "act.open": "Open",
   "act.tech": "Technical details",
   "act.copy": "Copy",
-  "act.none_match": "Nothing in the history matches."
+  "act.none_match": "Nothing in the history matches.",
+  "now.quiet": "Quiet.",
+  "now.busy_app": "The processor is busy: {app} is using most of it.",
+  "now.busy": "The processor is busy ({pct}%).",
+  "now.mem_full": "Memory is nearly full.",
+  "now.drives_asleep": "The drives are asleep.",
+  "now.drives_awake": "{n, plural, one {The drive is awake.} other {All # drives are awake.}}",
+  "now.drives_some": "{awake} awake, {asleep} asleep.",
+  "now.n_drives": "{n, plural, one {# drive} other {# drives}}",
+  "now.apps_title": "Apps by use"
 };

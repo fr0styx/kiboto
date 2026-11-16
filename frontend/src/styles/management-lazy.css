@@ -398,6 +398,13 @@
 .history-details { margin: 8px 0 0 26px; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
 .history-details pre { margin: 0; padding: 10px; width: 100%; box-sizing: border-box; background: var(--kb-shade-25); border-radius: 6px; font-size: var(--kb-fs-xs); white-space: pre-wrap; word-break: break-all; }
 .history-none { padding: 14px; text-align: center; color: var(--muted); font-size: var(--kb-fs-xs); }
+/* Activity -> Right now (SET-27) */
+.right-now { margin: 0 0 14px; padding: 12px 14px; border: 1px solid var(--kb-line-8); border-radius: 10px; }
+.right-now-line { margin: 0; font-weight: 600; }
+.right-now-h { margin: 12px 0 6px; font-size: var(--kb-fs-xs); color: var(--muted); }
+.right-now-apps { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; font-size: var(--kb-fs-xs); }
+.right-now-apps li { display: flex; justify-content: space-between; gap: 10px; }
+.right-now-use { color: var(--muted); font-variant-numeric: tabular-nums; }
 .net-link { color: var(--kb-text-accent); font-weight: 600; }
 /* Network: This NAS at home and one row per port (SET-24 m) */
 .net-home { margin-bottom: 14px; }

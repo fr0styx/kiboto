@@ -7839,5 +7839,14 @@ export default {
   "act.open": "打开",
   "act.tech": "技术详情",
   "act.copy": "复制",
-  "act.none_match": "历史记录中没有匹配的内容。"
+  "act.none_match": "历史记录中没有匹配的内容。",
+  "now.quiet": "空闲。",
+  "now.busy_app": "处理器繁忙：{app} 占用了大部分。",
+  "now.busy": "处理器繁忙（{pct}%）。",
+  "now.mem_full": "内存快满了。",
+  "now.drives_asleep": "硬盘正在休眠。",
+  "now.drives_awake": "{n, plural, other {全部 # 块硬盘都在运行。}}",
+  "now.drives_some": "{awake} 在运行，{asleep} 块在休眠。",
+  "now.n_drives": "{n, plural, other {# 块硬盘}}",
+  "now.apps_title": "按占用排序的应用"
 };

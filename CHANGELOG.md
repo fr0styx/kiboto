@@ -67,6 +67,12 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **History reads by day**: Today, Yesterday, then dates; "All" and "Needs a look" and a search box; each entry
   has an Open button to the page that deals with it, and its technical details fold open in place with Copy.
 
+#### Changes
+
+- **Right now says what the server is doing**: "Quiet." or "The processor is busy: Jellyfin is using most of it.",
+  whether the drives are awake, and the five apps using the processor most, with their memory. It updates live
+  while the tab is open.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

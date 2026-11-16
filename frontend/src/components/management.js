@@ -748,6 +748,7 @@ export function initManagement() {
         window.initCalendarView();
       }
     } else if (paneId === 'mgmt-pane-metrics') {
+      import('./right-now.js').then((m) => m.installRightNow()).catch(() => {}); // SET-27 Activity 3
       // the chart's code loads when its page opens: it came with Settings, in the first seconds
       // after sign-in, and took the page over its download budget
       setTimeout(() => import('./metrics-chart.js').then((m) => m.showMetricsPage()), 50);

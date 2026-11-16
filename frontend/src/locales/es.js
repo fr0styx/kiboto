@@ -7839,5 +7839,14 @@ export default {
   "act.open": "Abrir",
   "act.tech": "Detalles técnicos",
   "act.copy": "Copiar",
-  "act.none_match": "Nada del historial coincide."
+  "act.none_match": "Nada del historial coincide.",
+  "now.quiet": "Tranquilo.",
+  "now.busy_app": "El procesador está ocupado: {app} usa la mayor parte.",
+  "now.busy": "El procesador está ocupado ({pct} %).",
+  "now.mem_full": "La memoria está casi llena.",
+  "now.drives_asleep": "Los discos están en reposo.",
+  "now.drives_awake": "{n, plural, one {El disco está activo.} other {Los # discos están activos.}}",
+  "now.drives_some": "{awake} activos, {asleep} en reposo.",
+  "now.n_drives": "{n, plural, one {# disco} other {# discos}}",
+  "now.apps_title": "Apps por uso"
 };
