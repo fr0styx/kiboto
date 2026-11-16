@@ -1589,7 +1589,22 @@ def get_cached_thumbnail(
     dependencies=[Depends(require_scope("system:read", "storage:read"))],
 )
 def get_rag_config() -> dict[str, Any]:
-    return get_rag_engine().get_config()
+    return {**get_rag_engine().get_config(), "at_rest": encryption_at_rest()}
+
+
+def encryption_at_rest() -> str:
+    """Whether chats and the index are encrypted on this NAS, as one word for Kib's Privacy section
+    (AI decision 11): "encrypted", "encrypting", "locked" (key missing or wrong) or "off"."""
+    from backend import db_crypto
+    from backend.services.ai_conversations_db import get_db_path
+    from backend.services.rag_engine import RAG_DB_PATH
+
+    states = {db_crypto.status(RAG_DB_PATH), db_crypto.status(get_db_path())}
+    if "locked" in states:
+        return "locked"
+    if "encrypting" in states or ("plain" in states and db_crypto.enabled()):
+        return "encrypting"
+    return "encrypted" if states == {"encrypted"} else "off"
 
 
 class AiAccessUpdate(BaseModel):

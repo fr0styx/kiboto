@@ -2,7 +2,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
-import { onThisNas, privacyLines, renderKibPrivacy } from '../components/management/kib-privacy.js';
+import { onThisNas, privacyLines, renderKibPrivacy, atRestLine } from '../components/management/kib-privacy.js';
 import { loadKibPrivacy } from '../components/management/ai.js';
 import { installAiAccess } from '../components/management/ai-access.js';
 import { api } from '../api.js';
@@ -71,5 +71,15 @@ describe('Kib settings sections (AI 4)', () => {
     expect(document.getElementById('kib-who-mount').children.length).toBe(1);
     expect(document.getElementById('ai-rerank-form').nextElementSibling).toBeNull();
     expect(document.querySelector('#kib-who-mount .kb-title')).toBeNull(); // the section heading names it
+  });
+
+  it('says whether chats and the index are encrypted on this NAS (decision 11)', () => {
+    expect(atRestLine('encrypted')).toBe('On this NAS: chats and the index are encrypted.');
+    expect(atRestLine('encrypting')).toContain('being encrypted');
+    expect(atRestLine('locked')).toContain('the key is missing or wrong');
+    expect(atRestLine('off')).toContain('Set KIBOTO_DATA_KEY');
+    expect(atRestLine(undefined)).toBe('');
+    expect(privacyLines({ at_rest: 'encrypted' }).at(-1)).toBe('On this NAS: chats and the index are encrypted.');
+    expect(privacyLines({})).toHaveLength(1);
   });
 });

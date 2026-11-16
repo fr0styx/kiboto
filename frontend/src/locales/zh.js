@@ -8131,5 +8131,9 @@ export default {
   "kib4.start_over_btn": "忘记一切并重新开始…",
   "kib4.start_over_title": "忘记一切并重新开始？",
   "kib4.start_over_ok": "忘记并重新开始",
-  "kibs.cancel": "取消读取"
+  "kibs.cancel": "取消读取",
+  "kibp.enc_on": "在这台 NAS 上：聊天和索引已加密。",
+  "kibp.enc_going": "在这台 NAS 上：正在加密聊天和索引。",
+  "kibp.enc_locked": "在这台 NAS 上：聊天和索引已加密，但密钥缺失或错误，Kib 无法打开它们。",
+  "kibp.enc_off": "在这台 NAS 上：聊天和索引未加密。在容器设置中设置 KIBOTO_DATA_KEY 即可加密。"
 };

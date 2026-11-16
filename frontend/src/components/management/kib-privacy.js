@@ -29,6 +29,15 @@ export function onThisNas(url) {
  * @param {Record<string, any>} cfg Kib's settings (GET /api/ai/config)
  * @returns {string[]}
  */
+/** The "On this NAS" line: are chats and the index encrypted (AI decision 11)? */
+export function atRestLine(state) {
+  if (state === 'encrypted') return t('kibp.enc_on', 'On this NAS: chats and the index are encrypted.');
+  if (state === 'encrypting') return t('kibp.enc_going', 'On this NAS: chats and the index are being encrypted.');
+  if (state === 'locked') return t('kibp.enc_locked', 'On this NAS: chats and the index are encrypted, but the key is missing or wrong, so Kib cannot open them.');
+  if (state === 'off') return t('kibp.enc_off', 'On this NAS: chats and the index are not encrypted. Set KIBOTO_DATA_KEY in the container settings to encrypt them.');
+  return '';
+}
+
 export function privacyLines(cfg = {}) {
   const lines = [t('kibp.web', 'Web lookups: off unless a chat turns them on; that choice is not remembered.')];
   for (const [key, what] of SENDS) {
@@ -38,6 +47,8 @@ export function privacyLines(cfg = {}) {
     try { host = new URL(url).host; } catch { /* shown as typed */ }
     lines.push(t('kibp.leaves', '{host} gets: {what}.', { host, what: what() }));
   }
+  const atRest = atRestLine(cfg.at_rest);
+  if (atRest) lines.push(atRest);
   return lines;
 }
 

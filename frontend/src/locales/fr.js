@@ -8131,5 +8131,9 @@ export default {
   "kib4.start_over_btn": "Tout oublier et recommencer…",
   "kib4.start_over_title": "Tout oublier et recommencer ?",
   "kib4.start_over_ok": "Oublier et recommencer",
-  "kibs.cancel": "Annuler la lecture"
+  "kibs.cancel": "Annuler la lecture",
+  "kibp.enc_on": "Sur ce NAS : les discussions et l’index sont chiffrés.",
+  "kibp.enc_going": "Sur ce NAS : les discussions et l’index sont en cours de chiffrement.",
+  "kibp.enc_locked": "Sur ce NAS : les discussions et l’index sont chiffrés, mais la clé manque ou est fausse, donc Kib ne peut pas les ouvrir.",
+  "kibp.enc_off": "Sur ce NAS : les discussions et l’index ne sont pas chiffrés. Définissez KIBOTO_DATA_KEY dans les réglages du conteneur pour les chiffrer."
 };

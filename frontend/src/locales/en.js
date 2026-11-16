@@ -8131,5 +8131,9 @@ export default {
   "kib4.start_over_btn": "Forget everything and start over…",
   "kib4.start_over_title": "Forget everything and start over?",
   "kib4.start_over_ok": "Forget and start over",
-  "kibs.cancel": "Cancel reading"
+  "kibs.cancel": "Cancel reading",
+  "kibp.enc_on": "On this NAS: chats and the index are encrypted.",
+  "kibp.enc_going": "On this NAS: chats and the index are being encrypted.",
+  "kibp.enc_locked": "On this NAS: chats and the index are encrypted, but the key is missing or wrong, so Kib cannot open them.",
+  "kibp.enc_off": "On this NAS: chats and the index are not encrypted. Set KIBOTO_DATA_KEY in the container settings to encrypt them."
 };

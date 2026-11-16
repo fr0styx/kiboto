@@ -8131,5 +8131,9 @@ export default {
   "kib4.start_over_btn": "Olvidar todo y empezar de nuevo…",
   "kib4.start_over_title": "¿Olvidar todo y empezar de nuevo?",
   "kib4.start_over_ok": "Olvidar y empezar de nuevo",
-  "kibs.cancel": "Cancelar la lectura"
+  "kibs.cancel": "Cancelar la lectura",
+  "kibp.enc_on": "En este NAS: los chats y el índice están cifrados.",
+  "kibp.enc_going": "En este NAS: los chats y el índice se están cifrando.",
+  "kibp.enc_locked": "En este NAS: los chats y el índice están cifrados, pero falta la clave o es incorrecta, así que Kib no puede abrirlos.",
+  "kibp.enc_off": "En este NAS: los chats y el índice no están cifrados. Define KIBOTO_DATA_KEY en los ajustes del contenedor para cifrarlos."
 };

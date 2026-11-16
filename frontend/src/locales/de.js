@@ -8131,5 +8131,9 @@ export default {
   "kib4.start_over_btn": "Alles vergessen und neu beginnen…",
   "kib4.start_over_title": "Alles vergessen und neu beginnen?",
   "kib4.start_over_ok": "Vergessen und neu beginnen",
-  "kibs.cancel": "Lesen abbrechen"
+  "kibs.cancel": "Lesen abbrechen",
+  "kibp.enc_on": "Auf diesem NAS: Chats und Index sind verschlüsselt.",
+  "kibp.enc_going": "Auf diesem NAS: Chats und Index werden gerade verschlüsselt.",
+  "kibp.enc_locked": "Auf diesem NAS: Chats und Index sind verschlüsselt, aber der Schlüssel fehlt oder ist falsch, daher kann Kib sie nicht öffnen.",
+  "kibp.enc_off": "Auf diesem NAS: Chats und Index sind nicht verschlüsselt. Setzen Sie KIBOTO_DATA_KEY in den Container-Einstellungen, um sie zu verschlüsseln."
 };

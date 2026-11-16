@@ -383,6 +383,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   "See why" opens the files Kib could not read, "Read now" stays with the folders, and "Forget everything and start
   over…" has its own place under Advanced, with a dialog in the same words.
 
+#### Changes
+
+- **Kib's Privacy section says whether chats and the index are encrypted on this NAS**, being encrypted, locked
+  because the key is missing, or not encrypted (with how to turn it on).
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 
