@@ -88,6 +88,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Sign-ins in History**: for administrators, a "Sign-ins" chip shows who signed in, failed sign-ins and blocked
   addresses, two-step sign-in changes and changes to people, as sentences by day.
 
+#### Changes
+
+- **Each bay shows Drive Health's verdict**: "Healthy", "Keep an eye on it", "Replace soon" or "Replace now", in its
+  colour, from the last check (no drive is woken to show it).
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

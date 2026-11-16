@@ -3,7 +3,7 @@
   "buttonClasses": 75,
   "inlineStyles": 1262,
   "emojiIcons": 3,
-  "colours": 3770,
+  "colours": 3772,
   "primitiveUses": 4,
   "importantPerFile": {
     "frontend/index.html": 64,
@@ -157,7 +157,7 @@
     "frontend/src/styles/77-mc-lists.css": 8,
     "frontend/src/styles/78-storage-analyzer.css": 12,
     "frontend/src/styles/80-public-apps.css": 1,
-    "frontend/src/styles/management-lazy.css": 7,
+    "frontend/src/styles/management-lazy.css": 9,
     "frontend/src/styles/users-lazy.css": 2,
     "frontend/src/toast.js": 31,
     "frontend/src/utils.js": 1,

@@ -182,7 +182,7 @@ request and response schemas.
 | :--- | :--- | :--- | :--- |
 | `POST` | `/api/v1/chassis/bay_map` | any of `storage:admin`, `system:config` | Saves user-customized chassis profile, total bays, and drag-and-drop bay slot assignments |
 | `GET` | `/api/v1/chassis/bridges` | any of `hardware:read`, `storage:read`, `system:view` | Returns detected hardware platform bridges (Zettlab, Aoostar, Ugreen, CWWK) |
-| `GET` | `/api/v1/chassis/config` | any of `hardware:read`, `storage:read`, `system:view` | Returns dynamic chassis layout configuration, detected bays, populated disks, and motherboard M.2 NVMe slots |
+| `GET` | `/api/v1/chassis/config` | any of `hardware:read`, `storage:read`, `system:view` | Returns dynamic chassis layout configuration, detected bays, populated disks, and motherboard M.2 NVMe slots; each drive carries Drive He… |
 
 ### Docker App Catalog
 

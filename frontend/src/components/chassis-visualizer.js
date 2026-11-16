@@ -95,6 +95,14 @@ export async function triggerLocateDisk(devName, targetElement = null) {
  * Computes color and status token for thermal heatmap
  */
 /** One word for a drive's health (SET-22 Storage 1): Asleep, Healthy, Failing, Needs a look. */
+/** A drive's stored Drive Health verdict as Drive Health words it, with its look; null without one. */
+export function verdictWord(d) {
+  if (!d || !d.verdict || !d.verdict_label_key) return null;
+  const fallback = { now: 'Needs attention now', soon: 'Needs attention', watch: 'Keep an eye on it', ok: 'Healthy' }[d.verdict] || '';
+  const look = { now: 'bad', soon: 'warn', watch: 'warn', ok: 'ok' }[d.verdict] || 'muted';
+  return { word: t(`dh.label.${d.verdict_label_key}`, fallback), look };
+}
+
 export function healthWord(health, standby = false) {
   if (standby) return t('chassis.asleep', 'Asleep');
   const h = String(health || '').toLowerCase();
@@ -275,7 +283,12 @@ export function renderChassisTwin(container, disks = [], options = {}) {
               <svg class="locate-icon" viewBox="0 0 24 24" width="12" height="12"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" fill="currentColor"/></svg>
               <span>${t('chassis.find_drive', 'Find this drive')}</span>
             </button>
-            <span class="bay-health-tag ${thermal.cls}">${escapeHtml(healthWord(d.health, isStandby))}</span>
+            ${(() => {
+              const v = verdictWord(d); // Drive Health's stored verdict, read from memory (SET-22)
+              return v
+                ? `<span class="bay-health-tag is-verdict is-${v.look}">${escapeHtml(v.word)}</span>`
+                : `<span class="bay-health-tag ${thermal.cls}">${escapeHtml(healthWord(d.health, isStandby))}</span>`;
+            })()}
           </div>
         </div>
       `;

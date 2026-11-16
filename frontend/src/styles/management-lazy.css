@@ -411,6 +411,11 @@
 .front-panel-more { align-self: flex-start; }
 /* the daily update check (Settings decision 5) */
 .update-daily { display: inline-flex; align-items: center; gap: 6px; font-size: var(--kb-fs-xs); font-weight: 600; margin: 4px 0; min-height: 32px; cursor: pointer; }
+/* the bay tile's Drive Health verdict (SET-22 Storage 3) */
+.bay-health-tag.is-verdict { font-weight: 700; }
+.bay-health-tag.is-verdict.is-ok { color: var(--ok, #3bf58b); }
+.bay-health-tag.is-verdict.is-warn { color: var(--kb-text-warn); }
+.bay-health-tag.is-verdict.is-bad { color: var(--crit, #f0553b); }
 .net-link { color: var(--kb-text-accent); font-weight: 600; }
 /* Network: This NAS at home and one row per port (SET-24 m) */
 .net-home { margin-bottom: 14px; }

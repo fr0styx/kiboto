@@ -47328,7 +47328,7 @@
   },
   "/api/v1/chassis/config": {
    "get": {
-    "description": "Returns dynamic chassis layout configuration, detected bays, populated disks,\nand motherboard M.2 NVMe slots.",
+    "description": "Returns dynamic chassis layout configuration, detected bays, populated disks,\nand motherboard M.2 NVMe slots; each drive carries Drive Health's stored verdict (SET-22).",
     "operationId": "get_chassis_config_api_v1_chassis_config_get",
     "responses": {
      "200": {
