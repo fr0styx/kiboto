@@ -7883,5 +7883,7 @@ export default {
   "act.pinned": "Noch nicht gesehen",
   "act.mark_seen": "Als gesehen markieren",
   "act.chip_files": "Dateien",
-  "apps.in_stack": "In {stack}"
+  "apps.in_stack": "In {stack}",
+  "chassis.guess": "Position nicht bestätigt",
+  "chassis.guess_hint": "Kiboto hat dieses Laufwerk geschätzt hier eingeordnet. Prüfen Sie es unter „Welches Laufwerk in welchem Einschub steckt“."
 };

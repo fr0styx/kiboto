@@ -222,6 +222,27 @@ class ChassisEngine:
             "lcd_resolution": lcd_resolution,
         }
 
+    @staticmethod
+    def _bay_disk(d: PhysicalDiskRecord) -> dict[str, Any]:
+        """A drive in a bay, with its last temperature and health from memory (no drive is read)."""
+        cached_temp, cached_health = Z_STATE.cached_smart_data.get(d.dev_name, (None, "ok"))
+        return {
+            "dev": d.dev_name,
+            "canonical_id": d.canonical_id,
+            "model": d.model,
+            "serial": d.serial,
+            "vendor": d.vendor,
+            "transport": d.transport,
+            "controller_driver": d.controller_driver,
+            "size_bytes": d.size_bytes,
+            "size_formatted": d.size_formatted,
+            "role": d.role,
+            "temp": cached_temp,
+            "health": cached_health,
+            "standby": cached_health == "standby",
+            "is_nvme": False,
+        }
+
     @classmethod
     def load_bay_mapping_config(cls) -> dict[str, Any]:
         if os.path.exists(CHASSIS_MAP_FILE):
@@ -471,29 +492,13 @@ class ChassisEngine:
                 custom_label = None
 
             if d:
-                cached_temp, cached_health = Z_STATE.cached_smart_data.get(d.dev_name, (None, "ok"))
-                is_standby = cached_health == "standby"
                 bays.append(
                     {
                         "slot_index": slot,
                         "is_populated": True,
                         "custom_label": custom_label,
-                        "disk": {
-                            "dev": d.dev_name,
-                            "canonical_id": d.canonical_id,
-                            "model": d.model,
-                            "serial": d.serial,
-                            "vendor": d.vendor,
-                            "transport": d.transport,
-                            "controller_driver": d.controller_driver,
-                            "size_bytes": d.size_bytes,
-                            "size_formatted": d.size_formatted,
-                            "role": d.role,
-                            "temp": cached_temp,
-                            "health": cached_health,
-                            "standby": is_standby,
-                            "is_nvme": False,
-                        },
+                        "mapped": slot in slot_map,  # False: put here by guess (SET-22, Storage decision 4 a)
+                        "disk": cls._bay_disk(d),
                     }
                 )
             else:

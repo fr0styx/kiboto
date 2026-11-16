@@ -55,5 +55,14 @@ describe('Storage says plain words in your language (SET-22 Storage 1)', () => {
     renderChassisTwin(box, [], { chassisConfig: { total_bays: 1, bays: [{ slot_index: 1, is_populated: true, disk: { dev: 'sda', model: 'IronWolf', health: 'PASSED', temp: 35, verdict: 'watch', verdict_label_key: 'watch' } }] } });
     expect(box.querySelector('.bay-health-tag.is-verdict')?.textContent).toBe('Keep an eye on it');
   });
+
+  it('a bay filled in by guess says the position is not confirmed', () => {
+    const box = document.createElement('div');
+    const disk = { dev: 'sda', model: 'IronWolf', health: 'PASSED', temp: 35 };
+    renderChassisTwin(box, [], { chassisConfig: { total_bays: 2, bays: [{ slot_index: 1, is_populated: true, mapped: false, disk }, { slot_index: 2, is_populated: true, mapped: true, disk: { ...disk, dev: 'sdb' } }] } });
+    const notes = box.querySelectorAll('.bay-guess-note');
+    expect(notes.length).toBe(1);
+    expect(notes[0].textContent).toBe('Position not confirmed');
+  });
 });
 

@@ -267,6 +267,7 @@ export function renderChassisTwin(container, disks = [], options = {}) {
             <div class="cv-row">
               <span class="bay-num">${t('chassis.bay_n', 'Bay {n}', { n: slotNum })}</span>
               ${customLabel}
+              ${bay.mapped === false ? `<span class="bay-guess-note" title="${escapeHtml(t('chassis.guess_hint', 'Kiboto put this drive here by guess. Check it in "Which drive is in which bay".'))}">${escapeHtml(t('chassis.guess', 'Position not confirmed'))}</span>` : ''}
             </div>
             <span class="bay-temp-pill" style="color: ${thermal.color}; border-color: ${thermal.color};">${thermal.text}</span>
           </div>

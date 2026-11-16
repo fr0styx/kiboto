@@ -7883,5 +7883,7 @@ export default {
   "act.pinned": "Pas encore vu",
   "act.mark_seen": "Marquer comme vu",
   "act.chip_files": "Fichiers",
-  "apps.in_stack": "Dans {stack}"
+  "apps.in_stack": "Dans {stack}",
+  "chassis.guess": "Position non confirmée",
+  "chassis.guess_hint": "Kiboto a placé ce disque ici par supposition. Vérifiez-le dans « Quel disque est dans quelle baie »."
 };

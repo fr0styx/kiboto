@@ -118,6 +118,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Storage keeps its expert tools under Advanced**: "Which drive is in which bay" and "Create pool" show with
   "Show advanced tools" on.
 
+#### Changes
+
+- **Guessed bays say so**: a drive Kiboto placed in a bay by guess shows "Position not confirmed" until you set it
+  in "Which drive is in which bay".
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

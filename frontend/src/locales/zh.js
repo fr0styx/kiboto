@@ -7883,5 +7883,7 @@ export default {
   "act.pinned": "尚未查看",
   "act.mark_seen": "标为已查看",
   "act.chip_files": "文件",
-  "apps.in_stack": "属于 {stack}"
+  "apps.in_stack": "属于 {stack}",
+  "chassis.guess": "位置未确认",
+  "chassis.guess_hint": "Kiboto 是推测把这块硬盘放在这里的。请在“哪块硬盘在哪个盘位”中确认。"
 };

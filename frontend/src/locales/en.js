@@ -7883,5 +7883,7 @@ export default {
   "act.pinned": "Not seen yet",
   "act.mark_seen": "Mark as seen",
   "act.chip_files": "Files",
-  "apps.in_stack": "In {stack}"
+  "apps.in_stack": "In {stack}",
+  "chassis.guess": "Position not confirmed",
+  "chassis.guess_hint": "Kiboto put this drive here by guess. Check it in \"Which drive is in which bay\"."
 };
