@@ -237,6 +237,17 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **MiniDLNA in Get apps**: smart TVs, consoles and older players on your home network can find and play films,
   music and photos from a share. It runs on the host's network so TVs discover it by themselves.
 
+#### Added
+
+- **HTTPS at home**: Away from home can get a Let's Encrypt certificate for your Dynamic DNS name, proved with a DNS
+  record (no open port needed), and serves https://<name>:8443 with it; it renews by itself when 30 days are left.
+  Off by default. Port 8443 has to be mapped in the container settings.
+
+#### Changes
+
+- **A smaller first load**: the invite sign-up form now loads only when an invite link is opened (about 1 kB less
+  for everyone else).
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

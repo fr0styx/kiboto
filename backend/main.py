@@ -629,6 +629,10 @@ async def lifespan(app: FastAPI):
     from backend.api.power_schedule import power_schedule_loop
 
     power_task = asyncio.create_task(power_schedule_loop())  # scheduled power, does nothing while off (audit A10)
+    from backend.api.https import renew_loop, start_tls
+
+    start_tls(app)  # HTTPS beside HTTP once a certificate exists (audit A9)
+    https_task = asyncio.create_task(renew_loop())
     try:
         yield
     finally:
@@ -636,6 +640,7 @@ async def lifespan(app: FastAPI):
         update_task.cancel()
         ddns_task.cancel()
         power_task.cancel()
+        https_task.cancel()
         Z_STATE.ui_wake.set()
         broadcaster.shutdown()
         close_notification_client()

@@ -27,6 +27,7 @@ from backend.api.firewall import router as firewall_router
 from backend.api.fleet import router as fleet_router
 from backend.api.fs import router as fs_router
 from backend.api.home_assistant import router as home_assistant_router
+from backend.api.https import router as https_router
 from backend.api.hw_helper import router as hw_helper_router  # noqa: E402
 from backend.api.immich import router as immich_router  # noqa: E402
 from backend.api.invites import router as invites_router  # noqa: E402
@@ -167,3 +168,4 @@ api_router.include_router(update_watch_router)  # the daily update check (Settin
 api_router.include_router(ddns_router)  # Dynamic DNS, off by default (audit A8)
 api_router.include_router(firewall_router)  # host firewall, off by default (audit A13)
 api_router.include_router(power_schedule_router)  # scheduled power off and wake-up, off by default (audit A10)
+api_router.include_router(https_router)  # HTTPS at home via ACME over DNS, off by default (audit A9)

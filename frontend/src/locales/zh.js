@@ -7991,5 +7991,17 @@ export default {
   "ps.d_thu": "周四",
   "ps.d_fri": "周五",
   "ps.d_sat": "周六",
-  "ps.d_sun": "周日"
+  "ps.d_sun": "周日",
+  "https.title": "家中的 HTTPS",
+  "https.st_off": "已关闭",
+  "https.st_error": "没有证书：{error}",
+  "https.st_on": "https://{name}:{port} 可用；证书会自动续期（还剩 {days} 天）。",
+  "https.st_cert": "{name} 的证书已就绪（还剩 {days} 天）。",
+  "https.st_none": "已开启：请点“获取证书”。",
+  "https.help": "一张 {name} 的 Let's Encrypt 证书，通过你的动态 DNS 服务验证，让浏览器信任 https://{name}:{port}。Kiboto 必须能通过端口 {port} 访问（在容器设置中映射），并且在家中该名称必须指向这台 NAS（路由器或本地 DNS）。",
+  "https.need_ddns": "请先在上方设置动态 DNS：证书是为该名称签发的。",
+  "https.get": "获取证书",
+  "https.renew": "立即续期",
+  "https.terms": "获取证书即表示接受 Let's Encrypt 订户协议：",
+  "https.working": "正在请求 Let's Encrypt（约一分钟）…"
 };

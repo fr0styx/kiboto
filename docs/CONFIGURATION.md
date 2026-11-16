@@ -16,6 +16,17 @@ name set beside an old one wins.
 | `DISKS` | `(empty)` | Comma-separated disks to show when they can't be detected. |
 | `OS_NVME` | `nvme1n1` | The NVMe device the operating system runs from, hidden from data disks. |
 | `SHOW_OS_DISK` | `on` | Show the operating-system disk in the disk list. |
+
+## Web
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `KIBOTO_HTTPS_PORT` | `8443` | Port of the HTTPS listener used once a Let's Encrypt certificate exists (map it in the container). |
+
+## Host
+
+| Variable | Default | Meaning |
+|---|---|---|
 | `KIBOTO_OWNS_FIREWALL` | `off` | Kiboto manages the host firewall (set by Kiboto's own system images; leave off in a container). |
 | `REMOTES_PATH` | `/mnt/remotes` | Where cloud and network remotes are mounted. |
 | `HOST_ETC` | `/host/etc` | Where the host's /etc is mounted. |

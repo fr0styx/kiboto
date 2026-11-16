@@ -23189,6 +23189,22 @@
     "title": "HostIpRevertRequest",
     "type": "object"
    },
+   "HttpsIn": {
+    "properties": {
+     "enabled": {
+      "default": false,
+      "title": "Enabled",
+      "type": "boolean"
+     },
+     "staging": {
+      "default": false,
+      "title": "Staging",
+      "type": "boolean"
+     }
+    },
+    "title": "HttpsIn",
+    "type": "object"
+   },
    "HuggingFacePullRequest": {
     "properties": {
      "activate": {
@@ -59950,6 +59966,114 @@
      }
     },
     "summary": "Revert Host Ip Config Endpoint",
+    "tags": [
+     "Network & Switching"
+    ],
+    "x-required-scopes": [
+     "system:config"
+    ]
+   }
+  },
+  "/api/v1/network/https": {
+   "get": {
+    "operationId": "get_https_api_v1_network_https_get",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Get Https Api V1 Network Https Get",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Get Https",
+    "tags": [
+     "Network & Switching"
+    ],
+    "x-required-scopes": [
+     "system:view"
+    ]
+   },
+   "put": {
+    "operationId": "put_https_api_v1_network_https_put",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/HttpsIn"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Put Https Api V1 Network Https Put",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Put Https",
+    "tags": [
+     "Network & Switching"
+    ],
+    "x-required-scopes": [
+     "system:config"
+    ]
+   }
+  },
+  "/api/v1/network/https/certificate": {
+   "post": {
+    "description": "Asks Let's Encrypt now (about a minute: the DNS record needs time to spread).",
+    "operationId": "get_certificate_api_v1_network_https_certificate_post",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Get Certificate Api V1 Network Https Certificate Post",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Get Certificate",
     "tags": [
      "Network & Switching"
     ],

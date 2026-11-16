@@ -81,6 +81,12 @@ class Settings:
         "OS_NVME", "nvme1n1", "The NVMe device the operating system runs from, hidden from data disks.", group="Host"
     )
     show_os_disk: bool = _s("SHOW_OS_DISK", True, "Show the operating-system disk in the disk list.", group="Host")
+    https_port: int = _s(
+        "KIBOTO_HTTPS_PORT",
+        8443,
+        "Port of the HTTPS listener used once a Let's Encrypt certificate exists (map it in the container).",
+        group="Web",
+    )
     owns_firewall: bool = _s(
         "KIBOTO_OWNS_FIREWALL",
         False,

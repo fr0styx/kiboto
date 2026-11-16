@@ -761,6 +761,7 @@ export function initManagement() {
       // COMP-01: the guided "Use from anywhere" card above the Tailscale details
       import('./remote-access.js').then((m) => m.installRemoteAccess(document.getElementById('remote-access-mount'))).catch(() => {});
       import('./ddns-card.js').then((m) => m.renderDdnsCard()).catch(() => {}); // Dynamic DNS (audit A8)
+      import('./https-card.js').then((m) => m.renderHttpsCard()).catch(() => {}); // HTTPS at home (audit A9)
       fetchAndRenderTailscaleDetails();
     } else if (paneId === 'mgmt-pane-unraid') {
       if (state.lastStats) updateManagementTelemetry(state.lastStats);

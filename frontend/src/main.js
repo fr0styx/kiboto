@@ -47,7 +47,6 @@ import { initJobsCentre } from './components/jobs-centre.js';
 import { initDriveHealth } from './components/drive-health.js';
 import { initGettingStarted } from './components/getting-started.js';
 import { initRouter } from './router.js';
-import { initInviteLanding } from './components/invites.js';
 import { initPhoneShell } from './components/phone-shell.js';
 import './file-preview-loader.js'; // window.openFilePreviewModal before the viewer loads
 import { installWindowFocus } from './window-focus.js';
@@ -319,7 +318,9 @@ document.addEventListener('DOMContentLoaded', () => {  if (window.location.searc
   initDockSystem();
   installDialogChrome();
   installWindowFocus(DockManager);
-  initInviteLanding(textsReady); // the sign-up form for invite links, over the sign-in screen, in the person's language
+  // the sign-up form for invite links, over the sign-in screen, in the person's language; loaded only
+  // for an invite address, so the first load of everyone else stays small (audit A7)
+  if (window.location.hash.startsWith('#/invite/')) import('./components/invites.js').then((m) => m.initInviteLanding(textsReady)).catch(() => {});
   initAuth();
   initDashboardClicks();
   // the fan and LED controls are in the settings drawer, whose markup arrives after the first

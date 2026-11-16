@@ -7991,5 +7991,17 @@ export default {
   "ps.d_thu": "Do",
   "ps.d_fri": "Fr",
   "ps.d_sat": "Sa",
-  "ps.d_sun": "So"
+  "ps.d_sun": "So",
+  "https.title": "HTTPS zu Hause",
+  "https.st_off": "Aus",
+  "https.st_error": "Kein Zertifikat: {error}",
+  "https.st_on": "https://{name}:{port} funktioniert; das Zertifikat erneuert sich selbst (noch {days} Tage).",
+  "https.st_cert": "Zertifikat für {name} bereit (noch {days} Tage).",
+  "https.st_none": "An: Drücken Sie „Zertifikat holen“.",
+  "https.help": "Ein Let's-Encrypt-Zertifikat für {name}, nachgewiesen über Ihren Dynamic-DNS-Dienst, damit Browser https://{name}:{port} vertrauen. Kiboto muss auf Port {port} erreichbar sein (in den Container-Einstellungen zuordnen), und zu Hause muss der Name zu diesem NAS führen (Router oder lokales DNS).",
+  "https.need_ddns": "Richten Sie zuerst oben Dynamic DNS ein: Das Zertifikat gilt für diesen Namen.",
+  "https.get": "Zertifikat holen",
+  "https.renew": "Jetzt erneuern",
+  "https.terms": "Mit dem Zertifikat akzeptieren Sie die Let's-Encrypt-Abonnentenvereinbarung:",
+  "https.working": "Frage bei Let's Encrypt an (etwa eine Minute) …"
 };

@@ -38,7 +38,7 @@ request and response schemas.
 
 <!-- BEGIN generated endpoints: python scripts/api_reference.py --update -->
 
-730 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
+733 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
 
 ### AI Conversation History
 
@@ -462,6 +462,9 @@ request and response schemas.
 | `GET` | `/api/v1/network/host/config` | any of `system:view`, `system:config` | Retrieve host IP assignment mode, primary interface, netmask, gateway, and DNS servers |
 | `POST` | `/api/v1/network/host/confirm` | `system:config` | Keep a trial address: only on a host Kiboto manages (409 not_on_this_host elsewhere) |
 | `POST` | `/api/v1/network/host/revert` | `system:config` | Go back from a trial address: only on a host Kiboto manages (409 not_on_this_host elsewhere) |
+| `GET` | `/api/v1/network/https` | `system:view` | Get Https |
+| `PUT` | `/api/v1/network/https` | `system:config` | Put Https |
+| `POST` | `/api/v1/network/https/certificate` | `system:config` | Asks Let's Encrypt now (about a minute: the DNS record needs time to spread) |
 | `GET` | `/api/v1/network/mesh-vpn` | `system:view` | Retrieves Zero-Trust Mesh VPN telemetry and status for Tailscale and WireGuard |
 | `POST` | `/api/v1/network/mesh-vpn/tailscale/reauth` | `system:config` | Forces node re-authentication before node key expiration |
 | `POST` | `/api/v1/network/mesh-vpn/tailscale/set-exit-node` | `system:config` | Enables or disables advertising this NAS as a Tailscale Exit Node |
