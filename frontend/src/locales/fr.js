@@ -198,7 +198,7 @@ export default {
   "mgmt.notif_desc": "Envoyez des alertes critiques (pannes SMART, avertissements thermiques, événements UPS et sauvegardes) vers Discord, Telegram, Email, ntfy ou des webhooks personnalisés.",
   "mgmt.notif_btn_test_all": "Envoyer une alerte de test",
   "mgmt.notif_btn_save": "Enregistrer les paramètres",
-  "mgmt.notif_master_label": "Moteur principal de notifications",
+  "mgmt.notif_master_label": "Envoyer les alertes",
   "mgmt.notif_master_desc": "Lorsqu'il est désactivé, aucune notification externe ni webhook ne sera envoyé.",
   "mgmt.notif_channels_title": "CANAUX D'ENVOI D'ALERTES",
   "mgmt.notif_rules_title": "DÉCLENCHEURS D'ÉVÉNEMENTS ET SENSIBILITÉ",
@@ -7738,5 +7738,10 @@ export default {
   "shares.page_title": "Dossiers partagés",
   "shares.page_desc": "Les dossiers que les personnes de la maison ouvrent depuis leurs ordinateurs et téléphones. Chacun dit qui peut l'ouvrir et comment s'y connecter.",
   "shares.advanced": "Autres façons de se connecter : SFTP, et l'état de chaque service",
-  "general.tech_details": "Détails techniques"
+  "general.tech_details": "Détails techniques",
+  "ntf.dest_email": "e-mail",
+  "ntf.dest_webhook": "un webhook",
+  "ntf.sentence_off": "Les alertes sont coupées : personne n'est prévenu quand quelque chose tombe en panne.",
+  "ntf.sentence_nobody": "Personne n'est encore prévenu quand quelque chose tombe en panne : choisissez ci-dessous où vont les alertes.",
+  "ntf.sentence_to": "Les alertes vont vers {where}."
 };

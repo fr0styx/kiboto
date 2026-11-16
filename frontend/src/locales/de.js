@@ -1816,7 +1816,7 @@ export default {
   "mgmt.notif_desc": "Kritische Alarme (SMART-Fehler, Überhitzung, USV-Ereignisse) an Discord, Telegram, E-Mail oder ntfy senden.",
   "mgmt.notif_btn_test_all": "Testalarm senden",
   "mgmt.notif_btn_save": "Einstellungen speichern",
-  "mgmt.notif_master_label": "Haupt-Benachrichtigungssystem",
+  "mgmt.notif_master_label": "Warnungen senden",
   "mgmt.notif_master_desc": "Wenn deaktiviert, werden keine externen Benachrichtigungen oder Webhooks versendet.",
   "mgmt.notif_channels_title": "BENACHRICHTIGUNGSKANÄLE",
   "mgmt.notif_rules_title": "EREIGNISAUSLÖSER & EMPFINDLICHKEIT",
@@ -7738,5 +7738,10 @@ export default {
   "shares.page_title": "Freigegebene Ordner",
   "shares.page_desc": "Ordner, die die Personen zu Hause von ihren Computern und Telefonen öffnen. Jeder sagt, wer ihn öffnen kann und wie man sich verbindet.",
   "shares.advanced": "Weitere Verbindungswege: SFTP und der Zustand jedes Dienstes",
-  "general.tech_details": "Technische Details"
+  "general.tech_details": "Technische Details",
+  "ntf.dest_email": "E-Mail",
+  "ntf.dest_webhook": "einen Webhook",
+  "ntf.sentence_off": "Warnungen sind aus: Niemand erfährt, wenn etwas kaputtgeht.",
+  "ntf.sentence_nobody": "Noch erfährt niemand, wenn etwas kaputtgeht: Wählen Sie unten, wohin Warnungen gehen.",
+  "ntf.sentence_to": "Warnungen gehen an {where}."
 };

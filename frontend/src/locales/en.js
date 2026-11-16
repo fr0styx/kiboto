@@ -1816,7 +1816,7 @@ export default {
   "mgmt.notif_desc": "Dispatch critical alerts (SMART failures, thermal warnings, UPS events, and copy jobs) to Discord, Telegram, Email, ntfy, or custom webhooks.",
   "mgmt.notif_btn_test_all": "Send Test Alert",
   "mgmt.notif_btn_save": "Save Settings",
-  "mgmt.notif_master_label": "Master Notification Engine",
+  "mgmt.notif_master_label": "Send alerts",
   "mgmt.notif_master_desc": "When disabled, no external notifications or chat webhooks will be dispatched.",
   "mgmt.notif_channels_title": "Where alerts go",
   "mgmt.notif_rules_title": "What you are alerted about",
@@ -7738,5 +7738,10 @@ export default {
   "shares.page_title": "Shared folders",
   "shares.page_desc": "Folders the people at home open from their computers and phones. Each one says who can open it and how to connect.",
   "shares.advanced": "Other ways to connect: SFTP, and each service's state",
-  "general.tech_details": "Technical details"
+  "general.tech_details": "Technical details",
+  "ntf.dest_email": "e-mail",
+  "ntf.dest_webhook": "a webhook",
+  "ntf.sentence_off": "Alerts are off: nobody is told when something breaks.",
+  "ntf.sentence_nobody": "Nobody is told when something breaks yet: choose where alerts go below.",
+  "ntf.sentence_to": "Alerts go to {where}."
 };

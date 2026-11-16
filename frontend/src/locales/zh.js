@@ -1816,7 +1816,7 @@ export default {
   "mgmt.notif_desc": "将关键警报（SMART故障、温度异常、UPS电源事件）发送至Discord、Telegram、邮件或ntfy。",
   "mgmt.notif_btn_test_all": "发送测试警报",
   "mgmt.notif_btn_save": "保存设置",
-  "mgmt.notif_master_label": "主通知引擎",
+  "mgmt.notif_master_label": "发送提醒",
   "mgmt.notif_master_desc": "禁用后将不会向外部服务或群组发送任何通知。",
   "mgmt.notif_channels_title": "警报分发渠道",
   "mgmt.notif_rules_title": "子系统触发器与灵敏度",
@@ -7738,5 +7738,10 @@ export default {
   "shares.page_title": "共享文件夹",
   "shares.page_desc": "家里的人从电脑和手机打开的文件夹。每个文件夹都写明谁能打开以及如何连接。",
   "shares.advanced": "其他连接方式：SFTP，以及各项服务的状态",
-  "general.tech_details": "技术详情"
+  "general.tech_details": "技术详情",
+  "ntf.dest_email": "电子邮件",
+  "ntf.dest_webhook": "Webhook",
+  "ntf.sentence_off": "提醒已关闭：出问题时没有人会收到通知。",
+  "ntf.sentence_nobody": "出问题时还没有人会收到通知：请在下方选择提醒发送到哪里。",
+  "ntf.sentence_to": "提醒会发送到 {where}。"
 };

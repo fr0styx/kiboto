@@ -353,6 +353,9 @@
 /* General: technical details folded (SET-23) */
 .ab-tech { margin-top: 10px; }
 .ab-tech > summary { cursor: pointer; font-weight: 700; font-size: var(--kb-fs-sm); }
+/* Notifications: the Send alerts sentence (SET-23) */
+#notif-master-sentence { margin: 0; }
+#notif-master-sentence.is-warn { color: var(--kb-text-warn); font-weight: 600; }
 .net-link { color: var(--kb-text-accent); font-weight: 600; }
 /* Network: This NAS at home and one row per port (SET-24 m) */
 .net-home { margin-bottom: 14px; }

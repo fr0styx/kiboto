@@ -1816,7 +1816,7 @@ export default {
   "mgmt.notif_desc": "Envíe alertas críticas (fallos SMART, temperatura, eventos SAI) a Discord, Telegram, Email o ntfy.",
   "mgmt.notif_btn_test_all": "Enviar alerta de prueba",
   "mgmt.notif_btn_save": "Guardar cambios",
-  "mgmt.notif_master_label": "Motor principal de notificaciones",
+  "mgmt.notif_master_label": "Enviar avisos",
   "mgmt.notif_master_desc": "Si está desactivado, no se enviará ninguna notificación externa.",
   "mgmt.notif_channels_title": "CANALES DE ALERTA",
   "mgmt.notif_rules_title": "DISPARADORES DE EVENTOS Y SENSIBILIDAD",
@@ -7738,5 +7738,10 @@ export default {
   "shares.page_title": "Carpetas compartidas",
   "shares.page_desc": "Las carpetas que las personas de casa abren desde sus ordenadores y teléfonos. Cada una dice quién puede abrirla y cómo conectarse.",
   "shares.advanced": "Otras formas de conectarse: SFTP, y el estado de cada servicio",
-  "general.tech_details": "Detalles técnicos"
+  "general.tech_details": "Detalles técnicos",
+  "ntf.dest_email": "correo",
+  "ntf.dest_webhook": "un webhook",
+  "ntf.sentence_off": "Los avisos están apagados: nadie se entera cuando algo falla.",
+  "ntf.sentence_nobody": "Aún nadie se entera cuando algo falla: elige abajo adónde van los avisos.",
+  "ntf.sentence_to": "Los avisos van a {where}."
 };

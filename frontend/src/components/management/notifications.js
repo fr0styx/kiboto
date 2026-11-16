@@ -26,6 +26,32 @@ export async function fetchAndRenderNotificationConfig() {
   }
 }
 
+/** The channels alerts really go to: switched on and set up (the same test as their badges). */
+export function alertDestinations(cfg = {}) {
+  const out = [];
+  if (cfg.email_enabled && cfg.smtp_host) out.push(t('ntf.dest_email', 'e-mail'));
+  if (cfg.telegram_enabled && cfg.telegram_bot_token && cfg.telegram_chat_id) out.push('Telegram');
+  if (cfg.discord_enabled && cfg.discord_webhook_url) out.push('Discord');
+  if (cfg.ntfy_enabled && cfg.ntfy_topic) out.push('ntfy');
+  if (cfg.webhook_enabled && cfg.webhook_url) out.push(t('ntf.dest_webhook', 'a webhook'));
+  if (Array.isArray(cfg.apprise_urls) && cfg.apprise_urls.length && cfg.apprise_enabled !== false) out.push('Apprise');
+  return out;
+}
+
+/** [sentence, warn] for the Send alerts card (SET-23): true, and amber when nobody would be told. */
+export function alertSentence(cfg = {}) {
+  if (!cfg.enabled) return [t('ntf.sentence_off', 'Alerts are off: nobody is told when something breaks.'), true];
+  const where = alertDestinations(cfg);
+  if (!where.length) return [t('ntf.sentence_nobody', 'Nobody is told when something breaks yet: choose where alerts go below.'), true];
+  let list = where.join(', ');
+  try {
+    list = new Intl.ListFormat(document.documentElement.lang || 'en', { type: 'conjunction' }).format(where);
+  } catch {
+    /* an old browser: commas */
+  }
+  return [t('ntf.sentence_to', 'Alerts go to {where}.', { where: list }), false];
+}
+
 export function renderNotificationConfigUI() {
   if (!_notificationConfig) return;
   const cfg = _notificationConfig;
@@ -52,6 +78,12 @@ export function renderNotificationConfigUI() {
   const masterSwitch = document.getElementById('notif-master-enabled');
   const masterBadge = document.getElementById('notif-master-status-badge');
   if (masterSwitch) masterSwitch.checked = !!cfg.enabled;
+  const sentence = document.getElementById('notif-master-sentence');
+  if (sentence) {
+    const [text, warn] = alertSentence(cfg);
+    sentence.textContent = text;
+    sentence.classList.toggle('is-warn', warn);
+  }
   if (masterBadge) {
     masterBadge.textContent = cfg.enabled ? t('notif.badge.active', 'Active') : t('notif.badge.disabled', 'Disabled');
     masterBadge.style.background = cfg.enabled ? 'rgba(51,205,184,0.15)' : 'rgba(255,255,255,0.06)';
