@@ -17,6 +17,8 @@ import { bindCheckersForm } from './ai-checkers.js';
 import { formatDateTime, formatFixed, formatNumber, formatTime } from '../../format.js';
 import { setIconLabel } from '../../ui/primitives.js';
 import { currentUser } from '../../route-access.js';
+import { renderKibStatusLine } from './kib-status-line.js';
+import { renderKibFolders } from './kib-folders.js';
 
 // An icon next to translated words: screen readers skip it (UX-35)
 const ico = (e) => `<span aria-hidden="true">${e}</span>`;
@@ -1750,10 +1752,48 @@ export function initAiKnowledgeEngine() {
   }, 300);
 }
 
+/** What the status line's one button does, per state (AI 4). */
+export function kibStatusActions() {
+  return {
+    pause: () => controlAiSync('pause'),
+    resume: () => controlAiSync('resume'),
+    why: () => openAiLearningResults(),
+    on: () => updateAiServiceConfig({ enabled: true }),
+    folders: () => document.getElementById('ai-watched-dropdown-summary')?.closest('button, [role="button"], div')?.scrollIntoView({ block: 'center' }),
+  };
+}
+
+/** What the folder list's tick boxes and menu do (AI 4). */
+export function kibFolderActions() {
+  return {
+    // each change redraws the list from the server, which says what Kib now reads
+    tick: (path, on) => (on ? addAiWatchedFolder(path) : removeAiWatchedFolder(path)).then(() => fetchAndRenderAiStatus()),
+    read: (path) => runAiPathIndex(path),
+    stop: (path) => removeAiWatchedFolder(path).then(() => fetchAndRenderAiStatus()),
+    forget: (path) => forgetAiFolder(path).then(() => fetchAndRenderAiStatus()),
+    unforget: async (path) => {
+      try {
+        await api.post('/api/ai/folders', { action: 'remove', target: 'excluded', path });
+        await fetchAndRenderAiStatus();
+      } catch (err) {
+        showToast(t('kibf.unforget_failed', 'Could not take the folder off the list: {error}', { error: err.message }), 'error');
+      }
+    },
+    add: () => {
+      const browse = /** @type {any} */ (window).openFolderBrowser;
+      if (typeof browse === 'function') {
+        browse('/mnt/user/', (picked) => addAiWatchedFolder(String(picked || '').replace(/\/+$/, '') || '/mnt/user'));
+      }
+    },
+  };
+}
+
 export async function fetchAndRenderAiStatus() {
   try {
     const res = await api.get('/api/media/status');
     if (!res) return null;
+    renderKibStatusLine(document.getElementById('kib-status-mount'), res, kibStatusActions());
+    renderKibFolders(document.getElementById('kib-folders-mount'), res, kibFolderActions());
 
     const hw = res.hardware || res.acceleration || {};
     const stats = res.index_stats || {};

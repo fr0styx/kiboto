@@ -483,3 +483,31 @@
 .mgmt-vm-state { font-size: var(--kb-fs-xs); font-weight: 600; color: var(--muted); white-space: nowrap; }
 .mgmt-vm-line.is-running .mgmt-vm-state { color: var(--kb-text-ok); }
 .mgmt-vm-line.is-paused .mgmt-vm-state { color: var(--kb-text-warn); }
+/* Kib's status line (AI 4): icon and words first, the one button that fits on the right */
+.kib-status-line { display: flex; align-items: center; gap: 12px; padding: 12px 14px; margin: 0 0 14px; border: 1px solid var(--kb-line-10); border-radius: 10px; }
+.kib-status-icon { font-size: 1.2em; width: 1.5em; text-align: center; flex: 0 0 auto; }
+.kib-status-text { display: flex; flex-direction: column; gap: 2px; flex: 1 1 auto; min-width: 0; }
+.kib-status-text > span { font-size: var(--kb-fs-xs); color: var(--muted); }
+.kib-status-line.is-ready .kib-status-icon { color: var(--kb-text-ok); }
+.kib-status-line.is-look .kib-status-icon { color: var(--kb-text-warn); }
+@media (max-width: 600px) { .kib-status-line { flex-wrap: wrap; } .kib-status-line > button { margin-left: auto; } }
+/* "Kib can read these folders" (AI 4): one row per folder, a real tick box, the state in words */
+.kibf { display: flex; flex-direction: column; gap: 8px; }
+.kibf-intro { margin: 0; font-size: var(--kb-fs-xs); color: var(--muted); }
+.kibf-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.kibf-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid var(--kb-line-7); border-radius: 8px; min-height: 44px; box-sizing: border-box; }
+.kibf-row input[type="checkbox"] { width: 18px; height: 18px; flex: 0 0 auto; }
+.kibf-name { display: flex; flex-direction: column; gap: 1px; flex: 1 1 auto; min-width: 0; cursor: pointer; }
+.kibf-path { font-size: var(--kb-fs-xs); color: var(--muted); overflow-wrap: anywhere; }
+.kibf-state { font-size: var(--kb-fs-xs); font-weight: 600; white-space: nowrap; color: var(--kb-text-ok); }
+.kibf-state.is-asleep { color: var(--muted); }
+.kibf-menu { position: relative; }
+.kibf-menu > summary { list-style: none; cursor: pointer; }
+.kibf-menu > summary::-webkit-details-marker { display: none; }
+.kibf-menu-list { position: absolute; right: 0; top: calc(100% + 4px); z-index: 30; display: flex; flex-direction: column; min-width: 260px; padding: 4px; border: 1px solid var(--kb-line-10); border-radius: 8px; background: var(--card); box-shadow: 0 8px 24px var(--lt-b-0000008c, rgba(0,0,0,0.55)); }
+.kibf-menu-list > button { text-align: left; padding: 9px 10px; border: 0; border-radius: 6px; background: transparent; color: var(--kb-text); cursor: pointer; font: inherit; font-size: var(--kb-fs-xs); }
+.kibf-menu-list > button:hover, .kibf-menu-list > button:focus-visible { background: var(--kb-glaze-10); }
+.kibf-sub { margin: 10px 0 2px; font-size: var(--kb-fs-xs); }
+.kibf > [data-kibf-act="add"] { align-self: flex-start; }
+.kibf-empty { font-size: var(--kb-fs-xs); color: var(--muted); padding: 6px 2px; }
+@media (max-width: 600px) { .kibf-row { flex-wrap: wrap; } .kibf-state { order: 3; margin-left: 28px; } }

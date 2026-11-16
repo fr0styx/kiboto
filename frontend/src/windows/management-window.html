@@ -3665,8 +3665,9 @@
 
             <!-- Tab 3: Dedicated Configuration (Service Switch, Scope/Schedule/Standby Rules, Watched Shares & NPU/GPU Models) -->
             <div id="mgmt-pane-ai-index" class="mgmt-tab-pane" style="display: none;">
-              <!-- Informational Live Telemetry Ribbon: Hardware Accelerator, Standby Guard & Index Status -->
-              <div class="ai-telemetry-ribbon" id="ai-telemetry-ribbon" style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px; padding:10px 14px; margin-bottom:12px; background:var(--lt-b-0e1c1ea6, rgba(14,28,30,0.65)); border:1px solid rgba(51,205,184,0.3); border-radius:10px; box-sizing:border-box;">
+              <!-- AI 4: one status line in place of the ribbon's five pills -->
+              <div id="kib-status-mount"></div>
+              <div class="ai-telemetry-ribbon" id="ai-telemetry-ribbon" hidden style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px; padding:10px 14px; margin-bottom:12px; background:var(--lt-b-0e1c1ea6, rgba(14,28,30,0.65)); border:1px solid rgba(51,205,184,0.3); border-radius:10px; box-sizing:border-box;">
                 <div class="aix-row">
                   <span class="ai-tier-badge" id="ai-accel-chain-pill" style="display:inline-flex; align-items:center; gap:4px; padding:3px 9px; border-radius:999px; font-size:var(--kb-fs-xs); font-weight:700; background:rgba(51,205,184,0.18); color:var(--lt-ink-brand, var(--accent-cyan, #33cdb8)); border:1px solid rgba(51,205,184,0.4); flex-shrink:0;">
                     <span class="aix-xs">⚡</span>
@@ -3939,8 +3940,8 @@
               <div style="background:var(--lt-b-0e1c1e73, rgba(14,28,30,0.45)); border:1px solid var(--kb-line-10); border-radius:10px; padding:14px; display:flex; flex-direction:column; gap:12px; margin-bottom:12px;">
                 <div class="aix-row-9">
                   <div>
-                    <div class="aix-fs13-bold-strong-3"><span aria-hidden="true">📁</span> <span data-i18n="ai.index_folder_title">Watched Folders, NAS Shares &amp; Sync</span></div>
-                    <p style="font-size:var(--kb-fs-xs); color:var(--muted,#95a8ab); margin:0;" data-i18n="ai.index_folder_desc">Choose which NAS shares Kib learns from. Files on sleeping drives are learned when the drive spins up.</p>
+                    <div class="aix-fs13-bold-strong-3"><span aria-hidden="true">📁</span> <span data-i18n="ai.index_folder_title">Kib can read these folders</span></div>
+                    <p style="font-size:var(--kb-fs-xs); color:var(--muted,#95a8ab); margin:0;" data-i18n="ai.index_folder_desc" hidden>Choose which NAS shares Kib learns from. Files on sleeping drives are learned when the drive spins up.</p>
                   </div>
                   <!-- Sync Transport Controls + Learning Results Button -->
                   <div class="aix-row-6">
@@ -4009,12 +4010,14 @@
 
                 <!-- Unified Watched Folders Multi-Select Dropdown Checklist -->
                 <div class="aix-col" id="ai-watched-folders-section">
-                  <div class="aix-row-12">
+                  <!-- AI 4: the always-open folder list with words; the dropdown and chips below stay hidden -->
+                  <div id="kib-folders-mount" class="kibf"></div>
+                  <div class="aix-row-12" hidden>
                     <span class="aix-xs-bold-accent" data-i18n="ai.watched_folders_label">Watched Folders (Click Dropdown to Check/Uncheck Shares for RAG)</span>
                     <span style="font-size:var(--kb-fs-xs); color:var(--muted,#95a8ab);" data-i18n="ai.watched_folders_hint">Tick a folder to let AI search read it; untick it to stop.</span>
                   </div>
 
-                  <div class="aix-row-13">
+                  <div class="aix-row-13" hidden>
                     <div class="aix-grow" id="ai-watched-folders-dropdown-container">
                       <button type="button" id="btn-ai-watched-folders-dropdown" aria-expanded="false" style="width:100%; min-height:38px; padding:6px 12px; border-radius:8px; background:var(--lt-b-0e1c1ed9, rgba(14,28,30,0.85)); border:1px solid rgba(79,216,196,0.42); color:var(--lt-t-f5f9f9ff, #f5f9f9); font-size:var(--kb-fs-xs); display:flex; justify-content:space-between; align-items:center; gap:10px; cursor:pointer; text-align:left;">
                         <div class="aix-row-14">
@@ -4039,7 +4042,7 @@
                   </div>
 
                   <!-- Compact active checked chips summary -->
-                  <div class="aix-row-16" id="ai-watched-folders-list"></div>
+                  <div class="aix-row-16" id="ai-watched-folders-list" hidden></div>
 
                   <div id="ai-index-run-feedback" style="font-size:var(--kb-fs-xs); color:var(--ok2,#33cdb8);"></div>
                   <div id="ai-index-db-summary" style="font-size:var(--kb-fs-xs); color:var(--muted,#95a8ab); display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:4px; padding-top:6px; border-top:1px solid var(--kb-line-6);"></div>

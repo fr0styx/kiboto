@@ -339,6 +339,15 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   with the new setting and switches when it is done. Search keeps working as before in the meantime, instead of
   quietly falling back to exact words.
 
+#### Changes
+
+- **Kib's settings start with one status line**: "Kib is ready. Kib can read 3 folders. It knows 12,480 files.", or
+  reading, paused, outside the reading hours, waiting for a drive, off, or what needs a look, with the one button
+  that fits. It replaces the row of hardware, model and "Standby Guard" pills.
+- **"Kib can read these folders" is an always-open list**: a tick box per folder, its state in words ("Up to date",
+  "Reading", "Waiting for a drive to wake"), a menu with "Read now", "Stop reading" and "Stop reading and forget this
+  folder", "Add a folder…", and a "Never read" list with Remove. No device names, no "RAG Checked".
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 
