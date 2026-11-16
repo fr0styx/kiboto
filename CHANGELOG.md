@@ -298,6 +298,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **The monthly disk check** no longer reads "Off off: a scrub spins up…"; it says once that turning it on
   wakes the disks once a month.
 
+#### Changes
+
+- **The last ZettNAS names at run time are gone**: the hardware runner and the fan watchdog's heartbeat
+  use Kiboto's names (the old heartbeat name is still written until 2.2 for older watchdogs).
+
 ## v2.0.2 (2026-11-12)
 ### 🧭 A new Settings sidebar, five themes, honest pages, and remote access cut down to what works
 

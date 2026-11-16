@@ -8,6 +8,7 @@ beat with "released": true. /dev/shm is memory: the beats never wake a disk."""
 import os
 import time
 
+from backend import legacy_names
 from backend.config import HOST_DEV, logger
 from backend.fsutil import atomic_write_json
 
@@ -16,7 +17,14 @@ _last = 0.0
 
 
 def heartbeat_path() -> str:
-    return os.environ.get("FAN_WATCHDOG_HEARTBEAT") or os.path.join(HOST_DEV, "shm", "zettnas-fan-heartbeat.json")
+    return os.environ.get("FAN_WATCHDOG_HEARTBEAT") or os.path.join(HOST_DEV, "shm", "kiboto-fan-heartbeat.json")
+
+
+def legacy_path() -> str | None:
+    """Where a watchdog from before the rebrand looks; None when the path is set by hand."""
+    if os.environ.get("FAN_WATCHDOG_HEARTBEAT"):
+        return None
+    return os.path.join(HOST_DEV, "shm", legacy_names.OLD_FAN_HEARTBEAT)
 
 
 def beat(released: bool = False, now: float | None = None, force: bool = False) -> bool:
@@ -25,8 +33,12 @@ def beat(released: bool = False, now: float | None = None, force: bool = False) 
     now = time.time() if now is None else now
     if not force and now - _last < BEAT_EVERY:
         return True
+    data = {"ts": now, "released": bool(released), "pid": os.getpid()}
     try:
-        atomic_write_json(heartbeat_path(), {"ts": now, "released": bool(released), "pid": os.getpid()})
+        atomic_write_json(heartbeat_path(), data)
+        old = legacy_path()
+        if old:
+            atomic_write_json(old, data)  # a watchdog pinned to an older image still hears it (until 2.2)
     except OSError:
         logger.debug("fan heartbeat not written", exc_info=True)
         return False

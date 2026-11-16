@@ -9,7 +9,7 @@ if [ -f "$STATE/.runner" ]; then
 else
   : "${RUNNER_TOKEN:?first start needs RUNNER_TOKEN}"
   ./config.sh --unattended --url "${RUNNER_URL:-https://github.com/fr0styx/kiboto}" \
-    --token "$RUNNER_TOKEN" --name "${RUNNER_NAME:-kiboto-hw-1}" --labels zettnas-hardware \
+    --token "$RUNNER_TOKEN" --name "${RUNNER_NAME:-kiboto-hw-1}" --labels kiboto-hardware \
     --no-default-labels --work _work --replace
   mkdir -p "$STATE"
   cp .runner .credentials .credentials_rsaparams "$STATE/"

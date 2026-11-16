@@ -24,7 +24,7 @@ Kiboto install runs three every night (`.github/workflows/hardware.yml`), in thi
 
 - The workflow runs only on its schedule or by hand, from `main`. It has no `pull_request`
   trigger, so code from a fork never reaches the machine. No other workflow uses the runner's
-  label (`zettnas-hardware`), and the runner has no default labels.
+  label (`kiboto-hardware`), and the runner has no default labels.
 - The runner joins the app's private Docker network (`kiboto_default`) so the AI eval
   can reach the model servers, which have no published ports and no sign-in; that is also why
   only code from `main` may run there.
@@ -42,7 +42,7 @@ Kiboto install runs three every night (`.github/workflows/hardware.yml`), in thi
 3. Start it (the token is used once; the registration is kept in the state folder):
 
 ```bash
-docker run -d --name kiboto-hw-runner --restart unless-stopped --hostname zettnas-hw \
+docker run -d --name kiboto-hw-runner --restart unless-stopped --hostname kiboto-hw \
   -e RUNNER_TOKEN=<token> -e HOST_PROC=/host/proc -e HW_RESULTS_DIR=/results \
   -v /proc:/host/proc:ro \
   -v /mnt/user/appdata/kiboto-hw-runner/state:/home/runner/state \

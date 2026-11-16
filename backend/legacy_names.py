@@ -40,6 +40,7 @@ OLD_SELF_UPDATER = "zettnas-self-updater"
 OLD_APP_CONTAINER = "zettnas-toolkit"  # the app's own container on installs made before
 OLD_APP_CONTAINER_NAMES = ("zettnas-toolkit", "zettnas", "zettnas_toolkit")
 OLD_ROLLBACK_REPO = "zettnas-toolkit-rollback"  # rollback images tagged before keep their tag
+OLD_FAN_HEARTBEAT = "zettnas-fan-heartbeat.json"  # a fan watchdog from before reads this name (written too)
 OLD_HOST_APPDATA = "/mnt/user/appdata/zettnas-toolkit"  # Unraid's appdata folder on installs made before
 OLD_MODEL_SERVERS = ("zettnas-ollama", "zettnas-ovms")
 OLD_SESSION_COOKIE = "zettnas_session"  # browsers signed in before the rebrand still send it

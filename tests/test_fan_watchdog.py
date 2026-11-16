@@ -25,7 +25,7 @@ def test_beats_are_written_and_throttled(tmp_path, monkeypatch):
 
 def test_the_default_place_is_the_hosts_dev_shm(monkeypatch):
     monkeypatch.delenv("FAN_WATCHDOG_HEARTBEAT", raising=False)
-    assert fan_heartbeat.heartbeat_path().endswith("/shm/zettnas-fan-heartbeat.json")
+    assert fan_heartbeat.heartbeat_path().endswith("/shm/kiboto-fan-heartbeat.json")
 
 
 def test_when_to_step_in():
@@ -128,3 +128,19 @@ def test_dry_run_only_logs(monkeypatch, capsys):
     monkeypatch.setattr(wd, "DRY_RUN", True)
     assert wd._release() is True
     assert "dry run" in capsys.readouterr().out
+
+
+def test_a_beat_also_reaches_a_watchdog_from_before_the_rebrand(tmp_path, monkeypatch):
+    """The app writes the new name and the old one; a hand-set path gets only itself."""
+    import json
+
+    from backend.services import fan_heartbeat
+
+    monkeypatch.delenv("FAN_WATCHDOG_HEARTBEAT", raising=False)
+    monkeypatch.setattr(fan_heartbeat, "HOST_DEV", str(tmp_path))
+    (tmp_path / "shm").mkdir()
+    assert fan_heartbeat.beat(force=True, now=100.0)
+    for name in ("kiboto-fan-heartbeat.json", "zettnas-fan-heartbeat.json"):
+        assert json.loads((tmp_path / "shm" / name).read_text())["ts"] == 100.0
+    monkeypatch.setenv("FAN_WATCHDOG_HEARTBEAT", str(tmp_path / "own.json"))
+    assert fan_heartbeat.legacy_path() is None
