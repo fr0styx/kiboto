@@ -3565,7 +3565,8 @@ export function openFileManager(path = null) {
   if (primary) {
     primary.open(path);
   }
-  ZettEventBus.emit('window:open', { id: 'file-manager-window', path: path || undefined });
+  // others hear that it opened; it is not opened a second time (that read the folder and the roots twice: Files 5)
+  ZettEventBus.emit('window:open', { id: 'file-manager-window', path: path || undefined, opened: true });
 }
 window.openFileManager = openFileManager;
 
@@ -3612,7 +3613,7 @@ export function initFileManager() {
     });
 
     primary.open();
-    ZettEventBus.emit('window:open', { id: 'file-manager-window' });
+    ZettEventBus.emit('window:open', { id: 'file-manager-window', opened: true }); // already open: not twice (Files 5)
   };
 
   if (fmIcon) {
@@ -3635,7 +3636,7 @@ export function initFileManager() {
   }
 
   ZettEventBus.on('window:open', (payload) => {
-    if (payload.id === 'file-manager-window') {
+    if (payload.id === 'file-manager-window' && !payload.opened) {
       primary.open(payload.path);
     }
   });

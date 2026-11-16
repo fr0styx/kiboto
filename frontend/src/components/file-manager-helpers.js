@@ -253,14 +253,16 @@ export class FmSidebarTree {
     this.init();
   }
 
+  /** Draws the tree only: the window is built at start-up, hidden, and asking for the roots and the
+   *  favourites then could wake sleeping drives before anyone opened Files (SET-28, Files 5). */
   async init() {
     if (!this.container) return;
-    await Promise.all([this.loadRoots(), loadFavorites()]);
     this.render();
   }
 
+  /** Reads the roots (and the favourites, once) and draws; open() calls this. */
   async refresh() {
-    await this.loadRoots();
+    await Promise.all([this.loadRoots(), loadFavorites()]);
     this.render();
     this.updateActive(this.fm.currentPath);
   }

@@ -269,6 +269,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Backup opens with fewer requests**: what is folded (More, and the list of every earlier version,
   which reads the pool's folders) loads only when you open it.
 
+#### Changes
+
+- **Files asks for nothing before you open it**, and reads the folder and the drive list once when you
+  do (it read them twice), so sleeping drives are left alone.
+
 ## v2.0.2 (2026-11-12)
 ### 🧭 A new Settings sidebar, five themes, honest pages, and remote access cut down to what works
 
