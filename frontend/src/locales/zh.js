@@ -7912,5 +7912,8 @@ export default {
   "mvm.load_failed": "无法加载虚拟机。",
   "mvm.try_again": "重试",
   "vmd.ram_unknown": "可供虚拟机使用的内存未知；会在虚拟机启动时检查。",
-  "vm.tpm_available": "可用安全芯片（vTPM）"
+  "vm.tpm_available": "可用安全芯片（vTPM）",
+  "storage.sum_watch": "{n, plural, other {所有硬盘都在工作。硬盘健康正在留意 # 块硬盘。}}",
+  "storage.sum_watch_item": "{place} 的 {model}：请留意",
+  "storage.m2_n": "M.2 插槽 {n}"
 };

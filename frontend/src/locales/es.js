@@ -7912,5 +7912,8 @@ export default {
   "mvm.load_failed": "No se pudieron cargar las máquinas virtuales.",
   "mvm.try_again": "Reintentar",
   "vmd.ram_unknown": "No se sabe cuánta memoria queda para las máquinas; se comprueba al arrancar la máquina.",
-  "vm.tpm_available": "Chip de seguridad (vTPM) disponible"
+  "vm.tpm_available": "Chip de seguridad (vTPM) disponible",
+  "storage.sum_watch": "{n, plural, one {Todos los discos funcionan. Salud de discos vigila # disco.} other {Todos los discos funcionan. Salud de discos vigila # discos.}}",
+  "storage.sum_watch_item": "{model} en {place}: vigílalo",
+  "storage.m2_n": "Ranura M.2 {n}"
 };

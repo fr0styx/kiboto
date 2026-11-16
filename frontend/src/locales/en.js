@@ -7912,5 +7912,8 @@ export default {
   "mvm.load_failed": "The virtual machines could not be loaded.",
   "mvm.try_again": "Try again",
   "vmd.ram_unknown": "The memory left for machines is not known; it is checked when the machine starts.",
-  "vm.tpm_available": "Security chip (vTPM) available"
+  "vm.tpm_available": "Security chip (vTPM) available",
+  "storage.sum_watch": "{n, plural, one {All drives work. Drive Health keeps an eye on # drive.} other {All drives work. Drive Health keeps an eye on # drives.}}",
+  "storage.sum_watch_item": "{model} in {place}: keep an eye on it",
+  "storage.m2_n": "M.2 slot {n}"
 };

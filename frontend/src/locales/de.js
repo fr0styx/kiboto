@@ -7912,5 +7912,8 @@ export default {
   "mvm.load_failed": "Die virtuellen Maschinen konnten nicht geladen werden.",
   "mvm.try_again": "Erneut versuchen",
   "vmd.ram_unknown": "Der freie Speicher für Maschinen ist nicht bekannt; er wird beim Start der Maschine geprüft.",
-  "vm.tpm_available": "Sicherheitschip (vTPM) verfügbar"
+  "vm.tpm_available": "Sicherheitschip (vTPM) verfügbar",
+  "storage.sum_watch": "{n, plural, one {Alle Laufwerke arbeiten. Laufwerkszustand behält # Laufwerk im Auge.} other {Alle Laufwerke arbeiten. Laufwerkszustand behält # Laufwerke im Auge.}}",
+  "storage.sum_watch_item": "{model} in {place}: im Auge behalten",
+  "storage.m2_n": "M.2-Steckplatz {n}"
 };

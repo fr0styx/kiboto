@@ -17,8 +17,22 @@ export function storageItems(summary) {
   return (summary?.items || []).filter((i) => STORAGE_ID.test(i.id || '') || ['drives', 'storage'].includes(i.open));
 }
 
-/** [sentence, tone]: what needs a look, that a check could not run, or that all is fine. */
-export function storageSentence(summary) {
+/** The drives Drive Health keeps an eye on ("watch"), from the bay picture's stored verdicts:
+ *  [{model, place}], where place is "Bay 2" or "M.2 slot 1". Read from memory, no drive woken. */
+export function watchedDrives(chassis) {
+  const out = [];
+  for (const bay of chassis?.bays || []) {
+    if (bay?.disk?.verdict === 'watch') out.push({ model: bay.disk.model || bay.disk.dev || '', place: t('chassis.bay_n', 'Bay {n}', { n: (bay.slot_index ?? 0) + 1 }) });
+  }
+  for (const [i, slot] of (chassis?.nvme_slots || []).entries()) {
+    if (slot?.disk?.verdict === 'watch') out.push({ model: slot.disk.model || slot.disk.name || '', place: t('storage.m2_n', 'M.2 slot {n}', { n: i + 1 }) });
+  }
+  return out;
+}
+
+/** [sentence, tone]: what needs a look, that a check could not run, that drives are watched, or
+ *  that all is fine. "All drives are fine" never stands beside a drive marked "Keep an eye on it". */
+export function storageSentence(summary, watched = []) {
   const items = storageItems(summary);
   if (items.length) {
     const tone = items.some((i) => i.level === 'critical') ? 'bad' : 'warn';
@@ -26,6 +40,9 @@ export function storageSentence(summary) {
   }
   if ((summary?.unchecked || []).some((c) => STORAGE_CHECKS.includes(c))) {
     return [t('storage.sum_unknown', "Kiboto couldn't check every drive just now."), 'warn'];
+  }
+  if (watched.length) {
+    return [t('storage.sum_watch', '{n, plural, one {All drives work. Drive Health keeps an eye on # drive.} other {All drives work. Drive Health keeps an eye on # drives.}}', { n: watched.length }), 'ok'];
   }
   return [t('storage.sum_ok', 'All drives are fine.'), 'ok'];
 }
@@ -52,12 +69,17 @@ export async function renderStorageSummary(mount = document.getElementById('stor
     });
   }
   let summary;
+  let chassis = null;
   try {
-    summary = await api.get('/api/system/status-summary');
+    [summary, chassis] = await Promise.all([
+      api.get('/api/system/status-summary'),
+      api.get('/api/chassis/config').catch(() => null),
+    ]);
   } catch {
     summary = { items: [], unchecked: STORAGE_CHECKS };
   }
-  const [text, tone] = storageSentence(summary);
+  const watched = watchedDrives(chassis);
+  const [text, tone] = storageSentence(summary, watched);
   const line = el('p', `storage-sum-line is-${tone}`);
   line.append(el('strong', '', text));
   const when = formatTime(new Date());
@@ -80,6 +102,11 @@ export async function renderStorageSummary(mount = document.getElementById('stor
       }
       list.append(li);
     }
+    parts.push(list);
+  }
+  if (watched.length && !items.length) {
+    const list = el('ul', 'storage-sum-list');
+    for (const w of watched) list.append(el('li', 'storage-sum-item is-watch', t('storage.sum_watch_item', '{model} in {place}: keep an eye on it', w)));
     parts.push(list);
   }
   parts.push(again);

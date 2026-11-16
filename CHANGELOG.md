@@ -195,6 +195,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 
 - **USB for virtual machines leaves out root hubs**: the device list no longer offers the NAS's own USB root hubs.
 
+#### Changes
+
+- **Storage names the drives Drive Health is watching**: instead of "All drives are fine." beside a drive marked
+  "Keep an eye on it", the summary says "All drives work. Drive Health keeps an eye on 1 drive." and names it.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

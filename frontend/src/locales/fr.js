@@ -7912,5 +7912,8 @@ export default {
   "mvm.load_failed": "Les machines virtuelles n'ont pas pu être chargées.",
   "mvm.try_again": "Réessayer",
   "vmd.ram_unknown": "La mémoire restante pour les machines est inconnue ; elle est vérifiée au démarrage de la machine.",
-  "vm.tpm_available": "Puce de sécurité (vTPM) disponible"
+  "vm.tpm_available": "Puce de sécurité (vTPM) disponible",
+  "storage.sum_watch": "{n, plural, one {Tous les disques fonctionnent. Santé des disques surveille # disque.} other {Tous les disques fonctionnent. Santé des disques surveille # disques.}}",
+  "storage.sum_watch_item": "{model} dans {place} : à surveiller",
+  "storage.m2_n": "Emplacement M.2 {n}"
 };
