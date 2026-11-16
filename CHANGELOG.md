@@ -2,6 +2,14 @@
 
 Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep that name.
 
+## Unreleased
+
+#### Changes
+
+- **The Security check says it in words**: "Everything is fine" or "2 things need a look", with what needs a
+  look first, instead of "Score: 65/100 (grade C)". Plain HTTP costs nothing on your home network; it counts
+  only when something on the NAS is reachable from outside. The Overview shows the same number.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

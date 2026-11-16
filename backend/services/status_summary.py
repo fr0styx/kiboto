@@ -217,15 +217,13 @@ def _password() -> list[dict[str, Any]]:
 
 
 def _security() -> list[dict[str, Any]]:
-    """The security check's serious findings (critical or high), as one row: the Overview said
-    "Everything is fine" while the security check showed red rows (SET-14). The first-time
-    password has its own row above."""
+    """The rows the security check calls "Needs a look" (failed, and they count), as one row with
+    the same number (SET-23, Settings decision 4): the Overview said "Everything is fine" while the
+    security check showed red rows. The first-time password has its own row above."""
     from backend.services.security_advisor import evaluate_security_posture
 
-    issues = evaluate_security_posture(None).get("issues") or []
-    serious = [
-        i for i in issues if i.get("severity") in ("critical", "high") and i.get("id") != "sec-issue-default-password"
-    ]
+    checks = evaluate_security_posture(None).get("checks") or []
+    serious = [c for c in checks if not c.get("passed") and c.get("penalty") and c.get("id") != "default_password"]
     if not serious:
         return []
     level = "critical" if any(i.get("severity") == "critical" for i in serious) else "warning"

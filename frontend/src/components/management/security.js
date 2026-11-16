@@ -226,13 +226,28 @@ export function checkName(c) {
 /** A row's sentence: translated when the server said what goes into it (`params`), else its own. */
 export function checkDetails(c) {
   if (!c.params || typeof c.params !== 'object') return c.details || '';
-  return t(`sec.check.${c.id}.${c.passed ? 'ok' : 'look'}`, c.details || '', c.params);
+  // `variant` names a third sentence (plain HTTP at home, SET-23)
+  return t(`sec.check.${c.id}.${c.variant || (c.passed ? 'ok' : 'look')}`, c.details || '', c.params);
 }
+
+/** [sentence, tone] for the top of the security check, in words (SET-23, Settings decision 4). */
+export function checkVerdict(checks = []) {
+  const looks = checks.filter((c) => checkState(c) === 'look');
+  const tips = checks.filter((c) => checkState(c) === 'tip').length;
+  if (looks.length) {
+    const tone = looks.some((c) => c.severity === 'critical') ? 'bad' : 'warn';
+    return [t('sec.verdict_look', '{n, plural, one {# thing needs a look} other {# things need a look}}', { n: looks.length }), tone];
+  }
+  if (tips) return [t('sec.verdict_ok_tips', 'Everything is fine · {n, plural, one {# suggestion} other {# suggestions}}', { n: tips }), 'ok'];
+  return [t('sec.verdict_ok', 'Everything is fine'), 'ok'];
+}
+
+const ORDER = { look: 0, tip: 1, ok: 2 };
 
 const STATE_WORD = {
   ok: () => t('sec.state_ok', 'Passed'),
   tip: () => t('sec.state_tip', 'Suggestion'),
-  look: () => t('sec.state_look', 'Needs action'),
+  look: () => t('sec.state_look', 'Needs a look'),
 };
 
 // the safe-defaults findings that carry a fix of the same name (backend/services/safe_defaults_advisor.py)
@@ -269,33 +284,21 @@ export async function fetchAndRenderSecurityPosture() {
     if (!data) return;
 
     if (badge) {
-      badge.textContent = t('sec.score_grade', 'Score: {score}/100 (grade {grade})', { score: data.score, grade: data.grade });
-      if (data.score >= 90) {
-        badge.style.background = 'rgba(51,205,184,0.15)';
-        badge.style.color = 'var(--lt-t-33cdb8ff, #33cdb8)';
-        badge.style.borderColor = 'rgba(51,205,184,0.3)';
-      } else if (data.score >= 75) {
-        badge.style.background = 'rgba(79,216,196,0.15)';
-        badge.style.color = 'var(--kb-text-accent)';
-        badge.style.borderColor = 'rgba(79,216,196,0.3)';
-      } else if (data.score >= 50) {
-        badge.style.background = 'rgba(234,179,8,0.15)';
-        badge.style.color = 'var(--lt-t-eab308ff, #eab308)';
-        badge.style.borderColor = 'rgba(234,179,8,0.3)';
-      } else {
-        badge.style.background = 'rgba(239,68,68,0.15)';
-        badge.style.color = 'var(--lt-t-ef4444ff, #ef4444)';
-        badge.style.borderColor = 'rgba(239,68,68,0.3)';
-      }
+      const [sentence, tone] = checkVerdict(data.checks || []);
+      badge.textContent = sentence;
+      badge.dataset.tone = tone;
+      const look = { ok: ['rgba(51,205,184,0.15)', 'var(--lt-t-33cdb8ff, #33cdb8)', 'rgba(51,205,184,0.3)'], warn: ['rgba(234,179,8,0.15)', 'var(--lt-t-eab308ff, #eab308)', 'rgba(234,179,8,0.3)'], bad: ['rgba(239,68,68,0.15)', 'var(--lt-t-ef4444ff, #ef4444)', 'rgba(239,68,68,0.3)'] }[tone];
+      [badge.style.background, badge.style.color, badge.style.borderColor] = look;
     }
 
     if (container && Array.isArray(data.checks)) {
-      container.innerHTML = data.checks.map(c => {
+      const rows = [...data.checks].sort((x, y) => ORDER[checkState(x)] - ORDER[checkState(y)]);
+      container.innerHTML = rows.map(c => {
         const state = checkState(c);
         const passIcon = { ok: '✔', tip: 'ℹ', look: '✖' }[state];
         const passColor = { ok: 'var(--lt-t-22c55eff, #22c55e)', tip: 'var(--kb-text-muted)', look: 'var(--lt-t-fca5a5ff, #fca5a5)' }[state]; // the lighter red passes 4.5:1 on the dark row
         const badgeBg = c.passed ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)';
-        const actionText = c.passed ? t('sec.action_review', 'Review ➔') : t('sec.action_configure', 'Configure ➔');
+        const actionText = c.passed ? t('sec.action_review', 'Review') : t('sec.action_configure', 'Set up');
         return `
           <div class="sec-advisor-item ${c.passed ? 'passed' : 'needs-action'}" data-check-id="${escapeHtml(c.id)}" style="background:${badgeBg}; border:1px solid ${c.passed ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.3)'};">
             <div style="display:flex; align-items:center; gap:10px; flex:1; min-width:0;">

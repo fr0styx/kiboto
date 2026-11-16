@@ -27,7 +27,7 @@ describe('one security check (SET-14)', () => {
     await setLanguage('de');
     await fetchAndRenderSecurityPosture();
     const words = [...document.querySelectorAll('.sec-advisor-status-badge')].map((e) => e.textContent);
-    expect(words).toEqual(['Bestanden', 'Vorschlag', 'Handlungsbedarf']);
+    expect(words).toEqual(['Bitte prüfen', 'Vorschlag', 'Bestanden']); // what needs a look first (SET-23)
     expect(document.getElementById('sec-advisor-items').textContent).not.toMatch(/PASSED|NEEDS ACTION/);
   });
 });

@@ -3,7 +3,7 @@
   "buttonClasses": 75,
   "inlineStyles": 1272,
   "emojiIcons": 3,
-  "colours": 3773,
+  "colours": 3771,
   "primitiveUses": 4,
   "importantPerFile": {
     "frontend/index.html": 64,
@@ -75,7 +75,7 @@
     "frontend/src/components/management/docker.js": 101,
     "frontend/src/components/management/network.js": 17,
     "frontend/src/components/management/notifications.js": 8,
-    "frontend/src/components/management/security.js": 25,
+    "frontend/src/components/management/security.js": 23,
     "frontend/src/components/management/system.js": 23,
     "frontend/src/components/management/ups.js": 22,
     "frontend/src/components/metrics-chart.js": 27,

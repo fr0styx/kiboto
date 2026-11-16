@@ -87,8 +87,34 @@ def _check_admin_2fa(checks: list[dict[str, Any]], issues: list[dict[str, Any]])
         )
 
 
+# How the last page view connected: the Overview asks without a request, and should say what the
+# Security page said (SET-23)
+_last_https = {"seen": False}
+_OUTSIDE_TTL = 60.0
+_outside = {"at": 0.0, "public": False}
+
+
+def reachable_from_outside(now: float | None = None) -> bool:
+    """Something on this NAS is on the internet (share links, an app, Funnel): exposure's "public".
+    Read at most once a minute; a reading that fails counts as not reachable."""
+    now = time.time() if now is None else now
+    if now - _outside["at"] < _OUTSIDE_TTL:
+        return _outside["public"]
+    try:
+        from backend.services import exposure
+
+        public = exposure.summary().get("level") == "public"
+    except (OSError, ValueError, RuntimeError, KeyError, TypeError, AttributeError) as e:
+        logger.debug("[SecurityAdvisor] exposure unreadable: %s", e)
+        public = False
+    _outside.update(at=now, public=public)
+    return public
+
+
 def _check_https(checks: list[dict[str, Any]], issues: list[dict[str, Any]], request: Request | None) -> None:
-    """evaluate_security_posture: encrypted transport through HTTPS or a TLS proxy (weight 15)."""
+    """evaluate_security_posture: encrypted transport through HTTPS or a TLS proxy (weight 15). Plain
+    HTTP costs nothing on the home network and counts only when the NAS is reachable from outside
+    (Settings decision 4)."""
     is_https = False
     if getattr(config, "ENABLE_PROXY_SSO", False):
         is_https = True
@@ -96,22 +122,32 @@ def _check_https(checks: list[dict[str, Any]], issues: list[dict[str, Any]], req
         from backend.auth import request_is_https
 
         is_https = request_is_https(request)  # forwarded headers only from trusted proxies
+        _last_https["seen"] = is_https
+    else:
+        is_https = _last_https["seen"]
+    outside = False if is_https else reachable_from_outside()
+    counts = not is_https and outside
 
     checks.append(
         {
             "id": "https_transport",
-            "params": {},
+            "params": {"outside": outside},
+            **({"variant": "home"} if not is_https and not outside else {}),
             "name": "HTTPS Transport Encryption",
             "category": "Network",
             "passed": is_https,
-            "penalty": 0 if is_https else 15,
-            "severity": "medium" if not is_https else "info",
+            "penalty": 15 if counts else 0,
+            "severity": "info" if is_https else ("medium" if counts else "low"),
             "details": "Encrypted HTTPS / Reverse Proxy connection active"
             if is_https
-            else "Unencrypted HTTP session in use",
+            else (
+                "Unencrypted HTTP session in use while this NAS is reachable from outside"
+                if outside
+                else "Plain HTTP on the home network: fine at home; use HTTPS before anything reaches this NAS from outside"
+            ),
         }
     )
-    if not is_https:
+    if counts:
         issues.append(
             {
                 "id": "sec-issue-https-transport",

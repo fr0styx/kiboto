@@ -16,7 +16,7 @@ describe('security check rows (SET-14, Settings finding 25)', () => {
     expect(row.hasAttribute('tabindex')).toBe(false);
     const action = row.querySelector('button.sec-advisor-action-pill');
     expect(action).not.toBeNull();
-    expect(action.getAttribute('aria-label')).toBe('Configure: Some shared folders have no snapshots');
+    expect(action.getAttribute('aria-label')).toBe('Set up: Some shared folders have no snapshots');
     expect(row.querySelectorAll('button')).toHaveLength(2); // the fix and the action, side by side
   });
 });

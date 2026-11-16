@@ -91,7 +91,7 @@ describe('Security Advisor Hardening Checklist - Interactive Configuration Routi
     // the row is no button around buttons; its action is the button (SET-14)
     expect(first.getAttribute('role')).toBeNull();
     expect(first.querySelector('button.sec-advisor-action-pill')).not.toBeNull();
-    expect(first.querySelector('.sec-advisor-action-pill')?.textContent).toContain('Configure');
+    expect(first.querySelector('.sec-advisor-action-pill')?.textContent).toContain('Set up');
 
     const third = items[2];
     expect(third.dataset.checkId).toBe('https_transport');
