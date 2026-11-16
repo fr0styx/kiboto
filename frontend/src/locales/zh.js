@@ -7879,5 +7879,7 @@ export default {
   "signin.someone": "某人",
   "signin.unreadable": "无法读取登录记录：{error}",
   "signin.none": "还没有登录记录。",
-  "apps.search": "搜索应用"
+  "apps.search": "搜索应用",
+  "act.pinned": "尚未查看",
+  "act.mark_seen": "标为已查看"
 };

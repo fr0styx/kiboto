@@ -7879,5 +7879,7 @@ export default {
   "signin.someone": "Jemand",
   "signin.unreadable": "Das Anmeldeprotokoll konnte nicht gelesen werden: {error}",
   "signin.none": "Noch keine Anmeldungen aufgezeichnet.",
-  "apps.search": "Apps suchen"
+  "apps.search": "Apps suchen",
+  "act.pinned": "Noch nicht gesehen",
+  "act.mark_seen": "Als gesehen markieren"
 };

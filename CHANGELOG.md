@@ -98,6 +98,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Get apps starts with search**: a full-width "Search apps" box, the categories on one row, and an installed
   app's card offers Open for its page. The image and port show with "Show Docker details".
 
+#### Changes
+
+- **Problems you haven't seen stay on top of History** under "Not seen yet", until you mark them as seen there or
+  in the bell.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

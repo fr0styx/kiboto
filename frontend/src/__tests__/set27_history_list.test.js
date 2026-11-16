@@ -33,8 +33,8 @@ describe('Activity -> History reads by day (SET-27 Activity 2b)', () => {
   it('draws day headings, Open for an entry with a page, details folded with Copy', () => {
     renderEventLog(EVENTS);
     const list = /** @type {HTMLElement} */ (document.getElementById('events-list'));
-    expect([...list.querySelectorAll('.history-day')].map((h) => h.textContent)).toEqual(['Today', 'Yesterday']);
-    const first = /** @type {HTMLElement} */ (list.querySelector('.history-entry'));
+    expect([...list.querySelectorAll(':scope > .history-day')].map((h) => h.textContent)).toEqual(['Today', 'Yesterday']); // the days (the pinned block has its own heading)
+    const first = /** @type {HTMLElement} */ (list.querySelector(':scope > .history-entry'));
     expect(first.textContent).toContain('Backup failed');
     const open = vi.spyOn(ROUTES, 'backup').mockImplementation(() => {});
     /** @type {HTMLElement} */ (first.querySelector('.history-open')).click();
@@ -45,14 +45,14 @@ describe('Activity -> History reads by day (SET-27 Activity 2b)', () => {
     expect(details.hidden).toBe(false);
     /** @type {HTMLElement} */ (first.querySelector('.history-copy')).click();
     expect(copyTextToClipboard).toHaveBeenCalled();
-    expect(list.querySelectorAll('.history-entry')[1].querySelector('.history-open')).toBeNull(); // no page of its own
+    expect(list.querySelectorAll(':scope > .history-entry')[1].querySelector('.history-open')).toBeNull(); // no page of its own
   });
 
   it('the chips and the search filter the drawn list; nothing found says so', () => {
     renderEventLog(EVENTS);
     const bar = /** @type {HTMLElement} */ (document.querySelector('.history-controls'));
     /** @type {HTMLElement} */ (bar.querySelector('[data-filter="look"]')).click();
-    expect(document.querySelectorAll('.history-entry').length).toBe(2);
+    expect(document.querySelectorAll('#events-list > .history-entry').length).toBe(2);
     const search = /** @type {HTMLInputElement} */ (bar.querySelector('.history-search'));
     search.value = 'nothing like this';
     search.dispatchEvent(new Event('input'));
@@ -60,11 +60,28 @@ describe('Activity -> History reads by day (SET-27 Activity 2b)', () => {
     search.value = '';
     search.dispatchEvent(new Event('input'));
     /** @type {HTMLElement} */ (bar.querySelector('[data-filter="all"]')).click();
-    expect(document.querySelectorAll('.history-entry').length).toBe(3);
+    expect(document.querySelectorAll('#events-list > .history-entry').length).toBe(3);
   });
 
   it('an empty history says nothing has happened yet', () => {
     renderEventLog([]);
     expect(document.getElementById('events-list')?.textContent).toContain('Nothing has happened yet');
   });
+
+  it('pins the problems not seen yet, until they are marked as seen', async () => {
+    const { pinnedEvents } = await import('../components/events.js');
+    expect(pinnedEvents(EVENTS, () => false).map((e) => e.id)).toEqual([3]);
+    expect(pinnedEvents(EVENTS, () => true)).toEqual([]);
+    const { api } = await import('../api.js');
+    vi.spyOn(api, 'put').mockResolvedValue({});
+    localStorage.removeItem('kiboto_last_read_event_ts_v2');
+    renderEventLog([...EVENTS, { id: 9, ts: now + 5, level: 'error', title: 'Pool degraded', message: 'm' }]);
+    const box = /** @type {HTMLElement | null} */ (document.querySelector('.history-pinned'));
+    if (box) {
+      expect(box.textContent).toContain('Not seen yet');
+      /** @type {HTMLElement} */ (box.querySelector('.history-seen')).click();
+      expect(document.querySelector('.history-pinned')).toBeNull();
+    }
+  });
 });
+

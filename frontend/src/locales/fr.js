@@ -7879,5 +7879,7 @@ export default {
   "signin.someone": "Quelqu'un",
   "signin.unreadable": "Le journal des connexions n'a pas pu être lu : {error}",
   "signin.none": "Aucune connexion enregistrée pour l'instant.",
-  "apps.search": "Rechercher des apps"
+  "apps.search": "Rechercher des apps",
+  "act.pinned": "Pas encore vu",
+  "act.mark_seen": "Marquer comme vu"
 };

@@ -7879,5 +7879,7 @@ export default {
   "signin.someone": "Someone",
   "signin.unreadable": "The sign-in log couldn't be read: {error}",
   "signin.none": "No sign-ins recorded yet.",
-  "apps.search": "Search apps"
+  "apps.search": "Search apps",
+  "act.pinned": "Not seen yet",
+  "act.mark_seen": "Mark as seen"
 };

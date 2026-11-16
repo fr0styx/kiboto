@@ -397,6 +397,8 @@
 .history-actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
 .history-details { margin: 8px 0 0 26px; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
 .history-details pre { margin: 0; padding: 10px; width: 100%; box-sizing: border-box; background: var(--kb-shade-25); border-radius: 6px; font-size: var(--kb-fs-xs); white-space: pre-wrap; word-break: break-all; }
+.history-pinned { border: 1px solid var(--crit, #f0553b); border-radius: 10px; margin-bottom: 10px; padding-bottom: 4px; }
+.history-pinned-head { display: flex; justify-content: space-between; align-items: center; padding-right: 10px; }
 .history-none { padding: 14px; text-align: center; color: var(--muted); font-size: var(--kb-fs-xs); }
 /* Activity -> Right now (SET-27) */
 .right-now { margin: 0 0 14px; padding: 12px 14px; border: 1px solid var(--kb-line-8); border-radius: 10px; }

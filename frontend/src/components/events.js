@@ -4,6 +4,7 @@
  * each entry opens the page that deals with it, and its technical details fold open in place.
  */
 import { eventView, eventWhen, eventPlace, needsALook } from '../event-view.js';
+import { api } from '../api.js';
 import { escapeHtml, copyTextToClipboard } from '../utils.js';
 import { t, getLanguage } from '../i18n.js';
 import { formatDate, formatTime } from '../format.js';
@@ -24,6 +25,40 @@ export function dayLabel(ts, now = new Date()) {
   if (days === 0) return t('act.today', 'Today');
   if (days === 1) return t('act.yesterday', 'Yesterday');
   return formatDate(d);
+}
+
+// The "seen up to" mark the bell keeps (dock/notifications.js), read here without importing it: a
+// lazy module that imports small first-load helpers makes the build split them into first-load
+// chunks of their own, over the first-load budget (it did, 16 Nov 2026)
+const SEEN_COPY = 'kiboto_last_read_event_ts_v2'; // gitleaks:allow (a storage key name)
+
+export function seenUpTo(user = /** @type {any} */ (globalThis).kibotoUser) {
+  let local = 0;
+  try {
+    local = parseFloat(localStorage.getItem(SEEN_COPY) || '0') || 0;
+  } catch {
+    /* private window */
+  }
+  const prefs = (user && (user.preferences || user.user?.preferences)) || {};
+  return Math.max(local, Number(prefs.events_seen) || 0);
+}
+
+/** Everything up to the newest entry is seen, here and in the bell (saved with the account). */
+export function markSeen(events) {
+  const newest = Math.max(0, ...(events || []).map(eventWhen));
+  if (!newest) return 0;
+  try {
+    localStorage.setItem(SEEN_COPY, String(newest));
+  } catch {
+    /* private window */
+  }
+  api.put('/api/auth/me/preferences', { events_seen: newest }).catch(() => {});
+  return newest;
+}
+
+/** The problems not seen yet: red (failed or critical) and newer than the seen mark. */
+export function pinnedEvents(events, isRead = (e) => eventWhen(e) <= seenUpTo()) {
+  return (events || []).filter((e) => eventView(e).look === 'error' && !isRead(e));
 }
 
 /** The entries the chips and the search leave. */
@@ -154,6 +189,28 @@ export function renderEventLog(events) {
     return;
   }
   list.replaceChildren();
+  // problems not seen yet stay on top until read (Activity report section 4, row 1)
+  const pinned = _currentFilter === 'all' && !_query ? pinnedEvents(_events) : [];
+  if (pinned.length) {
+    const box = document.createElement('section');
+    box.className = 'history-pinned';
+    const head = document.createElement('div');
+    head.className = 'history-pinned-head';
+    const h = document.createElement('h3');
+    h.className = 'history-day';
+    h.textContent = t('act.pinned', 'Not seen yet');
+    const seen = document.createElement('button');
+    seen.type = 'button';
+    seen.className = 'btn-pill-toggle history-seen';
+    seen.textContent = t('act.mark_seen', 'Mark as seen');
+    seen.addEventListener('click', () => {
+      markSeen(_events);
+      redraw();
+    });
+    head.append(h, seen);
+    box.append(head, ...pinned.map((e) => entryRow(e)));
+    list.append(box);
+  }
   let day = '';
   for (const e of shown) {
     const label = dayLabel(eventWhen(e));
