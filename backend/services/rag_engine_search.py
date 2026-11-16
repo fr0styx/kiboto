@@ -489,7 +489,7 @@ class RagSearchMixin:
         photo_when, photo_place_name = self._photo_filters(query, mode, taken, place)
         intent = parse_multimodal_query(query)
         cfg = self.get_config()
-        fav_set = {os.path.normpath(p) for p in (cfg.get("favorites") or [])}
+        fav_set = {os.path.normpath(p) for p in self.my_favorites(principal)}
 
         # Merge explicit filter chips with auto-extracted query intent
         req_colors: list[str] = []

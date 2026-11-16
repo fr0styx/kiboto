@@ -69,10 +69,12 @@ describe('AI settings words (NUX-20)', () => {
 
     const post = vi.spyOn(api, 'post').mockResolvedValueOnce({ hardware_warning: true, warning_message: 'too big', model: { hf_repo: 'org/big' } });
     await pullHuggingFaceModel('org/big');
-    expect(byId('ai-hf-search-status').textContent).toBe('⚠️ Pulled org/big — too big');
+    expect(byId('ai-hf-search-status').textContent).toBe('⚠️ org/big is on the list: too big');
+    // AI finding 18: adding to the list does not make it Kib's model
+    expect(post).toHaveBeenLastCalledWith('/api/media/models/huggingface/pull', { repo_id: 'org/big', activate: false });
     post.mockResolvedValueOnce({ model: {} });
     await pullHuggingFaceModel('org/small');
-    expect(byId('ai-hf-search-status').textContent).toBe('✅ Pulled org/small from Hugging Face (Fits your hardware).');
+    expect(byId('ai-hf-search-status').textContent).toBe('✅ org/small is on the list. It fits this NAS.');
     post.mockRejectedValueOnce(new Error('denied'));
     await pullHuggingFaceModel('org/small');
     expect(byId('ai-hf-search-status').textContent).toBe('⚠️ Failed to pull from Hugging Face: denied');
@@ -115,7 +117,7 @@ describe('AI settings words (NUX-20)', () => {
     document.body.innerHTML = '<div id="ai-hf-search-status"></div>';
     api.post.mockResolvedValueOnce({ hardware_warning: true, warning_message: 'slow' });
     await pullHuggingFaceModel('org/x');
-    expect(byId('ai-hf-search-status').textContent).toBe('⚠️ Pulled org/x — slow');
+    expect(byId('ai-hf-search-status').textContent).toBe('⚠️ org/x is on the list: slow');
   });
 
   it('reports indexing a folder and the re-index progress', async () => {

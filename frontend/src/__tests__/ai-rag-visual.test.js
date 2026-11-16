@@ -845,7 +845,7 @@ describe('Kib — Multi-Modal Local RAG & Visual Search Frontend Suite', () => {
     expect(confirmCb).toBeTypeOf('function');
     await confirmCb();
 
-    expect(postSpy).toHaveBeenCalledWith('/api/ai/index/flush');
+    expect(postSpy).toHaveBeenCalledWith('/api/ai/index/flush', {}, { confirmed: true }); // the dialog above is the confirmation (AI 3)
     const feedbackEl = document.getElementById('ai-index-run-feedback');
     expect(feedbackEl.textContent).toContain('index is empty');
 

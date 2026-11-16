@@ -304,6 +304,30 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   virtual machines window. Starting, stopping and changing machines happen in that window, so there is one set of
   buttons and words instead of two.
 
+#### Changes
+
+- **Kib's settings are for administrators only**: every settings route now asks for one right, "manage Kib", which
+  the administrator holds. A storage administrator or a role with only "change settings" no longer changes some of
+  Kib's settings and not others. Using Kib (chat and search) is unchanged.
+
+#### Fixes
+
+- **Kib's "Re-index" says what happened**: it reports that rebuilding started, that it is already running, or why it
+  did not start, instead of nothing.
+- **"Learning Results" shows the real numbers**: waiting files, the name of each file Kib could not read and why, and
+  how many "Try again" recovered.
+- **Kib reads one set of folders at a time**: a second "read now" while it reads says "Kib is already reading"
+  instead of reading the same folders beside it, and "Index Path Now" runs in the background with progress and Stop.
+- **Emptying Kib's index is confirmed on the server**, as forgetting one folder already was.
+- **"Add to list" (was "Pull from Hugging Face") only adds the model to the list**; it no longer makes it Kib's model,
+  or Kib's reader model, without asking.
+
+#### Changes
+
+- **Kib's favourites and recent searches are each person's own**: a star no longer shows for everyone, and the next
+  person to sign in on the same browser no longer sees what the last one searched for. The old shared favourites go
+  to the first administrator who opens Kib after the update.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

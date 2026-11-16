@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
-from backend.auth import require_scope
+from backend.auth import KIB_MANAGE, require_scope
 from backend.services import ai_pack
 
 router = APIRouter(tags=["AI pack"])
@@ -18,7 +18,7 @@ class PackInstallRequest(BaseModel):
     storage_root: str = "/mnt/user/appdata"
 
 
-@router.get("/ai/pack", dependencies=[Depends(require_scope("system:config"))])
+@router.get("/ai/pack", dependencies=[Depends(require_scope(KIB_MANAGE))])
 async def pack_status():
     """The box, the recommended preset, and the pack's state (absent, warming, ready, stopped)."""
     from backend.services.rag_engine import get_rag_engine
@@ -26,7 +26,7 @@ async def pack_status():
     return await asyncio.to_thread(lambda: ai_pack.status(get_rag_engine().get_config()))
 
 
-@router.post("/ai/pack/install", dependencies=[Depends(require_scope("containers:manage"))])
+@router.post("/ai/pack/install", dependencies=[Depends(require_scope(KIB_MANAGE))])
 def pack_install(req: PackInstallRequest | None = None):
     req = req or PackInstallRequest()
 
@@ -40,7 +40,7 @@ def pack_install(req: PackInstallRequest | None = None):
     return StreamingResponse(events(), media_type="application/x-ndjson")
 
 
-@router.post("/ai/pack/use", dependencies=[Depends(require_scope("system:config"))])
+@router.post("/ai/pack/use", dependencies=[Depends(require_scope(KIB_MANAGE))])
 async def pack_use():
     """Chat through the pack; the answer says how to move the embeddings."""
     try:

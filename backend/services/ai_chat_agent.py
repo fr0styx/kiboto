@@ -596,7 +596,7 @@ TOOL_REQUIRED_SCOPES: dict[str, tuple[str, ...] | None] = {
     "list_docker_containers": ("containers:read", "containers:manage", "system:view"),
     "control_docker_container": ("containers:manage",),
     "set_fan_profile": ("hardware:fans",),
-    "trigger_ai_sync": ("system:config", "ai:manage"),
+    "trigger_ai_sync": ("ai:manage",),
 }
 _WEB_TOOLS = ("browse_internet", "get_weather")
 

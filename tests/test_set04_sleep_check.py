@@ -87,11 +87,12 @@ def _read(calls):
 @pytest.mark.real_confirmations
 def test_a_family_member_cannot_read_with_the_check_off(client, member, rag, folder):
     r = client.post("/api/ai/index/sync", json={"path": folder, "respect_standby": False}, headers=member)
-    assert r.status_code == 403 and "administrator" in r.json()["detail"]
+    assert r.status_code == 403
     assert _read(rag.calls) == []
-    # with the check on, their Sync works as before
+    # AI decision 10 (16 Nov 2026): reading is one of Kib's settings, for administrators only, so
+    # with the check on a family member is refused too
     r = client.post("/api/ai/index/sync", json={"path": folder}, headers=member)
-    assert r.status_code == 200 and _read(rag.calls)[-1][2] is True
+    assert r.status_code == 403 and _read(rag.calls) == []
 
 
 @pytest.mark.real_confirmations
@@ -113,9 +114,11 @@ def test_an_administrator_is_asked_first(client, auth_headers, rag, folder):
 @pytest.mark.real_confirmations
 def test_nothing_is_asked_where_the_check_is_already_off(client, auth_headers, member, rag, folder):
     rag.cfg["respect_standby"] = False  # an administrator turned it off, and confirmed that then
-    for headers in (auth_headers, member):
-        r = client.post("/api/ai/index/sync", json={"path": folder, "respect_standby": False}, headers=headers)
-        assert r.status_code == 200, r.text
+    r = client.post("/api/ai/index/sync", json={"path": folder, "respect_standby": False}, headers=auth_headers)
+    assert r.status_code == 200, r.text
+    # AI decision 10: reading is an administrator's setting; a family member is refused before anything else
+    r = client.post("/api/ai/index/sync", json={"path": folder, "respect_standby": False}, headers=member)
+    assert r.status_code == 403
 
 
 @pytest.mark.real_confirmations

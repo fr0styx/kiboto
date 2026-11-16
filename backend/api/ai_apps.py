@@ -17,7 +17,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
 
-from backend.auth import AuthenticatedPrincipal, get_current_principal, require_scope
+from backend.auth import KIB_MANAGE, AuthenticatedPrincipal, get_current_principal, require_scope
 from backend.config import logger
 from backend.services import ai_access, ai_apps
 
@@ -140,7 +140,7 @@ def _base_url(request: Request) -> str:
     return f"{str(request.base_url).rstrip('/')}/api/v1/ai/openai"
 
 
-@router.get("/ai/apps", dependencies=[Depends(require_scope("system:config"))])
+@router.get("/ai/apps", dependencies=[Depends(require_scope(KIB_MANAGE))])
 def list_app_keys(request: Request, principal: AuthenticatedPrincipal = Depends(get_current_principal)):
     """The apps that can be set up, and the keys made for them (masked)."""
     from backend.users_db import list_user_api_tokens
@@ -170,7 +170,7 @@ def list_app_keys(request: Request, principal: AuthenticatedPrincipal = Depends(
     }
 
 
-@router.post("/ai/apps/keys", dependencies=[Depends(require_scope("system:config"))])
+@router.post("/ai/apps/keys", dependencies=[Depends(require_scope(KIB_MANAGE))])
 def create_app_key(
     req: AppKeyRequest, request: Request, principal: AuthenticatedPrincipal = Depends(get_current_principal)
 ):
@@ -192,7 +192,7 @@ def create_app_key(
     return {"id": meta["token_id"], "key": raw, **ai_apps.settings_for(req.app, _base_url(request), raw)}
 
 
-@router.delete("/ai/apps/keys/{token_id}", dependencies=[Depends(require_scope("system:config"))])
+@router.delete("/ai/apps/keys/{token_id}", dependencies=[Depends(require_scope(KIB_MANAGE))])
 def delete_app_key(token_id: str, principal: AuthenticatedPrincipal = Depends(get_current_principal)):
     from backend.users_db import revoke_scoped_api_token
 

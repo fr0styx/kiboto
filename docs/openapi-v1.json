@@ -23208,7 +23208,7 @@
    "HuggingFacePullRequest": {
     "properties": {
      "activate": {
-      "default": true,
+      "default": false,
       "title": "Activate",
       "type": "boolean"
      },
@@ -41744,8 +41744,7 @@
      "Smart Media & AI RAG Engine"
     ],
     "x-required-scopes": [
-     "system:config",
-     "users:read"
+     "ai:manage"
     ]
    },
    "put": {
@@ -41788,7 +41787,7 @@
      "Smart Media & AI RAG Engine"
     ],
     "x-required-scopes": [
-     "system:config"
+     "ai:manage"
     ]
    }
   },
@@ -41944,7 +41943,7 @@
      "AI for apps"
     ],
     "x-required-scopes": [
-     "system:config"
+     "ai:manage"
     ]
    }
   },
@@ -41988,7 +41987,7 @@
      "AI for apps"
     ],
     "x-required-scopes": [
-     "system:config"
+     "ai:manage"
     ]
    }
   },
@@ -42035,7 +42034,7 @@
      "AI for apps"
     ],
     "x-required-scopes": [
-     "system:config"
+     "ai:manage"
     ]
    }
   },
@@ -42116,8 +42115,7 @@
      "Smart Media & AI RAG Engine"
     ],
     "x-required-scopes": [
-     "system:config",
-     "storage:admin"
+     "ai:manage"
     ]
    }
   },
@@ -42334,8 +42332,7 @@
      "Smart Media & AI RAG Engine"
     ],
     "x-required-scopes": [
-     "system:config",
-     "storage:admin"
+     "ai:manage"
     ]
    },
    "put": {
@@ -42378,8 +42375,7 @@
      "Smart Media & AI RAG Engine"
     ],
     "x-required-scopes": [
-     "system:config",
-     "storage:admin"
+     "ai:manage"
     ]
    }
   },
@@ -42939,7 +42935,6 @@
      "Smart Media & AI RAG Engine"
     ],
     "x-required-scopes": [
-     "system:config",
      "ai:manage"
     ]
    },
@@ -42984,7 +42979,6 @@
      "Smart Media & AI RAG Engine"
     ],
     "x-required-scopes": [
-     "system:config",
      "ai:manage"
     ]
    }
@@ -43031,10 +43025,7 @@
      "Smart Media & AI RAG Engine"
     ],
     "x-required-scopes": [
-     "shares:user_write",
-     "storage:write",
-     "storage:admin",
-     "system:config"
+     "ai:manage"
     ]
    }
   },
@@ -43080,14 +43071,13 @@
      "Smart Media & AI RAG Engine"
     ],
     "x-required-scopes": [
-     "system:config",
      "ai:manage"
     ]
    }
   },
   "/api/v1/ai/index/flush": {
    "post": {
-    "description": "Flushes all indexed files, vector embeddings, chunks, and manifests from rag_index.db to start fresh.",
+    "description": "Flushes all indexed files, vector embeddings, chunks, and manifests from rag_index.db to start fresh.\n\nConfirmed on the server like forgetting one folder (AI finding 28): a script or a stale page cannot\nempty the index without the person agreeing.",
     "operationId": "flush_rag_index_api_v1_ai_index_flush_post",
     "responses": {
      "200": {
@@ -43114,7 +43104,6 @@
      "Smart Media & AI RAG Engine"
     ],
     "x-required-scopes": [
-     "system:config",
      "ai:manage"
     ]
    }
@@ -43161,7 +43150,6 @@
      "Smart Media & AI RAG Engine"
     ],
     "x-required-scopes": [
-     "system:config",
      "ai:manage"
     ]
    }
@@ -43208,10 +43196,7 @@
      "Smart Media & AI RAG Engine"
     ],
     "x-required-scopes": [
-     "shares:user_write",
-     "storage:write",
-     "storage:admin",
-     "system:config"
+     "ai:manage"
     ]
    }
   },
@@ -43244,7 +43229,6 @@
      "Smart Media & AI RAG Engine"
     ],
     "x-required-scopes": [
-     "system:config",
      "ai:manage"
     ]
    }
@@ -43278,9 +43262,7 @@
      "Smart Media & AI RAG Engine"
     ],
     "x-required-scopes": [
-     "system:read",
-     "shares:read",
-     "storage:read"
+     "ai:manage"
     ]
    }
   },
@@ -43365,9 +43347,7 @@
      "Smart Media & AI RAG Engine"
     ],
     "x-required-scopes": [
-     "system:read",
-     "ai:manage",
-     "system:config"
+     "ai:manage"
     ]
    },
    "post": {
@@ -43397,7 +43377,6 @@
      "Smart Media & AI RAG Engine"
     ],
     "x-required-scopes": [
-     "system:config",
      "ai:manage"
     ]
    }
@@ -43444,7 +43423,6 @@
      "Smart Media & AI RAG Engine"
     ],
     "x-required-scopes": [
-     "system:config",
      "ai:manage"
     ]
    }
@@ -43491,7 +43469,6 @@
      "Smart Media & AI RAG Engine"
     ],
     "x-required-scopes": [
-     "system:config",
      "ai:manage"
     ]
    }
@@ -43580,9 +43557,7 @@
      "Smart Media & AI RAG Engine"
     ],
     "x-required-scopes": [
-     "system:read",
-     "shares:read",
-     "storage:read"
+     "ai:manage"
     ]
    }
   },
@@ -43628,7 +43603,6 @@
      "Smart Media & AI RAG Engine"
     ],
     "x-required-scopes": [
-     "system:config",
      "ai:manage"
     ]
    }
@@ -43678,7 +43652,6 @@
      "Smart Media & AI RAG Engine"
     ],
     "x-required-scopes": [
-     "system:config",
      "ai:manage"
     ]
    }
@@ -43728,7 +43701,6 @@
      "Smart Media & AI RAG Engine"
     ],
     "x-required-scopes": [
-     "system:config",
      "ai:manage"
     ]
    }
@@ -43762,9 +43734,7 @@
      "Smart Media & AI RAG Engine"
     ],
     "x-required-scopes": [
-     "system:read",
-     "ai:manage",
-     "system:config"
+     "ai:manage"
     ]
    }
   },
@@ -43829,9 +43799,7 @@
      "Smart Media & AI RAG Engine"
     ],
     "x-required-scopes": [
-     "system:read",
-     "shares:read",
-     "storage:read"
+     "ai:manage"
     ]
    }
   },
@@ -43918,7 +43886,6 @@
      "Smart Media & AI RAG Engine"
     ],
     "x-required-scopes": [
-     "system:config",
      "ai:manage"
     ]
    },
@@ -43963,7 +43930,6 @@
      "Smart Media & AI RAG Engine"
     ],
     "x-required-scopes": [
-     "system:config",
      "ai:manage"
     ]
    }
@@ -44010,7 +43976,6 @@
      "Smart Media & AI RAG Engine"
     ],
     "x-required-scopes": [
-     "system:config",
      "ai:manage"
     ]
    }
@@ -44191,7 +44156,7 @@
      "AI pack"
     ],
     "x-required-scopes": [
-     "system:config"
+     "ai:manage"
     ]
    }
   },
@@ -44241,7 +44206,7 @@
      "AI pack"
     ],
     "x-required-scopes": [
-     "containers:manage"
+     "ai:manage"
     ]
    }
   },
@@ -44272,7 +44237,7 @@
      "AI pack"
     ],
     "x-required-scopes": [
-     "system:config"
+     "ai:manage"
     ]
    }
   },
@@ -44394,8 +44359,7 @@
      "Smart Media & AI RAG Engine"
     ],
     "x-required-scopes": [
-     "system:config",
-     "storage:admin"
+     "ai:manage"
     ]
    }
   },
@@ -44495,8 +44459,7 @@
      "Smart Media & AI RAG Engine"
     ],
     "x-required-scopes": [
-     "system:config",
-     "audit:read"
+     "ai:manage"
     ]
    }
   },
@@ -56367,8 +56330,7 @@
      "Smart Media & AI RAG Engine"
     ],
     "x-required-scopes": [
-     "system:config",
-     "storage:admin"
+     "ai:manage"
     ]
    }
   },
@@ -56421,8 +56383,7 @@
      "Smart Media & AI RAG Engine"
     ],
     "x-required-scopes": [
-     "system:config",
-     "storage:admin"
+     "ai:manage"
     ]
    }
   },
@@ -56720,8 +56681,7 @@
      "Smart Media & AI RAG Engine"
     ],
     "x-required-scopes": [
-     "system:config",
-     "storage:admin"
+     "ai:manage"
     ]
    }
   },
@@ -57271,7 +57231,6 @@
      "Smart Media & AI RAG Engine"
     ],
     "x-required-scopes": [
-     "system:config",
      "ai:manage"
     ]
    },
@@ -57316,7 +57275,6 @@
      "Smart Media & AI RAG Engine"
     ],
     "x-required-scopes": [
-     "system:config",
      "ai:manage"
     ]
    }
@@ -57565,10 +57523,7 @@
      "Smart Media & AI RAG Engine"
     ],
     "x-required-scopes": [
-     "shares:user_write",
-     "storage:write",
-     "storage:admin",
-     "system:config"
+     "ai:manage"
     ]
    }
   },
@@ -57614,14 +57569,13 @@
      "Smart Media & AI RAG Engine"
     ],
     "x-required-scopes": [
-     "system:config",
      "ai:manage"
     ]
    }
   },
   "/api/v1/media/index/flush": {
    "post": {
-    "description": "Flushes all indexed files, vector embeddings, chunks, and manifests from rag_index.db to start fresh.",
+    "description": "Flushes all indexed files, vector embeddings, chunks, and manifests from rag_index.db to start fresh.\n\nConfirmed on the server like forgetting one folder (AI finding 28): a script or a stale page cannot\nempty the index without the person agreeing.",
     "operationId": "flush_rag_index_api_v1_media_index_flush_post",
     "responses": {
      "200": {
@@ -57648,7 +57602,6 @@
      "Smart Media & AI RAG Engine"
     ],
     "x-required-scopes": [
-     "system:config",
      "ai:manage"
     ]
    }
@@ -57682,7 +57635,6 @@
      "Smart Media & AI RAG Engine"
     ],
     "x-required-scopes": [
-     "system:config",
      "ai:manage"
     ]
    }
@@ -57716,9 +57668,7 @@
      "Smart Media & AI RAG Engine"
     ],
     "x-required-scopes": [
-     "system:read",
-     "shares:read",
-     "storage:read"
+     "ai:manage"
     ]
    }
   },
@@ -57816,7 +57766,6 @@
      "Smart Media & AI RAG Engine"
     ],
     "x-required-scopes": [
-     "system:config",
      "ai:manage"
     ]
    }
@@ -57905,9 +57854,7 @@
      "Smart Media & AI RAG Engine"
     ],
     "x-required-scopes": [
-     "system:read",
-     "shares:read",
-     "storage:read"
+     "ai:manage"
     ]
    }
   },
@@ -57972,9 +57919,7 @@
      "Smart Media & AI RAG Engine"
     ],
     "x-required-scopes": [
-     "system:read",
-     "shares:read",
-     "storage:read"
+     "ai:manage"
     ]
    }
   },
@@ -58061,7 +58006,6 @@
      "Smart Media & AI RAG Engine"
     ],
     "x-required-scopes": [
-     "system:config",
      "ai:manage"
     ]
    },
@@ -58106,7 +58050,6 @@
      "Smart Media & AI RAG Engine"
     ],
     "x-required-scopes": [
-     "system:config",
      "ai:manage"
     ]
    }
@@ -58153,7 +58096,6 @@
      "Smart Media & AI RAG Engine"
     ],
     "x-required-scopes": [
-     "system:config",
      "ai:manage"
     ]
    }

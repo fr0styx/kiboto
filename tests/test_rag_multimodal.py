@@ -577,12 +577,14 @@ def test_zettai_learning_lifecycle_favorites_and_multimode_search(tmp_path):
         assert learn_res["failed_count"] == 0
         assert learn_res["kib_status"] == "Idle"
 
-        # Toggle favorite on doc_a
-        fav_on = engine.toggle_favorite(str(doc_a))
+        # Toggle favorite on doc_a (each person's own since AI 3)
+        from backend.services.rag_engine_search import SYSTEM_PRINCIPAL
+
+        fav_on = engine.toggle_favorite(str(doc_a), SYSTEM_PRINCIPAL)
         assert fav_on["is_favorite"] is True
 
         # Search with keyword tab and mtime sort
-        search_res = engine.search("OpenVINO", match_tab="keyword", sort_by="mtime")
+        search_res = engine.search("OpenVINO", match_tab="keyword", sort_by="mtime", principal=SYSTEM_PRINCIPAL)
         assert search_res["match_tab"] == "keyword"
         assert search_res["sort_by"] == "mtime"
         assert len(search_res["category_groups"]["documents"]) >= 1

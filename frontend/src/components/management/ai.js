@@ -16,6 +16,7 @@ import { installAiAccess } from './ai-access.js';
 import { bindCheckersForm } from './ai-checkers.js';
 import { formatDateTime, formatFixed, formatNumber, formatTime } from '../../format.js';
 import { setIconLabel } from '../../ui/primitives.js';
+import { currentUser } from '../../route-access.js';
 
 // An icon next to translated words: screen readers skip it (UX-35)
 const ico = (e) => `<span aria-hidden="true">${e}</span>`;
@@ -42,22 +43,43 @@ let _aiAvailableFolders = [];
 let _aiSyncPollTimer = null;
 let _aiLastResultsList = [];
 let _aiSearchHistory = [];
-try {
-  const savedHist = JSON.parse(localStorage.getItem('kiboto_ai_search_history') || '[]');
-  if (Array.isArray(savedHist)) _aiSearchHistory = savedHist.slice(0, 8);
-} catch (_) {}
+let _aiHistoryOwner = null;
+
+/**
+ * Where this person's recent searches are kept in this browser (AI 3: each person's own). One key
+ * was shared by everyone who signed in here, so the next person saw what the last one looked for.
+ */
+export function aiHistoryKey(user = currentUser()) {
+  const who = String(user?.username || user?.id || '').toLowerCase();
+  return who ? `kiboto_ai_search_history:${who}` : '';
+}
+
+function _loadAiSearchHistory() {
+  const key = aiHistoryKey();
+  if (key === _aiHistoryOwner) return;
+  _aiHistoryOwner = key;
+  _aiSearchHistory = [];
+  try {
+    localStorage.removeItem('kiboto_ai_search_history'); // the old shared list: whose it was is unknown
+    const saved = key ? JSON.parse(localStorage.getItem(key) || '[]') : [];
+    if (Array.isArray(saved)) _aiSearchHistory = saved.slice(0, 8);
+  } catch (_) { /* storage off: no history */ }
+}
 
 function _recordAiSearchHistory(query) {
   const clean = String(query || '').trim();
   if (!clean) return;
+  _loadAiSearchHistory();
   _aiSearchHistory = [clean, ..._aiSearchHistory.filter((q) => q.toLowerCase() !== clean.toLowerCase())].slice(0, 8);
+  const key = aiHistoryKey();
   try {
-    localStorage.setItem('kiboto_ai_search_history', JSON.stringify(_aiSearchHistory));
-  } catch (_) {}
+    if (key) localStorage.setItem(key, JSON.stringify(_aiSearchHistory));
+  } catch (_) { /* storage off: kept for this page only */ }
   renderAiSearchHistory();
 }
 
 export function renderAiSearchHistory() {
+  _loadAiSearchHistory();
   const bar = document.getElementById('ai-history-bar');
   const chipsContainer = document.getElementById('ai-history-chips');
   if (!bar || !chipsContainer) return;
@@ -377,7 +399,7 @@ export function renderAiLlmRecommendations(recData = {}, activeModel = '') {
   gridEl.querySelectorAll('.btn-ai-pull-hf-card').forEach((btn) => {
     btn.addEventListener('click', () => {
       const repo = btn.dataset.hfRepo;
-      if (repo) pullHuggingFaceModel(repo, true);
+      if (repo) pullHuggingFaceModel(repo);
     });
   });
 
@@ -525,7 +547,7 @@ export async function searchHuggingFaceModels(query = '') {
   }
 }
 
-export async function pullHuggingFaceModel(repoId, activate = true) {
+export async function pullHuggingFaceModel(repoId, activate = false) {
   const cleanRepo = String(repoId || '').trim();
   if (!cleanRepo) {
     showToast(t('toast.enter_a_hugging_face_model_repo', 'Enter a Hugging Face model repo or URL (e.g. Qwen/Qwen2.5-7B-Instruct-GGUF)'), 'warn');
@@ -599,6 +621,16 @@ export async function openAiLearningResults() {
   }
 }
 
+/**
+ * Why a file could not be read, in words (AI finding 20). The server stores "parse_error" for
+ * every file it could not read; anything else it sends is shown as it is.
+ * @param {string | undefined} reason
+ */
+export function learnReason(reason) {
+  const r = String(reason || '').trim();
+  return !r || r === 'parse_error' || r === 'error' ? t('ait.why_error', 'Kib could not open this file.') : r;
+}
+
 export function renderAiLearningResultsData(data = {}) {
   const succEl = document.getElementById('ai-learn-succeeded-count');
   const failEl = document.getElementById('ai-learn-failed-count');
@@ -607,7 +639,7 @@ export function renderAiLearningResultsData(data = {}) {
 
   if (succEl) succEl.textContent = String(data.succeeded_count ?? 0);
   if (failEl) failEl.textContent = String(data.failed_count ?? 0);
-  if (defEl) defEl.textContent = String(data.deferred_standby_count ?? 0);
+  if (defEl) defEl.textContent = String(data.deferred_count ?? data.deferred_standby_count ?? 0);
 
   if (listEl) {
     const failedFiles = Array.isArray(data.failed_files) ? data.failed_files : [];
@@ -616,8 +648,8 @@ export function renderAiLearningResultsData(data = {}) {
     } else {
       listEl.innerHTML = failedFiles.map((f) => `
         <div class="aik-row-box-2">
-          <span style="font-family:monospace; color:var(--lt-t-fca5a5ff, #fca5a5);">${escapeHtml(f.file_path || f.file_name || '')}</span>
-          <span class="aik-xs-muted">${escapeHtml(f.error || 'Failed to parse')}</span>
+          <span style="font-family:monospace; color:var(--lt-t-fca5a5ff, #fca5a5);">${escapeHtml(f.path || f.name || f.file_path || f.file_name || '')}</span>
+          <span class="aik-xs-muted">${escapeHtml(learnReason(f.reason || f.error))}</span>
         </div>
       `).join('');
     }
@@ -628,7 +660,7 @@ export async function relearnAiFailedFiles() {
   try {
     const res = await api.post('/api/media/learning/relearn-failed', {});
     if (res) {
-      showToast(t('toast.relearned', 'Relearned {count} file(s) ({remaining} remaining).', { count: res.relearned ?? 0, remaining: res.still_failed ?? 0 }), 'success');
+      showToast(t('toast.relearned', 'Relearned {count} file(s) ({remaining} remaining).', { count: res.recovered ?? res.relearned ?? 0, remaining: res.failed_count ?? res.still_failed ?? 0 }), 'success');
       await openAiLearningResults();
       await fetchAndRenderAiStatus();
     }
@@ -979,7 +1011,7 @@ export async function flushAiIndex() {
       if (feedbackEl) setIconLabel(feedbackEl, '⏳', t('ui.flushing_rag_index_database', 'Emptying the AI search index...'));
       showToast(t('toast.flushing_rag_index_database', 'Emptying the AI search index...'), 'info');
       try {
-        const res = await api.post('/api/ai/index/flush');
+        const res = await api.post('/api/ai/index/flush', {}, { confirmed: true }); // asked just above
         await fetchAndRenderAiStatus();
         if (feedbackEl) feedbackEl.textContent = t('ui.rag_database_flushed_clean_ready', '✓ The AI search index is empty and will be rebuilt.');
         showToast(
@@ -1062,6 +1094,39 @@ function _noFolderChosen(feedbackEl) {
   return null;
 }
 
+/**
+ * What a "read now" request answered, in words (AI finding 22): started in the background, already
+ * running (one reading job at a time), or finished at once.
+ * @param {any} res
+ * @param {HTMLElement | null} feedbackEl
+ * @param {string} targetLabel
+ */
+function _readNowSaid(res, feedbackEl, targetLabel) {
+  if (res.sync_progress) updateAiSyncProgressUi(res.sync_progress);
+  if (res.status === 'already_running') {
+    const msg = t('ait.read_already', 'Kib is already reading. It goes on with what it was doing.');
+    if (feedbackEl) feedbackEl.textContent = `🔄 ${msg}`;
+    showToast(msg, 'info');
+    _ensureAiSyncPoll(true);
+    return;
+  }
+  if (res.status === 'started') {
+    const msg = t('ait.read_started', 'Kib started reading {target}. Sleeping drives are left asleep.', { target: targetLabel });
+    if (feedbackEl) feedbackEl.textContent = `🔄 ${msg}`;
+    showToast(msg, 'info');
+    _ensureAiSyncPoll(true);
+    return;
+  }
+  const indexedCount = res.indexed ?? res.indexed_files ?? 0;
+  const skippedCount = res.skipped_unchanged ?? 0;
+  const deferredCount = res.deferred_standby ?? 0;
+  const msg = deferredCount > 0
+    ? `Indexed ${indexedCount} file(s), ${skippedCount} unchanged (${deferredCount} deferred to protect sleeping drives).`
+    : `Indexed ${indexedCount} file(s) (${skippedCount} unchanged) on ${targetLabel}.`;
+  if (feedbackEl) feedbackEl.textContent = `✓ ${msg}`;
+  showToast(msg, 'success');
+}
+
 export async function syncAiWatchedFolders(respectStandby = true, background = true) {
   const feedbackEl = document.getElementById('ai-index-run-feedback');
   const pathsToSync = Array.isArray(_aiWatchedPaths) ? _aiWatchedPaths : [];
@@ -1077,24 +1142,7 @@ export async function syncAiWatchedFolders(respectStandby = true, background = t
       background: Boolean(background),
     });
     if (res) {
-      if (res.sync_progress) {
-        updateAiSyncProgressUi(res.sync_progress);
-      }
-      if (res.status === 'started') {
-        const msg = `Sync started on ${pathsToSync.join(', ')} (Active disks only — sleeping drives protected).`;
-        if (feedbackEl) feedbackEl.textContent = `🔄 ${msg}`;
-        showToast(msg, 'info');
-        _ensureAiSyncPoll(true);
-      } else {
-        const indexedCount = res.indexed ?? res.indexed_files ?? 0;
-        const skippedCount = res.skipped_unchanged ?? 0;
-        const deferredCount = res.deferred_standby ?? 0;
-        const msg = deferredCount > 0
-          ? `Indexed ${indexedCount} file(s), ${skippedCount} unchanged (${deferredCount} deferred to protect sleeping drives).`
-          : `Indexed ${indexedCount} file(s) (${skippedCount} unchanged).`;
-        if (feedbackEl) feedbackEl.textContent = `✓ ${msg}`;
-        showToast(msg, 'success');
-      }
+      _readNowSaid(res, feedbackEl, pathsToSync.length === 1 ? pathsToSync[0] : t('ait.n_folders', '{count, plural, one {# folder} other {# folders}}', { count: pathsToSync.length }));
       await fetchAndRenderAiStatus();
     }
     return res;
@@ -1177,7 +1225,7 @@ export function initAiKnowledgeEngine() {
   if (hfPullBtn && !hfPullBtn.dataset.bound) {
     hfPullBtn.dataset.bound = '1';
     hfPullBtn.addEventListener('click', () => {
-      pullHuggingFaceModel(hfSearchInput ? hfSearchInput.value : '', true);
+      pullHuggingFaceModel(hfSearchInput ? hfSearchInput.value : '');
     });
   }
   if (hfSearchInput && !hfSearchInput.dataset.bound) {
@@ -1274,7 +1322,7 @@ export function initAiKnowledgeEngine() {
     clearHistBtn.dataset.bound = '1';
     clearHistBtn.addEventListener('click', () => {
       _aiSearchHistory = [];
-      try { localStorage.removeItem('kiboto_ai_search_history'); } catch (_) {}
+      try { const key = aiHistoryKey(); if (key) localStorage.removeItem(key); } catch (_) { /* storage off */ }
       renderAiSearchHistory();
     });
   }
@@ -2747,19 +2795,10 @@ export async function runAiPathIndex(targetPath = null, respectStandby = true) {
       paths: targets,
       respect_standby: Boolean(respectStandby),
       recursive: true,
+      background: true, // one reading job, in the background, with progress and Stop (AI finding 22)
     });
     if (res) {
-      const indexedCount = res.indexed ?? res.indexed_files ?? 0;
-      const skippedCount = res.skipped_unchanged ?? 0;
-      const deferredCount = res.deferred_standby ?? 0;
-      const targetLabel = targets.length === 1 ? (res.path || targets[0]) : `${targets.length} watched folder(s)`;
-      const msg = deferredCount > 0
-        ? `Indexed ${indexedCount} file(s), ${skippedCount} unchanged (${deferredCount} deferred to protect sleeping drives).`
-        : `Indexed ${indexedCount} file(s) (${skippedCount} unchanged) on ${targetLabel}.`;
-      if (feedbackEl) {
-        feedbackEl.textContent = `✓ ${msg}`;
-      }
-      showToast(msg, 'success');
+      _readNowSaid(res, feedbackEl, targets.length === 1 ? (res.path || targets[0]) : t('ait.n_folders', '{count, plural, one {# folder} other {# folders}}', { count: targets.length }));
       await fetchAndRenderAiStatus();
     }
     return res;
@@ -4229,9 +4268,17 @@ export async function triggerInPlaceReindex() {
   if (container) container.style.display = 'block';
   try {
     const resp = await api.post('/api/ai/reindex');
-    if (resp && (resp.status === 'ok' || resp.status === 'in_progress')) {
+    const status = String(resp?.status || '');
+    if (status === 'in_progress') {
+      // AI finding 19: the server says a run is already going; say that instead of nothing
+      showToast(t('ai.reindex_running', 'Kib is already rebuilding its search index.'), 'info');
+      _pollReindexProgress();
+    } else if (status === 'started' || status === 'ok') {
       showToast(t('ai.reindex_started', 'In-place re-indexing started in background'), 'success');
       _pollReindexProgress();
+    } else {
+      if (container) container.style.display = 'none';
+      showToast(t('toast.failed_trigger_reindex', 'Failed to start re-indexing: {error}', { error: resp?.detail || status || '?' }), 'error');
     }
   } catch (err) {
     showToast(t('toast.failed_trigger_reindex', 'Failed to start re-indexing: {error}', { error: err.message }), 'error');

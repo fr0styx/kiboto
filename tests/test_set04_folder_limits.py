@@ -47,6 +47,8 @@ class FakeRag:
     def remove_deferred_path(self, path):
         return 0
 
+    progress: dict = {}
+
     def enqueue_deferred_path(self, *a, **k):
         return {}
 
@@ -60,7 +62,7 @@ class FakeRag:
         return {}
 
     def get_sync_progress(self):
-        return {}
+        return dict(self.progress)
 
 
 class _Media:
@@ -104,17 +106,16 @@ def test_folder_inside():
     assert folder_inside("/a", ["/a/b", ""]) == ""
 
 
-def test_a_member_reads_inside_the_chosen_folders_only(client, member, rag):
-    r = client.post("/api/ai/index/sync", json={"path": OTHER}, headers=member)
-    assert r.status_code == 403 and "only the folders chosen" in r.json()["detail"]
-    assert _read(rag) == []
-    r = client.post("/api/ai/index/sync", json={"paths": [WATCHED, OTHER]}, headers=member)
-    assert r.status_code == 403 and _read(rag) == []
+def test_a_member_cannot_ask_kib_to_read(client, member, rag):
+    # AI decision 10 (16 Nov 2026): reading is one of Kib's settings, for administrators only; before,
+    # a family member could read inside the chosen folders
     inside = os.path.join(WATCHED, "holiday")
     os.makedirs(inside, exist_ok=True)
     try:
-        r = client.post("/api/ai/index/sync", json={"path": inside}, headers=member)
-        assert r.status_code == 200 and _read(rag)[-1][1] == os.path.realpath(inside)
+        for body in ({"path": OTHER}, {"paths": [WATCHED, OTHER]}, {"path": inside}):
+            r = client.post("/api/ai/index/sync", json=body, headers=member)
+            assert r.status_code == 403, body
+        assert _read(rag) == []
     finally:
         os.rmdir(inside)
 
@@ -125,10 +126,10 @@ def test_an_administrator_may_read_a_folder_outside_the_list(client, auth_header
 
 
 def test_a_forgotten_folder_is_refused_for_everyone(client, auth_headers, member, rag):
-    for headers in (auth_headers, member):
-        for path in (FORGOTTEN, os.path.join(FORGOTTEN, "2025")):
-            r = client.post("/api/ai/index/sync", json={"path": path}, headers=headers)
-            assert r.status_code == 400 and "forget" in r.json()["detail"], path
+    for path in (FORGOTTEN, os.path.join(FORGOTTEN, "2025")):
+        r = client.post("/api/ai/index/sync", json={"path": path}, headers=auth_headers)
+        assert r.status_code == 400 and "forget" in r.json()["detail"], path
+        assert client.post("/api/ai/index/sync", json={"path": path}, headers=member).status_code == 403
     assert _read(rag) == []
 
 
@@ -175,3 +176,14 @@ def test_the_reader_itself_skips_a_forgotten_folder(tmp_path, monkeypatch):
         assert conn.execute("SELECT COUNT(*) FROM indexed_files").fetchone()[0] == 0
     finally:
         conn.close()
+
+
+def test_one_reading_job_at_a_time(client, auth_headers, rag):
+    """AI finding 22: a second "read now" while a job runs says so instead of reading beside it."""
+    rag.progress = {"state": "running", "can_stop": True}
+    r = client.post("/api/ai/index/sync", json={"path": WATCHED, "background": False}, headers=auth_headers)
+    assert r.status_code == 200 and r.json().get("status") == "already_running", r.json()
+    assert _read(rag) == []
+    rag.progress = {"state": "idle", "can_stop": False}
+    r = client.post("/api/ai/index/sync", json={"path": WATCHED, "background": False}, headers=auth_headers)
+    assert r.status_code == 200 and _read(rag)[-1][0] == "index_directory"

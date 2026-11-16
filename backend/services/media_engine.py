@@ -1083,7 +1083,7 @@ def search_huggingface_models(
     }
 
 
-def pull_huggingface_model(repo_id: str, activate: bool = True) -> dict[str, Any]:
+def pull_huggingface_model(repo_id: str, activate: bool = False) -> dict[str, Any]:
     """
     Pulls/registers a release model from https://huggingface.co into the user's
     Kib model catalog, evaluates whether it fits the user's hardware, and
@@ -1158,11 +1158,12 @@ def pull_huggingface_model(repo_id: str, activate: bool = True) -> dict[str, Any
         model_entry["role"] = f"Vector Embedding Model ({model_entry.get('pipeline_tag') or 'embedding'})"
         model_entry["category"] = "Embedding & Semantic Search"
         model_entry["is_embedding"] = True
-        updates["embedding_model"] = model_entry["id"]
-        model_entry["warning_message"] = (
-            f"Configured '{model_entry['id']}' as vector embedding engine for semantic search & RAG. "
-            f"Conversational chat remains '{rag_cfg.get('active_model') or 'qwen2.5:3b'}'."
-        )
+        if activate:  # AI findings 18/23: a reader model is switched only when asked (search waits for a re-read)
+            updates["embedding_model"] = model_entry["id"]
+            model_entry["warning_message"] = (
+                f"Configured '{model_entry['id']}' as vector embedding engine for semantic search & RAG. "
+                f"Conversational chat remains '{rag_cfg.get('active_model') or 'qwen2.5:3b'}'."
+            )
     elif activate:
         updates["active_model"] = model_entry["id"]
         updates["llm_model"] = model_entry["id"]

@@ -6,7 +6,8 @@
  */
 import { currentUser, hasScope } from '../../route-access.js';
 
-const MANAGE = ['system:config', 'storage:admin'];
+// AI decision 10: administrators only, the one right every Kib settings route asks for
+const MANAGE = ['ai:manage'];
 const CONFIG_PANE = 'mgmt-pane-ai-index';
 
 /**
@@ -42,13 +43,14 @@ export function kibPaneFor(paneId, user = currentUser()) {
  */
 export function loadKibExtras(paneId, user = currentUser()) {
   const isAdmin = Boolean(user) && hasScope(user.scopes, 'system:config');
+  const mayKib = Boolean(user) && mayManageKib(user);
   if (paneId === 'mgmt-pane-ai-rag' || paneId === 'mgmt-pane-ai-visual') {
     import('../immich-settings.js')
       .then((m) => m.renderImmichSettings(document.getElementById('immich-settings-mount'), isAdmin))
       .catch(() => {});
   }
   if (paneId === CONFIG_PANE) {
-    import('../ai-apps-settings.js').then((m) => m.renderAiApps(document.getElementById('ai-apps-mount'), isAdmin)).catch(() => {}); // COMP-07
-    import('../ai-pack-settings.js').then((m) => m.renderAiPack(document.getElementById('ai-pack-mount'), isAdmin)).catch(() => {}); // AI-40
+    import('../ai-apps-settings.js').then((m) => m.renderAiApps(document.getElementById('ai-apps-mount'), mayKib)).catch(() => {}); // COMP-07
+    import('../ai-pack-settings.js').then((m) => m.renderAiPack(document.getElementById('ai-pack-mount'), mayKib)).catch(() => {}); // AI-40
   }
 }

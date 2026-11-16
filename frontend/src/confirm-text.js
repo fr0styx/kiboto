@@ -27,6 +27,7 @@ const ACTIONS = {
   'updates.apply': ['Update now', 'Update Kiboto and restart it?', false],
   'updates.revert': ['Go back', 'Go back to the previous version of Kiboto and its data?', true],
   'ai.index.forget': ['Forget the folder', 'Delete what the AI index learned from this folder?', true],
+  'ai.index.flush': ['Forget and start over', 'Make Kib forget everything it knows about your files? Your files are not touched.', true],
   'webdav.config': ['Save WebDAV', 'Change who can reach files over WebDAV and which folder it shares?', false],
   'security.rotate_key': ['Replace the key', 'Replace the secret key? Everyone signs in to WebDAV and two-factor again.', true],
   'docker.container.recreate.elevated': ['Give host access', 'Recreate the container {target} with access to the host system?', false],

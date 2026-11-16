@@ -949,18 +949,25 @@ class RagLearningMixin:
         updated["recovered"] = recovered
         return updated
 
-    def toggle_favorite(self, path: str) -> dict[str, Any]:
-        """Adds or removes a file path from Kib favorites."""
+    def my_favorites(self, principal: Any = None) -> list[str]:
+        """This person's Kib favourites (AI 3: one list per person). The list the settings used to
+        hold for everyone goes to the first administrator who opens Kib after the update."""
+        from backend.services import kib_favorites
+
+        shared = list(self.get_config().get("favorites") or [])
+        has = getattr(principal, "has_scope", None)
+        if shared and callable(has) and has("ai:manage"):
+            kib_favorites.adopt_shared(principal, shared)
+            self.update_config({"favorites": []})
+        return kib_favorites.load(principal)
+
+    def toggle_favorite(self, path: str, principal: Any = None) -> dict[str, Any]:
+        """Adds or removes a file path from this person's Kib favourites."""
+        from backend.services import kib_favorites
+
         norm_p = os.path.normpath(str(path or "").strip())
-        cfg = self.get_config()
-        favs: list[str] = list(cfg.get("favorites") or [])
-        if norm_p in favs:
-            favs.remove(norm_p)
-            is_fav = False
-        else:
-            favs.append(norm_p)
-            is_fav = True
-        self.update_config({"favorites": favs})
+        self.my_favorites(principal)
+        is_fav, favs = kib_favorites.toggle(principal, norm_p)
         return {"status": "ok", "path": norm_p, "is_favorite": is_fav, "favorites": favs}
 
     def get_sync_progress(self) -> dict[str, Any]:

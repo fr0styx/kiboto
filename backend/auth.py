@@ -809,6 +809,11 @@ def get_current_principal(request: Request) -> AuthenticatedPrincipal:
     return AuthenticatedPrincipal(sess)
 
 
+# AI decision 10 (owner, 16 Nov 2026): Kib's settings are for administrators only, behind this one
+# right on every route; the built-in administrator holds it through "*", other roles only when given it
+KIB_MANAGE = "ai:manage"
+
+
 def require_scope(*required_scopes: str):
     """FastAPI dependency factory enforcing that the authenticated principal possesses
 

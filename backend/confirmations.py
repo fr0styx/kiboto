@@ -53,6 +53,7 @@ ACTIONS: dict[str, str] = {
     "updates.apply": "Update Kiboto and restart it",
     "updates.revert": "Revert Kiboto to the previous version and its data",
     "ai.index.forget": "Delete what the AI index learned from a folder",
+    "ai.index.flush": "Make Kib forget everything it knows about your files. The files are not touched",
     "webdav.config": "Change who can reach files over WebDAV and which folder it shares",
     "security.rotate_key": "Replace the install's secret key; everyone signs in to WebDAV and two-factor again",
     "docker.container.recreate.elevated": "Recreate container {target} with access to the host system",

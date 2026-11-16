@@ -24,9 +24,9 @@ logger = logging.getLogger(__name__)
 
 from backend import legacy_names
 from backend.api.system import check_user_path_access
-from backend.auth import AuthenticatedPrincipal, get_current_principal, require_scope
+from backend.auth import KIB_MANAGE, AuthenticatedPrincipal, get_current_principal, require_scope
 from backend.config import ALLOWED_BROWSE_ROOTS, POOL_PATH
-from backend.confirmations import require_confirmation
+from backend.confirmations import confirm_or_raise, require_confirmation
 from backend.fsutil import resolve_within
 from backend.rate_limit import rate_limit
 from backend.services import ai_access
@@ -266,7 +266,8 @@ class ModelRemoveRequest(BaseModel):
 
 class HuggingFacePullRequest(BaseModel):
     repo_id: str = Field(..., min_length=1, max_length=256)
-    activate: bool = True
+    # AI finding 18: adding a model to the list never makes it Kib's model unless asked
+    activate: bool = False
 
 
 class AiChatRequest(BaseModel):
@@ -406,15 +407,15 @@ def trigger_media_scan(
 
 @router.post(
     "/media/index",
-    dependencies=[Depends(require_scope("shares:user_write", "storage:write", "storage:admin", "system:config"))],
+    dependencies=[Depends(require_scope(KIB_MANAGE))],
 )
 @router.post(
     "/ai/index",
-    dependencies=[Depends(require_scope("shares:user_write", "storage:write", "storage:admin", "system:config"))],
+    dependencies=[Depends(require_scope(KIB_MANAGE))],
 )
 @router.post(
     "/ai/index/sync",
-    dependencies=[Depends(require_scope("shares:user_write", "storage:write", "storage:admin", "system:config"))],
+    dependencies=[Depends(require_scope(KIB_MANAGE))],
 )
 async def sync_rag_index(
     req: RagIndexSyncRequest,
@@ -470,6 +471,11 @@ async def sync_rag_index(
         res["stats"] = rag.get_index_stats()
         return res
 
+    if rag.get_sync_progress().get("can_stop"):
+        # AI finding 22: one reading job at a time; a second run inside the request read the same
+        # folders beside it and then said "Indexed N files"
+        return {"status": "already_running", **rag.get_sync_progress(), "stats": rag.get_index_stats()}
+
     if len(validated_paths) == 1:
         res = await asyncio.to_thread(
             rag.index_directory,
@@ -497,16 +503,22 @@ async def sync_rag_index(
 
 @router.post(
     "/media/index/control",
-    dependencies=[Depends(require_scope("system:config", "ai:manage"))],
+    dependencies=[Depends(require_scope(KIB_MANAGE))],
 )
 @router.post(
     "/ai/index/control",
-    dependencies=[Depends(require_scope("system:config", "ai:manage"))],
+    dependencies=[Depends(require_scope(KIB_MANAGE))],
 )
-def control_rag_index(req: RagSyncControlRequest) -> dict[str, Any]:
+def control_rag_index(
+    req: RagSyncControlRequest,
+    request: Request,
+    principal: AuthenticatedPrincipal = Depends(get_current_principal),
+) -> dict[str, Any]:
     """Pause, resume, stop, query, or flush the active RAG & Visual Search indexing sync job."""
     rag = get_rag_engine()
     act = req.action.strip().lower()
+    if act in ("flush", "clear"):
+        confirm_or_raise(request, principal, "ai.index.flush")  # as the flush route (AI finding 28)
     if act == "pause":
         res = rag.pause_sync()
     elif act == "resume":
@@ -524,16 +536,19 @@ def control_rag_index(req: RagSyncControlRequest) -> dict[str, Any]:
 
 @router.post(
     "/media/index/flush",
-    dependencies=[Depends(require_scope("system:config", "ai:manage"))],
+    dependencies=[Depends(require_scope(KIB_MANAGE)), Depends(require_confirmation("ai.index.flush"))],
 )
 @router.post(
     "/ai/index/flush",
-    dependencies=[Depends(require_scope("system:config", "ai:manage"))],
+    dependencies=[Depends(require_scope(KIB_MANAGE)), Depends(require_confirmation("ai.index.flush"))],
 )
 async def flush_rag_index(
     principal: AuthenticatedPrincipal = Depends(get_current_principal),
 ) -> dict[str, Any]:
-    """Flushes all indexed files, vector embeddings, chunks, and manifests from rag_index.db to start fresh."""
+    """Flushes all indexed files, vector embeddings, chunks, and manifests from rag_index.db to start fresh.
+
+    Confirmed on the server like forgetting one folder (AI finding 28): a script or a stale page cannot
+    empty the index without the person agreeing."""
     rag = get_rag_engine()
     res = await asyncio.to_thread(rag.flush_index)
     res["acceleration"] = get_media_engine().get_status()["acceleration"]
@@ -547,7 +562,7 @@ class ForgetFolderRequest(BaseModel):
 @router.post(
     "/ai/index/forget",
     dependencies=[
-        Depends(require_scope("system:config", "ai:manage")),
+        Depends(require_scope(KIB_MANAGE)),
         Depends(require_confirmation("ai.index.forget")),
     ],
 )
@@ -565,11 +580,11 @@ async def forget_rag_folder(
 
 @router.get(
     "/media/folders",
-    dependencies=[Depends(require_scope("system:config", "ai:manage"))],
+    dependencies=[Depends(require_scope(KIB_MANAGE))],
 )
 @router.get(
     "/ai/folders",
-    dependencies=[Depends(require_scope("system:config", "ai:manage"))],
+    dependencies=[Depends(require_scope(KIB_MANAGE))],
 )
 def get_watched_folders() -> dict[str, Any]:
     """Returns configured watched/excluded RAG folders and discovered NAS shares with live disk standby state."""
@@ -588,11 +603,11 @@ def get_watched_folders() -> dict[str, Any]:
 
 @router.post(
     "/media/folders",
-    dependencies=[Depends(require_scope("system:config", "ai:manage"))],
+    dependencies=[Depends(require_scope(KIB_MANAGE))],
 )
 @router.post(
     "/ai/folders",
-    dependencies=[Depends(require_scope("system:config", "ai:manage"))],
+    dependencies=[Depends(require_scope(KIB_MANAGE))],
 )
 def update_watched_folders(
     req: RagWatchedFoldersRequest,
@@ -674,11 +689,11 @@ async def get_duplicates(
 
 @router.get(
     "/media/models/recommendations",
-    dependencies=[Depends(require_scope("system:read", "shares:read", "storage:read"))],
+    dependencies=[Depends(require_scope(KIB_MANAGE))],
 )
 @router.get(
     "/ai/models/recommendations",
-    dependencies=[Depends(require_scope("system:read", "shares:read", "storage:read"))],
+    dependencies=[Depends(require_scope(KIB_MANAGE))],
 )
 async def get_model_recommendations(
     sort_by: str = Query(default="date", max_length=32),
@@ -720,11 +735,11 @@ async def get_model_recommendations(
 
 @router.post(
     "/media/models/select",
-    dependencies=[Depends(require_scope("system:config", "ai:manage"))],
+    dependencies=[Depends(require_scope(KIB_MANAGE))],
 )
 @router.post(
     "/ai/models/select",
-    dependencies=[Depends(require_scope("system:config", "ai:manage"))],
+    dependencies=[Depends(require_scope(KIB_MANAGE))],
 )
 def select_recommended_model(req: ModelSelectRequest) -> dict[str, Any]:
     """Selects and applies an LLM / multi-modal model for Kib, returning any hardware fit warnings."""
@@ -778,11 +793,11 @@ def select_recommended_model(req: ModelSelectRequest) -> dict[str, Any]:
 
 @router.get(
     "/media/models/huggingface/search",
-    dependencies=[Depends(require_scope("system:read", "shares:read", "storage:read"))],
+    dependencies=[Depends(require_scope(KIB_MANAGE))],
 )
 @router.get(
     "/ai/models/huggingface/search",
-    dependencies=[Depends(require_scope("system:read", "shares:read", "storage:read"))],
+    dependencies=[Depends(require_scope(KIB_MANAGE))],
 )
 def search_hf_release_models(
     q: str = Query(default="", max_length=200),
@@ -796,11 +811,11 @@ def search_hf_release_models(
 
 @router.post(
     "/media/models/huggingface/pull",
-    dependencies=[Depends(require_scope("system:config", "ai:manage"))],
+    dependencies=[Depends(require_scope(KIB_MANAGE))],
 )
 @router.post(
     "/ai/models/huggingface/pull",
-    dependencies=[Depends(require_scope("system:config", "ai:manage"))],
+    dependencies=[Depends(require_scope(KIB_MANAGE))],
 )
 def pull_hf_release_model(req: HuggingFacePullRequest) -> dict[str, Any]:
     """Pulls/registers a release model from https://huggingface.co and flags hardware fit warnings."""
@@ -814,7 +829,7 @@ class ModelInstallRequest(BaseModel):
     model: str = Field(..., min_length=1, max_length=200)
 
 
-@router.get("/ai/models/installed", dependencies=[Depends(require_scope("system:read", "ai:manage", "system:config"))])
+@router.get("/ai/models/installed", dependencies=[Depends(require_scope(KIB_MANAGE))])
 async def list_installed_models() -> dict[str, Any]:
     """Models the Ollama runtime has installed, and copies of one model under another name (AI-16)."""
     from backend.services.model_installer import installed_models
@@ -826,7 +841,7 @@ class BenchmarkApplyRequest(BaseModel):
     tier: str = Field(..., pattern="^(fast|balanced)$")
 
 
-@router.get("/ai/models/benchmark", dependencies=[Depends(require_scope("system:read", "ai:manage", "system:config"))])
+@router.get("/ai/models/benchmark", dependencies=[Depends(require_scope(KIB_MANAGE))])
 def get_model_benchmark() -> dict[str, Any]:
     """Last benchmark results, the recommended tiers and a running job (D2)."""
     from backend.services import model_benchmark
@@ -834,14 +849,14 @@ def get_model_benchmark() -> dict[str, Any]:
     return model_benchmark.status()
 
 
-@router.post("/ai/models/benchmark", dependencies=[Depends(require_scope("system:config", "ai:manage"))])
+@router.post("/ai/models/benchmark", dependencies=[Depends(require_scope(KIB_MANAGE))])
 def start_model_benchmark() -> dict[str, Any]:
     from backend.services import model_benchmark
 
     return model_benchmark.start()
 
 
-@router.post("/ai/models/benchmark/apply", dependencies=[Depends(require_scope("system:config", "ai:manage"))])
+@router.post("/ai/models/benchmark/apply", dependencies=[Depends(require_scope(KIB_MANAGE))])
 def apply_model_tier(req: BenchmarkApplyRequest) -> dict[str, Any]:
     """Makes the recommended model of a tier Ask Kib's chat model."""
     from backend.services import model_benchmark
@@ -855,7 +870,7 @@ def apply_model_tier(req: BenchmarkApplyRequest) -> dict[str, Any]:
     return {"active_model": name, "tier": req.tier}
 
 
-@router.post("/ai/models/install", dependencies=[Depends(require_scope("system:config", "ai:manage"))])
+@router.post("/ai/models/install", dependencies=[Depends(require_scope(KIB_MANAGE))])
 async def install_model(
     req: ModelInstallRequest, principal: AuthenticatedPrincipal = Depends(get_current_principal)
 ) -> dict[str, Any]:
@@ -868,7 +883,7 @@ async def install_model(
         raise HTTPException(status_code=400, detail=str(e)) from e
 
 
-@router.get("/ai/models/install/{job_id}", dependencies=[Depends(require_scope("system:config", "ai:manage"))])
+@router.get("/ai/models/install/{job_id}", dependencies=[Depends(require_scope(KIB_MANAGE))])
 def get_install_job(job_id: str) -> dict[str, Any]:
     from backend.services.model_installer import get_job
 
@@ -878,7 +893,7 @@ def get_install_job(job_id: str) -> dict[str, Any]:
     return job
 
 
-@router.post("/ai/models/install/{job_id}/cancel", dependencies=[Depends(require_scope("system:config", "ai:manage"))])
+@router.post("/ai/models/install/{job_id}/cancel", dependencies=[Depends(require_scope(KIB_MANAGE))])
 def cancel_install_job(job_id: str) -> dict[str, Any]:
     from backend.services.model_installer import cancel_job
 
@@ -887,11 +902,11 @@ def cancel_install_job(job_id: str) -> dict[str, Any]:
 
 @router.post(
     "/media/models/remove",
-    dependencies=[Depends(require_scope("system:config", "ai:manage"))],
+    dependencies=[Depends(require_scope(KIB_MANAGE))],
 )
 @router.post(
     "/ai/models/remove",
-    dependencies=[Depends(require_scope("system:config", "ai:manage"))],
+    dependencies=[Depends(require_scope(KIB_MANAGE))],
 )
 def remove_model_post_endpoint(req: ModelRemoveRequest) -> dict[str, Any]:
     """Removes a model from the Kib catalog and local storage."""
@@ -908,11 +923,11 @@ def remove_model_post_endpoint(req: ModelRemoveRequest) -> dict[str, Any]:
 
 @router.delete(
     "/media/models/remove",
-    dependencies=[Depends(require_scope("system:config", "ai:manage"))],
+    dependencies=[Depends(require_scope(KIB_MANAGE))],
 )
 @router.delete(
     "/ai/models/remove",
-    dependencies=[Depends(require_scope("system:config", "ai:manage"))],
+    dependencies=[Depends(require_scope(KIB_MANAGE))],
 )
 def remove_model_delete_explicit_endpoint(
     model: str | None = Query(default=None),
@@ -933,11 +948,11 @@ def remove_model_delete_explicit_endpoint(
 
 @router.delete(
     "/media/models/{model_id:path}",
-    dependencies=[Depends(require_scope("system:config", "ai:manage"))],
+    dependencies=[Depends(require_scope(KIB_MANAGE))],
 )
 @router.delete(
     "/ai/models/{model_id:path}",
-    dependencies=[Depends(require_scope("system:config", "ai:manage"))],
+    dependencies=[Depends(require_scope(KIB_MANAGE))],
 )
 def delete_model_endpoint(model_id: str) -> dict[str, Any]:
     """Removes a model from the Kib catalog and local storage."""
@@ -954,11 +969,11 @@ def delete_model_endpoint(model_id: str) -> dict[str, Any]:
 
 @router.get(
     "/media/learning/results",
-    dependencies=[Depends(require_scope("system:read", "shares:read", "storage:read"))],
+    dependencies=[Depends(require_scope(KIB_MANAGE))],
 )
 @router.get(
     "/ai/learning/results",
-    dependencies=[Depends(require_scope("system:read", "shares:read", "storage:read"))],
+    dependencies=[Depends(require_scope(KIB_MANAGE))],
 )
 def get_kib_learning_results(
     principal: AuthenticatedPrincipal = Depends(get_current_principal),
@@ -969,11 +984,11 @@ def get_kib_learning_results(
 
 @router.post(
     "/media/learning/relearn-failed",
-    dependencies=[Depends(require_scope("system:config", "ai:manage"))],
+    dependencies=[Depends(require_scope(KIB_MANAGE))],
 )
 @router.post(
     "/ai/learning/relearn-failed",
-    dependencies=[Depends(require_scope("system:config", "ai:manage"))],
+    dependencies=[Depends(require_scope(KIB_MANAGE))],
 )
 async def relearn_failed_items() -> dict[str, Any]:
     """Retries indexing failed files without waking sleeping drives."""
@@ -996,7 +1011,10 @@ def toggle_favorite_item(
 ) -> dict[str, Any]:
     """Adds or removes a file path from Kib favorites."""
     vp = _validate_media_path(req.path, principal, must_exist=False)
-    return get_rag_engine().toggle_favorite(vp)
+    try:
+        return get_rag_engine().toggle_favorite(vp, principal)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
 async def _with_immich(res: Any, q: str | None, mode: str | None, principal: Any, limit: int) -> Any:
@@ -1572,13 +1590,13 @@ class AiAccessUpdate(BaseModel):
     search_roles: dict[str, bool] = Field(default_factory=dict)  # AI search (B11, AI-26)
 
 
-@router.get("/ai/access", dependencies=[Depends(require_scope("system:config", "users:read"))])
+@router.get("/ai/access", dependencies=[Depends(require_scope(KIB_MANAGE))])
 def get_ai_access() -> dict[str, Any]:
     """Who may ask Kib, per role (B8)."""
     return {"roles": ai_access.roles_with_access(), "log_days": ai_access.LOG_DAYS}
 
 
-@router.put("/ai/access", dependencies=[Depends(require_scope("system:config"))])
+@router.put("/ai/access", dependencies=[Depends(require_scope(KIB_MANAGE))])
 def put_ai_access(req: AiAccessUpdate) -> dict[str, Any]:
     try:
         get_rag_engine().update_config(
@@ -1597,7 +1615,7 @@ def get_my_ai_access(principal: AuthenticatedPrincipal = Depends(get_current_pri
     return {"allowed": ai_access.allowed(principal), "search": ai_access.allowed(principal, feature="search")}
 
 
-@router.get("/ai/requests", dependencies=[Depends(require_scope("system:config", "audit:read"))])
+@router.get("/ai/requests", dependencies=[Depends(require_scope(KIB_MANAGE))])
 def get_ai_requests(
     limit: int = Query(100, ge=1, le=500), user: str | None = Query(None, max_length=64)
 ) -> dict[str, Any]:
@@ -1607,15 +1625,15 @@ def get_ai_requests(
 
 @router.put(
     "/media/config",
-    dependencies=[Depends(require_scope("system:config", "storage:admin"))],
+    dependencies=[Depends(require_scope(KIB_MANAGE))],
 )
 @router.put(
     "/ai/config",
-    dependencies=[Depends(require_scope("system:config", "storage:admin"))],
+    dependencies=[Depends(require_scope(KIB_MANAGE))],
 )
 @router.post(
     "/ai/config",
-    dependencies=[Depends(require_scope("system:config", "storage:admin"))],
+    dependencies=[Depends(require_scope(KIB_MANAGE))],
 )
 def update_rag_config(
     req: RagConfigUpdateRequest,
@@ -1699,11 +1717,11 @@ def get_ai_reindex_status() -> dict[str, Any]:
 
 @router.post(
     "/media/ai/benchmark",
-    dependencies=[Depends(require_scope("system:config", "storage:admin"))],
+    dependencies=[Depends(require_scope(KIB_MANAGE))],
 )
 @router.post(
     "/ai/benchmark",
-    dependencies=[Depends(require_scope("system:config", "storage:admin"))],
+    dependencies=[Depends(require_scope(KIB_MANAGE))],
 )
 async def run_ai_benchmark() -> dict[str, Any]:
     """
@@ -1770,11 +1788,11 @@ async def run_ai_benchmark() -> dict[str, Any]:
 
 @router.post(
     "/media/ai/reindex",
-    dependencies=[Depends(require_scope("system:config", "storage:admin"))],
+    dependencies=[Depends(require_scope(KIB_MANAGE))],
 )
 @router.post(
     "/ai/reindex",
-    dependencies=[Depends(require_scope("system:config", "storage:admin"))],
+    dependencies=[Depends(require_scope(KIB_MANAGE))],
 )
 async def trigger_ai_reindex(
     req: RagConfigUpdateRequest | None = None,

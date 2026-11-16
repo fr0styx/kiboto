@@ -30,7 +30,10 @@ describe('who sees Kib’s Configuration (SET-04)', () => {
 
   it('knows who may change Kib by the rights the settings route asks for', () => {
     expect(mayManageKib(owner)).toBe(true);
-    expect(mayManageKib(storageAdmin)).toBe(true);
+    // AI decision 10: administrators only; a storage administrator no longer changes Kib
+    expect(mayManageKib(storageAdmin)).toBe(false);
+    expect(mayManageKib({ scopes: ['system:config'] })).toBe(false);
+    expect(mayManageKib({ scopes: ['ai:manage'] })).toBe(true);
     expect(mayManageKib(family)).toBe(false);
     expect(mayManageKib({ scopes: [] })).toBe(false);
     expect(mayManageKib(null)).toBe(true); // nobody known yet: nothing is taken away

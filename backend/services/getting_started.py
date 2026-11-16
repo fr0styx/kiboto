@@ -137,7 +137,7 @@ NEEDS: dict[str, tuple[str, ...] | None] = {
     "backup": ("backup:write",),
     "alerts": ("system:config",),
     "away": ("system:config",),
-    "ai_folder": ("system:config", "ai:manage"),
+    "ai_folder": ("ai:manage",),
     "phone_backup": None,
 }
 
