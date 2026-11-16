@@ -63,6 +63,8 @@ def remap_ports(app: dict, taken: set[int]) -> tuple[dict, int]:
     """A copy of the template with every host port moved to a free one; returns (app, main port)."""
     app = json.loads(json.dumps(app))
     default = int(app["default_port"])
+    if app.get("host_network"):
+        return app, default  # shares the host's network: it answers on its own port, which must be free
     main = free_port(47000, taken)
     ports = []
     for p_str in app.get("ports") or []:

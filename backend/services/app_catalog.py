@@ -1304,6 +1304,11 @@ def default_storage_root() -> str:
 
 def _apply_runtime_options(create_body: dict[str, Any], app: dict[str, Any]) -> None:
     """Command, capabilities, kernel settings and devices a template asks for."""
+    if app.get("host_network"):
+        # the host's network (DLNA discovery, audit A12): no mapping; the app answers on its own port
+        create_body["HostConfig"]["NetworkMode"] = "host"
+        create_body["HostConfig"].pop("PortBindings", None)
+        create_body.pop("ExposedPorts", None)
     host = create_body.setdefault("HostConfig", {})
     if isinstance(app.get("command"), list) and app["command"]:
         create_body["Cmd"] = [str(c) for c in app["command"]]

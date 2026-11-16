@@ -16,6 +16,8 @@ Each template is deployed by backend/services/app_catalog.py through the Docker 
   volume_owner      "uid:gid" the app runs as; its folders are handed to it on install
   credentials       login shown after deploy; "{{secret:name}}" makes and keeps a password
   probe             "tcp" when the app has no web UI (game servers); webui_path is None
+  host_network      True: the app shares the host's network (TVs find a DLNA server by multicast);
+                    no port is mapped, the app answers on its own default_port
   logo              icon name from the dashboard-icons set (cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons)
 
 Every template here was deployed on a real host and its web UI answered before it was added
@@ -113,6 +115,27 @@ CURATED_APP_CATALOG: list[dict[str, Any]] = [
         "media_library": "/media",
         "hw_transcoding": "jellyfin",
         "logo": "jellyfin",
+    },
+    {
+        # audit A12 (owner decision 16 Nov): older TVs and consoles play from a DLNA server
+        "id": "minidlna",
+        "name": "MiniDLNA (TV and console streaming)",
+        "category": "media",
+        "description": "Lets smart TVs, consoles and older players on your home network find and play films, music and photos (DLNA). Read-only.",
+        "image": "vladgh/minidlna:latest",
+        "default_port": 8200,
+        "webui_path": "/",
+        "host_network": True,  # DLNA is found by multicast on the home network
+        "env": {
+            "MINIDLNA_MEDIA_DIR": "/media",
+            "MINIDLNA_FRIENDLY_NAME": "Kiboto",
+            "MINIDLNA_INOTIFY": "yes",
+            "TZ": "UTC",
+        },
+        "volumes": {"media": "/media"},
+        "share_folders": {"media": "Media library"},
+        "media_library": "/media",
+        "logo": "minidlna",
     },
     {
         "id": "plex",

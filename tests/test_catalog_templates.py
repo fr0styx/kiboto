@@ -138,3 +138,25 @@ def test_installing_a_builtin_app_gets_its_starter_files():
     listed = next(a for a in app_catalog.get_all_catalog_apps() if a["id"] == "caddy")
     assert "seed_files" not in listed
     assert "Caddyfile" in app_catalog.get_catalog_app("caddy")["seed_files"]["etc"]
+
+
+def test_minidlna_shares_the_host_network_and_maps_no_port(monkeypatch, tmp_path):
+    """Audit A12: DLNA is found by multicast, so MiniDLNA runs on the host's network."""
+    from backend.services import app_catalog
+    from backend.services.catalog_templates import CURATED_APP_CATALOG
+    from tests.test_m3_immich_stack import FakeDocker
+
+    app = next(a for a in CURATED_APP_CATALOG if a["id"] == "minidlna")
+    assert (
+        app["host_network"] is True
+        and app["default_port"] == 8200
+        and app["share_folders"] == {"media": "Media library"}
+    )
+    fake = FakeDocker()
+    monkeypatch.setattr(app_catalog, "_docker_request", fake)
+    monkeypatch.setattr(app_catalog, "check_port_available_detailed", lambda *a, **k: (True, None))
+    events = list(app_catalog.stream_deploy_catalog_app("minidlna", storage_root=str(tmp_path)))
+    assert events[-1]["step"] == "success", events[-1]
+    body = fake.created["minidlna"]
+    assert body["HostConfig"]["NetworkMode"] == "host"
+    assert "PortBindings" not in body["HostConfig"] and "ExposedPorts" not in body
