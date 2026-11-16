@@ -17,6 +17,7 @@ export const ROUTES = {
   network: () => window.openManagementSection?.('mgmt-sec-network'),
   power: () => window.openManagementSection?.('mgmt-sec-ups'),
   ai: () => window.openManagementSection?.('mgmt-sec-ai'),
+  ask: () => /** @type {any} */ (window).openKibWindow?.('mgmt-pane-ai-chat'), // Kib's own window (AI decision 1)
   vms: () => window.openManagementSection?.('mgmt-sec-vms'),
   settings: () => window.openManagementSection?.('mgmt-sec-system-group'),
   time: () => import('./components/widgets.js').then((m) => m.openTimezoneModal()),

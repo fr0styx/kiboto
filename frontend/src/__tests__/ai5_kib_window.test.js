@@ -7,7 +7,8 @@ vi.mock('../management-dom.js', () => ({ ensureManagementDom: vi.fn(async () => 
 vi.mock('../components/management/ai.js', () => ({ fetchAndRenderAiStatus: vi.fn(), runAiVisualSearch: vi.fn(), _getActiveAiSearchQuery: vi.fn(() => '') }));
 vi.mock('../components/management/kib-access.js', () => ({ loadKibExtras: vi.fn() }));
 
-const { openKibWindow, kibPane, isKibWindowPane, ensureKibWindow, adoptPanes, showKibPane, KIB_PANES } = await import('../components/kib-window.js');
+const { openKibWindow, kibPane, isKibWindowPane, ensureKibWindow, adoptPanes, showKibPane, KIB_PANES, markKibAccess } = await import('../components/kib-window.js');
+const { api } = await import('../api.js');
 const ai = await import('../components/management/ai.js');
 const access = await import('../components/management/kib-access.js');
 const flush = () => new Promise((r) => setTimeout(r, 0));
@@ -92,5 +93,36 @@ describe('Kib window (AI 5)', () => {
     const mgmt = fs.readFileSync(path.resolve(__dirname, '../components/management.js'), 'utf8');
     expect(mgmt).toContain("'ai': { section: 'mgmt-sec-ai', pane: 'mgmt-pane-ai-index' }");
     expect(fs.readFileSync(path.resolve(__dirname, '../main.js'), 'utf8')).toContain("'openKibWindow'");
+  });
+
+  it('says "Kib is turned off for you" and disables the box, per pane', async () => {
+    document.body.innerHTML = `<div id="mgmt-pane-ai-chat"><textarea id="ai-chat-input"></textarea><button id="btn-ai-chat-send"></button></div>
+      <div id="mgmt-pane-ai-rag"><input id="ai-visual-search-input"><button id="btn-ai-rag-ask"></button></div>`;
+    markKibAccess({ allowed: false, search: true });
+    expect(document.querySelector('#mgmt-pane-ai-chat .kib-off-note').textContent).toContain('Kib is turned off for you.');
+    expect(document.getElementById('ai-chat-input').disabled).toBe(true);
+    expect(document.getElementById('btn-ai-chat-send').disabled).toBe(true);
+    expect(document.querySelector('#mgmt-pane-ai-rag .kib-off-note')).toBeNull();
+    markKibAccess({ allowed: false, search: false }); // no second note
+    expect(document.querySelectorAll('.kib-off-note')).toHaveLength(2);
+    markKibAccess({ allowed: true, search: true });
+    expect(document.querySelectorAll('.kib-off-note')).toHaveLength(0);
+    expect(document.getElementById('ai-visual-search-input').disabled).toBe(false);
+    markKibAccess(null); // unknown: everything stays usable
+    expect(document.querySelectorAll('.kib-off-note')).toHaveLength(0);
+    document.body.innerHTML = '';
+    markKibAccess({ allowed: false });
+  });
+
+  it('opening the window asks what this person may use', async () => {
+    const get = vi.spyOn(api, 'get').mockResolvedValue({ allowed: false, search: true });
+    await openKibWindow('mgmt-pane-ai-chat');
+    await flush();
+    expect(get).toHaveBeenCalledWith('/api/ai/access/me');
+    expect(document.querySelector('#mgmt-pane-ai-chat .kib-off-note')).not.toBeNull();
+    get.mockRejectedValueOnce(new Error('offline'));
+    await openKibWindow('mgmt-pane-ai-chat');
+    await flush();
+    get.mockRestore();
   });
 });

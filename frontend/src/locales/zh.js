@@ -8124,5 +8124,6 @@ export default {
   "vmp.p_win11": "Windows 11",
   "vmp.p_win11_2": "4 核，8 GB，64 GB 磁盘，UEFI 和 TPM",
   "vmp.n_win11": "Windows 11 需要 UEFI 和 TPM：两者都已设置。请选择 Windows 安装程序作为启动 ISO，并从 ISO 目录添加驱动光盘（virtio-win），让 Windows 能识别磁盘。",
-  "vmp.n_linux": "选择安装程序作为启动 ISO，或从 ISO 目录中挑选一个。"
+  "vmp.n_linux": "选择安装程序作为启动 ISO，或从 ISO 目录中挑选一个。",
+  "kibw.off_for_you": "Kib 已为你关闭。管理这台 NAS 的人可以在 设置 → Kib → 谁可以使用 Kib 中开启。"
 };

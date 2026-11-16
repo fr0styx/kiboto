@@ -8124,5 +8124,6 @@ export default {
   "vmp.p_win11": "Windows 11",
   "vmp.p_win11_2": "4 núcleos, 8 GB, disco de 64 GB, UEFI y TPM",
   "vmp.n_win11": "Windows 11 necesita UEFI y un TPM: ambos están configurados. Elige el instalador de Windows como ISO de arranque y añade el disco de controladores (virtio-win) desde el catálogo de ISO para que Windows vea su disco.",
-  "vmp.n_linux": "Elige el instalador como ISO de arranque, o toma uno del catálogo de ISO."
+  "vmp.n_linux": "Elige el instalador como ISO de arranque, o toma uno del catálogo de ISO.",
+  "kibw.off_for_you": "Kib está desactivado para ti. Quien administra este NAS puede activarlo en Ajustes → Kib → Quién puede usar Kib."
 };

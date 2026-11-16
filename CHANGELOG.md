@@ -372,6 +372,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   (4 cores, 8 GB, 64 GB, UEFI and TPM, with a note about the driver disc). Sizes stay inside what this NAS can give,
   and every field can still be changed.
 
+#### Changes
+
+- **"Ask Kib" on the phone home screen for everyone**: it opens the Kib window. Someone whose role has Kib switched
+  off reads "Kib is turned off for you" before typing, and the question box is disabled.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

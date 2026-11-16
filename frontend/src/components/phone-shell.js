@@ -34,6 +34,7 @@ const CLOSING = /\b(window-closing|closing|window-minimized|is-closing|minimized
 export const TILES = () => [
   ['files', t('mgmt.sidebar_files', 'Files'), '#i-storage', 'mgmt.sidebar_files'],
   ['apps', t('dock.containers', 'Apps'), '#i-chip', 'dock.containers'],
+  ['ask', t('ai.tab_chat', 'Ask Kib'), '#i-kib', 'ai.tab_chat'], // the Kib window, for every role that may use Kib (AI 5)
   ['storage', t('mgmt.sidebar_storage', 'Storage'), '#i-disk', 'mgmt.sidebar_storage'],
   ['shares', t('mgmt.sidebar_shared_folders', 'Shared folders'), '#i-net', 'mgmt.sidebar_shared_folders'],
   ['backup', t('mgmt.sidebar_backup', 'Backup'), '#i-save', 'mgmt.sidebar_backup'],

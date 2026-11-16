@@ -3,6 +3,7 @@
 // markup and code: the window takes them out of Settings the first time it opens, so every handler
 // the page code bound stays bound.
 import { ensureManagementDom } from '../management-dom.js';
+import { api } from '../api.js';
 import { makeDraggable, bringToFront } from './dock.js';
 import { ZettEventBus } from '../event-bus.js';
 import { escapeHtml } from '../utils.js';
@@ -74,6 +75,35 @@ export function adoptPanes(win) {
   }
 }
 
+/**
+ * Says "Kib is turned off for you" before anyone types (AI 5): Who can use Kib may switch asking
+ * or searching off for a role. The box and button of a switched-off pane are disabled.
+ * @param {{ allowed?: boolean, search?: boolean } | null} me GET /api/ai/access/me
+ */
+export function markKibAccess(me) {
+  const parts = [
+    ['mgmt-pane-ai-chat', me?.allowed !== false, ['ai-chat-input', 'btn-ai-chat-send']],
+    ['mgmt-pane-ai-rag', me?.search !== false, ['ai-visual-search-input', 'btn-ai-rag-ask']],
+  ];
+  for (const [paneId, on, controls] of parts) {
+    const pane = document.getElementById(/** @type {string} */ (paneId));
+    if (!pane) continue;
+    let note = pane.querySelector(':scope > .kib-off-note');
+    if (!on && !note) {
+      note = document.createElement('p');
+      note.className = 'kib-off-note';
+      note.setAttribute('role', 'status');
+      note.textContent = t('kibw.off_for_you', 'Kib is turned off for you. The person who runs this NAS can turn it on under Settings → Kib → Who can use Kib.');
+      pane.prepend(note);
+    }
+    if (on && note) note.remove();
+    for (const id of /** @type {string[]} */ (controls)) {
+      const el = /** @type {HTMLInputElement | null} */ (document.getElementById(id));
+      if (el) el.disabled = !on;
+    }
+  }
+}
+
 /** Shows one pane and marks its tab. */
 export function showKibPane(pane) {
   for (const id of KIB_PANES) {
@@ -115,6 +145,7 @@ export async function openKibWindow(pane = 'mgmt-pane-ai-chat') {
   win.style.display = 'flex';
   bringToFront(win);
   showKibPane(kibPane(pane));
+  api.get('/api/ai/access/me').then(markKibAccess).catch(() => {}); // unknown: leave it as it is
   ZettEventBus.emit('window:open', { id: WIN_ID });
   return win;
 }
