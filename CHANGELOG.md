@@ -151,6 +151,18 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Replication is part of Backup**: pool replication moved from a hidden Storage tab to Backup → More. It shows
   where this NAS can replicate its pools or already keeps jobs; old links to the Replication tab open Backup.
 
+#### Changes
+
+- **The bell says where everything else is**: with nothing to look at it says "Nothing needs a look. Everything that
+  happened is in Activity", and its footer reads "See all activity" (it named the old Event Log).
+
+#### Changes
+
+- **Apps in household words**: "Remove app" instead of "Destroy Container"; removing says the folders you gave the app
+  stay; "Keep a copy of its folders and settings under Backup"; "Install a second copy" and "Replace and start"
+  instead of "Deploy New Instance" and "Stop, Replace & Launch"; "Details", "Show the log", "Terminal", "Limits",
+  "Search apps" and "Remove leftovers from old updates". Five languages.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

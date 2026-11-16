@@ -233,7 +233,7 @@ export async function openAppDeployModal(appId) {
           modal.classList.add('window-minimized');
           modal.style.display = 'none';
         }
-        showToast(t('toast.deploying_in_background_click_dock_icon', 'Deploying {activeAppId} in background. Click Dock icon to restore.', { activeAppId: modal._activeAppId || 'app' }), 'info');
+        showToast(t('toast.deploying_in_background_click_dock_icon', '{activeAppId} is still installing. Its window is in the dock.', { activeAppId: modal._activeAppId || 'app' }), 'info');
       } else {
         if (modal._close) modal._close();
       }
@@ -414,7 +414,7 @@ export async function openAppDeployModal(appId) {
         banner.style.border = '1px solid var(--ok2, #33cdb8)';
         banner.innerHTML = `<span style="color:var(--ok2, #33cdb8); font-weight:bold;">${ico('✓')} ${t('dk.alongside_lead', 'Install alongside:')}</span> ${t('dk.alongside', 'Suggested name {name} on free port {port}.', { name: bold(suggestedContainerName), port: bold(suggestedPort) })}`;
       }
-      if (deployConfirmBtn) setIconLabel(deployConfirmBtn, '🚀', t('ui.deploy_new_instance', 'Deploy New Instance'));
+      if (deployConfirmBtn) setIconLabel(deployConfirmBtn, '🚀', t('ui.deploy_new_instance', 'Install a second copy'));
     } else if (resolveData.conflict_detected) {
       if (nameInput) nameInput.value = appId;
       if (portInput) portInput.value = suggestedPort;
@@ -463,7 +463,7 @@ export async function openAppDeployModal(appId) {
     banner.innerHTML = `<span style="color:var(--lt-t-ff8080ff, #ff8080); font-weight:bold;">${ico('⚠️')} ${t('dk.replace_lead', 'Stop & replace:')}</span> ${t('dk.replace_existing', 'The container {name} is stopped and replaced on port {port}. Saved data stays.', { name: bold(defaultContainerName), port: bold(defaultPort) })}`;
 
     if (deployConfirmBtn) {
-      setIconLabel(deployConfirmBtn, '🔄', t('ui.stop_replace_launch', 'Stop, Replace & Launch'));
+      setIconLabel(deployConfirmBtn, '🔄', t('ui.stop_replace_launch', 'Replace and start'));
       setDeployButtonTone(deployConfirmBtn, 'danger');
       deployConfirmBtn.disabled = false;
       deployConfirmBtn.style.opacity = '1';
@@ -502,7 +502,7 @@ export async function openAppDeployModal(appId) {
     banner.innerHTML = `<span style="color:var(--ok2, #33cdb8); font-weight:bold;">${ico('✓')} ${t('dk.new_lead', 'New copy:')}</span> ${t('dk.new_instance', 'Setting up {name} on free port {port}, next to the one already there.', { name: bold(suggestedContainerName), port: bold(suggestedPort) })}`;
 
     if (deployConfirmBtn) {
-      setIconLabel(deployConfirmBtn, '🚀', t('ui.deploy_new_instance', 'Deploy New Instance'));
+      setIconLabel(deployConfirmBtn, '🚀', t('ui.deploy_new_instance', 'Install a second copy'));
       setDeployButtonTone(deployConfirmBtn, 'brand');
       deployConfirmBtn.disabled = false;
       deployConfirmBtn.style.opacity = '1';
@@ -1065,7 +1065,7 @@ export async function openDockerPruneModal() {
               <label class="dkd-row-xs">
                 <input class="dkd-x-5" type="checkbox" id="dpm-opt-images" checked>
                 <div>
-                  <strong>${t('dk.p_dangling', 'Remove dangling images')}</strong>
+                  <strong>${t('dk.p_dangling', 'Remove leftovers from old updates')}</strong>
                   <div class="dkd-xs-muted-2">${t('dk.p_dangling_d', 'Removes untagged “none” build layers and leftover images.')}</div>
                 </div>
               </label>

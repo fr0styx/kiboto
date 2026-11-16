@@ -23,7 +23,7 @@ describe('Docker settings in German (NUX-20)', () => {
     await openDockerPruneModal();
     const modal = document.getElementById('docker-prune-modal-overlay');
     expect(modal.textContent).toContain('Docker aufräumen');
-    expect(modal.textContent).toContain('Verwaiste Images entfernen');
+    expect(modal.textContent).toContain('Reste alter Updates entfernen');
     expect(modal.textContent).toContain('Entfernt unbenannte „none“-Build-Schichten');
     expect(modal.textContent).toContain('Freigebbar');
     expect(document.getElementById('dpm-cancel-btn').textContent).toBe('Abbrechen');

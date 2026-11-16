@@ -104,7 +104,7 @@ describe('container details in German (NUX-20)', () => {
     openContainerDeleteModal('c1abcdef123456', 'paperless', 'paperless-ngx:2');
     const dialog = document.getElementById('container-delete-modal-overlay');
     expect(dialog.textContent).toContain('Den Container paperless (c1abcdef1234) endgültig löschen?');
-    expect(dialog.textContent).toContain('Auch das Container-Image löschen (paperless-ngx:2)');
+    expect(dialog.textContent).toContain('Auch die heruntergeladenen App-Dateien löschen (paperless-ngx:2)');
     expect(document.getElementById('cdm-cancel-btn').textContent).toBe('Abbrechen');
   });
 });

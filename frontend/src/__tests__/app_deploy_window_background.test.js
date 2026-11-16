@@ -252,19 +252,19 @@ describe('App Catalog Deployment Window - Background & Minimize Suite', () => {
     // Defaults to Deploy Alongside: suggested name 'uptime-kuma-2', suggested port 3002
     expect(nameInput.value).toBe('uptime-kuma-2');
     expect(portInput.value).toBe('3002');
-    expect(deployBtn.textContent).toContain('Deploy New Instance');
+    expect(deployBtn.textContent).toContain('Install a second copy');
 
     // User switches to "Stop & Replace Existing"
     replaceBtn.click();
     expect(nameInput.value).toBe('uptime-kuma');
     expect(portInput.value).toBe('3001');
-    expect(deployBtn.textContent).toContain('Stop, Replace & Launch');
+    expect(deployBtn.textContent).toContain('Replace and start');
 
     // User switches back to "Deploy Alongside (New)"
     newBtn.click();
     expect(nameInput.value).toBe('uptime-kuma-2');
     expect(portInput.value).toBe('3002');
-    expect(deployBtn.textContent).toContain('Deploy New Instance');
+    expect(deployBtn.textContent).toContain('Install a second copy');
 
     // User customizes the container name and port manually
     nameInput.value = 'my-custom-kuma';

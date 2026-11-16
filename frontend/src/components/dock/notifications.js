@@ -1,7 +1,6 @@
 // Notifications: which events were read, checked or cleared, the dock toast and the notification centre.
 // Part of dock.js, split out by ARC-5.
 
-import { eventLook } from '../../event-level.js';
 import { eventView, eventWhen, needsALook } from '../../event-view.js';
 import { api } from '../../api.js';
 import { ROUTES } from '../../router.js';
@@ -16,7 +15,6 @@ import { bringToFront } from './window-drag.js';
 import { applySavedBounds, loadSavedWindowBounds, saveOpenWindowsState } from './window-state.js';
 
 let lastReadEventTs = parseFloat(localStorage.getItem('kiboto_last_read_event_ts_v2') || '0');
-let currentNotifFilter = 'all';
 const READER_KEY = 'kiboto_events_reader'; // gitleaks:allow (a storage key name)
 
 /** What the bell shows: the entries that ask for attention, the newest report first (SET-13).
@@ -262,16 +260,12 @@ export function renderNotificationCenter() {
   const list = document.getElementById('notif-center-list');
   if (!list || !state.latestStats || !state.latestStats.events) return;
   
-  let events = bellEvents();
-  if (currentNotifFilter === 'error' || currentNotifFilter === 'warning') {
-    events = events.filter((e) => eventLook(e.level) === currentNotifFilter);
-  }
-  
+  // the bell lists only what needs a look (bellEvents); everything else is in Activity -> History
+  const events = bellEvents();
+
   if (events.length === 0) {
-    const emptyMsg = currentNotifFilter === 'all'
-      ? t('notif.empty', 'No recent notifications.')
-      : t('notif.no_matching', 'No notifications matching filter.');
-    const emptySig = `empty_${currentNotifFilter}_${getLanguage()}`;
+    const emptyMsg = t('notif.nothing_to_look_at', 'Nothing needs a look. Everything that happened is in Activity.');
+    const emptySig = `empty_${getLanguage()}`;
     if (list._lastRenderedSignature === emptySig) return;
     list._lastRenderedSignature = emptySig;
     list.innerHTML = `<div style="padding:28px 16px; text-align:center; color:var(--muted); font-size:var(--kb-fs-xs);">${escapeHtml(emptyMsg)}</div>`;
@@ -280,7 +274,7 @@ export function renderNotificationCenter() {
   
   const visibleEvents = events.slice(0, 50);
   const sigParts = visibleEvents.map(e => `${getEventKey(e)}:${isEventChecked(e) ? '1' : '0'}`);
-  const currentSignature = `${currentNotifFilter}_${getLanguage()}_${visibleEvents.length}_${sigParts.join(';')}`;
+  const currentSignature = `${getLanguage()}_${visibleEvents.length}_${sigParts.join(';')}`;
 
   // If signature has not changed, do not touch innerHTML so hover state, transitions, and active clicks aren't lost
   if (list._lastRenderedSignature === currentSignature) {
@@ -361,24 +355,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  document.querySelectorAll('.notif-filter-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      document.querySelectorAll('.notif-filter-btn').forEach(b => {
-        b.classList.remove('active');
-        b.style.background = 'transparent';
-        b.style.borderColor = 'transparent';
-        b.style.color = b.dataset.filter === 'error' ? 'var(--crit, #ff5c5c)' : (b.dataset.filter === 'warning' ? 'var(--warn, #f5a623)' : '#c9d6d7');
-      });
-      btn.classList.add('active');
-      btn.style.background = 'rgba(255,255,255,0.1)';
-      btn.style.borderColor = 'rgba(255,255,255,0.15)';
-      btn.style.color = '#fff';
-      currentNotifFilter = btn.dataset.filter || 'all';
-      renderNotificationCenter();
-    });
-  });
-  
   const notifSettingsBtn = document.getElementById('notif-settings-btn');
   if (notifSettingsBtn) {
     notifSettingsBtn.addEventListener('click', (e) => {

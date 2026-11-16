@@ -1162,17 +1162,17 @@ function bindCwTableEvents(tbody) {
         const items = [
           {
             icon: '🔍',
-            label: t('docker.inspect', 'Inspect & Overview'),
+            label: t('docker.inspect', 'Details'),
             onClick: () => openContainerInspector(cid, cname, 'overview'),
           },
           {
             icon: '📋',
-            label: t('docker.logs', 'View Container Logs'),
+            label: t('docker.logs', 'Show the log'),
             onClick: () => openContainerInspector(cid, cname, 'logs'),
           },
           {
             icon: '📟',
-            label: t('docker.terminal', 'Web Terminal Console'),
+            label: t('docker.terminal', 'Terminal'),
             onClick: () => openContainerInspector(cid, cname, 'terminal'),
           },
           {

@@ -686,7 +686,7 @@ async function loadContainerDetails(cid) {
       <!-- Live Resource Tuning Section (Phase 3) -->
       <div class="ci-metric-card ci-box-3">
         <div class="ci-row-6">
-          <div class="ci-xs-bold-strong">${ico('⚡')} ${t('ci.tuning', 'Live resource limits (no downtime)')}</div>
+          <div class="ci-xs-bold-strong">${ico('⚡')} ${t('ci.tuning', 'Limits')}</div>
           <span style="font-size:var(--kb-fs-xs); color:var(--lt-ink-brand, var(--accent-cyan, #33cdb8)); background:var(--lt-b-33cdb81a, rgba(51,205,184,0.1)); padding:2px 6px; border-radius:4px;">${t('ci.hot', 'Applies at once')}</span>
         </div>
         <div class="ci-grid-2">
@@ -744,7 +744,7 @@ async function loadContainerDetails(cid) {
           </div>
           <div class="ci-row-5">
             <button class="btn-pill-toggle" id="ci-btn-restart-action">${ico('🔄')} ${t('chassis.restart', 'Restart')}</button>
-            <button class="btn-pill-toggle is-danger ci-strong" id="ci-btn-destroy-action">${ico('🗑️')} ${t('ci.destroy', 'Delete container')}</button>
+            <button class="btn-pill-toggle is-danger ci-strong" id="ci-btn-destroy-action">${ico('🗑️')} ${t('ci.destroy', 'Remove app')}</button>
           </div>
         </div>
       </div>
@@ -806,7 +806,7 @@ async function loadContainerDetails(cid) {
           showToast(t('toast.resource_update_failed', 'Resource update failed: {error}', { error: err.message }), 'error');
         } finally {
           applyResBtn.disabled = false;
-          setIconLabel(applyResBtn, '💾', t('ui.apply_tuning', 'Apply Tuning'));
+          setIconLabel(applyResBtn, '💾', t('ui.apply_tuning', 'Apply'));
         }
       });
     }
@@ -1458,7 +1458,7 @@ export function openContainerDeleteModal(cid, cname, imageRef = '', onDeleted = 
           <div class="smart-modal-header ci-row-9">
             <div class="ci-row">
               <span class="ci-fs18">⚠️</span>
-              <span style="font-weight:700; color:var(--crit, #ff6b6b); font-size:13px;">${t('ci.destroy', 'Delete container')}</span>
+              <span style="font-weight:700; color:var(--crit, #ff6b6b); font-size:13px;">${t('ci.destroy', 'Remove app')}</span>
             </div>
             <button class="win-btn close-btn" id="cdm-close-btn" title="${t('diagnostics.close_btn', 'Close')}" aria-label="${t('diagnostics.close_btn', 'Close')}"></button>
           </div>
@@ -1470,12 +1470,12 @@ export function openContainerDeleteModal(cid, cname, imageRef = '', onDeleted = 
               })}
             </div>
             <div style="background:rgba(255,107,107,0.08); border:1px solid rgba(255,107,107,0.25); border-radius:6px; padding:10px 12px; font-size:var(--kb-fs-xs); color:var(--lt-t-fca5a5ff, #fca5a5); line-height:1.4;">
-              ${ico('⚠️')} <strong>${t('ci.warning', 'Warning:')}</strong> ${t('ci.delete_warn', 'The container is stopped and removed from Docker. Anything saved only inside the container is lost.')}
+              ${ico('⚠️')} <strong>${t('ci.warning', 'Warning:')}</strong> ${t('ci.delete_warn', 'The app is stopped and removed. The folders you gave it stay. Anything it kept only inside itself is lost.')}
             </div>
             <div class="ci-col-box">
               <label style="display:flex; align-items:center; gap:8px; font-size:var(--kb-fs-xs); color:var(--lt-t-fb923cff, #fb923c); font-weight:600; cursor:pointer;">
                 <input class="ci-x-2" type="checkbox" id="cdm-archive" checked>
-                <span>${t('ci.opt_archive', 'Archive the app data and settings (kept in the backup library, never deleted)')}</span>
+                <span>${t('ci.opt_archive', 'Keep a copy of its folders and settings under Backup')}</span>
               </label>
               <label class="ci-row-xs">
                 <input class="ci-x-2" type="checkbox" id="cdm-force" checked>
@@ -1483,18 +1483,18 @@ export function openContainerDeleteModal(cid, cname, imageRef = '', onDeleted = 
               </label>
               <label class="ci-row-xs">
                 <input class="ci-x-2" type="checkbox" id="cdm-volumes" checked>
-                <span>${t('ci.opt_volumes', 'Delete its anonymous volumes (frees space)')}</span>
+                <span>${t('ci.opt_volumes', 'Also delete storage that Docker made for this app and that has no folder of its own')}</span>
               </label>
               <label class="ci-row-xs">
                 <input class="ci-x-2" type="checkbox" id="cdm-image">
-                <span>${t('ci.opt_image', 'Also delete the container image')} <code class="ci-xs-muted-2" id="cdm-image-tag"></code></span>
+                <span>${t('ci.opt_image', 'Also delete the downloaded app files')} <code class="ci-xs-muted-2" id="cdm-image-tag"></code></span>
               </label>
             </div>
           </div>
           <div class="ci-row-box-3">
             <button class="btn-pill-toggle" id="cdm-cancel-btn">${t('common.cancel', 'Cancel')}</button>
             <button class="btn-pill-toggle is-danger ci-strong-box" id="cdm-confirm-btn">
-              ${ico('💥')} ${t('ci.destroy', 'Delete container')}
+              ${ico('💥')} ${t('ci.destroy', 'Remove app')}
             </button>
           </div>
         </div>
@@ -1533,7 +1533,7 @@ export function openContainerDeleteModal(cid, cname, imageRef = '', onDeleted = 
 
   const confirmBtn = document.getElementById('cdm-confirm-btn');
   confirmBtn.disabled = false;
-  setIconLabel(confirmBtn, '💥', t('ui.destroy_container', 'Destroy Container'));
+  setIconLabel(confirmBtn, '💥', t('ui.destroy_container', 'Remove app'));
 
   confirmBtn.onclick = async () => {
     const archiveData = document.getElementById('cdm-archive')?.checked ?? true;
@@ -1557,7 +1557,7 @@ export function openContainerDeleteModal(cid, cname, imageRef = '', onDeleted = 
     } catch (err) {
       showToast(t('toast.failed_to_destroy_container', 'Failed to destroy container: {error}', { error: err.message }), 'error');
       confirmBtn.disabled = false;
-      setIconLabel(confirmBtn, '💥', t('ui.destroy_container', 'Destroy Container'));
+      setIconLabel(confirmBtn, '💥', t('ui.destroy_container', 'Remove app'));
     }
   };
 }

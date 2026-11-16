@@ -27,8 +27,6 @@ describe('Notification Center Draggable Window & Event Detail Inspector', () => 
           </div>
         </div>
         <div id="notif-filter-bar">
-          <button class="notif-filter-btn active" data-filter="all">All</button>
-          <button class="notif-filter-btn" data-filter="error">Errors</button>
         </div>
         <div id="notif-center-list"></div>
         <div id="notif-center-resizer" class="window-resizer-grip"></div>
