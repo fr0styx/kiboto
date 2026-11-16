@@ -34,6 +34,7 @@ def _signature(obj):
     except (TypeError, ValueError):
         return "?"
     sig = re.sub(r" at 0x[0-9a-f]+", "", sig)
+    sig = sig.replace(", max_concurrency=None)", ")")  # FastAPI 0.163 prints this Depends default; 0.162 did not
     return re.sub(r"backend\.api\.(fs|files)(\.\w+)*?\.(?=[A-Z])", "", sig)  # where a type lives may change
 
 
