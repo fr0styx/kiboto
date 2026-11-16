@@ -7,9 +7,9 @@ the setting: off until the person turns it on and confirms (the Docker guard let
 the host's network through only then; the yes is remembered, so an update or a rename can make it
 again), the name, and the names the NAS had before.
 
-The rebrand: DEFAULT_NAME is the one place the product's name is used. The name from before the
-Kiboto rebrand is in PREVIOUS_NAMES, so bookmarks, saved shares and Finder favourites keep working;
-a name the family changes in the settings is kept the same way.
+The rebrand: DEFAULT_NAME is the one place the product's name is used. A saved name from before the
+Kiboto rebrand becomes the new default and no longer answers. A name the family changes in the
+settings keeps answering, so their bookmarks, saved shares and Finder favourites keep working.
 """
 
 import hashlib
@@ -26,7 +26,7 @@ from backend.fsutil import atomic_write_json, read_json
 
 DEFAULT_NAME = "kiboto"
 DEFAULT_LABEL = "Kiboto"  # how Finder lists the NAS when it has the default name
-PREVIOUS_NAMES: tuple[str, ...] = (legacy_names.OLD_NAS_NAME,)  # still answer after the rebrand
+PREVIOUS_NAMES: tuple[str, ...] = ()  # product names that still answer (none since the old one was dropped)
 KEEP_OLD = 3  # names the family used before that still answer
 CONTAINER = "kiboto-name"
 RESPONDER = "/app/backend/services/mdns_responder.py"
@@ -49,8 +49,10 @@ def config() -> dict[str, Any]:
     data = data if isinstance(data, dict) else {}
     name = str(data.get("name") or settings.current("nas_name") or DEFAULT_NAME).lower()
     if name == legacy_names.OLD_NAS_NAME:
-        name = DEFAULT_NAME  # the default saved before the rebrand: the new one, the old still answers
-    previous = [p for p in data.get("previous", []) if isinstance(p, str) and valid(p)]
+        name = DEFAULT_NAME  # the default saved before the rebrand becomes the new one
+    previous = [
+        p for p in data.get("previous", []) if isinstance(p, str) and valid(p) and p != legacy_names.OLD_NAS_NAME
+    ]
     return {
         "enabled": bool(data.get("enabled", False)),
         "name": name if valid(name) else DEFAULT_NAME,

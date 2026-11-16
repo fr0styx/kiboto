@@ -303,6 +303,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **The last ZettNAS names at run time are gone**: the hardware runner and the fan watchdog's heartbeat
   use Kiboto's names (the old heartbeat name is still written until 2.2 for older watchdogs).
 
+#### Changes
+
+- **zettnas.local no longer answers**: the NAS is found as kiboto.local, or by the name you chose in
+  the settings (names you used before that still answer). A name saved before the rebrand becomes kiboto.
+
 ## v2.0.2 (2026-11-12)
 ### 🧭 A new Settings sidebar, five themes, honest pages, and remote access cut down to what works
 

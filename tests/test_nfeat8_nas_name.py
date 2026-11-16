@@ -158,14 +158,14 @@ def test_off_until_turned_on_then_with_the_products_name(docker):
     assert st == {
         "enabled": True,
         "name": "kiboto",
-        "also_answers": ["zettnas"],
+        "also_answers": [],
         "running": True,
         "address": "kiboto.local",
         "url": "http://kiboto.local:8090",
         "error": "",
     }
     cmd = docker.box["Config"]["Cmd"]
-    assert cmd == [nas_name.RESPONDER, "--names", "kiboto,zettnas", "--label", "Kiboto", "--http-port", "8090"]
+    assert cmd == [nas_name.RESPONDER, "--names", "kiboto", "--label", "Kiboto", "--http-port", "8090"]
     assert docker.box["Config"]["Image"] == "ghcr.io/x/zettnas-toolkit:sha-abc"
     assert docker.box["Config"]["HostConfig"]["NetworkMode"] == "host"
     calls = len(docker.calls)
@@ -176,9 +176,9 @@ def test_a_rename_keeps_the_old_name_answering_and_an_update_recreates(docker):
     nas_name.save(enabled=True)
     nas_name.ensure()
     st = nas_name.save(name="Smith-NAS.local")
-    assert st["name"] == "smith-nas" and st["also_answers"] == ["kiboto", "zettnas"]
+    assert st["name"] == "smith-nas" and st["also_answers"] == ["kiboto"]
     cmd = docker.box["Config"]["Cmd"]
-    assert cmd[cmd.index("--names") + 1] == "smith-nas,kiboto,zettnas" and cmd[cmd.index("--label") + 1] == "smith-nas"
+    assert cmd[cmd.index("--names") + 1] == "smith-nas,kiboto" and cmd[cmd.index("--label") + 1] == "smith-nas"
     docker.me["Config"]["Image"] = "ghcr.io/x/zettnas-toolkit:sha-new"
     nas_name.ensure()
     assert (
@@ -189,18 +189,18 @@ def test_a_rename_keeps_the_old_name_answering_and_an_update_recreates(docker):
         nas_name.save(name="-bad name-")
 
 
-def test_after_the_rebrand_the_old_product_name_still_answers(docker):
+def test_after_the_rebrand_the_old_product_name_no_longer_answers(docker):
     # turned on before the rebrand: the default "zettnas" was saved, and its container still runs
     import json
 
     with open(nas_name.STATE_FILE, "w") as f:
-        json.dump({"enabled": True, "name": "zettnas", "previous": []}, f)
+        json.dump({"enabled": True, "name": "zettnas", "previous": ["zettnas", "attic"]}, f)
     docker.old = {"State": {"Running": True}}
     st = nas_name.ensure()
-    assert st["name"] == "kiboto" and st["also_answers"] == ["zettnas"] and st["address"] == "kiboto.local"
+    assert st["name"] == "kiboto" and st["also_answers"] == ["attic"] and st["address"] == "kiboto.local"
     assert docker.old is None and ("DELETE", "/containers/zettnas-name") in docker.calls  # one responder
     cmd = docker.box["Config"]["Cmd"]
-    assert cmd[cmd.index("--names") + 1] == "kiboto,zettnas" and cmd[cmd.index("--label") + 1] == "Kiboto"
+    assert cmd[cmd.index("--names") + 1] == "kiboto,attic" and cmd[cmd.index("--label") + 1] == "Kiboto"
     # a name the family chose stays theirs
     nas_name.save(name="smith-nas")
     assert nas_name.config()["name"] == "smith-nas"
