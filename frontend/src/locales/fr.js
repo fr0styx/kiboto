@@ -8014,5 +8014,6 @@ export default {
   "fm.m_details": "Détails",
   "fm.m_ai": "Recherche IA",
   "fm.m_view": "Affichage",
-  "fm.m_more": "Plus"
+  "fm.m_more": "Plus",
+  "vmd.discard_q": "Fermer sans enregistrer ? Vos modifications seront perdues."
 };

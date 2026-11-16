@@ -11,6 +11,7 @@ import { t } from '../../i18n.js';
 const ico = (e) => `<span aria-hidden="true">${e}</span>`;
 import { makeDraggable, bringToFront } from '../dock.js';
 import { vmState } from './state.js';
+import { asDialog, askBeforeDiscard } from './dialog-a11y.js';
 import { loadIsos, fillIsoSelect } from './isos.js';
 import { openKvmDiagnosticsModal } from './connect-modal.js';
 import { vtpmBadgeHtml } from './shared.js';
@@ -400,6 +401,7 @@ export function openVmEditModal(vmId, vmObj = null) {
   modal.classList.add('open');
   modal.style.removeProperty('display');
   modal.style.display = 'flex';
+  asDialog(modal, { modal: false, escape: false });
 
   const modalWin = modal.querySelector('.smart-modal-window');
   const modalHdr = modal.querySelector('.smart-modal-header');
@@ -459,8 +461,8 @@ export function openVmEditModal(vmId, vmObj = null) {
   };
 
   onKeyDown = (e) => {
-    if (e.key === 'Escape' && modal.classList.contains('open')) {
-      close();
+    if (e.key === 'Escape' && modal.classList.contains('open') && !document.getElementById('confirm-toast-backdrop')) {
+      askBeforeDiscard(modal, close); // VMs report 35
     }
   };
   document.addEventListener('keydown', onKeyDown);

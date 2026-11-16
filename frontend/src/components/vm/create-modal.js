@@ -11,6 +11,7 @@ import { t } from '../../i18n.js';
 const ico = (e) => `<span aria-hidden="true">${e}</span>`;
 import { makeDraggable, bringToFront } from '../dock.js';
 import { vmState } from './state.js';
+import { asDialog, askBeforeDiscard } from './dialog-a11y.js';
 import { loadIsos, fillIsoSelect } from './isos.js';
 import { openIsoManagerModal } from './iso-manager.js';
 import { vtpmBadgeHtml } from './shared.js';
@@ -337,8 +338,8 @@ export function openVmCreateModal() {
   };
 
   onKeyDown = (e) => {
-    if (e.key === 'Escape' && modal.classList.contains('open')) {
-      closeModal();
+    if (e.key === 'Escape' && modal.classList.contains('open') && !document.getElementById('confirm-toast-backdrop')) {
+      askBeforeDiscard(modal, closeModal); // a changed form is not thrown away without asking (VMs report 35)
     }
   };
   document.addEventListener('keydown', onKeyDown);
@@ -764,6 +765,7 @@ export function openVmCreateModal() {
   modal.style.display = 'flex';
   loadIsos().then(() => fillIsoSelect(modal.querySelector('#vm-create-iso')));
   modal.classList.add('open');
+  asDialog(modal, { modal: false, escape: false }); // Escape is handled above, asking first
   if (modalWin) {
     modalWin.classList.remove('window-minimized');
     modalWin.style.removeProperty('display');

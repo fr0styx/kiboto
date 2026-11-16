@@ -8,6 +8,7 @@ import { t } from '../../i18n.js';
 import { makeDraggable } from '../dock.js';
 import { vmState } from './state.js';
 import { copyToClipboard, openVmConsole } from './console.js';
+import { asDialog } from './dialog-a11y.js';
 
 const STATE_KEYS = { running: 'vmm.st_running', paused: 'vmm.st_paused', stopped: 'vmm.st_stopped', shutoff: 'vmm.st_stopped', shutting_down: 'vmp.st_shutting' };
 const STATE_WORDS = { running: 'Running', paused: 'Paused', stopped: 'Stopped', shutoff: 'Stopped', shutting_down: 'Shutting down' };
@@ -185,6 +186,7 @@ export function openVmConnectModal(vmId, vmObj = null) {
 
   modal.classList.add('open');
   modal.style.display = 'flex';
+  asDialog(modal); // VMs report 35
 
   const close = () => {
     modal.classList.remove('open');
@@ -377,4 +379,5 @@ export function openKvmDiagnosticsModal(kvm = null) {
 
   modal.style.display = 'flex';
   modal.classList.add('open');
+  asDialog(modal);
 }

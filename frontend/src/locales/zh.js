@@ -8014,5 +8014,6 @@ export default {
   "fm.m_details": "详情",
   "fm.m_ai": "AI 搜索",
   "fm.m_view": "视图",
-  "fm.m_more": "更多"
+  "fm.m_more": "更多",
+  "vmd.discard_q": "不保存就关闭吗？你的更改将会丢失。"
 };

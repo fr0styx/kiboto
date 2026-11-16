@@ -8014,5 +8014,6 @@ export default {
   "fm.m_details": "Details",
   "fm.m_ai": "AI search",
   "fm.m_view": "View",
-  "fm.m_more": "More"
+  "fm.m_more": "More",
+  "vmd.discard_q": "Close without saving? Your changes are lost."
 };

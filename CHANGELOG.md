@@ -265,6 +265,12 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   menus: View (List, Compact list, Icons, Show hidden files) and More (New window, Tidy films and series, Transfers,
   Details, AI search). Quick locations leaves the toolbar on a computer, where the sidebar lists the same places.
 
+#### Changes
+
+- **Virtual machine dialogs work with the keyboard and screen readers**: they announce themselves as dialogs, start
+  on their first field, close with Escape, and Escape on a changed New machine or Edit form asks before throwing it
+  away.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

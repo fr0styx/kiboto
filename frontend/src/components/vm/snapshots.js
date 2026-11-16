@@ -11,6 +11,7 @@ import { openVmConnectModal } from './connect-modal.js';
 import { openVmEditModal } from './edit-modal.js';
 import { loadVmDashboard } from '../vm-manager.js';
 import { isOff, snapshotList } from './power.js';
+import { asDialog } from './dialog-a11y.js';
 
 export async function openVmSnapshotsModal(vmId, vmObj = null) {
   let modal = document.getElementById('modal-vm-snapshots');
@@ -108,6 +109,7 @@ export async function openVmSnapshotsModal(vmId, vmObj = null) {
   modal.style.removeProperty('display');
   modal.style.setProperty('display', 'flex', 'important');
   modal.style.zIndex = '9600';
+  asDialog(modal); // VMs report 35: a dialog, Escape closes it
 
   const win = modal.querySelector('.smart-modal-window');
   if (win) {
