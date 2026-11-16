@@ -247,6 +247,26 @@ OFFICIAL_ISO_CATALOG: list[dict[str, Any]] = [
         "sha256": "bdc2ad1727a08b6d8a59d40e112d930f53a2b354bdef85903abaad896214f0a3",
         "recommended_specs": {"min_vcpus": 1, "min_ram_gb": 0.5, "min_disk_gb": 1, "recommended_bus": "sata"},
     },
+    {
+        # VMs decision 5, third preset: Home Assistant ships as a ready-made disk, not an installer. The
+        # download is checked against GitHub's digest, then unpacked next to the installers.
+        "id": "haos",
+        "name": "Home Assistant OS 18.4",
+        "distribution": "Home Assistant",
+        "version": "18.4",
+        "category": "appliance",
+        "badge": "Ready-made disk",
+        "architecture": "x86_64",
+        "kernel": "UEFI",
+        "description": "Home Assistant's own system as a ready-made disk: no installer, it starts straight away.",
+        "download_url": "https://github.com/home-assistant/operating-system/releases/download/18.4/haos_ova-18.4.qcow2.xz",
+        "filename": "haos_ova-18.4.qcow2.xz",
+        "unpack": "xz",
+        "size_bytes": 508539728,  # GitHub's asset size, 27 Oct 2026 release
+        "size_formatted": "485 MB",
+        "sha256": "756ec485b1b153099ca53e88a5eebd63a801d56b791afe5c6d63ef94a35dc02d",
+        "recommended_specs": {"min_vcpus": 2, "min_ram_gb": 2.0, "min_disk_gb": 32, "recommended_bus": "virtio"},
+    },
 ]
 
 
@@ -254,3 +274,41 @@ _RUNNING_QEMU_PROCS: dict[str, dict[str, Any]] = {}
 
 
 _LAST_QEMU_ERRORS: dict[str, str] = {}
+
+
+def unpack_xz(path: str) -> str:
+    """Unpacks a downloaded .xz next to itself and removes the archive; returns the unpacked file.
+    Streams in pieces, so a disk image several times the download never sits in memory."""
+    import lzma
+
+    out = path[:-3] if path.endswith(".xz") else path + ".unpacked"
+    part = out + ".unpacking"
+    try:
+        with lzma.open(path, "rb") as src, open(part, "wb") as dst:
+            shutil.copyfileobj(src, dst, length=4 * 1024 * 1024)
+        os.replace(part, out)
+    except (OSError, lzma.LZMAError):
+        if os.path.exists(part):
+            os.remove(part)
+        raise
+    os.remove(path)
+    os.chmod(out, 0o644)
+    return out
+
+
+def make_primary_disk(target_vm: dict[str, Any], disk_path: str, qemu_img: str, run: Any = None) -> None:
+    """Makes a machine's own disk at its first start: a copy of its ready-made disk (Home Assistant OS,
+    VMs decision 5) grown to the size chosen, or an empty disk of that size. Raises on failure."""
+    import subprocess
+
+    run = run or subprocess.run
+    size = f"{int(target_vm.get('disk_size_gb', 32) or 32)}G"
+    image = target_vm.get("disk_image_path")
+    source = _confined(image, _vm_iso_roots(), "file") if image else None
+    if image and not (source and os.path.exists(source)):
+        raise ValueError("The ready-made disk is missing or outside the installer folders.")
+    if source:
+        run([qemu_img, "convert", "-O", "qcow2", source, disk_path], check=True, capture_output=True, timeout=1800)
+        run([qemu_img, "resize", disk_path, size], check=True, capture_output=True, timeout=120)
+    else:
+        run([qemu_img, "create", "-f", "qcow2", disk_path, size], check=True, capture_output=True, timeout=120)

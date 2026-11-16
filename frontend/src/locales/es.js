@@ -8144,5 +8144,11 @@ export default {
   "vmst.more": "Más",
   "vmst.steps": "Pasos",
   "vmst.back": "Atrás",
-  "vmst.next": "Siguiente"
+  "vmst.next": "Siguiente",
+  "vmd.disk_image_label": "Disco listo para usar (opcional)",
+  "vmd.disk_image_none": "Ninguno: instalar desde la ISO de arranque",
+  "vmd.disk_image_help": "Un sistema que viene como disco, como Home Assistant OS del catálogo de ISO. Se copia para esta máquina.",
+  "vmp.p_ha": "Home Assistant",
+  "vmp.p_ha_2": "2 núcleos, 4 GB, su disco listo para usar",
+  "vmp.n_ha": "Home Assistant OS viene como disco listo para usar. Si «Disco listo para usar» no muestra ninguno, descarga primero Home Assistant OS desde el catálogo de ISO."
 };

@@ -103,17 +103,18 @@
    "desc": "Essential Red Hat signed VirtIO storage (viostor), network (NetKVM), and memory balloon drivers."
   },
   {
-   "id": "win-server-2022",
-   "name": "Windows Server 2022 Eval",
-   "family": "windows",
-   "badge": "Microsoft Eval",
-   "edition": "Standard / Datacenter",
-   "size_formatted": "4.7 GB",
+   "id": "haos",
+   "name": "Home Assistant OS 18.4",
+   "family": "linux",
+   "badge": "Ready-made disk",
+   "edition": "18.4",
+   "size_formatted": "485 MB",
    "arch": "x86_64",
-   "kernel": "NT 10.0",
-   "url": "https://software-download.microsoft.com/download/pr/SERVER_EVAL_x64FRE_en-us.iso",
-   "filename": "Windows_Server_2022_Eval_x64.iso",
-   "desc": "Official Microsoft 180-day evaluation image for Active Directory and Windows workloads."
+   "kernel": "UEFI",
+   "url": "https://github.com/home-assistant/operating-system/releases/download/18.4/haos_ova-18.4.qcow2.xz",
+   "filename": "haos_ova-18.4.qcow2",
+   "disk": true,
+   "desc": "Home Assistant's own system as a ready-made disk: no installer, it starts straight away (VMs decision 5)."
   }
  ]
 }

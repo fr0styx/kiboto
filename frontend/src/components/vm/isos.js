@@ -9,8 +9,9 @@ import { vmState } from './state.js';
 /** Reads the installer list into vmState.isos; on a failure the last list stays. */
 export async function loadIsos() {
   try {
-    const isos = await api.get('/api/vms/isos');
+    const [isos, disks] = await Promise.all([api.get('/api/vms/isos'), api.get('/api/vms/disk-images').catch(() => vmState.diskImages)]);
     vmState.isos = Array.isArray(isos) ? isos : [];
+    vmState.diskImages = Array.isArray(disks) ? disks : [];
   } catch (_) {
     // the dialog keeps the list it has
   }

@@ -38,7 +38,7 @@ request and response schemas.
 
 <!-- BEGIN generated endpoints: python scripts/api_reference.py --update -->
 
-733 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
+734 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
 
 ### AI Conversation History
 
@@ -973,6 +973,7 @@ request and response schemas.
 | `GET` | `/api/v1/vms/catalog/tasks` | any of `vms:read`, `system:config` | Returns status and telemetry of active and recent ISO download tasks |
 | `DELETE` | `/api/v1/vms/catalog/tasks/{task_id}` | any of `vms:manage`, `system:config` | Cancels an in-flight ISO download task or removes a finished/failed task record |
 | `POST` | `/api/v1/vms/catalog/{catalog_id}/download` | any of `vms:manage`, `system:config` | Initiates a background download of a verified official distribution ISO |
+| `GET` | `/api/v1/vms/disk-images` | any of `vms:read`, `system:config` | Ready-made disks a new machine can start from (VMs decision 5) |
 | `GET` | `/api/v1/vms/iommu-groups` | any of `vms:read`, `system:config` | Scans Linux host sysfs /sys/kernel/iommu_groups to report IOMMU isolation groups and PCI devices |
 | `DELETE` | `/api/v1/vms/isos` | any of `vms:manage`, `system:config` | Delete Iso Image |
 | `GET` | `/api/v1/vms/isos` | any of `vms:read`, `system:config` | Lists available ISO and OS installation images |

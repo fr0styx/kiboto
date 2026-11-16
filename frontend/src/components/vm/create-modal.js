@@ -18,6 +18,7 @@ import { openIsoManagerModal } from './iso-manager.js';
 import { vtpmBadgeHtml } from './shared.js';
 import { presetsHtml, bindPresets } from './presets.js';
 import { stepsHtml, installSteps } from './create-steps.js';
+import { bindDiskImages } from './disk-images.js';
 import { loadVmDashboard } from '../vm-manager.js';
 
 let _telemetryAsked = false;
@@ -146,6 +147,13 @@ export function openVmCreateModal() {
               <option value="">${t('vmd.iso_none_net', 'None (network boot or empty disk)')}</option>
               ${vmState.isos.map((iso) => `<option value="${escapeHtml(iso.path)}">${escapeHtml(iso.name)} (${iso.size_formatted})</option>`).join('')}
             </select>
+          </div>
+          <div>
+            <label class="vmc-xs-bold-muted-2" for="vm-create-disk-image">${t('vmd.disk_image_label', 'Ready-made disk (optional)')}</label>
+            <select id="vm-create-disk-image" class="tz-select" style="width: 100%; padding: 8px 10px; border-radius: 6px; background: var(--lt-b-1a2629ff, #1a2629); border: 1px solid var(--kb-line-12); color: var(--kb-text-strong); font-size: var(--kb-fs-xs); box-sizing: border-box;" aria-describedby="vm-create-disk-image-help">
+              <option value="">${t('vmd.disk_image_none', 'None: install from the boot ISO')}</option>
+            </select>
+            <div class="vmc-xs-muted" id="vm-create-disk-image-help">${t('vmd.disk_image_help', 'A system that comes as a disk, such as Home Assistant OS from the ISO catalog. It is copied for this machine.')}</div>
           </div>
           <div>
             <label class="vmc-xs-bold-muted-2" for="vm-create-driver-iso">${t('vmd.driver_iso_label', 'Driver disc (optional)')}</label>
@@ -706,6 +714,7 @@ export function openVmCreateModal() {
   // Submit Handler
   bindPresets(modal); // VMs decision 5: start from Linux or Windows 11
   installSteps(modal); // three steps (VMs report stage 3)
+  bindDiskImages(modal); // ready-made disks such as Home Assistant OS (VMs decision 5)
   const btnSubmit = modal.querySelector('#vm-create-submit');
   if (btnSubmit) {
     btnSubmit.onclick = async () => {
@@ -755,6 +764,7 @@ export function openVmCreateModal() {
           disk_bus: 'virtio',
           iso_path: modal.querySelector('#vm-create-iso')?.value || null,
           driver_iso_path: /** @type {HTMLSelectElement | null} */ (modal.querySelector('#vm-create-driver-iso'))?.value || null,
+          disk_image_path: /** @type {HTMLSelectElement | null} */ (modal.querySelector('#vm-create-disk-image'))?.value || null,
           boot_order: modal.querySelector('input[name="vm-create-boot-order"]:checked')?.value || 'iso',
           bridge: modal.querySelector('#vm-create-bridge')?.value || 'br0',
           autostart: !!modal.querySelector('#vm-create-autostart')?.checked,

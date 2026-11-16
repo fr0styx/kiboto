@@ -99,17 +99,18 @@ export const OFFICIAL_ISO_CATALOG = [
     desc: 'Essential Red Hat signed VirtIO storage (viostor), network (NetKVM), and memory balloon drivers.'
   },
   {
-    id: 'win-server-2022',
-    name: 'Windows Server 2022 Eval',
-    family: 'windows',
-    badge: 'Microsoft Eval',
-    edition: 'Standard / Datacenter',
-    size_formatted: '4.7 GB',
+    id: 'haos',
+    name: 'Home Assistant OS 18.4',
+    family: 'linux',
+    badge: 'Ready-made disk',
+    edition: '18.4',
+    size_formatted: '485 MB',
     arch: 'x86_64',
-    kernel: 'NT 10.0',
-    url: 'https://software-download.microsoft.com/download/pr/SERVER_EVAL_x64FRE_en-us.iso',
-    filename: 'Windows_Server_2022_Eval_x64.iso',
-    desc: 'Official Microsoft 180-day evaluation image for Active Directory and Windows workloads.'
+    kernel: 'UEFI',
+    url: 'https://github.com/home-assistant/operating-system/releases/download/18.4/haos_ova-18.4.qcow2.xz',
+    filename: 'haos_ova-18.4.qcow2',
+    disk: true, // a ready-made disk, chosen under "Ready-made disk", never booted as an ISO
+    desc: 'Home Assistant\'s own system as a ready-made disk: no installer, it starts straight away (VMs decision 5).'
   }
 ];
 
@@ -514,7 +515,7 @@ export async function openIsoManagerModal(initialTab = 'catalog') {
 
     const list = catalogList || OFFICIAL_ISO_CATALOG;
     container.innerHTML = list.map((item) => {
-      const inStorage = (vmState.isos || []).some((iso) =>
+      const inStorage = [...(vmState.isos || []), ...(vmState.diskImages || [])].some((iso) =>
         iso.name.toLowerCase() === item.filename.toLowerCase() ||
         (iso.path && iso.path.toLowerCase().endsWith(item.filename.toLowerCase()))
       );
@@ -546,7 +547,7 @@ export async function openIsoManagerModal(initialTab = 'catalog') {
             <span class="vmi-xs-muted-mono">${item.arch || item.architecture || 'x86_64'} • ${item.kernel || 'Linux'}</span>
             <div class="vmi-row-7">
               ${inStorage ? `
-                <button class="btn-pill-toggle btn-boot-catalog-iso" data-filename="${escapeHtml(item.filename)}" style="background: rgba(51,205,184,0.18); color: var(--kb-text-accent); border-color: rgba(51,205,184,0.35);">
+                <button class="btn-pill-toggle btn-boot-catalog-iso" data-filename="${escapeHtml(item.filename)}"${item.disk ? ' hidden' : ''} style="background: rgba(51,205,184,0.18); color: var(--kb-text-accent); border-color: rgba(51,205,184,0.35);">
                   ${ico('▶')} ${t('viso.boot', 'Create VM')}
                 </button>
                 <button class="btn-save-preset btn-dl-catalog" data-id="${item.id}" disabled style="padding: 5px 10px; font-size: var(--kb-fs-xs); font-weight: 700; background: rgba(16,185,129,0.2); color: var(--kb-text-ok); border-color: #34d399;">

@@ -8144,5 +8144,11 @@ export default {
   "vmst.more": "More",
   "vmst.steps": "Steps",
   "vmst.back": "Back",
-  "vmst.next": "Next"
+  "vmst.next": "Next",
+  "vmd.disk_image_label": "Ready-made disk (optional)",
+  "vmd.disk_image_none": "None: install from the boot ISO",
+  "vmd.disk_image_help": "A system that comes as a disk, such as Home Assistant OS from the ISO catalog. It is copied for this machine.",
+  "vmp.p_ha": "Home Assistant",
+  "vmp.p_ha_2": "2 cores, 4 GB, its ready-made disk",
+  "vmp.n_ha": "Home Assistant OS comes as a ready-made disk. If \"Ready-made disk\" shows none, download Home Assistant OS from the ISO catalog first."
 };

@@ -1,9 +1,9 @@
 {
   "important": 3383,
   "buttonClasses": 75,
-  "inlineStyles": 1256,
+  "inlineStyles": 1257,
   "emojiIcons": 3,
-  "colours": 3714,
+  "colours": 3715,
   "primitiveUses": 4,
   "importantPerFile": {
     "frontend/index.html": 64,
@@ -98,7 +98,7 @@
     "frontend/src/components/vm/connect-modal.js": 15,
     "frontend/src/components/vm/console-ansi.js": 51,
     "frontend/src/components/vm/console.js": 15,
-    "frontend/src/components/vm/create-modal.js": 20,
+    "frontend/src/components/vm/create-modal.js": 21,
     "frontend/src/components/vm/edit-modal.js": 33,
     "frontend/src/components/vm/iso-manager.js": 30,
     "frontend/src/components/vm/shared.js": 4,

@@ -359,7 +359,12 @@ def _asleep(d: str) -> bool:
     return rag_standby.is_backing_disk_in_standby(rag_standby.resolve_path_backing_dev(d) or d)
 
 
-def scan_isos(asleep=_asleep) -> list[dict[str, Any]]:
+def scan_disk_images(asleep=_asleep) -> list[dict[str, Any]]:
+    """Ready-made disks (.qcow2) in the installer folders, such as Home Assistant OS (VMs decision 5)."""
+    return scan_isos(asleep, (".qcow2",))
+
+
+def scan_isos(asleep=_asleep, exts: tuple[str, ...] = (".iso", ".img")) -> list[dict[str, Any]]:
     """Discovers bootable ISO and raw disk images in storage shares. A folder whose disk sleeps is
     left out until it is awake: opening the VM window walked every installer folder, which could
     wake the pool's drives just to draw a list (VMs report 28)."""
@@ -372,7 +377,7 @@ def scan_isos(asleep=_asleep) -> list[dict[str, Any]]:
             try:
                 for root, _, files in os.walk(d):
                     for f in files:
-                        if f.lower().endswith((".iso", ".img")):
+                        if f.lower().endswith(exts):
                             p = os.path.join(root, f)
                             if p not in seen:
                                 seen.add(p)

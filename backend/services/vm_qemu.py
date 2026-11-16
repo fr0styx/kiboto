@@ -445,15 +445,8 @@ def _start_qemu(target_vm: dict[str, Any], vnc_port: int) -> tuple[bool, str | N
         return False, disk_problem
 
     if not os.path.exists(disk_path):
-        size_gb = int(target_vm.get("disk_size_gb", 32) or 32)
-        qemu_img = shutil.which("qemu-img") or "/usr/bin/qemu-img"
-        try:
-            subprocess.run(
-                [qemu_img, "create", "-f", "qcow2", disk_path, f"{size_gb}G"],
-                check=True,
-                capture_output=True,
-                timeout=120,
-            )
+        try:  # empty, or a copy of the machine's ready-made disk (VMs decision 5)
+            vm_store.make_primary_disk(target_vm, disk_path, shutil.which("qemu-img") or "/usr/bin/qemu-img")
         except Exception as e:
             err_msg = f"Failed to initialize primary disk: {e}"
             logger.error("[VM-%s] %s", vm_id, err_msg)

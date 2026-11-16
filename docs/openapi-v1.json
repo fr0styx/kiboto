@@ -40901,6 +40901,17 @@
       "title": "Disk Format",
       "type": "string"
      },
+     "disk_image_path": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Disk Image Path"
+     },
      "disk_size_gb": {
       "default": 32,
       "maximum": 4096.0,
@@ -70642,6 +70653,43 @@
     ],
     "x-required-scopes": [
      "vms:manage",
+     "system:config"
+    ]
+   }
+  },
+  "/api/v1/vms/disk-images": {
+   "get": {
+    "description": "Ready-made disks a new machine can start from (VMs decision 5).",
+    "operationId": "list_disk_images_api_v1_vms_disk_images_get",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "items": {
+          "additionalProperties": true,
+          "type": "object"
+         },
+         "title": "Response List Disk Images Api V1 Vms Disk Images Get",
+         "type": "array"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "List Disk Images",
+    "tags": [
+     "Virtual Machines"
+    ],
+    "x-required-scopes": [
+     "vms:read",
      "system:config"
     ]
    }

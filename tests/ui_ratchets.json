@@ -476,7 +476,7 @@
  "frontend/src/components/vm/create-modal.js": {
   "buttons": 0,
   "globals": 0,
-  "styles": 21,
+  "styles": 22,
   "templates": 5
  },
  "frontend/src/components/vm/create-steps.js": {

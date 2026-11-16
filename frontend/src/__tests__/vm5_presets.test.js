@@ -14,12 +14,12 @@ const FORM = `<form>
 describe('new machine presets (VMs decision 5)', () => {
   beforeEach(() => { document.body.innerHTML = presetsHtml() + FORM; });
 
-  it('offers Linux first, then Windows 11, and no Home Assistant yet', () => {
+  it('offers Linux first, then Windows 11, then Home Assistant', () => {
     const ids = [...document.querySelectorAll('[data-vm-preset]')].map((b) => b.dataset.vmPreset);
-    expect(ids).toEqual(['linux', 'windows11']);
+    expect(ids).toEqual(['linux', 'windows11', 'homeassistant']);
     expect(document.body.textContent).toContain('Linux or another system');
     expect(document.body.textContent).toContain('4 cores, 8 GB, 64 GB disk, UEFI and TPM');
-    expect(Object.keys(PRESETS)).toEqual(['linux', 'windows11']);
+    expect(Object.keys(PRESETS)).toEqual(['linux', 'windows11', 'homeassistant']);
   });
 
   it('Windows 11 sets UEFI, TPM and its sizes, inside this NAS\'s limits', () => {
@@ -53,4 +53,15 @@ describe('new machine presets (VMs decision 5)', () => {
     applyPreset(bare, 'windows11');
     expect(bare.innerHTML).toBe('');
   });
+
+  it('Home Assistant picks its ready-made disk, or says to download it first', () => {
+    document.body.insertAdjacentHTML('beforeend', '<select id="vm-create-disk-image"><option value="">None</option><option value="/mnt/user/isos/haos_ova-18.4.qcow2">haos_ova-18.4.qcow2 (1.4 GB)</option></select>');
+    applyPreset(document, 'homeassistant');
+    expect(document.getElementById('vm-create-disk-image').value).toBe('/mnt/user/isos/haos_ova-18.4.qcow2');
+    expect(document.querySelector('input[value="uefi"]').checked).toBe(true);
+    expect(document.getElementById('vm-preset-note').textContent).toContain('download Home Assistant OS from the ISO catalog first');
+    applyPreset(document, 'linux'); // another preset lets go of the disk
+    expect(document.getElementById('vm-create-disk-image').value).toBe('');
+  });
 });
+

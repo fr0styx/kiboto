@@ -128,6 +128,9 @@ class VmCreateRequest(BaseModel):
     disk_format: str = Field("qcow2", pattern="^(qcow2|raw)$")
     disk_bus: str = Field("virtio", pattern="^(virtio|sata|nvme)$")
     iso_path: str | None = None
+    # VMs decision 5 (Home Assistant): a ready-made disk from the installer folders, copied as the
+    # machine's own disk at its first start and grown to disk_size_gb
+    disk_image_path: str | None = None
     # SET-29 stage 4 (Windows 11): a second disc beside the installer, e.g. virtio-win, so Windows
     # Setup can see a virtio disk
     driver_iso_path: str | None = None
@@ -296,6 +299,9 @@ def _download_iso_worker(task_id: str, catalog_item: dict[str, Any], target_dir:
                 os.chmod(final_path, 0o644)  # QEMU only reads it
             except OSError:
                 pass
+        if catalog_item.get("unpack") == "xz":  # a ready-made disk (Home Assistant OS): unpack it
+            _DOWNLOAD_TASKS[task_id]["status"] = "unpacking"
+            final_path = vm_store.unpack_xz(final_path)
 
         _DOWNLOAD_TASKS[task_id].update(
             {
@@ -429,6 +435,12 @@ def list_vms():
 def get_discovered_isos():
     """Lists available ISO and OS installation images."""
     return vm_host.scan_isos()
+
+
+@router.get("/disk-images", dependencies=[Depends(require_scope("vms:read", "system:config"))])
+def list_disk_images() -> list[dict[str, Any]]:
+    """Ready-made disks a new machine can start from (VMs decision 5)."""
+    return vm_host.scan_disk_images()
 
 
 def _image_format(path: str) -> str:
@@ -582,6 +594,8 @@ def download_official_iso(
 
     target_dir = vm_host._get_target_iso_dir()
     final_path = os.path.join(target_dir, item["filename"])
+    if item.get("unpack") == "xz":  # what stays on disk is the unpacked image
+        final_path = final_path[:-3]
     if os.path.exists(final_path):
         return {
             "status": "already_present",
@@ -652,6 +666,7 @@ def create_vm(req: VmCreateRequest, principal: AuthenticatedPrincipal = Depends(
     """Provisions a new virtual machine with dynamic headroom validation and volume mappings."""
     vm_store._validate_vm_inputs(req.secondary_disks, req.iso_path, req.host_shares)
     vm_store._validate_vm_inputs([], req.driver_iso_path, [])
+    vm_store._validate_vm_inputs([], req.disk_image_path, [])
     vms = vm_qemu._load_vms()
     if any(v["name"].lower() == req.name.lower() for v in vms):
         raise HTTPException(status_code=400, detail=f"Virtual machine '{req.name}' already exists.")
@@ -689,6 +704,7 @@ def create_vm(req: VmCreateRequest, principal: AuthenticatedPrincipal = Depends(
         "disk_bus": req.disk_bus,
         "iso_path": req.iso_path,
         "driver_iso_path": req.driver_iso_path or None,
+        "disk_image_path": req.disk_image_path or None,
         "bridge": req.bridge,
         "mac": mac,
         "autostart": req.autostart,

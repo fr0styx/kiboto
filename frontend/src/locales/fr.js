@@ -8144,5 +8144,11 @@ export default {
   "vmst.more": "Plus",
   "vmst.steps": "Étapes",
   "vmst.back": "Retour",
-  "vmst.next": "Suivant"
+  "vmst.next": "Suivant",
+  "vmd.disk_image_label": "Disque prêt à l’emploi (facultatif)",
+  "vmd.disk_image_none": "Aucun : installer depuis l’ISO de démarrage",
+  "vmd.disk_image_help": "Un système fourni sous forme de disque, comme Home Assistant OS du catalogue ISO. Il est copié pour cette machine.",
+  "vmp.p_ha": "Home Assistant",
+  "vmp.p_ha_2": "2 cœurs, 4 Go, son disque prêt à l’emploi",
+  "vmp.n_ha": "Home Assistant OS est fourni comme disque prêt à l’emploi. Si « Disque prêt à l’emploi » n’en affiche aucun, téléchargez d’abord Home Assistant OS depuis le catalogue ISO."
 };

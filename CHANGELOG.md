@@ -422,6 +422,14 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **On a phone each app is a card of two lines**: its name and state, then Open and the menu (about 90 px, was about
   325). The filters, ports and usage stay with "Show Docker details".
 
+#### Changes
+
+- **Home Assistant as a virtual machine**: the ISO catalog offers Home Assistant OS 18.4 as a ready-made disk
+  (checked against GitHub's checksum and unpacked), and a new machine's "Home Assistant" preset starts from it: UEFI,
+  2 cores, 4 GB, the disk copied for that machine and grown to the size chosen. Any other ready-made .qcow2 disk in
+  the installer folders can be chosen too. Not yet tried with a full Home Assistant start on real hardware.
+- The ISO catalog no longer lists the Windows Server trial, whose download no longer exists.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 
