@@ -3019,10 +3019,10 @@
           <div class="mgmt-detail-body">
             <!-- 3. Copies outside this Kiboto (SET-21 stage 4): off-site backups, then the paired boxes -->
             <section class="drawer-card offsite-card" aria-labelledby="offsite-title">
-              <div class="bk-copies-head"><h3 id="offsite-title" class="offsite-title" data-i18n="offsite.title">Offsite backup</h3>
+              <div class="bk-copies-head"><h3 id="offsite-title" class="offsite-title" data-i18n="offsite.title">Copies outside this Kiboto</h3>
                 <!-- One way to add a copy: the guide (SET-21 stage 3) -->
                 <button type="button" class="btn-pill-toggle is-primary" id="btn-add-copy" data-i18n="bk.add_copy">Add a copy</button></div>
-              <p class="offsite-note" data-i18n="offsite.desc">Versioned, deduplicated and encrypted copies of your folders on a USB disk, another NAS or any cloud rclone can reach.</p>
+              <p class="offsite-note" data-i18n="offsite.desc">Copies on a USB disk, another NAS or in the cloud. Earlier versions are kept, and the copy is encrypted.</p>
               <div id="offsite-backup-mount"></div>
               <!-- Your Kiboto boxes: a buddy backup to another Kiboto (moved from Network, SET-24) -->
                             <div class="nsv-grid" id="backup-fleet-grid"></div>
@@ -3044,7 +3044,7 @@
                   </button>
                 </div>
               </div>
-              <h4 class="snap-subhead" data-i18n="snap.schedules_title">Scheduled snapshots per share</h4>
+              <h4 class="snap-subhead" data-i18n="snap.schedules_title">Folders that keep earlier versions</h4>
               <div id="snapshot-schedules-mount"></div>
               <details class="bk-all-versions">
                 <summary data-i18n="bk.all_versions">All earlier versions</summary>
@@ -3089,7 +3089,7 @@
             <!-- System Configuration Backup & Restore -->
             <div class="drawer-card bk-section">
               <div class="card-headline">
-                <span class="card-head-title bk-title-block" data-i18n="settings.backup_title">System Configuration Backup & Restore</span>
+                <span class="card-head-title bk-title-block" data-i18n="settings.backup_title">Kiboto's settings file</span>
               </div>
               <div class="bk-desc bk-desc--spaced" data-i18n="settings.backup_desc">
                 Download a complete backup archive of all system configurations, 6-point fan curves, layouts, widgets, and themes. Restoring will apply all configurations across the suite.
@@ -3113,15 +3113,13 @@
                 <div>
                   <span class="card-head-title bk-title">
                     <span aria-hidden="true">📦</span>
-                    <span data-i18n="mgmt.app_backups_title">Application Backups & Recovery</span>
+                    <span data-i18n="mgmt.app_backups_title">App backups</span>
                   </span>
-                  <div class="bk-desc" data-i18n="mgmt.app_backups_desc">
-                    Point-in-time archives of container configurations, compose specs, and host appdata mounts created on uninstall (never delete) or on-demand.
-                  </div>
+                  <div class="bk-desc" data-i18n="mgmt.app_backups_desc">A copy of an app's settings and data, made when you remove the app or ask for one.</div>
                 </div>
                 <div class="bk-actions bk-actions--center">
                   <select id="app-backups-filter-app" class="tz-select-input" style="font-size: var(--kb-fs-xs); padding: 5px 8px; min-width: 140px;" title="Filter by Application" data-i18n-title="ui.filter_by_application">
-                    <option value="" data-i18n="mgmt.app_backups_all">All Applications (Box-Wide)</option>
+                    <option value="" data-i18n="mgmt.app_backups_all">All apps</option>
                   </select>
                 </div>
               </div>
@@ -3155,46 +3153,7 @@
           </div>
 
           <div class="mgmt-detail-body">
-            <!-- System Information Banner Card -->
-            <div class="drawer-card ab-box">
-              <div class="ab-row">
-                <div class="ab-row-2">
-                  <div style="width:44px; height:44px; border-radius:8px; background:linear-gradient(135deg, rgba(51,205,184,0.2), rgba(51,205,184,0.2)); border:1px solid rgba(51,205,184,0.4); display:flex; align-items:center; justify-content:center; font-size:22px;">
-                    ⚡
-                  </div>
-                  <div>
-                    <div class="ab-fs16-bold-strong">Kiboto</div>
-                    <div class="ab-xs-muted" data-i18n="mw.all_in_one_nas_hardware_and">All-in-One NAS Hardware & Container Orchestration Suite</div>
-                  </div>
-                </div>
-                <div class="ab-row-3">
-                  <span id="about-version-badge" class="badge-pill" style="background:rgba(51,205,184,0.15); border:1px solid rgba(51,205,184,0.4); color:var(--ok2); font-weight:700; font-size:var(--kb-fs-xs); padding:4px 10px; border-radius:20px;" data-sample>
-                    —
-                  </span>
-                </div>
-              </div>
-
-              <div class="ab-grid-box">
-                <div>
-                  <div class="ab-xs-bold-muted" data-i18n="mw.drive_bays">Drive bays</div>
-                  <div class="ab-xs-semi-strong" id="about-chassis-model" data-sample>Detecting...</div>
-                </div>
-                <div>
-                  <div class="ab-xs-bold-muted" data-i18n="mw.host_and_platform">HOST & PLATFORM</div>
-                  <div class="ab-xs-semi-soft" id="about-host-platform" data-sample>Detecting...</div>
-                </div>
-                <div>
-                  <div class="ab-xs-bold-muted" data-i18n="mw.runtime_environment">RUNTIME ENVIRONMENT</div>
-                  <div class="ab-xs-semi-soft" id="about-runtime-env" data-sample>—</div>
-                </div>
-                <div>
-                  <div class="ab-xs-bold-muted" data-i18n="mw.uptime_caps">UPTIME</div>
-                  <div id="about-system-uptime" style="font-size:var(--kb-fs-xs); font-weight:600; color:var(--lt-ink-brand, var(--accent-cyan, #33cdb8));">--</div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Software Updates Card -->
+            <!-- Software update, first on General (SET-23, Settings 3) -->
             <div class="drawer-card ab-box-2">
               <div class="ab-row-4">
                 <div>
@@ -3271,6 +3230,47 @@
                   </div>
                 </div>
               </div>
+            </div>
+
+            <!-- This server (SET-23: after Software update; technical details folded) -->
+            <div class="drawer-card ab-box">
+              <div class="ab-row">
+                <div class="ab-row-2">
+                  <div style="width:44px; height:44px; border-radius:8px; background:linear-gradient(135deg, rgba(51,205,184,0.2), rgba(51,205,184,0.2)); border:1px solid rgba(51,205,184,0.4); display:flex; align-items:center; justify-content:center; font-size:22px;">
+                    ⚡
+                  </div>
+                  <div>
+                    <div class="ab-fs16-bold-strong">Kiboto</div>
+                  </div>
+                </div>
+                <div class="ab-row-3">
+                  <span id="about-version-badge" class="badge-pill" style="background:rgba(51,205,184,0.15); border:1px solid rgba(51,205,184,0.4); color:var(--ok2); font-weight:700; font-size:var(--kb-fs-xs); padding:4px 10px; border-radius:20px;" data-sample>
+                    —
+                  </span>
+                </div>
+              </div>
+
+              <details class="ab-tech">
+                <summary data-i18n="general.tech_details">Technical details</summary>
+                <div class="ab-grid-box">
+                  <div>
+                    <div class="ab-xs-bold-muted" data-i18n="mw.drive_bays">Drive bays</div>
+                    <div class="ab-xs-semi-strong" id="about-chassis-model" data-sample>Detecting...</div>
+                  </div>
+                  <div>
+                    <div class="ab-xs-bold-muted" data-i18n="mw.host_and_platform">HOST & PLATFORM</div>
+                    <div class="ab-xs-semi-soft" id="about-host-platform" data-sample>Detecting...</div>
+                  </div>
+                  <div>
+                    <div class="ab-xs-bold-muted" data-i18n="mw.runtime_environment">RUNTIME ENVIRONMENT</div>
+                    <div class="ab-xs-semi-soft" id="about-runtime-env" data-sample>—</div>
+                  </div>
+                  <div>
+                    <div class="ab-xs-bold-muted" data-i18n="mw.uptime_caps">UPTIME</div>
+                    <div id="about-system-uptime" style="font-size:var(--kb-fs-xs); font-weight:600; color:var(--lt-ink-brand, var(--accent-cyan, #33cdb8));">--</div>
+                  </div>
+                </div>
+              </details>
             </div>
 
             <!-- Observability & Diagnostics Bundle Card -->

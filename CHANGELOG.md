@@ -274,6 +274,12 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Files asks for nothing before you open it**, and reads the folder and the drive list once when you
   do (it read them twice), so sleeping drives are left alone.
 
+#### Changes
+
+- **General starts with Software update**; the server's technical details are folded under This server.
+- **Backup in plain words**: "Copies outside this Kiboto", "Folders that keep earlier versions", Browse,
+  Check the backup, Remove from Kiboto, App backups; in five languages.
+
 ## v2.0.2 (2026-11-12)
 ### 🧭 A new Settings sidebar, five themes, honest pages, and remote access cut down to what works
 
