@@ -411,6 +411,12 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   Edit come with "Show Docker details" (a menu item that asks for one of them still opens it), and the tabs wrap
   instead of running off the dialog. On a phone, "Get apps" is first in the row of actions.
 
+#### Changes
+
+- **A new virtual machine in three steps**: "What to install" (preset, name, installer, driver disc, disk), "How big"
+  (memory, cores, extra disks) and "More" (start-up order, firmware, network, display, shared folders, USB), with Back
+  and Next. Next checks the name first and says what is wrong next to the field.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

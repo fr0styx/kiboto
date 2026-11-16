@@ -1,7 +1,7 @@
 {
-  "important": 3371,
+  "important": 3372,
   "buttonClasses": 75,
-  "inlineStyles": 1255,
+  "inlineStyles": 1256,
   "emojiIcons": 3,
   "colours": 3714,
   "primitiveUses": 4,
@@ -52,6 +52,7 @@
     "frontend/src/styles/files-lazy.css": 1,
     "frontend/src/styles/kib-window.css": 4,
     "frontend/src/styles/management-lazy.css": 2,
+    "frontend/src/styles/vm-lazy.css": 1,
     "frontend/src/vm-console-direct.css": 47
   },
   "coloursPerFile": {
@@ -97,7 +98,7 @@
     "frontend/src/components/vm/connect-modal.js": 15,
     "frontend/src/components/vm/console-ansi.js": 51,
     "frontend/src/components/vm/console.js": 15,
-    "frontend/src/components/vm/create-modal.js": 19,
+    "frontend/src/components/vm/create-modal.js": 20,
     "frontend/src/components/vm/edit-modal.js": 33,
     "frontend/src/components/vm/iso-manager.js": 30,
     "frontend/src/components/vm/shared.js": 4,
@@ -163,7 +164,6 @@
     "frontend/src/styles/files-lazy.css": 1,
     "frontend/src/styles/management-lazy.css": 12,
     "frontend/src/styles/users-lazy.css": 2,
-    "frontend/src/styles/vm-lazy.css": 1,
     "frontend/src/toast.js": 31,
     "frontend/src/utils.js": 1,
     "frontend/src/vm-console-direct.css": 2,

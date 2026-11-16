@@ -8138,5 +8138,11 @@ export default {
   "kibp.enc_off": "在这台 NAS 上：聊天和索引未加密。在容器设置中设置 KIBOTO_DATA_KEY 即可加密。",
   "vmd.driver_iso_label": "驱动光盘（可选）",
   "vmd.driver_iso_none": "无",
-  "vmd.driver_iso_help": "安装程序之外的第二张光盘，例如用于 Windows 的 virtio-win。"
+  "vmd.driver_iso_help": "安装程序之外的第二张光盘，例如用于 Windows 的 virtio-win。",
+  "vmst.what": "安装什么",
+  "vmst.size": "多大",
+  "vmst.more": "更多",
+  "vmst.steps": "步骤",
+  "vmst.back": "上一步",
+  "vmst.next": "下一步"
 };

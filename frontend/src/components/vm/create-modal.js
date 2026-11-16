@@ -17,6 +17,7 @@ import { loadIsos, fillIsoSelect } from './isos.js';
 import { openIsoManagerModal } from './iso-manager.js';
 import { vtpmBadgeHtml } from './shared.js';
 import { presetsHtml, bindPresets } from './presets.js';
+import { stepsHtml, installSteps } from './create-steps.js';
 import { loadVmDashboard } from '../vm-manager.js';
 
 let _telemetryAsked = false;
@@ -66,15 +67,16 @@ export function openVmCreateModal() {
       </div>
 
       <div class="smart-modal-body vmc-col-2">
-        ${presetsHtml()}
+        ${stepsHtml()}
+        <div data-vm-step="1">${presetsHtml()}</div>
         <!-- Step 1: General -->
-        <div>
+        <div data-vm-step="1">
           <label class="vmc-xs-bold-muted" for="vm-create-name">${t('vmd.name_label', 'VM name *')}</label>
           <input class="vmc-xs-strong-box" type="text" id="vm-create-name" placeholder="e.g. ubuntu-dev-node" maxlength="64" aria-describedby="vm-create-name-rule" />
           <div class="vmc-xs-muted" id="vm-create-name-rule">${t('vmd.name_rule', 'Letters, numbers, - and _ only, 2 to 64 characters.')}</div>
         </div>
 
-        <div class="vmc-grid">
+        <div class="vmc-grid" data-vm-step="1">
           <div>
             <label class="vmc-xs-bold-muted" for="vm-create-os">${t('vmd.os_family', 'OS family')}</label>
             <select id="vm-create-os" class="tz-select" style="width: 100%; padding: 8px 10px; border-radius: 6px; background: var(--lt-b-1a2629ff, #1a2629); border: 1px solid var(--kb-line-12); color: var(--kb-text-strong); font-size: var(--kb-fs-xs); box-sizing: border-box;">
@@ -94,7 +96,7 @@ export function openVmCreateModal() {
         </div>
 
         <!-- Step 2: Compute & Elastic Headroom -->
-        <div class="vmc-box">
+        <div data-vm-step="2" class="vmc-box">
           <div class="vmc-row-4">
             <span class="vmc-xs-bold-strong">${t('vmd.ram_title', 'Memory (leaves room for the NAS)')}</span>
             <span class="vmc-xs-bold-accent" id="vm-ram-display">4.0 GB</span>
@@ -118,7 +120,7 @@ export function openVmCreateModal() {
         </div>
 
         <!-- vCPU Slider & Overcommit Warning -->
-        <div class="vmc-box">
+        <div data-vm-step="2" class="vmc-box">
           <div class="vmc-row-4">
             <span class="vmc-xs-bold-strong">${t('vmd.vcpus', 'vCPU cores')}</span>
             <span class="vmc-xs-bold-strong" id="vm-vcpu-display">2 vCPUs</span>
@@ -134,7 +136,7 @@ export function openVmCreateModal() {
         </div>
 
         <!-- Step 3: Storage & ISO -->
-        <div class="vmc-grid">
+        <div data-vm-step="1" class="vmc-grid">
           <div>
             <div class="vmc-row-5">
               <label class="vmc-xs-bold-muted-2" for="vm-create-iso">${t('vmd.boot_iso_label', 'Boot ISO')}</label>
@@ -147,7 +149,7 @@ export function openVmCreateModal() {
           </div>
           <div>
             <label class="vmc-xs-bold-muted-2" for="vm-create-driver-iso">${t('vmd.driver_iso_label', 'Driver disc (optional)')}</label>
-            <select id="vm-create-driver-iso" class="tz-select vm-driver-iso" aria-describedby="vm-create-driver-iso-help">
+            <select id="vm-create-driver-iso" class="tz-select" style="width: 100%; padding: 8px 10px; border-radius: 6px; background: var(--lt-b-1a2629ff, #1a2629); border: 1px solid var(--kb-line-12); color: var(--kb-text-strong); font-size: var(--kb-fs-xs); box-sizing: border-box;" aria-describedby="vm-create-driver-iso-help">
               <option value="">${t('vmd.driver_iso_none', 'None')}</option>
               ${vmState.isos.map((iso) => `<option value="${escapeHtml(iso.path)}">${escapeHtml(iso.name)} (${escapeHtml(iso.size_formatted || '')})</option>`).join('')}
             </select>
@@ -160,7 +162,7 @@ export function openVmCreateModal() {
         </div>
 
         <!-- Boot Priority Order -->
-        <div>
+        <div data-vm-step="3">
           <label class="vmc-xs-bold-muted">${t('vmd.boot_order', 'Boot order')}</label>
           <div class="vm-boot-order-group">
             <label class="boot-order-label">
@@ -175,7 +177,7 @@ export function openVmCreateModal() {
         </div>
 
         <!-- Firmware & Boot Architecture -->
-        <div class="vmc-box">
+        <div data-vm-step="3" class="vmc-box">
           <div class="vmc-x">
             <div class="vmc-xs-bold-strong" data-i18n="vm.firmware_title">${t('vm.firmware_title', 'Firmware & Boot Architecture')}</div>
             <div class="vmc-xs-muted" data-i18n="vm.firmware_desc">${t('vm.firmware_desc', 'Select hypervisor firmware initialization and virtual hardware security.')}</div>
@@ -208,7 +210,7 @@ export function openVmCreateModal() {
         </div>
 
         <!-- Step 4: Host Volume Mappings (VirtIO-FS / 9p) -->
-        <div class="vmc-box">
+        <div data-vm-step="3" class="vmc-box">
           <div class="vmc-row-4">
             <div>
               <span class="vmc-xs-bold-strong">${t('vmd.folders_title', 'Host folders in the VM (VirtIO-FS / 9p)')}</span>
@@ -222,7 +224,7 @@ export function openVmCreateModal() {
         </div>
 
         <!-- Step 5: Secondary Virtual Disks -->
-        <div class="vmc-box">
+        <div data-vm-step="2" class="vmc-box">
           <div class="vmc-row-4">
             <div>
               <span class="vmc-xs-bold-strong">${t('vmd.disks_title', 'More virtual disks')}</span>
@@ -236,7 +238,7 @@ export function openVmCreateModal() {
         </div>
 
         <!-- Step 6: Network Bridge -->
-        <div>
+        <div data-vm-step="3">
           <label class="vmc-xs-bold-muted" for="vm-create-bridge">${t('vmd.bridge_label', 'Network bridge')}</label>
           <select id="vm-create-bridge" class="tz-select" style="width: 100%; padding: 8px 10px; border-radius: 6px; background: var(--lt-b-1a2629ff, #1a2629); border: 1px solid var(--kb-line-12); color: var(--kb-text-strong); font-size: var(--kb-fs-xs); box-sizing: border-box;">
             ${vmState.bridges.map((b) => `<option value="${escapeHtml(b)}">${escapeHtml(t('vmd.host_bridge', '{name} (host bridge)', { name: b }))}</option>`).join('')}
@@ -244,7 +246,7 @@ export function openVmCreateModal() {
         </div>
 
         <!-- Step 7: Display & Graphics (KVM GUI) -->
-        <div class="vmc-box">
+        <div data-vm-step="3" class="vmc-box">
           <div class="vmc-row-4">
             <div>
               <span class="vmc-xs-bold-strong" data-i18n="vm.video_title">${t('vm.video_title', 'Display & Video Adapter')}</span>
@@ -265,7 +267,7 @@ export function openVmCreateModal() {
         </div>
 
         <!-- Step 8: Host USB Device Passthrough -->
-        <div class="vm-config-card vmc-box-2">
+        <div data-vm-step="3" class="vm-config-card vmc-box-2">
           <div class="vmc-row-6">
             <div>
               <div class="vmc-xs-bold-strong" data-i18n="vm.usb_title">${t('vm.usb_title', 'Host USB Device Passthrough')}</div>
@@ -703,6 +705,7 @@ export function openVmCreateModal() {
 
   // Submit Handler
   bindPresets(modal); // VMs decision 5: start from Linux or Windows 11
+  installSteps(modal); // three steps (VMs report stage 3)
   const btnSubmit = modal.querySelector('#vm-create-submit');
   if (btnSubmit) {
     btnSubmit.onclick = async () => {

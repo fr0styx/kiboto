@@ -8138,5 +8138,11 @@ export default {
   "kibp.enc_off": "En este NAS: los chats y el índice no están cifrados. Define KIBOTO_DATA_KEY en los ajustes del contenedor para cifrarlos.",
   "vmd.driver_iso_label": "Disco de controladores (opcional)",
   "vmd.driver_iso_none": "Ninguno",
-  "vmd.driver_iso_help": "Un segundo disco junto al instalador, como virtio-win para Windows."
+  "vmd.driver_iso_help": "Un segundo disco junto al instalador, como virtio-win para Windows.",
+  "vmst.what": "Qué instalar",
+  "vmst.size": "Qué tamaño",
+  "vmst.more": "Más",
+  "vmst.steps": "Pasos",
+  "vmst.back": "Atrás",
+  "vmst.next": "Siguiente"
 };
