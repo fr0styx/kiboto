@@ -609,10 +609,14 @@ async def lifespan(app: FastAPI):
     threading.Thread(target=_refresh_share_access, name="ShareAccess", daemon=True).start()
     threading.Thread(target=_reapply_tailscale_options, name="TailscaleOptions", daemon=True).start()
     _start_home_assistant()
+    from backend.api.update_watch import watch_loop
+
+    update_task = asyncio.create_task(watch_loop())  # the daily update check (Settings decision 5)
     try:
         yield
     finally:
         Z_STATE.shutting_down = True
+        update_task.cancel()
         Z_STATE.ui_wake.set()
         broadcaster.shutdown()
         close_notification_client()

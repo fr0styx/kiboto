@@ -7853,5 +7853,11 @@ export default {
   "front.light": "Luz frontal",
   "front.screen": "Pantalla frontal",
   "front.more": "Colores, brillo y horario nocturno",
-  "front.failed": "No se cambió: {error}"
+  "front.failed": "No se cambió: {error}",
+  "updates.daily": "Buscar actualizaciones cada día",
+  "updates.mark": "Actualización",
+  "updates.mark_title": "La versión {version} está lista",
+  "updates.daily_failed": "No se cambió: {error}",
+  "alert.update_ready.title": "Hay una actualización de Kiboto lista",
+  "alert.update_ready.msg": "La versión {version} está lista para instalar. Abre Ajustes y luego General para actualizar."
 };

@@ -7853,5 +7853,11 @@ export default {
   "front.light": "Front light",
   "front.screen": "Front screen",
   "front.more": "Colours, brightness and night times",
-  "front.failed": "That wasn't changed: {error}"
+  "front.failed": "That wasn't changed: {error}",
+  "updates.daily": "Check for updates every day",
+  "updates.mark": "Update",
+  "updates.mark_title": "Version {version} is ready",
+  "updates.daily_failed": "That wasn't changed: {error}",
+  "alert.update_ready.title": "A Kiboto update is ready",
+  "alert.update_ready.msg": "Version {version} is ready to install. Open Settings, then General, to update."
 };

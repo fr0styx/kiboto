@@ -55,6 +55,7 @@ from backend.api.snapshots import router as snapshots_router  # noqa: E402
 from backend.api.stats import router as stats_router
 from backend.api.storage import router as storage_router
 from backend.api.system import router as system_router
+from backend.api.update_watch import router as update_watch_router
 from backend.api.ups import router as ups_router
 from backend.api.user_data import router as user_data_router
 from backend.api.vms import router as vms_router
@@ -159,3 +160,4 @@ __all__ = [
     "ai_pack_router",
     "ai_conversations_router",
 ]
+api_router.include_router(update_watch_router)  # the daily update check (Settings decision 5)

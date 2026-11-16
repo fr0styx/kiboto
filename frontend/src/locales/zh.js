@@ -7853,5 +7853,11 @@ export default {
   "front.light": "前灯",
   "front.screen": "前屏幕",
   "front.more": "颜色、亮度和夜间时段",
-  "front.failed": "未更改：{error}"
+  "front.failed": "未更改：{error}",
+  "updates.daily": "每天检查更新",
+  "updates.mark": "更新",
+  "updates.mark_title": "版本 {version} 已就绪",
+  "updates.daily_failed": "未更改：{error}",
+  "alert.update_ready.title": "Kiboto 更新已就绪",
+  "alert.update_ready.msg": "版本 {version} 可以安装了。打开设置，然后进入常规进行更新。"
 };

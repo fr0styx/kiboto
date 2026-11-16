@@ -39558,6 +39558,19 @@
     "title": "UpdateVmResponsePciPassthroughItem",
     "type": "object"
    },
+   "UpdateWatchIn": {
+    "properties": {
+     "daily": {
+      "title": "Daily",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "daily"
+    ],
+    "title": "UpdateWatchIn",
+    "type": "object"
+   },
    "UpdateWebdavConfigResponse": {
     "additionalProperties": true,
     "description": "POST /webdav/config",
@@ -68080,6 +68093,81 @@
     ],
     "x-required-scopes": [
      "system:view"
+    ]
+   }
+  },
+  "/api/v1/system/update-watch": {
+   "get": {
+    "operationId": "get_update_watch_api_v1_system_update_watch_get",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Get Update Watch Api V1 System Update Watch Get",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Get Update Watch",
+    "tags": [
+     "System"
+    ],
+    "x-required-scopes": [
+     "system:view"
+    ]
+   },
+   "put": {
+    "operationId": "put_update_watch_api_v1_system_update_watch_put",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/UpdateWatchIn"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Put Update Watch Api V1 System Update Watch Put",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Put Update Watch",
+    "tags": [
+     "System"
+    ],
+    "x-required-scopes": [
+     "system:config"
     ]
    }
   },

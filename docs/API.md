@@ -38,7 +38,7 @@ request and response schemas.
 
 <!-- BEGIN generated endpoints: python scripts/api_reference.py --update -->
 
-721 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
+723 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
 
 ### AI Conversation History
 
@@ -817,6 +817,13 @@ request and response schemas.
 | `GET` | `/api/v1/storage/smart/schedule` | any of `storage:read`, `system:view` | Returns current SMART test schedule, intervals, and last execution timestamps |
 | `POST` | `/api/v1/storage/smart/schedule` | `storage:admin` | Configures automated Short and Extended SMART test schedules |
 | `GET` | `/api/v1/storage/unraid-api/status` | any of `storage:read`, `system:view` | Array, disks, shares and parity check from the Unraid API (companion mode, D5) |
+
+### System
+
+| Method | Path | Access | What it does |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/v1/system/update-watch` | `system:view` | Get Update Watch |
+| `PUT` | `/api/v1/system/update-watch` | `system:config` | Put Update Watch |
 
 ### System & Storage
 

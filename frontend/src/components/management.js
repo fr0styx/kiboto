@@ -813,6 +813,7 @@ export function initManagement() {
     } else if (paneId === 'mgmt-pane-about') {
       fetchAndRenderSystemAbout();
       import('./front-panel.js').then((m) => m.renderFrontPanel()).catch(() => {}); // SET-30, decision 2 a
+      import('./update-mark.js').then((m) => m.refreshUpdateMark()).catch(() => {}); // the daily check's switch
     } else if (paneId === 'mgmt-pane-vms-list' || paneId === 'mgmt-pane-vms-create' || paneId === 'mgmt-pane-vms-kvm') {
       fetchAndRenderMgmtVms();
     } else if (paneId === 'mgmt-pane-hardware-ups') {

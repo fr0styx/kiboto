@@ -7853,5 +7853,11 @@ export default {
   "front.light": "Lumière en façade",
   "front.screen": "Écran en façade",
   "front.more": "Couleurs, luminosité et horaires de nuit",
-  "front.failed": "Rien n'a été changé : {error}"
+  "front.failed": "Rien n'a été changé : {error}",
+  "updates.daily": "Rechercher les mises à jour chaque jour",
+  "updates.mark": "Mise à jour",
+  "updates.mark_title": "La version {version} est prête",
+  "updates.daily_failed": "Rien n'a été changé : {error}",
+  "alert.update_ready.title": "Une mise à jour de Kiboto est prête",
+  "alert.update_ready.msg": "La version {version} est prête à être installée. Ouvrez Réglages, puis Général, pour mettre à jour."
 };

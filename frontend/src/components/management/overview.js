@@ -193,6 +193,7 @@ export async function renderStatusSummary(root = document) {
     announceChange('status-summary', statusSaid(state));
     return null;
   }
+  import('../update-mark.js').then((m) => m.refreshUpdateMark(root)).catch(() => {}); // the mark on General (decision 5)
   let protection = null;
   try {
     protection = await api.get('/api/system/protection');

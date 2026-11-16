@@ -64,6 +64,8 @@
  "alert.sync_ok.title": "同步完成：{name}",
  "alert.unraid_error.msg": "Unraid 阵列处于错误状态。",
  "alert.unraid_error.title": "Unraid 阵列错误",
+ "alert.update_ready.msg": "版本 {version} 可以安装了。打开设置，然后进入常规进行更新。",
+ "alert.update_ready.title": "Kiboto 更新已就绪",
  "alert.ups_critical.msg": "UPS 电量严重不足（剩余 {charge}%，约 {runtime} 分钟）。安全关机会按 UPS 设置执行。",
  "alert.ups_critical.title": "UPS 电量严重不足",
  "alert.ups_manual.msg": "Kiboto 无法自行关闭这台服务器，UPS 的插座也没有断电。请现在手动关闭 NAS，以免突然断电。",

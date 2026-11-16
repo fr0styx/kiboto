@@ -409,6 +409,8 @@
 .front-panel { display: flex; flex-direction: column; gap: 6px; }
 .front-panel-row { display: flex; justify-content: space-between; align-items: center; min-height: 44px; font-weight: 600; cursor: pointer; }
 .front-panel-more { align-self: flex-start; }
+/* the daily update check (Settings decision 5) */
+.update-daily { display: inline-flex; align-items: center; gap: 6px; font-size: var(--kb-fs-xs); font-weight: 600; margin: 4px 0; min-height: 32px; cursor: pointer; }
 .net-link { color: var(--kb-text-accent); font-weight: 600; }
 /* Network: This NAS at home and one row per port (SET-24 m) */
 .net-home { margin-bottom: 14px; }

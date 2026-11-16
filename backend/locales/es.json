@@ -64,6 +64,8 @@
  "alert.sync_ok.title": "Sincronización terminada: {name}",
  "alert.unraid_error.msg": "El array de Unraid está en estado de error.",
  "alert.unraid_error.title": "Error en el array de Unraid",
+ "alert.update_ready.msg": "La versión {version} está lista para instalar. Abre Ajustes y luego General para actualizar.",
+ "alert.update_ready.title": "Hay una actualización de Kiboto lista",
  "alert.ups_critical.msg": "Batería del SAI crítica ({charge} % restante, ~{runtime} min). El apagado seguro se ejecuta cuando lo indiquen los ajustes del SAI.",
  "alert.ups_critical.title": "Batería del SAI crítica",
  "alert.ups_manual.msg": "Kiboto no pudo apagar este servidor por sí mismo y las salidas del SAI no se cortaron. Apaga el NAS a mano ahora para evitar un corte de corriente brusco.",

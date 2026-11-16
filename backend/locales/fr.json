@@ -64,6 +64,8 @@
  "alert.sync_ok.title": "Synchronisation terminée : {name}",
  "alert.unraid_error.msg": "La grappe Unraid est en état d’erreur.",
  "alert.unraid_error.title": "Erreur de la grappe Unraid",
+ "alert.update_ready.msg": "La version {version} est prête à être installée. Ouvrez Réglages, puis Général, pour mettre à jour.",
+ "alert.update_ready.title": "Une mise à jour de Kiboto est prête",
  "alert.ups_critical.msg": "Batterie de l’onduleur critique ({charge} % restants, ~{runtime} min). L’arrêt sécurisé se lance selon les réglages de l’onduleur.",
  "alert.ups_critical.title": "Batterie de l’onduleur critique",
  "alert.ups_manual.msg": "Kiboto n’a pas pu éteindre ce serveur tout seul, et les prises de l’onduleur n’ont pas été coupées. Éteignez le NAS à la main maintenant pour éviter une coupure brutale.",

@@ -83,6 +83,7 @@
           <button class="mgmt-sidebar-item" data-mgmt-target="mgmt-sec-system-group" data-mgmt-pane="mgmt-pane-about" data-route="general" title="General" data-i18n-title="mgmt.sidebar_general">
             <svg class="mgmt-sidebar-svg"><use href="#i-management"/></svg>
             <span class="mgmt-sidebar-text" data-i18n="mgmt.sidebar_general">General</span>
+            <span class="mgmt-sidebar-badge" id="mgmt-sidebar-update-badge" hidden data-i18n="updates.mark">Update</span>
           </button>
           <button type="button" class="mgmt-sidebar-category mgmt-sidebar-group-toggle" id="mgmt-advanced-group" aria-expanded="true" data-group-toggle="advanced">
             <span data-i18n="mgmt.cat_advanced">Advanced</span>
@@ -3156,6 +3157,7 @@
               <div class="ab-row-4">
                 <div>
                   <span class="card-head-title ab-fs14-bold-strong" data-i18n="updates.title">Software Updates</span>
+                  <label class="update-daily" for="update-daily-toggle"><input type="checkbox" id="update-daily-toggle" checked> <span data-i18n="updates.daily">Check for updates every day</span></label>
                   <span class="ab-xs-muted" data-i18n="updates.subtitle">Check for the latest stable releases, security patches, or opt in to bleeding-edge commit features.</span>
                 </div>
                 <div class="ab-row-5">

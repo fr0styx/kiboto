@@ -78,6 +78,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **The front light and screen on General**: on machines that have them, General has "Front panel" with an
   On/Off switch for each, and a link to Hardware for colours, brightness and night times.
 
+#### Changes
+
+- **Kiboto tells you when an update is ready**: it checks once a day, marks General in Settings and sends one
+  alert per new version. "Check for updates every day" on General turns it off; the privacy guide says so.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 
