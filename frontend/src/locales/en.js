@@ -7768,5 +7768,8 @@ export default {
   "chassis.connected_at": "Connected at {path}",
   "chassis.not_connected": "Not connected",
   "chassis.start": "Start",
-  "chassis.stop": "Stop"
+  "chassis.stop": "Stop",
+  "media.org_kept": "{count, plural, one {# file was already there and was kept.} other {# files were already there and were kept.}}",
+  "media.org_not_sorted": "{count, plural, one {# file could not be sorted.} other {# files could not be sorted.}}",
+  "media.org_no_link": "A link is not possible there; nothing was moved."
 };

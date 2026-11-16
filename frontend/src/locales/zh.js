@@ -7768,5 +7768,8 @@ export default {
   "chassis.connected_at": "已连接到 {path}",
   "chassis.not_connected": "未连接",
   "chassis.start": "启动",
-  "chassis.stop": "停止"
+  "chassis.stop": "停止",
+  "media.org_kept": "{count, plural, other {# 个文件已经存在，已保留原文件。}}",
+  "media.org_not_sorted": "{count, plural, other {# 个文件无法整理。}}",
+  "media.org_no_link": "那里无法创建链接；没有移动任何文件。"
 };

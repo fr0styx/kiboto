@@ -296,20 +296,62 @@ def preview_organize(
     }
 
 
+NO_LINK = "A link is not possible here (another drive or file system); nothing was moved."
+
+
+def _copy_new(src: str, dst: str) -> None:
+    """Copies src to a new file at dst; raises FileExistsError rather than replace one."""
+    with open(src, "rb") as fi, open(dst, "xb") as fo:
+        shutil.copyfileobj(fi, fo, 1 << 20)
+    shutil.copystat(src, dst)
+
+
+def _place(src: str, dst: str, action: str, hardlink: bool) -> str:
+    """Puts src at dst and never replaces a file there: "" when done, "kept" when something was
+    already there, "no_link" when a link was asked for and cannot be made."""
+    if os.path.lexists(dst):
+        return "kept"
+    os.makedirs(os.path.dirname(dst), exist_ok=True)
+    try:
+        if hardlink:
+            try:
+                os.link(src, dst)
+            except FileExistsError:
+                raise
+            except OSError:
+                return "no_link"
+            return ""
+        if action == "copy":
+            _copy_new(src, dst)
+            return ""
+        try:
+            os.link(src, dst)  # a move on the same drive that cannot replace anything
+        except FileExistsError:
+            raise
+        except OSError:
+            _copy_new(src, dst)  # another drive: copy, then remove the original
+        os.remove(src)
+        return ""
+    except FileExistsError:
+        return "kept"
+
+
 def apply_organize(
     items: list[dict[str, Any]],
     action: str = "move",
     hardlink: bool = False,
 ) -> dict[str, Any]:
     """
-    Executes physical reorganization (atomic move, copy, or hardlink).
-    Preserves torrent seeding when hardlink=True.
+    Executes physical reorganization (move, copy, or hardlink) and never replaces a file already
+    at the target. Preserves torrent seeding when hardlink=True; a link that cannot be made is a
+    failure, not a quiet move.
     """
     from backend.fsutil import resolve_within
 
     allowed_roots = _get_allowed_media_roots()
     success_count = 0
     failed_items = []
+    kept_items: list[dict[str, Any]] = []  # a file was already at the target: it stays (Files 2)
 
     for it in items:
         src = it.get("source_path")
@@ -343,34 +385,23 @@ def apply_organize(
             continue
 
         try:
-            os.makedirs(os.path.dirname(dst), exist_ok=True)
-
-            if hardlink:
-                try:
-                    os.link(src, dst)
-                    success_count += 1
-                    continue
-                except OSError as e:
-                    logger.debug(f"[MediaOrganizer] Hardlink failed, falling back to move: {e}")
-
-            if action == "copy":
-                shutil.copy2(src, dst)
-            else:
-                # Atomic rename on same filesystem, copy+delete if cross-device
-                try:
-                    os.replace(src, dst)
-                except OSError:
-                    shutil.copy2(src, dst)
-                    os.remove(src)
-
-            success_count += 1
+            outcome = _place(src, dst, action, hardlink)
         except Exception as e:
             failed_items.append({"source": src, "destination": dst, "error": str(e)})
+            continue
+        if outcome == "kept":
+            kept_items.append({"source": src, "destination": dst})
+        elif outcome == "no_link":
+            failed_items.append({"source": src, "destination": dst, "error": NO_LINK, "code": "no_link"})
+        else:
+            success_count += 1
 
     return {
-        "status": "ok" if not failed_items else "partial",
+        "status": "ok" if not failed_items and not kept_items else "partial",
         "total_processed": len(items),
         "success_count": success_count,
+        "kept_count": len(kept_items),
+        "kept": kept_items,
         "failed_count": len(failed_items),
         "failures": failed_items,
     }

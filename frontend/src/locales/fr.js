@@ -7768,5 +7768,8 @@ export default {
   "chassis.connected_at": "Connecté sur {path}",
   "chassis.not_connected": "Non connecté",
   "chassis.start": "Démarrer",
-  "chassis.stop": "Arrêter"
+  "chassis.stop": "Arrêter",
+  "media.org_kept": "{count, plural, one {# fichier était déjà là et a été gardé.} other {# fichiers étaient déjà là et ont été gardés.}}",
+  "media.org_not_sorted": "{count, plural, one {# fichier n'a pas pu être rangé.} other {# fichiers n'ont pas pu être rangés.}}",
+  "media.org_no_link": "Un lien n'est pas possible à cet endroit ; rien n'a été déplacé."
 };

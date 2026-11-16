@@ -3971,8 +3971,7 @@ export function openMediaOrganizerModal(initialPath = '') {
           hardlink,
         });
 
-        const procCount = res.processed != null ? res.processed : previewItems.length;
-        showToast(t('media.org_done', '{count, plural, one {Media sorted: # file.} other {Media sorted: # files.}}', { count: procCount }), 'success');
+        organizeResultToasts(res, previewItems.length);
         closeModal();
         if (typeof openFileManager === 'function') {
           openFileManager(srcInput?.value || initialPath);
@@ -3988,6 +3987,19 @@ export function openMediaOrganizerModal(initialPath = '') {
 
   modal.style.display = 'flex';
   modal.classList.add('open');
+}
+
+/** What Organize Media really did: files already at the target are kept, never replaced (SET-28). */
+export function organizeResultToasts(res, planned = 0) {
+  const done = res?.success_count ?? planned;
+  const kept = res?.kept_count || 0;
+  const failed = res?.failed_count || 0;
+  showToast(t('media.org_done', '{count, plural, one {Media sorted: # file.} other {Media sorted: # files.}}', { count: done }), kept || failed ? 'warning' : 'success');
+  if (kept) showToast(t('media.org_kept', '{count, plural, one {# file was already there and was kept.} other {# files were already there and were kept.}}', { count: kept }), 'warning');
+  if (failed) {
+    const why = res.failures?.[0]?.code === 'no_link' ? ' ' + t('media.org_no_link', 'A link is not possible there; nothing was moved.') : '';
+    showToast(t('media.org_not_sorted', '{count, plural, one {# file could not be sorted.} other {# files could not be sorted.}}', { count: failed }) + why, 'error');
+  }
 }
 
 // Where the share pop-over opens: next to the button or menu item that was clicked

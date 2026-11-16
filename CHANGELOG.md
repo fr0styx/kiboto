@@ -332,6 +332,12 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Storage labels stop shouting**: "Which drive is in which bay", "Kind of case", "Number of bays",
   "Drives in this pool", "Check for errors" (was "Scrub pool") and "Asleep" (was STANDBY), in five languages.
 
+#### Fixes
+
+- **Organize Media never replaces a film or episode already in the target folder**: the one that is
+  there stays and you are told how many were kept. Asking for links (to keep seeding) no longer turns
+  into a move when a link is not possible; those files stay where they are and you are told why.
+
 ## v2.0.2 (2026-11-12)
 ### 🧭 A new Settings sidebar, five themes, honest pages, and remote access cut down to what works
 
