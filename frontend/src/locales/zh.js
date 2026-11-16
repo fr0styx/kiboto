@@ -7892,5 +7892,12 @@ export default {
   "mvm.threads_used": "{used} / {total}",
   "mvm.vhost_none": "不可用",
   "mvm.bridges": "网桥",
-  "mvm.bridges_none": "未找到"
+  "mvm.bridges_none": "未找到",
+  "vmd.name_rule": "只能用字母、数字、- 和 _，2 到 64 个字符。",
+  "vmd.name_rule_bad": "不能使用“{name}”。只能用字母、数字、- 和 _，2 到 64 个字符。",
+  "vm.snap_name_rule": "只能用字母、数字、- 和 _。",
+  "vm.snap_name_rule_bad": "不能使用“{name}”。只能用字母、数字、- 和 _，最多 64 个字符。",
+  "vm.delete_erases": "删除 {name}？它的磁盘和快照会被清除，备份会保留。",
+  "now.jobs_title": "{n, plural, other {# 个任务正在运行}}",
+  "now.jobs_open": "打开任务列表"
 };

@@ -7892,5 +7892,12 @@ export default {
   "mvm.threads_used": "{used} of {total}",
   "mvm.vhost_none": "Not available",
   "mvm.bridges": "Network bridges",
-  "mvm.bridges_none": "None found"
+  "mvm.bridges_none": "None found",
+  "vmd.name_rule": "Letters, numbers, - and _ only, 2 to 64 characters.",
+  "vmd.name_rule_bad": "\"{name}\" can't be used. Use letters, numbers, - and _ only, 2 to 64 characters.",
+  "vm.snap_name_rule": "Letters, numbers, - and _ only.",
+  "vm.snap_name_rule_bad": "\"{name}\" can't be used. Use letters, numbers, - and _ only, up to 64 characters.",
+  "vm.delete_erases": "Delete {name}? Its disks and snapshots are erased. Backups are kept.",
+  "now.jobs_title": "{n, plural, one {# job running} other {# jobs running}}",
+  "now.jobs_open": "Open the Jobs list"
 };

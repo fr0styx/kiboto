@@ -1,6 +1,7 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { ZettEventBus } from '../event-bus.js';
-import { topApps, rightNowSentences, renderRightNow, installRightNow } from '../components/right-now.js';
+import { api } from '../api.js';
+import { topApps, rightNowSentences, renderRightNow, installRightNow, runningJobs, refreshJobs } from '../components/right-now.js';
 
 const DOCKER = [
   { name: 'jellyfin', state: 'running', cpu_pct: 61.2, mem_used: 512 * 1024 * 1024 },
@@ -40,4 +41,52 @@ describe('Activity -> Right now (SET-27 Activity 3)', () => {
     expect(mount.textContent).toContain('Quiet.');
     expect(installRightNow(null)).toBe(false);
   });
+
+  describe('running jobs (SET-27 rest)', () => {
+    afterEach(() => { vi.restoreAllMocks(); delete globalThis.openJobsCentre; });
+    const JOBS = {
+      active: [
+        { id: '1', title: 'Backup', status: 'running', percent: 40 },
+        { id: '2', title: 'Drive test', title_id: 'jobs.kind_smart_test', status: 'queued' },
+        { id: '3', title: 'Scrub', status: 'running', percent: 66.7 },
+        { id: '4', title: 'Old', status: 'done', percent: 100 },
+      ],
+      history: [],
+    };
+
+    it('keeps the running, waiting and paused jobs, most advanced first', () => {
+      expect(runningJobs(JOBS).map((j) => j.id)).toEqual(['3', '1', '2']);
+      expect(runningJobs(null)).toEqual([]);
+      expect(runningJobs({ active: 'x' })).toEqual([]);
+    });
+
+    it('lists them with progress and opens the Jobs list', () => {
+      document.body.innerHTML = '<section id="right-now" hidden></section>';
+      const mount = /** @type {HTMLElement} */ (document.getElementById('right-now'));
+      const open = vi.fn();
+      globalThis.openJobsCentre = open;
+      renderRightNow(mount, { cpu: { util: 1 } }, runningJobs(JOBS));
+      expect(mount.textContent).toContain('3 jobs running');
+      expect(mount.textContent).toContain('Scrub');
+      expect(mount.textContent).toContain('67%');
+      expect(mount.textContent).toContain('Waiting');
+      /** @type {HTMLButtonElement} */ (mount.querySelector('.right-now-open')).click();
+      expect(open).toHaveBeenCalled();
+      renderRightNow(mount, { cpu: { util: 1 } }, []);
+      expect(mount.textContent).not.toContain('running');
+    });
+
+    it('asks the server at most every 15 seconds and keeps the list on a failure', async () => {
+      const get = vi.spyOn(api, 'get').mockResolvedValue(JOBS);
+      const t0 = Date.now() + 60_000; // later than any fetch an earlier test started
+      const first = await refreshJobs(t0);
+      expect(first.length).toBe(3);
+      await refreshJobs(t0 + 5_000);
+      expect(get).toHaveBeenCalledTimes(1);
+      get.mockRejectedValueOnce(new Error('down'));
+      expect((await refreshJobs(t0 + 20_000)).length).toBe(3);
+      expect(get).toHaveBeenCalledTimes(2);
+    });
+  });
 });
+

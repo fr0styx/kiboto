@@ -68,7 +68,7 @@ export async function openVmSnapshotsModal(vmId, vmObj = null) {
           <div id="vm-snap-create-form" style="display: none; background: var(--kb-shade-30); border: 1px solid rgba(51,205,184,0.3); border-radius: 8px; padding: 12px; flex-direction: column; gap: 10px;">
             <div class="vmsn-xs-bold-accent">${t('vsn.new_title', 'New snapshot')}</div>
             <div class="vmsn-row-5">
-              <input class="vmsn-xs-strong-box-grow" type="text" id="vm-snap-name-input" placeholder="${t('vm.snapshot_name', 'Snapshot Name')}" />
+              <input class="vmsn-xs-strong-box-grow" type="text" id="vm-snap-name-input" maxlength="64" placeholder="${t('vm.snapshot_name', 'Snapshot Name')}" title="${t('vm.snap_name_rule', 'Letters, numbers, - and _ only.')}" />
               <input class="vmsn-xs-strong-box-grow-2" type="text" id="vm-snap-desc-input" placeholder="${t('vm.snapshot_desc', 'Description (optional)')}" />
             </div>
             <div class="vmsn-row-6">
@@ -412,6 +412,11 @@ export async function openVmSnapshotsModal(vmId, vmObj = null) {
       const description = (descInput?.value || '').trim();
       if (!name) {
         showToast(t('toast.please_specify_a_snapshot_name', 'Please specify a snapshot name'), 'warning');
+        return;
+      }
+      // SNAPSHOT_NAME_PATTERN on the server (VMs report 24)
+      if (!/^[a-zA-Z0-9_-]{1,64}$/.test(name)) {
+        showToast(t('vm.snap_name_rule_bad', '"{name}" can\'t be used. Use letters, numbers, - and _ only, up to 64 characters.', { name }), 'warning');
         return;
       }
       btnSubmit.disabled = true;

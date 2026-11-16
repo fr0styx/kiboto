@@ -54,7 +54,8 @@ export function openVmCreateModal() {
         <!-- Step 1: General -->
         <div>
           <label class="vmc-xs-bold-muted" for="vm-create-name">${t('vmd.name_label', 'VM name *')}</label>
-          <input class="vmc-xs-strong-box" type="text" id="vm-create-name" placeholder="e.g. ubuntu-dev-node" />
+          <input class="vmc-xs-strong-box" type="text" id="vm-create-name" placeholder="e.g. ubuntu-dev-node" maxlength="64" aria-describedby="vm-create-name-rule" />
+          <div class="vmc-xs-muted" id="vm-create-name-rule">${t('vmd.name_rule', 'Letters, numbers, - and _ only, 2 to 64 characters.')}</div>
         </div>
 
         <div class="vmc-grid">
@@ -688,6 +689,11 @@ export function openVmCreateModal() {
       const name = modal.querySelector('#vm-create-name')?.value?.trim();
       if (!name) {
         showToast(t('toast.please_enter_a_valid_vm_name', 'Please enter a valid VM name.'), 'warning');
+        return;
+      }
+      // the server's rule (VmCreateRequest.name), said before it refuses (VMs report 24)
+      if (!/^[a-zA-Z0-9_-]{2,64}$/.test(name)) {
+        showToast(t('vmd.name_rule_bad', '"{name}" can\'t be used. Use letters, numbers, - and _ only, 2 to 64 characters.', { name }), 'warning');
         return;
       }
 

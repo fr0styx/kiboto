@@ -7892,5 +7892,12 @@ export default {
   "mvm.threads_used": "{used} von {total}",
   "mvm.vhost_none": "Nicht verfügbar",
   "mvm.bridges": "Netzwerkbrücken",
-  "mvm.bridges_none": "Keine gefunden"
+  "mvm.bridges_none": "Keine gefunden",
+  "vmd.name_rule": "Nur Buchstaben, Ziffern, - und _, 2 bis 64 Zeichen.",
+  "vmd.name_rule_bad": "„{name}“ geht nicht. Nur Buchstaben, Ziffern, - und _, 2 bis 64 Zeichen.",
+  "vm.snap_name_rule": "Nur Buchstaben, Ziffern, - und _.",
+  "vm.snap_name_rule_bad": "„{name}“ geht nicht. Nur Buchstaben, Ziffern, - und _, höchstens 64 Zeichen.",
+  "vm.delete_erases": "{name} löschen? Seine Festplatten und Snapshots werden gelöscht. Sicherungen bleiben erhalten.",
+  "now.jobs_title": "{n, plural, one {# Aufgabe läuft} other {# Aufgaben laufen}}",
+  "now.jobs_open": "Aufgabenliste öffnen"
 };

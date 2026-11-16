@@ -890,7 +890,8 @@ function bindVmGridHandlers(grid) {
       const vmName = btn.dataset.name;
       showConfirmToast(
         t('vm.delete', 'Delete'),
-        `${t('vm.delete_confirm', 'Are you sure you want to delete virtual machine')} '${vmName}'?`,
+        // the disks and snapshots go with it; VM backups live in the backup list and stay (VMs report 25)
+        t('vm.delete_erases', 'Delete {name}? Its disks and snapshots are erased. Backups are kept.', { name: vmName }),
         async () => {
           try {
             await api.delete(`/api/vms/${vmId}`, { confirmed: true });

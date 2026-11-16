@@ -1,14 +1,43 @@
 /**
  * Activity -> Right now (SET-27, Activity report section 4, tab 2): what the server is doing, in a
- * sentence, and the apps using it most. Drawn from the live stats the page already receives; it
- * redraws only while the tab is on screen.
+ * sentence, the jobs running and the apps using it most. Drawn from the live stats the page already
+ * receives and /api/jobs (at most every 15 s); it redraws only while the tab is on screen.
  */
 import { t } from '../i18n.js';
 import { formatFixed } from '../format.js';
+import { api } from '../api.js';
 import { ZettEventBus } from '../event-bus.js';
 import { state } from '../state.js';
 
 const BUSY_PCT = 25;
+const JOBS_EVERY_MS = 15000;
+let _jobs = [];
+let _jobsAt = 0;
+
+/** A job's title in the reader's language (as the Jobs list says it; copied, not imported, so this
+ *  lazy module pulls no first-load code into its own chunk). */
+function jobName(job) {
+  return job.title_id ? t(job.title_id, job.title || '', job.title_params || {}) : job.title || '';
+}
+
+/** The jobs running or waiting, at most five, with the most advanced first. */
+export function runningJobs(data, n = 5) {
+  const active = data && Array.isArray(data.active) ? data.active : [];
+  return active
+    .filter((j) => j && (j.status === 'running' || j.status === 'queued' || j.status === 'paused'))
+    .sort((a, b) => (b.percent ?? -1) - (a.percent ?? -1))
+    .slice(0, n);
+}
+
+/** Fetches the running jobs when the last look is older than 15 s; a failure keeps the last list. */
+export async function refreshJobs(now = Date.now()) {
+  if (now - _jobsAt < JOBS_EVERY_MS) return _jobs;
+  _jobsAt = now;
+  try {
+    _jobs = runningJobs(await api.get('/api/jobs'));
+  } catch (_) { /* the Jobs list is not reachable: keep what was there */ }
+  return _jobs;
+}
 
 /** The apps using the processor most (Kiboto's own parts left out), at most five. */
 export function topApps(docker, n = 5) {
@@ -51,11 +80,35 @@ function el(tag, cls, text) {
   return node;
 }
 
-export function renderRightNow(mount = document.getElementById('right-now'), stats = state.latestStats) {
+function jobsBlock(jobs) {
+  const box = el('div', 'right-now-jobs');
+  box.append(el('h4', 'right-now-h', t('now.jobs_title', '{n, plural, one {# job running} other {# jobs running}}', { n: jobs.length })));
+  const list = el('ul', 'right-now-apps');
+  for (const j of jobs) {
+    const li = el('li');
+    li.append(el('span', 'right-now-name', jobName(j)));
+    const pct = typeof j.percent === 'number' ? `${formatFixed(Math.max(0, Math.min(100, j.percent)), 0)}%` : '';
+    const what = j.status === 'queued' ? t('jobs.status_queued', 'Waiting') : j.status === 'paused' ? t('jobs.status_paused', 'Paused') : pct;
+    li.append(el('span', 'right-now-use', what));
+    list.append(li);
+  }
+  box.append(list);
+  const open = /** @type {any} */ (globalThis).openJobsCentre;
+  if (typeof open === 'function') {
+    const btn = el('button', 'btn-secondary right-now-open', t('now.jobs_open', 'Open the Jobs list'));
+    btn.setAttribute('type', 'button');
+    btn.addEventListener('click', () => open());
+    box.append(btn);
+  }
+  return box;
+}
+
+export function renderRightNow(mount = document.getElementById('right-now'), stats = state.latestStats, jobs = _jobs) {
   if (!mount) return false;
   const head = el('p', 'right-now-line', rightNowSentences(stats).join(' '));
   const apps = topApps(stats && stats.docker);
   const parts = [head];
+  if (jobs && jobs.length) parts.push(jobsBlock(jobs));
   if (apps.length) {
     parts.push(el('h4', 'right-now-h', t('now.apps_title', 'Apps by use')));
     const list = el('ol', 'right-now-apps');
@@ -79,11 +132,15 @@ let _listening = false;
 export function installRightNow(mount = document.getElementById('right-now')) {
   if (!mount) return false;
   renderRightNow(mount);
+  _jobsAt = 0;
+  refreshJobs().then(() => renderRightNow(mount)).catch(() => {});
   if (!_listening) {
     _listening = true;
     ZettEventBus.on('stats:updated', (stats) => {
       const m = document.getElementById('right-now');
-      if (m && m.offsetParent !== null) renderRightNow(m, stats);
+      if (!m || m.offsetParent === null) return;
+      renderRightNow(m, stats);
+      refreshJobs().then((jobs) => renderRightNow(m, stats, jobs)).catch(() => {});
     });
   }
   return true;

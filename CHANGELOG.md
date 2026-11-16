@@ -129,6 +129,17 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   vhost-net is there and which network bridges exist come from this NAS. Before, the boxes read fields the server
   never sent and always said "Dynamic", "Optimal", "8 Threads", "Supported" and "br0 / virbr0".
 
+#### Changes
+
+- **Virtual machine names say the rule**: the create form says "Letters, numbers, - and _ only, 2 to 64 characters",
+  and a name like "My PC" is stopped with that sentence instead of the server's pattern. Snapshot names the same.
+- **Deleting a virtual machine says what goes**: "Its disks and snapshots are erased. Backups are kept."
+
+#### Changes
+
+- **Right now shows the jobs running**: Activity → Right now lists backups, drive tests, copies and other jobs
+  with their progress, and opens the Jobs list.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 
