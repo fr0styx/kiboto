@@ -7941,5 +7941,20 @@ export default {
   "dg.title_add": "Hier ein Laufwerk einsetzen",
   "dg.who": "{owner} erledigt die Arbeit; dies sind die Schritte. Kiboto ändert nichts an Ihren Pools.",
   "dg.who_other": "Dies sind die Schritte. Kiboto ändert nichts an Ihren Pools.",
-  "dg.close": "Schließen"
+  "dg.close": "Schließen",
+  "ddns.title": "Ein Name für Ihre Heimadresse (Dynamic DNS)",
+  "ddns.st_off": "Aus",
+  "ddns.st_error": "Nicht aktualisiert: {error}",
+  "ddns.st_ok": "{name} zeigt auf {ip} (geprüft {time})",
+  "ddns.st_waiting": "An: {name} wird innerhalb von 5 Minuten aktualisiert",
+  "ddns.help": "Hält einen Namen wie home.duckdns.org auf Ihre Internetadresse zu Hause gerichtet, wenn sie sich ändert. Ein Name allein öffnet nichts: Um Kiboto von außen zu erreichen, braucht es zusätzlich eine Portweiterleitung am Router. Für privaten Zugang braucht Tailscale beides nicht.",
+  "ddns.provider": "Dienst",
+  "ddns.name": "Name",
+  "ddns.token": "Token",
+  "ddns.token_saved": "Gespeichert; zum Ändern einen neuen eingeben",
+  "ddns.cf_help": "Ein Cloudflare-API-Token mit „Zone: Read“ und „DNS: Edit“ für diese Domain.",
+  "ddns.duck_help": "Der Token, der auf duckdns.org nach der Anmeldung angezeigt wird.",
+  "ddns.save": "Speichern",
+  "ddns.now": "Jetzt aktualisieren",
+  "ddns.load_failed": "Dynamic DNS konnte nicht geladen werden: {error}"
 };

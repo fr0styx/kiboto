@@ -7941,5 +7941,20 @@ export default {
   "dg.title_add": "Ajouter un disque ici",
   "dg.who": "{owner} fait le travail ; voici les étapes. Kiboto ne modifie rien sur vos pools.",
   "dg.who_other": "Voici les étapes. Kiboto ne modifie rien sur vos pools.",
-  "dg.close": "Fermer"
+  "dg.close": "Fermer",
+  "ddns.title": "Un nom pour votre adresse à la maison (DNS dynamique)",
+  "ddns.st_off": "Désactivé",
+  "ddns.st_error": "Pas mis à jour : {error}",
+  "ddns.st_ok": "{name} pointe vers {ip} (vérifié à {time})",
+  "ddns.st_waiting": "Activé : {name} est mis à jour d'ici 5 minutes",
+  "ddns.help": "Garde un nom comme home.duckdns.org pointé vers l'adresse internet de votre maison quand elle change. Un nom seul n'ouvre rien : atteindre Kiboto de l'extérieur demande aussi une redirection de port sur votre box. Pour un accès privé, Tailscale n'a besoin d'aucun des deux.",
+  "ddns.provider": "Service",
+  "ddns.name": "Nom",
+  "ddns.token": "Jeton",
+  "ddns.token_saved": "Enregistré ; saisissez-en un nouveau pour le changer",
+  "ddns.cf_help": "Un jeton d'API Cloudflare avec Zone : Read et DNS : Edit pour ce domaine.",
+  "ddns.duck_help": "Le jeton affiché sur duckdns.org une fois connecté.",
+  "ddns.save": "Enregistrer",
+  "ddns.now": "Mettre à jour",
+  "ddns.load_failed": "Le DNS dynamique n'a pas pu être chargé : {error}"
 };

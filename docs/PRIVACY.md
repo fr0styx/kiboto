@@ -41,6 +41,7 @@ health report below, which is off unless you turn it on.
 | Desktop weather widget | api.open-meteo.com and geocoding-api.open-meteo.com (from your browser) | city name, then its coordinates | while the widget is on the desktop |
 | Calendar holidays | date.nager.at (from your browser) | year and country code | when the calendar shows public holidays |
 | Update check | api.github.com, ghcr.io | your IP address and the version request | once a day, unless you turn off "Check for updates every day" in Settings → General; and when you open **Software update** |
+| Dynamic DNS | www.duckdns.org, or api.cloudflare.com and 1.1.1.1 | your IP address, the name you chose and its token | every 5 minutes, only after you turn on Dynamic DNS on the Away from home page |
 | Container image updates | the registries your containers come from (e.g. Docker Hub at index.docker.io, ghcr.io) | image names | when you check for or apply container updates |
 | App catalog | github.com / raw.githubusercontent.com and the catalog sources you add | template requests | when you open or refresh the catalog |
 | App logos in the catalog | cdn.jsdelivr.net (the dashboard-icons set) or raw.githubusercontent.com, asked by Kiboto, never by your browser | the logo's address | once per logo; Kiboto keeps a copy, and logos from any other host aren't shown |

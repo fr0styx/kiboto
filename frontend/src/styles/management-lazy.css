@@ -457,3 +457,9 @@
 .drive-guide-who { margin: 0 0 12px; color: var(--muted); font-size: var(--kb-fs-sm); }
 .drive-guide-steps { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; line-height: 1.5; }
 .drive-guide-actions { display: flex; justify-content: flex-end; margin-top: 16px; }
+/* Dynamic DNS card (audit A8) */
+.ddns-form { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+.ddns-field { display: flex; flex-direction: column; gap: 3px; font-size: var(--kb-fs-xs); color: var(--muted); }
+.ddns-field input, .ddns-field select { min-height: 36px; }
+.ddns-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.ddns-error { color: var(--kb-text-danger, var(--crit)); font-size: var(--kb-fs-xs); }

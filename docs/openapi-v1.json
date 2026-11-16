@@ -5019,6 +5019,42 @@
     "title": "CreateVmSnapshotResponse",
     "type": "object"
    },
+   "DdnsIn": {
+    "properties": {
+     "enabled": {
+      "default": false,
+      "title": "Enabled",
+      "type": "boolean"
+     },
+     "hostname": {
+      "default": "",
+      "maxLength": 253,
+      "title": "Hostname",
+      "type": "string"
+     },
+     "provider": {
+      "default": "duckdns",
+      "pattern": "^(duckdns|cloudflare)$",
+      "title": "Provider",
+      "type": "string"
+     },
+     "token": {
+      "anyOf": [
+       {
+        "maxLength": 512,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "None keeps the stored token; an empty string clears it",
+      "title": "Token"
+     }
+    },
+    "title": "DdnsIn",
+    "type": "object"
+   },
    "DeleteAppBackupEndpointResponse": {
     "additionalProperties": true,
     "description": "DELETE /backup/apps/{backup_id}",
@@ -59242,6 +59278,113 @@
     ],
     "x-required-scopes": [
      "system:view",
+     "system:config"
+    ]
+   }
+  },
+  "/api/v1/network/ddns": {
+   "get": {
+    "operationId": "get_ddns_api_v1_network_ddns_get",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Get Ddns Api V1 Network Ddns Get",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Get Ddns",
+    "tags": [
+     "Network & Switching"
+    ],
+    "x-required-scopes": [
+     "system:view"
+    ]
+   },
+   "put": {
+    "operationId": "put_ddns_api_v1_network_ddns_put",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/DdnsIn"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Put Ddns Api V1 Network Ddns Put",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Put Ddns",
+    "tags": [
+     "Network & Switching"
+    ],
+    "x-required-scopes": [
+     "system:config"
+    ]
+   }
+  },
+  "/api/v1/network/ddns/update": {
+   "post": {
+    "operationId": "update_ddns_now_api_v1_network_ddns_update_post",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Update Ddns Now Api V1 Network Ddns Update Post",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Update Ddns Now",
+    "tags": [
+     "Network & Switching"
+    ],
+    "x-required-scopes": [
      "system:config"
     ]
    }

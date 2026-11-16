@@ -13,6 +13,7 @@ from backend.api.backup import router as backup_router
 from backend.api.calendar import router as calendar_router
 from backend.api.catalog import router as catalog_router
 from backend.api.chassis import router as chassis_router
+from backend.api.ddns import router as ddns_router
 from backend.api.diagnostics import router as diagnostics_router
 from backend.api.docker import router as docker_router
 from backend.api.drives import router as drives_router
@@ -161,3 +162,4 @@ __all__ = [
     "ai_conversations_router",
 ]
 api_router.include_router(update_watch_router)  # the daily update check (Settings decision 5)
+api_router.include_router(ddns_router)  # Dynamic DNS, off by default (audit A8)

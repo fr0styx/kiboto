@@ -7941,5 +7941,20 @@ export default {
   "dg.title_add": "在这里加装硬盘",
   "dg.who": "由 {owner} 完成实际操作，以下是步骤。Kiboto 不会改动你的存储池。",
   "dg.who_other": "以下是步骤。Kiboto 不会改动你的存储池。",
-  "dg.close": "关闭"
+  "dg.close": "关闭",
+  "ddns.title": "为家庭地址设置名称（动态 DNS）",
+  "ddns.st_off": "已关闭",
+  "ddns.st_error": "未更新：{error}",
+  "ddns.st_ok": "{name} 指向 {ip}（{time} 检查）",
+  "ddns.st_waiting": "已开启：{name} 将在 5 分钟内更新",
+  "ddns.help": "让 home.duckdns.org 这样的名称在家庭网络地址变化时始终指向它。仅有名称不会开放任何东西：从外部访问 Kiboto 还需要在路由器上转发端口。若只需私密访问，Tailscale 两者都不需要。",
+  "ddns.provider": "服务",
+  "ddns.name": "名称",
+  "ddns.token": "令牌",
+  "ddns.token_saved": "已保存；输入新的即可更换",
+  "ddns.cf_help": "一个对该域名具有 Zone: Read 和 DNS: Edit 权限的 Cloudflare API 令牌。",
+  "ddns.duck_help": "登录 duckdns.org 后显示的令牌。",
+  "ddns.save": "保存",
+  "ddns.now": "立即更新",
+  "ddns.load_failed": "无法加载动态 DNS：{error}"
 };
