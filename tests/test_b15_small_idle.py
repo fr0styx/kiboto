@@ -109,7 +109,12 @@ def test_events_are_written_in_batches_and_unchanged_ones_not_repeated(monkeypat
     for i in range(5):
         state.add_event("warning", f"Disk {i} hot", "52 C")
     assert writes == []  # not yet: one write for the batch
-    time.sleep(0.6)
+    # the counter goes up just before the file lands: wait for the file, not a fixed time (a CI
+    # flake read the file in between); time.time is the test's clock here, so the wait uses monotonic
+    deadline = time.monotonic() + 5
+    while not events_file.exists() and time.monotonic() < deadline:
+        time.sleep(0.05)
+    time.sleep(0.1)
     assert writes == [5] and len(json.loads(events_file.read_text())) == 5
     clock["t"] += 120
     state.add_event("warning", "Disk 0 hot", "52 C")  # unchanged: not again within the hour
