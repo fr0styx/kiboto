@@ -8115,5 +8115,7 @@ export default {
   "kibm.load_failed": "Kibs Modell konnte nicht geladen werden.",
   "kibm.now": "Kib antwortet jetzt mit {model}.",
   "kibm.failed": "Die Wahl wurde nicht gespeichert: {error}",
-  "kibm.test_failed": "Der Geschwindigkeitstest ist nicht gestartet: {error}"
+  "kibm.test_failed": "Der Geschwindigkeitstest ist nicht gestartet: {error}",
+  "kibw.title": "Kib",
+  "kibw.open": "Kib öffnen"
 };

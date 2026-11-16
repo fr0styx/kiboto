@@ -1175,7 +1175,18 @@ export function _getActiveAiSearchQuery() {
   return askInput ? askInput.value.trim() : '';
 }
 
+/** "Open Kib" in Settings → Kib opens the Kib window on Ask (AI decision 1). */
+export function bindOpenKib(root = document) {
+  root.querySelectorAll('[data-kib-open]').forEach((b) => {
+    const btn = /** @type {HTMLElement} */ (b);
+    if (btn.dataset.bound) return;
+    btn.dataset.bound = '1';
+    btn.addEventListener('click', () => /** @type {any} */ (window).openKibWindow?.('mgmt-pane-ai-chat'));
+  });
+}
+
 export function initAiKnowledgeEngine() {
+  bindOpenKib();
   import('../model-bench.js').then((m) => m.renderModelBench()).catch(() => {}); // D2
   renderAiSearchHistory();
 

@@ -84,10 +84,10 @@ describe('Kib — Multi-Modal Local RAG & Visual Search Frontend Suite', () => {
   });
 
   it('maps AI & RAG subpanes accurately in SUBPANE_MAP', () => {
-    expect(SUBPANE_MAP['ai']).toEqual({ section: 'mgmt-sec-ai', pane: 'mgmt-pane-ai-chat' });
+    expect(SUBPANE_MAP['ai']).toEqual({ section: 'mgmt-sec-ai', pane: 'mgmt-pane-ai-index' }); // Settings → Kib is the settings (AI 1)
     expect(SUBPANE_MAP['chatbot']).toEqual({ section: 'mgmt-sec-ai', pane: 'mgmt-pane-ai-chat' });
     expect(SUBPANE_MAP['rag']).toEqual({ section: 'mgmt-sec-ai', pane: 'mgmt-pane-ai-rag' });
-    expect(SUBPANE_MAP['mgmt-sec-ai']).toEqual({ section: 'mgmt-sec-ai', pane: 'mgmt-pane-ai-chat' });
+    expect(SUBPANE_MAP['mgmt-sec-ai']).toEqual({ section: 'mgmt-sec-ai', pane: 'mgmt-pane-ai-index' });
     expect(SUBPANE_MAP['mgmt-pane-ai-visual']).toEqual({ section: 'mgmt-sec-ai', pane: 'mgmt-pane-ai-visual' });
     expect(SUBPANE_MAP['mgmt-pane-ai-index']).toEqual({ section: 'mgmt-sec-ai', pane: 'mgmt-pane-ai-index' });
   });

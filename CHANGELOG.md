@@ -360,6 +360,12 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   with how it runs here once "Test speed" has measured it. The choice is kept, so a later speed test moves it to the
   model that now fits; a model picked by name stays put.
 
+#### Changes
+
+- **Kib has its own window**: Ask Kib and AI search open in a Kib window from the dock, from search, from "Ask Kib
+  about this" and from every old link; Settings → Kib holds only Kib's settings, with an "Open Kib" button. Someone who
+  may use Kib but not change its settings gets the window instead of a page that is not theirs.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

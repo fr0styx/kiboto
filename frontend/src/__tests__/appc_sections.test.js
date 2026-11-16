@@ -1,6 +1,8 @@
 /** Mission Control opens tabs that hold several panes, by link, by default and by click (APP-C). */
 import { describe, it, expect, vi, beforeAll } from 'vitest';
 import { initManagement } from '../components/management.js';
+import { ZettEventBus } from '../event-bus.js';
+import '../route-access.js';
 import { api } from '../api.js';
 
 const shown = (id) => document.getElementById(id).style.display;
@@ -81,9 +83,17 @@ describe('Mission Control tab groups (APP-C)', () => {
     window.openManagementWindow('mgmt-sec-docker', 'mgmt-pane-docker-catalog');
     expect(active('#cat')).toBe(true);
     expect(shown('mgmt-pane-docker')).toBe('block');
+    // Ask Kib is its own window now (AI decision 1): Settings hands the link to it
+    const openKib = vi.fn();
+    window.openKibWindow = openKib;
     window.openManagementWindow('mgmt-sec-ai', 'mgmt-pane-ai-chat');
-    expect(shown('mgmt-pane-ai-chat')).toBe('flex');
+    expect(openKib).toHaveBeenCalledWith('mgmt-pane-ai-chat');
+    window.openManagementWindow('mgmt-sec-ai', 'mgmt-pane-ai-visual');
+    expect(openKib).toHaveBeenLastCalledWith('mgmt-pane-ai-visual');
+    // someone who may not change Kib's settings gets the window, not a page that is not theirs
+    ZettEventBus.emit('session:user', { username: 'kid', scopes: ['shares:read'] });
     window.openManagementWindow('mgmt-sec-ai');
-    expect(shown('mgmt-pane-ai-chat')).toBe('flex');
+    expect(openKib).toHaveBeenLastCalledWith('mgmt-pane-ai-chat');
+    ZettEventBus.emit('session:user', null);
   });
 });

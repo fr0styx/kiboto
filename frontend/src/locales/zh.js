@@ -8115,5 +8115,7 @@ export default {
   "kibm.load_failed": "无法加载 Kib 的模型。",
   "kibm.now": "Kib 现在使用 {model} 回答。",
   "kibm.failed": "选择未保存：{error}",
-  "kibm.test_failed": "速度测试未能开始：{error}"
+  "kibm.test_failed": "速度测试未能开始：{error}",
+  "kibw.title": "Kib",
+  "kibw.open": "打开 Kib"
 };

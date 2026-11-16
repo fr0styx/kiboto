@@ -340,7 +340,7 @@ document.addEventListener('DOMContentLoaded', () => {  if (window.location.searc
     iconId: 'management-desktop-icon',
     load: () => ensureManagementDom().then(() => import('./components/management.js')),
     init: 'initManagement',
-    globals: ['openManagementWindow', 'openManagementSection'],
+    globals: ['openManagementWindow', 'openManagementSection', 'openKibWindow'],
     openGlobal: 'openManagementWindow',
   });
   let managementReady = false;

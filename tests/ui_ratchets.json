@@ -215,6 +215,12 @@
   "styles": 1,
   "templates": 2
  },
+ "frontend/src/components/kib-window.js": {
+  "buttons": 0,
+  "globals": 0,
+  "styles": 3,
+  "templates": 1
+ },
  "frontend/src/components/management.js": {
   "buttons": 0,
   "globals": 4,

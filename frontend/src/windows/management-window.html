@@ -3443,15 +3443,15 @@
             <div class="mgmt-sticky-subnav">
               <!-- 3-Tab Navigation Bar: Local Chatbot + Unified RAG + Dedicated Configuration -->
               <div class="mgmt-inner-tabs" role="tablist">
-                <button class="mgmt-inner-tab active" role="tab" aria-selected="true" data-tab-target="mgmt-pane-ai-chat" id="mgmt-tab-ai-chat">
+                <button class="mgmt-inner-tab" role="tab" aria-selected="false" data-tab-target="mgmt-pane-ai-chat" id="mgmt-tab-ai-chat" hidden>
                   <svg class="ic" style="width: 14px; height: 14px;"><use href="#i-kib"/></svg>
                   <span data-i18n="ai.tab_chat">Ask Kib</span>
                 </button>
-                <button class="mgmt-inner-tab" role="tab" aria-selected="false" data-tab-target="mgmt-pane-ai-rag" id="mgmt-tab-ai-rag">
+                <button class="mgmt-inner-tab" role="tab" aria-selected="false" data-tab-target="mgmt-pane-ai-rag" id="mgmt-tab-ai-rag" hidden>
                   <svg class="ic" style="width: 14px; height: 14px;"><use href="#i-search"/></svg>
                   <span data-i18n="ai.tab_rag">AI search</span>
                 </button>
-                <button class="mgmt-inner-tab" role="tab" aria-selected="false" data-tab-target="mgmt-pane-ai-index" id="mgmt-tab-ai-index">
+                <button class="mgmt-inner-tab active" role="tab" aria-selected="true" data-tab-target="mgmt-pane-ai-index" id="mgmt-tab-ai-index">
                   <svg class="ic" style="width: 14px; height: 14px;"><use href="#i-sliders"/></svg>
                   <span data-i18n="ai.tab_index">Configuration</span>
                 </button>
@@ -3477,7 +3477,7 @@
                 <div id="ai-reindex-univ-bar" style="height:100%; width:0%; background:linear-gradient(90deg, #33cdb8, #33cdb8); transition:width 0.3s ease;"></div>
               </div>
             </div>
-            <div id="mgmt-pane-ai-chat" class="mgmt-tab-pane" style="display: flex; flex-direction: column; flex: 1; min-height: 0; height: 100%; box-sizing: border-box;">
+            <div id="mgmt-pane-ai-chat" class="mgmt-tab-pane" style="display: none; flex-direction: column; flex: 1; min-height: 0; height: 100%; box-sizing: border-box;">
               <div id="ai-chat-dual-container" class="ai-chat-dual-container">
                 
                 <!-- Left: Collapsible Conversation History Sidebar (260px) -->
@@ -3664,7 +3664,8 @@
             </div>
 
             <!-- Tab 3: Dedicated Configuration (Service Switch, Scope/Schedule/Standby Rules, Watched Shares & NPU/GPU Models) -->
-            <div id="mgmt-pane-ai-index" class="mgmt-tab-pane" style="display: none;">
+            <div id="mgmt-pane-ai-index" class="mgmt-tab-pane" style="display: block;">
+              <div class="kib-open-row"><button type="button" class="btn-pill-toggle is-small" data-kib-open data-i18n="kibw.open">Open Kib</button></div>
               <div id="kib-status-mount"></div>
               <div class="ai-telemetry-ribbon" id="ai-telemetry-ribbon" hidden style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px; padding:10px 14px; margin-bottom:12px; background:var(--lt-b-0e1c1ea6, rgba(14,28,30,0.65)); border:1px solid rgba(51,205,184,0.3); border-radius:10px; box-sizing:border-box;">
                 <div class="aix-row">

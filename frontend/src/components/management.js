@@ -3,7 +3,9 @@ import { isNvmeDrive } from './temp-rule.js';
 import { refreshAndSay } from './refresh-say.js';
 import { isShuttingDown } from './vm/power.js';
 import { loadAccountPane, loadBackupExtras, loadSecurityPane, loadNotificationsPane, loadConnectionsPane } from './management/admin-panes.js';
-import { kibPaneFor, loadKibExtras } from './management/kib-access.js';
+import { kibPaneFor, loadKibExtras, mayManageKib } from './management/kib-access.js';
+
+const KIB_WINDOW_PANES = new Set(['mgmt-pane-ai-chat', 'mgmt-pane-ai-rag', 'mgmt-pane-ai-visual']);
 import { syncDesktopThemeUI, openDrawer, restoreHardwareTabsToManagement } from './settings.js';
 import { ZettEventBus } from '../event-bus.js';
 import { fitMiniPreviewScale, syncMiniPreviewTelemetry } from './mini-preview.js';
@@ -182,13 +184,14 @@ export const SUBPANE_MAP = {
   'region': { section: 'mgmt-sec-system-group', pane: 'mgmt-pane-language' },
 
   // --- Pillar 8: AI Knowledge & Visual Search (Kib) ---
-  'ai': { section: 'mgmt-sec-ai', pane: 'mgmt-pane-ai-chat' },
+  // Settings → Kib is the settings; Ask and Search open the Kib window (AI decision 1)
+  'ai': { section: 'mgmt-sec-ai', pane: 'mgmt-pane-ai-index' },
   'chatbot': { section: 'mgmt-sec-ai', pane: 'mgmt-pane-ai-chat' },
   'chat': { section: 'mgmt-sec-ai', pane: 'mgmt-pane-ai-chat' },
   'rag': { section: 'mgmt-sec-ai', pane: 'mgmt-pane-ai-rag' },
   'zettai': { section: 'mgmt-sec-ai', pane: 'mgmt-pane-ai-chat' },
   'ai-chat': { section: 'mgmt-sec-ai', pane: 'mgmt-pane-ai-chat' },
-  'mgmt-sec-ai': { section: 'mgmt-sec-ai', pane: 'mgmt-pane-ai-chat' },
+  'mgmt-sec-ai': { section: 'mgmt-sec-ai', pane: 'mgmt-pane-ai-index' },
   'mgmt-sec-ai-rag': { section: 'mgmt-sec-ai', pane: 'mgmt-pane-ai-rag' },
   'mgmt-pane-ai-rag': { section: 'mgmt-sec-ai', pane: 'mgmt-pane-ai-rag' },
   'mgmt-pane-ai-chat': { section: 'mgmt-sec-ai', pane: 'mgmt-pane-ai-chat' },
@@ -559,6 +562,8 @@ export function showPanes(card, panes) {
 
 export function initManagement() {
   window.__updateManagementTelemetry = updateManagementTelemetry;
+  // the Kib window loads on first use (AI decision 1)
+  /** @type {any} */ (window).openKibWindow = (pane) => import('./kib-window.js').then((m) => m.openKibWindow(pane));
   if (state.isLcdDirect || (typeof window !== 'undefined' && window.location.search.includes('mode=lcd')) || (document.body && document.body.classList.contains('lcd-direct'))) {
     return;
   }
@@ -822,7 +827,7 @@ export function initManagement() {
       if (typeof fetchAndRenderUpsTelemetry === 'function') fetchAndRenderUpsTelemetry();
     } else if (paneId === 'mgmt-pane-ai-rag' || paneId === 'mgmt-pane-ai-chat' || paneId === 'mgmt-pane-ai-visual' || paneId === 'mgmt-pane-ai-index') {
       if (kibPaneFor(paneId) !== paneId) { // Configuration is for people who manage Kib (SET-04)
-        document.getElementById('mgmt-tab-ai-chat')?.click();
+        /** @type {any} */ (window).openKibWindow('mgmt-pane-ai-chat'); // Ask Kib is in its own window now (AI decision 1)
         return;
       }
       fetchAndRenderAiStatus();
@@ -1001,6 +1006,13 @@ export function initManagement() {
       // Apps live in one place, the Apps window (UX-4)
       window.openContainersManager({ view: desiredSubPane === 'mgmt-pane-docker-catalog' ? 'catalog' : 'installed' });
       return false; // nothing changed here: the caller leaves Settings as it was
+    }
+    if (targetId === 'mgmt-sec-ai' && (KIB_WINDOW_PANES.has(desiredSubPane || '') || !mayManageKib())) {
+      // Ask and Search live in the Kib window (AI decision 1); someone who may not change Kib's
+      // settings gets the window too, instead of a page that is not theirs
+      if (desiredSubPane === 'mgmt-pane-ai-visual') setAiVisualFiltersDrawerOpen(true);
+      /** @type {any} */ (window).openKibWindow(KIB_WINDOW_PANES.has(desiredSubPane || '') ? desiredSubPane : 'mgmt-pane-ai-chat');
+      return false;
     }
     if (mayNotOpen(targetId, desiredSubPane)) {
       // this person's rights hide the page; a link, an alert or the page remembered from before

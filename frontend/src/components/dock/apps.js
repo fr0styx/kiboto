@@ -166,7 +166,10 @@ export const KNOWN_APPS = {
     icon: '#i-kib',
     getTitle: () => t('dock.kib', 'Ask Kib'),
     launch: () => {
-      if (typeof window.openManagementWindow === 'function') {
+      const openKib = /** @type {any} */ (window).openKibWindow;
+      if (typeof openKib === 'function') {
+        openKib('mgmt-pane-ai-chat'); // Kib is its own window (AI decision 1)
+      } else if (typeof window.openManagementWindow === 'function') {
         window.openManagementWindow('mgmt-sec-ai-rag', 'mgmt-pane-ai-rag');
       } else {
         document.getElementById('management-desktop-icon')?.click();

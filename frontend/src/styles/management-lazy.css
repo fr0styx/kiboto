@@ -531,3 +531,4 @@
 .kibm-text > span { font-size: var(--kb-fs-xs); color: var(--kb-text-soft); }
 .kibm-text > small { font-size: var(--kb-fs-xs); color: var(--muted); }
 #kib-model-choice > [data-kibm-test] { align-self: flex-start; }
+.kib-open-row { display: flex; justify-content: flex-end; margin: 0 0 8px; }
