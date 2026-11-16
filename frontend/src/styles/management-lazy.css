@@ -473,3 +473,7 @@
 .fw-note { color: var(--muted); font-size: var(--kb-fs-xs); }
 .fw-rules pre { max-height: 220px; overflow: auto; font-size: var(--kb-fs-xs); }
 .fw-error { color: var(--kb-text-danger, var(--crit)); font-size: var(--kb-fs-xs); }
+/* Switch off at night (audit A10) */
+.ps-times { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 6px; }
+.ps-days { display: flex; flex-wrap: wrap; gap: 4px 12px; }
+.ps-day { display: inline-flex; align-items: center; gap: 4px; min-height: 32px; font-size: var(--kb-fs-sm); }

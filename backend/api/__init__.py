@@ -44,6 +44,7 @@ from backend.api.oidc import ldap_router
 from backend.api.oidc import router as oidc_router
 from backend.api.passkeys import router as passkeys_router  # noqa: E402
 from backend.api.photo_import import router as photo_import_router
+from backend.api.power_schedule import router as power_schedule_router
 from backend.api.protection import router as protection_router
 from backend.api.public_links import router as public_links_router
 from backend.api.push import router as push_router
@@ -165,3 +166,4 @@ __all__ = [
 api_router.include_router(update_watch_router)  # the daily update check (Settings decision 5)
 api_router.include_router(ddns_router)  # Dynamic DNS, off by default (audit A8)
 api_router.include_router(firewall_router)  # host firewall, off by default (audit A13)
+api_router.include_router(power_schedule_router)  # scheduled power off and wake-up, off by default (audit A10)

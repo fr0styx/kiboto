@@ -32832,6 +32832,45 @@
     "title": "PostUpsTestConnectionResponse",
     "type": "object"
    },
+   "PowerScheduleIn": {
+    "properties": {
+     "days": {
+      "default": [
+       0,
+       1,
+       2,
+       3,
+       4,
+       5,
+       6
+      ],
+      "items": {
+       "type": "integer"
+      },
+      "title": "Days",
+      "type": "array"
+     },
+     "enabled": {
+      "default": false,
+      "title": "Enabled",
+      "type": "boolean"
+     },
+     "off_at": {
+      "default": "01:00",
+      "maxLength": 5,
+      "title": "Off At",
+      "type": "string"
+     },
+     "wake_at": {
+      "default": "07:00",
+      "maxLength": 5,
+      "title": "Wake At",
+      "type": "string"
+     }
+    },
+    "title": "PowerScheduleIn",
+    "type": "object"
+   },
    "PublicAppIn": {
     "properties": {
      "funnel_port": {
@@ -67866,6 +67905,81 @@
     "x-required-scopes": [
      "system:view",
      "system:config"
+    ]
+   }
+  },
+  "/api/v1/system/power-schedule": {
+   "get": {
+    "operationId": "get_power_schedule_api_v1_system_power_schedule_get",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Get Power Schedule Api V1 System Power Schedule Get",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Get Power Schedule",
+    "tags": [
+     "System"
+    ],
+    "x-required-scopes": [
+     "system:view"
+    ]
+   },
+   "put": {
+    "operationId": "put_power_schedule_api_v1_system_power_schedule_put",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/PowerScheduleIn"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Put Power Schedule Api V1 System Power Schedule Put",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Put Power Schedule",
+    "tags": [
+     "System"
+    ],
+    "x-required-scopes": [
+     "system:power"
     ]
    }
   },

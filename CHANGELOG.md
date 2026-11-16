@@ -226,6 +226,12 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   the NAS's network (its own system images); in a container on Unraid or TrueNAS the card says the NAS's own
   firewall applies.
 
+#### Added
+
+- **Switch off at night** on the Power page, off by default: choose when the NAS switches off, when it wakes and on
+  which nights. It sets its wake-up clock first and never switches off without one; a running backup or virtual
+  machine makes it wait up to two hours.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

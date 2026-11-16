@@ -1162,6 +1162,7 @@ export function initManagement() {
         sectionName = t('mgmt.sidebar_ups', 'Power & Battery');
         fetchAndRenderUpsTelemetry();
         if (typeof loadUpsConfigToDrawer === 'function') loadUpsConfigToDrawer();
+        import('./power-schedule-card.js').then((m) => m.renderPowerScheduleCard()).catch(() => {}); // audit A10
       } else if (targetId === 'mgmt-sec-system-group') {
         sectionName = t('mgmt.system_title', 'System & Identity');
       } else if (targetId === 'mgmt-sec-ai') {

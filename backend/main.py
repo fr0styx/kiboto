@@ -626,12 +626,16 @@ async def lifespan(app: FastAPI):
     from backend.api.ddns import ddns_loop
 
     ddns_task = asyncio.create_task(ddns_loop())  # Dynamic DNS, runs only while it is on (audit A8)
+    from backend.api.power_schedule import power_schedule_loop
+
+    power_task = asyncio.create_task(power_schedule_loop())  # scheduled power, does nothing while off (audit A10)
     try:
         yield
     finally:
         Z_STATE.shutting_down = True
         update_task.cancel()
         ddns_task.cancel()
+        power_task.cancel()
         Z_STATE.ui_wake.set()
         broadcaster.shutdown()
         close_notification_client()
