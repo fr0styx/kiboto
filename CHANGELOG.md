@@ -289,6 +289,10 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 
 - **Help improve Kiboto** is at the end of General, next to the report for support.
 
+#### Changes
+
+- **This server** on General is titled with the server's own name.
+
 ## v2.0.2 (2026-11-12)
 ### 🧭 A new Settings sidebar, five themes, honest pages, and remote access cut down to what works
 

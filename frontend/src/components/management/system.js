@@ -70,7 +70,21 @@ function syncUpdateChannelUI() {
   }
 }
 
+/** This server's card is titled with the name the household gave it (SET-23); "Kiboto" until it has one. */
+export function showServerName(el = document.getElementById('about-server-name')) {
+  if (!el) return Promise.resolve(null);
+  return Promise.resolve()
+    .then(() => api.get('/api/system/identity'))
+    .then((id) => {
+      const name = String(id?.server_name || '').trim();
+      if (name) el.textContent = name;
+      return name || null;
+    })
+    .catch(() => null);
+}
+
 export async function fetchAndRenderSystemAbout(force = false, channelOverride = null) {
+  showServerName();
   const versionBadge = document.getElementById('about-version-badge');
   const chassisEl = document.getElementById('about-chassis-model');
   const hostEl = document.getElementById('about-host-platform');
