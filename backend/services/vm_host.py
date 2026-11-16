@@ -414,6 +414,29 @@ def scan_bridges(fallback: bool = True) -> list[str]:
     return sorted(set(found))
 
 
+# UPS makers whose USB UPS units Kiboto's UPS watch talks to (APC, CyberPower, Eaton/MGE, Tripp Lite, generic)
+UPS_VENDORS = frozenset({"051d", "0764", "0463", "09ae", "0665"})
+
+
+def usb_nas_use(usb_dir: str, entry: str, entries: list[str], vid: str) -> str:
+    """What the NAS itself uses a USB device for: "storage" (a USB disk, or Unraid's boot stick),
+    "ups" (a UPS on its data cable), or "". Handing such a device to a machine takes it away from
+    the NAS (VMs report 26)."""
+    classes = set()
+    for ent in entries:
+        if ent.startswith(entry + ":"):
+            try:
+                with open(os.path.join(usb_dir, ent, "bInterfaceClass"), encoding="ascii", errors="replace") as f:
+                    classes.add(f.read().strip().lower())
+            except OSError:
+                pass
+    if "08" in classes:
+        return "storage"
+    if "03" in classes and vid in UPS_VENDORS:
+        return "ups"
+    return ""
+
+
 def scan_host_usb_devices() -> list[dict[str, Any]]:
     """
     Discovers physical USB devices connected to the host via sysfs (/host/sys/bus/usb/devices or /sys/bus/usb/devices).
@@ -488,6 +511,7 @@ def scan_host_usb_devices() -> list[dict[str, Any]]:
                 "dev": dev,
                 "serial": serial,
                 "is_root_hub": is_root_hub,
+                "nas_use": usb_nas_use(usb_dir, entry, entries, vid),
                 "sysfs_path": entry,
             }
         )

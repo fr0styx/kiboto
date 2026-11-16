@@ -283,6 +283,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   to tap, the screen's key sheet has the arrow keys and Enter that text installers need, and missing numbers show a
   dash instead of "undefined".
 
+#### Changes
+
+- **USB for virtual machines warns about devices the NAS uses**: a USB drive (which may be the boot drive) or the UPS
+  cable is marked in the device list, and adding it to a machine asks first.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

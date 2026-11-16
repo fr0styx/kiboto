@@ -614,3 +614,21 @@ def test_the_data_folder_is_always_read_and_other_folders_ask_without_waking(tmp
     monkeypatch.setattr(rag_standby, "is_backing_disk_in_standby", lambda dev: asked.append(dev) or True)
     assert vm_host._asleep(str(tmp_path / "isos")) is False and asked == []
     assert vm_host._asleep("/mnt/user/isos") is True and asked == ["sdb"]
+
+
+def test_usb_devices_the_nas_uses_are_marked(tmp_path):
+    """VMs report 26: a USB disk or the UPS cable is flagged before it is given to a machine."""
+    from backend.services import vm_host
+
+    def dev(entry, vid, cls):
+        (tmp_path / entry).mkdir()
+        (tmp_path / f"{entry}:1.0").mkdir()
+        (tmp_path / f"{entry}:1.0" / "bInterfaceClass").write_text(cls + "\n")
+        return entry
+
+    entries = [dev("1-1", "0781", "08"), dev("1-2", "051d", "03"), dev("1-3", "046d", "03")]
+    names = sorted(p.name for p in tmp_path.iterdir())
+    assert vm_host.usb_nas_use(str(tmp_path), "1-1", names, "0781") == "storage"
+    assert vm_host.usb_nas_use(str(tmp_path), "1-2", names, "051d") == "ups"
+    assert vm_host.usb_nas_use(str(tmp_path), "1-3", names, "046d") == ""
+    assert entries

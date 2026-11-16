@@ -12,6 +12,7 @@ const ico = (e) => `<span aria-hidden="true">${e}</span>`;
 import { makeDraggable, bringToFront } from '../dock.js';
 import { vmState } from './state.js';
 import { asDialog, askBeforeDiscard } from './dialog-a11y.js';
+import { usbUseNote, confirmUsbUse } from './usb-use.js';
 import { loadIsos, fillIsoSelect } from './isos.js';
 import { openKvmDiagnosticsModal } from './connect-modal.js';
 import { vtpmBadgeHtml } from './shared.js';
@@ -784,8 +785,10 @@ export function openVmEditModal(vmId, vmObj = null) {
             manufacturer: d.manufacturer,
             bus: d.bus,
             dev: d.dev,
+            nas_use: d.nas_use || '',
           });
-          opt.textContent = `[${d.vendor_id}:${d.product_id}] ${d.description || d.product}`;
+          const use = usbUseNote(d);
+          opt.textContent = `[${d.vendor_id}:${d.product_id}] ${d.description || d.product}${use ? ` (${use})` : ''}`;
           usbSelect.appendChild(opt);
         });
       } else {
@@ -807,9 +810,11 @@ export function openVmEditModal(vmId, vmObj = null) {
       try {
         const item = JSON.parse(val);
         if (!currentUsbDevices.some((d) => d.vendor_id === item.vendor_id && d.product_id === item.product_id)) {
-          currentUsbDevices.push(item);
-          renderUsbList();
-          showToast(t('toast.attached_usb_device', 'Attached USB device: {description}', { description: item.description || item.vendor_id }), 'info');
+          confirmUsbUse(item, () => {
+            currentUsbDevices.push(item);
+            renderUsbList();
+            showToast(t('toast.attached_usb_device', 'Attached USB device: {description}', { description: item.description || item.vendor_id }), 'info');
+          });
         } else {
           showToast(t('toast.device_is_already_attached_to_this', 'Device is already attached to this VM'), 'warning');
         }

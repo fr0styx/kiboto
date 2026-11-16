@@ -2,6 +2,7 @@
  *  edit dialog says so and locks those two sliders instead of promising a later restart. */
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { api } from '../api.js';
+import * as toast from '../toast.js';
 import { vmState } from '../components/vm/state.js';
 import { openVmEditModal } from '../components/vm/edit-modal.js';
 
@@ -57,6 +58,19 @@ describe('VM edit on a running machine (VMs report 25)', () => {
       expect(document.body.textContent).toContain('No USB devices found');
       vi.restoreAllMocks();
     }
+  });
+
+  it('marks a USB drive the NAS uses and asks before adding it (VMs report 26)', async () => {
+    usbDevs = [{ vendor_id: '0781', product_id: '5583', description: 'SanDisk', nas_use: 'storage' }];
+    const ask = vi.spyOn(toast, 'showConfirmToast').mockImplementation((msg, ok) => ok());
+    await open('stopped');
+    const sel = /** @type {HTMLSelectElement} */ (document.querySelector('#vm-edit-host-usb-select'));
+    const drive = [...sel.options].find((o) => o.textContent?.includes('SanDisk'));
+    expect(drive?.textContent).toContain('(used by this NAS: a USB drive)');
+    sel.value = drive?.value || '';
+    /** @type {HTMLButtonElement} */ (document.querySelector('#btn-edit-add-usb-device')).click();
+    expect(ask.mock.calls.at(-1)?.[0]).toContain('boot drive');
+    /** @type {HTMLButtonElement} */ (document.querySelector('#btn-edit-add-usb-device')).click();
   });
 });
 

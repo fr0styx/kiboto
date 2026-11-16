@@ -8025,5 +8025,9 @@ export default {
   "vcon.k_down": "Flèche bas",
   "vcon.k_left": "Flèche gauche",
   "vcon.k_right": "Flèche droite",
-  "vcon.k_enter": "Entrée"
+  "vcon.k_enter": "Entrée",
+  "vmd.usb_use_storage": "utilisé par ce NAS : un disque USB",
+  "vmd.usb_use_ups": "utilisé par ce NAS : l'onduleur",
+  "vmd.usb_q_ups": "C'est l'onduleur que ce NAS surveille. Donné à la machine, le NAS ne peut plus s'éteindre proprement en cas de coupure. L'ajouter quand même ?",
+  "vmd.usb_q_storage": "Ce disque USB est utilisé par ce NAS (ce peut être le disque de démarrage). Donné à la machine, il disparaît du NAS. L'ajouter quand même ?"
 };

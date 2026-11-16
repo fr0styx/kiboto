@@ -1,6 +1,7 @@
 /** VMs report 18: the new-machine dialog uses this NAS's numbers, fetched when the VM window has not. */
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { api } from '../api.js';
+import * as toast from '../toast.js';
 import { vmState } from '../components/vm/state.js';
 import { openVmCreateModal } from '../components/vm/create-modal.js';
 
@@ -58,6 +59,23 @@ describe('new machine from Settings (VMs report 18)', () => {
       await flush();
       expect(document.getElementById('modal-vm-create')?.textContent).toContain('No USB devices found');
     }
+  });
+
+  it('marks the UPS the NAS uses and asks before adding it (VMs report 26)', async () => {
+    vmState.telemetry = { memory_budget: { safe_slider_max_gb: 8 }, cpu_capacity: { host_threads: 4 } };
+    vi.spyOn(api, 'get').mockImplementation(async (url) => (url === '/api/vms/usb-devices'
+      ? [{ vendor_id: '051d', product_id: '0002', description: 'APC UPS', nas_use: 'ups' }, { vendor_id: '046d', product_id: 'c52b', description: 'Receiver' }] : []));
+    const ask = vi.spyOn(toast, 'showConfirmToast').mockImplementation((msg, ok) => ok());
+    await openVmCreateModal();
+    await flush();
+    const sel = /** @type {HTMLSelectElement} */ (document.querySelector('#vm-create-host-usb-select'));
+    const ups = [...sel.options].find((o) => o.textContent?.includes('APC UPS'));
+    expect(ups?.textContent).toContain('(used by this NAS: the UPS)');
+    sel.value = ups?.value || '';
+    /** @type {HTMLButtonElement} */ (document.querySelector('#btn-create-add-usb-device')).click();
+    expect(ask).toHaveBeenCalled();
+    expect(document.body.textContent).toContain('APC UPS');
+    /** @type {HTMLButtonElement} */ (document.querySelector('#btn-create-add-usb-device')).click(); // already there
   });
 });
 
