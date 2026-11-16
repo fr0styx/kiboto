@@ -8123,7 +8123,7 @@ export default {
   "vmp.p_linux_2": "2 Kerne, 4 GB, 32-GB-Datenträger",
   "vmp.p_win11": "Windows 11",
   "vmp.p_win11_2": "4 Kerne, 8 GB, 64-GB-Datenträger, UEFI und TPM",
-  "vmp.n_win11": "Windows 11 braucht UEFI und ein TPM: beides ist eingestellt. Wählen Sie den Windows-Installer als Boot-ISO und fügen Sie die Treiber-CD (virtio-win) aus dem ISO-Katalog hinzu, damit Windows seinen Datenträger sieht.",
+  "vmp.n_win11": "Windows 11 braucht UEFI und ein TPM: beides ist eingestellt. Wählen Sie den Windows-Installer als Boot-ISO und virtio-win (aus dem ISO-Katalog) als Treiber-CD, damit das Windows-Setup seinen Datenträger sieht.",
   "vmp.n_linux": "Wählen Sie den Installer als Boot-ISO oder nehmen Sie einen aus dem ISO-Katalog.",
   "kibw.off_for_you": "Kib ist für Sie ausgeschaltet. Wer dieses NAS betreut, kann es unter Einstellungen → Kib → Wer Kib nutzen darf einschalten.",
   "kib4.start_over_h": "Neu beginnen",
@@ -8135,5 +8135,8 @@ export default {
   "kibp.enc_on": "Auf diesem NAS: Chats und Index sind verschlüsselt.",
   "kibp.enc_going": "Auf diesem NAS: Chats und Index werden gerade verschlüsselt.",
   "kibp.enc_locked": "Auf diesem NAS: Chats und Index sind verschlüsselt, aber der Schlüssel fehlt oder ist falsch, daher kann Kib sie nicht öffnen.",
-  "kibp.enc_off": "Auf diesem NAS: Chats und Index sind nicht verschlüsselt. Setzen Sie KIBOTO_DATA_KEY in den Container-Einstellungen, um sie zu verschlüsseln."
+  "kibp.enc_off": "Auf diesem NAS: Chats und Index sind nicht verschlüsselt. Setzen Sie KIBOTO_DATA_KEY in den Container-Einstellungen, um sie zu verschlüsseln.",
+  "vmd.driver_iso_label": "Treiber-CD (optional)",
+  "vmd.driver_iso_none": "Keine",
+  "vmd.driver_iso_help": "Eine zweite CD neben dem Installer, etwa virtio-win für Windows."
 };

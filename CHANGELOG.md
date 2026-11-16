@@ -393,6 +393,13 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Kib's reading progress has a total**: "Kib is reading your files: 1,234 of about 5,000", from what Kib knew of
   those folders last time. No drive is read to count; when more is found, it says "so far".
 
+#### Changes
+
+- **Windows 11 can be set up in a virtual machine**: a new machine with UEFI gets the chipset Windows 11 and
+  secure-boot firmware need, and a "Driver disc" can sit beside the installer (virtio-win from the ISO catalog), so
+  Windows Setup sees its disk. Machines made before keep the chipset they were installed on. Not yet tried with a full
+  Windows 11 installation on real hardware.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

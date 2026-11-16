@@ -8123,7 +8123,7 @@ export default {
   "vmp.p_linux_2": "2 cores, 4 GB, 32 GB disk",
   "vmp.p_win11": "Windows 11",
   "vmp.p_win11_2": "4 cores, 8 GB, 64 GB disk, UEFI and TPM",
-  "vmp.n_win11": "Windows 11 needs UEFI and a TPM: both are set. Choose the Windows installer as the boot ISO, and add the driver disc (virtio-win) from the ISO catalog so Windows can see its disk.",
+  "vmp.n_win11": "Windows 11 needs UEFI and a TPM: both are set. Choose the Windows installer as the boot ISO, and virtio-win (from the ISO catalog) as the driver disc, so Windows Setup can see its disk.",
   "vmp.n_linux": "Choose the installer as the boot ISO, or pick one from the ISO catalog.",
   "kibw.off_for_you": "Kib is turned off for you. The person who runs this NAS can turn it on under Settings → Kib → Who can use Kib.",
   "kib4.start_over_h": "Start over",
@@ -8135,5 +8135,8 @@ export default {
   "kibp.enc_on": "On this NAS: chats and the index are encrypted.",
   "kibp.enc_going": "On this NAS: chats and the index are being encrypted.",
   "kibp.enc_locked": "On this NAS: chats and the index are encrypted, but the key is missing or wrong, so Kib cannot open them.",
-  "kibp.enc_off": "On this NAS: chats and the index are not encrypted. Set KIBOTO_DATA_KEY in the container settings to encrypt them."
+  "kibp.enc_off": "On this NAS: chats and the index are not encrypted. Set KIBOTO_DATA_KEY in the container settings to encrypt them.",
+  "vmd.driver_iso_label": "Driver disc (optional)",
+  "vmd.driver_iso_none": "None",
+  "vmd.driver_iso_help": "A second disc beside the installer, such as virtio-win for Windows."
 };

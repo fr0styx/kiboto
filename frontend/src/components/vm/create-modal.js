@@ -146,6 +146,14 @@ export function openVmCreateModal() {
             </select>
           </div>
           <div>
+            <label class="vmc-xs-bold-muted-2" for="vm-create-driver-iso">${t('vmd.driver_iso_label', 'Driver disc (optional)')}</label>
+            <select id="vm-create-driver-iso" class="tz-select vm-driver-iso" aria-describedby="vm-create-driver-iso-help">
+              <option value="">${t('vmd.driver_iso_none', 'None')}</option>
+              ${vmState.isos.map((iso) => `<option value="${escapeHtml(iso.path)}">${escapeHtml(iso.name)} (${escapeHtml(iso.size_formatted || '')})</option>`).join('')}
+            </select>
+            <div class="vmc-xs-muted" id="vm-create-driver-iso-help">${t('vmd.driver_iso_help', 'A second disc beside the installer, such as virtio-win for Windows.')}</div>
+          </div>
+          <div>
             <label class="vmc-xs-bold-muted" for="vm-create-disk">${t('vmd.os_disk', 'System disk (GB)')}</label>
             <input class="vmc-xs-strong-box" type="number" id="vm-create-disk" min="10" max="2000" value="32" />
           </div>
@@ -743,6 +751,7 @@ export function openVmCreateModal() {
           disk_format: 'qcow2',
           disk_bus: 'virtio',
           iso_path: modal.querySelector('#vm-create-iso')?.value || null,
+          driver_iso_path: /** @type {HTMLSelectElement | null} */ (modal.querySelector('#vm-create-driver-iso'))?.value || null,
           boot_order: modal.querySelector('input[name="vm-create-boot-order"]:checked')?.value || 'iso',
           bridge: modal.querySelector('#vm-create-bridge')?.value || 'br0',
           autostart: !!modal.querySelector('#vm-create-autostart')?.checked,
@@ -771,7 +780,10 @@ export function openVmCreateModal() {
   modal.classList.remove('window-minimized');
   modal.style.removeProperty('display');
   modal.style.display = 'flex';
-  loadIsos().then(() => fillIsoSelect(modal.querySelector('#vm-create-iso')));
+  loadIsos().then(() => {
+    fillIsoSelect(modal.querySelector('#vm-create-iso'));
+    fillIsoSelect(modal.querySelector('#vm-create-driver-iso'));
+  });
   modal.classList.add('open');
   asDialog(modal, { modal: false, escape: false }); // Escape is handled above, asking first
   if (modalWin) {

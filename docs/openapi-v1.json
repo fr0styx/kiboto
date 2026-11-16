@@ -40919,6 +40919,17 @@
       ],
       "title": "Display Adapter"
      },
+     "driver_iso_path": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Driver Iso Path"
+     },
      "firmware": {
       "anyOf": [
        {
@@ -41195,6 +41206,17 @@
        }
       ],
       "title": "Display Adapter"
+     },
+     "driver_iso_path": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Driver Iso Path"
      },
      "firmware": {
       "anyOf": [

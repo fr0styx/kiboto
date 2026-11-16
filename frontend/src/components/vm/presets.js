@@ -24,7 +24,7 @@ export function presetsHtml() {
 /** What to tell someone after choosing a preset. */
 export function presetNote(id) {
   if (id === 'windows11') {
-    return t('vmp.n_win11', 'Windows 11 needs UEFI and a TPM: both are set. Choose the Windows installer as the boot ISO, and add the driver disc (virtio-win) from the ISO catalog so Windows can see its disk.');
+    return t('vmp.n_win11', 'Windows 11 needs UEFI and a TPM: both are set. Choose the Windows installer as the boot ISO, and virtio-win (from the ISO catalog) as the driver disc, so Windows Setup can see its disk.');
   }
   return t('vmp.n_linux', 'Choose the installer as the boot ISO, or pick one from the ISO catalog.');
 }

@@ -3,7 +3,7 @@
   "buttonClasses": 75,
   "inlineStyles": 1255,
   "emojiIcons": 3,
-  "colours": 3713,
+  "colours": 3714,
   "primitiveUses": 4,
   "importantPerFile": {
     "frontend/index.html": 64,
@@ -163,6 +163,7 @@
     "frontend/src/styles/files-lazy.css": 1,
     "frontend/src/styles/management-lazy.css": 12,
     "frontend/src/styles/users-lazy.css": 2,
+    "frontend/src/styles/vm-lazy.css": 1,
     "frontend/src/toast.js": 31,
     "frontend/src/utils.js": 1,
     "frontend/src/vm-console-direct.css": 2,

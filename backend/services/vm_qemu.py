@@ -295,6 +295,27 @@ def _get_qemu_vnc_port(vms: list[dict[str, Any]], vm_id: str) -> int:
     return port
 
 
+def _machine_args(target_vm: dict[str, Any]) -> list[str]:
+    """SET-29 stage 4: machines stored as q35 (new UEFI ones) start on q35 with SMM, which the
+    secure-boot UEFI firmware and Windows 11 need; the flash they boot from is marked secure."""
+    if target_vm.get("machine") != "q35":
+        return []
+    return ["-machine", "q35,smm=on", "-global", "driver=cfi.pflash01,property=secure,value=on"]
+
+
+def _driver_disc_args(vm_id: str, target_vm: dict[str, Any]) -> list[str]:
+    """A second disc beside the installer (SET-29 stage 4): virtio-win for Windows Setup. Confined to
+    the ISO folders like the installer; a missing file is left out with a line in the log."""
+    raw = target_vm.get("driver_iso_path")
+    if not raw:
+        return []
+    path = vm_store._confined(raw, vm_store._vm_iso_roots(), "file")
+    if not path or not os.path.exists(path):
+        logger.warning("[VM-%s] The driver disc is missing or outside the ISO folders; not attaching it.", vm_id)
+        return []
+    return ["-drive", f"file={path},media=cdrom,readonly=on,if=none,id=drivercd", "-device", "ide-cd,drive=drivercd"]
+
+
 def _prepare_vtpm(vm_id: str, vm_dir: str, wait_secs: float = 3.0) -> list[str]:
     """Starts a swtpm TPM 2.0 emulator for the VM and returns the QEMU args that attach it.
 
@@ -486,15 +507,8 @@ def _start_qemu(target_vm: dict[str, Any], vnc_port: int) -> tuple[bool, str | N
         else:
             smp_str = str(vcpus_val)
 
-        c = [
-            qemu_bin,
-            "-name",
-            target_vm["name"],
-            "-m",
-            str(ram_mb),
-            "-smp",
-            smp_str,
-        ]
+        c = [qemu_bin, "-name", target_vm["name"], "-m", str(ram_mb), "-smp", smp_str]
+        c.extend(_machine_args(target_vm) + _driver_disc_args(vm_id, target_vm))
         if has_kvm:
             c.extend(["-enable-kvm", "-cpu", "host"])
         else:

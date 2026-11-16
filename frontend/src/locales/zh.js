@@ -8123,7 +8123,7 @@ export default {
   "vmp.p_linux_2": "2 核，4 GB，32 GB 磁盘",
   "vmp.p_win11": "Windows 11",
   "vmp.p_win11_2": "4 核，8 GB，64 GB 磁盘，UEFI 和 TPM",
-  "vmp.n_win11": "Windows 11 需要 UEFI 和 TPM：两者都已设置。请选择 Windows 安装程序作为启动 ISO，并从 ISO 目录添加驱动光盘（virtio-win），让 Windows 能识别磁盘。",
+  "vmp.n_win11": "Windows 11 需要 UEFI 和 TPM：两者都已设置。请选择 Windows 安装程序作为启动 ISO，并选择 virtio-win（来自 ISO 目录）作为驱动光盘，让 Windows 安装程序能识别磁盘。",
   "vmp.n_linux": "选择安装程序作为启动 ISO，或从 ISO 目录中挑选一个。",
   "kibw.off_for_you": "Kib 已为你关闭。管理这台 NAS 的人可以在 设置 → Kib → 谁可以使用 Kib 中开启。",
   "kib4.start_over_h": "重新开始",
@@ -8135,5 +8135,8 @@ export default {
   "kibp.enc_on": "在这台 NAS 上：聊天和索引已加密。",
   "kibp.enc_going": "在这台 NAS 上：正在加密聊天和索引。",
   "kibp.enc_locked": "在这台 NAS 上：聊天和索引已加密，但密钥缺失或错误，Kib 无法打开它们。",
-  "kibp.enc_off": "在这台 NAS 上：聊天和索引未加密。在容器设置中设置 KIBOTO_DATA_KEY 即可加密。"
+  "kibp.enc_off": "在这台 NAS 上：聊天和索引未加密。在容器设置中设置 KIBOTO_DATA_KEY 即可加密。",
+  "vmd.driver_iso_label": "驱动光盘（可选）",
+  "vmd.driver_iso_none": "无",
+  "vmd.driver_iso_help": "安装程序之外的第二张光盘，例如用于 Windows 的 virtio-win。"
 };

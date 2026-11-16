@@ -8123,7 +8123,7 @@ export default {
   "vmp.p_linux_2": "2 cœurs, 4 Go, disque de 32 Go",
   "vmp.p_win11": "Windows 11",
   "vmp.p_win11_2": "4 cœurs, 8 Go, disque de 64 Go, UEFI et TPM",
-  "vmp.n_win11": "Windows 11 a besoin de l’UEFI et d’un TPM : les deux sont réglés. Choisissez l’installateur Windows comme ISO de démarrage et ajoutez le disque de pilotes (virtio-win) depuis le catalogue ISO pour que Windows voie son disque.",
+  "vmp.n_win11": "Windows 11 a besoin de l’UEFI et d’un TPM : les deux sont réglés. Choisissez l’installateur Windows comme ISO de démarrage et virtio-win (dans le catalogue ISO) comme disque de pilotes, pour que l’installation de Windows voie son disque.",
   "vmp.n_linux": "Choisissez l’installateur comme ISO de démarrage, ou prenez-en un dans le catalogue ISO.",
   "kibw.off_for_you": "Kib est désactivé pour vous. La personne qui gère ce NAS peut l’activer dans Réglages → Kib → Qui peut utiliser Kib.",
   "kib4.start_over_h": "Recommencer",
@@ -8135,5 +8135,8 @@ export default {
   "kibp.enc_on": "Sur ce NAS : les discussions et l’index sont chiffrés.",
   "kibp.enc_going": "Sur ce NAS : les discussions et l’index sont en cours de chiffrement.",
   "kibp.enc_locked": "Sur ce NAS : les discussions et l’index sont chiffrés, mais la clé manque ou est fausse, donc Kib ne peut pas les ouvrir.",
-  "kibp.enc_off": "Sur ce NAS : les discussions et l’index ne sont pas chiffrés. Définissez KIBOTO_DATA_KEY dans les réglages du conteneur pour les chiffrer."
+  "kibp.enc_off": "Sur ce NAS : les discussions et l’index ne sont pas chiffrés. Définissez KIBOTO_DATA_KEY dans les réglages du conteneur pour les chiffrer.",
+  "vmd.driver_iso_label": "Disque de pilotes (facultatif)",
+  "vmd.driver_iso_none": "Aucun",
+  "vmd.driver_iso_help": "Un second disque à côté de l’installateur, comme virtio-win pour Windows."
 };

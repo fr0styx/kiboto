@@ -128,6 +128,9 @@ class VmCreateRequest(BaseModel):
     disk_format: str = Field("qcow2", pattern="^(qcow2|raw)$")
     disk_bus: str = Field("virtio", pattern="^(virtio|sata|nvme)$")
     iso_path: str | None = None
+    # SET-29 stage 4 (Windows 11): a second disc beside the installer, e.g. virtio-win, so Windows
+    # Setup can see a virtio disk
+    driver_iso_path: str | None = None
     bridge: str = Field("br0", min_length=2)
     autostart: bool = False
     override_limits: bool = False
@@ -152,6 +155,7 @@ class VmUpdateRequest(BaseModel):
     vcpus: int | None = Field(None, ge=1, le=128)
     ram_gb: float | None = Field(None, ge=0.5, le=1024.0)
     iso_path: str | None = None
+    driver_iso_path: str | None = None
     boot_order: str | None = Field(None, pattern="^(iso|disk)$")
     autostart: bool | None = None
     override_limits: bool | None = None
@@ -647,6 +651,7 @@ def get_host_usb_devices():
 def create_vm(req: VmCreateRequest, principal: AuthenticatedPrincipal = Depends(get_current_principal)):
     """Provisions a new virtual machine with dynamic headroom validation and volume mappings."""
     vm_store._validate_vm_inputs(req.secondary_disks, req.iso_path, req.host_shares)
+    vm_store._validate_vm_inputs([], req.driver_iso_path, [])
     vms = vm_qemu._load_vms()
     if any(v["name"].lower() == req.name.lower() for v in vms):
         raise HTTPException(status_code=400, detail=f"Virtual machine '{req.name}' already exists.")
@@ -683,6 +688,7 @@ def create_vm(req: VmCreateRequest, principal: AuthenticatedPrincipal = Depends(
         "disk_format": req.disk_format,
         "disk_bus": req.disk_bus,
         "iso_path": req.iso_path,
+        "driver_iso_path": req.driver_iso_path or None,
         "bridge": req.bridge,
         "mac": mac,
         "autostart": req.autostart,
@@ -693,6 +699,9 @@ def create_vm(req: VmCreateRequest, principal: AuthenticatedPrincipal = Depends(
         "secondary_disks": req.secondary_disks,
         "boot_order": req.boot_order or "iso",
         "firmware": req.firmware or "seabios",
+        # new UEFI machines get the q35 chipset with SMM, which the secure-boot UEFI firmware and
+        # Windows 11 need; machines made before keep the chipset they were installed on
+        "machine": "q35" if (req.firmware or "seabios") == "uefi" else "pc",
         "video_adapter": req.video_adapter or req.display_adapter or "virtio-gpu",
         "tpm_enabled": bool(req.tpm_enabled),
         "usb_passthrough": req.usb_passthrough or [],
@@ -912,6 +921,10 @@ def update_vm(
 
     if "iso_path" in req.model_fields_set:  # sent as null means "none": it used to mean "no change"
         target_vm["iso_path"] = req.iso_path.strip() if req.iso_path and req.iso_path.strip() else None
+
+    if "driver_iso_path" in req.model_fields_set:
+        vm_store._validate_vm_inputs([], req.driver_iso_path, [])
+        target_vm["driver_iso_path"] = (req.driver_iso_path or "").strip() or None
 
     if req.boot_order is not None:
         target_vm["boot_order"] = req.boot_order
