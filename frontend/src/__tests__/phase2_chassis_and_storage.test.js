@@ -22,7 +22,7 @@ describe('Phase 2: Thermal Heatmap Level Calculations', () => {
     // Standby drive
     const stby = getThermalLevel(null, true);
     expect(stby.cls).toBe('standby');
-    expect(stby.text).toBe('STANDBY');
+    expect(stby.text).toBe('Asleep');
 
     // Cool drive (< 35C)
     const cool = getThermalLevel(28, false);

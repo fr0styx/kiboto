@@ -327,6 +327,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   weather, system, network, storage and the rest you chose), one per row. Every section as a tile now
   lives under the Settings tab, and a page opened from there keeps Settings lit.
 
+#### Changes
+
+- **Storage labels stop shouting**: "Which drive is in which bay", "Kind of case", "Number of bays",
+  "Drives in this pool", "Check for errors" (was "Scrub pool") and "Asleep" (was STANDBY), in five languages.
+
 ## v2.0.2 (2026-11-12)
 ### 🧭 A new Settings sidebar, five themes, honest pages, and remote access cut down to what works
 

@@ -62,7 +62,7 @@ describe('Sprint 5: Generic Linux Active Provisioner & Samba Engine (Frontend)',
     // Action buttons
     const scrubBtn = container.querySelector('.btn-pool-scrub');
     expect(scrubBtn).not.toBeNull();
-    expect(scrubBtn.textContent).toContain('Scrub pool');
+    expect(scrubBtn.textContent).toContain('Check for errors');
 
     expect(container.querySelector('.btn-pool-snaps')).toBeNull(); // snapshots are on the Backup page (SET-06)
 

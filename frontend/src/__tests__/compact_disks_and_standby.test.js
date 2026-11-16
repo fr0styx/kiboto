@@ -63,7 +63,7 @@ describe('Compact Disks Display & Standby Safety Suite', () => {
       const tile = diskTile({ name: 'sda', role: 'data', temp: null, health: 'standby', standby: true });
       expect(tile.classList.contains('disk-standby')).toBe(true);
       expect(tile.querySelector('.standby-badge')).not.toBeNull();
-      expect(tile.querySelector('.standby-badge').textContent).toBe('STANDBY');
+      expect(tile.querySelector('.standby-badge').textContent).toBe('Asleep');
       expect(tile.querySelector('.dn').textContent).toBe('sda');
     });
   });

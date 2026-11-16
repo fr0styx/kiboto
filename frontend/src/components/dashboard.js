@@ -210,7 +210,7 @@ export function diskTile(d) {
   el.title = driveTileTitle(d, isParity, isStandby);
 
   const tempHtml = isStandby
-    ? `<div class="dt s-standby"><span class="standby-badge">${t('chassis.standby', 'STANDBY')}</span></div>`
+    ? `<div class="dt s-standby"><span class="standby-badge">${t('chassis.standby', 'Asleep')}</span></div>`
     : `<div class="dt ${'s-' + lvl}"><span class="dt-temp">${temp == null ? '--' : temp}<span class="u">°C</span></span></div>`;
 
   const displayName = formatDiskDisplayName(d.name);
@@ -317,7 +317,7 @@ export function renderDisks(disks) {
       if (tempEl) {
         tempEl.className = 'dt ' + (isStandby ? 's-standby' : 's-' + lvl);
         tempEl.innerHTML = isStandby
-          ? `<span class="standby-badge">${t('chassis.standby', 'STANDBY')}</span>`
+          ? `<span class="standby-badge">${t('chassis.standby', 'Asleep')}</span>`
           : `<span class="dt-temp">${temp == null ? '--' : temp}<span class="u">°C</span></span>`;
       }
 
@@ -871,7 +871,7 @@ export function updateStreamlineBayChips(disks) {
     const devPathName = formatDiskDisplayName(d.name);
     const roleLabel = isParity ? (d.parity_label === 'P2' ? 'PARITY 2' : 'PARITY') : meta.label;
     const tempHtml = isStandby
-      ? `<span class="sl-chip-temp s-standby"><span class="standby-badge">${t('chassis.standby', 'STANDBY')}</span></span>`
+      ? `<span class="sl-chip-temp s-standby"><span class="standby-badge">${t('chassis.standby', 'Asleep')}</span></span>`
       : `<span class="sl-chip-temp">${d.temp == null ? '--' : d.temp + '°C'}</span>`;
 
     return `<div class="sl-chip-top">` +

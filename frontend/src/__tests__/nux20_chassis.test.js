@@ -30,16 +30,16 @@ describe('chassis and storage text in German (NUX-20)', () => {
     expect(c.textContent).toContain('Bereit für ein Laufwerk');
     expect(c.querySelector('[data-bay="1"]').getAttribute('aria-label')).toMatch(/^Einschub 1: IronWolf 8TB, /);
     expect(c.querySelector('.bay-locate-btn').getAttribute('aria-label')).toBe('Laufwerk in Einschub 1 finden');
-    expect(c.textContent).toContain('M.2-STECKPLATZ 1 • /dev/nvme0n1');
+    expect(c.textContent).toContain('M.2-Steckplatz 1 • /dev/nvme0n1');
     expect(c.textContent).toContain('Verschleiß:');
-    expect(c.textContent).toContain('EINSCHÜBE / ZUORDNUNG');
-    expect(getThermalLevel(null).text).toBe('UNBEKANNT');
+    expect(c.textContent).toContain('Welches Laufwerk in welchem Einschub steckt');
+    expect(getThermalLevel(null).text).toBe('Unbekannt');
   });
 
   it('sets up bays with the icon kept out of the words', () => {
     openChassisConfigModal({ profile: 'custom', total_bays: 1, bays: [], available_drives: [] });
     const m = document.getElementById('chassis-config-modal-overlay');
-    expect(m.textContent).toContain('GEHÄUSE UND EINSCHÜBE');
+    expect(m.textContent).toContain('Welches Laufwerk in welchem Einschub steckt');
     expect(m.querySelector('#chassis-profile-select').selectedOptions[0].textContent).toBe('Eigenes Gehäuse');
     expect(m.querySelector('.slot-drive-select option').textContent).toBe('— Leerer Einschub —');
     const auto = m.querySelector('#chassis-auto-assign-btn');
@@ -56,9 +56,9 @@ describe('chassis and storage text in German (NUX-20)', () => {
       pools: [{ id: 'tank', name: 'tank', fs_type: 'btrfs', parity_protected: true, used_bytes: 1e12, total_bytes: 4e12, free_bytes: 3e12, used_pct: 25, members: [] }],
     });
     expect(c.textContent).toContain('Durch Parität geschützt');
-    expect(c.textContent).toContain('LAUFWERKE IM POOL (0)');
+    expect(c.textContent).toContain('Laufwerke in diesem Pool (0)');
     expect(c.textContent).toContain('Keine Laufwerke zugewiesen');
-    expect(c.querySelector('.btn-pool-scrub').textContent).toContain('Pool prüfen (Scrub)');
+    expect(c.querySelector('.btn-pool-scrub').textContent).toContain('Auf Fehler prüfen');
     expect(c.querySelector('.btn-pool-destroy').textContent).toContain('Löschen');
     expect(c.querySelector('.topo-free-space').textContent).toMatch(/ frei$/);
   });

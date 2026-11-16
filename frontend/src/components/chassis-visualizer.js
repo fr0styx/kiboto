@@ -128,7 +128,7 @@ export function getThermalLevel(tempC, isStandby = false, isNvme = false) {
       cls: 'standby',
       color: 'var(--muted, #6c8084)',
       glow: 'rgba(108, 128, 132, 0.3)',
-      text: isStandby ? t('chassis.standby', 'STANDBY') : t('chassis.unknown', 'UNKNOWN'),
+      text: isStandby ? t('chassis.standby', 'Asleep') : t('chassis.unknown', 'Not known'),
       toString() { return this.cls; }
     };
   }
@@ -300,7 +300,7 @@ export function renderChassisTwin(container, disks = [], options = {}) {
       m2Html += `
         <div class="m2-slot-card ${thermal.cls}" data-dev="${devName}" role="button" tabindex="0">
           <div class="m2-header">
-            <span class="m2-name">${t('chassis.m2_slot', 'M.2 SLOT {n}', { n: idx + 1 })} • /dev/${devName}</span>
+            <span class="m2-name">${t('chassis.m2_slot', 'M.2 slot {n}', { n: idx + 1 })} • /dev/${devName}</span>
             <span class="m2-temp" style="color:${thermal.color};">${thermal.text}</span>
           </div>
           <div class="m2-body">
@@ -326,7 +326,7 @@ export function renderChassisTwin(container, disks = [], options = {}) {
           <div class="chassis-top-actions">
             <button class="chassis-config-btn" id="chassis-open-slots-btn" title="${t('ui.configure_chassis_bays_profile', 'Configure Chassis Bays & Profile')}" aria-label="${t('ui.configure_chassis_bays_profile', 'Configure Chassis Bays & Profile')}">
               <svg viewBox="0 0 24 24" width="12" height="12"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z" fill="currentColor"/><path fill-rule="evenodd" d="M1.323 11.447C2.811 6.976 7.028 3.75 12.001 3.75c4.97 0 9.185 3.223 10.675 7.69.12.362.12.752 0 1.113-1.487 4.471-5.705 7.697-10.677 7.697-4.97 0-9.186-3.223-10.675-7.69a1.762 1.762 0 010-1.113zM17.25 12a5.25 5.25 0 11-10.5 0 5.25 5.25 0 0110.5 0z" clip-rule="evenodd" fill="currentColor"/></svg>
-              <span>${t('chassis.slots_mapping', 'SLOTS / MAPPING')}</span>
+              <span>${t('chassis.slots_mapping', 'Which drive is in which bay')}</span>
             </button>
           </div>
           <div class="chassis-honeycomb-vents"></div>
@@ -426,14 +426,14 @@ export function openChassisConfigModal(currentConfig = {}, onSaved = null) {
       <div class="smart-modal-header cv-row-2">
         <div class="smart-modal-title cv-row-3">
           <svg viewBox="0 0 24 24" width="16" height="16"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z" fill="currentColor"/></svg>
-          <span>${t('chassis.config_title', 'CHASSIS ENCLOSURE & BAY CONFIGURATION')}</span>
+          <span>${t('chassis.config_title', 'Which drive is in which bay')}</span>
         </div>
         <button class="win-btn close-btn" id="chassis-config-close" title="${t('diagnostics.close_btn', 'Close')}" aria-label="${t('diagnostics.close_btn', 'Close')}"></button>
       </div>
       <div class="smart-modal-body cv-col-2">
         <div class="cv-grid">
           <div>
-            <label class="cv-xs-bold-muted" for="chassis-profile-select">${t('chassis.profile', 'ENCLOSURE PROFILE')}</label>
+            <label class="cv-xs-bold-muted" for="chassis-profile-select">${t('chassis.profile', 'Kind of case')}</label>
             <select id="chassis-profile-select" class="tz-select-input cv-xs-strong-box">
               <option value="auto" ${profile === 'auto' ? 'selected' : ''}>${t('chassis.profile_auto', 'Automatic (detect)')}</option>
               <option value="compact_dual" ${profile === 'compact_dual' ? 'selected' : ''}>${t('chassis.profile_compact', 'Compact (1–2 bays)')}</option>
@@ -443,14 +443,14 @@ export function openChassisConfigModal(currentConfig = {}, onSaved = null) {
             </select>
           </div>
           <div>
-            <label class="cv-xs-bold-muted" for="chassis-total-bays-input">${t('chassis.total_bays', 'TOTAL PHYSICAL BAYS')}</label>
+            <label class="cv-xs-bold-muted" for="chassis-total-bays-input">${t('chassis.total_bays', 'Number of bays')}</label>
             <input class="cv-xs-strong-box" type="number" id="chassis-total-bays-input" min="1" max="48" value="${totalBays}">
           </div>
         </div>
 
         <div>
           <div class="cv-row-4">
-            <label class="cv-xs-bold-muted-2">${t('chassis.allocation', 'PHYSICAL BAY ALLOCATION & LABELS')}</label>
+            <label class="cv-xs-bold-muted-2">${t('chassis.allocation', 'Each bay\'s drive and label')}</label>
             <button id="chassis-auto-assign-btn" class="btn-pill-toggle">${ico('⚡')} ${t('chassis.auto_assign', 'Auto-assign in order')}</button>
           </div>
           <div class="cv-box">
@@ -714,14 +714,14 @@ function buildPoolBlockInner(pool, isObserver, can = { scrub: true }) {
     </div>
 
     <div class="topo-members-section">
-      <div class="topo-members-label">${t('chassis.pool_members', 'POOL MEMBER DISKS ({count})', { count: (pool.members || []).length })}</div>
+      <div class="topo-members-label">${t('chassis.pool_members', 'Drives in this pool ({count})', { count: (pool.members || []).length })}</div>
       <div class="topo-members-grid">
         ${membersHtml || `<span class="empty-note">${t('chassis.no_members', 'No assigned member drives')}</span>`}
       </div>
     </div>
 
     <div class="topo-pool-actions cv-row-5">
-      ${can.scrub ? `<button class="btn-pool-scrub btn-pill-toggle" data-pool-id="${escapeHtml(pool.id)}" data-pool-name="${escapeHtml(pool.name || pool.id)}" title="${t('ui.trigger_filesystem_scrub_or_parity', 'Trigger filesystem scrub or parity check')}">${ico('⚡')} ${t('chassis.scrub_pool', 'Scrub pool')}</button>` : ''}
+      ${can.scrub ? `<button class="btn-pool-scrub btn-pill-toggle" data-pool-id="${escapeHtml(pool.id)}" data-pool-name="${escapeHtml(pool.name || pool.id)}" title="${t('ui.trigger_filesystem_scrub_or_parity', 'Trigger filesystem scrub or parity check')}">${ico('⚡')} ${t('chassis.scrub_pool', 'Check for errors')}</button>` : ''}
       ${!isObserver ? `<button class="btn-pool-rename btn-pill-toggle" data-pool-id="${escapeHtml(pool.id)}" data-pool-name="${escapeHtml(pool.name)}" title="${t('ui.rename_storage_pool', 'Rename storage pool')}">${ico('✏️')} ${t('chassis.rename', 'Rename')}</button>` : ''}
       ${(!isObserver || pool.fs_type === 'zfs') && pool.id !== 'unraid_array' && pool.id !== 'default_pool' ? `<button class="btn-pool-export btn-pill-toggle" data-pool-id="${escapeHtml(pool.id)}" style="background: rgba(245,158,11,0.15); border-color: rgba(245,158,11,0.3); color: var(--kb-text-warn);" title="${t('ui.safely_flush_dirty_cache_and', 'Safely flush dirty cache and detach pool')}">${ico('⏏️')} ${t('chassis.eject', 'Safely eject')}</button>` : ''}
       ${!isObserver && pool.id !== 'default_pool' ? `<button class="btn-pool-destroy btn-pill-toggle is-danger" data-pool-id="${escapeHtml(pool.id)}" title="${t('ui.destroy_storage_pool', 'Destroy storage pool')}">${ico('🗑️')} ${t('chassis.destroy', 'Destroy')}</button>` : ''}
