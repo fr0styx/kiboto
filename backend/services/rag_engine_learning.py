@@ -803,6 +803,18 @@ class RagLearningMixin:
                 "sync": sync_res,
             }
 
+    @staticmethod
+    def schedule_time_zone() -> str:
+        """The zone the reading hours are in (AI finding 28): the household's time zone from General,
+        which Kiboto applies to its own clock, else the container's."""
+        try:
+            from backend.services.identity import get_identity
+
+            zone = str(get_identity().get("timezone") or "")
+        except (OSError, ValueError):
+            zone = ""
+        return zone or (time.tzname[0] if time.tzname and time.tzname[0] else "UTC")
+
     def is_within_learning_schedule(self) -> tuple[bool, str]:
         """Checks whether current local time is within the configured Kib learning window."""
         cfg = self.get_config()
@@ -891,7 +903,7 @@ class RagLearningMixin:
             reason = "Learning paused by user."
         elif not in_sched:
             z_status = "Paused"
-            reason = f"Outside scheduled learning window (resumes at {resume_time})."
+            reason = f"Outside scheduled learning window (resumes at {resume_time}, {self.schedule_time_zone()})."
         else:
             z_status = "Idle"
             reason = "No pending learning tasks."
@@ -900,6 +912,7 @@ class RagLearningMixin:
             "kib_status": z_status,
             "status_reason": reason,
             "resume_time": resume_time or None,
+            "schedule_time_zone": self.schedule_time_zone(),
             "succeeded_count": int(succeeded_count),
             "failed_count": int(failed_count),
             "deferred_count": int(deferred_count),

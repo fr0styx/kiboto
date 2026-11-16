@@ -27,6 +27,9 @@ class FakeRag:
         self.calls.append(("start_background_sync", kw))
         return {"status": "started"}
 
+    def is_within_learning_schedule(self):
+        return (True, "")
+
     def index_directory(self, path, respect_standby, force_wake, max_files, recursive):
         self.calls.append(("index_directory", path, respect_standby, force_wake, max_files, recursive))
         return {"indexed_files": 3}
@@ -306,6 +309,15 @@ def test_folder_add_starts_learning_outside_tests(client, auth_headers, rag, mon
     client.post("/api/ai/folders", json={"action": "add", "path": _dir("learn")}, headers=auth_headers)
     kw = next(c[1] for c in rag.calls if c[0] == "start_background_sync")
     assert kw["paths"][0].endswith("learn") and kw["force_wake"] is False
+
+
+def test_folder_add_outside_the_reading_hours_waits(client, auth_headers, rag, monkeypatch):
+    """AI finding 28: outside "When Kib reads" a new folder is read in the next window."""
+    monkeypatch.setenv("TESTING", "0")
+    monkeypatch.delenv("KIBOTO_TEST_MODE", raising=False)
+    monkeypatch.setattr(rag, "is_within_learning_schedule", lambda: (False, "01:00"), raising=False)
+    client.post("/api/ai/folders", json={"action": "add", "path": _dir("later")}, headers=auth_headers)
+    assert not [c for c in rag.calls if c[0] == "start_background_sync"]
 
 
 # ---------------------------------------------------------------------------

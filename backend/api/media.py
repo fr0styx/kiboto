@@ -656,6 +656,7 @@ def update_watched_folders(
             not test_mode()  # ARC-29, NARC-6: nothing in the released image
             and updated_cfg.get("enabled", True)
             and updated_cfg.get("auto_learn_on_spinup", True)
+            and rag.is_within_learning_schedule()[0]  # AI finding 28: outside the hours it waits for them
         ):
             rag.start_background_sync(
                 paths=[added_vp],
@@ -1635,7 +1636,7 @@ def get_ai_requests(
     "/ai/config",
     dependencies=[Depends(require_scope(KIB_MANAGE))],
 )
-def update_rag_config(
+async def update_rag_config(
     req: RagConfigUpdateRequest,
     http_request: Request,
     principal: AuthenticatedPrincipal = Depends(get_current_principal),
@@ -1684,7 +1685,33 @@ def update_rag_config(
     for key in ("watched_paths", "excluded_paths"):  # they were stored as sent, with no check
         if key in updates:
             updates[key] = _checked_folder_list(updates[key], principal)
-    return get_rag_engine().update_config(updates)
+    rag = get_rag_engine()
+    reindex = await _reader_change_as_one_step(rag, updates)
+    res = await asyncio.to_thread(rag.update_config, updates) if updates else rag.get_config()
+    return {**res, "reindex": reindex} if reindex else res
+
+
+_READER_KEYS = ("embedding_model", "embedding_dim", "embedding_host")
+
+
+async def _reader_change_as_one_step(rag: Any, updates: dict[str, Any]) -> dict[str, Any] | None:
+    """AI finding 23: a new reader model (or index size) was saved at once and search fell back to
+    exact words until a re-index nobody was told about. Such a change now starts the rebuild, and
+    the settings switch when it is done. Takes the three keys out of `updates`."""
+    if not any(k in updates for k in _READER_KEYS):
+        return None
+    cfg = rag.get_config()
+    model = updates.pop("embedding_model", None)
+    dim = updates.pop("embedding_dim", None)
+    host = updates.pop("embedding_host", None)
+    same = (
+        (model or cfg.get("embedding_model")) == cfg.get("embedding_model")
+        and int(dim or cfg.get("embedding_dim") or 0) == int(cfg.get("embedding_dim") or 0)
+        and ((host if host is not None else cfg.get("embedding_host")) or None) == (cfg.get("embedding_host") or None)
+    )
+    if same:
+        return None
+    return await _begin_reindex(model, dim, host)
 
 
 @router.get("/ai/photo-vectors/status", dependencies=[Depends(require_scope("system:read", "storage:read"))])
@@ -1798,6 +1825,16 @@ async def trigger_ai_reindex(
     req: RagConfigUpdateRequest | None = None,
 ) -> dict[str, Any]:
     """Triggers background in-place re-embedding without waking sleeping hard drives."""
+    return await _begin_reindex(
+        req.embedding_model if req else None,
+        req.embedding_dim if req else None,
+        req.embedding_host if req else None,
+    )
+
+
+async def _begin_reindex(model: str | None, dim: int | None, host: str | None) -> dict[str, Any]:
+    """Starts the in-place re-embedding (or says it is running). Search keeps the old vectors until
+    every chunk is done, then index and settings switch together (in_place_reembed_collection)."""
     global _REINDEX_TASK, _REINDEX_STATUS
     if _REINDEX_TASK and not _REINDEX_TASK.done():
         return {
@@ -1808,11 +1845,9 @@ async def trigger_ai_reindex(
 
     rag = get_rag_engine()
     cfg = rag.get_config()
-    target_model = (
-        req.embedding_model if (req and req.embedding_model) else (cfg.get("embedding_model") or "embeddinggemma")
-    )
-    target_dim = req.embedding_dim if (req and req.embedding_dim) else (cfg.get("embedding_dim") or 768)
-    target_host = req.embedding_host if (req and req.embedding_host is not None) else cfg.get("embedding_host")
+    target_model = model or (cfg.get("embedding_model") or "embeddinggemma")
+    target_dim = dim or (cfg.get("embedding_dim") or 768)
+    target_host = host if host is not None else cfg.get("embedding_host")
     if target_host:
         from backend.services.rag_rerank import endpoint_ok
 

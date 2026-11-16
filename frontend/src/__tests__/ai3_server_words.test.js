@@ -1,8 +1,8 @@
 /** AI 3, findings 19 and 20: the Kib page reads what the server really answers. */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { learnReason, renderAiLearningResultsData, relearnAiFailedFiles, triggerInPlaceReindex, syncAiWatchedFolders, runAiPathIndex, renderAiWatchedFoldersAndShares } from '../components/management/ai.js';
+import { learnReason, renderAiLearningResultsData, relearnAiFailedFiles, triggerInPlaceReindex, syncAiWatchedFolders, runAiPathIndex, renderAiWatchedFoldersAndShares, renderScheduleZone, changeReader } from '../components/management/ai.js';
 import { api } from '../api.js';
-import { showToast } from '../toast.js';
+import { showToast, showConfirmToast } from '../toast.js';
 
 vi.mock('../toast.js', () => ({ showToast: vi.fn(), showConfirmToast: vi.fn(), showPromptToast: vi.fn(), showBottomSheet: vi.fn() }));
 
@@ -106,5 +106,66 @@ describe('Kib re-index and learning results (AI 3)', () => {
     await syncAiWatchedFolders();
     expect(byId('ai-index-run-feedback').textContent).toBe('🔄 Kib started reading /mnt/user/docs. Sleeping drives are left asleep.');
     await vi.advanceTimersByTimeAsync(3000);
+  });
+
+  it('names the time zone of the reading hours (finding 28)', () => {
+    renderScheduleZone('Europe/Berlin');
+    expect(byId('ai-schedule-zone')).toBeNull();
+    document.body.insertAdjacentHTML('beforeend', '<div id="ai-schedule-zone" hidden></div>');
+    renderScheduleZone('Europe/Berlin');
+    expect(byId('ai-schedule-zone').hidden).toBe(false);
+    expect(byId('ai-schedule-zone').textContent).toBe('Times are in Europe/Berlin, the time zone set under General.');
+    renderScheduleZone(undefined);
+    expect(byId('ai-schedule-zone').hidden).toBe(true);
+    expect(byId('ai-schedule-zone').textContent).toBe('');
+  });
+
+  it('a new reader model is asked first and rebuilds, or is put back (finding 23)', async () => {
+    document.body.insertAdjacentHTML('beforeend', '<select id="emb"><option value="a">a</option><option value="b">b</option></select>');
+    const sel = byId('emb');
+    sel.dataset.saved = 'a';
+    sel.value = 'b';
+    const post = vi.spyOn(api, 'post').mockResolvedValueOnce({ reindex: { status: 'started' } });
+    changeReader(sel, { embedding_model: 'b' });
+    const [title, , onOk, onCancel, opts] = showConfirmToast.mock.calls.at(-1);
+    expect(title).toBe('Change the model and rebuild the index?');
+    expect(opts.okText).toBe('Change and rebuild');
+    await onOk();
+    expect(post).toHaveBeenCalledWith('/api/ai/config', { embedding_model: 'b' });
+    expect(lastToast()).toEqual(['Kib is rebuilding its index with the new setting.', 'success']);
+    expect(byId('ai-reindex-progress-container').style.display).toBe('block');
+    expect(sel.dataset.saved).toBe('b');
+    await vi.advanceTimersByTimeAsync(1600);
+
+    sel.value = 'a';
+    post.mockResolvedValueOnce({ reindex: { status: 'in_progress' } });
+    changeReader(sel, { embedding_model: 'a' });
+    await showConfirmToast.mock.calls.at(-1)[2]();
+    expect(lastToast()).toEqual(['Kib is already rebuilding its search index.', 'info']);
+    expect(sel.value).toBe('b');
+    await vi.advanceTimersByTimeAsync(1600);
+
+    sel.value = 'a';
+    post.mockRejectedValueOnce(new Error('denied'));
+    changeReader(sel, { embedding_model: 'a' });
+    await showConfirmToast.mock.calls.at(-1)[2]();
+    expect(lastToast()).toEqual(['The setting was not changed: denied', 'error']);
+    expect(sel.value).toBe('b');
+
+    sel.value = 'a';
+    post.mockResolvedValueOnce({});
+    changeReader(sel, { embedding_model: 'a' });
+    await showConfirmToast.mock.calls.at(-1)[2]();
+    expect(sel.dataset.saved).toBe('a');
+
+    sel.value = 'b';
+    changeReader(sel, { embedding_model: 'b' });
+    showConfirmToast.mock.calls.at(-1)[3]();
+    expect(sel.value).toBe('a');
+    delete sel.dataset.saved;
+    sel.value = 'b';
+    changeReader(sel, { embedding_model: 'b' });
+    showConfirmToast.mock.calls.at(-1)[3]();
+    expect(onCancel).toBeTypeOf('function');
   });
 });

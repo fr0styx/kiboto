@@ -8040,5 +8040,11 @@ export default {
   "confirm.ai_index_flush.msg": "Soll Kib alles vergessen, was es über Ihre Dateien weiß? Ihre Dateien bleiben unberührt.",
   "ait.read_already": "Kib liest bereits. Es macht mit dem weiter, was es gerade tut.",
   "ait.read_started": "Kib liest jetzt {target}. Schlafende Laufwerke bleiben im Ruhezustand.",
-  "ait.n_folders": "{count, plural, one {# Ordner} other {# Ordner}}"
+  "ait.n_folders": "{count, plural, one {# Ordner} other {# Ordner}}",
+  "ait.schedule_zone": "Die Zeiten gelten für {zone}, die unter Allgemein eingestellte Zeitzone.",
+  "ait.reader_change_title": "Modell wechseln und Index neu aufbauen?",
+  "ait.reader_change_desc": "Kib liest mit der neuen Einstellung erneut, was es weiß. Die Suche funktioniert bis dahin wie bisher. Es wird kein Laufwerk gelesen.",
+  "ait.reader_change_ok": "Wechseln und neu aufbauen",
+  "ait.reader_change_started": "Kib baut seinen Index mit der neuen Einstellung neu auf.",
+  "ait.reader_change_failed": "Die Einstellung wurde nicht geändert: {error}"
 };

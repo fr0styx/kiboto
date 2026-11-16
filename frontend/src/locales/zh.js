@@ -8040,5 +8040,11 @@ export default {
   "confirm.ai_index_flush.msg": "让 Kib 忘记它对你的文件所知的一切？你的文件不会被改动。",
   "ait.read_already": "Kib 已在读取，会继续当前的工作。",
   "ait.read_started": "Kib 已开始读取 {target}。休眠的硬盘不会被唤醒。",
-  "ait.n_folders": "{count, plural, other {# 个文件夹}}"
+  "ait.n_folders": "{count, plural, other {# 个文件夹}}",
+  "ait.schedule_zone": "时间以 {zone} 为准，即“通用”中设置的时区。",
+  "ait.reader_change_title": "更换模型并重建索引？",
+  "ait.reader_change_desc": "Kib 会用新设置重新处理已知内容。完成前搜索照常可用。不会读取任何硬盘。",
+  "ait.reader_change_ok": "更换并重建",
+  "ait.reader_change_started": "Kib 正在用新设置重建索引。",
+  "ait.reader_change_failed": "设置未更改：{error}"
 };

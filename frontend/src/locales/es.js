@@ -8040,5 +8040,11 @@ export default {
   "confirm.ai_index_flush.msg": "¿Hacer que Kib olvide todo lo que sabe de tus archivos? Tus archivos no se tocan.",
   "ait.read_already": "Kib ya está leyendo. Sigue con lo que estaba haciendo.",
   "ait.read_started": "Kib empezó a leer {target}. Los discos en reposo siguen en reposo.",
-  "ait.n_folders": "{count, plural, one {# carpeta} other {# carpetas}}"
+  "ait.n_folders": "{count, plural, one {# carpeta} other {# carpetas}}",
+  "ait.schedule_zone": "Las horas están en {zone}, la zona horaria elegida en General.",
+  "ait.reader_change_title": "¿Cambiar el modelo y reconstruir el índice?",
+  "ait.reader_change_desc": "Kib vuelve a leer lo que sabe con el nuevo ajuste. La búsqueda sigue funcionando como antes hasta que termine. No se lee ningún disco.",
+  "ait.reader_change_ok": "Cambiar y reconstruir",
+  "ait.reader_change_started": "Kib está reconstruyendo su índice con el nuevo ajuste.",
+  "ait.reader_change_failed": "El ajuste no se cambió: {error}"
 };

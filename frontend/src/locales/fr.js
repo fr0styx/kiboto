@@ -8040,5 +8040,11 @@ export default {
   "confirm.ai_index_flush.msg": "Faire oublier à Kib tout ce qu’il sait de vos fichiers ? Vos fichiers ne sont pas touchés.",
   "ait.read_already": "Kib lit déjà. Il poursuit ce qu’il faisait.",
   "ait.read_started": "Kib a commencé à lire {target}. Les disques en veille ne sont pas réveillés.",
-  "ait.n_folders": "{count, plural, one {# dossier} other {# dossiers}}"
+  "ait.n_folders": "{count, plural, one {# dossier} other {# dossiers}}",
+  "ait.schedule_zone": "Les heures sont en {zone}, le fuseau horaire choisi dans Général.",
+  "ait.reader_change_title": "Changer de modèle et reconstruire l’index ?",
+  "ait.reader_change_desc": "Kib relit ce qu’il sait avec le nouveau réglage. La recherche fonctionne comme avant jusqu’à la fin. Aucun disque n’est lu.",
+  "ait.reader_change_ok": "Changer et reconstruire",
+  "ait.reader_change_started": "Kib reconstruit son index avec le nouveau réglage.",
+  "ait.reader_change_failed": "Le réglage n’a pas été modifié : {error}"
 };

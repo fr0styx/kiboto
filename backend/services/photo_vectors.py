@@ -100,6 +100,8 @@ class PhotoVectorQueue:
         host, model = settings(self.engine.get_config())
         if not host:
             return "disabled"
+        if hasattr(self.engine, "is_within_learning_schedule") and not self.engine.is_within_learning_schedule()[0]:
+            return "outside_hours"  # AI finding 28: photo search by meaning keeps Kib's reading hours too
         if not self.idle():
             return "busy"
         conn = self.engine._get_conn()
@@ -147,7 +149,7 @@ class PhotoVectorQueue:
         return {"enabled": bool(host), "model": model, "photos": total, "done": done, "state": self.last_state}
 
     def run_forever(self, sleep: Callable = time.sleep) -> None:
-        waits = {"done": 1, "empty": 300, "busy": 60, "disabled": 300, "error": 120}
+        waits = {"done": 1, "empty": 300, "busy": 60, "disabled": 300, "error": 120, "outside_hours": 300}
         while True:
             try:
                 self.last_state = self.process_batch()

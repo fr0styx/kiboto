@@ -328,6 +328,17 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   person to sign in on the same browser no longer sees what the last one searched for. The old shared favourites go
   to the first administrator who opens Kib after the update.
 
+#### Changes
+
+- **Kib's reading hours cover everything Kib reads**: photo search by meaning and the start after adding a folder now
+  wait for the hours too, and the page names the time zone they are in.
+
+#### Changes
+
+- **Changing the model that reads your files, or the index size, is one step**: Kib asks first, rebuilds its index
+  with the new setting and switches when it is done. Search keeps working as before in the meantime, instead of
+  quietly falling back to exact words.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

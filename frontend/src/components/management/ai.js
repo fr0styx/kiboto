@@ -631,6 +631,17 @@ export function learnReason(reason) {
   return !r || r === 'parse_error' || r === 'error' ? t('ait.why_error', 'Kib could not open this file.') : r;
 }
 
+/**
+ * Names the time zone of Kib's reading hours (AI finding 28): the household's zone from General.
+ * @param {string | undefined} zone
+ */
+export function renderScheduleZone(zone) {
+  const el = document.getElementById('ai-schedule-zone');
+  if (!el) return;
+  el.hidden = !zone;
+  el.textContent = zone ? t('ait.schedule_zone', 'Times are in {zone}, the time zone set under General.', { zone }) : '';
+}
+
 export function renderAiLearningResultsData(data = {}) {
   const succEl = document.getElementById('ai-learn-succeeded-count');
   const failEl = document.getElementById('ai-learn-failed-count');
@@ -1776,6 +1787,7 @@ export async function fetchAndRenderAiStatus() {
     if (schedStart && cfg.schedule_start) schedStart.value = cfg.schedule_start;
     const schedEnd = document.getElementById('ai-schedule-end-input');
     if (schedEnd && cfg.schedule_end) schedEnd.value = cfg.schedule_end;
+    renderScheduleZone(res.learning_results?.schedule_time_zone);
     if (typeof window !== 'undefined' && window.initGlassTimePickers) {
       window.initGlassTimePickers(document.getElementById('mgmt-sec-ai') || document);
     }
@@ -1883,37 +1895,29 @@ export async function fetchAndRenderAiStatus() {
     const embModelSelect = document.getElementById('ai-embedding-model-select');
     if (embModelSelect && (cfg.embedding_model || res.embedding_model)) {
       const embVal = cfg.embedding_model || res.embedding_model || 'embeddinggemma';
+      embModelSelect.dataset.saved = embVal;
       // older installs saved the name "google/embeddinggemma-2" for the same model
       embModelSelect.value = /embeddinggemma/i.test(embVal) ? 'embeddinggemma' : embVal;
     }
     const mrlDimSelect = document.getElementById('ai-mrl-dimension-select');
     if (mrlDimSelect && (cfg.embedding_dim !== undefined || res.embedding_dim !== undefined)) {
       mrlDimSelect.value = String(cfg.embedding_dim ?? res.embedding_dim ?? 768);
+      mrlDimSelect.dataset.saved = mrlDimSelect.value;
     }
 
     if (embModelSelect && !embModelSelect.dataset.bound) {
       embModelSelect.dataset.bound = '1';
-      embModelSelect.addEventListener('change', async (e) => {
-        const val = e.target.value;
-        try {
-          await api.post('/api/ai/config', { embedding_model: val });
-          showToast(t('ai.embedding_model_saved', 'Embedding model updated'), 'success');
-        } catch (err) {
-          showToast(t('toast.failed_update_embedding_model', 'Failed to update embedding model: {error}', { error: err.message }), 'error');
-        }
+      embModelSelect.addEventListener('change', (e) => {
+        const sel = /** @type {HTMLSelectElement} */ (e.target);
+        changeReader(sel, { embedding_model: sel.value });
       });
     }
 
     if (mrlDimSelect && !mrlDimSelect.dataset.bound) {
       mrlDimSelect.dataset.bound = '1';
-      mrlDimSelect.addEventListener('change', async (e) => {
-        const val = parseInt(e.target.value, 10);
-        try {
-          await api.post('/api/ai/config', { embedding_dim: val });
-          showToast(t('ai.mrl_dim_saved', 'Vector size updated'), 'success');
-        } catch (err) {
-          showToast(t('toast.failed_update_vector_size', 'Failed to update vector size: {error}', { error: err.message }), 'error');
-        }
+      mrlDimSelect.addEventListener('change', (e) => {
+        const sel = /** @type {HTMLSelectElement} */ (e.target);
+        changeReader(sel, { embedding_dim: parseInt(sel.value, 10) });
       });
     }
 
@@ -4261,6 +4265,44 @@ export function _pollReindexProgress() {
       _reindexPollTimer = null;
     }
   }, 1500);
+}
+
+/**
+ * Changing the model that reads your files, or the index size, as one step (AI finding 23): ask,
+ * then the server rebuilds the index and switches when it is done. Cancel puts the choice back.
+ * @param {HTMLSelectElement} select
+ * @param {Record<string, unknown>} change
+ */
+export function changeReader(select, change) {
+  const before = select.dataset.saved ?? select.defaultValue ?? '';
+  const putBack = () => { select.value = before; };
+  showConfirmToast(
+    t('ait.reader_change_title', 'Change the model and rebuild the index?'),
+    t('ait.reader_change_desc', 'Kib reads what it knows again with the new setting. Search keeps working as before until it is done. No drive is read.'),
+    async () => {
+      try {
+        const res = await api.post('/api/ai/config', change);
+        const status = res?.reindex?.status;
+        if (status === 'in_progress') {
+          putBack();
+          showToast(t('ai.reindex_running', 'Kib is already rebuilding its search index.'), 'info');
+          return;
+        }
+        select.dataset.saved = select.value;
+        if (status === 'started') {
+          const box = document.getElementById('ai-reindex-progress-container');
+          if (box) box.style.display = 'block';
+          showToast(t('ait.reader_change_started', 'Kib is rebuilding its index with the new setting.'), 'success');
+          _pollReindexProgress();
+        }
+      } catch (err) {
+        putBack();
+        showToast(t('ait.reader_change_failed', 'The setting was not changed: {error}', { error: err.message }), 'error');
+      }
+    },
+    putBack,
+    { okText: t('ait.reader_change_ok', 'Change and rebuild'), cancelText: t('common.cancel', 'Cancel') },
+  );
 }
 
 export async function triggerInPlaceReindex() {

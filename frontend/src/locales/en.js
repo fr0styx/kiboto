@@ -8040,5 +8040,11 @@ export default {
   "confirm.ai_index_flush.msg": "Make Kib forget everything it knows about your files? Your files are not touched.",
   "ait.read_already": "Kib is already reading. It goes on with what it was doing.",
   "ait.read_started": "Kib started reading {target}. Sleeping drives are left asleep.",
-  "ait.n_folders": "{count, plural, one {# folder} other {# folders}}"
+  "ait.n_folders": "{count, plural, one {# folder} other {# folders}}",
+  "ait.schedule_zone": "Times are in {zone}, the time zone set under General.",
+  "ait.reader_change_title": "Change the model and rebuild the index?",
+  "ait.reader_change_desc": "Kib reads what it knows again with the new setting. Search keeps working as before until it is done. No drive is read.",
+  "ait.reader_change_ok": "Change and rebuild",
+  "ait.reader_change_started": "Kib is rebuilding its index with the new setting.",
+  "ait.reader_change_failed": "The setting was not changed: {error}"
 };

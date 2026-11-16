@@ -923,14 +923,17 @@ describe('Kib — Multi-Modal Local RAG & Visual Search Frontend Suite', () => {
     expect(embSelect.value).toBe('embeddinggemma'); // legacy name maps to the real model
     expect(mrlSelect.value).toBe('512');
 
-    // 3. Test changing embedding model & MRL dim
+    // 3. Test changing embedding model & MRL dim: asked first, then one step (AI finding 23)
+    const askSpy = vi.spyOn(toast, 'showConfirmToast').mockImplementation((title, desc, onConfirm) => { onConfirm(); });
     embSelect.value = 'nomic-embed-text';
     embSelect.dispatchEvent(new Event('change'));
+    expect(askSpy.mock.calls.at(-1)[0]).toBe('Change the model and rebuild the index?');
     expect(postSpy).toHaveBeenCalledWith('/api/ai/config', { embedding_model: 'nomic-embed-text' });
 
     mrlSelect.value = '256';
     mrlSelect.dispatchEvent(new Event('change'));
     expect(postSpy).toHaveBeenCalledWith('/api/ai/config', { embedding_dim: 256 });
+    askSpy.mockRestore();
 
     // 4. Test running benchmark
     const btnBenchmark = document.getElementById('btn-ai-run-benchmark');
