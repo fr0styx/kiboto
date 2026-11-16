@@ -34,4 +34,17 @@
 .ci-nav-tabs { flex-wrap: wrap; }
 /* the phone's action row starts with "Get apps": it was the last of seven, about 690 px in (SET-25, Apps finding 20) */
 @media (max-width: 768px) { .cw-action-btns-wrap > #btn-cw-catalog { order: -1; } }
+/* SET-25 (Apps finding 20): on a phone an app is a card of two lines in the household view, the name
+   and its state, then Open and the menu. It was a card of about 325 px, seven apps almost five screens. */
+@media (max-width: 768px) {
+  #containers-manager-window.cw-simple .docker-table tbody tr:not(:has(td[colspan])) { display: grid !important; grid-template-columns: 1fr auto; grid-template-areas: "name status" "open actions"; align-items: center; gap: 6px 10px !important; padding: 10px 12px !important; }
+  #containers-manager-window.cw-simple .docker-table tbody td { border-bottom: none !important; min-height: 0 !important; padding: 0 !important; width: auto !important; }
+  #containers-manager-window.cw-simple .docker-table tbody td.docker-name-cell { grid-area: name; justify-content: flex-start !important; }
+  #containers-manager-window.cw-simple .docker-table tbody td.docker-status-cell { grid-area: status; justify-content: flex-end !important; }
+  #containers-manager-window.cw-simple .docker-table tbody td.docker-open-cell { grid-area: open; justify-content: flex-start !important; }
+  #containers-manager-window.cw-simple .docker-table tbody td.docker-actions-cell { grid-area: actions; }
+  /* the phone sheets show every cell and the filter row; the household view keeps them hidden there too */
+  #containers-manager-window.cw-simple .docker-table tbody td:is(.docker-stack-cell, .docker-hw-cell, .docker-telemetry-cell, .docker-ports-cell),
+  #containers-manager-window.cw-simple .cwm-row-4 { display: none !important; }
+}
 

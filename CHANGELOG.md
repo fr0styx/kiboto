@@ -417,6 +417,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   (memory, cores, extra disks) and "More" (start-up order, firmware, network, display, shared folders, USB), with Back
   and Next. Next checks the name first and says what is wrong next to the field.
 
+#### Changes
+
+- **On a phone each app is a card of two lines**: its name and state, then Open and the menu (about 90 px, was about
+  325). The filters, ports and usage stay with "Show Docker details".
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

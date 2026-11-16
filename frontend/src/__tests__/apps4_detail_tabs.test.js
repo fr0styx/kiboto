@@ -35,4 +35,13 @@ describe('detail tabs by Docker details (SET-25)', () => {
     expect(css).toMatch(/@media \(max-width: 768px\) \{ \.cw-action-btns-wrap > #btn-cw-catalog \{ order: -1; \} \}/);
     expect(css).toMatch(/\.ci-nav-tabs \{ flex-wrap: wrap; \}/);
   });
+
+  it('on a phone an app in the household view is a card of two lines', () => {
+    const css = fs.readFileSync(path.resolve(__dirname, '../styles/containers-lazy.css'), 'utf8');
+    expect(css).toContain('grid-template-areas: "name status" "open actions"');
+    for (const cell of ['docker-name-cell', 'docker-status-cell', 'docker-open-cell', 'docker-actions-cell']) {
+      expect(css).toContain(`#containers-manager-window.cw-simple .docker-table tbody td.${cell}`);
+    }
+  });
 });
+
