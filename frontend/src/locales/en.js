@@ -7743,5 +7743,6 @@ export default {
   "ntf.dest_webhook": "a webhook",
   "ntf.sentence_off": "Alerts are off: nobody is told when something breaks.",
   "ntf.sentence_nobody": "Nobody is told when something breaks yet: choose where alerts go below.",
-  "ntf.sentence_to": "Alerts go to {where}."
+  "ntf.sentence_to": "Alerts go to {where}.",
+  "prot.scrub_off_why": "Turning it on wakes the disks once a month."
 };

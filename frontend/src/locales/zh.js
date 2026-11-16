@@ -7743,5 +7743,6 @@ export default {
   "ntf.dest_webhook": "Webhook",
   "ntf.sentence_off": "提醒已关闭：出问题时没有人会收到通知。",
   "ntf.sentence_nobody": "出问题时还没有人会收到通知：请在下方选择提醒发送到哪里。",
-  "ntf.sentence_to": "提醒会发送到 {where}。"
+  "ntf.sentence_to": "提醒会发送到 {where}。",
+  "prot.scrub_off_why": "开启后每月会唤醒一次硬盘。"
 };

@@ -7743,5 +7743,6 @@ export default {
   "ntf.dest_webhook": "einen Webhook",
   "ntf.sentence_off": "Warnungen sind aus: Niemand erfährt, wenn etwas kaputtgeht.",
   "ntf.sentence_nobody": "Noch erfährt niemand, wenn etwas kaputtgeht: Wählen Sie unten, wohin Warnungen gehen.",
-  "ntf.sentence_to": "Warnungen gehen an {where}."
+  "ntf.sentence_to": "Warnungen gehen an {where}.",
+  "prot.scrub_off_why": "Eingeschaltet weckt sie die Laufwerke einmal im Monat."
 };

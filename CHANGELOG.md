@@ -293,6 +293,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 
 - **This server** on General is titled with the server's own name.
 
+#### Fixes
+
+- **The monthly disk check** no longer reads "Off off: a scrub spins up…"; it says once that turning it on
+  wakes the disks once a month.
+
 ## v2.0.2 (2026-11-12)
 ### 🧭 A new Settings sidebar, five themes, honest pages, and remote access cut down to what works
 

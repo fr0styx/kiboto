@@ -7743,5 +7743,6 @@ export default {
   "ntf.dest_webhook": "un webhook",
   "ntf.sentence_off": "Les alertes sont coupées : personne n'est prévenu quand quelque chose tombe en panne.",
   "ntf.sentence_nobody": "Personne n'est encore prévenu quand quelque chose tombe en panne : choisissez ci-dessous où vont les alertes.",
-  "ntf.sentence_to": "Les alertes vont vers {where}."
+  "ntf.sentence_to": "Les alertes vont vers {where}.",
+  "prot.scrub_off_why": "L'activer réveille les disques une fois par mois."
 };

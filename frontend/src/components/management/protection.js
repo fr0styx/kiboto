@@ -33,13 +33,22 @@ function toggleHtml(j) {
   return html`<input type="checkbox" role="switch" data-scrub-pool="${j.id}" aria-label="${name}" ${j.enabled ? 'checked' : ''}>`;
 }
 
+/** The reason under a state, said once and in the page's language: the server's English reason for a
+ *  monthly check that is off repeated the word ("Off off: a scrub spins up...", Backup B12). */
+export function whyText(j) {
+  if (j.kind === 'scrub' && j.status === 'off') {
+    return j.why && j.why !== 'off' ? t('prot.scrub_off_why', 'Turning it on wakes the disks once a month.') : '';
+  }
+  return j.why || '';
+}
+
 export function jobsHtml(jobs) {
   if (!jobs.length) return html`<p class="kb-muted">${t('prot.none', 'Nothing protects your data yet. Set up a backup below.')}</p>`;
   return html`<table class="kb-table prot-table"><thead><tr><th>${t('prot.what', 'What')}</th><th>${t('prot.name', 'Name')}</th>
     <th>${t('prot.state', 'State')}</th><th>${t('prot.last_ok', 'Last success')}</th><th></th></tr></thead>
     <tbody>${jobs.map(
       (j) => html`<tr class="prot-row prot-${j.status}"><td>${label(KIND, j.kind)}</td><td>${j.name}</td>
-        <td><span class="prot-status">${label(STATUS, j.status)}</span>${j.why ? html` <small class="kb-muted">${j.why}</small>` : ''}</td>
+        <td><span class="prot-status">${label(STATUS, j.status)}</span>${whyText(j) ? html` <small class="kb-muted">${whyText(j)}</small>` : ''}</td>
         <td>${j.last_ok ? formatDateTime(Number(j.last_ok) * 1000) : '—'}</td><td>${toggleHtml(j)}</td></tr>`,
     )}</tbody></table>`;
 }
