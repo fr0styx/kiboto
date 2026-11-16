@@ -288,6 +288,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **USB for virtual machines warns about devices the NAS uses**: a USB drive (which may be the boot drive) or the UPS
   cable is marked in the device list, and adding it to a machine asks first.
 
+#### Changes
+
+- **Virtual machine downloads that work**: the Windows Server trial is gone from the download list (Microsoft no longer
+  serves it at a fixed address), and the VirtIO driver disc has its real size. Every other entry was checked to answer.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

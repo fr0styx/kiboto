@@ -632,3 +632,18 @@ def test_usb_devices_the_nas_uses_are_marked(tmp_path):
     assert vm_host.usb_nas_use(str(tmp_path), "1-2", names, "051d") == "ups"
     assert vm_host.usb_nas_use(str(tmp_path), "1-3", names, "046d") == ""
     assert entries
+
+
+def test_every_catalog_entry_has_a_full_checksum_and_no_dead_windows_trial():
+    """VMs report 19: the Windows Server trial link answered 400 (Microsoft asks for a form), and
+    the driver disc's size was the old one."""
+    from backend.services import vm_store
+
+    cat = next(
+        v
+        for v in vars(vm_store).values()
+        if isinstance(v, list) and v and isinstance(v[0], dict) and "download_url" in v[0]
+    )
+    assert all(len(e["sha256"]) == 64 for e in cat)
+    assert not any(e["id"] == "win-server-2022" for e in cat)
+    assert next(e for e in cat if e["id"] == "virtio-win")["size_bytes"] == 725135360
