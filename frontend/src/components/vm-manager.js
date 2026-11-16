@@ -470,11 +470,7 @@ function buildVmCardHtml(vm, vms) {
 
       const stateBadge = `<span style="padding: 2px 7px; border-radius: 4px; font-size: var(--kb-fs-xs); font-weight: 700; background: ${statusBg}; color: ${statusColor}; text-transform: uppercase;">${escapeHtml(vmStateLabel(vm.state))}</span>`;
 
-      const vncPort = vm.vnc_port || (5901 + (vms.findIndex((v) => v.id === vm.id) % 10));
-      const vncDisplay = Math.max(1, vncPort - 5900);
-      const hostIp = (typeof window !== 'undefined' && window.location && window.location.hostname) || 'localhost';
-      const sshCmd = vm.ip_address ? `ssh root@${vm.ip_address}` : '';
-      const vncUri = `vnc://${hostIp}:${vncPort}`;
+      const sshCmd = vm.ip_address ? `ssh ${vm.ip_address}` : ''; // no assumed user: the system inside decides (VMs report 20)
       const qemuPid = vm.qemu_pid || null;
       const bootOrder = vm.boot_order || (vm.iso_path ? 'iso' : 'disk');
       const cpuUsagePct = vm.cpu_usage_pct !== undefined ? vm.cpu_usage_pct : 0.0;
@@ -552,19 +548,13 @@ function buildVmCardHtml(vm, vms) {
           <!-- Connection Info Bar with 1-Click Copy Buttons -->
           <div class="vmm-row-xs-box">
             <div class="vmm-row-xs-mono">
-              <span style="color: var(--lt-t-f59e0bff, #f59e0b); display: inline-flex; align-items: center; gap: 3px;">
-                <span>VNC :${vncDisplay}</span>
-                <button class="btn-copy-vnc vmm-row-muted-box" data-uri="${escapeHtml(vncUri)}" title="${escapeHtml(t('vmm.copy_vnc', 'Copy the VNC address ({uri})', { uri: vncUri }))}">
+              <!-- the screen listens on the NAS itself only, so no VNC address is offered: Console opens it (VMs report 20) -->
+              ${vm.ip_address
+                ? `<span class="vmm-row-accent"><span>${escapeHtml(t('vmm.address', 'Address {ip}', { ip: vm.ip_address }))}</span>
+                <button class="btn-copy-ssh-cmd vmm-row-muted-box" data-cmd="${escapeHtml(vm.ip_address)}" title="${escapeHtml(t('vm.copy_ip', 'Copy IP Address'))}">
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                </button>
-              </span>
-              <span style="color: var(--lt-t-ffffff26, rgba(255,255,255,0.15));${sshCmd ? '' : ' display:none;'}">|</span>
-              <span class="vmm-row-accent"${sshCmd ? '' : ' hidden'}>
-                <span>${escapeHtml(sshCmd)}</span>
-                <button class="btn-copy-ssh-cmd vmm-row-muted-box" data-cmd="${escapeHtml(sshCmd)}" title="${t('vm.copy_ssh', 'Copy SSH Command')}">
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                </button>
-              </span>
+                </button></span>`
+                : `<span class="vmm-xs-muted">${escapeHtml(t('vm.why_no_ip', 'Waiting for the VM to get a network address'))}</span>`}
             </div>
             <button class="btn-vm-join-toggle" data-id="${vm.id}" style="background: rgba(51,205,184,0.15); border: 1px solid rgba(51,205,184,0.3); border-radius: 4px; color: var(--kb-text-accent); font-size: var(--kb-fs-xs); font-weight: 700; padding: 2px 6px; cursor: pointer; flex-shrink: 0;" title="${t('ui.join_vm_connection_options', 'Join VM connection options')}">
               ${t('vmm.join', 'Connect')} ${ico('▾')}
@@ -620,10 +610,6 @@ function buildVmCardHtml(vm, vms) {
                 <div class="join-popover-item btn-join-web" data-ip="${escapeHtml(vm.ip_address)}">
                   <span>🌐 ${t('vm.open_web', 'Open Web UI (HTTP)')}</span>
                   <span style="font-size: var(--kb-fs-xs); color: var(--lt-t-a78bfaff, #a78bfa);">http://${escapeHtml(vm.ip_address)}</span>
-                </div>
-                <div class="join-popover-item btn-join-vnc" data-id="${vm.id}">
-                  <span>🔗 ${t('vm.native_vnc', 'Native VNC Client (vnc://)')}</span>
-                  <span style="font-size: var(--kb-fs-xs); color: var(--lt-t-f59e0bff, #f59e0b);">${t('vmm.port', 'Port {port}', { port: vncPort })}</span>
                 </div>
                 <div class="join-popover-item btn-join-rdp" data-ip="${escapeHtml(vm.ip_address)}">
                   <span>🪟 ${t('vm.rdp', 'Remote Desktop (RDP)')}</span>
@@ -861,19 +847,6 @@ function bindVmGridHandlers(grid) {
     };
   });
 
-  grid.querySelectorAll('.btn-copy-vnc').forEach((btn) => {
-    btn.onclick = async (e) => {
-      e.stopPropagation();
-      const uri = btn.dataset.uri;
-      const ok = await copyToClipboard(uri);
-      if (ok) {
-        showToast(t('toast.copied_vnc_uri', 'Copied VNC URI \'{uri}\'', { uri: uri }), 'info');
-      } else {
-        showToast(t('toast.failed_to_copy_vnc_uri', `Failed to copy VNC URI`), 'error');
-      }
-    };
-  });
-
   grid.querySelectorAll('.btn-copy-ssh-cmd').forEach((btn) => {
     btn.onclick = async (e) => {
       e.stopPropagation();
@@ -1001,20 +974,6 @@ function bindVmGridHandlers(grid) {
       const ip = btn.dataset.ip;
       if (ip) {
         window.open(`http://${ip}`, '_blank');
-      }
-      document.querySelectorAll('.vm-join-popover').forEach((p) => (p.style.display = 'none'));
-    };
-  });
-
-  grid.querySelectorAll('.btn-join-vnc').forEach((btn) => {
-    btn.onclick = async (e) => {
-      e.stopPropagation();
-      const vmId = btn.dataset.id;
-      const port = 5900 + ((parseInt(vmId, 10) || 1) % 10);
-      const uri = `vnc://${window.location.hostname || '127.0.0.1'}:${port}`;
-      const ok = await copyToClipboard(uri);
-      if (ok) {
-        showToast(t('toast.copied_vnc_uri_for_native_client', 'Copied VNC URI \'{uri}\' for native client', { uri: uri }), 'info');
       }
       document.querySelectorAll('.vm-join-popover').forEach((p) => (p.style.display = 'none'));
     };

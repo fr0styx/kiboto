@@ -8003,5 +8003,16 @@ export default {
   "https.get": "获取证书",
   "https.renew": "立即续期",
   "https.terms": "获取证书即表示接受 Let's Encrypt 订户协议：",
-  "https.working": "正在请求 Let's Encrypt（约一分钟）…"
+  "https.working": "正在请求 Let's Encrypt（约一分钟）…",
+  "vmm.address": "地址 {ip}",
+  "fm.v_list": "列表",
+  "fm.v_compact": "紧凑列表",
+  "fm.v_icons": "图标",
+  "fm.m_new_window": "新窗口",
+  "fm.m_organize": "整理电影和剧集",
+  "fm.m_transfers": "传输",
+  "fm.m_details": "详情",
+  "fm.m_ai": "AI 搜索",
+  "fm.m_view": "视图",
+  "fm.m_more": "更多"
 };

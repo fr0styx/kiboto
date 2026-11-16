@@ -3,3 +3,11 @@
    here; tests/test_lazy_css.py checks that (lazy CSS lands after every global sheet). */
 @import './49-file-explorer-layout.css';
 @import './71-file-explorer.css';
+/* Files 3, design B (owner's pick): the moved buttons stay in the page for their handlers, out of sight */
+.fm-toolbar { position: relative; }
+.fm-toolbar .fm-moved { display: none !important; }
+@media (min-width: 769px) { body:not(.mobile-mode) .fm-toolbar .fm-locations-btn { display: none; } }
+.fm-menu { position: absolute; top: calc(100% + 4px); z-index: 50; min-width: 220px; padding: 6px 0; border: 1px solid var(--kb-line-10); border-radius: 9px; background: var(--card); box-shadow: var(--kb-shadow-pop, 0 8px 24px rgba(0, 0, 0, 0.25)); display: flex; flex-direction: column; }
+.fm-menu-item { display: flex; align-items: center; gap: 8px; min-height: 36px; padding: 6px 14px; border: 0; background: none; color: var(--kb-text-strong); font-size: var(--kb-fs-sm); text-align: left; cursor: pointer; }
+.fm-menu-item:hover, .fm-menu-item:focus-visible { background: var(--kb-glaze-3); outline: none; }
+.fm-menu-check { width: 14px; color: var(--kb-text-accent); }

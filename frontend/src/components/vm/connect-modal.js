@@ -60,10 +60,7 @@ export function openVmConnectModal(vmId, vmObj = null) {
   const renderConnectModal = (targetVm) => {
     const name = targetVm.name || t('vmm.appliance', 'Virtual machine');
     const ip = targetVm.ip_address || '';
-    const vncPort = targetVm.vnc_port || 5900;
-    const hostIp = (typeof window !== 'undefined' && window.location) ? window.location.hostname : '127.0.0.1';
-    const vncUri = `vnc://${hostIp}:${vncPort}`;
-    const sshCmd = ip ? `ssh root@${ip}` : '';
+    const sshCmd = ip ? `ssh ${ip}` : ''; // no assumed user (VMs report 20)
     const rdpUri = ip ? `${ip}:3389` : '';
     const hostShares = targetVm.host_shares || [];
 
@@ -109,26 +106,6 @@ export function openVmConnectModal(vmId, vmObj = null) {
                 ${t('vmc.tty', 'Serial terminal')}
               </button>
             </div>
-          </div>
-        </div>
-
-        <!-- Option 2: Native RFB / VNC Client -->
-        <div class="vmk-box">
-          <div class="vmk-row-5">
-            <div class="vmk-row">
-              <span class="vmk-fs14">🌐</span>
-              <div>
-                <div class="vmk-xs-bold-strong">${t('vmc.vnc_title', 'VNC app (RFB)')}</div>
-                <div class="vmk-xs-muted" translate="no">TigerVNC, RealVNC, macOS Screen Sharing</div>
-              </div>
-            </div>
-            <button class="btn-console-act btn-connect-copy-vnc vmk-xs">
-              ${ico('📋')} ${t('vmc.copy_vnc', 'Copy VNC address')}
-            </button>
-          </div>
-          <div class="vmk-row-xs-accent-mono-box">
-            <span>${vncUri}</span>
-            <span class="vmk-xs-muted-2">${t('vmm.port', 'Port {port}', { port: vncPort })}</span>
           </div>
         </div>
 
@@ -233,12 +210,6 @@ export function openVmConnectModal(vmId, vmObj = null) {
   });
 
   // Copy buttons
-  modal.querySelector('.btn-connect-copy-vnc')?.addEventListener('click', async () => {
-    const ok = await copyToClipboard(vncUri);
-    if (ok) showToast(t('toast.copied_vnc_uri_2', 'Copied VNC URI \'{vncUri}\'', { vncUri: vncUri }), 'info');
-    else showToast(t('toast.failed_to_copy_vnc_uri', 'Failed to copy VNC URI'), 'error');
-  });
-
   modal.querySelector('.btn-connect-copy-ssh')?.addEventListener('click', async () => {
     if (!sshCmd) return;
     const ok = await copyToClipboard(sshCmd);

@@ -8003,5 +8003,16 @@ export default {
   "https.get": "Get a certificate",
   "https.renew": "Renew now",
   "https.terms": "Getting a certificate accepts the Let's Encrypt Subscriber Agreement:",
-  "https.working": "Asking Let's Encrypt (about a minute)…"
+  "https.working": "Asking Let's Encrypt (about a minute)…",
+  "vmm.address": "Address {ip}",
+  "fm.v_list": "List",
+  "fm.v_compact": "Compact list",
+  "fm.v_icons": "Icons",
+  "fm.m_new_window": "New window",
+  "fm.m_organize": "Tidy films and series",
+  "fm.m_transfers": "Transfers",
+  "fm.m_details": "Details",
+  "fm.m_ai": "AI search",
+  "fm.m_view": "View",
+  "fm.m_more": "More"
 };

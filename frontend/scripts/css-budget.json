@@ -1,9 +1,9 @@
 {
-  "important": 3365,
+  "important": 3366,
   "buttonClasses": 75,
-  "inlineStyles": 1257,
+  "inlineStyles": 1254,
   "emojiIcons": 3,
-  "colours": 3763,
+  "colours": 3761,
   "primitiveUses": 4,
   "importantPerFile": {
     "frontend/index.html": 64,
@@ -49,6 +49,7 @@
     "frontend/src/styles/47-containers-bulk.css": 11,
     "frontend/src/styles/56-phone.css": 5,
     "frontend/src/styles/containers-lazy.css": 7,
+    "frontend/src/styles/files-lazy.css": 1,
     "frontend/src/styles/management-lazy.css": 1,
     "frontend/src/vm-console-direct.css": 47
   },
@@ -91,7 +92,7 @@
     "frontend/src/components/stack-modal.js": 45,
     "frontend/src/components/terminal-view.js": 22,
     "frontend/src/components/users.js": 6,
-    "frontend/src/components/vm-manager.js": 57,
+    "frontend/src/components/vm-manager.js": 54,
     "frontend/src/components/vm/connect-modal.js": 15,
     "frontend/src/components/vm/console-ansi.js": 51,
     "frontend/src/components/vm/console.js": 58,
@@ -158,6 +159,7 @@
     "frontend/src/styles/77-mc-lists.css": 8,
     "frontend/src/styles/78-storage-analyzer.css": 12,
     "frontend/src/styles/80-public-apps.css": 1,
+    "frontend/src/styles/files-lazy.css": 1,
     "frontend/src/styles/management-lazy.css": 11,
     "frontend/src/styles/users-lazy.css": 2,
     "frontend/src/toast.js": 31,

@@ -31,6 +31,7 @@ export function prefetchThumbs(res) {
 
 import { formatBytes as formatSize, formatDateTime } from '../format.js';
 import { isCompact } from '../device.js';
+import { installToolbarMenus } from './fm-toolbar-menus.js';
 import '../styles/files-lazy.css'; // the explorer's own sheet loads with this code (PERF-9)
 // Virtualized DOM constants
 const ROW_HEIGHT = 42;
@@ -593,6 +594,7 @@ export class FileManagerWindow {
     this.btnTransfersToggle = this.windowEl.querySelector('.fm-btn-transfers-toggle');
     this.btnInspectorToggle = this.windowEl.querySelector('.fm-btn-inspector-toggle');
     this.marqueeBox = this.windowEl.querySelector('.fm-marquee-box');
+    installToolbarMenus(this.windowEl); // Files 3, design B: View and More menus
 
     const treeContainer = this.windowEl.querySelector('.fm-sidebar-tree');
     if (treeContainer) {

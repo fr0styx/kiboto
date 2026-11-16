@@ -8003,5 +8003,16 @@ export default {
   "https.get": "Obtenir un certificat",
   "https.renew": "Renouveler maintenant",
   "https.terms": "Obtenir un certificat accepte l'accord d'abonné de Let's Encrypt :",
-  "https.working": "Demande à Let's Encrypt (environ une minute)…"
+  "https.working": "Demande à Let's Encrypt (environ une minute)…",
+  "vmm.address": "Adresse {ip}",
+  "fm.v_list": "Liste",
+  "fm.v_compact": "Liste compacte",
+  "fm.v_icons": "Icônes",
+  "fm.m_new_window": "Nouvelle fenêtre",
+  "fm.m_organize": "Ranger films et séries",
+  "fm.m_transfers": "Transferts",
+  "fm.m_details": "Détails",
+  "fm.m_ai": "Recherche IA",
+  "fm.m_view": "Affichage",
+  "fm.m_more": "Plus"
 };

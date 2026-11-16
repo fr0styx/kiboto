@@ -103,9 +103,9 @@ describe('VM manager window (NUX-20)', () => {
     expect(web.textContent).not.toContain('vCPU load'); // not measured by the server: no invented 0 % (SET-14)
     expect(web.textContent).not.toContain('Memory used');
     expect(web.textContent).toContain('Connect to web1');
-    expect(web.textContent).toContain('Port 5902');
+    expect(web.textContent).not.toMatch(/VNC :\d|vnc:\/\//); // the screen listens on the NAS only: Console, not an address (VMs report 20)
     expect(web.textContent).toContain('All ways to connect…');
-    expect(web.querySelector('.btn-copy-vnc').getAttribute('title')).toMatch(/^Copy the VNC address \(vnc:\/\/.+:5902\)$/);
+    expect(web.querySelector('.btn-copy-vnc')).toBeNull();
     expect(web.querySelector('.btn-vm-join-toggle').textContent.trim()).toBe('Connect ▾');
     for (const word of ['Restart', 'Shut down', 'Turn off now', 'Edit']) expect(web.querySelector('.vm-card-actions').textContent).toContain(word);
 
@@ -181,10 +181,10 @@ describe('connect dialog and KVM checks (NUX-20)', () => {
     expect(text).toContain('Console in the browser');
     expect(text).toContain('Open the desktop');
     expect(text).toContain('Serial terminal');
-    expect(text).toContain('Copy VNC address');
-    expect(text).toContain('Port 5903');
+    expect(text).not.toContain('Copy VNC address');
     expect(text).toContain('Port 3389');
-    expect(text).toContain('ssh root@10.0.0.9');
+    expect(text).toContain('ssh 10.0.0.9');
+    expect(text).not.toContain('root@');
     expect(text).toContain('10.0.0.9:3389');
     expect(text).toContain('Mount the shared folders (VirtIO-FS / 9p)');
     expect(document.querySelector('.btn-copy-mount-cmd').textContent).toBe('Copy');
@@ -198,7 +198,7 @@ describe('connect dialog and KVM checks (NUX-20)', () => {
     expect(text).toContain('Unknown');
     expect(text).toContain('No network address yet (waiting for DHCP)');
     expect(text).toContain('Waiting for the VM to get a network address');
-    expect(text).toContain('Port 5900');
+    expect(text).not.toContain('Port 5900');
   });
 
   it('shows the KVM checks on a working host', () => {

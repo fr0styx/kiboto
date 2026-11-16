@@ -253,6 +253,18 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Virtual machines no longer wake sleeping drives to list installers**: an installer folder on a sleeping drive
   is left out of the list until the drive is awake; Kiboto's own data folder is always listed.
 
+#### Changes
+
+- **Virtual machine connection details that work**: the VNC addresses are gone (the screen only listens on the NAS
+  itself; Console opens it in the browser), each card shows the machine's network address with Copy, and the SSH
+  command no longer assumes the "root" user.
+
+#### Changes
+
+- **A calmer File Explorer toolbar**: Back, Forward, Up, the path, Refresh, Search, Upload and New folder, then two
+  menus: View (List, Compact list, Icons, Show hidden files) and More (New window, Tidy films and series, Transfers,
+  Details, AI search). Quick locations leaves the toolbar on a computer, where the sidebar lists the same places.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

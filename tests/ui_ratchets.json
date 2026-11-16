@@ -173,6 +173,12 @@
   "styles": 0,
   "templates": 1
  },
+ "frontend/src/components/fm-toolbar-menus.js": {
+  "buttons": 0,
+  "globals": 0,
+  "styles": 0,
+  "templates": 1
+ },
  "frontend/src/components/fm-upload.js": {
   "buttons": 0,
   "globals": 0,
@@ -428,7 +434,7 @@
  "frontend/src/components/vm-manager.js": {
   "buttons": 0,
   "globals": 3,
-  "styles": 31,
+  "styles": 28,
   "templates": 1
  },
  "frontend/src/components/vm/connect-modal.js": {

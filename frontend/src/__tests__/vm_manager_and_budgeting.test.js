@@ -407,7 +407,7 @@ describe('VM Manager & Dynamic Elastic Headroom Budgeting', () => {
       expect(popover.querySelector('.btn-join-gui')).not.toBeNull();
       expect(popover.querySelector('.btn-join-console')).not.toBeNull();
       expect(popover.querySelector('.btn-join-web')).not.toBeNull();
-      expect(popover.querySelector('.btn-join-vnc')).not.toBeNull();
+      expect(popover.querySelector('.btn-join-vnc')).toBeNull(); // VMs report 20
       expect(popover.querySelector('.btn-join-rdp')).not.toBeNull();
       expect(popover.querySelector('.btn-join-ssh')).not.toBeNull();
       expect(popover.querySelector('.btn-join-ip')).not.toBeNull();
@@ -984,16 +984,13 @@ describe('VM Manager & Dynamic Elastic Headroom Budgeting', () => {
       expect(modal.classList.contains('open')).toBe(true);
       expect(modal.textContent).toContain('Connect to enterprise-server');
       expect(modal.textContent).toContain('192.168.1.150');
-      expect(modal.textContent).toContain('vnc://');
-      expect(modal.textContent).toContain('5902');
-      expect(modal.textContent).toContain('ssh root@192.168.1.150');
+      expect(modal.textContent).not.toContain('vnc://');
+      expect(modal.textContent).toContain('ssh 192.168.1.150');
       expect(modal.textContent).toContain('192.168.1.150:3389');
       expect(modal.textContent).toContain('sudo mount -t virtiofs appdata_mount');
 
       // Test copy VNC URI button
-      const copyVncBtn = modal.querySelector('.btn-connect-copy-vnc');
-      expect(copyVncBtn).not.toBeNull();
-      copyVncBtn.click();
+      expect(modal.querySelector('.btn-connect-copy-vnc')).toBeNull();
 
       // Test close button
       const closeBtn = modal.querySelector('#vm-connect-close');

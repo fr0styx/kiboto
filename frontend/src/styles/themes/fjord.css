@@ -391,7 +391,6 @@ body.kb-theme-fjord.theme-light:not(.lcd-direct) {
   --lt-t-cfdbdeff: #152536;
   --lt-t-e9fbf8ff: #086393;
   --lt-t-f5f9f9ff: #091a2d;
-  --lt-t-ffffff26: #091a2d;
   --lt-t-ffffff33: #091a2d;
   --lt-t-ffffff40: #091a2d;
   --lt-t-ffffff4c: #091a2d;
@@ -709,7 +708,6 @@ body.kb-theme-fjord.theme-oled:not(.theme-light):not(.lcd-direct) {
     --lt-t-a8bcc0ff: oklch(0.2591 calc(0.0388 * var(--kb-tint, 1)) 250.9);
     --lt-t-cfdbdeff: oklch(0.2591 calc(0.0388 * var(--kb-tint, 1)) 250.9);
     --lt-t-f5f9f9ff: oklch(0.2144 calc(0.0441 * var(--kb-tint, 1)) 252.8);
-    --lt-t-ffffff26: oklch(0.2144 calc(0.0441 * var(--kb-tint, 1)) 252.8);
     --lt-t-ffffff33: oklch(0.2144 calc(0.0441 * var(--kb-tint, 1)) 252.8);
     --lt-t-ffffff40: oklch(0.2144 calc(0.0441 * var(--kb-tint, 1)) 252.8);
     --lt-t-ffffff4c: oklch(0.2144 calc(0.0441 * var(--kb-tint, 1)) 252.8);
