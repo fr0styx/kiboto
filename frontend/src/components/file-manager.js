@@ -1558,6 +1558,7 @@ export class FileManagerWindow {
 
   handleSearchInput(val) {
     this.searchQuery = (val || '').trim();
+    this.lastSearch = this.searchQuery;
     if (!this.searchQuery) {
       this.isSearching = false;
       this.fileList = [...this.rawFileList];
@@ -1578,6 +1579,7 @@ export class FileManagerWindow {
     this.searchAbortController = new AbortController();
     const useAi = Boolean(this.aiSearchMode || q.startsWith('?') || /^ai:/i.test(q));
     const cleanQ = q.replace(/^(\?|ai:\s*)/i, '').trim() || q;
+    this.lastSearch = cleanQ;
     try {
       if (useAi) {
         showToast(t('toast.kib_searching', 'Kib searching "{cleanQ}"...', { cleanQ: cleanQ }), 'info');
@@ -2183,14 +2185,41 @@ export class FileManagerWindow {
         this.showAsleep(path, isNavigatingHistory, keepSelection); // not woken: say so, offer to (folder.wake)
         return;
       }
-      if (err.name !== 'AbortError') {
-        const errorMsg =
-          err?.status === 403
-            ? t('fm.err_access_denied', 'Access denied or path invalid')
-            : (err?.detail?.message || err?.detail || err?.message || t('fm.err_load_dir', 'Failed to load directory'));
-        showToast(errorMsg, 'error');
-      }
+      if (err.name !== 'AbortError') this.showLoadFailed(path, loadFailReason(err));
     }
+  }
+
+  /** The folder couldn't be opened: say why in the list, with Try again and Back (SET-28). The
+   *  old folder stayed on screen under a pop-up, as if nothing had happened. */
+  showLoadFailed(path, reason) {
+    const list = /** @type {HTMLElement | null} */ (this.list);
+    if (!list) return;
+    const input = /** @type {HTMLInputElement | null} */ (this.pathInput);
+    if (input) input.value = path;
+    this.fileList = [];
+    const spacer = /** @type {HTMLElement | null} */ (this.spacer);
+    if (spacer) spacer.style.height = '0px';
+    list.style.transform = 'none';
+    const box = document.createElement('div');
+    box.className = 'fm-asleep fm-load-failed';
+    box.setAttribute('role', 'alert');
+    const text = document.createElement('p');
+    text.textContent = t('fm.cant_open', "This folder couldn't be opened: {reason}", { reason });
+    const again = document.createElement('button');
+    again.type = 'button';
+    again.className = 'btn-pill-toggle';
+    again.textContent = t('fm.try_again', 'Try again');
+    again.addEventListener('click', () => this.loadPath(path));
+    box.append(text, again);
+    if (this.currentPath && this.currentPath !== path) {
+      const back = document.createElement('button');
+      back.type = 'button';
+      back.className = 'btn-pill-toggle';
+      back.textContent = t('fm.back_to', 'Back to {name}', { name: this.currentPath.split('/').filter(Boolean).pop() || '/' });
+      back.addEventListener('click', () => this.loadPath(this.currentPath));
+      box.append(back);
+    }
+    list.replaceChildren(box);
   }
 
   /** The folder wasn't opened because its disk is asleep and the person said no to waking it. */
@@ -2220,6 +2249,30 @@ export class FileManagerWindow {
   renderViewport() {
     if (!this.viewport || !this.list) return;
 
+    // a search with no hit says so, with a way out; only the parent row left is no hit either (SET-28)
+    if (this.isSearching && !this.fileList.some((f) => f.name !== '..')) {
+      const spacer = /** @type {HTMLElement | null} */ (this.spacer);
+      const list = /** @type {HTMLElement} */ (this.list);
+      if (spacer) spacer.style.height = '0px';
+      list.style.transform = 'none';
+      const box = document.createElement('div');
+      box.className = 'fmx-fs13-muted-center fm-no-match';
+      box.setAttribute('role', 'status');
+      const p = document.createElement('p');
+      p.textContent = t('fm.no_match', 'Nothing here matches "{q}".', { q: this.lastSearch || this.searchQuery || '' });
+      const clear = document.createElement('button');
+      clear.type = 'button';
+      clear.className = 'btn-pill-toggle';
+      clear.textContent = t('fm.clear_search', 'Clear the search');
+      clear.addEventListener('click', () => {
+        const input = /** @type {HTMLInputElement | null} */ (this.searchInput);
+        if (input) input.value = '';
+        this.handleSearchInput('');
+      });
+      box.append(p, clear);
+      list.replaceChildren(box);
+      return;
+    }
     if (this.fileList.length === 0) {
       if (this.spacer) this.spacer.style.height = '0px';
       this.list.style.transform = 'none';
@@ -4000,6 +4053,15 @@ export function organizeResultToasts(res, planned = 0) {
     const why = res.failures?.[0]?.code === 'no_link' ? ' ' + t('media.org_no_link', 'A link is not possible there; nothing was moved.') : '';
     showToast(t('media.org_not_sorted', '{count, plural, one {# file could not be sorted.} other {# files could not be sorted.}}', { count: failed }) + why, 'error');
   }
+}
+
+/** Why a folder didn't open: the server's own reason when it gave one, else in the reader's words. */
+export function loadFailReason(err) {
+  const detail = err?.detail?.message || (typeof err?.detail === 'string' ? err.detail : '');
+  if (detail) return detail;
+  if (err?.status === 403) return t('fm.err_access_denied', "You don't have access to this folder.");
+  if (err?.status === 404) return t('fm.err_gone', 'It is not there any more.');
+  return err?.message || t('fm.err_load_dir', 'Failed to load directory');
 }
 
 // Where the share pop-over opens: next to the button or menu item that was clicked

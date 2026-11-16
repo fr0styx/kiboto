@@ -338,6 +338,12 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   there stays and you are told how many were kept. Asking for links (to keep seeding) no longer turns
   into a move when a link is not possible; those files stay where they are and you are told why.
 
+#### Fixes
+
+- **Files says what happened**: a search with no hit says "Nothing here matches …" with a way to clear it
+  (it said "This folder is empty" or showed a bare list), and a folder that can't be opened says why in
+  the list, with Try again and Back, instead of leaving the old folder on screen under a pop-up.
+
 ## v2.0.2 (2026-11-12)
 ### 🧭 A new Settings sidebar, five themes, honest pages, and remote access cut down to what works
 

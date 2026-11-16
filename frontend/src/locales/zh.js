@@ -2460,7 +2460,7 @@ export default {
   "fm.prompt_new_folder": "输入新文件夹名称：",
   "fm.prompt_rename": "输入新名称：",
   "fm.confirm_delete": "你确定要删除 {name} 吗？",
-  "fm.err_access_denied": "访问被拒绝或路径无效",
+  "fm.err_access_denied": "你无权访问此文件夹。",
   "fm.err_load_dir": "无法加载目录",
   "notif.title": "通知中心",
   "notif.mark_all_read": "全部标为已读",
@@ -7771,5 +7771,11 @@ export default {
   "chassis.stop": "停止",
   "media.org_kept": "{count, plural, other {# 个文件已经存在，已保留原文件。}}",
   "media.org_not_sorted": "{count, plural, other {# 个文件无法整理。}}",
-  "media.org_no_link": "那里无法创建链接；没有移动任何文件。"
+  "media.org_no_link": "那里无法创建链接；没有移动任何文件。",
+  "fm.cant_open": "无法打开此文件夹：{reason}",
+  "fm.try_again": "重试",
+  "fm.back_to": "返回 {name}",
+  "fm.err_gone": "它已不存在。",
+  "fm.no_match": "这里没有与“{q}”匹配的内容。",
+  "fm.clear_search": "清除搜索"
 };

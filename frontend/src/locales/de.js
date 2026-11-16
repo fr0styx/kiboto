@@ -2460,7 +2460,7 @@ export default {
   "fm.prompt_new_folder": "Namen des neuen Ordners eingeben:",
   "fm.prompt_rename": "Neuen Namen eingeben:",
   "fm.confirm_delete": "Möchten Sie {name} wirklich löschen?",
-  "fm.err_access_denied": "Zugriff verweigert oder Pfad ungültig",
+  "fm.err_access_denied": "Sie haben keinen Zugriff auf diesen Ordner.",
   "fm.err_load_dir": "Verzeichnis konnte nicht geladen werden",
   "notif.title": "Benachrichtigungen",
   "notif.mark_all_read": "Alle als gelesen markieren",
@@ -7771,5 +7771,11 @@ export default {
   "chassis.stop": "Stoppen",
   "media.org_kept": "{count, plural, one {# Datei war schon da und wurde behalten.} other {# Dateien waren schon da und wurden behalten.}}",
   "media.org_not_sorted": "{count, plural, one {# Datei konnte nicht einsortiert werden.} other {# Dateien konnten nicht einsortiert werden.}}",
-  "media.org_no_link": "Eine Verknüpfung ist dort nicht möglich; nichts wurde verschoben."
+  "media.org_no_link": "Eine Verknüpfung ist dort nicht möglich; nichts wurde verschoben.",
+  "fm.cant_open": "Dieser Ordner konnte nicht geöffnet werden: {reason}",
+  "fm.try_again": "Erneut versuchen",
+  "fm.back_to": "Zurück zu {name}",
+  "fm.err_gone": "Er ist nicht mehr da.",
+  "fm.no_match": "Hier passt nichts zu „{q}“.",
+  "fm.clear_search": "Suche löschen"
 };

@@ -2460,7 +2460,7 @@ export default {
   "fm.prompt_new_folder": "Enter folder name:",
   "fm.prompt_rename": "Enter new name:",
   "fm.confirm_delete": "Are you sure you want to delete {name}?",
-  "fm.err_access_denied": "Access denied or path invalid",
+  "fm.err_access_denied": "You don't have access to this folder.",
   "fm.err_load_dir": "Failed to load directory",
   "notif.title": "Notification Center",
   "notif.mark_all_read": "Mark all read",
@@ -7771,5 +7771,11 @@ export default {
   "chassis.stop": "Stop",
   "media.org_kept": "{count, plural, one {# file was already there and was kept.} other {# files were already there and were kept.}}",
   "media.org_not_sorted": "{count, plural, one {# file could not be sorted.} other {# files could not be sorted.}}",
-  "media.org_no_link": "A link is not possible there; nothing was moved."
+  "media.org_no_link": "A link is not possible there; nothing was moved.",
+  "fm.cant_open": "This folder couldn't be opened: {reason}",
+  "fm.try_again": "Try again",
+  "fm.back_to": "Back to {name}",
+  "fm.err_gone": "It is not there any more.",
+  "fm.no_match": "Nothing here matches \"{q}\".",
+  "fm.clear_search": "Clear the search"
 };

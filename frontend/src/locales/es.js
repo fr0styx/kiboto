@@ -2460,7 +2460,7 @@ export default {
   "fm.prompt_new_folder": "Ingrese el nombre de la nueva carpeta:",
   "fm.prompt_rename": "Ingrese el nuevo nombre:",
   "fm.confirm_delete": "¿Seguro que quieres eliminar {name}?",
-  "fm.err_access_denied": "Acceso denegado o ruta inválida",
+  "fm.err_access_denied": "No tienes acceso a esta carpeta.",
   "fm.err_load_dir": "Error al cargar el directorio",
   "notif.title": "Centro de notificaciones",
   "notif.mark_all_read": "Marcar todo como leído",
@@ -7771,5 +7771,11 @@ export default {
   "chassis.stop": "Detener",
   "media.org_kept": "{count, plural, one {# archivo ya estaba allí y se ha conservado.} other {# archivos ya estaban allí y se han conservado.}}",
   "media.org_not_sorted": "{count, plural, one {# archivo no se pudo ordenar.} other {# archivos no se pudieron ordenar.}}",
-  "media.org_no_link": "Ahí no se puede crear un enlace; no se ha movido nada."
+  "media.org_no_link": "Ahí no se puede crear un enlace; no se ha movido nada.",
+  "fm.cant_open": "No se pudo abrir esta carpeta: {reason}",
+  "fm.try_again": "Reintentar",
+  "fm.back_to": "Volver a {name}",
+  "fm.err_gone": "Ya no está.",
+  "fm.no_match": "Nada aquí coincide con «{q}».",
+  "fm.clear_search": "Borrar la búsqueda"
 };

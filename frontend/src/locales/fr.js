@@ -2460,7 +2460,7 @@ export default {
   "fm.prompt_new_folder": "Entrez le nom du nouveau dossier :",
   "fm.prompt_rename": "Entrez le nouveau nom :",
   "fm.confirm_delete": "Voulez-vous vraiment supprimer {name} ?",
-  "fm.err_access_denied": "Accès refusé ou chemin invalide",
+  "fm.err_access_denied": "Vous n'avez pas accès à ce dossier.",
   "fm.err_load_dir": "Échec du chargement du répertoire",
   "notif.title": "Centre de notifications",
   "notif.mark_all_read": "Tout marquer comme lu",
@@ -7771,5 +7771,11 @@ export default {
   "chassis.stop": "Arrêter",
   "media.org_kept": "{count, plural, one {# fichier était déjà là et a été gardé.} other {# fichiers étaient déjà là et ont été gardés.}}",
   "media.org_not_sorted": "{count, plural, one {# fichier n'a pas pu être rangé.} other {# fichiers n'ont pas pu être rangés.}}",
-  "media.org_no_link": "Un lien n'est pas possible à cet endroit ; rien n'a été déplacé."
+  "media.org_no_link": "Un lien n'est pas possible à cet endroit ; rien n'a été déplacé.",
+  "fm.cant_open": "Ce dossier n'a pas pu être ouvert : {reason}",
+  "fm.try_again": "Réessayer",
+  "fm.back_to": "Retour à {name}",
+  "fm.err_gone": "Il n'existe plus.",
+  "fm.no_match": "Rien ici ne correspond à « {q} ».",
+  "fm.clear_search": "Effacer la recherche"
 };
