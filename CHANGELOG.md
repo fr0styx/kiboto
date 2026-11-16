@@ -2,7 +2,28 @@
 
 Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep that name.
 
-## Unreleased
+## v2.0.3 (2026-11-16)
+### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
+
+People is one row per person with their own page, Add a person in three steps, household rules,
+invites that carry folders and sign-in hours, and a choice of what happens to someone's files when
+they leave. Everyone has My account. Backup opens with "Are your files safe?", has one place to get
+something back and one way to add a copy. Shared folders say who can open them and how to connect.
+Notifications reads top to bottom and says where alerts go. On a phone, Home is a home screen with
+your widgets and the sections sit under Settings. Storage, Backup and the General page say what they
+mean in five languages, Search settings finds pages, tabs and everyday tasks, and the last ZettNAS
+names are gone.
+
+#### Before you upgrade
+
+- **zettnas.local no longer answers.** Use kiboto.local (or the name you gave the NAS in Settings) in
+  bookmarks, mapped drives and saved shares that still point at zettnas.local.
+- **The self-hosted hardware test runner** (tools/hardware-runner) registers as kiboto-hw-1 with the
+  label kiboto-hardware. Re-register it if you run one. The fan watchdog reads the new heartbeat file;
+  the old one is still written until 2.2, so an older watchdog image keeps working.
+- **The backup job dialog backs up Kiboto's settings only.** Existing jobs keep running; new copies of
+  your files are made with Add a copy on Backup.
+
 
 #### Changes
 
