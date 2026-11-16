@@ -163,6 +163,12 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   instead of "Deploy New Instance" and "Stop, Replace & Launch"; "Details", "Show the log", "Terminal", "Limits",
   "Search apps" and "Remove leftovers from old updates". Five languages.
 
+#### Changes
+
+- **Editing a running virtual machine says what it can't change**: processors and memory are locked with "Shut it
+  down to change its processors or memory", instead of promising they apply at the next restart (the server refuses
+  them while the machine runs).
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

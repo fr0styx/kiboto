@@ -159,7 +159,7 @@ export function openVmEditModal(vmId, vmObj = null) {
         ${isRunning ? `
           <div style="background: rgba(51,205,184,0.12); border: 1px solid rgba(51,205,184,0.3); border-radius: 6px; padding: 10px 14px; font-size: var(--kb-fs-xs); color: var(--kb-text-accent); display: flex; align-items: center; gap: 8px;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-            <span>${t('vmd.running_note', 'This VM is running. Hardware changes (vCPUs, memory, boot order) take effect when it next restarts.')}</span>
+            <span>${t('vmd.running_locked', 'This machine is running. Shut it down to change its processors or memory. Other changes are used from its next start.')}</span>
           </div>
         ` : ''}
 
@@ -195,7 +195,7 @@ export function openVmEditModal(vmId, vmObj = null) {
             <span class="vme-xs-bold-strong">${t('vmd.ram_title', 'Memory (leaves room for the NAS)')}</span>
             <span class="vme-xs-bold-accent" id="vm-edit-ram-display">${targetVm.ram_gb || 4.0} GB</span>
           </div>
-          <input type="range" id="vm-edit-ram-slider" min="0.5" max="${Math.max(budget.safe_slider_max_gb, targetVm.ram_gb || 4)}" step="0.5" value="${targetVm.ram_gb || 4.0}" style="width: 100%; accent-color: var(--accent-cyan, #33cdb8); cursor: pointer;" />
+          <input type="range" id="vm-edit-ram-slider" ${isRunning ? 'disabled ' : ''}min="0.5" max="${Math.max(budget.safe_slider_max_gb, targetVm.ram_gb || 4)}" step="0.5" value="${targetVm.ram_gb || 4.0}" style="width: 100%; accent-color: var(--accent-cyan, #33cdb8); cursor: pointer;" />
           <div class="vme-row-xs-muted">
             <span>${t('vmd.ram_min', 'Min: 0.5 GB')}</span>
             <span id="vm-edit-slider-max-label">${t('vmd.ram_safe', 'Safe max: {gb} GB', { gb: budget.safe_slider_max_gb })}</span>
@@ -217,7 +217,7 @@ export function openVmEditModal(vmId, vmObj = null) {
             <span class="vme-xs-bold-strong">${t('vmd.vcpus', 'vCPU cores')}</span>
             <span class="vme-xs-bold-strong" id="vm-edit-vcpu-display">${targetVm.vcpus || 2} vCPUs</span>
           </div>
-          <input type="range" id="vm-edit-vcpu-slider" min="1" max="${Math.max(hostThreads, targetVm.vcpus || 2)}" step="1" value="${targetVm.vcpus || 2}" style="width: 100%; accent-color: var(--accent-cyan, #33cdb8); cursor: pointer;" />
+          <input type="range" id="vm-edit-vcpu-slider" ${isRunning ? 'disabled ' : ''}min="1" max="${Math.max(hostThreads, targetVm.vcpus || 2)}" step="1" value="${targetVm.vcpus || 2}" style="width: 100%; accent-color: var(--accent-cyan, #33cdb8); cursor: pointer;" />
           <div class="vme-row-xs-muted">
             <span>1 vCPU</span>
             <span>${t('vmd.thread_limit', 'Physical limit: {count, plural, one {# thread} other {# threads}}', { count: hostThreads })}</span>

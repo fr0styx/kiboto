@@ -7905,5 +7905,6 @@ export default {
   "webdav.stopped_toast": "WebDAV server stopped.",
   "webdav.started_toast": "WebDAV server started on port {port}.",
   "notif.see_all_activity": "See all activity",
-  "notif.nothing_to_look_at": "Nothing needs a look. Everything that happened is in Activity."
+  "notif.nothing_to_look_at": "Nothing needs a look. Everything that happened is in Activity.",
+  "vmd.running_locked": "This machine is running. Shut it down to change its processors or memory. Other changes are used from its next start."
 };
