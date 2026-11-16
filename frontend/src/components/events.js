@@ -1,29 +1,128 @@
 /**
- * Kiboto Hardware Events Logger
- * Renders system alerts, diagnostic events, and handles event log clearing.
+ * Activity -> History (SET-27, Activity report section 4): what happened, by day. One view of an
+ * entry for the history, the bell and the dialog (event-view.js); chips and a search filter it;
+ * each entry opens the page that deals with it, and its technical details fold open in place.
  */
-import { eventView, eventWhen } from '../event-view.js';
-import { escapeHtml } from '../utils.js';
-
+import { eventView, eventWhen, eventPlace, needsALook } from '../event-view.js';
+import { escapeHtml, copyTextToClipboard } from '../utils.js';
 import { t, getLanguage } from '../i18n.js';
-import { formatDateTime } from '../format.js';
+import { formatDate, formatTime } from '../format.js';
 import { emptyStateHtml } from './empty-state.js';
 import { state } from '../state.js';
+
 let _lastEventHash = '';
-let _expandedEvents = new Set();
+const _expandedEvents = new Set();
 let _currentFilter = 'all';
+let _query = '';
+let _events = [];
+
+/** "Today", "Yesterday" or the date, in the reader's language. */
+export function dayLabel(ts, now = new Date()) {
+  const d = new Date(ts * 1000);
+  const start = (x) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+  const days = Math.round((start(now) - start(d)) / 86400000);
+  if (days === 0) return t('act.today', 'Today');
+  if (days === 1) return t('act.yesterday', 'Yesterday');
+  return formatDate(d);
+}
+
+/** The entries the chips and the search leave. */
+export function filterEvents(events, filter = 'all', query = '') {
+  const q = (query || '').trim().toLowerCase();
+  return (events || []).filter((e) => {
+    if (filter === 'look' && !needsALook(e)) return false;
+    if (!q) return true;
+    const v = eventView(e);
+    return `${v.title} ${v.message}`.toLowerCase().includes(q);
+  });
+}
+
+function ensureControls(list) {
+  if (list.previousElementSibling && list.previousElementSibling.classList.contains('history-controls')) return;
+  const bar = document.createElement('div');
+  bar.className = 'history-controls';
+  bar.innerHTML = `
+    <div class="history-chips" role="group" aria-label="${escapeHtml(t('act.filter', 'Show'))}">
+      <button type="button" class="btn-pill-toggle history-chip active" data-filter="all" aria-pressed="true">${escapeHtml(t('act.chip_all', 'All'))}</button>
+      <button type="button" class="btn-pill-toggle history-chip" data-filter="look" aria-pressed="false">${escapeHtml(t('act.chip_look', 'Needs a look'))}</button>
+    </div>
+    <input type="search" class="tz-text-input history-search" placeholder="${escapeHtml(t('act.search', 'Search the history'))}" aria-label="${escapeHtml(t('act.search', 'Search the history'))}">`;
+  list.before(bar);
+  bar.addEventListener('click', (ev) => {
+    const chip = /** @type {HTMLElement | null} */ (/** @type {Element} */ (ev.target).closest('.history-chip'));
+    if (!chip) return;
+    _currentFilter = chip.dataset.filter || 'all';
+    bar.querySelectorAll('.history-chip').forEach((c) => {
+      const on = c === chip;
+      c.classList.toggle('active', on);
+      c.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    redraw();
+  });
+  bar.querySelector('.history-search')?.addEventListener('input', (ev) => {
+    _query = /** @type {HTMLInputElement} */ (ev.target).value;
+    redraw();
+  });
+}
+
+function redraw() {
+  _lastEventHash = '';
+  renderEventLog(_events);
+}
+
+function entryRow(e) {
+  const v = eventView(e); // one view for the history, the bell and the dialog (SET-13)
+  const place = eventPlace(e);
+  const key = `${e.id || e.ts}_${e.title}`;
+  const row = document.createElement('article');
+  row.className = `history-entry is-${v.look}`;
+  const time = [formatTime(new Date(v.when * 1000)), v.repeated].filter(Boolean).join(' · ');
+  row.innerHTML = `
+    <div class="history-line">
+      <span class="history-icon" aria-hidden="true">${escapeHtml(v.icon)}</span>
+      <div class="history-text">
+        <div class="history-title" style="color: ${escapeHtml(v.color)};">${escapeHtml(v.title)} <span class="history-word">${escapeHtml(v.word)}</span></div>
+        <div class="history-message">${escapeHtml(v.message)}</div>
+        <div class="history-time">${escapeHtml(time)}</div>
+      </div>
+      <div class="history-actions">
+        ${place.route !== 'events' ? `<button type="button" class="btn-pill-toggle history-open">${escapeHtml(t('act.open', 'Open'))}</button>` : ''}
+        <button type="button" class="btn-pill-toggle history-more" aria-expanded="false">${escapeHtml(t('act.tech', 'Technical details'))}</button>
+      </div>
+    </div>
+    <div class="history-details" hidden>
+      <pre></pre>
+      <button type="button" class="btn-pill-toggle history-copy">${escapeHtml(t('act.copy', 'Copy'))}</button>
+    </div>`;
+  const details = /** @type {HTMLElement} */ (row.querySelector('.history-details'));
+  /** @type {HTMLElement} */ (row.querySelector('pre')).textContent = JSON.stringify(e, null, 2);
+  const more = /** @type {HTMLElement} */ (row.querySelector('.history-more'));
+  const setOpen = (open) => {
+    details.hidden = !open;
+    more.setAttribute('aria-expanded', open ? 'true' : 'false');
+    if (open) _expandedEvents.add(key);
+    else _expandedEvents.delete(key);
+  };
+  setOpen(_expandedEvents.has(key));
+  more.addEventListener('click', () => setOpen(details.hidden));
+  row.querySelector('.history-open')?.addEventListener('click', () => place.open());
+  row.querySelector('.history-copy')?.addEventListener('click', () => copyTextToClipboard(JSON.stringify(e, null, 2)));
+  return row;
+}
 
 export function renderEventLog(events) {
   const list = document.getElementById('events-list');
   if (!list) return;
+  _events = events || [];
+  ensureControls(list);
 
   // a counted repeat changes neither the length nor the first time: the hash carries both, and the language
-  const top = events && events[0];
-  const currentHash = events ? `${events.length}-${top ? `${top.id}-${eventWhen(top)}-${top.count || 1}` : 0}-${_currentFilter}-${getLanguage()}` : 'empty';
+  const top = _events[0];
+  const currentHash = `${_events.length}-${top ? `${top.id}-${eventWhen(top)}-${top.count || 1}` : 0}-${_currentFilter}-${_query}-${getLanguage()}`;
   if (_lastEventHash === currentHash) return;
   _lastEventHash = currentHash;
 
-  if (!events || events.length === 0) {
+  if (_events.length === 0) {
     list.innerHTML = emptyStateHtml({
       compact: true,
       title: t('events.none_title', 'Nothing has happened yet'),
@@ -31,80 +130,24 @@ export function renderEventLog(events) {
     });
     return;
   }
-
-  const filtered = _currentFilter === 'all'
-    ? events
-    : events.filter((e) => e.level === _currentFilter);
-
-  if (filtered.length === 0) {
-    list.innerHTML = `<div style="padding: 14px; text-align: center; color: var(--muted); font-size: var(--kb-fs-xs);">${escapeHtml(t('evx.none', 'No {level} events.', { level: _currentFilter }))}</div>`;
+  const shown = filterEvents(_events, _currentFilter, _query);
+  if (shown.length === 0) {
+    list.innerHTML = `<div class="history-none">${escapeHtml(t('act.none_match', 'Nothing in the history matches.'))}</div>`;
     return;
   }
-
-  list.innerHTML = '';
-
-  filtered.forEach((e) => {
-    const text = eventView(e); // one view for the log, the bell and the dialog (SET-13)
-    const { color, icon } = text;
-    const timeStr = [formatDateTime(new Date(text.when * 1000)), text.repeated].filter(Boolean).join(' · ');
-
-    const row = document.createElement('div');
-    row.style.cssText = 'padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; gap: 8px; cursor: pointer;';
-
-    row.onmouseover = () => { row.style.background = 'rgba(255,255,255,0.02)'; };
-    row.onmouseout = () => { row.style.background = 'transparent'; };
-
-    const topHtml = `
-      <div style="display: flex; gap: 10px; align-items: flex-start;">
-        <span style="font-size: 14px; margin-top: 2px;">${icon}</span>
-        <div style="display: flex; flex-direction: column; gap: 4px; flex-grow: 1;">
-          <div style="font-size: var(--kb-fs-xs); color: ${color}; font-weight: 700; letter-spacing: 0.3px;">${escapeHtml(text.title)}</div>
-          <div style="font-size: var(--kb-fs-xs); color: var(--kb-text-strong);">${escapeHtml(text.message)}</div>
-          <div style="font-size: var(--kb-fs-xs); color: var(--muted);">${escapeHtml(timeStr)}</div>
-        </div>
-        <div style="display: flex; gap: 6px; align-items: center; padding-top: 2px;">
-          <button class="event-inspect-btn" type="button" title="${t('ui.view_full_event_details', 'View full event details')}" style="background: rgba(51, 205, 184, 0.15); border: 1px solid rgba(51, 205, 184, 0.35); color: var(--kb-text-accent); font-size: var(--kb-fs-xs); font-weight: 700; padding: 2px 7px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 3px;">
-            <span aria-hidden="true">🔍</span> <span>${t('evx.more', 'More Info')}</span>
-          </button>
-          <span style="font-size: var(--kb-fs-xs); color: var(--muted); cursor: pointer; padding: 2px 4px;"><span aria-hidden="true">▼</span> ${t('evx.details', 'Details')}</span>
-        </div>
-      </div>
-    `;
-
-    row.innerHTML = topHtml;
-
-    const detailsBox = document.createElement('pre');
-    detailsBox.style.cssText = 'display: none; margin: 0; padding: 10px; background: rgba(0,0,0,0.4); border-radius: 6px; font-size: var(--kb-fs-xs); color: #a4b8bc; border: 1px solid rgba(255,255,255,0.05); white-space: pre-wrap; word-break: break-all;';
-    detailsBox.textContent = JSON.stringify(e, null, 2);
-    row.appendChild(detailsBox);
-
-    const evKey = `${e.ts}_${e.title}`;
-    if (_expandedEvents.has(evKey)) {
-      detailsBox.style.display = 'block';
+  list.replaceChildren();
+  let day = '';
+  for (const e of shown) {
+    const label = dayLabel(eventWhen(e));
+    if (label !== day) {
+      day = label;
+      const h = document.createElement('h3');
+      h.className = 'history-day';
+      h.textContent = label;
+      list.append(h);
     }
-
-    const inspectBtn = row.querySelector('.event-inspect-btn');
-    if (inspectBtn) {
-      inspectBtn.addEventListener('click', (ev) => {
-        ev.stopPropagation();
-        if (window.openEventDetailModal) {
-          window.openEventDetailModal(e);
-        }
-      });
-    }
-
-    row.addEventListener('click', () => {
-      const isHidden = detailsBox.style.display === 'none';
-      detailsBox.style.display = isHidden ? 'block' : 'none';
-      if (isHidden) {
-        _expandedEvents.add(evKey);
-      } else {
-        _expandedEvents.delete(evKey);
-      }
-    });
-
-    list.appendChild(row);
-  });
+    list.append(entryRow(e));
+  }
 }
 
 export function initEvents() {

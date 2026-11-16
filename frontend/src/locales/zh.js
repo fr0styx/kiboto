@@ -7829,5 +7829,15 @@ export default {
   "appmenu.details": "详情",
   "appmenu.remove": "移除",
   "act.tab_history": "历史记录",
-  "act.tab_now": "当前"
+  "act.tab_now": "当前",
+  "act.today": "今天",
+  "act.yesterday": "昨天",
+  "act.filter": "显示",
+  "act.chip_all": "全部",
+  "act.chip_look": "需要查看",
+  "act.search": "搜索历史记录",
+  "act.open": "打开",
+  "act.tech": "技术详情",
+  "act.copy": "复制",
+  "act.none_match": "历史记录中没有匹配的内容。"
 };

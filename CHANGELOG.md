@@ -62,6 +62,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Activity opens on History**: the event log moved from Settings into Activity, for everyone. The hardware
   charts are its second tab, "Right now", shown with Advanced on. Old links to the event log open History.
 
+#### Changes
+
+- **History reads by day**: Today, Yesterday, then dates; "All" and "Needs a look" and a search box; each entry
+  has an Open button to the page that deals with it, and its technical details fold open in place with Copy.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

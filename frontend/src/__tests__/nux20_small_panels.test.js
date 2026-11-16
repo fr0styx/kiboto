@@ -32,8 +32,8 @@ describe('small panels (NUX-20)', () => {
     document.body.innerHTML = '<div id="events-list"></div>';
     renderEventLog([{ ts: 1700000000, level: 'info', title: 'Pool scrub', message: 'Done' }]);
     const text = byId('events-list').textContent;
-    expect(text).toContain('More Info');
-    expect(text).toContain('▼ Details');
+    expect(text).toContain('Technical details'); // details fold open in place (SET-27)
+    expect(text).toContain('Pool scrub');
   });
 
   it('lists listening ports, or says why there are none', async () => {

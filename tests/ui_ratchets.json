@@ -128,8 +128,8 @@
  "frontend/src/components/events.js": {
   "buttons": 0,
   "globals": 0,
-  "styles": 10,
-  "templates": 1
+  "styles": 1,
+  "templates": 3
  },
  "frontend/src/components/fan-control.js": {
   "buttons": 0,

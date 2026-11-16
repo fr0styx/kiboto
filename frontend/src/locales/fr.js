@@ -7829,5 +7829,15 @@ export default {
   "appmenu.details": "Détails",
   "appmenu.remove": "Supprimer",
   "act.tab_history": "Historique",
-  "act.tab_now": "En ce moment"
+  "act.tab_now": "En ce moment",
+  "act.today": "Aujourd'hui",
+  "act.yesterday": "Hier",
+  "act.filter": "Afficher",
+  "act.chip_all": "Tout",
+  "act.chip_look": "À vérifier",
+  "act.search": "Rechercher dans l'historique",
+  "act.open": "Ouvrir",
+  "act.tech": "Détails techniques",
+  "act.copy": "Copier",
+  "act.none_match": "Rien dans l'historique ne correspond."
 };

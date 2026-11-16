@@ -1,9 +1,9 @@
 {
   "important": 3358,
   "buttonClasses": 75,
-  "inlineStyles": 1273,
+  "inlineStyles": 1262,
   "emojiIcons": 3,
-  "colours": 3777,
+  "colours": 3770,
   "primitiveUses": 4,
   "importantPerFile": {
     "frontend/index.html": 64,
@@ -64,7 +64,6 @@
     "frontend/src/components/dock/notifications.js": 15,
     "frontend/src/components/dock/user-flyout.js": 1,
     "frontend/src/components/docker-table.js": 1,
-    "frontend/src/components/events.js": 7,
     "frontend/src/components/fan-control.js": 44,
     "frontend/src/components/file-manager-helpers.js": 8,
     "frontend/src/components/file-manager.js": 34,
