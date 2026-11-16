@@ -2,7 +2,7 @@
 # Stage 1: Build modern offline-first frontend assets
 # =========================================================================
 # Base images are pinned by digest (OPS-19); Dependabot proposes updates.
-# Node.js 26.13.0 (26.12.1 was the October 2026 security release, Brotli decoder CVE-2026-111497). Keep in step with .nvmrc.
+# Node.js 26.13.1 (26.12.1 was the October 2026 security release, Brotli decoder CVE-2026-111497). Keep in step with .nvmrc.
 FROM --platform=$BUILDPLATFORM node:26.13.1-alpine@sha256:6bd9ab43c0ec0190ca7b2d193906cb8b7edf6e7f4afa43ddeccd6452710bffb5 AS frontend-builder
 
 WORKDIR /build
@@ -147,7 +147,7 @@ RUN if [ "$DEV_BUILD" != "1" ]; then echo "release image: test switches are off"
 
 # Playwright (LCD renderer) ships its own Node.js, which lags behind security releases.
 # Replace it with the patched official build so no vulnerable copy stays in the image.
-COPY --from=node:26.13.0-trixie-slim@sha256:e4db4c914bf8ad241bd24804fc25d272d89bad97e68cdc8a1414862790a02c39 /usr/local/bin/node /usr/local/lib/python3.12/site-packages/playwright/driver/node
+COPY --from=node:26.13.1-trixie-slim@sha256:e6bedef217677b276c591795e169840edd9096dbf13f29df8ef8d1856b8820bc /usr/local/bin/node /usr/local/lib/python3.12/site-packages/playwright/driver/node
 
 # Build metadata arguments injected by CI
 ARG BUILD_COMMIT=""
