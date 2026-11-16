@@ -26,8 +26,8 @@ describe('chassis and storage text in German (NUX-20)', () => {
     const c = box();
     renderChassisTwin(c, [{ name: 'sda', model: 'IronWolf 8TB', temp: 38 }, { name: 'nvme0n1', model: 'SN770', temp: 41, percentage_used: 3 }]);
     expect(c.querySelector('[data-bay="2"]').getAttribute('aria-label')).toBe('Einschub 2, leer');
-    expect(c.textContent).toContain('Einschub 2 frei');
-    expect(c.textContent).toContain('KEIN LAUFWERK');
+    expect(c.textContent).toContain('Kein Laufwerk in Einschub 2');
+    expect(c.textContent).toContain('Bereit für ein Laufwerk');
     expect(c.querySelector('[data-bay="1"]').getAttribute('aria-label')).toMatch(/^Einschub 1: IronWolf 8TB, /);
     expect(c.querySelector('.bay-locate-btn').getAttribute('aria-label')).toBe('Laufwerk in Einschub 1 finden');
     expect(c.textContent).toContain('M.2-STECKPLATZ 1 • /dev/nvme0n1');

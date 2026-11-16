@@ -1,0 +1,47 @@
+import { describe, it, expect, beforeEach } from 'vitest';
+import { healthWord, poolStatusWord, roleWord, renderChassisTwin, renderStructuredPoolsTopology } from '../components/chassis-visualizer.js';
+import { setLanguage } from '../i18n.js';
+
+describe('Storage says plain words in your language (SET-22 Storage 1)', () => {
+  beforeEach(async () => {
+    await setLanguage('en');
+  });
+
+  it('one word for health, pool state and role', () => {
+    expect(healthWord('PASSED')).toBe('Healthy');
+    expect(healthWord('', true)).toBe('Asleep');
+    expect(healthWord('failing')).toBe('Failing');
+    expect(healthWord('warning')).toBe('Needs a look');
+    expect(healthWord('unknown-x')).toBe('unknown-x');
+    expect(poolStatusWord(undefined)).toBe('Healthy');
+    expect(poolStatusWord('SYNCING')).toBe('Rebuilding protection');
+    expect(poolStatusWord('DEGRADED')).toBe('Needs attention');
+    expect(poolStatusWord('IMPORTING')).toBe('IMPORTING');
+    expect(roleWord('parity')).toBe('Parity');
+    expect(roleWord('cache')).toBe('Cache');
+    expect(roleWord(undefined)).toBe('Data');
+    expect(roleWord('spare')).toBe('SPARE');
+  });
+
+  it('the bays have no English capitals left, and German reads German', async () => {
+    const box = document.createElement('div');
+    const disks = [{ dev: 'sda', model: 'IronWolf', health: 'PASSED', temp: 35, slot: 1 }];
+    renderChassisTwin(box, disks, { bays: 4 });
+    for (const word of ['VACANT', 'LOCATE', 'EMPTY', 'BAY ']) expect(box.textContent).not.toContain(word);
+    await setLanguage('de');
+    renderChassisTwin(box, disks, { bays: 4 });
+    expect(box.textContent).toContain('Einschub');
+    expect(box.textContent).not.toContain('Bay ');
+  });
+
+  it('a pool says how full it is in one phrase', () => {
+    const box = document.createElement('div');
+    renderStructuredPoolsTopology(box, {
+      pools: [{ id: 'p', name: 'Main', fs_type: 'btrfs', status: 'DEGRADED', used_bytes: 1e12, total_bytes: 4e12, free_bytes: 3e12, used_pct: 25, members: [{ device: 'sdb', role: 'parity', size_bytes: 4e12 }] }],
+    });
+    expect(box.textContent).toContain('1.0 TB of 4.0 TB used');
+    expect(box.textContent).toContain('Needs attention');
+    expect(box.textContent).toContain('Parity');
+    expect(box.textContent).not.toContain('used /');
+  });
+});

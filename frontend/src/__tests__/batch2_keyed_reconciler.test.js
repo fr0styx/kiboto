@@ -264,7 +264,7 @@ describe('Batch 2: High-Performance Keyed Table Reconciler (Zero-Flicker Telemet
       expect(poolsContainer.children.length).toBe(1);
       // In-place reconciliation preserves the block element
       expect(poolsContainer.children[0]).toBe(poolBlock);
-      expect(topoContainer.textContent).toContain('52%');
+      expect(topoContainer.textContent).toContain('used');
     });
   });
 });

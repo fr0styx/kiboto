@@ -292,7 +292,7 @@ describe('Sprint 3: Storage Pools Topology & Network Shares', () => {
     expect(container.textContent).toContain('Parity protected');
     expect(container.textContent).toContain('/dev/sdb');
     expect(container.textContent).toContain('/dev/sda');
-    expect(container.textContent).toContain('Standby');
+    expect(container.textContent).toContain('Asleep');
     expect(container.textContent).toContain('41°C');
     expect(container.textContent).toContain("never changes them");
     expect(container.querySelectorAll('.btn-locate-topo').length).toBe(2);

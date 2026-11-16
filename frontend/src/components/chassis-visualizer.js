@@ -94,6 +94,34 @@ export async function triggerLocateDisk(devName, targetElement = null) {
 /**
  * Computes color and status token for thermal heatmap
  */
+/** One word for a drive's health (SET-22 Storage 1): Asleep, Healthy, Failing, Needs a look. */
+export function healthWord(health, standby = false) {
+  if (standby) return t('chassis.asleep', 'Asleep');
+  const h = String(health || '').toLowerCase();
+  if (!h || ['ok', 'passed', 'healthy', 'good'].includes(h)) return t('chassis.h_healthy', 'Healthy');
+  if (['failed', 'failing', 'critical', 'bad'].includes(h)) return t('chassis.h_failing', 'Failing');
+  if (['warning', 'warn', 'attention', 'degraded'].includes(h)) return t('chassis.h_look', 'Needs a look');
+  return String(health);
+}
+
+/** A pool's state in words. */
+export function poolStatusWord(status) {
+  const s = String(status || 'HEALTHY').toUpperCase();
+  if (s === 'HEALTHY' || s === 'ONLINE' || s === 'OK') return t('chassis.pool_healthy', 'Healthy');
+  if (s === 'SYNCING') return t('chassis.pool_syncing', 'Rebuilding protection');
+  if (s === 'DEGRADED') return t('chassis.pool_degraded', 'Needs attention');
+  return String(status);
+}
+
+/** What a drive does in a pool. */
+export function roleWord(role) {
+  const r = String(role || 'data').toLowerCase();
+  if (r === 'data') return t('chassis.role_data', 'Data');
+  if (r === 'parity') return t('chassis.role_parity', 'Parity');
+  if (r === 'cache') return t('chassis.role_cache', 'Cache');
+  return String(role).toUpperCase();
+}
+
 export function getThermalLevel(tempC, isStandby = false, isNvme = false) {
   if (isStandby || tempC == null) {
     return {
@@ -196,22 +224,22 @@ export function renderChassisTwin(container, disks = [], options = {}) {
         <div class="chassis-bay-slot empty" data-bay="${slotNum}" role="region" aria-label="${t('chassis.bay_empty_aria', 'Bay {n}, empty', { n: slotNum })}">
           <div class="bay-header">
             <div class="cv-row">
-              <span class="bay-num">BAY ${slotNum}</span>
+              <span class="bay-num">${t('chassis.bay_n', 'Bay {n}', { n: slotNum })}</span>
               ${customLabel}
             </div>
-            <span class="bay-status-badge empty">VACANT</span>
+            <span class="bay-status-badge empty">${t('chassis.empty', 'Empty')}</span>
           </div>
           <div class="bay-tray-handle">
             <div class="bay-led-lens off"></div>
             <div class="bay-drive-info">
-              <span class="bay-drive-model cv-x">VACANT</span>
-              <span class="bay-drive-dev cv-x-2">${t('chassis.slot_available', 'Slot {n} available', { n: slotNum })}</span>
-              <span class="bay-sub-badge cv-x-3">${t('chassis.standby_ready', 'STANDBY READY')}</span>
+              <span class="bay-drive-model cv-x">${t('chassis.empty', 'Empty')}</span>
+              <span class="bay-drive-dev cv-x-2">${t('chassis.slot_available', 'No drive in bay {n}', { n: slotNum })}</span>
+              <span class="bay-sub-badge cv-x-3">${t('chassis.standby_ready', 'Ready for a drive')}</span>
             </div>
           </div>
           <div class="bay-footer">
-            <span class="bay-meta cv-xs-muted">${t('chassis.no_disk', 'NO DISK')}</span>
-            <span class="bay-health-tag cv-x-4">EMPTY</span>
+            <span class="bay-meta cv-xs-muted">${t('chassis.no_disk', 'No drive')}</span>
+            <span class="bay-health-tag cv-x-4">${t('chassis.empty', 'Empty')}</span>
           </div>
         </div>
       `;
@@ -229,7 +257,7 @@ export function renderChassisTwin(container, disks = [], options = {}) {
         <div class="chassis-bay-slot populated ${thermal.cls}" data-bay="${slotNum}" data-dev="${devName}" role="button" tabindex="0" aria-label="${escapeHtml(t('chassis.bay_aria', 'Bay {n}: {model}, {state}', { n: slotNum, model: modelStr, state: thermal.text }))}">
           <div class="bay-header">
             <div class="cv-row">
-              <span class="bay-num">BAY ${slotNum}</span>
+              <span class="bay-num">${t('chassis.bay_n', 'Bay {n}', { n: slotNum })}</span>
               ${customLabel}
             </div>
             <span class="bay-temp-pill" style="color: ${thermal.color}; border-color: ${thermal.color};">${thermal.text}</span>
@@ -245,9 +273,9 @@ export function renderChassisTwin(container, disks = [], options = {}) {
           <div class="bay-footer">
             <button class="bay-locate-btn" data-dev="${devName}" title="${t('ui.locate_drive_blink_bay_led', 'Locate Drive (Blink Bay LED)')}" aria-label="${t('chassis.locate_bay_aria', 'Locate the drive in bay {n}', { n: slotNum })}">
               <svg class="locate-icon" viewBox="0 0 24 24" width="12" height="12"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" fill="currentColor"/></svg>
-              <span>LOCATE</span>
+              <span>${t('chassis.find_drive', 'Find this drive')}</span>
             </button>
-            <span class="bay-health-tag ${thermal.cls}">${isStandby ? t('chassis.standby', 'STANDBY') : (d.health ? String(d.health).toUpperCase() : 'OK')}</span>
+            <span class="bay-health-tag ${thermal.cls}">${escapeHtml(healthWord(d.health, isStandby))}</span>
           </div>
         </div>
       `;
@@ -281,7 +309,7 @@ export function renderChassisTwin(container, disks = [], options = {}) {
           </div>
           <button class="m2-locate-btn bay-locate-btn" data-dev="${devName}">
             <svg viewBox="0 0 24 24" width="11" height="11"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" fill="currentColor"/></svg>
-            <span>LOCATE</span>
+            <span>${t('chassis.find_drive', 'Find this drive')}</span>
           </button>
         </div>
       `;
@@ -467,7 +495,7 @@ export function openChassisConfigModal(currentConfig = {}, onSaved = null) {
 
       rowsHtml += `
         <tr data-slot="${slot}">
-          <td style="font-weight:700; color:var(--lt-ink-brand, var(--accent-cyan, #33cdb8));">BAY ${slot}</td>
+          <td style="font-weight:700; color:var(--lt-ink-brand, var(--accent-cyan, #33cdb8));">${t('chassis.bay_n', 'Bay {n}', { n: slot })}</td>
           <td>
             <select class="slot-drive-select tz-select-input cv-xs-strong-box-2">
               ${optionsHtml}
@@ -629,17 +657,13 @@ function buildPoolBlockInner(pool, isObserver, can = { scrub: true }) {
   const barColor = pct > 90 ? 'var(--alert, #ef4444)' : (pct > 75 ? 'var(--warn, #f59e0b)' : 'var(--accent, #3bf58b)');
 
   let statusClass = 'status-healthy';
-  let statusLabel = pool.status || 'HEALTHY';
-  if (statusLabel === 'SYNCING') {
-    statusClass = 'status-syncing';
-    statusLabel = '🔄 PARITY SYNCING';
-  } else if (statusLabel === 'DEGRADED') {
-    statusClass = 'status-degraded';
-  }
+  const statusLabel = poolStatusWord(pool.status);
+  if (pool.status === 'SYNCING') statusClass = 'status-syncing';
+  else if (pool.status === 'DEGRADED') statusClass = 'status-degraded';
 
   const membersHtml = (pool.members || []).map((m) => {
     const isStandby = m.spundown || m.status === 'STANDBY';
-    const tempDisplay = isStandby ? '🌙 Standby' : (m.temp_c != null ? `${m.temp_c}°C` : '--');
+    const tempDisplay = isStandby ? t('chassis.asleep', 'Asleep') : (m.temp_c != null ? `${m.temp_c}°C` : '--');
     const tempLevel = isStandby ? 'standby' : (m.temp_c != null ? getThermalLevel(m.temp_c, false, isNvmeDrive(m)).cls : 'cool');
     const readsStr = m.num_reads ? formatNumber(m.num_reads) : '0';
     const writesStr = m.num_writes ? formatNumber(m.num_writes) : '0';
@@ -647,7 +671,7 @@ function buildPoolBlockInner(pool, isObserver, can = { scrub: true }) {
     return `
       <div class="topo-disk-card role-${m.role || 'data'} ${isStandby ? 'disk-standby' : ''}">
         <div class="topo-disk-top">
-          <span class="topo-role-badge role-${m.role || 'data'}">${(m.role || 'DATA').toUpperCase()}</span>
+          <span class="topo-role-badge role-${m.role || 'data'}">${escapeHtml(roleWord(m.role))}</span>
           <span class="topo-dev-name">/dev/${escapeHtml(m.device || m.name)}</span>
           <span class="topo-temp-badge thermal-${tempLevel}">${tempDisplay}</span>
         </div>
@@ -657,7 +681,7 @@ function buildPoolBlockInner(pool, isObserver, can = { scrub: true }) {
         </div>
         <div class="topo-disk-actions">
           <button class="btn-locate-topo" data-dev="${escapeHtml(m.device || m.name)}" title="${t('ui.blink_drive_activity_led', 'Blink drive activity LED')}">
-            ${ico('💡')} ${t('chassis.locate', 'Locate')}
+            ${ico('💡')} ${t('chassis.locate', 'Find this drive')}
           </button>
         </div>
       </div>
@@ -681,7 +705,7 @@ function buildPoolBlockInner(pool, isObserver, can = { scrub: true }) {
 
     <div class="topo-pool-usage">
       <div class="topo-usage-labels">
-        <span><strong>${usedStr}</strong> used / <strong>${totalStr}</strong> total (${pct}%)</span>
+        <span>${t('chassis.used_of', '{used} of {total} used', { used: usedStr, total: totalStr })}</span>
         <span class="topo-free-space">${t('chassis.free', '{size} free', { size: freeStr })}</span>
       </div>
       <div class="topo-usage-track">
@@ -1614,7 +1638,7 @@ export async function fetchAndRenderRemoteStorage(container) {
 
     const isRunning = webdavStatus.running;
     const webdavPillClass = isRunning ? 'running' : 'stopped';
-    const webdavPillText = isRunning ? `🟢 RUNNING (PID: ${webdavStatus.pid || 'Active'})` : '⚪ STOPPED';
+    const webdavPillText = isRunning ? t('chassis.running', 'Running') : t('chassis.stopped', 'Stopped');
 
     const qc = webdavStatus.quick_connect || {};
     const hostIp = window.location.hostname;
@@ -1639,7 +1663,7 @@ export async function fetchAndRenderRemoteStorage(container) {
       const cards = remotes.map((r) => {
         const icon = PROVIDER_ICONS[r.type] || PROVIDER_ICONS.unknown;
         const isMounted = r.is_mounted;
-        const statusText = isMounted ? `🟢 Mounted at ${escapeHtml(r.mount_path)}` : '⚪ Not Mounted';
+        const statusText = isMounted ? escapeHtml(t('chassis.connected_at', 'Connected at {path}', { path: r.mount_path })) : t('chassis.not_connected', 'Not connected');
         const statusCls = isMounted ? 'mounted' : '';
 
         return `
@@ -1705,7 +1729,7 @@ export async function fetchAndRenderRemoteStorage(container) {
             </div>
             <div class="cv-row-7">
               <button class="btn-pill-toggle" id="btn-webdav-toggle">
-                ${isRunning ? '⏹ Stop Server' : '▶ Start Server'}
+                ${isRunning ? t('chassis.stop', 'Stop') : t('chassis.start', 'Start')}
               </button>
               <button class="btn-pill-toggle" id="btn-webdav-restart" title="${t('ui.restart_webdav_server', 'Restart WebDAV Server')}">
                 ${ico('↺')} ${t('chassis.restart', 'Restart')}

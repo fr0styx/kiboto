@@ -315,6 +315,12 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   what to tell you about in household words, and How often with the limits folded under Fine-tune and
   named for what they do. The Cameras card shows only when Frigate runs here.
 
+#### Changes
+
+- **Storage speaks your language**: bays, pools, drive health, cloud drives and WebDAV no longer show
+  English capitals (BAY, VACANT, LOCATE, HEALTHY, "used / total", Mounted at, Start Server). A pool says
+  "9.1 TB of 16 TB used", a drive is Healthy, Asleep, Failing or Needs a look, and Locate is "Find this drive".
+
 ## v2.0.2 (2026-11-12)
 ### 🧭 A new Settings sidebar, five themes, honest pages, and remote access cut down to what works
 

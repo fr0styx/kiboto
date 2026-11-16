@@ -53,7 +53,7 @@ describe('Sprint 4: Remote & Cloud Storage Subsystem (Frontend)', () => {
     await fetchAndRenderRemoteStorage(container);
 
     expect(container.textContent).toContain('WebDAV file server');
-    expect(container.textContent).toContain('RUNNING (PID: 14205)');
+    expect(container.textContent).toContain('Running');
     expect(container.textContent).toContain('8084');
     expect(container.textContent).toContain('/mnt/user');
     expect(container.textContent).toContain('macOS Finder');
@@ -102,9 +102,9 @@ describe('Sprint 4: Remote & Cloud Storage Subsystem (Frontend)', () => {
     await fetchAndRenderRemoteStorage(container);
 
     expect(container.textContent).toContain('google-drive-photos');
-    expect(container.textContent).toContain('Mounted at /mnt/remotes/google-drive-photos');
+    expect(container.textContent).toContain('Connected at /mnt/remotes/google-drive-photos');
     expect(container.textContent).toContain('backup-s3');
-    expect(container.textContent).toContain('Not Mounted');
+    expect(container.textContent).toContain('Not connected');
 
     // Clicking "Open in File Explorer" triggers ZettEventBus
     const revealBtn = container.querySelector('.btn-remote-reveal');

@@ -30,7 +30,7 @@ data/
 .ruff_cache/
 
 # Node / Frontend artifacts
-node_modules/
+node_modules
 dist/
 scratch/
 .fuse_hidden*
