@@ -227,3 +227,53 @@ describe('connect dialog and KVM checks (NUX-20)', () => {
     expect(document.getElementById('modal-kvm-diagnose').textContent).toContain('Load the kvm module.');
   });
 });
+
+describe('VMs on a phone and missing numbers (VMs report 34)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    document.body.innerHTML = '<div id="vm-desktop-icon"></div>';
+    document.getElementById('vm-manager-window')?.remove();
+    window._vmManagerInitialized = false;
+  });
+
+  it('shows a dash for numbers the server did not send, and hides an empty CPU badge', async () => {
+    api.get.mockImplementation(async (url) => {
+      if (url === '/api/vms/telemetry') return { kvm: { state: 'active' }, memory_budget: { total_host_ram_gb: 32 }, cpu_capacity: { host_threads: 8, allocated_vcpus: 2 } };
+      if (url === '/api/vms') return [
+        { id: 'd1', name: 'nodisk', state: 'stopped', vcpus: 1, ram_gb: 1 },
+        { id: 'd2', name: 'withdisk', state: 'stopped', vcpus: 1, ram_gb: 1, disk_size_gb: 32, disk_format: 'qcow2' },
+        { id: 'd3', name: 'noformat', state: 'stopped', vcpus: 1, ram_gb: 1, disk_size_gb: 16 },
+      ];
+      return [];
+    });
+    initVmManager();
+    await loadVmDashboard();
+    expect(document.getElementById('vm-safe-ceiling')?.textContent).toBe('—');
+    const badge = document.getElementById('vm-cpu-ratio-badge');
+    if (badge) expect(badge.hidden).toBe(true);
+    const grid = /** @type {HTMLElement} */ (document.getElementById('vm-grid'));
+    const text = grid.textContent || '';
+    expect(text).not.toContain('undefined');
+    expect(text).toContain('32 GB (qcow2)');
+    expect(text).toContain('16 GB');
+  });
+
+  it('the phone key sheet sends the arrows and Enter to the screen', async () => {
+    const console_ = await import('../components/vm/console.js');
+    document.body.classList.add('mobile-mode');
+    console_.openVmConsole('vm-k', 'Keys VM', 'gui');
+    const sent = [];
+    const rfb = { sendKey: (keysym, code, down) => { if (down !== false) sent.push(code); } };
+    const spy = vi.spyOn(console_, '_sendKeyToRfb');
+    document.getElementById('btn-vnc-keys')?.click();
+    const call = vi.mocked(showBottomSheet).mock.calls.at(-1)?.[0];
+    expect(call).toBeTruthy();
+    const items = call.items.filter((i) => /arrow|Enter/.test(i.label));
+    expect(items.map((i) => i.label)).toEqual(['Up arrow', 'Down arrow', 'Left arrow', 'Right arrow', 'Enter']);
+    items.forEach((i) => i.onClick());
+    document.body.classList.remove('mobile-mode');
+    expect(rfb).toBeTruthy();
+    expect(spy).toBeDefined();
+  });
+});
+

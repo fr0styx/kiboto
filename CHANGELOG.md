@@ -277,6 +277,12 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   of …", and when the screen or serial console can't be opened it says so, with a hint, instead of drawing a fake
   desktop or a pretend shell with invented boot lines.
 
+#### Changes
+
+- **Virtual machines on a phone**: the button rows wrap instead of running off the screen, VM buttons are big enough
+  to tap, the screen's key sheet has the arrow keys and Enter that text installers need, and missing numbers show a
+  dash instead of "undefined".
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

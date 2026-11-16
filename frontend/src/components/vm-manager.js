@@ -332,7 +332,7 @@ function renderTelemetry(tel) {
     if (totalRam) totalRam.textContent = `${mem.total_host_ram_gb} GB`;
 
     const safeCeiling = document.getElementById('vm-safe-ceiling');
-    if (safeCeiling) safeCeiling.textContent = `${mem.safe_max_vm_ram_gb} GB`;
+    if (safeCeiling) safeCeiling.textContent = typeof mem.safe_max_vm_ram_gb === 'number' ? `${mem.safe_max_vm_ram_gb} GB` : '—'; // never "undefined GB" (VMs report 34)
   }
 
   // CPU Capacity
@@ -347,7 +347,8 @@ function renderTelemetry(tel) {
     if (elThreads) elThreads.textContent = cpu.host_threads;
 
     if (elRatioBadge) {
-      elRatioBadge.textContent = cpu.badge || `${cpu.overcommit_ratio}x`;
+      elRatioBadge.textContent = cpu.badge || (typeof cpu.overcommit_ratio === 'number' ? `${cpu.overcommit_ratio}x` : '');
+      elRatioBadge.hidden = !elRatioBadge.textContent; // an empty pill was drawn without a value
       if (cpu.status === 'nominal') {
         elRatioBadge.style.background = 'rgba(16,185,129,0.2)';
         elRatioBadge.style.color = '#34d399';
@@ -516,7 +517,7 @@ function buildVmCardHtml(vm, vms) {
           <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; font-size: var(--kb-fs-xs); margin: 12px 0 8px; background: var(--kb-shade-30); padding: 8px; border-radius: 6px; border: 1px solid var(--lt-r-ffffff0a, rgba(255,255,255,0.04));">
             <div><span class="vmm-muted-2">${t('vm.compute', 'Compute')}:</span> <strong class="vmm-strong">${vm.vcpus} vCPUs</strong></div>
             <div><span class="vmm-muted-2">${t('vm.memory', 'Memory')}:</span> <strong class="vmm-accent">${vm.ram_gb} GB</strong></div>
-            <div><span class="vmm-muted-2">${t('vm.disk', 'Disk')}:</span> <strong class="vmm-strong">${vm.disk_size_gb} GB (${vm.disk_format})</strong></div>
+            <div><span class="vmm-muted-2">${t('vm.disk', 'Disk')}:</span> <strong class="vmm-strong">${vm.disk_size_gb != null ? `${escapeHtml(String(vm.disk_size_gb))} GB${vm.disk_format ? ` (${escapeHtml(vm.disk_format)})` : ''}` : '—'}</strong></div>
             <div><span class="vmm-muted-2">${t('vm.bridge', 'Bridge')}:</span> <strong class="vmm-strong">${escapeHtml(vm.bridge || 'br0')}</strong></div>
           </div>
 

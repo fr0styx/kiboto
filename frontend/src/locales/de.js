@@ -8020,5 +8020,10 @@ export default {
   "vcon.connecting_gui": "Verbinde mit dem Bildschirm von {name} …",
   "vcon.failed_cli": "Die serielle Konsole von {name} konnte nicht geöffnet werden.",
   "vcon.failed_gui": "Der Bildschirm von {name} konnte nicht geöffnet werden.",
-  "vcon.failed_hint": "Prüfen Sie, ob die Maschine läuft, und drücken Sie dann „Neu verbinden“."
+  "vcon.failed_hint": "Prüfen Sie, ob die Maschine läuft, und drücken Sie dann „Neu verbinden“.",
+  "vcon.k_up": "Pfeil nach oben",
+  "vcon.k_down": "Pfeil nach unten",
+  "vcon.k_left": "Pfeil nach links",
+  "vcon.k_right": "Pfeil nach rechts",
+  "vcon.k_enter": "Eingabe"
 };

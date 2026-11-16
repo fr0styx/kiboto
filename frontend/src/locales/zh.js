@@ -8020,5 +8020,10 @@ export default {
   "vcon.connecting_gui": "正在连接 {name} 的屏幕…",
   "vcon.failed_cli": "无法打开 {name} 的串行控制台。",
   "vcon.failed_gui": "无法打开 {name} 的屏幕。",
-  "vcon.failed_hint": "请确认虚拟机正在运行，然后点“重新连接”。"
+  "vcon.failed_hint": "请确认虚拟机正在运行，然后点“重新连接”。",
+  "vcon.k_up": "上箭头",
+  "vcon.k_down": "下箭头",
+  "vcon.k_left": "左箭头",
+  "vcon.k_right": "右箭头",
+  "vcon.k_enter": "回车"
 };

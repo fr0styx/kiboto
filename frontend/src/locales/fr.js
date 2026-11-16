@@ -8020,5 +8020,10 @@ export default {
   "vcon.connecting_gui": "Connexion à l'écran de {name}…",
   "vcon.failed_cli": "La console série de {name} n'a pas pu être ouverte.",
   "vcon.failed_gui": "L'écran de {name} n'a pas pu être ouvert.",
-  "vcon.failed_hint": "Vérifiez que la machine est en marche, puis appuyez sur Reconnecter."
+  "vcon.failed_hint": "Vérifiez que la machine est en marche, puis appuyez sur Reconnecter.",
+  "vcon.k_up": "Flèche haut",
+  "vcon.k_down": "Flèche bas",
+  "vcon.k_left": "Flèche gauche",
+  "vcon.k_right": "Flèche droite",
+  "vcon.k_enter": "Entrée"
 };

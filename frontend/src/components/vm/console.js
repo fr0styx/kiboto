@@ -1047,6 +1047,12 @@ export function openVmConsole(vmId, vmName = 'Virtual Machine', initialMode = 'g
               { icon: '🛑', label: 'Ctrl + C', onClick: () => { _sendCtrlCToRfb(); showToast(t('toast.sent_key_ctrl_c_to_guest', "Sent key 'Ctrl+C' to guest VM"), 'info'); } },
               { icon: '🪟', label: t('vcon.super', 'Super / Windows key'), onClick: () => { _sendKeyToRfb(0xffeb, 'MetaLeft'); showToast(t('toast.sent_key_super_to_guest_vm', "Sent key 'Super' to guest VM"), 'info'); } },
               { icon: '⚙️', label: t('vcon.f12', 'F12 (boot menu)'), onClick: () => { _sendKeyToRfb(0xffcb, 'F12'); showToast(t('toast.sent_key_f12_to_guest_vm', "Sent key 'F12' to guest VM"), 'info'); } },
+              // text installers need the arrows and Enter, which a phone keyboard lacks (VMs report 34)
+              { icon: '↑', label: t('vcon.k_up', 'Up arrow'), onClick: () => _sendKeyToRfb(0xff52, 'ArrowUp') },
+              { icon: '↓', label: t('vcon.k_down', 'Down arrow'), onClick: () => _sendKeyToRfb(0xff54, 'ArrowDown') },
+              { icon: '←', label: t('vcon.k_left', 'Left arrow'), onClick: () => _sendKeyToRfb(0xff51, 'ArrowLeft') },
+              { icon: '→', label: t('vcon.k_right', 'Right arrow'), onClick: () => _sendKeyToRfb(0xff53, 'ArrowRight') },
+              { icon: '⏎', label: t('vcon.k_enter', 'Enter'), onClick: () => _sendKeyToRfb(0xff0d, 'Enter') },
               { icon: '⚡', label: 'Ctrl + Alt + Del', destructive: true, onClick: () => { consoleWin.querySelector('#btn-vnc-cad')?.click(); } },
             ],
           });

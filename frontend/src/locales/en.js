@@ -8020,5 +8020,10 @@ export default {
   "vcon.connecting_gui": "Connecting to the screen of {name}…",
   "vcon.failed_cli": "The serial console of {name} could not be opened.",
   "vcon.failed_gui": "The screen of {name} could not be opened.",
-  "vcon.failed_hint": "Check that the machine is running, then press Reconnect."
+  "vcon.failed_hint": "Check that the machine is running, then press Reconnect.",
+  "vcon.k_up": "Up arrow",
+  "vcon.k_down": "Down arrow",
+  "vcon.k_left": "Left arrow",
+  "vcon.k_right": "Right arrow",
+  "vcon.k_enter": "Enter"
 };

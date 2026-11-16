@@ -395,8 +395,8 @@ body.mobile-mode textarea {
 
   .vm-action-btns-wrap {
     display: flex !important;
-    flex-wrap: nowrap !important;
-    overflow-x: auto !important;
+    flex-wrap: wrap !important; /* a cut-off row hid "Create" on phones (VMs report 34) */
+    overflow-x: visible !important;
     -webkit-overflow-scrolling: touch !important;
     scrollbar-width: none !important;
     gap: 6px !important;
@@ -569,8 +569,8 @@ body.mobile-mode .vm-telemetry-header {
 
 body.mobile-mode .vm-action-btns-wrap {
   display: flex !important;
-  flex-wrap: nowrap !important;
-  overflow-x: auto !important;
+  flex-wrap: wrap !important;
+  overflow-x: visible !important;
   -webkit-overflow-scrolling: touch !important;
   scrollbar-width: none !important;
   gap: 6px !important;
@@ -2476,4 +2476,10 @@ body.theme-yak .mgmt-inner-tab.active .ic {
   content-visibility: auto;
   contain-intrinsic-size: auto none auto 500px;
 }
-
+/* VMs report 34: on a phone the VM buttons were 25-32 px and the Settings row of four ran off the edge */
+@media (max-width: 768px) {
+  #mgmt-pane-vms-list .vml-row-2 { flex-wrap: wrap; }
+  #mgmt-sec-vms button, #vm-manager-window button, .vm-manager-window button { min-height: 44px; }
+}
+body.mobile-mode #mgmt-pane-vms-list .vml-row-2 { flex-wrap: wrap; }
+body.mobile-mode #mgmt-sec-vms button, body.mobile-mode #vm-manager-window button { min-height: 44px; }
