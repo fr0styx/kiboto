@@ -7911,5 +7911,6 @@ export default {
   "mvm.not_checked": "Konnte nicht geprüft werden",
   "mvm.load_failed": "Die virtuellen Maschinen konnten nicht geladen werden.",
   "mvm.try_again": "Erneut versuchen",
-  "vmd.ram_unknown": "Der freie Speicher für Maschinen ist nicht bekannt; er wird beim Start der Maschine geprüft."
+  "vmd.ram_unknown": "Der freie Speicher für Maschinen ist nicht bekannt; er wird beim Start der Maschine geprüft.",
+  "vm.tpm_available": "Sicherheitschip (vTPM) verfügbar"
 };

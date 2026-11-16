@@ -7911,5 +7911,6 @@ export default {
   "mvm.not_checked": "Could not be checked",
   "mvm.load_failed": "The virtual machines could not be loaded.",
   "mvm.try_again": "Try again",
-  "vmd.ram_unknown": "The memory left for machines is not known; it is checked when the machine starts."
+  "vmd.ram_unknown": "The memory left for machines is not known; it is checked when the machine starts.",
+  "vm.tpm_available": "Security chip (vTPM) available"
 };

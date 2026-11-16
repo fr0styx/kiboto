@@ -7911,5 +7911,6 @@ export default {
   "mvm.not_checked": "Vérification impossible",
   "mvm.load_failed": "Les machines virtuelles n'ont pas pu être chargées.",
   "mvm.try_again": "Réessayer",
-  "vmd.ram_unknown": "La mémoire restante pour les machines est inconnue ; elle est vérifiée au démarrage de la machine."
+  "vmd.ram_unknown": "La mémoire restante pour les machines est inconnue ; elle est vérifiée au démarrage de la machine.",
+  "vm.tpm_available": "Puce de sécurité (vTPM) disponible"
 };

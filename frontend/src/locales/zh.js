@@ -7911,5 +7911,6 @@ export default {
   "mvm.not_checked": "无法检查",
   "mvm.load_failed": "无法加载虚拟机。",
   "mvm.try_again": "重试",
-  "vmd.ram_unknown": "可供虚拟机使用的内存未知；会在虚拟机启动时检查。"
+  "vmd.ram_unknown": "可供虚拟机使用的内存未知；会在虚拟机启动时检查。",
+  "vm.tpm_available": "可用安全芯片（vTPM）"
 };

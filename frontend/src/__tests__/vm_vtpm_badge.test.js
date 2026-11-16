@@ -44,6 +44,7 @@ describe('vTPM availability badge', () => {
   it('shows the Windows 11 badge when swtpm is available', async () => {
     const badge = await openCreateWith({ state: 'active', vtpm_available: true });
     expect(badge.classList.contains('unavailable')).toBe(false);
-    expect(badge.textContent).toContain('Windows 11 Ready');
+    expect(badge.textContent).toContain('Security chip (vTPM) available');
+    expect(badge.textContent).not.toContain('Windows 11');
   });
 });

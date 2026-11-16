@@ -440,13 +440,13 @@
  "frontend/src/components/vm/create-modal.js": {
   "buttons": 0,
   "globals": 0,
-  "styles": 22,
+  "styles": 20,
   "templates": 5
  },
  "frontend/src/components/vm/edit-modal.js": {
   "buttons": 0,
   "globals": 0,
-  "styles": 29,
+  "styles": 28,
   "templates": 6
  },
  "frontend/src/components/vm/iso-manager.js": {

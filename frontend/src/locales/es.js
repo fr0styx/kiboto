@@ -7911,5 +7911,6 @@ export default {
   "mvm.not_checked": "No se pudo comprobar",
   "mvm.load_failed": "No se pudieron cargar las máquinas virtuales.",
   "mvm.try_again": "Reintentar",
-  "vmd.ram_unknown": "No se sabe cuánta memoria queda para las máquinas; se comprueba al arrancar la máquina."
+  "vmd.ram_unknown": "No se sabe cuánta memoria queda para las máquinas; se comprueba al arrancar la máquina.",
+  "vm.tpm_available": "Chip de seguridad (vTPM) disponible"
 };

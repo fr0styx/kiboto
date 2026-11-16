@@ -238,9 +238,6 @@ export function openVmCreateModal() {
               <span class="vmc-xs-bold-strong" data-i18n="vm.video_title">${t('vm.video_title', 'Display & Video Adapter')}</span>
               <div class="vmc-xs-muted">${t('vmd.video_desc2', 'Virtual graphics card and video acceleration')}</div>
             </div>
-            <span style="font-size: var(--kb-fs-xs); padding: 2px 6px; border-radius: 4px; background: rgba(16,185,129,0.15); color: var(--kb-text-ok); border: 1px solid rgba(16,185,129,0.3);">
-              ${t('vmd.gpu_accel', 'GPU accelerated')}
-            </span>
           </div>
           <div class="vmc-grid-2">
             <div>
@@ -251,13 +248,6 @@ export function openVmCreateModal() {
                 <option value="vga">${t('vmd.v_vga', 'Standard VGA (works everywhere)')}</option>
                 <option value="none">${t('vmd.v_none', 'Headless (serial console only, no video memory)')}</option>
               </select>
-            </div>
-            <div>
-              <label class="vmc-xs-muted-2">${t('vmd.display_mode', 'Display')}</label>
-              <label class="vmc-row-xs-strong-3">
-                <input type="checkbox" id="vm-create-enable-gui" checked style="accent-color: var(--accent-cyan, #33cdb8);" />
-                <span>${t('vmd.display_on', 'Graphical desktop (display :0)')}</span>
-              </label>
             </div>
           </div>
         </div>
@@ -752,7 +742,6 @@ export function openVmCreateModal() {
           display_adapter: modal.querySelector('#vm-create-gpu-driver')?.value || 'virtio-gpu',
           tpm_enabled: !!modal.querySelector('#vm-create-tpm')?.checked,
           usb_passthrough: createUsbDevices,
-          enable_gui: !!modal.querySelector('#vm-create-enable-gui')?.checked,
           host_shares,
           secondary_disks,
         });

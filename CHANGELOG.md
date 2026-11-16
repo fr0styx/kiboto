@@ -185,6 +185,12 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **New virtual machine uses this NAS's numbers**: opened from Settings, the dialog no longer offers "Safe max: 28 GB"
   and 8 threads on every NAS; it reads them first, and says the limit is not known if the server does not answer.
 
+#### Changes
+
+- **Virtual machine labels that did nothing are gone**: "GPU accelerated" (shown for every adapter) and the
+  "Graphical desktop (display :0)" box (never read by the server) are removed, and the security-chip badge says
+  "Security chip (vTPM) available" instead of "Windows 11 Ready".
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

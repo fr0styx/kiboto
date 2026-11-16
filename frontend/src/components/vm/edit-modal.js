@@ -295,9 +295,6 @@ export function openVmEditModal(vmId, vmObj = null) {
               <div class="vme-xs-bold-strong" data-i18n="vm.video_title">${t('vm.video_title', 'Display & Video Adapter')}</div>
               <div class="vme-xs-muted-3">${t('vmd.video_desc', 'Choose the virtual graphics card, or a text console only')}</div>
             </div>
-            <span style="font-size: var(--kb-fs-xs); padding: 2px 6px; border-radius: 4px; background: rgba(16,185,129,0.15); color: var(--kb-text-ok); border: 1px solid rgba(16,185,129,0.3);">
-              ${t('vmd.gpu_accel', 'GPU accelerated')}
-            </span>
           </div>
           <select id="vm-edit-video-adapter" class="tz-select" style="width: 100%; padding: 8px 10px; border-radius: 6px; background: var(--lt-b-1a2629ff, #1a2629); border: 1px solid var(--kb-line-12); color: var(--kb-text-strong); font-size: var(--kb-fs-xs); box-sizing: border-box;">
             <option value="virtio-gpu" ${targetVideo === 'virtio-gpu' ? 'selected' : ''}>${t('vmd.v_virtio', 'VirtIO-GPU (recommended, 2D/3D acceleration on Linux)')}</option>
