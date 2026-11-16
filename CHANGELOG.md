@@ -83,6 +83,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Kiboto tells you when an update is ready**: it checks once a day, marks General in Settings and sends one
   alert per new version. "Check for updates every day" on General turns it off; the privacy guide says so.
 
+#### Changes
+
+- **Sign-ins in History**: for administrators, a "Sign-ins" chip shows who signed in, failed sign-ins and blocked
+  addresses, two-step sign-in changes and changes to people, as sentences by day.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 
