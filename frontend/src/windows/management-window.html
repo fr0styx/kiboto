@@ -2226,13 +2226,10 @@
           <div id="mgmt-sec-storage" class="mgmt-detail-card" style="display: none;">
             <div class="mgmt-sticky-subnav">
               <div class="mgmt-inner-tabs" role="tablist">
-                <button class="mgmt-inner-tab active" role="tab" aria-selected="true" data-tab-target="mgmt-pane-chassis-twin">
+                <!-- SET-22 Storage 3: the bays and the pools are one tab, Drives; a link to either opens it -->
+                <button class="mgmt-inner-tab active" role="tab" aria-selected="true" data-tab-target="mgmt-pane-chassis-twin" data-tab-panes="mgmt-pane-chassis-twin mgmt-pane-storage-topo">
                   <svg class="ic" style="width: 14px; height: 14px;"><use href="#i-disk"/></svg>
-                  <span data-i18n="mgmt.subtab_disks_chassis">Drives and bays</span>
-                </button>
-                <button class="mgmt-inner-tab" role="tab" aria-selected="false" data-tab-target="mgmt-pane-storage-topo">
-                  <svg class="ic" style="width: 14px; height: 14px;"><use href="#i-storage"/></svg>
-                  <span data-i18n="mgmt.subtab_pools_topology">Pools & Topology</span>
+                  <span data-i18n="mgmt.subtab_disks_chassis">Drives</span>
                 </button>
                 <button class="mgmt-inner-tab" role="tab" aria-selected="false" data-tab-target="mgmt-pane-storage-shares">
                   <svg class="ic" style="width: 14px; height: 14px;"><use href="#i-storage"/></svg>
@@ -2240,7 +2237,7 @@
                 </button>
                 <button class="mgmt-inner-tab" role="tab" aria-selected="false" data-tab-target="mgmt-pane-storage-remotes">
                   <svg class="ic" style="width: 14px; height: 14px;"><use href="#i-globe"/></svg>
-                  <span data-i18n="mgmt.subtab_remotes">Remote & Cloud Storage</span>
+                  <span data-i18n="mgmt.subtab_remotes">Cloud drives</span>
                 </button>
                 <button class="mgmt-inner-tab" role="tab" aria-selected="false" data-tab-target="mgmt-pane-copy">
                   <svg class="ic" style="width: 14px; height: 14px;"><use href="#i-storage"/></svg>
@@ -2257,6 +2254,7 @@
 
             <!-- Sub-tab 1: Chassis Digital Twin -->
             <div id="mgmt-pane-chassis-twin" class="mgmt-tab-pane" style="display: block;">
+              <section id="storage-summary" class="storage-summary" aria-live="polite" hidden></section>
               <div class="mgmt-card-intro" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
                 <div>
                   <div class="mgmt-card-intro-title"><svg class="ic"><use href="#i-disk"/></svg> <span data-i18n="mgmt.chassis_title">Drive bays</span></div>
@@ -2273,8 +2271,8 @@
             <div id="mgmt-pane-storage-topo" class="mgmt-tab-pane" style="display: none;">
               <div class="mgmt-card-intro" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
                 <div>
-                  <div class="mgmt-card-intro-title"><svg class="ic"><use href="#i-storage"/></svg> <span data-i18n="mgmt.topo_title">Storage Pool & Array Topology</span></div>
-                  <div class="mgmt-card-intro-desc" data-i18n="mgmt.topo_desc">Hierarchical view of storage pools, parity protection drives, data array disks, and SSD cache tiers.</div>
+                  <div class="mgmt-card-intro-title"><svg class="ic"><use href="#i-storage"/></svg> <span data-i18n="mgmt.topo_title">Pools</span></div>
+                  <div class="mgmt-card-intro-desc" data-i18n="mgmt.topo_desc">How your drives are combined and how full they are.</div>
                 </div>
                 <div style="display:flex; align-items:center; gap:8px;">
                   <button class="btn-pill-toggle is-primary" id="btn-create-storage-pool" style="display: none;" title="Create New Storage Pool" data-i18n-title="ui.create_new_storage_pool"><span aria-hidden="true">+</span> <span data-i18n="mw.create_pool">Create Pool</span></button>

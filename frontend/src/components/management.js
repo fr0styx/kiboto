@@ -774,6 +774,7 @@ export function initManagement() {
     } else if (paneId === 'mgmt-pane-hardware-copy') {
       if (typeof restoreHardwareTabsToManagement === 'function') restoreHardwareTabsToManagement();
     } else if (paneId === 'mgmt-pane-chassis-twin') {
+      import('./storage-summary.js').then((m) => m.renderStorageSummary()).catch(() => {}); // SET-22 Storage 3
       const mount = document.getElementById('mgmt-chassis-twin-mount');
       if (mount) fetchAndRenderChassisTwin(mount);
       import('./management/network.js').then((n) => n.revealReplicationTab()).catch(() => {});

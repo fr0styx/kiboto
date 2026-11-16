@@ -22,7 +22,7 @@ const ASKED = [
   ['sign out', 'My account'],
   ['time zone', 'Time, Language & Region'],
   ['fan curve', 'Fans'],
-  ['dropbox', 'Remote & Cloud Storage'],
+  ['dropbox', 'Cloud drives'],
   ['dark mode', 'Switch between dark and light'],
   ['fan noise', 'Make the fans quieter'],
   ['add a person', 'Add a person'],
