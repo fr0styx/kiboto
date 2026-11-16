@@ -348,14 +348,27 @@ def iso_dirs() -> list[str]:
     return dirs
 
 
-def scan_isos() -> list[dict[str, Any]]:
-    """Discovers bootable ISO and raw disk images in storage shares."""
+def _asleep(d: str) -> bool:
+    """True when the disk behind an installer folder sleeps (never wakes it to find out). Kiboto's own
+    data folder is read all the time anyway, so it is never skipped (VMs report 28)."""
+    from backend.services import rag_standby
+
+    real = os.path.realpath(d)
+    if real == os.path.realpath(DATA_DIR) or real.startswith(os.path.realpath(DATA_DIR) + os.sep):
+        return False
+    return rag_standby.is_backing_disk_in_standby(rag_standby.resolve_path_backing_dev(d) or d)
+
+
+def scan_isos(asleep=_asleep) -> list[dict[str, Any]]:
+    """Discovers bootable ISO and raw disk images in storage shares. A folder whose disk sleeps is
+    left out until it is awake: opening the VM window walked every installer folder, which could
+    wake the pool's drives just to draw a list (VMs report 28)."""
     iso_dirs_list = iso_dirs()
     discovered = []
     seen = set()
 
     for d in iso_dirs_list:
-        if os.path.isdir(d):
+        if os.path.isdir(d) and not asleep(d):
             try:
                 for root, _, files in os.walk(d):
                     for f in files:

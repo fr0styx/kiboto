@@ -248,6 +248,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **A smaller first load**: the invite sign-up form now loads only when an invite link is opened (about 1 kB less
   for everyone else).
 
+#### Changes
+
+- **Virtual machines no longer wake sleeping drives to list installers**: an installer folder on a sleeping drive
+  is left out of the list until the drive is awake; Kiboto's own data folder is always listed.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

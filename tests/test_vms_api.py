@@ -589,3 +589,28 @@ def test_bridge_scan_falls_back_only_when_asked(monkeypatch):
     monkeypatch.setattr(vm_host.os.path, "isdir", lambda p: False)
     assert vm_host.scan_bridges() == ["br0", "virbr0"]
     assert vm_host.scan_bridges(fallback=False) == []
+
+
+def test_installer_folders_on_sleeping_drives_are_not_walked(tmp_path, monkeypatch):
+    """VMs report 28: listing installers must not wake the pool's drives."""
+    from backend.services import vm_host
+
+    awake_dir, sleepy_dir = tmp_path / "awake", tmp_path / "sleepy"
+    awake_dir.mkdir()
+    sleepy_dir.mkdir()
+    (awake_dir / "debian.iso").write_bytes(b"x")
+    (sleepy_dir / "ubuntu.iso").write_bytes(b"x")
+    monkeypatch.setattr(vm_host, "iso_dirs", lambda: [str(awake_dir), str(sleepy_dir)])
+    found = vm_host.scan_isos(asleep=lambda d: d == str(sleepy_dir))
+    assert [i["name"] for i in found] == ["debian.iso"]
+
+
+def test_the_data_folder_is_always_read_and_other_folders_ask_without_waking(tmp_path, monkeypatch):
+    from backend.services import rag_standby, vm_host
+
+    monkeypatch.setattr(vm_host, "DATA_DIR", str(tmp_path))
+    asked = []
+    monkeypatch.setattr(rag_standby, "resolve_path_backing_dev", lambda p: "sdb")
+    monkeypatch.setattr(rag_standby, "is_backing_disk_in_standby", lambda dev: asked.append(dev) or True)
+    assert vm_host._asleep(str(tmp_path / "isos")) is False and asked == []
+    assert vm_host._asleep("/mnt/user/isos") is True and asked == ["sdb"]
