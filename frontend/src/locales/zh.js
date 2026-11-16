@@ -7796,5 +7796,12 @@ export default {
   "conn.redfish_on": "响应 Redfish 请求",
   "conn.redfish_saved_on": "Redfish 已开启。",
   "conn.redfish_saved_off": "Redfish 已关闭。",
-  "conn.redfish_fail": "Redfish 未更改：{error}"
+  "conn.redfish_fail": "Redfish 未更改：{error}",
+  "ql.copy_text": "复制文本",
+  "ql.copy_path": "复制路径",
+  "ql.copied_text": "已复制文本。",
+  "ql.copied_image": "已复制图片。",
+  "ql.copied_path": "已复制路径。",
+  "ql.archive_kind": "压缩包",
+  "ql.archive": "这是一个压缩包。在菜单中选择“解压”来解开它，或下载它。"
 };

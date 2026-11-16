@@ -190,7 +190,7 @@ export async function openFilePreviewModal(path, name, aiMeta = null, fileList =
           <div class="quicklook-btn-group">
             <button type="button" class="quicklook-btn" id="ql-info-toggle" style="display:none;" title="${t('preview.info', 'Photo Details & EXIF (I)')}" aria-label="${t('preview.info', 'Photo Details & EXIF (I)')}">${ICONS.info}</button>
             <button type="button" class="quicklook-btn" id="ql-filmstrip-toggle" style="display:none;" title="${t('preview.filmstrip', 'Toggle Filmstrip')}" aria-label="${t('preview.filmstrip', 'Toggle Filmstrip')}">${ICONS.filmstrip}</button>
-            <button type="button" class="quicklook-btn" id="quicklook-copy-btn" title="${t('preview.copy', 'Copy Image / Path')}" aria-label="${t('preview.copy', 'Copy Image / Path')}">${ICONS.copy}</button>
+            <button type="button" class="quicklook-btn" id="quicklook-copy-btn" title="${t('preview.copy', 'Copy image')}" aria-label="${t('preview.copy', 'Copy image')}">${ICONS.copy}</button>
             <button type="button" class="quicklook-btn" id="ql-download-btn" title="${t('preview.download', 'Download')}" aria-label="${t('preview.download', 'Download')}">${ICONS.download}</button>
             <button type="button" class="quicklook-btn" id="ql-maximize-btn" title="${t('preview.maximize', 'Fullscreen (F)')}" aria-label="${t('preview.maximize', 'Fullscreen (F)')}">${ICONS.maximize}</button>
           </div>
@@ -527,6 +527,7 @@ async function loadCurrentItem() {
     }
 
     _currentMeta = res;
+    labelCopyButton(copyKind(res, _currentName));
     const szStr = res.size !== undefined ? ` • ${formatSize(res.size)}` : '';
 
     if (res.type === 'image') {
@@ -593,6 +594,15 @@ async function loadCurrentItem() {
         } else {
           bodyEl.innerHTML = `<pre class="quicklook-code"><code>${escapeHtml(res.content || '')}</code></pre>`;
         }
+      } else if (res.type === 'hex' && isArchiveName(_currentName)) {
+        // an archive is no hex dump to read: say what it is and what to do with it (SET-28)
+        metaEl.textContent = `${t('ql.archive_kind', 'Archive')}${szStr}`;
+        bodyEl.innerHTML = `
+          <div class="qlv-col-muted">
+            <div class="qlv-fs36">🗜️</div>
+            <span>${escapeHtml(t('ql.archive', 'A compressed archive. Choose Extract in the menu to unpack it, or download it.'))}</span>
+          </div>
+        `;
       } else if (res.type === 'hex') {
         metaEl.textContent = `${t('ql.hex', 'Binary file, first 1 KB')}${szStr}`;
         const dumpText = Array.isArray(res.hex_dump) ? res.hex_dump.join('\n') : '';
@@ -1107,15 +1117,48 @@ function triggerDownload() {
   a.remove();
 }
 
-async function triggerCopy() {
+/** What Copy does for this file: its text, the picture, or (for everything else) its path. */
+export function copyKind(meta, name) {
+  if (meta && meta.type === 'text') return 'text';
+  if ((meta && meta.type === 'image') || isImageFile(name || '')) return 'image';
+  return 'path';
+}
+
+export function isArchiveName(name) {
+  return /\.(zip|7z|rar|tar|tgz|gz|bz2|xz|zst)$/i.test(name || '');
+}
+
+const COPY_LABEL = {
+  text: () => t('ql.copy_text', 'Copy text'),
+  image: () => t('preview.copy', 'Copy image'),
+  path: () => t('ql.copy_path', 'Copy path'),
+};
+
+function labelCopyButton(kind) {
+  const btn = document.getElementById('quicklook-copy-btn');
+  if (!btn) return;
+  const label = COPY_LABEL[kind]();
+  btn.title = label;
+  btn.setAttribute('aria-label', label);
+  btn.dataset.copyKind = kind;
+}
+
+export async function triggerCopy() {
   if (!_currentPath) return;
-  if (_currentMeta && _currentMeta.type === 'text') {
+  const kind = copyKind(_currentMeta, _currentName);
+  if (kind === 'text') {
     try {
       await copyText(_currentMeta.content || '');
-      showToast(t('common.copied', 'Text copied to clipboard!'), 'success');
+      showToast(t('ql.copied_text', 'Text copied.'), 'success');
     } catch (_) {
       showToast(t('toast.failed_to_copy_text', 'Failed to copy text'), 'error');
     }
+    return;
+  }
+  if (kind === 'path') {
+    // a video or an archive was fetched whole to try it as a picture: copy the path at once
+    await copyText(_currentPath);
+    showToast(t('ql.copied_path', 'Path copied.'), 'info');
     return;
   }
 
@@ -1132,15 +1175,15 @@ async function triggerCopy() {
     if (typeof ClipboardItem !== 'undefined') {
       try {
         await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
-        showToast(t('common.copied', 'Image copied to clipboard!'), 'success');
+        showToast(t('ql.copied_image', 'Picture copied.'), 'success');
         return;
       } catch (_) {}
     }
     await copyText(_currentPath);
-    showToast(t('common.copied', 'File path copied to clipboard!'), 'info');
+    showToast(t('ql.copied_path', 'Path copied.'), 'info');
   } catch (_) {
     await copyText(_currentPath);
-    showToast(t('common.copied', 'File path copied to clipboard!'), 'info');
+    showToast(t('ql.copied_path', 'Path copied.'), 'info');
   }
 }
 

@@ -22,6 +22,12 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **The File Explorer's details panel no longer hides file names**: it lies over the list instead of
   squeezing it, so names keep their width (at some window sizes they shrank to nothing).
 
+#### Fixes
+
+- **Quick look's Copy matches the file**: "Copy text" for text and CSV, "Copy image" for pictures, "Copy path"
+  for everything else (it fetched a whole video or archive to try it as a picture). A ZIP or other archive
+  says what it is and points to Extract instead of opening as a hex dump.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

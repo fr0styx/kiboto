@@ -56,7 +56,7 @@ export default {
   "media.plays_direct": "Plays as is",
   "media.plays_converted": "Converted while playing",
   "video.converting": "Converted for this browser",
-  "preview.copy": "Copy Image",
+  "preview.copy": "Copy image",
   "preview.maximize": "Fullscreen",
   "preview.restore": "Exit Fullscreen",
   "preview.prev": "Previous",
@@ -7796,5 +7796,12 @@ export default {
   "conn.redfish_on": "Answer Redfish requests",
   "conn.redfish_saved_on": "Redfish is on.",
   "conn.redfish_saved_off": "Redfish is off.",
-  "conn.redfish_fail": "Redfish wasn't changed: {error}"
+  "conn.redfish_fail": "Redfish wasn't changed: {error}",
+  "ql.copy_text": "Copy text",
+  "ql.copy_path": "Copy path",
+  "ql.copied_text": "Text copied.",
+  "ql.copied_image": "Picture copied.",
+  "ql.copied_path": "Path copied.",
+  "ql.archive_kind": "Archive",
+  "ql.archive": "A compressed archive. Choose Extract in the menu to unpack it, or download it."
 };

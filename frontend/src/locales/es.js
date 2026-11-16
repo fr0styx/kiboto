@@ -7796,5 +7796,12 @@ export default {
   "conn.redfish_on": "Responder a las peticiones Redfish",
   "conn.redfish_saved_on": "Redfish está activado.",
   "conn.redfish_saved_off": "Redfish está desactivado.",
-  "conn.redfish_fail": "No se cambió Redfish: {error}"
+  "conn.redfish_fail": "No se cambió Redfish: {error}",
+  "ql.copy_text": "Copiar texto",
+  "ql.copy_path": "Copiar ruta",
+  "ql.copied_text": "Texto copiado.",
+  "ql.copied_image": "Imagen copiada.",
+  "ql.copied_path": "Ruta copiada.",
+  "ql.archive_kind": "Archivo comprimido",
+  "ql.archive": "Un archivo comprimido. Elige Extraer en el menú para descomprimirlo, o descárgalo."
 };
