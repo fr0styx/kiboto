@@ -22,6 +22,16 @@
 .fm-path-breadcrumbs .fm-crumb { flex-shrink: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fm-path-breadcrumbs .fm-crumb-last { flex-shrink: 0; max-width: 75%; }
 
+/* Files 2 (SET-28, finding 13): the details panel lies over the list instead of squeezing the names,
+   which fell to a few pixels (or none) at 800-1000 px */
+.fm-3pane-layout { position: relative; }
+.fm-3pane-layout > .fm-inspector-pane {
+  position: absolute; top: 0; right: 0; bottom: 0; z-index: 35;
+  width: min(300px, 85%); max-width: none;
+  box-shadow: -10px 0 28px rgba(0, 0, 0, 0.45);
+  background-color: var(--lt-b-0b1719ff, #0b1719); /* opaque: the list headers showed through */
+}
+
 @container fmwin (max-width: 980px) {
   .fm-col-type { display: none; }
   .fm-col-mtime { flex-basis: 140px; }

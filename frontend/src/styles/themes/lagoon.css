@@ -57,6 +57,7 @@
     --lt-b-0b1719d9: oklch(0.1943 calc(0.0176 * var(--kb-tint, 1)) 209.1 / 0.851);
     --lt-b-0b1719f0: oklch(0.1943 calc(0.0176 * var(--kb-tint, 1)) 209.1 / 0.941);
     --lt-b-0b1719f2: oklch(0.1943 calc(0.0176 * var(--kb-tint, 1)) 209.1 / 0.949);
+    --lt-b-0b1719ff: oklch(0.1943 calc(0.0176 * var(--kb-tint, 1)) 209.1);
     --lt-b-0b191cbf: oklch(0.2022 calc(0.0203 * var(--kb-tint, 1)) 212.8 / 0.749);
     --lt-b-0b1a1dfa: oklch(0.2058 calc(0.0214 * var(--kb-tint, 1)) 211.8 / 0.98);
     --lt-b-0c1517ff: oklch(0.1878 calc(0.0139 * var(--kb-tint, 1)) 213.0);

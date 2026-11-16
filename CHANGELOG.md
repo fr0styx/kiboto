@@ -17,6 +17,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   it for API keys, and the Security check's "unused tokens" row opens it. In the Security check,
   suggestions are no longer drawn in red.
 
+#### Fixes
+
+- **The File Explorer's details panel no longer hides file names**: it lies over the list instead of
+  squeezing it, so names keep their width (at some window sizes they shrank to nothing).
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

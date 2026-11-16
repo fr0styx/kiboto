@@ -3,7 +3,7 @@
   "buttonClasses": 75,
   "inlineStyles": 1274,
   "emojiIcons": 3,
-  "colours": 3774,
+  "colours": 3776,
   "primitiveUses": 4,
   "importantPerFile": {
     "frontend/index.html": 64,
@@ -142,7 +142,7 @@
     "frontend/src/styles/46-time-picker.css": 7,
     "frontend/src/styles/47-containers-bulk.css": 13,
     "frontend/src/styles/48-viewer.css": 24,
-    "frontend/src/styles/49-file-explorer-layout.css": 21,
+    "frontend/src/styles/49-file-explorer-layout.css": 23,
     "frontend/src/styles/50-components.css": 105,
     "frontend/src/styles/52-jobs-centre.css": 3,
     "frontend/src/styles/53-getting-started.css": 2,
