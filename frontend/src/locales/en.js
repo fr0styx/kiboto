@@ -7881,5 +7881,6 @@ export default {
   "signin.none": "No sign-ins recorded yet.",
   "apps.search": "Search apps",
   "act.pinned": "Not seen yet",
-  "act.mark_seen": "Mark as seen"
+  "act.mark_seen": "Mark as seen",
+  "act.chip_files": "Files"
 };

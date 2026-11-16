@@ -80,6 +80,7 @@ function ensureControls(list) {
     <div class="history-chips" role="group" aria-label="${escapeHtml(t('act.filter', 'Show'))}">
       <button type="button" class="btn-pill-toggle history-chip active" data-filter="all" aria-pressed="true">${escapeHtml(t('act.chip_all', 'All'))}</button>
       <button type="button" class="btn-pill-toggle history-chip" data-filter="look" aria-pressed="false">${escapeHtml(t('act.chip_look', 'Needs a look'))}</button>
+      <button type="button" class="btn-pill-toggle history-chip" data-filter="files" aria-pressed="false" hidden>${escapeHtml(t('act.chip_files', 'Files'))}</button>
       <button type="button" class="btn-pill-toggle history-chip" data-filter="signins" aria-pressed="false" hidden>${escapeHtml(t('act.chip_signins', 'Sign-ins'))}</button>
     </div>
     <input type="search" class="tz-text-input history-search" placeholder="${escapeHtml(t('act.search', 'Search the history'))}" aria-label="${escapeHtml(t('act.search', 'Search the history'))}">`;
@@ -87,8 +88,10 @@ function ensureControls(list) {
   // Sign-ins for people who may read the security log (Activity report section 4, row 5)
   import('./history-signins.js')
     .then((m) => {
-      const chip = /** @type {HTMLElement | null} */ (bar.querySelector('[data-filter="signins"]'));
-      if (chip) chip.hidden = !m.maySeeSignins();
+      // Files and Sign-ins share the audit right (File activity, the security log)
+      bar.querySelectorAll('[data-filter="signins"], [data-filter="files"]').forEach((chip) => {
+        /** @type {HTMLElement} */ (chip).hidden = !m.maySeeSignins();
+      });
     })
     .catch(() => {});
   bar.addEventListener('click', (ev) => {
@@ -110,11 +113,12 @@ function ensureControls(list) {
 
 function redraw() {
   _lastEventHash = '';
-  if (_currentFilter === 'signins') {
+  if (_currentFilter === 'signins' || _currentFilter === 'files') {
     const list = document.getElementById('events-list');
     const search = /** @type {HTMLElement | null} */ (document.querySelector('.history-search'));
-    if (search) search.hidden = true;
-    if (list) import('./history-signins.js').then((m) => m.renderSignins(list)).catch(() => {});
+    if (search) search.hidden = true; // each has its own search
+    if (list && _currentFilter === 'signins') import('./history-signins.js').then((m) => m.renderSignins(list)).catch(() => {});
+    if (list && _currentFilter === 'files') import('./file-activity.js').then((m) => m.renderFileActivity(list)).catch(() => {});
     return;
   }
   const search = /** @type {HTMLElement | null} */ (document.querySelector('.history-search'));
@@ -167,7 +171,7 @@ export function renderEventLog(events) {
   if (!list) return;
   _events = events || [];
   ensureControls(list);
-  if (_currentFilter === 'signins') return; // the sign-in log is on screen; new events wait for All
+  if (_currentFilter === 'signins' || _currentFilter === 'files') return; // their own lists are on screen; new events wait for All
 
   // a counted repeat changes neither the length nor the first time: the hash carries both, and the language
   const top = _events[0];

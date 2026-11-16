@@ -7881,5 +7881,6 @@ export default {
   "signin.none": "Aucune connexion enregistrée pour l'instant.",
   "apps.search": "Rechercher des apps",
   "act.pinned": "Pas encore vu",
-  "act.mark_seen": "Marquer comme vu"
+  "act.mark_seen": "Marquer comme vu",
+  "act.chip_files": "Fichiers"
 };

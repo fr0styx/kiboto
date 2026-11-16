@@ -7881,5 +7881,6 @@ export default {
   "signin.none": "Aún no hay inicios de sesión registrados.",
   "apps.search": "Buscar apps",
   "act.pinned": "Aún sin ver",
-  "act.mark_seen": "Marcar como visto"
+  "act.mark_seen": "Marcar como visto",
+  "act.chip_files": "Archivos"
 };

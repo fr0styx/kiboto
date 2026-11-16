@@ -7881,5 +7881,6 @@ export default {
   "signin.none": "Noch keine Anmeldungen aufgezeichnet.",
   "apps.search": "Apps suchen",
   "act.pinned": "Noch nicht gesehen",
-  "act.mark_seen": "Als gesehen markieren"
+  "act.mark_seen": "Als gesehen markieren",
+  "act.chip_files": "Dateien"
 };

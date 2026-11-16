@@ -53,4 +53,17 @@ describe('History -> Sign-ins (Activity report section 4, row 5)', () => {
     /** @type {HTMLElement} */ (document.querySelector('[data-filter="all"]')).click();
     expect(document.getElementById('events-list')?.textContent).toContain('new');
   });
+
+  it('Files shows the File activity table in History, for the same people', async () => {
+    /** @type {any} */ (globalThis).kibotoUser = { scopes: ['audit:read'] };
+    document.body.innerHTML = '<div><div id="events-list"></div></div>';
+    renderEventLog([{ id: 1, ts: now, level: 'info', title: 'x', message: 'y' }]);
+    const chip = /** @type {HTMLElement} */ (document.querySelector('[data-filter="files"]'));
+    await vi.waitFor(() => expect(chip.hidden).toBe(false));
+    vi.spyOn(api, 'get').mockResolvedValue({ items: [], actions: [], next_before: null });
+    chip.click();
+    await vi.waitFor(() => expect(document.getElementById('events-list')?.textContent).toContain('Nothing in the last 90 days matches.'));
+    expect(/** @type {HTMLElement} */ (document.querySelector('.history-search')).hidden).toBe(true);
+  });
 });
+

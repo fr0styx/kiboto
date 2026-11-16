@@ -103,6 +103,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Problems you haven't seen stay on top of History** under "Not seen yet", until you mark them as seen there or
   in the bell.
 
+#### Changes
+
+- **File activity in History**: for administrators, a "Files" chip shows who opened, changed or deleted which
+  file, with its own search, beside Sign-ins.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 
