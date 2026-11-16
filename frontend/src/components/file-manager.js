@@ -614,10 +614,13 @@ export class FileManagerWindow {
     }
   }
 
-  /** A window with no saved place opens centred below the top bar, not under it. */
+  /** A window with no saved place opens centred below the top bar, not under it, and at a size
+   *  that shows the toolbar and the columns (SET-28: the first open got the smallest size, 480 x 320). */
   placeIfUnplaced() {
     const el = this.windowEl;
     if (!el || el.style.top || isCompact()) return;
+    if (!el.style.width) el.style.width = `${firstOpenSize(window.innerWidth, window.innerHeight).width}px`;
+    if (!el.style.height) el.style.height = `${firstOpenSize(window.innerWidth, window.innerHeight).height}px`;
     const r = el.getBoundingClientRect();
     const w = r.width || 900;
     const h = r.height || 600;
@@ -4062,6 +4065,14 @@ export function loadFailReason(err) {
   if (err?.status === 403) return t('fm.err_access_denied', "You don't have access to this folder.");
   if (err?.status === 404) return t('fm.err_gone', 'It is not there any more.');
   return err?.message || t('fm.err_load_dir', 'Failed to load directory');
+}
+
+/** The File Explorer's first-open size: roomy, inside the screen, never below the smallest size. */
+export function firstOpenSize(screenW, screenH) {
+  return {
+    width: Math.max(480, Math.min(1000, screenW - 48)),
+    height: Math.max(320, Math.min(640, screenH - 140)),
+  };
 }
 
 // Where the share pop-over opens: next to the button or menu item that was clicked

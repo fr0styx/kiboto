@@ -344,6 +344,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   (it said "This folder is empty" or showed a bare list), and a folder that can't be opened says why in
   the list, with Try again and Back, instead of leaving the old folder on screen under a pop-up.
 
+#### Fixes
+
+- **The File Explorer opens at a usable size** the first time (up to 1000 × 640, inside the screen), with
+  the whole toolbar and every column showing. It opened at the smallest size, 480 × 320.
+
 ## v2.0.2 (2026-11-12)
 ### 🧭 A new Settings sidebar, five themes, honest pages, and remote access cut down to what works
 
