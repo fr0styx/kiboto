@@ -1253,7 +1253,7 @@ body.mobile-mode #desktop-widgets-container .cal-glance-bar {
   }
 
   body.mobile-mode #management-modal-overlay .management-hub-grid {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: minmax(0, 1fr) !important;
     gap: 10px !important;
     width: 100% !important;
   }

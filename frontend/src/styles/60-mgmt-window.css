@@ -28,7 +28,7 @@
   }
 
   @container mgmtpane (max-width: 560px) {
-    .management-hub-grid { grid-template-columns: 1fr; }
+    .management-hub-grid { grid-template-columns: minmax(0, 1fr); }
   }
 }
 
