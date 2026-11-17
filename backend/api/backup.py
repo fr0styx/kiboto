@@ -13,6 +13,7 @@ from pydantic import AfterValidator, BaseModel, Field
 from backend.auth import require_scope
 from backend.config import CLIENT_PREFS_FILE, DATA_DIR, logger
 from backend.confirmations import require_confirmation
+from backend.errors import ApiError
 from backend.fsutil import atomic_write_json, read_json, single_name
 from backend.hardware.pal_storage import PlatformCapabilityError, get_storage_platform
 from backend.logging_config import in_this_request
@@ -176,7 +177,7 @@ async def restore_backup(request: Request):
     except zipfile.BadZipFile:
         raise HTTPException(status_code=400, detail="Invalid zip archive") from None
     except ValueError as ve:
-        raise HTTPException(status_code=400, detail=str(ve)) from ve
+        raise ApiError(400, str(ve), "backup_refused", text=getattr(ve, "text", None)) from ve
     except Exception as e:
         logger.error(f"[BACKUP] Restore failed: {e}")
         raise HTTPException(status_code=500, detail=str(e)) from e
@@ -221,7 +222,7 @@ def create_or_update_backup_job(job: BackupJobModel):
             raise HTTPException(status_code=409, detail=NO_NEW_COPY_JOBS)
         saved = save_backup_job(data)
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e)) from e
+        raise ApiError(400, str(e), "backup_refused", text=getattr(e, "text", None)) from e
     return {
         "status": "ok",
         "job": {**saved, "encryption_password": None, "has_passphrase": bool(saved.get("encryption_password"))},
@@ -253,7 +254,7 @@ def migrate_backup_job(job_id: str):
     except KeyError as e:
         raise HTTPException(status_code=404, detail=str(e).strip("'")) from None
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e)) from None
+        raise ApiError(400, str(e), "backup_refused", text=getattr(e, "text", None)) from None
     except ResticError as e:
         raise HTTPException(status_code=502, detail=str(e)) from None
 

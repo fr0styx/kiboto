@@ -142,16 +142,18 @@ def decrypt_backup(blob: bytes, passphrase: str) -> bytes:
     from cryptography.exceptions import InvalidTag
     from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
+    from backend.errors import SaidError
+
     if not blob.startswith(ENCRYPTED_MAGIC):
-        raise ValueError("Not an encrypted Kiboto backup")
+        raise SaidError("Not an encrypted Kiboto backup", "backup_not_encrypted")
     if not passphrase:
-        raise ValueError("This backup is encrypted: enter its passphrase")
+        raise SaidError("This backup is encrypted: enter its passphrase", "backup_needs_passphrase")
     head = len(ENCRYPTED_MAGIC)
     salt, nonce, ct = blob[head : head + 16], blob[head + 16 : head + 28], blob[head + 28 :]
     try:
         return AESGCM(_derive_key(passphrase, salt)).decrypt(nonce, ct, ENCRYPTED_MAGIC)
     except InvalidTag as e:
-        raise ValueError("Wrong passphrase, or the backup file is damaged") from e
+        raise SaidError("Wrong passphrase, or the backup file is damaged", "backup_wrong_passphrase") from e
 
 
 # Keys that unlock what the backup holds (2FA secrets, backup passphrases, Web Push): only in an
@@ -443,7 +445,9 @@ def checked_subvolume(value: Any) -> str:
     raw = str(value or "").strip()
     parts = [x for x in raw.split("/") if x]
     if raw.startswith("/") or "\\" in raw or any(x in (".", "..") for x in parts):
-        raise ValueError("The backup source must be a folder inside the pool.")
+        from backend.errors import SaidError
+
+        raise SaidError("The backup source must be a folder inside the pool.", "backup_source_outside")
     return "/".join(parts)
 
 
@@ -454,18 +458,25 @@ MIN_PASSPHRASE = 8
 def _settings_job_checks(job_data: dict[str, Any], password: str) -> None:
     """A Kiboto-settings backup is always encrypted and goes to a pool folder or an rclone remote (OPS-8)."""
     from backend import config
+    from backend.errors import SaidError
 
     if len(password) < MIN_PASSPHRASE:
-        raise ValueError(f"A settings backup needs a passphrase of at least {MIN_PASSPHRASE} characters.")
+        raise SaidError(
+            f"A settings backup needs a passphrase of at least {MIN_PASSPHRASE} characters.",
+            "backup_passphrase_short",
+            n=MIN_PASSPHRASE,
+        )
     dest = job_data.get("destination_type")
     if dest == "local_folder":
         if not resolve_within(str(job_data.get("local_path") or ""), config.ALLOWED_BROWSE_ROOTS):
-            raise ValueError("The destination folder must be inside the storage folders.")
+            raise SaidError("The destination folder must be inside the storage folders.", "backup_dest_outside")
     elif dest == "remote":
         if not str(job_data.get("remote_name") or "").strip():
-            raise ValueError("Choose an rclone remote for the settings backup.")
+            raise SaidError("Choose an rclone remote for the settings backup.", "backup_choose_remote")
     else:
-        raise ValueError("A settings backup goes to a folder in the pool or to an rclone remote.")
+        raise SaidError(
+            "A settings backup goes to a folder in the pool or to an rclone remote.", "backup_settings_where"
+        )
 
 
 # A mirror deletes at the destination what is gone at the source. More deletions than this in one

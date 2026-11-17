@@ -448,6 +448,9 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Shared folders**: when a folder can't be shared (outside the storage folders, Kiboto's own data, a reserved
   name), the reason now shows in your language.
 
+- **Backup**: a wrong passphrase, a folder outside the storage pool and the settings-backup checks now say what is
+  wrong in your language.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 
