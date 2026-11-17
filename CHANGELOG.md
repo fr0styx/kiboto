@@ -385,6 +385,8 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **A guide to Storage** (docs/STORAGE.md): your drives at a glance, sleeping drives, the bays, and replacing a
   drive step by step.
 
+- **A guide to Files** (docs/FILES.md): the Recycle Bin, earlier versions, share links and send-me-files links.
+
 #### Fixes
 
 - **The File Explorer's details panel no longer hides file names**: it lies over the list instead of
