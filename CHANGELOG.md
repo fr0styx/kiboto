@@ -371,6 +371,9 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **A guide to Apps** (docs/APPS.md): getting apps, how updates work and go back, changing an app's Compose file,
   backups and removal.
 
+- **A guide to Power** (docs/POWER.md): what happens when the power goes out, how the NAS comes back by itself,
+  Restart and Shut down, and switching off at night.
+
 #### Fixes
 
 - **The File Explorer's details panel no longer hides file names**: it lies over the list instead of
