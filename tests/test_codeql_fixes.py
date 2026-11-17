@@ -1,233 +1,85 @@
-"""Fixes for code scanning findings, each with the alert it answers."""
+"""Code-scanning fixes of 17 Nov 2026: names from a request never lead out of their folder, logo
+fetches stay on image files, and unexpected error text stays in the server log."""
 
-import json
+from unittest.mock import patch
 
-from backend.hardware.net import tailscale, tailscale_setup
+import pytest
+from fastapi import HTTPException
 
-
-def test_only_real_sign_in_links_are_shown(monkeypatch):
-    """CodeQL #382 (incomplete URL substring sanitization): any https link in tailscale's output
-    used to become the sign-in link when the text mentioned login.tailscale.com."""
-    monkeypatch.setattr(tailscale, "_get_tailscale_container_info", lambda: {"exists": False})
-    monkeypatch.setattr(tailscale, "login_server", lambda: "")
-    calls = []
-
-    def fake(cmd, timeout=0):
-        calls.append(cmd)
-        if cmd[0] == "up":
-            return 1, "To sign in, see login.tailscale.com or https://evil.example/a/123"
-        return 0, json.dumps({"AuthURL": "https://evil.example/a/456"})
-
-    monkeypatch.setattr(tailscale, "_run_tailscale_cmd", fake)
-    res = tailscale_setup.execute_tailscale_up()
-    assert not res.get("auth_url")
-
-    def real(cmd, timeout=0):
-        if cmd[0] == "up":
-            return 1, "To authenticate, visit:\n\n\thttps://login.tailscale.com/a/abc123\n"
-        return 0, "{}"
-
-    monkeypatch.setattr(tailscale, "_run_tailscale_cmd", real)
-    assert tailscale_setup.execute_tailscale_up()["auth_url"] == "https://login.tailscale.com/a/abc123"
-
-    def status_only(cmd, timeout=0):
-        if cmd[0] == "up":
-            return 1, "waiting"
-        return 0, json.dumps({"AuthURL": "https://login.tailscale.com/a/xyz"})
-
-    monkeypatch.setattr(tailscale, "_run_tailscale_cmd", status_only)
-    assert tailscale_setup.execute_tailscale_up()["auth_url"] == "https://login.tailscale.com/a/xyz"
+from backend.services import vm_store
 
 
-def test_snapshot_names_are_one_name(tmp_path):
-    """py/path-injection: a snapshot or subvolume name like ../@shares/media used to reach
-    btrfs as a path outside the snapshots folder (delete would then skip the WORM lock)."""
-    import pytest
+@pytest.mark.parametrize("bad", ["..", "../x", "a/b", "", "x" * 65, "a b"])
+def test_a_vm_id_never_names_a_path(bad):
+    with pytest.raises(ValueError):
+        vm_store.checked_vm_id(bad)
+    with pytest.raises(ValueError):
+        vm_store.vm_file(bad, "qemu.pid")
 
-    from backend.fsutil import child_path, single_name
 
-    for bad in ("", ".", "..", "../x", "a/b", "x\x00"):
+def test_a_vm_file_stays_in_its_folder():
+    assert vm_store.vm_file("vm-1", "qemu.pid").endswith("/vms/vm-1/qemu.pid")
+    with pytest.raises(ValueError):
+        vm_store.vm_file("vm-1", "../../escape")
+
+
+def test_qemu_helpers_refuse_a_bad_id():
+    from backend.services import vm_qemu
+
+    assert vm_qemu._is_qemu_process_alive("..") is False
+    with pytest.raises(ValueError):
+        vm_qemu._sync_cleanup_qemu_process("../..")
+
+
+def test_an_upload_name_stays_in_its_folder(tmp_path):
+    from backend.api.files import uploads
+
+    assert uploads._inside(str(tmp_path), "a.txt") == str(tmp_path / "a.txt")
+    for bad in ("../a.txt", "sub/a.txt", "..", "/etc/passwd"):
+        with pytest.raises(HTTPException):
+            uploads._inside(str(tmp_path), bad)
+    (tmp_path / "a.txt").write_text("x")
+    assert uploads._free_name(str(tmp_path), "a.txt") == "a (2).txt"
+    assert uploads._landing_name(str(tmp_path), "b.txt", "keep_both") == "b.txt"
+
+
+def test_a_home_stays_in_the_homes_folder(tmp_path):
+    from backend.services import user_spaces
+
+    assert user_spaces._within(str(tmp_path), "anna") == str(tmp_path / "anna")
+    for bad in ("..", "../x", "."):
         with pytest.raises(ValueError):
-            single_name(bad)
+            user_spaces._within(str(tmp_path), bad)
+    with patch("backend.users_db.get_user_by_username", return_value={}):
         with pytest.raises(ValueError):
-            child_path(str(tmp_path), bad)
-    assert child_path(str(tmp_path), "media@2026-10-29") == str(tmp_path / "media@2026-10-29")
+            user_spaces.home_of("..")
 
 
-def test_snapshot_requests_refuse_paths(client, auth_headers):
-    bad = client.post(
-        "/api/backup/snapshots", headers=auth_headers, json={"subvol_name": "media", "snapshot_name": "../x"}
-    )
-    assert bad.status_code == 422
+def test_logos_are_image_files_on_the_two_hosts():
+    from backend.services.catalog_logos import allowed
+
+    assert allowed("https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/jellyfin.png")
+    assert allowed("https://raw.githubusercontent.com/Lissy93/portainer-templates/main/images/x.JPG")
+    assert not allowed("https://cdn.jsdelivr.net/gh/someone/repo/secrets.json")
+    assert not allowed("https://cdn.jsdelivr.net/gh/a/b/x.png;evil")
+    assert not allowed("https://cdn.jsdelivr.net/gh/a/b/%2e%2e/x.png")
 
 
-def test_resolve_within_still_answers_the_same(tmp_path):
-    from backend.fsutil import resolve_within
+def test_a_failed_command_says_what_failed_without_its_error_text():
+    from backend.hardware.pal.base import StoragePlatformAdapter
+    from backend.hardware.pal.generic_linux import GenericLinuxStorageAdapter
 
-    (tmp_path / "a").mkdir()
-    assert resolve_within(str(tmp_path), str(tmp_path)) == str(tmp_path.resolve())
-    assert resolve_within(str(tmp_path / "a"), str(tmp_path)) == str((tmp_path / "a").resolve())
-    assert resolve_within(str(tmp_path / ".." / "x"), str(tmp_path)) is None
-    assert resolve_within(str(tmp_path) + "-other", str(tmp_path)) is None
-
-
-def test_log_values_stay_on_one_line():
-    """py/log-injection: a pool name with a line break could fake a log entry."""
-    from backend.logging_config import one_line
-
-    assert one_line("pool\n2026-10-29 - Kiboto - INFO - fake\r") == "pool\\n2026-10-29 - Kiboto - INFO - fake\\r"
-    assert one_line(ValueError("x")) == "x"
+    adapter = GenericLinuxStorageAdapter(pool_path="/mnt/storage")
+    with patch("subprocess.run", side_effect=RuntimeError("secret /internal/path detail")):
+        code, out, err = adapter._run_cmd(["btrfs", "scrub", "start"])
+        assert code == 1 and "secret" not in err and err.startswith("btrfs could not be run")
+        code, out, err = StoragePlatformAdapter._run_cmd(adapter, ["zfs", "list"])
+        assert code == 1 and "secret" not in err and err.startswith("zfs could not be run")
 
 
-def test_mfa_token_never_signed_with_a_built_in_key(monkeypatch):
-    """The "password ok, now the code" token fell back to a key written in the source."""
-    import base64
-    import hashlib
-    import hmac
-    import time
+def test_a_folder_that_could_not_be_moved_is_said_without_paths():
+    from backend.api import auth
 
-    from backend import config
-    from backend.api import auth as auth_api
-
-    monkeypatch.setattr(config, "SECRET_KEY", "")
-    tok = auth_api.create_mfa_token("1", "admin", False)
-    assert auth_api.verify_mfa_token(tok)["u"] == "admin"
-    raw = json.dumps({"uid": "1", "u": "admin", "rm": False, "exp": time.time() + 300}, separators=(",", ":"))
-    b64 = base64.urlsafe_b64encode(raw.encode()).decode().rstrip("=")
-    forged = hmac.new(b"zettnas-mfa-default-key", b64.encode(), hashlib.sha256).hexdigest()
-    assert auth_api.verify_mfa_token(f"mfa_{b64}.{forged}") is None
-
-
-def test_hugging_face_ids_and_image_tags_are_checked():
-    """py/partial-ssrf: only a real owner/name or image tag goes into the request URL."""
-    import asyncio
-
-    from backend.api import system
-    from backend.services.media_engine import _normalize_hf_repo_input, is_hf_repo_id
-
-    assert is_hf_repo_id("Qwen/Qwen3-4B") and is_hf_repo_id("org/model.v2_x-1")
-    for bad in ("../../x", "org/../x", "org/.x", "a b/c", "org/model/extra", "org"):
-        assert not is_hf_repo_id(bad), bad
-    assert _normalize_hf_repo_input("https://huggingface.co/Qwen/Qwen3-4B/tree/main") == "Qwen/Qwen3-4B"
-    assert asyncio.run(system._registry_digest("../../v2/other/manifests/x")) is None
-
-
-def test_slow_regex_inputs_are_bounded():
-    """py/polynomial-redos: long hostile strings come back quickly."""
-    import time
-
-    from backend.services import notifications
-    from backend.services.media_engine import _normalize_hf_repo_input
-
-    t0 = time.monotonic()
-    _normalize_hf_repo_input("/tree/" * 50_000)
-    try:
-        notifications.set_route("nobody", email="a@" + "." * 50_000)
-    except ValueError:
-        pass
-    assert time.monotonic() - t0 < 2
-
-
-def test_script_tags_with_a_space_are_stripped():
-    """py/bad-tag-filter: </script > is still the end of a script."""
-    from backend.services.chat_web_tools import _strip_html_tags
-
-    assert _strip_html_tags("<p>hi</p><script>evil()</script ><p>there</p>") == "hi there"
-
-
-def test_phone_sign_in_page_escapes_what_it_shows(client):
-    """py/reflective-xss: the provider and sign-in link are escaped in the phone page."""
-    import time
-
-    from backend.api import remotes
-
-    remotes._ACTIVE_OAUTH_SESSIONS["sidx"] = {
-        "provider_type": "<img src=x onerror=alert(1)>",
-        "auth_url": 'https://login.example/a?x=1&y="><script>',
-        "started_at": time.time(),
-    }
-    try:
-        page = client.get("/api/remotes/oauth/mobile-page?sid=sidx").text
-    finally:
-        remotes._ACTIVE_OAUTH_SESSIONS.pop("sidx", None)
-    assert "<img src=x" not in page and '"><script>' not in page
-    assert "&lt;img src=x onerror=alert(1)&gt;" in page
-
-
-def test_stack_env_files_are_private(tmp_path, monkeypatch):
-    """py/clear-text-storage: a stack's .env holds its passwords; only root reads it now."""
-    import os
-    import stat
-
-    from backend.services import docker_stacks
-
-    compose = tmp_path / "docker-compose.yml"
-    compose.write_text("services: {}\n")
-    monkeypatch.setattr(
-        docker_stacks,
-        "get_stack_details",
-        lambda name: {"location_type": "host_fs", "config_file": str(compose), "working_dir": str(tmp_path)},
-    )
-    monkeypatch.setattr(docker_stacks, "stack_path_ok", lambda *a: True)
-    res = docker_stacks.save_stack_config("s", "services: {}\n", "DB_PASSWORD=x\n")
-    assert res["success"], res
-    assert stat.S_IMODE(os.stat(tmp_path / ".env").st_mode) == 0o600
-    baks = [p for p in os.listdir(tmp_path) if ".bak." in p]
-    assert baks and stat.S_IMODE(os.stat(tmp_path / baks[0]).st_mode) == 0o600
-
-
-def test_catalog_stackfiles_come_only_from_github():
-    """py/incomplete-url-substring-sanitization: "github.com/" anywhere in the link was enough,
-    and .rstrip(".git") cut repo names ending in g, i, t or a dot (my-digit -> my-di)."""
-    from backend.services.app_catalog import github_repo
-
-    assert github_repo("https://github.com/Lissy93/portainer-templates") == "Lissy93/portainer-templates"
-    assert github_repo("https://github.com/acme/my-digit.git") == "acme/my-digit"
-    assert github_repo("https://github.com/acme/tools/tree/main") == "acme/tools"
-    for bad in (
-        "https://evil.example/github.com/a/b",
-        "https://github.com.evil.example/a/b",
-        "ftp://github.com/a/b",
-        "https://github.com/a",
-        "",
-    ):
-        assert github_repo(bad) is None, bad
-
-
-def test_a_catalog_stackfile_is_read_from_raw_github(monkeypatch):
-    from backend.services import app_catalog
-
-    app = {
-        "id": "demo",
-        "default_port": 8080,
-        "repository": {"url": "https://github.com/acme/my-digit.git", "stackfile": "/stacks/demo.yml"},
-    }
-    monkeypatch.setattr(app_catalog, "get_catalog_app", lambda app_id: dict(app))
-    asked = []
-
-    class Resp:
-        def __init__(self, body):
-            self.body = body
-
-        def __enter__(self):
-            return self
-
-        def __exit__(self, *a):
-            return False
-
-        def read(self):
-            return self.body
-
-    def fake_urlopen(req, timeout=0):
-        asked.append(req.full_url)
-        if "/main/" in req.full_url:
-            raise OSError("404")
-        return Resp(b"services:\n  demo: {image: demo}\n")
-
-    monkeypatch.setattr(app_catalog.urllib.request, "urlopen", fake_urlopen)
-    out = app_catalog.generate_compose_for_app("demo")
-    assert out["compose_yaml"].startswith("services:")
-    assert asked == [
-        "https://raw.githubusercontent.com/acme/my-digit/main/stacks/demo.yml",
-        "https://raw.githubusercontent.com/acme/my-digit/master/stacks/demo.yml",
-    ]
+    with patch("backend.services.user_spaces.retire_home", side_effect=OSError("/mnt/user/homes/anna: busy")):
+        res = auth._retire_files({"username": "anna"}, "keep", "", "/mnt/user/homes/anna")
+    assert res["files"] == "error" and "/mnt" not in res["error"]

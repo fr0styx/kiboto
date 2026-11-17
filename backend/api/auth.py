@@ -1412,9 +1412,9 @@ def _retire_files(target: dict[str, Any], files: str, give_to: str, home: str) -
 
     try:
         return retire_home(target["username"], files, give_to, home)
-    except OSError as e:
+    except OSError:
         logger.warning("[Users] the files of %s could not be handled", target.get("username"), exc_info=True)
-        return {"files": "error", "error": str(e)}
+        return {"files": "error", "error": "The folder could not be moved or deleted. The server log says why."}
 
 
 @router.delete(
@@ -1453,7 +1453,7 @@ def delete_user_endpoint(
             from backend.services.user_data import erase_user_data
 
             erase_user_data(target)
-            files_done = _retire_files(target, files, give_to, home)
+            files_done = _retire_files(target, files, recipient["username"] if recipient else "", home)
         log_security_event(
             "user.deleted",
             "success",

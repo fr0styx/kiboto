@@ -98,11 +98,21 @@ async def fs_inbox_upload(
 ON_CONFLICT = ("keep_both", "ask", "replace")
 
 
+def _inside(folder: str, filename: str) -> str:
+    """folder/filename, refused when the name would lead out of the folder (CodeQL py/path-injection;
+    the routes already keep only a plain file name)."""
+    root = os.path.normpath(folder)
+    path = os.path.normpath(os.path.join(root, filename))
+    if os.path.dirname(path) != root:
+        raise HTTPException(status_code=400, detail="Invalid filename")
+    return path
+
+
 def _free_name(folder: str, filename: str) -> str:
     """ "name (2).ext", "name (3).ext"...: the first one nothing in the folder has."""
     stem, ext = os.path.splitext(filename)
     n, candidate = 1, filename
-    while os.path.lexists(os.path.join(folder, candidate)):
+    while os.path.lexists(_inside(folder, candidate)):
         n += 1
         candidate = f"{stem} ({n}){ext}"
     return candidate
@@ -118,7 +128,7 @@ def _landing_name(folder: str, filename: str, on_conflict: str) -> str:
     """The name an upload will have in `folder`, before any byte of it is stored."""
     if on_conflict not in ON_CONFLICT:
         raise HTTPException(status_code=400, detail="on_conflict is keep_both, ask or replace.")
-    target = os.path.join(folder, filename)
+    target = _inside(folder, filename)
     if not os.path.lexists(target):
         return filename
     if on_conflict == "ask":

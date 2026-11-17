@@ -67,6 +67,10 @@ def _pid_is_machine(pid: int, vm_id: str) -> bool:
 
 def _is_qemu_process_alive(vm_id: str) -> bool:
     """Checks whether the QEMU process for the specified VM is currently alive."""
+    try:
+        vm_id = vm_store.checked_vm_id(vm_id)
+    except ValueError:
+        return False
     entry = vm_store._RUNNING_QEMU_PROCS.get(vm_id)
     if entry:
         proc = entry.get("proc")
@@ -82,7 +86,7 @@ def _is_qemu_process_alive(vm_id: str) -> bool:
             vm_store._RUNNING_QEMU_PROCS.pop(vm_id, None)
             return False
 
-    pid_file = os.path.join(DATA_DIR, "vms", vm_id, "qemu.pid")
+    pid_file = vm_store.vm_file(vm_id, "qemu.pid")
     if os.path.exists(pid_file):
         try:
             with open(pid_file) as f:
@@ -762,12 +766,13 @@ def _start_qemu(target_vm: dict[str, Any], vnc_port: int) -> tuple[bool, str | N
 
 def _sync_cleanup_qemu_process(vm_id: str, force: bool = False):
     """Terminates or kills the QEMU process and removes temporary sockets and PID files."""
+    vm_id = vm_store.checked_vm_id(vm_id)
     entry = vm_store._RUNNING_QEMU_PROCS.pop(vm_id, None)
     proc = entry.get("proc") if entry else None
     pid = entry.get("pid") if entry else None
 
     if not pid:
-        pid_file = os.path.join(DATA_DIR, "vms", vm_id, "qemu.pid")
+        pid_file = vm_store.vm_file(vm_id, "qemu.pid")
         if os.path.exists(pid_file):
             try:
                 with open(pid_file) as f:
@@ -792,7 +797,7 @@ def _sync_cleanup_qemu_process(vm_id: str, force: bool = False):
         except OSError:
             pass
 
-    pid_file = os.path.join(DATA_DIR, "vms", vm_id, "qemu.pid")
+    pid_file = vm_store.vm_file(vm_id, "qemu.pid")
     if os.path.exists(pid_file):
         try:
             os.remove(pid_file)

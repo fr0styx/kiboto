@@ -103,7 +103,11 @@ def test_commands_report_failures_as_codes(monkeypatch):
 
     a = GenericLinuxStorageAdapter(pool_path="/tmp/kb-pool")
     monkeypatch.setattr(subprocess, "run", lambda *x, **k: (_ for _ in ()).throw(RuntimeError("boom")))
-    assert a._run_cmd(["zfs", "list"]) == (1, "", "boom")
+    assert a._run_cmd(["zfs", "list"]) == (
+        1,
+        "",
+        "zfs could not be run. The server log says why.",
+    )  # the text stays in the log
 
 
 @pytest.mark.parametrize(

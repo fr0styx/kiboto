@@ -98,5 +98,8 @@ def test_a_folder_that_cannot_be_moved_is_reported(client, auth_headers, pool, m
 
     monkeypatch.setattr(user_spaces, "_rename", stuck)
     r = _delete(client, auth_headers, user)
-    assert r.status_code == 200 and r.json()["files"] == {"files": "error", "error": "busy"}
+    assert r.status_code == 200 and r.json()["files"] == {
+        "files": "error",
+        "error": "The folder could not be moved or deleted. The server log says why.",
+    }
     assert not get_user_by_username("del_eva")  # the account is gone either way

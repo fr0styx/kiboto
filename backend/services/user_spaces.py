@@ -47,7 +47,18 @@ def home_of(username: str) -> str:
     from backend.users_db import get_user_by_username
 
     user = get_user_by_username(username) or {}
-    return user.get("home_directory") or os.path.join(homes_root(), username.lower())
+    if user.get("home_directory"):
+        return user["home_directory"]
+    return _within(homes_root(), username.lower())
+
+
+def _within(root: str, name: str) -> str:
+    """root/name, refused when the name would lead out of root (CodeQL py/path-injection)."""
+    base = os.path.normpath(root)
+    path = os.path.normpath(os.path.join(base, name))
+    if not path.startswith(base + os.sep):
+        raise ValueError("Not a folder inside " + base)
+    return path
 
 
 def quota_of(username: str) -> int:
@@ -128,13 +139,13 @@ def retire_home(username: str, files: str, give_to: str = "", home: str | None =
         _remove(home)
         return {"files": "deleted"}
     if files == "give":
-        dest = _free_name(os.path.join(ensure_home(give_to)["home"], f"From {username}"))
+        dest = _free_name(_within(ensure_home(give_to)["home"], f"From {os.path.basename(username)}"))
         os.makedirs(dest)
         for entry in os.listdir(home):
             shutil.move(os.path.join(home, entry), dest)
         _remove(home)  # empty now
         return {"files": "given", "to": give_to, "where": dest}
-    dest = _free_name(os.path.join(homes_root(), f"{username.lower()}-former-{time.strftime('%Y-%m-%d')}"))
+    dest = _free_name(_within(homes_root(), f"{os.path.basename(username).lower()}-former-{time.strftime('%Y-%m-%d')}"))
     _rename(home, dest)
     return {"files": "kept", "where": dest}
 

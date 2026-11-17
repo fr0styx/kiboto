@@ -880,10 +880,11 @@ class RagLearningMixin:
                 for r in failed_rows
                 if self._check_post_rbac(r["canonical_path"], principal)
             ]
-        except Exception as e:
+        except Exception:
+            logger.warning("Kib status could not be read", exc_info=True)
             return {
                 "kib_status": "Error",
-                "status_reason": str(e),
+                "status_reason": "Kib's status could not be read. The server log says why.",
                 "succeeded_count": 0,
                 "failed_count": 0,
                 "deferred_count": 0,

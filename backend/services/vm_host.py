@@ -210,7 +210,7 @@ def get_kvm_status() -> dict[str, Any]:
                     cgroup_restricted = True
                 probe_error = f"PermissionError: errno={pe.errno} ({os.strerror(pe.errno or 0)})"
             except OSError as oe:
-                probe_error = f"OSError: {oe}"
+                probe_error = f"OSError: errno={oe.errno} ({os.strerror(oe.errno or 0)})"
 
     vmx = False
     svm = False

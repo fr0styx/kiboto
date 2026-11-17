@@ -86,6 +86,24 @@ _MAC_RE = re.compile(r"[0-9a-fA-F]{2}(:[0-9a-fA-F]{2}){5}")
 _VM_ID_RE = re.compile(r"[A-Za-z0-9_-]{1,64}")
 
 
+def checked_vm_id(vm_id: Any) -> str:
+    """A VM id that is safe in a file name, or ValueError: "..", slashes and the like never name a
+    path (CodeQL py/path-injection)."""
+    vm_id = str(vm_id or "")
+    if not _VM_ID_RE.fullmatch(vm_id):
+        raise ValueError("Not a virtual machine id.")
+    return vm_id
+
+
+def vm_file(vm_id: Any, name: str) -> str:
+    """DATA_DIR/vms/<vm_id>/<name>, refused when it would leave the VM's own folder."""
+    root = os.path.realpath(os.path.join(DATA_DIR, "vms"))
+    path = os.path.normpath(os.path.join(root, checked_vm_id(vm_id), name))
+    if not path.startswith(root + os.sep):
+        raise ValueError("Not a virtual machine file.")
+    return path
+
+
 def _primary_disk_problem(vm: dict[str, Any], disk_path: str) -> str | None:
     """Why the VM's main disk settings can't be given to QEMU, or None."""
     if not _confined(disk_path, _vm_disk_roots(), "file"):

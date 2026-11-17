@@ -473,13 +473,16 @@ async def upload_iso_file(
     """Streams uploaded ISO file directly into NAS storage (/mnt/user/isos)."""
     target_dir = vm_host._get_target_iso_dir()
     raw_name = filename or request.headers.get("x-filename") or f"uploaded-{uuid.uuid4().hex[:6]}.iso"
-    clean_name = os.path.basename(raw_name)
+    clean_name = re.sub(r"[^A-Za-z0-9 ._()+-]", "_", os.path.basename(raw_name)).strip(" .") or "uploaded"
     if not clean_name.lower().endswith((".iso", ".img")):
         clean_name += ".iso"
 
     upload_id = uuid.uuid4().hex[:8]
-    tmp_path = os.path.join(target_dir, f".tmp_{upload_id}_{clean_name}")
-    out_path = os.path.join(target_dir, clean_name)
+    root = os.path.normpath(os.path.abspath(target_dir))
+    tmp_path = os.path.normpath(os.path.join(root, f".tmp_{upload_id}_{clean_name}"))
+    out_path = os.path.normpath(os.path.join(root, clean_name))
+    if not (tmp_path.startswith(root + os.sep) and out_path.startswith(root + os.sep)):
+        raise HTTPException(status_code=400, detail="Not a file name for an ISO image.")
     total_written = 0
     hasher = hashlib.sha256()
 

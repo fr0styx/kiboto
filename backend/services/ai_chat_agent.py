@@ -2363,8 +2363,8 @@ async def stream_agentic_chat(
                 ignored("backend.services.ai_chat_agent.stream_agentic_chat")
         raise
     except Exception as ex:
-        logger.error(f"[Kib] Streaming exception: {ex}")
-        yield f"event: error\ndata: {json.dumps({'error': str(ex)})}\n\n"
+        logger.error("[Kib] Streaming exception: %s", ex, exc_info=True)
+        yield f"event: error\ndata: {json.dumps({'error': 'Kib stopped because of an error. The server log says why.'})}\n\n"
     finally:
         cancel_event.set()
         with Z_STATE.lock:

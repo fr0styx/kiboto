@@ -343,8 +343,9 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
             return 127, "", f"Command not found: {cmd[0]}"
         except subprocess.TimeoutExpired:
             return 124, "", "Command timed out"
-        except Exception as e:
-            return 1, "", str(e)
+        except Exception:
+            logger.warning("[PAL] %s could not be run", cmd[0], exc_info=True)
+            return 1, "", f"{cmd[0]} could not be run. The server log says why."
 
     def _resolve_disk_path(self, disk: str) -> str:
         """

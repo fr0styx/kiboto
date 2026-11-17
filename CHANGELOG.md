@@ -504,6 +504,13 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   steps that name who switches the NAS off (in red when nothing can), and "Will it start again by itself?" with its
   honest answer. Everything comes from one answer of the server, so the page cannot contradict itself.
 
+#### Security
+
+- **Code-scanning fixes**: a virtual machine id or an uploaded file name from a request can no longer name a path
+  outside its own folder; "give the files to" uses the recipient's account name; unexpected error text (paths,
+  internals) stays in the server log instead of reaching the page; the logo proxy fetches only image files from its
+  two hosts.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

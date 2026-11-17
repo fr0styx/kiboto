@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import hashlib
 import os
+import re
 import time
 import urllib.error
 import urllib.parse
@@ -22,6 +23,9 @@ from backend.config import DATA_DIR, logger
 
 LOGO_HOSTS = ("cdn.jsdelivr.net", "raw.githubusercontent.com")
 MAX_BYTES = 512 * 1024
+# a logo is an image file: plain path characters and an image extension, nothing else on those hosts
+# (a query is dropped when the address is rebuilt)
+LOGO_PATH = re.compile(r"/[A-Za-z0-9 ._~@+/()-]{1,300}\.(?:png|jpe?g|gif|webp)", re.IGNORECASE)
 TIMEOUT = 8.0
 MISS_SECS = 24 * 3600  # a logo that couldn't be fetched isn't asked for again for a day
 TYPES = {  # what the server says it is -> the bytes it must start with
@@ -47,7 +51,8 @@ def allowed(url: str) -> bool:
         and u.port in (None, 443)
         and not u.username
         and not u.password
-        and ".." not in u.path
+        and ".." not in urllib.parse.unquote(u.path)
+        and bool(LOGO_PATH.fullmatch(urllib.parse.unquote(u.path)))
     )
 
 
