@@ -260,15 +260,24 @@ def test_the_sftp_port_passes_bytes_on_and_closes_blocked_addresses():
 
 
 def test_a_connection_is_closed_when_rclone_is_not_there():
+    # a port held bound but not listening: connecting is refused, and no other test worker can
+    # take it in between (a "free" port taken by a parallel worker made CI wait forever, 17 Nov)
+    held = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    held.bind(("127.0.0.1", 0))
+    dead_port = held.getsockname()[1]
+
     async def run():
-        front = await sftp_front.serve(0, _free_port(), lambda ip: False, host="127.0.0.1")
+        front = await sftp_front.serve(0, dead_port, lambda ip: False, host="127.0.0.1")
         port = front.sockets[0].getsockname()[1]
         reader, writer = await asyncio.open_connection("127.0.0.1", port)
         assert await asyncio.wait_for(reader.read(10), 5) == b""
         writer.close()
         front.close()
 
-    asyncio.run(run())
+    try:
+        asyncio.run(run())
+    finally:
+        held.close()
 
 
 def test_the_sftp_front_stops_rclone_when_it_is_stopped(tmp_path, monkeypatch):
