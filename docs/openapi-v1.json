@@ -2758,6 +2758,19 @@
     "title": "ClosePort",
     "type": "object"
    },
+   "ComesBackAnswer": {
+    "properties": {
+     "by_itself": {
+      "title": "By Itself",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "by_itself"
+    ],
+    "title": "ComesBackAnswer",
+    "type": "object"
+   },
    "ConfigBackupRequest": {
     "properties": {
      "passphrase": {
@@ -62812,6 +62825,52 @@
     "x-required-scopes": [
      "hardware:read",
      "system:view"
+    ]
+   }
+  },
+  "/api/v1/power/comes-back": {
+   "post": {
+    "description": "The answer to Power's one question after a power cut: did the NAS switch on by itself?",
+    "operationId": "post_power_comes_back_api_v1_power_comes_back_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ComesBackAnswer"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Post Power Comes Back Api V1 Power Comes Back Post",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Post Power Comes Back",
+    "tags": [
+     "UPS & Power Integrity"
+    ],
+    "x-required-scopes": [
+     "system:config"
     ]
    }
   },

@@ -102,6 +102,21 @@ async def get_power_summary() -> dict[str, Any]:
     return await asyncio.to_thread(summary)
 
 
+class ComesBackAnswer(BaseModel):
+    by_itself: bool
+
+
+@router.post("/power/comes-back", dependencies=[Depends(require_scope("system:config"))])
+async def post_power_comes_back(req: ComesBackAnswer) -> dict[str, Any]:
+    """The answer to Power's one question after a power cut: did the NAS switch on by itself?"""
+    from backend.services.power_summary import answer_comes_back
+
+    try:
+        return await asyncio.to_thread(answer_comes_back, req.by_itself)
+    except ValueError as e:
+        raise HTTPException(status_code=409, detail=str(e)) from e
+
+
 @router.get("/ups/shutdown-path", dependencies=[Depends(require_scope("hardware:read", "system:view"))])
 async def get_ups_shutdown_path():
     """Who switches the NAS off when the battery runs out, for the Power page's permanent line (SET-15)."""

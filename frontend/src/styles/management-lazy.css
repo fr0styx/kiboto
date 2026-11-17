@@ -583,3 +583,4 @@
 .pwc-line { margin: 0; flex: 1 1 260px; font-size: var(--kb-fs-xs); color: var(--kb-text-soft); line-height: 1.45; }
 .pwc-item .ups-shutdown-line { flex-basis: 100%; }
 #mgmt-sec-ups:not([data-power="none"]):not([data-power="silent"]) #btn-refresh-ups { display: none; }
+.pw-ask { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }

@@ -8311,4 +8311,8 @@ export default {
   "pws.desc": "会先要求正在运行的虚拟机关闭。所有正在使用 NAS 的人都会断开连接，直到它恢复。",
   "pws.reboot": "重启 NAS",
   "pws.shutdown": "关闭 NAS",
+  "pwr.back_ask": "{date} 停电后：NAS 是自己重新开机的吗？",
+  "pwr.back_yes": "是，自己开机的",
+  "pwr.back_no_btn": "不是，有人开的机",
+  "pwr.back_saved": "谢谢。答案会保留在此页面上。",
 };

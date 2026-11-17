@@ -8311,4 +8311,8 @@ export default {
   "pws.desc": "Running virtual machines are asked to shut down first. Everyone using the NAS loses their connection until it is back.",
   "pws.reboot": "Restart the NAS",
   "pws.shutdown": "Shut down the NAS",
+  "pwr.back_ask": "After the power cut on {date}: did the NAS switch on again by itself?",
+  "pwr.back_yes": "Yes, by itself",
+  "pwr.back_no_btn": "No, someone switched it on",
+  "pwr.back_saved": "Thank you. The answer is kept on this page.",
 };

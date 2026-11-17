@@ -116,3 +116,17 @@ describe('the first screen', () => {
     expect(document.getElementById('ups-show-setup')?.hidden).toBe(true);
   });
 });
+
+describe("one question after a real power cut", () => {
+  it("asks whether the NAS switched on by itself and passes the answer on", () => {
+    expect(comesBack({ comes_back: { answer: "ask", at: 1762900000 } }).line).toMatch(/^After the power cut on .+: did the NAS switch on again by itself\?$/);
+    document.body.innerHTML = "<div id=\"b\"></div>";
+    const box = /** @type {HTMLElement} */ (document.getElementById("b"));
+    const answers = [];
+    renderPowerTop(box, { state: "protected", numbers: {}, switch_off: { by: "kiboto", ok: true }, rule: RULE, checks: [], comes_back: { answer: "ask", at: 1762900000 } }, (yes) => answers.push(yes));
+    expect(box.querySelector(".pw-back")?.hasAttribute("open")).toBe(true);
+    /** @type {HTMLElement} */ (box.querySelector("[data-back=\"yes\"]")).click();
+    /** @type {HTMLElement} */ (box.querySelector("[data-back=\"no\"]")).click();
+    expect(answers).toEqual([true, false]);
+  });
+});

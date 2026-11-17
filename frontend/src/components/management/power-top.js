@@ -126,6 +126,7 @@ export function whenPowerGoes(s) {
 export function comesBack(s) {
   const c = s?.comes_back || { answer: 'not_proven' };
   const why = t('pwr.back_why', 'Whether the NAS switches on again when the power returns depends on its own start-up setting (often called "Restore on AC power loss" in the BIOS) and, with a UPS, on whether the UPS switches its sockets back on.');
+  if (c.answer === 'ask') return { line: t('pwr.back_ask', 'After the power cut on {date}: did the NAS switch on again by itself?', { date: formatDateTime(c.at * 1000) }), detail: why, ask: true };
   if (c.answer === 'host') return { line: t('pwr.back_host', '{host} decides this.', { host: c.host }), detail: why };
   if (c.answer === 'proven') return { line: t('pwr.back_proven', 'Yes, proven on {date}.', { date: formatDateTime(c.at * 1000) }), detail: why };
   if (c.answer === 'no') return { line: t('pwr.back_no', 'No: after the power cut on {date} the NAS did not start again by itself.', { date: formatDateTime(c.at * 1000) }), detail: why };
@@ -148,8 +149,9 @@ export function stateFromReading(ups) {
  * Draws the first screen into the status box; keeps the reader's open sections open.
  * @param {HTMLElement | null} box
  * @param {any} s the /api/power answer
+ * @param {(byItself: boolean) => unknown} [onAnswer] the owner's answer to "did it switch on by itself?"
  */
-export function renderPowerTop(box, s) {
+export function renderPowerTop(box, s, onAnswer) {
   if (!box) return;
   const open = { when: box.querySelector('.pw-when')?.hasAttribute('open'), back: box.querySelector('.pw-back')?.hasAttribute('open') };
   const state = s?.state || 'none';
@@ -164,7 +166,10 @@ export function renderPowerTop(box, s) {
     ${nums.length ? `<div class="pw-numbers">${nums.map((x) => `<span class="pw-number">${escapeHtml(x)}</span>`).join('')}</div>` : ''}
     <details class="pw-when${when.bad ? ' is-bad' : ''}"${open.when ? ' open' : ''}><summary><span class="pw-q">${escapeHtml(t('pwr.when_title', 'When the power goes out'))}</span> <span id="ups-shutdown-line" class="pw-a">${escapeHtml(when.line)}</span></summary>
       <ol class="pw-steps">${when.steps.map((x, i) => `<li${when.bad && i === when.steps.length - 1 ? ' class="is-bad"' : ''}>${escapeHtml(x)}</li>`).join('')}</ol></details>
-    <details class="pw-back"${open.back ? ' open' : ''}><summary><span class="pw-q">${escapeHtml(t('pwr.back_title', 'Will it start again by itself?'))}</span> <span id="ups-restart-line" class="pw-a">${escapeHtml(back.line)}</span></summary>
-      <p class="pw-detail">${escapeHtml(back.detail)}</p></details>
+    <details class="pw-back"${open.back || back.ask ? ' open' : ''}><summary><span class="pw-q">${escapeHtml(t('pwr.back_title', 'Will it start again by itself?'))}</span> <span id="ups-restart-line" class="pw-a">${escapeHtml(back.line)}</span></summary>
+      <p class="pw-detail">${escapeHtml(back.detail)}</p>${back.ask ? `<div class="pw-ask">
+        <button type="button" class="btn-pill-toggle is-primary" data-back="yes">${escapeHtml(t('pwr.back_yes', 'Yes, by itself'))}</button>
+        <button type="button" class="btn-pill-toggle" data-back="no">${escapeHtml(t('pwr.back_no_btn', 'No, someone switched it on'))}</button></div>` : ''}</details>
     <button type="button" id="ups-show-setup" class="btn-pill-toggle ups-show-setup" hidden>${escapeHtml(t('upx.setup_ups', 'Set up a UPS'))}</button>`;
+  box.querySelectorAll('[data-back]').forEach((btn) => btn.addEventListener('click', () => onAnswer?.(/** @type {HTMLElement} */ (btn).dataset.back === 'yes')));
 }

@@ -638,7 +638,12 @@ async def lifespan(app: FastAPI):
 
     start_tls(app)  # HTTPS beside HTTP once a certificate exists (audit A9)
     https_task = asyncio.create_task(renew_loop())
-    from backend.services import snmp_agent
+    from backend.services import power_comes_back, snmp_agent
+
+    try:
+        power_comes_back.ask_after_start()  # after Kiboto's own shutdown for a power cut, Power asks once
+    except OSError as e:
+        logger.warning("Power: the last power cut was not read: %s", e)
 
     await asyncio.to_thread(snmp_agent.apply)  # the SNMP v3 agent, only while it is on
     try:

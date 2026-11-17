@@ -412,6 +412,9 @@ def execute_atomic_failsafe_shutdown(charge: float | None, runtime: float | None
     container_timeout = int(cfg.get("container_shutdown_timeout_sec", 30))
     _step("stop the apps", graceful_docker_teardown, container_timeout)
     # Step 3: Flush filesystem buffers to physical disks
+    from backend.services import power_comes_back
+
+    _step("remember the power cut", power_comes_back.remember_power_cut)  # asked about after the next start
     _step("flush the disks", os.sync)
 
     # Step 4a: on Unraid and TrueNAS the host's own UPS service shuts the server down (D10)
@@ -442,6 +445,7 @@ def execute_atomic_failsafe_shutdown(charge: float | None, runtime: float | None
         if cfg.get("poweroff_ups"):
             _step("switch the UPS sockets off", send_ups_cut_power)
         return
+    _step("forget the power cut", power_comes_back.forget_power_cut)  # nothing was switched off
     msg = (
         "Kiboto could not shut down this server on its own (no working host shutdown command). "
         "The UPS outlets were NOT switched off. Shut the NAS down by hand now to avoid a hard power loss."

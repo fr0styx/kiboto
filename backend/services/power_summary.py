@@ -20,10 +20,12 @@ import time
 from typing import Any
 
 from backend.config import DATA_DIR
-from backend.fsutil import read_json
 from backend.hardware import ups_state
+from backend.services import power_comes_back
+from backend.services.power_comes_back import ask_after_start, forget_power_cut, remember_power_cut
 
-COMES_BACK_FILE = os.path.join(DATA_DIR, "power_comes_back.json")
+__all__ = ["ask_after_start", "forget_power_cut", "remember_power_cut", "summary"]
+
 HISTORY_ROWS = 5
 LOOK_BACK_ROWS = 50  # how far back the last battery test is looked for
 
@@ -73,6 +75,12 @@ def state_of(ups: dict[str, Any], path: dict[str, Any], outage: dict[str, Any], 
     return "protected", ""
 
 
+def answer_comes_back(by_itself: bool) -> dict[str, Any]:
+    """The owner's answer to that one question: proven on the date of the cut, or not."""
+    power_comes_back.answer(by_itself)
+    return comes_back("kiboto")
+
+
 def comes_back(owner: str) -> dict[str, Any]:
     """Will the NAS start again by itself after a power cut? Proven only after a real one (Power
     decision 6); on Unraid and TrueNAS the host decides."""
@@ -80,10 +88,12 @@ def comes_back(owner: str) -> dict[str, Any]:
 
     if owner in HOST_OWNED:
         return {"answer": "host", "host": HOST_OWNED[owner]}
-    rec = read_json(COMES_BACK_FILE, {}) or {}
-    if isinstance(rec, dict) and rec.get("proven_at"):
+    rec = power_comes_back.record()
+    if rec.get("ask_at"):
+        return {"answer": "ask", "at": rec["ask_at"]}
+    if rec.get("proven_at"):
         return {"answer": "proven", "at": rec["proven_at"]}
-    if isinstance(rec, dict) and rec.get("failed_at"):
+    if rec.get("failed_at"):
         return {"answer": "no", "at": rec["failed_at"]}
     return {"answer": "not_proven"}
 

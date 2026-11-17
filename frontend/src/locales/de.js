@@ -8311,4 +8311,8 @@ export default {
   "pws.desc": "Laufende virtuelle Maschinen werden zuerst gebeten, sich zu beenden. Alle, die das NAS nutzen, verlieren die Verbindung, bis es wieder da ist.",
   "pws.reboot": "NAS neu starten",
   "pws.shutdown": "NAS herunterfahren",
+  "pwr.back_ask": "Nach dem Stromausfall am {date}: Ist das NAS von selbst wieder angegangen?",
+  "pwr.back_yes": "Ja, von selbst",
+  "pwr.back_no_btn": "Nein, jemand hat es eingeschaltet",
+  "pwr.back_saved": "Danke. Die Antwort bleibt auf dieser Seite.",
 };

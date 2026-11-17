@@ -8311,4 +8311,8 @@ export default {
   "pws.desc": "Primero se pide a las máquinas virtuales en marcha que se apaguen. Quien esté usando el NAS pierde la conexión hasta que vuelva.",
   "pws.reboot": "Reiniciar el NAS",
   "pws.shutdown": "Apagar el NAS",
+  "pwr.back_ask": "Tras el corte de luz del {date}: ¿el NAS volvió a encenderse solo?",
+  "pwr.back_yes": "Sí, solo",
+  "pwr.back_no_btn": "No, alguien lo encendió",
+  "pwr.back_saved": "Gracias. La respuesta se guarda en esta página.",
 };

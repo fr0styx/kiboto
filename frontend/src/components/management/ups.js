@@ -209,7 +209,15 @@ async function renderPowerSummary(ups) {
   if (!box) return;
   const asked = await api.get('/api/power').catch(() => null);
   const summary = asked && asked.state ? asked : stateFromReading(ups);
-  renderPowerTop(box, summary);
+  renderPowerTop(box, summary, async (byItself) => {
+    try {
+      await api.post('/api/power/comes-back', { by_itself: byItself });
+      showToast(t('pwr.back_saved', 'Thank you. The answer is kept on this page.'), 'success');
+    } catch (err) {
+      showToast(/** @type {Error} */ (err).message, 'error');
+    }
+    fetchAndRenderUpsTelemetry();
+  });
   renderPowerCheck(document.getElementById('power-check'), summary);
   renderPowerSwitch(document.getElementById('power-switch'));
   const state = box.dataset.state || 'none';

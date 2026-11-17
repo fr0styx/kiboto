@@ -5,6 +5,7 @@ import time
 
 import pytest
 
+from backend.services import power_comes_back
 from backend.services import power_summary as ps
 
 CFG = {
@@ -71,7 +72,7 @@ def test_the_four_checks():
 
 
 def test_starts_again_by_itself(tmp_path, monkeypatch):
-    monkeypatch.setattr(ps, "COMES_BACK_FILE", str(tmp_path / "back.json"))
+    monkeypatch.setattr(power_comes_back, "COMES_BACK_FILE", str(tmp_path / "back.json"))
     assert ps.comes_back("unraid") == {"answer": "host", "host": "Unraid"}
     assert ps.comes_back("kiboto") == {"answer": "not_proven"}
     (tmp_path / "back.json").write_text(json.dumps({"proven_at": 1700000000}))
@@ -81,7 +82,7 @@ def test_starts_again_by_itself(tmp_path, monkeypatch):
 
 
 def test_the_whole_answer(monkeypatch, tmp_path):
-    monkeypatch.setattr(ps, "COMES_BACK_FILE", str(tmp_path / "back.json"))
+    monkeypatch.setattr(power_comes_back, "COMES_BACK_FILE", str(tmp_path / "back.json"))
     monkeypatch.setattr("backend.services.ups_watchdog.last_practice", lambda: {"at": 1, "ok": True})
     events = [{"ts": i, "event_type": "outage"} for i in range(7)]
     s = ps.summary(
@@ -129,7 +130,7 @@ def test_who_switches_the_nas_off_is_asked_once_a_minute(monkeypatch):
 
 
 def test_the_last_battery_test_is_found_further_back(monkeypatch, tmp_path):
-    monkeypatch.setattr(ps, "COMES_BACK_FILE", str(tmp_path / "back.json"))
+    monkeypatch.setattr(power_comes_back, "COMES_BACK_FILE", str(tmp_path / "back.json"))
     monkeypatch.setattr("backend.services.ups_watchdog.last_practice", lambda: {})
     events = [{"ts": 10 - i, "event_type": "OUTAGE_RECOVERED"} for i in range(6)]
     events.append({"ts": 2, "event_type": "SELF_TEST", "action_taken": "accepted"})
@@ -137,3 +138,53 @@ def test_the_last_battery_test_is_found_further_back(monkeypatch, tmp_path):
     assert s["tests"]["battery"] == {"at": 2, "text": "accepted"} and len(s["history"]) == 5
     s = ps.summary(ups=ups(), path=OK_PATH, outage=QUIET, cfg=CFG, events=[])
     assert s["tests"] == {"practice": None, "battery": None}
+
+
+def test_one_question_after_a_real_power_cut(monkeypatch, tmp_path):
+    """Power decision 6: "starts again by itself" is proven only by a real power cut, from one question."""
+    monkeypatch.setattr(power_comes_back, "COMES_BACK_FILE", str(tmp_path / "back.json"))
+    assert ps.ask_after_start() is False  # an ordinary start asks nothing
+    ps.remember_power_cut(1700000000)
+    ps.forget_power_cut()  # the host command failed: nothing was switched off
+    assert ps.ask_after_start() is False
+    ps.remember_power_cut(1700000000)
+    assert ps.ask_after_start() is True
+    assert ps.comes_back("kiboto") == {"answer": "ask", "at": 1700000000}
+    assert ps.answer_comes_back(True) == {"answer": "proven", "at": 1700000000}
+    with pytest.raises(ValueError):
+        ps.answer_comes_back(True)  # asked once
+    ps.remember_power_cut(1700000500)
+    ps.ask_after_start()
+    assert ps.answer_comes_back(False) == {"answer": "no", "at": 1700000500}
+
+
+def test_the_answer_route(client, auth_headers, monkeypatch, tmp_path):
+    monkeypatch.setattr(power_comes_back, "COMES_BACK_FILE", str(tmp_path / "back.json"))
+    assert client.post("/api/power/comes-back", json={"by_itself": True}, headers=auth_headers).status_code == 409
+    ps.remember_power_cut(1700000000)
+    ps.ask_after_start()
+    r = client.post("/api/power/comes-back", json={"by_itself": True}, headers=auth_headers)
+    assert r.json() == {"answer": "proven", "at": 1700000000}
+
+
+def test_the_safe_shutdown_remembers_the_cut_and_forgets_it_when_nothing_switched_off(monkeypatch, tmp_path):
+    from backend.services import ups_watchdog
+
+    monkeypatch.setattr(power_comes_back, "COMES_BACK_FILE", str(tmp_path / "back.json"))
+    for name in (
+        "_say_shutdown_starts",
+        "nut_forced_shutdown",
+        "_pause_copy",
+        "_machines_first",
+        "graceful_docker_teardown",
+        "log_ups_event",
+        "add_event",
+    ):
+        monkeypatch.setattr(ups_watchdog, name, lambda *a, **k: None)
+    monkeypatch.setattr(ups_watchdog, "shutdown_owner", lambda: "kiboto")
+    monkeypatch.setattr(ups_watchdog, "load_ups_config", lambda: {})
+    monkeypatch.setattr(ups_watchdog, "signal_host_powerdown", lambda: True)
+    monkeypatch.setattr(ups_watchdog, "_failsafe_engaged", False)
+    monkeypatch.setattr(ups_watchdog, "_host_shutdown_started", False)
+    ups_watchdog.execute_atomic_failsafe_shutdown(5, 2, "battery low")
+    assert "cut_at" in json.loads((tmp_path / "back.json").read_text())

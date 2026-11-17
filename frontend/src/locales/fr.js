@@ -8311,4 +8311,8 @@ export default {
   "pws.desc": "Les machines virtuelles en marche sont d’abord invitées à s’arrêter. Tous ceux qui utilisent le NAS perdent la connexion jusqu’à son retour.",
   "pws.reboot": "Redémarrer le NAS",
   "pws.shutdown": "Arrêter le NAS",
+  "pwr.back_ask": "Après la coupure du {date} : le NAS s’est-il rallumé tout seul ?",
+  "pwr.back_yes": "Oui, tout seul",
+  "pwr.back_no_btn": "Non, quelqu’un l’a rallumé",
+  "pwr.back_saved": "Merci. La réponse reste sur cette page.",
 };
