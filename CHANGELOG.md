@@ -374,6 +374,9 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **A guide to Power** (docs/POWER.md): what happens when the power goes out, how the NAS comes back by itself,
   Restart and Shut down, and switching off at night.
 
+- **A guide to shared folders** (docs/SHARED_FOLDERS.md): sharing a folder, who can open it, connecting from
+  Windows and Mac, and Time Machine backups.
+
 #### Fixes
 
 - **The File Explorer's details panel no longer hides file names**: it lies over the list instead of
