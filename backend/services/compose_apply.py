@@ -495,20 +495,38 @@ def _ensure_network(docker: Docker, built: dict[str, Any]) -> None:
                 raise ComposeError(f"The volume {name} could not be made: {resp}")
 
 
-def _wait_running(docker: Docker, cid: str, healthcheck: bool, wait: Callable[[float], Any], limit: float) -> str:
-    """'' once it runs (and is healthy where it has a check), else why not."""
-    waited = 0.0
+SETTLE_SECS = 5  # without a health check, a part must keep running this long
+
+
+def _wait_running(
+    docker: Docker, cid: str, healthcheck: bool, wait: Callable[[float], Any], limit: float, settle: float = SETTLE_SECS
+) -> str:
+    """'' once it runs and keeps running (or is healthy where it has a check), else why not. Tried
+    on a real Docker engine: a container that exits a moment after its start was "running" at the
+    first look, so a broken file replaced a working app instead of going back."""
+    waited = steady = 0.0
+    restarts = None
     while True:
         st, info = docker.request("GET", f"/containers/{cid}/json")
         state = (info or {}).get("State") or {} if st == 200 else {}
         if st == 200 and not state.get("Running") and state.get("Status") in ("exited", "dead"):
             return f"stopped (exit code {state.get('ExitCode')})"
+        count = (info or {}).get("RestartCount", 0) if st == 200 else 0
+        if state.get("Restarting") or (restarts is not None and count > restarts):
+            return f"keeps restarting (exit code {state.get('ExitCode')})"
+        restarts = count if restarts is None else restarts
         health = (state.get("Health") or {}).get("Status")
-        if state.get("Running") and (not healthcheck or health == "healthy"):
-            return ""
         if health == "unhealthy":
             return "its health check failed"
-        if waited >= limit:
+        if state.get("Running") and healthcheck and health == "healthy":
+            return ""
+        if state.get("Running") and not healthcheck:
+            if steady >= settle:
+                return ""
+            steady += 1.0
+        else:
+            steady = 0.0
+        if waited >= limit + settle:
             return "did not become healthy in time" if healthcheck else "did not start in time"
         wait(1.0)
         waited += 1.0

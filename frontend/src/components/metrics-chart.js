@@ -141,6 +141,22 @@ function keepFresh() {
 }
 
 /** Stops reading the chart again (the page went away). */
+/** The readings with a gap point where the NAS was off (Activity finding 11): the line breaks
+ *  there, and the axis says "NAS off", instead of joining the hours before and after. A gap is a
+ *  jump of more than three usual steps between two readings. */
+export function withGaps(data) {
+  if (!Array.isArray(data) || data.length < 3) return data || [];
+  const steps = data.slice(1).map((d, i) => d.ts - data[i].ts).filter((s) => s > 0).sort((a, b) => a - b);
+  const usual = steps[Math.floor(steps.length / 2)] || 300;
+  const limit = Math.max(usual * 3, 60);
+  const out = [];
+  data.forEach((d, i) => {
+    if (i > 0 && d.ts - data[i - 1].ts > limit) out.push({ ts: data[i - 1].ts + usual, gap: true });
+    out.push(d);
+  });
+  return out;
+}
+
 /** The chart in words for screen readers (Activity finding 25): each line's lowest, highest and average. */
 export function chartSummary(datasets, rangeText) {
   const round = (x) => Math.round(x * 10) / 10;
@@ -183,8 +199,8 @@ export async function fetchAndRenderMetrics(skipFetch = false) {
 
   try {
     if (reqId !== _renderRequestId) return;
-    const data = _cachedData;
-    updateSummaryStrip(data);
+    const data = withGaps(_cachedData);
+    updateSummaryStrip(_cachedData);
     if (!data || data.length === 0) {
       say(canvas, 'empty', { text: t('mch.empty', 'No history yet. The first reading is stored five minutes after Kiboto starts.') });
       keepFresh();
@@ -197,7 +213,7 @@ export async function fetchAndRenderMetrics(skipFetch = false) {
     if (!Chart || reqId !== _renderRequestId) return;
 
     const colors = chartColors(); // from the theme: fixed light greys could not be read in light mode
-    const labels = data.map((d) => pointLabel(d.ts, _metricsRange));
+    const labels = data.map((d) => (d.gap ? t('mch.off', 'NAS off') : pointLabel(d.ts, _metricsRange)));
 
     const datasets = [];
     const scales = {
@@ -290,7 +306,7 @@ export async function fetchAndRenderMetrics(skipFetch = false) {
 
       datasets.push({
         label: t('mch.rx', 'Download Rx ({unit})', { unit: unitStr }),
-        data: data.map((d) => Number(((d.net_rx || 0) / factor).toFixed(2))),
+        data: data.map((d) => (d.gap ? null : Number(((d.net_rx || 0) / factor).toFixed(2)))),
         borderColor: '#4fd8c4',
         backgroundColor: 'rgba(79, 216, 196, 0.15)',
         borderWidth: 2,
@@ -302,7 +318,7 @@ export async function fetchAndRenderMetrics(skipFetch = false) {
 
       datasets.push({
         label: t('mch.tx', 'Upload Tx ({unit})', { unit: unitStr }),
-        data: data.map((d) => Number(((d.net_tx || 0) / factor).toFixed(2))),
+        data: data.map((d) => (d.gap ? null : Number(((d.net_tx || 0) / factor).toFixed(2)))),
         borderColor: '#a78bfa',
         backgroundColor: 'rgba(167, 139, 250, 0.15)',
         borderWidth: 2,
@@ -316,7 +332,7 @@ export async function fetchAndRenderMetrics(skipFetch = false) {
       if (maxDisk > 0) {
         datasets.push({
           label: t('mch.read', 'Disk Read ({unit})', { unit: unitStr }),
-          data: data.map((d) => Number(((d.disk_read || 0) / factor).toFixed(2))),
+          data: data.map((d) => (d.gap ? null : Number(((d.disk_read || 0) / factor).toFixed(2)))),
           borderColor: '#33cdb8',
           borderDash: [3, 3],
           borderWidth: 1.5,
@@ -327,7 +343,7 @@ export async function fetchAndRenderMetrics(skipFetch = false) {
         });
         datasets.push({
           label: t('mch.write', 'Disk Write ({unit})', { unit: unitStr }),
-          data: data.map((d) => Number(((d.disk_write || 0) / factor).toFixed(2))),
+          data: data.map((d) => (d.gap ? null : Number(((d.disk_write || 0) / factor).toFixed(2)))),
           borderColor: '#f5a623',
           borderDash: [3, 3],
           borderWidth: 1.5,

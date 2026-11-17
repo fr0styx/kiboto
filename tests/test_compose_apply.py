@@ -262,9 +262,18 @@ def test_a_container_that_cannot_be_set_aside_stops_the_apply():
     assert not res["ok"] and "could not be set aside" in res["error"]
 
 
+def _states(*seq):
+    """Answers the given container states in turn, then the last one for ever."""
+    seen = list(seq)
+
+    def req(m, p, **k):
+        return (200, seen.pop(0) if len(seen) > 1 else seen[0])
+
+    return req
+
+
 def test_waiting_for_a_container():
-    states = iter([{"Running": False, "Status": "created"}, {"Running": True}])
-    req = lambda m, p, **k: (200, {"State": next(states)})  # noqa: E731
+    req = _states({"State": {"Running": False, "Status": "created"}}, {"State": {"Running": True}})
     assert ca._wait_running(ca.Docker(req, None), "c", False, lambda s: None, 5) == ""
     req2 = lambda m, p, **k: (200, {"State": {"Running": False, "Status": "exited", "ExitCode": 3}})  # noqa: E731
     assert ca._wait_running(ca.Docker(req2, None), "c", False, lambda s: None, 5) == "stopped (exit code 3)"
@@ -272,3 +281,20 @@ def test_waiting_for_a_container():
     assert ca._wait_running(ca.Docker(req3, None), "c", True, lambda s: None, 2) == "did not become healthy in time"
     req4 = lambda m, p, **k: (404, {})  # noqa: E731
     assert ca._wait_running(ca.Docker(req4, None), "c", False, lambda s: None, 1) == "did not start in time"
+
+
+def test_a_part_that_exits_a_moment_after_its_start_is_not_running():
+    """Found on a real Docker engine: running at the first look, exited two seconds later."""
+    up = {"State": {"Running": True}, "RestartCount": 0}
+    gone = {"State": {"Running": False, "Status": "exited", "ExitCode": 3}, "RestartCount": 0}
+    req = _states(up, up, gone)
+    assert ca._wait_running(ca.Docker(req, None), "c", False, lambda s: None, 5) == "stopped (exit code 3)"
+
+
+def test_a_part_that_keeps_restarting_is_not_running():
+    req = _states(
+        {"State": {"Running": True}, "RestartCount": 0}, {"State": {"Running": True, "ExitCode": 1}, "RestartCount": 1}
+    )
+    assert "keeps restarting" in ca._wait_running(ca.Docker(req, None), "c", False, lambda s: None, 5)
+    req2 = _states({"State": {"Running": False, "Restarting": True, "ExitCode": 2}})
+    assert ca._wait_running(ca.Docker(req2, None), "c", False, lambda s: None, 5) == "keeps restarting (exit code 2)"

@@ -8352,4 +8352,5 @@ export default {
   "mch.sr_none": "Graphique, {range} : aucune mesure.",
   "mch.sr_series": "{label} : de {min} à {max}, en moyenne {avg}",
   "mch.sr_chart": "Graphique, {range}. {series}.",
+  "mch.off": "NAS éteint",
 };

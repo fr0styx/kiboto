@@ -582,6 +582,17 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Files follows this server's folders**: the first folder, Quick Locations, the Recycle Bin and Organize Media start
   where this NAS keeps its files, not at Unraid's /mnt/user (nothing changes on Unraid).
 
+#### Changes
+
+- **The Activity chart shows when the NAS was off**: the lines break there and the axis says "NAS off", instead of
+  joining the hours before and after.
+
+#### Fixes
+
+- **Applying a Compose file goes back when a part stops right after its start**: the check looked once and took a
+  container that exited a moment later for a working one. A part must now keep running for a few seconds (or be
+  healthy, where it has a health check). Found by trying the apply on a real Docker engine.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

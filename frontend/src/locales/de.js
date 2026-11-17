@@ -8352,4 +8352,5 @@ export default {
   "mch.sr_none": "Diagramm, {range}: keine Messwerte.",
   "mch.sr_series": "{label}: von {min} bis {max}, im Schnitt {avg}",
   "mch.sr_chart": "Diagramm, {range}. {series}.",
+  "mch.off": "NAS aus",
 };
