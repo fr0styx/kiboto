@@ -1,5 +1,6 @@
 """COMP-04, 05, 16, 10: the pages that lead with private search say only what the code does."""
 
+import glob
 import os
 import re
 import sys
@@ -39,7 +40,9 @@ def test_rag_md_keeps_no_hand_copied_scores():
 
 
 def test_every_file_and_page_the_docs_name_exists():
-    for page in ("docs/SAFE_AI.md", "docs/SEARCH_QUALITY.md", "README.md"):
+    # every guide, not three: the household guides link each other (17 Nov 2026)
+    pages = ["README.md"] + sorted(os.path.relpath(p, ROOT) for p in glob.glob(os.path.join(ROOT, "docs", "*.md")))
+    for page in pages:
         text = _read(page)
         base = os.path.dirname(os.path.join(ROOT, page))
         for target in re.findall(r"\]\(([^)#\s]+\.md)(?:#[^)]*)?\)", text):
