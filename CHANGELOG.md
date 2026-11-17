@@ -521,6 +521,13 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Power: "Check that it works"**: the battery test and the practice run sit together, each with when it was last
   done and what came of it; the battery test is greyed with the reason where the UPS cannot take it.
 
+#### Changes
+
+- **Restart and Shut down on Power**: two buttons, each confirmed. Kiboto now checks that a command really reaches the
+  host and reads its answer; where none can, the button is greyed with the reason and nothing is stopped first. The
+  emergency kernel power-off that cut the power without stopping anything is gone. The UPS safe shutdown uses the
+  same checked path.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

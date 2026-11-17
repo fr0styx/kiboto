@@ -354,34 +354,19 @@ def send_ups_cut_power():
 
 
 def host_shutdown_paths() -> list[str]:
-    """Commands that shut down the HOST (REL-10). Inside a container /sbin/poweroff only stops the
+    """Commands that shut down the HOST (REL-10): the one list the Shut down button uses too
+    (SET-31, backend/services/host_power.py). Inside a container /sbin/poweroff would only stop the
     container, so it counts only when Kiboto runs directly on the host."""
-    paths = ["/host/powerdown", "/usr/local/sbin/powerdown"]
-    if not os.path.exists("/.dockerenv"):
-        paths.append("/sbin/poweroff")
-    return [p for p in paths if os.path.exists(p) and os.access(p, os.X_OK)]
+    from backend.services import host_power
+
+    return host_power.commands("shutdown")
 
 
 def signal_host_powerdown() -> bool:
     """Shuts the host down; True only when a host shutdown command ran and reported success."""
-    if test_mode():
-        logger.info("[UPS FAILSAFE] Test mode active; skipping host powerdown.")
-        return True
-    import subprocess
+    from backend.services import host_power
 
-    for trigger_path in host_shutdown_paths():
-        try:
-            res = subprocess.run([trigger_path], capture_output=True, text=True, timeout=60)
-        except Exception as e:
-            logger.error(f"[UPS FAILSAFE] {trigger_path} could not run: {e}")
-            continue
-        if res.returncode == 0:
-            logger.critical("[UPS FAILSAFE] Host shutdown started with %s", trigger_path)
-            return True
-        logger.error(
-            "[UPS FAILSAFE] %s failed (exit %s): %s", trigger_path, res.returncode, (res.stderr or "").strip()[:200]
-        )
-    return False
+    return bool(host_power.run("shutdown", host_shutdown_paths())["started"])
 
 
 def execute_atomic_failsafe_shutdown(charge: float | None, runtime: float | None, reason: str):

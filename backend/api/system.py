@@ -846,41 +846,6 @@ def delete_token(token_id: str, principal: AuthenticatedPrincipal = Depends(get_
     raise HTTPException(status_code=404, detail="Token not found or unauthorized to revoke.")
 
 
-REBOOT_TRIGGERS = (
-    ("/host/reboot",),
-    ("/usr/local/sbin/reboot",),
-    ("reboot",),
-    ("shutdown", "-r", "now"),
-)
-POWEROFF_TRIGGERS = (
-    ("/host/powerdown",),
-    ("/usr/local/sbin/powerdown",),
-    ("/sbin/poweroff",),
-    ("poweroff",),
-    ("shutdown", "-h", "now"),
-)
-SYSRQ_TRIGGER = "/proc/sysrq-trigger"
-
-
-def _sysrq_power(action: str) -> bool:
-    """Last resort: the kernel's emergency keys. They act at once, so the disks are flushed
-    (s) and switched to read-only (u) first; otherwise unwritten data would be lost."""
-    if not os.path.exists(SYSRQ_TRIGGER):
-        return False
-    try:
-        os.sync()
-        for key in ("s", "u"):
-            with open(SYSRQ_TRIGGER, "w") as f:
-                f.write(key)
-            time.sleep(1.0)
-        with open(SYSRQ_TRIGGER, "w") as f:
-            f.write("b" if action == "reboot" else "o")
-        return True
-    except Exception as e:
-        logger.debug(f"[Power] Sysrq fallback failed: {e}")
-        return False
-
-
 def machines_first(come_back: bool = True) -> None:
     """Before Kiboto ends itself or the NAS: running virtual machines are asked to shut down and
     waited for. With come_back they are started again at Kiboto's next start (SET-07)."""
@@ -890,25 +855,28 @@ def machines_first(come_back: bool = True) -> None:
 
 
 def trigger_power_action(action: str) -> bool:
-    """
-    Triggers host system reboot or shutdown.
-    Checks host trigger scripts, container-host volume mounts, and system power commands.
-    """
-    if test_mode():
-        logger.info("[Power] Test mode active; harmlessly mocked host trigger for '%s'", action)
-        return True
+    """Restarts ("reboot") or switches off ("shutdown") the host with the first command that really
+    reaches it, and says whether one started (SET-31, Power stage 4; backend/services/host_power.py)."""
+    from backend.services import host_power
 
-    for cmd in REBOOT_TRIGGERS if action == "reboot" else POWEROFF_TRIGGERS:
-        bin_path = cmd[0]
-        if (os.path.exists(bin_path) and os.access(bin_path, os.X_OK)) or shutil.which(bin_path):
-            try:
-                subprocess.Popen(list(cmd), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                logger.info("[Power] Executed host trigger: %s", list(cmd))
-                return True
-            except Exception as e:
-                logger.error("[Power] Failed executing host trigger %s: %s", list(cmd), e)
+    return bool(host_power.run(action)["started"])
 
-    return _sysrq_power(action)
+
+def _can_or_refuse(action: str) -> None:
+    """Refuses before anything is stopped when nothing can do it here (409 with the reason)."""
+    from backend.services import host_power
+
+    able = host_power.can(action)
+    if not able["ok"]:
+        raise HTTPException(status_code=409, detail=able["why"])
+
+
+@router.get("/system/power-actions", dependencies=[Depends(require_scope("system:view"))])
+def get_power_actions() -> dict[str, Any]:
+    """Whether Restart and Shut down can work here, and why not (SET-31, Power stage 4)."""
+    from backend.services import host_power
+
+    return {"reboot": host_power.can("reboot"), "shutdown": host_power.can("shutdown")}
 
 
 @router.post(
@@ -917,10 +885,13 @@ def trigger_power_action(action: str) -> bool:
 )
 async def system_reboot():
     """Trigger system reboot (requires system:power scope)."""
+    await asyncio.to_thread(_can_or_refuse, "reboot")
     add_event("warning", "System", "System reboot sequence initiated by authorized user", event_text("reboot"))
     await asyncio.to_thread(machines_first)
     success = await asyncio.to_thread(trigger_power_action, "reboot")
-    return {"status": "ok", "action_dispatched": success, "message": "System reboot sequence initiated"}
+    if not success:
+        raise HTTPException(status_code=502, detail="The restart command did not start. The server log says why.")
+    return {"status": "ok", "action_dispatched": True, "message": "System reboot sequence initiated"}
 
 
 @router.post(
@@ -929,10 +900,13 @@ async def system_reboot():
 )
 async def system_shutdown():
     """Trigger system poweroff (requires system:power scope)."""
+    await asyncio.to_thread(_can_or_refuse, "shutdown")
     add_event("warning", "System", "System shutdown sequence initiated by authorized user", event_text("shutdown"))
     await asyncio.to_thread(machines_first, False)  # after a shutdown only "Start with the NAS" brings one back
     success = await asyncio.to_thread(trigger_power_action, "shutdown")
-    return {"status": "ok", "action_dispatched": success, "message": "System shutdown sequence initiated"}
+    if not success:
+        raise HTTPException(status_code=502, detail="The shut-down command did not start. The server log says why.")
+    return {"status": "ok", "action_dispatched": True, "message": "System shutdown sequence initiated"}
 
 
 @router.get("/system/disks", dependencies=[Depends(require_scope("storage:read", "system:view"))])

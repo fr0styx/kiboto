@@ -8304,4 +8304,11 @@ export default {
   "pwc.battery": "测试电池",
   "pwc.practice": "演练",
   "pwc.practice_what": "Kiboto 假装停电 15 秒，并检查谁会关闭 NAS。不会关闭任何东西。",
+  "pws.rebooting": "NAS 正在重启。它重新运行后此页面会恢复。",
+  "pws.shutting": "NAS 正在关机。请用它的电源按钮重新开机。",
+  "pws.failed": "没有执行任何操作：{error}",
+  "pws.title": "重启或关机",
+  "pws.desc": "会先要求正在运行的虚拟机关闭。所有正在使用 NAS 的人都会断开连接，直到它恢复。",
+  "pws.reboot": "重启 NAS",
+  "pws.shutdown": "关闭 NAS",
 };

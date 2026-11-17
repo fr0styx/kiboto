@@ -8304,4 +8304,11 @@ export default {
   "pwc.battery": "Tester la batterie",
   "pwc.practice": "Exercice",
   "pwc.practice_what": "Kiboto fait comme si le courant était coupé pendant 15 secondes et vérifie qui éteindrait le NAS. Rien n’est éteint.",
+  "pws.rebooting": "Le NAS redémarre. Cette page revient quand il est de nouveau prêt.",
+  "pws.shutting": "Le NAS s’arrête. Rallumez-le avec son bouton d’alimentation.",
+  "pws.failed": "Rien n’a été basculé : {error}",
+  "pws.title": "Redémarrer ou arrêter",
+  "pws.desc": "Les machines virtuelles en marche sont d’abord invitées à s’arrêter. Tous ceux qui utilisent le NAS perdent la connexion jusqu’à son retour.",
+  "pws.reboot": "Redémarrer le NAS",
+  "pws.shutdown": "Arrêter le NAS",
 };

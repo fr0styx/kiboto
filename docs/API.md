@@ -38,7 +38,7 @@ request and response schemas.
 
 <!-- BEGIN generated endpoints: python scripts/api_reference.py --update -->
 
-746 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
+747 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
 
 ### AI Conversation History
 
@@ -883,6 +883,7 @@ request and response schemas.
 | `PUT` | `/api/v1/system/identity` | `system:config` | Put Server Identity |
 | `POST` | `/api/v1/system/identity/detected-timezone` | `system:config` | An administrator's browser zone, used only while the server has none |
 | `GET` | `/api/v1/system/network-topology` | any of `system:view`, `system:config` | Expose complete host networking topology, physical NIC carrier states, link negotiation speeds (10GbE / 2.5GbE / 1GbE / 100M), duplex, MT… |
+| `GET` | `/api/v1/system/power-actions` | `system:view` | Whether Restart and Shut down can work here, and why not (SET-31, Power stage 4) |
 | `POST` | `/api/v1/system/profile` | `system:config` | The Host tab's cooling mode |
 | `GET` | `/api/v1/system/protection` | `system:view` | The copies outside this NAS, for the Overview (FEAT-01) |
 | `GET` | `/api/v1/system/protection/folders` | any of `backup:read`, `backup:manage` | Backup 5: each shared folder, the copies outside this NAS that hold it, and the folders left out on purpose |

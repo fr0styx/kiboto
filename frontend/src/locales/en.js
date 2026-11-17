@@ -8304,4 +8304,11 @@ export default {
   "pwc.battery": "Test the battery",
   "pwc.practice": "Practice run",
   "pwc.practice_what": "Kiboto acts as if the power went out for 15 seconds and checks who would switch the NAS off. Nothing is switched off.",
+  "pws.rebooting": "The NAS is restarting. This page comes back when it is up again.",
+  "pws.shutting": "The NAS is shutting down. Switch it on again with its power button.",
+  "pws.failed": "Nothing was switched: {error}",
+  "pws.title": "Restart or shut down",
+  "pws.desc": "Running virtual machines are asked to shut down first. Everyone using the NAS loses their connection until it is back.",
+  "pws.reboot": "Restart the NAS",
+  "pws.shutdown": "Shut down the NAS",
 };

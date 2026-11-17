@@ -68568,6 +68568,39 @@
     ]
    }
   },
+  "/api/v1/system/power-actions": {
+   "get": {
+    "description": "Whether Restart and Shut down can work here, and why not (SET-31, Power stage 4).",
+    "operationId": "get_power_actions_api_v1_system_power_actions_get",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Get Power Actions Api V1 System Power Actions Get",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Get Power Actions",
+    "tags": [
+     "System & Storage"
+    ],
+    "x-required-scopes": [
+     "system:view"
+    ]
+   }
+  },
   "/api/v1/system/power-schedule": {
    "get": {
     "operationId": "get_power_schedule_api_v1_system_power_schedule_get",

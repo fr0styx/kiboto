@@ -8304,4 +8304,11 @@ export default {
   "pwc.battery": "Probar la batería",
   "pwc.practice": "Simulacro",
   "pwc.practice_what": "Kiboto actúa como si se fuera la luz durante 15 segundos y comprueba quién apagaría el NAS. No se apaga nada.",
+  "pws.rebooting": "El NAS se está reiniciando. Esta página vuelve cuando esté en marcha.",
+  "pws.shutting": "El NAS se está apagando. Vuelve a encenderlo con su botón de encendido.",
+  "pws.failed": "No se ha cambiado nada: {error}",
+  "pws.title": "Reiniciar o apagar",
+  "pws.desc": "Primero se pide a las máquinas virtuales en marcha que se apaguen. Quien esté usando el NAS pierde la conexión hasta que vuelva.",
+  "pws.reboot": "Reiniciar el NAS",
+  "pws.shutdown": "Apagar el NAS",
 };

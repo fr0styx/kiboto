@@ -12,6 +12,7 @@ import { setIconLabel } from '../../ui/primitives.js';
 import { renderPowerTop, stateFromReading } from './power-top.js';
 import { renderPowerHistory } from './power-history.js';
 import { renderPowerCheck } from './power-check.js';
+import { renderPowerSwitch } from './power-switch.js';
 
 export function renderUpsTelemetry(ups) {
   if (!ups) return;
@@ -210,6 +211,7 @@ async function renderPowerSummary(ups) {
   const summary = asked && asked.state ? asked : stateFromReading(ups);
   renderPowerTop(box, summary);
   renderPowerCheck(document.getElementById('power-check'), summary);
+  renderPowerSwitch(document.getElementById('power-switch'));
   const state = box.dataset.state || 'none';
   // no UPS: one sentence and "Set up a UPS"; the gauges, settings and history wait (SET-15, Power B1)
   const pane = document.getElementById('mgmt-sec-ups');

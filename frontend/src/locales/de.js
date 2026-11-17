@@ -8304,4 +8304,11 @@ export default {
   "pwc.battery": "Akku testen",
   "pwc.practice": "Übung",
   "pwc.practice_what": "Kiboto tut 15 Sekunden lang so, als wäre der Strom weg, und prüft, wer das NAS ausschalten würde. Nichts wird ausgeschaltet.",
+  "pws.rebooting": "Das NAS startet neu. Diese Seite kommt zurück, wenn es wieder läuft.",
+  "pws.shutting": "Das NAS fährt herunter. Schalten Sie es mit seinem Einschaltknopf wieder ein.",
+  "pws.failed": "Nichts wurde geschaltet: {error}",
+  "pws.title": "Neu starten oder herunterfahren",
+  "pws.desc": "Laufende virtuelle Maschinen werden zuerst gebeten, sich zu beenden. Alle, die das NAS nutzen, verlieren die Verbindung, bis es wieder da ist.",
+  "pws.reboot": "NAS neu starten",
+  "pws.shutdown": "NAS herunterfahren",
 };
