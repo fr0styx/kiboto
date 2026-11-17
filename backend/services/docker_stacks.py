@@ -893,7 +893,14 @@ def start_stack_apply(
             f"{stack_name}: {res['error']}",
             event_text("stack_not_applied", app=stack_name, error=res["error"]),
         )
-        job_manager.finish(job.id, "error", res["error"])
+        said_how = res.get("text") or {}
+        job_manager.finish(
+            job.id,
+            "error",
+            res["error"],
+            error_id=said_how.get("msg_key", ""),
+            error_params=said_how.get("params") or {},
+        )
 
     threading.Thread(target=run, daemon=True, name=f"stack-apply-{stack_name}").start()
     return {"status": "started", "job": job.id, "steps": preview["steps"]}

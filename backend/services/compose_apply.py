@@ -532,6 +532,22 @@ def _wait_running(
         waited += 1.0
 
 
+def why_text(part: str, why: str) -> dict[str, Any]:
+    """The message key and values of a part's failure (from _wait_running or a Docker answer), so
+    the Jobs centre says it in the reader's language; the English stays in the error."""
+    code = re.search(r"exit code (-?\d+)", why)
+    for prefix, key in (
+        ("stopped", "apply_part_stopped"),
+        ("keeps restarting", "apply_part_restarting"),
+        ("its health check failed", "apply_part_unhealthy"),
+        ("did not", "apply_part_slow"),
+    ):
+        if why.startswith(prefix):
+            params = {"part": part, "code": code.group(1) if code else ""}
+            return {"msg_key": f"srv.{key}", "params": params}  # gitleaks:allow (a text key)
+    return {"msg_key": "srv.apply_part_failed", "params": {"part": part, "error": why}}  # gitleaks:allow (a text key)
+
+
 def apply_built(
     built: dict[str, Any],
     current: list[dict[str, Any]],
@@ -557,12 +573,16 @@ def apply_built(
                 "ok": False,
                 "steps": the_plan["steps"],
                 "error": f"{image} could not be downloaded: {err}. Nothing was changed.",
+                "text": {
+                    "msg_key": "srv.apply_pull_failed",  # gitleaks:allow (a text key)
+                    "params": {"image": image, "error": f"{err}"},
+                },
             }
     _ensure_network(docker, built)
     started: list[tuple[str, str, bool]] = []  # (service, container id, health check)
     aside: list[dict[str, Any]] = []
 
-    def go_back(error: str) -> dict[str, Any]:
+    def go_back(error: str, text: dict[str, Any] | None = None) -> dict[str, Any]:
         for _svc, cid, _hc in started:
             docker.request("DELETE", f"/containers/{cid}?force=true&v=false")
         for a in reversed(aside):
@@ -570,7 +590,10 @@ def apply_built(
             if a["was_running"]:
                 docker.request("POST", f"/containers/{a['name']}/start")
         logger.warning("compose_apply: %s went back: %s", built["project"], error)
-        return {"ok": False, "steps": the_plan["steps"], "error": error + " Everything is back as it was."}
+        out = {"ok": False, "steps": the_plan["steps"], "error": error + " Everything is back as it was."}
+        if text:
+            out["text"] = text
+        return out
 
     def set_aside(c: dict[str, Any]) -> None:
         name = str(c.get("Name") or "").lstrip("/")
@@ -599,16 +622,16 @@ def apply_built(
         st, resp = docker.request("POST", f"/containers/create?name={s['container']}", body=s["body"], headers=headers)
         cid = resp.get("Id") if st == 201 and isinstance(resp, dict) else None
         if not cid:
-            return go_back(f"{s['name']} could not be created: {resp}.")
+            return go_back(f"{s['name']} could not be created: {resp}.", why_text(s["name"], f"{resp}"))
         started.append((s["name"], cid, s["healthcheck"]))
         st, resp = docker.request("POST", f"/containers/{cid}/start")
         if st not in (204, 304):
-            return go_back(f"{s['name']} could not be started: {resp}.")
+            return go_back(f"{s['name']} could not be started: {resp}.", why_text(s["name"], f"{resp}"))
     progress("Checking that everything runs", 92)
     for svc, cid, hc in started:
         why = _wait_running(docker, cid, hc, wait, limit)
         if why:
-            return go_back(f"{svc} {why}.")
+            return go_back(f"{svc} {why}.", why_text(svc, why))
     for svc, action in todo.items():
         if action == "remove":
             c = by_service[svc]

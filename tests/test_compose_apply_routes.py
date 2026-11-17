@@ -74,9 +74,9 @@ def test_apply_runs_as_a_job_and_the_old_file_comes_back_on_failure(stack, monke
     real_finish = job_manager.finish
     seen = {}
 
-    def finish(jid, status="done", error=None):
-        seen.update(status=status, error=error)
-        real_finish(jid, status, error)
+    def finish(jid, status="done", error=None, **kw):
+        seen.update(status=status, error=error, **kw)
+        real_finish(jid, status, error, **kw)
         finished.set()
 
     monkeypatch.setattr(job_manager, "finish", finish)
