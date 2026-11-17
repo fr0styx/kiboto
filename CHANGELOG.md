@@ -539,6 +539,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   sockets off and leave them off, so the NAS could not start again by itself. It now asks for "off, and back on when
   the power returns", reads the answer, and Power says whether your UPS can do it.
 
+#### Changes
+
+- **Power reads top to bottom**: the answers first, then Check that it works, History and Restart or shut down; the
+  gauges and the connection settings are under a closed "Advanced".
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

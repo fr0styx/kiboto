@@ -8318,4 +8318,5 @@ export default {
   "pwr.sockets_ok": "Votre onduleur peut rallumer ses prises au retour du courant. Activez ci-dessous le réglage des prises de l’onduleur pour qu’il le fasse.",
   "pwr.sockets_no": "Votre onduleur n’a pas de commande pour rallumer ses prises au retour du courant.",
   "pwr.sockets_unknown": "Kiboto n’a pas pu demander à votre onduleur s’il rallume ses prises.",
+  "pwa.title": "Avancé : connexion et détails",
 };

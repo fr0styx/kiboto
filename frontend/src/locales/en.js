@@ -8318,4 +8318,5 @@ export default {
   "pwr.sockets_ok": "Your UPS can switch its sockets back on when the power returns. Turn on the UPS sockets setting below so it does.",
   "pwr.sockets_no": "Your UPS has no command to switch its sockets back on when the power returns.",
   "pwr.sockets_unknown": "Kiboto could not ask your UPS whether it switches its sockets back on.",
+  "pwa.title": "Advanced: connection and details",
 };

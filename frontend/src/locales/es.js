@@ -8318,4 +8318,5 @@ export default {
   "pwr.sockets_ok": "Tu SAI puede volver a dar corriente a sus enchufes cuando vuelva la luz. Activa abajo el ajuste de los enchufes del SAI para que lo haga.",
   "pwr.sockets_no": "Tu SAI no tiene ninguna orden para volver a dar corriente a sus enchufes cuando vuelva la luz.",
   "pwr.sockets_unknown": "Kiboto no ha podido preguntar a tu SAI si vuelve a dar corriente a sus enchufes.",
+  "pwa.title": "Avanzado: conexión y detalles",
 };

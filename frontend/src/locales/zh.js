@@ -8318,4 +8318,5 @@ export default {
   "pwr.sockets_ok": "你的 UPS 可以在恢复供电时重新打开插座。请开启下方的 UPS 插座设置，让它这样做。",
   "pwr.sockets_no": "你的 UPS 没有在恢复供电时重新打开插座的命令。",
   "pwr.sockets_unknown": "Kiboto 无法询问你的 UPS 是否会重新打开插座。",
+  "pwa.title": "高级：连接和详细信息",
 };

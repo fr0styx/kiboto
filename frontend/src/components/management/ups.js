@@ -233,6 +233,8 @@ async function renderPowerSummary(ups) {
     setup.addEventListener('click', () => {
       pane?.classList.add('ups-show-all');
       setup.hidden = true;
+      const advanced = /** @type {HTMLDetailsElement | null} */ (document.getElementById('pw-advanced'));
+      if (advanced) advanced.open = true; // the connection settings are in Advanced (SET-31)
       document.getElementById('ups-cockpit-config-section')?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
     });
   }

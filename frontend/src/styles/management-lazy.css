@@ -567,8 +567,10 @@
 .pw-steps { margin: 6px 0 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; font-size: var(--kb-fs-xs); line-height: 1.5; }
 .pw-detail { margin: 6px 0 0; font-size: var(--kb-fs-xs); color: var(--kb-text-soft); line-height: 1.5; }
 .ups-status-line[data-power="by_hand"] { border-left-color: var(--err, #eb5757); }
-.pw-when summary::before, .pw-back summary::before { content: "▸"; color: var(--kb-text-soft); }
-.pw-when[open] summary::before, .pw-back[open] summary::before { content: "▾"; }
+.pw-when summary::before, .pw-back summary::before, .pw-advanced-sum::before { content: ""; width: 6px; height: 6px; margin: 0 6px 2px 2px; border-right: 2px solid var(--kb-text-soft); border-bottom: 2px solid var(--kb-text-soft); transform: rotate(-45deg); flex: none; align-self: center; }
+.pw-when[open] summary::before, .pw-back[open] summary::before, .pw-advanced[open] .pw-advanced-sum::before { transform: rotate(45deg); }
+.pw-when summary, .pw-back summary, .pw-advanced-sum { list-style: none; }
+.pw-when summary::-webkit-details-marker, .pw-back summary::-webkit-details-marker, .pw-advanced-sum::-webkit-details-marker { display: none; }
 /* Power history in sentences (SET-31) */
 .pwh-title { margin: 0 0 8px; }
 .pwh-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
@@ -584,3 +586,9 @@
 .pwc-item .ups-shutdown-line { flex-basis: 100%; }
 #mgmt-sec-ups:not([data-power="none"]):not([data-power="silent"]) #btn-refresh-ups { display: none; }
 .pw-ask { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+/* Power, Advanced (SET-31): the gauges and the connection settings, closed */
+.pw-advanced { margin: 0 0 14px; border: 1px solid var(--kb-line-12); border-radius: 8px; padding: 0 14px; }
+.pw-advanced[open] { padding-bottom: 14px; }
+.pw-advanced-sum { cursor: pointer; min-height: 44px; display: flex; align-items: center; font-size: var(--kb-fs-sm); font-weight: 700; color: var(--kb-text-strong); }
+/* the status line says it: the old banner repeated it in capitals */
+#ups-emergency-banner { display: none !important; }

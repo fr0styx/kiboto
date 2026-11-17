@@ -1972,8 +1972,6 @@
                 <button id="btn-open-ups-config" style="display:none;" aria-hidden="true"></button>
               </div>
             </div>
-            <!-- Switch off at night, off by default (audit A10): drawn by power-schedule-card.js -->
-            <section id="power-schedule-card" class="sec-advisor-card fw-card" data-admin-only hidden></section>
 
             <!-- One sentence for the state, and who switches the NAS off (SET-15, Power 2) -->
             <div id="ups-status-line" class="ups-status-line" data-state="none" role="status">
@@ -1985,6 +1983,11 @@
             </div>
             <!-- Check that it works: the battery test and the practice run with their last results (SET-31): drawn by management/power-check.js -->
             <section id="power-check" class="pwc" hidden></section>
+            <!-- Power history in sentences (SET-31, Power stage 3): drawn by management/power-history.js -->
+            <section class="ups-events-section ups-x-4" aria-labelledby="ups-history-title">
+              <h3 class="ups-fs13-semi pwh-title" id="ups-history-title" data-i18n="pwh.title">Power history</h3>
+              <div id="ups-history" class="pwh" aria-live="polite"></div>
+            </section>
             <!-- Restart or shut down (SET-31, Power stage 4): drawn by management/power-switch.js -->
             <section id="power-switch" class="pwc" hidden></section>
 
@@ -2010,6 +2013,11 @@
             </div>
 
             <!-- Tier 1: 2.5D Power Flow Digital Twin -->
+            <!-- Switch off at night, off by default (audit A10): drawn by power-schedule-card.js -->
+            <section id="power-schedule-card" class="sec-advisor-card fw-card" data-admin-only hidden></section>
+            <!-- Advanced (SET-31, Power report section 4, item 7): the gauges and the connection, closed -->
+            <details id="pw-advanced" class="pw-advanced">
+              <summary class="pw-advanced-sum" data-i18n="pwa.title">Advanced: connection and details</summary>
             <div class="ups-power-flow-container" id="ups-power-flow-container">
               <div class="ups-flow-card" id="ups-card-grid">
                 <div class="ups-card-status-dot active" id="ups-grid-dot"></div>
@@ -2267,13 +2275,9 @@
                 </div>
               </div>
             </div>
+            </details>
 
-            <!-- Tier 3: Power Outage History & Analytics Table -->
-            <!-- Power history in sentences (SET-31, Power stage 3): drawn by management/power-history.js -->
-            <section class="ups-events-section ups-x-4" aria-labelledby="ups-history-title">
-              <h3 class="ups-fs13-semi pwh-title" id="ups-history-title" data-i18n="pwh.title">Power history</h3>
-              <div id="ups-history" class="pwh" aria-live="polite"></div>
-            </section>
+
           </div>
 
 

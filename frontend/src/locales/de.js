@@ -8318,4 +8318,5 @@ export default {
   "pwr.sockets_ok": "Ihre USV kann ihre Steckdosen wieder einschalten, wenn der Strom zurückkommt. Schalten Sie unten die Einstellung für die USV-Steckdosen ein, damit sie es tut.",
   "pwr.sockets_no": "Ihre USV hat keinen Befehl, ihre Steckdosen wieder einzuschalten, wenn der Strom zurückkommt.",
   "pwr.sockets_unknown": "Kiboto konnte Ihre USV nicht fragen, ob sie ihre Steckdosen wieder einschaltet.",
+  "pwa.title": "Erweitert: Verbindung und Details",
 };
