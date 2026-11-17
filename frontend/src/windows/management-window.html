@@ -4855,7 +4855,10 @@
 
       <div>
         <label class="nshare-xs-bold-muted" for="create-share-path" data-i18n="mw.path_on_disk">PATH ON DISK</label>
-        <input type="text" id="create-share-path" class="tz-select-input nshare-xs-strong-box" placeholder="/mnt/storage/vault" />
+        <div class="share-path-row">
+          <input type="text" id="create-share-path" class="tz-select-input nshare-xs-strong-box" placeholder="/mnt/storage/vault" />
+          <button type="button" class="btn-pill-toggle" id="create-share-pick" data-i18n="shr1.choose">Choose…</button>
+        </div>
       </div>
 
       <div class="nshare-grid">
@@ -4872,7 +4875,7 @@
         </div>
       </div>
 
-      <p class="nshare-xs-muted" id="create-share-users-note" data-i18n="mw.share_people_note">Who may open the new folder is set per person under Users, once it is made.</p>
+      <p class="nshare-xs-muted" id="create-share-users-note" data-i18n="shr1.people_next">Next you choose who may open the new folder.</p>
 
       <div class="nshare-col-box-2">
         <label class="nshare-row-xs-strong" for="create-share-export-smb">

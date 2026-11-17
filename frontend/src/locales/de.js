@@ -8150,5 +8150,7 @@ export default {
   "vmd.disk_image_help": "Ein System, das als Datenträger kommt, etwa Home Assistant OS aus dem ISO-Katalog. Es wird für diese Maschine kopiert.",
   "vmp.p_ha": "Home Assistant",
   "vmp.p_ha_2": "2 Kerne, 4 GB, sein fertiger Datenträger",
-  "vmp.n_ha": "Home Assistant OS kommt als fertiger Datenträger. Zeigt „Fertiger Datenträger“ keinen an, laden Sie Home Assistant OS zuerst aus dem ISO-Katalog herunter."
+  "vmp.n_ha": "Home Assistant OS kommt als fertiger Datenträger. Zeigt „Fertiger Datenträger“ keinen an, laden Sie Home Assistant OS zuerst aus dem ISO-Katalog herunter.",
+  "shr1.choose": "Auswählen…",
+  "shr1.people_next": "Danach wählen Sie, wer den neuen Ordner öffnen darf."
 };

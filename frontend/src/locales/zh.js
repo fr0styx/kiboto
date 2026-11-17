@@ -8150,5 +8150,7 @@ export default {
   "vmd.disk_image_help": "以磁盘形式提供的系统，例如 ISO 目录中的 Home Assistant OS。会为这台虚拟机复制一份。",
   "vmp.p_ha": "Home Assistant",
   "vmp.p_ha_2": "2 核，4 GB，使用其现成磁盘",
-  "vmp.n_ha": "Home Assistant OS 以现成磁盘提供。如果“现成磁盘”中没有可选项，请先从 ISO 目录下载 Home Assistant OS。"
+  "vmp.n_ha": "Home Assistant OS 以现成磁盘提供。如果“现成磁盘”中没有可选项，请先从 ISO 目录下载 Home Assistant OS。",
+  "shr1.choose": "选择…",
+  "shr1.people_next": "接下来选择谁可以打开这个新文件夹。"
 };

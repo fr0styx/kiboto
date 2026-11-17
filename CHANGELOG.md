@@ -430,6 +430,16 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   the installer folders can be chosen too. Not yet tried with a full Home Assistant start on real hardware.
 - The ISO catalog no longer lists the Windows Server trial, whose download no longer exists.
 
+#### Fixes
+
+- **A missed off-site backup is caught up**: a NAS that was off at its backup hour now backs up once it is on again,
+  instead of skipping the day. A backup that fails is tried again once an hour, no longer every minute of its hour.
+
+#### Changes
+
+- **Sharing a folder takes two steps**: pick the folder with "Choose…" (Kiboto asks before it wakes a sleeping drive,
+  and names the share after the folder), then choose who may open it, in the same window a share's card opens.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

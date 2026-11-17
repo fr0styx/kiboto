@@ -3069,6 +3069,11 @@ export function openCreateNetworkShareModal(onSuccess) {
 
   const usersMatrix = null; // the people list called an address that does not exist and never loaded (SET-14)
 
+  // Shares R1, step 1: pick the folder instead of typing its path; the browser asks before it wakes
+  // a sleeping drive (folder.wake)
+  const pickBtn = document.getElementById('create-share-pick');
+  if (pickBtn) pickBtn.onclick = () => pickShareFolder();
+
   if (form) {
     form.onsubmit = async (e) => {
       e.preventDefault();
@@ -3137,6 +3142,8 @@ export function openCreateNetworkShareModal(onSuccess) {
         close();
         showToast(t('toast.share_created_successfully', 'Share \'{name}\' created successfully!', { name: name }), 'info');
         if (onSuccess) onSuccess();
+        // Shares R1, step 2: who may open it, in the same window the card's "Change" opens
+        import('./share-who.js').then((m) => m.openWhoWindow(name, onSuccess)).catch(() => {});
       } catch (err) {
         if (errorBox) {
           errorBox.textContent = err.message || t('chassis.share_create_failed', 'Could not create the share');
@@ -3150,6 +3157,23 @@ export function openCreateNetworkShareModal(onSuccess) {
       }
     };
   }
+}
+
+/** Shares R1: the folder browser fills the path, and the name when it is still empty. */
+export function pickShareFolder() {
+  const pathIn = /** @type {HTMLInputElement | null} */ (document.getElementById('create-share-path'));
+  const nameIn = /** @type {HTMLInputElement | null} */ (document.getElementById('create-share-name'));
+  const browse = /** @type {any} */ (window).openFolderBrowser;
+  if (!pathIn || typeof browse !== 'function') return false;
+  browse(pathIn.value.trim() || '/mnt/user/', (picked) => {
+    const clean = String(picked || '').replace(/\/+$/, '');
+    if (!clean) return;
+    pathIn.value = clean;
+    if (nameIn && !nameIn.value.trim()) {
+      nameIn.value = (clean.split('/').pop() || '').toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '');
+    }
+  });
+  return true;
 }
 
 /**

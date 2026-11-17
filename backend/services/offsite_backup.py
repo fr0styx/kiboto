@@ -924,15 +924,33 @@ def _update(repo_id: str, **fields: Any) -> None:
             _save(repos)
 
 
+# Backup A16: a NAS that was off at its hour catches the day up once it is on again
+CATCH_UP_AFTER_SECS = 26 * 3600
+RETRY_AFTER_SECS = 3600  # one try an hour: a failed backup no longer starts again every minute
+
+
+def backup_due(repo: dict[str, Any], now: float) -> bool:
+    """Whether the daily backup should start now: at its hour, or late when a day was missed; never
+    twice within an hour, whatever the last try did."""
+    last = float(repo.get("last_backup") or 0)
+    if now - float(repo.get("last_attempt") or 0) < RETRY_AFTER_SECS:
+        return False
+    at_hour = time.localtime(now).tm_hour == repo["hour"] and now - last > 20 * 3600
+    missed = last > 0 and now - last > CATCH_UP_AFTER_SECS  # a first backup still waits for its hour
+    return at_hour or missed
+
+
 def run_due(now: float | None = None) -> list[str]:
-    """Called every minute by the scheduler: daily backups at their hour, a weekly check."""
+    """Called every minute by the scheduler: daily backups at their hour (or late, once, when a day
+    was missed), a weekly check."""
     now = now or time.time()
     t = time.localtime(now)
     started = []
     for repo in list_repos():
         if repo.get("hour") is None or repo["id"] in _RUNNING or repo["id"] in _BUSY:
             continue
-        if t.tm_hour == repo["hour"] and now - float(repo.get("last_backup") or 0) > 20 * 3600:
+        if backup_due(repo, now):
+            _update(repo["id"], last_attempt=now)
             threading.Thread(target=_safe, args=(backup, repo["id"]), daemon=True, name=f"offsite-{repo['id']}").start()
             started.append(repo["id"])
         elif (

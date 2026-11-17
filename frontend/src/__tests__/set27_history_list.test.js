@@ -5,6 +5,9 @@ const { copyTextToClipboard } = await import('../utils.js');
 const { renderEventLog, dayLabel, filterEvents } = await import('../components/events.js');
 const { ROUTES } = await import('../router.js');
 
+// noon: an entry 25 hours old is yesterday at any hour of the run (it failed after midnight)
+vi.useFakeTimers({ toFake: ['Date'] });
+vi.setSystemTime(new Date(2026, 10, 16, 12));
 const now = Math.floor(Date.now() / 1000);
 const EVENTS = [
   { id: 3, ts: now - 60, level: 'error', title: 'Backup failed', message: 'The copy to the USB disk stopped.', link: 'backup' },

@@ -8150,5 +8150,7 @@ export default {
   "vmd.disk_image_help": "A system that comes as a disk, such as Home Assistant OS from the ISO catalog. It is copied for this machine.",
   "vmp.p_ha": "Home Assistant",
   "vmp.p_ha_2": "2 cores, 4 GB, its ready-made disk",
-  "vmp.n_ha": "Home Assistant OS comes as a ready-made disk. If \"Ready-made disk\" shows none, download Home Assistant OS from the ISO catalog first."
+  "vmp.n_ha": "Home Assistant OS comes as a ready-made disk. If \"Ready-made disk\" shows none, download Home Assistant OS from the ISO catalog first.",
+  "shr1.choose": "Choose…",
+  "shr1.people_next": "Next you choose who may open the new folder."
 };

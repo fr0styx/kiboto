@@ -536,3 +536,6 @@
    The old row's other buttons, the IDLE banner and the counters stay in the markup for the page code. */
 #mgmt-pane-ai-index :is(#btn-ai-index-pause, #btn-ai-index-resume, #btn-ai-index-stop, #btn-ai-learning-results, #btn-ai-in-place-reindex, #btn-ai-flush-index, #ai-sync-progress-banner, #ai-index-db-summary) { display: none !important; }
 #mgmt-pane-ai-index [data-kib-flush] { align-self: flex-start; }
+/* Shares R1: the folder field and its picker on one line */
+.share-path-row { display: flex; gap: 8px; align-items: stretch; }
+.share-path-row > input { flex: 1 1 auto; min-width: 0; }
