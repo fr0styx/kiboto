@@ -20,6 +20,7 @@ from typing import Any, Optional
 
 from backend.ai_defaults import DEFAULT_CHAT_MODEL
 from backend.config import DATA_DIR, HOST_DEV, HOST_PROC, HOST_SYS, logger
+from backend.errors import said
 from backend.fsutil import atomic_write_json, read_json
 from backend.ignored_errors import ignored
 from backend.services.rag_engine import (
@@ -400,6 +401,37 @@ def _estimate_hf_model_specs(
     }
 
 
+# The words the advice uses for a device it could not name; any other label is the hardware's own name.
+_DEVICE_WORDS = {
+    "Onboard NPU": "ai_label_npu",
+    "None detected": "ai_label_none",
+    "CPU Fallback": "ai_label_cpu",
+    "CPU": "ai_label_cpu",
+    "GPU": "ai_label_gpu",
+}
+
+
+def _num(value: float, digits: int = 1) -> dict[str, Any]:
+    """A number the page writes in the reader's language (frontend/src/server-text.js)."""
+    return {"number": round(float(value), digits), "digits": digits}
+
+
+def _device(label: str) -> Any:
+    """A device label as a value of a sentence: Kiboto's own fallback words are translated."""
+    key = _DEVICE_WORDS.get(label)
+    return {"key": f"srv.{key}", "default": label} if key else label
+
+
+def _part(key: str, **params: Any) -> dict[str, Any]:
+    """A sentence used inside another one (a value of `said`)."""
+    return {"key": f"srv.{key}", "params": params}
+
+
+def _role_key(model_id: Any) -> str:
+    """The text key of a catalog model's role: srv.ai_role.<id with only letters, digits and _>."""
+    return "ai_role." + re.sub(r"[^a-z0-9]+", "_", str(model_id or "").lower()).strip("_")
+
+
 def evaluate_model_hardware_fit(
     model: dict[str, Any],
     accel: dict[str, Any],
@@ -434,38 +466,59 @@ def evaluate_model_hardware_fit(
     fits_hardware = True
     warning_severity: str | None = None
     warning_message: str | None = None
+    warning_text: dict[str, Any] | None = None
 
     if est_ram_gb > eff_ram or min_ram_gb > eff_ram:
         fits_hardware = False
         warning_severity = "critical"
         fit_status = "insufficient_ram"
         fit_badge = f"⚠️ Doesn't Fit Hardware ({int(min_ram_gb)}GB+ RAM)"
+        fit_badge_text = said("ai_badge_no_fit", gb=int(min_ram_gb))
+        warning_text = said("ai_warn_no_fit", model=_num(est_ram_gb), host=int(min_ram_gb), ram=_num(eff_ram))
         warning_message = (
             f"Hardware Warning: Requires ~{est_ram_gb:.1f} GB model memory ({min_ram_gb:.0f} GB+ system RAM recommended), "
             f"which exceeds your host's {eff_ram:.1f} GB RAM capacity."
         )
         fit_reason = warning_message
+        fit_reason_text = warning_text
     elif est_ram_gb > safe_ai_ram_gb:
         fits_hardware = False
         warning_severity = "critical"
         fit_status = "insufficient_ram"
         fit_badge = f"⚠️ Exceeds Safe NAS RAM ({est_ram_gb:.1f}GB)"
+        fit_badge_text = said("ai_badge_over_safe", gb=_num(est_ram_gb))
+        warning_text = said("ai_warn_over_safe", model=_num(est_ram_gb), safe=_num(safe_ai_ram_gb), ram=_num(eff_ram))
         warning_message = (
             f"Hardware Warning: Model weights (~{est_ram_gb:.1f} GB) exceed your safe NAS AI memory ceiling "
             f"({safe_ai_ram_gb:.1f} GB of {eff_ram:.1f} GB RAM) and risk OOM-killing storage services."
         )
         fit_reason = warning_message
+        fit_reason_text = warning_text
     elif (req_dgpu_vram_gb > 0 or est_ram_gb > npu_igpu_ceiling_gb) and not has_dgpu:
         fits_hardware = False
         warning_severity = "warning"
         fit_status = "insufficient_vram"
         fit_badge = f"⚠️ Exceeds Onboard NPU/iGPU ({est_ram_gb:.1f}GB)"
         accel_desc = f"{npu_label} + {gpu_label}" if (has_npu and has_igpu) else (npu_label if has_npu else gpu_label)
+        accel_words = (
+            _part("ai_pair", a=_device(npu_label), b=_device(gpu_label))
+            if (has_npu and has_igpu)
+            else _device(npu_label if has_npu else gpu_label)
+        )
+        fit_badge_text = said("ai_badge_over_onboard", gb=_num(est_ram_gb))
+        warning_text = said(
+            "ai_warn_over_onboard",
+            model=_num(est_ram_gb),
+            vram=max(16, int(req_dgpu_vram_gb)),
+            device=accel_words,
+            ceiling=int(npu_igpu_ceiling_gb),
+        )
         warning_message = (
             f"Hardware Warning: Requires ~{est_ram_gb:.1f} GB dedicated GPU VRAM ({max(16, int(req_dgpu_vram_gb))} GB+ dGPU). "
             f"Exceeds onboard {accel_desc} shared aperture ({npu_igpu_ceiling_gb:.0f} GB max) and would be very slow on the CPU."
         )
         fit_reason = warning_message
+        fit_reason_text = warning_text
     elif (
         has_npu and model.get("recommended_for_npu") and model.get("category") in ("edge_llm", "vision_multimodal")
     ) or (has_gpu and model.get("recommended_for_gpu") and str(model.get("ollama_tag", "")).lower() == primary_rec):
@@ -474,15 +527,23 @@ def evaluate_model_hardware_fit(
         if target_acc == "NPU":
             fit_badge = "★ Best for Onboard NPU"
             fit_reason = f"Hardware-matched for {npu_label} ({est_ram_gb:.1f} GB footprint)."
+            fit_badge_text = said("ai_badge_best_npu")
+            fit_reason_text = said("ai_why_npu", device=_device(npu_label), model=_num(est_ram_gb))
         elif target_acc == "NPU+GPU":
             fit_badge = "★ Best for NPU + iGPU"
             fit_reason = f"Splits vision encoder onto NPU and language decoder onto {gpu_label}."
+            fit_badge_text = said("ai_badge_best_npu_gpu")
+            fit_reason_text = said("ai_why_npu_gpu", device=_device(gpu_label))
         else:
             fit_badge = "★ Best for Onboard GPU"
             fit_reason = f"Hardware-matched for {gpu_label} with {eff_ram:.1f} GB system RAM."
+            fit_badge_text = said("ai_badge_best_gpu")
+            fit_reason_text = said("ai_why_gpu", device=_device(gpu_label), ram=_num(eff_ram))
     else:
         fit_status = "compatible"
         fit_badge = "✓ Fits Your Hardware"
+        fit_badge_text = said("ai_badge_fits")
+        fit_reason_text = said("ai_why_fits", ram=_num(eff_ram), model=_num(est_ram_gb))
         fit_reason = (
             f"Fits comfortably within your {eff_ram:.1f} GB RAM & accelerator budget ({est_ram_gb:.1f} GB required)."
         )
@@ -495,6 +556,10 @@ def evaluate_model_hardware_fit(
         "fit_status": fit_status,
         "fit_badge": fit_badge,
         "fit_reason": fit_reason,
+        # how each sentence was made, so the page shows it in the reader's language
+        "fit_badge_text": fit_badge_text,
+        "fit_reason_text": fit_reason_text,
+        "warning_text": warning_text,
     }
 
 
@@ -539,6 +604,9 @@ def catalog_entry(m: dict[str, Any], hw: dict[str, Any]) -> dict[str, Any]:
         acc, dev = "CPU", "CPU"
     e["target_accelerator"] = acc
     e["target_device"] = dev
+    if e.get("requires_dgpu_vram_gb") and not hw["has_dgpu"]:
+        e["target_device_text"] = said("ai_needs_dgpu", gb=int(e["requires_dgpu_vram_gb"]))
+    e["role_text"] = said(_role_key(e.get("id")))
     e["est_speed"] = None
     e["recommended_for_npu"] = e.get("runtime") == "ovms"
     e["suits_this_box"] = hw.get("class") in (e.get("classes") or [])
@@ -546,6 +614,42 @@ def catalog_entry(m: dict[str, Any], hw: dict[str, Any]) -> dict[str, Any]:
         e["license_note"] = "Research licence: not for commercial use"
     e["hf_url"] = f"https://huggingface.co/{e['hf_repo']}"
     return e
+
+
+def _sort_models(models: list[dict[str, Any]], sort_by: str) -> None:
+    """Orders the advice's models in place: newest, recommended, most downloaded or by size."""
+    if sort_by == "date":
+        models.sort(
+            key=lambda x: (
+                float(x.get("release_timestamp") or 0.0),
+                int(x.get("downloads") or 0),
+            ),
+            reverse=True,
+        )
+    elif sort_by == "recommended":
+        models.sort(
+            key=lambda x: (
+                1 if x.get("recommended") else 0,
+                1 if x.get("fits_hardware") else 0,
+                float(x.get("release_timestamp") or 0.0),
+            ),
+            reverse=True,
+        )
+    elif sort_by == "downloads":
+        models.sort(
+            key=lambda x: (
+                int(x.get("downloads") or 0),
+                float(x.get("release_timestamp") or 0.0),
+            ),
+            reverse=True,
+        )
+    elif sort_by == "size_asc":
+        models.sort(key=lambda x: float(x.get("est_ram_gb") or x.get("vram_or_ram_gb") or 0.0))
+    elif sort_by == "size_desc":
+        models.sort(
+            key=lambda x: float(x.get("est_ram_gb") or x.get("vram_or_ram_gb") or 0.0),
+            reverse=True,
+        )
 
 
 def build_llm_recommendations(
@@ -586,6 +690,8 @@ def build_llm_recommendations(
 
     if has_npu and has_gpu:
         tier_headline = f"{npu_label} + {gpu_label} ({eff_ram:.1f} GB RAM)"
+        tier_words = _part("ai_tier_both", npu=_device(npu_label), gpu=_device(gpu_label), ram=_num(eff_ram))
+        advice_words = _part("ai_advice_both", gpu=_device(gpu_label), npu=_device(npu_label))
         advisor_summary = (
             f"Chat models run in Ollama on the {gpu_label}; models served by OpenVINO Model Server "
             f"can use the {npu_label}."
@@ -593,16 +699,22 @@ def build_llm_recommendations(
         primary_rec = "qwen2.5:7b" if eff_ram >= 16.0 else DEFAULT_CHAT_MODEL
     elif has_npu:
         tier_headline = f"{npu_label} ({eff_ram:.1f} GB RAM)"
+        tier_words = _part("ai_tier_one", device=_device(npu_label), ram=_num(eff_ram))
+        advice_words = _part("ai_advice_npu", npu=_device(npu_label))
         advisor_summary = (
             f"Ollama models run on the CPU here; models served by OpenVINO Model Server can use the {npu_label}."
         )
         primary_rec = "deepseek-r1-distill-qwen-1.5b-npu-ov"
     elif has_gpu:
         tier_headline = f"{gpu_label} ({eff_ram:.1f} GB RAM)"
+        tier_words = _part("ai_tier_one", device=_device(gpu_label), ram=_num(eff_ram))
+        advice_words = _part("ai_advice_gpu", gpu=_device(gpu_label))
         advisor_summary = f"Chat models run in Ollama on the {gpu_label}; 3B–8B models fit well."
         primary_rec = "qwen2.5:7b" if eff_ram >= 16.0 else DEFAULT_CHAT_MODEL
     else:
         tier_headline = f"CPU AVX2/NEON Execution ({eff_ram:.1f} GB RAM)"
+        tier_words = _part("ai_tier_cpu", ram=_num(eff_ram))
+        advice_words = _part("ai_advice_cpu")
         advisor_summary = (
             "No GPU or NPU found: chat runs on the CPU, so small (1.5B–4B) models keep the NAS responsive."
         )
@@ -672,7 +784,9 @@ def build_llm_recommendations(
         enriched["hf_url"] = m.get("hf_url") or f"https://huggingface.co/{enriched['hf_repo']}"
         enriched.update(fit_eval)
         enriched["why_recommended"] = fit_eval["fit_reason"]
+        enriched["why_recommended_text"] = fit_eval["fit_reason_text"]
         enriched["use_case"] = m.get("role", "Hugging Face Release Model")
+        enriched["use_case_text"] = m.get("role_text")
         enriched["vram_or_ram_gb"] = m.get("est_ram_gb", 2.0)
         enriched["estimated_speed"] = m.get("est_speed")  # measured only (AI-02, AI-29)
         enriched["recommended"] = fit_eval["fit_status"] == "best_match" or (
@@ -691,45 +805,22 @@ def build_llm_recommendations(
 
         enriched_models.append(enriched)
 
-    # Sort enriched models according to sort_by
-    if sort_by == "date":
-        enriched_models.sort(
-            key=lambda x: (
-                float(x.get("release_timestamp") or 0.0),
-                int(x.get("downloads") or 0),
-            ),
-            reverse=True,
-        )
-    elif sort_by == "recommended":
-        enriched_models.sort(
-            key=lambda x: (
-                1 if x.get("recommended") else 0,
-                1 if x.get("fits_hardware") else 0,
-                float(x.get("release_timestamp") or 0.0),
-            ),
-            reverse=True,
-        )
-    elif sort_by == "downloads":
-        enriched_models.sort(
-            key=lambda x: (
-                int(x.get("downloads") or 0),
-                float(x.get("release_timestamp") or 0.0),
-            ),
-            reverse=True,
-        )
-    elif sort_by == "size_asc":
-        enriched_models.sort(key=lambda x: float(x.get("est_ram_gb") or x.get("vram_or_ram_gb") or 0.0))
-    elif sort_by == "size_desc":
-        enriched_models.sort(
-            key=lambda x: float(x.get("est_ram_gb") or x.get("vram_or_ram_gb") or 0.0),
-            reverse=True,
-        )
+    _sort_models(enriched_models, sort_by)
 
+    head_key = (
+        "ai_head_hybrid"
+        if (has_npu and has_gpu)
+        else ("ai_head_npu" if has_npu else ("ai_head_gpu" if has_gpu else ""))
+    )
     return {
         "headline": f"NPU + GPU Hybrid ({tier_headline})"
         if (has_npu and has_gpu)
         else (f"NPU ({tier_headline})" if has_npu else (f"GPU ({tier_headline})" if has_gpu else tier_headline)),
         "hardware_summary": f"{tier_headline} — {advisor_summary}",
+        "headline_text": said(head_key, tier=tier_words)
+        if head_key
+        else said(tier_words["key"][4:], **tier_words["params"]),
+        "hardware_summary_text": said("ai_summary", tier=tier_words, advice=advice_words),
         "active_model": active_model or DEFAULT_CHAT_MODEL,
         "compatible_count": compatible_count,
         "warning_count": warning_count,
@@ -824,9 +915,11 @@ def _format_hf_api_item(
     # Hugging Face models are pulled into Ollama (hf.co/…), which runs on a GPU or the CPU and
     # never on the NPU (AI-29). No speed or power figures: those are measured, not guessed.
     params_b = specs["params_b"]
+    target_dev_text = None
     if params_b > 15.0:
         target_accel = "dGPU (24GB+ VRAM)" if params_b <= 35.0 else "Multi-GPU (48GB+ VRAM)"
         target_dev = gpu_label if has_dgpu else f"Requires {max(24, int(specs['est_ram_gb']))}GB+ Discrete GPU"
+        target_dev_text = None if has_dgpu else said("ai_needs_dgpu", gb=max(24, int(specs["est_ram_gb"])))
     elif has_gpu:
         target_accel, target_dev = "GPU", gpu_label
     else:
@@ -838,6 +931,7 @@ def _format_hf_api_item(
     downloads = int(item.get("downloads") or 0)
     likes = int(item.get("likes") or 0)
     role_desc = f"Hugging Face Release ({pipeline_tag}) · {downloads:,} downloads · ♥ {likes:,}"
+    role_text = said("ai_hf_role", task=pipeline_tag, downloads=_num(downloads, 0), likes=_num(likes, 0))
 
     raw_date = (
         item.get("createdAt") or item.get("created_at") or item.get("lastModified") or item.get("last_modified") or ""
@@ -854,6 +948,7 @@ def _format_hf_api_item(
         "category": specs["category"],
         "role": role_desc,
         "use_case": role_desc,
+        "use_case_text": role_text,
         "params": specs["params"],
         "quantization": specs["quantization"],
         "est_ram_gb": specs["est_ram_gb"],
@@ -866,6 +961,7 @@ def _format_hf_api_item(
         "release_timestamp": release_ts,
         "target_accelerator": target_accel,
         "target_device": target_dev,
+        "target_device_text": target_dev_text,
         "est_speed": est_speed,
         "estimated_speed": est_speed,
         "power_profile": power,
@@ -881,6 +977,7 @@ def _format_hf_api_item(
     fit_eval = evaluate_model_hardware_fit(candidate, accel=accel, eff_ram=eff_ram)
     candidate.update(fit_eval)
     candidate["why_recommended"] = fit_eval["fit_reason"]
+    candidate["why_recommended_text"] = fit_eval["fit_reason_text"]
     candidate["recommended"] = fit_eval["fit_status"] == "best_match"
     is_sel = active_norm in (candidate["id"].lower(), repo_id.lower())
     candidate["is_selected"] = is_sel

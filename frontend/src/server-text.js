@@ -4,6 +4,7 @@
 // on an event. Without that the server's own sentence is shown as it came.
 
 import { getLanguage, t } from './i18n.js';
+import { formatNumber } from './format.js';
 
 /** Weekday numbers (0 = Monday) as short names in the reader's language. */
 export function weekdayNames(days, lang = getLanguage()) {
@@ -18,15 +19,23 @@ export function weekdayNames(days, lang = getLanguage()) {
   return names.join(', ');
 }
 
-/** The values of a text: one may be a text to translate ({key, default, params}) or weekdays ({weekdays: [0-6]}). */
+/** The values of a text: one may be a text to translate ({key, default, params}), weekdays ({weekdays: [0-6]})
+ * or a number to write in the reader's language ({number, digits}). */
 export function resolveParams(params) {
   const out = {};
   for (const [k, v] of Object.entries(params || {})) {
     if (v && typeof v === 'object' && 'key' in v) out[k] = t(v.key, v.default || '', resolveParams(v.params));
     else if (v && typeof v === 'object' && Array.isArray(v.weekdays)) out[k] = weekdayNames(v.weekdays);
+    else if (v && typeof v === 'object' && typeof v.number === 'number') out[k] = numberWords(v);
     else out[k] = v;
   }
   return out;
+}
+
+/** A number value of a text, e.g. {number: 12.5, digits: 1} is "12,5" in German. */
+function numberWords(v) {
+  const digits = v.digits || 0;
+  return formatNumber(v.number, { minimumFractionDigits: digits, maximumFractionDigits: digits });
 }
 
 /**

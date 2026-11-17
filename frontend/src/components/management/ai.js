@@ -8,6 +8,7 @@ import { api, auth } from '../../api.js';
 import { showToast, showConfirmToast, showPromptToast } from '../../toast.js';
 import { escapeHtml, copyText } from '../../utils.js';
 import { t } from '../../i18n.js';
+import { serverSaid } from '../../server-text.js';
 import { immichResultsHtml } from '../immich-settings.js';
 import { installDocFilters, selectedTags } from './doc-filters.js';
 import { installPhotoFilters, selectedPhotoFilters, hasPhotoFilters } from './photo-filters.js';
@@ -174,6 +175,33 @@ let _aiLastActiveModel = ''; // the model the server reported; never a made-up d
 let _aiActiveHfFilter = 'all';
 let _aiModelsSortBy = 'date';
 
+/** A text the server sent: in the reader's language when it said how it was made, else its own words. */
+const said = (how, own) => serverSaid({ text: how }, own || '');
+const FIT_MARK = { best_match: '★ ', compatible: '✓ ' };
+
+/** A model's fit badge: the server's words in the reader's language, or ours when it sent none. */
+export function fitBadge(m, hasWarn, isRec) {
+  if (m.fit_badge_text) return `${hasWarn ? '⚠️ ' : FIT_MARK[m.fit_status] || ''}${said(m.fit_badge_text, m.fit_badge)}`;
+  if (m.fit_badge) return m.fit_badge;
+  if (hasWarn) return `⚠️ ${t('ait.badge_no_fit', "Doesn't fit this NAS")}`;
+  return isRec ? `★ ${t('ait.badge_recommended', 'Recommended')}` : `✓ ${t('ait.badge_fits', 'Fits this NAS')}`;
+}
+
+/** The words on the active model's card. */
+export const activeWord = (hasWarn) =>
+  hasWarn ? `⚠️ ${t('ait.active_over', 'Active (too big for this NAS)')}` : `✓ ${t('ait.active', 'Active')}`;
+
+/** Why a model suits (or does not suit) this NAS, and what it is for, in the reader's language. */
+export function modelWords(m) {
+  return {
+    warning: said(m.warning_text || m.fit_reason_text, m.warning_message || m.fit_reason) ||
+      t('ait.warn_default', 'This model needs more memory than this NAS has.'),
+    why: said(m.why_recommended_text, m.why_recommended),
+    useCase: said(m.use_case_text, m.use_case),
+    device: said(m.target_device_text, m.target_device),
+  };
+}
+
 export function renderAiLlmRecommendations(recData = {}, activeModel = '') {
   if (recData && Array.isArray(recData.models)) {
     _aiLastLlmRecommendations = recData;
@@ -198,10 +226,10 @@ export function renderAiLlmRecommendations(recData = {}, activeModel = '') {
   }
 
   if (headlineEl && recData.headline) {
-    headlineEl.textContent = recData.headline;
+    headlineEl.textContent = said(recData.headline_text, recData.headline);
   }
   if (summaryEl && recData.hardware_summary) {
-    summaryEl.textContent = recData.hardware_summary;
+    summaryEl.textContent = said(recData.hardware_summary_text, recData.hardware_summary);
   }
 
   const allModelsRaw = Array.isArray(recData.models) ? recData.models : [];
@@ -339,7 +367,7 @@ export function renderAiLlmRecommendations(recData = {}, activeModel = '') {
       : isRec
         ? '#4fd8c4'
         : '#6ee7b7';
-    const warningText = m.warning_message || m.fit_reason || 'Warning: This model exceeds your NAS hardware memory/VRAM capacity.';
+    const words = modelWords(m);
 
     return `
       <div class="ai-llm-rec-card ${hasWarn ? 'ai-llm-hw-warning' : 'ai-llm-hw-ok'}" data-model-id="${escapeHtml(m.id)}" data-hf-repo="${escapeHtml(hfRepo)}" data-recommended="${isRec ? '1' : '0'}" data-active="${isAct ? '1' : '0'}" data-fits-hardware="${hasWarn ? '0' : '1'}" data-hardware-warning="${hasWarn ? '1' : '0'}" style="background:${bgCol}; border:1px solid ${borderCol}; border-radius:9px; padding:10px 12px; display:flex; flex-direction:column; gap:6px;">
@@ -351,12 +379,12 @@ export function renderAiLlmRecommendations(recData = {}, activeModel = '') {
               ${hfRepo ? `<a href="${escapeHtml(hfUrl)}" target="_blank" rel="noopener noreferrer" style="color:var(--lt-t-fde047ff, #fde047); text-decoration:none; font-family:monospace; font-size:var(--kb-fs-xs);" title="View on https://huggingface.co">🤗 ${escapeHtml(hfRepo)} ↗</a>` : ''}
             </div>
             <span class="ai-model-fit-badge" style="font-size:var(--kb-fs-xs); font-weight:700; padding:2px 8px; border-radius:999px; background:${badgeBg}; color:${badgeColor}; white-space:nowrap; display:inline-flex; align-items:center; gap:3px;">
-              ${escapeHtml(m.fit_badge || (hasWarn ? "⚠️ Doesn't Fit Hardware" : (isRec ? '★ Recommended' : '✓ Fits Hardware')))}
+              ${escapeHtml(fitBadge(m, hasWarn, isRec))}
             </span>
           </div>
         </div>
         <div class="aik-row-xs">
-          ${m.target_device ? `<span style="padding:1px 6px; border-radius:4px; background:var(--kb-shade-30); color:${hasWarn ? '#fca5a5' : '#6ee7b7'};">⚡ ${escapeHtml(m.target_device)}</span>` : ''}
+          ${m.target_device ? `<span style="padding:1px 6px; border-radius:4px; background:var(--kb-shade-30); color:${hasWarn ? '#fca5a5' : '#6ee7b7'};">⚡ ${escapeHtml(words.device)}</span>` : ''}
           <span style="padding:1px 6px; border-radius:4px; background:var(--kb-shade-30); color:${hasWarn ? '#fdba74' : '#c8f3ec'};">${ico('💾')} ${t('ait.model_gb', '~{gb} GB Model', { gb: m.vram_or_ram_gb ?? m.est_ram_gb ?? 2.0 })}${m.min_ram_gb ? t('ait.host_gb', ' ({gb}GB+ Host)', { gb: m.min_ram_gb }) : ''}</span>
           <span style="padding:1px 6px; border-radius:4px; background:var(--kb-shade-30); color:var(--lt-t-f5f9f9ff, #f5f9f9);" title="${escapeHtml(t('ait.release_date', 'Hugging Face Release Date: {date}', { date: releaseDateText }))}">📅 ${escapeHtml(releaseDateText)}</span>
           ${m.estimated_speed ? `<span style="padding:1px 6px; border-radius:4px; background:var(--kb-shade-30); color:var(--lt-t-fde68aff, #fde68a);">🚀 ${escapeHtml(m.estimated_speed)}</span>` : ''}
@@ -364,18 +392,18 @@ export function renderAiLlmRecommendations(recData = {}, activeModel = '') {
         ${hasWarn ? `
           <div class="ai-model-hw-warning-banner" style="padding:6px 8px; border-radius:6px; background:${isCritical ? 'rgba(239,68,68,0.16)' : 'rgba(245,158,11,0.15)'}; border:1px solid ${isCritical ? 'rgba(248,113,113,0.45)' : 'rgba(251,191,36,0.45)'}; color:${isCritical ? '#fecaca' : '#fef08a'}; font-size:var(--kb-fs-xs); line-height:1.35; display:flex; align-items:flex-start; gap:6px;">
             <span class="aik-xs">⚠️</span>
-            <span>${escapeHtml(warningText)}</span>
+            <span>${escapeHtml(words.warning)}</span>
           </div>
         ` : `
-          <div class="aik-xs-soft" title="${escapeHtml(m.why_recommended || m.use_case || '')}">
-            ${escapeHtml(m.use_case || '')}${m.why_recommended ? ` — ${escapeHtml(m.why_recommended)}` : ''}
+          <div class="aik-xs-soft" title="${escapeHtml(words.why || words.useCase)}">
+            ${escapeHtml(words.useCase)}${words.why ? ` — ${escapeHtml(words.why)}` : ''}
           </div>
         `}
         <div class="aik-row-box">
           <span class="ai-model-licence" style="font-size:var(--kb-fs-xs); color:${m.license_kind === 'non_commercial' ? '#fcd34d' : 'var(--kb-text-muted)'};" title="${escapeHtml(m.license_note || m.license || '')}">📜 ${escapeHtml(m.license || t('ai.licence_unknown', 'Licence not listed'))}${m.license_note ? ` • ${escapeHtml(t('ai.licence_non_commercial', 'Not for commercial use'))}` : ''}</span>
           <div class="aik-row-2">
             ${isAct
-              ? `<span style="font-size:var(--kb-fs-xs); font-weight:800; color:${hasWarn ? '#fbbf24' : '#34d399'}; padding:2px 8px; border-radius:6px; background:${hasWarn ? 'rgba(245,158,11,0.18)' : 'rgba(16,185,129,0.18)'}; border:1px solid ${hasWarn ? 'rgba(245,158,11,0.45)' : 'rgba(16,185,129,0.4)'};">${hasWarn ? '⚠️ Active (Exceeds HW)' : '✓ Active'}</span>`
+              ? `<span style="font-size:var(--kb-fs-xs); font-weight:800; color:${hasWarn ? '#fbbf24' : '#34d399'}; padding:2px 8px; border-radius:6px; background:${hasWarn ? 'rgba(245,158,11,0.18)' : 'rgba(16,185,129,0.18)'}; border:1px solid ${hasWarn ? 'rgba(245,158,11,0.45)' : 'rgba(16,185,129,0.4)'};">${activeWord(hasWarn)}</span>`
               : (m.installed === false && m.ollama_tag)
                 ? `<button type="button" class="btn-pill-toggle btn-ai-install-model is-small" data-model-id="${escapeHtml(m.id)}" data-model-tag="${escapeHtml(m.ollama_tag)}" title="${escapeHtml(t('ai.install_model_title', 'Download this model into Ollama'))}" style="background: var(--lt-b-facc152e, rgba(250,204,21,0.18)); border: 1px solid var(--lt-r-facc157a, rgba(250,204,21,0.48)); color: var(--lt-t-fde047ff, #fde047);">⬇️ ${escapeHtml(t('ai.install_model', 'Install'))}</button>`
               : isLiveHfResult
@@ -500,7 +528,7 @@ export async function selectAiRecommendedModel(modelId) {
         renderAiLlmRecommendations(recs, res.active_model || cleanId);
       }
       if (res.hardware_warning && res.warning_message) {
-        showToast(t('toast.message_2', '{warning_message}', { warning_message: res.warning_message }), 'warn');
+        showToast(t('toast.message_2', '{warning_message}', { warning_message: said(res.warning_text, res.warning_message) }), 'warn');
       } else {
         showToast(t('ai.model_selected_toast', 'Active Kib model switched to {model}', { model: cleanId }), 'success');
       }
@@ -533,8 +561,10 @@ export async function searchHuggingFaceModels(query = '') {
       }
       renderAiLlmRecommendations(
         {
-          headline: _aiLastLlmRecommendations?.headline || 'Hugging Face Hub Search',
+          headline: _aiLastLlmRecommendations?.headline || t('ait.hf_search', 'Hugging Face search'),
+          headline_text: _aiLastLlmRecommendations?.headline_text,
           hardware_summary: _aiLastLlmRecommendations?.hardware_summary || '',
+          hardware_summary_text: _aiLastLlmRecommendations?.hardware_summary_text,
           active_model: _aiLastActiveModel,
           models: res.models,
         },
@@ -573,9 +603,9 @@ export async function pullHuggingFaceModel(repoId, activate = false) {
       }
       if (res.hardware_warning && res.warning_message) {
         if (statusEl) {
-          statusEl.textContent = `⚠️ ${t('ait.pulled_warn', 'Pulled {repo} — {warning}', { repo: res.model?.hf_repo || cleanRepo, warning: res.warning_message })}`;
+          statusEl.textContent = `⚠️ ${t('ait.pulled_warn', 'Pulled {repo} — {warning}', { repo: res.model?.hf_repo || cleanRepo, warning: said(res.warning_text, res.warning_message) })}`;
         }
-        showToast(t('toast.hf_pulled_warning', 'Added {model}: {warning}', { model: res.model?.name || cleanRepo, warning: res.warning_message }), 'warn');
+        showToast(t('toast.hf_pulled_warning', 'Added {model}: {warning}', { model: res.model?.name || cleanRepo, warning: said(res.warning_text, res.warning_message) }), 'warn');
       } else {
         if (statusEl) {
           statusEl.textContent = `✅ ${t('ait.pulled_ok', 'Pulled {repo} from Hugging Face (Fits your hardware).', { repo: res.model?.hf_repo || cleanRepo })}`;
