@@ -26,7 +26,7 @@
 .gs-desc { font-size: 13px; color: var(--muted); }
 .gs-done { color: var(--ok); font-size: 18px; font-weight: 700; padding: 0 8px; }
 .setup-steps { display: flex; gap: 8px; margin: 0 0 4px; padding: 0; list-style: none; font-size: 13px; color: var(--muted); }
-.setup-steps li { flex: 1; padding-top: 6px; border-top: 3px solid var(--kb-line-12); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.setup-steps li { flex: 1; padding-top: 6px; border-top: 3px solid var(--kb-line-12); }
 .setup-steps li.is-current { color: var(--fg); border-top-color: var(--brand); font-weight: 700; }
 .setup-steps li.is-done { border-top-color: rgba(var(--brand-rgb), 0.5); }
 /* a phone has no room for six step names: the bars stay, only the current step is named

@@ -2053,7 +2053,7 @@ export default {
   "stg.score": "Score: {score}/100",
   "stg.no_encryption_hint": "Leave empty for no encryption",
   "toast.failed_to_load_catalog": "Failed to load catalog: {error}",
-  "sys.kernel": "ZettOS kernel {platform}",
+  "sys.kernel": "Kernel {platform}",
   "sys.drives_standby": "{count, plural, one {# drive} other {# drives}} ({standby} asleep)",
   "sys.restarting_dead": "{restarting} restarting, {dead} failed",
   "mgmt.load_normal": "Normal",

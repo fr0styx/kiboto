@@ -456,6 +456,9 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Setup on a phone**: the setup wizard's step names no longer run past the screen; the current step is named
   and the others show as bars.
 
+- **Sign-in page**: its title said "Kiboto Toolkit" in German, Spanish, French and Chinese; now "Kiboto" like in
+  English. The setup welcome likewise.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 
