@@ -1061,3 +1061,6 @@
 .storage-facts { padding-top: 0; }
 .storage-facts-h { margin: 0 0 var(--kb-space-2); font-size: var(--kb-fs-xs); font-weight: 700; color: var(--muted); }
 .right-now-load { margin: var(--kb-space-2) 0 0; font-size: var(--kb-fs-xs); color: var(--muted); }
+
+/* Card copies: what Overwrite does, under the existing-file rule (hardware report, finding 18) */
+.copy-overwrite-warn { margin: var(--kb-space-2) 0 0; font-size: var(--kb-fs-xs); color: var(--warn); }

@@ -22,6 +22,16 @@ import { DEFAULT_LOOK, THEMES, hasOwnLook, loadLook, lookColour, normalizeLook, 
 
 const $ = (id) => document.getElementById(id);
 
+/** What the copy settings say under the existing-file rule: nothing, unless Overwrite is chosen. */
+export function overwriteWarning(cfg) {
+  const c = cfg || {};
+  if (c.on_collision !== 'overwrite') return '';
+  if (c.auto_ingest && !c.require_confirmation) {
+    return t('copy.overwrite_warn_auto', 'Copying starts by itself when a card goes in, and files with the same name already in the folder are replaced without asking.');
+  }
+  return t('copy.overwrite_warn', "Files with the same name already in the folder are replaced by the card's copy.");
+}
+
 export function restoreHardwareTabsToManagement() {
   const drawer = $('led-drawer') || document.querySelector('.slide-drawer');
   if (drawer && drawer.classList.contains('open')) {
@@ -539,7 +549,22 @@ export function initSettings() {
   const btnCopyAutoIngest = $('btn-copy-auto-ingest');
   const btnCopyRequireConfirm = $('btn-copy-require-confirm');
   const btnCopyCollision = $('btn-copy-collision');
-  const btnCopySave = $('btn-copy-save');
+  const btnCopyWarn = $('btn-copy-overwrite-warn');
+
+  // Overwrite replaces files without a word unless the page says so (hardware report, finding 18)
+  const showOverwriteWarning = () => {
+    if (!btnCopyWarn) return;
+    const rule = /** @type {HTMLSelectElement|null} */ (btnCopyCollision);
+    const auto = /** @type {HTMLInputElement|null} */ (btnCopyAutoIngest);
+    const ask = /** @type {HTMLInputElement|null} */ (btnCopyRequireConfirm);
+    const text = overwriteWarning({
+      on_collision: rule && rule.value,
+      auto_ingest: !!(auto && auto.checked),
+      require_confirmation: !ask || ask.checked,
+    });
+    btnCopyWarn.textContent = text;
+    btnCopyWarn.hidden = !text;
+  };
 
   async function loadButtonConfig() {
     try {
@@ -551,6 +576,7 @@ export function initSettings() {
       if (btnCopyAutoIngest) btnCopyAutoIngest.checked = !!data.auto_ingest;
       if (btnCopyRequireConfirm) btnCopyRequireConfirm.checked = data.require_confirmation !== false;
       if (btnCopyCollision) btnCopyCollision.value = data.on_collision || 'skip';
+      showOverwriteWarning();
 
       if (btnCopyOptions) {
         btnCopyOptions.style.opacity = data.enabled ? '1' : '0.3';
@@ -602,16 +628,17 @@ export function initSettings() {
     });
   }
 
-  if (btnCopySave) {
-    btnCopySave.addEventListener('click', async (e) => {
-      btnCopySave.textContent = t('ui.saving', 'Saving...');
-      await saveButtonConfig(e);
-      btnCopySave.textContent = t('ui.saved', 'Saved!');
-      setTimeout(() => { setIconLabel(btnCopySave, '💾', t('settings.btn_save_config', 'Save Configuration')); }, 2000);
-    });
-  }
-
+  // every setting saves when it changes; there is no Save button to forget
   if (btnCopySrc) btnCopySrc.addEventListener('change', () => saveButtonConfig());
+  for (const el of [btnCopyAutoIngest, btnCopyRequireConfirm, btnCopyCollision]) {
+    if (el) {
+      el.addEventListener('change', () => {
+        showOverwriteWarning();
+        saveButtonConfig();
+      });
+    }
+  }
+  window.addEventListener('kiboto:lang-changed', showOverwriteWarning);
   if (btnCopyExif) btnCopyExif.addEventListener('change', () => saveButtonConfig());
   if (btnCopyDst) {
     btnCopyDst.addEventListener('change', saveButtonConfig);
@@ -932,10 +959,6 @@ export function initSettings() {
   window.addEventListener('kiboto:lang-changed', () => {
     updateDrawerDynamicHeader();
     _cardReorderUpdaters.forEach((fn) => fn());
-    const copySaveBtn = $('btn-copy-save');
-    if (copySaveBtn) {
-      setIconLabel(copySaveBtn, '💾', t('settings.btn_save_config', 'Save Configuration'));
-    }
     syncThemeSettingsUI();
   });
 

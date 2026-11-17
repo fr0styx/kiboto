@@ -255,11 +255,6 @@ window.addEventListener('DOMContentLoaded', () => {
       closeFbModal();
       ZettEventBus.dispatchEvent(new CustomEvent('folder_selected', { detail: selected }));
       
-      const btnCopySave = $("btn-copy-save");
-      if (btnCopySave) {
-        btnCopySave.textContent = t('ui.saved', 'Saved!');
-        setTimeout(() => { setIconLabel(btnCopySave, '💾', t('settings.btn_save_config', 'Save Configuration')); }, 2000);
-      }
     });
   }
 

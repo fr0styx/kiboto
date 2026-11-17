@@ -754,18 +754,14 @@
           </div>
 
           <div class="slider-row drw-x-12">
-            <span class="slider-label drw-xs-bold-4" data-i18n="settings.collision_rule">Existing File Collision Rule</span>
+            <span class="slider-label drw-xs-bold-4" data-i18n="settings.collision_rule">If a file with the same name is already there</span>
             <select id="btn-copy-collision" class="tz-text-input drw-size-5">
-              <option value="skip" selected data-i18n="settings.collision_skip">Skip Existing Files Automatically</option>
-              <option value="overwrite" data-i18n="settings.collision_overwrite">Overwrite Existing Files</option>
-              <option value="ask" data-i18n="settings.collision_ask">Ask / Prompt in WebUI</option>
+              <option value="skip" selected data-i18n="settings.collision_skip">Keep the one that is there</option>
+              <option value="overwrite" data-i18n="settings.collision_overwrite">Replace it with the card's copy</option>
+              <option value="ask" data-i18n="settings.collision_ask">Ask me each time</option>
             </select>
           </div>
-          
-          <div class="slider-row drw-x-13">
-            <button id="btn-copy-save" class="btn-save-preset drw-size-7" data-i18n="settings.btn_save_config">💾 Save Configuration</button>
-
-          </div>
+          <p class="copy-overwrite-warn" id="btn-copy-overwrite-warn" role="status" hidden></p>
         </div>
       </div>
     </div>

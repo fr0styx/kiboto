@@ -41,21 +41,15 @@ describe('icons apart from the words', () => {
     expect(showToast).toHaveBeenCalledWith('Needs a discrete GPU', 'warn');
   });
 
-  it('the card rescan and copy settings buttons come back with their icon', async () => {
-    document.body.innerHTML = '<button id="btn-media-rescan"></button><button id="btn-copy-save"></button><div id="management-modal-overlay"></div>';
+  it('the card rescan button comes back with its icon (the copy settings save as they change)', async () => {
+    document.body.innerHTML = '<button id="btn-media-rescan"></button><div id="management-modal-overlay"></div>';
     vi.spyOn(api, 'get').mockResolvedValue({});
     vi.spyOn(api, 'post').mockResolvedValue({});
     const settings = await import('../components/settings.js');
     settings.initSettings();
     const rescan = document.getElementById('btn-media-rescan');
-    const save = document.getElementById('btn-copy-save');
     rescan.click();
-    save.click();
     await vi.waitFor(() => expect(iconAndWords(rescan)).toEqual(['🔄', '🔄 Scan']), { timeout: 3000 });
-    await vi.waitFor(() => expect(iconAndWords(save)).toEqual(['💾', '💾 Save Configuration']), { timeout: 3500 });
-    save.textContent = 'x';
-    window.dispatchEvent(new Event('kiboto:lang-changed'));
-    expect(iconAndWords(save)).toEqual(['💾', '💾 Save Configuration']);
   });
 
   it('the container backup button and the compose file read from disk', async () => {

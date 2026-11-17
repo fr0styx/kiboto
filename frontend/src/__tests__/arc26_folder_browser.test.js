@@ -10,7 +10,6 @@ vi.mock('../components/dock.js', () => ({
 document.body.innerHTML = `
   <input id="btn-copy-dst" value="/mnt/user/media/">
   <button id="btn-browse-dst">Browse</button>
-  <button id="btn-copy-save">Save</button>
   <div id="folder-browser-modal"><div class="smart-modal-window">
     <button id="fb-min"></button><button id="fb-close"></button>
     <div id="fb-current-path"></div>
@@ -127,7 +126,7 @@ describe('folder picker', () => {
     await vi.waitFor(() => expect(showToast).toHaveBeenLastCalledWith('Failed to load folder: Error: offline', 'error'));
   });
 
-  it('picking a folder fills the copy destination and says saved', async () => {
+  it('picking a folder fills the copy destination (settings.js saves it and says so)', async () => {
     vi.useFakeTimers();
     try {
       window.openFolderBrowser('/mnt/user/media/');
@@ -140,9 +139,6 @@ describe('folder picker', () => {
       expect(seen.mock.calls[0][0].detail).toBe('/mnt/user/media/');
       expect($('folder-browser-modal').classList.contains('open')).toBe(false);
       expect(DockManager.unregister).toHaveBeenCalledWith('fb');
-      expect($('btn-copy-save').textContent).toBe('Saved!');
-      vi.advanceTimersByTime(2000);
-      expect($('btn-copy-save').textContent).toMatch(/Save/);
     } finally {
       vi.useRealTimers();
     }

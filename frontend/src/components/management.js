@@ -1426,13 +1426,6 @@ export function initManagement() {
     });
   }
 
-  const btnOpenCopy = document.getElementById('btn-open-copy-drawer');
-  if (btnOpenCopy) {
-    btnOpenCopy.addEventListener('click', () => {
-      openDrawer('tab-buttons');
-    });
-  }
-
   const btnOpenFullUps = document.getElementById('btn-open-full-ups-view');
   if (btnOpenFullUps) {
     btnOpenFullUps.addEventListener('click', () => {
