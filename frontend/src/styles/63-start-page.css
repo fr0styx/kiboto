@@ -50,7 +50,6 @@
 #desktop-widgets-container .dsk-row-3 { display: flex; align-items: center; gap: 6px; }
 #desktop-widgets-container .dsk-xs-warn { color: var(--kb-text-warn); font-size: var(--kb-fs-xs); }
 #desktop-widgets-container .dsk-box { height: 4px; background: var(--kb-glaze-8); border-radius: 999px; overflow: hidden; }
-#desktop-widgets-container .dsk-x-4 { opacity: 0.65; }
 #desktop-widgets-container .dsk-row-4 { display: flex; justify-content: space-between; align-items: center; }
 #desktop-widgets-container .w-weather-ask { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--kb-space-2); }
 #desktop-widgets-container .w-weather-ask[hidden] { display: none; }

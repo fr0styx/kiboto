@@ -324,10 +324,6 @@ export function applyWidgetConfig() {
           openWeatherPlace();
         }
       });
-      document.getElementById('w-weather-ask-btn')?.addEventListener('click', (e) => {
-        e.stopPropagation();
-        openWeatherPlace();
-      });
     }
   }
   if (wSystem) {
@@ -1321,7 +1317,8 @@ window.addEventListener('kiboto:lang-changed', () => {
   else if (_lastWeather) renderWeatherUI(_lastWeather);
 });
 
-/** Opens Widget settings at the place field (the card, its keyboard and its button). */
+/** Opens Widget settings at the place field (a click or Enter on the card; its "Choose a place" pill is a
+ * picture of that, not a second control: a button inside the card's own button is not allowed). */
 export function openWeatherPlace() {
   if (typeof window.openManagementWindow !== 'function') return;
   window.openManagementWindow('mgmt-sec-wallpaper', 'mgmt-pane-widgets');
@@ -1360,10 +1357,7 @@ export function renderWeatherAsk(reason = 'none') {
   const btn = document.getElementById('w-weather-ask-btn');
   if (btn) btn.textContent = t('w.choose_place', 'Choose a place');
   const badge = document.getElementById('w-weather-city');
-  if (badge) {
-    badge.textContent = t('w.no_place', 'No place yet');
-    badge.title = badge.textContent;
-  }
+  if (badge) badge.hidden = true;
 }
 
 export function renderWeatherUI(weatherData) {
@@ -1373,6 +1367,8 @@ export function renderWeatherUI(weatherData) {
   const weatherWidget = document.getElementById('widget-weather');
   if (!weatherWidget) return;
   showWeatherBody(true);
+  const placeBadge = document.getElementById('w-weather-city');
+  if (placeBadge) placeBadge.hidden = false;
 
   const cityBadge = document.getElementById('w-weather-city');
   const iconEl = document.getElementById('w-weather-icon');
@@ -2256,7 +2252,7 @@ export function initWidgets() {
         } else if (gUtil > 0 || (stats.ai_active && (stats.ai_accelerator === 'gpu' || stats.ai_accelerator === 'arc'))) {
           aiEngineStatus.innerHTML = '<span class="ai-status-dot active-gpu"></span> <strong style="color:var(--kb-text-ai);">' + escapeHtml(t('wai.gpu_active', 'Intel Arc GPU Active')) + '</strong>';
         } else if (npu.present && gpu.present) {
-          aiEngineStatus.innerHTML = '<span class="ai-status-dot standby"></span> <span>' + escapeHtml(t('wai.hybrid', 'Hybrid Dual Silicon')) + '</span> <span style="opacity:0.65;">' + escapeHtml(t('wai.hybrid_ready', '(NPU + GPU Ready)')) + '</span>';
+          aiEngineStatus.innerHTML = '<span class="ai-status-dot standby"></span> <span>' + escapeHtml(t('wai.hybrid', 'NPU and GPU ready')) + '</span>';
         } else {
           aiEngineStatus.innerHTML = '<span class="ai-status-dot standby"></span> <span>' + escapeHtml(t('wai.neural_ready', 'Neural Engine Ready')) + '</span>';
         }

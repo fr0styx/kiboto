@@ -48,7 +48,7 @@ describe('weather card asks for a place', () => {
     expect(fetch).not.toHaveBeenCalled();
     expect(asking()).toBe(true);
     expect(document.getElementById('w-weather-ask-text').textContent).toBe('Choose a place to see its weather.');
-    expect(document.getElementById('w-weather-city').textContent).toBe('No place yet');
+    expect(document.getElementById('w-weather-city').hidden).toBe(true);
   });
 
   it('"find it for me" that finds nothing asks again, never a stand-in city', async () => {
@@ -90,6 +90,7 @@ describe('weather card asks for a place', () => {
     expect(document.getElementById('w-weather-ask-btn').textContent).toBe('Ort wählen');
     renderWeatherUI({ code: 0, tempC: 10, highC: 12, lowC: 4, humidity: 40, wind: 5, city: 'Kiel' });
     expect(asking()).toBe(false);
+    expect(document.getElementById('w-weather-city').hidden).toBe(false);
     await setLanguage('en');
     expect(document.getElementById('w-weather-ask').hidden).toBe(true);
   });

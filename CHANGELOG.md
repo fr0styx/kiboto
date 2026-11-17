@@ -520,6 +520,9 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Phone home screen in your language**: the system status labels and the weather card no longer stay in English
   when the page opens.
 
+- **AI chips card fits**: its title and the line under the gauges no longer run past the card ("AI Chips",
+  "NPU and GPU ready").
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 
