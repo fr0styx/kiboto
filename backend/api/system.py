@@ -864,11 +864,12 @@ def trigger_power_action(action: str) -> bool:
 
 def _can_or_refuse(action: str) -> None:
     """Refuses before anything is stopped when nothing can do it here (409 with the reason)."""
+    from backend.errors import ApiError
     from backend.services import host_power
 
     able = host_power.can(action)
     if not able["ok"]:
-        raise HTTPException(status_code=409, detail=able["why"])
+        raise ApiError(409, able["why"], "power_not_here", text=able.get("text"))
 
 
 @router.get("/system/power-actions", dependencies=[Depends(require_scope("system:view"))])

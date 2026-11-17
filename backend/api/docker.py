@@ -15,6 +15,7 @@ from pydantic import BaseModel, Field
 from backend.auth import AuthenticatedPrincipal, get_current_principal, require_scope, session_cookie
 from backend.config import docker_sock, logger
 from backend.confirmations import require_confirmation
+from backend.errors import ApiError, said
 from backend.hardware.docker_stats import container_action, read_docker_containers
 from backend.ignored_errors import ignored
 from backend.models.schemas import DockerActionRequest
@@ -713,7 +714,7 @@ async def post_docker_app_backup(stack_name: str):
     try:
         record = await asyncio.to_thread(create_stack_backup, stack_name)
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e)) from e
+        raise ApiError(400, str(e), "app_refused", text=getattr(e, "text", None)) from e
     return {"status": "ok", "backup": record}
 
 
@@ -729,7 +730,7 @@ async def post_docker_app_update(stack_name: str, principal: AuthenticatedPrinci
     try:
         return await asyncio.to_thread(start_app_update, stack_name, getattr(principal, "username", None))
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e)) from e
+        raise ApiError(400, str(e), "app_refused", text=getattr(e, "text", None)) from e
 
 
 @router.delete(
@@ -747,9 +748,14 @@ async def delete_docker_app(stack_name: str, keep_backup: bool = True):
     try:
         return await asyncio.to_thread(remove_app, stack_name, keep_backup)
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e)) from e
+        raise ApiError(400, str(e), "app_refused", text=getattr(e, "text", None)) from e
     except OSError as e:
-        raise HTTPException(status_code=409, detail=f"The app was not removed: its backup failed ({e}).") from e
+        raise ApiError(
+            409,
+            f"The app was not removed: its backup failed ({e}).",
+            "app_backup_failed",
+            text=said("app_backup_failed", error=str(e)),
+        ) from e
 
 
 @router.post(

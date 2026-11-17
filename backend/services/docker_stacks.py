@@ -904,10 +904,14 @@ def app_details(stack_name: str) -> dict[str, Any]:
     parts, and none of them is Kiboto itself."""
     details = get_stack_details(stack_name)
     parts = details.get("containers") or []
+    from backend.errors import SaidError
+
     if not parts:
-        raise ValueError(f"No app named '{stack_name}'.")
+        raise SaidError(f"No app named '{stack_name}'.", "app_not_found", name=stack_name)
     if any(is_kiboto_itself(str(c.get("id") or ""), str(c.get("name") or "")) for c in parts):
-        raise ValueError("This app holds Kiboto itself, which is never removed or replaced from inside.")
+        raise SaidError(
+            "This app holds Kiboto itself, which is never removed or replaced from inside.", "app_is_kiboto"
+        )
     details["containers"] = topological_sort_stack_containers(parts, details.get("compose_yaml"), reverse=False)
     return details
 

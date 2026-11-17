@@ -57,9 +57,10 @@ class ApiError(StarletteHTTPException):
     """An HTTP error with its own slug, so the interface can say the real cause in every language
     instead of a sentence picked by the status code (NUX-1)."""
 
-    def __init__(self, status_code: int, detail: str, error: str):
+    def __init__(self, status_code: int, detail: str, error: str, text: dict[str, Any] | None = None):
         super().__init__(status_code=status_code, detail=detail)
         self.error = error
+        self.text = text  # said(...): the sentence's key and values, for the reader's language
 
 
 def _hide_internal(status: int, detail: str, extra: dict[str, Any], shown: bool = False) -> str:
@@ -77,6 +78,15 @@ def said(key: str, **params: Any) -> dict[str, Any]:
     then shows it in the reader's language (frontend/src/server-text.js). The key is srv.<key> in
     the locale files. A value {"weekdays": [0-6]} is written out as day names by the page."""
     return {"msg_key": f"srv.{key}", "params": params}
+
+
+class SaidError(ValueError):
+    """A refusal for a person, raised in a service: its English sentence and how it was made
+    (said), so the route can answer in the reader's language."""
+
+    def __init__(self, sentence: str, key: str, **params: Any):
+        super().__init__(sentence)
+        self.text = said(key, **params)
 
 
 def error_body(status: int, detail: str, error: str | None = None, shown: bool = False, **extra: Any) -> dict[str, Any]:
@@ -100,8 +110,15 @@ def error_response(
 async def http_exception_handler(request: Request, exc: StarletteHTTPException) -> JSONResponse:
     detail = exc.detail if isinstance(exc.detail, str) else "Request failed."
     shown = bool(getattr(exc, "expose", False))
+    text = getattr(exc, "text", None)
+    extra = {"text": text} if text else {}
     return error_response(
-        exc.status_code, detail, error=getattr(exc, "error", None), headers=getattr(exc, "headers", None), shown=shown
+        exc.status_code,
+        detail,
+        error=getattr(exc, "error", None),
+        headers=getattr(exc, "headers", None),
+        shown=shown,
+        **extra,
     )
 
 

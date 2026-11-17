@@ -435,6 +435,10 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 
 - **Add your own app**: when a name cannot be used, the reason now shows in your language.
 
+- **Power**: when Restart or Shut down cannot work from Kiboto, the reason now shows in your language.
+
+- **Apps**: when backing up, updating or removing an app is refused, the reason now shows in your language.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

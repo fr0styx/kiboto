@@ -53,13 +53,17 @@ def can(action: str) -> dict[str, Any]:
     if found:
         return {"ok": True, "how": found[0], "why": ""}
     name = "reboot" if action == "reboot" else "powerdown"
-    why = (
-        f"Kiboto runs in a container and no host command is mounted. Mount the host's {name} command at "
-        f"/host/{name}, or use the host's own menu."
-        if in_container()
-        else "No restart or shut-down command was found on this system."
-    )
-    return {"ok": False, "how": "", "why": why}
+    if in_container():
+        why = (
+            f"Kiboto runs in a container and no host command is mounted. Mount the host's {name} command at "
+            f"/host/{name}, or use the host's own menu."
+        )
+        text = {"msg_key": "srv.power_no_host_command", "params": {"name": name}}  # gitleaks:allow (a text key)
+    else:
+        why = "No restart or shut-down command was found on this system."
+        text = {"msg_key": "srv.power_no_command", "params": {}}  # gitleaks:allow (a text key)
+    # the sentence's key and values beside it, so the page shows it in the reader's language
+    return {"ok": False, "how": "", "why": why, "text": text}
 
 
 def run(action: str, cmds: list[str] | None = None) -> dict[str, Any]:

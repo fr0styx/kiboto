@@ -9,6 +9,12 @@ import { escapeHtml } from '../../utils.js';
 import { showToast } from '../../toast.js';
 import { currentUser, hasScope } from '../../route-access.js';
 
+/** Why Restart or Shut down cannot work here, in the reader's language when the server sent a key. */
+export function whyNot(c) {
+  const key = c && c.text && c.text.msg_key;
+  return key ? t(key, c.why || '', c.text.params || {}) : (c && c.why) || '';
+}
+
 /** What a button says it did, or why not. */
 export function switchSaid(action, ok, error = '') {
   if (ok) return action === 'reboot' ? t('pws.rebooting', 'The NAS is restarting. This page comes back when it is up again.') : t('pws.shutting', 'The NAS is shutting down. Switch it on again with its power button.');
@@ -39,7 +45,7 @@ export async function renderPowerSwitch(mount) {
     const key = escapeHtml(action);
     return `<div class="pwc-item">
       <button type="button" class="btn-pill-toggle${action === 'shutdown' ? ' is-danger' : ''}" data-power-action="${key}"${c.ok ? '' : ` disabled aria-describedby="pws-why-${key}"`}>${escapeHtml(label)}</button>
-      ${c.ok ? '' : `<p class="pwc-line" id="pws-why-${key}">${escapeHtml(c.why)}</p>`}
+      ${c.ok ? '' : `<p class="pwc-line" id="pws-why-${key}">${escapeHtml(whyNot(c))}</p>`}
     </div>`;
   };
   mount.innerHTML = `
