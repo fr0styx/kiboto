@@ -357,6 +357,7 @@ body.theme-yak .lcd-dot.active {
 /* Management Unraid & Profiles */
 .profile-switcher-row {
   display: flex;
+  flex-wrap: wrap; /* four profiles ran past a phone screen (five-language sweep, 17 Nov) */
   gap: 10px;
   margin: 12px 0 16px 0;
 }
