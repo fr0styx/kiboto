@@ -100,6 +100,7 @@ def check_media_slot_transitions(slots: dict) -> list[dict]:
                     "record": False,
                     "message": f"{mb} MB card detected on /dev/{curr_dev}. Ready for import.",
                     "level": "info",
+                    "text": event_text("card_inserted", slot=slot_label, dev=curr_dev, mb=mb),
                 }
             )
             _maybe_trigger_auto_ingest(slot, dev=curr_dev, size=curr_sz)
@@ -195,6 +196,7 @@ def _maybe_trigger_auto_ingest(slot: str, dev: str | None = None, size: int | No
                 "title": "Auto-Ingest Started",
                 "message": f"Automatically importing photos from {slot.upper()} card to {job_cfg['dest']}",
                 "record": False,
+                "text": event_text("card_auto_import", slot=slot.upper()),
                 "level": "info",
             }
         )
@@ -526,6 +528,34 @@ def _slot_source(src_mode: str) -> tuple[str, bool]:
     return mounted_path, tmp_mount
 
 
+_DONE_ALERT = "copy_finished"  # one alert per kind, however often it happens
+_FAILED_ALERT = "copy_failed"
+
+
+def _tell_copy_done(done_cnt: int, verify_checksum: bool) -> None:
+    send_notification(
+        title="Kiboto: Media Ingest Complete",
+        message=f"Successfully copied {done_cnt} files to array storage.",
+        level="normal",
+        event_type="copy",
+        dedup_key=_DONE_ALERT,
+        record=False,  # _note_copy_done wrote the entry
+        text=event_text("copy_verified" if verify_checksum else "copy_done", n=done_cnt),
+    )
+
+
+def _tell_copy_failed(e: BaseException) -> None:
+    send_notification(
+        title="Kiboto Alert: Media Ingest Failed",
+        message=f"Media copy operation failed: {e}",
+        level="warning",
+        event_type="copy",
+        dedup_key=_FAILED_ALERT,
+        record=False,  # the entry is written just before
+        text=event_text("copy_failed", error=str(e)),
+    )
+
+
 async def _do_copy(cfg):
     src_mode = cfg.get("source", "sd").strip()
     dst = cfg.get("dest", "/mnt/user/").strip()
@@ -622,14 +652,7 @@ async def _do_copy(cfg):
             Z_STATE.copy_status = "success"
             done_cnt = Z_STATE.copy.snapshot().get("files_done", 0)
             _note_copy_done(done_cnt, verify_checksum)
-            send_notification(
-                title="Kiboto: Media Ingest Complete",
-                message=f"Successfully copied {done_cnt} files to array storage.",
-                level="normal",
-                event_type="copy",
-                dedup_key="copy_finished",
-                record=False,  # _note_copy_done wrote the entry
-            )
+            _tell_copy_done(done_cnt, verify_checksum)
             Z_STATE.copy.update(file="Finished successfully.")
 
     except Exception as e:
@@ -638,14 +661,7 @@ async def _do_copy(cfg):
         Z_STATE.copy_status = "error"
         Z_STATE.copy.update(file=f"Error: {e}")
         add_event("error", "Copy Failed", str(e), event_text("copy_failed", error=str(e)))
-        send_notification(
-            title="Kiboto Alert: Media Ingest Failed",
-            message=f"Media copy operation failed: {e}",
-            level="warning",
-            event_type="copy",
-            dedup_key="copy_failed",
-            record=False,
-        )
+        _tell_copy_failed(e)
         try:
             send_led_packet(5, 255, 0, 0, 0, 0, 0, speed=10)
         except (OSError, ValueError):

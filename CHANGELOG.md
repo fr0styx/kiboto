@@ -561,6 +561,12 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Add your own app**: in Apps → Get apps, paste a Docker Compose file and give it a name. Kiboto shows what it will
   create and asks first; if a part does not come up, everything it started is removed again.
 
+#### Fixes
+
+- **Every alert in your household's language**: alerts about drive checks, syncs, cloud copies, copies to another NAS,
+  card imports, off-site backups, updates, malware and the ransomware guard were sent in English. They now follow the
+  language set for alerts, like the rest.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

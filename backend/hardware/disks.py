@@ -1973,19 +1973,27 @@ def check_active_smart_tests():
 
             # If failed, send notification via Apprise
             if not passed and not is_aborted:
-                try:
-                    send_notification(
-                        title=f"S.M.A.R.T. Hardware Failure: /dev/{dev_name}",
-                        message=f"{model} ({serial}) failed {test_type.title()} test at LBA {lba_err}. Data loss risk: Replace drive immediately.",
-                        level="critical",
-                        event_type="smart",
-                        dedup_key=f"smart_failure_{dev_name}",
-                    )
-                except Exception as notif_e:
-                    logger.warning(f"[SMART] Failed to dispatch notification: {notif_e}")
+                _alert_smart_failed(dev_name, model, serial, test_type, lba_err)
 
         except Exception as e:
             logger.error(f"[SMART] Error checking active self-test for {dev_name}: {e}")
+
+
+def _alert_smart_failed(dev_name: str, model: Any, serial: Any, test_type: str, lba_err: Any) -> None:
+    """A drive failed its self-test: the household is told, in its language (NUX-3)."""
+    try:
+        from backend.services.notifications import alert_text
+
+        send_notification(
+            title=f"S.M.A.R.T. Hardware Failure: /dev/{dev_name}",
+            message=f"{model} ({serial}) failed {test_type.title()} test at LBA {lba_err}. Data loss risk: Replace drive immediately.",
+            level="critical",
+            event_type="smart",
+            dedup_key=f"smart_failure_{dev_name}",
+            text=alert_text("smart_failed", dev=dev_name, model=model, serial=serial, test=test_type, lba=lba_err),
+        )
+    except Exception as notif_e:
+        logger.warning(f"[SMART] Failed to dispatch notification: {notif_e}")
 
 
 def locate_disk(dev_name: str, duration_sec: int = 5, allow_read_strobe: bool = True) -> dict:

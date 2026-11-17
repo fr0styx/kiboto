@@ -996,7 +996,7 @@ def _safe(fn: Any, repo_or_id: Any, *args: Any, **kwargs: Any) -> None:
     except Exception as e:
         logger.warning("[Offsite] %s of %s failed: %s", fn.__name__, repo_id, e)
         try:
-            from backend.services.notifications import send_notification
+            from backend.services.notifications import alert_text, send_notification
 
             send_notification(
                 "Kiboto offsite backup failed",
@@ -1004,6 +1004,7 @@ def _safe(fn: Any, repo_or_id: Any, *args: Any, **kwargs: Any) -> None:
                 level="warning",
                 event_type="backup",
                 dedup_key=f"offsite-{repo_id}",
+                text=alert_text("offsite_failed", repo=repo_id, error=f"{e}"),
             )
         except Exception:
             logger.debug("offsite: notification failed", exc_info=True)

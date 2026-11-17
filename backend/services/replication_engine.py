@@ -466,7 +466,7 @@ class ReplicationEngine:
             logger.error("[Replication] %s failed: %s", name, err)
             self.update_job_status(job_id, "error", error=err)
             job_manager.finish(run.id, "error", err)
-            _notify(f"Replication failed: {name}", err, "warning", job_id)
+            _notify(f"Replication failed: {name}", err, "warning", job_id, name)
             return
         job_manager.finish(run.id)
         self.update_job_status(
@@ -512,11 +512,18 @@ def _finished(alert: str, title: str, message: str, name: str) -> None:
         logger.debug("[Replication] The finished run was not logged", exc_info=True)
 
 
-def _notify(title: str, message: str, level: str, job_id: str) -> None:
+def _notify(title: str, message: str, level: str, job_id: str, name: str = "") -> None:
     try:
-        from backend.services.notifications import send_notification
+        from backend.services.notifications import alert_text, send_notification
 
-        send_notification(title, message, level=level, event_type="backup", dedup_key=f"replication-{job_id}")
+        send_notification(
+            title,
+            message,
+            level=level,
+            event_type="backup",
+            dedup_key=f"replication-{job_id}",
+            text=alert_text("replication_failed", name=name or job_id, error=message),
+        )
     except Exception as e:
         logger.debug(f"[Replication] Notification failed: {e}")
 

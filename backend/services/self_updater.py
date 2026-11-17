@@ -629,6 +629,7 @@ def report_last_update_result(data_dir: str) -> dict[str, Any] | None:
                 event_type="system_update",
                 dedup_key=f"update-{data.get('at')}",
                 record=False,
+                text=details,
             )
         except Exception as e:
             logger.warning(f"[SelfUpdater] Could not send the update notification: {e}")

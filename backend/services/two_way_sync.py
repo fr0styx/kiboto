@@ -307,10 +307,16 @@ def _log_finished(pair: dict[str, Any]) -> None:
 
 def _notify(pair: dict[str, Any], message: str) -> None:
     try:
-        from backend.services.notifications import send_notification
+        from backend.services.notifications import alert_text, send_notification
 
         send_notification(
-            {"type": "backup", "title": f"Sync {pair['name']} stopped", "message": message, "level": "warning"}
+            {
+                "type": "backup",
+                "title": f"Sync {pair['name']} stopped",
+                "message": message,
+                "level": "warning",
+                "text": alert_text("sync_stopped", name=pair["name"], why=message),
+            }
         )
     except (ImportError, OSError, ValueError):
         logger.debug("two_way_sync: notification failed", exc_info=True)

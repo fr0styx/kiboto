@@ -6,7 +6,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-export const SERVER_PREFIXES = ['alert.', 'dh.label.', 'dh.f.'];
+export const SERVER_PREFIXES = ['alert.', 'ev.', 'dh.label.', 'dh.f.'];
 export const LANGS = ['en', 'de', 'es', 'fr', 'zh'];
 
 /** The strings the server needs, by key, sorted. */

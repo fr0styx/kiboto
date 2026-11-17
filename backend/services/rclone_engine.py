@@ -332,7 +332,7 @@ def _tell_sync_done(job: dict[str, Any], action: str, src: str, dst: str, job_id
     """A finished or failed cloud sync: the event log gets its entry either way, the alert goes
     out when the job asks for one (SET-13)."""
     try:
-        from backend.services.notifications import send_notification
+        from backend.services.notifications import alert_text, send_notification
 
         told = bool(job.get("notify", True))
         if job["status"] == "success":
@@ -344,6 +344,7 @@ def _tell_sync_done(job: dict[str, Any], action: str, src: str, dst: str, job_id
                     "message": f"Operation '{action}' from {src} to {dst} finished successfully ({mb} MB transferred).",
                     "level": "info",
                     "deliver": told,
+                    "text": alert_text("cloud_sync_ok", action=action, src=src, dst=dst, mb=mb),
                     "meta": {"job_id": job_id, "src": src, "dst": dst},
                 }
             )
@@ -355,6 +356,7 @@ def _tell_sync_done(job: dict[str, Any], action: str, src: str, dst: str, job_id
                     "message": f"Sync from {src} to {dst} failed: {job.get('error')}",
                     "level": "error",
                     "deliver": told,
+                    "text": alert_text("cloud_sync_failed", action=action, src=src, dst=dst, error=job.get("error")),
                     "meta": {"job_id": job_id, "src": src, "dst": dst, "error": job.get("error")},
                 }
             )

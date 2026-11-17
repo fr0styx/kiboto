@@ -750,18 +750,14 @@ def evaluate_smart_velocity_alerts() -> list[dict[str, Any]]:
                         f"Risk level: {risk.upper()}. "
                         f"{v.get('recommendation', 'Plan replacement.')}"
                     )
-                    add_event(
-                        "critical",
-                        "Drive Degradation",
-                        msg,
-                        event_text(
-                            "drive_degrading",
-                            dev=dev,
-                            sectors=realloc_7d,
-                            risk=risk.upper(),
-                            advice=v.get("recommendation", "Plan replacement."),
-                        ),
+                    said = event_text(
+                        "drive_degrading",
+                        dev=dev,
+                        sectors=realloc_7d,
+                        risk=risk.upper(),
+                        advice=v.get("recommendation", "Plan replacement."),
                     )
+                    add_event("critical", "Drive Degradation", msg, said)
                     send_notification(
                         {
                             "type": "smart",
@@ -769,6 +765,7 @@ def evaluate_smart_velocity_alerts() -> list[dict[str, Any]]:
                             "title": title,
                             "record": False,
                             "message": msg,
+                            "text": said,
                         }
                     )
                     triggered_alerts.append({"dev": dev, "realloc_7d_delta": realloc_7d, "risk": risk})

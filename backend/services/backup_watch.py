@@ -80,7 +80,7 @@ def check_and_alert(now: float | None = None) -> list[dict[str, Any]]:
     found = overdue_backups(now)
     if not found:
         return []
-    from backend.services.notifications import send_notification
+    from backend.services.notifications import alert_text, send_notification
 
     day = time.strftime("%Y-%m-%d", time.localtime(now))
     for b in found:
@@ -91,6 +91,7 @@ def check_and_alert(now: float | None = None) -> list[dict[str, Any]]:
                 level="warning",
                 event_type="backup",
                 dedup_key=f"backup-overdue-{b['kind']}-{b['id']}-{day}",
+                text=alert_text("backup_overdue", name=b["name"], why=b["why"]),
             )
         except Exception:
             logger.warning("backup_watch: alert failed", exc_info=True)

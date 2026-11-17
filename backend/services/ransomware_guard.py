@@ -343,6 +343,7 @@ class RansomwareGuard:
             logger.debug("ransomware_guard: event log unavailable", exc_info=True)
         try:
             from backend.services.notifications import send_notification
+            from backend.state import event_text
 
             send_notification(
                 "Kiboto stopped a possible ransomware attack",
@@ -351,6 +352,7 @@ class RansomwareGuard:
                 event_type="security",
                 dedup_key="ransomware-guard",
                 record=False,
+                text=event_text("guard_frozen", reason=reason),
             )
         except Exception:
             logger.warning("[RansomwareGuard] Could not send the alert", exc_info=True)
