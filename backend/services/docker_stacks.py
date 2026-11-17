@@ -829,6 +829,16 @@ def preview_stack_apply(stack_name: str, compose_yaml: str, env_content: str | N
     return compose_apply.plan(inputs["built"], inputs["current"], _elevated)
 
 
+def _apply_progress_text(msg: str) -> dict[str, Any]:
+    """The Jobs centre's message key for a Compose apply's progress line, so it reads in the
+    reader's language (the English stays as the detail)."""
+    for prefix, key, param in (("Getting ", "apply_getting", "image"), ("Starting ", "apply_starting", "part")):
+        if msg.startswith(prefix):
+            return {"detail_id": f"jobs.d.{key}", "detail_params": {param: msg[len(prefix) :]}}
+    key = {"Checking that everything runs": "apply_checking", "Done": "apply_done"}.get(msg)
+    return {"detail_id": f"jobs.d.{key}", "detail_params": {}} if key else {}
+
+
 def start_stack_apply(
     stack_name: str, compose_yaml: str, env_content: str | None, elevated_ok: bool, owner: str | None = None
 ) -> dict[str, Any]:
@@ -864,7 +874,9 @@ def start_stack_apply(
                 inputs["current"],
                 compose_apply.Docker(docker_request, pull_image_blocking),
                 elevated_ok,
-                progress=lambda msg, pct: job_manager.update(job.id, detail=msg, percent=float(pct)),
+                progress=lambda msg, pct: job_manager.update(
+                    job.id, detail=msg, percent=float(pct), **_apply_progress_text(msg)
+                ),
                 elevated_reasons=_elevated,
             )
         except (
