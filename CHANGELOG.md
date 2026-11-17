@@ -4,313 +4,381 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 
 ## Unreleased
 
-#### Changes
+#### Security
 
-- **The Security check says it in words**: "Everything is fine" or "2 things need a look", with what needs a
-  look first, instead of "Score: 65/100 (grade C)". Plain HTTP costs nothing on your home network; it counts
-  only when something on the NAS is reachable from outside. The Overview shows the same number.
+- **Code-scanning fixes**: a virtual machine id or an uploaded file name from a request can no longer name a path
+  outside its own folder; "give the files to" uses the recipient's account name; unexpected error text (paths,
+  internals) stays in the server log instead of reaching the page; the logo proxy fetches only image files from its
+  two hosts.
 
-#### Changes
-
-- **Connections**, a new Advanced page: Home Assistant, API tokens, single sign-on and LDAP in one place,
-  plus a switch for Redfish (for server-monitoring tools), which had no screen before. My account links to
-  it for API keys, and the Security check's "unused tokens" row opens it. In the Security check,
-  suggestions are no longer drawn in red.
-
-#### Fixes
-
-- **The File Explorer's details panel no longer hides file names**: it lies over the list instead of
-  squeezing it, so names keep their width (at some window sizes they shrank to nothing).
-
-#### Fixes
-
-- **Quick look's Copy matches the file**: "Copy text" for text and CSV, "Copy image" for pictures, "Copy path"
-  for everything else (it fetched a whole video or archive to try it as a picture). A ZIP or other archive
-  says what it is and points to Extract instead of opening as a hex dump.
-
-#### Changes
-
-- **Storage opens with one Drives tab**: a sentence from the Overview's own status ("All drives are fine." or
-  what needs a look, with Open), then the bays, then the pools on the same page. The cloud tab is "Cloud drives".
-
-#### Changes
-
-- **Storage is about drives**: Shared folders is a page of its own (no Storage tabs above it), and card copies
-  sit with the Copy button on Hardware. Storage keeps Drives and Cloud drives and is called "Storage".
-  Old links and desktop shortcuts open the new places.
-
-#### Changes
-
-- **The File Explorer remembers your view on every device**: list, compact or icons, the sort, and whether
-  hidden files show follow your account. Hidden files (names starting with a dot) are hidden by default;
-  an eye button by the view buttons shows them, and a line under the list says how many are hidden.
-
-#### Changes
-
-- **A calmer Apps window**: each app shows its name, its state, an Open button for its page, and one "⋯" menu
-  (Restart, Stop or Start, Resume, Update, Back up now, Show the log, Details, Remove). "Show Docker details"
-  brings back the columns, filters, search, row boxes, stacks and network map; it is saved with your account.
-  With no apps yet the window says so and offers Get apps.
-
-#### Changes
-
-- **The Apps list shows your apps, not Kiboto's parts**: Kiboto itself and its name responder are left out
-  (they still show with "Show Docker details").
-
-#### Changes
-
-- **Activity opens on History**: the event log moved from Settings into Activity, for everyone. The hardware
-  charts are its second tab, "Right now", shown with Advanced on. Old links to the event log open History.
-
-#### Changes
-
-- **History reads by day**: Today, Yesterday, then dates; "All" and "Needs a look" and a search box; each entry
-  has an Open button to the page that deals with it, and its technical details fold open in place with Copy.
-
-#### Changes
-
-- **Right now says what the server is doing**: "Quiet." or "The processor is busy: Jellyfin is using most of it.",
-  whether the drives are awake, and the five apps using the processor most, with their memory. It updates live
-  while the tab is open.
-
-#### Changes
-
-- **The front light and screen on General**: on machines that have them, General has "Front panel" with an
-  On/Off switch for each, and a link to Hardware for colours, brightness and night times.
-
-#### Changes
-
-- **Kiboto tells you when an update is ready**: it checks once a day, marks General in Settings and sends one
-  alert per new version. "Check for updates every day" on General turns it off; the privacy guide says so.
-
-#### Changes
-
-- **Sign-ins in History**: for administrators, a "Sign-ins" chip shows who signed in, failed sign-ins and blocked
-  addresses, two-step sign-in changes and changes to people, as sentences by day.
-
-#### Changes
-
-- **Each bay shows Drive Health's verdict**: "Healthy", "Keep an eye on it", "Replace soon" or "Replace now", in its
-  colour, from the last check (no drive is woken to show it).
-
-#### Changes
-
-- **Get apps starts with search**: a full-width "Search apps" box, the categories on one row, and an installed
-  app's card offers Open for its page. The image and port show with "Show Docker details".
-
-#### Changes
-
-- **Problems you haven't seen stay on top of History** under "Not seen yet", until you mark them as seen there or
-  in the bell.
-
-#### Changes
-
-- **File activity in History**: for administrators, a "Files" chip shows who opened, changed or deleted which
-  file, with its own search, beside Sign-ins.
-
-#### Changes
-
-- **Apps that belong together sit together**: the apps of one stack are listed side by side and say "In immich"
-  (or their stack's name) under their own name.
-
-#### Changes
-
-- **Storage keeps its expert tools under Advanced**: "Which drive is in which bay" and "Create pool" show with
-  "Show advanced tools" on.
-
-#### Changes
-
-- **Guessed bays say so**: a drive Kiboto placed in a bay by guess shows "Position not confirmed" until you set it
-  in "Which drive is in which bay".
-
-#### Changes
-
-- **Virtual machines summary shows real numbers**: memory left for machines, processor threads in use, whether
-  vhost-net is there and which network bridges exist come from this NAS. Before, the boxes read fields the server
-  never sent and always said "Dynamic", "Optimal", "8 Threads", "Supported" and "br0 / virbr0".
-
-#### Changes
-
-- **Virtual machine names say the rule**: the create form says "Letters, numbers, - and _ only, 2 to 64 characters",
-  and a name like "My PC" is stopped with that sentence instead of the server's pattern. Snapshot names the same.
-- **Deleting a virtual machine says what goes**: "Its disks and snapshots are erased. Backups are kept."
-
-#### Changes
-
-- **Right now shows the jobs running**: Activity → Right now lists backups, drive tests, copies and other jobs
-  with their progress, and opens the Jobs list.
-
-#### Changes
-
-- **WebDAV is on Shared folders**: the WebDAV server card moved from Cloud drives to Shared folders → Other ways to
-  connect, beside SFTP. Cloud drives now shows only the cloud accounts you connect, and no longer draws a second
-  SFTP card.
-
-#### Changes
-
-- **Replication is part of Backup**: pool replication moved from a hidden Storage tab to Backup → More. It shows
-  where this NAS can replicate its pools or already keeps jobs; old links to the Replication tab open Backup.
-
-#### Changes
-
-- **The bell says where everything else is**: with nothing to look at it says "Nothing needs a look. Everything that
-  happened is in Activity", and its footer reads "See all activity" (it named the old Event Log).
-
-#### Changes
-
-- **Apps in household words**: "Remove app" instead of "Destroy Container"; removing says the folders you gave the app
-  stay; "Keep a copy of its folders and settings under Backup"; "Install a second copy" and "Replace and start"
-  instead of "Deploy New Instance" and "Stop, Replace & Launch"; "Details", "Show the log", "Terminal", "Limits",
-  "Search apps" and "Remove leftovers from old updates". Five languages.
-
-#### Changes
-
-- **Editing a running virtual machine says what it can't change**: processors and memory are locked with "Shut it
-  down to change its processors or memory", instead of promising they apply at the next restart (the server refuses
-  them while the machine runs).
-
-#### Changes
-
-- **Apps grouped by stack**: in the simple Apps view a header row names each stack above its apps, and apps without
-  one follow under "Other apps".
-
-#### Changes
-
-- **Virtual machines that can't be loaded say so**: when the server fails or refuses, Settings → Virtual machines
-  says "The virtual machines could not be loaded" with Try again, instead of "No Virtual Machines Found" and a red
-  "Software Emulation".
-
-#### Changes
-
-- **New virtual machine uses this NAS's numbers**: opened from Settings, the dialog no longer offers "Safe max: 28 GB"
-  and 8 threads on every NAS; it reads them first, and says the limit is not known if the server does not answer.
-
-#### Changes
-
-- **Virtual machine labels that did nothing are gone**: "GPU accelerated" (shown for every adapter) and the
-  "Graphical desktop (display :0)" box (never read by the server) are removed, and the security-chip badge says
-  "Security chip (vTPM) available" instead of "Windows 11 Ready".
-
-#### Changes
-
-- **USB for virtual machines leaves out root hubs**: the device list no longer offers the NAS's own USB root hubs.
-
-#### Changes
-
-- **Storage names the drives Drive Health is watching**: instead of "All drives are fine." beside a drive marked
-  "Keep an eye on it", the summary says "All drives work. Drive Health keeps an eye on 1 drive." and names it.
-
-#### Changes
-
-- **Virtual machines say when they run in slow mode**: on a NAS without hardware virtualization, machines still
-  start, and now each running card says "Slow: no hardware virtualization", Start warns that it fell back to slow
-  mode, and Settings shows "Slow mode" with the fix (for example, enable VT-x in the BIOS).
-
-#### Added
+#### New
 
 - **Drive replacement guide**: a drive Drive Health says to replace now or soon gets "Replace this drive", and an
   empty bay gets "Add a drive here". Each opens the steps for your system (Unraid, TrueNAS, or other Linux pools):
   which drive and bay, what to buy, how to swap, and what to click after. A guide only; Kiboto changes nothing on
   your pools.
 
-#### Added
-
 - **Dynamic DNS**: Away from home has "A name for your home address": keep a DuckDNS or Cloudflare name pointing at
   your home's internet address, checked every 5 minutes. Off by default; the token is stored encrypted and never
   shown again; nothing is sent while it is off (see the privacy guide).
-
-#### Added
 
 - **Firewall** on the Security page, off by default: choose who can connect (home only, or any address) and which
   services stay reachable; this page always stays reachable from home. Kiboto loads the rules only where it manages
   the NAS's network (its own system images); in a container on Unraid or TrueNAS the card says the NAS's own
   firewall applies.
 
-#### Added
-
 - **Switch off at night** on the Power page, off by default: choose when the NAS switches off, when it wakes and on
   which nights. It sets its wake-up clock first and never switches off without one; a running backup or virtual
   machine makes it wait up to two hours.
 
-#### Added
-
 - **MiniDLNA in Get apps**: smart TVs, consoles and older players on your home network can find and play films,
   music and photos from a share. It runs on the host's network so TVs discover it by themselves.
-
-#### Added
 
 - **HTTPS at home**: Away from home can get a Let's Encrypt certificate for your Dynamic DNS name, proved with a DNS
   record (no open port needed), and serves https://<name>:8443 with it; it renews by itself when 30 days are left.
   Off by default. Port 8443 has to be mapped in the container settings.
 
+- **SNMP v3 for monitoring tools** (off by default): Settings → Connections → Monitoring tools. LibreNMS, Zabbix,
+  PRTG and other tools can read uptime, memory, the storage pool, processor load, network traffic (64-bit counters)
+  and the load average. Version 3 only, always with SHA-256 authentication and AES encryption; v1 and v2c get no
+  answer, and nothing can be changed over SNMP. UDP 161 by default; map it when Kiboto runs in its own network. See
+  docs/SNMP.md.
+
+- **Add your own app**: in Apps → Get apps, paste a Docker Compose file and give it a name. Kiboto shows what it will
+  create and asks first; if a part does not come up, everything it started is removed again.
+
 #### Changes
+
+- **The Security check says it in words**: "Everything is fine" or "2 things need a look", with what needs a
+  look first, instead of "Score: 65/100 (grade C)". Plain HTTP costs nothing on your home network; it counts
+  only when something on the NAS is reachable from outside. The Overview shows the same number.
+
+- **Connections**, a new Advanced page: Home Assistant, API tokens, single sign-on and LDAP in one place,
+  plus a switch for Redfish (for server-monitoring tools), which had no screen before. My account links to
+  it for API keys, and the Security check's "unused tokens" row opens it. In the Security check,
+  suggestions are no longer drawn in red.
+
+- **Storage opens with one Drives tab**: a sentence from the Overview's own status ("All drives are fine." or
+  what needs a look, with Open), then the bays, then the pools on the same page. The cloud tab is "Cloud drives".
+
+- **Storage is about drives**: Shared folders is a page of its own (no Storage tabs above it), and card copies
+  sit with the Copy button on Hardware. Storage keeps Drives and Cloud drives and is called "Storage".
+  Old links and desktop shortcuts open the new places.
+
+- **The File Explorer remembers your view on every device**: list, compact or icons, the sort, and whether
+  hidden files show follow your account. Hidden files (names starting with a dot) are hidden by default;
+  an eye button by the view buttons shows them, and a line under the list says how many are hidden.
+
+- **A calmer Apps window**: each app shows its name, its state, an Open button for its page, and one "⋯" menu
+  (Restart, Stop or Start, Resume, Update, Back up now, Show the log, Details, Remove). "Show Docker details"
+  brings back the columns, filters, search, row boxes, stacks and network map; it is saved with your account.
+  With no apps yet the window says so and offers Get apps.
+
+- **The Apps list shows your apps, not Kiboto's parts**: Kiboto itself and its name responder are left out
+  (they still show with "Show Docker details").
+
+- **Activity opens on History**: the event log moved from Settings into Activity, for everyone. The hardware
+  charts are its second tab, "Right now", shown with Advanced on. Old links to the event log open History.
+
+- **History reads by day**: Today, Yesterday, then dates; "All" and "Needs a look" and a search box; each entry
+  has an Open button to the page that deals with it, and its technical details fold open in place with Copy.
+
+- **Right now says what the server is doing**: "Quiet." or "The processor is busy: Jellyfin is using most of it.",
+  whether the drives are awake, and the five apps using the processor most, with their memory. It updates live
+  while the tab is open.
+
+- **The front light and screen on General**: on machines that have them, General has "Front panel" with an
+  On/Off switch for each, and a link to Hardware for colours, brightness and night times.
+
+- **Kiboto tells you when an update is ready**: it checks once a day, marks General in Settings and sends one
+  alert per new version. "Check for updates every day" on General turns it off; the privacy guide says so.
+
+- **Sign-ins in History**: for administrators, a "Sign-ins" chip shows who signed in, failed sign-ins and blocked
+  addresses, two-step sign-in changes and changes to people, as sentences by day.
+
+- **Each bay shows Drive Health's verdict**: "Healthy", "Keep an eye on it", "Replace soon" or "Replace now", in its
+  colour, from the last check (no drive is woken to show it).
+
+- **Get apps starts with search**: a full-width "Search apps" box, the categories on one row, and an installed
+  app's card offers Open for its page. The image and port show with "Show Docker details".
+
+- **Problems you haven't seen stay on top of History** under "Not seen yet", until you mark them as seen there or
+  in the bell.
+
+- **File activity in History**: for administrators, a "Files" chip shows who opened, changed or deleted which
+  file, with its own search, beside Sign-ins.
+
+- **Apps that belong together sit together**: the apps of one stack are listed side by side and say "In immich"
+  (or their stack's name) under their own name.
+
+- **Storage keeps its expert tools under Advanced**: "Which drive is in which bay" and "Create pool" show with
+  "Show advanced tools" on.
+
+- **Guessed bays say so**: a drive Kiboto placed in a bay by guess shows "Position not confirmed" until you set it
+  in "Which drive is in which bay".
+
+- **Virtual machines summary shows real numbers**: memory left for machines, processor threads in use, whether
+  vhost-net is there and which network bridges exist come from this NAS. Before, the boxes read fields the server
+  never sent and always said "Dynamic", "Optimal", "8 Threads", "Supported" and "br0 / virbr0".
+
+- **Virtual machine names say the rule**: the create form says "Letters, numbers, - and _ only, 2 to 64 characters",
+  and a name like "My PC" is stopped with that sentence instead of the server's pattern. Snapshot names the same.
+- **Deleting a virtual machine says what goes**: "Its disks and snapshots are erased. Backups are kept."
+
+- **Right now shows the jobs running**: Activity → Right now lists backups, drive tests, copies and other jobs
+  with their progress, and opens the Jobs list.
+
+- **WebDAV is on Shared folders**: the WebDAV server card moved from Cloud drives to Shared folders → Other ways to
+  connect, beside SFTP. Cloud drives now shows only the cloud accounts you connect, and no longer draws a second
+  SFTP card.
+
+- **Replication is part of Backup**: pool replication moved from a hidden Storage tab to Backup → More. It shows
+  where this NAS can replicate its pools or already keeps jobs; old links to the Replication tab open Backup.
+
+- **The bell says where everything else is**: with nothing to look at it says "Nothing needs a look. Everything that
+  happened is in Activity", and its footer reads "See all activity" (it named the old Event Log).
+
+- **Apps in household words**: "Remove app" instead of "Destroy Container"; removing says the folders you gave the app
+  stay; "Keep a copy of its folders and settings under Backup"; "Install a second copy" and "Replace and start"
+  instead of "Deploy New Instance" and "Stop, Replace & Launch"; "Details", "Show the log", "Terminal", "Limits",
+  "Search apps" and "Remove leftovers from old updates". Five languages.
+
+- **Editing a running virtual machine says what it can't change**: processors and memory are locked with "Shut it
+  down to change its processors or memory", instead of promising they apply at the next restart (the server refuses
+  them while the machine runs).
+
+- **Apps grouped by stack**: in the simple Apps view a header row names each stack above its apps, and apps without
+  one follow under "Other apps".
+
+- **Virtual machines that can't be loaded say so**: when the server fails or refuses, Settings → Virtual machines
+  says "The virtual machines could not be loaded" with Try again, instead of "No Virtual Machines Found" and a red
+  "Software Emulation".
+
+- **New virtual machine uses this NAS's numbers**: opened from Settings, the dialog no longer offers "Safe max: 28 GB"
+  and 8 threads on every NAS; it reads them first, and says the limit is not known if the server does not answer.
+
+- **Virtual machine labels that did nothing are gone**: "GPU accelerated" (shown for every adapter) and the
+  "Graphical desktop (display :0)" box (never read by the server) are removed, and the security-chip badge says
+  "Security chip (vTPM) available" instead of "Windows 11 Ready".
+
+- **USB for virtual machines leaves out root hubs**: the device list no longer offers the NAS's own USB root hubs.
+
+- **Storage names the drives Drive Health is watching**: instead of "All drives are fine." beside a drive marked
+  "Keep an eye on it", the summary says "All drives work. Drive Health keeps an eye on 1 drive." and names it.
+
+- **Virtual machines say when they run in slow mode**: on a NAS without hardware virtualization, machines still
+  start, and now each running card says "Slow: no hardware virtualization", Start warns that it fell back to slow
+  mode, and Settings shows "Slow mode" with the fix (for example, enable VT-x in the BIOS).
 
 - **A smaller first load**: the invite sign-up form now loads only when an invite link is opened (about 1 kB less
   for everyone else).
 
-#### Changes
-
 - **Virtual machines no longer wake sleeping drives to list installers**: an installer folder on a sleeping drive
   is left out of the list until the drive is awake; Kiboto's own data folder is always listed.
-
-#### Changes
 
 - **Virtual machine connection details that work**: the VNC addresses are gone (the screen only listens on the NAS
   itself; Console opens it in the browser), each card shows the machine's network address with Copy, and the SSH
   command no longer assumes the "root" user.
 
-#### Changes
-
 - **A calmer File Explorer toolbar**: Back, Forward, Up, the path, Refresh, Search, Upload and New folder, then two
   menus: View (List, Compact list, Icons, Show hidden files) and More (New window, Tidy films and series, Transfers,
   Details, AI search). Quick locations leaves the toolbar on a computer, where the sidebar lists the same places.
-
-#### Changes
 
 - **Virtual machine dialogs work with the keyboard and screen readers**: they announce themselves as dialogs, start
   on their first field, close with Escape, and Escape on a changed New machine or Edit form asks before throwing it
   away.
 
-#### Changes
-
 - **The virtual machine console no longer shows a made-up screen**: while connecting it says "Connecting to the screen
   of …", and when the screen or serial console can't be opened it says so, with a hint, instead of drawing a fake
   desktop or a pretend shell with invented boot lines.
-
-#### Changes
 
 - **Virtual machines on a phone**: the button rows wrap instead of running off the screen, VM buttons are big enough
   to tap, the screen's key sheet has the arrow keys and Enter that text installers need, and missing numbers show a
   dash instead of "undefined".
 
-#### Changes
-
 - **USB for virtual machines warns about devices the NAS uses**: a USB drive (which may be the boot drive) or the UPS
   cable is marked in the device list, and adding it to a machine asks first.
-
-#### Changes
 
 - **Virtual machine downloads that work**: the Windows Server trial is gone from the download list (Microsoft no longer
   serves it at a fixed address), and the VirtIO driver disc has its real size. Every other entry was checked to answer.
 
-#### Changes
-
 - **PCI/GPU passthrough is hidden for now**: it led to a dead end because Kiboto can't yet prepare the device. A
   machine that already has a device passed through still shows it, so it can be removed.
-
-#### Changes
 
 - **Settings → Virtual machines shows status only**: one line per machine with its state, and a button that opens the
   virtual machines window. Starting, stopping and changing machines happen in that window, so there is one set of
   buttons and words instead of two.
 
-#### Changes
-
 - **Kib's settings are for administrators only**: every settings route now asks for one right, "manage Kib", which
   the administrator holds. A storage administrator or a role with only "change settings" no longer changes some of
   Kib's settings and not others. Using Kib (chat and search) is unchanged.
 
+- **Kib's favourites and recent searches are each person's own**: a star no longer shows for everyone, and the next
+  person to sign in on the same browser no longer sees what the last one searched for. The old shared favourites go
+  to the first administrator who opens Kib after the update.
+
+- **Kib's reading hours cover everything Kib reads**: photo search by meaning and the start after adding a folder now
+  wait for the hours too, and the page names the time zone they are in.
+
+- **Changing the model that reads your files, or the index size, is one step**: Kib asks first, rebuilds its index
+  with the new setting and switches when it is done. Search keeps working as before in the meantime, instead of
+  quietly falling back to exact words.
+
+- **Kib's settings start with one status line**: "Kib is ready. Kib can read 3 folders. It knows 12,480 files.", or
+  reading, paused, outside the reading hours, waiting for a drive, off, or what needs a look, with the one button
+  that fits. It replaces the row of hardware, model and "Standby Guard" pills.
+- **"Kib can read these folders" is an always-open list**: a tick box per folder, its state in words ("Up to date",
+  "Reading", "Waiting for a drive to wake"), a menu with "Read now", "Stop reading" and "Stop reading and forget this
+  folder", "Add a folder…", and a "Never read" list with Remove. No device names, no "RAG Checked".
+
+- **Kib's settings read top to bottom**: the status line, "Kib can read these folders", "Who can use Kib", "Privacy",
+  then everything else folded under "Advanced". Privacy starts with "Kib runs on this NAS. Your files and questions
+  stay here." and lists web lookups and every server address that is not this NAS, with what it gets.
+
+- **"Kib answers with": Automatic (recommended), Fast, Balanced or Best**: the model's name is shown small under each,
+  with how it runs here once "Test speed" has measured it. The choice is kept, so a later speed test moves it to the
+  model that now fits; a model picked by name stays put.
+
+- **Kib has its own window**: Ask Kib and AI search open in a Kib window from the dock, from search, from "Ask Kib
+  about this" and from every old link; Settings → Kib holds only Kib's settings, with an "Open Kib" button. Someone who
+  may use Kib but not change its settings gets the window instead of a page that is not theirs.
+
+- **A new virtual machine starts from a preset**: "Linux or another system" (2 cores, 4 GB, 32 GB) or "Windows 11"
+  (4 cores, 8 GB, 64 GB, UEFI and TPM, with a note about the driver disc). Sizes stay inside what this NAS can give,
+  and every field can still be changed.
+
+- **"Ask Kib" on the phone home screen for everyone**: it opens the Kib window. Someone whose role has Kib switched
+  off reads "Kib is turned off for you" before typing, and the question box is disabled.
+
+- **Kib's settings lose the row of seven buttons**: Pause, Continue and "Cancel reading" are on the status line,
+  "See why" opens the files Kib could not read, "Read now" stays with the folders, and "Forget everything and start
+  over…" has its own place under Advanced, with a dialog in the same words.
+
+- **Kib's Privacy section says whether chats and the index are encrypted on this NAS**, being encrypted, locked
+  because the key is missing, or not encrypted (with how to turn it on).
+
+- **Kib's reading progress has a total**: "Kib is reading your files: 1,234 of about 5,000", from what Kib knew of
+  those folders last time. No drive is read to count; when more is found, it says "so far".
+
+- **Windows 11 can be set up in a virtual machine**: a new machine with UEFI gets the chipset Windows 11 and
+  secure-boot firmware need, and a "Driver disc" can sit beside the installer (virtio-win from the ISO catalog), so
+  Windows Setup sees its disk. Machines made before keep the chipset they were installed on. Not yet tried with a full
+  Windows 11 installation on real hardware.
+
+- **Settings → Kib is called "Kib" in its title**, as in the sidebar, and on a phone each folder's state sits on its
+  own line under the folder.
+
+- **An app's details show three tabs to everyone**: Overview, Folders and Log. Ports, Environment, Compose, Terminal and
+  Edit come with "Show Docker details" (a menu item that asks for one of them still opens it), and the tabs wrap
+  instead of running off the dialog. On a phone, "Get apps" is first in the row of actions.
+
+- **A new virtual machine in three steps**: "What to install" (preset, name, installer, driver disc, disk), "How big"
+  (memory, cores, extra disks) and "More" (start-up order, firmware, network, display, shared folders, USB), with Back
+  and Next. Next checks the name first and says what is wrong next to the field.
+
+- **On a phone each app is a card of two lines**: its name and state, then Open and the menu (about 90 px, was about
+  325). The filters, ports and usage stay with "Show Docker details".
+
+- **Home Assistant as a virtual machine**: the ISO catalog offers Home Assistant OS 18.4 as a ready-made disk
+  (checked against GitHub's checksum and unpacked), and a new machine's "Home Assistant" preset starts from it: UEFI,
+  2 cores, 4 GB, the disk copied for that machine and grown to the size chosen. Any other ready-made .qcow2 disk in
+  the installer folders can be chosen too. Not yet tried with a full Home Assistant start on real hardware.
+- The ISO catalog no longer lists the Windows Server trial, whose download no longer exists.
+
+- **Sharing a folder takes two steps**: pick the folder with "Choose…" (Kiboto asks before it wakes a sleeping drive,
+  and names the share after the folder), then choose who may open it, in the same window a share's card opens.
+
+- **"Backups from a Mac" on Shared folders**: the folders Macs back up to with their size limits, "Change the size"
+  and "Stop Mac backups" (the backups already there stay), "Make a folder for Mac backups", and the three steps on the
+  Mac. Where Unraid or TrueNAS runs the shares, it says the host makes these folders and keeps the steps.
+
+- **"Use this disk for backups?"**: plugging in a large empty USB disk (64 GB or more, no backups, no camera folder)
+  offers to keep a copy of this NAS on it; "Set it up" opens "Protect this NAS" with that disk already chosen.
+
+- **Backup shows which folders have no copy**: "Your folders and their copies" lists each shared folder with the
+  backups outside this NAS that hold it, all or part of it, or "No copy outside this NAS". A scratch or download folder
+  can be marked "Leave out on purpose".
+
+- **Apply a Compose file**: the stack editor has "Apply". It first says what will happen, service by service (new,
+  replaced and why, kept, removed) and any access to the host the file asks for; then it downloads the images, sets
+  aside each container that changes, starts the new ones and checks they run (and are healthy). If anything fails,
+  everything goes back as it was, the old file too. A stack Kib writes can now be started. Settings Kiboto does not
+  apply yet (such as building an image) are named and refused, never skipped.
+
+- **One row per app**: in Apps without the Docker details, an app made of several containers (such as Immich) is one
+  row with one state, one Open and one menu. Its menu starts, stops, restarts, updates, backs up and removes the whole
+  app, and lists its parts. With the Docker details, the containers sit under a header with their app's name.
+- **Whole-app backup, update and removal**: one archive holds an app's Compose file and the folders of all its parts;
+  restoring it stops and starts every part, and brings the app back if it was removed. Update replaces each part that
+  has a newer version, one after the other. Removing an app keeps a backup of it first; if that backup fails, nothing
+  is removed.
+
+- **One access list for shared folders**: the table on Users (Who can open the shared folders) now decides alone, for
+  the network and Files alike. Lists a shared folder carried of its own are written into the table person by person
+  at the next start, so everyone keeps what they could do; the old lists are copied aside first. Lists that name a
+  group are left as they are. People chosen when a shared folder is made go into the table too.
+
+- **Power, first screen rebuilt** (SET-31, first step of the rebuild): one status word and sentence for every state
+  (No battery backup, Protected, Needs a look and why, The power is out since when and what happens next, Shutting
+  down, Shut the NAS down by hand, UPS not answering), up to three numbers, "When the power goes out" as numbered
+  steps that name who switches the NAS off (in red when nothing can), and "Will it start again by itself?" with its
+  honest answer. Everything comes from one answer of the server, so the page cannot contradict itself.
+
+- **Power history in sentences**: "The power was out for 2 minutes. The battery went from 100 % to 85 %." instead of a
+  table of event codes; the last five first, "Show all" opens the rest.
+
+- **Power: "Check that it works"**: the battery test and the practice run sit together, each with when it was last
+  done and what came of it; the battery test is greyed with the reason where the UPS cannot take it.
+
+- **Restart and Shut down on Power**: two buttons, each confirmed. Kiboto now checks that a command really reaches the
+  host and reads its answer; where none can, the button is greyed with the reason and nothing is stopped first. The
+  emergency kernel power-off that cut the power without stopping anything is gone. The UPS safe shutdown uses the
+  same checked path.
+
+- **"Will it start again by itself?" can now be proven**: after Kiboto shuts the NAS down for a power cut, Power asks
+  once at the next start whether it switched on by itself; the answer ("Yes, proven on …" or "No") stays on the page.
+
+- **Power reads top to bottom**: the answers first, then Check that it works, History and Restart or shut down; the
+  gauges and the connection settings are under a closed "Advanced".
+
+- **Power: one shutdown rule, shown as it works**: minutes left and battery left both apply, the first one reached
+  wins (or the UPS's own low-battery signal); "after a set time on battery" can be added. The page used to show three
+  exclusive choices while the server applied all of them.
+- **Restart or shut down from the top bar**: in the menu under your name, for people who may do it.
+
+- **Power for people who may only look**: they see every answer; the battery test, practice run, Restart and Shut
+  down are not offered to them, instead of buttons that only said "no permission".
+
+- **The Activity chart for screen readers**: it is read out as each line's lowest, highest and average value over the
+  chosen time.
+
+- **The bell by keyboard**: its entries can be reached with Tab and opened with Enter or Space, and a screen reader
+  hears their level.
+
+- **Files follows this server's folders**: the first folder, Quick Locations, the Recycle Bin and Organize Media start
+  where this NAS keeps its files, not at Unraid's /mnt/user (nothing changes on Unraid).
+
+- **The Activity chart shows when the NAS was off**: the lines break there and the axis says "NAS off", instead of
+  joining the hours before and after.
+
+- **Faster first load**: the menu behind your name in the top bar now loads when you first open it, so the
+  desktop has a little less to fetch at start.
+
+- **Catalog apps update to tested versions**: an app from Kiboto's catalog now offers an update when a Kiboto
+  release ships a newer version that was tested with it, not whenever its maker publishes something new. Apps you
+  added yourself are checked against their own source, as before.
+
+- **A guide to Apps** (docs/APPS.md): getting apps, how updates work and go back, changing an app's Compose file,
+  backups and removal.
+
 #### Fixes
+
+- **The File Explorer's details panel no longer hides file names**: it lies over the list instead of
+  squeezing it, so names keep their width (at some window sizes they shrank to nothing).
+
+- **Quick look's Copy matches the file**: "Copy text" for text and CSV, "Copy image" for pictures, "Copy path"
+  for everything else (it fetched a whole video or archive to try it as a picture). A ZIP or other archive
+  says what it is and points to Extract instead of opening as a hex dump.
 
 - **Kib's "Re-index" says what happened**: it reports that rebuilding started, that it is already running, or why it
   did not start, instead of nothing.
@@ -322,327 +390,45 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **"Add to list" (was "Pull from Hugging Face") only adds the model to the list**; it no longer makes it Kib's model,
   or Kib's reader model, without asking.
 
-#### Changes
-
-- **Kib's favourites and recent searches are each person's own**: a star no longer shows for everyone, and the next
-  person to sign in on the same browser no longer sees what the last one searched for. The old shared favourites go
-  to the first administrator who opens Kib after the update.
-
-#### Changes
-
-- **Kib's reading hours cover everything Kib reads**: photo search by meaning and the start after adding a folder now
-  wait for the hours too, and the page names the time zone they are in.
-
-#### Changes
-
-- **Changing the model that reads your files, or the index size, is one step**: Kib asks first, rebuilds its index
-  with the new setting and switches when it is done. Search keeps working as before in the meantime, instead of
-  quietly falling back to exact words.
-
-#### Changes
-
-- **Kib's settings start with one status line**: "Kib is ready. Kib can read 3 folders. It knows 12,480 files.", or
-  reading, paused, outside the reading hours, waiting for a drive, off, or what needs a look, with the one button
-  that fits. It replaces the row of hardware, model and "Standby Guard" pills.
-- **"Kib can read these folders" is an always-open list**: a tick box per folder, its state in words ("Up to date",
-  "Reading", "Waiting for a drive to wake"), a menu with "Read now", "Stop reading" and "Stop reading and forget this
-  folder", "Add a folder…", and a "Never read" list with Remove. No device names, no "RAG Checked".
-
-#### Changes
-
-- **Kib's settings read top to bottom**: the status line, "Kib can read these folders", "Who can use Kib", "Privacy",
-  then everything else folded under "Advanced". Privacy starts with "Kib runs on this NAS. Your files and questions
-  stay here." and lists web lookups and every server address that is not this NAS, with what it gets.
-
-#### Changes
-
-- **"Kib answers with": Automatic (recommended), Fast, Balanced or Best**: the model's name is shown small under each,
-  with how it runs here once "Test speed" has measured it. The choice is kept, so a later speed test moves it to the
-  model that now fits; a model picked by name stays put.
-
-#### Changes
-
-- **Kib has its own window**: Ask Kib and AI search open in a Kib window from the dock, from search, from "Ask Kib
-  about this" and from every old link; Settings → Kib holds only Kib's settings, with an "Open Kib" button. Someone who
-  may use Kib but not change its settings gets the window instead of a page that is not theirs.
-
-#### Changes
-
-- **A new virtual machine starts from a preset**: "Linux or another system" (2 cores, 4 GB, 32 GB) or "Windows 11"
-  (4 cores, 8 GB, 64 GB, UEFI and TPM, with a note about the driver disc). Sizes stay inside what this NAS can give,
-  and every field can still be changed.
-
-#### Changes
-
-- **"Ask Kib" on the phone home screen for everyone**: it opens the Kib window. Someone whose role has Kib switched
-  off reads "Kib is turned off for you" before typing, and the question box is disabled.
-
-#### Changes
-
-- **Kib's settings lose the row of seven buttons**: Pause, Continue and "Cancel reading" are on the status line,
-  "See why" opens the files Kib could not read, "Read now" stays with the folders, and "Forget everything and start
-  over…" has its own place under Advanced, with a dialog in the same words.
-
-#### Changes
-
-- **Kib's Privacy section says whether chats and the index are encrypted on this NAS**, being encrypted, locked
-  because the key is missing, or not encrypted (with how to turn it on).
-
-#### Changes
-
-- **Kib's reading progress has a total**: "Kib is reading your files: 1,234 of about 5,000", from what Kib knew of
-  those folders last time. No drive is read to count; when more is found, it says "so far".
-
-#### Changes
-
-- **Windows 11 can be set up in a virtual machine**: a new machine with UEFI gets the chipset Windows 11 and
-  secure-boot firmware need, and a "Driver disc" can sit beside the installer (virtio-win from the ISO catalog), so
-  Windows Setup sees its disk. Machines made before keep the chipset they were installed on. Not yet tried with a full
-  Windows 11 installation on real hardware.
-
-#### Changes
-
-- **Settings → Kib is called "Kib" in its title**, as in the sidebar, and on a phone each folder's state sits on its
-  own line under the folder.
-
-#### Changes
-
-- **An app's details show three tabs to everyone**: Overview, Folders and Log. Ports, Environment, Compose, Terminal and
-  Edit come with "Show Docker details" (a menu item that asks for one of them still opens it), and the tabs wrap
-  instead of running off the dialog. On a phone, "Get apps" is first in the row of actions.
-
-#### Changes
-
-- **A new virtual machine in three steps**: "What to install" (preset, name, installer, driver disc, disk), "How big"
-  (memory, cores, extra disks) and "More" (start-up order, firmware, network, display, shared folders, USB), with Back
-  and Next. Next checks the name first and says what is wrong next to the field.
-
-#### Changes
-
-- **On a phone each app is a card of two lines**: its name and state, then Open and the menu (about 90 px, was about
-  325). The filters, ports and usage stay with "Show Docker details".
-
-#### Changes
-
-- **Home Assistant as a virtual machine**: the ISO catalog offers Home Assistant OS 18.4 as a ready-made disk
-  (checked against GitHub's checksum and unpacked), and a new machine's "Home Assistant" preset starts from it: UEFI,
-  2 cores, 4 GB, the disk copied for that machine and grown to the size chosen. Any other ready-made .qcow2 disk in
-  the installer folders can be chosen too. Not yet tried with a full Home Assistant start on real hardware.
-- The ISO catalog no longer lists the Windows Server trial, whose download no longer exists.
-
-#### Fixes
-
 - **A missed off-site backup is caught up**: a NAS that was off at its backup hour now backs up once it is on again,
   instead of skipping the day. A backup that fails is tried again once an hour, no longer every minute of its hour.
-
-#### Changes
-
-- **Sharing a folder takes two steps**: pick the folder with "Choose…" (Kiboto asks before it wakes a sleeping drive,
-  and names the share after the folder), then choose who may open it, in the same window a share's card opens.
-
-#### Changes
-
-- **"Backups from a Mac" on Shared folders**: the folders Macs back up to with their size limits, "Change the size"
-  and "Stop Mac backups" (the backups already there stay), "Make a folder for Mac backups", and the three steps on the
-  Mac. Where Unraid or TrueNAS runs the shares, it says the host makes these folders and keeps the steps.
-
-#### Changes
-
-- **"Use this disk for backups?"**: plugging in a large empty USB disk (64 GB or more, no backups, no camera folder)
-  offers to keep a copy of this NAS on it; "Set it up" opens "Protect this NAS" with that disk already chosen.
-
-#### Changes
-
-- **Backup shows which folders have no copy**: "Your folders and their copies" lists each shared folder with the
-  backups outside this NAS that hold it, all or part of it, or "No copy outside this NAS". A scratch or download folder
-  can be marked "Leave out on purpose".
-
-#### Changes
-
-- **Apply a Compose file**: the stack editor has "Apply". It first says what will happen, service by service (new,
-  replaced and why, kept, removed) and any access to the host the file asks for; then it downloads the images, sets
-  aside each container that changes, starts the new ones and checks they run (and are healthy). If anything fails,
-  everything goes back as it was, the old file too. A stack Kib writes can now be started. Settings Kiboto does not
-  apply yet (such as building an image) are named and refused, never skipped.
-
-#### Fixes
 
 - **Restoring the backup of a removed app brings the app back**: its saved Compose file is started through the safe
   apply, which takes everything back if the app does not come up. A file that asks for access to the host is not
   started by itself; the message says so and where the file is kept.
 
-#### Changes
-
-- **One row per app**: in Apps without the Docker details, an app made of several containers (such as Immich) is one
-  row with one state, one Open and one menu. Its menu starts, stops, restarts, updates, backs up and removes the whole
-  app, and lists its parts. With the Docker details, the containers sit under a header with their app's name.
-- **Whole-app backup, update and removal**: one archive holds an app's Compose file and the folders of all its parts;
-  restoring it stops and starts every part, and brings the app back if it was removed. Update replaces each part that
-  has a newer version, one after the other. Removing an app keeps a backup of it first; if that backup fails, nothing
-  is removed.
-
-#### New
-
-- **SNMP v3 for monitoring tools** (off by default): Settings → Connections → Monitoring tools. LibreNMS, Zabbix,
-  PRTG and other tools can read uptime, memory, the storage pool, processor load, network traffic (64-bit counters)
-  and the load average. Version 3 only, always with SHA-256 authentication and AES encryption; v1 and v2c get no
-  answer, and nothing can be changed over SNMP. UDP 161 by default; map it when Kiboto runs in its own network. See
-  docs/SNMP.md.
-
-#### Changes
-
-- **One access list for shared folders**: the table on Users (Who can open the shared folders) now decides alone, for
-  the network and Files alike. Lists a shared folder carried of its own are written into the table person by person
-  at the next start, so everyone keeps what they could do; the old lists are copied aside first. Lists that name a
-  group are left as they are. People chosen when a shared folder is made go into the table too.
-
-#### Changes
-
-- **Power, first screen rebuilt** (SET-31, first step of the rebuild): one status word and sentence for every state
-  (No battery backup, Protected, Needs a look and why, The power is out since when and what happens next, Shutting
-  down, Shut the NAS down by hand, UPS not answering), up to three numbers, "When the power goes out" as numbered
-  steps that name who switches the NAS off (in red when nothing can), and "Will it start again by itself?" with its
-  honest answer. Everything comes from one answer of the server, so the page cannot contradict itself.
-
-#### Security
-
-- **Code-scanning fixes**: a virtual machine id or an uploaded file name from a request can no longer name a path
-  outside its own folder; "give the files to" uses the recipient's account name; unexpected error text (paths,
-  internals) stays in the server log instead of reaching the page; the logo proxy fetches only image files from its
-  two hosts.
-
-#### Changes
-
-- **Power history in sentences**: "The power was out for 2 minutes. The battery went from 100 % to 85 %." instead of a
-  table of event codes; the last five first, "Show all" opens the rest.
-
-#### Changes
-
-- **Power: "Check that it works"**: the battery test and the practice run sit together, each with when it was last
-  done and what came of it; the battery test is greyed with the reason where the UPS cannot take it.
-
-#### Changes
-
-- **Restart and Shut down on Power**: two buttons, each confirmed. Kiboto now checks that a command really reaches the
-  host and reads its answer; where none can, the button is greyed with the reason and nothing is stopped first. The
-  emergency kernel power-off that cut the power without stopping anything is gone. The UPS safe shutdown uses the
-  same checked path.
-
-#### Changes
-
-- **"Will it start again by itself?" can now be proven**: after Kiboto shuts the NAS down for a power cut, Power asks
-  once at the next start whether it switched on by itself; the answer ("Yes, proven on …" or "No") stays on the page.
-
-#### Fixes
-
 - **The UPS sockets come back on when the power returns**: after a safe shutdown Kiboto asked the UPS to switch its
   sockets off and leave them off, so the NAS could not start again by itself. It now asks for "off, and back on when
   the power returns", reads the answer, and Power says whether your UPS can do it.
-
-#### Changes
-
-- **Power reads top to bottom**: the answers first, then Check that it works, History and Restart or shut down; the
-  gauges and the connection settings are under a closed "Advanced".
-
-#### Changes
-
-- **Power: one shutdown rule, shown as it works**: minutes left and battery left both apply, the first one reached
-  wins (or the UPS's own low-battery signal); "after a set time on battery" can be added. The page used to show three
-  exclusive choices while the server applied all of them.
-- **Restart or shut down from the top bar**: in the menu under your name, for people who may do it.
-
-#### Changes
-
-- **Power for people who may only look**: they see every answer; the battery test, practice run, Restart and Shut
-  down are not offered to them, instead of buttons that only said "no permission".
-
-#### New
-
-- **Add your own app**: in Apps → Get apps, paste a Docker Compose file and give it a name. Kiboto shows what it will
-  create and asks first; if a part does not come up, everything it started is removed again.
-
-#### Fixes
 
 - **Every alert in your household's language**: alerts about drive checks, syncs, cloud copies, copies to another NAS,
   card imports, off-site backups, updates, malware and the ransomware guard were sent in English. They now follow the
   language set for alerts, like the rest.
 
-#### Changes
-
-- **The Activity chart for screen readers**: it is read out as each line's lowest, highest and average value over the
-  chosen time.
-
-#### Changes
-
-- **The bell by keyboard**: its entries can be reached with Tab and opened with Enter or Space, and a screen reader
-  hears their level.
-
-#### Changes
-
-- **Files follows this server's folders**: the first folder, Quick Locations, the Recycle Bin and Organize Media start
-  where this NAS keeps its files, not at Unraid's /mnt/user (nothing changes on Unraid).
-
-#### Changes
-
-- **The Activity chart shows when the NAS was off**: the lines break there and the axis says "NAS off", instead of
-  joining the hours before and after.
-
-#### Fixes
-
 - **Applying a Compose file goes back when a part stops right after its start**: the check looked once and took a
   container that exited a moment later for a working one. A part must now keep running for a few seconds (or be
   healthy, where it has a health check). Found by trying the apply on a real Docker engine.
-
-#### Fixes
 
 - **App backups keep the app's command**: a restored app whose container runs its own command (not its image's
   default) came back running the default instead. Backups now keep the command and entrypoint. Found by restoring
   a backup on a real Docker engine.
 
-#### Changes
-
-- **Faster first load**: the menu behind your name in the top bar now loads when you first open it, so the
-  desktop has a little less to fetch at start.
-
-#### Fixes
-
 - **Updates go back when the new version does not run**: an app whose new version crashed or stopped right
   after starting stayed broken. Now an app must keep running on its new version, or its old version comes back.
   Updating an app of several parts never leaves it half updated: if one part fails, the others go back too.
-
-#### Fixes
 
 - **Kib in your language**: a new chat's title, the number of chats and a few Advanced texts in the Kib window
   were always English; screen readers heard the rename button in English. Settings → Kib no longer shows a bar
   with a single tab.
 
-#### Fixes
-
 - **More of Kiboto in your language**: the SFTP card, read and write labels, "Ask Kib" in the dock and the main
   storage pool's name were English in other languages. Found by opening every Settings page in all five languages.
-
-#### Changes
-
-- **Catalog apps update to tested versions**: an app from Kiboto's catalog now offers an update when a Kiboto
-  release ships a newer version that was tested with it, not whenever its maker publishes something new. Apps you
-  added yourself are checked against their own source, as before.
-
-#### Fixes
 
 - **Virtual machines: the speed check in your language**: the dialog that explains why virtual machines run slow,
   and what to do about it, was always English.
 
-#### Changes
-
-- **A guide to Apps** (docs/APPS.md): getting apps, how updates work and go back, changing an app's Compose file,
-  backups and removal.
-
-#### Fixes
-
 - **App updates speak your language**: the Jobs centre and Activity now say in your language why an app update
   failed and whether its parts went back to their old versions.
-
-#### Fixes
 
 - **Activity in your language**: the night switch-off, applying an app's Compose file and files received through a
   link now show in your language too.
