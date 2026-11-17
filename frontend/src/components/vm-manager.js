@@ -12,6 +12,7 @@ import { escapeHtml, reconcileKeyedTable } from '../utils.js';
 import { ZettEventBus } from '../event-bus.js';
 import { showToast, showConfirmToast, showBottomSheet } from '../toast.js';
 import { t } from '../i18n.js';
+import { kvmWords, cpuShareWords } from './vm/host-words.js';
 import { makeDraggable, bringToFront } from './dock.js';
 import { vmState } from './vm/state.js';
 import { openKvmDiagnosticsModal, openVmConnectModal, vmStateLabel } from './vm/connect-modal.js';
@@ -289,7 +290,7 @@ function renderTelemetry(tel) {
     kvmBadge.style.color = '#fbbf24';
     kvmBadge.style.borderColor = 'rgba(245,158,11,0.3)';
   } else if (kvmBadge && tel.kvm) {
-    kvmBadge.innerHTML = `<span aria-hidden="true">⚡</span> <span>${escapeHtml(tel.kvm.badge || 'KVM Active')}</span> <span class="vmm-xs" title="${t('ui.view_kvm_diagnostics_fix', 'View KVM Diagnostics & Fix')}">ℹ️</span>`;
+    kvmBadge.innerHTML = `<span aria-hidden="true">⚡</span> <span>${escapeHtml(kvmWords(tel.kvm))}</span> <span class="vmm-xs" title="${t('ui.view_kvm_diagnostics_fix', 'View KVM Diagnostics & Fix')}">ℹ️</span>`;
     kvmBadge.style.cursor = 'pointer';
     kvmBadge.onclick = () => openKvmDiagnosticsModal(tel.kvm);
     if (tel.kvm.state === 'active') {
@@ -347,7 +348,7 @@ function renderTelemetry(tel) {
     if (elThreads) elThreads.textContent = cpu.host_threads;
 
     if (elRatioBadge) {
-      elRatioBadge.textContent = cpu.badge || (typeof cpu.overcommit_ratio === 'number' ? `${cpu.overcommit_ratio}x` : '');
+      elRatioBadge.textContent = cpuShareWords(cpu);
       elRatioBadge.hidden = !elRatioBadge.textContent; // an empty pill was drawn without a value
       if (cpu.status === 'nominal') {
         elRatioBadge.style.background = 'rgba(16,185,129,0.2)';

@@ -174,9 +174,9 @@ describe('Feature 4: SFTP file access Card & User Management', () => {
 
     const usersList = document.getElementById('sftp-users-list');
     expect(usersList.textContent).toContain('chroot_alice');
-    expect(usersList.textContent).toContain('Read-Only');
+    expect(usersList.textContent).toContain('Read only');
     expect(usersList.textContent).toContain('sync_bob');
-    expect(usersList.textContent).toContain('Read/Write');
+    expect(usersList.textContent).toContain('Read and write');
 
     const hint = document.getElementById('sftp-quick-connect-hint');
     expect(hint.textContent).toContain('sftp -P 2222 chroot_alice@');

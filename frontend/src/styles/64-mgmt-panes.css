@@ -275,7 +275,7 @@
 #mgmt-sec-ups .ups-fs20 { font-size: 20px; line-height: 1; }
 #mgmt-sec-ups .ups-grow { flex: 1; }
 #mgmt-sec-ups .ups-xs { font-size: var(--kb-fs-xs); color: var(--text); line-height: 1.4; }
-#mgmt-sec-ups .ups-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 16px; margin-top: 16px; align-items: start; }
+#mgmt-sec-ups .ups-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr)); gap: 16px; margin-top: 16px; align-items: start; }
 #mgmt-sec-ups .ups-col { display: flex; flex-direction: column; gap: 14px; }
 #mgmt-sec-ups .ups-row-3 { display: flex; justify-content: space-between; align-items: center; }
 #mgmt-sec-ups .ups-row-fs13-bold-strong { font-weight: 700; font-size: 13px; color: var(--kb-text-strong); display: flex; align-items: center; gap: 6px; }
@@ -692,7 +692,7 @@
 
 /* The mgmt-pane-network-ports pane: classes instead of inline styles (NUX-15), same look */
 #mgmt-pane-network-ports .nport-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
-#mgmt-pane-network-ports .nport-row-2 { display: flex; gap: 8px; align-items: center; }
+#mgmt-pane-network-ports .nport-row-2 { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 #mgmt-pane-network-ports .nport-xs { width: 220px; font-size: var(--kb-fs-xs); padding: 4px 8px; }
 #mgmt-pane-network-ports .nport-x { max-height: 480px; overflow-y: auto; }
 #mgmt-pane-network-ports .nport-size { width: 90px; }

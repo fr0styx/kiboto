@@ -616,6 +616,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   were always English; screen readers heard the rename button in English. Settings → Kib no longer shows a bar
   with a single tab.
 
+#### Fixes
+
+- **More of Kiboto in your language**: the SFTP card, read and write labels, "Ask Kib" in the dock and the main
+  storage pool's name were English in other languages. Found by opening every Settings page in all five languages.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

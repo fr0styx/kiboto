@@ -37,7 +37,7 @@ describe('chassis-visualizer markup on classes (NUX-15)', () => {
 
   it('marks a read-only WebDAV server', async () => {
     renderWebdavCard(mount, { enabled: true, running: true, pid: 1, port: 8084, root_path: '/srv', read_only: true, quick_connect: {} });
-    expect([...mount.querySelectorAll('strong.cv-strong')].map((n) => n.textContent)).toContain('Read-Only');
+    expect([...mount.querySelectorAll('strong.cv-strong')].map((n) => n.textContent)).toContain('Read only');
   });
 
   it('shows a stopped SFTP service in its dialog', async () => {

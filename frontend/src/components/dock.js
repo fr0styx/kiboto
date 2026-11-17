@@ -201,6 +201,7 @@ export function initDockSystem() {
   if (dock) {
     dock.setAttribute('role', 'toolbar');
     dock.setAttribute('aria-label', t('dock.label', 'Dock: open apps'));
+    dock.setAttribute('data-i18n-aria-label', 'dock.label'); // set before the language file loads: translated with the page
     dock.addEventListener('keydown', (e) => {
       const items = Array.from(dock.querySelectorAll('.dock-item'));
       const activeIdx = items.indexOf(document.activeElement);

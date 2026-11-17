@@ -393,7 +393,8 @@ body.theme-yak .input-modern:focus {
 
 .ups-cockpit-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  /* never wider than the window: a 360 px column ran past a phone screen (five-language sweep) */
+  grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr));
   gap: 16px;
   margin-top: 16px;
   align-items: start;
@@ -412,7 +413,10 @@ body.theme-yak .input-modern:focus {
     width: 100%;
   }
   .ups-cockpit-grid {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  .ups-cockpit-grid > * {
+    min-width: 0;
   }
 }
 

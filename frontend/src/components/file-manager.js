@@ -9,6 +9,8 @@ import { fmHome,
 import { api, auth } from '../api.js';
 import { escapeHtml, copyTextToClipboard } from '../utils.js';
 import { ZettEventBus } from '../event-bus.js';
+import { poolName } from './pool-names.js';
+import { fileKind } from './file-kind.js';
 import { showToast, showConfirmToast, showDangerConfirm, showPromptToast, showBottomSheet, showActionToast } from '../toast.js';
 import { t } from '../i18n.js';
 import { startingView, saveFilesView, visibleEntries, currentUser } from './fm-view-prefs.js';
@@ -787,7 +789,7 @@ export class FileManagerWindow {
         if (r.available !== false && r.is_mounted !== false) places.push({ icon: '☁️', name: r.name, path: r.path });
       });
       (this.sidebarTree?.pools || []).forEach((pool) => {
-        if (pool.available !== false) places.push({ icon: pool.type === 'disk' ? '💽' : '⚡', name: pool.name, path: pool.path });
+        if (pool.available !== false) places.push({ icon: pool.type === 'disk' ? '💽' : '⚡', name: poolName(pool.name), path: pool.path });
       });
       places.push({ icon: '🗑️', name: t('dock.recycle_bin', 'Recycle Bin'), path: `${home}/.RecycleBin` });
       favorites().forEach((f) => places.push({ icon: '⭐', name: f.name, path: f.path, favorite: true }));
@@ -2498,7 +2500,7 @@ export class FileManagerWindow {
       const escName = escapeHtml(file.name);
       const escPath = escapeHtml(file.path);
       const isImage = file.name.match(/\.(jpeg|jpg|png|gif|webp|svg)$/i);
-      let fileType = file.is_dir ? (isRemoteDir ? 'Cloud Drive' : (isDiskDir ? 'Disk Drive' : 'Folder')) : (file.name.includes('.') ? file.name.split('.').pop().toUpperCase() : 'File');
+      let fileType = fileKind(file, isRemoteDir, isDiskDir);
       if (this._inBin) fileType = file.original_path ? file.original_path.replace(/\/[^/]*$/, '') || '/' : '–'; // where it was
       const mtimeStr = formatDateTime(file.mtime, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 
@@ -2628,7 +2630,7 @@ export class FileManagerWindow {
       );
       showBottomSheet({
         title: oldName || path.split('/').pop(),
-        subtitle: isDir ? 'Folder' : (file ? formatBytes(file.size) : path),
+        subtitle: isDir ? fileKind({ name: '', is_dir: true }) : (file ? formatBytes(file.size) : path),
         items: sheetItems,
       });
       return;

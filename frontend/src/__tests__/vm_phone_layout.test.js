@@ -21,7 +21,7 @@ describe('VMs on a phone (VMs report 34)', () => {
   it('missing numbers show a dash, not "undefined"', () => {
     const v = src('components/vm-manager.js');
     expect(v).toContain("typeof mem.safe_max_vm_ram_gb === 'number'");
-    expect(v).toContain("typeof cpu.overcommit_ratio === 'number'");
+    expect(src('components/vm/host-words.js')).toContain("typeof cpu?.overcommit_ratio === 'number'");
     expect(v).toContain('vm.disk_size_gb != null');
     expect(v).toContain('elRatioBadge.hidden = !elRatioBadge.textContent');
   });

@@ -1,4 +1,5 @@
 import { escapeHtml, trapFocus, copyTextToClipboard, reconcileKeyedTable } from '../utils.js';
+import { poolName, shareComment, accessWords } from './pool-names.js';
 import { isNvmeDrive, tempLevel } from './temp-rule.js';
 import { showReadError } from './refresh-say.js';
 import { locateSaid } from './locate-text.js';
@@ -720,7 +721,7 @@ function buildPoolBlockInner(pool, isObserver, can = { scrub: true }) {
       <div class="topo-pool-title-wrap">
         <svg viewBox="0 0 24 24" width="18" height="18" class="pool-icon"><use href="#i-storage"/></svg>
         <div>
-          <span class="topo-pool-name">${escapeHtml(pool.name)}</span>
+          <span class="topo-pool-name">${escapeHtml(poolName(pool.name))}</span>
           <span class="topo-pool-fs">${escapeHtml(pool.fs_type.toUpperCase())}${pool.fs_profile ? ` · ${escapeHtml(pool.fs_profile.toUpperCase())}` : ''}</span>
         </div>
       </div>
@@ -748,7 +749,7 @@ function buildPoolBlockInner(pool, isObserver, can = { scrub: true }) {
     </div>
 
     <div class="topo-pool-actions cv-row-5">
-      ${can.scrub ? `<button class="btn-pool-scrub btn-pill-toggle" data-pool-id="${escapeHtml(pool.id)}" data-pool-name="${escapeHtml(pool.name || pool.id)}" title="${t('ui.trigger_filesystem_scrub_or_parity', 'Trigger filesystem scrub or parity check')}">${ico('⚡')} ${t('chassis.scrub_pool', 'Check for errors')}</button>` : ''}
+      ${can.scrub ? `<button class="btn-pool-scrub btn-pill-toggle" data-pool-id="${escapeHtml(pool.id)}" data-pool-name="${escapeHtml(poolName(pool.name) || pool.id)}" title="${t('ui.trigger_filesystem_scrub_or_parity', 'Trigger filesystem scrub or parity check')}">${ico('⚡')} ${t('chassis.scrub_pool', 'Check for errors')}</button>` : ''}
       ${!isObserver ? `<button class="btn-pool-rename btn-pill-toggle" data-pool-id="${escapeHtml(pool.id)}" data-pool-name="${escapeHtml(pool.name)}" title="${t('ui.rename_storage_pool', 'Rename storage pool')}">${ico('✏️')} ${t('chassis.rename', 'Rename')}</button>` : ''}
       ${(!isObserver || pool.fs_type === 'zfs') && pool.id !== 'unraid_array' && pool.id !== 'default_pool' ? `<button class="btn-pool-export btn-pill-toggle" data-pool-id="${escapeHtml(pool.id)}" style="background: rgba(245,158,11,0.15); border-color: rgba(245,158,11,0.3); color: var(--kb-text-warn);" title="${t('ui.safely_flush_dirty_cache_and', 'Safely flush dirty cache and detach pool')}">${ico('⏏️')} ${t('chassis.eject', 'Safely eject')}</button>` : ''}
       ${!isObserver && pool.id !== 'default_pool' ? `<button class="btn-pool-destroy btn-pill-toggle is-danger" data-pool-id="${escapeHtml(pool.id)}" title="${t('ui.destroy_storage_pool', 'Destroy storage pool')}">${ico('🗑️')} ${t('chassis.destroy', 'Destroy')}</button>` : ''}
@@ -1035,7 +1036,7 @@ export function buildSftpCardHtml(sftpStatus, usersCount = 0, sampleUser = '') {
 
   const finderCmd = `sftp://${user}@${hostIp}:${port}/`;
   const terminalCmd = `sftp -P ${port} ${user}@${hostIp}`;
-  const filezillaHint = `Host: ${hostIp} · Port: ${port} · Protocol: SFTP`;
+  const filezillaHint = t('sftp.filezilla_hint', 'Host: {host} · Port: {port} · Protocol: SFTP', { host: hostIp, port });
   const sshfsCmd = `sshfs -p ${port} ${user}@${hostIp}:/ /mnt/sftp`;
 
   return `
@@ -1043,7 +1044,7 @@ export function buildSftpCardHtml(sftpStatus, usersCount = 0, sampleUser = '') {
       <div class="webdav-card-header">
         <div class="webdav-header-title">
           <svg class="ic" style="width:18px; height:18px; fill:currentColor; color:var(--lt-ink-brand, var(--brand, #33cdb8));"><use href="#i-storage"/></svg>
-          <span data-i18n="sftp.title">SFTP file access</span>
+          <span>${escapeHtml(t('sftp.title', 'SFTP file access'))}</span>
           <span class="webdav-status-pill ${sftpPillClass}">${sftpPillText}</span>
         </div>
         <div class="cv-row-7">
@@ -1358,7 +1359,7 @@ function buildShareCardInner(s, canManageShares) {
         <span class="share-folder-icon">📁</span>
         <div>
           <span class="share-name">${escapeHtml(s.name)}</span>
-          ${s.comment ? `<div class="share-comment">${escapeHtml(s.comment)}</div>` : ''}
+          ${s.comment ? `<div class="share-comment">${escapeHtml(shareComment(s.comment))}</div>` : ''}
         </div>
       </div>
       ${shareSecurityBadge(s.security)}
@@ -1560,7 +1561,7 @@ export async function openSftpUsersModal(onSuccess) {
               <div>
                 <span class="cv-bold-strong">${escapeHtml(u.username)}</span>
                 <span class="ci-badge cv-xs-muted-box">
-                  ${u.read_only ? 'Read-Only' : 'Read/Write'}
+                  ${escapeHtml(accessWords(u.read_only))}
                 </span>
                 <div class="cv-xs-muted-mono">
                   ${escapeHtml(t('chassis.chroot', 'Chroot: {path}', { path: u.home_dir || '/home/' + u.username }))}
@@ -1678,7 +1679,7 @@ export function buildWebdavCardHtml(webdavStatus) {
       <div class="cv-row-xs-muted">
         <span>${t('chassis.port', 'Port:')} <strong class="cv-strong">${webdavStatus.port}</strong></span>
         <span>${t('chassis.root_path', 'Root folder:')} <code class="cv-accent">${escapeHtml(webdavStatus.root_path)}</code></span>
-        <span>${t('chassis.mode', 'Mode:')} <strong class="cv-strong">${webdavStatus.read_only ? 'Read-Only' : 'Read/Write'}</strong></span>
+        <span>${t('chassis.mode', 'Mode:')} <strong class="cv-strong">${escapeHtml(accessWords(webdavStatus.read_only))}</strong></span>
         <span>${t('chassis.auth', 'Sign-in:')} <strong class="cv-strong">${escapeHtml(t('webdav.auth_accounts', 'Kiboto accounts'))}</strong></span>
       </div>
 
