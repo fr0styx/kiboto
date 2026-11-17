@@ -51,15 +51,20 @@ def public_state() -> dict[str, Any]:
 
 
 def save(enabled: bool, off_at: str, wake_at: str, days: list[int]) -> dict[str, Any]:
+    from backend.errors import SaidError
+
     if not (HHMM.match(off_at or "") and HHMM.match(wake_at or "")):
-        raise ValueError("Use times like 01:00 and 07:00.")
+        raise SaidError("Use times like 01:00 and 07:00.", "sched_times")
     if off_at == wake_at:
-        raise ValueError("The switch-off and wake-up times must differ.")
+        raise SaidError("The switch-off and wake-up times must differ.", "sched_same_times")
     days = sorted({int(d) for d in days if 0 <= int(d) <= 6})
     if enabled and not days:
-        raise ValueError("Choose at least one night.")
+        raise SaidError("Choose at least one night.", "sched_no_night")
     if enabled and not rtc_path():
-        raise ValueError("This NAS's wake-up clock can't be set from Kiboto, so it would not come back on by itself.")
+        raise SaidError(
+            "This NAS's wake-up clock can't be set from Kiboto, so it would not come back on by itself.",
+            "sched_no_clock",
+        )
     st = state()
     st.update({"enabled": bool(enabled), "off_at": off_at, "wake_at": wake_at, "days": days, "postponed_min": 0})
     atomic_write_json(STATE_FILE, st)

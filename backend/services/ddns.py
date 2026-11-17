@@ -87,20 +87,22 @@ def valid_hostname(provider: str, hostname: str) -> bool:
 def save(enabled: bool, provider: str, hostname: str, token: str | None) -> dict[str, Any]:
     """Saves the settings. token None keeps the stored one; "" clears it. Raises ValueError with a
     sentence for the page when the settings can't work."""
+    from backend.errors import SaidError
     from backend.secret_box import seal
 
     if provider not in PROVIDERS:
-        raise ValueError("Choose DuckDNS or Cloudflare.")
+        raise SaidError("Choose DuckDNS or Cloudflare.", "ddns_provider")
     hostname = normalize_hostname(provider, hostname)
     st = _raw()
     if hostname and not valid_hostname(provider, hostname):
-        raise ValueError(
-            "That name can't be used. Use letters, digits and hyphens, like home.duckdns.org or nas.example.com."
+        raise SaidError(
+            "That name can't be used. Use letters, digits and hyphens, like home.duckdns.org or nas.example.com.",
+            "ddns_name",
         )
     if token is not None:
         st["token"] = seal(token.strip()) if token.strip() else ""
     if enabled and not (hostname and st.get("token")):
-        raise ValueError("Fill in the name and the token before turning it on.")
+        raise SaidError("Fill in the name and the token before turning it on.", "ddns_fill_in")
     changed = provider != st.get("provider") or hostname != st.get("hostname")
     st.update({"enabled": bool(enabled), "provider": provider, "hostname": hostname})
     if changed:

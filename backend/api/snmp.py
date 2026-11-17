@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field
 
 from backend.auth import AuthenticatedPrincipal, get_current_principal, require_scope
 from backend.confirmations import confirm_or_raise
+from backend.errors import ApiError
 from backend.services import snmp_agent
 
 router = APIRouter(tags=["Network & Switching"])
@@ -50,4 +51,4 @@ async def put_snmp(
             req.location,
         )
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e)) from e
+        raise ApiError(400, str(e), "invalid_settings", text=getattr(e, "text", None)) from e

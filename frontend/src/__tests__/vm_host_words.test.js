@@ -31,6 +31,6 @@ describe('VM host state in words', () => {
     expect(kvmFix({ substate: 'new', remediation: 'Server words' })).toBe('Server words');
     expect(kvmFix(undefined)).toBe('');
     await setLanguage('de');
-    expect(kvmFix({ substate: 'bios_disabled' })).toBe('Starte das NAS neu und schalte Intel VT-x oder AMD SVM im BIOS bzw. UEFI ein.');
+    expect(kvmFix({ substate: 'bios_disabled' })).toBe('Starten Sie das NAS neu und schalten Sie Intel VT-x oder AMD SVM im BIOS bzw. UEFI ein.');
   });
 });

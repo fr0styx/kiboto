@@ -81,25 +81,28 @@ def save(
 ) -> dict[str, Any]:
     """Saves the settings and starts or stops the agent. A password of None keeps the stored one.
     Raises ValueError with a sentence for the page when the settings cannot work."""
+    from backend.errors import SaidError
     from backend.secret_box import seal
 
     st = _raw()
     user = (user or "").strip()
     if not 1 <= int(port) <= 65535:
-        raise ValueError("Choose a port between 1 and 65535 (SNMP uses 161).")
+        raise SaidError("Choose a port between 1 and 65535 (SNMP uses 161).", "snmp_port")
     if user and (len(user) > 32 or not all(ch.isalnum() or ch in "-_." for ch in user)):
-        raise ValueError("Use up to 32 letters, digits, dots, hyphens or underscores for the user name.")
+        raise SaidError("Use up to 32 letters, digits, dots, hyphens or underscores for the user name.", "snmp_user")
     for label, pw in (("authentication", auth_password), ("encryption", priv_password)):
         if pw is not None and len(pw) < MIN_PASSWORD:
-            raise ValueError(f"The {label} password needs at least {MIN_PASSWORD} characters.")
+            raise SaidError(
+                f"The {label} password needs at least {MIN_PASSWORD} characters.", f"snmp_{label}_short", n=MIN_PASSWORD
+            )
     if auth_password is not None:
         st["auth"] = seal(auth_password)
     if priv_password is not None:
         st["priv"] = seal(priv_password)
     if enabled and not (user and st.get("auth") and st.get("priv")):
-        raise ValueError("Fill in the user name and both passwords before turning it on.")
+        raise SaidError("Fill in the user name and both passwords before turning it on.", "snmp_fill_in")
     if enabled and auth_password is not None and auth_password == priv_password:
-        raise ValueError("Use two different passwords for authentication and encryption.")
+        raise SaidError("Use two different passwords for authentication and encryption.", "snmp_same_passwords")
     st.update(
         {
             "enabled": bool(enabled),

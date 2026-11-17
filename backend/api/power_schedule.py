@@ -9,6 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 from backend.auth import require_scope
+from backend.errors import ApiError
 from backend.services import power_schedule
 
 router = APIRouter(tags=["System"])
@@ -31,7 +32,7 @@ def put_power_schedule(req: PowerScheduleIn) -> dict[str, Any]:
     try:
         return power_schedule.save(req.enabled, req.off_at, req.wake_at, req.days)
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e)) from e
+        raise ApiError(400, str(e), "invalid_settings", text=getattr(e, "text", None)) from e
 
 
 def _power_off() -> bool:

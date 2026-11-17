@@ -439,6 +439,9 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 
 - **Apps**: when backing up, updating or removing an app is refused, the reason now shows in your language.
 
+- **SNMP, switch off at night and Dynamic DNS**: when a setting can't be saved, the reason now shows in your
+  language.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

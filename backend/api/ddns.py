@@ -11,6 +11,7 @@ from pydantic import BaseModel, Field
 
 from backend.auth import require_scope
 from backend.config import logger
+from backend.errors import ApiError
 from backend.services import ddns
 
 router = APIRouter(tags=["Network & Switching"])
@@ -36,7 +37,7 @@ def put_ddns(req: DdnsIn) -> dict[str, Any]:
     try:
         return ddns.save(req.enabled, req.provider, req.hostname, req.token)
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e)) from e
+        raise ApiError(400, str(e), "invalid_settings", text=getattr(e, "text", None)) from e
 
 
 @router.post("/network/ddns/update", dependencies=[Depends(require_scope("system:config"))])
