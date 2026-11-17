@@ -887,3 +887,16 @@ def start_stack_apply(
 
     threading.Thread(target=run, daemon=True, name=f"stack-apply-{stack_name}").start()
     return {"status": "started", "job": job.id, "steps": preview["steps"]}
+
+
+def app_details(stack_name: str) -> dict[str, Any]:
+    """A whole app (a Compose project) that Kiboto may back up, update or remove as one: it has
+    parts, and none of them is Kiboto itself."""
+    details = get_stack_details(stack_name)
+    parts = details.get("containers") or []
+    if not parts:
+        raise ValueError(f"No app named '{stack_name}'.")
+    if any(is_kiboto_itself(str(c.get("id") or ""), str(c.get("name") or "")) for c in parts):
+        raise ValueError("This app holds Kiboto itself, which is never removed or replaced from inside.")
+    details["containers"] = topological_sort_stack_containers(parts, details.get("compose_yaml"), reverse=False)
+    return details

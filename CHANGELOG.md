@@ -471,6 +471,16 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   apply, which takes everything back if the app does not come up. A file that asks for access to the host is not
   started by itself; the message says so and where the file is kept.
 
+#### Changes
+
+- **One row per app**: in Apps without the Docker details, an app made of several containers (such as Immich) is one
+  row with one state, one Open and one menu. Its menu starts, stops, restarts, updates, backs up and removes the whole
+  app, and lists its parts. With the Docker details, the containers sit under a header with their app's name.
+- **Whole-app backup, update and removal**: one archive holds an app's Compose file and the folders of all its parts;
+  restoring it stops and starts every part, and brings the app back if it was removed. Update replaces each part that
+  has a newer version, one after the other. Removing an app keeps a backup of it first; if that backup fails, nothing
+  is removed.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

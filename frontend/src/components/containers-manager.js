@@ -18,6 +18,7 @@ import '../styles/containers-lazy.css'; // the window's own sheet loads with thi
 import { makeDraggable, bringToFront } from './dock.js';
 import { openContainerInspector, openContainerDeleteModal } from './container-modal.js';
 import { openStackModal, openStackPickerModal } from './stack-modal.js';
+import { appMenu, appUpdateInfo, askAppUpdate, isAppRow, mergeApps, partIds, runAppAction } from './app-rows.js';
 import { openNetworkMap } from './container-network-map.js';
 import { appsDockerNetsHtml, installAppsDockerNets } from './apps-docker-nets.js';
 import { appsFamilyHtml, installAppsFamily, openFamily } from './apps-family.js';
@@ -874,7 +875,7 @@ export function renderContainersWindowTable(containersList = null) {
   }
 
   // Filter list
-  const filtered = shownList.filter((c) => {
+  let filtered = shownList.filter((c) => {
     if (_cwFilter === 'running' && c.state !== 'running') return false;
     if (_cwFilter === 'stopped' && c.state === 'running') return false;
     if (_cwFilter === 'updates') {
@@ -941,8 +942,9 @@ export function renderContainersWindowTable(containersList = null) {
     });
   }
 
-  // the simple view keeps a stack's apps together (SET-25: rows of one stack sit together)
-  if (!_cwSortCol && !appsDetailsOn()) filtered.sort(byStackThenName);
+  // a stack's containers sit together (SET-25); without the Docker details they are one app (Apps decision 2)
+  if (!_cwSortCol) filtered.sort(byStackThenName);
+  if (!appsDetailsOn()) filtered = mergeApps(filtered);
 
   if (filtered.length === 0) {
     _cwFilteredList = [];
@@ -1096,8 +1098,8 @@ function renderCwRows(tbody, filtered, currentHost) {
     ];
   } else {
     _cwLastWindow = '';
-    // the simple view names each stack in a header row above its apps (SET-25)
-    if (!_cwSortCol && !appsDetailsOn()) items = withStackHeads(filtered);
+    // with the Docker details, each stack is named in a header row above its containers
+    if (!_cwSortCol && appsDetailsOn()) items = withStackHeads(filtered);
   }
   tbody.classList.toggle('cw-has-heads', items.some((c) => c.__stack !== undefined));
 
@@ -1125,22 +1127,41 @@ function renderCwRows(tbody, filtered, currentHost) {
 }
 
 export function getCwFilteredContainerIds() {
-  return _cwFilteredList.map((c) => c.id).filter(Boolean);
+  return partIds(_cwFilteredList);
+}
+
+/** What the update check says for a row; an app row has an update when any part has one. */
+function cwUpdateInfo(c) {
+  if (isAppRow(c)) return appUpdateInfo(c, _cwUpdatesCache);
+  return _cwUpdatesCache?.containers?.[c.name] || _cwUpdatesCache?.containers?.[c.id];
+}
+
+/** The menu and buttons of an app row act on the whole app (Apps decision 2). */
+function onAppRowAct(app, act) {
+  const reload = () => loadContainersData();
+  const hasUpdate = Boolean(cwUpdateInfo(app)?.has_update);
+  if (act === 'stack' || act === 'edit') return openStackModal(app.stack);
+  if (act === 'update-single') return askAppUpdate(app, reload);
+  if (act === 'delete') return runAppAction(app, 'remove', { reload });
+  if (['start', 'stop', 'restart', 'unpause', 'backup'].includes(act)) return runAppAction(app, act, { reload });
+  const run = (action) => (action === 'update' ? askAppUpdate(app, reload) : runAppAction(app, action, { reload }));
+  const openPart = (part) => openContainerInspector(part.id, part.name, 'overview');
+  return showBottomSheet(/** @type {any} */ ({ title: app.name, items: appMenu(app, hasUpdate, run, openPart) }));
 }
 
 function buildCwContainerRowInner(c, currentHost) {
-  const updateInfo = _cwUpdatesCache?.containers?.[c.name] || _cwUpdatesCache?.containers?.[c.id];
+  const updateInfo = cwUpdateInfo(c);
   return buildSharedContainerRowInner(c, currentHost, updateInfo);
 }
 
 function createCwContainerRow(c, currentHost) {
-  const updateInfo = _cwUpdatesCache?.containers?.[c.name] || _cwUpdatesCache?.containers?.[c.id];
-  return createSharedContainerRow(c, currentHost, updateInfo);
+  const tr = createSharedContainerRow(c, currentHost, cwUpdateInfo(c));
+  tr.classList.toggle('cw-app-row', isAppRow(c));
+  return tr;
 }
 
 function updateCwContainerRow(tr, c, currentHost) {
-  const updateInfo = _cwUpdatesCache?.containers?.[c.name] || _cwUpdatesCache?.containers?.[c.id];
-  return updateSharedContainerRow(tr, c, currentHost, updateInfo);
+  return updateSharedContainerRow(tr, c, currentHost, cwUpdateInfo(c));
 }
 
 function bindCwTableEvents(tbody) {
@@ -1177,6 +1198,11 @@ function bindCwTableEvents(tbody) {
       const cid = actBtn.dataset.id;
       const cname = actBtn.dataset.name;
       const act = actBtn.dataset.action;
+      const appRow = String(cid || '').startsWith('app:') ? _cwFilteredList.find((x) => x.id === cid) : null;
+      if (appRow) {
+        onAppRowAct(appRow, act);
+        return;
+      }
 
       if (act === 'stack') {
         const stackName = actBtn.dataset.stack;
@@ -1350,7 +1376,9 @@ function bindCwTableEvents(tbody) {
       e.stopPropagation();
       const cid = nameLink.dataset.id;
       const cname = nameLink.dataset.name;
-      if (cid) openContainerInspector(cid, cname);
+      const appRow = String(cid || '').startsWith('app:') ? _cwFilteredList.find((x) => x.id === cid) : null;
+      if (appRow) onAppRowAct(appRow, 'more-sheet');
+      else if (cid) openContainerInspector(cid, cname);
     }
   });
 }

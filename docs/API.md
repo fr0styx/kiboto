@@ -38,7 +38,7 @@ request and response schemas.
 
 <!-- BEGIN generated endpoints: python scripts/api_reference.py --update -->
 
-740 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
+743 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
 
 ### AI Conversation History
 
@@ -226,11 +226,14 @@ request and response schemas.
 | `POST` | `/api/v1/docker/containers/{container_id}/update-image` | `containers:manage` | Post Docker Container Update Image |
 | `GET` | `/api/v1/docker/networks/topology` | any of `containers:read`, `containers:manage`, `system:view` | Docker networks with their attached containers and IPs, for the Network Map |
 | `GET` | `/api/v1/docker/stacks` | any of `containers:read`, `containers:manage` | Get Docker Stacks |
+| `DELETE` | `/api/v1/docker/stacks/{stack_name}` | `containers:manage` | Removes every part of an app; one archive of it is kept first unless asked not to |
 | `GET` | `/api/v1/docker/stacks/{stack_name}` | any of `containers:read`, `containers:manage` | Get Docker Stack Details |
 | `POST` | `/api/v1/docker/stacks/{stack_name}/action` | any of `containers:write`, `containers:manage` | Post Docker Stack Action |
 | `POST` | `/api/v1/docker/stacks/{stack_name}/apply` | `containers:manage` | Applies the file as a job; host-level access needs a confirmation (Apps decision 4b) |
+| `POST` | `/api/v1/docker/stacks/{stack_name}/backup` | any of `containers:manage`, `backup:write`, `backup:manage` | One archive of a whole app: its Compose file and the folders of all its parts (Apps decision 2) |
 | `POST` | `/api/v1/docker/stacks/{stack_name}/preview` | `containers:manage` | What applying the file would do (Apps decision 4b); nothing changes |
 | `POST` | `/api/v1/docker/stacks/{stack_name}/save` | `containers:manage` | Post Docker Stack Save |
+| `POST` | `/api/v1/docker/stacks/{stack_name}/update` | `containers:manage` | Updates every part of an app that has a newer image, as a job (Apps decision 2) |
 | `GET` | `/api/v1/docker/status` | any of `containers:read`, `containers:manage`, `system:view` | Whether the list of apps can be trusted: {available, answering, as_of, stale, error} |
 | `GET` | `/api/v1/docker/system/df` | any of `containers:read`, `containers:manage`, `system:view` | Get System Df |
 | `POST` | `/api/v1/docker/system/prune` | `containers:manage` | Post System Prune |

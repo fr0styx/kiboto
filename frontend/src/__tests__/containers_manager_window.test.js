@@ -16,6 +16,9 @@ import { api } from '../api.js';
 describe('Dedicated Containers Window & Desktop Icon Suite', () => {
   beforeEach(() => {
     localStorage.clear();
+    // these tests read container rows, telemetry and the stack filter: the Docker details view
+    // (without it, a stack is one app row, Apps decision 2)
+    localStorage.setItem('kiboto_apps_details', '1');
     document.body.innerHTML = `
       <div id="os-dock-container">
         <div id="os-dock"></div>

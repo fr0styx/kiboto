@@ -237,6 +237,139 @@ def resume_left_paused() -> list[str]:
     return done
 
 
+def _sort_mounts(inspects: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """The folders worth keeping of one or more containers (each once), and those left out with why."""
+    appdata_mounts: list[dict[str, Any]] = []
+    skipped_mounts: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for inspect_data in inspects:
+        for m in inspect_data.get("Mounts", []) or []:
+            src = m.get("Source", "")
+            dst = m.get("Destination", "")
+            if m.get("Type", "") != "bind" or not src or src in seen:
+                continue
+            seen.add(src)
+            if any(src == p or src.startswith(p + "/") for p in SYSTEM_MOUNT_PREFIXES):
+                continue
+            if any(src == p or src.startswith(p + "/") for p in BULK_STORAGE_PREFIXES):
+                skipped_mounts.append({"source": src, "destination": dst, "reason": "bulk_media_excluded"})
+            elif os.path.exists(src):
+                appdata_mounts.append(
+                    {
+                        "source": src,
+                        "destination": dst,
+                        "rw": m.get("RW", True),
+                        "archive_prefix": f"data/mount_{len(appdata_mounts)}",
+                    }
+                )
+            else:
+                skipped_mounts.append({"source": src, "destination": dst, "reason": "host_path_not_found"})
+    return appdata_mounts, skipped_mounts
+
+
+def _add_bytes(tar: tarfile.TarFile, name: str, data: bytes) -> None:
+    info = tarfile.TarInfo(name=name)
+    info.size = len(data)
+    info.mtime = int(time.time())
+    tar.addfile(info, io.BytesIO(data))
+
+
+def _stack_compose(details: dict[str, Any], inspects: list[dict[str, Any]]) -> str:
+    """The app's own Compose file when it has one on disk, otherwise one rebuilt from its containers."""
+    if details.get("has_real_file") and details.get("compose_yaml"):
+        return str(details["compose_yaml"])
+    import yaml
+
+    services: dict[str, Any] = {}
+    for info in inspects:
+        try:
+            name, spec = synthesize_compose_spec(info, mask_secrets=False)
+        except (KeyError, TypeError, ValueError, AttributeError) as e:
+            logger.warning("[App Backup] Could not rebuild the settings of %s: %s", info.get("Name"), e)
+            continue
+        services[name] = spec
+    return yaml.safe_dump({"services": services}, sort_keys=False)
+
+
+def create_stack_backup(stack: str, reason: str = "on-demand") -> dict[str, Any]:
+    """One archive for a whole app of several containers (Apps decision 2): its Compose file and
+    the folders of all its parts. Running parts are paused while their folders are read."""
+    from backend.services.docker_stacks import app_details
+
+    details = app_details(stack)
+    inspects = []
+    for c in details.get("containers") or []:
+        st, info = _docker_request("GET", f"/containers/{c.get('id')}/json")
+        if st == 200 and isinstance(info, dict):
+            inspects.append(info)
+    if not inspects:
+        raise ValueError(f"No app named '{stack}'.")
+    compose_yaml = _stack_compose(details, inspects)
+    appdata_mounts, skipped_mounts = _sort_mounts(inspects)
+    names = [str(i.get("Name", "")).lstrip("/") for i in inspects]
+    backup_dir = get_app_backup_dir(stack)
+    ts = time.strftime("%Y%m%d_%H%M%S")
+    backup_id = f"abk_{stack}_{uuid.uuid4().hex[:8]}"
+    archive_filename = f"{stack}_{reason}_{ts}.tar.gz"
+    archive_filepath = os.path.join(backup_dir, archive_filename)
+    manifest: dict[str, Any] = {
+        "backup_id": backup_id,
+        "app_name": stack,
+        "stack": stack,
+        "containers": names,
+        "container_name": "",
+        "working_dir": details.get("working_dir") or "",
+        "image": ", ".join(str((i.get("Config") or {}).get("Image") or "") for i in inspects),
+        "reason": reason,
+        "created_at": time.time(),
+        "created_at_iso": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "mounts": appdata_mounts,
+        "skipped_mounts": skipped_mounts,
+        "has_compose": True,
+    }
+    paused: list[str] = []
+    try:
+        for info in inspects:
+            if (info.get("State") or {}).get("Running"):
+                st, _ = _docker_request("POST", f"/containers/{info.get('Id')}/pause")
+                if st in (200, 204) and _mark_paused("containers", str(info.get("Id"))):
+                    paused.append(str(info.get("Id")))
+        with tarfile.open(archive_filepath, "w:gz") as tar:
+            _add_bytes(tar, "manifest.json", json.dumps(manifest, indent=2).encode("utf-8"))
+            _add_bytes(tar, "docker-compose.yml", compose_yaml.encode("utf-8"))
+            _add_bytes(tar, "container_inspect.json", json.dumps(inspects, indent=2).encode("utf-8"))
+            for m in appdata_mounts:
+                if os.path.isdir(m["source"]):
+                    tar.add(m["source"], arcname=m["archive_prefix"], recursive=True)
+                elif os.path.isfile(m["source"]):
+                    tar.add(m["source"], arcname=f"{m['archive_prefix']}/{os.path.basename(m['source'])}")
+    finally:
+        for cid in paused:
+            _unpause_container(cid)
+    size_bytes = os.path.getsize(archive_filepath)
+    record: dict[str, Any] = {
+        "id": backup_id,
+        "app_name": stack,
+        "stack": stack,
+        "containers": names,
+        "container_name": names[0] if len(names) == 1 else "",
+        "container_id": "",
+        "reason": reason,
+        "filename": archive_filename,
+        "filepath": archive_filepath,
+        "size_bytes": size_bytes,
+        "size_human": _format_bytes(size_bytes),
+        "created_at": manifest["created_at"],
+        "created_at_iso": manifest["created_at_iso"],
+        "image": manifest["image"],
+        "mounts_count": len(appdata_mounts),
+        "mounts": appdata_mounts,
+    }
+    save_app_backup_record(record)
+    logger.info("[App Backup] Archived the whole app '%s' (%d parts): %s", stack, len(names), archive_filename)
+    return record
+
+
 def create_app_backup(
     container_id_or_name: str,
     reason: str = "on-demand",
@@ -273,32 +406,7 @@ def create_app_backup(
         )
 
     # 2. Identify bind mounts to back up
-    mounts = inspect_data.get("Mounts", [])
-    appdata_mounts: list[dict[str, Any]] = []
-    skipped_mounts: list[dict[str, Any]] = []
-
-    for m in mounts:
-        m_type = m.get("Type", "")
-        src = m.get("Source", "")
-        dst = m.get("Destination", "")
-        if m_type == "bind" and src:
-            if any(src == p or src.startswith(p + "/") for p in SYSTEM_MOUNT_PREFIXES):
-                continue
-            if any(src == p or src.startswith(p + "/") for p in BULK_STORAGE_PREFIXES):
-                skipped_mounts.append({"source": src, "destination": dst, "reason": "bulk_media_excluded"})
-                continue
-            if os.path.exists(src):
-                idx = len(appdata_mounts)
-                appdata_mounts.append(
-                    {
-                        "source": src,
-                        "destination": dst,
-                        "rw": m.get("RW", True),
-                        "archive_prefix": f"data/mount_{idx}",
-                    }
-                )
-            else:
-                skipped_mounts.append({"source": src, "destination": dst, "reason": "host_path_not_found"})
+    appdata_mounts, skipped_mounts = _sort_mounts([inspect_data])
 
     backup_dir = get_app_backup_dir(cname)
     ts = time.strftime("%Y%m%d_%H%M%S")
@@ -479,6 +587,19 @@ def _release_app(name: str, held: dict[str, Any]) -> str:
     return "running_again" if status in (200, 204, 304) else "start_failed"
 
 
+def _combined(outcomes: list[str]) -> str:
+    """What became of an app of several parts: gone (files_only), some gone (parts_missing), or the
+    worst of the rest."""
+    if not outcomes or all(o == "files_only" for o in outcomes):
+        return "files_only"
+    if "files_only" in outcomes:
+        return "parts_missing"
+    for worst in ("start_failed", "running_again"):
+        if worst in outcomes:
+            return worst
+    return "stopped_kept"
+
+
 def _bring_back(app_name: str, compose_yaml: str, base: str) -> tuple[str, str]:
     """The app was removed: its saved Compose file starts it again through the safe apply, which
     takes everything back if a container does not come up (Apps 7). A file that asks for
@@ -542,7 +663,8 @@ def restore_app_backup(
 
         if not manifest:
             raise ValueError("Corrupt backup archive: Missing manifest.json.")
-        held = _hold_app(str(manifest.get("container_name") or "")) if recreate_container else {"exists": False}
+        names = [str(n) for n in (manifest.get("containers") or [manifest.get("container_name") or ""]) if n]
+        held = {n: _hold_app(n) for n in names} if recreate_container else {}
 
         mounts = manifest.get("mounts", [])
         for m in mounts:
@@ -593,10 +715,11 @@ def restore_app_backup(
         compose_path = os.path.join(stack_dir, "docker-compose.yml")
         with open(compose_path, "w", encoding="utf-8") as f:
             f.write(compose_yaml)
-    outcome = _release_app(str(manifest.get("container_name") or ""), held) if recreate_container else "files_only"
+    outcome = _combined([_release_app(n, h) for n, h in held.items()]) if recreate_container else "files_only"
     detail = ""
     if outcome == "files_only" and recreate_container and compose_yaml:
-        outcome, detail = _bring_back(app_name, compose_yaml, os.path.dirname(compose_path))
+        base = str(manifest.get("working_dir") or "") or os.path.dirname(compose_path)
+        outcome, detail = _bring_back(str(manifest.get("stack") or app_name), compose_yaml, base)
 
     return {
         "success": True,

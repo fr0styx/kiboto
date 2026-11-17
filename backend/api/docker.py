@@ -674,6 +674,62 @@ async def post_docker_stack_apply(
         raise HTTPException(status_code=400, detail=str(e)) from e
 
 
+def _app_name_ok(stack_name: str) -> None:
+    if not stack_name or not re.match(r"^[a-zA-Z0-9_.-]{1,128}$", stack_name):
+        raise HTTPException(status_code=400, detail="Invalid app name")
+
+
+@router.post(
+    "/docker/stacks/{stack_name}/backup",
+    dependencies=[Depends(require_scope("containers:manage", "backup:write", "backup:manage"))],
+)
+async def post_docker_app_backup(stack_name: str):
+    """One archive of a whole app: its Compose file and the folders of all its parts (Apps decision 2)."""
+    _app_name_ok(stack_name)
+    from backend.services.app_backup import create_stack_backup
+
+    try:
+        record = await asyncio.to_thread(create_stack_backup, stack_name)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    return {"status": "ok", "backup": record}
+
+
+@router.post(
+    "/docker/stacks/{stack_name}/update",
+    dependencies=[Depends(require_scope("containers:manage"))],
+)
+async def post_docker_app_update(stack_name: str, principal: AuthenticatedPrincipal = Depends(get_current_principal)):
+    """Updates every part of an app that has a newer image, as a job (Apps decision 2)."""
+    _app_name_ok(stack_name)
+    from backend.services.whole_app import start_app_update
+
+    try:
+        return await asyncio.to_thread(start_app_update, stack_name, getattr(principal, "username", None))
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+
+@router.delete(
+    "/docker/stacks/{stack_name}",
+    dependencies=[
+        Depends(require_scope("containers:manage")),
+        Depends(require_confirmation("docker.stack.remove")),
+    ],
+)
+async def delete_docker_app(stack_name: str, keep_backup: bool = True):
+    """Removes every part of an app; one archive of it is kept first unless asked not to."""
+    _app_name_ok(stack_name)
+    from backend.services.whole_app import remove_app
+
+    try:
+        return await asyncio.to_thread(remove_app, stack_name, keep_backup)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    except OSError as e:
+        raise HTTPException(status_code=409, detail=f"The app was not removed: its backup failed ({e}).") from e
+
+
 @router.post(
     "/docker/stacks/{stack_name}/action",
     dependencies=[Depends(require_scope("containers:write", "containers:manage"))],

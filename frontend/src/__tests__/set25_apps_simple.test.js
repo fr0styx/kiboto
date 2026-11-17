@@ -112,7 +112,7 @@ describe('the Apps window: a simple view, and Docker details per person (SET-25 
     expect(tr.querySelector('.cw-stack-note')?.textContent).toBe('In immich');
   });
 
-  it('the simple view names each stack in a header row; Docker details and a chosen sort do not', async () => {
+  it('the simple view shows one row per app; the Docker details name each stack in a header row', async () => {
     const { renderContainersWindowTable, withStackHeads } = await import('../components/containers-manager.js');
     expect(withStackHeads([{ name: 'a' }])).toEqual([{ name: 'a' }]);
     expect(withStackHeads([{ name: 'x', stack: 'arr' }, { name: 'b' }]).map((c) => c.__stack ?? c.name)).toEqual(['arr', 'x', '', 'b']);
@@ -122,18 +122,26 @@ describe('the Apps window: a simple view, and Docker details per person (SET-25 
       { id: 'd', name: 'db', stack: 'immich', state: 'running', status: 'Up', ports: [] },
       { id: 'j', name: 'jellyfin', state: 'running', status: 'Up', ports: [] },
     ];
+    localStorage.removeItem('kiboto_apps_details');
     renderContainersWindowTable(list);
     const tbody = /** @type {HTMLElement} */ (document.getElementById('cw-docker-containers-tbody'));
     const rows = () => [...tbody.children].map((tr) => (tr.classList.contains('cw-stack-head') ? `# ${tr.textContent}` : tr.querySelector('.btn-docker-name-link')?.textContent));
-    expect(rows()).toEqual(['# immich', 'db', 'web', '# Other apps', 'jellyfin']);
-    expect(tbody.classList.contains('cw-has-heads')).toBe(true);
-    expect(tbody.querySelector('.cw-stack-head th')?.getAttribute('scope')).toBe('colgroup');
-    renderContainersWindowTable(list); // a redraw keeps one header per stack
-    expect(rows().filter((r) => String(r).startsWith('#')).length).toBe(2);
+    // Apps decision 2: the two containers of immich are one app
+    expect(rows()).toEqual(['immich', 'jellyfin']);
+    expect(tbody.classList.contains('cw-has-heads')).toBe(false);
+    const appRow = /** @type {HTMLElement} */ (tbody.querySelector('tr.cw-app-row'));
+    expect(appRow.querySelector('.docker-status-text')?.textContent).toBe('2 parts');
+    expect(appRow.querySelector('.cw-stack-note')).toBeNull();
+    /** @type {HTMLElement} */ (appRow.querySelector('[data-action="more-sheet"]')).click();
+    expect(document.body.textContent).toContain('Part: db');
+    /** @type {HTMLElement} */ (appRow.querySelector('.btn-docker-name-link')).click();
+    renderContainersWindowTable(list); // a redraw keeps one row per app
+    expect(rows()).toEqual(['immich', 'jellyfin']);
     localStorage.setItem('kiboto_apps_details', '1');
     renderContainersWindowTable(list);
-    expect(tbody.querySelector('.cw-stack-head')).toBeNull();
-    expect(tbody.classList.contains('cw-has-heads')).toBe(false);
+    expect(rows()).toEqual(['# immich', 'db', 'web', '# Other apps', 'jellyfin']);
+    expect(tbody.querySelector('.cw-stack-head th')?.getAttribute('scope')).toBe('colgroup');
+    localStorage.removeItem('kiboto_apps_details');
   });
 });
 

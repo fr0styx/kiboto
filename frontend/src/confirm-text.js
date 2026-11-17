@@ -16,6 +16,7 @@ const ACTIONS = {
   'users.erase_data': ['Erase their data', 'Erase the chats, Kib log and search data of {target}?', true],
   'users.export_data': ['Download their data', 'Download the chats, Kib log and search data of {target}? They are told.', false],
   'docker.container.delete': ['Delete the app', 'Delete the container {target}?', true],
+  'docker.stack.remove': ['Remove the app', 'Remove {target} and all its parts? A backup of it is kept first.', true],
   'vm.delete': ['Delete the VM', 'Delete the virtual machine {target}?', true],
   'vm.restore': ['Restore the backup', 'Restore the backup {target}? The machine’s disks and settings are replaced by the backup’s.', true],
   'backup.delete': ['Delete the backup', 'Delete the backup {target}?', true],
