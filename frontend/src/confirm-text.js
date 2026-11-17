@@ -41,6 +41,7 @@ const ACTIONS = {
   'pool.scrub_schedule': ['Check monthly', 'Check the pool {target} for errors once a month? Its disks spin up for the check.', false],
   'security.advisor_fix': ['Apply the fix', 'Apply the Security Advisor fix "{target}"? People may lose access they had before.', false],
   'hardware.helper': ['Turn on the helper', 'Move the fan and button hardware access into {target}, a small container with no network that alone opens /dev/mem? The next update takes that access away from Kiboto itself.', false],
+  'network.snmp': ['Turn on', 'Let monitoring tools read how the NAS is doing over SNMP v3 on {target}? Only someone with the user name and both passwords gets an answer.', false],
   'network.nas_name': ['Turn on', 'Let the NAS answer to {target} on the home network? A small helper on the host\'s network does it and only answers name lookups.', false],
   'security.malware_scan': ['Turn on the scan', 'Start ClamAV in {target} to scan files that arrive from outside? It needs about 1.5 GB of memory, briefly up to 3 GB, and downloads its signatures first.', false],
   'security.malware_restore': ['Restore it', 'Put {target} back where it came from although ClamAV flagged it as malware?', true],

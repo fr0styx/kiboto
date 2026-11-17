@@ -13,6 +13,8 @@ pillow-heif>=1.8.1
 # Video thumbnails: the ffmpeg libraries (HEVC, H.264, VP9, AV1, ProRes), amd64 and arm64 wheels
 av>=19.0.2
 playwright==1.65.1
+# SNMP v3 agent (off by default); AES and SHA-256 come from cryptography
+pysnmp==7.1.33
 PyYAML>=6.0.3
 sigstore==4.5.1
 sqlcipher3==0.6.5

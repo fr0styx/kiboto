@@ -633,6 +633,9 @@ async def lifespan(app: FastAPI):
 
     start_tls(app)  # HTTPS beside HTTP once a certificate exists (audit A9)
     https_task = asyncio.create_task(renew_loop())
+    from backend.services import snmp_agent
+
+    await asyncio.to_thread(snmp_agent.apply)  # the SNMP v3 agent, only while it is on
     try:
         yield
     finally:
@@ -641,6 +644,7 @@ async def lifespan(app: FastAPI):
         ddns_task.cancel()
         power_task.cancel()
         https_task.cancel()
+        snmp_agent.stop()
         Z_STATE.ui_wake.set()
         broadcaster.shutdown()
         close_notification_client()

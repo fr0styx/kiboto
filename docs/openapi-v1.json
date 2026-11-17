@@ -36504,6 +36504,68 @@
     "title": "SnapshotCreateModel",
     "type": "object"
    },
+   "SnmpIn": {
+    "properties": {
+     "auth_password": {
+      "anyOf": [
+       {
+        "maxLength": 128,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "None keeps the stored password",
+      "title": "Auth Password"
+     },
+     "contact": {
+      "default": "",
+      "maxLength": 255,
+      "title": "Contact",
+      "type": "string"
+     },
+     "enabled": {
+      "default": false,
+      "title": "Enabled",
+      "type": "boolean"
+     },
+     "location": {
+      "default": "",
+      "maxLength": 255,
+      "title": "Location",
+      "type": "string"
+     },
+     "port": {
+      "default": 161,
+      "maximum": 65535.0,
+      "minimum": 1.0,
+      "title": "Port",
+      "type": "integer"
+     },
+     "priv_password": {
+      "anyOf": [
+       {
+        "maxLength": 128,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "None keeps the stored password",
+      "title": "Priv Password"
+     },
+     "user": {
+      "default": "",
+      "maxLength": 32,
+      "title": "User",
+      "type": "string"
+     }
+    },
+    "title": "SnmpIn",
+    "type": "object"
+   },
    "StackActionRequest": {
     "properties": {
      "action": {
@@ -61213,6 +61275,82 @@
      }
     },
     "summary": "Post Remote Access Publish",
+    "tags": [
+     "Network & Switching"
+    ],
+    "x-required-scopes": [
+     "system:config"
+    ]
+   }
+  },
+  "/api/v1/network/snmp": {
+   "get": {
+    "operationId": "get_snmp_api_v1_network_snmp_get",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Get Snmp Api V1 Network Snmp Get",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Get Snmp",
+    "tags": [
+     "Network & Switching"
+    ],
+    "x-required-scopes": [
+     "system:view"
+    ]
+   },
+   "put": {
+    "description": "Saves the settings; turning the agent on is confirmed first (428 until then): it opens a\nport on the home network.",
+    "operationId": "put_snmp_api_v1_network_snmp_put",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SnmpIn"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Put Snmp Api V1 Network Snmp Put",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Put Snmp",
     "tags": [
      "Network & Switching"
     ],

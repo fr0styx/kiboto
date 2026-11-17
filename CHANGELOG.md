@@ -481,6 +481,14 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   has a newer version, one after the other. Removing an app keeps a backup of it first; if that backup fails, nothing
   is removed.
 
+#### New
+
+- **SNMP v3 for monitoring tools** (off by default): Settings → Connections → Monitoring tools. LibreNMS, Zabbix,
+  PRTG and other tools can read uptime, memory, the storage pool, processor load, network traffic (64-bit counters)
+  and the load average. Version 3 only, always with SHA-256 authentication and AES encryption; v1 and v2c get no
+  answer, and nothing can be changed over SNMP. UDP 161 by default; map it when Kiboto runs in its own network. See
+  docs/SNMP.md.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

@@ -43,6 +43,7 @@ export function loadConnectionsPane() {
   import('../settings.js').then((m) => m.renderApiTokens && m.renderApiTokens()).catch(() => {});
   import('../sso.js').then((m) => { m.renderSsoPanel(); m.renderLdapPanel(); }).catch(() => {});
   import('./connections.js').then((m) => m.renderRedfishCard()).catch(() => {});
+  import('./snmp-card.js').then((m) => m.renderSnmpCard()).catch(() => {}); // SNMP v3, off by default
   return true;
 }
 

@@ -38,7 +38,7 @@ request and response schemas.
 
 <!-- BEGIN generated endpoints: python scripts/api_reference.py --update -->
 
-743 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
+745 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
 
 ### AI Conversation History
 
@@ -484,6 +484,8 @@ request and response schemas.
 | `POST` | `/api/v1/network/remote-access/netbird/connect` | `system:config` | Joins NetBird with a setup key; asks first before its container is put on the host's network |
 | `POST` | `/api/v1/network/remote-access/netbird/disconnect` | `system:config` | Leaves NetBird; the container and its sign-in stay for next time |
 | `POST` | `/api/v1/network/remote-access/publish` | `system:config` | HTTPS addresses in the tailnet for Kiboto and Immich |
+| `GET` | `/api/v1/network/snmp` | `system:view` | Get Snmp |
+| `PUT` | `/api/v1/network/snmp` | `system:config` | Saves the settings; turning the agent on is confirmed first (428 until then): it opens a port on the home network |
 | `GET` | `/api/v1/network/topology` | any of `system:view`, `system:config` | Retrieve full host network topology, physical NICs, bridges, bonds, and Docker networks |
 | `POST` | `/api/v1/network/vlan/create` | `system:config` | Add a VLAN: only on a host Kiboto manages (409 not_on_this_host elsewhere) |
 | `DELETE` | `/api/v1/network/vlan/{vlan_iface}` | `system:config` | Remove a VLAN: only on a host Kiboto manages (409 not_on_this_host elsewhere) |
