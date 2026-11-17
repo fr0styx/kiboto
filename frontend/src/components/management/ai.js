@@ -2476,7 +2476,9 @@ export async function runAiRagAsk(rawQuestion, options = {}) {
   } catch (err) {
     const errHtml = `<div style="padding: 16px; color: var(--crit, #ff5c5c); font-size: var(--kb-fs-xs);">${escapeHtml(t('aiq.rag_error', 'RAG Query Error: {error}', { error: err.message || String(err) }))}</div>`;
     if (outTest) outTest.innerHTML = errHtml;
-    if (answerCard && !options.unifiedMode) {
+    // the Search pane has no separate answer area: there the answer card says it, or a failed search
+    // showed nothing at all (found moving the tests to the real markup, SET-26)
+    if (answerCard && (!options.unifiedMode || !outTest)) {
       answerCard.style.display = 'block';
       answerCard.innerHTML = errHtml;
     }

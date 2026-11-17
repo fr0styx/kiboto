@@ -1,5 +1,6 @@
 /** The AI search result inspector: the photo shows, and its buttons open, download, favourite and share. */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { windowPane } from './helpers/window-pane.js';
 
 vi.mock('../toast.js', () => ({ showToast: vi.fn(), showConfirmToast: vi.fn(), showPromptToast: vi.fn(), showActionToast: vi.fn() }));
 vi.mock('../utils.js', async (orig) => ({ ...(await orig()), copyText: vi.fn(async () => {}) }));
@@ -14,7 +15,7 @@ const PHOTO = { file_id: 7, file_path: '/mnt/user/Photos/beach.jpg', file_name: 
 describe('AI search inspector', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    document.body.innerHTML = '<div id="ai-search-split-layout"></div><div id="ai-preview-inspector-pane"></div>';
+    document.body.innerHTML = windowPane('mgmt-pane-ai-rag'); // the real markup (SET-26)
   });
   afterEach(() => vi.restoreAllMocks());
 

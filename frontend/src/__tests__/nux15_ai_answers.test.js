@@ -1,5 +1,6 @@
 // NUX-15: the AI answers (knowledge search, chat replies, chat markdown) use classes from
 // Mission Control's sheet instead of inline styles; each part still renders with them.
+import { windowPane } from './helpers/window-pane.js';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { runAiRagAsk, selectAiConversation, _formatChatMarkdown } from '../components/management/ai.js';
 import { api } from '../api.js';
@@ -13,9 +14,7 @@ afterEach(() => {
 
 describe('AI answers on classes (NUX-15)', () => {
   it('shows a recipe card in a knowledge answer', async () => {
-    document.body.innerHTML = `<input id="ai-rag-query-input"><select id="ai-rag-scope-select"><option value="all" selected>all</option></select>
-      <button id="btn-ai-rag-ask"></button><div id="ai-rag-empty-state"></div><div id="ai-rag-answer-container"></div>
-      <div id="ai-rag-answer-card"></div><div id="ai-rag-structured-card"></div><div id="ai-rag-citations-grid"></div>`;
+    document.body.innerHTML = windowPane('mgmt-pane-ai-rag'); // the real Search pane (SET-26)
     vi.spyOn(api, 'post').mockResolvedValue({
       answer_markdown: 'Mix it.', citations: [],
       structured_cards: [{ type: 'recipe', title: 'Pancakes', ingredients: ['flour'], steps: ['Fry'], prep_time: '5 min' }, { type: 'recipe' }],
@@ -25,6 +24,20 @@ describe('AI answers on classes (NUX-15)', () => {
     expect(html).toContain('ai-structured-recipe-card');
     const titles = new Set([...document.querySelectorAll('.airg-fs135-bold-strong')].map((n) => n.textContent));
     expect([...titles].sort()).toEqual(['Pancakes', 'Structured Recipe Card']);
+  });
+
+  it('a failed search says so in the real Search pane, which has no separate answer area', async () => {
+    document.body.innerHTML = windowPane('mgmt-pane-ai-rag');
+    vi.spyOn(api, 'post').mockRejectedValue(new Error('index busy'));
+    await runAiRagAsk('pancakes', { unifiedMode: true });
+    const card = document.getElementById('ai-rag-answer-card');
+    expect(card.style.display).toBe('block');
+    expect(card.textContent).toContain('index busy');
+    card.style.display = 'none';
+    await runAiRagAsk('pancakes'); // the older Ask page: the same card
+    expect(card.style.display).toBe('block');
+    document.body.innerHTML = '';
+    await expect(runAiRagAsk('pancakes', { unifiedMode: true })).resolves.toBeNull(); // no pane: nothing to write, no error
   });
 
   it('shows photo cards in a saved chat, with and without a thumbnail', async () => {

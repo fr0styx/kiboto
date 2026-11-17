@@ -4,6 +4,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { windowPane } from './helpers/window-pane.js';
 
 describe('Kib Conversation History & Dual-Pane UI Suite', () => {
   let managementModule;
@@ -13,35 +14,7 @@ describe('Kib Conversation History & Dual-Pane UI Suite', () => {
     vi.resetModules();
     localStorage.clear();
 
-    document.body.innerHTML = `
-      <div id="mgmt-pane-ai-chat" class="mgmt-tab-pane">
-        <div id="ai-chat-dual-container" class="ai-chat-dual-container">
-          <aside id="ai-chat-sidebar" class="ai-chat-sidebar">
-            <button id="btn-ai-chat-new" class="btn-ai-new-chat">+ New Chat</button>
-            <button id="btn-ai-chat-sidebar-toggle" class="btn-ai-icon-toggle">◀</button>
-            <input id="ai-chat-search-input" class="ai-search-input" />
-            <div id="ai-chat-threads-list" class="ai-chat-threads-scroll"></div>
-            <span id="ai-chat-thread-count">0 chats</span>
-            <button id="btn-ai-chat-clear-all" class="btn-ai-clear-all">Clear All</button>
-          </aside>
-          <main id="ai-chat-main-stage" class="ai-chat-main-stage">
-            <button id="btn-ai-chat-sidebar-open" style="display:none;">▶</button>
-            <span id="ai-chat-active-title">New Conversation</span>
-            <button id="btn-ai-chat-rename">✏️</button>
-            <span id="ai-chat-active-model-badge">DeepSeek-R1</span>
-            <button id="btn-ai-chat-export-toggle">Export</button>
-            <div id="ai-chat-export-menu" style="display:none;">
-              <button id="btn-ai-chat-export-md">Export MD</button>
-              <button id="btn-ai-chat-export-json">Export JSON</button>
-            </div>
-            <button id="btn-ai-chat-clear">Clear Chat</button>
-            <div id="ai-chat-messages-list"></div>
-            <input id="ai-chat-input" value="" />
-            <button id="btn-ai-chat-send">Ask Kib</button>
-          </main>
-        </div>
-      </div>
-    `;
+    document.body.innerHTML = windowPane('mgmt-pane-ai-chat'); // the real markup (SET-26)
 
     apiModule = await import('../api.js');
     managementModule = await import('../components/management.js');
