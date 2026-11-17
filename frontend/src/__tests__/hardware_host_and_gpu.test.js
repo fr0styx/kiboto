@@ -1,235 +1,143 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { updateManagementTelemetry } from '../components/management.js';
+// Hardware 3 (hardware report, section 4): the Host tab's facts live on the pages they belong to —
+// system, processor, mainboard and graphics on About; the array on Storage; the AI chip on Kib; the
+// load on Activity. The live stats fill them wherever they are.
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import fs from 'fs';
+import path from 'path';
+import { updateManagementTelemetry, processorWords, powerModeWord, graphicsWords } from '../components/management.js';
 
-describe('Hardware Subsystem & GPU Transcode Cockpit (Option C & D)', () => {
+const HTML = fs.readFileSync(path.resolve(__dirname, '../windows/management-window.html'), 'utf8');
+
+const FIXTURE = `
+  <div data-host="unraid"><span id="mgmt-unraid-version">-</span></div>
+  <div data-host="generic" style="display: none;"><span id="mgmt-generic-os">-</span></div>
+  <span id="mgmt-generic-cpu">-</span><span id="mgmt-cpu-gov">-</span>
+  <span id="mgmt-board-name">-</span><span id="mgmt-bios-ver">-</span><span id="mgmt-gpu-line">-</span>
+  <div class="unraid-details-grid" data-host="unraid">
+    <span id="mgmt-unraid-state">-</span><span id="mgmt-unraid-disks">-</span>
+    <span id="mgmt-unraid-parity">-</span><span id="mgmt-unraid-mover">-</span>
+  </div>
+  <div class="unraid-details-grid" data-host="generic" style="display: none;"><span id="mgmt-generic-engine">-</span></div>
+  <div id="mgmt-npu-container">
+    <span id="mgmt-npu-status-badge">-</span><span id="mgmt-npu-name">-</span><span id="mgmt-npu-driver">-</span>
+    <span id="mgmt-npu-node">-</span><span id="mgmt-npu-clock">-</span><span id="mgmt-npu-accel">-</span>
+    <div id="mgmt-npu-frameworks-list"></div>
+  </div>`;
+const text = (id) => document.getElementById(id).textContent;
+const shown = (host) => [...document.querySelectorAll(`[data-host="${host}"]`)].every((el) => el.style.display === '');
+const hidden = (host) => [...document.querySelectorAll(`[data-host="${host}"]`)].every((el) => el.style.display === 'none');
+
+/** One pane's markup, from its opening tag to the next pane at the same depth (good enough for ids). */
+function pane(id, until) {
+  const a = HTML.indexOf(`id="${id}"`);
+  const b = HTML.indexOf(until, a);
+  return HTML.slice(a, b);
+}
+
+describe('Hardware 3: facts on their own pages', () => {
   beforeEach(() => {
-    document.body.innerHTML = `
-      <div id="mgmt-sec-hardware">
-        <label id="mgmt-host-status-label">HOST SUBSYSTEM STATUS</label>
-        
-        <div class="unraid-details-grid" style="display:none;">
-          <span id="mgmt-unraid-state">-</span>
-          <span id="mgmt-unraid-server">-</span>
-          <span id="mgmt-unraid-version">-</span>
-          <span id="mgmt-unraid-disks">-</span>
-          <span id="mgmt-unraid-parity">-</span>
-          <span id="mgmt-unraid-mover">-</span>
-        </div>
-
-        <div class="generic-details-grid" style="display:none;">
-          <span id="mgmt-generic-os">-</span>
-          <span id="mgmt-generic-host">-</span>
-          <span id="mgmt-generic-uptime">-</span>
-          <span id="mgmt-generic-cpu">-</span>
-          <span id="mgmt-generic-load">-</span>
-          <span id="mgmt-generic-engine">-</span>
-        </div>
-
-        <div id="mgmt-board-details-grid">
-          <span id="mgmt-board-name">-</span>
-          <span id="mgmt-bios-ver">-</span>
-          <span id="mgmt-cpu-gov">-</span>
-          <span id="mgmt-cpu-cores">-</span>
-        </div>
-
-        <span id="mgmt-gpu-status-badge">STANDBY</span>
-        <span id="mgmt-gpu-name">-</span>
-        <span id="mgmt-gpu-driver">-</span>
-        <span id="mgmt-gpu-node">-</span>
-        <span id="mgmt-gpu-accel">-</span>
-        <div id="mgmt-gpu-codecs-list"></div>
-
-        <div id="mgmt-npu-container">
-          <span id="mgmt-npu-status-badge">STANDBY</span>
-          <span id="mgmt-npu-name">-</span>
-          <span id="mgmt-npu-driver">-</span>
-          <span id="mgmt-npu-node">-</span>
-          <span id="mgmt-npu-clock">-</span>
-          <span id="mgmt-npu-accel">-</span>
-          <div id="mgmt-npu-frameworks-list"></div>
-        </div>
-      </div>
-    `;
+    document.body.innerHTML = FIXTURE;
+  });
+  afterEach(() => {
+    delete window.openManagementWindow;
   });
 
-  it('renders real Unraid array status and updates dynamic header when Unraid is available', () => {
-    const mockStats = {
-      unraid: {
-        available: true,
-        state: 'STARTED',
-        color: 'green-on',
-        version: '7.3.2',
-        server_name: 'HomeNAS',
-        model: 'D6U',
-        disks: { total: 12, disabled: 0, invalid: 0 },
-        parity_check: { active: false, errors: 0 },
-        mover: { active: false }
-      },
-      name: 'HomeNAS',
-      motherboard: {
-        vendor: 'Zettlab',
-        board: 'WY120',
-        bios_version: 'WY120V016',
-        bios_date: '05/09/2026'
-      },
-      cpu: {
-        model: 'Intel Core Ultra 5 125H',
-        cores: 18,
-        governor: 'performance'
-      }
-    };
-
-    updateManagementTelemetry(mockStats);
-
-    const unraidGrid = document.querySelector('.unraid-details-grid');
-    const genericGrid = document.querySelector('.generic-details-grid');
-    const hostLabel = document.getElementById('mgmt-host-status-label');
-    const stateEl = document.getElementById('mgmt-unraid-state');
-    const srvEl = document.getElementById('mgmt-unraid-server');
-    const verEl = document.getElementById('mgmt-unraid-version');
-
-    expect(unraidGrid.style.display).toBe('grid');
-    expect(genericGrid.style.display).toBe('none');
-    expect(hostLabel.textContent).toContain('Unraid');
-    expect(stateEl.textContent).toContain('STARTED');
-    expect(srvEl.textContent).toContain('HomeNAS (D6U)');
-    expect(verEl.textContent).toBe('Unraid 7.3.2');
+  it('on Unraid: the array on Storage, the Unraid version on About, the other host rows hidden', () => {
+    updateManagementTelemetry({
+      unraid: { available: true, state: 'STARTED', color: 'green-on', version: '7.3.2', disks: { total: 12 }, parity_check: { active: false, errors: 0 }, mover: { active: false } },
+    });
+    expect(shown('unraid')).toBe(true);
+    expect(hidden('generic')).toBe(true);
+    expect(text('mgmt-unraid-state')).toBe('STARTED');
+    expect(text('mgmt-unraid-version')).toBe('Unraid 7.3.2');
+    expect(text('mgmt-unraid-disks')).toBe('12 Disks (0 disabled, 0 invalid)');
+    expect(text('mgmt-unraid-mover')).toBe('Idle');
+    updateManagementTelemetry({ unraid: { available: true } });
+    expect(text('mgmt-unraid-state')).toBe('—');
+    expect(text('mgmt-unraid-version')).toBe('Unraid');
   });
 
-  it('renders real Host System & Kernel topology when on Generic Linux', () => {
-    const mockStats = {
-      unraid: { available: false },
-      system: {
-        os: 'Debian GNU/Linux 13 (trixie)',
-        kernel: '6.18.38-generic',
-        uptime_str: '5d 12h 30m',
-        hostname: 'HomeNAS-Node'
-      },
-      cpu: {
-        model: 'Intel(R) Core(TM) Ultra 5 125H',
-        cores: 18,
-        governor: 'performance',
-        load_avg: [0.15, 0.25, 0.35]
-      },
-      storage: {
-        engine: 'Btrfs Native Subvolumes'
-      }
-    };
-
-    updateManagementTelemetry(mockStats);
-
-    const unraidGrid = document.querySelector('.unraid-details-grid');
-    const genericGrid = document.querySelector('.generic-details-grid');
-    const hostLabel = document.getElementById('mgmt-host-status-label');
-    const osEl = document.getElementById('mgmt-generic-os');
-    const cpuEl = document.getElementById('mgmt-generic-cpu');
-    const loadEl = document.getElementById('mgmt-generic-load');
-    const engineEl = document.getElementById('mgmt-generic-engine');
-
-    expect(unraidGrid.style.display).toBe('none');
-    expect(genericGrid.style.display).toBe('grid');
-    expect(hostLabel.textContent).toBe('Host system');
-    expect(osEl.textContent).toBe('Debian GNU/Linux 13 (trixie)');
-    expect(cpuEl.textContent).toBe('Intel Core Ultra 5 125H (18T)');
-    expect(loadEl.textContent).toBe('0.15 · 0.25 · 0.35');
-    expect(engineEl.textContent).toBe('Btrfs Native Subvolumes');
+  it('on another system: its name on About and its storage engine on Storage', () => {
+    updateManagementTelemetry({ os: { distro: 'Debian GNU/Linux 13 (trixie)' }, storage: { engine: 'Btrfs' } });
+    expect(shown('generic')).toBe(true);
+    expect(hidden('unraid')).toBe(true);
+    expect(text('mgmt-generic-os')).toBe('Debian GNU/Linux 13 (trixie)');
+    expect(text('mgmt-generic-engine')).toBe('Btrfs');
+    updateManagementTelemetry({ system: { distro: 'Fedora' } });
+    expect(text('mgmt-generic-os')).toBe('Fedora');
+    expect(text('mgmt-generic-engine')).toBe('Btrfs / OpenZFS');
   });
 
-  it('renders Motherboard DMI firmware and CPU scaling governor (Option D)', () => {
-    const mockStats = {
-      motherboard: {
-        vendor: 'Zettlab',
-        board: 'WY120',
-        bios_version: 'WY120V016',
-        bios_date: '05/09/2026'
-      },
-      cpu: {
-        governor: 'powersave',
-        cores: 18
-      }
-    };
-
-    updateManagementTelemetry(mockStats);
-
-    const boardEl = document.getElementById('mgmt-board-name');
-    const biosEl = document.getElementById('mgmt-bios-ver');
-    const govEl = document.getElementById('mgmt-cpu-gov');
-    const coresEl = document.getElementById('mgmt-cpu-cores');
-
-    expect(boardEl.textContent).toBe('Zettlab WY120');
-    expect(biosEl.textContent).toBe('WY120V016 (05/09/2026)');
-    expect(govEl.textContent).toBe('powersave');
-    expect(coresEl.textContent).toBe('18 Threads / Cores');
+  it('processor, power mode, mainboard and BIOS in words', () => {
+    updateManagementTelemetry({
+      unraid: { available: true },
+      cpu: { model: 'Intel(R) Core(TM) Ultra 5 125H', cores: 18, governor: 'powersave' },
+      motherboard: { vendor: 'Zettlab', board: 'WY120', bios_version: 'WY120V016', bios_date: '05/09/2026' },
+    });
+    expect(text('mgmt-generic-cpu')).toBe('Intel Core Ultra 5 125H · 18 threads');
+    expect(text('mgmt-cpu-gov')).toBe('Power saving');
+    expect(text('mgmt-board-name')).toBe('Zettlab WY120');
+    expect(text('mgmt-bios-ver')).toBe('WY120V016 (05/09/2026)');
+    updateManagementTelemetry({ motherboard: {} });
+    expect(text('mgmt-board-name')).toBe('Standard PC');
+    expect(text('mgmt-bios-ver')).toBe('—');
+    expect(processorWords({})).toBe('Not reported');
+    expect(processorWords({ model: 'ARM Cortex-A76', cores: 1 })).toBe('ARM Cortex-A76 · 1 thread');
+    expect(powerModeWord('performance')).toBe('Full speed');
+    expect(powerModeWord('schedutil')).toBe('Adjusts to the load');
+    expect(powerModeWord('userspace')).toBe('userspace');
+    expect(powerModeWord(undefined)).toBe('');
   });
 
-  it('renders GPU Hardware Transcode Engine telemetry and supported codecs (Option D)', () => {
-    const mockStats = {
-      gpu: {
-        present: true,
-        vendor: 'Intel',
-        model: 'Intel Arc Graphics (Meteor Lake-P GT1)',
-        driver: 'i915',
-        render_node: '/dev/dri/renderD128',
-        acceleration: 'Intel QuickSync Video (QSV) • VA-API 1.20',
-        codecs: ['AV1', 'HEVC 10-bit', 'H.264', 'VP9'],
-        ready: true
-      }
-    };
-
-    updateManagementTelemetry(mockStats);
-
-    const badge = document.getElementById('mgmt-gpu-status-badge');
-    const nameEl = document.getElementById('mgmt-gpu-name');
-    const driverEl = document.getElementById('mgmt-gpu-driver');
-    const nodeEl = document.getElementById('mgmt-gpu-node');
-    const accelEl = document.getElementById('mgmt-gpu-accel');
-    const codecsEl = document.getElementById('mgmt-gpu-codecs-list');
-
-    expect(badge.textContent).toBe('ACCELERATION ACTIVE');
-    expect(nameEl.textContent).toBe('Intel Arc Graphics (Meteor Lake-P GT1)');
-    expect(driverEl.textContent).toBe('Driver: i915');
-    expect(nodeEl.textContent).toBe('/dev/dri/renderD128');
-    expect(accelEl.textContent).toContain('QuickSync');
-    expect(codecsEl.querySelectorAll('.gpu-codec-tag').length).toBe(4);
-    expect(codecsEl.textContent).toContain('AV1');
-    expect(codecsEl.textContent).toContain('HEVC 10-bit');
+  it('graphics as one line', () => {
+    updateManagementTelemetry({ gpu: { ready: true, model: 'Intel Arc Graphics', codecs: ['AV1', 'HEVC', 'H.264'] } });
+    expect(text('mgmt-gpu-line')).toBe('Intel Arc Graphics · video in hardware: AV1, HEVC, H.264');
+    expect(graphicsWords({ ready: false, model: 'Matrox G200' })).toBe('Matrox G200 · video in software');
+    expect(graphicsWords({ ready: true, model: 'Arc', codecs: [] })).toBe('Arc · video in software');
+    expect(graphicsWords({})).toBe('No graphics chip found');
+    expect(graphicsWords(null)).toBe('No graphics chip found');
   });
 
-  it('renders NPU Neural Acceleration Engine telemetry and AI frameworks', () => {
-    const mockStats = {
-      npu: {
-        present: true,
-        vendor: 'Intel',
-        model: 'Intel AI Boost NPU (Meteor Lake VPU 3720)',
-        driver: 'intel_vpu',
-        render_node: '/dev/accel/accel0',
-        max_freq_mhz: 1400,
-        acceleration: 'Intel OpenVINO • ONNX Runtime • DirectML',
-        frameworks: ['OpenVINO', 'ONNX Runtime', 'DirectML', 'PyTorch IPEX'],
-        ready: true
-      }
-    };
+  it('the AI chip card is filled on Kib', () => {
+    updateManagementTelemetry({
+      npu: { present: true, ready: true, model: 'Intel AI Boost NPU', driver: 'intel_vpu', render_node: '/dev/accel/accel0', max_freq_mhz: 1400, acceleration: 'OpenVINO', frameworks: ['OpenVINO', 'ONNX Runtime'] },
+    });
+    expect(document.getElementById('mgmt-npu-container').style.display).toBe('block');
+    expect(text('mgmt-npu-status-badge')).toBe('NPU ACTIVE');
+    expect(text('mgmt-npu-driver')).toBe('Driver: intel_vpu');
+    expect(text('mgmt-npu-clock')).toBe('1400 MHz');
+    expect(document.querySelectorAll('#mgmt-npu-frameworks-list .gpu-codec-tag').length).toBe(2);
+  });
 
-    updateManagementTelemetry(mockStats);
+  it('the Host tab says where each fact went, and its buttons go there', () => {
+    const open = vi.fn();
+    window.openManagementWindow = open;
+    document.body.innerHTML = '<button data-goto-section="mgmt-sec-system-group" data-goto-pane="mgmt-pane-about"><span>About</span></button><button data-goto-section="mgmt-sec-ai">Kib</button><p>else</p>';
+    document.querySelector('span').click();
+    expect(open).toHaveBeenLastCalledWith('mgmt-sec-system-group', 'mgmt-pane-about');
+    document.querySelectorAll('button')[1].click();
+    expect(open).toHaveBeenLastCalledWith('mgmt-sec-ai', undefined);
+    document.querySelector('p').click();
+    expect(open).toHaveBeenCalledTimes(2);
+    delete window.openManagementWindow;
+    expect(() => document.querySelector('button').click()).not.toThrow();
+  });
 
-    const container = document.getElementById('mgmt-npu-container');
-    const badge = document.getElementById('mgmt-npu-status-badge');
-    const nameEl = document.getElementById('mgmt-npu-name');
-    const driverEl = document.getElementById('mgmt-npu-driver');
-    const nodeEl = document.getElementById('mgmt-npu-node');
-    const clockEl = document.getElementById('mgmt-npu-clock');
-    const accelEl = document.getElementById('mgmt-npu-accel');
-    const fwEl = document.getElementById('mgmt-npu-frameworks-list');
-
-    expect(container.style.display).toBe('block');
-    expect(badge.textContent).toBe('NPU ACTIVE');
-    expect(nameEl.textContent).toBe('Intel AI Boost NPU (Meteor Lake VPU 3720)');
-    expect(driverEl.textContent).toBe('Driver: intel_vpu');
-    expect(nodeEl.textContent).toBe('/dev/accel/accel0');
-    expect(clockEl.textContent).toBe('1400 MHz');
-    expect(accelEl.textContent).toContain('OpenVINO');
-    expect(fwEl.querySelectorAll('.gpu-codec-tag').length).toBe(4);
-    expect(fwEl.textContent).toContain('ONNX Runtime');
-    expect(fwEl.textContent).toContain('DirectML');
+  it('the window markup: each fact once, on its new page', () => {
+    const host = pane('mgmt-pane-unraid', '<!-- Sub-tab 2: Front-panel LCD');
+    expect(host).toContain('id="hw-facts-moved"');
+    expect(host).not.toMatch(/id="mgmt-(unraid|generic|board|bios|cpu|gpu|npu)-/);
+    const about = pane('mgmt-pane-about', '<!-- Observability');
+    for (const id of ['mgmt-unraid-version', 'mgmt-generic-os', 'mgmt-generic-cpu', 'mgmt-cpu-gov', 'mgmt-board-name', 'mgmt-bios-ver', 'mgmt-gpu-line']) {
+      expect(about).toContain(`id="${id}"`);
+    }
+    const storage = pane('mgmt-pane-storage-topo', '<!-- Sub-tab 4');
+    for (const id of ['mgmt-unraid-state', 'mgmt-unraid-disks', 'mgmt-unraid-parity', 'mgmt-unraid-mover', 'mgmt-generic-engine']) {
+      expect(storage).toContain(`id="${id}"`);
+    }
+    expect(pane('kib-advanced', '</details>')).toContain('id="mgmt-npu-container"');
+    const ids = [...HTML.matchAll(/\sid="(mgmt-(?:unraid|generic|board|bios|cpu|gpu|npu)-[a-z-]+)"/g)].map((m) => m[1]);
+    expect(ids.length).toBeGreaterThan(15);
+    expect(new Set(ids).size).toBe(ids.length);
   });
 });

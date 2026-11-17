@@ -3,9 +3,8 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { updateManagementTelemetry } from '../components/management.js';
 
 const ids = [
-  'mgmt-unraid-disks', 'mgmt-unraid-parity', 'mgmt-unraid-mover', 'mgmt-generic-host', 'mgmt-generic-uptime',
-  'mgmt-cpu-cores', 'mgmt-gpu-status-badge', 'mgmt-gpu-name', 'mgmt-gpu-driver', 'mgmt-gpu-node', 'mgmt-gpu-accel',
-  'mgmt-gpu-codecs-list', 'mgmt-npu-container', 'mgmt-npu-status-badge', 'mgmt-npu-name', 'mgmt-npu-driver',
+  'mgmt-unraid-disks', 'mgmt-unraid-parity', 'mgmt-unraid-mover', 'mgmt-generic-os', 'mgmt-generic-cpu',
+  'mgmt-gpu-line', 'mgmt-npu-container', 'mgmt-npu-status-badge', 'mgmt-npu-name', 'mgmt-npu-driver',
   'mgmt-npu-node', 'mgmt-npu-clock', 'mgmt-npu-accel', 'mgmt-npu-frameworks-list', 'mgmt-hub-storage-pill',
   'mgmt-sidebar-storage-badge', 'mgmt-hub-vms-pill', 'mgmt-sidebar-vms-badge',
 ];
@@ -28,13 +27,8 @@ describe('Mission Control telemetry words (NUX-20)', () => {
     expect(text('mgmt-unraid-disks')).toBe('0 Disks (0 disabled, 0 invalid)');
     expect(text('mgmt-unraid-parity')).toBe('Active (Sync 0%) • 0 Errors');
     expect(text('mgmt-unraid-mover')).toBe('Active (0 files left)');
-    expect(text('mgmt-cpu-cores')).toBe('1 Thread / Core');
-    expect(text('mgmt-gpu-status-badge')).toBe('SOFTWARE ONLY');
-    expect(text('mgmt-gpu-name')).toBe('No GPU Detected');
-    expect(text('mgmt-gpu-driver')).toBe('Driver: none');
-    expect(text('mgmt-gpu-node')).toBe('No render node');
-    expect(text('mgmt-gpu-accel')).toBe('Software CPU Only');
-    expect(text('mgmt-gpu-codecs-list')).toBe('CPU Decode Only');
+    expect(text('mgmt-generic-cpu')).toBe('Not reported');
+    expect(text('mgmt-gpu-line')).toBe('No graphics chip found');
     expect(text('mgmt-npu-status-badge')).toBe('NPU OFFLINE');
     expect(text('mgmt-npu-name')).toBe('No NPU Detected');
     expect(text('mgmt-npu-driver')).toBe('Driver: none');
@@ -64,9 +58,8 @@ describe('Mission Control telemetry words (NUX-20)', () => {
     });
     expect(text('mgmt-unraid-disks')).toBe('6 Disks (1 disabled, 0 invalid)');
     expect(text('mgmt-unraid-parity')).toBe('Completed / Idle • 2 Errors');
-    expect(text('mgmt-cpu-cores')).toBe('8 Threads / Cores');
-    expect(text('mgmt-gpu-status-badge')).toBe('ACCELERATION ACTIVE');
-    expect(text('mgmt-gpu-driver')).toBe('Driver: i915');
+    expect(text('mgmt-generic-cpu')).toBe('Not reported · 8 threads');
+    expect(text('mgmt-gpu-line')).toBe('Arc · video in hardware: AV1');
     expect(text('mgmt-npu-status-badge')).toBe('NPU ACTIVE');
     expect(text('mgmt-npu-clock')).toBe('1400 MHz');
     expect(text('mgmt-hub-storage-pill')).toBe('2 Drives');
@@ -81,11 +74,7 @@ describe('Mission Control telemetry words (NUX-20)', () => {
 
   it('names a generic host without details', () => {
     updateManagementTelemetry({ system: {} });
-    expect(text('mgmt-generic-host')).toBe('Kiboto Host');
-    expect(text('mgmt-generic-uptime')).toBe('Active');
-    updateManagementTelemetry({ name: 'nas1', os: { uptime: '3d' } });
-    expect(text('mgmt-generic-host')).toBe('nas1');
-    expect(text('mgmt-generic-uptime')).toBe('3d');
+    expect(text('mgmt-generic-os')).toBe('Linux');
     document.body.innerHTML = '';
     expect(() => updateManagementTelemetry({ unraid: { available: true }, gpu: {}, npu: {}, disks: [], vms: [] })).not.toThrow();
   });

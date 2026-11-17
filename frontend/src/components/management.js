@@ -199,6 +199,38 @@ export const SUBPANE_MAP = {
   'mgmt-pane-ai-index': { section: 'mgmt-sec-ai', pane: 'mgmt-pane-ai-index' },
 };
 
+/** "Intel Core Ultra 5 125H · 18 threads" (About → Technical details). */
+export function processorWords(cpu) {
+  const c = cpu || {};
+  const name = c.model ? c.model.replace(/\(R\)|\(TM\)/g, '').replace(/\s+/g, ' ').trim() : t('hw.cpu_unknown', 'Not reported');
+  return c.cores ? `${name} · ${t('hw.threads', '{n, plural, one {# thread} other {# threads}}', { n: c.cores })}` : name;
+}
+
+const POWER_MODES = { performance: ['hw.gov_performance', 'Full speed'], powersave: ['hw.gov_powersave', 'Power saving'], schedutil: ['hw.gov_adaptive', 'Adjusts to the load'], ondemand: ['hw.gov_adaptive', 'Adjusts to the load'], conservative: ['hw.gov_adaptive', 'Adjusts to the load'] };
+/** The processor's scaling governor in words ("powersave" → "Power saving"); an unknown one as it is. */
+export function powerModeWord(governor) {
+  const m = POWER_MODES[String(governor || '').toLowerCase()];
+  return m ? t(m[0], m[1]) : String(governor || '');
+}
+
+/** One line for the graphics chip: its name and whether video is done in hardware. */
+export function graphicsWords(gpu) {
+  const g = gpu || {};
+  const name = g.model || t('hw.no_gpu', 'No graphics chip found');
+  const codecs = Array.isArray(g.codecs) ? g.codecs.filter(Boolean) : [];
+  if (g.ready && codecs.length) return `${name} · ${t('hw.gpu_video_hw', 'video in hardware: {codecs}', { codecs: codecs.join(', ') })}`;
+  return g.model ? `${name} · ${t('hw.gpu_video_sw', 'video in software')}` : name;
+}
+
+// "Load → Activity" and the other buttons that send a fact's old place to its new page (Hardware 3)
+document.addEventListener('click', (e) => {
+  const target = e.target instanceof Element ? e.target : null;
+  const b = /** @type {HTMLElement|null} */ (target && target.closest('[data-goto-section]'));
+  const open = /** @type {any} */ (window).openManagementWindow;
+  if (!b || typeof open !== 'function') return;
+  open(b.dataset.gotoSection, b.dataset.gotoPane || undefined);
+});
+
 export function updateManagementTelemetry(stats) {
   if (!stats) return;
   const overlay = document.getElementById('management-modal-overlay');
@@ -206,35 +238,25 @@ export function updateManagementTelemetry(stats) {
     return;
   }
   const unraid = stats.unraid;
-  const unraidGrid = document.querySelector('.unraid-details-grid');
-  const genericGrid = document.querySelector('.generic-details-grid');
-  const hostLabel = document.getElementById('mgmt-host-status-label');
+  // Hardware 3: the facts live on About, Storage and Kib; rows for the other kind of host stay hidden
+  const hostKind = unraid && unraid.available ? 'unraid' : 'generic';
+  document.querySelectorAll('[data-host]').forEach((node) => {
+    const el = /** @type {HTMLElement} */ (node);
+    el.style.display = el.dataset.host === hostKind ? '' : 'none';
+  });
+  const setText = (id, text) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = text;
+    return el;
+  };
 
-  if (unraid && unraid.available) {
-    if (unraidGrid) unraidGrid.style.display = 'grid';
-    if (genericGrid) genericGrid.style.display = 'none';
-    if (hostLabel) hostLabel.textContent = t('mgmt.unraid_status_label');
-
-    const stateEl = document.getElementById('mgmt-unraid-state');
-    const srvEl = document.getElementById('mgmt-unraid-server');
-    const verEl = document.getElementById('mgmt-unraid-version');
-    const disksEl = document.getElementById('mgmt-unraid-disks');
+  if (hostKind === 'unraid') {
+    const stateEl = setText('mgmt-unraid-state', unraid.state || '—');
+    if (stateEl) stateEl.style.color = unraid.color?.startsWith('green') ? 'var(--ok2)' : 'var(--warn)';
+    setText('mgmt-unraid-version', `Unraid ${unraid.version || ''}`.trim());
+    const d = unraid.disks || {};
+    setText('mgmt-unraid-disks', t('mgx.disks', '{count, plural, one {# Disk} other {# Disks}} ({disabled} disabled, {invalid} invalid)', { count: d.total || 0, disabled: d.disabled || 0, invalid: d.invalid || 0 }));
     const parityEl = document.getElementById('mgmt-unraid-parity');
-    const moverEl = document.getElementById('mgmt-unraid-mover');
-
-    if (stateEl) {
-      stateEl.textContent = unraid.state;
-      stateEl.style.color = unraid.color?.startsWith('green') ? 'var(--ok2)' : 'var(--warn)';
-    }
-    if (srvEl) {
-      const chassisName = stats.chassis_label || stats.motherboard?.board || (stats.chassis ? stats.chassis.toUpperCase() : 'D6U');
-      srvEl.textContent = `${unraid.server_name || stats.name || 'NAS'} (${unraid.model || chassisName})`;
-    }
-    if (verEl) verEl.textContent = `Unraid ${unraid.version || ''}`;
-    if (disksEl) {
-      const d = unraid.disks || {};
-      disksEl.textContent = t('mgx.disks', '{count, plural, one {# Disk} other {# Disks}} ({disabled} disabled, {invalid} invalid)', { count: d.total || 0, disabled: d.disabled || 0, invalid: d.invalid || 0 });
-    }
     if (parityEl) {
       const p = unraid.parity_check || {};
       if (p.active) {
@@ -245,6 +267,7 @@ export function updateManagementTelemetry(stats) {
         parityEl.style.color = 'var(--ok2)';
       }
     }
+    const moverEl = document.getElementById('mgmt-unraid-mover');
     if (moverEl) {
       const m = unraid.mover || {};
       if (m.active) {
@@ -256,91 +279,18 @@ export function updateManagementTelemetry(stats) {
       }
     }
   } else {
-    if (unraidGrid) unraidGrid.style.display = 'none';
-    if (genericGrid) genericGrid.style.display = 'grid';
-    if (hostLabel) hostLabel.textContent = t('mgmt.generic_status_label');
-
-    const osNameEl = document.getElementById('mgmt-generic-os');
-    const hostEl = document.getElementById('mgmt-generic-host');
-    const uptimeEl = document.getElementById('mgmt-generic-uptime');
-    const cpuEl = document.getElementById('mgmt-generic-cpu');
-    const loadEl = document.getElementById('mgmt-generic-load');
-    const engineEl = document.getElementById('mgmt-generic-engine');
-
-    const distroName = stats.os?.distro || stats.system?.os || stats.system?.distro || 'Linux';
-    if (osNameEl) osNameEl.textContent = distroName;
-    if (hostEl) hostEl.textContent = stats.system?.hostname || stats.name || t('mgx.host', 'Kiboto Host');
-    if (uptimeEl) uptimeEl.textContent = stats.system?.uptime_str || stats.os?.uptime || t('mgx.active', 'Active');
-    if (cpuEl) {
-      const cpuName = stats.cpu?.model ? stats.cpu.model.replace(/\(R\)|\(TM\)/g, '').trim() : 'x86_64 / ARM64';
-      const coresStr = stats.cpu?.cores ? ` (${stats.cpu.cores}T)` : '';
-      cpuEl.textContent = `${cpuName}${coresStr}`;
-    }
-    if (loadEl) {
-      if (Array.isArray(stats.cpu?.load_avg)) {
-        // in the reader's number format; a dot between, since "0,52, 0,48" would read wrong in German
-        loadEl.textContent = stats.cpu.load_avg.map((v) => formatFixed(Number(v), 2)).join(' · ');
-      } else {
-        loadEl.textContent = stats.cpu?.load_avg || t('mgmt.load_normal', 'Normal');
-      }
-    }
-    if (engineEl) engineEl.textContent = stats.storage?.engine || 'Btrfs / OpenZFS';
+    setText('mgmt-generic-os', stats.os?.distro || stats.system?.os || stats.system?.distro || 'Linux');
+    setText('mgmt-generic-engine', stats.storage?.engine || 'Btrfs / OpenZFS');
   }
 
-  // Option D: Motherboard & DMI
-  const boardEl = document.getElementById('mgmt-board-name');
-  const biosEl = document.getElementById('mgmt-bios-ver');
-  const govEl = document.getElementById('mgmt-cpu-gov');
-  const cpuCoresEl = document.getElementById('mgmt-cpu-cores');
-
+  setText('mgmt-generic-cpu', processorWords(stats.cpu));
+  if (stats.cpu?.governor) setText('mgmt-cpu-gov', powerModeWord(stats.cpu.governor));
   if (stats.motherboard) {
-    if (boardEl) boardEl.textContent = `${stats.motherboard.vendor || ''} ${stats.motherboard.board || 'Standard PC'}`.trim();
-    if (biosEl) {
-      const bDate = stats.motherboard.bios_date ? ` (${stats.motherboard.bios_date})` : '';
-      biosEl.textContent = `${stats.motherboard.bios_version || 'N/A'}${bDate}`;
-    }
+    setText('mgmt-board-name', `${stats.motherboard.vendor || ''} ${stats.motherboard.board || 'Standard PC'}`.trim());
+    const bDate = stats.motherboard.bios_date ? ` (${stats.motherboard.bios_date})` : '';
+    setText('mgmt-bios-ver', `${stats.motherboard.bios_version || '—'}${bDate}`);
   }
-  if (govEl) govEl.textContent = stats.cpu?.governor || 'performance';
-  if (cpuCoresEl) {
-    const cores = stats.cpu?.cores || 1;
-    cpuCoresEl.textContent = t('mgx.cores', '{count, plural, one {# Thread / Core} other {# Threads / Cores}}', { count: cores });
-  }
-
-  // Option D: GPU Hardware Transcode Engine
-  if (stats.gpu) {
-    const gpuBadge = document.getElementById('mgmt-gpu-status-badge');
-    const gpuNameEl = document.getElementById('mgmt-gpu-name');
-    const gpuDriverEl = document.getElementById('mgmt-gpu-driver');
-    const gpuNodeEl = document.getElementById('mgmt-gpu-node');
-    const gpuAccelEl = document.getElementById('mgmt-gpu-accel');
-    const gpuCodecsEl = document.getElementById('mgmt-gpu-codecs-list');
-
-    if (gpuBadge) {
-      if (stats.gpu.ready) {
-        gpuBadge.textContent = t('mgx.gpu_active', 'ACCELERATION ACTIVE');
-        gpuBadge.style.color = 'var(--ok2)';
-        gpuBadge.style.borderColor = 'rgba(51,205,184,0.35)';
-      } else {
-        gpuBadge.textContent = t('mgx.gpu_software', 'SOFTWARE ONLY');
-        gpuBadge.style.color = 'var(--muted)';
-        gpuBadge.style.borderColor = 'rgba(255,255,255,0.1)';
-      }
-    }
-    if (gpuNameEl) gpuNameEl.textContent = stats.gpu.model || t('mgx.no_gpu', 'No GPU Detected');
-    if (gpuDriverEl) gpuDriverEl.textContent = t('mgx.driver', 'Driver: {name}', { name: stats.gpu.driver || t('mgx.none', 'none') });
-    if (gpuNodeEl) {
-      gpuNodeEl.textContent = stats.gpu.render_node || t('mgx.no_render_node', 'No render node');
-      gpuNodeEl.style.display = stats.gpu.render_node ? 'inline-block' : 'none';
-    }
-    if (gpuAccelEl) gpuAccelEl.textContent = stats.gpu.acceleration || t('mgx.cpu_only', 'Software CPU Only');
-    if (gpuCodecsEl && Array.isArray(stats.gpu.codecs)) {
-      if (stats.gpu.codecs.length > 0) {
-        gpuCodecsEl.innerHTML = stats.gpu.codecs.map(c => `<span class="gpu-codec-tag">${escapeHtml(c)}</span>`).join('');
-      } else {
-        gpuCodecsEl.innerHTML = `<span class="gpu-codec-tag mgx-muted-box">${t('mgx.cpu_decode', 'CPU Decode Only')}</span>`;
-      }
-    }
-  }
+  if (stats.gpu) setText('mgmt-gpu-line', graphicsWords(stats.gpu));
 
   // NPU Neural Acceleration Engine
   if (stats.npu) {

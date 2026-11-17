@@ -41,7 +41,7 @@ describe('Mission Control Navigation Restructure & Hardware Agnosticism', () => 
         <div id="mgmt-sec-hardware" class="mgmt-detail-card" style="display:none;">
           <div id="mgmt-pane-unraid" class="mgmt-tab-pane" style="display:block;">
             <span id="unraid-profile-current-pill">ACTIVE: AUTO DYNAMIC</span>
-            <div class="unraid-details-grid" style="display:none;">
+            <div class="unraid-details-grid" data-host="unraid" style="display:none;">
               <span id="mgmt-unraid-state">-</span>
               <span id="mgmt-unraid-server">-</span>
               <span id="mgmt-unraid-version">-</span>
@@ -49,7 +49,7 @@ describe('Mission Control Navigation Restructure & Hardware Agnosticism', () => 
               <span id="mgmt-unraid-parity">-</span>
               <span id="mgmt-unraid-mover">-</span>
             </div>
-            <div class="generic-details-grid" style="display:none;">
+            <div class="generic-details-grid" data-host="generic" style="display:none;">
               <span id="mgmt-generic-os">-</span>
               <span id="mgmt-generic-host">-</span>
               <span id="mgmt-generic-uptime">-</span>
@@ -165,12 +165,11 @@ describe('Mission Control Navigation Restructure & Hardware Agnosticism', () => 
     const unraidGrid = document.querySelector('.unraid-details-grid');
     const genericGrid = document.querySelector('.generic-details-grid');
     const stateEl = document.getElementById('mgmt-unraid-state');
-    const srvEl = document.getElementById('mgmt-unraid-server');
 
-    expect(unraidGrid.style.display).toBe('grid');
+    // Hardware 3: the rows for the host Kiboto runs on show; the server's name is on About
+    expect(unraidGrid.style.display).toBe('');
     expect(genericGrid.style.display).toBe('none');
     expect(stateEl.textContent).toBe('STARTED');
-    expect(srvEl.textContent).toBe('Tower (D6U)');
   });
 
   it('renders Generic Linux grid when running on non-Unraid host (OS & Hardware Agnostic)', () => {
@@ -187,15 +186,12 @@ describe('Mission Control Navigation Restructure & Hardware Agnosticism', () => 
     const unraidGrid = document.querySelector('.unraid-details-grid');
     const genericGrid = document.querySelector('.generic-details-grid');
     const osEl = document.getElementById('mgmt-generic-os');
-    const hostEl = document.getElementById('mgmt-generic-host');
-    const uptimeEl = document.getElementById('mgmt-generic-uptime');
     const engineEl = document.getElementById('mgmt-generic-engine');
 
+    // host name and uptime are About's own rows (fetchAndRenderSystemAbout)
     expect(unraidGrid.style.display).toBe('none');
-    expect(genericGrid.style.display).toBe('grid');
+    expect(genericGrid.style.display).toBe('');
     expect(osEl.textContent).toBe('Ubuntu 24.04 LTS');
-    expect(hostEl.textContent).toBe('zettnas-homelab');
-    expect(uptimeEl.textContent).toBe('14 days');
     expect(engineEl.textContent).toBe('Btrfs Native Subvolumes');
   });
 

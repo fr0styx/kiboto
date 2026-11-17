@@ -398,6 +398,10 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Weather asks where you are**: until you choose a place (or pick "Find it for me"), the weather card asks for one
   instead of showing another city's weather.
 
+- **Hardware facts where you look for them**: processor, mainboard, BIOS and graphics are under Settings → About; the
+  array and parity under Storage → Pools; the AI chip under Kib → Advanced; the load under Activity → Right now. The
+  Hardware page keeps the cooling choice and points to each.
+
 #### Fixes
 
 - **The File Explorer's details panel no longer hides file names**: it lies over the list instead of

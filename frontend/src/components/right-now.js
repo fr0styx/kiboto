@@ -103,6 +103,13 @@ function jobsBlock(jobs) {
   return box;
 }
 
+/** "Load (1, 5, 15 min): 0.52 · 0.48 · 0.40" in the reader's numbers; moved from Hardware (Hardware 3). */
+export function loadLine(stats) {
+  const l = stats && stats.cpu && stats.cpu.load_avg;
+  if (!Array.isArray(l) || !l.length) return '';
+  return t('now.load', 'Load (1, 5, 15 min): {load}', { load: l.map((v) => formatFixed(Number(v) || 0, 2)).join(' · ') });
+}
+
 export function renderRightNow(mount = document.getElementById('right-now'), stats = state.latestStats, jobs = _jobs) {
   if (!mount) return false;
   const head = el('p', 'right-now-line', rightNowSentences(stats).join(' '));
@@ -121,6 +128,8 @@ export function renderRightNow(mount = document.getElementById('right-now'), sta
     }
     parts.push(list);
   }
+  const load = loadLine(stats);
+  if (load) parts.push(el('p', 'right-now-load', load));
   mount.replaceChildren(...parts);
   mount.hidden = false;
   return true;

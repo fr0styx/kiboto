@@ -231,7 +231,7 @@
   "buttons": 0,
   "globals": 4,
   "styles": 4,
-  "templates": 6
+  "templates": 5
  },
  "frontend/src/components/management/ai.js": {
   "buttons": 0,
@@ -608,7 +608,7 @@
  "frontend/src/windows/management-window.html": {
   "buttons": 6,
   "globals": 0,
-  "styles": 457,
+  "styles": 455,
   "templates": 0
  }
 }
