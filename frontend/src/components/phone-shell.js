@@ -90,13 +90,14 @@ function adoptWidgets(on) {
 }
 
 export function statusHtml() {
-  const cell = (key, label) =>
-    `<div class="phone-stat"><span class="phone-stat-label">${escapeHtml(label)}</span><span class="phone-stat-val" data-phone-stat="${key}">–</span></div>`;
+  // data-i18n: built before the language has loaded, the labels still follow it
+  const cell = (key, label, i18n) =>
+    `<div class="phone-stat"><span class="phone-stat-label" data-i18n="${i18n}">${escapeHtml(label)}</span><span class="phone-stat-val" data-phone-stat="${key}">–</span></div>`;
   return `<section class="phone-status" aria-label="${escapeHtml(t('phone.status', 'System status'))}">${[
-    cell('cpu', t('phone.cpu', 'CPU')),
-    cell('ram', t('phone.ram', 'Memory')),
-    cell('storage', t('mgmt.sidebar_storage', 'Storage')),
-    cell('net', t('phone.network_now', 'Network')),
+    cell('cpu', t('phone.cpu', 'CPU'), 'phone.cpu'),
+    cell('ram', t('phone.ram', 'Memory'), 'phone.ram'),
+    cell('storage', t('mgmt.sidebar_storage', 'Storage'), 'mgmt.sidebar_storage'),
+    cell('net', t('phone.network_now', 'Network'), 'phone.network_now'),
   ].join('')}</section>`;
 }
 

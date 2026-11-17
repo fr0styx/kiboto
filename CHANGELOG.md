@@ -514,6 +514,9 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **The desktop in your language**: the storage card says Running, Stopped or Online instead of Unraid's code words,
   the copy progress starts in your language, and widget titles fit without being cut off.
 
+- **Phone home screen in your language**: the system status labels and the weather card no longer stay in English
+  when the page opens.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

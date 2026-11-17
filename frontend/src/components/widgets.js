@@ -1322,8 +1322,13 @@ export function getWeatherInfo(code) {
   return { icon: '⛅', desc: t('weather.partly_cloudy', 'Partly Cloudy') };
 }
 
-function renderWeatherUI(weatherData) {
+let _lastWeather = null;
+// drawn from the cache before the language had loaded: draw it again in the reader's words
+window.addEventListener('kiboto:lang-changed', () => { if (_lastWeather) renderWeatherUI(_lastWeather); });
+
+export function renderWeatherUI(weatherData) {
   if (!weatherData) return;
+  _lastWeather = weatherData;
   const weatherWidget = document.getElementById('widget-weather');
   if (!weatherWidget) return;
 
