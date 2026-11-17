@@ -446,6 +446,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   and "Stop Mac backups" (the backups already there stay), "Make a folder for Mac backups", and the three steps on the
   Mac. Where Unraid or TrueNAS runs the shares, it says the host makes these folders and keeps the steps.
 
+#### Changes
+
+- **"Use this disk for backups?"**: plugging in a large empty USB disk (64 GB or more, no backups, no camera folder)
+  offers to keep a copy of this NAS on it; "Set it up" opens "Protect this NAS" with that disk already chosen.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

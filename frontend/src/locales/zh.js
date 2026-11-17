@@ -8167,5 +8167,8 @@ export default {
   "tm.saved": "Mac 现在可以备份到 {name}，最多 {gb} GB。",
   "tm.stopped": "Mac 不再备份到 {name}。已有的备份会保留。",
   "tm.size_title": "{name} 的大小限制",
-  "tm.size_ask": "Mac 备份最多可以占用多少 GB？"
+  "tm.size_ask": "Mac 备份最多可以占用多少 GB？",
+  "usb.setup_title": "将此磁盘用于备份？",
+  "usb.setup_msg": "{name} 上还没有备份。要在上面保存这台 NAS 的副本，并每晚更新吗？",
+  "usb.setup_ok": "设置"
 };

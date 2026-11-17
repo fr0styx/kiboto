@@ -15,10 +15,34 @@ export function offersFor(disk) {
   const out = [];
   if ((disk.backups || []).length) out.push('backup');
   if (disk.media) out.push('import');
+  if (disk.setup) out.push('setup'); // Backup 5: an empty disk, used for backups in one step
   return out;
 }
 
+/** Backup 5: "Use this disk for backups?" opens "Protect this NAS" with the disk already chosen. */
+function askSetup(disk, next) {
+  const name = disk.name || disk.path;
+  showConfirmToast(
+    t('usb.setup_title', 'Use this disk for backups?'),
+    t('usb.setup_msg', '{name} has no backups yet. Keep a copy of this NAS on it, brought up to date every night?', { name }),
+    async () => {
+      const m = await import('./protect-nas.js');
+      await m.openProtectGuide(`usb|${disk.path}`);
+      next();
+    },
+    async () => {
+      await api.post('/api/usb/dismiss').catch(() => {});
+      next();
+    },
+    { isMedia: true, okText: t('usb.setup_ok', 'Set it up'), cancelText: t('media.btn_dismiss', 'Dismiss') },
+  );
+}
+
 function ask(disk, kind, rest) {
+  if (kind === 'setup') {
+    askSetup(disk, () => rest.length && ask(disk, rest[0], rest.slice(1)));
+    return;
+  }
   const name = escapeHtml(disk.name || disk.path);
   const backups = (disk.backups || []).map((b) => escapeHtml(b.name || b.id)).join(', ');
   const title = kind === 'backup' ? t('usb.backup_title', 'Back up the NAS to this disk?') : t('usb.import_title', 'Import photos from this disk?');

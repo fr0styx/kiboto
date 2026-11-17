@@ -112,15 +112,27 @@ def start_backups(path: str, owner: str | None = None) -> list[str]:
     return started
 
 
+# Backup 5: a large empty disk is offered for backups in one step; small sticks (installers) are not
+SETUP_MIN_BYTES = 64 * 1024**3
+
+
 def _offer(disk: dict[str, Any], z_state: Any, notify: Any) -> None:
     what = []
     if disk["backups"]:
         what.append("back up the NAS to it")
     if disk["media"]:
         what.append("import its photos")
+    setup = (
+        not disk["backups"]
+        and not disk["media"]
+        and not disk.get("started")
+        and int(disk.get("total_bytes") or 0) >= SETUP_MIN_BYTES
+    )
+    if setup:
+        what.append("keep backups of the NAS on it")
     if not what:
         return
-    z_state.pending_usb = {**disk, "ts": time.time()}
+    z_state.pending_usb = {**disk, "setup": setup, "ts": time.time()}
     z_state.ui_wake.set()
     notify(
         {
@@ -164,7 +176,7 @@ def tick(z_state: Any = None, notify: Any = None) -> list[str]:
                     "level": "info",
                 }
             )
-            disk = {**disk, "backups": []}  # started; only the photo import is left to offer
+            disk = {**disk, "backups": [], "started": True}  # started; only the photo import is left to offer
         if cfg["offer"]:
             _offer(disk, z_state, notify)
     return new

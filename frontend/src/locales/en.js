@@ -8167,5 +8167,8 @@ export default {
   "tm.saved": "Macs can now back up to {name}, up to {gb} GB.",
   "tm.stopped": "Macs no longer back up to {name}. The backups already there stay.",
   "tm.size_title": "Size limit for {name}",
-  "tm.size_ask": "How many GB may the Mac backups take?"
+  "tm.size_ask": "How many GB may the Mac backups take?",
+  "usb.setup_title": "Use this disk for backups?",
+  "usb.setup_msg": "{name} has no backups yet. Keep a copy of this NAS on it, brought up to date every night?",
+  "usb.setup_ok": "Set it up"
 };

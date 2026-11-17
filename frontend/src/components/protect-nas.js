@@ -149,7 +149,7 @@ export function closeGuide(host = document.getElementById('protect-nas')) {
   host.style.display = 'none';
 }
 
-export async function openProtectGuide() {
+export async function openProtectGuide(preselect = '') {
   const host = guideWindow();
   let names = {};
   const body = host.querySelector('.smart-modal-body');
@@ -167,6 +167,9 @@ export async function openProtectGuide() {
     const peers = (fleet?.peers || []).map((p) => ({ value: p.id, label: p.name || t('protect.kiboto', 'Another Kiboto') }));
     names = Object.fromEntries(peers.map((p) => [p.value, p.label]));
     body.innerHTML = guideHtml({ ...dest, kiboto: peers }, shares);
+    // a disk just plugged in comes chosen (Backup 5); a value that is not offered chooses nothing
+    const chosen = preselect ? /** @type {HTMLInputElement | undefined} */ ([...body.querySelectorAll('input[name="target"]')].find((r) => /** @type {HTMLInputElement} */ (r).value === preselect)) : undefined;
+    if (chosen) chosen.checked = true;
   } catch (err) {
     body.textContent = err.message || String(err);
     return host;

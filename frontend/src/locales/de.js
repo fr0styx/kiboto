@@ -8167,5 +8167,8 @@ export default {
   "tm.saved": "Macs können jetzt in {name} sichern, bis zu {gb} GB.",
   "tm.stopped": "Macs sichern nicht mehr in {name}. Vorhandene Sicherungen bleiben.",
   "tm.size_title": "Größenbegrenzung für {name}",
-  "tm.size_ask": "Wie viele GB dürfen die Mac-Sicherungen belegen?"
+  "tm.size_ask": "Wie viele GB dürfen die Mac-Sicherungen belegen?",
+  "usb.setup_title": "Diesen Datenträger für Sicherungen nutzen?",
+  "usb.setup_msg": "{name} enthält noch keine Sicherungen. Eine Kopie dieses NAS darauf halten und jede Nacht aktualisieren?",
+  "usb.setup_ok": "Einrichten"
 };

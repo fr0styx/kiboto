@@ -95,6 +95,7 @@ def test_a_new_disk_is_offered_once(usb, monkeypatch):
 def test_a_plain_disk_is_not_offered_and_offers_can_be_off(usb, monkeypatch):
     root, mounts = usb
     monkeypatch.setattr(ob, "list_repos", lambda: [])
+    monkeypatch.setattr(usb_copy, "SETUP_MIN_BYTES", 10**18)  # a small stick, such as an installer
     sent, state = [], _State()
     usb_copy.tick(state, sent.append)
     plug(root, mounts, "empty")
@@ -217,3 +218,32 @@ def test_api(client, auth_headers, usb, monkeypatch):
     monkeypatch.setattr(ob, "start_backup", lambda rid, owner=None: None)
     assert client.post("/api/usb/backup", json={"path": disk}, headers=auth_headers).json()["backups"] == ["u"]
     assert client.post("/api/usb/dismiss", headers=auth_headers).json()["status"] == "dismissed"
+
+
+def test_a_large_empty_disk_is_offered_for_backups(usb, monkeypatch):
+    """Backup 5: "Use this disk for backups?" in one step."""
+    root, mounts = usb
+    monkeypatch.setattr(ob, "list_repos", lambda: [])
+    monkeypatch.setattr(usb_copy, "SETUP_MIN_BYTES", 0)
+    sent, state = [], _State()
+    usb_copy.tick(state, sent.append)
+    plug(root, mounts, "new-disk")
+    usb_copy.tick(state, sent.append)
+    assert state.pending_usb["setup"] is True and "keep backups of the NAS on it" in sent[0]["message"]
+    state.pending_usb = None
+    plug(root, mounts, "camera", dcim=True)  # a camera disk is offered for its photos, not for backups
+    usb_copy.tick(state, sent.append)
+    assert state.pending_usb["setup"] is False
+
+
+def test_a_disk_whose_backups_just_started_is_not_offered_again(usb, monkeypatch):
+    root, mounts = usb
+    monkeypatch.setattr(ob, "list_repos", lambda: [{"id": "b1", "name": "B1", "location": f"{root}/kept"}])
+    monkeypatch.setattr(ob, "start_backup", lambda rid, owner=None: None)
+    monkeypatch.setattr(usb_copy, "SETUP_MIN_BYTES", 0)
+    usb_copy.save_settings(auto_backup=True, offer=True)
+    sent, state = [], _State()
+    usb_copy.tick(state, sent.append)
+    plug(root, mounts, "kept")
+    usb_copy.tick(state, sent.append)
+    assert state.pending_usb is None  # backups started, nothing left to offer

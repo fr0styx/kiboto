@@ -8167,5 +8167,8 @@ export default {
   "tm.saved": "Los Mac ya pueden hacer copias en {name}, hasta {gb} GB.",
   "tm.stopped": "Los Mac ya no hacen copias en {name}. Las copias que ya hay se quedan.",
   "tm.size_title": "Límite de tamaño de {name}",
-  "tm.size_ask": "¿Cuántos GB pueden ocupar las copias de Mac?"
+  "tm.size_ask": "¿Cuántos GB pueden ocupar las copias de Mac?",
+  "usb.setup_title": "¿Usar este disco para copias de seguridad?",
+  "usb.setup_msg": "{name} aún no tiene copias. ¿Guardar en él una copia de este NAS, actualizada cada noche?",
+  "usb.setup_ok": "Configurar"
 };

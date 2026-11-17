@@ -8167,5 +8167,8 @@ export default {
   "tm.saved": "Les Mac peuvent maintenant sauvegarder dans {name}, jusqu’à {gb} Go.",
   "tm.stopped": "Les Mac ne sauvegardent plus dans {name}. Les sauvegardes déjà présentes restent.",
   "tm.size_title": "Limite de taille pour {name}",
-  "tm.size_ask": "Combien de Go les sauvegardes de Mac peuvent-elles occuper ?"
+  "tm.size_ask": "Combien de Go les sauvegardes de Mac peuvent-elles occuper ?",
+  "usb.setup_title": "Utiliser ce disque pour les sauvegardes ?",
+  "usb.setup_msg": "{name} ne contient encore aucune sauvegarde. Y garder une copie de ce NAS, mise à jour chaque nuit ?",
+  "usb.setup_ok": "Configurer"
 };
