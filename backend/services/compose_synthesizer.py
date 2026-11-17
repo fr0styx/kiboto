@@ -190,7 +190,19 @@ def synthesize_compose_spec(inspect_data: dict[str, Any], mask_secrets: bool = F
     if privileged:
         spec["privileged"] = True
 
+    # what the container runs: without these a restored app started its image's defaults instead
+    # (found restoring a backup on a real Docker engine)
+    for key, field in (("entrypoint", "Entrypoint"), ("command", "Cmd")):
+        value = config.get(field)
+        if isinstance(value, list) and value:
+            spec[key] = [mask_inline_secrets(str(v)) if mask_secrets else str(v) for v in value]
+        elif isinstance(value, str) and value:
+            spec[key] = mask_inline_secrets(value) if mask_secrets else value
+
     return service_name, spec
+
+
+YAML_SPECIAL = set(":= #\"'{}[],&*!|>%@`")
 
 
 def format_compose_yaml(service_name: str, spec: dict[str, Any]) -> str:
@@ -215,10 +227,10 @@ def format_compose_yaml(service_name: str, spec: dict[str, Any]) -> str:
         elif isinstance(val, list):
             lines.append(f"    {key}:")
             for item in val:
-                # Wrap item in quotes if it contains colons or special chars
+                # quoted as JSON (valid YAML) when it holds anything YAML could read otherwise
                 clean_item = str(item)
-                if any(c in clean_item for c in ":= #"):
-                    clean_item = f'"{clean_item}"'
+                if not clean_item or clean_item != clean_item.strip() or any(c in clean_item for c in YAML_SPECIAL):
+                    clean_item = json.dumps(clean_item, ensure_ascii=False)
                 lines.append(f"      - {clean_item}")
         elif isinstance(val, dict):
             lines.append(f"    {key}:")

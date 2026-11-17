@@ -593,6 +593,12 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   container that exited a moment later for a working one. A part must now keep running for a few seconds (or be
   healthy, where it has a health check). Found by trying the apply on a real Docker engine.
 
+#### Fixes
+
+- **App backups keep the app's command**: a restored app whose container runs its own command (not its image's
+  default) came back running the default instead. Backups now keep the command and entrypoint. Found by restoring
+  a backup on a real Docker engine.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 
