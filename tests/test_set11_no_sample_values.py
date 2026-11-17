@@ -35,7 +35,7 @@ PROMPTS = {
     "btn-sftp-toggle-service": "Start SFTP",
     "w-weather-desc": "Loading…",
     "setup-hw-chassis": "Detecting...",
-    "copy-toast-file": "Preparing files...",
+    "copy-toast-file": "Preparing files…",
     "copy-toast-time": "Estimating time...",
 }
 LONG_PROMPTS = {"ts-form-intro", "update-status-desc", "ai-llm-advisor-summary", "net-bond-mode-desc"}  # sentences

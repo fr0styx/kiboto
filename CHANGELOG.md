@@ -511,6 +511,9 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Desktop widgets in your language**: the network card says "All ports" instead of "combined", the weather card
   without a place says "Here" in your language, and the AI accelerator's state no longer runs past the card.
 
+- **The desktop in your language**: the storage card says Running, Stopped or Online instead of Unraid's code words,
+  the copy progress starts in your language, and widget titles fit without being cut off.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

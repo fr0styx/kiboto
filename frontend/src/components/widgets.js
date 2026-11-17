@@ -6,6 +6,17 @@ import { escapeHtml } from '../utils.js';
 import { t } from '../i18n.js';
 
 /** The network card's port: the server says "combined" when it adds up every physical port. */
+const POOL_STATES = {
+  STARTED: ['w.pool_running', 'Running'],
+  STOPPED: ['w.pool_stopped', 'Stopped'],
+  STANDALONE: ['w.pool_online', 'Online'], // not an Unraid array: the pool is simply there
+};
+/** The storage card's state: Unraid's array states in words; another state is shown as reported. */
+export function poolStateWord(state) {
+  const known = POOL_STATES[state || 'STANDALONE'];
+  return known ? t(known[0], known[1]) : state;
+}
+
 export const ifaceWord = (iface) => (iface === 'combined' ? t('w.net_all_ports', 'All ports') : iface);
 import { api, auth } from '../api.js';
 import { makeDraggable } from './dock.js';
@@ -2000,7 +2011,7 @@ export function initWidgets() {
       if (elVal) elVal.textContent = `${stats.storage.used} / ${stats.storage.total}`;
       if (elBar) elBar.style.width = `${Math.min(100, Math.max(0, stats.storage.pct || 0))}%`;
       if (elStatus && stats.unraid) {
-        elStatus.textContent = stats.unraid.state || 'ONLINE';
+        elStatus.textContent = poolStateWord(stats.unraid.state);
       }
     }
 
