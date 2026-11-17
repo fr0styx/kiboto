@@ -8349,4 +8349,7 @@ export default {
   "alert.offsite_failed.msg": "{repo}: {error}",
   "alert.replication_failed.title": "Kopie auf ein anderes NAS fehlgeschlagen: {name}",
   "alert.replication_failed.msg": "{error}",
+  "mch.sr_none": "Diagramm, {range}: keine Messwerte.",
+  "mch.sr_series": "{label}: von {min} bis {max}, im Schnitt {avg}",
+  "mch.sr_chart": "Diagramm, {range}. {series}.",
 };

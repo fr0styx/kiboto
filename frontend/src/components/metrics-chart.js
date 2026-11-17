@@ -141,6 +141,19 @@ function keepFresh() {
 }
 
 /** Stops reading the chart again (the page went away). */
+/** The chart in words for screen readers (Activity finding 25): each line's lowest, highest and average. */
+export function chartSummary(datasets, rangeText) {
+  const round = (x) => Math.round(x * 10) / 10;
+  const series = (datasets || []).map((ds) => {
+    const vals = (ds.data || []).filter((v) => v != null).map(Number).filter(Number.isFinite);
+    if (!vals.length) return '';
+    const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
+    return t('mch.sr_series', '{label}: from {min} to {max}, on average {avg}', { label: ds.label, min: round(Math.min(...vals)), max: round(Math.max(...vals)), avg: round(avg) });
+  }).filter(Boolean);
+  if (!series.length) return t('mch.sr_none', 'Chart, {range}: no readings.', { range: rangeText });
+  return t('mch.sr_chart', 'Chart, {range}. {series}.', { range: rangeText, series: series.join('; ') });
+}
+
 export function stopMetricsRefresh() {
   if (_refreshTimer) clearInterval(_refreshTimer);
   _refreshTimer = null;
@@ -426,6 +439,11 @@ export async function fetchAndRenderMetrics(skipFetch = false) {
         scales
       }
     });
+
+    // the chart in words for screen readers (Activity finding 25)
+    const rangeSel = /** @type {HTMLSelectElement | null} */ (document.getElementById('metrics-range-select'));
+    canvas.setAttribute('role', 'img');
+    canvas.setAttribute('aria-label', chartSummary(datasets, rangeSel?.selectedOptions?.[0]?.textContent?.trim() || _metricsRange));
 
     _zoomed = false;
     const resetBtn = document.getElementById('metrics-reset-zoom-btn');

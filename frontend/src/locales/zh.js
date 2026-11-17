@@ -8349,4 +8349,7 @@ export default {
   "alert.offsite_failed.msg": "{repo}：{error}",
   "alert.replication_failed.title": "复制到另一台 NAS 失败：{name}",
   "alert.replication_failed.msg": "{error}",
+  "mch.sr_none": "图表，{range}：没有读数。",
+  "mch.sr_series": "{label}：从 {min} 到 {max}，平均 {avg}",
+  "mch.sr_chart": "图表，{range}。{series}。",
 };

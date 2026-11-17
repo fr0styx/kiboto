@@ -567,6 +567,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   card imports, off-site backups, updates, malware and the ransomware guard were sent in English. They now follow the
   language set for alerts, like the rest.
 
+#### Changes
+
+- **The Activity chart for screen readers**: it is read out as each line's lowest, highest and average value over the
+  chosen time.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 
