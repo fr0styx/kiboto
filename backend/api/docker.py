@@ -652,11 +652,13 @@ async def post_docker_stack_create(
 ):
     """Adds your own app from a Compose file: refused when the name is taken, then applied like a
     stack (Apps decision 3 with 4b)."""
-    from backend.services.docker_stacks import new_stack_problem
+    from backend.errors import error_response, said
+    from backend.services.docker_stacks import new_stack_name_check
 
-    problem = await asyncio.to_thread(new_stack_problem, stack_name)
+    problem = await asyncio.to_thread(new_stack_name_check, stack_name)
     if problem:
-        raise HTTPException(status_code=409, detail=problem)
+        sentence, key, params = problem
+        return error_response(409, sentence, error="name_not_free", text=said(key, **params))
     return await post_docker_stack_apply(stack_name, req, request, principal)
 
 

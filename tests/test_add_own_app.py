@@ -34,7 +34,11 @@ def test_the_create_route(client, auth_headers, stacks, monkeypatch):
     body = {"compose_yaml": FILE, "env_content": ""}
     r = client.post("/api/docker/stacks/immich/create", json=body, headers=auth_headers)
     assert r.status_code == 409 and "exists already" in r.text
+    answer = r.json()
+    assert answer["error"] == "name_not_free" and answer["text"]["msg_key"] == "srv.own_app_name_taken"
+    assert answer["text"]["params"] == {"name": "immich"}
     monkeypatch.setattr(ds, "preview_stack_apply", lambda n, c, e=None: {"steps": [], "elevated": []})
     monkeypatch.setattr(ds, "start_stack_apply", lambda *a: {"status": "started", "job": "job:7", "steps": []})
     r = client.post("/api/docker/stacks/web/create", json=body, headers=auth_headers)
-    assert r.status_code == 200 and r.json()["job"] == "job:7"
+    assert r.status_code == 200, r.text
+    assert r.json()["job"] == "job:7"

@@ -433,6 +433,8 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Activity in your language**: the night switch-off, applying an app's Compose file and files received through a
   link now show in your language too.
 
+- **Add your own app**: when a name cannot be used, the reason now shows in your language.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

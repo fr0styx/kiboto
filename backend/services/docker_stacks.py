@@ -915,14 +915,33 @@ def app_details(stack_name: str) -> dict[str, Any]:
 NEW_STACK_NAME = re.compile(r"^[a-z0-9][a-z0-9_-]{0,62}$")
 
 
-def new_stack_problem(stack_name: str) -> str | None:
-    """Why a new app cannot take this name ("Add your own app", Apps decision 3), or None: the name
-    is a Compose project name, no stack or container has it, and no app file sits in its folder."""
+def new_stack_name_check(stack_name: str) -> tuple[str, str, dict[str, Any]] | None:
+    """Why a new app cannot take this name ("Add your own app", Apps decision 3), or None, as
+    (English sentence, srv.* key, values) so the page can show it in the reader's language: the
+    name is a Compose project name, no stack or container has it, and no app file sits in its folder."""
     if not NEW_STACK_NAME.fullmatch(stack_name or ""):
-        return "Use small letters, digits, hyphens and underscores, starting with a letter or digit."
+        return (
+            "Use small letters, digits, hyphens and underscores, starting with a letter or digit.",
+            "own_app_name_rule",
+            {},
+        )
     if any(s.get("name") == stack_name for s in list_all_stacks()):
-        return f"An app named {stack_name} exists already. Open it from Stacks to change it."
+        return (
+            f"An app named {stack_name} exists already. Open it from Stacks to change it.",
+            "own_app_name_taken",
+            {"name": stack_name},
+        )
     folder = f"/mnt/user/appdata/{stack_name}"
     if any(os.path.exists(os.path.join(folder, n)) for n in ("docker-compose.yml", "compose.yaml", "compose.yml")):
-        return f"{folder} already holds an app file. Choose another name, or remove that file first."
+        return (
+            f"{folder} already holds an app file. Choose another name, or remove that file first.",
+            "own_app_folder_has_file",
+            {"folder": folder},
+        )
     return None
+
+
+def new_stack_problem(stack_name: str) -> str | None:
+    """The English sentence of new_stack_name_check, or None."""
+    found = new_stack_name_check(stack_name)
+    return found[0] if found else None
