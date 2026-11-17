@@ -5497,7 +5497,7 @@ export default {
   "ql.wake_load": "Festplatte wecken und ganze Datei laden",
   "sa.default": "Standard",
   "sa.everyone_else": "Alle anderen, auf Freigaben ohne eigene Einstellung:",
-  "sa.help": "Administratoren haben immer vollen Zugriff. Jeder hat immer seinen eigenen Home-Ordner. „inherit“ nimmt die Samba-Benutzerlisten der Freigabe, dann den Standard der Freigabe, dann die Einstellung oben.",
+  "sa.help": "Administratoren öffnen immer jeden Ordner. Jeder hat immer seinen eigenen Ordner. Diese Tabelle ist die eine Liste für das Netzwerk und Dateien: „inherit“ nimmt den Standard des Ordners, dann die Einstellung oben.",
   "sa.no_shares": "Keine Freigaben gefunden.",
   "sa.share": "Freigabe",
   "sa.title": "Zugriff auf Freigaben",

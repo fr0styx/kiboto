@@ -1255,21 +1255,8 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
         self._make_share_dir(full_path)
         quota = fs_quota.apply(full_path, quota_gb * 1024**3) if quota_gb > 0 else None  # FEAT-10
 
+        # Shares R4: the people chosen go into share access (the route does it), not into lists of the share's own
         user_perms = user_permissions or {}
-        valid_users = None
-        read_list = None
-        write_list = None
-
-        if user_perms:
-            rw_users = [u for u, p in user_perms.items() if p == "rw"]
-            ro_users = [u for u, p in user_perms.items() if p == "ro"]
-            all_allowed = rw_users + ro_users
-            if all_allowed:
-                valid_users = " ".join(all_allowed)
-            if ro_users:
-                read_list = " ".join(ro_users)
-            if rw_users:
-                write_list = " ".join(rw_users)
 
         if export_smb:
             try:
@@ -1284,9 +1271,6 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
                     guest_ok=(security == "public"),
                     browseable=True,
                     quota_gb=quota_gb if quota_gb > 0 else None,
-                    valid_users=valid_users,
-                    read_list=read_list,
-                    write_list=write_list,
                 )
                 engine.add_or_update_share(share_cfg)
             except ValueError:

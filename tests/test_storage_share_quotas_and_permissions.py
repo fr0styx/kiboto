@@ -62,10 +62,8 @@ def test_generic_linux_storage_adapter_creates_share_with_quotas_and_perms(mock_
     cfg: SambaShareConfig = mock_samba.add_or_update_share.call_args[0][0]
     assert cfg.name == "finance"
     assert cfg.quota_gb == 250
-    assert "cfo" in cfg.valid_users
-    assert "auditor" in cfg.valid_users
-    assert cfg.write_list == "cfo"
-    assert cfg.read_list == "auditor"
+    # Shares R4: the people chosen go into share access, the one list; the share has no lists of its own
+    assert cfg.valid_users is None and cfg.write_list is None and cfg.read_list is None
 
 
 def test_samba_engine_conf_includes_read_write_lists_and_quota(tmp_path):
@@ -172,16 +170,24 @@ def test_storage_share_create_endpoint_with_quota_and_matrix(mock_get_platform, 
     }
     mock_get_platform.return_value = mock_adapter
 
-    res = client.post(
-        "/api/storage/shares",
-        json={
-            "name": "documents",
-            "path": "/mnt/storage/documents",
-            "quota_gb": 150,
-            "user_permissions": {"john": "rw", "sarah": "ro"},
-        },
-        headers=auth_headers,
-    )
+    granted = MagicMock()
+    with (
+        patch("backend.services.share_access.grant_many", granted),
+        patch("backend.services.samba_engine.refresh_access") as refreshed,
+    ):
+        res = client.post(
+            "/api/storage/shares",
+            json={
+                "name": "documents",
+                "path": "/mnt/storage/documents",
+                "quota_gb": 150,
+                "user_permissions": {"john": "rw", "sarah": "ro", "tom": "deny"},
+            },
+            headers=auth_headers,
+        )
+    # Shares R4: the people chosen go into share access, the one list for the network and Files
+    granted.assert_called_once_with("documents", {"john": "write", "sarah": "read", "tom": "none"})
+    refreshed.assert_called_once()
     assert res.status_code == 200
     data = res.json()
     assert data["status"] == "created"

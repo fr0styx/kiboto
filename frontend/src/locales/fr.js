@@ -5497,7 +5497,7 @@ export default {
   "ql.wake_load": "Réveiller le disque et charger tout le fichier",
   "sa.default": "Par défaut",
   "sa.everyone_else": "Tous les autres, sur les partages sans réglage :",
-  "sa.help": "Les administrateurs ont toujours un accès complet. Chacun a toujours son dossier personnel. « inherit » utilise les listes d'utilisateurs Samba du partage, puis la valeur par défaut du partage, puis le réglage ci-dessus.",
+  "sa.help": "Les administrateurs ouvrent toujours tous les dossiers. Chacun a toujours son propre dossier. Ce tableau est la seule liste pour le réseau et Fichiers : « inherit » utilise la valeur par défaut du dossier, puis le réglage ci-dessus.",
   "sa.no_shares": "Aucun partage trouvé.",
   "sa.share": "Partage",
   "sa.title": "Accès aux partages",

@@ -69,7 +69,7 @@ export function buildShareAccessHtml(data, users) {
       <thead><tr class="sha-muted"><th class="sha-x-3">${t('sa.share', 'Share')}</th><th class="sha-x-4">${t('sa.default', 'Default')}</th>${head}</tr></thead>
       <tbody>${rows || `<tr><td class="sha-muted-2" colspan="${2 + userNames.length}">${t('sa.no_shares', 'No shares found.')}</td></tr>`}</tbody>
     </table></div>
-    <div class="sha-xs-muted">${t('sa.help', `Admins always have full access. Users always have their own home folder. "inherit" uses the share's Samba user lists, then the share default, then the setting above.`)}</div>`;
+    <div class="sha-xs-muted">${t('sa.help', `Administrators always open every folder. Everyone always has their own folder. This table is the one list for the network and Files: "inherit" uses the folder’s default, then the setting above.`)}</div>`;
 }
 
 export function collectShareAccess(root) {

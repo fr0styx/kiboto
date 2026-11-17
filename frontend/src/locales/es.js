@@ -5497,7 +5497,7 @@ export default {
   "ql.wake_load": "Despertar el disco y cargar el archivo completo",
   "sa.default": "Predeterminado",
   "sa.everyone_else": "Todos los demás, en carpetas compartidas sin ajuste:",
-  "sa.help": "Los administradores siempre tienen acceso completo. Cada persona tiene siempre su carpeta personal. «inherit» usa las listas de usuarios de Samba de la carpeta, luego su valor predeterminado y luego el ajuste de arriba.",
+  "sa.help": "Los administradores siempre abren todas las carpetas. Cada persona tiene siempre su propia carpeta. Esta tabla es la única lista para la red y Archivos: «inherit» usa el valor predeterminado de la carpeta y luego el ajuste de arriba.",
   "sa.no_shares": "No se encontraron carpetas compartidas.",
   "sa.share": "Carpeta compartida",
   "sa.title": "Acceso a carpetas compartidas",

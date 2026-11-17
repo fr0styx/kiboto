@@ -462,6 +462,9 @@ def put_share_access(req: ShareAccessUpdate) -> dict[str, Any]:
     return saved
 
 
+SHARE_LEVELS = {"rw": "write", "ro": "read", "deny": "none"}  # the create dialog's words, in share access
+
+
 @router.post("/shares", dependencies=[Depends(require_scope("shares:manage"))])
 def create_storage_share(req: StorageShareCreateRequest) -> dict[str, Any]:
     """
@@ -505,6 +508,13 @@ def create_storage_share(req: StorageShareCreateRequest) -> dict[str, Any]:
     except ValueError as e:
         # a folder outside the allowed places, a reserved name, a bad client list: say which (SET-01)
         raise HTTPException(status_code=400, detail=str(e)) from e
+    people = {u: SHARE_LEVELS[p] for u, p in (req.user_permissions or {}).items() if p in SHARE_LEVELS}
+    if people:
+        from backend.services.samba_engine import refresh_access
+        from backend.services.share_access import grant_many
+
+        grant_many(req.name, people)  # Shares R4: the one access list, for the network and Files
+        refresh_access()
     if req.timemachine:
         _make_time_machine(req.name, int(req.quota_gb or 0))
     try:

@@ -489,6 +489,13 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   answer, and nothing can be changed over SNMP. UDP 161 by default; map it when Kiboto runs in its own network. See
   docs/SNMP.md.
 
+#### Changes
+
+- **One access list for shared folders**: the table on Users (Who can open the shared folders) now decides alone, for
+  the network and Files alike. Lists a shared folder carried of its own are written into the table person by person
+  at the next start, so everyone keeps what they could do; the old lists are copied aside first. Lists that name a
+  group are left as they are. People chosen when a shared folder is made go into the table too.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

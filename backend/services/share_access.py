@@ -13,7 +13,8 @@ Levels live in data/share_access.json:
     {"default_level": "write",
      "shares": {"media": {"default": "read", "users": {"alice": "write"}}}}
 A user's level for a share is, in order: their entry under "users", the
-share's Samba user lists (valid users / read list / write list), the share's
+share's Samba user lists (valid users / read list / write list; since Shares R4
+only lists naming groups remain, the rest were folded into "users"), the share's
 "default", the default for their role ("role_defaults", e.g. kids and guests), then
 the global "default_level". A new install starts at "none" (B11, SEC-21); an install
 upgraded from an earlier version had "write" written down for it, so nothing changes
@@ -87,6 +88,16 @@ def grant(username: str, levels: dict[str, str]) -> dict[str, Any]:
     cfg = load_config()
     for share, level in levels.items():
         entry = cfg["shares"].setdefault(share, {"users": {}})
+        entry.setdefault("users", {})[username.lower()] = level
+    return save_config(cfg)
+
+
+def grant_many(share: str, people: dict[str, str]) -> dict[str, Any]:
+    """Gives these people these levels on one share ({username: "read" | "write"}), keeping the rest.
+    For the people chosen when a share is made (Shares R4)."""
+    cfg = load_config()
+    entry = cfg["shares"].setdefault(share, {"users": {}})
+    for username, level in people.items():
         entry.setdefault("users", {})[username.lower()] = level
     return save_config(cfg)
 
@@ -307,3 +318,79 @@ def level_for(username: str, real_path: str) -> str:
     if any(_inside(root, real) for root, lvl in grants if lvl != "none") and os.path.isdir(real):
         return "list"
     return "none"
+
+
+USER_NAME = re.compile(r"^[A-Za-z0-9._-]{1,64}$")
+
+
+def _before_fold_file() -> str:
+    return os.path.join(config.DATA_DIR, "share_lists_before_fold.json")
+
+
+def fold_share_lists(engine: Any = None, users: list[dict[str, Any]] | None = None) -> dict[str, Any]:
+    """Shares R4 (owner, 16 Nov 2026 evening): one access list. A share's own Samba lists (valid
+    users, read list, write list) are written into the share access table, person by person, and
+    then cleared, so the table on Users is the only place that decides, for the network and Files
+    alike. What each person could do stays the same: their own cell in the table already decided
+    Files and is kept; for everyone else the share's lists decide, as they did over the network.
+    Administrators open every folder anyway (and are in the network list Kiboto writes).
+
+    The old lists are copied to share_lists_before_fold.json first. Lists that name a group
+    (@group, +group, &group) cannot be said person by person and are left as they are.
+    Does nothing once no share has lists of its own, so it runs at every start."""
+    import time as _time
+
+    from backend.services.samba_engine import get_samba_engine, refresh_access
+
+    engine = engine or get_samba_engine()
+    if users is None:
+        from backend.users_db import list_users
+
+        users = list_users()
+    cfg = load_config()
+    folded: list[str] = []
+    kept: list[dict[str, str]] = []
+    before: dict[str, Any] = {}
+    changed: dict[str, dict[str, str]] = {}
+    for share in engine.list_shares():
+        raw = {f: (getattr(share, f) or "").strip() for f in ("valid_users", "read_list", "write_list")}
+        if not any(raw.values()):
+            continue
+        names = [n for v in raw.values() for n in re.split(r"[,\s]+", v) if n]
+        if any(n.startswith(("@", "+", "&")) for n in names):
+            kept.append({"name": share.name, "why": "groups"})
+            continue
+        samba = {
+            "valid": _split_users(raw["valid_users"]),
+            "read": _split_users(raw["read_list"]),
+            "write": _split_users(raw["write_list"]),
+            "read_only": bool(share.read_only),
+        }
+        entry = cfg["shares"].setdefault(share.name, {"users": {}})
+        cells = entry.setdefault("users", {})
+        for u in users:
+            name = str(u.get("username") or "").lower()
+            role = str(u.get("role_id") or "")
+            if (u.get("status") or "active") != "active" or not USER_NAME.match(name) or role in ADMIN_ROLES:
+                continue
+            if name in cells:
+                continue  # their own cell already decided Files: kept
+            level = _samba_level(samba, name)
+            if level and level != share_level(cfg, share.name, name, role):
+                cells[name] = level
+                changed.setdefault(share.name, {})[name] = level
+        before[share.name] = {**raw, "read_only": bool(share.read_only), "folded_at": _time.time()}
+        folded.append(share.name)
+    if not folded:
+        return {"folded": [], "kept": kept, "changed": {}}
+    kept_before = read_json(_before_fold_file(), {}) or {}
+    atomic_write_json(_before_fold_file(), {**kept_before, **before})  # the old lists, before anything changes
+    os.chmod(_before_fold_file(), 0o600)
+    save_config(cfg)
+    for share in engine.list_shares():
+        if share.name in folded:
+            share.valid_users = share.read_list = share.write_list = None
+            engine.add_or_update_share(share)
+    refresh_access()
+    logger.info("Shares R4: folded the own lists of %s into share access (%s)", ", ".join(folded), changed)
+    return {"folded": folded, "kept": kept, "changed": changed}

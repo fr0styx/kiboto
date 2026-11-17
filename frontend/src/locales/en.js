@@ -5497,7 +5497,7 @@ export default {
   "ql.wake_load": "Wake the disk and load the whole file",
   "sa.default": "Default",
   "sa.everyone_else": "Everyone else, on shares without a setting:",
-  "sa.help": "Admins always have full access. Users always have their own home folder. \"inherit\" uses the share's Samba user lists, then the share default, then the setting above.",
+  "sa.help": "Administrators always open every folder. Everyone always has their own folder. This table is the one list for the network and Files: \"inherit\" uses the folder’s default, then the setting above.",
   "sa.no_shares": "No shares found.",
   "sa.share": "Share",
   "sa.title": "Share access",

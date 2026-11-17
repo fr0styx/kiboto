@@ -590,7 +590,12 @@ def _refresh_share_access() -> None:
     """Network access follows the people and share access as they are now (SET-01): a change an
     older version made without rewriting the Samba settings takes effect at the next start."""
     from backend.services.samba_engine import refresh_access
+    from backend.services.share_access import fold_share_lists
 
+    try:
+        fold_share_lists()  # Shares R4: a share's own lists join the one table (old lists kept aside)
+    except (OSError, ValueError, KeyError, TypeError, RuntimeError) as e:
+        logger.warning("Shares R4: the share lists were not folded: %s", e)
     refresh_access()
 
 
