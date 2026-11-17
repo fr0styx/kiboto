@@ -191,7 +191,9 @@ jobs:
         run: npm ci
 
       - name: Known vulnerabilities in the npm dependencies (ARC-32)
-        run: npm audit --audit-level=high
+        # high and critical fail; a named exception (EXCEPTIONS in the script) covers an unfixed advisory
+        # in build tools only, and ends when the package publishes a fix
+        run: node frontend/scripts/npm-audit-gate.mjs
 
       - name: Run Frontend Tests (Vitest with Coverage)
         run: npm run test:coverage
