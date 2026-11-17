@@ -642,6 +642,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **App updates speak your language**: the Jobs centre and Activity now say in your language why an app update
   failed and whether its parts went back to their old versions.
 
+#### Fixes
+
+- **Activity in your language**: the night switch-off, applying an app's Compose file and files received through a
+  link now show in your language too.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

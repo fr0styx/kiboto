@@ -46,6 +46,7 @@ LINKS: tuple[tuple[str, str], ...] = (
     ("api_access_", "settings"),
     ("app_", "apps"),
     ("prune_", "apps"),
+    ("stack_", "apps"),
     ("backup_", "backup"),
     ("bond_", "network"),
     ("bridge_", "network"),
@@ -70,6 +71,7 @@ LINKS: tuple[tuple[str, str], ...] = (
     ("fan_", "hardware"),
     ("cpu_hot", "hardware"),
     ("fm_", "files"),
+    ("files_received", "files"),
     ("guard_", "settings"),
     ("malware_", "settings"),
     ("iso_", "vms"),
@@ -77,6 +79,7 @@ LINKS: tuple[tuple[str, str], ...] = (
     ("settings_", "settings"),
     ("update_", "settings"),
     ("ups_", "power"),
+    ("power_", "power"),
 )
 _COLUMNS = "id, ts, last_ts, level, kind, link, title, message, details, count"
 

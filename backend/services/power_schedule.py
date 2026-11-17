@@ -152,12 +152,23 @@ def tick(
 
 
 def _tell(what: str, **params: Any) -> None:
-    from backend.state import add_event
+    from backend.state import add_event, event_text
 
     if what == "off":
-        add_event("info", "Power schedule", f"Switching off for the night; waking at {params.get('wake_at')}.")
+        wake = str(params.get("wake_at"))
+        add_event(
+            "info",
+            "Power schedule",
+            f"Switching off for the night; waking at {wake}.",
+            event_text("power_night_off", wake=wake),
+        )
     else:
-        add_event("warning", "Power schedule", "Not switched off: the wake-up clock could not be set.")
+        add_event(
+            "warning",
+            "Power schedule",
+            "Not switched off: the wake-up clock could not be set.",
+            event_text("power_night_no_clock"),
+        )
 
 
 def loop_once(power_off: Callable[[], bool] | None = None) -> str:

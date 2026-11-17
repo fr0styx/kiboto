@@ -840,7 +840,7 @@ def start_stack_apply(
     from backend.services.app_catalog import pull_image_blocking
     from backend.services.container_mutator import docker_request
     from backend.services.jobs import job_manager
-    from backend.state import add_event
+    from backend.state import add_event, event_text
 
     inputs = _apply_inputs(stack_name, compose_yaml, env_content)
     preview = compose_apply.plan(inputs["built"], inputs["current"], _elevated)
@@ -877,12 +877,22 @@ def start_stack_apply(
         ) as e:  # the job must end and the file go back
             res = {"ok": False, "error": f"{e}"}
         if res["ok"]:
-            add_event("success", "Stack applied", f"{stack_name}: the file is applied.")
+            add_event(
+                "success",
+                "Stack applied",
+                f"{stack_name}: the file is applied.",
+                event_text("stack_applied", app=stack_name),
+            )
             job_manager.finish(job.id, "done")
             return
         if inputs["had_file"]:
             save_stack_config(stack_name, inputs["old_compose"], inputs["old_env"])  # the old file comes back
-        add_event("warning", "Stack not applied", f"{stack_name}: {res['error']}")
+        add_event(
+            "warning",
+            "Stack not applied",
+            f"{stack_name}: {res['error']}",
+            event_text("stack_not_applied", app=stack_name, error=res["error"]),
+        )
         job_manager.finish(job.id, "error", res["error"])
 
     threading.Thread(target=run, daemon=True, name=f"stack-apply-{stack_name}").start()

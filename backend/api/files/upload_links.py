@@ -154,10 +154,15 @@ async def receive(item: dict[str, Any], folder: str, request: Request) -> tuple[
 
 
 def note(item: dict[str, Any], name: str, size: int, ip: str) -> None:
-    from backend.state import add_event
+    from backend.state import add_event, event_text
 
     label = item.get("label") or os.path.basename(str(item.get("path") or ""))
-    add_event("info", "Files received", f"{name} ({size:,} bytes) arrived in {label} through a send-me-files link")
+    add_event(
+        "info",
+        "Files received",
+        f"{name} ({size:,} bytes) arrived in {label} through a send-me-files link",
+        event_text("files_received", name=name, size=f"{size:,}", folder=label),
+    )
     logger.info("[UploadLink] %s (%s bytes) into %s from %s", name, size, label, ip)
 
 
