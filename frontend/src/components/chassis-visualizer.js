@@ -844,8 +844,8 @@ function bindTopologyTreeEvents(tree, container) {
           try {
             exportBtn.disabled = true;
             setIconLabel(exportBtn, '⏳', t('ui.ejecting', 'Ejecting...'));
-            const res = await api.post(`/api/storage/pools/${encodeURIComponent(pid)}/export`, { force: false });
-            showToast(res.message || t('chassis.pool_ejected_unplug', 'Pool "{pool}" was ejected. You can unplug it now.', { pool: pid }), 'success');
+            await api.post(`/api/storage/pools/${encodeURIComponent(pid)}/export`, { force: false });
+            showToast(t('chassis.pool_ejected_unplug', 'Pool "{pool}" was ejected. You can unplug it now.', { pool: pid }), 'success');
             fetchAndRenderStorageTopology(container);
           } catch (err) {
             if (err.message && err.message.includes('force=true')) {
@@ -854,8 +854,8 @@ function bindTopologyTreeEvents(tree, container) {
                 `${err.message}\n\n${t('chassis.force_eject_q', 'Eject and unmount it anyway?')}`,
                 async () => {
                   try {
-                    const res = await api.post(`/api/storage/pools/${encodeURIComponent(pid)}/export`, { force: true });
-                    showToast(res.message || t('chassis.pool_ejected', 'Pool "{pool}" was ejected.', { pool: pid }), 'success');
+                    await api.post(`/api/storage/pools/${encodeURIComponent(pid)}/export`, { force: true });
+                    showToast(t('chassis.pool_ejected', 'Pool "{pool}" was ejected.', { pool: pid }), 'success');
                     fetchAndRenderStorageTopology(container);
                   } catch (e2) {
                     showToast(e2.message || t('chassis.force_eject_failed', 'Could not force-eject the pool'), 'error');
