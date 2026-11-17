@@ -212,14 +212,14 @@
 #mgmt-pane-ai-index .aix-xs-soft { margin: 4px 0 0 18px; padding: 0; color: var(--kb-text-soft); font-size: var(--kb-fs-xs); line-height: 1.6; }
 #mgmt-pane-ai-index .aix-row-box { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--kb-line-7); }
 #mgmt-pane-ai-index .aix-row-fs13-bold-strong { font-size: 13px; font-weight: 700; color: var(--kb-text-strong); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-#mgmt-pane-ai-index .aix-row-3 { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+#mgmt-pane-ai-index .aix-row-3 { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0; max-width: 100%; }
 #mgmt-pane-ai-index .aix-xs-bold-soft { font-size: var(--kb-fs-xs); font-weight: 700; color: var(--kb-text-soft); }
 #mgmt-pane-ai-index .aix-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin-bottom: 14px; }
 #mgmt-pane-ai-index .aix-row-4 { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
 #mgmt-pane-ai-index .aix-fs13-bold-strong { font-size: 13px; font-weight: 700; color: var(--kb-text-strong); margin-top: 6px; line-height: 1.4; }
 #mgmt-pane-ai-index .aix-row-xs-bold-accent { font-size: var(--kb-fs-xs); font-weight: 800; color: var(--kb-text-accent); text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; }
 #mgmt-pane-ai-index .aix-row-5 { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
-#mgmt-pane-ai-index .aix-row-6 { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+#mgmt-pane-ai-index .aix-row-6 { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; min-width: 0; max-width: 100%; } /* model filter pills wrap on a phone (17 Nov) */
 #mgmt-pane-ai-index .aix-row-xs-muted-box { display: flex; align-items: center; gap: 5px; font-size: var(--kb-fs-xs); color: var(--kb-text-muted); background: var(--kb-shade-30); padding: 2px 8px; border-radius: 6px; border: 1px solid var(--kb-line-8); }
 #mgmt-pane-ai-index .aix-row-7 { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 #mgmt-pane-ai-index .aix-xs-muted { font-size: var(--kb-fs-xs); color: var(--kb-text-muted); }
