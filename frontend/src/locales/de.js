@@ -8326,4 +8326,13 @@ export default {
   "pwa.rule_sum": "Bei {min} Min. oder {pct} % übrig, oder wenn die USV es meldet",
   "pwa.rule_sum_timer": ", oder nach {min, plural, one {# Minute} other {# Minuten}} am Akku",
   "pwc.admins_only": "Nur Administratoren können das ausführen.",
+  "own.name_needed": "Geben Sie der App einen Namen.",
+  "own.name_bad": "Verwenden Sie Kleinbuchstaben, Ziffern, Bindestriche und Unterstriche, beginnend mit einem Buchstaben oder einer Ziffer.",
+  "own.title": "Eigene App hinzufügen",
+  "own.help": "Fügen Sie eine Docker-Compose-Datei ein. Kiboto zeigt, was es anlegen wird, und fragt, bevor es etwas startet; kommt ein Teil nicht hoch, wird alles Gestartete wieder entfernt.",
+  "own.name": "Name",
+  "own.compose": "Compose-Datei",
+  "own.env": "Einstellungsdatei (.env, optional)",
+  "own.go": "Prüfen und hinzufügen",
+  "own.compose_needed": "Fügen Sie die Compose-Datei ein.",
 };

@@ -8326,4 +8326,13 @@ export default {
   "pwa.rule_sum": "剩余 {min} 分钟或 {pct} % 时，或 UPS 发出信号时",
   "pwa.rule_sum_timer": "，或在电池上运行 {min, plural, other {# 分钟}}后",
   "pwc.admins_only": "只有管理员可以运行这些。",
+  "own.name_needed": "给应用起个名字。",
+  "own.name_bad": "请使用小写字母、数字、连字符和下划线，并以字母或数字开头。",
+  "own.title": "添加你自己的应用",
+  "own.help": "粘贴一个 Docker Compose 文件。Kiboto 会显示将要创建的内容，并在启动任何东西前询问；如果某个部分没有启动，它启动的所有内容都会被移除。",
+  "own.name": "名称",
+  "own.compose": "Compose 文件",
+  "own.env": "设置文件（.env，可选）",
+  "own.go": "检查并添加",
+  "own.compose_needed": "请粘贴 Compose 文件。",
 };

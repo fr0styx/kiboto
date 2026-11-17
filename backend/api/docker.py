@@ -641,6 +641,26 @@ async def post_docker_stack_preview(stack_name: str, req: StackSaveRequest):
 
 
 @router.post(
+    "/docker/stacks/{stack_name}/create",
+    dependencies=[Depends(require_scope("containers:manage"))],
+)
+async def post_docker_stack_create(
+    stack_name: str,
+    req: StackSaveRequest,
+    request: Request,
+    principal: AuthenticatedPrincipal = Depends(get_current_principal),
+):
+    """Adds your own app from a Compose file: refused when the name is taken, then applied like a
+    stack (Apps decision 3 with 4b)."""
+    from backend.services.docker_stacks import new_stack_problem
+
+    problem = await asyncio.to_thread(new_stack_problem, stack_name)
+    if problem:
+        raise HTTPException(status_code=409, detail=problem)
+    return await post_docker_stack_apply(stack_name, req, request, principal)
+
+
+@router.post(
     "/docker/stacks/{stack_name}/apply",
     dependencies=[Depends(require_scope("containers:manage"))],
 )

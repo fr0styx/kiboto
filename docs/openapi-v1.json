@@ -50180,6 +50180,62 @@
     ]
    }
   },
+  "/api/v1/docker/stacks/{stack_name}/create": {
+   "post": {
+    "description": "Adds your own app from a Compose file: refused when the name is taken, then applied like a\nstack (Apps decision 3 with 4b).",
+    "operationId": "post_docker_stack_create_api_v1_docker_stacks__stack_name__create_post",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "stack_name",
+      "required": true,
+      "schema": {
+       "title": "Stack Name",
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/StackSaveRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "404": {
+      "$ref": "#/components/responses/NotFound"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Post Docker Stack Create",
+    "tags": [
+     "Docker Containers & Stacks"
+    ],
+    "x-required-scopes": [
+     "containers:manage"
+    ]
+   }
+  },
   "/api/v1/docker/stacks/{stack_name}/preview": {
    "post": {
     "description": "What applying the file would do (Apps decision 4b); nothing changes.",

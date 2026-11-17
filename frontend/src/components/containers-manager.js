@@ -217,6 +217,7 @@ export function initContainersManager() {
                 <button class="btn-pill-toggle cw-cat-btn" data-cat="smart_home">${t('cw.cat_smart_home', 'Smart home')}</button>
                 <button class="btn-pill-toggle cw-cat-btn" data-cat="downloaders">${t('cw.cat_downloaders', 'Downloaders')}</button>
               </div>
+              <button type="button" class="btn-pill-toggle cw-own-app" id="btn-cw-own-app">${t('own.title', 'Add your own app')}</button>
             </div>
             <div class="cwm-x-5" id="cw-catalog-grid" style="display: grid;">
               <div class="cwm-muted-center-2">${t('cw.loading_catalog', 'Loading the app catalog…')}</div>
@@ -434,6 +435,10 @@ export function initContainersManager() {
   });
 
   // Catalog Search Input
+  // Add your own app from a Compose file (Apps decision 3, with the safe apply of 4b)
+  document.getElementById('btn-cw-own-app')?.addEventListener('click', () => {
+    import('./add-own-app.js').then((m) => m.openAddOwnApp({ done: () => loadContainersData() })).catch(() => {});
+  });
   const catSearchInput = document.getElementById('cw-catalog-search-input');
   if (catSearchInput) {
     catSearchInput.addEventListener('input', (e) => {

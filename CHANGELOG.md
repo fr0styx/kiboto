@@ -556,6 +556,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Power for people who may only look**: they see every answer; the battery test, practice run, Restart and Shut
   down are not offered to them, instead of buttons that only said "no permission".
 
+#### New
+
+- **Add your own app**: in Apps → Get apps, paste a Docker Compose file and give it a name. Kiboto shows what it will
+  create and asks first; if a part does not come up, everything it started is removed again.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

@@ -8326,4 +8326,13 @@ export default {
   "pwa.rule_sum": "At {min} min or {pct} % left, or when the UPS says so",
   "pwa.rule_sum_timer": ", or after {min, plural, one {# minute} other {# minutes}} on battery",
   "pwc.admins_only": "Only administrators can run these.",
+  "own.name_needed": "Give the app a name.",
+  "own.name_bad": "Use small letters, digits, hyphens and underscores, starting with a letter or digit.",
+  "own.title": "Add your own app",
+  "own.help": "Paste a Docker Compose file. Kiboto shows what it will create and asks before it starts anything; if a part does not come up, everything it started is removed again.",
+  "own.name": "Name",
+  "own.compose": "Compose file",
+  "own.env": "Settings file (.env, optional)",
+  "own.go": "Check and add",
+  "own.compose_needed": "Paste the Compose file.",
 };

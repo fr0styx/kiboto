@@ -44,7 +44,7 @@ export async function followJob(id, wait = (ms) => new Promise((r) => setTimeout
  * @param {string} name
  * @param {string} compose
  * @param {string} env
- * @param {{ msg?: HTMLElement | null, done?: () => unknown, wait?: (ms: number) => Promise<unknown> }} [opts]
+ * @param {{ msg?: HTMLElement | null, done?: () => unknown, wait?: (ms: number) => Promise<unknown>, create?: boolean }} [opts]
  */
 export async function applyStack(name, compose, env, opts = {}) {
   const say = (text) => { if (opts.msg) opts.msg.textContent = text; };
@@ -70,7 +70,8 @@ export async function applyStack(name, compose, env, opts = {}) {
   let started;
   try {
     // the question above named the host access, so it is the confirmation the server asks for
-    started = await api.post(`/api/docker/stacks/${encodeURIComponent(name)}/apply`, { compose_yaml: compose, env_content: env }, { confirmed: true });
+    const step = opts.create ? 'create' : 'apply'; // a new app's name is checked again by the server
+    started = await api.post(`/api/docker/stacks/${encodeURIComponent(name)}/${step}`, { compose_yaml: compose, env_content: env }, { confirmed: true });
   } catch (err) {
     say(/** @type {Error} */ (err).message);
     showToast(/** @type {Error} */ (err).message, 'error');

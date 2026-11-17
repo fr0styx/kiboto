@@ -900,3 +900,19 @@ def app_details(stack_name: str) -> dict[str, Any]:
         raise ValueError("This app holds Kiboto itself, which is never removed or replaced from inside.")
     details["containers"] = topological_sort_stack_containers(parts, details.get("compose_yaml"), reverse=False)
     return details
+
+
+NEW_STACK_NAME = re.compile(r"^[a-z0-9][a-z0-9_-]{0,62}$")
+
+
+def new_stack_problem(stack_name: str) -> str | None:
+    """Why a new app cannot take this name ("Add your own app", Apps decision 3), or None: the name
+    is a Compose project name, no stack or container has it, and no app file sits in its folder."""
+    if not NEW_STACK_NAME.fullmatch(stack_name or ""):
+        return "Use small letters, digits, hyphens and underscores, starting with a letter or digit."
+    if any(s.get("name") == stack_name for s in list_all_stacks()):
+        return f"An app named {stack_name} exists already. Open it from Stacks to change it."
+    folder = f"/mnt/user/appdata/{stack_name}"
+    if any(os.path.exists(os.path.join(folder, n)) for n in ("docker-compose.yml", "compose.yaml", "compose.yml")):
+        return f"{folder} already holds an app file. Choose another name, or remove that file first."
+    return None

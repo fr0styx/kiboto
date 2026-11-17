@@ -38,7 +38,7 @@ request and response schemas.
 
 <!-- BEGIN generated endpoints: python scripts/api_reference.py --update -->
 
-748 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
+749 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
 
 ### AI Conversation History
 
@@ -231,6 +231,7 @@ request and response schemas.
 | `POST` | `/api/v1/docker/stacks/{stack_name}/action` | any of `containers:write`, `containers:manage` | Post Docker Stack Action |
 | `POST` | `/api/v1/docker/stacks/{stack_name}/apply` | `containers:manage` | Applies the file as a job; host-level access needs a confirmation (Apps decision 4b) |
 | `POST` | `/api/v1/docker/stacks/{stack_name}/backup` | any of `containers:manage`, `backup:write`, `backup:manage` | One archive of a whole app: its Compose file and the folders of all its parts (Apps decision 2) |
+| `POST` | `/api/v1/docker/stacks/{stack_name}/create` | `containers:manage` | Adds your own app from a Compose file: refused when the name is taken, then applied like a stack (Apps decision 3 with 4b) |
 | `POST` | `/api/v1/docker/stacks/{stack_name}/preview` | `containers:manage` | What applying the file would do (Apps decision 4b); nothing changes |
 | `POST` | `/api/v1/docker/stacks/{stack_name}/save` | `containers:manage` | Post Docker Stack Save |
 | `POST` | `/api/v1/docker/stacks/{stack_name}/update` | `containers:manage` | Updates every part of an app that has a newer image, as a job (Apps decision 2) |
