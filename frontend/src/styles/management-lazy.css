@@ -539,3 +539,11 @@
 /* Shares R1: the folder field and its picker on one line */
 .share-path-row { display: flex; gap: 8px; align-items: stretch; }
 .share-path-row > input { flex: 1 1 auto; min-width: 0; }
+/* Backups from a Mac (Shares R3) */
+.tm-section { margin-top: 18px; display: flex; flex-direction: column; gap: 8px; }
+.tm-h { margin: 0; font-size: var(--kb-fs); font-weight: 700; color: var(--kb-text-strong); }
+.tm-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.tm-list > li { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 10px; border: 1px solid var(--kb-line-7); border-radius: 8px; }
+.tm-list > li > button:first-of-type { margin-left: auto; }
+.tm-steps { margin: 0; padding-left: 20px; font-size: var(--kb-fs-xs); color: var(--kb-text-soft); display: flex; flex-direction: column; gap: 3px; }
+.tm-section [data-tm-make] { align-self: flex-start; }

@@ -38004,6 +38004,22 @@
     "title": "ThumbPrefetchRequest",
     "type": "object"
    },
+   "TimeMachineUpdate": {
+    "properties": {
+     "size_gb": {
+      "description": "The size limit in GB; 0 stops Mac backups to the folder",
+      "maximum": 1000000.0,
+      "minimum": 0.0,
+      "title": "Size Gb",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "size_gb"
+    ],
+    "title": "TimeMachineUpdate",
+    "type": "object"
+   },
    "ToggleWebdavResponse": {
     "additionalProperties": true,
     "description": "POST /webdav/toggle",
@@ -67133,6 +67149,66 @@
     ]
    }
   },
+  "/api/v1/storage/shares/{name}/time-machine": {
+   "put": {
+    "description": "Shares R3: changes a folder's Mac-backup size limit, or stops Mac backups to it, keeping every\nother setting of the share (the share route replaces the whole share).",
+    "operationId": "put_time_machine_api_v1_storage_shares__name__time_machine_put",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "name",
+      "required": true,
+      "schema": {
+       "title": "Name",
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/TimeMachineUpdate"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Put Time Machine Api V1 Storage Shares  Name  Time Machine Put",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "404": {
+      "$ref": "#/components/responses/NotFound"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Put Time Machine",
+    "tags": [
+     "Storage Subsystem & PAL"
+    ],
+    "x-required-scopes": [
+     "shares:manage"
+    ]
+   }
+  },
   "/api/v1/storage/smart/failure-predictions": {
    "get": {
     "description": "Scrutiny-style failure probability analytics and historical attribute velocity\nfor all discovered storage drives.",
@@ -67245,6 +67321,39 @@
     ],
     "x-required-scopes": [
      "storage:admin"
+    ]
+   }
+  },
+  "/api/v1/storage/time-machine": {
+   "get": {
+    "description": "Shares R3: the folders Macs back up to, with their size limits, where Kiboto runs the shares.",
+    "operationId": "get_time_machine_folders_api_v1_storage_time_machine_get",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Get Time Machine Folders Api V1 Storage Time Machine Get",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Get Time Machine Folders",
+    "tags": [
+     "Storage Subsystem & PAL"
+    ],
+    "x-required-scopes": [
+     "shares:manage"
     ]
    }
   },

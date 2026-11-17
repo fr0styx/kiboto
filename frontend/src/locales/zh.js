@@ -8152,5 +8152,20 @@ export default {
   "vmp.p_ha_2": "2 核，4 GB，使用其现成磁盘",
   "vmp.n_ha": "Home Assistant OS 以现成磁盘提供。如果“现成磁盘”中没有可选项，请先从 ISO 目录下载 Home Assistant OS。",
   "shr1.choose": "选择…",
-  "shr1.people_next": "接下来选择谁可以打开这个新文件夹。"
+  "shr1.people_next": "接下来选择谁可以打开这个新文件夹。",
+  "tm.step1": "在 Mac 上打开“系统设置”→“通用”→“时间机器”。",
+  "tm.step2": "选择“添加备份磁盘”，然后选择这台 NAS 上的文件夹。",
+  "tm.step3": "Mac 询问时，用你的 Kiboto 用户名和密码登录。",
+  "tm.host": "Mac 备份所用的文件夹由 {host} 创建。然后：",
+  "tm.none": "还没有文件夹接收 Mac 备份。",
+  "tm.make": "创建用于 Mac 备份的文件夹",
+  "tm.limit": "最多 {gb} GB",
+  "tm.no_limit": "没有大小限制",
+  "tm.change": "更改大小",
+  "tm.stop": "停止 Mac 备份",
+  "tm.title": "来自 Mac 的备份",
+  "tm.saved": "Mac 现在可以备份到 {name}，最多 {gb} GB。",
+  "tm.stopped": "Mac 不再备份到 {name}。已有的备份会保留。",
+  "tm.size_title": "{name} 的大小限制",
+  "tm.size_ask": "Mac 备份最多可以占用多少 GB？"
 };

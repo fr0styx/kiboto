@@ -8152,5 +8152,20 @@ export default {
   "vmp.p_ha_2": "2 cores, 4 GB, its ready-made disk",
   "vmp.n_ha": "Home Assistant OS comes as a ready-made disk. If \"Ready-made disk\" shows none, download Home Assistant OS from the ISO catalog first.",
   "shr1.choose": "Choose…",
-  "shr1.people_next": "Next you choose who may open the new folder."
+  "shr1.people_next": "Next you choose who may open the new folder.",
+  "tm.step1": "On the Mac, open System Settings → General → Time Machine.",
+  "tm.step2": "Choose \"Add Backup Disk\" and pick the folder from this NAS.",
+  "tm.step3": "Sign in with your Kiboto name and password when the Mac asks.",
+  "tm.host": "{host} makes the folders Macs back up to. Then:",
+  "tm.none": "No folder takes Mac backups yet.",
+  "tm.make": "Make a folder for Mac backups",
+  "tm.limit": "up to {gb} GB",
+  "tm.no_limit": "no size limit",
+  "tm.change": "Change the size",
+  "tm.stop": "Stop Mac backups",
+  "tm.title": "Backups from a Mac",
+  "tm.saved": "Macs can now back up to {name}, up to {gb} GB.",
+  "tm.stopped": "Macs no longer back up to {name}. The backups already there stay.",
+  "tm.size_title": "Size limit for {name}",
+  "tm.size_ask": "How many GB may the Mac backups take?"
 };

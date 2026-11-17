@@ -535,6 +535,52 @@ def _make_time_machine(name: str, size_gb: int) -> None:
     nas_name.refresh()  # a Time Machine share is announced to Macs (FEAT-09)
 
 
+class TimeMachineUpdate(BaseModel):
+    size_gb: int = Field(..., ge=0, le=1_000_000, description="The size limit in GB; 0 stops Mac backups to the folder")
+
+
+@router.get("/time-machine", dependencies=[Depends(require_scope("shares:manage"))])
+def get_time_machine_folders() -> dict[str, Any]:
+    """Shares R3: the folders Macs back up to, with their size limits, where Kiboto runs the shares."""
+    adapter = get_storage_platform()
+    if adapter.get_capabilities().is_observer_mode:
+        return {"managed": False, "folders": []}
+    from backend.services.samba_engine import get_samba_engine
+
+    folders = [
+        {"name": s.name, "size_gb": int(s.timemachine_quota_gb or 0)}
+        for s in get_samba_engine().list_shares()
+        if s.timemachine
+    ]
+    return {"managed": True, "folders": folders}
+
+
+@router.put("/shares/{name}/time-machine", dependencies=[Depends(require_scope("shares:manage"))])
+def put_time_machine(name: str, req: TimeMachineUpdate) -> dict[str, Any]:
+    """Shares R3: changes a folder's Mac-backup size limit, or stops Mac backups to it, keeping every
+    other setting of the share (the share route replaces the whole share)."""
+    from backend.services import nas_name
+    from backend.services.samba_engine import get_samba_engine
+
+    if get_storage_platform().get_capabilities().is_observer_mode:
+        raise HTTPException(status_code=403, detail="The host runs the shares here; change Time Machine there.")
+    engine = get_samba_engine()
+    share = engine.get_share(name)
+    if share is None:
+        raise HTTPException(status_code=404, detail=f"There is no shared folder {name}.")
+    update = (
+        {"timemachine": True, "timemachine_quota_gb": req.size_gb}
+        if req.size_gb
+        else {"timemachine": False, "timemachine_quota_gb": None}
+    )
+    try:
+        engine.add_or_update_share(share.model_copy(update=update))
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    nas_name.refresh()  # Macs see the change in the folders they are offered
+    return {"name": name, "size_gb": req.size_gb, "timemachine": bool(req.size_gb)}
+
+
 class ShareCompressionRequest(BaseModel):
     value: str = Field(
         ...,

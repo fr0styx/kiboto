@@ -8152,5 +8152,20 @@ export default {
   "vmp.p_ha_2": "2 cœurs, 4 Go, son disque prêt à l’emploi",
   "vmp.n_ha": "Home Assistant OS est fourni comme disque prêt à l’emploi. Si « Disque prêt à l’emploi » n’en affiche aucun, téléchargez d’abord Home Assistant OS depuis le catalogue ISO.",
   "shr1.choose": "Choisir…",
-  "shr1.people_next": "Ensuite, vous choisissez qui peut ouvrir le nouveau dossier."
+  "shr1.people_next": "Ensuite, vous choisissez qui peut ouvrir le nouveau dossier.",
+  "tm.step1": "Sur le Mac, ouvrez Réglages Système → Général → Time Machine.",
+  "tm.step2": "Choisissez « Ajouter un disque de sauvegarde » puis le dossier de ce NAS.",
+  "tm.step3": "Connectez-vous avec votre nom et votre mot de passe Kiboto quand le Mac le demande.",
+  "tm.host": "{host} crée les dossiers où les Mac sauvegardent. Ensuite :",
+  "tm.none": "Aucun dossier ne reçoit encore de sauvegardes de Mac.",
+  "tm.make": "Créer un dossier pour les sauvegardes de Mac",
+  "tm.limit": "jusqu’à {gb} Go",
+  "tm.no_limit": "aucune limite de taille",
+  "tm.change": "Changer la taille",
+  "tm.stop": "Arrêter les sauvegardes de Mac",
+  "tm.title": "Sauvegardes d’un Mac",
+  "tm.saved": "Les Mac peuvent maintenant sauvegarder dans {name}, jusqu’à {gb} Go.",
+  "tm.stopped": "Les Mac ne sauvegardent plus dans {name}. Les sauvegardes déjà présentes restent.",
+  "tm.size_title": "Limite de taille pour {name}",
+  "tm.size_ask": "Combien de Go les sauvegardes de Mac peuvent-elles occuper ?"
 };

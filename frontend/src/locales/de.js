@@ -8152,5 +8152,20 @@ export default {
   "vmp.p_ha_2": "2 Kerne, 4 GB, sein fertiger Datenträger",
   "vmp.n_ha": "Home Assistant OS kommt als fertiger Datenträger. Zeigt „Fertiger Datenträger“ keinen an, laden Sie Home Assistant OS zuerst aus dem ISO-Katalog herunter.",
   "shr1.choose": "Auswählen…",
-  "shr1.people_next": "Danach wählen Sie, wer den neuen Ordner öffnen darf."
+  "shr1.people_next": "Danach wählen Sie, wer den neuen Ordner öffnen darf.",
+  "tm.step1": "Öffnen Sie auf dem Mac Systemeinstellungen → Allgemein → Time Machine.",
+  "tm.step2": "Wählen Sie „Backup-Volume hinzufügen“ und dann den Ordner auf diesem NAS.",
+  "tm.step3": "Melden Sie sich mit Ihrem Kiboto-Namen und Passwort an, wenn der Mac fragt.",
+  "tm.host": "{host} legt die Ordner an, in die Macs sichern. Danach:",
+  "tm.none": "Noch kein Ordner nimmt Mac-Sicherungen auf.",
+  "tm.make": "Ordner für Mac-Sicherungen anlegen",
+  "tm.limit": "bis zu {gb} GB",
+  "tm.no_limit": "keine Größenbegrenzung",
+  "tm.change": "Größe ändern",
+  "tm.stop": "Mac-Sicherungen beenden",
+  "tm.title": "Sicherungen von einem Mac",
+  "tm.saved": "Macs können jetzt in {name} sichern, bis zu {gb} GB.",
+  "tm.stopped": "Macs sichern nicht mehr in {name}. Vorhandene Sicherungen bleiben.",
+  "tm.size_title": "Größenbegrenzung für {name}",
+  "tm.size_ask": "Wie viele GB dürfen die Mac-Sicherungen belegen?"
 };

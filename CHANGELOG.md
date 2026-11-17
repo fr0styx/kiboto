@@ -440,6 +440,12 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Sharing a folder takes two steps**: pick the folder with "Choose…" (Kiboto asks before it wakes a sleeping drive,
   and names the share after the folder), then choose who may open it, in the same window a share's card opens.
 
+#### Changes
+
+- **"Backups from a Mac" on Shared folders**: the folders Macs back up to with their size limits, "Change the size"
+  and "Stop Mac backups" (the backups already there stay), "Make a folder for Mac backups", and the three steps on the
+  Mac. Where Unraid or TrueNAS runs the shares, it says the host makes these folders and keeps the steps.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

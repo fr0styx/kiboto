@@ -38,7 +38,7 @@ request and response schemas.
 
 <!-- BEGIN generated endpoints: python scripts/api_reference.py --update -->
 
-734 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
+736 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
 
 ### AI Conversation History
 
@@ -821,9 +821,11 @@ request and response schemas.
 | `DELETE` | `/api/v1/storage/shares/{name}` | `shares:manage` | Deletes a network share configuration |
 | `GET` | `/api/v1/storage/shares/{name}/compression` | any of `storage:read`, `shares:manage` | What compression a share's data uses now, the ratio where the filesystem reports one, and what can be chosen (FEAT-15) |
 | `PUT` | `/api/v1/storage/shares/{name}/compression` | any of `shares:manage`, `storage:admin` | Change a share's compression; it applies to data written from now on (FEAT-15) |
+| `PUT` | `/api/v1/storage/shares/{name}/time-machine` | `shares:manage` | Shares R3: changes a folder's Mac-backup size limit, or stops Mac backups to it, keeping every other setting of the share (the share rout… |
 | `GET` | `/api/v1/storage/smart/failure-predictions` | any of `storage:read`, `system:view` | Scrutiny-style failure probability analytics and historical attribute velocity for all discovered storage drives |
 | `GET` | `/api/v1/storage/smart/schedule` | any of `storage:read`, `system:view` | Returns current SMART test schedule, intervals, and last execution timestamps |
 | `POST` | `/api/v1/storage/smart/schedule` | `storage:admin` | Configures automated Short and Extended SMART test schedules |
+| `GET` | `/api/v1/storage/time-machine` | `shares:manage` | Shares R3: the folders Macs back up to, with their size limits, where Kiboto runs the shares |
 | `GET` | `/api/v1/storage/unraid-api/status` | any of `storage:read`, `system:view` | Array, disks, shares and parity check from the Unraid API (companion mode, D5) |
 
 ### System

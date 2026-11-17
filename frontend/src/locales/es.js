@@ -8152,5 +8152,20 @@ export default {
   "vmp.p_ha_2": "2 núcleos, 4 GB, su disco listo para usar",
   "vmp.n_ha": "Home Assistant OS viene como disco listo para usar. Si «Disco listo para usar» no muestra ninguno, descarga primero Home Assistant OS desde el catálogo de ISO.",
   "shr1.choose": "Elegir…",
-  "shr1.people_next": "Después eliges quién puede abrir la nueva carpeta."
+  "shr1.people_next": "Después eliges quién puede abrir la nueva carpeta.",
+  "tm.step1": "En el Mac, abre Ajustes del Sistema → General → Time Machine.",
+  "tm.step2": "Elige «Añadir disco de copia de seguridad» y la carpeta de este NAS.",
+  "tm.step3": "Inicia sesión con tu nombre y contraseña de Kiboto cuando el Mac lo pida.",
+  "tm.host": "{host} crea las carpetas donde los Mac hacen copias. Después:",
+  "tm.none": "Aún no hay ninguna carpeta para copias de Mac.",
+  "tm.make": "Crear una carpeta para copias de Mac",
+  "tm.limit": "hasta {gb} GB",
+  "tm.no_limit": "sin límite de tamaño",
+  "tm.change": "Cambiar el tamaño",
+  "tm.stop": "Detener las copias de Mac",
+  "tm.title": "Copias de seguridad de un Mac",
+  "tm.saved": "Los Mac ya pueden hacer copias en {name}, hasta {gb} GB.",
+  "tm.stopped": "Los Mac ya no hacen copias en {name}. Las copias que ya hay se quedan.",
+  "tm.size_title": "Límite de tamaño de {name}",
+  "tm.size_ask": "¿Cuántos GB pueden ocupar las copias de Mac?"
 };
