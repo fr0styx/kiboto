@@ -10,6 +10,7 @@ import { t } from '../../i18n.js';
 import { formatDateTime } from '../../format.js';
 import { setIconLabel } from '../../ui/primitives.js';
 import { renderPowerTop, stateFromReading } from './power-top.js';
+import { renderPowerHistory } from './power-history.js';
 
 export function renderUpsTelemetry(ups) {
   if (!ups) return;
@@ -159,38 +160,13 @@ export function renderUpsTelemetry(ups) {
   }
 }
 
+/** Power history in sentences, the last five first (SET-31, Power stage 3). */
 export async function fetchAndRenderUpsEvents() {
-  const tbody = document.getElementById('ups-events-tbody');
-  if (!tbody) return;
+  const mount = document.getElementById('ups-history');
+  if (!mount) return;
   try {
     const res = await api.get('/api/ups/events');
-    const events = res && Array.isArray(res.events) ? res.events : [];
-    if (!events.length) {
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--muted); padding:16px;">' + escapeHtml(t('upx.no_events', 'No power events or brownouts recorded. All power lines normal.')) + '</td></tr>';
-      return;
-    }
-    tbody.innerHTML = events.map(ev => {
-      const dateStr = formatDateTime(ev.ts);
-      let typeBadge = `<span class="badge" style="background:var(--lt-b-33cdb826, rgba(51,205,184,0.15)); border:1px solid #33cdb8; color:var(--lt-t-33cdb8ff, #33cdb8); padding:2px 8px; border-radius:4px; font-size:var(--kb-fs-xs);">${escapeHtml(ev.event_type)}</span>`;
-      if (ev.event_type.includes('OUTAGE') || ev.event_type.includes('FAILSAFE')) {
-        typeBadge = `<span class="badge" style="background:rgba(245,166,35,0.15); border:1px solid #f5a623; color:var(--lt-t-f5a623ff, #f5a623); padding:2px 8px; border-radius:4px; font-size:var(--kb-fs-xs);">${escapeHtml(ev.event_type)}</span>`;
-      } else if (ev.event_type.includes('SELF_TEST')) {
-        typeBadge = `<span class="badge" style="background:rgba(51,205,184,0.15); border:1px solid #33cdb8; color:var(--lt-t-33cdb8ff, #33cdb8); padding:2px 8px; border-radius:4px; font-size:var(--kb-fs-xs);">${escapeHtml(ev.event_type)}</span>`;
-      }
-      const durStr = ev.duration_sec ? `${ev.duration_sec}s` : '--';
-      const battDelta = ev.start_battery_pct != null && ev.end_battery_pct != null
-        ? `${ev.start_battery_pct}% ➔ ${ev.end_battery_pct}%`
-        : (ev.start_battery_pct != null ? `${ev.start_battery_pct}%` : '--');
-      const action = ev.action_taken || ev.status || '--';
-
-      return `<tr>
-        <td style="font-size:var(--kb-fs-xs); font-variant-numeric:tabular-nums;">${escapeHtml(dateStr)}</td>
-        <td>${typeBadge}</td>
-        <td style="font-size:var(--kb-fs-xs);">${escapeHtml(durStr)}</td>
-        <td style="font-size:var(--kb-fs-xs);">${escapeHtml(battDelta)}</td>
-        <td style="font-size:var(--kb-fs-xs); color:var(--text);">${escapeHtml(action)}</td>
-      </tr>`;
-    }).join('');
+    renderPowerHistory(mount, res && Array.isArray(res.events) ? res.events : []);
   } catch (err) {
     console.debug('Failed to fetch UPS events:', err);
   }

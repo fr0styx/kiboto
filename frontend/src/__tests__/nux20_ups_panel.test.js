@@ -61,10 +61,10 @@ describe('UPS panel words (NUX-20)', () => {
   });
 
   it('says when no power events were recorded', async () => {
-    document.body.innerHTML = '<table><tbody id="ups-events-tbody"></tbody></table>';
+    document.body.innerHTML = '<div id="ups-history"></div>';
     vi.spyOn(api, 'get').mockResolvedValue({ events: [] });
     await fetchAndRenderUpsEvents();
-    expect(byId('ups-events-tbody').textContent).toBe('No power events or brownouts recorded. All power lines normal.');
+    expect(byId('ups-history').textContent).toBe('No power cuts recorded yet.');
   });
 
   it('sums up the shutdown rule', () => {

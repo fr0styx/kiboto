@@ -511,6 +511,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   internals) stays in the server log instead of reaching the page; the logo proxy fetches only image files from its
   two hosts.
 
+#### Changes
+
+- **Power history in sentences**: "The power was out for 2 minutes. The battery went from 100 % to 85 %." instead of a
+  table of event codes; the last five first, "Show all" opens the rest.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

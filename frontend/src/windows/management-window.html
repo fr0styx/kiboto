@@ -2265,28 +2265,11 @@
             </div>
 
             <!-- Tier 3: Power Outage History & Analytics Table -->
-            <div class="ups-events-section ups-x-4">
-              <div class="ups-row-4">
-                <div class="ups-fs13-semi"><span aria-hidden="true">📜</span> <span data-i18n="mgmt.ups_events_title">Power Integrity & Outage Ledger</span></div>
-                <span class="ups-xs-muted" data-i18n="mw.real_time_historical_brownout_self_test">Real-time historical brownout, self-test & failsafe events</span>
-              </div>
-              <div class="table-container ups-x-5" tabindex="0">
-                <table class="copy-history-table responsive-cards" id="ups-events-table">
-                  <thead>
-                    <tr>
-                      <th data-i18n="mgmt.ups_col_time">Date / Time</th>
-                      <th data-i18n="mgmt.ups_col_type">Event Type</th>
-                      <th data-i18n="mgmt.ups_col_duration">Duration</th>
-                      <th data-i18n="mgmt.ups_col_battery">Battery Delta</th>
-                      <th data-i18n="mgmt.ups_col_action">Action Taken</th>
-                    </tr>
-                  </thead>
-                  <tbody id="ups-events-tbody">
-                    <tr><td class="ups-muted" colspan="5" data-i18n="mgmt.ups_no_events">No power events or brownouts recorded. All power lines normal.</td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
+            <!-- Power history in sentences (SET-31, Power stage 3): drawn by management/power-history.js -->
+            <section class="ups-events-section ups-x-4" aria-labelledby="ups-history-title">
+              <h3 class="ups-fs13-semi pwh-title" id="ups-history-title" data-i18n="pwh.title">Power history</h3>
+              <div id="ups-history" class="pwh" aria-live="polite"></div>
+            </section>
           </div>
 
 

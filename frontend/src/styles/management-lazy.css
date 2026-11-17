@@ -569,3 +569,10 @@
 .ups-status-line[data-power="by_hand"] { border-left-color: var(--err, #eb5757); }
 .pw-when summary::before, .pw-back summary::before { content: "▸"; color: var(--kb-text-soft); }
 .pw-when[open] summary::before, .pw-back[open] summary::before { content: "▾"; }
+/* Power history in sentences (SET-31) */
+.pwh-title { margin: 0 0 8px; }
+.pwh-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.pwh-row { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: var(--kb-fs-xs); line-height: 1.45; }
+.pwh-when { color: var(--kb-text-soft); font-variant-numeric: tabular-nums; min-width: 9em; }
+.pwh-empty { margin: 0; font-size: var(--kb-fs-xs); color: var(--kb-text-soft); }
+.pwh-more { margin-top: 8px; }

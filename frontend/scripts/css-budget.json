@@ -1,9 +1,9 @@
 {
   "important": 3383,
   "buttonClasses": 75,
-  "inlineStyles": 1257,
+  "inlineStyles": 1249,
   "emojiIcons": 3,
-  "colours": 3717,
+  "colours": 3708,
   "primitiveUses": 4,
   "importantPerFile": {
     "frontend/index.html": 64,
@@ -81,7 +81,7 @@
     "frontend/src/components/management/notifications.js": 8,
     "frontend/src/components/management/security.js": 25,
     "frontend/src/components/management/system.js": 23,
-    "frontend/src/components/management/ups.js": 22,
+    "frontend/src/components/management/ups.js": 13,
     "frontend/src/components/metrics-chart.js": 27,
     "frontend/src/components/metrics-view.js": 4,
     "frontend/src/components/network-manager.js": 11,

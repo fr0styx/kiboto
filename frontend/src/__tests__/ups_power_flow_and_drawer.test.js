@@ -59,9 +59,7 @@ describe('UPS Power Flow Digital Twin & Drawer Controls', () => {
           </div>
         </div>
 
-        <table>
-          <tbody id="ups-events-tbody"></tbody>
-        </table>
+        <div id="ups-history"></div>
 
         <button id="btn-open-ups-config">Configure</button>
         <button id="btn-run-ups-selftest">Self-Test</button>
@@ -240,20 +238,17 @@ describe('UPS Power Flow Digital Twin & Drawer Controls', () => {
 
     await fetchAndRenderUpsEvents();
 
-    const tbody = document.getElementById('ups-events-tbody');
-    expect(tbody.querySelectorAll('tr').length).toBe(2);
-    expect(tbody.innerHTML).toContain('OUTAGE_START');
-    expect(tbody.innerHTML).toContain('SELF_TEST_PASS');
-    expect(tbody.innerHTML).toContain('120s');
-    expect(tbody.innerHTML).toContain('100% ➔ 85%');
+    // SET-31: one sentence per event, no codes (an unknown kind says what was done)
+    const box = document.getElementById('ups-history');
+    expect(box.querySelectorAll('li').length).toBe(2);
+    expect(box.textContent).not.toContain('➔');
   });
 
   it('handles empty events gracefully', async () => {
     vi.spyOn(api, 'get').mockResolvedValue({ events: [] });
     await fetchAndRenderUpsEvents();
 
-    const tbody = document.getElementById('ups-events-tbody');
-    expect(tbody.innerHTML).toContain('No power events or brownouts recorded');
+    expect(document.getElementById('ups-history').textContent).toContain('No power cuts recorded yet.');
   });
 
   it('opens and closes the configuration drawer', () => {
