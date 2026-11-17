@@ -14,6 +14,7 @@ from pydantic import BaseModel, Field
 from backend.api.files.common import _observe, _safe_fs_target, record_activity
 from backend.auth import AuthenticatedPrincipal, get_current_principal, require_scope
 from backend.config import logger
+from backend.errors import ApiError, said
 from backend.fsutil import resolve_within, root_for
 from backend.rate_limit import rate_limit
 from backend.services import recycle_bin
@@ -56,7 +57,7 @@ async def fs_rename(req: RenameRequest, principal: AuthenticatedPrincipal = Depe
     target_unresolved, parent_canonical, _ = _safe_fs_target(req.path)
     new_name = str(req.new_name or "").strip()
     if not new_name or "/" in new_name or "\\" in new_name or new_name in (".", ".."):
-        raise HTTPException(status_code=400, detail="Invalid new name")
+        raise ApiError(400, "Invalid new name", "bad_name", text=said("fm_bad_name"))
 
     is_admin = (
         principal.role_id in ("superadmin", "storage_admin")
@@ -69,7 +70,7 @@ async def fs_rename(req: RenameRequest, principal: AuthenticatedPrincipal = Depe
     dst = os.path.join(parent_canonical, new_name)
     await asyncio.to_thread(check_user_path_access, dst, principal, write=True)
     if os.path.lexists(dst):
-        raise HTTPException(status_code=400, detail="Destination already exists")
+        raise ApiError(400, "Destination already exists", "name_taken", text=said("fm_name_taken", name=new_name))
     await asyncio.to_thread(_observe, "rename", target_unresolved, principal, new_path=dst)
     try:
         await asyncio.to_thread(os.rename, target_unresolved, dst)

@@ -2321,6 +2321,8 @@ export default {
   "srv.own_app_name_rule": "Usa minúsculas, dígitos, guiones y guiones bajos, empezando por una letra o un dígito.",
   "srv.own_app_name_taken": "Ya existe una app llamada {name}. Ábrela desde Stacks para cambiarla.",
   "srv.own_app_folder_has_file": "{folder} ya contiene un archivo de app. Elige otro nombre o elimina antes ese archivo.",
+  "srv.fm_bad_name": "Ese nombre no se puede usar: no puede estar vacío, ser \".\" o \"..\", ni llevar barras.",
+  "srv.fm_name_taken": "Ya hay algo llamado \"{name}\" aquí. Elige otro nombre.",
   "srv.apply_pull_failed": "No se pudo descargar {image}: {error}. No se cambió nada.",
   "srv.apply_part_stopped": "{part} se detuvo (código de salida {code}). Todo ha vuelto a como estaba.",
   "srv.apply_part_restarting": "{part} se reinicia una y otra vez (código de salida {code}). Todo ha vuelto a como estaba.",

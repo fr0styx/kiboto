@@ -1083,7 +1083,11 @@
    "body": {
     "code": 400,
     "detail": "Invalid new name",
-    "error": "bad_request"
+    "error": "bad_name",
+    "text": {
+     "msg_key": "srv.fm_bad_name",
+     "params": {}
+    }
    },
    "label": "rename bad",
    "status": 400
@@ -1092,7 +1096,13 @@
    "body": {
     "code": 400,
     "detail": "Destination already exists",
-    "error": "bad_request"
+    "error": "name_taken",
+    "text": {
+     "msg_key": "srv.fm_name_taken",
+     "params": {
+      "name": "sub"
+     }
+    }
    },
    "label": "rename clash",
    "status": 400

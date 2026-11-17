@@ -2321,6 +2321,8 @@ export default {
   "srv.own_app_name_rule": "Use small letters, digits, hyphens and underscores, starting with a letter or digit.",
   "srv.own_app_name_taken": "An app named {name} exists already. Open it from Stacks to change it.",
   "srv.own_app_folder_has_file": "{folder} already holds an app file. Choose another name, or remove that file first.",
+  "srv.fm_bad_name": "That name can't be used: it can't be empty, \".\" or \"..\", or contain slashes.",
+  "srv.fm_name_taken": "There is already something called \"{name}\" here. Choose another name.",
   "srv.apply_pull_failed": "{image} could not be downloaded: {error}. Nothing was changed.",
   "srv.apply_part_stopped": "{part} stopped (exit code {code}). Everything is back as it was.",
   "srv.apply_part_restarting": "{part} keeps restarting (exit code {code}). Everything is back as it was.",

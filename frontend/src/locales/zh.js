@@ -2321,6 +2321,8 @@ export default {
   "srv.own_app_name_rule": "请使用小写字母、数字、连字符和下划线，并以字母或数字开头。",
   "srv.own_app_name_taken": "已存在名为 {name} 的应用。请在 Stacks 中打开它进行修改。",
   "srv.own_app_folder_has_file": "{folder} 中已有应用文件。请换一个名字，或先删除该文件。",
+  "srv.fm_bad_name": "这个名称不能用：不能为空、不能是“.”或“..”，也不能包含斜杠。",
+  "srv.fm_name_taken": "这里已经有名为“{name}”的项目。请换一个名称。",
   "srv.apply_pull_failed": "无法下载 {image}：{error}。没有做任何更改。",
   "srv.apply_part_stopped": "{part} 已停止（退出代码 {code}）。一切已恢复原样。",
   "srv.apply_part_restarting": "{part} 不断重启（退出代码 {code}）。一切已恢复原样。",

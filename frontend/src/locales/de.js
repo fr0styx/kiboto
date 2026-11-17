@@ -2321,6 +2321,8 @@ export default {
   "srv.own_app_name_rule": "Verwenden Sie Kleinbuchstaben, Ziffern, Bindestriche und Unterstriche, am Anfang ein Buchstabe oder eine Ziffer.",
   "srv.own_app_name_taken": "Eine App namens {name} gibt es schon. Öffnen Sie sie unter Stacks, um sie zu ändern.",
   "srv.own_app_folder_has_file": "{folder} enthält schon eine App-Datei. Wählen Sie einen anderen Namen oder entfernen Sie diese Datei zuerst.",
+  "srv.fm_bad_name": "Dieser Name geht nicht: Er darf nicht leer, \".\" oder \"..\" sein und keine Schrägstriche enthalten.",
+  "srv.fm_name_taken": "Hier gibt es schon etwas namens \"{name}\". Wählen Sie einen anderen Namen.",
   "srv.apply_pull_failed": "{image} konnte nicht heruntergeladen werden: {error}. Nichts wurde geändert.",
   "srv.apply_part_stopped": "{part} ist stehen geblieben (Exit-Code {code}). Alles ist wieder wie vorher.",
   "srv.apply_part_restarting": "{part} startet immer wieder neu (Exit-Code {code}). Alles ist wieder wie vorher.",

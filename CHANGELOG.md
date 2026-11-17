@@ -480,6 +480,9 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 
 - **Applying a Compose file**: when it goes back, the Jobs centre now says why in your language.
 
+- **Files**: when a new name can't be used (already taken, or not a valid name), the reason now shows in your
+  language.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 
