@@ -351,6 +351,8 @@
  "ev.sched_short.title": "Scheduled task",
  "ev.sched_short_asleep.msg": "Quick drive checks started on {n, plural, one {# drive} other {# drives}}; sleeping drives are left asleep.",
  "ev.sched_short_asleep.title": "Scheduled task",
+ "ev.security_fix_applied.msg": "{who}: {change}",
+ "ev.security_fix_applied.title": "Security fix applied",
  "ev.settings_damaged.msg": "{file} was damaged and set aside as {dest}. The newest good copy from the daily snapshot is used if there is one, otherwise the defaults.",
  "ev.settings_damaged.title": "Damaged settings file",
  "ev.settings_restored.msg": "{file} was damaged; the copy from {snap} is back.",

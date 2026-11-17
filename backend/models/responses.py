@@ -4495,6 +4495,7 @@ class SystemSecurityFixResponse(_Doc):
     fix: str | None = None
     message: str | None = None
     ok: bool | None = None
+    text: dict[str, Any] | None = None
 
 
 class SystemShutdownResponse(_Doc):

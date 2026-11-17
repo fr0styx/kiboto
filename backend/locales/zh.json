@@ -351,6 +351,8 @@
  "ev.sched_short.title": "计划任务",
  "ev.sched_short_asleep.msg": "已在 {n} 块硬盘上开始快速检测；休眠的硬盘保持休眠。",
  "ev.sched_short_asleep.title": "计划任务",
+ "ev.security_fix_applied.msg": "{who}：{change}",
+ "ev.security_fix_applied.title": "已应用安全修复",
  "ev.settings_damaged.msg": "{file} 已损坏，已另存为 {dest}。如有每日快照中最新的完好副本则使用它，否则使用默认值。",
  "ev.settings_damaged.title": "设置文件已损坏",
  "ev.settings_restored.msg": "{file} 已损坏，已恢复 {snap} 的副本。",

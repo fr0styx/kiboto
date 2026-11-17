@@ -351,6 +351,8 @@
  "ev.sched_short.title": "Tarea programada",
  "ev.sched_short_asleep.msg": "Comprobaciones rápidas iniciadas en {n, plural, one {# disco} other {# discos}}; los discos dormidos siguen dormidos.",
  "ev.sched_short_asleep.title": "Tarea programada",
+ "ev.security_fix_applied.msg": "{who}: {change}",
+ "ev.security_fix_applied.title": "Corrección de seguridad aplicada",
  "ev.settings_damaged.msg": "{file} estaba dañado y se apartó como {dest}. Se usa la copia buena más reciente de la instantánea diaria, o si no los valores predeterminados.",
  "ev.settings_damaged.title": "Archivo de ajustes dañado",
  "ev.settings_restored.msg": "{file} estaba dañado; se ha recuperado la copia de {snap}.",

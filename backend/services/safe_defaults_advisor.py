@@ -12,6 +12,7 @@ from collections.abc import Callable
 from typing import Any
 
 from backend.config import logger
+from backend.errors import SaidText
 
 FAMILY_ROLES = ("kid", "guest")
 
@@ -73,7 +74,7 @@ def _fix_share_access_family() -> str:
     from backend.services.samba_engine import refresh_access
 
     refresh_access()  # over the network too, not only in Files (SET-01)
-    return "Kids and guests now open only the folders you share with them."
+    return SaidText("Kids and guests now open only the folders you share with them.", "sec_fixed_family")
 
 
 def _open_nfs_exports() -> list[Any]:
@@ -118,7 +119,10 @@ def _fix_nfs_open_exports() -> str:
             update["squash"] = "root_squash"
         engine.add_or_update_export(rule.model_copy(update=update))
         names.append(rule.name)
-    return f"Limited {', '.join(names)} to {net}." if names else "Nothing to change."
+    if not names:
+        return SaidText("Nothing to change.", "sec_fixed_nothing")
+    shown = ", ".join(names)
+    return SaidText(f"Limited {shown} to {net}.", "sec_fixed_nfs", names=shown, net=net)
 
 
 def _fix_smb_guest() -> str:
@@ -135,8 +139,15 @@ def _fix_smb_guest() -> str:
         except Exception as e:
             logger.warning(f"[SecurityAdvisor] Could not make {share.name} private: {e}")
             failed.append(share.name)
-    msg = f"{', '.join(fixed)} now need a sign-in." if fixed else "Nothing changed."
-    return msg + (f" Not changed: {', '.join(failed)}." if failed else "")
+    names, left = ", ".join(fixed), ", ".join(failed)
+    msg = f"{names} now need a sign-in." if fixed else "Nothing changed."
+    msg += f" Not changed: {left}." if failed else ""
+    key = (
+        ("sec_fixed_smb_partly" if failed else "sec_fixed_smb")
+        if fixed
+        else ("sec_fixed_smb_failed" if failed else "sec_fixed_nothing_changed")
+    )
+    return SaidText(msg, key, names=names, failed=left)
 
 
 def _auditor_scopes() -> list[str] | None:
@@ -177,7 +188,7 @@ def _fix_auditor() -> str:
         conn.execute("UPDATE roles SET scopes_json = ? WHERE id = 'auditor'", (json.dumps(SAFE_AUDITOR_SCOPES),))
     with _TOKEN_CACHE_LOCK:  # cached tokens carry the role's old scopes
         _TOKEN_CACHE.clear()
-    return "Auditor now reads system status only."
+    return SaidText("Auditor now reads system status only.", "sec_fixed_auditor")
 
 
 def _ai_search_finding() -> dict[str, Any] | None:
@@ -205,7 +216,7 @@ def _fix_ai_search_family() -> str:
     from backend.services.rag_engine import get_rag_engine
 
     get_rag_engine().update_config({"ai_search_role_access": {r: False for r in FAMILY_ROLES}})
-    return "AI search is off for kids and guests."
+    return SaidText("AI search is off for kids and guests.", "sec_fixed_ai")
 
 
 # --- sign-in (B11, SEC-29): warned in 1.11, refused since 1.12 (D11) ------------------------------
@@ -328,7 +339,10 @@ def _fix_snapshots_off() -> str:
     from backend.services import snapshot_service
 
     done = [s for s in _shares_without_snapshots() if snapshot_service.ensure_default(s)]
-    return f"Snapshots are on for {', '.join(done)}." if done else "Nothing to change."
+    if not done:
+        return SaidText("Nothing to change.", "sec_fixed_nothing")
+    shown = ", ".join(done)
+    return SaidText(f"Snapshots are on for {shown}.", "sec_fixed_snapshots", folders=shown)
 
 
 FINDERS: tuple[Callable[[], dict[str, Any] | None], ...] = (

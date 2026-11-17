@@ -351,6 +351,8 @@
  "ev.sched_short.title": "Geplante Aufgabe",
  "ev.sched_short_asleep.msg": "Schnelle Laufwerksprüfungen auf {n, plural, one {# Laufwerk} other {# Laufwerke}} gestartet; schlafende Laufwerke schlafen weiter.",
  "ev.sched_short_asleep.title": "Geplante Aufgabe",
+ "ev.security_fix_applied.msg": "{who}: {change}",
+ "ev.security_fix_applied.title": "Sicherheitskorrektur angewendet",
  "ev.settings_damaged.msg": "{file} war beschädigt und wurde als {dest} beiseitegelegt. Die neueste gute Kopie aus der täglichen Sicherung wird verwendet, sonst die Standardwerte.",
  "ev.settings_damaged.title": "Beschädigte Einstellungsdatei",
  "ev.settings_restored.msg": "{file} war beschädigt; die Kopie von {snap} ist wieder da.",

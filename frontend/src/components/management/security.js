@@ -7,6 +7,7 @@ import { api } from '../../api.js';
 import { showToast } from '../../toast.js';
 import { escapeHtml } from '../../utils.js';
 import { t } from '../../i18n.js';
+import { serverSaid } from '../../server-text.js';
 
 // =========================================================================
 // Security Advisor Hardening Checklist & HTTPS Guidance Modal
@@ -263,7 +264,7 @@ export async function applySecurityFix(fixId, btn = null) {
   if (btn) btn.disabled = true;
   try {
     const res = await api.post(`/api/system/security-posture/fix/${encodeURIComponent(fixId)}`, {});
-    showToast(res?.message || t('sec.fix_done', 'Fixed.'), 'success');
+    showToast(serverSaid(res, res?.message || t('sec.fix_done', 'Fixed.')), 'success');
     await fetchAndRenderSecurityPosture();
   } catch (err) {
     if (err?.error === 'cancelled') return; // the person chose not to apply it

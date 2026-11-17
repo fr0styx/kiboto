@@ -503,6 +503,9 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   version did not start") now shows in your language in Settings and the activity log, and the update progress
   lines no longer switch to English.
 
+- **Security fixes in your language**: a one-click fix in Settings → Security now says what it changed in your
+  language, in the message and in the activity log.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

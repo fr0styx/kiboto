@@ -37727,6 +37727,18 @@
        }
       ],
       "title": "Ok"
+     },
+     "text": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Text"
      }
     },
     "title": "SystemSecurityFixResponse",

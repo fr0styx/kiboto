@@ -351,6 +351,8 @@
  "ev.sched_short.title": "Tâche planifiée",
  "ev.sched_short_asleep.msg": "Vérifications rapides lancées sur {n, plural, one {# disque} other {# disques}} ; les disques en veille y restent.",
  "ev.sched_short_asleep.title": "Tâche planifiée",
+ "ev.security_fix_applied.msg": "{who} : {change}",
+ "ev.security_fix_applied.title": "Correctif de sécurité appliqué",
  "ev.settings_damaged.msg": "{file} était endommagé et a été mis de côté sous le nom {dest}. La dernière bonne copie de l'instantané quotidien est utilisée, sinon les valeurs par défaut.",
  "ev.settings_damaged.title": "Fichier de réglages endommagé",
  "ev.settings_restored.msg": "{file} était endommagé ; la copie de {snap} a été remise en place.",

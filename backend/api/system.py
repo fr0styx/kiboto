@@ -1891,7 +1891,10 @@ async def system_security_fix(fix_id: str, principal: AuthenticatedPrincipal = D
     try:
         from backend.state import add_event, event_text
 
-        add_event("info", "Security Advisor fix applied", f"{who}: {message}", details={"fix": fix_id})
+        how = getattr(message, "text", None)
+        change = {"key": how["msg_key"], "default": str(message), "params": how["params"]} if how else str(message)
+        details = {**event_text("security_fix_applied", who=who, change=change), "fix": fix_id}
+        add_event("info", "Security Advisor fix applied", f"{who}: {message}", details=details)
     except Exception as e:
         logger.debug(f"[SecurityAdvisor] Could not record event: {e}")
-    return {"ok": True, "fix": fix_id, "message": message}
+    return {"ok": True, "fix": fix_id, "message": str(message), "text": getattr(message, "text", None)}

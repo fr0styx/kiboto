@@ -80,6 +80,18 @@ def said(key: str, **params: Any) -> dict[str, Any]:
     return {"msg_key": f"srv.{key}", "params": params}
 
 
+class SaidText(str):
+    """A sentence for a person that is still a plain str, and also says how it was made
+    (`text`, from said), so an answer that is a sentence can be shown in the reader's language."""
+
+    text: dict[str, Any]
+
+    def __new__(cls, sentence: str, key: str, **params: Any) -> "SaidText":
+        obj = super().__new__(cls, sentence)
+        obj.text = said(key, **params)
+        return obj
+
+
 class SaidError(ValueError):
     """A refusal for a person, raised in a service: its English sentence and how it was made
     (said), so the route can answer in the reader's language."""
