@@ -465,6 +465,12 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   everything goes back as it was, the old file too. A stack Kib writes can now be started. Settings Kiboto does not
   apply yet (such as building an image) are named and refused, never skipped.
 
+#### Fixes
+
+- **Restoring the backup of a removed app brings the app back**: its saved Compose file is started through the safe
+  apply, which takes everything back if the app does not come up. A file that asks for access to the host is not
+  started by itself; the message says so and where the file is kept.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

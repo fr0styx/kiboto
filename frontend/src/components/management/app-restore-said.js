@@ -15,6 +15,12 @@ export function restoredSaid(result, app) {
       return [t('apprest.running', '"{app}" was restored ({count, plural, one {# folder} other {# folders}}) and runs again.', values), 'success'];
     case 'stopped_kept':
       return [t('apprest.stopped', '"{app}" was restored ({count, plural, one {# folder} other {# folders}}). It was stopped before and stays stopped.', values), 'success'];
+    case 'brought_back':
+      return [t('apprest.brought_back', '"{app}" was restored ({count, plural, one {# folder} other {# folders}}) and started again from its saved Compose file.', values), 'success'];
+    case 'needs_review':
+      return [t('apprest.needs_review', 'The folders of "{app}" were restored ({count}). Its saved Compose file asks for host-level access, so Kiboto did not start it by itself; the file is kept at {path}.', values), 'warn'];
+    case 'bring_back_failed':
+      return [t('apprest.bring_back_failed', 'The folders of "{app}" were restored ({count}), but the app did not start again and nothing was left half-done. Its Compose file is kept at {path}.', values), 'warn'];
     case 'start_failed':
       return [t('apprest.start_failed', '"{app}" was restored ({count, plural, one {# folder} other {# folders}}), but it did not start again. Start it from Apps.', values), 'warn'];
     default:

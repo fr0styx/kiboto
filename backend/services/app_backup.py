@@ -479,6 +479,32 @@ def _release_app(name: str, held: dict[str, Any]) -> str:
     return "running_again" if status in (200, 204, 304) else "start_failed"
 
 
+def _bring_back(app_name: str, compose_yaml: str, base: str) -> tuple[str, str]:
+    """The app was removed: its saved Compose file starts it again through the safe apply, which
+    takes everything back if a container does not come up (Apps 7). A file that asks for
+    host-level access is never started without a person confirming it."""
+    from backend.services import compose_apply
+    from backend.services.app_catalog import pull_image_blocking
+    from backend.services.docker_stacks import elevated_reasons_for
+
+    try:
+        built = compose_apply.build(compose_yaml, None, app_name, base)
+        if compose_apply.plan(built, [], elevated_reasons_for)["elevated"]:
+            return "needs_review", "The saved file asks for host-level access."
+        res = compose_apply.apply_built(
+            built,
+            [],
+            compose_apply.Docker(_docker_request, pull_image_blocking),
+            False,
+            elevated_reasons=elevated_reasons_for,
+        )
+    except (compose_apply.ComposeError, OSError, ValueError, KeyError, TypeError, RuntimeError) as e:
+        return "bring_back_failed", f"{e}"
+    if res.get("ok"):
+        return "brought_back", ""
+    return "bring_back_failed", str(res.get("error") or "")
+
+
 def restore_app_backup(
     backup_id: str,
     recreate_container: bool = True,
@@ -556,9 +582,8 @@ def restore_app_backup(
     app_name = manifest.get("app_name", "app")
     logger.info("[App Backup] Restored data for '%s' from backup '%s'.", app_name, backup_id)
 
-    # The app is not created again from the archive: Kiboto cannot start a Compose file (SET-14).
-    # It was "re-deployed" through a restart of containers that no longer existed, and the answer
-    # said it was recreated. Its Compose file is kept where it can be started by hand.
+    # A removed app comes back from its saved Compose file through the safe apply (Apps 7); the
+    # file is also kept where it can be started by hand.
     compose_path = ""
     if compose_yaml:
         from backend.config import DATA_DIR
@@ -569,6 +594,9 @@ def restore_app_backup(
         with open(compose_path, "w", encoding="utf-8") as f:
             f.write(compose_yaml)
     outcome = _release_app(str(manifest.get("container_name") or ""), held) if recreate_container else "files_only"
+    detail = ""
+    if outcome == "files_only" and recreate_container and compose_yaml:
+        outcome, detail = _bring_back(app_name, compose_yaml, os.path.dirname(compose_path))
 
     return {
         "success": True,
@@ -577,8 +605,10 @@ def restore_app_backup(
         "restored_mounts": extracted_mounts,
         "has_compose": bool(compose_yaml),
         "recreate_requested": recreate_container,
-        "recreated": False,
-        "outcome": outcome,  # running_again, stopped_kept, start_failed, files_only
+        "recreated": outcome == "brought_back",
+        # running_again, stopped_kept, start_failed, files_only, brought_back, needs_review, bring_back_failed
+        "outcome": outcome,
+        "detail": detail,
         "compose_path": compose_path,
         "message": f"Restored {len(extracted_mounts)} folder(s) for '{app_name}' ({outcome}).",
     }

@@ -306,6 +306,50 @@ def test_restore_stops_a_running_app_and_starts_it_again(tmp_path, mock_containe
 
         state["exists"] = False
         res = restore_app_backup(record["id"])
-        assert res["outcome"] == "files_only" and res["compose_path"].endswith("stacks/test-app/docker-compose.yml")
+        # the saved file mounts the Docker socket: never started without a person confirming it
+        assert res["outcome"] == "needs_review" and res["compose_path"].endswith("stacks/test-app/docker-compose.yml")
         assert os.path.exists(res["compose_path"])
         assert restore_app_backup(record["id"], recreate_container=False)["outcome"] == "files_only"
+
+
+def test_restore_brings_a_removed_app_back(tmp_path, mock_container_inspect):
+    """Apps 7: restoring the backup of a removed app only put its folders back."""
+    from backend.services import app_backup
+
+    appdata_dir = tmp_path / "appdata" / "test-app"
+    appdata_dir.mkdir(parents=True)
+    mock_container_inspect["Mounts"] = [
+        {"Type": "bind", "Source": str(appdata_dir), "Destination": "/app/data", "RW": True}
+    ]
+    backup_base = tmp_path / "backups"
+    backup_base.mkdir()
+    state = {"exists": True}
+
+    def docker(method, path, **kwargs):
+        if method == "GET":
+            return (200, mock_container_inspect) if state["exists"] else (404, {})
+        return 204, {}
+
+    with (
+        patch("backend.services.app_backup.get_app_backup_base_dir", return_value=str(backup_base)),
+        patch("backend.services.app_backup.APP_BACKUPS_REGISTRY_FILE", str(tmp_path / "reg.json")),
+        patch("backend.services.app_backup._docker_request", side_effect=docker),
+        patch("backend.config.DATA_DIR", str(tmp_path / "data")),
+    ):
+        record = create_app_backup("test-app", reason="on-demand")
+        state["exists"] = False
+        with patch("backend.services.compose_apply.apply_built", return_value={"ok": True}) as applied:
+            res = restore_app_backup(record["id"])
+        assert res["outcome"] == "brought_back" and res["recreated"] is True
+        assert applied.call_args.args[1] == [] and applied.call_args.args[3] is False
+        with patch(
+            "backend.services.compose_apply.apply_built", return_value={"ok": False, "error": "web did not start."}
+        ):
+            res = restore_app_backup(record["id"])
+        assert res["outcome"] == "bring_back_failed" and res["detail"] == "web did not start."
+        assert os.path.exists(res["compose_path"])
+        with patch("backend.services.compose_apply.apply_built") as applied:
+            assert restore_app_backup(record["id"], recreate_container=False)["outcome"] == "files_only"
+        applied.assert_not_called()
+
+    assert app_backup._bring_back("x", "services: [", str(tmp_path))[0] == "bring_back_failed"

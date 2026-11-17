@@ -8195,5 +8195,8 @@ export default {
   "stap.failed": "{name} no se aplicó: {error}",
   "jobs.t.stack_apply": "Aplicar {name}",
   "confirm.docker_stack_apply_elevated.title": "Dar acceso al sistema",
-  "confirm.docker_stack_apply_elevated.msg": "¿Aplicar la pila {target}? Su archivo da a los contenedores acceso al sistema."
+  "confirm.docker_stack_apply_elevated.msg": "¿Aplicar la pila {target}? Su archivo da a los contenedores acceso al sistema.",
+  "apprest.brought_back": "Se ha restaurado «{app}» ({count, plural, one {# carpeta} other {# carpetas}}) y se ha vuelto a iniciar desde su archivo Compose guardado.",
+  "apprest.needs_review": "Se han restaurado las carpetas de «{app}» ({count}). Su archivo Compose guardado pide acceso al host, así que Kiboto no lo ha iniciado por su cuenta; el archivo está en {path}.",
+  "apprest.bring_back_failed": "Se han restaurado las carpetas de «{app}» ({count}), pero la aplicación no volvió a iniciarse y no quedó nada a medias. Su archivo Compose está en {path}.",
 };

@@ -818,6 +818,9 @@ def _elevated(body: dict[str, Any]) -> list[str]:
     return docker_proxy.elevated_reasons("/containers/create", body)
 
 
+elevated_reasons_for = _elevated  # public: app restore checks a saved file the same way
+
+
 def preview_stack_apply(stack_name: str, compose_yaml: str, env_content: str | None = None) -> dict[str, Any]:
     """What applying the file would do, service by service; nothing is changed."""
     from backend.services import compose_apply

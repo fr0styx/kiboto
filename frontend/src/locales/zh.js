@@ -8195,5 +8195,8 @@ export default {
   "stap.failed": "{name} 未应用：{error}",
   "jobs.t.stack_apply": "应用 {name}",
   "confirm.docker_stack_apply_elevated.title": "授予主机访问权限",
-  "confirm.docker_stack_apply_elevated.msg": "应用堆栈 {target}？其文件会让容器访问主机系统。"
+  "confirm.docker_stack_apply_elevated.msg": "应用堆栈 {target}？其文件会让容器访问主机系统。",
+  "apprest.brought_back": "“{app}”已恢复（{count, plural, other {# 个文件夹}}），并已从保存的 Compose 文件重新启动。",
+  "apprest.needs_review": "“{app}”的文件夹已恢复（{count}）。其保存的 Compose 文件需要主机级访问权限，因此 Kiboto 没有自行启动它；文件保存在 {path}。",
+  "apprest.bring_back_failed": "“{app}”的文件夹已恢复（{count}），但应用未能再次启动，也没有留下半完成的内容。其 Compose 文件保存在 {path}。",
 };

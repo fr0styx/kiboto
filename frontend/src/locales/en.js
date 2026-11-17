@@ -8195,5 +8195,8 @@ export default {
   "stap.failed": "{name} was not applied: {error}",
   "jobs.t.stack_apply": "Apply {name}",
   "confirm.docker_stack_apply_elevated.title": "Give host access",
-  "confirm.docker_stack_apply_elevated.msg": "Apply the stack {target}? Its file gives containers access to the host system."
+  "confirm.docker_stack_apply_elevated.msg": "Apply the stack {target}? Its file gives containers access to the host system.",
+  "apprest.brought_back": "\"{app}\" was restored ({count, plural, one {# folder} other {# folders}}) and started again from its saved Compose file.",
+  "apprest.needs_review": "The folders of \"{app}\" were restored ({count}). Its saved Compose file asks for host-level access, so Kiboto did not start it by itself; the file is kept at {path}.",
+  "apprest.bring_back_failed": "The folders of \"{app}\" were restored ({count}), but the app did not start again and nothing was left half-done. Its Compose file is kept at {path}.",
 };

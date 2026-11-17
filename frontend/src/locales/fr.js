@@ -8195,5 +8195,8 @@ export default {
   "stap.failed": "{name} n’a pas été appliqué : {error}",
   "jobs.t.stack_apply": "Appliquer {name}",
   "confirm.docker_stack_apply_elevated.title": "Donner l’accès au système",
-  "confirm.docker_stack_apply_elevated.msg": "Appliquer la pile {target} ? Son fichier donne aux conteneurs un accès au système."
+  "confirm.docker_stack_apply_elevated.msg": "Appliquer la pile {target} ? Son fichier donne aux conteneurs un accès au système.",
+  "apprest.brought_back": "« {app} » a été restaurée ({count, plural, one {# dossier} other {# dossiers}}) et redémarrée depuis son fichier Compose enregistré.",
+  "apprest.needs_review": "Les dossiers de « {app} » ont été restaurés ({count}). Son fichier Compose enregistré demande un accès à l’hôte, Kiboto ne l’a donc pas démarrée seul ; le fichier se trouve dans {path}.",
+  "apprest.bring_back_failed": "Les dossiers de « {app} » ont été restaurés ({count}), mais l’application n’a pas redémarré et rien n’est resté à moitié fait. Son fichier Compose se trouve dans {path}.",
 };

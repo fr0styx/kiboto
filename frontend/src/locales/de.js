@@ -8195,5 +8195,8 @@ export default {
   "stap.failed": "{name} wurde nicht angewendet: {error}",
   "jobs.t.stack_apply": "{name} anwenden",
   "confirm.docker_stack_apply_elevated.title": "Systemzugriff erlauben",
-  "confirm.docker_stack_apply_elevated.msg": "Den Stack {target} anwenden? Seine Datei gibt Containern Zugriff auf das System."
+  "confirm.docker_stack_apply_elevated.msg": "Den Stack {target} anwenden? Seine Datei gibt Containern Zugriff auf das System.",
+  "apprest.brought_back": "„{app}“ wurde wiederhergestellt ({count, plural, one {# Ordner} other {# Ordner}}) und aus seiner gespeicherten Compose-Datei neu gestartet.",
+  "apprest.needs_review": "Die Ordner von „{app}“ wurden wiederhergestellt ({count}). Die gespeicherte Compose-Datei verlangt Zugriff auf den Host, daher hat Kiboto sie nicht selbst gestartet; die Datei liegt unter {path}.",
+  "apprest.bring_back_failed": "Die Ordner von „{app}“ wurden wiederhergestellt ({count}), aber die App startete nicht wieder; nichts blieb halb erledigt. Die Compose-Datei liegt unter {path}.",
 };
