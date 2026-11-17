@@ -8170,5 +8170,14 @@ export default {
   "tm.size_ask": "How many GB may the Mac backups take?",
   "usb.setup_title": "Use this disk for backups?",
   "usb.setup_msg": "{name} has no backups yet. Keep a copy of this NAS on it, brought up to date every night?",
-  "usb.setup_ok": "Set it up"
+  "usb.setup_ok": "Set it up",
+  "bkf.left_out": "Left out on purpose",
+  "bkf.copied_when": "Copied by {names}, last {when}",
+  "bkf.copied": "Copied by {names}",
+  "bkf.partly": "Partly copied by {names}",
+  "bkf.none": "No copy outside this NAS",
+  "bkf.summary_missing": "{n, plural, one {# folder has} other {# folders have}} no copy outside this NAS",
+  "bkf.summary_ok": "Every folder has a copy outside this NAS, or is left out on purpose",
+  "bkf.leave_out": "Leave out on purpose",
+  "bkf.title": "Your folders and their copies"
 };

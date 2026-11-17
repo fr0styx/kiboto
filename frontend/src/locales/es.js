@@ -8170,5 +8170,14 @@ export default {
   "tm.size_ask": "¿Cuántos GB pueden ocupar las copias de Mac?",
   "usb.setup_title": "¿Usar este disco para copias de seguridad?",
   "usb.setup_msg": "{name} aún no tiene copias. ¿Guardar en él una copia de este NAS, actualizada cada noche?",
-  "usb.setup_ok": "Configurar"
+  "usb.setup_ok": "Configurar",
+  "bkf.left_out": "Excluida a propósito",
+  "bkf.copied_when": "Copiada por {names}, la última vez {when}",
+  "bkf.copied": "Copiada por {names}",
+  "bkf.partly": "Copiada en parte por {names}",
+  "bkf.none": "Sin copia fuera de este NAS",
+  "bkf.summary_missing": "{n, plural, one {# carpeta no tiene} other {# carpetas no tienen}} copia fuera de este NAS",
+  "bkf.summary_ok": "Cada carpeta tiene una copia fuera de este NAS o está excluida a propósito",
+  "bkf.leave_out": "Excluir a propósito",
+  "bkf.title": "Tus carpetas y sus copias"
 };

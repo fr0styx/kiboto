@@ -38,7 +38,7 @@ request and response schemas.
 
 <!-- BEGIN generated endpoints: python scripts/api_reference.py --update -->
 
-736 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
+738 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
 
 ### AI Conversation History
 
@@ -878,6 +878,8 @@ request and response schemas.
 | `GET` | `/api/v1/system/network-topology` | any of `system:view`, `system:config` | Expose complete host networking topology, physical NIC carrier states, link negotiation speeds (10GbE / 2.5GbE / 1GbE / 100M), duplex, MT… |
 | `POST` | `/api/v1/system/profile` | `system:config` | The Host tab's cooling mode |
 | `GET` | `/api/v1/system/protection` | `system:view` | The copies outside this NAS, for the Overview (FEAT-01) |
+| `GET` | `/api/v1/system/protection/folders` | any of `backup:read`, `backup:manage` | Backup 5: each shared folder, the copies outside this NAS that hold it, and the folders left out on purpose |
+| `PUT` | `/api/v1/system/protection/folders/left-out` | `backup:manage` | Backup 5: marks a folder as left out of backups on purpose, or takes the mark away |
 | `GET` | `/api/v1/system/protection/verdict` | `system:view` | Are your files safe? One answer for the top of Backup, with what needs a look (SET-21) |
 | `POST` | `/api/v1/system/reboot` | `system:power` | Trigger system reboot (requires system:power scope) |
 | `GET` | `/api/v1/system/redfish` | `system:config` | Whether the Redfish interface for monitoring tools answers (off by default, SET-01) |

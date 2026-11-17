@@ -129,3 +129,112 @@ def destinations() -> dict[str, list[str]]:
     except Exception:
         logger.debug("protection_status: rclone remotes unreadable", exc_info=True)
     return {"usb": _mounted(USB_ROOT), "nas": [p for root in NAS_ROOTS for p in _mounted(root)], "cloud": cloud}
+
+
+# Backup 5: which shared folders have a copy outside this NAS. A folder can be left out on purpose
+# (a scratch or download folder); the list of those is kept here, apart from the backups.
+LEFT_OUT_FILE_NAME = "backup_left_out.json"
+
+
+def _left_out_file() -> str:
+    from backend.config import DATA_DIR
+
+    return os.path.join(DATA_DIR, LEFT_OUT_FILE_NAME)
+
+
+def left_out() -> list[str]:
+    from backend.fsutil import read_json
+
+    data = read_json(_left_out_file(), [])
+    return [str(n) for n in data] if isinstance(data, list) else []
+
+
+def set_left_out(name: str, on: bool) -> list[str]:
+    from backend.fsutil import atomic_write_json, locked_json
+
+    with locked_json(_left_out_file()):
+        names = [n for n in left_out() if n != name]
+        if on:
+            names.append(name)
+        atomic_write_json(_left_out_file(), sorted(names))
+    return sorted(names)
+
+
+def _copy_sources(pool_path: Any = None) -> list[dict[str, Any]]:
+    """Each copy outside this NAS with the folders it reads: off-site backups, copy jobs to a remote
+    and replication to another NAS."""
+    out: list[dict[str, Any]] = []
+    try:
+        from backend.services.offsite_backup import list_repos
+
+        for r in list_repos():
+            if kind_of(str(r.get("location") or "")) != "here":
+                out.append(
+                    {
+                        "name": r.get("name") or r.get("id"),
+                        "paths": list(r.get("paths") or []),
+                        "last_ok": r.get("last_backup"),
+                    }
+                )
+    except (OSError, ValueError, KeyError, TypeError, AttributeError, ImportError, RuntimeError):
+        logger.debug("protection_status: off-site backups unreadable", exc_info=True)
+    if pool_path is None:
+        from backend.hardware.pal_storage import get_storage_platform
+
+        pool_path = get_storage_platform().get_pool_path
+    try:
+        from backend.services.backup_engine import get_backup_jobs
+
+        for j in get_backup_jobs():
+            if j.get("kind") == "config" or j.get("destination_type") != "remote" or j.get("enabled") is False:
+                continue
+            base = str(pool_path(j.get("source_pool", "default")) or "")
+            sub = str(j.get("source_subvolume") or "").strip("/")
+            paths = [os.path.join(base, "@shares", sub), os.path.join(base, sub)] if sub else [base]
+            out.append({"name": j.get("name"), "paths": [p for p in paths if p], "last_ok": j.get("last_success_at")})
+    except (OSError, ValueError, KeyError, TypeError, AttributeError, ImportError, RuntimeError):
+        logger.debug("protection_status: copy jobs unreadable", exc_info=True)
+    try:
+        from backend.services.replication_engine import get_replication_engine
+
+        for j in get_replication_engine().list_jobs():
+            if j.get("target_type", "local") == "local":
+                continue
+            base = str(pool_path(j.get("source_pool", "")) or "")
+            path = os.path.join(base, str(j.get("source_dataset") or "").strip("/")) if base else ""
+            out.append({"name": j.get("name"), "paths": [path] if path else [], "last_ok": j.get("last_success")})
+    except (OSError, ValueError, KeyError, TypeError, AttributeError, ImportError, RuntimeError):
+        logger.debug("protection_status: replication jobs unreadable", exc_info=True)
+    return out
+
+
+def _inside(child: str, parent: str) -> bool:
+    child, parent = os.path.normpath(child), os.path.normpath(parent)
+    return child == parent or child.startswith(parent.rstrip("/") + "/")
+
+
+def folder_coverage(shares: list[dict[str, Any]], sources: list[dict[str, Any]] | None = None) -> list[dict[str, Any]]:
+    """Per shared folder: the copies that hold all of it, those that hold part of it, and whether it
+    was left out on purpose."""
+    sources = _copy_sources() if sources is None else sources
+    skipped = set(left_out())
+    rows = []
+    for share in shares:
+        path = str(share.get("path") or "")
+        whole, part = [], []
+        for src in sources:
+            paths = [p for p in src.get("paths") or [] if p]
+            if any(_inside(path, p) for p in paths):
+                whole.append({"name": src.get("name"), "last_ok": src.get("last_ok")})
+            elif any(_inside(p, path) for p in paths):
+                part.append({"name": src.get("name"), "last_ok": src.get("last_ok")})
+        rows.append(
+            {
+                "name": share.get("name"),
+                "path": path,
+                "copies": whole,
+                "partly": part,
+                "left_out": share.get("name") in skipped,
+            }
+        )
+    return rows

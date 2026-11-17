@@ -1168,6 +1168,30 @@ def get_protection_status():
     return status()
 
 
+@router.get("/system/protection/folders", dependencies=[Depends(require_scope("backup:read", "backup:manage"))])
+def get_protection_folders():
+    """Backup 5: each shared folder, the copies outside this NAS that hold it, and the folders left
+    out on purpose."""
+    from backend.hardware.pal_storage import get_storage_platform
+    from backend.services.protection_status import folder_coverage
+
+    shares = [{"name": s.name, "path": s.mountpoint} for s in get_storage_platform().list_shares()]
+    return {"folders": folder_coverage([s for s in shares if s["path"]])}
+
+
+class LeftOutUpdate(BaseModel):
+    name: str = Field(..., min_length=1, max_length=128)
+    left_out: bool
+
+
+@router.put("/system/protection/folders/left-out", dependencies=[Depends(require_scope("backup:manage"))])
+def put_protection_left_out(req: LeftOutUpdate):
+    """Backup 5: marks a folder as left out of backups on purpose, or takes the mark away."""
+    from backend.services.protection_status import set_left_out
+
+    return {"left_out": set_left_out(req.name, req.left_out)}
+
+
 @router.get("/system/protection/verdict", dependencies=[Depends(require_scope("system:view"))])
 def get_protection_verdict():
     """Are your files safe? One answer for the top of Backup, with what needs a look (SET-21)."""

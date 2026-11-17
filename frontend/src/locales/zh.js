@@ -8170,5 +8170,14 @@ export default {
   "tm.size_ask": "Mac 备份最多可以占用多少 GB？",
   "usb.setup_title": "将此磁盘用于备份？",
   "usb.setup_msg": "{name} 上还没有备份。要在上面保存这台 NAS 的副本，并每晚更新吗？",
-  "usb.setup_ok": "设置"
+  "usb.setup_ok": "设置",
+  "bkf.left_out": "有意不备份",
+  "bkf.copied_when": "由 {names} 复制，最近一次 {when}",
+  "bkf.copied": "由 {names} 复制",
+  "bkf.partly": "部分由 {names} 复制",
+  "bkf.none": "这台 NAS 之外没有副本",
+  "bkf.summary_missing": "{n, plural, other {有 # 个文件夹}}在这台 NAS 之外没有副本",
+  "bkf.summary_ok": "每个文件夹都在这台 NAS 之外有副本，或已有意不备份",
+  "bkf.leave_out": "有意不备份",
+  "bkf.title": "你的文件夹及其副本"
 };

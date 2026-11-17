@@ -23919,6 +23919,26 @@
     "title": "LedConfigRequest",
     "type": "object"
    },
+   "LeftOutUpdate": {
+    "properties": {
+     "left_out": {
+      "title": "Left Out",
+      "type": "boolean"
+     },
+     "name": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+     }
+    },
+    "required": [
+     "name",
+     "left_out"
+    ],
+    "title": "LeftOutUpdate",
+    "type": "object"
+   },
    "ListAllVirtualMachineBackupsResponse": {
     "additionalProperties": true,
     "description": "GET /vms/backups",
@@ -68263,6 +68283,78 @@
     ],
     "x-required-scopes": [
      "system:view"
+    ]
+   }
+  },
+  "/api/v1/system/protection/folders": {
+   "get": {
+    "description": "Backup 5: each shared folder, the copies outside this NAS that hold it, and the folders left\nout on purpose.",
+    "operationId": "get_protection_folders_api_v1_system_protection_folders_get",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Get Protection Folders",
+    "tags": [
+     "System & Storage"
+    ],
+    "x-required-scopes": [
+     "backup:read",
+     "backup:manage"
+    ]
+   }
+  },
+  "/api/v1/system/protection/folders/left-out": {
+   "put": {
+    "description": "Backup 5: marks a folder as left out of backups on purpose, or takes the mark away.",
+    "operationId": "put_protection_left_out_api_v1_system_protection_folders_left_out_put",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/LeftOutUpdate"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Put Protection Left Out",
+    "tags": [
+     "System & Storage"
+    ],
+    "x-required-scopes": [
+     "backup:manage"
     ]
    }
   },

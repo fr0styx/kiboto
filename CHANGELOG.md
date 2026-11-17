@@ -451,6 +451,12 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **"Use this disk for backups?"**: plugging in a large empty USB disk (64 GB or more, no backups, no camera folder)
   offers to keep a copy of this NAS on it; "Set it up" opens "Protect this NAS" with that disk already chosen.
 
+#### Changes
+
+- **Backup shows which folders have no copy**: "Your folders and their copies" lists each shared folder with the
+  backups outside this NAS that hold it, all or part of it, or "No copy outside this NAS". A scratch or download folder
+  can be marked "Leave out on purpose".
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 
