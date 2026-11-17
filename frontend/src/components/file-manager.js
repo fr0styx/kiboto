@@ -1,4 +1,4 @@
-import {
+import { fmHome,
   FmMarqueeController,
   FmSidebarTree,
   FmInspector,
@@ -155,7 +155,7 @@ export class FileManagerWindow {
     this.id = id;
     this.dockId = dockId;
     this.isPrimary = isPrimary;
-    this.currentPath = initialPath || (isPrimary ? (localStorage.getItem('kiboto_fm_last_path') || '/mnt/user') : '/mnt/user');
+    this.currentPath = initialPath || (isPrimary ? (localStorage.getItem('kiboto_fm_last_path') || fmHome()) : fmHome());
     // view, sort and hidden files follow the person (SET-28 Files 4)
     const start = startingView();
     this.viewMode = start.view;
@@ -239,7 +239,7 @@ export class FileManagerWindow {
   getTitle() {
     const baseTitle = t('fm.title', 'File Explorer');
     const folderName = this.currentPath.split('/').filter(Boolean).pop();
-    if (!folderName || (this.isPrimary && this.currentPath === '/mnt/user')) {
+    if (!folderName || (this.isPrimary && this.currentPath === fmHome())) {
       return baseTitle;
     }
     return `${baseTitle} (${folderName})`;
@@ -775,10 +775,12 @@ export class FileManagerWindow {
     // Quick Locations: a dropdown under the button on desktop, a bottom sheet on phones
     this.locationsBtn?.addEventListener('click', (e) => {
       e.stopPropagation();
+      // the server's own places; App data and the boot flash exist only on Unraid (Files finding 28)
+      const home = fmHome();
+      const onUnraid = home === '/mnt/user';
       const places = [
-        { icon: '📁', name: t('fm.loc_user_shares', 'User Shares'), path: '/mnt/user' },
-        { icon: '⚙️', name: t('fm.loc_appdata', 'AppData'), path: '/mnt/user/appdata' },
-        { icon: '💾', name: t('fm.loc_boot', 'Boot Flash'), path: '/boot' },
+        { icon: '📁', name: t('fm.loc_user_shares', 'User Shares'), path: home },
+        ...(onUnraid ? [{ icon: '⚙️', name: t('fm.loc_appdata', 'AppData'), path: '/mnt/user/appdata' }, { icon: '💾', name: t('fm.loc_boot', 'Boot Flash'), path: '/boot' }] : []),
         { icon: '☁️', name: t('fm.loc_remotes', 'Cloud Remotes'), path: '/mnt/remotes' },
       ];
       (this.sidebarTree?.remotes || []).forEach((r) => {
@@ -787,7 +789,7 @@ export class FileManagerWindow {
       (this.sidebarTree?.pools || []).forEach((pool) => {
         if (pool.available !== false) places.push({ icon: pool.type === 'disk' ? '💽' : '⚡', name: pool.name, path: pool.path });
       });
-      places.push({ icon: '🗑️', name: t('dock.recycle_bin', 'Recycle Bin'), path: '/mnt/user/.RecycleBin' });
+      places.push({ icon: '🗑️', name: t('dock.recycle_bin', 'Recycle Bin'), path: `${home}/.RecycleBin` });
       favorites().forEach((f) => places.push({ icon: '⭐', name: f.name, path: f.path, favorite: true }));
       const here = this.currentPath;
       const starred = isFavorite(here);
@@ -1886,7 +1888,7 @@ export class FileManagerWindow {
           if (targetPath === '/' && (!window._fmRoots || !window._fmRoots.includes('/'))) {
             targetPath = (window._fmRoots && window._fmRoots.includes('/mnt'))
               ? '/mnt'
-              : (window._fmRoots ? window._fmRoots[0] : '/mnt/user');
+              : fmHome();
           }
           this.loadPath(targetPath);
         };
@@ -3644,7 +3646,7 @@ export function openNewFileManagerWindow(path = null) {
   _fmInstanceSeq++;
   const instId = `file-manager-window-${_fmInstanceSeq}`;
   const dockId = `fm-${_fmInstanceSeq}`;
-  const targetPath = path || (getActiveFmInstance()?.currentPath) || '/mnt/user';
+  const targetPath = path || (getActiveFmInstance()?.currentPath) || fmHome();
 
   const inst = new FileManagerWindow(instId, dockId, targetPath, false);
   _fmInstances.set(instId, inst);
@@ -3700,15 +3702,7 @@ window.navigateToPath = (path = null) => {
 };
 
 window.openRecycleBin = () => {
-  let target = '/mnt/user/.RecycleBin';
-  if (window._fmRoots && window._fmRoots.length > 0) {
-    if (window._fmRoots.includes('/mnt/user')) target = '/mnt/user/.RecycleBin';
-    else if (window._fmRoots.includes('/mnt/storage')) target = '/mnt/storage/.RecycleBin';
-    else target = `${window._fmRoots[0].replace(/\/$/, '')}/.RecycleBin`;
-  } else {
-    const cur = getActiveFmInstance()?.currentPath;
-    if (cur && cur.startsWith('/mnt/storage')) target = '/mnt/storage/.RecycleBin';
-  }
+  const target = `${fmHome()}/.RecycleBin`; // the bin of the server's main pool (Files finding 28)
   ZettEventBus.emit('window:open', { id: 'file-manager-window', path: target });
 };
 
@@ -3717,7 +3711,7 @@ export function initFileManager() {
   window._fmInitialized = true;
 
   // Initialize primary instance
-  const currentPath = localStorage.getItem('kiboto_fm_last_path') || '/mnt/user';
+  const currentPath = localStorage.getItem('kiboto_fm_last_path') || fmHome();
   let primary = _fmInstances.get('file-manager-window');
   if (!primary) {
     primary = new FileManagerWindow('file-manager-window', 'fm', currentPath, true);
@@ -3980,10 +3974,10 @@ export function openMediaOrganizerModal(initialPath = '') {
   if (!modal.hasAttribute('tabindex')) modal.setAttribute('tabindex', '-1');
 
   if (srcInput && (!srcInput.value || initialPath)) {
-    srcInput.value = initialPath || '/mnt/user/downloads';
+    srcInput.value = initialPath || `${fmHome()}/downloads`;
   }
   if (dstInput && !dstInput.value) {
-    dstInput.value = '/mnt/user/media';
+    dstInput.value = `${fmHome()}/media`;
   }
 
   if (btnPreview) {

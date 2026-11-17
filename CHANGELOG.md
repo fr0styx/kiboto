@@ -577,6 +577,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **The bell by keyboard**: its entries can be reached with Tab and opened with Enter or Space, and a screen reader
   hears their level.
 
+#### Changes
+
+- **Files follows this server's folders**: the first folder, Quick Locations, the Recycle Bin and Organize Media start
+  where this NAS keeps its files, not at Unraid's /mnt/user (nothing changes on Unraid).
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

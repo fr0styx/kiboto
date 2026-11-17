@@ -17,6 +17,15 @@ import { showToast } from '../toast.js';
 import { formatDateTime } from '../format.js';
 import { transferCenter } from './transfer-center.js';
 import { favorites, loadFavorites, removeFavorite, isFavorite, toggleFavorite } from './fm-favorites.js';
+/** Where this server keeps its files: the main pool it reported (/api/fs/roots), else the first
+ *  folder Files may show, else Unraid's /mnt/user. Files used /mnt/user everywhere, which does not
+ *  exist on Kiboto's own OS images (Files finding 28). */
+export function fmHome() {
+  const w = /** @type {any} */ (typeof window !== 'undefined' ? window : {});
+  const first = Array.isArray(w._fmRoots) && w._fmRoots.length ? w._fmRoots[0] : '';
+  return String(w._fmHome || (typeof first === 'string' ? first : first?.path) || '/mnt/user').replace(/\/$/, '') || '/mnt/user';
+}
+
 /** The "Sort by" rows of the menu for empty space in a folder: each field, the current one
  * ticked, then ascending and descending. */
 export function sortMenuHtml(sortBy, sortDir) {
@@ -244,7 +253,7 @@ export class FmSidebarTree {
     this.container = containerEl;
     this.roots = [];
     this.remotes = [];
-    this.expandedPaths = new Set(['/mnt/user']);
+    this.expandedPaths = new Set([fmHome()]);
     this._onMountChanged = () => this.refresh();
     this._onFavorites = () => this.render();
     ZettEventBus.on('fm:favorites', this._onFavorites);
@@ -289,6 +298,7 @@ export class FmSidebarTree {
         const data = await res.json();
         this.roots = data.roots || [];
         this.array = data.array || null;
+        if (this.array?.path) /** @type {any} */ (window)._fmHome = this.array.path;
         this.remotes = data.remotes || [];
         this.pools = data.pools || [];
         this.special = data.special || [];
@@ -302,8 +312,8 @@ export class FmSidebarTree {
 
     if (!this.roots.length) {
       this.roots = [
-        { name: 'Array Shares', path: '/mnt/user', icon: '📁', is_dir: true },
-        { name: 'Recycle Bin', path: '/mnt/user/.RecycleBin', icon: '🗑️', is_dir: true },
+        { name: 'Array Shares', path: fmHome(), icon: '📁', is_dir: true },
+        { name: 'Recycle Bin', path: `${fmHome()}/.RecycleBin`, icon: '🗑️', is_dir: true },
         { name: 'Cloud Remotes', path: '/mnt/remotes', icon: '☁️', is_dir: true },
       ];
     }
@@ -335,7 +345,7 @@ export class FmSidebarTree {
 
     // UX-29: places are buttons with names in the person's language, built from where this
     // server keeps its files (Unraid's /mnt/user, or /mnt/storage, or the first browse root)
-    const base = (this.array && this.array.path) || '/mnt/user';
+    const base = (this.array && this.array.path) || fmHome();
     const onUnraid = base === '/mnt/user';
     const hasRoot = (p) => (this.roots || []).some((r) => (typeof r === 'string' ? r : r && r.path) === p);
     const place = (path, icon, label, active, cls = '', extra = '') => `
