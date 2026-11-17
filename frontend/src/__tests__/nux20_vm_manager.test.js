@@ -205,7 +205,7 @@ describe('connect dialog and KVM checks (NUX-20)', () => {
     openKvmDiagnosticsModal({ state: 'active', hardware_virt: true, module_loaded: true, device_present: true, device_writable: true });
     const modal = document.getElementById('modal-kvm-diagnose');
     expect(modal.textContent).toContain('Virtualization checks (KVM)');
-    expect(modal.textContent).toContain('KVM status');
+    expect(modal.textContent).toContain('Fast: hardware virtualization is on');
     expect(modal.textContent).toContain('Hardware acceleration (KVM) is fully on.');
     expect(modal.textContent).toContain('4. The container may use /dev/kvm');
     expect(modal.textContent).not.toContain('How to fix it');

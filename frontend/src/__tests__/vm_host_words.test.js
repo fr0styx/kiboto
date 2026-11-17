@@ -1,6 +1,6 @@
 // Five-language sweep: the VM window words the host's KVM and processor state from the server's codes.
 import { describe, it, expect, afterEach } from 'vitest';
-import { kvmWords, cpuShareWords } from '../components/vm/host-words.js';
+import { kvmWords, cpuShareWords, kvmFix } from '../components/vm/host-words.js';
 import { setLanguage } from '../i18n.js';
 
 describe('VM host state in words', () => {
@@ -21,5 +21,16 @@ describe('VM host state in words', () => {
     await setLanguage('de');
     expect(kvmWords({ substate: 'bios_disabled' })).toBe('Langsam: Virtualisierung ist im BIOS ausgeschaltet');
     expect(cpuShareWords({ status: 'nominal', overcommit_ratio: 0.5 })).toBe('Jeder virtuelle Prozessor hat einen eigenen Thread');
+  });
+
+  it('says what to do for each slow KVM state, keeping the commands', async () => {
+    expect(kvmFix({ substate: 'module_missing' })).toContain('modprobe kvm_intel');
+    expect(kvmFix({ substate: 'container_restricted' })).toContain('--device /dev/kvm');
+    expect(kvmFix({ substate: 'restricted' })).toContain('/dev/kvm');
+    expect(kvmFix({ substate: 'active', remediation: null })).toBe('');
+    expect(kvmFix({ substate: 'new', remediation: 'Server words' })).toBe('Server words');
+    expect(kvmFix(undefined)).toBe('');
+    await setLanguage('de');
+    expect(kvmFix({ substate: 'bios_disabled' })).toBe('Starte das NAS neu und schalte Intel VT-x oder AMD SVM im BIOS bzw. UEFI ein.');
   });
 });

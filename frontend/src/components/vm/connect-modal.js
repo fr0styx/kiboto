@@ -5,6 +5,7 @@ import { api } from '../../api.js';
 import { escapeHtml } from '../../utils.js';
 import { showToast } from '../../toast.js';
 import { t } from '../../i18n.js';
+import { kvmWords, kvmFix } from './host-words.js';
 import { makeDraggable } from '../dock.js';
 import { vmState } from './state.js';
 import { copyToClipboard, openVmConsole } from './console.js';
@@ -299,10 +300,10 @@ export function openKvmDiagnosticsModal(kvm = null) {
         <div style="padding: 12px 14px; border-radius: 8px; background: ${k.state === 'active' ? 'rgba(16,185,129,0.15)' : 'rgba(245,158,11,0.15)'}; border: 1px solid ${k.state === 'active' ? 'rgba(16,185,129,0.3)' : 'rgba(245,158,11,0.3)'};">
           <div style="font-weight: 700; color: ${k.state === 'active' ? '#34d399' : '#fbbf24'}; font-size: 13px; display: flex; align-items: center; gap: 6px;">
             <span aria-hidden="true">${k.state === 'active' ? '✓' : '⚠️'}</span>
-            <span>${escapeHtml(k.badge || t('vmc.kvm_status', 'KVM status'))}</span>
+            <span>${escapeHtml(kvmWords(k))}</span>
           </div>
           <div class="vmk-xs-soft">
-            ${escapeHtml(k.remediation || (k.state === 'active' ? t('vmc.kvm_ok', 'Hardware acceleration (KVM) is fully on.') : t('vmc.kvm_partial', 'Virtualization is partly restricted.')))}
+            ${escapeHtml(kvmFix(k) || (k.state === 'active' ? t('vmc.kvm_ok', 'Hardware acceleration (KVM) is fully on.') : t('vmc.kvm_partial', 'Virtualization is partly restricted.')))}
           </div>
         </div>
 

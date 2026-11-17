@@ -627,6 +627,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   release ships a newer version that was tested with it, not whenever its maker publishes something new. Apps you
   added yourself are checked against their own source, as before.
 
+#### Fixes
+
+- **Virtual machines: the speed check in your language**: the dialog that explains why virtual machines run slow,
+  and what to do about it, was always English.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 
