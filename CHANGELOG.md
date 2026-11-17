@@ -508,6 +508,9 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 
 - **Safely eject in your language**: ejecting a pool now confirms it in your language instead of in English.
 
+- **Desktop widgets in your language**: the network card says "All ports" instead of "combined", the weather card
+  without a place says "Here" in your language, and the AI accelerator's state no longer runs past the card.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

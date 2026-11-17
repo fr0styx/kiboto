@@ -5199,6 +5199,7 @@ export default {
   "dh.short_started": "Prueba corta iniciada en {dev}.",
   "dh.test_failed_start": "No se pudo iniciar la prueba: {error}",
   "dh.title": "Salud de los discos",
+  "w.net_all_ports": "Todos los puertos",
   "srv.sec_fixed_family": "Ahora los niños y los invitados solo abren las carpetas que compartes con ellos.",
   "srv.sec_fixed_nfs": "{names} limitado a {net}.",
   "srv.sec_fixed_nothing": "No hay nada que cambiar.",

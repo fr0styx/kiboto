@@ -4,6 +4,9 @@ import { state } from '../state.js';
 import { showToast } from '../toast.js';
 import { escapeHtml } from '../utils.js';
 import { t } from '../i18n.js';
+
+/** The network card's port: the server says "combined" when it adds up every physical port. */
+export const ifaceWord = (iface) => (iface === 'combined' ? t('w.net_all_ports', 'All ports') : iface);
 import { api, auth } from '../api.js';
 import { makeDraggable } from './dock.js';
 import { advancedOn } from '../advanced.js';
@@ -1403,7 +1406,7 @@ export async function fetchWeather(force = false) {
     if (lat == null || lon == null) {
       lat = 40.71;
       lon = -74.01;
-      cityName = cityName || 'Local';
+      // no name of our own: the card says "here" in the reader's language (renderWeatherUI)
     }
 
     const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min&timezone=auto`;
@@ -1985,7 +1988,7 @@ export function initWidgets() {
       if (elRx) elRx.textContent = rxText;
       if (elTx) elTx.textContent = txText;
       if (elIface && stats.net.iface) {
-        elIface.textContent = stats.net.iface;
+        elIface.textContent = ifaceWord(stats.net.iface);
       }
     }
 

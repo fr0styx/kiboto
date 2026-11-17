@@ -5199,6 +5199,7 @@ export default {
   "dh.short_started": "已在 {dev} 上开始快速测试。",
   "dh.test_failed_start": "无法开始测试：{error}",
   "dh.title": "硬盘健康",
+  "w.net_all_ports": "所有端口",
   "srv.sec_fixed_family": "孩子和访客现在只能打开你与他们共享的文件夹。",
   "srv.sec_fixed_nfs": "已将 {names} 限制为 {net}。",
   "srv.sec_fixed_nothing": "无需更改。",

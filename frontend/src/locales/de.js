@@ -5199,6 +5199,7 @@ export default {
   "dh.short_started": "Kurzer Test auf {dev} gestartet.",
   "dh.test_failed_start": "Der Test konnte nicht gestartet werden: {error}",
   "dh.title": "Laufwerkszustand",
+  "w.net_all_ports": "Alle Anschlüsse",
   "srv.sec_fixed_family": "Kinder und Gäste öffnen jetzt nur die Ordner, die Sie mit ihnen teilen.",
   "srv.sec_fixed_nfs": "{names} auf {net} beschränkt.",
   "srv.sec_fixed_nothing": "Nichts zu ändern.",

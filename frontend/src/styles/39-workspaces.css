@@ -105,9 +105,12 @@
 
 .ai-gauge-label {
   display: flex;
+  flex-wrap: wrap; /* a long state word ("Bereitschaft") drops under the chip name instead of past the card */
   align-items: center;
   justify-content: space-between;
+  gap: 2px 4px;
   width: 100%;
+  min-width: 0;
   padding: 0 4px;
 }
 
@@ -129,6 +132,9 @@
   border: 1px solid var(--kb-line-10);
   letter-spacing: 0.3px;
   white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .ai-metric-pill.sleep {

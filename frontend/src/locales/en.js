@@ -5199,6 +5199,7 @@ export default {
   "dh.short_started": "Short test started on {dev}.",
   "dh.test_failed_start": "Could not start the test: {error}",
   "dh.title": "Drive Health",
+  "w.net_all_ports": "All ports",
   "srv.sec_fixed_family": "Kids and guests now open only the folders you share with them.",
   "srv.sec_fixed_nfs": "Limited {names} to {net}.",
   "srv.sec_fixed_nothing": "Nothing to change.",
