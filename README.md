@@ -101,7 +101,12 @@ work and goes up one patch number at a time: see [releasing](docs/RELEASING.md).
 | Using Kiboto away from home; the family's own way in | [REMOTE_ACCESS.md](docs/REMOTE_ACCESS.md) |
 | Passkeys; one sign-in for the family's apps | [PASSKEYS.md](docs/PASSKEYS.md), [FAMILY_SIGNIN.md](docs/FAMILY_SIGNIN.md) |
 | Sign-in with OpenID Connect or LDAP | [SSO.md](docs/SSO.md) |
+| Apps: getting them, updates that go back, your own Compose files | [APPS.md](docs/APPS.md) |
+| Shared folders: who can open them, connecting from Windows and Mac | [SHARED_FOLDERS.md](docs/SHARED_FOLDERS.md) |
+| Backup: are your files safe, adding a copy, getting a file back | [BACKUP.md](docs/BACKUP.md) |
 | Backing up your computers, a second box, disaster recovery | [BACKUP_GUIDE.md](docs/BACKUP_GUIDE.md) |
+| Power: outages, coming back by itself, Restart, nights off | [POWER.md](docs/POWER.md) |
+| SNMP for monitoring tools | [SNMP.md](docs/SNMP.md) |
 | Ask Kib and document search | [RAG.md](docs/RAG.md) |
 | How well search works, measured | [SEARCH_QUALITY.md](docs/SEARCH_QUALITY.md) |
 | What the AI may and may not do | [SAFE_AI.md](docs/SAFE_AI.md) |
