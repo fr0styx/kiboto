@@ -3431,8 +3431,8 @@
 
           <!-- 8. AI Knowledge & Visual Search Engine (mgmt-sec-ai) -->
           <div id="mgmt-sec-ai" class="mgmt-detail-card" style="display: none;">
-            <!-- Sticky Sub-Navigation Bar -->
-            <div class="mgmt-sticky-subnav">
+            <!-- Sticky Sub-Navigation Bar: hidden, Ask and Search live in the Kib window and one tab is no bar (SET-26) -->
+            <div class="mgmt-sticky-subnav" hidden>
               <!-- 3-Tab Navigation Bar: Local Chatbot + Unified RAG + Dedicated Configuration -->
               <div class="mgmt-inner-tabs" role="tablist">
                 <button class="mgmt-inner-tab" role="tab" aria-selected="false" data-tab-target="mgmt-pane-ai-chat" id="mgmt-tab-ai-chat" hidden>
@@ -3496,7 +3496,7 @@
 
                   <!-- Sidebar Footer: Stats & Clear All -->
                   <div class="ai-sidebar-footer">
-                    <span id="ai-chat-thread-count" class="ai-thread-count-badge">0 chats</span>
+                    <span id="ai-chat-thread-count" class="ai-thread-count-badge"></span>
                     <button type="button" id="btn-ai-chat-clear-all" class="btn-ai-clear-all" title="Clear all conversation threads" data-i18n-title="ui.clear_all_conversation_threads">
                       <span aria-hidden="true">🗑️</span> <span data-i18n="ai.clear_all">Clear All</span>
                     </button>
@@ -3595,7 +3595,7 @@
                     <button type="button" class="btn-pill-toggle ai-filetype-chip is-small" data-filetype="folders" data-base-label="📁 Folders"><span aria-hidden="true">📁</span> <span data-i18n="mw.folders">Folders</span></button>
                   </div>
                   <div class="rag-row-4">
-                    <div id="ai-search-match-tabs" style="display:inline-flex; background:var(--lt-b-0e1c1ebf, rgba(14,28,30,0.75)); border:1px solid var(--kb-line-12); border-radius:7px; padding:2px;">
+                    <div id="ai-search-match-tabs" style="display:inline-flex; flex-wrap:wrap; max-width:100%; background:var(--lt-b-0e1c1ebf, rgba(14,28,30,0.75)); border:1px solid var(--kb-line-12); border-radius:7px; padding:2px;">
                       <button type="button" class="btn-pill-toggle ai-match-tab active is-small" data-match-tab="semantic" style="border: none; background: rgba(51,205,184,0.28); color: var(--kb-text-strong);"><span aria-hidden="true">✨</span> <span data-i18n="mw.semantic">Semantic</span></button>
                       <button type="button" class="btn-pill-toggle ai-match-tab is-small rag-muted-box" data-match-tab="keyword"><span aria-hidden="true">🔤</span> <span data-i18n="mw.by_word">Keyword</span></button>
                       <button type="button" class="btn-pill-toggle ai-match-tab is-small rag-muted-box" data-match-tab="audio"><span aria-hidden="true">🎙️</span> <span data-i18n="mw.audio">Audio</span></button>
@@ -3938,8 +3938,8 @@
                       <span data-i18n="ai.llm_advisor_title">Onboard NPU &amp; GPU Acceleration • Hugging Face Release Models</span>
                       <a href="https://huggingface.co/models" target="_blank" rel="noopener noreferrer" style="font-size:var(--kb-fs-xs); font-weight:700; padding:2px 8px; border-radius:999px; background:var(--lt-b-facc1524, rgba(250,204,21,0.14)); border:1px solid var(--lt-r-facc1566, rgba(250,204,21,0.4)); color:var(--lt-t-fde047ff, #fde047); text-decoration:none;">🤗 huggingface.co ↗</a>
                     </div>
-                    <div id="ai-llm-advisor-summary" style="font-size:var(--kb-fs-xs); color:var(--muted,#95a8ab); margin-top:2px;" data-sample>
-                      Analyzing onboard NPU, iGPU/dGPU, and system RAM to recommend optimal Hugging Face release models and flag models that exceed your hardware...
+                    <div id="ai-llm-advisor-summary" style="font-size:var(--kb-fs-xs); color:var(--muted,#95a8ab); margin-top:2px;" data-sample data-i18n="ai.llm_advisor_analyzing">
+                      Checking this NAS's NPU, graphics and memory to suggest models that fit…
                     </div>
                   </div>
                   <div class="aix-row-3">
@@ -3960,7 +3960,7 @@
                       <option value="deepseek-r1:70b">⚠️ DeepSeek-R1 70B (Doesn't Fit Hardware)</option>
                       <option value="llama3.1:405b">⚠️ Meta Llama 3.1 405B FP8 (Doesn't Fit Hardware)</option>
                     </select>
-                    <span id="ai-llm-advisor-headline" style="padding:3px 10px; border-radius:999px; font-size:var(--kb-fs-xs); font-weight:700; background:rgba(99,102,241,0.18); color:var(--lt-t-c7d2feff, #c7d2fe); border:1px solid rgba(99,102,241,0.4);" data-sample>NPU + GPU Advisor</span>
+                    <span id="ai-llm-advisor-headline" style="padding:3px 10px; border-radius:999px; font-size:var(--kb-fs-xs); font-weight:700; background:rgba(99,102,241,0.18); color:var(--lt-t-c7d2feff, #c7d2fe); border:1px solid rgba(99,102,241,0.4);" data-sample data-i18n="ai.llm_advisor_badge">Model advice</span>
                   </div>
                 </div>
 
@@ -4026,7 +4026,7 @@
                     </div>
                   </div>
                   <div class="aix-row-7">
-                    <input id="ai-hf-search-input" type="text" placeholder="Search https://huggingface.co models or paste repo/URL (e.g. Qwen/Qwen2.5-14B-Instruct-GGUF, meta-llama/Llama-3.3-70B-Instruct)..." style="flex:1; min-width:240px; height:32px; padding:0 11px; border-radius:6px; background:var(--lt-b-0e1c1ee6, rgba(14,28,30,0.9)); border:1px solid var(--lt-r-ffffff29, rgba(255,255,255,0.16)); color:var(--kb-text-strong); font-size:var(--kb-fs-xs);" aria-label="Search https://huggingface.co models or paste repo/URL (e.g. Qwen/Qwen2.5-14B-Instruct-GGUF, meta-llama/Llama-3.3-70B-Instruct)...">
+                    <input id="ai-hf-search-input" type="text" placeholder="Search Hugging Face models or paste a repo or link (e.g. Qwen/Qwen2.5-14B-Instruct-GGUF)" data-i18n-placeholder="ai.hf_search_placeholder" style="flex:1; min-width:240px; height:32px; padding:0 11px; border-radius:6px; background:var(--lt-b-0e1c1ee6, rgba(14,28,30,0.9)); border:1px solid var(--lt-r-ffffff29, rgba(255,255,255,0.16)); color:var(--kb-text-strong); font-size:var(--kb-fs-xs);" aria-label="Search Hugging Face models or paste a repo or link (e.g. Qwen/Qwen2.5-14B-Instruct-GGUF)" data-i18n-aria-label="ai.hf_search_placeholder">
                     <button id="btn-ai-hf-search" type="button" class="btn-pill-toggle" style="background: rgba(51,205,184,0.18); border: 1px solid rgba(51,205,184,0.45); color: var(--kb-text-accent);">
                       🔍 <span data-i18n="ai.hf_search_btn">Search HF Hub</span>
                     </button>

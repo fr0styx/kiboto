@@ -197,7 +197,12 @@ export function applyTranslations() {
   document.querySelectorAll('[data-i18n-title]').forEach((el) => {
     const key = el.getAttribute('data-i18n-title');
     if (key) {
-      el.setAttribute('title', t(key, el.getAttribute('title') || ''));
+      const before = el.getAttribute('title') || '';
+      const after = t(key, before);
+      el.setAttribute('title', after);
+      // an icon-only button named from its title before the page was translated keeps that name
+      // otherwise (the Kib window's rename button stayed English, SET-26 screenshots)
+      if (el.getAttribute('aria-label') === before && !el.hasAttribute('data-i18n-aria-label')) el.setAttribute('aria-label', after);
     }
   });
 

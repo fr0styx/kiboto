@@ -116,7 +116,7 @@ def start_app_update(stack: str, owner: str | None = None) -> dict[str, Any]:
             try:
                 done.append(update_single_container(name, keep_backup=True) or {})
             except _FAILS as e:
-                error = f"{name} could not be updated: {e}"
+                error = f"{name} could not be updated: {str(e).rstrip('.')}."
                 if done:
                     job_manager.update(job.id, detail="Going back to the old versions")
                     stuck = _go_back(done)

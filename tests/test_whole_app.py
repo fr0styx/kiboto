@@ -233,7 +233,7 @@ def test_update_runs_part_by_part_as_a_job(app, monkeypatch):
     whole_app.start_app_update("shop")
     assert finished.wait(5) and seen["status"] == "error"
     assert (
-        "shop-web-1 could not be updated: pull failed" in seen["error"]
+        "shop-web-1 could not be updated: pull failed. The parts" in seen["error"]
         and "went back to their old versions" in seen["error"]
     )
     # the part already updated is put back on its old container

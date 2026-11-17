@@ -610,6 +610,12 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   after starting stayed broken. Now an app must keep running on its new version, or its old version comes back.
   Updating an app of several parts never leaves it half updated: if one part fails, the others go back too.
 
+#### Fixes
+
+- **Kib in your language**: a new chat's title, the number of chats and a few Advanced texts in the Kib window
+  were always English; screen readers heard the rename button in English. Settings → Kib no longer shows a bar
+  with a single tab.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

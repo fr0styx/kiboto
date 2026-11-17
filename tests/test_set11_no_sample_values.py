@@ -26,7 +26,7 @@ PROMPTS = {
     "btn-revert-update-text": "Revert to previous version",
     "update-progress-desc": "Downloading the new version and restarting Kiboto.",
     "ai-chat-active-title": "New Conversation",
-    "ai-llm-advisor-headline": "NPU + GPU Advisor",
+    "ai-llm-advisor-headline": "Model advice",
     "ai-hw-tier1-status": "Probing NPU...",
     "ai-hw-tier2-status": "Probing GPU...",
     "ai-watched-dropdown-summary": "Select Watched Folders for RAG...",

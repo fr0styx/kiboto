@@ -3146,6 +3146,17 @@ function _buildAiAssistantMessageHtml(res, defaultModel) {
 
 let _activeConversationId = null;
 let _activeConversationTitle = 'New Conversation';
+
+/** A conversation's title as shown: the server stores new ones as "New Conversation", which is
+ * shown in the reader's language (found by the five-language screenshots, SET-26). */
+export function shownTitle(title) {
+  return !title || title === 'New Conversation' ? t('ui.new_conversation', 'New Conversation') : title;
+}
+
+/** Writes a conversation's shown title into the header, when the header is there. */
+export function putTitle(titleEl, title) {
+  if (titleEl) titleEl.textContent = shownTitle(title);
+}
 let _aiConversations = [];
 let _aiActiveAbortController = null;
 let _aiActiveRequestId = 0;
@@ -3196,7 +3207,7 @@ export async function fetchAndRenderAiConversations(searchQuery = '') {
     _aiConversations = convs;
 
     if (countBadge) {
-      countBadge.textContent = `${convs.length} ${convs.length === 1 ? 'chat' : 'chats'}`;
+      countBadge.textContent = t('ai.chat_count', '{count, plural, one {# chat} other {# chats}}', { count: convs.length });
     }
 
     if (convs.length === 0) {
@@ -3216,7 +3227,7 @@ export async function fetchAndRenderAiConversations(searchQuery = '') {
         const pinTitle = c.is_pinned ? 'Unpin' : 'Pin';
         gHtml += `
           <div class="ai-thread-item ${isActive ? 'active' : ''}" data-conv-id="${escapeHtml(c.id)}">
-            <span class="ai-thread-title-text" title="${escapeHtml(c.title || t('ui.new_conversation', 'New Conversation'))}">${escapeHtml(c.title || t('ui.new_conversation', 'New Conversation'))}</span>
+            <span class="ai-thread-title-text" title="${escapeHtml(shownTitle(c.title))}">${escapeHtml(shownTitle(c.title))}</span>
             <div class="ai-thread-actions">
               <button type="button" class="btn-ai-thread-action btn-ai-thread-pin" data-conv-id="${escapeHtml(c.id)}" data-pinned="${c.is_pinned ? '1' : '0'}" title="${pinTitle}">${pinIcon}</button>
               <button type="button" class="btn-ai-thread-action btn-ai-thread-rename" data-conv-id="${escapeHtml(c.id)}" title="${t('mgmt.wallpaper_rename', 'Rename')}">✏️</button>
@@ -3304,7 +3315,7 @@ export async function selectAiConversation(convId) {
     if (!res || !res.conversation) return;
     const conv = res.conversation;
     _activeConversationTitle = conv.title || 'New Conversation';
-    if (titleEl) titleEl.textContent = _activeConversationTitle;
+    putTitle(titleEl, _activeConversationTitle);
 
     if (!listEl) return;
     listEl.innerHTML = '';
@@ -3355,7 +3366,7 @@ export async function createNewAiConversation() {
       _activeConversationId = res.conversation.id;
       _activeConversationTitle = res.conversation.title || 'New Conversation';
       const titleEl = document.getElementById('ai-chat-active-title');
-      if (titleEl) titleEl.textContent = _activeConversationTitle;
+      putTitle(titleEl, _activeConversationTitle);
       const listEl = document.getElementById('ai-chat-messages-list');
       if (listEl) listEl.innerHTML = '';
       _aiChatHistory = [];
@@ -3383,7 +3394,7 @@ export async function renameAiConversation(convId, customTitle = null) {
       if (targetId === _activeConversationId) {
         _activeConversationTitle = titleToSet.trim();
         const titleEl = document.getElementById('ai-chat-active-title');
-        if (titleEl) titleEl.textContent = _activeConversationTitle;
+        putTitle(titleEl, _activeConversationTitle);
       }
       await fetchAndRenderAiConversations();
       showToast(t('ai.chat_renamed', 'Conversation renamed.'), 'success');
@@ -3575,6 +3586,7 @@ export function initAiConversationControls() {
   }
 
   const titleEl = document.getElementById('ai-chat-active-title');
+  if (titleEl && !_activeConversationId) titleEl.textContent = shownTitle(_activeConversationTitle);
   if (titleEl && !titleEl.dataset.bound) {
     titleEl.dataset.bound = '1';
     titleEl.addEventListener('dblclick', () => renameAiConversation(_activeConversationId));
@@ -3911,7 +3923,7 @@ export async function sendAiChatMessage(rawMessage = null) {
       if (res && res.conversation_title && _activeConversationId) {
         _activeConversationTitle = res.conversation_title;
         const titleEl = document.getElementById('ai-chat-active-title');
-        if (titleEl) titleEl.textContent = res.conversation_title;
+        putTitle(titleEl, res.conversation_title);
       }
     } else {
       // Production browser runtime: consume SSE stream from /api/media/chat/stream
@@ -4030,7 +4042,7 @@ export async function sendAiChatMessage(rawMessage = null) {
                 if (parsed?.title && currentConvId === _activeConversationId) {
                   _activeConversationTitle = parsed.title;
                   const titleEl = document.getElementById('ai-chat-active-title');
-                  if (titleEl) titleEl.textContent = parsed.title;
+                  putTitle(titleEl, parsed.title);
                   const tItem = document.querySelector(`.ai-thread-item[data-conv-id="${currentConvId}"] .ai-thread-title-text`);
                   if (tItem) tItem.textContent = parsed.title;
                 }
