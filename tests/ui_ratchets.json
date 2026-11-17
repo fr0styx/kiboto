@@ -293,6 +293,12 @@
   "styles": 0,
   "templates": 1
  },
+ "frontend/src/components/management/power-check.js": {
+  "buttons": 0,
+  "globals": 0,
+  "styles": 0,
+  "templates": 1
+ },
  "frontend/src/components/management/power-history.js": {
   "buttons": 0,
   "globals": 0,

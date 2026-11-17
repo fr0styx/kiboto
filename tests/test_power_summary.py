@@ -126,3 +126,14 @@ def test_who_switches_the_nas_off_is_asked_once_a_minute(monkeypatch):
     assert ps._path(report) == {"by": "kiboto", "ok": True}
     ps._path(report)
     assert len(calls) == 1
+
+
+def test_the_last_battery_test_is_found_further_back(monkeypatch, tmp_path):
+    monkeypatch.setattr(ps, "COMES_BACK_FILE", str(tmp_path / "back.json"))
+    monkeypatch.setattr("backend.services.ups_watchdog.last_practice", lambda: {})
+    events = [{"ts": 10 - i, "event_type": "OUTAGE_RECOVERED"} for i in range(6)]
+    events.append({"ts": 2, "event_type": "SELF_TEST", "action_taken": "accepted"})
+    s = ps.summary(ups=ups(), path=OK_PATH, outage=QUIET, cfg=CFG, events=events)
+    assert s["tests"]["battery"] == {"at": 2, "text": "accepted"} and len(s["history"]) == 5
+    s = ps.summary(ups=ups(), path=OK_PATH, outage=QUIET, cfg=CFG, events=[])
+    assert s["tests"] == {"practice": None, "battery": None}

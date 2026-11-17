@@ -1966,8 +1966,8 @@
               </div>
               <div class="ups-row-2">
                 <button class="btn-pill-toggle" id="btn-ups-discover" title="Scan local USB ports and host gateway for power daemons" data-i18n-title="ui.scan_local_usb_ports_and" data-i18n="mgmt.ups_btn_scan">🔍 Scan Hardware</button>
-                <button class="btn-pill-toggle" id="btn-run-ups-selftest" title="Trigger 10s diagnostic battery self-test" data-i18n-title="ui.trigger_10s_diagnostic_battery_self"><span aria-hidden="true">🔋</span> <span data-i18n="mgmt.ups_btn_selftest">Self-Test</span></button>
-                <button class="btn-pill-toggle" id="btn-ups-simulate" title="Simulate 15s power outage drill" data-i18n-title="ui.simulate_15s_power_outage_drill"><span aria-hidden="true">▶</span> <span data-i18n="mgmt.ups_btn_simulate">Simulate Drill</span></button>
+                <button class="btn-pill-toggle" id="btn-run-ups-selftest" hidden title="Trigger 10s diagnostic battery self-test" data-i18n-title="ui.trigger_10s_diagnostic_battery_self"><span aria-hidden="true">🔋</span> <span data-i18n="mgmt.ups_btn_selftest">Self-Test</span></button>
+                <button class="btn-pill-toggle" id="btn-ups-simulate" hidden title="Simulate 15s power outage drill" data-i18n-title="ui.simulate_15s_power_outage_drill"><span aria-hidden="true">▶</span> <span data-i18n="mgmt.ups_btn_simulate">Simulate Drill</span></button>
                 <button class="btn-pill-toggle" id="btn-refresh-ups" title="Refresh UPS readings" data-i18n-title="ui.refresh_ups_telemetry"><span aria-hidden="true">🔄</span> <span data-i18n="mgmt.refresh">Refresh</span></button>
                 <button id="btn-open-ups-config" style="display:none;" aria-hidden="true"></button>
               </div>
@@ -1983,6 +1983,8 @@
               <div id="ups-restart-line" class="ups-shutdown-line" hidden data-i18n="upx.restart_unproven">Starts again by itself after a power cut: not proven yet.</div>
               <button type="button" id="ups-show-setup" class="btn-pill-toggle ups-show-setup" hidden data-i18n="upx.setup_ups">Set up a UPS</button>
             </div>
+            <!-- Check that it works: the battery test and the practice run with their last results (SET-31): drawn by management/power-check.js -->
+            <section id="power-check" class="pwc" hidden></section>
 
             <!-- Emergency Warning Banner (Shown when on battery or simulating) -->
             <div id="ups-emergency-banner" class="ups-emergency-banner" style="display:none;">

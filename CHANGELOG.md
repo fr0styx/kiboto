@@ -516,6 +516,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Power history in sentences**: "The power was out for 2 minutes. The battery went from 100 % to 85 %." instead of a
   table of event codes; the last five first, "Show all" opens the rest.
 
+#### Changes
+
+- **Power: "Check that it works"**: the battery test and the practice run sit together, each with when it was last
+  done and what came of it; the battery test is greyed with the reason where the UPS cannot take it.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

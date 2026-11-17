@@ -11,6 +11,7 @@ import { formatDateTime } from '../../format.js';
 import { setIconLabel } from '../../ui/primitives.js';
 import { renderPowerTop, stateFromReading } from './power-top.js';
 import { renderPowerHistory } from './power-history.js';
+import { renderPowerCheck } from './power-check.js';
 
 export function renderUpsTelemetry(ups) {
   if (!ups) return;
@@ -208,10 +209,14 @@ async function renderPowerSummary(ups) {
   const asked = await api.get('/api/power').catch(() => null);
   const summary = asked && asked.state ? asked : stateFromReading(ups);
   renderPowerTop(box, summary);
+  renderPowerCheck(document.getElementById('power-check'), summary);
   const state = box.dataset.state || 'none';
   // no UPS: one sentence and "Set up a UPS"; the gauges, settings and history wait (SET-15, Power B1)
   const pane = document.getElementById('mgmt-sec-ups');
-  if (pane) pane.dataset.upsState = state;
+  if (pane) {
+    pane.dataset.upsState = state;
+    pane.dataset.power = summary.state || 'none'; // "Look again" shows only with no UPS or a silent one
+  }
   const setup = document.getElementById('ups-show-setup');
   if (setup) {
     setup.hidden = state !== 'none' || Boolean(pane?.classList.contains('ups-show-all'));

@@ -8297,4 +8297,11 @@ export default {
   "pwh.none": "Aucune coupure de courant enregistrée pour l’instant.",
   "pwh.show_all": "Tout afficher ({count})",
   "pwh.title": "Historique",
+  "pwc.battery_cannot": "On ne peut pas demander un test de batterie à cet onduleur d’ici : seul un onduleur en réseau (NUT) accepte la commande. La plupart des onduleurs testent leur batterie eux-mêmes toutes les quelques semaines.",
+  "pwc.battery_never": "Pas encore testé depuis Kiboto. L’onduleur fonctionne environ 10 secondes sur sa batterie ; le résultat s’affiche sur l’onduleur.",
+  "pwc.battery_last": "Dernier test envoyé le {when}. Le résultat s’affiche sur l’onduleur.",
+  "pwc.title": "Vérifier que ça marche",
+  "pwc.battery": "Tester la batterie",
+  "pwc.practice": "Exercice",
+  "pwc.practice_what": "Kiboto fait comme si le courant était coupé pendant 15 secondes et vérifie qui éteindrait le NAS. Rien n’est éteint.",
 };

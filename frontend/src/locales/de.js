@@ -8297,4 +8297,11 @@ export default {
   "pwh.none": "Noch kein Stromausfall verzeichnet.",
   "pwh.show_all": "Alle zeigen ({count})",
   "pwh.title": "Verlauf",
+  "pwc.battery_cannot": "Diese USV lässt sich von hier nicht um einen Akkutest bitten: Nur eine USV im Netzwerk (NUT) nimmt den Befehl an. Die meisten USVs testen ihren Akku alle paar Wochen selbst.",
+  "pwc.battery_never": "Noch nicht von Kiboto aus getestet. Die USV läuft etwa 10 Sekunden am Akku; das Ergebnis zeigt die USV selbst an.",
+  "pwc.battery_last": "Letzter Test gesendet am {when}. Das Ergebnis zeigt die USV selbst an.",
+  "pwc.title": "Prüfen, ob es funktioniert",
+  "pwc.battery": "Akku testen",
+  "pwc.practice": "Übung",
+  "pwc.practice_what": "Kiboto tut 15 Sekunden lang so, als wäre der Strom weg, und prüft, wer das NAS ausschalten würde. Nichts wird ausgeschaltet.",
 };

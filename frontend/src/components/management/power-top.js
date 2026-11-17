@@ -166,6 +166,5 @@ export function renderPowerTop(box, s) {
       <ol class="pw-steps">${when.steps.map((x, i) => `<li${when.bad && i === when.steps.length - 1 ? ' class="is-bad"' : ''}>${escapeHtml(x)}</li>`).join('')}</ol></details>
     <details class="pw-back"${open.back ? ' open' : ''}><summary><span class="pw-q">${escapeHtml(t('pwr.back_title', 'Will it start again by itself?'))}</span> <span id="ups-restart-line" class="pw-a">${escapeHtml(back.line)}</span></summary>
       <p class="pw-detail">${escapeHtml(back.detail)}</p></details>
-    <div id="ups-practice-line" class="ups-shutdown-line" hidden></div>
     <button type="button" id="ups-show-setup" class="btn-pill-toggle ups-show-setup" hidden>${escapeHtml(t('upx.setup_ups', 'Set up a UPS'))}</button>`;
 }

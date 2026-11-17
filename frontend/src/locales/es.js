@@ -8297,4 +8297,11 @@ export default {
   "pwh.none": "Aún no hay cortes de luz registrados.",
   "pwh.show_all": "Ver todos ({count})",
   "pwh.title": "Historial",
+  "pwc.battery_cannot": "A este SAI no se le puede pedir una prueba de batería desde aquí: solo un SAI en red (NUT) acepta la orden. La mayoría de los SAI prueban su batería por sí solos cada pocas semanas.",
+  "pwc.battery_never": "Aún no se ha probado desde Kiboto. El SAI funciona con su batería unos 10 segundos; el resultado aparece en el propio SAI.",
+  "pwc.battery_last": "Última prueba enviada el {when}. El resultado aparece en el propio SAI.",
+  "pwc.title": "Comprobar que funciona",
+  "pwc.battery": "Probar la batería",
+  "pwc.practice": "Simulacro",
+  "pwc.practice_what": "Kiboto actúa como si se fuera la luz durante 15 segundos y comprueba quién apagaría el NAS. No se apaga nada.",
 };

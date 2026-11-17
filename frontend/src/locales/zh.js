@@ -8297,4 +8297,11 @@ export default {
   "pwh.none": "尚未记录停电。",
   "pwh.show_all": "显示全部（{count}）",
   "pwh.title": "历史记录",
+  "pwc.battery_cannot": "无法从这里要求这台 UPS 进行电池测试：只有通过网络（NUT）连接的 UPS 接受该命令。大多数 UPS 每隔几周会自己测试电池。",
+  "pwc.battery_never": "尚未从 Kiboto 测试过。UPS 会用电池运行约 10 秒；结果显示在 UPS 本身上。",
+  "pwc.battery_last": "上次测试于 {when} 发送。结果显示在 UPS 本身上。",
+  "pwc.title": "检查是否正常",
+  "pwc.battery": "测试电池",
+  "pwc.practice": "演练",
+  "pwc.practice_what": "Kiboto 假装停电 15 秒，并检查谁会关闭 NAS。不会关闭任何东西。",
 };

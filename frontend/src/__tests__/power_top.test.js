@@ -104,7 +104,7 @@ describe('the first screen', () => {
   });
 
   it('the page asks /api/power and folds the rest away without a UPS', async () => {
-    document.body.innerHTML = '<div id="mgmt-sec-ups"><div id="ups-status-line"></div><div id="ups-cockpit-config-section"></div></div>';
+    document.body.innerHTML = '<div id="mgmt-sec-ups"><div id="ups-status-line"></div><section id="power-check" hidden></section><div id="ups-cockpit-config-section"></div></div>';
     vi.spyOn(api, 'get').mockImplementation(async (url) => (url === '/api/power'
       ? { state: 'protected', numbers: { battery_pct: 90, minutes: 40 }, switch_off: KIBOTO, rule: RULE, checks: [], tests: { practice: { at: 1762900000, ok: true, detail: 'Kiboto shuts the server down.' } } }
       : url === '/api/ups' ? { available: true, status: 'OL', battery_charge_pct: 90 } : {}));

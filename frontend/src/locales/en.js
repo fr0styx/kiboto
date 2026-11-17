@@ -8297,4 +8297,11 @@ export default {
   "pwh.none": "No power cuts recorded yet.",
   "pwh.show_all": "Show all ({count})",
   "pwh.title": "Power history",
+  "pwc.battery_cannot": "This UPS cannot be asked for a battery test from here: only a UPS reached over the network (NUT) takes the command. Most UPSs test their battery by themselves every few weeks.",
+  "pwc.battery_never": "Not tested from Kiboto yet. The UPS runs on its battery for about 10 seconds; its result shows on the UPS itself.",
+  "pwc.battery_last": "Last test sent on {when}. Its result shows on the UPS itself.",
+  "pwc.title": "Check that it works",
+  "pwc.battery": "Test the battery",
+  "pwc.practice": "Practice run",
+  "pwc.practice_what": "Kiboto acts as if the power went out for 15 seconds and checks who would switch the NAS off. Nothing is switched off.",
 };

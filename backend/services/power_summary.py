@@ -25,6 +25,7 @@ from backend.hardware import ups_state
 
 COMES_BACK_FILE = os.path.join(DATA_DIR, "power_comes_back.json")
 HISTORY_ROWS = 5
+LOOK_BACK_ROWS = 50  # how far back the last battery test is looked for
 
 
 def _words(status: Any) -> set[str]:
@@ -117,7 +118,8 @@ def summary(
     path = path if path is not None else _path(ups_watchdog.shutdown_path_report)
     outage = outage if outage is not None else ups_watchdog.outage_view()
     cfg = cfg if cfg is not None else load_ups_config()
-    events = events if events is not None else query_ups_events(limit=HISTORY_ROWS)
+    events = events if events is not None else query_ups_events(limit=LOOK_BACK_ROWS)
+    battery = next((e for e in events if e.get("event_type") == "SELF_TEST"), None)
     state, reason = state_of(ups, path, outage, cfg)
     mode = str(ups.get("mode") or cfg.get("mode") or "")
     over_nut = "nut" in mode or "nut" in str(ups.get("protocol") or "").lower()
@@ -146,7 +148,10 @@ def summary(
             "timer_sec": cfg.get("shutdown_timer_sec", 300),
         },
         "comes_back": comes_back(str(path.get("by") or "kiboto")),
-        "tests": {"practice": ups_watchdog.last_practice() or None},
+        "tests": {
+            "practice": ups_watchdog.last_practice() or None,
+            "battery": {"at": battery.get("ts"), "text": battery.get("action_taken")} if battery else None,
+        },
         "history": events[:HISTORY_ROWS],
         "can": {
             "self_test": bool(ups.get("available")) and over_nut,

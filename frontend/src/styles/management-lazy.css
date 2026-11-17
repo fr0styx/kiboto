@@ -576,3 +576,10 @@
 .pwh-when { color: var(--kb-text-soft); font-variant-numeric: tabular-nums; min-width: 9em; }
 .pwh-empty { margin: 0; font-size: var(--kb-fs-xs); color: var(--kb-text-soft); }
 .pwh-more { margin-top: 8px; }
+/* Check that it works (SET-31) */
+.pwc { margin: 0 0 14px; padding: 12px 14px; border-radius: 8px; border: 1px solid var(--kb-line-12); background: var(--kb-glaze-3); }
+.pwc-title { margin: 0 0 8px; font-size: var(--kb-fs-sm); color: var(--kb-text-strong); }
+.pwc-item { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; margin-top: 8px; }
+.pwc-line { margin: 0; flex: 1 1 260px; font-size: var(--kb-fs-xs); color: var(--kb-text-soft); line-height: 1.45; }
+.pwc-item .ups-shutdown-line { flex-basis: 100%; }
+#mgmt-sec-ups:not([data-power="none"]):not([data-power="silent"]) #btn-refresh-ups { display: none; }
