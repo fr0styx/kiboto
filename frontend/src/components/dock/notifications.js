@@ -301,6 +301,14 @@ export function renderNotificationCenter() {
         window.openEventDetailModal(eventObj);
       }
     });
+    // rows are reached and opened by keyboard too (Activity finding 25)
+    list.addEventListener('keydown', (ev) => {
+      const row = /** @type {HTMLElement | null} */ (/** @type {HTMLElement} */ (ev.target).closest('.notif-center-item'));
+      if (row && (ev.key === 'Enter' || ev.key === ' ')) {
+        ev.preventDefault();
+        row.click();
+      }
+    });
   }
 
   list.innerHTML = '';
@@ -314,12 +322,14 @@ export function renderNotificationCenter() {
     row.className = 'notif-center-item' + (isChecked ? ' notif-event-checked' : '');
     row.dataset.eventKey = getEventKey(e);
     row._eventData = e;
+    row.tabIndex = 0;
+    row.setAttribute('role', 'button');
     row.style.cssText = `padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; gap: 8px; align-items: flex-start; cursor:pointer; transition: background 0.15s ease; ${isChecked ? 'opacity: 0.45; filter: grayscale(0.5); background: transparent;' : 'background: rgba(255,255,255,0.05);'}`;
     row.innerHTML = `
       <span class="notif-center-icon" style="font-size: 14px; margin-top:2px; flex-shrink:0;">${icon}</span>
       <div style="display:flex; flex-direction:column; gap:2px; flex:1; min-width:0;">
         <div style="display:flex; justify-content:space-between; align-items:center;">
-          <div class="notif-center-title" style="font-size:var(--kb-fs-xs); font-weight:700; color:${color}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; ${isChecked ? 'opacity:0.75;' : ''}">${escapeHtml(view.title)}</div>
+          <span class="sr-only">${escapeHtml(view.word)}: </span><div class="notif-center-title" style="font-size:var(--kb-fs-xs); font-weight:700; color:${color}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; ${isChecked ? 'opacity:0.75;' : ''}">${escapeHtml(view.title)}</div>
           <span style="font-size:var(--kb-fs-xs); color:var(--muted); opacity:0.8; margin-left:6px; flex-shrink:0;">🔍</span>
         </div>
         <div class="notif-center-msg" style="font-size:var(--kb-fs-xs); color:${isChecked ? 'var(--muted)' : '#fff'}; line-height:1.4; word-break:break-word;">${escapeHtml(view.message)}</div>
