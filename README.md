@@ -104,6 +104,7 @@ work and goes up one patch number at a time: see [releasing](docs/RELEASING.md).
 | Apps: getting them, updates that go back, your own Compose files | [APPS.md](docs/APPS.md) |
 | People: adding family members, roles, a lost phone | [PEOPLE.md](docs/PEOPLE.md) |
 | Shared folders: who can open them, connecting from Windows and Mac | [SHARED_FOLDERS.md](docs/SHARED_FOLDERS.md) |
+| Storage: drives, bays, Drive Health, replacing a drive | [STORAGE.md](docs/STORAGE.md) |
 | Backup: are your files safe, adding a copy, getting a file back | [BACKUP.md](docs/BACKUP.md) |
 | Backing up your computers, a second box, disaster recovery | [BACKUP_GUIDE.md](docs/BACKUP_GUIDE.md) |
 | Power: outages, coming back by itself, Restart, nights off | [POWER.md](docs/POWER.md) |
