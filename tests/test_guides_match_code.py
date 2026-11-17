@@ -2,7 +2,8 @@
 
 import os
 
-from backend.services import compose_apply, docker_updates, offsite_backup
+from backend import config
+from backend.services import compose_apply, docker_updates, offsite_backup, recycle_bin
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -22,3 +23,14 @@ def test_backup_guide_numbers():
     text = _doc("BACKUP.md")
     assert offsite_backup.RETRY_AFTER_SECS == 3600 and "again once an hour" in text
     assert offsite_backup.CATCH_UP_AFTER_SECS > 24 * 3600 and "missed for more than a day" in text
+
+
+def test_files_guide_numbers():
+    text = _doc("FILES.md")
+    assert f"stays there for {recycle_bin.KEEP_DAYS} days" in text
+    assert recycle_bin.MAX_SHARE_OF_DISK == 0.10 and "a tenth of its drive" in text
+    assert recycle_bin.MIN_KEEP_SECS == 86400 and "stays in the bin for one day" in text
+
+
+def test_people_guide_numbers():
+    assert f"first password of {config.MIN_PASSWORD_LENGTH} characters or more" in _doc("PEOPLE.md")

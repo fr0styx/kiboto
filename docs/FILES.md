@@ -13,7 +13,7 @@ image or the path, whichever fits the file.
 ## Deleting and the Recycle Bin
 
 Deleting moves a file to the **Recycle Bin** of its shared folder, where you can put it
-back. A file larger than the bin keeps (a tenth of its drive) stays in the bin for one day,
+back; it stays there for 30 days. A file larger than the bin keeps (a tenth of its drive) stays in the bin for one day,
 then goes for good; Files says so before you delete it. **Empty Recycle Bin** deletes for
 good. A bin on a sleeping drive is not shown, so the drive stays asleep; it appears once the
 drive is awake.
