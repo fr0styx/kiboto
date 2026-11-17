@@ -637,6 +637,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **A guide to Apps** (docs/APPS.md): getting apps, how updates work and go back, changing an app's Compose file,
   backups and removal.
 
+#### Fixes
+
+- **App updates speak your language**: the Jobs centre and Activity now say in your language why an app update
+  failed and whether its parts went back to their old versions.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

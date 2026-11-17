@@ -205,9 +205,9 @@ def test_update_runs_part_by_part_as_a_job(app, monkeypatch):
     seen = {}
     real = job_manager.finish
 
-    def finish(jid, status="done", error=None):
-        seen.update(status=status, error=error)
-        real(jid, status, error)
+    def finish(jid, status="done", error=None, **kw):
+        seen.update(status=status, error=error, **kw)
+        real(jid, status, error, **kw)
         finished.set()
 
     monkeypatch.setattr(job_manager, "finish", finish)
@@ -236,6 +236,9 @@ def test_update_runs_part_by_part_as_a_job(app, monkeypatch):
         "shop-web-1 could not be updated: pull failed. The parts" in seen["error"]
         and "went back to their old versions" in seen["error"]
     )
+    # the Jobs centre words it in the reader's language
+    assert seen["error_id"] == "jobs.e.app_update_back"
+    assert seen["error_params"] == {"app": "shop", "name": "shop-web-1", "reason": "pull failed"}
     # the part already updated is put back on its old container
     assert calls == [
         ("DELETE", "/containers/new-shop-db-1?v=false&force=true"),
@@ -250,6 +253,15 @@ def test_update_runs_part_by_part_as_a_job(app, monkeypatch):
     )
     whole_app.start_app_update("shop")
     assert finished.wait(5) and "Could not put back: shop-db-1." in seen["error"]
+    assert seen["error_id"] == "jobs.e.app_update_stuck" and seen["error_params"]["stuck"] == "shop-db-1"
+
+    def first_fails(name, keep_backup=False):
+        raise RuntimeError("pull failed")
+
+    finished.clear()
+    monkeypatch.setattr("backend.services.docker_updates.update_single_container", first_fails)
+    whole_app.start_app_update("shop")
+    assert finished.wait(5) and seen["error_id"] == "jobs.e.app_update_failed"
 
     monkeypatch.setattr("backend.services.docker_updates.check_all_container_updates", lambda force=False: {})
     assert whole_app.start_app_update("shop") == {"status": "up_to_date", "parts": []}

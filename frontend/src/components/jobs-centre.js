@@ -51,6 +51,13 @@ const STATUS = {
 };
 const label = (map, key) => (map[key] ? t(map[key][0], map[key][1]) : key);
 
+/** A job's error, or else its detail line, in the reader's language when the server sent a key. */
+export function jobDetail(job) {
+  if (job.error_id) return t(job.error_id, job.error || '', job.error_params || {});
+  if (job.error) return job.error;
+  return job.detail_id ? t(job.detail_id, job.detail || '', job.detail_params || {}) : job.detail || '';
+}
+
 /** A job's title in the reader's language when the server says how (NUX-3), else as sent. */
 export function jobTitle(job) {
   return job && job.title_id ? t(job.title_id, job.title || '', job.title_params || {}) : (job && job.title) || '';
@@ -72,7 +79,7 @@ export function jobRowHtml(job, active) {
   const cancel = active && job.can_cancel
     ? `<button type="button" class="jobs-cancel" data-job-cancel="${escapeHtml(job.id)}">${escapeHtml(t('jobs.cancel', 'Cancel'))}</button>`
     : '';
-  const detail = job.error || (job.detail_id ? t(job.detail_id, job.detail || '', job.detail_params || {}) : job.detail || '');
+  const detail = jobDetail(job);
   return `<li class="jobs-row is-${escapeHtml(job.status)}">
     <div class="jobs-row-head">
       <span class="jobs-kind">${escapeHtml(label(KIND, job.kind))}</span>

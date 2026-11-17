@@ -46,6 +46,9 @@ class Job:
     # the same for the detail line, when a source has one in the messages ("3 errors corrected so far")
     detail_id: str = ""
     detail_params: dict[str, Any] = field(default_factory=dict)
+    # and for the error, when the source words it in the messages ("x could not be updated: ...")
+    error_id: str = ""
+    error_params: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -97,12 +100,20 @@ class JobManager:
                     if hasattr(reg.job, k):
                         setattr(reg.job, k, v)
 
-    def finish(self, job_id: str, status: str = "done", error: str | None = None) -> None:
+    def finish(
+        self,
+        job_id: str,
+        status: str = "done",
+        error: str | None = None,
+        error_id: str = "",
+        error_params: dict[str, Any] | None = None,
+    ) -> None:
         with self._lock:
             reg = self._jobs.pop(job_id, None)
             if not reg:
                 return
             reg.job.status, reg.job.error, reg.job.finished_at, reg.job.can_cancel = status, error, time.time(), False
+            reg.job.error_id, reg.job.error_params = error_id, dict(error_params or {})
             if status == "done":
                 reg.job.percent = 100.0
             self._remember(reg.job.to_dict())

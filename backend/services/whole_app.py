@@ -90,13 +90,36 @@ def _drop_old(done: list[dict[str, Any]]) -> None:
             logger.warning("[Apps] Old container %s left behind: %s", res.get("backup_name"), e)
 
 
+def _tell_not_updated(job_id: str, stack: str, name: str, reason: str, done: list[dict[str, Any]]) -> None:
+    """A part failed: the parts already updated go back, the job and the activity log say so,
+    in the reader's language (the English stays for the log file)."""
+    from backend.services.jobs import job_manager
+    from backend.state import add_event, event_text
+
+    error = f"{name} could not be updated: {reason}."
+    key, params = "app_update_failed", {"app": stack, "name": name, "reason": reason}
+    if done:
+        job_manager.update(
+            job_id, detail="Going back to the old versions", detail_id="jobs.d.app_going_back", detail_params={}
+        )
+        stuck = _go_back(done)
+        if stuck:
+            error += f" Could not put back: {', '.join(stuck)}."
+            key, params = "app_update_stuck", {**params, "stuck": ", ".join(stuck)}
+        else:
+            error += " The parts already updated went back to their old versions."
+            key = "app_update_back"
+    add_event("warning", "App not updated", f"{stack}: {error}", event_text(key, **params))
+    job_manager.finish(job_id, "error", error, error_id=f"jobs.e.{key}", error_params=params)
+
+
 def start_app_update(stack: str, owner: str | None = None) -> dict[str, Any]:
     """Updates every part of an app that has a newer image, one after the other in start order,
     as a job. Each part must keep running on its new version; a part that fails stops the rest and
     the parts already updated go back to their old versions, so the app never runs half updated."""
     from backend.services.docker_updates import update_single_container
     from backend.services.jobs import job_manager
-    from backend.state import add_event
+    from backend.state import add_event, event_text
 
     parts = parts_with_updates(stack)
     if not parts:
@@ -112,24 +135,25 @@ def start_app_update(stack: str, owner: str | None = None) -> dict[str, Any]:
     def run() -> None:
         done: list[dict[str, Any]] = []
         for i, name in enumerate(parts):
-            job_manager.update(job.id, detail=f"Updating {name}", percent=float(100 * i / len(parts)))
+            job_manager.update(
+                job.id,
+                detail=f"Updating {name}",
+                detail_id="jobs.d.app_updating",
+                detail_params={"name": name},
+                percent=float(100 * i / len(parts)),
+            )
             try:
                 done.append(update_single_container(name, keep_backup=True) or {})
             except _FAILS as e:
-                error = f"{name} could not be updated: {str(e).rstrip('.')}."
-                if done:
-                    job_manager.update(job.id, detail="Going back to the old versions")
-                    stuck = _go_back(done)
-                    error += (
-                        f" Could not put back: {', '.join(stuck)}."
-                        if stuck
-                        else " The parts already updated went back to their old versions."
-                    )
-                add_event("warning", "App not updated", f"{stack}: {error}")
-                job_manager.finish(job.id, "error", error)
+                _tell_not_updated(job.id, stack, name, str(e).rstrip("."), done)
                 return
         _drop_old(done)
-        add_event("success", "App updated", f"{stack}: {', '.join(parts)}.")
+        add_event(
+            "success",
+            "App updated",
+            f"{stack}: {', '.join(parts)}.",
+            event_text("app_updated", app=stack, parts=", ".join(parts)),
+        )
         job_manager.finish(job.id, "done")
 
     threading.Thread(target=run, daemon=True, name=f"app-update-{stack}").start()
