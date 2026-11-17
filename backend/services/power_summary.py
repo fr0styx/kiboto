@@ -112,6 +112,28 @@ def _path(report) -> dict[str, Any]:
     return value or {}
 
 
+_sockets_cache: dict[str, Any] = {"at": 0.0, "key": None, "value": None}
+SOCKETS_FRESH_SECS = 600.0
+
+
+def _sockets(cfg: dict[str, Any]) -> dict[str, Any] | None:
+    """Whether the UPS can switch its sockets back on by itself; asked at most every 10 minutes and
+    only of a UPS reached over NUT (the only one that takes commands)."""
+    from backend.services import ups_sockets
+
+    if not ups_sockets.over_nut(cfg):
+        return None
+    key = (cfg.get("host"), cfg.get("port"), cfg.get("ups_name"))
+    now = time.monotonic()
+    if (
+        _sockets_cache["value"] is None
+        or _sockets_cache["key"] != key
+        or now - _sockets_cache["at"] > SOCKETS_FRESH_SECS
+    ):
+        _sockets_cache.update(at=now, key=key, value=ups_sockets.check(cfg))
+    return _sockets_cache["value"]
+
+
 def summary(
     ups: dict[str, Any] | None = None,
     path: dict[str, Any] | None = None,
@@ -158,6 +180,7 @@ def summary(
             "timer_sec": cfg.get("shutdown_timer_sec", 300),
         },
         "comes_back": comes_back(str(path.get("by") or "kiboto")),
+        "sockets": _sockets(cfg) if ups.get("available") else None,
         "tests": {
             "practice": ups_watchdog.last_practice() or None,
             "battery": {"at": battery.get("ts"), "text": battery.get("action_taken")} if battery else None,

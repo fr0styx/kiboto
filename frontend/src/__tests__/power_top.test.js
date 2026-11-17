@@ -130,3 +130,14 @@ describe("one question after a real power cut", () => {
     expect(answers).toEqual([true, false]);
   });
 });
+
+describe("the UPS sockets", () => {
+  it("says whether the UPS switches its sockets back on", async () => {
+    const { socketsLine } = await import("../components/management/power-top.js");
+    expect(socketsLine({})).toBe("");
+    expect(socketsLine({ sockets: { ok: true } })).toMatch(/^Your UPS can switch its sockets back on/);
+    expect(socketsLine({ sockets: { ok: false, code: "no_command" } })).toMatch(/^Your UPS has no command/);
+    expect(socketsLine({ sockets: { ok: false, code: "unreachable" } })).toMatch(/^Kiboto could not ask/);
+    expect(comesBack({ sockets: { ok: true } }).detail).toContain("Your UPS can switch its sockets back on");
+  });
+});

@@ -1994,7 +1994,7 @@ export default {
   "mgmt.ups_policy_batt": "Apagar si la carga de batería baja de:",
   "mgmt.ups_policy_timer": "Apagar tras un tiempo en batería superior a:",
   "mgmt.ups_chk_docker": "Dar a las aplicaciones hasta 45 segundos para cerrarse (siempre se detienen antes del apagado)",
-  "mgmt.ups_chk_cutpower": "Apagar las tomas del SAI cuando el NAS se haya apagado",
+  "mgmt.ups_chk_cutpower": "Apagar las tomas del SAI cuando el NAS se haya apagado y encenderlas al volver la luz",
   "mgmt.ups_btn_selftest": "Autodiagnóstico",
   "mgmt.ups_emergency_title": "CORTE DE ENERGÍA DE LÍNEA DETECTADO",
   "mgmt.ups_emergency_desc": "Sistema funcionando con batería de reserva. La política de apagado seguro está activa.",
@@ -8315,4 +8315,7 @@ export default {
   "pwr.back_yes": "Sí, solo",
   "pwr.back_no_btn": "No, alguien lo encendió",
   "pwr.back_saved": "Gracias. La respuesta se guarda en esta página.",
+  "pwr.sockets_ok": "Tu SAI puede volver a dar corriente a sus enchufes cuando vuelva la luz. Activa abajo el ajuste de los enchufes del SAI para que lo haga.",
+  "pwr.sockets_no": "Tu SAI no tiene ninguna orden para volver a dar corriente a sus enchufes cuando vuelva la luz.",
+  "pwr.sockets_unknown": "Kiboto no ha podido preguntar a tu SAI si vuelve a dar corriente a sus enchufes.",
 };

@@ -1994,7 +1994,7 @@ export default {
   "mgmt.ups_policy_batt": "Arrêter si la charge batterie passe sous :",
   "mgmt.ups_policy_timer": "Arrêter après une durée sur batterie supérieure à :",
   "mgmt.ups_chk_docker": "Laisser aux applications jusqu’à 45 secondes pour se fermer (elles sont toujours arrêtées avant l’extinction)",
-  "mgmt.ups_chk_cutpower": "Couper les prises de l’onduleur une fois le NAS éteint",
+  "mgmt.ups_chk_cutpower": "Couper les prises de l’onduleur une fois le NAS éteint, et les rallumer au retour du courant",
   "mgmt.ups_btn_selftest": "Auto-test",
   "mgmt.ups_emergency_title": "PANNE DE COURANT SECTEUR DÉTECTÉE",
   "mgmt.ups_emergency_desc": "Système sur batterie de secours. La politique d'arrêt automatique est active.",
@@ -8315,4 +8315,7 @@ export default {
   "pwr.back_yes": "Oui, tout seul",
   "pwr.back_no_btn": "Non, quelqu’un l’a rallumé",
   "pwr.back_saved": "Merci. La réponse reste sur cette page.",
+  "pwr.sockets_ok": "Votre onduleur peut rallumer ses prises au retour du courant. Activez ci-dessous le réglage des prises de l’onduleur pour qu’il le fasse.",
+  "pwr.sockets_no": "Votre onduleur n’a pas de commande pour rallumer ses prises au retour du courant.",
+  "pwr.sockets_unknown": "Kiboto n’a pas pu demander à votre onduleur s’il rallume ses prises.",
 };

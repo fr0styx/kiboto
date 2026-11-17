@@ -1994,7 +1994,7 @@ export default {
   "mgmt.ups_policy_batt": "Herunterfahren wenn Akkustand unter:",
   "mgmt.ups_policy_timer": "Herunterfahren nach Akkubetriebszeit von:",
   "mgmt.ups_chk_docker": "Apps bis zu 45 Sekunden zum Beenden geben (sie werden vor dem Herunterfahren immer gestoppt)",
-  "mgmt.ups_chk_cutpower": "Die Steckdosen der USV ausschalten, nachdem das NAS heruntergefahren ist",
+  "mgmt.ups_chk_cutpower": "Die Steckdosen der USV ausschalten, nachdem das NAS heruntergefahren ist, und wieder einschalten, wenn der Strom zurückkommt",
   "mgmt.ups_btn_selftest": "Selbsttest",
   "mgmt.ups_emergency_title": "STROMNETZAUSFALL ERKANNT",
   "mgmt.ups_emergency_desc": "System läuft auf Batteriereserve. Automatische Notabschaltung ist aktiv.",
@@ -8315,4 +8315,7 @@ export default {
   "pwr.back_yes": "Ja, von selbst",
   "pwr.back_no_btn": "Nein, jemand hat es eingeschaltet",
   "pwr.back_saved": "Danke. Die Antwort bleibt auf dieser Seite.",
+  "pwr.sockets_ok": "Ihre USV kann ihre Steckdosen wieder einschalten, wenn der Strom zurückkommt. Schalten Sie unten die Einstellung für die USV-Steckdosen ein, damit sie es tut.",
+  "pwr.sockets_no": "Ihre USV hat keinen Befehl, ihre Steckdosen wieder einzuschalten, wenn der Strom zurückkommt.",
+  "pwr.sockets_unknown": "Kiboto konnte Ihre USV nicht fragen, ob sie ihre Steckdosen wieder einschaltet.",
 };

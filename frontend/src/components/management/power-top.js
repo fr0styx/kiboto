@@ -122,10 +122,20 @@ export function whenPowerGoes(s) {
   };
 }
 
+/** What the UPS can do with its sockets after the shutdown, when Kiboto could ask it. */
+export function socketsLine(s) {
+  const k = s?.sockets;
+  if (!k) return '';
+  if (k.ok) return t('pwr.sockets_ok', 'Your UPS can switch its sockets back on when the power returns. Turn on the UPS sockets setting below so it does.');
+  if (k.code === 'no_command') return t('pwr.sockets_no', 'Your UPS has no command to switch its sockets back on when the power returns.');
+  return t('pwr.sockets_unknown', 'Kiboto could not ask your UPS whether it switches its sockets back on.');
+}
+
 /** "Will it start again by itself?": the answer and its explanation. */
 export function comesBack(s) {
   const c = s?.comes_back || { answer: 'not_proven' };
-  const why = t('pwr.back_why', 'Whether the NAS switches on again when the power returns depends on its own start-up setting (often called "Restore on AC power loss" in the BIOS) and, with a UPS, on whether the UPS switches its sockets back on.');
+  const sockets = socketsLine(s);
+  const why = (sockets ? `${sockets} ` : '') + t('pwr.back_why', 'Whether the NAS switches on again when the power returns depends on its own start-up setting (often called "Restore on AC power loss" in the BIOS) and, with a UPS, on whether the UPS switches its sockets back on.');
   if (c.answer === 'ask') return { line: t('pwr.back_ask', 'After the power cut on {date}: did the NAS switch on again by itself?', { date: formatDateTime(c.at * 1000) }), detail: why, ask: true };
   if (c.answer === 'host') return { line: t('pwr.back_host', '{host} decides this.', { host: c.host }), detail: why };
   if (c.answer === 'proven') return { line: t('pwr.back_proven', 'Yes, proven on {date}.', { date: formatDateTime(c.at * 1000) }), detail: why };

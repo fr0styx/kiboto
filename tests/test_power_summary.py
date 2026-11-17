@@ -188,3 +188,19 @@ def test_the_safe_shutdown_remembers_the_cut_and_forgets_it_when_nothing_switche
     monkeypatch.setattr(ups_watchdog, "_host_shutdown_started", False)
     ups_watchdog.execute_atomic_failsafe_shutdown(5, 2, "battery low")
     assert "cut_at" in json.loads((tmp_path / "back.json").read_text())
+
+
+def test_the_sockets_are_asked_of_a_nut_ups_only_and_rarely(monkeypatch, tmp_path):
+    monkeypatch.setattr(power_comes_back, "COMES_BACK_FILE", str(tmp_path / "back.json"))
+    monkeypatch.setattr("backend.services.ups_watchdog.last_practice", lambda: {})
+    monkeypatch.setattr(ps, "_sockets_cache", {"at": 0.0, "key": None, "value": None})
+    asked = []
+    monkeypatch.setattr(
+        "backend.services.ups_sockets.check", lambda cfg: asked.append(cfg) or {"ok": True, "code": "", "why": ""}
+    )
+    s = ps.summary(ups=ups(), path=OK_PATH, outage=QUIET, cfg=CFG, events=[])
+    assert s["sockets"] is None and asked == []  # not over NUT
+    nut = {**CFG, "mode": "nut_client", "host": "10.0.0.2", "port": 3493}
+    assert ps.summary(ups=ups(), path=OK_PATH, outage=QUIET, cfg=nut, events=[])["sockets"]["ok"] is True
+    ps.summary(ups=ups(), path=OK_PATH, outage=QUIET, cfg=nut, events=[])
+    assert len(asked) == 1

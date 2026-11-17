@@ -533,6 +533,12 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **"Will it start again by itself?" can now be proven**: after Kiboto shuts the NAS down for a power cut, Power asks
   once at the next start whether it switched on by itself; the answer ("Yes, proven on …" or "No") stays on the page.
 
+#### Fixes
+
+- **The UPS sockets come back on when the power returns**: after a safe shutdown Kiboto asked the UPS to switch its
+  sockets off and leave them off, so the NAS could not start again by itself. It now asks for "off, and back on when
+  the power returns", reads the answer, and Power says whether your UPS can do it.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

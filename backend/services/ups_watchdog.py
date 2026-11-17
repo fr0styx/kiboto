@@ -323,34 +323,16 @@ def shutdown_path_report() -> dict[str, Any]:
     }
 
 
-def send_ups_cut_power():
-    """Issues shutdown command to UPS controller so it drops outlets after host halts."""
-    cfg = load_ups_config()
-    host = cfg.get("host", "127.0.0.1")
-    port = cfg.get("port", 3551)
-    mode = cfg.get("mode", "auto")
-    ups_name = cfg.get("ups_name", "ups")
+def send_ups_cut_power() -> dict[str, Any]:
+    """After the host shutdown started: the UPS switches its sockets off after a delay and back on
+    when the power returns (NUT "shutdown.return"; SET-31 stage 5). The old "load.off.delay" left
+    them off, so the NAS could not start again by itself; its answer was never read."""
+    from backend.services import ups_sockets
 
-    logger.warning("[UPS FAILSAFE] Issuing delayed power-cut command to UPS...")
-    # Attempt NUT socket command: load.off.delay
-    if mode in ("nut_client", "nut") or port == 3493:
-        try:
-            import socket
-
-            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                s.settimeout(2.0)
-                s.connect((host, port))
-                if cfg.get("username"):
-                    s.sendall(f"USERNAME {cfg['username']}\n".encode())
-                    s.recv(1024)
-                if cfg.get("password"):
-                    s.sendall(f"PASSWORD {cfg['password']}\n".encode())
-                    s.recv(1024)
-                s.sendall(f"INSTCMD {ups_name} load.off.delay 60\n".encode())
-                s.recv(1024)
-                logger.info("[UPS FAILSAFE] Issued 'load.off.delay 60' to NUT.")
-        except Exception as e:
-            logger.debug(f"[UPS FAILSAFE] Failed sending NUT power-cut: {e}")
+    res = ups_sockets.send_return(load_ups_config())
+    if not res["ok"]:
+        logger.error("[UPS FAILSAFE] The UPS sockets were not set to come back: %s", res["why"])
+    return res
 
 
 def host_shutdown_paths() -> list[str]:

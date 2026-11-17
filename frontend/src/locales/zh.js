@@ -1994,7 +1994,7 @@ export default {
   "mgmt.ups_policy_batt": "当电池剩余电量低于以下数值时触发关机：",
   "mgmt.ups_policy_timer": "在电池供电持续时间超过以下数值时触发关机：",
   "mgmt.ups_chk_docker": "给应用最多 45 秒时间关闭（关机前总会停止它们）",
-  "mgmt.ups_chk_cutpower": "NAS 关机后关闭 UPS 插座",
+  "mgmt.ups_chk_cutpower": "NAS 关机后关闭 UPS 插座，并在恢复供电时重新打开",
   "mgmt.ups_btn_selftest": "电池自检",
   "mgmt.ups_emergency_title": "监测到市电输入中断",
   "mgmt.ups_emergency_desc": "系统当前正依靠电池储备供电，自动安全关机策略已激活。",
@@ -8315,4 +8315,7 @@ export default {
   "pwr.back_yes": "是，自己开机的",
   "pwr.back_no_btn": "不是，有人开的机",
   "pwr.back_saved": "谢谢。答案会保留在此页面上。",
+  "pwr.sockets_ok": "你的 UPS 可以在恢复供电时重新打开插座。请开启下方的 UPS 插座设置，让它这样做。",
+  "pwr.sockets_no": "你的 UPS 没有在恢复供电时重新打开插座的命令。",
+  "pwr.sockets_unknown": "Kiboto 无法询问你的 UPS 是否会重新打开插座。",
 };

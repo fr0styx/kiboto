@@ -1994,7 +1994,7 @@ export default {
   "mgmt.ups_policy_batt": "Shutdown when Battery Charge drops below:",
   "mgmt.ups_policy_timer": "Shutdown after Time on Battery exceeds:",
   "mgmt.ups_chk_docker": "Give apps up to 45 seconds to close (they are always stopped before the shutdown)",
-  "mgmt.ups_chk_cutpower": "Turn the UPS sockets off after the NAS has shut down",
+  "mgmt.ups_chk_cutpower": "Turn the UPS sockets off after the NAS has shut down, and back on when the power returns",
   "mgmt.ups_btn_selftest": "Self-Test",
   "mgmt.ups_emergency_title": "The power is out",
   "mgmt.ups_emergency_desc": "System running on battery reserve. Automated powerdown policy is active.",
@@ -8315,4 +8315,7 @@ export default {
   "pwr.back_yes": "Yes, by itself",
   "pwr.back_no_btn": "No, someone switched it on",
   "pwr.back_saved": "Thank you. The answer is kept on this page.",
+  "pwr.sockets_ok": "Your UPS can switch its sockets back on when the power returns. Turn on the UPS sockets setting below so it does.",
+  "pwr.sockets_no": "Your UPS has no command to switch its sockets back on when the power returns.",
+  "pwr.sockets_unknown": "Kiboto could not ask your UPS whether it switches its sockets back on.",
 };
