@@ -8325,4 +8325,5 @@ export default {
   "pwa.rule_timer": "在电池上运行固定时间后也关机",
   "pwa.rule_sum": "剩余 {min} 分钟或 {pct} % 时，或 UPS 发出信号时",
   "pwa.rule_sum_timer": "，或在电池上运行 {min, plural, other {# 分钟}}后",
+  "pwc.admins_only": "只有管理员可以运行这些。",
 };

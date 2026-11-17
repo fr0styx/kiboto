@@ -8325,4 +8325,5 @@ export default {
   "pwa.rule_timer": "Apagar también tras un tiempo fijo con batería",
   "pwa.rule_sum": "Con {min} min o un {pct} % restante, o cuando el SAI lo indique",
   "pwa.rule_sum_timer": ", o tras {min, plural, one {# minuto} other {# minutos}} con batería",
+  "pwc.admins_only": "Solo los administradores pueden hacerlo.",
 };

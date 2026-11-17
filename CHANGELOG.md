@@ -551,6 +551,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   exclusive choices while the server applied all of them.
 - **Restart or shut down from the top bar**: in the menu under your name, for people who may do it.
 
+#### Changes
+
+- **Power for people who may only look**: they see every answer; the battery test, practice run, Restart and Shut
+  down are not offered to them, instead of buttons that only said "no permission".
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

@@ -8325,4 +8325,5 @@ export default {
   "pwa.rule_timer": "Auch nach einer festen Zeit am Akku herunterfahren",
   "pwa.rule_sum": "Bei {min} Min. oder {pct} % übrig, oder wenn die USV es meldet",
   "pwa.rule_sum_timer": ", oder nach {min, plural, one {# Minute} other {# Minuten}} am Akku",
+  "pwc.admins_only": "Nur Administratoren können das ausführen.",
 };

@@ -7,6 +7,7 @@
 import { t } from '../../i18n.js';
 import { escapeHtml } from '../../utils.js';
 import { formatDateTime } from '../../format.js';
+import { isAdministrator } from '../../admin-only.js';
 
 const when = (ts) => formatDateTime(Number(ts) * (Number(ts) < 1e12 ? 1000 : 1));
 
@@ -31,7 +32,9 @@ export function renderPowerCheck(mount, s) {
     mount.innerHTML = '<div id="ups-practice-line" class="ups-shutdown-line" hidden></div>';
     return;
   }
-  const canTest = Boolean(s.can?.self_test);
+  // view-only people see the results; the buttons are for those who may change settings (SET-31)
+  const admin = isAdministrator();
+  const canTest = admin && Boolean(s.can?.self_test);
   mount.innerHTML = `
     <h3 class="pwc-title">${escapeHtml(t('pwc.title', 'Check that it works'))}</h3>
     <div class="pwc-item">
@@ -39,10 +42,10 @@ export function renderPowerCheck(mount, s) {
       <p class="pwc-line" id="pwc-battery-line">${escapeHtml(batteryLine(s))}</p>
     </div>
     <div class="pwc-item">
-      <button type="button" class="btn-pill-toggle" id="pwc-practice"${s.can?.practice ? '' : ' disabled'}>${escapeHtml(t('pwc.practice', 'Practice run'))}</button>
+      <button type="button" class="btn-pill-toggle" id="pwc-practice"${admin && s.can?.practice ? '' : ' disabled'}>${escapeHtml(t('pwc.practice', 'Practice run'))}</button>
       <p class="pwc-line">${escapeHtml(t('pwc.practice_what', 'Kiboto acts as if the power went out for 15 seconds and checks who would switch the NAS off. Nothing is switched off.'))}</p>
       <div id="ups-practice-line" class="ups-shutdown-line" hidden></div>
-    </div>`;
+    </div>${admin ? '' : `<p class="pwc-line">${escapeHtml(t('pwc.admins_only', 'Only administrators can run these.'))}</p>`}`;
   mount.querySelector('#pwc-battery')?.addEventListener('click', () => document.getElementById('btn-run-ups-selftest')?.click());
   mount.querySelector('#pwc-practice')?.addEventListener('click', () => document.getElementById('btn-ups-simulate')?.click());
 }

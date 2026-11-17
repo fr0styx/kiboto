@@ -8325,4 +8325,5 @@ export default {
   "pwa.rule_timer": "Also shut down after a set time on battery",
   "pwa.rule_sum": "At {min} min or {pct} % left, or when the UPS says so",
   "pwa.rule_sum_timer": ", or after {min, plural, one {# minute} other {# minutes}} on battery",
+  "pwc.admins_only": "Only administrators can run these.",
 };

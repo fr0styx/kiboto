@@ -7,6 +7,7 @@ import { api } from '../../api.js';
 import { t } from '../../i18n.js';
 import { escapeHtml } from '../../utils.js';
 import { showToast } from '../../toast.js';
+import { currentUser, hasScope } from '../../route-access.js';
 
 /** What a button says it did, or why not. */
 export function switchSaid(action, ok, error = '') {
@@ -20,6 +21,11 @@ export function switchSaid(action, ok, error = '') {
  */
 export async function renderPowerSwitch(mount) {
   if (!mount || mount.dataset.drawn === '1') return;
+  const user = currentUser();
+  if (user && !hasScope(user.scopes || [], 'system:power')) {
+    mount.hidden = true; // not this person's to do: no buttons that only answer "no permission"
+    return;
+  }
   let can;
   try {
     can = await api.get('/api/system/power-actions');

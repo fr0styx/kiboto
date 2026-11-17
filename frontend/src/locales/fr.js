@@ -8325,4 +8325,5 @@ export default {
   "pwa.rule_timer": "Arrêter aussi après un temps fixe sur batterie",
   "pwa.rule_sum": "À {min} min ou {pct} % restants, ou quand l’onduleur le signale",
   "pwa.rule_sum_timer": ", ou après {min, plural, one {# minute} other {# minutes}} sur batterie",
+  "pwc.admins_only": "Seuls les administrateurs peuvent les lancer.",
 };

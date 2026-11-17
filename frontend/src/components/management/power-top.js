@@ -177,7 +177,7 @@ export function renderPowerTop(box, s, onAnswer) {
     <details class="pw-when${when.bad ? ' is-bad' : ''}"${open.when ? ' open' : ''}><summary><span class="pw-q">${escapeHtml(t('pwr.when_title', 'When the power goes out'))}</span> <span id="ups-shutdown-line" class="pw-a">${escapeHtml(when.line)}</span></summary>
       <ol class="pw-steps">${when.steps.map((x, i) => `<li${when.bad && i === when.steps.length - 1 ? ' class="is-bad"' : ''}>${escapeHtml(x)}</li>`).join('')}</ol></details>
     <details class="pw-back"${open.back || back.ask ? ' open' : ''}><summary><span class="pw-q">${escapeHtml(t('pwr.back_title', 'Will it start again by itself?'))}</span> <span id="ups-restart-line" class="pw-a">${escapeHtml(back.line)}</span></summary>
-      <p class="pw-detail">${escapeHtml(back.detail)}</p>${back.ask ? `<div class="pw-ask">
+      <p class="pw-detail">${escapeHtml(back.detail)}</p>${back.ask && onAnswer ? `<div class="pw-ask">
         <button type="button" class="btn-pill-toggle is-primary" data-back="yes">${escapeHtml(t('pwr.back_yes', 'Yes, by itself'))}</button>
         <button type="button" class="btn-pill-toggle" data-back="no">${escapeHtml(t('pwr.back_no_btn', 'No, someone switched it on'))}</button></div>` : ''}</details>
     <button type="button" id="ups-show-setup" class="btn-pill-toggle ups-show-setup" hidden>${escapeHtml(t('upx.setup_ups', 'Set up a UPS'))}</button>`;
