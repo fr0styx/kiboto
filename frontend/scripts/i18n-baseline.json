@@ -1,7 +1,7 @@
 {
   "raw_toasts": 0,
   "raw_dialogs": 0,
-  "hardcoded_ui": 63,
+  "hardcoded_ui": 59,
   "missing_plurals": 0,
   "to_fixed": 37,
   "emoji_strings": 0,
@@ -11,15 +11,14 @@
     "frontend/src/components/dock/user-flyout.js": 1,
     "frontend/src/components/encrypted-folders.js": 1,
     "frontend/src/components/fan-control.js": 1,
-    "frontend/src/components/file-manager.js": 1,
     "frontend/src/components/file-preview-modal.js": 2,
     "frontend/src/components/management.js": 2,
     "frontend/src/components/management/ai.js": 3,
     "frontend/src/components/settings.js": 1,
     "frontend/src/components/setup-wizard.js": 1,
-    "frontend/src/components/spotlight.js": 3,
+    "frontend/src/components/spotlight.js": 2,
     "frontend/src/components/stack-modal.js": 2,
-    "frontend/src/components/vm/console.js": 6,
+    "frontend/src/components/vm/console.js": 4,
     "frontend/src/windows/management-window.html": 6
   }
 }
