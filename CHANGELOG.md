@@ -632,6 +632,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Virtual machines: the speed check in your language**: the dialog that explains why virtual machines run slow,
   and what to do about it, was always English.
 
+#### Changes
+
+- **A guide to Apps** (docs/APPS.md): getting apps, how updates work and go back, changing an app's Compose file,
+  backups and removal.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 
