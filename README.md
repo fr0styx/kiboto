@@ -111,6 +111,7 @@ work and goes up one patch number at a time: see [releasing](docs/RELEASING.md).
 | Power: outages, coming back by itself, Restart, nights off | [POWER.md](docs/POWER.md) |
 | Virtual machines: Linux, Windows 11, Home Assistant | [VMS.md](docs/VMS.md) |
 | SNMP for monitoring tools | [SNMP.md](docs/SNMP.md) |
+| Kib: which folders it reads, who can use it, privacy | [KIB.md](docs/KIB.md) |
 | Ask Kib and document search | [RAG.md](docs/RAG.md) |
 | How well search works, measured | [SEARCH_QUALITY.md](docs/SEARCH_QUALITY.md) |
 | What the AI may and may not do | [SAFE_AI.md](docs/SAFE_AI.md) |

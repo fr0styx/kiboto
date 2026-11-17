@@ -390,6 +390,8 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **A guide to virtual machines** (docs/VMS.md): Linux, Windows 11 and Home Assistant in three steps, and why a
   machine may run slowly.
 
+- **A guide to Kib** (docs/KIB.md): which folders it reads, who can use it, how it answers, and privacy.
+
 #### Fixes
 
 - **The File Explorer's details panel no longer hides file names**: it lies over the list instead of
