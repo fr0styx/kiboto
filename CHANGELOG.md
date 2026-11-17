@@ -496,6 +496,14 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   at the next start, so everyone keeps what they could do; the old lists are copied aside first. Lists that name a
   group are left as they are. People chosen when a shared folder is made go into the table too.
 
+#### Changes
+
+- **Power, first screen rebuilt** (SET-31, first step of the rebuild): one status word and sentence for every state
+  (No battery backup, Protected, Needs a look and why, The power is out since when and what happens next, Shutting
+  down, Shut the NAS down by hand, UPS not answering), up to three numbers, "When the power goes out" as numbered
+  steps that name who switches the NAS off (in red when nothing can), and "Will it start again by itself?" with its
+  honest answer. Everything comes from one answer of the server, so the page cannot contradict itself.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

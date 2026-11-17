@@ -524,6 +524,16 @@ def _say_shutdown_starts(reason: str, charge: float | None, runtime: float | Non
     )
 
 
+def outage_view() -> dict[str, Any]:
+    """What the watchdog knows about a power cut right now, for the Power page (SET-31)."""
+    return {
+        "since": _outage_start_ts,
+        "drill": _outage_is_drill,
+        "failsafe": _failsafe_engaged,
+        "silent": ups_went_silent(),
+    }
+
+
 def ups_went_silent() -> bool:
     """The UPS stopped answering during a power cut and has not answered since (for the Overview)."""
     return bool(_silent_alerted and _outage_start_ts is not None)

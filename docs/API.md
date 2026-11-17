@@ -38,7 +38,7 @@ request and response schemas.
 
 <!-- BEGIN generated endpoints: python scripts/api_reference.py --update -->
 
-745 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
+746 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
 
 ### AI Conversation History
 
@@ -945,6 +945,7 @@ request and response schemas.
 
 | Method | Path | Access | What it does |
 | :--- | :--- | :--- | :--- |
+| `GET` | `/api/v1/power` | any of `hardware:read`, `system:view` | The whole answer of the Power page from one reading (SET-31, Power stage 3): state and reason, numbers, checks, who switches the NAS off,… |
 | `GET` | `/api/v1/ups` | any of `hardware:read`, `system:view` | Returns real-time UPS telemetry enriched with power flow metrics and voltage data |
 | `GET` | `/api/v1/ups/config` | `system:view` | Returns persistent UPS configuration with secret passwords masked |
 | `POST` | `/api/v1/ups/config` | `system:config` | Saves persistent UPS configuration and reloads power watchdog parameters |

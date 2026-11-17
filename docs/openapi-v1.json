@@ -62781,6 +62781,40 @@
     ]
    }
   },
+  "/api/v1/power": {
+   "get": {
+    "description": "The whole answer of the Power page from one reading (SET-31, Power stage 3): state and\nreason, numbers, checks, who switches the NAS off, whether it starts again by itself, the last\npractice run, the last power events and what the page may offer.",
+    "operationId": "get_power_summary_api_v1_power_get",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Get Power Summary Api V1 Power Get",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Get Power Summary",
+    "tags": [
+     "UPS & Power Integrity"
+    ],
+    "x-required-scopes": [
+     "hardware:read",
+     "system:view"
+    ]
+   }
+  },
   "/api/v1/protection/jobs": {
    "get": {
     "operationId": "list_protection_jobs_api_v1_protection_jobs_get",

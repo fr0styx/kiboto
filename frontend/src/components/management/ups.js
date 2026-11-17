@@ -9,6 +9,7 @@ import { escapeHtml } from '../../utils.js';
 import { t } from '../../i18n.js';
 import { formatDateTime } from '../../format.js';
 import { setIconLabel } from '../../ui/primitives.js';
+import { renderPowerTop, stateFromReading } from './power-top.js';
 
 export function renderUpsTelemetry(ups) {
   if (!ups) return;
@@ -206,8 +207,6 @@ export function upsState(ups) {
   return 'mains';
 }
 
-const STATE_ICON = { none: '○', unreadable: '!', cut: '⚡', look: '⚠', mains: '✓' };
-
 /** The sentence for a state, in the reader's language (SET-15, Power 2). */
 export function upsSentence(ups) {
   const state = upsState(ups);
@@ -226,34 +225,29 @@ export function upsSentence(ups) {
   return t('upx.say_mains', 'On mains power. Kiboto shuts your NAS down safely when the battery is nearly empty.');
 }
 
-function renderUpsStatusLine(ups) {
+/** The first screen from GET /api/power (SET-31, Power stage 3); a bare reading where the server is older. */
+async function renderPowerSummary(ups) {
   const box = document.getElementById('ups-status-line');
   if (!box) return;
-  const state = upsState(ups);
-  box.dataset.state = state;
-  const icon = document.getElementById('ups-status-icon');
-  if (icon) icon.textContent = STATE_ICON[state];
-  const sentence = document.getElementById('ups-status-sentence');
-  if (sentence) sentence.textContent = upsSentence(ups);
-  const line = document.getElementById('ups-shutdown-line');
-  if (line && state === 'none') line.hidden = true; // nothing to switch off by battery without a UPS
-  const restart = document.getElementById('ups-restart-line');
-  if (restart) restart.hidden = state === 'none'; // proven only after a real power cut (Power decision 6)
+  const asked = await api.get('/api/power').catch(() => null);
+  const summary = asked && asked.state ? asked : stateFromReading(ups);
+  renderPowerTop(box, summary);
+  const state = box.dataset.state || 'none';
   // no UPS: one sentence and "Set up a UPS"; the gauges, settings and history wait (SET-15, Power B1)
   const pane = document.getElementById('mgmt-sec-ups');
   if (pane) pane.dataset.upsState = state;
   const setup = document.getElementById('ups-show-setup');
   if (setup) {
     setup.hidden = state !== 'none' || Boolean(pane?.classList.contains('ups-show-all'));
-    if (!setup.dataset.bound) {
-      setup.dataset.bound = '1';
-      setup.addEventListener('click', () => {
-        pane?.classList.add('ups-show-all');
-        setup.hidden = true;
-        document.getElementById('ups-cockpit-config-section')?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
-      });
-    }
+    setup.addEventListener('click', () => {
+      pane?.classList.add('ups-show-all');
+      setup.hidden = true;
+      document.getElementById('ups-cockpit-config-section')?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
+    });
   }
+  renderPracticeLine(summary.tests?.practice || null);
+  _pathBy = summary.switch_off?.by || '';
+  applyCutPowerAvailability();
 }
 
 let _upsMode = '';
@@ -284,32 +278,12 @@ export function renderPracticeLine(rec) {
   line.hidden = false;
 }
 
-let _pathAt = 0;
-/** Who switches the NAS off, asked at most once a minute (it may look for the host's UPS service). */
-async function renderShutdownLine(ups) {
-  const line = document.getElementById('ups-shutdown-line');
-  if (!line || upsState(ups) === 'none' || Date.now() - _pathAt < 60000) return;
-  _pathAt = Date.now();
-  try {
-    const [path, practice] = await Promise.all([api.get('/api/ups/shutdown-path'), api.get('/api/ups/practice').catch(() => null)]);
-    renderPracticeLine(practice);
-    _pathBy = path?.by || '';
-    applyCutPowerAvailability();
-    line.textContent = serverSaid(path, path?.detail || '');
-    line.classList.toggle('is-bad', path?.ok === false);
-    line.hidden = !line.textContent;
-  } catch (_) {
-    _pathAt = 0;
-  }
-}
-
 export async function fetchAndRenderUpsTelemetry() {
   try {
     const ups = await api.get('/api/ups');
     if (!ups) return;
     renderUpsTelemetry(ups);
-    renderUpsStatusLine(ups);
-    renderShutdownLine(ups);
+    await renderPowerSummary(ups);
     fetchAndRenderUpsEvents();
   } catch (err) {
     console.debug('Failed to fetch UPS telemetry:', err);

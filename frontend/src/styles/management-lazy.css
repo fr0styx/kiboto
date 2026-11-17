@@ -555,3 +555,17 @@
 .bkf-row > span { color: var(--muted); }
 .bkf-row.is-none > span { color: var(--kb-text-warn); }
 .bkf-left { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; }
+/* Power, first screen (SET-31, Power stage 3) */
+.pw-sentence { margin-top: 4px; font-size: var(--kb-fs-sm); color: var(--kb-text-strong); line-height: 1.45; }
+.pw-numbers { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.pw-number { padding: 2px 8px; border-radius: 999px; border: 1px solid var(--kb-line-12); font-size: var(--kb-fs-xs); font-variant-numeric: tabular-nums; }
+.pw-when, .pw-back { margin-top: 10px; }
+.pw-when summary, .pw-back summary { cursor: pointer; min-height: 32px; display: flex; flex-wrap: wrap; gap: 6px; align-items: baseline; font-size: var(--kb-fs-xs); }
+.pw-q { font-weight: 700; color: var(--kb-text-strong); }
+.pw-a { color: var(--kb-text-soft); }
+.pw-when.is-bad .pw-a, .pw-steps li.is-bad { color: var(--err, #eb5757); font-weight: 600; }
+.pw-steps { margin: 6px 0 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; font-size: var(--kb-fs-xs); line-height: 1.5; }
+.pw-detail { margin: 6px 0 0; font-size: var(--kb-fs-xs); color: var(--kb-text-soft); line-height: 1.5; }
+.ups-status-line[data-power="by_hand"] { border-left-color: var(--err, #eb5757); }
+.pw-when summary::before, .pw-back summary::before { content: "▸"; color: var(--kb-text-soft); }
+.pw-when[open] summary::before, .pw-back[open] summary::before { content: "▾"; }

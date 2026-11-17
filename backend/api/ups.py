@@ -92,6 +92,16 @@ async def get_ups_telemetry():
     return await asyncio.to_thread(read_ups_status, reprobe=True)
 
 
+@router.get("/power", dependencies=[Depends(require_scope("hardware:read", "system:view"))])
+async def get_power_summary() -> dict[str, Any]:
+    """The whole answer of the Power page from one reading (SET-31, Power stage 3): state and
+    reason, numbers, checks, who switches the NAS off, whether it starts again by itself, the last
+    practice run, the last power events and what the page may offer."""
+    from backend.services.power_summary import summary
+
+    return await asyncio.to_thread(summary)
+
+
 @router.get("/ups/shutdown-path", dependencies=[Depends(require_scope("hardware:read", "system:view"))])
 async def get_ups_shutdown_path():
     """Who switches the NAS off when the battery runs out, for the Power page's permanent line (SET-15)."""
