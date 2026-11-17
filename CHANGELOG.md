@@ -380,6 +380,8 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **A guide to the Backup page** (docs/BACKUP.md): whether your files are safe, adding a copy, and getting a file
   back.
 
+- **A guide to People** (docs/PEOPLE.md): adding family members, roles, a lost phone, and removing someone.
+
 #### Fixes
 
 - **The File Explorer's details panel no longer hides file names**: it lies over the list instead of
