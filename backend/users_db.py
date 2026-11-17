@@ -561,10 +561,12 @@ def create_user(
     must_change_password: bool = False,
 ) -> dict[str, Any]:
     username_clean = username.strip().lower()
+    from backend.errors import SaidError
+
     if len(username_clean) < 2 or len(username_clean) > 32:
-        raise ValueError("Username must be between 2 and 32 characters.")
+        raise SaidError("Username must be between 2 and 32 characters.", "username_length")
     if unsafe_username(username_clean):
-        raise ValueError("A username can't start with a dot or contain slashes.")
+        raise SaidError("A username can't start with a dot or contain slashes.", "username_unsafe")
 
     now = time.time()
     user_id = str(uuid.uuid4())

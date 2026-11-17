@@ -20,6 +20,7 @@ from backend import legacy_names
 from backend import settings as _settings
 from backend.config import DATA_DIR, POOL_PATH, docker_sock, logger
 from backend.config import docker_sock as _docker_sock_path
+from backend.errors import SaidError
 from backend.fsutil import atomic_write_json, atomic_write_text
 from backend.ignored_errors import ignored
 
@@ -104,9 +105,10 @@ def validate_share_path(path: str) -> str:
             else:
                 continue
             if is_protected(found):
-                raise ValueError("Share path is Kiboto's own data folder; choose another folder")
+                raise SaidError("Share path is Kiboto's own data folder; choose another folder", "share_kiboto_folder")
             return found
-    raise ValueError(f"Share path must be inside {', '.join(roots) or 'the storage pool'}")
+    places = ", ".join(roots) or "the storage pool"
+    raise SaidError(f"Share path must be inside {places}", "share_outside", places=places)
 
 
 def protected_veto_names(share_path: str) -> list[str]:
@@ -307,7 +309,7 @@ class SambaEngine:
         # Validate name (safe SMB share name)
         clean_name = re.sub(r"[^a-zA-Z0-9_\-\.]", "_", share.name.strip())
         if not clean_name or clean_name.lower() in ("global", "homes", "printers", "ipc$"):
-            raise ValueError("Share name cannot be empty, invalid or reserved")
+            raise SaidError("Share name cannot be empty, invalid or reserved", "share_bad_name")
         share.name = clean_name
 
         # Ensure directory exists if possible

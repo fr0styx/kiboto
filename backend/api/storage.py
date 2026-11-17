@@ -15,7 +15,7 @@ from pydantic import AfterValidator, BaseModel, Field
 from backend import config
 from backend.auth import AuthenticatedPrincipal, get_current_principal, require_scope
 from backend.confirmations import require_confirmation
-from backend.errors import error_response
+from backend.errors import ApiError, error_response
 from backend.fsutil import single_name
 from backend.hardware.pal_storage import (
     PlatformCapabilityError,
@@ -506,8 +506,9 @@ def create_storage_share(req: StorageShareCreateRequest) -> dict[str, Any]:
     except PlatformCapabilityError as e:
         raise HTTPException(status_code=403, detail=str(e)) from e
     except ValueError as e:
-        # a folder outside the allowed places, a reserved name, a bad client list: say which (SET-01)
-        raise HTTPException(status_code=400, detail=str(e)) from e
+        # a folder outside the allowed places, a reserved name, a bad client list: say which (SET-01),
+        # in the reader's language where the refusal says how
+        raise ApiError(400, str(e), "invalid_share", text=getattr(e, "text", None)) from e
     people = {u: SHARE_LEVELS[p] for u, p in (req.user_permissions or {}).items() if p in SHARE_LEVELS}
     if people:
         from backend.services.samba_engine import refresh_access
