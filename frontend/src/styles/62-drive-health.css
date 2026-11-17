@@ -60,7 +60,7 @@
 
 /* Drive Health revamp: the fleet line, the outlook notes, the schedule and the history charts */
 .dh-fleet-line { margin: 0 0 var(--kb-space-2); font-size: var(--kb-fs-xs); color: var(--muted); }
-.dh-schedule { margin: calc(-1 * var(--kb-space-1)) 0 var(--kb-space-2); font-size: var(--kb-fs-xs); color: var(--muted); }
+.dh-schedule { margin: var(--kb-space-1) 0 var(--kb-space-2); font-size: var(--kb-fs-xs); color: var(--muted); }
 .dh-schedule:empty { display: none; }
 .dh-life { margin: var(--kb-space-1) 0 0; font-size: var(--kb-fs-sm); }
 .dh-chart-label { margin: var(--kb-space-2) 0 2px; font-size: var(--kb-fs-xs); color: var(--muted); }
