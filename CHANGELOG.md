@@ -387,6 +387,9 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 
 - **A guide to Files** (docs/FILES.md): the Recycle Bin, earlier versions, share links and send-me-files links.
 
+- **A guide to virtual machines** (docs/VMS.md): Linux, Windows 11 and Home Assistant in three steps, and why a
+  machine may run slowly.
+
 #### Fixes
 
 - **The File Explorer's details panel no longer hides file names**: it lies over the list instead of
