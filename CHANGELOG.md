@@ -402,6 +402,9 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   array and parity under Storage → Pools; the AI chip under Kib → Advanced; the load under Activity → Right now. The
   Hardware page keeps the cooling choice and points to each.
 
+- **"Too hot" says what**: the Overview names the drive or the processor that is too hot and its temperature, and
+  what to check. A sleeping drive is never woken for it.
+
 #### Fixes
 
 - **The File Explorer's details panel no longer hides file names**: it lies over the list instead of

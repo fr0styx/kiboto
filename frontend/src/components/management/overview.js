@@ -89,7 +89,9 @@ const MESSAGES = {
   ups_silent: () => t('overview.ups_silent', 'The UPS stopped answering during a power cut. Shut the NAS down by hand if the power stays off.'),
   ups_unreadable: () => t('overview.ups_unreadable', 'A UPS was found, but Kiboto cannot read it.'),
   power_nobody: () => t('overview.power_nobody', 'Nothing can switch the NAS off when the UPS battery runs out.'),
-  too_hot: () => t('overview.too_hot', 'The server is too hot.'),
+  too_hot: (i) => (i && i.hot
+    ? t('overview.too_hot_what', 'Too hot: {detail}. The fans run at full speed; check that nothing blocks the air around the NAS.')
+    : t('overview.too_hot', 'The server is too hot.')),
   default_password: () => t('overview.default_password', 'The first-time password is still in use.'),
   security_look: () => t('overview.security_look', 'The security check has findings to look at ({subject}).'),
   timezone_unset: () => t('overview.timezone_unset_clock', "The server's time zone isn't set, so nightly work (backups, checks, AI indexing) runs at night by London winter time (UTC), which may be daytime where you are."),
@@ -112,10 +114,18 @@ const SERVICES = {
   VisionCaptioner: () => t('overview.svc_vision', 'photo descriptions'),
 };
 
+/** "drive sdb at 57 °C, the processor at 81 °C": what is too hot (status_summary._hot_parts). */
+export function hotWords(hot) {
+  const h = hot || {};
+  const parts = (Array.isArray(h.drives) ? h.drives : []).map((d) => t('overview.hot_drive', 'drive {name} at {temp} °C', { name: d.name, temp: d.temp }));
+  if (h.cpu != null) parts.push(t('overview.hot_cpu', 'the processor at {temp} °C', { temp: h.cpu }));
+  return parts.join(', ');
+}
+
 export function itemText(i) {
   const subject = i.kind === 'service_stalled' && SERVICES[i.subject] ? SERVICES[i.subject]() : i.subject || '';
-  const msg = MESSAGES[i.kind] ? MESSAGES[i.kind]() : t('overview.unknown_item', 'Something needs attention: {subject}.');
-  const detail = i.detail_key ? t(i.detail_key, i.detail || '', i.detail_params || {}) : i.detail || '';
+  const msg = MESSAGES[i.kind] ? MESSAGES[i.kind](i) : t('overview.unknown_item', 'Something needs attention: {subject}.');
+  const detail = i.hot ? hotWords(i.hot) : i.detail_key ? t(i.detail_key, i.detail || '', i.detail_params || {}) : i.detail || '';
   const text = msg.replace('{subject}', subject || i.kind || '').replace('{detail}', detail);
   // someone who can't fix it is told who can (NUX-5)
   return i.tell_admin ? `${text} ${t('overview.tell_admin', 'Tell the person who manages Kiboto.')}` : text;
