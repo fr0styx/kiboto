@@ -599,6 +599,17 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   default) came back running the default instead. Backups now keep the command and entrypoint. Found by restoring
   a backup on a real Docker engine.
 
+#### Changes
+
+- **Faster first load**: the menu behind your name in the top bar now loads when you first open it, so the
+  desktop has a little less to fetch at start.
+
+#### Fixes
+
+- **Updates go back when the new version does not run**: an app whose new version crashed or stopped right
+  after starting stayed broken. Now an app must keep running on its new version, or its old version comes back.
+  Updating an app of several parts never leaves it half updated: if one part fails, the others go back too.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

@@ -17,7 +17,7 @@ import { isEventChecked, markEventChecked, renderNotificationCenter, resetChecke
 import { getCurrentWorkspace, initWindowKeyboardShortcuts, initWorkspaceSwitcher, switchWorkspace } from './dock/shortcuts.js';
 import { initSnapAssistFlyout } from './dock/snap-assist.js';
 import { getActiveWindowElement, restoreWindowSnap } from './dock/snap.js';
-import { initTopbarUserPill } from './dock/user-flyout.js';
+import { initTopbarUserPill } from './dock/user-pill.js';
 import { bringToFront, makeDraggable, makeResizable } from './dock/window-drag.js';
 import { clearMobileInlineBounds, loadSavedWindowBounds, restoreOpenWindowsState, saveOpenWindowsState, saveWindowBounds, setWindowRestorationComplete } from './dock/window-state.js';
 import { COMPACT_MAX } from '../device.js';
@@ -31,7 +31,7 @@ export { CHECKED_EVENTS_KEY, DOCK_PINNED_KEY, getEventKey, isEventChecked, markE
 export { WORKSPACES, getCurrentWorkspace, initWindowKeyboardShortcuts, initWorkspaceSwitcher, switchWorkspace } from './dock/shortcuts.js';
 export { initSnapAssistFlyout } from './dock/snap-assist.js';
 export { DOCK_MARGIN, NAVBAR_OFFSET, applyWindowSnap, evaluateSnapZone, getActiveWindowElement, getSnapGeometry, restoreWindowSnap } from './dock/snap.js';
-export { initTopbarUserPill, toggleUserProfileFlyout } from './dock/user-flyout.js';
+export { initTopbarUserPill, toggleUserProfileFlyout } from './dock/user-pill.js';
 export { DESKTOP_WINDOW_SELECTOR, activeWindowZIndex, bringToFront, handleWindowActivation, makeDraggable, makeResizable } from './dock/window-drag.js';
 export { OPEN_WINDOWS_KEY, applySavedBounds, clearMobileInlineBounds, loadSavedWindowBounds, restoreOpenWindowsState, restoreWindowsAfterWiden, saveOpenWindowsState, saveWindowBounds, setWindowRestorationComplete } from './dock/window-state.js';
 

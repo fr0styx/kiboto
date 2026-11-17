@@ -350,6 +350,74 @@ def _recreate_payload(cloned_exposed_ports: Any, config: Any, env: Any, new_host
     return create_body
 
 
+def _verify_live(
+    new_id: str, target_name: str, grace_period_seconds: float, timeout: float, was_running: bool, starting_ok: bool
+) -> None:
+    """Two-tier liveness and healthcheck verification over the grace period, before the old
+    container is removed. Raises RuntimeError when the new container does not hold up."""
+    logger.info(
+        "[Container Recreate] Verifying container '%s' liveness for %ss grace period...",
+        target_name,
+        grace_period_seconds,
+    )
+    deadline = time.time() + grace_period_seconds
+    health_verified = False
+    has_healthcheck = False
+    last_health_status = ""
+
+    while time.time() < deadline:
+        time.sleep(min(0.5, max(0.05, deadline - time.time())))
+        st_code, inspect_live = _docker_request("GET", f"/containers/{new_id}/json", timeout=timeout)
+        if st_code == 200 and isinstance(inspect_live, dict):
+            live_state = inspect_live.get("State", {})
+            is_running = live_state.get("Running", False)
+            exit_code = live_state.get("ExitCode", 0)
+            error_msg = live_state.get("Error", "")
+            if not is_running and exit_code != 0:
+                raise RuntimeError(
+                    f"Container '{target_name}' crashed immediately after launch with exit code {exit_code}: {error_msg or 'Abnormal termination'}"
+                )
+            if not is_running and was_running and not live_state.get("Restarting", False):
+                raise RuntimeError(f"Container '{target_name}' stopped right after it started (exit code 0)")
+            if live_state.get("Dead", False) or live_state.get("OOMKilled", False):
+                raise RuntimeError(
+                    f"Container '{target_name}' failed liveness check: OOMKilled={live_state.get('OOMKilled')}, Dead={live_state.get('Dead')}"
+                )
+            restart_count = live_state.get("RestartCount", 0)
+            if restart_count > 0:
+                raise RuntimeError(
+                    f"Container '{target_name}' crashed and restarted {restart_count} times during grace period"
+                )
+
+            # Two-tier healthcheck evaluator:
+            # Tier 1: Check Docker HEALTHCHECK if defined on image or container
+            cfg_health = inspect_live.get("Config", {}).get("Healthcheck")
+            health_info = live_state.get("Health")
+            if (cfg_health and cfg_health.get("Test")) or health_info is not None:
+                has_healthcheck = True
+                if health_info:
+                    last_health_status = str(health_info.get("Status", "")).lower()
+                    if last_health_status == "unhealthy":
+                        streak = health_info.get("FailingStreak", 0)
+                        raise RuntimeError(
+                            f"Container '{target_name}' failed healthcheck: status is unhealthy (failing streak: {streak})"
+                        )
+                    elif last_health_status == "healthy":
+                        logger.info(
+                            "[Container Recreate] Container '%s' passed healthcheck (Status: healthy).",
+                            target_name,
+                        )
+                        health_verified = True
+                        break
+                    # If still 'starting', continue polling until deadline or state transition
+
+    # If a Docker HEALTHCHECK was defined, require 'healthy' status before decommissioning backup container
+    if has_healthcheck and not health_verified and not (starting_ok and last_health_status != "unhealthy"):
+        raise RuntimeError(
+            f"Container '{target_name}' failed healthcheck evaluation: expected 'healthy', but status remained '{last_health_status or 'starting'}' after {grace_period_seconds}s grace period"
+        )
+
+
 def recreate_container(
     cid: str,
     name: str | None = None,
@@ -364,8 +432,11 @@ def recreate_container(
     timeout: float = 45.0,
     grace_period_seconds: float = 0.0,
     approve_elevated: bool = False,
+    starting_ok: bool = False,
 ) -> dict[str, Any]:
     """
+    With starting_ok, a health check still "starting" when the grace period ends is accepted
+    (only "unhealthy" fails): an update must not go back because an app takes a minute to warm up.
     Safely reconfigures and mutates a container using the Atomic Clone-and-Recreate pattern.
     Supports updating container name, image tag, environment variables, mounts / binds,
     network mode, port bindings, and restart policy.
@@ -382,6 +453,8 @@ def recreate_container(
     orig_name = inspect_data.get("Name", "").lstrip("/")
     if not orig_name:
         raise ValueError(f"Could not determine container name for '{cid}'.")
+    # a one-shot container may end with exit code 0; one that was running must keep running
+    was_running = bool((inspect_data.get("State") or {}).get("Running"))
 
     self_hostname = socket.gethostname()
     if (self_hostname and cid.startswith(self_hostname)) or legacy_names.is_app_container(orig_name):
@@ -475,67 +548,9 @@ def recreate_container(
         if status != 204:
             raise RuntimeError(f"Failed to start newly created container: {start_resp}")
 
-        # Step 9b: Two-tier liveness and healthcheck verification with grace period before removing backup
+        # Step 9b: liveness and health check over the grace period before removing the backup
         if grace_period_seconds > 0:
-            logger.info(
-                "[Container Recreate] Verifying container '%s' liveness for %ss grace period...",
-                target_name,
-                grace_period_seconds,
-            )
-            deadline = time.time() + grace_period_seconds
-            health_verified = False
-            has_healthcheck = False
-            last_health_status = ""
-
-            while time.time() < deadline:
-                time.sleep(min(0.5, max(0.05, deadline - time.time())))
-                st_code, inspect_live = _docker_request("GET", f"/containers/{new_id}/json", timeout=timeout)
-                if st_code == 200 and isinstance(inspect_live, dict):
-                    live_state = inspect_live.get("State", {})
-                    is_running = live_state.get("Running", False)
-                    exit_code = live_state.get("ExitCode", 0)
-                    error_msg = live_state.get("Error", "")
-                    if not is_running and exit_code != 0:
-                        raise RuntimeError(
-                            f"Container '{target_name}' crashed immediately after launch with exit code {exit_code}: {error_msg or 'Abnormal termination'}"
-                        )
-                    if live_state.get("Dead", False) or live_state.get("OOMKilled", False):
-                        raise RuntimeError(
-                            f"Container '{target_name}' failed liveness check: OOMKilled={live_state.get('OOMKilled')}, Dead={live_state.get('Dead')}"
-                        )
-                    restart_count = live_state.get("RestartCount", 0)
-                    if restart_count > 0:
-                        raise RuntimeError(
-                            f"Container '{target_name}' crashed and restarted {restart_count} times during grace period"
-                        )
-
-                    # Two-tier healthcheck evaluator:
-                    # Tier 1: Check Docker HEALTHCHECK if defined on image or container
-                    cfg_health = inspect_live.get("Config", {}).get("Healthcheck")
-                    health_info = live_state.get("Health")
-                    if (cfg_health and cfg_health.get("Test")) or health_info is not None:
-                        has_healthcheck = True
-                        if health_info:
-                            last_health_status = str(health_info.get("Status", "")).lower()
-                            if last_health_status == "unhealthy":
-                                streak = health_info.get("FailingStreak", 0)
-                                raise RuntimeError(
-                                    f"Container '{target_name}' failed healthcheck: status is unhealthy (failing streak: {streak})"
-                                )
-                            elif last_health_status == "healthy":
-                                logger.info(
-                                    "[Container Recreate] Container '%s' passed healthcheck (Status: healthy).",
-                                    target_name,
-                                )
-                                health_verified = True
-                                break
-                            # If still 'starting', continue polling until deadline or state transition
-
-            # If a Docker HEALTHCHECK was defined, require 'healthy' status before decommissioning backup container
-            if has_healthcheck and not health_verified:
-                raise RuntimeError(
-                    f"Container '{target_name}' failed healthcheck evaluation: expected 'healthy', but status remained '{last_health_status or 'starting'}' after {grace_period_seconds}s grace period"
-                )
+            _verify_live(new_id, target_name, grace_period_seconds, timeout, was_running, starting_ok)
 
         # Step 10: Success! Cleanup or retain backup
         if not keep_backup:

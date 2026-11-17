@@ -167,7 +167,7 @@ describe('Phase 5: Multi-User Identity, RBAC & Desktop Lock UI', () => {
     const openMgmtSpy = vi.fn();
     window.openManagementWindow = openMgmtSpy;
 
-    toggleUserProfileFlyout(topbarPill);
+    await toggleUserProfileFlyout(topbarPill);
 
     const flyout = document.getElementById('user-profile-flyout');
     expect(flyout).not.toBeNull();

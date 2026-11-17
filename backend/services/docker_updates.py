@@ -406,9 +406,16 @@ def _repin(img: str) -> str:
     return img
 
 
-def update_single_container(cid: str) -> dict[str, Any]:
+# How long a running app must keep running on its new version before the old one is removed.
+UPDATE_GRACE_SECS = 15.0
+
+
+def update_single_container(cid: str, keep_backup: bool = False) -> dict[str, Any]:
     """
-    Pulls the latest image for a container and recreates it with automated rollback.
+    Pulls the latest image for a container and recreates it with automated rollback. An app that
+    was running must keep running for UPDATE_GRACE_SECS on the new version, or the old one comes
+    back (before, an image that crashed at start replaced the old container for good). With
+    keep_backup the old container stays (stopped, renamed) so a whole-app update can go back.
     """
     from backend.services.compose_synthesizer import fetch_container_raw_inspect
 
@@ -437,7 +444,15 @@ def update_single_container(cid: str) -> dict[str, Any]:
         img = _repin(img)
 
     logger.info("[Docker Updates] Recreating container '%s' with new image layers...", orig_name)
-    res = recreate_container(cid, image=img, pull_image=False, keep_backup=False)
+    was_running = bool((inspect_data.get("State") or {}).get("Running"))
+    res = recreate_container(
+        cid,
+        image=img,
+        pull_image=False,
+        keep_backup=keep_backup,
+        grace_period_seconds=UPDATE_GRACE_SECS if was_running else 0.0,
+        starting_ok=True,
+    )
 
     # Invalidate / update cache for this container
     with _update_lock:
@@ -450,6 +465,19 @@ def update_single_container(cid: str) -> dict[str, Any]:
                 _update_cache["updates_available_count"] = max(0, _update_cache.get("updates_available_count", 1) - 1)
 
     return res
+
+
+def mark_update_pending(name: str) -> None:
+    """After a whole-app update went back: the part runs its old version again, so its update is
+    still there to install."""
+    with _update_lock:
+        for entry in (_update_cache.get("containers") or {}).values():
+            if entry.get("name") == name and not entry.get("has_update"):
+                entry["has_update"] = True
+                entry["status"] = "update_available"
+        names = {e.get("name") for e in (_update_cache.get("containers") or {}).values() if e.get("has_update")}
+        if "updates_available_count" in _update_cache:
+            _update_cache["updates_available_count"] = len(names)
 
 
 def update_all_containers() -> dict[str, Any]:

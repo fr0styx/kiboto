@@ -190,7 +190,17 @@ def test_update_runs_part_by_part_as_a_job(app, monkeypatch):
         lambda force=False: {"containers": {"shop-web-1": {"has_update": True}, "shop-db-1": {"has_update": True}}},
     )
     updated = []
-    monkeypatch.setattr("backend.services.docker_updates.update_single_container", lambda n: updated.append(n))
+    monkeypatch.setattr(
+        "backend.services.docker_updates.update_single_container",
+        lambda n, keep_backup=False: (
+            updated.append(n) or {"target_name": n, "old_id": f"old-{n}", "new_id": f"new-{n}"}
+        ),
+    )
+    calls = []
+    monkeypatch.setattr(
+        "backend.services.container_mutator.docker_request",
+        lambda method, path, **kw: calls.append((method, path)) or (204, {}),
+    )
     finished = threading.Event()
     seen = {}
     real = job_manager.finish
@@ -204,21 +214,42 @@ def test_update_runs_part_by_part_as_a_job(app, monkeypatch):
     res = whole_app.start_app_update("shop", owner="admin")
     assert res["status"] == "started" and res["parts"] == ["shop-db-1", "shop-web-1"]
     assert finished.wait(5) and seen["status"] == "done" and updated == ["shop-db-1", "shop-web-1"]
+    # the old containers kept for going back are removed once the whole app runs
+    assert calls == [
+        ("DELETE", "/containers/old-shop-db-1?v=false&force=true"),
+        ("DELETE", "/containers/old-shop-web-1?v=false&force=true"),
+    ]
 
     finished.clear()
+    calls.clear()
 
-    def second_fails(name):
+    def second_fails(name, keep_backup=False):
         if name == "shop-web-1":
             raise RuntimeError("pull failed")
         updated.append(name)
+        return {"target_name": name, "old_id": f"old-{name}", "new_id": f"new-{name}"}
 
     monkeypatch.setattr("backend.services.docker_updates.update_single_container", second_fails)
     whole_app.start_app_update("shop")
     assert finished.wait(5) and seen["status"] == "error"
     assert (
         "shop-web-1 could not be updated: pull failed" in seen["error"]
-        and "Already updated: shop-db-1" in seen["error"]
+        and "went back to their old versions" in seen["error"]
     )
+    # the part already updated is put back on its old container
+    assert calls == [
+        ("DELETE", "/containers/new-shop-db-1?v=false&force=true"),
+        ("POST", "/containers/old-shop-db-1/rename?name=shop-db-1"),
+        ("POST", "/containers/old-shop-db-1/start"),
+    ]
+
+    finished.clear()
+    monkeypatch.setattr(
+        "backend.services.container_mutator.docker_request",
+        lambda method, path, **kw: (404, {}) if "rename" in path else (204, {}),
+    )
+    whole_app.start_app_update("shop")
+    assert finished.wait(5) and "Could not put back: shop-db-1." in seen["error"]
 
     monkeypatch.setattr("backend.services.docker_updates.check_all_container_updates", lambda force=False: {})
     assert whole_app.start_app_update("shop") == {"status": "up_to_date", "parts": []}

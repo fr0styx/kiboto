@@ -110,7 +110,7 @@ describe('Dock characterization (ARC-5)', () => {
     pieces.notifications = clean(document.getElementById('notification-center')?.outerHTML || '');
 
     const anchor = document.getElementById('topbar-user-pill');
-    dock.toggleUserProfileFlyout(anchor);
+    await dock.toggleUserProfileFlyout(anchor);
     pieces.userFlyout = clean([...document.querySelectorAll('[id*=flyout], [class*=flyout]')].map((m) => m.outerHTML).join('\n'));
 
     for (const [name, html] of Object.entries(pieces)) {

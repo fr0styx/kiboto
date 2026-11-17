@@ -76,7 +76,14 @@ def test_update_single_container(mock_inspect, mock_recreate, mock_pull):
     res = update_single_container("c123456")
     assert res["status"] == "success"
     mock_pull.assert_called_once_with("myorg/testapp:latest", timeout=240.0)
-    mock_recreate.assert_called_once_with("c123456", image="myorg/testapp:latest", pull_image=False, keep_backup=False)
+    mock_recreate.assert_called_once_with(
+        "c123456",
+        image="myorg/testapp:latest",
+        pull_image=False,
+        keep_backup=False,
+        grace_period_seconds=0.0,
+        starting_ok=True,
+    )
 
 
 @patch("backend.services.docker_updates.check_all_container_updates")

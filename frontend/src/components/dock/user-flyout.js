@@ -1,28 +1,9 @@
-// The top bar's user pill and profile menu.
-// Part of dock.js, split out by ARC-5.
+// The profile menu that opens from the top bar's user pill.
+// Part of dock.js, split out by ARC-5; loaded on the first click (user-pill.js), not at start.
 
 import { ZettEventBus } from '../../event-bus.js';
 import { escapeHtml } from '../../utils.js';
 import { t } from '../../i18n.js';
-
-export function initTopbarUserPill() {
-  const topbarPill = document.getElementById('topbar-user-pill');
-  if (!topbarPill || topbarPill.dataset.userPillBound === 'true') return;
-  topbarPill.dataset.userPillBound = 'true';
-
-  topbarPill.addEventListener('click', (e) => {
-    e.stopPropagation();
-    toggleUserProfileFlyout(topbarPill);
-  });
-
-  topbarPill.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      e.stopPropagation();
-      toggleUserProfileFlyout(topbarPill);
-    }
-  });
-}
 
 export function toggleUserProfileFlyout(anchorEl) {
   let flyout = document.getElementById('user-profile-flyout');
