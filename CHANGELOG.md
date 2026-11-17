@@ -492,6 +492,9 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   window; the Recycle Bin's title says Recycle Bin instead of ".RecycleBin"; adding a cloud drive explains its three
   steps in your language.
 
+- **Drive Health and Spotlight**: drive roles and the kind of each Spotlight result now show in your language, and
+  values a drive could not report no longer say "Unknown".
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

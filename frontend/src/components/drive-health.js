@@ -18,6 +18,27 @@ import { formatBytes, formatDateTime } from '../format.js';
 import { lineChart } from './drive-charts.js';
 import { t } from '../i18n.js';
 import { ZettEventBus } from '../event-bus.js';
+
+const ROLES = {
+  data: ['dh.role_data', 'data'],
+  cache: ['dh.role_cache', 'cache'],
+  parity: ['dh.role_parity', 'parity'],
+  os: ['dh.role_os', 'system'],
+  boot: ['dh.role_boot', 'boot'],
+  spare: ['dh.role_spare', 'spare'],
+  log: ['dh.role_log', 'log'],
+  metadata: ['dh.role_metadata', 'metadata'],
+};
+
+/** A drive's role (data, cache, parity, ...) in the reader's language; an unknown role as it is. */
+export function roleWord(role) {
+  const known = ROLES[role];
+  return known ? t(known[0], known[1]) : role || '';
+}
+
+/** A serial number, model or reading worth showing: the hardware layer writes "Unknown" (or
+ * "Unknown (Standby)") when it could not read one. */
+export const shownSerial = (serial) => (serial && !String(serial).startsWith('Unknown') ? serial : '');
 import { bringToFront, makeDraggable } from './dock.js';
 import { showToast } from '../toast.js';
 import { announceChange } from '../a11y.js';
@@ -49,8 +70,8 @@ function when(ts) {
 }
 
 export function driveCardHtml(d, selected) {
-  const name = d.model || d.dev;
-  const bits = [d.dev, d.role, d.temp != null ? `${Math.round(d.temp)} °C` : ''].filter(Boolean).join(' · ');
+  const name = shownSerial(d.model) || d.dev; // a model the hardware could not read says "Unknown": show the device
+  const bits = [d.dev, roleWord(d.role), d.temp != null ? `${Math.round(d.temp)} °C` : ''].filter(Boolean).join(' · ');
   const asleep = d.asleep ? `<span class="dh-asleep">${escapeHtml(t('dh.asleep', 'Asleep'))}</span>` : '';
   const testing = d.active_test ? `<span class="dh-asleep">${escapeHtml(t('dh.testing', 'Testing'))}</span>` : '';
   return `<li><button type="button" class="dh-card ${verdictClass(d.verdict)}${selected ? ' is-selected' : ''}" data-dh-dev="${escapeHtml(d.dev)}"${selected ? ' aria-current="true"' : ''}>
@@ -131,9 +152,9 @@ function testRowsHtml(history) {
 function readingsHtml(detail) {
   const m = (detail && detail.metrics) || {};
   const rows = [
-    [t('dh.r_model', 'Model'), detail?.model],
-    [t('dh.r_serial', 'Serial number'), detail?.serial],
-    [t('dh.r_hours', 'Hours powered on'), detail?.power_on_hours],
+    [t('dh.r_model', 'Model'), shownSerial(detail?.model)],
+    [t('dh.r_serial', 'Serial number'), shownSerial(detail?.serial)],
+    [t('dh.r_hours', 'Hours powered on'), shownSerial(detail?.power_on_hours)],
     [t('dh.r_temp', 'Temperature'), detail?.temp != null ? `${detail.temp} °C` : null],
     [t('dh.r_realloc', 'Replaced sectors'), m.realloc],
     [t('dh.r_pending', 'Sectors waiting to be replaced'), m.pending],
@@ -176,8 +197,8 @@ export function detailHtml(drive, detail, tests) {
   return `
     <div class="dh-head">
       <div>
-        <h3 class="dh-title">${escapeHtml(drive.model || drive.dev)}</h3>
-        <div class="dh-sub">${escapeHtml([drive.dev, drive.role, drive.serial].filter(Boolean).join(' · '))}</div>
+        <h3 class="dh-title">${escapeHtml(shownSerial(drive.model) || drive.dev)}</h3>
+        <div class="dh-sub">${escapeHtml([drive.dev, roleWord(drive.role), shownSerial(drive.serial)].filter(Boolean).join(' · '))}</div>
       </div>
       <span class="dh-pill ${verdictClass(health.verdict)}">${escapeHtml(labelText(health))}</span>
     </div>

@@ -343,6 +343,23 @@ export function parseNaturalLanguageAction(rawQuery) {
   return null;
 }
 
+
+const CATEGORIES = {
+  app: ['sp.cat_app', 'app'],
+  action: ['sp.cat_action', 'action'],
+  setting: ['sp.cat_setting', 'setting'],
+  ai: ['sp.cat_ai', 'Kib'],
+  container: ['sp.cat_container', 'app'],
+  folder: ['sp.cat_folder', 'folder'],
+  file: ['sp.cat_file', 'file'],
+};
+
+/** A result's kind on its badge, in the reader's language (it showed the code word). */
+export function categoryWord(category) {
+  const known = CATEGORIES[category || 'action'];
+  return known ? t(known[0], known[1]) : category;
+}
+
 export function openSpotlight(initialQuery = '') {
   initSpotlight();
   const overlay = document.getElementById('spotlight-palette-overlay');
@@ -476,7 +493,7 @@ function renderSpotlightResults() {
             <span class="spotlight-item-sub">${escapeHtml(item.subtitle || '')}</span>
           </div>
         </div>
-        <span class="spotlight-badge ${badgeClass}">${item.category || 'action'}</span>
+        <span class="spotlight-badge ${badgeClass}">${escapeHtml(categoryWord(item.category))}</span>
       </div>
     `;
   }).join('');
