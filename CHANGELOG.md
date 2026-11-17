@@ -457,6 +457,14 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   backups outside this NAS that hold it, all or part of it, or "No copy outside this NAS". A scratch or download folder
   can be marked "Leave out on purpose".
 
+#### Changes
+
+- **Apply a Compose file**: the stack editor has "Apply". It first says what will happen, service by service (new,
+  replaced and why, kept, removed) and any access to the host the file asks for; then it downloads the images, sets
+  aside each container that changes, starts the new ones and checks they run (and are healthy). If anything fails,
+  everything goes back as it was, the old file too. A stack Kib writes can now be started. Settings Kiboto does not
+  apply yet (such as building an image) are named and refused, never skipped.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

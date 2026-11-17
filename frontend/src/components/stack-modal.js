@@ -105,7 +105,8 @@ export function initStackModal() {
             <button class="btn-pill-toggle" id="stack-cancel-btn">${t('common.cancel', 'Cancel')}</button>
             <button class="btn-pill-toggle stk-box" id="stack-secrets-btn" aria-pressed="false">${t('stk.show_secrets', 'Show secrets')}</button>
             <button class="btn-pill-toggle stk-box" id="stack-save-btn">${t('stk.save', 'Save')}</button>
-            <button class="btn-pill-toggle is-primary" id="stack-save-redeploy-btn">${t('stk.save_redeploy', 'Save and restart')}</button>
+            <button class="btn-pill-toggle" id="stack-save-redeploy-btn">${t('stk.save_redeploy', 'Save and restart')}</button>
+            <button class="btn-pill-toggle is-primary" id="stack-apply-btn">${t('stap.ok', 'Apply')}</button>
           </div>
         </div>
       </div>
@@ -205,6 +206,7 @@ export function initStackModal() {
   document.getElementById('stack-secrets-btn')?.addEventListener('click', () => toggleStackSecrets());
   document.getElementById('stack-save-btn')?.addEventListener('click', () => saveStack(false));
   document.getElementById('stack-save-redeploy-btn')?.addEventListener('click', () => saveStack(true));
+  document.getElementById('stack-apply-btn')?.addEventListener('click', () => applyActiveStack());
 
   // Copy buttons
   document.getElementById('stack-compose-copy-btn')?.addEventListener('click', () => {
@@ -295,7 +297,7 @@ export async function openStackModal(stackName, initialYaml = null) {
     if (msgEl) {
       msgEl.textContent = risks.length
         ? t('stk.review_risky', 'Review before deploying. This AI-written stack asks for host access:\n{risks}', { risks: composeRiskSummary(risks) })
-        : t('stk.review', 'Loaded an AI-written Compose file. Kiboto can save it, but it cannot start a new stack from a file yet: install the app from the catalog, or start the file with Docker Compose on the server.');
+        : t('stk.review', 'Loaded an AI-written Compose file. Press Apply to see what it will start, then start it.');
       msgEl.style.whiteSpace = 'pre-line';
       msgEl.style.color = risks.some((r) => r.level === 'danger') ? '#fca5a5' : '';
     }
@@ -471,6 +473,16 @@ export async function toggleStackSecrets() {
   } catch (err) {
     showToast(t('toast.failed_loading_stack', 'Failed loading stack: {error}', { error: err.message }), 'error');
   }
+}
+
+/** "Apply" (Apps decision 4b): what will happen first, then a job that goes back on failure. */
+export async function applyActiveStack() {
+  if (!_activeStackName) return false;
+  const name = _activeStackName;
+  const compose = /** @type {HTMLTextAreaElement | null} */ (document.getElementById('stack-compose-editor'))?.value || '';
+  const env = /** @type {HTMLTextAreaElement | null} */ (document.getElementById('stack-env-editor'))?.value || '';
+  const { applyStack } = await import('./stack-apply.js');
+  return applyStack(name, compose, env, { msg: document.getElementById('stack-modal-msg'), done: () => openStackModal(name) });
 }
 
 async function saveStack(redeployAfterSave = false) {

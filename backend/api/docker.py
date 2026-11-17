@@ -624,6 +624,57 @@ async def post_docker_stack_save(stack_name: str, req: StackSaveRequest):
 
 
 @router.post(
+    "/docker/stacks/{stack_name}/preview",
+    dependencies=[Depends(require_scope("containers:manage"))],
+)
+async def post_docker_stack_preview(stack_name: str, req: StackSaveRequest):
+    """What applying the file would do (Apps decision 4b); nothing changes."""
+    if not stack_name or not re.match(r"^[a-zA-Z0-9_.-]{1,128}$", stack_name):
+        raise HTTPException(status_code=400, detail="Invalid stack name")
+    from backend.services.compose_apply import ComposeError
+    from backend.services.docker_stacks import preview_stack_apply
+
+    try:
+        return await asyncio.to_thread(preview_stack_apply, stack_name, req.compose_yaml, req.env_content)
+    except ComposeError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+
+@router.post(
+    "/docker/stacks/{stack_name}/apply",
+    dependencies=[Depends(require_scope("containers:manage"))],
+)
+async def post_docker_stack_apply(
+    stack_name: str,
+    req: StackSaveRequest,
+    request: Request,
+    principal: AuthenticatedPrincipal = Depends(get_current_principal),
+):
+    """Applies the file as a job; host-level access needs a confirmation (Apps decision 4b)."""
+    if not stack_name or not re.match(r"^[a-zA-Z0-9_.-]{1,128}$", stack_name):
+        raise HTTPException(status_code=400, detail="Invalid stack name")
+    from backend.confirmations import confirm_or_raise
+    from backend.services.compose_apply import ComposeError
+    from backend.services.docker_stacks import preview_stack_apply, start_stack_apply
+
+    try:
+        preview = await asyncio.to_thread(preview_stack_apply, stack_name, req.compose_yaml, req.env_content)
+        elevated = bool(preview["elevated"])
+        if elevated:
+            confirm_or_raise(request, principal, "docker.stack.apply.elevated", stack_name)
+        return await asyncio.to_thread(
+            start_stack_apply,
+            stack_name,
+            req.compose_yaml,
+            req.env_content,
+            elevated,
+            getattr(principal, "username", None),
+        )
+    except ComposeError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+
+@router.post(
     "/docker/stacks/{stack_name}/action",
     dependencies=[Depends(require_scope("containers:write", "containers:manage"))],
 )

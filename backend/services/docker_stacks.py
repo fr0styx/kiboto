@@ -772,3 +772,115 @@ def execute_stack_action(stack_name: str, action: str) -> dict[str, Any]:
         "action": action,
         "details": results,
     }
+
+
+# ---------------------------------------------------------------- Apply (Apps decision 4b)
+
+
+def _apply_inputs(stack_name: str, compose_yaml: str, env_content: str | None) -> dict[str, Any]:
+    """What preview and apply both need: the file with its secrets put back, where its relative
+    folders live, and the stack's containers as Docker describes them."""
+    from backend.services import compose_apply
+    from backend.services.container_mutator import docker_request
+
+    details = get_stack_details(stack_name)
+    if details.get("location_type") == "dockhand":
+        raise compose_apply.ComposeError("This stack's file lives in Dockhand; apply it there.")
+    if any(is_kiboto_itself(str(c.get("id") or ""), str(c.get("name") or "")) for c in details.get("containers") or []):
+        raise compose_apply.ComposeError("This stack holds Kiboto itself, which never replaces its own container.")
+    old_compose = details.get("compose_yaml") or ""
+    old_env = details.get("env_content") or ""
+    try:
+        compose_yaml, env_content = _restore_masked_stack_secrets(compose_yaml, env_content, old_compose, old_env)
+    except ValueError as e:
+        raise compose_apply.ComposeError(str(e)) from e
+    base = details.get("working_dir") or f"/mnt/user/appdata/{stack_name}"
+    current = []
+    for c in details.get("containers") or []:
+        st, info = docker_request("GET", f"/containers/{c.get('id')}/json")
+        if st == 200 and isinstance(info, dict):
+            current.append(info)
+    built = compose_apply.build(compose_yaml, env_content if env_content is not None else old_env, stack_name, base)
+    return {
+        "built": built,
+        "current": current,
+        "compose": compose_yaml,
+        "env": env_content,
+        "old_compose": old_compose,
+        "old_env": old_env,
+        "had_file": bool(details.get("has_real_file")),
+    }
+
+
+def _elevated(body: dict[str, Any]) -> list[str]:
+    from backend import docker_proxy
+
+    return docker_proxy.elevated_reasons("/containers/create", body)
+
+
+def preview_stack_apply(stack_name: str, compose_yaml: str, env_content: str | None = None) -> dict[str, Any]:
+    """What applying the file would do, service by service; nothing is changed."""
+    from backend.services import compose_apply
+
+    inputs = _apply_inputs(stack_name, compose_yaml, env_content)
+    return compose_apply.plan(inputs["built"], inputs["current"], _elevated)
+
+
+def start_stack_apply(
+    stack_name: str, compose_yaml: str, env_content: str | None, elevated_ok: bool, owner: str | None = None
+) -> dict[str, Any]:
+    """Saves the file (the old one is kept) and applies it as a job; on failure the containers and
+    the file go back as they were."""
+    import threading
+
+    from backend.services import compose_apply
+    from backend.services.app_catalog import pull_image_blocking
+    from backend.services.container_mutator import docker_request
+    from backend.services.jobs import job_manager
+    from backend.state import add_event
+
+    inputs = _apply_inputs(stack_name, compose_yaml, env_content)
+    preview = compose_apply.plan(inputs["built"], inputs["current"], _elevated)
+    if preview["elevated"] and not elevated_ok:
+        raise compose_apply.ComposeError("The file asks for host-level access; confirm it first.")
+    saved = save_stack_config(stack_name, inputs["compose"], inputs["env"])
+    if not saved.get("success"):
+        raise compose_apply.ComposeError(saved.get("error") or "The file could not be saved.")
+    job = job_manager.register(
+        "stack_apply",
+        f"Apply {stack_name}",
+        owner=owner,
+        title_id="jobs.t.stack_apply",
+        title_params={"name": stack_name},
+    )
+
+    def run() -> None:
+        try:
+            res = compose_apply.apply_built(
+                inputs["built"],
+                inputs["current"],
+                compose_apply.Docker(docker_request, pull_image_blocking),
+                elevated_ok,
+                progress=lambda msg, pct: job_manager.update(job.id, detail=msg, percent=float(pct)),
+                elevated_reasons=_elevated,
+            )
+        except (
+            compose_apply.ComposeError,
+            OSError,
+            ValueError,
+            KeyError,
+            TypeError,
+            RuntimeError,
+        ) as e:  # the job must end and the file go back
+            res = {"ok": False, "error": f"{e}"}
+        if res["ok"]:
+            add_event("success", "Stack applied", f"{stack_name}: the file is applied.")
+            job_manager.finish(job.id, "done")
+            return
+        if inputs["had_file"]:
+            save_stack_config(stack_name, inputs["old_compose"], inputs["old_env"])  # the old file comes back
+        add_event("warning", "Stack not applied", f"{stack_name}: {res['error']}")
+        job_manager.finish(job.id, "error", res["error"])
+
+    threading.Thread(target=run, daemon=True, name=f"stack-apply-{stack_name}").start()
+    return {"status": "started", "job": job.id, "steps": preview["steps"]}

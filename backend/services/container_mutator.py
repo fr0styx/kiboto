@@ -601,3 +601,7 @@ def recreate_container_ports(
         timeout=timeout,
         grace_period_seconds=grace_period_seconds,
     )
+
+
+# shared with the stack apply (Apps decision 4b)
+docker_request = _docker_request

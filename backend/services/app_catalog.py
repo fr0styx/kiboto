@@ -1984,3 +1984,7 @@ def stream_deploy_catalog_app(*args: Any, **kwargs: Any) -> Iterator[dict[str, A
     """Deploys a curated app (see _deploy_steps), each progress event carrying how it was said."""
     for event in _deploy_steps(*args, **kwargs):
         yield with_text(event)
+
+
+# shared with the stack apply (Apps decision 4b)
+pull_image_blocking = _pull_image_blocking

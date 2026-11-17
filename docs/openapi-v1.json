@@ -49947,6 +49947,118 @@
     ]
    }
   },
+  "/api/v1/docker/stacks/{stack_name}/apply": {
+   "post": {
+    "description": "Applies the file as a job; host-level access needs a confirmation (Apps decision 4b).",
+    "operationId": "post_docker_stack_apply_api_v1_docker_stacks__stack_name__apply_post",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "stack_name",
+      "required": true,
+      "schema": {
+       "title": "Stack Name",
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/StackSaveRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "404": {
+      "$ref": "#/components/responses/NotFound"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Post Docker Stack Apply",
+    "tags": [
+     "Docker Containers & Stacks"
+    ],
+    "x-required-scopes": [
+     "containers:manage"
+    ]
+   }
+  },
+  "/api/v1/docker/stacks/{stack_name}/preview": {
+   "post": {
+    "description": "What applying the file would do (Apps decision 4b); nothing changes.",
+    "operationId": "post_docker_stack_preview_api_v1_docker_stacks__stack_name__preview_post",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "stack_name",
+      "required": true,
+      "schema": {
+       "title": "Stack Name",
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/StackSaveRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "404": {
+      "$ref": "#/components/responses/NotFound"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Post Docker Stack Preview",
+    "tags": [
+     "Docker Containers & Stacks"
+    ],
+    "x-required-scopes": [
+     "containers:manage"
+    ]
+   }
+  },
   "/api/v1/docker/stacks/{stack_name}/save": {
    "post": {
     "operationId": "post_docker_stack_save_api_v1_docker_stacks__stack_name__save_post",

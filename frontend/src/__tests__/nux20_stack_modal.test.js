@@ -75,7 +75,7 @@ describe('stack inspector (NUX-20)', () => {
     await flush();
     expect(byId('stack-header-title').textContent).toBe('Deploy stack: app');
     expect(byId('stack-header-origin').textContent).toBe('AI template');
-    expect(byId('stack-modal-msg').textContent).toContain('it cannot start a new stack from a file yet');
+    expect(byId('stack-modal-msg').textContent).toContain('Press Apply to see what it will start');
 
     deployComposeStackSnippet('services:\n  tool:\n    image: x\n    privileged: true\n');
     await flush();
