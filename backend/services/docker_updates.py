@@ -251,7 +251,19 @@ def _check_container_image_update(c: dict) -> dict[str, Any]:
             # pinned by its owner (or without a tag): nothing to compare against
             res["status"] = "pinned"
             return res
-        # a catalog app pinned at install ("repo:tag@sha256:..."): compare the tag with the pin
+        # a catalog app pinned at install ("repo:tag@sha256:..."): it updates to the version this
+        # Kiboto ships (Apps decision 7), not to whatever its tag points to upstream today
+        from backend.services.image_ref import tested_ref
+
+        tested = tested_ref(img)
+        if tested:
+            res["tested_image"] = tested
+            res["local_digest"] = split_ref(img)[3]
+            res["remote_digest"] = split_ref(tested)[3]
+            res["has_update"] = tested != img
+            res["status"] = "update_available" if res["has_update"] else "up_to_date"
+            return res
+        # not from the built-in catalog (or no longer in it): compare the tag with the pin
         pinned_digest = split_ref(img)[3]
         img = name
 
@@ -378,11 +390,15 @@ def check_all_container_updates(force: bool = False) -> dict[str, Any]:
 
 
 def _update_target(img: str) -> str:
-    """What to pull for an update: a pinned catalog app ("repo:tag@sha256:...") follows its tag."""
-    from backend.services.image_ref import name_and_tag
+    """What to pull for an update: a pinned built-in catalog app goes to the version this Kiboto
+    ships (Apps decision 7); another pinned image ("repo:tag@sha256:...") follows its tag."""
+    from backend.services.image_ref import name_and_tag, tested_ref
 
     if "@" not in img:
         return img
+    tested = tested_ref(img)
+    if tested:
+        return tested
     name = name_and_tag(img)
     if ":" not in name.rsplit("/", 1)[-1]:
         raise ValueError(

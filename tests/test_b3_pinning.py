@@ -101,6 +101,7 @@ def _fake_docker(remote, repo_digests):
 
 @pytest.mark.parametrize("remote, has_update", [(B, True), (A, False)])
 def test_a_pinned_app_is_checked_against_its_tag(monkeypatch, remote, has_update):
+    monkeypatch.setattr(image_ref, "_lock", lambda: {})  # an image outside the built-in catalog follows its tag
     monkeypatch.setattr(docker_updates, "get_container_update_policy", lambda n: "notify")
     monkeypatch.setattr(docker_updates, "get_registry_auth_header", lambda i: {})
     paths = []
@@ -114,6 +115,7 @@ def test_a_pinned_app_is_checked_against_its_tag(monkeypatch, remote, has_update
 
 
 def test_a_digest_without_a_tag_stays_pinned(monkeypatch):
+    monkeypatch.setattr(image_ref, "_lock", lambda: {})  # an image outside the built-in catalog follows its tag
     monkeypatch.setattr(docker_updates, "get_container_update_policy", lambda n: "notify")
     res = docker_updates._check_container_image_update(
         {"Names": ["/jf"], "Id": "x", "Image": "jellyfin/jellyfin@" + A, "Labels": FOLLOW}
@@ -127,6 +129,7 @@ def test_a_digest_without_a_tag_stays_pinned(monkeypatch):
 
 
 def test_updating_a_pinned_app_pins_the_new_image(monkeypatch):
+    monkeypatch.setattr(image_ref, "_lock", lambda: {})  # an image outside the built-in catalog follows its tag
     from backend.services import compose_synthesizer
 
     monkeypatch.setattr(

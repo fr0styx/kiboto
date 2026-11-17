@@ -73,6 +73,21 @@ def pinned(image: str) -> str:
     return with_digest(image, digest) if digest else image
 
 
+def tested_ref(image: str) -> str | None:
+    """The version this Kiboto ships for a built-in catalog image, as "repo:tag@digest" (Apps
+    decision 7: catalog apps update to Kiboto's tested versions). Found by name and tag; when the
+    catalog moved to another tag, by repository if it ships exactly one. None for other images."""
+    lock = _lock()
+    name = name_and_tag(image or "")
+    if not name or ":" not in name.rsplit("/", 1)[-1]:
+        return None  # a digest without a tag was pinned by its owner, never by a catalog install
+    if name in lock:
+        return with_digest(name, lock[name])
+    where = split_ref(name)[:2]
+    same = [k for k in lock if split_ref(k)[:2] == where]
+    return with_digest(same[0], lock[same[0]]) if len(same) == 1 else None
+
+
 def pin_app(app: dict) -> dict:
     """A copy of a built-in catalog app with its images (and its companions') pinned."""
     out = dict(app)

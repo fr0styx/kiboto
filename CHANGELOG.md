@@ -621,6 +621,12 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **More of Kiboto in your language**: the SFTP card, read and write labels, "Ask Kib" in the dock and the main
   storage pool's name were English in other languages. Found by opening every Settings page in all five languages.
 
+#### Changes
+
+- **Catalog apps update to tested versions**: an app from Kiboto's catalog now offers an update when a Kiboto
+  release ships a newer version that was tested with it, not whenever its maker publishes something new. Apps you
+  added yourself are checked against their own source, as before.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 
