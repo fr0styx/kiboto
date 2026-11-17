@@ -8319,4 +8319,10 @@ export default {
   "pwr.sockets_no": "Ihre USV hat keinen Befehl, ihre Steckdosen wieder einzuschalten, wenn der Strom zurückkommt.",
   "pwr.sockets_unknown": "Kiboto konnte Ihre USV nicht fragen, ob sie ihre Steckdosen wieder einschaltet.",
   "pwa.title": "Erweitert: Verbindung und Details",
+  "pwa.rule_intro": "Kiboto fährt das NAS beim ersten dieser Werte herunter, oder wenn die USV selbst meldet, dass ihr Akku schwach ist:",
+  "pwa.rule_minutes": "Minuten, die die USV noch schätzt",
+  "pwa.rule_battery": "Verbleibende Akkuladung",
+  "pwa.rule_timer": "Auch nach einer festen Zeit am Akku herunterfahren",
+  "pwa.rule_sum": "Bei {min} Min. oder {pct} % übrig, oder wenn die USV es meldet",
+  "pwa.rule_sum_timer": ", oder nach {min, plural, one {# Minute} other {# Minuten}} am Akku",
 };

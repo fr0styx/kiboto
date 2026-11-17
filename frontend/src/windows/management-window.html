@@ -2222,9 +2222,9 @@
                   <!-- Trigger Policies & Dynamic Sliders -->
                   <div class="ups-col-3">
                     <div>
-                      <label class="ups-row-7">
-                        <input type="radio" name="ups-policy" value="runtime_left" checked style="accent-color:var(--ok2, #33cdb8); width:16px; height:16px; cursor:pointer;">
-                        <span style="font-size:var(--kb-fs-xs); font-weight:600; color:var(--fg, #f1f7f7);"><strong data-i18n="mgmt.ups_policy_runtime">Shutdown when Estimated Runtime drops below:</strong></span>
+                      <p class="ups-rule-head" data-i18n="pwa.rule_intro">Kiboto shuts the NAS down at the first of these, or when the UPS itself says its battery is low:</p>
+                      <label class="ups-row-7" for="ups-slider-runtime">
+                        <span style="font-size:var(--kb-fs-xs); font-weight:600; color:var(--fg, #f1f7f7);"><strong data-i18n="pwa.rule_minutes">Minutes the UPS estimates are left</strong></span>
                       </label>
                       <div class="ups-row-8" id="ups-slider-runtime-container">
                         <input type="range" id="ups-slider-runtime" min="2" max="25" step="1" value="5" class="custom-slider ups-grow">
@@ -2233,11 +2233,10 @@
                     </div>
 
                     <div>
-                      <label class="ups-row-9">
-                        <input type="radio" name="ups-policy" value="battery_pct" style="accent-color:var(--ok2, #33cdb8); width:16px; height:16px; cursor:pointer;">
-                        <span style="font-size:var(--kb-fs-xs); font-weight:600; color:var(--fg, #f1f7f7);"><strong data-i18n="mgmt.ups_policy_batt">Shutdown when Battery Charge drops below:</strong></span>
+                      <label class="ups-row-9" for="ups-slider-battery">
+                        <span style="font-size:var(--kb-fs-xs); font-weight:600; color:var(--fg, #f1f7f7);"><strong data-i18n="pwa.rule_battery">Battery charge left</strong></span>
                       </label>
-                      <div class="ups-x-3" id="ups-slider-battery-container" style="display: none;">
+                      <div class="ups-x-3" id="ups-slider-battery-container">
                         <input type="range" id="ups-slider-battery" min="10" max="50" step="5" value="20" class="custom-slider ups-grow">
                         <span id="ups-val-battery" class="slider-val-badge">20 %</span>
                       </div>
@@ -2245,8 +2244,8 @@
 
                     <div>
                       <label class="ups-row-9">
-                        <input type="radio" name="ups-policy" value="timer" style="accent-color:var(--ok2, #33cdb8); width:16px; height:16px; cursor:pointer;">
-                        <span style="font-size:var(--kb-fs-xs); font-weight:600; color:var(--fg, #f1f7f7);"><strong data-i18n="mgmt.ups_policy_timer">Shutdown after Time on Battery exceeds:</strong></span>
+                        <input type="checkbox" name="ups-policy" value="timer" style="accent-color:var(--ok2, #33cdb8); width:16px; height:16px; cursor:pointer;">
+                        <span style="font-size:var(--kb-fs-xs); font-weight:600; color:var(--fg, #f1f7f7);"><strong data-i18n="pwa.rule_timer">Also shut down after a set time on battery</strong></span>
                       </label>
                       <div class="ups-x-3" id="ups-slider-timer-container" style="display: none;">
                         <input type="range" id="ups-slider-timer" min="60" max="900" step="30" value="300" class="custom-slider ups-grow">

@@ -97,9 +97,7 @@ describe('UPS Power Flow Digital Twin & Drawer Controls', () => {
           <button id="btn-toggle-ups-policy"><span id="ups-toggle-policy-text">Collapse Policy</span></button>
           <div id="ups-policy-summary" style="display:none;"><span id="ups-policy-summary-text"></span></div>
           <div id="ups-policy-body" style="display:flex;">
-            <input type="radio" name="ups-policy" value="runtime_left" checked>
-            <input type="radio" name="ups-policy" value="battery_pct">
-            <input type="radio" name="ups-policy" value="timer">
+            <input type="checkbox" name="ups-policy" value="timer">
 
             <div id="ups-slider-runtime-container" style="display:flex;">
               <input type="range" id="ups-slider-runtime" min="2" max="25" value="5">
@@ -378,13 +376,13 @@ describe('UPS Power Flow Digital Twin & Drawer Controls', () => {
       runtime_threshold_min: 12,
     }));
 
-    // 2. Changing policy radio
-    const battPolicyRadio = document.querySelector('input[name="ups-policy"][value="battery_pct"]');
-    battPolicyRadio.checked = true;
-    battPolicyRadio.dispatchEvent(new Event('change'));
+    // 2. "Also after a set time on battery" (one rule, Power decision 4)
+    const timerBox = document.querySelector('input[name="ups-policy"][value="timer"]');
+    timerBox.checked = true;
+    timerBox.dispatchEvent(new Event('change'));
 
     expect(postSpy).toHaveBeenCalledWith('/api/ups/config', expect.objectContaining({
-      shutdown_policy: 'battery_pct',
+      shutdown_policy: 'timer',
     }));
 
     // 3. Changing cut-power toggle
@@ -496,20 +494,20 @@ describe('UPS Power Flow Digital Twin & Drawer Controls', () => {
     const battBox = document.getElementById('ups-slider-battery-container');
     const timerBox = document.getElementById('ups-slider-timer-container');
 
-    const battRadio = document.querySelector('input[name="ups-policy"][value="battery_pct"]');
-    battRadio.checked = true;
-    battRadio.dispatchEvent(new Event('change'));
+    // minutes and charge always apply; the set time shows when it is chosen
+    const timerCheck = document.querySelector('input[name="ups-policy"][value="timer"]');
+    timerCheck.checked = false;
+    timerCheck.dispatchEvent(new Event('change'));
 
-    expect(rtBox.style.display).toBe('none');
+    expect(rtBox.style.display).toBe('flex');
     expect(battBox.style.display).toBe('flex');
     expect(timerBox.style.display).toBe('none');
 
-    const timerRadio = document.querySelector('input[name="ups-policy"][value="timer"]');
-    timerRadio.checked = true;
-    timerRadio.dispatchEvent(new Event('change'));
+    timerCheck.checked = true;
+    timerCheck.dispatchEvent(new Event('change'));
 
-    expect(rtBox.style.display).toBe('none');
-    expect(battBox.style.display).toBe('none');
+    expect(rtBox.style.display).toBe('flex');
+    expect(battBox.style.display).toBe('flex');
     expect(timerBox.style.display).toBe('flex');
   });
 

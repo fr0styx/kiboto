@@ -70,20 +70,15 @@ describe('UPS panel words (NUX-20)', () => {
   it('sums up the shutdown rule', () => {
     document.body.innerHTML = `
       <span id="ups-policy-summary-text"></span>
-      <input type="radio" name="ups-policy" value="runtime_left" checked>
-      <input type="radio" name="ups-policy" value="battery_pct">
-      <input type="radio" name="ups-policy" value="timer">
+      <input type="checkbox" name="ups-policy" value="timer">
       <input type="range" id="ups-slider-runtime" value="7"><input type="range" id="ups-slider-battery" value="25">
       <input type="range" id="ups-slider-timer" min="30" max="600" value="120"><input type="checkbox" id="ups-chk-docker">`;
+    // one rule, the first limit reached wins (Power decision 4)
     updateUpsPolicySummary();
-    expect(byId('ups-policy-summary-text').textContent).toBe('Active: Estimated Runtime < 7 min');
-    document.querySelector('[value="battery_pct"]').checked = true;
-    byId('ups-chk-docker').checked = true;
-    updateUpsPolicySummary();
-    expect(byId('ups-policy-summary-text').textContent).toBe('Active: Battery Charge < 25% · Docker WAL flush');
+    expect(byId('ups-policy-summary-text').textContent).toBe('Active: At 7 min or 25 % left, or when the UPS says so');
     document.querySelector('[value="timer"]').checked = true;
     updateUpsPolicySummary();
-    expect(byId('ups-policy-summary-text').textContent).toBe('Active: Time on Battery > 120s · Docker WAL flush');
+    expect(byId('ups-policy-summary-text').textContent).toBe('Active: At 7 min or 25 % left, or when the UPS says so, or after 2 minutes on battery');
   });
 
   it('labels discovery results and asks before a drill or self-test', async () => {

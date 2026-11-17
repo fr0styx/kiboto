@@ -544,6 +544,13 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Power reads top to bottom**: the answers first, then Check that it works, History and Restart or shut down; the
   gauges and the connection settings are under a closed "Advanced".
 
+#### Changes
+
+- **Power: one shutdown rule, shown as it works**: minutes left and battery left both apply, the first one reached
+  wins (or the UPS's own low-battery signal); "after a set time on battery" can be added. The page used to show three
+  exclusive choices while the server applied all of them.
+- **Restart or shut down from the top bar**: in the menu under your name, for people who may do it.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

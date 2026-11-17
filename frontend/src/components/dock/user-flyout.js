@@ -52,6 +52,9 @@ export function toggleUserProfileFlyout(anchorEl) {
         <button class="user-flyout-btn ufl-btn" id="btn-flyout-security">
           <span class="ufl-ico">🛡️</span> <span>${escapeHtml(t('account.title', 'My account'))}</span>
         </button>
+        <button class="user-flyout-btn ufl-btn" id="btn-flyout-power" hidden>
+          <span class="ufl-ico">⏻</span> <span>${escapeHtml(t('pws.title', 'Restart or shut down'))}</span>
+        </button>
         <div class="ufl-sep"></div>
         <button class="user-flyout-btn ufl-btn-soft" id="btn-flyout-switch">
           <span class="ufl-ico">🔄</span> <span>${escapeHtml(t('dock.uf_switch', 'Switch person'))}</span>
@@ -116,6 +119,16 @@ export function toggleUserProfileFlyout(anchorEl) {
       flyout.style.display = 'none';
       resetFlyoutTrigger();
       openMgmtPane('mgmt-pane-account');
+    });
+
+    // Restart or shut down (SET-31, X5 d): for people who may switch the NAS; it opens Power there
+    const powerBtn = /** @type {HTMLElement} */ (document.getElementById('btn-flyout-power'));
+    import('../../route-access.js').then((m) => { powerBtn.hidden = !m.hasScope(m.currentUser()?.scopes || [], 'system:power'); }).catch(() => {});
+    powerBtn.addEventListener('click', () => {
+      flyout.style.display = 'none';
+      resetFlyoutTrigger();
+      openMgmtPane('mgmt-sec-ups');
+      setTimeout(() => document.getElementById('power-switch')?.scrollIntoView?.({ block: 'center' }), 900);
     });
 
     document.getElementById('btn-flyout-switch').addEventListener('click', () => {

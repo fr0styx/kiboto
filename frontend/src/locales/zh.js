@@ -8319,4 +8319,10 @@ export default {
   "pwr.sockets_no": "你的 UPS 没有在恢复供电时重新打开插座的命令。",
   "pwr.sockets_unknown": "Kiboto 无法询问你的 UPS 是否会重新打开插座。",
   "pwa.title": "高级：连接和详细信息",
+  "pwa.rule_intro": "达到以下任一条件，或 UPS 自己报告电池电量低时，Kiboto 会关闭 NAS：",
+  "pwa.rule_minutes": "UPS 估计的剩余分钟数",
+  "pwa.rule_battery": "剩余电池电量",
+  "pwa.rule_timer": "在电池上运行固定时间后也关机",
+  "pwa.rule_sum": "剩余 {min} 分钟或 {pct} % 时，或 UPS 发出信号时",
+  "pwa.rule_sum_timer": "，或在电池上运行 {min, plural, other {# 分钟}}后",
 };

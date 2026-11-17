@@ -376,8 +376,9 @@ export function updateUpsPolicySliders(selectedPolicy) {
   const battContainer = document.getElementById('ups-slider-battery-container');
   const timerContainer = document.getElementById('ups-slider-timer-container');
 
-  if (rtContainer) rtContainer.style.display = (policy === 'runtime_left') ? 'flex' : 'none';
-  if (battContainer) battContainer.style.display = (policy === 'battery_pct') ? 'flex' : 'none';
+  // one rule, the first limit reached wins (Power decision 4): minutes and charge both apply always
+  if (rtContainer) rtContainer.style.display = 'flex';
+  if (battContainer) battContainer.style.display = 'flex';
   if (timerContainer) timerContainer.style.display = (policy === 'timer') ? 'flex' : 'none';
 
   updateUpsPolicySummary();
@@ -392,20 +393,12 @@ export function updateUpsPolicySummary() {
   const rtVal = document.getElementById('ups-slider-runtime')?.value || 5;
   const battVal = document.getElementById('ups-slider-battery')?.value || 20;
   const timerVal = document.getElementById('ups-slider-timer')?.value || 300;
-  const dockerChecked = document.getElementById('ups-chk-docker')?.checked;
 
-  let policyDesc;
-  if (policy === 'runtime_left') {
-    policyDesc = t('upx.rule_runtime', 'Estimated Runtime < {min} min', { min: rtVal });
-  } else if (policy === 'battery_pct') {
-    policyDesc = t('upx.rule_battery', 'Battery Charge < {pct}%', { pct: battVal });
-  } else {
-    policyDesc = t('upx.rule_timer', 'Time on Battery > {s}s', { s: timerVal });
+  let policyDesc = t('pwa.rule_sum', 'At {min} min or {pct} % left, or when the UPS says so', { min: rtVal, pct: battVal });
+  if (policy === 'timer') {
+    policyDesc += t('pwa.rule_sum_timer', ', or after {min, plural, one {# minute} other {# minutes}} on battery', { min: Math.round(Number(timerVal) / 60) });
   }
 
-  if (dockerChecked) {
-    policyDesc += t('upx.docker_flush', ' · Docker WAL flush');
-  }
   summaryText.textContent = t('upx.summary', 'Active: {policy}', { policy: policyDesc });
 }
 if (typeof window !== 'undefined') window.updateUpsPolicySummary = updateUpsPolicySummary;
@@ -671,7 +664,7 @@ export function initUpsDrawerControls() {
   const policyRadios = document.querySelectorAll('input[name="ups-policy"]');
   policyRadios.forEach(radio => {
     radio.addEventListener('change', () => {
-      updateUpsPolicySliders(radio.value);
+      updateUpsPolicySliders();
       triggerImmediateSave();
     });
   });

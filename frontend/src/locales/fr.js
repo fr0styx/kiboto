@@ -8319,4 +8319,10 @@ export default {
   "pwr.sockets_no": "Votre onduleur n’a pas de commande pour rallumer ses prises au retour du courant.",
   "pwr.sockets_unknown": "Kiboto n’a pas pu demander à votre onduleur s’il rallume ses prises.",
   "pwa.title": "Avancé : connexion et détails",
+  "pwa.rule_intro": "Kiboto arrête le NAS au premier de ces seuils, ou quand l’onduleur signale lui-même que sa batterie est faible :",
+  "pwa.rule_minutes": "Minutes que l’onduleur estime restantes",
+  "pwa.rule_battery": "Charge de batterie restante",
+  "pwa.rule_timer": "Arrêter aussi après un temps fixe sur batterie",
+  "pwa.rule_sum": "À {min} min ou {pct} % restants, ou quand l’onduleur le signale",
+  "pwa.rule_sum_timer": ", ou après {min, plural, one {# minute} other {# minutes}} sur batterie",
 };

@@ -592,3 +592,4 @@
 .pw-advanced-sum { cursor: pointer; min-height: 44px; display: flex; align-items: center; font-size: var(--kb-fs-sm); font-weight: 700; color: var(--kb-text-strong); }
 /* the status line says it: the old banner repeated it in capitals */
 #ups-emergency-banner { display: none !important; }
+.ups-rule-head { margin: 0 0 8px; font-size: var(--kb-fs-xs); color: var(--kb-text-soft); line-height: 1.45; }

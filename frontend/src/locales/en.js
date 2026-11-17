@@ -8319,4 +8319,10 @@ export default {
   "pwr.sockets_no": "Your UPS has no command to switch its sockets back on when the power returns.",
   "pwr.sockets_unknown": "Kiboto could not ask your UPS whether it switches its sockets back on.",
   "pwa.title": "Advanced: connection and details",
+  "pwa.rule_intro": "Kiboto shuts the NAS down at the first of these, or when the UPS itself says its battery is low:",
+  "pwa.rule_minutes": "Minutes the UPS estimates are left",
+  "pwa.rule_battery": "Battery charge left",
+  "pwa.rule_timer": "Also shut down after a set time on battery",
+  "pwa.rule_sum": "At {min} min or {pct} % left, or when the UPS says so",
+  "pwa.rule_sum_timer": ", or after {min, plural, one {# minute} other {# minutes}} on battery",
 };

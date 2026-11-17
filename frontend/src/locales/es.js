@@ -8319,4 +8319,10 @@ export default {
   "pwr.sockets_no": "Tu SAI no tiene ninguna orden para volver a dar corriente a sus enchufes cuando vuelva la luz.",
   "pwr.sockets_unknown": "Kiboto no ha podido preguntar a tu SAI si vuelve a dar corriente a sus enchufes.",
   "pwa.title": "Avanzado: conexión y detalles",
+  "pwa.rule_intro": "Kiboto apaga el NAS al llegar al primero de estos límites, o cuando el propio SAI avisa de que su batería está baja:",
+  "pwa.rule_minutes": "Minutos que el SAI calcula que quedan",
+  "pwa.rule_battery": "Carga de batería restante",
+  "pwa.rule_timer": "Apagar también tras un tiempo fijo con batería",
+  "pwa.rule_sum": "Con {min} min o un {pct} % restante, o cuando el SAI lo indique",
+  "pwa.rule_sum_timer": ", o tras {min, plural, one {# minuto} other {# minutos}} con batería",
 };
