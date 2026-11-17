@@ -392,6 +392,9 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 
 - **A guide to Kib** (docs/KIB.md): which folders it reads, who can use it, how it answers, and privacy.
 
+- **A guide to notifications** (docs/NOTIFICATIONS.md): where alerts go, what you are told about, and your own
+  alerts.
+
 #### Fixes
 
 - **The File Explorer's details panel no longer hides file names**: it lies over the list instead of
