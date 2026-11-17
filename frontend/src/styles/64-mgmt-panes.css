@@ -62,14 +62,14 @@
 #mgmt-pane-calendar .cal-box-2 { background: var(--kb-shade-30); border: 1px solid var(--kb-line-10); border-radius: 8px; padding: 10px; flex-direction: column; gap: 8px; }
 #mgmt-pane-calendar .cal-xs-strong-box { width: 100%; border: 1px solid var(--kb-line-12); background: var(--kb-shade-30); padding: 5px 8px; color: var(--kb-text-strong); border-radius: 5px; font-size: var(--kb-fs-xs); }
 #mgmt-pane-calendar .cal-xs-strong-box-2 { background: var(--kb-shade-40); border: 1px solid var(--kb-line-12); color: var(--kb-text-strong); border-radius: 5px; font-size: var(--kb-fs-xs); padding: 3px 6px; }
-#mgmt-pane-calendar .cal-row-5 { display: flex; gap: 6px; }
+#mgmt-pane-calendar .cal-row-5 { display: flex; gap: 6px; flex-wrap: wrap; }
 #mgmt-pane-calendar .cal-xs-muted { font-size: var(--kb-fs-xs); color: var(--muted); line-height: 1.3; }
 #mgmt-pane-calendar .cal-col-2 { display: flex; flex-direction: column; gap: 6px; }
-#mgmt-pane-calendar .cal-row-box { padding: 16px 20px; border-bottom: 1px solid var(--kb-line-8); display: flex; justify-content: space-between; align-items: center; background: var(--kb-glaze-2); }
+#mgmt-pane-calendar .cal-row-box { padding: 16px 20px; border-bottom: 1px solid var(--kb-line-8); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; background: var(--kb-glaze-2); } /* the day's filters and the add row wrap in a narrow window (17 Nov) */
 #mgmt-pane-calendar .cal-fs16-bold-strong { font-size: 16px; font-weight: 800; color: var(--kb-text-strong); }
 #mgmt-pane-calendar .cal-xs-muted-2 { font-size: var(--kb-fs-xs); color: var(--muted); margin-top: 2px; }
 #mgmt-pane-calendar .cal-col-box-2 { padding: 14px 20px; border-bottom: 1px solid var(--kb-line-8); background: var(--kb-shade-25); display: flex; flex-direction: column; gap: 10px; }
-#mgmt-pane-calendar .cal-row-6 { display: flex; gap: 10px; align-items: center; }
+#mgmt-pane-calendar .cal-row-6 { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 #mgmt-pane-calendar .cal-xs-strong-box-grow { flex: 1; border: 1px solid var(--kb-line-14); background: var(--kb-shade-30); padding: 7px 12px; color: var(--kb-text-strong); border-radius: 6px; font-size: var(--kb-fs-xs); outline: none; }
 #mgmt-pane-calendar .cal-xs-strong-box-3 { border: 1px solid var(--kb-line-14); background: var(--kb-shade-30); padding: 6px 10px; color: var(--kb-text-strong); border-radius: 6px; font-size: var(--kb-fs-xs); font-family: var(--font-mono); }
 #mgmt-pane-calendar .cal-xs-strong-box-4 { border: 1px solid var(--kb-line-14); background: var(--kb-shade-35); padding: 6px 10px; color: var(--kb-text-strong); border-radius: 6px; font-size: var(--kb-fs-xs); }
@@ -101,7 +101,7 @@
 #mgmt-pane-language .lng-xs-strong-box { width: 100%; border: 1px solid var(--kb-line-14); background: var(--kb-shade-30); padding: 8px 12px; color: var(--kb-text-strong); border-radius: 8px; font-size: var(--kb-fs-xs); outline: none; }
 #mgmt-pane-language .lng-row-3 { display: flex; gap: 6px; flex-wrap: wrap; }
 #mgmt-pane-language .lng-col-box { max-height: 240px; overflow-y: auto; border: 1px solid var(--kb-line-8); border-radius: 8px; background: var(--kb-shade-25); display: flex; flex-direction: column; padding: 4px; margin-bottom: 12px; }
-#mgmt-pane-language .lng-row-4 { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+#mgmt-pane-language .lng-row-4 { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; } /* "Use it" stays on a phone screen (17 Nov) */
 #mgmt-pane-language .lng-xs-bold-muted { font-size: var(--kb-fs-xs); font-weight: 700; color: var(--muted); white-space: nowrap; }
 #mgmt-pane-language .lng-xs-strong-box-grow { flex: 1; border: 1px solid var(--kb-line-12); background: var(--kb-shade-30); padding: 6px 10px; color: var(--kb-text-strong); border-radius: 6px; font-size: var(--kb-fs-xs); }
 #mgmt-pane-language .lng-x-2 { margin: 0; }

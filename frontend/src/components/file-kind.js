@@ -9,3 +9,9 @@ export function fileKind(file, isRemoteDir = false, isDiskDir = false) {
   }
   return file.name.includes('.') ? file.name.split('.').pop().toUpperCase() : t('fm.kind_file', 'File');
 }
+
+/** A folder's name as Files shows it: the Recycle Bin's own folder (".RecycleBin") in the
+ * reader's language, every other name as it is. */
+export function shownFolderName(name) {
+  return name === '.RecycleBin' ? t('dock.recycle_bin', 'Recycle Bin') : name;
+}

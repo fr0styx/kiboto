@@ -1,7 +1,7 @@
 // Five-language sweep: names the server makes up on its own are shown in the reader's language.
 import { describe, it, expect, afterEach } from 'vitest';
 import { poolName, shareComment, accessWords } from '../components/pool-names.js';
-import { fileKind } from '../components/file-kind.js';
+import { fileKind, shownFolderName } from '../components/file-kind.js';
 import { setLanguage } from '../i18n.js';
 
 describe('server-made names', () => {
@@ -27,5 +27,11 @@ describe('server-made names', () => {
     expect(fileKind({ name: 'sdb', is_dir: true }, false, true)).toBe('Laufwerk');
     expect(fileKind({ name: 'brief.pdf' })).toBe('PDF');
     expect(fileKind({ name: 'README' })).toBe('Datei');
+  });
+
+  it('the Recycle Bin folder is named in the reader\'s language', async () => {
+    await setLanguage('de');
+    expect(shownFolderName('.RecycleBin')).toBe('Papierkorb');
+    expect(shownFolderName('Fotos')).toBe('Fotos');
   });
 });

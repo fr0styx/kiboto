@@ -1898,7 +1898,7 @@
     <form id="new-remote-form">
       <div class="cloud-remote-scroll-body">
         <div class="remote-form-section">
-          <label for="new-remote-provider-select" class="remote-section-label" data-sample>1. SELECT CLOUD / STORAGE PROVIDER</label>
+          <label for="new-remote-provider-select" class="remote-section-label" data-i18n="remote.step_provider">1. Choose the cloud or storage service</label>
           <select id="new-remote-provider-select" class="tz-select-input ncr-size">
             <!-- Dynamically populated from /api/remotes/providers -->
           </select>
@@ -1906,13 +1906,13 @@
         </div>
 
         <div class="remote-form-section">
-          <label for="new-remote-name" class="remote-section-label" data-sample>2. REMOTE NAME (Local Identifier)</label>
+          <label for="new-remote-name" class="remote-section-label" data-i18n="remote.step_name">2. A name for it on this NAS</label>
           <input type="text" id="new-remote-name" class="tz-select-input ncr-size" placeholder="e.g. backup-s3, gdrive, onedrive-photos, offsite-nas" data-i18n-placeholder="ph.remote_name" required pattern="^[a-zA-Z0-9_\-\.]{1,64}$" />
           <div class="ncr-xs-muted-2"><span data-i18n="ix.will_be_mounted_to">Will be mounted to:</span> <code class="ncr-semi-accent">/mnt/remotes/&lt;name&gt;</code></div>
         </div>
 
         <div class="remote-form-section">
-          <div class="remote-section-label" data-sample>3. PROVIDER PARAMETERS</div>
+          <div class="remote-section-label" data-i18n="remote.step_params">3. Its settings</div>
           <div class="ncr-x-3" id="new-remote-dynamic-fields" style="display: flex;">
             <!-- Dynamically populated fields based on provider -->
           </div>

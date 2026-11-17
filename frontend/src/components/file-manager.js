@@ -10,7 +10,7 @@ import { api, auth } from '../api.js';
 import { escapeHtml, copyTextToClipboard } from '../utils.js';
 import { ZettEventBus } from '../event-bus.js';
 import { poolName } from './pool-names.js';
-import { fileKind } from './file-kind.js';
+import { fileKind, shownFolderName } from './file-kind.js';
 import { showToast, showConfirmToast, showDangerConfirm, showPromptToast, showBottomSheet, showActionToast } from '../toast.js';
 import { t } from '../i18n.js';
 import { startingView, saveFilesView, visibleEntries, currentUser } from './fm-view-prefs.js';
@@ -244,7 +244,7 @@ export class FileManagerWindow {
     if (!folderName || (this.isPrimary && this.currentPath === fmHome())) {
       return baseTitle;
     }
-    return `${baseTitle} (${folderName})`;
+    return `${baseTitle} (${shownFolderName(folderName)})`;
   }
 
   init() {
@@ -1864,7 +1864,7 @@ export class FileManagerWindow {
 
     const addSpan = (text, p, isLast) => {
       const span = document.createElement('span');
-      span.textContent = text;
+      span.textContent = shownFolderName(text);
       if (isLast) span.classList.add('fm-crumb-last');
       span.style.padding = '2px 4px';
       span.style.borderRadius = '4px';
@@ -2217,7 +2217,7 @@ export class FileManagerWindow {
       // Update folder title in header
       if (this.titleFolderSpan) {
         const folderName = this.currentPath.split('/').filter(Boolean).pop();
-        this.titleFolderSpan.textContent = folderName ? `— ${folderName}` : '';
+        this.titleFolderSpan.textContent = folderName ? `— ${shownFolderName(folderName)}` : '';
       }
 
       // Update DockManager title
