@@ -16929,6 +16929,18 @@
       ],
       "title": "Reason"
      },
+     "reason_text": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Reason Text"
+     },
      "result": {
       "anyOf": [
        {

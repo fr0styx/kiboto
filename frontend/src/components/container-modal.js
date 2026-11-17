@@ -1054,11 +1054,11 @@ function renderPortsTab(details) {
 
           try {
             const targetId = details.cid || details.overview?.id;
-            const res = await api.post(`/api/docker/containers/${encodeURIComponent(targetId)}/ports`, {
+            await api.post(`/api/docker/containers/${encodeURIComponent(targetId)}/ports`, {
               ports: newPorts,
               keep_backup: false
             });
-            showToast(res.message || 'Container recreated successfully!', 'success');
+            showToast(t('ctr.ports_applied', 'The new ports are in place: the container was recreated.'), 'success');
             await loadContainerDetails(targetId);
           } catch (err) {
             showToast(t('toast.port_reconfiguration_failed', 'Port reconfiguration failed: {error}', { error: err.message }), 'error');

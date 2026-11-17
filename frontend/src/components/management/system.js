@@ -8,6 +8,7 @@ import { api } from '../../api.js';
 import { showToast, showConfirmToast, showPromptToast } from '../../toast.js';
 import { escapeHtml, copyTextToClipboard } from '../../utils.js';
 import { t } from '../../i18n.js';
+import { resolveParams } from '../../server-text.js';
 import { collectClientEnvironment, getClientLogs } from '../../client-logger.js';
 import { formatDateTime, formatTime, formatUptime } from '../../format.js';
 import { setIconLabel } from '../../ui/primitives.js';
@@ -269,7 +270,7 @@ export async function showLastUpdateResult() {
       const fallback = r.result === 'rolled_back'
         ? 'The last update ({when}) did not start cleanly and was rolled back: {reason}'
         : 'The last update ({when}) was not applied: {reason}';
-      box.textContent = t(key, fallback).replace('{when}', when).replace('{reason}', r.reason || '');
+      box.textContent = t(key, fallback, { when, reason: resolveParams({ reason: r.reason_text || r.reason || '' }).reason });
       box.hidden = false;
     } else {
       box.hidden = true;
@@ -314,10 +315,10 @@ export async function revertSystemUpdate() {
       const title = document.getElementById('update-progress-title');
       const desc = document.getElementById('update-progress-desc');
       try {
-        const res = await api.post('/api/system/updates/revert', { snapshot_id: prev.id, current_password: password }, { confirmed: true });
+        await api.post('/api/system/updates/revert', { snapshot_id: prev.id, current_password: password }, { confirmed: true });
         if (overlay) overlay.style.display = 'block';
         if (title) title.textContent = t('sysu.reverting', 'Reverting to {name}...', { name });
-        if (desc) desc.textContent = res?.message || t('sysu.restoring', 'Restoring the previous version and reconnecting...');
+        if (desc) desc.textContent = t('sysu.restoring', 'Restoring the previous version and reconnecting...');
         let attempts = 0;
         let wentDown = false;
         const timer = setInterval(async () => {
@@ -368,18 +369,18 @@ export async function applySystemUpdate() {
 
       try {
         const res = await postUpdate(channel);
-        showToast(res?.message || t('updates.started', 'The update has started. Kiboto reconnects when it is back.'), 'info');
+        showToast(t('updates.started', 'The update has started. Kiboto reconnects when it is back.'), 'info');
 
         if (res && res.auto_restarting === false) {
           if (progressTitle) setIconLabel(progressTitle, '📦', t('ui.image_pulled', 'Image Pulled'));
           if (progressDesc) {
-            progressDesc.innerHTML = `${escapeHtml(res.message || t('updates.image_downloaded', 'The new version is downloaded.'))}<br><br><span style="color:var(--lt-ink-brand, var(--brand, #33cdb8));font-weight:600;">${escapeHtml(t('sysu.restart_to_finish', 'Please restart the container in Unraid or Docker to finalize.'))}</span>`;
+            progressDesc.innerHTML = `${escapeHtml(t('updates.image_downloaded', 'The new version is downloaded.'))}<br><br><span style="color:var(--lt-ink-brand, var(--brand, #33cdb8));font-weight:600;">${escapeHtml(t('sysu.restart_to_finish', 'Please restart the container in Unraid or Docker to finalize.'))}</span>`;
           }
           if (applyBtn) applyBtn.disabled = false;
           return;
         }
 
-        if (progressDesc) progressDesc.textContent = res?.message || t('sysu.restarting', 'Restarting container and reconnecting...');
+        if (progressDesc) progressDesc.textContent = t('sysu.restarting', 'Restarting container and reconnecting...');
 
         // Poll health endpoint until back online
         let attempts = 0;

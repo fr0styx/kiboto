@@ -215,6 +215,34 @@ def _protect_rollback_image(image_id: str, build: str, data_dir: str) -> None:
                     _docker_request("DELETE", f"/images/{ref}?noprune=1")
 
 
+# The reasons the updater records, as values the activity log and System -> Updates show in the
+# reader's language (ev.update_reason.<kind>). A reason not listed here is shown as it was written.
+_REASONS = (
+    (r"could not snapshot the data folder: (?P<error>.*)", "snapshot"),
+    (r"could not restore the earlier data: (?P<error>.*)", "restore"),
+    (r"could not keep the current version aside", "keep_aside"),
+    (r"the new version's container could not be created", "create"),
+    (r"could not connect network (?P<network>.+)", "network"),
+    (r"the new version did not start", "not_started"),
+    (r"container exited \(code (?P<code>[^)]*)\)", "exited"),
+    (r"healthcheck reported unhealthy", "unhealthy"),
+    (r"the app reported a failed part \(degraded\)", "degraded"),
+    (r"timed out waiting for the app to report ok", "timeout"),
+)
+
+
+def reason_words(reason: str) -> Any:
+    """A recorded reason as a value of a sentence: one the updater writes is translated (also when
+    an older updater wrote it), any other stays as it is."""
+    from backend import i18n
+
+    for pattern, kind in _REASONS:
+        found = re.fullmatch(pattern, reason or "", re.S)
+        if found:
+            return i18n.ref(f"ev.update_reason.{kind}", reason, found.groupdict())
+    return reason
+
+
 def write_update_result(data_dir: str | None, result: str, reason: str = "", **extra: Any) -> None:
     """Records how the update ended, for the app to report after it starts (OPS-7)."""
     if not data_dir:
@@ -614,7 +642,7 @@ def report_last_update_result(data_dir: str) -> dict[str, Any] | None:
         message = f"{target}: {reason}. The previous version is running." if reason else f"{target}."
         rb = data["result"] == "rolled_back"
         details = (
-            event_text("update_rolled_back" if rb else "update_not_applied", target=target, reason=reason)
+            event_text("update_rolled_back" if rb else "update_not_applied", target=target, reason=reason_words(reason))
             if reason
             else event_text("update_rolled_back_short" if rb else "update_not_applied_short", target=target)
         )

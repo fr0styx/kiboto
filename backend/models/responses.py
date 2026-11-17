@@ -2123,6 +2123,7 @@ class GetLastUpdateResultResponse(_Doc):
 
     at: float | None = None
     reason: str | None = None
+    reason_text: dict[str, Any] | None = None
     result: str | None = None
     to_image: str | None = None
 

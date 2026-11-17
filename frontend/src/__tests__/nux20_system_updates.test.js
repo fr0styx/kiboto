@@ -109,7 +109,7 @@ describe('updates panel words (NUX-20)', () => {
     expect(text('update-progress-desc')).toBe('Restoring the previous version and reconnecting...');
     post.mockResolvedValueOnce({ message: 'Going back' });
     await onOk('pw');
-    expect(text('update-progress-desc')).toBe('Going back');
+    expect(text('update-progress-desc')).toBe('Restoring the previous version and reconnecting...'); // the page's words, in the reader's language
     vi.clearAllTimers();
     vi.unstubAllGlobals();
   });
@@ -124,13 +124,13 @@ describe('updates panel words (NUX-20)', () => {
     expect(byId('update-progress-desc').textContent).toBe('The new version is downloaded.Please restart the container in Unraid or Docker to finalize.');
     post.mockResolvedValue({ auto_restarting: false, message: 'Pulled.' });
     await onOk();
-    expect(byId('update-progress-desc').textContent).toContain('Pulled.');
+    expect(byId('update-progress-desc').textContent).not.toContain('Pulled.'); // not the server's English
     post.mockResolvedValue({});
     await onOk();
     expect(text('update-progress-desc')).toBe('Restarting container and reconnecting...');
     post.mockResolvedValue({ message: 'Restarting now' });
     await onOk();
-    expect(text('update-progress-desc')).toBe('Restarting now');
+    expect(text('update-progress-desc')).toBe('Restarting container and reconnecting...');
     vi.clearAllTimers();
     vi.unstubAllGlobals();
   });

@@ -499,6 +499,10 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   not), what it is for and where it would run were always in English; they now follow your language, with sizes
   written your way.
 
+- **Updates in your language**: when an update is rolled back or not applied, the reason (for example "the new
+  version did not start") now shows in your language in Settings and the activity log, and the update progress
+  lines no longer switch to English.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 
