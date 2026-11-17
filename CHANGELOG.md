@@ -453,6 +453,9 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 
 - **Kib Search**: a search that fails now says so; before, the page showed nothing.
 
+- **Setup on a phone**: the setup wizard's step names no longer run past the screen; the current step is named
+  and the others show as bars.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 
