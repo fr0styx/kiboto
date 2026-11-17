@@ -52,6 +52,9 @@
 #desktop-widgets-container .dsk-box { height: 4px; background: var(--kb-glaze-8); border-radius: 999px; overflow: hidden; }
 #desktop-widgets-container .dsk-x-4 { opacity: 0.65; }
 #desktop-widgets-container .dsk-row-4 { display: flex; justify-content: space-between; align-items: center; }
+#desktop-widgets-container .w-weather-ask { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--kb-space-2); }
+#desktop-widgets-container .w-weather-ask[hidden] { display: none; }
+#desktop-widgets-container .w-weather-ask > span { flex: 1 1 10rem; min-width: 0; }
 #desktop-widgets-container .dsk-row-5 { display: flex; align-items: center; gap: 8px; }
 #desktop-widgets-container .dsk-fs24 { font-size: 24px; line-height: 1; }
 #desktop-widgets-container .dsk-col-2 { display: flex; flex-direction: column; }

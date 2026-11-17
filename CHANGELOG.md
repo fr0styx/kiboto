@@ -395,6 +395,9 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **A guide to notifications** (docs/NOTIFICATIONS.md): where alerts go, what you are told about, and your own
   alerts.
 
+- **Weather asks where you are**: until you choose a place (or pick "Find it for me"), the weather card asks for one
+  instead of showing another city's weather.
+
 #### Fixes
 
 - **The File Explorer's details panel no longer hides file names**: it lies over the list instead of

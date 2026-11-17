@@ -715,7 +715,7 @@
           <span class="widget-title"><svg class="ic dsk-size"><use href="#i-weather"/></svg> <span data-i18n="widget.weather">Local Weather</span></span>
           <span class="widget-badge" id="w-weather-city" title="Detected location" data-i18n-title="ui.detected_location">--</span>
         </div>
-        <div class="dsk-row-4">
+        <div class="dsk-row-4" id="w-weather-body">
           <div class="dsk-row-5">
             <span class="dsk-fs24" id="w-weather-icon">⛅</span>
             <div class="dsk-col-2">
@@ -727,6 +727,10 @@
             <span class="dsk-xs-semi-soft-mono" id="w-weather-range">H: --° L: --°</span>
             <span class="dsk-xs-muted-2" id="w-weather-details">💧 --% • 💨 --</span>
           </div>
+        </div>
+        <div class="w-weather-ask" id="w-weather-ask" hidden>
+          <span class="dsk-xs-muted" id="w-weather-ask-text" data-i18n="w.ask_place">Choose a place to see its weather.</span>
+          <button type="button" class="btn-pill-toggle is-small is-primary" id="w-weather-ask-btn" data-i18n="w.choose_place">Choose a place</button>
         </div>
       </div>
 

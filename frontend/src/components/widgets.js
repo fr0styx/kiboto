@@ -54,6 +54,7 @@ const DEFAULT_CONFIG = {
   weatherLat: null,
   weatherLon: null,
   weatherCountry: '',
+  weatherAuto: false,
   weatherUnit: 'c',
   calendarCountry: 'auto',
   calendarHolidays: true,
@@ -315,27 +316,17 @@ export function applyWidgetConfig() {
       wWeather.setAttribute('tabindex', '0');
       wWeather.addEventListener('click', (e) => {
         if (e.target.closest('#w-weather-temp') || e.target.closest('.widget-handle') || e.target.closest('.widget-close') || e.target.closest('button')) return;
-        if (typeof window.openManagementWindow === 'function') {
-          window.openManagementWindow('mgmt-sec-wallpaper', 'mgmt-pane-widgets');
-          setTimeout(() => {
-            const cityInput = document.getElementById('widget-weather-city-input');
-            if (cityInput) {
-              cityInput.focus();
-              cityInput.classList.add('element-focus-pulse');
-              setTimeout(() => cityInput.classList.remove('element-focus-pulse'), 1500);
-            }
-          }, 150);
-        }
+        openWeatherPlace();
       });
       wWeather.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          if (e.target === wWeather) {
-            e.preventDefault();
-            if (typeof window.openManagementWindow === 'function') {
-              window.openManagementWindow('mgmt-sec-wallpaper', 'mgmt-pane-widgets');
-            }
-          }
+        if ((e.key === 'Enter' || e.key === ' ') && e.target === wWeather) {
+          e.preventDefault();
+          openWeatherPlace();
         }
+      });
+      document.getElementById('w-weather-ask-btn')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openWeatherPlace();
       });
     }
   }
@@ -1323,14 +1314,65 @@ export function getWeatherInfo(code) {
 }
 
 let _lastWeather = null;
+let _weatherAsk = null;
 // drawn from the cache before the language had loaded: draw it again in the reader's words
-window.addEventListener('kiboto:lang-changed', () => { if (_lastWeather) renderWeatherUI(_lastWeather); });
+window.addEventListener('kiboto:lang-changed', () => {
+  if (_weatherAsk) renderWeatherAsk(_weatherAsk);
+  else if (_lastWeather) renderWeatherUI(_lastWeather);
+});
+
+/** Opens Widget settings at the place field (the card, its keyboard and its button). */
+export function openWeatherPlace() {
+  if (typeof window.openManagementWindow !== 'function') return;
+  window.openManagementWindow('mgmt-sec-wallpaper', 'mgmt-pane-widgets');
+  setTimeout(() => {
+    const cityInput = document.getElementById('widget-weather-city-input');
+    if (cityInput) {
+      cityInput.focus();
+      cityInput.classList.add('element-focus-pulse');
+      setTimeout(() => cityInput.classList.remove('element-focus-pulse'), 1500);
+    }
+  }, 150);
+}
+
+/** A place was chosen, or the person picked "find it for me". Until then the card asks. */
+export function weatherPlaceSet(cfg) {
+  return !!(cfg && (cfg.weatherAuto || (cfg.weatherCity || '').trim() || (cfg.weatherLat != null && cfg.weatherLon != null)));
+}
+
+function showWeatherBody(on) {
+  const body = document.getElementById('w-weather-body');
+  const ask = document.getElementById('w-weather-ask');
+  if (body) body.style.display = on ? '' : 'none';
+  if (ask) ask.hidden = on;
+}
+
+/** The card asks for a place: nothing set yet ('none'), or "find it for me" found nothing ('not_found'). */
+export function renderWeatherAsk(reason = 'none') {
+  _weatherAsk = reason;
+  showWeatherBody(false);
+  const text = document.getElementById('w-weather-ask-text');
+  if (text) {
+    text.textContent = reason === 'not_found'
+      ? t('w.ask_place_not_found', 'Could not tell where this is. Choose a place to see its weather.')
+      : t('w.ask_place', 'Choose a place to see its weather.');
+  }
+  const btn = document.getElementById('w-weather-ask-btn');
+  if (btn) btn.textContent = t('w.choose_place', 'Choose a place');
+  const badge = document.getElementById('w-weather-city');
+  if (badge) {
+    badge.textContent = t('w.no_place', 'No place yet');
+    badge.title = badge.textContent;
+  }
+}
 
 export function renderWeatherUI(weatherData) {
   if (!weatherData) return;
   _lastWeather = weatherData;
+  _weatherAsk = null;
   const weatherWidget = document.getElementById('widget-weather');
   if (!weatherWidget) return;
+  showWeatherBody(true);
 
   const cityBadge = document.getElementById('w-weather-city');
   const iconEl = document.getElementById('w-weather-icon');
@@ -1359,6 +1401,10 @@ export function renderWeatherUI(weatherData) {
 export async function fetchWeather(force = false) {
   const config = _config || loadWidgetConfig();
   if (!config.enabled || !config.widgets.weather) return;
+  if (!weatherPlaceSet(config)) {
+    renderWeatherAsk('none');
+    return;
+  }
 
   let lat = config.weatherLat ?? null;
   let lon = config.weatherLon ?? null;
@@ -1396,8 +1442,8 @@ export async function fetchWeather(force = false) {
       }
     }
 
-    // 2. If no city name, resolve browser timezone
-    if (lat == null || lon == null) {
+    // 2. "Find it for me": the browser's time zone names a city
+    if ((lat == null || lon == null) && config.weatherAuto && !cityName) {
       let tzCity = '';
       try {
         const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
@@ -1418,11 +1464,10 @@ export async function fetchWeather(force = false) {
       }
     }
 
-    // 3. Fallback to default coordinates if unresolved
+    // 3. Nothing found: ask for a place rather than show another city's weather
     if (lat == null || lon == null) {
-      lat = 40.71;
-      lon = -74.01;
-      // no name of our own: the card says "here" in the reader's language (renderWeatherUI)
+      renderWeatherAsk('not_found');
+      return;
     }
 
     const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min&timezone=auto`;
@@ -1562,7 +1607,7 @@ function initWeatherCityAutocomplete() {
         ev.stopPropagation();
         cityInput.value = '';
         closeDropdown();
-        saveWidgetConfig({ weatherCity: '', weatherLat: null, weatherLon: null, weatherCountry: '' });
+        saveWidgetConfig({ weatherCity: '', weatherLat: null, weatherLon: null, weatherCountry: '', weatherAuto: true });
         fetchWeather(true);
         showToast(t('toast.weather_location_reset_to_auto_detect', 'Weather location reset to Auto-detect'), 'success');
       });
