@@ -65,3 +65,22 @@ def test_webdav_with_dedicated_password_stays_on(sandbox):
     get_webdav_engine().save_config({"enabled": True, "auth_enabled": True, "password": "a-real-webdav-pass"})
     security_upgrade.run_once()
     assert get_webdav_engine().load_config()["enabled"] is True
+
+
+def test_a_new_install_gets_no_security_update_entries(sandbox, monkeypatch):
+    """Nobody to sign out, nothing to revoke: day one's activity log stays free of upgrade notices."""
+    events = []
+    monkeypatch.setattr("backend.state.add_event", lambda *a, **k: events.append(a[1]))
+    assert security_upgrade.run_once() is True
+    assert security_upgrade.run_1_10_2_once() is True
+    assert events == []
+
+
+def test_an_upgraded_install_with_sessions_still_hears_about_it(sandbox, monkeypatch):
+    tmp, db = sandbox
+    create_user("boss", "Boss", "StrongPass123!", role_id="superadmin", db_path=db)
+    create_user_session(get_user_by_username("boss")["id"], "boss", db_path=db)
+    events = []
+    monkeypatch.setattr("backend.state.add_event", lambda *a, **k: events.append(a[1]))
+    assert security_upgrade.run_once() is True
+    assert events == ["Security update (v1.9.2)"]

@@ -5409,6 +5409,8 @@ export default {
   "ev.webdav_fixed.title": "WebDAV-Einstellungen korrigiert",
   "ev.app_removed.msg": "Der Container {name} wurde entfernt.",
   "ev.app_removed.title": "App-Container entfernt",
+  "ev.family_shares_closed.title": "Kinder und Gäste: nur die Ordner, die Sie freigeben",
+  "ev.family_shares_closed.msg": "Kiboto 2.0.2 hat die Voreinstellung geschlossen, mit der Kinder und Gäste jeden freigegebenen Ordner öffnen konnten. {people} öffnen jetzt nur die Ordner, die mit ihnen geteilt sind; geben Sie unter Freigegebene Ordner einen Ordner für sie frei.",
   "ev.power_night_off.title": "Zeitplan",
   "ev.power_night_off.msg": "Schaltet für die Nacht aus; wacht um {wake} auf.",
   "ev.power_night_no_clock.title": "Zeitplan",

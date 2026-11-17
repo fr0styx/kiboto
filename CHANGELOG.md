@@ -475,6 +475,9 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Sign-in page**: its title said "Kiboto Toolkit" in German, Spanish, French and Chinese; now "Kiboto" like in
   English. The setup welcome likewise.
 
+- **A new install's activity log**: it no longer starts with two "security update" warnings about sign-outs and
+  revoked tokens that never happened on that install.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

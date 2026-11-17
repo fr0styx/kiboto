@@ -5409,6 +5409,8 @@ export default {
   "ev.webdav_fixed.title": "Paramètres WebDAV corrigés",
   "ev.app_removed.msg": "Le conteneur {name} a été supprimé.",
   "ev.app_removed.title": "Conteneur d'application supprimé",
+  "ev.family_shares_closed.title": "Enfants et invités : seulement les dossiers que vous partagez",
+  "ev.family_shares_closed.msg": "Kiboto 2.0.2 a fermé le réglage par défaut qui permettait aux enfants et aux invités d'ouvrir tous les dossiers partagés. {people} n'ouvrent plus que les dossiers partagés avec eux ; partagez un dossier avec eux dans Dossiers partagés.",
   "ev.power_night_off.title": "Programme d'alimentation",
   "ev.power_night_off.msg": "Extinction pour la nuit ; réveil à {wake}.",
   "ev.power_night_no_clock.title": "Programme d'alimentation",

@@ -5409,6 +5409,8 @@ export default {
   "ev.webdav_fixed.title": "WebDAV 设置已修正",
   "ev.app_removed.msg": "容器 {name} 已被删除。",
   "ev.app_removed.title": "应用容器已删除",
+  "ev.family_shares_closed.title": "孩子和访客：只能打开你共享的文件夹",
+  "ev.family_shares_closed.msg": "Kiboto 2.0.2 关闭了让孩子和访客打开所有共享文件夹的默认设置。{people} 现在只能打开与他们共享的文件夹；请在“共享文件夹”中与他们共享文件夹。",
   "ev.power_night_off.title": "电源计划",
   "ev.power_night_off.msg": "夜间关机；将于 {wake} 唤醒。",
   "ev.power_night_no_clock.title": "电源计划",

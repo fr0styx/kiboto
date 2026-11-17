@@ -5409,6 +5409,8 @@ export default {
   "ev.webdav_fixed.title": "WebDAV settings fixed",
   "ev.app_removed.msg": "The container {name} was removed.",
   "ev.app_removed.title": "App container removed",
+  "ev.family_shares_closed.title": "Kids and guests: only the folders you share",
+  "ev.family_shares_closed.msg": "Kiboto 2.0.2 closed the default that let kids and guests open every shared folder. {people} now open only the folders shared with them; share a folder with them in Shared folders.",
   "ev.power_night_off.title": "Power schedule",
   "ev.power_night_off.msg": "Switching off for the night; waking at {wake}.",
   "ev.power_night_no_clock.title": "Power schedule",

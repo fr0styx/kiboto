@@ -108,7 +108,9 @@ def run_once() -> bool:
         )
         if result["webdav"] == "disabled":
             msg += " WebDAV was turned off; re-enable it in Settings if you use it."
-        add_event("warning", "Security update (v1.9.2)", msg, details=result)
+        # a new install has nobody to sign out and nothing to revoke: no entry saying so on day one
+        if result.get("sessions") or result.get("api_tokens") or result["webdav"] == "disabled":
+            add_event("warning", "Security update (v1.9.2)", msg, details=result)
     except Exception as e:
         logger.debug(f"[SecurityUpgrade] Could not record event: {e}")
 
@@ -212,9 +214,13 @@ def run_1_10_2_once() -> bool:
             "Security update applied. If anyone other than you could manage shares or containers, "
             "review your API tokens and turn two-factor sign-in off and on again to get a new code."
         )
-        if isinstance(result.get("wildcard_tokens_revoked"), int) and result["wildcard_tokens_revoked"]:
-            msg += f" {result['wildcard_tokens_revoked']} API token(s) of accounts that are no longer superadmins were revoked."
-        add_event("warning", "Security update (v1.10.2)", msg, details=result)
+        revoked = result.get("wildcard_tokens_revoked")
+        if isinstance(revoked, int) and revoked:
+            msg += f" {revoked} API token(s) of accounts that are no longer superadmins were revoked."
+        # only an install that had tokens or sealed passphrases to clean up gets the entry
+        sealed = result.get("backup_passphrases_sealed")
+        if (isinstance(revoked, int) and revoked) or (isinstance(sealed, int) and sealed):
+            add_event("warning", "Security update (v1.10.2)", msg, details=result)
     except Exception as e:
         logger.debug(f"[SecurityUpgrade] Could not record event: {e}")
     try:
@@ -257,7 +263,7 @@ def run_2_0_2_once() -> list[str]:
         if finding:
             people = sorted(p for p in str(finding["params"]["people"]).split(", ") if p)
             safe_defaults_advisor.close_family_shares()
-            from backend.state import add_event
+            from backend.state import add_event, event_text
 
             add_event(
                 "warning",
@@ -265,6 +271,7 @@ def run_2_0_2_once() -> list[str]:
                 f"Kiboto 2.0.2 closed the default that let kids and guests open every shared folder. "
                 f"{', '.join(people)} now open only the folders shared with them; share a folder with "
                 f"them in Shared folders.",
+                event_text("family_shares_closed", people=", ".join(people)),
             )
             logger.warning("[SecurityUpgrade] 2.0.2: kids and guests now open only shared folders: %s", people)
     except (OSError, ValueError, KeyError, RuntimeError):
