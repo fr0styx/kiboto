@@ -64,9 +64,9 @@ export function openVmCreateModal() {
           <span data-i18n="vm.create_btn">${escapeHtml(t('vm.create_btn', 'Create Virtual Machine'))}</span>
         </div>
         <div class="os-window-controls vmc-row-3">
-          <button class="win-btn min-btn" id="vm-create-modal-min" title="${t('window.minimize', 'Minimize')}" aria-label="${t('window.minimize', 'Minimize')}"></button>
-          <button class="win-btn max-btn" id="vm-create-modal-max" title="${t('ui.maximize', 'Maximize')}" aria-label="${t('ui.maximize', 'Maximize')}"></button>
-          <button class="win-btn close-btn" id="vm-modal-close" title="${t('diagnostics.close_btn', 'Close')}" aria-label="${t('diagnostics.close_btn', 'Close')}"></button>
+          <button class="win-btn min-btn" id="vm-create-modal-min" title="${t('window.minimize', 'Minimize')}" data-i18n-title="window.minimize" aria-label="${t('window.minimize', 'Minimize')}" data-i18n-aria-label="window.minimize"></button>
+          <button class="win-btn max-btn" id="vm-create-modal-max" title="${t('ui.maximize', 'Maximize')}" data-i18n-title="ui.maximize" aria-label="${t('ui.maximize', 'Maximize')}" data-i18n-aria-label="ui.maximize"></button>
+          <button class="win-btn close-btn" id="vm-modal-close" title="${t('diagnostics.close_btn', 'Close')}" data-i18n-title="diagnostics.close_btn" aria-label="${t('diagnostics.close_btn', 'Close')}" data-i18n-aria-label="diagnostics.close_btn"></button>
         </div>
       </div>
 
@@ -589,7 +589,7 @@ export function openVmCreateModal() {
         </div>
         <div class="vmc-row-2">
           <span class="usb-vidpid-badge">${escapeHtml(dev.vendor_id)}:${escapeHtml(dev.product_id)}</span>
-          <button type="button" class="btn-remove-usb vmc-xs-crit-box" data-idx="${idx}" title="${t('ui.remove_device', 'Remove device')}">✕</button>
+          <button type="button" class="btn-remove-usb vmc-xs-crit-box" data-idx="${idx}" title="${t('ui.remove_device', 'Remove device')}" data-i18n-title="ui.remove_device">✕</button>
         </div>
       `;
       card.querySelector('.btn-remove-usb').onclick = () => {

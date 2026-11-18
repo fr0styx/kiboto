@@ -194,7 +194,7 @@ export function toggleFmWindowSwitcher(anchorEl, fmWindows = []) {
   header.className = 'dock-switcher-header';
   header.innerHTML = `
     <span>${t('dock.switcher_title', 'File Explorer Windows')} (${fmWindows.length})</span>
-    <button class="win-btn close-btn" style="width:14px; height:14px;" title="${t('diagnostics.close_btn', 'Close')}" aria-label="${t('diagnostics.close_btn', 'Close')}"></button>
+    <button class="win-btn close-btn" style="width:14px; height:14px;" title="${t('diagnostics.close_btn', 'Close')}" data-i18n-title="diagnostics.close_btn" aria-label="${t('diagnostics.close_btn', 'Close')}" data-i18n-aria-label="diagnostics.close_btn"></button>
   `;
   header.querySelector('.close-btn').onclick = () => popover.remove();
   popover.appendChild(header);
@@ -217,7 +217,7 @@ export function toggleFmWindowSwitcher(anchorEl, fmWindows = []) {
         <span class="dock-switcher-name">${escapeHtml(folderName)}</span>
         ${pathStr ? `<span class="dock-switcher-path">${escapeHtml(pathStr)}</span>` : ''}
       </div>
-      <button class="dock-switcher-close" title="${t('dock.close_window', 'Close Window')}" aria-label="${t('dock.close_window', 'Close Window')}">✕</button>
+      <button class="dock-switcher-close" title="${t('dock.close_window', 'Close Window')}" data-i18n-title="dock.close_window" aria-label="${t('dock.close_window', 'Close Window')}" data-i18n-aria-label="dock.close_window">✕</button>
     `;
 
     item.addEventListener('click', (e) => {

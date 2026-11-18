@@ -102,9 +102,9 @@ export function initVmManager() {
             <span data-i18n="dock.vm_manager">${t('dock.vm_manager', 'Virtual Machines')}</span>
           </div>
           <div class="os-window-controls">
-            <button class="win-btn min-btn" id="vm-min" title="${t('window.minimize', 'Minimize')}" aria-label="${t('window.minimize', 'Minimize')}"></button>
-            <button class="win-btn max-btn" id="vm-max" title="${t('ui.maximize', 'Maximize')}" aria-label="${t('ui.maximize', 'Maximize')}"></button>
-            <button class="win-btn close-btn" id="vm-close" title="${t('diagnostics.close_btn', 'Close')}" aria-label="${t('diagnostics.close_btn', 'Close')}"></button>
+            <button class="win-btn min-btn" id="vm-min" title="${t('window.minimize', 'Minimize')}" data-i18n-title="window.minimize" aria-label="${t('window.minimize', 'Minimize')}" data-i18n-aria-label="window.minimize"></button>
+            <button class="win-btn max-btn" id="vm-max" title="${t('ui.maximize', 'Maximize')}" data-i18n-title="ui.maximize" aria-label="${t('ui.maximize', 'Maximize')}" data-i18n-aria-label="ui.maximize"></button>
+            <button class="win-btn close-btn" id="vm-close" title="${t('diagnostics.close_btn', 'Close')}" data-i18n-title="diagnostics.close_btn" aria-label="${t('diagnostics.close_btn', 'Close')}" data-i18n-aria-label="diagnostics.close_btn"></button>
           </div>
         </div>
 
@@ -115,11 +115,11 @@ export function initVmManager() {
               <span aria-hidden="true">⚡</span> <span>${t('vmm.loading_kvm', 'Checking virtualization support…')}</span>
             </div>
             <div class="vm-action-btns-wrap vmm-row-2">
-              <button id="btn-vm-refresh" class="btn-pill-toggle" title="${t('vm.refresh', 'Refresh')}">
+              <button id="btn-vm-refresh" class="btn-pill-toggle" title="${t('vm.refresh', 'Refresh')}" data-i18n-title="vm.refresh">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
                 <span data-i18n="vm.refresh">${t('vm.refresh', 'Refresh')}</span>
               </button>
-              <button id="btn-vm-isos" class="btn-pill-toggle" title="${t('ui.iso_library_official_catalog', 'ISO Library & Official Catalog')}">
+              <button id="btn-vm-isos" class="btn-pill-toggle" title="${t('ui.iso_library_official_catalog', 'ISO Library & Official Catalog')}" data-i18n-title="ui.iso_library_official_catalog">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="5"/></svg>
                 <span>${t('vmm.iso_library', 'ISO library')}</span>
               </button>
@@ -138,9 +138,9 @@ export function initVmManager() {
                 <span class="vmm-bold-accent" id="vm-headroom-text">--</span>
               </div>
               <div class="vmm-box-3" style="display: flex;" id="vm-memory-segments">
-                <div id="vm-seg-running" style="width: 0%; background: #33cdb8; transition: width 0.3s;" title="${t('ui.running_vms', 'Running VMs')}"></div>
-                <div id="vm-seg-reserve" style="width: 10%; background: #f59e0b; transition: width 0.3s;" title="${t('ui.host_reserve_protected', 'Host Reserve (Protected)')}"></div>
-                <div id="vm-seg-headroom" style="width: 0%; background: #10b981; transition: width 0.3s;" title="${t('ui.available_safe_headroom', 'Available Safe Headroom')}"></div>
+                <div id="vm-seg-running" style="width: 0%; background: #33cdb8; transition: width 0.3s;" title="${t('ui.running_vms', 'Running VMs')}" data-i18n-title="ui.running_vms"></div>
+                <div id="vm-seg-reserve" style="width: 10%; background: #f59e0b; transition: width 0.3s;" title="${t('ui.host_reserve_protected', 'Host Reserve (Protected)')}" data-i18n-title="ui.host_reserve_protected"></div>
+                <div id="vm-seg-headroom" style="width: 0%; background: #10b981; transition: width 0.3s;" title="${t('ui.available_safe_headroom', 'Available Safe Headroom')}" data-i18n-title="ui.available_safe_headroom"></div>
               </div>
               <div class="vmm-row-xs-muted">
                 <span>${t('vmm.total_host', 'Total memory:')} <strong class="vmm-strong" id="vm-total-ram">--</strong></span>
@@ -318,7 +318,7 @@ function renderTelemetry(tel) {
     kvmBadge.style.color = '#fbbf24';
     kvmBadge.style.borderColor = 'rgba(245,158,11,0.3)';
   } else if (kvmBadge && tel.kvm) {
-    kvmBadge.innerHTML = `<span aria-hidden="true">⚡</span> <span>${escapeHtml(kvmWords(tel.kvm))}</span> <span class="vmm-xs" title="${t('ui.view_kvm_diagnostics_fix', 'View KVM Diagnostics & Fix')}">ℹ️</span>`;
+    kvmBadge.innerHTML = `<span aria-hidden="true">⚡</span> <span>${escapeHtml(kvmWords(tel.kvm))}</span> <span class="vmm-xs" title="${t('ui.view_kvm_diagnostics_fix', 'View KVM Diagnostics & Fix')}" data-i18n-title="ui.view_kvm_diagnostics_fix">ℹ️</span>`;
     kvmBadge.style.cursor = 'pointer';
     kvmBadge.onclick = () => openKvmDiagnosticsModal(tel.kvm);
     if (tel.kvm.state === 'active') {
@@ -545,15 +545,15 @@ function buildVmCardHtml(vm, vms) {
             <div class="vmm-row-6">
               ${
                 bootOrder === 'disk'
-                  ? `<span class="vm-boot-order-pill disk" title="${t('ui.boot_order_virtual_disk_first', 'Boot order: Virtual disk first')}">${ico('💽')} ${t('vmm.boot_disk', 'Disk')}</span>`
-                  : `<span class="vm-boot-order-pill iso" title="${t('ui.boot_order_iso_installer_first', 'Boot order: ISO installer first')}">${ico('💿')} ${t('vmm.boot_iso', 'ISO first')}</span>`
+                  ? `<span class="vm-boot-order-pill disk" title="${t('ui.boot_order_virtual_disk_first', 'Boot order: Virtual disk first')}" data-i18n-title="ui.boot_order_virtual_disk_first">${ico('💽')} ${t('vmm.boot_disk', 'Disk')}</span>`
+                  : `<span class="vm-boot-order-pill iso" title="${t('ui.boot_order_iso_installer_first', 'Boot order: ISO installer first')}" data-i18n-title="ui.boot_order_iso_installer_first">${ico('💿')} ${t('vmm.boot_iso', 'ISO first')}</span>`
               }
               ${
                 isRunning || isShutting
-                  ? `<span class="qemu-process-badge active" title="${t('ui.qemu_kvm_hypervisor_process_active', 'Virtual machine service running')}">${ico('●')} QEMU ${qemuPid ? `(${qemuPid})` : t('vmm.active', 'active')}</span>`
+                  ? `<span class="qemu-process-badge active" title="${t('ui.qemu_kvm_hypervisor_process_active', 'Virtual machine service running')}" data-i18n-title="ui.qemu_kvm_hypervisor_process_active">${ico('●')} QEMU ${qemuPid ? `(${qemuPid})` : t('vmm.active', 'active')}</span>`
                   : isPaused
-                    ? `<span class="qemu-process-badge paused" title="${t('ui.qemu_process_paused', 'QEMU process paused')}">${ico('⏸')} ${t('vmm.qemu_paused', 'QEMU paused')}</span>`
-                    : `<span class="qemu-process-badge stopped" title="${t('ui.qemu_process_inactive', 'QEMU process inactive')}">${ico('○')} ${t('vmm.qemu_stopped', 'QEMU stopped')}</span>`
+                    ? `<span class="qemu-process-badge paused" title="${t('ui.qemu_process_paused', 'QEMU process paused')}" data-i18n-title="ui.qemu_process_paused">${ico('⏸')} ${t('vmm.qemu_paused', 'QEMU paused')}</span>`
+                    : `<span class="qemu-process-badge stopped" title="${t('ui.qemu_process_inactive', 'QEMU process inactive')}" data-i18n-title="ui.qemu_process_inactive">${ico('○')} ${t('vmm.qemu_stopped', 'QEMU stopped')}</span>`
               }
               ${stateBadge}
             </div>
@@ -598,13 +598,13 @@ function buildVmCardHtml(vm, vms) {
               ${
                 vm.ip_address
                   ? `<span class="vmm-row-accent"><span>${escapeHtml(t('vmm.address', 'Address {ip}', { ip: vm.ip_address }))}</span>
-                <button class="btn-copy-ssh-cmd vmm-row-muted-box" data-cmd="${escapeHtml(vm.ip_address)}" title="${escapeHtml(t('vm.copy_ip', 'Copy IP Address'))}">
+                <button class="btn-copy-ssh-cmd vmm-row-muted-box" data-cmd="${escapeHtml(vm.ip_address)}" title="${escapeHtml(t('vm.copy_ip', 'Copy IP Address'))}" data-i18n-title="vm.copy_ip">
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
                 </button></span>`
                   : `<span class="vmm-xs-muted">${escapeHtml(t('vm.why_no_ip', 'Waiting for the VM to get a network address'))}</span>`
               }
             </div>
-            <button class="btn-vm-join-toggle" data-id="${vm.id}" style="background: rgba(51,205,184,0.15); border: 1px solid rgba(51,205,184,0.3); border-radius: 4px; color: var(--kb-text-accent); font-size: var(--kb-fs-xs); font-weight: 700; padding: 2px 6px; cursor: pointer; flex-shrink: 0;" title="${t('ui.join_vm_connection_options', 'Join VM connection options')}">
+            <button class="btn-vm-join-toggle" data-id="${vm.id}" style="background: rgba(51,205,184,0.15); border: 1px solid rgba(51,205,184,0.3); border-radius: 4px; color: var(--kb-text-accent); font-size: var(--kb-fs-xs); font-weight: 700; padding: 2px 6px; cursor: pointer; flex-shrink: 0;" title="${t('ui.join_vm_connection_options', 'Join VM connection options')}" data-i18n-title="ui.join_vm_connection_options">
               ${t('vmm.join', 'Connect')} ${ico('▾')}
             </button>
           </div>
@@ -621,7 +621,7 @@ function buildVmCardHtml(vm, vms) {
                 <button class="btn-join-gui" data-id="${vm.id}" data-name="${escapeHtml(vm.name)}" style="background: rgba(245,158,11,0.2); border: 1px solid rgba(245,158,11,0.4); border-radius: 4px; color: var(--kb-text-warn); font-size: var(--kb-fs-xs); font-weight: 700; padding: 2px 8px; cursor: pointer;">
                   ${t('vmm.open_console', 'Open console')} ${ico('🖥️')}
                 </button>
-                <button class="btn-join-separate" data-id="${vm.id}" data-name="${escapeHtml(vm.name)}" data-mode="gui" style="background: rgba(245,158,11,0.2); border: 1px solid rgba(245,158,11,0.4); border-radius: 4px; color: var(--kb-text-warn); font-size: var(--kb-fs-xs); font-weight: 700; padding: 2px 6px; cursor: pointer;" title="${t('vm.open_separate', 'Open in Separate Window')}">
+                <button class="btn-join-separate" data-id="${vm.id}" data-name="${escapeHtml(vm.name)}" data-mode="gui" style="background: rgba(245,158,11,0.2); border: 1px solid rgba(245,158,11,0.4); border-radius: 4px; color: var(--kb-text-warn); font-size: var(--kb-fs-xs); font-weight: 700; padding: 2px 6px; cursor: pointer;" title="${t('vm.open_separate', 'Open in Separate Window')}" data-i18n-title="vm.open_separate">
                   ↗
                 </button>
               </div>
@@ -635,7 +635,7 @@ function buildVmCardHtml(vm, vms) {
                 ${escapeHtml(vm.ip_address)}
               </span>
               <div class="vmm-row-8">
-                <button class="btn-copy-ip vmm-row-muted-box-2" data-ip="${escapeHtml(vm.ip_address)}" title="${t('ui.copy_ip', 'Copy IP')}">
+                <button class="btn-copy-ip vmm-row-muted-box-2" data-ip="${escapeHtml(vm.ip_address)}" title="${t('ui.copy_ip', 'Copy IP')}" data-i18n-title="ui.copy_ip">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
                 </button>
               </div>
@@ -689,7 +689,7 @@ function buildVmCardHtml(vm, vms) {
                 <button class="btn-join-gui" data-id="${vm.id}" data-name="${escapeHtml(vm.name)}" style="background: rgba(51,205,184,0.2); border: 1px solid rgba(51,205,184,0.4); border-radius: 4px; color: var(--kb-text-accent); font-size: var(--kb-fs-xs); font-weight: 700; padding: 2px 8px; cursor: pointer;">
                   ${t('vmm.open_console', 'Open console')} ${ico('🖥️')}
                 </button>
-                <button class="btn-join-separate" data-id="${vm.id}" data-name="${escapeHtml(vm.name)}" data-mode="gui" style="background: rgba(51,205,184,0.2); border: 1px solid rgba(51,205,184,0.4); border-radius: 4px; color: var(--kb-text-accent); font-size: var(--kb-fs-xs); font-weight: 700; padding: 2px 6px; cursor: pointer;" title="${t('vm.open_separate', 'Open in Separate Window')}">
+                <button class="btn-join-separate" data-id="${vm.id}" data-name="${escapeHtml(vm.name)}" data-mode="gui" style="background: rgba(51,205,184,0.2); border: 1px solid rgba(51,205,184,0.4); border-radius: 4px; color: var(--kb-text-accent); font-size: var(--kb-fs-xs); font-weight: 700; padding: 2px 6px; cursor: pointer;" title="${t('vm.open_separate', 'Open in Separate Window')}" data-i18n-title="vm.open_separate">
                   ↗
                 </button>
               </div>
@@ -704,19 +704,19 @@ function buildVmCardHtml(vm, vms) {
           ${
             !isRunning && !isPaused && !isShutting
               ? `
-            <button class="btn-vm-action btn-vm-start vmm-grow-2" data-id="${vm.id}" data-act="start" title="${t('vm.start', 'Start')}">
+            <button class="btn-vm-action btn-vm-start vmm-grow-2" data-id="${vm.id}" data-act="start" title="${t('vm.start', 'Start')}" data-i18n-title="vm.start">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
               <span>${t('vm.start', 'Start')}</span>
             </button>
-            <button class="btn-vm-action btn-vm-edit" data-id="${vm.id}" title="${t('ui.edit_vm_configuration', 'Edit VM Configuration')}">
+            <button class="btn-vm-action btn-vm-edit" data-id="${vm.id}" title="${t('ui.edit_vm_configuration', 'Edit VM Configuration')}" data-i18n-title="ui.edit_vm_configuration">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
               <span>${t('vmm.edit', 'Edit')}</span>
             </button>
-            <button class="btn-vm-action btn-vm-snapshots" data-id="${vm.id}" title="${t('vm.snapshots', 'Snapshots & Rollback')}">
+            <button class="btn-vm-action btn-vm-snapshots" data-id="${vm.id}" title="${t('vm.snapshots', 'Snapshots & Rollback')}" data-i18n-title="vm.snapshots">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
               <span>${t('vm.snapshots_short', 'Snapshots')}</span>
             </button>
-            <button class="btn-vm-action btn-vm-delete" data-id="${vm.id}" data-name="${escapeHtml(vm.name)}" title="${t('vm.delete', 'Delete')}">
+            <button class="btn-vm-action btn-vm-delete" data-id="${vm.id}" data-name="${escapeHtml(vm.name)}" title="${t('vm.delete', 'Delete')}" data-i18n-title="vm.delete">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
               <span>${t('vm.delete', 'Delete')}</span>
             </button>
@@ -726,35 +726,35 @@ function buildVmCardHtml(vm, vms) {
           ${
             isRunning
               ? `
-            <button class="btn-vm-action btn-vm-pause vmm-grow-2" data-id="${vm.id}" data-act="pause" title="${t('vm.pause', 'Pause')}">
+            <button class="btn-vm-action btn-vm-pause vmm-grow-2" data-id="${vm.id}" data-act="pause" title="${t('vm.pause', 'Pause')}" data-i18n-title="vm.pause">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
               <span>${t('vm.pause', 'Pause')}</span>
             </button>
-            <button class="btn-vm-action btn-vm-restart vmm-grow-2" data-id="${vm.id}" data-act="restart" title="${t('ui.restart_vm', 'Restart VM')}">
+            <button class="btn-vm-action btn-vm-restart vmm-grow-2" data-id="${vm.id}" data-act="restart" title="${t('ui.restart_vm', 'Restart VM')}" data-i18n-title="ui.restart_vm">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
               <span>${t('vmm.restart', 'Restart')}</span>
             </button>
-            <button class="btn-vm-action btn-vm-acpi vmm-grow-2" data-id="${vm.id}" data-act="stop" title="${t('ui.acpi_shutdown_graceful_power_off', 'ACPI Shutdown (Graceful Power Off)')}">
+            <button class="btn-vm-action btn-vm-acpi vmm-grow-2" data-id="${vm.id}" data-act="stop" title="${t('ui.acpi_shutdown_graceful_power_off', 'ACPI Shutdown (Graceful Power Off)')}" data-i18n-title="ui.acpi_shutdown_graceful_power_off">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
               <span>${t('vmm.shutdown', 'Shut down')}</span>
             </button>
-            <button class="btn-vm-action btn-vm-stop btn-vm-force-off vmm-grow-2" data-id="${vm.id}" data-act="force_off" title="${t('vmm.force_off', 'Turn off now (like pulling the plug)')}">
+            <button class="btn-vm-action btn-vm-stop btn-vm-force-off vmm-grow-2" data-id="${vm.id}" data-act="force_off" title="${t('vmm.force_off', 'Turn off now (like pulling the plug)')}" data-i18n-title="vmm.force_off">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>
               <span>${t('vmm.force_stop', 'Turn off now')}</span>
             </button>
-            <button class="btn-vm-gui" data-id="${vm.id}" title="${t('vm.gui', 'KVM GUI')}">
+            <button class="btn-vm-gui" data-id="${vm.id}" title="${t('vm.gui', 'KVM GUI')}" data-i18n-title="vm.gui">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
               <span>${t('vm.gui', 'KVM GUI')}</span>
             </button>
-            <button class="btn-vm-console" data-id="${vm.id}" title="${t('vm.console', 'Console')}">
+            <button class="btn-vm-console" data-id="${vm.id}" title="${t('vm.console', 'Console')}" data-i18n-title="vm.console">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
               <span>${t('vm.console', 'Console')}</span>
             </button>
-            <button class="btn-vm-action btn-vm-edit" data-id="${vm.id}" title="${t('ui.edit_vm_configuration', 'Edit VM Configuration')}">
+            <button class="btn-vm-action btn-vm-edit" data-id="${vm.id}" title="${t('ui.edit_vm_configuration', 'Edit VM Configuration')}" data-i18n-title="ui.edit_vm_configuration">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
               <span>${t('vmm.edit', 'Edit')}</span>
             </button>
-            <button class="btn-vm-action btn-vm-snapshots" data-id="${vm.id}" title="${t('vm.snapshots', 'Snapshots & Rollback')}">
+            <button class="btn-vm-action btn-vm-snapshots" data-id="${vm.id}" title="${t('vm.snapshots', 'Snapshots & Rollback')}" data-i18n-title="vm.snapshots">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
               <span>${t('vm.snapshots_short', 'Snapshots')}</span>
             </button>
@@ -764,30 +764,30 @@ function buildVmCardHtml(vm, vms) {
           ${
             isPaused
               ? `
-            <button class="btn-vm-action btn-vm-resume vmm-grow-2" data-id="${vm.id}" data-act="resume" title="${t('vm.resume', 'Resume')}">
+            <button class="btn-vm-action btn-vm-resume vmm-grow-2" data-id="${vm.id}" data-act="resume" title="${t('vm.resume', 'Resume')}" data-i18n-title="vm.resume">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
               <span>${t('vm.resume', 'Resume')}</span>
             </button>
-            <button class="btn-vm-action btn-vm-acpi vmm-grow-2" data-id="${vm.id}" data-act="stop" title="${t('ui.acpi_shutdown', 'ACPI Shutdown')}">
+            <button class="btn-vm-action btn-vm-acpi vmm-grow-2" data-id="${vm.id}" data-act="stop" title="${t('ui.acpi_shutdown', 'ACPI Shutdown')}" data-i18n-title="ui.acpi_shutdown">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
               <span>${t('vmm.shutdown', 'Shut down')}</span>
             </button>
-            <button class="btn-vm-action btn-vm-stop btn-vm-force-off vmm-grow-2" data-id="${vm.id}" data-act="force_off" title="${t('vmm.force_off', 'Turn off now (like pulling the plug)')}">
+            <button class="btn-vm-action btn-vm-stop btn-vm-force-off vmm-grow-2" data-id="${vm.id}" data-act="force_off" title="${t('vmm.force_off', 'Turn off now (like pulling the plug)')}" data-i18n-title="vmm.force_off">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>
               <span>${t('vmm.force_stop', 'Turn off now')}</span>
             </button>
-            <button class="btn-vm-action btn-vm-edit" data-id="${vm.id}" title="${t('ui.edit_vm_configuration', 'Edit VM Configuration')}">
+            <button class="btn-vm-action btn-vm-edit" data-id="${vm.id}" title="${t('ui.edit_vm_configuration', 'Edit VM Configuration')}" data-i18n-title="ui.edit_vm_configuration">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
               <span>${t('vmm.edit', 'Edit')}</span>
             </button>
-            <button class="btn-vm-action btn-vm-snapshots" data-id="${vm.id}" title="${t('vm.snapshots', 'Snapshots & Rollback')}">
+            <button class="btn-vm-action btn-vm-snapshots" data-id="${vm.id}" title="${t('vm.snapshots', 'Snapshots & Rollback')}" data-i18n-title="vm.snapshots">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
               <span>${t('vm.snapshots_short', 'Snapshots')}</span>
             </button>
           `
               : ''
           }
-          <button type="button" class="btn-vm-more-sheet" data-id="${vm.id}" title="${t('ui.more_actions', 'More Actions')}" style="display:none;">···</button>
+          <button type="button" class="btn-vm-more-sheet" data-id="${vm.id}" title="${t('ui.more_actions', 'More Actions')}" data-i18n-title="ui.more_actions" style="display:none;">···</button>
         </div>
       </div>
     `;

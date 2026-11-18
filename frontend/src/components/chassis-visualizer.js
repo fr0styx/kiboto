@@ -318,7 +318,7 @@ export function renderChassisTwin(container, disks = [], options = {}) {
             <div class="cv-row">
               <span class="bay-num">${t('chassis.bay_n', 'Bay {n}', { n: slotNum })}</span>
               ${customLabel}
-              ${bay.mapped === false ? `<span class="bay-guess-note" title="${escapeHtml(t('chassis.guess_hint', 'Kiboto put this drive here by guess. Check it in "Which drive is in which bay".'))}">${escapeHtml(t('chassis.guess', 'Position not confirmed'))}</span>` : ''}
+              ${bay.mapped === false ? `<span class="bay-guess-note" title="${escapeHtml(t('chassis.guess_hint', 'Kiboto put this drive here by guess. Check it in "Which drive is in which bay".'))}" data-i18n-title="chassis.guess_hint">${escapeHtml(t('chassis.guess', 'Position not confirmed'))}</span>` : ''}
             </div>
             <span class="bay-temp-pill" style="color: ${thermal.color}; border-color: ${thermal.color};">${thermal.text}</span>
           </div>
@@ -331,7 +331,7 @@ export function renderChassisTwin(container, disks = [], options = {}) {
             </div>
           </div>
           <div class="bay-footer">
-            <button class="bay-locate-btn" data-dev="${devName}" title="${t('ui.locate_drive_blink_bay_led', 'Locate Drive (Blink Bay LED)')}" aria-label="${t('chassis.locate_bay_aria', 'Locate the drive in bay {n}', { n: slotNum })}">
+            <button class="bay-locate-btn" data-dev="${devName}" title="${t('ui.locate_drive_blink_bay_led', 'Locate Drive (Blink Bay LED)')}" data-i18n-title="ui.locate_drive_blink_bay_led" aria-label="${t('chassis.locate_bay_aria', 'Locate the drive in bay {n}', { n: slotNum })}">
               <svg class="locate-icon" viewBox="0 0 24 24" width="12" height="12"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" fill="currentColor"/></svg>
               <span>${t('chassis.find_drive', 'Find this drive')}</span>
             </button>
@@ -390,7 +390,7 @@ export function renderChassisTwin(container, disks = [], options = {}) {
           <div class="chassis-screw-head"></div>
           <div class="chassis-brand-mark">${escapeHtml(chassisModel)}</div>
           <div class="chassis-top-actions">
-            <button class="chassis-config-btn" id="chassis-open-slots-btn" data-advanced-only title="${t('ui.configure_chassis_bays_profile', 'Configure Chassis Bays & Profile')}" aria-label="${t('ui.configure_chassis_bays_profile', 'Configure Chassis Bays & Profile')}">
+            <button class="chassis-config-btn" id="chassis-open-slots-btn" data-advanced-only title="${t('ui.configure_chassis_bays_profile', 'Configure Chassis Bays & Profile')}" data-i18n-title="ui.configure_chassis_bays_profile" aria-label="${t('ui.configure_chassis_bays_profile', 'Configure Chassis Bays & Profile')}" data-i18n-aria-label="ui.configure_chassis_bays_profile">
               <svg viewBox="0 0 24 24" width="12" height="12"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z" fill="currentColor"/><path fill-rule="evenodd" d="M1.323 11.447C2.811 6.976 7.028 3.75 12.001 3.75c4.97 0 9.185 3.223 10.675 7.69.12.362.12.752 0 1.113-1.487 4.471-5.705 7.697-10.677 7.697-4.97 0-9.186-3.223-10.675-7.69a1.762 1.762 0 010-1.113zM17.25 12a5.25 5.25 0 11-10.5 0 5.25 5.25 0 0110.5 0z" clip-rule="evenodd" fill="currentColor"/></svg>
               <span>${t('chassis.slots_mapping', 'Which drive is in which bay')}</span>
             </button>
@@ -516,7 +516,7 @@ export function openChassisConfigModal(currentConfig = {}, onSaved = null) {
           <svg viewBox="0 0 24 24" width="16" height="16"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z" fill="currentColor"/></svg>
           <span>${t('chassis.config_title', 'Which drive is in which bay')}</span>
         </div>
-        <button class="win-btn close-btn" id="chassis-config-close" title="${t('diagnostics.close_btn', 'Close')}" aria-label="${t('diagnostics.close_btn', 'Close')}"></button>
+        <button class="win-btn close-btn" id="chassis-config-close" title="${t('diagnostics.close_btn', 'Close')}" data-i18n-title="diagnostics.close_btn" aria-label="${t('diagnostics.close_btn', 'Close')}" data-i18n-aria-label="diagnostics.close_btn"></button>
       </div>
       <div class="smart-modal-body cv-col-2">
         <div class="cv-grid">
@@ -780,10 +780,10 @@ function buildPoolBlockInner(pool, isObserver, can = { scrub: true }) {
         </div>
         <div class="topo-disk-sub">
           <span class="topo-disk-size">${formatBytes(m.size_bytes)}</span>
-          <span class="topo-disk-io" title="${t('ui.disk_i_o_reads_writes', 'Disk I/O Reads & Writes')}">R: ${readsStr} · W: ${writesStr}</span>
+          <span class="topo-disk-io" title="${t('ui.disk_i_o_reads_writes', 'Disk I/O Reads & Writes')}" data-i18n-title="ui.disk_i_o_reads_writes">R: ${readsStr} · W: ${writesStr}</span>
         </div>
         <div class="topo-disk-actions">
-          <button class="btn-locate-topo" data-dev="${escapeHtml(m.device || m.name)}" title="${t('ui.blink_drive_activity_led', 'Blink drive activity LED')}">
+          <button class="btn-locate-topo" data-dev="${escapeHtml(m.device || m.name)}" title="${t('ui.blink_drive_activity_led', 'Blink drive activity LED')}" data-i18n-title="ui.blink_drive_activity_led">
             ${ico('💡')} ${t('chassis.locate', 'Find this drive')}
           </button>
         </div>
@@ -825,10 +825,10 @@ function buildPoolBlockInner(pool, isObserver, can = { scrub: true }) {
     </div>
 
     <div class="topo-pool-actions cv-row-5">
-      ${can.scrub ? `<button class="btn-pool-scrub btn-pill-toggle" data-pool-id="${escapeHtml(pool.id)}" data-pool-name="${escapeHtml(poolName(pool.name) || pool.id)}" title="${t('ui.trigger_filesystem_scrub_or_parity', 'Trigger filesystem scrub or parity check')}">${ico('⚡')} ${t('chassis.scrub_pool', 'Check for errors')}</button>` : ''}
-      ${!isObserver ? `<button class="btn-pool-rename btn-pill-toggle" data-pool-id="${escapeHtml(pool.id)}" data-pool-name="${escapeHtml(pool.name)}" title="${t('ui.rename_storage_pool', 'Rename storage pool')}">${ico('✏️')} ${t('chassis.rename', 'Rename')}</button>` : ''}
-      ${(!isObserver || pool.fs_type === 'zfs') && pool.id !== 'unraid_array' && pool.id !== 'default_pool' ? `<button class="btn-pool-export btn-pill-toggle" data-pool-id="${escapeHtml(pool.id)}" style="background: rgba(245,158,11,0.15); border-color: rgba(245,158,11,0.3); color: var(--kb-text-warn);" title="${t('ui.safely_flush_dirty_cache_and', 'Safely flush dirty cache and detach pool')}">${ico('⏏️')} ${t('chassis.eject', 'Safely eject')}</button>` : ''}
-      ${!isObserver && pool.id !== 'default_pool' ? `<button class="btn-pool-destroy btn-pill-toggle is-danger" data-pool-id="${escapeHtml(pool.id)}" title="${t('ui.destroy_storage_pool', 'Destroy storage pool')}">${ico('🗑️')} ${t('chassis.destroy', 'Destroy')}</button>` : ''}
+      ${can.scrub ? `<button class="btn-pool-scrub btn-pill-toggle" data-pool-id="${escapeHtml(pool.id)}" data-pool-name="${escapeHtml(poolName(pool.name) || pool.id)}" title="${t('ui.trigger_filesystem_scrub_or_parity', 'Trigger filesystem scrub or parity check')}" data-i18n-title="ui.trigger_filesystem_scrub_or_parity">${ico('⚡')} ${t('chassis.scrub_pool', 'Check for errors')}</button>` : ''}
+      ${!isObserver ? `<button class="btn-pool-rename btn-pill-toggle" data-pool-id="${escapeHtml(pool.id)}" data-pool-name="${escapeHtml(pool.name)}" title="${t('ui.rename_storage_pool', 'Rename storage pool')}" data-i18n-title="ui.rename_storage_pool">${ico('✏️')} ${t('chassis.rename', 'Rename')}</button>` : ''}
+      ${(!isObserver || pool.fs_type === 'zfs') && pool.id !== 'unraid_array' && pool.id !== 'default_pool' ? `<button class="btn-pool-export btn-pill-toggle" data-pool-id="${escapeHtml(pool.id)}" style="background: rgba(245,158,11,0.15); border-color: rgba(245,158,11,0.3); color: var(--kb-text-warn);" title="${t('ui.safely_flush_dirty_cache_and', 'Safely flush dirty cache and detach pool')}" data-i18n-title="ui.safely_flush_dirty_cache_and">${ico('⏏️')} ${t('chassis.eject', 'Safely eject')}</button>` : ''}
+      ${!isObserver && pool.id !== 'default_pool' ? `<button class="btn-pool-destroy btn-pill-toggle is-danger" data-pool-id="${escapeHtml(pool.id)}" title="${t('ui.destroy_storage_pool', 'Destroy storage pool')}" data-i18n-title="ui.destroy_storage_pool">${ico('🗑️')} ${t('chassis.destroy', 'Destroy')}</button>` : ''}
       ${eraseButtonHtml(pool)}
     </div>
   `;
@@ -1162,7 +1162,7 @@ export function buildSftpCardHtml(sftpStatus, usersCount = 0, sampleUser = '') {
           <button class="btn-pill-toggle btn-sftp-toggle-action" id="btn-sftp-header-toggle" style="padding:5px 12px; font-size:var(--kb-fs-xs); font-weight:700; ${isRunning ? 'background:rgba(239,68,68,0.15); color:var(--kb-text-crit); border-color:rgba(239,68,68,0.3);' : ''}">
             ${isRunning ? `${ico('⏹')} ${t('chassis.sftp_stop', 'Stop SFTP')}` : `${ico('▶')} ${t('chassis.sftp_start', 'Start SFTP')}`}
           </button>
-          <button class="btn-pill-toggle btn-sftp-users-action" id="btn-sftp-header-users" style="background: rgba(51,205,184,0.15); color: var(--kb-text-accent); border-color: rgba(51,205,184,0.3);" title="${t('ui.manage_sftp_users_and_permissions', 'Manage SFTP users and permissions')}">
+          <button class="btn-pill-toggle btn-sftp-users-action" id="btn-sftp-header-users" style="background: rgba(51,205,184,0.15); color: var(--kb-text-accent); border-color: rgba(51,205,184,0.3);" title="${t('ui.manage_sftp_users_and_permissions', 'Manage SFTP users and permissions')}" data-i18n-title="ui.manage_sftp_users_and_permissions">
             ${ico('👥')} ${t('chassis.manage_users', 'Manage users ({count})', { count: usersCount })}
           </button>
         </div>
@@ -1178,7 +1178,7 @@ export function buildSftpCardHtml(sftpStatus, usersCount = 0, sampleUser = '') {
         <div class="webdav-qc-item">
           <div class="webdav-qc-label">
             <span>${ico('🍏')} ${t('chassis.qc_finder_sftp', 'macOS Finder / Cyberduck')}</span>
-            <button class="btn-qc-copy" data-copy="${escapeHtml(finderCmd)}" title="${t('ui.copy_sftp_url', 'Copy SFTP URL')}">${ico('📋')} ${t('chassis.copy', 'Copy')}</button>
+            <button class="btn-qc-copy" data-copy="${escapeHtml(finderCmd)}" title="${t('ui.copy_sftp_url', 'Copy SFTP URL')}" data-i18n-title="ui.copy_sftp_url">${ico('📋')} ${t('chassis.copy', 'Copy')}</button>
           </div>
           <div class="webdav-qc-code">
             <span>${escapeHtml(finderCmd)}</span>
@@ -1188,7 +1188,7 @@ export function buildSftpCardHtml(sftpStatus, usersCount = 0, sampleUser = '') {
         <div class="webdav-qc-item">
           <div class="webdav-qc-label">
             <span>${ico('💻')} ${t('chassis.qc_terminal', 'Terminal / OpenSSH')}</span>
-            <button class="btn-qc-copy" data-copy="${escapeHtml(terminalCmd)}" title="${t('ui.copy_cli_command', 'Copy CLI Command')}">${ico('📋')} ${t('chassis.copy', 'Copy')}</button>
+            <button class="btn-qc-copy" data-copy="${escapeHtml(terminalCmd)}" title="${t('ui.copy_cli_command', 'Copy CLI Command')}" data-i18n-title="ui.copy_cli_command">${ico('📋')} ${t('chassis.copy', 'Copy')}</button>
           </div>
           <div class="webdav-qc-code">
             <span>${escapeHtml(terminalCmd)}</span>
@@ -1198,7 +1198,7 @@ export function buildSftpCardHtml(sftpStatus, usersCount = 0, sampleUser = '') {
         <div class="webdav-qc-item">
           <div class="webdav-qc-label">
             <span>${ico('📁')} ${t('chassis.qc_filezilla', 'FileZilla / WinSCP')}</span>
-            <button class="btn-qc-copy" data-copy="${escapeHtml(filezillaHint)}" title="${t('ui.copy_connection_info', 'Copy Connection Info')}">${ico('📋')} ${t('chassis.copy', 'Copy')}</button>
+            <button class="btn-qc-copy" data-copy="${escapeHtml(filezillaHint)}" title="${t('ui.copy_connection_info', 'Copy Connection Info')}" data-i18n-title="ui.copy_connection_info">${ico('📋')} ${t('chassis.copy', 'Copy')}</button>
           </div>
           <div class="webdav-qc-code">
             <span>${escapeHtml(filezillaHint)}</span>
@@ -1208,7 +1208,7 @@ export function buildSftpCardHtml(sftpStatus, usersCount = 0, sampleUser = '') {
         <div class="webdav-qc-item">
           <div class="webdav-qc-label">
             <span>${ico('📜')} ${t('chassis.qc_sshfs', 'SSHFS mount (Linux/macOS)')}</span>
-            <button class="btn-qc-copy" data-copy="${escapeHtml(sshfsCmd)}" title="${t('ui.copy_sshfs_mount_command', 'Copy SSHFS Mount Command')}">${ico('📋')} ${t('chassis.copy', 'Copy')}</button>
+            <button class="btn-qc-copy" data-copy="${escapeHtml(sshfsCmd)}" title="${t('ui.copy_sshfs_mount_command', 'Copy SSHFS Mount Command')}" data-i18n-title="ui.copy_sshfs_mount_command">${ico('📋')} ${t('chassis.copy', 'Copy')}</button>
           </div>
           <div class="webdav-qc-code">
             <span>${escapeHtml(sshfsCmd)}</span>
@@ -1554,7 +1554,7 @@ function buildShareCardInner(s, canManageShares) {
     }
 
     <div class="share-card-actions cv-row-2">
-      <button class="btn-share-reveal" data-path="${escapeHtml(s.mountpoint || '')}" title="${t('ui.open_share_in_file_explorer', 'Open share in File Explorer')}">
+      <button class="btn-share-reveal" data-path="${escapeHtml(s.mountpoint || '')}" title="${t('ui.open_share_in_file_explorer', 'Open share in File Explorer')}" data-i18n-title="ui.open_share_in_file_explorer">
         ${ico('📂')} ${t('ui.open_in_file_explorer', 'Open in File Explorer')}
       </button>
       ${
@@ -1563,10 +1563,10 @@ function buildShareCardInner(s, canManageShares) {
         <button class="btn-share-space btn-pill-toggle is-small" data-share-name="${escapeHtml(s.name)}" data-path="${escapeHtml(s.mountpoint || '')}" title="${t('space.button_title', "Where this share's space goes")}">
           ${t('space.button', 'Space')}
         </button>
-        <button class="btn-share-compress btn-pill-toggle is-small" data-share-name="${escapeHtml(s.name)}" title="${t('compress.button_title', 'Compression for this share')}">
+        <button class="btn-share-compress btn-pill-toggle is-small" data-share-name="${escapeHtml(s.name)}" title="${t('compress.button_title', 'Compression for this share')}" data-i18n-title="compress.button_title">
           ${t('compress.button', 'Compression')}
         </button>
-        <button class="btn-share-delete btn-pill-toggle is-danger is-small" data-share-name="${escapeHtml(s.name)}" title="${t('ui.delete_network_share', 'Delete network share')}">
+        <button class="btn-share-delete btn-pill-toggle is-danger is-small" data-share-name="${escapeHtml(s.name)}" title="${t('ui.delete_network_share', 'Delete network share')}" data-i18n-title="ui.delete_network_share">
           ${ico('🗑️')} ${t('chassis.delete', 'Delete')}
         </button>
       `
@@ -1867,10 +1867,10 @@ export function buildWebdavCardHtml(webdavStatus) {
           <button class="btn-pill-toggle" id="btn-webdav-toggle">
             ${isRunning ? t('chassis.stop', 'Stop') : t('chassis.start', 'Start')}
           </button>
-          <button class="btn-pill-toggle" id="btn-webdav-restart" title="${t('ui.restart_webdav_server', 'Restart WebDAV Server')}">
+          <button class="btn-pill-toggle" id="btn-webdav-restart" title="${t('ui.restart_webdav_server', 'Restart WebDAV Server')}" data-i18n-title="ui.restart_webdav_server">
             ${ico('↺')} ${t('chassis.restart', 'Restart')}
           </button>
-          <button class="btn-pill-toggle" id="btn-webdav-config-open" title="${t('ui.configure_webdav_settings', 'Configure WebDAV settings')}">
+          <button class="btn-pill-toggle" id="btn-webdav-config-open" title="${t('ui.configure_webdav_settings', 'Configure WebDAV settings')}" data-i18n-title="ui.configure_webdav_settings">
             ${ico('⚙️')} ${t('chassis.settings', 'Settings')}
           </button>
         </div>
@@ -1888,7 +1888,7 @@ export function buildWebdavCardHtml(webdavStatus) {
         <div class="webdav-qc-item">
           <div class="webdav-qc-label">
             <span>${ico('🍏')} ${t('chassis.qc_finder', 'macOS Finder (⌘K)')}</span>
-            <button class="btn-qc-copy" data-copy="${escapeHtml(qc.macos || '')}" title="${t('ui.copy_command', 'Copy command')}">${ico('📋')} ${t('chassis.copy', 'Copy')}</button>
+            <button class="btn-qc-copy" data-copy="${escapeHtml(qc.macos || '')}" title="${t('ui.copy_command', 'Copy command')}" data-i18n-title="ui.copy_command">${ico('📋')} ${t('chassis.copy', 'Copy')}</button>
           </div>
           <div class="webdav-qc-code">
             <span>${escapeHtml(qc.macos || '')}</span>
@@ -1898,7 +1898,7 @@ export function buildWebdavCardHtml(webdavStatus) {
         <div class="webdav-qc-item">
           <div class="webdav-qc-label">
             <span>${ico('🪟')} ${t('chassis.qc_windows', 'Windows: map network drive')}</span>
-            <button class="btn-qc-copy" data-copy="${escapeHtml(qc.windows || '')}" title="${t('ui.copy_command', 'Copy command')}">${ico('📋')} ${t('chassis.copy', 'Copy')}</button>
+            <button class="btn-qc-copy" data-copy="${escapeHtml(qc.windows || '')}" title="${t('ui.copy_command', 'Copy command')}" data-i18n-title="ui.copy_command">${ico('📋')} ${t('chassis.copy', 'Copy')}</button>
           </div>
           <div class="webdav-qc-code">
             <span>${escapeHtml(qc.windows || '')}</span>
@@ -1908,7 +1908,7 @@ export function buildWebdavCardHtml(webdavStatus) {
         <div class="webdav-qc-item">
           <div class="webdav-qc-label">
             <span>${ico('📱')} ${t('chassis.qc_mobile', 'Files app (iOS & Android)')}</span>
-            <button class="btn-qc-copy" data-copy="${escapeHtml(qc.ios || '')}" title="${t('ui.copy_url', 'Copy URL')}">${ico('📋')} ${t('chassis.copy', 'Copy')}</button>
+            <button class="btn-qc-copy" data-copy="${escapeHtml(qc.ios || '')}" title="${t('ui.copy_url', 'Copy URL')}" data-i18n-title="ui.copy_url">${ico('📋')} ${t('chassis.copy', 'Copy')}</button>
           </div>
           <div class="webdav-qc-code">
             <span>${escapeHtml(qc.ios || '')}</span>
@@ -1918,7 +1918,7 @@ export function buildWebdavCardHtml(webdavStatus) {
         <div class="webdav-qc-item">
           <div class="webdav-qc-label">
             <span>${ico('🌐')} ${t('chassis.qc_proxy', 'Through Kiboto (reverse proxy)')}</span>
-            <button class="btn-qc-copy" data-copy="${escapeHtml(proxyUrl)}" title="${t('ui.copy_proxy_url', 'Copy Proxy URL')}">${ico('📋')} ${t('chassis.copy', 'Copy')}</button>
+            <button class="btn-qc-copy" data-copy="${escapeHtml(proxyUrl)}" title="${t('ui.copy_proxy_url', 'Copy Proxy URL')}" data-i18n-title="ui.copy_proxy_url">${ico('📋')} ${t('chassis.copy', 'Copy')}</button>
           </div>
           <div class="webdav-qc-code">
             <span>${escapeHtml(proxyUrl)}</span>
@@ -2057,12 +2057,12 @@ export async function fetchAndRenderRemoteStorage(container) {
                 ${
                   isMounted
                     ? `
-                  <button class="btn-remote-reveal btn-pill-toggle" data-path="${escapeHtml(r.mount_path)}" title="${t('ui.open_in_file_explorer', 'Open in File Explorer')}" style="background: rgba(51,205,184,0.15); color: var(--kb-text-accent); border-color: rgba(51,205,184,0.3);">
+                  <button class="btn-remote-reveal btn-pill-toggle" data-path="${escapeHtml(r.mount_path)}" title="${t('ui.open_in_file_explorer', 'Open in File Explorer')}" data-i18n-title="ui.open_in_file_explorer" style="background: rgba(51,205,184,0.15); color: var(--kb-text-accent); border-color: rgba(51,205,184,0.3);">
                     ${ico('📂')} ${t('ui.open_in_file_explorer', 'Open in File Explorer')}
                   </button>
                 `
                     : `
-                  <button class="btn-remote-mount btn-pill-toggle" data-name="${escapeHtml(r.name)}" title="${t('ui.mount_to_mnt_remotes', 'Mount to /mnt/remotes')}" style="background: var(--lt-b-3bf58b1f, rgba(59,245,139,0.12)); color: var(--lt-t-3bf58bff, #3bf58b); border-color: var(--lt-r-3bf58b40, rgba(59,245,139,0.25));">
+                  <button class="btn-remote-mount btn-pill-toggle" data-name="${escapeHtml(r.name)}" title="${t('ui.mount_to_mnt_remotes', 'Mount to /mnt/remotes')}" data-i18n-title="ui.mount_to_mnt_remotes" style="background: var(--lt-b-3bf58b1f, rgba(59,245,139,0.12)); color: var(--lt-t-3bf58bff, #3bf58b); border-color: var(--lt-r-3bf58b40, rgba(59,245,139,0.25));">
                     ${ico('▶')} ${t('chassis.mount', 'Mount')}
                   </button>
                 `
@@ -2072,13 +2072,13 @@ export async function fetchAndRenderRemoteStorage(container) {
                 ${
                   isMounted
                     ? `
-                  <button class="btn-remote-unmount btn-pill-toggle" data-name="${escapeHtml(r.name)}" title="${t('ui.unmount_from_system', 'Unmount from system')}">
+                  <button class="btn-remote-unmount btn-pill-toggle" data-name="${escapeHtml(r.name)}" title="${t('ui.unmount_from_system', 'Unmount from system')}" data-i18n-title="ui.unmount_from_system">
                     ${ico('⏹')} ${t('chassis.unmount', 'Unmount')}
                   </button>
                 `
                     : ''
                 }
-                <button class="btn-remote-delete btn-pill-toggle is-danger" data-name="${escapeHtml(r.name)}" title="${t('ui.delete_remote', 'Delete remote')}">
+                <button class="btn-remote-delete btn-pill-toggle is-danger" data-name="${escapeHtml(r.name)}" title="${t('ui.delete_remote', 'Delete remote')}" data-i18n-title="ui.delete_remote">
                   🗑
                 </button>
               </div>
@@ -2103,7 +2103,7 @@ export async function fetchAndRenderRemoteStorage(container) {
             <div class="cv-fs13-bold-strong">
               ${t('chassis.remotes_count', 'Connected cloud drives ({count})', { count: remotes ? remotes.length : 0 })}
             </div>
-            <button class="btn-pill-toggle btn-trigger-new-remote" style="background: rgba(51,205,184,0.15); color: var(--kb-text-accent); border-color: rgba(51,205,184,0.3);" title="${t('ui.connect_new_cloud_remote', 'Connect New Cloud Remote')}">
+            <button class="btn-pill-toggle btn-trigger-new-remote" style="background: rgba(51,205,184,0.15); color: var(--kb-text-accent); border-color: rgba(51,205,184,0.3);" title="${t('ui.connect_new_cloud_remote', 'Connect New Cloud Remote')}" data-i18n-title="ui.connect_new_cloud_remote">
               ${ico('☁️')} ${t('chassis.add_remote', 'Add cloud drive')}
             </button>
           </div>
@@ -2521,7 +2521,7 @@ export async function openNewCloudRemoteModal(onSuccess) {
                   </div>
                   <div class="cv-row-xs-semi">
                     <span>${ico('📱')} ${t('chassis.qr_scan', 'Scan with your phone or tablet camera to sign in')}</span>
-                    <button type="button" id="btn-oauth-qr" class="btn-pill-toggle is-small" title="${t('ui.refresh_qr_code', 'Refresh QR Code')}">${ico('🔄')} ${t('common.refresh', 'Refresh')}</button>
+                    <button type="button" id="btn-oauth-qr" class="btn-pill-toggle is-small" title="${t('ui.refresh_qr_code', 'Refresh QR Code')}" data-i18n-title="ui.refresh_qr_code">${ico('🔄')} ${t('common.refresh', 'Refresh')}</button>
                   </div>
                 </div>
               </div>

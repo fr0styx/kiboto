@@ -403,7 +403,7 @@ export const DockManager = {
             </div>
             <div class="dock-tooltip-actions">
               <span class="dock-tooltip-status" id="dock-tooltip-badge">${escapeHtml(t('dock.badge_active', 'Active'))}</span>
-              <button type="button" class="dock-tooltip-close-btn" id="dock-tooltip-close-btn" title="${t('dock.close_window', 'Close Window')}" aria-label="${t('dock.close_window', 'Close Window')}">✕</button>
+              <button type="button" class="dock-tooltip-close-btn" id="dock-tooltip-close-btn" title="${t('dock.close_window', 'Close Window')}" data-i18n-title="dock.close_window" aria-label="${t('dock.close_window', 'Close Window')}" data-i18n-aria-label="dock.close_window">✕</button>
             </div>
           </div>
           <div class="dock-tooltip-preview" id="dock-tooltip-preview-content"></div>

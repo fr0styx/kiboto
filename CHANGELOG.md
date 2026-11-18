@@ -544,6 +544,9 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Appearance and Power in your language**: the slider scales under Appearance, the UPS state ("On mains power", "On
   battery") and the "in use" badges no longer stay in English.
 
+- **Windows in your language after a reload**: a window that reopens after a reload no longer shows in English, and
+  button names for screen readers (Close, Delete, Edit and others) follow your language.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

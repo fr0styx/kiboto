@@ -139,9 +139,9 @@ export async function openIsoManagerModal(initialTab = 'catalog') {
           <span>${t('vmm.iso_library', 'ISO library')}</span>
         </div>
         <div class="os-window-controls">
-          <button class="win-btn min-btn" id="iso-win-min" title="${t('window.minimize', 'Minimize')}" aria-label="${t('window.minimize', 'Minimize')}"></button>
-          <button class="win-btn max-btn" id="iso-win-max" title="${t('ui.maximize', 'Maximize')}" aria-label="${t('ui.maximize', 'Maximize')}"></button>
-          <button class="win-btn close-btn" id="iso-modal-close" title="${t('diagnostics.close_btn', 'Close')}" aria-label="${t('diagnostics.close_btn', 'Close')}"></button>
+          <button class="win-btn min-btn" id="iso-win-min" title="${t('window.minimize', 'Minimize')}" data-i18n-title="window.minimize" aria-label="${t('window.minimize', 'Minimize')}" data-i18n-aria-label="window.minimize"></button>
+          <button class="win-btn max-btn" id="iso-win-max" title="${t('ui.maximize', 'Maximize')}" data-i18n-title="ui.maximize" aria-label="${t('ui.maximize', 'Maximize')}" data-i18n-aria-label="ui.maximize"></button>
+          <button class="win-btn close-btn" id="iso-modal-close" title="${t('diagnostics.close_btn', 'Close')}" data-i18n-title="diagnostics.close_btn" aria-label="${t('diagnostics.close_btn', 'Close')}" data-i18n-aria-label="diagnostics.close_btn"></button>
         </div>
       </div>
 
@@ -411,7 +411,7 @@ export async function openIsoManagerModal(initialTab = 'catalog') {
           <div class="vmi-row-4">
             <span class="vmi-xs-semi-muted">${iso.size_formatted}</span>
             <button class="btn-pill-toggle btn-boot-iso" data-path="${escapeHtml(iso.path)}" style="background: rgba(51,205,184,0.18); color: var(--kb-text-accent); border-color: rgba(51,205,184,0.35);">${ico('▶')} ${t('viso.boot', 'Create VM')}</button>
-            <button class="btn-pill-toggle btn-delete-iso is-danger" data-path="${escapeHtml(iso.path)}" data-name="${escapeHtml(iso.name)}" title="${t('ui.delete_iso_from_storage', 'Delete ISO from storage')}">🗑</button>
+            <button class="btn-pill-toggle btn-delete-iso is-danger" data-path="${escapeHtml(iso.path)}" data-name="${escapeHtml(iso.name)}" title="${t('ui.delete_iso_from_storage', 'Delete ISO from storage')}" data-i18n-title="ui.delete_iso_from_storage">🗑</button>
           </div>
         </div>
       `

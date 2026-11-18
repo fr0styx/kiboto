@@ -174,9 +174,9 @@ function ensureWindow() {
       <div class="os-window-header">
         <div class="os-window-title" id="jobs-centre-title">${escapeHtml(t('jobs.title', 'Jobs'))}</div>
         <div class="os-window-controls">
-          <button class="win-btn min-btn" id="jobs-centre-min" title="${escapeHtml(t('window.minimize', 'Minimize'))}" aria-label="${escapeHtml(t('window.minimize', 'Minimize'))}"></button>
-          <button class="win-btn max-btn" id="jobs-centre-max" title="${escapeHtml(t('ui.maximize', 'Maximize'))}" aria-label="${escapeHtml(t('ui.maximize', 'Maximize'))}"></button>
-          <button class="win-btn close-btn" id="jobs-centre-close" title="${escapeHtml(t('window.close', 'Close'))}" aria-label="${escapeHtml(t('window.close', 'Close'))}"></button>
+          <button class="win-btn min-btn" id="jobs-centre-min" title="${escapeHtml(t('window.minimize', 'Minimize'))}" data-i18n-title="window.minimize" aria-label="${escapeHtml(t('window.minimize', 'Minimize'))}" data-i18n-aria-label="window.minimize"></button>
+          <button class="win-btn max-btn" id="jobs-centre-max" title="${escapeHtml(t('ui.maximize', 'Maximize'))}" data-i18n-title="ui.maximize" aria-label="${escapeHtml(t('ui.maximize', 'Maximize'))}" data-i18n-aria-label="ui.maximize"></button>
+          <button class="win-btn close-btn" id="jobs-centre-close" title="${escapeHtml(t('window.close', 'Close'))}" data-i18n-title="window.close" aria-label="${escapeHtml(t('window.close', 'Close'))}" data-i18n-aria-label="window.close"></button>
         </div>
       </div>
       <div class="jobs-body">
@@ -303,6 +303,7 @@ export function initJobsCentre() {
     btn.className = 'topbar-jobs-btn';
     btn.title = t('jobs.title', 'Jobs');
     btn.setAttribute('aria-label', t('jobs.title', 'Jobs'));
+    btn.setAttribute('data-i18n-aria-label', 'jobs.title'); // followed when the language arrives or changes
     btn.innerHTML = `<span class="topbar-jobs-icon" aria-hidden="true">⇅</span><span id="topbar-jobs-count" class="topbar-jobs-count" hidden>0</span>`;
     btn.addEventListener('click', openJobsCentre);
     pills.insertBefore(btn, pills.firstChild);

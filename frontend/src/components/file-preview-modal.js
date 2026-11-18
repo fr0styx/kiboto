@@ -198,24 +198,24 @@ export async function openFilePreviewModal(path, name, aiMeta = null, fileList =
         </div>
         <div class="quicklook-toolbar" id="quicklook-toolbar">
           <div class="quicklook-btn-group" id="quicklook-image-tools" style="display:none;">
-            <button type="button" class="quicklook-btn" id="ql-zoom-out" title="${t('preview.zoom_out', 'Zoom Out (-)')}" aria-label="${t('preview.zoom_out', 'Zoom Out (-)')}">${ICONS.zoomOut}</button>
-            <span class="quicklook-zoom-pill" id="quicklook-zoom-pill" title="${t('preview.fit', 'Fit to screen')}">${t('preview.fit', 'Fit')}</span>
-            <button type="button" class="quicklook-btn" id="ql-zoom-in" title="${t('preview.zoom_in', 'Zoom In (+)')}" aria-label="${t('preview.zoom_in', 'Zoom In (+)')}">${ICONS.zoomIn}</button>
-            <button type="button" class="quicklook-btn" id="ql-actual-size" title="${t('preview.actual_size', '100%')}" aria-label="1:1 (${t('preview.actual_size', '100%')})">1:1</button>
-            <button type="button" class="quicklook-btn" id="ql-rotate-ccw" title="${t('preview.rotate_ccw', 'Rotate 90° Left')}" aria-label="${t('preview.rotate_ccw', 'Rotate 90° Left')}">${ICONS.rotateLeft}</button>
-            <button type="button" class="quicklook-btn" id="ql-rotate-cw" title="${t('preview.rotate_cw', 'Rotate 90° Right (R)')}" aria-label="${t('preview.rotate_cw', 'Rotate 90° Right (R)')}">${ICONS.rotateRight}</button>
-            <button type="button" class="quicklook-btn" id="ql-flip-h" title="${t('preview.flip', 'Flip Horizontally')}" aria-label="${t('preview.flip', 'Flip Horizontally')}">${ICONS.flip}</button>
+            <button type="button" class="quicklook-btn" id="ql-zoom-out" title="${t('preview.zoom_out', 'Zoom Out (-)')}" data-i18n-title="preview.zoom_out" aria-label="${t('preview.zoom_out', 'Zoom Out (-)')}" data-i18n-aria-label="preview.zoom_out">${ICONS.zoomOut}</button>
+            <span class="quicklook-zoom-pill" id="quicklook-zoom-pill" title="${t('preview.fit', 'Fit to screen')}" data-i18n-title="preview.fit">${t('preview.fit', 'Fit')}</span>
+            <button type="button" class="quicklook-btn" id="ql-zoom-in" title="${t('preview.zoom_in', 'Zoom In (+)')}" data-i18n-title="preview.zoom_in" aria-label="${t('preview.zoom_in', 'Zoom In (+)')}" data-i18n-aria-label="preview.zoom_in">${ICONS.zoomIn}</button>
+            <button type="button" class="quicklook-btn" id="ql-actual-size" title="${t('preview.actual_size', '100%')}" data-i18n-title="preview.actual_size" aria-label="1:1 (${t('preview.actual_size', '100%')})">1:1</button>
+            <button type="button" class="quicklook-btn" id="ql-rotate-ccw" title="${t('preview.rotate_ccw', 'Rotate 90° Left')}" data-i18n-title="preview.rotate_ccw" aria-label="${t('preview.rotate_ccw', 'Rotate 90° Left')}" data-i18n-aria-label="preview.rotate_ccw">${ICONS.rotateLeft}</button>
+            <button type="button" class="quicklook-btn" id="ql-rotate-cw" title="${t('preview.rotate_cw', 'Rotate 90° Right (R)')}" data-i18n-title="preview.rotate_cw" aria-label="${t('preview.rotate_cw', 'Rotate 90° Right (R)')}" data-i18n-aria-label="preview.rotate_cw">${ICONS.rotateRight}</button>
+            <button type="button" class="quicklook-btn" id="ql-flip-h" title="${t('preview.flip', 'Flip Horizontally')}" data-i18n-title="preview.flip" aria-label="${t('preview.flip', 'Flip Horizontally')}" data-i18n-aria-label="preview.flip">${ICONS.flip}</button>
           </div>
           <div class="quicklook-btn-group">
-            <button type="button" class="quicklook-btn" id="ql-info-toggle" style="display:none;" title="${t('preview.info', 'Photo Details & EXIF (I)')}" aria-label="${t('preview.info', 'Photo Details & EXIF (I)')}">${ICONS.info}</button>
-            <button type="button" class="quicklook-btn" id="ql-filmstrip-toggle" style="display:none;" title="${t('preview.filmstrip', 'Toggle Filmstrip')}" aria-label="${t('preview.filmstrip', 'Toggle Filmstrip')}">${ICONS.filmstrip}</button>
+            <button type="button" class="quicklook-btn" id="ql-info-toggle" style="display:none;" title="${t('preview.info', 'Photo Details & EXIF (I)')}" data-i18n-title="preview.info" aria-label="${t('preview.info', 'Photo Details & EXIF (I)')}" data-i18n-aria-label="preview.info">${ICONS.info}</button>
+            <button type="button" class="quicklook-btn" id="ql-filmstrip-toggle" style="display:none;" title="${t('preview.filmstrip', 'Toggle Filmstrip')}" data-i18n-title="preview.filmstrip" aria-label="${t('preview.filmstrip', 'Toggle Filmstrip')}" data-i18n-aria-label="preview.filmstrip">${ICONS.filmstrip}</button>
             <button type="button" class="quicklook-btn" id="quicklook-copy-btn" title="${t('preview.copy', 'Copy image')}" aria-label="${t('preview.copy', 'Copy image')}">${ICONS.copy}</button>
-            <button type="button" class="quicklook-btn" id="ql-download-btn" title="${t('preview.download', 'Download')}" aria-label="${t('preview.download', 'Download')}">${ICONS.download}</button>
+            <button type="button" class="quicklook-btn" id="ql-download-btn" title="${t('preview.download', 'Download')}" data-i18n-title="preview.download" aria-label="${t('preview.download', 'Download')}" data-i18n-aria-label="preview.download">${ICONS.download}</button>
             <button type="button" class="quicklook-btn" id="ql-maximize-btn" title="${t('preview.maximize', 'Fullscreen (F)')}" aria-label="${t('preview.maximize', 'Fullscreen (F)')}">${ICONS.maximize}</button>
           </div>
         </div>
-        <button type="button" class="quicklook-toolbar-more" id="quicklook-toolbar-more" hidden title="${t('preview.more_tools', 'More tools')}" aria-label="${t('preview.more_tools', 'More tools')}"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
-        <button type="button" class="quicklook-close-btn" id="quicklook-close-btn" title="${t('preview.close', 'Close (Esc)')}" aria-label="${t('preview.close', 'Close (Esc)')}">${ICONS.close}</button>
+        <button type="button" class="quicklook-toolbar-more" id="quicklook-toolbar-more" hidden title="${t('preview.more_tools', 'More tools')}" data-i18n-title="preview.more_tools" aria-label="${t('preview.more_tools', 'More tools')}" data-i18n-aria-label="preview.more_tools"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
+        <button type="button" class="quicklook-close-btn" id="quicklook-close-btn" title="${t('preview.close', 'Close (Esc)')}" data-i18n-title="preview.close" aria-label="${t('preview.close', 'Close (Esc)')}" data-i18n-aria-label="preview.close">${ICONS.close}</button>
       </div>
       <div class="quicklook-body" id="quicklook-body">
         <div class="qlv-col-muted">
@@ -226,7 +226,7 @@ export async function openFilePreviewModal(path, name, aiMeta = null, fileList =
       <div class="quicklook-inspector" id="quicklook-inspector">
         <div class="quicklook-inspector-header">
           <span>ℹ️ ${escapeHtml(t('preview.info', 'Photo Details & EXIF'))}</span>
-          <button type="button" class="quicklook-close-btn" id="ql-inspector-close" style="padding:2px 6px;" aria-label="${t('preview.close', 'Close (Esc)')}">${ICONS.close}</button>
+          <button type="button" class="quicklook-close-btn" id="ql-inspector-close" style="padding:2px 6px;" aria-label="${t('preview.close', 'Close (Esc)')}" data-i18n-aria-label="preview.close">${ICONS.close}</button>
         </div>
         <div class="quicklook-inspector-content" id="quicklook-inspector-content"></div>
       </div>
@@ -705,11 +705,11 @@ function renderImagePreview(bodyEl, imgUrl, meta) {
   const showNav = _gallery.length > 1;
 
   bodyEl.innerHTML = `
-    ${showNav ? `<button type="button" class="quicklook-nav-btn quicklook-prev-btn" id="ql-nav-prev" title="${t('preview.prev', 'Previous (Left Arrow)')}" aria-label="${t('preview.prev', 'Previous (Left Arrow)')}">${ICONS.prev}</button>` : ''}
+    ${showNav ? `<button type="button" class="quicklook-nav-btn quicklook-prev-btn" id="ql-nav-prev" title="${t('preview.prev', 'Previous (Left Arrow)')}" data-i18n-title="preview.prev" aria-label="${t('preview.prev', 'Previous (Left Arrow)')}" data-i18n-aria-label="preview.prev">${ICONS.prev}</button>` : ''}
     <div class="quicklook-viewport" id="quicklook-viewport">
       <img src="${imgUrl}" class="quicklook-img" id="quicklook-img" alt="${escapeHtml(_currentName)}" draggable="false" />
     </div>
-    ${showNav ? `<button type="button" class="quicklook-nav-btn quicklook-next-btn" id="ql-nav-next" title="${t('preview.next', 'Next (Right Arrow)')}" aria-label="${t('preview.next', 'Next (Right Arrow)')}">${ICONS.next}</button>` : ''}
+    ${showNav ? `<button type="button" class="quicklook-nav-btn quicklook-next-btn" id="ql-nav-next" title="${t('preview.next', 'Next (Right Arrow)')}" data-i18n-title="preview.next" aria-label="${t('preview.next', 'Next (Right Arrow)')}" data-i18n-aria-label="preview.next">${ICONS.next}</button>` : ''}
     ${showNav ? `<div class="quicklook-filmstrip ${_isFilmstripOpen ? '' : 'collapsed'}" id="quicklook-filmstrip"></div>` : ''}
   `;
 
@@ -1248,7 +1248,7 @@ function renderVideoPlayer(container, streamUrl, meta) {
       <video class="quicklook-video-element" id="quicklook-video-player" src="${escapeHtml(streamUrl)}" playsinline preload="metadata"></video>
       
       <!-- Floating Center Big Play/Pause Button -->
-      <button type="button" class="quicklook-video-center-btn" id="ql-video-center-btn" aria-label="${escapeHtml(t('video.play', 'Play'))}">
+      <button type="button" class="quicklook-video-center-btn" id="ql-video-center-btn" aria-label="${escapeHtml(t('video.play', 'Play'))}" data-i18n-aria-label="video.play">
         <svg class="ql-icon-play" viewBox="0 0 24 24" width="34" height="34" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
       </button>
 
@@ -1298,7 +1298,7 @@ function renderVideoPlayer(container, streamUrl, meta) {
                 <svg id="ql-icon-vol-high" viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
                 <svg id="ql-icon-vol-muted" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" style="display:none;"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
               </button>
-              <input type="range" class="quicklook-video-vol-slider" id="ql-video-vol-slider" min="0" max="1" step="0.05" value="1" aria-label="${escapeHtml(t('video.mute', 'Volume'))}">
+              <input type="range" class="quicklook-video-vol-slider" id="ql-video-vol-slider" min="0" max="1" step="0.05" value="1" aria-label="${escapeHtml(t('video.mute', 'Volume'))}" data-i18n-aria-label="video.mute">
             </div>
 
             <span class="quicklook-video-time" id="ql-video-time">00:00 / 00:00</span>
@@ -1306,8 +1306,8 @@ function renderVideoPlayer(container, streamUrl, meta) {
 
           <!-- Right Controls -->
           <div class="quicklook-video-ctrl-group">
-            <button type="button" class="quicklook-vctrl-pill" id="ql-video-speed-btn" title="${escapeHtml(t('video.speed', 'Playback Speed'))}">1x</button>
-            <button type="button" class="quicklook-vctrl-btn" id="ql-video-loop-btn" title="${escapeHtml(t('video.loop', 'Loop'))}" aria-label="${escapeHtml(t('video.loop', 'Loop'))}">
+            <button type="button" class="quicklook-vctrl-pill" id="ql-video-speed-btn" title="${escapeHtml(t('video.speed', 'Playback Speed'))}" data-i18n-title="video.speed">1x</button>
+            <button type="button" class="quicklook-vctrl-btn" id="ql-video-loop-btn" title="${escapeHtml(t('video.loop', 'Loop'))}" data-i18n-title="video.loop" aria-label="${escapeHtml(t('video.loop', 'Loop'))}" data-i18n-aria-label="video.loop">
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>
             </button>
             ${

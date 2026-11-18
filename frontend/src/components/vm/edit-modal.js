@@ -155,9 +155,9 @@ export function openVmEditModal(vmId, vmObj = null) {
             <span>${escapeHtml(t('vmd.edit_title', 'Edit VM: {name}', { name: targetVm.name }))}</span>
           </div>
           <div class="os-window-controls vme-row-3">
-            <button class="win-btn min-btn" id="vm-edit-modal-min" title="${t('window.minimize', 'Minimize')}" aria-label="${t('window.minimize', 'Minimize')}"></button>
-            <button class="win-btn max-btn" id="vm-edit-modal-max" title="${t('ui.maximize', 'Maximize')}" aria-label="${t('ui.maximize', 'Maximize')}"></button>
-            <button class="win-btn close-btn" id="vm-edit-modal-close" title="${t('diagnostics.close_btn', 'Close')}" aria-label="${t('diagnostics.close_btn', 'Close')}"></button>
+            <button class="win-btn min-btn" id="vm-edit-modal-min" title="${t('window.minimize', 'Minimize')}" data-i18n-title="window.minimize" aria-label="${t('window.minimize', 'Minimize')}" data-i18n-aria-label="window.minimize"></button>
+            <button class="win-btn max-btn" id="vm-edit-modal-max" title="${t('ui.maximize', 'Maximize')}" data-i18n-title="ui.maximize" aria-label="${t('ui.maximize', 'Maximize')}" data-i18n-aria-label="ui.maximize"></button>
+            <button class="win-btn close-btn" id="vm-edit-modal-close" title="${t('diagnostics.close_btn', 'Close')}" data-i18n-title="diagnostics.close_btn" aria-label="${t('diagnostics.close_btn', 'Close')}" data-i18n-aria-label="diagnostics.close_btn"></button>
           </div>
         </div>
 
@@ -789,7 +789,7 @@ export function openVmEditModal(vmId, vmObj = null) {
         </div>
         <div class="vme-row-2">
           <span class="usb-vidpid-badge">${escapeHtml(dev.vendor_id)}:${escapeHtml(dev.product_id)}</span>
-          <button type="button" class="btn-remove-usb vme-xs-crit-box" data-idx="${idx}" title="${t('ui.remove_device', 'Remove device')}">✕</button>
+          <button type="button" class="btn-remove-usb vme-xs-crit-box" data-idx="${idx}" title="${t('ui.remove_device', 'Remove device')}" data-i18n-title="ui.remove_device">✕</button>
         </div>
       `;
         card.querySelector('.btn-remove-usb').onclick = () => {

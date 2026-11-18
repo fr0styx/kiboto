@@ -14,7 +14,7 @@ export function stepNames() {
 
 /** The step list at the top of the dialog. */
 export function stepsHtml() {
-  return `<ol class="vm-steps" aria-label="${escapeHtml(t('vmst.steps', 'Steps'))}">${stepNames()
+  return `<ol class="vm-steps" aria-label="${escapeHtml(t('vmst.steps', 'Steps'))}" data-i18n-aria-label="vmst.steps">${stepNames()
     .map(
       (name, i) =>
         `<li data-vm-step-label="${i + 1}"><span class="vm-step-n" aria-hidden="true">${i + 1}</span> ${escapeHtml(name)}</li>`

@@ -23,8 +23,10 @@ import {
   hrefFor as hrefIn,
   iconMarkup,
   iconOnlyLabel,
+  iconOnlyLabelKey,
   selectorOf,
 } from './icons-rules.js';
+import { t } from './i18n.js';
 
 export const SPRITE_URL = '/zi-sprite.svg';
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -83,8 +85,10 @@ function nameIconOnly(parent, iconName) {
   const host = parent.closest('button, a, [role="button"]');
   if (!host || host.getAttribute('aria-label') || host.getAttribute('aria-labelledby')) return;
   if ((host.textContent || '').trim()) return;
+  const key = iconOnlyLabelKey(host.getAttribute('title'), iconName);
   const label = iconOnlyLabel(host.getAttribute('title'), iconName);
-  host.setAttribute('aria-label', label);
+  host.setAttribute('aria-label', key ? t(key, label) : label);
+  if (key) host.setAttribute('data-i18n-aria-label', key); // followed when the language arrives or changes
 }
 
 function convertTextNode(node) {

@@ -467,7 +467,7 @@ export function openAddDesktopShortcutModal() {
               <div class="asd-sub">${escapeHtml(t('ds.sub', 'Put the things you open most on the desktop'))}</div>
             </div>
           </div>
-          <button class="win-btn close-btn" id="btn-close-add-shortcut" title="${t('diagnostics.close_btn', 'Close')}" aria-label="${t('diagnostics.close_btn', 'Close')}" style="width:16px; height:16px; border-radius:50%; background:#ff5f56; border:none; cursor:pointer;"></button>
+          <button class="win-btn close-btn" id="btn-close-add-shortcut" title="${t('diagnostics.close_btn', 'Close')}" data-i18n-title="diagnostics.close_btn" aria-label="${t('diagnostics.close_btn', 'Close')}" data-i18n-aria-label="diagnostics.close_btn" style="width:16px; height:16px; border-radius:50%; background:#ff5f56; border:none; cursor:pointer;"></button>
         </div>
 
         <!-- Tab Switcher -->

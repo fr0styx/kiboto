@@ -18,15 +18,15 @@ export function initSnapAssistFlyout() {
     flyout.innerHTML = `
       <div class="snap-layout-title">${t('snap.layouts', 'Window layouts')}</div>
       <div class="snap-templates-grid">
-        <div class="snap-card" title="${t('ui.split_screen_1_2', 'Split Screen (1/2)')}">
-          <button class="snap-slot" data-snap="left" aria-label="${t('ui.snap_left_half', 'Snap Left Half')}"></button>
-          <button class="snap-slot" data-snap="right" aria-label="${t('ui.snap_right_half', 'Snap Right Half')}"></button>
+        <div class="snap-card" title="${t('ui.split_screen_1_2', 'Split Screen (1/2)')}" data-i18n-title="ui.split_screen_1_2">
+          <button class="snap-slot" data-snap="left" aria-label="${t('ui.snap_left_half', 'Snap Left Half')}" data-i18n-aria-label="ui.snap_left_half"></button>
+          <button class="snap-slot" data-snap="right" aria-label="${t('ui.snap_right_half', 'Snap Right Half')}" data-i18n-aria-label="ui.snap_right_half"></button>
         </div>
-        <div class="snap-card snap-card-quad" title="${t('ui.quarter_grid_1_4', 'Quarter Grid (1/4)')}">
-          <button class="snap-slot" data-snap="top-left" aria-label="${t('ui.snap_top_left', 'Snap Top Left')}"></button>
-          <button class="snap-slot" data-snap="top-right" aria-label="${t('ui.snap_top_right', 'Snap Top Right')}"></button>
-          <button class="snap-slot" data-snap="bottom-left" aria-label="${t('ui.snap_bottom_left', 'Snap Bottom Left')}"></button>
-          <button class="snap-slot" data-snap="bottom-right" aria-label="${t('ui.snap_bottom_right', 'Snap Bottom Right')}"></button>
+        <div class="snap-card snap-card-quad" title="${t('ui.quarter_grid_1_4', 'Quarter Grid (1/4)')}" data-i18n-title="ui.quarter_grid_1_4">
+          <button class="snap-slot" data-snap="top-left" aria-label="${t('ui.snap_top_left', 'Snap Top Left')}" data-i18n-aria-label="ui.snap_top_left"></button>
+          <button class="snap-slot" data-snap="top-right" aria-label="${t('ui.snap_top_right', 'Snap Top Right')}" data-i18n-aria-label="ui.snap_top_right"></button>
+          <button class="snap-slot" data-snap="bottom-left" aria-label="${t('ui.snap_bottom_left', 'Snap Bottom Left')}" data-i18n-aria-label="ui.snap_bottom_left"></button>
+          <button class="snap-slot" data-snap="bottom-right" aria-label="${t('ui.snap_bottom_right', 'Snap Bottom Right')}" data-i18n-aria-label="ui.snap_bottom_right"></button>
         </div>
       </div>
     `;

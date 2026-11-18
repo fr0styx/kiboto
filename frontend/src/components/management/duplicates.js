@@ -60,7 +60,7 @@ function dupWindow() {
     <div class="smart-modal-header">
       <span class="smart-modal-title" id="ai-duplicates-title"><svg class="ic" aria-hidden="true"><use href="#i-files"/></svg> ${t('dup.title', 'Duplicate files')}</span>
       <div class="os-window-controls">
-        <button type="button" class="win-btn close-btn" data-close title="${t('diagnostics.close_btn', 'Close')}" aria-label="${t('diagnostics.close_btn', 'Close')}"></button>
+        <button type="button" class="win-btn close-btn" data-close title="${t('diagnostics.close_btn', 'Close')}" data-i18n-title="diagnostics.close_btn" aria-label="${t('diagnostics.close_btn', 'Close')}" data-i18n-aria-label="diagnostics.close_btn"></button>
       </div>
     </div>
     <div class="smart-modal-body dup-body"></div>

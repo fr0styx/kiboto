@@ -52,10 +52,10 @@ export function schedulesHtml(schedules, shares, convertible = []) {
         .map(([k, v]) => `<option value="${k}"${k === 'daily' ? ' selected' : ''}>${escapeHtml(v)}</option>`)
         .join('')}</select></label>
       <label>${escapeHtml(t('snap.keep', 'Keep'))}<input name="keep" type="number" min="1" max="1000" value="14"></label>
-      <label title="${escapeHtml(t('snap.keep_daily_help', 'Besides the ones above, one snapshot a day is kept for this many days. 0 keeps none.'))}">${escapeHtml(
+      <label title="${escapeHtml(t('snap.keep_daily_help', 'Besides the ones above, one snapshot a day is kept for this many days. 0 keeps none.'))}" data-i18n-title="snap.keep_daily_help">${escapeHtml(
         t('snap.keep_daily', 'One a day for days')
       )}<input name="keep_daily" type="number" min="0" max="3650" value="0"></label>
-      <label title="${escapeHtml(t('snap.lock_help', 'Days each snapshot cannot be deleted, even by an administrator; protects against ransomware.'))}">${escapeHtml(
+      <label title="${escapeHtml(t('snap.lock_help', 'Days each snapshot cannot be deleted, even by an administrator; protects against ransomware.'))}" data-i18n-title="snap.lock_help">${escapeHtml(
         t('snap.lock', 'Lock for days')
       )}<input name="immutable_days" type="number" min="0" max="3650" value="0"></label>
       <button type="submit" class="btn-pill-toggle is-primary">${escapeHtml(t('snap.add_schedule', 'Snapshot this share'))}</button>

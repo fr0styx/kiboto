@@ -42,7 +42,7 @@ export async function openPhotoImport(path) {
       <div class="smart-modal-header">
         <span class="smart-modal-title" id="phi-title"><span aria-hidden="true">🏠</span> ${escapeHtml(t('phi.title', 'Bring photos home'))}</span>
         <div class="os-window-controls">
-          <button type="button" id="phi-close" class="win-btn close-btn" title="${escapeHtml(t('diagnostics.close_btn', 'Close'))}" aria-label="${escapeHtml(t('diagnostics.close_btn', 'Close'))}"></button>
+          <button type="button" id="phi-close" class="win-btn close-btn" title="${escapeHtml(t('diagnostics.close_btn', 'Close'))}" data-i18n-title="diagnostics.close_btn" aria-label="${escapeHtml(t('diagnostics.close_btn', 'Close'))}" data-i18n-aria-label="diagnostics.close_btn"></button>
         </div>
       </div>
       <div class="smart-modal-body phi-body">

@@ -3297,7 +3297,7 @@ export function renderDayAgenda(dateKey) {
                 ${isSynced ? `<span class="cag-badge-warn">${escapeHtml(item.feed_name || 'Synced')}</span>` : `<span class="cag-badge">${escapeHtml(category)}</span>`}
                 ${
                   !isSynced
-                    ? `<button type="button" class="btn-cal-delete-note btn-icon cag-del" title="${t('ui.delete_note', 'Delete Note')}">🗑️</button>`
+                    ? `<button type="button" class="btn-cal-delete-note btn-icon cag-del" title="${t('ui.delete_note', 'Delete Note')}" data-i18n-title="ui.delete_note">🗑️</button>`
                     : ''
                 }
               </div>
@@ -3343,7 +3343,7 @@ export function renderFeedsList() {
             <div class="cfl-sub">${escapeHtml(feedMeta(feed))}</div>
           </div>
         </div>
-        <button type="button" class="btn-cal-delete-feed btn-icon cfl-del" title="${t('ui.delete_feed', 'Delete Feed')}">🗑️</button>
+        <button type="button" class="btn-cal-delete-feed btn-icon cfl-del" title="${t('ui.delete_feed', 'Delete Feed')}" data-i18n-title="ui.delete_feed">🗑️</button>
       </div>
     `;
   });

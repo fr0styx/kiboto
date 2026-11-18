@@ -26,7 +26,7 @@ function shell(body) {
       <div class="smart-modal-header">
         <span class="smart-modal-title" id="ic-title"><span aria-hidden="true">☁️</span> ${escapeHtml(t('ic.title', 'Download from iCloud Photos'))}</span>
         <div class="os-window-controls">
-          <button type="button" id="ic-close" class="win-btn close-btn" title="${escapeHtml(t('diagnostics.close_btn', 'Close'))}" aria-label="${escapeHtml(t('diagnostics.close_btn', 'Close'))}"></button>
+          <button type="button" id="ic-close" class="win-btn close-btn" title="${escapeHtml(t('diagnostics.close_btn', 'Close'))}" data-i18n-title="diagnostics.close_btn" aria-label="${escapeHtml(t('diagnostics.close_btn', 'Close'))}" data-i18n-aria-label="diagnostics.close_btn"></button>
         </div>
       </div>
       <div class="smart-modal-body phi-body" id="ic-body"></div>

@@ -37,9 +37,9 @@ export function initStackModal() {
             <span id="stack-header-status" class="ci-state-pill" style="display:none;"></span>
           </div>
           <div class="os-window-controls stk-row-2">
-            <button class="win-btn min-btn" id="stack-min-btn" title="${t('window.minimize', 'Minimize')}" aria-label="${t('window.minimize', 'Minimize')}"></button>
-            <button class="win-btn max-btn" id="stack-max-btn" title="${t('ui.maximize', 'Maximize')}" aria-label="${t('ui.maximize', 'Maximize')}"></button>
-            <button class="win-btn close-btn" id="stack-close-btn" title="${t('diagnostics.close_btn', 'Close')}" aria-label="${t('diagnostics.close_btn', 'Close')}"></button>
+            <button class="win-btn min-btn" id="stack-min-btn" title="${t('window.minimize', 'Minimize')}" data-i18n-title="window.minimize" aria-label="${t('window.minimize', 'Minimize')}" data-i18n-aria-label="window.minimize"></button>
+            <button class="win-btn max-btn" id="stack-max-btn" title="${t('ui.maximize', 'Maximize')}" data-i18n-title="ui.maximize" aria-label="${t('ui.maximize', 'Maximize')}" data-i18n-aria-label="ui.maximize"></button>
+            <button class="win-btn close-btn" id="stack-close-btn" title="${t('diagnostics.close_btn', 'Close')}" data-i18n-title="diagnostics.close_btn" aria-label="${t('diagnostics.close_btn', 'Close')}" data-i18n-aria-label="diagnostics.close_btn"></button>
           </div>
         </div>
 
@@ -643,7 +643,7 @@ export async function openStackPickerModal(stacksInput = null) {
             <span id="stack-picker-badge" class="ci-badge" style="font-size:var(--kb-fs-xs); padding:2px 7px; border-radius:4px; font-weight:700; background:rgba(51,205,184,0.15); color:var(--lt-ink-brand, var(--accent-cyan-hi, #4fd8c4)); border:1px solid rgba(79,216,196,0.3);">${t('stk.count', '{count, plural, one {# Stack} other {# Stacks}}', { count: 0 })}</span>
           </div>
           <div class="os-window-controls">
-            <button class="win-btn close-btn" id="stack-picker-close-btn" title="${t('diagnostics.close_btn', 'Close')}" aria-label="${t('diagnostics.close_btn', 'Close')}"></button>
+            <button class="win-btn close-btn" id="stack-picker-close-btn" title="${t('diagnostics.close_btn', 'Close')}" data-i18n-title="diagnostics.close_btn" aria-label="${t('diagnostics.close_btn', 'Close')}" data-i18n-aria-label="diagnostics.close_btn"></button>
           </div>
         </div>
 

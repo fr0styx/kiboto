@@ -26,7 +26,7 @@ export function funnelStepsHtml(f, waiting = '') {
   if (f.headscale) {
     return `<div class="funnel-steps nsv-xs-muted">${escapeHtml(t('funnel.headscale', 'Funnel is a Tailscale service: with your own Headscale server, nothing can be put on the internet this way.'))}</div>`;
   }
-  return `<div class="funnel-steps" role="group" aria-label="${escapeHtml(t('funnel.title', 'Before Funnel works'))}">
+  return `<div class="funnel-steps" role="group" aria-label="${escapeHtml(t('funnel.title', 'Before Funnel works'))}" data-i18n-aria-label="funnel.title">
     <div class="nsv-xs-muted">${escapeHtml(t('funnel.owner', "Two switches in Tailscale that only the tailnet's owner can turn on, one click each. This list ticks itself."))}</div>
     <ol class="funnel-list">
       ${step(f.https, t('funnel.step_https', 'Turn on HTTPS certificates'), f.dns_url, t('funnel.step_https_help', 'Tailscale admin → DNS → Enable HTTPS'))}

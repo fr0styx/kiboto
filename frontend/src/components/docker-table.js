@@ -149,9 +149,9 @@ export function buildContainerRowInner(c, currentHost, updateInfo = null) {
   const updateBtn = hasUpdate
     ? `<button class="btn-container-act btn-docker-update-single" data-id="${escapeHtml(c.id)}" data-name="${escapeHtml(c.name)}" data-action="update-single" title="${escapeHtml(t('dkt.update', 'Update {name} to latest image', { name: c.name }))}">⬆️</button>`
     : '';
-  const backupBtn = `<button class="btn-container-act btn-docker-backup" data-id="${escapeHtml(c.id)}" data-name="${escapeHtml(c.name)}" data-action="backup" title="${t('ui.backup_app_data_config', 'Backup App Data & Config')}">💾</button>`;
+  const backupBtn = `<button class="btn-container-act btn-docker-backup" data-id="${escapeHtml(c.id)}" data-name="${escapeHtml(c.name)}" data-action="backup" title="${t('ui.backup_app_data_config', 'Backup App Data & Config')}" data-i18n-title="ui.backup_app_data_config">💾</button>`;
   const deleteBtn = `<button class="btn-container-act btn-docker-delete" data-id="${escapeHtml(c.id)}" data-name="${escapeHtml(c.name)}" data-image="${escapeHtml(c.image || '')}" data-action="delete" title="${escapeHtml(t('dkt.delete', 'Destroy / Delete {name}', { name: c.name }))}">🗑️</button>`;
-  const moreBtn = `<button class="btn-container-act btn-docker-more-sheet" data-id="${escapeHtml(c.id)}" data-name="${escapeHtml(c.name)}" data-action="more-sheet" title="${t('ui.more_actions', 'More Actions')}">···</button>`;
+  const moreBtn = `<button class="btn-container-act btn-docker-more-sheet" data-id="${escapeHtml(c.id)}" data-name="${escapeHtml(c.name)}" data-action="more-sheet" title="${t('ui.more_actions', 'More Actions')}" data-i18n-title="ui.more_actions">···</button>`;
   // a paused app can be resumed, and an app caught in a restart loop can be stopped: both had
   // only "Start", which does nothing for them
   const resumeBtn = canResume(c)

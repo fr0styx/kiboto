@@ -93,7 +93,7 @@ export function checklistHtml(data) {
   const rows = (data.items || []).map((item) => {
     const [tk, tf, dk, df] = ITEMS[item.id] || [item.id, item.id, '', ''];
     const action = item.done
-      ? `<span class="gs-done" role="img" aria-label="${escapeHtml(t('gs.done', 'Done'))}">✓</span>`
+      ? `<span class="gs-done" role="img" aria-label="${escapeHtml(t('gs.done', 'Done'))}" data-i18n-aria-label="gs.done">✓</span>`
       : `<button type="button" class="btn-pill-toggle is-primary is-small gs-open" data-gs-open="${escapeHtml(item.open)}">${escapeHtml(t('gs.open', 'Open'))}</button>`;
     return `<li class="gs-item${item.done ? ' is-done' : ''}">
       <div class="gs-text"><span class="gs-title">${escapeHtml(t(tk, tf, { host: hostName(item.host) }))}</span><span class="gs-desc">${escapeHtml(t(dk, df, { host: hostName(item.host) }))}</span></div>

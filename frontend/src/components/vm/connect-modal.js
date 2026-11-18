@@ -100,7 +100,7 @@ export function openVmConnectModal(vmId, vmObj = null) {
           <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
           <span>${escapeHtml(t('vmm.connect_to', 'Connect to {name}', { name }))}</span>
         </div>
-        <button id="vm-connect-modal-close" class="modal-close-btn" style="background: none; border: none; color: var(--muted); cursor: pointer; font-size: 16px; padding: 4px 8px; border-radius: 4px;" title="${t('diagnostics.close_btn', 'Close')}" aria-label="${t('diagnostics.close_btn', 'Close')}">✕</button>
+        <button id="vm-connect-modal-close" class="modal-close-btn" style="background: none; border: none; color: var(--muted); cursor: pointer; font-size: 16px; padding: 4px 8px; border-radius: 4px;" title="${t('diagnostics.close_btn', 'Close')}" data-i18n-title="diagnostics.close_btn" aria-label="${t('diagnostics.close_btn', 'Close')}" data-i18n-aria-label="diagnostics.close_btn">✕</button>
       </div>
 
       <div class="smart-modal-body vmk-col-2">
@@ -148,7 +148,7 @@ export function openVmConnectModal(vmId, vmObj = null) {
                 <div class="vmk-xs-muted">${t('vmc.ssh_desc', 'A terminal command for OpenSSH or PuTTY')}</div>
               </div>
             </div>
-            <button class="btn-console-act btn-connect-copy-ssh" ${ip ? '' : `disabled title="${escapeHtml(t('vm.why_no_ip', 'Waiting for the VM to get a network address'))}"`} style="padding: 4px 10px; font-size: var(--kb-fs-xs); ${ip ? '' : 'opacity: 0.5; cursor: not-allowed;'}">
+            <button class="btn-console-act btn-connect-copy-ssh" ${ip ? '' : `disabled title="${escapeHtml(t('vm.why_no_ip', 'Waiting for the VM to get a network address'))}" data-i18n-title="vm.why_no_ip"`} style="padding: 4px 10px; font-size: var(--kb-fs-xs); ${ip ? '' : 'opacity: 0.5; cursor: not-allowed;'}">
               ${ico('📋')} ${t('vm.copy_ssh', 'Copy SSH Command')}
             </button>
           </div>
@@ -168,10 +168,10 @@ export function openVmConnectModal(vmId, vmObj = null) {
               </div>
             </div>
             <div class="vmk-row-4">
-              <button class="btn-console-act btn-connect-copy-rdp" ${ip ? '' : `disabled title="${escapeHtml(t('vm.why_no_ip', 'Waiting for the VM to get a network address'))}"`} style="padding: 4px 10px; font-size: var(--kb-fs-xs); ${ip ? '' : 'opacity: 0.5; cursor: not-allowed;'}">
+              <button class="btn-console-act btn-connect-copy-rdp" ${ip ? '' : `disabled title="${escapeHtml(t('vm.why_no_ip', 'Waiting for the VM to get a network address'))}" data-i18n-title="vm.why_no_ip"`} style="padding: 4px 10px; font-size: var(--kb-fs-xs); ${ip ? '' : 'opacity: 0.5; cursor: not-allowed;'}">
                 ${ico('📋')} ${t('vmc.copy_rdp', 'Copy RDP address')}
               </button>
-              <button class="btn-console-act btn-connect-dl-rdp" ${ip ? '' : `disabled title="${escapeHtml(t('vm.why_no_ip', 'Waiting for the VM to get a network address'))}"`} style="padding: 4px 10px; font-size: var(--kb-fs-xs); ${ip ? '' : 'opacity: 0.5; cursor: not-allowed;'}">
+              <button class="btn-console-act btn-connect-dl-rdp" ${ip ? '' : `disabled title="${escapeHtml(t('vm.why_no_ip', 'Waiting for the VM to get a network address'))}" data-i18n-title="vm.why_no_ip"`} style="padding: 4px 10px; font-size: var(--kb-fs-xs); ${ip ? '' : 'opacity: 0.5; cursor: not-allowed;'}">
                 ${ico('⬇')} ${t('vmc.dl_rdp', '.rdp file')}
               </button>
             </div>
@@ -334,7 +334,7 @@ export function openKvmDiagnosticsModal(kvm = null) {
           <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
           <span>${t('vmc.kvm_title', 'Virtualization checks (KVM)')}</span>
         </div>
-        <button id="kvm-diag-close" class="modal-close-btn" title="${t('diagnostics.close_btn', 'Close')}" aria-label="${t('diagnostics.close_btn', 'Close')}" style="background: none; border: none; color: var(--muted); cursor: pointer; font-size: 16px; padding: 4px 8px;">✕</button>
+        <button id="kvm-diag-close" class="modal-close-btn" title="${t('diagnostics.close_btn', 'Close')}" data-i18n-title="diagnostics.close_btn" aria-label="${t('diagnostics.close_btn', 'Close')}" data-i18n-aria-label="diagnostics.close_btn" style="background: none; border: none; color: var(--muted); cursor: pointer; font-size: 16px; padding: 4px 8px;">✕</button>
       </div>
 
       <div class="smart-modal-body vmk-col-5">

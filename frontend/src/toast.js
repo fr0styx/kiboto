@@ -58,7 +58,7 @@ export function showActionToast(msg, actionText, onAction, durationMs = 10000) {
       <div class="tst-msg">${escapeHtml(msg)}</div>
     </div>
     <button class="top-toast-action-btn tst-act"${UNDO_RE.test(actionText) ? ' aria-keyshortcuts="Control+Z Meta+Z"' : ''}>${escapeHtml(actionText)}</button>
-    <button class="top-toast-close tst-close" title="${escapeHtml(t('toast.dismiss', 'Dismiss'))}" aria-label="${escapeHtml(t('toast.dismiss', 'Dismiss'))}">&times;</button>
+    <button class="top-toast-close tst-close" title="${escapeHtml(t('toast.dismiss', 'Dismiss'))}" data-i18n-title="toast.dismiss" aria-label="${escapeHtml(t('toast.dismiss', 'Dismiss'))}" data-i18n-aria-label="toast.dismiss">&times;</button>
   `;
 
   if (UNDO_RE.test(actionText)) toast.dataset.undo = '1';
@@ -218,7 +218,7 @@ function _showTopNotification(msg, type = 'error') {
       <div class="tst-msg">${escapeHtml(msg)}</div>
       ${details ? `<details class="top-toast-details"><summary>${escapeHtml(t('toast.details', 'Details'))}</summary><div class="top-toast-details-text">${escapeHtml(details)}</div></details>` : ''}
     </div>
-    <button class="top-toast-close tst-close" title="${escapeHtml(t('toast.dismiss', 'Dismiss'))}" aria-label="${escapeHtml(t('toast.dismiss', 'Dismiss'))}">&times;</button>
+    <button class="top-toast-close tst-close" title="${escapeHtml(t('toast.dismiss', 'Dismiss'))}" data-i18n-title="toast.dismiss" aria-label="${escapeHtml(t('toast.dismiss', 'Dismiss'))}" data-i18n-aria-label="toast.dismiss">&times;</button>
   `;
 
   container.appendChild(toast);
@@ -356,12 +356,12 @@ function _showTopConfirm(title, msg, onConfirm, onCancel, options = {}) {
         <div class="cfd-title" id="confirm-toast-title">
           ${t('toast.confirm_title', 'Please confirm')}
         </div>
-        <button type="button" id="confirm-toast-close" class="win-btn close-btn" title="${t('jobs.cancel', 'Cancel')}" aria-label="${t('diagnostics.close_btn', 'Close')}"></button>
+        <button type="button" id="confirm-toast-close" class="win-btn close-btn" title="${t('jobs.cancel', 'Cancel')}" data-i18n-title="jobs.cancel" aria-label="${t('diagnostics.close_btn', 'Close')}" data-i18n-aria-label="diagnostics.close_btn"></button>
       </div>
       <div class="cfd-body">
         <div id="confirm-toast-msg" class="cfd-msg"></div>
         <div class="cfd-actions">
-          <button id="confirm-toast-eject" class="btn-pill-toggle is-danger is-small" style="display: none; margin-right: auto;" title="${t('ui.safely_unmount_and_eject_card', 'Safely unmount and eject card')}">⏏ ${t('toast.eject', 'Eject')}</button>
+          <button id="confirm-toast-eject" class="btn-pill-toggle is-danger is-small" style="display: none; margin-right: auto;" title="${t('ui.safely_unmount_and_eject_card', 'Safely unmount and eject card')}" data-i18n-title="ui.safely_unmount_and_eject_card">⏏ ${t('toast.eject', 'Eject')}</button>
           <button id="confirm-toast-cancel" class="btn-pill-toggle is-small">${t('common.cancel', 'Cancel')}</button>
           <button id="confirm-toast-ok" class="cfd-ok">${t('toast.confirm', 'Confirm')}</button>
         </div>
@@ -625,7 +625,7 @@ export function showPromptToast(title, msg, defaultVal, onConfirm, onCancel = nu
       <div class="pmt-title" id="confirm-toast-title">
         <span>${icon}</span> ${escapeHtml(title || 'Rename')}
       </div>
-      <button type="button" id="confirm-toast-close" class="win-btn close-btn" title="${t('jobs.cancel', 'Cancel')}" aria-label="${t('diagnostics.close_btn', 'Close')}"></button>
+      <button type="button" id="confirm-toast-close" class="win-btn close-btn" title="${t('jobs.cancel', 'Cancel')}" data-i18n-title="jobs.cancel" aria-label="${t('diagnostics.close_btn', 'Close')}" data-i18n-aria-label="diagnostics.close_btn"></button>
     </div>
     <div class="cfd-body">
       <div class="pmt-msg">${safePromptMsg}</div>

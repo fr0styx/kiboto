@@ -82,6 +82,38 @@ export function iconMarkup(name, spriteUrl, extraClass = '') {
   return `<svg class="zi${extraClass ? ` ${extraClass}` : ''}" data-zi="${name}" aria-hidden="true" focusable="false"><use href="${hrefFor(name, spriteUrl)}"></use></svg>`;
 }
 
+// Their text keys: the page shows the name in the reader's language and follows a change (sweep, 18 Nov)
+export const ICON_LABEL_KEYS = {
+  'trash-2': 'icon.delete',
+  x: 'icon.close',
+  'circle-x': 'icon.close',
+  pencil: 'icon.edit',
+  'refresh-cw': 'icon.refresh',
+  'clipboard-list': 'icon.copy',
+  search: 'icon.search',
+  settings: 'icon.settings',
+  eye: 'icon.show',
+  'eye-off': 'icon.hide',
+  download: 'icon.download',
+  upload: 'icon.upload',
+  plus: 'icon.add',
+  check: 'icon.done',
+  play: 'icon.start',
+  pause: 'icon.pause',
+  square: 'icon.stop',
+  'arrow-right': 'icon.open',
+  save: 'icon.save',
+  link: 'icon.link',
+  maximize: 'icon.full_screen',
+  'folder-open': 'icon.open_folder',
+  'corner-left-up': 'icon.up_level',
+};
+
+/** The text key of an icon-only button's name, when it is one of the known ones (not its own title). */
+export function iconOnlyLabelKey(title, iconName) {
+  return title ? '' : ICON_LABEL_KEYS[iconName] || '';
+}
+
 /** The name an icon-only button gets: its title, a known label, or the icon's name. */
 export function iconOnlyLabel(title, iconName) {
   return title || ICON_LABELS[iconName] || iconName.replace(/-/g, ' ');

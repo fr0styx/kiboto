@@ -71,7 +71,7 @@ export function modelChoiceHtml(bench, cfg) {
     ? `<p class="kib-note" role="status">${escapeHtml(t('kibm.testing', 'Testing the speed: {done} of {total, plural, one {# model} other {# models}}…', { done: bench.job.done || 0, total: bench.job.total || 0 }))}</p>`
     : `<button type="button" class="btn-pill-toggle is-small" data-kibm-test>${escapeHtml(tested ? t('kibm.retest', 'Test speed again') : t('kibm.test', 'Test speed'))}</button>`;
   return `<h4 class="kib-h">${escapeHtml(t('kibm.title', 'Kib answers with'))}</h4>
-    <div class="kibm-list" role="radiogroup" aria-label="${escapeHtml(t('kibm.title', 'Kib answers with'))}">${rows}</div>${manual}${test}`;
+    <div class="kibm-list" role="radiogroup" aria-label="${escapeHtml(t('kibm.title', 'Kib answers with'))}" data-i18n-aria-label="kibm.title">${rows}</div>${manual}${test}`;
 }
 
 /**

@@ -243,8 +243,8 @@ export function diskTile(d) {
     `<span class="dn">${escapeHtml(displayName)}</span>` +
     `<div class="disk-indicators">` +
     (isStandby
-      ? `<span class="standby-zzz" title="${t('dash.disk_asleep', 'Asleep (spun down)')}">zZz</span>`
-      : `<span class="io-dot" title="${t('dash.disk_busy', 'Reading or writing')}"></span>`) +
+      ? `<span class="standby-zzz" title="${t('dash.disk_asleep', 'Asleep (spun down)')}" data-i18n-title="dash.disk_asleep">zZz</span>`
+      : `<span class="io-dot" title="${t('dash.disk_busy', 'Reading or writing')}" data-i18n-title="dash.disk_busy"></span>`) +
     `<span class="hdot ${'dot-' + lvl}"></span>` +
     `</div></div>` +
     tempHtml +
@@ -357,8 +357,8 @@ export function renderDisks(disks) {
       if (indEl) {
         indEl.innerHTML =
           (isStandby
-            ? `<span class="standby-zzz" title="${t('dash.disk_asleep', 'Asleep (spun down)')}">zZz</span>`
-            : `<span class="io-dot" title="${t('dash.disk_busy', 'Reading or writing')}"></span>`) +
+            ? `<span class="standby-zzz" title="${t('dash.disk_asleep', 'Asleep (spun down)')}" data-i18n-title="dash.disk_asleep">zZz</span>`
+            : `<span class="io-dot" title="${t('dash.disk_busy', 'Reading or writing')}" data-i18n-title="dash.disk_busy"></span>`) +
           `<span class="hdot dot-${lvl}"></span>`;
       }
 

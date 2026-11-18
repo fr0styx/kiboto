@@ -105,7 +105,7 @@ function treemapSvg(result, prefix) {
         : ` data-space-open="${escapeHtml(item.path)}" role="button" tabindex="0"`;
     return `<g class="space-cell${drill ? ' is-open' : ''}"${drill}><rect x="${r1(x)}" y="${r1(y)}" width="${r1(Math.max(0, w - 2))}" height="${r1(Math.max(0, h - 2))}" rx="3" class="space-cell-rect space-tone-${i % 6}"><title>${escapeHtml(label)}</title></rect>${text}</g>`;
   });
-  return `<svg class="space-treemap" viewBox="0 0 ${W} ${H}" role="img" aria-label="${escapeHtml(t('space.folders', 'Biggest folders'))}">${rects.join('')}</svg>`;
+  return `<svg class="space-treemap" viewBox="0 0 ${W} ${H}" role="img" aria-label="${escapeHtml(t('space.folders', 'Biggest folders'))}" data-i18n-aria-label="space.folders">${rects.join('')}</svg>`;
 }
 
 function kindsSvg(result) {
@@ -162,7 +162,7 @@ export async function openStorageAnalyzer(share, root = '') {
   backdrop.className = 'smart-modal-backdrop open';
   backdrop.innerHTML = `<div class="smart-modal-window space-window" role="dialog" aria-modal="true" aria-labelledby="space-title">
       <div class="smart-modal-header"><span class="smart-modal-title" id="space-title">${escapeHtml(t('space.title', 'Space in {share}', { share }))}</span>
-        <div class="os-window-controls"><button type="button" class="win-btn close-btn" data-space-close aria-label="${escapeHtml(t('diagnostics.close_btn', 'Close'))}"></button></div></div>
+        <div class="os-window-controls"><button type="button" class="win-btn close-btn" data-space-close aria-label="${escapeHtml(t('diagnostics.close_btn', 'Close'))}" data-i18n-aria-label="diagnostics.close_btn"></button></div></div>
       <div class="smart-modal-body" data-space-body><p class="immich-note">…</p></div></div>`;
   document.body.appendChild(backdrop);
   const body = backdrop.querySelector('[data-space-body]');

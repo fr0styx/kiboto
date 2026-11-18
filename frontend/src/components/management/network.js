@@ -121,8 +121,8 @@ export async function fetchAndRenderReplication() {
             <td>${j.retention_count || 14} snaps</td>
             <td><span class="mgmt-app-pill ${j.last_status === 'error' ? 'text-crit' : j.last_status === 'success' ? 'text-emerald' : 'text-muted'}" title="${escapeHtml(j.last_error || '')}">${escapeHtml(j.last_status || 'idle')}</span></td>
             <td class="nw-x-2">
-              <button class="btn-pill-toggle btn-run-repl is-small nw-x-3" data-id="${escapeHtml(j.id)}" title="${t('ui.execute_replication_now', 'Execute Replication Now')}">${ico('▶')} ${t('ci.run', 'Run')}</button>
-              <button class="btn-pill-toggle btn-del-repl is-danger is-small" data-id="${escapeHtml(j.id)}" title="${t('ui.delete_pipeline', 'Delete Pipeline')}">🗑️</button>
+              <button class="btn-pill-toggle btn-run-repl is-small nw-x-3" data-id="${escapeHtml(j.id)}" title="${t('ui.execute_replication_now', 'Execute Replication Now')}" data-i18n-title="ui.execute_replication_now">${ico('▶')} ${t('ci.run', 'Run')}</button>
+              <button class="btn-pill-toggle btn-del-repl is-danger is-small" data-id="${escapeHtml(j.id)}" title="${t('ui.delete_pipeline', 'Delete Pipeline')}" data-i18n-title="ui.delete_pipeline">🗑️</button>
             </td>
           </tr>
         `;
@@ -595,7 +595,7 @@ async function loadNetworkTopology() {
                 <div>↓ ${rxFmt} / ↑ ${txFmt}</div>
               </td>
               <td class="nw-x-2">
-                <button class="btn-pill-toggle btn-delete-vlan is-danger is-small" data-net-edit="vlan" data-vlan="${escapeHtml(v.name)}" title="${t('ui.delete_vlan', 'Delete VLAN')}">🗑</button>
+                <button class="btn-pill-toggle btn-delete-vlan is-danger is-small" data-net-edit="vlan" data-vlan="${escapeHtml(v.name)}" title="${t('ui.delete_vlan', 'Delete VLAN')}" data-i18n-title="ui.delete_vlan">🗑</button>
               </td>
             </tr>
           `;
@@ -627,7 +627,7 @@ async function loadNetworkTopology() {
                   <svg class="ic nw-size"><use href="#i-chip"/></svg>
                   ${escapeHtml(net.name)}
                   <span class="network-docker-driver">${escapeHtml(net.driver)}</span>
-                  ${net.is_custom ? `<button class="net-docker-delete-btn" data-net-id="${escapeHtml(net.id)}" data-net-name="${escapeHtml(net.name)}" title="${t('ui.delete_network', 'Delete Network')}">🗑</button>` : ''}
+                  ${net.is_custom ? `<button class="net-docker-delete-btn" data-net-id="${escapeHtml(net.id)}" data-net-name="${escapeHtml(net.name)}" title="${t('ui.delete_network', 'Delete Network')}" data-i18n-title="ui.delete_network">🗑</button>` : ''}
                 </div>
                 <div class="network-docker-cidr">
                   ${net.subnet ? `${t('net.subnet', 'Subnet:')} <strong>${escapeHtml(net.subnet)}</strong>` : ''}

@@ -49,9 +49,9 @@ export function ensureKibWindow() {
       <div class="os-window-header">
         <div class="os-window-title"><svg class="ic" style="width:14px;height:14px" aria-hidden="true"><use href="#i-kib"/></svg><span id="kib-window-title">${escapeHtml(t('kibw.title', 'Kib'))}</span></div>
         <div class="os-window-controls">
-          <button class="win-btn min-btn" data-kibw="min" title="${escapeHtml(t('window.minimize', 'Minimize'))}" aria-label="${escapeHtml(t('window.minimize', 'Minimize'))}"></button>
-          <button class="win-btn max-btn" data-kibw="max" title="${escapeHtml(t('ui.maximize', 'Maximize'))}" aria-label="${escapeHtml(t('ui.maximize', 'Maximize'))}"></button>
-          <button class="win-btn close-btn" data-kibw="close" title="${escapeHtml(t('diagnostics.close_btn', 'Close'))}" aria-label="${escapeHtml(t('diagnostics.close_btn', 'Close'))}"></button>
+          <button class="win-btn min-btn" data-kibw="min" title="${escapeHtml(t('window.minimize', 'Minimize'))}" data-i18n-title="window.minimize" aria-label="${escapeHtml(t('window.minimize', 'Minimize'))}" data-i18n-aria-label="window.minimize"></button>
+          <button class="win-btn max-btn" data-kibw="max" title="${escapeHtml(t('ui.maximize', 'Maximize'))}" data-i18n-title="ui.maximize" aria-label="${escapeHtml(t('ui.maximize', 'Maximize'))}" data-i18n-aria-label="ui.maximize"></button>
+          <button class="win-btn close-btn" data-kibw="close" title="${escapeHtml(t('diagnostics.close_btn', 'Close'))}" data-i18n-title="diagnostics.close_btn" aria-label="${escapeHtml(t('diagnostics.close_btn', 'Close'))}" data-i18n-aria-label="diagnostics.close_btn"></button>
         </div>
       </div>
       <div class="mgmt-inner-tabs kib-window-tabs" role="tablist">

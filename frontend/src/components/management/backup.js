@@ -116,12 +116,12 @@ export async function fetchAndRenderBackupJobs(mountEl) {
           </td>
           <td class="is-end">
             <div class="kb-actions">
-              ${isRemote && !isSettings && !job.migrated_to ? `<button class="btn-rect btn-migrate-backup-job" data-job-id="${escapeHtml(job.id)}" title="${escapeHtml(t('backup.migrate_help', 'Make this an off-site backup: versions of every file, encrypted. The copy so far stays where it is.'))}">${escapeHtml(t('backup.migrate', 'Move to off-site backup'))}</button>` : ''}
+              ${isRemote && !isSettings && !job.migrated_to ? `<button class="btn-rect btn-migrate-backup-job" data-job-id="${escapeHtml(job.id)}" title="${escapeHtml(t('backup.migrate_help', 'Make this an off-site backup: versions of every file, encrypted. The copy so far stays where it is.'))}" data-i18n-title="backup.migrate_help">${escapeHtml(t('backup.migrate', 'Move to off-site backup'))}</button>` : ''}
               ${paused ? `<button class="btn-rect btn-resume-backup-job" data-job-id="${escapeHtml(job.id)}">${escapeHtml(t('backup.resume', 'Switch on'))}</button>` : ''}
-              <button class="btn-rect primary btn-run-backup-job" data-job-id="${escapeHtml(job.id)}" title="${t('ui.run_backup_job_now', 'Run Backup Job Now')}">
+              <button class="btn-rect primary btn-run-backup-job" data-job-id="${escapeHtml(job.id)}" title="${t('ui.run_backup_job_now', 'Run Backup Job Now')}" data-i18n-title="ui.run_backup_job_now">
                 <span aria-hidden="true">▶</span> ${escapeHtml(t('backup.run', 'Run'))}
               </button>
-              <button class="btn-rect danger btn-delete-backup-job" data-job-id="${escapeHtml(job.id)}" data-job-name="${escapeHtml(job.name || job.id)}" title="${t('ui.delete_backup_job', 'Delete Backup Job')}">
+              <button class="btn-rect danger btn-delete-backup-job" data-job-id="${escapeHtml(job.id)}" data-job-name="${escapeHtml(job.name || job.id)}" title="${t('ui.delete_backup_job', 'Delete Backup Job')}" data-i18n-title="ui.delete_backup_job">
                 🗑️
               </button>
             </div>
@@ -302,10 +302,10 @@ export async function fetchAndRenderSystemSnapshots(mountEl, { lazy = false } = 
           </td>
           <td class="is-end">
             <div class="kb-actions">
-              <button class="btn-rect btn-sys-browse-snap" data-snap-name="${escapeHtml(s.name)}" title="${t('snap.browse', 'Browse and restore files')}">
+              <button class="btn-rect btn-sys-browse-snap" data-snap-name="${escapeHtml(s.name)}" title="${t('snap.browse', 'Browse and restore files')}" data-i18n-title="snap.browse">
                 <svg class="ic" aria-hidden="true"><use href="#i-storage"/></svg> ${t('snap.browse_short', 'Files')}
               </button>
-              <button class="btn-rect danger btn-sys-delete-snap" data-snap-name="${escapeHtml(s.name)}" data-pool-id="${escapeHtml(poolId)}" title="${t('ui.delete_snapshot', 'Delete Snapshot')}">
+              <button class="btn-rect danger btn-sys-delete-snap" data-snap-name="${escapeHtml(s.name)}" data-pool-id="${escapeHtml(poolId)}" title="${t('ui.delete_snapshot', 'Delete Snapshot')}" data-i18n-title="ui.delete_snapshot">
                 🗑️
               </button>
             </div>
@@ -451,13 +451,13 @@ export async function fetchAndRenderAppBackups(mountEl, filterApp = '') {
           </td>
           <td class="is-end">
             <div class="kb-actions">
-              <button class="btn-rect btn-download-app-backup" data-backup-id="${escapeHtml(b.id)}" data-file="${escapeHtml(fileName)}"${b.missing ? ' disabled' : ''} title="${t('ui.download_archive_tar_gz', 'Download Archive (.tar.gz)')}">
+              <button class="btn-rect btn-download-app-backup" data-backup-id="${escapeHtml(b.id)}" data-file="${escapeHtml(fileName)}"${b.missing ? ' disabled' : ''} title="${t('ui.download_archive_tar_gz', 'Download Archive (.tar.gz)')}" data-i18n-title="ui.download_archive_tar_gz">
                 <span aria-hidden="true">⬇️</span> ${escapeHtml(t('backup.download', 'Download'))}
               </button>
-              <button class="btn-rect btn-restore-app-backup" data-backup-id="${escapeHtml(b.id)}" data-app-name="${escapeHtml(appName)}"${b.missing ? ' disabled' : ''} title="${t('ui.restore_configuration_data', 'Restore Configuration & Data')}">
+              <button class="btn-rect btn-restore-app-backup" data-backup-id="${escapeHtml(b.id)}" data-app-name="${escapeHtml(appName)}"${b.missing ? ' disabled' : ''} title="${t('ui.restore_configuration_data', 'Restore Configuration & Data')}" data-i18n-title="ui.restore_configuration_data">
                 <span aria-hidden="true">🔄</span> ${escapeHtml(t('backup.restore', 'Restore'))}
               </button>
-              <button class="btn-rect danger btn-delete-app-backup" data-backup-id="${escapeHtml(b.id)}" data-file="${escapeHtml(fileName)}" title="${t('ui.delete_backup_archive', 'Delete Backup Archive')}">
+              <button class="btn-rect danger btn-delete-app-backup" data-backup-id="${escapeHtml(b.id)}" data-file="${escapeHtml(fileName)}" title="${t('ui.delete_backup_archive', 'Delete Backup Archive')}" data-i18n-title="ui.delete_backup_archive">
                 🗑️
               </button>
             </div>

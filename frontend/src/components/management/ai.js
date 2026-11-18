@@ -444,12 +444,12 @@ export function renderAiLlmRecommendations(recData = {}, activeModel = '') {
               isAct
                 ? `<span style="font-size:var(--kb-fs-xs); font-weight:800; color:${hasWarn ? '#fbbf24' : '#34d399'}; padding:2px 8px; border-radius:6px; background:${hasWarn ? 'rgba(245,158,11,0.18)' : 'rgba(16,185,129,0.18)'}; border:1px solid ${hasWarn ? 'rgba(245,158,11,0.45)' : 'rgba(16,185,129,0.4)'};">${activeWord(hasWarn)}</span>`
                 : m.installed === false && m.ollama_tag
-                  ? `<button type="button" class="btn-pill-toggle btn-ai-install-model is-small" data-model-id="${escapeHtml(m.id)}" data-model-tag="${escapeHtml(m.ollama_tag)}" title="${escapeHtml(t('ai.install_model_title', 'Download this model into Ollama'))}" style="background: var(--lt-b-facc152e, rgba(250,204,21,0.18)); border: 1px solid var(--lt-r-facc157a, rgba(250,204,21,0.48)); color: var(--lt-t-fde047ff, #fde047);">⬇️ ${escapeHtml(t('ai.install_model', 'Install'))}</button>`
+                  ? `<button type="button" class="btn-pill-toggle btn-ai-install-model is-small" data-model-id="${escapeHtml(m.id)}" data-model-tag="${escapeHtml(m.ollama_tag)}" title="${escapeHtml(t('ai.install_model_title', 'Download this model into Ollama'))}" data-i18n-title="ai.install_model_title" style="background: var(--lt-b-facc152e, rgba(250,204,21,0.18)); border: 1px solid var(--lt-r-facc157a, rgba(250,204,21,0.48)); color: var(--lt-t-fde047ff, #fde047);">⬇️ ${escapeHtml(t('ai.install_model', 'Install'))}</button>`
                   : isLiveHfResult
                     ? `<button type="button" class="btn-pill-toggle btn-ai-pull-hf-card" data-hf-repo="${escapeHtml(hfRepo)}" style="font-size:var(--kb-fs-xs); font-weight:700; padding:2px 9px; background:${hasWarn ? 'rgba(245,158,11,0.18)' : 'rgba(250,204,21,0.18)'}; border:1px solid ${hasWarn ? 'rgba(245,158,11,0.5)' : 'rgba(250,204,21,0.48)'}; color:${hasWarn ? '#fbbf24' : '#fde047'}; cursor:pointer;">${hasWarn ? '⚠️ Pull Anyway (Unfit)' : '⬇️ Pull from HF'}</button>`
                     : `<button type="button" class="btn-pill-toggle btn-ai-activate-model" data-model-id="${escapeHtml(m.id)}" style="font-size:var(--kb-fs-xs); font-weight:700; padding:2px 9px; background:${hasWarn ? 'rgba(245,158,11,0.16)' : 'rgba(51,205,184,0.18)'}; border:1px solid ${hasWarn ? 'rgba(245,158,11,0.45)' : 'rgba(51,205,184,0.45)'}; color:${hasWarn ? '#fbbf24' : '#4fd8c4'}; cursor:pointer;">${hasWarn ? '⚠️ Activate Anyway' : '⚡ Activate'}</button>`
             }
-            <button type="button" class="btn-pill-toggle btn-ai-remove-model is-danger is-small" data-model-id="${escapeHtml(m.id)}" data-model-name="${escapeHtml(m.name)}" title="${t('ui.remove_model_from_catalog_and', 'Remove model from catalog and disk')}" aria-label="${escapeHtml(t('aic.remove_model', 'Remove model {name}', { name: m.name }))}">🗑️</button>
+            <button type="button" class="btn-pill-toggle btn-ai-remove-model is-danger is-small" data-model-id="${escapeHtml(m.id)}" data-model-name="${escapeHtml(m.name)}" title="${t('ui.remove_model_from_catalog_and', 'Remove model from catalog and disk')}" data-i18n-title="ui.remove_model_from_catalog_and" aria-label="${escapeHtml(t('aic.remove_model', 'Remove model {name}', { name: m.name }))}">🗑️</button>
           </div>
         </div>
       </div>
@@ -1052,9 +1052,9 @@ export function renderAiWatchedFoldersAndShares(watchedPaths = null, availableFo
           <span style="font-size:var(--kb-fs-xs); padding:1px 6px; border-radius:999px; background:${inStandby ? 'rgba(245,158,11,0.18)' : 'rgba(51,205,184,0.18)'}; color:${inStandby ? '#fbbf24' : '#34d399'};">
             ${inStandby ? `💤 Standby${dev ? ` (${escapeHtml(dev)})` : ''}` : `🟢 Running${dev ? ` (${escapeHtml(dev)})` : ''}`}
           </span>
-          <button type="button" class="btn-ai-sync-single-folder aik-xs-accent-box" data-folder-path="${escapeHtml(fp)}" title="${t('ui.sync_this_folder_now_standby', 'Sync this folder now (Standby Safe)')}">🔄</button>
-          <button type="button" class="btn-ai-remove-watched-folder aik-xs-bold-crit-box" data-folder-path="${escapeHtml(fp)}" title="${t('ui.uncheck_folder_from_rag_watched', 'Stop AI search reading this folder')}">✕</button>
-          <button type="button" class="btn-ai-forget-folder" data-folder-path="${escapeHtml(fp)}" title="${escapeHtml(t('ai.forget_folder_title', 'Forget: delete everything the AI learned from this folder'))}" aria-label="${escapeHtml(t('ai.forget_folder_title', 'Forget: delete everything the AI learned from this folder'))}" style="background:transparent; border:none; color:var(--lt-t-fca5a5ff, #fca5a5); cursor:pointer; font-size:var(--kb-fs-xs); padding:0 2px;">🗑</button>
+          <button type="button" class="btn-ai-sync-single-folder aik-xs-accent-box" data-folder-path="${escapeHtml(fp)}" title="${t('ui.sync_this_folder_now_standby', 'Sync this folder now (Standby Safe)')}" data-i18n-title="ui.sync_this_folder_now_standby">🔄</button>
+          <button type="button" class="btn-ai-remove-watched-folder aik-xs-bold-crit-box" data-folder-path="${escapeHtml(fp)}" title="${t('ui.uncheck_folder_from_rag_watched', 'Stop AI search reading this folder')}" data-i18n-title="ui.uncheck_folder_from_rag_watched">✕</button>
+          <button type="button" class="btn-ai-forget-folder" data-folder-path="${escapeHtml(fp)}" title="${escapeHtml(t('ai.forget_folder_title', 'Forget: delete everything the AI learned from this folder'))}" data-i18n-title="ai.forget_folder_title" aria-label="${escapeHtml(t('ai.forget_folder_title', 'Forget: delete everything the AI learned from this folder'))}" data-i18n-aria-label="ai.forget_folder_title" style="background:transparent; border:none; color:var(--lt-t-fca5a5ff, #fca5a5); cursor:pointer; font-size:var(--kb-fs-xs); padding:0 2px;">🗑</button>
         </div>
       `;
       })
@@ -2495,7 +2495,7 @@ export async function fetchAndRenderAiStatus() {
         <div>• <strong>${t('ait.deferred', 'Deferred Standby Queue:')}</strong> ${t('ait.deferred_detail', '{count, plural, one {# path} other {# paths}} waiting for drive wake', { count: defCount })}${defDetail}</div>
         <div class="aik-row-5">
           <span>• <strong>${t('ait.footprint', 'NVMe Index Footprint:')}</strong> ${sizeKb} KB (<code>${escapeHtml(stats.db_path || '/app/data/rag_index.db')}</code>)</span>
-          ${totalFiles > 0 || totalChunks > 0 ? `<button type="button" id="btn-ai-flush-index-link" class="btn-pill-toggle is-danger is-small" title="${t('ui.flush_existing_rag_index_vector', 'Delete what AI search has learned and start again')}"><span aria-hidden="true">🗑️</span> <span>${escapeHtml(t('aic.flush', 'Flush & Start Fresh'))}</span></button>` : ''}
+          ${totalFiles > 0 || totalChunks > 0 ? `<button type="button" id="btn-ai-flush-index-link" class="btn-pill-toggle is-danger is-small" title="${t('ui.flush_existing_rag_index_vector', 'Delete what AI search has learned and start again')}" data-i18n-title="ui.flush_existing_rag_index_vector"><span aria-hidden="true">🗑️</span> <span>${escapeHtml(t('aic.flush', 'Flush & Start Fresh'))}</span></button>` : ''}
         </div>
       `;
       const flushLink = dbSummary.querySelector('#btn-ai-flush-index-link');
@@ -2740,7 +2740,7 @@ export async function runAiRagAsk(rawQuestion, options = {}) {
             <span>${res.elapsed_ms || llmTel.elapsed_ms || 0} ms</span>
             <span>•</span>
             <span style="color: var(--lt-t-6ee7b7ff, #6ee7b7);">💤 ${t('aiq.standby_safe', 'Standby Safe')}</span>
-            <button type="button" class="btn-ai-dismiss-synthesis btn-pill-toggle is-small airg-x-2" title="${t('ui.hide_synthesis_card', 'Hide synthesis card')}">✕</button>
+            <button type="button" class="btn-ai-dismiss-synthesis btn-pill-toggle is-small airg-x-2" title="${t('ui.hide_synthesis_card', 'Hide synthesis card')}" data-i18n-title="ui.hide_synthesis_card">✕</button>
           </div>
         </div>
         <div class="airg-xs">
@@ -2895,7 +2895,7 @@ export function renderAiPreviewInspector(item) {
       <button type="button" id="btn-ai-inspector-open" class="btn-pill-toggle" style="background: rgba(51,205,184,0.22); border: 1px solid rgba(51,205,184,0.5); color: var(--kb-text-strong);">
         👁️ ${t('aiq.open_file', 'Open File')}
       </button>
-      <button type="button" id="btn-ai-inspector-location" class="btn-pill-toggle" style="background: rgba(51,205,184,0.18); border: 1px solid rgba(51,205,184,0.45); color: var(--lt-t-6ee7b7ff, #6ee7b7);" title="${t('ui.open_parent_folder_in_file', 'Open parent folder in File Manager')}">
+      <button type="button" id="btn-ai-inspector-location" class="btn-pill-toggle" style="background: rgba(51,205,184,0.18); border: 1px solid rgba(51,205,184,0.45); color: var(--lt-t-6ee7b7ff, #6ee7b7);" title="${t('ui.open_parent_folder_in_file', 'Open parent folder in File Manager')}" data-i18n-title="ui.open_parent_folder_in_file">
         📂 ${t('aiq.open_location', 'Open Location')}
       </button>
       <button type="button" id="btn-ai-inspector-download" class="btn-pill-toggle">
@@ -3367,7 +3367,7 @@ function _buildAiActionProposalsHtml(toolsCalled) {
 function _buildAiExternalNoteHtml(res) {
   const ext = Array.isArray(res?.external_services) ? res.external_services : [];
   if (!ext.length) return '';
-  return `<div class="ai-chat-external-note aicm-xs-warn" title="${t('ui.this_answer_used_services_outside', 'This answer used services outside your NAS')}">🌐 ${escapeHtml(t('aiq.data_left', 'Data left this device: {services}', { services: ext.join(', ') }))}</div>`;
+  return `<div class="ai-chat-external-note aicm-xs-warn" title="${t('ui.this_answer_used_services_outside', 'This answer used services outside your NAS')}" data-i18n-title="ui.this_answer_used_services_outside">🌐 ${escapeHtml(t('aiq.data_left', 'Data left this device: {services}', { services: ext.join(', ') }))}</div>`;
 }
 
 // Web is a choice for one chat (SET-04, the owner's decision S13). It is never remembered: the
@@ -3728,8 +3728,8 @@ export async function fetchAndRenderAiConversations(searchQuery = '') {
             <span class="ai-thread-title-text" title="${escapeHtml(shownTitle(c.title))}">${escapeHtml(shownTitle(c.title))}</span>
             <div class="ai-thread-actions">
               <button type="button" class="btn-ai-thread-action btn-ai-thread-pin" data-conv-id="${escapeHtml(c.id)}" data-pinned="${c.is_pinned ? '1' : '0'}" title="${pinTitle}">${pinIcon}</button>
-              <button type="button" class="btn-ai-thread-action btn-ai-thread-rename" data-conv-id="${escapeHtml(c.id)}" title="${t('mgmt.wallpaper_rename', 'Rename')}">✏️</button>
-              <button type="button" class="btn-ai-thread-action btn-ai-thread-del" data-conv-id="${escapeHtml(c.id)}" title="${t('vm.delete', 'Delete')}">🗑️</button>
+              <button type="button" class="btn-ai-thread-action btn-ai-thread-rename" data-conv-id="${escapeHtml(c.id)}" title="${t('mgmt.wallpaper_rename', 'Rename')}" data-i18n-title="mgmt.wallpaper_rename">✏️</button>
+              <button type="button" class="btn-ai-thread-action btn-ai-thread-del" data-conv-id="${escapeHtml(c.id)}" title="${t('vm.delete', 'Delete')}" data-i18n-title="vm.delete">🗑️</button>
             </div>
           </div>
         `;
@@ -4355,7 +4355,7 @@ export function setAiChatFocus(path, name = '') {
   chip.id = 'ai-chat-focus';
   chip.className = 'ai-chat-focus';
   chip.innerHTML = `<span>${escapeHtml(t('ai.focus_about', 'About {name}', { name: _aiFocus.name }))}</span>
-    <button type="button" class="win-btn close-btn" aria-label="${escapeHtml(t('ai.focus_clear', 'Stop asking about this file'))}"></button>`;
+    <button type="button" class="win-btn close-btn" aria-label="${escapeHtml(t('ai.focus_clear', 'Stop asking about this file'))}" data-i18n-aria-label="ai.focus_clear"></button>`;
   chip.querySelector('button').addEventListener('click', () => setAiChatFocus(null));
   (input.closest('div') || input).insertAdjacentElement('beforebegin', chip);
 }

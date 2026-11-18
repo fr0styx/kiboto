@@ -64,7 +64,7 @@ import { applyDashboardLayout, fetchDashboardLayout, fitMiniPreviewScale } from 
 import { initWallpapers, loadWallpapers } from './components/wallpapers.js';
 import { initSetupWizardLauncher } from './components/setup-wizard-gate.js';
 import { initCommandPalette } from './components/command-palette.js';
-import { lazyWindow } from './lazy-windows.js';
+import { lazyWindow, whenTextsReady } from './lazy-windows.js';
 import { initJobsCentre } from './components/jobs-centre.js';
 import { initDriveHealth } from './components/drive-health.js';
 import { initGettingStarted } from './components/getting-started.js';
@@ -339,6 +339,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   setWindowRestorationComplete(false);
   const textsReady = initI18n();
+  whenTextsReady(textsReady); // windows build their markup once the language is in
   initDockSystem();
   installDialogChrome();
   installWindowFocus(DockManager);

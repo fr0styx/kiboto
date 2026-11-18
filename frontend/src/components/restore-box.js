@@ -14,7 +14,7 @@ export function kitHtml() {
     <label class="setup-label" for="restorebox-kit">${escapeHtml(t('restorebox.kit_label', 'Recovery kit'))}</label>
     <textarea id="restorebox-kit" class="input-text restorebox-kit" rows="8" spellcheck="false" autocomplete="off"></textarea>
     <div class="restorebox-row">
-      <input type="file" id="restorebox-file" accept=".txt,text/plain" aria-label="${escapeHtml(t('restorebox.kit_file', 'Recovery kit file'))}">
+      <input type="file" id="restorebox-file" accept=".txt,text/plain" aria-label="${escapeHtml(t('restorebox.kit_file', 'Recovery kit file'))}" data-i18n-aria-label="restorebox.kit_file">
       <button type="button" class="btn-pill-toggle is-primary" data-rb="connect">${escapeHtml(t('restorebox.connect', 'Connect the backup'))}</button>
     </div>`;
 }

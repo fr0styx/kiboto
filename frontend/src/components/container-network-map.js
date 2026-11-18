@@ -146,7 +146,7 @@ export function renderNetworkMapSvg(layout, highlight = null) {
     })
     .join('');
 
-  return `<svg class="nm-svg" viewBox="0 0 ${layout.width} ${layout.height}" width="100%" style="display:block; min-width:520px;" role="img" aria-label="${escapeHtml(t('cw.netmap_title', 'Container Network Map'))}">${edges}${nets}${ctrs}</svg>`;
+  return `<svg class="nm-svg" viewBox="0 0 ${layout.width} ${layout.height}" width="100%" style="display:block; min-width:520px;" role="img" aria-label="${escapeHtml(t('cw.netmap_title', 'Container Network Map'))}" data-i18n-aria-label="cw.netmap_title">${edges}${nets}${ctrs}</svg>`;
 }
 
 function ensureOverlay() {
@@ -165,7 +165,7 @@ function ensureOverlay() {
           <span id="netmap-summary" style="font-size:var(--kb-fs-xs); color:var(--muted);"></span>
         </div>
         <div class="os-window-controls">
-          <button class="win-btn close-btn" id="netmap-close-btn" title="${t('diagnostics.close_btn', 'Close')}" aria-label="${t('diagnostics.close_btn', 'Close')}"></button>
+          <button class="win-btn close-btn" id="netmap-close-btn" title="${t('diagnostics.close_btn', 'Close')}" data-i18n-title="diagnostics.close_btn" aria-label="${t('diagnostics.close_btn', 'Close')}" data-i18n-aria-label="diagnostics.close_btn"></button>
         </div>
       </div>
       <div style="padding:8px 16px; font-size:var(--kb-fs-xs); color:var(--muted); border-bottom:1px solid var(--kb-line-6);" data-i18n="cw.netmap_hint">${escapeHtml(t('cw.netmap_hint', 'Click a network to highlight its containers.'))}</div>

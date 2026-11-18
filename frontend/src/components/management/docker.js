@@ -96,8 +96,8 @@ export async function openAppDeployModal(appId) {
               <span class="dkd-fs13-bold-strong" id="adm-title">${t('catalog.install_app', 'Install an app')}</span>
             </div>
             <div class="os-window-controls dkd-row-2">
-              <button class="win-btn min-btn" id="adm-min-btn" title="${t('ui.minimize_to_dock', 'Minimize to Dock')}" aria-label="${t('window.minimize', 'Minimize')}"></button>
-              <button class="win-btn close-btn" id="adm-close-btn" title="${t('diagnostics.close_btn', 'Close')}" aria-label="${t('diagnostics.close_btn', 'Close')}"></button>
+              <button class="win-btn min-btn" id="adm-min-btn" title="${t('ui.minimize_to_dock', 'Minimize to Dock')}" data-i18n-title="ui.minimize_to_dock" aria-label="${t('window.minimize', 'Minimize')}" data-i18n-aria-label="window.minimize"></button>
+              <button class="win-btn close-btn" id="adm-close-btn" title="${t('diagnostics.close_btn', 'Close')}" data-i18n-title="diagnostics.close_btn" aria-label="${t('diagnostics.close_btn', 'Close')}" data-i18n-aria-label="diagnostics.close_btn"></button>
             </div>
           </div>
 
@@ -1140,7 +1140,7 @@ export async function openDockerPruneModal() {
               <span class="dkd-fs18">🧹</span>
               <span class="dkd-fs13-bold-strong">${t('dk.prune_title', 'Docker cleanup')}</span>
             </div>
-            <button class="win-btn close-btn" id="dpm-close-btn" title="${t('diagnostics.close_btn', 'Close')}" aria-label="${t('diagnostics.close_btn', 'Close')}"></button>
+            <button class="win-btn close-btn" id="dpm-close-btn" title="${t('diagnostics.close_btn', 'Close')}" data-i18n-title="diagnostics.close_btn" aria-label="${t('diagnostics.close_btn', 'Close')}" data-i18n-aria-label="diagnostics.close_btn"></button>
           </div>
           <div class="dkd-col-2">
             <div class="dkd-xs-soft-3">
@@ -1212,7 +1212,7 @@ export async function openDockerPruneModal() {
                 <span id="dpm-progress-msg" class="kb-muted"></span>
                 <strong id="dpm-progress-pct" class="dpm-progress-pct">0%</strong>
               </div>
-              <div class="dpm-bar" id="dpm-bar" role="progressbar" aria-label="${t('ui.cleanup_progress', 'Cleanup progress')}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="dpm-bar-fill" id="dpm-bar-fill"></div></div>
+              <div class="dpm-bar" id="dpm-bar" role="progressbar" aria-label="${t('ui.cleanup_progress', 'Cleanup progress')}" data-i18n-aria-label="ui.cleanup_progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="dpm-bar-fill" id="dpm-bar-fill"></div></div>
               <ul class="kb-list" id="dpm-steps"></ul>
               <div class="kb-muted" id="dpm-freed"></div>
             </div>

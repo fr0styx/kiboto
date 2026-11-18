@@ -55,9 +55,9 @@ export function initContainerModal() {
             <span id="ci-header-state" class="ci-state-pill" style="display:none;"></span>
           </div>
           <div class="os-window-controls ci-row-2">
-            <button class="win-btn min-btn" id="ci-min-btn" title="${t('window.minimize', 'Minimize')}" aria-label="${t('window.minimize', 'Minimize')}"></button>
-            <button class="win-btn max-btn" id="ci-max-btn" title="${t('ui.maximize', 'Maximize')}" aria-label="${t('ui.maximize', 'Maximize')}"></button>
-            <button class="win-btn close-btn" id="ci-close-btn" title="${t('diagnostics.close_btn', 'Close')}" aria-label="${t('diagnostics.close_btn', 'Close')}"></button>
+            <button class="win-btn min-btn" id="ci-min-btn" title="${t('window.minimize', 'Minimize')}" data-i18n-title="window.minimize" aria-label="${t('window.minimize', 'Minimize')}" data-i18n-aria-label="window.minimize"></button>
+            <button class="win-btn max-btn" id="ci-max-btn" title="${t('ui.maximize', 'Maximize')}" data-i18n-title="ui.maximize" aria-label="${t('ui.maximize', 'Maximize')}" data-i18n-aria-label="ui.maximize"></button>
+            <button class="win-btn close-btn" id="ci-close-btn" title="${t('diagnostics.close_btn', 'Close')}" data-i18n-title="diagnostics.close_btn" aria-label="${t('diagnostics.close_btn', 'Close')}" data-i18n-aria-label="diagnostics.close_btn"></button>
           </div>
         </div>
 
@@ -131,7 +131,7 @@ export function initContainerModal() {
                 <label class="ci-row-xs-muted-2">
                   <input type="checkbox" id="ci-logs-autoscroll" checked> ${t('ci.autoscroll', 'Auto-scroll')}
                 </label>
-                <label style="display:flex; align-items:center; gap:4px; font-size:var(--kb-fs-xs); color:var(--lt-ink-brand, var(--accent-cyan, #33cdb8)); cursor:pointer; font-weight:600;" title="${t('ui.stream_live_container_logs_continuously', 'Stream live container logs continuously via SSE')}">
+                <label style="display:flex; align-items:center; gap:4px; font-size:var(--kb-fs-xs); color:var(--lt-ink-brand, var(--accent-cyan, #33cdb8)); cursor:pointer; font-weight:600;" title="${t('ui.stream_live_container_logs_continuously', 'Stream live container logs continuously via SSE')}" data-i18n-title="ui.stream_live_container_logs_continuously">
                   <input type="checkbox" id="ci-logs-stream-toggle"> <span>${t('ci.follow', 'Follow live')}</span>
                 </label>
               </div>
@@ -1284,8 +1284,8 @@ function renderEnvTab(details) {
                   <span id="env-val-${idx}">${escapeHtml(e.masked_value)}</span>
                 </td>
                 <td class="ci-x-7">
-                  ${isSec ? `<button class="btn-toggle-secret btn-pill-toggle is-small" data-idx="${idx}" title="${t('ui.toggle_show_hide', 'Toggle show/hide')}">👁️</button>` : ''}
-                  <button class="btn-copy-env btn-pill-toggle is-small" data-idx="${idx}" title="${t('ui.copy_value', 'Copy value')}">📋</button>
+                  ${isSec ? `<button class="btn-toggle-secret btn-pill-toggle is-small" data-idx="${idx}" title="${t('ui.toggle_show_hide', 'Toggle show/hide')}" data-i18n-title="ui.toggle_show_hide">👁️</button>` : ''}
+                  <button class="btn-copy-env btn-pill-toggle is-small" data-idx="${idx}" title="${t('ui.copy_value', 'Copy value')}" data-i18n-title="ui.copy_value">📋</button>
                 </td>
               </tr>
             `;
@@ -1582,7 +1582,7 @@ export function openContainerDeleteModal(cid, cname, imageRef = '', onDeleted = 
               <span class="ci-fs18">⚠️</span>
               <span style="font-weight:700; color:var(--crit, #ff6b6b); font-size:13px;">${t('ci.destroy', 'Remove app')}</span>
             </div>
-            <button class="win-btn close-btn" id="cdm-close-btn" title="${t('diagnostics.close_btn', 'Close')}" aria-label="${t('diagnostics.close_btn', 'Close')}"></button>
+            <button class="win-btn close-btn" id="cdm-close-btn" title="${t('diagnostics.close_btn', 'Close')}" data-i18n-title="diagnostics.close_btn" aria-label="${t('diagnostics.close_btn', 'Close')}" data-i18n-aria-label="diagnostics.close_btn"></button>
           </div>
           <div class="ci-col-2">
             <div class="ci-xs-soft-3">
@@ -1803,7 +1803,7 @@ async function renderContainerEditTab(cid) {
       <div class="ci-metric-card ci-box-6">
         <div class="ci-row-8">
           <div class="ci-xs-bold-strong">${t('ci.ports_title', 'Port bindings')}</div>
-          <button class="btn-pill-toggle ci-xs-10" id="cie-btn-add-port" ${isToolkit ? `disabled title="${escapeHtml(t('container.why_self', 'Kiboto cannot rebuild its own container; change it in Docker Compose'))}"` : ''}>+ ${t('ci.add_port', 'Add port')}</button>
+          <button class="btn-pill-toggle ci-xs-10" id="cie-btn-add-port" ${isToolkit ? `disabled title="${escapeHtml(t('container.why_self', 'Kiboto cannot rebuild its own container; change it in Docker Compose'))}" data-i18n-title="container.why_self"` : ''}>+ ${t('ci.add_port', 'Add port')}</button>
         </div>
         <div class="ci-x-10" id="cie-ports-container" style="display: flex;"></div>
       </div>
@@ -1812,7 +1812,7 @@ async function renderContainerEditTab(cid) {
       <div class="ci-metric-card ci-box-6">
         <div class="ci-row-8">
           <div class="ci-xs-bold-strong">${t('ci.mounts_title', 'Mounted folders')}</div>
-          <button class="btn-pill-toggle ci-xs-10" id="cie-btn-add-mount" ${isToolkit ? `disabled title="${escapeHtml(t('container.why_self', 'Kiboto cannot rebuild its own container; change it in Docker Compose'))}"` : ''}>+ ${t('ci.add_mount', 'Add folder')}</button>
+          <button class="btn-pill-toggle ci-xs-10" id="cie-btn-add-mount" ${isToolkit ? `disabled title="${escapeHtml(t('container.why_self', 'Kiboto cannot rebuild its own container; change it in Docker Compose'))}" data-i18n-title="container.why_self"` : ''}>+ ${t('ci.add_mount', 'Add folder')}</button>
         </div>
         <div class="ci-x-10" id="cie-mounts-container" style="display: flex;"></div>
       </div>
@@ -1823,7 +1823,7 @@ async function renderContainerEditTab(cid) {
           <div class="ci-xs-bold-strong">${t('ci.env_title', 'Environment variables')}</div>
           <div class="ci-row-2">
             <input type="text" id="cie-env-filter" placeholder="${t('ui.filter_variables', 'Filter variables...')}" class="tz-text-input ci-xs-11">
-            <button class="btn-pill-toggle ci-xs-10" id="cie-btn-add-env" ${isToolkit ? `disabled title="${escapeHtml(t('container.why_self', 'Kiboto cannot rebuild its own container; change it in Docker Compose'))}"` : ''}>+ ${t('ci.add_var', 'Add variable')}</button>
+            <button class="btn-pill-toggle ci-xs-10" id="cie-btn-add-env" ${isToolkit ? `disabled title="${escapeHtml(t('container.why_self', 'Kiboto cannot rebuild its own container; change it in Docker Compose'))}" data-i18n-title="container.why_self"` : ''}>+ ${t('ci.add_var', 'Add variable')}</button>
           </div>
         </div>
         <div class="ci-x-11" id="cie-env-container" style="display: flex;"></div>
@@ -1837,7 +1837,7 @@ async function renderContainerEditTab(cid) {
         </label>
         <div class="ci-row-11">
           <button class="btn-pill-toggle" id="cie-btn-cancel">${t('common.cancel', 'Cancel')}</button>
-          <button class="btn-pill-toggle" id="cie-btn-save" style="font-weight:700; background:var(--brand, #33cdb8); color:var(--accent-contrast-fg, #0c1517); border:none; padding:6px 16px;" ${isToolkit ? `disabled title="${escapeHtml(t('container.why_self', 'Kiboto cannot rebuild its own container; change it in Docker Compose'))}"` : ''}>
+          <button class="btn-pill-toggle" id="cie-btn-save" style="font-weight:700; background:var(--brand, #33cdb8); color:var(--accent-contrast-fg, #0c1517); border:none; padding:6px 16px;" ${isToolkit ? `disabled title="${escapeHtml(t('container.why_self', 'Kiboto cannot rebuild its own container; change it in Docker Compose'))}" data-i18n-title="container.why_self"` : ''}>
             ${ico('💾')} ${t('ci.save_recreate', 'Save and recreate the container')}
           </button>
         </div>
@@ -1867,8 +1867,8 @@ async function renderContainerEditTab(cid) {
       <span class="ci-muted">➔</span>
       <span class="ci-xs-muted">${t('ci.row_host', 'Host:')}</span>
       <input type="number" class="tz-text-input cie-hp-input ci-xs-12" placeholder="8080" value="${p.host_port || ''}">
-      <input type="text" class="tz-text-input cie-ip-input ci-xs-12" placeholder="0.0.0.0" value="${p.host_ip || '0.0.0.0'}" title="${t('ui.host_ip', 'Host IP')}">
-      <button class="btn-pill-toggle cie-row-del is-danger is-small" title="${t('ai.remove_model_btn', 'Remove')}">🗑️</button>
+      <input type="text" class="tz-text-input cie-ip-input ci-xs-12" placeholder="0.0.0.0" value="${p.host_ip || '0.0.0.0'}" title="${t('ui.host_ip', 'Host IP')}" data-i18n-title="ui.host_ip">
+      <button class="btn-pill-toggle cie-row-del is-danger is-small" title="${t('ai.remove_model_btn', 'Remove')}" data-i18n-title="ai.remove_model_btn">🗑️</button>
     `;
     row.querySelector('.cie-row-del').onclick = () => row.remove();
     portsBox.appendChild(row);
@@ -1891,7 +1891,7 @@ async function renderContainerEditTab(cid) {
         <option value="rw" ${m.mode === 'ro' ? '' : 'selected'}>rw</option>
         <option value="ro" ${m.mode === 'ro' ? 'selected' : ''}>ro</option>
       </select>
-      <button class="btn-pill-toggle cie-row-del is-danger is-small" title="${t('ai.remove_model_btn', 'Remove')}">🗑️</button>
+      <button class="btn-pill-toggle cie-row-del is-danger is-small" title="${t('ai.remove_model_btn', 'Remove')}" data-i18n-title="ai.remove_model_btn">🗑️</button>
     `;
     row.querySelector('.cie-row-del').onclick = () => row.remove();
     mountsBox.appendChild(row);
@@ -1906,7 +1906,7 @@ async function renderContainerEditTab(cid) {
       <input type="text" class="tz-text-input cie-key-input ci-xs-bold-mono" placeholder="KEY" value="${escapeHtml(e.key || '')}">
       <span class="ci-muted">=</span>
       <input type="text" class="tz-text-input cie-val-input ci-xs-mono-grow" placeholder="value" value="${escapeHtml(e.value || '')}">
-      <button class="btn-pill-toggle cie-row-del is-danger is-small" title="${t('ai.remove_model_btn', 'Remove')}">🗑️</button>
+      <button class="btn-pill-toggle cie-row-del is-danger is-small" title="${t('ai.remove_model_btn', 'Remove')}" data-i18n-title="ai.remove_model_btn">🗑️</button>
     `;
     row.querySelector('.cie-row-del').onclick = () => row.remove();
     envBox.appendChild(row);

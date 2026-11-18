@@ -126,7 +126,7 @@ class TransferCenter {
             <div style="display:flex; align-items:center; gap:10px;">
               <button type="button" class="fm-transfers-clear" id="fm-cockpit-clear-btn">${escapeHtml(t('transfers.clear', 'Clear finished'))}</button>
               <div class="os-window-controls">
-                <button type="button" class="win-btn close-btn" id="fm-cockpit-close-btn" title="${t('diagnostics.close_btn', 'Close')}" aria-label="${t('diagnostics.close_btn', 'Close')}"></button>
+                <button type="button" class="win-btn close-btn" id="fm-cockpit-close-btn" title="${t('diagnostics.close_btn', 'Close')}" data-i18n-title="diagnostics.close_btn" aria-label="${t('diagnostics.close_btn', 'Close')}" data-i18n-aria-label="diagnostics.close_btn"></button>
               </div>
             </div>
           </div>

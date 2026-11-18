@@ -50,7 +50,7 @@ export async function openPreviousVersions(path, name, onChange = null) {
   dialog.setAttribute('aria-labelledby', `${DIALOG_ID}-title`);
   dialog.innerHTML = `<div class="fm-versions-card">
       <div class="fm-versions-head"><h2 id="${DIALOG_ID}-title">${escapeHtml(t('fm.versions_title', 'Previous versions of {name}', { name }))}</h2>
-        <button type="button" class="win-btn close-btn" data-act="close" aria-label="${escapeHtml(t('diagnostics.close_btn', 'Close'))}"></button></div>
+        <button type="button" class="win-btn close-btn" data-act="close" aria-label="${escapeHtml(t('diagnostics.close_btn', 'Close'))}" data-i18n-aria-label="diagnostics.close_btn"></button></div>
       <div class="fm-versions-body" aria-live="polite">${escapeHtml(t('fm.versions_loading', 'Looking for earlier versions…'))}</div>
     </div>`;
   document.body.appendChild(dialog);

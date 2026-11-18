@@ -8,7 +8,7 @@ import { showToast } from '../toast.js';
 
 export function immichResultsHtml(items) {
   if (!items || !items.length) return '';
-  return `<section class="immich-strip" aria-label="${escapeHtml(t('immich.from', 'From your Immich'))}">
+  return `<section class="immich-strip" aria-label="${escapeHtml(t('immich.from', 'From your Immich'))}" data-i18n-aria-label="immich.from">
     <h4>${escapeHtml(t('immich.from', 'From your Immich'))}</h4>
     <ul>${items
       .map(
@@ -41,7 +41,7 @@ export function settingsHtml(s, isAdmin) {
       s.connected
         ? `<p>${escapeHtml(t('immich.connected', 'Your Immich is connected.'))} <button type="button" class="btn-pill-toggle is-small" data-immich-disconnect>${escapeHtml(t('immich.disconnect', 'Disconnect'))}</button></p>`
         : `<form class="immich-form" data-immich-key><label>${escapeHtml(t('immich.key', 'Your Immich API key (Immich → Account settings → API keys)'))}<input name="api_key" type="password" autocomplete="off" minlength="20"></label>
-      <button type="submit" class="btn-pill-toggle is-primary"${s.url ? '' : ` disabled title="${escapeHtml(t('immich.need_address', 'An administrator sets the Immich address first'))}"`}>${escapeHtml(t('immich.connect', 'Connect my Immich'))}</button></form>`
+      <button type="submit" class="btn-pill-toggle is-primary"${s.url ? '' : ` disabled title="${escapeHtml(t('immich.need_address', 'An administrator sets the Immich address first'))}" data-i18n-title="immich.need_address"`}>${escapeHtml(t('immich.connect', 'Connect my Immich'))}</button></form>`
     }`;
 }
 

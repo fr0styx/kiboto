@@ -868,9 +868,9 @@ export function openVmConsole(vmId, vmName = 'Virtual Machine', initialMode = 'g
             <span id="vm-console-status-pill" class="console-status-pill">● ${t('vcon.st_live', 'Live')}</span>
           </div>
           <div class="os-window-controls">
-            <button class="win-btn min-btn" id="vm-console-min" title="${t('window.minimize', 'Minimize')}" aria-label="${t('window.minimize', 'Minimize')}"></button>
-            <button class="win-btn max-btn" id="vm-console-max" title="${t('ui.maximize', 'Maximize')}" aria-label="${t('ui.maximize', 'Maximize')}"></button>
-            <button class="win-btn close-btn" id="vm-console-close" title="${t('diagnostics.close_btn', 'Close')}" aria-label="${t('diagnostics.close_btn', 'Close')}"></button>
+            <button class="win-btn min-btn" id="vm-console-min" title="${t('window.minimize', 'Minimize')}" data-i18n-title="window.minimize" aria-label="${t('window.minimize', 'Minimize')}" data-i18n-aria-label="window.minimize"></button>
+            <button class="win-btn max-btn" id="vm-console-max" title="${t('ui.maximize', 'Maximize')}" data-i18n-title="ui.maximize" aria-label="${t('ui.maximize', 'Maximize')}" data-i18n-aria-label="ui.maximize"></button>
+            <button class="win-btn close-btn" id="vm-console-close" title="${t('diagnostics.close_btn', 'Close')}" data-i18n-title="diagnostics.close_btn" aria-label="${t('diagnostics.close_btn', 'Close')}" data-i18n-aria-label="diagnostics.close_btn"></button>
           </div>
         </div>
 
@@ -878,11 +878,11 @@ export function openVmConsole(vmId, vmName = 'Virtual Machine', initialMode = 'g
         <div class="vm-console-toolbar">
           <div class="console-toolbar-left">
             <div class="console-mode-switch">
-              <button class="btn-console-mode ${initialMode === 'gui' ? 'active' : ''}" id="btn-console-mode-gui" title="${t('vm.mode_gui', 'KVM GUI')}">
+              <button class="btn-console-mode ${initialMode === 'gui' ? 'active' : ''}" id="btn-console-mode-gui" title="${t('vm.mode_gui', 'KVM GUI')}" data-i18n-title="vm.mode_gui">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
                 <span>${t('vm.mode_gui', 'KVM GUI')}</span>
               </button>
-              <button class="btn-console-mode ${initialMode === 'cli' ? 'active' : ''}" id="btn-console-mode-cli" title="${t('vm.mode_tty', 'Serial TTY')}">
+              <button class="btn-console-mode ${initialMode === 'cli' ? 'active' : ''}" id="btn-console-mode-cli" title="${t('vm.mode_tty', 'Serial TTY')}" data-i18n-title="vm.mode_tty">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
                 <span>${t('vm.mode_tty', 'Serial TTY')}</span>
               </button>
@@ -893,14 +893,14 @@ export function openVmConsole(vmId, vmName = 'Virtual Machine', initialMode = 'g
             <span class="toolbar-stat" id="vm-console-kbd-pill" style="color: var(--kb-text-accent); font-weight: 500; cursor: pointer;" title="${t('ui.keyboard_captured_by_vm_console', 'Keyboard captured by VM console. Click outside or minimize to release.')}"><span aria-hidden="true">⌨️</span> ${t('ui.captured', 'Captured')}</span>
           </div>
           <div class="console-toolbar-right">
-            <button class="btn-console-act" id="btn-vnc-softkbd" title="${t('vm.soft_kbd', 'Keyboard')}">
+            <button class="btn-console-act" id="btn-vnc-softkbd" title="${t('vm.soft_kbd', 'Keyboard')}" data-i18n-title="vm.soft_kbd">
               <span>⌨️ ${t('vm.soft_kbd', 'Keyboard')}</span>
             </button>
-            <button class="btn-console-act" id="btn-vnc-cad" title="${t('ui.send_ctrl_alt_del', 'Send Ctrl+Alt+Del')}">
+            <button class="btn-console-act" id="btn-vnc-cad" title="${t('ui.send_ctrl_alt_del', 'Send Ctrl+Alt+Del')}" data-i18n-title="ui.send_ctrl_alt_del">
               <span translate="no">Ctrl+Alt+Del</span>
             </button>
             <div class="dropdown-sendkey-wrap" style="position: relative;">
-              <button class="btn-console-act" id="btn-vnc-keys" title="${t('ui.send_special_key', 'Send Special Key')}">
+              <button class="btn-console-act" id="btn-vnc-keys" title="${t('ui.send_special_key', 'Send Special Key')}" data-i18n-title="ui.send_special_key">
                 <span>${t('vcon.send_key', 'Send key')} ${ico('▾')}</span>
               </button>
               <div id="menu-vnc-keys" class="vnc-keys-menu" style="display: none;">
@@ -911,16 +911,16 @@ export function openVmConsole(vmId, vmName = 'Virtual Machine', initialMode = 'g
                 <button class="vnc-key-item" data-key="F12">${t('vcon.f12', 'F12 (boot menu)')}</button>
               </div>
             </div>
-            <button class="btn-console-act" id="btn-vnc-clipboard" title="${t('ui.paste_text_to_guest', 'Paste text to guest')}">
+            <button class="btn-console-act" id="btn-vnc-clipboard" title="${t('ui.paste_text_to_guest', 'Paste text to guest')}" data-i18n-title="ui.paste_text_to_guest">
               <span>${ico('📋')} ${t('vcon.paste', 'Paste text')}</span>
             </button>
-            <button class="btn-console-act" id="btn-vnc-popout" title="${t('vm.popout', 'Separate Window')}">
+            <button class="btn-console-act" id="btn-vnc-popout" title="${t('vm.popout', 'Separate Window')}" data-i18n-title="vm.popout">
               <span>↗ ${t('vm.popout', 'Separate Window')}</span>
             </button>
-            <button class="btn-console-act" id="btn-vnc-reconnect" title="${t('ui.reconnect_stream', 'Reconnect stream')}">
+            <button class="btn-console-act" id="btn-vnc-reconnect" title="${t('ui.reconnect_stream', 'Reconnect stream')}" data-i18n-title="ui.reconnect_stream">
               <span>${ico('↻')} ${t('vcon.reconnect', 'Reconnect')}</span>
             </button>
-            <button class="btn-console-act" id="btn-vnc-fullscreen" title="${t('ctx.fullscreen', 'Toggle Fullscreen')}">
+            <button class="btn-console-act" id="btn-vnc-fullscreen" title="${t('ctx.fullscreen', 'Toggle Fullscreen')}" data-i18n-title="ctx.fullscreen">
               <span>${ico('⛶')} ${t('vcon.fullscreen', 'Full screen')}</span>
             </button>
           </div>

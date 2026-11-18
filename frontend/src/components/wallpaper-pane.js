@@ -171,10 +171,10 @@ export function renderWallpaperGallery(files, active, version) {
           <span>${escapeHtml(t('wp.active', 'Active'))}</span>
         </div>
         <div class="wallpaper-card-actions">
-          <button class="wallpaper-action-btn rename-btn" title="${t('ui.rename_image', 'Rename image')}" aria-label="${t('ui.rename_image', 'Rename image')}">
+          <button class="wallpaper-action-btn rename-btn" title="${t('ui.rename_image', 'Rename image')}" data-i18n-title="ui.rename_image" aria-label="${t('ui.rename_image', 'Rename image')}" data-i18n-aria-label="ui.rename_image">
             <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
           </button>
-          <button class="wallpaper-action-btn delete-btn" title="${t('ui.delete_image', 'Delete image')}" aria-label="${t('ui.delete_image', 'Delete image')}">
+          <button class="wallpaper-action-btn delete-btn" title="${t('ui.delete_image', 'Delete image')}" data-i18n-title="ui.delete_image" aria-label="${t('ui.delete_image', 'Delete image')}" data-i18n-aria-label="ui.delete_image">
             <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
           </button>
         </div>

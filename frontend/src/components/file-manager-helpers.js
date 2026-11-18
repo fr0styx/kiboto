@@ -44,7 +44,7 @@ export function sortMenuHtml(sortBy, sortDir) {
   ];
   const row = (act, label, on) =>
     `<div class="fm-ctx-item${on ? ' is-current' : ''}" data-act="${act}" role="menuitemradio" tabindex="-1" aria-checked="${on}"><span class="fm-ctx-check">${on ? '✓' : ''}</span>${escapeHtml(label)}</div>`;
-  return `<div class="fm-ctx-group" role="group" aria-label="${escapeHtml(t('fm.sort_by', 'Sort by'))}"><div class="fm-ctx-heading">${escapeHtml(t('fm.sort_by', 'Sort by'))}</div>${fields
+  return `<div class="fm-ctx-group" role="group" aria-label="${escapeHtml(t('fm.sort_by', 'Sort by'))}" data-i18n-aria-label="fm.sort_by"><div class="fm-ctx-heading">${escapeHtml(t('fm.sort_by', 'Sort by'))}</div>${fields
     .map(([k, label]) => row(`sort-${k}`, label, sortBy === k))
     .join(
       ''
@@ -395,7 +395,7 @@ export class FmSidebarTree {
           <div class="fm-tree-item fm-fav-item ${this.fm.currentPath === f.path ? 'active' : ''}${f.available === false ? ' is-missing' : ''}" data-path="${escapeHtml(f.path)}" title="${escapeHtml(f.available === false ? t('fm.fav_missing', 'This folder is no longer available') : f.path)}">
             <span class="fm-tree-icon" aria-hidden="true">⭐</span>
             <span class="fm-tree-label" role="button" tabindex="0"${this.fm.currentPath === f.path ? ' aria-current="true"' : ''}>${escapeHtml(f.name)}</span>
-            <button type="button" class="fm-fav-remove" data-fav-remove="${escapeHtml(f.path)}" title="${escapeHtml(t('fm.fav_remove', 'Remove from Favorites'))}" aria-label="${escapeHtml(t('fm.fav_remove', 'Remove from Favorites'))}: ${escapeHtml(f.name)}">✕</button>
+            <button type="button" class="fm-fav-remove" data-fav-remove="${escapeHtml(f.path)}" title="${escapeHtml(t('fm.fav_remove', 'Remove from Favorites'))}" data-i18n-title="fm.fav_remove" aria-label="${escapeHtml(t('fm.fav_remove', 'Remove from Favorites'))}: ${escapeHtml(f.name)}">✕</button>
           </div>`
           )
           .join('')}
@@ -775,7 +775,7 @@ export class FmInspector {
               : ''
           }
 
-          <button type="button" id="fm-insp-apply-perms-btn" class="btn-pill-toggle active" ${isGuarded ? `disabled title="${escapeHtml(t('fm.why_guarded', 'System folder: its permissions are protected'))}"` : ''} style="width: 100%; font-size: var(--kb-fs-xs); font-weight: 700; padding: 6px 12px; background: #0a7a70; color: #fff;">
+          <button type="button" id="fm-insp-apply-perms-btn" class="btn-pill-toggle active" ${isGuarded ? `disabled title="${escapeHtml(t('fm.why_guarded', 'System folder: its permissions are protected'))}" data-i18n-title="fm.why_guarded"` : ''} style="width: 100%; font-size: var(--kb-fs-xs); font-weight: 700; padding: 6px 12px; background: #0a7a70; color: #fff;">
             ${escapeHtml(t('ui.apply_permissions', 'Apply Permissions'))}
           </button>
         </div>

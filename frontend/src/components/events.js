@@ -77,13 +77,13 @@ function ensureControls(list) {
   const bar = document.createElement('div');
   bar.className = 'history-controls';
   bar.innerHTML = `
-    <div class="history-chips" role="group" aria-label="${escapeHtml(t('act.filter', 'Show'))}">
+    <div class="history-chips" role="group" aria-label="${escapeHtml(t('act.filter', 'Show'))}" data-i18n-aria-label="act.filter">
       <button type="button" class="btn-pill-toggle history-chip active" data-filter="all" aria-pressed="true">${escapeHtml(t('act.chip_all', 'All'))}</button>
       <button type="button" class="btn-pill-toggle history-chip" data-filter="look" aria-pressed="false">${escapeHtml(t('act.chip_look', 'Needs a look'))}</button>
       <button type="button" class="btn-pill-toggle history-chip" data-filter="files" aria-pressed="false" hidden>${escapeHtml(t('act.chip_files', 'Files'))}</button>
       <button type="button" class="btn-pill-toggle history-chip" data-filter="signins" aria-pressed="false" hidden>${escapeHtml(t('act.chip_signins', 'Sign-ins'))}</button>
     </div>
-    <input type="search" class="tz-text-input history-search" placeholder="${escapeHtml(t('act.search', 'Search the history'))}" aria-label="${escapeHtml(t('act.search', 'Search the history'))}">`;
+    <input type="search" class="tz-text-input history-search" placeholder="${escapeHtml(t('act.search', 'Search the history'))}" aria-label="${escapeHtml(t('act.search', 'Search the history'))}" data-i18n-aria-label="act.search">`;
   list.before(bar);
   // Sign-ins for people who may read the security log (Activity report section 4, row 5)
   import('./history-signins.js')

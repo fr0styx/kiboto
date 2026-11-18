@@ -9,6 +9,15 @@
 import { OPEN_WINDOWS_KEY } from './components/dock.js';
 
 const _entries = {};
+// A window builds its markup with t() once, when its module first loads. A window reopened after a
+// reload (or preloaded by hovering its icon) could load before the language did, and stayed English
+// (the window sweep of 18 Nov: the whole Apps window in Chinese). Its module now waits for the texts.
+let _textsReady = Promise.resolve();
+
+/** main.js hands over initI18n()'s promise; a failed language load still lets windows open. */
+export function whenTextsReady(promise) {
+  _textsReady = Promise.resolve(promise).catch(() => {});
+}
 
 function wasOpen(id) {
   try {
@@ -24,7 +33,7 @@ export function lazyWindow({ id, iconId, load, init, globals = [], openGlobal })
   const stubs = {};
   const ensure = () => {
     if (!promise) {
-      promise = load().then((mod) => {
+      promise = Promise.all([load(), _textsReady]).then(([mod]) => {
         mod[init]();
         if (icon) EVENTS.forEach((ev) => icon.removeEventListener(ev, onIcon));
         return mod;

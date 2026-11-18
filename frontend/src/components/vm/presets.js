@@ -15,7 +15,7 @@ export const PRESETS = {
 export function presetsHtml() {
   const b = (id, title, sub) => `<button type="button" class="vm-preset" data-vm-preset="${id}" aria-pressed="false">
       <strong>${escapeHtml(title)}</strong><span>${escapeHtml(sub)}</span></button>`;
-  return `<div class="vm-presets" role="group" aria-label="${escapeHtml(t('vmp.presets', 'Start from'))}">
+  return `<div class="vm-presets" role="group" aria-label="${escapeHtml(t('vmp.presets', 'Start from'))}" data-i18n-aria-label="vmp.presets">
       ${b('linux', t('vmp.p_linux', 'Linux or another system'), t('vmp.p_linux_2', '2 cores, 4 GB, 32 GB disk'))}
       ${b('windows11', t('vmp.p_win11', 'Windows 11'), t('vmp.p_win11_2', '4 cores, 8 GB, 64 GB disk, UEFI and TPM'))}
       ${b('homeassistant', t('vmp.p_ha', 'Home Assistant'), t('vmp.p_ha_2', '2 cores, 4 GB, its ready-made disk'))}

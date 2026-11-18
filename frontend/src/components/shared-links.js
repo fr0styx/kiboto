@@ -115,7 +115,7 @@ export function openSharedLinks({ everyone = false, me = '' } = {}) {
       <div class="smart-modal-header">
         <span class="smart-modal-title" id="shared-links-title"><span aria-hidden="true">🔗</span> ${escapeHtml(title)}</span>
         <div class="os-window-controls">
-          <button type="button" id="shared-links-close" class="win-btn close-btn" aria-label="${escapeHtml(t('diagnostics.close_btn', 'Close'))}">✕</button>
+          <button type="button" id="shared-links-close" class="win-btn close-btn" aria-label="${escapeHtml(t('diagnostics.close_btn', 'Close'))}" data-i18n-aria-label="diagnostics.close_btn">✕</button>
         </div>
       </div>
       <div class="smart-modal-body shared-links-list" id="shared-links-list" aria-live="polite"></div>

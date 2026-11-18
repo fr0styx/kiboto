@@ -31,7 +31,7 @@ const roleName = (roleId) => formatRole(roleId);
 export function aiSwitchesHtml(access) {
   const roles = (access?.roles || []).filter((r) => KID_ROLES.includes(r.id));
   if (!roles.length) return null;
-  return html`<div class="kids-ai" role="group" aria-label="${t('kids.ai', 'Kib, the AI helper')}">
+  return html`<div class="kids-ai" role="group" aria-label="${t('kids.ai', 'Kib, the AI helper')}" data-i18n-aria-label="kids.ai">
     ${roles.map(
       (r) => html`<div class="kids-ai-row"><span class="kids-ai-role">${roleName(r.id)}</span>
         <label class="kb-toggle"><input type="checkbox" role="switch" data-kids-ai="roles" data-role="${r.id}" ${r.on ? 'checked' : ''}><span>${t('ai.access_ask', 'Ask Kib')}</span></label>

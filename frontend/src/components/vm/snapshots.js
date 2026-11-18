@@ -36,7 +36,7 @@ export async function openVmSnapshotsModal(vmId, vmObj = null) {
           <span>${t('vm.snapshots', 'Snapshots & Rollback')}: ${escapeHtml(targetVm.name)}</span>
         </div>
         <div class="os-window-controls vmsn-row-3">
-          <button class="win-btn close-btn" id="vm-snap-modal-close" title="${t('diagnostics.close_btn', 'Close')}" aria-label="${t('diagnostics.close_btn', 'Close')}"></button>
+          <button class="win-btn close-btn" id="vm-snap-modal-close" title="${t('diagnostics.close_btn', 'Close')}" data-i18n-title="diagnostics.close_btn" aria-label="${t('diagnostics.close_btn', 'Close')}" data-i18n-aria-label="diagnostics.close_btn"></button>
         </div>
       </div>
 
@@ -70,7 +70,7 @@ export async function openVmSnapshotsModal(vmId, vmObj = null) {
           <div id="vm-snap-create-form" style="display: none; background: var(--kb-shade-30); border: 1px solid rgba(51,205,184,0.3); border-radius: 8px; padding: 12px; flex-direction: column; gap: 10px;">
             <div class="vmsn-xs-bold-accent">${t('vsn.new_title', 'New snapshot')}</div>
             <div class="vmsn-row-5">
-              <input class="vmsn-xs-strong-box-grow" type="text" id="vm-snap-name-input" maxlength="64" placeholder="${t('vm.snapshot_name', 'Snapshot Name')}" title="${t('vm.snap_name_rule', 'Letters, numbers, - and _ only.')}" />
+              <input class="vmsn-xs-strong-box-grow" type="text" id="vm-snap-name-input" maxlength="64" placeholder="${t('vm.snapshot_name', 'Snapshot Name')}" title="${t('vm.snap_name_rule', 'Letters, numbers, - and _ only.')}" data-i18n-title="vm.snap_name_rule" />
               <input class="vmsn-xs-strong-box-grow-2" type="text" id="vm-snap-desc-input" placeholder="${t('vm.snapshot_desc', 'Description (optional)')}" />
             </div>
             <div class="vmsn-row-6">

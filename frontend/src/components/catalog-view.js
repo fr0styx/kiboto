@@ -162,7 +162,7 @@ export function catalogCardHtml(app, { installed = false, openUrl = '' } = {}) {
       <div class="cat-card-badges">${badges.join('')}</div>
       <p class="cat-card-desc">${escapeHtml(app.description || '')}</p>
       <div class="cat-card-foot">
-        <span class="cat-card-port" title="${escapeHtml(t('catalog.port_hint', 'Suggested web UI port'))}">:${escapeHtml(String(app.default_port || ''))}</span>
+        <span class="cat-card-port" title="${escapeHtml(t('catalog.port_hint', 'Suggested web UI port'))}" data-i18n-title="catalog.port_hint">:${escapeHtml(String(app.default_port || ''))}</span>
         ${
           installed && openUrl
             ? `<a class="btn-pill-toggle catalog-open" href="${escapeHtml(openUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('apps.open', 'Open'))}</a>`

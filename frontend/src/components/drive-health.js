@@ -138,7 +138,7 @@ function ackHtml(f, canAck) {
     return `<div class="dh-ack">${escapeHtml(t('dh.acked', 'You acknowledged this on {date}; it counts again if it changes.', { date: when(f.acknowledged.at) }))} <button type="button" class="btn-pill-toggle is-small" data-dh-unack="${escapeHtml(f.code)}">${escapeHtml(t('dh.unack', 'Count it again'))}</button></div>`;
   }
   if (!canAck || !['watch', 'soon'].includes(f.severity)) return '';
-  return ` <button type="button" class="btn-pill-toggle is-small" data-dh-ack="${escapeHtml(f.code)}" title="${escapeHtml(t('dh.ack_hint', 'Stop counting this until it changes: the drive reads Healthy and no alert is sent for it'))}">${escapeHtml(t('dh.ack', 'I know about this'))}</button>`;
+  return ` <button type="button" class="btn-pill-toggle is-small" data-dh-ack="${escapeHtml(f.code)}" title="${escapeHtml(t('dh.ack_hint', 'Stop counting this until it changes: the drive reads Healthy and no alert is sent for it'))}" data-i18n-title="dh.ack_hint">${escapeHtml(t('dh.ack', 'I know about this'))}</button>`;
 }
 
 export function findingHtml(f, canAck = false) {
@@ -382,10 +382,10 @@ function windowHtml() {
     <div class="os-window-header">
       <div class="os-window-title" id="drive-health-title">${escapeHtml(t('dh.title', 'Drive Health'))}</div>
       <div class="os-window-controls">
-        <button class="win-btn refresh-btn" id="drive-health-export" title="${escapeHtml(t('dh.export', 'Save a report'))}" aria-label="${escapeHtml(t('dh.export', 'Save a report'))}">⤓</button>
-        <button class="win-btn refresh-btn" id="drive-health-refresh" title="${escapeHtml(t('dh.refresh', 'Check again'))}" aria-label="${escapeHtml(t('dh.refresh', 'Check again'))}">↻</button>
-        <button class="win-btn min-btn" id="drive-health-min" title="${escapeHtml(t('window.minimize', 'Minimize'))}" aria-label="${escapeHtml(t('window.minimize', 'Minimize'))}"></button>
-        <button class="win-btn close-btn" id="drive-health-close" title="${escapeHtml(t('window.close', 'Close'))}" aria-label="${escapeHtml(t('window.close', 'Close'))}"></button>
+        <button class="win-btn refresh-btn" id="drive-health-export" title="${escapeHtml(t('dh.export', 'Save a report'))}" data-i18n-title="dh.export" aria-label="${escapeHtml(t('dh.export', 'Save a report'))}" data-i18n-aria-label="dh.export">⤓</button>
+        <button class="win-btn refresh-btn" id="drive-health-refresh" title="${escapeHtml(t('dh.refresh', 'Check again'))}" data-i18n-title="dh.refresh" aria-label="${escapeHtml(t('dh.refresh', 'Check again'))}" data-i18n-aria-label="dh.refresh">↻</button>
+        <button class="win-btn min-btn" id="drive-health-min" title="${escapeHtml(t('window.minimize', 'Minimize'))}" data-i18n-title="window.minimize" aria-label="${escapeHtml(t('window.minimize', 'Minimize'))}" data-i18n-aria-label="window.minimize"></button>
+        <button class="win-btn close-btn" id="drive-health-close" title="${escapeHtml(t('window.close', 'Close'))}" data-i18n-title="window.close" aria-label="${escapeHtml(t('window.close', 'Close'))}" data-i18n-aria-label="window.close"></button>
       </div>
     </div>
     <div class="dh-body">
@@ -393,7 +393,7 @@ function windowHtml() {
         <div id="dh-overall"></div>
         <div id="dh-fleet" class="dh-fleet"></div>
         <button type="button" class="btn-pill-toggle is-small dh-compare-open" data-dh-compare>${escapeHtml(t('dh.compare_open', 'Compare all drives'))}</button>
-        <ul id="dh-list" class="dh-list" aria-label="${escapeHtml(t('dh.drives', 'Drives'))}"></ul>
+        <ul id="dh-list" class="dh-list" aria-label="${escapeHtml(t('dh.drives', 'Drives'))}" data-i18n-aria-label="dh.drives"></ul>
         <div id="dh-retired"></div>
       </aside>
       <section id="dh-detail" class="dh-detail" aria-live="polite"></section>

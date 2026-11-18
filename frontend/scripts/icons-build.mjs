@@ -18,6 +18,7 @@ import {
   emojiMatchers,
   iconMarkup,
   iconOnlyLabel,
+  iconOnlyLabelKey,
 } from '../src/icons-rules.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -84,10 +85,11 @@ function convert(src, root, offset = 0) {
     if (wordsBelow(host).trim()) return;
     labelled.add(host);
     const label = iconOnlyLabel(stripEmoji(attrOf(host, 'title') || ''), firstIcon);
+    const key = iconOnlyLabelKey(stripEmoji(attrOf(host, 'title') || ''), firstIcon);
     // last, as the page adds it (before the start tag closes)
     const tag = host.sourceCodeLocation.startTag;
     const at = src[tag.endOffset - 2] === '/' ? tag.endOffset - 2 : tag.endOffset - 1;
-    edits.push([at, at, ` aria-label="${escAttr(label)}"`]);
+    edits.push([at, at, ` aria-label="${escAttr(label)}"${key ? ` data-i18n-aria-label="${key}"` : ''}`]);
   }
 
   function walk(node, parents, skipText, skipAttrs) {

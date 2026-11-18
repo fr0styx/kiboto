@@ -94,7 +94,7 @@ export function statusHtml() {
   // data-i18n: built before the language has loaded, the labels still follow it
   const cell = (key, label, i18n) =>
     `<div class="phone-stat"><span class="phone-stat-label" data-i18n="${i18n}">${escapeHtml(label)}</span><span class="phone-stat-val" data-phone-stat="${key}">–</span></div>`;
-  return `<section class="phone-status" aria-label="${escapeHtml(t('phone.status', 'System status'))}">${[
+  return `<section class="phone-status" aria-label="${escapeHtml(t('phone.status', 'System status'))}" data-i18n-aria-label="phone.status">${[
     cell('cpu', t('phone.cpu', 'CPU'), 'phone.cpu'),
     cell('ram', t('phone.ram', 'Memory'), 'phone.ram'),
     cell('storage', t('mgmt.sidebar_storage', 'Storage'), 'mgmt.sidebar_storage'),
@@ -103,7 +103,7 @@ export function statusHtml() {
 }
 
 export function launcherHtml() {
-  const health = `<section class="phone-health" aria-label="${escapeHtml(t('overview.status_label', 'Status'))}" hidden></section>`;
+  const health = `<section class="phone-health" aria-label="${escapeHtml(t('overview.status_label', 'Status'))}" data-i18n-aria-label="overview.status_label" hidden></section>`;
   const title = `<h2 id="phone-settings-title" class="phone-settings-title" data-i18n="mgmt.sidebar_system">${escapeHtml(t('mgmt.sidebar_system', 'Settings'))}</h2>`;
   return `${health}${statusHtml()}<div class="phone-widgets" id="phone-widgets"></div><section class="phone-settings" aria-labelledby="phone-settings-title">${title}<nav class="phone-launcher-grid" data-i18n-aria-label="mgmt.sidebar_system" aria-label="${escapeHtml(t('mgmt.sidebar_system', 'Settings'))}">${TILES()
     .map(
@@ -195,7 +195,7 @@ export async function openAlertsPage() {
     page.className = 'phone-alerts-page';
     page.setAttribute('aria-labelledby', 'phone-alerts-title');
     page.innerHTML = html`<header class="phone-alerts-head"><h2 id="phone-alerts-title">${t('phone.attention', 'Needs attention')}</h2>
-      <button type="button" class="close-btn phone-alerts-close" aria-label="${t('common.close', 'Close')}">×</button></header>
+      <button type="button" class="close-btn phone-alerts-close" aria-label="${t('common.close', 'Close')}" data-i18n-aria-label="common.close">×</button></header>
       <div class="phone-alerts-body"></div>
       <button type="button" class="btn-pill-toggle phone-alerts-log" data-phone-log>${t('phone.all_activity', 'All activity')}</button>`;
     document.body.appendChild(page);
