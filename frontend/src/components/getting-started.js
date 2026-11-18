@@ -107,6 +107,13 @@ export function checklistHtml(data) {
     <ul class="gs-list">${rows.join('')}</ul>`;
 }
 
+let _lastChecklist = null;
+// drawn 1.5 s after load: on a slow connection the language came later and the list stayed English
+window.addEventListener('kiboto:lang-changed', () => {
+  const card = document.getElementById('getting-started-card');
+  if (card && !card.hidden && _lastChecklist) card.innerHTML = checklistHtml(_lastChecklist);
+});
+
 export async function showGettingStarted({ force = false } = {}) {
   if (!force && isHidden()) return null;
   let data;
@@ -136,6 +143,7 @@ export async function showGettingStarted({ force = false } = {}) {
       }
     });
   }
+  _lastChecklist = data;
   card.innerHTML = checklistHtml(data);
   card.hidden = false;
   return data;

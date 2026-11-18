@@ -190,6 +190,7 @@ export function initWizardStepper(modal) {
   const steps = document.createElement('ol');
   steps.className = 'setup-steps';
   steps.setAttribute('aria-label', t('setup.steps_label', 'Setup steps'));
+  steps.setAttribute('data-i18n-aria-label', 'setup.steps_label');
   steps.innerHTML = names.map((n, i) => `<li data-step="${i + 1}">${n}</li>`).join('');
   if (body) body.insertBefore(steps, body.firstChild);
   const back = document.createElement('button');
@@ -547,6 +548,7 @@ export function openSetupWizard(stats = null, forced = false) {
     if (closeBtn) {
       closeBtn.style.display = 'inline-block';
       closeBtn.title = t('ui.close_dialog', 'Close dialog');
+      closeBtn.setAttribute('data-i18n-title', 'ui.close_dialog');
     }
   }
 

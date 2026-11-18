@@ -5858,7 +5858,7 @@ export default {
   "icon.up_level": "Up one level",
   "chassis.open_health": "Open Drive Health for this drive",
   "cal.note_time": "Time",
-  "cal.note_kind": "Kind",
+  "cal.note_kind": "Note type",
   "w.ask_place": "Choose a place to see its weather.",
   "w.ask_place_not_found": "Could not tell where this is. Choose a place to see its weather.",
   "w.choose_place": "Choose a place",

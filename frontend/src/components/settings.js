@@ -491,10 +491,12 @@ export function initSettings() {
         badge.textContent = t('stg.lcd_badge_off', 'LCD: SCREEN OFF');
         badge.className = 'lcd-status-badge lcd-status-disabled';
         badge.title = t('ui.physical_lcd_display_is_turned', 'Physical LCD display is turned off (0 FPS).');
+        badge.setAttribute('data-i18n-title', 'ui.physical_lcd_display_is_turned');
       } else {
         badge.textContent = t('stg.lcd_badge_on', 'LCD: ACTIVE');
         badge.className = 'lcd-status-badge lcd-status-active';
         badge.title = t('ui.lcd_direct_output_is_actively', 'LCD direct output is actively streaming.');
+        badge.setAttribute('data-i18n-title', 'ui.lcd_direct_output_is_actively');
       }
     }
   }

@@ -56,6 +56,7 @@ export async function installDocFilters(root = document, onChange = () => {}) {
     box = Object.assign(document.createElement('div'), { id: BOX_ID, className: 'kb-row' });
     box.setAttribute('role', 'group');
     box.setAttribute('aria-label', t('tags.group', 'Document filters'));
+    box.setAttribute('data-i18n-aria-label', 'tags.group');
     placeFilter(box, anchor, root);
     box.addEventListener('click', (e) => {
       const b = /** @type {HTMLElement} */ (e.target).closest('[data-doc-tag], [data-doc-tag-clear]');

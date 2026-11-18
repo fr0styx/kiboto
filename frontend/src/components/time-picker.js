@@ -152,6 +152,7 @@ function getOrCreatePopover() {
     popover.style.display = 'none';
     popover.setAttribute('role', 'dialog');
     popover.setAttribute('aria-label', t('tp.label', 'Choose a time'));
+    popover.setAttribute('data-i18n-aria-label', 'tp.label');
     document.body.appendChild(popover);
   }
   return popover;

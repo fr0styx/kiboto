@@ -2127,6 +2127,7 @@ export class FileManagerWindow {
             ellipsis.style.cssText =
               'padding: 1px 5px; border-radius: 4px; background: rgba(255,255,255,0.08); cursor: pointer; font-size: var(--kb-fs-xs); margin: 0 2px;';
             ellipsis.title = t('ui.show_intermediate_folders', 'Show intermediate folders');
+            ellipsis.setAttribute('data-i18n-title', 'ui.show_intermediate_folders');
             ellipsis.onclick = (e) => {
               e.stopPropagation();
               this.showBreadcrumbsDropdown(ellipsis, parts, 1, hidden + 1);
@@ -2178,6 +2179,7 @@ export class FileManagerWindow {
     menu.className = 'fm-loc-menu';
     menu.setAttribute('role', 'menu');
     menu.setAttribute('aria-label', t('fm.quick_locations', 'Quick Locations'));
+    menu.setAttribute('data-i18n-aria-label', 'fm.quick_locations');
     // Only the closest place is the current one (/mnt/user/appdata, not also /mnt/user)
     const currentPath = closestPath(
       places.filter((pl) => !pl.action).map((pl) => pl.path),
@@ -2478,7 +2480,8 @@ export class FileManagerWindow {
       back.addEventListener('click', () => this.loadPath(this.currentPath));
       box.append(back);
     }
-    list.replaceChildren(box);
+    list.setAttribute('role', 'grid');
+    list.replaceChildren(gridMessage(box)); // a grid holds rows, also for its alert (axe, CI 18 Nov)
   }
 
   /** The folder wasn't opened because its disk is asleep and the person said no to waking it. */
@@ -2502,7 +2505,8 @@ export class FileManagerWindow {
     wake.textContent = t('fm.wake_open', 'Wake it and open');
     wake.addEventListener('click', () => this.loadPath(path, isNavigatingHistory, keepSelection));
     box.append(text, wake);
-    list.replaceChildren(box);
+    list.setAttribute('role', 'grid');
+    list.replaceChildren(gridMessage(box));
   }
 
   renderViewport() {
@@ -2531,6 +2535,7 @@ export class FileManagerWindow {
       box.append(p, clear);
       list.setAttribute('role', 'grid');
       list.setAttribute('aria-label', t('fmx.files', 'Files'));
+      list.setAttribute('data-i18n-aria-label', 'fmx.files');
       list.replaceChildren(gridMessage(box));
       return;
     }
@@ -2540,6 +2545,7 @@ export class FileManagerWindow {
       // a grid also when it holds one sentence: the row needs its grid (axe, 18 Nov)
       this.list.setAttribute('role', 'grid');
       this.list.setAttribute('aria-label', t('fmx.files', 'Files'));
+      this.list.setAttribute('data-i18n-aria-label', 'fmx.files');
       this.list.innerHTML = `<div role="row"><div role="gridcell" class="fmx-fs13-muted-center">${escapeHtml(t('fm.empty_folder', 'This folder is empty.'))}</div></div>`;
       return;
     }
@@ -2571,6 +2577,7 @@ export class FileManagerWindow {
       this.list.innerHTML = '';
       this.list.setAttribute('role', 'grid');
       this.list.setAttribute('aria-label', t('fm.grid_label', 'Files in this folder'));
+      this.list.setAttribute('data-i18n-aria-label', 'fm.grid_label');
 
       const folderSvg =
         '<svg viewBox="0 0 24 24" width="44" height="44" stroke="currentColor" stroke-width="1.5" fill="#eab308"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>';
@@ -2662,6 +2669,7 @@ export class FileManagerWindow {
 
     this.list.setAttribute('role', 'grid');
     this.list.setAttribute('aria-label', t('fmx.files', 'Files'));
+    this.list.setAttribute('data-i18n-aria-label', 'fmx.files');
     this.list.setAttribute('aria-multiselectable', 'true');
     for (let i = startIndex; i < endIndex; i++) {
       const file = this.fileList[i];

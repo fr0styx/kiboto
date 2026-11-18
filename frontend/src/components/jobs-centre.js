@@ -124,7 +124,12 @@ export function renderJobs(data, root = document) {
   );
 }
 
+let _jobsShown = 0;
+// the button's name follows the language, also when it arrives after the first count
+window.addEventListener('kiboto:lang-changed', () => setJobsBadge(_jobsShown));
+
 export function setJobsBadge(n) {
+  _jobsShown = n;
   const badge = document.getElementById('topbar-jobs-count');
   const btn = document.getElementById('topbar-jobs-btn');
   if (badge) {
@@ -302,6 +307,7 @@ export function initJobsCentre() {
     btn.id = 'topbar-jobs-btn';
     btn.className = 'topbar-jobs-btn';
     btn.title = t('jobs.title', 'Jobs');
+    btn.setAttribute('data-i18n-title', 'jobs.title');
     btn.setAttribute('aria-label', t('jobs.title', 'Jobs'));
     btn.setAttribute('data-i18n-aria-label', 'jobs.title'); // followed when the language arrives or changes
     btn.innerHTML = `<span class="topbar-jobs-icon" aria-hidden="true">⇅</span><span id="topbar-jobs-count" class="topbar-jobs-count" hidden>0</span>`;

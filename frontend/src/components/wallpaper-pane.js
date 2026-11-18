@@ -129,6 +129,7 @@ export function renderWallpaperGallery(files, active, version) {
   defaultCard.setAttribute('role', 'button');
   defaultCard.setAttribute('tabindex', '0');
   defaultCard.setAttribute('title', t('wp.default_title', 'Use the theme gradient'));
+  defaultCard.setAttribute('data-i18n-title', 'wp.default_title');
   defaultCard.innerHTML = `
     <div class="wallpaper-card-thumb-wrap default-gradient-thumb">
       <div class="wallpaper-gradient-preview"></div>

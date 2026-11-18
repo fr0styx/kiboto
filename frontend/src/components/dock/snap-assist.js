@@ -14,6 +14,7 @@ export function initSnapAssistFlyout() {
     flyout.className = 'snap-assist-flyout';
     flyout.setAttribute('role', 'dialog');
     flyout.setAttribute('aria-label', t('snap.layouts', 'Window layouts'));
+    flyout.setAttribute('data-i18n-aria-label', 'snap.layouts');
     flyout.setAttribute('aria-hidden', 'true');
     flyout.innerHTML = `
       <div class="snap-layout-title">${t('snap.layouts', 'Window layouts')}</div>

@@ -932,6 +932,7 @@ export const DockManager = {
     dashItem.type = 'button';
     dashItem.className = 'dock-item';
     dashItem.setAttribute('aria-label', t('dock.home', 'Dashboard Home'));
+    dashItem.setAttribute('data-i18n-aria-label', 'dock.home');
     dashItem.innerHTML = `<svg><use href="#i-globe"/></svg>`;
     dashItem.addEventListener('mouseenter', () =>
       showDockTooltip(dashItem, 'home', t('dock.home', 'Dashboard Home'), '#i-globe', false)
@@ -955,6 +956,7 @@ export const DockManager = {
     spotItem.type = 'button';
     spotItem.className = 'dock-item dock-item-spotlight';
     spotItem.setAttribute('aria-label', t('dock.palette', 'Search (Cmd+K)'));
+    spotItem.setAttribute('data-i18n-aria-label', 'dock.palette');
     spotItem.innerHTML = `<span class="dkp-e15">🔍</span>`;
     spotItem.addEventListener('mouseenter', () =>
       showDockTooltip(spotItem, 'spotlight', t('dock.palette', 'Search (Cmd+K)'), '', false)
@@ -1148,6 +1150,7 @@ export const DockManager = {
     notifItem.type = 'button';
     notifItem.className = 'dock-item dock-notif-btn';
     notifItem.setAttribute('aria-label', t('dock.notifications', 'Notification Center'));
+    notifItem.setAttribute('data-i18n-aria-label', 'dock.notifications');
     notifItem.innerHTML = `<svg><use href="#i-bell"/></svg><span class="dock-badge" id="dock-notif-badge" aria-hidden="true">0</span>`;
     notifItem.addEventListener('mouseenter', () =>
       showDockTooltip(notifItem, 'notif', t('dock.notifications', 'Notification Center'), '#i-bell', false)

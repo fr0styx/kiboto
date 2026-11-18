@@ -531,7 +531,9 @@ export function openVmEditModal(vmId, vmObj = null) {
           modalWin.style.maxHeight = 'calc(100vh - 36px - 72px)';
           modalWin.style.borderRadius = '0px';
           maxBtn.setAttribute('title', t('vmd.restore', 'Restore'));
+          maxBtn.setAttribute('data-i18n-title', 'vmd.restore');
           maxBtn.setAttribute('aria-label', t('vmd.restore', 'Restore'));
+          maxBtn.setAttribute('data-i18n-aria-label', 'vmd.restore');
           isMax = true;
         } else {
           modalWin.classList.remove('maximized');
@@ -555,7 +557,9 @@ export function openVmEditModal(vmId, vmObj = null) {
             modalWin.style.borderRadius = '14px';
           }
           maxBtn.setAttribute('title', t('ui.maximize', 'Maximize'));
+          maxBtn.setAttribute('data-i18n-title', 'ui.maximize');
           maxBtn.setAttribute('aria-label', t('ui.maximize', 'Maximize'));
+          maxBtn.setAttribute('data-i18n-aria-label', 'ui.maximize');
           isMax = false;
         }
       };

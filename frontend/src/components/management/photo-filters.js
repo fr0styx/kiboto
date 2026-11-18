@@ -35,6 +35,7 @@ export async function installPhotoFilters(root = document, onChange = () => {}) 
     box = Object.assign(document.createElement('div'), { id: BOX_ID, className: 'kb-row' });
     box.setAttribute('role', 'group');
     box.setAttribute('aria-label', t('photo_filters.group', 'Photo filters'));
+    box.setAttribute('data-i18n-aria-label', 'photo_filters.group');
     placeFilter(box, anchor, root);
     box.addEventListener('click', (e) => {
       const b = /** @type {HTMLElement} */ (e.target).closest(

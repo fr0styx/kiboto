@@ -207,6 +207,7 @@ export async function renderStatusSummary(root = document) {
     box.id = 'mgmt-status-summary';
     box.className = 'mgmt-status-summary';
     box.setAttribute('aria-label', t('overview.status_label', 'Status'));
+    box.setAttribute('data-i18n-aria-label', 'overview.status_label');
     const head = hub.querySelector('.mgmt-hub-heading'); // the page's heading stays first (Overview 5)
     hub.insertBefore(box, head ? head.nextSibling : hub.firstChild);
     hubTiles()

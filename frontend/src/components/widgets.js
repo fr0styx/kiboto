@@ -241,6 +241,7 @@ export function applyWidgetConfig() {
       wClock.dataset.boundClick = '1';
       wClock.style.cursor = 'pointer';
       wClock.title = t('ui.click_to_change_timezone_clock', 'Click to change timezone & clock format');
+      wClock.setAttribute('data-i18n-title', 'ui.click_to_change_timezone_clock');
       wClock.setAttribute('role', 'button');
       wClock.setAttribute('tabindex', '0');
       wClock.addEventListener('click', (e) => {
@@ -268,6 +269,7 @@ export function applyWidgetConfig() {
       wAiAccel.dataset.boundClick = '1';
       wAiAccel.style.cursor = 'pointer';
       wAiAccel.title = t('ui.click_to_open_ai_knowledge', 'Click to open AI Knowledge & Search');
+      wAiAccel.setAttribute('data-i18n-title', 'ui.click_to_open_ai_knowledge');
       wAiAccel.setAttribute('role', 'button');
       wAiAccel.setAttribute('tabindex', '0');
       wAiAccel.addEventListener('click', (e) => {
@@ -299,6 +301,7 @@ export function applyWidgetConfig() {
       wCalendar.dataset.boundClick = '1';
       wCalendar.style.cursor = 'pointer';
       wCalendar.title = t('ui.click_to_view_notes_reminders', 'Click to view notes, reminders & calendar sync');
+      wCalendar.setAttribute('data-i18n-title', 'ui.click_to_view_notes_reminders');
       wCalendar.setAttribute('role', 'button');
       wCalendar.setAttribute('tabindex', '0');
       wCalendar.addEventListener('click', (e) => {
@@ -351,6 +354,7 @@ export function applyWidgetConfig() {
       wWeather.dataset.boundClick = '1';
       wWeather.style.cursor = 'pointer';
       wWeather.title = t('ui.click_to_open_weather_widget', 'Click to open Weather & Widget Settings');
+      wWeather.setAttribute('data-i18n-title', 'ui.click_to_open_weather_widget');
       wWeather.setAttribute('role', 'button');
       wWeather.setAttribute('tabindex', '0');
       wWeather.addEventListener('click', (e) => {
@@ -377,6 +381,7 @@ export function applyWidgetConfig() {
       wSystem.dataset.boundClick = '1';
       wSystem.style.cursor = 'pointer';
       wSystem.title = t('ui.click_to_open_dashboard_telemetry', 'Open the dashboard');
+      wSystem.setAttribute('data-i18n-title', 'ui.click_to_open_dashboard_telemetry');
       wSystem.setAttribute('role', 'button');
       wSystem.setAttribute('tabindex', '0');
       wSystem.addEventListener('click', (e) => {
@@ -408,6 +413,7 @@ export function applyWidgetConfig() {
       wNetwork.dataset.boundClick = '1';
       wNetwork.style.cursor = 'pointer';
       wNetwork.title = t('ui.click_to_open_network_switch', 'Click to open Network & Switch Inspector');
+      wNetwork.setAttribute('data-i18n-title', 'ui.click_to_open_network_switch');
       wNetwork.setAttribute('role', 'button');
       wNetwork.setAttribute('tabindex', '0');
       wNetwork.addEventListener('click', (e) => {
@@ -439,6 +445,7 @@ export function applyWidgetConfig() {
       wStorage.dataset.boundClick = '1';
       wStorage.style.cursor = 'pointer';
       wStorage.title = t('ui.click_to_open_storage_pool', 'Click to open Storage Pool & Array Topology');
+      wStorage.setAttribute('data-i18n-title', 'ui.click_to_open_storage_pool');
       wStorage.setAttribute('role', 'button');
       wStorage.setAttribute('tabindex', '0');
       wStorage.addEventListener('click', (e) => {
@@ -470,6 +477,7 @@ export function applyWidgetConfig() {
       wUptime.dataset.boundClick = '1';
       wUptime.style.cursor = 'pointer';
       wUptime.title = t('ui.click_to_open_dashboard_telemetry', 'Open the dashboard');
+      wUptime.setAttribute('data-i18n-title', 'ui.click_to_open_dashboard_telemetry');
       wUptime.setAttribute('role', 'button');
       wUptime.setAttribute('tabindex', '0');
       wUptime.addEventListener('click', (e) => {
@@ -501,6 +509,7 @@ export function applyWidgetConfig() {
       wDriveTemp.dataset.boundClick = '1';
       wDriveTemp.style.cursor = 'pointer';
       wDriveTemp.title = t('ui.click_to_open_storage_disks', 'Click to open Storage & Disks');
+      wDriveTemp.setAttribute('data-i18n-title', 'ui.click_to_open_storage_disks');
       wDriveTemp.setAttribute('role', 'button');
       wDriveTemp.setAttribute('tabindex', '0');
       wDriveTemp.addEventListener('click', (e) => {
@@ -532,6 +541,7 @@ export function applyWidgetConfig() {
       wNetDial.dataset.boundClick = '1';
       wNetDial.style.cursor = 'pointer';
       wNetDial.title = t('ui.click_to_open_network_cockpit', 'Click to open Network Cockpit');
+      wNetDial.setAttribute('data-i18n-title', 'ui.click_to_open_network_cockpit');
       wNetDial.setAttribute('role', 'button');
       wNetDial.setAttribute('tabindex', '0');
       wNetDial.addEventListener('click', (e) => {
@@ -563,6 +573,7 @@ export function applyWidgetConfig() {
       wUpsGauge.dataset.boundClick = '1';
       wUpsGauge.style.cursor = 'pointer';
       wUpsGauge.title = t('ui.click_to_open_power_battery', 'Click to open Power & Battery Cockpit');
+      wUpsGauge.setAttribute('data-i18n-title', 'ui.click_to_open_power_battery');
       wUpsGauge.setAttribute('role', 'button');
       wUpsGauge.setAttribute('tabindex', '0');
       wUpsGauge.addEventListener('click', (e) => {
@@ -2323,6 +2334,7 @@ export function initWidgets() {
         wUpsGauge.dataset.boundClick = '1';
         wUpsGauge.style.cursor = 'pointer';
         wUpsGauge.title = t('ui.click_to_open_power_battery', 'Click to open Power & Battery Cockpit');
+        wUpsGauge.setAttribute('data-i18n-title', 'ui.click_to_open_power_battery');
         wUpsGauge.addEventListener('click', (e) => {
           if (
             /** @type {HTMLElement} */ (e.target).closest('.widget-handle') ||

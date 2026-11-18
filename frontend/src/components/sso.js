@@ -139,6 +139,7 @@ function immichBlock() {
     value: `${window.location.protocol}//${window.location.hostname}:2283`,
   });
   url.setAttribute('aria-label', t('sso.immich_url', 'Immich address'));
+  url.setAttribute('data-i18n-aria-label', 'sso.immich_url');
   const btn = Object.assign(document.createElement('button'), {
     type: 'button',
     className: 'btn-pill-toggle',
