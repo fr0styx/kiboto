@@ -33513,6 +33513,29 @@
     "title": "PutUrlResponse",
     "type": "object"
    },
+   "QuietNightIn": {
+    "properties": {
+     "enabled": {
+      "default": false,
+      "title": "Enabled",
+      "type": "boolean"
+     },
+     "end": {
+      "default": "07:00",
+      "maxLength": 5,
+      "title": "End",
+      "type": "string"
+     },
+     "start": {
+      "default": "23:00",
+      "maxLength": 5,
+      "title": "Start",
+      "type": "string"
+     }
+    },
+    "title": "QuietNightIn",
+    "type": "object"
+   },
    "RagAskRequest": {
     "properties": {
      "limit": {
@@ -52556,6 +52579,83 @@
      }
     },
     "summary": "Apply Fan Preset",
+    "tags": [
+     "Thermal & Fan Control"
+    ],
+    "x-required-scopes": [
+     "hardware:fans"
+    ]
+   }
+  },
+  "/api/v1/fans/quiet-night": {
+   "get": {
+    "description": "Quieter at night (hardware extra, off by default): backend/services/quiet_night.py.",
+    "operationId": "get_quiet_night_api_v1_fans_quiet_night_get",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Get Quiet Night Api V1 Fans Quiet Night Get",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Get Quiet Night",
+    "tags": [
+     "Thermal & Fan Control"
+    ],
+    "x-required-scopes": [
+     "hardware:read",
+     "system:view"
+    ]
+   },
+   "put": {
+    "operationId": "put_quiet_night_api_v1_fans_quiet_night_put",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/QuietNightIn"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Put Quiet Night Api V1 Fans Quiet Night Put",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Put Quiet Night",
     "tags": [
      "Thermal & Fan Control"
     ],

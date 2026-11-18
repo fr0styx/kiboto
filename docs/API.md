@@ -38,7 +38,7 @@ request and response schemas.
 
 <!-- BEGIN generated endpoints: python scripts/api_reference.py --update -->
 
-751 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
+753 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
 
 ### AI Conversation History
 
@@ -944,6 +944,8 @@ request and response schemas.
 | `POST` | `/api/v1/fans/presets` | `hardware:fans` | Saves or updates a custom named fan curve preset |
 | `DELETE` | `/api/v1/fans/presets/{preset_name}` | `hardware:fans` | Deletes a custom named fan curve preset |
 | `POST` | `/api/v1/fans/presets/{preset_name}/apply` | `hardware:fans` | Applies a custom named preset to the active fan curve |
+| `GET` | `/api/v1/fans/quiet-night` | any of `hardware:read`, `system:view` | Quieter at night (hardware extra, off by default): backend/services/quiet_night.py |
+| `PUT` | `/api/v1/fans/quiet-night` | `hardware:fans` | Put Quiet Night |
 
 ### UPS & Power Integrity
 

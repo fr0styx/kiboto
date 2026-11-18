@@ -51,6 +51,9 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   Kiboto warns you, stops the virtual machines and apps, saves what is in memory and switches the NAS off. Where it
   can't switch the NAS off itself, it stops what it can and asks you to.
 
+- **Quieter at night** (Hardware, off by default): in Automatic, the drive fans turn a little slower between two
+  times; warm drives get the normal curve and the safety limits still run the fans at full speed.
+
 #### Changes
 
 - **The Security check says it in words**: "Everything is fine" or "2 things need a look", with what needs a

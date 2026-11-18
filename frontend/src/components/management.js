@@ -1031,6 +1031,7 @@ export function initManagement() {
       if (targetId === 'mgmt-sec-hardware' || targetId === 'mgmt-sec-services') {
         sectionName = t('mgmt.hardware_title', 'Hardware & Profiles');
         if (typeof restoreHardwareTabsToManagement === 'function') restoreHardwareTabsToManagement();
+        import('./quiet-night-card.js').then((m) => m.renderQuietNightCard()).catch(() => {}); // hardware extra
         if (state.lastStats || state.latestStats) updateManagementTelemetry(state.lastStats || state.latestStats);
       } else if (targetId === 'mgmt-sec-away') {
         sectionName = t('mgmt.sidebar_away', 'Away from home');

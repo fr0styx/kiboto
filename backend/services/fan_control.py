@@ -82,6 +82,17 @@ DISK_RELEASE_C = 3
 CRITICAL_ALERT_GAP_SECS = 900  # a return within 15 minutes of the last alert is logged, not alerted again
 
 
+def _drive_curve_temp(temp, profile):
+    """The temperature a drive zone's curve is read at: a few degrees lower at night when
+    "Quieter at night" is on, in Automatic only (backend/services/quiet_night.py). The full-speed
+    override, fan stop, the NVMe and processor fans keep the real temperatures."""
+    if profile != "auto":
+        return temp
+    from backend.services import quiet_night
+
+    return quiet_night.curve_temp(temp)
+
+
 def _critical_override(cpu_temp, disks) -> bool:
     """Whether fans must run at 100%; alerts and logs when that starts and logs when it ends."""
     active = Z_STATE.critical_temp_active
@@ -220,7 +231,7 @@ def run_fan_control(
     cpu_curve = fan_cfg.get("cpu_curve_points")
 
     raw_pwm1 = calc_curve_pwm(
-        t_zone1,
+        _drive_curve_temp(t_zone1, profile),
         min_pwm=FAN_MIN_PWM,
         max_pwm=FAN_MAX_PWM,
         temp_min=temp_min,
@@ -230,7 +241,7 @@ def run_fan_control(
         zone_key="zone1",
     )
     raw_pwm2 = calc_curve_pwm(
-        t_zone2,
+        _drive_curve_temp(t_zone2, profile),
         min_pwm=FAN_MIN_PWM,
         max_pwm=FAN_MAX_PWM,
         temp_min=temp_min,

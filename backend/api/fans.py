@@ -1,6 +1,7 @@
-from typing import Optional
+from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel, Field
 
 from backend.auth import require_scope
 from backend.config import (
@@ -209,3 +210,28 @@ def get_acoustic_calibration():
 def stop_acoustic_calibration():
     """Aborts the acoustic calibration sweep and immediately restores normal fan curves."""
     return stop_acoustic_sweep()
+
+
+class QuietNightIn(BaseModel):
+    enabled: bool = False
+    start: str = Field("23:00", max_length=5)
+    end: str = Field("07:00", max_length=5)
+
+
+@router.get("/fans/quiet-night", dependencies=[Depends(require_scope("hardware:read", "system:view"))])
+def get_quiet_night() -> dict[str, Any]:
+    """Quieter at night (hardware extra, off by default): backend/services/quiet_night.py."""
+    from backend.services import quiet_night
+
+    return quiet_night.public_state()
+
+
+@router.put("/fans/quiet-night", dependencies=[Depends(require_scope("hardware:fans"))])
+def put_quiet_night(req: QuietNightIn) -> dict[str, Any]:
+    from backend.errors import ApiError, SaidError
+    from backend.services import quiet_night
+
+    try:
+        return quiet_night.save(req.enabled, req.start, req.end)
+    except SaidError as e:
+        raise ApiError(400, str(e), "invalid_settings", text=e.text) from e
