@@ -83,7 +83,8 @@ def test_the_download_is_checked_then_unpacked(tmp_path, monkeypatch):
         "sha256": hashlib.sha256(payload).hexdigest(),
     }
     monkeypatch.setattr("backend.services.safe_fetch.safe_open", lambda url, **kw: _Resp(payload))
-    vms._DOWNLOAD_TASKS["t1"] = {"status": "downloading"}
+    # setitem: removed afterwards; a task left behind broke the jobs list for a later test (random order, seed 629288)
+    monkeypatch.setitem(vms._DOWNLOAD_TASKS, "t1", {"status": "downloading"})
     vms._download_iso_worker("t1", item, str(tmp_path))
     assert vms._DOWNLOAD_TASKS["t1"]["status"] == "completed"
     assert vms._DOWNLOAD_TASKS["t1"]["path"] == str(tmp_path / "haos.qcow2")

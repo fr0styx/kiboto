@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import pathlib
 import re
 import sys
@@ -25,7 +26,12 @@ NEWEST = 2  # release lines per platform that should have a recording
 
 
 def _get(url: str) -> object:
-    req = urllib.request.Request(url, headers={"User-Agent": "kiboto-compat-check", "Accept": "application/json"})
+    headers = {"User-Agent": "kiboto-compat-check", "Accept": "application/json"}
+    token = os.environ.get("GITHUB_TOKEN", "")
+    if token and url.startswith("https://api.github.com/"):
+        # without it the runner shares GitHub's per-address limit: "403 rate limit exceeded" on 17 Nov
+        headers["Authorization"] = f"Bearer {token}"
+    req = urllib.request.Request(url, headers=headers)
     with urllib.request.urlopen(req, timeout=30) as r:  # noqa: S310 (two fixed https addresses)
         return json.loads(r.read())
 

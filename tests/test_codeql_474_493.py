@@ -7,9 +7,13 @@ import pytest
 
 
 def test_a_version_is_never_restored_through_a_symlink_out_of_the_shares(pool_tree, tmp_path, monkeypatch):
-    from backend.services import file_versions
+    from backend.services import file_versions, recycle_bin
 
     POOL_DIR = pool_tree
+    # the pool is shared: the old file must not land in its recycle bin, where a later test lists
+    # the trash (the random-order nightly of 17 Nov, seed 629288). Binning has its own tests.
+    monkeypatch.setattr(recycle_bin, "bin_for", lambda path: None)
+    monkeypatch.setattr(recycle_bin, "same_disk_bin", lambda path: None)
     secret = os.path.join(os.path.realpath(os.path.join(pool_tree, "escape")), "secret", "keep.txt")
     with open(secret, "w") as f:
         f.write("untouched")
@@ -32,7 +36,9 @@ def test_a_version_is_never_restored_through_a_symlink_out_of_the_shares(pool_tr
         with open(plain) as f:
             assert f.read() == "old version"
     finally:
-        os.remove(link)
+        for leftover in (link, os.path.join(POOL_DIR, "media", "plain.txt"), secret):
+            if os.path.lexists(leftover):
+                os.remove(leftover)
 
 
 def test_mqtt_over_tls_asks_for_tls_1_2_at_least(monkeypatch):

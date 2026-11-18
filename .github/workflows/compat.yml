@@ -30,4 +30,6 @@ jobs:
           python-version: "3.12"
 
       - name: Compare release lines with the recordings
+        env:
+          GITHUB_TOKEN: ${{ github.token }}  # read-only; for TrueNAS's tags on GitHub
         run: python scripts/compat_trains.py --summary "$GITHUB_STEP_SUMMARY"
