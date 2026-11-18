@@ -7,7 +7,7 @@ import { showToast, showPromptToast, showBottomSheet } from '../../toast.js';
 import { t } from '../../i18n.js';
 import { makeDraggable, bringToFront } from '../dock.js';
 import { createTerminalView } from '../terminal-view.js';
-import { vmState } from './state.js';
+import './state.js';
 import { isCompact, isTouch } from '../../device.js';
 import { setIconLabel } from '../../ui/primitives.js';
 
@@ -998,7 +998,7 @@ export function openVmConsole(vmId, vmName = 'Virtual Machine', initialMode = 'g
       });
     }
 
-    const hiddenInput = consoleWin.querySelector('#vm-console-hidden-input');
+    const hiddenInput = /** @type {HTMLInputElement} */ (consoleWin.querySelector('#vm-console-hidden-input'));
     const btnSoftKbd = consoleWin.querySelector('#btn-vnc-softkbd');
     if (btnSoftKbd && hiddenInput) {
       btnSoftKbd.onclick = (e) => {
@@ -1088,7 +1088,7 @@ export function openVmConsole(vmId, vmName = 'Virtual Machine', initialMode = 'g
           } catch (_) {}
           _activeSerialWs = null;
         }
-        const canvas = consoleWin.querySelector('#vm-console-canvas');
+        const canvas = /** @type {HTMLCanvasElement} */ (consoleWin.querySelector('#vm-console-canvas'));
         if (canvas && canvas._blinkInterval) {
           clearInterval(canvas._blinkInterval);
           canvas._blinkInterval = null;

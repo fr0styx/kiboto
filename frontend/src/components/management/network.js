@@ -744,11 +744,11 @@ export async function openNetworkPortModal(ifaceName) {
 
   const titleIface = document.getElementById('net-port-cfg-iface');
   const dot = document.getElementById('net-port-cfg-dot');
-  const aliasInput = document.getElementById('net-port-alias-input');
-  const mtuInput = document.getElementById('net-port-mtu-input');
-  const wolToggle = document.getElementById('net-port-wol-toggle');
+  const aliasInput = /** @type {HTMLInputElement} */ (document.getElementById('net-port-alias-input'));
+  const mtuInput = /** @type {HTMLInputElement} */ (document.getElementById('net-port-mtu-input'));
+  const wolToggle = /** @type {HTMLInputElement} */ (document.getElementById('net-port-wol-toggle'));
   const wolDesc = document.getElementById('net-port-wol-desc');
-  const speedSelect = document.getElementById('net-port-speed-select');
+  const speedSelect = /** @type {HTMLSelectElement} */ (document.getElementById('net-port-speed-select'));
   const roMac = document.getElementById('net-port-ro-mac');
   const roDriver = document.getElementById('net-port-ro-driver');
   const roPci = document.getElementById('net-port-ro-pci');
@@ -842,11 +842,11 @@ export function closeNetworkPortModal() {
 
 export async function saveNetworkPortConfig() {
   if (!_currentPortIface) return;
-  const aliasInput = document.getElementById('net-port-alias-input');
-  const mtuInput = document.getElementById('net-port-mtu-input');
-  const wolToggle = document.getElementById('net-port-wol-toggle');
-  const speedSelect = document.getElementById('net-port-speed-select');
-  const saveBtn = document.getElementById('net-port-cfg-save-btn');
+  const aliasInput = /** @type {HTMLInputElement} */ (document.getElementById('net-port-alias-input'));
+  const mtuInput = /** @type {HTMLInputElement} */ (document.getElementById('net-port-mtu-input'));
+  const wolToggle = /** @type {HTMLInputElement} */ (document.getElementById('net-port-wol-toggle'));
+  const speedSelect = /** @type {HTMLSelectElement} */ (document.getElementById('net-port-speed-select'));
+  const saveBtn = /** @type {HTMLButtonElement} */ (document.getElementById('net-port-cfg-save-btn'));
 
   const alias = aliasInput ? aliasInput.value.trim() : '';
   const mtu = mtuInput ? parseInt(mtuInput.value, 10) : 1500;
@@ -891,10 +891,10 @@ export function openDockerNetworkCreateModal() {
   const overlay = document.getElementById('network-docker-create-overlay');
   if (!overlay) return;
 
-  const nameInput = document.getElementById('net-docker-name-input');
-  const driverSelect = document.getElementById('net-docker-driver-select');
-  const subnetInput = document.getElementById('net-docker-subnet-input');
-  const gwInput = document.getElementById('net-docker-gateway-input');
+  const nameInput = /** @type {HTMLInputElement} */ (document.getElementById('net-docker-name-input'));
+  const driverSelect = /** @type {HTMLSelectElement} */ (document.getElementById('net-docker-driver-select'));
+  const subnetInput = /** @type {HTMLInputElement} */ (document.getElementById('net-docker-subnet-input'));
+  const gwInput = /** @type {HTMLInputElement} */ (document.getElementById('net-docker-gateway-input'));
 
   if (nameInput) nameInput.value = '';
   if (driverSelect) driverSelect.value = 'bridge';
@@ -912,11 +912,11 @@ export function closeDockerNetworkCreateModal() {
 }
 
 export async function submitDockerNetworkCreate() {
-  const nameInput = document.getElementById('net-docker-name-input');
-  const driverSelect = document.getElementById('net-docker-driver-select');
-  const subnetInput = document.getElementById('net-docker-subnet-input');
-  const gwInput = document.getElementById('net-docker-gateway-input');
-  const submitBtn = document.getElementById('net-docker-create-submit-btn');
+  const nameInput = /** @type {HTMLInputElement} */ (document.getElementById('net-docker-name-input'));
+  const driverSelect = /** @type {HTMLSelectElement} */ (document.getElementById('net-docker-driver-select'));
+  const subnetInput = /** @type {HTMLInputElement} */ (document.getElementById('net-docker-subnet-input'));
+  const gwInput = /** @type {HTMLInputElement} */ (document.getElementById('net-docker-gateway-input'));
+  const submitBtn = /** @type {HTMLButtonElement} */ (document.getElementById('net-docker-create-submit-btn'));
 
   const name = nameInput ? nameInput.value.trim() : '';
   const driver = driverSelect ? driverSelect.value : 'bridge';
@@ -955,11 +955,11 @@ export async function openHostIpConfigModal() {
   const btnStatic = document.getElementById('net-proto-btn-static');
   const btnDhcp = document.getElementById('net-proto-btn-dhcp');
   const ifaceSelect = document.getElementById('net-host-iface-select');
-  const ipInput = document.getElementById('net-host-ip-input');
-  const netmaskInput = document.getElementById('net-host-netmask-input');
-  const gwInput = document.getElementById('net-host-gateway-input');
-  const dns1Input = document.getElementById('net-host-dns1-input');
-  const dns2Input = document.getElementById('net-host-dns2-input');
+  const ipInput = /** @type {HTMLInputElement} */ (document.getElementById('net-host-ip-input'));
+  const netmaskInput = /** @type {HTMLInputElement} */ (document.getElementById('net-host-netmask-input'));
+  const gwInput = /** @type {HTMLInputElement} */ (document.getElementById('net-host-gateway-input'));
+  const dns1Input = /** @type {HTMLInputElement} */ (document.getElementById('net-host-dns1-input'));
+  const dns2Input = /** @type {HTMLInputElement} */ (document.getElementById('net-host-dns2-input'));
   const staticFields = document.getElementById('net-host-static-fields');
 
   try {
@@ -1019,13 +1019,13 @@ export async function applyHostIpConfig() {
   const btnStatic = document.getElementById('net-proto-btn-static');
   const isStatic = btnStatic ? btnStatic.classList.contains('active') : true;
   const mode = isStatic ? 'static' : 'dhcp';
-  const ifaceSelect = document.getElementById('net-host-iface-select');
-  const ipInput = document.getElementById('net-host-ip-input');
-  const netmaskInput = document.getElementById('net-host-netmask-input');
-  const gwInput = document.getElementById('net-host-gateway-input');
-  const dns1Input = document.getElementById('net-host-dns1-input');
-  const dns2Input = document.getElementById('net-host-dns2-input');
-  const applyBtn = document.getElementById('net-host-cfg-apply-btn');
+  const ifaceSelect = /** @type {HTMLSelectElement} */ (document.getElementById('net-host-iface-select'));
+  const ipInput = /** @type {HTMLInputElement} */ (document.getElementById('net-host-ip-input'));
+  const netmaskInput = /** @type {HTMLInputElement} */ (document.getElementById('net-host-netmask-input'));
+  const gwInput = /** @type {HTMLInputElement} */ (document.getElementById('net-host-gateway-input'));
+  const dns1Input = /** @type {HTMLInputElement} */ (document.getElementById('net-host-dns1-input'));
+  const dns2Input = /** @type {HTMLInputElement} */ (document.getElementById('net-host-dns2-input'));
+  const applyBtn = /** @type {HTMLButtonElement} */ (document.getElementById('net-host-cfg-apply-btn'));
 
   const iface = ifaceSelect ? ifaceSelect.value : 'br0';
   const ip = ipInput ? ipInput.value.trim() : '';
@@ -1078,10 +1078,10 @@ export async function openBondConfigModal(bondName) {
   if (!overlay) return;
 
   const targetBadge = document.getElementById('net-bond-target-badge');
-  const modeSelect = document.getElementById('net-bond-mode-select');
+  const modeSelect = /** @type {HTMLSelectElement} */ (document.getElementById('net-bond-mode-select'));
   const modeDesc = document.getElementById('net-bond-mode-desc');
   const slavesContainer = document.getElementById('net-bond-slaves-container');
-  const miimonInput = document.getElementById('net-bond-miimon-input');
+  const miimonInput = /** @type {HTMLInputElement} */ (document.getElementById('net-bond-miimon-input'));
 
   if (targetBadge) targetBadge.textContent = bondName;
 
@@ -1138,9 +1138,9 @@ export function closeBondConfigModal() {
 
 export async function saveBondConfig() {
   if (!_currentBondName) return;
-  const modeSelect = document.getElementById('net-bond-mode-select');
-  const miimonInput = document.getElementById('net-bond-miimon-input');
-  const saveBtn = document.getElementById('net-bond-cfg-save-btn');
+  const modeSelect = /** @type {HTMLSelectElement} */ (document.getElementById('net-bond-mode-select'));
+  const miimonInput = /** @type {HTMLInputElement} */ (document.getElementById('net-bond-miimon-input'));
+  const saveBtn = /** @type {HTMLButtonElement} */ (document.getElementById('net-bond-cfg-save-btn'));
 
   const mode = modeSelect ? modeSelect.value : '1';
   const miimon = miimonInput ? parseInt(miimonInput.value, 10) : 100;
@@ -1190,7 +1190,7 @@ export async function openBridgeConfigModal(brName) {
   const targetBadge = document.getElementById('net-bridge-target-badge');
   const btnEnable = document.getElementById('net-stp-btn-enable');
   const btnDisable = document.getElementById('net-stp-btn-disable');
-  const fdInput = document.getElementById('net-bridge-fd-input');
+  const fdInput = /** @type {HTMLInputElement} */ (document.getElementById('net-bridge-fd-input'));
   const membersContainer = document.getElementById('net-bridge-members-container');
 
   if (targetBadge) targetBadge.textContent = brName;
@@ -1251,8 +1251,8 @@ export function closeBridgeConfigModal() {
 export async function saveBridgeConfig() {
   if (!_currentBridgeName) return;
   const btnEnable = document.getElementById('net-stp-btn-enable');
-  const fdInput = document.getElementById('net-bridge-fd-input');
-  const saveBtn = document.getElementById('net-bridge-cfg-save-btn');
+  const fdInput = /** @type {HTMLInputElement} */ (document.getElementById('net-bridge-fd-input'));
+  const saveBtn = /** @type {HTMLButtonElement} */ (document.getElementById('net-bridge-cfg-save-btn'));
 
   const stp = btnEnable ? btnEnable.classList.contains('active') : false;
   const forward_delay = fdInput ? parseInt(fdInput.value, 10) : 0;
@@ -1291,8 +1291,8 @@ export async function openCreateVlanModal() {
   if (!overlay) return;
 
   const parentSelect = document.getElementById('net-vlan-parent-select');
-  const idInput = document.getElementById('net-vlan-id-input');
-  const aliasInput = document.getElementById('net-vlan-alias-input');
+  const idInput = /** @type {HTMLInputElement} */ (document.getElementById('net-vlan-id-input'));
+  const aliasInput = /** @type {HTMLInputElement} */ (document.getElementById('net-vlan-alias-input'));
 
   if (idInput) idInput.value = '';
   if (aliasInput) aliasInput.value = '';
@@ -1330,10 +1330,10 @@ export function closeCreateVlanModal() {
 }
 
 export async function submitCreateVlan() {
-  const parentSelect = document.getElementById('net-vlan-parent-select');
-  const idInput = document.getElementById('net-vlan-id-input');
-  const aliasInput = document.getElementById('net-vlan-alias-input');
-  const submitBtn = document.getElementById('net-vlan-create-submit-btn');
+  const parentSelect = /** @type {HTMLSelectElement} */ (document.getElementById('net-vlan-parent-select'));
+  const idInput = /** @type {HTMLInputElement} */ (document.getElementById('net-vlan-id-input'));
+  const aliasInput = /** @type {HTMLInputElement} */ (document.getElementById('net-vlan-alias-input'));
+  const submitBtn = /** @type {HTMLButtonElement} */ (document.getElementById('net-vlan-create-submit-btn'));
 
   const parent = parentSelect ? parentSelect.value : '';
   const vid = idInput ? parseInt(idInput.value, 10) : 0;
@@ -1455,7 +1455,7 @@ export function initNetworkControls() {
     if (!btn.dataset.bound) {
       btn.dataset.bound = '1';
       btn.addEventListener('click', () => {
-        const netmaskInput = document.getElementById('net-host-netmask-input');
+        const netmaskInput = /** @type {HTMLInputElement} */ (document.getElementById('net-host-netmask-input'));
         if (netmaskInput && btn.dataset.netmask) {
           netmaskInput.value = btn.dataset.netmask;
           document.querySelectorAll('.net-cidr-preset').forEach((b) => b.classList.remove('active'));
@@ -1469,8 +1469,8 @@ export function initNetworkControls() {
     if (!btn.dataset.bound) {
       btn.dataset.bound = '1';
       btn.addEventListener('click', () => {
-        const dns1Input = document.getElementById('net-host-dns1-input');
-        const dns2Input = document.getElementById('net-host-dns2-input');
+        const dns1Input = /** @type {HTMLInputElement} */ (document.getElementById('net-host-dns1-input'));
+        const dns2Input = /** @type {HTMLInputElement} */ (document.getElementById('net-host-dns2-input'));
         if (dns1Input && btn.dataset.dns1) dns1Input.value = btn.dataset.dns1;
         if (dns2Input && btn.dataset.dns2) dns2Input.value = btn.dataset.dns2;
         document.querySelectorAll('.net-dns-preset').forEach((b) => b.classList.remove('active'));
@@ -1497,7 +1497,7 @@ export function initNetworkControls() {
     portSave.addEventListener('click', saveNetworkPortConfig);
   }
 
-  const mtuInput = document.getElementById('net-port-mtu-input');
+  const mtuInput = /** @type {HTMLInputElement} */ (document.getElementById('net-port-mtu-input'));
   if (mtuInput && !mtuInput.dataset.bound) {
     mtuInput.dataset.bound = '1';
     mtuInput.addEventListener('input', () => {
@@ -1559,7 +1559,7 @@ export function initNetworkControls() {
     bondSave.addEventListener('click', saveBondConfig);
   }
 
-  const bondModeSelect = document.getElementById('net-bond-mode-select');
+  const bondModeSelect = /** @type {HTMLSelectElement} */ (document.getElementById('net-bond-mode-select'));
   const bondModeDesc = document.getElementById('net-bond-mode-desc');
   if (bondModeSelect && !bondModeSelect.dataset.bound) {
     bondModeSelect.dataset.bound = '1';

@@ -71,7 +71,7 @@ export async function openPreviousVersions(path, name, onChange = null) {
 
   dialog.addEventListener('click', async (e) => {
     if (e.target === dialog) return done();
-    const btn = e.target.closest('button[data-act]');
+    const btn = /** @type {HTMLElement} */ (e.target).closest('button[data-act]');
     if (!btn) return;
     const act = btn.dataset.act;
     if (act === 'close') return done();

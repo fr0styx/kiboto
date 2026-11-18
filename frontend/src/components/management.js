@@ -808,7 +808,7 @@ export function initManagement() {
     } else if (paneId === 'mgmt-pane-theme') {
       if (typeof syncDesktopThemeUI === 'function') syncDesktopThemeUI();
     } else if (paneId === 'mgmt-pane-language') {
-      const select = document.getElementById('mgmt-lang-select');
+      const select = /** @type {HTMLSelectElement} */ (document.getElementById('mgmt-lang-select'));
       if (select && typeof getLanguage === 'function') {
         select.value = getLanguage();
       }
@@ -1753,8 +1753,8 @@ export function initManagement() {
   if (createReplBtn && replModal) {
     const replCloseBtn = document.getElementById('modal-repl-close-btn');
     const replCancelBtn = document.getElementById('modal-repl-cancel-btn');
-    const replForm = document.getElementById('create-replication-pipeline-form');
-    const replTargetType = document.getElementById('repl-target-type');
+    const replForm = /** @type {HTMLFormElement} */ (document.getElementById('create-replication-pipeline-form'));
+    const replTargetType = /** @type {HTMLSelectElement} */ (document.getElementById('repl-target-type'));
     const replRemoteFields = document.getElementById('repl-remote-fields');
 
     const closeReplModal = () => {
@@ -1798,27 +1798,40 @@ export function initManagement() {
       replForm._bound = true;
       replForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const submitBtn = document.getElementById('btn-submit-repl-pipeline');
+        const submitBtn = /** @type {HTMLButtonElement} */ (document.getElementById('btn-submit-repl-pipeline'));
         try {
           if (submitBtn) {
             submitBtn.disabled = true;
             submitBtn.textContent = t('ui.saving', 'Saving...');
           }
-          const tType = document.getElementById('repl-target-type')?.value || 'local';
+          const tType =
+            /** @type {HTMLSelectElement} */ (document.getElementById('repl-target-type'))?.value || 'local';
           const payload = {
-            name: document.getElementById('repl-job-name')?.value.trim(),
-            source_pool: document.getElementById('repl-source-pool')?.value.trim(),
-            source_dataset: document.getElementById('repl-source-dataset')?.value.trim(),
+            name: /** @type {HTMLInputElement} */ (document.getElementById('repl-job-name'))?.value.trim(),
+            source_pool: /** @type {HTMLInputElement} */ (document.getElementById('repl-source-pool'))?.value.trim(),
+            source_dataset: /** @type {HTMLInputElement} */ (
+              document.getElementById('repl-source-dataset')
+            )?.value.trim(),
             target_type: tType,
-            target_pool: document.getElementById('repl-target-pool')?.value.trim(),
-            target_dataset: document.getElementById('repl-target-dataset')?.value.trim(),
-            schedule: document.getElementById('repl-schedule')?.value || 'daily',
-            retention_count: parseInt(document.getElementById('repl-retention')?.value || '14', 10),
+            target_pool: /** @type {HTMLInputElement} */ (document.getElementById('repl-target-pool'))?.value.trim(),
+            target_dataset: /** @type {HTMLInputElement} */ (
+              document.getElementById('repl-target-dataset')
+            )?.value.trim(),
+            schedule: /** @type {HTMLSelectElement} */ (document.getElementById('repl-schedule'))?.value || 'daily',
+            retention_count: parseInt(
+              /** @type {HTMLInputElement} */ (document.getElementById('repl-retention'))?.value || '14',
+              10
+            ),
           };
           if (tType !== 'local') {
-            payload.target_host = document.getElementById('repl-target-host')?.value.trim() || undefined;
-            payload.target_port = parseInt(document.getElementById('repl-target-port')?.value || '22', 10);
-            payload.target_user = document.getElementById('repl-target-user')?.value.trim() || 'root';
+            payload.target_host =
+              /** @type {HTMLInputElement} */ (document.getElementById('repl-target-host'))?.value.trim() || undefined;
+            payload.target_port = parseInt(
+              /** @type {HTMLInputElement} */ (document.getElementById('repl-target-port'))?.value || '22',
+              10
+            );
+            payload.target_user =
+              /** @type {HTMLInputElement} */ (document.getElementById('repl-target-user'))?.value.trim() || 'root';
           }
           await api.post('/api/storage/replication/jobs', payload);
           showToast(
@@ -2013,7 +2026,7 @@ export function initManagement() {
   const modalBackupJob = document.getElementById('modal-create-backup-job');
   const btnCloseBackupJob = document.getElementById('modal-backup-job-close-btn');
   const btnCancelBackupJob = document.getElementById('modal-backup-job-cancel-btn');
-  const formBackupJob = document.getElementById('create-backup-job-form');
+  const formBackupJob = /** @type {HTMLFormElement} */ (document.getElementById('create-backup-job-form'));
   const btnRefreshBackupJobs = document.getElementById('btn-refresh-backup-jobs');
 
   if (btnOpenBackupJob && modalBackupJob) {
@@ -2050,20 +2063,31 @@ export function initManagement() {
   if (formBackupJob) {
     formBackupJob.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const kind = document.getElementById('backup-job-kind')?.value || 'data';
+      const kind = /** @type {HTMLSelectElement} */ (document.getElementById('backup-job-kind'))?.value || 'data';
       const payload = {
-        name: document.getElementById('backup-job-name')?.value.trim() || 'Untitled Backup Task',
+        name:
+          /** @type {HTMLInputElement} */ (document.getElementById('backup-job-name'))?.value.trim() ||
+          'Untitled Backup Task',
         kind,
-        local_path: document.getElementById('backup-job-local-path')?.value.trim() || '',
-        source_subvolume: kind === 'config' ? '' : document.getElementById('backup-job-subvolume')?.value.trim() || '',
-        destination_type: document.getElementById('backup-job-dest-type')?.value || 'local_snapshot',
-        remote_name: document.getElementById('backup-job-remote-name')?.value.trim() || '',
-        remote_path: document.getElementById('backup-job-remote-path')?.value.trim() || '',
-        schedule: document.getElementById('backup-job-schedule')?.value || 'daily',
-        retention_count: parseInt(document.getElementById('backup-job-retention')?.value, 10) || 7,
-        enabled: !!document.getElementById('backup-job-enabled')?.checked,
+        local_path:
+          /** @type {HTMLInputElement} */ (document.getElementById('backup-job-local-path'))?.value.trim() || '',
+        source_subvolume:
+          kind === 'config'
+            ? ''
+            : /** @type {HTMLInputElement} */ (document.getElementById('backup-job-subvolume'))?.value.trim() || '',
+        destination_type:
+          /** @type {HTMLSelectElement} */ (document.getElementById('backup-job-dest-type'))?.value || 'local_snapshot',
+        remote_name:
+          /** @type {HTMLInputElement} */ (document.getElementById('backup-job-remote-name'))?.value.trim() || '',
+        remote_path:
+          /** @type {HTMLInputElement} */ (document.getElementById('backup-job-remote-path'))?.value.trim() || '',
+        schedule: /** @type {HTMLSelectElement} */ (document.getElementById('backup-job-schedule'))?.value || 'daily',
+        retention_count:
+          parseInt(/** @type {HTMLInputElement} */ (document.getElementById('backup-job-retention'))?.value, 10) || 7,
+        enabled: !!(/** @type {HTMLInputElement} */ (document.getElementById('backup-job-enabled'))?.checked),
       };
-      const passphrase = document.getElementById('backup-job-passphrase')?.value || '';
+      const passphrase =
+        /** @type {HTMLInputElement} */ (document.getElementById('backup-job-passphrase'))?.value || '';
       if (kind === 'config' && passphrase) payload.encryption_password = passphrase;
 
       try {
@@ -2091,7 +2115,7 @@ export function initManagement() {
   const modalSnapshot = document.getElementById('modal-create-snapshot');
   const btnCloseSnapshot = document.getElementById('modal-create-snapshot-close-btn');
   const btnCancelSnapshot = document.getElementById('modal-create-snapshot-cancel-btn');
-  const formSnapshot = document.getElementById('create-snapshot-form');
+  const formSnapshot = /** @type {HTMLFormElement} */ (document.getElementById('create-snapshot-form'));
   const btnRefreshSnapshots = document.getElementById('btn-refresh-snapshots');
 
   if (btnOpenSnapshot && modalSnapshot) {
@@ -2120,9 +2144,12 @@ export function initManagement() {
     formSnapshot.addEventListener('submit', async (e) => {
       e.preventDefault();
       const payload = {
-        subvol_name: document.getElementById('snapshot-subvol-input')?.value.trim() || '',
-        snapshot_name: document.getElementById('snapshot-custom-name-input')?.value.trim() || undefined,
-        readonly: !!document.getElementById('snapshot-readonly-input')?.checked,
+        subvol_name:
+          /** @type {HTMLInputElement} */ (document.getElementById('snapshot-subvol-input'))?.value.trim() || '',
+        snapshot_name:
+          /** @type {HTMLInputElement} */ (document.getElementById('snapshot-custom-name-input'))?.value.trim() ||
+          undefined,
+        readonly: !!(/** @type {HTMLInputElement} */ (document.getElementById('snapshot-readonly-input'))?.checked),
       };
 
       try {
@@ -2151,13 +2178,14 @@ export function initManagement() {
   const btnRefreshAppBackups = document.getElementById('btn-refresh-app-backups');
   if (btnRefreshAppBackups) {
     btnRefreshAppBackups.addEventListener('click', () => {
-      const filterApp = document.getElementById('app-backups-filter-app')?.value || '';
+      const filterApp =
+        /** @type {HTMLSelectElement} */ (document.getElementById('app-backups-filter-app'))?.value || '';
       fetchAndRenderAppBackups(null, filterApp);
       showToast(t('toast.application_backups_refreshed', 'Application backups refreshed.'), 'info');
     });
   }
 
-  const selectFilterAppBackups = document.getElementById('app-backups-filter-app');
+  const selectFilterAppBackups = /** @type {HTMLSelectElement} */ (document.getElementById('app-backups-filter-app'));
   if (selectFilterAppBackups) {
     selectFilterAppBackups.addEventListener('change', () => {
       fetchAndRenderAppBackups(null, selectFilterAppBackups.value);

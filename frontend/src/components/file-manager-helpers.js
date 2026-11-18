@@ -5,7 +5,7 @@
  */
 
 import { t } from '../i18n.js';
-import { escapeHtml, copyTextToClipboard } from '../utils.js';
+import { escapeHtml } from '../utils.js';
 import { ZettEventBus } from '../event-bus.js';
 import { formatBytes, executeTransferWithConflictCheck } from './file-manager.js';
 import { openFilePreview as openFilePreviewModal } from '../file-preview-loader.js';

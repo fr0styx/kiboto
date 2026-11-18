@@ -1,5 +1,5 @@
 import { ZettEventBus } from './event-bus.js';
-import { setIconLabel } from './ui/primitives.js';
+import './ui/primitives.js';
 import { showToast } from './toast.js';
 import { api } from './api.js';
 import { DockManager, bringToFront } from './components/dock.js';
@@ -10,7 +10,7 @@ window.addEventListener('DOMContentLoaded', () => {
   const $ = (id) => document.getElementById(id);
   // Folder Browser Modal Logic
   const btnBrowseDst = $('btn-browse-dst');
-  const btnCopyDst = $('btn-copy-dst');
+  const btnCopyDst = /** @type {HTMLInputElement} */ ($('btn-copy-dst'));
   const fbModal = $('folder-browser-modal');
   const fbCurrentPath = $('fb-current-path');
   const fbList = $('fb-list');
@@ -18,7 +18,7 @@ window.addEventListener('DOMContentLoaded', () => {
   const fbClose = $('fb-close');
   const fbSelect = $('fb-select');
   const fbCreateFolderBtn = $('fb-create-folder');
-  const fbNewFolderName = $('fb-new-folder-name');
+  const fbNewFolderName = /** @type {HTMLInputElement} */ ($('fb-new-folder-name'));
 
   let currentBrowsePath = '/mnt/user/';
   let currentBrowseDirs = [];
@@ -34,7 +34,7 @@ window.addEventListener('DOMContentLoaded', () => {
   };
   let fbSortReverse = false;
 
-  const fbSearchBar = $('fb-search-bar');
+  const fbSearchBar = /** @type {HTMLInputElement} */ ($('fb-search-bar'));
   const fbSortBtn = $('fb-sort-btn');
 
   if (fbSearchBar) fbSearchBar.addEventListener('input', renderBrowseList);

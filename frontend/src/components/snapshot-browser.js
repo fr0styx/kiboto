@@ -239,11 +239,11 @@ export async function openSnapshotBrowser(name) {
     }
   };
   dlg.onclick = async (e) => {
-    const open = e.target.closest('[data-snap-open]');
-    const restore = e.target.closest('[data-snap-restore]');
-    const replace = e.target.closest('[data-snap-replace]');
-    if (e.target.closest('[data-snap-close]')) dlg.close();
-    else if (e.target.closest('[data-snap-rollback]')) rollbackShare(name, () => show(''));
+    const open = /** @type {HTMLElement} */ (e.target).closest('[data-snap-open]');
+    const restore = /** @type {HTMLElement} */ (e.target).closest('[data-snap-restore]');
+    const replace = /** @type {HTMLElement} */ (e.target).closest('[data-snap-replace]');
+    if (/** @type {HTMLElement} */ (e.target).closest('[data-snap-close]')) dlg.close();
+    else if (/** @type {HTMLElement} */ (e.target).closest('[data-snap-rollback]')) rollbackShare(name, () => show(''));
     else if (open) show(open.dataset.snapOpen);
     else if (restore || replace) {
       const rel = (restore || replace).dataset[restore ? 'snapRestore' : 'snapReplace'];

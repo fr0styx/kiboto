@@ -90,7 +90,7 @@ export function initNetworkPortsInspector() {
   const searchInput = document.getElementById('net-ports-search');
   if (searchInput) {
     searchInput.addEventListener('input', (e) => {
-      renderListeningPortsTable(_cachedPorts, e.target.value);
+      renderListeningPortsTable(_cachedPorts, /** @type {HTMLInputElement} */ (e.target).value);
     });
   }
 }

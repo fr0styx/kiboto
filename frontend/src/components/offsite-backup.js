@@ -405,10 +405,10 @@ async function openVersions(repoId) {
   };
   dlg.onclick = async (e) => {
     try {
-      if (e.target.closest('[data-close]')) return dlg.close();
-      const ver = e.target.closest('[data-ver]');
-      const open = e.target.closest('[data-open]');
-      const rest = e.target.closest('[data-restore]');
+      if (/** @type {HTMLElement} */ (e.target).closest('[data-close]')) return dlg.close();
+      const ver = /** @type {HTMLElement} */ (e.target).closest('[data-ver]');
+      const open = /** @type {HTMLElement} */ (e.target).closest('[data-open]');
+      const rest = /** @type {HTMLElement} */ (e.target).closest('[data-restore]');
       if (ver) {
         version = ver.dataset.ver;
         await showFiles(ver.dataset.path);

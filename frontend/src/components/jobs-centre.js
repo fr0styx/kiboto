@@ -202,7 +202,7 @@ function ensureWindow() {
   on('#jobs-centre-max', toggleMaximizeJobsCentre);
   on('#jobs-history-clear', clearJobHistory);
   _win.addEventListener('click', async (e) => {
-    const btn = e.target.closest('[data-job-cancel]');
+    const btn = /** @type {HTMLElement} */ (e.target).closest('[data-job-cancel]');
     if (!btn) return;
     btn.disabled = true;
     try {

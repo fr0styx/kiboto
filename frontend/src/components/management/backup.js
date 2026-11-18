@@ -374,7 +374,7 @@ export async function fetchAndRenderAppBackups(mountEl, filterApp = '') {
     const backups = Array.isArray(data) ? data : data?.backups || [];
 
     // Update filter dropdown options if element exists and not currently active
-    const filterSelect = document.getElementById('app-backups-filter-app');
+    const filterSelect = /** @type {HTMLSelectElement} */ (document.getElementById('app-backups-filter-app'));
     if (filterSelect && (!filterApp || filterSelect.options.length <= 1)) {
       const currentVal = filterSelect.value || filterApp;
       const allData = filterApp ? await api.get('/api/backup/apps') : data;
@@ -520,7 +520,10 @@ export async function fetchAndRenderAppBackups(mountEl, filterApp = '') {
               showToast(t('toast.restoring', 'Restoring {appName}...', { appName: appName }), 'info');
               const res = await api.post(`/api/backup/apps/${encodeURIComponent(backupId)}/restore`);
               showToast(...restoredSaid(res?.result || res, appName));
-              fetchAndRenderAppBackups(mount, document.getElementById('app-backups-filter-app')?.value || '');
+              fetchAndRenderAppBackups(
+                mount,
+                /** @type {HTMLSelectElement} */ (document.getElementById('app-backups-filter-app'))?.value || ''
+              );
             } catch (err) {
               showToast(t('toast.restore_failed', 'Restore failed: {error}', { error: err.message }), 'error');
             }
@@ -543,7 +546,10 @@ export async function fetchAndRenderAppBackups(mountEl, filterApp = '') {
             try {
               await api.delete(`/api/backup/apps/${encodeURIComponent(backupId)}`, { confirmed: true });
               showToast(t('toast.backup_deleted', 'Backup "{filename}" deleted.', { filename: filename }), 'success');
-              fetchAndRenderAppBackups(mount, document.getElementById('app-backups-filter-app')?.value || '');
+              fetchAndRenderAppBackups(
+                mount,
+                /** @type {HTMLSelectElement} */ (document.getElementById('app-backups-filter-app'))?.value || ''
+              );
             } catch (err) {
               showToast(t('toast.delete_failed', 'Delete failed: {error}', { error: err.message }), 'error');
             }

@@ -138,7 +138,9 @@ function bindUserModals() {
   // Close modals via buttons
   document.querySelectorAll('.modal-close-btn').forEach((btn) => {
     btn.onclick = (e) => {
-      const modal = e.target.closest('.smart-modal-backdrop') || e.target.closest('.os-modal');
+      const modal =
+        /** @type {HTMLElement} */ (e.target).closest('.smart-modal-backdrop') ||
+        /** @type {HTMLElement} */ (e.target).closest('.os-modal');
       if (modal) closeModal(modal);
     };
   });
@@ -348,23 +350,23 @@ export function showResetPasswordModal(userId, username) {
   openModal(modal);
   document.getElementById('reset-pwd-username').textContent = `@${username}`;
 
-  const form = document.getElementById('form-reset-password');
+  const form = /** @type {HTMLFormElement} */ (document.getElementById('form-reset-password'));
   // Changing your own password needs the current one (SEC-13).
   const isSelf = !!getCurrentUser() && getCurrentUser().id === userId;
   const currentWrap = document.getElementById('reset-pwd-current-wrap');
-  const currentInput = document.getElementById('reset-pwd-current');
+  const currentInput = /** @type {HTMLInputElement} */ (document.getElementById('reset-pwd-current'));
   if (currentWrap) currentWrap.style.display = isSelf ? '' : 'none';
   if (currentInput) currentInput.required = isSelf;
   const tokensWrap = document.getElementById('reset-pwd-tokens-wrap');
-  const revokeTokens = document.getElementById('reset-pwd-revoke-tokens');
+  const revokeTokens = /** @type {HTMLInputElement} */ (document.getElementById('reset-pwd-revoke-tokens'));
   if (tokensWrap) tokensWrap.hidden = !isSelf; // someone else's tokens are always revoked (SEC-36)
   if (revokeTokens) revokeTokens.checked = false;
   if (form) {
     form.reset();
     form.onsubmit = async (e) => {
       e.preventDefault();
-      const newPassword = document.getElementById('reset-pwd-input').value;
-      const confirmPassword = document.getElementById('reset-pwd-confirm').value;
+      const newPassword = /** @type {HTMLInputElement} */ (document.getElementById('reset-pwd-input')).value;
+      const confirmPassword = /** @type {HTMLInputElement} */ (document.getElementById('reset-pwd-confirm')).value;
 
       if (newPassword !== confirmPassword) {
         showToast(t('toast.passwords_do_not_match', 'Passwords do not match.'), 'error');
@@ -631,13 +633,14 @@ export async function start2FASetup() {
     qrContainer.innerHTML = data.qr_svg || '';
     if (secretKeyEl) secretKeyEl.textContent = data.secret || data.totp_secret || '';
 
-    const form = document.getElementById('form-verify-2fa');
+    const form = /** @type {HTMLFormElement} */ (document.getElementById('form-verify-2fa'));
     if (form) {
       form.reset();
       form.onsubmit = async (e) => {
         e.preventDefault();
-        const code = document.getElementById('mfa-verify-code').value.trim();
-        const currentPassword = document.getElementById('mfa-current-password')?.value || '';
+        const code = /** @type {HTMLInputElement} */ (document.getElementById('mfa-verify-code')).value.trim();
+        const currentPassword =
+          /** @type {HTMLInputElement} */ (document.getElementById('mfa-current-password'))?.value || '';
         const verifyBtn = form.querySelector('button[type="submit"]');
         verifyBtn.disabled = true;
         verifyBtn.textContent = t('signin.verifying', 'Checking…');

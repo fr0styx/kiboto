@@ -37,7 +37,9 @@ export async function installPhotoFilters(root = document, onChange = () => {}) 
     box.setAttribute('aria-label', t('photo_filters.group', 'Photo filters'));
     placeFilter(box, anchor, root);
     box.addEventListener('click', (e) => {
-      const b = e.target.closest('[data-photo-taken], [data-photo-place], [data-photo-clear]');
+      const b = /** @type {HTMLElement} */ (e.target).closest(
+        '[data-photo-taken], [data-photo-place], [data-photo-clear]'
+      );
       if (!b) return;
       if (b.hasAttribute('data-photo-clear')) {
         chosen.taken = null;

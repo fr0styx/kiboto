@@ -200,12 +200,12 @@ export async function openAlertsPage() {
       <button type="button" class="btn-pill-toggle phone-alerts-log" data-phone-log>${t('phone.all_activity', 'All activity')}</button>`;
     document.body.appendChild(page);
     page.addEventListener('click', (e) => {
-      if (e.target.closest('.phone-alerts-close')) {
+      if (/** @type {HTMLElement} */ (e.target).closest('.phone-alerts-close')) {
         page.hidden = true;
-      } else if (e.target.closest('[data-phone-log]')) {
+      } else if (/** @type {HTMLElement} */ (e.target).closest('[data-phone-log]')) {
         ROUTES.events?.(); // the Event Log: "activity" is the page of that name now
       } else {
-        const open = e.target.closest('[data-ov-open]');
+        const open = /** @type {HTMLElement} */ (e.target).closest('[data-ov-open]');
         if (open && ROUTES[open.dataset.ovOpen]) ROUTES[open.dataset.ovOpen]();
       }
       schedule();
@@ -401,16 +401,16 @@ export function enablePhoneShell(on) {
     .then((m) => hideUnusable(shell, m.getCurrentUser()))
     .catch(() => {});
   shell.addEventListener('click', (e) => {
-    const tab = e.target.closest('[data-phone-tab]');
-    const tile = e.target.closest('[data-phone-open]');
-    if (e.target.closest('#phone-back')) {
+    const tab = /** @type {HTMLElement} */ (e.target).closest('[data-phone-tab]');
+    const tile = /** @type {HTMLElement} */ (e.target).closest('[data-phone-open]');
+    if (/** @type {HTMLElement} */ (e.target).closest('#phone-back')) {
       const page = topPage();
       if (stepBack(page)) return;
       closePage(page);
       if (page && topPage() === page) page.style.display = 'none';
       schedule();
-    } else if (e.target.closest('[data-ov-open]')) {
-      const route = e.target.closest('[data-ov-open]').dataset.ovOpen;
+    } else if (/** @type {HTMLElement} */ (e.target).closest('[data-ov-open]')) {
+      const route = /** @type {HTMLElement} */ (e.target).closest('[data-ov-open]').dataset.ovOpen;
       if (ROUTES[route]) ROUTES[route]();
       schedule();
     } else if (tab) {

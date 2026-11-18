@@ -21,7 +21,7 @@ startIconizer();
 import { ZettEventBus } from './event-bus.js';
 import { auth, api, setConfirmationHandler } from './api.js';
 import { state } from './state.js';
-import { showToast, showConfirmToast } from './toast.js';
+import { showConfirmToast } from './toast.js';
 import { confirmTextFor } from './confirm-text.js';
 
 // Server-required confirmation for destructive actions (backend/confirmations.py), asked in the
@@ -45,19 +45,11 @@ import './modals.js';
 import {
   initDockSystem,
   DockManager,
-  makeDraggable,
-  bringToFront,
   restoreOpenWindowsState,
   setWindowRestorationComplete,
 } from './components/dock.js';
 import { initAuth } from './components/auth.js';
-import {
-  applyStats,
-  applyTheme,
-  applyDesktopTheme,
-  applyLcdTheme,
-  initDashboardClicks,
-} from './components/dashboard.js';
+import { applyStats, applyDesktopTheme, applyLcdTheme, initDashboardClicks } from './components/dashboard.js';
 import { initFanControl } from './components/fan-control.js';
 import { initLedControl } from './components/led-control.js';
 import { applyDashboardLayout, fetchDashboardLayout, fitMiniPreviewScale } from './components/mini-preview.js';
@@ -81,7 +73,7 @@ import { initI18n } from './i18n.js';
 import { initA11y } from './a11y.js';
 import { initGlassTimePickers } from './components/time-picker.js';
 
-import { t } from './i18n.js';
+import './i18n.js';
 import { renderLcdBadge, renderStreamBadge } from './status-badges.js';
 
 // B6 first-load budget: the hardware-settings drawer and the users code are not needed for the

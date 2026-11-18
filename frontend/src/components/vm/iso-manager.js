@@ -289,7 +289,7 @@ export async function openIsoManagerModal(initialTab = 'catalog') {
     if (btnBrowse && fileInput) {
       btnBrowse.onclick = () => fileInput.click();
       fileInput.onchange = (e) => {
-        const file = e.target.files[0];
+        const file = /** @type {HTMLInputElement} */ (e.target).files[0];
         if (file) handleUpload(file);
       };
     }
@@ -424,7 +424,7 @@ export async function openIsoManagerModal(initialTab = 'catalog') {
           if (window.DockManager) window.DockManager.minimize('vm-iso-manager');
           else modal.style.display = 'none';
           openVmCreateModal();
-          const select = document.getElementById('vm-create-iso');
+          const select = /** @type {HTMLSelectElement} */ (document.getElementById('vm-create-iso'));
           if (select) select.value = path;
         };
       });
@@ -649,7 +649,7 @@ export async function openIsoManagerModal(initialTab = 'catalog') {
         if (window.DockManager) window.DockManager.minimize('vm-iso-manager');
         else modal.style.display = 'none';
         openVmCreateModal();
-        const select = document.getElementById('vm-create-iso');
+        const select = /** @type {HTMLSelectElement} */ (document.getElementById('vm-create-iso'));
         if (select) select.value = isoPath;
       };
     });

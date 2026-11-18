@@ -5,7 +5,7 @@
  * Dynamic Docker Compose Synthesizer, and Live Log Console.
  */
 
-import { api, auth } from '../api.js';
+import { api } from '../api.js';
 import { showToast, showConfirmToast } from '../toast.js';
 import { escapeHtml, trapFocus, copyText } from '../utils.js';
 import '../styles/containers-lazy.css'; // the inspector's own sheet loads with this code (NUX-15)
@@ -29,10 +29,8 @@ let _activeLogFilter = '';
 let _autoScrollLogs = true;
 let _logEventSource = null;
 let _unbindFocusTrap = null;
-let _activeTab = 'overview';
 let _termHistory = [];
 let _termHistoryIdx = -1;
-let _activeDetails = null;
 let _activeTermWs = null;
 let _termView = null;
 let _termViewCid = null;
@@ -298,7 +296,7 @@ export function initContainerModal() {
   const logFilterInput = document.getElementById('ci-logs-filter-input');
   if (logFilterInput) {
     logFilterInput.addEventListener('input', (e) => {
-      _activeLogFilter = (e.target.value || '').toLowerCase();
+      _activeLogFilter = (/** @type {HTMLInputElement} */ (e.target).value || '').toLowerCase();
       renderLogsOutput();
     });
   }
@@ -306,14 +304,14 @@ export function initContainerModal() {
   const autoscrollCb = document.getElementById('ci-logs-autoscroll');
   if (autoscrollCb) {
     autoscrollCb.addEventListener('change', (e) => {
-      _autoScrollLogs = e.target.checked;
+      _autoScrollLogs = /** @type {HTMLInputElement} */ (e.target).checked;
     });
   }
 
   const streamToggle = document.getElementById('ci-logs-stream-toggle');
   if (streamToggle) {
     streamToggle.addEventListener('change', (e) => {
-      if (e.target.checked) {
+      if (/** @type {HTMLInputElement} */ (e.target).checked) {
         if (_activeCid) startLogStream(_activeCid);
       } else {
         stopLogStream();
@@ -326,7 +324,7 @@ export function initContainerModal() {
   const envSearchInput = document.getElementById('ci-env-search');
   if (envSearchInput) {
     envSearchInput.addEventListener('input', (e) => {
-      const query = (e.target.value || '').toLowerCase();
+      const query = (/** @type {HTMLInputElement} */ (e.target).value || '').toLowerCase();
       document.querySelectorAll('#ci-env-content tr').forEach((row) => {
         const text = row.textContent.toLowerCase();
         row.style.display = text.includes(query) ? '' : 'none';
@@ -345,7 +343,7 @@ export function initContainerModal() {
     termSendBtn.addEventListener('click', executeTerminalCmd);
   }
 
-  const termInput = document.getElementById('ci-term-input');
+  const termInput = /** @type {HTMLInputElement} */ (document.getElementById('ci-term-input'));
   if (termInput) {
     termInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
@@ -471,7 +469,6 @@ export function connectContainerTerminalWs(cid) {
 
   const proto = typeof window !== 'undefined' && window.location.protocol === 'https:' ? 'wss:' : 'ws:';
   const host = typeof window !== 'undefined' ? window.location.host : '127.0.0.1:8082';
-  const token = auth.getToken() || '';
   const wsUrl = `${proto}//${host}/api/docker/containers/${encodeURIComponent(cid)}/terminal/ws`;
 
   try {
@@ -515,7 +512,6 @@ export async function switchContainerTab(tabTarget) {
       } catch (_) {}
     }
   });
-  _activeTab = tabTarget;
   overlay.querySelectorAll('.ci-pane').forEach((p) => {
     p.style.display = p.id === `ci-pane-${tabTarget}` ? 'block' : 'none';
   });
@@ -530,7 +526,7 @@ export async function switchContainerTab(tabTarget) {
     await loadContainerLogs(_activeCid);
   } else if (tabTarget === 'terminal') {
     if (_activeCid) connectContainerTerminalWs(_activeCid);
-    const input = document.getElementById('ci-term-input');
+    const input = /** @type {HTMLInputElement} */ (document.getElementById('ci-term-input'));
     if (input) setTimeout(() => input.focus(), 60);
   } else if (tabTarget === 'edit' && _activeCid) {
     await renderContainerEditTab(_activeCid);
@@ -538,7 +534,7 @@ export async function switchContainerTab(tabTarget) {
 }
 
 export async function executeTerminalCmd() {
-  const input = document.getElementById('ci-term-input');
+  const input = /** @type {HTMLInputElement} */ (document.getElementById('ci-term-input'));
   const view = ensureContainerTermView();
   if (!input || !view || !_activeCid) return;
 
@@ -646,7 +642,6 @@ async function loadContainerDetails(cid) {
 
   try {
     const details = await api.get(`/api/docker/containers/${encodeURIComponent(cid)}/details`);
-    _activeDetails = details;
     if (loadingEl) loadingEl.style.display = 'none';
     if (!contentEl) return;
     contentEl.style.display = 'block';
@@ -794,7 +789,7 @@ async function loadContainerDetails(cid) {
     });
 
     // Wire App Backup button
-    const backupActionBtn = document.getElementById('ci-btn-backup-action');
+    const backupActionBtn = /** @type {HTMLButtonElement} */ (document.getElementById('ci-btn-backup-action'));
     if (backupActionBtn) {
       backupActionBtn.addEventListener('click', async () => {
         backupActionBtn.disabled = true;
@@ -825,12 +820,12 @@ async function loadContainerDetails(cid) {
     }
 
     // Wire Resource Tuning button
-    const applyResBtn = document.getElementById('ci-btn-apply-resources');
+    const applyResBtn = /** @type {HTMLButtonElement} */ (document.getElementById('ci-btn-apply-resources'));
     if (applyResBtn) {
       applyResBtn.addEventListener('click', async () => {
-        const memInput = document.getElementById('ci-res-mem');
-        const cpuInput = document.getElementById('ci-res-cpu');
-        const restartInput = document.getElementById('ci-res-restart');
+        const memInput = /** @type {HTMLInputElement} */ (document.getElementById('ci-res-mem'));
+        const cpuInput = /** @type {HTMLInputElement} */ (document.getElementById('ci-res-cpu'));
+        const restartInput = /** @type {HTMLSelectElement} */ (document.getElementById('ci-res-restart'));
         const memVal = memInput ? parseInt(memInput.value, 10) : 0;
         const cpuVal = cpuInput ? parseFloat(cpuInput.value) : 0;
         const restartVal = restartInput ? restartInput.value : null;
@@ -870,7 +865,7 @@ async function loadContainerDetails(cid) {
       });
     }
 
-    const restartActionBtn = document.getElementById('ci-btn-restart-action');
+    const restartActionBtn = /** @type {HTMLButtonElement} */ (document.getElementById('ci-btn-restart-action'));
     if (restartActionBtn) {
       restartActionBtn.addEventListener('click', async () => {
         restartActionBtn.disabled = true;
@@ -1078,7 +1073,7 @@ function renderPortsTab(details) {
     input.addEventListener('input', handleInput);
   });
 
-  const applyPortsBtn = document.getElementById('ci-btn-apply-ports');
+  const applyPortsBtn = /** @type {HTMLButtonElement} */ (document.getElementById('ci-btn-apply-ports'));
   if (applyPortsBtn) {
     applyPortsBtn.addEventListener('click', () => {
       const cname = details.overview?.name || details.cid;
@@ -1348,7 +1343,7 @@ async function loadContainerCompose(cid) {
 
 async function renderComposeCode() {
   const codeEl = document.getElementById('ci-compose-code');
-  const maskToggle = document.getElementById('ci-compose-mask-toggle');
+  const maskToggle = /** @type {HTMLInputElement} */ (document.getElementById('ci-compose-mask-toggle'));
   if (!codeEl || !_activeComposeData) return;
 
   const mask = maskToggle ? maskToggle.checked : true;
@@ -1411,7 +1406,7 @@ export function stopLogStream() {
 export function startLogStream(cid) {
   stopLogStream();
   if (!cid) return;
-  const tailSelect = document.getElementById('ci-logs-tail-select');
+  const tailSelect = /** @type {HTMLSelectElement} */ (document.getElementById('ci-logs-tail-select'));
   const tail = tailSelect ? tailSelect.value : 100;
   const url = `/api/docker/containers/${encodeURIComponent(cid)}/logs/stream?tail=${tail}&follow=1`;
 
@@ -1503,14 +1498,14 @@ export function appendLogLine(l) {
 }
 
 async function loadContainerLogs(cid) {
-  const isStreamActive = document.getElementById('ci-logs-stream-toggle')?.checked;
+  const isStreamActive = /** @type {HTMLInputElement} */ (document.getElementById('ci-logs-stream-toggle'))?.checked;
   if (isStreamActive) {
     startLogStream(cid);
     return;
   }
   stopLogStream();
   const terminal = document.getElementById('ci-logs-terminal');
-  const tailSelect = document.getElementById('ci-logs-tail-select');
+  const tailSelect = /** @type {HTMLSelectElement} */ (document.getElementById('ci-logs-tail-select'));
   const tail = tailSelect ? tailSelect.value : 200;
 
   if (terminal)
@@ -1653,15 +1648,15 @@ export function openContainerDeleteModal(cid, cname, imageRef = '', onDeleted = 
   modal.classList.add('open');
   modal.style.display = 'flex';
 
-  const confirmBtn = document.getElementById('cdm-confirm-btn');
+  const confirmBtn = /** @type {HTMLButtonElement} */ (document.getElementById('cdm-confirm-btn'));
   confirmBtn.disabled = false;
   setIconLabel(confirmBtn, '💥', t('ui.destroy_container', 'Remove app'));
 
   confirmBtn.onclick = async () => {
-    const archiveData = document.getElementById('cdm-archive')?.checked ?? true;
-    const force = document.getElementById('cdm-force').checked;
-    const removeVolumes = document.getElementById('cdm-volumes').checked;
-    const removeImage = document.getElementById('cdm-image').checked;
+    const archiveData = /** @type {HTMLInputElement} */ (document.getElementById('cdm-archive'))?.checked ?? true;
+    const force = /** @type {HTMLInputElement} */ (document.getElementById('cdm-force')).checked;
+    const removeVolumes = /** @type {HTMLInputElement} */ (document.getElementById('cdm-volumes')).checked;
+    const removeImage = /** @type {HTMLInputElement} */ (document.getElementById('cdm-image')).checked;
 
     confirmBtn.disabled = true;
     confirmBtn.textContent = t('ui.destroying', 'Destroying...');
@@ -1923,7 +1918,7 @@ async function renderContainerEditTab(cid) {
 
   // Wire env search
   document.getElementById('cie-env-filter').oninput = (ev) => {
-    const q = (ev.target.value || '').toLowerCase();
+    const q = (/** @type {HTMLInputElement} */ (ev.target).value || '').toLowerCase();
     envBox.querySelectorAll('.cie-env-row').forEach((r) => {
       const keyVal = (r.querySelector('.cie-key-input').value || '').toLowerCase();
       r.style.display = keyVal.includes(q) ? 'flex' : 'none';
@@ -1936,16 +1931,16 @@ async function renderContainerEditTab(cid) {
   };
 
   // Wire Save
-  const saveBtn = document.getElementById('cie-btn-save');
+  const saveBtn = /** @type {HTMLButtonElement} */ (document.getElementById('cie-btn-save'));
   const statusMsg = document.getElementById('cie-status-msg');
 
   saveBtn.onclick = async () => {
-    const name = document.getElementById('cie-input-name').value.trim();
-    const image = document.getElementById('cie-input-image').value.trim();
-    const network_mode = document.getElementById('cie-select-network').value;
-    const restart_policy = document.getElementById('cie-select-restart').value;
-    const pull_image = document.getElementById('cie-cb-pull').checked;
-    const keep_backup = document.getElementById('cie-cb-backup').checked;
+    const name = /** @type {HTMLInputElement} */ (document.getElementById('cie-input-name')).value.trim();
+    const image = /** @type {HTMLInputElement} */ (document.getElementById('cie-input-image')).value.trim();
+    const network_mode = /** @type {HTMLSelectElement} */ (document.getElementById('cie-select-network')).value;
+    const restart_policy = /** @type {HTMLSelectElement} */ (document.getElementById('cie-select-restart')).value;
+    const pull_image = /** @type {HTMLInputElement} */ (document.getElementById('cie-cb-pull')).checked;
+    const keep_backup = /** @type {HTMLInputElement} */ (document.getElementById('cie-cb-backup')).checked;
 
     if (!name || !image) {
       showToast(t('toast.container_name_and_image_cannot_be', 'Container name and image cannot be empty.'), 'warn');
@@ -2067,7 +2062,6 @@ export function _resetContainerModalForTesting() {
   _activeLogLines = [];
   _activeLogFilter = '';
   _autoScrollLogs = true;
-  _activeTab = 'overview';
   if (_unbindFocusTrap) {
     _unbindFocusTrap();
     _unbindFocusTrap = null;

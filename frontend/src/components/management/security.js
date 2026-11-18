@@ -171,7 +171,7 @@ export function handleSecurityAdvisorClick(checkId) {
       }
       setTimeout(() => {
         const disableContainer = document.getElementById('sec-disable-admin-container');
-        const disableBtn = document.getElementById('btn-disable-default-admin');
+        const disableBtn = /** @type {HTMLButtonElement} */ (document.getElementById('btn-disable-default-admin'));
         if (disableContainer) {
           try {
             disableContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });

@@ -1,4 +1,4 @@
-import { api, auth } from '../api.js';
+import { api } from '../api.js';
 import { escapeHtml, copyText } from '../utils.js';
 import { t } from '../i18n.js';
 import { showToast } from '../toast.js';
@@ -1160,7 +1160,6 @@ function navigateGallery(direction) {
 
 function triggerDownload() {
   if (!_currentPath) return;
-  const token = (auth && typeof auth.getToken === 'function' ? auth.getToken() : null) || '';
   const a = document.createElement('a');
   a.href = `/api/fs/download?path=${encodeURIComponent(_currentPath)}`;
   a.download = _currentName || 'download';
@@ -1214,7 +1213,6 @@ export async function triggerCopy() {
     return;
   }
 
-  const token = (auth && typeof auth.getToken === 'function' ? auth.getToken() : null) || '';
   const isHeif = /\.(heic|heif|dng)$/i.test(_currentPath || ''); // shown as a server-made picture
   const imgUrl = isHeif
     ? `/api/fs/preview/image?path=${encodeURIComponent(_currentPath)}`

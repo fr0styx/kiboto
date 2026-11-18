@@ -8,10 +8,10 @@ import { t } from '../i18n.js';
 import { ZettEventBus } from '../event-bus.js';
 import { announceA11y } from '../a11y.js';
 import { showToast, showConfirmToast, showDangerConfirm, showPromptToast } from '../toast.js';
-import { state } from '../state.js';
+import '../state.js';
 import { makeDraggable, bringToFront, DockManager } from './dock.js';
 
-import { formatBytes as formatSize, formatDateTime, formatFixed } from '../format.js';
+import { formatBytes as formatSize, formatFixed } from '../format.js';
 import { emptyStateHtml } from './empty-state.js';
 import { setIconLabel } from '../ui/primitives.js';
 
@@ -564,8 +564,8 @@ export function openChassisConfigModal(currentConfig = {}, onSaved = null) {
   `;
 
   const tbody = modalOverlay.querySelector('#chassis-slots-tbody');
-  const baysInput = modalOverlay.querySelector('#chassis-total-bays-input');
-  const profileSelect = modalOverlay.querySelector('#chassis-profile-select');
+  const baysInput = /** @type {HTMLInputElement} */ (modalOverlay.querySelector('#chassis-total-bays-input'));
+  const profileSelect = /** @type {HTMLSelectElement} */ (modalOverlay.querySelector('#chassis-profile-select'));
 
   function renderRows(count, mappings = []) {
     let rowsHtml = '';
@@ -1660,7 +1660,7 @@ export async function openSftpUsersModal(onSuccess) {
 
   const closeBtn = document.getElementById('modal-sftp-close-btn');
   const closeBottomBtn = document.getElementById('modal-sftp-close-bottom-btn');
-  const toggleBtn = document.getElementById('btn-sftp-toggle-service');
+  const toggleBtn = /** @type {HTMLButtonElement} */ (document.getElementById('btn-sftp-toggle-service'));
   const statusText = document.getElementById('sftp-status-text');
   const usersList = document.getElementById('sftp-users-list');
   const copyBtn = document.getElementById('btn-copy-sftp-cmd');
@@ -1803,8 +1803,8 @@ export async function openSftpUsersModal(onSuccess) {
   if (addForm) {
     addForm.onsubmit = async (e) => {
       e.preventDefault();
-      const uInput = document.getElementById('sftp-new-username');
-      const pInput = document.getElementById('sftp-new-password');
+      const uInput = /** @type {HTMLInputElement} */ (document.getElementById('sftp-new-username'));
+      const pInput = /** @type {HTMLInputElement} */ (document.getElementById('sftp-new-password'));
       const roInput = document.getElementById('sftp-new-readonly');
       const username = (uInput?.value || '').trim();
       const password = (pInput?.value || '').trim();
@@ -2224,11 +2224,11 @@ export function openWebdavConfigModal(currentConfig, onSuccess) {
   const modal = document.getElementById('modal-webdav-config');
   if (!modal) return;
 
-  const portInput = document.getElementById('webdav-cfg-port');
-  const rootInput = document.getElementById('webdav-cfg-root');
-  const userInput = document.getElementById('webdav-cfg-user');
-  const passInput = document.getElementById('webdav-cfg-pass');
-  const roToggle = document.getElementById('webdav-cfg-readonly-toggle');
+  const portInput = /** @type {HTMLInputElement} */ (document.getElementById('webdav-cfg-port'));
+  const rootInput = /** @type {HTMLInputElement} */ (document.getElementById('webdav-cfg-root'));
+  const userInput = /** @type {HTMLInputElement} */ (document.getElementById('webdav-cfg-user'));
+  const passInput = /** @type {HTMLInputElement} */ (document.getElementById('webdav-cfg-pass'));
+  const roToggle = /** @type {HTMLInputElement} */ (document.getElementById('webdav-cfg-readonly-toggle'));
 
   if (portInput) portInput.value = currentConfig?.port || 8084;
   if (rootInput) rootInput.value = currentConfig?.root_path || '/mnt/user';
@@ -2292,14 +2292,14 @@ export async function openNewCloudRemoteModal(onSuccess) {
 
   const winEl = document.getElementById('cloud-remote-window') || modal.querySelector('.smart-modal-window');
   const headerEl = document.getElementById('cloud-remote-window-header') || modal.querySelector('.smart-modal-header');
-  const providerSelect = document.getElementById('new-remote-provider-select');
+  const providerSelect = /** @type {HTMLSelectElement} */ (document.getElementById('new-remote-provider-select'));
   const descEl = document.getElementById('new-remote-provider-desc');
   const dynamicFields = document.getElementById('new-remote-dynamic-fields');
-  const nameInput = document.getElementById('new-remote-name');
-  const autoMountToggle = document.getElementById('new-remote-auto-mount');
+  const nameInput = /** @type {HTMLInputElement} */ (document.getElementById('new-remote-name'));
+  const autoMountToggle = /** @type {HTMLInputElement} */ (document.getElementById('new-remote-auto-mount'));
   const errorBox = document.getElementById('new-remote-error-box');
   const testResult = document.getElementById('new-remote-test-result');
-  const testBtn = document.getElementById('new-remote-test-btn');
+  const testBtn = /** @type {HTMLButtonElement} */ (document.getElementById('new-remote-test-btn'));
 
   if (errorBox) errorBox.style.display = 'none';
   if (testResult) testResult.style.display = 'none';
@@ -2411,7 +2411,7 @@ export async function openNewCloudRemoteModal(onSuccess) {
   if (maxBtn) maxBtn.onclick = toggleMaximize;
   if (headerEl) {
     headerEl.ondblclick = (e) => {
-      if (e.target.closest('.os-window-controls')) return;
+      if (/** @type {HTMLElement} */ (e.target).closest('.os-window-controls')) return;
       toggleMaximize();
     };
   }
@@ -2616,11 +2616,11 @@ export async function openNewCloudRemoteModal(onSuccess) {
 
           // Bind OAuth Assistant if present
           if (isOAuthProv) {
-            const browserBtn = dynamicFields.querySelector('#btn-oauth-browser');
-            const qrBtn = dynamicFields.querySelector('#btn-oauth-qr');
+            const browserBtn = /** @type {HTMLButtonElement} */ (dynamicFields.querySelector('#btn-oauth-browser'));
+            const qrBtn = /** @type {HTMLButtonElement} */ (dynamicFields.querySelector('#btn-oauth-qr'));
             const pasteBtn = dynamicFields.querySelector('#btn-oauth-paste');
-            const exchangeBtn = dynamicFields.querySelector('#btn-oauth-exchange');
-            const urlInput = dynamicFields.querySelector('#oauth-redirect-url');
+            const exchangeBtn = /** @type {HTMLButtonElement} */ (dynamicFields.querySelector('#btn-oauth-exchange'));
+            const urlInput = /** @type {HTMLInputElement} */ (dynamicFields.querySelector('#oauth-redirect-url'));
             const statusEl = dynamicFields.querySelector('#oauth-assistant-status');
             const qrBox = dynamicFields.querySelector('#oauth-qr-box');
             const qrTarget = dynamicFields.querySelector('#oauth-qr-target');
@@ -3160,7 +3160,7 @@ export async function openNewCloudRemoteModal(onSuccess) {
           }
         });
 
-        const submitBtn = document.getElementById('new-remote-submit-btn');
+        const submitBtn = /** @type {HTMLButtonElement} */ (document.getElementById('new-remote-submit-btn'));
         if (submitBtn) {
           submitBtn.disabled = true;
           submitBtn.textContent = t('ui.connecting', 'Connecting...');
@@ -3243,7 +3243,7 @@ export async function openCreateStoragePoolModal(onSuccess) {
   const form = document.getElementById('create-pool-form');
   const errorBox = document.getElementById('create-pool-error-box');
   const disksContainer = document.getElementById('create-pool-disks-container');
-  const submitBtn = document.getElementById('create-pool-submit-btn');
+  const submitBtn = /** @type {HTMLButtonElement} */ (document.getElementById('create-pool-submit-btn'));
 
   const close = () => {
     modal.classList.remove('open');
@@ -3347,10 +3347,12 @@ export async function openCreateStoragePoolModal(onSuccess) {
       e.preventDefault();
       if (errorBox) errorBox.style.display = 'none';
 
-      const name = document.getElementById('create-pool-name')?.value.trim();
-      const fsType = document.getElementById('create-pool-fs')?.value || 'btrfs';
-      const profile = document.getElementById('create-pool-profile')?.value || 'raid1';
-      const mountpoint = document.getElementById('create-pool-mountpoint')?.value.trim() || '';
+      const name = /** @type {HTMLInputElement} */ (document.getElementById('create-pool-name'))?.value.trim();
+      const fsType = /** @type {HTMLSelectElement} */ (document.getElementById('create-pool-fs'))?.value || 'btrfs';
+      const profile =
+        /** @type {HTMLSelectElement} */ (document.getElementById('create-pool-profile'))?.value || 'raid1';
+      const mountpoint =
+        /** @type {HTMLInputElement} */ (document.getElementById('create-pool-mountpoint'))?.value.trim() || '';
 
       const checkedBoxes = Array.from(modal.querySelectorAll('input[name="pool-disk"]:checked'));
       const disks = checkedBoxes.map((cb) => cb.value);
@@ -3467,7 +3469,7 @@ export function openCreateNetworkShareModal(onSuccess) {
   const cancelBtn = document.getElementById('modal-create-share-cancel-btn');
   const form = document.getElementById('create-share-form');
   const errorBox = document.getElementById('create-share-error-box');
-  const submitBtn = document.getElementById('create-share-submit-btn');
+  const submitBtn = /** @type {HTMLButtonElement} */ (document.getElementById('create-share-submit-btn'));
 
   let _unbindTrap = null;
   const close = () => {
@@ -3495,7 +3497,7 @@ export function openCreateNetworkShareModal(onSuccess) {
   if (firstInput) setTimeout(() => firstInput.focus(), 60);
   if (errorBox) errorBox.style.display = 'none';
 
-  const exportNfsCb = document.getElementById('create-share-export-nfs');
+  const exportNfsCb = /** @type {HTMLInputElement} */ (document.getElementById('create-share-export-nfs'));
   const nfsOpts = document.getElementById('create-share-nfs-opts');
   if (exportNfsCb && nfsOpts) {
     const toggleNfs = () => {
@@ -3517,21 +3519,38 @@ export function openCreateNetworkShareModal(onSuccess) {
       e.preventDefault();
       if (errorBox) errorBox.style.display = 'none';
 
-      const name = document.getElementById('create-share-name')?.value.trim();
-      const path = document.getElementById('create-share-path')?.value.trim() || '';
-      const comment = document.getElementById('create-share-comment')?.value.trim() || '';
-      const quotaVal = parseInt(document.getElementById('create-share-quota-gb')?.value, 10);
+      const name = /** @type {HTMLInputElement} */ (document.getElementById('create-share-name'))?.value.trim();
+      const path = /** @type {HTMLInputElement} */ (document.getElementById('create-share-path'))?.value.trim() || '';
+      const comment =
+        /** @type {HTMLInputElement} */ (document.getElementById('create-share-comment'))?.value.trim() || '';
+      const quotaVal = parseInt(
+        /** @type {HTMLInputElement} */ (document.getElementById('create-share-quota-gb'))?.value,
+        10
+      );
       const quotaGb = isNaN(quotaVal) ? 0 : Math.max(0, quotaVal);
-      const security = document.getElementById('create-share-security')?.value || 'private';
-      const readOnly = document.getElementById('create-share-readonly')?.checked ?? false;
-      const isTm = document.getElementById('create-share-timemachine')?.checked ?? false;
-      const exportSmb = document.getElementById('create-share-export-smb')?.checked ?? true;
-      const exportNfs = document.getElementById('create-share-export-nfs')?.checked ?? false;
-      const nfsSquash = document.getElementById('create-share-nfs-squash')?.value || 'root_squash';
-      const nfsAnonuid = parseInt(document.getElementById('create-share-nfs-anonuid')?.value, 10) || 1000;
-      const nfsAnongid = parseInt(document.getElementById('create-share-nfs-anongid')?.value, 10) || 1000;
-      const nfsSync = (document.getElementById('create-share-nfs-sync')?.value || 'sync') === 'sync';
-      const nfsClients = document.getElementById('create-share-nfs-clients')?.value.trim() || '';
+      const security =
+        /** @type {HTMLSelectElement} */ (document.getElementById('create-share-security'))?.value || 'private';
+      const readOnly =
+        /** @type {HTMLInputElement} */ (document.getElementById('create-share-readonly'))?.checked ?? false;
+      const isTm =
+        /** @type {HTMLInputElement} */ (document.getElementById('create-share-timemachine'))?.checked ?? false;
+      const exportSmb =
+        /** @type {HTMLInputElement} */ (document.getElementById('create-share-export-smb'))?.checked ?? true;
+      const exportNfs =
+        /** @type {HTMLInputElement} */ (document.getElementById('create-share-export-nfs'))?.checked ?? false;
+      const nfsSquash =
+        /** @type {HTMLSelectElement} */ (document.getElementById('create-share-nfs-squash'))?.value || 'root_squash';
+      const nfsAnonuid =
+        parseInt(/** @type {HTMLInputElement} */ (document.getElementById('create-share-nfs-anonuid'))?.value, 10) ||
+        1000;
+      const nfsAnongid =
+        parseInt(/** @type {HTMLInputElement} */ (document.getElementById('create-share-nfs-anongid'))?.value, 10) ||
+        1000;
+      const nfsSync =
+        (/** @type {HTMLSelectElement} */ (document.getElementById('create-share-nfs-sync'))?.value || 'sync') ===
+        'sync';
+      const nfsClients =
+        /** @type {HTMLInputElement} */ (document.getElementById('create-share-nfs-clients'))?.value.trim() || '';
 
       const userPermissions = {};
       if (usersMatrix) {
@@ -3633,10 +3652,10 @@ export function openRenameStoragePoolModal(poolId, currentName, onSuccess) {
   const closeBtn = document.getElementById('modal-rename-pool-close-btn');
   const cancelBtn = document.getElementById('modal-rename-pool-cancel-btn');
   const form = document.getElementById('rename-pool-form');
-  const currentNameInput = document.getElementById('rename-pool-current-name');
-  const newNameInput = document.getElementById('rename-pool-new-name');
+  const currentNameInput = /** @type {HTMLInputElement} */ (document.getElementById('rename-pool-current-name'));
+  const newNameInput = /** @type {HTMLInputElement} */ (document.getElementById('rename-pool-new-name'));
   const errorBox = document.getElementById('rename-pool-error-box');
-  const submitBtn = document.getElementById('rename-pool-submit-btn');
+  const submitBtn = /** @type {HTMLButtonElement} */ (document.getElementById('rename-pool-submit-btn'));
 
   const close = () => {
     modal.classList.remove('open');

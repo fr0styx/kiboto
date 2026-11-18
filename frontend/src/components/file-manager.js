@@ -7,7 +7,7 @@ import {
   FmContextMenu,
   extractDataTransferEntries,
 } from './file-manager-helpers.js';
-import { api, auth } from '../api.js';
+import { api } from '../api.js';
 import { escapeHtml, copyTextToClipboard } from '../utils.js';
 import { ZettEventBus } from '../event-bus.js';
 import { poolName } from './pool-names.js';
@@ -548,7 +548,7 @@ export class FileManagerWindow {
         });
         // Picking a folder in the drawer closes it
         this.windowEl.querySelector('.fm-sidebar-tree')?.addEventListener('click', (e) => {
-          if (e.target.closest('.fm-tree-item, [data-path]')) {
+          if (/** @type {HTMLElement} */ (e.target).closest('.fm-tree-item, [data-path]')) {
             this.windowEl.classList.remove('fm-sidebar-open');
             toggle?.setAttribute('aria-expanded', 'false');
           }
@@ -881,7 +881,7 @@ export class FileManagerWindow {
     // Hidden file upload input
     if (this.uploadInput) {
       this.uploadInput.addEventListener('change', async (e) => {
-        const files = e.target.files;
+        const files = /** @type {HTMLInputElement} */ (e.target).files;
         if (files && files.length > 0) {
           await this.uploadFiles(files);
           this.uploadInput.value = '';
@@ -942,11 +942,13 @@ export class FileManagerWindow {
       });
     }
     if (this.searchInput) {
-      this.searchInput.addEventListener('input', (e) => this.handleSearchInput(e.target.value));
+      this.searchInput.addEventListener('input', (e) =>
+        this.handleSearchInput(/** @type {HTMLInputElement} */ (e.target).value)
+      );
       this.searchInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
           e.preventDefault();
-          this.executeBackendSearch(e.target.value);
+          this.executeBackendSearch(/** @type {HTMLInputElement} */ (e.target).value);
         } else if (e.key === 'Escape') {
           this.searchInput.value = '';
           this.handleSearchInput('');
@@ -1071,7 +1073,7 @@ export class FileManagerWindow {
 
       this.viewport.addEventListener('contextmenu', (e) => {
         e.preventDefault();
-        const itemEl = e.target.closest('.fm-row, .fm-grid-card');
+        const itemEl = /** @type {HTMLElement} */ (e.target).closest('.fm-row, .fm-grid-card');
         let itemFile = null;
         if (itemEl && itemEl.dataset.path) {
           const p = itemEl.dataset.path;
@@ -1099,7 +1101,7 @@ export class FileManagerWindow {
             : 'move';
 
         // Detect if hovering over a specific subfolder row or card
-        const folderItem = e.target.closest('.fm-row, .fm-grid-card');
+        const folderItem = /** @type {HTMLElement} */ (e.target).closest('.fm-row, .fm-grid-card');
         const p = folderItem?.dataset?.path;
         const file = p ? this.fileList.find((f) => f.path === p) : null;
         const isDir = Boolean(file && file.is_dir && file.name !== '..');
@@ -1143,7 +1145,7 @@ export class FileManagerWindow {
         }
 
         // Determine target destination path: subfolder if dropped on one, otherwise currentPath
-        const folderItem = hoveredFolder || e.target.closest('.fm-row, .fm-grid-card');
+        const folderItem = hoveredFolder || /** @type {HTMLElement} */ (e.target).closest('.fm-row, .fm-grid-card');
         const p = folderItem?.dataset?.path;
         const file = p ? this.fileList.find((f) => f.path === p) : null;
         const destPath = file && file.is_dir && file.name !== '..' ? file.path : this.currentPath;
@@ -1207,7 +1209,7 @@ export class FileManagerWindow {
         { passive: true }
       );
       this.list.addEventListener('click', (e) => {
-        const actBtn = e.target.closest('.fm-act-btn');
+        const actBtn = /** @type {HTMLElement} */ (e.target).closest('.fm-act-btn');
         if (actBtn) {
           e.stopPropagation();
           const p = actBtn.dataset.path;
@@ -1216,7 +1218,7 @@ export class FileManagerWindow {
           return;
         }
 
-        const item = e.target.closest('.fm-row, .fm-grid-card');
+        const item = /** @type {HTMLElement} */ (e.target).closest('.fm-row, .fm-grid-card');
         if (!item) return;
         const p = item.dataset.path;
         const file = this.fileList.find((f) => f.path === p);
@@ -1232,8 +1234,8 @@ export class FileManagerWindow {
           } catch (_) {}
         });
 
-        const chk = e.target.closest('.fm-checkbox');
-        const chkCell = e.target.closest('.fm-col-check');
+        const chk = /** @type {HTMLElement} */ (e.target).closest('.fm-checkbox');
+        const chkCell = /** @type {HTMLElement} */ (e.target).closest('.fm-col-check');
         if (touchTap && !chk && !chkCell) {
           if (Date.now() - (this._touchOpenAt || 0) < 450) return; // second tap of a double-tap
           if (this.selectedPaths.size === 0 || file.name === '..') {
@@ -1309,7 +1311,7 @@ export class FileManagerWindow {
 
       this.list.addEventListener('dblclick', (e) => {
         if (this._lastPointerType === 'touch') return; // the tap already opened it
-        const item = e.target.closest('.fm-row, .fm-grid-card');
+        const item = /** @type {HTMLElement} */ (e.target).closest('.fm-row, .fm-grid-card');
         if (!item) return;
         const p = item.dataset.path;
         const file = this.fileList.find((f) => f.path === p);
@@ -1319,7 +1321,7 @@ export class FileManagerWindow {
 
       // Drag start & end from this window
       this.list.addEventListener('dragstart', (e) => {
-        const item = e.target.closest('.fm-row, .fm-grid-card');
+        const item = /** @type {HTMLElement} */ (e.target).closest('.fm-row, .fm-grid-card');
         if (!item) return;
         const p = item.dataset.path;
         const file = this.fileList.find((f) => f.path === p);
@@ -1443,7 +1445,6 @@ export class FileManagerWindow {
         }),
         'info'
       );
-      const token = (auth && typeof auth.getToken === 'function' ? auth.getToken() : null) || '';
       const qs = paths.map((p) => `paths=${encodeURIComponent(p)}`).join('&');
       window.open(`/api/fs/download-zip?${qs}`, '_blank');
     });
@@ -2554,7 +2555,6 @@ export class FileManagerWindow {
       this.list.innerHTML = '';
       this.list.setAttribute('role', 'grid');
       this.list.setAttribute('aria-label', t('fm.grid_label', 'Files in this folder'));
-      const token = (auth && typeof auth.getToken === 'function' ? auth.getToken() : null) || '';
 
       const folderSvg =
         '<svg viewBox="0 0 24 24" width="44" height="44" stroke="currentColor" stroke-width="1.5" fill="#eab308"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>';
@@ -2844,7 +2844,6 @@ export class FileManagerWindow {
     } else if (act === 'share') {
       openShareLinkModal(path, oldName);
     } else if (act === 'download') {
-      const token = (auth && typeof auth.getToken === 'function' ? auth.getToken() : null) || '';
       window.open(`/api/fs/download?path=${encodeURIComponent(path)}`, '_blank');
     } else if (act === 'delete') {
       this.askDelete([path]);
@@ -4211,11 +4210,11 @@ export function openMediaOrganizerModal(initialPath = '') {
 
   const closeBtn = document.getElementById('modal-media-org-close-btn');
   const cancelBtn = document.getElementById('modal-media-org-cancel-btn');
-  const srcInput = document.getElementById('media-org-source-input');
-  const dstInput = document.getElementById('media-org-dest-input');
+  const srcInput = /** @type {HTMLInputElement} */ (document.getElementById('media-org-source-input'));
+  const dstInput = /** @type {HTMLInputElement} */ (document.getElementById('media-org-dest-input'));
   const modeSelect = document.getElementById('media-org-mode-select');
-  const btnPreview = document.getElementById('btn-media-org-preview');
-  const btnApply = document.getElementById('btn-media-org-apply');
+  const btnPreview = /** @type {HTMLButtonElement} */ (document.getElementById('btn-media-org-preview'));
+  const btnApply = /** @type {HTMLButtonElement} */ (document.getElementById('btn-media-org-apply'));
   const previewWrap = document.getElementById('media-org-preview-wrap');
 
   let previewItems = [];
@@ -4572,12 +4571,12 @@ export function openShareLinkModal(path, fileName, anchorEl = null) {
   const mineBtn = /** @type {HTMLButtonElement | null} */ (modal.querySelector('#fm-share-mine'));
   if (mineBtn) mineBtn.onclick = () => import('./shared-links.js').then((m) => m.openSharedLinks());
 
-  const submitBtn = modal.querySelector('#fm-share-submit');
+  const submitBtn = /** @type {HTMLButtonElement} */ (modal.querySelector('#fm-share-submit'));
   if (submitBtn) {
     submitBtn.onclick = async () => {
-      const expSelect = modal.querySelector('#fm-share-expires');
+      const expSelect = /** @type {HTMLSelectElement} */ (modal.querySelector('#fm-share-expires'));
       const expHours = expSelect ? parseInt(expSelect.value, 10) : 24;
-      const pwdInput = modal.querySelector('#fm-share-password');
+      const pwdInput = /** @type {HTMLInputElement} */ (modal.querySelector('#fm-share-password'));
       const pwd = pwdInput ? pwdInput.value.trim() : '';
       if (!(expHours > 0) && !pwd) {
         // the server refuses it too (SET-01): say so here, where the password can be typed
@@ -4587,7 +4586,7 @@ export function openShareLinkModal(path, fileName, anchorEl = null) {
       }
       submitBtn.disabled = true;
       submitBtn.textContent = t('ui.generating', 'Generating...');
-      const maxDlInput = modal.querySelector('#fm-share-max-dl');
+      const maxDlInput = /** @type {HTMLInputElement} */ (modal.querySelector('#fm-share-max-dl'));
       const maxDl = maxDlInput ? parseInt(maxDlInput.value, 10) : 0;
       const upload = Boolean(/** @type {HTMLInputElement | null} */ (modal.querySelector('#fm-share-upload'))?.checked);
 
@@ -4609,7 +4608,7 @@ export function openShareLinkModal(path, fileName, anchorEl = null) {
         const popEl = modal.querySelector('.fm-share-popover');
         if (popEl) placePopover(popEl, anchorRect); // taller now: keep it on screen
 
-        const urlInput = modal.querySelector('#fm-share-url-output');
+        const urlInput = /** @type {HTMLInputElement} */ (modal.querySelector('#fm-share-url-output'));
         if (urlInput) urlInput.value = fullUrl;
 
         // Auto-copy

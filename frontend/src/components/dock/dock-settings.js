@@ -11,7 +11,6 @@ let _magnificationScale = 1.45;
 export let _dockPosition = 'bottom';
 export let _dockSize = 'medium';
 export let _dockAutohide = false;
-let _parabolicInitialized = false;
 
 export function initParabolicDockMagnification(dockEl) {
   if (!dockEl) dockEl = document.getElementById('os-dock');
@@ -134,10 +133,10 @@ export function applyDockSettings(
       btn.setAttribute('aria-checked', isMatch ? 'true' : 'false');
     });
 
-    const magToggle = document.getElementById('dock-magnification-toggle');
+    const magToggle = /** @type {HTMLInputElement} */ (document.getElementById('dock-magnification-toggle'));
     if (magToggle) magToggle.checked = _magnificationEnabled;
 
-    const magSlider = document.getElementById('dock-magnification-slider');
+    const magSlider = /** @type {HTMLInputElement} */ (document.getElementById('dock-magnification-slider'));
     if (magSlider && parseFloat(magSlider.value) !== _magnificationScale) {
       magSlider.value = _magnificationScale.toString();
     }
@@ -145,7 +144,7 @@ export function applyDockSettings(
     const magVal = document.getElementById('dock-magnification-val');
     if (magVal) magVal.textContent = `${formatFixed(_magnificationScale, 2)}x`;
 
-    const autohideToggle = document.getElementById('dock-autohide-toggle');
+    const autohideToggle = /** @type {HTMLInputElement} */ (document.getElementById('dock-autohide-toggle'));
     if (autohideToggle) autohideToggle.checked = _dockAutohide;
 
     if (typeof window !== 'undefined' && typeof window.syncDesktopTwinPreview === 'function') {
@@ -220,7 +219,14 @@ export function initDockSettingsControls() {
   const magToggle = document.getElementById('dock-magnification-toggle');
   if (magToggle) {
     magToggle.addEventListener('change', (e) => {
-      applyDockSettings(_dockPosition, e.target.checked, _magnificationScale, _dockSize, _dockAutohide, true);
+      applyDockSettings(
+        _dockPosition,
+        /** @type {HTMLInputElement} */ (e.target).checked,
+        _magnificationScale,
+        _dockSize,
+        _dockAutohide,
+        true
+      );
     });
   }
 
@@ -230,7 +236,7 @@ export function initDockSettingsControls() {
       applyDockSettings(
         _dockPosition,
         _magnificationEnabled,
-        parseFloat(e.target.value),
+        parseFloat(/** @type {HTMLInputElement} */ (e.target).value),
         _dockSize,
         _dockAutohide,
         false
@@ -240,7 +246,7 @@ export function initDockSettingsControls() {
       applyDockSettings(
         _dockPosition,
         _magnificationEnabled,
-        parseFloat(e.target.value),
+        parseFloat(/** @type {HTMLInputElement} */ (e.target).value),
         _dockSize,
         _dockAutohide,
         true
@@ -251,7 +257,14 @@ export function initDockSettingsControls() {
   const autohideToggle = document.getElementById('dock-autohide-toggle');
   if (autohideToggle) {
     autohideToggle.addEventListener('change', (e) => {
-      applyDockSettings(_dockPosition, _magnificationEnabled, _magnificationScale, _dockSize, e.target.checked, true);
+      applyDockSettings(
+        _dockPosition,
+        _magnificationEnabled,
+        _magnificationScale,
+        _dockSize,
+        /** @type {HTMLInputElement} */ (e.target).checked,
+        true
+      );
     });
   }
 

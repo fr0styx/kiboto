@@ -5,17 +5,16 @@
  */
 
 import { ensureManagementDom } from '../management-dom.js';
-import { api } from '../api.js';
-import { state } from '../state.js';
+import '../api.js';
+import '../state.js';
 import { ZettEventBus } from '../event-bus.js';
-import { showToast, showConfirmToast } from '../toast.js';
+import '../toast.js';
 import { t } from '../i18n.js';
-import { makeDraggable, bringToFront, trapFocus } from './dock.js';
-import { applyDesktopTheme, applyLcdTheme } from './dashboard.js';
+import { makeDraggable, bringToFront } from './dock.js';
+import './dashboard.js';
 
 let personalizationWindow = null;
 let _activeTab = 'wallpaper';
-let _unbindTrap = null;
 
 export function initPersonalization() {
   if (window._personalizationInitialized) return;

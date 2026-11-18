@@ -32,7 +32,6 @@ import { appsFamilyHtml, installAppsFamily, openFamily } from './apps-family.js'
 import {
   createContainerRow as createSharedContainerRow,
   updateContainerRow as updateSharedContainerRow,
-  buildContainerRowInner as buildSharedContainerRowInner,
   getSelectedContainerIds,
   isContainerSelected,
   toggleContainerSelected,
@@ -308,7 +307,7 @@ export function initContainersManager() {
 
   // Quick Action Buttons
 
-  const btnCheckUpdates = document.getElementById('btn-cw-check-updates');
+  const btnCheckUpdates = /** @type {HTMLButtonElement} */ (document.getElementById('btn-cw-check-updates'));
   if (btnCheckUpdates) {
     btnCheckUpdates.onclick = async () => {
       btnCheckUpdates.disabled = true;
@@ -331,7 +330,7 @@ export function initContainersManager() {
     };
   }
 
-  const btnUpdateAll = document.getElementById('btn-cw-update-all');
+  const btnUpdateAll = /** @type {HTMLButtonElement} */ (document.getElementById('btn-cw-update-all'));
   if (btnUpdateAll) {
     btnUpdateAll.onclick = () => {
       showConfirmToast(
@@ -453,7 +452,7 @@ export function initContainersManager() {
   const catSearchInput = document.getElementById('cw-catalog-search-input');
   if (catSearchInput) {
     catSearchInput.addEventListener('input', (e) => {
-      _cwCatalogSearch = (e.target.value || '').trim().toLowerCase();
+      _cwCatalogSearch = (/** @type {HTMLInputElement} */ (e.target).value || '').trim().toLowerCase();
       renderCwCatalogGrid();
     });
   }
@@ -477,7 +476,7 @@ export function initContainersManager() {
   const searchInput = document.getElementById('cw-docker-search-input');
   if (searchInput) {
     searchInput.addEventListener('input', (e) => {
-      _cwSearchQuery = (e.target.value || '').trim().toLowerCase();
+      _cwSearchQuery = (/** @type {HTMLInputElement} */ (e.target).value || '').trim().toLowerCase();
       clearSelectedContainers();
       renderContainersWindowTable();
       updateCwBulkBar();
@@ -488,7 +487,11 @@ export function initContainersManager() {
   const sortHeaders = containersWindow.querySelectorAll('.cw-sortable-th');
   sortHeaders.forEach((th) => {
     th.addEventListener('click', (e) => {
-      if (e.target.id === 'cw-docker-select-all' || e.target.closest('#cw-docker-select-all')) return;
+      if (
+        /** @type {HTMLElement} */ (e.target).id === 'cw-docker-select-all' ||
+        /** @type {HTMLElement} */ (e.target).closest('#cw-docker-select-all')
+      )
+        return;
       const col = th.dataset.sortCol;
       if (!col) return;
       if (_cwSortCol === col) {
@@ -507,7 +510,7 @@ export function initContainersManager() {
   });
 
   // Select All Containers Checkbox
-  const selectAll = document.getElementById('cw-docker-select-all');
+  const selectAll = /** @type {HTMLInputElement} */ (document.getElementById('cw-docker-select-all'));
   if (selectAll) {
     selectAll.addEventListener('change', (e) => {
       e.stopPropagation();
@@ -538,7 +541,7 @@ export function initContainersManager() {
   const bulkBar = document.getElementById('cw-docker-bulk-bar');
   if (bulkBar) {
     bulkBar.addEventListener('click', (e) => {
-      const btn = e.target.closest('.btn-bulk-action');
+      const btn = /** @type {HTMLElement} */ (e.target).closest('.btn-bulk-action');
       if (!btn) return;
       e.stopPropagation();
       const action = btn.dataset.bulk;
@@ -796,7 +799,7 @@ export function renderCwCatalogGrid() {
     grid.querySelector('#cw-catalog-clear-filters')?.addEventListener('click', () => {
       _cwCatalogSearch = '';
       _cwCatalogCategory = 'all';
-      const input = document.getElementById('cw-catalog-search-input');
+      const input = /** @type {HTMLInputElement} */ (document.getElementById('cw-catalog-search-input'));
       if (input) input.value = '';
       renderCwCatalogGrid();
     });
@@ -1188,11 +1191,6 @@ function onAppRowAct(app, act) {
   return showBottomSheet(/** @type {any} */ ({ title: app.name, items: appMenu(app, hasUpdate, run, openPart) }));
 }
 
-function buildCwContainerRowInner(c, currentHost) {
-  const updateInfo = cwUpdateInfo(c);
-  return buildSharedContainerRowInner(c, currentHost, updateInfo);
-}
-
 function createCwContainerRow(c, currentHost) {
   const tr = createSharedContainerRow(c, currentHost, cwUpdateInfo(c));
   tr.classList.toggle('cw-app-row', isAppRow(c));
@@ -1441,7 +1439,7 @@ function bindCwTableEvents(tbody) {
 export function updateCwBulkBar() {
   const bar = document.getElementById('cw-docker-bulk-bar');
   const countEl = document.getElementById('cw-docker-bulk-count');
-  const selectAll = document.getElementById('cw-docker-select-all');
+  const selectAll = /** @type {HTMLInputElement} */ (document.getElementById('cw-docker-select-all'));
   const selectedIds = getSelectedContainerIds();
   const count = selectedIds.length;
 

@@ -55,11 +55,11 @@ export function alertSentence(cfg = {}) {
 export function renderNotificationConfigUI() {
   if (!_notificationConfig) return;
   const cfg = _notificationConfig;
-  const digestMode = document.getElementById('notif-digest-mode');
+  const digestMode = /** @type {HTMLSelectElement} */ (document.getElementById('notif-digest-mode'));
   if (digestMode) digestMode.value = cfg.digest_mode === 'daily' ? 'daily' : 'off';
-  const digestHour = document.getElementById('notif-digest-hour');
+  const digestHour = /** @type {HTMLInputElement} */ (document.getElementById('notif-digest-hour'));
   if (digestHour) digestHour.value = String(cfg.digest_hour ?? 8);
-  const weekly = document.getElementById('notif-weekly-report');
+  const weekly = /** @type {HTMLInputElement} */ (document.getElementById('notif-weekly-report'));
   if (weekly) weekly.checked = cfg.weekly_report !== false;
   const lang = /** @type {HTMLSelectElement | null} */ (document.getElementById('notif-language'));
   if (lang) {
@@ -78,7 +78,7 @@ export function renderNotificationConfigUI() {
   if (frigate) import('../frigate-events.js').then((m) => m.renderFrigateEvents(frigate)); // COMP-11
 
   // Master switch
-  const masterSwitch = document.getElementById('notif-master-enabled');
+  const masterSwitch = /** @type {HTMLInputElement} */ (document.getElementById('notif-master-enabled'));
   const masterBadge = document.getElementById('notif-master-status-badge');
   if (masterSwitch) masterSwitch.checked = !!cfg.enabled;
   const sentence = document.getElementById('notif-master-sentence');
@@ -179,27 +179,30 @@ export async function saveNotificationsConfig({ quiet = false } = {}) {
   if (!_notificationConfig) _notificationConfig = {};
   const cfg = _notificationConfig;
 
-  cfg.enabled = !!document.getElementById('notif-master-enabled')?.checked;
-  cfg.notify_on_smart = !!document.getElementById('notif-toggle-smart')?.checked;
-  cfg.notify_on_ups = !!document.getElementById('notif-toggle-ups')?.checked;
-  cfg.notify_on_temp = !!document.getElementById('notif-toggle-temp')?.checked;
-  cfg.notify_on_fan = !!document.getElementById('notif-toggle-fan')?.checked;
-  cfg.notify_on_copy = !!document.getElementById('notif-toggle-copy')?.checked;
-  cfg.notify_on_backup = !!document.getElementById('notif-toggle-backup')?.checked;
+  cfg.enabled = !!(/** @type {HTMLInputElement} */ (document.getElementById('notif-master-enabled'))?.checked);
+  cfg.notify_on_smart = !!(/** @type {HTMLInputElement} */ (document.getElementById('notif-toggle-smart'))?.checked);
+  cfg.notify_on_ups = !!(/** @type {HTMLInputElement} */ (document.getElementById('notif-toggle-ups'))?.checked);
+  cfg.notify_on_temp = !!(/** @type {HTMLInputElement} */ (document.getElementById('notif-toggle-temp'))?.checked);
+  cfg.notify_on_fan = !!(/** @type {HTMLInputElement} */ (document.getElementById('notif-toggle-fan'))?.checked);
+  cfg.notify_on_copy = !!(/** @type {HTMLInputElement} */ (document.getElementById('notif-toggle-copy'))?.checked);
+  cfg.notify_on_backup = !!(/** @type {HTMLInputElement} */ (document.getElementById('notif-toggle-backup'))?.checked);
 
-  const hdd = parseInt(document.getElementById('notif-input-hdd-temp')?.value, 10);
+  const hdd = parseInt(/** @type {HTMLInputElement} */ (document.getElementById('notif-input-hdd-temp'))?.value, 10);
   if (!isNaN(hdd)) cfg.hdd_temp_threshold = Math.max(30, Math.min(80, hdd));
 
-  const cpu = parseInt(document.getElementById('notif-input-cpu-temp')?.value, 10);
+  const cpu = parseInt(/** @type {HTMLInputElement} */ (document.getElementById('notif-input-cpu-temp'))?.value, 10);
   if (!isNaN(cpu)) cfg.cpu_temp_threshold = Math.max(40, Math.min(105, cpu));
 
-  const cd = parseInt(document.getElementById('notif-input-cooldown')?.value, 10);
+  const cd = parseInt(/** @type {HTMLInputElement} */ (document.getElementById('notif-input-cooldown'))?.value, 10);
   if (!isNaN(cd)) cfg.cooldown_seconds = Math.max(1, Math.min(1440, cd)) * 60;
 
-  cfg.digest_mode = document.getElementById('notif-digest-mode')?.value === 'daily' ? 'daily' : 'off';
-  const dh = parseInt(document.getElementById('notif-digest-hour')?.value, 10);
+  cfg.digest_mode =
+    /** @type {HTMLSelectElement} */ (document.getElementById('notif-digest-mode'))?.value === 'daily'
+      ? 'daily'
+      : 'off';
+  const dh = parseInt(/** @type {HTMLInputElement} */ (document.getElementById('notif-digest-hour'))?.value, 10);
   if (!isNaN(dh)) cfg.digest_hour = Math.max(0, Math.min(23, dh));
-  const weekly = document.getElementById('notif-weekly-report');
+  const weekly = /** @type {HTMLInputElement} */ (document.getElementById('notif-weekly-report'));
   if (weekly) cfg.weekly_report = weekly.checked;
   const lang = /** @type {HTMLSelectElement | null} */ (document.getElementById('notif-language'));
   if (lang && lang.value) cfg.language = lang.value;
@@ -219,7 +222,7 @@ export async function saveNotificationsConfig({ quiet = false } = {}) {
 }
 
 export async function testAllNotificationChannels() {
-  const btn = document.getElementById('btn-send-test-alert');
+  const btn = /** @type {HTMLButtonElement} */ (document.getElementById('btn-send-test-alert'));
   if (btn) {
     btn.disabled = true;
     btn.textContent = t('ui.testing_2', 'Testing...');
@@ -303,7 +306,7 @@ export function openChannelConfigModal(channel) {
 
   const titleEl = document.getElementById('notif-modal-title');
   const bodyEl = document.getElementById('notif-modal-body');
-  const enableChk = document.getElementById('notif-modal-channel-enable');
+  const enableChk = /** @type {HTMLInputElement} */ (document.getElementById('notif-modal-channel-enable'));
 
   if (titleEl)
     titleEl.textContent = t('ntf.configure', 'Configure {channel} Alerts', {
@@ -418,38 +421,43 @@ export function saveCurrentChannelModal() {
   const channel = modal.dataset.currentChannel;
   if (!_notificationConfig) _notificationConfig = {};
   const cfg = _notificationConfig;
-  const enabled = !!document.getElementById('notif-modal-channel-enable')?.checked;
+  const enabled = !!(/** @type {HTMLInputElement} */ (document.getElementById('notif-modal-channel-enable'))?.checked);
 
   if (channel === 'discord') {
     cfg.discord_enabled = enabled;
-    cfg.discord_webhook_url = document.getElementById('cfg-discord-url')?.value.trim() || '';
+    cfg.discord_webhook_url =
+      /** @type {HTMLInputElement} */ (document.getElementById('cfg-discord-url'))?.value.trim() || '';
   } else if (channel === 'telegram') {
     cfg.telegram_enabled = enabled;
-    const tok = document.getElementById('cfg-telegram-token')?.value.trim() || '';
+    const tok = /** @type {HTMLInputElement} */ (document.getElementById('cfg-telegram-token'))?.value.trim() || '';
     if (tok && tok !== '********') cfg.telegram_bot_token = tok;
-    cfg.telegram_chat_id = document.getElementById('cfg-telegram-chat')?.value.trim() || '';
+    cfg.telegram_chat_id =
+      /** @type {HTMLInputElement} */ (document.getElementById('cfg-telegram-chat'))?.value.trim() || '';
   } else if (channel === 'email') {
     cfg.email_enabled = enabled;
-    cfg.smtp_host = document.getElementById('cfg-smtp-host')?.value.trim() || '';
-    cfg.smtp_port = parseInt(document.getElementById('cfg-smtp-port')?.value, 10) || 587;
-    cfg.smtp_user = document.getElementById('cfg-smtp-user')?.value.trim() || '';
-    const pass = document.getElementById('cfg-smtp-pass')?.value || '';
+    cfg.smtp_host = /** @type {HTMLInputElement} */ (document.getElementById('cfg-smtp-host'))?.value.trim() || '';
+    cfg.smtp_port =
+      parseInt(/** @type {HTMLInputElement} */ (document.getElementById('cfg-smtp-port'))?.value, 10) || 587;
+    cfg.smtp_user = /** @type {HTMLInputElement} */ (document.getElementById('cfg-smtp-user'))?.value.trim() || '';
+    const pass = /** @type {HTMLInputElement} */ (document.getElementById('cfg-smtp-pass'))?.value || '';
     if (pass && pass !== '********') cfg.smtp_pass = pass;
-    cfg.smtp_tls = !!document.getElementById('cfg-smtp-tls')?.checked;
-    cfg.email_from = document.getElementById('cfg-email-from')?.value.trim() || '';
-    cfg.email_to = document.getElementById('cfg-email-to')?.value.trim() || '';
+    cfg.smtp_tls = !!(/** @type {HTMLInputElement} */ (document.getElementById('cfg-smtp-tls'))?.checked);
+    cfg.email_from = /** @type {HTMLInputElement} */ (document.getElementById('cfg-email-from'))?.value.trim() || '';
+    cfg.email_to = /** @type {HTMLInputElement} */ (document.getElementById('cfg-email-to'))?.value.trim() || '';
   } else if (channel === 'ntfy') {
     cfg.ntfy_enabled = enabled;
-    cfg.ntfy_url = document.getElementById('cfg-ntfy-url')?.value.trim() || 'https://ntfy.sh';
-    cfg.ntfy_topic = document.getElementById('cfg-ntfy-topic')?.value.trim() || '';
-    const tk = document.getElementById('cfg-ntfy-token')?.value.trim() || '';
+    cfg.ntfy_url =
+      /** @type {HTMLInputElement} */ (document.getElementById('cfg-ntfy-url'))?.value.trim() || 'https://ntfy.sh';
+    cfg.ntfy_topic = /** @type {HTMLInputElement} */ (document.getElementById('cfg-ntfy-topic'))?.value.trim() || '';
+    const tk = /** @type {HTMLInputElement} */ (document.getElementById('cfg-ntfy-token'))?.value.trim() || '';
     if (tk && tk !== '********') cfg.ntfy_token = tk;
   } else if (channel === 'webhook') {
     cfg.webhook_enabled = enabled;
-    cfg.webhook_url = document.getElementById('cfg-webhook-url')?.value.trim() || '';
+    cfg.webhook_url = /** @type {HTMLInputElement} */ (document.getElementById('cfg-webhook-url'))?.value.trim() || '';
   } else if (channel === 'apprise_raw') {
     cfg.apprise_enabled = enabled;
-    const rawLines = document.getElementById('cfg-apprise-raw')?.value.split('\n') || [];
+    const rawLines =
+      /** @type {HTMLTextAreaElement} */ (document.getElementById('cfg-apprise-raw'))?.value.split('\n') || [];
     cfg.apprise_urls = rawLines.map((l) => l.trim()).filter(Boolean);
   }
 

@@ -15,7 +15,6 @@ import {
   setScreenLayoutStyle,
   hexToRgb,
   getContrastRatio,
-  syncDesktopTwinPreview,
 } from './dashboard.js';
 import { fitMiniPreviewScale, syncMiniPreviewTelemetry } from './mini-preview.js';
 import { t } from '../i18n.js';
@@ -209,7 +208,6 @@ export function initSettings() {
   const dynamicTitle = $('drawer-dynamic-title');
   const dynamicDesc = $('drawer-dynamic-desc');
   const tabBtns = document.querySelectorAll('.drawer-tab-btn');
-  const tabContents = document.querySelectorAll('.drawer-tab-content');
 
   function updateDrawerDynamicHeader(targetId) {
     if (!targetId) {
@@ -266,10 +264,12 @@ export function initSettings() {
     'wheel',
     (e) => {
       if (
-        e.target.closest('.slide-drawer') ||
-        e.target.closest('.smart-modal-window, #console-window') ||
-        e.target.closest('#mini-lcd-canvas') ||
-        e.target.closest('.file-manager-window, .os-window, .cmd-palette-modal, .mgmt-detail-card')
+        /** @type {HTMLElement} */ (e.target).closest('.slide-drawer') ||
+        /** @type {HTMLElement} */ (e.target).closest('.smart-modal-window, #console-window') ||
+        /** @type {HTMLElement} */ (e.target).closest('#mini-lcd-canvas') ||
+        /** @type {HTMLElement} */ (e.target).closest(
+          '.file-manager-window, .os-window, .cmd-palette-modal, .mgmt-detail-card'
+        )
       ) {
         return;
       }
@@ -367,12 +367,12 @@ export function initSettings() {
 
     container.addEventListener('mousedown', (e) => {
       for (const sel of ignoredSelectors) {
-        if (e.target.closest(sel)) {
+        if (/** @type {HTMLElement} */ (e.target).closest(sel)) {
           allowDrag = false;
           return;
         }
       }
-      allowDrag = !isLocked && !!e.target.closest('.drag-handle');
+      allowDrag = !isLocked && !!(/** @type {HTMLElement} */ (e.target).closest('.drag-handle'));
     });
 
     container.querySelectorAll('.draggable-card').forEach((card) => {
@@ -402,7 +402,7 @@ export function initSettings() {
         if (isLocked || !draggedCard) return;
         e.preventDefault();
         e.dataTransfer.dropEffect = 'move';
-        const targetCard = e.target.closest('.draggable-card');
+        const targetCard = /** @type {HTMLElement} */ (e.target).closest('.draggable-card');
         if (targetCard && targetCard !== draggedCard && targetCard.parentElement === container) {
           const rect = targetCard.getBoundingClientRect();
           const next = (e.clientY - rect.top) / (rect.bottom - rect.top) > 0.5;
@@ -453,14 +453,14 @@ export function initSettings() {
   });
 
   // --- Screen Backlight & Night Dimming ---
-  const screenBriSlider = $('screen-bri-slider');
+  const screenBriSlider = /** @type {HTMLInputElement} */ ($('screen-bri-slider'));
   const screenBriVal = $('screen-bri-val');
   const screenPowerBtn = $('btn-toggle-screen-power');
-  const screenNightToggle = $('screen-night-toggle');
-  const screenNightStart = $('screen-night-start');
-  const screenNightEnd = $('screen-night-end');
-  const screenNightBri = $('screen-night-bri');
-  const screenCarouselSelect = $('screen-carousel-select');
+  const screenNightToggle = /** @type {HTMLInputElement} */ ($('screen-night-toggle'));
+  const screenNightStart = /** @type {HTMLInputElement} */ ($('screen-night-start'));
+  const screenNightEnd = /** @type {HTMLInputElement} */ ($('screen-night-end'));
+  const screenNightBri = /** @type {HTMLInputElement} */ ($('screen-night-bri'));
+  const screenCarouselSelect = /** @type {HTMLSelectElement} */ ($('screen-carousel-select'));
   let screenDebounce = null;
   let screenPower = true;
   let lastNonZeroBrightness = 100;
@@ -568,7 +568,7 @@ export function initSettings() {
 
   if (screenCarouselSelect) {
     screenCarouselSelect.addEventListener('change', async (e) => {
-      const secs = parseInt(e.target.value, 10);
+      const secs = parseInt(/** @type {HTMLInputElement} */ (e.target).value, 10);
       try {
         await api.post('/api/lcd/page', { cycle_seconds: secs });
         showToast(secs > 0 ? `Auto-cycling LCD every ${secs}s` : 'Auto-cycling disabled (manual control)', 'info');
@@ -580,14 +580,14 @@ export function initSettings() {
 
   if (screenBriSlider) {
     screenBriSlider.addEventListener('input', (e) => {
-      const val = parseInt(e.target.value, 10);
+      const val = parseInt(/** @type {HTMLInputElement} */ (e.target).value, 10);
       screenPower = val > 0;
       updateScreenPowerUI();
       clearTimeout(screenDebounce);
       screenDebounce = setTimeout(postScreenState, 100);
     });
     screenBriSlider.addEventListener('change', (e) => {
-      const val = parseInt(e.target.value, 10);
+      const val = parseInt(/** @type {HTMLInputElement} */ (e.target).value, 10);
       screenPower = val > 0;
       updateScreenPowerUI();
       clearTimeout(screenDebounce);
@@ -600,14 +600,14 @@ export function initSettings() {
   if (screenNightBri) screenNightBri.addEventListener('change', postScreenState);
 
   // --- Hardware Auto-Copy Button Config ---
-  const btnCopyToggle = $('btn-copy-toggle');
+  const btnCopyToggle = /** @type {HTMLInputElement} */ ($('btn-copy-toggle'));
   const btnCopyOptions = $('btn-copy-options');
-  const btnCopySrc = $('btn-copy-src');
-  const btnCopyDst = $('btn-copy-dst');
-  const btnCopyExif = $('btn-copy-exif');
-  const btnCopyAutoIngest = $('btn-copy-auto-ingest');
-  const btnCopyRequireConfirm = $('btn-copy-require-confirm');
-  const btnCopyCollision = $('btn-copy-collision');
+  const btnCopySrc = /** @type {HTMLSelectElement} */ ($('btn-copy-src'));
+  const btnCopyDst = /** @type {HTMLInputElement} */ ($('btn-copy-dst'));
+  const btnCopyExif = /** @type {HTMLInputElement} */ ($('btn-copy-exif'));
+  const btnCopyAutoIngest = /** @type {HTMLInputElement} */ ($('btn-copy-auto-ingest'));
+  const btnCopyRequireConfirm = /** @type {HTMLInputElement} */ ($('btn-copy-require-confirm'));
+  const btnCopyCollision = /** @type {HTMLSelectElement} */ ($('btn-copy-collision'));
   const btnCopyWarn = $('btn-copy-overwrite-warn');
 
   // Overwrite replaces files without a word unless the page says so (hardware report, finding 18)
@@ -673,7 +673,7 @@ export function initSettings() {
 
   if (btnCopyToggle) {
     btnCopyToggle.addEventListener('change', (e) => {
-      const isEnabled = e.target.checked;
+      const isEnabled = /** @type {HTMLInputElement} */ (e.target).checked;
       if (btnCopyOptions) {
         btnCopyOptions.style.opacity = isEnabled ? '1' : '0.3';
         btnCopyOptions.style.pointerEvents = isEnabled ? 'auto' : 'none';
@@ -721,7 +721,7 @@ export function initSettings() {
     });
   }
 
-  const btnMediaCopyNow = $('btn-media-copy-now');
+  const btnMediaCopyNow = /** @type {HTMLButtonElement} */ ($('btn-media-copy-now'));
   if (btnMediaCopyNow) {
     btnMediaCopyNow.addEventListener('click', async () => {
       const srcSlot = btnCopySrc ? btnCopySrc.value : 'sd';
@@ -796,7 +796,7 @@ export function initSettings() {
       try {
         const adv = await api.get('/api/security/advisor');
         const disableAdminCont = $('sec-disable-admin-container');
-        const disableAdminBtn = $('btn-disable-default-admin');
+        const disableAdminBtn = /** @type {HTMLButtonElement} */ ($('btn-disable-default-admin'));
         if (disableAdminCont && disableAdminBtn) {
           if (!adv.admin_is_disabled) {
             disableAdminCont.style.display = 'block';
@@ -851,8 +851,8 @@ export function initSettings() {
     fetchSecurity();
     fetchDefaultAdminState();
 
-    const newPwdEl = $('sec-new-pwd');
-    const confirmPwdEl = $('sec-confirm-pwd');
+    const newPwdEl = /** @type {HTMLInputElement} */ ($('sec-new-pwd'));
+    const confirmPwdEl = /** @type {HTMLInputElement} */ ($('sec-confirm-pwd'));
     const mismatchMsg = $('sec-pwd-mismatch-msg');
 
     function checkPwdMatch() {
@@ -887,7 +887,7 @@ export function initSettings() {
     const secSaveBtn = $('sec-save-btn');
     if (secSaveBtn) {
       secSaveBtn.addEventListener('click', async () => {
-        const curPwd = $('sec-cur-pwd') ? $('sec-cur-pwd').value : '';
+        const curPwd = $('sec-cur-pwd') ? /** @type {HTMLInputElement} */ ($('sec-cur-pwd')).value : '';
         if (!curPwd) {
           showToast(t('mgmt.sec_err_cur_pwd_required', 'Current password is required to save changes'), 'error');
           if ($('sec-cur-pwd')) $('sec-cur-pwd').focus();
@@ -929,7 +929,6 @@ export function initSettings() {
 
         // the signed-in person's own password, for every role. "Admin username" renamed nothing and
         // "Email for notifications" sent nothing: both fields are gone (SET-10)
-        const payload = { current_password: curPwd, new_password: newPwd };
         if (!newPwd) {
           showToast(t('mgmt.sec_err_new_required', 'Enter a new password.'), 'error');
           if (newPwdEl) newPwdEl.focus();
@@ -940,7 +939,7 @@ export function initSettings() {
         try {
           await changeOwnPassword(curPwd, newPwd);
           showToast(t('mgmt.sec_saved', 'Security settings updated successfully.'), 'success');
-          if ($('sec-cur-pwd')) $('sec-cur-pwd').value = '';
+          if ($('sec-cur-pwd')) /** @type {HTMLInputElement} */ ($('sec-cur-pwd')).value = '';
           if (newPwdEl) {
             newPwdEl.value = '';
             newPwdEl.style.borderColor = 'rgba(255,255,255,0.12)';
@@ -978,7 +977,7 @@ export function initSettings() {
 
   // --- Card Minimize / Collapse Toggle ---
   document.addEventListener('click', (e) => {
-    const btn = e.target.closest('.btn-minimize');
+    const btn = /** @type {HTMLElement} */ (e.target).closest('.btn-minimize');
     if (!btn) return;
     const card = btn.closest('.draggable-card');
     if (!card) return;
@@ -1147,7 +1146,7 @@ export function syncDesktopThemeUI() {
     badge.style.borderColor = lookColour(look);
   }
 
-  const picker = $('desktop-custom-color-picker');
+  const picker = /** @type {HTMLInputElement} */ ($('desktop-custom-color-picker'));
   const hexVal = $('desktop-custom-hex-val');
   if (picker && curAccent) {
     picker.value = curAccent;
@@ -1641,12 +1640,12 @@ export function initDesktopThemeControls() {
   const picker = $('desktop-custom-color-picker');
   if (picker) {
     picker.addEventListener('input', (e) => {
-      const hex = e.target.value;
+      const hex = /** @type {HTMLInputElement} */ (e.target).value;
       applyDesktopTheme(state.desktopTheme, hex);
       syncDesktopThemeUI();
     });
     picker.addEventListener('change', (e) => {
-      const hex = e.target.value;
+      const hex = /** @type {HTMLInputElement} */ (e.target).value;
       applyDesktopTheme(state.desktopTheme, hex);
       saveDesktopThemeToServer(state.desktopTheme, hex);
       syncDesktopThemeUI();
@@ -1690,13 +1689,14 @@ export function initDesktopThemeControls() {
 
   // Hook Theme Import
   const importBtn = $('theme-import-btn');
-  const importFileInput = $('theme-import-file');
+  const importFileInput = /** @type {HTMLInputElement} */ ($('theme-import-file'));
   if (importBtn && importFileInput) {
     importBtn.addEventListener('click', () => {
       importFileInput.click();
     });
     importFileInput.addEventListener('change', (e) => {
-      const file = e.target.files && e.target.files[0];
+      const file =
+        /** @type {HTMLInputElement} */ (e.target).files && /** @type {HTMLInputElement} */ (e.target).files[0];
       if (file) {
         importThemeBundle(file);
         importFileInput.value = '';
@@ -1744,7 +1744,7 @@ export function syncLcdThemeUI() {
     badge.style.borderColor = curAccent || 'var(--brand, #33cdb8)';
   }
 
-  const picker = $('lcd-custom-color-picker');
+  const picker = /** @type {HTMLInputElement} */ ($('lcd-custom-color-picker'));
   const hexVal = $('lcd-custom-hex-val');
   if (picker && curAccent) {
     picker.value = curAccent;
@@ -1768,7 +1768,7 @@ export function syncLcdThemeUI() {
     ).toUpperCase();
   }
 
-  const clarityToggle = $('lcd-text-clarity-toggle');
+  const clarityToggle = /** @type {HTMLInputElement} */ ($('lcd-text-clarity-toggle'));
   if (clarityToggle) {
     clarityToggle.checked = curClarity;
   }
@@ -1791,12 +1791,12 @@ export function initLcdThemeControls() {
   const picker = $('lcd-custom-color-picker');
   if (picker) {
     picker.addEventListener('input', (e) => {
-      const hex = e.target.value;
+      const hex = /** @type {HTMLInputElement} */ (e.target).value;
       applyLcdTheme(state.lcdTheme, hex, state.lcdTextClarity);
       syncLcdThemeUI();
     });
     picker.addEventListener('change', (e) => {
-      const hex = e.target.value;
+      const hex = /** @type {HTMLInputElement} */ (e.target).value;
       applyLcdTheme(state.lcdTheme, hex, state.lcdTextClarity);
       saveLcdThemeToServer(state.lcdTheme, hex, state.lcdTextClarity);
       syncLcdThemeUI();
@@ -1815,7 +1815,7 @@ export function initLcdThemeControls() {
   const clarityToggle = $('lcd-text-clarity-toggle');
   if (clarityToggle) {
     clarityToggle.addEventListener('change', (e) => {
-      const enabled = e.target.checked;
+      const enabled = /** @type {HTMLInputElement} */ (e.target).checked;
       applyLcdTheme(state.lcdTheme, state.lcdCustomAccent, enabled);
       saveLcdThemeToServer(state.lcdTheme, state.lcdCustomAccent, enabled);
       syncLcdThemeUI();
@@ -2064,7 +2064,7 @@ export function initSystemTab() {
   if (typeof renderApiTokens !== 'undefined') renderApiTokens();
   renderStagedRestore();
   syncClientPreferencesFromServerIfEmpty();
-  const btnDownload = document.getElementById('btn-backup-download');
+  const btnDownload = /** @type {HTMLButtonElement} */ (document.getElementById('btn-backup-download'));
   if (btnDownload) {
     btnDownload.addEventListener('click', async () => {
       const origHtml = btnDownload.innerHTML;
@@ -2129,10 +2129,10 @@ export function initSystemTab() {
     });
   }
 
-  const uploadInput = document.getElementById('backup-upload-input');
+  const uploadInput = /** @type {HTMLInputElement} */ (document.getElementById('backup-upload-input'));
   if (uploadInput) {
     uploadInput.addEventListener('change', async (e) => {
-      const file = e.target.files[0];
+      const file = /** @type {HTMLInputElement} */ (e.target).files[0];
       if (!file) return;
       if (!file.name.endsWith('.zip') && !file.name.endsWith('.zettbak')) {
         showToast(

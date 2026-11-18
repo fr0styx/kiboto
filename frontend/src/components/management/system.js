@@ -98,10 +98,10 @@ export async function fetchAndRenderSystemAbout(force = false, channelOverride =
   const lastCheckedEl = document.getElementById('update-last-checked');
   const detailsBox = document.getElementById('update-details-box');
   const releaseTitle = document.getElementById('update-release-title');
-  const releaseLink = document.getElementById('update-release-link');
+  const releaseLink = /** @type {HTMLAnchorElement} */ (document.getElementById('update-release-link'));
   const releaseNotes = document.getElementById('update-release-notes');
 
-  const btnCheck = document.getElementById('btn-check-updates');
+  const btnCheck = /** @type {HTMLButtonElement} */ (document.getElementById('btn-check-updates'));
   const btnIcon = document.getElementById('btn-check-updates-icon');
   const btnText = document.getElementById('btn-check-updates-text');
 
@@ -246,10 +246,10 @@ let _previousVersion = null;
 
 /** Backup job form: a settings backup (OPS-8) has a passphrase and a folder or remote, no source share. */
 export function syncBackupJobForm() {
-  const kind = document.getElementById('backup-job-kind')?.value || 'data';
+  const kind = /** @type {HTMLSelectElement} */ (document.getElementById('backup-job-kind'))?.value || 'data';
   const isConfig = kind === 'config';
-  const dest = document.getElementById('backup-job-dest-type');
-  const sub = document.getElementById('backup-job-subvolume');
+  const dest = /** @type {HTMLSelectElement} */ (document.getElementById('backup-job-dest-type'));
+  const sub = /** @type {HTMLInputElement} */ (document.getElementById('backup-job-subvolume'));
   const subWrap = document.getElementById('backup-subvolume-wrap');
   const cfg = document.getElementById('backup-config-fields');
   const local = document.getElementById('backup-local-fields');
@@ -385,7 +385,7 @@ export async function revertSystemUpdate() {
 }
 
 export async function applySystemUpdate() {
-  const applyBtn = document.getElementById('btn-apply-system-update');
+  const applyBtn = /** @type {HTMLButtonElement} */ (document.getElementById('btn-apply-system-update'));
   const progressOverlay = document.getElementById('update-progress-overlay');
   const progressTitle = document.getElementById('update-progress-title');
   const progressDesc = document.getElementById('update-progress-desc');
@@ -470,7 +470,7 @@ export async function applySystemUpdate() {
 }
 
 export async function downloadDiagnosticsBundle() {
-  const btn = document.getElementById('btn-download-diagnostics');
+  const btn = /** @type {HTMLButtonElement} */ (document.getElementById('btn-download-diagnostics'));
   const btnIcon = document.getElementById('btn-download-diagnostics-icon');
   const btnText = document.getElementById('btn-download-diagnostics-text');
 
@@ -652,7 +652,7 @@ export function openDiagnosticsPreviewModal(data) {
 }
 
 export async function previewDiagnosticsSummary() {
-  const btn = document.getElementById('btn-preview-diagnostics');
+  const btn = /** @type {HTMLButtonElement} */ (document.getElementById('btn-preview-diagnostics'));
   const origHtml = btn ? btn.innerHTML : '';
   try {
     if (btn) {

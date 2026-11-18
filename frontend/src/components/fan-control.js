@@ -240,7 +240,7 @@ export function updateFanCurveWorkstation(s) {
   }
 
   if (fc.zero_rpm_stop_delay !== undefined) {
-    const zeroRpmDelaySlider = $('zero-rpm-delay-slider');
+    const zeroRpmDelaySlider = /** @type {HTMLInputElement} */ ($('zero-rpm-delay-slider'));
     const zeroRpmDelayValDisplay = $('zero-rpm-delay-val-display');
     if (zeroRpmDelaySlider && document.activeElement !== zeroRpmDelaySlider) {
       zeroRpmDelaySlider.value = fc.zero_rpm_stop_delay;
@@ -248,7 +248,7 @@ export function updateFanCurveWorkstation(s) {
     }
   }
   if (fc.cpu_hold_secs !== undefined) {
-    const cpuHoldSlider = $('cpu-hold-slider');
+    const cpuHoldSlider = /** @type {HTMLInputElement} */ ($('cpu-hold-slider'));
     const cpuHoldValDisplay = $('cpu-hold-val-display');
     if (cpuHoldSlider && document.activeElement !== cpuHoldSlider) {
       cpuHoldSlider.value = fc.cpu_hold_secs;
@@ -414,13 +414,13 @@ export function initFanControl() {
   const legCpu = $('leg-item-cpu');
   const btnReset = $('btn-reset-curve');
   const fanProfileBtns = document.querySelectorAll('.fan-profile-btn');
-  const fanPwmSlider = $('fan-pwm-slider');
+  const fanPwmSlider = /** @type {HTMLInputElement} */ ($('fan-pwm-slider'));
   const fanPwmVal = $('fan-pwm-val-display') || $('fan-pwm-val');
-  const cpuFanToggle = $('cpu-fan-toggle') || $('fan-ctrl-cpu');
-  const zeroRpmToggle = $('zero-rpm-toggle');
-  const cpuHoldSlider = $('cpu-hold-slider');
+  const cpuFanToggle = /** @type {HTMLInputElement} */ ($('cpu-fan-toggle')) || $('fan-ctrl-cpu');
+  const zeroRpmToggle = /** @type {HTMLInputElement} */ ($('zero-rpm-toggle'));
+  const cpuHoldSlider = /** @type {HTMLInputElement} */ ($('cpu-hold-slider'));
   const cpuHoldValDisplay = $('cpu-hold-val-display');
-  const zeroRpmDelaySlider = $('zero-rpm-delay-slider');
+  const zeroRpmDelaySlider = /** @type {HTMLInputElement} */ ($('zero-rpm-delay-slider'));
   const zeroRpmDelayValDisplay = $('zero-rpm-delay-val-display');
   const fanCurveSvg = document.querySelector('.fan-curve-svg');
 
@@ -521,13 +521,13 @@ export function initFanControl() {
 
   if (cpuFanToggle) {
     cpuFanToggle.addEventListener('change', (e) => {
-      saveChange({ ctrl_cpu_fan: e.target.checked });
+      saveChange({ ctrl_cpu_fan: /** @type {HTMLInputElement} */ (e.target).checked });
     });
   }
 
   if (cpuHoldSlider) {
     cpuHoldSlider.addEventListener('input', (e) => {
-      const val = parseInt(e.target.value, 10);
+      const val = parseInt(/** @type {HTMLInputElement} */ (e.target).value, 10);
       if (cpuHoldValDisplay) cpuHoldValDisplay.textContent = `${val}s`;
       clearTimeout(cpuHoldDebounce);
       cpuHoldDebounce = setTimeout(async () => {
@@ -538,13 +538,13 @@ export function initFanControl() {
 
   if (zeroRpmToggle) {
     zeroRpmToggle.addEventListener('change', (e) => {
-      saveChange({ zero_rpm_enabled: e.target.checked });
+      saveChange({ zero_rpm_enabled: /** @type {HTMLInputElement} */ (e.target).checked });
     });
   }
 
   if (zeroRpmDelaySlider) {
     zeroRpmDelaySlider.addEventListener('input', (e) => {
-      const val = parseInt(e.target.value, 10);
+      const val = parseInt(/** @type {HTMLInputElement} */ (e.target).value, 10);
       if (zeroRpmDelayValDisplay) zeroRpmDelayValDisplay.textContent = `${val}s`;
       clearTimeout(zeroRpmDelayDebounce);
       zeroRpmDelayDebounce = setTimeout(async () => {
@@ -591,9 +591,9 @@ export function initFanControl() {
 
   if (fanCurveSvg) {
     fanCurveSvg.addEventListener('mousedown', (e) => {
-      if (e.target.classList.contains('curve-handle')) {
+      if (/** @type {HTMLElement} */ (e.target).classList.contains('curve-handle')) {
         isDraggingCurve = true;
-        dragIndex = parseInt(e.target.id.replace('ch-', ''), 10);
+        dragIndex = parseInt(/** @type {HTMLElement} */ (e.target).id.replace('ch-', ''), 10);
       }
     });
 
@@ -669,9 +669,9 @@ export function initFanControl() {
     window.addEventListener('touchend', onCurveUp);
   }
 
-  const presetSelect = $('fan-preset-select');
+  const presetSelect = /** @type {HTMLSelectElement} */ ($('fan-preset-select'));
   const btnSavePreset = $('btn-save-fan-preset');
-  const btnApplyPreset = $('btn-apply-fan-preset');
+  const btnApplyPreset = /** @type {HTMLButtonElement} */ ($('btn-apply-fan-preset'));
   const btnDeletePreset = $('btn-delete-fan-preset');
 
   async function loadFanPresets() {
@@ -699,16 +699,9 @@ export function initFanControl() {
   }
 
   const saveModal = document.getElementById('fan-preset-modal-overlay');
-  const nameInput = document.getElementById('fan-preset-name-input');
-  const btnSubmitSavePreset = document.getElementById('fan-preset-submit-btn');
-  const btnCancelSavePreset = document.getElementById('fan-preset-cancel-btn');
-  const btnCloseSavePreset = document.getElementById('fan-preset-close-btn');
+  const nameInput = /** @type {HTMLInputElement} */ (document.getElementById('fan-preset-name-input'));
 
   const deleteModal = document.getElementById('fan-preset-delete-overlay');
-  const deleteTargetText = document.getElementById('fan-delete-preset-target');
-  const btnConfirmDeletePreset = document.getElementById('fan-delete-confirm-btn');
-  const btnCancelDeletePreset = document.getElementById('fan-delete-cancel-btn');
-  const btnCloseDeletePreset = document.getElementById('fan-delete-close-btn');
 
   function openSavePresetModal() {
     if (!saveModal) return;
@@ -730,7 +723,7 @@ export function initFanControl() {
   }
 
   async function handleSavePreset() {
-    const inputEl = document.getElementById('fan-preset-name-input');
+    const inputEl = /** @type {HTMLInputElement} */ (document.getElementById('fan-preset-name-input'));
     const cleanName = (inputEl ? inputEl.value : '').trim();
     if (!cleanName) {
       if (inputEl) {
@@ -821,11 +814,11 @@ export function initFanControl() {
 
   if (saveModal) {
     saveModal.addEventListener('click', (e) => {
-      if (e.target.closest('#fan-preset-submit-btn')) {
+      if (/** @type {HTMLElement} */ (e.target).closest('#fan-preset-submit-btn')) {
         handleSavePreset();
       } else if (
-        e.target.closest('#fan-preset-cancel-btn') ||
-        e.target.closest('#fan-preset-close-btn') ||
+        /** @type {HTMLElement} */ (e.target).closest('#fan-preset-cancel-btn') ||
+        /** @type {HTMLElement} */ (e.target).closest('#fan-preset-close-btn') ||
         e.target === saveModal
       ) {
         closeSavePresetModal();
@@ -883,11 +876,11 @@ export function initFanControl() {
 
   if (deleteModal) {
     deleteModal.addEventListener('click', (e) => {
-      if (e.target.closest('#fan-delete-confirm-btn')) {
+      if (/** @type {HTMLElement} */ (e.target).closest('#fan-delete-confirm-btn')) {
         handleDeletePreset();
       } else if (
-        e.target.closest('#fan-delete-cancel-btn') ||
-        e.target.closest('#fan-delete-close-btn') ||
+        /** @type {HTMLElement} */ (e.target).closest('#fan-delete-cancel-btn') ||
+        /** @type {HTMLElement} */ (e.target).closest('#fan-delete-close-btn') ||
         e.target === deleteModal
       ) {
         closeDeletePresetModal();
@@ -920,8 +913,8 @@ export function initFanControl() {
 }
 
 export function initAcousticCalibration() {
-  const btnStart = $('btn-start-acoustic-sweep');
-  const btnStop = $('btn-stop-acoustic-sweep');
+  const btnStart = /** @type {HTMLButtonElement} */ ($('btn-start-acoustic-sweep'));
+  const btnStop = /** @type {HTMLButtonElement} */ ($('btn-stop-acoustic-sweep'));
   const badge = $('acoustic-sweep-badge');
   const statusEl = $('acoustic-sweep-status');
   const stepEl = $('acoustic-current-step');

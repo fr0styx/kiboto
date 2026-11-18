@@ -373,7 +373,7 @@ function _showTopConfirm(title, msg, onConfirm, onCancel, options = {}) {
   const msgEl = document.getElementById('confirm-toast-msg');
   const closeBtn = document.getElementById('confirm-toast-close');
   const cancelBtn = document.getElementById('confirm-toast-cancel');
-  const okBtn = document.getElementById('confirm-toast-ok');
+  const okBtn = /** @type {HTMLButtonElement} */ (document.getElementById('confirm-toast-ok'));
   const ejectBtn = document.getElementById('confirm-toast-eject');
   const headerBg = document.getElementById('confirm-toast-header-bg');
 

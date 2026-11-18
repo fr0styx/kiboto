@@ -133,7 +133,7 @@ export function initStackModal() {
     origY = 0;
 
   header.addEventListener('mousedown', (e) => {
-    if (e.target.closest('.os-window-controls')) return;
+    if (/** @type {HTMLElement} */ (e.target).closest('.os-window-controls')) return;
     isDragging = true;
     startX = e.clientX;
     startY = e.clientY;
@@ -213,14 +213,14 @@ export function initStackModal() {
 
   // Copy buttons
   document.getElementById('stack-compose-copy-btn')?.addEventListener('click', () => {
-    const val = document.getElementById('stack-compose-editor')?.value || '';
+    const val = /** @type {HTMLTextAreaElement} */ (document.getElementById('stack-compose-editor'))?.value || '';
     copyText(val).then(() =>
       showToast(t('toast.compose_yaml_copied_to_clipboard', 'Compose YAML copied to clipboard'), 'info')
     );
   });
 
   document.getElementById('stack-env-copy-btn')?.addEventListener('click', () => {
-    const val = document.getElementById('stack-env-editor')?.value || '';
+    const val = /** @type {HTMLTextAreaElement} */ (document.getElementById('stack-env-editor'))?.value || '';
     copyText(val).then(() => showToast(t('toast.env_copied_to_clipboard', '.env copied to clipboard'), 'info'));
   });
 
@@ -295,9 +295,9 @@ export async function openStackModal(stackName, initialYaml = null) {
     if (originPill) originPill.textContent = t('stk.from_ai', 'AI template');
     const pathLabel = document.getElementById('stack-path-label');
     if (pathLabel) pathLabel.textContent = t('ui.ready_to_deploy_via_compose', 'Ready to Deploy via Compose Engine');
-    const composeEd = document.getElementById('stack-compose-editor');
+    const composeEd = /** @type {HTMLTextAreaElement} */ (document.getElementById('stack-compose-editor'));
     if (composeEd) composeEd.value = initialYaml;
-    const envEd = document.getElementById('stack-env-editor');
+    const envEd = /** @type {HTMLTextAreaElement} */ (document.getElementById('stack-env-editor'));
     if (envEd) envEd.value = '';
     const msgEl = document.getElementById('stack-modal-msg');
     const risks = lintCompose(initialYaml);
@@ -317,8 +317,11 @@ export async function openStackModal(stackName, initialYaml = null) {
     name: _activeStackName,
   });
   document.getElementById('stack-header-status').style.display = 'none';
-  document.getElementById('stack-compose-editor').value = t('stk.loading', 'Loading the stack…');
-  document.getElementById('stack-env-editor').value = '';
+  /** @type {HTMLTextAreaElement} */ (document.getElementById('stack-compose-editor')).value = t(
+    'stk.loading',
+    'Loading the stack…'
+  );
+  /** @type {HTMLTextAreaElement} */ (document.getElementById('stack-env-editor')).value = '';
   document.getElementById('stack-modal-msg').textContent = t('ui.fetching_stack_setup', 'Fetching stack setup...');
 
   try {
@@ -402,8 +405,8 @@ function renderStackDetails(data) {
   }
 
   // Fill textareas
-  document.getElementById('stack-compose-editor').value = data.compose_yaml || '';
-  document.getElementById('stack-env-editor').value = data.env_content || '';
+  /** @type {HTMLTextAreaElement} */ (document.getElementById('stack-compose-editor')).value = data.compose_yaml || '';
+  /** @type {HTMLTextAreaElement} */ (document.getElementById('stack-env-editor')).value = data.env_content || '';
   const from = data.has_real_file
     ? t('stk.from_disk', 'Loaded from the Compose file on disk')
     : t('stk.synth', 'Rebuilt from the running containers');
@@ -539,8 +542,8 @@ export async function applyActiveStack() {
 async function saveStack(redeployAfterSave = false) {
   if (!_activeStackName) return;
 
-  const composeVal = document.getElementById('stack-compose-editor')?.value || '';
-  const envVal = document.getElementById('stack-env-editor')?.value || '';
+  const composeVal = /** @type {HTMLTextAreaElement} */ (document.getElementById('stack-compose-editor'))?.value || '';
+  const envVal = /** @type {HTMLTextAreaElement} */ (document.getElementById('stack-env-editor'))?.value || '';
   const msgEl = document.getElementById('stack-modal-msg');
 
   // AI-written compose files with host-level access need an explicit OK (AI-22).
@@ -691,7 +694,7 @@ export async function openStackPickerModal(stacksInput = null) {
   if (badge)
     badge.textContent = t('stk.count', '{count, plural, one {# Stack} other {# Stacks}}', { count: stacks.length });
 
-  const searchInput = overlay.querySelector('#stack-picker-search');
+  const searchInput = /** @type {HTMLInputElement} */ (overlay.querySelector('#stack-picker-search'));
   const listContainer = overlay.querySelector('#stack-picker-list');
 
   const renderFilteredCards = (query = '') => {

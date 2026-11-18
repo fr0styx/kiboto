@@ -8,12 +8,6 @@ import { escapeHtml } from '../utils.js';
 import { api } from '../api.js';
 import { state } from '../state.js';
 import { showToast, showConfirmToast } from '../toast.js';
-// loaded when first used (B6 first-load budget)
-const openContainerInspector = (...args) =>
-  import('./container-modal.js').then((m) => {
-    m.initContainerModal();
-    return m.openContainerInspector(...args);
-  });
 
 import { t } from '../i18n.js';
 import { ZettEventBus } from '../event-bus.js';
@@ -126,7 +120,7 @@ export function initSpotlight() {
   });
 
   input.addEventListener('input', (e) => {
-    filterSpotlightResults(e.target.value);
+    filterSpotlightResults(/** @type {HTMLInputElement} */ (e.target).value);
   });
 
   _buildDefaultSpotlightItems();
@@ -404,7 +398,7 @@ export function categoryWord(category) {
 export function openSpotlight(initialQuery = '') {
   initSpotlight();
   const overlay = document.getElementById('spotlight-palette-overlay');
-  const input = document.getElementById('spotlight-input');
+  const input = /** @type {HTMLInputElement} */ (document.getElementById('spotlight-input'));
   if (!overlay || !input) return;
 
   _isOpen = true;
@@ -487,7 +481,7 @@ export function filterSpotlightResults(query = '') {
                 if (visIn) visIn.value = cleanPrompt;
                 if (visBtn) visBtn.click();
               } else {
-                const askIn = document.getElementById('ai-rag-query-input');
+                const askIn = /** @type {HTMLInputElement} */ (document.getElementById('ai-rag-query-input'));
                 const askBtn = document.getElementById('btn-ai-rag-ask');
                 if (askIn) askIn.value = cleanPrompt;
                 if (askBtn) askBtn.click();

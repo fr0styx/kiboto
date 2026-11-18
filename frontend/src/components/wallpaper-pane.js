@@ -13,7 +13,7 @@ import { applyGlassSettings, applyWallpaperReadability, loadWallpapers, setWallp
 let _wallpapersInitialized = false;
 
 export async function selectWallpaper(filename) {
-  const selectDropdown = document.getElementById('wallpaper-select');
+  const selectDropdown = /** @type {HTMLSelectElement} */ (document.getElementById('wallpaper-select'));
   if (selectDropdown) {
     selectDropdown.value = filename || '';
   }
@@ -185,12 +185,12 @@ export function renderWallpaperGallery(files, active, version) {
     `;
 
     card.addEventListener('click', (e) => {
-      if (e.target.closest('.wallpaper-action-btn')) return;
+      if (/** @type {HTMLElement} */ (e.target).closest('.wallpaper-action-btn')) return;
       selectWallpaper(f);
     });
 
     card.addEventListener('keydown', (e) => {
-      if (e.target.closest('.wallpaper-action-btn')) return;
+      if (/** @type {HTMLElement} */ (e.target).closest('.wallpaper-action-btn')) return;
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
         selectWallpaper(f);
@@ -273,7 +273,7 @@ export function filterGalleryByCategory(cat = 'all') {
 }
 
 export function showWallpaperList(files, active, version) {
-  const selectDropdown = document.getElementById('wallpaper-select');
+  const selectDropdown = /** @type {HTMLSelectElement} */ (document.getElementById('wallpaper-select'));
   if (selectDropdown) {
     selectDropdown.replaceChildren(new Option(t('wp.theme_gradient', 'Theme gradient'), ''));
     files.forEach((f) => {
@@ -359,10 +359,10 @@ export async function uploadAndApplyWallpaper(file) {
 
 // The wallpaper gallery and sliders live in Mission Control, inserted when first needed (FE-04)
 export function initWallpaperPane() {
-  const fileInput = document.getElementById('wallpaper-upload');
+  const fileInput = /** @type {HTMLInputElement} */ (document.getElementById('wallpaper-upload'));
   const clearBtn = document.getElementById('wallpaper-clear-btn');
   const defaultBtn = document.getElementById('wallpaper-default-btn');
-  const selectDropdown = document.getElementById('wallpaper-select');
+  const selectDropdown = /** @type {HTMLSelectElement} */ (document.getElementById('wallpaper-select'));
   const deleteBtn = document.getElementById('wallpaper-delete-btn');
   const renameBtn = document.getElementById('wallpaper-rename-btn');
   const galleryEl = document.getElementById('wallpaper-gallery-grid');
@@ -389,7 +389,7 @@ export function initWallpaperPane() {
 
   if (selectDropdown) {
     selectDropdown.addEventListener('change', (e) => {
-      const val = e.target.value;
+      const val = /** @type {HTMLInputElement} */ (e.target).value;
       if (val) {
         setWallpaper(`/api/wallpapers/download/${encodeURIComponent(val)}`, val);
       } else {
@@ -405,7 +405,7 @@ export function initWallpaperPane() {
 
   if (fileInput) {
     fileInput.addEventListener('change', (e) => {
-      const file = e.target.files[0];
+      const file = /** @type {HTMLInputElement} */ (e.target).files[0];
       handleUploadFile(file);
       fileInput.value = '';
     });
@@ -455,8 +455,8 @@ export function initWallpaperPane() {
 }
 
 export function initWallpaperReadabilityControls() {
-  const dimSlider = document.getElementById('wallpaper-dim-slider');
-  const blurSlider = document.getElementById('wallpaper-blur-slider');
+  const dimSlider = /** @type {HTMLInputElement} */ (document.getElementById('wallpaper-dim-slider'));
+  const blurSlider = /** @type {HTMLInputElement} */ (document.getElementById('wallpaper-blur-slider'));
   const resetBtn = document.getElementById('wallpaper-readability-reset-btn');
 
   // Load saved values or default
@@ -474,22 +474,22 @@ export function initWallpaperReadabilityControls() {
   if (dimSlider) {
     dimSlider.addEventListener('input', (e) => {
       const curBlur = blurSlider ? parseInt(blurSlider.value, 10) : 0;
-      applyWallpaperReadability(e.target.value, curBlur, false);
+      applyWallpaperReadability(/** @type {HTMLInputElement} */ (e.target).value, curBlur, false);
     });
     dimSlider.addEventListener('change', (e) => {
       const curBlur = blurSlider ? parseInt(blurSlider.value, 10) : 0;
-      applyWallpaperReadability(e.target.value, curBlur, true);
+      applyWallpaperReadability(/** @type {HTMLInputElement} */ (e.target).value, curBlur, true);
     });
   }
 
   if (blurSlider) {
     blurSlider.addEventListener('input', (e) => {
       const curDim = dimSlider ? parseInt(dimSlider.value, 10) : 15;
-      applyWallpaperReadability(curDim, e.target.value, false);
+      applyWallpaperReadability(curDim, /** @type {HTMLInputElement} */ (e.target).value, false);
     });
     blurSlider.addEventListener('change', (e) => {
       const curDim = dimSlider ? parseInt(dimSlider.value, 10) : 15;
-      applyWallpaperReadability(curDim, e.target.value, true);
+      applyWallpaperReadability(curDim, /** @type {HTMLInputElement} */ (e.target).value, true);
     });
   }
 
@@ -585,9 +585,9 @@ function _leaveSolid() {
 }
 
 export function initGlassControls() {
-  const blurSlider = document.getElementById('glass-blur-slider');
-  const opacitySlider = document.getElementById('glass-opacity-slider');
-  const glowToggle = document.getElementById('window-glow-toggle');
+  const blurSlider = /** @type {HTMLInputElement} */ (document.getElementById('glass-blur-slider'));
+  const opacitySlider = /** @type {HTMLInputElement} */ (document.getElementById('glass-opacity-slider'));
+  const glowToggle = /** @type {HTMLInputElement} */ (document.getElementById('window-glow-toggle'));
   const resetBtn = document.getElementById('glass-reset-btn');
   const radiusBtns = document.querySelectorAll('.window-radius-btn');
 
@@ -617,14 +617,14 @@ export function initGlassControls() {
       const curGlow = glowToggle ? glowToggle.checked : false;
       const curActiveRadiusBtn = document.querySelector('.window-radius-btn.active');
       const curRadius = curActiveRadiusBtn ? curActiveRadiusBtn.dataset.radius : '12px';
-      applyGlassSettings(e.target.value, curOpacity, curRadius, curGlow, false);
+      applyGlassSettings(/** @type {HTMLInputElement} */ (e.target).value, curOpacity, curRadius, curGlow, false);
     });
     blurSlider.addEventListener('change', (e) => {
       const curOpacity = opacitySlider ? parseInt(opacitySlider.value, 10) : 72;
       const curGlow = glowToggle ? glowToggle.checked : false;
       const curActiveRadiusBtn = document.querySelector('.window-radius-btn.active');
       const curRadius = curActiveRadiusBtn ? curActiveRadiusBtn.dataset.radius : '12px';
-      applyGlassSettings(e.target.value, curOpacity, curRadius, curGlow, true);
+      applyGlassSettings(/** @type {HTMLInputElement} */ (e.target).value, curOpacity, curRadius, curGlow, true);
     });
   }
 
@@ -635,14 +635,14 @@ export function initGlassControls() {
       const curGlow = glowToggle ? glowToggle.checked : false;
       const curActiveRadiusBtn = document.querySelector('.window-radius-btn.active');
       const curRadius = curActiveRadiusBtn ? curActiveRadiusBtn.dataset.radius : '12px';
-      applyGlassSettings(curBlur, e.target.value, curRadius, curGlow, false);
+      applyGlassSettings(curBlur, /** @type {HTMLInputElement} */ (e.target).value, curRadius, curGlow, false);
     });
     opacitySlider.addEventListener('change', (e) => {
       const curBlur = blurSlider ? parseInt(blurSlider.value, 10) : 24;
       const curGlow = glowToggle ? glowToggle.checked : false;
       const curActiveRadiusBtn = document.querySelector('.window-radius-btn.active');
       const curRadius = curActiveRadiusBtn ? curActiveRadiusBtn.dataset.radius : '12px';
-      applyGlassSettings(curBlur, e.target.value, curRadius, curGlow, true);
+      applyGlassSettings(curBlur, /** @type {HTMLInputElement} */ (e.target).value, curRadius, curGlow, true);
     });
   }
 
@@ -662,7 +662,7 @@ export function initGlassControls() {
       const curOpacity = opacitySlider ? parseInt(opacitySlider.value, 10) : 72;
       const curActiveRadiusBtn = document.querySelector('.window-radius-btn.active');
       const curRadius = curActiveRadiusBtn ? curActiveRadiusBtn.dataset.radius : '12px';
-      applyGlassSettings(curBlur, curOpacity, curRadius, e.target.checked, true);
+      applyGlassSettings(curBlur, curOpacity, curRadius, /** @type {HTMLInputElement} */ (e.target).checked, true);
     });
   }
 

@@ -444,15 +444,19 @@ export function openVmCreateModal() {
   // Header double-click to toggle maximize
   if (modalHdr) {
     modalHdr.ondblclick = (e) => {
-      if (e.target.closest('button') || e.target.closest('input')) return;
+      if (
+        /** @type {HTMLElement} */ (e.target).closest('button') ||
+        /** @type {HTMLElement} */ (e.target).closest('input')
+      )
+        return;
       if (maxBtn) maxBtn.click();
     };
   }
 
   // Real-time Slider Bindings
-  const ramSlider = modal.querySelector('#vm-create-ram-slider');
+  const ramSlider = /** @type {HTMLInputElement} */ (modal.querySelector('#vm-create-ram-slider'));
   const ramDisplay = modal.querySelector('#vm-ram-display');
-  const overrideToggle = modal.querySelector('#vm-override-toggle');
+  const overrideToggle = /** @type {HTMLInputElement} */ (modal.querySelector('#vm-override-toggle'));
   const overridePill = modal.querySelector('#vm-override-pill');
   const maxLabel = modal.querySelector('#vm-slider-max-label');
 
@@ -480,7 +484,7 @@ export function openVmCreateModal() {
     };
   }
 
-  const vcpuSlider = modal.querySelector('#vm-create-vcpu-slider');
+  const vcpuSlider = /** @type {HTMLInputElement} */ (modal.querySelector('#vm-create-vcpu-slider'));
   const vcpuDisplay = modal.querySelector('#vm-vcpu-display');
   const overcommitWarning = modal.querySelector('#vm-overcommit-soft-warning');
 
@@ -555,7 +559,7 @@ export function openVmCreateModal() {
   // Host USB Passthrough Device Management
   let createUsbDevices = [];
   const usbList = modal.querySelector('#vm-create-usb-list');
-  const usbSelect = modal.querySelector('#vm-create-host-usb-select');
+  const usbSelect = /** @type {HTMLSelectElement} */ (modal.querySelector('#vm-create-host-usb-select'));
   const btnAddUsb = modal.querySelector('#btn-create-add-usb-device');
   const toggleCustomUsb = modal.querySelector('#btn-create-toggle-custom-usb');
   const customUsbWrap = modal.querySelector('#vm-create-custom-usb-wrap');
@@ -734,7 +738,7 @@ export function openVmCreateModal() {
   bindPresets(modal); // VMs decision 5: start from Linux or Windows 11
   installSteps(modal); // three steps (VMs report stage 3)
   bindDiskImages(modal); // ready-made disks such as Home Assistant OS (VMs decision 5)
-  const btnSubmit = modal.querySelector('#vm-create-submit');
+  const btnSubmit = /** @type {HTMLButtonElement} */ (modal.querySelector('#vm-create-submit'));
   if (btnSubmit) {
     btnSubmit.onclick = async () => {
       const name = modal.querySelector('#vm-create-name')?.value?.trim();

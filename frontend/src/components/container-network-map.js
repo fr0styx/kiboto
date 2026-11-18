@@ -185,7 +185,7 @@ function ensureOverlay() {
     if (e.key === 'Escape' && overlay.style.display !== 'none') close();
   });
   overlay.querySelector('#netmap-body').addEventListener('click', (e) => {
-    const net = e.target.closest?.('.nm-net');
+    const net = /** @type {HTMLElement} */ (e.target).closest?.('.nm-net');
     if (!net || !_topology) return;
     _highlight = _highlight === net.dataset.net ? null : net.dataset.net;
     renderBody(overlay);

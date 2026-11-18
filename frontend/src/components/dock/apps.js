@@ -221,7 +221,7 @@ export function toggleFmWindowSwitcher(anchorEl, fmWindows = []) {
     `;
 
     item.addEventListener('click', (e) => {
-      if (e.target.closest('.dock-switcher-close')) return;
+      if (/** @type {HTMLElement} */ (e.target).closest('.dock-switcher-close')) return;
       popover.remove();
       DockManager.restore(w.id);
       const innerWin = w.el?.querySelector?.('.file-manager-window') || w.el;

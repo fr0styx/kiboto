@@ -215,7 +215,6 @@ export function driveChipTitle(d, isParity, isStandby, devPathName) {
 export function diskTile(d) {
   const isStandby = Boolean(d.standby || d.health === 'standby');
   const isParity = Boolean(d.is_parity || d.role === 'parity');
-  const parityLbl = d.parity_label || 'P';
   const lvl = isStandby ? 'standby' : d.health || lvlDisk(d.temp);
   const temp = d.temp;
   const meta = ROLE_META[d.role] || ROLE_META.data;
@@ -260,7 +259,7 @@ export function renderDisks(disks) {
   if (!row._hasDelegatedClicks) {
     row._hasDelegatedClicks = true;
     row.addEventListener('click', (e) => {
-      const tile = e.target.closest('.disk');
+      const tile = /** @type {HTMLElement} */ (e.target).closest('.disk');
       if (!tile) return;
       const dev = tile.dataset.dev;
       // Drive Health shows a sleeping drive from its last reading and never wakes it on open
@@ -326,7 +325,6 @@ export function renderDisks(disks) {
       if (!tile) return;
       const isStandby = Boolean(d.standby || d.health === 'standby');
       const isParity = Boolean(d.is_parity || d.role === 'parity');
-      const parityLbl = d.parity_label || 'P';
       const lvl = isStandby ? 'standby' : d.health || lvlDisk(d.temp);
       const temp = d.temp;
       const meta = ROLE_META[d.role] || ROLE_META.data;
@@ -375,7 +373,6 @@ export function updateRowTelemetryBadges(s) {
   if (!s) return;
   const stBadge = $('telemetry-badge-storage');
   const cpuBadge = $('telemetry-badge-cpu');
-  const memBadge = $('telemetry-badge-mem');
   const fanBadge = $('telemetry-badge-fans');
   const netBadge = $('telemetry-badge-net');
   const dskBadge = $('telemetry-badge-disks');
@@ -401,7 +398,7 @@ export function updateRowTelemetryBadges(s) {
 }
 
 export function updateChassisImageForTheme() {
-  const chassisImg = $('chassis-hero-img');
+  const chassisImg = /** @type {HTMLImageElement} */ ($('chassis-hero-img'));
   if (!chassisImg) return;
 
   const modelMap = {
@@ -938,7 +935,7 @@ export function updateStreamlineBayChips(disks) {
   if (!row._hasDelegatedClicks) {
     row._hasDelegatedClicks = true;
     row.addEventListener('click', (e) => {
-      const chip = e.target.closest('.sl-bay-chip');
+      const chip = /** @type {HTMLElement} */ (e.target).closest('.sl-bay-chip');
       if (!chip) return;
       const dev = chip.dataset.dev;
       // Drive Health shows a sleeping drive from its last reading and never wakes it on open
@@ -2090,7 +2087,7 @@ let _prevClientMediaSlots = { sd: null, tf: null };
 
 export function updateMediaSlots(mediaSlots) {
   if (!mediaSlots) return;
-  const srcSelect = $('btn-copy-src');
+  const srcSelect = /** @type {HTMLSelectElement} */ ($('btn-copy-src'));
   const sd = mediaSlots.sd || {};
   const tf = mediaSlots.tf || {};
   const sdSize = sd.size || 0;

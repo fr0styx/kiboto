@@ -53,9 +53,7 @@ export function loadXterm() {
   return _xtermModules;
 }
 
-// eslint-disable-next-line no-control-regex
 const ANSI_RE = /\x1b\[[0-9;?]*[ -/]*[@-~]|\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)|\x1b[()][0-9A-Za-z]|\x1b[=>78DEHMc]/g;
-// eslint-disable-next-line no-control-regex
 const CTRL_RE = /[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/g;
 
 export function stripAnsi(text) {

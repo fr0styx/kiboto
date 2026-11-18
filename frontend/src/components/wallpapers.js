@@ -9,7 +9,6 @@ import { api } from '../api.js';
 
 let _loadPromise = null;
 let _currentFiles = [];
-let _activeWallpaper = null;
 
 export function setWallpaper(url, filename = null) {
   if (
@@ -70,7 +69,6 @@ export function setWallpaper(url, filename = null) {
 }
 
 function _updateGalleryActiveState(activeName) {
-  _activeWallpaper = activeName;
   const cards = document.querySelectorAll('.wallpaper-card');
   cards.forEach((card) => {
     const cardFile = card.getAttribute('data-filename');
@@ -93,7 +91,6 @@ export function loadWallpapers() {
     try {
       const data = await api.get('/api/wallpapers');
       _currentFiles = data.files || [];
-      _activeWallpaper = data.active || null;
       // the gallery and the list are Mission Control's: drawn only once that pane is there (NUX-15)
       if (document.getElementById('wallpaper-gallery-grid') || document.getElementById('wallpaper-select')) {
         const pane = await import('./wallpaper-pane.js');
@@ -139,9 +136,9 @@ export function applyWallpaperReadability(dimPercent, blurPx, persist = true) {
       document.documentElement.classList.toggle('has-wallpaper-blur', blurPx > 0);
     }
     const dimVal = document.getElementById('wallpaper-dim-val');
-    const dimSlider = document.getElementById('wallpaper-dim-slider');
+    const dimSlider = /** @type {HTMLInputElement} */ (document.getElementById('wallpaper-dim-slider'));
     const blurVal = document.getElementById('wallpaper-blur-val');
-    const blurSlider = document.getElementById('wallpaper-blur-slider');
+    const blurSlider = /** @type {HTMLInputElement} */ (document.getElementById('wallpaper-blur-slider'));
 
     if (dimVal) dimVal.textContent = `${dimPercent}%`;
     if (dimSlider && parseInt(dimSlider.value, 10) !== dimPercent) dimSlider.value = dimPercent;
@@ -183,10 +180,10 @@ export function applyGlassSettings(blurPx, opacityPercent, radiusPx, glowEnabled
     }
 
     const blurVal = document.getElementById('glass-blur-val');
-    const blurSlider = document.getElementById('glass-blur-slider');
+    const blurSlider = /** @type {HTMLInputElement} */ (document.getElementById('glass-blur-slider'));
     const opacityVal = document.getElementById('glass-opacity-val');
-    const opacitySlider = document.getElementById('glass-opacity-slider');
-    const glowToggle = document.getElementById('window-glow-toggle');
+    const opacitySlider = /** @type {HTMLInputElement} */ (document.getElementById('glass-opacity-slider'));
+    const glowToggle = /** @type {HTMLInputElement} */ (document.getElementById('window-glow-toggle'));
     const radiusBtns = document.querySelectorAll('.window-radius-btn');
 
     if (blurVal) blurVal.textContent = `${blurPx}px`;

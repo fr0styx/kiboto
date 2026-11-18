@@ -289,7 +289,7 @@ export function renderNotificationCenter() {
   if (!list._clickDelegated) {
     list._clickDelegated = true;
     list.addEventListener('click', (ev) => {
-      const row = ev.target.closest('.notif-center-item');
+      const row = /** @type {HTMLElement} */ (ev.target).closest('.notif-center-item');
       if (!row) return;
       const eventKey = row.dataset.eventKey;
       if (!eventKey) return;

@@ -69,7 +69,9 @@ export function installAdvancedSwitch(root = document) {
     <span><strong data-i18n="mgmt.advanced">${escapeHtml(t('mgmt.advanced', 'Show advanced tools'))}</strong>
     <small data-i18n="mgmt.advanced_desc">${escapeHtml(t('mgmt.advanced_desc', 'On the desktop, dock and phone, and expert details in windows'))}</small></span>`;
   nav.appendChild(row);
-  row.querySelector('input').addEventListener('change', (e) => setAdvanced(e.target.checked));
+  row
+    .querySelector('input')
+    .addEventListener('change', (e) => setAdvanced(/** @type {HTMLInputElement} */ (e.target).checked));
   applyAdvanced();
 }
 
@@ -211,7 +213,7 @@ export async function renderStatusSummary(root = document) {
       .then((m) => m.installHubTiles(root))
       .catch(() => {});
     box.addEventListener('click', (e) => {
-      if (e.target.closest('[data-ov-protect]')) {
+      if (/** @type {HTMLElement} */ (e.target).closest('[data-ov-protect]')) {
         import('../protect-nas.js').then((m) => m.openProtectGuide()).catch(() => {});
         return;
       }
@@ -219,7 +221,7 @@ export async function renderStatusSummary(root = document) {
         renderStatusSummary(root);
         return;
       }
-      const btn = e.target.closest('[data-ov-open]');
+      const btn = /** @type {HTMLElement} */ (e.target).closest('[data-ov-open]');
       if (btn && ROUTES[btn.dataset.ovOpen]) ROUTES[btn.dataset.ovOpen]();
     });
   }

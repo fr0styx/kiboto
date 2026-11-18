@@ -124,13 +124,13 @@ export async function showGettingStarted({ force = false } = {}) {
     card.setAttribute('aria-labelledby', 'gs-heading');
     document.body.appendChild(card);
     card.addEventListener('click', (e) => {
-      const open = e.target.closest('[data-gs-open]');
+      const open = /** @type {HTMLElement} */ (e.target).closest('[data-gs-open]');
       if (open && typeof window.openManagementSection === 'function') {
         window.openManagementSection(open.dataset.gsOpen);
       } else if (open && typeof window.openManagementWindow === 'function') {
         window.openManagementWindow(open.dataset.gsOpen);
       }
-      if (e.target.closest('[data-gs-hide]')) {
+      if (/** @type {HTMLElement} */ (e.target).closest('[data-gs-hide]')) {
         setHidden(true);
         card.hidden = true;
       }

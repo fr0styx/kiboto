@@ -354,16 +354,16 @@ export async function openAppDeployModal(appId) {
   let suggestedPort = 8080;
   let existingContainerInfo;
 
-  const deployConfirmBtn = document.getElementById('adm-deploy-confirm-btn');
+  const deployConfirmBtn = /** @type {HTMLButtonElement} */ (document.getElementById('adm-deploy-confirm-btn'));
   const banner = document.getElementById('adm-conflict-banner');
   const existingBox = document.getElementById('adm-existing-box');
   const existingBadge = document.getElementById('adm-existing-status-badge');
   const existingDesc = document.getElementById('adm-existing-desc');
   const choiceReplaceBtn = document.getElementById('adm-choice-replace-btn');
   const choiceNewBtn = document.getElementById('adm-choice-new-btn');
-  const nameInput = document.getElementById('adm-name-input');
-  const portInput = document.getElementById('adm-port-input');
-  const storageInput = document.getElementById('adm-storage-input');
+  const nameInput = /** @type {HTMLInputElement} */ (document.getElementById('adm-name-input'));
+  const portInput = /** @type {HTMLInputElement} */ (document.getElementById('adm-port-input'));
+  const storageInput = /** @type {HTMLInputElement} */ (document.getElementById('adm-storage-input'));
   // the host's own place for app data (TrueNAS, plain Linux), not always Unraid's (NUX-12)
   Promise.resolve()
     .then(() => api.get('/api/docker/catalog/defaults'))
@@ -752,10 +752,10 @@ export async function openAppDeployModal(appId) {
   const progressSpinner = document.getElementById('adm-progress-spinner');
   const deployLogs = document.getElementById('adm-deploy-logs');
   const successBox = document.getElementById('adm-success-box');
-  const webuiBtn = document.getElementById('adm-webui-launch-btn');
+  const webuiBtn = /** @type {HTMLAnchorElement} */ (document.getElementById('adm-webui-launch-btn'));
   const closeProgressBtn = document.getElementById('adm-progress-close-btn');
   const backConfigBtn = document.getElementById('adm-back-to-config-btn');
-  const closeBtn = document.getElementById('adm-close-btn');
+  const closeBtn = /** @type {HTMLButtonElement} */ (document.getElementById('adm-close-btn'));
 
   function logDeployLine(msg, type = 'info') {
     if (!deployLogs) return;
@@ -1248,8 +1248,8 @@ export async function openDockerPruneModal() {
       if (e.key === 'Escape' && modal.classList.contains('open')) closeModal();
     });
 
-    const optImages = document.getElementById('dpm-opt-images');
-    const optAllImages = document.getElementById('dpm-opt-all-images');
+    const optImages = /** @type {HTMLInputElement} */ (document.getElementById('dpm-opt-images'));
+    const optAllImages = /** @type {HTMLInputElement} */ (document.getElementById('dpm-opt-all-images'));
     const syncImageOptions = () => {
       if (optAllImages && optImages) {
         if (optAllImages.checked) {
@@ -1302,7 +1302,7 @@ export async function openDockerPruneModal() {
     }
   }
 
-  const confirmBtn = document.getElementById('dpm-confirm-btn');
+  const confirmBtn = /** @type {HTMLButtonElement} */ (document.getElementById('dpm-confirm-btn'));
   setPruneIdle();
 
   confirmBtn.onclick = async () => {
@@ -1312,18 +1312,20 @@ export async function openDockerPruneModal() {
       setPruneIdle();
       return;
     }
-    const allImages = document.getElementById('dpm-opt-all-images').checked;
-    const pruneBuildCache = document.getElementById('dpm-opt-buildcache').checked;
-    const removeStopped = document.getElementById('dpm-opt-containers').checked && _stoppedApps.length > 0;
+    const allImages = /** @type {HTMLInputElement} */ (document.getElementById('dpm-opt-all-images')).checked;
+    const pruneBuildCache = /** @type {HTMLInputElement} */ (document.getElementById('dpm-opt-buildcache')).checked;
+    const removeStopped =
+      /** @type {HTMLInputElement} */ (document.getElementById('dpm-opt-containers')).checked &&
+      _stoppedApps.length > 0;
     // removing apps is asked once more, by name: the one button used to start it at once
     if (removeStopped && !(await askRemoveStopped(_stoppedApps))) return;
     confirmBtn.disabled = true;
     try {
       const res = await api.post('/api/docker/system/prune/jobs', {
         prune_containers: removeStopped,
-        prune_images: document.getElementById('dpm-opt-images').checked || allImages,
+        prune_images: /** @type {HTMLInputElement} */ (document.getElementById('dpm-opt-images')).checked || allImages,
         all_images: allImages,
-        prune_volumes: document.getElementById('dpm-opt-volumes').checked,
+        prune_volumes: /** @type {HTMLInputElement} */ (document.getElementById('dpm-opt-volumes')).checked,
         prune_networks: pruneBuildCache,
         prune_build_cache: pruneBuildCache,
       });
@@ -1354,7 +1356,7 @@ const PRUNE_STEP_ICONS = { pending: '○', running: '◐', done: '✓', skipped:
 let _prunePollTimer = null;
 
 function setPruneIdle() {
-  const btn = document.getElementById('dpm-confirm-btn');
+  const btn = /** @type {HTMLButtonElement} */ (document.getElementById('dpm-confirm-btn'));
   const cancel = document.getElementById('dpm-cancel-btn');
   const opts = document.getElementById('dpm-opt-containers')?.closest('.dpm-opts');
   if (btn) {
@@ -1438,8 +1440,8 @@ export function renderPruneJob(job) {
 }
 
 function followPruneJob(job) {
-  const btn = document.getElementById('dpm-confirm-btn');
-  const cancel = document.getElementById('dpm-cancel-btn');
+  const btn = /** @type {HTMLButtonElement} */ (document.getElementById('dpm-confirm-btn'));
+  const cancel = /** @type {HTMLButtonElement} */ (document.getElementById('dpm-cancel-btn'));
   const opts = document.getElementById('dpm-opt-containers')?.closest('.dpm-opts');
   if (opts) opts.inert = true;
   if (cancel) {
@@ -1497,7 +1499,7 @@ async function finishPruneJob(job) {
   } else {
     showToast(t('prune.done', 'Cleanup finished: {freed} freed.', { freed }), 'success');
   }
-  const btn = document.getElementById('dpm-confirm-btn');
+  const btn = /** @type {HTMLButtonElement} */ (document.getElementById('dpm-confirm-btn'));
   const cancel = document.getElementById('dpm-cancel-btn');
   if (btn) {
     btn.disabled = false;

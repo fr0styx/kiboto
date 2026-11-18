@@ -531,7 +531,7 @@ export function initMetricsChart() {
   const rs = document.getElementById('metrics-range-select');
   if (rs) {
     rs.addEventListener('change', (e) => {
-      _metricsRange = e.target.value;
+      _metricsRange = /** @type {HTMLInputElement} */ (e.target).value;
       fetchAndRenderMetrics(false);
     });
   }

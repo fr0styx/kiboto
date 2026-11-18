@@ -9,15 +9,6 @@
 const MAX_LOG_ENTRIES = 250;
 const logRingBuffer = [];
 
-// Sensitive token & credential scrubbers
-const SCRUB_PATTERNS = [
-  /zat_[a-zA-Z0-9_-]{16,}/g,
-  /Bearer\s+[a-zA-Z0-9_.-]+/gi,
-  /Basic\s+[a-zA-Z0-9+/=]{8,}/gi,
-  /(password|passwd|token|secret|key|auth|api_key)=([^&\s"']+)/gi,
-  /"(password|passwd|token|secret|key|auth|api_key)":\s*"([^"]+)"/gi,
-];
-
 export function scrubClientString(str) {
   if (typeof str !== 'string') {
     try {

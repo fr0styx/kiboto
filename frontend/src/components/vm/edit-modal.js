@@ -425,13 +425,13 @@ export function openVmEditModal(vmId, vmObj = null) {
     const minBtn = modal.querySelector('#vm-edit-modal-min');
     const maxBtn = modal.querySelector('#vm-edit-modal-max');
     const cancelBtn = modal.querySelector('#vm-edit-cancel');
-    const submitBtn = modal.querySelector('#vm-edit-submit');
+    const submitBtn = /** @type {HTMLButtonElement} */ (modal.querySelector('#vm-edit-submit'));
 
-    const ramSlider = modal.querySelector('#vm-edit-ram-slider');
+    const ramSlider = /** @type {HTMLInputElement} */ (modal.querySelector('#vm-edit-ram-slider'));
     const ramDisplay = modal.querySelector('#vm-edit-ram-display');
-    const vcpuSlider = modal.querySelector('#vm-edit-vcpu-slider');
+    const vcpuSlider = /** @type {HTMLInputElement} */ (modal.querySelector('#vm-edit-vcpu-slider'));
     const vcpuDisplay = modal.querySelector('#vm-edit-vcpu-display');
-    const overrideToggle = modal.querySelector('#vm-edit-override-toggle');
+    const overrideToggle = /** @type {HTMLInputElement} */ (modal.querySelector('#vm-edit-override-toggle'));
     const overridePill = modal.querySelector('#vm-edit-override-pill');
     const sliderMaxLabel = modal.querySelector('#vm-edit-slider-max-label');
     const overcommitWarning = modal.querySelector('#vm-edit-overcommit-warning');
@@ -564,7 +564,11 @@ export function openVmEditModal(vmId, vmObj = null) {
     // Header double-click to toggle maximize
     if (modalHdr) {
       modalHdr.ondblclick = (e) => {
-        if (e.target.closest('button') || e.target.closest('input')) return;
+        if (
+          /** @type {HTMLElement} */ (e.target).closest('button') ||
+          /** @type {HTMLElement} */ (e.target).closest('input')
+        )
+          return;
         if (maxBtn) maxBtn.click();
       };
     }
@@ -755,7 +759,7 @@ export function openVmEditModal(vmId, vmObj = null) {
 
     // Host USB Passthrough Device Management
     const usbList = modal.querySelector('#vm-edit-usb-list');
-    const usbSelect = modal.querySelector('#vm-edit-host-usb-select');
+    const usbSelect = /** @type {HTMLSelectElement} */ (modal.querySelector('#vm-edit-host-usb-select'));
     const btnAddUsb = modal.querySelector('#btn-edit-add-usb-device');
     const toggleCustomUsb = modal.querySelector('#btn-edit-toggle-custom-usb');
     const customUsbWrap = modal.querySelector('#vm-edit-custom-usb-wrap');

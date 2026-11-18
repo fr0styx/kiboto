@@ -15,12 +15,10 @@ import { t } from '../i18n.js';
 
 let _contextMenuInitialized = false;
 let _activeContextWidgetKey = null;
-let _activeContextWidgetEl = null;
 
 export function _resetDesktopContextMenuForTesting() {
   _contextMenuInitialized = false;
   _activeContextWidgetKey = null;
-  _activeContextWidgetEl = null;
 }
 
 export function initDesktopContextMenu() {
@@ -32,7 +30,7 @@ export function initDesktopContextMenu() {
     if (typeof e.target?.closest !== 'function') return;
     // 1. Allow native context menu in text inputs, textareas, contenteditable, monaco, code editors, and links
     if (
-      e.target.closest(
+      /** @type {HTMLElement} */ (e.target).closest(
         'input, textarea, select, [contenteditable="true"], .monaco-editor, #ci-logs-terminal, .terminal, .code-editor, a[href]'
       )
     ) {
@@ -40,7 +38,7 @@ export function initDesktopContextMenu() {
     }
 
     // 2. Allow widgets to show dedicated widget context menu
-    const widgetEl = e.target.closest('.desktop-widget');
+    const widgetEl = /** @type {HTMLElement} */ (e.target).closest('.desktop-widget');
     if (widgetEl) {
       e.preventDefault();
       const widgetKey = getWidgetKeyFromElement(widgetEl);
@@ -50,7 +48,7 @@ export function initDesktopContextMenu() {
 
     // 3. Allow windows, modals, dock, navbar, and DESKTOP ICONS to handle their own context menus
     if (
-      e.target.closest(
+      /** @type {HTMLElement} */ (e.target).closest(
         '.os-window, .smart-modal-window, .notif-center-window, #os-dock, #os-dock-container, ' +
           '.suite-navbar, .smart-modal-backdrop, .chassis-hero-box, #desktop-ctx-menu, .dock-context-menu'
       )
@@ -114,7 +112,7 @@ export function initDesktopContextMenu() {
 
   // Document-level event delegation for context menu item clicks
   document.addEventListener('click', (e) => {
-    const item = e.target.closest?.('.context-menu-item');
+    const item = /** @type {HTMLElement} */ (e.target).closest?.('.context-menu-item');
     if (!item) return;
     const parentMenu = item.closest?.('#desktop-context-menu, #widget-context-menu');
     if (!parentMenu) return;
@@ -177,7 +175,6 @@ export function showWidgetContextMenu(x, y, widgetEl, widgetKey) {
   if (dockCtx) dockCtx.style.display = 'none';
 
   _activeContextWidgetKey = widgetKey || getWidgetKeyFromElement(widgetEl);
-  _activeContextWidgetEl = widgetEl || null;
 
   const removeLabel = document.getElementById('ctx-remove-widget-label');
   if (removeLabel) {

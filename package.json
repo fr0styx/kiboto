@@ -12,7 +12,7 @@
     "lint:i18n": "node frontend/scripts/i18n-lint.mjs",
     "lint:types": "node frontend/scripts/checkjs-ratchet.mjs",
     "lint:css": "node frontend/scripts/css-budget.mjs",
-    "lint:js": "eslint frontend vite.config.mjs vitest.config.mjs eslint.config.mjs --max-warnings 71",
+    "lint:js": "eslint frontend vite.config.mjs vitest.config.mjs eslint.config.mjs --max-warnings 0",
     "format": "oxfmt \"frontend/**/*.{js,mjs}\" \"*.mjs\"",
     "format:check": "oxfmt --check \"frontend/**/*.{js,mjs}\" \"*.mjs\"",
     "lint:py": "ruff check app.py backend tests",

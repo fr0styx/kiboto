@@ -553,8 +553,8 @@ export function openAddDesktopShortcutModal() {
 
     // Wire custom shortcut save
     overlay.querySelector('#btn-save-custom-shortcut')?.addEventListener('click', () => {
-      const nameInput = overlay.querySelector('#input-custom-shortcut-name');
-      const urlInput = overlay.querySelector('#input-custom-shortcut-url');
+      const nameInput = /** @type {HTMLInputElement} */ (overlay.querySelector('#input-custom-shortcut-name'));
+      const urlInput = /** @type {HTMLInputElement} */ (overlay.querySelector('#input-custom-shortcut-url'));
       const name = nameInput ? nameInput.value.trim() : '';
       const url = urlInput ? urlInput.value.trim() : '';
 

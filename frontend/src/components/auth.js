@@ -49,8 +49,7 @@ export function initAuth() {
   const loginBtn = document.getElementById('login-btn');
   const loginPwd = document.getElementById('login-password');
   import('./sso.js').then((m) => m.initSsoLogin()).catch(() => {}); // M6
-  const loginUser = document.getElementById('login-username');
-  const rememberMe = document.getElementById('login-remember-me');
+  const loginUser = /** @type {HTMLInputElement} */ (document.getElementById('login-username'));
 
   // Handle auth:required
   ZettEventBus.on('auth:required', () => {
@@ -147,7 +146,7 @@ export function initAuth() {
   if (btnToggleRecovery) {
     btnToggleRecovery.addEventListener('click', (e) => {
       e.preventDefault();
-      const codeInput = document.getElementById('mfa-challenge-code');
+      const codeInput = /** @type {HTMLInputElement} */ (document.getElementById('mfa-challenge-code'));
       // UX-20: the mode lives on the field, never in its (translated) placeholder
       const isRecovery = codeInput.dataset.mode === 'recovery';
       codeInput.dataset.mode = isRecovery ? 'totp' : 'recovery';
@@ -244,10 +243,6 @@ export function initAuth() {
 export async function renderLoginChooser(options = {}) {
   const { forceChooser = false } = options;
   const chooserContainer = document.getElementById('login-users-chooser');
-  const manualFields = document.getElementById('login-manual-fields');
-  const userSelectedCard = document.getElementById('login-user-selected-card');
-  const btnToggleManual = document.getElementById('login-toggle-manual');
-  const btnToggleChooser = document.getElementById('login-toggle-chooser');
 
   if (!chooserContainer) return;
 
@@ -300,7 +295,7 @@ export async function renderLoginChooser(options = {}) {
         setLoginMode('chooser');
       } else {
         setLoginMode('manual');
-        const loginUser = document.getElementById('login-username');
+        const loginUser = /** @type {HTMLInputElement} */ (document.getElementById('login-username'));
         if (loginUser) {
           loginUser.value = '';
           loginUser.focus();
@@ -326,7 +321,7 @@ function selectUserForLogin(username, displayName) {
   const userSelectedCard = document.getElementById('login-user-selected-card');
   const selectedName = document.getElementById('login-selected-name');
   const selectedInitial = document.getElementById('login-selected-initial');
-  const loginUser = document.getElementById('login-username');
+  const loginUser = /** @type {HTMLInputElement} */ (document.getElementById('login-username'));
   const loginPwd = document.getElementById('login-password');
   const manualFields = document.getElementById('login-manual-fields');
   const btnToggleManual = document.getElementById('login-toggle-manual');
@@ -353,8 +348,7 @@ function setLoginMode(mode) {
   const userSelectedCard = document.getElementById('login-user-selected-card');
   const btnToggleManual = document.getElementById('login-toggle-manual');
   const btnToggleChooser = document.getElementById('login-toggle-chooser');
-  const loginUser = document.getElementById('login-username');
-  const loginPwd = document.getElementById('login-password');
+  const loginUser = /** @type {HTMLInputElement} */ (document.getElementById('login-username'));
 
   if (mode === 'chooser') {
     _selectedUser = null;
@@ -387,11 +381,9 @@ function _showLoginError(msg) {
 
 async function doLogin() {
   const loginBtn = document.getElementById('login-btn');
-  const loginPwd = document.getElementById('login-password');
+  const loginPwd = /** @type {HTMLInputElement} */ (document.getElementById('login-password'));
   const loginUser = document.getElementById('login-username');
-  const rememberMe = document.getElementById('login-remember-me');
-  const overlay = document.getElementById('login-overlay');
-  const dock = document.getElementById('os-dock-container');
+  const rememberMe = /** @type {HTMLInputElement} */ (document.getElementById('login-remember-me'));
 
   if (!loginPwd) return;
 
@@ -509,7 +501,7 @@ function showMfaChallengeView(username) {
   const credsStep = document.getElementById('login-step-credentials');
   const mfaStep = document.getElementById('login-step-mfa');
   const mfaUserTxt = document.getElementById('mfa-user-target');
-  const codeInput = document.getElementById('mfa-challenge-code');
+  const codeInput = /** @type {HTMLInputElement} */ (document.getElementById('mfa-challenge-code'));
 
   if (credsStep) credsStep.style.display = 'none';
   if (mfaStep) mfaStep.style.display = 'block';
@@ -526,8 +518,8 @@ export function isRecoveryCode(codeInput, rawCode) {
 }
 
 async function submitMfaChallenge() {
-  const codeInput = document.getElementById('mfa-challenge-code');
-  const btnSubmit = document.getElementById('btn-submit-mfa');
+  const codeInput = /** @type {HTMLInputElement} */ (document.getElementById('mfa-challenge-code'));
+  const btnSubmit = /** @type {HTMLButtonElement} */ (document.getElementById('btn-submit-mfa'));
   const overlay = document.getElementById('login-overlay');
   const dock = document.getElementById('os-dock-container');
 
@@ -610,11 +602,10 @@ async function submitMfaChallenge() {
 // ==============================================================================
 
 export function initLockOverlay() {
-  const lockOverlay = document.getElementById('lock-overlay');
   const unlockBtn = document.getElementById('lock-unlock-btn');
   const unlockPwd = document.getElementById('lock-password');
   const switchBtn = document.getElementById('lock-switch-btn');
-  const timeoutSelect = document.getElementById('lock-timeout-select');
+  const timeoutSelect = /** @type {HTMLSelectElement} */ (document.getElementById('lock-timeout-select'));
 
   if (unlockBtn) unlockBtn.addEventListener('click', unlockDesktop);
   if (unlockPwd) {
@@ -680,9 +671,9 @@ export function lockDesktop() {
   clearInterval(_clockInterval);
   _clockInterval = setInterval(updateLockClock, 1000);
 
-  const pwdInput = document.getElementById('lock-password');
+  const pwdInput = /** @type {HTMLInputElement} */ (document.getElementById('lock-password'));
   const errorEl = document.getElementById('lock-error');
-  const timeoutSelect = document.getElementById('lock-timeout-select');
+  const timeoutSelect = /** @type {HTMLSelectElement} */ (document.getElementById('lock-timeout-select'));
   if (timeoutSelect) {
     timeoutSelect.value = localStorage.getItem('kiboto_auto_lock_timeout_ms') || String(DEFAULT_IDLE_TIMEOUT_MS);
   }
@@ -696,10 +687,10 @@ export function lockDesktop() {
 }
 
 export async function unlockDesktop() {
-  const pwdInput = document.getElementById('lock-password');
+  const pwdInput = /** @type {HTMLInputElement} */ (document.getElementById('lock-password'));
   const errorEl = document.getElementById('lock-error');
   const lockOverlay = document.getElementById('lock-overlay');
-  const unlockBtn = document.getElementById('lock-unlock-btn');
+  const unlockBtn = /** @type {HTMLButtonElement} */ (document.getElementById('lock-unlock-btn'));
 
   if (!pwdInput) return;
   const password = pwdInput.value;
@@ -750,7 +741,7 @@ export async function unlockDesktop() {
         }, 250);
       }
 
-      const timeoutSelect = document.getElementById('lock-timeout-select');
+      const timeoutSelect = /** @type {HTMLSelectElement} */ (document.getElementById('lock-timeout-select'));
       if (timeoutSelect) {
         localStorage.setItem('kiboto_auto_lock_timeout_ms', timeoutSelect.value);
       }
@@ -828,7 +819,7 @@ export async function logout() {
   if (credsStep) credsStep.style.display = 'block';
   if (mfaStep) mfaStep.style.display = 'none';
 
-  const loginPwd = document.getElementById('login-password');
+  const loginPwd = /** @type {HTMLInputElement} */ (document.getElementById('login-password'));
   if (loginPwd) loginPwd.value = '';
 
   document.documentElement.classList.remove('has-auth-session');

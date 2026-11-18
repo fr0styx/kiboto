@@ -84,7 +84,7 @@ export async function initInviteLanding(textsReady) {
     }
     dlg.close();
     history.replaceState(null, '', window.location.pathname);
-    const u = document.getElementById('login-username');
+    const u = /** @type {HTMLInputElement} */ (document.getElementById('login-username'));
     if (u) u.value = body.username;
     showToast(t('invite.done', 'Account created. Sign in with your new password.'), 'success');
   });

@@ -47,7 +47,7 @@ async function loadIdentity() {
   try {
     const id = await api.get('/api/system/identity');
     applyServerName(id?.server_name);
-    const nameInput = document.getElementById('setup-server-name');
+    const nameInput = /** @type {HTMLInputElement} */ (document.getElementById('setup-server-name'));
     if (nameInput && id?.server_name && !nameInput.value) nameInput.value = id.server_name;
     fillTimezones(document.getElementById('setup-timezone'), id?.timezone || '');
     return id;
@@ -59,9 +59,11 @@ async function loadIdentity() {
 
 /** The password step's problem, or '' when it can be submitted. */
 export function passwordStepProblem() {
-  const currentPwd = (document.getElementById('setup-current-pwd')?.value || '').trim();
-  const newPwd = (document.getElementById('setup-new-pwd')?.value || '').trim();
-  const confirmPwd = (document.getElementById('setup-confirm-pwd')?.value || '').trim();
+  const currentPwd = (/** @type {HTMLInputElement} */
+  (document.getElementById('setup-current-pwd'))?.value || '').trim();
+  const newPwd = (/** @type {HTMLInputElement} */ (document.getElementById('setup-new-pwd'))?.value || '').trim();
+  const confirmPwd = (/** @type {HTMLInputElement} */
+  (document.getElementById('setup-confirm-pwd'))?.value || '').trim();
   if (!currentPwd) return t('setup.err_enter_current', 'Please enter your current password.');
   if (!newPwd) return t('setup.err_enter_pwd', 'Please enter a new password.');
   if (newPwd.length < 8) return t('setup.err_min_8', 'Password must be at least 8 characters long.');
@@ -73,8 +75,8 @@ export function passwordStepProblem() {
 
 /** The people step's problem, or '' (UX-17: a person is optional, but needs a password). */
 export function personStepProblem() {
-  const name = (document.getElementById('setup-person-name')?.value || '').trim();
-  const pwd = document.getElementById('setup-person-pwd')?.value || '';
+  const name = (/** @type {HTMLInputElement} */ (document.getElementById('setup-person-name'))?.value || '').trim();
+  const pwd = /** @type {HTMLInputElement} */ (document.getElementById('setup-person-pwd'))?.value || '';
   if (!name) return '';
   if (!/^[a-zA-Z0-9_-][a-zA-Z0-9_.-]{1,31}$/.test(name))
     return t('setup.err_person_name', 'Use 2 to 32 letters, numbers, dots, dashes or underscores for the user name.');
@@ -254,7 +256,7 @@ export function initSetupWizard() {
 
   const btnClose = document.getElementById('setup-wizard-close');
   const btnSkip = document.getElementById('setup-wizard-skip');
-  const btnSubmit = document.getElementById('setup-wizard-submit');
+  const btnSubmit = /** @type {HTMLButtonElement} */ (document.getElementById('setup-wizard-submit'));
 
   const isPasswordDefault = () => {
     const s = state.stats || state.latestStats;
@@ -330,8 +332,9 @@ export function initSetupWizard() {
 
   if (btnSubmit) {
     btnSubmit.addEventListener('click', async () => {
-      const currentPwd = (document.getElementById('setup-current-pwd')?.value || '').trim();
-      const newPwd = (document.getElementById('setup-new-pwd')?.value || '').trim();
+      const currentPwd = (/** @type {HTMLInputElement} */
+      (document.getElementById('setup-current-pwd'))?.value || '').trim();
+      const newPwd = (/** @type {HTMLInputElement} */ (document.getElementById('setup-new-pwd'))?.value || '').trim();
       const setErr = setWizardError;
       const problem = passwordStepProblem();
       if (problem) {
@@ -382,7 +385,8 @@ export function initSetupWizard() {
         await saveSetupExtras();
 
         // 4. Save Notification Webhook if provided (needs the new session)
-        const notifUrl = (document.getElementById('setup-notif-url')?.value || '').trim();
+        const notifUrl = (/** @type {HTMLInputElement} */
+        (document.getElementById('setup-notif-url'))?.value || '').trim();
         if (notifUrl) {
           try {
             // REL-6: add to the saved settings (secrets stay masked and kept), then send a test alert
@@ -444,8 +448,8 @@ export function openRestoreAfterSetup() {
 
 /** Saves the optional steps; each one that fails says so and the rest still happen. */
 export async function saveSetupExtras() {
-  const name = document.getElementById('setup-server-name')?.value?.trim() || '';
-  const tz = document.getElementById('setup-timezone')?.value || '';
+  const name = /** @type {HTMLInputElement} */ (document.getElementById('setup-server-name'))?.value?.trim() || '';
+  const tz = /** @type {HTMLSelectElement} */ (document.getElementById('setup-timezone'))?.value || '';
   if (name || tz) {
     try {
       const id = await api.put('/api/system/identity', { server_name: name, timezone: tz || null });
@@ -458,9 +462,14 @@ export async function saveSetupExtras() {
     }
   }
   const shareForm = document.getElementById('setup-share-form');
-  const shareName = document.getElementById('setup-share-name')?.value?.trim() || '';
+  const shareName = /** @type {HTMLInputElement} */ (document.getElementById('setup-share-name'))?.value?.trim() || '';
   let sharedFolder = '';
-  if (shareForm && !shareForm.hidden && document.getElementById('setup-share-create')?.checked && shareName) {
+  if (
+    shareForm &&
+    !shareForm.hidden &&
+    /** @type {HTMLInputElement} */ (document.getElementById('setup-share-create'))?.checked &&
+    shareName
+  ) {
     try {
       await api.post('/api/storage/shares', { name: shareName, security: 'private' });
       sharedFolder = shareName;
@@ -468,13 +477,13 @@ export async function saveSetupExtras() {
       showToast(t('setup.err_share', 'The shared folder was not created: {error}', { error: err.message }), 'warning');
     }
   }
-  const person = document.getElementById('setup-person-name')?.value?.trim() || '';
+  const person = /** @type {HTMLInputElement} */ (document.getElementById('setup-person-name'))?.value?.trim() || '';
   if (person && !personStepProblem()) {
     try {
       await api.post('/api/users', {
         username: person,
-        password: document.getElementById('setup-person-pwd')?.value || '',
-        role_id: document.getElementById('setup-person-role')?.value || 'share_user',
+        password: /** @type {HTMLInputElement} */ (document.getElementById('setup-person-pwd'))?.value || '',
+        role_id: /** @type {HTMLSelectElement} */ (document.getElementById('setup-person-role'))?.value || 'share_user',
       });
       if (sharedFolder) await grantFolder(sharedFolder, person);
     } catch (err) {

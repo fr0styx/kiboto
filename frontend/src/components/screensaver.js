@@ -26,7 +26,6 @@ let _animFrameId = null;
 let _clockInterval = null;
 let _driftInterval = null;
 let _lastActivityTime = Date.now();
-let _idleCheckInterval = null;
 
 // Configuration
 let _enabled = true;
@@ -99,7 +98,7 @@ export function initScreensaverSystem() {
   window.addEventListener('wheel', recordActivity, { passive: true });
 
   // Heartbeat idle check every 3 seconds
-  _idleCheckInterval = setInterval(() => {
+  setInterval(() => {
     if (!_enabled || _timeoutMinutes <= 0 || _isActive) return;
 
     // Do not engage screensaver if desktop is already locked or initial setup overlay is open
@@ -362,9 +361,9 @@ function startStarfield(canvas) {
 export function initScreensaverSettingsControls() {
   if (_screensaverControlsBound) return;
 
-  const enableToggle = document.getElementById('screensaver-enable-toggle');
-  const timeoutSelect = document.getElementById('screensaver-timeout-select');
-  const lockToggle = document.getElementById('screensaver-lock-toggle');
+  const enableToggle = /** @type {HTMLInputElement} */ (document.getElementById('screensaver-enable-toggle'));
+  const timeoutSelect = /** @type {HTMLSelectElement} */ (document.getElementById('screensaver-timeout-select'));
+  const lockToggle = /** @type {HTMLInputElement} */ (document.getElementById('screensaver-lock-toggle'));
   const previewBtn = document.getElementById('screensaver-preview-btn');
   const resetBtn = document.getElementById('screensaver-reset-btn');
   const styleCards = document.querySelectorAll('.screensaver-style-card');
@@ -376,21 +375,33 @@ export function initScreensaverSettingsControls() {
   if (enableToggle) {
     enableToggle.checked = _enabled;
     enableToggle.addEventListener('change', (e) => {
-      applyScreensaverSettings(e.target.checked, undefined, undefined, undefined, true);
+      applyScreensaverSettings(
+        /** @type {HTMLInputElement} */ (e.target).checked,
+        undefined,
+        undefined,
+        undefined,
+        true
+      );
     });
   }
 
   if (timeoutSelect) {
     timeoutSelect.value = String(_timeoutMinutes);
     timeoutSelect.addEventListener('change', (e) => {
-      applyScreensaverSettings(undefined, e.target.value, undefined, undefined, true);
+      applyScreensaverSettings(undefined, /** @type {HTMLInputElement} */ (e.target).value, undefined, undefined, true);
     });
   }
 
   if (lockToggle) {
     lockToggle.checked = _requireLock;
     lockToggle.addEventListener('change', (e) => {
-      applyScreensaverSettings(undefined, undefined, undefined, e.target.checked, true);
+      applyScreensaverSettings(
+        undefined,
+        undefined,
+        undefined,
+        /** @type {HTMLInputElement} */ (e.target).checked,
+        true
+      );
     });
   }
 

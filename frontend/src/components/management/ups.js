@@ -451,9 +451,9 @@ export function updateUpsPolicySummary() {
   if (!summaryText) return;
 
   const policy = document.querySelector('input[name="ups-policy"]:checked')?.value || 'runtime_left';
-  const rtVal = document.getElementById('ups-slider-runtime')?.value || 5;
-  const battVal = document.getElementById('ups-slider-battery')?.value || 20;
-  const timerVal = document.getElementById('ups-slider-timer')?.value || 300;
+  const rtVal = /** @type {HTMLInputElement} */ (document.getElementById('ups-slider-runtime'))?.value || 5;
+  const battVal = /** @type {HTMLInputElement} */ (document.getElementById('ups-slider-battery'))?.value || 20;
+  const timerVal = /** @type {HTMLInputElement} */ (document.getElementById('ups-slider-timer'))?.value || 300;
 
   let policyDesc = t('pwa.rule_sum', 'At {min} min or {pct} % left, or when the UPS says so', {
     min: rtVal,
@@ -476,22 +476,31 @@ export async function saveUpsConfigFromDrawer() {
   }
   try {
     const mode = document.querySelector('input[name="ups-mode"]:checked')?.value || 'auto';
-    const host = document.getElementById('ups-cfg-host')?.value.trim() || '127.0.0.1';
+    const host = /** @type {HTMLInputElement} */ (document.getElementById('ups-cfg-host'))?.value.trim() || '127.0.0.1';
     let defaultPort = 3551;
     if (mode === 'nut_client') defaultPort = 3493;
-    const port = parseInt(document.getElementById('ups-cfg-port')?.value, 10) || defaultPort;
-    const ups_name = document.getElementById('ups-cfg-name')?.value.trim() || 'ups';
-    const username = document.getElementById('ups-cfg-user')?.value.trim() || '';
-    const passwordRaw = document.getElementById('ups-cfg-pass')?.value || '';
+    const port =
+      parseInt(/** @type {HTMLInputElement} */ (document.getElementById('ups-cfg-port'))?.value, 10) || defaultPort;
+    const ups_name = /** @type {HTMLInputElement} */ (document.getElementById('ups-cfg-name'))?.value.trim() || 'ups';
+    const username = /** @type {HTMLInputElement} */ (document.getElementById('ups-cfg-user'))?.value.trim() || '';
+    const passwordRaw = /** @type {HTMLInputElement} */ (document.getElementById('ups-cfg-pass'))?.value || '';
     const password = passwordRaw.startsWith('••') ? undefined : passwordRaw;
 
     const policy = document.querySelector('input[name="ups-policy"]:checked')?.value || 'runtime_left';
-    const runtime_threshold_min = parseInt(document.getElementById('ups-slider-runtime')?.value, 10) || 5;
-    const battery_threshold_pct = parseInt(document.getElementById('ups-slider-battery')?.value, 10) || 20;
-    const shutdown_timer_sec = parseInt(document.getElementById('ups-slider-timer')?.value, 10) || 300;
+    const runtime_threshold_min =
+      parseInt(/** @type {HTMLInputElement} */ (document.getElementById('ups-slider-runtime'))?.value, 10) || 5;
+    const battery_threshold_pct =
+      parseInt(/** @type {HTMLInputElement} */ (document.getElementById('ups-slider-battery'))?.value, 10) || 20;
+    const shutdown_timer_sec =
+      parseInt(/** @type {HTMLInputElement} */ (document.getElementById('ups-slider-timer'))?.value, 10) || 300;
 
-    const container_shutdown_timeout_sec = document.getElementById('ups-chk-docker')?.checked ? 45 : 0;
-    const poweroff_ups = Boolean(document.getElementById('ups-chk-cutpower')?.checked);
+    const container_shutdown_timeout_sec = /** @type {HTMLInputElement} */ (document.getElementById('ups-chk-docker'))
+      ?.checked
+      ? 45
+      : 0;
+    const poweroff_ups = Boolean(
+      /** @type {HTMLInputElement} */ (document.getElementById('ups-chk-cutpower'))?.checked
+    );
 
     const payload = {
       enabled: true,
@@ -561,11 +570,11 @@ export async function loadUpsConfigToDrawer() {
     updateUpsConnCardState(mode);
 
     // Inputs
-    const hostEl = document.getElementById('ups-cfg-host');
-    const portEl = document.getElementById('ups-cfg-port');
-    const nameEl = document.getElementById('ups-cfg-name');
-    const userEl = document.getElementById('ups-cfg-user');
-    const passEl = document.getElementById('ups-cfg-pass');
+    const hostEl = /** @type {HTMLInputElement} */ (document.getElementById('ups-cfg-host'));
+    const portEl = /** @type {HTMLInputElement} */ (document.getElementById('ups-cfg-port'));
+    const nameEl = /** @type {HTMLInputElement} */ (document.getElementById('ups-cfg-name'));
+    const userEl = /** @type {HTMLInputElement} */ (document.getElementById('ups-cfg-user'));
+    const passEl = /** @type {HTMLInputElement} */ (document.getElementById('ups-cfg-pass'));
 
     if (hostEl) hostEl.value = cfg.host || '127.0.0.1';
     if (portEl) portEl.value = cfg.port || (mode === 'nut_client' ? 3493 : 3551);
@@ -581,21 +590,21 @@ export async function loadUpsConfigToDrawer() {
     });
 
     // Sliders
-    const runtimeSlider = document.getElementById('ups-slider-runtime');
+    const runtimeSlider = /** @type {HTMLInputElement} */ (document.getElementById('ups-slider-runtime'));
     const runtimeVal = document.getElementById('ups-val-runtime');
     if (runtimeSlider) {
       runtimeSlider.value = cfg.runtime_threshold_min != null ? cfg.runtime_threshold_min : 5;
       if (runtimeVal) runtimeVal.textContent = `${runtimeSlider.value} min`;
     }
 
-    const batterySlider = document.getElementById('ups-slider-battery');
+    const batterySlider = /** @type {HTMLInputElement} */ (document.getElementById('ups-slider-battery'));
     const batteryVal = document.getElementById('ups-val-battery');
     if (batterySlider) {
       batterySlider.value = cfg.battery_threshold_pct != null ? cfg.battery_threshold_pct : 20;
       if (batteryVal) batteryVal.textContent = `${batterySlider.value} %`;
     }
 
-    const timerSlider = document.getElementById('ups-slider-timer');
+    const timerSlider = /** @type {HTMLInputElement} */ (document.getElementById('ups-slider-timer'));
     const timerVal = document.getElementById('ups-val-timer');
     if (timerSlider) {
       timerSlider.value = cfg.shutdown_timer_sec != null ? cfg.shutdown_timer_sec : 300;
@@ -603,12 +612,12 @@ export async function loadUpsConfigToDrawer() {
     }
 
     // Checkboxes
-    const chkDocker = document.getElementById('ups-chk-docker');
+    const chkDocker = /** @type {HTMLInputElement} */ (document.getElementById('ups-chk-docker'));
     if (chkDocker) {
       chkDocker.checked = (cfg.container_shutdown_timeout_sec ?? 45) > 0;
     }
 
-    const chkCutpower = document.getElementById('ups-chk-cutpower');
+    const chkCutpower = /** @type {HTMLInputElement} */ (document.getElementById('ups-chk-cutpower'));
     if (chkCutpower) {
       chkCutpower.checked = Boolean(cfg.poweroff_ups);
     }
@@ -650,7 +659,7 @@ export function initUpsDrawerControls() {
     }
   });
 
-  const btnRefresh = document.getElementById('btn-refresh-ups');
+  const btnRefresh = /** @type {HTMLButtonElement} */ (document.getElementById('btn-refresh-ups'));
   btnRefresh?.addEventListener('click', async () => {
     try {
       btnRefresh.disabled = true;
@@ -693,7 +702,7 @@ export function initUpsDrawerControls() {
   };
 
   // Slider value listeners + auto-save
-  const runtimeSlider = document.getElementById('ups-slider-runtime');
+  const runtimeSlider = /** @type {HTMLInputElement} */ (document.getElementById('ups-slider-runtime'));
   const runtimeVal = document.getElementById('ups-val-runtime');
   runtimeSlider?.addEventListener('input', () => {
     if (runtimeVal) runtimeVal.textContent = `${runtimeSlider.value} min`;
@@ -705,7 +714,7 @@ export function initUpsDrawerControls() {
     triggerImmediateSave();
   });
 
-  const batterySlider = document.getElementById('ups-slider-battery');
+  const batterySlider = /** @type {HTMLInputElement} */ (document.getElementById('ups-slider-battery'));
   const batteryVal = document.getElementById('ups-val-battery');
   batterySlider?.addEventListener('input', () => {
     if (batteryVal) batteryVal.textContent = `${batterySlider.value} %`;
@@ -717,7 +726,7 @@ export function initUpsDrawerControls() {
     triggerImmediateSave();
   });
 
-  const timerSlider = document.getElementById('ups-slider-timer');
+  const timerSlider = /** @type {HTMLInputElement} */ (document.getElementById('ups-slider-timer'));
   const timerVal = document.getElementById('ups-val-timer');
   timerSlider?.addEventListener('input', () => {
     if (timerVal) timerVal.textContent = `${timerSlider.value} sec`;
@@ -781,7 +790,7 @@ export function initUpsDrawerControls() {
   const modeRadios = document.querySelectorAll('input[name="ups-mode"]');
   modeRadios.forEach((radio) => {
     radio.addEventListener('change', () => {
-      const portEl = document.getElementById('ups-cfg-port');
+      const portEl = /** @type {HTMLInputElement} */ (document.getElementById('ups-cfg-port'));
       if (radio.value === 'apcupsd_client' && portEl && (portEl.value === '3493' || !portEl.value)) {
         portEl.value = '3551';
       } else if (radio.value === 'nut_client' && portEl && (portEl.value === '3551' || !portEl.value)) {
@@ -825,7 +834,7 @@ export function initUpsDrawerControls() {
   });
 
   // Auto-Discovery
-  const btnDiscover = document.getElementById('btn-ups-discover');
+  const btnDiscover = /** @type {HTMLButtonElement} */ (document.getElementById('btn-ups-discover'));
   const discoverContainer = document.getElementById('ups-discover-candidates');
   btnDiscover?.addEventListener('click', async () => {
     try {
@@ -873,9 +882,9 @@ export function initUpsDrawerControls() {
             : cand.mode || (isApc ? 'apcupsd_client' : isNut ? 'nut_client' : 'auto');
           const radio = document.querySelector(`input[name="ups-mode"][value="${targetMode}"]`);
           if (radio) radio.checked = true;
-          const hostEl = document.getElementById('ups-cfg-host');
-          const portEl = document.getElementById('ups-cfg-port');
-          const nameEl = document.getElementById('ups-cfg-name');
+          const hostEl = /** @type {HTMLInputElement} */ (document.getElementById('ups-cfg-host'));
+          const portEl = /** @type {HTMLInputElement} */ (document.getElementById('ups-cfg-port'));
+          const nameEl = /** @type {HTMLInputElement} */ (document.getElementById('ups-cfg-name'));
           if (isUsb) {
             if (hostEl) hostEl.value = '';
             if (portEl) portEl.value = '';
@@ -911,17 +920,19 @@ export function initUpsDrawerControls() {
   });
 
   // Test Connection
-  const btnTest = document.getElementById('btn-ups-test-conn');
+  const btnTest = /** @type {HTMLButtonElement} */ (document.getElementById('btn-ups-test-conn'));
   btnTest?.addEventListener('click', async () => {
     try {
       btnTest.disabled = true;
       btnTest.textContent = t('ui.testing', 'Testing...');
       const mode = document.querySelector('input[name="ups-mode"]:checked')?.value || 'auto';
-      const host = document.getElementById('ups-cfg-host')?.value.trim() || '127.0.0.1';
-      const port = parseInt(document.getElementById('ups-cfg-port')?.value, 10) || 3551;
-      const ups_name = document.getElementById('ups-cfg-name')?.value.trim() || 'ups';
-      const username = document.getElementById('ups-cfg-user')?.value.trim() || '';
-      const passwordRaw = document.getElementById('ups-cfg-pass')?.value || '';
+      const host =
+        /** @type {HTMLInputElement} */ (document.getElementById('ups-cfg-host'))?.value.trim() || '127.0.0.1';
+      const port =
+        parseInt(/** @type {HTMLInputElement} */ (document.getElementById('ups-cfg-port'))?.value, 10) || 3551;
+      const ups_name = /** @type {HTMLInputElement} */ (document.getElementById('ups-cfg-name'))?.value.trim() || 'ups';
+      const username = /** @type {HTMLInputElement} */ (document.getElementById('ups-cfg-user'))?.value.trim() || '';
+      const passwordRaw = /** @type {HTMLInputElement} */ (document.getElementById('ups-cfg-pass'))?.value || '';
       const password = passwordRaw.startsWith('••') ? '' : passwordRaw;
       const isUsbMode = mode === 'usb_hid';
 
@@ -982,7 +993,7 @@ export function initUpsDrawerControls() {
       async () => {
         try {
           showToast(t('toast.initiating_battery_self_test', 'Initiating battery self-test...'), 'info');
-          const res = await api.post('/api/ups/self-test');
+          await api.post('/api/ups/self-test');
           showToast(
             t('upx.selftest_accepted', 'The UPS accepted the battery test. Its result shows on the UPS itself.'),
             'success'

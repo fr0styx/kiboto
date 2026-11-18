@@ -26,7 +26,6 @@ export async function openVmSnapshotsModal(vmId, vmObj = null) {
 
   const targetVm = vmObj ||
     vmState.list.find((v) => v.id === vmId) || { id: vmId, name: 'Virtual Machine', state: 'stopped' };
-  let activeTab = 'snapshots';
 
   modal.innerHTML = `
     <div class="smart-modal-window vm-modal-window vmsn-col">
@@ -153,7 +152,6 @@ export async function openVmSnapshotsModal(vmId, vmObj = null) {
 
   if (tabSnaps && tabBackups) {
     tabSnaps.onclick = () => {
-      activeTab = 'snapshots';
       tabSnaps.classList.add('active');
       tabBackups.classList.remove('active');
       paneSnaps.style.display = 'flex';
@@ -161,7 +159,6 @@ export async function openVmSnapshotsModal(vmId, vmObj = null) {
       loadSnapshotsList();
     };
     tabBackups.onclick = () => {
-      activeTab = 'backups';
       tabBackups.classList.add('active');
       tabSnaps.classList.remove('active');
       paneBackups.style.display = 'flex';
@@ -173,10 +170,10 @@ export async function openVmSnapshotsModal(vmId, vmObj = null) {
   // Snapshot form wiring
   const btnTake = modal.querySelector('#btn-take-snapshot');
   const createForm = modal.querySelector('#vm-snap-create-form');
-  const nameInput = modal.querySelector('#vm-snap-name-input');
-  const descInput = modal.querySelector('#vm-snap-desc-input');
+  const nameInput = /** @type {HTMLInputElement} */ (modal.querySelector('#vm-snap-name-input'));
+  const descInput = /** @type {HTMLInputElement} */ (modal.querySelector('#vm-snap-desc-input'));
   const btnCancel = modal.querySelector('#btn-cancel-take-snapshot');
-  const btnSubmit = modal.querySelector('#btn-submit-take-snapshot');
+  const btnSubmit = /** @type {HTMLButtonElement} */ (modal.querySelector('#btn-submit-take-snapshot'));
 
   const defaultSnapName = () =>
     `snap-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${new Date().toTimeString().slice(0, 8).replace(/:/g, '')}`;
@@ -441,7 +438,7 @@ export async function openVmSnapshotsModal(vmId, vmObj = null) {
   }
 
   // Back up a VM now
-  const btnCreateBackup = modal.querySelector('#btn-create-hyper-backup');
+  const btnCreateBackup = /** @type {HTMLButtonElement} */ (modal.querySelector('#btn-create-hyper-backup'));
   if (btnCreateBackup) {
     btnCreateBackup.onclick = async () => {
       btnCreateBackup.disabled = true;

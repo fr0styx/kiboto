@@ -58,7 +58,7 @@ export async function installDocFilters(root = document, onChange = () => {}) {
     box.setAttribute('aria-label', t('tags.group', 'Document filters'));
     placeFilter(box, anchor, root);
     box.addEventListener('click', (e) => {
-      const b = e.target.closest('[data-doc-tag], [data-doc-tag-clear]');
+      const b = /** @type {HTMLElement} */ (e.target).closest('[data-doc-tag], [data-doc-tag-clear]');
       if (!b) return;
       if (b.hasAttribute('data-doc-tag-clear')) selected.clear();
       else if (selected.has(b.dataset.docTag)) selected.delete(b.dataset.docTag);

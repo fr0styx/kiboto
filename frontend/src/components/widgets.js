@@ -80,7 +80,6 @@ let _geoDebounceTimer = null;
 let _currentSuggestions = [];
 let _activeSuggestionIndex = -1;
 let _holidayData = {};
-let _currentHoverHoliday = null;
 
 // Timezone and Calendar Notes State
 let _calendarEventsMap = {};
@@ -245,7 +244,11 @@ export function applyWidgetConfig() {
       wClock.setAttribute('role', 'button');
       wClock.setAttribute('tabindex', '0');
       wClock.addEventListener('click', (e) => {
-        if (e.target.closest('.widget-handle') || e.target.closest('.widget-close') || e.target.closest('#w-clock-tz'))
+        if (
+          /** @type {HTMLElement} */ (e.target).closest('.widget-handle') ||
+          /** @type {HTMLElement} */ (e.target).closest('.widget-close') ||
+          /** @type {HTMLElement} */ (e.target).closest('#w-clock-tz')
+        )
           return;
         openTimezoneModal();
       });
@@ -268,7 +271,11 @@ export function applyWidgetConfig() {
       wAiAccel.setAttribute('role', 'button');
       wAiAccel.setAttribute('tabindex', '0');
       wAiAccel.addEventListener('click', (e) => {
-        if (e.target.closest('.widget-handle') || e.target.closest('.widget-close') || e.target.closest('button'))
+        if (
+          /** @type {HTMLElement} */ (e.target).closest('.widget-handle') ||
+          /** @type {HTMLElement} */ (e.target).closest('.widget-close') ||
+          /** @type {HTMLElement} */ (e.target).closest('button')
+        )
           return;
         if (typeof window.openManagementWindow === 'function') {
           window.openManagementWindow('mgmt-sec-ai', 'mgmt-pane-ai-rag');
@@ -295,15 +302,19 @@ export function applyWidgetConfig() {
       wCalendar.setAttribute('role', 'button');
       wCalendar.setAttribute('tabindex', '0');
       wCalendar.addEventListener('click', (e) => {
-        if (e.target.closest('.widget-handle') || e.target.closest('.widget-close')) return;
         if (
-          e.target.closest('#w-cal-prev') ||
-          e.target.closest('#w-cal-next') ||
-          e.target.closest('#w-cal-country-badge') ||
-          e.target.closest('#w-cal-month')
+          /** @type {HTMLElement} */ (e.target).closest('.widget-handle') ||
+          /** @type {HTMLElement} */ (e.target).closest('.widget-close')
         )
           return;
-        const dayCell = e.target.closest('.cal-day');
+        if (
+          /** @type {HTMLElement} */ (e.target).closest('#w-cal-prev') ||
+          /** @type {HTMLElement} */ (e.target).closest('#w-cal-next') ||
+          /** @type {HTMLElement} */ (e.target).closest('#w-cal-country-badge') ||
+          /** @type {HTMLElement} */ (e.target).closest('#w-cal-month')
+        )
+          return;
+        const dayCell = /** @type {HTMLElement} */ (e.target).closest('.cal-day');
         let selectedDateKey = null;
         if (dayCell && dayCell.dataset.day) {
           const day = parseInt(dayCell.dataset.day, 10);
@@ -316,8 +327,8 @@ export function applyWidgetConfig() {
           } else {
             selectedDateKey = toDateKey(_calViewDate.getFullYear(), _calViewDate.getMonth(), day);
           }
-        } else if (e.target.closest('#w-cal-glance-bar')) {
-          const glance = e.target.closest('#w-cal-glance-bar');
+        } else if (/** @type {HTMLElement} */ (e.target).closest('#w-cal-glance-bar')) {
+          const glance = /** @type {HTMLElement} */ (e.target).closest('#w-cal-glance-bar');
           if (glance?.dataset?.dateKey) {
             selectedDateKey = glance.dataset.dateKey;
           }
@@ -344,10 +355,10 @@ export function applyWidgetConfig() {
       wWeather.setAttribute('tabindex', '0');
       wWeather.addEventListener('click', (e) => {
         if (
-          e.target.closest('#w-weather-temp') ||
-          e.target.closest('.widget-handle') ||
-          e.target.closest('.widget-close') ||
-          e.target.closest('button')
+          /** @type {HTMLElement} */ (e.target).closest('#w-weather-temp') ||
+          /** @type {HTMLElement} */ (e.target).closest('.widget-handle') ||
+          /** @type {HTMLElement} */ (e.target).closest('.widget-close') ||
+          /** @type {HTMLElement} */ (e.target).closest('button')
         )
           return;
         openWeatherPlace();
@@ -369,7 +380,11 @@ export function applyWidgetConfig() {
       wSystem.setAttribute('role', 'button');
       wSystem.setAttribute('tabindex', '0');
       wSystem.addEventListener('click', (e) => {
-        if (e.target.closest('.widget-handle') || e.target.closest('.widget-close') || e.target.closest('button'))
+        if (
+          /** @type {HTMLElement} */ (e.target).closest('.widget-handle') ||
+          /** @type {HTMLElement} */ (e.target).closest('.widget-close') ||
+          /** @type {HTMLElement} */ (e.target).closest('button')
+        )
           return;
         if (typeof window.openManagementWindow === 'function') {
           window.openManagementWindow('mgmt-sec-activity', 'mgmt-pane-metrics');
@@ -396,7 +411,11 @@ export function applyWidgetConfig() {
       wNetwork.setAttribute('role', 'button');
       wNetwork.setAttribute('tabindex', '0');
       wNetwork.addEventListener('click', (e) => {
-        if (e.target.closest('.widget-handle') || e.target.closest('.widget-close') || e.target.closest('button'))
+        if (
+          /** @type {HTMLElement} */ (e.target).closest('.widget-handle') ||
+          /** @type {HTMLElement} */ (e.target).closest('.widget-close') ||
+          /** @type {HTMLElement} */ (e.target).closest('button')
+        )
           return;
         if (typeof window.openManagementWindow === 'function') {
           window.openManagementWindow('mgmt-sec-network', 'mgmt-pane-network');
@@ -423,7 +442,11 @@ export function applyWidgetConfig() {
       wStorage.setAttribute('role', 'button');
       wStorage.setAttribute('tabindex', '0');
       wStorage.addEventListener('click', (e) => {
-        if (e.target.closest('.widget-handle') || e.target.closest('.widget-close') || e.target.closest('button'))
+        if (
+          /** @type {HTMLElement} */ (e.target).closest('.widget-handle') ||
+          /** @type {HTMLElement} */ (e.target).closest('.widget-close') ||
+          /** @type {HTMLElement} */ (e.target).closest('button')
+        )
           return;
         if (typeof window.openManagementWindow === 'function') {
           window.openManagementWindow('mgmt-sec-storage', 'mgmt-pane-storage-topo');
@@ -450,7 +473,11 @@ export function applyWidgetConfig() {
       wUptime.setAttribute('role', 'button');
       wUptime.setAttribute('tabindex', '0');
       wUptime.addEventListener('click', (e) => {
-        if (e.target.closest('.widget-handle') || e.target.closest('.widget-close') || e.target.closest('button'))
+        if (
+          /** @type {HTMLElement} */ (e.target).closest('.widget-handle') ||
+          /** @type {HTMLElement} */ (e.target).closest('.widget-close') ||
+          /** @type {HTMLElement} */ (e.target).closest('button')
+        )
           return;
         if (typeof window.openManagementWindow === 'function') {
           window.openManagementWindow('mgmt-sec-activity', 'mgmt-pane-metrics');
@@ -477,7 +504,11 @@ export function applyWidgetConfig() {
       wDriveTemp.setAttribute('role', 'button');
       wDriveTemp.setAttribute('tabindex', '0');
       wDriveTemp.addEventListener('click', (e) => {
-        if (e.target.closest('.widget-handle') || e.target.closest('.widget-close') || e.target.closest('button'))
+        if (
+          /** @type {HTMLElement} */ (e.target).closest('.widget-handle') ||
+          /** @type {HTMLElement} */ (e.target).closest('.widget-close') ||
+          /** @type {HTMLElement} */ (e.target).closest('button')
+        )
           return;
         if (typeof window.openManagementWindow === 'function') {
           window.openManagementWindow('mgmt-sec-storage');
@@ -504,7 +535,11 @@ export function applyWidgetConfig() {
       wNetDial.setAttribute('role', 'button');
       wNetDial.setAttribute('tabindex', '0');
       wNetDial.addEventListener('click', (e) => {
-        if (e.target.closest('.widget-handle') || e.target.closest('.widget-close') || e.target.closest('button'))
+        if (
+          /** @type {HTMLElement} */ (e.target).closest('.widget-handle') ||
+          /** @type {HTMLElement} */ (e.target).closest('.widget-close') ||
+          /** @type {HTMLElement} */ (e.target).closest('button')
+        )
           return;
         if (typeof window.openManagementWindow === 'function') {
           window.openManagementWindow('mgmt-sec-network');
@@ -531,7 +566,11 @@ export function applyWidgetConfig() {
       wUpsGauge.setAttribute('role', 'button');
       wUpsGauge.setAttribute('tabindex', '0');
       wUpsGauge.addEventListener('click', (e) => {
-        if (e.target.closest('.widget-handle') || e.target.closest('.widget-close') || e.target.closest('button'))
+        if (
+          /** @type {HTMLElement} */ (e.target).closest('.widget-handle') ||
+          /** @type {HTMLElement} */ (e.target).closest('.widget-close') ||
+          /** @type {HTMLElement} */ (e.target).closest('button')
+        )
           return;
         if (typeof window.openManagementWindow === 'function') {
           window.openManagementWindow('mgmt-sec-ups');
@@ -580,25 +619,25 @@ export function applyWidgetConfig() {
 export function syncWidgetSettingsUI() {
   const config = _config || loadWidgetConfig();
 
-  const toggleMaster = document.getElementById('widget-toggle-master');
-  const posSelect = document.getElementById('widget-pos-select');
-  const opacitySelect = document.getElementById('widget-opacity-select');
-  const scaleSelect = document.getElementById('widget-scale-select');
+  const toggleMaster = /** @type {HTMLInputElement} */ (document.getElementById('widget-toggle-master'));
+  const posSelect = /** @type {HTMLSelectElement} */ (document.getElementById('widget-pos-select'));
+  const opacitySelect = /** @type {HTMLSelectElement} */ (document.getElementById('widget-opacity-select'));
+  const scaleSelect = /** @type {HTMLSelectElement} */ (document.getElementById('widget-scale-select'));
 
-  const chkClock = document.getElementById('w-cfg-clock');
-  const chkAiAccel = document.getElementById('w-cfg-ai-accelerator');
-  const chkCalendar = document.getElementById('w-cfg-calendar');
-  const chkWeather = document.getElementById('w-cfg-weather');
-  const chkSystem = document.getElementById('w-cfg-system');
-  const chkNetwork = document.getElementById('w-cfg-network');
-  const chkStorage = document.getElementById('w-cfg-storage');
-  const chkUptime = document.getElementById('w-cfg-uptime');
-  const chkDriveTemp = document.getElementById('w-cfg-drive-temp');
-  const chkNetDial = document.getElementById('w-cfg-net-dial');
-  const chkUpsGauge = document.getElementById('w-cfg-ups-gauge');
+  const chkClock = /** @type {HTMLInputElement} */ (document.getElementById('w-cfg-clock'));
+  const chkAiAccel = /** @type {HTMLInputElement} */ (document.getElementById('w-cfg-ai-accelerator'));
+  const chkCalendar = /** @type {HTMLInputElement} */ (document.getElementById('w-cfg-calendar'));
+  const chkWeather = /** @type {HTMLInputElement} */ (document.getElementById('w-cfg-weather'));
+  const chkSystem = /** @type {HTMLInputElement} */ (document.getElementById('w-cfg-system'));
+  const chkNetwork = /** @type {HTMLInputElement} */ (document.getElementById('w-cfg-network'));
+  const chkStorage = /** @type {HTMLInputElement} */ (document.getElementById('w-cfg-storage'));
+  const chkUptime = /** @type {HTMLInputElement} */ (document.getElementById('w-cfg-uptime'));
+  const chkDriveTemp = /** @type {HTMLInputElement} */ (document.getElementById('w-cfg-drive-temp'));
+  const chkNetDial = /** @type {HTMLInputElement} */ (document.getElementById('w-cfg-net-dial'));
+  const chkUpsGauge = /** @type {HTMLInputElement} */ (document.getElementById('w-cfg-ups-gauge'));
 
-  const weatherCityInput = document.getElementById('widget-weather-city-input');
-  const weatherUnitSelect = document.getElementById('widget-weather-unit-select');
+  const weatherCityInput = /** @type {HTMLInputElement} */ (document.getElementById('widget-weather-city-input'));
+  const weatherUnitSelect = /** @type {HTMLSelectElement} */ (document.getElementById('widget-weather-unit-select'));
 
   if (toggleMaster) toggleMaster.checked = !!config.enabled;
   if (posSelect) posSelect.value = config.position || 'pos-top-right';
@@ -622,8 +661,8 @@ export function syncWidgetSettingsUI() {
   }
   if (weatherUnitSelect) weatherUnitSelect.value = config.weatherUnit || 'c';
 
-  const calCountrySelect = document.getElementById('widget-calendar-country-select');
-  const calHolidayToggle = document.getElementById('w-cfg-holiday-toggle');
+  const calCountrySelect = /** @type {HTMLSelectElement} */ (document.getElementById('widget-calendar-country-select'));
+  const calHolidayToggle = /** @type {HTMLInputElement} */ (document.getElementById('w-cfg-holiday-toggle'));
   if (calCountrySelect) calCountrySelect.value = config.calendarCountry || 'auto';
   if (calHolidayToggle) calHolidayToggle.checked = config.calendarHolidays !== false;
 
@@ -1096,7 +1135,6 @@ function getHolidaysForYear(year, countryCode) {
 }
 
 function showCalendarTooltip(targetEl, name, dateStr) {
-  _currentHoverHoliday = { name, dateStr };
   let tooltip = document.getElementById('cal-holiday-tooltip');
   if (!tooltip) {
     tooltip = document.createElement('div');
@@ -1146,7 +1184,6 @@ function showCalendarTooltip(targetEl, name, dateStr) {
 }
 
 function hideCalendarTooltip() {
-  _currentHoverHoliday = null;
   const tooltip = document.getElementById('cal-holiday-tooltip');
   if (tooltip) {
     tooltip.classList.remove('visible');
@@ -1590,7 +1627,7 @@ export async function fetchWeather(force = false) {
    Weather City Autocomplete Dropdown
    ========================================================================= */
 function initWeatherCityAutocomplete() {
-  const cityInput = document.getElementById('widget-weather-city-input');
+  const cityInput = /** @type {HTMLInputElement} */ (document.getElementById('widget-weather-city-input'));
   const dropdown = document.getElementById('widget-weather-city-dropdown');
   const spinner = document.getElementById('widget-weather-city-spinner');
   if (!cityInput || !dropdown) return;
@@ -1675,7 +1712,7 @@ function initWeatherCityAutocomplete() {
   }
 
   cityInput.addEventListener('input', (e) => {
-    const q = e.target.value.trim();
+    const q = /** @type {HTMLInputElement} */ (e.target).value.trim();
     if (_geoDebounceTimer) clearTimeout(_geoDebounceTimer);
 
     if (!q) {
@@ -1782,42 +1819,42 @@ export function setupWidgetSettingsEvents() {
   const opacitySelect = document.getElementById('widget-opacity-select');
   const scaleSelect = document.getElementById('widget-scale-select');
 
-  const chkClock = document.getElementById('w-cfg-clock');
-  const chkAiAccel = document.getElementById('w-cfg-ai-accelerator');
-  const chkCalendar = document.getElementById('w-cfg-calendar');
-  const chkWeather = document.getElementById('w-cfg-weather');
-  const chkSystem = document.getElementById('w-cfg-system');
-  const chkNetwork = document.getElementById('w-cfg-network');
-  const chkStorage = document.getElementById('w-cfg-storage');
-  const chkUptime = document.getElementById('w-cfg-uptime');
-  const chkDriveTemp = document.getElementById('w-cfg-drive-temp');
-  const chkNetDial = document.getElementById('w-cfg-net-dial');
-  const chkUpsGauge = document.getElementById('w-cfg-ups-gauge');
+  const chkClock = /** @type {HTMLInputElement} */ (document.getElementById('w-cfg-clock'));
+  const chkAiAccel = /** @type {HTMLInputElement} */ (document.getElementById('w-cfg-ai-accelerator'));
+  const chkCalendar = /** @type {HTMLInputElement} */ (document.getElementById('w-cfg-calendar'));
+  const chkWeather = /** @type {HTMLInputElement} */ (document.getElementById('w-cfg-weather'));
+  const chkSystem = /** @type {HTMLInputElement} */ (document.getElementById('w-cfg-system'));
+  const chkNetwork = /** @type {HTMLInputElement} */ (document.getElementById('w-cfg-network'));
+  const chkStorage = /** @type {HTMLInputElement} */ (document.getElementById('w-cfg-storage'));
+  const chkUptime = /** @type {HTMLInputElement} */ (document.getElementById('w-cfg-uptime'));
+  const chkDriveTemp = /** @type {HTMLInputElement} */ (document.getElementById('w-cfg-drive-temp'));
+  const chkNetDial = /** @type {HTMLInputElement} */ (document.getElementById('w-cfg-net-dial'));
+  const chkUpsGauge = /** @type {HTMLInputElement} */ (document.getElementById('w-cfg-ups-gauge'));
 
   const weatherUnitSelect = document.getElementById('widget-weather-unit-select');
   const resetBtn = document.getElementById('widget-reset-defaults-btn');
 
   if (toggleMaster) {
     toggleMaster.addEventListener('change', (e) => {
-      saveWidgetConfig({ enabled: e.target.checked });
+      saveWidgetConfig({ enabled: /** @type {HTMLInputElement} */ (e.target).checked });
     });
   }
 
   if (posSelect) {
     posSelect.addEventListener('change', (e) => {
-      saveWidgetConfig({ position: e.target.value });
+      saveWidgetConfig({ position: /** @type {HTMLInputElement} */ (e.target).value });
     });
   }
 
   if (opacitySelect) {
     opacitySelect.addEventListener('change', (e) => {
-      saveWidgetConfig({ opacity: e.target.value });
+      saveWidgetConfig({ opacity: /** @type {HTMLInputElement} */ (e.target).value });
     });
   }
 
   if (scaleSelect) {
     scaleSelect.addEventListener('change', (e) => {
-      saveWidgetConfig({ scale: e.target.value });
+      saveWidgetConfig({ scale: /** @type {HTMLInputElement} */ (e.target).value });
     });
   }
 
@@ -1852,7 +1889,7 @@ export function setupWidgetSettingsEvents() {
 
   if (weatherUnitSelect) {
     weatherUnitSelect.addEventListener('change', (e) => {
-      saveWidgetConfig({ weatherUnit: e.target.value });
+      saveWidgetConfig({ weatherUnit: /** @type {HTMLInputElement} */ (e.target).value });
       try {
         const config = _config || loadWidgetConfig();
         const cityName = config.weatherCity?.trim() || '';
@@ -1909,9 +1946,13 @@ export function setupWidgetSettingsEvents() {
   const calCountrySelect = document.getElementById('widget-calendar-country-select');
   if (calCountrySelect) {
     calCountrySelect.addEventListener('change', (e) => {
-      saveWidgetConfig({ calendarCountry: e.target.value });
+      saveWidgetConfig({ calendarCountry: /** @type {HTMLInputElement} */ (e.target).value });
       renderCalendar();
-      const cName = e.target.value === 'auto' ? 'Auto-detect' : COUNTRY_NAMES[e.target.value] || e.target.value;
+      const cName =
+        /** @type {HTMLInputElement} */ (e.target).value === 'auto'
+          ? 'Auto-detect'
+          : COUNTRY_NAMES[/** @type {HTMLInputElement} */ (e.target).value] ||
+            /** @type {HTMLInputElement} */ (e.target).value;
       showToast(t('toast.calendar_holidays_set_to', 'Calendar holidays set to {cName}', { cName: cName }), 'success');
     });
   }
@@ -1919,10 +1960,10 @@ export function setupWidgetSettingsEvents() {
   const calHolidayToggle = document.getElementById('w-cfg-holiday-toggle');
   if (calHolidayToggle) {
     calHolidayToggle.addEventListener('change', (e) => {
-      saveWidgetConfig({ calendarHolidays: e.target.checked });
+      saveWidgetConfig({ calendarHolidays: /** @type {HTMLInputElement} */ (e.target).checked });
       renderCalendar();
       showToast(
-        e.target.checked
+        /** @type {HTMLInputElement} */ (e.target).checked
           ? t('toast.calendar_holidays_enabled', 'Calendar holidays enabled')
           : t('toast.calendar_holidays_disabled', 'Calendar holidays disabled'),
         'info'
@@ -1953,7 +1994,7 @@ export function setupWidgetSettingsEvents() {
   const calGrid = document.getElementById('w-calendar-grid');
   if (calGrid) {
     calGrid.addEventListener('mouseover', (e) => {
-      const cell = e.target.closest('.cal-day.cal-holiday');
+      const cell = /** @type {HTMLElement} */ (e.target).closest('.cal-day.cal-holiday');
       if (!cell) return;
       const holidayName = cell.getAttribute('data-holiday');
       const holidayDate = cell.getAttribute('data-date-str');
@@ -1963,7 +2004,7 @@ export function setupWidgetSettingsEvents() {
     });
 
     calGrid.addEventListener('mouseout', (e) => {
-      const cell = e.target.closest('.cal-day.cal-holiday');
+      const cell = /** @type {HTMLElement} */ (e.target).closest('.cal-day.cal-holiday');
       if (cell) {
         hideCalendarTooltip();
       }
@@ -2283,7 +2324,11 @@ export function initWidgets() {
         wUpsGauge.style.cursor = 'pointer';
         wUpsGauge.title = t('ui.click_to_open_power_battery', 'Click to open Power & Battery Cockpit');
         wUpsGauge.addEventListener('click', (e) => {
-          if (e.target.closest('.widget-handle') || e.target.closest('.widget-close') || e.target.closest('button'))
+          if (
+            /** @type {HTMLElement} */ (e.target).closest('.widget-handle') ||
+            /** @type {HTMLElement} */ (e.target).closest('.widget-close') ||
+            /** @type {HTMLElement} */ (e.target).closest('button')
+          )
             return;
           if (typeof window.openManagementWindow === 'function') {
             window.openManagementWindow('mgmt-sec-ups');
@@ -2583,7 +2628,7 @@ export async function openTimezoneModal() {
     modal.style.display = 'flex';
   }
 
-  const searchInput = document.getElementById('tz-search-input');
+  const searchInput = /** @type {HTMLInputElement} */ (document.getElementById('tz-search-input'));
   if (searchInput) searchInput.value = '';
 
   const pills = document.querySelectorAll('.tz-region-pill');
@@ -2609,7 +2654,7 @@ export function initTimezoneControls() {
   _tzSearchQuery = '';
   _tzActiveRegion = 'all';
 
-  const searchInput = document.getElementById('tz-search-input');
+  const searchInput = /** @type {HTMLInputElement} */ (document.getElementById('tz-search-input'));
   if (searchInput) searchInput.value = '';
 
   const pills = document.querySelectorAll('.tz-region-pill');
@@ -2867,7 +2912,7 @@ export function setupTimezoneModalEvents() {
   const saveBtn = document.getElementById('modal-clock-tz-save-btn');
   const useBrowserBtn = document.getElementById('btn-tz-use-browser');
   const searchInput = document.getElementById('tz-search-input');
-  const customInput = document.getElementById('tz-custom-input');
+  const customInput = /** @type {HTMLInputElement} */ (document.getElementById('tz-custom-input'));
   const applyCustomBtn = document.getElementById('btn-tz-apply-custom');
   const btn12 = document.getElementById('btn-tz-fmt-12');
   const btn24 = document.getElementById('btn-tz-fmt-24');
@@ -2911,7 +2956,7 @@ export function setupTimezoneModalEvents() {
 
   if (searchInput) {
     searchInput.addEventListener('input', (e) => {
-      _tzSearchQuery = e.target.value;
+      _tzSearchQuery = /** @type {HTMLInputElement} */ (e.target).value;
       renderTimezoneList();
     });
     searchInput.addEventListener('keydown', (e) => {
@@ -2935,7 +2980,7 @@ export function setupTimezoneModalEvents() {
   if (listContainer) {
     listContainer.addEventListener('keydown', onTimezoneListKey);
     listContainer.addEventListener('click', (e) => {
-      const row = e.target.closest('.tz-item-row');
+      const row = /** @type {HTMLElement} */ (e.target).closest('.tz-item-row');
       if (!row || !row.dataset.tzId) return;
       _tempSelectedTz = row.dataset.tzId;
       updateTzModalPreview();
@@ -3241,7 +3286,7 @@ export function renderDayAgenda(dateKey) {
   }
 
   // Check holiday for this day
-  const [y, m, d] = dateKey.split('-').map(Number);
+  const [y] = dateKey.split('-').map(Number);
   const country = getActiveCountry();
   const holidays = getHolidaysForYear(y, country)[dateKey] || [];
 
@@ -3387,7 +3432,7 @@ export function setupCalendarModalEvents() {
   }
 
   const closeBtn = document.getElementById('modal-cal-notes-close-btn');
-  const syncBtn = document.getElementById('btn-cal-sync-now');
+  const syncBtn = /** @type {HTMLButtonElement} */ (document.getElementById('btn-cal-sync-now'));
   const exportBtn = document.getElementById('btn-cal-export-ics');
   const prevBtn = document.getElementById('btn-modal-cal-prev');
   const nextBtn = document.getElementById('btn-modal-cal-next');
@@ -3397,7 +3442,7 @@ export function setupCalendarModalEvents() {
   const saveNoteBtn = document.getElementById('btn-cal-save-note');
   const toggleFeedBtn = document.getElementById('btn-toggle-add-feed');
   const cancelFeedBtn = document.getElementById('btn-cancel-add-feed');
-  const submitFeedBtn = document.getElementById('btn-submit-add-feed');
+  const submitFeedBtn = /** @type {HTMLButtonElement} */ (document.getElementById('btn-submit-add-feed'));
   const addFeedForm = document.getElementById('cal-add-feed-form');
   const feedsList = document.getElementById('cal-feeds-list');
 
@@ -3446,7 +3491,7 @@ export function setupCalendarModalEvents() {
 
   if (grid) {
     grid.addEventListener('click', (e) => {
-      const cell = e.target.closest('.cal-day');
+      const cell = /** @type {HTMLElement} */ (e.target).closest('.cal-day');
       if (!cell || !cell.dataset.dateKey) return;
       _modalCalSelectedDateKey = cell.dataset.dateKey;
       renderModalCalendarGrid();
@@ -3468,10 +3513,10 @@ export function setupCalendarModalEvents() {
   // Add Note composer
   if (saveNoteBtn) {
     saveNoteBtn.addEventListener('click', async () => {
-      const titleInput = document.getElementById('cal-new-note-title');
+      const titleInput = /** @type {HTMLInputElement} */ (document.getElementById('cal-new-note-title'));
       const timeInput = document.getElementById('cal-new-note-time');
       const typeSelect = document.getElementById('cal-new-note-type');
-      const descInput = document.getElementById('cal-new-note-desc');
+      const descInput = /** @type {HTMLInputElement} */ (document.getElementById('cal-new-note-desc'));
       const catInput = document.getElementById('cal-new-note-category');
 
       const title = titleInput?.value?.trim();
@@ -3514,12 +3559,12 @@ export function setupCalendarModalEvents() {
   // Task complete checkbox & Note delete in Agenda List
   if (agendaList) {
     agendaList.addEventListener('click', async (e) => {
-      const card = e.target.closest('.cal-agenda-card');
+      const card = /** @type {HTMLElement} */ (e.target).closest('.cal-agenda-card');
       if (!card || !card.dataset.itemId) return;
       const itemId = card.dataset.itemId;
 
       // Delete note
-      if (e.target.closest('.btn-cal-delete-note')) {
+      if (/** @type {HTMLElement} */ (e.target).closest('.btn-cal-delete-note')) {
         try {
           await api.delete(`/api/calendar/notes/${itemId}`);
           if (_calendarEventsMap[_modalCalSelectedDateKey]) {
@@ -3538,8 +3583,8 @@ export function setupCalendarModalEvents() {
       }
 
       // Toggle Task Checkbox
-      if (e.target.classList.contains('cal-task-check')) {
-        const checked = e.target.checked;
+      if (/** @type {HTMLElement} */ (e.target).classList.contains('cal-task-check')) {
+        const checked = /** @type {HTMLInputElement} */ (e.target).checked;
         try {
           await api.patch(`/api/calendar/notes/${itemId}`, { completed: checked });
           const items = _calendarEventsMap[_modalCalSelectedDateKey] || [];
@@ -3547,7 +3592,7 @@ export function setupCalendarModalEvents() {
           if (item) item.completed = checked;
           card.classList.toggle('completed', checked);
         } catch (err) {
-          e.target.checked = !checked;
+          /** @type {HTMLInputElement} */ (e.target).checked = !checked;
           showToast(t('toast.failed_update_task', 'Failed to update task: {error}', { error: err.message }), 'error');
         }
       }
@@ -3570,8 +3615,8 @@ export function setupCalendarModalEvents() {
   // Submit Add Feed Form
   if (submitFeedBtn) {
     submitFeedBtn.addEventListener('click', async () => {
-      const nameInput = document.getElementById('cal-feed-name-input');
-      const urlInput = document.getElementById('cal-feed-url-input');
+      const nameInput = /** @type {HTMLInputElement} */ (document.getElementById('cal-feed-name-input'));
+      const urlInput = /** @type {HTMLInputElement} */ (document.getElementById('cal-feed-url-input'));
       const colorSelect = document.getElementById('cal-feed-color-select');
 
       const name = nameInput?.value?.trim();
@@ -3624,7 +3669,7 @@ export function setupCalendarModalEvents() {
   // Delete feed
   if (feedsList) {
     feedsList.addEventListener('click', async (e) => {
-      const delBtn = e.target.closest('.btn-cal-delete-feed');
+      const delBtn = /** @type {HTMLElement} */ (e.target).closest('.btn-cal-delete-feed');
       if (!delBtn) return;
       const row = delBtn.closest('[data-feed-id]');
       if (!row || !row.dataset.feedId) return;

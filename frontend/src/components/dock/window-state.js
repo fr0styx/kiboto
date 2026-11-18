@@ -223,7 +223,7 @@ export function saveOpenWindowsState() {
               stateObj.windows[id].activePane = 'hub';
             }
           } else if (id === 'fm') {
-            const pathInput = document.getElementById('fm-path-input');
+            const pathInput = /** @type {HTMLInputElement} */ (document.getElementById('fm-path-input'));
             if (pathInput && pathInput.value) {
               stateObj.windows[id].activePath = pathInput.value;
             }

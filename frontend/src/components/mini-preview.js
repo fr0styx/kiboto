@@ -3,8 +3,8 @@
  * Handles dynamic modular tile reordering, visibility toggling, scaling, and presets.
  */
 import { api } from '../api.js';
-import { state, defaultVis, defaultSizes } from '../state.js';
-import { showToast } from '../toast.js';
+import { state, defaultVis } from '../state.js';
+import '../toast.js';
 import { t } from '../i18n.js';
 
 const $ = (id) => document.getElementById(id);
@@ -451,10 +451,6 @@ export function setupMiniPreviewInteractivity() {
       e.stopPropagation();
       el.classList.remove('mini-drag-over');
       if (!draggedMetricId) return;
-
-      const cardsEl = miniInner.querySelector('.cards');
-      const refRect = cardsEl ? cardsEl.getBoundingClientRect() : miniInner.getBoundingClientRect();
-      const isLowerHalf = e.clientY > refRect.top + refRect.height / 2;
 
       if (draggedMetricId === 'metric-disks') {
         // Just swap the position of disks!

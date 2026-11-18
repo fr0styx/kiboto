@@ -66,15 +66,15 @@ export function initLedControl() {
   initGlassTimePickers($('tab-led') || document);
   const previewBar = $('preview-bar') || $('led-live-preview-bar');
   const previewTxt = $('preview-state-txt') || $('led-preview-mode-txt');
-  const slider = $('led-slider') || $('led-brightness-slider');
+  const slider = /** @type {HTMLInputElement} */ ($('led-slider')) || $('led-brightness-slider');
   const valDisplay = $('led-val-display') || $('led-brightness-val');
-  const speedSlider = $('speed-slider') || $('led-speed-slider');
+  const speedSlider = /** @type {HTMLInputElement} */ ($('speed-slider')) || $('led-speed-slider');
   const speedValDisplay = $('speed-val-display') || $('led-speed-val');
   const powerBtn = $('btn-toggle-led') || $('led-power-btn');
-  const reactiveToggle = $('reactive-toggle') || $('led-reactive-toggle');
-  const ledNightToggle = $('led-night-toggle');
-  const ledNightStart = $('led-night-start');
-  const ledNightEnd = $('led-night-end');
+  const reactiveToggle = /** @type {HTMLInputElement} */ ($('reactive-toggle')) || $('led-reactive-toggle');
+  const ledNightToggle = /** @type {HTMLInputElement} */ ($('led-night-toggle'));
+  const ledNightStart = /** @type {HTMLInputElement} */ ($('led-night-start'));
+  const ledNightEnd = /** @type {HTMLInputElement} */ ($('led-night-end'));
 
   const effectBtns = document.querySelectorAll('#tab-led .effect-btn, .led-effect-btn');
   // the Custom swatch is a color-chip too, but a label around a colour input with no data-hex
@@ -258,7 +258,7 @@ export function initLedControl() {
   if (slider) {
     slider.addEventListener('input', (e) => {
       profilePills.forEach((pill) => pill.classList.remove('active'));
-      if (valDisplay) valDisplay.textContent = e.target.value + '%';
+      if (valDisplay) valDisplay.textContent = /** @type {HTMLInputElement} */ (e.target).value + '%';
       updateLivePreview();
       clearTimeout(briDebounce);
       briDebounce = setTimeout(() => postLed('on'), 75);
@@ -268,7 +268,8 @@ export function initLedControl() {
   if (speedSlider) {
     speedSlider.addEventListener('input', (e) => {
       profilePills.forEach((pill) => pill.classList.remove('active'));
-      if (speedValDisplay) speedValDisplay.textContent = formatSpeedText(e.target.value);
+      if (speedValDisplay)
+        speedValDisplay.textContent = formatSpeedText(/** @type {HTMLInputElement} */ (e.target).value);
       updateLivePreview();
       clearTimeout(speedDebounce);
       speedDebounce = setTimeout(() => postLed('on'), 75);
@@ -302,7 +303,7 @@ export function initLedControl() {
       profilePills.forEach((pill) => pill.classList.remove('active'));
       colorChips1.forEach((c) => c.classList.remove('active'));
       if (customChip1Label) customChip1Label.classList.add('active');
-      currentColor = e.target.value.replace('#', '');
+      currentColor = /** @type {HTMLInputElement} */ (e.target).value.replace('#', '');
       clearTimeout(colorDebounce);
       colorDebounce = setTimeout(() => postLed('on'), 75);
     });
@@ -324,7 +325,7 @@ export function initLedControl() {
       profilePills.forEach((pill) => pill.classList.remove('active'));
       colorChips2.forEach((c) => c.classList.remove('active'));
       if (customChip2Label) customChip2Label.classList.add('active');
-      currentColor2 = e.target.value.replace('#', '');
+      currentColor2 = /** @type {HTMLInputElement} */ (e.target).value.replace('#', '');
       clearTimeout(colorDebounce);
       colorDebounce = setTimeout(() => postLed('on'), 75);
     });

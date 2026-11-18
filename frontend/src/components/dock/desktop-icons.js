@@ -219,18 +219,18 @@ export function initDraggableDesktopIcons() {
   document.body.addEventListener('contextmenu', (e) => {
     if (typeof e.target?.closest !== 'function') return;
     if (
-      e.target.closest('.smart-modal-window') ||
-      e.target.closest('.os-window') ||
-      e.target.closest('#console-window') ||
-      e.target.closest('.os-context-menu') ||
-      e.target.closest('#os-dock-container') ||
-      e.target.closest('.suite-navbar') ||
-      e.target.closest('.slide-drawer')
+      /** @type {HTMLElement} */ (e.target).closest('.smart-modal-window') ||
+      /** @type {HTMLElement} */ (e.target).closest('.os-window') ||
+      /** @type {HTMLElement} */ (e.target).closest('#console-window') ||
+      /** @type {HTMLElement} */ (e.target).closest('.os-context-menu') ||
+      /** @type {HTMLElement} */ (e.target).closest('#os-dock-container') ||
+      /** @type {HTMLElement} */ (e.target).closest('.suite-navbar') ||
+      /** @type {HTMLElement} */ (e.target).closest('.slide-drawer')
     ) {
       return;
     }
 
-    const iconEl = e.target.closest('.chassis-hero-box');
+    const iconEl = /** @type {HTMLElement} */ (e.target).closest('.chassis-hero-box');
     if (iconEl) {
       e.preventDefault();
       // Ensure the background desktop context menu is closed

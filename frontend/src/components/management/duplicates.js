@@ -69,7 +69,7 @@ function dupWindow() {
   host.querySelector('[data-close]').addEventListener('click', () => closeWindow(host));
   host.addEventListener('click', (e) => {
     if (e.target === host) closeWindow(host);
-    const b = e.target.closest('[data-dup-bin]');
+    const b = /** @type {HTMLElement} */ (e.target).closest('[data-dup-bin]');
     if (b) askToBin(host, b.dataset.dupBin);
   });
   host.addEventListener('keydown', (e) => {

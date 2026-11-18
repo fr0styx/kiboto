@@ -112,7 +112,7 @@ export function renderAiSearchHistory() {
   chipsContainer.querySelectorAll('.ai-history-chip').forEach((chip) => {
     chip.addEventListener('click', () => {
       const q = chip.dataset.query || '';
-      const askInput = document.getElementById('ai-rag-query-input');
+      const askInput = /** @type {HTMLInputElement} */ (document.getElementById('ai-rag-query-input'));
       if (askInput) askInput.value = q;
       const visInput =
         document.getElementById('ai-visual-search-input') || document.getElementById('ai-visual-query-input');
@@ -184,7 +184,6 @@ function _updateAiVisualFilterBadge() {
 
 let _aiLastLlmRecommendations = null;
 let _aiLastActiveModel = ''; // the model the server reported; never a made-up default (FE-15)
-let _aiActiveHfFilter = 'all';
 let _aiModelsSortBy = 'date';
 
 /** A text the server sent: in the reader's language when it said how it was made, else its own words. */
@@ -223,14 +222,14 @@ export function renderAiLlmRecommendations(recData = {}, activeModel = '') {
   const headlineEl = document.getElementById('ai-llm-advisor-headline');
   const summaryEl = document.getElementById('ai-llm-advisor-summary');
   const gridEl = document.getElementById('ai-llm-recommendations-grid');
-  const topSelect = document.getElementById('ai-top-model-select');
-  const sortSelect = document.getElementById('ai-models-sort-select');
+  const topSelect = /** @type {HTMLSelectElement} */ (document.getElementById('ai-top-model-select'));
+  const sortSelect = /** @type {HTMLSelectElement} */ (document.getElementById('ai-models-sort-select'));
 
   if (sortSelect) {
     if (!sortSelect.dataset.sortBound) {
       sortSelect.dataset.sortBound = '1'; // per element: a rebuilt panel gets its own listener
       sortSelect.addEventListener('change', (e) => {
-        _aiModelsSortBy = e.target.value || 'date';
+        _aiModelsSortBy = /** @type {HTMLInputElement} */ (e.target).value || 'date';
         if (_aiLastLlmRecommendations) {
           renderAiLlmRecommendations(_aiLastLlmRecommendations, _aiLastActiveModel);
         }
@@ -868,9 +867,9 @@ export function updateAiSyncProgressUi(syncProg = {}, standbyGuard = {}, kibStat
   if (ribStop) ribStop.style.display = isRunning || isPaused ? 'inline-flex' : 'none';
 
   // Indexer pane transport buttons
-  const idxPause = document.getElementById('btn-ai-index-pause');
-  const idxResume = document.getElementById('btn-ai-index-resume');
-  const idxStop = document.getElementById('btn-ai-index-stop');
+  const idxPause = /** @type {HTMLButtonElement} */ (document.getElementById('btn-ai-index-pause'));
+  const idxResume = /** @type {HTMLButtonElement} */ (document.getElementById('btn-ai-index-resume'));
+  const idxStop = /** @type {HTMLButtonElement} */ (document.getElementById('btn-ai-index-stop'));
   if (idxPause) {
     idxPause.disabled = !(isRunning && !isPaused);
     idxPause.style.opacity = isRunning && !isPaused ? '1' : '0.45';
@@ -1350,7 +1349,7 @@ export function _getActiveAiSearchQuery() {
   const visInput =
     document.getElementById('ai-visual-search-input') || document.getElementById('ai-visual-query-input');
   if (visInput && visInput.value.trim()) return visInput.value.trim();
-  const askInput = document.getElementById('ai-rag-query-input');
+  const askInput = /** @type {HTMLInputElement} */ (document.getElementById('ai-rag-query-input'));
   return askInput ? askInput.value.trim() : '';
 }
 
@@ -1399,7 +1398,7 @@ export function initAiKnowledgeEngine() {
   }
 
   // Kib Master Switch (#ai-master-enable-toggle)
-  const masterToggle = document.getElementById('ai-master-enable-toggle');
+  const masterToggle = /** @type {HTMLInputElement} */ (document.getElementById('ai-master-enable-toggle'));
   if (masterToggle && !masterToggle.dataset.bound) {
     masterToggle.dataset.bound = '1';
     masterToggle.addEventListener('change', async () => {
@@ -1418,7 +1417,7 @@ export function initAiKnowledgeEngine() {
   }
 
   // Model Selector (#ai-top-model-select)
-  const topModelSelect = document.getElementById('ai-top-model-select');
+  const topModelSelect = /** @type {HTMLSelectElement} */ (document.getElementById('ai-top-model-select'));
   if (topModelSelect && !topModelSelect.dataset.bound) {
     topModelSelect.dataset.bound = '1';
     topModelSelect.addEventListener('change', () => {
@@ -1429,7 +1428,7 @@ export function initAiKnowledgeEngine() {
   }
 
   // Hugging Face Hub Search, Pull & Hardware Filter Pills
-  const hfSearchInput = document.getElementById('ai-hf-search-input');
+  const hfSearchInput = /** @type {HTMLInputElement} */ (document.getElementById('ai-hf-search-input'));
   const hfSearchBtn = document.getElementById('btn-ai-hf-search');
   const hfPullBtn = document.getElementById('btn-ai-hf-pull');
   const hfResetBtn = document.getElementById('btn-ai-hf-reset');
@@ -1462,7 +1461,6 @@ export function initAiKnowledgeEngine() {
       hfResetBtn.style.display = 'none';
       const statusEl = document.getElementById('ai-hf-search-status');
       if (statusEl) statusEl.style.display = 'none';
-      _aiActiveHfFilter = 'all';
       fetchAndRenderAiStatus();
     });
   }
@@ -1470,7 +1468,6 @@ export function initAiKnowledgeEngine() {
     if (btn.dataset.bound) return;
     btn.dataset.bound = '1';
     btn.addEventListener('click', () => {
-      _aiActiveHfFilter = btn.dataset.hfFilter || 'all';
       if (_aiLastLlmRecommendations) {
         renderAiLlmRecommendations(_aiLastLlmRecommendations, _aiLastActiveModel);
       }
@@ -1502,7 +1499,7 @@ export function initAiKnowledgeEngine() {
   }
 
   // Learning Scope Mode (#ai-learning-scope-mode) & Scheduled Learning Window
-  const scopeModeSelect = document.getElementById('ai-learning-scope-mode');
+  const scopeModeSelect = /** @type {HTMLSelectElement} */ (document.getElementById('ai-learning-scope-mode'));
   if (scopeModeSelect && !scopeModeSelect.dataset.bound) {
     scopeModeSelect.dataset.bound = '1';
     scopeModeSelect.addEventListener('change', async () => {
@@ -1519,9 +1516,13 @@ export function initAiKnowledgeEngine() {
   const saveSchedBtn = document.getElementById('btn-ai-save-schedule');
   const schedToggle = document.getElementById('ai-schedule-enabled-toggle');
   const saveScheduleHandler = async () => {
-    const schedule_enabled = Boolean(document.getElementById('ai-schedule-enabled-toggle')?.checked);
-    const schedule_start = document.getElementById('ai-schedule-start-input')?.value || '01:00';
-    const schedule_end = document.getElementById('ai-schedule-end-input')?.value || '06:00';
+    const schedule_enabled = Boolean(
+      /** @type {HTMLInputElement} */ (document.getElementById('ai-schedule-enabled-toggle'))?.checked
+    );
+    const schedule_start =
+      /** @type {HTMLInputElement} */ (document.getElementById('ai-schedule-start-input'))?.value || '01:00';
+    const schedule_end =
+      /** @type {HTMLInputElement} */ (document.getElementById('ai-schedule-end-input'))?.value || '06:00';
     await updateAiServiceConfig({ schedule_enabled, schedule_start, schedule_end });
     showToast(
       schedule_enabled
@@ -1667,7 +1668,7 @@ export function initAiKnowledgeEngine() {
   }
 
   // Unified Omni-Search & RAG Ask handlers
-  const askInput = document.getElementById('ai-rag-query-input');
+  const askInput = /** @type {HTMLInputElement} */ (document.getElementById('ai-rag-query-input'));
   const askBtn = document.getElementById('btn-ai-rag-ask');
   const executeUnifiedOmniSearch = (rawQuery) => {
     const q = String(rawQuery || '').trim();
@@ -1702,7 +1703,7 @@ export function initAiKnowledgeEngine() {
     chip.addEventListener('click', () => {
       const q = (chip.dataset.query || '').trim();
       const isVisual = chip.dataset.switchVisual === '1' || chip.dataset.mode === 'visual';
-      const currentAskIn = document.getElementById('ai-rag-query-input');
+      const currentAskIn = /** @type {HTMLInputElement} */ (document.getElementById('ai-rag-query-input'));
       if (currentAskIn) currentAskIn.value = q;
       const visIn =
         document.getElementById('ai-visual-search-input') || document.getElementById('ai-visual-query-input');
@@ -1775,7 +1776,7 @@ export function initAiKnowledgeEngine() {
   installDuplicatesButton(document); // copies kept more than once (AI-35)
 
   // Sort Selector (#ai-search-sort-select)
-  const sortSelect = document.getElementById('ai-search-sort-select');
+  const sortSelect = /** @type {HTMLSelectElement} */ (document.getElementById('ai-search-sort-select'));
   if (sortSelect && !sortSelect.dataset.bound) {
     sortSelect.dataset.bound = '1';
     sortSelect.addEventListener('change', () => {
@@ -1796,7 +1797,7 @@ export function initAiKnowledgeEngine() {
       const activeVisInput =
         document.getElementById('ai-visual-search-input') || document.getElementById('ai-visual-query-input');
       if (activeVisInput) activeVisInput.value = '';
-      const activeAskInput = document.getElementById('ai-rag-query-input');
+      const activeAskInput = /** @type {HTMLInputElement} */ (document.getElementById('ai-rag-query-input'));
       if (activeAskInput) activeAskInput.value = '';
       const answerCard = document.getElementById('ai-rag-answer-card');
       if (answerCard) answerCard.style.display = 'none';
@@ -1890,7 +1891,7 @@ export function initAiKnowledgeEngine() {
   });
 
   // Merged Standby-Safe Auto-Learn checkbox (#ai-index-respect-standby)
-  const respectStandbyCb = document.getElementById('ai-index-respect-standby');
+  const respectStandbyCb = /** @type {HTMLInputElement} */ (document.getElementById('ai-index-respect-standby'));
   if (respectStandbyCb && !respectStandbyCb.dataset.bound) {
     respectStandbyCb.dataset.bound = '1';
     respectStandbyCb.addEventListener('change', async () => {
@@ -1916,7 +1917,7 @@ export function initAiKnowledgeEngine() {
       );
     });
   }
-  const autoLearnSpinupCb = document.getElementById('ai-auto-learn-spinup');
+  const autoLearnSpinupCb = /** @type {HTMLInputElement} */ (document.getElementById('ai-auto-learn-spinup'));
   if (autoLearnSpinupCb && !autoLearnSpinupCb.dataset.bound) {
     autoLearnSpinupCb.dataset.bound = '1';
     autoLearnSpinupCb.addEventListener('change', async () => {
@@ -1942,7 +1943,7 @@ export function initAiKnowledgeEngine() {
 
   // AI Chatbot & NAS Copilot Controls (#mgmt-pane-ai-chat)
   const chatSendBtn = document.getElementById('btn-ai-chat-send');
-  const chatInput = document.getElementById('ai-chat-input');
+  const chatInput = /** @type {HTMLInputElement} */ (document.getElementById('ai-chat-input'));
   const chatClearBtn = document.getElementById('btn-ai-chat-clear');
   const chatStopBtn = document.getElementById('btn-ai-chat-stop');
   if (chatStopBtn && !chatStopBtn.dataset.bound) {
@@ -2081,31 +2082,31 @@ export async function fetchAndRenderAiStatus() {
     const totalChunks = stats.total_chunks ?? cats.chunks ?? 0;
 
     // Sync Kib Master Switch & Learning Scope/Schedule inputs
-    const masterToggle = document.getElementById('ai-master-enable-toggle');
+    const masterToggle = /** @type {HTMLInputElement} */ (document.getElementById('ai-master-enable-toggle'));
     if (masterToggle && res.enabled !== undefined) {
       masterToggle.checked = Boolean(res.enabled);
     }
-    const scopeModeSelect = document.getElementById('ai-learning-scope-mode');
+    const scopeModeSelect = /** @type {HTMLSelectElement} */ (document.getElementById('ai-learning-scope-mode'));
     if (scopeModeSelect && (res.scope_mode || cfg.scope_mode)) {
       scopeModeSelect.value = res.scope_mode || cfg.scope_mode || 'include';
     }
-    const schedToggle = document.getElementById('ai-schedule-enabled-toggle');
+    const schedToggle = /** @type {HTMLInputElement} */ (document.getElementById('ai-schedule-enabled-toggle'));
     if (schedToggle && cfg.schedule_enabled !== undefined) {
       schedToggle.checked = Boolean(cfg.schedule_enabled);
     }
-    const schedStart = document.getElementById('ai-schedule-start-input');
+    const schedStart = /** @type {HTMLInputElement} */ (document.getElementById('ai-schedule-start-input'));
     if (schedStart && cfg.schedule_start) schedStart.value = cfg.schedule_start;
-    const schedEnd = document.getElementById('ai-schedule-end-input');
+    const schedEnd = /** @type {HTMLInputElement} */ (document.getElementById('ai-schedule-end-input'));
     if (schedEnd && cfg.schedule_end) schedEnd.value = cfg.schedule_end;
     renderScheduleZone(res.learning_results?.schedule_time_zone);
     if (typeof window !== 'undefined' && window.initGlassTimePickers) {
       window.initGlassTimePickers(document.getElementById('mgmt-sec-ai') || document);
     }
-    const respectCbEl = document.getElementById('ai-index-respect-standby');
+    const respectCbEl = /** @type {HTMLInputElement} */ (document.getElementById('ai-index-respect-standby'));
     if (respectCbEl && (cfg.respect_standby !== undefined || res.standby_guard?.respect_standby !== undefined)) {
       respectCbEl.checked = Boolean(cfg.respect_standby ?? res.standby_guard?.respect_standby ?? true);
     }
-    const autoSpinupCbEl = document.getElementById('ai-auto-learn-spinup');
+    const autoSpinupCbEl = /** @type {HTMLInputElement} */ (document.getElementById('ai-auto-learn-spinup'));
     if (
       autoSpinupCbEl &&
       (cfg.auto_learn_on_spinup !== undefined || res.standby_guard?.auto_learn_on_spinup !== undefined)
@@ -2113,14 +2114,16 @@ export async function fetchAndRenderAiStatus() {
       autoSpinupCbEl.checked = Boolean(cfg.auto_learn_on_spinup ?? res.standby_guard?.auto_learn_on_spinup ?? true);
     }
 
-    const retentionSel = document.getElementById('ai-conversation-retention-select');
+    const retentionSel = /** @type {HTMLSelectElement} */ (document.getElementById('ai-conversation-retention-select'));
     if (retentionSel) {
       retentionSel.value = String(cfg.conversation_retention_days ?? 0);
       if (!retentionSel.dataset.bound) {
         retentionSel.dataset.bound = '1';
         retentionSel.addEventListener('change', async (e) => {
           try {
-            await api.post('/api/ai/config', { conversation_retention_days: parseInt(e.target.value, 10) || 0 });
+            await api.post('/api/ai/config', {
+              conversation_retention_days: parseInt(/** @type {HTMLInputElement} */ (e.target).value, 10) || 0,
+            });
             showToast(t('ai.retention_saved', 'Chat retention saved'), 'success');
           } catch (err) {
             showToast(
@@ -2139,7 +2142,7 @@ export async function fetchAndRenderAiStatus() {
     // Photo search by meaning (B14)
     const pvForm = document.getElementById('ai-photo-vector-form');
     if (pvForm) {
-      const host = document.getElementById('ai-photo-vector-host');
+      const host = /** @type {HTMLInputElement} */ (document.getElementById('ai-photo-vector-host'));
       const progress = document.getElementById('ai-photo-vector-progress');
       if (host) host.value = cfg.photo_vector_host || '';
       if (progress && cfg.photo_vector_host) {
@@ -2173,9 +2176,9 @@ export async function fetchAndRenderAiStatus() {
     // Speech to text for voice memos and videos (COMP-03)
     const speechForm = document.getElementById('ai-transcribe-form');
     if (speechForm) {
-      const ep = document.getElementById('ai-transcribe-endpoint');
-      const md = document.getElementById('ai-transcribe-model');
-      const vid = document.getElementById('ai-transcribe-video');
+      const ep = /** @type {HTMLInputElement} */ (document.getElementById('ai-transcribe-endpoint'));
+      const md = /** @type {HTMLInputElement} */ (document.getElementById('ai-transcribe-model'));
+      const vid = /** @type {HTMLInputElement} */ (document.getElementById('ai-transcribe-video'));
       if (ep) ep.value = cfg.transcribe_endpoint || '';
       if (md) md.value = cfg.transcribe_model || '';
       if (vid) vid.checked = !!cfg.transcribe_video;
@@ -2204,14 +2207,14 @@ export async function fetchAndRenderAiStatus() {
     }
 
     // Photo captions (AI-14)
-    const visionSel = document.getElementById('ai-vision-captions-select');
+    const visionSel = /** @type {HTMLSelectElement} */ (document.getElementById('ai-vision-captions-select'));
     if (visionSel) {
       visionSel.value = cfg.vision_captions === 'off' ? 'off' : 'auto';
       if (!visionSel.dataset.bound) {
         visionSel.dataset.bound = '1';
         visionSel.addEventListener('change', async (e) => {
           try {
-            await api.post('/api/ai/config', { vision_captions: e.target.value });
+            await api.post('/api/ai/config', { vision_captions: /** @type {HTMLInputElement} */ (e.target).value });
             showToast(t('ai.vision_saved', 'Photo captioning setting saved'), 'success');
             refreshVisionStatus();
           } catch (err) {
@@ -2228,14 +2231,14 @@ export async function fetchAndRenderAiStatus() {
     }
 
     // Hydrate Embedding Model & MRL Dimension selectors
-    const embModelSelect = document.getElementById('ai-embedding-model-select');
+    const embModelSelect = /** @type {HTMLSelectElement} */ (document.getElementById('ai-embedding-model-select'));
     if (embModelSelect && (cfg.embedding_model || res.embedding_model)) {
       const embVal = cfg.embedding_model || res.embedding_model || 'embeddinggemma';
       embModelSelect.dataset.saved = embVal;
       // older installs saved the name "google/embeddinggemma-2" for the same model
       embModelSelect.value = /embeddinggemma/i.test(embVal) ? 'embeddinggemma' : embVal;
     }
-    const mrlDimSelect = document.getElementById('ai-mrl-dimension-select');
+    const mrlDimSelect = /** @type {HTMLSelectElement} */ (document.getElementById('ai-mrl-dimension-select'));
     if (mrlDimSelect && (cfg.embedding_dim !== undefined || res.embedding_dim !== undefined)) {
       mrlDimSelect.value = String(cfg.embedding_dim ?? res.embedding_dim ?? 768);
       mrlDimSelect.dataset.saved = mrlDimSelect.value;
@@ -2257,7 +2260,7 @@ export async function fetchAndRenderAiStatus() {
       });
     }
 
-    const btnBenchmark = document.getElementById('btn-ai-run-benchmark');
+    const btnBenchmark = /** @type {HTMLButtonElement} */ (document.getElementById('btn-ai-run-benchmark'));
     if (btnBenchmark && !btnBenchmark.dataset.bound) {
       btnBenchmark.dataset.bound = '1';
       btnBenchmark.addEventListener('click', async () => {
@@ -2607,7 +2610,7 @@ function renderStructuredCardHtml(card) {
 }
 
 export async function runAiRagAsk(rawQuestion, options = {}) {
-  const askInput = document.getElementById('ai-rag-query-input');
+  const askInput = /** @type {HTMLInputElement} */ (document.getElementById('ai-rag-query-input'));
   const q = (
     rawQuestion !== undefined && rawQuestion !== null ? String(rawQuestion) : askInput ? askInput.value : ''
   ).trim();
@@ -2618,7 +2621,7 @@ export async function runAiRagAsk(rawQuestion, options = {}) {
 
   _recordAiSearchHistory(q);
 
-  const scopeSelect = document.getElementById('ai-rag-scope-select');
+  const scopeSelect = /** @type {HTMLSelectElement} */ (document.getElementById('ai-rag-scope-select'));
   const scope = scopeSelect ? scopeSelect.value : 'all';
 
   const outTest = document.getElementById('ai-rag-answer-container');
@@ -2626,7 +2629,7 @@ export async function runAiRagAsk(rawQuestion, options = {}) {
   const answerCard = document.getElementById('ai-rag-answer-card');
   const structuredCardEl = document.getElementById('ai-rag-structured-card');
   const citationsGrid = document.getElementById('ai-rag-citations-grid');
-  const askBtn = document.getElementById('btn-ai-rag-ask');
+  const askBtn = /** @type {HTMLButtonElement} */ (document.getElementById('btn-ai-rag-ask'));
   const hasUnifiedVisualGrid = Boolean(document.getElementById('ai-visual-results-grid'));
 
   if (askBtn) {
@@ -3748,7 +3751,7 @@ export async function fetchAndRenderAiConversations(searchQuery = '') {
     listContainer.querySelectorAll('.ai-thread-item').forEach((item) => {
       const cid = item.dataset.convId;
       item.addEventListener('click', (e) => {
-        if (e.target.closest('.ai-thread-actions')) return;
+        if (/** @type {HTMLElement} */ (e.target).closest('.ai-thread-actions')) return;
         selectAiConversation(cid);
         // on a phone the list covers the chat: close it once a conversation is picked
         const sidebar = document.getElementById('ai-chat-sidebar');
@@ -4074,7 +4077,7 @@ export function initAiConversationControls() {
     btnOpen.addEventListener('click', () => toggleAiSidebar());
   }
 
-  const searchInput = document.getElementById('ai-chat-search-input');
+  const searchInput = /** @type {HTMLInputElement} */ (document.getElementById('ai-chat-search-input'));
   if (searchInput && !searchInput.dataset.bound) {
     searchInput.dataset.bound = '1';
     let debounceTimer = null;
@@ -4114,7 +4117,10 @@ export function initAiConversationControls() {
       exportMenu.style.display = exportMenu.style.display === 'none' ? 'block' : 'none';
     });
     document.addEventListener('click', (e) => {
-      if (!e.target.closest('#ai-chat-export-menu') && !e.target.closest('#btn-ai-chat-export-toggle')) {
+      if (
+        !(/** @type {HTMLElement} */ (e.target).closest('#ai-chat-export-menu')) &&
+        !(/** @type {HTMLElement} */ (e.target).closest('#btn-ai-chat-export-toggle'))
+      ) {
         exportMenu.style.display = 'none';
       }
     });
@@ -4367,7 +4373,7 @@ export function askKibAbout(path, name = '') {
   setTimeout(() => {
     document.querySelector('.mgmt-inner-tab[data-tab-target="mgmt-pane-ai-chat"]')?.click();
     setAiChatFocus(path, name);
-    const input = document.getElementById('ai-chat-input');
+    const input = /** @type {HTMLInputElement} */ (document.getElementById('ai-chat-input'));
     if (input) {
       input.placeholder = t('ai.ask_about_file', 'Ask about {name}…', { name: _aiFocus?.name || '' });
       input.focus();
@@ -4377,8 +4383,8 @@ export function askKibAbout(path, name = '') {
 if (typeof window !== 'undefined') window.askKibAbout = askKibAbout;
 
 export async function sendAiChatMessage(rawMessage = null) {
-  const inputEl = document.getElementById('ai-chat-input');
-  const sendBtn = document.getElementById('btn-ai-chat-send');
+  const inputEl = /** @type {HTMLInputElement} */ (document.getElementById('ai-chat-input'));
+  const sendBtn = /** @type {HTMLButtonElement} */ (document.getElementById('btn-ai-chat-send'));
   const listEl = document.getElementById('ai-chat-messages-list');
 
   const msg = (
@@ -4399,7 +4405,7 @@ export async function sendAiChatMessage(rawMessage = null) {
   }
 
   // Web search and weather send the question outside the NAS: only when the user turns it on (AI-06).
-  const allowWeb = !!document.getElementById('ai-chat-web-toggle')?.checked;
+  const allowWeb = !!(/** @type {HTMLInputElement} */ (document.getElementById('ai-chat-web-toggle'))?.checked);
   const allowTools = true;
   const activeModel = _aiLastActiveModel || '—';
   const isThinking = isAiThinkingModel(activeModel);
