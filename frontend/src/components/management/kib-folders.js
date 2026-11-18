@@ -7,7 +7,10 @@ import { t } from '../../i18n.js';
 
 /** The last part of a path: what people call the folder. */
 export function folderName(path) {
-  const parts = String(path || '').replace(/\/+$/, '').split('/').filter(Boolean);
+  const parts = String(path || '')
+    .replace(/\/+$/, '')
+    .split('/')
+    .filter(Boolean);
   return parts.length ? parts[parts.length - 1] : String(path || '');
 }
 
@@ -23,7 +26,10 @@ const inside = (path, folder) => path === folder || String(path || '').startsWit
 export function folderState(path, res, info) {
   const sync = res?.sync_progress || {};
   const running = String(sync.state || '').toLowerCase() === 'running';
-  if (running && (inside(String(sync.current_path || ''), path) || (sync.target_paths || []).some((p) => inside(String(p), path)))) {
+  if (
+    running &&
+    (inside(String(sync.current_path || ''), path) || (sync.target_paths || []).some((p) => inside(String(p), path)))
+  ) {
     return { key: 'reading', text: t('kibf.reading', 'Reading') };
   }
   const queued = (res?.standby_guard?.deferred_queue || []).some((q) => inside(String(q?.path || q || ''), path));
@@ -49,29 +55,37 @@ export function kibFoldersHtml(res = {}) {
   const rows = folderRows(res);
   const never = (res.excluded_paths || []).map(String);
   const list = rows.length
-    ? rows.map((r, n) => {
-      const id = `kibf-${n}`;
-      const state = r.chosen ? folderState(r.path, res, r.info) : null;
-      const menu = r.chosen
-        ? `<details class="kibf-menu"><summary class="btn-pill-toggle is-small" aria-label="${escapeHtml(t('kibf.menu_for', 'What Kib does with {name}', { name: folderName(r.path) }))}">⋯</summary>
+    ? rows
+        .map((r, n) => {
+          const id = `kibf-${n}`;
+          const state = r.chosen ? folderState(r.path, res, r.info) : null;
+          const menu = r.chosen
+            ? `<details class="kibf-menu"><summary class="btn-pill-toggle is-small" aria-label="${escapeHtml(t('kibf.menu_for', 'What Kib does with {name}', { name: folderName(r.path) }))}">⋯</summary>
             <div class="kibf-menu-list">
               <button type="button" data-kibf-act="read" data-path="${escapeHtml(r.path)}">${escapeHtml(t('kibf.read_now', 'Read now'))}</button>
               <button type="button" data-kibf-act="stop" data-path="${escapeHtml(r.path)}">${escapeHtml(t('kibf.stop', 'Stop reading (Kib keeps what it knows)'))}</button>
               <button type="button" data-kibf-act="forget" data-path="${escapeHtml(r.path)}">${escapeHtml(t('kibf.forget', 'Stop reading and forget this folder (your files stay)'))}</button>
             </div></details>`
-        : '';
-      return `<li class="kibf-row${r.chosen ? ' is-chosen' : ''}">
+            : '';
+          return `<li class="kibf-row${r.chosen ? ' is-chosen' : ''}">
           <input type="checkbox" id="${id}" data-kibf-act="tick" data-path="${escapeHtml(r.path)}"${r.chosen ? ' checked' : ''}>
           <label for="${id}" class="kibf-name"><strong>${escapeHtml(folderName(r.path))}</strong><span class="kibf-path">${escapeHtml(r.path)}</span></label>
           ${state ? `<span class="kibf-state is-${state.key}">${escapeHtml(state.text)}</span>` : ''}
           ${menu}
         </li>`;
-    }).join('')
+        })
+        .join('')
     : `<li class="kibf-empty">${escapeHtml(t('kibf.none_found', 'No folders found yet. Add one below.'))}</li>`;
   const neverHtml = never.length
     ? `<h4 class="kibf-sub">${escapeHtml(t('kibf.never', 'Never read'))}</h4>
-       <ul class="kibf-list">${never.map((p) => `<li class="kibf-row"><span class="kibf-name"><strong>${escapeHtml(folderName(p))}</strong><span class="kibf-path">${escapeHtml(p)}</span></span>
-         <button type="button" class="btn-pill-toggle is-small" data-kibf-act="unforget" data-path="${escapeHtml(p)}">${escapeHtml(t('kibf.remove', 'Remove'))}</button></li>`).join('')}</ul>`
+       <ul class="kibf-list">${never
+         .map(
+           (
+             p
+           ) => `<li class="kibf-row"><span class="kibf-name"><strong>${escapeHtml(folderName(p))}</strong><span class="kibf-path">${escapeHtml(p)}</span></span>
+         <button type="button" class="btn-pill-toggle is-small" data-kibf-act="unforget" data-path="${escapeHtml(p)}">${escapeHtml(t('kibf.remove', 'Remove'))}</button></li>`
+         )
+         .join('')}</ul>`
     : '';
   return `<p class="kibf-intro">${escapeHtml(t('kibf.intro', 'Tick the folders Kib may read. If a drive is asleep, Kib reads the folder the next time the drive is awake.'))}</p>
     <ul class="kibf-list">${list}</ul>
@@ -95,9 +109,10 @@ export function renderKibFolders(mount, res, actions = {}) {
     const run = actions[act];
     if (typeof run !== 'function') return;
     if (act === 'tick') node.addEventListener('change', () => run(path, node.checked));
-    else node.addEventListener('click', () => {
-      node.closest('details')?.removeAttribute('open');
-      run(path);
-    });
+    else
+      node.addEventListener('click', () => {
+        node.closest('details')?.removeAttribute('open');
+        run(path);
+      });
   });
 }

@@ -24,13 +24,22 @@ export function driveIssues(summary) {
 /** "1.2 TB of 4 TB used · 3 drives, all healthy", or what needs a look. Health is claimed only
  *  once the status box has answered, so the tile never says "healthy" beside a warning row. */
 export function storageLine(stats, issues = _driveIssues) {
-  const used = stats?.storage?.used ? t('ov.tile_used', '{used} of {total} used', { used: stats.storage.used, total: stats.storage.total }) : '';
+  const used = stats?.storage?.used
+    ? t('ov.tile_used', '{used} of {total} used', { used: stats.storage.used, total: stats.storage.total })
+    : '';
   const disks = Array.isArray(stats?.disks) ? stats.disks : [];
   const bad = Math.max(issues || 0, disks.filter((d) => !HEALTHY.has(String(d.health || '').toLowerCase())).length);
   let health = '';
-  if (bad) health = t('ov.tile_drives_bad', '{count, plural, one {# drive needs a look} other {# drives need a look}}', { count: bad });
-  else if (disks.length && issues === 0) health = t('ov.tile_drives_ok', '{count, plural, one {# drive, healthy} other {# drives, all healthy}}', { count: disks.length });
-  else if (disks.length) health = t('ov.tile_drives', '{count, plural, one {# drive} other {# drives}}', { count: disks.length });
+  if (bad)
+    health = t('ov.tile_drives_bad', '{count, plural, one {# drive needs a look} other {# drives need a look}}', {
+      count: bad,
+    });
+  else if (disks.length && issues === 0)
+    health = t('ov.tile_drives_ok', '{count, plural, one {# drive, healthy} other {# drives, all healthy}}', {
+      count: disks.length,
+    });
+  else if (disks.length)
+    health = t('ov.tile_drives', '{count, plural, one {# drive} other {# drives}}', { count: disks.length });
   return [used, health].filter(Boolean).join(' · ');
 }
 
@@ -40,7 +49,10 @@ export function appsLine(stats) {
   const apps = stats.docker.filter((c) => !/^kiboto/.test(String(c.name || '')));
   const running = apps.filter((c) => c.state === 'running').length;
   const stopped = apps.filter((c) => STOPPED.has(c.state)).length;
-  const line = t('ov.tile_apps', '{count, plural, one {# app} other {# apps}}, {running} running', { count: apps.length, running });
+  const line = t('ov.tile_apps', '{count, plural, one {# app} other {# apps}}, {running} running', {
+    count: apps.length,
+    running,
+  });
   return stopped ? `${line} · ${t('ov.tile_apps_stopped', '{count} stopped', { count: stopped })}` : line;
 }
 

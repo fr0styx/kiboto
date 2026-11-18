@@ -42,7 +42,9 @@ export function filtersHtml(data) {
   const years = ((data && data.years) || []).slice(0, 8);
   if (!kinds.length && !years.length) return html``;
   return html`<span class="kb-muted">${t('tags.title', 'Filter documents:')}</span>${kinds.map(chip)}${years.length ? html`<span class="kb-muted">·</span>${years.map(chip)}` : ''}${
-    selected.size ? html`<button type="button" class="btn-pill-toggle is-small" data-doc-tag-clear>${t('tags.clear', 'Clear')}</button>` : ''
+    selected.size
+      ? html`<button type="button" class="btn-pill-toggle is-small" data-doc-tag-clear>${t('tags.clear', 'Clear')}</button>`
+      : ''
   }`;
 }
 

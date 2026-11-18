@@ -1,11 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import {
-  initFileManager,
-  openFileManager,
-} from '../components/file-manager.js';
-import {
-  fetchAndRenderStorageTopology,
-} from '../components/chassis-visualizer.js';
+import { initFileManager, openFileManager } from '../components/file-manager.js';
+import { fetchAndRenderStorageTopology } from '../components/chassis-visualizer.js';
 import { api } from '../api.js';
 
 describe('Batch 3 Community Features Suite', () => {
@@ -34,7 +29,12 @@ describe('Batch 3 Community Features Suite', () => {
             roots: ['/mnt/user'],
             dirs: [
               { name: '..', is_dir: true, path: '/mnt', size: 0 },
-              { name: 'backup_archive.tar.gz', is_dir: false, path: '/mnt/user/backup_archive.tar.gz', size: 1073741824 },
+              {
+                name: 'backup_archive.tar.gz',
+                is_dir: false,
+                path: '/mnt/user/backup_archive.tar.gz',
+                size: 1073741824,
+              },
               { name: 'photos', is_dir: true, path: '/mnt/user/photos', size: 4096 },
               { name: 'document.pdf', is_dir: false, path: '/mnt/user/document.pdf', size: 5242880 },
             ],
@@ -114,9 +114,7 @@ describe('Batch 3 Community Features Suite', () => {
                 total_bytes: 1000000,
                 free_bytes: 500000,
                 used_pct: 50,
-                members: [
-                  { name: 'sda', device: 'sda', role: 'data', size_bytes: 500000, status: 'OK' },
-                ],
+                members: [{ name: 'sda', device: 'sda', role: 'data', size_bytes: 500000, status: 'OK' }],
               },
             ],
           });

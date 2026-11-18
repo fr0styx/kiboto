@@ -11,11 +11,25 @@ import { labelText, warrantyText } from './drive-health-report.js';
 const when = (ts) => (ts ? formatDateTime(ts * 1000, undefined, '') : '');
 
 // Raw values that only ever mean trouble when they grow (Backblaze's five, plus a few more)
-const WATCHED = new Set(['5', '10', '184', '187', '188', '196', '197', '198', '199', 'nvme.media_errors', 'nvme.critical_warning']);
+const WATCHED = new Set([
+  '5',
+  '10',
+  '184',
+  '187',
+  '188',
+  '196',
+  '197',
+  '198',
+  '199',
+  'nvme.media_errors',
+  'nvme.critical_warning',
+]);
 
 /** "Reallocated_Sector_Ct" -> "Reallocated sector ct"; NVMe "media_errors" -> "Media errors". */
 export function prettyName(name) {
-  const text = String(name || '').replace(/_/g, ' ').trim();
+  const text = String(name || '')
+    .replace(/_/g, ' ')
+    .trim();
   return text ? text[0].toUpperCase() + text.slice(1).toLowerCase() : '';
 }
 
@@ -23,7 +37,13 @@ export function prettyName(name) {
 export function valueRows(attrs) {
   const rows = Object.entries(attrs || {}).map(([attr, a]) => {
     const first = a.points && a.points.length ? a.points[0][1] : a.raw;
-    return { attr, ...a, moved: a.raw !== first, rose: WATCHED.has(attr) && a.raw > first, low: a.thresh != null && a.value != null && a.thresh > 0 && a.value <= a.thresh };
+    return {
+      attr,
+      ...a,
+      moved: a.raw !== first,
+      rose: WATCHED.has(attr) && a.raw > first,
+      low: a.thresh != null && a.value != null && a.thresh > 0 && a.value <= a.thresh,
+    };
   });
   const order = (r) => (/^\d+$/.test(r.attr) ? Number(r.attr) : 1000);
   return rows.sort((x, y) => order(x) - order(y) || x.attr.localeCompare(y.attr));
@@ -42,13 +62,27 @@ export function valuesTable(attrs) {
   const box = document.createElement('div');
   box.className = 'dh-values';
   if (!rows.length) {
-    box.append(cell('p', t('dh.v_none', 'Shown after the drive has been read while awake; the values build up from then on.'), 'dh-hint'));
+    box.append(
+      cell(
+        'p',
+        t('dh.v_none', 'Shown after the drive has been read while awake; the values build up from then on.'),
+        'dh-hint'
+      )
+    );
     return box;
   }
   const table = document.createElement('table');
   table.className = 'dh-readings dh-values-table';
   const head = document.createElement('tr');
-  for (const h of [t('dh.v_id', 'ID'), t('dh.v_name', 'Name'), t('dh.v_norm', 'Normalized'), t('dh.v_worst', 'Worst'), t('dh.v_thresh', 'Threshold'), t('dh.v_raw', 'Raw'), t('dh.v_trend', '30 days')]) {
+  for (const h of [
+    t('dh.v_id', 'ID'),
+    t('dh.v_name', 'Name'),
+    t('dh.v_norm', 'Normalized'),
+    t('dh.v_worst', 'Worst'),
+    t('dh.v_thresh', 'Threshold'),
+    t('dh.v_raw', 'Raw'),
+    t('dh.v_trend', '30 days'),
+  ]) {
     const th = cell('th', h);
     th.scope = 'col';
     head.append(th);
@@ -61,10 +95,21 @@ export function valuesTable(attrs) {
     if (r.rose || r.low) tr.className = 'is-rising';
     const name = cell('th', prettyName(r.name) || r.attr);
     name.scope = 'row';
-    tr.append(cell('td', /^\d+$/.test(r.attr) ? r.attr : ''), name, cell('td', r.value), cell('td', r.worst), cell('td', r.thresh), cell('td', r.raw));
+    tr.append(
+      cell('td', /^\d+$/.test(r.attr) ? r.attr : ''),
+      name,
+      cell('td', r.value),
+      cell('td', r.worst),
+      cell('td', r.thresh),
+      cell('td', r.raw)
+    );
     const trend = document.createElement('td');
     if (r.moved && r.points.length > 1) {
-      const label = t('dh.v_moved', '{name}: from {a} to {b}', { name: prettyName(r.name), a: r.points[0][1], b: r.raw });
+      const label = t('dh.v_moved', '{name}: from {a} to {b}', {
+        name: prettyName(r.name),
+        a: r.points[0][1],
+        b: r.raw,
+      });
       trend.append(lineChart(r.points, { label, height: 24, width: 120, className: r.rose ? 'is-rising' : '' }));
     } else {
       trend.textContent = t('dh.v_steady', 'steady');
@@ -74,7 +119,14 @@ export function valuesTable(attrs) {
     body.append(tr);
   }
   table.append(thead, body);
-  const hint = cell('p', t('dh.v_hint', 'Highlighted: a value that only means trouble went up, or a normalized value reached its threshold.'), 'dh-hint');
+  const hint = cell(
+    'p',
+    t(
+      'dh.v_hint',
+      'Highlighted: a value that only means trouble went up, or a normalized value reached its threshold.'
+    ),
+    'dh-hint'
+  );
   box.append(table, hint);
   return box;
 }
@@ -112,7 +164,14 @@ export function takenOutBox(drives, notes, onForget) {
     li.append(name, meta, forget);
     list.append(li);
   }
-  const hint = cell('p', t('dh.retired_hint', 'Drives that were in this box before. Put one back in and it is shown with its history again.'), 'dh-hint');
+  const hint = cell(
+    'p',
+    t(
+      'dh.retired_hint',
+      'Drives that were in this box before. Put one back in and it is shown with its history again.'
+    ),
+    'dh-hint'
+  );
   box.append(summary, hint, list);
   return box;
 }

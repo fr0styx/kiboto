@@ -20,7 +20,9 @@ export function publishedHtml(p) {
       ? `<a href="${escapeHtml(p.url)}" target="_blank" rel="noopener">${escapeHtml(p.url)}</a>`
       : escapeHtml(t('pa.starting', 'Starting…'));
   return `<li class="pa-item"><span><strong>${escapeHtml(p.name)}</strong> · ${state}${
-    p.controls_server ? ` <span class="pa-warn">${escapeHtml(t('pa.controls_short', 'controls the server'))}</span>` : ''
+    p.controls_server
+      ? ` <span class="pa-warn">${escapeHtml(t('pa.controls_short', 'controls the server'))}</span>`
+      : ''
   }</span>
     <button type="button" class="btn-pill-toggle is-small is-danger" data-pa-stop="${escapeHtml(String(p.funnel_port))}">${escapeHtml(t('pa.stop', 'Take off the internet'))}</button></li>`;
 }
@@ -40,7 +42,12 @@ export function publicAppsHtml(st) {
     form = `<div class="nsv-xs-muted-2">${escapeHtml(t('pa.no_apps', 'No running app publishes a port to put on the internet.'))}</div>`;
   } else {
     const options = st.apps
-      .flatMap((a) => a.ports.map((port) => `<option value="${escapeHtml(`${a.name}|${port}`)}" data-controls="${a.controls_server ? '1' : ''}">${escapeHtml(t('pa.app_port', '{name} (port {port})', { name: a.name, port }))}</option>`))
+      .flatMap((a) =>
+        a.ports.map(
+          (port) =>
+            `<option value="${escapeHtml(`${a.name}|${port}`)}" data-controls="${a.controls_server ? '1' : ''}">${escapeHtml(t('pa.app_port', '{name} (port {port})', { name: a.name, port }))}</option>`
+        )
+      )
       .join('');
     const ports = st.free_ports.map((p) => `<option value="${p}">${p}</option>`).join('');
     form = `<form class="pa-form" data-pa-form>
@@ -53,7 +60,7 @@ export function publicAppsHtml(st) {
   const waiting = st.pending
     ? t('funnel.waiting_app', 'Kiboto puts {name} on the internet as soon as both are done.', { name: st.pending.name })
     : '';
-  return `${funnelStepsHtml(st.funnel, waiting)}${list}${form}<div class="nsv-xs-muted-2">${escapeHtml(t('pa.help', 'Anyone with the address reaches the app\'s own sign-in page, so publish only apps that have one. Kiboto\'s own page never goes on the internet.'))}</div>`;
+  return `${funnelStepsHtml(st.funnel, waiting)}${list}${form}<div class="nsv-xs-muted-2">${escapeHtml(t('pa.help', "Anyone with the address reaches the app's own sign-in page, so publish only apps that have one. Kiboto's own page never goes on the internet."))}</div>`;
 }
 
 function cardShell() {
@@ -105,11 +112,16 @@ export async function loadPublicAppsCard() {
       e.preventDefault();
       const f = new FormData(/** @type {HTMLFormElement} */ (e.target));
       const [name, port] = String(f.get('app') || '').split('|');
-      act(() => api.post('/api/network/public-apps', { name, host_port: Number(port), funnel_port: Number(f.get('port')) }));
+      act(() =>
+        api.post('/api/network/public-apps', { name, host_port: Number(port), funnel_port: Number(f.get('port')) })
+      );
     });
     card.addEventListener('click', (e) => {
       const stop = /** @type {Element} */ (e.target).closest('[data-pa-stop]');
-      if (stop) act(() => api.delete(`/api/network/public-apps/${encodeURIComponent(stop.getAttribute('data-pa-stop') || '')}`));
+      if (stop)
+        act(() =>
+          api.delete(`/api/network/public-apps/${encodeURIComponent(stop.getAttribute('data-pa-stop') || '')}`)
+        );
     });
   }
   await refreshPublicApps();

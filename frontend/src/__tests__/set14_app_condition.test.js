@@ -1,19 +1,72 @@
 // SET-14: the list of apps says what state each app is in, and what the list itself is worth.
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { setLanguage } from '../i18n.js';
-import { actionSaid, appsSummary, bulkSaid, canResume, canRestart, canStart, canStop, conditionOf, conditionView, needsLook, stackSaid } from '../components/app-condition.js';
+import {
+  actionSaid,
+  appsSummary,
+  bulkSaid,
+  canResume,
+  canRestart,
+  canStart,
+  canStop,
+  conditionOf,
+  conditionView,
+  needsLook,
+  stackSaid,
+} from '../components/app-condition.js';
 import { buildContainerRowInner, computeContainerRowSignature } from '../components/docker-table.js';
-import { initContainersManager, loadContainersData, stopCwAutoRefresh, _resetCwAutoRefreshForTesting } from '../components/containers-manager.js';
+import {
+  initContainersManager,
+  loadContainersData,
+  stopCwAutoRefresh,
+  _resetCwAutoRefreshForTesting,
+} from '../components/containers-manager.js';
 import { DockManager } from '../components/dock.js';
 import { api } from '../api.js';
 
-vi.mock('../toast.js', () => ({ showToast: vi.fn(), showConfirmToast: vi.fn(), showPromptToast: vi.fn(), showBottomSheet: vi.fn(), showDangerConfirm: vi.fn() }));
+vi.mock('../toast.js', () => ({
+  showToast: vi.fn(),
+  showConfirmToast: vi.fn(),
+  showPromptToast: vi.fn(),
+  showBottomSheet: vi.fn(),
+  showDangerConfirm: vi.fn(),
+}));
 
-const app = (name, more = {}) => ({ id: name, name, image: `${name}:1`, state: 'running', status: 'Up 2 days', condition: 'running', ...more });
-const PLEX = app('plex', { status: 'Up 2 days (unhealthy)', condition: 'unhealthy', needs_look: true, health: 'unhealthy' });
-const LOOP = app('loop', { state: 'restarting', status: 'Restarting (1) 3 seconds ago', condition: 'restarting', restart_count: 14 });
-const DEAD = app('radarr', { state: 'exited', status: 'Exited (1) 1 hour ago', condition: 'crashed', exit_code: 1, reason: 'exit_code' });
-const OOM = app('ollama', { state: 'exited', status: 'Exited (137) 1 hour ago', condition: 'crashed', exit_code: 137, reason: 'out_of_memory' });
+const app = (name, more = {}) => ({
+  id: name,
+  name,
+  image: `${name}:1`,
+  state: 'running',
+  status: 'Up 2 days',
+  condition: 'running',
+  ...more,
+});
+const PLEX = app('plex', {
+  status: 'Up 2 days (unhealthy)',
+  condition: 'unhealthy',
+  needs_look: true,
+  health: 'unhealthy',
+});
+const LOOP = app('loop', {
+  state: 'restarting',
+  status: 'Restarting (1) 3 seconds ago',
+  condition: 'restarting',
+  restart_count: 14,
+});
+const DEAD = app('radarr', {
+  state: 'exited',
+  status: 'Exited (1) 1 hour ago',
+  condition: 'crashed',
+  exit_code: 1,
+  reason: 'exit_code',
+});
+const OOM = app('ollama', {
+  state: 'exited',
+  status: 'Exited (137) 1 hour ago',
+  condition: 'crashed',
+  exit_code: 137,
+  reason: 'out_of_memory',
+});
 const OFF = app('sonarr', { state: 'exited', status: 'Exited (0) 1 hour ago', condition: 'stopped' });
 const HELD = app('nzb', { state: 'paused', status: 'Up 2 hours (Paused)', condition: 'paused' });
 
@@ -24,13 +77,29 @@ describe('the state of one app', () => {
 
   it('is one word with an icon, and why', async () => {
     expect(conditionView(app('ok'))).toMatchObject({ look: 'ok', icon: '✓', word: 'Running', why: '' });
-    expect(conditionView(PLEX)).toMatchObject({ look: 'warn', word: 'Needs a look', why: 'It runs, but its own health check fails.' }); // it was green
-    expect(conditionView(LOOP)).toMatchObject({ look: 'warn', word: 'Keeps restarting', why: 'It stops and is started again, 14 times so far.' });
-    expect(conditionView(DEAD)).toMatchObject({ look: 'crit', word: 'Stopped unexpectedly', why: 'It ended by itself with error 1.' }); // quiet grey
+    expect(conditionView(PLEX)).toMatchObject({
+      look: 'warn',
+      word: 'Needs a look',
+      why: 'It runs, but its own health check fails.',
+    }); // it was green
+    expect(conditionView(LOOP)).toMatchObject({
+      look: 'warn',
+      word: 'Keeps restarting',
+      why: 'It stops and is started again, 14 times so far.',
+    });
+    expect(conditionView(DEAD)).toMatchObject({
+      look: 'crit',
+      word: 'Stopped unexpectedly',
+      why: 'It ended by itself with error 1.',
+    }); // quiet grey
     expect(conditionView(OOM).why).toBe('It was ended for using more memory than it may.');
     expect(conditionView(OFF)).toMatchObject({ look: 'muted', word: 'Stopped', why: '' });
-    expect(conditionView(app('x', { state: 'exited', condition: 'stopped', reason: 'stopped_outside' })).why).toBe('It was stopped outside Kiboto.');
-    expect(conditionView(app('x', { state: 'dead', condition: 'dead', exit_code: null })).why).toBe('It ended without anyone stopping it.');
+    expect(conditionView(app('x', { state: 'exited', condition: 'stopped', reason: 'stopped_outside' })).why).toBe(
+      'It was stopped outside Kiboto.'
+    );
+    expect(conditionView(app('x', { state: 'dead', condition: 'dead', exit_code: null })).why).toBe(
+      'It ended without anyone stopping it.'
+    );
     await setLanguage('de');
     expect(conditionView(DEAD).word).toBe('Unerwartet beendet');
     expect(conditionView(LOOP).why).toContain('14-mal');
@@ -91,9 +160,14 @@ describe('the sentence above the list', () => {
     const stale = appsSummary([app('a')], { available: true, answering: false, stale: true, as_of: 1791394800 });
     expect(stale.look).toBe('crit');
     expect(stale.text).toMatch(/^Docker is not answering\. This list is from \d.* and may be out of date\.$/); // it stayed green
-    expect(appsSummary([], { available: true, answering: false, stale: false }).text).toBe('Docker is not answering, so the apps cannot be listed right now.');
+    expect(appsSummary([], { available: true, answering: false, stale: false }).text).toBe(
+      'Docker is not answering, so the apps cannot be listed right now.'
+    );
     expect(appsSummary([app('a')], { available: true, answering: true }).text).toBe('The app is running.');
-    expect(appsSummary([app('a')], null, 'Permission denied')).toEqual({ look: 'crit', text: 'The list of apps could not be read: Permission denied' });
+    expect(appsSummary([app('a')], null, 'Permission denied')).toEqual({
+      look: 'crit',
+      text: 'The list of apps could not be read: Permission denied',
+    });
   });
 });
 
@@ -112,7 +186,9 @@ describe('what an action says', () => {
     expect(bulkSaid('stop', 'failed', { error: 'no' })).toBe('That did not work: no');
     expect(stackSaid('stop', 'doing')).toBe('Stopping the apps of this stack…'); // "Executing stack stop..."
     expect(stackSaid('restart', 'done')).toBe('The apps of this stack were restarted.'); // "Stack action 'redeploy' completed!"
-    expect(stackSaid('start', 'failed', 'port in use')).toBe('The apps of this stack could not be started: port in use');
+    expect(stackSaid('start', 'failed', 'port in use')).toBe(
+      'The apps of this stack could not be started: port in use'
+    );
     expect(stackSaid('start', 'failed')).toBe('The apps of this stack could not be started.');
     expect(stackSaid('other', 'done')).toBe('The apps of this stack were restarted.');
     await setLanguage('de');
@@ -137,7 +213,16 @@ describe('the Apps window', () => {
     vi.restoreAllMocks();
   });
   const chip = () => document.getElementById('cw-status-chip');
-  const answers = (list, docker) => vi.spyOn(api, 'get').mockImplementation((url) => (url === '/api/docker/status' ? Promise.resolve(docker) : url === '/api/docker/containers' ? Promise.resolve(list) : Promise.resolve({})));
+  const answers = (list, docker) =>
+    vi
+      .spyOn(api, 'get')
+      .mockImplementation((url) =>
+        url === '/api/docker/status'
+          ? Promise.resolve(docker)
+          : url === '/api/docker/containers'
+            ? Promise.resolve(list)
+            : Promise.resolve({})
+      );
 
   it('says how the apps are, from what the server reports', async () => {
     answers([app('a'), PLEX], { available: true, answering: true });
@@ -159,7 +244,9 @@ describe('the Apps window', () => {
   });
 
   it('shows a list that could not be read as that, not as "no containers"', async () => {
-    vi.spyOn(api, 'get').mockImplementation((url) => (url === '/api/docker/containers' ? Promise.reject(new Error('Permission denied')) : Promise.resolve(null)));
+    vi.spyOn(api, 'get').mockImplementation((url) =>
+      url === '/api/docker/containers' ? Promise.reject(new Error('Permission denied')) : Promise.resolve(null)
+    );
     await loadContainersData();
     expect(chip().textContent.trim()).toBe('The list of apps could not be read: Permission denied');
     expect(document.getElementById('cw-docker-containers-tbody').textContent).toContain('Permission denied');

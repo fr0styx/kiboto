@@ -16,7 +16,11 @@ export function appsDockerNetsHtml() {
   </details>`;
 }
 
-const network = () => Promise.all([import('../management-dom.js').then((m) => m.ensureManagementDom()), import('./management/network.js')]).then(([, m]) => m);
+const network = () =>
+  Promise.all([
+    import('../management-dom.js').then((m) => m.ensureManagementDom()),
+    import('./management/network.js'),
+  ]).then(([, m]) => m);
 
 /** Reads the networks when the group opens; the create button opens the dialog. Bound once.
  *  @param {ParentNode} [root] */
@@ -25,12 +29,19 @@ export function installAppsDockerNets(root = document) {
   if (!group || group.dataset.bound) return false;
   group.dataset.bound = '1';
   group.addEventListener('toggle', () => {
-    if (/** @type {HTMLDetailsElement} */ (group).open) network().then((m) => m.fetchAndRenderNetworkTopology()).catch(() => {});
+    if (/** @type {HTMLDetailsElement} */ (group).open)
+      network()
+        .then((m) => m.fetchAndRenderNetworkTopology())
+        .catch(() => {});
   });
   const create = group.querySelector('#btn-create-docker-net');
   if (create instanceof HTMLElement) {
     create.dataset.bound = '1'; // network.js binds this id too: one click, one dialog
-    create.addEventListener('click', () => network().then((m) => m.openDockerNetworkCreateModal()).catch(() => {}));
+    create.addEventListener('click', () =>
+      network()
+        .then((m) => m.openDockerNetworkCreateModal())
+        .catch(() => {})
+    );
   }
   return true;
 }

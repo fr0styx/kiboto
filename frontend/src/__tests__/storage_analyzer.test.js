@@ -6,8 +6,15 @@ const { api } = await import('../api.js');
 const { squarify, childrenOf, analysisHtml, openStorageAnalyzer } = await import('../components/storage-analyzer.js');
 
 const RESULT = {
-  files: 4, bytes: 8710, complete: true, scanned_at: 1762700000,
-  folders: [{ path: 'Movies', bytes: 8000, files: 2 }, { path: 'Movies/Old', bytes: 3000, files: 1 }, { path: 'Photos', bytes: 700, files: 1 }],
+  files: 4,
+  bytes: 8710,
+  complete: true,
+  scanned_at: 1762700000,
+  folders: [
+    { path: 'Movies', bytes: 8000, files: 2 },
+    { path: 'Movies/Old', bytes: 3000, files: 1 },
+    { path: 'Photos', bytes: 700, files: 1 },
+  ],
   largest: [{ path: 'Movies/a.mkv', bytes: 5000 }],
   kinds: { video: { bytes: 8000, files: 2 }, photo: { bytes: 700, files: 1 }, mystery: { bytes: 10, files: 1 } },
 };
@@ -28,10 +35,13 @@ describe('Storage analyzer', () => {
     expect(squarify([])).toEqual([]);
   });
 
-  it('shows a folder\'s children and what lies loose beside them', () => {
+  it("shows a folder's children and what lies loose beside them", () => {
     expect(childrenOf(RESULT, '').map((c) => c.path)).toEqual(['Movies', 'Photos', '']);
     const movies = childrenOf(RESULT, 'Movies');
-    expect(movies.map((c) => [c.path, c.bytes, !!c.loose])).toEqual([['Movies/Old', 3000, false], ['Movies', 5000, true]]);
+    expect(movies.map((c) => [c.path, c.bytes, !!c.loose])).toEqual([
+      ['Movies/Old', 3000, false],
+      ['Movies', 5000, true],
+    ]);
   });
 
   it('offers to analyse a share it has not seen, and says when one is running', () => {

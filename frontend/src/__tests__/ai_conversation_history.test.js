@@ -199,7 +199,7 @@ describe('Kib Conversation History & Dual-Pane UI Suite', () => {
     const ssePayload = [
       'event: tool_done\ndata: {"tool":"browse_internet","summary":"5 web source(s) found"}\n\n',
       'event: token\ndata: {"token":"I was trained on a large dataset."}\n\n',
-      'event: done\ndata: {"status":"ok","reply":"I was trained on a large dataset.","tools_called":[{"tool":"browse_internet","summary":"5 web source(s) found"}],"llm_telemetry":{"active_model":"hf.co/ConwayResearch/Underdog-Bark-3.0-Pro","tokens_per_sec":12.6,"elapsed_ms":23067}}\n\n'
+      'event: done\ndata: {"status":"ok","reply":"I was trained on a large dataset.","tools_called":[{"tool":"browse_internet","summary":"5 web source(s) found"}],"llm_telemetry":{"active_model":"hf.co/ConwayResearch/Underdog-Bark-3.0-Pro","tokens_per_sec":12.6,"elapsed_ms":23067}}\n\n',
     ].join('');
 
     const encoder = new TextEncoder();
@@ -207,14 +207,14 @@ describe('Kib Conversation History & Dual-Pane UI Suite', () => {
       start(controller) {
         controller.enqueue(encoder.encode(ssePayload));
         controller.close();
-      }
+      },
     });
 
     const origFetch = window.fetch;
     window.fetch = vi.fn().mockResolvedValue({
       ok: true,
       status: 200,
-      body: stream
+      body: stream,
     });
 
     try {
@@ -231,7 +231,7 @@ describe('Kib Conversation History & Dual-Pane UI Suite', () => {
       expect(botMsgs.length).toBe(1);
       expect(botMsgs[0].textContent).toContain('I was trained on a large dataset');
       expect(botMsgs[0].textContent).toContain('browse_internet: 5 web source(s) found');
-      expect(botMsgs[0].textContent).toContain("12.6 tok/s");
+      expect(botMsgs[0].textContent).toContain('12.6 tok/s');
     } finally {
       delete window.__forceAiStreamingTest;
       window.fetch = origFetch;
@@ -247,7 +247,7 @@ describe('Kib Conversation History & Dual-Pane UI Suite', () => {
       '    container_name: test-nginx-copilot',
       '    ports:',
       '      - "8080:80"',
-      '```'
+      '```',
     ].join('\n');
 
     vi.spyOn(apiModule.api, 'post').mockResolvedValue({

@@ -21,7 +21,11 @@ describe('Shared folders and Storage, each with its title (SET-22 Storage 2)', (
             <div id="mgmt-pane-storage-shares" class="mgmt-tab-pane"><div id="mgmt-storage-shares-mount"></div></div>
           </div>
         </div></div></div>`;
-    try { initManagement(); } catch (_) { /* parts of the window this test doesn't build */ }
+    try {
+      initManagement();
+    } catch (_) {
+      /* parts of the window this test doesn't build */
+    }
   });
 
   it('Storage is titled Storage', () => {

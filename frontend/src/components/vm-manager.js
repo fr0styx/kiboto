@@ -27,7 +27,29 @@ import '../styles/vm-lazy.css'; // the VM windows' own sheet loads with this cod
 export { kvmChecks, openKvmDiagnosticsModal, openVmConnectModal, vmStateLabel } from './vm/connect-modal.js';
 import { formatFixed } from '../format.js';
 export { applyTerminalStream, formatAnsiToHtml, parseAnsiToHtml } from './vm/console-ansi.js';
-export { _activeRfb, _activeSerialWs, _consoleReconnectAttempts, _handleRfbKeyFallback, _reconnectTimer, _scheduleConsoleReconnect, _sendCtrlCToRfb, _sendKeyToRfb, _serialBuffers, cancelConsoleReconnect, clearConsoleReconnectTimer, copyToClipboard, focusActiveConsole, getActiveConsoleTarget, hideConsoleBanner, openVmConsole, openVmConsoleSeparateWindow, pasteTextToGuestConsole, serialKeyToData, setConsoleFocus, showConsoleBanner } from './vm/console.js';
+export {
+  _activeRfb,
+  _activeSerialWs,
+  _consoleReconnectAttempts,
+  _handleRfbKeyFallback,
+  _reconnectTimer,
+  _scheduleConsoleReconnect,
+  _sendCtrlCToRfb,
+  _sendKeyToRfb,
+  _serialBuffers,
+  cancelConsoleReconnect,
+  clearConsoleReconnectTimer,
+  copyToClipboard,
+  focusActiveConsole,
+  getActiveConsoleTarget,
+  hideConsoleBanner,
+  openVmConsole,
+  openVmConsoleSeparateWindow,
+  pasteTextToGuestConsole,
+  serialKeyToData,
+  setConsoleFocus,
+  showConsoleBanner,
+} from './vm/console.js';
 export { openVmCreateModal } from './vm/create-modal.js';
 export { openQemuErrorModal, openVmEditModal } from './vm/edit-modal.js';
 export { OFFICIAL_ISO_CATALOG, openIsoManagerModal } from './vm/iso-manager.js';
@@ -272,7 +294,10 @@ function watchShutdowns(vms) {
   _shutdownWatch = null;
   const open = vmState.window && vmState.window.style.display !== 'none' && document.body.contains(vmState.window);
   if (!open || !needsWatching(vms)) return;
-  _shutdownWatch = setTimeout(() => { _shutdownWatch = null; loadVmDashboard(); }, 5000);
+  _shutdownWatch = setTimeout(() => {
+    _shutdownWatch = null;
+    loadVmDashboard();
+  }, 5000);
 }
 
 function renderTelemetry(tel) {
@@ -283,7 +308,10 @@ function renderTelemetry(tel) {
   // The core image has no QEMU (OPS-11): say so instead of failing on start
   if (kvmBadge && tel.kvm && tel.kvm.qemu_available === false) {
     kvmBadge.textContent = `⚠️ ${t('vm.core_image', 'No VM support in the core image')}`;
-    kvmBadge.title = t('vm.core_image_hint', 'Switch to the full image (tag latest instead of latest-core) to run virtual machines.');
+    kvmBadge.title = t(
+      'vm.core_image_hint',
+      'Switch to the full image (tag latest instead of latest-core) to run virtual machines.'
+    );
     kvmBadge.style.cursor = 'default';
     kvmBadge.onclick = null;
     kvmBadge.style.background = 'rgba(245,158,11,0.15)';
@@ -326,14 +354,18 @@ function renderTelemetry(tel) {
 
     const headroomTxt = document.getElementById('vm-headroom-text');
     if (headroomTxt) {
-      headroomTxt.textContent = t('vmm.headroom', '{free} GB free for VMs ({used} GB in use)', { free: mem.safe_headroom_gb, used: mem.allocated_vm_ram_gb });
+      headroomTxt.textContent = t('vmm.headroom', '{free} GB free for VMs ({used} GB in use)', {
+        free: mem.safe_headroom_gb,
+        used: mem.allocated_vm_ram_gb,
+      });
     }
 
     const totalRam = document.getElementById('vm-total-ram');
     if (totalRam) totalRam.textContent = `${mem.total_host_ram_gb} GB`;
 
     const safeCeiling = document.getElementById('vm-safe-ceiling');
-    if (safeCeiling) safeCeiling.textContent = typeof mem.safe_max_vm_ram_gb === 'number' ? `${mem.safe_max_vm_ram_gb} GB` : '—'; // never "undefined GB" (VMs report 34)
+    if (safeCeiling)
+      safeCeiling.textContent = typeof mem.safe_max_vm_ram_gb === 'number' ? `${mem.safe_max_vm_ram_gb} GB` : '—'; // never "undefined GB" (VMs report 34)
   }
 
   // CPU Capacity
@@ -353,15 +385,27 @@ function renderTelemetry(tel) {
       if (cpu.status === 'nominal') {
         elRatioBadge.style.background = 'rgba(16,185,129,0.2)';
         elRatioBadge.style.color = '#34d399';
-        if (elNote) elNote.textContent = t('ui.optimal_execution_dedicated_physical_thread', 'Optimal execution. Dedicated physical thread capacity per vCPU.');
+        if (elNote)
+          elNote.textContent = t(
+            'ui.optimal_execution_dedicated_physical_thread',
+            'Optimal execution. Dedicated physical thread capacity per vCPU.'
+          );
       } else if (cpu.status === 'moderate_overcommit') {
         elRatioBadge.style.background = 'rgba(245,158,11,0.2)';
         elRatioBadge.style.color = '#fbbf24';
-        if (elNote) elNote.textContent = t('ui.moderate_overcommit_bursty_workloads_normal', 'Moderate overcommit. Bursty workloads normal; concurrent spikes may queue.');
+        if (elNote)
+          elNote.textContent = t(
+            'ui.moderate_overcommit_bursty_workloads_normal',
+            'Moderate overcommit. Bursty workloads normal; concurrent spikes may queue.'
+          );
       } else {
         elRatioBadge.style.background = 'rgba(239,68,68,0.2)';
         elRatioBadge.style.color = '#f87171';
-        if (elNote) elNote.textContent = t('ui.high_thread_contention_risk_advised', 'High thread contention risk. Advised only for idle background appliances.');
+        if (elNote)
+          elNote.textContent = t(
+            'ui.high_thread_contention_risk_advised',
+            'High thread contention risk. Advised only for idle background appliances.'
+          );
       }
     }
   }
@@ -452,41 +496,41 @@ function renderVmGrid(vms) {
       for (const { name, value } of Array.from(fresh.attributes)) card.setAttribute(name, value);
       card.dataset.structKey = structKey;
       needsBinding = true;
-    },
+    }
   );
 
   if (needsBinding) bindVmGridHandlers(grid);
 }
 
 function buildVmCardHtml(vm, vms) {
-      const stateKey = `${vm.state}|${vm.qemu_pid}|${vm.cpu_usage_pct}|${vm.ram_usage_pct}|${vm.ip_address}|${vm.vcpus}|${vm.ram_gb}|${vm.disk_size_gb}|${vm.name}`;
-      const isRunning = vm.state === 'running';
-      const isPaused = vm.state === 'paused';
-      const isShutting = isShuttingDown(vm);
-      const statusColor = isRunning ? '#34d399' : isPaused || isShutting ? '#fbbf24' : '#95a8ab';
-      const statusBg = isRunning
-        ? 'rgba(16,185,129,0.15)'
-        : isPaused || isShutting
-        ? 'rgba(245,158,11,0.15)'
-        : 'rgba(255,255,255,0.06)';
+  const stateKey = `${vm.state}|${vm.qemu_pid}|${vm.cpu_usage_pct}|${vm.ram_usage_pct}|${vm.ip_address}|${vm.vcpus}|${vm.ram_gb}|${vm.disk_size_gb}|${vm.name}`;
+  const isRunning = vm.state === 'running';
+  const isPaused = vm.state === 'paused';
+  const isShutting = isShuttingDown(vm);
+  const statusColor = isRunning ? '#34d399' : isPaused || isShutting ? '#fbbf24' : '#95a8ab';
+  const statusBg = isRunning
+    ? 'rgba(16,185,129,0.15)'
+    : isPaused || isShutting
+      ? 'rgba(245,158,11,0.15)'
+      : 'rgba(255,255,255,0.06)';
 
-      const stateBadge = `<span style="padding: 2px 7px; border-radius: 4px; font-size: var(--kb-fs-xs); font-weight: 700; background: ${statusBg}; color: ${statusColor}; text-transform: uppercase;">${escapeHtml(vmStateLabel(vm.state))}</span>`;
+  const stateBadge = `<span style="padding: 2px 7px; border-radius: 4px; font-size: var(--kb-fs-xs); font-weight: 700; background: ${statusBg}; color: ${statusColor}; text-transform: uppercase;">${escapeHtml(vmStateLabel(vm.state))}</span>`;
 
-      const sshCmd = vm.ip_address ? `ssh ${vm.ip_address}` : ''; // no assumed user: the system inside decides (VMs report 20)
-      const qemuPid = vm.qemu_pid || null;
-      const bootOrder = vm.boot_order || (vm.iso_path ? 'iso' : 'disk');
-      const cpuUsagePct = vm.cpu_usage_pct !== undefined ? vm.cpu_usage_pct : 0.0;
-      const ramUsagePct = vm.ram_usage_pct !== undefined ? vm.ram_usage_pct : 0.0;
-      const ramUsedGb = formatFixed(parseFloat(vm.ram_gb || 2) * (parseFloat(ramUsagePct) / 100), 1);
+  const sshCmd = vm.ip_address ? `ssh ${vm.ip_address}` : ''; // no assumed user: the system inside decides (VMs report 20)
+  const qemuPid = vm.qemu_pid || null;
+  const bootOrder = vm.boot_order || (vm.iso_path ? 'iso' : 'disk');
+  const cpuUsagePct = vm.cpu_usage_pct !== undefined ? vm.cpu_usage_pct : 0.0;
+  const ramUsagePct = vm.ram_usage_pct !== undefined ? vm.ram_usage_pct : 0.0;
+  const ramUsedGb = formatFixed(parseFloat(vm.ram_gb || 2) * (parseFloat(ramUsagePct) / 100), 1);
 
-      const osIcon =
-        vm.os_family === 'windows'
-          ? `<svg class="vmm-x-2" width="18" height="18" viewBox="0 0 24 24" fill="#4fd8c4"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.949-1.801"/></svg>`
-          : vm.os_family === 'linux'
-          ? `<svg class="vmm-x-2" width="18" height="18" viewBox="0 0 24 24" fill="#fbbf24"><path d="M12 2a5 5 0 0 0-5 5v3.1c-1.3.8-2 2-2 3.9 0 2.2 1.3 4 3 4.8V20a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-1.2c1.7-.8 3-2.6 3-4.8 0-1.9-.7-3.1-2-3.9V7a5 5 0 0 0-5-5zm-2 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2zm4 0a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/></svg>`
-          : `<svg class="vmm-x-2" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#95a8ab" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>`;
+  const osIcon =
+    vm.os_family === 'windows'
+      ? `<svg class="vmm-x-2" width="18" height="18" viewBox="0 0 24 24" fill="#4fd8c4"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.949-1.801"/></svg>`
+      : vm.os_family === 'linux'
+        ? `<svg class="vmm-x-2" width="18" height="18" viewBox="0 0 24 24" fill="#fbbf24"><path d="M12 2a5 5 0 0 0-5 5v3.1c-1.3.8-2 2-2 3.9 0 2.2 1.3 4 3 4.8V20a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-1.2c1.7-.8 3-2.6 3-4.8 0-1.9-.7-3.1-2-3.9V7a5 5 0 0 0-5-5zm-2 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2zm4 0a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/></svg>`
+        : `<svg class="vmm-x-2" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#95a8ab" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>`;
 
-      return `
+  return `
       <div class="glassmorphic-card" data-vm-id="${escapeHtml(vm.id)}" data-state-key="${escapeHtml(stateKey)}" style="border-radius: 10px; padding: 14px; display: flex; flex-direction: column; justify-content: space-between; border: 1px solid var(--kb-line-8); background: var(--lt-b-132225a6, rgba(19, 34, 37, 0.65));">
         <div>
           <div class="vmm-row-4">
@@ -508,8 +552,8 @@ function buildVmCardHtml(vm, vms) {
                 isRunning || isShutting
                   ? `<span class="qemu-process-badge active" title="${t('ui.qemu_kvm_hypervisor_process_active', 'Virtual machine service running')}">${ico('●')} QEMU ${qemuPid ? `(${qemuPid})` : t('vmm.active', 'active')}</span>`
                   : isPaused
-                  ? `<span class="qemu-process-badge paused" title="${t('ui.qemu_process_paused', 'QEMU process paused')}">${ico('⏸')} ${t('vmm.qemu_paused', 'QEMU paused')}</span>`
-                  : `<span class="qemu-process-badge stopped" title="${t('ui.qemu_process_inactive', 'QEMU process inactive')}">${ico('○')} ${t('vmm.qemu_stopped', 'QEMU stopped')}</span>`
+                    ? `<span class="qemu-process-badge paused" title="${t('ui.qemu_process_paused', 'QEMU process paused')}">${ico('⏸')} ${t('vmm.qemu_paused', 'QEMU paused')}</span>`
+                    : `<span class="qemu-process-badge stopped" title="${t('ui.qemu_process_inactive', 'QEMU process inactive')}">${ico('○')} ${t('vmm.qemu_stopped', 'QEMU stopped')}</span>`
               }
               ${stateBadge}
             </div>
@@ -551,12 +595,14 @@ function buildVmCardHtml(vm, vms) {
           <div class="vmm-row-xs-box">
             <div class="vmm-row-xs-mono">
               <!-- the screen listens on the NAS itself only, so no VNC address is offered: Console opens it (VMs report 20) -->
-              ${vm.ip_address
-                ? `<span class="vmm-row-accent"><span>${escapeHtml(t('vmm.address', 'Address {ip}', { ip: vm.ip_address }))}</span>
+              ${
+                vm.ip_address
+                  ? `<span class="vmm-row-accent"><span>${escapeHtml(t('vmm.address', 'Address {ip}', { ip: vm.ip_address }))}</span>
                 <button class="btn-copy-ssh-cmd vmm-row-muted-box" data-cmd="${escapeHtml(vm.ip_address)}" title="${escapeHtml(t('vm.copy_ip', 'Copy IP Address'))}">
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
                 </button></span>`
-                : `<span class="vmm-xs-muted">${escapeHtml(t('vm.why_no_ip', 'Waiting for the VM to get a network address'))}</span>`}
+                  : `<span class="vmm-xs-muted">${escapeHtml(t('vm.why_no_ip', 'Waiting for the VM to get a network address'))}</span>`
+              }
             </div>
             <button class="btn-vm-join-toggle" data-id="${vm.id}" style="background: rgba(51,205,184,0.15); border: 1px solid rgba(51,205,184,0.3); border-radius: 4px; color: var(--kb-text-accent); font-size: var(--kb-fs-xs); font-weight: 700; padding: 2px 6px; cursor: pointer; flex-shrink: 0;" title="${t('ui.join_vm_connection_options', 'Join VM connection options')}">
               ${t('vmm.join', 'Connect')} ${ico('▾')}
@@ -582,7 +628,7 @@ function buildVmCardHtml(vm, vms) {
             </div>
           `
               : vm.ip_address
-              ? `
+                ? `
             <div style="display: flex; justify-content: space-between; align-items: center; font-size: var(--kb-fs-xs); padding: 4px 8px; background: rgba(51,205,184,0.1); border: 1px solid rgba(51,205,184,0.25); border-radius: 4px; margin-bottom: 10px; position: relative;">
               <span class="vmm-row-accent-mono">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
@@ -632,8 +678,8 @@ function buildVmCardHtml(vm, vms) {
               </div>
             </div>
           `
-              : isRunning
-              ? `
+                : isRunning
+                  ? `
             <div style="display: flex; justify-content: space-between; align-items: center; font-size: var(--kb-fs-xs); padding: 6px 10px; background: rgba(51,205,184,0.08); border: 1px solid rgba(51,205,184,0.2); border-radius: 4px; margin-bottom: 10px;">
               <span class="vmm-row-accent-2">
                 <span aria-hidden="true">🖥️</span>
@@ -649,7 +695,7 @@ function buildVmCardHtml(vm, vms) {
               </div>
             </div>
           `
-              : ''
+                  : ''
           }
         </div>
 
@@ -765,41 +811,95 @@ function bindVmGridHandlers(grid) {
       if (stateStr === 'shutting_down') {
         // nothing to press while the system inside finishes; after two minutes, "Turn off now"
         if (targetVm?.turn_off_offered) {
-          items.push({ icon: '⏹️', label: t('vmm.force_off', 'Turn off now (like pulling the plug)'), destructive: true, onClick: () => card?.querySelector('.btn-vm-force-off')?.click() });
+          items.push({
+            icon: '⏹️',
+            label: t('vmm.force_off', 'Turn off now (like pulling the plug)'),
+            destructive: true,
+            onClick: () => card?.querySelector('.btn-vm-force-off')?.click(),
+          });
         }
-        items.push({ icon: '📸', label: t('vm.snapshots', 'Snapshots & Rollback'), onClick: () => openVmSnapshotsModal(vmId) });
+        items.push({
+          icon: '📸',
+          label: t('vm.snapshots', 'Snapshots & Rollback'),
+          onClick: () => openVmSnapshotsModal(vmId),
+        });
       } else if (isRunning) {
         items.push(
           { icon: '🖥️', label: t('vm.gui', 'KVM GUI'), onClick: () => openVmConsole(vmId, name, 'gui') },
-          { icon: '⌨️', label: t('vm.console', 'Console (Serial TTY)'), onClick: () => openVmConsole(vmId, name, 'cli') },
+          {
+            icon: '⌨️',
+            label: t('vm.console', 'Console (Serial TTY)'),
+            onClick: () => openVmConsole(vmId, name, 'cli'),
+          },
           { icon: '📸', label: t('vm.snapshots', 'Snapshots & Rollback'), onClick: () => openVmSnapshotsModal(vmId) },
-          { icon: '⏸️', label: t('vm.pause', 'Pause VM'), onClick: () => card?.querySelector('.btn-vm-pause')?.click() },
-          { icon: '🔄', label: t('vmm.restart_vm', 'Restart VM'), onClick: () => card?.querySelector('.btn-vm-restart')?.click() },
-          { icon: '⏻', label: t('vmm.acpi', 'Shut down (ACPI)'), onClick: () => card?.querySelector('.btn-vm-acpi')?.click() },
-          { icon: '⏹️', label: t('vmm.force_off', 'Turn off now (like pulling the plug)'), destructive: true, onClick: () => card?.querySelector('.btn-vm-force-off')?.click() },
+          {
+            icon: '⏸️',
+            label: t('vm.pause', 'Pause VM'),
+            onClick: () => card?.querySelector('.btn-vm-pause')?.click(),
+          },
+          {
+            icon: '🔄',
+            label: t('vmm.restart_vm', 'Restart VM'),
+            onClick: () => card?.querySelector('.btn-vm-restart')?.click(),
+          },
+          {
+            icon: '⏻',
+            label: t('vmm.acpi', 'Shut down (ACPI)'),
+            onClick: () => card?.querySelector('.btn-vm-acpi')?.click(),
+          },
+          {
+            icon: '⏹️',
+            label: t('vmm.force_off', 'Turn off now (like pulling the plug)'),
+            destructive: true,
+            onClick: () => card?.querySelector('.btn-vm-force-off')?.click(),
+          },
           { icon: '✏️', label: t('vmd.edit_settings', 'Edit VM settings'), onClick: () => openVmEditModal(vmId) }
         );
       } else if (isPaused) {
         items.push(
-          { icon: '▶️', label: t('vm.resume', 'Resume VM'), onClick: () => card?.querySelector('.btn-vm-resume')?.click() },
+          {
+            icon: '▶️',
+            label: t('vm.resume', 'Resume VM'),
+            onClick: () => card?.querySelector('.btn-vm-resume')?.click(),
+          },
           { icon: '📸', label: t('vm.snapshots', 'Snapshots & Rollback'), onClick: () => openVmSnapshotsModal(vmId) },
-          { icon: '⏻', label: t('vmm.acpi', 'Shut down (ACPI)'), onClick: () => card?.querySelector('.btn-vm-acpi')?.click() },
-          { icon: '⏹️', label: t('vmm.force_off', 'Turn off now (like pulling the plug)'), destructive: true, onClick: () => card?.querySelector('.btn-vm-force-off')?.click() },
+          {
+            icon: '⏻',
+            label: t('vmm.acpi', 'Shut down (ACPI)'),
+            onClick: () => card?.querySelector('.btn-vm-acpi')?.click(),
+          },
+          {
+            icon: '⏹️',
+            label: t('vmm.force_off', 'Turn off now (like pulling the plug)'),
+            destructive: true,
+            onClick: () => card?.querySelector('.btn-vm-force-off')?.click(),
+          },
           { icon: '✏️', label: t('vmd.edit_settings', 'Edit VM settings'), onClick: () => openVmEditModal(vmId) }
         );
       } else {
         items.push(
-          { icon: '▶️', label: t('vmm.start_vm', 'Start VM'), onClick: () => card?.querySelector('.btn-vm-start')?.click() },
+          {
+            icon: '▶️',
+            label: t('vmm.start_vm', 'Start VM'),
+            onClick: () => card?.querySelector('.btn-vm-start')?.click(),
+          },
           { icon: '📸', label: t('vm.snapshots', 'Snapshots & Rollback'), onClick: () => openVmSnapshotsModal(vmId) },
           { icon: '✏️', label: t('vmd.edit_settings', 'Edit VM settings'), onClick: () => openVmEditModal(vmId) },
-          { icon: '🗑️', label: t('vm.delete', 'Delete VM'), destructive: true, onClick: () => card?.querySelector('.btn-vm-delete')?.click() }
+          {
+            icon: '🗑️',
+            label: t('vm.delete', 'Delete VM'),
+            destructive: true,
+            onClick: () => card?.querySelector('.btn-vm-delete')?.click(),
+          }
         );
       }
 
       showBottomSheet({
         title: name,
         // the server sends ram_gb; memory_mb never came, so this said 2048 MB (SET-14, VMs 17)
-        subtitle: targetVm ? `${vmStateLabel(stateStr)} • ${targetVm.vcpus} vCPU • ${targetVm.ram_gb} GB` : vmStateLabel(stateStr),
+        subtitle: targetVm
+          ? `${vmStateLabel(stateStr)} • ${targetVm.vcpus} vCPU • ${targetVm.ram_gb} GB`
+          : vmStateLabel(stateStr),
         items,
       });
     };
@@ -818,7 +918,10 @@ function bindVmGridHandlers(grid) {
         try {
           const res = await api.post(`/api/vms/${vmId}/action`, { action });
           const said = powerToast(action, res?.state, name);
-          const slow = action === 'start' || action === 'restart' ? slowStartText(res, name, vmState.telemetry?.kvm?.remediation || '') : '';
+          const slow =
+            action === 'start' || action === 'restart'
+              ? slowStartText(res, name, vmState.telemetry?.kvm?.remediation || '')
+              : '';
           showToast(slow || said.text, slow ? 'warning' : said.tone);
           loadVmDashboard();
         } catch (err) {
@@ -855,7 +958,7 @@ function bindVmGridHandlers(grid) {
       const cmd = btn.dataset.cmd;
       const ok = await copyToClipboard(cmd);
       if (ok) {
-        showToast(t('toast.copied_to_clipboard', 'Copied \'{cmd}\' to clipboard', { cmd: cmd }), 'info');
+        showToast(t('toast.copied_to_clipboard', "Copied '{cmd}' to clipboard", { cmd: cmd }), 'info');
       } else {
         showToast(t('toast.failed_to_copy_ssh_command', `Failed to copy SSH command`), 'error');
       }
@@ -873,7 +976,7 @@ function bindVmGridHandlers(grid) {
         async () => {
           try {
             await api.delete(`/api/vms/${vmId}`, { confirmed: true });
-            showToast(t('toast.vm_deleted', 'VM \'{vmName}\' deleted', { vmName: vmName }), 'success');
+            showToast(t('toast.vm_deleted', "VM '{vmName}' deleted", { vmName: vmName }), 'success');
             loadVmDashboard();
           } catch (err) {
             showToast(t('toast.delete_failed', 'Delete failed: {error}', { error: err.message }), 'error');
@@ -918,7 +1021,7 @@ function bindVmGridHandlers(grid) {
       const cmd = `ssh root@${ip}`;
       const ok = await copyToClipboard(cmd);
       if (ok) {
-        showToast(t('toast.copied_to_clipboard', 'Copied \'{cmd}\' to clipboard', { cmd: cmd }), 'info');
+        showToast(t('toast.copied_to_clipboard', "Copied '{cmd}' to clipboard", { cmd: cmd }), 'info');
       }
       document.querySelectorAll('.vm-join-popover').forEach((p) => (p.style.display = 'none'));
     };
@@ -941,7 +1044,7 @@ function bindVmGridHandlers(grid) {
       e.stopPropagation();
       const vmId = btn.dataset.id;
       const targetVm = vmState.list.find((v) => v.id === vmId);
-      const name = targetVm ? targetVm.name : (btn.dataset.name || 'Virtual Machine');
+      const name = targetVm ? targetVm.name : btn.dataset.name || 'Virtual Machine';
       const mode = btn.dataset.mode || 'gui';
       document.querySelectorAll('.vm-join-popover').forEach((p) => (p.style.display = 'none'));
       openVmConsoleSeparateWindow(vmId, name, mode);
@@ -953,7 +1056,7 @@ function bindVmGridHandlers(grid) {
       e.stopPropagation();
       const vmId = btn.dataset.id;
       const targetVm = vmState.list.find((v) => v.id === vmId);
-      const name = targetVm ? targetVm.name : (btn.dataset.name || 'Virtual Machine');
+      const name = targetVm ? targetVm.name : btn.dataset.name || 'Virtual Machine';
       document.querySelectorAll('.vm-join-popover').forEach((p) => (p.style.display = 'none'));
       openVmConsole(vmId, name, 'gui');
     };
@@ -964,7 +1067,7 @@ function bindVmGridHandlers(grid) {
       e.stopPropagation();
       const vmId = btn.dataset.id;
       const targetVm = vmState.list.find((v) => v.id === vmId);
-      const name = targetVm ? targetVm.name : (btn.dataset.name || 'Virtual Machine');
+      const name = targetVm ? targetVm.name : btn.dataset.name || 'Virtual Machine';
       document.querySelectorAll('.vm-join-popover').forEach((p) => (p.style.display = 'none'));
       openVmConsole(vmId, name, 'cli');
     };
@@ -988,7 +1091,7 @@ function bindVmGridHandlers(grid) {
       const uri = `${ip}:3389`;
       const ok = await copyToClipboard(uri);
       if (ok) {
-        showToast(t('toast.copied_rdp_address_2', 'Copied RDP Address \'{uri}\'', { uri: uri }), 'info');
+        showToast(t('toast.copied_rdp_address_2', "Copied RDP Address '{uri}'", { uri: uri }), 'info');
       }
       document.querySelectorAll('.vm-join-popover').forEach((p) => (p.style.display = 'none'));
     };

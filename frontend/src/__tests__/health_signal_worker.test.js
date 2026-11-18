@@ -39,7 +39,11 @@ function fakeDb() {
 }
 
 const post = (body, extra = {}) =>
-  new Request('https://h.example/v1/report', { method: 'POST', body: typeof body === 'string' ? body : JSON.stringify(body), ...extra });
+  new Request('https://h.example/v1/report', {
+    method: 'POST',
+    body: typeof body === 'string' ? body : JSON.stringify(body),
+    ...extra,
+  });
 
 describe('health signal receiver', () => {
   it('numbers ISO weeks', () => {

@@ -8,11 +8,23 @@ const { fleetHtml, summaryHtml, pickHtml, loadFleetCard } = await import('../com
 
 const tick = () => new Promise((r) => setTimeout(r, 0));
 const SUMMARY = {
-  name: 'cellar', version: '2.0.0', uptime: 3 * 86400 + 5,
+  name: 'cellar',
+  version: '2.0.0',
+  uptime: 3 * 86400 + 5,
   storage: [{ total: 4e12, free: 1e12 }],
-  backups: [{ name: 'Photos', last_backup: 1762790400, last_result: 'ok' }, { name: 'Docs', last_backup: null, last_result: 'failed: disk' }],
+  backups: [
+    { name: 'Photos', last_backup: 1762790400, last_result: 'ok' },
+    { name: 'Docs', last_backup: null, last_result: 'failed: disk' },
+  ],
 };
-const PEER = { id: 'b1', name: 'cellar', address: 'http://100.101.102.103:8082', offer_space: false, backup_repo: '', summary: SUMMARY };
+const PEER = {
+  id: 'b1',
+  name: 'cellar',
+  address: 'http://100.101.102.103:8082',
+  offer_space: false,
+  backup_repo: '',
+  summary: SUMMARY,
+};
 const ST = { name: 'attic', address: 'https://attic.x.ts.net', pairing_waiting: false, peers: [PEER] };
 
 describe('your Kiboto boxes (RES-9)', () => {
@@ -34,13 +46,17 @@ describe('your Kiboto boxes (RES-9)', () => {
     expect(summaryHtml({ error: 'timed out' })).toContain('Not answering: timed out');
     expect(summaryHtml(undefined)).toBe('');
     expect(fleetHtml(ST)).toContain('Back up to this box');
-    expect(fleetHtml({ ...ST, peers: [{ ...PEER, backup_repo: 'buddy-b1', offer_space: true }] })).toContain('backs up there');
+    expect(fleetHtml({ ...ST, peers: [{ ...PEER, backup_repo: 'buddy-b1', offer_space: true }] })).toContain(
+      'backs up there'
+    );
     expect(pickHtml('b1', [])).toContain('No shares');
     expect(pickHtml('b1', [{ name: 'photos', path: '/mnt/user/photos' }])).toContain('value="/mnt/user/photos"');
   });
 
   it('makes a code, pairs, gives space, sets up a backup and unpairs', async () => {
-    api.get.mockImplementation(async (url) => (url === '/api/storage/shares' ? { shares: [{ name: 'photos', path: '/mnt/user/photos' }] } : ST));
+    api.get.mockImplementation(async (url) =>
+      url === '/api/storage/shares' ? { shares: [{ name: 'photos', path: '/mnt/user/photos' }] } : ST
+    );
     await loadFleetCard();
     const card = document.getElementById('fleet-card');
 
@@ -55,7 +71,10 @@ describe('your Kiboto boxes (RES-9)', () => {
     /** @type {HTMLInputElement} */ (add.elements.namedItem('code')).value = 'abcd-efgh-jklm-npqr';
     add.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
     await tick();
-    expect(api.post).toHaveBeenLastCalledWith('/api/fleet/peers', { address: 'http://100.64.0.2:8082', code: 'abcd-efgh-jklm-npqr' });
+    expect(api.post).toHaveBeenLastCalledWith('/api/fleet/peers', {
+      address: 'http://100.64.0.2:8082',
+      code: 'abcd-efgh-jklm-npqr',
+    });
 
     api.put.mockResolvedValueOnce({ ...ST, peers: [{ ...PEER, offer_space: true }] });
     const offer = /** @type {HTMLInputElement} */ (card.querySelector('[data-fleet-offer="b1"]'));

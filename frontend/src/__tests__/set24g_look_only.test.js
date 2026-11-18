@@ -8,7 +8,13 @@ const { ZettEventBus } = await import('../event-bus.js');
 await import('../route-access.js');
 const ra = await import('../components/remote-access.js');
 
-const RUNNING = { state: 'Running', name: 'nas.tail1.ts.net', ips: ['100.64.0.2'], https: true, addresses: { kiboto: 'https://nas.tail1.ts.net/' } };
+const RUNNING = {
+  state: 'Running',
+  name: 'nas.tail1.ts.net',
+  ips: ['100.64.0.2'],
+  https: true,
+  addresses: { kiboto: 'https://nas.tail1.ts.net/' },
+};
 const viewer = { username: 'auditor', scopes: ['system:view', '*:read'] };
 
 describe('Away from home for someone who may only look', () => {

@@ -25,11 +25,21 @@ describe('B12b (REL-9): a copy job moves to an off-site backup', () => {
 
   it('offers the move only on cloud copies of folders, and shows a skipped run', async () => {
     const mount = document.createElement('div');
-    api.get.mockResolvedValue({ jobs: [
-      { id: 'j1', name: 'Photos', kind: 'data', destination_type: 'remote', remote_name: 'cloud', last_status: 'skipped', last_error: 'frozen' },
-      { id: 'j2', name: 'Settings', kind: 'config', destination_type: 'remote', remote_name: 'cloud' },
-      { id: 'j3', name: 'Moved', kind: 'data', destination_type: 'remote', migrated_to: 'from-j3' },
-    ] });
+    api.get.mockResolvedValue({
+      jobs: [
+        {
+          id: 'j1',
+          name: 'Photos',
+          kind: 'data',
+          destination_type: 'remote',
+          remote_name: 'cloud',
+          last_status: 'skipped',
+          last_error: 'frozen',
+        },
+        { id: 'j2', name: 'Settings', kind: 'config', destination_type: 'remote', remote_name: 'cloud' },
+        { id: 'j3', name: 'Moved', kind: 'data', destination_type: 'remote', migrated_to: 'from-j3' },
+      ],
+    });
     await fetchAndRenderBackupJobs(mount);
     expect([...mount.querySelectorAll('.btn-migrate-backup-job')].map((b) => b.dataset.jobId)).toEqual(['j1']);
     expect(mount.querySelector('.backup-skipped').textContent).toBe('Skipped');

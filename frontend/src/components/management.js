@@ -2,14 +2,28 @@ import { syncWidgetSettingsUI } from './widgets.js';
 import { isNvmeDrive } from './temp-rule.js';
 import { refreshAndSay } from './refresh-say.js';
 import { isShuttingDown } from './vm/power.js';
-import { loadAccountPane, loadBackupExtras, loadSecurityPane, loadNotificationsPane, loadConnectionsPane } from './management/admin-panes.js';
+import {
+  loadAccountPane,
+  loadBackupExtras,
+  loadSecurityPane,
+  loadNotificationsPane,
+  loadConnectionsPane,
+} from './management/admin-panes.js';
 import { kibPaneFor, loadKibExtras, mayManageKib } from './management/kib-access.js';
 
 const KIB_WINDOW_PANES = new Set(['mgmt-pane-ai-chat', 'mgmt-pane-ai-rag', 'mgmt-pane-ai-visual']);
 import { syncDesktopThemeUI, openDrawer, restoreHardwareTabsToManagement } from './settings.js';
 import { ZettEventBus } from '../event-bus.js';
 import { fitMiniPreviewScale, syncMiniPreviewTelemetry } from './mini-preview.js';
-import { fetchAndRenderChassisTwin, fetchAndRenderStorageTopology, fetchAndRenderNetworkShares, fetchAndRenderRemoteStorage, openNewCloudRemoteModal, openCreateStoragePoolModal, getThermalLevel } from './chassis-visualizer.js';
+import {
+  fetchAndRenderChassisTwin,
+  fetchAndRenderStorageTopology,
+  fetchAndRenderNetworkShares,
+  fetchAndRenderRemoteStorage,
+  openNewCloudRemoteModal,
+  openCreateStoragePoolModal,
+  getThermalLevel,
+} from './chassis-visualizer.js';
 import { bringToFront, DockManager, makeDraggable, saveWindowBounds, saveOpenWindowsState } from './dock.js';
 import { state } from '../state.js';
 import { api } from '../api.js';
@@ -20,16 +34,58 @@ import '../styles/management-lazy.css'; // Mission Control's own sheet loads wit
 import { wireTablists, markCurrent } from './tab-a11y.js';
 import { highlightEntry, mayNotOpen } from './management/sidebar-current.js';
 import { openFilePreviewModal } from './file-preview-modal.js';
-import { fetchAndRenderUpsTelemetry, initUpsDrawerControls, loadUpsConfigToDrawer, renderUpsTelemetry } from './management/ups.js';
-import { fetchAndRenderCopyHistory, fetchAndRenderNetworkTopology, fetchAndRenderReplication, fetchAndRenderTailscaleDetails, initNetworkControls, loadNetworkPage } from './management/network.js';
+import {
+  fetchAndRenderUpsTelemetry,
+  initUpsDrawerControls,
+  loadUpsConfigToDrawer,
+  renderUpsTelemetry,
+} from './management/ups.js';
+import {
+  fetchAndRenderCopyHistory,
+  fetchAndRenderNetworkTopology,
+  fetchAndRenderReplication,
+  fetchAndRenderTailscaleDetails,
+  initNetworkControls,
+  loadNetworkPage,
+} from './management/network.js';
 import { fetchAndRenderDisksInventory } from './management/disks.js';
 import { closeHttpsGuideModal, handleSecurityAdvisorClick } from './management/security.js';
-import { applySystemUpdate, closeDiagnosticsPreviewModal, copySupportMarkdown, downloadDiagnosticsBundle, fetchAndRenderSystemAbout, previewDiagnosticsSummary, revertSystemUpdate, setUpdateChannel, syncBackupJobForm } from './management/system.js';
-import { openChannelConfigModal, saveCurrentChannelModal, saveNotificationsConfig, testAllNotificationChannels, testSingleChannel } from './management/notifications.js';
-import { fetchAndRenderAppBackups, fetchAndRenderBackupJobs, fetchAndRenderSystemSnapshots, loadBackupPane } from './management/backup.js';
+import {
+  applySystemUpdate,
+  closeDiagnosticsPreviewModal,
+  copySupportMarkdown,
+  downloadDiagnosticsBundle,
+  fetchAndRenderSystemAbout,
+  previewDiagnosticsSummary,
+  revertSystemUpdate,
+  setUpdateChannel,
+  syncBackupJobForm,
+} from './management/system.js';
+import {
+  openChannelConfigModal,
+  saveCurrentChannelModal,
+  saveNotificationsConfig,
+  testAllNotificationChannels,
+  testSingleChannel,
+} from './management/notifications.js';
+import {
+  fetchAndRenderAppBackups,
+  fetchAndRenderBackupJobs,
+  fetchAndRenderSystemSnapshots,
+  loadBackupPane,
+} from './management/backup.js';
 import { installAdvancedSwitch, installSidebarGroups, renderStatusSummary } from './management/overview.js';
 import { installHealthSignal } from './management/health-signal.js';
-import { _aiSelectedColor, _aiSelectedScene, _getActiveAiSearchQuery, _renderAiRagInitialEmptyState, fetchAndRenderAiStatus, initAiKnowledgeEngine, runAiVisualSearch, setAiVisualFiltersDrawerOpen } from './management/ai.js';
+import {
+  _aiSelectedColor,
+  _aiSelectedScene,
+  _getActiveAiSearchQuery,
+  _renderAiRagInitialEmptyState,
+  fetchAndRenderAiStatus,
+  initAiKnowledgeEngine,
+  runAiVisualSearch,
+  setAiVisualFiltersDrawerOpen,
+} from './management/ai.js';
 import { formatFixed } from '../format.js';
 import { slowNoteHtml } from './vm/slow-mode.js';
 import { FIXED_PCT, askFixedSpeed, modeName } from './fan-modes.js';
@@ -50,7 +106,6 @@ if (typeof window !== 'undefined') {
 
 let _activeProfile = 'balanced';
 let _unbindMgmtTrap = null;
-
 
 // The deploy button: a soft tint of the accent with a thin border, like the dialog's other controls.
 export function setDeployButtonTone(btn, tone) {
@@ -202,11 +257,24 @@ export const SUBPANE_MAP = {
 /** "Intel Core Ultra 5 125H · 18 threads" (About → Technical details). */
 export function processorWords(cpu) {
   const c = cpu || {};
-  const name = c.model ? c.model.replace(/\(R\)|\(TM\)/g, '').replace(/\s+/g, ' ').trim() : t('hw.cpu_unknown', 'Not reported');
-  return c.cores ? `${name} · ${t('hw.threads', '{n, plural, one {# thread} other {# threads}}', { n: c.cores })}` : name;
+  const name = c.model
+    ? c.model
+        .replace(/\(R\)|\(TM\)/g, '')
+        .replace(/\s+/g, ' ')
+        .trim()
+    : t('hw.cpu_unknown', 'Not reported');
+  return c.cores
+    ? `${name} · ${t('hw.threads', '{n, plural, one {# thread} other {# threads}}', { n: c.cores })}`
+    : name;
 }
 
-const POWER_MODES = { performance: ['hw.gov_performance', 'Full speed'], powersave: ['hw.gov_powersave', 'Power saving'], schedutil: ['hw.gov_adaptive', 'Adjusts to the load'], ondemand: ['hw.gov_adaptive', 'Adjusts to the load'], conservative: ['hw.gov_adaptive', 'Adjusts to the load'] };
+const POWER_MODES = {
+  performance: ['hw.gov_performance', 'Full speed'],
+  powersave: ['hw.gov_powersave', 'Power saving'],
+  schedutil: ['hw.gov_adaptive', 'Adjusts to the load'],
+  ondemand: ['hw.gov_adaptive', 'Adjusts to the load'],
+  conservative: ['hw.gov_adaptive', 'Adjusts to the load'],
+};
 /** The processor's scaling governor in words ("powersave" → "Power saving"); an unknown one as it is. */
 export function powerModeWord(governor) {
   const m = POWER_MODES[String(governor || '').toLowerCase()];
@@ -218,7 +286,8 @@ export function graphicsWords(gpu) {
   const g = gpu || {};
   const name = g.model || t('hw.no_gpu', 'No graphics chip found');
   const codecs = Array.isArray(g.codecs) ? g.codecs.filter(Boolean) : [];
-  if (g.ready && codecs.length) return `${name} · ${t('hw.gpu_video_hw', 'video in hardware: {codecs}', { codecs: codecs.join(', ') })}`;
+  if (g.ready && codecs.length)
+    return `${name} · ${t('hw.gpu_video_hw', 'video in hardware: {codecs}', { codecs: codecs.join(', ') })}`;
   return g.model ? `${name} · ${t('hw.gpu_video_sw', 'video in software')}` : name;
 }
 
@@ -234,7 +303,12 @@ document.addEventListener('click', (e) => {
 export function updateManagementTelemetry(stats) {
   if (!stats) return;
   const overlay = document.getElementById('management-modal-overlay');
-  if (overlay && (!overlay.classList.contains('open') || overlay.classList.contains('window-minimized') || overlay.style.display === 'none')) {
+  if (
+    overlay &&
+    (!overlay.classList.contains('open') ||
+      overlay.classList.contains('window-minimized') ||
+      overlay.style.display === 'none')
+  ) {
     return;
   }
   const unraid = stats.unraid;
@@ -255,15 +329,30 @@ export function updateManagementTelemetry(stats) {
     if (stateEl) stateEl.style.color = unraid.color?.startsWith('green') ? 'var(--ok2)' : 'var(--warn)';
     setText('mgmt-unraid-version', `Unraid ${unraid.version || ''}`.trim());
     const d = unraid.disks || {};
-    setText('mgmt-unraid-disks', t('mgx.disks', '{count, plural, one {# Disk} other {# Disks}} ({disabled} disabled, {invalid} invalid)', { count: d.total || 0, disabled: d.disabled || 0, invalid: d.invalid || 0 }));
+    setText(
+      'mgmt-unraid-disks',
+      t('mgx.disks', '{count, plural, one {# Disk} other {# Disks}} ({disabled} disabled, {invalid} invalid)', {
+        count: d.total || 0,
+        disabled: d.disabled || 0,
+        invalid: d.invalid || 0,
+      })
+    );
     const parityEl = document.getElementById('mgmt-unraid-parity');
     if (parityEl) {
       const p = unraid.parity_check || {};
       if (p.active) {
-        parityEl.textContent = t('mgx.parity_active', 'Active ({action} {pct}%) • {count, plural, one {# Error} other {# Errors}}', { action: p.action || t('mgx.sync', 'Sync'), pct: p.progress_pct || 0, count: p.errors || 0 });
+        parityEl.textContent = t(
+          'mgx.parity_active',
+          'Active ({action} {pct}%) • {count, plural, one {# Error} other {# Errors}}',
+          { action: p.action || t('mgx.sync', 'Sync'), pct: p.progress_pct || 0, count: p.errors || 0 }
+        );
         parityEl.style.color = 'var(--accent-cyan,#33cdb8)';
       } else {
-        parityEl.textContent = t('mgx.parity_idle', 'Completed / Idle • {count, plural, one {# Error} other {# Errors}}', { count: p.errors || 0 });
+        parityEl.textContent = t(
+          'mgx.parity_idle',
+          'Completed / Idle • {count, plural, one {# Error} other {# Errors}}',
+          { count: p.errors || 0 }
+        );
         parityEl.style.color = 'var(--ok2)';
       }
     }
@@ -271,7 +360,9 @@ export function updateManagementTelemetry(stats) {
     if (moverEl) {
       const m = unraid.mover || {};
       if (m.active) {
-        moverEl.textContent = t('mgx.mover_active', 'Active ({count, plural, one {# file} other {# files}} left)', { count: m.remain_files || 0 });
+        moverEl.textContent = t('mgx.mover_active', 'Active ({count, plural, one {# file} other {# files}} left)', {
+          count: m.remain_files || 0,
+        });
         moverEl.style.color = 'var(--warn)';
       } else {
         moverEl.textContent = t('ui.idle', 'Idle');
@@ -318,7 +409,8 @@ export function updateManagementTelemetry(stats) {
       }
     }
     if (npuNameEl) npuNameEl.textContent = stats.npu.model || t('mgx.no_npu', 'No NPU Detected');
-    if (npuDriverEl) npuDriverEl.textContent = t('mgx.driver', 'Driver: {name}', { name: stats.npu.driver || t('mgx.none', 'none') });
+    if (npuDriverEl)
+      npuDriverEl.textContent = t('mgx.driver', 'Driver: {name}', { name: stats.npu.driver || t('mgx.none', 'none') });
     if (npuNodeEl) {
       npuNodeEl.textContent = stats.npu.render_node || t('mgx.no_node', 'No node');
       npuNodeEl.style.display = stats.npu.render_node ? 'inline-block' : 'none';
@@ -332,7 +424,7 @@ export function updateManagementTelemetry(stats) {
       if (stats.npu.frameworks.length > 0) {
         npuFrameworksEl.innerHTML = stats.npu.frameworks
           .map(
-            f =>
+            (f) =>
               `<span class="gpu-codec-tag" style="background:rgba(168,85,247,0.12); color:var(--kb-text-ai); border-color:rgba(168,85,247,0.25);">${escapeHtml(f)}</span>`
           )
           .join('');
@@ -344,7 +436,7 @@ export function updateManagementTelemetry(stats) {
 
   // Update Docker pill in Hub and Left Sidebar
   if (stats.docker && Array.isArray(stats.docker)) {
-    const runningCount = stats.docker.filter(c => c.state === 'running').length;
+    const runningCount = stats.docker.filter((c) => c.state === 'running').length;
     const dockPill = document.getElementById('mgmt-hub-docker-pill');
     if (dockPill) dockPill.textContent = t('dk.active', '{count} running', { count: runningCount });
     const sideDockBadge = document.getElementById('mgmt-sidebar-docker-badge');
@@ -357,10 +449,15 @@ export function updateManagementTelemetry(stats) {
   // Update Storage pill in Hub and Left Sidebar
   if (stats.disks && Array.isArray(stats.disks)) {
     const storagePill = document.getElementById('mgmt-hub-storage-pill');
-    if (storagePill) storagePill.textContent = t('mgx.drives', '{count, plural, one {# Drive} other {# Drives}}', { count: stats.disks.length });
+    if (storagePill)
+      storagePill.textContent = t('mgx.drives', '{count, plural, one {# Drive} other {# Drives}}', {
+        count: stats.disks.length,
+      });
     const sideStorageBadge = document.getElementById('mgmt-sidebar-storage-badge');
     if (sideStorageBadge) {
-      sideStorageBadge.textContent = t('mgx.drives', '{count, plural, one {# Drive} other {# Drives}}', { count: stats.disks.length });
+      sideStorageBadge.textContent = t('mgx.drives', '{count, plural, one {# Drive} other {# Drives}}', {
+        count: stats.disks.length,
+      });
       sideStorageBadge.style.display = 'inline-block';
     }
 
@@ -376,8 +473,8 @@ export function updateManagementTelemetry(stats) {
           if (row) {
             const isStandby = Boolean(d.standby || d.health === 'standby');
             const thermal = getThermalLevel(d.temp, isStandby, isNvmeDrive(d));
-            const healthStr = isStandby ? 'STANDBY' : (d.health ? String(d.health).toUpperCase() : 'OK');
-            
+            const healthStr = isStandby ? 'STANDBY' : d.health ? String(d.health).toUpperCase() : 'OK';
+
             const healthTag = row.querySelector('.bay-health-tag');
             if (healthTag) {
               healthTag.className = `bay-health-tag ${thermal.cls}`;
@@ -428,7 +525,7 @@ export function updateManagementTelemetry(stats) {
 
   // Update Virtual Machines pill in Hub and Left Sidebar
   if (stats.vms && Array.isArray(stats.vms)) {
-    const runningCount = stats.vms.filter(v => v.state === 'running').length;
+    const runningCount = stats.vms.filter((v) => v.state === 'running').length;
     const vmsPill = document.getElementById('mgmt-hub-vms-pill');
     if (vmsPill) vmsPill.textContent = t('mgx.running', '{count} Running', { count: runningCount });
     const sideVmsBadge = document.getElementById('mgmt-sidebar-vms-badge');
@@ -462,8 +559,14 @@ export function updateManagementTelemetry(stats) {
   }
 
   // Peripheral Auto-Hiding (AGENTS.md §1.1)
-  const hasLcd = Boolean(stats?.peripherals?.fb_active) || Boolean(stats?.hardware?.has_lcd) || Boolean(stats?.lcd?.page !== undefined);
-  const hasLed = Boolean(stats?.peripherals?.led_ready) || Boolean(stats?.hardware?.has_mcu) || Boolean(stats?.peripherals?.led_port);
+  const hasLcd =
+    Boolean(stats?.peripherals?.fb_active) ||
+    Boolean(stats?.hardware?.has_lcd) ||
+    Boolean(stats?.lcd?.page !== undefined);
+  const hasLed =
+    Boolean(stats?.peripherals?.led_ready) ||
+    Boolean(stats?.hardware?.has_mcu) ||
+    Boolean(stats?.peripherals?.led_port);
 
   const ledTab = document.querySelector('.mgmt-inner-tab[data-tab-target="mgmt-pane-hardware-led"]');
   if (ledTab) ledTab.style.display = hasLed ? '' : 'none';
@@ -487,7 +590,10 @@ export async function chooseHostMode(p, btn, profileBtns) {
     showToast(t('toast.system_profile_switched', 'Cooling: {profile}.', { profile: modeName(p) }), 'success');
   } catch (err) {
     _activeProfile = null; // the next live reading puts back the mode the fans really have
-    showToast(t('toast.failed_to_switch_profile', 'The cooling mode was not changed: {error}', { error: err.message }), 'error');
+    showToast(
+      t('toast.failed_to_switch_profile', 'The cooling mode was not changed: {error}', { error: err.message }),
+      'error'
+    );
   }
 }
 
@@ -514,7 +620,11 @@ export function initManagement() {
   window.__updateManagementTelemetry = updateManagementTelemetry;
   // the Kib window loads on first use (AI decision 1)
   /** @type {any} */ (window).openKibWindow = (pane) => import('./kib-window.js').then((m) => m.openKibWindow(pane));
-  if (state.isLcdDirect || (typeof window !== 'undefined' && window.location.search.includes('mode=lcd')) || (document.body && document.body.classList.contains('lcd-direct'))) {
+  if (
+    state.isLcdDirect ||
+    (typeof window !== 'undefined' && window.location.search.includes('mode=lcd')) ||
+    (document.body && document.body.classList.contains('lcd-direct'))
+  ) {
     return;
   }
 
@@ -536,10 +646,14 @@ export function initManagement() {
     makeDraggable(win, header, 'management');
   }
 
-  win.addEventListener('pointerdown', () => {
-    bringToFront(win);
-    saveOpenWindowsState();
-  }, { capture: true });
+  win.addEventListener(
+    'pointerdown',
+    () => {
+      bringToFront(win);
+      saveOpenWindowsState();
+    },
+    { capture: true }
+  );
 
   win.addEventListener('mousedown', () => {
     bringToFront(win);
@@ -550,7 +664,10 @@ export function initManagement() {
   const minBtn = document.getElementById('management-min');
   if (minBtn) {
     const handleMin = (e) => {
-      if (e && e.type === 'touchend') { e.preventDefault(); e.stopPropagation(); }
+      if (e && e.type === 'touchend') {
+        e.preventDefault();
+        e.stopPropagation();
+      }
       DockManager.minimize('management');
     };
     minBtn.addEventListener('click', handleMin);
@@ -582,7 +699,7 @@ export function initManagement() {
           top: win.style.top,
           transform: win.style.transform,
           width: win.style.width,
-          height: win.style.height
+          height: win.style.height,
         };
         win.style.left = '16px';
         win.style.top = '56px';
@@ -596,7 +713,7 @@ export function initManagement() {
           top: 56,
           width: window.innerWidth - 32,
           height: window.innerHeight - 128,
-          snapped: 'maximize'
+          snapped: 'maximize',
         });
         saveOpenWindowsState();
       } else {
@@ -620,7 +737,7 @@ export function initManagement() {
           top: Math.round(window.innerHeight / 2 - 300),
           width: 900,
           height: 600,
-          snapped: ''
+          snapped: '',
         });
         saveOpenWindowsState();
       }
@@ -633,7 +750,10 @@ export function initManagement() {
   const closeBtn = document.getElementById('management-close');
   if (closeBtn) {
     const handleClose = (e) => {
-      if (e && e.type === 'touchend') { e.preventDefault(); e.stopPropagation(); }
+      if (e && e.type === 'touchend') {
+        e.preventDefault();
+        e.stopPropagation();
+      }
       overlay.classList.remove('open');
       overlay.style.setProperty('display', 'none', 'important');
       win.classList.remove('window-focus-pulse');
@@ -674,9 +794,6 @@ export function initManagement() {
     saveOpenWindowsState();
   }
 
-  
-
-
   function triggerSubTabLoad(paneId, subTabId = null) {
     if (paneId === 'mgmt-pane-widgets') {
       if (typeof syncWidgetSettingsUI === 'function') syncWidgetSettingsUI();
@@ -713,7 +830,9 @@ export function initManagement() {
       loadNetworkPage();
     } else if (paneId === 'mgmt-pane-network-wireguard') {
       // COMP-01: the guided "Use from anywhere" card above the Tailscale details
-      import('./remote-access.js').then((m) => m.installRemoteAccess(document.getElementById('remote-access-mount'))).catch(() => {});
+      import('./remote-access.js')
+        .then((m) => m.installRemoteAccess(document.getElementById('remote-access-mount')))
+        .catch(() => {});
       import('./ddns-card.js').then((m) => m.renderDdnsCard()).catch(() => {}); // Dynamic DNS (audit A8)
       import('./https-card.js').then((m) => m.renderHttpsCard()).catch(() => {}); // HTTPS at home (audit A9)
       fetchAndRenderTailscaleDetails();
@@ -751,9 +870,16 @@ export function initManagement() {
       fetchAndRenderDisksInventory();
     } else if (paneId === 'mgmt-pane-backups') {
       // replication sits in Backup -> More where this NAS can replicate (SET-22 Storage 3)
-      import('./management/network.js').then((n) => n.revealReplicationTab()).then((shown) => { if (shown) fetchAndRenderReplication(); }).catch(() => {});
+      import('./management/network.js')
+        .then((n) => n.revealReplicationTab())
+        .then((shown) => {
+          if (shown) fetchAndRenderReplication();
+        })
+        .catch(() => {});
       // phone backup sits with the other backups (UX-26)
-      import('./phone-backup.js').then((p) => p.installPhoneBackup(document.getElementById('phone-backup-mount'))).catch(() => {});
+      import('./phone-backup.js')
+        .then((p) => p.installPhoneBackup(document.getElementById('phone-backup-mount')))
+        .catch(() => {});
       loadBackupExtras();
       loadBackupPane(); // what is folded loads when it is opened (SET-21, B13)
     } else if (paneId === 'mgmt-pane-security') {
@@ -775,8 +901,14 @@ export function initManagement() {
       fetchAndRenderMgmtVms();
     } else if (paneId === 'mgmt-pane-hardware-ups') {
       if (typeof fetchAndRenderUpsTelemetry === 'function') fetchAndRenderUpsTelemetry();
-    } else if (paneId === 'mgmt-pane-ai-rag' || paneId === 'mgmt-pane-ai-chat' || paneId === 'mgmt-pane-ai-visual' || paneId === 'mgmt-pane-ai-index') {
-      if (kibPaneFor(paneId) !== paneId) { // Configuration is for people who manage Kib (SET-04)
+    } else if (
+      paneId === 'mgmt-pane-ai-rag' ||
+      paneId === 'mgmt-pane-ai-chat' ||
+      paneId === 'mgmt-pane-ai-visual' ||
+      paneId === 'mgmt-pane-ai-index'
+    ) {
+      if (kibPaneFor(paneId) !== paneId) {
+        // Configuration is for people who manage Kib (SET-04)
         /** @type {any} */ (window).openKibWindow('mgmt-pane-ai-chat'); // Ask Kib is in its own window now (AI decision 1)
         return;
       }
@@ -807,11 +939,14 @@ export function initManagement() {
       let listError = '';
       const [tel, list] = await Promise.all([
         api.get('/api/vms/telemetry').catch(() => null),
-        api.get('/api/vms').catch((e) => { listError = (e && e.message) || 'error'; return []; }),
+        api.get('/api/vms').catch((e) => {
+          listError = (e && e.message) || 'error';
+          return [];
+        }),
       ]);
 
       const vmsList = Array.isArray(list) ? list : [];
-      const runningCount = vmsList.filter(v => v.state === 'running').length;
+      const runningCount = vmsList.filter((v) => v.state === 'running').length;
       const hubPill = document.getElementById('mgmt-hub-vms-pill');
       if (hubPill) hubPill.textContent = t('mgx.running', '{count} Running', { count: runningCount });
       const sideBadge = document.getElementById('mgmt-sidebar-vms-badge');
@@ -823,18 +958,34 @@ export function initManagement() {
       if (strip) {
         const kvmActive = tel?.kvm?.state === 'active';
         // no answer is not "Software Emulation" in red: it was not checked (VMs report 16)
-        const kvmColor = !tel?.kvm ? 'var(--muted)' : kvmActive ? 'var(--ok2, #33cdb8)' : (tel.kvm.state === 'restricted' ? 'var(--warn, #f5a623)' : 'var(--danger, #ff6b6b)');
+        const kvmColor = !tel?.kvm
+          ? 'var(--muted)'
+          : kvmActive
+            ? 'var(--ok2, #33cdb8)'
+            : tel.kvm.state === 'restricted'
+              ? 'var(--warn, #f5a623)'
+              : 'var(--danger, #ff6b6b)';
         // without KVM machines run emulated: say "slow mode", not a technical badge (VMs decision 4 a)
-        const kvmBadge = !tel?.kvm ? t('mvm.not_checked', 'Could not be checked') : kvmActive ? (tel.kvm.badge || 'KVM Acceleration Active') : t('mvm.slow_mode', 'Slow mode: no hardware virtualization');
+        const kvmBadge = !tel?.kvm
+          ? t('mvm.not_checked', 'Could not be checked')
+          : kvmActive
+            ? tel.kvm.badge || 'KVM Acceleration Active'
+            : t('mvm.slow_mode', 'Slow mode: no hardware virtualization');
         const slowFix = tel?.kvm && !kvmActive && tel.kvm.remediation ? tel.kvm.remediation : '';
         // the server sends memory_budget and cpu_capacity; the old keys never came, so these boxes said
         // "Dynamic" and "Optimal" on every NAS (VMs report 15-16). Unknown values are left out.
         const budget = tel?.memory_budget || {};
         const cpuCap = tel?.cpu_capacity || {};
-        const headroom = typeof budget.safe_headroom_gb === 'number'
-          ? t('mvm.mem_left', '{gb} GB', { gb: formatFixed(budget.safe_headroom_gb, 1) }) : '';
+        const headroom =
+          typeof budget.safe_headroom_gb === 'number'
+            ? t('mvm.mem_left', '{gb} GB', { gb: formatFixed(budget.safe_headroom_gb, 1) })
+            : '';
         const threadsUsed = cpuCap.host_threads
-          ? t('mvm.threads_used', '{used} of {total}', { used: cpuCap.allocated_vcpus || 0, total: cpuCap.host_threads }) : '';
+          ? t('mvm.threads_used', '{used} of {total}', {
+              used: cpuCap.allocated_vcpus || 0,
+              total: cpuCap.host_threads,
+            })
+          : '';
 
         strip.innerHTML = `
           <div class="mgx-box">
@@ -844,18 +995,26 @@ export function initManagement() {
             </div>
             ${slowFix ? `<div class="vm-slow-fix">${escapeHtml(t('mvm.slow_fix', 'Machines still start, slowly. To fix it: {fix}', { fix: slowFix }))}</div>` : ''}
           </div>
-          ${headroom ? `<div class="mgx-box">
+          ${
+            headroom
+              ? `<div class="mgx-box">
             <div class="mgx-xs-bold-muted">${t('mvm.mem_left_label', 'Memory left for machines')}</div>
             <div style="font-size: 13px; font-weight: 700; color: var(--lt-ink-brand, var(--accent-cyan, #33cdb8)); margin-top: 4px;">
               ${escapeHtml(headroom)}
             </div>
-          </div>` : ''}
-          ${threadsUsed ? `<div class="mgx-box">
+          </div>`
+              : ''
+          }
+          ${
+            threadsUsed
+              ? `<div class="mgx-box">
             <div class="mgx-xs-bold-muted">${t('mvm.threads_used_label', 'Processor threads in use')}</div>
             <div class="mgx-fs13-bold-strong">
               ${escapeHtml(threadsUsed)}
             </div>
-          </div>` : ''}
+          </div>`
+              : ''
+          }
         `;
       }
 
@@ -868,7 +1027,9 @@ export function initManagement() {
             <div class="vml-xs">${escapeHtml(listError)}</div>
             <button type="button" class="btn-pill-toggle" id="mgmt-vms-retry">${escapeHtml(t('mvm.try_again', 'Try again'))}</button>
           </div>`;
-          grid.querySelector('#mgmt-vms-retry')?.addEventListener('click', () => window.dispatchEvent(new Event('vm-updated')));
+          grid
+            .querySelector('#mgmt-vms-retry')
+            ?.addEventListener('click', () => window.dispatchEvent(new Event('vm-updated')));
         } else if (vmsList.length === 0) {
           grid.innerHTML = '';
           if (empty) empty.style.display = 'block';
@@ -876,15 +1037,28 @@ export function initManagement() {
           if (empty) empty.style.display = 'none';
           // VMs decision 2 (owner, 16 Nov): Settings shows status, one line per machine; starting, stopping
           // and changing machines happen in the VM window only (two lists with different buttons and words)
-          const stateWord = (vm) => (isShuttingDown(vm) ? t('vmp.st_shutting', 'Shutting down')
-            : vm.state === 'running' ? t('mvm.st_running', 'Running')
-            : vm.state === 'paused' ? t('mvm.st_paused', 'Paused')
-            : t('mvm.st_stopped', 'Stopped'));
-          grid.innerHTML = `<ul class="mgmt-vm-lines">${vmsList.map((vm) => {
-            const ramGb = vm.ram_gb ? `${vm.ram_gb} GB` : (vm.memory_mb ? (vm.memory_mb >= 1024 ? `${formatFixed(vm.memory_mb / 1024, 0)} GB` : `${vm.memory_mb} MB`) : '1 GB');
-            const cores = vm.vcpus || vm.cores || 1;
-            const osType = vm.os_family ? (vm.os_family.charAt(0).toUpperCase() + vm.os_family.slice(1)) : (vm.os_type || 'Linux');
-            return `<li class="mgmt-vm-card mgmt-vm-line is-${escapeHtml(vm.state || 'stopped')}" data-vm-id="${escapeHtml(vm.id)}">
+          const stateWord = (vm) =>
+            isShuttingDown(vm)
+              ? t('vmp.st_shutting', 'Shutting down')
+              : vm.state === 'running'
+                ? t('mvm.st_running', 'Running')
+                : vm.state === 'paused'
+                  ? t('mvm.st_paused', 'Paused')
+                  : t('mvm.st_stopped', 'Stopped');
+          grid.innerHTML = `<ul class="mgmt-vm-lines">${vmsList
+            .map((vm) => {
+              const ramGb = vm.ram_gb
+                ? `${vm.ram_gb} GB`
+                : vm.memory_mb
+                  ? vm.memory_mb >= 1024
+                    ? `${formatFixed(vm.memory_mb / 1024, 0)} GB`
+                    : `${vm.memory_mb} MB`
+                  : '1 GB';
+              const cores = vm.vcpus || vm.cores || 1;
+              const osType = vm.os_family
+                ? vm.os_family.charAt(0).toUpperCase() + vm.os_family.slice(1)
+                : vm.os_type || 'Linux';
+              return `<li class="mgmt-vm-card mgmt-vm-line is-${escapeHtml(vm.state || 'stopped')}" data-vm-id="${escapeHtml(vm.id)}">
                 <div class="mgmt-vm-line-text">
                   <div class="mgx-fs13-bold-strong-2">${escapeHtml(vm.name || vm.id)}</div>
                   <div class="mgx-xs-muted">${escapeHtml(osType)} • ${cores} vCPU • ${ramGb} RAM</div>
@@ -892,7 +1066,8 @@ export function initManagement() {
                 </div>
                 <span class="mgmt-vm-state">${escapeHtml(stateWord(vm))}</span>
               </li>`;
-          }).join('')}</ul>
+            })
+            .join('')}</ul>
           <button type="button" class="btn-pill-toggle is-primary" id="mgmt-vms-open-window">${escapeHtml(t('mvm.open_window', 'Open the virtual machines window to start, stop or change them'))}</button>`;
           grid.querySelector('#mgmt-vms-open-window')?.addEventListener('click', () => {
             document.getElementById('btn-mgmt-vm-launch-window')?.click();
@@ -913,20 +1088,34 @@ export function initManagement() {
               ${escapeHtml(tel.kvm.details || '')}
             </div>
             <div class="mgx-grid">
-              ${tel.cpu_capacity?.host_threads ? `<div class="mgx-box-2">
+              ${
+                tel.cpu_capacity?.host_threads
+                  ? `<div class="mgx-box-2">
                 <div class="mgx-xs-muted">${t('mvm.host_threads', 'CPU Host Threads')}</div>
                 <div class="mgx-fs14-bold-strong">${t('mvm.threads', '{count, plural, one {# Thread} other {# Threads}}', { count: tel.cpu_capacity.host_threads })}</div>
-              </div>` : ''}
-              ${typeof tel.vhost_net === 'boolean' ? `<div class="mgx-box-2">
+              </div>`
+                  : ''
+              }
+              ${
+                typeof tel.vhost_net === 'boolean'
+                  ? `<div class="mgx-box-2">
                 <div class="mgx-xs-muted">${t('mvm.vhost', 'vhost-net Acceleration')}</div>
                 <div class="${tel.vhost_net ? 'mgx-fs14-bold-ok' : 'mgx-fs14-bold-strong'}">${tel.vhost_net ? t('mvm.supported', 'Supported') : t('mvm.vhost_none', 'Not available')}</div>
-              </div>` : ''}
-              ${Array.isArray(tel.bridges) ? `<div class="mgx-box-2">
+              </div>`
+                  : ''
+              }
+              ${
+                Array.isArray(tel.bridges)
+                  ? `<div class="mgx-box-2">
                 <div class="mgx-xs-muted">${t('mvm.bridges', 'Network bridges')}</div>
-                ${tel.bridges.length
-                  ? `<div class="mgx-fs14-bold-brand" translate="no">${escapeHtml(tel.bridges.join(' / '))}</div>`
-                  : `<div class="mgx-fs14-bold-strong">${t('mvm.bridges_none', 'None found')}</div>`}
-              </div>` : ''}
+                ${
+                  tel.bridges.length
+                    ? `<div class="mgx-fs14-bold-brand" translate="no">${escapeHtml(tel.bridges.join(' / '))}</div>`
+                    : `<div class="mgx-fs14-bold-strong">${t('mvm.bridges_none', 'None found')}</div>`
+                }
+              </div>`
+                  : ''
+              }
             </div>
           </div>
         `;
@@ -961,7 +1150,9 @@ export function initManagement() {
       // Ask and Search live in the Kib window (AI decision 1); someone who may not change Kib's
       // settings gets the window too, instead of a page that is not theirs
       if (desiredSubPane === 'mgmt-pane-ai-visual') setAiVisualFiltersDrawerOpen(true);
-      /** @type {any} */ (window).openKibWindow(KIB_WINDOW_PANES.has(desiredSubPane || '') ? desiredSubPane : 'mgmt-pane-ai-chat');
+      /** @type {any} */ (window).openKibWindow(
+        KIB_WINDOW_PANES.has(desiredSubPane || '') ? desiredSubPane : 'mgmt-pane-ai-chat'
+      );
       return false;
     }
     if (mayNotOpen(targetId, desiredSubPane)) {
@@ -1011,7 +1202,9 @@ export function initManagement() {
 
     const currentEntry = highlightEntry(targetId, desiredSubPane);
     if (currentEntry && typeof currentEntry.scrollIntoView === 'function') {
-      try { currentEntry.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }); } catch (_) {}
+      try {
+        currentEntry.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      } catch (_) {}
     }
 
     let sectionName = t('mgmt.title', 'Settings');
@@ -1066,7 +1259,9 @@ export function initManagement() {
           if (isActive && typeof t.scrollIntoView === 'function') {
             const tabsContainer = t.closest('.mgmt-inner-tabs');
             if (tabsContainer && tabsContainer.scrollWidth > tabsContainer.clientWidth) {
-              try { t.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }); } catch (_) {}
+              try {
+                t.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+              } catch (_) {}
             }
           }
         });
@@ -1076,7 +1271,9 @@ export function initManagement() {
         // the section starts at the top, or at the pane the link names when it is not the tab's first
         const contentPane = parentCard.closest('.mgmt-content-pane') || document.querySelector('.mgmt-content-pane');
         if (contentPane) contentPane.scrollTop = 0;
-        (scrollTo || (panes[0] !== desiredSubPane ? document.getElementById(desiredSubPane) : null))?.scrollIntoView?.({ block: 'start' });
+        (scrollTo || (panes[0] !== desiredSubPane ? document.getElementById(desiredSubPane) : null))?.scrollIntoView?.({
+          block: 'start',
+        });
       } else {
         let activeTabBtn = parentCard.querySelector('.mgmt-inner-tab.active');
         if (!activeTabBtn) {
@@ -1110,9 +1307,9 @@ export function initManagement() {
     tab.addEventListener('click', () => {
       const parentCard = tab.closest('.mgmt-detail-card');
       if (!parentCard) return;
-      
+
       // Update tab buttons
-      parentCard.querySelectorAll('.mgmt-inner-tab').forEach(t => {
+      parentCard.querySelectorAll('.mgmt-inner-tab').forEach((t) => {
         t.classList.remove('active');
         t.setAttribute('aria-selected', 'false');
       });
@@ -1121,15 +1318,17 @@ export function initManagement() {
       if (typeof tab.scrollIntoView === 'function') {
         const tabsContainer = tab.closest('.mgmt-inner-tabs');
         if (tabsContainer && tabsContainer.scrollWidth > tabsContainer.clientWidth) {
-          try { tab.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }); } catch (_) {}
+          try {
+            tab.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+          } catch (_) {}
         }
       }
-      
+
       // Update tab panes
       const targetPaneId = tab.dataset.tabTarget;
       const panes = tabPanes(tab);
       showPanes(parentCard, panes);
-      
+
       // Reset scroll position to top of pane when switching sub-tabs
       const contentPane = tab.closest('.mgmt-content-pane') || document.querySelector('.mgmt-content-pane');
       if (contentPane && contentPane.scrollTop > 0) {
@@ -1147,7 +1346,9 @@ export function initManagement() {
   document.querySelectorAll('.mgmt-sidebar-item').forEach((item) => {
     item.addEventListener('click', () => {
       if (typeof item.scrollIntoView === 'function') {
-        try { item.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }); } catch (_) {}
+        try {
+          item.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        } catch (_) {}
       }
       const targetId = item.dataset.mgmtTarget;
       if (item.dataset.mgmtAction === 'files') {
@@ -1245,12 +1446,18 @@ export function initManagement() {
     win.classList.add('window-focus-pulse');
     setTimeout(() => win.classList.remove('window-focus-pulse'), 850);
 
-    if (_unbindMgmtTrap) { _unbindMgmtTrap(); }
+    if (_unbindMgmtTrap) {
+      _unbindMgmtTrap();
+    }
     // a window, not a modal: Tab may leave it; Esc closes it (UX-30)
-    _unbindMgmtTrap = trapFocus(win, () => {
-      const cBtn = document.getElementById('management-close');
-      if (cBtn) cBtn.click();
-    }, { trap: false });
+    _unbindMgmtTrap = trapFocus(
+      win,
+      () => {
+        const cBtn = document.getElementById('management-close');
+        if (cBtn) cBtn.click();
+      },
+      { trap: false }
+    );
 
     if (window.DockManager) {
       window.DockManager.render();
@@ -1349,7 +1556,6 @@ export function initManagement() {
   }
   initNetworkControls();
 
-
   // UPS telemetry refresh button & drawer controls
   // Refresh is wired once, by initUpsDrawerControls (two handlers gave two messages, SET-15)
   initUpsDrawerControls();
@@ -1447,7 +1653,11 @@ export function initManagement() {
   if (refreshChassisBtn) {
     refreshChassisBtn.addEventListener('click', () => {
       const mount = document.getElementById('mgmt-chassis-twin-mount');
-      if (mount) refreshAndSay(() => fetchAndRenderChassisTwin(mount), t('toast.chassis_digital_twin_refreshed', 'Drive bays refreshed.'));
+      if (mount)
+        refreshAndSay(
+          () => fetchAndRenderChassisTwin(mount),
+          t('toast.chassis_digital_twin_refreshed', 'Drive bays refreshed.')
+        );
     });
   }
 
@@ -1456,7 +1666,11 @@ export function initManagement() {
   if (refreshTopoBtn) {
     refreshTopoBtn.addEventListener('click', () => {
       const mount = document.getElementById('mgmt-storage-topo-mount');
-      if (mount) refreshAndSay(() => fetchAndRenderStorageTopology(mount), t('toast.storage_topology_refreshed', 'Storage topology refreshed.'));
+      if (mount)
+        refreshAndSay(
+          () => fetchAndRenderStorageTopology(mount),
+          t('toast.storage_topology_refreshed', 'Storage topology refreshed.')
+        );
     });
   }
 
@@ -1469,7 +1683,6 @@ export function initManagement() {
       });
     });
   }
-
 
   // Network shares refresh & create buttons
   const refreshSharesBtn = document.getElementById('btn-refresh-shares');
@@ -1487,16 +1700,21 @@ export function initManagement() {
   // every link shared from this NAS, with "Stop sharing" (SET-01)
   const sharedLinksBtn = document.getElementById('btn-show-shared-links');
   if (sharedLinksBtn) {
-    sharedLinksBtn.addEventListener('click', () => import('./shared-links.js').then((m) => m.openSharedLinks({ everyone: true })));
+    sharedLinksBtn.addEventListener('click', () =>
+      import('./shared-links.js').then((m) => m.openSharedLinks({ everyone: true }))
+    );
   }
-
 
   // Remote & Cloud Storage refresh button
   const refreshRemotesBtn = document.getElementById('btn-refresh-remotes');
   if (refreshRemotesBtn) {
     refreshRemotesBtn.addEventListener('click', () => {
       const mount = document.getElementById('mgmt-storage-remotes-mount');
-      if (mount) refreshAndSay(() => fetchAndRenderRemoteStorage(mount), t('toast.remote_storage_refreshed', 'Remote storage refreshed.'));
+      if (mount)
+        refreshAndSay(
+          () => fetchAndRenderRemoteStorage(mount),
+          t('toast.remote_storage_refreshed', 'Remote storage refreshed.')
+        );
     });
   }
 
@@ -1603,11 +1821,17 @@ export function initManagement() {
             payload.target_user = document.getElementById('repl-target-user')?.value.trim() || 'root';
           }
           await api.post('/api/storage/replication/jobs', payload);
-          showToast(t('toast.replication_pipeline_created', 'Replication pipeline \'{name}\' created.', { name: payload.name }), 'success');
+          showToast(
+            t('toast.replication_pipeline_created', "Replication pipeline '{name}' created.", { name: payload.name }),
+            'success'
+          );
           closeReplModal();
           fetchAndRenderReplication();
         } catch (err) {
-          showToast(t('toast.failed_to_create_pipeline', 'Failed to create pipeline: {error}', { error: err.message }), 'error');
+          showToast(
+            t('toast.failed_to_create_pipeline', 'Failed to create pipeline: {error}', { error: err.message }),
+            'error'
+          );
         } finally {
           if (submitBtn) {
             submitBtn.disabled = false;
@@ -1760,13 +1984,13 @@ export function initManagement() {
   if (saveNotifBtn) {
     saveNotifBtn.addEventListener('click', saveNotificationsConfig);
   }
-  document.querySelectorAll('.notif-cfg-btn').forEach(btn => {
+  document.querySelectorAll('.notif-cfg-btn').forEach((btn) => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       openChannelConfigModal(btn.dataset.channel);
     });
   });
-  document.querySelectorAll('.notif-test-btn').forEach(btn => {
+  document.querySelectorAll('.notif-test-btn').forEach((btn) => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       testSingleChannel(btn.dataset.channel);
@@ -1850,7 +2074,10 @@ export function initManagement() {
         syncBackupJobForm();
         fetchAndRenderBackupJobs();
       } catch (err) {
-        showToast(t('toast.failed_to_save_backup_job', 'Failed to save backup job: {error}', { error: err.message }), 'error');
+        showToast(
+          t('toast.failed_to_save_backup_job', 'Failed to save backup job: {error}', { error: err.message }),
+          'error'
+        );
       }
     });
   }
@@ -1900,12 +2127,18 @@ export function initManagement() {
 
       try {
         await api.post('/api/backup/snapshots', payload);
-        showToast(t('toast.filesystem_snapshot_created_successfully', 'Filesystem snapshot created successfully!'), 'success');
+        showToast(
+          t('toast.filesystem_snapshot_created_successfully', 'Filesystem snapshot created successfully!'),
+          'success'
+        );
         closeSnapshotModal();
         formSnapshot.reset();
         fetchAndRenderSystemSnapshots();
       } catch (err) {
-        showToast(t('toast.failed_to_create_snapshot', 'Failed to create snapshot: {error}', { error: err.message }), 'error');
+        showToast(
+          t('toast.failed_to_create_snapshot', 'Failed to create snapshot: {error}', { error: err.message }),
+          'error'
+        );
       }
     });
   }
@@ -1933,7 +2166,9 @@ export function initManagement() {
 
   // Language switch update
   window.addEventListener('kiboto:lang-changed', () => {
-    const activeSection = Array.from(document.querySelectorAll('.mgmt-detail-card')).find((c) => c.style.display !== 'none');
+    const activeSection = Array.from(document.querySelectorAll('.mgmt-detail-card')).find(
+      (c) => c.style.display !== 'none'
+    );
     if (activeSection) {
       showSection(activeSection.id);
     } else if (hubView && hubView.style.display !== 'none') {
@@ -1948,6 +2183,5 @@ export function initManagement() {
 
   // Kib Multi-Modal RAG & Visual Search Engine
   initAiKnowledgeEngine();
-  if (typeof restoreHardwareTabsToManagement === "function") restoreHardwareTabsToManagement();
+  if (typeof restoreHardwareTabsToManagement === 'function') restoreHardwareTabsToManagement();
 }
-

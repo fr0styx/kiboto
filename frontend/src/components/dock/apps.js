@@ -28,7 +28,7 @@ export const KNOWN_APPS = {
           document.getElementById('fm-desktop-icon')?.click();
         }
       }
-    }
+    },
   },
   management: {
     id: 'management',
@@ -40,7 +40,7 @@ export const KNOWN_APPS = {
       } else {
         document.getElementById('management-desktop-icon')?.click();
       }
-    }
+    },
   },
   console: {
     id: 'console',
@@ -48,13 +48,13 @@ export const KNOWN_APPS = {
     getTitle: () => t('dock.kiboto', 'Kiboto'),
     launch: () => {
       openConsoleWindow();
-    }
+    },
   },
   smart: {
     id: 'smart',
     icon: '#i-disk',
     getTitle: () => t('dh.title', 'Drive Health'),
-    launch: (devName = null) => ZettEventBus.emit('modal:smart:open', devName)
+    launch: (devName = null) => ZettEventBus.emit('modal:smart:open', devName),
   },
   'container-inspector': {
     id: 'container-inspector',
@@ -64,7 +64,7 @@ export const KNOWN_APPS = {
       if (data && data.cid && typeof window.openContainerInspector === 'function') {
         window.openContainerInspector(data.cid, data.cname);
       }
-    }
+    },
   },
   containers: {
     id: 'containers',
@@ -87,7 +87,7 @@ export const KNOWN_APPS = {
           document.getElementById('containers-desktop-icon')?.click();
         }
       }
-    }
+    },
   },
   vm: {
     id: 'vm',
@@ -108,7 +108,7 @@ export const KNOWN_APPS = {
           document.getElementById('vm-desktop-icon')?.click();
         }
       }
-    }
+    },
   },
   'app-deploy': {
     id: 'app-deploy',
@@ -121,7 +121,7 @@ export const KNOWN_APPS = {
         if (DockManager) DockManager.restore('app-deploy');
         if (win) bringToFront(win);
       }
-    }
+    },
   },
   notif: {
     id: 'notif',
@@ -132,7 +132,7 @@ export const KNOWN_APPS = {
       if (panel && (panel.style.display === 'none' || panel.style.display === '')) {
         if (window.toggleNotificationCenter) window.toggleNotificationCenter();
       }
-    }
+    },
   },
   'cloud-remote': {
     id: 'cloud-remote',
@@ -149,7 +149,7 @@ export const KNOWN_APPS = {
           if (crWin) bringToFront(crWin);
         }
       }
-    }
+    },
   },
   personalization: {
     id: 'personalization',
@@ -159,7 +159,7 @@ export const KNOWN_APPS = {
       if (typeof window.openPersonalizationWindow === 'function') {
         window.openPersonalizationWindow(tab);
       }
-    }
+    },
   },
   zettai: {
     id: 'zettai',
@@ -174,8 +174,8 @@ export const KNOWN_APPS = {
       } else {
         document.getElementById('management-desktop-icon')?.click();
       }
-    }
-  }
+    },
+  },
 };
 
 export function toggleFmWindowSwitcher(anchorEl, fmWindows = []) {
@@ -244,7 +244,7 @@ export function toggleFmWindowSwitcher(anchorEl, fmWindows = []) {
   const rect = anchorEl.getBoundingClientRect();
   const popW = 280;
   const popH = popover.offsetHeight || 180;
-  let left = rect.left + (rect.width / 2) - (popW / 2);
+  let left = rect.left + rect.width / 2 - popW / 2;
   left = Math.max(12, Math.min(window.innerWidth - popW - 12, left));
   let top = rect.top - popH - 12;
   if (top < 10) top = rect.bottom + 12;
@@ -354,7 +354,7 @@ export function showDockItemContextMenu(x, y, id, title, isPinned, isRunning, op
   menu.style.display = 'block';
   const menuW = 180;
   const menuH = menu.offsetHeight || 90;
-  const left = Math.max(10, Math.min(window.innerWidth - menuW - 10, x - (menuW / 2)));
+  const left = Math.max(10, Math.min(window.innerWidth - menuW - 10, x - menuW / 2));
   const top = Math.max(10, Math.min(window.innerHeight - menuH - 60, y - menuH - 8));
   menu.style.left = `${left}px`;
   menu.style.top = `${top}px`;

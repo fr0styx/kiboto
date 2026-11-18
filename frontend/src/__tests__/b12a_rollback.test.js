@@ -14,7 +14,10 @@ describe('B12a (FEAT-02): roll a share back to a snapshot', () => {
     const after = vi.fn();
     await rollbackShare('photos@auto-20261027-1000', after);
     expect(api.post).toHaveBeenCalledWith('/api/snapshots/photos%40auto-20261027-1000/rollback', {});
-    expect(toast.showToast).toHaveBeenCalledWith(expect.stringContaining('photos@before-rollback-20261027-2200'), 'success');
+    expect(toast.showToast).toHaveBeenCalledWith(
+      expect.stringContaining('photos@before-rollback-20261027-2200'),
+      'success'
+    );
     expect(after).toHaveBeenCalled();
   });
 

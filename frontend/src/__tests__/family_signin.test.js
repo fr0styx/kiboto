@@ -13,10 +13,24 @@ const USERS = [
 ];
 const OFF = { enabled: false, running: false, url: '', https_ready: true, people: 0, apps: [] };
 const ON = {
-  enabled: true, running: true, url: 'https://attic.x.ts.net:11411', https_ready: true, people: 2,
-  apps: [{ key: 'immich', name: 'Immich', connected: false, url: 'https://attic.x.ts.net:8443/' }, { key: 'nextcloud', name: 'Nextcloud', connected: true, url: '' }],
+  enabled: true,
+  running: true,
+  url: 'https://attic.x.ts.net:11411',
+  https_ready: true,
+  people: 2,
+  apps: [
+    { key: 'immich', name: 'Immich', connected: false, url: 'https://attic.x.ts.net:8443/' },
+    { key: 'nextcloud', name: 'Nextcloud', connected: true, url: '' },
+  ],
 };
-const CONNECTED = { app: 'immich', name: 'Immich', issuer: 'https://attic.x.ts.net:11411', client_id: 'c1', client_secret: 'sek', where: 'Immich → Administration' };
+const CONNECTED = {
+  app: 'immich',
+  name: 'Immich',
+  issuer: 'https://attic.x.ts.net:11411',
+  client_id: 'c1',
+  client_secret: 'sek',
+  where: 'Immich → Administration',
+};
 
 describe('family sign-in (NFEAT-6)', () => {
   beforeEach(() => {
@@ -90,7 +104,7 @@ describe('family sign-in (NFEAT-6)', () => {
     /** @type {HTMLElement} */ (m.querySelector('[data-fs-connect="immich"]')).click();
     await tick();
     expect(toast.showToast).not.toHaveBeenCalled();
-    api.post.mockRejectedValueOnce(new Error('Pocket ID isn\'t answering yet'));
+    api.post.mockRejectedValueOnce(new Error("Pocket ID isn't answering yet"));
     /** @type {HTMLElement} */ (m.querySelector('[data-fs-link="u1"]')).click();
     await tick();
     expect(toast.showToast).toHaveBeenCalledWith("Pocket ID isn't answering yet", 'error');

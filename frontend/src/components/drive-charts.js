@@ -31,7 +31,13 @@ export function scale(points, w, h, pad = 4) {
 
 /** A line chart with an accessible name; `label` says what it shows in words. */
 export function lineChart(points, { width = 320, height = 80, label = '', className = '' } = {}) {
-  const svg = svgEl('svg', { viewBox: `0 0 ${width} ${height}`, width: '100%', height, role: 'img', class: `dh-chart ${className}`.trim() });
+  const svg = svgEl('svg', {
+    viewBox: `0 0 ${width} ${height}`,
+    width: '100%',
+    height,
+    role: 'img',
+    class: `dh-chart ${className}`.trim(),
+  });
   if (label) {
     const title = svgEl('title');
     title.textContent = label;

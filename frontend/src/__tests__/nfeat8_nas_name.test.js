@@ -6,7 +6,15 @@ const { api } = await import('../api.js');
 const { showToast } = await import('../toast.js');
 const { loadNasNameCard, nasNameStatus } = await import('../components/management/nas-name.js');
 
-const ON = { enabled: true, running: true, name: 'kiboto', address: 'kiboto.local', url: 'http://kiboto.local:8082', also_answers: [], error: '' };
+const ON = {
+  enabled: true,
+  running: true,
+  name: 'kiboto',
+  address: 'kiboto.local',
+  url: 'http://kiboto.local:8082',
+  also_answers: [],
+  error: '',
+};
 const q = (s) => document.querySelector(s);
 
 describe('find this NAS by name (NFEAT-8)', () => {
@@ -27,7 +35,13 @@ describe('find this NAS by name (NFEAT-8)', () => {
 
   it('shows the name and link, renames and turns it off', async () => {
     vi.spyOn(api, 'get').mockResolvedValue(ON);
-    const put = vi.spyOn(api, 'put').mockResolvedValue({ ...ON, name: 'smith-nas', address: 'smith-nas.local', url: 'http://smith-nas.local:8082', also_answers: ['zettnas'] });
+    const put = vi.spyOn(api, 'put').mockResolvedValue({
+      ...ON,
+      name: 'smith-nas',
+      address: 'smith-nas.local',
+      url: 'http://smith-nas.local:8082',
+      also_answers: ['zettnas'],
+    });
     await loadNasNameCard();
     expect(q('#nas-name-toggle').getAttribute('aria-pressed')).toBe('true');
     expect(q('#nas-name-input').value).toBe('kiboto');
@@ -37,7 +51,9 @@ describe('find this NAS by name (NFEAT-8)', () => {
     q('#nas-name-input').dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
     await vi.waitFor(() => expect(q('#nas-name-old').hidden).toBe(false));
     expect(put).toHaveBeenCalledWith('/api/network/nas-name', { name: 'smith-nas' });
-    expect(q('#nas-name-old').textContent).toBe('Also still answers to zettnas.local, so older bookmarks keep working.');
+    expect(q('#nas-name-old').textContent).toBe(
+      'Also still answers to zettnas.local, so older bookmarks keep working.'
+    );
     put.mockResolvedValue({ ...ON, enabled: false, running: false });
     q('#nas-name-toggle').click();
     await vi.waitFor(() => expect(q('#nas-name-toggle').getAttribute('aria-pressed')).toBe('false'));

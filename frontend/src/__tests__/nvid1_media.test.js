@@ -14,10 +14,17 @@ describe('converted videos (NVID-1)', () => {
   });
 
   it('plays a short or kept clip as a plain file and streams a long one while it is kept', () => {
-    expect(convertedPlan(hevcPcm, '/v/a.MOV', probe(['hvc1']))).toEqual({ src: convertedUrl('/v/a.MOV', 'copy'), live: false, mode: 'copy' });
+    expect(convertedPlan(hevcPcm, '/v/a.MOV', probe(['hvc1']))).toEqual({
+      src: convertedUrl('/v/a.MOV', 'copy'),
+      live: false,
+      mode: 'copy',
+    });
     const long = { ...hevcPcm, duration: 900 };
     expect(convertedPlan(long, '/v/a.MOV', probe(['hvc1']))).toEqual({
-      src: compatStreamUrl('/v/a.MOV', 0, 'copy'), live: true, mode: 'copy', prepare: convertedUrl('/v/a.MOV', 'copy'),
+      src: compatStreamUrl('/v/a.MOV', 0, 'copy'),
+      live: true,
+      mode: 'copy',
+      prepare: convertedUrl('/v/a.MOV', 'copy'),
     });
     expect(convertedPlan({ ...long, converted: { copy: true } }, '/v/a.MOV', probe(['hvc1'])).live).toBe(false);
     expect(compatStreamUrl('/v/a b.MOV', 3)).toBe('/api/fs/stream/compat?path=%2Fv%2Fa%20b.MOV&start=3.00&mode=full');

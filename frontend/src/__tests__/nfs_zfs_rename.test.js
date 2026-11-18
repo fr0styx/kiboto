@@ -1,4 +1,3 @@
-
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   openCreateStoragePoolModal,
@@ -140,7 +139,12 @@ describe('NFS Exports, OpenZFS RAIDZ Provisioning & Storage Pool Renaming', () =
     form.dispatchEvent(new Event('submit'));
 
     await vi.waitFor(() => expect(postSpy).toHaveBeenCalled());
-    expect(confirmSpy).toHaveBeenCalledWith('Open this folder to everyone?', expect.stringContaining('without a password'), expect.any(Function), expect.any(Function));
+    expect(confirmSpy).toHaveBeenCalledWith(
+      'Open this folder to everyone?',
+      expect.stringContaining('without a password'),
+      expect.any(Function),
+      expect.any(Function)
+    );
     expect(postSpy).toHaveBeenCalledWith('/api/storage/shares', {
       name: 'k8s_sql',
       path: '/mnt/storage/k8s_sql',
@@ -162,7 +166,9 @@ describe('NFS Exports, OpenZFS RAIDZ Provisioning & Storage Pool Renaming', () =
   });
 
   it('opens Rename Storage Pool modal and dispatches rename API request', async () => {
-    const postSpy = vi.spyOn(api, 'post').mockResolvedValue({ status: 'renamed', old_name: 'old_tank', new_name: 'vault_tank' });
+    const postSpy = vi
+      .spyOn(api, 'post')
+      .mockResolvedValue({ status: 'renamed', old_name: 'old_tank', new_name: 'vault_tank' });
     const successCb = vi.fn();
 
     openRenameStoragePoolModal('old_tank', 'Old Tank Pool', successCb);

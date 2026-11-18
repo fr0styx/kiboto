@@ -9,7 +9,9 @@ const { openFilePreviewModal, closeFilePreviewModal } = await import('../compone
 const q = (s) => document.querySelector(s);
 const meta = () => q('#quicklook-meta').textContent;
 async function open(name, reply) {
-  vi.spyOn(api, 'get').mockImplementation(async () => (reply instanceof Error ? Promise.reject(reply) : { status: 'ok', name, size: 2048, ...reply }));
+  vi.spyOn(api, 'get').mockImplementation(async () =>
+    reply instanceof Error ? Promise.reject(reply) : { status: 'ok', name, size: 2048, ...reply }
+  );
   await openFilePreviewModal(`/mnt/user/docs/${name}`, name);
   await vi.waitFor(() => expect(meta()).not.toMatch(/^Loading/));
 }
@@ -45,7 +47,9 @@ describe('preview by file type', () => {
     expect(q('.quicklook-markdown script')).toBeNull();
     closeFilePreviewModal();
     await open('manual.pdf', { type: 'pdf' });
-    expect(q('#quicklook-body iframe').getAttribute('src')).toBe('/api/fs/download?path=%2Fmnt%2Fuser%2Fdocs%2Fmanual.pdf');
+    expect(q('#quicklook-body iframe').getAttribute('src')).toBe(
+      '/api/fs/download?path=%2Fmnt%2Fuser%2Fdocs%2Fmanual.pdf'
+    );
     closeFilePreviewModal();
     await open('blob.bin', { type: 'hex', hex_dump: ['00 01', '02 03'] });
     expect(q('.quicklook-hex').textContent).toBe('00 01\n02 03');
@@ -68,7 +72,7 @@ describe('preview by file type', () => {
     vi.spyOn(api, 'get').mockImplementation(async (url) =>
       url.includes('info') || url.includes('probe') || url.includes('media')
         ? { video: { width: 1920, height: 1080, codec: 'h264' }, container: 'mp4', duration: 90 }
-        : { status: 'ok', type: 'media', ext: '.mp4', name: 'clip.mp4', size: 2048 },
+        : { status: 'ok', type: 'media', ext: '.mp4', name: 'clip.mp4', size: 2048 }
     );
     await openFilePreviewModal('/mnt/user/docs/clip.mp4', 'clip.mp4');
     await vi.waitFor(() => expect(meta()).toMatch(/^Video.*1920×1080/));

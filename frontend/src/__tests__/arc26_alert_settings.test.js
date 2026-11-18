@@ -42,10 +42,27 @@ afterEach(async () => {
 describe('alert settings pane', () => {
   it('shows a fully set-up household', async () => {
     await load({
-      enabled: true, digest_mode: 'daily', digest_hour: 19, weekly_report: false, language: 'de',
-      discord_enabled: true, discord_webhook_url: 'https://d', telegram_enabled: true, telegram_bot_token: 'x', telegram_chat_id: '1',
-      email_enabled: true, smtp_host: 'mail', ntfy_enabled: true, ntfy_topic: 'nas', webhook_enabled: true, webhook_url: 'https://w',
-      apprise_urls: ['a://1', 'b://2'], notify_on_fan: false, hdd_temp_threshold: 45, cpu_temp_threshold: 90, cooldown_seconds: 600,
+      enabled: true,
+      digest_mode: 'daily',
+      digest_hour: 19,
+      weekly_report: false,
+      language: 'de',
+      discord_enabled: true,
+      discord_webhook_url: 'https://d',
+      telegram_enabled: true,
+      telegram_bot_token: 'x',
+      telegram_chat_id: '1',
+      email_enabled: true,
+      smtp_host: 'mail',
+      ntfy_enabled: true,
+      ntfy_topic: 'nas',
+      webhook_enabled: true,
+      webhook_url: 'https://w',
+      apprise_urls: ['a://1', 'b://2'],
+      notify_on_fan: false,
+      hdd_temp_threshold: 45,
+      cpu_temp_threshold: 90,
+      cooldown_seconds: 600,
     });
     expect($('notif-digest-mode').value).toBe('daily');
     expect($('notif-digest-hour').value).toBe('19');
@@ -53,11 +70,14 @@ describe('alert settings pane', () => {
     expect($('notif-language').value).toBe('de');
     expect($('notif-language').options.length).toBeGreaterThan(1);
     expect($('notif-master-status-badge').textContent).toBe('Active');
-    for (const c of ['discord', 'telegram', 'email', 'ntfy', 'webhook']) expect($(`notif-badge-${c}`).textContent).toBe('Active');
+    for (const c of ['discord', 'telegram', 'email', 'ntfy', 'webhook'])
+      expect($(`notif-badge-${c}`).textContent).toBe('Active');
     expect($('notif-badge-apprise').textContent).toBe('2 URLs');
     expect($('notif-toggle-fan').checked).toBe(false);
     expect($('notif-toggle-smart').checked).toBe(true);
-    expect([$('notif-input-hdd-temp').value, $('notif-input-cpu-temp').value, $('notif-input-cooldown').value]).toEqual(['45', '90', '10']);
+    expect([$('notif-input-hdd-temp').value, $('notif-input-cpu-temp').value, $('notif-input-cooldown').value]).toEqual(
+      ['45', '90', '10']
+    );
     await vi.waitFor(() => expect(renderFrigateEvents).toHaveBeenCalledWith($('frigate-events-mount')));
   });
 
@@ -70,7 +90,9 @@ describe('alert settings pane', () => {
     expect($('notif-language').value).toBe('en');
     expect($('notif-master-status-badge').textContent).not.toBe('Active');
     expect($('notif-badge-apprise').textContent).toBe($('notif-badge-discord').textContent);
-    expect([$('notif-input-hdd-temp').value, $('notif-input-cpu-temp').value, $('notif-input-cooldown').value]).toEqual(['50', '80', '30']);
+    expect([$('notif-input-hdd-temp').value, $('notif-input-cpu-temp').value, $('notif-input-cooldown').value]).toEqual(
+      ['50', '80', '30']
+    );
   });
 
   it('says when the settings could not be read', async () => {
@@ -95,8 +117,16 @@ describe('alert settings pane', () => {
     const sent = post.mock.calls[0][1];
     expect(post.mock.calls[0][0]).toBe('/api/notifications/config');
     expect(sent).toMatchObject({
-      enabled: true, notify_on_ups: false, notify_on_smart: true, hdd_temp_threshold: 80, cpu_temp_threshold: 40,
-      cooldown_seconds: 60, digest_mode: 'daily', digest_hour: 23, weekly_report: false, language: 'fr',
+      enabled: true,
+      notify_on_ups: false,
+      notify_on_smart: true,
+      hdd_temp_threshold: 80,
+      cpu_temp_threshold: 40,
+      cooldown_seconds: 60,
+      digest_mode: 'daily',
+      digest_hour: 23,
+      weekly_report: false,
+      language: 'fr',
     });
     expect(showToast).toHaveBeenLastCalledWith('Notification settings saved successfully!', 'success');
     expect($('notif-master-status-badge').textContent).toBe('Active');
@@ -148,7 +178,10 @@ describe('alert settings pane', () => {
     const btn = document.querySelector('.notif-test-btn');
     post.mockResolvedValueOnce({ success: true, latency_ms: 42 });
     await n.testSingleChannel('ntfy');
-    expect(post).toHaveBeenCalledWith('/api/notifications/test-channel', { channel: 'ntfy', config: expect.objectContaining({ ntfy_topic: 'nas' }) });
+    expect(post).toHaveBeenCalledWith('/api/notifications/test-channel', {
+      channel: 'ntfy',
+      config: expect.objectContaining({ ntfy_topic: 'nas' }),
+    });
     expect(showToast).toHaveBeenLastCalledWith('✓ NTFY: Delivered in 42ms', 'success');
     expect(btn.textContent).toBe('Test');
     expect(btn.disabled).toBe(false);
@@ -159,7 +192,9 @@ describe('alert settings pane', () => {
 
   it('every channel dialog saves what was typed and keeps a hidden secret', async () => {
     await load({ telegram_bot_token: 'old', smtp_pass: 'oldpass', ntfy_token: 'oldtk' });
-    const type = (id, v) => { $(id).value = v; };
+    const type = (id, v) => {
+      $(id).value = v;
+    };
     const save = async (channel, fill, enable = true) => {
       n.openChannelConfigModal(channel);
       expect($('modal-notification-channel').style.display).toBe('flex');
@@ -170,21 +205,57 @@ describe('alert settings pane', () => {
       await vi.waitFor(() => expect(post.mock.calls.length).toBeGreaterThan(0));
       return post.mock.lastCall[1];
     };
-    expect(await save('discord', () => type('cfg-discord-url', ' https://d/1 '))).toMatchObject({ discord_enabled: true, discord_webhook_url: 'https://d/1' });
-    expect(await save('telegram', () => { type('cfg-telegram-token', '********'); type('cfg-telegram-chat', '-100'); })).toMatchObject({ telegram_bot_token: 'old', telegram_chat_id: '-100' });
-    expect(await save('telegram', () => type('cfg-telegram-token', 'new'))).toMatchObject({ telegram_bot_token: 'new' });
+    expect(await save('discord', () => type('cfg-discord-url', ' https://d/1 '))).toMatchObject({
+      discord_enabled: true,
+      discord_webhook_url: 'https://d/1',
+    });
+    expect(
+      await save('telegram', () => {
+        type('cfg-telegram-token', '********');
+        type('cfg-telegram-chat', '-100');
+      })
+    ).toMatchObject({ telegram_bot_token: 'old', telegram_chat_id: '-100' });
+    expect(await save('telegram', () => type('cfg-telegram-token', 'new'))).toMatchObject({
+      telegram_bot_token: 'new',
+    });
     const mail = await save('email', () => {
-      type('cfg-smtp-host', 'smtp.x'); type('cfg-smtp-port', 'x'); type('cfg-smtp-user', 'u');
-      type('cfg-smtp-pass', '********'); type('cfg-email-from', 'a@x'); type('cfg-email-to', 'b@x');
+      type('cfg-smtp-host', 'smtp.x');
+      type('cfg-smtp-port', 'x');
+      type('cfg-smtp-user', 'u');
+      type('cfg-smtp-pass', '********');
+      type('cfg-email-from', 'a@x');
+      type('cfg-email-to', 'b@x');
       $('cfg-smtp-tls').checked = false;
     });
-    expect(mail).toMatchObject({ email_enabled: true, smtp_host: 'smtp.x', smtp_port: 587, smtp_pass: 'oldpass', smtp_tls: false, email_from: 'a@x', email_to: 'b@x' });
+    expect(mail).toMatchObject({
+      email_enabled: true,
+      smtp_host: 'smtp.x',
+      smtp_port: 587,
+      smtp_pass: 'oldpass',
+      smtp_tls: false,
+      email_from: 'a@x',
+      email_to: 'b@x',
+    });
     expect(await save('email', () => type('cfg-smtp-pass', 'p2'))).toMatchObject({ smtp_pass: 'p2', smtp_port: 587 });
-    expect(await save('ntfy', () => { type('cfg-ntfy-url', ''); type('cfg-ntfy-topic', 't'); type('cfg-ntfy-token', ''); }, false))
-      .toMatchObject({ ntfy_enabled: false, ntfy_url: 'https://ntfy.sh', ntfy_topic: 't', ntfy_token: 'oldtk' });
+    expect(
+      await save(
+        'ntfy',
+        () => {
+          type('cfg-ntfy-url', '');
+          type('cfg-ntfy-topic', 't');
+          type('cfg-ntfy-token', '');
+        },
+        false
+      )
+    ).toMatchObject({ ntfy_enabled: false, ntfy_url: 'https://ntfy.sh', ntfy_topic: 't', ntfy_token: 'oldtk' });
     expect(await save('ntfy', () => type('cfg-ntfy-token', 'tk2'))).toMatchObject({ ntfy_token: 'tk2' });
-    expect(await save('webhook', () => type('cfg-webhook-url', 'https://w'))).toMatchObject({ webhook_enabled: true, webhook_url: 'https://w' });
-    expect(await save('apprise_raw', () => type('cfg-apprise-raw', ' a://1 \n\nb://2'))).toMatchObject({ apprise_urls: ['a://1', 'b://2'] });
+    expect(await save('webhook', () => type('cfg-webhook-url', 'https://w'))).toMatchObject({
+      webhook_enabled: true,
+      webhook_url: 'https://w',
+    });
+    expect(await save('apprise_raw', () => type('cfg-apprise-raw', ' a://1 \n\nb://2'))).toMatchObject({
+      apprise_urls: ['a://1', 'b://2'],
+    });
     n.openChannelConfigModal('apprise_raw');
     expect($('cfg-apprise-raw').value).toBe('a://1\nb://2');
     n.openChannelConfigModal('email');

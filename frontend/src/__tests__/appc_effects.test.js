@@ -21,7 +21,8 @@ function pane() {
   P.initGlassControls();
 }
 const look = (n) => document.querySelector(`[data-window-style="${n}"]`);
-const checked = () => [...document.querySelectorAll('[data-window-style][aria-checked="true"]')].map((b) => b.dataset.windowStyle);
+const checked = () =>
+  [...document.querySelectorAll('[data-window-style][aria-checked="true"]')].map((b) => b.dataset.windowStyle);
 
 describe('Effects: window looks', () => {
   beforeEach(() => {
@@ -103,7 +104,9 @@ describe('Effects: the markup', () => {
   it('three looks, corners in words, fine controls folded, no Eco switch', () => {
     for (const n of ['glass', 'soft', 'solid']) expect(html).toContain(`data-window-style="${n}"`);
     expect(html).toContain('data-i18n="effects.extra_round"');
-    expect(html).toMatch(/<details class="drawer-card gls-box effects-fine">[\s\S]*id="glass-blur-slider"[\s\S]*id="window-glow-toggle"[\s\S]*<\/details>/);
+    expect(html).toMatch(
+      /<details class="drawer-card gls-box effects-fine">[\s\S]*id="glass-blur-slider"[\s\S]*id="window-glow-toggle"[\s\S]*<\/details>/
+    );
     expect(html).not.toContain('eco-mode-toggle');
     expect(html).not.toContain('Sharp (6px)');
   });

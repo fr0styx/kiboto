@@ -2,7 +2,12 @@ import { readStyleCss } from './helpers/read-style-css.js';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { SYSTEM_SHORTCUTS, launchShortcut } from '../components/desktop-shortcuts.js';
 import { SUBPANE_MAP } from '../components/management.js';
-import { openStackModal, initStackModal, closeStackModal, _resetStackModalForTesting } from '../components/stack-modal.js';
+import {
+  openStackModal,
+  initStackModal,
+  closeStackModal,
+  _resetStackModalForTesting,
+} from '../components/stack-modal.js';
 import { bringToFront, DockManager } from '../components/dock.js';
 import fs from 'fs';
 import path from 'path';
@@ -25,23 +30,23 @@ describe('Storage Routing, File Manager Solid Styling, and Stack Inspector Eleva
     it('SUBPANE_MAP resolves legacy aliases and pools aliases to mgmt-pane-storage-topo', () => {
       expect(SUBPANE_MAP['mgmt-pane-chassis']).toEqual({
         section: 'mgmt-sec-storage',
-        pane: 'mgmt-pane-storage-topo'
+        pane: 'mgmt-pane-storage-topo',
       });
       expect(SUBPANE_MAP['mgmt-sec-pools']).toEqual({
         section: 'mgmt-sec-storage',
-        pane: 'mgmt-pane-storage-topo'
+        pane: 'mgmt-pane-storage-topo',
       });
       expect(SUBPANE_MAP['mgmt-pane-pools']).toEqual({
         section: 'mgmt-sec-storage',
-        pane: 'mgmt-pane-storage-topo'
+        pane: 'mgmt-pane-storage-topo',
       });
       expect(SUBPANE_MAP['storage-pools']).toEqual({
         section: 'mgmt-sec-storage',
-        pane: 'mgmt-pane-storage-topo'
+        pane: 'mgmt-pane-storage-topo',
       });
       expect(SUBPANE_MAP['mgmt-pane-storage-topo']).toEqual({
         section: 'mgmt-sec-storage',
-        pane: 'mgmt-pane-storage-topo'
+        pane: 'mgmt-pane-storage-topo',
       });
     });
 
@@ -52,7 +57,7 @@ describe('Storage Routing, File Manager Solid Styling, and Stack Inspector Eleva
       const legacyShortcut = {
         id: 'storage-desktop-icon',
         targetSection: 'mgmt-sec-storage',
-        targetPane: 'mgmt-pane-chassis'
+        targetPane: 'mgmt-pane-chassis',
       };
 
       launchShortcut(legacyShortcut);
@@ -67,7 +72,7 @@ describe('Storage Routing, File Manager Solid Styling, and Stack Inspector Eleva
       const shortcut = {
         id: 'storage-desktop-icon',
         targetSection: 'mgmt-sec-storage',
-        targetPane: 'mgmt-pane-storage-topo'
+        targetPane: 'mgmt-pane-storage-topo',
       };
 
       launchShortcut(shortcut);
@@ -111,7 +116,7 @@ describe('Storage Routing, File Manager Solid Styling, and Stack Inspector Eleva
         total_count: 3,
         compose_yaml: 'services:\n  sonarr:\n    image: sonarr\n',
         env_content: 'TZ=America/New_York\n',
-        containers: []
+        containers: [],
       });
 
       await openStackModal('arr');
@@ -137,7 +142,7 @@ describe('Storage Routing, File Manager Solid Styling, and Stack Inspector Eleva
       const { api } = await import('../api.js');
       vi.spyOn(api, 'get').mockResolvedValue({
         name: 'arr',
-        containers: []
+        containers: [],
       });
 
       await openStackModal('arr');

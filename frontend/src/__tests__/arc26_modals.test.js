@@ -40,8 +40,11 @@ const DOM = `
   </div></div>`;
 
 const STATS = {
-  name: 'nas', ip: '10.0.0.9', uptime: '3 days',
-  storage: { used: '1 TB', total: '4 TB', pct: 95 }, disks: [{ dev: 'sda' }],
+  name: 'nas',
+  ip: '10.0.0.9',
+  uptime: '3 days',
+  storage: { used: '1 TB', total: '4 TB', pct: 95 },
+  disks: [{ dev: 'sda' }],
   cpu: { temp: 80, util: 12 },
   mem: { used_gb: 6, total_gb: 16, pct: 37 },
   fans: [900, 0, 1200],
@@ -133,7 +136,12 @@ describe('detail windows (modals.js)', () => {
   it.each(CASES)('an entry that leads to "%s" is filed under %s and opens it', (link, place, opener, target) => {
     window[opener] = vi.fn();
     // the title says something else on purpose: words in it no longer decide
-    modals.openEventDetailModal({ title: 'SD card inserted while the fan curve changed', level: 'info', link, ts: Math.floor(Date.now() / 1000) });
+    modals.openEventDetailModal({
+      title: 'SD card inserted while the fan curve changed',
+      level: 'info',
+      link,
+      ts: Math.floor(Date.now() / 1000),
+    });
     expect(byId('event-detail-subsystem').textContent).toBe(place);
     expect(byId('event-detail-context-btn').textContent).toBe(`Open ${place}`);
     byId('event-detail-context-btn').click();
@@ -165,7 +173,12 @@ describe('detail windows (modals.js)', () => {
 
   it('shows the level, the time and the raw event', () => {
     const now = Math.floor(Date.now() / 1000);
-    for (const [level, icon] of [['error', '❌'], ['warning', '⚠️'], ['success', '✅'], [undefined, 'ℹ️']]) {
+    for (const [level, icon] of [
+      ['error', '❌'],
+      ['warning', '⚠️'],
+      ['success', '✅'],
+      [undefined, 'ℹ️'],
+    ]) {
       modals.openEventDetailModal({ title: 'x', level, ts: now });
       expect(byId('event-detail-badge-icon').textContent).toBe(icon);
     }

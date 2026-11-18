@@ -7,9 +7,21 @@ afterEach(() => vi.restoreAllMocks());
 describe('security check rows (SET-14, Settings finding 25)', () => {
   it('a row is no button; Review / Configure is one, named after its row', async () => {
     document.body.innerHTML = '<span id="sec-advisor-score-badge"></span><div id="sec-advisor-items"></div>';
-    vi.spyOn(api, 'get').mockResolvedValue({ score: 80, grade: 'B', checks: [
-      { id: 'snapshots_off', name: 'Some shared folders have no snapshots', passed: false, penalty: 5, severity: 'low', details: 'x', fix: 'snapshots_off' },
-    ] });
+    vi.spyOn(api, 'get').mockResolvedValue({
+      score: 80,
+      grade: 'B',
+      checks: [
+        {
+          id: 'snapshots_off',
+          name: 'Some shared folders have no snapshots',
+          passed: false,
+          penalty: 5,
+          severity: 'low',
+          details: 'x',
+          fix: 'snapshots_off',
+        },
+      ],
+    });
     await fetchAndRenderSecurityPosture();
     const row = document.querySelector('.sec-advisor-item');
     expect(row.getAttribute('role')).toBeNull();

@@ -11,10 +11,18 @@ export function isFocusableElementVisible(el) {
   if (el.style && (el.style.display === 'none' || el.style.visibility === 'hidden')) return false;
 
   // Filter out elements residing inside hidden containers or inactive tabs
-  if (el.closest?.('[aria-hidden="true"], [hidden], .tab-pane:not(.active), .mgmt-tab-pane:not(.active), .mgmt-content-pane:not(.active)')) {
+  if (
+    el.closest?.(
+      '[aria-hidden="true"], [hidden], .tab-pane:not(.active), .mgmt-tab-pane:not(.active), .mgmt-content-pane:not(.active)'
+    )
+  ) {
     return false;
   }
-  if (el.closest?.('[style*="display: none"], [style*="display:none"], [style*="visibility: hidden"], [style*="visibility:hidden"]')) {
+  if (
+    el.closest?.(
+      '[style*="display: none"], [style*="display:none"], [style*="visibility: hidden"], [style*="visibility:hidden"]'
+    )
+  ) {
     return false;
   }
 
@@ -57,7 +65,8 @@ export function isEscSafeField(el) {
 export function trapFocus(element, onClose = null, options = {}) {
   if (!element) return () => {};
 
-  const FOCUSABLE_SELECTOR = 'button:not([disabled]), a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+  const FOCUSABLE_SELECTOR =
+    'button:not([disabled]), a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
   function getFocusableElements() {
     return Array.from(element.querySelectorAll(FOCUSABLE_SELECTOR)).filter(isFocusableElementVisible);
@@ -188,7 +197,7 @@ export function formatBytes(bytes, decimals = 1) {
 export function reconcileKeyedTable(parentEl, items, keyFn, createRowFn, updateRowFn) {
   if (!parentEl || !Array.isArray(items)) return;
 
-  const incomingKeys = new Set(items.map(item => String(keyFn(item))));
+  const incomingKeys = new Set(items.map((item) => String(keyFn(item))));
   const existingMap = new Map();
   const children = parentEl.children;
 

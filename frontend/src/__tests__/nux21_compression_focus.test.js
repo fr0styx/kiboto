@@ -5,7 +5,10 @@ vi.mock('../i18n.js', () => ({
 }));
 vi.mock('../toast.js', () => ({ showToast: vi.fn() }));
 vi.mock('../api.js', () => ({
-  api: { get: vi.fn(async () => ({ value: 'zstd:3', supported: true, choices: ['zstd', 'lz4', 'off'] })), put: vi.fn() },
+  api: {
+    get: vi.fn(async () => ({ value: 'zstd:3', supported: true, choices: ['zstd', 'lz4', 'off'] })),
+    put: vi.fn(),
+  },
 }));
 
 const { openShareCompression, trapKeys } = await import('../components/share-compression.js');

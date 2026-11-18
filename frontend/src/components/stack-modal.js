@@ -127,7 +127,10 @@ export function initStackModal() {
   // Window drag handling
   const header = document.getElementById('stack-inspector-header');
   let isDragging = false;
-  let startX = 0, startY = 0, origX = 0, origY = 0;
+  let startX = 0,
+    startY = 0,
+    origX = 0,
+    origY = 0;
 
   header.addEventListener('mousedown', (e) => {
     if (e.target.closest('.os-window-controls')) return;
@@ -211,7 +214,9 @@ export function initStackModal() {
   // Copy buttons
   document.getElementById('stack-compose-copy-btn')?.addEventListener('click', () => {
     const val = document.getElementById('stack-compose-editor')?.value || '';
-    copyText(val).then(() => showToast(t('toast.compose_yaml_copied_to_clipboard', 'Compose YAML copied to clipboard'), 'info'));
+    copyText(val).then(() =>
+      showToast(t('toast.compose_yaml_copied_to_clipboard', 'Compose YAML copied to clipboard'), 'info')
+    );
   });
 
   document.getElementById('stack-env-copy-btn')?.addEventListener('click', () => {
@@ -255,7 +260,7 @@ export function switchStackTab(tabTarget) {
 export async function openStackModal(stackName, initialYaml = null) {
   initStackModal();
 
-  _activeStackName = typeof stackName === 'string' ? stackName : (stackName?.name || 'new-stack');
+  _activeStackName = typeof stackName === 'string' ? stackName : stackName?.name || 'new-stack';
   _fromCopilot = initialYaml !== null;
   const overlay = document.getElementById('stack-inspector-overlay');
   const win = document.getElementById('stack-inspector-window');
@@ -281,7 +286,9 @@ export async function openStackModal(stackName, initialYaml = null) {
   switchStackTab('compose');
 
   if (initialYaml !== null) {
-    document.getElementById('stack-header-title').textContent = t('stk.deploy_title', 'Deploy stack: {name}', { name: _activeStackName });
+    document.getElementById('stack-header-title').textContent = t('stk.deploy_title', 'Deploy stack: {name}', {
+      name: _activeStackName,
+    });
     const statusPill = document.getElementById('stack-header-status');
     if (statusPill) statusPill.style.display = 'none';
     const originPill = document.getElementById('stack-header-origin');
@@ -296,7 +303,9 @@ export async function openStackModal(stackName, initialYaml = null) {
     const risks = lintCompose(initialYaml);
     if (msgEl) {
       msgEl.textContent = risks.length
-        ? t('stk.review_risky', 'Review before deploying. This AI-written stack asks for host access:\n{risks}', { risks: composeRiskSummary(risks) })
+        ? t('stk.review_risky', 'Review before deploying. This AI-written stack asks for host access:\n{risks}', {
+            risks: composeRiskSummary(risks),
+          })
         : t('stk.review', 'Loaded an AI-written Compose file. Press Apply to see what it will start, then start it.');
       msgEl.style.whiteSpace = 'pre-line';
       msgEl.style.color = risks.some((r) => r.level === 'danger') ? '#fca5a5' : '';
@@ -304,7 +313,9 @@ export async function openStackModal(stackName, initialYaml = null) {
     return;
   }
 
-  document.getElementById('stack-header-title').textContent = t('stk.stack', 'Stack: {name}', { name: _activeStackName });
+  document.getElementById('stack-header-title').textContent = t('stk.stack', 'Stack: {name}', {
+    name: _activeStackName,
+  });
   document.getElementById('stack-header-status').style.display = 'none';
   document.getElementById('stack-compose-editor').value = t('stk.loading', 'Loading the stack…');
   document.getElementById('stack-env-editor').value = '';
@@ -315,7 +326,9 @@ export async function openStackModal(stackName, initialYaml = null) {
     _activeStackDetails = data;
     renderStackDetails(data);
   } catch (err) {
-    document.getElementById('stack-modal-msg').textContent = t('stk.load_failed', 'Could not load the stack: {error}', { error: err.message });
+    document.getElementById('stack-modal-msg').textContent = t('stk.load_failed', 'Could not load the stack: {error}', {
+      error: err.message,
+    });
     showToast(t('toast.failed_loading_stack', 'Failed loading stack: {error}', { error: err.message }), 'error');
   }
 }
@@ -333,7 +346,10 @@ export function deployComposeStackSnippet(yamlCode) {
     }
   }
   openStackModal(deducedName, yamlCode);
-  showToast(t('toast.copilot_compose_stack_loaded_ready_to', 'The stack from Kib\'s answer is loaded. Check it, then deploy.'), 'success');
+  showToast(
+    t('toast.copilot_compose_stack_loaded_ready_to', "The stack from Kib's answer is loaded. Check it, then deploy."),
+    'success'
+  );
 }
 
 if (typeof window !== 'undefined') {
@@ -356,16 +372,25 @@ function renderStackDetails(data) {
     statusEl.className = 'ci-state-pill';
     const isRunning = data.status === 'running';
     const isPartial = data.status === 'partial';
-    statusEl.style.background = isRunning ? 'rgba(16,185,129,0.15)' : (isPartial ? 'rgba(245,158,11,0.15)' : 'rgba(239,68,68,0.15)');
-    statusEl.style.color = isRunning ? '#10b981' : (isPartial ? '#f59e0b' : '#ef4444');
-    statusEl.style.border = `1px solid ${isRunning ? 'rgba(16,185,129,0.3)' : (isPartial ? 'rgba(245,158,11,0.3)' : 'rgba(239,68,68,0.3)')}`;
+    statusEl.style.background = isRunning
+      ? 'rgba(16,185,129,0.15)'
+      : isPartial
+        ? 'rgba(245,158,11,0.15)'
+        : 'rgba(239,68,68,0.15)';
+    statusEl.style.color = isRunning ? '#10b981' : isPartial ? '#f59e0b' : '#ef4444';
+    statusEl.style.border = `1px solid ${isRunning ? 'rgba(16,185,129,0.3)' : isPartial ? 'rgba(245,158,11,0.3)' : 'rgba(239,68,68,0.3)'}`;
     statusEl.textContent = `● ${t('stk.running', '{running}/{total} Running', { running: data.running_count, total: data.total_count })}`;
   }
 
   // Path label
   const pathLabel = document.getElementById('stack-path-label');
   if (pathLabel) {
-    const displayPath = data.config_file || data.working_dir || (data.location_type === 'synthesized' ? t('stk.synth', 'Rebuilt from the running containers') : t('stk.project', 'Docker Compose project'));
+    const displayPath =
+      data.config_file ||
+      data.working_dir ||
+      (data.location_type === 'synthesized'
+        ? t('stk.synth', 'Rebuilt from the running containers')
+        : t('stk.project', 'Docker Compose project'));
     pathLabel.textContent = displayPath;
     pathLabel.title = displayPath;
   }
@@ -379,7 +404,9 @@ function renderStackDetails(data) {
   // Fill textareas
   document.getElementById('stack-compose-editor').value = data.compose_yaml || '';
   document.getElementById('stack-env-editor').value = data.env_content || '';
-  const from = data.has_real_file ? t('stk.from_disk', 'Loaded from the Compose file on disk') : t('stk.synth', 'Rebuilt from the running containers');
+  const from = data.has_real_file
+    ? t('stk.from_disk', 'Loaded from the Compose file on disk')
+    : t('stk.synth', 'Rebuilt from the running containers');
   // passwords are hidden until asked for; a hidden line that you change cannot be put back, so
   // the save refuses it and points here (SET-07, the owner's decision S21)
   const hidden = !data.secrets_shown && `${data.compose_yaml || ''}\n${data.env_content || ''}`.includes('••••••••');
@@ -388,7 +415,9 @@ function renderStackDetails(data) {
     : from;
   const secretsBtn = document.getElementById('stack-secrets-btn');
   if (secretsBtn) {
-    secretsBtn.textContent = data.secrets_shown ? t('stk.hide_secrets', 'Hide secrets') : t('stk.show_secrets', 'Show secrets');
+    secretsBtn.textContent = data.secrets_shown // gitleaks:allow (a field name, not a secret)
+      ? t('stk.hide_secrets', 'Hide secrets')
+      : t('stk.show_secrets', 'Show secrets');
     secretsBtn.setAttribute('aria-pressed', data.secrets_shown ? 'true' : 'false');
   }
 
@@ -401,7 +430,10 @@ function renderServicesList(containers) {
   if (!containerEl) return;
 
   if (!containers.length) {
-    containerEl.innerHTML = '<div class="stk-xs-muted-2">' + escapeHtml(t('stk.no_containers', 'No containers found for this stack.')) + '</div>';
+    containerEl.innerHTML =
+      '<div class="stk-xs-muted-2">' +
+      escapeHtml(t('stk.no_containers', 'No containers found for this stack.')) +
+      '</div>';
     return;
   }
 
@@ -409,13 +441,20 @@ function renderServicesList(containers) {
   containers.forEach((c) => {
     const isRunning = c.state === 'running';
     const stateBadge = isRunning
-      ? '<span style="font-size:var(--kb-fs-xs); color:var(--lt-t-10b981ff, #10b981); font-weight:700;">● ' + escapeHtml(t('stk.svc_running', 'Running')) + '</span>'
-      : '<span style="font-size:var(--kb-fs-xs); color:var(--lt-t-ef4444ff, #ef4444); font-weight:700;">● ' + escapeHtml(t('stk.svc_stopped', 'Stopped')) + '</span>';
+      ? '<span style="font-size:var(--kb-fs-xs); color:var(--lt-t-10b981ff, #10b981); font-weight:700;">● ' +
+        escapeHtml(t('stk.svc_running', 'Running')) +
+        '</span>'
+      : '<span style="font-size:var(--kb-fs-xs); color:var(--lt-t-ef4444ff, #ef4444); font-weight:700;">● ' +
+        escapeHtml(t('stk.svc_stopped', 'Stopped')) +
+        '</span>';
 
-    const portsHtml = (c.ports || []).map((p) => {
-      const hp = p.host_port ? `${p.host_port}➔` : '';
-      return `<code class="stk-xs-box">${hp}${p.container_port}/${p.proto}</code>`;
-    }).join(' ') || '<span class="stk-xs-muted">' + escapeHtml(t('stk.no_ports', 'Host network / none')) + '</span>';
+    const portsHtml =
+      (c.ports || [])
+        .map((p) => {
+          const hp = p.host_port ? `${p.host_port}➔` : '';
+          return `<code class="stk-xs-box">${hp}${p.container_port}/${p.proto}</code>`;
+        })
+        .join(' ') || '<span class="stk-xs-muted">' + escapeHtml(t('stk.no_ports', 'Host network / none')) + '</span>';
 
     html += `
       <div class="drawer-card stk-col-box">
@@ -459,17 +498,25 @@ export async function toggleStackSecrets() {
   const show = !(_activeStackDetails && _activeStackDetails.secrets_shown);
   const composeEl = /** @type {HTMLTextAreaElement | null} */ (document.getElementById('stack-compose-editor'));
   const envEl = /** @type {HTMLTextAreaElement | null} */ (document.getElementById('stack-env-editor'));
-  const changed = _activeStackDetails
-    && ((composeEl?.value ?? '') !== (_activeStackDetails.compose_yaml || '') || (envEl?.value ?? '') !== (_activeStackDetails.env_content || ''));
+  const changed =
+    _activeStackDetails &&
+    ((composeEl?.value ?? '') !== (_activeStackDetails.compose_yaml || '') ||
+      (envEl?.value ?? '') !== (_activeStackDetails.env_content || ''));
   if (changed) {
-    showToast(t('stk.secrets_save_first', 'Save or undo your changes first: showing or hiding secrets loads the file again.'), 'warn');
+    showToast(
+      t('stk.secrets_save_first', 'Save or undo your changes first: showing or hiding secrets loads the file again.'),
+      'warn'
+    );
     return;
   }
   try {
-    const data = await api.get(`/api/docker/stacks/${encodeURIComponent(_activeStackName)}${show ? '?unmask=true' : ''}`);
+    const data = await api.get(
+      `/api/docker/stacks/${encodeURIComponent(_activeStackName)}${show ? '?unmask=true' : ''}`
+    );
     _activeStackDetails = data;
     renderStackDetails(data);
-    if (show && !data.secrets_shown) showToast(t('stk.secrets_not_allowed', 'Your account may not see this stack’s secrets.'), 'warn');
+    if (show && !data.secrets_shown)
+      showToast(t('stk.secrets_not_allowed', 'Your account may not see this stack’s secrets.'), 'warn');
   } catch (err) {
     showToast(t('toast.failed_loading_stack', 'Failed loading stack: {error}', { error: err.message }), 'error');
   }
@@ -479,10 +526,14 @@ export async function toggleStackSecrets() {
 export async function applyActiveStack() {
   if (!_activeStackName) return false;
   const name = _activeStackName;
-  const compose = /** @type {HTMLTextAreaElement | null} */ (document.getElementById('stack-compose-editor'))?.value || '';
+  const compose =
+    /** @type {HTMLTextAreaElement | null} */ (document.getElementById('stack-compose-editor'))?.value || '';
   const env = /** @type {HTMLTextAreaElement | null} */ (document.getElementById('stack-env-editor'))?.value || '';
   const { applyStack } = await import('./stack-apply.js');
-  return applyStack(name, compose, env, { msg: document.getElementById('stack-modal-msg'), done: () => openStackModal(name) });
+  return applyStack(name, compose, env, {
+    msg: document.getElementById('stack-modal-msg'),
+    done: () => openStackModal(name),
+  });
 }
 
 async function saveStack(redeployAfterSave = false) {
@@ -498,9 +549,11 @@ async function saveStack(redeployAfterSave = false) {
     const ok = await new Promise((resolve) => {
       showConfirmToast(
         t('stk.risk_title', 'Deploy a stack with host access?'),
-        t('stk.risk_msg', 'This Compose file came from an AI answer and asks for:\n{risks}', { risks: composeRiskSummary(risks) }),
+        t('stk.risk_msg', 'This Compose file came from an AI answer and asks for:\n{risks}', {
+          risks: composeRiskSummary(risks),
+        }),
         () => resolve(true),
-        () => resolve(false),
+        () => resolve(false)
       );
     });
     if (!ok) {
@@ -518,7 +571,10 @@ async function saveStack(redeployAfterSave = false) {
     });
 
     if (res.success) {
-      showToast(t('toast.stack_configuration_saved_successfully', 'Stack configuration saved successfully!'), 'success');
+      showToast(
+        t('toast.stack_configuration_saved_successfully', 'Stack configuration saved successfully!'),
+        'success'
+      );
       if (msgEl) msgEl.textContent = t('ui.configuration_saved', 'Configuration saved');
 
       if (redeployAfterSave) {
@@ -561,12 +617,12 @@ async function triggerStackAction(action) {
 
 export async function openStackPickerModal(stacksInput = null) {
   initStackModal();
-  let stacks = Array.isArray(stacksInput) ? stacksInput : (stacksInput?.stacks || null);
+  let stacks = Array.isArray(stacksInput) ? stacksInput : stacksInput?.stacks || null;
 
   if (!stacks) {
     try {
       const res = await api.get('/api/docker/stacks');
-      stacks = Array.isArray(res) ? res : (res?.stacks || []);
+      stacks = Array.isArray(res) ? res : res?.stacks || [];
     } catch {
       stacks = [];
     }
@@ -632,7 +688,8 @@ export async function openStackPickerModal(stacksInput = null) {
   }
 
   const badge = overlay.querySelector('#stack-picker-badge');
-  if (badge) badge.textContent = t('stk.count', '{count, plural, one {# Stack} other {# Stacks}}', { count: stacks.length });
+  if (badge)
+    badge.textContent = t('stk.count', '{count, plural, one {# Stack} other {# Stacks}}', { count: stacks.length });
 
   const searchInput = overlay.querySelector('#stack-picker-search');
   const listContainer = overlay.querySelector('#stack-picker-list');
@@ -656,28 +713,37 @@ export async function openStackPickerModal(stacksInput = null) {
       return;
     }
 
-    listContainer.innerHTML = filtered.map((s) => {
-      const isAllRunning = s.running_count === s.total_count && s.total_count > 0;
-      const isNoneRunning = s.running_count === 0;
+    listContainer.innerHTML = filtered
+      .map((s) => {
+        const isAllRunning = s.running_count === s.total_count && s.total_count > 0;
+        const isNoneRunning = s.running_count === 0;
 
-      let statusPill;
-      if (isAllRunning) {
-        statusPill = `<span style="display:inline-flex; align-items:center; gap:5px; font-size:var(--kb-fs-xs); color:var(--ok2, #10b981); background:rgba(16,185,129,0.12); padding:2px 8px; border-radius:12px; border:1px solid rgba(16,185,129,0.3); font-weight:600;"><span style="width:6px; height:6px; border-radius:50%; background:var(--ok2, #10b981); box-shadow:0 0 6px var(--ok2, #10b981);"></span> ${t('stk.running', '{running}/{total} Running', { running: s.running_count, total: s.total_count })}</span>`;
-      } else if (isNoneRunning) {
-        statusPill = `<span class="stk-row-xs-muted-box"><span class="stk-box-2"></span> ${t('stk.stopped_n', 'Stopped ({count})', { count: s.total_count })}</span>`;
-      } else {
-        statusPill = `<span style="display:inline-flex; align-items:center; gap:5px; font-size:var(--kb-fs-xs); color:var(--warn, #f5a623); background:rgba(245,166,35,0.12); padding:2px 8px; border-radius:12px; border:1px solid rgba(245,166,35,0.3); font-weight:600;"><span style="width:6px; height:6px; border-radius:50%; background:var(--warn, #f5a623); box-shadow:0 0 6px var(--warn, #f5a623);"></span> ${t('stk.running', '{running}/{total} Running', { running: s.running_count, total: s.total_count })}</span>`;
-      }
+        let statusPill;
+        if (isAllRunning) {
+          statusPill = `<span style="display:inline-flex; align-items:center; gap:5px; font-size:var(--kb-fs-xs); color:var(--ok2, #10b981); background:rgba(16,185,129,0.12); padding:2px 8px; border-radius:12px; border:1px solid rgba(16,185,129,0.3); font-weight:600;"><span style="width:6px; height:6px; border-radius:50%; background:var(--ok2, #10b981); box-shadow:0 0 6px var(--ok2, #10b981);"></span> ${t('stk.running', '{running}/{total} Running', { running: s.running_count, total: s.total_count })}</span>`;
+        } else if (isNoneRunning) {
+          statusPill = `<span class="stk-row-xs-muted-box"><span class="stk-box-2"></span> ${t('stk.stopped_n', 'Stopped ({count})', { count: s.total_count })}</span>`;
+        } else {
+          statusPill = `<span style="display:inline-flex; align-items:center; gap:5px; font-size:var(--kb-fs-xs); color:var(--warn, #f5a623); background:rgba(245,166,35,0.12); padding:2px 8px; border-radius:12px; border:1px solid rgba(245,166,35,0.3); font-weight:600;"><span style="width:6px; height:6px; border-radius:50%; background:var(--warn, #f5a623); box-shadow:0 0 6px var(--warn, #f5a623);"></span> ${t('stk.running', '{running}/{total} Running', { running: s.running_count, total: s.total_count })}</span>`;
+        }
 
-      const servicesHtml = (s.services || []).slice(0, 6).map((svc) => `
+        const servicesHtml = (s.services || [])
+          .slice(0, 6)
+          .map(
+            (svc) => `
         <span class="ci-badge stk-xs-soft-mono-box">${escapeHtml(svc)}</span>
-      `).join('');
+      `
+          )
+          .join('');
 
-      const moreCount = (s.services || []).length > 6 ? ` <span class="stk-xs-muted">${t('stk.more', '+{count} more', { count: s.services.length - 6 })}</span>` : '';
+        const moreCount =
+          (s.services || []).length > 6
+            ? ` <span class="stk-xs-muted">${t('stk.more', '+{count} more', { count: s.services.length - 6 })}</span>`
+            : '';
 
-      const pathStr = s.working_dir || s.config_files || t('stk.daemon', 'Managed by Docker');
+        const pathStr = s.working_dir || s.config_files || t('stk.daemon', 'Managed by Docker');
 
-      return `
+        return `
         <div class="stack-picker-card" data-stack="${escapeHtml(s.name)}" style="background:var(--kb-glaze-3); border:1px solid var(--lt-r-ffffff17, rgba(255,255,255,0.09)); border-radius:8px; padding:10px 14px; cursor:pointer; transition:all 0.16s cubic-bezier(0.16, 1, 0.3, 1); display:flex; flex-direction:column; gap:6px;">
           <div class="stk-row-11">
             <div class="stk-row">
@@ -690,15 +756,20 @@ export async function openStackPickerModal(stacksInput = null) {
           <div class="stk-xs-muted-mono">
             📂 ${escapeHtml(pathStr)}
           </div>
-          ${servicesHtml ? `
+          ${
+            servicesHtml
+              ? `
             <div class="stk-row-12">
               <span class="stk-xs-muted-6">${t('stk.services', 'Services:')}</span>
               ${servicesHtml}${moreCount}
             </div>
-          ` : ''}
+          `
+              : ''
+          }
         </div>
       `;
-    }).join('');
+      })
+      .join('');
 
     // Bind card clicks & hover effects
     listContainer.querySelectorAll('.stack-picker-card').forEach((card) => {

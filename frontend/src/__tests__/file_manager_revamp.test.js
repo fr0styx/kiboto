@@ -29,9 +29,23 @@ vi.mock('../toast.js', () => ({
 describe('File Explorer Revamp - SOTA Architecture & Advanced Features', () => {
   const sampleFiles = [
     { name: '..', path: '/mnt', is_dir: true, size: 0, mtime: 1700000000, mode: '0755' },
-    { name: 'document.pdf', path: '/mnt/user/document.pdf', is_dir: false, size: 1048576, mtime: 1710000000, mode: '0644' },
+    {
+      name: 'document.pdf',
+      path: '/mnt/user/document.pdf',
+      is_dir: false,
+      size: 1048576,
+      mtime: 1710000000,
+      mode: '0644',
+    },
     { name: 'photo.jpg', path: '/mnt/user/photo.jpg', is_dir: false, size: 2097152, mtime: 1720000000, mode: '0644' },
-    { name: 'archive.zip', path: '/mnt/user/archive.zip', is_dir: false, size: 5242880, mtime: 1730000000, mode: '0644' },
+    {
+      name: 'archive.zip',
+      path: '/mnt/user/archive.zip',
+      is_dir: false,
+      size: 5242880,
+      mtime: 1730000000,
+      mode: '0644',
+    },
     { name: 'projects', path: '/mnt/user/projects', is_dir: true, size: 4096, mtime: 1740000000, mode: '0755' },
   ];
 
@@ -216,9 +230,7 @@ describe('File Explorer Revamp - SOTA Architecture & Advanced Features', () => {
   it('dynamically displays mounted cloud remotes under Cloud Mounts in FmSidebarTree', async () => {
     const inst = getActiveFmInstance();
     const tree = inst.sidebarTree;
-    tree.remotes = [
-      { name: 'onedrive-personal', path: '/mnt/remotes/onedrive-personal', available: true },
-    ];
+    tree.remotes = [{ name: 'onedrive-personal', path: '/mnt/remotes/onedrive-personal', available: true }];
     tree.render();
 
     const onedriveItem = tree.container.querySelector('.fm-tree-sub-item[data-path="/mnt/remotes/onedrive-personal"]');
@@ -236,8 +248,20 @@ describe('File Explorer Revamp - SOTA Architecture & Advanced Features', () => {
     tree.remotes = [
       { name: 'my-gdrive', path: '/mnt/remotes/my-gdrive', type: 'drive', is_mounted: true, available: true },
       { name: 'backup-s3', path: '/mnt/remotes/backup-s3', type: 's3', is_mounted: true, available: true },
-      { name: 'photos-dropbox', path: '/mnt/remotes/photos-dropbox', type: 'dropbox', is_mounted: true, available: true },
-      { name: 'nextcloud-docs', path: '/mnt/remotes/nextcloud-docs', type: 'webdav', is_mounted: true, available: true },
+      {
+        name: 'photos-dropbox',
+        path: '/mnt/remotes/photos-dropbox',
+        type: 'dropbox',
+        is_mounted: true,
+        available: true,
+      },
+      {
+        name: 'nextcloud-docs',
+        path: '/mnt/remotes/nextcloud-docs',
+        type: 'webdav',
+        is_mounted: true,
+        available: true,
+      },
     ];
     tree.pools = [
       { name: 'External-NVMe', path: '/mnt/disks/External-NVMe', type: 'flash', available: true },

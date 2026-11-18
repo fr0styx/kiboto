@@ -5,7 +5,8 @@ vi.mock('../api.js', () => ({ api: { post } }));
 const showToast = vi.fn();
 vi.mock('../toast.js', () => ({ showToast, showConfirmToast: vi.fn() }));
 
-const { installLostDeviceFor, submitLostDevice, lostDoneText } = await import('../components/management/lost-device.js');
+const { installLostDeviceFor, submitLostDevice, lostDoneText } =
+  await import('../components/management/lost-device.js');
 const lea = { id: 'u-lea', username: 'lea' };
 
 describe('Lost phone or tablet? (SET-19, Users decision 8)', () => {
@@ -27,7 +28,9 @@ describe('Lost phone or tablet? (SET-19, Users decision 8)', () => {
     expect(modal.querySelectorAll('#lost-device').length).toBe(1); // reused, not added again
     expect(installLostDeviceFor(null, lea)).toBeNull();
     document.body.innerHTML = '<div id="bare"></div>';
-    expect(installLostDeviceFor(/** @type {HTMLElement} */ (document.getElementById('bare')), lea)?.parentElement).toBe(document.body); // after a dialog with no form
+    expect(installLostDeviceFor(/** @type {HTMLElement} */ (document.getElementById('bare')), lea)?.parentElement).toBe(
+      document.body
+    ); // after a dialog with no form
   });
 
   it('sends the own password and the two choices, and empties the password', async () => {
@@ -37,9 +40,16 @@ describe('Lost phone or tablet? (SET-19, Users decision 8)', () => {
     post.mockResolvedValue({ sessions_ended: 2, two_step_off: true, told: true });
     /** @type {HTMLElement} */ (box.querySelector('[data-lost-go]')).click();
     await vi.waitFor(() => expect(showToast).toHaveBeenCalled());
-    expect(post).toHaveBeenCalledWith('/api/users/u-lea/lost-device', { current_password: 'Mum-Pass-123', sign_out: true, turn_off_two_step: true });
+    expect(post).toHaveBeenCalledWith('/api/users/u-lea/lost-device', {
+      current_password: 'Mum-Pass-123',
+      sign_out: true,
+      turn_off_two_step: true,
+    });
     expect(/** @type {HTMLInputElement} */ (box.querySelector('[data-lost-pw]')).value).toBe('');
-    expect(showToast).toHaveBeenCalledWith('Ended 2 sessions of lea. Two-step sign-in is off for lea. They were told.', 'success');
+    expect(showToast).toHaveBeenCalledWith(
+      'Ended 2 sessions of lea. Two-step sign-in is off for lea. They were told.',
+      'success'
+    );
   });
 
   it('asks for a choice before sending anything', async () => {
@@ -58,8 +68,14 @@ describe('Lost phone or tablet? (SET-19, Users decision 8)', () => {
   });
 
   it('says plainly when there was nothing to end, or nobody could be told', () => {
-    expect(lostDoneText({ sessions_ended: 0, two_step_off: false, told: false }, 'lea', true)).toBe('lea was not signed in anywhere.');
-    expect(lostDoneText({ sessions_ended: 1, two_step_off: false, told: false }, 'lea', true)).toBe('Ended 1 session of lea. Kiboto could not tell them: they have no alerts or email set up.');
-    expect(lostDoneText({ sessions_ended: 0, two_step_off: true, told: true }, 'lea', false)).toBe('Two-step sign-in is off for lea. They were told.');
+    expect(lostDoneText({ sessions_ended: 0, two_step_off: false, told: false }, 'lea', true)).toBe(
+      'lea was not signed in anywhere.'
+    );
+    expect(lostDoneText({ sessions_ended: 1, two_step_off: false, told: false }, 'lea', true)).toBe(
+      'Ended 1 session of lea. Kiboto could not tell them: they have no alerts or email set up.'
+    );
+    expect(lostDoneText({ sessions_ended: 0, two_step_off: true, told: true }, 'lea', false)).toBe(
+      'Two-step sign-in is off for lea. They were told.'
+    );
   });
 });

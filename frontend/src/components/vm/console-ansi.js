@@ -1,8 +1,6 @@
 // ANSI escape codes to HTML, and terminal stream handling for the serial console.
 // Part of vm-manager.js, split out by ARC-5.
 
-
-
 /**
  * Converts terminal ANSI escape sequences to styled HTML spans for serial console rendering.
  * Sanitizes HTML entities to prevent XSS and maps 3/4-bit & 256-color foreground/background colors and styles.
@@ -79,18 +77,21 @@ export function formatAnsiToHtml(raw) {
   let openSpan = false;
   let result = '';
 
-  const regex = /(?:\x1b|\u001b)\[([\d;]*)m|(?:\x1b|\u001b)\[[?0-9;]*[a-zA-Z~@]|(?:\x1b|\u001b)\][^\x07\x1b]*(?:\x07|\x1b\\)|(?:\x1b|\u001b)[()#%][A-Za-z0-9]|(?:\x1b|\u001b)[=>cDEMNOZ78<]|\[(\d+(?:;\d+)*)m/g;
+  const regex =
+    /(?:\x1b|\u001b)\[([\d;]*)m|(?:\x1b|\u001b)\[[?0-9;]*[a-zA-Z~@]|(?:\x1b|\u001b)\][^\x07\x1b]*(?:\x07|\x1b\\)|(?:\x1b|\u001b)[()#%][A-Za-z0-9]|(?:\x1b|\u001b)[=>cDEMNOZ78<]|\[(\d+(?:;\d+)*)m/g;
   let lastIndex = 0;
   let match;
 
   const escapeHtmlEntities = (text) => {
-    return text
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      // Strip any dangling unparsed escape fragments (e.g. orphan \x1b[ or lone \x1b)
-      .replace(/(?:\x1b|\u001b)\[?[?0-9;]*/g, '');
+    return (
+      text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        // Strip any dangling unparsed escape fragments (e.g. orphan \x1b[ or lone \x1b)
+        .replace(/(?:\x1b|\u001b)\[?[?0-9;]*/g, '')
+    );
   };
 
   while ((match = regex.exec(raw)) !== null) {

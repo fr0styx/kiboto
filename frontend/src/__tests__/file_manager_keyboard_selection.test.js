@@ -129,10 +129,7 @@ describe('File Manager Keyboard Navigation & Multi-Selection', () => {
 
     expect(preventSpy).toHaveBeenCalled();
     expect(stopSpy).toHaveBeenCalled();
-    expect(getFmSelectedPaths()).toEqual([
-      '/mnt/user/Document 1.docx',
-      '/mnt/user/Document 2.docx',
-    ]);
+    expect(getFmSelectedPaths()).toEqual(['/mnt/user/Document 1.docx', '/mnt/user/Document 2.docx']);
     expect(getFmSelectionState().lastSelectedIndex).toBe(2);
     expect(getFmSelectionState().selectionAnchorIndex).toBe(1);
 
@@ -152,30 +149,19 @@ describe('File Manager Keyboard Navigation & Multi-Selection', () => {
   it('contracts selection when reversing direction with Shift + ArrowUp', () => {
     // Range is currently Document 1 to Document 3 (anchor 1, cursor 3)
     setFmStateForTesting({
-      selectedPaths: [
-        '/mnt/user/Document 1.docx',
-        '/mnt/user/Document 2.docx',
-        '/mnt/user/Document 3.docx',
-      ],
+      selectedPaths: ['/mnt/user/Document 1.docx', '/mnt/user/Document 2.docx', '/mnt/user/Document 3.docx'],
       lastSelectedIndex: 3,
       selectionAnchorIndex: 1,
     });
 
     // Press Shift + ArrowUp -> should contract to Document 1 & 2
-    handleFmKeydown(
-      new KeyboardEvent('keydown', { key: 'ArrowUp', shiftKey: true, bubbles: true, cancelable: true })
-    );
-    expect(getFmSelectedPaths()).toEqual([
-      '/mnt/user/Document 1.docx',
-      '/mnt/user/Document 2.docx',
-    ]);
+    handleFmKeydown(new KeyboardEvent('keydown', { key: 'ArrowUp', shiftKey: true, bubbles: true, cancelable: true }));
+    expect(getFmSelectedPaths()).toEqual(['/mnt/user/Document 1.docx', '/mnt/user/Document 2.docx']);
     expect(getFmSelectionState().lastSelectedIndex).toBe(2);
     expect(getFmSelectionState().selectionAnchorIndex).toBe(1);
 
     // Press Shift + ArrowUp again -> should contract to just Document 1
-    handleFmKeydown(
-      new KeyboardEvent('keydown', { key: 'ArrowUp', shiftKey: true, bubbles: true, cancelable: true })
-    );
+    handleFmKeydown(new KeyboardEvent('keydown', { key: 'ArrowUp', shiftKey: true, bubbles: true, cancelable: true }));
     expect(getFmSelectedPaths()).toEqual(['/mnt/user/Document 1.docx']);
     expect(getFmSelectionState().lastSelectedIndex).toBe(1);
   });
@@ -189,20 +175,13 @@ describe('File Manager Keyboard Navigation & Multi-Selection', () => {
     });
 
     // Press Shift + ArrowUp -> selects Document 2 & Document 3
-    handleFmKeydown(
-      new KeyboardEvent('keydown', { key: 'ArrowUp', shiftKey: true, bubbles: true, cancelable: true })
-    );
-    expect(getFmSelectedPaths()).toEqual([
-      '/mnt/user/Document 2.docx',
-      '/mnt/user/Document 3.docx',
-    ]);
+    handleFmKeydown(new KeyboardEvent('keydown', { key: 'ArrowUp', shiftKey: true, bubbles: true, cancelable: true }));
+    expect(getFmSelectedPaths()).toEqual(['/mnt/user/Document 2.docx', '/mnt/user/Document 3.docx']);
     expect(getFmSelectionState().lastSelectedIndex).toBe(2);
     expect(getFmSelectionState().selectionAnchorIndex).toBe(3);
 
     // Press Shift + ArrowUp again -> selects Document 1, 2, 3
-    handleFmKeydown(
-      new KeyboardEvent('keydown', { key: 'ArrowUp', shiftKey: true, bubbles: true, cancelable: true })
-    );
+    handleFmKeydown(new KeyboardEvent('keydown', { key: 'ArrowUp', shiftKey: true, bubbles: true, cancelable: true }));
     expect(getFmSelectedPaths()).toEqual([
       '/mnt/user/Document 1.docx',
       '/mnt/user/Document 2.docx',
@@ -300,10 +279,7 @@ describe('File Manager Keyboard Navigation & Multi-Selection', () => {
     });
     handleFmKeydown(shiftDownEvt);
 
-    expect(getFmSelectedPaths()).toEqual([
-      '/mnt/user/Document 1.docx',
-      '/mnt/user/Document 2.docx',
-    ]);
+    expect(getFmSelectedPaths()).toEqual(['/mnt/user/Document 1.docx', '/mnt/user/Document 2.docx']);
     expect(getFmSelectionState().selectionAnchorIndex).toBe(1);
     expect(getFmSelectionState().lastSelectedIndex).toBe(2);
   });
@@ -353,10 +329,7 @@ describe('File Manager Keyboard Navigation & Multi-Selection', () => {
     handleFmKeydown(shiftDownEvt);
 
     expect(preventSpy).toHaveBeenCalled();
-    expect(getFmSelectedPaths()).toEqual([
-      '/mnt/user/Document 1.docx',
-      '/mnt/user/Document 2.docx',
-    ]);
+    expect(getFmSelectedPaths()).toEqual(['/mnt/user/Document 1.docx', '/mnt/user/Document 2.docx']);
 
     smartModal.remove();
   });

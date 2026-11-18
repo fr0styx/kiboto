@@ -75,10 +75,13 @@ export function jobRowHtml(job, active) {
         pct === null ? '' : ` aria-valuenow="${Math.round(pct)}"`
       }><span class="jobs-bar-fill${pct === null ? ' is-indeterminate' : ''}" style="width:${pct === null ? 40 : pct}%"></span></div>`
     : '';
-  const when = active ? '' : `<span class="jobs-when">${escapeHtml(formatDateTime(job.finished_at ? job.finished_at * 1000 : null, undefined, ''))}</span>`;
-  const cancel = active && job.can_cancel
-    ? `<button type="button" class="jobs-cancel" data-job-cancel="${escapeHtml(job.id)}">${escapeHtml(t('jobs.cancel', 'Cancel'))}</button>`
-    : '';
+  const when = active
+    ? ''
+    : `<span class="jobs-when">${escapeHtml(formatDateTime(job.finished_at ? job.finished_at * 1000 : null, undefined, ''))}</span>`;
+  const cancel =
+    active && job.can_cancel
+      ? `<button type="button" class="jobs-cancel" data-job-cancel="${escapeHtml(job.id)}">${escapeHtml(t('jobs.cancel', 'Cancel'))}</button>`
+      : '';
   const detail = jobDetail(job);
   return `<li class="jobs-row is-${escapeHtml(job.status)}">
     <div class="jobs-row-head">
@@ -113,9 +116,12 @@ export function renderJobs(data, root = document) {
   }
   setJobsBadge(active.length);
   // UX-28: say when the number of running jobs changes, not each progress update
-  announceChange('jobs-running', active.length
-    ? t('a11y.jobs_running', '{n, plural, one {# job running} other {# jobs running}}', { n: active.length })
-    : t('a11y.jobs_none', 'No jobs running.'));
+  announceChange(
+    'jobs-running',
+    active.length
+      ? t('a11y.jobs_running', '{n, plural, one {# job running} other {# jobs running}}', { n: active.length })
+      : t('a11y.jobs_none', 'No jobs running.')
+  );
 }
 
 export function setJobsBadge(n) {
@@ -127,7 +133,10 @@ export function setJobsBadge(n) {
   }
   if (btn) {
     btn.classList.toggle('has-jobs', n > 0);
-    btn.setAttribute('aria-label', n > 0 ? t('jobs.button_running', '{n} jobs running', { n }) : t('jobs.title', 'Jobs'));
+    btn.setAttribute(
+      'aria-label',
+      n > 0 ? t('jobs.button_running', '{n} jobs running', { n }) : t('jobs.title', 'Jobs')
+    );
   }
 }
 

@@ -18,96 +18,112 @@ export const SYSTEM_SHORTCUTS = [
   {
     id: 'containers-desktop-icon',
     name: 'Containers',
-    get title() { return t('dsc.containers', 'Apps & Containers'); },
+    get title() {
+      return t('dsc.containers', 'Apps & Containers');
+    },
     desc: 'Manage Docker containers, Compose stacks, app catalog, and live container terminal.',
     icon: '#i-chip',
     svg: true,
     color: '#33cdb8',
     targetSection: 'mgmt-sec-docker',
     targetPane: 'mgmt-pane-docker',
-    badge: 'Docker'
+    badge: 'Docker',
   },
   {
     id: 'storage-desktop-icon',
     name: 'Storage & Pools',
-    get title() { return t('dsc.storage', 'Storage & Chassis'); },
+    get title() {
+      return t('dsc.storage', 'Storage & Chassis');
+    },
     desc: 'Drive bays, storage pools, shares and cloud storage.',
     icon: '#i-storage',
     svg: true,
     color: '#4fd8c4',
     targetSection: 'mgmt-sec-storage',
     targetPane: 'mgmt-pane-storage-topo',
-    badge: 'ZFS/Btrfs'
+    badge: 'ZFS/Btrfs',
   },
   {
     id: 'network-desktop-icon',
     name: 'Network & Switch',
-    get title() { return t('dsc.network', 'Network & Virtual Switch'); },
+    get title() {
+      return t('dsc.network', 'Network & Virtual Switch');
+    },
     desc: 'Visual hardware switch faceplate, link negotiation, host bridges, and Docker network topology.',
     icon: '#i-net',
     svg: true,
     color: '#33cdb8',
     targetSection: 'mgmt-sec-network',
     targetPane: 'mgmt-pane-network',
-    badge: 'Switch'
+    badge: 'Switch',
   },
   {
     id: 'activity-desktop-icon',
     name: 'Activity Monitor',
-    get title() { return t('dsc.activity', 'Activity & Telemetry'); },
+    get title() {
+      return t('dsc.activity', 'Activity & Telemetry');
+    },
     desc: 'Real-time CPU, RAM, disk thermals, and system telemetry historical trends.',
     icon: '#i-bolt',
     svg: true,
     color: '#fbbf24',
     targetSection: 'mgmt-sec-activity',
     targetPane: 'mgmt-pane-metrics',
-    badge: 'Telemetry'
+    badge: 'Telemetry',
   },
   {
     id: 'hardware-desktop-icon',
     name: 'Hardware & Fans',
-    get title() { return t('dsc.hardware', 'Hardware & Acoustic Profiles'); },
+    get title() {
+      return t('dsc.hardware', 'Hardware & Acoustic Profiles');
+    },
     desc: 'Acoustic profiles, custom zero-RPM fan curves, and host subsystems.',
     icon: '#i-fan',
     svg: true,
     color: '#34d399',
     targetSection: 'mgmt-sec-hardware',
-    badge: 'Fans'
+    badge: 'Fans',
   },
   {
     id: 'ups-desktop-icon',
     name: 'UPS & Power',
-    get title() { return t('dsc.ups', 'UPS & Power Integrity'); },
+    get title() {
+      return t('dsc.ups', 'UPS & Power Integrity');
+    },
     desc: 'Battery health, runtime estimation, load wattage, and NUT daemon telemetry.',
     icon: '#i-sliders',
     svg: true,
     color: '#a78bfa',
     targetSection: 'mgmt-sec-ups',
-    badge: 'NUT'
+    badge: 'NUT',
   },
   {
     id: 'settings-desktop-icon',
     name: 'System Settings',
-    get title() { return t('dsc.system', 'System & Security'); },
+    get title() {
+      return t('dsc.system', 'System & Security');
+    },
     desc: 'User accounts, RBAC, API tokens, master credentials, configuration backups, and updates.',
     icon: '#i-users',
     svg: true,
     color: '#f472b6',
     targetSection: 'mgmt-sec-system-group',
-    badge: 'RBAC'
+    badge: 'RBAC',
   },
   {
     id: 'notifications-desktop-icon',
     name: 'Notifications',
-    get title() { return t('dsc.alerts', 'Notifications & Alerts'); },
+    get title() {
+      return t('dsc.alerts', 'Notifications & Alerts');
+    },
     desc: 'Configure Discord, Telegram, Email, ntfy alerting channels and event rules.',
     icon: '#i-bell',
     svg: true,
     color: '#f87171',
     targetSection: 'mgmt-sec-system-group',
     targetPane: 'mgmt-pane-notifications',
-    badge: 'Alerts'
-  }
+    badge: 'Alerts',
+  },
 ];
 
 export function getCustomShortcuts() {
@@ -132,7 +148,12 @@ export function saveCustomShortcuts(shortcuts) {
 
 export function isShortcutActive(id) {
   const builtIn = document.getElementById(id);
-  if (builtIn && builtIn.style.display !== 'none' && !builtIn.classList.contains('hidden') && !builtIn.classList.contains('custom-desktop-shortcut')) {
+  if (
+    builtIn &&
+    builtIn.style.display !== 'none' &&
+    !builtIn.classList.contains('hidden') &&
+    !builtIn.classList.contains('custom-desktop-shortcut')
+  ) {
     return true;
   }
   const current = getCustomShortcuts();
@@ -216,7 +237,7 @@ export function calculateNextAvailablePosition() {
       if (!occupied.has(key)) {
         return {
           left: OFFSET_X + col * GRID_X,
-          top: OFFSET_Y + row * GRID_Y
+          top: OFFSET_Y + row * GRID_Y,
         };
       }
     }
@@ -245,9 +266,7 @@ export function createShortcutElement(shortcut) {
     ? `<svg class="console-hero-icon" style="${shortcut.color ? `color:${shortcut.color};` : ''}"><use href="${shortcut.icon}"/></svg>`
     : `<span class="dss-emoji">${escapeHtml(shortcut.icon || '🔗')}</span>`;
 
-  const dotStyle = shortcut.color
-    ? `background:${shortcut.color}; box-shadow:0 0 6px ${shortcut.color};`
-    : '';
+  const dotStyle = shortcut.color ? `background:${shortcut.color}; box-shadow:0 0 6px ${shortcut.color};` : '';
 
   el.innerHTML = `
     <div class="console-hero-box">
@@ -298,7 +317,7 @@ export function launchShortcut(shortcut) {
     ZettEventBus.emit('window:open', {
       id: 'management-window',
       section: targetSection,
-      pane: targetPane
+      pane: targetPane,
     });
   }
 }
@@ -309,14 +328,27 @@ export function launchShortcut(shortcut) {
 export function addDesktopShortcut(shortcutDef) {
   const current = getCustomShortcuts();
   if (current.some((s) => s.id === shortcutDef.id)) {
-    showToast(t('toast.shortcut_is_already_on_your_desktop', 'Shortcut "{name}" is already on your desktop.', { name: shortcutDef.name }), 'info');
+    showToast(
+      t('toast.shortcut_is_already_on_your_desktop', 'Shortcut "{name}" is already on your desktop.', {
+        name: shortcutDef.name,
+      }),
+      'info'
+    );
     return false;
   }
 
   // Prevent duplicate if element with this ID already exists in DOM as a built-in desktop icon
   const existingEl = document.getElementById(shortcutDef.id);
-  if (existingEl && existingEl.style.display !== 'none' && !existingEl.classList.contains('hidden') && !existingEl.classList.contains('custom-desktop-shortcut')) {
-    showToast(t('toast.is_already_on_your_desktop', '"{name}" is already on your desktop.', { name: shortcutDef.name }), 'info');
+  if (
+    existingEl &&
+    existingEl.style.display !== 'none' &&
+    !existingEl.classList.contains('hidden') &&
+    !existingEl.classList.contains('custom-desktop-shortcut')
+  ) {
+    showToast(
+      t('toast.is_already_on_your_desktop', '"{name}" is already on your desktop.', { name: shortcutDef.name }),
+      'info'
+    );
     return false;
   }
 
@@ -462,9 +494,13 @@ export function openAddDesktopShortcutModal() {
           <div>
             <label class="asd-label-wide">${escapeHtml(t('ds.icon', 'Icon'))}</label>
             <div class="asd-emojis" id="custom-shortcut-emojis">
-              ${['🌐', '🏠', '🎬', '🛡️', '📦', '⚡', '🔌', '🚀', '🎮', '🎵', '💾', '📊', '📡', '🛠️'].map((emoji, idx) => `
+              ${['🌐', '🏠', '🎬', '🛡️', '📦', '⚡', '🔌', '🚀', '🎮', '🎵', '💾', '📊', '📡', '🛠️']
+                .map(
+                  (emoji, idx) => `
                 <button type="button" class="btn-emoji-chip ${idx === 0 ? 'active' : ''}" data-emoji="${emoji}" style="padding:6px 10px; font-size:16px; background:${idx === 0 ? 'rgba(51,205,184,0.2)' : 'rgba(255,255,255,0.05)'}; border:1px solid ${idx === 0 ? 'rgba(51,205,184,0.6)' : 'rgba(255,255,255,0.1)'}; border-radius:6px; cursor:pointer;">${emoji}</button>
-              `).join('')}
+              `
+                )
+                .join('')}
             </div>
           </div>
           <button id="btn-save-custom-shortcut" class="asd-save">
@@ -523,7 +559,10 @@ export function openAddDesktopShortcutModal() {
       const url = urlInput ? urlInput.value.trim() : '';
 
       if (!name || !url) {
-        showToast(t('toast.please_provide_both_a_shortcut_name', 'Please provide both a shortcut name and URL.'), 'warn');
+        showToast(
+          t('toast.please_provide_both_a_shortcut_name', 'Please provide both a shortcut name and URL.'),
+          'warn'
+        );
         return;
       }
 
@@ -535,7 +574,7 @@ export function openAddDesktopShortcutModal() {
         url,
         icon: selectedEmoji,
         svg: false,
-        color: '#33cdb8'
+        color: '#33cdb8',
       };
 
       addDesktopShortcut(customDef);
@@ -616,7 +655,7 @@ function renderSystemShortcutsList(overlay) {
           svg: scDef.svg,
           color: scDef.color,
           targetSection: scDef.targetSection,
-          targetPane: scDef.targetPane
+          targetPane: scDef.targetPane,
         });
         btn.classList.add('active');
         btn.textContent = t('ui.on_desktop', '✓ On Desktop');

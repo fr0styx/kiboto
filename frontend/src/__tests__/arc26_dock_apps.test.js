@@ -4,7 +4,14 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 vi.mock('../components/dock/console-window.js', () => ({ openConsoleWindow: vi.fn() }));
 vi.mock('../components/dock/window-drag.js', () => ({ bringToFront: vi.fn() }));
 vi.mock('../components/dock/dock-manager.js', () => ({
-  DockManager: { activeId: null, windows: {}, restore: vi.fn(), closeWindow: vi.fn(), togglePin: vi.fn(), register: vi.fn() },
+  DockManager: {
+    activeId: null,
+    windows: {},
+    restore: vi.fn(),
+    closeWindow: vi.fn(),
+    togglePin: vi.fn(),
+    register: vi.fn(),
+  },
 }));
 
 const { KNOWN_APPS, toggleFmWindowSwitcher, showDockItemContextMenu } = await import('../components/dock/apps.js');
@@ -15,9 +22,20 @@ const { ZettEventBus } = await import('../event-bus.js');
 const { setLanguage } = await import('../i18n.js');
 
 const $ = (id) => document.getElementById(id);
-const GLOBALS = ['openFileManager', 'openManagementWindow', 'openContainerInspector', 'openContainersManager', 'openContainersWindow',
-  'openVmManager', 'toggleNotificationCenter', 'openNewCloudRemoteModal', 'openPersonalizationWindow', 'DockManager',
-  'openNewFileManagerWindow', 'closeAllFileManagerWindows'];
+const GLOBALS = [
+  'openFileManager',
+  'openManagementWindow',
+  'openContainerInspector',
+  'openContainersManager',
+  'openContainersWindow',
+  'openVmManager',
+  'toggleNotificationCenter',
+  'openNewCloudRemoteModal',
+  'openPersonalizationWindow',
+  'DockManager',
+  'openNewFileManagerWindow',
+  'closeAllFileManagerWindows',
+];
 const fakeDock = () => ({ windows: {}, register: vi.fn(), restore: vi.fn() });
 const fmWindow = (id, path) => {
   const el = document.createElement('div');
@@ -41,10 +59,20 @@ afterEach(async () => {
 });
 
 describe('known apps', () => {
-  it('every app has a title in the reader\'s language', async () => {
+  it("every app has a title in the reader's language", async () => {
     expect(Object.values(KNOWN_APPS).map((a) => a.getTitle())).toEqual([
-      'File Explorer', 'Settings', 'Kiboto', 'Drive Health', 'Container Inspector', 'Apps', 'Virtual Machines',
-      'App Deployment', 'Notification Center', 'Cloud Remotes', 'Desktop & Personalization', 'Ask Kib',
+      'File Explorer',
+      'Settings',
+      'Kiboto',
+      'Drive Health',
+      'Container Inspector',
+      'Apps',
+      'Virtual Machines',
+      'App Deployment',
+      'Notification Center',
+      'Cloud Remotes',
+      'Desktop & Personalization',
+      'Ask Kib',
     ]);
     await setLanguage('de');
     expect(KNOWN_APPS['container-inspector'].getTitle()).toBe('Container-Inspektor');
@@ -82,14 +110,17 @@ describe('known apps', () => {
     expect(window.openPersonalizationWindow).toHaveBeenCalledWith('wallpaper');
   });
 
-  it('without an opener, restores the app\'s window and registers it once', () => {
-    document.body.innerHTML = '<div id="file-manager-window"></div><div id="containers-manager-window"></div><div id="vm-manager-window"></div>';
+  it("without an opener, restores the app's window and registers it once", () => {
+    document.body.innerHTML =
+      '<div id="file-manager-window"></div><div id="containers-manager-window"></div><div id="vm-manager-window"></div>';
     window.DockManager = fakeDock();
     KNOWN_APPS.fm.launch('/mnt');
     KNOWN_APPS.containers.launch();
     KNOWN_APPS.vm.launch();
     expect(window.DockManager.register.mock.calls.map((c) => [c[0], c[1].id])).toEqual([
-      ['fm', 'file-manager-window'], ['containers', 'containers-manager-window'], ['vm', 'vm-manager-window'],
+      ['fm', 'file-manager-window'],
+      ['containers', 'containers-manager-window'],
+      ['vm', 'vm-manager-window'],
     ]);
     expect(emit).toHaveBeenCalledWith('window:open', { id: 'file-manager-window', path: '/mnt' });
     expect(emit).toHaveBeenCalledWith('window:open', { id: 'vm-manager-window' });
@@ -108,14 +139,22 @@ describe('known apps', () => {
 
   it('without a window either, clicks the desktop icon', () => {
     const clicks = [];
-    document.body.innerHTML = ['fm', 'management', 'containers', 'vm'].map((a) => `<button id="${a}-desktop-icon"></button>`).join('');
+    document.body.innerHTML = ['fm', 'management', 'containers', 'vm']
+      .map((a) => `<button id="${a}-desktop-icon"></button>`)
+      .join('');
     document.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => clicks.push(b.id)));
     KNOWN_APPS.fm.launch();
     KNOWN_APPS.management.launch();
     KNOWN_APPS.zettai.launch();
     KNOWN_APPS.containers.launch();
     KNOWN_APPS.vm.launch();
-    expect(clicks).toEqual(['fm-desktop-icon', 'management-desktop-icon', 'management-desktop-icon', 'containers-desktop-icon', 'vm-desktop-icon']);
+    expect(clicks).toEqual([
+      'fm-desktop-icon',
+      'management-desktop-icon',
+      'management-desktop-icon',
+      'containers-desktop-icon',
+      'vm-desktop-icon',
+    ]);
     KNOWN_APPS.personalization.launch();
   });
 
@@ -166,7 +205,11 @@ describe('File Explorer window switcher', () => {
     toggleFmWindowSwitcher(a, [w1, w2, w3]);
     const items = [...document.querySelectorAll('.dock-switcher-item')];
     expect(document.querySelector('.dock-switcher-header').textContent).toContain('File Explorer Windows (3)');
-    expect(items.map((i) => i.querySelector('.dock-switcher-name').textContent)).toEqual(['Photos', 'File Explorer', 'File Explorer']);
+    expect(items.map((i) => i.querySelector('.dock-switcher-name').textContent)).toEqual([
+      'Photos',
+      'File Explorer',
+      'File Explorer',
+    ]);
     expect(items[0].querySelector('.dock-switcher-path').textContent).toBe('/mnt/user/photos');
     expect(items[1].querySelector('.dock-switcher-path')).toBeNull();
     expect(items.map((i) => i.classList.contains('active'))).toEqual([true, false, false]);
@@ -227,7 +270,8 @@ describe('File Explorer window switcher', () => {
 });
 
 describe('dock item menu', () => {
-  const items = () => [...document.querySelectorAll('#dock-item-ctx-menu .ctx-item')].map((i) => i.id || i.dataset.winId);
+  const items = () =>
+    [...document.querySelectorAll('#dock-item-ctx-menu .ctx-item')].map((i) => i.id || i.dataset.winId);
 
   it('has no menu for home and the notification center', () => {
     showDockItemContextMenu(0, 0, 'home', 'Home', true, false);

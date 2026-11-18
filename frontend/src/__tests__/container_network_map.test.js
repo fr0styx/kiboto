@@ -15,8 +15,21 @@ const TOPO = {
   ],
   containers: [
     { name: 'zz-bridge-only', state: 'exited', networks: [{ network: 'bridge', ip: '172.17.0.4' }], ports: [] },
-    { name: 'sonarr', state: 'running', networks: [{ network: 'arr_default', ip: '172.20.0.3' }], ports: [{ public: 8989, private: 8989, type: 'tcp' }] },
-    { name: 'gluetun', state: 'running', networks: [{ network: 'arr_default', ip: '172.20.0.2' }, { network: 'bridge', ip: '172.17.0.2' }], ports: [] },
+    {
+      name: 'sonarr',
+      state: 'running',
+      networks: [{ network: 'arr_default', ip: '172.20.0.3' }],
+      ports: [{ public: 8989, private: 8989, type: 'tcp' }],
+    },
+    {
+      name: 'gluetun',
+      state: 'running',
+      networks: [
+        { network: 'arr_default', ip: '172.20.0.2' },
+        { network: 'bridge', ip: '172.17.0.2' },
+      ],
+      ports: [],
+    },
     { name: 'qbit', state: 'running', networks: [], shares_with: 'gluetun', ports: [] },
   ],
 };
@@ -49,7 +62,10 @@ describe('Container network map', () => {
 
   it('escapes names in the SVG', () => {
     const svg = renderNetworkMapSvg(
-      layoutNetworkMap({ networks: [{ name: '<img onerror=x>', container_count: 1 }], containers: [{ name: '"><script>', networks: [{ network: '<img onerror=x>', ip: '1.2.3.4' }] }] })
+      layoutNetworkMap({
+        networks: [{ name: '<img onerror=x>', container_count: 1 }],
+        containers: [{ name: '"><script>', networks: [{ network: '<img onerror=x>', ip: '1.2.3.4' }] }],
+      })
     );
     expect(svg).not.toContain('<img');
     expect(svg).not.toContain('<script>');

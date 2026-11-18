@@ -27,8 +27,11 @@ export function openVmCreateModal() {
   // opened from Settings before the VM window loaded the host's numbers: fetch them first (VMs report 18)
   if (!vmState.telemetry && !_telemetryAsked) {
     _telemetryAsked = true;
-    return api.get('/api/vms/telemetry')
-      .then((tel) => { if (tel && typeof tel === 'object') vmState.telemetry = tel; })
+    return api
+      .get('/api/vms/telemetry')
+      .then((tel) => {
+        if (tel && typeof tel === 'object') vmState.telemetry = tel;
+      })
       .catch(() => {})
       .then(() => openVmCreateModal());
   }
@@ -328,12 +331,7 @@ export function openVmCreateModal() {
 
   // Register in DockManager for window lifecycle (minimize & restore)
   if (window.DockManager && typeof window.DockManager.register === 'function') {
-    window.DockManager.register(
-      'modal-vm-create',
-      modal,
-      '#i-vm',
-      t('vm.create_btn', 'Create Virtual Machine')
-    );
+    window.DockManager.register('modal-vm-create', modal, '#i-vm', t('vm.create_btn', 'Create Virtual Machine'));
   }
 
   const closeBtn = modal.querySelector('#vm-modal-close');
@@ -605,7 +603,8 @@ export function openVmCreateModal() {
   renderUsbList();
 
   // Load available host USB devices
-  api.get('/api/vms/usb-devices')
+  api
+    .get('/api/vms/usb-devices')
     .then((devs) => {
       if (!usbSelect) return;
       usbSelect.innerHTML = '<option value="">' + t('vmd.usb_pick', '— Choose a USB device —') + '</option>';
@@ -649,7 +648,12 @@ export function openVmCreateModal() {
           confirmUsbUse(item, () => {
             createUsbDevices.push(item);
             renderUsbList();
-            showToast(t('toast.attached_usb_device', 'Attached USB device: {description}', { description: item.description || item.vendor_id }), 'info');
+            showToast(
+              t('toast.attached_usb_device', 'Attached USB device: {description}', {
+                description: item.description || item.vendor_id,
+              }),
+              'info'
+            );
           });
         } else {
           showToast(t('toast.device_is_already_attached_to_this', 'Device is already attached to this VM'), 'warning');
@@ -666,10 +670,16 @@ export function openVmCreateModal() {
         e.preventDefault();
         e.stopPropagation();
       }
-      const isHidden = customUsbWrap.style.display === 'none' || (typeof window !== 'undefined' && window.getComputedStyle && window.getComputedStyle(customUsbWrap).display === 'none');
+      const isHidden =
+        customUsbWrap.style.display === 'none' ||
+        (typeof window !== 'undefined' &&
+          window.getComputedStyle &&
+          window.getComputedStyle(customUsbWrap).display === 'none');
       customUsbWrap.style.display = isHidden ? 'flex' : 'none';
       toggleCustomUsb.classList.toggle('active', isHidden);
-      toggleCustomUsb.textContent = isHidden ? t('vm.usb_custom_close_btn', '− Custom VID:PID') : t('vm.usb_custom_btn', '+ Custom VID:PID');
+      toggleCustomUsb.textContent = isHidden
+        ? t('vm.usb_custom_close_btn', '− Custom VID:PID')
+        : t('vm.usb_custom_btn', '+ Custom VID:PID');
       if (isHidden) {
         const vidInput = modal.querySelector('#vm-create-custom-vid');
         if (vidInput) vidInput.focus();
@@ -695,7 +705,13 @@ export function openVmCreateModal() {
       const pid = modal.querySelector('#vm-create-custom-pid')?.value?.trim().toLowerCase().replace('0x', '');
       const desc = modal.querySelector('#vm-create-custom-desc')?.value?.trim() || `USB Device (${vid}:${pid})`;
       if (!vid || !pid || !/^[0-9a-fA-F]{1,4}$/.test(vid) || !/^[0-9a-fA-F]{1,4}$/.test(pid)) {
-        showToast(t('toast.please_enter_valid_4_character_hex', 'Please enter valid 4-character hex VID and PID (e.g. 10c4, ea60)'), 'warning');
+        showToast(
+          t(
+            'toast.please_enter_valid_4_character_hex',
+            'Please enter valid 4-character hex VID and PID (e.g. 10c4, ea60)'
+          ),
+          'warning'
+        );
         return;
       }
       if (!createUsbDevices.some((d) => d.vendor_id === vid && d.product_id === pid)) {
@@ -704,7 +720,10 @@ export function openVmCreateModal() {
         modal.querySelector('#vm-create-custom-vid').value = '';
         modal.querySelector('#vm-create-custom-pid').value = '';
         modal.querySelector('#vm-create-custom-desc').value = '';
-        showToast(t('toast.added_custom_usb_device', 'Added custom USB device [{vid}:{pid}]', { vid: vid, pid: pid }), 'info');
+        showToast(
+          t('toast.added_custom_usb_device', 'Added custom USB device [{vid}:{pid}]', { vid: vid, pid: pid }),
+          'info'
+        );
       } else {
         showToast(t('toast.device_is_already_attached_to_this', 'Device is already attached to this VM'), 'warning');
       }
@@ -725,7 +744,12 @@ export function openVmCreateModal() {
       }
       // the server's rule (VmCreateRequest.name), said before it refuses (VMs report 24)
       if (!/^[a-zA-Z0-9_-]{2,64}$/.test(name)) {
-        showToast(t('vmd.name_rule_bad', '"{name}" can\'t be used. Use letters, numbers, - and _ only, 2 to 64 characters.', { name }), 'warning');
+        showToast(
+          t('vmd.name_rule_bad', '"{name}" can\'t be used. Use letters, numbers, - and _ only, 2 to 64 characters.', {
+            name,
+          }),
+          'warning'
+        );
         return;
       }
 
@@ -763,8 +787,10 @@ export function openVmCreateModal() {
           disk_format: 'qcow2',
           disk_bus: 'virtio',
           iso_path: modal.querySelector('#vm-create-iso')?.value || null,
-          driver_iso_path: /** @type {HTMLSelectElement | null} */ (modal.querySelector('#vm-create-driver-iso'))?.value || null,
-          disk_image_path: /** @type {HTMLSelectElement | null} */ (modal.querySelector('#vm-create-disk-image'))?.value || null,
+          driver_iso_path:
+            /** @type {HTMLSelectElement | null} */ (modal.querySelector('#vm-create-driver-iso'))?.value || null,
+          disk_image_path:
+            /** @type {HTMLSelectElement | null} */ (modal.querySelector('#vm-create-disk-image'))?.value || null,
           boot_order: modal.querySelector('input[name="vm-create-boot-order"]:checked')?.value || 'iso',
           bridge: modal.querySelector('#vm-create-bridge')?.value || 'br0',
           autostart: !!modal.querySelector('#vm-create-autostart')?.checked,
@@ -778,7 +804,12 @@ export function openVmCreateModal() {
           secondary_disks,
         });
 
-        showToast(t('toast.virtual_machine_created_successfully', 'Virtual machine \'{name}\' created successfully!', { name: name }), 'success');
+        showToast(
+          t('toast.virtual_machine_created_successfully', "Virtual machine '{name}' created successfully!", {
+            name: name,
+          }),
+          'success'
+        );
         closeModal();
         loadVmDashboard();
       } catch (err) {

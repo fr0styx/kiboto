@@ -15,7 +15,15 @@
 import EMOJI_ICONS from './icons/emoji-icons.json';
 import { watchDom } from './dom-watch.js';
 import {
-  ATTR_SKIP, BUILT_ATTR, SKIP, TEXT_ATTRS, emojiMatchers, hrefFor as hrefIn, iconMarkup, iconOnlyLabel, selectorOf,
+  ATTR_SKIP,
+  BUILT_ATTR,
+  SKIP,
+  TEXT_ATTRS,
+  emojiMatchers,
+  hrefFor as hrefIn,
+  iconMarkup,
+  iconOnlyLabel,
+  selectorOf,
 } from './icons-rules.js';
 
 export const SPRITE_URL = '/zi-sprite.svg';
@@ -61,7 +69,10 @@ export function iconEl(name) {
 
 /** Text without mapped emoji (for tooltips, placeholders and labels). */
 export function stripEmoji(text) {
-  return String(text).replace(EMOJI_RE, '').replace(/\s{2,}/g, ' ').trim();
+  return String(text)
+    .replace(EMOJI_RE, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
 }
 
 function skipped(el) {
@@ -134,7 +145,10 @@ export function iconizeTree(root) {
   }
   const texts = [];
   const notBuilt = {
-    acceptNode: (n) => (n.nodeType === Node.ELEMENT_NODE && n.hasAttribute(BUILT_ATTR) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT),
+    acceptNode: (n) =>
+      n.nodeType === Node.ELEMENT_NODE && n.hasAttribute(BUILT_ATTR)
+        ? NodeFilter.FILTER_REJECT
+        : NodeFilter.FILTER_ACCEPT,
   };
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT, notBuilt);
   for (let n = walker.nextNode(); n; n = walker.nextNode()) {
@@ -160,13 +174,13 @@ export function startIconizer(doc = document) {
     attributes: TEXT_ATTRS,
     onRecords: (records) => {
       for (const r of records) {
-      if (r.type === 'childList') {
-        r.addedNodes.forEach(iconizeTree);
-      } else if (r.type === 'characterData') {
-        convertTextNode(r.target);
-      } else if (r.type === 'attributes') {
-        cleanAttributes(r.target);
-      }
+        if (r.type === 'childList') {
+          r.addedNodes.forEach(iconizeTree);
+        } else if (r.type === 'characterData') {
+          convertTextNode(r.target);
+        } else if (r.type === 'attributes') {
+          cleanAttributes(r.target);
+        }
       }
     },
   });

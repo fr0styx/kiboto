@@ -305,7 +305,7 @@ describe('UPS Power Flow Digital Twin & Drawer Controls', () => {
     expect(badge.style.display).toBe('inline-flex');
 
     const inputs = connCard.querySelectorAll('input, button');
-    inputs.forEach(el => {
+    inputs.forEach((el) => {
       expect(el.disabled).toBe(true);
     });
 
@@ -315,7 +315,7 @@ describe('UPS Power Flow Digital Twin & Drawer Controls', () => {
     expect(connCard.hasAttribute('aria-disabled')).toBe(false);
     expect(connCard.style.display).not.toBe('none');
     expect(badge.style.display).toBe('none');
-    inputs.forEach(el => {
+    inputs.forEach((el) => {
       expect(el.disabled).toBe(false);
     });
   });
@@ -375,36 +375,48 @@ describe('UPS Power Flow Digital Twin & Drawer Controls', () => {
     runtimeSlider.value = '12';
     runtimeSlider.dispatchEvent(new Event('change'));
 
-    expect(postSpy).toHaveBeenCalledWith('/api/ups/config', expect.objectContaining({
-      runtime_threshold_min: 12,
-    }));
+    expect(postSpy).toHaveBeenCalledWith(
+      '/api/ups/config',
+      expect.objectContaining({
+        runtime_threshold_min: 12,
+      })
+    );
 
     // 2. "Also after a set time on battery" (one rule, Power decision 4)
     const timerBox = document.querySelector('input[name="ups-policy"][value="timer"]');
     timerBox.checked = true;
     timerBox.dispatchEvent(new Event('change'));
 
-    expect(postSpy).toHaveBeenCalledWith('/api/ups/config', expect.objectContaining({
-      shutdown_policy: 'timer',
-    }));
+    expect(postSpy).toHaveBeenCalledWith(
+      '/api/ups/config',
+      expect.objectContaining({
+        shutdown_policy: 'timer',
+      })
+    );
 
     // 3. Changing cut-power toggle
     const chkCutpower = document.getElementById('ups-chk-cutpower');
     chkCutpower.checked = true;
     chkCutpower.dispatchEvent(new Event('change'));
 
-    expect(postSpy).toHaveBeenCalledWith('/api/ups/config', expect.objectContaining({
-      poweroff_ups: true,
-    }));
+    expect(postSpy).toHaveBeenCalledWith(
+      '/api/ups/config',
+      expect.objectContaining({
+        poweroff_ups: true,
+      })
+    );
 
     // 4. Changing mode to usb_hid
     const usbRadio = document.querySelector('input[name="ups-mode"][value="usb_hid"]');
     usbRadio.checked = true;
     usbRadio.dispatchEvent(new Event('change'));
 
-    expect(postSpy).toHaveBeenCalledWith('/api/ups/config', expect.objectContaining({
-      mode: 'usb_hid',
-    }));
+    expect(postSpy).toHaveBeenCalledWith(
+      '/api/ups/config',
+      expect.objectContaining({
+        mode: 'usb_hid',
+      })
+    );
     const connCard = document.getElementById('ups-drawer-conn-card');
     expect(connCard.classList.contains('disabled')).toBe(true);
   });
@@ -474,9 +486,12 @@ describe('UPS Power Flow Digital Twin & Drawer Controls', () => {
     expect(document.getElementById('ups-cfg-host').value).toBe('');
     expect(document.getElementById('ups-cfg-port').value).toBe('');
 
-    expect(postSpy).toHaveBeenCalledWith('/api/ups/config', expect.objectContaining({
-      mode: 'usb_hid',
-    }));
+    expect(postSpy).toHaveBeenCalledWith(
+      '/api/ups/config',
+      expect.objectContaining({
+        mode: 'usb_hid',
+      })
+    );
   });
 
   it('hides connection parameters card in auto mode when UPS telemetry indicates is_usb: true', () => {

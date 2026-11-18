@@ -109,9 +109,15 @@ describe('Compact Disks Display & Standby Safety Suite', () => {
 
     it('enforces compact rules on physical LCD via lcd-direct.css overrides', () => {
       expect(lcdDirectCssContent).toMatch(/body\.lcd-direct[\s\S]*?\.disks\.compact[\s\S]*?gap:\s*4px\s*!important/);
-      expect(lcdDirectCssContent).toMatch(/body\.lcd-direct[\s\S]*?\.disks\.compact\s+\.disk[\s\S]*?padding:\s*2px\s+2\.5px\s*!important/);
-      expect(lcdDirectCssContent).toMatch(/body\.lcd-direct[\s\S]*?\.disks\.compact\s+\.disk-ic[\s\S]*?display:\s*none\s*!important/);
-      expect(lcdDirectCssContent).toMatch(/body\.lcd-direct[\s\S]*?\.disks\.compact\s+\.io-dot[\s\S]*?display:\s*none\s*!important/);
+      expect(lcdDirectCssContent).toMatch(
+        /body\.lcd-direct[\s\S]*?\.disks\.compact\s+\.disk[\s\S]*?padding:\s*2px\s+2\.5px\s*!important/
+      );
+      expect(lcdDirectCssContent).toMatch(
+        /body\.lcd-direct[\s\S]*?\.disks\.compact\s+\.disk-ic[\s\S]*?display:\s*none\s*!important/
+      );
+      expect(lcdDirectCssContent).toMatch(
+        /body\.lcd-direct[\s\S]*?\.disks\.compact\s+\.io-dot[\s\S]*?display:\s*none\s*!important/
+      );
     });
   });
 

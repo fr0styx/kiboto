@@ -1,11 +1,49 @@
 import { describe, it, expect } from 'vitest';
-import { filterCatalog, catalogChipsHtml, catalogCardHtml, isInstalled, imageRepo } from '../components/catalog-view.js';
+import {
+  filterCatalog,
+  catalogChipsHtml,
+  catalogCardHtml,
+  isInstalled,
+  imageRepo,
+} from '../components/catalog-view.js';
 
 const apps = [
-  { id: 'caddy', name: 'Caddy', category: 'network', description: 'Reverse proxy with automatic HTTPS', image: 'caddy:2', tags: ['letsencrypt'], default_port: 80 },
-  { id: 'npm', name: 'Nginx Proxy Manager', category: 'network', description: 'Reverse proxy with a web UI', image: 'jc21/nginx-proxy-manager:latest', default_port: 81 },
-  { id: 'immich', name: 'Immich', category: 'photos', description: 'Photo backup', image: 'ghcr.io/immich-app/immich-server:release', type: 'stack', default_port: 2283 },
-  { id: 'x', name: 'Community app', category: 'utilities', description: 'From a source', image: 'foo/bar:1', source_name: 'Community', security_rating: 'review_required', default_port: 1 },
+  {
+    id: 'caddy',
+    name: 'Caddy',
+    category: 'network',
+    description: 'Reverse proxy with automatic HTTPS',
+    image: 'caddy:2',
+    tags: ['letsencrypt'],
+    default_port: 80,
+  },
+  {
+    id: 'npm',
+    name: 'Nginx Proxy Manager',
+    category: 'network',
+    description: 'Reverse proxy with a web UI',
+    image: 'jc21/nginx-proxy-manager:latest',
+    default_port: 81,
+  },
+  {
+    id: 'immich',
+    name: 'Immich',
+    category: 'photos',
+    description: 'Photo backup',
+    image: 'ghcr.io/immich-app/immich-server:release',
+    type: 'stack',
+    default_port: 2283,
+  },
+  {
+    id: 'x',
+    name: 'Community app',
+    category: 'utilities',
+    description: 'From a source',
+    image: 'foo/bar:1',
+    source_name: 'Community',
+    security_rating: 'review_required',
+    default_port: 1,
+  },
 ];
 
 describe('catalog view', () => {
@@ -19,7 +57,11 @@ describe('catalog view', () => {
   it('builds chips only for categories that have apps, with counts', () => {
     const div = document.createElement('div');
     div.innerHTML = catalogChipsHtml(apps, 'network', 'catalog-filter-btn', 'catalog-all-count');
-    const chips = [...div.querySelectorAll('button')].map((b) => [b.dataset.cat, b.textContent, b.classList.contains('active')]);
+    const chips = [...div.querySelectorAll('button')].map((b) => [
+      b.dataset.cat,
+      b.textContent,
+      b.classList.contains('active'),
+    ]);
     expect(chips).toEqual([
       ['all', 'All Apps4', false],
       ['photos', 'Photos1', false],

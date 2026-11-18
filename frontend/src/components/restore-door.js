@@ -48,7 +48,10 @@ export function foldersHtml(groups, mode) {
   }
   return `<p class="rd-step" id="rd-step-title">${escapeHtml(t('rd.which_folder', 'Which folder?'))}</p>
     <ul class="rd-list" aria-labelledby="rd-step-title">${names
-      .map((n) => `<li><button type="button" class="rd-item" data-rd-folder="${escapeHtml(n)}">${escapeHtml(n)} <span class="rd-item-meta">${escapeHtml(t('rd.newest', 'newest {when}', { when: formatDateTime(groups[n][0].created_at) }))}</span></button></li>`)
+      .map(
+        (n) =>
+          `<li><button type="button" class="rd-item" data-rd-folder="${escapeHtml(n)}">${escapeHtml(n)} <span class="rd-item-meta">${escapeHtml(t('rd.newest', 'newest {when}', { when: formatDateTime(groups[n][0].created_at) }))}</span></button></li>`
+      )
       .join('')}</ul>`;
 }
 
@@ -56,7 +59,10 @@ export function foldersHtml(groups, mode) {
 export function daysHtml(folder, snaps) {
   return `<p class="rd-step" id="rd-step-title"><button type="button" class="rd-link" data-rd-back>${escapeHtml(t('rd.back', 'Back'))}</button> ${escapeHtml(t('rd.which_day', '{folder}: which day?', { folder }))}</p>
     <ul class="rd-list" aria-labelledby="rd-step-title">${snaps
-      .map((s) => `<li><button type="button" class="rd-item" data-rd-snap="${escapeHtml(s.name)}">${escapeHtml(formatDateTime(s.created_at))}</button></li>`)
+      .map(
+        (s) =>
+          `<li><button type="button" class="rd-item" data-rd-snap="${escapeHtml(s.name)}">${escapeHtml(formatDateTime(s.created_at))}</button></li>`
+      )
       .join('')}</ul>`;
 }
 
@@ -68,7 +74,9 @@ export function installRestoreDoor(mount, deps = {}) {
   const pick = /** @type {HTMLElement} */ (mount.querySelector('[data-rd-pick]'));
   const open = async (mode) => {
     st.mode = mode;
-    mount.querySelectorAll('[data-rd]').forEach((b) => b.setAttribute('aria-pressed', String(b.getAttribute('data-rd') === mode)));
+    mount
+      .querySelectorAll('[data-rd]')
+      .forEach((b) => b.setAttribute('aria-pressed', String(b.getAttribute('data-rd') === mode)));
     pick.hidden = false;
     pick.textContent = t('rd.looking', 'Looking for earlier versions…');
     /** @type {any[]} */
@@ -90,7 +98,8 @@ export function installRestoreDoor(mount, deps = {}) {
     else if (act === 'all') {
       const m = await (deps.restoreBox || (() => import('./restore-box.js')))();
       m.openRestoreBox();
-    } else if (act === 'offsite') document.getElementById('offsite-title')?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
+    } else if (act === 'offsite')
+      document.getElementById('offsite-title')?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
     else if (act === 'file' || act === 'folder') await open(act);
     else if (el.hasAttribute('data-rd-back')) {
       pick.innerHTML = foldersHtml(st.groups, st.mode);

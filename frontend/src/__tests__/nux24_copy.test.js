@@ -15,7 +15,14 @@ describe('smaller copy gaps (NUX-24)', () => {
   });
 
   it('says where imported photos go', () => {
-    handlePendingUsb({ path: '/mnt/disks/cam', name: 'cam', backups: [], media: true, import_dest: '/mnt/user/Photos/', ts: 77 });
+    handlePendingUsb({
+      path: '/mnt/disks/cam',
+      name: 'cam',
+      backups: [],
+      media: true,
+      import_dest: '/mnt/user/Photos/',
+      ts: 77,
+    });
     expect(showConfirmToast.mock.calls[0][1]).toContain('/mnt/user/Photos/');
   });
 

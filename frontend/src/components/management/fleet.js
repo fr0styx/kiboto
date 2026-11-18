@@ -16,7 +16,8 @@ const esc = escapeHtml;
 /** One paired box's summary in a line or two, or why it can't be seen. */
 export function summaryHtml(s) {
   if (!s) return '';
-  if (s.error) return `<div class="pa-warn">${esc(t('fleet.unreachable', 'Not answering: {why}', { why: s.error }))}</div>`;
+  if (s.error)
+    return `<div class="pa-warn">${esc(t('fleet.unreachable', 'Not answering: {why}', { why: s.error }))}</div>`;
   const total = (s.storage || []).reduce((n, d) => n + (d.total || 0), 0);
   const free = (s.storage || []).reduce((n, d) => n + (d.free || 0), 0);
   const days = s.uptime ? Math.floor(s.uptime / 86400) : null;
@@ -31,13 +32,17 @@ export function summaryHtml(s) {
     return `<li class="${bad ? 'pa-warn' : ''}">${esc(b.name)} · ${esc(when)}${bad ? ` · ${esc(b.last_result)}` : ''}</li>`;
   });
   return `<div class="nsv-xs-muted">${esc(parts.join(' · '))}</div>${
-    backups.length ? `<ul class="fleet-backups">${backups.join('')}</ul>` : `<div class="nsv-xs-muted-2">${esc(t('fleet.no_backups', 'No off-site backups there.'))}</div>`
+    backups.length
+      ? `<ul class="fleet-backups">${backups.join('')}</ul>`
+      : `<div class="nsv-xs-muted-2">${esc(t('fleet.no_backups', 'No off-site backups there.'))}</div>`
   }`;
 }
 
 function peerHtml(p) {
   const id = esc(p.id);
-  const open = p.address ? ` <a href="${esc(p.address)}" target="_blank" rel="noopener">${esc(t('fleet.open', 'Open'))}</a>` : '';
+  const open = p.address
+    ? ` <a href="${esc(p.address)}" target="_blank" rel="noopener">${esc(t('fleet.open', 'Open'))}</a>`
+    : '';
   const backup = p.backup_repo
     ? `<div class="nsv-xs-muted-2">${esc(t('fleet.backs_up', 'This box backs up there: Backup → Off-site.'))}</div>`
     : `<button type="button" class="btn-pill-toggle is-small" data-fleet-backup="${id}">${esc(t('fleet.backup_there', 'Back up to this box'))}</button>`;
@@ -58,18 +63,23 @@ export function fleetHtml(st) {
     <div class="fleet-pair"><button type="button" class="btn-pill-toggle is-small" data-fleet="code">${esc(t('fleet.show_code', 'Pair this box'))}</button>
     <div data-fleet-code aria-live="polite"></div></div>
     <form class="fleet-form" data-fleet-add>
-      <input name="address" placeholder="https://…" aria-label="${esc(t('fleet.address', 'The other box\'s Tailscale address'))}">
+      <input name="address" placeholder="https://…" aria-label="${esc(t('fleet.address', "The other box's Tailscale address"))}">
       <input name="code" placeholder="${esc(t('fleet.code_ph', 'XXXX-XXXX-XXXX-XXXX'))}" autocomplete="off" aria-label="${esc(t('fleet.code', 'Its pairing code'))}">
       <button type="submit" class="btn-pill-toggle is-primary is-small">${esc(t('fleet.pair', 'Pair with that box'))}</button></form>
-    <div class="nsv-xs-muted-2">${esc(t('fleet.help', 'Boxes talk over your tailnet only. A paired box sees the other\'s name, version, free space and backups, nothing else. Backups on a box are append-only and encrypted with the sender\'s key.'))}</div>`;
+    <div class="nsv-xs-muted-2">${esc(t('fleet.help', "Boxes talk over your tailnet only. A paired box sees the other's name, version, free space and backups, nothing else. Backups on a box are append-only and encrypted with the sender's key."))}</div>`;
 }
 
 /** The folders to back up to a paired box. */
 export function pickHtml(id, shares) {
   if (!shares.length) return `<div class="nsv-xs-muted">${esc(t('fleet.no_shares', 'No shares to back up.'))}</div>`;
   return `<form data-fleet-paths="${esc(id)}">${shares
-    .map((s) => `<label class="offsite-check"><input type="checkbox" name="paths" value="${esc(s.path)}"> ${esc(s.name)}</label>`)
-    .join('')}<button type="submit" class="btn-pill-toggle is-primary is-small">${esc(t('fleet.start_backup', 'Set up the backup'))}</button></form>`;
+    .map(
+      (s) =>
+        `<label class="offsite-check"><input type="checkbox" name="paths" value="${esc(s.path)}"> ${esc(s.name)}</label>`
+    )
+    .join(
+      ''
+    )}<button type="submit" class="btn-pill-toggle is-primary is-small">${esc(t('fleet.start_backup', 'Set up the backup'))}</button></form>`;
 }
 
 function render(st) {
@@ -108,7 +118,9 @@ async function onClick(e) {
   const forget = hit('data-fleet-forget');
   if (forget) act(() => api.delete(`/api/fleet/peers/${encodeURIComponent(forget)}`));
   const backup = hit('data-fleet-backup');
-  const pick = backup ? /** @type {HTMLElement | null} */ (document.querySelector(`[data-fleet-pick="${CSS.escape(backup)}"]`)) : null;
+  const pick = backup
+    ? /** @type {HTMLElement | null} */ (document.querySelector(`[data-fleet-pick="${CSS.escape(backup)}"]`))
+    : null;
   if (pick && backup) {
     const sh = await api.get('/api/storage/shares').catch(() => ({ shares: [] }));
     pick.innerHTML = pickHtml(backup, sh.shares || []);

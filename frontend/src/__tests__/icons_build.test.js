@@ -41,7 +41,7 @@ describe('icons at build time', () => {
       expect(built.querySelectorAll('svg.zi, span.zi-dot').length).toBeGreaterThan(5);
       expect(normalise(built)).toBe(normalise(inPage));
     },
-    20000, // the management window is 500 kB, converted twice: slow when the whole suite runs in parallel
+    20000 // the management window is 500 kB, converted twice: slow when the whole suite runs in parallel
   );
 
   it('index.html converts the same as in the page', () => {
@@ -55,7 +55,8 @@ describe('icons at build time', () => {
   });
 
   it('changes only the emoji: the rest of the source stays as written', () => {
-    const src = '<div class="a">\n  <button title="🗑️ Delete">🗑️</button>\n  <pre>📁 kept</pre>\n  <span>📁 Shares &amp; more</span>\n</div>\n';
+    const src =
+      '<div class="a">\n  <button title="🗑️ Delete">🗑️</button>\n  <pre>📁 kept</pre>\n  <span>📁 Shares &amp; more</span>\n</div>\n';
     const out = iconizeFragment(src);
     expect(out).toContain('<div data-icons-built class="a">\n  <button title="Delete" aria-label="Delete">');
     expect(out).toContain('<pre>📁 kept</pre>');

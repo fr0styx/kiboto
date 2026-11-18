@@ -27,7 +27,8 @@ async function currentSubscription() {
 
 export async function enablePush() {
   const perm = await Notification.requestPermission();
-  if (perm !== 'granted') throw new Error(t('push.denied', 'Notifications are blocked for this site in the browser settings.'));
+  if (perm !== 'granted')
+    throw new Error(t('push.denied', 'Notifications are blocked for this site in the browser settings.'));
   const { key } = await api.get('/api/push/vapid-public-key');
   const reg = await navigator.serviceWorker.ready;
   const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(key) });
@@ -51,12 +52,19 @@ export async function renderPushCard() {
   const desc = Object.assign(document.createElement('div'), { className: 'kb-muted' });
   host.replaceChildren(title, desc);
   if (!support.ok) {
-    desc.textContent = support.reason === 'ios-install'
-      ? t('push.ios', 'On iPhone and iPad, add Kiboto to the home screen first (Share → Add to Home Screen), open it from there, then turn this on.')
-      : t('push.unsupported', 'This browser cannot receive notifications.');
+    desc.textContent =
+      support.reason === 'ios-install'
+        ? t(
+            'push.ios',
+            'On iPhone and iPad, add Kiboto to the home screen first (Share → Add to Home Screen), open it from there, then turn this on.'
+          )
+        : t('push.unsupported', 'This browser cannot receive notifications.');
     return;
   }
-  desc.textContent = t('push.desc', 'Disk failures, ransomware alerts and other critical events appear on this phone or computer, even when Kiboto is closed.');
+  desc.textContent = t(
+    'push.desc',
+    'Disk failures, ransomware alerts and other critical events appear on this phone or computer, even when Kiboto is closed.'
+  );
   const sub = await currentSubscription().catch(() => null);
   const row = Object.assign(document.createElement('div'), { className: 'kb-row' });
   const toggle = Object.assign(document.createElement('button'), {
@@ -68,7 +76,10 @@ export async function renderPushCard() {
     try {
       if (sub) await disablePush();
       else await enablePush();
-      showToast(sub ? t('push.off', 'Notifications turned off on this device') : t('push.on', 'Notifications turned on'), 'success');
+      showToast(
+        sub ? t('push.off', 'Notifications turned off on this device') : t('push.on', 'Notifications turned on'),
+        'success'
+      );
     } catch (err) {
       showToast(err.message, 'error');
     }
@@ -76,7 +87,11 @@ export async function renderPushCard() {
   });
   row.append(toggle);
   if (sub) {
-    const test = Object.assign(document.createElement('button'), { type: 'button', className: 'btn-pill-toggle', textContent: t('push.test', 'Send a test') });
+    const test = Object.assign(document.createElement('button'), {
+      type: 'button',
+      className: 'btn-pill-toggle',
+      textContent: t('push.test', 'Send a test'),
+    });
     test.addEventListener('click', async () => {
       try {
         await api.post('/api/push/test', {});

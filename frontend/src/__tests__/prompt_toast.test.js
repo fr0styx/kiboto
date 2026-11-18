@@ -19,7 +19,7 @@ describe('showPromptToast - Glassmorphic Prompt & Multiline Modal', () => {
       icon: '🏷️',
       okText: 'Save',
       cancelText: 'Abort',
-      placeholder: 'Enter filename...'
+      placeholder: 'Enter filename...',
     });
 
     const modal = document.getElementById('confirm-toast-modal');
@@ -50,7 +50,7 @@ describe('showPromptToast - Glassmorphic Prompt & Multiline Modal', () => {
       inputType: 'textarea',
       icon: '📋',
       okText: '📋 Paste into VM',
-      placeholder: 'Type or paste commands here...'
+      placeholder: 'Type or paste commands here...',
     });
 
     const input = document.getElementById('prompt-toast-input');
@@ -117,9 +117,16 @@ describe('Modal HTML Formatting & Sanitization', () => {
 
   it('renders rich HTML formatting in showConfirmToast without escaping', async () => {
     const { showConfirmToast } = await import('../toast.js');
-    const msg = 'Pull the latest image and update <strong>sonarr</strong> to its newest release?<br><br><span style="font-size:11.5px; color:var(--muted);">All volumes, persistent paths, and environment settings will be preserved intact.</span>';
+    const msg =
+      'Pull the latest image and update <strong>sonarr</strong> to its newest release?<br><br><span style="font-size:11.5px; color:var(--muted);">All volumes, persistent paths, and environment settings will be preserved intact.</span>';
 
-    showConfirmToast('Update Container', msg, () => {}, () => {}, { isUpdate: true });
+    showConfirmToast(
+      'Update Container',
+      msg,
+      () => {},
+      () => {},
+      { isUpdate: true }
+    );
 
     const msgEl = document.getElementById('confirm-toast-msg');
     expect(msgEl).not.toBeNull();
@@ -139,9 +146,15 @@ describe('Modal HTML Formatting & Sanitization', () => {
 
   it('sanitizes dangerous XSS payloads in showConfirmToast', async () => {
     const { showConfirmToast } = await import('../toast.js');
-    const dangerous = 'Update <strong>radarr</strong><script>alert("xss")</script><img src="x" onerror="evil()"><iframe src="https://evil.com"></iframe>';
+    const dangerous =
+      'Update <strong>radarr</strong><script>alert("xss")</script><img src="x" onerror="evil()"><iframe src="https://evil.com"></iframe>';
 
-    showConfirmToast('Confirm', dangerous, () => {}, () => {});
+    showConfirmToast(
+      'Confirm',
+      dangerous,
+      () => {},
+      () => {}
+    );
 
     const msgEl = document.getElementById('confirm-toast-msg');
     expect(msgEl).not.toBeNull();
@@ -156,7 +169,13 @@ describe('Modal HTML Formatting & Sanitization', () => {
     const { showConfirmToast } = await import('../toast.js');
     const msg = 'Plain text with <strong>literal tags</strong>';
 
-    showConfirmToast('Confirm', msg, () => {}, () => {}, { allowHtml: false });
+    showConfirmToast(
+      'Confirm',
+      msg,
+      () => {},
+      () => {},
+      { allowHtml: false }
+    );
 
     const msgEl = document.getElementById('confirm-toast-msg');
     expect(msgEl.innerHTML).toContain('&lt;strong&gt;literal tags&lt;/strong&gt;');
@@ -164,7 +183,12 @@ describe('Modal HTML Formatting & Sanitization', () => {
   });
 
   it('sanitizes HTML in showPromptToast message', async () => {
-    showPromptToast('Prompt Title', 'Enter value for <code>key_name</code>:<script>bad()</script>', 'default', () => {});
+    showPromptToast(
+      'Prompt Title',
+      'Enter value for <code>key_name</code>:<script>bad()</script>',
+      'default',
+      () => {}
+    );
 
     const modal = document.getElementById('confirm-toast-modal');
     expect(modal).not.toBeNull();
@@ -183,4 +207,3 @@ describe('Modal HTML Formatting & Sanitization', () => {
     expect(sanitizeModalHtml('<a href="javascript:alert(1)">Bad Link</a>')).toBe('<a>Bad Link</a>');
   });
 });
-

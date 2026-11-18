@@ -15,7 +15,9 @@ describe('what "Find this drive" says', () => {
       tone: 'success',
       blinking: true,
     });
-    expect(locateSaid({ success: true, method: 'activity_light', duration: 8 }, 'sdb').text).toBe('The activity light of sdb flickers for 8 seconds. Look for the light that moves.');
+    expect(locateSaid({ success: true, method: 'activity_light', duration: 8 }, 'sdb').text).toBe(
+      'The activity light of sdb flickers for 8 seconds. Look for the light that moves.'
+    );
   });
 
   it('says when no light could be blinked, with the reason when there is one', () => {
@@ -34,7 +36,11 @@ describe('the button', () => {
 
   it('says nothing before the answer, then names the light and marks the tile', async () => {
     let answer;
-    vi.spyOn(api, 'post').mockReturnValue(new Promise((resolve) => { answer = resolve; }));
+    vi.spyOn(api, 'post').mockReturnValue(
+      new Promise((resolve) => {
+        answer = resolve;
+      })
+    );
     const tile = document.createElement('div');
     const done = chassis.triggerLocateDisk('sda', tile);
     await Promise.resolve();
@@ -43,7 +49,10 @@ describe('the button', () => {
     answer({ success: true, method: 'activity_light', duration: 5 });
     await done;
     expect(api.post).toHaveBeenCalledWith('/api/disk/locate', { dev: 'sda', duration: 5 });
-    expect(showToast).toHaveBeenCalledWith('The activity light of sda flickers for 5 seconds. Look for the light that moves.', 'success');
+    expect(showToast).toHaveBeenCalledWith(
+      'The activity light of sda flickers for 5 seconds. Look for the light that moves.',
+      'success'
+    );
     expect(tile.classList.contains('strobe-active')).toBe(true);
   });
 

@@ -5,14 +5,60 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const FIXTURES = vi.hoisted(() => ({
   vms: [
-    { id: 'vm-1', name: 'Ubuntu Server', state: 'running', vcpus: 4, memory_mb: 8192, disk_gb: 64, os: 'linux', vnc_port: 5901, autostart: true, vtpm: false, cpu_pct: 12.5, mem_used_mb: 2048 },
-    { id: 'vm-2', name: 'Windows 11', state: 'stopped', vcpus: 8, memory_mb: 16384, disk_gb: 128, os: 'windows', vnc_port: null, autostart: false, vtpm: true, cpu_pct: 0, mem_used_mb: 0 },
+    {
+      id: 'vm-1',
+      name: 'Ubuntu Server',
+      state: 'running',
+      vcpus: 4,
+      memory_mb: 8192,
+      disk_gb: 64,
+      os: 'linux',
+      vnc_port: 5901,
+      autostart: true,
+      vtpm: false,
+      cpu_pct: 12.5,
+      mem_used_mb: 2048,
+    },
+    {
+      id: 'vm-2',
+      name: 'Windows 11',
+      state: 'stopped',
+      vcpus: 8,
+      memory_mb: 16384,
+      disk_gb: 128,
+      os: 'windows',
+      vnc_port: null,
+      autostart: false,
+      vtpm: true,
+      cpu_pct: 0,
+      mem_used_mb: 0,
+    },
   ],
-  telemetry: { kvm_available: true, cpu_model: 'Intel N100', host_vcpus: 4, host_mem_mb: 16384, allocated_vcpus: 12, allocated_mem_mb: 24576, running: 1, total: 2 },
-  isos: [{ name: 'ubuntu-24.04.iso', size: 2600000000 }, { name: 'win11.iso', size: 5800000000 }],
+  telemetry: {
+    kvm_available: true,
+    cpu_model: 'Intel N100',
+    host_vcpus: 4,
+    host_mem_mb: 16384,
+    allocated_vcpus: 12,
+    allocated_mem_mb: 24576,
+    running: 1,
+    total: 2,
+  },
+  isos: [
+    { name: 'ubuntu-24.04.iso', size: 2600000000 },
+    { name: 'win11.iso', size: 5800000000 },
+  ],
   bridges: ['br0', 'virbr0'],
-  snapshots: [{ name: 'clean', date: '2026-10-19 12:00:00', size_formatted: '512 MB', is_live: false, description: 'Baseline' }],
-  kvm: { kvm_available: true, nested: false, iommu: true, vfio: true, checks: [{ name: 'kvm', ok: true, detail: '/dev/kvm present' }] },
+  snapshots: [
+    { name: 'clean', date: '2026-10-19 12:00:00', size_formatted: '512 MB', is_live: false, description: 'Baseline' },
+  ],
+  kvm: {
+    kvm_available: true,
+    nested: false,
+    iommu: true,
+    vfio: true,
+    checks: [{ name: 'kvm', ok: true, detail: '/dev/kvm present' }],
+  },
 }));
 
 vi.mock('../api.js', () => {
@@ -41,7 +87,12 @@ vi.mock('../toast.js', () => ({
 }));
 vi.mock('../components/dock.js', () => ({ makeDraggable: vi.fn(), bringToFront: vi.fn() }));
 vi.mock('../components/terminal-view.js', () => ({
-  createTerminalView: vi.fn(() => ({ write: vi.fn(), clear: vi.fn(), dispose: vi.fn(), element: document.createElement('div') })),
+  createTerminalView: vi.fn(() => ({
+    write: vi.fn(),
+    clear: vi.fn(),
+    dispose: vi.fn(),
+    element: document.createElement('div'),
+  })),
 }));
 
 import * as vm from '../components/vm-manager.js';
@@ -91,8 +142,15 @@ describe('VM manager characterization (ARC-5)', () => {
       stream.push(buf);
     }
     const keys = [
-      { key: 'a' }, { key: 'Enter' }, { key: 'Backspace' }, { key: 'Tab' }, { key: 'ArrowUp' },
-      { key: 'c', ctrlKey: true }, { key: 'Escape' }, { key: 'F1' }, { key: 'Delete' },
+      { key: 'a' },
+      { key: 'Enter' },
+      { key: 'Backspace' },
+      { key: 'Tab' },
+      { key: 'ArrowUp' },
+      { key: 'c', ctrlKey: true },
+      { key: 'Escape' },
+      { key: 'F1' },
+      { key: 'Delete' },
     ].map((e) => vm.serialKeyToData({ preventDefault() {}, ...e }) ?? null);
     const out = { ansi, stream, keys, catalog: vm.OFFICIAL_ISO_CATALOG };
     await expect(JSON.stringify(out, null, 1) + '\n').toMatchFileSnapshot(`${SNAP}/console-helpers.json`);

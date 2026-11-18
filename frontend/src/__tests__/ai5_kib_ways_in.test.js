@@ -8,12 +8,20 @@ import { ROUTES } from '../router.js';
 import { TILES } from '../components/phone-shell.js';
 import { ROUTE_SCOPES } from '../route-access.js';
 
-vi.mock('../toast.js', () => ({ showToast: vi.fn(), showConfirmToast: vi.fn(), showPromptToast: vi.fn(), showBottomSheet: vi.fn() }));
+vi.mock('../toast.js', () => ({
+  showToast: vi.fn(),
+  showConfirmToast: vi.fn(),
+  showPromptToast: vi.fn(),
+  showBottomSheet: vi.fn(),
+}));
 
 describe('ways into the Kib window (AI 5)', () => {
-  afterEach(() => { delete window.openKibWindow; delete window.openManagementWindow; });
+  afterEach(() => {
+    delete window.openKibWindow;
+    delete window.openManagementWindow;
+  });
 
-  it('the dock\'s Kib opens the window, or Settings on an older page', () => {
+  it("the dock's Kib opens the window, or Settings on an older page", () => {
     window.openKibWindow = vi.fn();
     kibApp().launch();
     expect(window.openKibWindow).toHaveBeenCalledWith('mgmt-pane-ai-chat');

@@ -35,7 +35,8 @@ export function myAlertsHtml(route, events) {
       .join('')}</select></label>
     <fieldset><legend>${escapeHtml(t('alerts.kinds', 'About'))}</legend>${events
       .map(
-        (e) => `<label class="my-alerts-check"><input type="checkbox" name="events" value="${escapeHtml(e)}"${(route.events || []).includes(e) ? ' checked' : ''}> ${escapeHtml(names[e] || e)}</label>`,
+        (e) =>
+          `<label class="my-alerts-check"><input type="checkbox" name="events" value="${escapeHtml(e)}"${(route.events || []).includes(e) ? ' checked' : ''}> ${escapeHtml(names[e] || e)}</label>`
       )
       .join('')}</fieldset>
     <button type="submit" class="btn-pill-toggle is-primary">${escapeHtml(t('alerts.save', 'Save my alerts'))}</button>

@@ -36,7 +36,7 @@ describe('encrypted folders (FEAT-13)', () => {
   });
 
   it('says why when it cannot, and shows less to people who only use the folders', () => {
-    expect(encryptedFoldersBody({ ...INFO, available: false }).textContent).toContain("tool that encrypts them"); // plain words (NUX-11)
+    expect(encryptedFoldersBody({ ...INFO, available: false }).textContent).toContain('tool that encrypts them'); // plain words (NUX-11)
     const user = encryptedFoldersBody({ ...INFO, can_manage: false, shares: [] });
     expect(user.querySelector('.ef-create')).toBeNull();
     expect(user.querySelector('[name="keep"]')).toBeNull();
@@ -53,7 +53,9 @@ describe('encrypted folders (FEAT-13)', () => {
 
     /** @type {HTMLInputElement} */ (row(mount, 'Taxes').querySelector('[name="password"]')).value = 'pw one two three';
     click(row(mount, 'Taxes'), 'unlock');
-    await vi.waitFor(() => expect(api.post).toHaveBeenCalledWith('/api/encrypted-folders/Taxes/unlock', { password: 'pw one two three' }));
+    await vi.waitFor(() =>
+      expect(api.post).toHaveBeenCalledWith('/api/encrypted-folders/Taxes/unlock', { password: 'pw one two three' })
+    );
     await flush();
     click(row(mount, 'Photos'), 'lock');
     await vi.waitFor(() => expect(api.post).toHaveBeenCalledWith('/api/encrypted-folders/Photos/lock', {}));
@@ -87,7 +89,12 @@ describe('encrypted folders (FEAT-13)', () => {
     /** @type {HTMLInputElement} */ (form.querySelector('[name="start"]')).checked = true;
     click(form, 'create');
     await vi.waitFor(() => expect(mount.querySelector('.ef-key').textContent).toBe('aaaa-bbbb'));
-    expect(api.post).toHaveBeenCalledWith('/api/encrypted-folders', { share: 'Family', name: 'New', password: 'one long passphrase', unlock_at_start: true });
+    expect(api.post).toHaveBeenCalledWith('/api/encrypted-folders', {
+      share: 'Family',
+      name: 'New',
+      password: 'one long passphrase',
+      unlock_at_start: true,
+    });
     expect(document.activeElement).toBe(mount.querySelector('.ef-key')); // focus on the key
     const leave = new Event('beforeunload', { cancelable: true });
     window.dispatchEvent(leave);
@@ -114,7 +121,13 @@ describe('encrypted folders (FEAT-13)', () => {
     /** @type {HTMLInputElement} */ (form.querySelector('[name="name"]')).value = 'Old';
     /** @type {HTMLInputElement} */ (form.querySelector('[name="password"]')).value = 'its password here';
     click(mount, 'adopt');
-    await vi.waitFor(() => expect(api.post).toHaveBeenCalledWith('/api/encrypted-folders/adopt', { share: 'Family', name: 'Old', password: 'its password here' }));
+    await vi.waitFor(() =>
+      expect(api.post).toHaveBeenCalledWith('/api/encrypted-folders/adopt', {
+        share: 'Family',
+        name: 'Old',
+        password: 'its password here',
+      })
+    );
     await flush();
 
     const keep = /** @type {HTMLInputElement} */ (row(mount, 'Taxes').querySelector('[name="keep"]'));
@@ -126,12 +139,18 @@ describe('encrypted folders (FEAT-13)', () => {
     /** @type {HTMLInputElement} */ (row(mount, 'Taxes').querySelector('[name="password"]')).value = 'pw one two three';
     keep.checked = true;
     keep.dispatchEvent(new Event('change', { bubbles: true }));
-    await vi.waitFor(() => expect(api.put).toHaveBeenCalledWith('/api/encrypted-folders/Taxes/unlock-at-start', { password: 'pw one two three' }));
+    await vi.waitFor(() =>
+      expect(api.put).toHaveBeenCalledWith('/api/encrypted-folders/Taxes/unlock-at-start', {
+        password: 'pw one two three',
+      })
+    );
     await flush();
     const off = /** @type {HTMLInputElement} */ (row(mount, 'Photos').querySelector('[name="keep"]'));
     off.checked = false;
     off.dispatchEvent(new Event('change', { bubbles: true }));
-    await vi.waitFor(() => expect(api.put).toHaveBeenCalledWith('/api/encrypted-folders/Photos/unlock-at-start', { password: null }));
+    await vi.waitFor(() =>
+      expect(api.put).toHaveBeenCalledWith('/api/encrypted-folders/Photos/unlock-at-start', { password: null })
+    );
   });
 
   it('shows errors', async () => {
@@ -143,8 +162,8 @@ describe('encrypted folders (FEAT-13)', () => {
     await vi.waitFor(() => expect(showToast).toHaveBeenCalledWith('That password is wrong.', 'error'));
     api.get.mockRejectedValueOnce(new Error('forbidden'));
     await renderEncryptedFolders(mount);
-    expect(mount.textContent).toContain("forbidden"); // with a sentence and Retry (NUX-14)
-    expect(mount.querySelector(".kb-load-error button")).not.toBeNull();
+    expect(mount.textContent).toContain('forbidden'); // with a sentence and Retry (NUX-14)
+    expect(mount.querySelector('.kb-load-error button')).not.toBeNull();
     await renderEncryptedFolders(null);
   });
 
@@ -160,7 +179,9 @@ describe('encrypted folders (FEAT-13)', () => {
     expect(taxes.querySelector('label.ef-field').textContent).toContain('Password');
     /** @type {HTMLInputElement} */ (taxes.querySelector('[name="password"]')).value = 'pw one two three';
     taxes.querySelector('form').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-    await vi.waitFor(() => expect(api.post).toHaveBeenCalledWith('/api/encrypted-folders/Taxes/unlock', { password: 'pw one two three' }));
+    await vi.waitFor(() =>
+      expect(api.post).toHaveBeenCalledWith('/api/encrypted-folders/Taxes/unlock', { password: 'pw one two three' })
+    );
   });
 
   it('copy failures say what to do instead', async () => {
@@ -169,14 +190,20 @@ describe('encrypted folders (FEAT-13)', () => {
     const mount = document.createElement('div');
     await renderEncryptedFolders(mount);
     const form = mount.querySelector('.ef-create');
-    for (const [n, v] of [['name', 'Fotos Großeltern'], ['new', 'one long passphrase'], ['again', 'one long passphrase']]) {
+    for (const [n, v] of [
+      ['name', 'Fotos Großeltern'],
+      ['new', 'one long passphrase'],
+      ['again', 'one long passphrase'],
+    ]) {
       /** @type {HTMLInputElement} */ (form.querySelector(`[name="${n}"]`)).value = v;
     }
     click(form, 'create');
     await vi.waitFor(() => expect(mount.querySelector('.ef-key')).not.toBeNull());
     Object.assign(navigator, { clipboard: { writeText: vi.fn().mockRejectedValue(new Error('denied')) } });
     click(mount, 'copy');
-    await vi.waitFor(() => expect(showToast).toHaveBeenCalledWith(expect.stringContaining('download it as a file'), 'error'));
+    await vi.waitFor(() =>
+      expect(showToast).toHaveBeenCalledWith(expect.stringContaining('download it as a file'), 'error')
+    );
     URL.createObjectURL = vi.fn(() => 'blob:x');
     URL.revokeObjectURL = vi.fn();
     click(mount, 'download');

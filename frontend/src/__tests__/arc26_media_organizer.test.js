@@ -1,7 +1,12 @@
 /** NUX-20 / ARC-26: the media organizer's preview and apply, in the reader's language. */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-vi.mock('../toast.js', () => ({ showToast: vi.fn(), showConfirmToast: vi.fn(), showPromptToast: vi.fn(), showActionToast: vi.fn() }));
+vi.mock('../toast.js', () => ({
+  showToast: vi.fn(),
+  showConfirmToast: vi.fn(),
+  showPromptToast: vi.fn(),
+  showActionToast: vi.fn(),
+}));
 const { api } = await import('../api.js');
 const { showToast } = await import('../toast.js');
 const { setLanguage } = await import('../i18n.js');
@@ -9,8 +14,22 @@ const { openMediaOrganizerModal } = await import('../components/file-manager.js'
 
 const byId = (id) => document.getElementById(id);
 const ITEMS = [
-  { media_type: 'tv', season: 2, episode: 5, title: 'Show', original_filename: 'show.s02e05.mkv', proposed_relative_path: 'TV/Show/S02E05.mkv', resolution: '720p', codec: 'h265' },
-  { media_type: 'movie', year: 2020, original_filename: 'film.mkv', proposed_relative_path: 'Movies/Film (2020)/Film.mkv' },
+  {
+    media_type: 'tv',
+    season: 2,
+    episode: 5,
+    title: 'Show',
+    original_filename: 'show.s02e05.mkv',
+    proposed_relative_path: 'TV/Show/S02E05.mkv',
+    resolution: '720p',
+    codec: 'h265',
+  },
+  {
+    media_type: 'movie',
+    year: 2020,
+    original_filename: 'film.mkv',
+    proposed_relative_path: 'Movies/Film (2020)/Film.mkv',
+  },
 ];
 
 describe('media organizer', () => {
@@ -40,7 +59,12 @@ describe('media organizer', () => {
   it('previews what it would sort, then sorts it', async () => {
     openMediaOrganizerModal('/mnt/user/in');
     let release;
-    const post = vi.spyOn(api, 'post').mockImplementationOnce(() => new Promise((r) => { release = r; }));
+    const post = vi.spyOn(api, 'post').mockImplementationOnce(
+      () =>
+        new Promise((r) => {
+          release = r;
+        })
+    );
     byId('btn-media-org-preview').click();
     expect(byId('btn-media-org-preview').textContent).toBe('⏳ Analyzing...');
     expect(byId('media-org-preview-wrap').textContent).toContain('Reading the file names');
@@ -85,7 +109,11 @@ describe('media organizer', () => {
   });
 
   it('closes with its buttons and the backdrop', () => {
-    for (const close of [() => byId('modal-media-org-close-btn').click(), () => byId('modal-media-org-cancel-btn').click(), () => byId('modal-media-organizer').click()]) {
+    for (const close of [
+      () => byId('modal-media-org-close-btn').click(),
+      () => byId('modal-media-org-cancel-btn').click(),
+      () => byId('modal-media-organizer').click(),
+    ]) {
       openMediaOrganizerModal();
       close();
       expect(byId('modal-media-organizer').style.display).toBe('none');

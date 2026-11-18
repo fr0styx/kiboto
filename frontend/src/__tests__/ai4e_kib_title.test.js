@@ -16,7 +16,11 @@ describe('Settings → Kib title', () => {
             <div id="mgmt-pane-ai-index" class="mgmt-tab-pane"><div id="kib-status-mount"></div></div>
           </div>
         </div></div></div>`;
-    try { initManagement(); } catch (_) { /* parts of the window this test doesn't build */ }
+    try {
+      initManagement();
+    } catch (_) {
+      /* parts of the window this test doesn't build */
+    }
   });
 
   it('is titled Kib', () => {

@@ -1,5 +1,9 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { openContainerInspector, switchContainerTab, _resetContainerModalForTesting } from '../components/container-modal.js';
+import {
+  openContainerInspector,
+  switchContainerTab,
+  _resetContainerModalForTesting,
+} from '../components/container-modal.js';
 import { api } from '../api.js';
 import * as utils from '../utils.js';
 import * as toast from '../toast.js';
@@ -48,7 +52,9 @@ describe('the Environment tab acts on the value, not on the mask (SET-14, Apps 2
     const copy = vi.spyOn(utils, 'copyText').mockResolvedValue(true);
     const said = vi.spyOn(toast, 'showToast');
     document.querySelector('.btn-copy-env').click();
-    await vi.waitFor(() => expect(said).toHaveBeenCalledWith('Only people who manage apps can see this value.', 'warning'));
+    await vi.waitFor(() =>
+      expect(said).toHaveBeenCalledWith('Only people who manage apps can see this value.', 'warning')
+    );
     expect(copy).not.toHaveBeenCalled();
     document.querySelector('.btn-toggle-secret').click();
     await new Promise((r) => setTimeout(r, 0));

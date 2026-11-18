@@ -6,7 +6,8 @@ vi.mock('../utils.js', async (orig) => ({ ...(await orig()), copyText: vi.fn(asy
 const { api } = await import('../api.js');
 const { showToast } = await import('../toast.js');
 const { copyText } = await import('../utils.js');
-const { copyKind, isArchiveName, triggerCopy, openFilePreviewModal, closeFilePreviewModal } = await import('../components/file-preview-modal.js');
+const { copyKind, isArchiveName, triggerCopy, openFilePreviewModal, closeFilePreviewModal } =
+  await import('../components/file-preview-modal.js');
 
 const q = (sel) => /** @type {HTMLElement} */ (document.querySelector(sel));
 

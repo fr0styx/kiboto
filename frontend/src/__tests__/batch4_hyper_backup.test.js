@@ -1,8 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import {
-  fetchAndRenderBackupJobs,
-  fetchAndRenderSystemSnapshots,
-} from '../components/management.js';
+import { fetchAndRenderBackupJobs, fetchAndRenderSystemSnapshots } from '../components/management.js';
 import { api } from '../api.js';
 
 describe('Batch 4: Hyper-Backup Orchestrator & Snapshot Manager UI', () => {

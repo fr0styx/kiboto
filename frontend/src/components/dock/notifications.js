@@ -60,7 +60,9 @@ export function markAllRead(events = state.latestStats?.events) {
   } catch {
     /* private window */
   }
-  api.put('/api/auth/me/preferences', { events_seen: lastReadEventTs }).catch((e) => console.warn('[Kiboto] read marks were not saved to the account', e));
+  api
+    .put('/api/auth/me/preferences', { events_seen: lastReadEventTs })
+    .catch((e) => console.warn('[Kiboto] read marks were not saved to the account', e));
   return lastReadEventTs;
 }
 
@@ -138,7 +140,7 @@ export function showDockToast(msg, targetId = null) {
       const rect = item.getBoundingClientRect();
       if (rect.top > 0) {
         bottomPos = Math.max(76, Math.round(window.innerHeight - rect.top + 14));
-        leftPos = Math.max(120, Math.min(window.innerWidth - 120, Math.round(rect.left + (rect.width / 2))));
+        leftPos = Math.max(120, Math.min(window.innerWidth - 120, Math.round(rect.left + rect.width / 2)));
       }
     }
   }
@@ -182,7 +184,8 @@ export function showDockToast(msg, targetId = null) {
 
   const toast = document.createElement('div');
   toast.className = 'dock-pin-toast';
-  toast.style.cssText = 'background:rgba(19,32,34,0.92); border:1px solid rgba(255,255,255,0.22); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); color:#fff; font-size:var(--kb-fs-xs); font-weight:600; padding:6px 14px; border-radius:18px; box-shadow:0 8px 24px rgba(0,0,0,0.6), 0 0 1px rgba(255,255,255,0.2) inset; pointer-events:none; transition:opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1), transform 0.22s cubic-bezier(0.16, 1, 0.3, 1); transform:translateY(8px) scale(0.96); opacity:0; white-space:nowrap;';
+  toast.style.cssText =
+    'background:rgba(19,32,34,0.92); border:1px solid rgba(255,255,255,0.22); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); color:#fff; font-size:var(--kb-fs-xs); font-weight:600; padding:6px 14px; border-radius:18px; box-shadow:0 8px 24px rgba(0,0,0,0.6), 0 0 1px rgba(255,255,255,0.2) inset; pointer-events:none; transition:opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1), transform 0.22s cubic-bezier(0.16, 1, 0.3, 1); transform:translateY(8px) scale(0.96); opacity:0; white-space:nowrap;';
   toast.textContent = msg;
   container.appendChild(toast);
 
@@ -201,9 +204,9 @@ export function showDockToast(msg, targetId = null) {
 export function updateNotificationBadge() {
   const badge = document.getElementById('dock-notif-badge');
   if (!badge || !state.latestStats || !state.latestStats.events) return;
-  
+
   const unreadCount = bellEvents().filter((e) => !isEventChecked(e)).length;
-  
+
   if (unreadCount > 0) {
     badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
     badge.style.display = 'block';
@@ -222,7 +225,7 @@ export function updateNotificationBadge() {
   }
 }
 
-window.toggleNotificationCenter = function() {
+window.toggleNotificationCenter = function () {
   const panel = document.getElementById('notif-center-panel');
   if (!panel) return;
   if (panel.style.display === 'none' || panel.style.display === '') {
@@ -259,7 +262,7 @@ window.toggleNotificationCenter = function() {
 export function renderNotificationCenter() {
   const list = document.getElementById('notif-center-list');
   if (!list || !state.latestStats || !state.latestStats.events) return;
-  
+
   // the bell lists only what needs a look (bellEvents); everything else is in Activity -> History
   const events = bellEvents();
 
@@ -271,9 +274,9 @@ export function renderNotificationCenter() {
     list.innerHTML = `<div style="padding:28px 16px; text-align:center; color:var(--muted); font-size:var(--kb-fs-xs);">${escapeHtml(emptyMsg)}</div>`;
     return;
   }
-  
+
   const visibleEvents = events.slice(0, 50);
-  const sigParts = visibleEvents.map(e => `${getEventKey(e)}:${isEventChecked(e) ? '1' : '0'}`);
+  const sigParts = visibleEvents.map((e) => `${getEventKey(e)}:${isEventChecked(e) ? '1' : '0'}`);
   const currentSignature = `${getLanguage()}_${visibleEvents.length}_${sigParts.join(';')}`;
 
   // If signature has not changed, do not touch innerHTML so hover state, transitions, and active clicks aren't lost
@@ -290,20 +293,22 @@ export function renderNotificationCenter() {
       if (!row) return;
       const eventKey = row.dataset.eventKey;
       if (!eventKey) return;
-      const eventObj = row._eventData || (state.latestStats?.events || []).find(e => getEventKey(e) === eventKey);
+      const eventObj = row._eventData || (state.latestStats?.events || []).find((e) => getEventKey(e) === eventKey);
       if (!eventObj) return;
 
       markEventChecked(eventObj, true);
       updateNotificationBadge();
       renderNotificationCenter();
-      
+
       if (window.openEventDetailModal) {
         window.openEventDetailModal(eventObj);
       }
     });
     // rows are reached and opened by keyboard too (Activity finding 25)
     list.addEventListener('keydown', (ev) => {
-      const row = /** @type {HTMLElement | null} */ (/** @type {HTMLElement} */ (ev.target).closest('.notif-center-item'));
+      const row = /** @type {HTMLElement | null} */ (
+        /** @type {HTMLElement} */ (ev.target).closest('.notif-center-item')
+      );
       if (row && (ev.key === 'Enter' || ev.key === ' ')) {
         ev.preventDefault();
         row.click();
@@ -312,7 +317,7 @@ export function renderNotificationCenter() {
   }
 
   list.innerHTML = '';
-  visibleEvents.forEach(e => {
+  visibleEvents.forEach((e) => {
     const isChecked = isEventChecked(e);
     const view = eventView(e); // the reader's language: the bell showed the server's English (SET-13)
     const dt = new Date(view.when * 1000);
@@ -404,7 +409,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (tooltip && tooltip.classList.contains('visible') && tooltip.dataset.currentWindowId === 'notif') {
       const notifBtn = document.querySelector('.dock-notif-btn');
       if (notifBtn && window.DockManager && window.DockManager.showTooltip) {
-        window.DockManager.showTooltip(notifBtn, 'notif', t('dock.notifications', 'Notification Center'), '#i-bell', false);
+        window.DockManager.showTooltip(
+          notifBtn,
+          'notif',
+          t('dock.notifications', 'Notification Center'),
+          '#i-bell',
+          false
+        );
       }
     }
   });

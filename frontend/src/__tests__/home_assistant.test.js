@@ -4,10 +4,19 @@ vi.mock('../api.js', () => ({ api: { get: vi.fn(), put: vi.fn(), post: vi.fn() }
 vi.mock('../toast.js', () => ({ showToast: vi.fn() }));
 const { api } = await import('../api.js');
 const toast = await import('../toast.js');
-const { haStatus, haCardHtml, haFormValues, loadHomeAssistantCard } = await import('../components/management/home-assistant.js');
+const { haStatus, haCardHtml, haFormValues, loadHomeAssistantCard } =
+  await import('../components/management/home-assistant.js');
 
 const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
-const CFG = { enabled: true, host: 'mqtt.lan', port: 1883, username: 'kib', has_password: true, tls: false, status: { last_ok: true, sensors: 9, last_at: 1762700000 } };
+const CFG = {
+  enabled: true,
+  host: 'mqtt.lan',
+  port: 1883,
+  username: 'kib',
+  has_password: true,
+  tls: false,
+  status: { last_ok: true, sensors: 9, last_at: 1762700000 },
+};
 
 describe('Home Assistant card (RES-5)', () => {
   beforeEach(() => {
@@ -46,7 +55,12 @@ describe('Home Assistant card (RES-5)', () => {
     expect(toast.showToast).toHaveBeenCalledWith('9 sensors sent to Home Assistant.', 'success');
     card.querySelector('[data-ha-form]').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
     await tick();
-    expect(api.put).toHaveBeenLastCalledWith('/api/integrations/home-assistant', { host: 'mqtt.lan', port: 1883, username: 'kib', tls: false });
+    expect(api.put).toHaveBeenLastCalledWith('/api/integrations/home-assistant', {
+      host: 'mqtt.lan',
+      port: 1883,
+      username: 'kib',
+      tls: false,
+    });
     api.post.mockRejectedValueOnce(new Error('The broker did not take it'));
     card.querySelector('[data-ha-test]').dispatchEvent(new MouseEvent('click', { bubbles: true }));
     await tick();

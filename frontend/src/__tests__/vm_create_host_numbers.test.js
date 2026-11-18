@@ -8,12 +8,20 @@ import { openVmCreateModal } from '../components/vm/create-modal.js';
 const flush = () => new Promise((r) => setTimeout(r, 20));
 
 describe('new machine from Settings (VMs report 18)', () => {
-  afterEach(() => { vi.restoreAllMocks(); document.body.innerHTML = ''; vmState.telemetry = null; });
+  afterEach(() => {
+    vi.restoreAllMocks();
+    document.body.innerHTML = '';
+    vmState.telemetry = null;
+  });
 
   it('fetches the host numbers first and shows them', async () => {
     vmState.telemetry = null;
     const get = vi.spyOn(api, 'get').mockImplementation(async (url) => {
-      if (url === '/api/vms/telemetry') return { memory_budget: { safe_slider_max_gb: 11, override_max_ram_gb: 15 }, cpu_capacity: { host_threads: 4 } };
+      if (url === '/api/vms/telemetry')
+        return {
+          memory_budget: { safe_slider_max_gb: 11, override_max_ram_gb: 15 },
+          cpu_capacity: { host_threads: 4 },
+        };
       return [];
     });
     await openVmCreateModal();
@@ -25,7 +33,10 @@ describe('new machine from Settings (VMs report 18)', () => {
 
   it('says the limit is not known when the server does not answer', async () => {
     vmState.telemetry = null;
-    vi.spyOn(api, 'get').mockImplementation(async (url) => { if (url === '/api/vms/telemetry') throw new Error('down'); return []; });
+    vi.spyOn(api, 'get').mockImplementation(async (url) => {
+      if (url === '/api/vms/telemetry') throw new Error('down');
+      return [];
+    });
     await openVmCreateModal();
     await flush();
     expect(document.getElementById('vm-slider-max-label')?.textContent).toContain('is not known');
@@ -34,12 +45,13 @@ describe('new machine from Settings (VMs report 18)', () => {
   it("the USB list leaves out the NAS's root hubs (VMs report 26)", async () => {
     vmState.telemetry = { memory_budget: { safe_slider_max_gb: 8 }, cpu_capacity: { host_threads: 4 } };
     vi.spyOn(api, 'get').mockImplementation(async (url) => {
-      if (url === '/api/vms/usb-devices') return [
-        { vendor_id: '1d6b', product_id: '0002', description: 'Root Hub (1)', is_root_hub: true },
-        { vendor_id: '046d', product_id: 'c52b', description: 'Logitech Receiver' },
-        null,
-        { vendor_id: '1234', product_id: '5678', product: 'Game Pad' },
-      ];
+      if (url === '/api/vms/usb-devices')
+        return [
+          { vendor_id: '1d6b', product_id: '0002', description: 'Root Hub (1)', is_root_hub: true },
+          { vendor_id: '046d', product_id: 'c52b', description: 'Logitech Receiver' },
+          null,
+          { vendor_id: '1234', product_id: '5678', product: 'Game Pad' },
+        ];
       return [];
     });
     await openVmCreateModal();
@@ -63,8 +75,14 @@ describe('new machine from Settings (VMs report 18)', () => {
 
   it('marks the UPS the NAS uses and asks before adding it (VMs report 26)', async () => {
     vmState.telemetry = { memory_budget: { safe_slider_max_gb: 8 }, cpu_capacity: { host_threads: 4 } };
-    vi.spyOn(api, 'get').mockImplementation(async (url) => (url === '/api/vms/usb-devices'
-      ? [{ vendor_id: '051d', product_id: '0002', description: 'APC UPS', nas_use: 'ups' }, { vendor_id: '046d', product_id: 'c52b', description: 'Receiver' }] : []));
+    vi.spyOn(api, 'get').mockImplementation(async (url) =>
+      url === '/api/vms/usb-devices'
+        ? [
+            { vendor_id: '051d', product_id: '0002', description: 'APC UPS', nas_use: 'ups' },
+            { vendor_id: '046d', product_id: 'c52b', description: 'Receiver' },
+          ]
+        : []
+    );
     const ask = vi.spyOn(toast, 'showConfirmToast').mockImplementation((msg, ok) => ok());
     await openVmCreateModal();
     await flush();
@@ -78,4 +96,3 @@ describe('new machine from Settings (VMs report 18)', () => {
     /** @type {HTMLButtonElement} */ (document.querySelector('#btn-create-add-usb-device')).click(); // already there
   });
 });
-

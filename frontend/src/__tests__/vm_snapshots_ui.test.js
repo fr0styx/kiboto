@@ -29,14 +29,14 @@ describe('VM Snapshots & Hyper-Backup UI Modal', () => {
 
   it('renders modal with QCOW2 snapshots and takes a new snapshot', async () => {
     api.get.mockResolvedValueOnce([
-        {
-          name: 'snap-clean-install',
-          date: '2026-10-19 12:00:00',
-          size_formatted: '512 MB',
-          is_live: false,
-          description: 'Baseline OS installation',
-        },
-      ]);
+      {
+        name: 'snap-clean-install',
+        date: '2026-10-19 12:00:00',
+        size_formatted: '512 MB',
+        is_live: false,
+        description: 'Baseline OS installation',
+      },
+    ]);
 
     const targetVm = { id: 'vm-test-1', name: 'Ubuntu Test Server', state: 'stopped' };
     await openVmSnapshotsModal('vm-test-1', targetVm);
@@ -74,13 +74,13 @@ describe('VM Snapshots & Hyper-Backup UI Modal', () => {
 
   it('handles revert and delete snapshot actions', async () => {
     api.get.mockResolvedValueOnce([
-        {
-          name: 'snap-test-delete',
-          date: '2026-10-19 12:30:00',
-          size_formatted: '128 MB',
-          is_live: true,
-        },
-      ]);
+      {
+        name: 'snap-test-delete',
+        date: '2026-10-19 12:30:00',
+        size_formatted: '128 MB',
+        is_live: true,
+      },
+    ]);
 
     const targetVm = { id: 'vm-test-2', name: 'Debian Worker', state: 'stopped' };
     await openVmSnapshotsModal('vm-test-2', targetVm);
@@ -144,7 +144,8 @@ describe('VM Snapshots & Hyper-Backup UI Modal', () => {
     api.get.mockImplementation((url) => {
       if (url.includes('/budget')) return Promise.resolve({ safe_slider_max_gb: 16 });
       if (url.includes('/snapshots')) return Promise.resolve([]);
-      if (url.includes('/api/vms/vm-test-4')) return Promise.resolve({ id: 'vm-test-4', name: 'Server Four', ram_gb: 4 });
+      if (url.includes('/api/vms/vm-test-4'))
+        return Promise.resolve({ id: 'vm-test-4', name: 'Server Four', ram_gb: 4 });
       return Promise.resolve({});
     });
 
@@ -173,4 +174,3 @@ describe('VM Snapshots & Hyper-Backup UI Modal', () => {
     expect(snapModal.querySelector('.smart-modal-title svg')).not.toBeNull();
   });
 });
-

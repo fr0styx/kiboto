@@ -1,7 +1,11 @@
 /** ARC-26: the first-run wizard: who may skip it, what it shows, and saving the password. */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-vi.mock('../api.js', () => ({ api: { get: vi.fn(), post: vi.fn(), put: vi.fn() }, auth: { setToken: vi.fn(), getToken: vi.fn() }, ApiError: class extends Error {} }));
+vi.mock('../api.js', () => ({
+  api: { get: vi.fn(), post: vi.fn(), put: vi.fn() },
+  auth: { setToken: vi.fn(), getToken: vi.fn() },
+  ApiError: class extends Error {},
+}));
 vi.mock('../toast.js', () => ({ showToast: vi.fn() }));
 vi.mock('../components/dock.js', () => ({ bringToFront: vi.fn() }));
 vi.mock('../management-dom.js', () => ({ onManagementDom: (fn) => fn() }));
@@ -77,7 +81,12 @@ describe('first-run wizard', () => {
   });
 
   it('shows the hardware it found', () => {
-    W.openSetupWizard({ security: { is_default_password: true }, chassis: 'd4', peripherals: { fb_active: true, led_ready: true, led_port: '/dev/ttyS1' }, fans: [900, 0] });
+    W.openSetupWizard({
+      security: { is_default_password: true },
+      chassis: 'd4',
+      peripherals: { fb_active: true, led_ready: true, led_port: '/dev/ttyS1' },
+      fans: [900, 0],
+    });
     expect(byId('setup-wizard-skip').style.display).toBe('none');
     expect(byId('setup-hw-chassis').textContent).toBe('Zettlab D4 (4-Bay)');
     expect(byId('setup-hw-fb').textContent).toBe('Working');
@@ -116,11 +125,16 @@ describe('first-run wizard', () => {
     W.initSetupWizard();
     fill();
     byId('setup-notif-url').value = 'ntfy://alerts';
-    api.get.mockImplementation(async (url) => (url === '/api/auth/me' ? { id: 'u1', role: 'superadmin', username: 'admin' } : { apprise_urls: ['mailto://a'] }));
+    api.get.mockImplementation(async (url) =>
+      url === '/api/auth/me' ? { id: 'u1', role: 'superadmin', username: 'admin' } : { apprise_urls: ['mailto://a'] }
+    );
     api.post.mockImplementation(async (url) => (url === '/api/auth/login' ? { token: 'NEW' } : {}));
     byId('setup-wizard-submit').click();
     await vi.waitFor(() => expect(window.openGettingStarted).toHaveBeenCalled());
-    expect(api.post).toHaveBeenCalledWith('/api/security', { current_password: 'admin', new_password: 'Chosen-Pass-1' });
+    expect(api.post).toHaveBeenCalledWith('/api/security', {
+      current_password: 'admin',
+      new_password: 'Chosen-Pass-1',
+    });
     expect(api.post).toHaveBeenCalledWith('/api/auth/login', { username: 'admin', password: 'Chosen-Pass-1' });
     expect(auth.setToken).toHaveBeenCalledWith('NEW');
     const cfg = api.post.mock.calls.find((c) => c[0] === '/api/notifications/config')[1];
@@ -136,7 +150,11 @@ describe('first-run wizard', () => {
     W.initSetupWizard();
     fill('old-pass-1', 'Another-Pass-2');
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    api.get.mockImplementation(async (url) => (url === '/api/auth/me' ? { id: 'u 2', role: 'storage_admin', username: 'sam' } : Promise.reject(new Error('no config'))));
+    api.get.mockImplementation(async (url) =>
+      url === '/api/auth/me'
+        ? { id: 'u 2', role: 'storage_admin', username: 'sam' }
+        : Promise.reject(new Error('no config'))
+    );
     api.post.mockImplementation(async (url) => {
       if (url === '/api/auth/login') throw new Error('signed out');
       if (url === '/api/notifications/config') throw new Error('locked');
@@ -145,7 +163,10 @@ describe('first-run wizard', () => {
     byId('setup-notif-url').value = 'ntfy://x';
     byId('setup-wizard-submit').click();
     await vi.waitFor(() => expect(showToast.mock.calls.at(-1)?.[1]).toBe('success'));
-    expect(api.post).toHaveBeenCalledWith('/api/users/u%202/password', { current_password: 'old-pass-1', new_password: 'Another-Pass-2' });
+    expect(api.post).toHaveBeenCalledWith('/api/users/u%202/password', {
+      current_password: 'old-pass-1',
+      new_password: 'Another-Pass-2',
+    });
     expect(warn).toHaveBeenCalled();
     warn.mockRestore();
   });

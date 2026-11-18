@@ -50,7 +50,7 @@ describe('one definition of each kind of screen', () => {
     const block = css.slice(css.indexOf('@media (pointer: coarse)'));
     expect(block).toMatch(/button,[\s\S]*min-height: 44px/);
     expect(block).toMatch(/\.win-btn::after[\s\S]*inset:/);
-    expect(fs.readFileSync(path.resolve(__dirname, '..', 'style.css'), 'utf8')).toContain("styles/61-touch.css");
+    expect(fs.readFileSync(path.resolve(__dirname, '..', 'style.css'), 'utf8')).toContain('styles/61-touch.css');
   });
 });
 
@@ -73,7 +73,10 @@ describe('the phone launcher leads with health', () => {
   });
 
   it('lists what needs attention, and Open goes there', async () => {
-    api.get.mockResolvedValue({ ok: false, items: [{ kind: 'storage_full', level: 'warning', subject: '93%', open: 'storage' }] });
+    api.get.mockResolvedValue({
+      ok: false,
+      items: [{ kind: 'storage_full', level: 'warning', subject: '93%', open: 'storage' }],
+    });
     enablePhoneShell(true);
     await settle();
     const box = document.querySelector('#phone-shell .phone-health');

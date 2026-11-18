@@ -4,7 +4,12 @@ import { folderLine, foldersHtml, renderFolders } from '../components/backup-fol
 import { api } from '../api.js';
 import { showToast } from '../toast.js';
 
-vi.mock('../toast.js', () => ({ showToast: vi.fn(), showConfirmToast: vi.fn(), showPromptToast: vi.fn(), showBottomSheet: vi.fn() }));
+vi.mock('../toast.js', () => ({
+  showToast: vi.fn(),
+  showConfirmToast: vi.fn(),
+  showPromptToast: vi.fn(),
+  showBottomSheet: vi.fn(),
+}));
 const flush = () => new Promise((r) => setTimeout(r, 0));
 const FOLDERS = [
   { name: 'photos', copies: [{ name: 'Nightly', last_ok: 1763300000 }], partly: [] },
@@ -15,10 +20,13 @@ const FOLDERS = [
 ];
 
 describe('folders and their copies (Backup 5)', () => {
-  beforeEach(() => { document.body.innerHTML = '<div><div id="backup-verdict-mount"></div></div>'; vi.clearAllMocks(); });
+  beforeEach(() => {
+    document.body.innerHTML = '<div><div id="backup-verdict-mount"></div></div>';
+    vi.clearAllMocks();
+  });
   afterEach(() => vi.restoreAllMocks());
 
-  it('says each folder\'s state in words', () => {
+  it("says each folder's state in words", () => {
     expect(folderLine(FOLDERS[0]).text).toMatch(/^Copied by Nightly, last /);
     expect(folderLine(FOLDERS[1]).text).toBe('Partly copied by Cloud');
     expect(folderLine(FOLDERS[2]).text).toBe('No copy outside this NAS');
@@ -46,10 +54,12 @@ describe('folders and their copies (Backup 5)', () => {
     const box = document.querySelector('[data-bkf-left="music"]');
     box.checked = true;
     box.dispatchEvent(new Event('change'));
-    await flush(); await flush();
+    await flush();
+    await flush();
     expect(put).toHaveBeenCalledWith('/api/system/protection/folders/left-out', { name: 'music', left_out: true });
     document.querySelector('[data-bkf-left="music"]').dispatchEvent(new Event('change'));
-    await flush(); await flush();
+    await flush();
+    await flush();
     expect(showToast).toHaveBeenCalledWith('denied', 'error');
     get.mockResolvedValue({ folders: [] });
     await renderFolders(mount);

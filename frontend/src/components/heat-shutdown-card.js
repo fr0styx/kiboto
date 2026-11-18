@@ -11,12 +11,21 @@ import { formatDateTime } from '../format.js';
 export function heatStatus(st) {
   if (!st || !st.enabled) return t('heat.st_off', 'Off');
   const what = st.can_power_off
-    ? t('heat.st_on', 'On: a hard drive at {hdd} °C or an NVMe drive at {nvme} °C for {min} minutes switches the NAS off.', { hdd: st.hdd_c, nvme: st.nvme_c, min: st.hold_min })
-    : t('heat.st_on_apps', 'On: a hard drive at {hdd} °C or an NVMe drive at {nvme} °C for {min} minutes stops the apps and virtual machines.', { hdd: st.hdd_c, nvme: st.nvme_c, min: st.hold_min });
+    ? t(
+        'heat.st_on',
+        'On: a hard drive at {hdd} °C or an NVMe drive at {nvme} °C for {min} minutes switches the NAS off.',
+        { hdd: st.hdd_c, nvme: st.nvme_c, min: st.hold_min }
+      )
+    : t(
+        'heat.st_on_apps',
+        'On: a hard drive at {hdd} °C or an NVMe drive at {nvme} °C for {min} minutes stops the apps and virtual machines.',
+        { hdd: st.hdd_c, nvme: st.nvme_c, min: st.hold_min }
+      );
   const last = st.last;
   if (!last || !last.at) return what;
   const when = formatDateTime(last.at * 1000);
-  if (last.outcome === 'off') return `${what} ${t('heat.last_off', 'Last time ({when}) it switched the NAS off.', { when })}`;
+  if (last.outcome === 'off')
+    return `${what} ${t('heat.last_off', 'Last time ({when}) it switched the NAS off.', { when })}`;
   return `${what} ${t('heat.last_hand', 'Last time ({when}) it stopped the apps; the NAS had to be switched off by hand.', { when })}`;
 }
 
@@ -29,9 +38,17 @@ function html(st) {
       </div>
       <button type="button" class="btn-pill-toggle" id="heat-toggle" aria-pressed="${st.enabled ? 'true' : 'false'}" aria-labelledby="heat-title">${escapeHtml(st.enabled ? t('nas_name.btn_on', 'On') : t('nas_name.btn_off', 'Off'))}</button>
     </div>
-    <p class="fw-why">${escapeHtml(st.can_power_off
-      ? t('heat.help', 'A last line of defence when the fans cannot keep up, say a fan has failed or a vent is blocked. Kiboto warns you first, then stops the virtual machines and apps, saves what is in memory and switches the NAS off. Sleeping drives are never woken for it.')
-      : t('heat.help_apps', "A last line of defence when the fans cannot keep up. Kiboto can't switch this NAS off by itself, so it warns you, stops the virtual machines and apps to cool it down, and asks you to switch it off by hand. Sleeping drives are never woken for it."))}</p>
+    <p class="fw-why">${escapeHtml(
+      st.can_power_off
+        ? t(
+            'heat.help',
+            'A last line of defence when the fans cannot keep up, say a fan has failed or a vent is blocked. Kiboto warns you first, then stops the virtual machines and apps, saves what is in memory and switches the NAS off. Sleeping drives are never woken for it.'
+          )
+        : t(
+            'heat.help_apps',
+            "A last line of defence when the fans cannot keep up. Kiboto can't switch this NAS off by itself, so it warns you, stops the virtual machines and apps to cool it down, and asks you to switch it off by hand. Sleeping drives are never woken for it."
+          )
+    )}</p>
     <div class="fw-error" id="heat-error" role="alert" hidden></div>`;
 }
 

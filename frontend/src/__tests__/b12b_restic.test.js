@@ -31,7 +31,9 @@ describe('B12b (REL-16): off-site backups say what to watch', () => {
   });
 
   it('Back up now starts a job and says where to follow it', async () => {
-    api.get.mockImplementation(async (url) => (url === '/api/offsite' ? { available: true, repos: [repo] } : { shares: [] }));
+    api.get.mockImplementation(async (url) =>
+      url === '/api/offsite' ? { available: true, repos: [repo] } : { shares: [] }
+    );
     api.post.mockResolvedValue({ status: 'started', job: 'job:1' });
     const mount = document.createElement('div');
     document.body.appendChild(mount);

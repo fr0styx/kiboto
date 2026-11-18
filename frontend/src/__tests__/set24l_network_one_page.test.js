@@ -2,7 +2,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
 
-const get = vi.fn((url) => Promise.resolve(url.includes('ports') ? { ports: [] } : { status: 'ok', summary: {}, interfaces: [], docker_networks: [] }));
+const get = vi.fn((url) =>
+  Promise.resolve(
+    url.includes('ports') ? { ports: [] } : { status: 'ok', summary: {}, interfaces: [], docker_networks: [] }
+  )
+);
 vi.mock('../api.js', () => ({ api: { get, post: vi.fn(), put: vi.fn(), delete: vi.fn() } }));
 const loadNasNameCard = vi.fn();
 vi.mock('../components/management/nas-name.js', () => ({ loadNasNameCard }));
@@ -20,22 +24,43 @@ describe('SET-24 l: Network is one page, Away from home its own', () => {
     expect(sec.querySelector('.mgmt-inner-tab, .mgmt-sticky-subnav')).toBeNull();
     expect(sec.querySelectorAll('.mgmt-tab-pane').length).toBe(1);
     const titles = [...sec.querySelectorAll('.net-page-section h3')].map((h) => h.getAttribute('data-i18n'));
-    expect(titles).toEqual(['net.home_title', 'net.ports_hw_title', 'net.ts_opts_title', 'net.wiring_title', 'net.answers_title']);
+    expect(titles).toEqual([
+      'net.home_title',
+      'net.ports_hw_title',
+      'net.ts_opts_title',
+      'net.wiring_title',
+      'net.answers_title',
+    ]);
     for (const s of sec.querySelectorAll('.net-page-section')) {
       expect(document.getElementById(/** @type {string} */ (s.getAttribute('aria-labelledby')))).not.toBeNull();
     }
   });
 
   it('keeps every part the page code fills, and drops the Virtual Fleet tile', () => {
-    for (const id of ['nas-name-card', 'net-home', 'net-port-rows', 'network-bridges-container', 'network-vlan-tbody', 'net-listening-ports-tbody', 'net-ports-search', 'btn-refresh-net-ports']) {
+    for (const id of [
+      'nas-name-card',
+      'net-home',
+      'net-port-rows',
+      'network-bridges-container',
+      'network-vlan-tbody',
+      'net-listening-ports-tbody',
+      'net-ports-search',
+      'btn-refresh-net-ports',
+    ]) {
       expect(document.getElementById(id)?.closest('#mgmt-pane-network'), id).not.toBeNull();
     }
-    for (const id of ['net-kpi-docker', 'net-kpi-ip', 'network-switch-faceplate', 'network-physical-tbody']) expect(document.getElementById(id), id).toBeNull(); // SET-24 m
+    for (const id of ['net-kpi-docker', 'net-kpi-ip', 'network-switch-faceplate', 'network-physical-tbody'])
+      expect(document.getElementById(id), id).toBeNull(); // SET-24 m
     expect(html).not.toContain('mw.virtual_fleet');
   });
 
   it('the Tailscale options are on Network now, not in Away from home (SET-24 n)', () => {
-    for (const id of ['ts-subnet-router-toggle', 'ts-exit-node-toggle', 'ts-subnet-routes-input', 'btn-ts-save-routes']) {
+    for (const id of [
+      'ts-subnet-router-toggle',
+      'ts-exit-node-toggle',
+      'ts-subnet-routes-input',
+      'btn-ts-save-routes',
+    ]) {
       expect(document.getElementById(id)?.closest('#net-sec-tailscale'), id).not.toBeNull();
     }
     expect(document.querySelector('#mgmt-sec-away #tailscale-uses-card')).toBeNull();
@@ -62,10 +87,16 @@ describe('SET-24 l: Network is one page, Away from home its own', () => {
 
   it('old links to the Network tabs land on the right page', async () => {
     const { SUBPANE_MAP } = await import('../components/management.js');
-    expect(SUBPANE_MAP['mgmt-pane-network-wireguard']).toEqual({ section: 'mgmt-sec-away', pane: 'mgmt-pane-network-wireguard' });
+    expect(SUBPANE_MAP['mgmt-pane-network-wireguard']).toEqual({
+      section: 'mgmt-sec-away',
+      pane: 'mgmt-pane-network-wireguard',
+    });
     expect(SUBPANE_MAP['mgmt-sec-away']).toEqual({ section: 'mgmt-sec-away', pane: 'mgmt-pane-network-wireguard' });
     expect(SUBPANE_MAP['mgmt-pane-network-ports']).toEqual({ section: 'mgmt-sec-network', pane: 'mgmt-pane-network' });
     expect(SUBPANE_MAP.ports).toEqual({ section: 'mgmt-sec-network', pane: 'mgmt-pane-network' });
-    expect(SUBPANE_MAP['mgmt-pane-network-services']).toEqual({ section: 'mgmt-sec-network', pane: 'mgmt-pane-network' });
+    expect(SUBPANE_MAP['mgmt-pane-network-services']).toEqual({
+      section: 'mgmt-sec-network',
+      pane: 'mgmt-pane-network',
+    });
   });
 });

@@ -3,19 +3,16 @@ import {
   initDesktopContextMenu,
   showDesktopContextMenu,
   hideDesktopContextMenu,
-  executeContextAction
+  executeContextAction,
 } from '../components/desktop-context-menu.js';
-import {
-  initDesktopDragAndDrop,
-  hideDropZone
-} from '../components/desktop-drag-drop.js';
+import { initDesktopDragAndDrop, hideDropZone } from '../components/desktop-drag-drop.js';
 import {
   initScreensaverSystem,
   activateScreensaver,
   deactivateScreensaver,
   getScreensaverSettings,
   applyScreensaverSettings,
-  initScreensaverSettingsControls
+  initScreensaverSettingsControls,
 } from '../components/screensaver.js';
 import * as wallpapersModule from '../components/wallpaper-pane.js';
 import { SUBPANE_MAP } from '../components/management.js';
@@ -43,7 +40,7 @@ describe('Batch 4: Desktop Context Menu, Drag & Drop Ingestion & Screensaver Eng
       fillText: vi.fn(),
       beginPath: vi.fn(),
       arc: vi.fn(),
-      fill: vi.fn()
+      fill: vi.fn(),
     });
 
     // 1. Context Menu DOM
@@ -152,7 +149,7 @@ describe('Batch 4: Desktop Context Menu, Drag & Drop Ingestion & Screensaver Eng
       bubbles: true,
       cancelable: true,
       clientX: 200,
-      clientY: 300
+      clientY: 300,
     });
     document.body.dispatchEvent(bgEvent);
     expect(bgEvent.defaultPrevented).toBe(true);
@@ -167,7 +164,7 @@ describe('Batch 4: Desktop Context Menu, Drag & Drop Ingestion & Screensaver Eng
       bubbles: true,
       cancelable: true,
       clientX: 200,
-      clientY: 300
+      clientY: 300,
     });
     inputEl.dispatchEvent(inputEvent);
     expect(inputEvent.defaultPrevented).toBe(false);
@@ -181,7 +178,7 @@ describe('Batch 4: Desktop Context Menu, Drag & Drop Ingestion & Screensaver Eng
       bubbles: true,
       cancelable: true,
       clientX: 200,
-      clientY: 300
+      clientY: 300,
     });
     winEl.dispatchEvent(winEvent);
     expect(winEvent.defaultPrevented).toBe(false);
@@ -232,13 +229,15 @@ describe('Batch 4: Desktop Context Menu, Drag & Drop Ingestion & Screensaver Eng
     expect(dropZoneEl.style.display).toBe('none');
 
     // 3. Drop image file calls uploadAndApplyWallpaper
-    const uploadSpy = vi.spyOn(wallpapersModule, 'uploadAndApplyWallpaper').mockResolvedValue({ success: true, filename: 'my_bg.png' });
+    const uploadSpy = vi
+      .spyOn(wallpapersModule, 'uploadAndApplyWallpaper')
+      .mockResolvedValue({ success: true, filename: 'my_bg.png' });
 
     const dropEv = new Event('drop');
     const mockFile = new File(['mock data'], 'my_bg.png', { type: 'image/png' });
     dropEv.dataTransfer = {
       types: ['Files'],
-      files: [mockFile]
+      files: [mockFile],
     };
     dropEv.preventDefault = vi.fn();
 
@@ -324,11 +323,11 @@ describe('Batch 4: Desktop Context Menu, Drag & Drop Ingestion & Screensaver Eng
   it('Mission Control SUBPANE_MAP seamlessly routes mgmt-pane-screensaver', () => {
     expect(SUBPANE_MAP['mgmt-pane-screensaver']).toEqual({
       section: 'mgmt-sec-wallpaper',
-      pane: 'mgmt-pane-screensaver'
+      pane: 'mgmt-pane-screensaver',
     });
     expect(SUBPANE_MAP['mgmt-sec-screensaver']).toEqual({
       section: 'mgmt-sec-wallpaper',
-      pane: 'mgmt-pane-screensaver'
+      pane: 'mgmt-pane-screensaver',
     });
   });
 });

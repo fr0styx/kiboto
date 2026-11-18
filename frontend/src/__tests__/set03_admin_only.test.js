@@ -42,6 +42,8 @@ describe('an administrator’s set-up is not drawn for anyone else (SET-03)', ()
     }
     // a person's own things are not marked
     expect(html.match(/<div id="push-device-card"[^>]*>/)[0]).not.toContain('data-admin-only');
-    expect(html.match(/<section class="my-alerts-card" aria-labelledby="my-alerts-title"[^>]*>/)[0]).not.toContain('data-admin-only');
+    expect(html.match(/<section class="my-alerts-card" aria-labelledby="my-alerts-title"[^>]*>/)[0]).not.toContain(
+      'data-admin-only'
+    );
   });
 });

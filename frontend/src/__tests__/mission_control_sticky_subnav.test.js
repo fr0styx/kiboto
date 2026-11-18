@@ -5,7 +5,6 @@ import fs from 'fs';
 import path from 'path';
 
 describe('Mission Control Fixated Sticky Sub-Navigation Bar', () => {
-
   it('verifies style.css defines sticky positioning, top offset, and backdrop filters for .mgmt-sticky-subnav', () => {
     const cssContent = readStyleCss();
 
@@ -21,7 +20,9 @@ describe('Mission Control Fixated Sticky Sub-Navigation Bar', () => {
 
     // Mobile responsive overrides
     expect(cssContent).toMatch(/#management-modal-overlay\s+\.mgmt-sticky-subnav\s*\{[^}]*top:\s*0\s*!important/);
-    expect(cssContent).toMatch(/body\.mobile-mode\s+#management-modal-overlay\s+\.mgmt-sticky-subnav\s*\{[^}]*top:\s*0\s*!important/);
+    expect(cssContent).toMatch(
+      /body\.mobile-mode\s+#management-modal-overlay\s+\.mgmt-sticky-subnav\s*\{[^}]*top:\s*0\s*!important/
+    );
 
     // OLED theme override
     expect(cssContent).toMatch(/body\.theme-oled\s+\.mgmt-sticky-subnav/);
@@ -139,8 +140,12 @@ describe('Mission Control Fixated Sticky Sub-Navigation Bar', () => {
     expect(cssContent).toMatch(/\.mgmt-sticky-subnav\s*\{[^}]*padding:\s*8px\s+20px/);
 
     // Mobile overrides have compact padding
-    expect(cssContent).toMatch(/#management-modal-overlay\s+\.mgmt-sticky-subnav\s*\{[^}]*padding:\s*6px\s+10px\s*!important/);
-    expect(cssContent).toMatch(/#management-modal-overlay\s+\.mgmt-content-pane:not\(\.has-subnav\)[^{]*\{[^}]*padding-top:\s*12px\s*!important/);
+    expect(cssContent).toMatch(
+      /#management-modal-overlay\s+\.mgmt-sticky-subnav\s*\{[^}]*padding:\s*6px\s+10px\s*!important/
+    );
+    expect(cssContent).toMatch(
+      /#management-modal-overlay\s+\.mgmt-content-pane:not\(\.has-subnav\)[^{]*\{[^}]*padding-top:\s*12px\s*!important/
+    );
   });
 
   it('verifies views without subnav (HUB, UPS) do not have sticky subnav and keep 20px padding; Activity has tabs now (SET-27)', () => {
@@ -181,7 +186,9 @@ describe('Mission Control Fixated Sticky Sub-Navigation Bar', () => {
     // Test HUB navigation
     function simulateShowHub() {
       document.getElementById('management-hub-view').style.display = 'block';
-      document.querySelectorAll('.mgmt-detail-card').forEach((c) => { c.style.display = 'none'; });
+      document.querySelectorAll('.mgmt-detail-card').forEach((c) => {
+        c.style.display = 'none';
+      });
       contentPane.classList.remove('has-subnav');
     }
 
@@ -212,5 +219,4 @@ describe('Mission Control Fixated Sticky Sub-Navigation Bar', () => {
     simulateShowSection('mgmt-sec-storage');
     expect(contentPane.classList.contains('has-subnav')).toBe(true);
   });
-
 });

@@ -7,7 +7,7 @@ import {
   startCwAutoRefresh,
   stopCwAutoRefresh,
   _resetCwAutoRefreshForTesting,
-  CW_WATCHDOG_MS
+  CW_WATCHDOG_MS,
 } from '../components/containers-manager.js';
 import { DockManager } from '../components/dock.js';
 import { ZettEventBus } from '../event-bus.js';
@@ -134,7 +134,7 @@ describe('Dedicated Containers Window & Desktop Icon Suite', () => {
         webui_url: 'http://[HOST]:32400/web',
         managed_by: 'standalone',
         hardware_badges: [{ id: 'gpu', label: 'Intel QSV' }],
-        ports: [{ public_port: 32400, private_port: 32400 }]
+        ports: [{ public_port: 32400, private_port: 32400 }],
       },
       {
         id: 'c987654321098',
@@ -147,8 +147,8 @@ describe('Dedicated Containers Window & Desktop Icon Suite', () => {
         primary_port: 8080,
         managed_by: 'compose',
         stack: 'cloud-suite',
-        ports: [{ public_port: 8080, private_port: 80 }]
-      }
+        ports: [{ public_port: 8080, private_port: 80 }],
+      },
     ];
 
     renderContainersWindowTable(sampleContainers);
@@ -172,7 +172,15 @@ describe('Dedicated Containers Window & Desktop Icon Suite', () => {
     const sampleContainers = [
       { id: '1', name: 'app-running', state: 'running', status: 'Up 1 day', ports: [] },
       { id: '2', name: 'app-stopped', state: 'exited', status: 'Exited', ports: [] },
-      { id: '3', name: 'app-compose', state: 'running', status: 'Up', managed_by: 'compose', stack: 'my-stack', ports: [] },
+      {
+        id: '3',
+        name: 'app-compose',
+        state: 'running',
+        status: 'Up',
+        managed_by: 'compose',
+        stack: 'my-stack',
+        ports: [],
+      },
     ];
 
     renderContainersWindowTable(sampleContainers);
@@ -206,8 +214,14 @@ describe('Dedicated Containers Window & Desktop Icon Suite', () => {
   it('searches containers via search input', () => {
     initContainersManager();
     const sampleContainers = [
-      { id: '1', name: 'vaultwarden', image: 'vaultwarden/server:latest', state: 'running', ports: [{ public_port: 8000 }] },
-      { id: '2', name: 'heimdall', image: 'linuxserver/heimdall', state: 'running', ports: [{ public_port: 8081 }] }
+      {
+        id: '1',
+        name: 'vaultwarden',
+        image: 'vaultwarden/server:latest',
+        state: 'running',
+        ports: [{ public_port: 8000 }],
+      },
+      { id: '2', name: 'heimdall', image: 'linuxserver/heimdall', state: 'running', ports: [{ public_port: 8081 }] },
     ];
 
     renderContainersWindowTable(sampleContainers);
@@ -229,9 +243,7 @@ describe('Dedicated Containers Window & Desktop Icon Suite', () => {
 
   it('loadContainersData fetches containers from /api/docker/containers', async () => {
     initContainersManager();
-    const mockContainers = [
-      { id: '101', name: 'nginx-proxy', state: 'running', status: 'Up 3 days', ports: [] }
-    ];
+    const mockContainers = [{ id: '101', name: 'nginx-proxy', state: 'running', status: 'Up 3 days', ports: [] }];
     vi.spyOn(api, 'get').mockResolvedValueOnce(mockContainers);
 
     await loadContainersData();
@@ -303,8 +315,22 @@ describe('Dedicated Containers Window & Desktop Icon Suite', () => {
   it('btn-cw-stacks handles direct array response from /api/docker/stacks and opens picker modal', async () => {
     initContainersManager();
     const mockStacks = [
-      { name: 'arr', origin: 'compose', working_dir: '/mnt/user/appdata/arr', total_count: 5, running_count: 5, services: ['radarr', 'sonarr'] },
-      { name: 'immich', origin: 'compose', working_dir: '/mnt/user/appdata/immich', total_count: 2, running_count: 2, services: ['web', 'db'] }
+      {
+        name: 'arr',
+        origin: 'compose',
+        working_dir: '/mnt/user/appdata/arr',
+        total_count: 5,
+        running_count: 5,
+        services: ['radarr', 'sonarr'],
+      },
+      {
+        name: 'immich',
+        origin: 'compose',
+        working_dir: '/mnt/user/appdata/immich',
+        total_count: 2,
+        running_count: 2,
+        services: ['web', 'db'],
+      },
     ];
 
     vi.spyOn(api, 'get').mockImplementation(async (url) => {
@@ -388,25 +414,25 @@ describe('Dedicated Containers Window & Desktop Icon Suite', () => {
   });
 });
 
-
-
-
-describe("Apps window update badges", () => {
-  it("drops an updated container from the Updates list at once", async () => {
-    const mod = await import("../components/containers-manager.js");
+describe('Apps window update badges', () => {
+  it('drops an updated container from the Updates list at once', async () => {
+    const mod = await import('../components/containers-manager.js');
     document.body.innerHTML = `<span id="cw-count-updates-wrap"><span id="cw-count-updates">2</span></span>
       <button id="btn-cw-filter-updates"><span id="cw-pill-updates">2</span></button>
       <button id="btn-cw-update-all"><span id="cw-updates-count-badge">2</span></button>`;
-    const dozzle = { name: "dozzle", id: "8b7b", has_update: true };
-    mod._setCwUpdatesCacheForTesting({ updates_available_count: 2, containers: { dozzle, "8b7b": dozzle, other: { has_update: true } } });
-    mod.markCwContainerUpdated("dozzle", "8b7b");
+    const dozzle = { name: 'dozzle', id: '8b7b', has_update: true };
+    mod._setCwUpdatesCacheForTesting({
+      updates_available_count: 2,
+      containers: { dozzle, '8b7b': dozzle, other: { has_update: true } },
+    });
+    mod.markCwContainerUpdated('dozzle', '8b7b');
     expect(dozzle.has_update).toBe(false);
-    expect(document.getElementById("cw-pill-updates").textContent).toBe("1");
-    mod.markCwContainerUpdated("dozzle", "8b7b"); // already up to date: no change
-    expect(document.getElementById("cw-pill-updates").textContent).toBe("1");
-    mod.markCwContainerUpdated("other");
-    expect(document.getElementById("btn-cw-filter-updates").style.display).toBe("none");
+    expect(document.getElementById('cw-pill-updates').textContent).toBe('1');
+    mod.markCwContainerUpdated('dozzle', '8b7b'); // already up to date: no change
+    expect(document.getElementById('cw-pill-updates').textContent).toBe('1');
+    mod.markCwContainerUpdated('other');
+    expect(document.getElementById('btn-cw-filter-updates').style.display).toBe('none');
     mod._setCwUpdatesCacheForTesting(null);
-    expect(() => mod.markCwContainerUpdated("x")).not.toThrow();
+    expect(() => mod.markCwContainerUpdated('x')).not.toThrow();
   });
 });

@@ -12,10 +12,18 @@ vi.mock('@novnc/novnc', () => {
       this.pasted = [];
       rfbs.push(this);
     }
-    sendKey(keysym, code, down) { this.keys.push([keysym, code, down]); }
-    clipboardPasteFrom(text) { this.pasted.push(text); }
-    disconnect() { this.gone = true; }
-    focus() { this.focused = true; }
+    sendKey(keysym, code, down) {
+      this.keys.push([keysym, code, down]);
+    }
+    clipboardPasteFrom(text) {
+      this.pasted.push(text);
+    }
+    disconnect() {
+      this.gone = true;
+    }
+    focus() {
+      this.focused = true;
+    }
   }
   return { default: FakeRfb };
 });
@@ -23,7 +31,12 @@ vi.mock('../api.js', () => ({
   api: { get: vi.fn().mockResolvedValue({}), post: vi.fn().mockResolvedValue({}), delete: vi.fn() },
   auth: { hasToken: vi.fn().mockReturnValue(true), getToken: vi.fn(() => 'x') },
 }));
-vi.mock('../toast.js', () => ({ showToast: vi.fn(), showConfirmToast: vi.fn(), showPromptToast: vi.fn(), showBottomSheet: vi.fn() }));
+vi.mock('../toast.js', () => ({
+  showToast: vi.fn(),
+  showConfirmToast: vi.fn(),
+  showPromptToast: vi.fn(),
+  showBottomSheet: vi.fn(),
+}));
 
 const { showToast } = await import('../toast.js');
 const { openVmConsole } = await import('../components/vm-manager.js');
@@ -65,13 +78,21 @@ describe('VM console keyboard and paste', () => {
   it('Ctrl+C and other Ctrl combinations hold Control around the key', () => {
     vi.useFakeTimers();
     key('c', { ctrlKey: true });
-    expect(rfb.keys.slice(0, 2)).toEqual([[0xffe3, 'ControlLeft', true], [0x63, 'KeyC', true]]);
+    expect(rfb.keys.slice(0, 2)).toEqual([
+      [0xffe3, 'ControlLeft', true],
+      [0x63, 'KeyC', true],
+    ]);
     vi.advanceTimersByTime(50);
     expect(rfb.keys.at(-1)).toEqual([0xffe3, 'ControlLeft', false]);
     rfb.keys.length = 0;
     key('x', { ctrlKey: true, code: 'KeyX' });
     vi.advanceTimersByTime(50);
-    expect(rfb.keys).toEqual([[0xffe3, 'ControlLeft', true], [120, 'KeyX', true], [120, 'KeyX', false], [0xffe3, 'ControlLeft', false]]);
+    expect(rfb.keys).toEqual([
+      [0xffe3, 'ControlLeft', true],
+      [120, 'KeyX', true],
+      [120, 'KeyX', false],
+      [0xffe3, 'ControlLeft', false],
+    ]);
     rfb.keys.length = 0;
     key('z', { ctrlKey: true });
     expect(rfb.keys[1]).toEqual([122, 'KeyZ', true]);

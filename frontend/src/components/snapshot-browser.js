@@ -21,22 +21,26 @@ export function schedulesHtml(schedules, shares, convertible = []) {
           (s) => `<li class="snap-sched-row">
       <span class="snap-sched-share">${escapeHtml(s.share)}</span>
       <span>${escapeHtml(every[s.every] || s.every)} · ${escapeHtml(t('snap.keep_n', 'keep {n}', { n: s.keep }))}${
-            s.keep_daily ? ` · ${escapeHtml(t('snap.keep_daily_n', '{n, plural, one {plus one a day for # day} other {plus one a day for # days}}', { n: s.keep_daily }))}` : ''
-          }${
-            s.immutable_days ? ` · <svg class="ic" aria-hidden="true"><use href="#i-shield"/></svg> ${escapeHtml(t('snap.locked_days', 'locked {n} days', { n: s.immutable_days }))}` : ''
-          }</span>
+        s.keep_daily
+          ? ` · ${escapeHtml(t('snap.keep_daily_n', '{n, plural, one {plus one a day for # day} other {plus one a day for # days}}', { n: s.keep_daily }))}`
+          : ''
+      }${
+        s.immutable_days
+          ? ` · <svg class="ic" aria-hidden="true"><use href="#i-shield"/></svg> ${escapeHtml(t('snap.locked_days', 'locked {n} days', { n: s.immutable_days }))}`
+          : ''
+      }</span>
       <span class="snap-sched-last">${s.last_run ? escapeHtml(formatDateTime(s.last_run * 1000)) : escapeHtml(t('snap.not_yet', 'not run yet'))}${
-            s.last_result && s.last_result !== 'ok' ? ` · ${escapeHtml(s.last_result)}` : ''
-          }</span>
+        s.last_result && s.last_result !== 'ok' ? ` · ${escapeHtml(s.last_result)}` : ''
+      }</span>
       ${
-            convertible.includes(s.share)
-              ? `<span class="snap-sched-warn">${escapeHtml(t('snap.convert_why', "Its snapshots can't work yet: it is a plain folder."))}</span>
+        convertible.includes(s.share)
+          ? `<span class="snap-sched-warn">${escapeHtml(t('snap.convert_why', "Its snapshots can't work yet: it is a plain folder."))}</span>
       <button type="button" class="btn-pill-toggle is-small is-primary" data-snap-convert="${escapeHtml(s.share)}">${escapeHtml(t('snap.convert', 'Make it snapshot-ready'))}</button>`
-              : ''
-          }
+          : ''
+      }
       <button type="button" class="btn-pill-toggle is-small" data-snap-run="${escapeHtml(s.share)}">${escapeHtml(t('snap.run_now', 'Snapshot now'))}</button>
       <button type="button" class="btn-pill-toggle is-small is-danger" data-snap-unschedule="${escapeHtml(s.share)}">${escapeHtml(t('snap.remove', 'Remove'))}</button>
-    </li>`,
+    </li>`
         )
         .join('')
     : `<li class="snap-sched-empty">${escapeHtml(t('snap.no_schedules', 'No share is snapshotted on a schedule yet.'))}</li>`;
@@ -49,10 +53,10 @@ export function schedulesHtml(schedules, shares, convertible = []) {
         .join('')}</select></label>
       <label>${escapeHtml(t('snap.keep', 'Keep'))}<input name="keep" type="number" min="1" max="1000" value="14"></label>
       <label title="${escapeHtml(t('snap.keep_daily_help', 'Besides the ones above, one snapshot a day is kept for this many days. 0 keeps none.'))}">${escapeHtml(
-        t('snap.keep_daily', 'One a day for days'),
+        t('snap.keep_daily', 'One a day for days')
       )}<input name="keep_daily" type="number" min="0" max="3650" value="0"></label>
       <label title="${escapeHtml(t('snap.lock_help', 'Days each snapshot cannot be deleted, even by an administrator; protects against ransomware.'))}">${escapeHtml(
-        t('snap.lock', 'Lock for days'),
+        t('snap.lock', 'Lock for days')
       )}<input name="immutable_days" type="number" min="0" max="3650" value="0"></label>
       <button type="submit" class="btn-pill-toggle is-primary">${escapeHtml(t('snap.add_schedule', 'Snapshot this share'))}</button>
     </form>`;
@@ -66,7 +70,12 @@ export function schedulesHtml(schedules, shares, convertible = []) {
 export function fillScheduleForm(form, schedules) {
   if (!form) return;
   const field = (name) => /** @type {HTMLInputElement | HTMLSelectElement | null} */ (form.elements.namedItem(name));
-  const s = schedules.find((x) => x.share === field('share')?.value) || { every: 'daily', keep: 14, keep_daily: 0, immutable_days: 0 };
+  const s = schedules.find((x) => x.share === field('share')?.value) || {
+    every: 'daily',
+    keep: 14,
+    keep_daily: 0,
+    immutable_days: 0,
+  };
   for (const name of ['every', 'keep', 'keep_daily', 'immutable_days']) {
     const el = field(name);
     if (el) el.value = String(s[name] ?? 0);
@@ -79,13 +88,19 @@ export async function renderSnapshotSchedules(mount) {
   let shares;
   let convertible;
   try {
-    const [s, sh] = await Promise.all([api.get('/api/snapshots/schedules'), api.get('/api/storage/shares').catch(() => ({ shares: [] }))]);
+    const [s, sh] = await Promise.all([
+      api.get('/api/snapshots/schedules'),
+      api.get('/api/storage/shares').catch(() => ({ shares: [] })),
+    ]);
     schedules = s.schedules || [];
     convertible = s.convertible || [];
     shares = (sh.shares || []).map((x) => x.name).filter(Boolean);
     if (s.available === false) {
       // REL-4: no schedule is offered where snapshots can't be taken
-      mount.textContent = t('snap.unavailable', "Snapshots aren't available on this host: the btrfs and ZFS tools are missing.");
+      mount.textContent = t(
+        'snap.unavailable',
+        "Snapshots aren't available on this host: the btrfs and ZFS tools are missing."
+      );
       return;
     }
   } catch (e) {
@@ -93,7 +108,11 @@ export async function renderSnapshotSchedules(mount) {
     return;
   }
   mount.innerHTML = schedulesHtml(schedules, shares, convertible);
-  mount.querySelectorAll('[data-snap-convert]').forEach((b) => b.addEventListener('click', () => convertShare(b.dataset.snapConvert, () => renderSnapshotSchedules(mount))));
+  mount
+    .querySelectorAll('[data-snap-convert]')
+    .forEach((b) =>
+      b.addEventListener('click', () => convertShare(b.dataset.snapConvert, () => renderSnapshotSchedules(mount)))
+    );
   const form = /** @type {HTMLFormElement | null} */ (mount.querySelector('[data-snap-form]'));
   // a share that has a schedule shows it in the form, so a save changes what you changed (SET-06)
   const fill = () => fillScheduleForm(form, schedules);
@@ -119,15 +138,20 @@ export async function renderSnapshotSchedules(mount) {
   mount.querySelectorAll('[data-snap-run]').forEach((b) =>
     b.addEventListener('click', async () => {
       const res = await api.post(`/api/snapshots/schedules/${encodeURIComponent(b.dataset.snapRun)}/run`, {});
-      showToast(res.ok ? t('snap.taken', 'Snapshot {name} taken.', { name: res.name }) : t('snap.failed', 'The snapshot failed: {why}', { why: res.detail || '' }), res.ok ? 'success' : 'error');
+      showToast(
+        res.ok
+          ? t('snap.taken', 'Snapshot {name} taken.', { name: res.name })
+          : t('snap.failed', 'The snapshot failed: {why}', { why: res.detail || '' }),
+        res.ok ? 'success' : 'error'
+      );
       renderSnapshotSchedules(mount);
-    }),
+    })
   );
   mount.querySelectorAll('[data-snap-unschedule]').forEach((b) =>
     b.addEventListener('click', async () => {
       await api.delete(`/api/snapshots/schedules/${encodeURIComponent(b.dataset.snapUnschedule)}`);
       renderSnapshotSchedules(mount);
-    }),
+    })
   );
 }
 
@@ -156,7 +180,10 @@ export function entriesHtml(listing) {
 export async function convertShare(share, after = null) {
   try {
     await api.post(`/api/snapshots/shares/${encodeURIComponent(share)}/convert`, {});
-    showToast(t('snap.converting', 'Making {share} snapshot-ready; the Jobs centre shows how far it is.', { share }), 'success');
+    showToast(
+      t('snap.converting', 'Making {share} snapshot-ready; the Jobs centre shows how far it is.', { share }),
+      'success'
+    );
     if (after) after();
   } catch (err) {
     if (err?.error !== 'cancelled') showToast(err.message || String(err), 'error');
@@ -167,8 +194,20 @@ export async function convertShare(share, after = null) {
 export async function rollbackShare(name, after = null) {
   try {
     const res = await api.post(`/api/snapshots/${encodeURIComponent(name)}/rollback`, {});
-    if (res.job_id) showToast(t('snap.rolling_back', 'Rolling back; the Jobs centre shows how far it is. How it was before is kept as {safety}.', { safety: res.safety_snapshot }), 'success');
-    else showToast(t('snap.rolled_back', 'Rolled back. How it was before is kept as {safety}.', { safety: res.safety_snapshot }), 'success');
+    if (res.job_id)
+      showToast(
+        t(
+          'snap.rolling_back',
+          'Rolling back; the Jobs centre shows how far it is. How it was before is kept as {safety}.',
+          { safety: res.safety_snapshot }
+        ),
+        'success'
+      );
+    else
+      showToast(
+        t('snap.rolled_back', 'Rolled back. How it was before is kept as {safety}.', { safety: res.safety_snapshot }),
+        'success'
+      );
     if (after) after();
   } catch (err) {
     if (err?.error !== 'cancelled') showToast(err.message || String(err), 'error');
@@ -192,7 +231,9 @@ export async function openSnapshotBrowser(name) {
     <div class="snap-body"></div>`;
   const show = async (path) => {
     try {
-      body().innerHTML = entriesHtml(await api.get(`/api/snapshots/${encodeURIComponent(name)}/browse?path=${encodeURIComponent(path || '')}`));
+      body().innerHTML = entriesHtml(
+        await api.get(`/api/snapshots/${encodeURIComponent(name)}/browse?path=${encodeURIComponent(path || '')}`)
+      );
     } catch (e) {
       body().textContent = e.message || String(e);
     }
@@ -208,13 +249,20 @@ export async function openSnapshotBrowser(name) {
       const rel = (restore || replace).dataset[restore ? 'snapRestore' : 'snapReplace'];
       const go = async () => {
         try {
-          const res = await api.post(`/api/snapshots/${encodeURIComponent(name)}/restore`, { path: rel, overwrite: Boolean(replace) });
+          const res = await api.post(`/api/snapshots/${encodeURIComponent(name)}/restore`, {
+            path: rel,
+            overwrite: Boolean(replace),
+          });
           showToast(t('snap.restored', 'Restored as {path}', { path: res.restored }), 'success');
         } catch (err) {
           showToast(err.message || String(err), 'error');
         }
       };
-      if (replace) showConfirmToast(t('snap.replace_confirm', 'Replace the current {path} with the version from this snapshot?', { path: rel }), go);
+      if (replace)
+        showConfirmToast(
+          t('snap.replace_confirm', 'Replace the current {path} with the version from this snapshot?', { path: rel }),
+          go
+        );
       else go();
     }
   };

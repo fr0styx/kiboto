@@ -32,7 +32,6 @@ describe('B11: a new person gets only the folders chosen for them', () => {
     expect(await grantShares('Ann', { Family: 'none' })).toBe(false);
     expect(get).not.toHaveBeenCalled();
   });
-
 });
 
 describe('B11: guest access and NFS for every host are confirmed', () => {

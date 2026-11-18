@@ -5,7 +5,10 @@ import path from 'node:path';
 const fetchTopo = vi.fn();
 const openCreate = vi.fn();
 const ensureDom = vi.fn(() => Promise.resolve());
-vi.mock('../components/management/network.js', () => ({ fetchAndRenderNetworkTopology: fetchTopo, openDockerNetworkCreateModal: openCreate }));
+vi.mock('../components/management/network.js', () => ({
+  fetchAndRenderNetworkTopology: fetchTopo,
+  openDockerNetworkCreateModal: openCreate,
+}));
 vi.mock('../management-dom.js', () => ({ ensureManagementDom: ensureDom }));
 
 const { appsDockerNetsHtml, installAppsDockerNets } = await import('../components/apps-docker-nets.js');
@@ -38,7 +41,7 @@ describe('SET-24 k: Docker networks live in the Apps window, folded for experts'
     expect(group?.querySelector('#network-docker-container')).not.toBeNull();
   });
 
-  it('opening reads the networks after Settings\' markup is in; closing reads nothing', async () => {
+  it("opening reads the networks after Settings' markup is in; closing reads nothing", async () => {
     const root = /** @type {HTMLElement} */ (document.getElementById('win'));
     expect(installAppsDockerNets(root)).toBe(true);
     expect(installAppsDockerNets(root)).toBe(false); // bound once

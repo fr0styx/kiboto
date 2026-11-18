@@ -11,14 +11,25 @@ vi.mock('../toast.js', () => ({
   showPromptToast: vi.fn(),
 }));
 
-const pool = { id: 'sdc1', name: 'media', pool_type: 'btrfs_raid', fs_type: 'btrfs', mountpoint: '/mnt/pools/media', members: [], total_bytes: 10, used_bytes: 1 };
+const pool = {
+  id: 'sdc1',
+  name: 'media',
+  pool_type: 'btrfs_raid',
+  fs_type: 'btrfs',
+  mountpoint: '/mnt/pools/media',
+  members: [],
+  total_bytes: 10,
+  used_bytes: 1,
+};
 
 async function draw(flags = {}) {
   const container = document.createElement('div');
   document.body.appendChild(container);
   vi.spyOn(api, 'get').mockImplementation((url) => {
-    if (url === '/api/storage/pools') return Promise.resolve({ platform: 'generic_linux', is_observer_mode: false, pools: [pool], ...flags });
-    if (url === '/api/storage/platform') return Promise.resolve({ platform: 'generic_linux', capabilities: { is_observer_mode: false } });
+    if (url === '/api/storage/pools')
+      return Promise.resolve({ platform: 'generic_linux', is_observer_mode: false, pools: [pool], ...flags });
+    if (url === '/api/storage/platform')
+      return Promise.resolve({ platform: 'generic_linux', capabilities: { is_observer_mode: false } });
     return Promise.resolve({});
   });
   await fetchAndRenderStorageTopology(container);
@@ -55,9 +66,14 @@ describe('a pool’s check (SET-06)', () => {
 
   it('says why when the check was not started', async () => {
     const container = await draw({ can_trigger_scrub: true });
-    vi.spyOn(api, 'post').mockRejectedValue(new Error('media is ext4, which has no check of its own. Nothing was started.'));
+    vi.spyOn(api, 'post').mockRejectedValue(
+      new Error('media is ext4, which has no check of its own. Nothing was started.')
+    );
     container.querySelector('.btn-pool-scrub').click();
     await showConfirmToast.mock.calls[0][2]();
-    expect(showToast).toHaveBeenCalledWith('The check of “media” was not started: media is ext4, which has no check of its own. Nothing was started.', 'error');
+    expect(showToast).toHaveBeenCalledWith(
+      'The check of “media” was not started: media is ext4, which has no check of its own. Nothing was started.',
+      'error'
+    );
   });
 });

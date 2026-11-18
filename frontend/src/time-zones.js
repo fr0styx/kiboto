@@ -11,7 +11,15 @@ export function allZones() {
   try {
     zones = Intl.supportedValuesOf('timeZone');
   } catch {
-    zones = ['UTC', 'Europe/London', 'Europe/Berlin', 'America/New_York', 'America/Los_Angeles', 'Asia/Tokyo', 'Australia/Sydney'];
+    zones = [
+      'UTC',
+      'Europe/London',
+      'Europe/Berlin',
+      'America/New_York',
+      'America/Los_Angeles',
+      'Asia/Tokyo',
+      'Australia/Sydney',
+    ];
   }
   return ['UTC', ...zones.filter((z) => z !== 'UTC')];
 }

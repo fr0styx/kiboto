@@ -1,7 +1,14 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { ZettEventBus } from '../event-bus.js';
 import { api } from '../api.js';
-import { topApps, rightNowSentences, renderRightNow, installRightNow, runningJobs, refreshJobs } from '../components/right-now.js';
+import {
+  topApps,
+  rightNowSentences,
+  renderRightNow,
+  installRightNow,
+  runningJobs,
+  refreshJobs,
+} from '../components/right-now.js';
 
 const DOCKER = [
   { name: 'jellyfin', state: 'running', cpu_pct: 61.2, mem_used: 512 * 1024 * 1024 },
@@ -18,12 +25,20 @@ describe('Activity -> Right now (SET-27 Activity 3)', () => {
 
   it('says quiet, busy with which app, or just busy; memory and drives', () => {
     expect(rightNowSentences({ cpu: { util: 5 } })).toEqual(['Quiet.']);
-    expect(rightNowSentences({ cpu: { util: 80 }, docker: DOCKER })[0]).toBe('The processor is busy: jellyfin is using most of it.');
+    expect(rightNowSentences({ cpu: { util: 80 }, docker: DOCKER })[0]).toBe(
+      'The processor is busy: jellyfin is using most of it.'
+    );
     expect(rightNowSentences({ cpu: { util: 80 }, docker: [] })[0]).toBe('The processor is busy (80%).');
     expect(rightNowSentences({ cpu: { util: 5 }, mem: { pct: 95 } })).toContain('Memory is nearly full.');
-    expect(rightNowSentences({ cpu: { util: 5 }, disks: [{ standby: true }, { standby: true }] })).toContain('The drives are asleep.');
-    expect(rightNowSentences({ cpu: { util: 5 }, disks: [{ standby: false }, { standby: false }] })).toContain('All 2 drives are awake.');
-    expect(rightNowSentences({ cpu: { util: 5 }, disks: [{ standby: false }, { standby: true }, { is_nvme: true }] })).toContain('1 drive awake, 1 asleep.');
+    expect(rightNowSentences({ cpu: { util: 5 }, disks: [{ standby: true }, { standby: true }] })).toContain(
+      'The drives are asleep.'
+    );
+    expect(rightNowSentences({ cpu: { util: 5 }, disks: [{ standby: false }, { standby: false }] })).toContain(
+      'All 2 drives are awake.'
+    );
+    expect(
+      rightNowSentences({ cpu: { util: 5 }, disks: [{ standby: false }, { standby: true }, { is_nvme: true }] })
+    ).toContain('1 drive awake, 1 asleep.');
   });
 
   it('draws the sentence and the apps, and keeps current while on screen', () => {
@@ -43,7 +58,10 @@ describe('Activity -> Right now (SET-27 Activity 3)', () => {
   });
 
   describe('running jobs (SET-27 rest)', () => {
-    afterEach(() => { vi.restoreAllMocks(); delete globalThis.openJobsCentre; });
+    afterEach(() => {
+      vi.restoreAllMocks();
+      delete globalThis.openJobsCentre;
+    });
     const JOBS = {
       active: [
         { id: '1', title: 'Backup', status: 'running', percent: 40 },
@@ -89,4 +107,3 @@ describe('Activity -> Right now (SET-27 Activity 3)', () => {
     });
   });
 });
-

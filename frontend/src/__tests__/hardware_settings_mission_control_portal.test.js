@@ -4,11 +4,9 @@ import {
   openDrawer,
   closeDrawer,
   mountTabsInDrawer,
-  restoreHardwareTabsToManagement
+  restoreHardwareTabsToManagement,
 } from '../components/settings.js';
-import {
-  SUBPANE_MAP
-} from '../components/management.js';
+import { SUBPANE_MAP } from '../components/management.js';
 import { api } from '../api.js';
 
 describe('Hardware Settings Mission Control Portal & Bi-Directional Reparenting', () => {
@@ -77,19 +75,19 @@ describe('Hardware Settings Mission Control Portal & Bi-Directional Reparenting'
   it('SUBPANE_MAP correctly routes mgmt-pane-hardware-copy to mgmt-sec-hardware', () => {
     expect(SUBPANE_MAP['mgmt-pane-hardware-copy']).toEqual({
       section: 'mgmt-sec-hardware',
-      pane: 'mgmt-pane-hardware-copy'
+      pane: 'mgmt-pane-hardware-copy',
     });
     expect(SUBPANE_MAP['mgmt-pane-hardware-fans']).toEqual({
       section: 'mgmt-sec-hardware',
-      pane: 'mgmt-pane-hardware-fans'
+      pane: 'mgmt-pane-hardware-fans',
     });
     expect(SUBPANE_MAP['mgmt-pane-hardware-led']).toEqual({
       section: 'mgmt-sec-hardware',
-      pane: 'mgmt-pane-hardware-led'
+      pane: 'mgmt-pane-hardware-led',
     });
     expect(SUBPANE_MAP['mgmt-pane-hardware-lcd']).toEqual({
       section: 'mgmt-sec-hardware',
-      pane: 'mgmt-pane-hardware-lcd'
+      pane: 'mgmt-pane-hardware-lcd',
     });
   });
 
@@ -152,7 +150,7 @@ describe('Hardware Settings Mission Control Portal & Bi-Directional Reparenting'
     restoreHardwareTabsToManagement();
 
     // Select Fans in drawer nav
-    document.querySelectorAll('.drawer-tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.drawer-tab-btn').forEach((b) => b.classList.remove('active'));
     document.querySelector('.drawer-tab-btn[data-tab="tab-fans"]').classList.add('active');
 
     mountTabsInDrawer();
@@ -206,4 +204,3 @@ describe('Hardware Settings Mission Control Portal & Bi-Directional Reparenting'
     closeDrawer();
   });
 });
-

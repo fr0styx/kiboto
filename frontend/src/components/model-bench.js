@@ -37,21 +37,46 @@ export async function renderModelBench() {
   const title = cell('span', '', 'kb-title');
   setIconLabel(title, '⏱️', t('bench.title', 'Benchmark installed models'));
   head.append(title);
-  const run = cell('button', running ? t('bench.running', 'Running {done} of {total}…', { done: st.job.done || 0, total: st.job.total || '?' }) : t('bench.run', 'Run benchmark'), 'btn-pill-toggle');
+  const run = cell(
+    'button',
+    running
+      ? t('bench.running', 'Running {done} of {total}…', { done: st.job.done || 0, total: st.job.total || '?' })
+      : t('bench.run', 'Run benchmark'),
+    'btn-pill-toggle'
+  );
   run.type = 'button';
   run.disabled = running;
   run.addEventListener('click', async () => {
     await api.post('/api/ai/models/benchmark', {});
-    showToast(t('bench.started', 'Benchmark started. Each model is loaded once, so this can take a few minutes.'), 'info');
+    showToast(
+      t('bench.started', 'Benchmark started. Each model is loaded once, so this can take a few minutes.'),
+      'info'
+    );
     renderModelBench();
   });
   head.append(run);
-  const parts = [head, cell('div', t('bench.desc', 'Measures how fast each chat model writes on this NAS and where it runs. "Balanced" is the largest model that still writes at reading speed.'), 'kb-muted')];
+  const parts = [
+    head,
+    cell(
+      'div',
+      t(
+        'bench.desc',
+        'Measures how fast each chat model writes on this NAS and where it runs. "Balanced" is the largest model that still writes at reading speed.'
+      ),
+      'kb-muted'
+    ),
+  ];
   if (st.results && st.results.length) {
     const table = document.createElement('table');
     table.className = 'kb-table';
     const tr = document.createElement('tr');
-    [t('bench.model', 'Model'), t('bench.speed', 'Tokens/s'), t('bench.first', 'First token'), t('bench.doc_first', 'Long question'), t('bench.where', 'Runs on')].forEach((h) => tr.append(cell('th', h)));
+    [
+      t('bench.model', 'Model'),
+      t('bench.speed', 'Tokens/s'),
+      t('bench.first', 'First token'),
+      t('bench.doc_first', 'Long question'),
+      t('bench.where', 'Runs on'),
+    ].forEach((h) => tr.append(cell('th', h)));
     table.append(tr);
     for (const r of st.results) {
       const row = document.createElement('tr');
@@ -64,13 +89,22 @@ export async function renderModelBench() {
       table.append(row);
     }
     parts.push(table);
-    if (st.finished_at) parts.push(cell('div', t('bench.when', 'Measured {when}', { when: formatDateTime(st.finished_at * 1000) }), 'kb-muted'));
+    if (st.finished_at)
+      parts.push(
+        cell('div', t('bench.when', 'Measured {when}', { when: formatDateTime(st.finished_at * 1000) }), 'kb-muted')
+      );
     const rec = st.recommended || {};
     const actions = document.createElement('div');
     actions.className = 'kb-row';
     for (const tier of ['balanced', 'fast']) {
       if (!rec[tier]) continue;
-      const b = cell('button', tier === 'balanced' ? t('bench.use_balanced', 'Use balanced: {model}', { model: rec[tier] }) : t('bench.use_fast', 'Use fastest: {model}', { model: rec[tier] }), 'btn-pill-toggle');
+      const b = cell(
+        'button',
+        tier === 'balanced'
+          ? t('bench.use_balanced', 'Use balanced: {model}', { model: rec[tier] })
+          : t('bench.use_fast', 'Use fastest: {model}', { model: rec[tier] }),
+        'btn-pill-toggle'
+      );
       b.type = 'button';
       b.addEventListener('click', async () => {
         const res = await api.post('/api/ai/models/benchmark/apply', { tier });

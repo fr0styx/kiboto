@@ -1,7 +1,12 @@
 /** Network report F3: the Network page's dialogs work with a keyboard. */
 import { describe, it, expect, vi, afterEach } from 'vitest';
 
-vi.mock('../toast.js', () => ({ showToast: vi.fn(), showConfirmToast: vi.fn(), showActionToast: vi.fn(), showPromptToast: vi.fn() }));
+vi.mock('../toast.js', () => ({
+  showToast: vi.fn(),
+  showConfirmToast: vi.fn(),
+  showActionToast: vi.fn(),
+  showPromptToast: vi.fn(),
+}));
 const net = await import('../components/management/network.js');
 const { showNetDialog, hideNetDialog } = await import('../components/management/net-dialog.js');
 
@@ -14,7 +19,8 @@ const DIALOG = `
     </div>
   </div>`;
 
-const key = (el, k, shift = false) => el.dispatchEvent(new KeyboardEvent('keydown', { key: k, shiftKey: shift, bubbles: true }));
+const key = (el, k, shift = false) =>
+  el.dispatchEvent(new KeyboardEvent('keydown', { key: k, shiftKey: shift, bubbles: true }));
 
 describe('Network dialogs with a keyboard', () => {
   afterEach(() => {

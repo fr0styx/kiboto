@@ -20,14 +20,26 @@ describe('History -> Sign-ins (Activity report section 4, row 5)', () => {
 
   it('writes each entry as a sentence', () => {
     expect(signinSentence({ event_type: 'auth.login.success', actor_username: 'anna' })).toBe('anna signed in');
-    expect(signinSentence({ event_type: 'auth.lockout', actor_ip: '192.168.1.9' })).toBe('192.168.1.9 was blocked after failed sign-ins');
+    expect(signinSentence({ event_type: 'auth.lockout', actor_ip: '192.168.1.9' })).toBe(
+      '192.168.1.9 was blocked after failed sign-ins'
+    );
     expect(signinSentence({ event_type: 'auth.login.failure' })).toBe('A sign-in as Someone failed');
     expect(signinSentence({ event_type: 'odd.thing', actor_username: 'ben' })).toBe('odd.thing (ben)');
   });
 
   it('draws the log by day, says when there is none, and when it cannot be read', async () => {
     const list = document.createElement('div');
-    vi.spyOn(api, 'get').mockResolvedValueOnce({ audit_logs: [{ event_type: 'auth.login.success', actor_username: 'anna', actor_ip: '10.0.0.2', status: 'success', timestamp: now - 60 }] });
+    vi.spyOn(api, 'get').mockResolvedValueOnce({
+      audit_logs: [
+        {
+          event_type: 'auth.login.success',
+          actor_username: 'anna',
+          actor_ip: '10.0.0.2',
+          status: 'success',
+          timestamp: now - 60,
+        },
+      ],
+    });
     expect(await renderSignins(list)).toBe(true);
     expect(list.querySelector('.history-day')?.textContent).toBe('Today');
     expect(list.textContent).toContain('anna signed in');
@@ -45,7 +57,9 @@ describe('History -> Sign-ins (Activity report section 4, row 5)', () => {
     renderEventLog([{ id: 1, ts: now, level: 'info', title: 'x', message: 'y' }]);
     const chip = /** @type {HTMLElement} */ (document.querySelector('[data-filter="signins"]'));
     await vi.waitFor(() => expect(chip.hidden).toBe(false));
-    vi.spyOn(api, 'get').mockResolvedValue({ audit_logs: [{ event_type: 'auth.logout', actor_username: 'anna', status: 'success', timestamp: now }] });
+    vi.spyOn(api, 'get').mockResolvedValue({
+      audit_logs: [{ event_type: 'auth.logout', actor_username: 'anna', status: 'success', timestamp: now }],
+    });
     chip.click();
     await vi.waitFor(() => expect(document.getElementById('events-list')?.textContent).toContain('anna signed out'));
     renderEventLog([{ id: 2, ts: now, level: 'info', title: 'new', message: 'z' }]); // stays on the sign-in log
@@ -62,8 +76,9 @@ describe('History -> Sign-ins (Activity report section 4, row 5)', () => {
     await vi.waitFor(() => expect(chip.hidden).toBe(false));
     vi.spyOn(api, 'get').mockResolvedValue({ items: [], actions: [], next_before: null });
     chip.click();
-    await vi.waitFor(() => expect(document.getElementById('events-list')?.textContent).toContain('Nothing in the last 90 days matches.'));
+    await vi.waitFor(() =>
+      expect(document.getElementById('events-list')?.textContent).toContain('Nothing in the last 90 days matches.')
+    );
     expect(/** @type {HTMLElement} */ (document.querySelector('.history-search')).hidden).toBe(true);
   });
 });
-

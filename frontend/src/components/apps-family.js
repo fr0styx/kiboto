@@ -25,9 +25,12 @@ export function renderFamilyCards(root = document) {
   const mount = (id) => root.querySelector(`#${id}`);
   // @ts-expect-error a style sheet has no types; Vite loads it with the cards
   import('../styles/users-lazy.css').catch(() => {});
-  if (mount('family-filter-mount')) import('./family-filter.js').then((m) => m.renderFamilyFilter(mount('family-filter-mount'))).catch(() => {});
-  if (mount('family-calendar-mount')) import('./family-calendar.js').then((m) => m.renderFamilyCalendar(mount('family-calendar-mount'))).catch(() => {});
-  if (mount('family-signin-mount')) import('./family-signin.js').then((m) => m.renderFamilySignin(mount('family-signin-mount'))).catch(() => {});
+  if (mount('family-filter-mount'))
+    import('./family-filter.js').then((m) => m.renderFamilyFilter(mount('family-filter-mount'))).catch(() => {});
+  if (mount('family-calendar-mount'))
+    import('./family-calendar.js').then((m) => m.renderFamilyCalendar(mount('family-calendar-mount'))).catch(() => {});
+  if (mount('family-signin-mount'))
+    import('./family-signin.js').then((m) => m.renderFamilySignin(mount('family-signin-mount'))).catch(() => {});
 }
 
 /** Reads the cards each time the group opens. Bound once. @param {ParentNode} [root] */
@@ -56,8 +59,15 @@ export function openFamily(root = document, part = '') {
 
 /** The three states People shows; a request that fails says "unknown", never a guess. */
 export async function familyStates() {
-  const get = (url) => Promise.resolve().then(() => api.get(url)).catch(() => null);
-  const [ff, fc, fs] = await Promise.all([get('/api/family-filter'), get('/api/docker/catalog/office-suite/family'), get('/api/family-signin')]);
+  const get = (url) =>
+    Promise.resolve()
+      .then(() => api.get(url))
+      .catch(() => null);
+  const [ff, fc, fs] = await Promise.all([
+    get('/api/family-filter'),
+    get('/api/docker/catalog/office-suite/family'),
+    get('/api/family-signin'),
+  ]);
   const filtered = ff ? Object.values(ff.people || {}).filter((p) => (p?.devices || []).length).length : 0;
   return {
     filter: !ff ? 'unknown' : ff.has_password && ff.user ? (filtered ? 'on' : 'ready') : 'off',
@@ -71,11 +81,21 @@ export function stateText(part, st) {
   const v = st[part];
   if (v === 'unknown') return t('pf.unknown', "Couldn't read its state");
   if (part === 'filter') {
-    if (v === 'on') return t('pf.filter_on', '{n, plural, one {# person filtered} other {# people filtered}}', { n: st.filtered });
+    if (v === 'on')
+      return t('pf.filter_on', '{n, plural, one {# person filtered} other {# people filtered}}', { n: st.filtered });
     return v === 'ready' ? t('pf.filter_ready', 'Connected; nobody filtered yet') : t('pf.not_set_up', 'Not set up');
   }
-  if (part === 'calendar') return v === 'on' ? t('pf.on', 'On') : v === 'stopped' ? t('pf.stopped', 'The office suite is stopped') : t('pf.not_set_up', 'Not set up');
-  return v === 'on' ? t('pf.on', 'On') : v === 'starting' ? t('pf.starting', 'Starting') : t('pf.not_set_up', 'Not set up');
+  if (part === 'calendar')
+    return v === 'on'
+      ? t('pf.on', 'On')
+      : v === 'stopped'
+        ? t('pf.stopped', 'The office suite is stopped')
+        : t('pf.not_set_up', 'Not set up');
+  return v === 'on'
+    ? t('pf.on', 'On')
+    : v === 'starting'
+      ? t('pf.starting', 'Starting')
+      : t('pf.not_set_up', 'Not set up');
 }
 
 export function familyLinksHtml(st) {

@@ -10,7 +10,18 @@ import { conditionOf } from './app-condition.js';
 import { followJob } from './stack-apply.js';
 
 // worst first: an app is as well as its worst part
-const WORST = ['crashed', 'dead', 'restarting', 'unhealthy', 'starting', 'removing', 'paused', 'created', 'stopped', 'unknown'];
+const WORST = [
+  'crashed',
+  'dead',
+  'restarting',
+  'unhealthy',
+  'starting',
+  'removing',
+  'paused',
+  'created',
+  'stopped',
+  'unknown',
+];
 const UP = ['running', 'starting', 'unhealthy'];
 
 export const isAppRow = (c) => Boolean(c && c.__app);
@@ -27,9 +38,13 @@ export function appOf(stack, parts) {
   else if (conds.includes('unhealthy')) condition = 'unhealthy';
   const worstPart = parts.find((p) => conditionOf(p) === condition) || parts[0];
   const withPage = parts.find((p) => p.webui_url && p.state === 'running') || parts.find((p) => p.webui_url);
-  const status = up && up < parts.length
-    ? t('approw.some_run', '{running} of {total, plural, one {# part} other {# parts}} running.', { running: up, total: parts.length })
-    : t('approw.parts', '{count, plural, one {# part} other {# parts}}', { count: parts.length });
+  const status =
+    up && up < parts.length
+      ? t('approw.some_run', '{running} of {total, plural, one {# part} other {# parts}} running.', {
+          running: up,
+          total: parts.length,
+        })
+      : t('approw.parts', '{count, plural, one {# part} other {# parts}}', { count: parts.length });
   return {
     __app: true,
     id: `app:${stack}`,
@@ -42,7 +57,10 @@ export function appOf(stack, parts) {
     exit_code: worstPart.exit_code,
     restart_count: worstPart.restart_count,
     status,
-    image: parts.map((p) => p.image).filter(Boolean).join(', '),
+    image: parts
+      .map((p) => p.image)
+      .filter(Boolean)
+      .join(', '),
     webui_url: withPage?.webui_url || '',
     primary_port: withPage?.primary_port || 0,
     ports: [],
@@ -95,7 +113,8 @@ export function partIds(rows) {
  */
 export function appMenu(app, hasUpdate, run, openPart) {
   const items = [];
-  if (app.condition === 'paused') items.push({ icon: '⏵', label: t('appmenu.resume', 'Resume'), onClick: () => run('unpause') });
+  if (app.condition === 'paused')
+    items.push({ icon: '⏵', label: t('appmenu.resume', 'Resume'), onClick: () => run('unpause') });
   else if (UP.includes(app.condition) || app.condition === 'restarting') {
     items.push({ icon: '🔄', label: t('appmenu.restart', 'Restart'), onClick: () => run('restart') });
     items.push({ icon: '⏹', label: t('appmenu.stop', 'Stop'), onClick: () => run('stop') });
@@ -103,7 +122,11 @@ export function appMenu(app, hasUpdate, run, openPart) {
   if (hasUpdate) items.push({ icon: '⬆️', label: t('appmenu.update', 'Update'), onClick: () => run('update') });
   items.push({ icon: '💾', label: t('appmenu.backup', 'Back up now'), onClick: () => run('backup') });
   for (const part of app.parts) {
-    items.push({ icon: '🔍', label: t('approw.part', 'Part: {name}', { name: part.service || part.name }), onClick: () => openPart(part) });
+    items.push({
+      icon: '🔍',
+      label: t('approw.part', 'Part: {name}', { name: part.service || part.name }),
+      onClick: () => openPart(part),
+    });
   }
   items.push({ icon: '🗑️', label: t('appmenu.remove', 'Remove'), destructive: true, onClick: () => run('remove') });
   return items;
@@ -133,7 +156,13 @@ export async function runAppAction(app, action, opts = {}) {
       showToast(t('approw.backing_up', 'Backing up {name}…', { name }), 'info');
       const res = await api.post(`/api/docker/stacks/${enc}/backup`);
       const b = res?.backup || {};
-      showToast(t('approw.backed_up', '{name} is backed up ({file}).', { name, file: b.size_human ? `${b.filename}, ${b.size_human}` : b.filename || '' }), 'success');
+      showToast(
+        t('approw.backed_up', '{name} is backed up ({file}).', {
+          name,
+          file: b.size_human ? `${b.filename}, ${b.size_human}` : b.filename || '',
+        }),
+        'success'
+      );
       return true;
     }
     if (action === 'update') {
@@ -142,7 +171,10 @@ export async function runAppAction(app, action, opts = {}) {
         showToast(t('approw.up_to_date', '{name} is up to date.', { name }), 'info');
         return true;
       }
-      showToast(t('approw.updating', 'Updating {name}: {parts}…', { name, parts: (res?.parts || []).join(', ') }), 'info');
+      showToast(
+        t('approw.updating', 'Updating {name}: {parts}…', { name, parts: (res?.parts || []).join(', ') }),
+        'info'
+      );
       const end = await follow(res.job);
       if (end.status === 'done') showToast(t('approw.updated', '{name} is updated.', { name }), 'success');
       else showToast(end.error || t('approw.update_failed', '{name} was not updated.', { name }), 'error');
@@ -155,7 +187,10 @@ export async function runAppAction(app, action, opts = {}) {
         showToast(t('approw.removed', '{name} is removed. A backup of it was kept.', { name }), 'success');
       } else {
         const left = (res?.failed || []).map((f) => f.name).join(', ');
-        showToast(t('approw.remove_partly', 'Some parts of {name} were not removed: {parts}', { name, parts: left }), 'error');
+        showToast(
+          t('approw.remove_partly', 'Some parts of {name} were not removed: {parts}', { name, parts: left }),
+          'error'
+        );
       }
       await reload();
       return Boolean(res?.success);
@@ -181,7 +216,10 @@ export async function runAppAction(app, action, opts = {}) {
 export function askAppUpdate(app, reload) {
   showConfirmToast(
     t('approw.update_title', 'Update “{name}”?', { name: app.name }),
-    t('approw.update_msg', 'Each part with a newer version is updated, one after the other; folders and settings stay as they are.'),
-    () => runAppAction(app, 'update', { reload }),
+    t(
+      'approw.update_msg',
+      'Each part with a newer version is updated, one after the other; folders and settings stay as they are.'
+    ),
+    () => runAppAction(app, 'update', { reload })
   );
 }

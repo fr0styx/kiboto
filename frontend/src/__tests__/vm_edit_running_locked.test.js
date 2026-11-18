@@ -11,11 +11,16 @@ const flush = () => new Promise((r) => setTimeout(r, 30));
 let usbDevs = [];
 
 describe('VM edit on a running machine (VMs report 25)', () => {
-  afterEach(() => { vi.restoreAllMocks(); document.body.innerHTML = ''; vmState.list = []; });
+  afterEach(() => {
+    vi.restoreAllMocks();
+    document.body.innerHTML = '';
+    vmState.list = [];
+  });
 
   async function open(state) {
     vi.spyOn(api, 'get').mockImplementation(async (url) => {
-      if (url === '/api/vms/telemetry') return { memory_budget: { safe_slider_max_gb: 16 }, cpu_capacity: { host_threads: 8 } };
+      if (url === '/api/vms/telemetry')
+        return { memory_budget: { safe_slider_max_gb: 16 }, cpu_capacity: { host_threads: 8 } };
       if (url.startsWith('/api/vms/isos')) return [];
       if (url === '/api/vms/usb-devices') return usbDevs;
       return {};
@@ -42,7 +47,12 @@ describe('VM edit on a running machine (VMs report 25)', () => {
   });
 
   it("its USB list leaves out the NAS's root hubs (VMs report 26)", async () => {
-    usbDevs = [null, { vendor_id: '1d6b', product_id: '0002', description: 'Root Hub (1)', is_root_hub: true }, { vendor_id: '0bda', product_id: '8153', description: 'USB Ethernet' }, { vendor_id: '1234', product_id: '5678', product: 'Game Pad' }];
+    usbDevs = [
+      null,
+      { vendor_id: '1d6b', product_id: '0002', description: 'Root Hub (1)', is_root_hub: true },
+      { vendor_id: '0bda', product_id: '8153', description: 'USB Ethernet' },
+      { vendor_id: '1234', product_id: '5678', product: 'Game Pad' },
+    ];
     await open('stopped');
     const opts = [...document.querySelectorAll('select option')].map((o) => o.textContent || '');
     expect(opts.some((o) => o.includes('USB Ethernet'))).toBe(true);
@@ -73,4 +83,3 @@ describe('VM edit on a running machine (VMs report 25)', () => {
     /** @type {HTMLButtonElement} */ (document.querySelector('#btn-edit-add-usb-device')).click();
   });
 });
-

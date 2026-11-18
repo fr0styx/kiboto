@@ -12,7 +12,12 @@ let _currentFiles = [];
 let _activeWallpaper = null;
 
 export function setWallpaper(url, filename = null) {
-  if (state.isLcdDirect || (typeof window !== 'undefined' && window.location.search.includes('mode=lcd')) || (document.body && document.body.classList.contains('lcd-direct'))) return;
+  if (
+    state.isLcdDirect ||
+    (typeof window !== 'undefined' && window.location.search.includes('mode=lcd')) ||
+    (document.body && document.body.classList.contains('lcd-direct'))
+  )
+    return;
 
   const wpLayer = typeof document !== 'undefined' ? document.getElementById('desktop-wallpaper') : null;
 
@@ -202,7 +207,7 @@ export function applyGlassSettings(blurPx, opacityPercent, radiusPx, glowEnabled
         glassBlur: blurPx,
         glassOpacity: opacityPercent,
         windowRadius: radiusPx,
-        windowGlow: glowEnabled
+        windowGlow: glowEnabled,
       });
     }
   }

@@ -8,7 +8,13 @@ import { entryFor, highlightEntry, mayNotOpen } from '../components/management/s
 import { forgetWindows, isMine, ownerName } from '../components/dock/whose-windows.js';
 import { OPEN_WINDOWS_KEY, restoreOpenWindowsState } from '../components/dock/window-state.js';
 import { DockManager } from '../components/dock/dock-manager.js';
-import { initSpotlight, openSpotlight, closeSpotlight, registerSpotlightItem, relabelSpotlight } from '../components/spotlight.js';
+import {
+  initSpotlight,
+  openSpotlight,
+  closeSpotlight,
+  registerSpotlightItem,
+  relabelSpotlight,
+} from '../components/spotlight.js';
 import { applyAdvancedEverywhere, setServerAdvanced } from '../advanced.js';
 import { NO_ACCESS, ADVANCED_OFF, leavePage, mark } from '../hide-marks.js';
 import { installAdvancedSwitch, leaveAdvancedPage } from '../components/management/overview.js';
@@ -21,7 +27,8 @@ function settings() {
   overlay.id = 'management-modal-overlay';
   overlay.setAttribute('role', 'dialog');
   overlay.setAttribute('aria-modal', 'true');
-  overlay.innerHTML = '<div id="management-window" class="smart-modal-window" style="z-index:1000"><button id="management-close">x</button></div>';
+  overlay.innerHTML =
+    '<div id="management-window" class="smart-modal-window" style="z-index:1000"><button id="management-close">x</button></div>';
   document.body.appendChild(overlay);
   const close = vi.fn(() => {
     overlay.style.display = 'none';
@@ -69,8 +76,13 @@ describe('Back and Escape close Settings', () => {
     const { overlay } = settings();
     const dock = {
       windows: {},
-      register(id, el) { this.windows[id] = { el, minimized: false, closed: false }; },
-      closeWindow(id) { this.windows[id].el.style.display = 'none'; delete this.windows[id]; },
+      register(id, el) {
+        this.windows[id] = { el, minimized: false, closed: false };
+      },
+      closeWindow(id) {
+        this.windows[id].el.style.display = 'none';
+        delete this.windows[id];
+      },
     };
     installWindowFocus(dock);
     dock.register('w', document.getElementById('w'));
@@ -84,7 +96,8 @@ describe('Back and Escape close Settings', () => {
   });
 
   it('Escape still belongs to a question that is open', () => {
-    document.body.innerHTML = '<div id="w" class="os-window"><button id="bw">w</button></div><div role="dialog" aria-modal="true" id="q"></div>';
+    document.body.innerHTML =
+      '<div id="w" class="os-window"><button id="bw">w</button></div><div role="dialog" aria-modal="true" id="q"></div>';
     const dock = { windows: {}, closeWindow: vi.fn() };
     installWindowFocus(dock);
     dock.windows.w = { el: document.getElementById('w') };
@@ -162,7 +175,15 @@ describe('whose windows come back', () => {
 
   it('signing out closes every window and drops the list', () => {
     const closed = vi.fn();
-    DockManager.windows = { a: { onClose: closed }, b: { closed: true, onClose: closed }, c: { onClose: () => { throw new Error('stuck'); } } };
+    DockManager.windows = {
+      a: { onClose: closed },
+      b: { closed: true, onClose: closed },
+      c: {
+        onClose: () => {
+          throw new Error('stuck');
+        },
+      },
+    };
     localStorage.setItem(OPEN_WINDOWS_KEY, '{"who":"ana","windows":{}}');
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     ZettEventBus.emit('auth:logout');
@@ -170,19 +191,29 @@ describe('whose windows come back', () => {
     expect(warn).toHaveBeenCalled();
     expect(localStorage.getItem(OPEN_WINDOWS_KEY)).toBeNull();
     warn.mockRestore();
-    forgetWindows(null, OPEN_WINDOWS_KEY, { removeItem: () => { throw new Error('private'); } });
+    forgetWindows(null, OPEN_WINDOWS_KEY, {
+      removeItem: () => {
+        throw new Error('private');
+      },
+    });
   });
 
   it('the next person to sign in does not get the last person’s windows', () => {
     const closed = vi.fn();
     DockManager.windows = { a: { onClose: closed } };
-    localStorage.setItem(OPEN_WINDOWS_KEY, '{"who":"ana","windows":{"management":{"open":true,"activePane":"mgmt-pane-users"}}}');
+    localStorage.setItem(
+      OPEN_WINDOWS_KEY,
+      '{"who":"ana","windows":{"management":{"open":true,"activePane":"mgmt-pane-users"}}}'
+    );
     ZettEventBus.emit('session:user', { username: 'ana', scopes: ['*'] });
     expect(closed).not.toHaveBeenCalled();
     ZettEventBus.emit('session:user', { username: 'ben', scopes: ['*'] }); // the session ran out, ben signed in
     expect(closed).toHaveBeenCalledTimes(1);
     expect(localStorage.getItem(OPEN_WINDOWS_KEY)).toBeNull();
-    localStorage.setItem(OPEN_WINDOWS_KEY, '{"who":"ana","windows":{"management":{"open":true,"activePane":"mgmt-pane-users"}}}');
+    localStorage.setItem(
+      OPEN_WINDOWS_KEY,
+      '{"who":"ana","windows":{"management":{"open":true,"activePane":"mgmt-pane-users"}}}'
+    );
     window.openManagementWindow = vi.fn();
     restoreOpenWindowsState();
     expect(window.openManagementWindow).not.toHaveBeenCalled();
@@ -207,9 +238,13 @@ describe('a change of language reaches what is built once', () => {
     await setLanguage('de');
     expect(tile.textContent).toBe('Personen');
     expect(caption.textContent).toBe('Erweiterte Werkzeuge');
-    expect(document.querySelector('.mgmt-advanced-row').title).toBe('Auf dem Schreibtisch, im Dock und auf dem Telefon sowie Expertendetails in Fenstern');
+    expect(document.querySelector('.mgmt-advanced-row').title).toBe(
+      'Auf dem Schreibtisch, im Dock und auf dem Telefon sowie Expertendetails in Fenstern'
+    );
     expect(document.querySelector('[data-phone-tab="home"] span').getAttribute('data-i18n')).toBe('phone.home');
-    document.querySelectorAll('#l [data-i18n], #t [data-i18n]').forEach((el) => expect(el.textContent).not.toBe(el.getAttribute('data-i18n')));
+    document
+      .querySelectorAll('#l [data-i18n], #t [data-i18n]')
+      .forEach((el) => expect(el.textContent).not.toBe(el.getAttribute('data-i18n')));
   });
 
   it('a tile that Advanced hid at first comes back when it is switched on', () => {
@@ -237,13 +272,23 @@ describe('a change of language reaches what is built once', () => {
   it('Spotlight speaks the new language and keeps what other code added', async () => {
     document.body.innerHTML = '';
     initSpotlight();
-    registerSpotlightItem({ id: 'extra-one', title: 'Extra one', subtitle: '', icon: '', category: 'app', keywords: ['extra'], run: () => {} });
+    registerSpotlightItem({
+      id: 'extra-one',
+      title: 'Extra one',
+      subtitle: '',
+      icon: '',
+      category: 'app',
+      keywords: ['extra'],
+      run: () => {},
+    });
     await setLanguage('de');
     openSpotlight('');
     const results = document.getElementById('spotlight-results').textContent;
     expect(results).toContain('Extra one');
     expect(results).toContain('Papierkorb'); // the entries were built once, in the first language
-    expect(document.getElementById('spotlight-input').getAttribute('placeholder')).not.toBe('Search apps, folders and actions');
+    expect(document.getElementById('spotlight-input').getAttribute('placeholder')).not.toBe(
+      'Search apps, folders and actions'
+    );
     closeSpotlight();
     relabelSpotlight();
   });

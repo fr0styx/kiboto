@@ -30,8 +30,16 @@ describe('the Overview (SET-20, Overview 5)', () => {
     const hub = html.slice(html.indexOf('id="management-hub-view"'), html.indexOf('<!-- DETAIL CONTAINER'));
     expect(hub).toContain('class="mgmt-hub-heading"');
     expect((hub.match(/mgmt-hub-tile"/g) || []).length).toBe(3);
-    for (const target of ['mgmt-sec-storage', 'mgmt-sec-docker', 'mgmt-pane-backups']) expect(hub).toContain(`data-mgmt-target="${target}"`);
-    for (const gone of ['mgmt-sec-vms', 'mgmt-sec-network', 'mgmt-sec-wallpaper', 'mgmt-sec-system-group', 'mgmt-app-pill']) expect(hub).not.toContain(gone);
+    for (const target of ['mgmt-sec-storage', 'mgmt-sec-docker', 'mgmt-pane-backups'])
+      expect(hub).toContain(`data-mgmt-target="${target}"`);
+    for (const gone of [
+      'mgmt-sec-vms',
+      'mgmt-sec-network',
+      'mgmt-sec-wallpaper',
+      'mgmt-sec-system-group',
+      'mgmt-app-pill',
+    ])
+      expect(hub).not.toContain(gone);
   });
 
   it('says what storage, apps and backup hold, in words', () => {
@@ -41,9 +49,19 @@ describe('the Overview (SET-20, Overview 5)', () => {
     expect(tiles.storageLine(two, 1)).toBe('1.2 TB of 4 TB used · 1 drive needs a look'); // the status box's warning wins
     expect(tiles.storageLine({ disks: [{ health: 'FAILING' }] }, 0)).toBe('1 drive needs a look');
     expect(tiles.storageLine({}, null)).toBe('');
-    expect(tiles.driveIssues({ items: [{ kind: 'drive_warning' }, { kind: 'drive_attention' }, { kind: 'ups' }] })).toBe(2);
+    expect(
+      tiles.driveIssues({ items: [{ kind: 'drive_warning' }, { kind: 'drive_attention' }, { kind: 'ups' }] })
+    ).toBe(2);
     expect(tiles.driveIssues(null)).toBeNull();
-    expect(tiles.appsLine({ docker: [{ name: 'kiboto', state: 'running' }, { name: 'jellyfin', state: 'running' }, { name: 'plex', state: 'exited' }] })).toBe('2 apps, 1 running · 1 stopped');
+    expect(
+      tiles.appsLine({
+        docker: [
+          { name: 'kiboto', state: 'running' },
+          { name: 'jellyfin', state: 'running' },
+          { name: 'plex', state: 'exited' },
+        ],
+      })
+    ).toBe('2 apps, 1 running · 1 stopped');
     expect(tiles.appsLine({ docker: [{ name: 'immich', state: 'running' }] })).toBe('1 app, 1 running');
     expect(tiles.appsLine({})).toBe('');
     expect(tiles.backupLine({ level: 'none' })).toBe('No copy outside this NAS yet');
@@ -57,7 +75,12 @@ describe('the Overview (SET-20, Overview 5)', () => {
     state.lastStats = { docker: [{ name: 'a', state: 'running' }] };
     tiles.installHubTiles();
     expect(document.getElementById('mgmt-hub-apps-line').textContent).toBe('1 app, 1 running');
-    ZettEventBus.emit('stats:updated', { docker: [{ name: 'a', state: 'running' }, { name: 'b', state: 'running' }] });
+    ZettEventBus.emit('stats:updated', {
+      docker: [
+        { name: 'a', state: 'running' },
+        { name: 'b', state: 'running' },
+      ],
+    });
     await vi.waitFor(() => expect(document.getElementById('mgmt-hub-apps-line').textContent).toBe('2 apps, 2 running')); // the bus batches readings per frame
     tiles.updateHubTiles(null);
     state.lastStats = null;
@@ -65,7 +88,12 @@ describe('the Overview (SET-20, Overview 5)', () => {
 
   it('shows Getting started to whoever sets the NAS up, while steps are open', async () => {
     document.body.innerHTML = HUB;
-    api.get.mockResolvedValue({ items: [{ id: 'backup', open: 'mgmt-pane-backups', done: false }], done: 0, total: 1, complete: false });
+    api.get.mockResolvedValue({
+      items: [{ id: 'backup', open: 'mgmt-pane-backups', done: false }],
+      done: 0,
+      total: 1,
+      complete: false,
+    });
     state.lastStats = { disks: [{ health: 'OK' }] };
     await tiles.renderHubExtras(document, { level: 'none' }, { items: [{ kind: 'drive_warning' }] });
     expect(document.getElementById('mgmt-hub-storage-line').textContent).toBe('1 drive needs a look');

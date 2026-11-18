@@ -19,11 +19,21 @@ export function lostDeviceHtml(name) {
 /** What was done, in one sentence for the toast. */
 export function lostDoneText(r, name, signedOut) {
   const parts = [];
-  if (r.sessions_ended) parts.push(t('lost.done_signed_out', '{n, plural, one {Ended # session of {name}.} other {Ended # sessions of {name}.}}', { n: r.sessions_ended, name }));
+  if (r.sessions_ended)
+    parts.push(
+      t('lost.done_signed_out', '{n, plural, one {Ended # session of {name}.} other {Ended # sessions of {name}.}}', {
+        n: r.sessions_ended,
+        name,
+      })
+    );
   else if (signedOut) parts.push(t('lost.done_none', '{name} was not signed in anywhere.', { name }));
   if (r.two_step_off) parts.push(t('lost.done_two_step', 'Two-step sign-in is off for {name}.', { name }));
   if (r.sessions_ended || r.two_step_off) {
-    parts.push(r.told ? t('lost.done_told', 'They were told.') : t('lost.done_not_told', 'Kiboto could not tell them: they have no alerts or email set up.'));
+    parts.push(
+      r.told
+        ? t('lost.done_told', 'They were told.')
+        : t('lost.done_not_told', 'Kiboto could not tell them: they have no alerts or email set up.')
+    );
   }
   return parts.join(' ');
 }
@@ -40,7 +50,11 @@ export async function submitLostDevice(box, user) {
   const password = pw.value;
   pw.value = '';
   try {
-    const r = await api.post(`/api/users/${encodeURIComponent(user.id)}/lost-device`, { current_password: password, sign_out: signOut, turn_off_two_step: twoStep });
+    const r = await api.post(`/api/users/${encodeURIComponent(user.id)}/lost-device`, {
+      current_password: password,
+      sign_out: signOut,
+      turn_off_two_step: twoStep,
+    });
     showToast(lostDoneText(r, user.username, signOut), 'success');
     return r;
   } catch (err) {
@@ -57,7 +71,10 @@ export function installLostDeviceFor(modal, user, me = null) {
     box = document.createElement('details');
     box.id = 'lost-device';
     box.className = 'lost-device';
-    (modal.querySelector('#passkeys-reset') || modal.querySelector('form') || modal).insertAdjacentElement('afterend', box);
+    (modal.querySelector('#passkeys-reset') || modal.querySelector('form') || modal).insertAdjacentElement(
+      'afterend',
+      box
+    );
   }
   box.open = false;
   box.hidden = Boolean(me && me.id === user.id);

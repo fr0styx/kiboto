@@ -220,7 +220,8 @@ describe('Kib — Multi-Modal Local RAG & Visual Search Frontend Suite', () => {
 
   it('controls Pause, Resume, Stop sync state and manages Watched Folders with live disk standby status', async () => {
     vi.spyOn(api, 'get').mockResolvedValue({ status: 'ok', hardware: { tier_number: 1 } });
-    const postSpy = vi.spyOn(api, 'post')
+    const postSpy = vi
+      .spyOn(api, 'post')
       .mockResolvedValueOnce({
         status: 'ok',
         sync_state: 'paused',
@@ -229,7 +230,13 @@ describe('Kib — Multi-Modal Local RAG & Visual Search Frontend Suite', () => {
       .mockResolvedValueOnce({
         status: 'ok',
         sync_state: 'stopped',
-        sync_progress: { state: 'stopped', is_paused: false, is_scanning: false, indexed_files: 12, deferred_standby: 1 },
+        sync_progress: {
+          state: 'stopped',
+          is_paused: false,
+          is_scanning: false,
+          indexed_files: 12,
+          deferred_standby: 1,
+        },
       })
       .mockResolvedValueOnce({
         status: 'ok',
@@ -269,7 +276,9 @@ describe('Kib — Multi-Modal Local RAG & Visual Search Frontend Suite', () => {
   });
 
   it('opens the Watched Folders dropdown and toggles folder checkmarks in-place without closing the menu', async () => {
-    document.body.insertAdjacentHTML('beforeend', `
+    document.body.insertAdjacentHTML(
+      'beforeend',
+      `
       <div id="ai-watched-folders-dropdown-container">
         <button type="button" id="btn-ai-watched-folders-dropdown" aria-expanded="false">
           <span id="ai-watched-dropdown-summary"></span>
@@ -278,7 +287,8 @@ describe('Kib — Multi-Modal Local RAG & Visual Search Frontend Suite', () => {
         </button>
         <div id="ai-watched-folders-dropdown-menu" style="display:none;"></div>
       </div>
-    `);
+    `
+    );
     // Move #ai-discovered-shares-list inside the dropdown menu to match index.html
     const menuEl = document.getElementById('ai-watched-folders-dropdown-menu');
     const sharesEl = document.getElementById('ai-discovered-shares-list');
@@ -337,21 +347,23 @@ describe('Kib — Multi-Modal Local RAG & Visual Search Frontend Suite', () => {
     filterSpotlightResults('photo: red car in pool');
     expect(resultsEl.textContent).toContain('Photo search: “red car in pool”');
 
-      // Verify 5-language localization parity
-      for (const lang of ['en', 'de', 'zh', 'fr', 'es']) {
-        expect(TRANSLATIONS[lang]['mgmt.sidebar_ai']).toBeTruthy();
-        expect(TRANSLATIONS[lang]['mgmt.hub_ai_title']).toBeTruthy();
-        expect(TRANSLATIONS[lang]['ai.title']).toBeTruthy();
-        expect(TRANSLATIONS[lang]['ai.pause_sync']).toBeTruthy();
-        expect(TRANSLATIONS[lang]['ai.resume_sync']).toBeTruthy();
-        expect(TRANSLATIONS[lang]['ai.stop_sync']).toBeTruthy();
-        expect(TRANSLATIONS[lang]['ai.llm_advisor_title']).toBeTruthy();
-        expect(TRANSLATIONS[lang]['ai.learning_results_btn']).toBeTruthy();
-      }
-    });
+    // Verify 5-language localization parity
+    for (const lang of ['en', 'de', 'zh', 'fr', 'es']) {
+      expect(TRANSLATIONS[lang]['mgmt.sidebar_ai']).toBeTruthy();
+      expect(TRANSLATIONS[lang]['mgmt.hub_ai_title']).toBeTruthy();
+      expect(TRANSLATIONS[lang]['ai.title']).toBeTruthy();
+      expect(TRANSLATIONS[lang]['ai.pause_sync']).toBeTruthy();
+      expect(TRANSLATIONS[lang]['ai.resume_sync']).toBeTruthy();
+      expect(TRANSLATIONS[lang]['ai.stop_sync']).toBeTruthy();
+      expect(TRANSLATIONS[lang]['ai.llm_advisor_title']).toBeTruthy();
+      expect(TRANSLATIONS[lang]['ai.learning_results_btn']).toBeTruthy();
+    }
+  });
 
   it('renders NPU & GPU LLM recommendations, activates models, and opens Split-Pane Preview Inspector', async () => {
-    document.body.insertAdjacentHTML('beforeend', `
+    document.body.insertAdjacentHTML(
+      'beforeend',
+      `
       <select id="ai-top-model-select"></select>
       <span id="ai-llm-advisor-headline"></span>
       <div id="ai-llm-advisor-summary"></div>
@@ -365,71 +377,77 @@ describe('Kib — Multi-Modal Local RAG & Visual Search Frontend Suite', () => {
       <div id="ai-search-split-layout">
         <div id="ai-preview-inspector-pane" style="display:none;"></div>
       </div>
-    `);
+    `
+    );
 
-    renderAiLlmRecommendations({
-      headline: 'NPU + GPU Hybrid AI Acceleration Detected',
-      hardware_summary: 'Primary NPU: Intel AI Boost NPU (/dev/accel/accel0) • Secondary GPU: Intel Arc / QuickSync iGPU • System RAM: 58.4 GB',
-      active_model: 'qwen2.5:3b',
-      models: [
-        {
-          id: 'qwen2.5:3b',
-          name: 'Qwen2.5 3B Instruct (NPU INT4)',
-          category: 'Local LLM',
-          params: '3.1B',
-          quantization: 'INT4 / Q4_K_M',
-          vram_or_ram_gb: 2.1,
-          target_device: 'NPU (/dev/accel/accel0)',
-          fit_badge: '★ Best for Onboard NPU',
-          recommended: true,
-          active: true,
-          estimated_speed: '35–55 tok/s',
-          power_profile: '6–10W NPU Offload',
-          use_case: 'Fast grounded RAG Q&A',
-          why_recommended: 'Fits inside Intel AI Boost NPU.',
-        },
-        {
-          id: 'qwen2.5vl:7b',
-          name: 'Qwen2.5-VL 7B Vision-Language',
-          category: 'Vision-Language',
-          params: '7.6B',
-          quantization: 'Q4_K_M + FP16',
-          vram_or_ram_gb: 5.8,
-          target_device: 'Hybrid NPU + iGPU',
-          fit_badge: '★ Best for NPU + iGPU',
-          recommended: true,
-          active: false,
-          estimated_speed: '16–28 tok/s',
-          power_profile: '18–30W Hybrid',
-          use_case: 'Deep visual Q&A',
-          why_recommended: 'Splits vision encoder onto NPU and language decoder onto iGPU.',
-          fits_hardware: true,
-          hardware_warning: false,
-          hf_repo: 'Qwen/Qwen2.5-VL-7B-Instruct',
-        },
-        {
-          id: 'llama3.3:70b',
-          name: 'Meta Llama 3.3 70B Instruct (48GB+ VRAM Server Class)',
-          category: 'high_capacity_llm',
-          params: '70.6B',
-          quantization: 'Q4_K_M',
-          vram_or_ram_gb: 43.5,
-          min_ram_gb: 96.0,
-          target_device: 'Requires 48GB+ VRAM / 96GB+ RAM',
-          fit_badge: "⚠️ Doesn't Fit Hardware (96GB+ RAM)",
-          fit_status: 'insufficient_ram',
-          fits_hardware: false,
-          hardware_warning: true,
-          warning_severity: 'critical',
-          warning_message: 'Hardware Warning: Requires ~43.5 GB model memory (96 GB+ system RAM recommended), which exceeds your host RAM capacity.',
-          hf_repo: 'meta-llama/Llama-3.3-70B-Instruct-GGUF',
-          recommended: false,
-          active: false,
-          estimated_speed: '<0.8 tok/s (Swap/CPU)',
-          power_profile: 'Server Class (350W+)',
-        },
-      ],
-    }, 'qwen2.5:3b');
+    renderAiLlmRecommendations(
+      {
+        headline: 'NPU + GPU Hybrid AI Acceleration Detected',
+        hardware_summary:
+          'Primary NPU: Intel AI Boost NPU (/dev/accel/accel0) • Secondary GPU: Intel Arc / QuickSync iGPU • System RAM: 58.4 GB',
+        active_model: 'qwen2.5:3b',
+        models: [
+          {
+            id: 'qwen2.5:3b',
+            name: 'Qwen2.5 3B Instruct (NPU INT4)',
+            category: 'Local LLM',
+            params: '3.1B',
+            quantization: 'INT4 / Q4_K_M',
+            vram_or_ram_gb: 2.1,
+            target_device: 'NPU (/dev/accel/accel0)',
+            fit_badge: '★ Best for Onboard NPU',
+            recommended: true,
+            active: true,
+            estimated_speed: '35–55 tok/s',
+            power_profile: '6–10W NPU Offload',
+            use_case: 'Fast grounded RAG Q&A',
+            why_recommended: 'Fits inside Intel AI Boost NPU.',
+          },
+          {
+            id: 'qwen2.5vl:7b',
+            name: 'Qwen2.5-VL 7B Vision-Language',
+            category: 'Vision-Language',
+            params: '7.6B',
+            quantization: 'Q4_K_M + FP16',
+            vram_or_ram_gb: 5.8,
+            target_device: 'Hybrid NPU + iGPU',
+            fit_badge: '★ Best for NPU + iGPU',
+            recommended: true,
+            active: false,
+            estimated_speed: '16–28 tok/s',
+            power_profile: '18–30W Hybrid',
+            use_case: 'Deep visual Q&A',
+            why_recommended: 'Splits vision encoder onto NPU and language decoder onto iGPU.',
+            fits_hardware: true,
+            hardware_warning: false,
+            hf_repo: 'Qwen/Qwen2.5-VL-7B-Instruct',
+          },
+          {
+            id: 'llama3.3:70b',
+            name: 'Meta Llama 3.3 70B Instruct (48GB+ VRAM Server Class)',
+            category: 'high_capacity_llm',
+            params: '70.6B',
+            quantization: 'Q4_K_M',
+            vram_or_ram_gb: 43.5,
+            min_ram_gb: 96.0,
+            target_device: 'Requires 48GB+ VRAM / 96GB+ RAM',
+            fit_badge: "⚠️ Doesn't Fit Hardware (96GB+ RAM)",
+            fit_status: 'insufficient_ram',
+            fits_hardware: false,
+            hardware_warning: true,
+            warning_severity: 'critical',
+            warning_message:
+              'Hardware Warning: Requires ~43.5 GB model memory (96 GB+ system RAM recommended), which exceeds your host RAM capacity.',
+            hf_repo: 'meta-llama/Llama-3.3-70B-Instruct-GGUF',
+            recommended: false,
+            active: false,
+            estimated_speed: '<0.8 tok/s (Swap/CPU)',
+            power_profile: 'Server Class (350W+)',
+          },
+        ],
+      },
+      'qwen2.5:3b'
+    );
 
     expect(document.getElementById('ai-llm-advisor-headline').textContent).toContain('NPU + GPU Hybrid');
     const gridHtml = document.getElementById('ai-llm-recommendations-grid').innerHTML;
@@ -446,7 +464,10 @@ describe('Kib — Multi-Modal Local RAG & Visual Search Frontend Suite', () => {
     vi.spyOn(api, 'get').mockResolvedValueOnce({ status: 'ok', hardware: { tier_number: 1 } });
 
     await selectAiRecommendedModel('qwen2.5vl:7b');
-    expect(api.post).toHaveBeenCalledWith('/api/media/models/select', { model: 'qwen2.5vl:7b', model_id: 'qwen2.5vl:7b' });
+    expect(api.post).toHaveBeenCalledWith('/api/media/models/select', {
+      model: 'qwen2.5vl:7b',
+      model_id: 'qwen2.5vl:7b',
+    });
 
     // Test model removal with software UI confirmation dialog (showConfirmToast) instead of browser confirm
     expect(gridHtml).toContain('btn-ai-remove-model');
@@ -473,7 +494,10 @@ describe('Kib — Multi-Modal Local RAG & Visual Search Frontend Suite', () => {
       expect.stringContaining('from your Kib catalog'),
       expect.any(Function)
     );
-    expect(api.post).toHaveBeenCalledWith('/api/media/models/remove', { model: 'qwen2.5vl:7b', model_id: 'qwen2.5vl:7b' });
+    expect(api.post).toHaveBeenCalledWith('/api/media/models/remove', {
+      model: 'qwen2.5vl:7b',
+      model_id: 'qwen2.5vl:7b',
+    });
 
     // Test Hugging Face Hub search & pull with hardware warning
     vi.spyOn(api, 'get').mockResolvedValueOnce({
@@ -505,7 +529,11 @@ describe('Kib — Multi-Modal Local RAG & Visual Search Frontend Suite', () => {
       fits_hardware: false,
       hardware_warning: true,
       warning_message: 'Hardware Warning: Exceeds host RAM capacity.',
-      model: { id: 'hf.co/Qwen/Qwen2.5-72B-Instruct-GGUF', name: 'Qwen2.5-72B-Instruct-GGUF', hf_repo: 'Qwen/Qwen2.5-72B-Instruct-GGUF' },
+      model: {
+        id: 'hf.co/Qwen/Qwen2.5-72B-Instruct-GGUF',
+        name: 'Qwen2.5-72B-Instruct-GGUF',
+        hf_repo: 'Qwen/Qwen2.5-72B-Instruct-GGUF',
+      },
     });
     vi.spyOn(api, 'get').mockResolvedValueOnce({ status: 'ok', hardware: { tier_number: 1 } });
     await pullHuggingFaceModel('https://huggingface.co/Qwen/Qwen2.5-72B-Instruct-GGUF', true);
@@ -532,7 +560,9 @@ describe('Kib — Multi-Modal Local RAG & Visual Search Frontend Suite', () => {
   });
 
   it('merges Standby-Safe Auto-Learn toggle and updates live category counts in Type pills without undefined', async () => {
-    document.body.insertAdjacentHTML('beforeend', `
+    document.body.insertAdjacentHTML(
+      'beforeend',
+      `
       <input type="checkbox" id="ai-index-respect-standby" checked />
       <div id="ai-search-filetype-bar">
         <button class="ai-filetype-chip active" data-filetype="all">All</button>
@@ -540,7 +570,8 @@ describe('Kib — Multi-Modal Local RAG & Visual Search Frontend Suite', () => {
         <button class="ai-filetype-chip" data-filetype="documents">📄 Documents</button>
       </div>
       <div id="ai-category-summary-cards"></div>
-    `);
+    `
+    );
 
     initAiKnowledgeEngine();
 
@@ -591,7 +622,9 @@ describe('Kib — Multi-Modal Local RAG & Visual Search Frontend Suite', () => {
   });
 
   it('displays LLM execution telemetry proof on RAG answers and runs the AI Chatbot & NAS Copilot with hardware tools and live web browsing', async () => {
-    document.body.insertAdjacentHTML('beforeend', `
+    document.body.insertAdjacentHTML(
+      'beforeend',
+      `
       <span id="ai-active-llm-pill"><span id="ai-active-llm-label">qwen2.5:3b</span></span>
       <span id="ai-chat-active-model-badge"></span>
       <div id="ai-chat-messages-list"></div>
@@ -600,7 +633,8 @@ describe('Kib — Multi-Modal Local RAG & Visual Search Frontend Suite', () => {
       <input type="checkbox" id="ai-chat-tools-toggle" checked />
       <button id="btn-ai-chat-send">Ask Kib</button>
       <button id="btn-ai-chat-clear">Clear Chat</button>
-    `);
+    `
+    );
 
     expect(SUBPANE_MAP['mgmt-pane-ai-chat']).toEqual({
       section: 'mgmt-sec-ai',
@@ -622,28 +656,44 @@ describe('Kib — Multi-Modal Local RAG & Visual Search Frontend Suite', () => {
         elapsed_ms: 19.4,
       },
       citations: [
-        { index: 1, file_id: 1, file_name: 'garlic_pasta.md', file_path: '/mnt/user/recipes/garlic_pasta.md', excerpt: '6 cloves garlic' },
+        {
+          index: 1,
+          file_id: 1,
+          file_name: 'garlic_pasta.md',
+          file_path: '/mnt/user/recipes/garlic_pasta.md',
+          excerpt: '6 cloves garlic',
+        },
       ],
     });
 
     await runAiRagAsk('garlic pasta');
     const answerContainer = document.getElementById('ai-rag-answer-container');
     expect(answerContainer.innerHTML).toContain('Qwen/Qwen2.5-7B-Instruct-GGUF');
-    expect(answerContainer.innerHTML).toContain("32 tok/s");
+    expect(answerContainer.innerHTML).toContain('32 tok/s');
 
     // 2. Verify AI Chatbot & NAS Copilot sends message, renders tool-call trace pills & verified web sources
     const chatPostSpy = vi.spyOn(api, 'post').mockResolvedValueOnce({
       status: 'ok',
-      reply: '### 🖥️ NAS Telemetry\n- **CPU Load:** `12.4%` (`41°C`)\n- **Standby Disks:** `2` sleeping (0 wakeups)\n\n### 🌐 Web Verification\n- **Linux 6.12 LTS** is the latest long-term kernel.',
+      reply:
+        '### 🖥️ NAS Telemetry\n- **CPU Load:** `12.4%` (`41°C`)\n- **Standby Disks:** `2` sleeping (0 wakeups)\n\n### 🌐 Web Verification\n- **Linux 6.12 LTS** is the latest long-term kernel.',
       active_model: 'Qwen/Qwen2.5-7B-Instruct-GGUF',
       elapsed_ms: 42.8,
       tools_called: [
         { tool: 'get_system_telemetry', summary: 'CPU 12.4% (41°C), RAM 6.2/32 GB', result: { status: 'ok' } },
-        { tool: 'get_disks_and_standby_status', summary: '2 active, 2 sleeping in standby (0 wakeups)', result: { status: 'ok' } },
+        {
+          tool: 'get_disks_and_standby_status',
+          summary: '2 active, 2 sleeping in standby (0 wakeups)',
+          result: { status: 'ok' },
+        },
         { tool: 'browse_internet', summary: '2 web source(s) fetched for "Linux 6.12 LTS"', result: { status: 'ok' } },
       ],
       web_sources: [
-        { title: 'Linux kernel — Wikipedia', url: 'https://en.wikipedia.org/wiki/Linux_kernel', snippet: 'Linux 6.12 LTS release', source: 'Wikipedia' },
+        {
+          title: 'Linux kernel — Wikipedia',
+          url: 'https://en.wikipedia.org/wiki/Linux_kernel',
+          snippet: 'Linux 6.12 LTS release',
+          source: 'Wikipedia',
+        },
       ],
       llm_telemetry: {
         active_model: 'Qwen/Qwen2.5-7B-Instruct-GGUF',
@@ -700,7 +750,8 @@ describe('Kib — Multi-Modal Local RAG & Visual Search Frontend Suite', () => {
     // 3. Test sending message with thinking tags and code blocks
     vi.spyOn(api, 'post').mockResolvedValueOnce({
       status: 'ok',
-      reply: '<think>\nAnalyzing request and computing solution...\n</think>\nHere is the implementation:\n```rust\nfn main() {\n    println!("Hello Kiboto!");\n}\n```\nSources:\n[1] Rust Documentation\n',
+      reply:
+        '<think>\nAnalyzing request and computing solution...\n</think>\nHere is the implementation:\n```rust\nfn main() {\n    println!("Hello Kiboto!");\n}\n```\nSources:\n[1] Rust Documentation\n',
       active_model: 'DeepSeek-R1-Distill-Qwen-1.5B',
       elapsed_ms: 35.2,
       tools_called: [],
@@ -811,10 +862,12 @@ describe('Kib — Multi-Modal Local RAG & Visual Search Frontend Suite', () => {
 
     let confirmCb = null;
     let confirmOpts = null;
-    const confirmSpy = vi.spyOn(toast, 'showConfirmToast').mockImplementation((title, desc, onConfirm, onCancel, opts) => {
-      confirmCb = onConfirm;
-      confirmOpts = opts;
-    });
+    const confirmSpy = vi
+      .spyOn(toast, 'showConfirmToast')
+      .mockImplementation((title, desc, onConfirm, onCancel, opts) => {
+        confirmCb = onConfirm;
+        confirmOpts = opts;
+      });
 
     const postSpy = vi.spyOn(api, 'post').mockResolvedValue({
       status: 'ok',
@@ -924,7 +977,9 @@ describe('Kib — Multi-Modal Local RAG & Visual Search Frontend Suite', () => {
     expect(mrlSelect.value).toBe('512');
 
     // 3. Test changing embedding model & MRL dim: asked first, then one step (AI finding 23)
-    const askSpy = vi.spyOn(toast, 'showConfirmToast').mockImplementation((title, desc, onConfirm) => { onConfirm(); });
+    const askSpy = vi.spyOn(toast, 'showConfirmToast').mockImplementation((title, desc, onConfirm) => {
+      onConfirm();
+    });
     embSelect.value = 'nomic-embed-text';
     embSelect.dispatchEvent(new Event('change'));
     expect(askSpy.mock.calls.at(-1)[0]).toBe('Change the model and rebuild the index?');

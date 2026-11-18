@@ -46,9 +46,16 @@ export function compressionBody(name, info) {
   const ratio = ratioText(info.ratio);
   if (ratio) line(ratio);
   if (info.note) line(info.note, 'muted');
-  if (info.asleep) line(t('compress.asleep', 'The disk is asleep, so this shows the pool setting; the folder\'s own setting is read when it is awake.'), 'muted');
+  if (info.asleep)
+    line(
+      t(
+        'compress.asleep',
+        "The disk is asleep, so this shows the pool setting; the folder's own setting is read when it is awake."
+      ),
+      'muted'
+    );
   if (!info.supported || info.read_only) {
-    line(info.reason || t('compress.unsupported', 'This share\'s filesystem has no compression.'), 'muted');
+    line(info.reason || t('compress.unsupported', "This share's filesystem has no compression."), 'muted');
     return body;
   }
   const form = document.createElement('form');
@@ -68,7 +75,10 @@ export function compressionBody(name, info) {
   form.appendChild(label);
   const hint = document.createElement('p');
   hint.className = 'muted';
-  hint.textContent = t('compress.hint', 'Files already there keep how they are stored; new and changed files use the new setting. zstd is a good default.');
+  hint.textContent = t(
+    'compress.hint',
+    'Files already there keep how they are stored; new and changed files use the new setting. zstd is a good default.'
+  );
   form.appendChild(hint);
   const save = document.createElement('button');
   save.type = 'submit';
@@ -89,7 +99,8 @@ function dialogHost() {
     host.id = 'share-compression';
     host.className = 'smart-modal-backdrop';
     host.style.zIndex = '10020';
-    host.innerHTML = /** @type {any} */ (html`<div class="smart-modal-window" role="dialog" aria-modal="true" aria-labelledby="share-compression-title">
+    host.innerHTML = /** @type {any} */ (
+      html`<div class="smart-modal-window" role="dialog" aria-modal="true" aria-labelledby="share-compression-title">
       <div class="smart-modal-header">
         <span class="smart-modal-title" id="share-compression-title"></span>
         <div class="os-window-controls">
@@ -97,7 +108,8 @@ function dialogHost() {
         </div>
       </div>
       <div class="smart-modal-body"></div>
-    </div>`);
+    </div>`
+    );
     document.body.appendChild(host);
     const close = () => {
       host.classList.remove('open');
@@ -123,7 +135,9 @@ export function trapKeys(host, e, close) {
     return;
   }
   if (e.key !== 'Tab') return;
-  const items = [...host.querySelectorAll('button, select, input, [tabindex]:not([tabindex="-1"])')].filter((n) => !n.disabled);
+  const items = [...host.querySelectorAll('button, select, input, [tabindex]:not([tabindex="-1"])')].filter(
+    (n) => !n.disabled
+  );
   if (!items.length) return;
   const first = items[0];
   const last = items[items.length - 1];
@@ -156,7 +170,10 @@ export async function openShareCompression(name) {
       const value = /** @type {HTMLSelectElement} */ (form.querySelector('select[name="value"]')).value;
       try {
         render(await api.put(url, { value }));
-        showToast(t('compress.saved', 'Compression for {name} is now {value}.', { name, value: describeValue(value) }), 'success');
+        showToast(
+          t('compress.saved', 'Compression for {name} is now {value}.', { name, value: describeValue(value) }),
+          'success'
+        );
       } catch (err) {
         showToast(err.message || String(err), 'error');
       }

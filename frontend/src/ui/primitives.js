@@ -24,7 +24,17 @@ function icon(name) {
   return name ? html`<svg class="ic" aria-hidden="true"><use href="#i-${name}"/></svg>` : '';
 }
 
-export function uiButton({ label = '', variant = '', small = false, block = false, iconName = '', type = 'button', id, i18n, extra } = {}) {
+export function uiButton({
+  label = '',
+  variant = '',
+  small = false,
+  block = false,
+  iconName = '',
+  type = 'button',
+  id,
+  i18n,
+  extra,
+} = {}) {
   const cls = ['btn-pill-toggle'];
   if (VARIANTS.has(variant)) cls.push(`is-${variant}`);
   if (small) cls.push('is-small');

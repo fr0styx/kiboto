@@ -24,7 +24,10 @@ let _storageRoot = '/mnt/user/appdata'; // until the server says where this host
 function portBusy(port, check) {
   const p = escapeHtml(String(port));
   return check.in_use_by
-    ? t('dk.port_busy_by', 'Port {port} is already in use by {name}. Choose a free port before installing.', { port: p, name: escapeHtml(check.in_use_by) })
+    ? t('dk.port_busy_by', 'Port {port} is already in use by {name}. Choose a free port before installing.', {
+        port: p,
+        name: escapeHtml(check.in_use_by),
+      })
     : t('dk.port_busy', 'Port {port} is already in use. Choose a free port before installing.', { port: p });
 }
 
@@ -39,10 +42,18 @@ export function showDeployCredentials(successBox, data, hostPort) {
   if (!rows.length && !c.note) return;
   const box = document.createElement('div');
   box.className = 'adm-credentials';
-  box.innerHTML = `<div class="adm-cred-title">🔑 ${escapeHtml(t('catalog.cred_title', 'Sign-in details'))}</div>` +
-    rows.map(([label, value], i) => `<div class="adm-cred-row"><span class="adm-cred-label">${escapeHtml(label)}</span><code class="adm-cred-val">${escapeHtml(value)}</code><button type="button" class="adm-cred-copy" data-i="${i}" aria-label="${escapeHtml(t('catalog.copy', 'Copy'))} ${escapeHtml(label)}">${escapeHtml(t('catalog.copy', 'Copy'))}</button></div>`).join('') +
+  box.innerHTML =
+    `<div class="adm-cred-title">🔑 ${escapeHtml(t('catalog.cred_title', 'Sign-in details'))}</div>` +
+    rows
+      .map(
+        ([label, value], i) =>
+          `<div class="adm-cred-row"><span class="adm-cred-label">${escapeHtml(label)}</span><code class="adm-cred-val">${escapeHtml(value)}</code><button type="button" class="adm-cred-copy" data-i="${i}" aria-label="${escapeHtml(t('catalog.copy', 'Copy'))} ${escapeHtml(label)}">${escapeHtml(t('catalog.copy', 'Copy'))}</button></div>`
+      )
+      .join('') +
     (c.note ? `<div class="adm-cred-note">${escapeHtml(c.note)}</div>` : '') +
-    (c.password && /[A-Za-z0-9_-]{20,}/.test(c.password) ? `<div class="adm-cred-note">${escapeHtml(t('catalog.cred_saved', 'Saved in a hidden file in the app\'s folder, so a reinstall keeps it.'))}</div>` : '');
+    (c.password && /[A-Za-z0-9_-]{20,}/.test(c.password)
+      ? `<div class="adm-cred-note">${escapeHtml(t('catalog.cred_saved', "Saved in a hidden file in the app's folder, so a reinstall keeps it."))}</div>`
+      : '');
   box.addEventListener('click', async (e) => {
     const btn = e.target instanceof Element ? e.target.closest('.adm-cred-copy') : null;
     if (!btn) return;
@@ -61,8 +72,15 @@ export function portTakenHtml(defaultPort, suggestedPort, inUseBy) {
   const advanced = document.getElementById('adm-advanced');
   if (advanced) advanced.open = true;
   const msg = inUseBy
-    ? t('catalog.install_port_taken_by', 'Port {port} is already used by {app}, so this app uses port {free}.', { port: defaultPort, app: inUseBy, free: suggestedPort })
-    : t('catalog.install_port_taken', 'Port {port} is already in use, so this app uses port {free}.', { port: defaultPort, free: suggestedPort });
+    ? t('catalog.install_port_taken_by', 'Port {port} is already used by {app}, so this app uses port {free}.', {
+        port: defaultPort,
+        app: inUseBy,
+        free: suggestedPort,
+      })
+    : t('catalog.install_port_taken', 'Port {port} is already in use, so this app uses port {free}.', {
+        port: defaultPort,
+        free: suggestedPort,
+      });
   return `<span style="color:var(--warn, #f5a623); font-weight:bold;">⚠️</span> ${escapeHtml(msg)}`;
 }
 
@@ -204,9 +222,13 @@ export async function openAppDeployModal(appId) {
       makeDraggable(win, header, 'app-deploy');
     }
     if (win) {
-      win.addEventListener('pointerdown', () => {
-        bringToFront(win);
-      }, { capture: true });
+      win.addEventListener(
+        'pointerdown',
+        () => {
+          bringToFront(win);
+        },
+        { capture: true }
+      );
     }
 
     const minBtn = document.getElementById('adm-min-btn');
@@ -233,7 +255,14 @@ export async function openAppDeployModal(appId) {
           modal.classList.add('window-minimized');
           modal.style.display = 'none';
         }
-        showToast(t('toast.deploying_in_background_click_dock_icon', '{activeAppId} is still installing. Its window is in the dock.', { activeAppId: modal._activeAppId || 'app' }), 'info');
+        showToast(
+          t(
+            'toast.deploying_in_background_click_dock_icon',
+            '{activeAppId} is still installing. Its window is in the dock.',
+            { activeAppId: modal._activeAppId || 'app' }
+          ),
+          'info'
+        );
       } else {
         if (modal._close) modal._close();
       }
@@ -249,7 +278,10 @@ export async function openAppDeployModal(appId) {
         if (modal._isDeploying) {
           if (DockManager) DockManager.minimize('app-deploy');
           else modal.classList.add('window-minimized');
-          showToast(t('toast.deploying_in_background_reopen_from_dock', `Deploying in background. Reopen from Dock anytime.`), 'info');
+          showToast(
+            t('toast.deploying_in_background_reopen_from_dock', `Deploying in background. Reopen from Dock anytime.`),
+            'info'
+          );
         } else if (modal._close) {
           modal._close();
         }
@@ -291,7 +323,13 @@ export async function openAppDeployModal(appId) {
   // Register in DockManager
   if (DockManager) {
     if (!DockManager.windows['app-deploy']) {
-      DockManager.register('app-deploy', modal, '#i-chip', t('catalog.install_title', 'Install {name}', { name: appId }), false);
+      DockManager.register(
+        'app-deploy',
+        modal,
+        '#i-chip',
+        t('catalog.install_title', 'Install {name}', { name: appId }),
+        false
+      );
     } else {
       DockManager.windows['app-deploy'].title = t('catalog.install_title', 'Install {name}', { name: appId });
       DockManager.restore('app-deploy');
@@ -330,14 +368,14 @@ export async function openAppDeployModal(appId) {
   Promise.resolve()
     .then(() => api.get('/api/docker/catalog/defaults'))
     .then(
-    (d) => {
-      if (!d || !d.storage_root) return;
-      const box = /** @type {HTMLInputElement | null} */ (storageInput);
-      if (box && box.value === _storageRoot) box.value = d.storage_root;
-      _storageRoot = d.storage_root;
-    },
-    () => {},
-  );
+      (d) => {
+        if (!d || !d.storage_root) return;
+        const box = /** @type {HTMLInputElement | null} */ (storageInput);
+        if (box && box.value === _storageRoot) box.value = d.storage_root;
+        _storageRoot = d.storage_root;
+      },
+      () => {}
+    );
   const composePre = document.getElementById('adm-compose-pre');
   const shareMount = document.getElementById('adm-share-folders');
   const title = document.getElementById('adm-title');
@@ -376,7 +414,12 @@ export async function openAppDeployModal(appId) {
   title.textContent = t('catalog.install_title', 'Install {name}', { name: appId });
   const advanced = document.getElementById('adm-advanced');
   if (advanced) advanced.open = false;
-  banner.replaceChildren(Object.assign(document.createElement('span'), { className: 'muted', textContent: t('catalog.checking', 'Checking the ports and apps already here...') }));
+  banner.replaceChildren(
+    Object.assign(document.createElement('span'), {
+      className: 'muted',
+      textContent: t('catalog.checking', 'Checking the ports and apps already here...'),
+    })
+  );
   banner.style.background = 'rgba(255,255,255,0.04)';
   banner.style.border = '1px solid rgba(255,255,255,0.08)';
 
@@ -386,18 +429,24 @@ export async function openAppDeployModal(appId) {
     suggestedPort = resolveData.suggested_port || defaultPort;
     existingContainerInfo = resolveData.existing_container;
     suggestedContainerName = resolveData.suggested_container_name || appId;
-    defaultContainerName = (existingContainerInfo && existingContainerInfo.name) ? existingContainerInfo.name : appId;
+    defaultContainerName = existingContainerInfo && existingContainerInfo.name ? existingContainerInfo.name : appId;
 
     if (existingContainerInfo) {
       if (existingBox) existingBox.style.display = 'flex';
       const isRunning = existingContainerInfo.state === 'running';
       if (existingBadge) {
-        existingBadge.textContent = isRunning ? t('catalog.state_running', 'Running') : t('catalog.state_stopped', 'Stopped');
+        existingBadge.textContent = isRunning
+          ? t('catalog.state_running', 'Running')
+          : t('catalog.state_stopped', 'Stopped');
         existingBadge.style.color = isRunning ? 'var(--ok2, #33cdb8)' : 'var(--muted)';
         existingBadge.style.background = isRunning ? 'rgba(51,205,184,0.15)' : 'rgba(255,255,255,0.08)';
       }
       if (existingDesc) {
-        existingDesc.textContent = t('catalog.existing_desc', '{name} is already installed. Replace it, or install another copy next to it?', { name: existingContainerInfo.name }); // a name is text, never HTML
+        existingDesc.textContent = t(
+          'catalog.existing_desc',
+          '{name} is already installed. Replace it, or install another copy next to it?',
+          { name: existingContainerInfo.name }
+        ); // a name is text, never HTML
       }
 
       // Default to Deploy Alongside
@@ -431,7 +480,12 @@ export async function openAppDeployModal(appId) {
   } catch (e) {
     if (nameInput) nameInput.value = appId;
     if (portInput) portInput.value = 8080;
-    banner.replaceChildren(Object.assign(document.createElement('span'), { className: 'muted', textContent: t('catalog.port_default', 'Using the usual port.') }));
+    banner.replaceChildren(
+      Object.assign(document.createElement('span'), {
+        className: 'muted',
+        textContent: t('catalog.port_default', 'Using the usual port.'),
+      })
+    );
   }
 
   function selectReplaceMode() {
@@ -584,10 +638,10 @@ export async function openAppDeployModal(appId) {
       const check = await api.get(`/api/docker/check_port?port=${val}&proto=tcp`);
       if (check && check.available === false) {
         const cName = nameInput ? nameInput.value.trim() : appId;
-        const isOccupiedByTarget = replaceExisting && check.in_use_by && (
-          check.in_use_by === `container '${cName}'` ||
-          check.in_use_by.includes(cName)
-        );
+        const isOccupiedByTarget =
+          replaceExisting &&
+          check.in_use_by &&
+          (check.in_use_by === `container '${cName}'` || check.in_use_by.includes(cName));
 
         if (isOccupiedByTarget) {
           banner.style.background = 'rgba(235, 87, 87, 0.12)';
@@ -669,7 +723,10 @@ export async function openAppDeployModal(appId) {
   document.getElementById('adm-copy-btn').onclick = () => {
     copyTextToClipboard(composePre.textContent).then((ok) => {
       if (ok) {
-        showToast(t('toast.docker_compose_yaml_copied_to_clipboard', 'Docker Compose YAML copied to clipboard!'), 'success');
+        showToast(
+          t('toast.docker_compose_yaml_copied_to_clipboard', 'Docker Compose YAML copied to clipboard!'),
+          'success'
+        );
       } else {
         showToast(t('toast.failed_to_copy_to_clipboard', 'Failed to copy to clipboard'), 'warn');
       }
@@ -734,14 +791,17 @@ export async function openAppDeployModal(appId) {
         progressPct.textContent = t('preview.actual_size', '100%');
         progressPct.style.color = 'var(--ok2, #33cdb8)';
       }
-      if (progressTitle) progressTitle.textContent = `✓ ${t('dk.installed', '{app} is installed', { app: appId.toUpperCase() })}`;
+      if (progressTitle)
+        progressTitle.textContent = `✓ ${t('dk.installed', '{app} is installed', { app: appId.toUpperCase() })}`;
       if (progressSpinner) {
         progressSpinner.textContent = '✅';
         progressSpinner.style.animation = 'none';
       }
 
       if (successBox) successBox.style.display = 'flex';
-      const webUrl = data.webui_url ? data.webui_url.replace('[HOST]', window.location.hostname) : `http://${window.location.hostname}:${data.port || suggestedPort}`;
+      const webUrl = data.webui_url
+        ? data.webui_url.replace('[HOST]', window.location.hostname)
+        : `http://${window.location.hostname}:${data.port || suggestedPort}`;
       if (webuiBtn) {
         webuiBtn.href = webUrl;
         webuiBtn.textContent = `🌐 ${t('dk.open_webui', 'Open the web page (:{port})', { port: data.port || suggestedPort })} ↗`;
@@ -749,7 +809,14 @@ export async function openAppDeployModal(appId) {
       }
       showDeployCredentials(successBox, data, `${window.location.hostname}:${data.port || suggestedPort}`);
       if (data.setup_unfinished && data.setup_unfinished.length) {
-        showToast(t('catalog.setup_unfinished', 'Installed, but some set-up did not finish: {steps}. Open the app to finish it.', { steps: data.setup_unfinished.join(', ') }), 'warn');
+        showToast(
+          t(
+            'catalog.setup_unfinished',
+            'Installed, but some set-up did not finish: {steps}. Open the app to finish it.',
+            { steps: data.setup_unfinished.join(', ') }
+          ),
+          'warn'
+        );
       }
 
       if (closeBtn) {
@@ -764,16 +831,23 @@ export async function openAppDeployModal(appId) {
       modal._isDeploying = false;
 
       if (DockManager && DockManager.windows['app-deploy']) {
-        DockManager.windows['app-deploy'].title = `✓ ${t('dk.installed', '{app} is installed', { app: appId.toUpperCase() })}`;
+        DockManager.windows['app-deploy'].title =
+          `✓ ${t('dk.installed', '{app} is installed', { app: appId.toUpperCase() })}`;
         DockManager.render();
       }
-      if (modal.classList.contains('window-minimized') || (DockManager && DockManager.windows['app-deploy']?.minimized)) {
+      if (
+        modal.classList.contains('window-minimized') ||
+        (DockManager && DockManager.windows['app-deploy']?.minimized)
+      ) {
         showDockToast(`🚀 ${appId.toUpperCase()} stack deployed and running! Click to open.`, 'app-deploy');
       }
 
       ZettEventBus.emit('docker:containers:refresh'); // the Apps window reloads its list (SET-25)
 
-      showToast(t('toast.stack_deployed_and_running', '{appId} stack deployed and running!', { appId: appId }), 'success');
+      showToast(
+        t('toast.stack_deployed_and_running', '{appId} stack deployed and running!', { appId: appId }),
+        'success'
+      );
     } else if (data.step === 'error') {
       modal._isDeploying = false;
       if (progressSpinner) {
@@ -796,10 +870,14 @@ export async function openAppDeployModal(appId) {
       }
 
       if (DockManager && DockManager.windows['app-deploy']) {
-        DockManager.windows['app-deploy'].title = `❌ ${t('dk.install_failed', '{app} failed to install', { app: appId.toUpperCase() })}`;
+        DockManager.windows['app-deploy'].title =
+          `❌ ${t('dk.install_failed', '{app} failed to install', { app: appId.toUpperCase() })}`;
         DockManager.render();
       }
-      if (modal.classList.contains('window-minimized') || (DockManager && DockManager.windows['app-deploy']?.minimized)) {
+      if (
+        modal.classList.contains('window-minimized') ||
+        (DockManager && DockManager.windows['app-deploy']?.minimized)
+      ) {
         showDockToast(`❌ ${appId.toUpperCase()} deployment failed! Click to view logs.`, 'app-deploy');
       }
 
@@ -817,10 +895,14 @@ export async function openAppDeployModal(appId) {
       const sure = await new Promise((resolve) => {
         showConfirmToast(
           t('catalog.replace_title', 'Replace {name}', { name: cName }),
-          t('catalog.replace_msg', '{name} is stopped and replaced by a fresh install. Its settings folder stays, but anything kept only inside the app is lost.', { name: cName }),
+          t(
+            'catalog.replace_msg',
+            '{name} is stopped and replaced by a fresh install. Its settings folder stays, but anything kept only inside the app is lost.',
+            { name: cName }
+          ),
           () => resolve(true),
           () => resolve(false),
-          { destructive: true, allowHtml: false },
+          { destructive: true, allowHtml: false }
         );
       });
       if (!sure) return;
@@ -835,7 +917,14 @@ export async function openAppDeployModal(appId) {
           banner.style.border = '1px solid var(--warn, #f5a623)';
           if (nameInput) nameInput.style.borderColor = 'var(--warn, #f5a623)';
           banner.innerHTML = `<span style="color:var(--warn, #f5a623); font-weight:bold;">${ico('⚠️')} ${t('dk.name_used_lead', 'Name in use:')}</span> ${t('dk.name_used', 'A container named {name} already exists. Choose another name, or choose “Stop & replace”.', { name: bold(cName) })}`;
-          showToast(t('toast.container_already_exists_please_rename_or', 'Container \'{cName}\' already exists. Please rename or select Replace.', { cName: cName }), 'warn');
+          showToast(
+            t(
+              'toast.container_already_exists_please_rename_or',
+              "Container '{cName}' already exists. Please rename or select Replace.",
+              { cName: cName }
+            ),
+            'warn'
+          );
           return;
         }
       } catch (err) {}
@@ -848,7 +937,13 @@ export async function openAppDeployModal(appId) {
           banner.style.border = '1px solid var(--warn, #f5a623)';
           portInput.style.borderColor = 'var(--warn, #f5a623)';
           banner.innerHTML = `<span style="color:var(--warn, #f5a623); font-weight:bold;">${ico('⚠️')} ${t('dk.conflict_lead', 'Port in use:')}</span> ${portBusy(p, check)}`;
-          showToast(t('toast.port_is_already_in_use_please', 'Port {p} is already in use{inUse}. Please change the port.', { p: p, inUse: check.in_use_by ? ` (${check.in_use_by})` : '' }), 'warn');
+          showToast(
+            t('toast.port_is_already_in_use_please', 'Port {p} is already in use{inUse}. Please change the port.', {
+              p: p,
+              inUse: check.in_use_by ? ` (${check.in_use_by})` : '',
+            }),
+            'warn'
+          );
           return;
         }
       } catch (err) {}
@@ -874,7 +969,8 @@ export async function openAppDeployModal(appId) {
       progressPct.textContent = '0%';
       progressPct.style.color = 'var(--accent-cyan, #33cdb8)';
     }
-    if (progressTitle) progressTitle.textContent = t('catalog.installing_name', 'Installing {name}...', { name: cName });
+    if (progressTitle)
+      progressTitle.textContent = t('catalog.installing_name', 'Installing {name}...', { name: cName });
     if (progressStatus) {
       progressStatus.textContent = t('ui.connecting_to_docker_daemon', 'Connecting to the app service...');
       progressStatus.style.color = 'var(--muted)';
@@ -888,7 +984,9 @@ export async function openAppDeployModal(appId) {
     if (closeProgressBtn) closeProgressBtn.style.display = 'none';
     if (backConfigBtn) backConfigBtn.style.display = 'none';
 
-    logDeployLine(`Initiating deployment request for ${cName} (Port :${p}, Storage: ${s}, Replace: ${replaceExisting})...`);
+    logDeployLine(
+      `Initiating deployment request for ${cName} (Port :${p}, Storage: ${s}, Replace: ${replaceExisting})...`
+    );
 
     try {
       const response = await api.request(`/api/docker/catalog/${appId}/deploy`, {
@@ -987,10 +1085,19 @@ export function showStoppedApps(names) {
   const box = /** @type {HTMLInputElement | null} */ (document.getElementById('dpm-opt-containers'));
   const title = document.getElementById('dpm-opt-containers-title');
   const desc = document.getElementById('dpm-opt-containers-desc');
-  if (title) title.textContent = t('dk.p_containers_n', '{count, plural, one {Remove # stopped app} other {Remove # stopped apps}}', { count: names.length });
+  if (title)
+    title.textContent = t(
+      'dk.p_containers_n',
+      '{count, plural, one {Remove # stopped app} other {Remove # stopped apps}}',
+      { count: names.length }
+    );
   if (desc) {
     desc.textContent = names.length
-      ? t('dk.p_containers_names', 'These are not running and would be removed, with their set-up: {names}. Their folders stay. Leave this off unless you know every one of them.', { names: names.join(', ') })
+      ? t(
+          'dk.p_containers_names',
+          'These are not running and would be removed, with their set-up: {names}. Their folders stay. Leave this off unless you know every one of them.',
+          { names: names.join(', ') }
+        )
       : t('dk.p_containers_none', 'Every app is running: nothing to remove.');
   }
   if (box) {
@@ -1007,10 +1114,17 @@ export function showStoppedApps(names) {
 export function askRemoveStopped(names) {
   return new Promise((resolve) => {
     showDangerConfirm(
-      t('dk.remove_stopped_title', '{count, plural, one {Remove # stopped app?} other {Remove # stopped apps?}}', { count: names.length }),
-      t('dk.remove_stopped_msg', 'These apps and their set-up are removed for good: {names}. Their folders stay where they are. An app you stopped on purpose is gone as well.', { names: names.join(', ') }),
-      () => resolve(true), () => resolve(false),
-      { okText: t('dk.remove_stopped_ok', 'Remove them') },
+      t('dk.remove_stopped_title', '{count, plural, one {Remove # stopped app?} other {Remove # stopped apps?}}', {
+        count: names.length,
+      }),
+      t(
+        'dk.remove_stopped_msg',
+        'These apps and their set-up are removed for good: {names}. Their folders stay where they are. An app you stopped on purpose is gone as well.',
+        { names: names.join(', ') }
+      ),
+      () => resolve(true),
+      () => resolve(false),
+      { okText: t('dk.remove_stopped_ok', 'Remove them') }
     );
   });
 }
@@ -1119,9 +1233,17 @@ export async function openDockerPruneModal() {
       modal.classList.remove('open');
       modal.style.display = 'none';
     };
-    document.getElementById('dpm-close-btn').onclick = (e) => { e.preventDefault(); closeModal(); };
-    document.getElementById('dpm-cancel-btn').onclick = (e) => { e.preventDefault(); closeModal(); };
-    modal.onclick = (e) => { if (e.target === modal) closeModal(); };
+    document.getElementById('dpm-close-btn').onclick = (e) => {
+      e.preventDefault();
+      closeModal();
+    };
+    document.getElementById('dpm-cancel-btn').onclick = (e) => {
+      e.preventDefault();
+      closeModal();
+    };
+    modal.onclick = (e) => {
+      if (e.target === modal) closeModal();
+    };
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && modal.classList.contains('open')) closeModal();
     });
@@ -1154,10 +1276,22 @@ export async function openDockerPruneModal() {
     const volEl = document.getElementById('dpm-df-volumes');
     const recEl = document.getElementById('dpm-df-reclaimable');
 
-    if (imgEl && df.images) imgEl.textContent = t('dkd.df_images', '{total} ({unused} unused)', { total: df.images.total_count, unused: df.images.unused_count });
-    if (cntEl && df.containers) cntEl.textContent = t('dkd.df_containers', '{total} ({stopped} stopped)', { total: df.containers.total_count, stopped: df.containers.stopped_count });
+    if (imgEl && df.images)
+      imgEl.textContent = t('dkd.df_images', '{total} ({unused} unused)', {
+        total: df.images.total_count,
+        unused: df.images.unused_count,
+      });
+    if (cntEl && df.containers)
+      cntEl.textContent = t('dkd.df_containers', '{total} ({stopped} stopped)', {
+        total: df.containers.total_count,
+        stopped: df.containers.stopped_count,
+      });
     showStoppedApps((df.containers && df.containers.stopped_names) || []);
-    if (volEl && df.volumes) volEl.textContent = t('dkd.df_images', '{total} ({unused} unused)', { total: df.volumes.total_count, unused: df.volumes.unused_count });
+    if (volEl && df.volumes)
+      volEl.textContent = t('dkd.df_images', '{total} ({unused} unused)', {
+        total: df.volumes.total_count,
+        unused: df.volumes.unused_count,
+      });
     if (recEl) recEl.textContent = df.total_reclaimable_human || '0 B';
   } catch (err) {
     // the tiles stayed on "Loading…" for ever next to an empty bar (SET-14)
@@ -1234,7 +1368,10 @@ function setPruneIdle() {
     cancel.onclick = (e) => {
       e.preventDefault();
       const m = document.getElementById('docker-prune-modal-overlay');
-      if (m) { m.classList.remove('open'); m.style.display = 'none'; }
+      if (m) {
+        m.classList.remove('open');
+        m.style.display = 'none';
+      }
     };
   }
   if (opts) opts.inert = false;
@@ -1256,30 +1393,45 @@ export function renderPruneJob(job) {
   const msgEl = document.getElementById('dpm-progress-msg');
   if (msgEl) {
     let msg = job.step ? `${labels[job.step] || job.step}…` : '';
-    if (job.step === 'images' && job.images_phase === 'before') msg = t('prune.measuring_before', 'Measuring what the images use…');
-    else if (job.step === 'images' && job.images_phase === 'sweep') msg = t('prune.sweeping', 'Clearing the layers those images used…');
-    else if (job.step === 'images' && job.images_phase === 'after') msg = t('prune.measuring_after', 'Measuring the space freed…');
+    if (job.step === 'images' && job.images_phase === 'before')
+      msg = t('prune.measuring_before', 'Measuring what the images use…');
+    else if (job.step === 'images' && job.images_phase === 'sweep')
+      msg = t('prune.sweeping', 'Clearing the layers those images used…');
+    else if (job.step === 'images' && job.images_phase === 'after')
+      msg = t('prune.measuring_after', 'Measuring the space freed…');
     else if (job.step === 'images' && job.images_total) {
-      msg = t('prune.images_progress', 'Removing image {done} of {total}', { done: Math.min(job.images_done + 1, job.images_total), total: job.images_total });
+      msg = t('prune.images_progress', 'Removing image {done} of {total}', {
+        done: Math.min(job.images_done + 1, job.images_total),
+        total: job.images_total,
+      });
     }
     if (job.state !== 'running') msg = '';
     msgEl.textContent = msg;
   }
   const list = document.getElementById('dpm-steps');
   if (list) {
-    list.replaceChildren(...(job.steps || []).map((s) => {
-      const li = document.createElement('li');
-      li.className = `dpm-step is-${s.state}`;
-      const icon = Object.assign(document.createElement('span'), { className: 'dpm-step-icon', textContent: PRUNE_STEP_ICONS[s.state] || '○' });
-      icon.setAttribute('aria-hidden', 'true');
-      const name = Object.assign(document.createElement('span'), { textContent: labels[s.key] || s.key });
-      let detail = s.detail || '';
-      if (s.key === 'images' && s.state === 'running' && job.images_total) detail = `${job.images_done} / ${job.images_total}`;
-      if (s.freed_bytes > 0) detail = `${detail}${detail ? ' · ' : ''}${formatSize(s.freed_bytes)}`;
-      const det = Object.assign(document.createElement('span'), { className: 'kb-push-end kb-muted', textContent: detail });
-      li.append(icon, name, det);
-      return li;
-    }));
+    list.replaceChildren(
+      ...(job.steps || []).map((s) => {
+        const li = document.createElement('li');
+        li.className = `dpm-step is-${s.state}`;
+        const icon = Object.assign(document.createElement('span'), {
+          className: 'dpm-step-icon',
+          textContent: PRUNE_STEP_ICONS[s.state] || '○',
+        });
+        icon.setAttribute('aria-hidden', 'true');
+        const name = Object.assign(document.createElement('span'), { textContent: labels[s.key] || s.key });
+        let detail = s.detail || '';
+        if (s.key === 'images' && s.state === 'running' && job.images_total)
+          detail = `${job.images_done} / ${job.images_total}`;
+        if (s.freed_bytes > 0) detail = `${detail}${detail ? ' · ' : ''}${formatSize(s.freed_bytes)}`;
+        const det = Object.assign(document.createElement('span'), {
+          className: 'kb-push-end kb-muted',
+          textContent: detail,
+        });
+        li.append(icon, name, det);
+        return li;
+      })
+    );
   }
   const freed = document.getElementById('dpm-freed');
   if (freed) freed.textContent = t('prune.freed', '{freed} freed so far', { freed: job.freed_human || '0 B' });
@@ -1296,7 +1448,11 @@ function followPruneJob(job) {
     cancel.onclick = async (e) => {
       e.preventDefault();
       cancel.disabled = true;
-      try { await api.post(`/api/docker/system/prune/jobs/${job.id}/cancel`, {}); } catch (err) { console.warn('Stop failed:', err); }
+      try {
+        await api.post(`/api/docker/system/prune/jobs/${job.id}/cancel`, {});
+      } catch (err) {
+        console.warn('Stop failed:', err);
+      }
       cancel.disabled = false;
     };
   }
@@ -1322,13 +1478,22 @@ function followPruneJob(job) {
 }
 
 async function finishPruneJob(job) {
-  if (_prunePollTimer) { clearInterval(_prunePollTimer); _prunePollTimer = null; }
+  if (_prunePollTimer) {
+    clearInterval(_prunePollTimer);
+    _prunePollTimer = null;
+  }
   renderPruneJob(job);
   const freed = job.freed_human || '0 B';
   if (job.state === 'cancelled') {
     showToast(t('prune.stopped', 'Cleanup stopped: {freed} freed so far.', { freed }), 'info');
   } else if (job.errors && job.errors.length) {
-    showToast(t('prune.done_errors', 'Cleanup finished with errors: {freed} freed. {errors}', { freed, errors: job.errors.join('; ') }), 'warning');
+    showToast(
+      t('prune.done_errors', 'Cleanup finished with errors: {freed} freed. {errors}', {
+        freed,
+        errors: job.errors.join('; '),
+      }),
+      'warning'
+    );
   } else {
     showToast(t('prune.done', 'Cleanup finished: {freed} freed.', { freed }), 'success');
   }

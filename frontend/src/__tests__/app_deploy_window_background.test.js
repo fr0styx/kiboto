@@ -26,7 +26,9 @@ describe('App Catalog Deployment Window - Background & Minimize Suite', () => {
         return { port: 3001, proto: 'tcp', available: true };
       }
       return {
-        apps: [{ id: 'uptime-kuma', name: 'Uptime Kuma', default_port: 3001, category: 'utilities', description: 'Monitor' }],
+        apps: [
+          { id: 'uptime-kuma', name: 'Uptime Kuma', default_port: 3001, category: 'utilities', description: 'Monitor' },
+        ],
       };
     });
     vi.spyOn(api, 'request').mockResolvedValue({
@@ -151,7 +153,9 @@ describe('App Catalog Deployment Window - Background & Minimize Suite', () => {
         return { port: 3002, proto: 'tcp', available: true, in_use_by: null };
       }
       return {
-        apps: [{ id: 'uptime-kuma', name: 'Uptime Kuma', default_port: 3001, category: 'utilities', description: 'Monitor' }],
+        apps: [
+          { id: 'uptime-kuma', name: 'Uptime Kuma', default_port: 3001, category: 'utilities', description: 'Monitor' },
+        ],
       };
     });
 
@@ -297,7 +301,9 @@ describe('App Catalog Deployment Window - Background & Minimize Suite', () => {
     expect(deployWin.classList.contains('active-window')).toBe(true);
 
     // Initial state: deployWin is in foreground
-    expect(parseInt(deployWin.style.zIndex || '0', 10)).toBeGreaterThanOrEqual(parseInt(mgmtWin.style.zIndex || '0', 10));
+    expect(parseInt(deployWin.style.zIndex || '0', 10)).toBeGreaterThanOrEqual(
+      parseInt(mgmtWin.style.zIndex || '0', 10)
+    );
 
     // User clicks anywhere inside Mission Control (#management-window)
     const mgmtEvent = new MouseEvent('pointerdown', { bubbles: true, cancelable: true });
@@ -331,4 +337,3 @@ describe('App Catalog Deployment Window - Background & Minimize Suite', () => {
     expect(deployWin.classList.contains('active-window')).toBe(true);
   });
 });
-

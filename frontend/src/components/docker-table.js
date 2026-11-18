@@ -106,9 +106,7 @@ export function buildContainerRowInner(c, currentHost, updateInfo = null) {
       );
     }
   }
-  const otherPorts = (c.ports || []).filter(
-    (p) => p.public_port && p.public_port !== c.primary_port
-  );
+  const otherPorts = (c.ports || []).filter((p) => p.public_port && p.public_port !== c.primary_port);
   if (otherPorts.length > 0) {
     const otherTags = otherPorts
       .slice(0, 3)
@@ -287,7 +285,8 @@ export function updateContainerRow(tr, c, currentHost, updateInfo = null) {
   const said = conditionView(c).why || c.status || '';
   if (statusText && statusText.textContent !== said) statusText.textContent = said;
   const condition = tr.querySelector('.docker-condition');
-  if (condition && condition.getAttribute('title') !== (c.status || '')) condition.setAttribute('title', c.status || '');
+  if (condition && condition.getAttribute('title') !== (c.status || ''))
+    condition.setAttribute('title', c.status || '');
 }
 
 /**
@@ -302,8 +301,12 @@ export function initSynchronizedTableScrollbars(tableWrapEl, topScrollEl, sticky
     return tableWrapEl._syncScrollbarsController;
   }
 
-  const topInner = topScrollEl ? topScrollEl.querySelector('.docker-table-top-scroll-inner') || topScrollEl.firstElementChild : null;
-  const stickyInner = stickyScrollEl ? stickyScrollEl.querySelector('.docker-table-sticky-scroll-inner') || stickyScrollEl.firstElementChild : null;
+  const topInner = topScrollEl
+    ? topScrollEl.querySelector('.docker-table-top-scroll-inner') || topScrollEl.firstElementChild
+    : null;
+  const stickyInner = stickyScrollEl
+    ? stickyScrollEl.querySelector('.docker-table-sticky-scroll-inner') || stickyScrollEl.firstElementChild
+    : null;
 
   let isSyncing = false;
   let rafId = null;
@@ -395,7 +398,6 @@ export function initSynchronizedTableScrollbars(tableWrapEl, topScrollEl, sticky
   return controller;
 }
 
-
 /**
  * Bulk start/stop/restart/delete for the selected containers, shared by Mission Control
  * and the Containers window (FE-12). `view` tells it how to redraw that view:
@@ -422,7 +424,11 @@ export async function runBulkContainerAction(action, view) {
     const names = selectedIds.map(containerName);
     showDangerConfirm(
       t('docker.bulk_delete_title', 'Delete {count, plural, one {# container} other {# containers}}', { count }),
-      t('docker.bulk_delete_confirm', 'Remove these apps: {names}? A copy of each app’s set-up and folders is kept under Backup first. Their folders stay where they are.', { names: names.join(', ') }),
+      t(
+        'docker.bulk_delete_confirm',
+        'Remove these apps: {names}? A copy of each app’s set-up and folders is kept under Backup first. Their folders stay where they are.',
+        { names: names.join(', ') }
+      ),
       () => _deleteEach(selectedIds, view),
       null,
       { okText: t('docker.bulk_delete_ok', 'Delete'), cancelText: t('common.cancel', 'Cancel') }
@@ -444,7 +450,9 @@ export async function runBulkContainerAction(action, view) {
 
 /** The name of an app in the table, for a question about a selection; its short id when it is not drawn. */
 export function containerName(cid) {
-  const btn = /** @type {HTMLElement | null} */ (document.querySelector(`.btn-container-act[data-id="${CSS.escape(cid)}"][data-name]`));
+  const btn = /** @type {HTMLElement | null} */ (
+    document.querySelector(`.btn-container-act[data-id="${CSS.escape(cid)}"][data-name]`)
+  );
   return btn?.dataset.name || String(cid).slice(0, 12);
 }
 
@@ -455,14 +463,25 @@ async function _deleteEach(selectedIds, view) {
   for (const cid of selectedIds) {
     const name = containerName(cid);
     try {
-      await api.delete(`/api/docker/containers/${encodeURIComponent(cid)}?force=true&remove_volumes=false&archive_data=true`, { confirmed: true });
+      await api.delete(
+        `/api/docker/containers/${encodeURIComponent(cid)}?force=true&remove_volumes=false&archive_data=true`,
+        { confirmed: true }
+      );
       done += 1;
     } catch (err) {
       failed.push(`${name}: ${err.message}`);
     }
   }
-  if (failed.length) showToast(t('docker.bulk_delete_some', '{done} removed. Not removed: {failed}', { done, failed: failed.join('; ') }), 'error');
-  else showToast(t('docker.bulk_delete_done', '{count, plural, one {# app removed.} other {# apps removed.}}', { count: done }), 'success');
+  if (failed.length)
+    showToast(
+      t('docker.bulk_delete_some', '{done} removed. Not removed: {failed}', { done, failed: failed.join('; ') }),
+      'error'
+    );
+  else
+    showToast(
+      t('docker.bulk_delete_done', '{count, plural, one {# app removed.} other {# apps removed.}}', { count: done }),
+      'success'
+    );
   clearSelectedContainers();
   await view.refresh();
   view.updateBar();

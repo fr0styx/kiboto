@@ -17,7 +17,8 @@ describe('phone home words', () => {
   });
 
   it('the weather card is drawn again in the new language', async () => {
-    document.body.innerHTML = '<div id="widget-weather"><span id="w-weather-city"></span><span id="w-weather-icon"></span><span id="w-weather-temp"></span><span id="w-weather-desc"></span><span id="w-weather-range"></span><span id="w-weather-details"></span></div>';
+    document.body.innerHTML =
+      '<div id="widget-weather"><span id="w-weather-city"></span><span id="w-weather-icon"></span><span id="w-weather-temp"></span><span id="w-weather-desc"></span><span id="w-weather-range"></span><span id="w-weather-details"></span></div>';
     renderWeatherUI({ code: 0, temp: 13, max: 15, min: 2, humidity: 46, wind: 9 });
     expect(document.getElementById('w-weather-desc').textContent).toBe('Clear Sky');
     await setLanguage('de');

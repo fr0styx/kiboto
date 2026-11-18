@@ -1,4 +1,5 @@
-import { fmHome,
+import {
+  fmHome,
   FmMarqueeController,
   FmSidebarTree,
   FmInspector,
@@ -11,7 +12,14 @@ import { escapeHtml, copyTextToClipboard } from '../utils.js';
 import { ZettEventBus } from '../event-bus.js';
 import { poolName } from './pool-names.js';
 import { fileKind, shownFolderName } from './file-kind.js';
-import { showToast, showConfirmToast, showDangerConfirm, showPromptToast, showBottomSheet, showActionToast } from '../toast.js';
+import {
+  showToast,
+  showConfirmToast,
+  showDangerConfirm,
+  showPromptToast,
+  showBottomSheet,
+  showActionToast,
+} from '../toast.js';
 import { t } from '../i18n.js';
 import { startingView, saveFilesView, visibleEntries, currentUser } from './fm-view-prefs.js';
 import { setIconLabel } from '../ui/primitives.js';
@@ -79,12 +87,17 @@ export function fsUploadUrl(dir, name) {
 }
 
 const SEL_ICONS = {
-  clear: '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.2" fill="none" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>',
-  share: '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>',
-  download: '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>',
-  restore: '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" aria-hidden="true"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>',
+  clear:
+    '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.2" fill="none" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>',
+  share:
+    '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>',
+  download:
+    '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>',
+  restore:
+    '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" aria-hidden="true"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>',
   move: '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path><polyline points="12 11 15 14 12 17"></polyline><line x1="8" y1="14" x2="15" y2="14"></line></svg>',
-  trash: '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" aria-hidden="true"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>',
+  trash:
+    '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" aria-hidden="true"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>',
 };
 
 /** A row in the Recycle Bin: put it back, or delete it for good. Nothing else applies to a
@@ -117,7 +130,6 @@ function selectionBarHtml(withIds) {
     </div>`;
 }
 
-
 /** What a delete asks: the file's own name for one item, the count for several. Items already
  * in a Recycle Bin are deleted for good, and the question says so. */
 /** What POST /api/fs/rename takes: the item and its new name. The page sent two paths
@@ -148,8 +160,14 @@ export function binConfirmText(paths, files = []) {
       : t('fm.confirm_delete_one', 'Move “{name}” to the Recycle Bin?', { name });
   }
   return inBin
-    ? t('fm.confirm_bulk_delete_permanent', "{count, plural, one {# item will be deleted for good. This can't be undone.} other {# items will be deleted for good. This can't be undone.}}", { count: paths.length })
-    : t('fm.confirm_bulk_delete', 'Move {count, plural, one {# item} other {# items}} to the Recycle Bin?', { count: paths.length });
+    ? t(
+        'fm.confirm_bulk_delete_permanent',
+        "{count, plural, one {# item will be deleted for good. This can't be undone.} other {# items will be deleted for good. This can't be undone.}}",
+        { count: paths.length }
+      )
+    : t('fm.confirm_bulk_delete', 'Move {count, plural, one {# item} other {# items}} to the Recycle Bin?', {
+        count: paths.length,
+      });
 }
 
 export class FileManagerWindow {
@@ -157,7 +175,7 @@ export class FileManagerWindow {
     this.id = id;
     this.dockId = dockId;
     this.isPrimary = isPrimary;
-    this.currentPath = initialPath || (isPrimary ? (localStorage.getItem('kiboto_fm_last_path') || fmHome()) : fmHome());
+    this.currentPath = initialPath || (isPrimary ? localStorage.getItem('kiboto_fm_last_path') || fmHome() : fmHome());
     // view, sort and hidden files follow the person (SET-28 Files 4)
     const start = startingView();
     this.viewMode = start.view;
@@ -232,9 +250,7 @@ export class FileManagerWindow {
 
   isOpen() {
     return Boolean(
-      this.windowEl &&
-      this.windowEl.style.display !== 'none' &&
-      !this.windowEl.classList.contains('window-minimized')
+      this.windowEl && this.windowEl.style.display !== 'none' && !this.windowEl.classList.contains('window-minimized')
     );
   }
 
@@ -507,7 +523,14 @@ export class FileManagerWindow {
       if (!this.windowEl.querySelector('.fm-locations-btn')) {
         const navGrp = this.windowEl.querySelector('.fm-nav-btn-group');
         if (navGrp) {
-          navGrp.insertAdjacentHTML('beforeend', '<button type="button" class="fm-tool-btn fm-locations-btn" title="' + t('fm.quick_locations', 'Quick Locations') + '" aria-label="' + t('fm.quick_locations', 'Quick Locations') + '" aria-haspopup="menu" aria-expanded="false">📍</button>');
+          navGrp.insertAdjacentHTML(
+            'beforeend',
+            '<button type="button" class="fm-tool-btn fm-locations-btn" title="' +
+              t('fm.quick_locations', 'Quick Locations') +
+              '" aria-label="' +
+              t('fm.quick_locations', 'Quick Locations') +
+              '" aria-haspopup="menu" aria-expanded="false">📍</button>'
+          );
         }
       }
       if (!this.windowEl.querySelector('.fm-sidebar-toggle')) {
@@ -535,10 +558,20 @@ export class FileManagerWindow {
       if (contentEl) {
         contentEl.style.position = 'relative';
         if (!contentEl.querySelector('.fm-file-upload-input')) {
-          contentEl.insertAdjacentHTML('beforeend', '<input type="file" class="fm-file-upload-input" multiple style="display: none;" />');
+          contentEl.insertAdjacentHTML(
+            'beforeend',
+            '<input type="file" class="fm-file-upload-input" multiple style="display: none;" />'
+          );
         }
         if (!contentEl.querySelector('.fm-mobile-fab')) {
-          contentEl.insertAdjacentHTML('beforeend', '<button type="button" class="fm-mobile-fab" title="' + t('ui.quick_actions', 'Quick Actions') + '" aria-label="' + t('ui.quick_actions', 'Quick Actions') + '" style="display: none;">+</button>');
+          contentEl.insertAdjacentHTML(
+            'beforeend',
+            '<button type="button" class="fm-mobile-fab" title="' +
+              t('ui.quick_actions', 'Quick Actions') +
+              '" aria-label="' +
+              t('ui.quick_actions', 'Quick Actions') +
+              '" style="display: none;">+</button>'
+          );
         }
       }
     }
@@ -659,8 +692,10 @@ export class FileManagerWindow {
           const maxT = Math.max(56, window.innerHeight - (saved.height || 300) - 70);
           this.windowEl.style.left = Math.max(24, Math.min(maxL, saved.left)) + 'px';
           this.windowEl.style.top = Math.max(56, Math.min(maxT, saved.top)) + 'px';
-          if (saved.width) this.windowEl.style.width = Math.min(window.innerWidth - 30, Math.max(480, saved.width)) + 'px';
-          if (saved.height) this.windowEl.style.height = Math.min(window.innerHeight - 100, Math.max(320, saved.height)) + 'px';
+          if (saved.width)
+            this.windowEl.style.width = Math.min(window.innerWidth - 30, Math.max(480, saved.width)) + 'px';
+          if (saved.height)
+            this.windowEl.style.height = Math.min(window.innerHeight - 100, Math.max(320, saved.height)) + 'px';
         }
       }
     } catch (_) {}
@@ -692,12 +727,15 @@ export class FileManagerWindow {
     if (isCompact()) return;
     try {
       const rect = this.windowEl.getBoundingClientRect();
-      localStorage.setItem(BOUNDS_KEY, JSON.stringify({
-        left: Math.round(rect.left),
-        top: Math.round(rect.top),
-        width: Math.round(rect.width),
-        height: Math.round(rect.height),
-      }));
+      localStorage.setItem(
+        BOUNDS_KEY,
+        JSON.stringify({
+          left: Math.round(rect.left),
+          top: Math.round(rect.top),
+          width: Math.round(rect.width),
+          height: Math.round(rect.height),
+        })
+      );
     } catch (_) {}
   }
 
@@ -711,7 +749,9 @@ export class FileManagerWindow {
       _activeFmInstance = this;
       this.windowEl.classList.add('active-window');
       document.querySelectorAll('.chassis-hero-box').forEach((el) => {
-        try { el.blur(); } catch (_) {}
+        try {
+          el.blur();
+        } catch (_) {}
       });
       if (!e || !e.target || !e.target.closest('input:not([type="checkbox"]), textarea, select')) {
         this.ensureFocus();
@@ -735,7 +775,10 @@ export class FileManagerWindow {
     const closeBtn = this.windowEl.querySelector('.close-btn');
     if (closeBtn) {
       const onClose = (e) => {
-        if (e) { e.preventDefault(); e.stopPropagation(); }
+        if (e) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
         this.destroy();
       };
       closeBtn.addEventListener('click', onClose);
@@ -745,7 +788,10 @@ export class FileManagerWindow {
     const minBtn = this.windowEl.querySelector('.min-btn');
     if (minBtn) {
       const onMin = (e) => {
-        if (e) { e.preventDefault(); e.stopPropagation(); }
+        if (e) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
         this.minimize();
       };
       minBtn.addEventListener('click', onMin);
@@ -758,10 +804,13 @@ export class FileManagerWindow {
       const onMax = (e) => {
         if (e) {
           if (e.type === 'click' && Date.now() - lastTouchTs < 450) {
-            e.preventDefault(); e.stopPropagation(); return;
+            e.preventDefault();
+            e.stopPropagation();
+            return;
           }
           if (e.type === 'touchend') lastTouchTs = Date.now();
-          e.preventDefault(); e.stopPropagation();
+          e.preventDefault();
+          e.stopPropagation();
         }
         this.toggleMaximize();
       };
@@ -782,14 +831,20 @@ export class FileManagerWindow {
       const onUnraid = home === '/mnt/user';
       const places = [
         { icon: '📁', name: t('fm.loc_user_shares', 'User Shares'), path: home },
-        ...(onUnraid ? [{ icon: '⚙️', name: t('fm.loc_appdata', 'AppData'), path: '/mnt/user/appdata' }, { icon: '💾', name: t('fm.loc_boot', 'Boot Flash'), path: '/boot' }] : []),
+        ...(onUnraid
+          ? [
+              { icon: '⚙️', name: t('fm.loc_appdata', 'AppData'), path: '/mnt/user/appdata' },
+              { icon: '💾', name: t('fm.loc_boot', 'Boot Flash'), path: '/boot' },
+            ]
+          : []),
         { icon: '☁️', name: t('fm.loc_remotes', 'Cloud Remotes'), path: '/mnt/remotes' },
       ];
       (this.sidebarTree?.remotes || []).forEach((r) => {
         if (r.available !== false && r.is_mounted !== false) places.push({ icon: '☁️', name: r.name, path: r.path });
       });
       (this.sidebarTree?.pools || []).forEach((pool) => {
-        if (pool.available !== false) places.push({ icon: pool.type === 'disk' ? '💽' : '⚡', name: poolName(pool.name), path: pool.path });
+        if (pool.available !== false)
+          places.push({ icon: pool.type === 'disk' ? '💽' : '⚡', name: poolName(pool.name), path: pool.path });
       });
       places.push({ icon: '🗑️', name: t('dock.recycle_bin', 'Recycle Bin'), path: `${home}/.RecycleBin` });
       favorites().forEach((f) => places.push({ icon: '⭐', name: f.name, path: f.path, favorite: true }));
@@ -797,7 +852,9 @@ export class FileManagerWindow {
       const starred = isFavorite(here);
       places.push({
         icon: starred ? '☆' : '⭐',
-        name: starred ? t('fm.fav_remove_here', 'Remove this folder from Favorites') : t('fm.fav_add_here', 'Add this folder to Favorites'),
+        name: starred
+          ? t('fm.fav_remove_here', 'Remove this folder from Favorites')
+          : t('fm.fav_add_here', 'Add this folder to Favorites'),
         path: here,
         action: () => toggleFavorite(here),
       });
@@ -807,7 +864,11 @@ export class FileManagerWindow {
         showBottomSheet({
           title: t('fm.quick_locations', 'Quick Locations'),
           subtitle: t('fm.sheet_in', 'In {path}', { path: this.currentPath }),
-          items: places.map((pl) => ({ icon: pl.icon, label: pl.action ? pl.name : `${pl.name} (${pl.path})`, onClick: () => (pl.action ? pl.action() : this.loadPath(pl.path)) })),
+          items: places.map((pl) => ({
+            icon: pl.icon,
+            label: pl.action ? pl.name : `${pl.name} (${pl.path})`,
+            onClick: () => (pl.action ? pl.action() : this.loadPath(pl.path)),
+          })),
         });
         return;
       }
@@ -838,7 +899,9 @@ export class FileManagerWindow {
       if (_clipboard && _clipboard.items && _clipboard.items.length > 0) {
         fabItems.push({
           icon: '📋',
-          label: t('fm.sheet_paste', 'Paste here ({n, plural, one {# item} other {# items}})', { n: _clipboard.items.length }),
+          label: t('fm.sheet_paste', 'Paste here ({n, plural, one {# item} other {# items}})', {
+            n: _clipboard.items.length,
+          }),
           onClick: async () => {
             await executeTransferWithConflictCheck(_clipboard.items, this.currentPath, _clipboard.action || 'copy');
             if (_clipboard.action === 'move') _clipboard = { items: [], action: 'copy', sourceInstanceId: null };
@@ -902,7 +965,8 @@ export class FileManagerWindow {
       const promptMsg = t('fm.prompt_new_folder', 'Enter new folder name:');
       showPromptToast(t('fm.new_folder', 'New Folder'), promptMsg, '', (name) => {
         if (name) {
-          api.post('/api/mkdir', { path: this.currentPath + '/' + name })
+          api
+            .post('/api/mkdir', { path: this.currentPath + '/' + name })
             .then(() => {
               this.loadPath(this.currentPath);
               ZettEventBus.emit('fm:refresh');
@@ -985,9 +1049,13 @@ export class FileManagerWindow {
 
     // Viewport scrolling
     if (this.viewport) {
-      this.viewport.addEventListener('scroll', () => {
-        this.renderViewport();
-      }, { passive: true });
+      this.viewport.addEventListener(
+        'scroll',
+        () => {
+          this.renderViewport();
+        },
+        { passive: true }
+      );
 
       this.viewport.addEventListener('click', (e) => {
         if (this._suppressNextViewportClick) {
@@ -1025,7 +1093,10 @@ export class FileManagerWindow {
       // Viewport & Subfolder Unified Drag & Drop Engine
       this.viewport.addEventListener('dragover', (e) => {
         e.preventDefault();
-        e.dataTransfer.dropEffect = (e.altKey || window._activeDragPayload?.action === 'copy' || window.__zettActiveFmDrag?.action === 'copy') ? 'copy' : 'move';
+        e.dataTransfer.dropEffect =
+          e.altKey || window._activeDragPayload?.action === 'copy' || window.__zettActiveFmDrag?.action === 'copy'
+            ? 'copy'
+            : 'move';
 
         // Detect if hovering over a specific subfolder row or card
         const folderItem = e.target.closest('.fm-row, .fm-grid-card');
@@ -1075,7 +1146,7 @@ export class FileManagerWindow {
         const folderItem = hoveredFolder || e.target.closest('.fm-row, .fm-grid-card');
         const p = folderItem?.dataset?.path;
         const file = p ? this.fileList.find((f) => f.path === p) : null;
-        const destPath = (file && file.is_dir && file.name !== '..') ? file.path : this.currentPath;
+        const destPath = file && file.is_dir && file.name !== '..' ? file.path : this.currentPath;
 
         // Extract payload with full multi-source fallback
         let payload = window._activeDragPayload || window.__zettActiveFmDrag;
@@ -1089,7 +1160,10 @@ export class FileManagerWindow {
           try {
             const text = e.dataTransfer.getData('text/plain');
             if (text) {
-              const paths = text.split('\n').map((s) => s.trim()).filter(Boolean);
+              const paths = text
+                .split('\n')
+                .map((s) => s.trim())
+                .filter(Boolean);
               if (paths.length > 0 && paths[0].startsWith('/')) {
                 payload = { paths, action: e.altKey ? 'copy' : 'move' };
               }
@@ -1098,7 +1172,7 @@ export class FileManagerWindow {
         }
 
         if (payload && payload.paths && payload.paths.length > 0) {
-          const action = e.altKey ? 'copy' : (payload.action || 'move');
+          const action = e.altKey ? 'copy' : payload.action || 'move';
           await executeTransferWithConflictCheck(payload.paths, destPath, action);
           window._activeDragPayload = null;
           window.__zettActiveFmDrag = null;
@@ -1125,7 +1199,13 @@ export class FileManagerWindow {
     if (this.list) {
       // Touch screens: a tap opens (like a phone's Files app); the mouse keeps
       // click-to-select and double-click-to-open.
-      this.list.addEventListener('pointerdown', (e) => { this._lastPointerType = e.pointerType; }, { passive: true });
+      this.list.addEventListener(
+        'pointerdown',
+        (e) => {
+          this._lastPointerType = e.pointerType;
+        },
+        { passive: true }
+      );
       this.list.addEventListener('click', (e) => {
         const actBtn = e.target.closest('.fm-act-btn');
         if (actBtn) {
@@ -1147,7 +1227,9 @@ export class FileManagerWindow {
         _activeFmInstance = this;
         this.windowEl.classList.add('active-window');
         document.querySelectorAll('.chassis-hero-box').forEach((el) => {
-          try { el.blur(); } catch (_) {}
+          try {
+            el.blur();
+          } catch (_) {}
         });
 
         const chk = e.target.closest('.fm-checkbox');
@@ -1179,7 +1261,11 @@ export class FileManagerWindow {
           const idx = this.fileList.findIndex((f) => f.path === p);
           this.lastSelectedIndex = idx;
           if (this.selectionAnchorIndex === -1) this.selectionAnchorIndex = idx;
-          if (chk) { try { chk.blur(); } catch (_) {} }
+          if (chk) {
+            try {
+              chk.blur();
+            } catch (_) {}
+          }
           this.ensureFocus();
           this.updateRowSelectionUI();
           this.updateSelectionToolbar();
@@ -1189,7 +1275,7 @@ export class FileManagerWindow {
         const idx = this.fileList.findIndex((f) => f.path === p);
         if (e.shiftKey) {
           if (this.selectionAnchorIndex === -1) {
-            this.selectionAnchorIndex = (this.lastSelectedIndex !== -1) ? this.lastSelectedIndex : idx;
+            this.selectionAnchorIndex = this.lastSelectedIndex !== -1 ? this.lastSelectedIndex : idx;
           }
           const start = Math.min(this.selectionAnchorIndex, idx);
           const end = Math.max(this.selectionAnchorIndex, idx);
@@ -1322,7 +1408,13 @@ export class FileManagerWindow {
       if (paths.length === 0) return;
       if (typeof window.openFolderBrowser !== 'function') {
         _clipboard = { items: paths, action: 'move', sourceInstanceId: this.id };
-        showToast(t('fm.cut_items_toast', `Selected ${paths.length} item(s) to move. Navigate to destination folder and click Paste.`), 'info');
+        showToast(
+          t(
+            'fm.cut_items_toast',
+            `Selected ${paths.length} item(s) to move. Navigate to destination folder and click Paste.`
+          ),
+          'info'
+        );
         return;
       }
       window.openFolderBrowser(this.currentPath, (dest) => {
@@ -1345,7 +1437,12 @@ export class FileManagerWindow {
         this.handleAction('download', paths[0], paths[0].split('/').pop());
         return;
       }
-      showToast(t('fm.downloading_items', 'Downloading {count, plural, one {# item} other {# items}}…', { count: paths.length }), 'info');
+      showToast(
+        t('fm.downloading_items', 'Downloading {count, plural, one {# item} other {# items}}…', {
+          count: paths.length,
+        }),
+        'info'
+      );
       const token = (auth && typeof auth.getToken === 'function' ? auth.getToken() : null) || '';
       const qs = paths.map((p) => `paths=${encodeURIComponent(p)}`).join('&');
       window.open(`/api/fs/download-zip?${qs}`, '_blank');
@@ -1369,7 +1466,7 @@ export class FileManagerWindow {
           if (f.name !== '..') this.selectedPaths.add(f.path);
         });
         this.lastSelectedIndex = this.fileList.length - 1;
-        this.selectionAnchorIndex = (this.fileList[0]?.name === '..') ? 1 : 0;
+        this.selectionAnchorIndex = this.fileList[0]?.name === '..' ? 1 : 0;
       } else {
         this.selectedPaths.clear();
         this.lastSelectedIndex = -1;
@@ -1400,16 +1497,18 @@ export class FileManagerWindow {
       this.windowEl &&
       this.windowEl.contains(document.activeElement) &&
       (document.activeElement.tagName === 'INPUT' ||
-       document.activeElement.tagName === 'TEXTAREA' ||
-       document.activeElement.tagName === 'SELECT' ||
-       document.activeElement.isContentEditable) &&
+        document.activeElement.tagName === 'TEXTAREA' ||
+        document.activeElement.tagName === 'SELECT' ||
+        document.activeElement.isContentEditable) &&
       document.activeElement.type !== 'checkbox' &&
       document.activeElement.type !== 'radio'
     ) {
       return;
     }
     document.querySelectorAll('.chassis-hero-box').forEach((el) => {
-      try { el.blur(); } catch (_) {}
+      try {
+        el.blur();
+      } catch (_) {}
     });
     if (this.viewport && typeof this.viewport.focus === 'function') {
       try {
@@ -1448,7 +1547,9 @@ export class FileManagerWindow {
 
     // Unfocus any desktop icon that was clicked
     document.querySelectorAll('.chassis-hero-box').forEach((el) => {
-      try { el.blur(); } catch (_) {}
+      try {
+        el.blur();
+      } catch (_) {}
     });
     this.ensureFocus();
     setTimeout(() => this.ensureFocus(), 40);
@@ -1495,15 +1596,21 @@ export class FileManagerWindow {
       this._crumbObserver = null;
     }
     if (this.abortController) {
-      try { this.abortController.abort(); } catch (_) {}
+      try {
+        this.abortController.abort();
+      } catch (_) {}
       this.abortController = null;
     }
     if (this.searchAbortController) {
-      try { this.searchAbortController.abort(); } catch (_) {}
+      try {
+        this.searchAbortController.abort();
+      } catch (_) {}
       this.searchAbortController = null;
     }
     if (this.resizeObserver) {
-      try { this.resizeObserver.disconnect(); } catch (_) {}
+      try {
+        this.resizeObserver.disconnect();
+      } catch (_) {}
       this.resizeObserver = null;
     }
     if (this._onSaveBounds) {
@@ -1583,7 +1690,7 @@ export class FileManagerWindow {
   updateNavButtons() {
     if (this.backBtn) this.backBtn.disabled = this.historyIndex <= 0;
     if (this.fwdBtn) this.fwdBtn.disabled = this.historyIndex >= this.history.length - 1;
-    if (this.upBtn) this.upBtn.disabled = (this.currentPath === '/' || this.currentPath === '');
+    if (this.upBtn) this.upBtn.disabled = this.currentPath === '/' || this.currentPath === '';
   }
 
   handleSearchInput(val) {
@@ -1631,26 +1738,50 @@ export class FileManagerWindow {
         this.fileList = items;
         this.isSearching = true;
         this.renderViewport();
-        showToast(t('fm.search_results', 'Found {count, plural, one {# item} other {# items}}', { count: items.length }), 'success');
+        showToast(
+          t('fm.search_results', 'Found {count, plural, one {# item} other {# items}}', { count: items.length }),
+          'success'
+        );
         if (aiRes?.degraded) {
-          showToast(t('ai.search_degraded', "The AI search model didn't answer, so these results match words only. Try again in a moment."), 'warning');
+          showToast(
+            t(
+              'ai.search_degraded',
+              "The AI search model didn't answer, so these results match words only. Try again in a moment."
+            ),
+            'warning'
+          );
         }
         return;
       }
       showToast(t('fm.searching', `Searching for "${q}"...`), 'info');
-      const res = await api.get(`/api/fs/search?path=${encodeURIComponent(this.currentPath)}&q=${encodeURIComponent(q)}&limit=200`, {
-        signal: this.searchAbortController.signal,
-      });
+      const res = await api.get(
+        `/api/fs/search?path=${encodeURIComponent(this.currentPath)}&q=${encodeURIComponent(q)}&limit=200`,
+        {
+          signal: this.searchAbortController.signal,
+        }
+      );
       if (res && Array.isArray(res.items)) {
         this.fileList = res.items;
         this.isSearching = true;
         this.renderViewport();
-        showToast(t('fm.search_results', 'Found {count, plural, one {# item} other {# items}}', { count: res.items.length }), 'success');
+        showToast(
+          t('fm.search_results', 'Found {count, plural, one {# item} other {# items}}', { count: res.items.length }),
+          'success'
+        );
         // PERF-25: a sleeping disk is searched through the AI index only, and a huge walk stops early
         if (res.partial === 'asleep') {
-          showToast(t('fm.search_partial_asleep', 'A disk here is asleep, so only files the AI index knows about are shown.'), 'info');
+          showToast(
+            t('fm.search_partial_asleep', 'A disk here is asleep, so only files the AI index knows about are shown.'),
+            'info'
+          );
         } else if (res.partial === 'capped') {
-          showToast(t('fm.search_partial_capped', 'This folder is very large, so the search stopped early. Search a smaller folder to see everything.'), 'info');
+          showToast(
+            t(
+              'fm.search_partial_capped',
+              'This folder is very large, so the search stopped early. Search a smaller folder to see everything.'
+            ),
+            'info'
+          );
         }
       }
     } catch (err) {
@@ -1707,7 +1838,7 @@ export class FileManagerWindow {
     }
     this.applyHidden();
     const spacer = /** @type {HTMLElement | null} */ (this.spacer);
-    if (spacer) spacer.style.height = (this.fileList.length * (this.viewMode === 'compact' ? 28 : ROW_HEIGHT)) + 'px';
+    if (spacer) spacer.style.height = this.fileList.length * (this.viewMode === 'compact' ? 28 : ROW_HEIGHT) + 'px';
     this.renderViewport();
   }
 
@@ -1718,7 +1849,9 @@ export class FileManagerWindow {
     note.hidden = this.showHidden || !this.hiddenCount;
     if (note.hidden) return;
     const text = document.createElement('span');
-    text.textContent = t('fm.hidden_count', '{n, plural, one {# hidden item} other {# hidden items}}', { n: this.hiddenCount });
+    text.textContent = t('fm.hidden_count', '{n, plural, one {# hidden item} other {# hidden items}}', {
+      n: this.hiddenCount,
+    });
     const show = document.createElement('button');
     show.type = 'button';
     show.className = 'fm-hidden-show';
@@ -1791,7 +1924,9 @@ export class FileManagerWindow {
         }
       });
       const label = t('fm.selected_count', '{count} selected', { count: count });
-      this.selectedCount.innerHTML = escapeHtml(label) + (totalBytes > 0 ? `<span class="fm-sel-size"> · ${escapeHtml(formatBytes(totalBytes))}</span>` : '');
+      this.selectedCount.innerHTML =
+        escapeHtml(label) +
+        (totalBytes > 0 ? `<span class="fm-sel-size"> · ${escapeHtml(formatBytes(totalBytes))}</span>` : '');
       // in the Recycle Bin the bar offers Restore and "Delete for good", and nothing a deleted item can't do
       const inBin = Boolean(this._inBin);
       this.bulkRestoreBtn?.toggleAttribute('hidden', !inBin);
@@ -1801,7 +1936,9 @@ export class FileManagerWindow {
       if (this.bulkDeleteBtn) {
         const del = inBin
           ? t('fm.delete_for_good', 'Delete for good')
-          : (count > 1 ? t('fm.bulk_delete', 'Delete ({count})', { count: count }) : t('fm.delete', 'Delete'));
+          : count > 1
+            ? t('fm.bulk_delete', 'Delete ({count})', { count: count })
+            : t('fm.delete', 'Delete');
         const label = this.bulkDeleteBtn.querySelector('.fm-sel-label');
         if (label) label.textContent = inBin ? del : t('fm.delete', 'Delete');
         this.bulkDeleteBtn.title = del;
@@ -1888,9 +2025,7 @@ export class FileManagerWindow {
           e.stopPropagation();
           let targetPath = p;
           if (targetPath === '/' && (!window._fmRoots || !window._fmRoots.includes('/'))) {
-            targetPath = (window._fmRoots && window._fmRoots.includes('/mnt'))
-              ? '/mnt'
-              : fmHome();
+            targetPath = window._fmRoots && window._fmRoots.includes('/mnt') ? '/mnt' : fmHome();
           }
           this.loadPath(targetPath);
         };
@@ -1901,7 +2036,7 @@ export class FileManagerWindow {
       span.ondragover = (e) => {
         e.preventDefault();
         e.stopPropagation();
-        e.dataTransfer.dropEffect = (e.altKey || window._activeDragPayload?.action === 'copy') ? 'copy' : 'move';
+        e.dataTransfer.dropEffect = e.altKey || window._activeDragPayload?.action === 'copy' ? 'copy' : 'move';
         span.classList.add('fm-crumb-drop-hover');
       };
       span.ondragleave = (e) => {
@@ -1925,7 +2060,10 @@ export class FileManagerWindow {
           try {
             const text = e.dataTransfer.getData('text/plain');
             if (text) {
-              const paths = text.split('\n').map((s) => s.trim()).filter(Boolean);
+              const paths = text
+                .split('\n')
+                .map((s) => s.trim())
+                .filter(Boolean);
               if (paths.length > 0 && paths[0].startsWith('/')) {
                 payload = { paths, action: e.altKey ? 'copy' : 'move' };
               }
@@ -1934,7 +2072,7 @@ export class FileManagerWindow {
         }
 
         if (payload && payload.paths && payload.paths.length > 0) {
-          const action = e.altKey ? 'copy' : (payload.action || 'move');
+          const action = e.altKey ? 'copy' : payload.action || 'move';
           await executeTransferWithConflictCheck(payload.paths, targetPath, action);
           window._activeDragPayload = null;
           window.__zettActiveFmDrag = null;
@@ -1974,7 +2112,8 @@ export class FileManagerWindow {
             const ellipsis = document.createElement('span');
             ellipsis.textContent = '...';
             ellipsis.className = 'fm-breadcrumb-ellipsis';
-            ellipsis.style.cssText = 'padding: 1px 5px; border-radius: 4px; background: rgba(255,255,255,0.08); cursor: pointer; font-size: var(--kb-fs-xs); margin: 0 2px;';
+            ellipsis.style.cssText =
+              'padding: 1px 5px; border-radius: 4px; background: rgba(255,255,255,0.08); cursor: pointer; font-size: var(--kb-fs-xs); margin: 0 2px;';
             ellipsis.title = t('ui.show_intermediate_folders', 'Show intermediate folders');
             ellipsis.onclick = (e) => {
               e.stopPropagation();
@@ -2028,16 +2167,24 @@ export class FileManagerWindow {
     menu.setAttribute('role', 'menu');
     menu.setAttribute('aria-label', t('fm.quick_locations', 'Quick Locations'));
     // Only the closest place is the current one (/mnt/user/appdata, not also /mnt/user)
-    const currentPath = closestPath(places.filter((pl) => !pl.action).map((pl) => pl.path), this.currentPath);
-    menu.innerHTML = places.map((pl, i) => {
-      const current = !pl.action && pl.path === currentPath;
-      const sep = (pl.favorite && !places[i - 1]?.favorite) || (pl.action && i > 0) ? '<div class="fm-loc-sep" role="separator"></div>' : '';
-      return `${sep}<button type="button" class="fm-loc-item${current ? ' is-current' : ''}${pl.action ? ' is-action' : ''}" role="menuitem" data-idx="${i}" title="${escapeHtml(pl.path)}">
+    const currentPath = closestPath(
+      places.filter((pl) => !pl.action).map((pl) => pl.path),
+      this.currentPath
+    );
+    menu.innerHTML = places
+      .map((pl, i) => {
+        const current = !pl.action && pl.path === currentPath;
+        const sep =
+          (pl.favorite && !places[i - 1]?.favorite) || (pl.action && i > 0)
+            ? '<div class="fm-loc-sep" role="separator"></div>'
+            : '';
+        return `${sep}<button type="button" class="fm-loc-item${current ? ' is-current' : ''}${pl.action ? ' is-action' : ''}" role="menuitem" data-idx="${i}" title="${escapeHtml(pl.path)}">
         <span class="fm-loc-icon" aria-hidden="true">${pl.icon}</span>
         <span class="fm-loc-text"><span class="fm-loc-name">${escapeHtml(pl.name)}</span>${pl.action ? '' : `<span class="fm-loc-path">${escapeHtml(pl.path)}</span>`}</span>
         ${current ? '<span class="fm-loc-check" aria-hidden="true">✓</span>' : ''}
       </button>`;
-    }).join('');
+      })
+      .join('');
     document.body.appendChild(menu);
     menu._anchor = anchorEl;
     anchorEl.setAttribute('aria-expanded', 'true');
@@ -2102,20 +2249,29 @@ export class FileManagerWindow {
 
   showBreadcrumbsDropdown(anchorEl, parts, from = 1, to = parts.length - 2) {
     let menu = document.getElementById('fm-breadcrumbs-dropdown');
-    if (menu) { menu.remove(); return; }
+    if (menu) {
+      menu.remove();
+      return;
+    }
     menu = document.createElement('div');
     menu.id = 'fm-breadcrumbs-dropdown';
     menu.className = 'os-context-menu';
-    menu.style.cssText = 'position: fixed; z-index: 10000; background: rgba(19,32,34,0.95); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 4px; box-shadow: 0 8px 24px rgba(0,0,0,0.5); backdrop-filter: blur(12px); font-size: var(--kb-fs-xs); font-family: monospace; max-height: 200px; overflow-y: auto;';
+    menu.style.cssText =
+      'position: fixed; z-index: 10000; background: rgba(19,32,34,0.95); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 4px; box-shadow: 0 8px 24px rgba(0,0,0,0.5); backdrop-filter: blur(12px); font-size: var(--kb-fs-xs); font-family: monospace; max-height: 200px; overflow-y: auto;';
 
     for (let i = from; i < to; i++) {
       const segPath = '/' + parts.slice(0, i + 1).join('/');
       const item = document.createElement('div');
       item.className = 'ctx-item';
-      item.style.cssText = 'padding: 4px 8px; border-radius: 4px; cursor: pointer; color: #c9d6d7; display: flex; align-items: center; gap: 6px;';
+      item.style.cssText =
+        'padding: 4px 8px; border-radius: 4px; cursor: pointer; color: #c9d6d7; display: flex; align-items: center; gap: 6px;';
       item.innerHTML = `<span aria-hidden="true">📁</span> <span>${escapeHtml(parts[i])}</span>`;
-      item.onmouseover = () => { item.style.background = 'rgba(255,255,255,0.1)'; };
-      item.onmouseout = () => { item.style.background = 'transparent'; };
+      item.onmouseover = () => {
+        item.style.background = 'rgba(255,255,255,0.1)';
+      };
+      item.onmouseout = () => {
+        item.style.background = 'transparent';
+      };
       item.onclick = (e) => {
         e.stopPropagation();
         menu.remove();
@@ -2146,7 +2302,9 @@ export class FileManagerWindow {
 
   async loadPath(path, isNavigatingHistory = false, keepSelection = false) {
     if (this.abortController) {
-      try { this.abortController.abort(); } catch (_) {}
+      try {
+        this.abortController.abort();
+      } catch (_) {}
     }
     this.abortController = new AbortController();
 
@@ -2158,7 +2316,9 @@ export class FileManagerWindow {
       this.currentPath = res.current;
       prefetchThumbs(res);
       if (this.isPrimary) {
-        try { localStorage.setItem('kiboto_fm_last_path', this.currentPath); } catch (_) {}
+        try {
+          localStorage.setItem('kiboto_fm_last_path', this.currentPath);
+        } catch (_) {}
       }
 
       // History update
@@ -2181,15 +2341,19 @@ export class FileManagerWindow {
         const datalist = this.windowEl.querySelector('datalist');
         if (datalist && datalist.dataset.populated !== res.roots.join(',')) {
           datalist.dataset.populated = res.roots.join(',');
-          datalist.replaceChildren(...[...res.roots, `${res.current}/.RecycleBin`].map((v) => {
-            const opt = document.createElement('option');
-            opt.value = v;
-            return opt;
-          }));
+          datalist.replaceChildren(
+            ...[...res.roots, `${res.current}/.RecycleBin`].map((v) => {
+              const opt = document.createElement('option');
+              opt.value = v;
+              return opt;
+            })
+          );
         }
       }
 
-      const shouldRetain = Boolean((this._retainingRefresh || keepSelection) && this.currentPath === res.current && this.selectedPaths.size > 0);
+      const shouldRetain = Boolean(
+        (this._retainingRefresh || keepSelection) && this.currentPath === res.current && this.selectedPaths.size > 0
+      );
       this._retainingRefresh = false;
       if (shouldRetain) {
         const existingPaths = new Set((res.dirs || []).map((f) => f.path));
@@ -2208,10 +2372,20 @@ export class FileManagerWindow {
       if (this.pathInput) this.pathInput.value = this.currentPath;
       this._inBin = Boolean(res.recycle_bin);
       binColumns(this, this._inBin); // "From" and "Deleted" in the Recycle Bin (NUX-17)
-      binBar(this, this._inBin, () => this.loadPath(this.currentPath, true), { rules: res.bin_rules, soon: res.leaving_soon });
+      binBar(this, this._inBin, () => this.loadPath(this.currentPath, true), {
+        rules: res.bin_rules,
+        soon: res.leaving_soon,
+      });
       if (res.recycle_bin && res.bins_asleep > 0 && this._binsAsleepShown !== res.bins_asleep) {
         this._binsAsleepShown = res.bins_asleep;
-        showToast(t('fm.bins_asleep', '{count, plural, one {# Recycle Bin is} other {# Recycle Bins are}} on a sleeping disk and not shown, so the disk stays asleep. They appear once it wakes.', { count: res.bins_asleep }), 'info');
+        showToast(
+          t(
+            'fm.bins_asleep',
+            '{count, plural, one {# Recycle Bin is} other {# Recycle Bins are}} on a sleeping disk and not shown, so the disk stays asleep. They appear once it wakes.',
+            { count: res.bins_asleep }
+          ),
+          'info'
+        );
       }
 
       // Update folder title in header
@@ -2241,7 +2415,8 @@ export class FileManagerWindow {
       this.searchQuery = '';
       this.isSearching = false;
 
-      if (this.spacer) this.spacer.style.height = (this.fileList.length * (this.viewMode === 'compact' ? 28 : ROW_HEIGHT)) + 'px';
+      if (this.spacer)
+        this.spacer.style.height = this.fileList.length * (this.viewMode === 'compact' ? 28 : ROW_HEIGHT) + 'px';
       if (this.viewport) this.viewport.scrollTop = 0;
       if (this.sidebarTree) {
         this.sidebarTree.updateActive(this.currentPath);
@@ -2285,7 +2460,9 @@ export class FileManagerWindow {
       const back = document.createElement('button');
       back.type = 'button';
       back.className = 'btn-pill-toggle';
-      back.textContent = t('fm.back_to', 'Back to {name}', { name: this.currentPath.split('/').filter(Boolean).pop() || '/' });
+      back.textContent = t('fm.back_to', 'Back to {name}', {
+        name: this.currentPath.split('/').filter(Boolean).pop() || '/',
+      });
       back.addEventListener('click', () => this.loadPath(this.currentPath));
       box.append(back);
     }
@@ -2379,9 +2556,12 @@ export class FileManagerWindow {
       this.list.setAttribute('aria-label', t('fm.grid_label', 'Files in this folder'));
       const token = (auth && typeof auth.getToken === 'function' ? auth.getToken() : null) || '';
 
-      const folderSvg = '<svg viewBox="0 0 24 24" width="44" height="44" stroke="currentColor" stroke-width="1.5" fill="#eab308"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>';
-      const fileSvg = '<svg viewBox="0 0 24 24" width="40" height="40" stroke="currentColor" stroke-width="1.5" fill="none"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>';
-      const upSvg = '<svg viewBox="0 0 24 24" width="40" height="40" stroke="currentColor" stroke-width="1.5" fill="none"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>';
+      const folderSvg =
+        '<svg viewBox="0 0 24 24" width="44" height="44" stroke="currentColor" stroke-width="1.5" fill="#eab308"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>';
+      const fileSvg =
+        '<svg viewBox="0 0 24 24" width="40" height="40" stroke="currentColor" stroke-width="1.5" fill="none"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>';
+      const upSvg =
+        '<svg viewBox="0 0 24 24" width="40" height="40" stroke="currentColor" stroke-width="1.5" fill="none"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>';
 
       for (let i = startIndex; i < endIndex; i++) {
         const file = this.fileList[i];
@@ -2420,7 +2600,8 @@ export class FileManagerWindow {
           iconContent = fileSvg;
         }
 
-        const metaText = file.name === '..' ? '--' : (file.is_dir ? escapeHtml(t('fm.kind_folder', 'Folder')) : formatBytes(file.size));
+        const metaText =
+          file.name === '..' ? '--' : file.is_dir ? escapeHtml(t('fm.kind_folder', 'Folder')) : formatBytes(file.size);
 
         // One grid cell per card (a row of the grid); display: contents keeps the card's layout
         card.innerHTML = `<div class="fm-card-cell" role="gridcell">
@@ -2431,7 +2612,7 @@ export class FileManagerWindow {
             <div class="fm-card-meta">${metaText}</div>
           </div>
           <div class="fm-card-actions">
-            ${this._inBin ? binRowActions(escPath) : ''}${(!this._inBin && !file.is_dir && file.name !== '..' && isImage) ? `<button class="fm-act-btn" data-act="preview" data-path="${escPath}" title="${t('ui.preview', 'Preview')}">👁️</button>` : ''}
+            ${this._inBin ? binRowActions(escPath) : ''}${!this._inBin && !file.is_dir && file.name !== '..' && isImage ? `<button class="fm-act-btn" data-act="preview" data-path="${escPath}" title="${t('ui.preview', 'Preview')}">👁️</button>` : ''}
             ${!this._inBin && !file.is_dir && file.name !== '..' ? `<button class="fm-act-btn" data-act="download" data-path="${escPath}" title="${t('preview.download', 'Download')}">⬇️</button>` : ''}
             ${!this._inBin && file.name !== '..' ? `<button class="fm-act-btn" data-act="share" data-path="${escPath}" title="${t('ui.share_via_link', 'Share via Link')}">🔗</button>` : ''}
             ${!this._inBin && file.name !== '..' ? `<button class="fm-act-btn" data-act="rename" data-path="${escPath}" title="${t('mgmt.wallpaper_rename', 'Rename')}">✏️</button>` : ''}
@@ -2487,14 +2668,18 @@ export class FileManagerWindow {
       let icon;
       if (file.is_dir) {
         if (isRemoteDir) {
-          icon = '<svg viewBox="0 0 24 24" width="18" height="18" stroke="#4fd8c4" fill="rgba(79,216,196,0.2)" stroke-width="2"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></svg>';
+          icon =
+            '<svg viewBox="0 0 24 24" width="18" height="18" stroke="#4fd8c4" fill="rgba(79,216,196,0.2)" stroke-width="2"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></svg>';
         } else if (isDiskDir) {
-          icon = '<svg viewBox="0 0 24 24" width="18" height="18" stroke="#a855f7" fill="rgba(168,85,247,0.2)" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="12" cy="12" r="1"></circle></svg>';
+          icon =
+            '<svg viewBox="0 0 24 24" width="18" height="18" stroke="#a855f7" fill="rgba(168,85,247,0.2)" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="12" cy="12" r="1"></circle></svg>';
         } else {
-          icon = '<svg viewBox="0 0 24 24" width="18" stroke="currentColor" fill="#eab308"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>';
+          icon =
+            '<svg viewBox="0 0 24 24" width="18" stroke="currentColor" fill="#eab308"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>';
         }
       } else {
-        icon = '<svg viewBox="0 0 24 24" width="18" stroke="currentColor" fill="none"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>';
+        icon =
+          '<svg viewBox="0 0 24 24" width="18" stroke="currentColor" fill="none"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>';
       }
 
       const escName = escapeHtml(file.name);
@@ -2502,13 +2687,19 @@ export class FileManagerWindow {
       const isImage = file.name.match(/\.(jpeg|jpg|png|gif|webp|svg)$/i);
       let fileType = fileKind(file, isRemoteDir, isDiskDir);
       if (this._inBin) fileType = file.original_path ? file.original_path.replace(/\/[^/]*$/, '') || '/' : '–'; // where it was
-      const mtimeStr = formatDateTime(file.mtime, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+      const mtimeStr = formatDateTime(file.mtime, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
 
       const rowThumb = !file.is_dir && ['image', 'video'].includes(thumbKind(file.name));
       const leading = rowThumb
         ? `<img class="fm-row-thumb" src="${thumbUrl(file.path, file.mtime)}" alt="" loading="lazy" decoding="async" data-img-fallback="hide-show-next:inline-flex" /><span class="fm-row-thumb-fallback" style="display:none;">${icon}</span>`
         : icon;
-      const subLine = file.name === '..' ? '' : (file.is_dir ? mtimeStr : `${formatBytes(file.size)} · ${mtimeStr}`);
+      const subLine = file.name === '..' ? '' : file.is_dir ? mtimeStr : `${formatBytes(file.size)} · ${mtimeStr}`;
       row.innerHTML = `
         <div class="fm-col fm-col-check">${file.name !== '..' ? `<input type="checkbox" class="fm-checkbox fm-row-checkbox" ${this.selectedPaths.has(file.path) ? 'checked' : ''} data-path="${escPath}" title="${t('ui.select_item', 'Select item')}" />` : ''}</div>
         <div class="fm-col fm-col-name">${leading} <span class="fm-name-stack"><span class="fm-name-text">${escName}</span>${this._inBin && goesSoon(file) ? `<span class="kb-tag kb-tag--warn fm-bin-goes">${escapeHtml(goesLabel(file))}</span>` : ''}<span class="fm-row-sub">${escapeHtml(subLine)}</span></span></div>
@@ -2516,7 +2707,7 @@ export class FileManagerWindow {
         <div class="fm-col fm-col-size">${file.is_dir ? '--' : formatBytes(file.size)}</div>
         <div class="fm-col fm-col-mtime">${file.name === '..' ? '--' : mtimeStr}</div>
         <div class="fm-col fm-col-actions">
-          ${this._inBin ? binRowActions(escPath) : ''}${(!this._inBin && !file.is_dir && file.name !== '..' && isImage) ? `<button class="fm-act-btn" data-act="preview" data-path="${escPath}" title="${t('ui.preview', 'Preview')}">👁️</button>` : ''}
+          ${this._inBin ? binRowActions(escPath) : ''}${!this._inBin && !file.is_dir && file.name !== '..' && isImage ? `<button class="fm-act-btn" data-act="preview" data-path="${escPath}" title="${t('ui.preview', 'Preview')}">👁️</button>` : ''}
           ${!this._inBin && !file.is_dir && file.name !== '..' ? `<button class="fm-act-btn" data-act="download" data-path="${escPath}" title="${t('preview.download', 'Download')}">⬇️</button>` : ''}
           ${!this._inBin && file.name !== '..' ? `<button class="fm-act-btn" data-act="share" data-path="${escPath}" title="${t('ui.share_via_link', 'Share via Link')}">🔗</button>` : ''}
           ${!this._inBin && file.name !== '..' ? `<button class="fm-act-btn" data-act="rename" data-path="${escPath}" title="${t('mgmt.wallpaper_rename', 'Rename')}">✏️</button>` : ''}
@@ -2551,13 +2742,19 @@ export class FileManagerWindow {
       await this.restoreFromBin([path]);
       return;
     }
-    if (act === 'more-sheet' && this._inBin) { // the phone's "···" in the bin: the two things a deleted item can do
+    if (act === 'more-sheet' && this._inBin) {
+      // the phone's "···" in the bin: the two things a deleted item can do
       showBottomSheet({
         title: oldName || path.split('/').pop(),
         subtitle: t('fm.bin_sheet_sub', 'In the Recycle Bin'),
         items: [
           { icon: '↩️', label: t('fm.restore', 'Restore'), onClick: () => this.restoreFromBin([path]) },
-          { icon: '🗑️', label: t('fm.delete_for_good', 'Delete for good'), destructive: true, onClick: () => this.askDelete([path]) },
+          {
+            icon: '🗑️',
+            label: t('fm.delete_for_good', 'Delete for good'),
+            destructive: true,
+            onClick: () => this.askDelete([path]),
+          },
         ],
       });
       return;
@@ -2609,7 +2806,10 @@ export class FileManagerWindow {
           label: t('fm.ctx_copy', 'Copy'),
           onClick: () => {
             _clipboard = { items: [path], action: 'copy', sourceInstanceId: this.id };
-            showToast(t('toast.copied_to_clipboard_2', 'Copied \'{oldName}\' to clipboard', { oldName: oldName }), 'info');
+            showToast(
+              t('toast.copied_to_clipboard_2', "Copied '{oldName}' to clipboard", { oldName: oldName }),
+              'info'
+            );
           },
         },
         {
@@ -2618,7 +2818,12 @@ export class FileManagerWindow {
           onClick: () => {
             _clipboard = { items: [path], action: 'move', sourceInstanceId: this.id };
             this.renderViewport();
-            showToast(t('toast.cut_open_destination_and_tap_to', 'Cut \'{oldName}\' — open destination and tap + to Paste', { oldName: oldName }), 'info');
+            showToast(
+              t('toast.cut_open_destination_and_tap_to', "Cut '{oldName}' — open destination and tap + to Paste", {
+                oldName: oldName,
+              }),
+              'info'
+            );
           },
         },
         {
@@ -2630,7 +2835,7 @@ export class FileManagerWindow {
       );
       showBottomSheet({
         title: oldName || path.split('/').pop(),
-        subtitle: isDir ? fileKind({ name: '', is_dir: true }) : (file ? formatBytes(file.size) : path),
+        subtitle: isDir ? fileKind({ name: '', is_dir: true }) : file ? formatBytes(file.size) : path,
         items: sheetItems,
       });
       return;
@@ -2668,19 +2873,19 @@ export class FileManagerWindow {
     if (!isFmActive(this.windowEl)) return;
 
     const target = e.target;
-    const isTextInput = target && (
-      target.tagName === 'TEXTAREA' ||
-      target.tagName === 'SELECT' ||
-      target.isContentEditable ||
-      (target.tagName === 'INPUT' && target.type !== 'checkbox' && target.type !== 'radio')
-    );
+    const isTextInput =
+      target &&
+      (target.tagName === 'TEXTAREA' ||
+        target.tagName === 'SELECT' ||
+        target.isContentEditable ||
+        (target.tagName === 'INPUT' && target.type !== 'checkbox' && target.type !== 'radio'));
     if (isTextInput) return;
 
     if (isFmModalBlocking()) {
       return;
     }
 
-    const minSelectableIndex = (this.fileList[0]?.name === '..') ? 1 : 0;
+    const minSelectableIndex = this.fileList[0]?.name === '..' ? 1 : 0;
     const hasSelectableFiles = this.fileList.length > minSelectableIndex;
 
     // F2 -> Inline rename selected item (if exactly 1 item selected)
@@ -2774,7 +2979,9 @@ export class FileManagerWindow {
         e.preventDefault();
         e.stopPropagation();
         _clipboard = { items: Array.from(this.selectedPaths), action: 'copy', sourceInstanceId: this.id };
-        const msg = t('fm.copied_clipboard', 'Copied {count, plural, one {# item} other {# items}}', { count: this.selectedPaths.size });
+        const msg = t('fm.copied_clipboard', 'Copied {count, plural, one {# item} other {# items}}', {
+          count: this.selectedPaths.size,
+        });
         showToast(msg, 'info');
       }
     } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'x') {
@@ -2782,7 +2989,9 @@ export class FileManagerWindow {
         e.preventDefault();
         e.stopPropagation();
         _clipboard = { items: Array.from(this.selectedPaths), action: 'move', sourceInstanceId: this.id };
-        const msg = t('fm.cut_clipboard', 'Cut {count, plural, one {# item} other {# items}}', { count: this.selectedPaths.size });
+        const msg = t('fm.cut_clipboard', 'Cut {count, plural, one {# item} other {# items}}', {
+          count: this.selectedPaths.size,
+        });
         showToast(msg, 'info');
         this.updateRowSelectionUI();
       }
@@ -3013,7 +3222,8 @@ export class FileManagerWindow {
       if (!hasSelectableFiles) return;
       const targetIdx = minSelectableIndex;
       if (e.shiftKey) {
-        if (this.selectionAnchorIndex === -1) this.selectionAnchorIndex = (this.lastSelectedIndex >= 0) ? this.lastSelectedIndex : targetIdx;
+        if (this.selectionAnchorIndex === -1)
+          this.selectionAnchorIndex = this.lastSelectedIndex >= 0 ? this.lastSelectedIndex : targetIdx;
         this.lastSelectedIndex = targetIdx;
         this.selectedPaths.clear();
         const start = Math.min(this.selectionAnchorIndex, this.lastSelectedIndex);
@@ -3041,7 +3251,8 @@ export class FileManagerWindow {
       if (!hasSelectableFiles) return;
       const targetIdx = this.fileList.length - 1;
       if (e.shiftKey) {
-        if (this.selectionAnchorIndex === -1) this.selectionAnchorIndex = (this.lastSelectedIndex >= 0) ? this.lastSelectedIndex : minSelectableIndex;
+        if (this.selectionAnchorIndex === -1)
+          this.selectionAnchorIndex = this.lastSelectedIndex >= 0 ? this.lastSelectedIndex : minSelectableIndex;
         this.lastSelectedIndex = targetIdx;
         this.selectedPaths.clear();
         const start = Math.min(this.selectionAnchorIndex, this.lastSelectedIndex);
@@ -3114,9 +3325,10 @@ export class FileManagerWindow {
     if (this.selectedPaths.size === 0) return;
     _clipboard = { items: Array.from(this.selectedPaths), action, sourceInstanceId: this.id };
     const count = this.selectedPaths.size;
-    const msg = action === 'move'
-      ? t('fm.cut_clipboard', 'Cut {count, plural, one {# item} other {# items}}', { count })
-      : t('fm.copied_clipboard', 'Copied {count, plural, one {# item} other {# items}}', { count });
+    const msg =
+      action === 'move'
+        ? t('fm.cut_clipboard', 'Cut {count, plural, one {# item} other {# items}}', { count })
+        : t('fm.copied_clipboard', 'Copied {count, plural, one {# item} other {# items}}', { count });
     showToast(msg, 'info');
     this.updateRowSelectionUI();
   }
@@ -3141,8 +3353,8 @@ export class FileManagerWindow {
       if (!file || file.name === '..') continue;
       const oldName = file.name;
       const lastDot = oldName.lastIndexOf('.');
-      const stem = (file.is_dir || lastDot <= 0) ? oldName : oldName.substring(0, lastDot);
-      const ext = (file.is_dir || lastDot <= 0) ? '' : oldName.substring(lastDot);
+      const stem = file.is_dir || lastDot <= 0 ? oldName : oldName.substring(0, lastDot);
+      const ext = file.is_dir || lastDot <= 0 ? '' : oldName.substring(lastDot);
       const parent = p.substring(0, p.lastIndexOf('/')) || '/';
       if (!byParent.has(parent)) byParent.set(parent, { sources: [], names: [] });
       byParent.get(parent).sources.push(p);
@@ -3180,13 +3392,14 @@ export class FileManagerWindow {
 
     const oldName = file.name;
     const lastDot = oldName.lastIndexOf('.');
-    const stem = (file.is_dir || lastDot <= 0) ? oldName : oldName.substring(0, lastDot);
+    const stem = file.is_dir || lastDot <= 0 ? oldName : oldName.substring(0, lastDot);
 
     const input = document.createElement('input');
     input.type = 'text';
     input.className = 'fm-inline-rename-input';
     input.value = oldName;
-    input.style.cssText = 'width: 100%; padding: 2px 4px; font-size: inherit; background: rgba(0,0,0,0.6); border: 1px solid var(--accent, #33cdb8); border-radius: 4px; color: #fff; outline: none; z-index: 10;';
+    input.style.cssText =
+      'width: 100%; padding: 2px 4px; font-size: inherit; background: rgba(0,0,0,0.6); border: 1px solid var(--accent, #33cdb8); border-radius: 4px; color: #fff; outline: none; z-index: 10;';
 
     nameEl.style.display = 'none';
     nameEl.parentNode.insertBefore(input, nameEl);
@@ -3256,11 +3469,19 @@ export class FileManagerWindow {
       });
       transferCenter.followServerTask(
         res,
-        { action: 'archive_create', kind: 'archive_create', sources: paths, destination: `${this.currentPath}/${archiveName}` },
-        { label: t('transfers.zipping', 'Creating {name}', { name: archiveName }) },
+        {
+          action: 'archive_create',
+          kind: 'archive_create',
+          sources: paths,
+          destination: `${this.currentPath}/${archiveName}`,
+        },
+        { label: t('transfers.zipping', 'Creating {name}', { name: archiveName }) }
       );
     } catch (err) {
-      showToast(t('toast.archive_creation_failed', 'Archive creation failed: {error}', { error: err.message }), 'error');
+      showToast(
+        t('toast.archive_creation_failed', 'Archive creation failed: {error}', { error: err.message }),
+        'error'
+      );
     }
   }
 
@@ -3275,7 +3496,7 @@ export class FileManagerWindow {
       transferCenter.followServerTask(
         res,
         { action: 'archive_extract', kind: 'archive_extract', sources: [archivePath], destination: targetDir },
-        { label: t('transfers.extracting', 'Extracting {name}', { name }) },
+        { label: t('transfers.extracting', 'Extracting {name}', { name }) }
       );
     } catch (err) {
       showToast(t('toast.extraction_failed', 'Extraction failed: {error}', { error: err.message }), 'error');
@@ -3331,8 +3552,14 @@ export class FileManagerWindow {
     return new Promise((resolve) => {
       showDangerConfirm(
         t('fm.too_large_title', 'Larger than the Recycle Bin keeps'),
-        t('fm.too_large_msg', '“{name}” is larger than a Recycle Bin keeps, which is a tenth of its drive. In the bin it stays for one day, then it goes for good. Move it there anyway?', { name: shownName(path) }),
-        () => resolve(true), () => resolve(false), { okText: t('fm.move_to_bin', 'Move to Recycle Bin') },
+        t(
+          'fm.too_large_msg',
+          '“{name}” is larger than a Recycle Bin keeps, which is a tenth of its drive. In the bin it stays for one day, then it goes for good. Move it there anyway?',
+          { name: shownName(path) }
+        ),
+        () => resolve(true),
+        () => resolve(false),
+        { okText: t('fm.move_to_bin', 'Move to Recycle Bin') }
       );
     });
   }
@@ -3352,7 +3579,11 @@ export class FileManagerWindow {
         showToast(t('toast.restore_failed', 'Restore failed: {error}', { error: err.message }), 'error');
       }
     }
-    if (restored) showToast(t('fm.restored_count', '{count, plural, one {Restored # item} other {Restored # items}}', { count: restored }), 'success');
+    if (restored)
+      showToast(
+        t('fm.restored_count', '{count, plural, one {Restored # item} other {Restored # items}}', { count: restored }),
+        'success'
+      );
     this.loadPath(this.currentPath);
     return restored;
   }
@@ -3360,7 +3591,11 @@ export class FileManagerWindow {
   /** UX-6: a toast with Undo that brings the items back from the Recycle Bin. */
   offerUndo(trashIds) {
     showActionToast(
-      t('fm.moved_to_bin', '{count, plural, one {Moved # item to the Recycle Bin} other {Moved # items to the Recycle Bin}}', { count: trashIds.length }),
+      t(
+        'fm.moved_to_bin',
+        '{count, plural, one {Moved # item to the Recycle Bin} other {Moved # items to the Recycle Bin}}',
+        { count: trashIds.length }
+      ),
       t('fm.undo', 'Undo'),
       async () => {
         let restored = 0;
@@ -3372,9 +3607,15 @@ export class FileManagerWindow {
             showToast(t('toast.restore_failed', 'Restore failed: {error}', { error: err.message }), 'error');
           }
         }
-        if (restored) showToast(t('fm.restored_count', '{count, plural, one {Restored # item} other {Restored # items}}', { count: restored }), 'success');
+        if (restored)
+          showToast(
+            t('fm.restored_count', '{count, plural, one {Restored # item} other {Restored # items}}', {
+              count: restored,
+            }),
+            'success'
+          );
         this.loadPath(this.currentPath);
-      },
+      }
     );
   }
 
@@ -3400,14 +3641,24 @@ export class FileManagerWindow {
     };
     if (forGood) {
       showDangerConfirm(
-        t('fm.delete_for_good_title', '{count, plural, one {Delete # item for good?} other {Delete # items for good?}}', { count }),
-        binConfirmText(targets, files), run, null, { okText: t('fm.delete_for_good', 'Delete for good') },
+        t(
+          'fm.delete_for_good_title',
+          '{count, plural, one {Delete # item for good?} other {Delete # items for good?}}',
+          { count }
+        ),
+        binConfirmText(targets, files),
+        run,
+        null,
+        { okText: t('fm.delete_for_good', 'Delete for good') }
       );
     } else {
       showConfirmToast(
         t('fm.delete_title', '{count, plural, one {Delete # item?} other {Delete # items?}}', { count }),
         // it can be undone, so it is not marked dangerous and Enter confirms it, as the key always did
-        binConfirmText(targets, files), run, null, { okText: t('fm.move_to_bin', 'Move to Recycle Bin'), destructive: false },
+        binConfirmText(targets, files),
+        run,
+        null,
+        { okText: t('fm.move_to_bin', 'Move to Recycle Bin'), destructive: false }
       );
     }
   }
@@ -3475,7 +3726,8 @@ export class FileManagerWindow {
       const isCurrent = this.currentSortBy === key;
       el.classList.toggle('sorted', isCurrent);
       let icon = el.querySelector('.fm-sort-icon');
-      if (!icon) { // a language pass rewrites the header's words and takes the arrow's place with them
+      if (!icon) {
+        // a language pass rewrites the header's words and takes the arrow's place with them
         icon = document.createElement('span');
         icon.className = 'fm-sort-icon';
         el.appendChild(icon);
@@ -3487,8 +3739,13 @@ export class FileManagerWindow {
       el.setAttribute('role', 'button');
       el.setAttribute('tabindex', '0');
       // the words sit in their own element, so a language pass changes them and leaves the arrow
-      const name = (el.querySelector('.fm-col-label')?.textContent
-        ?? [...el.childNodes].filter((n) => n.nodeType === 3).map((n) => n.nodeValue).join('')).trim();
+      const name = (
+        el.querySelector('.fm-col-label')?.textContent ??
+        [...el.childNodes]
+          .filter((n) => n.nodeType === 3)
+          .map((n) => n.nodeValue)
+          .join('')
+      ).trim();
       const dir = this.currentSortDir === 'asc' ? t('fm.sort_asc', 'Ascending') : t('fm.sort_desc', 'Descending');
       el.setAttribute('aria-label', isCurrent ? `${name} (${dir})` : name);
       el.setAttribute('aria-pressed', isCurrent ? 'true' : 'false');
@@ -3502,7 +3759,9 @@ export class FileManagerWindow {
     for (const dir of dirs) {
       try {
         await api.post('/api/mkdir', { path: dir });
-      } catch (_) { /* it is there already, or the file's own upload says what is wrong */ }
+      } catch (_) {
+        /* it is there already, or the file's own upload says what is wrong */
+      }
     }
     const res = await uploadAll(items);
     if (res.uploaded > 0 || dirs.length) {
@@ -3516,11 +3775,11 @@ export class FileManagerWindow {
 export function isFmModalBlocking() {
   const modal = document.querySelector(
     '.smart-modal-backdrop.open:not(.window-minimized):not(#management-modal-overlay):not(#console-modal-overlay):not(#container-inspector-overlay):not(#stack-inspector-overlay), ' +
-    '#modal-fm-collision.open, ' +
-    '#confirm-toast-backdrop.open, ' +
-    '#confirm-toast-modal.open, ' +
-    '#mobile-sheet-backdrop.open, ' +
-    '.quicklook-modal-overlay'
+      '#modal-fm-collision.open, ' +
+      '#confirm-toast-backdrop.open, ' +
+      '#confirm-toast-modal.open, ' +
+      '#mobile-sheet-backdrop.open, ' +
+      '.quicklook-modal-overlay'
   );
   if (!modal) return false;
   if (
@@ -3547,7 +3806,9 @@ export function isFmActive(win) {
     if (inst && window.DockManager && window.DockManager.activeId === inst.dockId) return true;
     if (_activeFmInstance && _activeFmInstance.windowEl === win && _activeFmInstance.isOpen()) {
       if (!isFmModalBlocking()) {
-        const otherActiveWin = document.querySelector('.os-window.active-window:not(.file-manager-window), .management-window.active-window, .container-inspector-window.active-window');
+        const otherActiveWin = document.querySelector(
+          '.os-window.active-window:not(.file-manager-window), .management-window.active-window, .container-inspector-window.active-window'
+        );
         if (!otherActiveWin) return true;
       }
     }
@@ -3604,12 +3865,12 @@ export function handleFmKeydown(e) {
   if (!e || e.defaultPrevented) return;
 
   const target = e.target;
-  const isTextInput = target && (
-    target.tagName === 'TEXTAREA' ||
-    target.tagName === 'SELECT' ||
-    target.isContentEditable ||
-    (target.tagName === 'INPUT' && target.type !== 'checkbox' && target.type !== 'radio')
-  );
+  const isTextInput =
+    target &&
+    (target.tagName === 'TEXTAREA' ||
+      target.tagName === 'SELECT' ||
+      target.isContentEditable ||
+      (target.tagName === 'INPUT' && target.type !== 'checkbox' && target.type !== 'radio'));
   if (isTextInput) return;
 
   if (isFmModalBlocking()) {
@@ -3631,12 +3892,15 @@ export function handleFmKeydown(e) {
   // Intercept File Explorer keyboard actions to prevent focus leakage to desktop icons
   const fmNavKeys = ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'PageDown', 'PageUp'];
   const fmActKeys = ['Enter', 'Escape', 'F2', 'Delete', 'Backspace', ' '];
-  const isLetterShortcut = (e.ctrlKey || e.metaKey) && ['a', 'c', 'x', 'v', 'd', 'f', 'n'].includes(e.key?.toLowerCase());
+  const isLetterShortcut =
+    (e.ctrlKey || e.metaKey) && ['a', 'c', 'x', 'v', 'd', 'f', 'n'].includes(e.key?.toLowerCase());
 
   if (fmNavKeys.includes(e.key) || fmActKeys.includes(e.key) || isLetterShortcut) {
     if (target && !inst.windowEl.contains(target)) {
       document.querySelectorAll('.chassis-hero-box').forEach((el) => {
-        try { el.blur(); } catch (_) {}
+        try {
+          el.blur();
+        } catch (_) {}
       });
       inst.ensureFocus();
     }
@@ -3648,7 +3912,7 @@ export function openNewFileManagerWindow(path = null) {
   _fmInstanceSeq++;
   const instId = `file-manager-window-${_fmInstanceSeq}`;
   const dockId = `fm-${_fmInstanceSeq}`;
-  const targetPath = path || (getActiveFmInstance()?.currentPath) || fmHome();
+  const targetPath = path || getActiveFmInstance()?.currentPath || fmHome();
 
   const inst = new FileManagerWindow(instId, dockId, targetPath, false);
   _fmInstances.set(instId, inst);
@@ -3726,7 +3990,9 @@ export function initFileManager() {
   const openFm = (e) => {
     if (e && e.type === 'touchend') e.preventDefault();
     document.querySelectorAll('.chassis-hero-box').forEach((el) => {
-      try { el.blur(); } catch (_) {}
+      try {
+        el.blur();
+      } catch (_) {}
     });
 
     primary.open();
@@ -3736,7 +4002,9 @@ export function initFileManager() {
   if (fmIcon) {
     const blurDesktopIcons = () => {
       document.querySelectorAll('.chassis-hero-box').forEach((el) => {
-        try { el.blur(); } catch (_) {}
+        try {
+          el.blur();
+        } catch (_) {}
       });
     };
     fmIcon.addEventListener('mousedown', blurDesktopIcons);
@@ -3967,7 +4235,8 @@ export function openMediaOrganizerModal(initialPath = '') {
   modal.onclick = (e) => {
     if (e.target === modal) closeModal();
   };
-  modal.onkeydown = (e) => { // Escape closes it, like every other dialog (SET-05)
+  modal.onkeydown = (e) => {
+    // Escape closes it, like every other dialog (SET-05)
     if (e.key === 'Escape') {
       e.stopPropagation();
       closeModal();
@@ -3987,7 +4256,10 @@ export function openMediaOrganizerModal(initialPath = '') {
       const source_dir = (srcInput?.value || '').trim();
       const target_dir = (dstInput?.value || '').trim();
       if (!source_dir || !target_dir) {
-        showToast(t('toast.please_specify_both_source_and_destination', 'Please specify both source and destination folders.'), 'warning');
+        showToast(
+          t('toast.please_specify_both_source_and_destination', 'Please specify both source and destination folders.'),
+          'warning'
+        );
         return;
       }
 
@@ -4094,7 +4366,12 @@ export function openMediaOrganizerModal(initialPath = '') {
           openFileManager(srcInput?.value || initialPath);
         }
       } catch (err) {
-        showToast(t('toast.failed_to_execute_reorganization', 'Failed to execute reorganization: {error}', { error: err.message }), 'error');
+        showToast(
+          t('toast.failed_to_execute_reorganization', 'Failed to execute reorganization: {error}', {
+            error: err.message,
+          }),
+          'error'
+        );
       } finally {
         btnApply.disabled = false;
         btnApply.textContent = t('media.apply_btn', 'Execute Reorganization');
@@ -4111,11 +4388,32 @@ export function organizeResultToasts(res, planned = 0) {
   const done = res?.success_count ?? planned;
   const kept = res?.kept_count || 0;
   const failed = res?.failed_count || 0;
-  showToast(t('media.org_done', '{count, plural, one {Media sorted: # file.} other {Media sorted: # files.}}', { count: done }), kept || failed ? 'warning' : 'success');
-  if (kept) showToast(t('media.org_kept', '{count, plural, one {# file was already there and was kept.} other {# files were already there and were kept.}}', { count: kept }), 'warning');
+  showToast(
+    t('media.org_done', '{count, plural, one {Media sorted: # file.} other {Media sorted: # files.}}', { count: done }),
+    kept || failed ? 'warning' : 'success'
+  );
+  if (kept)
+    showToast(
+      t(
+        'media.org_kept',
+        '{count, plural, one {# file was already there and was kept.} other {# files were already there and were kept.}}',
+        { count: kept }
+      ),
+      'warning'
+    );
   if (failed) {
-    const why = res.failures?.[0]?.code === 'no_link' ? ' ' + t('media.org_no_link', 'A link is not possible there; nothing was moved.') : '';
-    showToast(t('media.org_not_sorted', '{count, plural, one {# file could not be sorted.} other {# files could not be sorted.}}', { count: failed }) + why, 'error');
+    const why =
+      res.failures?.[0]?.code === 'no_link'
+        ? ' ' + t('media.org_no_link', 'A link is not possible there; nothing was moved.')
+        : '';
+    showToast(
+      t(
+        'media.org_not_sorted',
+        '{count, plural, one {# file could not be sorted.} other {# files could not be sorted.}}',
+        { count: failed }
+      ) + why,
+      'error'
+    );
   }
 }
 
@@ -4139,9 +4437,13 @@ export function firstOpenSize(screenW, screenH) {
 // Where the share pop-over opens: next to the button or menu item that was clicked
 let _lastPointer = null;
 if (typeof document !== 'undefined') {
-  document.addEventListener('pointerdown', (e) => {
-    _lastPointer = { x: e.clientX, y: e.clientY, el: e.target instanceof Element ? e.target : null, t: Date.now() };
-  }, true);
+  document.addEventListener(
+    'pointerdown',
+    (e) => {
+      _lastPointer = { x: e.clientX, y: e.clientY, el: e.target instanceof Element ? e.target : null, t: Date.now() };
+    },
+    true
+  );
 }
 
 /** Places a pop-over below its anchor, right edges aligned, flipped above and kept on screen. */
@@ -4160,7 +4462,11 @@ export function placePopover(pop, anchorRect, gap = 8, margin = 12) {
 }
 
 function shareAnchorRect(anchorEl) {
-  const el = anchorEl || (_lastPointer && Date.now() - _lastPointer.t < 3000 ? _lastPointer.el?.closest('button, .fm-ctx-item, [data-act]') : null);
+  const el =
+    anchorEl ||
+    (_lastPointer && Date.now() - _lastPointer.t < 3000
+      ? _lastPointer.el?.closest('button, .fm-ctx-item, [data-act]')
+      : null);
   const rect = el && el.isConnected ? el.getBoundingClientRect() : null;
   if (rect && (rect.width || rect.height)) return rect; // a closed menu's item has no size
   if (_lastPointer && Date.now() - _lastPointer.t < 3000) {
@@ -4213,7 +4519,7 @@ export function openShareLinkModal(path, fileName, anchorEl = null) {
         </div>
 
         <div class="form-group fmx-x-4" id="fm-share-upload-row" hidden>
-          <label class="fmx-xs-semi-muted"><input type="checkbox" id="fm-share-upload" /> ${escapeHtml(t('fm.share_upload', 'Let people send files into this folder instead (they can\'t see what is in it)'))}</label>
+          <label class="fmx-xs-semi-muted"><input type="checkbox" id="fm-share-upload" /> ${escapeHtml(t('fm.share_upload', "Let people send files into this folder instead (they can't see what is in it)"))}</label>
         </div>
 
         <div class="form-group fmx-x-4">
@@ -4308,7 +4614,10 @@ export function openShareLinkModal(path, fileName, anchorEl = null) {
 
         // Auto-copy
         copyTextToClipboard(fullUrl);
-        showToast(t('toast.share_link_generated_and_copied_to', 'Share link generated and copied to clipboard!'), 'success');
+        showToast(
+          t('toast.share_link_generated_and_copied_to', 'Share link generated and copied to clipboard!'),
+          'success'
+        );
 
         const copyBtn = modal.querySelector('#fm-share-copy-btn');
         if (copyBtn) {
@@ -4326,9 +4635,19 @@ export function openShareLinkModal(path, fileName, anchorEl = null) {
               : t('fm.share_never_expires', 'Never expires'),
           ];
           if (res.has_password) parts.push(t('fm.share_pw_protected', 'Password protected'));
-          if (res.max_downloads) parts.push(t('fm.share_max_dl', 'At most {n, plural, one {# download} other {# downloads}}', { n: res.max_downloads }));
-          if (res.kind === 'upload') parts.push(t('fm.share_upload_meta', 'People can send files here but not see what is in the folder'));
-          parts.push(res.public_url ? t('fm.share_anywhere', 'Works from anywhere') : t('fm.share_home_only', 'Works at home and on your tailnet'));
+          if (res.max_downloads)
+            parts.push(
+              t('fm.share_max_dl', 'At most {n, plural, one {# download} other {# downloads}}', {
+                n: res.max_downloads,
+              })
+            );
+          if (res.kind === 'upload')
+            parts.push(t('fm.share_upload_meta', 'People can send files here but not see what is in the folder'));
+          parts.push(
+            res.public_url
+              ? t('fm.share_anywhere', 'Works from anywhere')
+              : t('fm.share_home_only', 'Works at home and on your tailnet')
+          );
           metaEl.textContent = parts.join(' • ');
         }
 
@@ -4336,7 +4655,10 @@ export function openShareLinkModal(path, fileName, anchorEl = null) {
         if (doneBtn) doneBtn.onclick = closeModal;
         showAwayButton(modal, res, closeModal);
       } catch (err) {
-        showToast(t('toast.failed_to_create_share_link', 'Failed to create share link: {error}', { error: err.message }), 'error');
+        showToast(
+          t('toast.failed_to_create_share_link', 'Failed to create share link: {error}', { error: err.message }),
+          'error'
+        );
         submitBtn.disabled = false;
         setIconLabel(submitBtn, '✨', t('ui.generate_share_link', 'Generate Share Link'));
       }
@@ -4375,4 +4697,3 @@ export function showAwayButton(modal, res, close) {
 if (typeof window !== 'undefined') {
   window.openShareLinkModal = openShareLinkModal;
 }
-

@@ -54,7 +54,7 @@ describe('Sprint 5: Generic Linux Active Provisioner & Samba Engine (Frontend)',
 
     renderStructuredPoolsTopology(container, mockData);
 
-    expect(container.textContent).toContain("Kiboto manages the storage pools");
+    expect(container.textContent).toContain('Kiboto manages the storage pools');
     expect(container.textContent).toContain('Vault Storage Pool');
     expect(container.textContent).toContain('BTRFS · RAID1');
     expect(container.textContent).toContain('Parity protected');
@@ -153,7 +153,7 @@ describe('Sprint 5: Generic Linux Active Provisioner & Samba Engine (Frontend)',
     await fetchAndRenderNetworkShares(container);
 
     expect(btnCreateShare.style.display).toBe('inline-flex');
-    expect(badge.textContent).toContain("Managed by Kiboto");
+    expect(badge.textContent).toContain('Managed by Kiboto');
 
     const delBtn = container.querySelector('.btn-share-delete');
     expect(delBtn).not.toBeNull();
@@ -225,15 +225,19 @@ describe('Sprint 5: Generic Linux Active Provisioner & Samba Engine (Frontend)',
 
     await new Promise((r) => setTimeout(r, 20));
 
-    expect(postSpy).toHaveBeenCalledWith('/api/storage/pools', {
-      name: 'vault',
-      fs_type: 'btrfs',
-      profile: 'raid1',
-      disks: ['sdb', 'sdc'],
-      mountpoint: '/mnt/storage/vault',
-      confirm_name: 'vault',
-      current_password: 'my-password',
-    }, { confirmed: true });
+    expect(postSpy).toHaveBeenCalledWith(
+      '/api/storage/pools',
+      {
+        name: 'vault',
+        fs_type: 'btrfs',
+        profile: 'raid1',
+        disks: ['sdb', 'sdc'],
+        mountpoint: '/mnt/storage/vault',
+        confirm_name: 'vault',
+        current_password: 'my-password',
+      },
+      { confirmed: true }
+    );
     expect(successCalled).toBe(true);
   });
 });

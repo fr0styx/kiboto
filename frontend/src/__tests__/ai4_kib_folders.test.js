@@ -1,11 +1,22 @@
 /** AI 4: "Kib can read these folders": tick boxes, states in words, a menu with words, "Never read". */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { folderName, folderState, folderRows, kibFoldersHtml, renderKibFolders } from '../components/management/kib-folders.js';
+import {
+  folderName,
+  folderState,
+  folderRows,
+  kibFoldersHtml,
+  renderKibFolders,
+} from '../components/management/kib-folders.js';
 import { kibFolderActions } from '../components/management/ai.js';
 import { api } from '../api.js';
 import { showToast } from '../toast.js';
 
-vi.mock('../toast.js', () => ({ showToast: vi.fn(), showConfirmToast: vi.fn(), showPromptToast: vi.fn(), showBottomSheet: vi.fn() }));
+vi.mock('../toast.js', () => ({
+  showToast: vi.fn(),
+  showConfirmToast: vi.fn(),
+  showPromptToast: vi.fn(),
+  showBottomSheet: vi.fn(),
+}));
 
 const res = {
   watched_paths: ['/mnt/user/docs', '/mnt/user/extra'],
@@ -16,7 +27,10 @@ const res = {
 };
 
 describe('Kib folder list (AI 4)', () => {
-  beforeEach(() => { document.body.innerHTML = '<div id="kib-folders-mount"></div>'; vi.clearAllMocks(); });
+  beforeEach(() => {
+    document.body.innerHTML = '<div id="kib-folders-mount"></div>';
+    vi.clearAllMocks();
+  });
   afterEach(() => vi.restoreAllMocks());
 
   it('calls a folder by its name', () => {
@@ -27,17 +41,32 @@ describe('Kib folder list (AI 4)', () => {
 
   it('says what Kib is doing with each chosen folder', () => {
     expect(folderState('/mnt/user/docs', res).text).toBe('Up to date');
-    expect(folderState('/mnt/user/docs', { sync_progress: { state: 'running', current_path: '/mnt/user/docs/2025/a.pdf' } }).text).toBe('Reading');
-    expect(folderState('/mnt/user/docs', { sync_progress: { state: 'running', target_paths: ['/mnt/user/docs'] } }).key).toBe('reading');
-    expect(folderState('/mnt/user/docs', { sync_progress: { state: 'running', current_path: '/mnt/user/docsx' } }).key).toBe('ok');
-    expect(folderState('/mnt/user/docs', { standby_guard: { deferred_queue: [{ path: '/mnt/user/docs' }] } }).text).toBe('Waiting for a drive to wake');
-    expect(folderState('/mnt/user/docs', { standby_guard: { deferred_queue: ['/mnt/user/docs/x'] } }).key).toBe('asleep');
+    expect(
+      folderState('/mnt/user/docs', { sync_progress: { state: 'running', current_path: '/mnt/user/docs/2025/a.pdf' } })
+        .text
+    ).toBe('Reading');
+    expect(
+      folderState('/mnt/user/docs', { sync_progress: { state: 'running', target_paths: ['/mnt/user/docs'] } }).key
+    ).toBe('reading');
+    expect(
+      folderState('/mnt/user/docs', { sync_progress: { state: 'running', current_path: '/mnt/user/docsx' } }).key
+    ).toBe('ok');
+    expect(
+      folderState('/mnt/user/docs', { standby_guard: { deferred_queue: [{ path: '/mnt/user/docs' }] } }).text
+    ).toBe('Waiting for a drive to wake');
+    expect(folderState('/mnt/user/docs', { standby_guard: { deferred_queue: ['/mnt/user/docs/x'] } }).key).toBe(
+      'asleep'
+    );
     expect(folderState('/mnt/user/photos', {}, { in_standby: true }).key).toBe('asleep');
     expect(folderState('/x', undefined).key).toBe('ok');
   });
 
   it('lists found folders and chosen ones, ticked or not', () => {
-    expect(folderRows(res).map((r) => [r.path, r.chosen])).toEqual([['/mnt/user/docs', true], ['/mnt/user/photos', false], ['/mnt/user/extra', true]]);
+    expect(folderRows(res).map((r) => [r.path, r.chosen])).toEqual([
+      ['/mnt/user/docs', true],
+      ['/mnt/user/photos', false],
+      ['/mnt/user/extra', true],
+    ]);
     expect(folderRows({})).toEqual([]);
   });
 
@@ -82,7 +111,7 @@ describe('Kib folder list (AI 4)', () => {
     renderKibFolders(null, res, acts);
   });
 
-  it('the page\'s folder actions call the right routes', async () => {
+  it("the page's folder actions call the right routes", async () => {
     const post = vi.spyOn(api, 'post').mockResolvedValue({ status: 'ok', watched_paths: [] });
     vi.spyOn(api, 'get').mockResolvedValue({});
     const a = kibFolderActions();
@@ -94,7 +123,11 @@ describe('Kib folder list (AI 4)', () => {
     await a.read('/mnt/user/docs');
     await a.forget('/mnt/user/docs');
     await a.unforget('/mnt/user/private');
-    expect(post).toHaveBeenCalledWith('/api/ai/folders', { action: 'remove', target: 'excluded', path: '/mnt/user/private' });
+    expect(post).toHaveBeenCalledWith('/api/ai/folders', {
+      action: 'remove',
+      target: 'excluded',
+      path: '/mnt/user/private',
+    });
     post.mockRejectedValueOnce(new Error('denied'));
     await a.unforget('/mnt/user/private');
     expect(showToast).toHaveBeenLastCalledWith('Could not take the folder off the list: denied', 'error');

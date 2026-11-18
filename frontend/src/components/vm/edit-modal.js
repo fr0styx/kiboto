@@ -61,11 +61,15 @@ export function openQemuErrorModal(vmName, errorMsg, vmId = null) {
         <button id="btn-qemu-error-diag" class="btn-console-act" style="background: rgba(51, 205, 184, 0.2); border-color: #4fd8c4; color: var(--kb-text-accent);">
           ${ico('🛠️')} ${t('vmd.run_diag', 'Run KVM checks')}
         </button>
-        ${vmId ? `
+        ${
+          vmId
+            ? `
           <button id="btn-qemu-error-edit" class="btn-console-act vme-strong-box">
             ${ico('⚙️')} ${t('vmd.edit_settings', 'Edit VM settings')}
           </button>
-        ` : ''}
+        `
+            : ''
+        }
         <button id="btn-qemu-error-dismiss" class="btn-console-act vme-soft-box">
           ${t('vmd.dismiss', 'Dismiss')}
         </button>
@@ -158,12 +162,16 @@ export function openVmEditModal(vmId, vmObj = null) {
         </div>
 
       <div class="smart-modal-body vme-col-3">
-        ${isRunning ? `
+        ${
+          isRunning
+            ? `
           <div style="background: rgba(51,205,184,0.12); border: 1px solid rgba(51,205,184,0.3); border-radius: 6px; padding: 10px 14px; font-size: var(--kb-fs-xs); color: var(--kb-text-accent); display: flex; align-items: center; gap: 8px;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
             <span>${t('vmd.running_locked', 'This machine is running. Shut it down to change its processors or memory. Other changes are used from its next start.')}</span>
           </div>
-        ` : ''}
+        `
+            : ''
+        }
 
         <!-- General Info -->
         <div>
@@ -399,211 +407,212 @@ export function openVmEditModal(vmId, vmObj = null) {
     </div>
   `;
 
-  modal.classList.remove('window-minimized');
-  modal.classList.add('open');
-  modal.style.removeProperty('display');
-  modal.style.display = 'flex';
-  asDialog(modal, { modal: false, escape: false });
-
-  const modalWin = modal.querySelector('.smart-modal-window');
-  const modalHdr = modal.querySelector('.smart-modal-header');
-
-  if (modalWin) {
-    modalWin.classList.remove('window-minimized');
-    modalWin.style.removeProperty('display');
-  }
-
-  const closeBtn = modal.querySelector('#vm-edit-modal-close');
-  const minBtn = modal.querySelector('#vm-edit-modal-min');
-  const maxBtn = modal.querySelector('#vm-edit-modal-max');
-  const cancelBtn = modal.querySelector('#vm-edit-cancel');
-  const submitBtn = modal.querySelector('#vm-edit-submit');
-
-  const ramSlider = modal.querySelector('#vm-edit-ram-slider');
-  const ramDisplay = modal.querySelector('#vm-edit-ram-display');
-  const vcpuSlider = modal.querySelector('#vm-edit-vcpu-slider');
-  const vcpuDisplay = modal.querySelector('#vm-edit-vcpu-display');
-  const overrideToggle = modal.querySelector('#vm-edit-override-toggle');
-  const overridePill = modal.querySelector('#vm-edit-override-pill');
-  const sliderMaxLabel = modal.querySelector('#vm-edit-slider-max-label');
-  const overcommitWarning = modal.querySelector('#vm-edit-overcommit-warning');
-
-  // Make VM Configuration modal draggable & focusable
-  if (modalWin && modalHdr) {
-    makeDraggable(modalWin, modalHdr, 'modal-vm-edit');
-    modalWin.addEventListener('pointerdown', () => bringToFront(modalWin));
-    bringToFront(modalWin);
-  }
-
-  // Register in DockManager for window lifecycle (minimize & restore)
-  if (window.DockManager && typeof window.DockManager.register === 'function') {
-    window.DockManager.register(
-      'modal-vm-edit',
-      modal,
-      '#i-vm',
-      `Edit: ${targetVm.name || 'VM Configuration'}`
-    );
-  }
-
-  let onKeyDown = null;
-  const close = () => {
-    modal.classList.remove('open');
     modal.classList.remove('window-minimized');
-    modal.style.display = 'none';
+    modal.classList.add('open');
+    modal.style.removeProperty('display');
+    modal.style.display = 'flex';
+    asDialog(modal, { modal: false, escape: false });
+
+    const modalWin = modal.querySelector('.smart-modal-window');
+    const modalHdr = modal.querySelector('.smart-modal-header');
+
     if (modalWin) {
       modalWin.classList.remove('window-minimized');
+      modalWin.style.removeProperty('display');
     }
-    if (onKeyDown) {
-      document.removeEventListener('keydown', onKeyDown);
-      onKeyDown = null;
+
+    const closeBtn = modal.querySelector('#vm-edit-modal-close');
+    const minBtn = modal.querySelector('#vm-edit-modal-min');
+    const maxBtn = modal.querySelector('#vm-edit-modal-max');
+    const cancelBtn = modal.querySelector('#vm-edit-cancel');
+    const submitBtn = modal.querySelector('#vm-edit-submit');
+
+    const ramSlider = modal.querySelector('#vm-edit-ram-slider');
+    const ramDisplay = modal.querySelector('#vm-edit-ram-display');
+    const vcpuSlider = modal.querySelector('#vm-edit-vcpu-slider');
+    const vcpuDisplay = modal.querySelector('#vm-edit-vcpu-display');
+    const overrideToggle = modal.querySelector('#vm-edit-override-toggle');
+    const overridePill = modal.querySelector('#vm-edit-override-pill');
+    const sliderMaxLabel = modal.querySelector('#vm-edit-slider-max-label');
+    const overcommitWarning = modal.querySelector('#vm-edit-overcommit-warning');
+
+    // Make VM Configuration modal draggable & focusable
+    if (modalWin && modalHdr) {
+      makeDraggable(modalWin, modalHdr, 'modal-vm-edit');
+      modalWin.addEventListener('pointerdown', () => bringToFront(modalWin));
+      bringToFront(modalWin);
     }
-    if (window.DockManager && typeof window.DockManager.unregister === 'function') {
-      window.DockManager.unregister('modal-vm-edit');
+
+    // Register in DockManager for window lifecycle (minimize & restore)
+    if (window.DockManager && typeof window.DockManager.register === 'function') {
+      window.DockManager.register('modal-vm-edit', modal, '#i-vm', `Edit: ${targetVm.name || 'VM Configuration'}`);
     }
-  };
 
-  onKeyDown = (e) => {
-    if (e.key === 'Escape' && modal.classList.contains('open') && !document.getElementById('confirm-toast-backdrop')) {
-      askBeforeDiscard(modal, close); // VMs report 35
-    }
-  };
-  document.addEventListener('keydown', onKeyDown);
-
-  if (closeBtn) closeBtn.onclick = close;
-  if (cancelBtn) cancelBtn.onclick = close;
-
-  const btnOpenSnaps = modal.querySelector('#vm-edit-open-snapshots');
-  if (btnOpenSnaps) {
-    btnOpenSnaps.onclick = () => {
-      openVmSnapshotsModal(vmId, targetVm);
-    };
-  }
-
-  // Minimize handler
-  if (minBtn) {
-    minBtn.onclick = (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      modal.classList.add('window-minimized');
+    let onKeyDown = null;
+    const close = () => {
       modal.classList.remove('open');
-      modal.style.setProperty('display', 'none', 'important');
+      modal.classList.remove('window-minimized');
+      modal.style.display = 'none';
       if (modalWin) {
-        modalWin.classList.add('window-minimized');
+        modalWin.classList.remove('window-minimized');
       }
-      if (window.DockManager && typeof window.DockManager.minimize === 'function') {
-        window.DockManager.minimize('modal-vm-edit');
+      if (onKeyDown) {
+        document.removeEventListener('keydown', onKeyDown);
+        onKeyDown = null;
+      }
+      if (window.DockManager && typeof window.DockManager.unregister === 'function') {
+        window.DockManager.unregister('modal-vm-edit');
       }
     };
-  }
 
-  // Maximize / Restore toggle handler
-  let isMax = false;
-  let preBounds = null;
-  if (maxBtn) {
-    maxBtn.onclick = (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      if (!isMax) {
-        preBounds = {
-          left: modalWin.style.left,
-          top: modalWin.style.top,
-          width: modalWin.style.width,
-          height: modalWin.style.height,
-          maxWidth: modalWin.style.maxWidth,
-          maxHeight: modalWin.style.maxHeight,
-          position: modalWin.style.position,
-          borderRadius: modalWin.style.borderRadius,
-        };
-        modalWin.classList.add('maximized');
-        modalWin.style.position = 'fixed';
-        modalWin.style.left = '0px';
-        modalWin.style.top = '36px';
-        modalWin.style.width = '100vw';
-        modalWin.style.height = 'calc(100vh - 36px - 72px)';
-        modalWin.style.maxWidth = '100vw';
-        modalWin.style.maxHeight = 'calc(100vh - 36px - 72px)';
-        modalWin.style.borderRadius = '0px';
-        maxBtn.setAttribute('title', t('vmd.restore', 'Restore'));
-        maxBtn.setAttribute('aria-label', t('vmd.restore', 'Restore'));
-        isMax = true;
-      } else {
-        modalWin.classList.remove('maximized');
-        if (preBounds) {
-          modalWin.style.left = preBounds.left || '';
-          modalWin.style.top = preBounds.top || '';
-          modalWin.style.width = preBounds.width || '92%';
-          modalWin.style.height = preBounds.height || '';
-          modalWin.style.maxWidth = preBounds.maxWidth || '580px';
-          modalWin.style.maxHeight = preBounds.maxHeight || '88vh';
-          modalWin.style.position = preBounds.position || '';
-          modalWin.style.borderRadius = preBounds.borderRadius || '14px';
+    onKeyDown = (e) => {
+      if (
+        e.key === 'Escape' &&
+        modal.classList.contains('open') &&
+        !document.getElementById('confirm-toast-backdrop')
+      ) {
+        askBeforeDiscard(modal, close); // VMs report 35
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+
+    if (closeBtn) closeBtn.onclick = close;
+    if (cancelBtn) cancelBtn.onclick = close;
+
+    const btnOpenSnaps = modal.querySelector('#vm-edit-open-snapshots');
+    if (btnOpenSnaps) {
+      btnOpenSnaps.onclick = () => {
+        openVmSnapshotsModal(vmId, targetVm);
+      };
+    }
+
+    // Minimize handler
+    if (minBtn) {
+      minBtn.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        modal.classList.add('window-minimized');
+        modal.classList.remove('open');
+        modal.style.setProperty('display', 'none', 'important');
+        if (modalWin) {
+          modalWin.classList.add('window-minimized');
+        }
+        if (window.DockManager && typeof window.DockManager.minimize === 'function') {
+          window.DockManager.minimize('modal-vm-edit');
+        }
+      };
+    }
+
+    // Maximize / Restore toggle handler
+    let isMax = false;
+    let preBounds = null;
+    if (maxBtn) {
+      maxBtn.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!isMax) {
+          preBounds = {
+            left: modalWin.style.left,
+            top: modalWin.style.top,
+            width: modalWin.style.width,
+            height: modalWin.style.height,
+            maxWidth: modalWin.style.maxWidth,
+            maxHeight: modalWin.style.maxHeight,
+            position: modalWin.style.position,
+            borderRadius: modalWin.style.borderRadius,
+          };
+          modalWin.classList.add('maximized');
+          modalWin.style.position = 'fixed';
+          modalWin.style.left = '0px';
+          modalWin.style.top = '36px';
+          modalWin.style.width = '100vw';
+          modalWin.style.height = 'calc(100vh - 36px - 72px)';
+          modalWin.style.maxWidth = '100vw';
+          modalWin.style.maxHeight = 'calc(100vh - 36px - 72px)';
+          modalWin.style.borderRadius = '0px';
+          maxBtn.setAttribute('title', t('vmd.restore', 'Restore'));
+          maxBtn.setAttribute('aria-label', t('vmd.restore', 'Restore'));
+          isMax = true;
         } else {
-          modalWin.style.left = '';
-          modalWin.style.top = '';
-          modalWin.style.width = '92%';
-          modalWin.style.height = '';
-          modalWin.style.maxWidth = '580px';
-          modalWin.style.maxHeight = '88vh';
-          modalWin.style.position = '';
-          modalWin.style.borderRadius = '14px';
+          modalWin.classList.remove('maximized');
+          if (preBounds) {
+            modalWin.style.left = preBounds.left || '';
+            modalWin.style.top = preBounds.top || '';
+            modalWin.style.width = preBounds.width || '92%';
+            modalWin.style.height = preBounds.height || '';
+            modalWin.style.maxWidth = preBounds.maxWidth || '580px';
+            modalWin.style.maxHeight = preBounds.maxHeight || '88vh';
+            modalWin.style.position = preBounds.position || '';
+            modalWin.style.borderRadius = preBounds.borderRadius || '14px';
+          } else {
+            modalWin.style.left = '';
+            modalWin.style.top = '';
+            modalWin.style.width = '92%';
+            modalWin.style.height = '';
+            modalWin.style.maxWidth = '580px';
+            modalWin.style.maxHeight = '88vh';
+            modalWin.style.position = '';
+            modalWin.style.borderRadius = '14px';
+          }
+          maxBtn.setAttribute('title', t('ui.maximize', 'Maximize'));
+          maxBtn.setAttribute('aria-label', t('ui.maximize', 'Maximize'));
+          isMax = false;
         }
-        maxBtn.setAttribute('title', t('ui.maximize', 'Maximize'));
-        maxBtn.setAttribute('aria-label', t('ui.maximize', 'Maximize'));
-        isMax = false;
-      }
-    };
-  }
+      };
+    }
 
-  // Header double-click to toggle maximize
-  if (modalHdr) {
-    modalHdr.ondblclick = (e) => {
-      if (e.target.closest('button') || e.target.closest('input')) return;
-      if (maxBtn) maxBtn.click();
-    };
-  }
+    // Header double-click to toggle maximize
+    if (modalHdr) {
+      modalHdr.ondblclick = (e) => {
+        if (e.target.closest('button') || e.target.closest('input')) return;
+        if (maxBtn) maxBtn.click();
+      };
+    }
 
-  if (ramSlider && ramDisplay) {
-    ramSlider.oninput = () => {
-      ramDisplay.textContent = `${formatFixed(parseFloat(ramSlider.value), 1)} GB`;
-    };
-  }
+    if (ramSlider && ramDisplay) {
+      ramSlider.oninput = () => {
+        ramDisplay.textContent = `${formatFixed(parseFloat(ramSlider.value), 1)} GB`;
+      };
+    }
 
-  if (overrideToggle) {
-    overrideToggle.onchange = () => {
-      if (overrideToggle.checked) {
-        ramSlider.max = budget.override_max_ram_gb || 31.0;
-        if (sliderMaxLabel) sliderMaxLabel.textContent = t('vmd.ram_override', 'Override max: {gb} GB', { gb: ramSlider.max });
-        if (overridePill) overridePill.style.display = 'inline-block';
-      } else {
-        ramSlider.max = budget.safe_slider_max_gb || 28;
-        if (parseFloat(ramSlider.value) > ramSlider.max) {
-          ramSlider.value = ramSlider.max;
-          ramDisplay.textContent = `${ramSlider.value} GB`;
+    if (overrideToggle) {
+      overrideToggle.onchange = () => {
+        if (overrideToggle.checked) {
+          ramSlider.max = budget.override_max_ram_gb || 31.0;
+          if (sliderMaxLabel)
+            sliderMaxLabel.textContent = t('vmd.ram_override', 'Override max: {gb} GB', { gb: ramSlider.max });
+          if (overridePill) overridePill.style.display = 'inline-block';
+        } else {
+          ramSlider.max = budget.safe_slider_max_gb || 28;
+          if (parseFloat(ramSlider.value) > ramSlider.max) {
+            ramSlider.value = ramSlider.max;
+            ramDisplay.textContent = `${ramSlider.value} GB`;
+          }
+          if (sliderMaxLabel)
+            sliderMaxLabel.textContent = t('vmd.ram_safe', 'Safe max: {gb} GB', { gb: ramSlider.max });
+          if (overridePill) overridePill.style.display = 'none';
         }
-        if (sliderMaxLabel) sliderMaxLabel.textContent = t('vmd.ram_safe', 'Safe max: {gb} GB', { gb: ramSlider.max });
-        if (overridePill) overridePill.style.display = 'none';
-      }
-    };
-  }
+      };
+    }
 
-  if (vcpuSlider && vcpuDisplay) {
-    vcpuSlider.oninput = () => {
-      const val = parseInt(vcpuSlider.value, 10);
-      vcpuDisplay.textContent = `${val} vCPUs`;
-      if (overcommitWarning) {
-        overcommitWarning.style.display = val > hostThreads ? 'block' : 'none';
-      }
-    };
-  }
+    if (vcpuSlider && vcpuDisplay) {
+      vcpuSlider.oninput = () => {
+        const val = parseInt(vcpuSlider.value, 10);
+        vcpuDisplay.textContent = `${val} vCPUs`;
+        if (overcommitWarning) {
+          overcommitWarning.style.display = val > hostThreads ? 'block' : 'none';
+        }
+      };
+    }
 
-  // Host Shares Row Addition
-  const sharesList = modal.querySelector('#vm-edit-host-shares-list');
-  const btnAddShare = modal.querySelector('#btn-edit-add-host-share');
-  const addShareRow = (share = {}) => {
-    const row = document.createElement('div');
-    row.className = 'host-share-row';
-    row.style.cssText = 'display: flex; gap: 6px; align-items: center;';
-    row.innerHTML = `
+    // Host Shares Row Addition
+    const sharesList = modal.querySelector('#vm-edit-host-shares-list');
+    const btnAddShare = modal.querySelector('#btn-edit-add-host-share');
+    const addShareRow = (share = {}) => {
+      const row = document.createElement('div');
+      row.className = 'host-share-row';
+      row.style.cssText = 'display: flex; gap: 6px; align-items: center;';
+      row.innerHTML = `
       <input type="text" class="share-host-path vme-xs-strong-box-grow" placeholder="/mnt/user/appdata" value="${escapeHtml(share.host_path || '/mnt/user/appdata')}" />
       <input type="text" class="share-mount-tag vme-xs-strong-box-grow-2" placeholder="appdata" value="${escapeHtml(share.mount_tag || 'appdata')}" />
       <select class="share-driver" style="flex: 1; padding: 6px 4px; border-radius: 4px; background: var(--lt-b-1a2629ff, #1a2629); border: 1px solid var(--kb-line-10); color: var(--kb-text-strong); font-size: var(--kb-fs-xs);">
@@ -616,25 +625,25 @@ export function openVmEditModal(vmId, vmObj = null) {
       </select>
       <button type="button" class="btn-remove-share vme-crit-box">✕</button>
     `;
-    row.querySelector('.btn-remove-share').onclick = () => row.remove();
-    sharesList.appendChild(row);
-  };
-  if (btnAddShare && sharesList) {
-    btnAddShare.onclick = () => addShareRow();
-    if (targetVm.host_shares && Array.isArray(targetVm.host_shares)) {
-      targetVm.host_shares.forEach((s) => addShareRow(s));
+      row.querySelector('.btn-remove-share').onclick = () => row.remove();
+      sharesList.appendChild(row);
+    };
+    if (btnAddShare && sharesList) {
+      btnAddShare.onclick = () => addShareRow();
+      if (targetVm.host_shares && Array.isArray(targetVm.host_shares)) {
+        targetVm.host_shares.forEach((s) => addShareRow(s));
+      }
     }
-  }
 
-  // Secondary Disks Row Addition
-  const disksList = modal.querySelector('#vm-edit-secondary-disks-list');
-  const btnAddDisk = modal.querySelector('#btn-edit-add-secondary-disk');
-  const addDiskRow = (disk = {}) => {
-    const idx = (disksList.children.length || 0) + 1;
-    const row = document.createElement('div');
-    row.className = 'secondary-disk-row';
-    row.style.cssText = 'display: flex; gap: 6px; align-items: center;';
-    row.innerHTML = `
+    // Secondary Disks Row Addition
+    const disksList = modal.querySelector('#vm-edit-secondary-disks-list');
+    const btnAddDisk = modal.querySelector('#btn-edit-add-secondary-disk');
+    const addDiskRow = (disk = {}) => {
+      const idx = (disksList.children.length || 0) + 1;
+      const row = document.createElement('div');
+      row.className = 'secondary-disk-row';
+      row.style.cssText = 'display: flex; gap: 6px; align-items: center;';
+      row.innerHTML = `
       <input type="text" class="disk-name vme-xs-strong-box-grow" placeholder="${t('ui.disk_name', 'Disk Name')}" value="${escapeHtml(disk.name || `data-disk-${idx}`)}" />
       <input type="number" class="disk-size vme-xs-strong-box-4" min="5" max="4000" placeholder="${t('ui.size_gb', 'Size (GB)')}" value="${disk.size_gb || 50}" />
       <select class="disk-bus" style="width: 80px; padding: 6px 4px; border-radius: 4px; background: var(--lt-b-1a2629ff, #1a2629); border: 1px solid var(--kb-line-10); color: var(--kb-text-strong); font-size: var(--kb-fs-xs);">
@@ -643,53 +652,77 @@ export function openVmEditModal(vmId, vmObj = null) {
       </select>
       <button type="button" class="btn-remove-disk vme-crit-box">✕</button>
     `;
-    row.querySelector('.btn-remove-disk').onclick = () => row.remove();
-    disksList.appendChild(row);
-  };
-  if (btnAddDisk && disksList) {
-    btnAddDisk.onclick = () => addDiskRow();
-    if (targetVm.secondary_disks && Array.isArray(targetVm.secondary_disks)) {
-      targetVm.secondary_disks.forEach((d) => addDiskRow(d));
-    }
-  }
-
-  // Host PCI / GPU passthrough (VFIO). Only devices the host has bound to vfio-pci
-  // can be picked; the rest show the driver they are on, so a host GPU, NIC or
-  // disk controller is never handed to a VM by accident.
-  const pciList = modal.querySelector('#vm-edit-pci-list');
-  const PCI_CLASS_LABELS = {
-    '0300': 'GPU', '0302': 'GPU', '0380': 'GPU', '0403': 'Audio', '0200': 'Network',
-    '0280': 'Wi-Fi', '0108': 'NVMe', '0106': 'SATA', '0104': 'RAID', '0c03': 'USB',
-  };
-  const PCI_HIDDEN_CLASSES = new Set(['0600', '0601', '0604']); // host/ISA/PCI bridges
-  const pciNote = (text, warn = false) =>
-    `<div class="vm-pci-note${warn ? ' warn' : ''}" style="font-size: var(--kb-fs-xs); padding: 6px 10px; border-radius: 4px; background: ${warn ? 'rgba(245,158,11,0.12)' : 'rgba(0,0,0,0.2)'}; color: ${warn ? '#fbbf24' : 'var(--muted)'};">${escapeHtml(text)}</div>`;
-  const renderPciList = (data) => {
-    if (!pciList) return;
-    if (!data || !data.iommu_enabled) {
-      pciList.innerHTML = pciNote(t('vm.pci_no_iommu', 'IOMMU is not enabled on this host, so PCI passthrough is unavailable.'), true);
-      return;
-    }
-    const selected = new Set(currentPciDevices.map((d) => d.slot));
-    const rows = [];
-    if (data.vfio_available === false) {
-      rows.push(pciNote(t('vm.pci_vfio_missing', '/dev/vfio is not available; pass it to the container to use PCI passthrough.'), true));
-    }
-    for (const group of data.groups || []) {
-      const devs = (group.devices || []).filter((d) => !PCI_HIDDEN_CLASSES.has(String(d.class_code || '').slice(0, 4)));
-      if (devs.length === 0) continue;
-      if (devs.length > 1) {
-        rows.push(`<div class="vm-pci-group-note vme-xs-muted-4">${escapeHtml(t('vm.pci_group_note', 'IOMMU group {group}: pass all of its devices together', { group: group.group_id }))}</div>`);
+      row.querySelector('.btn-remove-disk').onclick = () => row.remove();
+      disksList.appendChild(row);
+    };
+    if (btnAddDisk && disksList) {
+      btnAddDisk.onclick = () => addDiskRow();
+      if (targetVm.secondary_disks && Array.isArray(targetVm.secondary_disks)) {
+        targetVm.secondary_disks.forEach((d) => addDiskRow(d));
       }
-      for (const dev of devs) {
-        const slot = String(dev.slot || '').replace(/^0000:/, '').toLowerCase();
-        const kind = PCI_CLASS_LABELS[String(dev.class_code || '').slice(0, 4)] || 'PCI';
-        const ready = Boolean(dev.vfio_ready);
-        const checked = selected.has(slot);
-        const driverText = ready
-          ? 'vfio-pci'
-          : t('vm.pci_needs_vfio', 'On {driver}; bind to vfio-pci first', { driver: dev.driver || t('vm.pci_no_driver', 'no driver') });
-        rows.push(`
+    }
+
+    // Host PCI / GPU passthrough (VFIO). Only devices the host has bound to vfio-pci
+    // can be picked; the rest show the driver they are on, so a host GPU, NIC or
+    // disk controller is never handed to a VM by accident.
+    const pciList = modal.querySelector('#vm-edit-pci-list');
+    const PCI_CLASS_LABELS = {
+      '0300': 'GPU',
+      '0302': 'GPU',
+      '0380': 'GPU',
+      '0403': 'Audio',
+      '0200': 'Network',
+      '0280': 'Wi-Fi',
+      '0108': 'NVMe',
+      '0106': 'SATA',
+      '0104': 'RAID',
+      '0c03': 'USB',
+    };
+    const PCI_HIDDEN_CLASSES = new Set(['0600', '0601', '0604']); // host/ISA/PCI bridges
+    const pciNote = (text, warn = false) =>
+      `<div class="vm-pci-note${warn ? ' warn' : ''}" style="font-size: var(--kb-fs-xs); padding: 6px 10px; border-radius: 4px; background: ${warn ? 'rgba(245,158,11,0.12)' : 'rgba(0,0,0,0.2)'}; color: ${warn ? '#fbbf24' : 'var(--muted)'};">${escapeHtml(text)}</div>`;
+    const renderPciList = (data) => {
+      if (!pciList) return;
+      if (!data || !data.iommu_enabled) {
+        pciList.innerHTML = pciNote(
+          t('vm.pci_no_iommu', 'IOMMU is not enabled on this host, so PCI passthrough is unavailable.'),
+          true
+        );
+        return;
+      }
+      const selected = new Set(currentPciDevices.map((d) => d.slot));
+      const rows = [];
+      if (data.vfio_available === false) {
+        rows.push(
+          pciNote(
+            t('vm.pci_vfio_missing', '/dev/vfio is not available; pass it to the container to use PCI passthrough.'),
+            true
+          )
+        );
+      }
+      for (const group of data.groups || []) {
+        const devs = (group.devices || []).filter(
+          (d) => !PCI_HIDDEN_CLASSES.has(String(d.class_code || '').slice(0, 4))
+        );
+        if (devs.length === 0) continue;
+        if (devs.length > 1) {
+          rows.push(
+            `<div class="vm-pci-group-note vme-xs-muted-4">${escapeHtml(t('vm.pci_group_note', 'IOMMU group {group}: pass all of its devices together', { group: group.group_id }))}</div>`
+          );
+        }
+        for (const dev of devs) {
+          const slot = String(dev.slot || '')
+            .replace(/^0000:/, '')
+            .toLowerCase();
+          const kind = PCI_CLASS_LABELS[String(dev.class_code || '').slice(0, 4)] || 'PCI';
+          const ready = Boolean(dev.vfio_ready);
+          const checked = selected.has(slot);
+          const driverText = ready
+            ? 'vfio-pci'
+            : t('vm.pci_needs_vfio', 'On {driver}; bind to vfio-pci first', {
+                driver: dev.driver || t('vm.pci_no_driver', 'no driver'),
+              });
+          rows.push(`
           <label class="vm-pci-row${ready ? '' : ' disabled'}" style="display: flex; align-items: center; gap: 8px; font-size: var(--kb-fs-xs); padding: 4px 8px; border-radius: 4px; background: var(--kb-shade-20); cursor: ${ready || checked ? 'pointer' : 'not-allowed'}; opacity: ${ready || checked ? '1' : '0.6'};">
             <input type="checkbox" class="vm-pci-check" data-slot="${escapeHtml(slot)}" data-name="${escapeHtml(`${kind} ${dev.name || ''}`.trim())}" ${checked ? 'checked' : ''} ${ready || checked ? '' : 'disabled'} />
             <span class="vme-bold-strong">${escapeHtml(kind)}</span>
@@ -698,51 +731,51 @@ export function openVmEditModal(vmId, vmObj = null) {
             <span class="vm-pci-driver" style="font-size: var(--kb-fs-xs); color: ${ready ? '#34d399' : '#fbbf24'}; white-space: nowrap;">${escapeHtml(driverText)}</span>
           </label>
         `);
+        }
       }
-    }
-    if (rows.length === 0) rows.push(pciNote(t('vm.pci_none', 'No passthrough-capable PCI devices found.')));
-    pciList.innerHTML = rows.join('');
-    pciList.querySelectorAll('.vm-pci-check').forEach((cb) => {
-      cb.onchange = () => {
-        const slot = cb.dataset.slot;
-        currentPciDevices = currentPciDevices.filter((d) => d.slot !== slot);
-        if (cb.checked) currentPciDevices.push({ slot, name: cb.dataset.name || '' });
-      };
-    });
-  };
-  if (pciList) {
-    pciList.innerHTML = pciNote(t('vm.pci_scanning', 'Scanning host PCI devices...'));
-    api
-      .get('/api/vms/iommu-groups')
-      .then(renderPciList)
-      .catch(() => {
-        pciList.innerHTML = pciNote(t('vm.pci_scan_failed', 'Failed to scan host PCI devices.'), true);
+      if (rows.length === 0) rows.push(pciNote(t('vm.pci_none', 'No passthrough-capable PCI devices found.')));
+      pciList.innerHTML = rows.join('');
+      pciList.querySelectorAll('.vm-pci-check').forEach((cb) => {
+        cb.onchange = () => {
+          const slot = cb.dataset.slot;
+          currentPciDevices = currentPciDevices.filter((d) => d.slot !== slot);
+          if (cb.checked) currentPciDevices.push({ slot, name: cb.dataset.name || '' });
+        };
       });
-  }
+    };
+    if (pciList) {
+      pciList.innerHTML = pciNote(t('vm.pci_scanning', 'Scanning host PCI devices...'));
+      api
+        .get('/api/vms/iommu-groups')
+        .then(renderPciList)
+        .catch(() => {
+          pciList.innerHTML = pciNote(t('vm.pci_scan_failed', 'Failed to scan host PCI devices.'), true);
+        });
+    }
 
-  // Host USB Passthrough Device Management
-  const usbList = modal.querySelector('#vm-edit-usb-list');
-  const usbSelect = modal.querySelector('#vm-edit-host-usb-select');
-  const btnAddUsb = modal.querySelector('#btn-edit-add-usb-device');
-  const toggleCustomUsb = modal.querySelector('#btn-edit-toggle-custom-usb');
-  const customUsbWrap = modal.querySelector('#vm-edit-custom-usb-wrap');
-  const btnAddCustomUsb = modal.querySelector('#btn-edit-add-custom-usb');
+    // Host USB Passthrough Device Management
+    const usbList = modal.querySelector('#vm-edit-usb-list');
+    const usbSelect = modal.querySelector('#vm-edit-host-usb-select');
+    const btnAddUsb = modal.querySelector('#btn-edit-add-usb-device');
+    const toggleCustomUsb = modal.querySelector('#btn-edit-toggle-custom-usb');
+    const customUsbWrap = modal.querySelector('#vm-edit-custom-usb-wrap');
+    const btnAddCustomUsb = modal.querySelector('#btn-edit-add-custom-usb');
 
-  const renderUsbList = () => {
-    if (!usbList) return;
-    usbList.innerHTML = '';
-    if (currentUsbDevices.length === 0) {
-      usbList.innerHTML = `
+    const renderUsbList = () => {
+      if (!usbList) return;
+      usbList.innerHTML = '';
+      if (currentUsbDevices.length === 0) {
+        usbList.innerHTML = `
         <div class="vme-xs-muted-box-center" data-i18n="vm.usb_no_devices">
           ${t('vm.usb_no_devices', 'No host USB devices attached to this VM.')}
         </div>
       `;
-      return;
-    }
-    currentUsbDevices.forEach((dev, idx) => {
-      const card = document.createElement('div');
-      card.className = 'usb-device-card';
-      card.innerHTML = `
+        return;
+      }
+      currentUsbDevices.forEach((dev, idx) => {
+        const card = document.createElement('div');
+        card.className = 'usb-device-card';
+        card.innerHTML = `
         <div class="vme-row-7">
           <span class="vme-fs14">🔌</span>
           <div class="vme-size-2">
@@ -759,199 +792,231 @@ export function openVmEditModal(vmId, vmObj = null) {
           <button type="button" class="btn-remove-usb vme-xs-crit-box" data-idx="${idx}" title="${t('ui.remove_device', 'Remove device')}">✕</button>
         </div>
       `;
-      card.querySelector('.btn-remove-usb').onclick = () => {
-        currentUsbDevices.splice(idx, 1);
-        renderUsbList();
+        card.querySelector('.btn-remove-usb').onclick = () => {
+          currentUsbDevices.splice(idx, 1);
+          renderUsbList();
+        };
+        usbList.appendChild(card);
+      });
+    };
+
+    renderUsbList();
+
+    // Load available host USB devices
+    api
+      .get('/api/vms/usb-devices')
+      .then((devs) => {
+        if (!usbSelect) return;
+        usbSelect.innerHTML = '<option value="">' + t('vmd.usb_pick', '— Choose a USB device —') + '</option>';
+        // a root hub is the NAS's own USB controller: not something to hand to a machine (VMs report 26)
+        const usable = Array.isArray(devs) ? devs.filter((d) => d && !d.is_root_hub) : [];
+        if (usable.length > 0) {
+          usable.forEach((d) => {
+            const opt = document.createElement('option');
+            opt.value = JSON.stringify({
+              vendor_id: d.vendor_id,
+              product_id: d.product_id,
+              description: d.description || d.product,
+              manufacturer: d.manufacturer,
+              bus: d.bus,
+              dev: d.dev,
+              nas_use: d.nas_use || '',
+            });
+            const use = usbUseNote(d);
+            opt.textContent = `[${d.vendor_id}:${d.product_id}] ${d.description || d.product}${use ? ` (${use})` : ''}`;
+            usbSelect.appendChild(opt);
+          });
+        } else {
+          usbSelect.innerHTML = '<option value="">' + t('vmd.usb_none', 'No USB devices found') + '</option>';
+        }
+      })
+      .catch(() => {
+        if (!usbSelect) return;
+        usbSelect.innerHTML = '<option value="">' + t('vmd.usb_failed', 'Could not look for USB devices') + '</option>';
+      });
+
+    if (btnAddUsb && usbSelect) {
+      btnAddUsb.onclick = () => {
+        const val = usbSelect.value;
+        if (!val) {
+          showToast(t('toast.select_a_host_usb_device_to', 'Select a host USB device to attach'), 'warning');
+          return;
+        }
+        try {
+          const item = JSON.parse(val);
+          if (!currentUsbDevices.some((d) => d.vendor_id === item.vendor_id && d.product_id === item.product_id)) {
+            confirmUsbUse(item, () => {
+              currentUsbDevices.push(item);
+              renderUsbList();
+              showToast(
+                t('toast.attached_usb_device', 'Attached USB device: {description}', {
+                  description: item.description || item.vendor_id,
+                }),
+                'info'
+              );
+            });
+          } else {
+            showToast(
+              t('toast.device_is_already_attached_to_this', 'Device is already attached to this VM'),
+              'warning'
+            );
+          }
+        } catch (e) {
+          // ignore
+        }
       };
-      usbList.appendChild(card);
-    });
-  };
+    }
 
-  renderUsbList();
+    if (toggleCustomUsb && customUsbWrap) {
+      toggleCustomUsb.onclick = (e) => {
+        if (e) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+        const isHidden =
+          customUsbWrap.style.display === 'none' ||
+          (typeof window !== 'undefined' &&
+            window.getComputedStyle &&
+            window.getComputedStyle(customUsbWrap).display === 'none');
+        customUsbWrap.style.display = isHidden ? 'flex' : 'none';
+        toggleCustomUsb.classList.toggle('active', isHidden);
+        toggleCustomUsb.textContent = isHidden
+          ? t('vm.usb_custom_close_btn', '− Custom VID:PID')
+          : t('vm.usb_custom_btn', '+ Custom VID:PID');
+        if (isHidden) {
+          const vidInput = modal.querySelector('#vm-edit-custom-vid');
+          if (vidInput) vidInput.focus();
+        }
+      };
+    }
 
-  // Load available host USB devices
-  api.get('/api/vms/usb-devices')
-    .then((devs) => {
-      if (!usbSelect) return;
-      usbSelect.innerHTML = '<option value="">' + t('vmd.usb_pick', '— Choose a USB device —') + '</option>';
-      // a root hub is the NAS's own USB controller: not something to hand to a machine (VMs report 26)
-      const usable = Array.isArray(devs) ? devs.filter((d) => d && !d.is_root_hub) : [];
-      if (usable.length > 0) {
-        usable.forEach((d) => {
-          const opt = document.createElement('option');
-          opt.value = JSON.stringify({
-            vendor_id: d.vendor_id,
-            product_id: d.product_id,
-            description: d.description || d.product,
-            manufacturer: d.manufacturer,
-            bus: d.bus,
-            dev: d.dev,
-            nas_use: d.nas_use || '',
-          });
-          const use = usbUseNote(d);
-          opt.textContent = `[${d.vendor_id}:${d.product_id}] ${d.description || d.product}${use ? ` (${use})` : ''}`;
-          usbSelect.appendChild(opt);
+    ['#vm-edit-custom-vid', '#vm-edit-custom-pid', '#vm-edit-custom-desc'].forEach((sel) => {
+      const inp = modal.querySelector(sel);
+      if (inp) {
+        inp.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            btnAddCustomUsb?.click();
+          }
         });
-      } else {
-        usbSelect.innerHTML = '<option value="">' + t('vmd.usb_none', 'No USB devices found') + '</option>';
       }
-    })
-    .catch(() => {
-      if (!usbSelect) return;
-      usbSelect.innerHTML = '<option value="">' + t('vmd.usb_failed', 'Could not look for USB devices') + '</option>';
     });
 
-  if (btnAddUsb && usbSelect) {
-    btnAddUsb.onclick = () => {
-      const val = usbSelect.value;
-      if (!val) {
-        showToast(t('toast.select_a_host_usb_device_to', 'Select a host USB device to attach'), 'warning');
-        return;
-      }
-      try {
-        const item = JSON.parse(val);
-        if (!currentUsbDevices.some((d) => d.vendor_id === item.vendor_id && d.product_id === item.product_id)) {
-          confirmUsbUse(item, () => {
-            currentUsbDevices.push(item);
-            renderUsbList();
-            showToast(t('toast.attached_usb_device', 'Attached USB device: {description}', { description: item.description || item.vendor_id }), 'info');
-          });
+    if (btnAddCustomUsb) {
+      btnAddCustomUsb.onclick = () => {
+        const vid = modal.querySelector('#vm-edit-custom-vid')?.value?.trim().toLowerCase().replace('0x', '');
+        const pid = modal.querySelector('#vm-edit-custom-pid')?.value?.trim().toLowerCase().replace('0x', '');
+        const desc = modal.querySelector('#vm-edit-custom-desc')?.value?.trim() || `USB Device (${vid}:${pid})`;
+        if (!vid || !pid || !/^[0-9a-fA-F]{1,4}$/.test(vid) || !/^[0-9a-fA-F]{1,4}$/.test(pid)) {
+          showToast(
+            t(
+              'toast.please_enter_valid_4_character_hex',
+              'Please enter valid 4-character hex VID and PID (e.g. 10c4, ea60)'
+            ),
+            'warning'
+          );
+          return;
+        }
+        if (!currentUsbDevices.some((d) => d.vendor_id === vid && d.product_id === pid)) {
+          currentUsbDevices.push({ vendor_id: vid, product_id: pid, description: desc, manufacturer: 'Custom' });
+          renderUsbList();
+          modal.querySelector('#vm-edit-custom-vid').value = '';
+          modal.querySelector('#vm-edit-custom-pid').value = '';
+          modal.querySelector('#vm-edit-custom-desc').value = '';
+          showToast(
+            t('toast.added_custom_usb_device', 'Added custom USB device [{vid}:{pid}]', { vid: vid, pid: pid }),
+            'info'
+          );
         } else {
           showToast(t('toast.device_is_already_attached_to_this', 'Device is already attached to this VM'), 'warning');
         }
-      } catch (e) {
-        // ignore
-      }
-    };
-  }
-
-  if (toggleCustomUsb && customUsbWrap) {
-    toggleCustomUsb.onclick = (e) => {
-      if (e) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-      const isHidden = customUsbWrap.style.display === 'none' || (typeof window !== 'undefined' && window.getComputedStyle && window.getComputedStyle(customUsbWrap).display === 'none');
-      customUsbWrap.style.display = isHidden ? 'flex' : 'none';
-      toggleCustomUsb.classList.toggle('active', isHidden);
-      toggleCustomUsb.textContent = isHidden ? t('vm.usb_custom_close_btn', '− Custom VID:PID') : t('vm.usb_custom_btn', '+ Custom VID:PID');
-      if (isHidden) {
-        const vidInput = modal.querySelector('#vm-edit-custom-vid');
-        if (vidInput) vidInput.focus();
-      }
-    };
-  }
-
-  ['#vm-edit-custom-vid', '#vm-edit-custom-pid', '#vm-edit-custom-desc'].forEach((sel) => {
-    const inp = modal.querySelector(sel);
-    if (inp) {
-      inp.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          btnAddCustomUsb?.click();
-        }
-      });
-    }
-  });
-
-  if (btnAddCustomUsb) {
-    btnAddCustomUsb.onclick = () => {
-      const vid = modal.querySelector('#vm-edit-custom-vid')?.value?.trim().toLowerCase().replace('0x', '');
-      const pid = modal.querySelector('#vm-edit-custom-pid')?.value?.trim().toLowerCase().replace('0x', '');
-      const desc = modal.querySelector('#vm-edit-custom-desc')?.value?.trim() || `USB Device (${vid}:${pid})`;
-      if (!vid || !pid || !/^[0-9a-fA-F]{1,4}$/.test(vid) || !/^[0-9a-fA-F]{1,4}$/.test(pid)) {
-        showToast(t('toast.please_enter_valid_4_character_hex', 'Please enter valid 4-character hex VID and PID (e.g. 10c4, ea60)'), 'warning');
-        return;
-      }
-      if (!currentUsbDevices.some((d) => d.vendor_id === vid && d.product_id === pid)) {
-        currentUsbDevices.push({ vendor_id: vid, product_id: pid, description: desc, manufacturer: 'Custom' });
-        renderUsbList();
-        modal.querySelector('#vm-edit-custom-vid').value = '';
-        modal.querySelector('#vm-edit-custom-pid').value = '';
-        modal.querySelector('#vm-edit-custom-desc').value = '';
-        showToast(t('toast.added_custom_usb_device', 'Added custom USB device [{vid}:{pid}]', { vid: vid, pid: pid }), 'info');
-      } else {
-        showToast(t('toast.device_is_already_attached_to_this', 'Device is already attached to this VM'), 'warning');
-      }
-    };
-  }
-
-  if (submitBtn) {
-    submitBtn.onclick = async () => {
-      const newName = modal.querySelector('#vm-edit-name')?.value?.trim();
-      const newDesc = modal.querySelector('#vm-edit-desc')?.value?.trim();
-      const newRam = parseFloat(modal.querySelector('#vm-edit-ram-slider')?.value || targetVm.ram_gb);
-      const newVcpus = parseInt(modal.querySelector('#vm-edit-vcpu-slider')?.value || targetVm.vcpus, 10);
-      const newIso = modal.querySelector('#vm-edit-iso')?.value || null;
-      const newBootOrder = modal.querySelector('input[name="vm-edit-boot-order"]:checked')?.value || 'iso';
-      const newFirmware = modal.querySelector('input[name="vm-edit-firmware"]:checked')?.value || targetVm.firmware || 'seabios';
-      const newVideoAdapter = modal.querySelector('#vm-edit-video-adapter')?.value || targetVm.video_adapter || 'virtio-gpu';
-      const newTpm = !!modal.querySelector('#vm-edit-tpm')?.checked;
-      const newAutostart = modal.querySelector('#vm-edit-autostart')?.checked ?? targetVm.autostart;
-      const overrideLimits = modal.querySelector('#vm-edit-override-toggle')?.checked ?? false;
-
-      const hostShares = [];
-      modal.querySelectorAll('.host-share-row').forEach((row) => {
-        const p = row.querySelector('.share-host-path')?.value?.trim();
-        const t = row.querySelector('.share-mount-tag')?.value?.trim();
-        const d = row.querySelector('.share-driver')?.value || 'virtiofs';
-        const ro = row.querySelector('.share-mode')?.value === 'ro';
-        if (p && t) hostShares.push(shareRecord(p, t, d, ro));
-      });
-
-      const secondaryDisks = [];
-      modal.querySelectorAll('.secondary-disk-row').forEach((row) => {
-        const n = row.querySelector('.disk-name')?.value?.trim();
-        const s = parseInt(row.querySelector('.disk-size')?.value, 10);
-        const b = row.querySelector('.disk-bus')?.value || 'virtio';
-        if (n && s > 0) secondaryDisks.push({ name: n, size_gb: s, bus: b });
-      });
-
-      if (!newName) {
-        showToast(t('toast.vm_name_is_required', 'VM Name is required'), 'error');
-        return;
-      }
-
-      const payload = {
-        name: newName,
-        description: newDesc,
-        ram_gb: newRam,
-        vcpus: newVcpus,
-        iso_path: newIso,
-        boot_order: newBootOrder,
-        firmware: newFirmware,
-        video_adapter: newVideoAdapter,
-        tpm_enabled: newTpm,
-        usb_passthrough: currentUsbDevices,
-        pci_passthrough: currentPciDevices,
-        autostart: newAutostart,
-        override_limits: overrideLimits,
-        host_shares: hostShares,
-        secondary_disks: secondaryDisks,
       };
+    }
 
-      try {
-        submitBtn.disabled = true;
-        submitBtn.textContent = t('ui.saving', 'Saving...');
+    if (submitBtn) {
+      submitBtn.onclick = async () => {
+        const newName = modal.querySelector('#vm-edit-name')?.value?.trim();
+        const newDesc = modal.querySelector('#vm-edit-desc')?.value?.trim();
+        const newRam = parseFloat(modal.querySelector('#vm-edit-ram-slider')?.value || targetVm.ram_gb);
+        const newVcpus = parseInt(modal.querySelector('#vm-edit-vcpu-slider')?.value || targetVm.vcpus, 10);
+        const newIso = modal.querySelector('#vm-edit-iso')?.value || null;
+        const newBootOrder = modal.querySelector('input[name="vm-edit-boot-order"]:checked')?.value || 'iso';
+        const newFirmware =
+          modal.querySelector('input[name="vm-edit-firmware"]:checked')?.value || targetVm.firmware || 'seabios';
+        const newVideoAdapter =
+          modal.querySelector('#vm-edit-video-adapter')?.value || targetVm.video_adapter || 'virtio-gpu';
+        const newTpm = !!modal.querySelector('#vm-edit-tpm')?.checked;
+        const newAutostart = modal.querySelector('#vm-edit-autostart')?.checked ?? targetVm.autostart;
+        const overrideLimits = modal.querySelector('#vm-edit-override-toggle')?.checked ?? false;
 
-        await api.put(`/api/vms/${vmId}`, payload);
+        const hostShares = [];
+        modal.querySelectorAll('.host-share-row').forEach((row) => {
+          const p = row.querySelector('.share-host-path')?.value?.trim();
+          const t = row.querySelector('.share-mount-tag')?.value?.trim();
+          const d = row.querySelector('.share-driver')?.value || 'virtiofs';
+          const ro = row.querySelector('.share-mode')?.value === 'ro';
+          if (p && t) hostShares.push(shareRecord(p, t, d, ro));
+        });
 
-        Object.assign(targetVm, payload);
-        showToast(t('toast.vm_configuration_updated', 'VM \'{newName}\' configuration updated', { newName: newName }), 'success');
-        close();
-        loadVmDashboard();
-        window.dispatchEvent(new CustomEvent('vm-updated', { detail: { id: vmId } }));
-      } catch (err) {
-        showToast(t('toast.failed_to_update_vm', 'Failed to update VM: {error}', { error: err.message || 'Error' }), 'error');
-      } finally {
-        if (submitBtn) {
-          submitBtn.disabled = false;
-          submitBtn.textContent = t('ui.save_configuration', 'Save Configuration');
+        const secondaryDisks = [];
+        modal.querySelectorAll('.secondary-disk-row').forEach((row) => {
+          const n = row.querySelector('.disk-name')?.value?.trim();
+          const s = parseInt(row.querySelector('.disk-size')?.value, 10);
+          const b = row.querySelector('.disk-bus')?.value || 'virtio';
+          if (n && s > 0) secondaryDisks.push({ name: n, size_gb: s, bus: b });
+        });
+
+        if (!newName) {
+          showToast(t('toast.vm_name_is_required', 'VM Name is required'), 'error');
+          return;
         }
-      }
-    };
-  }
-};
+
+        const payload = {
+          name: newName,
+          description: newDesc,
+          ram_gb: newRam,
+          vcpus: newVcpus,
+          iso_path: newIso,
+          boot_order: newBootOrder,
+          firmware: newFirmware,
+          video_adapter: newVideoAdapter,
+          tpm_enabled: newTpm,
+          usb_passthrough: currentUsbDevices,
+          pci_passthrough: currentPciDevices,
+          autostart: newAutostart,
+          override_limits: overrideLimits,
+          host_shares: hostShares,
+          secondary_disks: secondaryDisks,
+        };
+
+        try {
+          submitBtn.disabled = true;
+          submitBtn.textContent = t('ui.saving', 'Saving...');
+
+          await api.put(`/api/vms/${vmId}`, payload);
+
+          Object.assign(targetVm, payload);
+          showToast(
+            t('toast.vm_configuration_updated', "VM '{newName}' configuration updated", { newName: newName }),
+            'success'
+          );
+          close();
+          loadVmDashboard();
+          window.dispatchEvent(new CustomEvent('vm-updated', { detail: { id: vmId } }));
+        } catch (err) {
+          showToast(
+            t('toast.failed_to_update_vm', 'Failed to update VM: {error}', { error: err.message || 'Error' }),
+            'error'
+          );
+        } finally {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = t('ui.save_configuration', 'Save Configuration');
+          }
+        }
+      };
+    }
+  };
 
   if (targetVm) {
     if (!vmState.list.some((v) => v.id === targetVm.id)) vmState.list.push(targetVm);
@@ -973,10 +1038,16 @@ export function openVmEditModal(vmId, vmObj = null) {
         if (!vmState.list.some((v) => v.id === direct.id)) vmState.list.push(direct);
         renderModal(direct);
       } else {
-        showToast(t('toast.virtual_machine_not_found', 'Virtual machine \'{vmId}\' not found', { vmId: vmId }), 'error');
+        showToast(t('toast.virtual_machine_not_found', "Virtual machine '{vmId}' not found", { vmId: vmId }), 'error');
       }
     })
     .catch((err) => {
-      showToast(t('toast.virtual_machine_not_found_2', 'Virtual machine \'{vmId}\' not found: {error}', { vmId: vmId, error: err.message || 'Error' }), 'error');
+      showToast(
+        t('toast.virtual_machine_not_found_2', "Virtual machine '{vmId}' not found: {error}", {
+          vmId: vmId,
+          error: err.message || 'Error',
+        }),
+        'error'
+      );
     });
 }

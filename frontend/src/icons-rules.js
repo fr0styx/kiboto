@@ -10,7 +10,12 @@ export const SKIP = {
   ids: ['screen', 'mini-lcd-canvas'],
 };
 // Tooltips and placeholders are cleaned everywhere except in what people wrote
-export const ATTR_SKIP = { tags: [], attrs: ['data-no-icons'], classes: ['ai-chat-msg', 'fm-name'], ids: ['screen', 'mini-lcd-canvas'] };
+export const ATTR_SKIP = {
+  tags: [],
+  attrs: ['data-no-icons'],
+  classes: ['ai-chat-msg', 'fm-name'],
+  ids: ['screen', 'mini-lcd-canvas'],
+};
 
 export const TEXT_ATTRS = ['title', 'placeholder', 'aria-label'];
 
@@ -19,11 +24,29 @@ export const BUILT_ATTR = 'data-icons-built';
 
 // Readable names for icon-only buttons without a title
 export const ICON_LABELS = {
-  'trash-2': 'Delete', x: 'Close', 'circle-x': 'Close', pencil: 'Edit', 'refresh-cw': 'Refresh',
-  'clipboard-list': 'Copy', search: 'Search', settings: 'Settings', eye: 'Show', 'eye-off': 'Hide',
-  download: 'Download', upload: 'Upload', plus: 'Add', check: 'Done', play: 'Start', pause: 'Pause',
-  square: 'Stop', 'arrow-right': 'Open', save: 'Save', link: 'Link', maximize: 'Full screen',
-  'folder-open': 'Open folder', 'corner-left-up': 'Up one level',
+  'trash-2': 'Delete',
+  x: 'Close',
+  'circle-x': 'Close',
+  pencil: 'Edit',
+  'refresh-cw': 'Refresh',
+  'clipboard-list': 'Copy',
+  search: 'Search',
+  settings: 'Settings',
+  eye: 'Show',
+  'eye-off': 'Hide',
+  download: 'Download',
+  upload: 'Upload',
+  plus: 'Add',
+  check: 'Done',
+  play: 'Start',
+  pause: 'Pause',
+  square: 'Stop',
+  'arrow-right': 'Open',
+  save: 'Save',
+  link: 'Link',
+  maximize: 'Full screen',
+  'folder-open': 'Open folder',
+  'corner-left-up': 'Up one level',
 };
 
 /** A rule set as a CSS selector (for closest()). */

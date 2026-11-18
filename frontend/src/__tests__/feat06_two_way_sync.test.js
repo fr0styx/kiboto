@@ -1,7 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 vi.mock('../api.js', () => ({ api: { get: vi.fn(), put: vi.fn(), post: vi.fn(), delete: vi.fn() } }));
-vi.mock('../toast.js', () => ({ showToast: vi.fn(), showConfirmToast: (msg, ok) => ok(), showDangerConfirm: (msg, ok) => ok() })); // Forget asks first (NUX-23)
+vi.mock('../toast.js', () => ({
+  showToast: vi.fn(),
+  showConfirmToast: (msg, ok) => ok(),
+  showDangerConfirm: (msg, ok) => ok(),
+})); // Forget asks first (NUX-23)
 
 import { api } from '../api.js';
 import { showToast } from '../toast.js';
@@ -26,7 +30,11 @@ describe('two-way sync (FEAT-06)', () => {
     const acts = (p) => [...pairRow(p).querySelectorAll('[data-sync]')].map((b) => b.dataset.sync);
     expect(acts({ ...base, state: 'new' })).toEqual(['preview', 'delete']);
     expect(acts({ ...base, state: 'previewed', preview: { ok: true } })).toEqual(['preview', 'approve', 'delete']);
-    expect(acts({ ...base, state: 'active', last_run: 1, last_result: 'Stopped: too many' })).toEqual(['preview', 'run', 'delete']);
+    expect(acts({ ...base, state: 'active', last_run: 1, last_result: 'Stopped: too many' })).toEqual([
+      'preview',
+      'run',
+      'delete',
+    ]);
     expect(pairRow({ ...base, state: 'active', last_result: 'Stopped: too many' }).textContent).toContain('Stopped');
   });
 
@@ -41,8 +49,19 @@ describe('two-way sync (FEAT-06)', () => {
     form.querySelector('[name="local"]').value = '/mnt/user/docs';
     form.querySelector('[name="remote"]').value = 'gdrive:docs';
     form.dispatchEvent(new Event('submit', { cancelable: true }));
-    await vi.waitFor(() => expect(api.put).toHaveBeenCalledWith('/api/sync/pairs', { id: 'my-docs', new: true, name: 'My Docs', local: '/mnt/user/docs', remote: 'gdrive:docs', every_hours: 6 }));
-    api.get.mockResolvedValue({ pairs: [{ id: 'my-docs', new: true, name: 'My Docs', local: '/a', remote: 'r:b', state: 'new' }] });
+    await vi.waitFor(() =>
+      expect(api.put).toHaveBeenCalledWith('/api/sync/pairs', {
+        id: 'my-docs',
+        new: true,
+        name: 'My Docs',
+        local: '/mnt/user/docs',
+        remote: 'gdrive:docs',
+        every_hours: 6,
+      })
+    );
+    api.get.mockResolvedValue({
+      pairs: [{ id: 'my-docs', new: true, name: 'My Docs', local: '/a', remote: 'r:b', state: 'new' }],
+    });
     await renderTwoWaySync(mount);
     api.post.mockRejectedValue(new Error('remote not found'));
     mount.querySelector('[data-sync="preview"]').click();

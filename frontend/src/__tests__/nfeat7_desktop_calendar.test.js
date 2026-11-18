@@ -10,10 +10,12 @@ import { familyCalendarBody } from '../components/family-calendar.js';
 describe('the family calendar on the desktop (NFEAT-7)', () => {
   it('names the family calendar in the feed list and counts events with a plural', async () => {
     document.body.innerHTML = '<div id="cal-feeds-list"></div>';
-    api.get.mockResolvedValue({ feeds: [
-      { id: 'a', name: 'Familie', provider: 'family', event_count: 1 },
-      { id: 'b', name: 'Work', provider: 'google', event_count: 3 },
-    ] });
+    api.get.mockResolvedValue({
+      feeds: [
+        { id: 'a', name: 'Familie', provider: 'family', event_count: 1 },
+        { id: 'b', name: 'Work', provider: 'google', event_count: 3 },
+      ],
+    });
     await fetchCalendarFeeds();
     const rows = [...document.querySelectorAll('[data-feed-id]')].map((r) => r.textContent.replace(/\s+/g, ' ').trim());
     expect(rows[0]).toContain('1 event · Family calendar');
@@ -22,7 +24,10 @@ describe('the family calendar on the desktop (NFEAT-7)', () => {
   });
 
   it('tells how to show it on the desktop', () => {
-    const box = familyCalendarBody({ installed: true, running: true, server: 's:8093', caldav: 'http://s:8093/remote.php/dav' }, () => {});
+    const box = familyCalendarBody(
+      { installed: true, running: true, server: 's:8093', caldav: 'http://s:8093/remote.php/dav' },
+      () => {}
+    );
     expect(box.textContent).toContain('copy the subscription link and paste it under Calendar Feeds with + Add Feed');
   });
 });

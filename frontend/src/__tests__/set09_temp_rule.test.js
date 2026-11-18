@@ -12,7 +12,7 @@ describe('the temperature rule', () => {
     expect(tempLevel('x')).toBe('unknown');
   });
 
-  it('knows an NVMe drive from any of the server\'s records', () => {
+  it("knows an NVMe drive from any of the server's records", () => {
     expect(isNvmeDrive({ is_nvme: true })).toBe(true);
     expect(isNvmeDrive({ dev: 'nvme0n1' })).toBe(true);
     expect(isNvmeDrive({ name: 'nv0' })).toBe(true);

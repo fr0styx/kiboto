@@ -18,8 +18,14 @@ const GROUPS = {
   iommu_enabled: true,
   vfio_available: true,
   groups: [
-    { group_id: 0, devices: [{ slot: '0000:00:00.0', class_code: '060000', name: 'Host bridge', driver: '', vfio_ready: false }] },
-    { group_id: 2, devices: [{ slot: '0000:00:02.0', class_code: '030000', name: 'iGPU', driver: 'i915', vfio_ready: false }] },
+    {
+      group_id: 0,
+      devices: [{ slot: '0000:00:00.0', class_code: '060000', name: 'Host bridge', driver: '', vfio_ready: false }],
+    },
+    {
+      group_id: 2,
+      devices: [{ slot: '0000:00:02.0', class_code: '030000', name: 'iGPU', driver: 'i915', vfio_ready: false }],
+    },
     {
       group_id: 14,
       devices: [
@@ -45,7 +51,15 @@ async function openEdit(vm, groups = GROUPS) {
   return document.getElementById('modal-vm-edit');
 }
 
-const baseVm = (extra = {}) => ({ id: 'vm-gpu', name: 'gaming', vcpus: 4, ram_gb: 8, state: 'stopped', boot_order: 'disk', ...extra });
+const baseVm = (extra = {}) => ({
+  id: 'vm-gpu',
+  name: 'gaming',
+  vcpus: 4,
+  ram_gb: 8,
+  state: 'stopped',
+  boot_order: 'disk',
+  ...extra,
+});
 
 describe('PCI / GPU passthrough card', () => {
   beforeEach(() => {
@@ -102,4 +116,3 @@ describe('PCI / GPU passthrough card', () => {
     expect(/** @type {HTMLElement} */ (modal.querySelector('.vm-pci-card')).hidden).toBe(false);
   });
 });
-

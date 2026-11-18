@@ -5,7 +5,14 @@
  */
 
 import { api } from '../api.js';
-import { catalogCardHtml, catalogChipsHtml, filterCatalog, installedContainer, appPageUrl, bindCatalogChips } from './catalog-view.js';
+import {
+  catalogCardHtml,
+  catalogChipsHtml,
+  filterCatalog,
+  installedContainer,
+  appPageUrl,
+  bindCatalogChips,
+} from './catalog-view.js';
 import { escapeHtml, reconcileKeyedTable } from '../utils.js';
 import { emptyStateHtml } from './empty-state.js';
 import { ZettEventBus } from '../event-bus.js';
@@ -306,7 +313,8 @@ export function initContainersManager() {
     btnCheckUpdates.onclick = async () => {
       btnCheckUpdates.disabled = true;
       const orig = btnCheckUpdates.innerHTML;
-      btnCheckUpdates.innerHTML = '<span aria-hidden="true">⏳</span> <span>' + escapeHtml(t('cw.checking', 'Checking…')) + '</span>';
+      btnCheckUpdates.innerHTML =
+        '<span aria-hidden="true">⏳</span> <span>' + escapeHtml(t('cw.checking', 'Checking…')) + '</span>';
       try {
         const res = await api.post('/api/docker/updates/check');
         _cwUpdatesCache = res;
@@ -367,13 +375,16 @@ export function initContainersManager() {
     btnStacks.onclick = async () => {
       try {
         const res = await api.get('/api/docker/stacks');
-        const stacks = Array.isArray(res) ? res : (res?.stacks || []);
+        const stacks = Array.isArray(res) ? res : res?.stacks || [];
         if (!stacks.length) {
           showToast(t('toast.no_active_compose_stacks_found', 'No active Compose stacks found.'), 'info');
         }
         openStackPickerModal(stacks);
       } catch (e) {
-        showToast(t('toast.failed_to_load_compose_stacks', 'Failed to load Compose stacks: {message}', { message: e.message }), 'error');
+        showToast(
+          t('toast.failed_to_load_compose_stacks', 'Failed to load Compose stacks: {message}', { message: e.message }),
+          'error'
+        );
         openStackPickerModal([]);
       }
     };
@@ -722,7 +733,10 @@ export function renderAppsSummary(failed = '') {
 export async function loadContainersData(isBackground = false) {
   try {
     // a failed or forbidden request was swallowed here and drawn as "no containers"
-    const [list, docker] = await Promise.all([api.get('/api/docker/containers'), api.get('/api/docker/status').catch(() => null)]);
+    const [list, docker] = await Promise.all([
+      api.get('/api/docker/containers'),
+      api.get('/api/docker/status').catch(() => null),
+    ]);
     _cwContainersList = Array.isArray(list) ? list : [];
     _cwDockerState = docker && typeof docker === 'object' ? docker : null;
     renderContainersWindowTable(_cwContainersList);
@@ -730,7 +744,10 @@ export async function loadContainersData(isBackground = false) {
   } catch (err) {
     renderAppsSummary(err.message || String(err));
     if (!isBackground || _cwContainersList.length === 0) {
-      showToast(t('toast.failed_to_load_containers', 'Failed to load containers: {error}', { error: err.message }), 'error');
+      showToast(
+        t('toast.failed_to_load_containers', 'Failed to load containers: {error}', { error: err.message }),
+        'error'
+      );
       const tbody = document.getElementById('cw-docker-containers-tbody');
       if (tbody && _cwContainersList.length === 0) {
         tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--crit, #ef4444); padding:24px;">${escapeHtml(t('toast.failed_to_load_containers', 'Failed to load containers: {error}', { error: err.message }))}</td></tr>`;
@@ -760,7 +777,8 @@ export function renderCwCatalogGrid() {
   if (!grid) return;
   const pills = document.querySelector('.cw-catalog-filter-pills');
   if (pills) {
-    if (_cwCatalogCategory !== 'all' && !_cwCatalogApps.some((a) => (a.category || 'other') === _cwCatalogCategory)) _cwCatalogCategory = 'all';
+    if (_cwCatalogCategory !== 'all' && !_cwCatalogApps.some((a) => (a.category || 'other') === _cwCatalogCategory))
+      _cwCatalogCategory = 'all';
     pills.innerHTML = catalogChipsHtml(_cwCatalogApps, _cwCatalogCategory, 'cw-cat-btn');
     bindCatalogChips(pills, '.cw-cat-btn', (cat) => {
       _cwCatalogCategory = cat;
@@ -875,7 +893,9 @@ export function renderContainersWindowTable(containersList = null) {
       return;
     }
     tbody.innerHTML = `<tr><td colspan="8">${emptyStateHtml(/** @type {any} */ ({ title: t('apps.empty_title', 'No apps yet.'), body: t('apps.empty_body', 'Choose one to install.'), action: { id: 'cw-empty-get-apps', label: t('apps.get_apps', 'Get apps') } }))}</td></tr>`;
-    tbody.querySelector('#cw-empty-get-apps')?.addEventListener('click', () => document.getElementById('btn-cw-catalog')?.click());
+    tbody
+      .querySelector('#cw-empty-get-apps')
+      ?.addEventListener('click', () => document.getElementById('btn-cw-catalog')?.click());
     return;
   }
 
@@ -959,7 +979,8 @@ export function renderContainersWindowTable(containersList = null) {
     return;
   }
 
-  const currentHost = typeof window !== 'undefined' && window.location.hostname ? window.location.hostname : 'localhost';
+  const currentHost =
+    typeof window !== 'undefined' && window.location.hostname ? window.location.hostname : 'localhost';
 
   // Clear the "no containers" placeholder row, but never the virtual spacer rows:
   // wiping those collapses the table and throws the scroll position to the top.
@@ -981,7 +1002,6 @@ export function renderContainersWindowTable(containersList = null) {
     initSynchronizedTableScrollbars(cwWrap, null, cwStickyScroll);
   }
 }
-
 
 // ---- Large inventories: render only rows near the viewport ----
 // Below CW_VIRTUALIZE_MIN_ROWS the table renders every row as before. Above it,
@@ -1106,14 +1126,28 @@ function renderCwRows(tbody, filtered, currentHost) {
     // with the Docker details, each stack is named in a header row above its containers
     if (!_cwSortCol && appsDetailsOn()) items = withStackHeads(filtered);
   }
-  tbody.classList.toggle('cw-has-heads', items.some((c) => c.__stack !== undefined));
+  tbody.classList.toggle(
+    'cw-has-heads',
+    items.some((c) => c.__stack !== undefined)
+  );
 
   reconcileKeyedTable(
     tbody,
     items,
-    (c) => (c.__spacer ? `__cw-spacer-${c.__spacer}` : c.__stack !== undefined ? `__cw-stack-${c.__stack}` : c.id || c.name),
-    (c) => (c.__spacer ? createCwSpacerRow(c) : c.__stack !== undefined ? createCwStackHead(c) : createCwContainerRow(c, currentHost)),
-    (tr, c) => (c.__spacer ? updateCwSpacerRow(tr, c) : c.__stack !== undefined ? updateCwStackHead(tr, c) : updateCwContainerRow(tr, c, currentHost))
+    (c) =>
+      c.__spacer ? `__cw-spacer-${c.__spacer}` : c.__stack !== undefined ? `__cw-stack-${c.__stack}` : c.id || c.name,
+    (c) =>
+      c.__spacer
+        ? createCwSpacerRow(c)
+        : c.__stack !== undefined
+          ? createCwStackHead(c)
+          : createCwContainerRow(c, currentHost),
+    (tr, c) =>
+      c.__spacer
+        ? updateCwSpacerRow(tr, c)
+        : c.__stack !== undefined
+          ? updateCwStackHead(tr, c)
+          : updateCwContainerRow(tr, c, currentHost)
   );
 
   // Spacer maths uses the real row-to-row distance: it includes the gap between
@@ -1218,7 +1252,7 @@ function bindCwTableEvents(tbody) {
       if (!cid || !act) return;
 
       if (act === 'more-sheet') {
-        const c = _cwContainersList.find((item) => (item.id === cid || item.name === cname));
+        const c = _cwContainersList.find((item) => item.id === cid || item.name === cname);
         if (!c) return;
         const updateInfo = _cwUpdatesCache?.containers?.[c.name] || _cwUpdatesCache?.containers?.[c.id];
         const hasUpdate = Boolean(updateInfo?.has_update);
@@ -1309,10 +1343,20 @@ function bindCwTableEvents(tbody) {
             actBtn.disabled = true;
             const originalContent = actBtn.innerHTML;
             actBtn.innerHTML = '⏳';
-            showToast(t('toast.updating_to_latest_image', 'Updating "{cname}" to latest image...', { cname: cname }), 'info');
+            showToast(
+              t('toast.updating_to_latest_image', 'Updating "{cname}" to latest image...', { cname: cname }),
+              'info'
+            );
             try {
               await api.post(`/api/docker/containers/${encodeURIComponent(cid)}/update-image`);
-              showToast(t('toast.container_updated_and_restarted_successfully', 'Container "{cname}" updated and restarted successfully!', { cname: cname }), 'success');
+              showToast(
+                t(
+                  'toast.container_updated_and_restarted_successfully',
+                  'Container "{cname}" updated and restarted successfully!',
+                  { cname: cname }
+                ),
+                'success'
+              );
               markCwContainerUpdated(cname, cid);
               await Promise.all([refreshCwUpdatesStatus(), loadContainersData()]);
               renderContainersWindowTable(_cwContainersList);
@@ -1343,7 +1387,13 @@ function bindCwTableEvents(tbody) {
           // the server names the file `filename` and its size `size_human`: every message said "archive.tar.gz" (SET-14)
           const archiveName = res?.backup?.filename || res?.backup?.archive_file || 'archive.tar.gz';
           const sizeStr = res?.backup?.size_human || res?.backup?.archive_size_formatted || '';
-          showToast(t('toast.app_backed_up', 'App "{name}" backed up ({archive}).', { name: cname, archive: sizeStr ? `${archiveName}, ${sizeStr}` : archiveName }), 'success');
+          showToast(
+            t('toast.app_backed_up', 'App "{name}" backed up ({archive}).', {
+              name: cname,
+              archive: sizeStr ? `${archiveName}, ${sizeStr}` : archiveName,
+            }),
+            'success'
+          );
         } catch (err) {
           showToast(t('toast.backup_failed', 'Backup failed: {error}', { error: err.message }), 'error');
         } finally {
@@ -1448,9 +1498,22 @@ export function householdMenu(c, actBtn, hasUpdate) {
   }
   if (hasUpdate) items.push({ icon: '⬆️', label: t('appmenu.update', 'Update'), onClick: press('update-single') });
   items.push({ icon: '💾', label: t('appmenu.backup', 'Back up now'), onClick: press('backup') });
-  items.push({ icon: '📋', label: t('appmenu.log', 'Show the log'), onClick: () => openContainerInspector(c.id, c.name, 'logs') });
-  items.push({ icon: '🔍', label: t('appmenu.details', 'Details'), onClick: () => openContainerInspector(c.id, c.name, 'overview') });
-  items.push({ icon: '🗑️', label: t('appmenu.remove', 'Remove'), destructive: true, onClick: () => openContainerDeleteModal(c.id, c.name, c.image) });
+  items.push({
+    icon: '📋',
+    label: t('appmenu.log', 'Show the log'),
+    onClick: () => openContainerInspector(c.id, c.name, 'logs'),
+  });
+  items.push({
+    icon: '🔍',
+    label: t('appmenu.details', 'Details'),
+    onClick: () => openContainerInspector(c.id, c.name, 'overview'),
+  });
+  items.push({
+    icon: '🗑️',
+    label: t('appmenu.remove', 'Remove'),
+    destructive: true,
+    onClick: () => openContainerDeleteModal(c.id, c.name, c.image),
+  });
   return items;
 }
 
@@ -1467,4 +1530,3 @@ export function byStackThenName(a, b) {
   const nb = (b.name || '').toLowerCase();
   return na < nb ? -1 : na > nb ? 1 : 0;
 }
-

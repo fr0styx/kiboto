@@ -15,7 +15,10 @@ export const EXCEPTIONS = {
 const SERIOUS = new Set(['high', 'critical']);
 
 /** The advisory id of an audit "via" entry (its GitHub advisory URL ends with it). */
-export const advisoryId = (via) => String(via.url || '').split('/').pop();
+export const advisoryId = (via) =>
+  String(via.url || '')
+    .split('/')
+    .pop();
 
 /** "1.2.10" > "1.2.9": compares dotted versions number by number. */
 export function newer(a, b) {
@@ -50,24 +53,30 @@ export function problems(audit, shipped, latest, exceptions = EXCEPTIONS) {
   const reached = (name, seen = new Set()) => {
     if (seen.has(name)) return [];
     seen.add(name);
-    return ((vulns[name] && vulns[name].via) || []).flatMap((via) => (typeof via === 'string' ? reached(via, seen) : [advisoryId(via)]));
+    return ((vulns[name] && vulns[name].via) || []).flatMap((via) =>
+      typeof via === 'string' ? reached(via, seen) : [advisoryId(via)]
+    );
   };
   const excused = new Set(
     Object.keys(vulns).filter((name) => {
       const ids = reached(name);
       return ids.length > 0 && ids.every((id) => live.has(id));
-    }),
+    })
   );
   for (const [name, v] of Object.entries(vulns)) {
     if (!SERIOUS.has(v.severity)) continue;
-    if (!excused.has(name)) out.push(`${name}: ${v.severity} (${(v.via || []).map((x) => (typeof x === 'string' ? x : x.url)).join(', ')})`);
-    else if (shipped.has(name)) out.push(`${name}: excused advisory but it ships (production dependency); no exception for that`);
+    if (!excused.has(name))
+      out.push(`${name}: ${v.severity} (${(v.via || []).map((x) => (typeof x === 'string' ? x : x.url)).join(', ')})`);
+    else if (shipped.has(name))
+      out.push(`${name}: excused advisory but it ships (production dependency); no exception for that`);
   }
   return out;
 }
 
 function shippedNames() {
-  const tree = JSON.parse(execFileSync('npm', ['ls', '--omit=dev', '--all', '--json'], { encoding: 'utf8', maxBuffer: 64 << 20 }));
+  const tree = JSON.parse(
+    execFileSync('npm', ['ls', '--omit=dev', '--all', '--json'], { encoding: 'utf8', maxBuffer: 64 << 20 })
+  );
   const names = new Set();
   const walk = (deps) => {
     for (const [name, d] of Object.entries(deps || {})) {
@@ -97,5 +106,7 @@ if (import.meta.url === pathToFileURL(process.argv[1] || '').href) {
     console.error(`npm audit gate: ${found.length} problem(s)\n` + found.map((l) => `  ${l}`).join('\n'));
     process.exit(1);
   }
-  console.log(`npm audit gate: no high or critical advisory (${Object.keys(EXCEPTIONS).length} named exception(s) for build tools)`);
+  console.log(
+    `npm audit gate: no high or critical advisory (${Object.keys(EXCEPTIONS).length} named exception(s) for build tools)`
+  );
 }

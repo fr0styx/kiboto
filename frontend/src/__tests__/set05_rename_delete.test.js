@@ -21,7 +21,10 @@ const BIN = '/mnt/user/Docs/.RecycleBin/files/1794349636_budget.csv';
 
 describe('rename (SET-05)', () => {
   it('sends what the server takes: the item and its new name', () => {
-    expect(renameBody('/mnt/user/Docs/old.txt', ' new.txt ')).toEqual({ path: '/mnt/user/Docs/old.txt', new_name: 'new.txt' });
+    expect(renameBody('/mnt/user/Docs/old.txt', ' new.txt ')).toEqual({
+      path: '/mnt/user/Docs/old.txt',
+      new_name: 'new.txt',
+    });
   });
 
   it('no rename request carries the old field names', () => {
@@ -52,7 +55,9 @@ describe('one delete, one question (SET-05)', () => {
   });
 
   it('in the bin it is red, says "for good", and shows the name the file had', async () => {
-    fm.fileList = [{ path: BIN, name: '1794349636_budget.csv', trash_id: 't1', original_path: '/mnt/user/Docs/budget.csv' }];
+    fm.fileList = [
+      { path: BIN, name: '1794349636_budget.csv', trash_id: 't1', original_path: '/mnt/user/Docs/budget.csv' },
+    ];
     fm.askDelete([BIN]);
     expect(showConfirmToast).not.toHaveBeenCalled();
     const [title, msg, run, , options] = showDangerConfirm.mock.calls[0];
@@ -74,7 +79,7 @@ describe('one delete, one question (SET-05)', () => {
     const page = src('components/file-manager.js');
     expect(page).not.toContain("t('common.confirm', 'Confirm Action'), confirmMsg");
     expect(page).toContain("this.bulkDeleteBtn?.addEventListener('click', () => this.bulkDelete());");
-    expect(page).toContain("this.askDelete([path]);");
+    expect(page).toContain('this.askDelete([path]);');
   });
 
   it('the request carries no "permanent" field the server never had', async () => {
@@ -90,14 +95,22 @@ describe('one delete, one question (SET-05)', () => {
 describe('the right-click menu (SET-05)', () => {
   const open = (fm, item = null) => {
     document.body.innerHTML = '';
-    const menu = new FmContextMenu({ currentPath: '/mnt/user/Docs', currentSortBy: 'name', currentSortDir: 'asc', ...fm });
+    const menu = new FmContextMenu({
+      currentPath: '/mnt/user/Docs',
+      currentSortBy: 'name',
+      currentSortDir: 'asc',
+      ...fm,
+    });
     menu.show(new MouseEvent('contextmenu', { clientX: 5, clientY: 5 }), item);
     return document.getElementById('fm-context-menu');
   };
   const acts = (el) => [...el.querySelectorAll('[data-act]')].map((r) => r.dataset.act);
 
   it('has no "Delete permanently" and no Shift+Delete', () => {
-    const el = open({ selectedPaths: new Set(['/mnt/user/Docs/a.txt']) }, { name: 'a.txt', path: '/mnt/user/Docs/a.txt', is_dir: false });
+    const el = open(
+      { selectedPaths: new Set(['/mnt/user/Docs/a.txt']) },
+      { name: 'a.txt', path: '/mnt/user/Docs/a.txt', is_dir: false }
+    );
     expect(acts(el)).toContain('trash');
     expect(acts(el)).not.toContain('delete-perm');
     expect(el.textContent).toContain('Move to the Recycle Bin');
@@ -109,11 +122,15 @@ describe('the right-click menu (SET-05)', () => {
     expect(el.style.display).toBe('block');
     expect(acts(el)).toEqual(expect.arrayContaining(['new-window', 'paste', 'fav-toggle-here', 'trash']));
     // nothing about "the" item: none was clicked
-    for (const act of ['rename', 'info', 'share', 'checksum', 'versions', 'ask-kib']) expect(acts(el)).not.toContain(act);
+    for (const act of ['rename', 'info', 'share', 'checksum', 'versions', 'ask-kib'])
+      expect(acts(el)).not.toContain(act);
   });
 
   it('in the bin the delete row says what it does', () => {
-    const el = open({ selectedPaths: new Set([BIN]), _inBin: true }, { name: '1794349636_budget.csv', path: BIN, is_dir: false, trash_id: 't1' });
+    const el = open(
+      { selectedPaths: new Set([BIN]), _inBin: true },
+      { name: '1794349636_budget.csv', path: BIN, is_dir: false, trash_id: 't1' }
+    );
     expect(el.textContent).toContain('Delete for good');
     expect(el.textContent).not.toContain('Move to the Recycle Bin');
   });

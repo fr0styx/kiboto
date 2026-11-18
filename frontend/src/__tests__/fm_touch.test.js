@@ -9,7 +9,12 @@ vi.mock('../api.js', () => ({
   auth: { getToken: vi.fn().mockReturnValue('') },
   ApiError: class ApiError extends Error {},
 }));
-vi.mock('../toast.js', () => ({ showToast: vi.fn(), showConfirmToast: vi.fn(), showPromptToast: vi.fn(), showBottomSheet: vi.fn() }));
+vi.mock('../toast.js', () => ({
+  showToast: vi.fn(),
+  showConfirmToast: vi.fn(),
+  showPromptToast: vi.fn(),
+  showBottomSheet: vi.fn(),
+}));
 
 function pointer(el, type, pointerType) {
   const ev = new Event(type, { bubbles: true });
@@ -34,13 +39,21 @@ async function makeExplorer() {
     { name: 'Trips', path: '/mnt/user/Photos/Trips', is_dir: true },
     { name: 'beach.jpg', path: '/mnt/user/Photos/beach.jpg', is_dir: false },
   ];
-  fm.list.innerHTML = fm.fileList.map((f) => `<div class="fm-row" data-path="${f.path}"><span class="fm-col-check"><input type="checkbox" class="fm-checkbox"></span><span class="fm-name">${f.name}</span></div>`).join('');
-  const row = (name) => fm.list.querySelector(`[data-path="${fm.fileList.find((f) => f.name === name).path}"] .fm-name`);
+  fm.list.innerHTML = fm.fileList
+    .map(
+      (f) =>
+        `<div class="fm-row" data-path="${f.path}"><span class="fm-col-check"><input type="checkbox" class="fm-checkbox"></span><span class="fm-name">${f.name}</span></div>`
+    )
+    .join('');
+  const row = (name) =>
+    fm.list.querySelector(`[data-path="${fm.fileList.find((f) => f.name === name).path}"] .fm-name`);
   return { fm, row };
 }
 
 describe('explorer on touch screens', () => {
-  beforeEach(() => { document.body.innerHTML = ''; });
+  beforeEach(() => {
+    document.body.innerHTML = '';
+  });
 
   it('a tap opens a photo, a folder, and the parent folder', async () => {
     const { fm, row } = await makeExplorer();
@@ -91,11 +104,19 @@ describe('explorer on touch screens', () => {
 
 describe('windows after the screen widens', () => {
   it('a window left without a position goes back below the navigation bar', async () => {
-    document.body.innerHTML = '<nav class="suite-navbar"></nav><div class="os-window" id="vm-window" style="display:block"></div>';
+    document.body.innerHTML =
+      '<nav class="suite-navbar"></nav><div class="os-window" id="vm-window" style="display:block"></div>';
     const bar = document.querySelector('.suite-navbar');
     const win = document.getElementById('vm-window');
     bar.getBoundingClientRect = () => ({ top: 0, bottom: 52, left: 0, right: 1280, width: 1280, height: 52 });
-    win.getBoundingClientRect = () => ({ top: Number.parseInt(win.style.top || '0', 10), left: 0, width: 600, height: 400, bottom: 400, right: 600 });
+    win.getBoundingClientRect = () => ({
+      top: Number.parseInt(win.style.top || '0', 10),
+      left: 0,
+      width: 600,
+      height: 400,
+      bottom: 400,
+      right: 600,
+    });
     const dock = await import('../components/dock.js');
     window.innerWidth = 375;
     dock.restoreWindowsAfterWiden();

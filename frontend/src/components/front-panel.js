@@ -37,7 +37,10 @@ function row(id, label, on, onChange) {
   return wrap;
 }
 
-export async function renderFrontPanel(mount = document.getElementById('general-front-panel'), stats = state.latestStats) {
+export async function renderFrontPanel(
+  mount = document.getElementById('general-front-panel'),
+  stats = state.latestStats
+) {
   if (!mount) return false;
   const parts = frontPanelParts(stats);
   if (!parts.light && !parts.screen) {
@@ -55,7 +58,11 @@ export async function renderFrontPanel(mount = document.getElementById('general-
     } catch {
       /* not readable: shown as on, as the light usually is */
     }
-    kids.push(row('front-light-on', t('front.light', 'Front light'), on, (v) => api.post('/api/led', { power: v ? 'on' : 'off' })));
+    kids.push(
+      row('front-light-on', t('front.light', 'Front light'), on, (v) =>
+        api.post('/api/led', { power: v ? 'on' : 'off' })
+      )
+    );
   }
   if (parts.screen) {
     let on = true;
@@ -64,9 +71,14 @@ export async function renderFrontPanel(mount = document.getElementById('general-
     } catch {
       /* as above */
     }
-    kids.push(row('front-screen-on', t('front.screen', 'Front screen'), on, (v) => api.post('/api/screen', { power: v })));
+    kids.push(
+      row('front-screen-on', t('front.screen', 'Front screen'), on, (v) => api.post('/api/screen', { power: v }))
+    );
   }
-  const more = Object.assign(document.createElement('button'), { type: 'button', className: 'btn-pill-toggle front-panel-more' });
+  const more = Object.assign(document.createElement('button'), {
+    type: 'button',
+    className: 'btn-pill-toggle front-panel-more',
+  });
   more.textContent = t('front.more', 'Colours, brightness and night times');
   more.addEventListener('click', () => ROUTES.hardware?.());
   kids.push(more);

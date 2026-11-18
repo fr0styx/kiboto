@@ -14,8 +14,12 @@ describe('file manager delete prompts and counts', () => {
   });
 
   it('says a delete inside the Recycle Bin is for good', () => {
-    expect(binConfirmText(['/mnt/user/.RecycleBin/old.txt'])).toBe("“old.txt” will be deleted for good. This can't be undone.");
-    expect(binConfirmText(['/mnt/user/.RecycleBin/a', '/mnt/user/.RecycleBin/b'])).toContain('2 items will be deleted for good');
+    expect(binConfirmText(['/mnt/user/.RecycleBin/old.txt'])).toBe(
+      "“old.txt” will be deleted for good. This can't be undone."
+    );
+    expect(binConfirmText(['/mnt/user/.RecycleBin/a', '/mnt/user/.RecycleBin/b'])).toContain(
+      '2 items will be deleted for good'
+    );
     expect(binConfirmText(['/mnt/user/.RecycleBin/a', '/mnt/user/b'])).toBe('Move 2 items to the Recycle Bin?');
   });
 

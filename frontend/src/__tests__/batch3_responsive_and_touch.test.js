@@ -137,7 +137,9 @@ describe('Batch 3: Responsive Layout Overhaul & Touch Navigation (<1024px & Mobi
       document.body.classList.add('mobile-mode');
       const closeBtn = modalHeader.querySelector('.close-btn');
       let closeClicked = false;
-      closeBtn.addEventListener('click', () => { closeClicked = true; });
+      closeBtn.addEventListener('click', () => {
+        closeClicked = true;
+      });
 
       makeDraggable(modalWindow, modalHeader, 'test-modal');
 
@@ -172,8 +174,12 @@ describe('Batch 3: Responsive Layout Overhaul & Touch Navigation (<1024px & Mobi
 
     it('contains mobile stacked card rules for docker and disk tables', () => {
       expect(cssContent).toMatch(/\.docker-table\s+thead[^{]*\{[^}]*display:\s*none\s*!important/);
-      expect(cssContent).toMatch(/\.docker-table\s+tbody[^{]*\{[^}]*display:\s*flex\s*!important;\s*flex-direction:\s*column\s*!important/);
-      expect(cssContent).toMatch(/\.docker-table\s+tbody\s+tr[^{]*\{[^}]*display:\s*flex\s*!important;\s*flex-direction:\s*column\s*!important/);
+      expect(cssContent).toMatch(
+        /\.docker-table\s+tbody[^{]*\{[^}]*display:\s*flex\s*!important;\s*flex-direction:\s*column\s*!important/
+      );
+      expect(cssContent).toMatch(
+        /\.docker-table\s+tbody\s+tr[^{]*\{[^}]*display:\s*flex\s*!important;\s*flex-direction:\s*column\s*!important/
+      );
     });
 
     it('enforces 44px minimum hit targets for touch elements on mobile', () => {
@@ -183,12 +189,18 @@ describe('Batch 3: Responsive Layout Overhaul & Touch Navigation (<1024px & Mobi
     });
 
     it('enforces zero horizontal overflow on mission control window and panes on mobile', () => {
-      expect(cssContent).toMatch(/#management-modal-overlay\s+#management-window[^{]*\{[^}]*max-width:\s*100%\s*!important/);
-      expect(cssContent).toMatch(/#management-modal-overlay\s+\.mgmt-content-pane[^{]*\{[^}]*overflow-x:\s*hidden\s*!important/);
+      expect(cssContent).toMatch(
+        /#management-modal-overlay\s+#management-window[^{]*\{[^}]*max-width:\s*100%\s*!important/
+      );
+      expect(cssContent).toMatch(
+        /#management-modal-overlay\s+\.mgmt-content-pane[^{]*\{[^}]*overflow-x:\s*hidden\s*!important/
+      );
     });
 
     it('enforces min-width: 0 !important on mobile windows to prevent viewport overflow', () => {
-      expect(cssContent).toMatch(/#management-modal-overlay\s+#management-window[^{]*\{[^}]*min-width:\s*0\s*!important/);
+      expect(cssContent).toMatch(
+        /#management-modal-overlay\s+#management-window[^{]*\{[^}]*min-width:\s*0\s*!important/
+      );
       expect(cssContent).toMatch(/\.smart-modal-window:not\(#copy-toast\)[^{]*\{[^}]*min-width:\s*0\s*!important/);
       expect(cssContent).toMatch(/\.os-window,\s*\.file-manager-window[^{]*\{[^}]*min-width:\s*0\s*!important/);
     });
@@ -249,7 +261,9 @@ describe('Batch 3: Responsive Layout Overhaul & Touch Navigation (<1024px & Mobi
       makeDraggable(mobileWin, header, 'test-fm-mobile');
 
       // Pointer down
-      header.dispatchEvent(new PointerEvent('pointerdown', { clientX: 100, clientY: 50, button: 0, pointerId: 1, bubbles: true }));
+      header.dispatchEvent(
+        new PointerEvent('pointerdown', { clientX: 100, clientY: 50, button: 0, pointerId: 1, bubbles: true })
+      );
       expect(mobileWin.classList.contains('window-dragging')).toBe(true);
 
       // Move down 40px

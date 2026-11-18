@@ -8,9 +8,7 @@ import { escapeHtml } from '../utils.js';
 export function emptyStateHtml({ icon = '', title, body = '', action = null, compact = false } = {}) {
   let button = '';
   if (action && action.label) {
-    const attrs = action.target
-      ? ` data-action="click-target" data-target="${escapeHtml(action.target)}"`
-      : '';
+    const attrs = action.target ? ` data-action="click-target" data-target="${escapeHtml(action.target)}"` : '';
     const id = action.id ? ` id="${escapeHtml(action.id)}"` : '';
     button = `<button type="button" class="btn-pill-toggle is-primary empty-state-action"${id}${attrs}>${escapeHtml(action.label)}</button>`;
   }

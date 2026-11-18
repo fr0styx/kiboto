@@ -22,7 +22,8 @@ const ACTIONS = {
   },
   'open-recycle-bin': () => window.openRecycleBin && window.openRecycleBin(),
   'open-drive-health': () => ZettEventBus.emit('modal:smart:open', null),
-  'open-file-preview': (el) => window.openFilePreviewModal && window.openFilePreviewModal(el.dataset.path || '', el.dataset.name || ''),
+  'open-file-preview': (el) =>
+    window.openFilePreviewModal && window.openFilePreviewModal(el.dataset.path || '', el.dataset.name || ''),
   'deploy-compose-code': (el) => {
     const code = el.closest('.ai-chat-code-block')?.querySelector('code')?.innerText;
     if (code && window.deployComposeStackSnippet) window.deployComposeStackSnippet(code);

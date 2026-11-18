@@ -1,6 +1,9 @@
 import { describe, it, expect, vi } from 'vitest';
 
-vi.mock('../i18n.js', () => ({ getLanguage: () => 'en', t: (k, f, p = {}) => String(f).replace(/\{(\w+)\}/g, (m, x) => (x in p ? p[x] : m)) }));
+vi.mock('../i18n.js', () => ({
+  getLanguage: () => 'en',
+  t: (k, f, p = {}) => String(f).replace(/\{(\w+)\}/g, (m, x) => (x in p ? p[x] : m)),
+}));
 const get = vi.fn();
 vi.mock('../api.js', () => ({ api: { get: (...a) => get(...a), put: vi.fn(), post: vi.fn(), delete: vi.fn() } }));
 vi.mock('../toast.js', () => ({ showToast: vi.fn(), showConfirmToast: vi.fn() }));

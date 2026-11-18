@@ -16,7 +16,10 @@ describe('the family calendar and contacts (NFEAT-7)', () => {
   });
 
   it('shows the address and how to add it on phones', () => {
-    const box = familyCalendarBody({ installed: true, running: true, server: 'nas.local:8093', caldav: 'http://nas.local:8093/remote.php/dav' }, () => {});
+    const box = familyCalendarBody(
+      { installed: true, running: true, server: 'nas.local:8093', caldav: 'http://nas.local:8093/remote.php/dav' },
+      () => {}
+    );
     expect(box.querySelector('code').textContent).toBe('http://nas.local:8093/remote.php/dav');
     expect(box.textContent).toContain('server nas.local:8093');
     expect(box.textContent).toContain('DAVx⁵');

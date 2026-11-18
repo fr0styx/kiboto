@@ -9,7 +9,12 @@ const flush = () => new Promise((r) => setTimeout(r, 0));
 
 describe("picking a child's devices (NUX-12)", () => {
   it('lists what AdGuard has seen and adds or removes them', async () => {
-    api.get.mockResolvedValue({ devices: [{ id: '192.0.2.20', name: 'lenas-tablet' }, { id: '192.0.2.21', name: '192.0.2.21' }] });
+    api.get.mockResolvedValue({
+      devices: [
+        { id: '192.0.2.20', name: 'lenas-tablet' },
+        { id: '192.0.2.21', name: '192.0.2.21' },
+      ],
+    });
     const input = document.createElement('input');
     input.value = '192.0.2.21';
     const box = devicePicker(input);

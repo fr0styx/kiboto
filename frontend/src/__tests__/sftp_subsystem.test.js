@@ -22,11 +22,7 @@ describe('Feature 4: SFTP file access Card & User Management', () => {
   });
 
   it('buildSftpCardHtml produces complete glassmorphic SFTP card with telemetry and quick connect items', () => {
-    const html = buildSftpCardHtml(
-      { running: true, port: 2222 },
-      2,
-      'alice'
-    );
+    const html = buildSftpCardHtml({ running: true, port: 2222 }, 2, 'alice');
 
     expect(html).toContain('SFTP file access');
     expect(html).toContain('Running (port 2222)');
@@ -67,9 +63,7 @@ describe('Feature 4: SFTP file access Card & User Management', () => {
         });
       }
       if (url === '/api/sftp/users') {
-        return Promise.resolve([
-          { username: 'backups', read_only: false, home_dir: '/home/backups' },
-        ]);
+        return Promise.resolve([{ username: 'backups', read_only: false, home_dir: '/home/backups' }]);
       }
       return Promise.reject(new Error(`Unknown url: ${url}`));
     });
@@ -187,7 +181,8 @@ describe('Feature 4: SFTP file access Card & User Management', () => {
       if (url === '/api/webdav/status') return Promise.resolve({ running: false, port: 8084 });
       if (url === '/api/remotes') return Promise.resolve([]);
       if (url === '/api/storage/shares') return Promise.resolve({ shares: [], platform: 'generic_linux' });
-      if (url === '/api/storage/platform') return Promise.resolve({ platform: 'generic_linux', capabilities: { can_manage_shares: true } });
+      if (url === '/api/storage/platform')
+        return Promise.resolve({ platform: 'generic_linux', capabilities: { can_manage_shares: true } });
       if (url === '/api/samba/status') return Promise.resolve(null);
       if (url === '/api/sftp/status') return Promise.resolve({ running: false, port: 2222 });
       if (url === '/api/sftp/users') return Promise.resolve([]);

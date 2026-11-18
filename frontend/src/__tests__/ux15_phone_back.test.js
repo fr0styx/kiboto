@@ -9,7 +9,9 @@ function openPage(id) {
   w.id = id;
   w.style.zIndex = '1000';
   w.innerHTML = '<button class="close-btn"></button>';
-  w.querySelector('.close-btn').onclick = () => { w.style.display = 'none'; };
+  w.querySelector('.close-btn').onclick = () => {
+    w.style.display = 'none';
+  };
   document.body.appendChild(w);
   return w;
 }

@@ -1,7 +1,12 @@
 /** Network report F1: a failed layout read is said on every part of the Network page. */
 import { describe, it, expect, vi, afterEach } from 'vitest';
 
-vi.mock('../toast.js', () => ({ showToast: vi.fn(), showConfirmToast: vi.fn(), showActionToast: vi.fn(), showPromptToast: vi.fn() }));
+vi.mock('../toast.js', () => ({
+  showToast: vi.fn(),
+  showConfirmToast: vi.fn(),
+  showActionToast: vi.fn(),
+  showPromptToast: vi.fn(),
+}));
 const { api } = await import('../api.js');
 const net = await import('../components/management/network.js');
 

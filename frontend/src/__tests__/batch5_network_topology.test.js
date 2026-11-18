@@ -150,7 +150,7 @@ describe('Batch 5: the Network page layout', () => {
     expect(eth0.querySelector('.net-port-speed').textContent).toBe(''); // not the host's English "Disconnected"
   });
 
-  it('a port\'s details carry its hardware address, driver, bond and traffic', async () => {
+  it("a port's details carry its hardware address, driver, bond and traffic", async () => {
     vi.spyOn(api, 'get').mockResolvedValueOnce(mockTopology);
 
     await fetchAndRenderNetworkTopology();
@@ -160,7 +160,9 @@ describe('Batch 5: the Network page layout', () => {
     expect(details).toContain('r8169');
     expect(details).toContain('bond0');
     expect(details).toContain('Received / sent');
-    expect(document.querySelector('.net-port-row[data-iface="eth0"] .net-port-details').textContent).not.toContain('Received / sent');
+    expect(document.querySelector('.net-port-row[data-iface="eth0"] .net-port-details').textContent).not.toContain(
+      'Received / sent'
+    );
   });
 
   it('renders host bridges and bonding groups card grid', async () => {

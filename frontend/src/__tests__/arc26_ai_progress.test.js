@@ -8,13 +8,41 @@ const ids = (list, tag = 'span') => list.map((id) => `<${tag} id="${id}"></${tag
 describe('AI sync progress', () => {
   beforeEach(() => {
     document.body.innerHTML =
-      ids(['ai-sync-state-badge', 'ai-sync-state-dot', 'ai-sync-state-text', 'ai-index-sync-state-pill', 'ai-index-current-path']) +
-      ids(['btn-ai-sync-pause', 'btn-ai-sync-resume', 'btn-ai-sync-stop', 'btn-ai-index-pause', 'btn-ai-index-resume', 'btn-ai-index-stop'], 'button');
+      ids([
+        'ai-sync-state-badge',
+        'ai-sync-state-dot',
+        'ai-sync-state-text',
+        'ai-index-sync-state-pill',
+        'ai-index-current-path',
+      ]) +
+      ids(
+        [
+          'btn-ai-sync-pause',
+          'btn-ai-sync-resume',
+          'btn-ai-sync-stop',
+          'btn-ai-index-pause',
+          'btn-ai-index-resume',
+          'btn-ai-index-stop',
+        ],
+        'button'
+      );
   });
 
   it.each([
-    [{ state: 'running' }, '', 'Sync: Running', 'LEARNING', { 'btn-ai-sync-pause': 'inline-flex', 'btn-ai-sync-stop': 'inline-flex', 'btn-ai-sync-resume': 'none' }],
-    [{ state: 'paused' }, '', 'Sync: Paused', 'PAUSED', { 'btn-ai-sync-resume': 'inline-flex', 'btn-ai-sync-pause': 'none' }],
+    [
+      { state: 'running' },
+      '',
+      'Sync: Running',
+      'LEARNING',
+      { 'btn-ai-sync-pause': 'inline-flex', 'btn-ai-sync-stop': 'inline-flex', 'btn-ai-sync-resume': 'none' },
+    ],
+    [
+      { state: 'paused' },
+      '',
+      'Sync: Paused',
+      'PAUSED',
+      { 'btn-ai-sync-resume': 'inline-flex', 'btn-ai-sync-pause': 'none' },
+    ],
     [{ state: 'stopped' }, '', 'Sync: Stopped', 'STOPPED', { 'btn-ai-sync-stop': 'none' }],
     [{ state: 'completed' }, '', 'Sync: Complete (Up to Date)', 'COMPLETE', {}],
     [{ indexed_files: 4 }, '', 'Sync: Complete (Up to Date)', 'COMPLETE', {}],
@@ -49,10 +77,28 @@ describe('AI sync progress', () => {
 });
 
 describe('AI re-index progress', () => {
-  const PARTS = ['ai-reindex-progress-container', 'ai-reindex-top-banner', 'ai-reindex-universal-strip', 'mgmt-sidebar-ai-badge', 'topbar-ai-accel-text',
-    'ai-reindex-top-progress-bar', 'ai-reindex-top-pct-label', 'ai-reindex-top-chunks-label', 'ai-reindex-top-speed-label', 'ai-reindex-top-eta-label',
-    'ai-reindex-univ-bar', 'ai-reindex-univ-pct', 'ai-reindex-univ-chunks', 'ai-reindex-univ-speed', 'ai-reindex-univ-eta',
-    'ai-reindex-progress-bar', 'ai-reindex-pct-label', 'ai-reindex-speed-label', 'ai-reindex-eta-label', 'ai-reindex-chunks-label'];
+  const PARTS = [
+    'ai-reindex-progress-container',
+    'ai-reindex-top-banner',
+    'ai-reindex-universal-strip',
+    'mgmt-sidebar-ai-badge',
+    'topbar-ai-accel-text',
+    'ai-reindex-top-progress-bar',
+    'ai-reindex-top-pct-label',
+    'ai-reindex-top-chunks-label',
+    'ai-reindex-top-speed-label',
+    'ai-reindex-top-eta-label',
+    'ai-reindex-univ-bar',
+    'ai-reindex-univ-pct',
+    'ai-reindex-univ-chunks',
+    'ai-reindex-univ-speed',
+    'ai-reindex-univ-eta',
+    'ai-reindex-progress-bar',
+    'ai-reindex-pct-label',
+    'ai-reindex-speed-label',
+    'ai-reindex-eta-label',
+    'ai-reindex-chunks-label',
+  ];
   beforeEach(() => {
     document.body.innerHTML = ids(PARTS, 'div');
   });
@@ -75,7 +121,8 @@ describe('AI re-index progress', () => {
   it('hides everything when idle or done, and puts the badge back', () => {
     updateAiReindexProgress({ status: 'running', completed: 1, total: 2 });
     updateAiReindexProgress({ status: 'running', completed: 2, total: 2 });
-    for (const id of ['ai-reindex-progress-container', 'ai-reindex-top-banner', 'ai-reindex-universal-strip']) expect(byId(id).style.display).toBe('none');
+    for (const id of ['ai-reindex-progress-container', 'ai-reindex-top-banner', 'ai-reindex-universal-strip'])
+      expect(byId(id).style.display).toBe('none');
     expect(byId('mgmt-sidebar-ai-badge').textContent).toBe('NPU/GPU');
     updateAiReindexProgress(null);
     updateAiReindexProgress({ type: 'complete' });

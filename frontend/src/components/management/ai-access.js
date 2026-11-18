@@ -29,20 +29,25 @@ export function rolesHtml(roles) {
   return html`<table class="kb-table ai-access-roles"><thead><tr><th></th>
       <th>${t('ai.access_ask', 'Ask Kib')}</th><th>${t('ai.access_search', 'AI search')}</th></tr></thead>
     <tbody>${roles.map(
-      (r) => html`<tr><td>${formatRole(r.id, r.name)}${r.locked ? html` <span class="kb-muted">${t('ai.access_always', 'Always on')}</span>` : ''}</td>
+      (
+        r
+      ) => html`<tr><td>${formatRole(r.id, r.name)}${r.locked ? html` <span class="kb-muted">${t('ai.access_always', 'Always on')}</span>` : ''}</td>
         <td><input type="checkbox" role="switch" aria-label="${t('ai.access_ask', 'Ask Kib')}: ${r.name}" data-ai-role="${r.id}" data-ai-feature="roles" ${r.on ? 'checked' : ''} ${r.locked ? 'disabled' : ''}></td>
-        <td><input type="checkbox" role="switch" aria-label="${t('ai.access_search', 'AI search')}: ${r.name}" data-ai-role="${r.id}" data-ai-feature="search_roles" ${r.search !== false ? 'checked' : ''} ${r.locked ? 'disabled' : ''}></td></tr>`,
+        <td><input type="checkbox" role="switch" aria-label="${t('ai.access_search', 'AI search')}: ${r.name}" data-ai-role="${r.id}" data-ai-feature="search_roles" ${r.search !== false ? 'checked' : ''} ${r.locked ? 'disabled' : ''}></td></tr>`
     )}</tbody></table>`;
 }
 
 export function logHtml(rows) {
-  if (!rows || !rows.length) return html`<p class="kb-muted">${t('ai.access_log_empty', 'Nobody has asked Kib yet.')}</p>`;
+  if (!rows || !rows.length)
+    return html`<p class="kb-muted">${t('ai.access_log_empty', 'Nobody has asked Kib yet.')}</p>`;
   return html`<table class="kb-table"><thead><tr>
       <th>${t('ai.access_when', 'When')}</th><th>${t('ai.access_who', 'Who')}</th><th>${t('ai.access_model', 'Model')}</th>
       <th>${t('ai.access_kind', 'What')}</th><th>${t('ai.access_web', 'Web')}</th><th>${t('ai.access_result', 'Result')}</th></tr></thead>
     <tbody>${rows.map(
-      (r) => html`<tr><td>${formatDateTime(r.ts * 1000)}</td><td>${r.username} (${r.role})</td><td>${r.model || '—'}</td>
-        <td>${(KINDS[r.kind] || (() => r.kind || '—'))()}</td><td>${r.web ? t('ai.access_yes', 'Yes') : t('ai.access_no', 'No')}</td><td>${(OUTCOMES[r.outcome] || (() => r.outcome))()}</td></tr>`,
+      (
+        r
+      ) => html`<tr><td>${formatDateTime(r.ts * 1000)}</td><td>${r.username} (${r.role})</td><td>${r.model || '—'}</td>
+        <td>${(KINDS[r.kind] || (() => r.kind || '—'))()}</td><td>${r.web ? t('ai.access_yes', 'Yes') : t('ai.access_no', 'No')}</td><td>${(OUTCOMES[r.outcome] || (() => r.outcome))()}</td></tr>`
     )}</tbody></table>`;
 }
 
@@ -54,12 +59,18 @@ export function renderAiAccess(card, access, log) {
     ${logHtml(log || [])}</details>`;
   // inside Kib settings' own section the section heading names it (AI 4)
   const inSection = card.parentElement?.id === 'kib-who-mount';
-  card.innerHTML = uiCard({ title: inSection ? '' : t('ai.access_title', 'Who can use Kib'), body: String(body), variant: 'boxed' });
+  card.innerHTML = uiCard({
+    title: inSection ? '' : t('ai.access_title', 'Who can use Kib'),
+    body: String(body),
+    variant: 'boxed',
+  });
   card.querySelectorAll('[data-ai-role]').forEach((sw) => {
     sw.addEventListener('change', async () => {
       sw.disabled = true;
       try {
-        const next = await api.put('/api/ai/access', { [sw.dataset.aiFeature || 'roles']: { [sw.dataset.aiRole]: sw.checked } });
+        const next = await api.put('/api/ai/access', {
+          [sw.dataset.aiFeature || 'roles']: { [sw.dataset.aiRole]: sw.checked },
+        });
         renderAiAccess(card, next, log);
       } catch {
         sw.checked = !sw.checked;

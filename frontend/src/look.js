@@ -154,7 +154,11 @@ function _prefersDark(win) {
  * Puts the look on the page: the theme's class, light or dark, True black, the tint, the phone's
  * status-bar colour, and the theme's stylesheet when it is needed. Returns "dark" or "light".
  */
-export function applyLook(look, doc = typeof document === 'undefined' ? null : document, win = typeof window === 'undefined' ? null : window) {
+export function applyLook(
+  look,
+  doc = typeof document === 'undefined' ? null : document,
+  win = typeof window === 'undefined' ? null : window
+) {
   const l = normalizeLook(look);
   const dark = l.mode === 'dark' || (l.mode === 'auto' && _prefersDark(win));
   _applied = { look: l, doc };

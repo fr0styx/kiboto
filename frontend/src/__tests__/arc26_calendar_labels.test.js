@@ -1,7 +1,10 @@
 /** The calendar's month titles and weekday heads in the app's language. */
 import { describe, it, expect, vi, afterEach } from 'vitest';
 
-vi.stubGlobal('fetch', vi.fn(() => Promise.reject(new Error('offline'))));
+vi.stubGlobal(
+  'fetch',
+  vi.fn(() => Promise.reject(new Error('offline')))
+);
 const { setLanguage } = await import('../i18n.js');
 const W = await import('../components/widgets.js');
 

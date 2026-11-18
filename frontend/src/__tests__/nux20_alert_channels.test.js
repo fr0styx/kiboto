@@ -24,7 +24,11 @@ describe('alert channel words (NUX-20)', () => {
       <span id="notif-badge-discord"></span><span id="notif-badge-telegram"></span>
       <div id="modal-notification-channel"><h3 id="notif-modal-title"></h3><div id="notif-modal-body"></div>
         <input type="checkbox" id="notif-modal-channel-enable"></div>`;
-    vi.spyOn(api, 'get').mockResolvedValue({ discord_enabled: true, discord_webhook_url: 'https://discord.example/h', smtp_tls: false });
+    vi.spyOn(api, 'get').mockResolvedValue({
+      discord_enabled: true,
+      discord_webhook_url: 'https://discord.example/h',
+      smtp_tls: false,
+    });
     await fetchAndRenderNotificationConfig();
   });
   afterEach(() => vi.restoreAllMocks());
@@ -36,9 +40,19 @@ describe('alert channel words (NUX-20)', () => {
 
   it('labels every channel dialog', () => {
     const labels = {
-      discord: ['DISCORD WEBHOOK URL', 'Paste the Webhook URL created in your Discord channel settings -> Integrations.'],
+      discord: [
+        'DISCORD WEBHOOK URL',
+        'Paste the Webhook URL created in your Discord channel settings -> Integrations.',
+      ],
       telegram: ['TELEGRAM BOT TOKEN', 'TELEGRAM CHAT ID', 'Obtained from @userinfobot'],
-      email: ['SMTP HOST', 'SMTP USER', 'SMTP PASSWORD', 'FROM EMAIL', 'TO RECIPIENT(S)', 'Use TLS / STARTTLS Encryption'],
+      email: [
+        'SMTP HOST',
+        'SMTP USER',
+        'SMTP PASSWORD',
+        'FROM EMAIL',
+        'TO RECIPIENT(S)',
+        'Use TLS / STARTTLS Encryption',
+      ],
       ntfy: ['NTFY SERVER URL', 'TOPIC NAME', 'ACCESS TOKEN (Optional)'],
       webhook: ['WEBHOOK URL', 'Receives POST requests with JSON payload'],
       apprise_raw: ['APPRISE TARGET URLS (One per line)', 'Apprise supports 100+ notification targets.'],

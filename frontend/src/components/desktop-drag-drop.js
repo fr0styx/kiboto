@@ -17,9 +17,10 @@ export function initDesktopDragAndDrop() {
   if (!dropZone) return;
 
   const hasFiles = (e) => {
-    return e.dataTransfer && e.dataTransfer.types && (
-      e.dataTransfer.types.includes('Files') ||
-      Array.from(e.dataTransfer.types).includes('Files')
+    return (
+      e.dataTransfer &&
+      e.dataTransfer.types &&
+      (e.dataTransfer.types.includes('Files') || Array.from(e.dataTransfer.types).includes('Files'))
     );
   };
 

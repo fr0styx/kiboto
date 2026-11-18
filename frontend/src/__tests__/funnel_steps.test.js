@@ -1,7 +1,20 @@
 import { describe, it, expect, vi } from 'vitest';
-import { funnelStepsHtml, recheckWhileOpen, RECHECK_MS, RECHECK_FOR_MS } from '../components/management/funnel-steps.js';
+import {
+  funnelStepsHtml,
+  recheckWhileOpen,
+  RECHECK_MS,
+  RECHECK_FOR_MS,
+} from '../components/management/funnel-steps.js';
 
-const NOT = { connected: true, https: false, funnel: false, ready: false, headscale: false, dns_url: 'https://login.tailscale.com/admin/dns', approve_url: 'https://login.tailscale.com/f/funnel?node=n1CNTRL' };
+const NOT = {
+  connected: true,
+  https: false,
+  funnel: false,
+  ready: false,
+  headscale: false,
+  dns_url: 'https://login.tailscale.com/admin/dns',
+  approve_url: 'https://login.tailscale.com/f/funnel?node=n1CNTRL',
+};
 
 describe('the steps only the tailnet owner can do (Funnel)', () => {
   it('lists both with a link each, ticks the done one, and says what waits', () => {

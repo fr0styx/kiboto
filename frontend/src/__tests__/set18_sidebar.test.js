@@ -13,14 +13,33 @@ describe('the sidebar (SET-18)', () => {
   it('has the approved entries in order, Calendar kept, Files and Apps gone', () => {
     const keys = [...nav().matchAll(/class="mgmt-sidebar-text" data-i18n="([a-z_.]+)"/g)].map((m) => m[1]);
     expect(keys).toEqual([
-      'mgmt.sidebar_search', 'mgmt.sidebar_overview', 'mgmt.sidebar_activity', 'mgmt.sidebar_calendar',
-      'mgmt.sidebar_storage', 'mgmt.sidebar_shared_folders', 'mgmt.sidebar_backup',
-      'mgmt.sidebar_people', 'mgmt.sidebar_away', 'mgmt.sidebar_notifications',
-      'mgmt.sidebar_kib', 'mgmt.sidebar_appearance', 'mgmt.sidebar_security', 'mgmt.sidebar_general',
-      'mgmt.sidebar_network', 'mgmt.sidebar_ups', 'mgmt.sidebar_hardware', 'mgmt.sidebar_vms', 'mgmt.sidebar_connections',
+      'mgmt.sidebar_search',
+      'mgmt.sidebar_overview',
+      'mgmt.sidebar_activity',
+      'mgmt.sidebar_calendar',
+      'mgmt.sidebar_storage',
+      'mgmt.sidebar_shared_folders',
+      'mgmt.sidebar_backup',
+      'mgmt.sidebar_people',
+      'mgmt.sidebar_away',
+      'mgmt.sidebar_notifications',
+      'mgmt.sidebar_kib',
+      'mgmt.sidebar_appearance',
+      'mgmt.sidebar_security',
+      'mgmt.sidebar_general',
+      'mgmt.sidebar_network',
+      'mgmt.sidebar_ups',
+      'mgmt.sidebar_hardware',
+      'mgmt.sidebar_vms',
+      'mgmt.sidebar_connections',
     ]);
     const heads = [...nav().matchAll(/data-i18n="(mgmt\.cat_[a-z_]+)"/g)].map((m) => m[1]);
-    expect(heads).toEqual(['mgmt.cat_files_backups', 'mgmt.cat_people_access', 'mgmt.cat_this_nas', 'mgmt.cat_advanced']);
+    expect(heads).toEqual([
+      'mgmt.cat_files_backups',
+      'mgmt.cat_people_access',
+      'mgmt.cat_this_nas',
+      'mgmt.cat_advanced',
+    ]);
     expect((nav().match(/data-group="advanced"/g) || []).length).toBe(5);
   });
 
@@ -58,9 +77,17 @@ describe('the sidebar (SET-18)', () => {
   it('links to the new names open their places; the old ones still do', () => {
     const open = vi.fn();
     window.openManagementSection = open;
-    for (const [route, target] of [['people', 'mgmt-pane-users'], ['folders', 'mgmt-pane-storage-shares'], ['kib', 'mgmt-sec-ai'],
-      ['away', 'mgmt-pane-network-wireguard'], ['notifications', 'mgmt-pane-notifications'], ['security', 'mgmt-pane-security'],
-      ['general', 'mgmt-pane-about'], ['connections', 'mgmt-pane-connections'], ['calendar', 'mgmt-sec-calendar']]) {
+    for (const [route, target] of [
+      ['people', 'mgmt-pane-users'],
+      ['folders', 'mgmt-pane-storage-shares'],
+      ['kib', 'mgmt-sec-ai'],
+      ['away', 'mgmt-pane-network-wireguard'],
+      ['notifications', 'mgmt-pane-notifications'],
+      ['security', 'mgmt-pane-security'],
+      ['general', 'mgmt-pane-about'],
+      ['connections', 'mgmt-pane-connections'],
+      ['calendar', 'mgmt-sec-calendar'],
+    ]) {
       expect(routeFromHash(`#/${route}`)).toBe(route);
       ROUTES[route]();
       expect(open).toHaveBeenLastCalledWith(target);
@@ -70,7 +97,8 @@ describe('the sidebar (SET-18)', () => {
 
   it('a family member sees no household set-up entries', () => {
     const family = { scopes: ['storage:read', 'shares:read'] };
-    for (const r of ['away', 'notifications', 'security', 'connections', 'people', 'kib']) expect(canOpen(r, family)).toBe(false);
+    for (const r of ['away', 'notifications', 'security', 'connections', 'people', 'kib'])
+      expect(canOpen(r, family)).toBe(false);
     for (const r of ['appearance', 'general', 'calendar']) expect(canOpen(r, family)).toBe(true);
   });
 });

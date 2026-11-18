@@ -1,13 +1,19 @@
 /** APP-C: the widget list can be reordered with up and down buttons, not only by dragging. */
 import { describe, it, expect, vi, afterEach } from 'vitest';
 
-vi.stubGlobal('fetch', vi.fn(() => Promise.reject(new Error('offline'))));
+vi.stubGlobal(
+  'fetch',
+  vi.fn(() => Promise.reject(new Error('offline')))
+);
 const { setLanguage } = await import('../i18n.js');
 const W = await import('../components/widgets.js');
 
 function list() {
   document.body.innerHTML = `<div id="l">${['clock', 'system', 'weather']
-    .map((id) => `<div class="widget-sortable-item" data-widget-id="${id}"><div class="widget-sortable-left"><div class="wdg-xs-bold-strong">${id} widget</div></div><input type="checkbox"></div>`)
+    .map(
+      (id) =>
+        `<div class="widget-sortable-item" data-widget-id="${id}"><div class="widget-sortable-left"><div class="wdg-xs-bold-strong">${id} widget</div></div><input type="checkbox"></div>`
+    )
     .join('')}</div>`;
   return document.getElementById('l');
 }

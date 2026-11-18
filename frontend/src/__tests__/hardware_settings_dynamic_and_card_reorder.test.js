@@ -144,19 +144,28 @@ describe('Yak Wallpaper Switch, Card Reordering, and Dynamic Hardware Settings S
     });
 
     it('restores custom card arrangement from localStorage across LED, Fans, and Copy tabs', () => {
-      localStorage.setItem('lcd_led_card_order', JSON.stringify(['card-brightness', 'card-preview', 'card-reactive', 'card-led-schedule']));
+      localStorage.setItem(
+        'lcd_led_card_order',
+        JSON.stringify(['card-brightness', 'card-preview', 'card-reactive', 'card-led-schedule'])
+      );
       localStorage.setItem('lcd_fans_card_order', JSON.stringify(['fan-card-zones', 'fan-card-tach']));
       localStorage.setItem('lcd_copy_card_order', JSON.stringify(['sec-autoingest', 'sec-copybtn']));
 
       initSettings();
 
-      const ledCards = Array.from(document.querySelectorAll('#drawer-cards-container .draggable-card')).map(c => c.dataset.cardId);
+      const ledCards = Array.from(document.querySelectorAll('#drawer-cards-container .draggable-card')).map(
+        (c) => c.dataset.cardId
+      );
       expect(ledCards).toEqual(['card-brightness', 'card-preview', 'card-reactive', 'card-led-schedule']);
 
-      const fanCards = Array.from(document.querySelectorAll('#fan-cards-container .draggable-card')).map(c => c.dataset.fanCardId);
+      const fanCards = Array.from(document.querySelectorAll('#fan-cards-container .draggable-card')).map(
+        (c) => c.dataset.fanCardId
+      );
       expect(fanCards).toEqual(['fan-card-zones', 'fan-card-tach']);
 
-      const copyCards = Array.from(document.querySelectorAll('#btn-sections-container .draggable-card')).map(c => c.dataset.btnCardId);
+      const copyCards = Array.from(document.querySelectorAll('#btn-sections-container .draggable-card')).map(
+        (c) => c.dataset.btnCardId
+      );
       expect(copyCards).toEqual(['sec-autoingest', 'sec-copybtn']);
     });
   });
@@ -327,7 +336,14 @@ describe('Yak Wallpaper Switch, Card Reordering, and Dynamic Hardware Settings S
 
       const getSpy = vi.spyOn(api, 'get').mockImplementation(async (url) => {
         if (url === '/api/screen') {
-          return { power: true, brightness: 80, night_mode: false, night_start: '23:00', night_end: '07:00', night_brightness: 10 };
+          return {
+            power: true,
+            brightness: 80,
+            night_mode: false,
+            night_start: '23:00',
+            night_end: '07:00',
+            night_brightness: 10,
+          };
         }
         return {};
       });
@@ -352,10 +368,7 @@ describe('Yak Wallpaper Switch, Card Reordering, and Dynamic Hardware Settings S
       expect(briVal.textContent).toBe('OFF');
       expect(powerBtn.textContent).toBe('Turn On');
       expect(badge.textContent).toBe('LCD: SCREEN OFF');
-      expect(postSpy).toHaveBeenCalledWith(
-        '/api/screen',
-        expect.objectContaining({ power: false, brightness: 80 })
-      );
+      expect(postSpy).toHaveBeenCalledWith('/api/screen', expect.objectContaining({ power: false, brightness: 80 }));
 
       // Click Turn On -> restores 80%
       powerBtn.click();
@@ -364,10 +377,7 @@ describe('Yak Wallpaper Switch, Card Reordering, and Dynamic Hardware Settings S
       expect(briVal.textContent).toBe('80%');
       expect(powerBtn.textContent).toBe('Turn Off');
       expect(badge.textContent).toBe('LCD: ACTIVE');
-      expect(postSpy).toHaveBeenCalledWith(
-        '/api/screen',
-        expect.objectContaining({ power: true, brightness: 80 })
-      );
+      expect(postSpy).toHaveBeenCalledWith('/api/screen', expect.objectContaining({ power: true, brightness: 80 }));
 
       getSpy.mockRestore();
       postSpy.mockRestore();

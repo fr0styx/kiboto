@@ -10,10 +10,23 @@ vi.mock('../toast.js', () => ({
 
 const { api } = await import('../api.js');
 const toast = await import('../toast.js');
-const { initStackModal, openStackModal, toggleStackSecrets, _resetStackModalForTesting } = await import('../components/stack-modal.js');
+const { initStackModal, openStackModal, toggleStackSecrets, _resetStackModalForTesting } =
+  await import('../components/stack-modal.js');
 
-const MASKED = { compose_yaml: 'services:\n  app:\n    environment:\n      - DB_PASSWORD=••••••••', env_content: 'TOKEN=••••••••', has_real_file: true, containers: [], secrets_shown: false };
-const SHOWN = { compose_yaml: 'services:\n  app:\n    environment:\n      - DB_PASSWORD=hunter2', env_content: 'TOKEN=abc', has_real_file: true, containers: [], secrets_shown: true };
+const MASKED = {
+  compose_yaml: 'services:\n  app:\n    environment:\n      - DB_PASSWORD=••••••••',
+  env_content: 'TOKEN=••••••••',
+  has_real_file: true,
+  containers: [],
+  secrets_shown: false,
+};
+const SHOWN = {
+  compose_yaml: 'services:\n  app:\n    environment:\n      - DB_PASSWORD=hunter2',
+  env_content: 'TOKEN=abc',
+  has_real_file: true,
+  containers: [],
+  secrets_shown: true,
+};
 const byId = (id) => document.getElementById(id);
 
 describe('secrets in the stack editor (SET-07)', () => {
@@ -55,7 +68,10 @@ describe('secrets in the stack editor (SET-07)', () => {
     get.mockClear();
     await toggleStackSecrets();
     expect(get).not.toHaveBeenCalled();
-    expect(toast.showToast).toHaveBeenCalledWith('Save or undo your changes first: showing or hiding secrets loads the file again.', 'warn');
+    expect(toast.showToast).toHaveBeenCalledWith(
+      'Save or undo your changes first: showing or hiding secrets loads the file again.',
+      'warn'
+    );
     expect(byId('stack-compose-editor').value).toContain('# a note');
   });
 

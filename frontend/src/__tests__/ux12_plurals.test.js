@@ -9,7 +9,9 @@ describe('ICU plurals (UX-12)', () => {
     expect(formatPlurals(s, { count: 5 }, 'en')).toBe('5 items left');
     expect(formatPlurals('{n, plural, one {# fichier} other {# fichiers}}', { n: 0 }, 'fr')).toBe('0 fichier'); // French: 0 is singular
     expect(formatPlurals('{n, plural, other {# 个}}', { n: 3 }, 'zh')).toBe('3 个');
-    expect(formatPlurals('{a, plural, one {# a} other {# as}} and {b, plural, one {# b} other {# bs}}', { a: 1, b: 2 }, 'en')).toBe('1 a and 2 bs');
+    expect(
+      formatPlurals('{a, plural, one {# a} other {# as}} and {b, plural, one {# b} other {# bs}}', { a: 1, b: 2 }, 'en')
+    ).toBe('1 a and 2 bs');
     expect(formatPlurals('plain {count}', { count: 2 })).toBe('plain {count}');
   });
 

@@ -6,7 +6,8 @@ const fold = await import('../components/management/search-filters-fold.js');
 const docs = await import('../components/management/doc-filters.js');
 const photos = await import('../components/management/photo-filters.js');
 
-const PAGE = '<div class="rag-row-2"><div><select id="ai-search-sort-select"></select></div></div><div id="ai-history-bar"></div>';
+const PAGE =
+  '<div class="rag-row-2"><div><select id="ai-search-sort-select"></select></div></div><div id="ai-history-bar"></div>';
 const tick = () => new Promise((r) => setTimeout(r, 0));
 
 describe('the AI search filters fold away (one line under the search row)', () => {
@@ -20,7 +21,11 @@ describe('the AI search filters fold away (one line under the search row)', () =
   });
 
   it('puts the document and photo filters in one closed "Filters" line', async () => {
-    api.get.mockImplementation(async (url) => (url.includes('tags') ? { kinds: [{ tag: 'bill', count: 3 }], years: [] } : { years: [{ value: '2024', count: 5 }], places: [] }));
+    api.get.mockImplementation(async (url) =>
+      url.includes('tags')
+        ? { kinds: [{ tag: 'bill', count: 3 }], years: [] }
+        : { years: [{ value: '2024', count: 5 }], places: [] }
+    );
     await docs.installDocFilters(document, () => {});
     await photos.installPhotoFilters(document, () => {});
     const box = document.getElementById('ai-more-filters');
@@ -33,7 +38,11 @@ describe('the AI search filters fold away (one line under the search row)', () =
   });
 
   it('counts the filters that are on, and remembers being opened', async () => {
-    api.get.mockImplementation(async (url) => (url.includes('tags') ? { kinds: [{ tag: 'bill', count: 3 }], years: [] } : { years: [{ value: '2024', count: 5 }], places: [{ value: 'Lisbon', count: 2 }] }));
+    api.get.mockImplementation(async (url) =>
+      url.includes('tags')
+        ? { kinds: [{ tag: 'bill', count: 3 }], years: [] }
+        : { years: [{ value: '2024', count: 5 }], places: [{ value: 'Lisbon', count: 2 }] }
+    );
     await docs.installDocFilters(document, () => {});
     await photos.installPhotoFilters(document, () => {});
     document.querySelector('[data-doc-tag="bill"]').click();

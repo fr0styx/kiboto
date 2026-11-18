@@ -8,20 +8,88 @@ import { parse as parseHtml } from 'parse5';
 
 // Names that read the same in every language
 const SAME_EVERYWHERE = new Set([
-  'Kiboto', 'Kib', 'Unraid', 'Docker', 'Immich', 'Ollama', 'OpenVINO', 'WebDAV', 'Tailscale', 'Jellyfin',
-  'Plex', 'Nextcloud', 'Syncthing', 'Samba', 'iSCSI', 'Btrfs', 'NVMe', 'SMART', 'Linux', 'Windows',
-  'macOS', 'iOS', 'Android', 'GitHub', 'Apprise', 'Telegram', 'Discord', 'Gotify', 'ntfy', 'Pushover',
-  'Wi-Fi', 'Ethernet', 'Bluetooth', 'QEMU', 'OK', 'Spotlight', 'Restic', 'Borg', 'rclone', 'rsync',
+  'Kiboto',
+  'Kib',
+  'Unraid',
+  'Docker',
+  'Immich',
+  'Ollama',
+  'OpenVINO',
+  'WebDAV',
+  'Tailscale',
+  'Jellyfin',
+  'Plex',
+  'Nextcloud',
+  'Syncthing',
+  'Samba',
+  'iSCSI',
+  'Btrfs',
+  'NVMe',
+  'SMART',
+  'Linux',
+  'Windows',
+  'macOS',
+  'iOS',
+  'Android',
+  'GitHub',
+  'Apprise',
+  'Telegram',
+  'Discord',
+  'Gotify',
+  'ntfy',
+  'Pushover',
+  'Wi-Fi',
+  'Ethernet',
+  'Bluetooth',
+  'QEMU',
+  'OK',
+  'Spotlight',
+  'Restic',
+  'Borg',
+  'rclone',
+  'rsync',
 ]);
 const PH = '\u0000'; // where a ${...} was
 // units that read the same everywhere: "${n} MHz", "${a} • ${b} vCPU • ${c} MB" are not text
-const UNITS = new Set(['B', 'KB', 'MB', 'GB', 'TB', 'KiB', 'MiB', 'GiB', 'TiB', 'Hz', 'kHz', 'MHz', 'GHz', 'vCPU', 'vCPUs', 'RPM', 'rpm', 'ms', 'W', 'V', 'A', 'Mbps', 'Gbps', 'MB/s', 'GB/s', 'IOPS']);
+const UNITS = new Set([
+  'B',
+  'KB',
+  'MB',
+  'GB',
+  'TB',
+  'KiB',
+  'MiB',
+  'GiB',
+  'TiB',
+  'Hz',
+  'kHz',
+  'MHz',
+  'GHz',
+  'vCPU',
+  'vCPUs',
+  'RPM',
+  'rpm',
+  'ms',
+  'W',
+  'V',
+  'A',
+  'Mbps',
+  'Gbps',
+  'MB/s',
+  'GB/s',
+  'IOPS',
+]);
 
 export function readable(raw) {
-  const v = raw.replace(/&nbsp;|&#160;/g, ' ').replace(/&[a-z]+;|&#\d+;/g, ' ').replace(/\s+/g, ' ').trim();
+  const v = raw
+    .replace(/&nbsp;|&#160;/g, ' ')
+    .replace(/&[a-z]+;|&#\d+;/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
   const words = v.replaceAll(PH, ' ').trim();
   if (!/[A-Za-z]{2}/.test(words)) return false;
-  if (/:\/\/|^[\w.+-]+@[\w.-]+$|^\/|^~|^[\w.-]+\.(?:conf|json|ya?ml|sh|py|js|local|lan|html|css)$/.test(words)) return false;
+  if (/:\/\/|^[\w.+-]+@[\w.-]+$|^\/|^~|^[\w.-]+\.(?:conf|json|ya?ml|sh|py|js|local|lan|html|css)$/.test(words))
+    return false;
   if (/^e\.g\.?\s*\S+$/.test(words)) return false;
   if (SAME_EVERYWHERE.has(words)) return false;
   const bare = words.split(' ').filter((w) => /[A-Za-z]/.test(w));
@@ -42,10 +110,21 @@ function htmlTextNodes(src, lines = false) {
   const out = [];
   const visit = (node, translated) => {
     const attrs = Object.fromEntries((node.attrs || []).map((a) => [a.name, a.value]));
-    const here = translated || 'data-i18n' in attrs || 'data-i18n-html' in attrs || 'data-sample' in attrs
-      || 'translate' in attrs && attrs.translate === 'no';
-    if (node.nodeName === 'script' || node.nodeName === 'style' || node.nodeName === 'code' || node.nodeName === 'pre'
-      || node.nodeName === 'kbd' || node.nodeName === 'svg') return;
+    const here =
+      translated ||
+      'data-i18n' in attrs ||
+      'data-i18n-html' in attrs ||
+      'data-sample' in attrs ||
+      ('translate' in attrs && attrs.translate === 'no');
+    if (
+      node.nodeName === 'script' ||
+      node.nodeName === 'style' ||
+      node.nodeName === 'code' ||
+      node.nodeName === 'pre' ||
+      node.nodeName === 'kbd' ||
+      node.nodeName === 'svg'
+    )
+      return;
     for (const child of node.childNodes || (node.content ? node.content.childNodes : [])) {
       if (child.nodeName === '#text') {
         if (!here && readable(child.value)) {
@@ -74,8 +153,16 @@ function markupText(markup) {
       if (m[1]) {
         const i = stack.map((s) => s.name).lastIndexOf(name);
         if (i >= 0) stack.length = i;
-      } else if (!/\/\s*$/.test(m[3]) && !['br', 'img', 'input', 'hr', 'use', 'meta', 'link', 'source', 'wbr', 'path', 'circle', 'rect'].includes(name)) {
-        stack.push({ name, quiet: /\sdata-i18n(?:-html)?=|\sdata-sample\b|translate="no"/.test(m[3]) || ['code', 'pre', 'kbd', 'script', 'style', 'svg'].includes(name) });
+      } else if (
+        !/\/\s*$/.test(m[3]) &&
+        !['br', 'img', 'input', 'hr', 'use', 'meta', 'link', 'source', 'wbr', 'path', 'circle', 'rect'].includes(name)
+      ) {
+        stack.push({
+          name,
+          quiet:
+            /\sdata-i18n(?:-html)?=|\sdata-sample\b|translate="no"/.test(m[3]) ||
+            ['code', 'pre', 'kbd', 'script', 'style', 'svg'].includes(name),
+        });
       }
     } else if (m[4] && !stack.some((s) => s.quiet) && !/=\s*"|^\s*"|"\s*$/.test(m[4]) && readable(m[4])) {
       // (a piece of a tag cut by string concatenation, like `" title="` + x, is not text)
@@ -88,8 +175,23 @@ function markupText(markup) {
 
 // Object properties and attributes whose value a person reads (NUX-20)
 const UI_PROPS = new Set([
-  'textContent', 'innerText', 'title', 'placeholder', 'ariaLabel', 'aria-label', 'label', 'text', 'message',
-  'tooltip', 'hint', 'description', 'heading', 'subtitle', 'confirmText', 'cancelText', 'emptyText',
+  'textContent',
+  'innerText',
+  'title',
+  'placeholder',
+  'ariaLabel',
+  'aria-label',
+  'label',
+  'text',
+  'message',
+  'tooltip',
+  'hint',
+  'description',
+  'heading',
+  'subtitle',
+  'confirmText',
+  'cancelText',
+  'emptyText',
 ]);
 const UI_SET_ATTRS = new Set(['title', 'aria-label', 'placeholder', 'alt']);
 const ASSIGNED = new Set(['textContent', 'innerText', 'title', 'placeholder']);
@@ -114,12 +216,21 @@ const keyName = (k) => (k && (k.type === 'Identifier' ? k.name : typeof k.value 
 // the text a person reads that sits in code rather than in markup
 function codeText(node) {
   if (node.type === 'Property' && !node.computed && UI_PROPS.has(keyName(node.key))) return uiStrings(node.value);
-  if (node.type === 'AssignmentExpression' && node.left.type === 'MemberExpression' && ASSIGNED.has(keyName(node.left.property))
-    && (node.right.type === 'ConditionalExpression' || node.right.type === 'LogicalExpression')) {
+  if (
+    node.type === 'AssignmentExpression' &&
+    node.left.type === 'MemberExpression' &&
+    ASSIGNED.has(keyName(node.left.property)) &&
+    (node.right.type === 'ConditionalExpression' || node.right.type === 'LogicalExpression')
+  ) {
     return uiStrings(node.right); // a plain string here is counted by the textContent check
   }
-  if (node.type === 'CallExpression' && node.callee.type === 'MemberExpression' && keyName(node.callee.property) === 'setAttribute'
-    && node.arguments.length === 2 && UI_SET_ATTRS.has(node.arguments[0].value)) {
+  if (
+    node.type === 'CallExpression' &&
+    node.callee.type === 'MemberExpression' &&
+    keyName(node.callee.property) === 'setAttribute' &&
+    node.arguments.length === 2 &&
+    UI_SET_ATTRS.has(node.arguments[0].value)
+  ) {
     return uiStrings(node.arguments[1]);
   }
   return [];

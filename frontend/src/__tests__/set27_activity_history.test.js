@@ -7,10 +7,12 @@ import { applyAdvanced } from '../components/management/overview.js';
 const doc = () => new DOMParser().parseFromString(markup, 'text/html');
 
 describe('Activity opens on History; Right now is for Advanced (SET-27 Activity 2)', () => {
-  it('the event log is Activity\'s first tab, and left Settings', () => {
+  it("the event log is Activity's first tab, and left Settings", () => {
     const d = doc();
     const act = /** @type {HTMLElement} */ (d.getElementById('mgmt-sec-activity'));
-    const tabs = [...act.querySelectorAll('.mgmt-inner-tab')].map((t) => /** @type {HTMLElement} */ (t).dataset.tabTarget);
+    const tabs = [...act.querySelectorAll('.mgmt-inner-tab')].map(
+      (t) => /** @type {HTMLElement} */ (t).dataset.tabTarget
+    );
     expect(tabs).toEqual(['mgmt-pane-events', 'mgmt-pane-metrics']);
     expect(act.querySelector('#mgmt-pane-events #events-list')).not.toBeNull();
     expect(d.getElementById('mgmt-sec-system-group')?.querySelector('[data-tab-target="mgmt-pane-events"]')).toBeNull();

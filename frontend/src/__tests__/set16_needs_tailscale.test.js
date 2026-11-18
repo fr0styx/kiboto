@@ -1,6 +1,10 @@
 /** SET-16: "Needs Tailscale" comes with a button that opens Network → Remote access. */
 import { describe, it, expect, vi } from 'vitest';
-import { installNeedsTailscale, needsTailscaleHtml, openRemoteAccess } from '../components/management/needs-tailscale.js';
+import {
+  installNeedsTailscale,
+  needsTailscaleHtml,
+  openRemoteAccess,
+} from '../components/management/needs-tailscale.js';
 import { escapeHtml } from '../utils.js';
 
 describe('needs Tailscale', () => {
@@ -27,10 +31,14 @@ describe('needs Tailscale', () => {
     const { readFileSync } = await import('node:fs');
     const { resolve } = await import('node:path');
     for (const f of ['public-apps', 'family-access', 'fleet']) {
-      expect(readFileSync(resolve(__dirname, `../components/management/${f}.js`), 'utf8')).toContain('needsTailscaleHtml(');
+      expect(readFileSync(resolve(__dirname, `../components/management/${f}.js`), 'utf8')).toContain(
+        'needsTailscaleHtml('
+      );
     }
     const html = readFileSync(resolve(__dirname, '../windows/management-window.html'), 'utf8');
-    expect(html).toContain('data-mgmt-target="mgmt-sec-away" data-mgmt-pane="mgmt-pane-network-wireguard" data-route="away" title="Away from home"'); // its own page (SET-24)
+    expect(html).toContain(
+      'data-mgmt-target="mgmt-sec-away" data-mgmt-pane="mgmt-pane-network-wireguard" data-route="away" title="Away from home"'
+    ); // its own page (SET-24)
     expect(html).not.toContain('network-canary-overlay');
     expect(html).not.toContain('value="macvlan"');
   });

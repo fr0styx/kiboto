@@ -15,14 +15,15 @@ const ID = 'modal-photo-import';
 export function foundText(info) {
   const counts = { photos: info.photos || 0, videos: info.videos || 0, size: formatBytes(info.bytes || 0) };
   if (!counts.photos && !counts.videos) return t('phi.none', 'There are no photos or videos in it.');
-  const what = {
-    google: t('phi.found_google', 'A Google Photos export'),
-    icloud: t('phi.found_icloud', 'An iCloud Photos export'),
-  }[info.kind] || t('phi.found_folder', 'A folder');
+  const what =
+    {
+      google: t('phi.found_google', 'A Google Photos export'),
+      icloud: t('phi.found_icloud', 'An iCloud Photos export'),
+    }[info.kind] || t('phi.found_folder', 'A folder');
   return t(
     'phi.found',
     '{what}: {photos, plural, one {# photo} other {# photos}} and {videos, plural, one {# video} other {# videos}} ({size}).',
-    { what, ...counts },
+    { what, ...counts }
   );
 }
 
@@ -72,7 +73,10 @@ export async function openPhotoImport(path) {
   });
   $('#phi-browse').addEventListener('click', () => {
     const browse = /** @type {any} */ (window).openFolderBrowser;
-    if (typeof browse === 'function') browse(dest.value || path, (picked) => { if (picked) dest.value = picked; });
+    if (typeof browse === 'function')
+      browse(dest.value || path, (picked) => {
+        if (picked) dest.value = picked;
+      });
   });
   start.addEventListener('click', async () => {
     start.disabled = true;
@@ -91,7 +95,8 @@ export async function openPhotoImport(path) {
     dest.value = info.destination || '';
     start.disabled = !(info.photos || info.videos);
   } catch (err) {
-    $('#phi-found').textContent = /** @type {Error} */ (err).message || t('phi.failed_read', 'The export could not be read.');
+    $('#phi-found').textContent =
+      /** @type {Error} */ (err).message || t('phi.failed_read', 'The export could not be read.');
   }
   dest.focus();
 }

@@ -47,7 +47,10 @@ export const needsALook = (e) => ['error', 'warning'].includes(eventLook(e && e.
 export function repeatedText(e) {
   const count = Number(e && e.count) || 1;
   if (count < 2) return '';
-  return t('events.repeated', '{count, plural, one {# time} other {# times}}, the last at {time}', { count, time: formatTime(e.last_ts, undefined, '') });
+  return t('events.repeated', '{count, plural, one {# time} other {# times}}, the last at {time}', {
+    count,
+    time: formatTime(e.last_ts, undefined, ''),
+  });
 }
 
 /** One entry as every list draws it: the look of its level, its text in the reader's language. */
@@ -55,7 +58,16 @@ export function eventView(e) {
   const look = eventLook(e && e.level);
   const { icon, color, word } = LOOKS[look];
   const text = eventText(e);
-  return { look, icon, color, word: t(word[0], word[1]), title: text.title, message: text.message, when: eventWhen(e), repeated: repeatedText(e) };
+  return {
+    look,
+    icon,
+    color,
+    word: t(word[0], word[1]),
+    title: text.title,
+    message: text.message,
+    when: eventWhen(e),
+    repeated: repeatedText(e),
+  };
 }
 
 /** How long ago, in the person's language: "5 minutes ago". */

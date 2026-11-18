@@ -56,7 +56,10 @@ describe('AI-35: the duplicate view', () => {
     expect(host.textContent).toContain('2 sets of copies');
     expect(host.textContent).toContain('Photos that look the same');
     expect(host.textContent).toContain('/mnt/user/backup');
-    expect([...host.querySelectorAll('img.dup-thumb')].map((i) => i.getAttribute('src'))).toEqual(['/api/media/thumbnail/1', '/api/media/thumbnail/2']);
+    expect([...host.querySelectorAll('img.dup-thumb')].map((i) => i.getAttribute('src'))).toEqual([
+      '/api/media/thumbnail/1',
+      '/api/media/thumbnail/2',
+    ]);
     expect(host.querySelectorAll('[data-dup-bin]').length).toBe(5);
   });
 

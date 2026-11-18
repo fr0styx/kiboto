@@ -236,9 +236,7 @@ describe('Batch 2: High-Performance Keyed Table Reconciler (Zero-Flicker Telemet
             free_bytes: 500000000000,
             used_pct: 50,
             parity_protected: true,
-            members: [
-              { device: 'sdb', role: 'data', temp_c: 32, num_reads: 100, num_writes: 50 },
-            ],
+            members: [{ device: 'sdb', role: 'data', temp_c: 32, num_reads: 100, num_writes: 50 }],
           },
         ],
       };

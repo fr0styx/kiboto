@@ -78,7 +78,11 @@ export function readingPills(data) {
     else pills.push([d.name, t('mch.no_reading', 'No reading'), 'muted']);
   }
   (last.fans || []).forEach((rpm, i) => {
-    pills.push([t('mch.fan_n', 'Fan {n}', { n: i + 1 }), typeof rpm === 'number' ? `${rpm} RPM` : t('mch.no_reading', 'No reading'), typeof rpm === 'number' ? '' : 'muted']);
+    pills.push([
+      t('mch.fan_n', 'Fan {n}', { n: i + 1 }),
+      typeof rpm === 'number' ? `${rpm} RPM` : t('mch.no_reading', 'No reading'),
+      typeof rpm === 'number' ? '' : 'muted',
+    ]);
   });
   return pills;
 }
@@ -88,5 +92,10 @@ export function readingPills(data) {
 export function chartColors(root = document.documentElement) {
   const css = typeof getComputedStyle === 'function' ? getComputedStyle(root) : null;
   const pick = (name, fallback) => (css && css.getPropertyValue(name).trim()) || fallback;
-  return { text: pick('--fg', '#c9d6d7'), muted: pick('--muted', '#95a8ab'), grid: pick('--track', 'rgba(255,255,255,0.08)'), panel: pick('--card', 'rgba(14, 27, 29, 0.95)') };
+  return {
+    text: pick('--fg', '#c9d6d7'),
+    muted: pick('--muted', '#95a8ab'),
+    grid: pick('--track', 'rgba(255,255,255,0.08)'),
+    panel: pick('--card', 'rgba(14, 27, 29, 0.95)'),
+  };
 }

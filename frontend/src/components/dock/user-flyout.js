@@ -49,8 +49,12 @@ export function toggleUserProfileFlyout(anchorEl) {
 
     // Hover effect for buttons
     flyout.querySelectorAll('.user-flyout-btn').forEach((btn) => {
-      btn.addEventListener('mouseenter', () => { btn.style.background = 'rgba(255,255,255,0.08)'; });
-      btn.addEventListener('mouseleave', () => { btn.style.background = 'transparent'; });
+      btn.addEventListener('mouseenter', () => {
+        btn.style.background = 'rgba(255,255,255,0.08)';
+      });
+      btn.addEventListener('mouseleave', () => {
+        btn.style.background = 'transparent';
+      });
     });
 
     const resetFlyoutTrigger = () => {
@@ -76,16 +80,18 @@ export function toggleUserProfileFlyout(anchorEl) {
       if (typeof window.openManagementWindow === 'function') {
         window.openManagementWindow(pane, null, subtab);
       } else {
-        import('../management.js').then((m) => {
-          if (typeof m.initManagement === 'function') m.initManagement();
-          if (typeof window.openManagementWindow === 'function') {
-            window.openManagementWindow(pane, null, subtab);
-          } else {
+        import('../management.js')
+          .then((m) => {
+            if (typeof m.initManagement === 'function') m.initManagement();
+            if (typeof window.openManagementWindow === 'function') {
+              window.openManagementWindow(pane, null, subtab);
+            } else {
+              document.getElementById('management-desktop-icon')?.click();
+            }
+          })
+          .catch(() => {
             document.getElementById('management-desktop-icon')?.click();
-          }
-        }).catch(() => {
-          document.getElementById('management-desktop-icon')?.click();
-        });
+          });
       }
       ZettEventBus.emit('window:open', { id: 'management', pane: pane, subtab: subtab });
     };
@@ -104,7 +110,11 @@ export function toggleUserProfileFlyout(anchorEl) {
 
     // Restart or shut down (SET-31, X5 d): for people who may switch the NAS; it opens Power there
     const powerBtn = /** @type {HTMLElement} */ (document.getElementById('btn-flyout-power'));
-    import('../../route-access.js').then((m) => { powerBtn.hidden = !m.hasScope(m.currentUser()?.scopes || [], 'system:power'); }).catch(() => {});
+    import('../../route-access.js')
+      .then((m) => {
+        powerBtn.hidden = !m.hasScope(m.currentUser()?.scopes || [], 'system:power');
+      })
+      .catch(() => {});
     powerBtn.addEventListener('click', () => {
       flyout.style.display = 'none';
       resetFlyoutTrigger();
@@ -167,7 +177,10 @@ export function toggleUserProfileFlyout(anchorEl) {
 
   if (isTopBar) {
     const topPos = rect.bottom + 8;
-    const leftPos = Math.max(12, Math.min((typeof window !== 'undefined' ? window.innerWidth : 1200) - flyoutW - 12, rect.left));
+    const leftPos = Math.max(
+      12,
+      Math.min((typeof window !== 'undefined' ? window.innerWidth : 1200) - flyoutW - 12, rect.left)
+    );
     flyout.style.position = 'fixed';
     flyout.style.top = `${topPos}px`;
     flyout.style.bottom = 'auto';
@@ -175,7 +188,13 @@ export function toggleUserProfileFlyout(anchorEl) {
     flyout.style.animation = 'flyoutSlideDown 0.18s cubic-bezier(0.16, 1, 0.3, 1)';
   } else {
     const bottomPos = (typeof window !== 'undefined' ? window.innerHeight : 900) - rect.top + 12;
-    const leftPos = Math.max(16, Math.min((typeof window !== 'undefined' ? window.innerWidth : 1200) - flyoutW - 16, rect.left + (rect.width / 2) - (flyoutW / 2)));
+    const leftPos = Math.max(
+      16,
+      Math.min(
+        (typeof window !== 'undefined' ? window.innerWidth : 1200) - flyoutW - 16,
+        rect.left + rect.width / 2 - flyoutW / 2
+      )
+    );
     flyout.style.position = 'fixed';
     flyout.style.top = 'auto';
     flyout.style.bottom = `${bottomPos}px`;

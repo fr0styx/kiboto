@@ -13,8 +13,13 @@ const { binColumns, binBar, mayEmpty } = await import('../components/fm-bin-view
 
 function fakeFm() {
   const windowEl = document.createElement('div');
-  windowEl.innerHTML = '<div class="fm-header-row"><div class="fm-col-type">Type <span></span></div><div class="fm-col-mtime">Modified <span></span></div></div>';
-  return { windowEl, colType: windowEl.querySelector('.fm-col-type'), colMtime: windowEl.querySelector('.fm-col-mtime') };
+  windowEl.innerHTML =
+    '<div class="fm-header-row"><div class="fm-col-type">Type <span></span></div><div class="fm-col-mtime">Modified <span></span></div></div>';
+  return {
+    windowEl,
+    colType: windowEl.querySelector('.fm-col-type'),
+    colMtime: windowEl.querySelector('.fm-col-mtime'),
+  };
 }
 
 describe('Recycle Bin view (NUX-17)', () => {

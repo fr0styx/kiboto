@@ -11,12 +11,14 @@ const CHOICES = ['auto', 'fast', 'balanced', 'best'];
 
 /** The words for a choice. */
 export function choiceWords(c) {
-  return {
-    auto: [t('kibm.auto', 'Automatic (recommended)'), t('kibm.auto_2', 'Kiboto picks the model that fits this NAS.')],
-    fast: [t('kibm.fast', 'Fast'), t('kibm.fast_2', 'Short answers, quickly.')],
-    balanced: [t('kibm.balanced', 'Balanced'), t('kibm.balanced_2', 'Good answers at reading speed.')],
-    best: [t('kibm.best', 'Best'), t('kibm.best_2', 'The most careful answers this NAS can give, more slowly.')],
-  }[c] || [c, ''];
+  return (
+    {
+      auto: [t('kibm.auto', 'Automatic (recommended)'), t('kibm.auto_2', 'Kiboto picks the model that fits this NAS.')],
+      fast: [t('kibm.fast', 'Fast'), t('kibm.fast_2', 'Short answers, quickly.')],
+      balanced: [t('kibm.balanced', 'Balanced'), t('kibm.balanced_2', 'Good answers at reading speed.')],
+      best: [t('kibm.best', 'Best'), t('kibm.best_2', 'The most careful answers this NAS can give, more slowly.')],
+    }[c] || [c, '']
+  );
 }
 
 /** How a measured model runs here, in words: never a number alone. */
@@ -51,13 +53,20 @@ export function modelChoiceHtml(bench, cfg) {
     const { name, result } = modelOf(c, bench, cfg?.active_model || '');
     const off = c !== 'auto' && !name;
     const fit = fitWords(result);
-    const small = name ? `${name}${fit ? ` · ${fit}` : ''}` : (c === 'auto' ? '' : t('kibm.untested', 'Test the speed first'));
+    const small = name
+      ? `${name}${fit ? ` · ${fit}` : ''}`
+      : c === 'auto'
+        ? ''
+        : t('kibm.untested', 'Test the speed first');
     return `<label class="kibm-row${off ? ' is-off' : ''}">
         <input type="radio" name="kib-model-choice" value="${c}"${current === c ? ' checked' : ''}${off ? ' disabled' : ''}>
         <span class="kibm-text"><strong>${escapeHtml(title)}</strong><span>${escapeHtml(note)}</span>${small ? `<small>${escapeHtml(small)}</small>` : ''}</span>
       </label>`;
   }).join('');
-  const manual = current === 'manual' ? `<p class="kib-note">${escapeHtml(t('kibm.manual', 'You picked {model} by name. Choose one above to let Kiboto pick again.', { model: cfg?.active_model || '' }))}</p>` : '';
+  const manual =
+    current === 'manual'
+      ? `<p class="kib-note">${escapeHtml(t('kibm.manual', 'You picked {model} by name. Choose one above to let Kiboto pick again.', { model: cfg?.active_model || '' }))}</p>`
+      : '';
   const test = running
     ? `<p class="kib-note" role="status">${escapeHtml(t('kibm.testing', 'Testing the speed: {done} of {total, plural, one {# model} other {# models}}…', { done: bench.job.done || 0, total: bench.job.total || 0 }))}</p>`
     : `<button type="button" class="btn-pill-toggle is-small" data-kibm-test>${escapeHtml(tested ? t('kibm.retest', 'Test speed again') : t('kibm.test', 'Test speed'))}</button>`;
@@ -79,7 +88,7 @@ export async function renderModelChoice(mount, opts = {}) {
   try {
     [bench, cfg] = await Promise.all([api.get('/api/ai/models/benchmark'), api.get('/api/ai/config')]);
   } catch {
-    mount.innerHTML = `<p class="kib-note">${escapeHtml(t('kibm.load_failed', 'Kib\'s model could not be loaded.'))}</p>`;
+    mount.innerHTML = `<p class="kib-note">${escapeHtml(t('kibm.load_failed', "Kib's model could not be loaded."))}</p>`;
     return;
   }
   mount.innerHTML = modelChoiceHtml(bench, cfg);

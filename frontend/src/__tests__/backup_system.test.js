@@ -40,7 +40,7 @@ describe('Unified Configuration Backup & Restore System', () => {
       lcd_theme: 'amber',
       zettnas_language: 'fr',
       zettnas_dock_pinned_v1: ['console', 'storage'],
-      zettnas_token: 'evil_token_overwrite'
+      zettnas_token: 'evil_token_overwrite',
     });
 
     expect(localStorage.getItem('lcd_theme')).toBe('amber');

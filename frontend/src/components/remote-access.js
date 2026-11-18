@@ -27,12 +27,22 @@ function el(tag, attrs = {}, ...children) {
 }
 
 const button = (label, action, primary = false) =>
-  el('button', { type: 'button', class: `btn-pill-toggle is-small${primary ? ' is-primary' : ''}`, 'data-remote': action, text: label });
+  el('button', {
+    type: 'button',
+    class: `btn-pill-toggle is-small${primary ? ' is-primary' : ''}`,
+    'data-remote': action,
+    text: label,
+  });
 
 export async function qrSvg(text) {
   try {
     const { default: QRCode } = await import('qrcode');
-    return await QRCode.toString(text, { type: 'svg', margin: 1, width: 148, color: { dark: '#000000', light: '#ffffff' } });
+    return await QRCode.toString(text, {
+      type: 'svg',
+      margin: 1,
+      width: 148,
+      color: { dark: '#000000', light: '#ffffff' },
+    });
   } catch {
     return '';
   }
@@ -62,32 +72,73 @@ function connectForm() {
   const nbFields = el(
     'div',
     { class: 'remote-own', hidden: true },
-    el('label', {}, t('remote.netbird_key', 'Setup key'), el('input', { name: 'setup_key', type: 'password', autocomplete: 'off' })),
-    el('label', {}, t('remote.netbird_server', 'Your own NetBird server (optional)'), el('input', { name: 'management_url', type: 'url', placeholder: 'https://netbird.example.com', autocomplete: 'off' })),
+    el(
+      'label',
+      {},
+      t('remote.netbird_key', 'Setup key'),
+      el('input', { name: 'setup_key', type: 'password', autocomplete: 'off' })
+    ),
+    el(
+      'label',
+      {},
+      t('remote.netbird_server', 'Your own NetBird server (optional)'),
+      el('input', {
+        name: 'management_url',
+        type: 'url',
+        placeholder: 'https://netbird.example.com',
+        autocomplete: 'off',
+      })
+    )
   );
-  const server = el('input', { name: 'login_server', type: 'url', placeholder: 'https://headscale.example.com', autocomplete: 'off' });
+  const server = el('input', {
+    name: 'login_server',
+    type: 'url',
+    placeholder: 'https://headscale.example.com',
+    autocomplete: 'off',
+  });
   const key = el('input', { name: 'auth_key', type: 'password', autocomplete: 'off' });
   const ownFields = el(
     'div',
     { class: 'remote-own', hidden: true },
     el('label', {}, t('remote.server', 'Headscale address'), server),
-    el('label', {}, t('remote.key', 'Pre-auth key (optional)'), key),
+    el('label', {}, t('remote.key', 'Pre-auth key (optional)'), key)
   );
   const form = el(
     'form',
     { class: 'remote-form', 'data-remote-form': '' },
-    el('p', { class: 'kb-muted', text: t('remote.intro', 'Open Kiboto and your photos on your phone away from home, through a private network between your devices. Nothing is opened on your router.') }),
+    el('p', {
+      class: 'kb-muted',
+      text: t(
+        'remote.intro',
+        'Open Kiboto and your photos on your phone away from home, through a private network between your devices. Nothing is opened on your router.'
+      ),
+    }),
     el(
       'fieldset',
       {},
       el('legend', { text: t('remote.how', 'How to connect') }),
-      el('label', { class: 'remote-choice' }, el('input', { type: 'radio', name: 'remote-kind', value: 'tailscale', checked: true }), t('remote.tailscale', 'Tailscale (free account with Google, Apple, Microsoft or GitHub)')),
-      el('label', { class: 'remote-choice' }, own, t('remote.headscale', 'My own Headscale server (no account anywhere)')),
-      el('label', { class: 'remote-choice' }, nb, t('remote.netbird', 'NetBird (free account, or your own NetBird server)')),
+      el(
+        'label',
+        { class: 'remote-choice' },
+        el('input', { type: 'radio', name: 'remote-kind', value: 'tailscale', checked: true }),
+        t('remote.tailscale', 'Tailscale (free account with Google, Apple, Microsoft or GitHub)')
+      ),
+      el(
+        'label',
+        { class: 'remote-choice' },
+        own,
+        t('remote.headscale', 'My own Headscale server (no account anywhere)')
+      ),
+      el(
+        'label',
+        { class: 'remote-choice' },
+        nb,
+        t('remote.netbird', 'NetBird (free account, or your own NetBird server)')
+      )
     ),
     ownFields,
     nbFields,
-    el('button', { type: 'submit', class: 'btn-pill-toggle is-primary', text: t('remote.connect', 'Connect') }),
+    el('button', { type: 'submit', class: 'btn-pill-toggle is-primary', text: t('remote.connect', 'Connect') })
   );
   form.addEventListener('change', () => {
     ownFields.hidden = !own.checked;
@@ -100,7 +151,10 @@ function connectForm() {
 export function netbirdBody(form) {
   const f = new FormData(form);
   if (f.get('remote-kind') !== 'netbird') return null;
-  return { setup_key: String(f.get('setup_key') || '').trim(), management_url: String(f.get('management_url') || '').trim() };
+  return {
+    setup_key: String(f.get('setup_key') || '').trim(),
+    management_url: String(f.get('management_url') || '').trim(),
+  };
 }
 
 /** Connected through NetBird: the address as a QR code, its devices, and Disconnect. */
@@ -109,10 +163,45 @@ export async function netbirdView(nb, loc = window.location) {
   return el(
     'div',
     { class: 'remote-step' },
-    el('p', { text: t('remote.netbird_connected', 'Connected to NetBird as {name}. On a phone with the NetBird app signed in to the same network, scan the code to open Kiboto.', { name: nb.name || nb.ip }) }),
-    el('div', { class: 'kb-row' }, await qrBox(url, t('remote.addr_qr', 'Kiboto address as a QR code')), el('ul', { class: 'kb-list remote-addresses' }, el('li', {}, `${t('remote.addr_kiboto', 'Kiboto')}: `, link(url, url)), el('li', { text: t('remote.netbird_devices', '{n, plural, one {# device} other {# devices}} connected', { n: nb.peers_connected || 0 }) }))),
-    el('p', { class: 'kb-muted', text: t('remote.netbird_plain', 'NetBird gives no HTTPS addresses, so the address starts with http://. The connection is still encrypted end to end.') }),
-    el('div', { class: 'kb-row remote-actions' }, el('button', { type: 'button', class: 'btn-pill-toggle is-small', 'data-netbird': 'disconnect', text: t('remote.disconnect', 'Disconnect') })),
+    el('p', {
+      text: t(
+        'remote.netbird_connected',
+        'Connected to NetBird as {name}. On a phone with the NetBird app signed in to the same network, scan the code to open Kiboto.',
+        { name: nb.name || nb.ip }
+      ),
+    }),
+    el(
+      'div',
+      { class: 'kb-row' },
+      await qrBox(url, t('remote.addr_qr', 'Kiboto address as a QR code')),
+      el(
+        'ul',
+        { class: 'kb-list remote-addresses' },
+        el('li', {}, `${t('remote.addr_kiboto', 'Kiboto')}: `, link(url, url)),
+        el('li', {
+          text: t('remote.netbird_devices', '{n, plural, one {# device} other {# devices}} connected', {
+            n: nb.peers_connected || 0,
+          }),
+        })
+      )
+    ),
+    el('p', {
+      class: 'kb-muted',
+      text: t(
+        'remote.netbird_plain',
+        'NetBird gives no HTTPS addresses, so the address starts with http://. The connection is still encrypted end to end.'
+      ),
+    }),
+    el(
+      'div',
+      { class: 'kb-row remote-actions' },
+      el('button', {
+        type: 'button',
+        class: 'btn-pill-toggle is-small',
+        'data-netbird': 'disconnect',
+        text: t('remote.disconnect', 'Disconnect'),
+      })
+    )
   );
 }
 
@@ -131,18 +220,41 @@ async function signInView(s) {
     el(
       'div',
       { class: 'remote-text' },
-      el('p', { text: t('remote.signin', 'Sign in to add this NAS to your network: scan the code with your phone, or open the link here. This card updates when it is done.') }),
-      el('a', { href: s.auth_url, target: '_blank', rel: 'noopener noreferrer', class: 'btn-pill-toggle is-primary is-small', text: t('remote.open_signin', 'Open the sign-in page') }),
-    ),
+      el('p', {
+        text: t(
+          'remote.signin',
+          'Sign in to add this NAS to your network: scan the code with your phone, or open the link here. This card updates when it is done.'
+        ),
+      }),
+      el('a', {
+        href: s.auth_url,
+        target: '_blank',
+        rel: 'noopener noreferrer',
+        class: 'btn-pill-toggle is-primary is-small',
+        text: t('remote.open_signin', 'Open the sign-in page'),
+      })
+    )
   );
 }
 
 function httpsHint(s) {
   if (s.https) return null;
   if (s.login_server) {
-    return el('p', { class: 'kb-muted', text: t('remote.no_https_headscale', 'Headscale gives no HTTPS certificates, so the addresses start with http://. The connection is still encrypted end to end by the private network.') });
+    return el('p', {
+      class: 'kb-muted',
+      text: t(
+        'remote.no_https_headscale',
+        'Headscale gives no HTTPS certificates, so the addresses start with http://. The connection is still encrypted end to end by the private network.'
+      ),
+    });
   }
-  return el('p', { class: 'kb-muted', text: t('remote.no_https', 'For https:// addresses, turn on MagicDNS and HTTPS certificates on the DNS page of the Tailscale admin console, then press "Turn on HTTPS".') });
+  return el('p', {
+    class: 'kb-muted',
+    text: t(
+      'remote.no_https',
+      'For https:// addresses, turn on MagicDNS and HTTPS certificates on the DNS page of the Tailscale admin console, then press "Turn on HTTPS".'
+    ),
+  });
 }
 
 const APPS_OPEN_KEY = 'kiboto_remote_apps_open';
@@ -180,18 +292,22 @@ export function addressesView(addresses = {}, open = appsOpen()) {
     'ul',
     { class: 'kb-list remote-addresses' },
     kiboto ? el('li', {}, `${t('remote.addr_kiboto', 'Kiboto')}: `, link(kiboto, kiboto)) : null,
-    immich ? el('li', {}, `${t('remote.addr_immich', 'Immich (photo backup)')}: `, link(immich, immich)) : null,
+    immich ? el('li', {}, `${t('remote.addr_immich', 'Immich (photo backup)')}: `, link(immich, immich)) : null
   );
   if (!apps.length) return el('div', { class: 'remote-addr-col' }, main);
   const fold = el(
     'details',
     { class: 'remote-apps', open },
-    el('summary', { text: t('remote.apps_n', '{n, plural, one {# app} other {# apps}} on your tailnet', { n: apps.length }) }),
+    el('summary', {
+      text: t('remote.apps_n', '{n, plural, one {# app} other {# apps}} on your tailnet', { n: apps.length }),
+    }),
     el(
       'ul',
       { class: 'remote-app-grid' },
-      ...apps.map((a) => el('li', {}, link(a.url, a.name), el('span', { class: 'remote-app-port', text: portLabel(a.url) }))),
-    ),
+      ...apps.map((a) =>
+        el('li', {}, link(a.url, a.name), el('span', { class: 'remote-app-port', text: portLabel(a.url) }))
+      )
+    )
   );
   fold.addEventListener('toggle', () => {
     try {
@@ -212,17 +328,31 @@ async function connectedView(s) {
   const actions = el(
     'div',
     { class: 'kb-row remote-actions' },
-    !kiboto.startsWith('https://') ? button(t('remote.publish', 'Turn on HTTPS'), 'publish', true)
-      : newApps ? button(t('remote.publish_apps', 'Turn on HTTPS for new apps'), 'publish', true) : null,
-    button(t('remote.disconnect', 'Disconnect'), 'disconnect'),
+    !kiboto.startsWith('https://')
+      ? button(t('remote.publish', 'Turn on HTTPS'), 'publish', true)
+      : newApps
+        ? button(t('remote.publish_apps', 'Turn on HTTPS for new apps'), 'publish', true)
+        : null,
+    button(t('remote.disconnect', 'Disconnect'), 'disconnect')
   );
   return el(
     'div',
     { class: 'remote-step' },
-    el('p', { text: t('remote.connected', 'Connected as {name}. On a phone with the Tailscale app signed in to the same network, scan the code to open Kiboto.', { name: s.name || (s.ips || [])[0] || '' }) }),
-    el('div', { class: 'kb-row' }, kiboto ? await qrBox(kiboto, t('remote.addr_qr', 'Kiboto address as a QR code')) : null, list),
+    el('p', {
+      text: t(
+        'remote.connected',
+        'Connected as {name}. On a phone with the Tailscale app signed in to the same network, scan the code to open Kiboto.',
+        { name: s.name || (s.ips || [])[0] || '' }
+      ),
+    }),
+    el(
+      'div',
+      { class: 'kb-row' },
+      kiboto ? await qrBox(kiboto, t('remote.addr_qr', 'Kiboto address as a QR code')) : null,
+      list
+    ),
     httpsHint(s),
-    actions,
+    actions
   );
 }
 
@@ -250,7 +380,10 @@ export function mayChange(user = /** @type {any} */ (globalThis).kibotoUser) {
 /** For someone who may only look: what is shown stays, the form and buttons that the server would
  *  refuse go, and the shared note says why (network report F1). */
 export function lookOnly(body) {
-  if (body.matches('form')) return stateBlock('readonly', { text: t('remote.look_only', 'Only someone who may change settings can connect this NAS.') });
+  if (body.matches('form'))
+    return stateBlock('readonly', {
+      text: t('remote.look_only', 'Only someone who may change settings can connect this NAS.'),
+    });
   body.querySelectorAll('.remote-actions, form').forEach((n) => n.remove());
   body.append(stateBlock('readonly'));
   return body;
@@ -268,7 +401,14 @@ export async function renderRemoteAccess(card, s = null) {
   }
   card.hidden = false;
   const nb = status.state === 'Running' ? null : await api.get('/api/network/remote-access/netbird').catch(() => null);
-  card.replaceChildren(el('div', { class: 'kb-card kb-card--boxed' }, el('div', { class: 'kb-title', text: t('remote.title', 'Use from anywhere') }), await remoteBody(status, nb)));
+  card.replaceChildren(
+    el(
+      'div',
+      { class: 'kb-card kb-card--boxed' },
+      el('div', { class: 'kb-title', text: t('remote.title', 'Use from anywhere') }),
+      await remoteBody(status, nb)
+    )
+  );
   card.querySelector('[data-remote-form]')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const form = /** @type {HTMLFormElement} */ (e.currentTarget);
@@ -301,23 +441,32 @@ export async function renderRemoteAccess(card, s = null) {
         const next = await api.post(`/api/network/remote-access/${action}`, body);
         if (next.approval_url) {
           window.open(next.approval_url, '_blank', 'noopener');
-          showToast(t('remote.approve', 'Allow HTTPS for this NAS on the Tailscale page that opened, then press "Turn on HTTPS" again.'), 'info');
+          showToast(
+            t(
+              'remote.approve',
+              'Allow HTTPS for this NAS on the Tailscale page that opened, then press "Turn on HTTPS" again.'
+            ),
+            'info'
+          );
         }
         await renderRemoteAccess(card, next);
       } catch (err) {
         showToast(err.message || String(err), 'error');
       }
-    }),
+    })
   );
   refreshExposure();
-  if (status.state === 'NeedsLogin') pollWhileOpen(card, () => signInDone(card, status), { ms: POLL_MS, limit: POLL_LIMIT });
+  if (status.state === 'NeedsLogin')
+    pollWhileOpen(card, () => signInDone(card, status), { ms: POLL_MS, limit: POLL_LIMIT });
 }
 
 /** The card when its state can't be read: says so, with Try again (network report F1: it vanished). */
 export function showLoadFailed(card, err) {
   card.hidden = false;
   const text = t('remote.load_failed', "Kiboto couldn't read how this NAS is reached from away.");
-  card.replaceChildren(stateBlock('failed', { text, detail: String(err?.message || ''), retry: () => renderRemoteAccess(card) }));
+  card.replaceChildren(
+    stateBlock('failed', { text, detail: String(err?.message || ''), retry: () => renderRemoteAccess(card) })
+  );
 }
 
 /** Share links, apps and family from anywhere live on Away from home too (SET-24); they load with it. */

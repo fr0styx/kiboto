@@ -59,7 +59,11 @@ export async function renderSsoPanel() {
   setIconLabel(title, '🔑', t('sso.title', 'Single sign-on (OpenID Connect)'));
   const desc = document.createElement('div');
   desc.className = 'kb-muted';
-  desc.textContent = t('sso.desc', 'Let people sign in with Authentik, Keycloak, Authelia or another OpenID Connect provider. Register Kiboto there with this redirect URI: {uri}', { uri: cfg.redirect_uri });
+  desc.textContent = t(
+    'sso.desc',
+    'Let people sign in with Authentik, Keycloak, Authelia or another OpenID Connect provider. Register Kiboto there with this redirect URI: {uri}',
+    { uri: cfg.redirect_uri }
+  );
   const form = document.createElement('form');
   form.className = 'kb-form';
   const enabled = document.createElement('label');
@@ -68,7 +72,10 @@ export async function renderSsoPanel() {
   cb.type = 'checkbox';
   cb.name = 'enabled';
   cb.checked = Boolean(cfg.enabled);
-  enabled.append(cb, Object.assign(document.createElement('span'), { textContent: t('sso.enabled', 'Show the single sign-on button') }));
+  enabled.append(
+    cb,
+    Object.assign(document.createElement('span'), { textContent: t('sso.enabled', 'Show the single sign-on button') })
+  );
   form.append(enabled);
   for (const [key, i18n, label, placeholder] of FIELDS) {
     const wrap = document.createElement('label');
@@ -97,7 +104,13 @@ export async function renderSsoPanel() {
     const body = { enabled: cb.checked };
     for (const [key] of FIELDS) {
       const v = String(fd.get(key) || '').trim();
-      body[key] = key === 'admin_groups' ? v.split(',').map((s) => s.trim()).filter(Boolean) : v;
+      body[key] =
+        key === 'admin_groups' // gitleaks:allow (a field name, not a secret)
+          ? v
+              .split(',')
+              .map((s) => s.trim())
+              .filter(Boolean)
+          : v;
     }
     try {
       await api.put('/api/auth/oidc/settings', body);
@@ -114,21 +127,32 @@ export async function renderSsoPanel() {
 /** One click: Immich uses the same sign-in provider (M3). */
 function immichBlock() {
   const box = Object.assign(document.createElement('div'), { className: 'kb-form' });
-  box.append(Object.assign(document.createElement('div'), { className: 'kb-title kb-title--sub', textContent: t('sso.immich_title', 'Immich') }));
+  box.append(
+    Object.assign(document.createElement('div'), {
+      className: 'kb-title kb-title--sub',
+      textContent: t('sso.immich_title', 'Immich'),
+    })
+  );
   const url = Object.assign(document.createElement('input'), {
     className: 'tz-select-input',
     type: 'url',
     value: `${window.location.protocol}//${window.location.hostname}:2283`,
   });
   url.setAttribute('aria-label', t('sso.immich_url', 'Immich address'));
-  const btn = Object.assign(document.createElement('button'), { type: 'button', className: 'btn-pill-toggle', textContent: t('sso.immich_connect', 'Use this sign-in for Immich') });
+  const btn = Object.assign(document.createElement('button'), {
+    type: 'button',
+    className: 'btn-pill-toggle',
+    textContent: t('sso.immich_connect', 'Use this sign-in for Immich'),
+  });
   const out = Object.assign(document.createElement('div'), { className: 'kb-muted' });
   out.setAttribute('aria-live', 'polite');
   btn.addEventListener('click', async () => {
     out.textContent = '…';
     try {
       const r = await api.post('/api/auth/oidc/apps/immich', { immich_url: url.value.trim() });
-      out.textContent = t('sso.immich_done', 'Done. Add these redirect URIs at your provider: {uris}', { uris: r.redirect_uris.join('  ') });
+      out.textContent = t('sso.immich_done', 'Done. Add these redirect URIs at your provider: {uris}', {
+        uris: r.redirect_uris.join('  '),
+      });
     } catch (err) {
       out.textContent = err.message;
     }
@@ -162,7 +186,10 @@ export async function renderLdapPanel() {
   setIconLabel(title, '🏢', t('ldap.title', 'LDAP / Active Directory'));
   const desc = Object.assign(document.createElement('div'), {
     className: 'kb-muted',
-    textContent: t('ldap.desc', 'People sign in with their directory name and password. Local accounts keep their own password. Use ldaps:// or StartTLS.'),
+    textContent: t(
+      'ldap.desc',
+      'People sign in with their directory name and password. Local accounts keep their own password. Use ldaps:// or StartTLS.'
+    ),
   });
   const form = document.createElement('form');
   form.className = 'kb-form';
@@ -190,8 +217,16 @@ export async function renderLdapPanel() {
   }
   const startTls = toggle('start_tls', t('ldap.start_tls', 'Use StartTLS (for ldap:// servers)'), cfg.start_tls);
   const row = Object.assign(document.createElement('div'), { className: 'kb-row' });
-  const save = Object.assign(document.createElement('button'), { type: 'submit', className: 'btn-pill-toggle', textContent: t('sso.save', 'Save') });
-  const test = Object.assign(document.createElement('button'), { type: 'button', className: 'btn-pill-toggle', textContent: t('ldap.test', 'Test connection') });
+  const save = Object.assign(document.createElement('button'), {
+    type: 'submit',
+    className: 'btn-pill-toggle',
+    textContent: t('sso.save', 'Save'),
+  });
+  const test = Object.assign(document.createElement('button'), {
+    type: 'button',
+    className: 'btn-pill-toggle',
+    textContent: t('ldap.test', 'Test connection'),
+  });
   const status = Object.assign(document.createElement('span'), { className: 'kb-muted' });
   status.setAttribute('aria-live', 'polite');
   row.append(save, test, status);
@@ -202,7 +237,13 @@ export async function renderLdapPanel() {
     const body = { enabled: enabled.checked, start_tls: startTls.checked };
     for (const [key] of LDAP_FIELDS) {
       const v = String(fd.get(key) || '').trim();
-      body[key] = key === 'admin_groups' ? v.split(',').map((x) => x.trim()).filter(Boolean) : v;
+      body[key] =
+        key === 'admin_groups' // gitleaks:allow (a field name, not a secret)
+          ? v
+              .split(',')
+              .map((x) => x.trim())
+              .filter(Boolean)
+          : v;
     }
     try {
       await api.put('/api/auth/ldap/settings', body);

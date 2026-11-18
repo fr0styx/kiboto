@@ -11,7 +11,13 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parse, parseFragment } from 'parse5';
 import {
-  ATTR_SKIP, BUILT_ATTR, SKIP, TEXT_ATTRS, emojiMatchers, iconMarkup, iconOnlyLabel,
+  ATTR_SKIP,
+  BUILT_ATTR,
+  SKIP,
+  TEXT_ATTRS,
+  emojiMatchers,
+  iconMarkup,
+  iconOnlyLabel,
 } from '../src/icons-rules.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -20,7 +26,11 @@ const { all: EMOJI_RE, any: HAS_EMOJI } = emojiMatchers(MAP);
 const SPRITE_URL = '/zi-sprite.svg';
 
 const iconFor = (emoji) => MAP[emoji.replace(/️/g, '')] || null;
-const stripEmoji = (text) => String(text).replace(EMOJI_RE, '').replace(/\s{2,}/g, ' ').trim();
+const stripEmoji = (text) =>
+  String(text)
+    .replace(EMOJI_RE, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
 const escAttr = (s) => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 const attrOf = (el, name) => el.attrs?.find((a) => a.name === name)?.value;
 
@@ -67,14 +77,16 @@ function convert(src, root, offset = 0) {
     if (raw.replace(EMOJI_RE, '').trim()) out = `<span class="zi-run">${out}</span>`;
     edits.push([loc.startOffset, loc.endOffset, out]);
     // an icon-only button gets a name
-    const host = [...parents].reverse().find((p) => ['button', 'a'].includes(p.tagName) || attrOf(p, 'role') === 'button');
+    const host = [...parents]
+      .reverse()
+      .find((p) => ['button', 'a'].includes(p.tagName) || attrOf(p, 'role') === 'button');
     if (!host || labelled.has(host) || attrOf(host, 'aria-label') || attrOf(host, 'aria-labelledby')) return;
     if (wordsBelow(host).trim()) return;
     labelled.add(host);
     const label = iconOnlyLabel(stripEmoji(attrOf(host, 'title') || ''), firstIcon);
     // last, as the page adds it (before the start tag closes)
     const tag = host.sourceCodeLocation.startTag;
-    const at = src[tag.endOffset - 2] === "/" ? tag.endOffset - 2 : tag.endOffset - 1;
+    const at = src[tag.endOffset - 2] === '/' ? tag.endOffset - 2 : tag.endOffset - 1;
     edits.push([at, at, ` aria-label="${escAttr(label)}"`]);
   }
 

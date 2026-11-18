@@ -16,7 +16,9 @@ describe('restart or shut down', () => {
   it('greys a button with the reason, asks the server and draws once', async () => {
     document.body.innerHTML = '<section id="ps" hidden></section>';
     const mount = /** @type {HTMLElement} */ (document.getElementById('ps'));
-    const get = vi.spyOn(api, 'get').mockResolvedValue({ reboot: { ok: true }, shutdown: { ok: false, why: 'No host command is mounted.' } });
+    const get = vi
+      .spyOn(api, 'get')
+      .mockResolvedValue({ reboot: { ok: true }, shutdown: { ok: false, why: 'No host command is mounted.' } });
     const post = vi.spyOn(api, 'post').mockResolvedValue({ status: 'ok' });
     await renderPowerSwitch(mount);
     expect(mount.hidden).toBe(false);

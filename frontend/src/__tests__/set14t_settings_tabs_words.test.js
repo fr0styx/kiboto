@@ -16,7 +16,7 @@ describe('the four Settings tabs carry no fixed English (SET-14)', () => {
     expect(html).not.toContain('>Configure 2FA');
   });
 
-  it('uptime is written in the reader\'s language', async () => {
+  it("uptime is written in the reader's language", async () => {
     await setLanguage('de');
     const de = formatUptime(3 * 86400 + 4 * 3600 + 12 * 60);
     expect(de).toMatch(/^3\s?T/);

@@ -29,18 +29,37 @@ describe('an invite carries folders and sign-in hours (SET-19, Users decision 11
     expect(inv.readInviteShares(document.querySelector('form'))).toEqual({ media: 'read' });
     expect(inv.hoursOrNull({})).toBeNull();
     expect(inv.hoursOrNull(null)).toBeNull();
-    expect(inv.hoursOrNull({ days: [0], start: '07:00', end: '20:00' })).toEqual({ days: [0], start: '07:00', end: '20:00' });
+    expect(inv.hoursOrNull({ days: [0], start: '07:00', end: '20:00' })).toEqual({
+      days: [0],
+      start: '07:00',
+      end: '20:00',
+    });
   });
 
   it('a row says what comes with the role', () => {
-    expect(inv.inviteExtrasText({ shares: { family: 'write', media: 'read' }, signin_hours: { days: [0] } })).toBe('2 folders · with sign-in hours');
+    expect(inv.inviteExtrasText({ shares: { family: 'write', media: 'read' }, signin_hours: { days: [0] } })).toBe(
+      '2 folders · with sign-in hours'
+    );
     expect(inv.inviteExtrasText({ shares: {} })).toBe('');
-    const html = inv.invitesHtml([{ id: 'a', role_id: 'kid', note: 'Mia', uses: 0, max_uses: 1, expires_at: 2e9, active: true, shares: { family: 'read' } }]);
+    const html = inv.invitesHtml([
+      {
+        id: 'a',
+        role_id: 'kid',
+        note: 'Mia',
+        uses: 0,
+        max_uses: 1,
+        expires_at: 2e9,
+        active: true,
+        shares: { family: 'read' },
+      },
+    ]);
     expect(html).toContain('1 folder');
   });
 
   it('creating an invite sends the folders and the hours', async () => {
-    get.mockImplementation((url) => Promise.resolve(url === '/api/storage/share-access' ? { shares: SHARES } : { invites: [] }));
+    get.mockImplementation((url) =>
+      Promise.resolve(url === '/api/storage/share-access' ? { shares: SHARES } : { invites: [] })
+    );
     post.mockResolvedValue({ link: '/#/invite/abc' });
     const mount = /** @type {HTMLElement} */ (document.getElementById('m'));
     await inv.renderInvites(mount);
@@ -56,7 +75,9 @@ describe('an invite carries folders and sign-in hours (SET-19, Users decision 11
   });
 
   it('without the right to manage folders, the form has none and still works', async () => {
-    get.mockImplementation((url) => (url === '/api/storage/share-access' ? Promise.reject(new Error('403')) : Promise.resolve({ invites: [] })));
+    get.mockImplementation((url) =>
+      url === '/api/storage/share-access' ? Promise.reject(new Error('403')) : Promise.resolve({ invites: [] })
+    );
     post.mockResolvedValue({ link: '/#/invite/abc' });
     const mount = /** @type {HTMLElement} */ (document.getElementById('m'));
     await inv.renderInvites(mount);

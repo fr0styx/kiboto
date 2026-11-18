@@ -8,15 +8,35 @@ import { showToast } from '../toast.js';
 import { shareChoicesHtml, grantShares } from './share-access.js';
 
 export const MAIN_ROLES = () => [
-  ['superadmin', t('ap.role_admin', 'Administrator'), t('ap.role_admin_d', 'Everything: people, settings, and every private folder')],
-  ['share_user', t('ap.role_member', 'Family member'), t('ap.role_member_d', 'Their own folder and the shared folders you choose')],
+  [
+    'superadmin',
+    t('ap.role_admin', 'Administrator'),
+    t('ap.role_admin_d', 'Everything: people, settings, and every private folder'),
+  ],
+  [
+    'share_user',
+    t('ap.role_member', 'Family member'),
+    t('ap.role_member_d', 'Their own folder and the shared folders you choose'),
+  ],
   ['kid', t('ap.role_kid', 'Kid'), t('ap.role_kid_d', 'Their own folder, the folders you choose, and limits')],
   ['guest', t('ap.role_guest', 'Guest'), t('ap.role_guest_d', 'Can look at the shared folders you choose')],
 ];
 export const MORE_ROLES = () => [
-  ['app_operator', t('ap.role_apps', 'App manager'), t('ap.role_apps_d', 'Installs and runs apps, and can give an app most data folders')],
-  ['storage_admin', t('ap.role_storage', 'Storage admin'), t('ap.role_storage_d', 'Drives, pools and shares, and can open every private folder')],
-  ['backup_operator', t('ap.role_backup', 'Backup manager'), t('ap.role_backup_d', "Backups and cloud copies; can bring back anyone's files and save the recovery kit")],
+  [
+    'app_operator',
+    t('ap.role_apps', 'App manager'),
+    t('ap.role_apps_d', 'Installs and runs apps, and can give an app most data folders'),
+  ],
+  [
+    'storage_admin',
+    t('ap.role_storage', 'Storage admin'),
+    t('ap.role_storage_d', 'Drives, pools and shares, and can open every private folder'),
+  ],
+  [
+    'backup_operator',
+    t('ap.role_backup', 'Backup manager'),
+    t('ap.role_backup_d', "Backups and cloud copies; can bring back anyone's files and save the recovery kit"),
+  ],
   ['auditor', t('ap.role_viewer', 'Viewer'), t('ap.role_viewer_d', "Can look, can't change")],
 ];
 const INVITABLE = ['share_user', 'kid', 'guest', 'backup_operator', 'app_operator', 'auditor'];
@@ -57,7 +77,10 @@ const h = (key, en, params) => escapeHtml(t(key, en, params));
 
 function rolesHtml(list, chosen) {
   return list
-    .map(([id, name, line]) => `<label class="ap-role"><input type="radio" name="ap-role" value="${id}"${id === chosen ? ' checked' : ''}><span class="ap-role-name">${escapeHtml(name)}</span><span class="ap-role-line">${escapeHtml(line)}</span></label>`)
+    .map(
+      ([id, name, line]) =>
+        `<label class="ap-role"><input type="radio" name="ap-role" value="${id}"${id === chosen ? ' checked' : ''}><span class="ap-role-name">${escapeHtml(name)}</span><span class="ap-role-line">${escapeHtml(line)}</span></label>`
+    )
     .join('');
 }
 
@@ -100,14 +123,26 @@ export function stepHtml(st, shares) {
         <label class="ap-field">${h('ap.days', 'The link works for (days)')}<input type="number" min="1" max="90" class="tz-text-input" data-ap-days value="${st.days}"></label>
       </div>`;
   }
-  const back = st.step > 1 ? `<button type="button" class="btn-pill-toggle" data-ap-back>${h('ap.back', 'Back')}</button>` : `<button type="button" class="btn-pill-toggle" data-ap-close>${h('ap.cancel', 'Cancel')}</button>`;
-  const next = st.step < 3 ? h('ap.next', 'Next') : st.how === 'invite' && canInvite(st.role) ? h('ap.make_link', 'Create the invite link') : h('ap.add', 'Add {name}', { name: st.name });
+  const back =
+    st.step > 1
+      ? `<button type="button" class="btn-pill-toggle" data-ap-back>${h('ap.back', 'Back')}</button>`
+      : `<button type="button" class="btn-pill-toggle" data-ap-close>${h('ap.cancel', 'Cancel')}</button>`;
+  const next =
+    st.step < 3
+      ? h('ap.next', 'Next')
+      : st.how === 'invite' && canInvite(st.role)
+        ? h('ap.make_link', 'Create the invite link')
+        : h('ap.add', 'Add {name}', { name: st.name });
   return `${head}${progress}<div class="ap-body">${body}</div><div class="ap-actions">${back}<button type="submit" class="btn-pill-toggle is-primary" data-ap-next>${next}</button></div>`;
 }
 
 /** The message to paste into a chat with the link. */
 export function inviteMessage(name, link) {
-  return t('ap.message', 'Hi {name}, here is your invite to our NAS: {link} Open it, choose a name and a password, and you are in.', { name, link });
+  return t(
+    'ap.message',
+    'Hi {name}, here is your invite to our NAS: {link} Open it, choose a name and a password, and you are in.',
+    { name, link }
+  );
 }
 
 /** Reads the current step's fields into the state; returns a problem to show, or ''. */
@@ -115,7 +150,8 @@ export function readStep(form, st, hoursMod) {
   const q = (sel) => /** @type {HTMLInputElement | null} */ (form.querySelector(sel));
   if (st.step === 1) {
     st.name = (q('[data-ap-name]')?.value || '').trim();
-    st.role = /** @type {HTMLInputElement | null} */ (form.querySelector('input[name="ap-role"]:checked'))?.value || st.role;
+    st.role =
+      /** @type {HTMLInputElement | null} */ (form.querySelector('input[name="ap-role"]:checked'))?.value || st.role;
     if (!st.name) return t('ap.need_name', 'Write their name first.');
   } else if (st.step === 2) {
     st.shares = {};
@@ -128,12 +164,14 @@ export function readStep(form, st, hoursMod) {
     if (st.hours && !Object.keys(st.hours).length) st.hours = null;
     st.quotaGb = parseInt(q('[data-ap-quota]')?.value || '0', 10) || 0;
   } else {
-    st.how = /** @type {HTMLInputElement | null} */ (form.querySelector('input[name="ap-how"]:checked'))?.value || 'create';
+    st.how =
+      /** @type {HTMLInputElement | null} */ (form.querySelector('input[name="ap-how"]:checked'))?.value || 'create';
     st.username = (q('[data-ap-username]')?.value || '').trim().toLowerCase();
     st.password = q('[data-ap-password]')?.value || '';
     st.mustChange = Boolean(q('[data-ap-must]')?.checked);
     st.days = parseInt(q('[data-ap-days]')?.value || '7', 10) || 7;
-    if (st.how === 'create' && (!st.username || st.password.length < 8)) return t('ap.need_login', 'Choose a sign-in name and a password of 8 characters or more.');
+    if (st.how === 'create' && (!st.username || st.password.length < 8))
+      return t('ap.need_login', 'Choose a sign-in name and a password of 8 characters or more.');
   }
   return '';
 }
@@ -141,20 +179,43 @@ export function readStep(form, st, hoursMod) {
 /** Makes the account or the invite. Returns {name, link?}. */
 export async function finish(st) {
   if (st.how === 'invite' && canInvite(st.role)) {
-    const r = await api.post('/api/invites', { role_id: st.role, note: st.name, days: st.days, quota_gb: st.quotaGb, max_uses: 1, shares: st.shares, signin_hours: st.hours });
-    return { name: st.name, link: `${window.location.origin}${window.location.pathname}${String(r.link || '').replace(/^\//, '')}` };
+    const r = await api.post('/api/invites', {
+      role_id: st.role,
+      note: st.name,
+      days: st.days,
+      quota_gb: st.quotaGb,
+      max_uses: 1,
+      shares: st.shares,
+      signin_hours: st.hours,
+    });
+    return {
+      name: st.name,
+      link: `${window.location.origin}${window.location.pathname}${String(r.link || '').replace(/^\//, '')}`,
+    };
   }
   const res = await apiFetch('/api/users', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
-    body: JSON.stringify({ username: st.username, display_name: st.name, password: st.password, role_id: st.role, storage_quota_bytes: st.quotaGb > 0 ? st.quotaGb * 1024 ** 3 : 0, must_change_password: st.mustChange }),
+    body: JSON.stringify({
+      username: st.username,
+      display_name: st.name,
+      password: st.password,
+      role_id: st.role,
+      storage_quota_bytes: st.quotaGb > 0 ? st.quotaGb * 1024 ** 3 : 0,
+      must_change_password: st.mustChange,
+    }),
   });
   const body = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(body.detail || `HTTP ${res.status}`);
   await grantShares(st.username, st.shares);
   if (st.hours && body.user?.id) {
-    await apiFetch(`/api/users/${body.user.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ signin_hours: st.hours }) });
+    await apiFetch(`/api/users/${body.user.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ signin_hours: st.hours }),
+    });
   }
   return { name: st.name };
 }
@@ -164,11 +225,17 @@ export async function finish(st) {
  * @param {{ onDone?: () => void }} [opts]
  */
 export async function openAddPerson({ onDone } = {}, doc = document) {
-  const shares = (await Promise.resolve().then(() => api.get('/api/storage/share-access')).catch(() => null))?.shares || []; // only for who manages folders
+  const shares =
+    (
+      await Promise.resolve()
+        .then(() => api.get('/api/storage/share-access'))
+        .catch(() => null)
+    )?.shares || []; // only for who manages folders
   const hoursMod = await import('./signin-hours.js');
   const back = /** @type {HTMLElement | null} */ (doc.activeElement);
   const wrap = Object.assign(doc.createElement('div'), { className: 'ap-backdrop' });
-  wrap.innerHTML = '<form class="ap-dialog" role="dialog" aria-modal="true" aria-labelledby="ap-title" novalidate></form>';
+  wrap.innerHTML =
+    '<form class="ap-dialog" role="dialog" aria-modal="true" aria-labelledby="ap-title" novalidate></form>';
   doc.body.append(wrap);
   const form = /** @type {HTMLFormElement} */ (wrap.firstElementChild);
   let st = newState();
@@ -182,21 +249,27 @@ export async function openAddPerson({ onDone } = {}, doc = document) {
     form.innerHTML = stepHtml(st, shares);
     if (st.step === 2 && !st.done) {
       Object.entries(st.shares).forEach(([name, lvl]) => {
-        const sel = /** @type {HTMLSelectElement | null} */ (form.querySelector(`select[data-add-user-share="${CSS.escape(name)}"]`));
+        const sel = /** @type {HTMLSelectElement | null} */ (
+          form.querySelector(`select[data-add-user-share="${CSS.escape(name)}"]`)
+        );
         if (sel) sel.value = lvl;
       });
-      hoursMod.installSigninHours(form.querySelector('[data-ap-hours]'), st.hours ? { signin_hours: st.hours } : null, { canBeLimited: canLimit(st.role) });
+      hoursMod.installSigninHours(form.querySelector('[data-ap-hours]'), st.hours ? { signin_hours: st.hours } : null, {
+        canBeLimited: canLimit(st.role),
+      });
     }
     form.querySelectorAll('input[name="ap-how"]').forEach((r) =>
       r.addEventListener('change', () => {
         const invite = /** @type {HTMLInputElement} */ (r).value === 'invite';
         /** @type {HTMLElement} */ (form.querySelector('[data-ap-create]')).hidden = invite;
         /** @type {HTMLElement} */ (form.querySelector('[data-ap-invite]')).hidden = !invite;
-      }),
+      })
     );
     release();
     release = trapFocus(form, close);
-    /** @type {HTMLElement | null} */ (form.querySelector('input:not([type="radio"]):not([hidden]), [data-ap-close], [data-ap-next]'))?.focus();
+    /** @type {HTMLElement | null} */ (
+      form.querySelector('input:not([type="radio"]):not([hidden]), [data-ap-close], [data-ap-next]')
+    )?.focus();
   };
   form.addEventListener('click', async (e) => {
     const el = /** @type {HTMLElement} */ (e.target).closest('button');

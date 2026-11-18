@@ -5,15 +5,23 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 vi.mock('../utils.js', async (orig) => ({ ...(await orig()), copyTextToClipboard: vi.fn() }));
 const utils = await import('../utils.js');
 const { api } = await import('../api.js');
-const { fetchAndRenderNetworkShares, fetchAndRenderRemoteStorage, renderWebdavCard } = await import('../components/chassis-visualizer.js');
+const { fetchAndRenderNetworkShares, fetchAndRenderRemoteStorage, renderWebdavCard } =
+  await import('../components/chassis-visualizer.js');
 const flush = () => new Promise((r) => setTimeout(r, 0));
 
-const WEBDAV = { running: true, port: 8084, root_path: '/mnt/user', read_only: false, quick_connect: { windows: 'net use Z: x' } };
+const WEBDAV = {
+  running: true,
+  port: 8084,
+  root_path: '/mnt/user',
+  read_only: false,
+  quick_connect: { windows: 'net use Z: x' },
+};
 
 function routes(webdav) {
   vi.spyOn(api, 'get').mockImplementation(async (url) => {
     if (url === '/api/storage/shares') return { shares: [], platform: 'generic_linux' };
-    if (url === '/api/storage/platform') return { platform: 'generic_linux', capabilities: { can_manage_shares: true } };
+    if (url === '/api/storage/platform')
+      return { platform: 'generic_linux', capabilities: { can_manage_shares: true } };
     if (url === '/api/sftp/status') return { running: false, port: 2222 };
     if (url === '/api/sftp/users') return [];
     if (url === '/api/samba/status') return null;
@@ -27,7 +35,8 @@ describe('WebDAV on Shared folders (SET-22 Storage 3)', () => {
   afterEach(() => vi.restoreAllMocks());
 
   it('draws the WebDAV card under Other ways to connect, beside SFTP', async () => {
-    document.body.innerHTML = '<div id="shares"></div><details><div id="shares-sftp-mount"></div><div id="shares-webdav-mount"></div></details>';
+    document.body.innerHTML =
+      '<div id="shares"></div><details><div id="shares-sftp-mount"></div><div id="shares-webdav-mount"></div></details>';
     routes(WEBDAV);
     await fetchAndRenderNetworkShares(document.getElementById('shares'));
     const mount = /** @type {HTMLElement} */ (document.getElementById('shares-webdav-mount'));
@@ -38,7 +47,8 @@ describe('WebDAV on Shared folders (SET-22 Storage 3)', () => {
   });
 
   it('leaves the place empty when the server does not answer for WebDAV', async () => {
-    document.body.innerHTML = '<div id="shares"></div><div id="shares-sftp-mount"></div><div id="shares-webdav-mount"></div>';
+    document.body.innerHTML =
+      '<div id="shares"></div><div id="shares-sftp-mount"></div><div id="shares-webdav-mount"></div>';
     routes(null);
     await fetchAndRenderNetworkShares(document.getElementById('shares'));
     expect(document.getElementById('shares-webdav-mount')?.innerHTML).toBe('');
@@ -62,7 +72,17 @@ describe('WebDAV on Shared folders (SET-22 Storage 3)', () => {
     const host = /** @type {HTMLElement} */ (document.getElementById('w'));
     const refresh = vi.fn();
     const post = vi.spyOn(api, 'post').mockResolvedValue({});
-    renderWebdavCard(host, { running: false, port: 8085, root_path: '/mnt/user', read_only: true, quick_connect: { windows: 'net use Z: y' } }, refresh);
+    renderWebdavCard(
+      host,
+      {
+        running: false,
+        port: 8085,
+        root_path: '/mnt/user',
+        read_only: true,
+        quick_connect: { windows: 'net use Z: y' },
+      },
+      refresh
+    );
     expect(host.textContent).toContain('Stopped');
     /** @type {HTMLButtonElement} */ (host.querySelector('#btn-webdav-toggle')).click();
     await flush();
@@ -95,4 +115,3 @@ describe('WebDAV on Shared folders (SET-22 Storage 3)', () => {
     expect(document.body.textContent).toContain('no port');
   });
 });
-

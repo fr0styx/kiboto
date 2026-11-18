@@ -1,7 +1,23 @@
 import { describe, it, expect } from 'vitest';
-import { personStatus, personMarks, personRowHtml, inviteRowHtml, peopleRowsHtml, peopleMessageHtml } from '../components/people-rows.js';
+import {
+  personStatus,
+  personMarks,
+  personRowHtml,
+  inviteRowHtml,
+  peopleRowsHtml,
+  peopleMessageHtml,
+} from '../components/people-rows.js';
 
-const lea = { id: 'u2', username: 'lea', display_name: 'Lea', role_id: 'kid', status: 'active', signed_in: 2, mfa_enabled: true, storage_quota_bytes: 5 * 2 ** 30 };
+const lea = {
+  id: 'u2',
+  username: 'lea',
+  display_name: 'Lea',
+  role_id: 'kid',
+  status: 'active',
+  signed_in: 2,
+  mfa_enabled: true,
+  storage_quota_bytes: 5 * 2 ** 30,
+};
 
 describe('People as rows (SET-19)', () => {
   it('one status line', () => {
@@ -33,7 +49,11 @@ describe('People as rows (SET-19)', () => {
     const inv = { id: 'i1', role_id: 'kid', note: 'Grandma', expires_at: 2000000000, active: true };
     expect(inviteRowHtml(inv, 'Kid')).toContain('Grandma');
     expect(inviteRowHtml({ ...inv, note: '' }, 'Kid')).toContain('<span class="person-name">Kid</span>');
-    const html = peopleRowsHtml([lea], [inv, { ...inv, id: 'i2', active: false }], { me: null, roleName: () => 'Kid', quotaText: () => '5 GB' });
+    const html = peopleRowsHtml([lea], [inv, { ...inv, id: 'i2', active: false }], {
+      me: null,
+      roleName: () => 'Kid',
+      quotaText: () => '5 GB',
+    });
     document.body.innerHTML = `<ul>${html}</ul>`;
     expect(document.querySelectorAll('.person-row').length).toBe(2);
     expect(document.querySelector('[data-invite-cancel="i1"]')).not.toBeNull();

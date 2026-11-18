@@ -36,7 +36,15 @@ export function initDraggableDesktopIcons() {
   ];
 
   const getAllIconElements = () => {
-    const defaultIds = ['management-desktop-icon', 'containers-desktop-icon', 'vm-desktop-icon', 'fm-desktop-icon', 'rb-desktop-icon', 'dh-desktop-icon', 'chassis-desktop-icon'];
+    const defaultIds = [
+      'management-desktop-icon',
+      'containers-desktop-icon',
+      'vm-desktop-icon',
+      'fm-desktop-icon',
+      'rb-desktop-icon',
+      'dh-desktop-icon',
+      'chassis-desktop-icon',
+    ];
     const elements = [];
     const seen = new Set();
     defaultIds.forEach((id) => {
@@ -46,12 +54,14 @@ export function initDraggableDesktopIcons() {
         seen.add(id);
       }
     });
-    document.querySelectorAll('#desktop-icons-container .chassis-hero-box, .chassis-workbench-stage .chassis-hero-box').forEach((el) => {
-      if (el.id && !seen.has(el.id) && el.style.display !== 'none' && !el.classList.contains('hidden')) {
-        elements.push({ id: el.id, el });
-        seen.add(el.id);
-      }
-    });
+    document
+      .querySelectorAll('#desktop-icons-container .chassis-hero-box, .chassis-workbench-stage .chassis-hero-box')
+      .forEach((el) => {
+        if (el.id && !seen.has(el.id) && el.style.display !== 'none' && !el.classList.contains('hidden')) {
+          elements.push({ id: el.id, el });
+          seen.add(el.id);
+        }
+      });
     return elements;
   };
 
@@ -166,7 +176,7 @@ export function initDraggableDesktopIcons() {
     const icons = getAllIconElements();
     let items = icons.map(({ id, el }) => {
       const nameEl = el.querySelector('.icon-text');
-      const name = (nameEl ? (nameEl.innerText || nameEl.textContent) : '') || id;
+      const name = (nameEl ? nameEl.innerText || nameEl.textContent : '') || id;
       return { id, el, name: String(name || '').trim() };
     });
     // Keep Mission Control anchored first, Containers second, Virtual Machines third, sort others alphabetically
@@ -208,13 +218,15 @@ export function initDraggableDesktopIcons() {
 
   document.body.addEventListener('contextmenu', (e) => {
     if (typeof e.target?.closest !== 'function') return;
-    if (e.target.closest('.smart-modal-window') ||
-        e.target.closest('.os-window') ||
-        e.target.closest('#console-window') ||
-        e.target.closest('.os-context-menu') ||
-        e.target.closest('#os-dock-container') ||
-        e.target.closest('.suite-navbar') ||
-        e.target.closest('.slide-drawer')) {
+    if (
+      e.target.closest('.smart-modal-window') ||
+      e.target.closest('.os-window') ||
+      e.target.closest('#console-window') ||
+      e.target.closest('.os-context-menu') ||
+      e.target.closest('#os-dock-container') ||
+      e.target.closest('.suite-navbar') ||
+      e.target.closest('.slide-drawer')
+    ) {
       return;
     }
 
@@ -242,22 +254,30 @@ export function initDraggableDesktopIcons() {
           <span class="cxm-ico">▶</span>
           <span>${escapeHtml(openLabel)}${iconName ? ` ${escapeHtml(iconName)}` : ''}</span>
         </div>
-        ${iconAppId === 'fm' ? `
+        ${
+          iconAppId === 'fm'
+            ? `
           <div class="ctx-item" id="ctx-new-window">
             <span class="cxm-ico">🪟</span>
             <span>${escapeHtml(t('dock.new_fm_window', 'New Window'))}</span>
           </div>
-        ` : ''}
+        `
+            : ''
+        }
         <div class="cxm-sep"></div>
         <div class="ctx-item" id="ctx-align-grid">📐 ${t('desktop.align_grid', 'Align to Grid')}</div>
         <div class="ctx-item" id="ctx-sort-name">🔤 ${t('desktop.sort_name', 'Sort by Name')}</div>
-        ${isCustom ? `
+        ${
+          isCustom
+            ? `
           <div class="cxm-sep"></div>
           <div class="ctx-item cxm-danger" id="ctx-remove-shortcut">
             <span class="cxm-ico">🗑️</span>
             <span>${escapeHtml(t('dock.remove_shortcut', 'Remove from the desktop'))}</span>
           </div>
-        ` : ''}
+        `
+            : ''
+        }
       `;
 
       document.getElementById('ctx-open-app')?.addEventListener('click', (ev) => {
@@ -403,7 +423,11 @@ export function initDraggableDesktopIcons() {
 
     // 2. Legacy stack migration: In v1.7 before Containers was added, VM was at 189.
     // If VM was saved at old default (left: 24, top: 189):
-    if (savedPositions['vm-desktop-icon'] && savedPositions['vm-desktop-icon'].left === 24 && savedPositions['vm-desktop-icon'].top === 189) {
+    if (
+      savedPositions['vm-desktop-icon'] &&
+      savedPositions['vm-desktop-icon'].left === 24 &&
+      savedPositions['vm-desktop-icon'].top === 189
+    ) {
       const cPos = savedPositions['containers-desktop-icon'];
       if (!cPos || (cPos.left === 24 && (cPos.top === 189 || cPos.top === 301))) {
         savedPositions['containers-desktop-icon'] = { left: 24, top: 189 };
@@ -412,9 +436,17 @@ export function initDraggableDesktopIcons() {
     }
 
     // 3. If Containers was saved at top: 301 (old collision where Containers overlapped File Explorer):
-    if (savedPositions['containers-desktop-icon'] && savedPositions['containers-desktop-icon'].left === 24 && savedPositions['containers-desktop-icon'].top === 301) {
+    if (
+      savedPositions['containers-desktop-icon'] &&
+      savedPositions['containers-desktop-icon'].left === 24 &&
+      savedPositions['containers-desktop-icon'].top === 301
+    ) {
       savedPositions['containers-desktop-icon'] = { left: 24, top: 189 };
-      if (!savedPositions['vm-desktop-icon'] || (savedPositions['vm-desktop-icon'].left === 24 && (savedPositions['vm-desktop-icon'].top === 189 || savedPositions['vm-desktop-icon'].top === 301))) {
+      if (
+        !savedPositions['vm-desktop-icon'] ||
+        (savedPositions['vm-desktop-icon'].left === 24 &&
+          (savedPositions['vm-desktop-icon'].top === 189 || savedPositions['vm-desktop-icon'].top === 301))
+      ) {
         savedPositions['vm-desktop-icon'] = { left: 24, top: 301 };
       }
     }
@@ -444,8 +476,8 @@ export function initDraggableDesktopIcons() {
 
     iconsToProcess.forEach(({ id, el, defaultLeft = 24, defaultTop = 77 }) => {
       const saved = savedPositions[id];
-      const curLeft = (saved && typeof saved.left === 'number') ? saved.left : defaultLeft;
-      const curTop = (saved && typeof saved.top === 'number') ? saved.top : defaultTop;
+      const curLeft = saved && typeof saved.left === 'number' ? saved.left : defaultLeft;
+      const curTop = saved && typeof saved.top === 'number' ? saved.top : defaultTop;
 
       const maxLeft = Math.max(24, window.innerWidth - (el.offsetWidth || 136) - 10);
       const maxTop = Math.max(77, window.innerHeight - (el.offsetHeight || 136) - 70);
@@ -488,7 +520,10 @@ export function initDraggableDesktopIcons() {
     if (!el || el._draggableBound) return;
     el._draggableBound = true;
 
-    let startX = 0, startY = 0, initLeft = 0, initTop = 0;
+    let startX = 0,
+      startY = 0,
+      initLeft = 0,
+      initTop = 0;
     let didDrag = false;
     let dragThresholdPassed = false;
 
@@ -559,7 +594,10 @@ export function initDraggableDesktopIcons() {
           } catch (err) {
             console.error('Failed to save desktop icon position', err);
           }
-          setTimeout(() => { didDrag = false; dragThresholdPassed = false; }, 60);
+          setTimeout(() => {
+            didDrag = false;
+            dragThresholdPassed = false;
+          }, 60);
         }
       };
 
@@ -570,14 +608,18 @@ export function initDraggableDesktopIcons() {
     el.addEventListener('mousedown', onMouseDown);
 
     // Capture phase click interceptor to stop modal opening on drag drop
-    el.addEventListener('click', (e) => {
-      if (didDrag || dragThresholdPassed) {
-        e.stopImmediatePropagation();
-        e.preventDefault();
-        didDrag = false;
-        dragThresholdPassed = false;
-      }
-    }, true);
+    el.addEventListener(
+      'click',
+      (e) => {
+        if (didDrag || dragThresholdPassed) {
+          e.stopImmediatePropagation();
+          e.preventDefault();
+          didDrag = false;
+          dragThresholdPassed = false;
+        }
+      },
+      true
+    );
   };
   window.makeDesktopIconDraggable = makeIconDraggable;
 

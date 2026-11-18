@@ -79,7 +79,9 @@ export function hideUnusable(root, user) {
   if (!root) return;
   // the Overview's cards too: they carried no place, so a family member saw cards that lead to
   // pages the sidebar hides from them (SET-12)
-  for (const el of root.querySelectorAll('[data-phone-open], [data-phone-tab], [data-route], .mgmt-app-card[data-mgmt-target]')) {
+  for (const el of root.querySelectorAll(
+    '[data-phone-open], [data-phone-tab], [data-route], .mgmt-app-card[data-mgmt-target]'
+  )) {
     const route = routeOf(el);
     if (route) mark(el, NO_ACCESS, !canOpen(route, user)); // one reason among others: see hide-marks.js
   }
@@ -100,7 +102,13 @@ export const CARD_ROUTES = {
 
 /** The place an element opens, or ''. */
 export function routeOf(el) {
-  return el.getAttribute('data-phone-open') || el.getAttribute('data-phone-tab') || el.getAttribute('data-route') || CARD_ROUTES[el.getAttribute('data-mgmt-target')] || '';
+  return (
+    el.getAttribute('data-phone-open') ||
+    el.getAttribute('data-phone-tab') ||
+    el.getAttribute('data-route') ||
+    CARD_ROUTES[el.getAttribute('data-mgmt-target')] ||
+    ''
+  );
 }
 
 ZettEventBus.on?.('session:user', (user) => {

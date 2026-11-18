@@ -13,7 +13,8 @@ export const FIRST_ROWS = 5;
 export function lasted(sec) {
   const s = Math.max(0, Math.round(Number(sec) || 0));
   if (s < 90) return t('pwh.secs', '{count, plural, one {# second} other {# seconds}}', { count: s });
-  if (s < 5400) return t('pwh.mins', '{count, plural, one {# minute} other {# minutes}}', { count: Math.round(s / 60) });
+  if (s < 5400)
+    return t('pwh.mins', '{count, plural, one {# minute} other {# minutes}}', { count: Math.round(s / 60) });
   return t('pwh.hours', '{count, plural, one {# hour} other {# hours}}', { count: Math.round(s / 3600) });
 }
 
@@ -24,11 +25,17 @@ export function historySentence(ev) {
   switch (ev?.event_type) {
     case 'OUTAGE_RECOVERED':
       return start != null && end != null
-        ? t('pwh.cut_battery', 'The power was out for {time}. The battery went from {start} % to {end} %.', { time: lasted(ev.duration_sec), start: Math.round(start), end: Math.round(end) })
+        ? t('pwh.cut_battery', 'The power was out for {time}. The battery went from {start} % to {end} %.', {
+            time: lasted(ev.duration_sec),
+            start: Math.round(start),
+            end: Math.round(end),
+          })
         : t('pwh.cut', 'The power was out for {time}.', { time: lasted(ev.duration_sec) });
     case 'FAILSAFE_SHUTDOWN':
       return end != null
-        ? t('pwh.shutdown_battery', 'The battery ran low ({end} % left), and the NAS was shut down safely.', { end: Math.round(end) })
+        ? t('pwh.shutdown_battery', 'The battery ran low ({end} % left), and the NAS was shut down safely.', {
+            end: Math.round(end),
+          })
         : t('pwh.shutdown', 'The battery ran low, and the NAS was shut down safely.');
     case 'SELF_TEST':
       return t('pwh.self_test', 'A battery test was sent to the UPS.');
@@ -54,7 +61,10 @@ export function renderPowerHistory(mount, events) {
   const all = mount.dataset.all === '1';
   const shown = all ? list : list.slice(0, FIRST_ROWS);
   mount.innerHTML = `<ol class="pwh-list">${shown.map((ev) => `<li class="pwh-row"><span class="pwh-when">${escapeHtml(formatDateTime(Number(ev.ts) * (Number(ev.ts) < 1e12 ? 1000 : 1)))}</span> <span class="pwh-what">${escapeHtml(historySentence(ev))}</span></li>`).join('')}</ol>${
-    list.length > FIRST_ROWS && !all ? `<button type="button" class="btn-pill-toggle pwh-more">${escapeHtml(t('pwh.show_all', 'Show all ({count})', { count: list.length }))}</button>` : ''}`;
+    list.length > FIRST_ROWS && !all
+      ? `<button type="button" class="btn-pill-toggle pwh-more">${escapeHtml(t('pwh.show_all', 'Show all ({count})', { count: list.length }))}</button>`
+      : ''
+  }`;
   mount.querySelector('.pwh-more')?.addEventListener('click', () => {
     mount.dataset.all = '1';
     renderPowerHistory(mount, list);

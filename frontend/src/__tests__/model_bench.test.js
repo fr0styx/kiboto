@@ -5,7 +5,14 @@ vi.mock('../api.js', () => ({
   api: {
     get: vi.fn(async () => ({
       results: [
-        { name: 'qwen2.5:3b', ok: true, tokens_per_s: 45, first_token_s: 1.2, doc_first_token_s: 26.6, placement: 'CPU' },
+        {
+          name: 'qwen2.5:3b',
+          ok: true,
+          tokens_per_s: 45,
+          first_token_s: 1.2,
+          doc_first_token_s: 26.6,
+          placement: 'CPU',
+        },
         { name: 'gemma3:12b', ok: true, tokens_per_s: 18, first_token_s: 2.5, placement: 'GPU' },
       ],
       finished_at: 1761100000,

@@ -12,11 +12,19 @@ describe('the viewer opens once and always closes (NUX-25)', () => {
 
   it('keeps only the newer viewer when two opens overlap', async () => {
     let release;
-    const slow = new Promise((r) => { release = r; });
+    const slow = new Promise((r) => {
+      release = r;
+    });
     vi.spyOn(api, 'get').mockImplementation(() => slow);
     const first = openFilePreviewModal('/mnt/user/p/a.jpg', 'a.jpg');
     const second = openFilePreviewModal('/mnt/user/p/b.jpg', 'b.jpg');
-    release({ current: '/mnt/user/p', dirs: [{ name: 'a.jpg', path: '/mnt/user/p/a.jpg' }, { name: 'b.jpg', path: '/mnt/user/p/b.jpg' }] });
+    release({
+      current: '/mnt/user/p',
+      dirs: [
+        { name: 'a.jpg', path: '/mnt/user/p/a.jpg' },
+        { name: 'b.jpg', path: '/mnt/user/p/b.jpg' },
+      ],
+    });
     await Promise.all([first, second]);
     const overlays = document.querySelectorAll('.quicklook-modal-overlay');
     expect(overlays.length).toBe(1);

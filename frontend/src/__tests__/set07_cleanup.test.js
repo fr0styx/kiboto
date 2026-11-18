@@ -19,7 +19,8 @@ const byId = (id) => document.getElementById(id);
 describe('"Clean up" and stopped apps (SET-07)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    document.body.innerHTML = '<input type="checkbox" id="dpm-opt-containers"><strong id="dpm-opt-containers-title"></strong><div id="dpm-opt-containers-desc"></div>';
+    document.body.innerHTML =
+      '<input type="checkbox" id="dpm-opt-containers"><strong id="dpm-opt-containers-title"></strong><div id="dpm-opt-containers-desc"></div>';
   });
 
   it('the option starts unticked', () => {
@@ -56,7 +57,7 @@ describe('"Clean up" and stopped apps (SET-07)', () => {
   });
 
   it('the start button sends "remove stopped apps" only after that question', () => {
-    const start = src.slice(src.indexOf('confirmBtn.onclick = async () => {'), src.indexOf("followPruneJob(res.job);"));
+    const start = src.slice(src.indexOf('confirmBtn.onclick = async () => {'), src.indexOf('followPruneJob(res.job);'));
     expect(start).toContain('if (removeStopped && !(await askRemoveStopped(_stoppedApps))) return;');
     expect(start).toContain('prune_containers: removeStopped,');
   });

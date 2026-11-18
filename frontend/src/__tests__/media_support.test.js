@@ -2,7 +2,12 @@ import { describe, it, expect } from 'vitest';
 import { canPlayHere, compatStreamUrl, describeMedia } from '../components/media-support.js';
 
 const browser = (types) => ({ canPlayType: (ty) => (types.some((x) => ty.includes(x)) ? 'probably' : '') });
-const iphone = { container: 'mov,mp4,m4a,3gp,3g2,mj2', duration: 31.5, video: { codec: 'hevc', profile: 'Main', width: 1080, height: 1920, fps: 30, bit_depth: 8, hdr: false }, audio: { codec: 'aac', channels: 1, sample_rate: 48000 } };
+const iphone = {
+  container: 'mov,mp4,m4a,3gp,3g2,mj2',
+  duration: 31.5,
+  video: { codec: 'hevc', profile: 'Main', width: 1080, height: 1920, fps: 30, bit_depth: 8, hdr: false },
+  audio: { codec: 'aac', channels: 1, sample_rate: 48000 },
+};
 
 describe('which videos this browser plays as they are', () => {
   it('iPhone HEVC: direct where HEVC plays, converted elsewhere', () => {
@@ -23,6 +28,8 @@ describe('which videos this browser plays as they are', () => {
     expect(rows.Video).toBe('HEVC (H.265) (Main)');
     expect(rows.Audio).toBe('AAC · mono · 48 kHz');
     expect(rows['In this browser']).toBe('Converted while playing');
-    expect(compatStreamUrl('/mnt/user/a b.mov', 12.345)).toBe('/api/fs/stream/compat?path=%2Fmnt%2Fuser%2Fa%20b.mov&start=12.35&mode=full');
+    expect(compatStreamUrl('/mnt/user/a b.mov', 12.345)).toBe(
+      '/api/fs/stream/compat?path=%2Fmnt%2Fuser%2Fa%20b.mov&start=12.35&mode=full'
+    );
   });
 });

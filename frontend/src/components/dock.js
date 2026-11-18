@@ -12,28 +12,97 @@ import { t } from '../i18n.js';
 import { _isConsoleMaximized, openConsoleWindow, toggleConsoleMaximize } from './dock/console-window.js';
 import { initDraggableDesktopIcons } from './dock/desktop-icons.js';
 import { DockManager } from './dock/dock-manager.js';
-import { applyDockSettings, getDockSettings, initDockSettingsControls, initParabolicDockMagnification } from './dock/dock-settings.js';
-import { isEventChecked, markEventChecked, renderNotificationCenter, resetCheckedEventsState, updateNotificationBadge } from './dock/notifications.js';
-import { getCurrentWorkspace, initWindowKeyboardShortcuts, initWorkspaceSwitcher, switchWorkspace } from './dock/shortcuts.js';
+import {
+  applyDockSettings,
+  getDockSettings,
+  initDockSettingsControls,
+  initParabolicDockMagnification,
+} from './dock/dock-settings.js';
+import {
+  isEventChecked,
+  markEventChecked,
+  renderNotificationCenter,
+  resetCheckedEventsState,
+  updateNotificationBadge,
+} from './dock/notifications.js';
+import {
+  getCurrentWorkspace,
+  initWindowKeyboardShortcuts,
+  initWorkspaceSwitcher,
+  switchWorkspace,
+} from './dock/shortcuts.js';
 import { initSnapAssistFlyout } from './dock/snap-assist.js';
 import { getActiveWindowElement, restoreWindowSnap } from './dock/snap.js';
 import { initTopbarUserPill } from './dock/user-pill.js';
 import { bringToFront, makeDraggable, makeResizable } from './dock/window-drag.js';
-import { clearMobileInlineBounds, loadSavedWindowBounds, restoreOpenWindowsState, saveOpenWindowsState, saveWindowBounds, setWindowRestorationComplete } from './dock/window-state.js';
+import {
+  clearMobileInlineBounds,
+  loadSavedWindowBounds,
+  restoreOpenWindowsState,
+  saveOpenWindowsState,
+  saveWindowBounds,
+  setWindowRestorationComplete,
+} from './dock/window-state.js';
 import { COMPACT_MAX } from '../device.js';
 export { KNOWN_APPS, showDockItemContextMenu, toggleFmWindowSwitcher } from './dock/apps.js';
 export { openConsoleWindow, toggleConsoleMaximize } from './dock/console-window.js';
 export { initDraggableDesktopIcons } from './dock/desktop-icons.js';
 export { DockManager } from './dock/dock-manager.js';
-export { applyDockSettings, getDockSettings, initDockSettingsControls, initParabolicDockMagnification } from './dock/dock-settings.js';
+export {
+  applyDockSettings,
+  getDockSettings,
+  initDockSettingsControls,
+  initParabolicDockMagnification,
+} from './dock/dock-settings.js';
 export { initDesktopLasso } from './dock/lasso.js';
-export { CHECKED_EVENTS_KEY, DOCK_PINNED_KEY, getEventKey, isEventChecked, markEventChecked, renderNotificationCenter, resetCheckedEventsState, saveCheckedEvents, showDockToast } from './dock/notifications.js';
-export { WORKSPACES, getCurrentWorkspace, initWindowKeyboardShortcuts, initWorkspaceSwitcher, switchWorkspace } from './dock/shortcuts.js';
+export {
+  CHECKED_EVENTS_KEY,
+  DOCK_PINNED_KEY,
+  getEventKey,
+  isEventChecked,
+  markEventChecked,
+  renderNotificationCenter,
+  resetCheckedEventsState,
+  saveCheckedEvents,
+  showDockToast,
+} from './dock/notifications.js';
+export {
+  WORKSPACES,
+  getCurrentWorkspace,
+  initWindowKeyboardShortcuts,
+  initWorkspaceSwitcher,
+  switchWorkspace,
+} from './dock/shortcuts.js';
 export { initSnapAssistFlyout } from './dock/snap-assist.js';
-export { DOCK_MARGIN, NAVBAR_OFFSET, applyWindowSnap, evaluateSnapZone, getActiveWindowElement, getSnapGeometry, restoreWindowSnap } from './dock/snap.js';
+export {
+  DOCK_MARGIN,
+  NAVBAR_OFFSET,
+  applyWindowSnap,
+  evaluateSnapZone,
+  getActiveWindowElement,
+  getSnapGeometry,
+  restoreWindowSnap,
+} from './dock/snap.js';
 export { initTopbarUserPill, toggleUserProfileFlyout } from './dock/user-pill.js';
-export { DESKTOP_WINDOW_SELECTOR, activeWindowZIndex, bringToFront, handleWindowActivation, makeDraggable, makeResizable } from './dock/window-drag.js';
-export { OPEN_WINDOWS_KEY, applySavedBounds, clearMobileInlineBounds, loadSavedWindowBounds, restoreOpenWindowsState, restoreWindowsAfterWiden, saveOpenWindowsState, saveWindowBounds, setWindowRestorationComplete } from './dock/window-state.js';
+export {
+  DESKTOP_WINDOW_SELECTOR,
+  activeWindowZIndex,
+  bringToFront,
+  handleWindowActivation,
+  makeDraggable,
+  makeResizable,
+} from './dock/window-drag.js';
+export {
+  OPEN_WINDOWS_KEY,
+  applySavedBounds,
+  clearMobileInlineBounds,
+  loadSavedWindowBounds,
+  restoreOpenWindowsState,
+  restoreWindowsAfterWiden,
+  saveOpenWindowsState,
+  saveWindowBounds,
+  setWindowRestorationComplete,
+} from './dock/window-state.js';
 
 try {
   localStorage.removeItem('kiboto_last_read_event_ts');
@@ -43,7 +112,12 @@ window.DockManager = DockManager;
 window.bringToFront = bringToFront;
 
 export function initDockSystem() {
-  if (state.isLcdDirect || (typeof window !== 'undefined' && window.location.search.includes('mode=lcd')) || (document.body && document.body.classList.contains('lcd-direct'))) return;
+  if (
+    state.isLcdDirect ||
+    (typeof window !== 'undefined' && window.location.search.includes('mode=lcd')) ||
+    (document.body && document.body.classList.contains('lcd-direct'))
+  )
+    return;
   initSnapAssistFlyout();
   initTopbarUserPill();
   onManagementDom(initDockSettingsControls); // dock settings are in Mission Control (FE-04)
@@ -72,7 +146,10 @@ export function initDockSystem() {
   const consoleMin = document.getElementById('console-min');
   if (consoleMin) {
     const handleMin = (e) => {
-      if (e && e.type === 'touchend') { e.preventDefault(); e.stopPropagation(); }
+      if (e && e.type === 'touchend') {
+        e.preventDefault();
+        e.stopPropagation();
+      }
       DockManager.minimize('console');
     };
     consoleMin.addEventListener('click', handleMin);
@@ -98,7 +175,10 @@ export function initDockSystem() {
   const consoleClose = document.getElementById('console-close');
   if (consoleClose) {
     const handleClose = (e) => {
-      if (e && e.type === 'touchend') { e.preventDefault(); e.stopPropagation(); }
+      if (e && e.type === 'touchend') {
+        e.preventDefault();
+        e.stopPropagation();
+      }
       DockManager.closeWindow('console');
     };
     consoleClose.addEventListener('click', handleClose);
@@ -141,7 +221,8 @@ export function initDockSystem() {
   if (!toastContainer) {
     toastContainer = document.createElement('div');
     toastContainer.id = 'global-toast-container';
-    toastContainer.style.cssText = 'position:fixed;bottom:84px;left:50%;transform:translateX(-50%);z-index:var(--z-toast, 10000);display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;';
+    toastContainer.style.cssText =
+      'position:fixed;bottom:84px;left:50%;transform:translateX(-50%);z-index:var(--z-toast, 10000);display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;';
     document.body.appendChild(toastContainer);
   }
 
@@ -166,7 +247,11 @@ export function initDockSystem() {
   const storedMobile = localStorage.getItem('kiboto_mobile_mode');
   const isMobileInitial = storedMobile === '1' || (storedMobile === null && window.innerWidth <= COMPACT_MAX);
   const purgeAllMobileWindows = () => {
-    document.querySelectorAll('.os-window, .file-manager-window, #management-window, .management-window, .smart-modal-window, #console-window, .chassis-front-panel, #container-inspector-window, #stack-inspector-window, #app-deploy-modal-window, #notif-center-panel').forEach(clearMobileInlineBounds);
+    document
+      .querySelectorAll(
+        '.os-window, .file-manager-window, #management-window, .management-window, .smart-modal-window, #console-window, .chassis-front-panel, #container-inspector-window, #stack-inspector-window, #app-deploy-modal-window, #notif-center-panel'
+      )
+      .forEach(clearMobileInlineBounds);
   };
   if (isMobileInitial) {
     document.body.classList.add('mobile-mode');
@@ -182,7 +267,9 @@ export function initDockSystem() {
     mobileToggleBtn.addEventListener('click', () => {
       const isMobile = document.body.classList.toggle('mobile-mode');
       mobileToggleBtn.classList.toggle('active', isMobile);
-      mobileToggleBtn.title = isMobile ? t('dock.stacked_on', 'Stacked view: click for desktop windows') : t('dock.stacked_off', 'Switch to the stacked view');
+      mobileToggleBtn.title = isMobile
+        ? t('dock.stacked_on', 'Stacked view: click for desktop windows')
+        : t('dock.stacked_off', 'Switch to the stacked view');
       localStorage.setItem('kiboto_mobile_mode', isMobile ? '1' : '0');
       if (isMobile) {
         purgeAllMobileWindows();

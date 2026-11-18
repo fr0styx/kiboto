@@ -117,9 +117,10 @@ export function initLedControl() {
       speed: parseInt(speedSlider ? speedSlider.value : 50, 10),
     };
     if (previewTxt) {
-      previewTxt.textContent = currentPower === 'off'
-        ? t('led.state_off', 'Off').toUpperCase()
-        : `${t('led.state_on', 'On')} • ${t(`dr.${currentMode}`, currentMode)}`.toUpperCase();
+      previewTxt.textContent =
+        currentPower === 'off'
+          ? t('led.state_off', 'Off').toUpperCase()
+          : `${t('led.state_on', 'On')} • ${t(`dr.${currentMode}`, currentMode)}`.toUpperCase();
     }
     renderLightbar(previewBar, look);
     // the console's bar shows the change at once; the next stats say what the bar really does
@@ -145,7 +146,7 @@ export function initLedControl() {
       reactive: reactiveToggle ? reactiveToggle.checked : true,
       night_mode: ledNightToggle ? ledNightToggle.checked : false,
       night_start: ledNightStart ? ledNightStart.value : '23:00',
-      night_end: ledNightEnd ? ledNightEnd.value : '07:00'
+      night_end: ledNightEnd ? ledNightEnd.value : '07:00',
     };
     try {
       await api.post('/api/led', payload);
@@ -179,14 +180,24 @@ export function initLedControl() {
       initGlassTimePickers($('tab-led') || document);
 
       effectBtns.forEach((b) => b.classList.toggle('active', b.dataset.effect === currentMode));
-      colorChips1.forEach((c) => c.classList.toggle('active', c.dataset.hex.toLowerCase() === currentColor.toLowerCase()));
-      colorChips2.forEach((c) => c.classList.toggle('active', c.dataset.hex.toLowerCase() === currentColor2.toLowerCase()));
+      colorChips1.forEach((c) =>
+        c.classList.toggle('active', c.dataset.hex.toLowerCase() === currentColor.toLowerCase())
+      );
+      colorChips2.forEach((c) =>
+        c.classList.toggle('active', c.dataset.hex.toLowerCase() === currentColor2.toLowerCase())
+      );
 
       profilePills.forEach((pill) => {
         const pr = pill.dataset.profile;
         let match = false;
         if (pr === 'clean' && currentMode === 'solid' && currentColor.toLowerCase() === '25c2a0') match = true;
-        else if (pr === 'cyberpunk' && currentMode === 'gradient' && currentColor.toLowerCase() === '00ffff' && currentColor2.toLowerCase() === 'ff0055') match = true;
+        else if (
+          pr === 'cyberpunk' &&
+          currentMode === 'gradient' &&
+          currentColor.toLowerCase() === '00ffff' &&
+          currentColor2.toLowerCase() === 'ff0055'
+        )
+          match = true;
         else if (pr === 'stealth' && currentMode === 'solid' && currentColor.toLowerCase() === '001428') match = true;
         else if (pr === 'rainbow' && currentMode === 'rainbow') match = true;
         pill.classList.toggle('active', match);
@@ -206,15 +217,34 @@ export function initLedControl() {
       const pr = p.dataset.profile;
       profilePills.forEach((pill) => pill.classList.toggle('active', pill === p));
 
-      if (pr === 'clean') { currentMode = 'solid'; currentColor = '25c2a0'; if (slider) slider.value = 25; }
-      else if (pr === 'cyberpunk') { currentMode = 'gradient'; currentColor = '00ffff'; currentColor2 = 'ff0055'; if (slider) slider.value = 40; if (speedSlider) speedSlider.value = 65; }
-      else if (pr === 'stealth') { currentMode = 'solid'; currentColor = '001428'; if (slider) slider.value = 8; }
-      else if (pr === 'rainbow') { currentMode = 'rainbow'; if (slider) slider.value = 35; if (speedSlider) speedSlider.value = 70; }
+      if (pr === 'clean') {
+        currentMode = 'solid';
+        currentColor = '25c2a0';
+        if (slider) slider.value = 25;
+      } else if (pr === 'cyberpunk') {
+        currentMode = 'gradient';
+        currentColor = '00ffff';
+        currentColor2 = 'ff0055';
+        if (slider) slider.value = 40;
+        if (speedSlider) speedSlider.value = 65;
+      } else if (pr === 'stealth') {
+        currentMode = 'solid';
+        currentColor = '001428';
+        if (slider) slider.value = 8;
+      } else if (pr === 'rainbow') {
+        currentMode = 'rainbow';
+        if (slider) slider.value = 35;
+        if (speedSlider) speedSlider.value = 70;
+      }
       if (valDisplay && slider) valDisplay.textContent = slider.value + '%';
       if (speedValDisplay && speedSlider) speedValDisplay.textContent = formatSpeedText(speedSlider.value);
       effectBtns.forEach((b) => b.classList.toggle('active', b.dataset.effect === currentMode));
-      colorChips1.forEach((c) => c.classList.toggle('active', c.dataset.hex.toLowerCase() === currentColor.toLowerCase()));
-      colorChips2.forEach((c) => c.classList.toggle('active', c.dataset.hex.toLowerCase() === currentColor2.toLowerCase()));
+      colorChips1.forEach((c) =>
+        c.classList.toggle('active', c.dataset.hex.toLowerCase() === currentColor.toLowerCase())
+      );
+      colorChips2.forEach((c) =>
+        c.classList.toggle('active', c.dataset.hex.toLowerCase() === currentColor2.toLowerCase())
+      );
       updateDynamicCards();
       postLed('on');
     });

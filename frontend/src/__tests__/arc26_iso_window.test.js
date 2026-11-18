@@ -8,7 +8,12 @@ vi.mock('../api.js', () => ({
   api: { get: vi.fn(), post: vi.fn(), delete: vi.fn() },
   auth: { hasToken: vi.fn().mockReturnValue(true), getToken: vi.fn(() => 'x') },
 }));
-vi.mock('../toast.js', () => ({ showToast: vi.fn(), showConfirmToast: vi.fn(), showPromptToast: vi.fn(), showBottomSheet: vi.fn() }));
+vi.mock('../toast.js', () => ({
+  showToast: vi.fn(),
+  showConfirmToast: vi.fn(),
+  showPromptToast: vi.fn(),
+  showBottomSheet: vi.fn(),
+}));
 
 const q = (sel) => document.querySelector(sel);
 let xhrs = [];
@@ -18,9 +23,15 @@ class FakeXhr {
     this.headers = {};
     xhrs.push(this);
   }
-  open(method, url) { Object.assign(this, { method, url }); }
-  setRequestHeader(k, v) { this.headers[k] = v; }
-  send(body) { this.body = body; }
+  open(method, url) {
+    Object.assign(this, { method, url });
+  }
+  setRequestHeader(k, v) {
+    this.headers[k] = v;
+  }
+  send(body) {
+    this.body = body;
+  }
 }
 const iso = (name = 'debian.iso') => new File(['x'], name);
 
@@ -30,7 +41,9 @@ describe('ISO library window', () => {
     document.body.innerHTML = '';
     xhrs = [];
     vi.stubGlobal('XMLHttpRequest', FakeXhr);
-    api.get.mockImplementation(async (url) => (url === '/api/vms/isos' || url === '/api/vms/bridges' ? [] : url === '/api/vms' ? [] : {}));
+    api.get.mockImplementation(async (url) =>
+      url === '/api/vms/isos' || url === '/api/vms/bridges' ? [] : url === '/api/vms' ? [] : {}
+    );
     window.DockManager = { windows: {}, register: vi.fn(), minimize: vi.fn(), closeWindow: vi.fn(), restore: vi.fn() };
   });
   afterEach(() => {

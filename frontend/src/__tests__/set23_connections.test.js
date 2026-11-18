@@ -12,7 +12,14 @@ describe('Connections, an Advanced page (SET-23, Settings decision 8)', () => {
   it('holds Home Assistant, API tokens, sign-in and Redfish; the old places do not', () => {
     const d = doc();
     const pane = /** @type {HTMLElement} */ (d.getElementById('mgmt-pane-connections'));
-    for (const id of ['notif-ha-grid', 'api-tokens-list', 'new-token-name', 'sec-sso-card', 'sec-ldap-card', 'conn-redfish-card']) {
+    for (const id of [
+      'notif-ha-grid',
+      'api-tokens-list',
+      'new-token-name',
+      'sec-sso-card',
+      'sec-ldap-card',
+      'conn-redfish-card',
+    ]) {
       expect(pane.querySelector(`#${id}`), id).not.toBeNull();
     }
     expect(d.getElementById('mgmt-pane-security')?.querySelector('#sec-sso-card')).toBeNull();

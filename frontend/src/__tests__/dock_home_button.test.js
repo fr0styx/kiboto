@@ -2,8 +2,17 @@
 import { describe, expect, it, vi } from 'vitest';
 
 vi.mock('../api.js', () => {
-  const api = { get: vi.fn(async () => ({})), post: vi.fn(async () => ({})), put: vi.fn(async () => ({})), delete: vi.fn(async () => ({})) };
-  return { api, default: api, auth: { getToken: () => 'test-token', getUser: () => ({ username: 'admin', role: 'superadmin' }) } };
+  const api = {
+    get: vi.fn(async () => ({})),
+    post: vi.fn(async () => ({})),
+    put: vi.fn(async () => ({})),
+    delete: vi.fn(async () => ({})),
+  };
+  return {
+    api,
+    default: api,
+    auth: { getToken: () => 'test-token', getUser: () => ({ username: 'admin', role: 'superadmin' }) },
+  };
 });
 
 const mk = (id) => {
@@ -16,7 +25,8 @@ const mk = (id) => {
 
 describe('Dock Home button', () => {
   it('leaves closed windows closed', async () => {
-    document.body.innerHTML = '<div id="os-dock-container" class="os-dock-container dock-pos-bottom"><div id="os-dock" class="os-dock active"></div></div>';
+    document.body.innerHTML =
+      '<div id="os-dock-container" class="os-dock-container dock-pos-bottom"><div id="os-dock" class="os-dock active"></div></div>';
     const { DockManager } = await import('../components/dock.js');
     DockManager.windows = {};
     DockManager.register('stack-inspector', mk('stack-inspector'), '#i-grid', 'Stack Inspector', true);
@@ -34,7 +44,8 @@ describe('Dock Home button', () => {
   });
 
   it('counts a closed Stack Inspector as closed', async () => {
-    document.body.innerHTML = '<div id="os-dock-container" class="os-dock-container dock-pos-bottom"><div id="os-dock" class="os-dock active"></div></div>';
+    document.body.innerHTML =
+      '<div id="os-dock-container" class="os-dock-container dock-pos-bottom"><div id="os-dock" class="os-dock active"></div></div>';
     const { DockManager } = await import('../components/dock.js');
     const { closeStackModal } = await import('../components/stack-modal.js');
     DockManager.windows = {};
@@ -49,7 +60,8 @@ describe('Dock Home button', () => {
   });
 
   it('the desktop preview under Home leaves closed windows closed too', async () => {
-    document.body.innerHTML = '<div id="os-dock-container" class="os-dock-container dock-pos-bottom"><div id="os-dock" class="os-dock active"></div></div>';
+    document.body.innerHTML =
+      '<div id="os-dock-container" class="os-dock-container dock-pos-bottom"><div id="os-dock" class="os-dock active"></div></div>';
     const { DockManager } = await import('../components/dock.js');
     DockManager.windows = {};
     DockManager.register('stack-inspector', mk('stack-inspector'), '#i-grid', 'Stack Inspector', true);

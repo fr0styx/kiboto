@@ -12,9 +12,10 @@ export const RECHECK_FOR_MS = 15 * 60 * 1000;
 
 function step(done, text, url, help) {
   const mark = done ? '✓' : '○';
-  const link = !done && url
-    ? ` <a class="btn-pill-toggle is-small" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('funnel.open', 'Open'))}</a>`
-    : '';
+  const link =
+    !done && url
+      ? ` <a class="btn-pill-toggle is-small" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('funnel.open', 'Open'))}</a>`
+      : '';
   return `<li class="funnel-step${done ? ' is-done' : ''}"><span class="funnel-mark" aria-hidden="true">${mark}</span>
     <span><strong>${escapeHtml(text)}</strong>${help ? ` <span class="nsv-xs-muted">${escapeHtml(help)}</span>` : ''}</span>${link}</li>`;
 }
@@ -26,7 +27,7 @@ export function funnelStepsHtml(f, waiting = '') {
     return `<div class="funnel-steps nsv-xs-muted">${escapeHtml(t('funnel.headscale', 'Funnel is a Tailscale service: with your own Headscale server, nothing can be put on the internet this way.'))}</div>`;
   }
   return `<div class="funnel-steps" role="group" aria-label="${escapeHtml(t('funnel.title', 'Before Funnel works'))}">
-    <div class="nsv-xs-muted">${escapeHtml(t('funnel.owner', 'Two switches in Tailscale that only the tailnet\'s owner can turn on, one click each. This list ticks itself.'))}</div>
+    <div class="nsv-xs-muted">${escapeHtml(t('funnel.owner', "Two switches in Tailscale that only the tailnet's owner can turn on, one click each. This list ticks itself."))}</div>
     <ol class="funnel-list">
       ${step(f.https, t('funnel.step_https', 'Turn on HTTPS certificates'), f.dns_url, t('funnel.step_https_help', 'Tailscale admin → DNS → Enable HTTPS'))}
       ${step(f.funnel, t('funnel.step_allow', 'Allow Funnel for this device'), f.approve_url, '')}

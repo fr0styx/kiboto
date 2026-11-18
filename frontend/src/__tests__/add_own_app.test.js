@@ -4,7 +4,10 @@ import { describe, it, expect, vi } from 'vitest';
 const applied = [];
 let result = true;
 vi.mock('../components/stack-apply.js', () => ({
-  applyStack: async (name, compose, env, opts) => { applied.push({ name, compose, env, create: opts.create }); return result; },
+  applyStack: async (name, compose, env, opts) => {
+    applied.push({ name, compose, env, create: opts.create });
+    return result;
+  },
 }));
 
 const { nameProblem, openAddOwnApp } = await import('../components/add-own-app.js');
@@ -33,7 +36,12 @@ describe('add your own app', () => {
     result = false;
     submit();
     await flush();
-    expect(applied.at(-1)).toEqual({ name: 'web', compose: 'services:\n  web:\n    image: nginx:1.27\n', env: 'TZ=UTC', create: true });
+    expect(applied.at(-1)).toEqual({
+      name: 'web',
+      compose: 'services:\n  web:\n    image: nginx:1.27\n',
+      env: 'TZ=UTC',
+      create: true,
+    });
     expect(document.getElementById('own-app-dialog')).not.toBeNull(); // kept open when not created
     result = true;
     submit();

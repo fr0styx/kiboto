@@ -20,6 +20,8 @@ export function slowNoteHtml(vm, fix = '') {
 /** What to say after Start when the machine came up in slow mode, or "". */
 export function slowStartText(res, name, fix = '') {
   if (!res || res.acceleration !== 'tcg') return '';
-  const head = t('vms.slow_started', "{name} started in slow mode: this NAS can't use hardware virtualization.", { name });
+  const head = t('vms.slow_started', "{name} started in slow mode: this NAS can't use hardware virtualization.", {
+    name,
+  });
   return fix ? `${head} ${fix}` : head;
 }

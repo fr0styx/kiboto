@@ -26,7 +26,7 @@ import {
   openVmEditModal,
   openQemuErrorModal,
   openVmConnectModal,
-  applyTerminalStream
+  applyTerminalStream,
 } from '../components/vm-manager.js';
 import { api } from '../api.js';
 import { showToast, showPromptToast } from '../toast.js';
@@ -609,7 +609,9 @@ describe('VM Manager & Dynamic Elastic Headroom Budgeting', () => {
       expect(canvas.dataset.note).toBe('The screen of Test Guest VM could not be opened.');
       expect(canvas.getAttribute('aria-label')).toContain('press Reconnect');
       failedNote(canvas, 'Test Guest VM', 'cli', 'refused');
-      expect(canvas.getAttribute('aria-label')).toBe('The serial console of Test Guest VM could not be opened. refused');
+      expect(canvas.getAttribute('aria-label')).toBe(
+        'The serial console of Test Guest VM could not be opened. refused'
+      );
       expect(showToast).not.toHaveBeenCalledWith(expect.stringContaining('Guest executed'));
     });
 
@@ -711,10 +713,7 @@ describe('VM Manager & Dynamic Elastic Headroom Budgeting', () => {
       await vi.waitFor(() => {
         expect(promptSpy).not.toHaveBeenCalled();
         expect(showPromptToast).toHaveBeenCalled();
-        expect(showToast).toHaveBeenCalledWith(
-          expect.stringContaining('Sent 5 characters to the VM'),
-          'success'
-        );
+        expect(showToast).toHaveBeenCalledWith(expect.stringContaining('Sent 5 characters to the VM'), 'success');
       });
     });
 
@@ -799,7 +798,8 @@ describe('VM Manager & Dynamic Elastic Headroom Budgeting', () => {
     });
 
     it('parses serial console socket waiting banner with accurate colors', () => {
-      const banner = "\r\n\x1b[33m[Kiboto Serial Console]\x1b[0m Waiting for serial socket at '/tmp/vm-test.sock'...\r\n\x1b[90mEnsure VM is running and serial socket is initialized.\x1b[0m\r\n";
+      const banner =
+        "\r\n\x1b[33m[Kiboto Serial Console]\x1b[0m Waiting for serial socket at '/tmp/vm-test.sock'...\r\n\x1b[90mEnsure VM is running and serial socket is initialized.\x1b[0m\r\n";
       const html = formatAnsiToHtml(banner);
       expect(html).toContain('style="color: #f59e0b"');
       expect(html).toContain('[Kiboto Serial Console]');
@@ -947,9 +947,7 @@ describe('VM Manager & Dynamic Elastic Headroom Budgeting', () => {
               ram_gb: 8.0,
               ip_address: '192.168.1.150',
               vnc_port: 5902,
-              host_shares: [
-                { host_path: '/mnt/user/appdata', mount_tag: 'appdata_mount' },
-              ],
+              host_shares: [{ host_path: '/mnt/user/appdata', mount_tag: 'appdata_mount' }],
             },
           ]);
         }
@@ -1035,7 +1033,8 @@ describe('VM Manager & Dynamic Elastic Headroom Budgeting', () => {
       modal.querySelector('#vm-edit-submit').click();
 
       await vi.waitFor(() => {
-        const calledPayload = (api.put?.mock?.calls?.[0]?.[1]) || (api.post?.mock?.calls?.find(c => c[0] === '/api/vms/vm-edit-vols')?.[1]);
+        const calledPayload =
+          api.put?.mock?.calls?.[0]?.[1] || api.post?.mock?.calls?.find((c) => c[0] === '/api/vms/vm-edit-vols')?.[1];
         expect(calledPayload).toEqual(
           expect.objectContaining({
             name: 'storage-node',
@@ -1100,7 +1099,12 @@ describe('VM Manager & Dynamic Elastic Headroom Budgeting', () => {
       api.get.mockImplementation((url) => {
         if (url === '/api/vms/usb-devices') {
           return Promise.resolve([
-            { vendor_id: '10c4', product_id: 'ea60', description: 'CP2102 Zigbee Dongle', manufacturer: 'Silicon Labs' },
+            {
+              vendor_id: '10c4',
+              product_id: 'ea60',
+              description: 'CP2102 Zigbee Dongle',
+              manufacturer: 'Silicon Labs',
+            },
           ]);
         }
         return Promise.resolve([]);
@@ -1192,7 +1196,8 @@ describe('VM Manager & Dynamic Elastic Headroom Budgeting', () => {
       editModal.querySelector('#vm-edit-submit').click();
 
       await vi.waitFor(() => {
-        const calledPayload = (api.put?.mock?.calls?.[0]?.[1]) || (api.post?.mock?.calls?.find(c => c[0] === '/api/vms/vm-edit-adv')?.[1]);
+        const calledPayload =
+          api.put?.mock?.calls?.[0]?.[1] || api.post?.mock?.calls?.find((c) => c[0] === '/api/vms/vm-edit-adv')?.[1];
         expect(calledPayload).toEqual(
           expect.objectContaining({
             name: 'win11-prod',
@@ -1404,14 +1409,12 @@ describe('VM Manager & Dynamic Elastic Headroom Budgeting', () => {
       expect(applyTerminalStream('hello!', '\x08 \x08')).toBe('hello');
 
       // 2. Erase multiple characters consecutively
-      expect(
-        applyTerminalStream('localhost:/# exping djdj', '\x08 \x08\x08 \x08\x08 \x08\x08 \x08')
-      ).toBe('localhost:/# exping ');
+      expect(applyTerminalStream('localhost:/# exping djdj', '\x08 \x08\x08 \x08\x08 \x08\x08 \x08')).toBe(
+        'localhost:/# exping '
+      );
 
       // 3. Erase with ANSI escape sequences intact
-      expect(
-        applyTerminalStream('\x1b[33mexping djdj\x1b[0m', '\x08 \x08\x08 \x08')
-      ).toBe('\x1b[33mexping dj\x1b[0m');
+      expect(applyTerminalStream('\x1b[33mexping djdj\x1b[0m', '\x08 \x08\x08 \x08')).toBe('\x1b[33mexping dj\x1b[0m');
 
       // 4. Erase in line ANSI sequence (\x08\x1b[K)
       expect(applyTerminalStream('testing', '\x08\x1b[K')).toBe('testin');
@@ -1452,7 +1455,3 @@ describe('VM Manager & Dynamic Elastic Headroom Budgeting', () => {
     });
   });
 });
-
-
-
-

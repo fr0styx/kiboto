@@ -36,9 +36,15 @@ function hide(win, how) {
 export function ensureKibWindow() {
   let win = document.getElementById(WIN_ID);
   if (win) return win;
-  const tabHtml = (pane, icon, words) => `<button type="button" class="mgmt-inner-tab" role="tab" aria-selected="false" data-kib-tab="${pane}">
+  const tabHtml = (
+    pane,
+    icon,
+    words
+  ) => `<button type="button" class="mgmt-inner-tab" role="tab" aria-selected="false" data-kib-tab="${pane}">
       <svg class="ic" style="width:14px;height:14px" aria-hidden="true"><use href="${icon}"/></svg><span>${escapeHtml(words)}</span></button>`;
-  document.body.insertAdjacentHTML('beforeend', `
+  document.body.insertAdjacentHTML(
+    'beforeend',
+    `
     <div id="kib-window" class="os-window kib-window" role="dialog" aria-labelledby="kib-window-title" style="display:none">
       <div class="os-window-header">
         <div class="os-window-title"><svg class="ic" style="width:14px;height:14px" aria-hidden="true"><use href="#i-kib"/></svg><span id="kib-window-title">${escapeHtml(t('kibw.title', 'Kib'))}</span></div>
@@ -53,12 +59,17 @@ export function ensureKibWindow() {
         ${tabHtml('mgmt-pane-ai-rag', '#i-search', t('ai.tab_rag', 'AI search'))}
       </div>
       <div class="kib-window-body"></div>
-    </div>`);
+    </div>`
+  );
   win = /** @type {HTMLElement} */ (document.getElementById(WIN_ID));
   win.querySelector('[data-kibw="min"]')?.addEventListener('click', () => hide(win, 'min'));
   win.querySelector('[data-kibw="close"]')?.addEventListener('click', () => hide(win, 'close'));
   win.querySelector('[data-kibw="max"]')?.addEventListener('click', () => win.classList.toggle('is-maximized'));
-  win.querySelectorAll('[data-kib-tab]').forEach((b) => b.addEventListener('click', () => showKibPane(/** @type {HTMLElement} */ (b).dataset.kibTab || '')));
+  win
+    .querySelectorAll('[data-kib-tab]')
+    .forEach((b) =>
+      b.addEventListener('click', () => showKibPane(/** @type {HTMLElement} */ (b).dataset.kibTab || ''))
+    );
   makeDraggable(win, win.querySelector('.os-window-header'));
   win.addEventListener('mousedown', () => bringToFront(win));
   return win;
@@ -93,7 +104,10 @@ export function markKibAccess(me) {
       note = document.createElement('p');
       note.className = 'kib-off-note';
       note.setAttribute('role', 'status');
-      note.textContent = t('kibw.off_for_you', 'Kib is turned off for you. The person who runs this NAS can turn it on under Settings → Kib → Who can use Kib.');
+      note.textContent = t(
+        'kibw.off_for_you',
+        'Kib is turned off for you. The person who runs this NAS can turn it on under Settings → Kib → Who can use Kib.'
+      );
       pane.prepend(note);
     }
     if (on && note) note.remove();
@@ -145,8 +159,10 @@ export async function openKibWindow(pane = 'mgmt-pane-ai-chat') {
   win.style.display = 'flex';
   bringToFront(win);
   showKibPane(kibPane(pane));
-  api.get('/api/ai/access/me').then(markKibAccess).catch(() => {}); // unknown: leave it as it is
+  api
+    .get('/api/ai/access/me')
+    .then(markKibAccess)
+    .catch(() => {}); // unknown: leave it as it is
   ZettEventBus.emit('window:open', { id: WIN_ID });
   return win;
 }
-

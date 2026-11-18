@@ -20,16 +20,18 @@ export function ensureDrawerDom() {
   if (isDrawerDomReady()) return Promise.resolve();
   if (!pending) {
     // the drawer's own sheet comes with its markup, not on first paint (NUX-15)
-    pending = Promise.all([import('./windows/drawer.html?raw'), import('./drawer-sheet.js')]).then(([{ default: markup }]) => {
-      if (!isDrawerDomReady()) {
-        const slot = document.getElementById('led-drawer-slot');
-        if (slot) slot.insertAdjacentHTML('beforebegin', markup);
-        else document.body.insertAdjacentHTML('beforeend', markup);
-        slot?.remove();
+    pending = Promise.all([import('./windows/drawer.html?raw'), import('./drawer-sheet.js')]).then(
+      ([{ default: markup }]) => {
+        if (!isDrawerDomReady()) {
+          const slot = document.getElementById('led-drawer-slot');
+          if (slot) slot.insertAdjacentHTML('beforebegin', markup);
+          else document.body.insertAdjacentHTML('beforeend', markup);
+          slot?.remove();
+        }
+        applyTranslations();
+        ZettEventBus.emit('dom:drawer-ready');
       }
-      applyTranslations();
-      ZettEventBus.emit('dom:drawer-ready');
-    });
+    );
   }
   return pending;
 }

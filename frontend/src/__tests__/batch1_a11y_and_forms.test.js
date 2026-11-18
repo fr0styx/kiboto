@@ -82,7 +82,9 @@ describe('Batch 1: Accessibility, Form Label Linking & ARIA Radiogroups', () => 
     expect(grid).not.toBeNull();
     expect(grid.getAttribute('role')).toBe('radiogroup');
     const labelledBy = grid.getAttribute('aria-labelledby');
-    expect(grid.getAttribute('aria-label') || (labelledBy && htmlDoc.getElementById(labelledBy)?.textContent.trim())).toBeTruthy();
+    expect(
+      grid.getAttribute('aria-label') || (labelledBy && htmlDoc.getElementById(labelledBy)?.textContent.trim())
+    ).toBeTruthy();
 
     const presets = grid.querySelectorAll('.desktop-theme-preset');
     expect(presets.length).toBe(5); // APP-B: Lagoon, Fjord, Moss, Heather, Canyon

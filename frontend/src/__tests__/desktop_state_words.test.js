@@ -23,9 +23,13 @@ describe('storage card state', () => {
 
   it('the card shows it', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, json: async () => ({}) }));
-    document.body.innerHTML = '<div id="widget-storage"><span id="w-storage-val"></span><div id="w-storage-bar"></div><span id="w-storage-status"></span></div>';
+    document.body.innerHTML =
+      '<div id="widget-storage"><span id="w-storage-val"></span><div id="w-storage-bar"></div><span id="w-storage-status"></span></div>';
     initWidgets();
-    ZettEventBus.emit('stats:updated', { storage: { used: '75GB', total: '97GB', pct: 77 }, unraid: { state: 'STARTED' } });
+    ZettEventBus.emit('stats:updated', {
+      storage: { used: '75GB', total: '97GB', pct: 77 },
+      unraid: { state: 'STARTED' },
+    });
     await vi.waitFor(() => expect(document.getElementById('w-storage-status').textContent).toBe('Running'));
   });
 });

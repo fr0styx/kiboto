@@ -40,7 +40,8 @@ function _withClock(options) {
   const o = { ...(options || {}) };
   if (_clock.timeZone && !o.timeZone) o.timeZone = _clock.timeZone;
   const hasTime = o.timeStyle || o.hour !== undefined;
-  if (hasTime && _clock.hour12 !== undefined && o.hour12 === undefined && o.hourCycle === undefined) o.hour12 = _clock.hour12;
+  if (hasTime && _clock.hour12 !== undefined && o.hour12 === undefined && o.hourCycle === undefined)
+    o.hour12 = _clock.hour12;
   return o;
 }
 
@@ -58,7 +59,8 @@ function _fmt(kind, options) {
   const key = `${kind}|${locale}|${JSON.stringify(options || {})}`;
   let f = _cache.get(key);
   if (!f) {
-    f = kind === 'number' ? new Intl.NumberFormat(locale, options) : new Intl.DateTimeFormat(locale, _withClock(options));
+    f =
+      kind === 'number' ? new Intl.NumberFormat(locale, options) : new Intl.DateTimeFormat(locale, _withClock(options));
     _cache.set(key, f);
   }
   return f;

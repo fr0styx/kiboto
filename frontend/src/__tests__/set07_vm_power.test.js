@@ -62,7 +62,10 @@ describe('the questions before a power action', () => {
 
 describe('what the page says and shows', () => {
   it('says "asked" while the machine still runs and "off" when it is off', () => {
-    expect(powerToast('stop', 'shutting_down', 'alpha')).toEqual({ text: 'alpha was asked to shut down.', tone: 'info' });
+    expect(powerToast('stop', 'shutting_down', 'alpha')).toEqual({
+      text: 'alpha was asked to shut down.',
+      tone: 'info',
+    });
     expect(powerToast('stop', 'stopped', 'alpha').text).toBe('alpha is off.');
     expect(powerToast('force_off', 'stopped', 'alpha').text).toBe('alpha was turned off.');
     expect(powerToast('start', 'running', 'alpha').text).toBe('alpha started.');
@@ -99,7 +102,13 @@ describe('what the page says and shows', () => {
     expect(shareReadOnly({ readonly: true })).toBe(true);
     expect(shareReadOnly({ mode: 'rw', readonly: false })).toBe(false);
     expect(shareReadOnly(undefined)).toBe(false);
-    expect(shareRecord('/mnt/user/media', 'media', 'virtiofs', true)).toEqual({ host_path: '/mnt/user/media', mount_tag: 'media', driver: 'virtiofs', mode: 'ro', readonly: true });
+    expect(shareRecord('/mnt/user/media', 'media', 'virtiofs', true)).toEqual({
+      host_path: '/mnt/user/media',
+      mount_tag: 'media',
+      driver: 'virtiofs',
+      mode: 'ro',
+      readonly: true,
+    });
     expect(shareRecord('/p', 't', '9p', false).mode).toBe('rw');
   });
 

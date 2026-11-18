@@ -17,7 +17,16 @@ const CID = 'c111222333444555666777888';
 function details(over = {}) {
   return {
     cid: CID,
-    overview: { id: CID.slice(0, 12), full_id: CID, name: 'jellyfin', image: 'img:latest', state: 'running', running: true, restart_policy: 'unless-stopped', network_mode: 'bridge' },
+    overview: {
+      id: CID.slice(0, 12),
+      full_id: CID,
+      name: 'jellyfin',
+      image: 'img:latest',
+      state: 'running',
+      running: true,
+      restart_policy: 'unless-stopped',
+      network_mode: 'bridge',
+    },
     resources: {},
     ports: [{ public_port: 8096, private_port: 8096, type: 'tcp', ip: '0.0.0.0' }, {}],
     mounts: [],
@@ -81,7 +90,12 @@ describe('container inspector on classes (NUX-15)', () => {
     await switchContainerTab('logs');
     expect(term.querySelector('.ci-logs-note.ci-muted-center-2')).not.toBeNull();
 
-    vi.stubGlobal('EventSource', class { close() {} });
+    vi.stubGlobal(
+      'EventSource',
+      class {
+        close() {}
+      }
+    );
     startLogStream(CID);
     expect(term.querySelector('.ci-logs-note')).not.toBeNull();
     appendLogLine({ ts: '2026-10-01T12:00:01Z', msg: 'hello', stream: 'stdout' });

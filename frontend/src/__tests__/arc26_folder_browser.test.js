@@ -39,7 +39,9 @@ const listing = (current, names, roots = ['/mnt/user']) => ({
 let request;
 beforeAll(() => window.dispatchEvent(new Event('DOMContentLoaded')));
 beforeEach(() => {
-  request = vi.spyOn(api, 'request').mockResolvedValue(reply(listing('/mnt/user/media/', ['..', 'Films', 'audio', 'Books'])));
+  request = vi
+    .spyOn(api, 'request')
+    .mockResolvedValue(reply(listing('/mnt/user/media/', ['..', 'Films', 'audio', 'Books'])));
 });
 afterEach(async () => {
   $('fb-cancel').click();
@@ -65,7 +67,11 @@ describe('folder picker', () => {
 
   it('only the parts of the path inside a root can be clicked', async () => {
     await open('/mnt/user/media/');
-    expect(crumbs().map((c) => c.textContent).join('')).toBe('/mnt/user/media');
+    expect(
+      crumbs()
+        .map((c) => c.textContent)
+        .join('')
+    ).toBe('/mnt/user/media');
     const [, mnt, , user, , media] = crumbs();
     expect(mnt.onclick).toBeNull();
     expect(user.onclick).toBeTypeOf('function');
@@ -111,19 +117,29 @@ describe('folder picker', () => {
     expect(request.mock.calls.map((c) => c[0])).toEqual(['/api/browse?path=%2Fetc%2F', '/api/browse?path=']);
 
     request.mockReset();
-    request.mockResolvedValueOnce(reply({}, false, 404)).mockResolvedValueOnce(reply({ detail: 'No pools' }, false, 500));
+    request
+      .mockResolvedValueOnce(reply({}, false, 404))
+      .mockResolvedValueOnce(reply({ detail: 'No pools' }, false, 500));
     window.openFolderBrowser('/gone/');
     await vi.waitFor(() => expect(showToast).toHaveBeenCalledWith('Failed to load folder: No pools', 'error'));
 
     request.mockReset();
-    request.mockResolvedValueOnce(reply({}, false, 404)).mockResolvedValueOnce({ ok: false, status: 502, json: async () => { throw new Error('html'); } });
+    request.mockResolvedValueOnce(reply({}, false, 404)).mockResolvedValueOnce({
+      ok: false,
+      status: 502,
+      json: async () => {
+        throw new Error('html');
+      },
+    });
     window.openFolderBrowser('/gone/');
     await vi.waitFor(() => expect(showToast).toHaveBeenLastCalledWith('Failed to load folder: 502', 'error'));
 
     request.mockReset();
     request.mockRejectedValueOnce(new Error('offline'));
     window.openFolderBrowser('');
-    await vi.waitFor(() => expect(showToast).toHaveBeenLastCalledWith('Failed to load folder: Error: offline', 'error'));
+    await vi.waitFor(() =>
+      expect(showToast).toHaveBeenLastCalledWith('Failed to load folder: Error: offline', 'error')
+    );
   });
 
   it('picking a folder fills the copy destination (settings.js saves it and says so)', async () => {
@@ -145,7 +161,9 @@ describe('folder picker', () => {
   });
 
   it('a caller with its own callback gets the folder instead', async () => {
-    const picked = vi.fn(() => { throw new Error('caller bug'); });
+    const picked = vi.fn(() => {
+      throw new Error('caller bug');
+    });
     const err = vi.spyOn(console, 'error').mockImplementation(() => {});
     $('btn-copy-dst').value = '/mnt/user/keep/';
     window.openFolderBrowser('/mnt/user/media/', picked);
@@ -170,12 +188,15 @@ describe('folder picker', () => {
     name.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
     name.dispatchEvent(new KeyboardEvent('keydown', { key: 'a' }));
     await vi.waitFor(() => expect($('fb-create-folder').textContent).toBe('+ Create'));
-    expect(request).toHaveBeenCalledWith('/api/mkdir', expect.objectContaining({ method: 'POST', body: { path: '/mnt/user/media/Holiday' } }));
+    expect(request).toHaveBeenCalledWith(
+      '/api/mkdir',
+      expect.objectContaining({ method: 'POST', body: { path: '/mnt/user/media/Holiday' } })
+    );
     expect(name.value).toBe('');
     expect(name.placeholder).toBe('New folder name...');
   });
 
-  it('says why a new folder failed, in the reader\'s language', async () => {
+  it("says why a new folder failed, in the reader's language", async () => {
     await open('/mnt/user/media/');
     const name = $('fb-new-folder-name');
     request.mockResolvedValueOnce(reply({ detail: 'Exists' }, false, 409));
@@ -183,7 +204,13 @@ describe('folder picker', () => {
     $('fb-create-folder').click();
     await vi.waitFor(() => expect(name.placeholder).toBe('Could not create the folder: Exists'));
 
-    request.mockResolvedValueOnce({ ok: false, status: 507, json: async () => { throw new Error(); } });
+    request.mockResolvedValueOnce({
+      ok: false,
+      status: 507,
+      json: async () => {
+        throw new Error();
+      },
+    });
     name.value = 'y';
     $('fb-create-folder').click();
     await vi.waitFor(() => expect(name.placeholder).toBe('Could not create the folder: 507'));

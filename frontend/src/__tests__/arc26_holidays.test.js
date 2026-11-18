@@ -1,7 +1,10 @@
 /** Public holidays in the calendar's day view, per country, and the day in the app's language. */
 import { describe, it, expect, vi, beforeAll, afterAll, beforeEach } from 'vitest';
 
-vi.stubGlobal('fetch', vi.fn(() => Promise.reject(new Error('offline'))));
+vi.stubGlobal(
+  'fetch',
+  vi.fn(() => Promise.reject(new Error('offline')))
+);
 const { setLanguage } = await import('../i18n.js');
 const W = await import('../components/widgets.js');
 
@@ -16,7 +19,8 @@ describe('holidays in the day view', () => {
   beforeAll(() => localStorage.clear());
   afterAll(() => vi.unstubAllGlobals());
   beforeEach(() => {
-    document.body.innerHTML = '<div id="modal-cal-selected-date-str"></div><div id="modal-cal-selected-sub"></div><div id="modal-cal-agenda-list"></div>';
+    document.body.innerHTML =
+      '<div id="modal-cal-selected-date-str"></div><div id="modal-cal-selected-sub"></div><div id="modal-cal-agenda-list"></div>';
   });
 
   it.each([

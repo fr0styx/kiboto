@@ -10,7 +10,7 @@ export const SUPPORTED_LANGUAGES = [
   { code: 'de', name: 'Deutsch' },
   { code: 'zh', name: '简体中文' },
   { code: 'fr', name: 'Français' },
-  { code: 'es', name: 'Español' }
+  { code: 'es', name: 'Español' },
 ];
 
 // Every language is its own file, loaded when it is used (FE-03). English too: every t()
@@ -202,7 +202,8 @@ export function applyTranslations() {
       el.setAttribute('title', after);
       // an icon-only button named from its title before the page was translated keeps that name
       // otherwise (the Kib window's rename button stayed English, SET-26 screenshots)
-      if (el.getAttribute('aria-label') === before && !el.hasAttribute('data-i18n-aria-label')) el.setAttribute('aria-label', after);
+      if (el.getAttribute('aria-label') === before && !el.hasAttribute('data-i18n-aria-label'))
+        el.setAttribute('aria-label', after);
     }
   });
 
@@ -247,7 +248,9 @@ export function bindLanguageMenus(doc = document) {
   _menusBound = true;
   doc.addEventListener('change', (e) => {
     const target = /** @type {HTMLElement | null} */ (e.target);
-    const menu = /** @type {HTMLSelectElement | null} */ (target && target.closest ? target.closest('.language-picker-select') : null);
+    const menu = /** @type {HTMLSelectElement | null} */ (
+      target && target.closest ? target.closest('.language-picker-select') : null
+    );
     if (menu) setLanguage(menu.value);
   });
 }

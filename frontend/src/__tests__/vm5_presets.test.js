@@ -12,7 +12,9 @@ const FORM = `<form>
 </form>`;
 
 describe('new machine presets (VMs decision 5)', () => {
-  beforeEach(() => { document.body.innerHTML = presetsHtml() + FORM; });
+  beforeEach(() => {
+    document.body.innerHTML = presetsHtml() + FORM;
+  });
 
   it('offers Linux first, then Windows 11, then Home Assistant', () => {
     const ids = [...document.querySelectorAll('[data-vm-preset]')].map((b) => b.dataset.vmPreset);
@@ -22,7 +24,7 @@ describe('new machine presets (VMs decision 5)', () => {
     expect(Object.keys(PRESETS)).toEqual(['linux', 'windows11', 'homeassistant']);
   });
 
-  it('Windows 11 sets UEFI, TPM and its sizes, inside this NAS\'s limits', () => {
+  it("Windows 11 sets UEFI, TPM and its sizes, inside this NAS's limits", () => {
     const ram = document.getElementById('vm-create-ram-slider');
     const heard = vi.fn();
     ram.addEventListener('input', heard);
@@ -55,13 +57,17 @@ describe('new machine presets (VMs decision 5)', () => {
   });
 
   it('Home Assistant picks its ready-made disk, or says to download it first', () => {
-    document.body.insertAdjacentHTML('beforeend', '<select id="vm-create-disk-image"><option value="">None</option><option value="/mnt/user/isos/haos_ova-18.4.qcow2">haos_ova-18.4.qcow2 (1.4 GB)</option></select>');
+    document.body.insertAdjacentHTML(
+      'beforeend',
+      '<select id="vm-create-disk-image"><option value="">None</option><option value="/mnt/user/isos/haos_ova-18.4.qcow2">haos_ova-18.4.qcow2 (1.4 GB)</option></select>'
+    );
     applyPreset(document, 'homeassistant');
     expect(document.getElementById('vm-create-disk-image').value).toBe('/mnt/user/isos/haos_ova-18.4.qcow2');
     expect(document.querySelector('input[value="uefi"]').checked).toBe(true);
-    expect(document.getElementById('vm-preset-note').textContent).toContain('download Home Assistant OS from the ISO catalog first');
+    expect(document.getElementById('vm-preset-note').textContent).toContain(
+      'download Home Assistant OS from the ISO catalog first'
+    );
     applyPreset(document, 'linux'); // another preset lets go of the disk
     expect(document.getElementById('vm-create-disk-image').value).toBe('');
   });
 });
-

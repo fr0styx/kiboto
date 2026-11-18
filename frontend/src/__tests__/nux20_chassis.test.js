@@ -16,16 +16,29 @@ import {
 } from '../components/chassis-visualizer.js';
 
 const box = () => document.body.appendChild(document.createElement('div'));
-const routes = (map) => vi.spyOn(api, 'get').mockImplementation((url) => (url in map ? Promise.resolve(map[url]) : Promise.reject(new Error(`no ${url}`))));
+const routes = (map) =>
+  vi
+    .spyOn(api, 'get')
+    .mockImplementation((url) => (url in map ? Promise.resolve(map[url]) : Promise.reject(new Error(`no ${url}`))));
 
 describe('chassis and storage text in German (NUX-20)', () => {
-  beforeAll(async () => { await setLanguage('de'); });
-  afterAll(async () => { await setLanguage('en'); });
-  afterEach(() => { document.body.innerHTML = ''; vi.restoreAllMocks(); });
+  beforeAll(async () => {
+    await setLanguage('de');
+  });
+  afterAll(async () => {
+    await setLanguage('en');
+  });
+  afterEach(() => {
+    document.body.innerHTML = '';
+    vi.restoreAllMocks();
+  });
 
   it('names bays, empty trays and M.2 slots', () => {
     const c = box();
-    renderChassisTwin(c, [{ name: 'sda', model: 'IronWolf 8TB', temp: 38 }, { name: 'nvme0n1', model: 'SN770', temp: 41, percentage_used: 3 }]);
+    renderChassisTwin(c, [
+      { name: 'sda', model: 'IronWolf 8TB', temp: 38 },
+      { name: 'nvme0n1', model: 'SN770', temp: 41, percentage_used: 3 },
+    ]);
     expect(c.querySelector('[data-bay="2"]').getAttribute('aria-label')).toBe('Einschub 2, leer');
     expect(c.textContent).toContain('Kein Laufwerk in Einschub 2');
     expect(c.textContent).toContain('Bereit für ein Laufwerk');
@@ -54,7 +67,19 @@ describe('chassis and storage text in German (NUX-20)', () => {
     const c = box();
     renderStructuredPoolsTopology(c, {
       is_observer_mode: false,
-      pools: [{ id: 'tank', name: 'tank', fs_type: 'btrfs', parity_protected: true, used_bytes: 1e12, total_bytes: 4e12, free_bytes: 3e12, used_pct: 25, members: [] }],
+      pools: [
+        {
+          id: 'tank',
+          name: 'tank',
+          fs_type: 'btrfs',
+          parity_protected: true,
+          used_bytes: 1e12,
+          total_bytes: 4e12,
+          free_bytes: 3e12,
+          used_pct: 25,
+          members: [],
+        },
+      ],
     });
     expect(c.textContent).toContain('Durch Parität geschützt');
     expect(c.textContent).toContain('Laufwerke in diesem Pool (0)');
@@ -78,7 +103,10 @@ describe('chassis and storage text in German (NUX-20)', () => {
     document.body.innerHTML = `
       <div id="modal-sftp-users"><div id="sftp-status-text"></div><button id="btn-sftp-toggle-service"></button>
       <div id="sftp-users-list"></div></div>`;
-    routes({ '/api/sftp/status': { running: true, port: 2022 }, '/api/sftp/users': [{ username: 'bob', read_only: true }] });
+    routes({
+      '/api/sftp/status': { running: true, port: 2022 },
+      '/api/sftp/users': [{ username: 'bob', read_only: true }],
+    });
     await openSftpUsersModal();
     expect(document.getElementById('sftp-status-text').textContent).toBe('● Läuft auf Port 2022');
     expect(document.getElementById('btn-sftp-toggle-service').textContent).toBe('SFTP stoppen');
@@ -95,7 +123,20 @@ describe('chassis and storage text in German (NUX-20)', () => {
   it('shows a share with its cache, and says when shares could not be read', async () => {
     const c = box();
     routes({
-      '/api/storage/shares': { is_observer_mode: false, shares: [{ name: 'media', mountpoint: '/mnt/user/media', cache_mode: 'yes', used_pct: 40, used_bytes: 4, total_bytes: 10, free_bytes: 6 }] },
+      '/api/storage/shares': {
+        is_observer_mode: false,
+        shares: [
+          {
+            name: 'media',
+            mountpoint: '/mnt/user/media',
+            cache_mode: 'yes',
+            used_pct: 40,
+            used_bytes: 4,
+            total_bytes: 10,
+            free_bytes: 6,
+          },
+        ],
+      },
       '/api/storage/platform': { platform: 'generic_linux', capabilities: { can_manage_shares: true } },
     });
     await fetchAndRenderNetworkShares(c);
@@ -129,7 +170,10 @@ describe('chassis and storage text in German (NUX-20)', () => {
     expect(c.querySelector('.btn-remote-mount').textContent).toContain('Einbinden');
 
     vi.restoreAllMocks();
-    routes({ '/api/webdav/status': { running: false, port: 8084, root_path: '/mnt/user', quick_connect: {} }, '/api/remotes': [] });
+    routes({
+      '/api/webdav/status': { running: false, port: 8084, root_path: '/mnt/user', quick_connect: {} },
+      '/api/remotes': [],
+    });
     await fetchAndRenderRemoteStorage(c);
     expect(c.textContent).toContain('Keine Cloud-Laufwerke verbunden');
     expect(c.querySelector('.btn-trigger-new-remote').textContent).toContain('Cloud-Laufwerk');

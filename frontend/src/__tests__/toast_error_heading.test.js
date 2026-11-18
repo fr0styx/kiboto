@@ -2,7 +2,9 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { showToast } from '../toast.js';
 
 describe('Toast headings', () => {
-  beforeEach(() => { document.body.innerHTML = ''; });
+  beforeEach(() => {
+    document.body.innerHTML = '';
+  });
 
   it('calls an ordinary failure an error and announces it', () => {
     showToast('Could not rename the file.', 'error');

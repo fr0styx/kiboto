@@ -5,8 +5,14 @@ const { api } = await import('../api.js');
 const pf = await import('../components/management/photo-filters.js');
 
 const FACETS = {
-  years: [{ value: '2024', count: 120 }, { value: '2023', count: 80 }],
-  places: [{ value: 'Rome, Lazio, Italy', count: 40 }, { value: 'Paris, Île-de-France, France', count: 12 }],
+  years: [
+    { value: '2024', count: 120 },
+    { value: '2023', count: 80 },
+  ],
+  places: [
+    { value: 'Rome, Lazio, Italy', count: 40 },
+    { value: 'Paris, Île-de-France, France', count: 12 },
+  ],
 };
 
 describe('AI-24: photo filters', () => {

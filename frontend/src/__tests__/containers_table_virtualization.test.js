@@ -7,7 +7,11 @@ import {
   stopCwAutoRefresh,
   CW_VIRTUALIZE_MIN_ROWS,
 } from '../components/containers-manager.js';
-import { clearSelectedContainers, getSelectedContainerIds, toggleContainerSelected } from '../components/docker-table.js';
+import {
+  clearSelectedContainers,
+  getSelectedContainerIds,
+  toggleContainerSelected,
+} from '../components/docker-table.js';
 import { api } from '../api.js';
 import { DockManager } from '../components/dock.js';
 
@@ -72,7 +76,14 @@ describe('Containers table virtualization', () => {
     expect(firstRow.dataset.key).toBe('c0');
 
     // Pretend the list is scrolled ~150 rows down.
-    vi.spyOn(tbody(), 'getBoundingClientRect').mockReturnValue({ top: -150 * 52, bottom: 0, left: 0, right: 0, height: 0, width: 0 });
+    vi.spyOn(tbody(), 'getBoundingClientRect').mockReturnValue({
+      top: -150 * 52,
+      bottom: 0,
+      left: 0,
+      right: 0,
+      height: 0,
+      width: 0,
+    });
     // The scroll listener sits on the nearest scrolling ancestor (or window).
     for (let el = tbody(); el; el = el.parentElement) el.dispatchEvent(new Event('scroll'));
     window.dispatchEvent(new Event('scroll'));
@@ -88,7 +99,14 @@ describe('Containers table virtualization', () => {
   it('a live re-render while scrolled keeps the window (spacer rows are not wiped)', async () => {
     const list = make(300);
     renderContainersWindowTable(list);
-    vi.spyOn(tbody(), 'getBoundingClientRect').mockReturnValue({ top: -150 * 52, bottom: 0, left: 0, right: 0, height: 0, width: 0 });
+    vi.spyOn(tbody(), 'getBoundingClientRect').mockReturnValue({
+      top: -150 * 52,
+      bottom: 0,
+      left: 0,
+      right: 0,
+      height: 0,
+      width: 0,
+    });
     for (let el = tbody(); el; el = el.parentElement) el.dispatchEvent(new Event('scroll'));
     window.dispatchEvent(new Event('scroll'));
     await nextFrame();

@@ -76,13 +76,19 @@ describe('a settings backup that waits (SET-06)', () => {
     await renderStagedRestore();
     card().querySelector('[data-staged="apply"]').click();
     await flush();
-    expect(toast.showToast).toHaveBeenCalledWith('Kiboto cannot restart itself here. Restart its container to apply the backup.', 'warn');
+    expect(toast.showToast).toHaveBeenCalledWith(
+      'Kiboto cannot restart itself here. Restart its container to apply the backup.',
+      'warn'
+    );
     expect(waitForRestart).not.toHaveBeenCalled();
   });
 
   it('an upload no longer says "Restore successful" and reloads', () => {
     expect(page).not.toContain('Restore successful! Reloading');
-    const upload = page.slice(page.indexOf("apiFetch('/api/system/restore'"), page.indexOf("showToast(t('settings.restore_failed'"));
+    const upload = page.slice(
+      page.indexOf("apiFetch('/api/system/restore'"),
+      page.indexOf("showToast(t('settings.restore_failed'")
+    );
     expect(upload).not.toContain('window.location.reload()');
     expect(upload).toContain('renderStagedRestore();');
   });
@@ -95,7 +101,10 @@ describe('a settings backup that waits (SET-06)', () => {
   });
 
   it('the card is in the Backup section of Settings', () => {
-    const section = html.slice(html.indexOf('id="btn-backup-download"'), html.indexOf('id="btn-backup-download"') + 1800);
+    const section = html.slice(
+      html.indexOf('id="btn-backup-download"'),
+      html.indexOf('id="btn-backup-download"') + 1800
+    );
     expect(section).toMatch(/<div id="restore-staged-card"[^>]*role="status"[^>]*hidden>/);
   });
 });

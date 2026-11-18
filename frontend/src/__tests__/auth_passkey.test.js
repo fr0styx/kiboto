@@ -5,7 +5,10 @@ vi.mock('../passkeys-check.js', () => ({ passkeysAvailable: vi.fn(() => true) })
 vi.mock('../toast.js', () => ({ showToast: vi.fn() }));
 vi.mock('../components/setup-wizard-gate.js', () => ({ openSetupWizard: vi.fn() }));
 vi.mock('../components/session.js', () => ({
-  fetchCurrentProfile: vi.fn(), getCurrentUser: vi.fn(), setCurrentUser: vi.fn(), promptRequiredMfa: vi.fn(),
+  fetchCurrentProfile: vi.fn(),
+  getCurrentUser: vi.fn(),
+  setCurrentUser: vi.fn(),
+  promptRequiredMfa: vi.fn(),
 }));
 const pk = await import('../passkeys.js');
 const toast = await import('../toast.js');
@@ -46,9 +49,9 @@ describe('signing in with a passkey (RES-3)', () => {
     pk.passkeySignIn.mockRejectedValueOnce(Object.assign(new Error('closed'), { name: 'NotAllowedError' }));
     expect(await signInWithPasskey('mfa_x')).toBe(false);
     expect(toast.showToast).not.toHaveBeenCalled();
-    pk.passkeySignIn.mockRejectedValueOnce(new Error('This passkey isn\'t known here.'));
+    pk.passkeySignIn.mockRejectedValueOnce(new Error("This passkey isn't known here."));
     await signInWithPasskey('mfa_x');
-    expect(toast.showToast).toHaveBeenCalledWith('This passkey isn\'t known here.', 'error');
+    expect(toast.showToast).toHaveBeenCalledWith("This passkey isn't known here.", 'error');
     pk.passkeySignIn.mockRejectedValueOnce(new Error('not an IP address'));
     await signInWithPasskey('');
     expect(document.getElementById('login-error').textContent).toContain('not an IP address');

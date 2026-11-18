@@ -8,7 +8,7 @@ import {
   syncDesktopTwinPreview,
   hexToRgb,
   getContrastRatio,
-  getRelativeLuminance
+  getRelativeLuminance,
 } from '../components/dashboard.js';
 import {
   syncDesktopThemeUI,
@@ -17,7 +17,7 @@ import {
   sampleWallpaperPalette,
   exportThemeBundle,
   importThemeBundle,
-  restoreAppearanceDefaultsWithUndo
+  restoreAppearanceDefaultsWithUndo,
 } from '../components/settings.js';
 import { applyGlassSettings, applyWallpaperReadability } from '../components/wallpapers.js';
 import { initGlassControls, filterGalleryByCategory, uploadAndApplyWallpaper } from '../components/wallpaper-pane.js';
@@ -95,7 +95,7 @@ describe('Appearance Studio & Desktop Personalization Revamp Suite', () => {
       wallpaperBlur: 8,
       dockPos: 'left',
       windowRadius: '20px',
-      windowGlow: true
+      windowGlow: true,
     });
 
     const dimmer = document.getElementById('dt-wallpaper-dimmer');
@@ -204,7 +204,9 @@ describe('Appearance Studio & Desktop Personalization Revamp Suite', () => {
     vi.spyOn(document, 'createElement').mockImplementation((tag) => {
       const el = origCreateElement(tag);
       if (tag === 'a') {
-        el.click = () => { clicked = true; };
+        el.click = () => {
+          clicked = true;
+        };
       }
       return el;
     });
@@ -227,7 +229,7 @@ describe('Appearance Studio & Desktop Personalization Revamp Suite', () => {
       theme: 'emerald',
       custom_accent: '#3bf58b',
       glass: { blur: 18, opacity: 80, radius: '6px', glow: true },
-      performance: { eco_mode: false }
+      performance: { eco_mode: false },
     };
     const validBlob = new Blob([JSON.stringify(validBundle)], { type: 'application/json' });
     importThemeBundle(validBlob);
@@ -334,7 +336,7 @@ describe('Appearance Studio & Desktop Personalization Revamp Suite', () => {
       'settings.theme_imported',
       'settings.theme_import_failed',
       'settings.palette_extracted_success',
-      'settings.palette_sampled_default'
+      'settings.palette_sampled_default',
     ];
 
     langs.forEach((lang) => {

@@ -15,7 +15,11 @@ describe('Updates panel: last update result (OPS-7)', () => {
   });
 
   it('shows a rollback and its reason', async () => {
-    api.get.mockResolvedValueOnce({ result: 'rolled_back', reason: 'timed out waiting for the app to report ok', at: 1700000000 });
+    api.get.mockResolvedValueOnce({
+      result: 'rolled_back',
+      reason: 'timed out waiting for the app to report ok',
+      at: 1700000000,
+    });
     await showLastUpdateResult();
     const box = document.getElementById('update-last-result');
     expect(box.hidden).toBe(false);

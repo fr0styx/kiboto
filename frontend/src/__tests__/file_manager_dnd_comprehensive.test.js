@@ -1,13 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import {
-  initFileManager,
-  getActiveFmInstance,
-} from '../components/file-manager.js';
+import { initFileManager, getActiveFmInstance } from '../components/file-manager.js';
 import { api } from '../api.js';
 
 vi.mock('../api.js', () => ({
   api: {
-    get: vi.fn().mockResolvedValue({ current: '/mnt/remotes/onedrive-personal', dirs: [], roots: ['/mnt/user', '/mnt/remotes'] }),
+    get: vi
+      .fn()
+      .mockResolvedValue({ current: '/mnt/remotes/onedrive-personal', dirs: [], roots: ['/mnt/user', '/mnt/remotes'] }),
     post: vi.fn().mockResolvedValue({ success: true, has_conflict: false, transferred: 2 }),
     postRaw: vi.fn().mockResolvedValue({ ok: true }),
   },
@@ -35,7 +34,8 @@ describe('File Manager Drag and Drop Comprehensive Suite', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    document.body.innerHTML = '<div id="desktop"><div class="chassis-hero-box fm-desktop-icon" id="fm-desktop-icon"></div></div>';
+    document.body.innerHTML =
+      '<div id="desktop"><div class="chassis-hero-box fm-desktop-icon" id="fm-desktop-icon"></div></div>';
     window._fmInitialized = false;
     delete document._fmDocKbBound;
     initFileManager();
@@ -58,7 +58,9 @@ describe('File Manager Drag and Drop Comprehensive Suite', () => {
 
     const dtData = {};
     const mockDataTransfer = {
-      setData: vi.fn((type, val) => { dtData[type] = val; }),
+      setData: vi.fn((type, val) => {
+        dtData[type] = val;
+      }),
       effectAllowed: '',
       setDragImage: vi.fn(),
     };

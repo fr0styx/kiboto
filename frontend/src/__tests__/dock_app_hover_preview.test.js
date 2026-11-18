@@ -1,9 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import {
-  DockManager,
-  KNOWN_APPS,
-  DOCK_PINNED_KEY
-} from '../components/dock.js';
+import { DockManager, KNOWN_APPS, DOCK_PINNED_KEY } from '../components/dock.js';
 import { state } from '../state.js';
 
 describe('Revamped Dock App Hover Preview Engine', () => {
@@ -37,7 +33,7 @@ describe('Revamped Dock App Hover Preview Engine', () => {
       title: 'Mission Control',
       icon: '#i-management',
       minimized: false,
-      closed: false
+      closed: false,
     };
 
     const containersWin = document.getElementById('containers-manager-window');
@@ -47,7 +43,7 @@ describe('Revamped Dock App Hover Preview Engine', () => {
       title: 'Containers',
       icon: '#i-chip',
       minimized: true,
-      closed: false
+      closed: false,
     };
 
     DockManager.render();
@@ -133,7 +129,7 @@ describe('Revamped Dock App Hover Preview Engine', () => {
       title: 'Virtual Machines',
       icon: '#i-vm',
       minimized: true,
-      closed: true
+      closed: true,
     };
     localStorage.setItem(DOCK_PINNED_KEY, JSON.stringify(['vm']));
     DockManager.render();
@@ -192,8 +188,8 @@ describe('Revamped Dock App Hover Preview Engine', () => {
     state.latestStats = {
       events: [
         { ts: Math.floor(Date.now() / 1000), level: 'error', title: 'Drive Warning', message: 'Temp elevated' },
-        { ts: Math.floor(Date.now() / 1000) - 60, level: 'info', title: 'Backup Done', message: 'Snapshot saved' }
-      ]
+        { ts: Math.floor(Date.now() / 1000) - 60, level: 'info', title: 'Backup Done', message: 'Snapshot saved' },
+      ],
     };
 
     DockManager.showTooltip(notifItem, 'notif', 'Notification Center', '#i-bell', false, false);
@@ -217,7 +213,7 @@ describe('Revamped Dock App Hover Preview Engine', () => {
       width: 48,
       height: 48,
       right: 398,
-      bottom: 848
+      bottom: 848,
     });
 
     DockManager.showTooltip(mgmtItem, 'management', 'Mission Control', '#i-management', false, false);
@@ -264,4 +260,3 @@ describe('Revamped Dock App Hover Preview Engine', () => {
     expect(clonedWin.style.transform).toBe('none');
   });
 });
-

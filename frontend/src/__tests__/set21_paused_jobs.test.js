@@ -10,7 +10,14 @@ const { fetchAndRenderBackupJobs } = await import('../components/management/back
 const JOBS = [
   { id: 'a', name: 'Photos snapshots', enabled: false, destination_type: 'local_snapshot', schedule: 'daily' },
   { id: 'b', name: 'Old cloud copy', enabled: false, migrated_to: 'r1', destination_type: 'remote', schedule: 'daily' },
-  { id: 'c', name: 'Active', enabled: true, destination_type: 'local_snapshot', schedule: 'daily', last_status: 'success' },
+  {
+    id: 'c',
+    name: 'Active',
+    enabled: true,
+    destination_type: 'local_snapshot',
+    schedule: 'daily',
+    last_status: 'success',
+  },
 ];
 
 describe('paused backup jobs (SET-21 stage 3, Backup A11)', () => {
@@ -30,7 +37,14 @@ describe('paused backup jobs (SET-21 stage 3, Backup A11)', () => {
     expect(rows[2]).not.toContain('Paused');
     expect(mount.querySelectorAll('.btn-resume-backup-job').length).toBe(1);
     /** @type {HTMLElement} */ (mount.querySelector('.btn-resume-backup-job')).click();
-    await vi.waitFor(() => expect(post).toHaveBeenCalledWith('/api/backup/schedule', expect.objectContaining({ id: 'a', enabled: true, encryption_password: null })));
-    await vi.waitFor(() => expect(showToast).toHaveBeenCalledWith('"Photos snapshots" runs on its schedule again.', 'success'));
+    await vi.waitFor(() =>
+      expect(post).toHaveBeenCalledWith(
+        '/api/backup/schedule',
+        expect.objectContaining({ id: 'a', enabled: true, encryption_password: null })
+      )
+    );
+    await vi.waitFor(() =>
+      expect(showToast).toHaveBeenCalledWith('"Photos snapshots" runs on its schedule again.', 'success')
+    );
   });
 });

@@ -18,7 +18,10 @@ describe('how to connect (SET-22, Shares 3)', () => {
   });
 
   it('the Windows and Mac addresses of a folder', () => {
-    expect(sc.addresses('Family Photos', '192.168.1.20')).toEqual({ windows: '\\\\192.168.1.20\\Family Photos', mac: 'smb://192.168.1.20/Family%20Photos' });
+    expect(sc.addresses('Family Photos', '192.168.1.20')).toEqual({
+      windows: '\\\\192.168.1.20\\Family Photos',
+      mac: 'smb://192.168.1.20/Family%20Photos',
+    });
   });
 
   it('which password: the Kiboto one, a separate one with two-step sign-in, or the host one', () => {
@@ -43,7 +46,8 @@ describe('how to connect (SET-22, Shares 3)', () => {
   });
 
   it('a button on each card, once', () => {
-    document.body.innerHTML = '<div id="g"><div data-share="photos"><div class="share-card-actions"></div></div><div data-share="media"></div></div>';
+    document.body.innerHTML =
+      '<div id="g"><div data-share="photos"><div class="share-card-actions"></div></div><div data-share="media"></div></div>';
     const grid = /** @type {HTMLElement} */ (document.getElementById('g'));
     expect(sc.addConnectButtons(grid)).toBe(1);
     expect(sc.addConnectButtons(grid)).toBe(0);

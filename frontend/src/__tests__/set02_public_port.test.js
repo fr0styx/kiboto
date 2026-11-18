@@ -11,7 +11,15 @@ const { showToast } = await import('../toast.js');
 const { renderPublicLinks } = await import('../components/management/public-links.js');
 
 const flush = () => new Promise((r) => setTimeout(r, 0));
-const BASE = { tailscale: true, enabled: true, live: true, base_url: 'https://nas.example:8443', funnel: {}, port_public: true, also_public: [] };
+const BASE = {
+  tailscale: true,
+  enabled: true,
+  live: true,
+  base_url: 'https://nas.example:8443',
+  funnel: {},
+  port_public: true,
+  also_public: [],
+};
 
 describe('the share links card warns when the port carries more (SET-02)', () => {
   beforeEach(() => {

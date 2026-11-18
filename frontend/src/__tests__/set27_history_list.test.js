@@ -10,7 +10,14 @@ vi.useFakeTimers({ toFake: ['Date'] });
 vi.setSystemTime(new Date(2026, 10, 16, 12));
 const now = Math.floor(Date.now() / 1000);
 const EVENTS = [
-  { id: 3, ts: now - 60, level: 'error', title: 'Backup failed', message: 'The copy to the USB disk stopped.', link: 'backup' },
+  {
+    id: 3,
+    ts: now - 60,
+    level: 'error',
+    title: 'Backup failed',
+    message: 'The copy to the USB disk stopped.',
+    link: 'backup',
+  },
   { id: 2, ts: now - 120, level: 'info', title: 'Backup finished', message: 'Photos were copied.' },
   { id: 1, ts: now - 86400 - 3600, level: 'warning', title: 'Drive is warm', message: 'sda reached 52 °C.' },
 ];
@@ -36,7 +43,10 @@ describe('Activity -> History reads by day (SET-27 Activity 2b)', () => {
   it('draws day headings, Open for an entry with a page, details folded with Copy', () => {
     renderEventLog(EVENTS);
     const list = /** @type {HTMLElement} */ (document.getElementById('events-list'));
-    expect([...list.querySelectorAll(':scope > .history-day')].map((h) => h.textContent)).toEqual(['Today', 'Yesterday']); // the days (the pinned block has its own heading)
+    expect([...list.querySelectorAll(':scope > .history-day')].map((h) => h.textContent)).toEqual([
+      'Today',
+      'Yesterday',
+    ]); // the days (the pinned block has its own heading)
     const first = /** @type {HTMLElement} */ (list.querySelector(':scope > .history-entry'));
     expect(first.textContent).toContain('Backup failed');
     const open = vi.spyOn(ROUTES, 'backup').mockImplementation(() => {});
@@ -87,4 +97,3 @@ describe('Activity -> History reads by day (SET-27 Activity 2b)', () => {
     }
   });
 });
-

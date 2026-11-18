@@ -1,7 +1,12 @@
 // SET-14: every row of the security check leads somewhere.
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-vi.mock('../api.js', () => ({ api: { get: vi.fn().mockResolvedValue({ checks: [], issues: [] }), post: vi.fn().mockResolvedValue({ message: 'Fixed.' }) } }));
+vi.mock('../api.js', () => ({
+  api: {
+    get: vi.fn().mockResolvedValue({ checks: [], issues: [] }),
+    post: vi.fn().mockResolvedValue({ message: 'Fixed.' }),
+  },
+}));
 vi.mock('../toast.js', () => ({ showToast: vi.fn(), showConfirmToast: vi.fn(), showDangerConfirm: vi.fn() }));
 const { api } = await import('../api.js');
 const { FIXABLE, handleSecurityAdvisorClick } = await import('../components/management/security.js');
@@ -19,7 +24,13 @@ describe('the rows of the security check', () => {
   });
 
   it('every other row opens a place; none does nothing', () => {
-    for (const id of ['ldap_plaintext', 'ldap_unverified', 'sso_http_issuer', 'proxy_sso_local_accounts', 'something_new']) {
+    for (const id of [
+      'ldap_plaintext',
+      'ldap_unverified',
+      'sso_http_issuer',
+      'proxy_sso_local_accounts',
+      'something_new',
+    ]) {
       handleSecurityAdvisorClick(id);
     }
     expect(window.openManagementWindow).toHaveBeenCalledTimes(5);
@@ -28,7 +39,7 @@ describe('the rows of the security check', () => {
     expect(window.openManagementWindow).toHaveBeenLastCalledWith('mgmt-sec-ai', 'mgmt-pane-ai-rag');
   });
 
-  it('the fixable list matches the server\'s fixes', async () => {
+  it("the fixable list matches the server's fixes", async () => {
     const { readFileSync } = await import('node:fs');
     const server = readFileSync('backend/services/safe_defaults_advisor.py', 'utf8');
     const fixes = [...server.matchAll(/"fix": "([a-z_]+)"/g)].map((m) => m[1]);

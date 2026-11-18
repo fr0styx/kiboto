@@ -30,11 +30,18 @@ const SERVICE_NAMES = {
 
 /** "192.168.1.20, aa:bb:…" in the field -> the list the API takes. */
 export function splitDevices(text) {
-  return String(text || '').split(/[\s,;]+/).map((s) => s.trim()).filter(Boolean);
+  return String(text || '')
+    .split(/[\s,;]+/)
+    .map((s) => s.trim())
+    .filter(Boolean);
 }
 
 function connectionBox(info) {
-  const box = el('fieldset', { className: 'ff-connection' }, el('legend', { textContent: t('ff.connection', 'AdGuard Home') }));
+  const box = el(
+    'fieldset',
+    { className: 'ff-connection' },
+    el('legend', { textContent: t('ff.connection', 'AdGuard Home') })
+  );
   const url = el('input', { type: 'text', name: 'url', maxLength: 200, value: info.url || 'http://adguardhome:3000' });
   const user = el('input', { type: 'text', name: 'user', maxLength: 64, value: info.user || '', autocomplete: 'off' });
   const pass = el('input', {
@@ -47,9 +54,17 @@ function connectionBox(info) {
   box.append(el('label', { className: 'ff-row' }, t('ff.url', 'Address'), ' ', url));
   box.append(el('label', { className: 'ff-row' }, t('ff.user', 'AdGuard user'), ' ', user));
   box.append(el('label', { className: 'ff-row' }, t('ff.password', 'AdGuard password'), ' ', pass));
-  const save = el('button', { type: 'button', className: 'btn-pill-toggle is-small', textContent: t('common.save', 'Save') });
+  const save = el('button', {
+    type: 'button',
+    className: 'btn-pill-toggle is-small',
+    textContent: t('common.save', 'Save'),
+  });
   save.dataset.ff = 'connect';
-  const check = el('button', { type: 'button', className: 'btn-pill-toggle is-small', textContent: t('ff.check', 'Check AdGuard Home') });
+  const check = el('button', {
+    type: 'button',
+    className: 'btn-pill-toggle is-small',
+    textContent: t('ff.check', 'Check AdGuard Home'),
+  });
   check.dataset.ff = 'check';
   const result = el('p', { className: 'ff-check muted', hidden: true });
   result.setAttribute('role', 'status'); // read out when a check answers (NUX-14)
@@ -63,7 +78,11 @@ function connectionBox(info) {
  */
 export function devicePicker(input) {
   const box = el('div', { className: 'ff-picker' });
-  const open = el('button', { type: 'button', className: 'btn-pill-toggle is-small', textContent: t('ff.pick_devices', 'Choose from the network') });
+  const open = el('button', {
+    type: 'button',
+    className: 'btn-pill-toggle is-small',
+    textContent: t('ff.pick_devices', 'Choose from the network'),
+  });
   const list = el('div', { className: 'ff-picker-list' });
   list.hidden = true;
   open.addEventListener('click', async () => {
@@ -79,7 +98,12 @@ export function devicePicker(input) {
     list.replaceChildren();
     const found = (data && data.devices) || [];
     if (!found.length) {
-      list.append(el('p', { className: 'ff-hint', textContent: data && data.error ? data.error : t('ff.pick_none', 'AdGuard Home hasn\'t seen any devices yet.') }));
+      list.append(
+        el('p', {
+          className: 'ff-hint',
+          textContent: data && data.error ? data.error : t('ff.pick_none', "AdGuard Home hasn't seen any devices yet."),
+        })
+      );
       return;
     }
     for (const d of found) {
@@ -115,8 +139,15 @@ function personRow(person, saved, services) {
     blocked.append(el('label', {}, cb, ' ', SERVICE_NAMES[s] || s));
   }
   row.append(blocked);
-  const save = el('button', { type: 'button', className: 'btn-pill-toggle is-small', textContent: t('common.save', 'Save') });
-  save.setAttribute('aria-label', t('ff.save_for', 'Save for {name}', { name: person.display_name || person.username }));
+  const save = el('button', {
+    type: 'button',
+    className: 'btn-pill-toggle is-small',
+    textContent: t('common.save', 'Save'),
+  });
+  save.setAttribute(
+    'aria-label',
+    t('ff.save_for', 'Save for {name}', { name: person.display_name || person.username })
+  );
   save.dataset.ff = 'person';
   const state = (saved.devices || []).length
     ? t('ff.filtered', '{n, plural, one {# device filtered} other {# devices filtered}}', { n: saved.devices.length })
@@ -142,7 +173,9 @@ async function onAction(mount, b) {
   if (b.dataset.ff === 'check') {
     const r = await api.post('/api/family-filter/check');
     const out = /** @type {HTMLElement} */ (mount.querySelector('.ff-check'));
-    out.textContent = r.ok ? t('ff.check_ok', 'AdGuard Home {version} answers.', { version: r.version || '' }) : r.error;
+    out.textContent = r.ok
+      ? t('ff.check_ok', 'AdGuard Home {version} answers.', { version: r.version || '' })
+      : r.error;
     out.hidden = false;
     return;
   }
@@ -159,7 +192,12 @@ async function onAction(mount, b) {
       .filter((c) => /** @type {HTMLInputElement} */ (c).checked)
       .map((c) => /** @type {HTMLInputElement} */ (c).value);
     await api.put(`/api/family-filter/people/${encodeURIComponent(row.dataset.user || '')}`, { devices, blocked });
-    showToast(devices.length ? t('ff.person_saved', 'Their devices are filtered now.') : t('ff.person_cleared', 'Their devices are no longer filtered.'), 'success');
+    showToast(
+      devices.length
+        ? t('ff.person_saved', 'Their devices are filtered now.')
+        : t('ff.person_cleared', 'Their devices are no longer filtered.'),
+      'success'
+    );
   }
   renderFamilyFilter(mount);
 }

@@ -178,5 +178,4 @@ describe('Docker Multi-Select & Floating Bulk Action Subsystem', () => {
     });
     expect(getSelectedContainerIds()).toEqual([]);
   });
-
 });

@@ -15,7 +15,6 @@ import { renderPowerCheck } from './power-check.js';
 import { renderPowerSwitch } from './power-switch.js';
 import { isAdministrator } from '../../admin-only.js';
 
-
 /** The UPS's state in words (sweep, 18 Nov: "ONLINE" stayed English in every language). */
 export function upsStateWord(ups, permissionError = false) {
   const u = ups || {};
@@ -33,7 +32,11 @@ export function renderUpsTelemetry(ups) {
   const icon = { cut: '⚡ ', look: '⚠ ', unreadable: '! ' }[state] || '';
   const upsVal = isPermErr
     ? t('upx.perm_short', 'Perm Req')
-    : (ups.battery_charge_pct != null ? `${icon}${ups.battery_charge_pct}%` : (ups.available ? t('upx.active', 'Active') : t('upx.no_ups_short', 'No UPS')));
+    : ups.battery_charge_pct != null
+      ? `${icon}${ups.battery_charge_pct}%`
+      : ups.available
+        ? t('upx.active', 'Active')
+        : t('upx.no_ups_short', 'No UPS');
   const upsWords = upsSentence(ups);
   const upsPill = document.getElementById('mgmt-hub-ups-pill');
   if (upsPill) {
@@ -56,7 +59,7 @@ export function renderUpsTelemetry(ups) {
     sideUpsBadge.textContent = upsVal;
     sideUpsBadge.title = upsWords;
     sideUpsBadge.setAttribute('aria-label', upsWords);
-    sideUpsBadge.style.display = (ups.available || isPermErr) ? 'inline-block' : 'none';
+    sideUpsBadge.style.display = ups.available || isPermErr ? 'inline-block' : 'none';
     // the colour follows the state each time: it stayed red after a USB access error had gone (SET-15, Power B9)
     sideUpsBadge.style.background = isPermErr ? 'rgba(235,87,87,0.2)' : '';
     sideUpsBadge.style.color = isPermErr ? 'var(--err, #eb5757)' : '';
@@ -77,16 +80,22 @@ export function renderUpsTelemetry(ups) {
     statusEl.title = ups.status || ''; // the UPS's own word (ONLINE, OB DISCHRG) for whoever knows it
     statusEl.style.color = isPermErr
       ? 'var(--err, #eb5757)'
-      : (ups.available ? (ups.on_battery ? 'var(--warn)' : 'var(--ok2)') : 'var(--muted)');
+      : ups.available
+        ? ups.on_battery
+          ? 'var(--warn)'
+          : 'var(--ok2)'
+        : 'var(--muted)';
   }
   if (modelEl) modelEl.textContent = ups.model || t('upx.generic', 'Generic UPS');
   if (chargeEl) {
     chargeEl.textContent = ups.battery_charge_pct != null ? `${ups.battery_charge_pct}%` : 'N/A';
-    chargeEl.style.color = (ups.battery_charge_pct == null || ups.battery_charge_pct > 30) ? 'var(--ok2)' : 'var(--crit)';
+    chargeEl.style.color = ups.battery_charge_pct == null || ups.battery_charge_pct > 30 ? 'var(--ok2)' : 'var(--crit)';
   }
   if (runtimeEl) runtimeEl.textContent = ups.time_left_min != null ? `${ups.time_left_min} min` : 'N/A';
   if (loadEl) loadEl.textContent = ups.load_pct != null ? `${ups.load_pct}%` : 'N/A';
-  if (linevEl) linevEl.textContent = ups.line_volts != null ? `${ups.line_volts} V` : (ups.output_volts != null ? `${ups.output_volts} V` : 'N/A');
+  if (linevEl)
+    linevEl.textContent =
+      ups.line_volts != null ? `${ups.line_volts} V` : ups.output_volts != null ? `${ups.output_volts} V` : 'N/A';
   if (protocolEl) {
     let protoLabel = ups.protocol || 'Auto / NIS';
     if (ups.is_usb && !protoLabel.toLowerCase().includes('usb')) {
@@ -97,7 +106,10 @@ export function renderUpsTelemetry(ups) {
     updateUpsConnCardState(currentUpsMode, ups);
   }
   if (battvEl) battvEl.textContent = ups.battery_volts != null ? `${ups.battery_volts} V` : 'N/A';
-  if (policyEl) policyEl.textContent = ups.active_policy ? t('upx.policy', 'Policy: {policy}', { policy: ups.active_policy }) : t('upx.runtime_lt', 'Runtime < 5m');
+  if (policyEl)
+    policyEl.textContent = ups.active_policy
+      ? t('upx.policy', 'Policy: {policy}', { policy: ups.active_policy })
+      : t('upx.runtime_lt', 'Runtime < 5m');
 
   // Digital Twin Nodes
   const flowContainer = document.getElementById('ups-power-flow-container');
@@ -123,18 +135,29 @@ export function renderUpsTelemetry(ups) {
     }
   }
 
-  if (twinLinev) twinLinev.textContent = ups.line_volts != null ? `${ups.line_volts} V` : (ups.output_volts != null ? `${ups.output_volts} V` : '-- V');
+  if (twinLinev)
+    twinLinev.textContent =
+      ups.line_volts != null ? `${ups.line_volts} V` : ups.output_volts != null ? `${ups.output_volts} V` : '-- V';
   if (twinGridStatus) {
     // only what the UPS reported: "120V / 60Hz Nominal" was shown with no reading at all (SET-15, B5)
     twinGridStatus.textContent = ups.on_battery
       ? t('upx.mains_off', 'AC Mains Disconnected')
-      : (ups.line_freq_hz ? t('upx.hz', '{hz} Hz Nominal', { hz: ups.line_freq_hz }) : (ups.available && ups.line_volts != null ? t('upx.mains_on', 'On mains power') : t('upx.no_reading', 'No reading')));
+      : ups.line_freq_hz
+        ? t('upx.hz', '{hz} Hz Nominal', { hz: ups.line_freq_hz })
+        : ups.available && ups.line_volts != null
+          ? t('upx.mains_on', 'On mains power')
+          : t('upx.no_reading', 'No reading');
   }
   if (twinWatts) {
     // watts only when measured or worked out from a known capacity; else the load as the UPS gives it
-    twinWatts.textContent = ups.power_watts != null
-      ? `${ups.power_watts} W`
-      : (ups.load_pct != null && ups.nominal_power_watts ? `${Math.round(ups.load_pct * (ups.nominal_power_watts / 100))} W` : (ups.load_pct != null ? t('upx.load_pct', '{pct} % load', { pct: ups.load_pct }) : '-- W'));
+    twinWatts.textContent =
+      ups.power_watts != null
+        ? `${ups.power_watts} W`
+        : ups.load_pct != null && ups.nominal_power_watts
+          ? `${Math.round(ups.load_pct * (ups.nominal_power_watts / 100))} W`
+          : ups.load_pct != null
+            ? t('upx.load_pct', '{pct} % load', { pct: ups.load_pct })
+            : '-- W';
   }
   if (twinBattVolts) {
     const vStr = ups.battery_volts != null ? `${ups.battery_volts} V` : '-- V';
@@ -149,23 +172,36 @@ export function renderUpsTelemetry(ups) {
     const pct = known ? Math.max(0, Math.min(100, ups.battery_charge_pct)) : 0;
     const offset = 175.93 * (1 - pct / 100);
     radialFill.style.strokeDashoffset = offset;
-    radialFill.style.stroke = !known ? 'var(--muted, #8a9a9c)' : (pct <= 20 ? 'var(--err, #eb5757)' : (pct <= 40 ? 'var(--warn, #f5a623)' : 'var(--ok2, #33cdb8)'));
+    radialFill.style.stroke = !known
+      ? 'var(--muted, #8a9a9c)'
+      : pct <= 20
+        ? 'var(--err, #eb5757)'
+        : pct <= 40
+          ? 'var(--warn, #f5a623)'
+          : 'var(--ok2, #33cdb8)';
   }
 
   if (flowContainer) {
     flowContainer.classList.toggle('on-battery', Boolean(ups.on_battery));
-    flowContainer.classList.toggle('critical-battery', Boolean(ups.battery_charge_pct != null && ups.battery_charge_pct <= 20));
+    flowContainer.classList.toggle(
+      'critical-battery',
+      Boolean(ups.battery_charge_pct != null && ups.battery_charge_pct <= 20)
+    );
   }
 
   if (gridDot) {
-    gridDot.className = 'ups-card-status-dot ' + (isPermErr ? 'danger' : (ups.on_battery ? 'danger' : (ups.available ? 'active' : '')));
+    gridDot.className =
+      'ups-card-status-dot ' + (isPermErr ? 'danger' : ups.on_battery ? 'danger' : ups.available ? 'active' : '');
   }
 
   if (emergencyBanner) {
     if (ups.on_battery) {
       emergencyBanner.style.display = 'flex';
       if (emergencyCountdown) {
-        emergencyCountdown.textContent = ups.time_left_min != null ? t('upx.remaining', '~{min}m remaining', { min: ups.time_left_min }) : t('upx.on_battery', 'ON BATTERY');
+        emergencyCountdown.textContent =
+          ups.time_left_min != null
+            ? t('upx.remaining', '~{min}m remaining', { min: ups.time_left_min })
+            : t('upx.on_battery', 'ON BATTERY');
       }
     } else {
       emergencyBanner.style.display = 'none';
@@ -191,8 +227,11 @@ export function upsState(ups) {
   if (ups.permission_error || ups.unreadable) return 'unreadable';
   if (!ups.available) return 'none';
   if (ups.on_battery) return 'cut';
-  const words = String(ups.status || '').toUpperCase().split(/\s+/);
-  if (words.includes('RB') || words.includes('LB') || (ups.battery_charge_pct != null && ups.battery_charge_pct <= 20)) return 'look';
+  const words = String(ups.status || '')
+    .toUpperCase()
+    .split(/\s+/);
+  if (words.includes('RB') || words.includes('LB') || (ups.battery_charge_pct != null && ups.battery_charge_pct <= 20))
+    return 'look';
   return 'mains';
 }
 
@@ -203,11 +242,15 @@ export function upsSentence(ups) {
   if (state === 'unreadable') return t('upx.say_unreadable', 'A UPS was found, but Kiboto cannot read it.');
   if (state === 'cut') {
     return ups.time_left_min != null
-      ? t('upx.say_cut_min', 'Power cut: the NAS runs on its battery, about {min} min left.', { min: Math.round(ups.time_left_min) })
+      ? t('upx.say_cut_min', 'Power cut: the NAS runs on its battery, about {min} min left.', {
+          min: Math.round(ups.time_left_min),
+        })
       : t('upx.say_cut', 'Power cut: the NAS runs on its battery.');
   }
   if (state === 'look') {
-    const words = String(ups.status || '').toUpperCase().split(/\s+/);
+    const words = String(ups.status || '')
+      .toUpperCase()
+      .split(/\s+/);
     if (words.includes('RB')) return t('upx.say_replace', 'The UPS says its battery needs replacing.');
     return t('upx.say_low', 'The UPS battery is low.');
   }
@@ -220,15 +263,21 @@ async function renderPowerSummary(ups) {
   if (!box) return;
   const asked = await api.get('/api/power').catch(() => null);
   const summary = asked && asked.state ? asked : stateFromReading(ups);
-  renderPowerTop(box, summary, !isAdministrator() ? undefined : async (byItself) => {
-    try {
-      await api.post('/api/power/comes-back', { by_itself: byItself });
-      showToast(t('pwr.back_saved', 'Thank you. The answer is kept on this page.'), 'success');
-    } catch (err) {
-      showToast(/** @type {Error} */ (err).message, 'error');
-    }
-    fetchAndRenderUpsTelemetry();
-  });
+  renderPowerTop(
+    box,
+    summary,
+    !isAdministrator()
+      ? undefined
+      : async (byItself) => {
+          try {
+            await api.post('/api/power/comes-back', { by_itself: byItself });
+            showToast(t('pwr.back_saved', 'Thank you. The answer is kept on this page.'), 'success');
+          } catch (err) {
+            showToast(/** @type {Error} */ (err).message, 'error');
+          }
+          fetchAndRenderUpsTelemetry();
+        }
+  );
   renderPowerCheck(document.getElementById('power-check'), summary);
   renderPowerSwitch(document.getElementById('power-switch'));
   const state = box.dataset.state || 'none';
@@ -341,11 +390,12 @@ export function updateUpsConnCardState(mode, upsData) {
   const currentMode = mode || document.querySelector('input[name="ups-mode"]:checked')?.value || 'auto';
   const protocolText = (document.getElementById('mgmt-ups-protocol')?.textContent || '').toLowerCase().trim();
   const isUsbProtocol = protocolText.includes('usb') || protocolText.includes('hid');
-  const isDirectUsb = (currentMode === 'usb_hid') ||
-                      Boolean(upsData?.is_usb) ||
-                      (upsData?.cable && String(upsData.cable).toLowerCase().includes('usb')) ||
-                      (upsData?.driver && String(upsData.driver).toLowerCase().includes('usb')) ||
-                      (currentMode === 'auto' && isUsbProtocol);
+  const isDirectUsb =
+    currentMode === 'usb_hid' ||
+    Boolean(upsData?.is_usb) ||
+    (upsData?.cable && String(upsData.cable).toLowerCase().includes('usb')) ||
+    (upsData?.driver && String(upsData.driver).toLowerCase().includes('usb')) ||
+    (currentMode === 'auto' && isUsbProtocol);
 
   if (isDirectUsb) {
     connCard.classList.add('disabled');
@@ -375,7 +425,7 @@ export function updateUpsConnCardState(mode, upsData) {
     if (toggleContainer) toggleContainer.style.display = 'none';
   }
   const inputs = connCard.querySelectorAll('input, button');
-  inputs.forEach(el => {
+  inputs.forEach((el) => {
     el.disabled = isDirectUsb;
   });
 }
@@ -390,7 +440,7 @@ export function updateUpsPolicySliders(selectedPolicy) {
   // one rule, the first limit reached wins (Power decision 4): minutes and charge both apply always
   if (rtContainer) rtContainer.style.display = 'flex';
   if (battContainer) battContainer.style.display = 'flex';
-  if (timerContainer) timerContainer.style.display = (policy === 'timer') ? 'flex' : 'none';
+  if (timerContainer) timerContainer.style.display = policy === 'timer' ? 'flex' : 'none';
 
   updateUpsPolicySummary();
 }
@@ -405,9 +455,14 @@ export function updateUpsPolicySummary() {
   const battVal = document.getElementById('ups-slider-battery')?.value || 20;
   const timerVal = document.getElementById('ups-slider-timer')?.value || 300;
 
-  let policyDesc = t('pwa.rule_sum', 'At {min} min or {pct} % left, or when the UPS says so', { min: rtVal, pct: battVal });
+  let policyDesc = t('pwa.rule_sum', 'At {min} min or {pct} % left, or when the UPS says so', {
+    min: rtVal,
+    pct: battVal,
+  });
   if (policy === 'timer') {
-    policyDesc += t('pwa.rule_sum_timer', ', or after {min, plural, one {# minute} other {# minutes}} on battery', { min: Math.round(Number(timerVal) / 60) });
+    policyDesc += t('pwa.rule_sum_timer', ', or after {min, plural, one {# minute} other {# minutes}} on battery', {
+      min: Math.round(Number(timerVal) / 60),
+    });
   }
 
   summaryText.textContent = t('upx.summary', 'Active: {policy}', { policy: policyDesc });
@@ -450,7 +505,7 @@ export async function saveUpsConfigFromDrawer() {
       battery_threshold_pct,
       shutdown_timer_sec,
       container_shutdown_timeout_sec,
-      poweroff_ups
+      poweroff_ups,
     };
     if (password !== undefined) {
       payload.password = password;
@@ -498,8 +553,8 @@ export async function loadUpsConfigToDrawer() {
     // Mode selection
     const mode = cfg.mode || 'auto';
     const modeRadios = document.querySelectorAll('input[name="ups-mode"]');
-    modeRadios.forEach(r => {
-      r.checked = (r.value === mode);
+    modeRadios.forEach((r) => {
+      r.checked = r.value === mode;
     });
 
     // Update connection parameters card state (gray out if Direct USB)
@@ -521,8 +576,8 @@ export async function loadUpsConfigToDrawer() {
     // Shutdown Policy
     const policy = cfg.shutdown_policy || 'runtime_left';
     const policyRadios = document.querySelectorAll('input[name="ups-policy"]');
-    policyRadios.forEach(r => {
-      r.checked = (r.value === policy);
+    policyRadios.forEach((r) => {
+      r.checked = r.value === policy;
     });
 
     // Sliders
@@ -604,7 +659,10 @@ export function initUpsDrawerControls() {
       await loadUpsConfigToDrawer();
       showToast(t('toast.ups_telemetry_refreshed', 'UPS readings refreshed.'), 'info'); // nothing was saved (SET-15, Power B8)
     } catch (err) {
-      showToast(t('upx.refresh_failed', 'The UPS readings were not refreshed: {error}', { error: err?.message || '' }), 'error');
+      showToast(
+        t('upx.refresh_failed', 'The UPS readings were not refreshed: {error}', { error: err?.message || '' }),
+        'error'
+      );
     } finally {
       btnRefresh.disabled = false;
       setIconLabel(btnRefresh, '🔄', t('mgmt.refresh', 'Refresh'));
@@ -673,7 +731,7 @@ export function initUpsDrawerControls() {
 
   // Policy radio auto-save + accordion slider collapse
   const policyRadios = document.querySelectorAll('input[name="ups-policy"]');
-  policyRadios.forEach(radio => {
+  policyRadios.forEach((radio) => {
     radio.addEventListener('change', () => {
       updateUpsPolicySliders();
       triggerImmediateSave();
@@ -693,13 +751,17 @@ export function initUpsDrawerControls() {
       policyBody.style.display = 'flex';
       if (policySummary) policySummary.style.display = 'none';
       if (toggleText) toggleText.textContent = t('mgmt.ups_collapse_policy', 'Collapse Policy');
-      try { localStorage.setItem('kiboto_ups_policy_collapsed', '0'); } catch (_) {}
+      try {
+        localStorage.setItem('kiboto_ups_policy_collapsed', '0');
+      } catch (_) {}
     } else {
       policyBody.style.display = 'none';
       if (policySummary) policySummary.style.display = 'flex';
       updateUpsPolicySummary();
       if (toggleText) toggleText.textContent = t('mgmt.ups_expand_policy', 'Configure Policy');
-      try { localStorage.setItem('kiboto_ups_policy_collapsed', '1'); } catch (_) {}
+      try {
+        localStorage.setItem('kiboto_ups_policy_collapsed', '1');
+      } catch (_) {}
     }
   });
 
@@ -717,7 +779,7 @@ export function initUpsDrawerControls() {
 
   // Mode radio ports auto-fill, gray-out state, and auto-save
   const modeRadios = document.querySelectorAll('input[name="ups-mode"]');
-  modeRadios.forEach(radio => {
+  modeRadios.forEach((radio) => {
     radio.addEventListener('change', () => {
       const portEl = document.getElementById('ups-cfg-port');
       if (radio.value === 'apcupsd_client' && portEl && (portEl.value === '3493' || !portEl.value)) {
@@ -750,9 +812,9 @@ export function initUpsDrawerControls() {
     document.getElementById('ups-cfg-port'),
     document.getElementById('ups-cfg-name'),
     document.getElementById('ups-cfg-user'),
-    document.getElementById('ups-cfg-pass')
+    document.getElementById('ups-cfg-pass'),
   ];
-  connInputs.forEach(input => {
+  connInputs.forEach((input) => {
     if (!input) return;
     input.addEventListener('change', () => {
       triggerImmediateSave();
@@ -776,25 +838,29 @@ export function initUpsDrawerControls() {
         discoverContainer.innerHTML = `<div style="font-size:var(--kb-fs-xs); color:var(--muted); padding:6px 0;">${t('upx.none_found', 'No active UPS daemons or USB devices detected on local ports.')}</div>`;
         return;
       }
-      discoverContainer.innerHTML = candidates.map((cand, idx) => {
-        const isUsb = Boolean(cand.is_usb || cand.type === 'usb_hid' || cand.mode === 'usb_hid');
-        const isApc = !isUsb && (cand.type === 'apcupsd' || cand.type === 'apcupsd_client' || cand.port === 3551);
-        const isNut = !isUsb && (cand.type === 'nut' || cand.type === 'nut_client' || cand.port === 3493);
-        const typeLabel = isUsb ? 'Direct USB HID' : (isApc ? 'APCUPSD NIS' : (isNut ? 'NUT Server' : 'USB HID Device'));
-        const hostPort = isUsb
-          ? (cand.description || `USB ${cand.vendor_id || ''}:${cand.product_id || ''}`)
-          : (cand.port ? `${cand.host}:${cand.port}` : (cand.path || cand.host || 'local'));
-        const displayTitle = cand.title || cand.label || typeLabel;
-        return `<div class="ups-discover-item" data-idx="${idx}" style="display:flex; justify-content:space-between; align-items:center; background:var(--kb-shade-30); border:1px solid var(--kb-line-8); padding:8px 12px; border-radius:6px; cursor:pointer;">
+      discoverContainer.innerHTML = candidates
+        .map((cand, idx) => {
+          const isUsb = Boolean(cand.is_usb || cand.type === 'usb_hid' || cand.mode === 'usb_hid');
+          const isApc = !isUsb && (cand.type === 'apcupsd' || cand.type === 'apcupsd_client' || cand.port === 3551);
+          const isNut = !isUsb && (cand.type === 'nut' || cand.type === 'nut_client' || cand.port === 3493);
+          const typeLabel = isUsb ? 'Direct USB HID' : isApc ? 'APCUPSD NIS' : isNut ? 'NUT Server' : 'USB HID Device';
+          const hostPort = isUsb
+            ? cand.description || `USB ${cand.vendor_id || ''}:${cand.product_id || ''}`
+            : cand.port
+              ? `${cand.host}:${cand.port}`
+              : cand.path || cand.host || 'local';
+          const displayTitle = cand.title || cand.label || typeLabel;
+          return `<div class="ups-discover-item" data-idx="${idx}" style="display:flex; justify-content:space-between; align-items:center; background:var(--kb-shade-30); border:1px solid var(--kb-line-8); padding:8px 12px; border-radius:6px; cursor:pointer;">
           <div>
             <div style="font-size:var(--kb-fs-xs); font-weight:600; color:var(--kb-text-strong);">${escapeHtml(displayTitle)}</div>
             <div style="font-size:var(--kb-fs-xs); color:var(--muted);">${escapeHtml(typeLabel)} • <code>${escapeHtml(hostPort)}</code></div>
           </div>
           <button type="button" class="btn-rect is-small">${t('upx.apply', 'Apply')}</button>
         </div>`;
-      }).join('');
+        })
+        .join('');
 
-      discoverContainer.querySelectorAll('.ups-discover-item').forEach(item => {
+      discoverContainer.querySelectorAll('.ups-discover-item').forEach((item) => {
         item.addEventListener('click', () => {
           const idx = parseInt(item.dataset.idx, 10);
           const cand = candidates[idx];
@@ -802,7 +868,9 @@ export function initUpsDrawerControls() {
           const isUsb = Boolean(cand.is_usb || cand.type === 'usb_hid' || cand.mode === 'usb_hid');
           const isApc = !isUsb && (cand.type === 'apcupsd' || cand.type === 'apcupsd_client' || cand.port === 3551);
           const isNut = !isUsb && (cand.type === 'nut' || cand.type === 'nut_client' || cand.port === 3493);
-          const targetMode = isUsb ? 'usb_hid' : (cand.mode || (isApc ? 'apcupsd_client' : (isNut ? 'nut_client' : 'auto')));
+          const targetMode = isUsb
+            ? 'usb_hid'
+            : cand.mode || (isApc ? 'apcupsd_client' : isNut ? 'nut_client' : 'auto');
           const radio = document.querySelector(`input[name="ups-mode"][value="${targetMode}"]`);
           if (radio) radio.checked = true;
           const hostEl = document.getElementById('ups-cfg-host');
@@ -826,8 +894,12 @@ export function initUpsDrawerControls() {
           }
           updateUpsConnCardState(targetMode);
           triggerImmediateSave();
-          const displayTitle = cand.title || cand.label || (isUsb ? 'Direct USB HID' : (isApc ? 'APCUPSD' : (isNut ? 'NUT' : 'USB HID')));
-          showToast(t('toast.applied_parameters', 'Applied {displayTitle} parameters!', { displayTitle: displayTitle }), 'info');
+          const displayTitle =
+            cand.title || cand.label || (isUsb ? 'Direct USB HID' : isApc ? 'APCUPSD' : isNut ? 'NUT' : 'USB HID');
+          showToast(
+            t('toast.applied_parameters', 'Applied {displayTitle} parameters!', { displayTitle: displayTitle }),
+            'info'
+          );
         });
       });
     } catch (err) {
@@ -851,7 +923,7 @@ export function initUpsDrawerControls() {
       const username = document.getElementById('ups-cfg-user')?.value.trim() || '';
       const passwordRaw = document.getElementById('ups-cfg-pass')?.value || '';
       const password = passwordRaw.startsWith('••') ? '' : passwordRaw;
-      const isUsbMode = (mode === 'usb_hid');
+      const isUsbMode = mode === 'usb_hid';
 
       const res = await api.post('/api/ups/test-connection', {
         mode,
@@ -859,22 +931,36 @@ export function initUpsDrawerControls() {
         port: isUsbMode ? 0 : port,
         ups_name: isUsbMode ? '' : ups_name,
         username: isUsbMode ? '' : username,
-        password: isUsbMode ? '' : password
+        password: isUsbMode ? '' : password,
       });
 
       if (res && (res.connected || res.success)) {
-        showToast(t('toast.connection_successful', 'Connection successful! ({model})', { model: res.model || res.status || 'ONLINE' }), 'success');
+        showToast(
+          t('toast.connection_successful', 'Connection successful! ({model})', {
+            model: res.model || res.status || 'ONLINE',
+          }),
+          'success'
+        );
         btnTest.textContent = t('ui.connected', '✓ Connected');
-        setTimeout(() => { setIconLabel(btnTest, '🔌', t('mgmt.ups_btn_test_conn', 'Test Connection')); }, 3000);
+        setTimeout(() => {
+          setIconLabel(btnTest, '🔌', t('mgmt.ups_btn_test_conn', 'Test Connection'));
+        }, 3000);
       } else {
-        showToast(t('toast.connection_failed', 'Connection failed: {error}', { error: res.error || 'UPS daemon unreachable' }), 'error');
+        showToast(
+          t('toast.connection_failed', 'Connection failed: {error}', { error: res.error || 'UPS daemon unreachable' }),
+          'error'
+        );
         btnTest.textContent = t('ui.failed', '✗ Failed');
-        setTimeout(() => { setIconLabel(btnTest, '🔌', t('mgmt.ups_btn_test_conn', 'Test Connection')); }, 3000);
+        setTimeout(() => {
+          setIconLabel(btnTest, '🔌', t('mgmt.ups_btn_test_conn', 'Test Connection'));
+        }, 3000);
       }
     } catch (err) {
       showToast(t('toast.connection_test_error', 'Connection test error: {error}', { error: err.message }), 'error');
       btnTest.textContent = t('ui.error_2', '✗ Error');
-      setTimeout(() => { setIconLabel(btnTest, '🔌', t('mgmt.ups_btn_test_conn', 'Test Connection')); }, 3000);
+      setTimeout(() => {
+        setIconLabel(btnTest, '🔌', t('mgmt.ups_btn_test_conn', 'Test Connection'));
+      }, 3000);
     } finally {
       btnTest.disabled = false;
     }
@@ -897,7 +983,10 @@ export function initUpsDrawerControls() {
         try {
           showToast(t('toast.initiating_battery_self_test', 'Initiating battery self-test...'), 'info');
           const res = await api.post('/api/ups/self-test');
-          showToast(t('upx.selftest_accepted', 'The UPS accepted the battery test. Its result shows on the UPS itself.'), 'success');
+          showToast(
+            t('upx.selftest_accepted', 'The UPS accepted the battery test. Its result shows on the UPS itself.'),
+            'success'
+          );
           fetchAndRenderUpsTelemetry();
         } catch (err) {
           showToast(t('toast.self_test_failed', 'Self-test failed: {error}', { error: err.message }), 'error');
@@ -913,7 +1002,10 @@ export function initUpsDrawerControls() {
   btnSimulate?.addEventListener('click', () => {
     showConfirmToast(
       t('upx.drill_title', 'Start a practice run?'),
-      t('upx.drill_msg', 'Kiboto acts as if the power went out for 15 seconds and checks who would switch the NAS off. Nothing is switched off and no app is closed.'),
+      t(
+        'upx.drill_msg',
+        'Kiboto acts as if the power went out for 15 seconds and checks who would switch the NAS off. Nothing is switched off and no app is closed.'
+      ),
       async () => {
         try {
           showToast(t('toast.outage_drill_started_15s', 'Practice run started: 15 seconds.'), 'info');
@@ -922,7 +1014,10 @@ export function initUpsDrawerControls() {
           renderPracticeLine(res?.practice);
           fetchAndRenderUpsTelemetry();
         } catch (err) {
-          showToast(t('toast.simulation_failed', 'The practice run did not start: {error}', { error: err.message }), 'error');
+          showToast(
+            t('toast.simulation_failed', 'The practice run did not start: {error}', { error: err.message }),
+            'error'
+          );
         }
       },
       null,

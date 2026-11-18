@@ -44,14 +44,22 @@ export function initSnapAssistFlyout() {
     clearTimeout(hideTimer);
     clearTimeout(showTimer);
     showTimer = setTimeout(() => {
-      const win = btn.closest('.win-box, .modal-container, .chassis-front-panel, .mgmt-app-window, .file-manager-window, .smart-modal-window, .container-inspector-window') ||
-                  btn.closest('[id$="-window"]');
+      const win =
+        btn.closest(
+          '.win-box, .modal-container, .chassis-front-panel, .mgmt-app-window, .file-manager-window, .smart-modal-window, .container-inspector-window'
+        ) || btn.closest('[id$="-window"]');
       if (!win) return;
       activeTargetWindow = win;
-      activeTargetWinId = win.id === 'file-manager-window' ? 'fm' :
-                         (win.id === 'management-window' ? 'management' :
-                         (win.id === 'console-window' ? 'console' :
-                         (win.id === 'smart-modal-window' ? 'smart' : win.id)));
+      activeTargetWinId =
+        win.id === 'file-manager-window'
+          ? 'fm'
+          : win.id === 'management-window'
+            ? 'management'
+            : win.id === 'console-window'
+              ? 'console'
+              : win.id === 'smart-modal-window'
+                ? 'smart'
+                : win.id;
 
       const rect = btn.getBoundingClientRect();
       flyout.style.top = `${rect.bottom + 6}px`;
@@ -85,7 +93,8 @@ export function initSnapAssistFlyout() {
     });
   });
 
-  const MAX_BTN_SELECTOR = '.win-btn.max-btn, #console-max, #management-max, #fb-max, #smart-modal-max, #copy-toast-max, #setup-wizard-max';
+  const MAX_BTN_SELECTOR =
+    '.win-btn.max-btn, #console-max, #management-max, #fb-max, #smart-modal-max, #copy-toast-max, #setup-wizard-max';
   const isMaxBtn = (el) => el && el.closest && el.closest(MAX_BTN_SELECTOR);
 
   // High-performance event delegation replaces full-body subtree MutationObserver

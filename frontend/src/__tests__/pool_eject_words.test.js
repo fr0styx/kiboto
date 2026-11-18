@@ -17,13 +17,26 @@ import { setLanguage } from '../i18n.js';
 const pools = {
   platform: 'generic_linux',
   is_observer_mode: false,
-  pools: [{ id: 'ext', name: 'ext', fs_type: 'zfs', status: 'HEALTHY', used_bytes: 1, total_bytes: 2, free_bytes: 1, used_pct: 50, members: [{ name: 'sda', device: 'sda', role: 'data', size_bytes: 1, status: 'OK' }] }],
+  pools: [
+    {
+      id: 'ext',
+      name: 'ext',
+      fs_type: 'zfs',
+      status: 'HEALTHY',
+      used_bytes: 1,
+      total_bytes: 2,
+      free_bytes: 1,
+      used_pct: 50,
+      members: [{ name: 'sda', device: 'sda', role: 'data', size_bytes: 1, status: 'OK' }],
+    },
+  ],
 };
 
 async function render() {
   vi.spyOn(api, 'get').mockImplementation((url) => {
     if (url === '/api/storage/pools') return Promise.resolve(pools);
-    if (url === '/api/storage/platform') return Promise.resolve({ platform: 'generic_linux', capabilities: { can_export_pools: true } });
+    if (url === '/api/storage/platform')
+      return Promise.resolve({ platform: 'generic_linux', capabilities: { can_export_pools: true } });
     if (url === '/api/storage/pools/discover') return Promise.resolve({ discovered_pools: [] });
     return Promise.reject(new Error(url));
   });
@@ -53,7 +66,9 @@ describe('Safely eject in words', () => {
 
     showToast.mockClear();
     container = await render();
-    vi.spyOn(api, 'post').mockRejectedValueOnce(new Error('Pool is busy; retry with force=true')).mockResolvedValueOnce(english);
+    vi.spyOn(api, 'post')
+      .mockRejectedValueOnce(new Error('Pool is busy; retry with force=true'))
+      .mockResolvedValueOnce(english);
     container.querySelector('.btn-pool-export').click();
     await vi.waitFor(() => expect(showToast).toHaveBeenCalled());
     expect(showToast.mock.calls.at(-1)[0]).not.toContain('safely exported');

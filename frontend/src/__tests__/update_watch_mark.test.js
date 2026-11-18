@@ -6,7 +6,8 @@ afterEach(() => vi.restoreAllMocks());
 
 describe('the daily update check in Settings (Settings decision 5)', () => {
   it('marks General when an update is ready and keeps the switch in step', async () => {
-    document.body.innerHTML = '<span id="mgmt-sidebar-update-badge" hidden></span><input type="checkbox" id="update-daily-toggle">';
+    document.body.innerHTML =
+      '<span id="mgmt-sidebar-update-badge" hidden></span><input type="checkbox" id="update-daily-toggle">';
     vi.spyOn(api, 'get').mockResolvedValue({ daily: true, available: true, latest: '2.0.4' });
     const put = vi.spyOn(api, 'put').mockResolvedValue({ daily: false });
     await refreshUpdateMark();

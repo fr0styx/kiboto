@@ -4,26 +4,60 @@ import { api } from '../api.js';
 import { httpsStatus, renderHttpsCard } from '../components/https-card.js';
 
 const flush = () => new Promise((r) => setTimeout(r, 10));
-const BASE = { enabled: false, staging: false, hostname: '', has_cert: false, serving: false, last_error: '', ddns_ready: true, ddns_hostname: 'home.duckdns.org', port: 8443, days_left: 0, terms: 'https://letsencrypt.org/repository/' };
+const BASE = {
+  enabled: false,
+  staging: false,
+  hostname: '',
+  has_cert: false,
+  serving: false,
+  last_error: '',
+  ddns_ready: true,
+  ddns_hostname: 'home.duckdns.org',
+  port: 8443,
+  days_left: 0,
+  terms: 'https://letsencrypt.org/repository/',
+};
 
 describe('HTTPS at home (audit A9)', () => {
-  afterEach(() => { vi.restoreAllMocks(); document.body.innerHTML = ''; });
+  afterEach(() => {
+    vi.restoreAllMocks();
+    document.body.innerHTML = '';
+  });
 
   it('says off, waiting, ready, serving or why not', () => {
     expect(httpsStatus(null)).toBe('Off');
     expect(httpsStatus(BASE)).toBe('Off');
     expect(httpsStatus({ ...BASE, enabled: true })).toContain('Get a certificate');
-    expect(httpsStatus({ ...BASE, enabled: true, last_error: 'Let\'s Encrypt refused: x' })).toBe("No certificate: Let's Encrypt refused: x");
-    expect(httpsStatus({ ...BASE, enabled: true, has_cert: true, hostname: 'home.duckdns.org', days_left: 89 })).toBe('Certificate ready for home.duckdns.org (89 days left).');
-    expect(httpsStatus({ ...BASE, enabled: true, has_cert: true, serving: true, hostname: 'home.duckdns.org', days_left: 89 })).toContain('https://home.duckdns.org:8443 works');
+    expect(httpsStatus({ ...BASE, enabled: true, last_error: "Let's Encrypt refused: x" })).toBe(
+      "No certificate: Let's Encrypt refused: x"
+    );
+    expect(httpsStatus({ ...BASE, enabled: true, has_cert: true, hostname: 'home.duckdns.org', days_left: 89 })).toBe(
+      'Certificate ready for home.duckdns.org (89 days left).'
+    );
+    expect(
+      httpsStatus({
+        ...BASE,
+        enabled: true,
+        has_cert: true,
+        serving: true,
+        hostname: 'home.duckdns.org',
+        days_left: 89,
+      })
+    ).toContain('https://home.duckdns.org:8443 works');
   });
 
   it('turns on, gets a certificate, and shows a refusal', async () => {
     document.body.innerHTML = '<div id="https-card" hidden></div>';
     let st = { ...BASE };
     vi.spyOn(api, 'get').mockImplementation(async () => st);
-    const put = vi.spyOn(api, 'put').mockImplementation(async (_u, b) => { st = { ...st, ...b }; return st; });
-    const post = vi.spyOn(api, 'post').mockImplementation(async () => { st = { ...st, has_cert: true, serving: true, hostname: 'home.duckdns.org', days_left: 90 }; return st; });
+    const put = vi.spyOn(api, 'put').mockImplementation(async (_u, b) => {
+      st = { ...st, ...b };
+      return st;
+    });
+    const post = vi.spyOn(api, 'post').mockImplementation(async () => {
+      st = { ...st, has_cert: true, serving: true, hostname: 'home.duckdns.org', days_left: 90 };
+      return st;
+    });
     await renderHttpsCard();
     const box = /** @type {HTMLElement} */ (document.getElementById('https-card'));
     expect(box.hidden).toBe(false);

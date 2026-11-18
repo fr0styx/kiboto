@@ -1,7 +1,17 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { api, ApiError } from '../api.js';
 import {
-  monthsLeft, warrantyText, underWarranty, notesRows, notesForm, reportCsv, driveReportText, safeName, freeName, saveTextToNas, openReportDialog,
+  monthsLeft,
+  warrantyText,
+  underWarranty,
+  notesRows,
+  notesForm,
+  reportCsv,
+  driveReportText,
+  safeName,
+  freeName,
+  saveTextToNas,
+  openReportDialog,
 } from '../components/drive-health-report.js';
 
 const flush = () => new Promise((r) => setTimeout(r, 0));
@@ -32,7 +42,9 @@ describe('Drive Health warranty', () => {
   it('saves the details from its form', async () => {
     const host = document.createElement('section');
     host.textContent = 'about';
-    const put = vi.spyOn(api, 'put').mockResolvedValue({ notes: { bought: '2024-03-01', warranty_until: '2027-03-01' } });
+    const put = vi
+      .spyOn(api, 'put')
+      .mockResolvedValue({ notes: { bought: '2024-03-01', warranty_until: '2027-03-01' } });
     const saved = vi.fn();
     const form = notesForm(host, 'S1', null, saved);
     form.querySelector('[name=bought]').value = '2024-03-01';
@@ -40,7 +52,13 @@ describe('Drive Health warranty', () => {
     expect(form.querySelector('[name=warranty_until]').value).toBe('2027-03-01');
     form.dispatchEvent(new Event('submit', { cancelable: true }));
     await flush();
-    expect(put).toHaveBeenCalledWith('/api/drives/notes', { serial: 'S1', bought: '2024-03-01', warranty_until: '2027-03-01', note: '', temp_limit: null });
+    expect(put).toHaveBeenCalledWith('/api/drives/notes', {
+      serial: 'S1',
+      bought: '2024-03-01',
+      warranty_until: '2027-03-01',
+      note: '',
+      temp_limit: null,
+    });
     expect(saved).toHaveBeenCalledWith({ bought: '2024-03-01', warranty_until: '2027-03-01' });
   });
 
@@ -59,7 +77,9 @@ describe('Drive Health warranty', () => {
 
 describe('Drive Health reports', () => {
   it('keeps formulas out of the spreadsheet and adds the warranty', () => {
-    const csv = reportCsv([{ dev: 'sda', model: '=HYPERLINK("x")', serial: 'S1', findings: [] }], { S1: { warranty_until: '2027-01-01', note: 'bay 1' } });
+    const csv = reportCsv([{ dev: 'sda', model: '=HYPERLINK("x")', serial: 'S1', findings: [] }], {
+      S1: { warranty_until: '2027-01-01', note: 'bay 1' },
+    });
     const row = csv.trim().split('\n')[1];
     expect(row).toContain(`"'=HYPERLINK(""x"")"`);
     expect(row).toContain('"2027-01-01","bay 1"');
@@ -69,14 +89,41 @@ describe('Drive Health reports', () => {
   it('writes one drive in full', () => {
     const text = driveReportText({
       drive: { dev: 'sdb', model: 'IronWolf', serial: 'ZA1', role: 'disk1', temp: 38 },
-      detail: { raw: 'SMART overall-health: PASSED\n', drive_health: { verdict: 'soon', label_key: 'soon_replace', label: 'Replace soon', identity: { firmware: 'SC60', capacity_bytes: 4e12 }, findings: [{ code: 'x', severity: 'soon', title: 'Parts could not be read', detail: '8 sectors', action: 'Back up' }, { code: 'y', severity: 'ok', title: 'hidden' }] } },
+      detail: {
+        raw: 'SMART overall-health: PASSED\n',
+        drive_health: {
+          verdict: 'soon',
+          label_key: 'soon_replace',
+          label: 'Replace soon',
+          identity: { firmware: 'SC60', capacity_bytes: 4e12 },
+          findings: [
+            { code: 'x', severity: 'soon', title: 'Parts could not be read', detail: '8 sectors', action: 'Back up' },
+            { code: 'y', severity: 'ok', title: 'hidden' },
+          ],
+        },
+      },
       tests: { history: [{ ts: 1, test_type: 'long', status: 'Completed: read failure' }] },
-      history: { samples: 3, temp: { min: 30, max: 41, avg: 35 }, counters: { pending_sectors: { first: 2, last: 8 } } },
+      history: {
+        samples: 3,
+        temp: { min: 30, max: 41, avg: 35 },
+        counters: { pending_sectors: { first: 2, last: 8 } },
+      },
       notes: { bought: '2023-01-01', warranty_until: '2028-01-01' },
       now: at,
       counterName: (k) => (k === 'pending_sectors' ? 'Waiting sectors' : k),
     });
-    for (const want of ['IronWolf', 'ZA1', 'SC60', 'Replace soon', 'Parts could not be read', 'Back up', 'read failure', 'Waiting sectors: 2 → 8', 'SMART overall-health: PASSED', 'Until 2028-01-01']) {
+    for (const want of [
+      'IronWolf',
+      'ZA1',
+      'SC60',
+      'Replace soon',
+      'Parts could not be read',
+      'Back up',
+      'read failure',
+      'Waiting sectors: 2 → 8',
+      'SMART overall-health: PASSED',
+      'Until 2028-01-01',
+    ]) {
       expect(text).toContain(want);
     }
     expect(text).not.toContain('hidden');
@@ -95,7 +142,9 @@ describe('Drive Health reports', () => {
     const path = await saveTextToNas('/mnt/user/reports/', 'drive-health.csv', 'a,b\n', 'text/csv');
     expect(path).toBe('/mnt/user/reports/drive-health (2).csv');
     expect(raw.mock.calls[0][0]).toBe('/api/fs/upload?path=%2Fmnt%2Fuser%2Freports&filename=drive-health%20(2).csv');
-    raw.mockResolvedValue(new Response(JSON.stringify({ detail: 'This upload would go over your space.' }), { status: 507 }));
+    raw.mockResolvedValue(
+      new Response(JSON.stringify({ detail: 'This upload would go over your space.' }), { status: 507 })
+    );
     await expect(saveTextToNas('/mnt/user/reports', 'x.csv', '')).rejects.toThrow('over your space');
   });
 
@@ -127,7 +176,7 @@ describe('Drive Health reports', () => {
     host.remove();
   });
 
-  it('says so when the folder\'s disk stays asleep, and closes on Escape', async () => {
+  it("says so when the folder's disk stays asleep, and closes on Escape", async () => {
     const host = document.createElement('div');
     document.body.append(host);
     vi.spyOn(api, 'get').mockRejectedValue(new ApiError('Cancelled', { status: 428, error: 'cancelled' }));

@@ -49,6 +49,7 @@ describe('small truths on the Backup page (SET-06)', () => {
 
   it('deleting a job asks about its name', () => {
     expect(page).toContain('data-job-name="${escapeHtml(job.name || job.id)}"');
-    expect(page).toContain('{ name: btn.dataset.jobName || jobId }');
+    // the formatter may put the object on its own lines: match it with any spacing
+    expect(page).toMatch(/\{\s*name: btn\.dataset\.jobName \|\| jobId,?\s*\}/);
   });
 });

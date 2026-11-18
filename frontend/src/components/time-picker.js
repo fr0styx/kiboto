@@ -87,11 +87,15 @@ function bindGlobalEvents() {
     }
   });
 
-  window.addEventListener('scroll', () => {
-    if (_activePopover && _activePopover.style.display !== 'none' && _activeTrigger) {
-      positionPopover(_activePopover, _activeTrigger);
-    }
-  }, true);
+  window.addEventListener(
+    'scroll',
+    () => {
+      if (_activePopover && _activePopover.style.display !== 'none' && _activeTrigger) {
+        positionPopover(_activePopover, _activeTrigger);
+      }
+    },
+    true
+  );
 
   document.addEventListener('keydown', (e) => {
     if (!_activePopover || _activePopover.style.display === 'none') return;
@@ -230,10 +234,12 @@ export function openGlassTimePicker(inputEl, triggerEl) {
         <div class="gtp-column">
           <div class="gtp-col-label">${t('tp.hour', 'Hour')}</div>
           <div class="gtp-scroll-list" id="gtp-hours-list">
-            ${Array.from({ length: 12 }, (_, i) => i + 1).map((h) => {
-              const activeCls = h === selectedH12 ? 'active' : '';
-              return `<button type="button" class="gtp-item-btn ${activeCls}" data-hour="${h}">${String(h).padStart(2, '0')}</button>`;
-            }).join('')}
+            ${Array.from({ length: 12 }, (_, i) => i + 1)
+              .map((h) => {
+                const activeCls = h === selectedH12 ? 'active' : '';
+                return `<button type="button" class="gtp-item-btn ${activeCls}" data-hour="${h}">${String(h).padStart(2, '0')}</button>`;
+              })
+              .join('')}
           </div>
         </div>
 
@@ -241,10 +247,12 @@ export function openGlassTimePicker(inputEl, triggerEl) {
         <div class="gtp-column">
           <div class="gtp-col-label">${t('tp.minute', 'Minute')}</div>
           <div class="gtp-scroll-list" id="gtp-minutes-list">
-            ${minutesList.map((m) => {
-              const activeCls = m === selectedMin ? 'active' : '';
-              return `<button type="button" class="gtp-item-btn ${activeCls}" data-minute="${m}">${String(m).padStart(2, '0')}</button>`;
-            }).join('')}
+            ${minutesList
+              .map((m) => {
+                const activeCls = m === selectedMin ? 'active' : '';
+                return `<button type="button" class="gtp-item-btn ${activeCls}" data-minute="${m}">${String(m).padStart(2, '0')}</button>`;
+              })
+              .join('')}
           </div>
         </div>
 
@@ -315,7 +323,7 @@ export function openGlassTimePicker(inputEl, triggerEl) {
         e.stopPropagation();
         const now = new Date();
         const nowH = now.getHours();
-        const nowM = Math.round(now.getMinutes() / 5) * 5 % 60;
+        const nowM = (Math.round(now.getMinutes() / 5) * 5) % 60;
         selectedPeriod = nowH >= 12 ? 'PM' : 'AM';
         selectedH12 = nowH % 12 || 12;
         selectedMin = nowM;

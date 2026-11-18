@@ -2,8 +2,26 @@ import { describe, it, expect, vi } from 'vitest';
 import { compareTable, sortDrives } from '../components/drive-health-compare.js';
 
 const drives = [
-  { dev: 'sda', model: 'Alpha', verdict: 'ok', label_key: 'ok', temp: 31, power_on_hours: 8766, capacity_bytes: 4e12, serial: 'A' },
-  { dev: 'sdb', model: 'Beta', verdict: 'soon', label_key: 'soon_replace', temp: 44, power_on_hours: 40000, capacity_bytes: 8e12, serial: 'B' },
+  {
+    dev: 'sda',
+    model: 'Alpha',
+    verdict: 'ok',
+    label_key: 'ok',
+    temp: 31,
+    power_on_hours: 8766,
+    capacity_bytes: 4e12,
+    serial: 'A',
+  },
+  {
+    dev: 'sdb',
+    model: 'Beta',
+    verdict: 'soon',
+    label_key: 'soon_replace',
+    temp: 44,
+    power_on_hours: 40000,
+    capacity_bytes: 8e12,
+    serial: 'B',
+  },
   { dev: 'sdc', model: 'Gamma', verdict: 'watch', label_key: 'watch', temp: null, capacity_bytes: 2e12, serial: 'C' },
 ];
 const notes = { A: { warranty_until: '2030-01-01' }, B: { warranty_until: '2027-01-01' } };

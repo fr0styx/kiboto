@@ -1,6 +1,13 @@
 import { describe, it, expect, vi } from 'vitest';
 import {
-  ICONS, renderMarkdown, srtToVtt, getResume, setResume, loadFolderGallery, displayImageUrl, attachGestures,
+  ICONS,
+  renderMarkdown,
+  srtToVtt,
+  getResume,
+  setResume,
+  loadFolderGallery,
+  displayImageUrl,
+  attachGestures,
 } from '../components/viewer-kit.js';
 
 function memStore() {
@@ -14,7 +21,9 @@ describe('viewer kit', () => {
   });
 
   it('renders Markdown safely', () => {
-    const html = renderMarkdown('# Title\n\nSome **bold** and `code`.\n\n- a\n- b\n\n[x](javascript:alert(1)) [ok](https://example.com)\n\n<script>alert(1)</script>');
+    const html = renderMarkdown(
+      '# Title\n\nSome **bold** and `code`.\n\n- a\n- b\n\n[x](javascript:alert(1)) [ok](https://example.com)\n\n<script>alert(1)</script>'
+    );
     expect(html).toContain('<h1>Title</h1>');
     expect(html).toContain('<strong>bold</strong>');
     expect(html).toContain('<ul>\n<li>a</li>');
@@ -24,7 +33,9 @@ describe('viewer kit', () => {
   });
 
   it('converts SRT to VTT', () => {
-    expect(srtToVtt('1\n00:00:01,500 --> 00:00:03,000\nHello')).toBe('WEBVTT\n\n1\n00:00:01.500 --> 00:00:03.000\nHello\n');
+    expect(srtToVtt('1\n00:00:01,500 --> 00:00:03,000\nHello')).toBe(
+      'WEBVTT\n\n1\n00:00:01.500 --> 00:00:03.000\nHello\n'
+    );
   });
 
   it('remembers where a video stopped, but not the start or the end', () => {
@@ -38,10 +49,15 @@ describe('viewer kit', () => {
   });
 
   it('builds next/previous from the folder, in natural order', async () => {
-    const apiGet = vi.fn(async () => ({ dirs: [
-      { name: 'IMG_10.jpg', path: '/p/IMG_10.jpg' }, { name: 'IMG_2.jpg', path: '/p/IMG_2.jpg' },
-      { name: 'notes.txt', path: '/p/notes.txt' }, { name: 'clip.mp4', path: '/p/clip.mp4' }, { name: 'sub', path: '/p/sub', is_dir: true },
-    ] }));
+    const apiGet = vi.fn(async () => ({
+      dirs: [
+        { name: 'IMG_10.jpg', path: '/p/IMG_10.jpg' },
+        { name: 'IMG_2.jpg', path: '/p/IMG_2.jpg' },
+        { name: 'notes.txt', path: '/p/notes.txt' },
+        { name: 'clip.mp4', path: '/p/clip.mp4' },
+        { name: 'sub', path: '/p/sub', is_dir: true },
+      ],
+    }));
     const g = await loadFolderGallery('/p/IMG_2.jpg', apiGet, { imagesOnly: true });
     expect(apiGet).toHaveBeenCalledWith('/api/browse?path=%2Fp&dirs_only=0');
     expect(g.map((x) => x.name)).toEqual(['IMG_2.jpg', 'IMG_10.jpg']);

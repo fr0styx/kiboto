@@ -48,7 +48,14 @@ describe('UPS panel words (NUX-20)', () => {
     expect(byId('mgmt-ups-status').textContent).toBe('Offline');
     expect(byId('ups-emergency-countdown').textContent).toBe('ON BATTERY');
 
-    renderUpsTelemetry({ available: true, status: 'OL', battery_charge_pct: 90, model: 'Back-UPS', active_policy: 'battery_pct', line_freq_hz: 50 });
+    renderUpsTelemetry({
+      available: true,
+      status: 'OL',
+      battery_charge_pct: 90,
+      model: 'Back-UPS',
+      active_policy: 'battery_pct',
+      line_freq_hz: 50,
+    });
     expect(byId('mgmt-hub-ups-pill').textContent).toBe('90%');
     expect(byId('mgmt-ups-status').textContent).toBe('On mains power');
     expect(byId('mgmt-ups-status').title).toBe('OL');
@@ -79,7 +86,9 @@ describe('UPS panel words (NUX-20)', () => {
     expect(byId('ups-policy-summary-text').textContent).toBe('Active: At 7 min or 25 % left, or when the UPS says so');
     document.querySelector('[value="timer"]').checked = true;
     updateUpsPolicySummary();
-    expect(byId('ups-policy-summary-text').textContent).toBe('Active: At 7 min or 25 % left, or when the UPS says so, or after 2 minutes on battery');
+    expect(byId('ups-policy-summary-text').textContent).toBe(
+      'Active: At 7 min or 25 % left, or when the UPS says so, or after 2 minutes on battery'
+    );
   });
 
   it('labels discovery results and asks before a drill or self-test', async () => {
@@ -91,7 +100,9 @@ describe('UPS panel words (NUX-20)', () => {
     await initUpsDrawerControls();
     byId('btn-ups-discover').click();
     await flush();
-    expect(byId('ups-discover-candidates').textContent).toBe('No active UPS daemons or USB devices detected on local ports.');
+    expect(byId('ups-discover-candidates').textContent).toBe(
+      'No active UPS daemons or USB devices detected on local ports.'
+    );
     post.mockResolvedValue({ candidates: [{ type: 'nut', host: '10.0.0.5', port: 3493, title: 'Rack UPS' }] });
     byId('btn-ups-discover').click();
     await flush();
@@ -101,7 +112,9 @@ describe('UPS panel words (NUX-20)', () => {
     const [title, msg] = showConfirmToast.mock.calls.at(-1);
     expect(title).toBe('Start a practice run?'); // SET-15, Power B4
     // it promises only what it does: nothing is switched off; the diagram and banner do not react
-    expect(msg).toBe('Kiboto acts as if the power went out for 15 seconds and checks who would switch the NAS off. Nothing is switched off and no app is closed.');
+    expect(msg).toBe(
+      'Kiboto acts as if the power went out for 15 seconds and checks who would switch the NAS off. Nothing is switched off and no app is closed.'
+    );
     byId('btn-run-ups-selftest').click();
     expect(showConfirmToast.mock.calls.at(-1)[4]).toMatchObject({ okText: '🔋 Run Self-Test', cancelText: 'Cancel' });
   });

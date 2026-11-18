@@ -62,11 +62,21 @@ export function appPageUrl(container, host = typeof window !== 'undefined' ? win
 
 /** Apps matching a category and a search (name, description, image, tags, category, source). */
 export function filterCatalog(apps, cat, query) {
-  const q = String(query || '').trim().toLowerCase();
+  const q = String(query || '')
+    .trim()
+    .toLowerCase();
   return (apps || []).filter((app) => {
     if (cat && cat !== 'all' && (app.category || 'other') !== cat) return false;
     if (!q) return true;
-    const hay = [app.name, app.description, app.id, app.image, app.source_name, categoryLabel(app.category), ...(app.tags || [])]
+    const hay = [
+      app.name,
+      app.description,
+      app.id,
+      app.image,
+      app.source_name,
+      categoryLabel(app.category),
+      ...(app.tags || []),
+    ]
       .join(' ')
       .toLowerCase();
     return q.split(/\s+/).every((word) => hay.includes(word));
@@ -103,14 +113,40 @@ export function catalogCardHtml(app, { installed = false, openUrl = '' } = {}) {
     : `<span class="cat-card-emoji">${icon}</span>`;
   const builtin = !app.source_name || app.source_name === 'Built-in';
   const badges = [badge('cat-badge-category', categoryLabel(app.category))];
-  if (app.type === 'stack') badges.push(badge('cat-badge-stack', t('catalog.stack', 'Stack'), t('catalog.stack_hint', 'Installs several containers that work together')));
+  if (app.type === 'stack')
+    badges.push(
+      badge(
+        'cat-badge-stack',
+        t('catalog.stack', 'Stack'),
+        t('catalog.stack_hint', 'Installs several containers that work together')
+      )
+    );
   if (builtin) {
-    badges.push(badge('cat-badge-builtin', t('catalog.builtin', 'Built-in'), t('catalog.builtin_hint', 'Tested Kiboto template')));
+    badges.push(
+      badge('cat-badge-builtin', t('catalog.builtin', 'Built-in'), t('catalog.builtin_hint', 'Tested Kiboto template'))
+    );
   } else {
     badges.push(badge('cat-badge-source', app.source_name));
-    if (app.security_rating === 'verified') badges.push(badge('cat-badge-ok', `🛡️ ${t('catalog.rate_safe', 'Safe')}`, t('catalog.rate_safe_hint', 'Checked: it asks for nothing beyond its own folders')));
-    else if (app.security_rating === 'review_required') badges.push(badge('cat-badge-warn', `⚠️ ${t('catalog.rate_review', 'Read first')}`, (app.security_flags || []).join('; ')));
-    else if (app.security_rating === 'elevated') badges.push(badge('cat-badge-crit', `🚨 ${t('catalog.rate_elevated', 'Wide access')}`, (app.security_flags || []).join('; ')));
+    if (app.security_rating === 'verified')
+      badges.push(
+        badge(
+          'cat-badge-ok',
+          `🛡️ ${t('catalog.rate_safe', 'Safe')}`,
+          t('catalog.rate_safe_hint', 'Checked: it asks for nothing beyond its own folders')
+        )
+      );
+    else if (app.security_rating === 'review_required')
+      badges.push(
+        badge('cat-badge-warn', `⚠️ ${t('catalog.rate_review', 'Read first')}`, (app.security_flags || []).join('; '))
+      );
+    else if (app.security_rating === 'elevated')
+      badges.push(
+        badge(
+          'cat-badge-crit',
+          `🚨 ${t('catalog.rate_elevated', 'Wide access')}`,
+          (app.security_flags || []).join('; ')
+        )
+      );
   }
   if (installed) badges.push(badge('cat-badge-installed', `✓ ${t('catalog.installed', 'Installed')}`));
   const image = app.image || (app.repository ? 'compose-stack' : 'container');
@@ -127,9 +163,11 @@ export function catalogCardHtml(app, { installed = false, openUrl = '' } = {}) {
       <p class="cat-card-desc">${escapeHtml(app.description || '')}</p>
       <div class="cat-card-foot">
         <span class="cat-card-port" title="${escapeHtml(t('catalog.port_hint', 'Suggested web UI port'))}">:${escapeHtml(String(app.default_port || ''))}</span>
-        ${installed && openUrl
-          ? `<a class="btn-pill-toggle catalog-open" href="${escapeHtml(openUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('apps.open', 'Open'))}</a>`
-          : `<button type="button" class="btn-pill-toggle btn-deploy-app catalog-deploy" data-appid="${escapeHtml(app.id)}">${escapeHtml(installed ? t('catalog.install_again', 'Install again') : t('catalog.install', 'Install'))}</button>`}
+        ${
+          installed && openUrl
+            ? `<a class="btn-pill-toggle catalog-open" href="${escapeHtml(openUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('apps.open', 'Open'))}</a>`
+            : `<button type="button" class="btn-pill-toggle btn-deploy-app catalog-deploy" data-appid="${escapeHtml(app.id)}">${escapeHtml(installed ? t('catalog.install_again', 'Install again') : t('catalog.install', 'Install'))}</button>`
+        }
       </div>
     </div>`;
 }

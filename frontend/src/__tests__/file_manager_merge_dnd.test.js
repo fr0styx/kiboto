@@ -29,10 +29,7 @@ describe('File Manager Merge & DnD Parity', () => {
     const { showToast } = await import('../toast.js');
     await executeTransferWithConflictCheck(['/mnt/user/downloads'], '/mnt/user/downloads/subfolder', 'move');
 
-    expect(showToast).toHaveBeenCalledWith(
-      expect.stringContaining('Cannot move an item into itself'),
-      'warning'
-    );
+    expect(showToast).toHaveBeenCalledWith(expect.stringContaining('Cannot move an item into itself'), 'warning');
     expect(api.post).not.toHaveBeenCalled();
   });
 

@@ -123,7 +123,7 @@ describe('File Manager Icon View & Grid Mode', () => {
     expect(imgEl.getAttribute('loading')).toBe('lazy');
     expect(imgEl.src).toContain('/api/fs/preview/image?path=%2Fmnt%2Fuser%2Fvacation.jpg&thumb=1');
     // Credentials never go in URLs (SEC-16); the session cookie authenticates thumbnails.
-    expect(imgEl.src).not.toContain("token=");
+    expect(imgEl.src).not.toContain('token=');
 
     // Card 4 is 'report.pdf' non-image
     expect(cards[4].dataset.name).toBe('report.pdf');
@@ -203,11 +203,7 @@ describe('File Manager Icon View & Grid Mode', () => {
 
     // Shift + ArrowRight expands to screenshot.png
     handleFmKeydown(new KeyboardEvent('keydown', { key: 'ArrowRight', shiftKey: true, bubbles: true }));
-    expect(getFmSelectedPaths()).toEqual([
-      '/mnt/user/Photos',
-      '/mnt/user/vacation.jpg',
-      '/mnt/user/screenshot.png',
-    ]);
+    expect(getFmSelectedPaths()).toEqual(['/mnt/user/Photos', '/mnt/user/vacation.jpg', '/mnt/user/screenshot.png']);
   });
 
   it('synchronizes view mode across multiple open File Explorer windows', () => {

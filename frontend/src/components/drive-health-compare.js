@@ -14,16 +14,41 @@ const YEAR_HOURS = 8766;
 export function columns(notes) {
   const note = (d) => (d.serial && notes && notes[d.serial]) || {};
   return [
-    { key: 'name', head: t('dh.c_drive', 'Drive'), text: (d) => `${d.model || d.dev} (${d.dev})`, value: (d) => String(d.model || d.dev).toLowerCase() },
-    { key: 'health', head: t('dh.c_health', 'Health'), text: (d) => labelText(d), value: (d) => SEVERITY[d.verdict] ?? 3 },
-    { key: 'temp', head: t('dh.c_temp', 'Temperature'), text: (d) => (d.temp != null ? `${Math.round(d.temp)} °C` : '–'), value: (d) => (d.temp != null ? -d.temp : Infinity) },
+    {
+      key: 'name',
+      head: t('dh.c_drive', 'Drive'),
+      text: (d) => `${d.model || d.dev} (${d.dev})`,
+      value: (d) => String(d.model || d.dev).toLowerCase(),
+    },
+    {
+      key: 'health',
+      head: t('dh.c_health', 'Health'),
+      text: (d) => labelText(d),
+      value: (d) => SEVERITY[d.verdict] ?? 3,
+    },
+    {
+      key: 'temp',
+      head: t('dh.c_temp', 'Temperature'),
+      text: (d) => (d.temp != null ? `${Math.round(d.temp)} °C` : '–'),
+      value: (d) => (d.temp != null ? -d.temp : Infinity),
+    },
     {
       key: 'age',
       head: t('dh.c_age', 'Powered on'),
-      text: (d) => (d.power_on_hours ? t('dh.a_years', '{y, plural, one {# year} other {# years}}', { y: Math.round((d.power_on_hours / YEAR_HOURS) * 10) / 10 }) : '–'),
+      text: (d) =>
+        d.power_on_hours
+          ? t('dh.a_years', '{y, plural, one {# year} other {# years}}', {
+              y: Math.round((d.power_on_hours / YEAR_HOURS) * 10) / 10,
+            })
+          : '–',
       value: (d) => (d.power_on_hours ? -d.power_on_hours : Infinity),
     },
-    { key: 'size', head: t('dh.c_size', 'Size'), text: (d) => (d.capacity_bytes ? formatBytes(d.capacity_bytes) : '–'), value: (d) => -(Number(d.capacity_bytes) || 0) },
+    {
+      key: 'size',
+      head: t('dh.c_size', 'Size'),
+      text: (d) => (d.capacity_bytes ? formatBytes(d.capacity_bytes) : '–'),
+      value: (d) => -(Number(d.capacity_bytes) || 0),
+    },
     {
       key: 'warranty',
       head: t('dh.n_warranty', 'Warranty'),
@@ -69,7 +94,9 @@ export function compareTable(drives, notes, onPick, key = 'health', reverse = fa
     b.type = 'button';
     b.className = 'dh-sort';
     b.textContent = c.head;
-    b.addEventListener('click', () => box.replaceWith(compareTable(drives, notes, onPick, c.key, c.key === key ? !reverse : false)));
+    b.addEventListener('click', () =>
+      box.replaceWith(compareTable(drives, notes, onPick, c.key, c.key === key ? !reverse : false))
+    );
     th.append(b);
     head.append(th);
   }

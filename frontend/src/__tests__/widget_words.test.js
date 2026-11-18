@@ -20,7 +20,8 @@ describe('widget words', () => {
 
   it('the network card shows it', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, json: async () => ({}) }));
-    document.body.innerHTML = '<div id="widget-network"><span id="w-net-rx"></span><span id="w-net-tx"></span><span id="w-net-iface"></span></div>';
+    document.body.innerHTML =
+      '<div id="widget-network"><span id="w-net-rx"></span><span id="w-net-tx"></span><span id="w-net-iface"></span></div>';
     initWidgets();
     ZettEventBus.emit('stats:updated', { net: { iface: 'combined', rx: '1 KB/s', tx: '0 B/s' } });
     await vi.waitFor(() => expect(document.getElementById('w-net-iface').textContent).toBe('All ports'));

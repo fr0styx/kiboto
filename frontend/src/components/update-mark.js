@@ -16,7 +16,9 @@ export async function refreshUpdateMark(root = document) {
   const mark = /** @type {HTMLElement | null} */ (root.getElementById('mgmt-sidebar-update-badge'));
   if (mark) {
     mark.hidden = !st.available;
-    mark.title = st.available ? t('updates.mark_title', 'Version {version} is ready', { version: st.latest || '' }) : '';
+    mark.title = st.available
+      ? t('updates.mark_title', 'Version {version} is ready', { version: st.latest || '' })
+      : '';
   }
   const box = /** @type {HTMLInputElement | null} */ (root.getElementById('update-daily-toggle'));
   if (box) {

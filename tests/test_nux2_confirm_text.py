@@ -17,5 +17,7 @@ def test_every_server_action_has_a_dialog():
 def test_targets_match():
     js = JS.read_text(encoding="utf-8")
     for action, summary in ACTIONS.items():
-        line = next(ln for ln in js.splitlines() if ln.startswith(f"  '{action}': ["))
-        assert ("{target}" in line) == ("{target}" in summary), action
+        # the whole entry: the formatter (oxfmt) may spread a long one over several lines
+        start = js.index(f"  '{action}': [")
+        entry = js[start : js.index("],", start)]
+        assert ("{target}" in entry) == ("{target}" in summary), action

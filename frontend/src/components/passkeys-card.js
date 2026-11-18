@@ -25,7 +25,7 @@ export function passkeysHtml(list, available) {
             <span class="pk-actions">
               <button type="button" class="btn-pill-toggle is-small" data-pk-rename="${escapeHtml(p.id)}">${escapeHtml(t('passkeys.rename', 'Rename'))}</button>
               <button type="button" class="btn-pill-toggle is-small is-danger" data-pk-remove="${escapeHtml(p.id)}">${escapeHtml(t('passkeys.remove', 'Remove'))}</button>
-            </span></li>`,
+            </span></li>`
         )
         .join('')}</ul>`
     : `<p class="usr-xs-muted">${escapeHtml(t('passkeys.none', 'No passkeys yet.'))}</p>`;
@@ -41,7 +41,7 @@ function shell() {
   card.id = 'passkeys-card';
   card.className = 'drawer-card usr-box';
   card.innerHTML = `<div class="usr-base-bold-strong">${escapeHtml(t('passkeys.title', 'Passkeys'))}</div>
-    <div class="usr-xs-muted">${escapeHtml(t('passkeys.desc', 'Sign in with your phone, your laptop\'s fingerprint or face, or a security key: no password to type, nothing to steal. A passkey also counts as the second step.'))}</div>
+    <div class="usr-xs-muted">${escapeHtml(t('passkeys.desc', "Sign in with your phone, your laptop's fingerprint or face, or a security key: no password to type, nothing to steal. A passkey also counts as the second step."))}</div>
     <div id="passkeys-body" aria-live="polite">…</div>`;
   const after = document.getElementById('mfa-status-card');
   if (after && after.parentNode === pane) after.after(card);
@@ -73,24 +73,30 @@ export async function loadPasskeysCard(win = window) {
       const remove = el.closest('[data-pk-remove]');
       try {
         if (add) {
-          const name = win.prompt(t('passkeys.name_prompt', 'A name for this passkey (for example "Anna\'s phone")'), '') ?? null;
+          const name =
+            win.prompt(t('passkeys.name_prompt', 'A name for this passkey (for example "Anna\'s phone")'), '') ?? null;
           if (name === null) return;
           await addPasskey(api, name.trim());
           showToast(t('passkeys.added', 'Passkey added. Next time, choose "Sign in with a passkey".'), 'success');
         } else if (rename) {
           const name = win.prompt(t('passkeys.rename_prompt', 'New name'), '') ?? '';
           if (!name.trim()) return;
-          await api.patch(`/api/auth/passkeys/${encodeURIComponent(rename.getAttribute('data-pk-rename') || '')}`, { name: name.trim() });
+          await api.patch(`/api/auth/passkeys/${encodeURIComponent(rename.getAttribute('data-pk-rename') || '')}`, {
+            name: name.trim(),
+          });
         } else if (remove) {
           const id = remove.getAttribute('data-pk-remove') || '';
-          showConfirmToast(t('passkeys.remove_confirm', 'Remove this passkey? The device stops working for signing in to Kiboto.'), async () => {
-            try {
-              await api.delete(`/api/auth/passkeys/${encodeURIComponent(id)}`);
-            } catch (err) {
-              showToast(/** @type {Error} */ (err).message, 'error');
+          showConfirmToast(
+            t('passkeys.remove_confirm', 'Remove this passkey? The device stops working for signing in to Kiboto.'),
+            async () => {
+              try {
+                await api.delete(`/api/auth/passkeys/${encodeURIComponent(id)}`);
+              } catch (err) {
+                showToast(/** @type {Error} */ (err).message, 'error');
+              }
+              render(win);
             }
-            render(win);
-          });
+          );
           return;
         } else {
           return;
@@ -120,14 +126,24 @@ export function installPasskeyResetFor(modal, user) {
   box.innerHTML = `<button type="button" class="btn-pill-toggle is-small is-danger" data-pk-reset>${escapeHtml(t('passkeys.reset', 'Remove passkeys'))}</button>
     <span class="usr-xs-muted">${escapeHtml(t('passkeys.reset_help', 'For someone who lost their devices: they sign in with the password again and add new ones.'))}</span>`;
   /** @type {HTMLElement} */ (box.querySelector('[data-pk-reset]')).onclick = () => {
-    showConfirmToast(t('passkeys.reset_confirm', 'Remove every passkey of {name}?', { name: user.username }), async () => {
-      try {
-        const r = await api.delete(`/api/users/${encodeURIComponent(user.id)}/passkeys`);
-        showToast(t('passkeys.reset_done', '{n, plural, =0 {{name} had no passkeys.} one {Removed # passkey of {name}.} other {Removed # passkeys of {name}.}}', { n: r.removed || 0, name: user.username }), 'success');
-      } catch (err) {
-        showToast(/** @type {Error} */ (err).message, 'error');
+    showConfirmToast(
+      t('passkeys.reset_confirm', 'Remove every passkey of {name}?', { name: user.username }),
+      async () => {
+        try {
+          const r = await api.delete(`/api/users/${encodeURIComponent(user.id)}/passkeys`);
+          showToast(
+            t(
+              'passkeys.reset_done',
+              '{n, plural, =0 {{name} had no passkeys.} one {Removed # passkey of {name}.} other {Removed # passkeys of {name}.}}',
+              { n: r.removed || 0, name: user.username }
+            ),
+            'success'
+          );
+        } catch (err) {
+          showToast(/** @type {Error} */ (err).message, 'error');
+        }
       }
-    });
+    );
   };
   return box;
 }

@@ -16,7 +16,8 @@ const WHEN = 1800000000;
 describe('Are your files safe? (SET-21)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    document.body.innerHTML = '<section id="s" hidden><div id="m"></div></section><h3 id="offsite-title"></h3><div id="backup-jobs-mount"></div>';
+    document.body.innerHTML =
+      '<section id="s" hidden><div id="m"></div></section><h3 id="offsite-title"></h3><div id="backup-jobs-mount"></div>';
   });
 
   it('a word with an icon for each level, and one sentence', () => {
@@ -24,7 +25,9 @@ describe('Are your files safe? (SET-21)', () => {
     expect(bv.verdictWord('failed')[1]).toBe('Failed');
     expect(bv.verdictWord('look')[1]).toBe('Needs a look');
     expect(bv.verdictWord('none')[1]).toBe('Not protected yet');
-    expect(bv.verdictSentence({ level: 'fine', newest: { name: 'Office disk', when: WHEN } })).toContain('on "Office disk"');
+    expect(bv.verdictSentence({ level: 'fine', newest: { name: 'Office disk', when: WHEN } })).toContain(
+      'on "Office disk"'
+    );
     expect(bv.verdictSentence({ level: 'none', newest: null })).toBe('No copy of your files outside this Kiboto yet.');
     expect(bv.verdictSentence({ level: 'look', newest: null })).toBe('No good copy outside this Kiboto yet.');
   });
@@ -54,11 +57,15 @@ describe('Are your files safe? (SET-21)', () => {
   });
 
   it('shows the answer and acts on a line', async () => {
-    get.mockResolvedValue({ level: 'failed', newest: { name: 'B2', when: WHEN }, issues: [
-      { kind: 'failed', name: 'B2', id: 'r1', engine: 'offsite' },
-      { kind: 'kit', name: 'B2', id: 'r1', engine: 'offsite' },
-      { kind: 'late', name: 'Copy', id: null, engine: 'copy', since: WHEN },
-    ] });
+    get.mockResolvedValue({
+      level: 'failed',
+      newest: { name: 'B2', when: WHEN },
+      issues: [
+        { kind: 'failed', name: 'B2', id: 'r1', engine: 'offsite' },
+        { kind: 'kit', name: 'B2', id: 'r1', engine: 'offsite' },
+        { kind: 'late', name: 'Copy', id: null, engine: 'copy', since: WHEN },
+      ],
+    });
     const mount = /** @type {HTMLElement} */ (document.getElementById('m'));
     Element.prototype.scrollIntoView = vi.fn();
     await bv.renderVerdict(mount);

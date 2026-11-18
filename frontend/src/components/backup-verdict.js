@@ -16,7 +16,11 @@ export function verdictWord(level) {
 
 /** The one sentence under the word. */
 export function verdictSentence(v) {
-  if (v.newest) return t('bk.v_newest', 'Newest copy outside this Kiboto: {when}, on "{name}".', { when: formatDateTime(v.newest.when * 1000), name: v.newest.name });
+  if (v.newest)
+    return t('bk.v_newest', 'Newest copy outside this Kiboto: {when}, on "{name}".', {
+      when: formatDateTime(v.newest.when * 1000),
+      name: v.newest.name,
+    });
   if (v.level === 'none') return t('bk.v_nothing', 'No copy of your files outside this Kiboto yet.');
   return t('bk.v_no_good', 'No good copy outside this Kiboto yet.');
 }
@@ -28,15 +32,28 @@ export function issueText(i) {
     case 'failed':
       return t('bk.i_failed', '{name}: the last backup failed.', { name });
     case 'late':
-      return i.since ? t('bk.i_late', '{name}: no backup since {when}.', { name, when: formatDateTime(i.since * 1000) }) : t('bk.i_never', '{name}: no backup yet.', { name });
+      return i.since
+        ? t('bk.i_late', '{name}: no backup since {when}.', { name, when: formatDateTime(i.since * 1000) })
+        : t('bk.i_never', '{name}: no backup yet.', { name });
     case 'same_disk':
-      return t('bk.i_same_disk', '{name} is on the same disk as the files it copies: if the disk fails, both are gone.', { name });
+      return t(
+        'bk.i_same_disk',
+        '{name} is on the same disk as the files it copies: if the disk fails, both are gone.',
+        { name }
+      );
     case 'here_only':
       return t('bk.i_here', '{name} stays on this Kiboto: a fire or a theft takes both.', { name });
     case 'kit':
-      return t('bk.i_kit', '{name}: the recovery kit is not saved yet. Without it the backup cannot be opened elsewhere.', { name });
+      return t(
+        'bk.i_kit',
+        '{name}: the recovery kit is not saved yet. Without it the backup cannot be opened elsewhere.',
+        { name }
+      );
     case 'unreadable':
-      return t('bk.i_unreadable', '{name}: {n, plural, one {# file} other {# files}} could not be read.', { name, n: i.count || 0 });
+      return t('bk.i_unreadable', '{name}: {n, plural, one {# file} other {# files}} could not be read.', {
+        name,
+        n: i.count || 0,
+      });
     case 'drill':
       return t('bk.i_drill', '{name}: the last test restore failed.', { name });
     case 'snap_failed':
@@ -46,7 +63,10 @@ export function issueText(i) {
     case 'check_late':
       return t('bk.i_check_late', '{name}: the monthly disk check has not run lately.', { name });
     case 'check_errors':
-      return t('bk.i_check_errors', '{name}: the last disk check found {n, plural, one {# error} other {# errors}}.', { name, n: i.count || 0 });
+      return t('bk.i_check_errors', '{name}: the last disk check found {n, plural, one {# error} other {# errors}}.', {
+        name,
+        n: i.count || 0,
+      });
     default:
       return name;
   }
@@ -54,7 +74,8 @@ export function issueText(i) {
 
 /** The one button for a line: what it does and what it says. */
 export function issueAction(i) {
-  if ((i.kind === 'failed' || i.kind === 'late') && i.engine === 'offsite' && i.id) return { act: 'backup', label: t('bk.a_backup', 'Back up now') };
+  if ((i.kind === 'failed' || i.kind === 'late') && i.engine === 'offsite' && i.id)
+    return { act: 'backup', label: t('bk.a_backup', 'Back up now') };
   if (i.kind === 'kit' && i.id) return { act: 'kit', label: t('bk.a_kit', 'Save the recovery kit') };
   return { act: 'open', label: t('bk.a_open', 'Open') };
 }
@@ -70,7 +91,10 @@ export function verdictHtml(v) {
       return `<li class="bk-issue"><span>${escapeHtml(issueText(i))}</span><button type="button" class="btn-pill-toggle is-small" data-bk-act="${a.act}" data-bk-n="${n}">${escapeHtml(a.label)}</button></li>`;
     })
     .join('');
-  const protect = v.level === 'none' ? `<button type="button" class="btn-pill-toggle is-primary" data-bk-act="protect">${escapeHtml(t('bk.a_protect', 'Protect this Kiboto'))}</button>` : '';
+  const protect =
+    v.level === 'none'
+      ? `<button type="button" class="btn-pill-toggle is-primary" data-bk-act="protect">${escapeHtml(t('bk.a_protect', 'Protect this Kiboto'))}</button>`
+      : '';
   return `<p class="bk-verdict-line is-${escapeHtml(v.level)}"><span class="bk-verdict-icon" aria-hidden="true">${icon}</span><strong>${escapeHtml(word)}.</strong> ${escapeHtml(verdictSentence(v))}</p>
     ${lines ? `<ul class="bk-issues">${lines}</ul>` : ''}${protect}`;
 }
@@ -99,7 +123,9 @@ export async function renderVerdict(mount) {
         showToast(/** @type {Error} */ (err).message, 'error');
       }
     } else if (b.dataset.bkAct === 'kit') {
-      import('./offsite-backup.js').then((m) => m.offerRecoveryKit({ id: issue.id }, () => renderVerdict(mount))).catch(() => {});
+      import('./offsite-backup.js')
+        .then((m) => m.offerRecoveryKit({ id: issue.id }, () => renderVerdict(mount)))
+        .catch(() => {});
     } else if (b.dataset.bkAct === 'protect') {
       import('./protect-nas.js').then((m) => m.openProtectGuide()).catch(() => {});
     } else {

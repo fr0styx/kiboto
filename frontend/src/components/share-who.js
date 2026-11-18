@@ -35,7 +35,11 @@ export function whoSentence(people, host = '', locale = currentLocale()) {
   return host ? t('who.host', 'In Files: {text} Over the network: {host} decides.', { text, host }) : text;
 }
 
-const LEVEL_WORDS = () => ({ none: t('who.l_none', 'No access'), read: t('who.l_read', 'Can view'), write: t('who.l_write', 'Can view and change') });
+const LEVEL_WORDS = () => ({
+  none: t('who.l_none', 'No access'),
+  read: t('who.l_read', 'Can view'),
+  write: t('who.l_write', 'Can view and change'),
+});
 
 /** The window's rows: administrators as they are, everyone else with a choice; a guest views at most. */
 export function whoRowsHtml(people) {
@@ -43,7 +47,8 @@ export function whoRowsHtml(people) {
   return people
     .map((p) => {
       const name = escapeHtml(p.name || p.username);
-      if (p.admin) return `<li class="who-row"><span>${name}</span><span class="who-fixed">${escapeHtml(t('who.l_admin', 'Can view and change (administrator)'))}</span></li>`;
+      if (p.admin)
+        return `<li class="who-row"><span>${name}</span><span class="who-fixed">${escapeHtml(t('who.l_admin', 'Can view and change (administrator)'))}</span></li>`;
       const levels = p.role === 'guest' ? ['none', 'read'] : ['none', 'read', 'write'];
       const value = levels.includes(p.level) ? p.level : 'read';
       return `<li class="who-row"><label for="who-${escapeHtml(p.username)}">${name}</label><select id="who-${escapeHtml(p.username)}" class="tz-select-input" data-who-user="${escapeHtml(p.username)}">${levels
@@ -56,7 +61,8 @@ export function whoRowsHtml(people) {
 /** Every share's saved entry, with this one's people as chosen: the PUT replaces the list whole. */
 export function savedWith(access, share, chosen) {
   const shares = {};
-  for (const s of access.shares || []) shares[s.name] = { users: { ...(s.users || {}) }, ...(s.default ? { default: s.default } : {}) };
+  for (const s of access.shares || [])
+    shares[s.name] = { users: { ...(s.users || {}) }, ...(s.default ? { default: s.default } : {}) };
   shares[share] = { ...(shares[share] || {}), users: { ...((shares[share] || {}).users || {}), ...chosen } };
   return { shares };
 }
@@ -94,7 +100,12 @@ export async function openWhoWindow(share, onSaved = null) {
       if (!b) return;
       if (b.hasAttribute('data-who-close')) done(false);
       else if (b.hasAttribute('data-who-save')) {
-        const chosen = Object.fromEntries([...dlg.querySelectorAll('select[data-who-user]')].map((s) => [/** @type {HTMLElement} */ (s).dataset.whoUser, /** @type {HTMLSelectElement} */ (s).value]));
+        const chosen = Object.fromEntries(
+          [...dlg.querySelectorAll('select[data-who-user]')].map((s) => [
+            /** @type {HTMLElement} */ (s).dataset.whoUser,
+            /** @type {HTMLSelectElement} */ (s).value,
+          ])
+        );
         try {
           await api.put('/api/storage/share-access', savedWith(access, share, chosen));
           showToast(t('who.saved', 'Saved. "{share}" opens for the people you chose.', { share }), 'success');
@@ -122,17 +133,24 @@ export async function fillWhoLines(grid, names = {}) {
   }
   const host = who.host ? names[who.host] || who.host : '';
   for (const share of who.shares || []) {
-    const card = [...grid.querySelectorAll('[data-share]')].find((c) => /** @type {HTMLElement} */ (c).dataset.share === share.name);
+    const card = [...grid.querySelectorAll('[data-share]')].find(
+      (c) => /** @type {HTMLElement} */ (c).dataset.share === share.name
+    );
     if (!card) continue;
     let line = card.querySelector('.share-who');
     if (!line) {
       line = document.createElement('div');
       line.className = 'share-who';
-      line.innerHTML = '<span class="share-who-text"></span> <button type="button" class="btn-pill-toggle is-small" data-who-open></button>';
+      line.innerHTML =
+        '<span class="share-who-text"></span> <button type="button" class="btn-pill-toggle is-small" data-who-open></button>';
       card.querySelector('.share-card-header')?.after(line);
-      /** @type {HTMLElement} */ (line.querySelector('[data-who-open]')).onclick = () => openWhoWindow(share.name, () => fillWhoLines(grid, names));
+      /** @type {HTMLElement} */ (line.querySelector('[data-who-open]')).onclick = () =>
+        openWhoWindow(share.name, () => fillWhoLines(grid, names));
     }
-    /** @type {HTMLElement} */ (line.querySelector('.share-who-text')).textContent = whoSentence(share.people || [], host);
+    /** @type {HTMLElement} */ (line.querySelector('.share-who-text')).textContent = whoSentence(
+      share.people || [],
+      host
+    );
     /** @type {HTMLElement} */ (line.querySelector('[data-who-open]')).textContent = t('who.open', 'Who can open it');
   }
   return who;

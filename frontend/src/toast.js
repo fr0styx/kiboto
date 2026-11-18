@@ -13,33 +13,43 @@ let _toastContainer = null;
 
 function _getOrCreateToastContainer() {
   if (_toastContainer && document.body.contains(_toastContainer)) return _toastContainer;
-  _toastContainer = document.getElementById("top-toast-container");
+  _toastContainer = document.getElementById('top-toast-container');
   if (!_toastContainer) {
-    _toastContainer = document.createElement("div");
-    _toastContainer.id = "top-toast-container";
-    _toastContainer.setAttribute("role", "status");
-    _toastContainer.setAttribute("aria-live", "polite");
-    _toastContainer.setAttribute("aria-atomic", "false");
+    _toastContainer = document.createElement('div');
+    _toastContainer.id = 'top-toast-container';
+    _toastContainer.setAttribute('role', 'status');
+    _toastContainer.setAttribute('aria-live', 'polite');
+    _toastContainer.setAttribute('aria-atomic', 'false');
     document.body.appendChild(_toastContainer);
   }
   return _toastContainer;
 }
 
-export function showToast(msg, type = "error") {
-  if (state.isLcdDirect || (typeof window !== 'undefined' && window.location.search.includes('mode=lcd')) || (document.body && document.body.classList.contains('lcd-direct'))) return;
+export function showToast(msg, type = 'error') {
+  if (
+    state.isLcdDirect ||
+    (typeof window !== 'undefined' && window.location.search.includes('mode=lcd')) ||
+    (document.body && document.body.classList.contains('lcd-direct'))
+  )
+    return;
   triggerHaptic(type === 'success' ? 'success' : type === 'warn' ? 'warning' : 'light');
   _showTopNotification(msg, type);
   ZettEventBus.emit('toast:show', { msg, type });
 }
 
 export function showActionToast(msg, actionText, onAction, durationMs = 10000) {
-  if (state.isLcdDirect || (typeof window !== 'undefined' && window.location.search.includes('mode=lcd')) || (document.body && document.body.classList.contains('lcd-direct'))) return;
+  if (
+    state.isLcdDirect ||
+    (typeof window !== 'undefined' && window.location.search.includes('mode=lcd')) ||
+    (document.body && document.body.classList.contains('lcd-direct'))
+  )
+    return;
   if (!document.body) return;
   triggerHaptic('light');
   const container = _getOrCreateToastContainer();
 
-  const toast = document.createElement("div");
-  toast.className = "top-toast-item";
+  const toast = document.createElement('div');
+  toast.className = 'top-toast-item';
   toast.style.borderLeft = `4px solid #4fd8c4`;
   toast.innerHTML = `
     <div class="tst-ico" aria-hidden="true">↺</div>
@@ -54,7 +64,7 @@ export function showActionToast(msg, actionText, onAction, durationMs = 10000) {
   if (UNDO_RE.test(actionText)) toast.dataset.undo = '1';
   container.appendChild(toast);
 
-  const actionBtn = toast.querySelector(".top-toast-action-btn");
+  const actionBtn = toast.querySelector('.top-toast-action-btn');
   if (actionBtn) {
     actionBtn.onclick = () => {
       _dismissToastItem(toast);
@@ -62,27 +72,35 @@ export function showActionToast(msg, actionText, onAction, durationMs = 10000) {
     };
   }
 
-  const closeBtn = toast.querySelector(".top-toast-close");
+  const closeBtn = toast.querySelector('.top-toast-close');
   if (closeBtn) {
     closeBtn.onclick = () => _dismissToastItem(toast);
   }
 
   requestAnimationFrame(() => {
-    toast.classList.add("show");
+    toast.classList.add('show');
   });
 
   _armDismiss(toast, durationMs);
 }
 
 // Words that mark an action as destructive (the button turns red), in the five UI languages
-const DESTRUCTIVE_RE = /\b(delete|remove|destroy|wipe|format|erase|revoke|reset|clear|uninstall|purge|discard|kill|forget|löschen|entfernen|zurücksetzen|zerstören|vergessen|supprimer|effacer|retirer|détruire|oublier|eliminar|borrar|quitar|destruir|olvidar)\b|删除|移除|清除|清空|销毁|忘记/i;
+const DESTRUCTIVE_RE =
+  /\b(delete|remove|destroy|wipe|format|erase|revoke|reset|clear|uninstall|purge|discard|kill|forget|löschen|entfernen|zurücksetzen|zerstören|vergessen|supprimer|effacer|retirer|détruire|oublier|eliminar|borrar|quitar|destruir|olvidar)\b|删除|移除|清除|清空|销毁|忘记/i;
 const GENERIC_TITLES = new Set(['confirm action', 'confirm', 'are you sure?']);
-const isGenericTitle = (title) => GENERIC_TITLES.has(String(title || '').trim().toLowerCase()) || String(title || '').trim() === t('confirm.title', 'Confirm action');
+const isGenericTitle = (title) =>
+  GENERIC_TITLES.has(
+    String(title || '')
+      .trim()
+      .toLowerCase()
+  ) || String(title || '').trim() === t('confirm.title', 'Confirm action');
 
 /** The button label and colour for a confirm dialog (UX-5: verbs, red only when destructive). */
 export function confirmButtonFor(title, msg, options = {}) {
   const text = `${title || ''} ${options.okText || ''}`;
-  const destructive = options.destructive ?? (DESTRUCTIVE_RE.test(text) || (isGenericTitle(title) && DESTRUCTIVE_RE.test(String(msg || '').slice(0, 60))));
+  const destructive =
+    options.destructive ??
+    (DESTRUCTIVE_RE.test(text) || (isGenericTitle(title) && DESTRUCTIVE_RE.test(String(msg || '').slice(0, 60))));
   let label = options.okText;
   if (!label) {
     const plain = String(title || '').trim();
@@ -93,13 +111,15 @@ export function confirmButtonFor(title, msg, options = {}) {
 }
 
 function _focusables(card) {
-  return [...card.querySelectorAll('button, input, textarea, select, [tabindex]:not([tabindex="-1"])')]
-    .filter((el) => !el.disabled && el.style.display !== 'none' && !el.closest('[hidden]'));
+  return [...card.querySelectorAll('button, input, textarea, select, [tabindex]:not([tabindex="-1"])')].filter(
+    (el) => !el.disabled && el.style.display !== 'none' && !el.closest('[hidden]')
+  );
 }
 
 // A dialog that was dragged opens in its usual place next time
 function resetDraggedPosition(el) {
-  for (const prop of ["position", "left", "top", "right", "bottom", "margin", "transition"]) el.style.removeProperty(prop);
+  for (const prop of ['position', 'left', 'top', 'right', 'bottom', 'margin', 'transition'])
+    el.style.removeProperty(prop);
 }
 
 export function showConfirmToast(title, msg, onConfirm, onCancel, options = {}) {
@@ -110,7 +130,12 @@ export function showConfirmToast(title, msg, onConfirm, onCancel, options = {}) 
     msg = title;
     title = options.title || t('confirm.title', 'Confirm action');
   }
-  if (state.isLcdDirect || (typeof window !== 'undefined' && window.location.search.includes('mode=lcd')) || (document.body && document.body.classList.contains('lcd-direct'))) return;
+  if (
+    state.isLcdDirect ||
+    (typeof window !== 'undefined' && window.location.search.includes('mode=lcd')) ||
+    (document.body && document.body.classList.contains('lcd-direct'))
+  )
+    return;
   triggerHaptic('warning');
   _showTopConfirm(title, msg, onConfirm, onCancel, options);
   ZettEventBus.emit('toast:confirm', { title, msg, onConfirm, onCancel, options });
@@ -119,27 +144,28 @@ export function showConfirmToast(title, msg, onConfirm, onCancel, options = {}) 
 /** A confirmation for an action that loses or overwrites something: red, with focus on Cancel,
  *  whatever the language of its words (SET-00). Takes what showConfirmToast takes. */
 export function showDangerConfirm(title, msg, onConfirm, onCancel, options = {}) {
-  if (typeof msg === 'function') return showConfirmToast(title, msg, onConfirm, { ...(onCancel || {}), destructive: true });
+  if (typeof msg === 'function')
+    return showConfirmToast(title, msg, onConfirm, { ...(onCancel || {}), destructive: true });
   return showConfirmToast(title, msg, onConfirm, onCancel, { ...options, destructive: true });
 }
 
 export function hideConfirmToast() {
-  const backdrop = document.getElementById("confirm-toast-backdrop");
-  const card = document.getElementById("confirm-toast-modal");
+  const backdrop = document.getElementById('confirm-toast-backdrop');
+  const card = document.getElementById('confirm-toast-modal');
   if (backdrop && card) {
-    backdrop.style.opacity = "0";
-    card.style.opacity = "0";
-    card.style.pointerEvents = "none";
-    card.style.transform = "translate(-50%, -15px) scale(0.95)";
+    backdrop.style.opacity = '0';
+    card.style.opacity = '0';
+    card.style.pointerEvents = 'none';
+    card.style.transform = 'translate(-50%, -15px) scale(0.95)';
     setTimeout(() => {
-      backdrop.style.display = "none";
-      card.style.display = "none";
+      backdrop.style.display = 'none';
+      card.style.display = 'none';
     }, 200);
   }
 }
 
 // --- Multi-Toast Notification System (Top-centered stacked) ---
-function _showTopNotification(msg, type = "error") {
+function _showTopNotification(msg, type = 'error') {
   if (!document.body) return;
   const container = _getOrCreateToastContainer();
 
@@ -149,40 +175,40 @@ function _showTopNotification(msg, type = "error") {
     _dismissToastItem(existing[0]);
   }
 
-  const toast = document.createElement("div");
-  toast.className = "top-toast-item";
+  const toast = document.createElement('div');
+  toast.className = 'top-toast-item';
 
-  const isSecurity = type === "security";
-  const isErr = (type === "error" || type === "crit" || isSecurity);
-  const isWarn = (type === "warn" || type === "warning");
-  const isSucc = (type === "success" || type === "ok");
+  const isSecurity = type === 'security';
+  const isErr = type === 'error' || type === 'crit' || isSecurity;
+  const isWarn = type === 'warn' || type === 'warning';
+  const isSucc = type === 'success' || type === 'ok';
 
-  let borderColor = "#4fd8c4";
-  let icon = "ℹ️";
-  let tagText = t('toast.info', "Information");
+  let borderColor = '#4fd8c4';
+  let icon = 'ℹ️';
+  let tagText = t('toast.info', 'Information');
   // heading colours from the theme: the light theme needs darker ones for 4.5:1 (UX-27)
-  let tagColor = "var(--kb-toast-info)";
+  let tagColor = 'var(--kb-toast-info)';
 
   if (isErr) {
-    borderColor = "#ef4444";
-    icon = "⚠️";
+    borderColor = '#ef4444';
+    icon = '⚠️';
     // Security wording only for security events; an ordinary failure is just an error.
-    tagText = isSecurity ? t('toast.security_alert', "Security alert") : t('toast.error_heading', "Error");
-    tagColor = "var(--kb-toast-err)";
+    tagText = isSecurity ? t('toast.security_alert', 'Security alert') : t('toast.error_heading', 'Error');
+    tagColor = 'var(--kb-toast-err)';
   } else if (isWarn) {
-    borderColor = "#f59e0b";
-    icon = "⚠️";
-    tagText = t('toast.warning', "Warning");
-    tagColor = "var(--kb-toast-warn)";
+    borderColor = '#f59e0b';
+    icon = '⚠️';
+    tagText = t('toast.warning', 'Warning');
+    tagColor = 'var(--kb-toast-warn)';
   } else if (isSucc) {
-    borderColor = "#22c55e";
-    icon = "✅";
-    tagText = t('toast.success', "Done");
-    tagColor = "var(--kb-toast-ok)";
+    borderColor = '#22c55e';
+    icon = '✅';
+    tagText = t('toast.success', 'Done');
+    tagColor = 'var(--kb-toast-ok)';
   }
 
   toast.style.borderLeft = `4px solid ${borderColor}`;
-  if (isErr) toast.setAttribute("role", "alert");
+  if (isErr) toast.setAttribute('role', 'alert');
   // UX-22: a translated error keeps the server's own words under "Details"
   const details = isErr ? detailsFor(msg) : '';
   toast.innerHTML = `
@@ -197,15 +223,21 @@ function _showTopNotification(msg, type = "error") {
 
   container.appendChild(toast);
 
-  const closeBtn = toast.querySelector(".top-toast-close");
+  const closeBtn = toast.querySelector('.top-toast-close');
   if (closeBtn) {
-    closeBtn.onmouseover = () => { closeBtn.style.color = "#fff"; closeBtn.style.background = "rgba(255,255,255,0.1)"; };
-    closeBtn.onmouseout = () => { closeBtn.style.color = "#95a8ab"; closeBtn.style.background = "transparent"; };
+    closeBtn.onmouseover = () => {
+      closeBtn.style.color = '#fff';
+      closeBtn.style.background = 'rgba(255,255,255,0.1)';
+    };
+    closeBtn.onmouseout = () => {
+      closeBtn.style.color = '#95a8ab';
+      closeBtn.style.background = 'transparent';
+    };
     closeBtn.onclick = () => _dismissToastItem(toast);
   }
 
   requestAnimationFrame(() => {
-    toast.classList.add("show");
+    toast.classList.add('show');
   });
 
   // UX-27: an error stays until it is closed; anything else goes after a while, but not while
@@ -231,8 +263,12 @@ function _armDismiss(toast, ms) {
   };
   toast.addEventListener('mouseenter', pause);
   toast.addEventListener('focusin', pause);
-  toast.addEventListener('mouseleave', () => { if (!toast.contains(document.activeElement)) start(); });
-  toast.addEventListener('focusout', (e) => { if (!toast.contains(e.relatedTarget) && !toast.matches(':hover')) start(); });
+  toast.addEventListener('mouseleave', () => {
+    if (!toast.contains(document.activeElement)) start();
+  });
+  toast.addEventListener('focusout', (e) => {
+    if (!toast.contains(e.relatedTarget) && !toast.matches(':hover')) start();
+  });
   start();
 }
 
@@ -258,7 +294,7 @@ if (typeof document !== 'undefined' && !document._znUndoKey) {
 function _dismissToastItem(toast) {
   if (!toast || !toast.parentNode) return;
   if (toast._dismissTimer) clearTimeout(toast._dismissTimer);
-  toast.classList.remove("show");
+  toast.classList.remove('show');
   setTimeout(() => {
     if (toast.parentNode) toast.parentNode.removeChild(toast);
   }, 260);
@@ -294,27 +330,27 @@ function _showTopConfirm(title, msg, onConfirm, onCancel, options = {}) {
   }
   if (!document.body) return;
 
-  let backdrop = document.getElementById("confirm-toast-backdrop");
+  let backdrop = document.getElementById('confirm-toast-backdrop');
   if (!backdrop) {
-    backdrop = document.createElement("div");
-    backdrop.id = "confirm-toast-backdrop";
+    backdrop = document.createElement('div');
+    backdrop.id = 'confirm-toast-backdrop';
     document.body.appendChild(backdrop);
   }
 
-  let card = document.getElementById("confirm-toast-modal");
+  let card = document.getElementById('confirm-toast-modal');
   if (!card) {
-    card = document.createElement("div");
-    card.id = "confirm-toast-modal";
-    card.dataset.dialogChrome = "alert"; // standard title bar and close button (dialog-chrome.js)
+    card = document.createElement('div');
+    card.id = 'confirm-toast-modal';
+    card.dataset.dialogChrome = 'alert'; // standard title bar and close button (dialog-chrome.js)
     document.body.appendChild(card);
   }
   _aboveModalWindows(backdrop, card);
-  if (card.dataset.mode !== "confirm") {
-    card.dataset.mode = "confirm";
-    card.setAttribute("role", "alertdialog");
-    card.setAttribute("aria-modal", "true");
-    card.setAttribute("aria-labelledby", "confirm-toast-title");
-    card.setAttribute("aria-describedby", "confirm-toast-msg");
+  if (card.dataset.mode !== 'confirm') {
+    card.dataset.mode = 'confirm';
+    card.setAttribute('role', 'alertdialog');
+    card.setAttribute('aria-modal', 'true');
+    card.setAttribute('aria-labelledby', 'confirm-toast-title');
+    card.setAttribute('aria-describedby', 'confirm-toast-msg');
     card.innerHTML = `
       <div class="cfd-head" id="confirm-toast-header-bg" data-dialog-header>
         <div class="cfd-title" id="confirm-toast-title">
@@ -333,75 +369,82 @@ function _showTopConfirm(title, msg, onConfirm, onCancel, options = {}) {
     `;
   }
 
-  const titleEl = document.getElementById("confirm-toast-title");
-  const msgEl = document.getElementById("confirm-toast-msg");
-  const closeBtn = document.getElementById("confirm-toast-close");
-  const cancelBtn = document.getElementById("confirm-toast-cancel");
-  const okBtn = document.getElementById("confirm-toast-ok");
-  const ejectBtn = document.getElementById("confirm-toast-eject");
-  const headerBg = document.getElementById("confirm-toast-header-bg");
+  const titleEl = document.getElementById('confirm-toast-title');
+  const msgEl = document.getElementById('confirm-toast-msg');
+  const closeBtn = document.getElementById('confirm-toast-close');
+  const cancelBtn = document.getElementById('confirm-toast-cancel');
+  const okBtn = document.getElementById('confirm-toast-ok');
+  const ejectBtn = document.getElementById('confirm-toast-eject');
+  const headerBg = document.getElementById('confirm-toast-header-bg');
 
   const isStandby = title && title.toLowerCase().includes('standby');
-  const isMedia = options.isMedia || (title && (title.toLowerCase().includes('media') || title.toLowerCase().includes('ingest') || title.toLowerCase().includes('card') || title.toLowerCase().includes('import')));
-  const isUpdate = options.isUpdate || (title && (title.toLowerCase().includes('update') || title.toLowerCase().includes('upgrade')));
+  const isMedia =
+    options.isMedia ||
+    (title &&
+      (title.toLowerCase().includes('media') ||
+        title.toLowerCase().includes('ingest') ||
+        title.toLowerCase().includes('card') ||
+        title.toLowerCase().includes('import')));
+  const isUpdate =
+    options.isUpdate || (title && (title.toLowerCase().includes('update') || title.toLowerCase().includes('upgrade')));
 
   const safeTitle = escapeHtml(title || t('confirm.title', 'Confirm action'));
   let safeMsg;
   if (options.allowHtml === false) {
-    safeMsg = escapeHtml(msg || "");
+    safeMsg = escapeHtml(msg || '');
   } else if (options.allowHtml || (msg && /<[a-z0-9]+/i.test(msg))) {
-    safeMsg = sanitizeModalHtml(msg || "");
+    safeMsg = sanitizeModalHtml(msg || '');
   } else {
-    safeMsg = escapeHtml(msg || "");
+    safeMsg = escapeHtml(msg || '');
   }
 
   if (isMedia) {
     titleEl.innerHTML = `<span aria-hidden="true">📷</span> ${safeTitle}`;
-    okBtn.innerHTML = options.okText ? escapeHtml(options.okText) : "📥 Import Media";
-    okBtn.style.background = "linear-gradient(135deg, #33cdb8, #33cdb8)";
-    okBtn.style.border = "1px solid #33cdb8";
-    okBtn.style.color = "#fff";
-    headerBg.style.background = "rgba(51, 205, 184, 0.12)";
-    titleEl.style.color = "#4fd8c4";
+    okBtn.innerHTML = options.okText ? escapeHtml(options.okText) : '📥 Import Media';
+    okBtn.style.background = 'linear-gradient(135deg, #33cdb8, #33cdb8)';
+    okBtn.style.border = '1px solid #33cdb8';
+    okBtn.style.color = '#fff';
+    headerBg.style.background = 'rgba(51, 205, 184, 0.12)';
+    titleEl.style.color = '#4fd8c4';
   } else if (isStandby) {
     titleEl.innerHTML = `<span aria-hidden="true">⚡</span> ${safeTitle}`;
-    okBtn.innerHTML = options.okText ? escapeHtml(options.okText) : "⚡ Wake & Inspect";
-    okBtn.style.background = "#fbbf24";
-    okBtn.style.border = "1px solid #f59e0b";
-    okBtn.style.color = "#0a1113";
-    headerBg.style.background = "rgba(245, 158, 11, 0.08)";
-    titleEl.style.color = "#fbbf24";
+    okBtn.innerHTML = options.okText ? escapeHtml(options.okText) : '⚡ Wake & Inspect';
+    okBtn.style.background = '#fbbf24';
+    okBtn.style.border = '1px solid #f59e0b';
+    okBtn.style.color = '#0a1113';
+    headerBg.style.background = 'rgba(245, 158, 11, 0.08)';
+    titleEl.style.color = '#fbbf24';
   } else if (isUpdate) {
     titleEl.innerHTML = `<span aria-hidden="true">⬆️</span> ${safeTitle}`;
-    okBtn.innerHTML = options.okText ? escapeHtml(options.okText) : "⬆️ Update Now";
-    okBtn.style.background = "linear-gradient(135deg, #f59e0b, #d97706)";
-    okBtn.style.border = "1px solid #f59e0b";
-    okBtn.style.color = "#0a1113";
-    okBtn.style.fontWeight = "700";
-    headerBg.style.background = "rgba(245, 158, 11, 0.14)";
-    titleEl.style.color = "#fbbf24";
+    okBtn.innerHTML = options.okText ? escapeHtml(options.okText) : '⬆️ Update Now';
+    okBtn.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
+    okBtn.style.border = '1px solid #f59e0b';
+    okBtn.style.color = '#0a1113';
+    okBtn.style.fontWeight = '700';
+    headerBg.style.background = 'rgba(245, 158, 11, 0.14)';
+    titleEl.style.color = '#fbbf24';
   } else {
     const { label, destructive } = confirmButtonFor(title, msg, options);
-    card.dataset.destructive = destructive ? "true" : "false";
+    card.dataset.destructive = destructive ? 'true' : 'false';
     const icon = options.icon || (destructive ? '🗑️' : '💬');
     titleEl.innerHTML = `<span aria-hidden="true">${icon}</span> ${safeTitle}`;
     okBtn.innerHTML = escapeHtml(label);
     if (destructive) {
-      okBtn.style.background = "var(--kb-confirm-danger)";
-      okBtn.style.border = "1px solid var(--kb-confirm-danger-line)";
-      headerBg.style.background = "rgba(239, 68, 68, 0.1)";
-      titleEl.style.color = "var(--kb-confirm-danger-title)";
-      card.style.borderColor = "rgba(239, 68, 68, 0.45)";
-      card.style.boxShadow = "0 24px 60px rgba(0, 0, 0, 0.9), 0 0 30px rgba(239, 68, 68, 0.15)";
+      okBtn.style.background = 'var(--kb-confirm-danger)';
+      okBtn.style.border = '1px solid var(--kb-confirm-danger-line)';
+      headerBg.style.background = 'rgba(239, 68, 68, 0.1)';
+      titleEl.style.color = 'var(--kb-confirm-danger-title)';
+      card.style.borderColor = 'rgba(239, 68, 68, 0.45)';
+      card.style.boxShadow = '0 24px 60px rgba(0, 0, 0, 0.9), 0 0 30px rgba(239, 68, 68, 0.15)';
     } else {
-      okBtn.style.background = "var(--kb-confirm-ok)";
-      okBtn.style.border = "1px solid var(--kb-confirm-ok-line)";
-      headerBg.style.background = "rgba(51, 205, 184, 0.1)";
-      titleEl.style.color = "var(--kb-confirm-title)";
-      card.style.borderColor = "";
-      card.style.boxShadow = "";
+      okBtn.style.background = 'var(--kb-confirm-ok)';
+      okBtn.style.border = '1px solid var(--kb-confirm-ok-line)';
+      headerBg.style.background = 'rgba(51, 205, 184, 0.1)';
+      titleEl.style.color = 'var(--kb-confirm-title)';
+      card.style.borderColor = '';
+      card.style.boxShadow = '';
     }
-    okBtn.style.color = "#fff";
+    okBtn.style.color = '#fff';
   }
 
   cancelBtn.innerHTML = options.cancelText ? escapeHtml(options.cancelText) : escapeHtml(t('confirm.cancel', 'Cancel'));
@@ -411,7 +454,7 @@ function _showTopConfirm(title, msg, onConfirm, onCancel, options = {}) {
   card.querySelector('#confirm-toast-type')?.remove();
   let typeInput = null;
   okBtn.disabled = false;
-  okBtn.style.opacity = "";
+  okBtn.style.opacity = '';
   if (options.typeToConfirm) {
     const expected = String(options.typeToConfirm);
     const wrap = document.createElement('div');
@@ -419,13 +462,15 @@ function _showTopConfirm(title, msg, onConfirm, onCancel, options = {}) {
     wrap.style.marginTop = '12px';
     wrap.innerHTML = `<label for="confirm-toast-type-input" class="cfd-type-label"></label>
       <input id="confirm-toast-type-input" type="text" autocomplete="off" spellcheck="false" class="cfd-type-input" />`;
-    wrap.querySelector('label').textContent = t('confirm.type_to_confirm', 'Type {name} to confirm', { name: expected });
+    wrap.querySelector('label').textContent = t('confirm.type_to_confirm', 'Type {name} to confirm', {
+      name: expected,
+    });
     msgEl.after(wrap);
     typeInput = wrap.querySelector('input');
     const sync = () => {
       const ok = typeInput.value.trim() === expected;
       okBtn.disabled = !ok;
-      okBtn.style.opacity = ok ? "" : "0.45";
+      okBtn.style.opacity = ok ? '' : '0.45';
     };
     typeInput.addEventListener('input', sync);
     sync();
@@ -433,49 +478,57 @@ function _showTopConfirm(title, msg, onConfirm, onCancel, options = {}) {
   const returnFocusTo = document.activeElement;
 
   if (options.onEject && ejectBtn) {
-    ejectBtn.style.display = "block";
+    ejectBtn.style.display = 'block';
     ejectBtn.innerHTML = options.ejectText || `⏏ ${escapeHtml(t('toast.eject', 'Eject'))}`;
     // the third button is red for "Eject"; a caller with another third answer says how it looks
-    ejectBtn.className = options.ejectClass || "btn-pill-toggle is-danger is-small";
+    ejectBtn.className = options.ejectClass || 'btn-pill-toggle is-danger is-small';
   } else if (ejectBtn) {
-    ejectBtn.style.display = "none";
+    ejectBtn.style.display = 'none';
   }
 
   resetDraggedPosition(card);
-  backdrop.style.display = "block";
-  card.style.display = "block";
-  card.style.pointerEvents = "auto";
+  backdrop.style.display = 'block';
+  card.style.display = 'block';
+  card.style.pointerEvents = 'auto';
 
   setTimeout(() => {
-    backdrop.classList.add("open");
-    card.classList.add("open");
-    backdrop.style.opacity = "1";
-    card.style.opacity = "1";
-    card.style.transform = "translate(-50%, 0) scale(1)";
+    backdrop.classList.add('open');
+    card.classList.add('open');
+    backdrop.style.opacity = '1';
+    card.style.opacity = '1';
+    card.style.transform = 'translate(-50%, 0) scale(1)';
     // UX-5: focus moves into the dialog; a destructive action starts on Cancel
-    const start = typeInput || (card.dataset.destructive === "true" ? cancelBtn : okBtn);
-    try { start.focus({ preventScroll: true }); } catch { start.focus(); }
+    const start = typeInput || (card.dataset.destructive === 'true' ? cancelBtn : okBtn);
+    try {
+      start.focus({ preventScroll: true });
+    } catch {
+      start.focus();
+    }
   }, 10);
 
   const cleanup = () => {
-    backdrop.classList.remove("open");
-    card.classList.remove("open");
-    backdrop.style.opacity = "0";
-    card.style.opacity = "0";
-    card.style.pointerEvents = "none";
-    card.style.transform = "translate(-50%, -15px) scale(0.95)";
+    backdrop.classList.remove('open');
+    card.classList.remove('open');
+    backdrop.style.opacity = '0';
+    card.style.opacity = '0';
+    card.style.pointerEvents = 'none';
+    card.style.transform = 'translate(-50%, -15px) scale(0.95)';
     setTimeout(() => {
-      backdrop.style.display = "none";
-      card.style.display = "none";
+      backdrop.style.display = 'none';
+      card.style.display = 'none';
     }, 200);
-    closeBtn.removeEventListener("click", onCancelClick);
-    cancelBtn.removeEventListener("click", onCancelClick);
-    backdrop.removeEventListener("click", onCancelClick);
-    okBtn.removeEventListener("click", onOkClick);
-    if (ejectBtn) ejectBtn.removeEventListener("click", onEjectClick);
-    document.removeEventListener("keydown", onKeyDown);
+    closeBtn.removeEventListener('click', onCancelClick);
+    cancelBtn.removeEventListener('click', onCancelClick);
+    backdrop.removeEventListener('click', onCancelClick);
+    okBtn.removeEventListener('click', onOkClick);
+    if (ejectBtn) ejectBtn.removeEventListener('click', onEjectClick);
+    document.removeEventListener('keydown', onKeyDown);
     if (returnFocusTo && typeof returnFocusTo.focus === 'function' && document.contains(returnFocusTo)) {
-      try { returnFocusTo.focus({ preventScroll: true }); } catch { /* the element went away */ }
+      try {
+        returnFocusTo.focus({ preventScroll: true });
+      } catch {
+        /* the element went away */
+      }
     }
   };
 
@@ -496,76 +549,81 @@ function _showTopConfirm(title, msg, onConfirm, onCancel, options = {}) {
     if (options.onEject) options.onEject();
   };
   const onKeyDown = (e) => {
-    if (e.key === "Escape") {
+    if (e.key === 'Escape') {
       onCancelClick(e);
-    } else if (e.key === "Enter" && e.target === typeInput) {
+    } else if (e.key === 'Enter' && e.target === typeInput) {
       onOkClick(e);
-    } else if (e.key === "Tab") {
+    } else if (e.key === 'Tab') {
       // UX-5: Tab stays inside the dialog
       const items = _focusables(card);
       if (!items.length) return;
       const i = items.indexOf(document.activeElement);
-      const next = e.shiftKey ? (i <= 0 ? items.length - 1 : i - 1) : (i === -1 || i === items.length - 1 ? 0 : i + 1);
+      const next = e.shiftKey ? (i <= 0 ? items.length - 1 : i - 1) : i === -1 || i === items.length - 1 ? 0 : i + 1;
       e.preventDefault();
       items[next].focus();
     }
   };
 
-  closeBtn.addEventListener("click", onCancelClick);
-  cancelBtn.addEventListener("click", onCancelClick);
-  backdrop.addEventListener("click", onCancelClick);
-  okBtn.addEventListener("click", onOkClick);
-  if (ejectBtn && options.onEject) ejectBtn.addEventListener("click", onEjectClick);
-  document.addEventListener("keydown", onKeyDown);
+  closeBtn.addEventListener('click', onCancelClick);
+  cancelBtn.addEventListener('click', onCancelClick);
+  backdrop.addEventListener('click', onCancelClick);
+  okBtn.addEventListener('click', onOkClick);
+  if (ejectBtn && options.onEject) ejectBtn.addEventListener('click', onEjectClick);
+  document.addEventListener('keydown', onKeyDown);
 }
 
-
 export function showPromptToast(title, msg, defaultVal, onConfirm, onCancel = null, options = {}) {
-  if (state.isLcdDirect || (typeof window !== 'undefined' && window.location.search.includes('mode=lcd')) || (document.body && document.body.classList.contains('lcd-direct'))) return;
+  if (
+    state.isLcdDirect ||
+    (typeof window !== 'undefined' && window.location.search.includes('mode=lcd')) ||
+    (document.body && document.body.classList.contains('lcd-direct'))
+  )
+    return;
   if (!document.body) return;
 
-  let backdrop = document.getElementById("confirm-toast-backdrop");
+  let backdrop = document.getElementById('confirm-toast-backdrop');
   if (!backdrop) {
-    backdrop = document.createElement("div");
-    backdrop.id = "confirm-toast-backdrop";
+    backdrop = document.createElement('div');
+    backdrop.id = 'confirm-toast-backdrop';
     document.body.appendChild(backdrop);
   }
 
-  let card = document.getElementById("confirm-toast-modal");
+  let card = document.getElementById('confirm-toast-modal');
   if (!card) {
-    card = document.createElement("div");
-    card.id = "confirm-toast-modal";
-    card.dataset.dialogChrome = "alert"; // standard title bar and close button (dialog-chrome.js)
+    card = document.createElement('div');
+    card.id = 'confirm-toast-modal';
+    card.dataset.dialogChrome = 'alert'; // standard title bar and close button (dialog-chrome.js)
     document.body.appendChild(card);
   }
   _aboveModalWindows(backdrop, card);
 
-  card.dataset.mode = "prompt";
-  card.setAttribute("role", "dialog");
-  card.setAttribute("aria-modal", "true");
-  card.setAttribute("aria-labelledby", "confirm-toast-title");
+  card.dataset.mode = 'prompt';
+  card.setAttribute('role', 'dialog');
+  card.setAttribute('aria-modal', 'true');
+  card.setAttribute('aria-labelledby', 'confirm-toast-title');
 
-  const inputType = options.inputType || "text";
+  const inputType = options.inputType || 'text';
   const okText = options.okText || t('toast.confirm', 'Confirm');
   const cancelText = options.cancelText || t('common.cancel', 'Cancel');
-  const icon = options.icon || "✏️";
-  const placeholder = options.placeholder || "";
+  const icon = options.icon || '✏️';
+  const placeholder = options.placeholder || '';
 
-  const isTextarea = inputType === "textarea";
+  const isTextarea = inputType === 'textarea';
   const inputHtml = isTextarea
     ? `<textarea id="prompt-toast-input" placeholder="${escapeHtml(placeholder)}" class="pmt-area">${escapeHtml(defaultVal || '')}</textarea>`
     : `<input type="${inputType}" id="prompt-toast-input" placeholder="${escapeHtml(placeholder)}" class="pmt-input" value="${escapeHtml(defaultVal || '')}" />`;
 
-  const safePromptMsg = options.allowHtml === false
-    ? escapeHtml(msg || "")
-    : (options.allowHtml || (msg && /<[a-z0-9]+/i.test(msg)))
-      ? sanitizeModalHtml(msg || "")
-      : escapeHtml(msg || "");
+  const safePromptMsg =
+    options.allowHtml === false
+      ? escapeHtml(msg || '')
+      : options.allowHtml || (msg && /<[a-z0-9]+/i.test(msg))
+        ? sanitizeModalHtml(msg || '')
+        : escapeHtml(msg || '');
 
   card.innerHTML = `
     <div class="pmt-head" id="confirm-toast-header-bg" data-dialog-header>
       <div class="pmt-title" id="confirm-toast-title">
-        <span>${icon}</span> ${escapeHtml(title || "Rename")}
+        <span>${icon}</span> ${escapeHtml(title || 'Rename')}
       </div>
       <button type="button" id="confirm-toast-close" class="win-btn close-btn" title="${t('jobs.cancel', 'Cancel')}" aria-label="${t('diagnostics.close_btn', 'Close')}"></button>
     </div>
@@ -580,17 +638,17 @@ export function showPromptToast(title, msg, defaultVal, onConfirm, onCancel = nu
   `;
 
   resetDraggedPosition(card);
-  backdrop.style.display = "block";
-  card.style.display = "flex";
-  card.style.pointerEvents = "auto";
+  backdrop.style.display = 'block';
+  card.style.display = 'flex';
+  card.style.pointerEvents = 'auto';
 
   setTimeout(() => {
-    backdrop.classList.add("open");
-    card.classList.add("open");
-    backdrop.style.opacity = "1";
-    card.style.opacity = "1";
-    card.style.transform = "translate(-50%, 0) scale(1)";
-    const input = document.getElementById("prompt-toast-input");
+    backdrop.classList.add('open');
+    card.classList.add('open');
+    backdrop.style.opacity = '1';
+    card.style.opacity = '1';
+    card.style.transform = 'translate(-50%, 0) scale(1)';
+    const input = document.getElementById('prompt-toast-input');
     if (input) {
       input.focus();
       input.select();
@@ -598,17 +656,17 @@ export function showPromptToast(title, msg, defaultVal, onConfirm, onCancel = nu
   }, 10);
 
   const cleanup = () => {
-    backdrop.classList.remove("open");
-    card.classList.remove("open");
-    backdrop.style.opacity = "0";
-    card.style.opacity = "0";
-    card.style.pointerEvents = "none";
-    card.style.transform = "translate(-50%, -15px) scale(0.95)";
+    backdrop.classList.remove('open');
+    card.classList.remove('open');
+    backdrop.style.opacity = '0';
+    card.style.opacity = '0';
+    card.style.pointerEvents = 'none';
+    card.style.transform = 'translate(-50%, -15px) scale(0.95)';
     setTimeout(() => {
-      backdrop.style.display = "none";
-      card.style.display = "none";
+      backdrop.style.display = 'none';
+      card.style.display = 'none';
     }, 200);
-    document.removeEventListener("keydown", onKeyDown);
+    document.removeEventListener('keydown', onKeyDown);
   };
 
   const onCancelClick = (e) => {
@@ -619,68 +677,77 @@ export function showPromptToast(title, msg, defaultVal, onConfirm, onCancel = nu
 
   const onOkClick = (e) => {
     if (e) e.preventDefault();
-    const input = document.getElementById("prompt-toast-input");
-    const val = input ? input.value : "";
+    const input = document.getElementById('prompt-toast-input');
+    const val = input ? input.value : '';
     cleanup();
     if (onConfirm) onConfirm(val);
   };
 
   const onKeyDown = (e) => {
-    if (e.key === "Escape") {
+    if (e.key === 'Escape') {
       onCancelClick(e);
     }
   };
 
-  document.getElementById("confirm-toast-close").onclick = onCancelClick;
-  document.getElementById("confirm-toast-cancel").onclick = onCancelClick;
+  document.getElementById('confirm-toast-close').onclick = onCancelClick;
+  document.getElementById('confirm-toast-cancel').onclick = onCancelClick;
   backdrop.onclick = onCancelClick;
-  document.getElementById("confirm-toast-ok").onclick = onOkClick;
-  const inputEl = document.getElementById("prompt-toast-input");
+  document.getElementById('confirm-toast-ok').onclick = onOkClick;
+  const inputEl = document.getElementById('prompt-toast-input');
   if (inputEl) {
     inputEl.onkeydown = (e) => {
       if (isTextarea) {
-        if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
           e.preventDefault();
           onOkClick(e);
         }
       } else {
-        if (e.key === "Enter") {
+        if (e.key === 'Enter') {
           e.preventDefault();
           onOkClick(e);
         }
       }
     };
   }
-  document.addEventListener("keydown", onKeyDown);
+  document.addEventListener('keydown', onKeyDown);
 }
 
 export function showBottomSheet({ title, subtitle, items = [], onCancel = null }) {
-  if (state.isLcdDirect || (typeof window !== 'undefined' && window.location.search.includes('mode=lcd')) || (document.body && document.body.classList.contains('lcd-direct'))) return;
+  if (
+    state.isLcdDirect ||
+    (typeof window !== 'undefined' && window.location.search.includes('mode=lcd')) ||
+    (document.body && document.body.classList.contains('lcd-direct'))
+  )
+    return;
   if (!document.body) return;
 
-  let backdrop = document.getElementById("mobile-sheet-backdrop");
+  let backdrop = document.getElementById('mobile-sheet-backdrop');
   if (!backdrop) {
-    backdrop = document.createElement("div");
-    backdrop.id = "mobile-sheet-backdrop";
-    backdrop.className = "mobile-sheet-backdrop";
+    backdrop = document.createElement('div');
+    backdrop.id = 'mobile-sheet-backdrop';
+    backdrop.className = 'mobile-sheet-backdrop';
     document.body.appendChild(backdrop);
   }
 
-  let sheet = document.getElementById("mobile-bottom-sheet");
+  let sheet = document.getElementById('mobile-bottom-sheet');
   if (!sheet) {
-    sheet = document.createElement("div");
-    sheet.id = "mobile-bottom-sheet";
-    sheet.className = "mobile-bottom-sheet";
+    sheet = document.createElement('div');
+    sheet.id = 'mobile-bottom-sheet';
+    sheet.className = 'mobile-bottom-sheet';
     document.body.appendChild(sheet);
   }
 
-  const itemsHtml = items.map((item, idx) => `
+  const itemsHtml = items
+    .map(
+      (item, idx) => `
     <button type="button" class="sheet-action-item ${item.destructive ? 'destructive' : ''}" data-index="${idx}">
       <span class="sheet-action-icon">${item.icon || '•'}</span>
       <span class="sheet-action-label">${escapeHtml(item.label || '')}</span>
       <span class="sheet-action-arrow">›</span>
     </button>
-  `).join('');
+  `
+    )
+    .join('');
 
   sheet.innerHTML = `
     <div class="sheet-handle-bar">
@@ -698,26 +765,26 @@ export function showBottomSheet({ title, subtitle, items = [], onCancel = null }
     </div>
   `;
 
-  backdrop.style.display = "block";
-  sheet.style.display = "flex";
-  sheet.style.transform = "";
-  sheet.style.transition = "";
+  backdrop.style.display = 'block';
+  sheet.style.display = 'flex';
+  sheet.style.transform = '';
+  sheet.style.transition = '';
 
   requestAnimationFrame(() => {
-    backdrop.classList.add("open");
-    sheet.classList.add("open");
+    backdrop.classList.add('open');
+    sheet.classList.add('open');
   });
 
   const cleanup = () => {
-    backdrop.classList.remove("open");
-    sheet.classList.remove("open");
-    sheet.style.transform = "";
-    sheet.style.transition = "";
+    backdrop.classList.remove('open');
+    sheet.classList.remove('open');
+    sheet.style.transform = '';
+    sheet.style.transition = '';
     setTimeout(() => {
-      backdrop.style.display = "none";
-      sheet.style.display = "none";
+      backdrop.style.display = 'none';
+      sheet.style.display = 'none';
     }, 250);
-    document.removeEventListener("keydown", onKeyDown);
+    document.removeEventListener('keydown', onKeyDown);
   };
 
   const onCancelClick = () => {
@@ -726,12 +793,12 @@ export function showBottomSheet({ title, subtitle, items = [], onCancel = null }
   };
 
   const onKeyDown = (e) => {
-    if (e.key === "Escape") onCancelClick();
+    if (e.key === 'Escape') onCancelClick();
   };
 
   // Swipe-down-to-dismiss gesture on handle bar & header
-  const handleBar = sheet.querySelector(".sheet-handle-bar");
-  const headerBar = sheet.querySelector(".sheet-header");
+  const handleBar = sheet.querySelector('.sheet-handle-bar');
+  const headerBar = sheet.querySelector('.sheet-header');
   let startY = 0;
   let currentDy = 0;
   let isDragging = false;
@@ -741,15 +808,17 @@ export function showBottomSheet({ title, subtitle, items = [], onCancel = null }
     isDragging = true;
     startY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
     currentDy = 0;
-    sheet.style.transition = "none";
-    if (e.currentTarget && typeof e.currentTarget.setPointerCapture === "function" && e.pointerId !== undefined) {
-      try { e.currentTarget.setPointerCapture(e.pointerId); } catch (_) {}
+    sheet.style.transition = 'none';
+    if (e.currentTarget && typeof e.currentTarget.setPointerCapture === 'function' && e.pointerId !== undefined) {
+      try {
+        e.currentTarget.setPointerCapture(e.pointerId);
+      } catch (_) {}
     }
   };
 
   const onPointerMove = (e) => {
     if (!isDragging) return;
-    const clientY = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : startY);
+    const clientY = e.clientY !== undefined ? e.clientY : e.touches && e.touches[0] ? e.touches[0].clientY : startY;
     currentDy = Math.max(0, clientY - startY);
     sheet.style.transform = `translateY(${currentDy}px)`;
   };
@@ -757,38 +826,37 @@ export function showBottomSheet({ title, subtitle, items = [], onCancel = null }
   const onPointerEnd = (e) => {
     if (!isDragging) return;
     isDragging = false;
-    sheet.style.transition = "";
-    if (e.type !== "pointercancel" && currentDy > 70) {
-      sheet.style.transform = "";
+    sheet.style.transition = '';
+    if (e.type !== 'pointercancel' && currentDy > 70) {
+      sheet.style.transform = '';
       onCancelClick();
     } else {
-      sheet.style.transform = "";
+      sheet.style.transform = '';
     }
   };
 
   [handleBar, headerBar].forEach((el) => {
     if (!el) return;
-    el.addEventListener("pointerdown", onPointerDown);
-    el.addEventListener("pointermove", onPointerMove);
-    el.addEventListener("pointerup", onPointerEnd);
-    el.addEventListener("pointercancel", onPointerEnd);
+    el.addEventListener('pointerdown', onPointerDown);
+    el.addEventListener('pointermove', onPointerMove);
+    el.addEventListener('pointerup', onPointerEnd);
+    el.addEventListener('pointercancel', onPointerEnd);
   });
 
   backdrop.onclick = onCancelClick;
-  const cancelBtn = sheet.querySelector("#sheet-cancel-btn");
+  const cancelBtn = sheet.querySelector('#sheet-cancel-btn');
   if (cancelBtn) cancelBtn.onclick = onCancelClick;
 
-  sheet.querySelectorAll(".sheet-action-item").forEach((btn) => {
+  sheet.querySelectorAll('.sheet-action-item').forEach((btn) => {
     btn.onclick = () => {
       const idx = parseInt(btn.dataset.index, 10);
       const item = items[idx];
       cleanup();
-      if (item && typeof item.onClick === "function") {
+      if (item && typeof item.onClick === 'function') {
         item.onClick();
       }
     };
   });
 
-  document.addEventListener("keydown", onKeyDown);
+  document.addEventListener('keydown', onKeyDown);
 }
-

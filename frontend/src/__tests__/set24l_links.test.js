@@ -25,7 +25,11 @@ describe('links into the old Network tabs (SET-24 l)', () => {
             <div id="mgmt-pane-network-wireguard" class="mgmt-tab-pane"><div id="remote-access-mount"></div></div>
           </div>
         </div></div></div>`;
-    try { initManagement(); } catch (_) { /* parts of the window this test doesn't build */ }
+    try {
+      initManagement();
+    } catch (_) {
+      /* parts of the window this test doesn't build */
+    }
   });
 
   it('a link to What answers opens Network and scrolls to that section, loading the page', async () => {

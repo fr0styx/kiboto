@@ -52,12 +52,8 @@ describe('Container Edit & Docker Update System', () => {
         state: 'running',
         running: true,
       },
-      ports: [
-        { private_port: 8096, public_port: 8096, type: 'tcp', ip: '0.0.0.0' },
-      ],
-      mounts: [
-        { source: '/mnt/user/appdata/jellyfin', destination: '/config', mode: 'rw', rw: true },
-      ],
+      ports: [{ private_port: 8096, public_port: 8096, type: 'tcp', ip: '0.0.0.0' }],
+      mounts: [{ source: '/mnt/user/appdata/jellyfin', destination: '/config', mode: 'rw', rw: true }],
       env: [
         { key: 'PUID', value: '1000' },
         { key: 'PGID', value: '100' },
@@ -116,6 +112,4 @@ describe('Container Edit & Docker Update System', () => {
     expect(callPayload.image).toBe('lscr.io/linuxserver/jellyfin:latest');
     expect(callPayload.network_mode).toBe('bridge');
   });
-
 });
-

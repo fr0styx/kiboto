@@ -11,7 +11,8 @@ const { openFilePreviewModal, closeFilePreviewModal } = await import('../compone
 
 const q = (sel) => document.querySelector(sel);
 const click = (id) => q(`#${id}`).click();
-const key = (k, extra = {}) => document.dispatchEvent(new KeyboardEvent('keydown', { key: k, bubbles: true, cancelable: true, ...extra }));
+const key = (k, extra = {}) =>
+  document.dispatchEvent(new KeyboardEvent('keydown', { key: k, bubbles: true, cancelable: true, ...extra }));
 const PHOTOS = [
   { name: 'a.jpg', path: '/mnt/user/Photos/a.jpg', is_dir: false, size: 1000 },
   { name: 'b.jpg', path: '/mnt/user/Photos/b.jpg', is_dir: false, size: 1000 },
@@ -22,9 +23,18 @@ describe('preview toolbar', () => {
     vi.clearAllMocks();
     document.body.innerHTML = '';
     vi.spyOn(api, 'get').mockImplementation(async (url) => {
-      if (url.includes('notes.txt')) return { status: 'ok', type: 'text', name: 'notes.txt', content: 'hello', size: 5, ext: '.txt' };
+      if (url.includes('notes.txt'))
+        return { status: 'ok', type: 'text', name: 'notes.txt', content: 'hello', size: 5, ext: '.txt' };
       const name = decodeURIComponent(url).split('/').pop();
-      return { status: 'ok', type: 'image', name, size: 1000, ext: '.jpg', dimensions: '10 × 10', exif: { camera: 'X' } };
+      return {
+        status: 'ok',
+        type: 'image',
+        name,
+        size: 1000,
+        ext: '.jpg',
+        dimensions: '10 × 10',
+        exif: { camera: 'X' },
+      };
     });
   });
   afterEach(() => closeFilePreviewModal());

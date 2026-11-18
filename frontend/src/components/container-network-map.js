@@ -59,10 +59,20 @@ export function layoutNetworkMap(topo) {
   for (const c of ctrNodes) {
     for (const a of c.networks || []) {
       const n = netByName.get(a.network);
-      if (n) edges.push({ kind: 'net', network: n.name, container: c.name, y1: n.y, y2: c.y, color: n.color, ip: a.ip || '' });
+      if (n)
+        edges.push({
+          kind: 'net',
+          network: n.name,
+          container: c.name,
+          y1: n.y,
+          y2: c.y,
+          color: n.color,
+          ip: a.ip || '',
+        });
     }
     const target = c.shares_with && ctrByName.get(c.shares_with);
-    if (target) edges.push({ kind: 'shares', network: null, container: c.name, target: target.name, y1: target.y, y2: c.y });
+    if (target)
+      edges.push({ kind: 'shares', network: null, container: c.name, target: target.name, y1: target.y, y2: c.y });
   }
   return { width: WIDTH, height, networks: netNodes, containers: ctrNodes, edges };
 }
@@ -117,7 +127,12 @@ export function renderNetworkMapSvg(layout, highlight = null) {
       const running = c.state === 'running';
       const op = highlight && !ctrLit.has(c.name) ? 0.35 : 1;
       const ports = (c.ports || []).filter((p) => p.public).map((p) => `${p.public}→${p.private}/${p.type}`);
-      const tip = [c.name, c.state, c.compose_project && `stack ${c.compose_project}`, ports.length && `ports ${ports.join(', ')}`]
+      const tip = [
+        c.name,
+        c.state,
+        c.compose_project && `stack ${c.compose_project}`,
+        ports.length && `ports ${ports.join(', ')}`,
+      ]
         .filter(Boolean)
         .join('\n');
       return `

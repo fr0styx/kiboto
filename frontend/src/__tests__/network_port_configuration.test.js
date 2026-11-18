@@ -125,7 +125,9 @@ describe('Network Port Configuration & Docker Network Fleet Management', () => {
     expect(row.querySelector('.net-port-name').textContent).toBe('Direct 10G to Workstation (eth1)');
     const nameBtn = row.querySelector('[data-name-port="eth1"]');
     expect(nameBtn).toBeTruthy();
-    const get = vi.spyOn(api, 'get').mockResolvedValue({ status: 'ok', interface: { name: 'eth1' }, alias: '', mtu: 1500 });
+    const get = vi
+      .spyOn(api, 'get')
+      .mockResolvedValue({ status: 'ok', interface: { name: 'eth1' }, alias: '', mtu: 1500 });
     get.mockClear();
     nameBtn.click();
     await vi.waitFor(() => expect(get.mock.calls.some(([url]) => String(url).includes('eth1'))).toBe(true));

@@ -20,7 +20,10 @@ import { renderOffsite, offerRecoveryKit } from '../offsite-backup.js';
 export function migrateJob(jobId, onDone = null) {
   showConfirmToast(
     t('backup.migrate', 'Move to off-site backup'),
-    t('backup.migrate_confirm', 'The folder will be backed up with versions and encryption to a new folder next to the copy on the same remote. The copy so far stays as it is; this copy job is turned off.'),
+    t(
+      'backup.migrate_confirm',
+      'The folder will be backed up with versions and encryption to a new folder next to the copy on the same remote. The copy so far stays as it is; this copy job is turned off.'
+    ),
     async () => {
       try {
         const res = await api.post(`/api/backup/schedule/${encodeURIComponent(jobId)}/migrate`, {});
@@ -30,7 +33,7 @@ export function migrateJob(jobId, onDone = null) {
       } catch (err) {
         showToast(t('toast.backup_run_failed', 'Backup run failed: {error}', { error: err.message }), 'error');
       }
-    },
+    }
   );
 }
 
@@ -46,50 +49,59 @@ export async function fetchAndRenderBackupJobs(mountEl) {
       mount.innerHTML = emptyStateHtml({
         icon: '🛡️',
         title: t('backup.none_settings_title', 'No settings backups scheduled'),
-        body: t('backup.none_settings_desc', "A settings backup keeps people, shared folders and apps, so a new Kiboto can start where this one was. Your files are copied by Add a copy."),
-        action: { target: 'btn-open-create-backup-job', label: t('backup.add_settings_job', 'Back up the settings on a schedule') },
+        body: t(
+          'backup.none_settings_desc',
+          'A settings backup keeps people, shared folders and apps, so a new Kiboto can start where this one was. Your files are copied by Add a copy.'
+        ),
+        action: {
+          target: 'btn-open-create-backup-job',
+          label: t('backup.add_settings_job', 'Back up the settings on a schedule'),
+        },
       });
       return;
     }
 
-    const rowsHtml = jobs.map(job => {
-      const isRemote = job.destination_type === 'remote';
-      const isSettings = job.kind === 'config';
-      const destBadge = isRemote
-        ? `<span class="badge kb-tag kb-tag--info">☁️ ${escapeHtml(job.remote_name || 'Cloud')}:${escapeHtml(job.remote_path || '')}</span>`
-        : job.destination_type === 'local_folder'
-          ? `<span class="badge kb-tag kb-tag--ok">📁 ${escapeHtml(job.local_path || '')}</span>`
-          : `<span class="badge kb-tag kb-tag--ok">📸 ${escapeHtml(t('backup.dest_snapshot', 'Snapshot on this server'))}</span>`;
+    const rowsHtml = jobs
+      .map((job) => {
+        const isRemote = job.destination_type === 'remote';
+        const isSettings = job.kind === 'config';
+        const destBadge = isRemote
+          ? `<span class="badge kb-tag kb-tag--info">☁️ ${escapeHtml(job.remote_name || 'Cloud')}:${escapeHtml(job.remote_path || '')}</span>`
+          : job.destination_type === 'local_folder'
+            ? `<span class="badge kb-tag kb-tag--ok">📁 ${escapeHtml(job.local_path || '')}</span>`
+            : `<span class="badge kb-tag kb-tag--ok">📸 ${escapeHtml(t('backup.dest_snapshot', 'Snapshot on this server'))}</span>`;
 
-      const schedBadge = `<span class="badge kb-tag kb-tag--plain">${escapeHtml(job.schedule || 'daily')}</span>`;
-      
-      let statusHtml;
-      const paused = job.enabled === false && !job.migrated_to; // looked like an active job (Backup A11)
-      if (job.enabled === false && job.migrated_to) {
-        statusHtml = `<span class="kb-state kb-state--idle">${escapeHtml(t('backup.state_moved', 'Moved to an off-site backup'))}</span>`;
-      } else if (paused) {
-        statusHtml = `<span class="kb-state kb-state--idle"><span aria-hidden="true">⏸</span> ${escapeHtml(t('backup.state_paused', 'Paused'))}</span>`;
-      } else if (job.last_status === 'running') {
-        statusHtml = `<span class="kb-state kb-state--busy"><span class="spinner-inline kb-spinner-sm"></span> ${escapeHtml(t('backup.state_running', 'Running…'))}</span>`;
-      } else if (job.last_status === 'success') {
-        statusHtml = `<span class="kb-state kb-state--ok">${escapeHtml(t('backup.state_ok', '✓ Done'))}</span>`;
-      } else if (job.last_status === 'skipped') {
-        statusHtml = `<span class="backup-skipped" title="${escapeHtml(job.last_error || '')}">${escapeHtml(t('backup.skipped', 'Skipped'))}</span>`;
-      } else if (job.last_status === 'error') {
-        statusHtml = `<span class="kb-state kb-state--crit" title="${escapeHtml(job.last_error || '')}"><span aria-hidden="true">⚠</span> ${escapeHtml(t('backup.state_failed', 'Failed'))}</span>`;
-      } else {
-        statusHtml = `<span class="kb-state kb-state--idle">${escapeHtml(t('backup.state_idle', 'Not run yet'))}</span>`;
-      }
+        const schedBadge = `<span class="badge kb-tag kb-tag--plain">${escapeHtml(job.schedule || 'daily')}</span>`;
 
-      const lastRunStr = formatDateTime(job.last_run_at, undefined, t('common.never', 'Never'));
+        let statusHtml;
+        const paused = job.enabled === false && !job.migrated_to; // looked like an active job (Backup A11)
+        if (job.enabled === false && job.migrated_to) {
+          statusHtml = `<span class="kb-state kb-state--idle">${escapeHtml(t('backup.state_moved', 'Moved to an off-site backup'))}</span>`;
+        } else if (paused) {
+          statusHtml = `<span class="kb-state kb-state--idle"><span aria-hidden="true">⏸</span> ${escapeHtml(t('backup.state_paused', 'Paused'))}</span>`;
+        } else if (job.last_status === 'running') {
+          statusHtml = `<span class="kb-state kb-state--busy"><span class="spinner-inline kb-spinner-sm"></span> ${escapeHtml(t('backup.state_running', 'Running…'))}</span>`;
+        } else if (job.last_status === 'success') {
+          statusHtml = `<span class="kb-state kb-state--ok">${escapeHtml(t('backup.state_ok', '✓ Done'))}</span>`;
+        } else if (job.last_status === 'skipped') {
+          statusHtml = `<span class="backup-skipped" title="${escapeHtml(job.last_error || '')}">${escapeHtml(t('backup.skipped', 'Skipped'))}</span>`;
+        } else if (job.last_status === 'error') {
+          statusHtml = `<span class="kb-state kb-state--crit" title="${escapeHtml(job.last_error || '')}"><span aria-hidden="true">⚠</span> ${escapeHtml(t('backup.state_failed', 'Failed'))}</span>`;
+        } else {
+          statusHtml = `<span class="kb-state kb-state--idle">${escapeHtml(t('backup.state_idle', 'Not run yet'))}</span>`;
+        }
 
-      return `
+        const lastRunStr = formatDateTime(job.last_run_at, undefined, t('common.never', 'Never'));
+
+        return `
         <tr>
           <td class="is-strong">
             <div>${escapeHtml(job.name)}</div>
-            <div class="kb-sub">${isSettings
-              ? escapeHtml(t('backup.kind_config_source', 'Kiboto settings (encrypted)'))
-              : `${escapeHtml(t('backup.source_folder', 'Folder:'))} <code>${escapeHtml(job.source_subvolume || '@shares')}</code>`}</div>
+            <div class="kb-sub">${
+              isSettings
+                ? escapeHtml(t('backup.kind_config_source', 'Kiboto settings (encrypted)'))
+                : `${escapeHtml(t('backup.source_folder', 'Folder:'))} <code>${escapeHtml(job.source_subvolume || '@shares')}</code>`
+            }</div>
           </td>
           <td>${destBadge}</td>
           <td>
@@ -116,7 +128,8 @@ export async function fetchAndRenderBackupJobs(mountEl) {
           </td>
         </tr>
       `;
-    }).join('');
+      })
+      .join('');
 
     mount.innerHTML = `
       <div class="kb-datatable-wrap">
@@ -135,16 +148,22 @@ export async function fetchAndRenderBackupJobs(mountEl) {
       </div>
     `;
 
-    mount.querySelectorAll('.btn-run-backup-job').forEach(btn => {
+    mount.querySelectorAll('.btn-run-backup-job').forEach((btn) => {
       btn.addEventListener('click', async () => {
         const jobId = btn.dataset.jobId;
         const origText = btn.innerHTML;
         try {
           btn.disabled = true;
           btn.innerHTML = `<span class="spinner-inline kb-spinner-xs"></span>`;
-          showToast(t('toast.triggering_backup_pipeline', 'Triggering backup pipeline {jobId}...', { jobId: jobId }), 'info');
+          showToast(
+            t('toast.triggering_backup_pipeline', 'Triggering backup pipeline {jobId}...', { jobId: jobId }),
+            'info'
+          );
           await api.post(`/api/backup/schedule/${jobId}/run`);
-          showToast(t('toast.backup_started', 'The backup started. You will get a notification when it finishes.'), 'success');
+          showToast(
+            t('toast.backup_started', 'The backup started. You will get a notification when it finishes.'),
+            'success'
+          );
           fetchAndRenderBackupJobs(mount);
         } catch (err) {
           showToast(t('toast.backup_run_failed', 'Backup run failed: {error}', { error: err.message }), 'error');
@@ -161,7 +180,10 @@ export async function fetchAndRenderBackupJobs(mountEl) {
         if (!job) return;
         try {
           await api.post('/api/backup/schedule', { ...job, enabled: true, encryption_password: null }); // an empty passphrase keeps the stored one
-          showToast(t('backup.resumed', '"{name}" runs on its schedule again.', { name: job.name || job.id }), 'success');
+          showToast(
+            t('backup.resumed', '"{name}" runs on its schedule again.', { name: job.name || job.id }),
+            'success'
+          );
           fetchAndRenderBackupJobs(mount);
         } catch (err) {
           showToast(/** @type {Error} */ (err).message, 'error');
@@ -173,23 +195,30 @@ export async function fetchAndRenderBackupJobs(mountEl) {
       btn.addEventListener('click', () => migrateJob(btn.dataset.jobId, () => fetchAndRenderBackupJobs(mount)));
     });
 
-    mount.querySelectorAll('.btn-delete-backup-job').forEach(btn => {
+    mount.querySelectorAll('.btn-delete-backup-job').forEach((btn) => {
       btn.addEventListener('click', async () => {
         const jobId = btn.dataset.jobId;
-        showConfirmToast(t('backup.delete_job_q', 'Delete the backup job "{name}"? Copies already made stay where they are.', { name: btn.dataset.jobName || jobId }), async () => {
-          try {
-            await api.delete(`/api/backup/schedule/${jobId}`);
-            showToast(t('toast.backup_task_removed', 'Backup task removed.'), 'success');
-            fetchAndRenderBackupJobs(mount);
-          } catch (err) {
-            showToast(t('toast.failed_to_delete_job', 'Failed to delete job: {error}', { error: err.message }), 'error');
+        showConfirmToast(
+          t('backup.delete_job_q', 'Delete the backup job "{name}"? Copies already made stay where they are.', {
+            name: btn.dataset.jobName || jobId,
+          }),
+          async () => {
+            try {
+              await api.delete(`/api/backup/schedule/${jobId}`);
+              showToast(t('toast.backup_task_removed', 'Backup task removed.'), 'success');
+              fetchAndRenderBackupJobs(mount);
+            } catch (err) {
+              showToast(
+                t('toast.failed_to_delete_job', 'Failed to delete job: {error}', { error: err.message }),
+                'error'
+              );
+            }
           }
-        });
+        );
       });
     });
-
   } catch (err) {
-    mount.innerHTML = `<div class="kb-load-error">${escapeHtml(t('backup.jobs_failed', 'The backup jobs couldn\'t be loaded: {error}', { error: err.message }))}</div>`;
+    mount.innerHTML = `<div class="kb-load-error">${escapeHtml(t('backup.jobs_failed', "The backup jobs couldn't be loaded: {error}", { error: err.message }))}</div>`;
   }
 }
 
@@ -221,7 +250,9 @@ export function loadBackupPane(doc = document) {
     fetchAndRenderAppBackups();
     const sync2 = doc.getElementById('two-way-sync-mount');
     if (sync2) import('../two-way-sync.js').then((m) => m.renderTwoWaySync(sync2)).catch(() => {}); // FEAT-06
-    import('./protection.js').then((p) => p.installProtectionJobs(doc.getElementById('protection-jobs-mount'))).catch(() => {});
+    import('./protection.js')
+      .then((p) => p.installProtectionJobs(doc.getElementById('protection-jobs-mount')))
+      .catch(() => {});
   });
   fetchAndRenderSystemSnapshots(null, { lazy: true });
 }
@@ -246,15 +277,19 @@ export async function fetchAndRenderSystemSnapshots(mountEl, { lazy = false } = 
         title: t('backup.snap_none_title', 'No snapshots yet'),
         // no button: the one that was here pressed a button of the pool's window, which did nothing,
         // or, where that window had been opened for a pool, snapshotted that pool (SET-06)
-        body: t('backup.snap_none_desc', 'A snapshot freezes a folder as it is now, in seconds, so you can go back to it later. Add a share under “Scheduled snapshots per share”; “Snapshot now” on its row takes one at once.'),
+        body: t(
+          'backup.snap_none_desc',
+          'A snapshot freezes a folder as it is now, in seconds, so you can go back to it later. Add a share under “Scheduled snapshots per share”; “Snapshot now” on its row takes one at once.'
+        ),
       });
       return;
     }
 
-    const rowsHtml = snaps.map(s => {
-      const createdDate = formatDateTime(s.created_at, undefined, 'N/A');
-      const poolId = s.pool_id || 'default';
-      return `
+    const rowsHtml = snaps
+      .map((s) => {
+        const createdDate = formatDateTime(s.created_at, undefined, 'N/A');
+        const poolId = s.pool_id || 'default';
+        return `
         <tr>
           <td class="is-strong">
             <span class="is-mono">📸 ${escapeHtml(s.name)}</span>
@@ -277,7 +312,8 @@ export async function fetchAndRenderSystemSnapshots(mountEl, { lazy = false } = 
           </td>
         </tr>
       `;
-    }).join('');
+      })
+      .join('');
 
     mount.innerHTML = `
       <div class="kb-datatable-wrap">
@@ -299,24 +335,28 @@ export async function fetchAndRenderSystemSnapshots(mountEl, { lazy = false } = 
       btn.addEventListener('click', () => openSnapshotBrowser(btn.dataset.snapName));
     });
 
-    mount.querySelectorAll('.btn-sys-delete-snap').forEach(btn => {
+    mount.querySelectorAll('.btn-sys-delete-snap').forEach((btn) => {
       btn.addEventListener('click', () => {
         const snapName = btn.dataset.snapName;
         const poolId = btn.dataset.poolId || 'default';
         showConfirmToast(t('backup.snap_delete_q', 'Delete snapshot "{name}"?', { name: snapName }), async () => {
           try {
-            await api.delete(`/api/backup/snapshots/${encodeURIComponent(poolId)}/${encodeURIComponent(snapName)}`, { confirmed: true });
+            await api.delete(`/api/backup/snapshots/${encodeURIComponent(poolId)}/${encodeURIComponent(snapName)}`, {
+              confirmed: true,
+            });
             showToast(t('toast.snapshot_deleted', 'Snapshot "{snapName}" deleted.', { snapName: snapName }), 'success');
             fetchAndRenderSystemSnapshots(mount);
           } catch (err) {
-            showToast(t('toast.failed_to_delete_snapshot', 'Failed to delete snapshot: {error}', { error: err.message }), 'error');
+            showToast(
+              t('toast.failed_to_delete_snapshot', 'Failed to delete snapshot: {error}', { error: err.message }),
+              'error'
+            );
           }
         });
       });
     });
-
   } catch (err) {
-    mount.innerHTML = `<div class="kb-load-error">${escapeHtml(t('backup.snaps_failed', 'The snapshots couldn\'t be loaded: {error}', { error: err.message }))}</div>`;
+    mount.innerHTML = `<div class="kb-load-error">${escapeHtml(t('backup.snaps_failed', "The snapshots couldn't be loaded: {error}", { error: err.message }))}</div>`;
   }
 }
 
@@ -331,18 +371,24 @@ export async function fetchAndRenderAppBackups(mountEl, filterApp = '') {
   try {
     const url = `/api/backup/apps${filterApp ? `?app_name=${encodeURIComponent(filterApp)}` : ''}`;
     const data = await api.get(url);
-    const backups = Array.isArray(data) ? data : (data?.backups || []);
+    const backups = Array.isArray(data) ? data : data?.backups || [];
 
     // Update filter dropdown options if element exists and not currently active
     const filterSelect = document.getElementById('app-backups-filter-app');
     if (filterSelect && (!filterApp || filterSelect.options.length <= 1)) {
       const currentVal = filterSelect.value || filterApp;
       const allData = filterApp ? await api.get('/api/backup/apps') : data;
-      const allBackups = Array.isArray(allData) ? allData : (allData?.backups || []);
-      const appNames = Array.from(new Set(allBackups.map(b => b.container_name).filter(Boolean))).sort();
-      
-      filterSelect.innerHTML = `<option value="">${escapeHtml(t('backup.apps_all', 'All apps'))}</option>` +
-        appNames.map(name => `<option value="${escapeHtml(name)}" ${name === currentVal ? 'selected' : ''}>${escapeHtml(name)}</option>`).join('');
+      const allBackups = Array.isArray(allData) ? allData : allData?.backups || [];
+      const appNames = Array.from(new Set(allBackups.map((b) => b.container_name).filter(Boolean))).sort();
+
+      filterSelect.innerHTML =
+        `<option value="">${escapeHtml(t('backup.apps_all', 'All apps'))}</option>` +
+        appNames
+          .map(
+            (name) =>
+              `<option value="${escapeHtml(name)}" ${name === currentVal ? 'selected' : ''}>${escapeHtml(name)}</option>`
+          )
+          .join('');
     }
 
     if (backups.length === 0) {
@@ -351,28 +397,36 @@ export async function fetchAndRenderAppBackups(mountEl, filterApp = '') {
         title: t('backup.app_none_title', 'No app backups yet'),
         body: filterApp
           ? t('backup.app_none_for', 'No backups recorded for {app}.', { app: filterApp })
-          : t('backup.app_none_desc', 'An app backup is made when you remove an app with "keep a backup" ticked, or from an app\'s details with Back up now.'),
+          : t(
+              'backup.app_none_desc',
+              'An app backup is made when you remove an app with "keep a backup" ticked, or from an app\'s details with Back up now.'
+            ),
       });
       return;
     }
 
-    const rowsHtml = backups.map(b => {
-      const isUninstall = b.reason === 'uninstall';
-      const reasonBadge = isUninstall
-        ? `<span class="badge kb-tag kb-tag--crit">⚠️ ${escapeHtml(t('backup.app_reason_uninstall', 'When removed'))}</span>`
-        : `<span class="badge kb-tag kb-tag--warn">💾 ${escapeHtml(t('backup.app_reason_manual', 'By hand'))}</span>`;
+    const rowsHtml = backups
+      .map((b) => {
+        const isUninstall = b.reason === 'uninstall';
+        const reasonBadge = isUninstall
+          ? `<span class="badge kb-tag kb-tag--crit">⚠️ ${escapeHtml(t('backup.app_reason_uninstall', 'When removed'))}</span>`
+          : `<span class="badge kb-tag kb-tag--warn">💾 ${escapeHtml(t('backup.app_reason_manual', 'By hand'))}</span>`;
 
-      const createdDate = formatDateTime(b.created_at ?? b.created_at_iso, undefined, 'N/A');
-      // the record's own fields: the table read names the server never sent, so the file column
-      // showed the id, the size "--", and every download was called app_backup.tar.gz (SET-06)
-      const fileName = b.filename || b.id;
-      const sizeStr = b.size_human || b.size_formatted || (b.size_bytes ? formatBytes(b.size_bytes) : '--');
-      const appName = b.container_name || b.vm_name || b.app_name || b.id;
-      const missingHtml = b.missing ? `<div class="kb-sub is-spaced"><span class="kb-tag kb-tag--warn">${escapeHtml(t('backup.app_missing', 'The file is not there right now'))}</span></div>` : '';
-      const stackHtml = b.stack ? `<span class="kb-sub" style="margin-left:6px;">(${escapeHtml(t('backup.app_stack', 'Stack:'))} <code>${escapeHtml(b.stack)}</code>)</span>` : '';
-      const mountsCount = b.mounts_count || (b.mounts ? b.mounts.length : 0);
+        const createdDate = formatDateTime(b.created_at ?? b.created_at_iso, undefined, 'N/A');
+        // the record's own fields: the table read names the server never sent, so the file column
+        // showed the id, the size "--", and every download was called app_backup.tar.gz (SET-06)
+        const fileName = b.filename || b.id;
+        const sizeStr = b.size_human || b.size_formatted || (b.size_bytes ? formatBytes(b.size_bytes) : '--');
+        const appName = b.container_name || b.vm_name || b.app_name || b.id;
+        const missingHtml = b.missing
+          ? `<div class="kb-sub is-spaced"><span class="kb-tag kb-tag--warn">${escapeHtml(t('backup.app_missing', 'The file is not there right now'))}</span></div>`
+          : '';
+        const stackHtml = b.stack
+          ? `<span class="kb-sub" style="margin-left:6px;">(${escapeHtml(t('backup.app_stack', 'Stack:'))} <code>${escapeHtml(b.stack)}</code>)</span>`
+          : '';
+        const mountsCount = b.mounts_count || (b.mounts ? b.mounts.length : 0);
 
-      return `
+        return `
         <tr>
           <td class="is-strong">
             <div class="kb-inline">
@@ -410,7 +464,8 @@ export async function fetchAndRenderAppBackups(mountEl, filterApp = '') {
           </td>
         </tr>
       `;
-    }).join('');
+      })
+      .join('');
 
     mount.innerHTML = `
       <div class="kb-datatable-wrap">
@@ -430,13 +485,16 @@ export async function fetchAndRenderAppBackups(mountEl, filterApp = '') {
     `;
 
     // Download action
-    mount.querySelectorAll('.btn-download-app-backup').forEach(btn => {
+    mount.querySelectorAll('.btn-download-app-backup').forEach((btn) => {
       btn.addEventListener('click', async () => {
         const backupId = btn.dataset.backupId;
         const filename = btn.dataset.file;
         try {
           btn.disabled = true;
-          showToast(t('toast.downloading_backup', 'Downloading backup "{filename}"...', { filename: filename }), 'info');
+          showToast(
+            t('toast.downloading_backup', 'Downloading backup "{filename}"...', { filename: filename }),
+            'info'
+          );
           await api.downloadBlob(`/api/backup/apps/${encodeURIComponent(backupId)}/download`, filename);
         } catch (err) {
           showToast(t('toast.download_failed', 'Download failed: {error}', { error: err.message }), 'error');
@@ -447,13 +505,16 @@ export async function fetchAndRenderAppBackups(mountEl, filterApp = '') {
     });
 
     // Restore action
-    mount.querySelectorAll('.btn-restore-app-backup').forEach(btn => {
+    mount.querySelectorAll('.btn-restore-app-backup').forEach((btn) => {
       btn.addEventListener('click', () => {
         const backupId = btn.dataset.backupId;
         const appName = btn.dataset.appName;
         showDangerConfirm(
           t('backup.app_restore_title', 'Restore the data of "{app}"?', { app: appName }),
-          t('backup.app_restore_msg', 'Its settings and data go back to the folders they came from. What is there now is kept in a .pre_restore copy first.'),
+          t(
+            'backup.app_restore_msg',
+            'Its settings and data go back to the folders they came from. What is there now is kept in a .pre_restore copy first.'
+          ),
           async () => {
             try {
               showToast(t('toast.restoring', 'Restoring {appName}...', { appName: appName }), 'info');
@@ -471,7 +532,7 @@ export async function fetchAndRenderAppBackups(mountEl, filterApp = '') {
     });
 
     // Delete action
-    mount.querySelectorAll('.btn-delete-app-backup').forEach(btn => {
+    mount.querySelectorAll('.btn-delete-app-backup').forEach((btn) => {
       btn.addEventListener('click', () => {
         const backupId = btn.dataset.backupId;
         const filename = btn.dataset.file;
@@ -492,8 +553,7 @@ export async function fetchAndRenderAppBackups(mountEl, filterApp = '') {
         );
       });
     });
-
   } catch (err) {
-    mount.innerHTML = `<div class="kb-load-error">${escapeHtml(t('backup.apps_failed', 'The app backups couldn\'t be loaded: {error}', { error: err.message }))}</div>`;
+    mount.innerHTML = `<div class="kb-load-error">${escapeHtml(t('backup.apps_failed', "The app backups couldn't be loaded: {error}", { error: err.message }))}</div>`;
   }
 }

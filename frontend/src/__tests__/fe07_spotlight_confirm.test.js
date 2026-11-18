@@ -5,7 +5,9 @@ const apiPost = vi.fn();
 const confirms = [];
 const toasts = [];
 
-vi.mock('../api.js', () => ({ api: { delete: (...a) => apiDelete(...a), post: (...a) => apiPost(...a), get: vi.fn() } }));
+vi.mock('../api.js', () => ({
+  api: { delete: (...a) => apiDelete(...a), post: (...a) => apiPost(...a), get: vi.fn() },
+}));
 vi.mock('../toast.js', () => ({
   showToast: (msg, type) => toasts.push({ msg, type }),
   showConfirmToast: (title, msg, onConfirm, onCancel) => confirms.push({ title, onConfirm, onCancel }),

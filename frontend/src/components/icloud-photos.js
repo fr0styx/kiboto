@@ -82,7 +82,9 @@ function signInView(folder, st) {
     }
   };
   go.addEventListener('click', submit);
-  modal.querySelector('#ic-pw').addEventListener('keydown', (/** @type {KeyboardEvent} */ e) => { if (e.key === 'Enter') submit(); });
+  modal.querySelector('#ic-pw').addEventListener('keydown', (/** @type {KeyboardEvent} */ e) => {
+    if (e.key === 'Enter') submit();
+  });
   /** @type {HTMLElement} */ (modal.querySelector(st.apple_id ? '#ic-pw' : '#ic-id')).focus();
 }
 
@@ -97,14 +99,21 @@ function codeView(folder) {
   const submit = async () => {
     go.disabled = true;
     try {
-      render(folder, await api.post('/api/media/icloud/code', { code: /** @type {HTMLInputElement} */ (modal.querySelector('#ic-code')).value }));
+      render(
+        folder,
+        await api.post('/api/media/icloud/code', {
+          code: /** @type {HTMLInputElement} */ (modal.querySelector('#ic-code')).value,
+        })
+      );
     } catch (err) {
       go.disabled = false;
       showToast(/** @type {Error} */ (err).message, 'error');
     }
   };
   go.addEventListener('click', submit);
-  modal.querySelector('#ic-code').addEventListener('keydown', (/** @type {KeyboardEvent} */ e) => { if (e.key === 'Enter') submit(); });
+  modal.querySelector('#ic-code').addEventListener('keydown', (/** @type {KeyboardEvent} */ e) => {
+    if (e.key === 'Enter') submit();
+  });
   /** @type {HTMLElement} */ (modal.querySelector('#ic-code')).focus();
 }
 
@@ -125,7 +134,10 @@ function readyView(folder, st) {
   start.disabled = Boolean(st.downloading);
   modal.querySelector('#ic-browse').addEventListener('click', () => {
     const browse = /** @type {any} */ (window).openFolderBrowser;
-    if (typeof browse === 'function') browse(dest.value || folder, (picked) => { if (picked) dest.value = picked; });
+    if (typeof browse === 'function')
+      browse(dest.value || folder, (picked) => {
+        if (picked) dest.value = picked;
+      });
   });
   start.addEventListener('click', async () => {
     start.disabled = true;

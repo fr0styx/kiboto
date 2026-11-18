@@ -20,12 +20,12 @@ export function getSnapGeometry(snapZone) {
   let availH = winH - NAVBAR_OFFSET - DOCK_MARGIN;
 
   if (_dockPosition === 'left' && !_dockAutohide) {
-    const dockW = _dockSize === 'large' ? 84 : (_dockSize === 'small' ? 60 : 70);
+    const dockW = _dockSize === 'large' ? 84 : _dockSize === 'small' ? 60 : 70;
     leftInset = dockW + 12;
     availW = winW - leftInset - 8;
     availH = winH - NAVBAR_OFFSET - 16;
   } else if (_dockPosition === 'top' && !_dockAutohide) {
-    const dockH = _dockSize === 'large' ? 76 : (_dockSize === 'small' ? 56 : 64);
+    const dockH = _dockSize === 'large' ? 76 : _dockSize === 'small' ? 56 : 64;
     topInset = NAVBAR_OFFSET + dockH + 8;
     availH = winH - topInset - 16;
   } else if (_dockAutohide) {
@@ -43,7 +43,7 @@ export function getSnapGeometry(snapZone) {
         top: topInset,
         width: halfW,
         height: halfH,
-        label: t('snap.top_left', 'Top Left (1/4)')
+        label: t('snap.top_left', 'Top Left (1/4)'),
       };
     case 'top-right':
       return {
@@ -51,7 +51,7 @@ export function getSnapGeometry(snapZone) {
         top: topInset,
         width: halfW,
         height: halfH,
-        label: t('snap.top_right', 'Top Right (1/4)')
+        label: t('snap.top_right', 'Top Right (1/4)'),
       };
     case 'bottom-left':
       return {
@@ -59,7 +59,7 @@ export function getSnapGeometry(snapZone) {
         top: topInset + halfH + 8,
         width: halfW,
         height: halfH,
-        label: t('snap.bottom_left', 'Bottom Left (1/4)')
+        label: t('snap.bottom_left', 'Bottom Left (1/4)'),
       };
     case 'bottom-right':
       return {
@@ -67,7 +67,7 @@ export function getSnapGeometry(snapZone) {
         top: topInset + halfH + 8,
         width: halfW,
         height: halfH,
-        label: t('snap.bottom_right', 'Bottom Right (1/4)')
+        label: t('snap.bottom_right', 'Bottom Right (1/4)'),
       };
     case 'left':
       return {
@@ -75,7 +75,7 @@ export function getSnapGeometry(snapZone) {
         top: topInset,
         width: halfW,
         height: availH,
-        label: t('snap.left_half', 'Left Half (1/2)')
+        label: t('snap.left_half', 'Left Half (1/2)'),
       };
     case 'right':
       return {
@@ -83,7 +83,7 @@ export function getSnapGeometry(snapZone) {
         top: topInset,
         width: halfW,
         height: availH,
-        label: t('snap.right_half', 'Right Half (1/2)')
+        label: t('snap.right_half', 'Right Half (1/2)'),
       };
     case 'maximize':
       return {
@@ -91,7 +91,7 @@ export function getSnapGeometry(snapZone) {
         top: topInset,
         width: availW,
         height: availH,
-        label: t('snap.full', 'Maximize (Full)')
+        label: t('snap.full', 'Maximize (Full)'),
       };
     default:
       return null;
@@ -181,7 +181,7 @@ export function applyWindowSnap(dragEl, snapZone, winId) {
       top: geom.top,
       width: geom.width,
       height: geom.height,
-      snapped: snapZone
+      snapped: snapZone,
     });
     saveOpenWindowsState();
   }
@@ -197,12 +197,19 @@ export function getActiveWindowElement() {
   if (window.DockManager && window.DockManager.activeId) {
     const w = window.DockManager.windows[window.DockManager.activeId];
     if (w && w.el) {
-      return w.el.querySelector?.('#console-window, #management-window, .chassis-front-panel, .mgmt-app-window, .container-inspector-window, #container-inspector-window, #app-deploy-modal-window, .os-window, #file-manager-window, #notif-center-panel') || w.el;
+      return (
+        w.el.querySelector?.(
+          '#console-window, #management-window, .chassis-front-panel, .mgmt-app-window, .container-inspector-window, #container-inspector-window, #app-deploy-modal-window, .os-window, #file-manager-window, #notif-center-panel'
+        ) || w.el
+      );
     }
   }
   const allWins = Array.from(document.querySelectorAll(DESKTOP_WINDOW_SELECTOR))
     .filter((el) => {
-      const parent = el.closest?.('#console-modal-overlay, #management-modal-overlay, #container-inspector-overlay, #smart-modal-overlay, #stack-inspector-overlay, #stack-picker-overlay, #app-deploy-modal-overlay') || el;
+      const parent =
+        el.closest?.(
+          '#console-modal-overlay, #management-modal-overlay, #container-inspector-overlay, #smart-modal-overlay, #stack-inspector-overlay, #stack-picker-overlay, #app-deploy-modal-overlay'
+        ) || el;
       return parent.style.display !== 'none' && !parent.classList.contains('hidden');
     })
     .sort((a, b) => parseInt(b.style.zIndex || '0', 10) - parseInt(a.style.zIndex || '0', 10));
@@ -228,7 +235,11 @@ export function restoreWindowSnap(dragEl, winId) {
   if (id) {
     // the restored size, not the snapped one: otherwise the window comes back snapped-size
     // from the dock or after a reload
-    const bounds = { snapped: '', left: Math.round(parseFloat(dragEl.style.left) || 0), top: Math.round(parseFloat(dragEl.style.top) || 0) };
+    const bounds = {
+      snapped: '',
+      left: Math.round(parseFloat(dragEl.style.left) || 0),
+      top: Math.round(parseFloat(dragEl.style.top) || 0),
+    };
     if (width) bounds.width = width;
     if (height) bounds.height = height;
     saveWindowBounds(id, bounds);

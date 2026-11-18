@@ -29,12 +29,33 @@ const FINDING_NOW = {
   kind: 'replace',
   title: 'Parts of the disk could not be read',
   detail: '8 sectors could not be read back. Files there may already be damaged.',
-  action: 'Copy what matters on it to another drive or a backup now. Run a long self-test, and plan to replace the drive.',
+  action:
+    'Copy what matters on it to another drive or a backup now. Run a long self-test, and plan to replace the drive.',
 };
 const DRIVES = {
   drives: [
-    { dev: 'sdc', model: 'Old Disk', role: 'data', verdict: 'now', label: 'Replace now', summary: '8 sectors could not be read', findings: [FINDING_NOW], asleep: false, temp: 41 },
-    { dev: 'sdb', model: 'Sleepy Disk', role: 'parity', verdict: 'ok', label: 'Healthy', summary: 'No sign of trouble.', findings: [], asleep: true, reading_ts: 1700000000 },
+    {
+      dev: 'sdc',
+      model: 'Old Disk',
+      role: 'data',
+      verdict: 'now',
+      label: 'Replace now',
+      summary: '8 sectors could not be read',
+      findings: [FINDING_NOW],
+      asleep: false,
+      temp: 41,
+    },
+    {
+      dev: 'sdb',
+      model: 'Sleepy Disk',
+      role: 'parity',
+      verdict: 'ok',
+      label: 'Healthy',
+      summary: 'No sign of trouble.',
+      findings: [],
+      asleep: true,
+      reading_ts: 1700000000,
+    },
   ],
   counts: { now: 1, ok: 1 },
 };
@@ -43,7 +64,16 @@ function routeGet(overrides = {}) {
   api.get.mockImplementation(async (url) => {
     if (url.startsWith('/api/drives/health')) return overrides.drives || DRIVES;
     if (url.startsWith('/api/disk/smart_tests')) return overrides.tests || { active_test: null, history: [] };
-    if (url.startsWith('/api/disk_detail')) return overrides.detail || { model: 'Old Disk', serial: 'X1', is_standby: false, metrics: { pending: 8 }, raw: 'smartctl output' };
+    if (url.startsWith('/api/disk_detail'))
+      return (
+        overrides.detail || {
+          model: 'Old Disk',
+          serial: 'X1',
+          is_standby: false,
+          metrics: { pending: 8 },
+          raw: 'smartctl output',
+        }
+      );
     throw new Error(`unexpected ${url}`);
   });
 }
@@ -159,10 +189,15 @@ describe('Drive Health', () => {
   });
 
   it('shows a running test with its progress and greys out the test buttons', async () => {
-    routeGet({ tests: { active_test: { test_type: 'long', percent_remaining: 70 }, history: [
-      { ts: 1700000000, status: 'Completed without error', test_type: 'short' },
-      { ts: 1690000000, status: 'Completed: read failure', test_type: 'long', passed: 0 },
-    ] } });
+    routeGet({
+      tests: {
+        active_test: { test_type: 'long', percent_remaining: 70 },
+        history: [
+          { ts: 1700000000, status: 'Completed without error', test_type: 'short' },
+          { ts: 1690000000, status: 'Completed: read failure', test_type: 'long', passed: 0 },
+        ],
+      },
+    });
     await dh.openDriveHealth();
     const detail = document.getElementById('dh-detail');
     expect(detail.querySelector('.dh-progress').textContent).toContain('70% left');
@@ -197,7 +232,19 @@ describe('Drive Health', () => {
   });
 
   it('puts its verdicts on the Overview and the phone, opening Drive Health', () => {
-    const html = statusHtml({ ok: false, items: [{ id: 'drive:sdc', level: 'warning', kind: 'drive_attention', subject: 'sdc', detail: 'The drive is too hot', open: 'drives' }] });
+    const html = statusHtml({
+      ok: false,
+      items: [
+        {
+          id: 'drive:sdc',
+          level: 'warning',
+          kind: 'drive_attention',
+          subject: 'sdc',
+          detail: 'The drive is too hot',
+          open: 'drives',
+        },
+      ],
+    });
     expect(html).toContain('Drive sdc needs attention: The drive is too hot.');
     expect(html).toContain('data-ov-open="drives"');
   });
@@ -222,7 +269,15 @@ describe('Drive Health', () => {
 
   it('takes a free spot on a desktop someone already arranged, moving none of their icons', async () => {
     const { initDraggableDesktopIcons } = await import('../components/dock/desktop-icons.js');
-    const ids = ['management-desktop-icon', 'containers-desktop-icon', 'vm-desktop-icon', 'fm-desktop-icon', 'rb-desktop-icon', 'dh-desktop-icon', 'chassis-desktop-icon'];
+    const ids = [
+      'management-desktop-icon',
+      'containers-desktop-icon',
+      'vm-desktop-icon',
+      'fm-desktop-icon',
+      'rb-desktop-icon',
+      'dh-desktop-icon',
+      'chassis-desktop-icon',
+    ];
     document.body.innerHTML = `<div id="desktop-icons-container">${ids.map((id) => `<div class="chassis-hero-box" id="${id}"><span class="icon-text">${id}</span></div>`).join('')}</div>`;
     const saved = {
       'management-desktop-icon': { left: 24, top: 77 },
@@ -243,27 +298,64 @@ describe('Drive Health', () => {
   });
 });
 
-describe('Drive Health in the reader\'s language', () => {
+describe("Drive Health in the reader's language", () => {
   afterEach(async () => {
     await setLanguage('en');
   });
 
   it('shows findings, labels, summaries and the Overview line from their message keys', async () => {
     await setLanguage('de');
-    const warm = { code: 'warm', key: 'warm', params: { temp: '55', limit: 50 }, severity: 'watch', kind: 'cooling', title: 'The drive runs warm', detail: 'x', action: 'y' };
+    const warm = {
+      code: 'warm',
+      key: 'warm',
+      params: { temp: '55', limit: 50 },
+      severity: 'watch',
+      kind: 'cooling',
+      title: 'The drive runs warm',
+      detail: 'x',
+      action: 'y',
+    };
     const html = dh.findingHtml(warm);
     expect(html).toContain('Das Laufwerk läuft warm');
     expect(html).toContain('Jetzt 55 °C; unter 50 °C ist besser');
-    const card = dh.driveCardHtml({ dev: 'sdc', verdict: 'now', label: 'Replace now', label_key: 'now_replace', summary: 'Parts of the disk could not be read', summary_key: 'unreadable_sectors', summary_params: { n: 3 } }, false);
+    const card = dh.driveCardHtml(
+      {
+        dev: 'sdc',
+        verdict: 'now',
+        label: 'Replace now',
+        label_key: 'now_replace',
+        summary: 'Parts of the disk could not be read',
+        summary_key: 'unreadable_sectors',
+        summary_params: { n: 3 },
+      },
+      false
+    );
     expect(card).toContain('Jetzt austauschen');
     expect(card).toContain('Teile der Platte konnten nicht gelesen werden');
-    const ov = statusHtml({ ok: false, items: [{ kind: 'drive_attention', level: 'warning', subject: 'sdc', detail: 'The drive is too hot', detail_key: 'dh.f.too_hot.title', detail_params: {}, open: 'drives' }] });
+    const ov = statusHtml({
+      ok: false,
+      items: [
+        {
+          kind: 'drive_attention',
+          level: 'warning',
+          subject: 'sdc',
+          detail: 'The drive is too hot',
+          detail_key: 'dh.f.too_hot.title',
+          detail_params: {},
+          open: 'drives',
+        },
+      ],
+    });
     expect(ov).toContain('Das Laufwerk ist zu heiß');
   });
 
   it('falls back to the server text for a message it does not know', async () => {
     await setLanguage('de');
-    expect(dh.findingHtml({ code: 'brand_new', title: 'A new rule', detail: 'd', action: 'a' })).toContain('A new rule');
-    expect(dh.driveCardHtml({ dev: 'sdc', verdict: 'ok', label: 'Healthy', summary: 'Server words' }, false)).toContain('Server words');
+    expect(dh.findingHtml({ code: 'brand_new', title: 'A new rule', detail: 'd', action: 'a' })).toContain(
+      'A new rule'
+    );
+    expect(dh.driveCardHtml({ dev: 'sdc', verdict: 'ok', label: 'Healthy', summary: 'Server words' }, false)).toContain(
+      'Server words'
+    );
   });
 });

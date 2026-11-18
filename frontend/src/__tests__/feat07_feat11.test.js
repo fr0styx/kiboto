@@ -59,18 +59,28 @@ describe('the NUT server panel (FEAT-11)', () => {
   });
 
   it('saves, renews and shows the PC setup', async () => {
-    api.get.mockImplementation((url) => Promise.resolve(url.endsWith('/client') ? { upsmon: 'MONITOR ups@NAS-ADDRESS:3493 1 monuser pw secondary' } : { enabled: false, port: 3493, user: 'monuser' }));
+    api.get.mockImplementation((url) =>
+      Promise.resolve(
+        url.endsWith('/client')
+          ? { upsmon: 'MONITOR ups@NAS-ADDRESS:3493 1 monuser pw secondary' }
+          : { enabled: false, port: 3493, user: 'monuser' }
+      )
+    );
     api.put.mockResolvedValue({});
     const mount = document.createElement('div');
     await renderNutServer(mount);
     /** @type {HTMLInputElement} */ (mount.querySelector('[name="enabled"]')).checked = true;
     mount.querySelector('[data-nut="save"]').click();
-    await vi.waitFor(() => expect(api.put).toHaveBeenCalledWith('/api/ups/nut-server', { enabled: true, port: 3493, user: 'monuser' }));
+    await vi.waitFor(() =>
+      expect(api.put).toHaveBeenCalledWith('/api/ups/nut-server', { enabled: true, port: 3493, user: 'monuser' })
+    );
     mount.querySelector('[data-nut="renew"]').click();
     await vi.waitFor(() => expect(api.put).toHaveBeenCalledWith('/api/ups/nut-server', { new_password: true }));
     await vi.waitFor(() => expect(mount.querySelector('[data-nut="client"]')).not.toBeNull());
     mount.querySelector('[data-nut="client"]').click();
-    await vi.waitFor(() => expect(mount.querySelector('.nut-server-client').textContent).toContain('MONITOR ups@NAS-ADDRESS'));
+    await vi.waitFor(() =>
+      expect(mount.querySelector('.nut-server-client').textContent).toContain('MONITOR ups@NAS-ADDRESS')
+    );
   });
 
   it('shows a load error', async () => {

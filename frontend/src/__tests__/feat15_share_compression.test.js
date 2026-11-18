@@ -25,7 +25,13 @@ describe('share compression (FEAT-15)', () => {
   });
 
   it('offers the choices with the current one selected', () => {
-    const body = compressionBody('media', { supported: true, value: 'zstd:3', choices: ['off', 'zstd', 'lzo', 'zlib'], ratio: null, from_mount: true });
+    const body = compressionBody('media', {
+      supported: true,
+      value: 'zstd:3',
+      choices: ['off', 'zstd', 'lzo', 'zlib'],
+      ratio: null,
+      from_mount: true,
+    });
     const select = body.querySelector('select');
     expect([...select.options].map((o) => o.value)).toEqual(['off', 'zstd', 'lzo', 'zlib']);
     expect(select.value).toBe('zstd');
@@ -33,7 +39,13 @@ describe('share compression (FEAT-15)', () => {
   });
 
   it('shows why when it cannot be set', () => {
-    const ro = compressionBody('media', { supported: true, read_only: true, value: 'lz4', choices: ['off'], reason: 'Set compression in unraid\'s own settings' });
+    const ro = compressionBody('media', {
+      supported: true,
+      read_only: true,
+      value: 'lz4',
+      choices: ['off'],
+      reason: "Set compression in unraid's own settings",
+    });
     expect(ro.querySelector('form')).toBeNull();
     expect(ro.textContent).toContain('unraid');
     const none = compressionBody('x', { supported: false, value: 'off', choices: [] });

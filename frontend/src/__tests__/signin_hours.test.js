@@ -14,7 +14,12 @@ describe('sign-in hours fields (COMP-13)', () => {
     expect(changed()).toBe(false);
     box.querySelector('[data-hours-row="school"]').click(); // school days on, with their own times (SET-19)
     expect(changed()).toBe(true);
-    expect(readHours(box)).toEqual({ rows: [{ days: [0, 1, 2, 3, 4], start: '07:00', end: '20:00' }, { days: [5, 6], start: '09:00', end: '21:00' }] });
+    expect(readHours(box)).toEqual({
+      rows: [
+        { days: [0, 1, 2, 3, 4], start: '07:00', end: '20:00' },
+        { days: [5, 6], start: '09:00', end: '21:00' },
+      ],
+    });
   });
 
   it('without hours the fields start hidden with both rows, and off means no limit', () => {
@@ -26,7 +31,12 @@ describe('sign-in hours fields (COMP-13)', () => {
     on.checked = true;
     on.dispatchEvent(new Event('change', { bubbles: true }));
     expect(box.querySelector('[data-hours-fields]').hidden).toBe(false);
-    expect(readHours(box)).toEqual({ rows: [{ days: [0, 1, 2, 3, 4], start: '07:00', end: '20:00' }, { days: [5, 6], start: '09:00', end: '21:00' }] });
+    expect(readHours(box)).toEqual({
+      rows: [
+        { days: [0, 1, 2, 3, 4], start: '07:00', end: '20:00' },
+        { days: [5, 6], start: '09:00', end: '21:00' },
+      ],
+    });
   });
 
   it('is hidden for accounts that manage people', () => {

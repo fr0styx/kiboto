@@ -16,7 +16,7 @@ export function renderSmbPassword(box, { username, password }) {
   note.textContent = t(
     'smb.shown_once',
     'Your shared folders password. It is shown only now: when your computer asks for a password to open the shared folders, enter the username {username} and this password. Making a new one replaces it.',
-    { username },
+    { username }
   );
   const code = document.createElement('code');
   code.className = 'smb-pw-value';
@@ -74,6 +74,6 @@ export function askForSmbPassword(box = document.getElementById('smb-password-bo
     '',
     (pwd) => (pwd ? makeSmbPassword(pwd, box) : undefined),
     null,
-    { inputType: 'password', okText: t('smb.make_ok', 'Make it'), cancelText: t('common.cancel', 'Cancel') },
+    { inputType: 'password', okText: t('smb.make_ok', 'Make it'), cancelText: t('common.cancel', 'Cancel') }
   );
 }

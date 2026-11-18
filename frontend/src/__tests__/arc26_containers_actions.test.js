@@ -11,7 +11,12 @@ import { DockManager } from '../components/dock.js';
 import { api } from '../api.js';
 import { showToast, showConfirmToast, showBottomSheet } from '../toast.js';
 
-vi.mock('../toast.js', () => ({ showToast: vi.fn(), showConfirmToast: vi.fn(), showPromptToast: vi.fn(), showBottomSheet: vi.fn() }));
+vi.mock('../toast.js', () => ({
+  showToast: vi.fn(),
+  showConfirmToast: vi.fn(),
+  showPromptToast: vi.fn(),
+  showBottomSheet: vi.fn(),
+}));
 
 const byId = (id) => document.getElementById(id);
 const lastToast = () => showToast.mock.calls.at(-1);
@@ -67,7 +72,9 @@ describe('Containers window row actions', () => {
   });
 
   it('backs up an app and names the archive', async () => {
-    const post = vi.spyOn(api, 'post').mockResolvedValueOnce({ backup: { archive_file: 'web.tar.gz', archive_size_formatted: '3 MB' } });
+    const post = vi
+      .spyOn(api, 'post')
+      .mockResolvedValueOnce({ backup: { archive_file: 'web.tar.gz', archive_size_formatted: '3 MB' } });
     const btn = rowButton('backup');
     btn.click();
     await vi.waitFor(() => expect(lastToast()[1]).toBe('success'));

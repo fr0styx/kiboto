@@ -10,7 +10,8 @@ import { formatDateTime } from '../format.js';
 export function personStatus(u) {
   if (u.status !== 'active') return t('users.status_disabled', 'Turned off');
   const n = Number(u.signed_in || 0);
-  if (n > 0) return t('people.signed_in_n', '{n, plural, one {Signed in on # device} other {Signed in on # devices}}', { n });
+  if (n > 0)
+    return t('people.signed_in_n', '{n, plural, one {Signed in on # device} other {Signed in on # devices}}', { n });
   return t('people.not_signed_in', 'Not signed in now');
 }
 
@@ -60,7 +61,9 @@ export function inviteRowHtml(inv, roleName) {
 /** The people, then the invites still waiting. */
 export function peopleRowsHtml(users, invites, opts) {
   return [
-    ...users.map((u) => personRowHtml(u, { me: opts.me, roleName: opts.roleName(u.role_id), quotaText: opts.quotaText(u) })),
+    ...users.map((u) =>
+      personRowHtml(u, { me: opts.me, roleName: opts.roleName(u.role_id), quotaText: opts.quotaText(u) })
+    ),
     ...(invites || []).filter((i) => i.active).map((i) => inviteRowHtml(i, opts.roleName(i.role_id))),
   ].join('');
 }

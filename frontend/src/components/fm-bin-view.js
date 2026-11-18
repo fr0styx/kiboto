@@ -10,7 +10,8 @@ import { formatDate } from '../format.js';
 function setLabel(col, key, fallback) {
   if (!col) return;
   const label = col.querySelector('.fm-col-label');
-  if (label) { // the key goes with the words, so a language pass keeps "From" in the bin
+  if (label) {
+    // the key goes with the words, so a language pass keeps "From" in the bin
     label.setAttribute('data-i18n', key);
     label.textContent = t(key, fallback);
     return;
@@ -66,7 +67,11 @@ export function goesLabel(file, now = Date.now() / 1000) {
 export function binNote(rules = {}, soon = 0) {
   const days = rules.keep_days || 30;
   const percent = rules.max_percent_of_disk || 10;
-  const text = t('fm.bin_note', 'Items stay here for {days} days after they are deleted, then they go for good. A bin that grows past {percent}% of its drive lets its oldest items go sooner, but never within a day.', { days, percent });
+  const text = t(
+    'fm.bin_note',
+    'Items stay here for {days} days after they are deleted, then they go for good. A bin that grows past {percent}% of its drive lets its oldest items go sooner, but never within a day.',
+    { days, percent }
+  );
   if (!soon) return text;
   return `${text} ${t('fm.bin_soon', '{count, plural, one {# item goes in the next {days} days.} other {# items go in the next {days} days.}}', { count: soon, days: rules.soon_days || 7 })}`;
 }
@@ -75,18 +80,25 @@ export function emptyAll(onDone) {
   const word = t('fm.empty_word', 'EMPTY');
   showConfirmToast(
     t('fm.empty_bins_title', 'Empty every Recycle Bin'),
-    t('fm.empty_bins_msg', "This permanently deletes what the Recycle Bin of every share holds, for everyone. It can't be undone. Type {word} to confirm.", { word }),
+    t(
+      'fm.empty_bins_msg',
+      "This permanently deletes what the Recycle Bin of every share holds, for everyone. It can't be undone. Type {word} to confirm.",
+      { word }
+    ),
     async () => {
       try {
         await api.delete('/api/fs/trash/empty', { confirmed: true });
-        showToast(t('toast.trash_emptied_storage_reclaimed', 'Recycle Bin emptied. The space is free again.'), 'success');
+        showToast(
+          t('toast.trash_emptied_storage_reclaimed', 'Recycle Bin emptied. The space is free again.'),
+          'success'
+        );
         onDone();
       } catch (err) {
         showToast(err.message, 'error');
       }
     },
     null,
-    { destructive: true, typeToConfirm: word, okText: t('fm.empty_bins', 'Empty all Recycle Bins'), allowHtml: false },
+    { destructive: true, typeToConfirm: word, okText: t('fm.empty_bins', 'Empty all Recycle Bins'), allowHtml: false }
   );
 }
 
@@ -118,8 +130,11 @@ export function binBar(fm, inBin, onEmptied, info = {}) {
   btn.textContent = t('fm.empty_bins', 'Empty all Recycle Bins');
   btn.hidden = true; // until the account's rights are known
   // session.js is loaded when needed: the File Explorer stays importable on its own
-  bar.ready = import('./session.js').then((m) => {
-    btn.hidden = !mayEmpty(m.getCurrentUser());
-  }, () => {});
+  bar.ready = import('./session.js').then(
+    (m) => {
+      btn.hidden = !mayEmpty(m.getCurrentUser());
+    },
+    () => {}
+  );
   return bar;
 }

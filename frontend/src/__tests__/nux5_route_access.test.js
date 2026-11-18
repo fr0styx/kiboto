@@ -1,6 +1,9 @@
 import { describe, it, expect, vi } from 'vitest';
 
-vi.mock('../i18n.js', () => ({ getLanguage: () => 'en', t: (k, f, p = {}) => String(f).replace(/\{(\w+)\}/g, (m, x) => (x in p ? p[x] : m)) }));
+vi.mock('../i18n.js', () => ({
+  getLanguage: () => 'en',
+  t: (k, f, p = {}) => String(f).replace(/\{(\w+)\}/g, (m, x) => (x in p ? p[x] : m)),
+}));
 
 const { canOpen, canRun, hasScope, hideUnusable } = await import('../route-access.js');
 const { itemText } = await import('../components/management/overview.js');
@@ -28,7 +31,8 @@ describe('places by role (NUX-5)', () => {
 
   it('hides tiles and tabs, and brings back only what it hid', () => {
     const root = document.createElement('div');
-    root.innerHTML = '<button data-phone-open="users"></button><button data-phone-open="files"></button><button data-phone-open="vms" hidden></button><button data-phone-tab="apps"></button>';
+    root.innerHTML =
+      '<button data-phone-open="users"></button><button data-phone-open="files"></button><button data-phone-open="vms" hidden></button><button data-phone-tab="apps"></button>';
     hideUnusable(root, KID);
     const [users, files, vms, apps] = root.children;
     expect([users.hidden, files.hidden, vms.hidden, apps.hidden]).toEqual([true, false, true, true]);
@@ -39,7 +43,8 @@ describe('places by role (NUX-5)', () => {
 
   it("hides Mission Control's sidebar entries too", () => {
     const root = document.createElement('div');
-    root.innerHTML = '<button data-route="users"></button><button data-route="hardware"></button><button data-mgmt-target="files"></button>';
+    root.innerHTML =
+      '<button data-route="users"></button><button data-route="hardware"></button><button data-mgmt-target="files"></button>';
     hideUnusable(root, FAMILY);
     expect([...root.children].map((b) => b.hidden)).toEqual([true, true, false]);
   });
@@ -53,6 +58,8 @@ describe('places by role (NUX-5)', () => {
   });
 
   it('an item someone cannot fix says who can', () => {
-    expect(itemText({ kind: 'storage_full', subject: '91%', tell_admin: true })).toBe('Storage is 91% full. Tell the person who manages Kiboto.');
+    expect(itemText({ kind: 'storage_full', subject: '91%', tell_admin: true })).toBe(
+      'Storage is 91% full. Tell the person who manages Kiboto.'
+    );
   });
 });

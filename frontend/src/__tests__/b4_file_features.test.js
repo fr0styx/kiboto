@@ -28,7 +28,9 @@ describe('Previous versions (missing feature 7)', () => {
     expect(versionsHtml('plan.txt', [])).toContain('Get something back'); // points to Backup's one door (SET-21)
     const html = versionsHtml('plan.txt', V);
     expect((html.match(/data-version=/g) || []).length).toBe(2);
-    expect(versionUrl('/mnt/user/a b.txt', 'zfs:x')).toBe('/api/fs/versions/download?path=%2Fmnt%2Fuser%2Fa%20b.txt&version=zfs%3Ax');
+    expect(versionUrl('/mnt/user/a b.txt', 'zfs:x')).toBe(
+      '/api/fs/versions/download?path=%2Fmnt%2Fuser%2Fa%20b.txt&version=zfs%3Ax'
+    );
   });
 
   it('restores a copy, or replaces the file after confirming, then refreshes', async () => {
@@ -40,7 +42,11 @@ describe('Previous versions (missing feature 7)', () => {
     expect(dialog.getAttribute('role')).toBe('dialog');
     dialog.querySelector('[data-version="zfs:auto-1"] [data-act="copy"]').click();
     await flush();
-    expect(api.post).toHaveBeenCalledWith('/api/fs/versions/restore', { path: '/mnt/user/plan.txt', version: 'zfs:auto-1', overwrite: false });
+    expect(api.post).toHaveBeenCalledWith('/api/fs/versions/restore', {
+      path: '/mnt/user/plan.txt',
+      version: 'zfs:auto-1',
+      overwrite: false,
+    });
     expect(onChange).toHaveBeenCalled();
     expect(document.getElementById('fm-versions-dialog')).toBeNull();
     expect(document.activeElement.id).toBe('opener');
@@ -48,7 +54,11 @@ describe('Previous versions (missing feature 7)', () => {
     dialog = await openPreviousVersions('/mnt/user/plan.txt', 'plan.txt', onChange);
     dialog.querySelector('[data-version="zfs:auto-2"] [data-act="replace"]').click();
     await flush();
-    expect(api.post).toHaveBeenLastCalledWith('/api/fs/versions/restore', { path: '/mnt/user/plan.txt', version: 'zfs:auto-2', overwrite: true });
+    expect(api.post).toHaveBeenLastCalledWith('/api/fs/versions/restore', {
+      path: '/mnt/user/plan.txt',
+      version: 'zfs:auto-2',
+      overwrite: true,
+    });
   });
 
   it('opens a version in a new tab and closes on Escape', async () => {

@@ -21,7 +21,14 @@ function button(label, action, extra = {}) {
 }
 
 function passwordInput(name, label) {
-  return el('input', { type: 'password', name, autocomplete: name === 'new' ? 'new-password' : 'current-password', maxLength: 256, placeholder: label, ariaLabel: label });
+  return el('input', {
+    type: 'password',
+    name,
+    autocomplete: name === 'new' ? 'new-password' : 'current-password', // gitleaks:allow (a field name, not a secret)
+    maxLength: 256,
+    placeholder: label,
+    ariaLabel: label,
+  });
 }
 
 /** A labelled field: the label is visible, not only a placeholder (NUX-11). */
@@ -31,7 +38,8 @@ function field(label, input) {
 
 /** Who may open a folder, in words (NSEC-5): its own list, or everyone who may use its share. */
 export function whoText(f) {
-  if (!Array.isArray(f.people)) return t('ef.who_share', 'Everyone who may use {share} can open it', { share: f.share });
+  if (!Array.isArray(f.people))
+    return t('ef.who_share', 'Everyone who may use {share} can open it', { share: f.share });
   return t('ef.who_people', 'Only {names} can open it', { names: f.people.join(', ') });
 }
 
@@ -48,10 +56,17 @@ export async function peopleForm(mount, row) {
   }
   const form = el('form', { className: 'ef-people' });
   const everyone = el('input', { type: 'checkbox', name: 'everyone', checked: current === null });
-  form.append(el('label', { className: 'ef-keep' }, everyone, ' ', t('ef.who_everyone', 'Everyone who may use the share')));
+  form.append(
+    el('label', { className: 'ef-keep' }, everyone, ' ', t('ef.who_everyone', 'Everyone who may use the share'))
+  );
   const list = el('div', { className: 'ef-people-list' });
   for (const u of users || []) {
-    const cb = el('input', { type: 'checkbox', name: 'person', value: u.username, checked: Array.isArray(current) && current.some((p) => p.toLowerCase() === String(u.username).toLowerCase()) });
+    const cb = el('input', {
+      type: 'checkbox',
+      name: 'person',
+      value: u.username,
+      checked: Array.isArray(current) && current.some((p) => p.toLowerCase() === String(u.username).toLowerCase()),
+    });
     list.append(el('label', { className: 'ef-keep' }, cb, ' ', u.display_name || u.username));
   }
   const sync = () => {
@@ -59,14 +74,28 @@ export async function peopleForm(mount, row) {
   };
   everyone.addEventListener('change', sync);
   sync();
-  const save = el('button', { type: 'submit', className: 'btn-pill-toggle is-small is-primary', textContent: t('ef.who_save', 'Save') });
-  const cancel = el('button', { type: 'button', className: 'btn-pill-toggle is-small', textContent: t('ef.who_cancel', 'Cancel') });
+  const save = el('button', {
+    type: 'submit',
+    className: 'btn-pill-toggle is-small is-primary',
+    textContent: t('ef.who_save', 'Save'),
+  });
+  const cancel = el('button', {
+    type: 'button',
+    className: 'btn-pill-toggle is-small',
+    textContent: t('ef.who_cancel', 'Cancel'),
+  });
   cancel.addEventListener('click', () => renderEncryptedFolders(mount));
   form.append(list, el('div', { className: 'ef-actions' }, save, cancel));
   form.addEventListener('submit', (e) => {
     e.preventDefault();
-    const people = everyone.checked ? null : [...list.querySelectorAll('input:checked')].map((cb) => /** @type {HTMLInputElement} */ (cb).value);
-    act(mount, () => api.put(`/api/encrypted-folders/${encodeURIComponent(name)}/people`, { people }), t('ef.who_saved', 'Saved: who may open it.'));
+    const people = everyone.checked
+      ? null
+      : [...list.querySelectorAll('input:checked')].map((cb) => /** @type {HTMLInputElement} */ (cb).value);
+    act(
+      mount,
+      () => api.put(`/api/encrypted-folders/${encodeURIComponent(name)}/people`, { people }),
+      t('ef.who_saved', 'Saved: who may open it.')
+    );
   });
   const actions = row.querySelector('.ef-actions');
   if (actions) actions.replaceWith(form);
@@ -80,9 +109,15 @@ function folderRow(f, canManage) {
   // the state says "Unlocked", the button "Unlock": not one word for both (NUX-11)
   const state = f.unlocked ? t('ef.state_unlocked', 'Unlocked') : t('ef.locked', 'Locked');
   row.append(
-    el('div', { className: 'ef-name' }, el('strong', { textContent: f.name }), ' ', el('span', { className: `ef-state ef-${f.unlocked ? 'open' : 'locked'}`, textContent: state })),
+    el(
+      'div',
+      { className: 'ef-name' },
+      el('strong', { textContent: f.name }),
+      ' ',
+      el('span', { className: `ef-state ef-${f.unlocked ? 'open' : 'locked'}`, textContent: state })
+    ),
     el('div', { className: 'ef-where muted', textContent: t('ef.in_share', 'In {share}', { share: f.share }) }),
-    el('div', { className: 'ef-where muted ef-who', textContent: whoText(f) }),
+    el('div', { className: 'ef-where muted ef-who', textContent: whoText(f) })
   );
   row.dataset.people = JSON.stringify(f.people ?? null);
   const actions = el('div', { className: 'ef-actions' });
@@ -107,28 +142,66 @@ function folderRow(f, canManage) {
 }
 
 function createForm(shares) {
-  const form = el('fieldset', { className: 'ef-create' }, el('legend', { textContent: t('ef.new', 'New encrypted folder') }));
+  const form = el(
+    'fieldset',
+    { className: 'ef-create' },
+    el('legend', { textContent: t('ef.new', 'New encrypted folder') })
+  );
   const share = el('select', { name: 'share' });
   for (const s of shares) share.append(el('option', { value: s, textContent: s }));
   form.append(
     field(t('ef.share', 'In the share'), share),
-    field(t('ef.name', 'Name'), el('input', { type: 'text', name: 'name', maxLength: 48, placeholder: t('ef.name_hint', 'Letters, digits and spaces, in any language') })),
+    field(
+      t('ef.name', 'Name'),
+      el('input', {
+        type: 'text',
+        name: 'name',
+        maxLength: 48,
+        placeholder: t('ef.name_hint', 'Letters, digits and spaces, in any language'),
+      })
+    ),
     field(t('ef.password', 'Password'), passwordInput('new', t('ef.password', 'Password'))),
     field(t('ef.again', 'Password again'), passwordInput('again', t('ef.again', 'Password again'))),
-    el('label', { className: 'ef-keep' }, el('input', { type: 'checkbox', name: 'start' }), ' ', t('ef.keep', 'Open when Kiboto starts')),
-    el('p', { className: 'muted ef-hint', textContent: t('ef.keep_hint', 'Kept open, the password is stored sealed with this server\'s key: anyone who gets the whole server can read the folder. Without it, someone must open it after each restart.') }),
-    el('div', { className: 'ef-actions' }, button(t('ef.make', 'Make it'), 'create', { className: 'btn-pill-toggle is-small is-primary' })),
+    el(
+      'label',
+      { className: 'ef-keep' },
+      el('input', { type: 'checkbox', name: 'start' }),
+      ' ',
+      t('ef.keep', 'Open when Kiboto starts')
+    ),
+    el('p', {
+      className: 'muted ef-hint',
+      textContent: t(
+        'ef.keep_hint',
+        "Kept open, the password is stored sealed with this server's key: anyone who gets the whole server can read the folder. Without it, someone must open it after each restart."
+      ),
+    }),
+    el(
+      'div',
+      { className: 'ef-actions' },
+      button(t('ef.make', 'Make it'), 'create', { className: 'btn-pill-toggle is-small is-primary' })
+    )
   );
   // its own fields: adding a folder back needs its password once, not a new one twice (NUX-11)
-  const adopt = el('details', { className: 'ef-adopt' }, el('summary', { textContent: t('ef.adopt', 'Add back an encrypted folder') }));
+  const adopt = el(
+    'details',
+    { className: 'ef-adopt' },
+    el('summary', { textContent: t('ef.adopt', 'Add back an encrypted folder') })
+  );
   const adoptShare = el('select', { name: 'share' });
   for (const s of shares) adoptShare.append(el('option', { value: s, textContent: s }));
   adopt.append(
-    el('p', { className: 'muted ef-hint', textContent: t('ef.adopt_hint', 'Its encrypted files are still in the share (after a reinstall or a restore): give the share, its name and its password.') }),
+    el('p', {
+      className: 'muted ef-hint',
+      textContent: t(
+        'ef.adopt_hint',
+        'Its encrypted files are still in the share (after a reinstall or a restore): give the share, its name and its password.'
+      ),
+    }),
     field(t('ef.share', 'In the share'), adoptShare),
     field(t('ef.name', 'Name'), el('input', { type: 'text', name: 'name', maxLength: 48 })),
     field(t('ef.password', 'Password'), passwordInput('password', t('ef.password', 'Password'))),
-    el('div', { className: 'ef-actions' }, button(t('ef.adopt_btn', 'Add it back'), 'adopt')),
+    el('div', { className: 'ef-actions' }, button(t('ef.adopt_btn', 'Add it back'), 'adopt'))
   );
   return [form, adopt];
 }
@@ -139,11 +212,24 @@ function recoveryBox(key, name = '') {
   box.dataset.folder = name;
   box.append(
     el('strong', { textContent: t('ef.recovery_title', 'Save this recovery key now') }),
-    el('p', { textContent: t('ef.recovery_desc', 'With it the files can be read even if the password is forgotten. Kiboto shows it only this once and does not keep it.') }),
-    code,
+    el('p', {
+      textContent: t(
+        'ef.recovery_desc',
+        'With it the files can be read even if the password is forgotten. Kiboto shows it only this once and does not keep it.'
+      ),
+    }),
+    code
   );
   const done = button(t('ef.saved', 'I have saved it'), 'saved');
-  box.append(el('div', { className: 'ef-actions' }, button(t('ef.copy', 'Copy'), 'copy'), button(t('ef.download', 'Download as a file'), 'download'), done));
+  box.append(
+    el(
+      'div',
+      { className: 'ef-actions' },
+      button(t('ef.copy', 'Copy'), 'copy'),
+      button(t('ef.download', 'Download as a file'), 'download'),
+      done
+    )
+  );
   return box;
 }
 
@@ -173,16 +259,32 @@ function downloadKey(mount) {
 export function encryptedFoldersBody(info) {
   const box = el('div', { className: 'ef-body' });
   if (!info.available) {
-    box.append(el('p', { className: 'muted', title: 'gocryptfs, /dev/fuse', textContent: t('ef.unavailable_plain', 'This server can\'t open encrypted folders: the tool that encrypts them isn\'t available here. The person who manages Kiboto can find the details in its documentation.') }));
+    box.append(
+      el('p', {
+        className: 'muted',
+        title: 'gocryptfs, /dev/fuse',
+        textContent: t(
+          'ef.unavailable_plain',
+          "This server can't open encrypted folders: the tool that encrypts them isn't available here. The person who manages Kiboto can find the details in its documentation."
+        ),
+      })
+    );
     return box;
   }
   const list = el('div', { className: 'ef-list' });
-  if (!info.folders.length) list.append(el('p', { className: 'muted', textContent: t('ef.none', 'No encrypted folders yet.') }));
+  if (!info.folders.length)
+    list.append(el('p', { className: 'muted', textContent: t('ef.none', 'No encrypted folders yet.') }));
   for (const f of info.folders) list.append(folderRow(f, info.can_manage));
   box.append(list);
   if (info.can_manage) {
     if (info.shares.length) box.append(...createForm(info.shares));
-    else box.append(el('p', { className: 'muted', textContent: t('ef.no_shares', 'Create a share first: an encrypted folder lives inside one.') }));
+    else
+      box.append(
+        el('p', {
+          className: 'muted',
+          textContent: t('ef.no_shares', 'Create a share first: an encrypted folder lives inside one.'),
+        })
+      );
   }
   return box;
 }
@@ -208,37 +310,55 @@ function onClick(mount, e) {
   const path = (n) => `/api/encrypted-folders/${encodeURIComponent(n)}`;
   const pw = row ? row.querySelector('[name="password"]') : null;
   const action = btn.dataset.ef;
-  if (action === 'unlock') act(mount, () => api.post(`${path(name)}/unlock`, { password: pw.value }), t('ef.opened', 'The folder is open.'));
-  else if (action === 'lock') act(mount, () => api.post(`${path(name)}/lock`, {}), t('ef.locked_now', 'The folder is locked.'));
+  if (action === 'unlock')
+    act(mount, () => api.post(`${path(name)}/unlock`, { password: pw.value }), t('ef.opened', 'The folder is open.'));
+  else if (action === 'lock')
+    act(mount, () => api.post(`${path(name)}/lock`, {}), t('ef.locked_now', 'The folder is locked.'));
   else if (action === 'people') peopleForm(mount, row);
   else if (action === 'forget') {
     showConfirmToast(
       t('ef.remove_title', 'Remove {name} from the list', { name }),
-      t('ef.remove_msg', 'Kiboto stops showing {name}. Its encrypted files stay in the share, and you can add it back later with its password.', { name }),
-      () => act(mount, () => api.delete(path(name)), t('ef.forgotten', 'Taken off Kiboto. Its encrypted files are still in the share.')),
+      t(
+        'ef.remove_msg',
+        'Kiboto stops showing {name}. Its encrypted files stay in the share, and you can add it back later with its password.',
+        { name }
+      ),
+      () =>
+        act(
+          mount,
+          () => api.delete(path(name)),
+          t('ef.forgotten', 'Taken off Kiboto. Its encrypted files are still in the share.')
+        ),
       null,
-      { allowHtml: false },
+      { allowHtml: false }
     );
-  }
-  else if (action === 'files') /** @type {any} */ (window).openFileManager?.(`/mnt/encrypted/${name}`);
+  } else if (action === 'files') /** @type {any} */ (window).openFileManager?.(`/mnt/encrypted/${name}`);
   else if (action === 'create' || action === 'adopt') submitForm(mount, action);
   else if (action === 'copy') {
     const write = navigator.clipboard?.writeText(mount.querySelector('.ef-key').textContent);
     Promise.resolve(write || Promise.reject(new Error('no clipboard'))).then(
-      () => showToast(t('ef.copied', 'The recovery key is copied. Paste it somewhere safe, away from this server.'), 'success'),
-      () => showToast(t('ef.copy_failed', "It couldn't be copied: select the key and copy it, or download it as a file."), 'error'),
+      () =>
+        showToast(
+          t('ef.copied', 'The recovery key is copied. Paste it somewhere safe, away from this server.'),
+          'success'
+        ),
+      () =>
+        showToast(
+          t('ef.copy_failed', "It couldn't be copied: select the key and copy it, or download it as a file."),
+          'error'
+        )
     );
   } else if (action === 'download') downloadKey(mount);
   else if (action === 'saved') {
     showConfirmToast(
       t('ef.saved_title', 'Is the recovery key saved?'),
-      t('ef.saved_msg', 'Kiboto won\'t show it again. Without it and the password, nobody can read this folder.'),
+      t('ef.saved_msg', "Kiboto won't show it again. Without it and the password, nobody can read this folder."),
       () => {
         holdKey(false);
         renderEncryptedFolders(mount);
       },
       null,
-      { okText: t('ef.saved_yes', 'Yes, it is saved'), allowHtml: false },
+      { okText: t('ef.saved_yes', 'Yes, it is saved'), allowHtml: false }
     );
   }
 }
@@ -248,7 +368,11 @@ async function submitForm(mount, action) {
     const box = mount.querySelector('.ef-adopt');
     const v = (n) => box.querySelector(`[name="${n}"]`).value;
     const body = { share: v('share'), name: v('name').trim(), password: v('password') };
-    return act(mount, () => api.post('/api/encrypted-folders/adopt', body), t('ef.added_back', 'The folder is back and open.'));
+    return act(
+      mount,
+      () => api.post('/api/encrypted-folders/adopt', body),
+      t('ef.added_back', 'The folder is back and open.')
+    );
   }
   const form = mount.querySelector('.ef-create');
   const value = (n) => form.querySelector(`[name="${n}"]`).value;
@@ -279,7 +403,8 @@ async function onKeep(mount, e) {
     await act(mount, () => api.put(url, { password: null }), t('ef.keep_off', 'It will stay locked after a restart.'));
     return;
   }
-  const pw = row.querySelector('[name="password"]') || row.appendChild(passwordInput('password', t('ef.password', 'Password')));
+  const pw =
+    row.querySelector('[name="password"]') || row.appendChild(passwordInput('password', t('ef.password', 'Password')));
   if (!pw.value) {
     box.checked = false;
     pw.focus();
@@ -307,6 +432,10 @@ export async function renderEncryptedFolders(mount) {
     e.preventDefault();
     const row = /** @type {HTMLElement} */ (form.closest('.ef-row'));
     const pw = /** @type {HTMLInputElement} */ (form.querySelector('[name="password"]'));
-    act(mount, () => api.post(`/api/encrypted-folders/${encodeURIComponent(row.dataset.name)}/unlock`, { password: pw.value }), t('ef.opened', 'The folder is open.'));
+    act(
+      mount,
+      () => api.post(`/api/encrypted-folders/${encodeURIComponent(row.dataset.name)}/unlock`, { password: pw.value }),
+      t('ef.opened', 'The folder is open.')
+    );
   };
 }

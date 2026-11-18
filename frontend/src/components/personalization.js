@@ -186,7 +186,7 @@ export function openPersonalizationWindow(tab = null) {
       'screensaver': 'screensaver',
       'widgets': 'widgets',
       'console': 'console',
-      'layout': 'console'
+      'layout': 'console',
     };
     switchPersonalizationTab(tabMap[tab] || 'wallpaper');
   }

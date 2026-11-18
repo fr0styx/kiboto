@@ -18,9 +18,14 @@ describe('the invite page', () => {
 
   it('draws nothing until the texts are loaded', async () => {
     window.location.hash = '#/invite/abcdefghijklmnop12';
-    vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true, json: async () => ({ valid: true, role: 'ShareUser', role_id: 'share_user' }) })));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => ({ ok: true, json: async () => ({ valid: true, role: 'ShareUser', role_id: 'share_user' }) }))
+    );
     let loaded;
-    const texts = new Promise((resolve) => { loaded = resolve; });
+    const texts = new Promise((resolve) => {
+      loaded = resolve;
+    });
     const drawn = initInviteLanding(texts);
     await new Promise((r) => setTimeout(r, 0));
     expect(document.querySelector('dialog.invite-landing')).toBeNull();
@@ -35,7 +40,10 @@ describe('the invite page', () => {
   it('is still drawn when the texts fail to load, and does nothing without an invite', async () => {
     expect(await initInviteLanding(Promise.resolve())).toBe(false);
     window.location.hash = '#/invite/abcdefghijklmnop12';
-    vi.stubGlobal('fetch', vi.fn(async () => ({ ok: false })));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => ({ ok: false }))
+    );
     expect(await initInviteLanding(Promise.reject(new Error('offline')))).toBe(true);
     expect(document.querySelector('dialog.invite-landing').textContent).toContain('expired');
     vi.unstubAllGlobals();

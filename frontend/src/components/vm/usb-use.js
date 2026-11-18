@@ -18,9 +18,16 @@ export function confirmUsbUse(item, add) {
     add();
     return false;
   }
-  const what = item.nas_use === 'ups'
-    ? t('vmd.usb_q_ups', 'This is the UPS this NAS watches. Given to the machine, the NAS can no longer shut down safely on a power cut. Add it anyway?')
-    : t('vmd.usb_q_storage', 'This USB drive is used by this NAS (it may be the boot drive). Given to the machine, it disappears from the NAS. Add it anyway?');
+  const what =
+    item.nas_use === 'ups'
+      ? t(
+          'vmd.usb_q_ups',
+          'This is the UPS this NAS watches. Given to the machine, the NAS can no longer shut down safely on a power cut. Add it anyway?'
+        )
+      : t(
+          'vmd.usb_q_storage',
+          'This USB drive is used by this NAS (it may be the boot drive). Given to the machine, it disappears from the NAS. Add it anyway?'
+        );
   showConfirmToast(what, () => add());
   return true;
 }

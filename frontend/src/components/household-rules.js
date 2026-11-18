@@ -57,8 +57,12 @@ async function saveTwoStep(mount, select) {
 export async function renderHousehold(mount) {
   if (!mount) return;
   const [view, access] = await Promise.all([
-    Promise.resolve().then(() => api.get('/api/security/mfa-policy')).catch(() => null),
-    Promise.resolve().then(() => api.get('/api/ai/access')).catch(() => null),
+    Promise.resolve()
+      .then(() => api.get('/api/security/mfa-policy'))
+      .catch(() => null),
+    Promise.resolve()
+      .then(() => api.get('/api/ai/access'))
+      .catch(() => null),
   ]);
   const html = householdHtml(view, access);
   const section = /** @type {HTMLElement | null} */ (mount.closest('section'));
@@ -73,9 +77,13 @@ export async function renderHousehold(mount) {
       // until they set it up, they can sign in only to do that: say so first
       showConfirmToast(
         t('sec.mfa_policy_q_title', 'Require two-step sign-in?'),
-        t('hh.q', '{n, plural, one {# adult has not set it up. Until they do, they can sign in only to set it up.} other {# adults have not set it up. Until they do, they can sign in only to set it up.}}', { n }),
+        t(
+          'hh.q',
+          '{n, plural, one {# adult has not set it up. Until they do, they can sign in only to set it up.} other {# adults have not set it up. Until they do, they can sign in only to set it up.}}',
+          { n }
+        ),
         () => saveTwoStep(mount, select),
-        () => renderHousehold(mount),
+        () => renderHousehold(mount)
       );
     };
   }

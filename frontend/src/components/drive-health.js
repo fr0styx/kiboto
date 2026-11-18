@@ -44,7 +44,16 @@ import { showToast } from '../toast.js';
 import { announceChange } from '../a11y.js';
 import { compareTable } from './drive-health-compare.js';
 import { valuesTable, takenOutBox } from './drive-health-values.js';
-import { findingText, labelText, summaryText, reportCsv, openReportDialog, notesRows, notesForm, underWarranty } from './drive-health-report.js';
+import {
+  findingText,
+  labelText,
+  summaryText,
+  reportCsv,
+  openReportDialog,
+  notesRows,
+  notesForm,
+  underWarranty,
+} from './drive-health-report.js';
 
 export { labelText, summaryText, reportCsv };
 
@@ -63,7 +72,6 @@ let _current = null; // the chosen drive as last read: {drive, detail, tests, hi
 
 const VERDICT_CLASS = { ok: 'is-ok', watch: 'is-watch', soon: 'is-soon', now: 'is-now', unknown: 'is-unknown' };
 const verdictClass = (v) => VERDICT_CLASS[v] || 'is-unknown';
-
 
 function when(ts) {
   return ts ? formatDateTime(ts * 1000, undefined, '') : '';
@@ -102,7 +110,11 @@ export function overallHtml(data) {
 
 // What a finding's button does, by the kind of advice it gives
 function findingButton(f) {
-  if (['unreadable_sectors', 'reallocated_growing', 'reallocated_stable', 'reallocated_many', 'no_recent_test'].includes(f.code)) {
+  if (
+    ['unreadable_sectors', 'reallocated_growing', 'reallocated_stable', 'reallocated_many', 'no_recent_test'].includes(
+      f.code
+    )
+  ) {
     return `<button type="button" class="btn-pill-toggle is-small" data-dh-test="long">${escapeHtml(t('dh.run_long', 'Run a long test'))}</button>`;
   }
   if (f.kind === 'cooling') {
@@ -116,7 +128,9 @@ function findingButton(f) {
 
 // The serial a drive goes by; a sleeping drive's reading hides it ("Hidden while in standby")
 export const serialOf = (drive, detail) =>
-  [detail && detail.serial, drive && drive.serial].map((s) => String(s || '').trim()).find((s) => s && !/standby/i.test(s)) || '';
+  [detail && detail.serial, drive && drive.serial]
+    .map((s) => String(s || '').trim())
+    .find((s) => s && !/standby/i.test(s)) || '';
 
 /** "I know about this" on a finding to watch or plan for, or what was acknowledged and its undo. */
 function ackHtml(f, canAck) {
@@ -136,14 +150,20 @@ export function findingHtml(f, canAck = false) {
 }
 
 function testRowsHtml(history) {
-  if (!history || !history.length) return `<li class="dh-empty">${escapeHtml(t('dh.no_tests', 'No self-test has been run from Kiboto yet.'))}</li>`;
+  if (!history || !history.length)
+    return `<li class="dh-empty">${escapeHtml(t('dh.no_tests', 'No self-test has been run from Kiboto yet.'))}</li>`;
   return history
     .slice(0, 6)
     .map((h) => {
       // the stored pass flag; smartctl's normal pass text is "Completed without error"
       const status = String(h.status || '');
-      const ok = h.passed != null ? Boolean(h.passed) : /pass|without error/i.test(status) || (/complet/i.test(status) && !/fail|error/i.test(status));
-      const kind = /long|extended/i.test(String(h.test_type || '')) ? t('dh.test_long', 'Long test') : t('dh.test_short', 'Short test');
+      const ok =
+        h.passed != null
+          ? Boolean(h.passed)
+          : /pass|without error/i.test(status) || (/complet/i.test(status) && !/fail|error/i.test(status));
+      const kind = /long|extended/i.test(String(h.test_type || ''))
+        ? t('dh.test_long', 'Long test')
+        : t('dh.test_short', 'Short test');
       return `<li class="dh-test ${ok ? 'is-ok' : 'is-now'}"><span>${escapeHtml(kind)}</span><span>${escapeHtml(ok ? t('dh.test_passed', 'Passed') : status || t('dh.test_failed', 'Failed'))}</span><span class="dh-when">${escapeHtml(when(h.ts))}</span></li>`;
     })
     .join('');
@@ -165,7 +185,9 @@ function readingsHtml(detail) {
     [t('dh.r_media', 'Media errors'), m.nvme_media_err || null],
     [t('dh.r_written', 'Data written'), m.tbw_tb != null ? `${m.tbw_tb} TB` : null],
   ].filter(([, v]) => v !== null && v !== undefined && v !== '');
-  const table = rows.map(([k, v]) => `<tr><th scope="row">${escapeHtml(k)}</th><td>${escapeHtml(String(v))}</td></tr>`).join('');
+  const table = rows
+    .map(([k, v]) => `<tr><th scope="row">${escapeHtml(k)}</th><td>${escapeHtml(String(v))}</td></tr>`)
+    .join('');
   return `<table class="dh-readings">${table}</table>${detail?.raw ? `<pre class="dh-raw" data-no-icons>${escapeHtml(detail.raw)}</pre>` : ''}`;
 }
 
@@ -178,14 +200,20 @@ export function detailHtml(drive, detail, tests) {
   const sleepNote = asleep
     ? `<div class="dh-note">${escapeHtml(
         health.reading_ts
-          ? t('dh.asleep_note', 'This drive is asleep. What you see is from its last reading ({when}); it was not woken.', { when: when(health.reading_ts) })
-          : t('dh.asleep_never', 'This drive is asleep and has not been read yet; it was not woken.'),
+          ? t(
+              'dh.asleep_note',
+              'This drive is asleep. What you see is from its last reading ({when}); it was not woken.',
+              { when: when(health.reading_ts) }
+            )
+          : t('dh.asleep_never', 'This drive is asleep and has not been read yet; it was not woken.')
       )} <button type="button" class="btn-pill-toggle is-small" data-dh-wake>${escapeHtml(t('dh.read_now', 'Read now (wakes it)'))}</button></div>`
     : '';
   const active = (tests && tests.active_test) || drive.active_test;
   const progress = active
     ? `<div class="dh-progress" role="status">${escapeHtml(/long|extended/i.test(String(active.test_type || active.type || '')) ? t('dh.running_long', 'A long test is running') : t('dh.running_short', 'A short test is running'))}${
-        active.percent_remaining != null ? ` · ${escapeHtml(t('dh.left', '{p}% left', { p: active.percent_remaining }))}` : ''
+        active.percent_remaining != null
+          ? ` · ${escapeHtml(t('dh.left', '{p}% left', { p: active.percent_remaining }))}`
+          : ''
       }</div>`
     : '';
   const serial = serialOf(drive, detail);
@@ -290,7 +318,15 @@ async function loadDetail(dev, wake = false) {
       api.get(`/api/disk/smart_tests?dev=${encodeURIComponent(dev)}&limit=10`).catch(() => null),
     ]);
     if (_selected !== dev) return; // another drive was chosen meanwhile
-    _current = { drive: drive || { dev }, detail, tests, history: null, life: null, identity: {}, serial: serialOf(drive, detail) };
+    _current = {
+      drive: drive || { dev },
+      detail,
+      tests,
+      history: null,
+      life: null,
+      identity: {},
+      serial: serialOf(drive, detail),
+    };
     pane.innerHTML = detailHtml(drive || { dev }, detail, tests);
     loadExtras(dev, (detail && detail.drive_health && detail.drive_health.identity) || {});
     clearInterval(_testTimer);
@@ -330,7 +366,7 @@ async function runTest(kind) {
       kind === 'long'
         ? t('dh.long_started', 'Long test started on {dev}. You can close this window; it keeps running.', { dev })
         : t('dh.short_started', 'Short test started on {dev}.', { dev }),
-      'success',
+      'success'
     );
     loadDetail(dev);
   } catch (e) {
@@ -483,9 +519,16 @@ export function fleetHtml(drives) {
   const space = drives.reduce((a, d) => a + (Number(d.capacity_bytes) || 0), 0);
   if (space) bits.push(t('dh.fleet_space', '{size} in all', { size: formatBytes(space) }));
   const warm = drives.filter((d) => d.temp != null).sort((a, b) => b.temp - a.temp)[0];
-  if (warm) bits.push(t('dh.fleet_hottest', 'warmest {name} at {temp} °C', { name: warm.dev, temp: Math.round(warm.temp) }));
+  if (warm)
+    bits.push(t('dh.fleet_hottest', 'warmest {name} at {temp} °C', { name: warm.dev, temp: Math.round(warm.temp) }));
   const old = drives.filter((d) => d.power_on_hours).sort((a, b) => b.power_on_hours - a.power_on_hours)[0];
-  if (old) bits.push(t('dh.fleet_oldest', 'oldest {name}, {y, plural, one {# year} other {# years}} on', { name: old.dev, y: years(old.power_on_hours) }));
+  if (old)
+    bits.push(
+      t('dh.fleet_oldest', 'oldest {name}, {y, plural, one {# year} other {# years}} on', {
+        name: old.dev,
+        y: years(old.power_on_hours),
+      })
+    );
   const asleep = drives.filter((d) => d.asleep).length;
   if (asleep) bits.push(t('dh.fleet_asleep', '{n, plural, one {# asleep} other {# asleep}}', { n: asleep }));
   return bits.length ? `<p class="dh-fleet-line">${escapeHtml(bits.join(' · '))}</p>` : '';
@@ -509,22 +552,41 @@ export function aboutHtml(id, life, notes = null) {
     [t('dh.a_firmware', 'Firmware'), id && id.firmware],
     [t('dh.a_cycles', 'Times switched on'), id && id.power_cycles != null ? String(id.power_cycles) : ''],
     [t('dh.a_written', 'Written over its life'), id && id.written_bytes ? formatBytes(id.written_bytes) : ''],
-    [t('dh.a_age', 'Powered on'), life && life.age_years != null ? t('dh.a_years', '{y, plural, one {# year} other {# years}}', { y: life.age_years }) : ''],
+    [
+      t('dh.a_age', 'Powered on'),
+      life && life.age_years != null
+        ? t('dh.a_years', '{y, plural, one {# year} other {# years}}', { y: life.age_years })
+        : '',
+    ],
   ].filter(([, v]) => v);
   rows.push(...notesRows(notes));
   const lines = [];
   if (life && life.wear_pct != null) {
     lines.push(
       life.years_left != null
-        ? t('dh.wear_rate', '{p}% of its rated writes used; at the pace of the last weeks, about {y, plural, one {# year} other {# years}} left.', { p: life.wear_pct, y: life.years_left })
-        : t('dh.wear_flat', '{p}% of its rated writes used; too little change yet to say how long it lasts.', { p: life.wear_pct }),
+        ? t(
+            'dh.wear_rate',
+            '{p}% of its rated writes used; at the pace of the last weeks, about {y, plural, one {# year} other {# years}} left.',
+            { p: life.wear_pct, y: life.years_left }
+          )
+        : t('dh.wear_flat', '{p}% of its rated writes used; too little change yet to say how long it lasts.', {
+            p: life.wear_pct,
+          })
     );
   }
   if (life && life.age_years >= 5 && id && id.rotation_rpm > 0) {
-    lines.push(t('dh.old_hdd', 'Older than the five years most hard drives are built for. It may run for years, but keep its backup current.'));
+    lines.push(
+      t(
+        'dh.old_hdd',
+        'Older than the five years most hard drives are built for. It may run for years, but keep its backup current.'
+      )
+    );
   }
-  if (!rows.length && !lines.length) return `<p class="dh-hint">${escapeHtml(t('dh.about_later', 'Shown after the drive has been read while awake.'))}</p>`;
-  const table = rows.map(([k, v]) => `<tr><th scope="row">${escapeHtml(k)}</th><td>${escapeHtml(String(v))}</td></tr>`).join('');
+  if (!rows.length && !lines.length)
+    return `<p class="dh-hint">${escapeHtml(t('dh.about_later', 'Shown after the drive has been read while awake.'))}</p>`;
+  const table = rows
+    .map(([k, v]) => `<tr><th scope="row">${escapeHtml(k)}</th><td>${escapeHtml(String(v))}</td></tr>`)
+    .join('');
   return `<table class="dh-readings">${table}</table>${lines.map((n) => `<p class="dh-life">${escapeHtml(n)}</p>`).join('')}`;
 }
 
@@ -555,16 +617,21 @@ export function historyBody(h) {
     return p;
   };
   if (h.temp) {
-    const label = t('dh.h_temp', 'Temperature: {min}–{max} °C, average {avg} °C', { min: Math.round(h.temp.min), max: Math.round(h.temp.max), avg: h.temp.avg });
+    const label = t('dh.h_temp', 'Temperature: {min}–{max} °C, average {avg} °C', {
+      min: Math.round(h.temp.min),
+      max: Math.round(h.temp.max),
+      avg: h.temp.avg,
+    });
     box.append(head(label), lineChart(h.temp.points, { label, className: 'is-temp' }));
   }
   const names = Object.keys(h.counters || {});
   for (const key of names) {
     const c = h.counters[key];
     const name = (COUNTER_NAMES[key] || (() => key))();
-    const label = c.last > c.first
-      ? t('dh.h_rose', '{name}: rose from {a} to {b}', { name, a: c.first, b: c.last })
-      : t('dh.h_steady', '{name}: steady at {b}', { name, b: c.last });
+    const label =
+      c.last > c.first
+        ? t('dh.h_rose', '{name}: rose from {a} to {b}', { name, a: c.first, b: c.last })
+        : t('dh.h_steady', '{name}: steady at {b}', { name, b: c.last });
     box.append(head(label), lineChart(c.points, { label, height: 48, className: c.last > c.first ? 'is-rising' : '' }));
   }
   if (!names.length) {
@@ -587,7 +654,18 @@ export function aboutSectionHtml(id, life, serial = '') {
 /** The report dialog, with what is on screen now. */
 function openReport(preset) {
   if (!_win) return;
-  openReportDialog(_win, () => ({ drives: _drives, notes: _notes, current: _current && _current.drive?.dev === _selected ? { ..._current, counterName: (k) => (COUNTER_NAMES[k] || (() => k))() } : null }), preset);
+  openReportDialog(
+    _win,
+    () => ({
+      drives: _drives,
+      notes: _notes,
+      current:
+        _current && _current.drive?.dev === _selected
+          ? { ..._current, counterName: (k) => (COUNTER_NAMES[k] || (() => k))() }
+          : null,
+    }),
+    preset
+  );
 }
 
 /** Acknowledges a finding of the chosen drive (on) or takes that back, then shows the new verdict. */
@@ -597,7 +675,14 @@ export async function ackFinding(code, on) {
   const f = (health.findings || []).find((x) => x.code === code);
   if (!serial || !f) return;
   try {
-    if (on) await api.post('/api/drives/acks', { serial, code, params: f.params || {}, severity: f.severity, title: f.title || '' });
+    if (on)
+      await api.post('/api/drives/acks', {
+        serial,
+        code,
+        params: f.params || {},
+        severity: f.severity,
+        title: f.title || '',
+      });
     else await api.post('/api/drives/acks/forget', { serial, code });
     await loadDrives();
     if (_selected) await loadDetail(_selected);
@@ -635,11 +720,18 @@ export function scheduleText(cfg) {
     const every = cfg[`${field}_test_interval`];
     if (!every || every === 'disabled') return null;
     const name = kind === 'long' ? t('dh.test_long', 'Long test') : t('dh.test_short', 'Short test');
-    const freq = { daily: t('dh.every_day', 'every day'), weekly: t('dh.every_week', 'every week'), monthly: t('dh.every_month', 'every month') }[every] || every;
+    const freq =
+      {
+        daily: t('dh.every_day', 'every day'),
+        weekly: t('dh.every_week', 'every week'),
+        monthly: t('dh.every_month', 'every month'),
+      }[every] || every;
     return `${name} ${freq}, ${String(cfg[`${field}_test_hour`] ?? 2).padStart(2, '0')}:00`;
   };
   const parts = [part('short'), part('long')].filter(Boolean);
-  return parts.length ? t('dh.sched', 'Automatic tests: {list}. Sleeping drives are skipped.', { list: parts.join(' · ') }) : t('dh.sched_off', 'Automatic self-tests are off.');
+  return parts.length
+    ? t('dh.sched', 'Automatic tests: {list}. Sleeping drives are skipped.', { list: parts.join(' · ') })
+    : t('dh.sched_off', 'Automatic self-tests are off.');
 }
 
 let _schedule = null;
@@ -651,11 +743,15 @@ async function loadExtras(dev, id) {
     // the address was /api/smart/schedule, which no route answers: the line always said "off"
     if (!_schedule) _schedule = await api.get('/api/storage/smart/schedule').catch(() => null);
     const sched = pane.querySelector('#dh-schedule');
-    if (sched) sched.textContent = _schedule ? scheduleText(_schedule) : t('dh.sched_unknown', 'The schedule of the automatic tests could not be read.');
+    if (sched)
+      sched.textContent = _schedule
+        ? scheduleText(_schedule)
+        : t('dh.sched_unknown', 'The schedule of the automatic tests could not be read.');
     const data = await api.get(`/api/drives/history?dev=${encodeURIComponent(dev)}&days=30`);
     if (_selected !== dev) return;
     const about = pane.querySelector('#dh-about');
-    if (_current && _current.drive?.dev === dev) Object.assign(_current, { history: data.history, life: data.life, identity: id });
+    if (_current && _current.drive?.dev === dev)
+      Object.assign(_current, { history: data.history, life: data.life, identity: id });
     if (about) about.innerHTML = aboutSectionHtml(id, data.life, _current?.serial || '');
     const body = pane.querySelector('#dh-history .dh-history-body');
     if (body) body.replaceChildren(historyBody(data.history));

@@ -13,8 +13,12 @@ describe('explorer thumbnails', () => {
   });
 
   it('uses small server thumbnails, never the whole file', () => {
-    expect(thumbUrl('/mnt/user/a b/IMG_1.HEIC')).toBe('/api/fs/preview/image?path=%2Fmnt%2Fuser%2Fa%20b%2FIMG_1.HEIC&thumb=1');
+    expect(thumbUrl('/mnt/user/a b/IMG_1.HEIC')).toBe(
+      '/api/fs/preview/image?path=%2Fmnt%2Fuser%2Fa%20b%2FIMG_1.HEIC&thumb=1'
+    );
     expect(thumbUrl('/mnt/user/clip.MOV')).toContain('&thumb=1');
-    expect(previewUrl('/mnt/user/clip.MOV', 480)).toBe('/api/fs/preview/image?path=%2Fmnt%2Fuser%2Fclip.MOV&max_dim=480');
+    expect(previewUrl('/mnt/user/clip.MOV', 480)).toBe(
+      '/api/fs/preview/image?path=%2Fmnt%2Fuser%2Fclip.MOV&max_dim=480'
+    );
   });
 });

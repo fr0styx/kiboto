@@ -38,13 +38,7 @@ export async function fetchAndRenderDisksInventory() {
 
     bindDiskTableEvents(tbody);
 
-    reconcileKeyedTable(
-      tbody,
-      disks,
-      (d) => d.dev || d.name || 'unknown',
-      createDiskRow,
-      updateDiskRow
-    );
+    reconcileKeyedTable(tbody, disks, (d) => d.dev || d.name || 'unknown', createDiskRow, updateDiskRow);
   } catch (err) {
     console.warn('[Management] Failed to fetch disks inventory:', err);
     tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--crit); padding:20px;">${t('dkx.failed', 'Failed to load disks inventory.')}</td></tr>`;
@@ -60,7 +54,7 @@ function buildDiskRowInner(d) {
   const transportStr = (d.transport || (devName.startsWith('nvme') ? 'nvme' : 'sata')).toUpperCase();
   const driverStr = d.controller_driver || (devName.startsWith('nvme') ? 'nvme' : 'ahci');
   const sizeStr = d.size_formatted || d.size || '--';
-  const healthStr = isStandby ? 'STANDBY' : (d.health ? String(d.health).toUpperCase() : 'OK');
+  const healthStr = isStandby ? 'STANDBY' : d.health ? String(d.health).toUpperCase() : 'OK';
 
   return `
     <td style="font-weight:700; color:var(--kb-text-strong);">/dev/${escapeHtml(devName)}</td>
@@ -118,7 +112,7 @@ function updateDiskRow(row, d) {
 
   const isStandby = Boolean(d.standby || d.health === 'standby');
   const thermal = getThermalLevel(d.temp, isStandby, isNvmeDrive(d));
-  const healthStr = isStandby ? 'STANDBY' : (d.health ? String(d.health).toUpperCase() : 'OK');
+  const healthStr = isStandby ? 'STANDBY' : d.health ? String(d.health).toUpperCase() : 'OK';
 
   const healthTag = row.querySelector('.bay-health-tag');
   if (healthTag) {

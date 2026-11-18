@@ -11,11 +11,18 @@ async function ask(id) {
   const action = await api.get(`/api/ai/actions/${encodeURIComponent(id)}`);
   showConfirmToast(
     t('ai.mcp_confirm_title', 'An assistant wants to make a change'),
-    t('ai.mcp_confirm_body', 'Requested through an AI client (MCP): {summary}. Only confirm if you asked for this.', { summary: action.summary }),
+    t('ai.mcp_confirm_body', 'Requested through an AI client (MCP): {summary}. Only confirm if you asked for this.', {
+      summary: action.summary,
+    }),
     async () => {
       const res = await api.post(`/api/ai/actions/${encodeURIComponent(id)}/confirm`, {});
       const ok = res && !['forbidden', 'blocked', 'error', 'not_found'].includes(res.status);
-      showToast(ok ? t('ai.mcp_done', 'Done: {summary}', { summary: action.summary }) : res.error || t('ai.mcp_failed', 'The action did not run.'), ok ? 'success' : 'error');
+      showToast(
+        ok
+          ? t('ai.mcp_done', 'Done: {summary}', { summary: action.summary })
+          : res.error || t('ai.mcp_failed', 'The action did not run.'),
+        ok ? 'success' : 'error'
+      );
     },
     null,
     { okText: t('ai.confirm', 'Confirm'), cancelText: t('common.cancel', 'Cancel') }
@@ -31,7 +38,11 @@ export function initConfirmLink(win = window) {
   win.history.replaceState(null, '', win.location.pathname + (q ? `?${q}` : ''));
   ask(id).catch((err) => {
     if (err && err.status === 401) {
-      ZettEventBus.on('auth:login', () => ask(id).catch(() => showToast(t('ai.mcp_expired', 'That request expired or belongs to another account.'), 'warn')));
+      ZettEventBus.on('auth:login', () =>
+        ask(id).catch(() =>
+          showToast(t('ai.mcp_expired', 'That request expired or belongs to another account.'), 'warn')
+        )
+      );
     } else {
       showToast(t('ai.mcp_expired', 'That request expired or belongs to another account.'), 'warn');
     }

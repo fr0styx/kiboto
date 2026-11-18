@@ -7,7 +7,8 @@ afterEach(() => enablePhoneShell(false));
 
 describe('phone Home is a home screen with widgets; Settings has the tiles', () => {
   it('the desktop widgets live on Home while the phone shell is on, and go back after', () => {
-    document.body.innerHTML = '<main id="desk"><div id="desktop-widgets-container"><div class="desktop-widget" id="widget-clock"></div></div><i id="after"></i></main>';
+    document.body.innerHTML =
+      '<main id="desk"><div id="desktop-widgets-container"><div class="desktop-widget" id="widget-clock"></div></div><i id="after"></i></main>';
     enablePhoneShell(true);
     const w = document.getElementById('desktop-widgets-container');
     expect(w?.parentElement?.id).toBe('phone-widgets');

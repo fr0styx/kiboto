@@ -12,7 +12,11 @@ function box() {
 describe('deploy credentials', () => {
   it('show the login and say a generated password is kept in a hidden file', () => {
     const { wrap, success } = box();
-    showDeployCredentials(success, { credentials: { user: 'backup', password: 'x'.repeat(24), note: 'Use it on your own network.' } }, 'nas:8000');
+    showDeployCredentials(
+      success,
+      { credentials: { user: 'backup', password: 'x'.repeat(24), note: 'Use it on your own network.' } },
+      'nas:8000'
+    );
     const text = wrap.querySelector('.adm-credentials').textContent;
     expect(text).toContain('backup');
     expect(text).toContain('Use it on your own network.');

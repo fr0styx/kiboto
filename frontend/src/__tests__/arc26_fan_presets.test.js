@@ -21,7 +21,15 @@ describe('fan presets', () => {
       <div id="fan-preset-delete-overlay"><span id="fan-delete-preset-target"></span>
         <button id="fan-delete-confirm-btn"></button><button id="fan-delete-cancel-btn"></button><button id="fan-delete-close-btn"></button></div>`;
     vi.spyOn(api, 'get').mockImplementation(async (url) =>
-      url === '/api/fans/presets' ? { presets: { Quiet: {}, Loud: {} } } : { profile: 'auto', curve_points: [[30, 30], [60, 100]] },
+      url === '/api/fans/presets'
+        ? { presets: { Quiet: {}, Loud: {} } }
+        : {
+            profile: 'auto',
+            curve_points: [
+              [30, 30],
+              [60, 100],
+            ],
+          }
     );
     initFanControl();
     await vi.waitFor(() => expect(byId('fan-preset-select').options).toHaveLength(3));
@@ -37,7 +45,15 @@ describe('fan presets', () => {
     sel.dispatchEvent(new Event('change'));
     expect(byId('btn-apply-fan-preset').disabled).toBe(false);
     expect(byId('btn-delete-fan-preset').style.display).toBe('inline-flex');
-    const post = vi.spyOn(api, 'post').mockResolvedValueOnce({ fan_config: { profile: 'curve', curve_points: [[30, 20], [60, 90]] } });
+    const post = vi.spyOn(api, 'post').mockResolvedValueOnce({
+      fan_config: {
+        profile: 'curve',
+        curve_points: [
+          [30, 20],
+          [60, 90],
+        ],
+      },
+    });
     byId('btn-apply-fan-preset').click();
     await vi.waitFor(() => expect(lastToast()).toEqual({ message: 'Preset "Quiet" applied', type: 'success' }));
     expect(post).toHaveBeenCalledWith('/api/fans/presets/Quiet/apply');
@@ -99,7 +115,9 @@ describe('fan presets', () => {
       byId('btn-delete-fan-preset').click();
       del.mockRejectedValueOnce(new Error('gesperrt'));
       byId('fan-delete-confirm-btn').click();
-      await vi.waitFor(() => expect(lastToast()).toEqual({ message: 'Das Profil konnte nicht gelöscht werden: gesperrt', type: 'error' }));
+      await vi.waitFor(() =>
+        expect(lastToast()).toEqual({ message: 'Das Profil konnte nicht gelöscht werden: gesperrt', type: 'error' })
+      );
       del.mockRejectedValueOnce('offline');
       byId('fan-delete-confirm-btn').click();
       await vi.waitFor(() => expect(lastToast().message).toBe('Das Profil konnte nicht gelöscht werden: offline'));

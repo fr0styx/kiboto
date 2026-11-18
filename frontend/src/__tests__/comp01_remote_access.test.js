@@ -67,7 +67,9 @@ describe('COMP-01: use from anywhere', () => {
     const open = vi.spyOn(window, 'open').mockImplementation(() => null);
     api.post.mockResolvedValue({ ...RUNNING, approval_url: 'https://login.tailscale.com/f/serve?node=1' });
     /** @type {HTMLElement} */ (mount.querySelector('[data-remote="publish"]')).click();
-    await vi.waitFor(() => expect(open).toHaveBeenCalledWith('https://login.tailscale.com/f/serve?node=1', '_blank', 'noopener'));
+    await vi.waitFor(() =>
+      expect(open).toHaveBeenCalledWith('https://login.tailscale.com/f/serve?node=1', '_blank', 'noopener')
+    );
     expect(api.post).toHaveBeenCalledWith('/api/network/remote-access/publish', { app_port: ra.appPort() });
     expect(toast.showToast).toHaveBeenCalled();
   });
@@ -125,7 +127,9 @@ describe('COMP-01: use from anywhere', () => {
     api.get.mockRejectedValue(new Error('403'));
     await ra.renderRemoteAccess(card);
     expect(card.hidden).toBe(false);
-    expect(card.querySelector('.state-block.is-failed').textContent).toContain("Kiboto couldn't read how this NAS is reached from away.");
+    expect(card.querySelector('.state-block.is-failed').textContent).toContain(
+      "Kiboto couldn't read how this NAS is reached from away."
+    );
     expect(card.textContent).toContain('403');
     api.get.mockResolvedValue({ state: 'Stopped' });
     /** @type {HTMLElement} */ (card.querySelector('[data-try-again]')).click();
@@ -149,7 +153,10 @@ describe('COMP-01: use from anywhere', () => {
     expect(portLabel('https://a.ts.net/')).toBe('');
     expect(portLabel('not a url')).toBe('');
     const view = addressesView({ kiboto: 'https://a.ts.net/', immich: 'https://a.ts.net:8443/' }, false);
-    expect([...view.querySelectorAll('.remote-addresses a')].map((a) => a.getAttribute('href'))).toEqual(['https://a.ts.net/', 'https://a.ts.net:8443/']);
+    expect([...view.querySelectorAll('.remote-addresses a')].map((a) => a.getAttribute('href'))).toEqual([
+      'https://a.ts.net/',
+      'https://a.ts.net:8443/',
+    ]);
     expect(view.querySelector('details')).toBeNull();
   });
 });

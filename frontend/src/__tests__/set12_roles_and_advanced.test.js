@@ -94,7 +94,10 @@ describe('rights and the Advanced switch', () => {
     api.put.mockRejectedValueOnce(new Error('offline'));
     await ov.setAdvanced(false);
     expect(overview).not.toHaveBeenCalled(); // X1: the page stays in the sidebar, so nobody is moved off it
-    expect(showToast).toHaveBeenCalledWith('That choice could not be saved to your account. It holds in this browser for now.', 'error');
+    expect(showToast).toHaveBeenCalledWith(
+      'That choice could not be saved to your account. It holds in this browser for now.',
+      'error'
+    );
     api.put.mockResolvedValueOnce({});
     vi.clearAllMocks();
     await ov.setAdvanced(true);

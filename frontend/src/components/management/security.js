@@ -113,7 +113,8 @@ export function handleSecurityAdvisorClick(checkId) {
         window.openManagementWindow('mgmt-sec-storage', 'mgmt-pane-storage-shares');
       }
       setTimeout(() => {
-        const sharesMount = document.getElementById('mgmt-storage-shares-mount') || document.getElementById('mgmt-pane-storage-shares');
+        const sharesMount =
+          document.getElementById('mgmt-storage-shares-mount') || document.getElementById('mgmt-pane-storage-shares');
         if (sharesMount) {
           try {
             sharesMount.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -125,7 +126,10 @@ export function handleSecurityAdvisorClick(checkId) {
           sharesMount.classList.add('element-focus-pulse');
           setTimeout(() => sharesMount.classList.remove('element-focus-pulse'), 1500);
         }
-        showToast(t('sec.toast_shares_focus', 'Inspect and manage network share permissions and guest access settings.'), 'info');
+        showToast(
+          t('sec.toast_shares_focus', 'Inspect and manage network share permissions and guest access settings.'),
+          'info'
+        );
       }, 150);
       break;
     }
@@ -238,9 +242,20 @@ export function checkVerdict(checks = []) {
   const tips = checks.filter((c) => checkState(c) === 'tip').length;
   if (looks.length) {
     const tone = looks.some((c) => c.severity === 'critical') ? 'bad' : 'warn';
-    return [t('sec.verdict_look', '{n, plural, one {# thing needs a look} other {# things need a look}}', { n: looks.length }), tone];
+    return [
+      t('sec.verdict_look', '{n, plural, one {# thing needs a look} other {# things need a look}}', {
+        n: looks.length,
+      }),
+      tone,
+    ];
   }
-  if (tips) return [t('sec.verdict_ok_tips', 'Everything is fine · {n, plural, one {# suggestion} other {# suggestions}}', { n: tips }), 'ok'];
+  if (tips)
+    return [
+      t('sec.verdict_ok_tips', 'Everything is fine · {n, plural, one {# suggestion} other {# suggestions}}', {
+        n: tips,
+      }),
+      'ok',
+    ];
   return [t('sec.verdict_ok', 'Everything is fine'), 'ok'];
 }
 
@@ -253,7 +268,13 @@ const STATE_WORD = {
 };
 
 // the safe-defaults findings that carry a fix of the same name (backend/services/safe_defaults_advisor.py)
-export const FIXABLE = ['share_access_family', 'nfs_open_exports', 'auditor_reads_everything', 'ai_search_family', 'snapshots_off'];
+export const FIXABLE = [
+  'share_access_family',
+  'nfs_open_exports',
+  'auditor_reads_everything',
+  'ai_search_family',
+  'snapshots_off',
+];
 const PLACES = {
   ai_runtime_exposure: ['mgmt-sec-ai', 'mgmt-pane-ai-rag'],
 };
@@ -289,21 +310,36 @@ export async function fetchAndRenderSecurityPosture() {
       const [sentence, tone] = checkVerdict(data.checks || []);
       badge.textContent = sentence;
       badge.dataset.tone = tone;
-      const look = { ok: ['rgba(51,205,184,0.15)', 'var(--lt-t-33cdb8ff, #33cdb8)', 'rgba(51,205,184,0.3)'], warn: ['rgba(234,179,8,0.15)', 'var(--lt-t-eab308ff, #eab308)', 'rgba(234,179,8,0.3)'], bad: ['rgba(239,68,68,0.15)', 'var(--lt-t-ef4444ff, #ef4444)', 'rgba(239,68,68,0.3)'] }[tone];
+      const look = {
+        ok: ['rgba(51,205,184,0.15)', 'var(--lt-t-33cdb8ff, #33cdb8)', 'rgba(51,205,184,0.3)'],
+        warn: ['rgba(234,179,8,0.15)', 'var(--lt-t-eab308ff, #eab308)', 'rgba(234,179,8,0.3)'],
+        bad: ['rgba(239,68,68,0.15)', 'var(--lt-t-ef4444ff, #ef4444)', 'rgba(239,68,68,0.3)'],
+      }[tone];
       [badge.style.background, badge.style.color, badge.style.borderColor] = look;
     }
 
     if (container && Array.isArray(data.checks)) {
       const rows = [...data.checks].sort((x, y) => ORDER[checkState(x)] - ORDER[checkState(y)]);
-      container.innerHTML = rows.map(c => {
-        const state = checkState(c);
-        const passIcon = { ok: '✔', tip: 'ℹ', look: '✖' }[state];
-        const passColor = { ok: 'var(--lt-t-22c55eff, #22c55e)', tip: 'var(--kb-text-muted)', look: 'var(--lt-t-fca5a5ff, #fca5a5)' }[state]; // the lighter red passes 4.5:1 on the dark row
-        // a suggestion is neutral, not red like what needs a look (SET-23)
-        const badgeBg = { ok: 'rgba(34,197,94,0.08)', tip: 'rgba(255,255,255,0.03)', look: 'rgba(239,68,68,0.08)' }[state];
-        const rowLine = { ok: 'rgba(34,197,94,0.2)', tip: 'var(--kb-line-8, rgba(255,255,255,0.08))', look: 'rgba(239,68,68,0.3)' }[state];
-        const actionText = c.passed ? t('sec.action_review', 'Review') : t('sec.action_configure', 'Set up');
-        return `
+      container.innerHTML = rows
+        .map((c) => {
+          const state = checkState(c);
+          const passIcon = { ok: '✔', tip: 'ℹ', look: '✖' }[state];
+          const passColor = {
+            ok: 'var(--lt-t-22c55eff, #22c55e)',
+            tip: 'var(--kb-text-muted)',
+            look: 'var(--lt-t-fca5a5ff, #fca5a5)',
+          }[state]; // the lighter red passes 4.5:1 on the dark row
+          // a suggestion is neutral, not red like what needs a look (SET-23)
+          const badgeBg = { ok: 'rgba(34,197,94,0.08)', tip: 'rgba(255,255,255,0.03)', look: 'rgba(239,68,68,0.08)' }[
+            state
+          ];
+          const rowLine = {
+            ok: 'rgba(34,197,94,0.2)',
+            tip: 'var(--kb-line-8, rgba(255,255,255,0.08))',
+            look: 'rgba(239,68,68,0.3)',
+          }[state];
+          const actionText = c.passed ? t('sec.action_review', 'Review') : t('sec.action_configure', 'Set up');
+          return `
           <div class="sec-advisor-item ${c.passed ? 'passed' : 'needs-action'}" data-check-id="${escapeHtml(c.id)}" style="background:${badgeBg}; border:1px solid ${rowLine};">
             <div style="display:flex; align-items:center; gap:10px; flex:1; min-width:0;">
               <span class="sec-advisor-item-icon" style="color:${passColor}; font-weight:800; font-size: var(--kb-fs-sm); line-height:1;">${passIcon}</span>
@@ -319,9 +355,10 @@ export async function fetchAndRenderSecurityPosture() {
             </div>
           </div>
         `;
-      }).join('');
+        })
+        .join('');
 
-      container.querySelectorAll('.sec-advisor-fix-btn').forEach(btn => {
+      container.querySelectorAll('.sec-advisor-fix-btn').forEach((btn) => {
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
           applySecurityFix(btn.dataset.fix, btn);
@@ -330,7 +367,7 @@ export async function fetchAndRenderSecurityPosture() {
 
       // a row is not a button around buttons (screen readers lose the inner ones, SET-14): its
       // "Review" / "Configure" is a real button, and a click anywhere else on the row does the same
-      container.querySelectorAll('.sec-advisor-item').forEach(item => {
+      container.querySelectorAll('.sec-advisor-item').forEach((item) => {
         const checkId = item.dataset.checkId;
         item.addEventListener('click', () => handleSecurityAdvisorClick(checkId));
       });

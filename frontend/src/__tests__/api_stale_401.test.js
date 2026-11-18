@@ -11,7 +11,10 @@ describe('stale 401 after sign-in', () => {
   it('keeps the new session when a request sent before login comes back 401', async () => {
     let release;
     vi.spyOn(window, 'fetch').mockImplementation(
-      () => new Promise((resolve) => { release = () => resolve(new Response('{}', { status: 401 })); }),
+      () =>
+        new Promise((resolve) => {
+          release = () => resolve(new Response('{}', { status: 401 }));
+        })
     );
     const pending = api.get('/api/fans').catch((e) => e);
     auth.setToken('ignored-cookie-session');

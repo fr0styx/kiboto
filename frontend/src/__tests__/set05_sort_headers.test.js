@@ -28,7 +28,10 @@ describe('sorting in the File Explorer (SET-05)', () => {
   });
 
   it('a refresh uses the same sort as a click on a header, and no other', () => {
-    const load = page.slice(page.indexOf('  async loadPath('), page.indexOf('  /** The folder wasn\'t opened because its disk is asleep'));
+    const load = page.slice(
+      page.indexOf('  async loadPath('),
+      page.indexOf("  /** The folder wasn't opened because its disk is asleep")
+    );
     expect(load).toContain('this.applyHidden();'); // which sorts (SET-28 Files 4)
     const hide = page.slice(page.indexOf('  applyHidden() {'), page.indexOf('  toggleHidden() {'));
     expect(hide).toContain('this.applySorting();');
@@ -41,8 +44,12 @@ describe('sorting in the File Explorer (SET-05)', () => {
   it('the arrow is on the column that sorts, and the bin keeps "From" and "Deleted"', () => {
     const fm = Object.create(FileManagerWindow.prototype);
     Object.assign(fm, {
-      colName: header('Name'), colType: header('Type'), colSize: header('Size'), colMtime: header('Modified'),
-      currentSortBy: 'mtime', currentSortDir: 'desc',
+      colName: header('Name'),
+      colType: header('Type'),
+      colSize: header('Size'),
+      colMtime: header('Modified'),
+      currentSortBy: 'mtime',
+      currentSortDir: 'desc',
     });
     binColumns(fm, true);
     fm.updateSortHeaderUI();

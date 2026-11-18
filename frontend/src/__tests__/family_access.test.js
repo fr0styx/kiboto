@@ -5,7 +5,8 @@ vi.mock('../toast.js', () => ({ showToast: vi.fn() }));
 vi.mock('../components/remote-access.js', () => ({ qrSvg: vi.fn(async () => '<svg id="qr"></svg>') }));
 const { api } = await import('../api.js');
 const toast = await import('../toast.js');
-const { familyAccessHtml, inviteMessage, loadFamilyAccessCard } = await import('../components/management/family-access.js');
+const { familyAccessHtml, inviteMessage, loadFamilyAccessCard } =
+  await import('../components/management/family-access.js');
 
 const tick = () => new Promise((r) => setTimeout(r, 0));
 // a made-up key, built in pieces so secret scanning doesn't take it for a real one
@@ -15,8 +16,25 @@ const USERS = [
   { id: 'u2', username: 'kid', display_name: '', status: 'active' },
   { id: 'u3', username: 'gone', status: 'disabled' },
 ];
-const BASE = { tailscale: true, headscale: false, has_key: true, key_days_left: 60, key_expiring: false, keys_page: 'https://login.tailscale.com/admin/settings/keys', public_page: true, people: [] };
-const INVITED = { user_id: 'u1', username: 'gran', name: 'Gran', state: 'invited', login: '', page_url: 'https://a.ts.net:8443/api/fs/shared/join/tok', invite_url: 'https://login.tailscale.com/admin/invite/c1' };
+const BASE = {
+  tailscale: true,
+  headscale: false,
+  has_key: true,
+  key_days_left: 60,
+  key_expiring: false,
+  keys_page: 'https://login.tailscale.com/admin/settings/keys',
+  public_page: true,
+  people: [],
+};
+const INVITED = {
+  user_id: 'u1',
+  username: 'gran',
+  name: 'Gran',
+  state: 'invited',
+  login: '',
+  page_url: 'https://a.ts.net:8443/api/fs/shared/join/tok',
+  invite_url: 'https://login.tailscale.com/admin/invite/c1',
+};
 
 describe('family from anywhere (NFEAT-1)', () => {
   beforeEach(() => {
@@ -44,11 +62,16 @@ describe('family from anywhere (NFEAT-1)', () => {
     const invited = familyAccessHtml({ ...BASE, people: [INVITED] }, USERS);
     expect(invited).toContain('Invited, not joined yet');
     expect(invited).toContain('data-fa-copy="u1"');
-    const online = familyAccessHtml({ ...BASE, people: [{ ...INVITED, state: 'online', login: 'gran@example.com', page_url: '', invite_url: '' }] }, USERS);
+    const online = familyAccessHtml(
+      { ...BASE, people: [{ ...INVITED, state: 'online', login: 'gran@example.com', page_url: '', invite_url: '' }] },
+      USERS
+    );
     expect(online).toContain('online now');
     expect(online).toContain('gran@example.com');
     expect(online).toContain('Remove access');
-    expect(familyAccessHtml({ ...BASE, people: [{ ...INVITED, state: 'expired' }] }, USERS)).toContain('Invite expired');
+    expect(familyAccessHtml({ ...BASE, people: [{ ...INVITED, state: 'expired' }] }, USERS)).toContain(
+      'Invite expired'
+    );
     expect(inviteMessage(INVITED)).toContain('/join/tok');
     const plain = inviteMessage({ ...INVITED, page_url: '' });
     expect(plain).toContain('install the Tailscale app');

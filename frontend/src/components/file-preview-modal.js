@@ -4,7 +4,14 @@ import { t } from '../i18n.js';
 import { showToast } from '../toast.js';
 
 import { formatBytes, formatDateTime } from '../format.js';
-import { canPlayHere, codecName, compatStreamUrl, convertedPlan, formatDuration, mediaInfoUrl } from './media-support.js';
+import {
+  canPlayHere,
+  codecName,
+  compatStreamUrl,
+  convertedPlan,
+  formatDuration,
+  mediaInfoUrl,
+} from './media-support.js';
 import {
   ICONS,
   isImageName,
@@ -50,7 +57,20 @@ let _isMaximized = false;
 let _isInfoOpen = false;
 let _isFilmstripOpen = true;
 
-const IMAGE_EXTS = new Set(['.jpg', '.jpeg', '.png', '.webp', '.gif', '.svg', '.bmp', '.ico', '.tiff', '.heic', '.heif', '.dng']);
+const IMAGE_EXTS = new Set([
+  '.jpg',
+  '.jpeg',
+  '.png',
+  '.webp',
+  '.gif',
+  '.svg',
+  '.bmp',
+  '.ico',
+  '.tiff',
+  '.heic',
+  '.heif',
+  '.dng',
+]);
 const MEDIA_EXTS = new Set(['.mp4', '.mkv', '.webm', '.mov', '.avi', '.mp3', '.wav', '.ogg', '.flac', '.aac', '.m4a']);
 
 function isImageFile(filename) {
@@ -64,7 +84,6 @@ function isPreviewableFile(filename) {
   const ext = '.' + filename.split('.').pop().toLowerCase();
   return IMAGE_EXTS.has(ext) || MEDIA_EXTS.has(ext);
 }
-
 
 // On a phone the toolbar scrolls sideways. Fade the cut-off edge and show a chevron
 // button, so the tools past the edge (Download, Fullscreen) can be found.
@@ -276,7 +295,11 @@ function bindModalGlobalEvents(overlay) {
 
     // Video-specific keybindings when video player is active
     if (_activeVideoController) {
-      if (e.key === 'PageDown' || e.key === 'PageUp' || (e.shiftKey && (e.key === 'ArrowRight' || e.key === 'ArrowLeft'))) {
+      if (
+        e.key === 'PageDown' ||
+        e.key === 'PageUp' ||
+        (e.shiftKey && (e.key === 'ArrowRight' || e.key === 'ArrowLeft'))
+      ) {
         if (_gallery.length > 1) {
           e.preventDefault();
           e.stopPropagation();
@@ -485,9 +508,10 @@ async function loadCurrentItem() {
 
     setIconLabel(metaEl, '💤', t('ui.nvme_rag_cache_zero_disk', 'Search without waking drives'));
     const isPhoto = isImageFile(_currentName);
-    const thumbHtml = isPhoto && _currentAiMeta.thumbnailUrl
-      ? `<img src="${escapeHtml(_currentAiMeta.thumbnailUrl)}" class="quicklook-img qlv-box" alt="${escapeHtml(_currentName)}" />`
-      : '';
+    const thumbHtml =
+      isPhoto && _currentAiMeta.thumbnailUrl
+        ? `<img src="${escapeHtml(_currentAiMeta.thumbnailUrl)}" class="quicklook-img qlv-box" alt="${escapeHtml(_currentName)}" />`
+        : '';
     const excerptHtml = _currentAiMeta.excerpt
       ? `<pre class="quicklook-code qlv-size"><code>${escapeHtml(_currentAiMeta.excerpt)}</code></pre>`
       : '';
@@ -572,7 +596,13 @@ async function loadCurrentItem() {
           // the first time while the server keeps a copy for next time (NVID-1)
           const plan = compat ? convertedPlan(media, forPath) : null;
           if (plan && plan.prepare) api.get(plan.prepare).catch(() => {});
-          renderVideoPlayer(bodyEl, plan ? plan.src : streamUrl, { ...res, media, compat: Boolean(plan && plan.live), converted: Boolean(plan), mode: plan ? plan.mode : 'full' });
+          renderVideoPlayer(bodyEl, plan ? plan.src : streamUrl, {
+            ...res,
+            media,
+            compat: Boolean(plan && plan.live),
+            converted: Boolean(plan),
+            mode: plan ? plan.mode : 'full',
+          });
           addGalleryNav(bodyEl);
         } else {
           bodyEl.innerHTML = `
@@ -727,21 +757,25 @@ function renderImagePreview(bodyEl, imgUrl, meta) {
 
 function bindPanZoomHandlers(viewport, img) {
   // Mouse Wheel Zoom centered at cursor
-  viewport.addEventListener('wheel', (e) => {
-    e.preventDefault();
-    const rect = viewport.getBoundingClientRect();
-    const mouseX = e.clientX - (rect.left + rect.width / 2);
-    const mouseY = e.clientY - (rect.top + rect.height / 2);
+  viewport.addEventListener(
+    'wheel',
+    (e) => {
+      e.preventDefault();
+      const rect = viewport.getBoundingClientRect();
+      const mouseX = e.clientX - (rect.left + rect.width / 2);
+      const mouseY = e.clientY - (rect.top + rect.height / 2);
 
-    const factor = e.deltaY < 0 ? 1.15 : (1 / 1.15);
-    const nextZoom = Math.min(10.0, Math.max(0.15, _zoom * factor));
+      const factor = e.deltaY < 0 ? 1.15 : 1 / 1.15;
+      const nextZoom = Math.min(10.0, Math.max(0.15, _zoom * factor));
 
-    _panX = mouseX - (mouseX - _panX) * (nextZoom / _zoom);
-    _panY = mouseY - (mouseY - _panY) * (nextZoom / _zoom);
-    _zoom = nextZoom;
+      _panX = mouseX - (mouseX - _panX) * (nextZoom / _zoom);
+      _panY = mouseY - (mouseY - _panY) * (nextZoom / _zoom);
+      _zoom = nextZoom;
 
-    applyTransform(img, viewport, false);
-  }, { passive: false });
+      applyTransform(img, viewport, false);
+    },
+    { passive: false }
+  );
 
   // Touch: swipe for next/previous, pinch to zoom
   attachGestures(viewport, {
@@ -762,7 +796,9 @@ function bindPanZoomHandlers(viewport, img) {
     _isDragging = true;
     _dragStartX = e.clientX - _panX;
     _dragStartY = e.clientY - _panY;
-    try { viewport.setPointerCapture(e.pointerId); } catch (_) {}
+    try {
+      viewport.setPointerCapture(e.pointerId);
+    } catch (_) {}
     viewport.style.cursor = 'grabbing';
   });
 
@@ -776,7 +812,9 @@ function bindPanZoomHandlers(viewport, img) {
   const endDrag = (e) => {
     if (!_isDragging) return;
     _isDragging = false;
-    try { viewport.releasePointerCapture(e.pointerId); } catch (_) {}
+    try {
+      viewport.releasePointerCapture(e.pointerId);
+    } catch (_) {}
     viewport.style.cursor = _zoom > 1.02 ? 'grab' : 'default';
   };
   viewport.addEventListener('pointerup', endDrag);
@@ -992,14 +1030,15 @@ function updateInspectorContent(meta) {
   const exif = meta.exif || {};
 
   // Camera & lens
-  const camera = (exif.camera || exif.lens)
-    ? `<div class="quicklook-camera-card">
+  const camera =
+    exif.camera || exif.lens
+      ? `<div class="quicklook-camera-card">
         <div class="quicklook-section-title">📷 ${escapeHtml(t('preview.camera', 'Camera & Lens'))}</div>
         ${exif.camera ? `<div class="quicklook-camera-name">${escapeHtml(exif.camera)}</div>` : ''}
         ${exif.lens ? `<div class="quicklook-camera-lens">${escapeHtml(exif.lens)}</div>` : ''}
         ${exif.lens_spec && exif.lens_spec !== exif.lens ? `<div class="quicklook-camera-spec">${escapeHtml(exif.lens_spec)}</div>` : ''}
       </div>`
-    : '';
+      : '';
 
   const makerHasWb = (exif.maker_settings?.rows || []).some((r) => r.label === 'White balance');
 
@@ -1008,8 +1047,11 @@ function updateInspectorContent(meta) {
     exifTile(t('preview.shutter', 'Shutter'), exif.shutter_speed),
     exifTile(t('preview.aperture', 'Aperture'), exif.aperture),
     exifTile(t('preview.iso', 'ISO'), exif.iso ? exif.iso.replace(/^ISO\s*/, '') : ''),
-    exifTile(t('preview.focal', 'Focal length'), exif.focal_length,
-      exif.focal_length_35mm ? t('preview.equiv', '{value} full-frame', { value: exif.focal_length_35mm }) : ''),
+    exifTile(
+      t('preview.focal', 'Focal length'),
+      exif.focal_length,
+      exif.focal_length_35mm ? t('preview.equiv', '{value} full-frame', { value: exif.focal_length_35mm }) : ''
+    ),
   ].join('');
   const exposure = inspectorSection(
     t('preview.exposure', 'Exposure'),
@@ -1021,16 +1063,23 @@ function updateInspectorContent(meta) {
       // Maker settings carry the white balance with its fine-tune; don't show it twice
       (makerHasWb ? '' : inspectorRow(t('preview.white_balance', 'White balance'), exif.white_balance)) +
       inspectorRow(t('preview.scene', 'Scene'), exif.scene_type) +
-      inspectorRow(t('preview.subject_distance', 'Subject distance'), exif.subject_distance),
+      inspectorRow(t('preview.subject_distance', 'Subject distance'), exif.subject_distance)
   );
 
   // In-camera settings (Fujifilm film simulation and friends)
-  const maker = exif.maker_settings && Array.isArray(exif.maker_settings.rows)
-    ? inspectorSection(
-      exif.maker_settings.title === 'Fujifilm settings' ? t('preview.maker_fujifilm', 'Fujifilm settings') : exif.maker_settings.title,
-      exif.maker_settings.rows.map((r) => inspectorRow(MAKER_LABEL_KEYS[r.label] ? t(MAKER_LABEL_KEYS[r.label], r.label) : r.label, r.value)).join(''),
-    )
-    : '';
+  const maker =
+    exif.maker_settings && Array.isArray(exif.maker_settings.rows)
+      ? inspectorSection(
+          exif.maker_settings.title === 'Fujifilm settings'
+            ? t('preview.maker_fujifilm', 'Fujifilm settings')
+            : exif.maker_settings.title,
+          exif.maker_settings.rows
+            .map((r) =>
+              inspectorRow(MAKER_LABEL_KEYS[r.label] ? t(MAKER_LABEL_KEYS[r.label], r.label) : r.label, r.value)
+            )
+            .join('')
+        )
+      : '';
 
   // When and where
   const gps = exif.gps;
@@ -1038,14 +1087,15 @@ function updateInspectorContent(meta) {
   if (gps && Number.isFinite(gps.lat) && Number.isFinite(gps.lon)) {
     const coords = `${gps.lat.toFixed(5)}, ${gps.lon.toFixed(5)}`;
     const mapUrl = `https://www.openstreetmap.org/?mlat=${gps.lat}&mlon=${gps.lon}#map=16/${gps.lat}/${gps.lon}`;
-    place = inspectorRow(t('preview.coordinates', 'Coordinates'), coords) +
+    place =
+      inspectorRow(t('preview.coordinates', 'Coordinates'), coords) +
       inspectorRow(t('preview.altitude', 'Altitude'), gps.altitude_m != null ? `${gps.altitude_m} m` : '') +
       inspectorRow(t('preview.direction', 'Facing'), gps.direction != null ? `${gps.direction}°` : '') +
       `<a class="quicklook-map-link" href="${escapeHtml(mapUrl)}" target="_blank" rel="noopener noreferrer">🗺️ ${escapeHtml(t('preview.open_map', 'Open in OpenStreetMap'))}</a>`;
   }
   const when = inspectorSection(
     t('preview.capture', 'Capture'),
-    inspectorRow(t('preview.taken', 'Taken'), takenText(exif)) + place,
+    inspectorRow(t('preview.taken', 'Taken'), takenText(exif)) + place
   );
 
   // The file itself
@@ -1053,7 +1103,9 @@ function updateInspectorContent(meta) {
     (meta.ext || '').toUpperCase().replace('.', ''),
     meta.bit_depth ? `${meta.bit_depth}-bit` : '',
     meta.color_mode || '',
-  ].filter(Boolean).join(' · ');
+  ]
+    .filter(Boolean)
+    .join(' · ');
   const stars = exif.rating ? '★'.repeat(exif.rating) + '☆'.repeat(5 - exif.rating) : '';
   const file = inspectorSection(
     t('preview.specs', 'File Specifications'),
@@ -1063,7 +1115,7 @@ function updateInspectorContent(meta) {
       inspectorRow(t('preview.format', 'Format'), format) +
       inspectorRow(t('preview.color_space', 'Color space'), meta.color_profile || exif.color_space) +
       inspectorRow(t('preview.orientation', 'Orientation'), exif.orientation) +
-      inspectorRow(t('preview.rating', 'Rating'), stars),
+      inspectorRow(t('preview.rating', 'Rating'), stars)
   );
 
   // Who and what made it
@@ -1073,7 +1125,7 @@ function updateInspectorContent(meta) {
       inspectorRow(t('preview.copyright', 'Copyright'), exif.copyright) +
       inspectorRow(t('preview.software', 'Software'), exif.software) +
       inspectorRow(t('preview.body_serial', 'Camera serial'), exif.body_serial) +
-      inspectorRow(t('preview.lens_serial', 'Lens serial'), exif.lens_serial),
+      inspectorRow(t('preview.lens_serial', 'Lens serial'), exif.lens_serial)
   );
 
   contentEl.innerHTML = `
@@ -1188,7 +1240,8 @@ export async function triggerCopy() {
 }
 
 function renderVideoPlayer(container, streamUrl, meta) {
-  const isPipSupported = typeof document !== 'undefined' && 'pictureInPictureEnabled' in document && document.pictureInPictureEnabled;
+  const isPipSupported =
+    typeof document !== 'undefined' && 'pictureInPictureEnabled' in document && document.pictureInPictureEnabled;
 
   container.innerHTML = `
     <div class="quicklook-video-container" id="quicklook-video-container" tabindex="0">
@@ -1257,10 +1310,14 @@ function renderVideoPlayer(container, streamUrl, meta) {
             <button type="button" class="quicklook-vctrl-btn" id="ql-video-loop-btn" title="${escapeHtml(t('video.loop', 'Loop'))}" aria-label="${escapeHtml(t('video.loop', 'Loop'))}">
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>
             </button>
-            ${isPipSupported ? `
+            ${
+              isPipSupported
+                ? `
             <button type="button" class="quicklook-vctrl-btn" id="ql-video-pip-btn" title="${escapeHtml(t('video.pip', 'Picture in Picture'))} (P)">
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="14" x="3" y="5" rx="2"/><rect width="7" height="5" x="12" y="12" rx="1"/></svg>
-            </button>` : ''}
+            </button>`
+                : ''
+            }
             <button type="button" class="quicklook-vctrl-btn" id="ql-video-fs-btn" title="${escapeHtml(t('video.fullscreen', 'Fullscreen'))} (F)">
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
             </button>
@@ -1309,9 +1366,19 @@ function renderVideoPlayer(container, streamUrl, meta) {
   const videoPath = _currentPath;
   // A converted stream starts at the second it was asked for: keep that offset, take the
   // length from the file's details, and seek by restarting the stream.
-  const clock = { compat: !!(meta && meta.compat), mode: (meta && meta.mode) || 'full', offset: 0, duration: (meta && meta.media && meta.media.duration) || 0 };
+  const clock = {
+    compat: !!(meta && meta.compat),
+    mode: (meta && meta.mode) || 'full',
+    offset: 0,
+    duration: (meta && meta.media && meta.media.duration) || 0,
+  };
   const getTime = () => (videoEl ? videoEl.currentTime || 0 : 0) + (clock.compat ? clock.offset : 0);
-  const getDur = () => (clock.compat ? clock.duration : (videoEl && Number.isFinite(videoEl.duration) ? videoEl.duration : clock.duration)) || 0;
+  const getDur = () =>
+    (clock.compat
+      ? clock.duration
+      : videoEl && Number.isFinite(videoEl.duration)
+        ? videoEl.duration
+        : clock.duration) || 0;
   function seekTo(seconds) {
     if (!videoEl) return;
     const target = Math.max(0, Math.min(getDur() || seconds, seconds));
@@ -1341,16 +1408,25 @@ function renderVideoPlayer(container, streamUrl, meta) {
     showUnplayableVideo(container, meta);
   }
   if (videoEl) {
-    if (clock.compat || (meta && meta.converted)) videoEl.addEventListener('loadeddata', () => showBadge(t('video.converting', 'Converted for this browser'), 2500), { once: true });
-    videoEl.addEventListener('loadedmetadata', () => {
-      const at = getResume(videoPath, getDur());
-      if (at) {
-        seekTo(at);
-        const mm = Math.floor(at / 60);
-        const ss = String(Math.floor(at % 60)).padStart(2, '0');
-        showBadge(t('video.resumed', 'Continuing at {time}', { time: `${mm}:${ss}` }), 2500);
-      }
-    }, { once: true });
+    if (clock.compat || (meta && meta.converted))
+      videoEl.addEventListener(
+        'loadeddata',
+        () => showBadge(t('video.converting', 'Converted for this browser'), 2500),
+        { once: true }
+      );
+    videoEl.addEventListener(
+      'loadedmetadata',
+      () => {
+        const at = getResume(videoPath, getDur());
+        if (at) {
+          seekTo(at);
+          const mm = Math.floor(at / 60);
+          const ss = String(Math.floor(at % 60)).padStart(2, '0');
+          showBadge(t('video.resumed', 'Continuing at {time}', { time: `${mm}:${ss}` }), 2500);
+        }
+      },
+      { once: true }
+    );
     let lastSaved = 0;
     videoEl.addEventListener('timeupdate', () => {
       if (Math.abs(getTime() - lastSaved) >= 5) {
@@ -1390,7 +1466,8 @@ function renderVideoPlayer(container, streamUrl, meta) {
     containerEl?.classList.toggle('is-playing', isPlaying);
     if (playIcon) playIcon.style.display = isPlaying ? 'none' : 'block';
     if (pauseIcon) pauseIcon.style.display = isPlaying ? 'block' : 'none';
-    if (playBtn) playBtn.title = isPlaying ? `${t('video.pause', 'Pause')} (Space / K)` : `${t('video.play', 'Play')} (Space / K)`;
+    if (playBtn)
+      playBtn.title = isPlaying ? `${t('video.pause', 'Pause')} (Space / K)` : `${t('video.play', 'Play')} (Space / K)`;
     if (isPlaying) {
       resetHudTimer();
     } else {
@@ -1655,7 +1732,7 @@ function showUnplayableVideo(container, meta) {
   container.innerHTML = `
     <div class="quicklook-unplayable" role="alert">
       <div class="quicklook-unplayable-title">${escapeHtml(t('video.unplayable', "This video can't play in the browser"))}</div>
-      <div class="quicklook-unplayable-text">${escapeHtml(t('video.unplayable_hint', 'Its format or codec ({ext}) isn\'t supported here. Download it, or open it in VLC or Infuse.', { ext: ext || '?' }))}</div>
+      <div class="quicklook-unplayable-text">${escapeHtml(t('video.unplayable_hint', "Its format or codec ({ext}) isn't supported here. Download it, or open it in VLC or Infuse.", { ext: ext || '?' }))}</div>
       <button type="button" class="btn-pill-toggle" id="ql-unplayable-download">${ICONS.download} ${escapeHtml(t('preview.download', 'Download'))}</button>
     </div>`;
   container.querySelector('#ql-unplayable-download')?.addEventListener('click', () => triggerDownload());
@@ -1671,13 +1748,18 @@ async function addSubtitles(videoEl, path) {
   try {
     if (!_folderCache.has(dir)) {
       const res = await api.get(`/api/browse?path=${encodeURIComponent(dir)}&dirs_only=0`);
-      _folderCache.set(dir, (res.dirs || []).filter((f) => !f.is_dir).map((f) => f.name));
+      _folderCache.set(
+        dir,
+        (res.dirs || []).filter((f) => !f.is_dir).map((f) => f.name)
+      );
       if (_folderCache.size > 20) _folderCache.delete(_folderCache.keys().next().value);
     }
     const names = _folderCache.get(dir) || [];
     const subs = names.filter((n) => n.startsWith(base + '.') && /\.(vtt|srt)$/i.test(n)).slice(0, 4);
     for (const name of subs) {
-      const r = await fetch(`/api/fs/download?path=${encodeURIComponent(`${dir}/${name}`)}`, { credentials: 'same-origin' });
+      const r = await fetch(`/api/fs/download?path=${encodeURIComponent(`${dir}/${name}`)}`, {
+        credentials: 'same-origin',
+      });
       if (!r.ok) continue;
       const text = await r.text();
       const vtt = /\.srt$/i.test(name) ? srtToVtt(text) : text;

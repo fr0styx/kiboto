@@ -1,6 +1,11 @@
 /** NUX-20: the Docker stack inspector and stack picker read as plain, translatable words. */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { openStackModal, openStackPickerModal, deployComposeStackSnippet, _resetStackModalForTesting } from '../components/stack-modal.js';
+import {
+  openStackModal,
+  openStackPickerModal,
+  deployComposeStackSnippet,
+  _resetStackModalForTesting,
+} from '../components/stack-modal.js';
 import { api } from '../api.js';
 import { showToast, showConfirmToast } from '../toast.js';
 
@@ -24,7 +29,14 @@ const DETAILS = {
   total_count: 2,
   compose_yaml: 'services:\n  app:\n    image: nginx\n',
   containers: [
-    { id: 'c1', service: 'app', image: 'nginx', state: 'running', ports: [{ host_port: 8080, container_port: 80, proto: 'tcp' }], webui_url: 'http://x:8080' },
+    {
+      id: 'c1',
+      service: 'app',
+      image: 'nginx',
+      state: 'running',
+      ports: [{ host_port: 8080, container_port: 80, proto: 'tcp' }],
+      webui_url: 'http://x:8080',
+    },
     { id: 'c2', name: 'db', image: 'postgres', state: 'exited', ports: [] },
   ],
 };
@@ -48,14 +60,23 @@ describe('stack inspector (NUX-20)', () => {
     expect(byId('stack-path-label').textContent).toBe('/mnt/user/appdata/web/compose.yaml');
     expect(byId('stack-modal-msg').textContent).toBe('Loaded from the Compose file on disk');
     const services = byId('stack-services-list').textContent;
-    for (const w of ['● Running', '● Stopped', 'Host network / none', 'Ports:', 'Web UI', 'Container details']) expect(services).toContain(w);
+    for (const w of ['● Running', '● Stopped', 'Host network / none', 'Ports:', 'Web UI', 'Container details'])
+      expect(services).toContain(w);
     const win = byId('stack-inspector-window').textContent;
-    for (const w of ['Compose file (compose.yaml)', 'Environment (.env)', 'Services', 'Copy YAML', 'Save and restart']) expect(win).toContain(w);
+    for (const w of ['Compose file (compose.yaml)', 'Environment (.env)', 'Services', 'Copy YAML', 'Save and restart'])
+      expect(win).toContain(w);
     expect(byId('stack-action-redeploy')).toBeNull(); // it was a restart under another name (SET-14)
   });
 
   it('says where a stack without a file came from, or that it could not load', async () => {
-    const get = vi.spyOn(api, 'get').mockResolvedValue({ name: 'live', location_type: 'synthesized', has_real_file: false, running_count: 0, total_count: 0, containers: [] });
+    const get = vi.spyOn(api, 'get').mockResolvedValue({
+      name: 'live',
+      location_type: 'synthesized',
+      has_real_file: false,
+      running_count: 0,
+      total_count: 0,
+      containers: [],
+    });
     await openStackModal('live');
     expect(byId('stack-path-label').textContent).toBe('Rebuilt from the running containers');
     expect(byId('stack-modal-msg').textContent).toBe('Rebuilt from the running containers');
@@ -79,7 +100,9 @@ describe('stack inspector (NUX-20)', () => {
 
     deployComposeStackSnippet('services:\n  tool:\n    image: x\n    privileged: true\n');
     await flush();
-    expect(byId('stack-modal-msg').textContent).toMatch(/^Review before deploying\. This AI-written stack asks for host access:\n/);
+    expect(byId('stack-modal-msg').textContent).toMatch(
+      /^Review before deploying\. This AI-written stack asks for host access:\n/
+    );
     byId('stack-save-btn').click();
     await flush();
     const [title, msg, , no] = showConfirmToast.mock.calls.at(-1);
@@ -139,7 +162,13 @@ describe('stack picker (NUX-20)', () => {
 
   it('counts stacks and shows each one’s state', async () => {
     await openStackPickerModal([
-      { name: 'all', running_count: 2, total_count: 2, working_dir: '/w/all', services: ['a', 'b', 'c', 'd', 'e', 'f', 'g'] },
+      {
+        name: 'all',
+        running_count: 2,
+        total_count: 2,
+        working_dir: '/w/all',
+        services: ['a', 'b', 'c', 'd', 'e', 'f', 'g'],
+      },
       { name: 'none', running_count: 0, total_count: 3, services: [] },
       { name: 'some', running_count: 1, total_count: 3, config_files: '/w/some.yaml', services: ['x'] },
     ]);

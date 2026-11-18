@@ -38,7 +38,8 @@ describe('network settings states (NUX-20)', () => {
   });
 
   it('lists tailnet devices, online and offline', () => {
-    document.body.innerHTML = '<span id="ts-peer-count-pill"></span><table><tbody id="ts-peers-table-body"></tbody></table>';
+    document.body.innerHTML =
+      '<span id="ts-peer-count-pill"></span><table><tbody id="ts-peers-table-body"></tbody></table>';
     renderTailscalePeersTable([
       { hostname: 'phone', ip: '100.64.0.2', online: true, direct: true },
       { hostname: 'laptop', ip: '', online: false },
@@ -62,7 +63,15 @@ describe('network layout with missing parts (NUX-20)', () => {
   afterEach(() => vi.restoreAllMocks());
 
   it('falls back to plain words when the host says little', async () => {
-    vi.spyOn(api, 'get').mockResolvedValue({ status: 'ok', summary: {}, physical_interfaces: [], bonds: [], bridges: [], docker_networks: [], vlans: [] });
+    vi.spyOn(api, 'get').mockResolvedValue({
+      status: 'ok',
+      summary: {},
+      physical_interfaces: [],
+      bonds: [],
+      bridges: [],
+      docker_networks: [],
+      vlans: [],
+    });
     await fetchAndRenderNetworkTopology();
     expect(byId('net-home').textContent).toBe("Kiboto could not read this NAS's address.");
     expect(byId('net-port-rows').textContent).toBe('No network ports found.');
@@ -74,8 +83,17 @@ describe('network layout with missing parts (NUX-20)', () => {
   it('names ports, bridges and bonds without their optional details', async () => {
     vi.spyOn(api, 'get').mockResolvedValue({
       status: 'ok',
-      summary: { primary_interface: 'br0', active_physical: 1, total_physical: 1, docker_networks_count: 1, docker_containers_count: 1 },
-      physical_interfaces: [{ name: 'eth0', is_up: true }, { name: 'eth1', is_up: false, master: 'br0', driver: 'igc', speed_human: '1 Gbps' }],
+      summary: {
+        primary_interface: 'br0',
+        active_physical: 1,
+        total_physical: 1,
+        docker_networks_count: 1,
+        docker_containers_count: 1,
+      },
+      physical_interfaces: [
+        { name: 'eth0', is_up: true },
+        { name: 'eth1', is_up: false, master: 'br0', driver: 'igc', speed_human: '1 Gbps' },
+      ],
       bridges: [{ name: 'br0', interfaces: [] }],
       bonds: [{ name: 'bond0' }],
       docker_networks: [{ name: 'apps', subnet: '172.30.0.0/16', containers: [] }],
@@ -137,7 +155,12 @@ describe('port, bond and bridge settings (NUX-20)', () => {
     expect(byId('net-bond-slaves-container').textContent).toBe('No Ethernet adapters found.');
     await openBridgeConfigModal('br0');
     expect(byId('net-bridge-members-container').textContent).toBe('No ports available to bridge.');
-    get.mockResolvedValue({ candidate_slaves: [{ name: 'eth0', is_up: true }, { name: 'eth1', is_up: false }] });
+    get.mockResolvedValue({
+      candidate_slaves: [
+        { name: 'eth0', is_up: true },
+        { name: 'eth1', is_up: false },
+      ],
+    });
     await openBondConfigModal('bond0');
     const text = byId('net-bond-slaves-container').textContent;
     expect(text).toContain('Connected');

@@ -17,23 +17,52 @@ vi.mock('chart.js', () => {
   }
   Chart.defaults = { font: {} };
   const part = {};
-  return { Chart, LineController: part, LineElement: part, PointElement: part, LinearScale: part, CategoryScale: part, Legend: part, Tooltip: part, Filler: part };
+  return {
+    Chart,
+    LineController: part,
+    LineElement: part,
+    PointElement: part,
+    LinearScale: part,
+    CategoryScale: part,
+    Legend: part,
+    Tooltip: part,
+    Filler: part,
+  };
 });
 vi.mock('../api.js', () => ({ api: { get: vi.fn() } }));
 
 const { api } = await import('../api.js');
 const { state } = await import('../state.js');
 const { setLanguage } = await import('../i18n.js');
-const { initMetricsChart, fetchAndRenderMetrics, stopMetricsRefresh, showMetricsPage } = await import('../components/metrics-chart.js');
+const { initMetricsChart, fetchAndRenderMetrics, stopMetricsRefresh, showMetricsPage } =
+  await import('../components/metrics-chart.js');
 const view = await import('../components/metrics-view.js');
 
 const SAMPLE = {
-  ts: 1700000000, cpu_temp: 45, cpu_util: 12, mem_pct: 38,
-  net_rx: 1548576, net_tx: 524288, disk_read: 2097152, disk_write: 1048576,
-  disks: [{ name: 'sda', temp: 34, standby: false }, { name: 'sdb', temp: null, standby: true }, { name: 'sdc', temp: 58, standby: false }],
+  ts: 1700000000,
+  cpu_temp: 45,
+  cpu_util: 12,
+  mem_pct: 38,
+  net_rx: 1548576,
+  net_tx: 524288,
+  disk_read: 2097152,
+  disk_write: 1048576,
+  disks: [
+    { name: 'sda', temp: 34, standby: false },
+    { name: 'sdb', temp: null, standby: true },
+    { name: 'sdc', temp: 58, standby: false },
+  ],
   fans: [950, 1100, 4200, null],
 };
-const LATER = { ...SAMPLE, ts: 1700000300, disks: [{ name: 'sda', temp: 35, standby: false }, { name: 'sdb', temp: 31, standby: false }], fans: [900, 1150, 4100, 600] };
+const LATER = {
+  ...SAMPLE,
+  ts: 1700000300,
+  disks: [
+    { name: 'sda', temp: 35, standby: false },
+    { name: 'sdb', temp: 31, standby: false },
+  ],
+  fans: [900, 1150, 4100, 600],
+};
 const strip = () => document.getElementById('metrics-device-summary-strip').textContent;
 const said = () => document.querySelector('.metrics-chart-state');
 
@@ -91,7 +120,11 @@ describe('the history chart', () => {
     expect(strip()).toBe('');
 
     let answer;
-    api.get.mockReturnValueOnce(new Promise((resolve) => { answer = resolve; }));
+    api.get.mockReturnValueOnce(
+      new Promise((resolve) => {
+        answer = resolve;
+      })
+    );
     const second = fetchAndRenderMetrics(false);
     expect(said().textContent).toBe('Loading…');
     expect(document.getElementById('metricsChart').hidden).toBe(true);
@@ -113,7 +146,9 @@ describe('the history chart', () => {
     api.get.mockResolvedValue([SAMPLE, LATER]);
     await fetchAndRenderMetrics(false);
     document.querySelector('[data-metric-group="disks"]').click();
-    await vi.waitFor(() => expect(drawn.at(-1).data.datasets.map((d) => d.label)).toEqual(['sda (°C)', 'sdb (°C)', 'sdc (°C)']));
+    await vi.waitFor(() =>
+      expect(drawn.at(-1).data.datasets.map((d) => d.label)).toEqual(['sda (°C)', 'sdb (°C)', 'sdc (°C)'])
+    );
     const disks = drawn.at(-1);
     expect(disks.data.datasets[1].data).toEqual([null, 31]);
     expect(disks.data.datasets[2].data).toEqual([58, null]); // not in the later sample: a gap, not a line to it
@@ -174,7 +209,15 @@ describe('what the chart makes of its data', () => {
   });
 
   it('fits the axis to the values', () => {
-    expect(view.axisRange([[34, 35], [null, 58]], { floor: 20, step: 5 })).toEqual({ min: 20, max: 65 });
+    expect(
+      view.axisRange(
+        [
+          [34, 35],
+          [null, 58],
+        ],
+        { floor: 20, step: 5 }
+      )
+    ).toEqual({ min: 20, max: 65 });
     expect(view.axisRange([[8, 12]], { floor: 20, step: 5 })).toEqual({ min: 5, max: 15 }); // a cold room is on the chart too
     expect(view.axisRange([[900, 4200]], { floor: 0, step: 500 })).toEqual({ min: 0, max: 5000 });
     expect(view.axisRange([[null], []])).toEqual({});
@@ -188,7 +231,13 @@ describe('what the chart makes of its data', () => {
     expect(view.readingNote([SAMPLE], '30d')).toMatch(/^Average of the 120 minutes up to /);
     expect(view.readingNote([], '24h')).toBe('');
     expect(view.readingPills(null)).toEqual([]);
-    expect(view.readingPills([{ cpu_temp: 1, cpu_util: 2, mem_pct: 3, disks: [{ name: 'sdq', temp: null, standby: false }, {}] }]).at(-1)).toEqual(['sdq', 'No reading', 'muted']);
+    expect(
+      view
+        .readingPills([
+          { cpu_temp: 1, cpu_util: 2, mem_pct: 3, disks: [{ name: 'sdq', temp: null, standby: false }, {}] },
+        ])
+        .at(-1)
+    ).toEqual(['sdq', 'No reading', 'muted']);
   });
 
   it('takes the chart’s colours from the theme', () => {

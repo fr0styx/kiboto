@@ -32,7 +32,7 @@ function dispatch(records) {
       (r) =>
         r.type === 'childList' ||
         (r.type === 'characterData' && s.characterData) ||
-        (r.type === 'attributes' && s.attributes?.includes(r.attributeName)),
+        (r.type === 'attributes' && s.attributes?.includes(r.attributeName))
     );
     if (!mine.length) continue;
     try {

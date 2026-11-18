@@ -22,23 +22,25 @@ export function ensureManagementDom() {
   if (isManagementDomReady()) return Promise.resolve();
   if (!pending) {
     // the drawer first: Mission Control's Hardware section borrows its tabs
-    pending = Promise.all([import('./windows/management-window.html?raw'), ensureDrawerDom()]).then(([{ default: markup }]) => {
-      if (!isManagementDomReady()) {
-        const slot = document.getElementById('management-window-slot');
-        if (slot) slot.insertAdjacentHTML('beforebegin', markup);
-        else document.body.insertAdjacentHTML('beforeend', markup);
-        slot?.remove();
-      }
-      applyTranslations();
-      for (const fn of waiters.splice(0)) {
-        try {
-          fn();
-        } catch (err) {
-          console.error('Mission Control setup failed:', err);
+    pending = Promise.all([import('./windows/management-window.html?raw'), ensureDrawerDom()]).then(
+      ([{ default: markup }]) => {
+        if (!isManagementDomReady()) {
+          const slot = document.getElementById('management-window-slot');
+          if (slot) slot.insertAdjacentHTML('beforebegin', markup);
+          else document.body.insertAdjacentHTML('beforeend', markup);
+          slot?.remove();
         }
+        applyTranslations();
+        for (const fn of waiters.splice(0)) {
+          try {
+            fn();
+          } catch (err) {
+            console.error('Mission Control setup failed:', err);
+          }
+        }
+        ZettEventBus.emit('dom:management-ready');
       }
-      ZettEventBus.emit('dom:management-ready');
-    });
+    );
   }
   return pending;
 }

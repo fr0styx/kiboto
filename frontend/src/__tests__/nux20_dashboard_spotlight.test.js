@@ -1,7 +1,15 @@
 /** NUX-20: drive titles on the dashboard and Spotlight's commands read in the person's language. */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { setLanguage } from '../i18n.js';
-import { driveLabel, driveTileTitle, driveChipTitle, updateRowTelemetryBadges, updateUnraidTelemetry, updateCopyToast, updateMediaSlots } from '../components/dashboard.js';
+import {
+  driveLabel,
+  driveTileTitle,
+  driveChipTitle,
+  updateRowTelemetryBadges,
+  updateUnraidTelemetry,
+  updateCopyToast,
+  updateMediaSlots,
+} from '../components/dashboard.js';
 import { initSpotlight, openSpotlight, filterSpotlightResults, closeSpotlight } from '../components/spotlight.js';
 
 describe('drive titles (NUX-20)', () => {
@@ -11,15 +19,23 @@ describe('drive titles (NUX-20)', () => {
     expect(driveLabel(d, true)).toBe('disk1 [PARITY]');
     expect(driveTileTitle(d, true, true)).toBe('disk1 [PARITY] is asleep (spun down)');
     expect(driveTileTitle(d, false, false)).toBe('Click to see the health of disk1');
-    expect(driveTileTitle({ name: 'disk2', risk: 'critical' }, false, false)).toBe('disk2: likely to fail soon. Back up its data and plan a replacement.');
-    expect(driveTileTitle({ name: 'disk2', risk: 'high', risk_advice: 'Replace it now.' }, false, false)).toBe('disk2: likely to fail soon. Replace it now.');
+    expect(driveTileTitle({ name: 'disk2', risk: 'critical' }, false, false)).toBe(
+      'disk2: likely to fail soon. Back up its data and plan a replacement.'
+    );
+    expect(driveTileTitle({ name: 'disk2', risk: 'high', risk_advice: 'Replace it now.' }, false, false)).toBe(
+      'disk2: likely to fail soon. Replace it now.'
+    );
     expect(driveChipTitle(d, false, false, 'sdb')).toBe('Drive disk1 (sdb): click to see its health');
     expect(driveChipTitle(d, false, true, 'sdb')).toBe('disk1 is asleep (spun down)');
   });
 
   describe('in German', () => {
-    beforeAll(async () => { await setLanguage('de'); });
-    afterAll(async () => { await setLanguage('en'); });
+    beforeAll(async () => {
+      await setLanguage('de');
+    });
+    afterAll(async () => {
+      await setLanguage('en');
+    });
 
     it('translates the titles and Spotlight’s typed commands', () => {
       expect(driveTileTitle({ name: 'disk1' }, true, true)).toBe('disk1 [PARITÄT] schläft (abgeschaltet)');
@@ -40,7 +56,6 @@ describe('drive titles (NUX-20)', () => {
   });
 });
 
-
 const text = (id) => document.getElementById(id).textContent;
 
 describe('dashboard badges, array, copy window and card reader (NUX-20)', () => {
@@ -60,12 +75,21 @@ describe('dashboard badges, array, copy window and card reader (NUX-20)', () => 
       <div id="unraid-mover-pill"><span id="unraid-mover-status"></span></div>
       <div id="unraid-storage-badge"><span id="unraid-storage-text"></span></div>
       <div id="unraid-parity-box"><div id="unraid-parity-bar"></div><span id="unraid-parity-txt"></span></div>`;
-    updateUnraidTelemetry({ available: true, mover: { active: true, remain_files: 3 }, parity_check: { active: true, progress_pct: 40, errors: 1 } });
+    updateUnraidTelemetry({
+      available: true,
+      mover: { active: true, remain_files: 3 },
+      parity_check: { active: true, progress_pct: 40, errors: 1 },
+    });
     expect(text('unraid-array-status')).toBe('STARTED');
     expect(text('unraid-mover-status')).toBe('3 files left');
     expect(text('unraid-storage-text')).toBe('UNRAID: STARTED');
     expect(text('unraid-parity-txt')).toBe('Parity: 40% (1 error)');
-    updateUnraidTelemetry({ available: true, state: 'STOPPED', mover: { active: true }, parity_check: { active: true } });
+    updateUnraidTelemetry({
+      available: true,
+      state: 'STOPPED',
+      mover: { active: true },
+      parity_check: { active: true },
+    });
     expect(text('unraid-array-status')).toBe('STOPPED');
     expect(text('unraid-mover-status')).toBe('Active');
     expect(text('unraid-storage-text')).toBe('UNRAID: STOPPED');
@@ -77,10 +101,18 @@ describe('dashboard badges, array, copy window and card reader (NUX-20)', () => 
       <div id="copy-toast"><div class="smart-modal-body"></div><span id="copy-toast-pct"></span><div id="copy-toast-bar"></div>
       <span id="copy-toast-file"></span><span id="copy-toast-time"></span></div>`;
     const now = Date.now() / 1000;
-    updateCopyToast({ active: true, status: 'copying', progress: { total: 100 * 1024 * 1024, copied: 50 * 1024 * 1024, start: now - 10, files_total: 3, files_done: 1 } });
+    updateCopyToast({
+      active: true,
+      status: 'copying',
+      progress: { total: 100 * 1024 * 1024, copied: 50 * 1024 * 1024, start: now - 10, files_total: 3, files_done: 1 },
+    });
     expect(text('copy-toast-file')).toBe('Preparing files…');
     expect(text('copy-toast-time')).toMatch(/^2 files left • \d+\.\d MB\/s • ~\d+ min \d+ s$/);
-    updateCopyToast({ active: true, status: 'copying', progress: { total: 100, copied: 50, start: now - 10, file: 'a.jpg' } });
+    updateCopyToast({
+      active: true,
+      status: 'copying',
+      progress: { total: 100, copied: 50, start: now - 10, file: 'a.jpg' },
+    });
     expect(text('copy-toast-file')).toBe('a.jpg');
     expect(text('copy-toast-time')).toMatch(/^\d+\.\d MB\/s/);
   });

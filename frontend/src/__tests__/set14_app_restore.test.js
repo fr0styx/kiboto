@@ -5,18 +5,33 @@ import { restoredSaid } from '../components/management/app-restore-said.js';
 describe('what a restored app backup says', () => {
   it('names the folders and what became of the app', () => {
     const two = ['/mnt/user/appdata/plex', '/mnt/user/media'];
-    expect(restoredSaid({ restored_mounts: two, outcome: 'running_again' }, 'plex')).toEqual(['"plex" was restored (2 folders) and runs again.', 'success']);
-    expect(restoredSaid({ restored_mounts: ['/a'], outcome: 'stopped_kept' }, 'plex')[0]).toBe('"plex" was restored (1 folder). It was stopped before and stays stopped.');
+    expect(restoredSaid({ restored_mounts: two, outcome: 'running_again' }, 'plex')).toEqual([
+      '"plex" was restored (2 folders) and runs again.',
+      'success',
+    ]);
+    expect(restoredSaid({ restored_mounts: ['/a'], outcome: 'stopped_kept' }, 'plex')[0]).toBe(
+      '"plex" was restored (1 folder). It was stopped before and stays stopped.'
+    );
     expect(restoredSaid({ restored_mounts: two, outcome: 'start_failed' }, 'plex')[1]).toBe('warn');
     // "successfully restored (0 paths restored)!" every time, and "recreated" when nothing had started
-    expect(restoredSaid({ restored_mounts: two, outcome: 'files_only', compose_path: '/data/stacks/plex/docker-compose.yml' }, 'plex')).toEqual([
+    expect(
+      restoredSaid(
+        { restored_mounts: two, outcome: 'files_only', compose_path: '/data/stacks/plex/docker-compose.yml' },
+        'plex'
+      )
+    ).toEqual([
       'The folders of "plex" were restored (2), but the app itself is not installed any more. Install it again from the catalog; its Compose file is kept at /data/stacks/plex/docker-compose.yml.',
       'warn',
     ]);
-    expect(restoredSaid({ restored_mounts: [] }, 'plex')[0]).toBe('The folders of "plex" were restored (0), but the app itself is not installed any more. Install it again from the catalog.');
+    expect(restoredSaid({ restored_mounts: [] }, 'plex')[0]).toBe(
+      'The folders of "plex" were restored (0), but the app itself is not installed any more. Install it again from the catalog.'
+    );
     expect(restoredSaid(null, 'plex')[1]).toBe('warn');
     // Apps 7: a removed app comes back from its saved Compose file
-    expect(restoredSaid({ restored_mounts: two, outcome: 'brought_back' }, 'plex')).toEqual(['"plex" was restored (2 folders) and started again from its saved Compose file.', 'success']);
+    expect(restoredSaid({ restored_mounts: two, outcome: 'brought_back' }, 'plex')).toEqual([
+      '"plex" was restored (2 folders) and started again from its saved Compose file.',
+      'success',
+    ]);
     const kept = { restored_mounts: two, compose_path: '/data/stacks/plex/docker-compose.yml' };
     expect(restoredSaid({ ...kept, outcome: 'needs_review' }, 'plex')).toEqual([
       'The folders of "plex" were restored (2). Its saved Compose file asks for host-level access, so Kiboto did not start it by itself; the file is kept at /data/stacks/plex/docker-compose.yml.',

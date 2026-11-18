@@ -9,9 +9,30 @@ afterEach(async () => {
 });
 
 const ROWS = [
-  { id: 'default_password', name: 'Default Administrator Password', passed: true, penalty: 0, severity: 'info', details: 'Custom administrator password set' },
-  { id: 'sec_default_admin', name: "Default 'admin' account", passed: false, penalty: 0, severity: 'low', details: 'still on' },
-  { id: 'admin_mfa', name: 'Administrator Two-Factor Authentication (2FA)', passed: false, penalty: 15, severity: 'high', details: 'lack' },
+  {
+    id: 'default_password',
+    name: 'Default Administrator Password',
+    passed: true,
+    penalty: 0,
+    severity: 'info',
+    details: 'Custom administrator password set',
+  },
+  {
+    id: 'sec_default_admin',
+    name: "Default 'admin' account",
+    passed: false,
+    penalty: 0,
+    severity: 'low',
+    details: 'still on',
+  },
+  {
+    id: 'admin_mfa',
+    name: 'Administrator Two-Factor Authentication (2FA)',
+    passed: false,
+    penalty: 15,
+    severity: 'high',
+    details: 'lack',
+  },
 ];
 
 describe('one security check (SET-14)', () => {
@@ -21,7 +42,7 @@ describe('one security check (SET-14)', () => {
     expect(checkState({ passed: false, penalty: 15, severity: 'low' })).toBe('look');
   });
 
-  it('the rows say their state in the reader\'s language', async () => {
+  it("the rows say their state in the reader's language", async () => {
     document.body.innerHTML = '<span id="sec-advisor-score-badge"></span><div id="sec-advisor-items"></div>';
     vi.spyOn(api, 'get').mockResolvedValue({ score: 85, grade: 'B', checks: ROWS, issues: [] });
     await setLanguage('de');

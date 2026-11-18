@@ -95,7 +95,12 @@ describe('Tier 3: Advanced Virtual Switching, Bonding & 802.1Q VLAN Tagging', ()
     active_slave: 'eth0',
     available_modes: [
       { code: '1', name: 'active-backup', title: 'Active-Backup', description: 'Active-backup policy' },
-      { code: '4', name: '802.3ad', title: 'Dynamic Link Aggregation (802.3ad LACP)', description: 'LACP dynamic aggregation' },
+      {
+        code: '4',
+        name: '802.3ad',
+        title: 'Dynamic Link Aggregation (802.3ad LACP)',
+        description: 'LACP dynamic aggregation',
+      },
     ],
     candidate_slaves: [
       { name: 'eth0', is_slave: true, is_up: true, speed_human: '1 Gbps' },
@@ -118,9 +123,7 @@ describe('Tier 3: Advanced Virtual Switching, Bonding & 802.1Q VLAN Tagging', ()
     physical_interfaces: [{ name: 'eth0' }, { name: 'eth1' }],
     bonds: [{ name: 'bond0' }],
     bridges: [{ name: 'br0' }],
-    vlans: [
-      { name: 'eth0.10', parent: 'eth0', vlan_id: 10, is_up: true, ip_address: '192.168.10.1', alias: 'DMZ' },
-    ],
+    vlans: [{ name: 'eth0.10', parent: 'eth0', vlan_id: 10, is_up: true, ip_address: '192.168.10.1', alias: 'DMZ' }],
   };
 
   beforeEach(() => {

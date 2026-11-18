@@ -1,5 +1,14 @@
 import { describe, it, expect } from 'vitest';
-import { fleetHtml, kindText, aboutHtml, historyBody, scheduleText, shouldPoll, findDrive, reportCsv } from '../components/drive-health.js';
+import {
+  fleetHtml,
+  kindText,
+  aboutHtml,
+  historyBody,
+  scheduleText,
+  shouldPoll,
+  findDrive,
+  reportCsv,
+} from '../components/drive-health.js';
 import { scale, lineChart } from '../components/drive-charts.js';
 
 describe('Drive Health revamp', () => {
@@ -22,7 +31,10 @@ describe('Drive Health revamp', () => {
   });
 
   it('describes the drive and its outlook', () => {
-    const about = aboutHtml({ protocol: 'nvme', capacity_bytes: 1e12, firmware: 'F1', power_cycles: 9 }, { age_years: 1.5, wear_pct: 12, years_left: 3.6 });
+    const about = aboutHtml(
+      { protocol: 'nvme', capacity_bytes: 1e12, firmware: 'F1', power_cycles: 9 },
+      { age_years: 1.5, wear_pct: 12, years_left: 3.6 }
+    );
     expect(about).toContain('NVMe SSD');
     expect(about).toContain('F1');
     expect(about).toContain('about 3.6 years left');
@@ -34,8 +46,35 @@ describe('Drive Health revamp', () => {
   it('draws the history', () => {
     const box = historyBody({
       samples: 3,
-      temp: { points: [[1, 30], [2, 33], [3, 31]], min: 30, max: 33, avg: 31.3 },
-      counters: { crc_errors: { points: [[1, 0], [2, 2], [3, 6]], first: 0, last: 6 }, pending_sectors: { points: [[1, 2], [3, 2]], first: 2, last: 2 } },
+      temp: {
+        points: [
+          [1, 30],
+          [2, 33],
+          [3, 31],
+        ],
+        min: 30,
+        max: 33,
+        avg: 31.3,
+      },
+      counters: {
+        crc_errors: {
+          points: [
+            [1, 0],
+            [2, 2],
+            [3, 6],
+          ],
+          first: 0,
+          last: 6,
+        },
+        pending_sectors: {
+          points: [
+            [1, 2],
+            [3, 2],
+          ],
+          first: 2,
+          last: 2,
+        },
+      },
     });
     expect(box.querySelectorAll('svg').length).toBe(3);
     expect(box.textContent).toContain('Temperature: 30–33 °C');
@@ -47,12 +86,28 @@ describe('Drive Health revamp', () => {
 
   it('scales and draws a line', () => {
     expect(scale([], 100, 50)).toEqual([]);
-    const pts = scale([[0, 0], [10, 10]], 100, 50, 0);
+    const pts = scale(
+      [
+        [0, 0],
+        [10, 10],
+      ],
+      100,
+      50,
+      0
+    );
     expect(pts[0]).toEqual([0, 50]);
     expect(pts[1]).toEqual([100, 0]);
     expect(scale([[5, 3]], 100, 50)[0][0]).toBe(50);
     expect(lineChart([[1, 1]]).querySelector('circle')).not.toBeNull();
-    expect(lineChart([[1, 1], [2, 2]], { label: 'x' }).querySelector('path')).not.toBeNull();
+    expect(
+      lineChart(
+        [
+          [1, 1],
+          [2, 2],
+        ],
+        { label: 'x' }
+      ).querySelector('path')
+    ).not.toBeNull();
   });
 
   it('reads the list again only while someone can see it (SET-09)', () => {
@@ -75,15 +130,33 @@ describe('Drive Health revamp', () => {
 
   it('says the schedule', () => {
     expect(scheduleText({ enabled: false })).toContain('off');
-    expect(scheduleText({ short_test_interval: 'monthly', short_test_hour: 2, extended_test_interval: 'disabled' })).toBe('Automatic tests: Short test every month, 02:00. Sleeping drives are skipped.');
+    expect(
+      scheduleText({ short_test_interval: 'monthly', short_test_hour: 2, extended_test_interval: 'disabled' })
+    ).toBe('Automatic tests: Short test every month, 02:00. Sleeping drives are skipped.');
     expect(scheduleText(null)).toBe('');
     // the long test is "extended" in the server's answer; it never showed (SET-09)
-    expect(scheduleText({ short_test_interval: 'disabled', extended_test_interval: 'monthly', extended_test_hour: 3 })).toBe('Automatic tests: Long test every month, 03:00. Sleeping drives are skipped.');
+    expect(
+      scheduleText({ short_test_interval: 'disabled', extended_test_interval: 'monthly', extended_test_hour: 3 })
+    ).toBe('Automatic tests: Long test every month, 03:00. Sleeping drives are skipped.');
     expect(scheduleText({ short_test_interval: 'disabled', extended_test_interval: 'disabled' })).toContain('off');
   });
 
   it('writes a CSV report', () => {
-    const csv = reportCsv([{ dev: 'sda', model: 'WD "Red"', serial: 'S1', verdict: 'watch', label: 'Keep an eye on it', summary: 'x', temp: 35, findings: [{ severity: 'watch', title: 'Timeouts' }, { severity: 'ok', title: 'fine' }] }]);
+    const csv = reportCsv([
+      {
+        dev: 'sda',
+        model: 'WD "Red"',
+        serial: 'S1',
+        verdict: 'watch',
+        label: 'Keep an eye on it',
+        summary: 'x',
+        temp: 35,
+        findings: [
+          { severity: 'watch', title: 'Timeouts' },
+          { severity: 'ok', title: 'fine' },
+        ],
+      },
+    ]);
     const lines = csv.trim().split('\n');
     expect(lines[0]).toContain('"device","model"');
     expect(lines[1]).toContain('"WD ""Red"""');

@@ -28,9 +28,10 @@ export function canProtect(user) {
 export function protectionRow(p, user) {
   if (!p || !p.level || p.level === 'good') return null;
   const when = p.last_good ? formatDateTime(p.last_good * 1000) : '';
-  const text = p.level === 'none'
-    ? t('protect.none', 'No copy of your files outside this NAS yet.')
-    : t('protect.stale', 'Your newest copy outside this NAS is from {when}.', { when: when || '?' });
+  const text =
+    p.level === 'none'
+      ? t('protect.none', 'No copy of your files outside this NAS yet.')
+      : t('protect.stale', 'Your newest copy outside this NAS is from {when}.', { when: when || '?' });
   return { level: 'warning', text, protect: canProtect(user), tellAdmin: !canProtect(user) };
 }
 
@@ -40,7 +41,8 @@ export function protectionRow(p, user) {
  * @returns {{ level: string, rows: any[], unchecked: number, copies: any, reason: string }}
  */
 export function statusState({ summary, protection, error, user, rowText, canOpen } = {}) {
-  if (error) return { level: 'unknown', rows: [], unchecked: 0, copies: null, reason: String(error.message || error || '') };
+  if (error)
+    return { level: 'unknown', rows: [], unchecked: 0, copies: null, reason: String(error.message || error || '') };
   if (!summary) return { level: 'checking', rows: [], unchecked: 0, copies: null, reason: '' };
   const rows = (summary.items || []).map((i) => ({
     level: i.level === 'critical' ? 'critical' : 'warning',
@@ -92,8 +94,12 @@ export function statusBoxHtml(state) {
   }
   const n = s.rows.length;
   const problem = s.level === 'problem';
-  const lead = problem ? `<span aria-hidden="true">✕</span> ${escapeHtml(t('overview.word_problem', 'Problem'))}` : `<span aria-hidden="true">!</span> ${escapeHtml(t('overview.word_look', 'Needs a look'))}`;
-  const count = n ? `: ${escapeHtml(t('overview.attention', '{n, plural, one {# thing needs your attention} other {# things need your attention}}', { n }))}` : '';
+  const lead = problem
+    ? `<span aria-hidden="true">✕</span> ${escapeHtml(t('overview.word_problem', 'Problem'))}`
+    : `<span aria-hidden="true">!</span> ${escapeHtml(t('overview.word_look', 'Needs a look'))}`;
+  const count = n
+    ? `: ${escapeHtml(t('overview.attention', '{n, plural, one {# thing needs your attention} other {# things need your attention}}', { n }))}`
+    : '';
   return `<div class="ov-status ${problem ? 'ov-problem' : 'ov-attention'}"><strong>${lead}${count}</strong>${missed}
     ${n ? `<ul>${s.rows.map(rowHtml).join('')}</ul>` : ''}</div>`;
 }
@@ -105,6 +111,8 @@ export function statusSaid(state) {
   if (s.level === 'unknown') return t('overview.unknown', 'Kiboto could not check how things are');
   const n = (s.rows || []).length;
   if (s.level === 'fine') return t('a11y.status_ok', 'All is well.');
-  const said = t('a11y.status_items', '{n, plural, one {# thing needs attention} other {# things need attention}}', { n: Math.max(n, 1) });
+  const said = t('a11y.status_items', '{n, plural, one {# thing needs attention} other {# things need attention}}', {
+    n: Math.max(n, 1),
+  });
   return s.level === 'problem' ? `${t('overview.word_problem', 'Problem')}: ${said}` : said;
 }

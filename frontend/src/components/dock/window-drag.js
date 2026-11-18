@@ -48,17 +48,18 @@ export function bringToFront(windowEl) {
     windowEl.classList?.contains('cloud-remote-window') ||
     windowEl.classList?.contains('vm-modal-window') ||
     windowEl.classList?.contains('os-window') ||
-    windowEl.closest?.('#console-modal-overlay, #management-modal-overlay, #file-manager-window, #notif-center-panel, #container-inspector-window, #container-inspector-overlay, #stack-inspector-window, #stack-inspector-overlay, #stack-picker-window, #stack-picker-overlay, #app-deploy-modal-window, #app-deploy-modal-overlay, #modal-new-cloud-remote, #modal-vm-edit, #modal-vm-create, #modal-vm-snapshots')
+    windowEl.closest?.(
+      '#console-modal-overlay, #management-modal-overlay, #file-manager-window, #notif-center-panel, #container-inspector-window, #container-inspector-overlay, #stack-inspector-window, #stack-inspector-overlay, #stack-picker-window, #stack-picker-overlay, #app-deploy-modal-window, #app-deploy-modal-overlay, #modal-new-cloud-remote, #modal-vm-edit, #modal-vm-create, #modal-vm-snapshots'
+    )
   );
 
   // Protect standalone modal backdrops & modal dialogs from being demoted into window z-index layer
   if (
-    !isDesktopApp && (
-      windowEl.classList.contains('smart-modal-window') ||
+    !isDesktopApp &&
+    (windowEl.classList.contains('smart-modal-window') ||
       windowEl.closest('.smart-modal-backdrop') ||
       windowEl.classList.contains('modal-container') ||
-      windowEl.closest('.modal-backdrop')
-    )
+      windowEl.closest('.modal-backdrop'))
   ) {
     const backdrop = windowEl.closest('.smart-modal-backdrop') || windowEl.closest('.modal-backdrop');
     if (backdrop) {
@@ -72,7 +73,11 @@ export function bringToFront(windowEl) {
   if (window.DockManager) {
     Object.keys(window.DockManager.windows).forEach((id) => {
       const wEl = window.DockManager.windows[id].el;
-      if (wEl === windowEl || (wEl && wEl.contains && wEl.contains(windowEl)) || (windowEl && windowEl.contains && windowEl.contains(wEl))) {
+      if (
+        wEl === windowEl ||
+        (wEl && wEl.contains && wEl.contains(windowEl)) ||
+        (windowEl && windowEl.contains && windowEl.contains(wEl))
+      ) {
         foundId = id;
       }
     });
@@ -80,7 +85,10 @@ export function bringToFront(windowEl) {
 
   // Fast-path guard: if already at top z-index and active, do not churn DOM or GPU layers
   const curZ = parseInt(windowEl.style.zIndex || '0', 10);
-  const targetWin = windowEl.querySelector?.('#console-window, #management-window, .chassis-front-panel, .mgmt-app-window, .container-inspector-window, #container-inspector-window, #app-deploy-modal-window, #cloud-remote-window, .cloud-remote-window, .vm-modal-window') || windowEl;
+  const targetWin =
+    windowEl.querySelector?.(
+      '#console-window, #management-window, .chassis-front-panel, .mgmt-app-window, .container-inspector-window, #container-inspector-window, #app-deploy-modal-window, #cloud-remote-window, .cloud-remote-window, .vm-modal-window'
+    ) || windowEl;
   const isAlreadyActive = targetWin?.classList?.contains('active-window');
   const isTopZ = curZ === activeWindowZIndex;
 
@@ -100,7 +108,9 @@ export function bringToFront(windowEl) {
     openWins.forEach((el) => {
       const curZ = (baseZ++).toString();
       el.style.zIndex = curZ;
-      const inner = el.querySelector?.('#console-window, #management-window, .chassis-front-panel, .mgmt-app-window, .container-inspector-window, #container-inspector-window, .smart-modal-window, #smart-modal-window, #stack-inspector-window, #stack-picker-window, #app-deploy-modal-window, #cloud-remote-window, .cloud-remote-window');
+      const inner = el.querySelector?.(
+        '#console-window, #management-window, .chassis-front-panel, .mgmt-app-window, .container-inspector-window, #container-inspector-window, .smart-modal-window, #smart-modal-window, #stack-inspector-window, #stack-picker-window, #app-deploy-modal-window, #cloud-remote-window, .cloud-remote-window'
+      );
       if (inner) inner.style.zIndex = curZ;
     });
     activeWindowZIndex = baseZ;
@@ -110,12 +120,16 @@ export function bringToFront(windowEl) {
   windowEl.style.zIndex = zStr;
 
   // Elevate parent overlay wrapper if applicable
-  const parentOverlay = windowEl.closest?.('#console-modal-overlay, #management-modal-overlay, #container-inspector-overlay, #smart-modal-overlay, #stack-inspector-overlay, #stack-picker-overlay, #app-deploy-modal-overlay, #modal-new-cloud-remote, #vm-console-overlay, #vm-iso-manager-overlay');
+  const parentOverlay = windowEl.closest?.(
+    '#console-modal-overlay, #management-modal-overlay, #container-inspector-overlay, #smart-modal-overlay, #stack-inspector-overlay, #stack-picker-overlay, #app-deploy-modal-overlay, #modal-new-cloud-remote, #vm-console-overlay, #vm-iso-manager-overlay'
+  );
   if (parentOverlay && parentOverlay !== windowEl) {
     parentOverlay.style.zIndex = zStr;
   }
   // Elevate child window if applicable
-  const childWin = windowEl.querySelector?.('#console-window, #management-window, .chassis-front-panel, .mgmt-app-window, .container-inspector-window, #container-inspector-window, .smart-modal-window, #smart-modal-window, #stack-inspector-window, #stack-picker-window, #app-deploy-modal-window, #cloud-remote-window, .cloud-remote-window');
+  const childWin = windowEl.querySelector?.(
+    '#console-window, #management-window, .chassis-front-panel, .mgmt-app-window, .container-inspector-window, #container-inspector-window, .smart-modal-window, #smart-modal-window, #stack-inspector-window, #stack-picker-window, #app-deploy-modal-window, #cloud-remote-window, .cloud-remote-window'
+  );
   if (childWin && childWin !== windowEl) {
     childWin.style.zIndex = zStr;
   }
@@ -140,26 +154,30 @@ export function bringToFront(windowEl) {
   } catch (e) {}
 }
 
-export const DESKTOP_WINDOW_SELECTOR = '#console-window, #management-window, #file-manager-window, .file-manager-window, #notif-center-panel, .container-inspector-window, #container-inspector-window, #stack-inspector-window, #stack-picker-window, #app-deploy-modal-window, #cloud-remote-window, .cloud-remote-window, .os-window, .vm-modal-window';
+export const DESKTOP_WINDOW_SELECTOR =
+  '#console-window, #management-window, #file-manager-window, .file-manager-window, #notif-center-panel, .container-inspector-window, #container-inspector-window, #stack-inspector-window, #stack-picker-window, #app-deploy-modal-window, #cloud-remote-window, .cloud-remote-window, .os-window, .vm-modal-window';
 
 export const handleWindowActivation = (e) => {
   // If the click directly targeted an overlay backdrop, do not activate it as a window
-  if (e.target && (
-    e.target.id === 'app-deploy-modal-overlay' ||
-    e.target.id === 'management-modal-overlay' ||
-    e.target.id === 'console-modal-overlay' ||
-    e.target.id === 'smart-modal-overlay' ||
-    e.target.id === 'modal-new-cloud-remote' ||
-    e.target.id === 'modal-vm-edit' ||
-    e.target.id === 'modal-vm-create'
-  )) {
+  if (
+    e.target &&
+    (e.target.id === 'app-deploy-modal-overlay' ||
+      e.target.id === 'management-modal-overlay' ||
+      e.target.id === 'console-modal-overlay' ||
+      e.target.id === 'smart-modal-overlay' ||
+      e.target.id === 'modal-new-cloud-remote' ||
+      e.target.id === 'modal-vm-edit' ||
+      e.target.id === 'modal-vm-create')
+  ) {
     return;
   }
   const windowEl = e.target.closest?.(DESKTOP_WINDOW_SELECTOR);
   if (windowEl) {
     bringToFront(windowEl);
     document.querySelectorAll('.chassis-hero-box').forEach((el) => {
-      try { el.blur(); } catch (_) {}
+      try {
+        el.blur();
+      } catch (_) {}
     });
   } else if (e.target.closest?.('#desktop') && !e.target.closest?.(DESKTOP_WINDOW_SELECTOR)) {
     // User clicked on empty desktop wallpaper or desktop icons/widgets
@@ -211,13 +229,15 @@ export function makeDraggable(dragEl, handleEl, customId) {
   handleEl = handleEl || dragEl;
   handleEl.style.cursor = 'move';
 
-  const winId = customId || (dragEl.id === 'file-manager-window' || dragEl.classList.contains('file-manager-window') ? 'fm' : null)
-                         || (dragEl.id === 'management-window' || dragEl.classList.contains('mgmt-app-window') ? 'management' : null)
-                         || (dragEl.id === 'console-window' || dragEl.classList.contains('chassis-front-panel') ? 'console' : null)
-                         || (dragEl.id === 'smart-modal-window' ? 'smart' : null)
-                         || (dragEl.id === 'notif-center-panel' ? 'notif-center' : null)
-                         || dragEl.id
-                         || dragEl.dataset.windowId;
+  const winId =
+    customId ||
+    (dragEl.id === 'file-manager-window' || dragEl.classList.contains('file-manager-window') ? 'fm' : null) ||
+    (dragEl.id === 'management-window' || dragEl.classList.contains('mgmt-app-window') ? 'management' : null) ||
+    (dragEl.id === 'console-window' || dragEl.classList.contains('chassis-front-panel') ? 'console' : null) ||
+    (dragEl.id === 'smart-modal-window' ? 'smart' : null) ||
+    (dragEl.id === 'notif-center-panel' ? 'notif-center' : null) ||
+    dragEl.id ||
+    dragEl.dataset.windowId;
 
   if (winId) {
     applySavedBounds(dragEl, winId);
@@ -251,12 +271,21 @@ export function makeDraggable(dragEl, handleEl, customId) {
     dragEl._resizeObserver = ro;
   }
 
-  let startX = 0, startY = 0, initialMouseX = 0, initialMouseY = 0;
+  let startX = 0,
+    startY = 0,
+    initialMouseX = 0,
+    initialMouseY = 0;
   let activeSnap = null;
 
   handleEl.style.touchAction = 'none';
   const onPointerDown = (e) => {
-    if (e.button !== 0 || e.target.closest('button') || e.target.closest('input') || e.target.closest('.modal-ctrl-btn')) return;
+    if (
+      e.button !== 0 ||
+      e.target.closest('button') ||
+      e.target.closest('input') ||
+      e.target.closest('.modal-ctrl-btn')
+    )
+      return;
     bringToFront(dragEl);
     if (isCompact()) {
       // Mobile & touch swipe-to-dismiss gesture
@@ -267,12 +296,15 @@ export function makeDraggable(dragEl, handleEl, customId) {
         handleEl.setPointerCapture?.(pointerId);
       } catch (_) {}
 
-      const isLeftPinnedMobile = dragEl.classList.contains('os-window') ||
+      const isLeftPinnedMobile =
+        dragEl.classList.contains('os-window') ||
         dragEl.classList.contains('file-manager-window') ||
         dragEl.classList.contains('vm-manager-window') ||
         dragEl.classList.contains('containers-manager-window') ||
         (window.innerWidth <= COMPACT_MAX && !dragEl.style.left?.includes('50%'));
-      const hasTranslateX50 = !isLeftPinnedMobile && Boolean((dragEl.style.transform || '').includes('translateX(-50%)') || dragEl.style.left === '50%');
+      const hasTranslateX50 =
+        !isLeftPinnedMobile &&
+        Boolean((dragEl.style.transform || '').includes('translateX(-50%)') || dragEl.style.left === '50%');
       const xPrefix = hasTranslateX50 ? 'translateX(-50%) ' : '';
 
       dragEl.classList.add('window-dragging');
@@ -283,7 +315,7 @@ export function makeDraggable(dragEl, handleEl, customId) {
           currentDy = dy;
           dragEl.style.transition = 'none';
           dragEl.style.transform = `${xPrefix}translateY(${Math.round(dy * 0.75)}px)`;
-          dragEl.style.opacity = String(Math.max(0.3, 1 - (dy / 300)));
+          dragEl.style.opacity = String(Math.max(0.3, 1 - dy / 300));
         }
       };
 
@@ -310,7 +342,9 @@ export function makeDraggable(dragEl, handleEl, customId) {
             if (winId && DockManager.windows[winId]) {
               DockManager.minimize(winId);
             } else {
-              const closeBtn = dragEl.querySelector('.close-btn, .modal-close, .modal-ctrl-btn, #console-close, #management-close');
+              const closeBtn = dragEl.querySelector(
+                '.close-btn, .modal-close, .modal-ctrl-btn, #console-close, #management-close'
+              );
               if (closeBtn) closeBtn.click();
               else dragEl.style.setProperty('display', 'none', 'important');
             }
@@ -424,7 +458,7 @@ export function makeDraggable(dragEl, handleEl, customId) {
           top: Math.round(finalRect.top),
           width: Math.round(finalRect.width),
           height: Math.round(finalRect.height),
-          snapped: ''
+          snapped: '',
         });
         saveOpenWindowsState();
       }
@@ -440,7 +474,10 @@ export function makeDraggable(dragEl, handleEl, customId) {
     if (isCompact()) return;
     if (dragEl.id === 'console-window') {
       const cMax = document.getElementById('console-max');
-      if (cMax) { cMax.click(); return; }
+      if (cMax) {
+        cMax.click();
+        return;
+      }
     }
     if (dragEl.dataset.snapped) {
       dragEl.dataset.snapped = '';
@@ -451,7 +488,9 @@ export function makeDraggable(dragEl, handleEl, customId) {
       const targetH = parseFloat(dragEl._preSnapHeight) || 400;
       dragEl.style.left = Math.max(24, Math.round((window.innerWidth - targetW) / 2)) + 'px';
       dragEl.style.top = Math.max(50, Math.round((window.innerHeight - targetH) / 2)) + 'px';
-      setTimeout(() => { dragEl.style.transition = 'none'; }, 250);
+      setTimeout(() => {
+        dragEl.style.transition = 'none';
+      }, 250);
     } else {
       dragEl._preSnapWidth = dragEl.offsetWidth + 'px';
       dragEl._preSnapHeight = dragEl.offsetHeight + 'px';
@@ -461,7 +500,9 @@ export function makeDraggable(dragEl, handleEl, customId) {
       dragEl.style.top = '48px';
       dragEl.style.width = 'calc(100vw - 16px)';
       dragEl.style.height = 'calc(100vh - 48px - 76px)';
-      setTimeout(() => { dragEl.style.transition = 'none'; }, 250);
+      setTimeout(() => {
+        dragEl.style.transition = 'none';
+      }, 250);
     }
 
     if (winId) {
@@ -471,7 +512,7 @@ export function makeDraggable(dragEl, handleEl, customId) {
         top: Math.round(finalRect.top),
         width: Math.round(finalRect.width),
         height: Math.round(finalRect.height),
-        snapped: dragEl.dataset.snapped || ''
+        snapped: dragEl.dataset.snapped || '',
       });
       saveOpenWindowsState();
     }
@@ -484,7 +525,9 @@ export function makeDraggable(dragEl, handleEl, customId) {
     handleEl.removeEventListener('pointerdown', onPointerDown);
     handleEl.removeEventListener('dblclick', onDblClick);
     if (ro) {
-      try { ro.disconnect(); } catch (_) {}
+      try {
+        ro.disconnect();
+      } catch (_) {}
       ro = null;
     }
     dragEl._draggableInitialized = false;
@@ -553,7 +596,7 @@ export function makeResizable(dragEl, resizerEl, customId, options = {}) {
           left: Math.round(finalRect.left),
           top: Math.round(finalRect.top),
           width: Math.round(finalRect.width),
-          height: Math.round(finalRect.height)
+          height: Math.round(finalRect.height),
         });
         saveOpenWindowsState();
       }

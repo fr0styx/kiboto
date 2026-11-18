@@ -23,7 +23,10 @@ import { favorites, loadFavorites, removeFavorite, isFavorite, toggleFavorite } 
 export function fmHome() {
   const w = /** @type {any} */ (typeof window !== 'undefined' ? window : {});
   const first = Array.isArray(w._fmRoots) && w._fmRoots.length ? w._fmRoots[0] : '';
-  return String(w._fmHome || (typeof first === 'string' ? first : first?.path) || '/mnt/user').replace(/\/$/, '') || '/mnt/user';
+  return (
+    String(w._fmHome || (typeof first === 'string' ? first : first?.path) || '/mnt/user').replace(/\/$/, '') ||
+    '/mnt/user'
+  );
 }
 
 /** The "Sort by" rows of the menu for empty space in a folder: each field, the current one
@@ -43,7 +46,9 @@ export function sortMenuHtml(sortBy, sortDir) {
     `<div class="fm-ctx-item${on ? ' is-current' : ''}" data-act="${act}" role="menuitemradio" tabindex="-1" aria-checked="${on}"><span class="fm-ctx-check">${on ? '✓' : ''}</span>${escapeHtml(label)}</div>`;
   return `<div class="fm-ctx-group" role="group" aria-label="${escapeHtml(t('fm.sort_by', 'Sort by'))}"><div class="fm-ctx-heading">${escapeHtml(t('fm.sort_by', 'Sort by'))}</div>${fields
     .map(([k, label]) => row(`sort-${k}`, label, sortBy === k))
-    .join('')}<div class="fm-ctx-divider"></div>${dirs.map(([k, label]) => row(`sort-${k}`, label, sortDir === k)).join('')}</div>`;
+    .join(
+      ''
+    )}<div class="fm-ctx-divider"></div>${dirs.map(([k, label]) => row(`sort-${k}`, label, sortDir === k)).join('')}</div>`;
 }
 
 /** "Ctrl" on Windows and Linux, "⌘" on a Mac or iPad (NUX-7). */
@@ -83,7 +88,19 @@ export function onMenuKeys(menu, e, hide) {
 export function isGuardedSystemDir(path) {
   if (!path) return false;
   const normalized = String(path).replace(/\\/g, '/').toLowerCase();
-  const guarded = ['/boot', '/etc', '/sys', '/proc', '/dev', '/usr', '/bin', '/sbin', '/var', '/appdata', '/mnt/user/appdata'];
+  const guarded = [
+    '/boot',
+    '/etc',
+    '/sys',
+    '/proc',
+    '/dev',
+    '/usr',
+    '/bin',
+    '/sbin',
+    '/var',
+    '/appdata',
+    '/mnt/user/appdata',
+  ];
   return guarded.some((p) => normalized === p || normalized.startsWith(p + '/'));
 }
 
@@ -367,40 +384,52 @@ export class FmSidebarTree {
         </div>
       </div>
 
-      ${favorites().length ? `
+      ${
+        favorites().length
+          ? `
       <div class="fm-tree-group fm-tree-favorites fmh-x">
         <div class="fm-tree-group-title">${t('fm.favorites', 'Favorites')}</div>
-        ${favorites().map((f) => `
+        ${favorites()
+          .map(
+            (f) => `
           <div class="fm-tree-item fm-fav-item ${this.fm.currentPath === f.path ? 'active' : ''}${f.available === false ? ' is-missing' : ''}" data-path="${escapeHtml(f.path)}" title="${escapeHtml(f.available === false ? t('fm.fav_missing', 'This folder is no longer available') : f.path)}">
             <span class="fm-tree-icon" aria-hidden="true">⭐</span>
             <span class="fm-tree-label" role="button" tabindex="0"${this.fm.currentPath === f.path ? ' aria-current="true"' : ''}>${escapeHtml(f.name)}</span>
             <button type="button" class="fm-fav-remove" data-fav-remove="${escapeHtml(f.path)}" title="${escapeHtml(t('fm.fav_remove', 'Remove from Favorites'))}" aria-label="${escapeHtml(t('fm.fav_remove', 'Remove from Favorites'))}: ${escapeHtml(f.name)}">✕</button>
-          </div>`).join('')}
-      </div>` : ''}
+          </div>`
+          )
+          .join('')}
+      </div>`
+          : ''
+      }
 
       <div class="fm-tree-group fmh-x">
         <div class="fm-tree-group-title">${t('fm.storage_remotes', 'Storage and remotes')}</div>
         ${place('/mnt/remotes', '☁️', t('fm.cloud_mounts', 'Cloud folders'), isCloudActive)}
-        ${mountedRemotes.map((r) => {
-          const isRemoteActive = this.fm.currentPath === r.path || this.fm.currentPath.startsWith(r.path + '/');
-          const icon = getRemoteIcon(r.type);
-          return `
+        ${mountedRemotes
+          .map((r) => {
+            const isRemoteActive = this.fm.currentPath === r.path || this.fm.currentPath.startsWith(r.path + '/');
+            const icon = getRemoteIcon(r.type);
+            return `
             <div class="fm-tree-item fm-tree-sub-item ${isRemoteActive ? 'active' : ''} fmh-x-2" data-path="${escapeHtml(r.path)}" role="button" tabindex="0"${isRemoteActive ? ' aria-current="true"' : ''} title="${escapeHtml(r.name)} (${escapeHtml(r.type || 'cloud')})">
               <span class="fm-tree-icon" aria-hidden="true">${icon}</span>
               <span class="fm-tree-label">${escapeHtml(r.name)}</span>
             </div>
           `;
-        }).join('')}
-        ${(this.pools || []).map((p) => {
-          const isPoolActive = this.fm.currentPath === p.path || this.fm.currentPath.startsWith(p.path + '/');
-          const icon = p.type === 'disk' ? '💽' : '⚡';
-          return `
+          })
+          .join('')}
+        ${(this.pools || [])
+          .map((p) => {
+            const isPoolActive = this.fm.currentPath === p.path || this.fm.currentPath.startsWith(p.path + '/');
+            const icon = p.type === 'disk' ? '💽' : '⚡';
+            return `
             <div class="fm-tree-item ${isPoolActive ? 'active' : ''}" data-path="${escapeHtml(p.path)}" role="button" tabindex="0"${isPoolActive ? ' aria-current="true"' : ''} title="${escapeHtml(p.path)}">
               <span class="fm-tree-icon" aria-hidden="true">${icon}</span>
               <span class="fm-tree-label">${escapeHtml(p.name)}</span>
             </div>
           `;
-        }).join('')}
+          })
+          .join('')}
         ${hasRoot('/boot') ? place('/boot', '💾', t('fm.place_boot', 'Boot drive'), at('/boot')) : ''}
       </div>
     `;
@@ -426,7 +455,7 @@ export class FmSidebarTree {
       item.addEventListener('dragover', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        e.dataTransfer.dropEffect = (e.altKey || window._activeDragPayload?.action === 'copy') ? 'copy' : 'move';
+        e.dataTransfer.dropEffect = e.altKey || window._activeDragPayload?.action === 'copy' ? 'copy' : 'move';
         item.classList.add('fm-tree-drop-hover');
       });
 
@@ -453,7 +482,10 @@ export class FmSidebarTree {
           try {
             const text = e.dataTransfer.getData('text/plain');
             if (text) {
-              const paths = text.split('\n').map((s) => s.trim()).filter(Boolean);
+              const paths = text
+                .split('\n')
+                .map((s) => s.trim())
+                .filter(Boolean);
               if (paths.length > 0 && paths[0].startsWith('/')) {
                 payload = { paths, action: e.altKey ? 'copy' : 'move' };
               }
@@ -462,7 +494,7 @@ export class FmSidebarTree {
         }
 
         if (payload && payload.paths && payload.paths.length > 0) {
-          const action = e.altKey ? 'copy' : (payload.action || 'move');
+          const action = e.altKey ? 'copy' : payload.action || 'move';
           if (targetPath.includes('.RecycleBin')) {
             if (typeof this.fm.handleAction === 'function') {
               for (const src of payload.paths) {
@@ -560,13 +592,21 @@ export class FmInspector {
       again.className = 'btn-pill-toggle is-small';
       again.textContent = t('fm.count_anyway', 'Count anyway (wakes the disk)');
       again.addEventListener('click', () => this.countFolder(content, path, true));
-      out.replaceChildren(document.createTextNode(t('fm.size_asleep', 'Its disk is asleep, so it wasn\'t counted.')), ' ', again);
+      out.replaceChildren(
+        document.createTextNode(t('fm.size_asleep', "Its disk is asleep, so it wasn't counted.")),
+        ' ',
+        again
+      );
     } else if (res) {
-      const text = t('fm.folder_counts', '{size} · {files, plural, one {# file} other {# files}} · {dirs, plural, one {# folder} other {# folders}}', {
-        size: formatBytes(res.size),
-        files: res.files_count,
-        dirs: res.dirs_count,
-      });
+      const text = t(
+        'fm.folder_counts',
+        '{size} · {files, plural, one {# file} other {# files}} · {dirs, plural, one {# folder} other {# folders}}',
+        {
+          size: formatBytes(res.size),
+          files: res.files_count,
+          dirs: res.dirs_count,
+        }
+      );
       out.textContent = res.at_least ? t('fm.at_least', 'At least {what}', { what: text }) : text;
     }
     out.style.display = 'block';
@@ -639,7 +679,8 @@ export class FmInspector {
     const kind = thumbKind(item.name);
     const isImage = kind === 'image' || kind === 'vector' || kind === 'video';
     const isVideo = kind === 'video';
-    const thumbUrl = kind === 'vector' ? `/api/fs/download?path=${encodeURIComponent(item.path)}` : previewUrl(item.path, 480);
+    const thumbUrl =
+      kind === 'vector' ? `/api/fs/download?path=${encodeURIComponent(item.path)}` : previewUrl(item.path, 480);
     const isGuarded = isGuardedSystemDir(item.path);
 
     let previewHtml;
@@ -670,11 +711,15 @@ export class FmInspector {
             <span id="fm-insp-perm-badge" style="font-family: monospace; font-size: var(--kb-fs-xs); padding: 2px 6px; border-radius: 4px; background: rgba(79,216,196,0.15); color: var(--kb-text-accent);">--</span>
           </div>
 
-          ${isGuarded ? `
+          ${
+            isGuarded
+              ? `
             <div class="fm-perm-guarded-banner" style="padding: 8px 10px; border-radius: 6px; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.3); color: var(--lt-t-fca5a5ff, #fca5a5); font-size: var(--kb-fs-xs); margin-bottom: 10px;">
               ⚠️ ${escapeHtml(t('fm.i_protected', 'A system folder: its permissions can’t be changed here.'))}
             </div>
-          ` : ''}
+          `
+              : ''
+          }
 
           <div class="fmh-x-3">
             <label class="fmh-xs-muted-2" for="fm-insp-octal-input">${escapeHtml(t('fm.i_octal', 'Mode as a number (e.g. 0755, 0644)'))}</label>
@@ -717,14 +762,18 @@ export class FmInspector {
             </div>
           </div>
 
-          ${item.is_dir ? `
+          ${
+            item.is_dir
+              ? `
             <div class="fmh-x-4">
               <label class="fmh-row-xs-soft">
                 <input type="checkbox" id="fm-insp-recursive-chk" ${isGuarded ? 'disabled' : ''} />
                 <span>${escapeHtml(t('fm.i_recursive', 'Also to everything inside it'))}</span>
               </label>
             </div>
-          ` : ''}
+          `
+              : ''
+          }
 
           <button type="button" id="fm-insp-apply-perms-btn" class="btn-pill-toggle active" ${isGuarded ? `disabled title="${escapeHtml(t('fm.why_guarded', 'System folder: its permissions are protected'))}"` : ''} style="width: 100%; font-size: var(--kb-fs-xs); font-weight: 700; padding: 6px 12px; background: #0a7a70; color: #fff;">
             ${escapeHtml(t('ui.apply_permissions', 'Apply Permissions'))}
@@ -768,9 +817,9 @@ export class FmInspector {
         if (chkOX) chkOX.checked = Boolean(val & 0o001);
 
         const rwx = (d) => (d & 4 ? 'r' : '-') + (d & 2 ? 'w' : '-') + (d & 1 ? 'x' : '-');
-        const u = ((chkUR?.checked ? 4 : 0) + (chkUW?.checked ? 2 : 0) + (chkUX?.checked ? 1 : 0));
-        const g = ((chkGR?.checked ? 4 : 0) + (chkGW?.checked ? 2 : 0) + (chkGX?.checked ? 1 : 0));
-        const o = ((chkOR?.checked ? 4 : 0) + (chkOW?.checked ? 2 : 0) + (chkOX?.checked ? 1 : 0));
+        const u = (chkUR?.checked ? 4 : 0) + (chkUW?.checked ? 2 : 0) + (chkUX?.checked ? 1 : 0);
+        const g = (chkGR?.checked ? 4 : 0) + (chkGW?.checked ? 2 : 0) + (chkGX?.checked ? 1 : 0);
+        const o = (chkOR?.checked ? 4 : 0) + (chkOW?.checked ? 2 : 0) + (chkOX?.checked ? 1 : 0);
         const human = (item.is_dir ? 'd' : '-') + rwx(u) + rwx(g) + rwx(o);
         if (humanLabel) humanLabel.textContent = human;
         if (badgeLabel) badgeLabel.textContent = `0${u}${g}${o}`;
@@ -820,7 +869,10 @@ export class FmInspector {
       if (applyBtn) {
         applyBtn.addEventListener('click', async () => {
           if (isGuarded) {
-            showToast(t('toast.modifying_permissions_on_system_roots_is', 'Modifying permissions on system roots is forbidden'), 'error');
+            showToast(
+              t('toast.modifying_permissions_on_system_roots_is', 'Modifying permissions on system roots is forbidden'),
+              'error'
+            );
             return;
           }
           applyBtn.disabled = true;
@@ -846,7 +898,10 @@ export class FmInspector {
               applyBtn.textContent = t('ui.apply_permissions', 'Apply Permissions');
             }, 1400);
           } catch (err) {
-            showToast(t('toast.failed_updating_permissions', 'Failed updating permissions: {error}', { error: err.message }), 'error');
+            showToast(
+              t('toast.failed_updating_permissions', 'Failed updating permissions: {error}', { error: err.message }),
+              'error'
+            );
             applyBtn.disabled = false;
             applyBtn.textContent = t('ui.apply_permissions', 'Apply Permissions');
           }
@@ -872,19 +927,23 @@ export class FmInspector {
         <button type="button" id="fm-insp-go-perms-btn" class="btn-pill-toggle is-block is-small fmh-x-5">🔒 ${escapeHtml(t('fm.i_edit_perms', 'Change permissions'))}</button>
       </div>
 
-      ${!item.is_dir ? `
+      ${
+        !item.is_dir
+          ? `
         <div class="fm-inspector-section fmh-x-6">
           <div class="fmh-xs-semi-muted">${escapeHtml(t('fm.i_checksum', 'Checksum (SHA-256)'))}</div>
           <button type="button" id="fm-btn-calc-sha" class="btn-pill-toggle is-block">${escapeHtml(t('fm.i_compute', 'Work it out'))}</button>
           <div class="fmh-xs-mono" id="fm-insp-sha-result" style="display: none;"></div>
         </div>
-      ` : `
+      `
+          : `
         <div class="fm-inspector-section fmh-x-6">
           <div class="fmh-xs-semi-muted">${escapeHtml(t('fm.folder_size', 'Size and contents'))}</div>
           <button type="button" id="fm-btn-calc-folder-sz" class="btn-pill-toggle is-block">${escapeHtml(t('fm.count', 'Count'))}</button>
           <div class="fmh-xs-2" id="fm-insp-folder-sz-res" style="display: none;"></div>
         </div>
-      `}
+      `
+      }
 
       <div class="fm-inspector-actions fmh-col">
         ${!item.is_dir ? `<button type="button" id="fm-insp-preview-btn" class="btn-pill-toggle is-block">${escapeHtml(t('fm.i_preview', 'Quick look (Space)'))}</button>` : ''}
@@ -911,15 +970,24 @@ export class FmInspector {
     // Video details: duration, resolution, codecs, and whether this browser plays it as is
     const mediaEl = content.querySelector('#fm-insp-media');
     if (mediaEl) {
-      api.get(mediaInfoUrl(item.path)).then((info) => {
-        if (!mediaEl.isConnected) return;
-        mediaEl.replaceChildren(...describeMedia(info, canPlayHere(info, item.name)).map(([label, value]) => {
-          const row = document.createElement('div');
-          row.className = 'fm-inspector-row';
-          row.append(Object.assign(document.createElement('span'), { textContent: `${label}:` }), ' ', Object.assign(document.createElement('span'), { textContent: value }));
-          return row;
-        }));
-      }).catch((err) => console.warn('Video details unavailable:', err));
+      api
+        .get(mediaInfoUrl(item.path))
+        .then((info) => {
+          if (!mediaEl.isConnected) return;
+          mediaEl.replaceChildren(
+            ...describeMedia(info, canPlayHere(info, item.name)).map(([label, value]) => {
+              const row = document.createElement('div');
+              row.className = 'fm-inspector-row';
+              row.append(
+                Object.assign(document.createElement('span'), { textContent: `${label}:` }),
+                ' ',
+                Object.assign(document.createElement('span'), { textContent: value })
+              );
+              return row;
+            })
+          );
+        })
+        .catch((err) => console.warn('Video details unavailable:', err));
     }
 
     // Fetch POSIX permissions
@@ -1039,9 +1107,13 @@ export class FmContextMenu {
 
     document.addEventListener('click', () => this.hide());
     // Any press outside the menu closes it: dragging a window never produces a click
-    document.addEventListener('pointerdown', (e) => {
-      if (this.menuEl && !this.menuEl.contains(e.target)) this.hide();
-    }, true);
+    document.addEventListener(
+      'pointerdown',
+      (e) => {
+        if (this.menuEl && !this.menuEl.contains(e.target)) this.hide();
+      },
+      true
+    );
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') this.hide();
     });
@@ -1071,8 +1143,12 @@ export class FmContextMenu {
     const fav = (here) => {
       const on = isFavorite(here ? this.fm.currentPath : fileItem.path);
       const label = here
-        ? (on ? t('fm.fav_remove_here', 'Remove this folder from Favorites') : t('fm.fav_add_here', 'Add this folder to Favorites'))
-        : (on ? t('fm.fav_remove', 'Remove from Favorites') : t('fm.fav_add', 'Add to Favorites'));
+        ? on
+          ? t('fm.fav_remove_here', 'Remove this folder from Favorites')
+          : t('fm.fav_add_here', 'Add this folder to Favorites')
+        : on
+          ? t('fm.fav_remove', 'Remove from Favorites')
+          : t('fm.fav_add', 'Add to Favorites');
       return it(here ? 'fav-toggle-here' : 'fav-toggle', on ? '☆' : '⭐', label);
     };
     // every label in the person's language, keys as their keyboard has them (NUX-7)
@@ -1096,7 +1172,9 @@ export class FmContextMenu {
       group([
         hasSelection && it('archive-create', '🗜️', t('fm.ctx_zip', 'Compress to a .zip file')),
         isZip && it('archive-extract', '📦', t('fm.ctx_unzip', 'Extract here')),
-        one && (isDir || /\.zip$/i.test(fileItem.name)) && it('photo-import', '🏠', t('fm.ctx_photo_import', 'Bring photos home…')),
+        one &&
+          (isDir || /\.zip$/i.test(fileItem.name)) &&
+          it('photo-import', '🏠', t('fm.ctx_photo_import', 'Bring photos home…')),
         one && isDir && it('icloud-photos', '☁️', t('fm.ctx_icloud_photos', 'Download from iCloud Photos…')),
         one && it('share', '🔗', t('fm.ctx_share', 'Share a link…')),
         one && !isDir && it('checksum', '🛡️', t('fm.ctx_checksum', 'Show its SHA-256 checksum')),
@@ -1109,7 +1187,14 @@ export class FmContextMenu {
       line,
       group([
         // one delete: to the Recycle Bin, or, for what is already in it, for good (SET-05)
-        hasSelection && it('trash', '🗑️', inBin ? t('fm.delete_for_good', 'Delete for good') : t('fm.ctx_to_bin', 'Move to the Recycle Bin'), t('fm.kbd_delete', 'Delete'), 'text-danger'),
+        hasSelection &&
+          it(
+            'trash',
+            '🗑️',
+            inBin ? t('fm.delete_for_good', 'Delete for good') : t('fm.ctx_to_bin', 'Move to the Recycle Bin'),
+            t('fm.kbd_delete', 'Delete'),
+            'text-danger'
+          ),
       ]),
     ].join('');
     if (inBin && fileItem) {
@@ -1118,7 +1203,9 @@ export class FmContextMenu {
       itemsHtml = [
         group([it('restore', '↩️', t('fm.restore', 'Restore')), one && it('info', 'ℹ️', t('fm.ctx_info', 'Get info'))]),
         line,
-        group([it('trash', '🗑️', t('fm.delete_for_good', 'Delete for good'), t('fm.kbd_delete', 'Delete'), 'text-danger')]),
+        group([
+          it('trash', '🗑️', t('fm.delete_for_good', 'Delete for good'), t('fm.kbd_delete', 'Delete'), 'text-danger'),
+        ]),
       ].join('');
     }
     this._returnFocus = /** @type {HTMLElement | null} */ (document.activeElement);
@@ -1141,7 +1228,9 @@ export class FmContextMenu {
 
     this.menuEl.style.left = `${left}px`;
     this.menuEl.style.top = `${top}px`;
-    const first = /** @type {HTMLElement | null} */ (this.menuEl.querySelector('[role="menuitem"], [role="menuitemradio"]'));
+    const first = /** @type {HTMLElement | null} */ (
+      this.menuEl.querySelector('[role="menuitem"], [role="menuitemradio"]')
+    );
     if (first) first.focus(); // a menu opened with Shift+F10 or the menu key is used by keyboard
 
     // Click handler for menu actions
@@ -1244,7 +1333,9 @@ export class FmContextMenu {
         break;
       case 'versions':
         if (item) {
-          import('./file-versions.js').then((m) => m.openPreviousVersions(item.path, item.name, () => this.fm.loadPath(this.fm.currentPath)));
+          import('./file-versions.js').then((m) =>
+            m.openPreviousVersions(item.path, item.name, () => this.fm.loadPath(this.fm.currentPath))
+          );
         }
         break;
       case 'ask-kib':

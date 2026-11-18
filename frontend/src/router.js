@@ -46,7 +46,8 @@ for (const [name, id] of Object.entries({
   general: 'pane-about',
   connections: 'pane-connections', // its own Advanced page (SET-23, decision 8)
   calendar: 'sec-calendar',
-})) ROUTES[name] = () => section(`mgmt-${id}`);
+}))
+  ROUTES[name] = () => section(`mgmt-${id}`);
 
 /** Opens a section of the Settings window by its id. */
 function section(id) {

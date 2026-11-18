@@ -18,7 +18,18 @@ describe('File Explorer path bar', () => {
   it('shows every folder when there is room', () => {
     const fm = fakeExplorer(deep, 2000);
     render(fm);
-    expect(texts(fm)).toEqual(['/', 'mnt', '/', 'user', '/', 'vault', '/', 'Movies', '/', '(500) Days of Summer (2009)']);
+    expect(texts(fm)).toEqual([
+      '/',
+      'mnt',
+      '/',
+      'user',
+      '/',
+      'vault',
+      '/',
+      'Movies',
+      '/',
+      '(500) Days of Summer (2009)',
+    ]);
     expect(fm.breadcrumbs.querySelector('.fm-breadcrumb-ellipsis')).toBeNull();
   });
 
@@ -27,7 +38,12 @@ describe('File Explorer path bar', () => {
     render(fm);
     expect(texts(fm)).toEqual(['/', 'mnt', '/', '...', '/', 'Movies', '/', '(500) Days of Summer (2009)']);
     fm.breadcrumbs.querySelector('.fm-breadcrumb-ellipsis').click();
-    expect(fm.showBreadcrumbsDropdown).toHaveBeenCalledWith(expect.anything(), ['mnt', 'user', 'vault', 'Movies', '(500) Days of Summer (2009)'], 1, 3);
+    expect(fm.showBreadcrumbsDropdown).toHaveBeenCalledWith(
+      expect.anything(),
+      ['mnt', 'user', 'vault', 'Movies', '(500) Days of Summer (2009)'],
+      1,
+      3
+    );
   });
 
   it('does not fold before the bar has a size, and has no stray separator after the root', () => {

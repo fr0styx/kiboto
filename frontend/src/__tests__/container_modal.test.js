@@ -4,7 +4,7 @@ import {
   openContainerInspector,
   closeContainerInspector,
   switchContainerTab,
-  _resetContainerModalForTesting
+  _resetContainerModalForTesting,
 } from '../components/container-modal.js';
 import { api } from '../api.js';
 import { ZettEventBus } from '../event-bus.js';
@@ -24,11 +24,11 @@ describe('Container Inspector & Docker Compose Viewer - Phase 2', () => {
       restart_policy: 'unless-stopped',
       command: '/init',
       ip_address: '172.17.0.4',
-      network_mode: 'bridge'
+      network_mode: 'bridge',
     },
     resources: {
       memory_limit: 4294967296, // 4096 MB
-      cpu_quota: 0
+      cpu_quota: 0,
     },
     primary_port: 8096,
     webui_url: 'http://[HOST]:8096/',
@@ -37,11 +37,11 @@ describe('Container Inspector & Docker Compose Viewer - Phase 2', () => {
     managed_by: 'compose',
     hardware_badges: [
       { id: 'gpu', label: 'GPU' },
-      { id: 'nvidia', label: 'NVIDIA' }
+      { id: 'nvidia', label: 'NVIDIA' },
     ],
     ports: [
       { public_port: 8096, private_port: 8096, type: 'tcp', ip: '0.0.0.0' },
-      { public_port: 8920, private_port: 8920, type: 'tcp', ip: '0.0.0.0' }
+      { public_port: 8920, private_port: 8920, type: 'tcp', ip: '0.0.0.0' },
     ],
     mounts: [
       {
@@ -50,7 +50,7 @@ describe('Container Inspector & Docker Compose Viewer - Phase 2', () => {
         mode: 'rw',
         rw: true,
         type: 'bind',
-        is_appdata: true
+        is_appdata: true,
       },
       {
         source: '/mnt/user/media',
@@ -58,23 +58,23 @@ describe('Container Inspector & Docker Compose Viewer - Phase 2', () => {
         mode: 'ro',
         rw: false,
         type: 'bind',
-        is_appdata: false
-      }
+        is_appdata: false,
+      },
     ],
     env: [
       {
         key: 'PUID',
         value: '1000',
         masked_value: '1000',
-        is_secret: false
+        is_secret: false,
       },
       {
         key: 'JELLYFIN_API_KEY',
         value: 'secret_api_token_xyz999',
         masked_value: '••••••••',
-        is_secret: true
-      }
-    ]
+        is_secret: true,
+      },
+    ],
   };
 
   const mockComposeData = {
@@ -85,12 +85,12 @@ describe('Container Inspector & Docker Compose Viewer - Phase 2', () => {
         jellyfin: {
           image: 'lscr.io/linuxserver/jellyfin:latest',
           container_name: 'jellyfin',
-          restart: 'unless-stopped'
-        }
-      }
+          restart: 'unless-stopped',
+        },
+      },
     },
     compose_yaml: `version: "3.8"\nservices:\n  jellyfin:\n    image: lscr.io/linuxserver/jellyfin:latest\n    container_name: jellyfin\n    environment:\n      - JELLYFIN_API_KEY=secret_api_token_xyz999\n`,
-    masked_yaml: `version: "3.8"\nservices:\n  jellyfin:\n    image: lscr.io/linuxserver/jellyfin:latest\n    container_name: jellyfin\n    environment:\n      - JELLYFIN_API_KEY=••••••••\n`
+    masked_yaml: `version: "3.8"\nservices:\n  jellyfin:\n    image: lscr.io/linuxserver/jellyfin:latest\n    container_name: jellyfin\n    environment:\n      - JELLYFIN_API_KEY=••••••••\n`,
   };
 
   const mockLogsData = {
@@ -99,8 +99,8 @@ describe('Container Inspector & Docker Compose Viewer - Phase 2', () => {
     lines: [
       { stream: 'stdout', ts: '2026-10-08T12:00:01.000000000Z', msg: '[INF] Core service initialized.' },
       { stream: 'stdout', ts: '2026-10-08T12:00:02.000000000Z', msg: '[INF] Listening on 0.0.0.0:8096.' },
-      { stream: 'stderr', ts: '2026-10-08T12:00:03.000000000Z', msg: '[WRN] Slow query detected on database.' }
-    ]
+      { stream: 'stderr', ts: '2026-10-08T12:00:03.000000000Z', msg: '[WRN] Slow query detected on database.' },
+    ],
   };
 
   beforeEach(() => {
@@ -181,7 +181,7 @@ describe('Container Inspector & Docker Compose Viewer - Phase 2', () => {
     revealBtn.click();
     expect(emitSpy).toHaveBeenCalledWith('window:open', {
       id: 'file-manager-window',
-      path: '/mnt/user/appdata/jellyfin'
+      path: '/mnt/user/appdata/jellyfin',
     });
 
     // 4. Environment Tab verification & secret reveal toggle
@@ -275,7 +275,7 @@ describe('Container Inspector & Docker Compose Viewer - Phase 2', () => {
     vi.spyOn(api, 'get').mockResolvedValue(mockContainerDetails);
     const postSpy = vi.spyOn(api, 'post').mockResolvedValue({
       status: 'success',
-      message: 'Container resource limits updated'
+      message: 'Container resource limits updated',
     });
 
     await openContainerInspector('c11122233344', 'jellyfin');
@@ -298,14 +298,11 @@ describe('Container Inspector & Docker Compose Viewer - Phase 2', () => {
     applyBtn.click();
 
     await vi.waitFor(() => {
-      expect(postSpy).toHaveBeenCalledWith(
-        '/api/docker/containers/c11122233344/resources',
-        {
-          memory_mb: 2048,
-          nano_cpus: 4.0,
-          restart_policy: 'always'
-        }
-      );
+      expect(postSpy).toHaveBeenCalledWith('/api/docker/containers/c11122233344/resources', {
+        memory_mb: 2048,
+        nano_cpus: 4.0,
+        restart_policy: 'always',
+      });
     });
     await new Promise((r) => setTimeout(r, 30));
   });
@@ -324,7 +321,7 @@ describe('Container Inspector & Docker Compose Viewer - Phase 2', () => {
 
     const postSpy = vi.spyOn(api, 'post').mockResolvedValue({
       status: 'success',
-      message: 'Container recreated with updated ports'
+      message: 'Container recreated with updated ports',
     });
 
     // Mock confirm dialog
@@ -375,13 +372,12 @@ describe('Container Inspector & Docker Compose Viewer - Phase 2', () => {
         `/api/docker/containers/${mockContainerDetails.cid}/ports`,
         expect.objectContaining({
           ports: expect.arrayContaining([
-            expect.objectContaining({ container_port: 8096, host_port: 8097, proto: 'tcp' })
+            expect.objectContaining({ container_port: 8096, host_port: 8097, proto: 'tcp' }),
           ]),
-          keep_backup: false
+          keep_backup: false,
         })
       );
     });
     await new Promise((r) => setTimeout(r, 30));
   });
 });
-

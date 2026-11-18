@@ -5,7 +5,9 @@ import { fileKind, shownFolderName } from '../components/file-kind.js';
 import { setLanguage } from '../i18n.js';
 
 describe('server-made names', () => {
-  afterEach(async () => { await setLanguage('en'); });
+  afterEach(async () => {
+    await setLanguage('en');
+  });
 
   it('the generic main pool and its share are translated, chosen names are not', async () => {
     expect(poolName('Primary Storage Pool')).toBe('Main storage pool');
@@ -29,7 +31,7 @@ describe('server-made names', () => {
     expect(fileKind({ name: 'README' })).toBe('Datei');
   });
 
-  it('the Recycle Bin folder is named in the reader\'s language', async () => {
+  it("the Recycle Bin folder is named in the reader's language", async () => {
     await setLanguage('de');
     expect(shownFolderName('.RecycleBin')).toBe('Papierkorb');
     expect(shownFolderName('Fotos')).toBe('Fotos');

@@ -57,7 +57,10 @@ describe('Batch 6: Observability, Structured Logging & Diagnostics Export', () =
       expect.objectContaining({ method: 'POST' })
     );
     expect(toast.showToast).toHaveBeenCalledWith('Generating diagnostics bundle (scrubbing secrets)...', 'info');
-    expect(toast.showToast).toHaveBeenCalledWith(`Diagnostics bundle downloaded successfully (${mockFilename}).`, 'success');
+    expect(toast.showToast).toHaveBeenCalledWith(
+      `Diagnostics bundle downloaded successfully (${mockFilename}).`,
+      'success'
+    );
 
     // Restored state
     const btn = document.getElementById('btn-download-diagnostics');
@@ -106,7 +109,9 @@ describe('Batch 6: Observability, Structured Logging & Diagnostics Export', () =
     vi.spyOn(document, 'createElement').mockImplementation((tagName) => {
       const el = origCreateElement(tagName);
       if (tagName === 'a') {
-        el.click = () => { clicked = true; };
+        el.click = () => {
+          clicked = true;
+        };
       }
       return el;
     });
@@ -136,9 +141,7 @@ describe('Batch 6: Observability, Structured Logging & Diagnostics Export', () =
 
     const mockData = {
       executive_status: 'ATTENTION_REQUIRED',
-      alerts: [
-        { level: 'warning', message: 'Containers requiring attention: zettnas-samba' },
-      ],
+      alerts: [{ level: 'warning', message: 'Containers requiring attention: zettnas-samba' }],
       platform: 'Linux 6.18.54-Unraid',
       chassis: 'Zettlab D6 Ultra (6-Bay)',
       uptime_hours: 4.2,

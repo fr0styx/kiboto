@@ -40,7 +40,9 @@ export function openModal(modal) {
   modal.classList.add('open');
   modal.style.display = 'flex';
   if (modal._unbindFocusTrap) {
-    try { modal._unbindFocusTrap(); } catch (_) {}
+    try {
+      modal._unbindFocusTrap();
+    } catch (_) {}
     modal._unbindFocusTrap = null;
   }
   const modalWin = modal.querySelector('.modal-window, .mgmt-modal-window, .smart-modal-window') || modal;
@@ -52,7 +54,9 @@ export function openModal(modal) {
 export function closeModal(modal) {
   if (!modal) return;
   if (modal._unbindFocusTrap) {
-    try { modal._unbindFocusTrap(); } catch (_) {}
+    try {
+      modal._unbindFocusTrap();
+    } catch (_) {}
     modal._unbindFocusTrap = null;
   }
   modal.classList.remove('open');
@@ -60,7 +64,6 @@ export function closeModal(modal) {
 }
 
 let _usersCache = {};
-
 
 // the dialogs this page still opens (the old Add and Edit ones are gone: SET-19)
 const PERSON_DIALOGS = ['modal-setup-2fa', 'modal-reset-password'];
@@ -71,14 +74,26 @@ export function initUsersManagement() {
   onManagementDom(bindUsersPane);
   bindUserModals();
   // the lists update themselves while People is open (SET-19)
-  import('./people-live.js').then((m) => m.installPeopleLive({ bus: ZettEventBus, reload: () => { loadUsersList(); loadSessionsList(); }, shown: () => m.peopleShown() })).catch(() => {});
+  import('./people-live.js')
+    .then((m) =>
+      m.installPeopleLive({
+        bus: ZettEventBus,
+        reload: () => {
+          loadUsersList();
+          loadSessionsList();
+        },
+        shown: () => m.peopleShown(),
+      })
+    )
+    .catch(() => {});
 }
 
 // The Users pane lives in Mission Control, which is inserted when first needed (FE-04)
 function bindUsersPane() {
   // Modal triggers
   const btnAddUser = document.getElementById('btn-add-user');
-  if (btnAddUser) btnAddUser.onclick = () => import('./add-person.js').then((m) => m.openAddPerson({ onDone: loadUsersList })); // three steps (SET-19)
+  if (btnAddUser)
+    btnAddUser.onclick = () => import('./add-person.js').then((m) => m.openAddPerson({ onDone: loadUsersList })); // three steps (SET-19)
 
   const btnShareAccess = document.getElementById('btn-share-access');
   if (btnShareAccess) btnShareAccess.onclick = openShareAccessModal;
@@ -117,7 +132,6 @@ function bindUsersPane() {
       }
     };
   }
-
 }
 
 function bindUserModals() {
@@ -192,7 +206,10 @@ export async function loadUsersList() {
     const res = await apiFetch('/api/users', { credentials: 'include' });
     if (!res.ok) {
       if (res.status === 403) {
-        container.innerHTML = peopleMessageHtml(t('users.admin_only', 'Only administrators can see the list of people.'), true);
+        container.innerHTML = peopleMessageHtml(
+          t('users.admin_only', 'Only administrators can see the list of people.'),
+          true
+        );
         return;
       }
       throw new Error(`Server returned ${res.status}`);
@@ -201,21 +218,30 @@ export async function loadUsersList() {
     const users = data.users || [];
     const kids = document.getElementById('kids-rules-mount'); // NUX-18: kids' rules in one place
     if (kids) {
-      import('./kids-rules.js').then((m) => m.renderKidsRules(kids, users, {
-        onEdit: (id) => _usersCache[id] && openPerson(_usersCache[id]),
-      }));
+      import('./kids-rules.js').then((m) =>
+        m.renderKidsRules(kids, users, {
+          onEdit: (id) => _usersCache[id] && openPerson(_usersCache[id]),
+        })
+      );
     }
-    import('./household-rules.js').then((m) => m.renderHousehold(document.getElementById('household-mount'))).catch(() => {}); // SET-19
+    import('./household-rules.js')
+      .then((m) => m.renderHousehold(document.getElementById('household-mount')))
+      .catch(() => {}); // SET-19
 
     renderInvites(document.getElementById('invites-mount'));
     const invites = await waitingInvites(); // invited people are rows too (SET-19)
     if (users.length === 0 && !invites.some((i) => i.active)) {
-      container.innerHTML = `<li class="people-msg">${emptyStateHtml(/** @type {any} */ ({
-        compact: true,
-        title: t('users.none_title', 'Only you so far'),
-        body: t('users.none_desc', 'Give each person in the house their own sign-in, so their files and access are their own.'),
-        action: { target: 'btn-add-user', label: t('users.add', 'Add a person') },
-      }))}</li>`;
+      container.innerHTML = `<li class="people-msg">${emptyStateHtml(
+        /** @type {any} */ ({
+          compact: true,
+          title: t('users.none_title', 'Only you so far'),
+          body: t(
+            'users.none_desc',
+            'Give each person in the house their own sign-in, so their files and access are their own.'
+          ),
+          action: { target: 'btn-add-user', label: t('users.add', 'Add a person') },
+        })
+      )}</li>`;
       return;
     }
 
@@ -227,7 +253,8 @@ export async function loadUsersList() {
     container.innerHTML = peopleRowsHtml(users, invites, {
       me: getCurrentUser(),
       roleName: formatRole,
-      quotaText: (u) => `${Math.round(u.storage_quota_bytes / (1024 * 1024 * 1024))} GB${quotaHow(u.quota_enforcement)}`,
+      quotaText: (u) =>
+        `${Math.round(u.storage_quota_bytes / (1024 * 1024 * 1024))} GB${quotaHow(u.quota_enforcement)}`,
     });
     container.querySelectorAll('[data-invite-cancel]').forEach((el) => {
       const btn = /** @type {HTMLElement} */ (el);
@@ -265,9 +292,11 @@ export async function loadUsersList() {
         confirmDeleteUser(btn.dataset.id, btn.dataset.user);
       };
     });
-
   } catch (err) {
-    container.innerHTML = peopleMessageHtml(t('users.load_failed', 'The list of people couldn\'t be loaded: {error}', { error: err.message }), true);
+    container.innerHTML = peopleMessageHtml(
+      t('users.load_failed', "The list of people couldn't be loaded: {error}", { error: err.message }),
+      true
+    );
   }
 }
 
@@ -275,9 +304,18 @@ export async function loadUsersList() {
 /** The role choices of a person's page, in the order the old edit dialog had them (SET-19). */
 export const ROLE_CHOICES = () => [
   ['share_user', t('role.share_user_option', 'Family member: their own folder and the shared folders you choose')],
-  ['app_operator', t('role.app_operator_option', 'App manager: installs and runs apps, and can give an app most data folders')],
-  ['storage_admin', t('role.storage_admin_option', 'Storage admin: drives, pools and shares, and can open every private folder')],
-  ['backup_operator', t('role.backup_operator_option', "Backup manager: backups and cloud copies; can bring back anyone's files")],
+  [
+    'app_operator',
+    t('role.app_operator_option', 'App manager: installs and runs apps, and can give an app most data folders'),
+  ],
+  [
+    'storage_admin',
+    t('role.storage_admin_option', 'Storage admin: drives, pools and shares, and can open every private folder'),
+  ],
+  [
+    'backup_operator',
+    t('role.backup_operator_option', "Backup manager: backups and cloud copies; can bring back anyone's files"),
+  ],
   ['kid', t('role.kid_option', "Kid: their own folder, the shared folders you choose, and the kids' rules")],
   ['guest', t('role.guest_option', 'Guest: can look at the shared folders you choose')],
   ['auditor', t('role.auditor_option', "Viewer: can look, can't change")],
@@ -285,7 +323,9 @@ export const ROLE_CHOICES = () => [
 ];
 
 export function roleOptionsHtml() {
-  return ROLE_CHOICES().map(([id, label]) => `<option value="${id}">${escapeHtml(label)}</option>`).join('');
+  return ROLE_CHOICES()
+    .map(([id, label]) => `<option value="${id}">${escapeHtml(label)}</option>`)
+    .join('');
 }
 
 export function openPerson(user) {
@@ -298,7 +338,7 @@ export function openPerson(user) {
       resetPassword: showResetPasswordModal,
       setStatus: toggleUserStatus,
       remove: confirmDeleteUser,
-    }),
+    })
   );
 }
 
@@ -342,12 +382,21 @@ export function showResetPasswordModal(userId, username) {
           credentials: 'include',
           body: JSON.stringify(
             isSelf
-              ? { new_password: newPassword, current_password: currentInput?.value || '', revoke_tokens: Boolean(revokeTokens?.checked) }
+              ? {
+                  new_password: newPassword,
+                  current_password: currentInput?.value || '',
+                  revoke_tokens: Boolean(revokeTokens?.checked),
+                }
               : { new_password: newPassword }
-          )
+          ),
         });
         if (res.ok) {
-          showToast(isSelf ? t('users.pwd_changed_self', 'Password changed. Your other sessions were signed out.') : t('users.pwd_changed_other', 'Password changed. They were signed out everywhere.'), 'success');
+          showToast(
+            isSelf
+              ? t('users.pwd_changed_self', 'Password changed. Your other sessions were signed out.')
+              : t('users.pwd_changed_other', 'Password changed. They were signed out everywhere.'),
+            'success'
+          );
           closeModal(modal);
         } else {
           const err = await res.json();
@@ -369,14 +418,17 @@ async function toggleUserStatus(userId, newStatus) {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
-      body: JSON.stringify({ status: newStatus })
+      body: JSON.stringify({ status: newStatus }),
     });
     if (res.ok) {
       loadUsersList();
       showToast(t('toast.user_status_updated', 'User status updated.'), 'success');
     } else {
       const err = await res.json();
-      showToast(t('toast.could_not_change_status', 'Could not change status: {detail}', { detail: err.detail || 'Error' }), 'error');
+      showToast(
+        t('toast.could_not_change_status', 'Could not change status: {detail}', { detail: err.detail || 'Error' }),
+        'error'
+      );
     }
   } catch (err) {
     showToast(t('toast.request_failed', 'Request failed: {error}', { error: err.message }), 'error');
@@ -385,22 +437,33 @@ async function toggleUserStatus(userId, newStatus) {
 
 export function confirmDeleteUser(userId, username) {
   // what happens to their files first (Users decision 7, SET-19)
-  return import('./management/delete-person.js').then((m) => m.askDeletePerson({ id: userId, username }, (choice) => deletePerson(userId, username, choice, m)));
+  return import('./management/delete-person.js').then((m) =>
+    m.askDeletePerson({ id: userId, username }, (choice) => deletePerson(userId, username, choice, m))
+  );
 }
 
 /** Deletes the account with the files choice; the toast says what happened to the files. */
 export async function deletePerson(userId, username, choice, m) {
   try {
-    const res = await apiFetch(`/api/users/${userId}${m.deleteQuery(choice)}`, { method: 'DELETE', confirmed: true, credentials: 'include' });
+    const res = await apiFetch(`/api/users/${userId}${m.deleteQuery(choice)}`, {
+      method: 'DELETE',
+      confirmed: true,
+      credentials: 'include',
+    });
     if (res.ok) {
       const body = await res.json().catch(() => ({}));
       loadUsersList();
       const files = m.filesDoneText(body.files);
-      const said = [t('toast.user_deleted_2', 'User @{username} deleted.', { username }), files].filter(Boolean).join(' ');
+      const said = [t('toast.user_deleted_2', 'User @{username} deleted.', { username }), files]
+        .filter(Boolean)
+        .join(' ');
       showToast(said, body.files?.files === 'error' ? 'warning' : 'success');
     } else {
       const err = await res.json();
-      showToast(t('toast.could_not_delete_user', 'Could not delete user: {detail}', { detail: err.detail || 'Error' }), 'error');
+      showToast(
+        t('toast.could_not_delete_user', 'Could not delete user: {detail}', { detail: err.detail || 'Error' }),
+        'error'
+      );
     }
   } catch (err) {
     showToast(t('toast.request_failed', 'Request failed: {error}', { error: err.message }), 'error');
@@ -410,7 +473,10 @@ export async function deletePerson(userId, username, choice, m) {
 export async function loadSessionsList() {
   const container = document.getElementById('sessions-table-body');
   if (!container) return;
-  container.innerHTML = '<tr><td colspan="5" class="kb-datatable-msg">' + escapeHtml(t('users.sessions_loading', 'Loading sign-ins…')) + '</td></tr>';
+  container.innerHTML =
+    '<tr><td colspan="5" class="kb-datatable-msg">' +
+    escapeHtml(t('users.sessions_loading', 'Loading sign-ins…')) +
+    '</td></tr>';
 
   try {
     const res = await apiFetch('/api/auth/sessions', { credentials: 'include' });
@@ -419,16 +485,20 @@ export async function loadSessionsList() {
     const sessions = data.sessions || [];
 
     if (sessions.length === 0) {
-      container.innerHTML = '<tr><td colspan="5" class="kb-datatable-msg">' + escapeHtml(t('users.sessions_none', 'No other sign-ins.')) + '</td></tr>';
+      container.innerHTML =
+        '<tr><td colspan="5" class="kb-datatable-msg">' +
+        escapeHtml(t('users.sessions_none', 'No other sign-ins.')) +
+        '</td></tr>';
       return;
     }
 
-    container.innerHTML = sessions.map((s) => {
-      const createdStr = formatDateTime(s.created_at);
-      const lastStr = formatDateTime(s.last_active_at);
-      const isCurrent = !!s.is_current;
+    container.innerHTML = sessions
+      .map((s) => {
+        const createdStr = formatDateTime(s.created_at);
+        const lastStr = formatDateTime(s.last_active_at);
+        const isCurrent = !!s.is_current;
 
-      return `
+        return `
         <tr>
           <td class="is-bold">
             <span aria-hidden="true">${isCurrent ? '💻' : '🌐'}</span> ${escapeHtml(isCurrent ? t('users.this_browser', 'This browser') : t('users.other_device', 'Another device'))}
@@ -439,13 +509,18 @@ export async function loadSessionsList() {
           <td class="is-dim">${createdStr}</td>
           <td class="is-dim">${lastStr}</td>
           <td class="is-end">
-            ${!isCurrent ? `
+            ${
+              !isCurrent
+                ? `
               <button class="suite-toolkit-btn sm danger btn-revoke-session" data-id="${s.id}">${escapeHtml(t('users.sign_out', 'Sign out'))}</button>
-            ` : '<span class="kb-sub">' + escapeHtml(t('users.in_use', 'In use')) + '</span>'}
+            `
+                : '<span class="kb-sub">' + escapeHtml(t('users.in_use', 'In use')) + '</span>'
+            }
           </td>
         </tr>
       `;
-    }).join('');
+      })
+      .join('');
 
     container.querySelectorAll('.btn-revoke-session').forEach((btn) => {
       btn.addEventListener('click', async () => {
@@ -454,9 +529,11 @@ export async function loadSessionsList() {
         loadSessionsList();
       });
     });
-
   } catch (err) {
-    container.innerHTML = '<tr><td colspan="5" class="kb-datatable-msg is-crit">' + escapeHtml(t('users.sessions_failed', 'The sign-ins couldn\'t be loaded: {error}', { error: err.message })) + '</td></tr>';
+    container.innerHTML =
+      '<tr><td colspan="5" class="kb-datatable-msg is-crit">' +
+      escapeHtml(t('users.sessions_failed', "The sign-ins couldn't be loaded: {error}", { error: err.message })) +
+      '</td></tr>';
   }
 }
 
@@ -508,7 +585,10 @@ export async function load2FAStatus() {
     if (desc) {
       desc.textContent = isEnabled
         ? t('users.2fa_desc_on', 'Two-step sign-in is on: signing in asks for a code from your authenticator app.')
-        : t('users.2fa_desc_off', 'Two-step sign-in is off. Turn it on, and a stolen password alone can\'t open your account.');
+        : t(
+            'users.2fa_desc_off',
+            "Two-step sign-in is off. Turn it on, and a stolen password alone can't open your account."
+          );
     }
 
     if (btnEnable) btnEnable.style.display = isEnabled ? 'none' : 'inline-flex';
@@ -518,7 +598,6 @@ export async function load2FAStatus() {
       const node = document.getElementById(id);
       if (node) node.hidden = !isEnabled;
     }
-
   } catch (err) {
     console.warn('[USERS] Failed to fetch 2FA status:', err);
   }
@@ -536,12 +615,15 @@ export async function start2FASetup() {
 
   stepVerify.style.display = 'block';
   stepSuccess.style.display = 'none';
-  qrContainer.innerHTML = '<div style="color:var(--muted); padding:30px;">' + escapeHtml(t('users.2fa_preparing', 'Preparing the key…')) + '</div>';
+  qrContainer.innerHTML =
+    '<div style="color:var(--muted); padding:30px;">' +
+    escapeHtml(t('users.2fa_preparing', 'Preparing the key…')) +
+    '</div>';
 
   try {
     const res = await apiFetch('/api/auth/mfa/setup', {
       method: 'POST',
-      credentials: 'include'
+      credentials: 'include',
     });
     if (!res.ok) throw new Error('Could not initialize TOTP setup');
     const data = await res.json();
@@ -569,8 +651,8 @@ export async function start2FASetup() {
               secret: data.secret || data.totp_secret,
               code,
               current_password: currentPassword,
-              recovery_codes: data.recovery_codes || []
-            })
+              recovery_codes: data.recovery_codes || [],
+            }),
           });
           const verifyData = await verifyRes.json();
           if (verifyRes.ok) {
@@ -579,25 +661,36 @@ export async function start2FASetup() {
 
             const codesContainer = document.getElementById('mfa-recovery-codes-list');
             if (codesContainer && Array.isArray(verifyData.recovery_codes)) {
-              codesContainer.innerHTML = verifyData.recovery_codes.map((rc) => `
+              codesContainer.innerHTML = verifyData.recovery_codes
+                .map(
+                  (rc) => `
                 <div style="background:var(--kb-shade-40); padding:6px 10px; border-radius:6px; font-family:monospace; font-size: var(--kb-fs-sm); font-weight:700; color:var(--kb-text-accent); text-align:center; border:1px solid var(--kb-line-10);">
                   ${escapeHtml(rc)}
                 </div>
-              `).join('');
+              `
+                )
+                .join('');
 
               const copyBtn = document.getElementById('btn-copy-recovery-codes');
               if (copyBtn) {
                 copyBtn.onclick = () => {
                   copyText(verifyData.recovery_codes.join('\n'));
                   copyBtn.textContent = t('users.2fa_copied', 'Copied');
-                  setTimeout(() => { copyBtn.textContent = t('users.2fa_copy_codes', 'Copy all codes'); }, 2000);
+                  setTimeout(() => {
+                    copyBtn.textContent = t('users.2fa_copy_codes', 'Copy all codes');
+                  }, 2000);
                 };
               }
             }
             load2FAStatus();
             fetchCurrentProfile();
           } else {
-            showToast(t('toast.verification_failed', 'Verification failed: {detail}', { detail: verifyData.detail || 'Invalid code' }), 'error');
+            showToast(
+              t('toast.verification_failed', 'Verification failed: {detail}', {
+                detail: verifyData.detail || 'Invalid code',
+              }),
+              'error'
+            );
           }
         } catch (err) {
           showToast(t('toast.error_2', 'Error: {error}', { error: err.message }), 'error');
@@ -607,9 +700,11 @@ export async function start2FASetup() {
         }
       };
     }
-
   } catch (err) {
-    qrContainer.innerHTML = '<div style="color:var(--crit); padding:20px;">' + escapeHtml(t('users.2fa_error', 'Two-step sign-in couldn\'t be set up: {error}', { error: err.message })) + '</div>';
+    qrContainer.innerHTML =
+      '<div style="color:var(--crit); padding:20px;">' +
+      escapeHtml(t('users.2fa_error', "Two-step sign-in couldn't be set up: {error}", { error: err.message })) +
+      '</div>';
   }
 }
 
@@ -623,7 +718,10 @@ export function disable2FA() {
       // SEC-27: the password and a current code (or a recovery code) are both needed
       showPromptToast(
         t('mfa.disable_title', 'Turn off two-factor sign-in'),
-        t('mfa.disable_code_prompt', 'Enter the 6-digit code from your authenticator app, or one of your recovery codes:'),
+        t(
+          'mfa.disable_code_prompt',
+          'Enter the 6-digit code from your authenticator app, or one of your recovery codes:'
+        ),
         '',
         (code) => (code ? _sendDisable2FA(pwd, code.trim()) : undefined),
         null,
@@ -641,15 +739,23 @@ async function _sendDisable2FA(pwd, code) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
-      body: JSON.stringify({ password: pwd, code })
+      body: JSON.stringify({ password: pwd, code }),
     });
     if (res.ok) {
-      showToast(t('toast.two_factor_authentication_has_been_disabled', 'Two-Factor Authentication has been disabled.'), 'success');
+      showToast(
+        t('toast.two_factor_authentication_has_been_disabled', 'Two-Factor Authentication has been disabled.'),
+        'success'
+      );
       load2FAStatus();
       fetchCurrentProfile();
     } else {
       const err = await res.json();
-      showToast(t('toast.could_not_disable_2fa', 'Could not disable 2FA: {detail}', { detail: err.detail || 'Invalid password' }), 'error');
+      showToast(
+        t('toast.could_not_disable_2fa', 'Could not disable 2FA: {detail}', {
+          detail: err.detail || 'Invalid password',
+        }),
+        'error'
+      );
     }
   } catch (err) {
     showToast(t('toast.request_failed', 'Request failed: {error}', { error: err.message }), 'error');

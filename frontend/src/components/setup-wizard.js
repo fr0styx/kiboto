@@ -22,9 +22,10 @@ function setWizardError(msg, step = 2) {
   const errEl = document.getElementById('setup-wizard-err');
   if (errEl) {
     // the message sits under the step that has the problem
-    const home = step === 2
-      ? document.getElementById('setup-confirm-pwd')?.closest('[data-setup-step]')
-      : document.querySelector(`#setup-wizard-modal [data-setup-step="${step}"]`);
+    const home =
+      step === 2
+        ? document.getElementById('setup-confirm-pwd')?.closest('[data-setup-step]')
+        : document.querySelector(`#setup-wizard-modal [data-setup-step="${step}"]`);
     if (msg && home && !home.contains(errEl)) home.appendChild(errEl);
     errEl.textContent = msg;
     errEl.style.display = msg ? 'block' : 'none';
@@ -64,7 +65,8 @@ export function passwordStepProblem() {
   if (!currentPwd) return t('setup.err_enter_current', 'Please enter your current password.');
   if (!newPwd) return t('setup.err_enter_pwd', 'Please enter a new password.');
   if (newPwd.length < 8) return t('setup.err_min_8', 'Password must be at least 8 characters long.');
-  if (newPwd.toLowerCase() === 'admin') return t('setup.err_not_admin', "Please choose a secure password other than 'admin'.");
+  if (newPwd.toLowerCase() === 'admin')
+    return t('setup.err_not_admin', "Please choose a secure password other than 'admin'.");
   if (newPwd !== confirmPwd) return t('setup.err_no_match', 'New password and confirmation do not match.');
   return '';
 }
@@ -74,7 +76,8 @@ export function personStepProblem() {
   const name = (document.getElementById('setup-person-name')?.value || '').trim();
   const pwd = document.getElementById('setup-person-pwd')?.value || '';
   if (!name) return '';
-  if (!/^[a-zA-Z0-9_-][a-zA-Z0-9_.-]{1,31}$/.test(name)) return t('setup.err_person_name', 'Use 2 to 32 letters, numbers, dots, dashes or underscores for the user name.');
+  if (!/^[a-zA-Z0-9_-][a-zA-Z0-9_.-]{1,31}$/.test(name))
+    return t('setup.err_person_name', 'Use 2 to 32 letters, numbers, dots, dashes or underscores for the user name.');
   if (pwd.length < 8) return t('setup.err_person_pwd', 'Their password needs at least 8 characters.');
   return '';
 }
@@ -86,13 +89,15 @@ export function fillTimezones(select, current = '') {
   const chosen = current || browser;
   const zones = zoneCatalog(currentLocale()); // the same list as Settings, in the person's language (NUX-22)
   const list = zones.some((z) => z.id === chosen) ? zones : [{ id: chosen, name: chosen, country: '' }, ...zones];
-  select.replaceChildren(...list.map((z) => {
-    const opt = document.createElement('option');
-    opt.value = z.id;
-    opt.textContent = z.country ? `${z.name} · ${z.country}` : z.name;
-    opt.selected = z.id === chosen;
-    return opt;
-  }));
+  select.replaceChildren(
+    ...list.map((z) => {
+      const opt = document.createElement('option');
+      opt.value = z.id;
+      opt.textContent = z.country ? `${z.name} · ${z.country}` : z.name;
+      opt.selected = z.id === chosen;
+      return opt;
+    })
+  );
 }
 
 /** Step 3 and 4: what the storage is, and whether Kiboto or the host makes shares. */
@@ -101,21 +106,34 @@ export async function loadStorageStep() {
   const shareHost = document.getElementById('setup-share-host');
   const shareForm = document.getElementById('setup-share-form');
   try {
-    const [platform, pools] = await Promise.all([api.get('/api/storage/platform'), api.get('/api/storage/pools').catch(() => ({}))]);
+    const [platform, pools] = await Promise.all([
+      api.get('/api/storage/platform'),
+      api.get('/api/storage/pools').catch(() => ({})),
+    ]);
     const host = String(platform?.platform || '').replace(/^\w/, (c) => c.toUpperCase());
     const list = Array.isArray(pools?.pools) ? pools.pools : [];
     const observer = Boolean(platform?.capabilities?.is_observer_mode);
     if (info) {
-      const names = list.map((p) => p.name || p.id).filter(Boolean).slice(0, 4).join(', ');
+      const names = list
+        .map((p) => p.name || p.id)
+        .filter(Boolean)
+        .slice(0, 4)
+        .join(', ');
       info.textContent = observer
-        ? t('setup.storage_host', '{host} looks after the drives and storage; Kiboto shows and uses what it sets up.', { host })
+        ? t('setup.storage_host', '{host} looks after the drives and storage; Kiboto shows and uses what it sets up.', {
+            host,
+          })
         : list.length
           ? t('setup.storage_pools', 'Storage ready: {names}.', { names })
           : t('setup.storage_none', 'No storage pool yet. You can create one later in Storage.');
     }
     if (observer && shareHost && shareForm) {
       shareHost.hidden = false;
-      shareHost.textContent = t('setup.share_host', 'Shared folders are made in {host} itself; Kiboto lists them under Shares.', { host });
+      shareHost.textContent = t(
+        'setup.share_host',
+        'Shared folders are made in {host} itself; Kiboto lists them under Shares.',
+        { host }
+      );
       shareForm.hidden = true;
     }
     return { observer };
@@ -133,8 +151,9 @@ export async function loadStorageStep() {
 /** Focus the step's heading (or its first field) and say "Step n of m" (UX-34). */
 export function focusStep(els, n, last) {
   const visible = (els || []).filter(Boolean);
-  const target = visible.map((el) => el.querySelector('h2, h3, h4, legend, .setup-step-title')).find(Boolean)
-    || visible.map((el) => el.querySelector('input, select, textarea, button')).find(Boolean);
+  const target =
+    visible.map((el) => el.querySelector('h2, h3, h4, legend, .setup-step-title')).find(Boolean) ||
+    visible.map((el) => el.querySelector('input, select, textarea, button')).find(Boolean);
   if (target) {
     if (!/^(INPUT|SELECT|TEXTAREA|BUTTON)$/.test(target.tagName)) target.setAttribute('tabindex', '-1');
     target.focus({ preventScroll: false });
@@ -214,7 +233,12 @@ export function initWizardStepper(modal) {
     show(current + 1);
   });
   show(1, false);
-  return { show, get current() { return current; } };
+  return {
+    show,
+    get current() {
+      return current;
+    },
+  };
 }
 
 export function initSetupWizard() {
@@ -239,7 +263,13 @@ export function initSetupWizard() {
 
   const closeWizard = (dismiss = true) => {
     if (dismiss && isPasswordDefault()) {
-      showToast(t('setup.cannot_dismiss', 'Security Setup Required: Please configure a new administrator password before continuing.'), 'warning');
+      showToast(
+        t(
+          'setup.cannot_dismiss',
+          'Security Setup Required: Please configure a new administrator password before continuing.'
+        ),
+        'warning'
+      );
       return;
     }
     modal.classList.remove('open');
@@ -267,17 +297,27 @@ export function initSetupWizard() {
   });
 
   // Guard Escape key when password is required
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modal.classList.contains('open')) {
-      if (isPasswordDefault()) {
-        e.preventDefault();
-        e.stopPropagation();
-        showToast(t('setup.cannot_dismiss', 'Security Setup Required: Please configure a new administrator password before continuing.'), 'warning');
-      } else {
-        closeWizard(true);
+  document.addEventListener(
+    'keydown',
+    (e) => {
+      if (e.key === 'Escape' && modal.classList.contains('open')) {
+        if (isPasswordDefault()) {
+          e.preventDefault();
+          e.stopPropagation();
+          showToast(
+            t(
+              'setup.cannot_dismiss',
+              'Security Setup Required: Please configure a new administrator password before continuing.'
+            ),
+            'warning'
+          );
+        } else {
+          closeWizard(true);
+        }
       }
-    }
-  }, true);
+    },
+    true
+  );
 
   const stepper = initWizardStepper(modal);
   // RES-7: a temporary password first (the API answers nothing else until then), then the kit
@@ -318,12 +358,12 @@ export function initSetupWizard() {
         if (me && me.role && me.role !== 'superadmin') {
           await api.post(`/api/users/${encodeURIComponent(me.id)}/password`, {
             current_password: currentPwd,
-            new_password: newPwd
+            new_password: newPwd,
           });
         } else {
           await api.post('/api/security', {
             current_password: currentPwd,
-            new_password: newPwd
+            new_password: newPwd,
           });
         }
 
@@ -374,7 +414,10 @@ export function initSetupWizard() {
         const warnEl = document.getElementById('sec-default-pwd-warning');
         if (warnEl) warnEl.style.display = 'none';
 
-        showToast(t('setup.success_toast', 'Setup completed! Your new administrator password is now active.'), 'success');
+        showToast(
+          t('setup.success_toast', 'Setup completed! Your new administrator password is now active.'),
+          'success'
+        );
         if (restoreAfter) openRestoreAfterSetup();
         else if (typeof window.openGettingStarted === 'function') window.openGettingStarted();
       } catch (err) {
@@ -408,7 +451,10 @@ export async function saveSetupExtras() {
       const id = await api.put('/api/system/identity', { server_name: name, timezone: tz || null });
       applyServerName(id?.server_name ?? name);
     } catch (err) {
-      showToast(t('setup.err_identity', 'The name and time zone were not saved: {error}', { error: err.message }), 'warning');
+      showToast(
+        t('setup.err_identity', 'The name and time zone were not saved: {error}', { error: err.message }),
+        'warning'
+      );
     }
   }
   const shareForm = document.getElementById('setup-share-form');
@@ -432,7 +478,10 @@ export async function saveSetupExtras() {
       });
       if (sharedFolder) await grantFolder(sharedFolder, person);
     } catch (err) {
-      showToast(t('setup.err_person', '{name} was not added: {error}', { name: person, error: err.message }), 'warning');
+      showToast(
+        t('setup.err_person', '{name} was not added: {error}', { name: person, error: err.message }),
+        'warning'
+      );
     }
   }
 }
@@ -442,7 +491,14 @@ export async function grantFolder(share, person) {
   try {
     await grantShares(person, { [share]: 'write' });
   } catch (err) {
-    showToast(t('setup.err_grant', '{name} was added but cannot open {share} yet: {error}', { name: person, share, error: err.message }), 'warning');
+    showToast(
+      t('setup.err_grant', '{name} was added but cannot open {share} yet: {error}', {
+        name: person,
+        share,
+        error: err.message,
+      }),
+      'warning'
+    );
   }
 }
 
@@ -470,7 +526,7 @@ export function openSetupWizard(stats = null, forced = false) {
   if (!modal) return;
 
   const currentStats = stats || state.stats || state.latestStats;
-  const isDefaultPwd = forced ? false : (currentStats?.security?.is_default_password === true);
+  const isDefaultPwd = forced ? false : currentStats?.security?.is_default_password === true;
   const skipBtn = document.getElementById('setup-wizard-skip');
   const closeBtn = document.getElementById('setup-wizard-close');
 
@@ -491,27 +547,40 @@ export function openSetupWizard(stats = null, forced = false) {
     const hwFans = document.getElementById('setup-hw-fans');
     const hwLeds = document.getElementById('setup-hw-leds');
     if (hwModel) {
-      const friendlyName = currentStats.chassis_label || (
-        currentStats.chassis === 'd4' ? 'Zettlab D4 (4-Bay)' :
-        currentStats.chassis === 'd6u' ? 'Zettlab D6 Ultra (6-Bay)' :
-        currentStats.chassis === 'd8u' ? 'Zettlab D8 Ultra (8-Bay)' :
-        (currentStats.chassis ? String(currentStats.chassis).toUpperCase() : (currentStats.model || currentStats.name || 'Kiboto Hardware'))
-      );
+      const friendlyName =
+        currentStats.chassis_label ||
+        (currentStats.chassis === 'd4'
+          ? 'Zettlab D4 (4-Bay)'
+          : currentStats.chassis === 'd6u'
+            ? 'Zettlab D6 Ultra (6-Bay)'
+            : currentStats.chassis === 'd8u'
+              ? 'Zettlab D8 Ultra (8-Bay)'
+              : currentStats.chassis
+                ? String(currentStats.chassis).toUpperCase()
+                : currentStats.model || currentStats.name || 'Kiboto Hardware');
       hwModel.textContent = friendlyName;
     }
 
     if (hwFb) {
-      const fbActive = currentStats?.peripherals?.fb_active ?? (currentStats?.lcd_active && currentStats?.lcd?.page !== undefined);
-      hwFb.textContent = fbActive ? t('setup.hw_screen_on', 'Working') : t('setup.hw_screen_none', 'None found (that is fine)');
-      hwFb.title = fbActive ? '/dev/fb0' : t('ui.no_framebuffer_device_detected_at', 'No framebuffer device detected at /dev/fb0.');
+      const fbActive =
+        currentStats?.peripherals?.fb_active ?? (currentStats?.lcd_active && currentStats?.lcd?.page !== undefined);
+      hwFb.textContent = fbActive
+        ? t('setup.hw_screen_on', 'Working')
+        : t('setup.hw_screen_none', 'None found (that is fine)');
+      hwFb.title = fbActive
+        ? '/dev/fb0'
+        : t('ui.no_framebuffer_device_detected_at', 'No framebuffer device detected at /dev/fb0.');
       hwFb.style.color = fbActive ? 'var(--ok2)' : 'var(--muted)';
     }
 
     if (hwFans) {
       const fanList = Array.isArray(currentStats.fans) ? currentStats.fans : [];
-      const spinningCount = fanList.filter(r => r > 0).length;
+      const spinningCount = fanList.filter((r) => r > 0).length;
       if (spinningCount > 0) {
-        hwFans.textContent = t('setup.hw_fans_on', '{n} of {total} fans running', { n: spinningCount, total: fanList.length });
+        hwFans.textContent = t('setup.hw_fans_on', '{n} of {total} fans running', {
+          n: spinningCount,
+          total: fanList.length,
+        });
         hwFans.style.color = 'var(--ok2)';
       } else if (fanList.length > 0) {
         hwFans.textContent = t('setup.hw_fans_idle', '{total} fans, all stopped for now', { total: fanList.length });
@@ -541,7 +610,8 @@ export function openSetupWizard(stats = null, forced = false) {
     const upsText = document.getElementById('setup-ups-text');
     if (upsBadge && upsText) {
       const ups = currentStats?.ups;
-      const isOnline = ups && (ups.status === 'OL' || ups.status === 'online' || (ups.battery_charge && ups.battery_charge > 0));
+      const isOnline =
+        ups && (ups.status === 'OL' || ups.status === 'online' || (ups.battery_charge && ups.battery_charge > 0));
       if (isOnline) {
         upsBadge.style.background = 'var(--ok2, #4ade80)';
         upsText.textContent = `${t('setup.ups_detected', 'UPS Online & Monitored')} (${ups.model || ups.ups_name || 'NUT'}) - ${ups.battery_charge || 100}%`;

@@ -12,7 +12,13 @@ vi.mock('../toast.js', () => ({
 
 import { api } from '../api.js';
 import { showToast } from '../toast.js';
-import { clearSelectedContainers, containerName, getSelectedContainerIds, runBulkContainerAction, selectAllContainers } from '../components/docker-table.js';
+import {
+  clearSelectedContainers,
+  containerName,
+  getSelectedContainerIds,
+  runBulkContainerAction,
+  selectAllContainers,
+} from '../components/docker-table.js';
 
 const view = { rerender: vi.fn(), refresh: vi.fn(async () => {}), updateBar: vi.fn() };
 

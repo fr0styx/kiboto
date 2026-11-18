@@ -13,7 +13,8 @@ describe('Power shows with Advanced off when it matters (SET-15, Power decision 
   });
 
   it('a hidden Power place comes back, and goes again when it no longer matters', () => {
-    document.body.innerHTML = '<div data-advanced-section="mgmt-sec-ups" id="p"></div><div data-advanced-section="mgmt-sec-vms" id="v"></div>';
+    document.body.innerHTML =
+      '<div data-advanced-section="mgmt-sec-ups" id="p"></div><div data-advanced-section="mgmt-sec-vms" id="v"></div>';
     applyAdvancedEverywhere(false);
     const p = document.getElementById('p');
     expect(p.hidden).toBe(true);

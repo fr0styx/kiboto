@@ -4,11 +4,15 @@ import { setLanguage } from '../i18n.js';
 import { showToast, showActionToast, TOAST_MS } from '../toast.js';
 import { announceChange } from '../a11y.js';
 
-describe('UX-22: errors in the person\'s language', () => {
-  afterEach(async () => { await setLanguage('en'); });
+describe("UX-22: errors in the person's language", () => {
+  afterEach(async () => {
+    await setLanguage('en');
+  });
 
   it('keeps the server sentence in English', () => {
-    expect(explain('A share named Photos already exists.', 'conflict')).toContain('A share named Photos already exists.');
+    expect(explain('A share named Photos already exists.', 'conflict')).toContain(
+      'A share named Photos already exists.'
+    );
   });
 
   it('translates by code elsewhere and keeps the server words as details', async () => {
@@ -22,8 +26,13 @@ describe('UX-22: errors in the person\'s language', () => {
 });
 
 describe('UX-27: humane toasts', () => {
-  beforeEach(() => { document.body.innerHTML = ''; vi.useFakeTimers(); });
-  afterEach(() => { vi.useRealTimers(); });
+  beforeEach(() => {
+    document.body.innerHTML = '';
+    vi.useFakeTimers();
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
 
   it('keeps an error until it is closed and shows its details', async () => {
     await setLanguage('de');

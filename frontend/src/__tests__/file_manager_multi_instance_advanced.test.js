@@ -17,9 +17,7 @@ vi.mock('../api.js', () => ({
       const decoded = decodeURIComponent(url);
       if (decoded.includes('/api/fs/search')) {
         return Promise.resolve({
-          items: [
-            { name: 'found-receipt.pdf', path: '/mnt/user/docs/found-receipt.pdf', is_dir: false, size: 1024 },
-          ],
+          items: [{ name: 'found-receipt.pdf', path: '/mnt/user/docs/found-receipt.pdf', is_dir: false, size: 1024 }],
         });
       }
       const match = url.match(/[?&]path=([^&]+)/);

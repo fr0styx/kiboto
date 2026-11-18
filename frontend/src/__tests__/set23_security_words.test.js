@@ -23,7 +23,9 @@ describe('the security check in words, no score (SET-23, Settings decision 4)', 
   });
 
   it('plain HTTP at home has its own sentence', () => {
-    expect(checkDetails({ id: 'https_transport', passed: false, variant: 'home', params: { outside: false }, details: 'x' })).toContain('fine at home');
+    expect(
+      checkDetails({ id: 'https_transport', passed: false, variant: 'home', params: { outside: false }, details: 'x' })
+    ).toContain('fine at home');
   });
 
   it('the page shows the words, no score, and what needs a look comes first', async () => {
@@ -34,9 +36,13 @@ describe('the security check in words, no score (SET-23, Settings decision 4)', 
     expect(badge.textContent).toBe('1 thing needs a look');
     expect(badge.dataset.tone).toBe('warn');
     expect(badge.textContent).not.toMatch(/Score|grade|\/100/);
-    const ids = [...document.querySelectorAll('.sec-advisor-item')].map((e) => /** @type {HTMLElement} */ (e).dataset.checkId);
+    const ids = [...document.querySelectorAll('.sec-advisor-item')].map(
+      (e) => /** @type {HTMLElement} */ (e).dataset.checkId
+    );
     expect(ids).toEqual(['admin_mfa', 'sec_default_admin', 'https_transport']);
-    const tipLine = /** @type {HTMLElement} */ (document.querySelector('[data-check-id="sec_default_admin"] div div div:last-child'));
+    const tipLine = /** @type {HTMLElement} */ (
+      document.querySelector('[data-check-id="sec_default_admin"] div div div:last-child')
+    );
     expect(tipLine.style.color).toBe('var(--kb-text-muted)'); // a suggestion is not red
     await setLanguage('de');
     await fetchAndRenderSecurityPosture();

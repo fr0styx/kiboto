@@ -13,7 +13,8 @@ const ROOT = resolve(__dirname, '..', '..', '..');
 const SRC = join(ROOT, 'frontend', 'src');
 const BASELINE = join(ROOT, 'frontend', 'scripts', 'html-escape-baseline.json');
 
-const SAFE_CALL = /^(escapeHtml|escapeAttr|esc|t|ico|iconHtml|html|raw|formatBytes|formatSize|formatDateTime|formatDate|formatTime|formatNumber|formatFixed|formatPercent|String|Number|Math\.\w+|encodeURIComponent|parseInt|parseFloat|JSON\.stringify|emptyStateHtml|emptyRowHtml|uiButton|uiCard|uiField|uiPaneHeader)$/;
+const SAFE_CALL =
+  /^(escapeHtml|escapeAttr|esc|t|ico|iconHtml|html|raw|formatBytes|formatSize|formatDateTime|formatDate|formatTime|formatNumber|formatFixed|formatPercent|String|Number|Math\.\w+|encodeURIComponent|parseInt|parseFloat|JSON\.stringify|emptyStateHtml|emptyRowHtml|uiButton|uiCard|uiField|uiPaneHeader)$/;
 const SAFE_NAME = /^(i|n|idx|count|pct|percent|width|height|px|size)$/;
 
 function walk(node, fn) {
@@ -34,18 +35,40 @@ export function unescapedValues(src) {
     if (!tpl || tpl.type !== 'TemplateLiteral') return;
     for (const e of tpl.expressions) {
       const code = src.slice(e.start, e.end);
-      if (e.type === 'Literal' || e.type === 'TemplateLiteral' || e.type === 'ConditionalExpression' || e.type === 'LogicalExpression') continue;
+      if (
+        e.type === 'Literal' ||
+        e.type === 'TemplateLiteral' ||
+        e.type === 'ConditionalExpression' ||
+        e.type === 'LogicalExpression'
+      )
+        continue;
       if (e.type === 'CallExpression') {
         const callee = src.slice(e.callee.start, e.callee.end);
-        if (SAFE_CALL.test(callee) || /\.(map|join)$/.test(callee) || /Html$/i.test(callee) || /\.(toFixed|toLocaleString)$/.test(callee)) continue;
+        if (
+          SAFE_CALL.test(callee) ||
+          /\.(map|join)$/.test(callee) ||
+          /Html$/i.test(callee) ||
+          /\.(toFixed|toLocaleString)$/.test(callee)
+        )
+          continue;
       }
       if (SAFE_NAME.test(code)) continue;
       found.push({ line: e.loc.start.line, code });
     }
   };
   walk(ast, (node) => {
-    if (node.type === 'AssignmentExpression' && node.left.type === 'MemberExpression' && ['innerHTML', 'outerHTML'].includes(node.left.property?.name)) check(node.right);
-    if (node.type === 'CallExpression' && node.callee.type === 'MemberExpression' && node.callee.property?.name === 'insertAdjacentHTML') check(node.arguments[1]);
+    if (
+      node.type === 'AssignmentExpression' &&
+      node.left.type === 'MemberExpression' &&
+      ['innerHTML', 'outerHTML'].includes(node.left.property?.name)
+    )
+      check(node.right);
+    if (
+      node.type === 'CallExpression' &&
+      node.callee.type === 'MemberExpression' &&
+      node.callee.property?.name === 'insertAdjacentHTML'
+    )
+      check(node.arguments[1]);
   });
   return found;
 }
@@ -60,7 +83,8 @@ function sourceFiles(dir) {
 
 describe('HTML templates escape what they insert (ARC-31)', () => {
   it('finds an unescaped value and accepts escaped ones', () => {
-    const src = "el.innerHTML = `<b>${name}</b><i>${escapeHtml(name)}</i>${t('k', 'x')}${count}`; el.insertAdjacentHTML('beforeend', `${user.bio}`);";
+    const src =
+      "el.innerHTML = `<b>${name}</b><i>${escapeHtml(name)}</i>${t('k', 'x')}${count}`; el.insertAdjacentHTML('beforeend', `${user.bio}`);";
     expect(unescapedValues(src).map((f) => f.code)).toEqual(['name', 'user.bio']);
   });
 
@@ -75,7 +99,9 @@ describe('HTML templates escape what they insert (ARC-31)', () => {
       return;
     }
     const base = JSON.parse(readFileSync(BASELINE, 'utf8'));
-    const grown = Object.entries(now).filter(([f, n]) => n > (base[f] ?? 0)).map(([f, n]) => `${f}: ${n} (baseline ${base[f] ?? 0})`);
+    const grown = Object.entries(now)
+      .filter(([f, n]) => n > (base[f] ?? 0))
+      .map(([f, n]) => `${f}: ${n} (baseline ${base[f] ?? 0})`);
     expect(grown, 'escape the new ${...} with escapeHtml() or set textContent instead').toEqual([]);
   });
 });

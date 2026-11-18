@@ -6,7 +6,7 @@ import {
   hideDesktopContextMenu,
   showWidgetContextMenu,
   hideWidgetContextMenu,
-  _resetDesktopContextMenuForTesting
+  _resetDesktopContextMenuForTesting,
 } from '../components/desktop-context-menu.js';
 import {
   SYSTEM_SHORTCUTS,
@@ -17,9 +17,15 @@ import {
   closeAddDesktopShortcutModal,
   createShortcutElement,
   _resetShortcutsForTesting,
-  SHORTCUTS_STORAGE_KEY
+  SHORTCUTS_STORAGE_KEY,
 } from '../components/desktop-shortcuts.js';
-import { loadWidgetConfig, saveWidgetConfig, applyWidgetConfig, removeWidget, openWidgetSettings } from '../components/widgets.js';
+import {
+  loadWidgetConfig,
+  saveWidgetConfig,
+  applyWidgetConfig,
+  removeWidget,
+  openWidgetSettings,
+} from '../components/widgets.js';
 
 describe('Desktop Shortcuts & Unified Context Menu Integration', () => {
   beforeEach(() => {
@@ -97,7 +103,7 @@ describe('Desktop Shortcuts & Unified Context Menu Integration', () => {
         bubbles: true,
         cancelable: true,
         clientX: 400,
-        clientY: 300
+        clientY: 300,
       });
       desktop.dispatchEvent(evt);
 
@@ -116,7 +122,7 @@ describe('Desktop Shortcuts & Unified Context Menu Integration', () => {
         bubbles: true,
         cancelable: true,
         clientX: 50,
-        clientY: 90
+        clientY: 90,
       });
       icon.dispatchEvent(evt);
 
@@ -139,7 +145,7 @@ describe('Desktop Shortcuts & Unified Context Menu Integration', () => {
 
   describe('Desktop Shortcuts Management', () => {
     it('SYSTEM_SHORTCUTS catalog has definitions for Containers, Storage, Activity Monitor, and Notifications', () => {
-      const ids = SYSTEM_SHORTCUTS.map(s => s.id);
+      const ids = SYSTEM_SHORTCUTS.map((s) => s.id);
       expect(ids).toContain('containers-desktop-icon');
       expect(ids).toContain('storage-desktop-icon');
       expect(ids).toContain('activity-desktop-icon');
@@ -150,7 +156,7 @@ describe('Desktop Shortcuts & Unified Context Menu Integration', () => {
     });
 
     it('adds a system shortcut (Containers) to DOM and persists to localStorage', () => {
-      const scDef = SYSTEM_SHORTCUTS.find(s => s.id === 'containers-desktop-icon');
+      const scDef = SYSTEM_SHORTCUTS.find((s) => s.id === 'containers-desktop-icon');
       expect(scDef).toBeDefined();
 
       const success = addDesktopShortcut(scDef);
@@ -170,7 +176,7 @@ describe('Desktop Shortcuts & Unified Context Menu Integration', () => {
     });
 
     it('custom shortcut right-click displays "Remove from Desktop" action', () => {
-      const scDef = SYSTEM_SHORTCUTS.find(s => s.id === 'activity-desktop-icon');
+      const scDef = SYSTEM_SHORTCUTS.find((s) => s.id === 'activity-desktop-icon');
       addDesktopShortcut(scDef);
 
       const iconEl = document.getElementById('activity-desktop-icon');
@@ -181,7 +187,7 @@ describe('Desktop Shortcuts & Unified Context Menu Integration', () => {
         bubbles: true,
         cancelable: true,
         clientX: 50,
-        clientY: 200
+        clientY: 200,
       });
       iconEl.dispatchEvent(evt);
 
@@ -192,7 +198,7 @@ describe('Desktop Shortcuts & Unified Context Menu Integration', () => {
     });
 
     it('removes a desktop shortcut from DOM and localStorage', () => {
-      const scDef = SYSTEM_SHORTCUTS.find(s => s.id === 'storage-desktop-icon');
+      const scDef = SYSTEM_SHORTCUTS.find((s) => s.id === 'storage-desktop-icon');
       addDesktopShortcut(scDef);
 
       expect(document.getElementById('storage-desktop-icon')).not.toBeNull();
@@ -217,7 +223,7 @@ describe('Desktop Shortcuts & Unified Context Menu Integration', () => {
         url: 'http://192.168.1.60:8123',
         icon: '🏠',
         svg: false,
-        color: '#38bdf8'
+        color: '#38bdf8',
       };
 
       const success = addDesktopShortcut(customUrlShortcut);
@@ -228,7 +234,7 @@ describe('Desktop Shortcuts & Unified Context Menu Integration', () => {
       expect(iconEl.textContent).toContain('Home Assistant');
 
       const saved = getCustomShortcuts();
-      expect(saved.some(s => s.id === 'url-shortcut-12345')).toBe(true);
+      expect(saved.some((s) => s.id === 'url-shortcut-12345')).toBe(true);
     });
 
     it('openAddDesktopShortcutModal opens modal and close button closes it', () => {
@@ -263,7 +269,7 @@ describe('Desktop Shortcuts & Unified Context Menu Integration', () => {
         bubbles: true,
         cancelable: true,
         clientX: 300,
-        clientY: 200
+        clientY: 200,
       });
       desktop.dispatchEvent(evt);
 
@@ -293,7 +299,7 @@ describe('Desktop Shortcuts & Unified Context Menu Integration', () => {
         bubbles: true,
         cancelable: true,
         clientX: 1100,
-        clientY: 60
+        clientY: 60,
       });
       clockWidget.dispatchEvent(evt);
 
@@ -306,7 +312,7 @@ describe('Desktop Shortcuts & Unified Context Menu Integration', () => {
       // Setup initial config with clock enabled
       saveWidgetConfig({
         enabled: true,
-        widgets: { clock: true, calendar: true }
+        widgets: { clock: true, calendar: true },
       });
       applyWidgetConfig();
 
@@ -318,7 +324,7 @@ describe('Desktop Shortcuts & Unified Context Menu Integration', () => {
         bubbles: true,
         cancelable: true,
         clientX: 1100,
-        clientY: 60
+        clientY: 60,
       });
       clockWidget.dispatchEvent(evt);
 
@@ -343,7 +349,7 @@ describe('Desktop Shortcuts & Unified Context Menu Integration', () => {
     it('right-clicking calendar widget dynamically identifies and removes calendar', () => {
       saveWidgetConfig({
         enabled: true,
-        widgets: { clock: true, calendar: true }
+        widgets: { clock: true, calendar: true },
       });
       applyWidgetConfig();
 
@@ -355,7 +361,7 @@ describe('Desktop Shortcuts & Unified Context Menu Integration', () => {
         bubbles: true,
         cancelable: true,
         clientX: 1100,
-        clientY: 120
+        clientY: 120,
       });
       calWidget.dispatchEvent(evt);
 
@@ -382,7 +388,7 @@ describe('Desktop Shortcuts & Unified Context Menu Integration', () => {
         bubbles: true,
         cancelable: true,
         clientX: 1100,
-        clientY: 60
+        clientY: 60,
       });
       clockWidget.dispatchEvent(evt);
 
@@ -408,7 +414,7 @@ describe('Desktop Shortcuts & Unified Context Menu Integration', () => {
         bubbles: true,
         cancelable: true,
         clientX: 400,
-        clientY: 300
+        clientY: 300,
       });
       desktop.dispatchEvent(evt);
 

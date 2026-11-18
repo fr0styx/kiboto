@@ -23,7 +23,8 @@ class FakeSource {
 beforeEach(() => {
   FakeSource.all = [];
   vi.stubGlobal('EventSource', FakeSource);
-  document.body.innerHTML = '<select id="ci-logs-tail-select"><option value="100" selected>100</option></select><div id="ci-logs-terminal"></div>';
+  document.body.innerHTML =
+    '<select id="ci-logs-tail-select"><option value="100" selected>100</option></select><div id="ci-logs-terminal"></div>';
 });
 afterEach(() => {
   stopLogStream();

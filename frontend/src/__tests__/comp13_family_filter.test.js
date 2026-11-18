@@ -12,15 +12,22 @@ const INFO = {
   user: 'admin',
   has_password: true,
   people: { mia: { devices: ['192.168.1.20'], blocked: ['tiktok'] } },
-  accounts: [{ username: 'mia', display_name: 'Mia' }, { username: 'leo', display_name: 'Leo' }],
+  accounts: [
+    { username: 'mia', display_name: 'Mia' },
+    { username: 'leo', display_name: 'Leo' },
+  ],
   services: ['tiktok', 'youtube'],
 };
 
-describe('filter for the kids\' devices (COMP-13)', () => {
+describe("filter for the kids' devices (COMP-13)", () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('splits a device list', () => {
-    expect(splitDevices(' 192.168.1.20, aa:bb:cc:dd:ee:ff;\n tablet ')).toEqual(['192.168.1.20', 'aa:bb:cc:dd:ee:ff', 'tablet']);
+    expect(splitDevices(' 192.168.1.20, aa:bb:cc:dd:ee:ff;\n tablet ')).toEqual([
+      '192.168.1.20',
+      'aa:bb:cc:dd:ee:ff',
+      'tablet',
+    ]);
     expect(splitDevices('')).toEqual([]);
   });
 
@@ -43,16 +50,28 @@ describe('filter for the kids\' devices (COMP-13)', () => {
     await renderFamilyFilter(mount);
 
     /** @type {HTMLElement} */ (mount.querySelector('[data-ff="check"]')).click();
-    await vi.waitFor(() => expect(mount.querySelector('.ff-check').textContent).toBe('AdGuard Home v0.107.60 answers.'));
+    await vi.waitFor(() =>
+      expect(mount.querySelector('.ff-check').textContent).toBe('AdGuard Home v0.107.60 answers.')
+    );
 
     /** @type {HTMLElement} */ (mount.querySelector('[data-ff="connect"]')).click();
-    await vi.waitFor(() => expect(api.put).toHaveBeenCalledWith('/api/family-filter/connection', { url: 'http://adguardhome:3000', user: 'admin' }));
+    await vi.waitFor(() =>
+      expect(api.put).toHaveBeenCalledWith('/api/family-filter/connection', {
+        url: 'http://adguardhome:3000',
+        user: 'admin',
+      })
+    );
 
     const leo = /** @type {HTMLElement} */ (mount.querySelectorAll('.ff-person')[1]);
     /** @type {HTMLInputElement} */ (leo.querySelector('[name="devices"]')).value = '192.168.1.30';
     /** @type {HTMLInputElement} */ (leo.querySelector('input[value="youtube"]')).checked = true;
     /** @type {HTMLElement} */ (leo.querySelector('[data-ff="person"]')).click();
-    await vi.waitFor(() => expect(api.put).toHaveBeenCalledWith('/api/family-filter/people/leo', { devices: ['192.168.1.30'], blocked: ['youtube'] }));
+    await vi.waitFor(() =>
+      expect(api.put).toHaveBeenCalledWith('/api/family-filter/people/leo', {
+        devices: ['192.168.1.30'],
+        blocked: ['youtube'],
+      })
+    );
     expect(showToast).toHaveBeenCalledWith('Their devices are filtered now.', 'success');
   });
 
@@ -64,11 +83,13 @@ describe('filter for the kids\' devices (COMP-13)', () => {
     const mia = /** @type {HTMLElement} */ (mount.querySelector('.ff-person'));
     /** @type {HTMLInputElement} */ (mia.querySelector('[name="devices"]')).value = '';
     /** @type {HTMLElement} */ (mia.querySelector('[data-ff="person"]')).click();
-    await vi.waitFor(() => expect(showToast).toHaveBeenCalledWith('AdGuard Home refused the user name or password.', 'error'));
+    await vi.waitFor(() =>
+      expect(showToast).toHaveBeenCalledWith('AdGuard Home refused the user name or password.', 'error')
+    );
     api.get.mockRejectedValueOnce(new Error('forbidden'));
     await renderFamilyFilter(mount);
-    expect(mount.textContent).toContain("forbidden"); // with a sentence and Retry (NUX-14)
-    expect(mount.querySelector(".kb-load-error button")).not.toBeNull();
+    expect(mount.textContent).toContain('forbidden'); // with a sentence and Retry (NUX-14)
+    expect(mount.querySelector('.kb-load-error button')).not.toBeNull();
     await renderFamilyFilter(null);
   });
 });

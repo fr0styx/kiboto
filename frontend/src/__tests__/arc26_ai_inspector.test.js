@@ -2,7 +2,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { windowPane } from './helpers/window-pane.js';
 
-vi.mock('../toast.js', () => ({ showToast: vi.fn(), showConfirmToast: vi.fn(), showPromptToast: vi.fn(), showActionToast: vi.fn() }));
+vi.mock('../toast.js', () => ({
+  showToast: vi.fn(),
+  showConfirmToast: vi.fn(),
+  showPromptToast: vi.fn(),
+  showActionToast: vi.fn(),
+}));
 vi.mock('../utils.js', async (orig) => ({ ...(await orig()), copyText: vi.fn(async () => {}) }));
 const { api } = await import('../api.js');
 const { showToast } = await import('../toast.js');
@@ -10,7 +15,14 @@ const { copyText } = await import('../utils.js');
 const { renderAiPreviewInspector } = await import('../components/management/ai.js');
 
 const byId = (id) => document.getElementById(id);
-const PHOTO = { file_id: 7, file_path: '/mnt/user/Photos/beach.jpg', file_name: 'beach.jpg', file_category: 'photos', excerpt: 'sand', also_at: ['/mnt/user/Backup/beach.jpg'] };
+const PHOTO = {
+  file_id: 7,
+  file_path: '/mnt/user/Photos/beach.jpg',
+  file_name: 'beach.jpg',
+  file_category: 'photos',
+  excerpt: 'sand',
+  also_at: ['/mnt/user/Backup/beach.jpg'],
+};
 
 describe('AI search inspector', () => {
   beforeEach(() => {
@@ -39,11 +51,17 @@ describe('AI search inspector', () => {
   it('downloads and shares through the real download address', async () => {
     renderAiPreviewInspector(PHOTO);
     let href = '';
-    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function () { href = this.getAttribute('href'); });
+    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function () {
+      href = this.getAttribute('href');
+    });
     byId('btn-ai-inspector-download').click();
     expect(href).toBe('/api/fs/download?path=%2Fmnt%2Fuser%2FPhotos%2Fbeach.jpg');
     byId('btn-ai-inspector-share').click();
-    await vi.waitFor(() => expect(copyText).toHaveBeenCalledWith(`${window.location.origin}/api/fs/download?path=%2Fmnt%2Fuser%2FPhotos%2Fbeach.jpg`));
+    await vi.waitFor(() =>
+      expect(copyText).toHaveBeenCalledWith(
+        `${window.location.origin}/api/fs/download?path=%2Fmnt%2Fuser%2FPhotos%2Fbeach.jpg`
+      )
+    );
     copyText.mockRejectedValueOnce(new Error('denied'));
     byId('btn-ai-inspector-share').click();
     await vi.waitFor(() => expect(showToast.mock.calls.at(-1)[1]).toBe('info'));
@@ -54,7 +72,11 @@ describe('AI search inspector', () => {
     window.openFileManager = vi.fn();
     renderAiPreviewInspector(PHOTO);
     byId('btn-ai-inspector-open').click();
-    expect(window.openFilePreviewModal).toHaveBeenCalledWith('/mnt/user/Photos/beach.jpg', 'beach.jpg', expect.objectContaining({ fileId: 7 }));
+    expect(window.openFilePreviewModal).toHaveBeenCalledWith(
+      '/mnt/user/Photos/beach.jpg',
+      'beach.jpg',
+      expect.objectContaining({ fileId: 7 })
+    );
     byId('btn-ai-inspector-location').click();
     expect(window.openFileManager).toHaveBeenCalledWith('/mnt/user/Photos');
     delete window.openFilePreviewModal;

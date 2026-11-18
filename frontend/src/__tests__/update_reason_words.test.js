@@ -15,7 +15,9 @@ describe('Updates panel: the reason in words', () => {
   beforeEach(() => {
     document.body.innerHTML = '<div id="update-last-result" hidden></div>';
   });
-  afterEach(async () => { await setLanguage('en'); });
+  afterEach(async () => {
+    await setLanguage('en');
+  });
 
   it('says the reason in German when the server said how', async () => {
     await setLanguage('de');

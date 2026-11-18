@@ -43,13 +43,14 @@ export function whyText(j) {
 }
 
 export function jobsHtml(jobs) {
-  if (!jobs.length) return html`<p class="kb-muted">${t('prot.none', 'Nothing protects your data yet. Set up a backup below.')}</p>`;
+  if (!jobs.length)
+    return html`<p class="kb-muted">${t('prot.none', 'Nothing protects your data yet. Set up a backup below.')}</p>`;
   return html`<table class="kb-table prot-table"><thead><tr><th>${t('prot.what', 'What')}</th><th>${t('prot.name', 'Name')}</th>
     <th>${t('prot.state', 'State')}</th><th>${t('prot.last_ok', 'Last success')}</th><th></th></tr></thead>
     <tbody>${jobs.map(
       (j) => html`<tr class="prot-row prot-${j.status}"><td>${label(KIND, j.kind)}</td><td>${j.name}</td>
         <td><span class="prot-status">${label(STATUS, j.status)}</span>${whyText(j) ? html` <small class="kb-muted">${whyText(j)}</small>` : ''}</td>
-        <td>${j.last_ok ? formatDateTime(Number(j.last_ok) * 1000) : '—'}</td><td>${toggleHtml(j)}</td></tr>`,
+        <td>${j.last_ok ? formatDateTime(Number(j.last_ok) * 1000) : '—'}</td><td>${toggleHtml(j)}</td></tr>`
     )}</tbody></table>`;
 }
 
@@ -73,7 +74,8 @@ export async function renderProtectionJobs(card) {
       } catch (err) {
         sw.checked = !sw.checked;
         sw.disabled = false;
-        if (err?.error !== 'cancelled') showToast(t('prot.save_failed', 'Could not change it: {error}', { error: err?.message || '' }), 'error');
+        if (err?.error !== 'cancelled')
+          showToast(t('prot.save_failed', 'Could not change it: {error}', { error: err?.message || '' }), 'error');
       }
     });
   });

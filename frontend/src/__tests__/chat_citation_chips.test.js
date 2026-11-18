@@ -17,7 +17,10 @@ describe('chat citation chips', () => {
   });
 
   it('links web citations to the page', () => {
-    const html = _formatChatMarkdown('Released in May [1].', { citations, webSources: [{ url: 'https://example.com/a', title: 'A' }] });
+    const html = _formatChatMarkdown('Released in May [1].', {
+      citations,
+      webSources: [{ url: 'https://example.com/a', title: 'A' }],
+    });
     expect(html).toContain('href="https://example.com/a"');
   });
 });

@@ -19,7 +19,11 @@ describe('AI accelerator widget words (NUX-20)', () => {
 
   it('says which chip is busy, or which are ready', async () => {
     const cases = [
-      [{ npu: { present: true, util_pct: 50 }, gpu: { present: true, util_pct: 30 } }, 'DUAL RUN', 'Intel AI Boost NPU Active'],
+      [
+        { npu: { present: true, util_pct: 50 }, gpu: { present: true, util_pct: 30 } },
+        'DUAL RUN',
+        'Intel AI Boost NPU Active',
+      ],
       [{ npu: { present: true, util_pct: 50 }, gpu: { present: false } }, 'NPU RUN', 'Intel AI Boost NPU Active'],
       [{ npu: { present: false }, gpu: { present: true, util_pct: 30 } }, 'GPU RUN', 'Intel Arc GPU Active'],
       [{ npu: { present: true }, gpu: { present: true } }, 'NPU + GPU', 'NPU and GPU ready'],

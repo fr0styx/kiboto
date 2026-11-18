@@ -17,7 +17,10 @@ export function whyNot(c) {
 
 /** What a button says it did, or why not. */
 export function switchSaid(action, ok, error = '') {
-  if (ok) return action === 'reboot' ? t('pws.rebooting', 'The NAS is restarting. This page comes back when it is up again.') : t('pws.shutting', 'The NAS is shutting down. Switch it on again with its power button.');
+  if (ok)
+    return action === 'reboot'
+      ? t('pws.rebooting', 'The NAS is restarting. This page comes back when it is up again.')
+      : t('pws.shutting', 'The NAS is shutting down. Switch it on again with its power button.');
   return t('pws.failed', 'Nothing was switched: {error}', { error });
 }
 

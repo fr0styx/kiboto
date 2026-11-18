@@ -8,7 +8,10 @@ describe('changing your own password', () => {
     vi.spyOn(api, 'get').mockResolvedValue({ id: 'usr 1', role });
     const post = vi.spyOn(api, 'post').mockResolvedValue({ status: 'ok' });
     await changeOwnPassword('old', 'new password 1');
-    expect(post).toHaveBeenCalledWith('/api/users/usr%201/password', { current_password: 'old', new_password: 'new password 1' });
+    expect(post).toHaveBeenCalledWith('/api/users/usr%201/password', {
+      current_password: 'old',
+      new_password: 'new password 1',
+    });
   });
 
   it('does nothing when nobody is signed in', async () => {

@@ -70,7 +70,11 @@ export async function initInviteLanding(textsReady) {
     const r = await fetch(`/api/invite/${encodeURIComponent(token)}/accept`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username: String(f.get('username')).toLowerCase(), display_name: f.get('display_name'), password: f.get('password') }),
+      body: JSON.stringify({
+        username: String(f.get('username')).toLowerCase(),
+        display_name: f.get('display_name'),
+        password: f.get('password'),
+      }),
     });
     const body = await r.json().catch(() => ({}));
     if (!r.ok) {

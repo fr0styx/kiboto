@@ -9,10 +9,13 @@ const NEXT_STEP = {
   forbidden: () => t('err.next_forbidden', 'Ask the owner of this server if you need access.'),
   not_found: () => t('err.next_not_found', 'Refresh the page: it may have been moved or deleted.'),
   conflict: () => t('err.next_conflict', 'Choose another name, or refresh to see the current state.'),
-  payload_too_large: () => t('err.next_too_large', 'Try a smaller file, or upload from File Explorer, which sends large files in parts.'),
+  payload_too_large: () =>
+    t('err.next_too_large', 'Try a smaller file, or upload from File Explorer, which sends large files in parts.'),
   rate_limited: () => t('err.next_rate_limited', 'Wait a minute, then try again.'),
-  unavailable: () => t('err.next_unavailable', 'That part of the server is starting or stopped. Try again in a moment.'),
-  timeout: () => t('err.next_timeout', 'The server may be busy. Try again; if it keeps happening, check that it is running.'),
+  unavailable: () =>
+    t('err.next_unavailable', 'That part of the server is starting or stopped. Try again in a moment.'),
+  timeout: () =>
+    t('err.next_timeout', 'The server may be busy. Try again; if it keeps happening, check that it is running.'),
 };
 
 /** The sentence to add after the server's message, or ''. */
@@ -20,7 +23,11 @@ export function nextStep(error, body = null) {
   if (error === 'internal_error') {
     const ref = body && body.reference ? String(body.reference) : '';
     return ref
-      ? t('err.next_internal_ref', 'Try again. If it keeps happening, download a diagnostics bundle (Settings → About) and mention reference {ref}.', { ref })
+      ? t(
+          'err.next_internal_ref',
+          'Try again. If it keeps happening, download a diagnostics bundle (Settings → About) and mention reference {ref}.',
+          { ref }
+        )
       : t('err.next_internal', 'Try again. If it keeps happening, download a diagnostics bundle (Settings → About).');
   }
   const fn = NEXT_STEP[error];
@@ -57,12 +64,17 @@ const MESSAGES = {
   vm_start_failed: () => t('err.vm_start_failed', "The virtual machine didn't start."),
   user_exists: () => t('err.user_exists', 'Someone with that name already exists.'),
   password_change_required: () => t('err.password_change_required', 'Change your password before you continue.'),
-  mfa_setup_required: () => t('err.mfa_setup_required', 'Turn on two-step sign-in before you continue: your role requires it.'),
+  mfa_setup_required: () =>
+    t('err.mfa_setup_required', 'Turn on two-step sign-in before you continue: your role requires it.'),
   idp_account: () => t('err.idp_account', 'This account signs in through your identity provider.'),
   disks_not_safe: () => t('err.disks_not_safe', "The disks aren't in a safe state for that."),
   confirmation_required: () => t('err.confirmation_required', 'Please confirm this first.'),
   bad_action: () => t('err.bad_action', "That action isn't available."),
-  ai_search_off_for_role: () => t('err.ai_search_off_for_role', 'AI search is turned off for your account. An administrator can turn it on in AI settings.'),
+  ai_search_off_for_role: () =>
+    t(
+      'err.ai_search_off_for_role',
+      'AI search is turned off for your account. An administrator can turn it on in AI settings.'
+    ),
   // NUX-1: causes that a status code alone would misstate
   wrong_password: () => t('err.wrong_password', 'That password is wrong.'),
   folder_busy: () => t('err.folder_busy', 'Something still has a file open in it. Close it and try again.'),
@@ -94,7 +106,11 @@ function byStatus(body) {
 /** "What happened. What to do." */
 export function explain(detail, error, body = null) {
   // whole messages the interface knows in every language
-  if (error === 'ai_off_for_role') return t('err.ai_off_for_role', 'Kib is turned off for your account. An administrator can turn it on in AI settings.');
+  if (error === 'ai_off_for_role')
+    return t(
+      'err.ai_off_for_role',
+      'Kib is turned off for your account. An administrator can turn it on in AI settings.'
+    );
   // a sentence the server described (text: {msg_key, params}) is shown in the reader's language
   const described = body && body.text && body.text.msg_key ? serverSaid(body, String(detail || '').trim()) : '';
   if (described) return described;

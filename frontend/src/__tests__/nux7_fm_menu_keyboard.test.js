@@ -22,10 +22,19 @@ describe('File Explorer menu by keyboard (NUX-7)', () => {
     document.body.innerHTML = '<button id="before">x</button>';
     const before = document.getElementById('before');
     before.focus();
-    const fm = { selectedPaths: new Set(['/mnt/user/a.txt']), currentPath: '/mnt/user', currentSortBy: 'name', currentSortDir: 'asc' };
+    const fm = {
+      selectedPaths: new Set(['/mnt/user/a.txt']),
+      currentPath: '/mnt/user',
+      currentSortBy: 'name',
+      currentSortDir: 'asc',
+    };
     const menu = new FmContextMenu(fm);
     menu.handleAction = vi.fn();
-    menu.show(new MouseEvent('contextmenu', { clientX: 5, clientY: 5 }), { name: 'a.txt', path: '/mnt/user/a.txt', is_dir: false });
+    menu.show(new MouseEvent('contextmenu', { clientX: 5, clientY: 5 }), {
+      name: 'a.txt',
+      path: '/mnt/user/a.txt',
+      is_dir: false,
+    });
     const el = document.getElementById('fm-context-menu');
     expect(el.getAttribute('role')).toBe('menu');
     expect(document.activeElement.dataset.act).toBe('preview');
@@ -60,7 +69,14 @@ describe('File Explorer menu by keyboard (NUX-7)', () => {
       d.innerHTML = 'Name <span class="fm-sort-icon"></span>';
       return d;
     };
-    Object.assign(fm, { colName: make(), colType: make(), colSize: make(), colMtime: make(), currentSortBy: 'size', currentSortDir: 'desc' });
+    Object.assign(fm, {
+      colName: make(),
+      colType: make(),
+      colSize: make(),
+      colMtime: make(),
+      currentSortBy: 'size',
+      currentSortDir: 'desc',
+    });
     fm.updateSortHeaderUI();
     expect(fm.colSize.getAttribute('aria-label')).toBe('Name (Descending)');
     expect(fm.colSize.getAttribute('aria-pressed')).toBe('true');

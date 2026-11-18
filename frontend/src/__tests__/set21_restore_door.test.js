@@ -29,7 +29,11 @@ describe('Get something back (SET-21 stage 2)', () => {
     const openBin = vi.fn();
     const mount = /** @type {HTMLElement} */ (document.getElementById('m'));
     rd.installRestoreDoor(mount, { openBin });
-    expect([...mount.querySelectorAll('.rd-choice')].map((b) => b.getAttribute('data-rd'))).toEqual(['file', 'folder', 'all']);
+    expect([...mount.querySelectorAll('.rd-choice')].map((b) => b.getAttribute('data-rd'))).toEqual([
+      'file',
+      'folder',
+      'all',
+    ]);
     /** @type {HTMLElement} */ (mount.querySelector('[data-rd="bin"]')).click();
     expect(openBin).toHaveBeenCalled();
   });
@@ -59,7 +63,10 @@ describe('Get something back (SET-21 stage 2)', () => {
     const rollbackShare = vi.fn();
     const openRestoreBox = vi.fn();
     const mount = /** @type {HTMLElement} */ (document.getElementById('m'));
-    rd.installRestoreDoor(mount, { snapshots: async () => ({ rollbackShare, openSnapshotBrowser: vi.fn() }), restoreBox: async () => ({ openRestoreBox }) });
+    rd.installRestoreDoor(mount, {
+      snapshots: async () => ({ rollbackShare, openSnapshotBrowser: vi.fn() }),
+      restoreBox: async () => ({ openRestoreBox }),
+    });
     /** @type {HTMLElement} */ (mount.querySelector('[data-rd="folder"]')).click();
     await vi.waitFor(() => expect(mount.querySelector('[data-rd-folder="photos"]')).not.toBeNull());
     expect(mount.querySelector('[data-rd-folder="docs"]')).toBeNull();

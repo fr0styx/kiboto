@@ -21,7 +21,9 @@ describe('AI pack settings (AI-40)', () => {
   });
 
   it('shows the warm-up, then offers to use it, then says it is in use', () => {
-    expect(stateText({ state: 'warming', phase: 'downloading OpenVINO/Qwen3-4B-int4-ov' })).toContain('downloading OpenVINO/Qwen3-4B-int4-ov');
+    expect(stateText({ state: 'warming', phase: 'downloading OpenVINO/Qwen3-4B-int4-ov' })).toContain(
+      'downloading OpenVINO/Qwen3-4B-int4-ov'
+    );
     const ready = packHtml({ ...BASE, installed: true, state: 'ready', in_use: false });
     expect(ready).toContain('data-ai-pack-use');
     expect(ready).not.toContain('data-ai-pack-install');

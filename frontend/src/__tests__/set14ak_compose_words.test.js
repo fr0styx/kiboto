@@ -6,7 +6,7 @@ afterEach(async () => {
   await setLanguage('en');
 });
 
-describe('the Compose safety check in the reader\'s language (SET-14, Apps)', () => {
+describe("the Compose safety check in the reader's language (SET-14, Apps)", () => {
   it('English stays as it was', () => {
     const f = lintCompose('services:\n  a:\n    privileged: true\n');
     expect(f[0].text).toBe('privileged: full access to the host');

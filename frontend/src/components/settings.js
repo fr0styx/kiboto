@@ -8,7 +8,15 @@ import { onManagementDom } from '../management-dom.js';
 import { api, auth, ApiError, apiFetch } from '../api.js';
 import { state, ZOOM_PROFILES } from '../state.js';
 import { ZettEventBus } from '../event-bus.js';
-import { applyTheme, applyDesktopTheme, applyLcdTheme, setScreenLayoutStyle, hexToRgb, getContrastRatio, syncDesktopTwinPreview } from './dashboard.js';
+import {
+  applyTheme,
+  applyDesktopTheme,
+  applyLcdTheme,
+  setScreenLayoutStyle,
+  hexToRgb,
+  getContrastRatio,
+  syncDesktopTwinPreview,
+} from './dashboard.js';
 import { fitMiniPreviewScale, syncMiniPreviewTelemetry } from './mini-preview.js';
 import { t } from '../i18n.js';
 import { formatDateTime, formatFixed } from '../format.js';
@@ -18,7 +26,16 @@ import { applyGlassSettings, applyWallpaperReadability } from './wallpapers.js';
 import { applyDockSettings } from './dock.js';
 import { initGlassTimePickers } from './time-picker.js';
 import { setIconLabel } from '../ui/primitives.js';
-import { DEFAULT_LOOK, THEMES, hasOwnLook, loadLook, lookColour, normalizeLook, saveLookToAccount, storeLook } from '../look.js';
+import {
+  DEFAULT_LOOK,
+  THEMES,
+  hasOwnLook,
+  loadLook,
+  lookColour,
+  normalizeLook,
+  saveLookToAccount,
+  storeLook,
+} from '../look.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -27,7 +44,10 @@ export function overwriteWarning(cfg) {
   const c = cfg || {};
   if (c.on_collision !== 'overwrite') return '';
   if (c.auto_ingest && !c.require_confirmation) {
-    return t('copy.overwrite_warn_auto', 'Copying starts by itself when a card goes in, and files with the same name already in the folder are replaced without asking.');
+    return t(
+      'copy.overwrite_warn_auto',
+      'Copying starts by itself when a card goes in, and files with the same name already in the folder are replaced without asking.'
+    );
   }
   return t('copy.overwrite_warn', "Files with the same name already in the folder are replaced by the card's copy.");
 }
@@ -171,7 +191,11 @@ export function renderClockSummary(changed) {
 }
 
 export function initSettings() {
-  if (state.isLcdDirect || (typeof window !== 'undefined' && window.location.search.includes('mode=lcd')) || (document.body && document.body.classList.contains('lcd-direct'))) {
+  if (
+    state.isLcdDirect ||
+    (typeof window !== 'undefined' && window.location.search.includes('mode=lcd')) ||
+    (document.body && document.body.classList.contains('lcd-direct'))
+  ) {
     return;
   }
 
@@ -194,16 +218,29 @@ export function initSettings() {
     }
     if (targetId === 'tab-layout') {
       if (dynamicTitle) dynamicTitle.textContent = t('settings.tab_layout_title', 'Dashboard Layout');
-      if (dynamicDesc) dynamicDesc.textContent = t('settings.tab_layout_desc', 'Configure dashboard sizes, visibility, and layout presets.');
+      if (dynamicDesc)
+        dynamicDesc.textContent = t(
+          'settings.tab_layout_desc',
+          'Configure dashboard sizes, visibility, and layout presets.'
+        );
     } else if (targetId === 'tab-led') {
       if (dynamicTitle) dynamicTitle.textContent = t('settings.tab_led_title', 'LED Strip bar');
-      if (dynamicDesc) dynamicDesc.textContent = t('settings.tab_led_desc', 'Adjust physical lighting and reactive hardware alerts.');
+      if (dynamicDesc)
+        dynamicDesc.textContent = t('settings.tab_led_desc', 'Adjust physical lighting and reactive hardware alerts.');
     } else if (targetId === 'tab-fans') {
       if (dynamicTitle) dynamicTitle.textContent = t('settings.tab_fans_title', 'Fans');
-      if (dynamicDesc) dynamicDesc.textContent = t('settings.tab_fans_desc', 'Configure cooling thresholds and dynamic thermal curves.');
+      if (dynamicDesc)
+        dynamicDesc.textContent = t(
+          'settings.tab_fans_desc',
+          'Configure cooling thresholds and dynamic thermal curves.'
+        );
     } else if (targetId === 'tab-buttons') {
       if (dynamicTitle) dynamicTitle.textContent = t('settings.tab_buttons_title', 'Copy Button');
-      if (dynamicDesc) dynamicDesc.textContent = t('settings.tab_buttons_desc', 'Assign SD card copy rules to the physical hardware button.');
+      if (dynamicDesc)
+        dynamicDesc.textContent = t(
+          'settings.tab_buttons_desc',
+          'Assign SD card copy rules to the physical hardware button.'
+        );
     }
   }
 
@@ -225,21 +262,30 @@ export function initSettings() {
   if (overlay) overlay.addEventListener('click', closeDrawer);
 
   let wheelZoomCooldown = 0;
-  window.addEventListener('wheel', (e) => {
-    if (e.target.closest('.slide-drawer') || e.target.closest('.smart-modal-window, #console-window') || e.target.closest('#mini-lcd-canvas') || e.target.closest('.file-manager-window, .os-window, .cmd-palette-modal, .mgmt-detail-card')) {
-      return;
-    }
-    const now = Date.now();
-    if (now - wheelZoomCooldown < 150) return;
+  window.addEventListener(
+    'wheel',
+    (e) => {
+      if (
+        e.target.closest('.slide-drawer') ||
+        e.target.closest('.smart-modal-window, #console-window') ||
+        e.target.closest('#mini-lcd-canvas') ||
+        e.target.closest('.file-manager-window, .os-window, .cmd-palette-modal, .mgmt-detail-card')
+      ) {
+        return;
+      }
+      const now = Date.now();
+      if (now - wheelZoomCooldown < 150) return;
 
-    if (e.deltaY < 0 && state.currentZoomIdx < ZOOM_PROFILES.length - 1) {
-      state.setZoomIdx(state.currentZoomIdx + 1);
-      wheelZoomCooldown = now;
-    } else if (e.deltaY > 0 && state.currentZoomIdx > 0) {
-      state.setZoomIdx(state.currentZoomIdx - 1);
-      wheelZoomCooldown = now;
-    }
-  }, { passive: true });
+      if (e.deltaY < 0 && state.currentZoomIdx < ZOOM_PROFILES.length - 1) {
+        state.setZoomIdx(state.currentZoomIdx + 1);
+        wheelZoomCooldown = now;
+      } else if (e.deltaY > 0 && state.currentZoomIdx > 0) {
+        state.setZoomIdx(state.currentZoomIdx - 1);
+        wheelZoomCooldown = now;
+      }
+    },
+    { passive: true }
+  );
 
   const yakEggBtn = $('yak-easter-egg-btn');
   if (yakEggBtn) {
@@ -282,7 +328,11 @@ export function initSettings() {
       localStorage.setItem(storageLockKey, isLocked);
       container.classList.toggle('locked', isLocked);
       if (lockBtn) {
-        setIconLabel(lockBtn, isLocked ? '🔒' : '🔓', isLocked ? t('settings.btn_locked', 'Locked') : t('settings.btn_reorder', 'Reorder'));
+        setIconLabel(
+          lockBtn,
+          isLocked ? '🔒' : '🔓',
+          isLocked ? t('settings.btn_locked', 'Locked') : t('settings.btn_reorder', 'Reorder')
+        );
         lockBtn.classList.toggle('unlocked', !isLocked);
       }
       container.querySelectorAll('.draggable-card').forEach((card) => {
@@ -292,7 +342,11 @@ export function initSettings() {
 
     _cardReorderUpdaters.push(() => {
       if (lockBtn) {
-        setIconLabel(lockBtn, isLocked ? '🔒' : '🔓', isLocked ? t('settings.btn_locked', 'Locked') : t('settings.btn_reorder', 'Reorder'));
+        setIconLabel(
+          lockBtn,
+          isLocked ? '🔒' : '🔓',
+          isLocked ? t('settings.btn_locked', 'Locked') : t('settings.btn_reorder', 'Reorder')
+        );
       }
     });
 
@@ -323,7 +377,10 @@ export function initSettings() {
 
     container.querySelectorAll('.draggable-card').forEach((card) => {
       card.addEventListener('dragstart', (e) => {
-        if (isLocked || !allowDrag) { e.preventDefault(); return false; }
+        if (isLocked || !allowDrag) {
+          e.preventDefault();
+          return false;
+        }
         draggedCard = card;
         card.classList.add('dragging');
         e.dataTransfer.effectAllowed = 'move';
@@ -419,7 +476,9 @@ export function initSettings() {
       screenBriVal.style.color = isOff ? 'var(--muted)' : '';
     }
     if (screenPowerBtn) {
-      screenPowerBtn.textContent = isOff ? t('settings.screen_turn_on', 'Turn On') : t('settings.screen_turn_off', 'Turn Off');
+      screenPowerBtn.textContent = isOff
+        ? t('settings.screen_turn_on', 'Turn On')
+        : t('settings.screen_turn_off', 'Turn Off');
       screenPowerBtn.style.borderColor = isOff ? 'rgba(51, 205, 184, 0.5)' : '';
       screenPowerBtn.style.color = isOff ? 'var(--ok2, #33cdb8)' : '';
     }
@@ -448,7 +507,7 @@ export function initSettings() {
       night_mode: screenNightToggle ? screenNightToggle.checked : false,
       night_start: screenNightStart ? screenNightStart.value : '23:00',
       night_end: screenNightEnd ? screenNightEnd.value : '07:00',
-      night_brightness: parseInt(screenNightBri ? screenNightBri.value : 10, 10)
+      night_brightness: parseInt(screenNightBri ? screenNightBri.value : 10, 10),
     };
     try {
       await api.post('/api/screen', payload);
@@ -603,7 +662,7 @@ export function initSettings() {
         use_exif: btnCopyExif ? btnCopyExif.checked : true,
         auto_ingest: btnCopyAutoIngest ? btnCopyAutoIngest.checked : false,
         require_confirmation: btnCopyRequireConfirm ? btnCopyRequireConfirm.checked : true,
-        on_collision: btnCopyCollision ? btnCopyCollision.value : 'skip'
+        on_collision: btnCopyCollision ? btnCopyCollision.value : 'skip',
       });
       showToast(t('toast.button_configuration_saved', 'Button configuration saved'), 'success');
     } catch (err) {
@@ -655,7 +714,9 @@ export function initSettings() {
       } catch (err) {
         showToast(t('toast.scan_failed', 'Scan failed: {error}', { error: err.message || err }), 'error');
       } finally {
-        setTimeout(() => { setIconLabel(btnMediaRescan, '🔄', t('ui.scan', 'Scan')); }, 1000);
+        setTimeout(() => {
+          setIconLabel(btnMediaRescan, '🔄', t('ui.scan', 'Scan'));
+        }, 1000);
       }
     });
   }
@@ -714,192 +775,205 @@ export function initSettings() {
 
   // Mission Control's security pane: set up once its markup is in the page (FE-04)
   onManagementDom(() => {
-  // --- Security Password Management ---
-  async function fetchSecurity() {
-    try {
-      const data = await api.get('/api/security');
-      if (data.is_default_password) {
-        const warnEl = $('sec-default-pwd-warning');
-        if (warnEl) warnEl.style.display = 'block';
-      }
-    } catch (e) {
-      console.warn('Failed to load security info', e);
-    }
-  }
-
-  // The security check's list and score are drawn by management/security.js alone: this script
-  // drew the same box from a second address with other checks and colours, and the later answer
-  // won (SET-14). Here only the "turn off admin" button is set up.
-  async function fetchDefaultAdminState() {
-    if (!isAdministrator()) return; // the security check is an administrator's (SET-03)
-    try {
-      const adv = await api.get('/api/security/advisor');
-      const disableAdminCont = $('sec-disable-admin-container');
-      const disableAdminBtn = $('btn-disable-default-admin');
-      if (disableAdminCont && disableAdminBtn) {
-        if (!adv.admin_is_disabled) {
-          disableAdminCont.style.display = 'block';
-          const canDisable = adv.active_superadmins_count >= 2;
-          disableAdminBtn.disabled = !canDisable;
-          disableAdminBtn.style.opacity = canDisable ? '1' : '0.5';
-          disableAdminBtn.style.cursor = canDisable ? 'pointer' : 'not-allowed';
-          if (!canDisable) {
-            disableAdminBtn.title = t('sec.disable_admin_need_superadmin', "Create another administrator account first, then turn off 'admin'.");
-          } else {
-            disableAdminBtn.title = t('sec.disable_admin_btn', "Disable Default Admin");
-          }
-        } else {
-          disableAdminCont.style.display = 'none';
+    // --- Security Password Management ---
+    async function fetchSecurity() {
+      try {
+        const data = await api.get('/api/security');
+        if (data.is_default_password) {
+          const warnEl = $('sec-default-pwd-warning');
+          if (warnEl) warnEl.style.display = 'block';
         }
+      } catch (e) {
+        console.warn('Failed to load security info', e);
       }
-    } catch (e) {
-      console.warn('Failed to load the default admin state', e);
     }
-  }
 
-  const disableAdminBtn = $('btn-disable-default-admin');
-  if (disableAdminBtn && !disableAdminBtn.dataset.bound) {
-    disableAdminBtn.dataset.bound = 'true';
-    disableAdminBtn.addEventListener('click', () => {
-      const confirmMsg = t('sec.disable_admin_confirm', "Turn off the default 'admin' account? Another administrator account then manages this server. If you are signed in as 'admin', you are signed out.");
-      showConfirmToast(t('common.confirm', 'Confirm Action'), confirmMsg, async () => {
-        try {
-          const res = await api.post('/api/users/admin/disable', {});
-          showToast(t('sec.disable_admin_success', "Default admin account has been disabled."), 'success');
-          if (res.is_self) {
-            setTimeout(() => {
-              window.location.href = '/login';
-            }, 1200);
+    // The security check's list and score are drawn by management/security.js alone: this script
+    // drew the same box from a second address with other checks and colours, and the later answer
+    // won (SET-14). Here only the "turn off admin" button is set up.
+    async function fetchDefaultAdminState() {
+      if (!isAdministrator()) return; // the security check is an administrator's (SET-03)
+      try {
+        const adv = await api.get('/api/security/advisor');
+        const disableAdminCont = $('sec-disable-admin-container');
+        const disableAdminBtn = $('btn-disable-default-admin');
+        if (disableAdminCont && disableAdminBtn) {
+          if (!adv.admin_is_disabled) {
+            disableAdminCont.style.display = 'block';
+            const canDisable = adv.active_superadmins_count >= 2;
+            disableAdminBtn.disabled = !canDisable;
+            disableAdminBtn.style.opacity = canDisable ? '1' : '0.5';
+            disableAdminBtn.style.cursor = canDisable ? 'pointer' : 'not-allowed';
+            if (!canDisable) {
+              disableAdminBtn.title = t(
+                'sec.disable_admin_need_superadmin',
+                "Create another administrator account first, then turn off 'admin'."
+              );
+            } else {
+              disableAdminBtn.title = t('sec.disable_admin_btn', 'Disable Default Admin');
+            }
           } else {
-            fetchSecurity();
-            fetchDefaultAdminState();
+            disableAdminCont.style.display = 'none';
           }
-        } catch (err) {
-          showToast(err.message, 'error');
         }
+      } catch (e) {
+        console.warn('Failed to load the default admin state', e);
+      }
+    }
+
+    const disableAdminBtn = $('btn-disable-default-admin');
+    if (disableAdminBtn && !disableAdminBtn.dataset.bound) {
+      disableAdminBtn.dataset.bound = 'true';
+      disableAdminBtn.addEventListener('click', () => {
+        const confirmMsg = t(
+          'sec.disable_admin_confirm',
+          "Turn off the default 'admin' account? Another administrator account then manages this server. If you are signed in as 'admin', you are signed out."
+        );
+        showConfirmToast(t('common.confirm', 'Confirm Action'), confirmMsg, async () => {
+          try {
+            const res = await api.post('/api/users/admin/disable', {});
+            showToast(t('sec.disable_admin_success', 'Default admin account has been disabled.'), 'success');
+            if (res.is_self) {
+              setTimeout(() => {
+                window.location.href = '/login';
+              }, 1200);
+            } else {
+              fetchSecurity();
+              fetchDefaultAdminState();
+            }
+          } catch (err) {
+            showToast(err.message, 'error');
+          }
+        });
       });
-    });
-  }
-
-  fetchSecurity();
-  fetchDefaultAdminState();
-
-  const newPwdEl = $('sec-new-pwd');
-  const confirmPwdEl = $('sec-confirm-pwd');
-  const mismatchMsg = $('sec-pwd-mismatch-msg');
-
-  function checkPwdMatch() {
-    if (!newPwdEl || !confirmPwdEl) return;
-    const newPwd = newPwdEl.value;
-    const confirmPwd = confirmPwdEl.value;
-
-    if (!newPwd && !confirmPwd) {
-      if (mismatchMsg) mismatchMsg.style.display = 'none';
-      newPwdEl.style.borderColor = 'rgba(255,255,255,0.12)';
-      confirmPwdEl.style.borderColor = 'rgba(255,255,255,0.12)';
-      return;
     }
 
-    if (confirmPwd.length > 0) {
-      if (newPwd !== confirmPwd) {
-        if (mismatchMsg) mismatchMsg.style.display = 'flex';
-        confirmPwdEl.style.borderColor = 'var(--crit, #ff6b6b)';
+    fetchSecurity();
+    fetchDefaultAdminState();
+
+    const newPwdEl = $('sec-new-pwd');
+    const confirmPwdEl = $('sec-confirm-pwd');
+    const mismatchMsg = $('sec-pwd-mismatch-msg');
+
+    function checkPwdMatch() {
+      if (!newPwdEl || !confirmPwdEl) return;
+      const newPwd = newPwdEl.value;
+      const confirmPwd = confirmPwdEl.value;
+
+      if (!newPwd && !confirmPwd) {
+        if (mismatchMsg) mismatchMsg.style.display = 'none';
+        newPwdEl.style.borderColor = 'rgba(255,255,255,0.12)';
+        confirmPwdEl.style.borderColor = 'rgba(255,255,255,0.12)';
+        return;
+      }
+
+      if (confirmPwd.length > 0) {
+        if (newPwd !== confirmPwd) {
+          if (mismatchMsg) mismatchMsg.style.display = 'flex';
+          confirmPwdEl.style.borderColor = 'var(--crit, #ff6b6b)';
+        } else {
+          if (mismatchMsg) mismatchMsg.style.display = 'none';
+          confirmPwdEl.style.borderColor = 'var(--ok2, #10b981)';
+        }
       } else {
         if (mismatchMsg) mismatchMsg.style.display = 'none';
-        confirmPwdEl.style.borderColor = 'var(--ok2, #10b981)';
+        confirmPwdEl.style.borderColor = 'rgba(255,255,255,0.12)';
       }
-    } else {
-      if (mismatchMsg) mismatchMsg.style.display = 'none';
-      confirmPwdEl.style.borderColor = 'rgba(255,255,255,0.12)';
     }
-  }
 
-  if (newPwdEl) newPwdEl.addEventListener('input', checkPwdMatch);
-  if (confirmPwdEl) confirmPwdEl.addEventListener('input', checkPwdMatch);
+    if (newPwdEl) newPwdEl.addEventListener('input', checkPwdMatch);
+    if (confirmPwdEl) confirmPwdEl.addEventListener('input', checkPwdMatch);
 
-  const secSaveBtn = $('sec-save-btn');
-  if (secSaveBtn) {
-    secSaveBtn.addEventListener('click', async () => {
-      const curPwd = $('sec-cur-pwd') ? $('sec-cur-pwd').value : '';
-      if (!curPwd) {
-        showToast(t('mgmt.sec_err_cur_pwd_required', 'Current password is required to save changes'), 'error');
-        if ($('sec-cur-pwd')) $('sec-cur-pwd').focus();
-        return;
-      }
-
-      const newPwd = newPwdEl ? newPwdEl.value : '';
-      const confirmPwd = confirmPwdEl ? confirmPwdEl.value : '';
-
-      if (newPwd) {
-        if (!confirmPwd) {
-          showToast(t('mgmt.sec_err_confirm_required', 'Please confirm your new password.'), 'error');
-          if (confirmPwdEl) confirmPwdEl.focus();
+    const secSaveBtn = $('sec-save-btn');
+    if (secSaveBtn) {
+      secSaveBtn.addEventListener('click', async () => {
+        const curPwd = $('sec-cur-pwd') ? $('sec-cur-pwd').value : '';
+        if (!curPwd) {
+          showToast(t('mgmt.sec_err_cur_pwd_required', 'Current password is required to save changes'), 'error');
+          if ($('sec-cur-pwd')) $('sec-cur-pwd').focus();
           return;
         }
-        if (newPwd !== confirmPwd) {
-          showToast(t('mgmt.sec_err_pwd_mismatch', 'New passwords do not match. Please verify and try again.'), 'error');
-          if (mismatchMsg) mismatchMsg.style.display = 'flex';
-          if (confirmPwdEl) {
-            confirmPwdEl.style.borderColor = 'var(--crit, #ff6b6b)';
-            confirmPwdEl.focus();
+
+        const newPwd = newPwdEl ? newPwdEl.value : '';
+        const confirmPwd = confirmPwdEl ? confirmPwdEl.value : '';
+
+        if (newPwd) {
+          if (!confirmPwd) {
+            showToast(t('mgmt.sec_err_confirm_required', 'Please confirm your new password.'), 'error');
+            if (confirmPwdEl) confirmPwdEl.focus();
+            return;
           }
-          return;
+          if (newPwd !== confirmPwd) {
+            showToast(
+              t('mgmt.sec_err_pwd_mismatch', 'New passwords do not match. Please verify and try again.'),
+              'error'
+            );
+            if (mismatchMsg) mismatchMsg.style.display = 'flex';
+            if (confirmPwdEl) {
+              confirmPwdEl.style.borderColor = 'var(--crit, #ff6b6b)';
+              confirmPwdEl.focus();
+            }
+            return;
+          }
+          if (newPwd.length < 8) {
+            showToast(t('mgmt.sec_err_min_8', 'New password must be at least 8 characters.'), 'error');
+            if (newPwdEl) newPwdEl.focus();
+            return;
+          }
+          if (newPwd.toLowerCase() === 'admin') {
+            showToast(t('mgmt.sec_err_not_admin', 'Please choose a password other than the default.'), 'error');
+            if (newPwdEl) newPwdEl.focus();
+            return;
+          }
         }
-        if (newPwd.length < 8) {
-          showToast(t('mgmt.sec_err_min_8', 'New password must be at least 8 characters.'), 'error');
+
+        // the signed-in person's own password, for every role. "Admin username" renamed nothing and
+        // "Email for notifications" sent nothing: both fields are gone (SET-10)
+        const payload = { current_password: curPwd, new_password: newPwd };
+        if (!newPwd) {
+          showToast(t('mgmt.sec_err_new_required', 'Enter a new password.'), 'error');
           if (newPwdEl) newPwdEl.focus();
           return;
         }
-        if (newPwd.toLowerCase() === 'admin') {
-          showToast(t('mgmt.sec_err_not_admin', 'Please choose a password other than the default.'), 'error');
-          if (newPwdEl) newPwdEl.focus();
-          return;
+
+        secSaveBtn.textContent = t('setup.saving', 'Saving...');
+        try {
+          await changeOwnPassword(curPwd, newPwd);
+          showToast(t('mgmt.sec_saved', 'Security settings updated successfully.'), 'success');
+          if ($('sec-cur-pwd')) $('sec-cur-pwd').value = '';
+          if (newPwdEl) {
+            newPwdEl.value = '';
+            newPwdEl.style.borderColor = 'rgba(255,255,255,0.12)';
+          }
+          if (confirmPwdEl) {
+            confirmPwdEl.value = '';
+            confirmPwdEl.style.borderColor = 'rgba(255,255,255,0.12)';
+          }
+          if (mismatchMsg) mismatchMsg.style.display = 'none';
+          fetchSecurity();
+
+          // this browser stays signed in: the change ends the person's other sessions, not this one
+        } catch (err) {
+          showToast(err.message || 'Failed to update settings', 'error');
         }
-      }
+        setIconLabel(secSaveBtn, '💾', t('mgmt.sec_save', 'Save'));
+      });
+    }
 
-      // the signed-in person's own password, for every role. "Admin username" renamed nothing and
-      // "Email for notifications" sent nothing: both fields are gone (SET-10)
-      const payload = { current_password: curPwd, new_password: newPwd };
-      if (!newPwd) {
-        showToast(t('mgmt.sec_err_new_required', 'Enter a new password.'), 'error');
-        if (newPwdEl) newPwdEl.focus();
-        return;
-      }
-
-      secSaveBtn.textContent = t('setup.saving', 'Saving...');
-      try {
-        await changeOwnPassword(curPwd, newPwd);
-        showToast(t('mgmt.sec_saved', 'Security settings updated successfully.'), 'success');
-        if ($('sec-cur-pwd')) $('sec-cur-pwd').value = '';
-        if (newPwdEl) {
-          newPwdEl.value = '';
-          newPwdEl.style.borderColor = 'rgba(255,255,255,0.12)';
+    const logoutBtn = $('sec-logout-btn');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', async () => {
+        try {
+          await api.post('/api/auth/logout', {});
+        } catch (e) {
+          /* session may already be gone */
         }
-        if (confirmPwdEl) {
-          confirmPwdEl.value = '';
-          confirmPwdEl.style.borderColor = 'rgba(255,255,255,0.12)';
-        }
-        if (mismatchMsg) mismatchMsg.style.display = 'none';
-        fetchSecurity();
-
-        // this browser stays signed in: the change ends the person's other sessions, not this one
-      } catch (err) {
-        showToast(err.message || 'Failed to update settings', 'error');
-      }
-      setIconLabel(secSaveBtn, '💾', t('mgmt.sec_save', 'Save'));
-    });
-  }
-
-  const logoutBtn = $('sec-logout-btn');
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', async () => {
-      try { await api.post('/api/auth/logout', {}); } catch (e) { /* session may already be gone */ }
-      localStorage.removeItem('kiboto_token');
-          localStorage.removeItem('kiboto_signed_in');
-      document.cookie = 'kiboto_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-      window.location.reload();
-    });
-  }
+        localStorage.removeItem('kiboto_token');
+        localStorage.removeItem('kiboto_signed_in');
+        document.cookie = 'kiboto_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        window.location.reload();
+      });
+    }
   });
 
   // --- Card Minimize / Collapse Toggle ---
@@ -912,7 +986,12 @@ export function initSettings() {
 
     const collapsed = [];
     document.querySelectorAll('.draggable-card.card-collapsed').forEach((c) => {
-      const id = c.dataset.layoutCardId || c.dataset.ledCardId || c.dataset.fanCardId || c.dataset.btnCardId || c.dataset.miscCardId;
+      const id =
+        c.dataset.layoutCardId ||
+        c.dataset.ledCardId ||
+        c.dataset.fanCardId ||
+        c.dataset.btnCardId ||
+        c.dataset.miscCardId;
       if (id) collapsed.push(id);
     });
     localStorage.setItem('kiboto_collapsed_cards', JSON.stringify(collapsed));
@@ -921,7 +1000,12 @@ export function initSettings() {
   try {
     const collapsed = JSON.parse(localStorage.getItem('kiboto_collapsed_cards') || '[]');
     document.querySelectorAll('.draggable-card').forEach((c) => {
-      const id = c.dataset.layoutCardId || c.dataset.ledCardId || c.dataset.fanCardId || c.dataset.btnCardId || c.dataset.miscCardId;
+      const id =
+        c.dataset.layoutCardId ||
+        c.dataset.ledCardId ||
+        c.dataset.fanCardId ||
+        c.dataset.btnCardId ||
+        c.dataset.miscCardId;
       if (id && collapsed.includes(id)) {
         c.classList.add('card-collapsed');
       }
@@ -933,8 +1017,18 @@ export function initSettings() {
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
     const consoleWin = document.getElementById('vm-console-window');
-    const isConsoleActive = consoleWin && !consoleWin.classList.contains('window-minimized') && consoleWin.style.display !== 'none' && (consoleWin.dataset.focused === 'true' || consoleWin.contains(document.activeElement));
-    if (activeTag === 'input' || activeTag === 'select' || activeTag === 'textarea' || document.activeElement?.isContentEditable || isConsoleActive) {
+    const isConsoleActive =
+      consoleWin &&
+      !consoleWin.classList.contains('window-minimized') &&
+      consoleWin.style.display !== 'none' &&
+      (consoleWin.dataset.focused === 'true' || consoleWin.contains(document.activeElement));
+    if (
+      activeTag === 'input' ||
+      activeTag === 'select' ||
+      activeTag === 'textarea' ||
+      document.activeElement?.isContentEditable ||
+      isConsoleActive
+    ) {
       if (e.key === 'Escape' && activeTag !== 'canvas') document.activeElement?.blur?.();
       return;
     }
@@ -973,7 +1067,7 @@ export async function saveLcdThemeToServer(theme, customAccent, textClarity) {
       await api.post('/api/system/client-preferences', {
         lcd_theme: theme,
         lcd_custom_accent: customAccent || '',
-        lcd_text_clarity: textClarity ? 'true' : 'false'
+        lcd_text_clarity: textClarity ? 'true' : 'false',
       });
     } catch (e) {
       console.warn('[LCD THEME] Failed syncing LCD theme to server:', e);
@@ -1096,7 +1190,7 @@ export function renderExtractedChips(colors) {
   const container = $('wallpaper-extracted-chips');
   if (!container) return;
   container.innerHTML = '';
-  colors.forEach(hex => {
+  colors.forEach((hex) => {
     const btn = document.createElement('button');
     btn.className = 'desktop-color-chip color-chip-btn';
     btn.dataset.color = hex;
@@ -1109,7 +1203,7 @@ export function renderExtractedChips(colors) {
       applyDesktopTheme(state.desktopTheme, hex);
       saveDesktopThemeToServer(state.desktopTheme, hex);
       syncDesktopThemeUI();
-      container.querySelectorAll('.desktop-color-chip').forEach(c => c.classList.remove('active'));
+      container.querySelectorAll('.desktop-color-chip').forEach((c) => c.classList.remove('active'));
       btn.classList.add('active');
     });
     container.appendChild(btn);
@@ -1184,11 +1278,13 @@ export async function sampleWallpaperPalette() {
 
       if (lum < 0.15 || lum > 0.85 || sat < 0.2) continue;
 
-      const hex = '#' + [qr, qg, qb].map(x => Math.min(255, Math.max(0, x)).toString(16).padStart(2, '0')).join('');
+      const hex = '#' + [qr, qg, qb].map((x) => Math.min(255, Math.max(0, x)).toString(16).padStart(2, '0')).join('');
       colorMap.set(hex, (colorMap.get(hex) || 0) + 1);
     }
 
-    let sorted = Array.from(colorMap.entries()).sort((a, b) => b[1] - a[1]).map(entry => entry[0]);
+    let sorted = Array.from(colorMap.entries())
+      .sort((a, b) => b[1] - a[1])
+      .map((entry) => entry[0]);
     if (sorted.length < 5) {
       const fillers = ['#33cdb8', '#38bdf8', '#3bf58b', '#ffbe40', '#c084fc', '#f43f5e'];
       for (const f of fillers) {
@@ -1213,25 +1309,41 @@ let _appearanceUndoSnapshot = null;
 let _appearanceUndoTimer = null;
 
 export function exportThemeBundle() {
-  let savedBlur = 24, savedOpacity = 72, savedRadius = '12px', savedGlow = false;
-  let savedDim = 15, savedBlurWp = 0;
-  let savedDockPos = 'bottom', savedDockSize = 'medium', savedDockMag = true, savedDockScale = 1.45, savedDockAutoHide = false;
+  let savedBlur = 24,
+    savedOpacity = 72,
+    savedRadius = '12px',
+    savedGlow = false;
+  let savedDim = 15,
+    savedBlurWp = 0;
+  let savedDockPos = 'bottom',
+    savedDockSize = 'medium',
+    savedDockMag = true,
+    savedDockScale = 1.45,
+    savedDockAutoHide = false;
   let savedEco = false;
 
   try {
-    if (localStorage.getItem('kiboto_glass_blur') !== null) savedBlur = parseInt(localStorage.getItem('kiboto_glass_blur'), 10);
-    if (localStorage.getItem('kiboto_glass_opacity') !== null) savedOpacity = parseInt(localStorage.getItem('kiboto_glass_opacity'), 10);
+    if (localStorage.getItem('kiboto_glass_blur') !== null)
+      savedBlur = parseInt(localStorage.getItem('kiboto_glass_blur'), 10);
+    if (localStorage.getItem('kiboto_glass_opacity') !== null)
+      savedOpacity = parseInt(localStorage.getItem('kiboto_glass_opacity'), 10);
     if (localStorage.getItem('kiboto_window_radius')) savedRadius = localStorage.getItem('kiboto_window_radius');
-    if (localStorage.getItem('kiboto_window_glow') !== null) savedGlow = localStorage.getItem('kiboto_window_glow') === 'true';
+    if (localStorage.getItem('kiboto_window_glow') !== null)
+      savedGlow = localStorage.getItem('kiboto_window_glow') === 'true';
 
-    if (localStorage.getItem('kiboto_wallpaper_dim') !== null) savedDim = parseInt(localStorage.getItem('kiboto_wallpaper_dim'), 10);
-    if (localStorage.getItem('kiboto_wallpaper_blur') !== null) savedBlurWp = parseInt(localStorage.getItem('kiboto_wallpaper_blur'), 10);
+    if (localStorage.getItem('kiboto_wallpaper_dim') !== null)
+      savedDim = parseInt(localStorage.getItem('kiboto_wallpaper_dim'), 10);
+    if (localStorage.getItem('kiboto_wallpaper_blur') !== null)
+      savedBlurWp = parseInt(localStorage.getItem('kiboto_wallpaper_blur'), 10);
 
     if (localStorage.getItem('kiboto_dock_position')) savedDockPos = localStorage.getItem('kiboto_dock_position');
     if (localStorage.getItem('kiboto_dock_size')) savedDockSize = localStorage.getItem('kiboto_dock_size');
-    if (localStorage.getItem('kiboto_dock_magnification') !== null) savedDockMag = localStorage.getItem('kiboto_dock_magnification') !== 'false';
-    if (localStorage.getItem('kiboto_dock_scale') !== null) savedDockScale = parseFloat(localStorage.getItem('kiboto_dock_scale'));
-    if (localStorage.getItem('kiboto_dock_autohide') !== null) savedDockAutoHide = localStorage.getItem('kiboto_dock_autohide') === 'true';
+    if (localStorage.getItem('kiboto_dock_magnification') !== null)
+      savedDockMag = localStorage.getItem('kiboto_dock_magnification') !== 'false';
+    if (localStorage.getItem('kiboto_dock_scale') !== null)
+      savedDockScale = parseFloat(localStorage.getItem('kiboto_dock_scale'));
+    if (localStorage.getItem('kiboto_dock_autohide') !== null)
+      savedDockAutoHide = localStorage.getItem('kiboto_dock_autohide') === 'true';
 
     if (localStorage.getItem('kiboto_eco_mode') !== null) savedEco = localStorage.getItem('kiboto_eco_mode') === 'true';
   } catch (e) {}
@@ -1248,23 +1360,24 @@ export function exportThemeBundle() {
       blur: savedBlur,
       opacity: savedOpacity,
       radius: savedRadius,
-      glow: savedGlow
+      glow: savedGlow,
     },
     wallpaper: {
-      active_file: (typeof localStorage !== 'undefined' ? localStorage.getItem('kiboto_active_wallpaper') : null) || null,
+      active_file:
+        (typeof localStorage !== 'undefined' ? localStorage.getItem('kiboto_active_wallpaper') : null) || null,
       dim: savedDim,
-      blur: savedBlurWp
+      blur: savedBlurWp,
     },
     dock: {
       position: savedDockPos,
       size: savedDockSize,
       magnification: savedDockMag,
       scale: savedDockScale,
-      autohide: savedDockAutoHide
+      autohide: savedDockAutoHide,
     },
     performance: {
-      eco_mode: savedEco
-    }
+      eco_mode: savedEco,
+    },
   };
 
   const blob = new Blob([JSON.stringify(bundle, null, 2)], { type: 'application/json' });
@@ -1285,7 +1398,8 @@ export function importThemeBundle(file) {
   reader.onload = (e) => {
     try {
       const data = JSON.parse(e.target.result);
-      if (!data || (!['kiboto-theme', 'zett-theme'].includes(data.format) && !data.theme)) { // zett-theme: saved before the rebrand
+      if (!data || (!['kiboto-theme', 'zett-theme'].includes(data.format) && !data.theme)) {
+        // zett-theme: saved before the rebrand
         throw new Error('Invalid theme file format. Expected a .kiboto-theme.json bundle.');
       }
 
@@ -1301,7 +1415,13 @@ export function importThemeBundle(file) {
 
       // Apply glass
       if (data.glass) {
-        applyGlassSettings(data.glass.blur ?? 24, data.glass.opacity ?? 72, data.glass.radius ?? '12px', data.glass.glow ?? false, true);
+        applyGlassSettings(
+          data.glass.blur ?? 24,
+          data.glass.opacity ?? 72,
+          data.glass.radius ?? '12px',
+          data.glass.glow ?? false,
+          true
+        );
       }
 
       // Apply wallpaper readability
@@ -1326,7 +1446,9 @@ export function importThemeBundle(file) {
         const isEco = !!data.performance.eco_mode;
         if (isEco) document.body.setAttribute('data-performance-mode', 'eco');
         else document.body.removeAttribute('data-performance-mode');
-        try { localStorage.setItem('kiboto_eco_mode', isEco ? 'true' : 'false'); } catch (err) {}
+        try {
+          localStorage.setItem('kiboto_eco_mode', isEco ? 'true' : 'false');
+        } catch (err) {}
         /** @type {any} */ (window).syncWindowStyleUI?.();
       }
 
@@ -1361,7 +1483,7 @@ function takeAppearanceSnapshot() {
       dockMag: localStorage.getItem('kiboto_dock_magnification'),
       dockScale: localStorage.getItem('kiboto_dock_scale'),
       dockAutoHide: localStorage.getItem('kiboto_dock_autohide'),
-      ecoMode: localStorage.getItem('kiboto_eco_mode')
+      ecoMode: localStorage.getItem('kiboto_eco_mode'),
     };
   } catch (e) {}
 }
@@ -1371,11 +1493,22 @@ export function restoreDesktopDefaultsWithUndo() {
   takeAppearanceSnapshot();
   applyDockSettings('bottom', true, 1.45, 'medium', false, true); // the dock's own defaults
   clearTimeout(_appearanceUndoTimer);
-  showActionToast(t('settings.desktop_reset', 'The desktop is back to its defaults.'), `↺ ${t('settings.undo_10s', 'Undo (10 s)')}`, () => {
-    const snap = _appearanceUndoSnapshot;
-    if (!snap) return;
-    applyDockSettings(snap.dockPos || 'bottom', snap.dockMag !== 'false', snap.dockScale ? parseFloat(snap.dockScale) : 1.45, snap.dockSize || 'medium', snap.dockAutoHide === 'true', true);
-  });
+  showActionToast(
+    t('settings.desktop_reset', 'The desktop is back to its defaults.'),
+    `↺ ${t('settings.undo_10s', 'Undo (10 s)')}`,
+    () => {
+      const snap = _appearanceUndoSnapshot;
+      if (!snap) return;
+      applyDockSettings(
+        snap.dockPos || 'bottom',
+        snap.dockMag !== 'false',
+        snap.dockScale ? parseFloat(snap.dockScale) : 1.45,
+        snap.dockSize || 'medium',
+        snap.dockAutoHide === 'true',
+        true
+      );
+    }
+  );
 }
 
 /** Reset look (APP-C): mode, theme, tint, accent, glass, wallpaper readability and eco mode, with Undo. */
@@ -1395,46 +1528,60 @@ export function restoreAppearanceDefaultsWithUndo() {
 
   // 5. Reset eco mode
   document.body.removeAttribute('data-performance-mode');
-  try { localStorage.removeItem('kiboto_eco_mode'); } catch (err) {}
+  try {
+    localStorage.removeItem('kiboto_eco_mode');
+  } catch (err) {}
   /** @type {any} */ (window).syncWindowStyleUI?.();
 
   syncDesktopThemeUI();
   if (typeof window.syncDesktopTwinPreview === 'function') {
-    window.syncDesktopTwinPreview({ theme: 'lagoon', accent: '', wallpaperDim: 15, wallpaperBlur: 0, dockPos: 'bottom' });
+    window.syncDesktopTwinPreview({
+      theme: 'lagoon',
+      accent: '',
+      wallpaperDim: 15,
+      wallpaperBlur: 0,
+      dockPos: 'bottom',
+    });
   }
 
   // Show 10s undo toast
   clearTimeout(_appearanceUndoTimer);
-  showActionToast(t('settings.appearance_reset', 'Appearance reset to factory defaults'), `↺ ${t('settings.undo_10s', 'Undo (10 s)')}`, () => {
-    if (!_appearanceUndoSnapshot) return;
-    const snap = _appearanceUndoSnapshot;
-    if (snap.look) storeLook(snap.look);
-    applyDesktopTheme(snap.theme, snap.customAccent);
-    saveDesktopThemeToServer(snap.theme, snap.customAccent);
+  showActionToast(
+    t('settings.appearance_reset', 'Appearance reset to factory defaults'),
+    `↺ ${t('settings.undo_10s', 'Undo (10 s)')}`,
+    () => {
+      if (!_appearanceUndoSnapshot) return;
+      const snap = _appearanceUndoSnapshot;
+      if (snap.look) storeLook(snap.look);
+      applyDesktopTheme(snap.theme, snap.customAccent);
+      saveDesktopThemeToServer(snap.theme, snap.customAccent);
 
-    applyGlassSettings(
-      snap.glassBlur !== null ? parseInt(snap.glassBlur, 10) : 24,
-      snap.glassOpacity !== null ? parseInt(snap.glassOpacity, 10) : 72,
-      snap.windowRadius || '12px',
-      snap.windowGlow === 'true',
-      true
-    );
+      applyGlassSettings(
+        snap.glassBlur !== null ? parseInt(snap.glassBlur, 10) : 24,
+        snap.glassOpacity !== null ? parseInt(snap.glassOpacity, 10) : 72,
+        snap.windowRadius || '12px',
+        snap.windowGlow === 'true',
+        true
+      );
 
-    applyWallpaperReadability(
-      snap.wallpaperDim !== null ? parseInt(snap.wallpaperDim, 10) : 15,
-      snap.wallpaperBlur !== null ? parseInt(snap.wallpaperBlur, 10) : 0,
-      true
-    );
+      applyWallpaperReadability(
+        snap.wallpaperDim !== null ? parseInt(snap.wallpaperDim, 10) : 15,
+        snap.wallpaperBlur !== null ? parseInt(snap.wallpaperBlur, 10) : 0,
+        true
+      );
 
-
-    if (snap.ecoMode === 'true') {
-      document.body.setAttribute('data-performance-mode', 'eco');
-      try { localStorage.setItem('kiboto_eco_mode', 'true'); } catch (e) {}
-      /** @type {any} */ (window).syncWindowStyleUI?.();
-    }
-    syncDesktopThemeUI();
-    showToast(t('settings.theme_restored', 'Appearance settings restored!'), 'success');
-  }, 10000);
+      if (snap.ecoMode === 'true') {
+        document.body.setAttribute('data-performance-mode', 'eco');
+        try {
+          localStorage.setItem('kiboto_eco_mode', 'true');
+        } catch (e) {}
+        /** @type {any} */ (window).syncWindowStyleUI?.();
+      }
+      syncDesktopThemeUI();
+      showToast(t('settings.theme_restored', 'Appearance settings restored!'), 'success');
+    },
+    10000
+  );
 }
 
 /** Choosing a theme gives back the theme's own colour; a person's own accent comes back with Undo. */
@@ -1442,9 +1589,15 @@ export function chooseTheme(themeId) {
   const before = loadLook();
   updateLook({ theme: themeId, accent: '' });
   if (before.accent) {
-    showActionToast(t('look.accent_reset', 'Using {theme}\u2019s own colour', { theme: t('look.theme_' + themeId, THEME_NAMES[themeId] || themeId) }), t('look.undo', 'Undo'), () => {
-      updateLook({ accent: before.accent });
-    });
+    showActionToast(
+      t('look.accent_reset', 'Using {theme}\u2019s own colour', {
+        theme: t('look.theme_' + themeId, THEME_NAMES[themeId] || themeId),
+      }),
+      t('look.undo', 'Undo'),
+      () => {
+        updateLook({ accent: before.accent });
+      }
+    );
   }
 }
 
@@ -1479,7 +1632,9 @@ export function initDesktopThemeControls() {
   container.querySelectorAll('[data-look-mode]').forEach((btn) => {
     btn.addEventListener('click', () => updateLook({ mode: btn.getAttribute('data-look-mode') }));
   });
-  $('look-true-black')?.addEventListener('change', (e) => updateLook({ trueBlack: /** @type {HTMLInputElement} */ (e.target).checked }));
+  $('look-true-black')?.addEventListener('change', (e) =>
+    updateLook({ trueBlack: /** @type {HTMLInputElement} */ (e.target).checked })
+  );
   const tint = /** @type {HTMLInputElement | null} */ ($('look-tint'));
   tint?.addEventListener('input', () => updateLook({ tint: Number(tint.value) / 100 }));
 
@@ -1595,7 +1750,22 @@ export function syncLcdThemeUI() {
     picker.value = curAccent;
   }
   if (hexVal) {
-    hexVal.textContent = (curAccent || (curTheme === 'amber' ? '#ffbe40' : curTheme === 'emerald' ? '#3bf58b' : curTheme === 'sapphire' ? '#38bdf8' : curTheme === 'amethyst' ? '#c084fc' : curTheme === 'crimson' ? '#fb7185' : curTheme === 'yak' ? '#d48a37' : '#33cdb8')).toUpperCase();
+    hexVal.textContent = (
+      curAccent ||
+      (curTheme === 'amber'
+        ? '#ffbe40'
+        : curTheme === 'emerald'
+          ? '#3bf58b'
+          : curTheme === 'sapphire'
+            ? '#38bdf8'
+            : curTheme === 'amethyst'
+              ? '#c084fc'
+              : curTheme === 'crimson'
+                ? '#fb7185'
+                : curTheme === 'yak'
+                  ? '#d48a37'
+                  : '#33cdb8')
+    ).toUpperCase();
   }
 
   const clarityToggle = $('lcd-text-clarity-toggle');
@@ -1715,7 +1885,12 @@ export function gatherClientPreferences() {
     const key = localStorage.key(i);
     if (!key) continue;
     // Exclude volatile session tokens and temporary caches
-    if (key === 'kiboto_token' || key === 'kiboto_signed_in' || key.startsWith('kiboto_weather_cache_') || key.startsWith('kiboto_holiday_cache_')) {
+    if (
+      key === 'kiboto_token' ||
+      key === 'kiboto_signed_in' ||
+      key.startsWith('kiboto_weather_cache_') ||
+      key.startsWith('kiboto_holiday_cache_')
+    ) {
       continue;
     }
     // Capture all Kiboto desktop configurations, window positions, widgets, dock pinned apps, themes, and layout locks
@@ -1750,23 +1925,36 @@ export async function syncClientPreferencesFromServerIfEmpty() {
     try {
       const token = auth.getToken();
       const res = await window.fetch('/api/system/client-preferences', {
-        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {},
       });
       if (res.ok) {
         const data = await res.json();
         if (data.preferences && Object.keys(data.preferences).length > 0) {
           applyClientPreferences(data.preferences);
-          if (!hasOwnLook() && (data.preferences.desktop_theme || data.preferences.desktop_custom_accent !== undefined)) {
+          if (
+            !hasOwnLook() &&
+            (data.preferences.desktop_theme || data.preferences.desktop_custom_accent !== undefined)
+          ) {
             applyDesktopTheme(
               data.preferences.desktop_theme || state.desktopTheme,
-              data.preferences.desktop_custom_accent !== undefined ? data.preferences.desktop_custom_accent : state.desktopCustomAccent
+              data.preferences.desktop_custom_accent !== undefined
+                ? data.preferences.desktop_custom_accent
+                : state.desktopCustomAccent
             );
           }
-          if (data.preferences.lcd_theme || data.preferences.lcd_custom_accent !== undefined || data.preferences.lcd_text_clarity !== undefined) {
+          if (
+            data.preferences.lcd_theme ||
+            data.preferences.lcd_custom_accent !== undefined ||
+            data.preferences.lcd_text_clarity !== undefined
+          ) {
             applyLcdTheme(
               data.preferences.lcd_theme || state.lcdTheme,
-              data.preferences.lcd_custom_accent !== undefined ? data.preferences.lcd_custom_accent : state.lcdCustomAccent,
-              data.preferences.lcd_text_clarity !== undefined ? data.preferences.lcd_text_clarity !== 'false' : state.lcdTextClarity
+              data.preferences.lcd_custom_accent !== undefined
+                ? data.preferences.lcd_custom_accent
+                : state.lcdCustomAccent,
+              data.preferences.lcd_text_clarity !== undefined
+                ? data.preferences.lcd_text_clarity !== 'false'
+                : state.lcdTextClarity
             );
           }
         }
@@ -1781,15 +1969,27 @@ export async function syncClientPreferencesFromServerIfEmpty() {
 // passphrase, '' for an unencrypted backup, or null when the user cancels.
 function askBackupPassphrase(title, msg, allowEmpty) {
   return new Promise((resolve) => {
-    showPromptToast(title, msg, '', (value) => {
-      const v = (value || '').trim();
-      if (!v && !allowEmpty) return resolve(null);
-      if (v && v.length < 8) {
-        showToast(t('toast.use_a_passphrase_of_at_least', 'Use a passphrase of at least 8 characters.'), 'error');
-        return resolve(null);
+    showPromptToast(
+      title,
+      msg,
+      '',
+      (value) => {
+        const v = (value || '').trim();
+        if (!v && !allowEmpty) return resolve(null);
+        if (v && v.length < 8) {
+          showToast(t('toast.use_a_passphrase_of_at_least', 'Use a passphrase of at least 8 characters.'), 'error');
+          return resolve(null);
+        }
+        resolve(v);
+      },
+      () => resolve(null),
+      {
+        inputType: 'password',
+        placeholder: allowEmpty
+          ? t('stg.no_encryption_hint', 'Leave empty for no encryption')
+          : t('backup.f_passphrase', 'Backup passphrase'),
       }
-      resolve(v);
-    }, () => resolve(null), { inputType: 'password', placeholder: allowEmpty ? t('stg.no_encryption_hint', 'Leave empty for no encryption') : t('backup.f_passphrase', 'Backup passphrase') });
+    );
   });
 }
 
@@ -1829,11 +2029,20 @@ export async function renderStagedRestore() {
     try {
       const r = await api.post('/api/system/restore/apply', {});
       if (r.restarting) {
-        card.textContent = t('settings.staged_restarting', 'Kiboto is restarting to apply the backup. This page reloads by itself; then sign in with the password from the backup.');
+        card.textContent = t(
+          'settings.staged_restarting',
+          'Kiboto is restarting to apply the backup. This page reloads by itself; then sign in with the password from the backup.'
+        );
         const { waitForRestart } = await import('./restore-box.js');
         waitForRestart();
       } else {
-        showToast(t('settings.staged_restart_yourself', 'Kiboto cannot restart itself here. Restart its container to apply the backup.'), 'warn');
+        showToast(
+          t(
+            'settings.staged_restart_yourself',
+            'Kiboto cannot restart itself here. Restart its container to apply the backup.'
+          ),
+          'warn'
+        );
       }
     } catch (err) {
       if (err?.error !== 'cancelled') showToast(err.message || String(err), 'error');
@@ -1863,7 +2072,10 @@ export function initSystemTab() {
       // off-site backup and the cloud accounts
       const passphrase = await askBackupPassphrase(
         t('settings.backup_pass_title', 'A passphrase for this backup'),
-        t('settings.backup_pass_msg', 'The backup holds people and their password hashes, the server’s secret key, the keys of your off-site backups and your cloud accounts, so it is always encrypted. Choose a passphrase of at least 8 characters and keep it somewhere other than this NAS: without it the backup cannot be restored.'),
+        t(
+          'settings.backup_pass_msg',
+          'The backup holds people and their password hashes, the server’s secret key, the keys of your off-site backups and your cloud accounts, so it is always encrypted. Choose a passphrase of at least 8 characters and keep it somewhere other than this NAS: without it the backup cannot be restored.'
+        ),
         false
       );
       if (!passphrase) return;
@@ -1879,9 +2091,9 @@ export function initSystemTab() {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+              ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
             },
-            body: JSON.stringify(prefs)
+            body: JSON.stringify(prefs),
           });
         } catch (syncErr) {
           console.warn('[BACKUP] Client preferences pre-backup sync warning:', syncErr);
@@ -1923,13 +2135,20 @@ export function initSystemTab() {
       const file = e.target.files[0];
       if (!file) return;
       if (!file.name.endsWith('.zip') && !file.name.endsWith('.zettbak')) {
-        showToast(t('toast.please_choose_a_kiboto_backup_zip', 'Please choose a Kiboto backup (.zip or .zettbak).'), 'error');
+        showToast(
+          t('toast.please_choose_a_kiboto_backup_zip', 'Please choose a Kiboto backup (.zip or .zettbak).'),
+          'error'
+        );
         uploadInput.value = '';
         return;
       }
       let restorePassphrase = '';
       if (await isEncryptedBackup(file)) {
-        restorePassphrase = await askBackupPassphrase(t('settings.restore_pass_title', 'Encrypted backup'), t('settings.restore_pass_msg', 'Enter the passphrase this backup was made with.'), false);
+        restorePassphrase = await askBackupPassphrase(
+          t('settings.restore_pass_title', 'Encrypted backup'),
+          t('settings.restore_pass_msg', 'Enter the passphrase this backup was made with.'),
+          false
+        );
         if (restorePassphrase === null) {
           uploadInput.value = '';
           return;
@@ -1937,7 +2156,10 @@ export function initSystemTab() {
       }
       showConfirmToast(
         t('settings.restore_confirm_title', 'Restore Configuration'),
-        t('settings.restore_confirm_desc', 'Are you sure you want to restore this configuration? This will restore all hardware settings, fan curves, layouts, widgets, and themes, and reload the interface.'),
+        t(
+          'settings.restore_confirm_desc',
+          'Are you sure you want to restore this configuration? This will restore all hardware settings, fan curves, layouts, widgets, and themes, and reload the interface.'
+        ),
         async () => {
           try {
             const res = await apiFetch('/api/system/restore', {
@@ -1957,7 +2179,10 @@ export function initSystemTab() {
             // Nothing is applied yet: the server keeps the checked backup for the next start. The
             // page said the restore had succeeded and reloaded into unchanged settings,
             // and the backup then replaced everything at some later restart (SET-06).
-            showToast(t('settings.restore_ready', 'The backup is checked and ready. It is applied when Kiboto restarts.'), 'success');
+            showToast(
+              t('settings.restore_ready', 'The backup is checked and ready. It is applied when Kiboto restarts.'),
+              'success'
+            );
             renderStagedRestore();
           } catch (err) {
             showToast(t('settings.restore_failed', 'Restore failed: ') + err.message, 'error');
@@ -1974,16 +2199,27 @@ document.addEventListener('DOMContentLoaded', () => {
   onManagementDom(initSystemTab);
 });
 
-
 /** One token's row: name, what it may reach, and when and by which client it was last used (COMP-06). */
 // The kinds a token can be made as (backend/api/system.py TOKEN_PRESETS), to say in the list what
 // each one may do (NSEC-2)
 /** @type {Array<[string, string[], () => string]>} */
 const TOKEN_KINDS = [
   ['files-read', ['shares:read', 'files:read'], () => t('tokens.kind_files_read', 'Read files')],
-  ['files-write', ['shares:read', 'files:read', 'shares:user_write', 'files:write'], () => t('tokens.kind_files_write', 'Read and change files')],
-  ['monitoring', ['system:view', 'hardware:read', 'storage:read'], () => t('tokens.kind_monitoring', 'See how the server is doing (monitoring)')],
-  ['mcp', ['ai:knowledge:read', 'shares:read', 'files:read', 'system:view'], () => t('tokens.kind_mcp', 'An AI assistant (MCP): search and read files')],
+  [
+    'files-write',
+    ['shares:read', 'files:read', 'shares:user_write', 'files:write'],
+    () => t('tokens.kind_files_write', 'Read and change files'),
+  ],
+  [
+    'monitoring',
+    ['system:view', 'hardware:read', 'storage:read'],
+    () => t('tokens.kind_monitoring', 'See how the server is doing (monitoring)'),
+  ],
+  [
+    'mcp',
+    ['ai:knowledge:read', 'shares:read', 'files:read', 'system:view'],
+    () => t('tokens.kind_mcp', 'An AI assistant (MCP): search and read files'),
+  ],
 ];
 
 /** What a token may do, in words: its kind when its rights are one, else how many it holds. */
@@ -2120,30 +2356,32 @@ function showCreatedToken(box, token) {
 }
 
 // The API token form is in Mission Control, inserted when first needed (FE-04)
-document.addEventListener('DOMContentLoaded', () => onManagementDom(() => {
-  const btnGen = document.getElementById('btn-generate-token');
-  const inputName = /** @type {HTMLInputElement | null} */ (document.getElementById('new-token-name'));
-  const inputFolders = /** @type {HTMLTextAreaElement | null} */ (document.getElementById('new-token-folders'));
-  const inputKind = /** @type {HTMLSelectElement | null} */ (document.getElementById('new-token-kind'));
-  const created = document.getElementById('api-token-created');
+document.addEventListener('DOMContentLoaded', () =>
+  onManagementDom(() => {
+    const btnGen = document.getElementById('btn-generate-token');
+    const inputName = /** @type {HTMLInputElement | null} */ (document.getElementById('new-token-name'));
+    const inputFolders = /** @type {HTMLTextAreaElement | null} */ (document.getElementById('new-token-folders'));
+    const inputKind = /** @type {HTMLSelectElement | null} */ (document.getElementById('new-token-kind'));
+    const created = document.getElementById('api-token-created');
 
-  if (btnGen && inputName) {
-    btnGen.addEventListener('click', async () => {
-      const name = inputName.value.trim();
-      if (!name) return;
-      const folders = parseTokenFolders(inputFolders?.value);
+    if (btnGen && inputName) {
+      btnGen.addEventListener('click', async () => {
+        const name = inputName.value.trim();
+        if (!name) return;
+        const folders = parseTokenFolders(inputFolders?.value);
 
-      try {
-        // NSEC-2: a token gets the rights its app needs, read-only files unless chosen otherwise
-        const body = { name, preset: inputKind?.value || 'files-read', ...(folders.length ? { folders } : {}) };
-        const res = await api.post('/api/tokens', body);
-        inputName.value = '';
-        if (inputFolders) inputFolders.value = '';
-        renderApiTokens();
-        if (created) showCreatedToken(created, res.token);
-      } catch (err) {
-        showToast(err.message, 'error');
-      }
-    });
-  }
-}));
+        try {
+          // NSEC-2: a token gets the rights its app needs, read-only files unless chosen otherwise
+          const body = { name, preset: inputKind?.value || 'files-read', ...(folders.length ? { folders } : {}) };
+          const res = await api.post('/api/tokens', body);
+          inputName.value = '';
+          if (inputFolders) inputFolders.value = '';
+          renderApiTokens();
+          if (created) showCreatedToken(created, res.token);
+        } catch (err) {
+          showToast(err.message, 'error');
+        }
+      });
+    }
+  })
+);

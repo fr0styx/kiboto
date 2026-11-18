@@ -48,11 +48,15 @@ function findHeader(win) {
 function findClose(header) {
   const marked = header.querySelector(CLOSE_SEL);
   if (marked) return marked;
-  return Array.from(header.querySelectorAll('button')).find((b) =>
-    GLYPH_CLOSE.test((b.textContent || '').trim())
-    || (!(b.textContent || '').trim() && b.querySelector('svg[data-zi="x"], svg[data-zi="circle-x"]'))
-    || /close/i.test(b.getAttribute('aria-label') || '')
-    || /close/i.test(b.title || '')) || null;
+  return (
+    Array.from(header.querySelectorAll('button')).find(
+      (b) =>
+        GLYPH_CLOSE.test((b.textContent || '').trim()) ||
+        (!(b.textContent || '').trim() && b.querySelector('svg[data-zi="x"], svg[data-zi="circle-x"]')) ||
+        /close/i.test(b.getAttribute('aria-label') || '') ||
+        /close/i.test(b.title || '')
+    ) || null
+  );
 }
 
 function makeButton(kind, label) {
@@ -119,15 +123,20 @@ export function upgradeDialog(win) {
   // runs first when it has one. A capture listener on the window runs before the header's own.
   if (!win._chromeDragHook) {
     win._chromeDragHook = true;
-    win.addEventListener('pointerdown', (e) => {
-      const h = findHeader(win);
-      if (!h || !h.contains(e.target)) return;
-      // Our drag handle was replaced along with the title bar: move it to the new one
-      if (win._draggableInitialized && win._chromeDragHeader && win._chromeDragHeader !== h) win._cleanupDraggable?.();
-      if (win._draggableInitialized) return;
-      makeDraggable(win, h);
-      win._chromeDragHeader = h;
-    }, true);
+    win.addEventListener(
+      'pointerdown',
+      (e) => {
+        const h = findHeader(win);
+        if (!h || !h.contains(e.target)) return;
+        // Our drag handle was replaced along with the title bar: move it to the new one
+        if (win._draggableInitialized && win._chromeDragHeader && win._chromeDragHeader !== h)
+          win._cleanupDraggable?.();
+        if (win._draggableInitialized) return;
+        makeDraggable(win, h);
+        win._chromeDragHeader = h;
+      },
+      true
+    );
   }
   return true;
 }

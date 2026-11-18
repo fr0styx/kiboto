@@ -68,11 +68,11 @@ describe('Notifications & Multi-Channel Alerting UI Integration', () => {
   it('verifies SUBPANE_MAP correctly routes notifications to System group', () => {
     expect(SUBPANE_MAP['mgmt-pane-notifications']).toEqual({
       section: 'mgmt-sec-system-group',
-      pane: 'mgmt-pane-notifications'
+      pane: 'mgmt-pane-notifications',
     });
     expect(SUBPANE_MAP['mgmt-sec-notifications']).toEqual({
       section: 'mgmt-sec-system-group',
-      pane: 'mgmt-pane-notifications'
+      pane: 'mgmt-pane-notifications',
     });
   });
 

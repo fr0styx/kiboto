@@ -25,7 +25,8 @@ const FIXTURE = `
   </div>`;
 const text = (id) => document.getElementById(id).textContent;
 const shown = (host) => [...document.querySelectorAll(`[data-host="${host}"]`)].every((el) => el.style.display === '');
-const hidden = (host) => [...document.querySelectorAll(`[data-host="${host}"]`)].every((el) => el.style.display === 'none');
+const hidden = (host) =>
+  [...document.querySelectorAll(`[data-host="${host}"]`)].every((el) => el.style.display === 'none');
 
 /** One pane's markup, from its opening tag to the next pane at the same depth (good enough for ids). */
 function pane(id, until) {
@@ -44,7 +45,15 @@ describe('Hardware 3: facts on their own pages', () => {
 
   it('on Unraid: the array on Storage, the Unraid version on About, the other host rows hidden', () => {
     updateManagementTelemetry({
-      unraid: { available: true, state: 'STARTED', color: 'green-on', version: '7.3.2', disks: { total: 12 }, parity_check: { active: false, errors: 0 }, mover: { active: false } },
+      unraid: {
+        available: true,
+        state: 'STARTED',
+        color: 'green-on',
+        version: '7.3.2',
+        disks: { total: 12 },
+        parity_check: { active: false, errors: 0 },
+        mover: { active: false },
+      },
     });
     expect(shown('unraid')).toBe(true);
     expect(hidden('generic')).toBe(true);
@@ -100,7 +109,16 @@ describe('Hardware 3: facts on their own pages', () => {
 
   it('the AI chip card is filled on Kib', () => {
     updateManagementTelemetry({
-      npu: { present: true, ready: true, model: 'Intel AI Boost NPU', driver: 'intel_vpu', render_node: '/dev/accel/accel0', max_freq_mhz: 1400, acceleration: 'OpenVINO', frameworks: ['OpenVINO', 'ONNX Runtime'] },
+      npu: {
+        present: true,
+        ready: true,
+        model: 'Intel AI Boost NPU',
+        driver: 'intel_vpu',
+        render_node: '/dev/accel/accel0',
+        max_freq_mhz: 1400,
+        acceleration: 'OpenVINO',
+        frameworks: ['OpenVINO', 'ONNX Runtime'],
+      },
     });
     expect(document.getElementById('mgmt-npu-container').style.display).toBe('block');
     expect(text('mgmt-npu-status-badge')).toBe('NPU ACTIVE');
@@ -112,7 +130,8 @@ describe('Hardware 3: facts on their own pages', () => {
   it('the Host tab says where each fact went, and its buttons go there', () => {
     const open = vi.fn();
     window.openManagementWindow = open;
-    document.body.innerHTML = '<button data-goto-section="mgmt-sec-system-group" data-goto-pane="mgmt-pane-about"><span>About</span></button><button data-goto-section="mgmt-sec-ai">Kib</button><p>else</p>';
+    document.body.innerHTML =
+      '<button data-goto-section="mgmt-sec-system-group" data-goto-pane="mgmt-pane-about"><span>About</span></button><button data-goto-section="mgmt-sec-ai">Kib</button><p>else</p>';
     document.querySelector('span').click();
     expect(open).toHaveBeenLastCalledWith('mgmt-sec-system-group', 'mgmt-pane-about');
     document.querySelectorAll('button')[1].click();
@@ -128,11 +147,25 @@ describe('Hardware 3: facts on their own pages', () => {
     expect(host).toContain('id="hw-facts-moved"');
     expect(host).not.toMatch(/id="mgmt-(unraid|generic|board|bios|cpu|gpu|npu)-/);
     const about = pane('mgmt-pane-about', '<!-- Observability');
-    for (const id of ['mgmt-unraid-version', 'mgmt-generic-os', 'mgmt-generic-cpu', 'mgmt-cpu-gov', 'mgmt-board-name', 'mgmt-bios-ver', 'mgmt-gpu-line']) {
+    for (const id of [
+      'mgmt-unraid-version',
+      'mgmt-generic-os',
+      'mgmt-generic-cpu',
+      'mgmt-cpu-gov',
+      'mgmt-board-name',
+      'mgmt-bios-ver',
+      'mgmt-gpu-line',
+    ]) {
       expect(about).toContain(`id="${id}"`);
     }
     const storage = pane('mgmt-pane-storage-topo', '<!-- Sub-tab 4');
-    for (const id of ['mgmt-unraid-state', 'mgmt-unraid-disks', 'mgmt-unraid-parity', 'mgmt-unraid-mover', 'mgmt-generic-engine']) {
+    for (const id of [
+      'mgmt-unraid-state',
+      'mgmt-unraid-disks',
+      'mgmt-unraid-parity',
+      'mgmt-unraid-mover',
+      'mgmt-generic-engine',
+    ]) {
       expect(storage).toContain(`id="${id}"`);
     }
     expect(pane('kib-advanced', '</details>')).toContain('id="mgmt-npu-container"');

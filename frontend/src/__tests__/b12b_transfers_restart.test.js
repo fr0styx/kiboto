@@ -7,7 +7,15 @@ import { transferCenter, taskStatus } from '../components/transfer-center.js';
 import { showToast, showConfirmToast } from '../toast.js';
 import { api } from '../api.js';
 
-const stopped = { id: 't1', status: 'interrupted', action: 'copy', sources: ['/mnt/user/a'], destination: '/mnt/user/b', created_at: 1, can_undo: true };
+const stopped = {
+  id: 't1',
+  status: 'interrupted',
+  action: 'copy',
+  sources: ['/mnt/user/a'],
+  destination: '/mnt/user/b',
+  created_at: 1,
+  can_undo: true,
+};
 
 describe('B12b (REL-25): a transfer stopped by a restart', () => {
   beforeEach(() => {
@@ -25,14 +33,18 @@ describe('B12b (REL-25): a transfer stopped by a restart', () => {
     expect(taskStatus(stopped)).toBe('Stopped by a restart');
     transferCenter.update(stopped);
     transferCenter.render();
-    for (const act of ['resume', 'undo', 'dismiss']) expect(transferCenter.host.querySelector(`[data-act='${act}']`)).not.toBeNull();
+    for (const act of ['resume', 'undo', 'dismiss'])
+      expect(transferCenter.host.querySelector(`[data-act='${act}']`)).not.toBeNull();
     transferCenter.update({ ...stopped, can_undo: false });
     transferCenter.render();
     expect(transferCenter.host.querySelector('[data-act="undo"]')).toBeNull();
   });
 
   it('resume follows the rerun in place of the stopped transfer', async () => {
-    api.post.mockResolvedValue({ status: 'ok', task: { id: 't2', status: 'running', action: 'copy', sources: ['/mnt/user/a'], destination: '/mnt/user/b' } });
+    api.post.mockResolvedValue({
+      status: 'ok',
+      task: { id: 't2', status: 'running', action: 'copy', sources: ['/mnt/user/a'], destination: '/mnt/user/b' },
+    });
     transferCenter.update(stopped);
     transferCenter.render();
     click('resume');

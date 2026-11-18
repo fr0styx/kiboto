@@ -28,7 +28,9 @@ describe('events_new', () => {
     expect(mergeNewEvents(msg, { events: [entry(1)] })).toBe(msg);
     expect(mergeNewEvents(null, null)).toBeNull();
     expect(mergeNewEvents({ events_new: [entry(5)] }, null).events).toEqual([entry(5)]);
-    expect(mergeNewEvents({ events_new: [entry(5)], events: [entry(4)] }, { events: [entry(1)] }).events.map((e) => e.id)).toEqual([5, 4]);
+    expect(
+      mergeNewEvents({ events_new: [entry(5)], events: [entry(4)] }, { events: [entry(1)] }).events.map((e) => e.id)
+    ).toEqual([5, 4]);
   });
 
   it('the page holds the merged list and the renderers are told that the log changed', () => {

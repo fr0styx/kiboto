@@ -10,7 +10,10 @@ function dlg(id) {
 }
 
 describe('VM dialogs and the keyboard (VMs report 35)', () => {
-  afterEach(() => { vi.restoreAllMocks(); document.body.innerHTML = ''; });
+  afterEach(() => {
+    vi.restoreAllMocks();
+    document.body.innerHTML = '';
+  });
 
   it('announces a dialog, labels it by its title, focuses the first field, and Escape closes it', () => {
     const b = dlg('modal-vm-snapshots');

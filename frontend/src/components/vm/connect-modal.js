@@ -11,8 +11,20 @@ import { vmState } from './state.js';
 import { copyToClipboard, openVmConsole } from './console.js';
 import { asDialog } from './dialog-a11y.js';
 
-const STATE_KEYS = { running: 'vmm.st_running', paused: 'vmm.st_paused', stopped: 'vmm.st_stopped', shutoff: 'vmm.st_stopped', shutting_down: 'vmp.st_shutting' };
-const STATE_WORDS = { running: 'Running', paused: 'Paused', stopped: 'Stopped', shutoff: 'Stopped', shutting_down: 'Shutting down' };
+const STATE_KEYS = {
+  running: 'vmm.st_running',
+  paused: 'vmm.st_paused',
+  stopped: 'vmm.st_stopped',
+  shutoff: 'vmm.st_stopped',
+  shutting_down: 'vmp.st_shutting',
+};
+const STATE_WORDS = {
+  running: 'Running',
+  paused: 'Paused',
+  stopped: 'Stopped',
+  shutoff: 'Stopped',
+  shutting_down: 'Shutting down',
+};
 
 /** A VM's state in words ("running" -> "Running"); an unknown state is shown as it came. */
 export function vmStateLabel(state) {
@@ -32,9 +44,24 @@ export function kvmChecks(k) {
   else if (restricted) access = { tone: 'warn', icon: '⚠️', text: t('vmc.cgroup', 'Blocked by the container (EPERM)') };
   const pass = (text) => ({ tone: 'ok', icon: '✓', text });
   return [
-    { label: t('vmc.t1', '1. The processor supports virtualization (VT-x / AMD-V)'), ...(virt ? pass(t('vmc.supported', 'Supported')) : { tone: 'crit', icon: '✕', text: t('vmc.bios_off', 'Turned off in the BIOS') }) },
-    { label: t('vmc.t2', '2. The kernel module is loaded (kvm_intel / kvm_amd)'), ...(mod ? pass(t('vmc.loaded', 'Loaded')) : { tone: 'warn', icon: '⚠️', text: t('vmc.mod_missing', 'Module missing') }) },
-    { label: t('vmc.t3', '3. The device /dev/kvm exists'), ...(node ? pass(t('vmc.present', 'Present')) : { tone: 'crit', icon: '✕', text: t('vmc.node_missing', 'Missing') }) },
+    {
+      label: t('vmc.t1', '1. The processor supports virtualization (VT-x / AMD-V)'),
+      ...(virt
+        ? pass(t('vmc.supported', 'Supported'))
+        : { tone: 'crit', icon: '✕', text: t('vmc.bios_off', 'Turned off in the BIOS') }),
+    },
+    {
+      label: t('vmc.t2', '2. The kernel module is loaded (kvm_intel / kvm_amd)'),
+      ...(mod
+        ? pass(t('vmc.loaded', 'Loaded'))
+        : { tone: 'warn', icon: '⚠️', text: t('vmc.mod_missing', 'Module missing') }),
+    },
+    {
+      label: t('vmc.t3', '3. The device /dev/kvm exists'),
+      ...(node
+        ? pass(t('vmc.present', 'Present'))
+        : { tone: 'crit', icon: '✕', text: t('vmc.node_missing', 'Missing') }),
+    },
     { label: t('vmc.t4', '4. The container may use /dev/kvm'), ...access },
   ];
 }
@@ -156,7 +183,9 @@ export function openVmConnectModal(vmId, vmObj = null) {
         </div>
 
         <!-- Option 5: Host Storage Shares (VirtIO-FS / 9p) -->
-        ${hostShares.length > 0 ? `
+        ${
+          hostShares.length > 0
+            ? `
           <div class="vmk-box">
             <div class="vmk-row-6">
               <span class="vmk-fs14">📂</span>
@@ -166,15 +195,21 @@ export function openVmConnectModal(vmId, vmObj = null) {
               </div>
             </div>
             <div class="vmk-col-3">
-              ${hostShares.map((s) => `
+              ${hostShares
+                .map(
+                  (s) => `
                 <div class="vmk-row-xs-mono-box">
                   <span class="vmk-soft" translate="no">sudo mount -t virtiofs ${escapeHtml(s.mount_tag)} /mnt/${escapeHtml(s.mount_tag)}</span>
                   <button class="btn-console-act btn-copy-mount-cmd vmk-xs-2" data-cmd="sudo mkdir -p /mnt/${escapeHtml(s.mount_tag)} && sudo mount -t virtiofs ${escapeHtml(s.mount_tag)} /mnt/${escapeHtml(s.mount_tag)}">${t('catalog.copy', 'Copy')}</button>
                 </div>
-              `).join('')}
+              `
+                )
+                .join('')}
             </div>
           </div>
-        ` : ''}
+        `
+            : ''
+        }
       </div>
 
       <div class="smart-modal-footer vmk-row-box-2">
@@ -185,69 +220,69 @@ export function openVmConnectModal(vmId, vmObj = null) {
     </div>
   `;
 
-  modal.classList.add('open');
-  modal.style.display = 'flex';
-  asDialog(modal); // VMs report 35
+    modal.classList.add('open');
+    modal.style.display = 'flex';
+    asDialog(modal); // VMs report 35
 
-  const close = () => {
-    modal.classList.remove('open');
-    modal.style.display = 'none';
-  };
-
-  const closeBtn = modal.querySelector('#vm-connect-modal-close');
-  const footerCloseBtn = modal.querySelector('#vm-connect-close');
-  if (closeBtn) closeBtn.onclick = close;
-  if (footerCloseBtn) footerCloseBtn.onclick = close;
-  modal.onclick = (e) => {
-    if (e.target === modal) close();
-  };
-
-  // Launch buttons
-  modal.querySelector('.btn-connect-gui')?.addEventListener('click', () => {
-    close();
-    openVmConsole(vmId, name, 'gui');
-  });
-  modal.querySelector('.btn-connect-tty')?.addEventListener('click', () => {
-    close();
-    openVmConsole(vmId, name, 'cli');
-  });
-
-  // Copy buttons
-  modal.querySelector('.btn-connect-copy-ssh')?.addEventListener('click', async () => {
-    if (!sshCmd) return;
-    const ok = await copyToClipboard(sshCmd);
-    if (ok) showToast(t('toast.copied_2', 'Copied \'{sshCmd}\'', { sshCmd: sshCmd }), 'info');
-    else showToast(t('toast.failed_to_copy_ssh_command', 'Failed to copy SSH command'), 'error');
-  });
-
-  modal.querySelector('.btn-connect-copy-rdp')?.addEventListener('click', async () => {
-    if (!rdpUri) return;
-    const ok = await copyToClipboard(rdpUri);
-    if (ok) showToast(t('toast.copied_rdp_address', 'Copied RDP Address \'{rdpUri}\'', { rdpUri: rdpUri }), 'info');
-    else showToast(t('toast.failed_to_copy_rdp_address', 'Failed to copy RDP Address'), 'error');
-  });
-
-  modal.querySelector('.btn-connect-dl-rdp')?.addEventListener('click', () => {
-    if (!ip) return;
-    const content = `full address:s:${ip}:3389\nprompt for credentials:i:1\nadministrative session:i:1\n`;
-    const blob = new Blob([content], { type: 'application/x-rdp' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `${name.replace(/\s+/g, '_')}.rdp`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(a.href);
-    showToast(t('toast.downloaded_rdp_file_for', 'Downloaded RDP file for {name}', { name: name }), 'success');
-  });
-
-  modal.querySelectorAll('.btn-copy-mount-cmd').forEach((btn) => {
-    btn.onclick = async () => {
-      const cmd = btn.dataset.cmd;
-      const ok = await copyToClipboard(cmd);
-      if (ok) showToast(t('toast.copied_mount_command_to_clipboard', 'Copied mount command to clipboard'), 'info');
+    const close = () => {
+      modal.classList.remove('open');
+      modal.style.display = 'none';
     };
-  });
+
+    const closeBtn = modal.querySelector('#vm-connect-modal-close');
+    const footerCloseBtn = modal.querySelector('#vm-connect-close');
+    if (closeBtn) closeBtn.onclick = close;
+    if (footerCloseBtn) footerCloseBtn.onclick = close;
+    modal.onclick = (e) => {
+      if (e.target === modal) close();
+    };
+
+    // Launch buttons
+    modal.querySelector('.btn-connect-gui')?.addEventListener('click', () => {
+      close();
+      openVmConsole(vmId, name, 'gui');
+    });
+    modal.querySelector('.btn-connect-tty')?.addEventListener('click', () => {
+      close();
+      openVmConsole(vmId, name, 'cli');
+    });
+
+    // Copy buttons
+    modal.querySelector('.btn-connect-copy-ssh')?.addEventListener('click', async () => {
+      if (!sshCmd) return;
+      const ok = await copyToClipboard(sshCmd);
+      if (ok) showToast(t('toast.copied_2', "Copied '{sshCmd}'", { sshCmd: sshCmd }), 'info');
+      else showToast(t('toast.failed_to_copy_ssh_command', 'Failed to copy SSH command'), 'error');
+    });
+
+    modal.querySelector('.btn-connect-copy-rdp')?.addEventListener('click', async () => {
+      if (!rdpUri) return;
+      const ok = await copyToClipboard(rdpUri);
+      if (ok) showToast(t('toast.copied_rdp_address', "Copied RDP Address '{rdpUri}'", { rdpUri: rdpUri }), 'info');
+      else showToast(t('toast.failed_to_copy_rdp_address', 'Failed to copy RDP Address'), 'error');
+    });
+
+    modal.querySelector('.btn-connect-dl-rdp')?.addEventListener('click', () => {
+      if (!ip) return;
+      const content = `full address:s:${ip}:3389\nprompt for credentials:i:1\nadministrative session:i:1\n`;
+      const blob = new Blob([content], { type: 'application/x-rdp' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `${name.replace(/\s+/g, '_')}.rdp`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(a.href);
+      showToast(t('toast.downloaded_rdp_file_for', 'Downloaded RDP file for {name}', { name: name }), 'success');
+    });
+
+    modal.querySelectorAll('.btn-copy-mount-cmd').forEach((btn) => {
+      btn.onclick = async () => {
+        const cmd = btn.dataset.cmd;
+        const ok = await copyToClipboard(cmd);
+        if (ok) showToast(t('toast.copied_mount_command_to_clipboard', 'Copied mount command to clipboard'), 'info');
+      };
+    });
   };
 
   if (targetVm) {
@@ -256,17 +291,24 @@ export function openVmConnectModal(vmId, vmObj = null) {
     return;
   }
 
-  api.get(`/api/vms/${vmId}`)
+  api
+    .get(`/api/vms/${vmId}`)
     .then((direct) => {
       if (direct && direct.id) {
         if (!vmState.list.some((v) => v.id === direct.id)) vmState.list.push(direct);
         renderConnectModal(direct);
       } else {
-        showToast(t('toast.virtual_machine_not_found', 'Virtual machine \'{vmId}\' not found', { vmId: vmId }), 'error');
+        showToast(t('toast.virtual_machine_not_found', "Virtual machine '{vmId}' not found", { vmId: vmId }), 'error');
       }
     })
     .catch((err) => {
-      showToast(t('toast.virtual_machine_not_found_2', 'Virtual machine \'{vmId}\' not found: {error}', { vmId: vmId, error: err.message || 'Error' }), 'error');
+      showToast(
+        t('toast.virtual_machine_not_found_2', "Virtual machine '{vmId}' not found: {error}", {
+          vmId: vmId,
+          error: err.message || 'Error',
+        }),
+        'error'
+      );
     });
 }
 
@@ -283,7 +325,7 @@ export function openKvmDiagnosticsModal(kvm = null) {
   }
 
   const k = kvm || vmState.telemetry?.kvm || {};
-  const isCgroupRestricted = k.cgroup_restricted || (k.substate === 'container_restricted');
+  const isCgroupRestricted = k.cgroup_restricted || k.substate === 'container_restricted';
 
   modal.innerHTML = `
     <div class="smart-modal-window kvm-diag-window vmk-col-4">
@@ -310,11 +352,15 @@ export function openKvmDiagnosticsModal(kvm = null) {
         <!-- 4-Tier Diagnostics Grid -->
         <div class="vmk-col-6">
           <div class="vmk-xs-bold-muted">${t('vmc.checks', 'Checks')}</div>
-          ${kvmChecks(k).map((c) => `
+          ${kvmChecks(k)
+            .map(
+              (c) => `
           <div class="vmk-row-xs-box">
             <span>${c.label}</span>
             <span style="font-weight: 700; color: var(--kb-text-${c.tone});">${ico(c.icon)} ${c.text}</span>
-          </div>`).join('')}
+          </div>`
+            )
+            .join('')}
         </div>
 
         ${

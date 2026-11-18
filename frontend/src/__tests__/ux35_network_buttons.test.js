@@ -27,12 +27,20 @@ describe('network panel icons (UX-35)', () => {
   });
 
   it('a replication job: Running..., then Run again', async () => {
-    document.body.innerHTML = "<table><tbody id='replication-jobs-tbody'></tbody></table><table><tbody id='replication-history-tbody'></tbody></table>";
+    document.body.innerHTML =
+      "<table><tbody id='replication-jobs-tbody'></tbody></table><table><tbody id='replication-history-tbody'></tbody></table>";
     vi.spyOn(api, 'get').mockImplementation(async (url) =>
-      url.endsWith('/jobs') ? { jobs: [{ id: 'j1', source: '/mnt/user/a', target: 'backup', schedule: 'daily' }] } : { history: [] },
+      url.endsWith('/jobs')
+        ? { jobs: [{ id: 'j1', source: '/mnt/user/a', target: 'backup', schedule: 'daily' }] }
+        : { history: [] }
     );
     let release;
-    vi.spyOn(api, 'post').mockImplementation(() => new Promise((r) => { release = r; }));
+    vi.spyOn(api, 'post').mockImplementation(
+      () =>
+        new Promise((r) => {
+          release = r;
+        })
+    );
     await fetchAndRenderReplication();
     const btn = document.querySelector('.btn-run-repl');
     btn.click();

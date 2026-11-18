@@ -34,7 +34,19 @@ const DEFAULT_CONFIG = {
   position: 'pos-top-right',
   opacity: 'glass-standard',
   scale: 'scale-normal',
-  order: ['clock', 'ai_accelerator', 'weather', 'calendar', 'system', 'network', 'storage', 'uptime', 'drive_temp', 'net_dial', 'ups_gauge'],
+  order: [
+    'clock',
+    'ai_accelerator',
+    'weather',
+    'calendar',
+    'system',
+    'network',
+    'storage',
+    'uptime',
+    'drive_temp',
+    'net_dial',
+    'ups_gauge',
+  ],
   widgets: {
     clock: true,
     ai_accelerator: true,
@@ -153,14 +165,22 @@ export function openWidgetSettings() {
   } else if (typeof window.openManagementSection === 'function') {
     window.openManagementSection('mgmt-sec-wallpaper', 'mgmt-pane-widgets');
   } else {
-    ZettEventBus.emit('window:open', { id: 'management-window', section: 'mgmt-sec-wallpaper', pane: 'mgmt-pane-widgets' });
+    ZettEventBus.emit('window:open', {
+      id: 'management-window',
+      section: 'mgmt-sec-wallpaper',
+      pane: 'mgmt-pane-widgets',
+    });
   }
 }
 window.openWidgetSettings = openWidgetSettings;
 
 // UX-24: hardware read-outs (drive temperatures, the network dial, the UPS gauge) are for people
 // who turned Advanced on; without it they and their switches in widget settings stay hidden
-export const HARDWARE_WIDGETS = { drive_temp: 'widget-drive-temp', net_dial: 'widget-net-dial', ups_gauge: 'widget-ups-gauge' };
+export const HARDWARE_WIDGETS = {
+  drive_temp: 'widget-drive-temp',
+  net_dial: 'widget-net-dial',
+  ups_gauge: 'widget-ups-gauge',
+};
 
 export function applyAdvancedToWidgets(on = advancedOn(), root = document) {
   for (const [key, id] of Object.entries(HARDWARE_WIDGETS)) {
@@ -225,7 +245,8 @@ export function applyWidgetConfig() {
       wClock.setAttribute('role', 'button');
       wClock.setAttribute('tabindex', '0');
       wClock.addEventListener('click', (e) => {
-        if (e.target.closest('.widget-handle') || e.target.closest('.widget-close') || e.target.closest('#w-clock-tz')) return;
+        if (e.target.closest('.widget-handle') || e.target.closest('.widget-close') || e.target.closest('#w-clock-tz'))
+          return;
         openTimezoneModal();
       });
       wClock.addEventListener('keydown', (e) => {
@@ -247,7 +268,8 @@ export function applyWidgetConfig() {
       wAiAccel.setAttribute('role', 'button');
       wAiAccel.setAttribute('tabindex', '0');
       wAiAccel.addEventListener('click', (e) => {
-        if (e.target.closest('.widget-handle') || e.target.closest('.widget-close') || e.target.closest('button')) return;
+        if (e.target.closest('.widget-handle') || e.target.closest('.widget-close') || e.target.closest('button'))
+          return;
         if (typeof window.openManagementWindow === 'function') {
           window.openManagementWindow('mgmt-sec-ai', 'mgmt-pane-ai-rag');
         }
@@ -274,7 +296,13 @@ export function applyWidgetConfig() {
       wCalendar.setAttribute('tabindex', '0');
       wCalendar.addEventListener('click', (e) => {
         if (e.target.closest('.widget-handle') || e.target.closest('.widget-close')) return;
-        if (e.target.closest('#w-cal-prev') || e.target.closest('#w-cal-next') || e.target.closest('#w-cal-country-badge') || e.target.closest('#w-cal-month')) return;
+        if (
+          e.target.closest('#w-cal-prev') ||
+          e.target.closest('#w-cal-next') ||
+          e.target.closest('#w-cal-country-badge') ||
+          e.target.closest('#w-cal-month')
+        )
+          return;
         const dayCell = e.target.closest('.cal-day');
         let selectedDateKey = null;
         if (dayCell && dayCell.dataset.day) {
@@ -315,7 +343,13 @@ export function applyWidgetConfig() {
       wWeather.setAttribute('role', 'button');
       wWeather.setAttribute('tabindex', '0');
       wWeather.addEventListener('click', (e) => {
-        if (e.target.closest('#w-weather-temp') || e.target.closest('.widget-handle') || e.target.closest('.widget-close') || e.target.closest('button')) return;
+        if (
+          e.target.closest('#w-weather-temp') ||
+          e.target.closest('.widget-handle') ||
+          e.target.closest('.widget-close') ||
+          e.target.closest('button')
+        )
+          return;
         openWeatherPlace();
       });
       wWeather.addEventListener('keydown', (e) => {
@@ -335,7 +369,8 @@ export function applyWidgetConfig() {
       wSystem.setAttribute('role', 'button');
       wSystem.setAttribute('tabindex', '0');
       wSystem.addEventListener('click', (e) => {
-        if (e.target.closest('.widget-handle') || e.target.closest('.widget-close') || e.target.closest('button')) return;
+        if (e.target.closest('.widget-handle') || e.target.closest('.widget-close') || e.target.closest('button'))
+          return;
         if (typeof window.openManagementWindow === 'function') {
           window.openManagementWindow('mgmt-sec-activity', 'mgmt-pane-metrics');
         }
@@ -361,7 +396,8 @@ export function applyWidgetConfig() {
       wNetwork.setAttribute('role', 'button');
       wNetwork.setAttribute('tabindex', '0');
       wNetwork.addEventListener('click', (e) => {
-        if (e.target.closest('.widget-handle') || e.target.closest('.widget-close') || e.target.closest('button')) return;
+        if (e.target.closest('.widget-handle') || e.target.closest('.widget-close') || e.target.closest('button'))
+          return;
         if (typeof window.openManagementWindow === 'function') {
           window.openManagementWindow('mgmt-sec-network', 'mgmt-pane-network');
         }
@@ -387,7 +423,8 @@ export function applyWidgetConfig() {
       wStorage.setAttribute('role', 'button');
       wStorage.setAttribute('tabindex', '0');
       wStorage.addEventListener('click', (e) => {
-        if (e.target.closest('.widget-handle') || e.target.closest('.widget-close') || e.target.closest('button')) return;
+        if (e.target.closest('.widget-handle') || e.target.closest('.widget-close') || e.target.closest('button'))
+          return;
         if (typeof window.openManagementWindow === 'function') {
           window.openManagementWindow('mgmt-sec-storage', 'mgmt-pane-storage-topo');
         }
@@ -413,7 +450,8 @@ export function applyWidgetConfig() {
       wUptime.setAttribute('role', 'button');
       wUptime.setAttribute('tabindex', '0');
       wUptime.addEventListener('click', (e) => {
-        if (e.target.closest('.widget-handle') || e.target.closest('.widget-close') || e.target.closest('button')) return;
+        if (e.target.closest('.widget-handle') || e.target.closest('.widget-close') || e.target.closest('button'))
+          return;
         if (typeof window.openManagementWindow === 'function') {
           window.openManagementWindow('mgmt-sec-activity', 'mgmt-pane-metrics');
         }
@@ -439,7 +477,8 @@ export function applyWidgetConfig() {
       wDriveTemp.setAttribute('role', 'button');
       wDriveTemp.setAttribute('tabindex', '0');
       wDriveTemp.addEventListener('click', (e) => {
-        if (e.target.closest('.widget-handle') || e.target.closest('.widget-close') || e.target.closest('button')) return;
+        if (e.target.closest('.widget-handle') || e.target.closest('.widget-close') || e.target.closest('button'))
+          return;
         if (typeof window.openManagementWindow === 'function') {
           window.openManagementWindow('mgmt-sec-storage');
         }
@@ -465,7 +504,8 @@ export function applyWidgetConfig() {
       wNetDial.setAttribute('role', 'button');
       wNetDial.setAttribute('tabindex', '0');
       wNetDial.addEventListener('click', (e) => {
-        if (e.target.closest('.widget-handle') || e.target.closest('.widget-close') || e.target.closest('button')) return;
+        if (e.target.closest('.widget-handle') || e.target.closest('.widget-close') || e.target.closest('button'))
+          return;
         if (typeof window.openManagementWindow === 'function') {
           window.openManagementWindow('mgmt-sec-network');
         }
@@ -491,7 +531,8 @@ export function applyWidgetConfig() {
       wUpsGauge.setAttribute('role', 'button');
       wUpsGauge.setAttribute('tabindex', '0');
       wUpsGauge.addEventListener('click', (e) => {
-        if (e.target.closest('.widget-handle') || e.target.closest('.widget-close') || e.target.closest('button')) return;
+        if (e.target.closest('.widget-handle') || e.target.closest('.widget-close') || e.target.closest('button'))
+          return;
         if (typeof window.openManagementWindow === 'function') {
           window.openManagementWindow('mgmt-sec-ups');
         }
@@ -511,7 +552,9 @@ export function applyWidgetConfig() {
 
   // Reorganize desktop widgets in the EXACT same order on the desktop ONLY if order differs
   const order = Array.isArray(config.order) && config.order.length ? config.order : DEFAULT_CONFIG.order;
-  const currentChildrenIds = Array.from(container.children).map((el) => el.id.replace('widget-', '').replace(/-/g, '_'));
+  const currentChildrenIds = Array.from(container.children).map((el) =>
+    el.id.replace('widget-', '').replace(/-/g, '_')
+  );
   const needsReorder = order.some((id, idx) => currentChildrenIds[idx] !== id);
   if (needsReorder) {
     order.forEach((id) => {
@@ -618,7 +661,9 @@ export function refreshWidgetMoveButtons(list) {
       const btn = /** @type {HTMLButtonElement} */ (b);
       const up = btn.dataset.move === 'up';
       btn.disabled = up ? i === 0 : i === rows.length - 1;
-      const label = up ? t('widget.move_up', 'Move {name} up', { name }) : t('widget.move_down', 'Move {name} down', { name });
+      const label = up
+        ? t('widget.move_up', 'Move {name} up', { name })
+        : t('widget.move_down', 'Move {name} down', { name });
       btn.setAttribute('aria-label', label);
       btn.title = label;
     });
@@ -807,8 +852,16 @@ export function getActiveCountry() {
   // Try timezone
   try {
     const tz = (Intl.DateTimeFormat().resolvedOptions().timeZone || '').toUpperCase();
-    if (tz.startsWith('AMERICA/NEW_YORK') || tz.startsWith('AMERICA/CHICAGO') || tz.startsWith('AMERICA/LOS_ANGELES') || tz.startsWith('AMERICA/DENVER') || tz.startsWith('AMERICA/PHOENIX')) return 'US';
-    if (tz.startsWith('AMERICA/TORONTO') || tz.startsWith('AMERICA/VANCOUVER') || tz.startsWith('AMERICA/MONTREAL')) return 'CA';
+    if (
+      tz.startsWith('AMERICA/NEW_YORK') ||
+      tz.startsWith('AMERICA/CHICAGO') ||
+      tz.startsWith('AMERICA/LOS_ANGELES') ||
+      tz.startsWith('AMERICA/DENVER') ||
+      tz.startsWith('AMERICA/PHOENIX')
+    )
+      return 'US';
+    if (tz.startsWith('AMERICA/TORONTO') || tz.startsWith('AMERICA/VANCOUVER') || tz.startsWith('AMERICA/MONTREAL'))
+      return 'CA';
     if (tz.startsWith('EUROPE/BERLIN')) return 'DE';
     if (tz.startsWith('EUROPE/LONDON')) return 'GB';
     if (tz.startsWith('EUROPE/PARIS')) return 'FR';
@@ -879,109 +932,109 @@ function getBuiltInHolidays(year, countryCode) {
 
   if (countryCode === 'US') {
     addHolidayEntry(map, new Date(year, 0, 1), "New Year's Day");
-    addHolidayEntry(map, getNthWeekdayOfMonth(year, 0, 1, 3), "Martin Luther King, Jr. Day");
+    addHolidayEntry(map, getNthWeekdayOfMonth(year, 0, 1, 3), 'Martin Luther King, Jr. Day');
     addHolidayEntry(map, getNthWeekdayOfMonth(year, 1, 1, 3), "Washington's Birthday (Presidents' Day)");
-    addHolidayEntry(map, getLastWeekdayOfMonth(year, 4, 1), "Memorial Day");
-    addHolidayEntry(map, new Date(year, 5, 19), "Juneteenth National Independence Day");
-    addHolidayEntry(map, new Date(year, 6, 4), "Independence Day");
-    addHolidayEntry(map, getNthWeekdayOfMonth(year, 8, 1, 1), "Labor Day");
+    addHolidayEntry(map, getLastWeekdayOfMonth(year, 4, 1), 'Memorial Day');
+    addHolidayEntry(map, new Date(year, 5, 19), 'Juneteenth National Independence Day');
+    addHolidayEntry(map, new Date(year, 6, 4), 'Independence Day');
+    addHolidayEntry(map, getNthWeekdayOfMonth(year, 8, 1, 1), 'Labor Day');
     addHolidayEntry(map, getNthWeekdayOfMonth(year, 9, 1, 2), "Columbus Day / Indigenous Peoples' Day");
-    addHolidayEntry(map, new Date(year, 10, 11), "Veterans Day");
-    addHolidayEntry(map, getNthWeekdayOfMonth(year, 10, 4, 4), "Thanksgiving Day");
-    addHolidayEntry(map, new Date(year, 11, 25), "Christmas Day");
+    addHolidayEntry(map, new Date(year, 10, 11), 'Veterans Day');
+    addHolidayEntry(map, getNthWeekdayOfMonth(year, 10, 4, 4), 'Thanksgiving Day');
+    addHolidayEntry(map, new Date(year, 11, 25), 'Christmas Day');
   } else if (countryCode === 'DE') {
-    addHolidayEntry(map, new Date(year, 0, 1), "New Year's Day", "Neujahr");
-    addHolidayEntry(map, addDays(easter, -2), "Good Friday", "Karfreitag");
-    addHolidayEntry(map, addDays(easter, 1), "Easter Monday", "Ostermontag");
-    addHolidayEntry(map, new Date(year, 4, 1), "Labor Day", "Tag der Arbeit");
-    addHolidayEntry(map, addDays(easter, 39), "Ascension Day", "Christi Himmelfahrt");
-    addHolidayEntry(map, addDays(easter, 50), "Whit Monday", "Pfingstmontag");
-    addHolidayEntry(map, new Date(year, 9, 3), "German Unity Day", "Tag der Deutschen Einheit");
-    addHolidayEntry(map, new Date(year, 11, 25), "Christmas Day", "1. Weihnachtstag");
-    addHolidayEntry(map, new Date(year, 11, 26), "St. Stephen's Day", "2. Weihnachtstag");
+    addHolidayEntry(map, new Date(year, 0, 1), "New Year's Day", 'Neujahr');
+    addHolidayEntry(map, addDays(easter, -2), 'Good Friday', 'Karfreitag');
+    addHolidayEntry(map, addDays(easter, 1), 'Easter Monday', 'Ostermontag');
+    addHolidayEntry(map, new Date(year, 4, 1), 'Labor Day', 'Tag der Arbeit');
+    addHolidayEntry(map, addDays(easter, 39), 'Ascension Day', 'Christi Himmelfahrt');
+    addHolidayEntry(map, addDays(easter, 50), 'Whit Monday', 'Pfingstmontag');
+    addHolidayEntry(map, new Date(year, 9, 3), 'German Unity Day', 'Tag der Deutschen Einheit');
+    addHolidayEntry(map, new Date(year, 11, 25), 'Christmas Day', '1. Weihnachtstag');
+    addHolidayEntry(map, new Date(year, 11, 26), "St. Stephen's Day", '2. Weihnachtstag');
   } else if (countryCode === 'GB') {
     addHolidayEntry(map, new Date(year, 0, 1), "New Year's Day");
-    addHolidayEntry(map, addDays(easter, -2), "Good Friday");
-    addHolidayEntry(map, addDays(easter, 1), "Easter Monday");
-    addHolidayEntry(map, getNthWeekdayOfMonth(year, 4, 1, 1), "Early May Bank Holiday");
-    addHolidayEntry(map, getLastWeekdayOfMonth(year, 4, 1), "Spring Bank Holiday");
-    addHolidayEntry(map, getLastWeekdayOfMonth(year, 7, 1), "Summer Bank Holiday");
-    addHolidayEntry(map, new Date(year, 11, 25), "Christmas Day");
-    addHolidayEntry(map, new Date(year, 11, 26), "Boxing Day");
+    addHolidayEntry(map, addDays(easter, -2), 'Good Friday');
+    addHolidayEntry(map, addDays(easter, 1), 'Easter Monday');
+    addHolidayEntry(map, getNthWeekdayOfMonth(year, 4, 1, 1), 'Early May Bank Holiday');
+    addHolidayEntry(map, getLastWeekdayOfMonth(year, 4, 1), 'Spring Bank Holiday');
+    addHolidayEntry(map, getLastWeekdayOfMonth(year, 7, 1), 'Summer Bank Holiday');
+    addHolidayEntry(map, new Date(year, 11, 25), 'Christmas Day');
+    addHolidayEntry(map, new Date(year, 11, 26), 'Boxing Day');
   } else if (countryCode === 'FR') {
     addHolidayEntry(map, new Date(year, 0, 1), "New Year's Day", "Jour de l'An");
-    addHolidayEntry(map, addDays(easter, 1), "Easter Monday", "Lundi de Pâques");
-    addHolidayEntry(map, new Date(year, 4, 1), "Labour Day", "Fête du Travail");
-    addHolidayEntry(map, new Date(year, 4, 8), "Victory in Europe Day", "Victoire 1945");
-    addHolidayEntry(map, addDays(easter, 39), "Ascension Day", "Ascension");
-    addHolidayEntry(map, addDays(easter, 50), "Whit Monday", "Lundi de Pentecôte");
-    addHolidayEntry(map, new Date(year, 6, 14), "Bastille Day", "Fête Nationale");
-    addHolidayEntry(map, new Date(year, 7, 15), "Assumption Day", "Assomption");
-    addHolidayEntry(map, new Date(year, 10, 1), "All Saints' Day", "La Toussaint");
-    addHolidayEntry(map, new Date(year, 10, 11), "Armistice Day", "Armistice 1918");
-    addHolidayEntry(map, new Date(year, 11, 25), "Christmas Day", "Noël");
+    addHolidayEntry(map, addDays(easter, 1), 'Easter Monday', 'Lundi de Pâques');
+    addHolidayEntry(map, new Date(year, 4, 1), 'Labour Day', 'Fête du Travail');
+    addHolidayEntry(map, new Date(year, 4, 8), 'Victory in Europe Day', 'Victoire 1945');
+    addHolidayEntry(map, addDays(easter, 39), 'Ascension Day', 'Ascension');
+    addHolidayEntry(map, addDays(easter, 50), 'Whit Monday', 'Lundi de Pentecôte');
+    addHolidayEntry(map, new Date(year, 6, 14), 'Bastille Day', 'Fête Nationale');
+    addHolidayEntry(map, new Date(year, 7, 15), 'Assumption Day', 'Assomption');
+    addHolidayEntry(map, new Date(year, 10, 1), "All Saints' Day", 'La Toussaint');
+    addHolidayEntry(map, new Date(year, 10, 11), 'Armistice Day', 'Armistice 1918');
+    addHolidayEntry(map, new Date(year, 11, 25), 'Christmas Day', 'Noël');
   } else if (countryCode === 'ES') {
-    addHolidayEntry(map, new Date(year, 0, 1), "New Year's Day", "Año Nuevo");
-    addHolidayEntry(map, new Date(year, 0, 6), "Epiphany", "Día de Reyes");
-    addHolidayEntry(map, addDays(easter, -2), "Good Friday", "Viernes Santo");
-    addHolidayEntry(map, new Date(year, 4, 1), "Labour Day", "Fiesta del Trabajo");
-    addHolidayEntry(map, new Date(year, 7, 15), "Assumption of Mary", "Asunción de la Virgen");
-    addHolidayEntry(map, new Date(year, 9, 12), "National Day of Spain", "Fiesta Nacional de España");
-    addHolidayEntry(map, new Date(year, 10, 1), "All Saints' Day", "Todos los Santos");
-    addHolidayEntry(map, new Date(year, 11, 6), "Constitution Day", "Día de la Constitución");
-    addHolidayEntry(map, new Date(year, 11, 8), "Immaculate Conception", "Inmaculada Concepción");
-    addHolidayEntry(map, new Date(year, 11, 25), "Christmas Day", "Navidad");
+    addHolidayEntry(map, new Date(year, 0, 1), "New Year's Day", 'Año Nuevo');
+    addHolidayEntry(map, new Date(year, 0, 6), 'Epiphany', 'Día de Reyes');
+    addHolidayEntry(map, addDays(easter, -2), 'Good Friday', 'Viernes Santo');
+    addHolidayEntry(map, new Date(year, 4, 1), 'Labour Day', 'Fiesta del Trabajo');
+    addHolidayEntry(map, new Date(year, 7, 15), 'Assumption of Mary', 'Asunción de la Virgen');
+    addHolidayEntry(map, new Date(year, 9, 12), 'National Day of Spain', 'Fiesta Nacional de España');
+    addHolidayEntry(map, new Date(year, 10, 1), "All Saints' Day", 'Todos los Santos');
+    addHolidayEntry(map, new Date(year, 11, 6), 'Constitution Day', 'Día de la Constitución');
+    addHolidayEntry(map, new Date(year, 11, 8), 'Immaculate Conception', 'Inmaculada Concepción');
+    addHolidayEntry(map, new Date(year, 11, 25), 'Christmas Day', 'Navidad');
   } else if (countryCode === 'CA') {
     addHolidayEntry(map, new Date(year, 0, 1), "New Year's Day");
-    addHolidayEntry(map, addDays(easter, -2), "Good Friday");
+    addHolidayEntry(map, addDays(easter, -2), 'Good Friday');
     const vDay = new Date(year, 4, 24 - ((new Date(year, 4, 24).getDay() - 1 + 7) % 7));
-    addHolidayEntry(map, vDay, "Victoria Day");
-    addHolidayEntry(map, new Date(year, 6, 1), "Canada Day");
-    addHolidayEntry(map, getNthWeekdayOfMonth(year, 8, 1, 1), "Labour Day");
-    addHolidayEntry(map, new Date(year, 8, 30), "Truth and Reconciliation Day");
-    addHolidayEntry(map, getNthWeekdayOfMonth(year, 9, 1, 2), "Thanksgiving Day");
-    addHolidayEntry(map, new Date(year, 10, 11), "Remembrance Day");
-    addHolidayEntry(map, new Date(year, 11, 25), "Christmas Day");
-    addHolidayEntry(map, new Date(year, 11, 26), "Boxing Day");
+    addHolidayEntry(map, vDay, 'Victoria Day');
+    addHolidayEntry(map, new Date(year, 6, 1), 'Canada Day');
+    addHolidayEntry(map, getNthWeekdayOfMonth(year, 8, 1, 1), 'Labour Day');
+    addHolidayEntry(map, new Date(year, 8, 30), 'Truth and Reconciliation Day');
+    addHolidayEntry(map, getNthWeekdayOfMonth(year, 9, 1, 2), 'Thanksgiving Day');
+    addHolidayEntry(map, new Date(year, 10, 11), 'Remembrance Day');
+    addHolidayEntry(map, new Date(year, 11, 25), 'Christmas Day');
+    addHolidayEntry(map, new Date(year, 11, 26), 'Boxing Day');
   } else if (countryCode === 'AU') {
     addHolidayEntry(map, new Date(year, 0, 1), "New Year's Day");
-    addHolidayEntry(map, new Date(year, 0, 26), "Australia Day");
-    addHolidayEntry(map, addDays(easter, -2), "Good Friday");
-    addHolidayEntry(map, addDays(easter, 1), "Easter Monday");
-    addHolidayEntry(map, new Date(year, 3, 25), "ANZAC Day");
+    addHolidayEntry(map, new Date(year, 0, 26), 'Australia Day');
+    addHolidayEntry(map, addDays(easter, -2), 'Good Friday');
+    addHolidayEntry(map, addDays(easter, 1), 'Easter Monday');
+    addHolidayEntry(map, new Date(year, 3, 25), 'ANZAC Day');
     addHolidayEntry(map, getNthWeekdayOfMonth(year, 5, 1, 2), "King's Birthday");
-    addHolidayEntry(map, new Date(year, 11, 25), "Christmas Day");
-    addHolidayEntry(map, new Date(year, 11, 26), "Boxing Day");
+    addHolidayEntry(map, new Date(year, 11, 25), 'Christmas Day');
+    addHolidayEntry(map, new Date(year, 11, 26), 'Boxing Day');
   } else if (countryCode === 'JP') {
-    addHolidayEntry(map, new Date(year, 0, 1), "New Year's Day", "元日");
-    addHolidayEntry(map, getNthWeekdayOfMonth(year, 0, 1, 2), "Coming of Age Day", "成人の日");
-    addHolidayEntry(map, new Date(year, 1, 11), "National Foundation Day", "建国記念の日");
-    addHolidayEntry(map, new Date(year, 1, 23), "Emperor's Birthday", "天皇誕生日");
-    addHolidayEntry(map, new Date(year, 2, 20), "Vernal Equinox Day", "春分の日");
-    addHolidayEntry(map, new Date(year, 3, 29), "Showa Day", "昭和の日");
-    addHolidayEntry(map, new Date(year, 4, 3), "Constitution Memorial Day", "憲法記念日");
-    addHolidayEntry(map, new Date(year, 4, 4), "Greenery Day", "みどりの日");
-    addHolidayEntry(map, new Date(year, 4, 5), "Children's Day", "こどもの日");
-    addHolidayEntry(map, getNthWeekdayOfMonth(year, 6, 1, 3), "Marine Day", "海の日");
-    addHolidayEntry(map, new Date(year, 7, 11), "Mountain Day", "山の日");
-    addHolidayEntry(map, getNthWeekdayOfMonth(year, 8, 1, 3), "Respect for the Aged Day", "敬老の日");
-    addHolidayEntry(map, new Date(year, 8, 23), "Autumnal Equinox Day", "秋分の日");
-    addHolidayEntry(map, getNthWeekdayOfMonth(year, 9, 1, 2), "Sports Day", "スポーツの日");
-    addHolidayEntry(map, new Date(year, 10, 3), "Culture Day", "文化の日");
-    addHolidayEntry(map, new Date(year, 10, 23), "Labor Thanksgiving Day", "勤労感謝の日");
+    addHolidayEntry(map, new Date(year, 0, 1), "New Year's Day", '元日');
+    addHolidayEntry(map, getNthWeekdayOfMonth(year, 0, 1, 2), 'Coming of Age Day', '成人の日');
+    addHolidayEntry(map, new Date(year, 1, 11), 'National Foundation Day', '建国記念の日');
+    addHolidayEntry(map, new Date(year, 1, 23), "Emperor's Birthday", '天皇誕生日');
+    addHolidayEntry(map, new Date(year, 2, 20), 'Vernal Equinox Day', '春分の日');
+    addHolidayEntry(map, new Date(year, 3, 29), 'Showa Day', '昭和の日');
+    addHolidayEntry(map, new Date(year, 4, 3), 'Constitution Memorial Day', '憲法記念日');
+    addHolidayEntry(map, new Date(year, 4, 4), 'Greenery Day', 'みどりの日');
+    addHolidayEntry(map, new Date(year, 4, 5), "Children's Day", 'こどもの日');
+    addHolidayEntry(map, getNthWeekdayOfMonth(year, 6, 1, 3), 'Marine Day', '海の日');
+    addHolidayEntry(map, new Date(year, 7, 11), 'Mountain Day', '山の日');
+    addHolidayEntry(map, getNthWeekdayOfMonth(year, 8, 1, 3), 'Respect for the Aged Day', '敬老の日');
+    addHolidayEntry(map, new Date(year, 8, 23), 'Autumnal Equinox Day', '秋分の日');
+    addHolidayEntry(map, getNthWeekdayOfMonth(year, 9, 1, 2), 'Sports Day', 'スポーツの日');
+    addHolidayEntry(map, new Date(year, 10, 3), 'Culture Day', '文化の日');
+    addHolidayEntry(map, new Date(year, 10, 23), 'Labor Thanksgiving Day', '勤労感謝の日');
   } else if (countryCode === 'CN') {
-    addHolidayEntry(map, new Date(year, 0, 1), "New Year's Day", "元旦");
-    addHolidayEntry(map, new Date(year, 3, 4), "Tomb Sweeping Day", "清明节");
-    addHolidayEntry(map, new Date(year, 4, 1), "Labour Day", "劳动节");
-    addHolidayEntry(map, new Date(year, 9, 1), "National Day", "国庆节");
-    addHolidayEntry(map, new Date(year, 9, 2), "National Day (Golden Week)", "国庆节");
-    addHolidayEntry(map, new Date(year, 9, 3), "National Day (Golden Week)", "国庆节");
+    addHolidayEntry(map, new Date(year, 0, 1), "New Year's Day", '元旦');
+    addHolidayEntry(map, new Date(year, 3, 4), 'Tomb Sweeping Day', '清明节');
+    addHolidayEntry(map, new Date(year, 4, 1), 'Labour Day', '劳动节');
+    addHolidayEntry(map, new Date(year, 9, 1), 'National Day', '国庆节');
+    addHolidayEntry(map, new Date(year, 9, 2), 'National Day (Golden Week)', '国庆节');
+    addHolidayEntry(map, new Date(year, 9, 3), 'National Day (Golden Week)', '国庆节');
   } else {
     addHolidayEntry(map, new Date(year, 0, 1), "New Year's Day");
-    addHolidayEntry(map, addDays(easter, -2), "Good Friday");
-    addHolidayEntry(map, addDays(easter, 1), "Easter Monday");
+    addHolidayEntry(map, addDays(easter, -2), 'Good Friday');
+    addHolidayEntry(map, addDays(easter, 1), 'Easter Monday');
     addHolidayEntry(map, new Date(year, 4, 1), "International Workers' Day");
-    addHolidayEntry(map, new Date(year, 11, 25), "Christmas Day");
+    addHolidayEntry(map, new Date(year, 11, 25), 'Christmas Day');
   }
   return map;
 }
@@ -1130,7 +1183,10 @@ function renderGlanceBarForCurrentView() {
     const key = toDateKey(year, month, d);
     const holidayList = holidaysYear[key];
     if (holidayList && holidayList.length > 0) {
-      const name = holidayList.map((h) => h.name || h.localName).filter((v, idx, arr) => arr.indexOf(v) === idx).join(' / ');
+      const name = holidayList
+        .map((h) => h.name || h.localName)
+        .filter((v, idx, arr) => arr.indexOf(v) === idx)
+        .join(' / ');
       const dateStr = `${formatDate(new Date(year, month, d))} ${d}`;
       monthHolidays.push({ day: d, name, dateStr });
     }
@@ -1138,7 +1194,11 @@ function renderGlanceBarForCurrentView() {
 
   if (!monthHolidays.length) {
     glanceBar.className = 'cal-glance-bar empty';
-    glanceBar.replaceChildren(Object.assign(document.createElement('span'), { textContent: t('w.no_holidays', 'No public holidays this month') }));
+    glanceBar.replaceChildren(
+      Object.assign(document.createElement('span'), {
+        textContent: t('w.no_holidays', 'No public holidays this month'),
+      })
+    );
     return;
   }
 
@@ -1153,7 +1213,10 @@ function renderGlanceBarForCurrentView() {
 
   glanceBar.className = 'cal-glance-bar';
   glanceBar.innerHTML = `<span class="cal-glance-bar-icon">✨</span> <span>${escapeHtml(target.dateStr)}: ${escapeHtml(target.name)}</span>`;
-  glanceBar.title = t('w.holiday_title', '{date}: {name} (public holiday)', { date: target.dateStr, name: target.name });
+  glanceBar.title = t('w.holiday_title', '{date}: {name} (public holiday)', {
+    date: target.dateStr,
+    name: target.name,
+  });
   if (target && target.day) {
     glanceBar.dataset.dateKey = toDateKey(year, month, target.day);
   } else {
@@ -1174,7 +1237,12 @@ export function monthTitle(year, month, width = 'long') {
 /** Two-letter weekday heads, Sunday first, in the app's language ("Su Mo" / "So Mo" / "周日"). */
 export function weekdayInitials() {
   const fmt = new Intl.DateTimeFormat(currentLocale(), { weekday: 'short' });
-  return Array.from({ length: 7 }, (_, i) => fmt.format(new Date(2023, 0, 1 + i)).replace('.', '').slice(0, 2));
+  return Array.from({ length: 7 }, (_, i) =>
+    fmt
+      .format(new Date(2023, 0, 1 + i))
+      .replace('.', '')
+      .slice(0, 2)
+  );
 }
 
 export function renderCalendar() {
@@ -1196,7 +1264,10 @@ export function renderCalendar() {
 
   if (countryBadge) {
     countryBadge.textContent = country;
-    countryBadge.title = t('w.holidays_of', 'Public holidays: {name} ({country}). Click to change.', { name: countryFullName, country });
+    countryBadge.title = t('w.holidays_of', 'Public holidays: {name} ({country}). Click to change.', {
+      name: countryFullName,
+      country,
+    });
   }
 
   if (monthBadge) {
@@ -1231,7 +1302,12 @@ export function renderCalendar() {
     const key = toDateKey(prevYear, prevMonthIdx, d);
     const holidayList = prevHolidaysYear[key];
     const isHoliday = !!holidayList && holidayList.length > 0;
-    const holidayName = isHoliday ? holidayList.map((h) => h.name || h.localName).filter((v, idx, arr) => arr.indexOf(v) === idx).join(' / ') : '';
+    const holidayName = isHoliday
+      ? holidayList
+          .map((h) => h.name || h.localName)
+          .filter((v, idx, arr) => arr.indexOf(v) === idx)
+          .join(' / ')
+      : '';
     const dateStr = `${formatDate(new Date(prevYear, prevMonthIdx, d))} ${d}`;
     let cls = 'cal-day cal-other-month';
     if (isHoliday) cls += ' cal-holiday';
@@ -1245,14 +1321,16 @@ export function renderCalendar() {
 
   // Current month days
   for (let d = 1; d <= totalDays; d++) {
-    const isToday =
-      today.getFullYear() === year &&
-      today.getMonth() === month &&
-      today.getDate() === d;
+    const isToday = today.getFullYear() === year && today.getMonth() === month && today.getDate() === d;
     const key = toDateKey(year, month, d);
     const holidayList = holidaysYear[key];
     const isHoliday = !!holidayList && holidayList.length > 0;
-    const holidayName = isHoliday ? holidayList.map((h) => h.name || h.localName).filter((v, idx, arr) => arr.indexOf(v) === idx).join(' / ') : '';
+    const holidayName = isHoliday
+      ? holidayList
+          .map((h) => h.name || h.localName)
+          .filter((v, idx, arr) => arr.indexOf(v) === idx)
+          .join(' / ')
+      : '';
     const dateStr = `${formatDate(new Date(year, month, d))} ${d}`;
 
     let cls = 'cal-day';
@@ -1274,7 +1352,12 @@ export function renderCalendar() {
     const key = toDateKey(nextYear, nextMonthIdx, d);
     const holidayList = nextHolidaysYear[key];
     const isHoliday = !!holidayList && holidayList.length > 0;
-    const holidayName = isHoliday ? holidayList.map((h) => h.name || h.localName).filter((v, idx, arr) => arr.indexOf(v) === idx).join(' / ') : '';
+    const holidayName = isHoliday
+      ? holidayList
+          .map((h) => h.name || h.localName)
+          .filter((v, idx, arr) => arr.indexOf(v) === idx)
+          .join(' / ')
+      : '';
     const dateStr = `${formatDate(new Date(nextYear, nextMonthIdx, d))} ${d}`;
     let cls = 'cal-day cal-other-month';
     if (isHoliday) cls += ' cal-holiday';
@@ -1334,7 +1417,10 @@ export function openWeatherPlace() {
 
 /** A place was chosen, or the person picked "find it for me". Until then the card asks. */
 export function weatherPlaceSet(cfg) {
-  return !!(cfg && (cfg.weatherAuto || (cfg.weatherCity || '').trim() || (cfg.weatherLat != null && cfg.weatherLon != null)));
+  return !!(
+    cfg &&
+    (cfg.weatherAuto || (cfg.weatherCity || '').trim() || (cfg.weatherLat != null && cfg.weatherLon != null))
+  );
 }
 
 function showWeatherBody(on) {
@@ -1350,9 +1436,10 @@ export function renderWeatherAsk(reason = 'none') {
   showWeatherBody(false);
   const text = document.getElementById('w-weather-ask-text');
   if (text) {
-    text.textContent = reason === 'not_found'
-      ? t('w.ask_place_not_found', 'Could not tell where this is. Choose a place to see its weather.')
-      : t('w.ask_place', 'Choose a place to see its weather.');
+    text.textContent =
+      reason === 'not_found'
+        ? t('w.ask_place_not_found', 'Could not tell where this is. Choose a place to see its weather.')
+        : t('w.ask_place', 'Choose a place to see its weather.');
   }
   const btn = document.getElementById('w-weather-ask-btn');
   if (btn) btn.textContent = t('w.choose_place', 'Choose a place');
@@ -1527,7 +1614,10 @@ function initWeatherCityAutocomplete() {
     });
     fetchWeather(true);
     const locationDesc = [item.name, item.admin1, item.country_code || item.country].filter(Boolean).join(', ');
-    showToast(t('toast.weather_location_set_to', 'Weather location set to {locationDesc}', { locationDesc: locationDesc }), 'success');
+    showToast(
+      t('toast.weather_location_set_to', 'Weather location set to {locationDesc}', { locationDesc: locationDesc }),
+      'success'
+    );
   }
 
   function renderDropdown(items) {
@@ -1603,7 +1693,13 @@ function initWeatherCityAutocomplete() {
         ev.stopPropagation();
         cityInput.value = '';
         closeDropdown();
-        saveWidgetConfig({ weatherCity: '', weatherLat: null, weatherLon: null, weatherCountry: '', weatherAuto: true });
+        saveWidgetConfig({
+          weatherCity: '',
+          weatherLat: null,
+          weatherLon: null,
+          weatherCountry: '',
+          weatherAuto: true,
+        });
         fetchWeather(true);
         showToast(t('toast.weather_location_reset_to_auto_detect', 'Weather location reset to Auto-detect'), 'success');
       });
@@ -1641,7 +1737,8 @@ function initWeatherCityAutocomplete() {
         saveWidgetConfig({ weatherCity: q, weatherLat: null, weatherLon: null });
         fetchWeather(true);
         if (q) showToast(t('toast.weather_location_set_to_2', 'Weather location set to {q}', { q: q }), 'success');
-        else showToast(t('toast.weather_location_set_to_auto_detect', 'Weather location set to Auto-detect'), 'success');
+        else
+          showToast(t('toast.weather_location_set_to_auto_detect', 'Weather location set to Auto-detect'), 'success');
       }
       return;
     }
@@ -1814,7 +1911,7 @@ export function setupWidgetSettingsEvents() {
     calCountrySelect.addEventListener('change', (e) => {
       saveWidgetConfig({ calendarCountry: e.target.value });
       renderCalendar();
-      const cName = e.target.value === 'auto' ? 'Auto-detect' : (COUNTRY_NAMES[e.target.value] || e.target.value);
+      const cName = e.target.value === 'auto' ? 'Auto-detect' : COUNTRY_NAMES[e.target.value] || e.target.value;
       showToast(t('toast.calendar_holidays_set_to', 'Calendar holidays set to {cName}', { cName: cName }), 'success');
     });
   }
@@ -1824,7 +1921,12 @@ export function setupWidgetSettingsEvents() {
     calHolidayToggle.addEventListener('change', (e) => {
       saveWidgetConfig({ calendarHolidays: e.target.checked });
       renderCalendar();
-      showToast(e.target.checked ? t('toast.calendar_holidays_enabled', 'Calendar holidays enabled') : t('toast.calendar_holidays_disabled', 'Calendar holidays disabled'), 'info');
+      showToast(
+        e.target.checked
+          ? t('toast.calendar_holidays_enabled', 'Calendar holidays enabled')
+          : t('toast.calendar_holidays_disabled', 'Calendar holidays disabled'),
+        'info'
+      );
     });
   }
 
@@ -1933,12 +2035,7 @@ export function setupWidgetSettingsEvents() {
 
       item.addEventListener('dragleave', (e) => {
         const rect = item.getBoundingClientRect();
-        if (
-          e.clientX < rect.left ||
-          e.clientX >= rect.right ||
-          e.clientY < rect.top ||
-          e.clientY >= rect.bottom
-        ) {
+        if (e.clientX < rect.left || e.clientX >= rect.right || e.clientY < rect.top || e.clientY >= rect.bottom) {
           item.classList.remove('drag-over-top', 'drag-over-bottom');
         }
       });
@@ -2013,7 +2110,11 @@ export function initWidgets() {
     if (!stats) return;
     if (typeof document !== 'undefined' && document.hidden && typeof process === 'undefined') return;
     const container = document.getElementById('desktop-widgets-container');
-    if (container && (container.style.display === 'none' || container.classList.contains('hidden') || _config?.enabled === false)) return;
+    if (
+      container &&
+      (container.style.display === 'none' || container.classList.contains('hidden') || _config?.enabled === false)
+    )
+      return;
 
     // CPU
     if (stats.cpu) {
@@ -2078,20 +2179,26 @@ export function initWidgets() {
         const activeCount = disks.filter((d) => !d.standby && d.temp !== null && d.temp !== undefined).length;
         driveSummary.textContent = `${activeCount}/${disks.length} Active`;
       }
-      driveGrid.innerHTML = disks.map((d, idx) => {
-        const bayLabel = d.bay !== undefined ? `Bay ${d.bay}` : (d.name || `Disk ${idx + 1}`);
-        const isStandby = d.standby || d.temp === null || d.temp === undefined;
-        const tempText = isStandby ? 'SLEEP' : `${d.temp}°C`;
-        const tempClass = isStandby
-          ? 'temp-standby'
-          : (d.temp >= 45 ? 'temp-hot' : (d.temp >= 35 ? 'temp-warm' : 'temp-cool'));
-        return `
+      driveGrid.innerHTML = disks
+        .map((d, idx) => {
+          const bayLabel = d.bay !== undefined ? `Bay ${d.bay}` : d.name || `Disk ${idx + 1}`;
+          const isStandby = d.standby || d.temp === null || d.temp === undefined;
+          const tempText = isStandby ? 'SLEEP' : `${d.temp}°C`;
+          const tempClass = isStandby
+            ? 'temp-standby'
+            : d.temp >= 45
+              ? 'temp-hot'
+              : d.temp >= 35
+                ? 'temp-warm'
+                : 'temp-cool';
+          return `
           <div class="drive-temp-cell ${tempClass}" title="${escapeHtml(d.name || '')} - ${tempText}">
             <span class="drive-temp-bay">${escapeHtml(bayLabel)}</span>
             <span class="drive-temp-val">${tempText}</span>
           </div>
         `;
-      }).join('');
+        })
+        .join('');
     }
 
     // Network Throughput Dial
@@ -2105,7 +2212,10 @@ export function initWidgets() {
       const txRate = stats.net.tx_rate || 0;
       const linkSpeedMbps = stats.net.speed || 1000;
       if (netDialSpeed) {
-        netDialSpeed.textContent = linkSpeedMbps >= 1000 ? `${formatNumber(linkSpeedMbps / 1000, { maximumFractionDigits: 1 })}G` : `${linkSpeedMbps}M`;
+        netDialSpeed.textContent =
+          linkSpeedMbps >= 1000
+            ? `${formatNumber(linkSpeedMbps / 1000, { maximumFractionDigits: 1 })}G`
+            : `${linkSpeedMbps}M`;
       }
       if (netDialRx) netDialRx.textContent = formatSpeed(rxRate);
       if (netDialTx) netDialTx.textContent = formatSpeed(txRate);
@@ -2129,19 +2239,41 @@ export function initWidgets() {
     const upsBadge = document.getElementById('w-ups-badge');
     if (stats.ups) {
       const charge = stats.ups.battery_charge_pct ?? stats.ups.battery_charge ?? stats.ups.charge ?? null; // unknown is not 100 % (SET-15)
-      const loadW = stats.ups.power_watts ?? stats.ups.load_wattage ?? (stats.ups.load_pct != null ? `${stats.ups.load_pct}%` : (stats.ups.load_percent ? `${stats.ups.load_percent}%` : '-- W'));
-      const runtimeMin = stats.ups.time_left_min != null ? Math.round(stats.ups.time_left_min) : (stats.ups.runtime_seconds ? Math.round(stats.ups.runtime_seconds / 60) : '--');
+      const loadW =
+        stats.ups.power_watts ??
+        stats.ups.load_wattage ??
+        (stats.ups.load_pct != null
+          ? `${stats.ups.load_pct}%`
+          : stats.ups.load_percent
+            ? `${stats.ups.load_percent}%`
+            : '-- W');
+      const runtimeMin =
+        stats.ups.time_left_min != null
+          ? Math.round(stats.ups.time_left_min)
+          : stats.ups.runtime_seconds
+            ? Math.round(stats.ups.runtime_seconds / 60)
+            : '--';
       const status = stats.ups.status || '';
 
       if (upsBattery) upsBattery.textContent = charge != null ? `${charge}%` : '--%';
       if (upsBar) {
         upsBar.style.width = `${charge != null ? Math.min(100, Math.max(0, charge)) : 0}%`;
-        upsBar.style.background = charge == null ? 'var(--muted, #8a9a9c)' : (charge < 20 ? 'var(--err, #eb5757)' : (charge < 50 ? 'var(--warn, #f5a623)' : 'var(--ok2, #33cdb8)'));
+        upsBar.style.background =
+          charge == null
+            ? 'var(--muted, #8a9a9c)'
+            : charge < 20
+              ? 'var(--err, #eb5757)'
+              : charge < 50
+                ? 'var(--warn, #f5a623)'
+                : 'var(--ok2, #33cdb8)';
       }
       if (upsLoad) upsLoad.textContent = typeof loadW === 'number' ? `${loadW} W` : String(loadW);
       if (upsRuntime) upsRuntime.textContent = `${runtimeMin} min`;
       if (upsBadge) {
-        upsBadge.textContent = status.includes('OB') || status.includes('BATT') ? t('wid.ups_on_batt', 'ON BATT') : t('wid.ups_online', 'ONLINE');
+        upsBadge.textContent =
+          status.includes('OB') || status.includes('BATT')
+            ? t('wid.ups_on_batt', 'ON BATT')
+            : t('wid.ups_online', 'ONLINE');
         upsBadge.style.color = status.includes('OB') ? 'var(--warn, #f5a623)' : 'var(--ok2, #33cdb8)';
       }
 
@@ -2151,7 +2283,8 @@ export function initWidgets() {
         wUpsGauge.style.cursor = 'pointer';
         wUpsGauge.title = t('ui.click_to_open_power_battery', 'Click to open Power & Battery Cockpit');
         wUpsGauge.addEventListener('click', (e) => {
-          if (e.target.closest('.widget-handle') || e.target.closest('.widget-close') || e.target.closest('button')) return;
+          if (e.target.closest('.widget-handle') || e.target.closest('.widget-close') || e.target.closest('button'))
+            return;
           if (typeof window.openManagementWindow === 'function') {
             window.openManagementWindow('mgmt-sec-ups');
           }
@@ -2187,13 +2320,19 @@ export function initWidgets() {
       if (npuVal) npuVal.textContent = npuKnown ? `${nUtil}%` : '–';
       if (npuFreq) {
         const curF = npu.cur_freq_mhz || 0;
-        npuFreq.textContent = curF > 0 ? `${curF} MHz` : (npu.present ? '0 MHz' : 'N/A');
+        npuFreq.textContent = curF > 0 ? `${curF} MHz` : npu.present ? '0 MHz' : 'N/A';
       }
       if (npuState) {
         if (!npu.present) {
           npuState.textContent = t('ui.none', 'None');
           npuState.className = 'ai-metric-pill';
-        } else if (nUtil > 5 || (npu.cur_freq_mhz && npu.cur_freq_mhz > 400) || npu.power_state === 'D0' || npu.inference_active || (stats.ai_active && stats.ai_accelerator === 'npu')) {
+        } else if (
+          nUtil > 5 ||
+          (npu.cur_freq_mhz && npu.cur_freq_mhz > 400) ||
+          npu.power_state === 'D0' ||
+          npu.inference_active ||
+          (stats.ai_active && stats.ai_accelerator === 'npu')
+        ) {
           npuState.textContent = t('ui.active_3w', 'Active');
           npuState.className = 'ai-metric-pill active-npu';
         } else {
@@ -2206,13 +2345,18 @@ export function initWidgets() {
       if (gpuVal) gpuVal.textContent = gpuKnown ? `${gUtil}%` : '–';
       if (gpuFreq) {
         const curG = gpu.cur_freq_mhz || 0;
-        gpuFreq.textContent = curG > 0 ? `${curG} MHz` : (gpu.present ? '0 MHz' : 'N/A');
+        gpuFreq.textContent = curG > 0 ? `${curG} MHz` : gpu.present ? '0 MHz' : 'N/A';
       }
       if (gpuState) {
         if (!gpu.present) {
           gpuState.textContent = t('ui.none', 'None');
           gpuState.className = 'ai-metric-pill';
-        } else if (gUtil > 5 || (gpu.cur_freq_mhz && gpu.cur_freq_mhz > 600) || gpu.inference_active || (stats.ai_active && (stats.ai_accelerator === 'gpu' || stats.ai_accelerator === 'arc'))) {
+        } else if (
+          gUtil > 5 ||
+          (gpu.cur_freq_mhz && gpu.cur_freq_mhz > 600) ||
+          gpu.inference_active ||
+          (stats.ai_active && (stats.ai_accelerator === 'gpu' || stats.ai_accelerator === 'arc'))
+        ) {
           gpuState.textContent = t('vm.compute', 'Compute');
           gpuState.className = 'ai-metric-pill active-gpu';
         } else {
@@ -2228,7 +2372,10 @@ export function initWidgets() {
         } else if (nUtil > 0 || (stats.ai_active && stats.ai_accelerator === 'npu')) {
           aiBadge.textContent = t('wai.npu', 'NPU RUN');
           aiBadge.style.color = 'var(--brand, #33cdb8)';
-        } else if (gUtil > 0 || (stats.ai_active && (stats.ai_accelerator === 'gpu' || stats.ai_accelerator === 'arc'))) {
+        } else if (
+          gUtil > 0 ||
+          (stats.ai_active && (stats.ai_accelerator === 'gpu' || stats.ai_accelerator === 'arc'))
+        ) {
           aiBadge.textContent = t('wai.gpu', 'GPU RUN');
           aiBadge.style.color = '#c084fc';
         } else if (npu.present && gpu.present) {
@@ -2248,13 +2395,28 @@ export function initWidgets() {
 
       if (aiEngineStatus) {
         if (nUtil > 0 || (stats.ai_active && stats.ai_accelerator === 'npu')) {
-          aiEngineStatus.innerHTML = '<span class="ai-status-dot active"></span> <strong style="color:var(--lt-ink-brand, var(--brand, #33cdb8));">' + escapeHtml(t('wai.npu_active', 'Intel AI Boost NPU Active')) + '</strong>';
-        } else if (gUtil > 0 || (stats.ai_active && (stats.ai_accelerator === 'gpu' || stats.ai_accelerator === 'arc'))) {
-          aiEngineStatus.innerHTML = '<span class="ai-status-dot active-gpu"></span> <strong style="color:var(--kb-text-ai);">' + escapeHtml(t('wai.gpu_active', 'Intel Arc GPU Active')) + '</strong>';
+          aiEngineStatus.innerHTML =
+            '<span class="ai-status-dot active"></span> <strong style="color:var(--lt-ink-brand, var(--brand, #33cdb8));">' +
+            escapeHtml(t('wai.npu_active', 'Intel AI Boost NPU Active')) +
+            '</strong>';
+        } else if (
+          gUtil > 0 ||
+          (stats.ai_active && (stats.ai_accelerator === 'gpu' || stats.ai_accelerator === 'arc'))
+        ) {
+          aiEngineStatus.innerHTML =
+            '<span class="ai-status-dot active-gpu"></span> <strong style="color:var(--kb-text-ai);">' +
+            escapeHtml(t('wai.gpu_active', 'Intel Arc GPU Active')) +
+            '</strong>';
         } else if (npu.present && gpu.present) {
-          aiEngineStatus.innerHTML = '<span class="ai-status-dot standby"></span> <span>' + escapeHtml(t('wai.hybrid', 'NPU and GPU ready')) + '</span>';
+          aiEngineStatus.innerHTML =
+            '<span class="ai-status-dot standby"></span> <span>' +
+            escapeHtml(t('wai.hybrid', 'NPU and GPU ready')) +
+            '</span>';
         } else {
-          aiEngineStatus.innerHTML = '<span class="ai-status-dot standby"></span> <span>' + escapeHtml(t('wai.neural_ready', 'Neural Engine Ready')) + '</span>';
+          aiEngineStatus.innerHTML =
+            '<span class="ai-status-dot standby"></span> <span>' +
+            escapeHtml(t('wai.neural_ready', 'Neural Engine Ready')) +
+            '</span>';
         }
       }
 
@@ -2293,7 +2455,8 @@ export function initWidgets() {
           wReindexStrip.style.display = 'block';
           if (wReindexBar) wReindexBar.style.width = `${pct}%`;
           if (wReindexPct) wReindexPct.textContent = `${pct}%`;
-          if (wReindexChunks) wReindexChunks.textContent = `${formatNumber(reindex.completed || 0)} / ${formatNumber(reindex.total || 0)}`;
+          if (wReindexChunks)
+            wReindexChunks.textContent = `${formatNumber(reindex.completed || 0)} / ${formatNumber(reindex.total || 0)}`;
           if (wReindexEta) wReindexEta.textContent = etaText;
           if (!wReindexStrip.dataset.bound) {
             wReindexStrip.dataset.bound = '1';
@@ -2346,7 +2509,10 @@ export function applyClockEverywhere(tz, format) {
       })
       .catch(() => {});
     return api.put('/api/system/identity', { timezone: zone }).catch((err) => {
-      showToast(t('tz.server_failed', "The server's time zone wasn't changed: {error}", { error: err.message }), 'error');
+      showToast(
+        t('tz.server_failed', "The server's time zone wasn't changed: {error}", { error: err.message }),
+        'error'
+      );
     });
   }
   return saved;
@@ -2364,7 +2530,8 @@ export function applyPersonClock(prefs) {
   }
   const next = {};
   if (p.timezone !== cfg.clockTimezone) next.clockTimezone = p.timezone;
-  if ((p.clock_format === '12' || p.clock_format === '24') && p.clock_format !== cfg.clockFormat) next.clockFormat = p.clock_format;
+  if ((p.clock_format === '12' || p.clock_format === '24') && p.clock_format !== cfg.clockFormat)
+    next.clockFormat = p.clock_format;
   if (!Object.keys(next).length) return;
   const merged = saveWidgetConfig(next);
   updateClock();
@@ -2675,7 +2842,9 @@ export function resetTimezoneChoice() {
   _tzActiveRegion = 'all';
   const searchInput = /** @type {HTMLInputElement | null} */ (document.getElementById('tz-search-input'));
   if (searchInput) searchInput.value = '';
-  document.querySelectorAll('.tz-region-pill').forEach((p) => p.classList.toggle('active', /** @type {HTMLElement} */ (p).dataset.region === 'all'));
+  document
+    .querySelectorAll('.tz-region-pill')
+    .forEach((p) => p.classList.toggle('active', /** @type {HTMLElement} */ (p).dataset.region === 'all'));
   updateTzModalPreview();
   renderTimezoneList();
 }
@@ -2785,7 +2954,14 @@ export function setupTimezoneModalEvents() {
         renderTimezoneList();
         showToast(t('toast.selected_custom_timezone', 'Selected custom timezone: {val}', { val: val }), 'info');
       } catch (err) {
-        showToast(t('toast.invalid_iana_timezone_example_america_toronto', 'Invalid IANA timezone: "{val}". Example: America/Toronto', { val: val }), 'error');
+        showToast(
+          t(
+            'toast.invalid_iana_timezone_example_america_toronto',
+            'Invalid IANA timezone: "{val}". Example: America/Toronto',
+            { val: val }
+          ),
+          'error'
+        );
       }
     });
   }
@@ -3037,7 +3213,8 @@ export function renderDayAgenda(dateKey) {
   try {
     const [y, m, d] = dateKey.split('-').map(Number);
     const parsedDate = new Date(y, m - 1, d);
-    const formattedDate = new Intl.DateTimeFormat(currentLocale(), { // the app's language, the browser's day
+    const formattedDate = new Intl.DateTimeFormat(currentLocale(), {
+      // the app's language, the browser's day
       weekday: 'long',
       month: 'long',
       day: 'numeric',
@@ -3058,7 +3235,9 @@ export function renderDayAgenda(dateKey) {
   });
 
   if (subEl) {
-    subEl.textContent = t('w.agenda_n', '{n, plural, one {# item on this day} other {# items on this day}}', { n: allItems.length });
+    subEl.textContent = t('w.agenda_n', '{n, plural, one {# item on this day} other {# items on this day}}', {
+      n: allItems.length,
+    });
   }
 
   // Check holiday for this day
@@ -3398,7 +3577,10 @@ export function setupCalendarModalEvents() {
       const name = nameInput?.value?.trim();
       const url = urlInput?.value?.trim();
       if (!name || !url) {
-        showToast(t('toast.please_enter_feed_name_and_valid', 'Please enter feed name and valid iCal (.ics) URL'), 'warning');
+        showToast(
+          t('toast.please_enter_feed_name_and_valid', 'Please enter feed name and valid iCal (.ics) URL'),
+          'warning'
+        );
         return;
       }
 
@@ -3414,7 +3596,13 @@ export function setupCalendarModalEvents() {
         });
 
         if (res && res.status === 'ok') {
-          showToast(t('toast.connected_events_synced', 'Connected {name} ({event_count} events synced)', { name: name, event_count: res.event_count || 0 }), 'success');
+          showToast(
+            t('toast.connected_events_synced', 'Connected {name} ({event_count} events synced)', {
+              name: name,
+              event_count: res.event_count || 0,
+            }),
+            'success'
+          );
           if (nameInput) nameInput.value = '';
           if (urlInput) urlInput.value = '';
           if (addFeedForm) addFeedForm.style.display = 'none';
@@ -3422,7 +3610,10 @@ export function setupCalendarModalEvents() {
           fetchCalendarEvents();
         }
       } catch (err) {
-        showToast(t('toast.failed_connect_feed', 'Failed to connect feed: {error}', { error: err.body?.detail || err.message }), 'error');
+        showToast(
+          t('toast.failed_connect_feed', 'Failed to connect feed: {error}', { error: err.body?.detail || err.message }),
+          'error'
+        );
       } finally {
         submitFeedBtn.disabled = false;
         submitFeedBtn.textContent = t('ui.connect_sync', 'Connect & Sync');
@@ -3458,7 +3649,13 @@ export function setupCalendarModalEvents() {
         syncBtn.textContent = t('ui.syncing', 'Syncing...');
         const res = await api.post('/api/calendar/sync');
         if (res && res.status === 'ok') {
-          showToast(t('toast.synced_feed_s_with_event_s', 'Synced {synced_feeds} feed(s) with {total_events} event(s)', { synced_feeds: res.synced_feeds, total_events: res.total_events }), 'success');
+          showToast(
+            t('toast.synced_feed_s_with_event_s', 'Synced {synced_feeds} feed(s) with {total_events} event(s)', {
+              synced_feeds: res.synced_feeds,
+              total_events: res.total_events,
+            }),
+            'success'
+          );
           fetchCalendarFeeds();
           fetchCalendarEvents();
         }
@@ -3476,4 +3673,3 @@ export function setupCalendarModalEvents() {
     exportBtn.addEventListener('click', exportCalendarIcs);
   }
 }
-

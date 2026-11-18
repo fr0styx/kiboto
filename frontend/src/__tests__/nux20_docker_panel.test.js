@@ -2,13 +2,15 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
 import { setLanguage } from '../i18n.js';
 import { api } from '../api.js';
-import {
-  openDockerPruneModal
-} from '../components/management.js';
+import { openDockerPruneModal } from '../components/management.js';
 
 describe('Docker settings in German (NUX-20)', () => {
-  beforeAll(async () => { await setLanguage('de'); });
-  afterAll(async () => { await setLanguage('en'); });
+  beforeAll(async () => {
+    await setLanguage('de');
+  });
+  afterAll(async () => {
+    await setLanguage('en');
+  });
   beforeEach(() => {
     document.body.innerHTML = `
       <div id="mgmt-pane-docker">
@@ -29,5 +31,4 @@ describe('Docker settings in German (NUX-20)', () => {
     expect(document.getElementById('dpm-cancel-btn').textContent).toBe('Abbrechen');
     expect(document.getElementById('dpm-confirm-btn').textContent).toContain('Aufräumen und Platz schaffen');
   });
-
 });

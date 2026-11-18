@@ -1,7 +1,10 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import markup from '../windows/management-window.html?raw';
 import { api } from '../api.js';
-import { fetchAndRenderNotificationConfig, testAllNotificationChannels } from '../components/management/notifications.js';
+import {
+  fetchAndRenderNotificationConfig,
+  testAllNotificationChannels,
+} from '../components/management/notifications.js';
 import { renderFrigateEvents } from '../components/frigate-events.js';
 
 vi.mock('../components/my-alerts.js', () => ({ renderMyAlerts: vi.fn() }));
@@ -20,7 +23,17 @@ describe("Notifications in the report's order (SET-23, cards 2-6)", () => {
       expect(ids, id).toContain(id);
       return ids.indexOf(id);
     };
-    const order = ['notif-master-enabled', 'push-device-card', 'notif-badge-email', 'notif-badge-ntfy', 'notif-more-channels', 'notif-toggle-smart', 'digest-title', 'notif-input-hdd-temp', 'frigate-events-mount']; // Home Assistant moved to Connections (SET-23)
+    const order = [
+      'notif-master-enabled',
+      'push-device-card',
+      'notif-badge-email',
+      'notif-badge-ntfy',
+      'notif-more-channels',
+      'notif-toggle-smart',
+      'digest-title',
+      'notif-input-hdd-temp',
+      'frigate-events-mount',
+    ]; // Home Assistant moved to Connections (SET-23)
     const pos = order.map(at);
     expect([...pos].sort((a, b) => a - b)).toEqual(pos);
   });
@@ -40,7 +53,8 @@ describe("Notifications in the report's order (SET-23, cards 2-6)", () => {
   });
 
   it('More opens when one of its services is in use', async () => {
-    document.body.innerHTML = '<input type="checkbox" id="notif-master-enabled"><details id="notif-more-channels"></details>';
+    document.body.innerHTML =
+      '<input type="checkbox" id="notif-master-enabled"><details id="notif-more-channels"></details>';
     vi.spyOn(api, 'get').mockResolvedValue({ enabled: true, webhook_enabled: true, webhook_url: 'http://x' });
     await fetchAndRenderNotificationConfig();
     expect(/** @type {HTMLDetailsElement} */ (document.getElementById('notif-more-channels')).open).toBe(true);

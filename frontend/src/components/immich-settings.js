@@ -12,8 +12,10 @@ export function immichResultsHtml(items) {
     <h4>${escapeHtml(t('immich.from', 'From your Immich'))}</h4>
     <ul>${items
       .map(
-        (p) => `<li><a href="${escapeHtml(p.immich_url)}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(p.name)}">
-          <img src="${escapeHtml(p.thumbnail_url)}" alt="${escapeHtml(p.name)}" loading="lazy" width="120" height="90"></a></li>`,
+        (
+          p
+        ) => `<li><a href="${escapeHtml(p.immich_url)}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(p.name)}">
+          <img src="${escapeHtml(p.thumbnail_url)}" alt="${escapeHtml(p.name)}" loading="lazy" width="120" height="90"></a></li>`
       )
       .join('')}</ul></section>`;
 }

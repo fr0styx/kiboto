@@ -30,16 +30,21 @@ export function cameraChoices(mount, names) {
   const box = /** @type {HTMLElement | null} */ (mount.querySelector('.frigate-cams'));
   const field = /** @type {HTMLInputElement | null} */ (mount.querySelector('[name="cameras"]'));
   if (!box || !field || !(names || []).length) return;
-  const chosen = field.value.split(',').map((s) => s.trim()).filter(Boolean);
+  const chosen = field.value
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
   const sync = () => {
     const ticked = [...box.querySelectorAll('input:checked')].map((c) => /** @type {HTMLInputElement} */ (c).value);
     field.value = ticked.length === names.length ? '' : ticked.join(', ');
   };
-  box.replaceChildren(...names.map((n) => {
-    const cb = el('input', { type: 'checkbox', value: n, checked: !chosen.length || chosen.includes(n) });
-    cb.addEventListener('change', sync);
-    return el('label', {}, cb, ' ', n);
-  }));
+  box.replaceChildren(
+    ...names.map((n) => {
+      const cb = el('input', { type: 'checkbox', value: n, checked: !chosen.length || chosen.includes(n) });
+      cb.addEventListener('change', sync);
+      return el('label', {}, cb, ' ', n);
+    })
+  );
   field.closest('label')?.setAttribute('hidden', '');
 }
 
@@ -48,34 +53,85 @@ export function stateText(info, now = Date.now() / 1000) {
   if (info.last_error) return info.last_error;
   if (!info.last_check) return t('frigate.waiting', 'On; the first look is within a minute');
   const mins = Math.max(0, Math.round((now - info.last_check) / 60));
-  return t('frigate.checked', 'On · Frigate last checked {n, plural, =0 {just now} one {# minute ago} other {# minutes ago}}', { n: mins });
+  return t(
+    'frigate.checked',
+    'On · Frigate last checked {n, plural, =0 {just now} one {# minute ago} other {# minutes ago}}',
+    { n: mins }
+  );
 }
 
 /** The card's contents for what /api/notifications/frigate returned. */
 export function frigateBody(info) {
   const box = el('div', { className: 'frigate-body' });
   const enabled = el('input', { type: 'checkbox', name: 'enabled', checked: Boolean(info.enabled) });
-  box.append(el('label', { className: 'frigate-row' }, enabled, ' ', t('frigate.enabled', 'Send what Frigate sees as camera alerts')));
+  box.append(
+    el(
+      'label',
+      { className: 'frigate-row' },
+      enabled,
+      ' ',
+      t('frigate.enabled', 'Send what Frigate sees as camera alerts')
+    )
+  );
   const url = el('input', { type: 'text', name: 'url', maxLength: 200, value: info.url || 'http://frigate:5000' });
   box.append(el('label', { className: 'frigate-row' }, t('frigate.url', "Frigate's address"), ' ', url));
   const names = LABEL_NAMES();
-  const labels = el('fieldset', { className: 'frigate-labels' }, el('legend', { textContent: t('frigate.labels', 'Alert me about') }));
+  const labels = el(
+    'fieldset',
+    { className: 'frigate-labels' },
+    el('legend', { textContent: t('frigate.labels', 'Alert me about') })
+  );
   for (const l of info.choices || Object.keys(names)) {
     const cb = el('input', { type: 'checkbox', name: 'label', value: l, checked: (info.labels || []).includes(l) });
     labels.append(el('label', {}, cb, ' ', names[l] || l));
   }
   box.append(labels);
-  const cams = el('input', { type: 'text', name: 'cameras', value: (info.cameras || []).join(', '), placeholder: t('frigate.all_cameras', 'all cameras') });
+  const cams = el('input', {
+    type: 'text',
+    name: 'cameras',
+    value: (info.cameras || []).join(', '),
+    placeholder: t('frigate.all_cameras', 'all cameras'),
+  });
   box.append(el('label', { className: 'frigate-row' }, t('frigate.cameras', 'Cameras'), ' ', cams));
   box.append(el('div', { className: 'frigate-cams' })); // checkboxes once Frigate has named its cameras (NUX-12)
-  const score = el('input', { type: 'number', name: 'min_score', min: 30, max: 99, value: String(Math.round((info.min_score || 0.7) * 100)) });
-  box.append(el('label', { className: 'frigate-row' }, t('frigate.min_score', 'Only when at least this sure (%)'), ' ', score));
-  const cool = el('input', { type: 'number', name: 'cooldown_min', min: 1, max: 240, value: String(info.cooldown_min || 5) });
-  box.append(el('label', { className: 'frigate-row' }, t('frigate.cooldown', 'Quiet minutes after an alert, per camera and object'), ' ', cool));
+  const score = el('input', {
+    type: 'number',
+    name: 'min_score',
+    min: 30,
+    max: 99,
+    value: String(Math.round((info.min_score || 0.7) * 100)),
+  });
+  box.append(
+    el('label', { className: 'frigate-row' }, t('frigate.min_score', 'Only when at least this sure (%)'), ' ', score)
+  );
+  const cool = el('input', {
+    type: 'number',
+    name: 'cooldown_min',
+    min: 1,
+    max: 240,
+    value: String(info.cooldown_min || 5),
+  });
+  box.append(
+    el(
+      'label',
+      { className: 'frigate-row' },
+      t('frigate.cooldown', 'Quiet minutes after an alert, per camera and object'),
+      ' ',
+      cool
+    )
+  );
   box.append(el('p', { className: 'frigate-state', textContent: stateText(info) }));
-  const save = el('button', { type: 'button', className: 'btn-pill-toggle is-small', textContent: t('common.save', 'Save') });
+  const save = el('button', {
+    type: 'button',
+    className: 'btn-pill-toggle is-small',
+    textContent: t('common.save', 'Save'),
+  });
   save.dataset.frigate = 'save';
-  const test = el('button', { type: 'button', className: 'btn-pill-toggle is-small', textContent: t('frigate.test', 'Check Frigate') });
+  const test = el('button', {
+    type: 'button',
+    className: 'btn-pill-toggle is-small',
+    textContent: t('frigate.test', 'Check Frigate'),
+  });
   test.dataset.frigate = 'test';
   box.append(el('div', { className: 'frigate-actions' }, save, test));
   const result = el('p', { className: 'frigate-test muted', hidden: true });
@@ -90,7 +146,10 @@ export function readForm(mount) {
   const labels = [...mount.querySelectorAll('input[name="label"]')]
     .filter((c) => /** @type {HTMLInputElement} */ (c).checked)
     .map((c) => /** @type {HTMLInputElement} */ (c).value);
-  const cameras = q('cameras').value.split(',').map((s) => s.trim()).filter(Boolean);
+  const cameras = q('cameras')
+    .value.split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
   return {
     enabled: q('enabled').checked,
     url: q('url').value.trim(),
@@ -123,10 +182,10 @@ export async function renderFrigateEvents(mount) {
         const out = /** @type {HTMLElement} */ (mount.querySelector('.frigate-test'));
         out.textContent = r.ok
           ? t('frigate.test_ok', 'Frigate {version} answers, {n, plural, one {# camera} other {# cameras}}: {names}', {
-            version: r.version || '',
-            n: (r.cameras || []).length,
-            names: (r.cameras || []).join(', ') || '–',
-          })
+              version: r.version || '',
+              n: (r.cameras || []).length,
+              names: (r.cameras || []).join(', ') || '–',
+            })
           : r.error;
         out.hidden = false;
         if (r.ok) cameraChoices(mount, r.cameras || []);

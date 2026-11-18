@@ -38,7 +38,10 @@ describe('Storage: one Drives tab with a summary, the bays and the pools (SET-22
   it('draws the sentence, the findings with Open, and Check again', async () => {
     const mount = document.createElement('section');
     mount.hidden = true;
-    const get = vi.spyOn(api, 'get').mockResolvedValue({ items: [{ id: 'drive:sdb', level: 'warning', kind: 'drive_warning', subject: 'sdb', open: 'storage' }], unchecked: [] });
+    const get = vi.spyOn(api, 'get').mockResolvedValue({
+      items: [{ id: 'drive:sdb', level: 'warning', kind: 'drive_warning', subject: 'sdb', open: 'storage' }],
+      unchecked: [],
+    });
     await renderStorageSummary(mount);
     expect(mount.hidden).toBe(false);
     expect(mount.textContent).toContain('1 thing on your drives needs a look');
@@ -62,15 +65,27 @@ describe('Storage: one Drives tab with a summary, the bays and the pools (SET-22
 
   it('never says all drives are fine beside a drive marked "Keep an eye on it"', async () => {
     const chassis = {
-      bays: [{ slot_index: 1, disk: { model: 'ST22000DM000', verdict: 'watch' } }, { slot_index: 4, disk: { model: 'ST22000DM000', verdict: 'ok' } }, { slot_index: 0 }],
+      bays: [
+        { slot_index: 1, disk: { model: 'ST22000DM000', verdict: 'watch' } },
+        { slot_index: 4, disk: { model: 'ST22000DM000', verdict: 'ok' } },
+        { slot_index: 0 },
+      ],
       nvme_slots: [{ disk: { name: 'nvme0n1', verdict: 'watch' } }, {}],
     };
-    expect(watchedDrives(chassis)).toEqual([{ model: 'ST22000DM000', place: 'Bay 2' }, { model: 'nvme0n1', place: 'M.2 slot 1' }]);
+    expect(watchedDrives(chassis)).toEqual([
+      { model: 'ST22000DM000', place: 'Bay 2' },
+      { model: 'nvme0n1', place: 'M.2 slot 1' },
+    ]);
     expect(watchedDrives(null)).toEqual([]);
-    expect(storageSentence({ items: [] }, watchedDrives(chassis))).toEqual(['All drives work. Drive Health keeps an eye on 2 drives.', 'ok']);
+    expect(storageSentence({ items: [] }, watchedDrives(chassis))).toEqual([
+      'All drives work. Drive Health keeps an eye on 2 drives.',
+      'ok',
+    ]);
     expect(storageSentence({ items: [] }, [])[0]).toBe('All drives are fine.');
     document.body.innerHTML = '<div id="storage-summary" hidden></div>';
-    vi.spyOn(api, 'get').mockImplementation(async (url) => (url === '/api/chassis/config' ? { bays: [chassis.bays[0]] } : { items: [] }));
+    vi.spyOn(api, 'get').mockImplementation(async (url) =>
+      url === '/api/chassis/config' ? { bays: [chassis.bays[0]] } : { items: [] }
+    );
     await renderStorageSummary();
     const box = /** @type {HTMLElement} */ (document.getElementById('storage-summary'));
     expect(box.textContent).toContain('Drive Health keeps an eye on 1 drive.');
@@ -78,4 +93,3 @@ describe('Storage: one Drives tab with a summary, the bays and the pools (SET-22
     expect(box.textContent).not.toContain('All drives are fine');
   });
 });
-

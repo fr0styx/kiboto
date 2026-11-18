@@ -79,10 +79,18 @@ describe('Kiboto System Console Mobile Layout & Screen Adaptation Suite', () => 
     expect(cssContent).toMatch(/#console-window\.chassis-front-panel[\s\S]*?touch-action:\s*pan-y\s*!important/);
     expect(cssContent).toMatch(/#console-window\.chassis-front-panel[\s\S]*?transform:\s*none\s*!important/);
 
-    expect(cssContent).toMatch(/body\.mobile-mode #console-window\.chassis-front-panel[\s\S]*?width:\s*100vw\s*!important/);
-    expect(cssContent).toMatch(/body\.mobile-mode #console-window\.chassis-front-panel[\s\S]*?min-width:\s*0\s*!important/);
-    expect(cssContent).toMatch(/body\.mobile-mode #console-window\.chassis-front-panel[\s\S]*?overflow-y:\s*auto\s*!important/);
-    expect(cssContent).toMatch(/body\.mobile-mode #console-window\.chassis-front-panel[\s\S]*?touch-action:\s*pan-y\s*!important/);
+    expect(cssContent).toMatch(
+      /body\.mobile-mode #console-window\.chassis-front-panel[\s\S]*?width:\s*100vw\s*!important/
+    );
+    expect(cssContent).toMatch(
+      /body\.mobile-mode #console-window\.chassis-front-panel[\s\S]*?min-width:\s*0\s*!important/
+    );
+    expect(cssContent).toMatch(
+      /body\.mobile-mode #console-window\.chassis-front-panel[\s\S]*?overflow-y:\s*auto\s*!important/
+    );
+    expect(cssContent).toMatch(
+      /body\.mobile-mode #console-window\.chassis-front-panel[\s\S]*?touch-action:\s*pan-y\s*!important/
+    );
   });
 
   it('enforces height: auto, width: 100%, and visible overflow on #console-window #screen', () => {
@@ -98,24 +106,38 @@ describe('Kiboto System Console Mobile Layout & Screen Adaptation Suite', () => 
   it('enforces flex-wrap: wrap on #screen header and 100% width on .h-right for phone readability', () => {
     expect(cssContent).toMatch(/#console-window #screen header[\s\S]*?flex-wrap:\s*wrap\s*!important/);
     expect(cssContent).toMatch(/#console-window #screen \.h-right[\s\S]*?width:\s*100%\s*!important/);
-    expect(cssContent).toMatch(/#console-window #screen \.h-right[\s\S]*?justify-content:\s*space-between\s*!important/);
+    expect(cssContent).toMatch(
+      /#console-window #screen \.h-right[\s\S]*?justify-content:\s*space-between\s*!important/
+    );
 
-    expect(cssContent).toMatch(/body\.mobile-mode #console-window #screen header[\s\S]*?flex-wrap:\s*wrap\s*!important/);
+    expect(cssContent).toMatch(
+      /body\.mobile-mode #console-window #screen header[\s\S]*?flex-wrap:\s*wrap\s*!important/
+    );
     expect(cssContent).toMatch(/body\.mobile-mode #console-window #screen \.h-right[\s\S]*?width:\s*100%\s*!important/);
   });
 
   it('enforces 2-column responsive grid on .cards and full-width span on .card-storage', () => {
-    expect(cssContent).toMatch(/#console-window \.cards[\s\S]*?grid-template-columns:\s*repeat\(2,\s*1fr\)\s*!important/);
+    expect(cssContent).toMatch(
+      /#console-window \.cards[\s\S]*?grid-template-columns:\s*repeat\(2,\s*1fr\)\s*!important/
+    );
     expect(cssContent).toMatch(/#console-window \.card\.card-storage[\s\S]*?grid-column:\s*1\s*\/\s*-1\s*!important/);
 
-    expect(cssContent).toMatch(/body\.mobile-mode #console-window \.cards[\s\S]*?grid-template-columns:\s*repeat\(2,\s*1fr\)\s*!important/);
-    expect(cssContent).toMatch(/body\.mobile-mode #console-window \.card\.card-storage[\s\S]*?grid-column:\s*1\s*\/\s*-1\s*!important/);
+    expect(cssContent).toMatch(
+      /body\.mobile-mode #console-window \.cards[\s\S]*?grid-template-columns:\s*repeat\(2,\s*1fr\)\s*!important/
+    );
+    expect(cssContent).toMatch(
+      /body\.mobile-mode #console-window \.card\.card-storage[\s\S]*?grid-column:\s*1\s*\/\s*-1\s*!important/
+    );
   });
 
   it('enforces responsive wrapping on disk inventory, bay matrix, and telemetry panels', () => {
     expect(cssContent).toMatch(/#console-window \.disks[\s\S]*?flex-direction:\s*column\s*!important/);
-    expect(cssContent).toMatch(/#console-window \.group-tiles[\s\S]*?grid-template-columns:\s*repeat\(auto-fill,\s*minmax\(130px,\s*1fr\)\)\s*!important/);
-    expect(cssContent).toMatch(/#console-window \.bay-matrix-grid[\s\S]*?grid-template-columns:\s*repeat\(auto-fill,\s*minmax\(95px,\s*1fr\)\)\s*!important/);
+    expect(cssContent).toMatch(
+      /#console-window \.group-tiles[\s\S]*?grid-template-columns:\s*repeat\(auto-fill,\s*minmax\(130px,\s*1fr\)\)\s*!important/
+    );
+    expect(cssContent).toMatch(
+      /#console-window \.bay-matrix-grid[\s\S]*?grid-template-columns:\s*repeat\(auto-fill,\s*minmax\(95px,\s*1fr\)\)\s*!important/
+    );
     expect(cssContent).toMatch(/#console-window \.net-io-grid[\s\S]*?flex-direction:\s*column\s*!important/);
     expect(cssContent).toMatch(/#console-window \.unraid-copy-grid[\s\S]*?flex-direction:\s*column\s*!important/);
   });

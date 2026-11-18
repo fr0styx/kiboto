@@ -43,8 +43,17 @@ describe('B12a (REL-17): the recovery kit must be saved', () => {
   });
 
   it('a backup whose kit was never saved says so', () => {
-    const repo = { id: 'usb', name: 'USB', location: '/mnt/disks/usb', paths: ['/mnt/user/a'], keep: { daily: 7, weekly: 4, monthly: 12 }, initialized: true };
+    const repo = {
+      id: 'usb',
+      name: 'USB',
+      location: '/mnt/disks/usb',
+      paths: ['/mnt/user/a'],
+      keep: { daily: 7, weekly: 4, monthly: 12 },
+      initialized: true,
+    };
     expect(reposHtml({ available: true, repos: [repo] })).toContain('Recovery kit not saved');
-    expect(reposHtml({ available: true, repos: [{ ...repo, kit_saved_at: 1 }] })).not.toContain('Recovery kit not saved');
+    expect(reposHtml({ available: true, repos: [{ ...repo, kit_saved_at: 1 }] })).not.toContain(
+      'Recovery kit not saved'
+    );
   });
 });

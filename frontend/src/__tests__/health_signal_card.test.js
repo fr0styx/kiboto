@@ -13,8 +13,7 @@ const STATUS = {
 
 describe('Help improve Kiboto card', () => {
   beforeEach(() => {
-    document.body.innerHTML =
-      '<div class="drawer-card"><div id="update-status-box"></div></div><div id="after"></div>';
+    document.body.innerHTML = '<div class="drawer-card"><div id="update-status-box"></div></div><div id="after"></div>';
     vi.clearAllMocks();
   });
 

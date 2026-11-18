@@ -36,7 +36,8 @@ describe('the People lists update themselves (SET-19)', () => {
   });
 
   it('knows when People is on screen', () => {
-    document.body.innerHTML = '<div id="management-modal-overlay" style="display:block"><div id="mgmt-pane-users" style="display:block"></div></div>';
+    document.body.innerHTML =
+      '<div id="management-modal-overlay" style="display:block"><div id="mgmt-pane-users" style="display:block"></div></div>';
     expect(peopleShown()).toBe(true);
     /** @type {HTMLElement} */ (document.getElementById('mgmt-pane-users')).style.display = 'none';
     expect(peopleShown()).toBe(false);

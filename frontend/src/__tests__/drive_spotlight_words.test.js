@@ -5,7 +5,9 @@ import { categoryWord } from '../components/spotlight.js';
 import { setLanguage } from '../i18n.js';
 
 describe('words on Drive Health and Spotlight', () => {
-  afterEach(async () => { await setLanguage('en'); });
+  afterEach(async () => {
+    await setLanguage('en');
+  });
 
   it('roles, serials and kinds', async () => {
     expect(roleWord('os')).toBe('system');

@@ -50,10 +50,13 @@ export async function renameWallpaper(oldName) {
       try {
         const data = await api.post('/api/wallpapers/rename', {
           old_name: oldName,
-          new_name: newName
+          new_name: newName,
         });
         if (data.success) {
-          showToast(t('toast.wallpaper_renamed_to', 'Wallpaper renamed to {new_name}', { new_name: data.new_name }), 'success');
+          showToast(
+            t('toast.wallpaper_renamed_to', 'Wallpaper renamed to {new_name}', { new_name: data.new_name }),
+            'success'
+          );
           if (localStorage.getItem('kiboto_active_wallpaper') === oldName) {
             try {
               localStorage.setItem('kiboto_active_wallpaper', data.new_name);
@@ -61,7 +64,12 @@ export async function renameWallpaper(oldName) {
           }
           await loadWallpapers();
         } else {
-          showToast(t('toast.rename_failed', 'Rename failed: {error}', { error: data.error || t('toast.unknown_error', 'Unknown error') }), 'error');
+          showToast(
+            t('toast.rename_failed', 'Rename failed: {error}', {
+              error: data.error || t('toast.unknown_error', 'Unknown error'),
+            }),
+            'error'
+          );
         }
       } catch (err) {
         showToast(t('toast.rename_request_failed', 'Rename request failed: {error}', { error: err.message }), 'error');
@@ -76,7 +84,9 @@ export async function deleteWallpaper(filename) {
   if (!filename) return;
   showConfirmToast(
     t('wp.delete_title', 'Delete wallpaper'),
-    t('wp.delete_msg', 'Delete the wallpaper {name}? This can’t be undone.', { name: `<strong>${escapeHtml(filename)}</strong>` }),
+    t('wp.delete_msg', 'Delete the wallpaper {name}? This can’t be undone.', {
+      name: `<strong>${escapeHtml(filename)}</strong>`,
+    }),
     async () => {
       try {
         await api.delete(`/api/wallpapers/${encodeURIComponent(filename)}`);
@@ -101,7 +111,9 @@ export function renderWallpaperGallery(files, active, version) {
   const countBadge = document.getElementById('wallpaper-count-badge');
 
   if (countBadge) {
-    countBadge.textContent = t('wp.count', '{n, plural, one {# background} other {# backgrounds}}', { n: files.length });
+    countBadge.textContent = t('wp.count', '{n, plural, one {# background} other {# backgrounds}}', {
+      n: files.length,
+    });
   }
 
   if (!galleryEl) return;
@@ -222,18 +234,41 @@ export function filterGalleryByCategory(cat = 'all') {
     if (cat === 'gradient') {
       isMatch = !fn || fn.includes('gradient');
     } else if (cat === 'scenic') {
-      isMatch = fn.includes('nature') || fn.includes('mountain') || fn.includes('fjord') || fn.includes('landscape') || fn.includes('sea') || fn.includes('lake') || fn.includes('sunset') || fn.includes('aurora') || fn.includes('forest');
+      isMatch =
+        fn.includes('nature') ||
+        fn.includes('mountain') ||
+        fn.includes('fjord') ||
+        fn.includes('landscape') ||
+        fn.includes('sea') ||
+        fn.includes('lake') ||
+        fn.includes('sunset') ||
+        fn.includes('aurora') ||
+        fn.includes('forest');
     } else if (cat === 'cyber') {
-      isMatch = fn.includes('cyber') || fn.includes('matrix') || fn.includes('neon') || fn.includes('tokyo') || fn.includes('synth') || fn.includes('future') || fn.includes('amethyst');
+      isMatch =
+        fn.includes('cyber') ||
+        fn.includes('matrix') ||
+        fn.includes('neon') ||
+        fn.includes('tokyo') ||
+        fn.includes('synth') ||
+        fn.includes('future') ||
+        fn.includes('amethyst');
     } else if (cat === 'oled') {
-      isMatch = fn.includes('oled') || fn.includes('dark') || fn.includes('black') || fn.includes('space') || fn.includes('star');
+      isMatch =
+        fn.includes('oled') ||
+        fn.includes('dark') ||
+        fn.includes('black') ||
+        fn.includes('space') ||
+        fn.includes('star');
     }
     card.style.display = isMatch ? 'flex' : 'none';
     if (isMatch) visibleCount++;
   });
   const countBadge = document.getElementById('wallpaper-count-badge');
   if (countBadge) {
-    countBadge.textContent = t('wp.count', '{n, plural, one {# background} other {# backgrounds}}', { n: visibleCount });
+    countBadge.textContent = t('wp.count', '{n, plural, one {# background} other {# backgrounds}}', {
+      n: visibleCount,
+    });
   }
 }
 
@@ -260,12 +295,21 @@ export async function uploadAndApplyWallpaper(file) {
   if (!file) return false;
   const MAX_BYTES = 15 * 1024 * 1024; // 15MB limit
   if (file.size && file.size > MAX_BYTES) {
-    showToast(t('toast.file_size_exceeds_15mb_limit_please', 'File size exceeds 15MB limit. Please choose a smaller image.'), 'error');
+    showToast(
+      t('toast.file_size_exceeds_15mb_limit_please', 'File size exceeds 15MB limit. Please choose a smaller image.'),
+      'error'
+    );
     return false;
   }
   const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/gif', 'image/svg+xml'];
   if (file.type && !validTypes.includes(file.type)) {
-    showToast(t('toast.unsupported_file_format_please_upload_jpg', 'Unsupported file format. Please upload JPG, PNG, WEBP, or AVIF.'), 'error');
+    showToast(
+      t(
+        'toast.unsupported_file_format_please_upload_jpg',
+        'Unsupported file format. Please upload JPG, PNG, WEBP, or AVIF.'
+      ),
+      'error'
+    );
     return false;
   }
   return new Promise((resolve, reject) => {
@@ -275,7 +319,7 @@ export async function uploadAndApplyWallpaper(file) {
       try {
         const data = await api.post('/api/wallpapers/upload', {
           image: base64data,
-          filename: file.name
+          filename: file.name,
         });
         if (data && data.success) {
           if (data.filename) {
@@ -287,10 +331,20 @@ export async function uploadAndApplyWallpaper(file) {
           if (data.filename) {
             await selectWallpaper(data.filename);
           }
-          showToast(t('toast.wallpaper_uploaded_applied', 'Wallpaper uploaded & applied: {filename}', { filename: data.filename || file.name }), 'success');
+          showToast(
+            t('toast.wallpaper_uploaded_applied', 'Wallpaper uploaded & applied: {filename}', {
+              filename: data.filename || file.name,
+            }),
+            'success'
+          );
           resolve(data);
         } else {
-          showToast(t('toast.upload_failed', 'Upload failed: {errDetail}', { errDetail: (data && data.error) || t('toast.unknown_error', 'Unknown error') }), 'error');
+          showToast(
+            t('toast.upload_failed', 'Upload failed: {errDetail}', {
+              errDetail: (data && data.error) || t('toast.unknown_error', 'Unknown error'),
+            }),
+            'error'
+          );
           reject(new Error((data && data.error) || 'Upload error'));
         }
       } catch (err) {
@@ -473,7 +527,11 @@ function _isEco() {
 
 /** Marks the chosen look, and says so when the sliders hold a mix of the person's own. */
 export function syncWindowStyleUI() {
-  const cur = windowStyleOf({ blur: _sliderValue('glass-blur-slider', 24), opacity: _sliderValue('glass-opacity-slider', 72), eco: _isEco() });
+  const cur = windowStyleOf({
+    blur: _sliderValue('glass-blur-slider', 24),
+    opacity: _sliderValue('glass-opacity-slider', 72),
+    eco: _isEco(),
+  });
   const btns = Array.from(document.querySelectorAll('[data-window-style]'));
   btns.forEach((b, i) => {
     const on = /** @type {HTMLElement} */ (b).dataset.windowStyle === cur;
@@ -500,8 +558,10 @@ export function chooseWindowStyle(name) {
   if (!s) return;
   setEcoMode(s.eco);
   if (!s.eco) {
-    const glow = /** @type {HTMLInputElement | null} */ (document.getElementById('window-glow-toggle'))?.checked || false;
-    const radius = /** @type {HTMLElement | null} */ (document.querySelector('.window-radius-btn.active'))?.dataset.radius || '12px';
+    const glow =
+      /** @type {HTMLInputElement | null} */ (document.getElementById('window-glow-toggle'))?.checked || false;
+    const radius =
+      /** @type {HTMLElement | null} */ (document.querySelector('.window-radius-btn.active'))?.dataset.radius || '12px';
     applyGlassSettings(s.blur, s.opacity, radius, glow, true);
   }
   syncWindowStyleUI();
@@ -545,7 +605,7 @@ export function initGlassControls() {
     const r = localStorage.getItem('kiboto_window_radius');
     if (r) savedRadius = r;
     const g = localStorage.getItem('kiboto_window_glow');
-    if (g !== null) savedGlow = (g === 'true');
+    if (g !== null) savedGlow = g === 'true';
   } catch (e) {}
 
   applyGlassSettings(savedBlur, savedOpacity, savedRadius, savedGlow, false);

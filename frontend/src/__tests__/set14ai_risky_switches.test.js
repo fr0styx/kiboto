@@ -14,7 +14,9 @@ beforeEach(() => {
 describe('risky switches ask first (SET-14, Settings finding 23)', () => {
   it('turning the ransomware guard off asks; nothing is saved before the answer', async () => {
     document.body.innerHTML = '<div id="sec-guard-card"></div>';
-    vi.spyOn(api, 'get').mockImplementation(async (u) => (u.includes('ip-blocks') ? [] : { enabled: true, canaries: true, canary_count: 2 }));
+    vi.spyOn(api, 'get').mockImplementation(async (u) =>
+      u.includes('ip-blocks') ? [] : { enabled: true, canaries: true, canary_count: 2 }
+    );
     const put = vi.spyOn(api, 'put').mockResolvedValue({});
     await renderGuardPanel();
     const box = document.querySelector('#sec-guard-card input[type=checkbox]');
@@ -28,7 +30,9 @@ describe('risky switches ask first (SET-14, Settings finding 23)', () => {
 
   it('a failed unblock says so', async () => {
     document.body.innerHTML = '<div id="sec-guard-card"></div>';
-    vi.spyOn(api, 'get').mockImplementation(async (u) => (u.includes('ip-blocks') ? [{ ip: '10.0.0.9', reason: 'x' }] : { enabled: true }));
+    vi.spyOn(api, 'get').mockImplementation(async (u) =>
+      u.includes('ip-blocks') ? [{ ip: '10.0.0.9', reason: 'x' }] : { enabled: true }
+    );
     vi.spyOn(api, 'delete').mockRejectedValue(new Error('down'));
     await renderGuardPanel();
     [...document.querySelectorAll('#sec-guard-card button')].find((b) => b.textContent === 'Unblock').click();

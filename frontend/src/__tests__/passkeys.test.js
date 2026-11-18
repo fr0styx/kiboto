@@ -1,6 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-vi.mock('../api.js', () => ({ api: { get: vi.fn(), post: vi.fn(), patch: vi.fn(), delete: vi.fn() }, auth: { setToken: vi.fn() } }));
+vi.mock('../api.js', () => ({
+  api: { get: vi.fn(), post: vi.fn(), patch: vi.fn(), delete: vi.fn() },
+  auth: { setToken: vi.fn() },
+}));
 vi.mock('../toast.js', () => ({ showToast: vi.fn(), showConfirmToast: vi.fn((msg, ok) => ok()) }));
 const { api } = await import('../api.js');
 const toast = await import('../toast.js');
@@ -9,7 +12,11 @@ const { passkeysHtml, loadPasskeysCard } = await import('../components/passkeys-
 
 const tick = () => new Promise((r) => setTimeout(r, 0));
 const bytes = (...n) => new Uint8Array(n).buffer;
-const SECURE = { PublicKeyCredential: function PKC() {}, isSecureContext: true, location: { hostname: 'attic.example.ts.net' } };
+const SECURE = {
+  PublicKeyCredential: function PKC() {},
+  isSecureContext: true,
+  location: { hostname: 'attic.example.ts.net' },
+};
 
 describe('passkeys in the browser (RES-3)', () => {
   beforeEach(() => vi.clearAllMocks());
@@ -31,7 +38,12 @@ describe('passkeys in the browser (RES-3)', () => {
   });
 
   it('prepares the options the browser wants', () => {
-    const c = pk.creationOptions({ challenge: 'AQID', user: { id: 'dTE', name: 'ann' }, excludeCredentials: [{ id: 'AQ', type: 'public-key' }], rp: { id: 'x' } });
+    const c = pk.creationOptions({
+      challenge: 'AQID',
+      user: { id: 'dTE', name: 'ann' },
+      excludeCredentials: [{ id: 'AQ', type: 'public-key' }],
+      rp: { id: 'x' },
+    });
     expect(c.challenge).toBeInstanceOf(ArrayBuffer);
     expect(c.user.id).toBeInstanceOf(ArrayBuffer);
     expect(c.excludeCredentials[0].id).toBeInstanceOf(ArrayBuffer);
@@ -40,26 +52,46 @@ describe('passkeys in the browser (RES-3)', () => {
     expect(pk.requestOptions({ challenge: 'AQID' }).allowCredentials).toBeUndefined();
   });
 
-  it('turns an answer into JSON, with or without the browser\'s toJSON', () => {
+  it("turns an answer into JSON, with or without the browser's toJSON", () => {
     expect(pk.credentialJSON({ toJSON: () => ({ id: 'native' }) })).toEqual({ id: 'native' });
     const j = pk.credentialJSON({
-      id: 'Aw', rawId: bytes(3), type: 'public-key',
-      response: { clientDataJSON: bytes(1), authenticatorData: bytes(2), signature: bytes(4), userHandle: bytes(5), attestationObject: bytes(6) },
+      id: 'Aw',
+      rawId: bytes(3),
+      type: 'public-key',
+      response: {
+        clientDataJSON: bytes(1),
+        authenticatorData: bytes(2),
+        signature: bytes(4),
+        userHandle: bytes(5),
+        attestationObject: bytes(6),
+      },
       getClientExtensionResults: () => ({ credProps: { rk: true } }),
     });
     expect(j).toEqual({
-      id: 'Aw', rawId: 'Aw', type: 'public-key',
-      response: { clientDataJSON: 'AQ', authenticatorData: 'Ag', signature: 'BA', userHandle: 'BQ', attestationObject: 'Bg' },
+      id: 'Aw',
+      rawId: 'Aw',
+      type: 'public-key',
+      response: {
+        clientDataJSON: 'AQ',
+        authenticatorData: 'Ag',
+        signature: 'BA',
+        userHandle: 'BQ',
+        attestationObject: 'Bg',
+      },
       clientExtensionResults: { credProps: { rk: true } },
     });
-    expect(pk.credentialJSON({ id: 'A', rawId: bytes(0), type: 'public-key', response: { clientDataJSON: bytes(1) } }).clientExtensionResults).toEqual({});
+    expect(
+      pk.credentialJSON({ id: 'A', rawId: bytes(0), type: 'public-key', response: { clientDataJSON: bytes(1) } })
+        .clientExtensionResults
+    ).toEqual({});
   });
 
   it('signs in: options, the device, then the check', async () => {
     const calls = [];
     const fetchImpl = vi.fn(async (url, init) => {
       calls.push([url, JSON.parse(init.body)]);
-      if (url.endsWith('/options')) return { ok: true, json: async () => ({ ticket: 't1', options: { publicKey: { challenge: 'AQID' } } }) };
+      if (url.endsWith('/options'))
+        return { ok: true, json: async () => ({ ticket: 't1', options: { publicKey: { challenge: 'AQID' } } }) };
       return { ok: true, json: async () => ({ status: 'ok', token: 'tok' }) };
     });
     const credentials = { get: vi.fn(async () => ({ toJSON: () => ({ id: 'cred' }) })) };
@@ -70,16 +102,31 @@ describe('passkeys in the browser (RES-3)', () => {
     await expect(pk.passkeySignIn({ fetchImpl, credentials: { get: async () => null } })).rejects.toThrow('No passkey');
     const failing = async () => ({ ok: false, status: 400, json: async () => ({ detail: 'not an IP address' }) });
     await expect(pk.passkeySignIn({ fetchImpl: failing, credentials })).rejects.toThrow('not an IP address');
-    const broken = async () => ({ ok: false, status: 500, json: async () => { throw new Error('x'); } });
+    const broken = async () => ({
+      ok: false,
+      status: 500,
+      json: async () => {
+        throw new Error('x');
+      },
+    });
     await expect(pk.passkeySignIn({ fetchImpl: broken, credentials })).rejects.toThrow('HTTP 500');
   });
 
   it('adds a passkey for the signed-in person', async () => {
-    api.post.mockResolvedValueOnce({ ticket: 't2', options: { publicKey: { challenge: 'AQID', user: { id: 'dTE' } } } }).mockResolvedValueOnce({ added: { id: 'p1' } });
+    api.post
+      .mockResolvedValueOnce({ ticket: 't2', options: { publicKey: { challenge: 'AQID', user: { id: 'dTE' } } } })
+      .mockResolvedValueOnce({ added: { id: 'p1' } });
     const credentials = { create: vi.fn(async () => ({ toJSON: () => ({ id: 'new' }) })) };
     await pk.addPasskey(api, 'Phone', credentials);
-    expect(api.post).toHaveBeenLastCalledWith('/api/auth/passkeys', { ticket: 't2', credential: { id: 'new' }, name: 'Phone' });
-    api.post.mockResolvedValueOnce({ ticket: 't3', options: { publicKey: { challenge: 'AQID', user: { id: 'dTE' } } } });
+    expect(api.post).toHaveBeenLastCalledWith('/api/auth/passkeys', {
+      ticket: 't2',
+      credential: { id: 'new' },
+      name: 'Phone',
+    });
+    api.post.mockResolvedValueOnce({
+      ticket: 't3',
+      options: { publicKey: { challenge: 'AQID', user: { id: 'dTE' } } },
+    });
     await expect(pk.addPasskey(api, 'x', { create: async () => null })).rejects.toThrow('No passkey');
   });
 });
@@ -92,7 +139,7 @@ describe('the passkeys card', () => {
     document.body.innerHTML = '<div id="users-pane-2fa"><div id="mfa-status-card"></div></div>';
   });
 
-  it('lists, and says when this address can\'t use passkeys', () => {
+  it("lists, and says when this address can't use passkeys", () => {
     expect(passkeysHtml([], true)).toContain('No passkeys yet');
     const off = passkeysHtml(LIST, false);
     expect(off).toContain('not at an IP address');
@@ -108,10 +155,14 @@ describe('the passkeys card', () => {
     expect(document.getElementById('mfa-status-card').nextElementSibling).toBe(card);
     const add = vi.spyOn(pk, 'addPasskey');
     api.post.mockResolvedValueOnce({ ticket: 't', options: { publicKey: { challenge: 'AQID', user: { id: 'dTE' } } } });
-    Object.defineProperty(globalThis.navigator, 'credentials', { value: { create: async () => ({ toJSON: () => ({ id: 'c' }) }) }, configurable: true });
+    Object.defineProperty(globalThis.navigator, 'credentials', {
+      value: { create: async () => ({ toJSON: () => ({ id: 'c' }) }) },
+      configurable: true,
+    });
     api.post.mockResolvedValueOnce({ added: { id: 'p2' } });
     card.querySelector('[data-pk-add]').dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    await tick(); await tick();
+    await tick();
+    await tick();
     expect(api.post).toHaveBeenCalledWith('/api/auth/passkeys', expect.objectContaining({ name: 'Laptop' }));
     expect(toast.showToast).toHaveBeenCalledWith(expect.stringContaining('Passkey added'), 'success');
     add.mockRestore();
@@ -157,7 +208,7 @@ describe('the passkeys card', () => {
   });
 });
 
-describe('an administrator removes someone\'s passkeys', () => {
+describe("an administrator removes someone's passkeys", () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('adds the button to the dialog once and removes on confirm', async () => {

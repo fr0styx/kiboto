@@ -44,7 +44,7 @@ describe('Phase 5: Multi-User Identity, RBAC & Desktop Lock UI', () => {
       username: 'johndoe',
       display_name: 'John Doe',
       role_id: 'superadmin',
-      scopes: ['*']
+      scopes: ['*'],
     };
 
     setCurrentUser(user);
@@ -69,7 +69,7 @@ describe('Phase 5: Multi-User Identity, RBAC & Desktop Lock UI', () => {
       username: 'alice',
       display_name: 'Alice',
       role_id: 'share_user',
-      scopes: ['storage:read', 'shares:read']
+      scopes: ['storage:read', 'shares:read'],
     };
 
     setCurrentUser(regularUser);

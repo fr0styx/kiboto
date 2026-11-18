@@ -41,7 +41,8 @@ export function alertDestinations(cfg = {}) {
 export function alertSentence(cfg = {}) {
   if (!cfg.enabled) return [t('ntf.sentence_off', 'Alerts are off: nobody is told when something breaks.'), true];
   const where = alertDestinations(cfg);
-  if (!where.length) return [t('ntf.sentence_nobody', 'Nobody is told when something breaks yet: choose where alerts go below.'), true];
+  if (!where.length)
+    return [t('ntf.sentence_nobody', 'Nobody is told when something breaks yet: choose where alerts go below.'), true];
   let list = where.join(', ');
   try {
     list = new Intl.ListFormat(document.documentElement.lang || 'en', { type: 'conjunction' }).format(where);
@@ -64,7 +65,10 @@ export function renderNotificationConfigUI() {
   if (lang) {
     // the household's language for pushes and e-mails (NUX-3); each language under its own name
     if (!lang.options.length) {
-      for (const l of SUPPORTED_LANGUAGES) lang.append(Object.assign(document.createElement('option'), { value: l.code, textContent: l.name, lang: l.code }));
+      for (const l of SUPPORTED_LANGUAGES)
+        lang.append(
+          Object.assign(document.createElement('option'), { value: l.code, textContent: l.name, lang: l.code })
+        );
     }
     lang.value = cfg.language || 'en';
   }
@@ -110,7 +114,11 @@ export function renderNotificationConfigUI() {
   // a service in use is always shown (SET-23): More opens when the webhook or Apprise is set up
   const more = /** @type {HTMLDetailsElement | null} */ (document.getElementById('notif-more-channels'));
   if (more && ((cfg.webhook_enabled && cfg.webhook_url) || rawCount > 0)) more.open = true;
-  updateBadge('notif-badge-apprise', rawCount > 0 && cfg.apprise_enabled !== false, t('ntf.url_count', '{count, plural, one {# URL} other {# URLs}}', { count: rawCount }));
+  updateBadge(
+    'notif-badge-apprise',
+    rawCount > 0 && cfg.apprise_enabled !== false,
+    t('ntf.url_count', '{count, plural, one {# URL} other {# URLs}}', { count: rawCount })
+  );
 
   // Event trigger checkboxes
   const setChk = (id, val) => {
@@ -200,7 +208,10 @@ export async function saveNotificationsConfig({ quiet = false } = {}) {
     const res = await api.post('/api/notifications/config', cfg);
     _notificationConfig = res.config || cfg;
     renderNotificationConfigUI();
-    showToast(quiet ? t('notif.saved_short', 'Saved.') : t('notif.saved_ok', 'Notification settings saved successfully!'), 'success');
+    showToast(
+      quiet ? t('notif.saved_short', 'Saved.') : t('notif.saved_ok', 'Notification settings saved successfully!'),
+      'success'
+    );
   } catch (err) {
     console.error('Failed to save notification settings:', err);
     showToast(err.message || t('notif.save_fail', 'Failed to save the notification settings'), 'error');
@@ -216,11 +227,22 @@ export async function testAllNotificationChannels() {
   try {
     const res = await api.post('/api/notifications/test', {});
     const channels = res?.tested_channels || {};
-    const successList = Object.keys(channels).filter(k => channels[k]);
+    const successList = Object.keys(channels).filter((k) => channels[k]);
     if (successList.length > 0) {
-      showToast(t('toast.test_alerts_delivered_to', '✓ Test alerts delivered to: {successList}', { successList: successList.join(', ') }), 'success');
+      showToast(
+        t('toast.test_alerts_delivered_to', '✓ Test alerts delivered to: {successList}', {
+          successList: successList.join(', '),
+        }),
+        'success'
+      );
     } else {
-      showToast(t('toast.no_active_channels_succeeded_check_configuration', 'No active channels succeeded. Check configuration and credentials.'), 'warning');
+      showToast(
+        t(
+          'toast.no_active_channels_succeeded_check_configuration',
+          'No active channels succeeded. Check configuration and credentials.'
+        ),
+        'warning'
+      );
     }
   } catch (err) {
     showToast(t('toast.test_failed', 'Test failed: {error}', { error: err.message }), 'error');
@@ -242,15 +264,30 @@ export async function testSingleChannel(channel) {
   try {
     const res = await api.post('/api/notifications/test-channel', {
       channel: channel,
-      config: _notificationConfig || {}
+      config: _notificationConfig || {},
     });
     if (res?.success) {
-      showToast(t('toast.delivered_in_ms', '✓ {channel}: Delivered in {latency_ms}ms', { channel: channel.toUpperCase(), latency_ms: res.latency_ms }), 'success');
+      showToast(
+        t('toast.delivered_in_ms', '✓ {channel}: Delivered in {latency_ms}ms', {
+          channel: channel.toUpperCase(),
+          latency_ms: res.latency_ms,
+        }),
+        'success'
+      );
     } else {
-      showToast(t('toast.message', '{channel}: {message}', { channel: channel.toUpperCase(), message: res.message || t('ntf.delivery_failed', 'Delivery failed') }), 'error');
+      showToast(
+        t('toast.message', '{channel}: {message}', {
+          channel: channel.toUpperCase(),
+          message: res.message || t('ntf.delivery_failed', 'Delivery failed'),
+        }),
+        'error'
+      );
     }
   } catch (err) {
-    showToast(t('toast.test_failed_for', 'Test failed for {channel}: {error}', { channel: channel, error: err.message }), 'error');
+    showToast(
+      t('toast.test_failed_for', 'Test failed for {channel}: {error}', { channel: channel, error: err.message }),
+      'error'
+    );
   } finally {
     if (btn) {
       btn.disabled = false;
@@ -268,7 +305,10 @@ export function openChannelConfigModal(channel) {
   const bodyEl = document.getElementById('notif-modal-body');
   const enableChk = document.getElementById('notif-modal-channel-enable');
 
-  if (titleEl) titleEl.textContent = t('ntf.configure', 'Configure {channel} Alerts', { channel: channel.replace(/_raw$/, '').replace(/^./, (c) => c.toUpperCase()) });
+  if (titleEl)
+    titleEl.textContent = t('ntf.configure', 'Configure {channel} Alerts', {
+      channel: channel.replace(/_raw$/, '').replace(/^./, (c) => c.toUpperCase()),
+    });
 
   let formHtml = '';
   if (channel === 'discord') {
@@ -410,7 +450,7 @@ export function saveCurrentChannelModal() {
   } else if (channel === 'apprise_raw') {
     cfg.apprise_enabled = enabled;
     const rawLines = document.getElementById('cfg-apprise-raw')?.value.split('\n') || [];
-    cfg.apprise_urls = rawLines.map(l => l.trim()).filter(Boolean);
+    cfg.apprise_urls = rawLines.map((l) => l.trim()).filter(Boolean);
   }
 
   saveNotificationsConfig();

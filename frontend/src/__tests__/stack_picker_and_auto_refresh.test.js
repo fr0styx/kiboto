@@ -22,7 +22,7 @@ describe('Stack Picker Modal, Auto-Refresh & Context Menu Polishing', () => {
         working_dir: '/mnt/user/appdata/arr',
         total_count: 10,
         running_count: 10,
-        services: ['sonarr', 'radarr', 'prowlarr', 'bazarr']
+        services: ['sonarr', 'radarr', 'prowlarr', 'bazarr'],
       },
       {
         name: 'immich-prod',
@@ -30,7 +30,7 @@ describe('Stack Picker Modal, Auto-Refresh & Context Menu Polishing', () => {
         working_dir: '/mnt/user/appdata/immich',
         total_count: 4,
         running_count: 4,
-        services: ['immich-server', 'immich-machine-learning', 'redis', 'postgres']
+        services: ['immich-server', 'immich-machine-learning', 'redis', 'postgres'],
       },
       {
         name: 'test-stopped',
@@ -38,8 +38,8 @@ describe('Stack Picker Modal, Auto-Refresh & Context Menu Polishing', () => {
         working_dir: '/mnt/user/appdata/test',
         total_count: 2,
         running_count: 0,
-        services: ['app', 'db']
-      }
+        services: ['app', 'db'],
+      },
     ];
 
     openStackPickerModal(mockStacks);
@@ -64,8 +64,22 @@ describe('Stack Picker Modal, Auto-Refresh & Context Menu Polishing', () => {
 
   it('filters stacks in real-time when typing in search input', () => {
     const mockStacks = [
-      { name: 'arr', origin: 'compose', working_dir: '/mnt/user/appdata/arr', total_count: 1, running_count: 1, services: ['sonarr'] },
-      { name: 'immich-prod', origin: 'compose', working_dir: '/mnt/user/appdata/immich', total_count: 1, running_count: 1, services: ['redis'] }
+      {
+        name: 'arr',
+        origin: 'compose',
+        working_dir: '/mnt/user/appdata/arr',
+        total_count: 1,
+        running_count: 1,
+        services: ['sonarr'],
+      },
+      {
+        name: 'immich-prod',
+        origin: 'compose',
+        working_dir: '/mnt/user/appdata/immich',
+        total_count: 1,
+        running_count: 1,
+        services: ['redis'],
+      },
     ];
 
     openStackPickerModal(mockStacks);
@@ -91,7 +105,14 @@ describe('Stack Picker Modal, Auto-Refresh & Context Menu Polishing', () => {
 
   it('openStackPickerModal fetches /api/docker/stacks automatically when called with null or empty', async () => {
     const mockApiStacks = [
-      { name: 'arr', origin: 'compose', working_dir: '/mnt/user/appdata/arr', total_count: 5, running_count: 5, services: ['radarr'] }
+      {
+        name: 'arr',
+        origin: 'compose',
+        working_dir: '/mnt/user/appdata/arr',
+        total_count: 5,
+        running_count: 5,
+        services: ['radarr'],
+      },
     ];
     vi.spyOn(api, 'get').mockResolvedValue(mockApiStacks);
 
@@ -108,8 +129,15 @@ describe('Stack Picker Modal, Auto-Refresh & Context Menu Polishing', () => {
   it('openStackPickerModal handles object with .stacks property as well as direct array', async () => {
     const mockWrapped = {
       stacks: [
-        { name: 'immich', origin: 'compose', working_dir: '/mnt/user/appdata/immich', total_count: 3, running_count: 3, services: ['web'] }
-      ]
+        {
+          name: 'immich',
+          origin: 'compose',
+          working_dir: '/mnt/user/appdata/immich',
+          total_count: 3,
+          running_count: 3,
+          services: ['web'],
+        },
+      ],
     };
 
     await openStackPickerModal(mockWrapped);
@@ -120,4 +148,3 @@ describe('Stack Picker Modal, Auto-Refresh & Context Menu Polishing', () => {
     expect(overlay.querySelector('.stack-picker-card strong').textContent).toBe('immich');
   });
 });
-

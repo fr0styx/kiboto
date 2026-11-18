@@ -67,61 +67,61 @@ describe('Mission Control Navigation Restructure & Hardware Agnosticism', () => 
     // Containers
     expect(SUBPANE_MAP['mgmt-sec-docker']).toEqual({
       section: 'mgmt-sec-docker',
-      pane: 'mgmt-pane-docker'
+      pane: 'mgmt-pane-docker',
     });
     expect(SUBPANE_MAP['mgmt-pane-docker']).toEqual({
       section: 'mgmt-sec-docker',
-      pane: 'mgmt-pane-docker'
+      pane: 'mgmt-pane-docker',
     });
     expect(SUBPANE_MAP['mgmt-sec-catalog']).toEqual({
       section: 'mgmt-sec-docker',
-      pane: 'mgmt-pane-docker'
+      pane: 'mgmt-pane-docker',
     });
 
     // Hardware & Profiles (including backward compatibility aliases)
     expect(SUBPANE_MAP['mgmt-sec-hardware']).toEqual({
       section: 'mgmt-sec-hardware',
-      pane: 'mgmt-pane-unraid'
+      pane: 'mgmt-pane-unraid',
     });
     expect(SUBPANE_MAP['mgmt-pane-hardware']).toEqual({
       section: 'mgmt-sec-hardware',
-      pane: 'mgmt-pane-unraid'
+      pane: 'mgmt-pane-unraid',
     });
     expect(SUBPANE_MAP['mgmt-sec-services']).toEqual({
       section: 'mgmt-sec-hardware',
-      pane: 'mgmt-pane-unraid'
+      pane: 'mgmt-pane-unraid',
     });
     expect(SUBPANE_MAP['mgmt-sec-unraid']).toEqual({
       section: 'mgmt-sec-hardware',
-      pane: 'mgmt-pane-unraid'
+      pane: 'mgmt-pane-unraid',
     });
     expect(SUBPANE_MAP['mgmt-pane-unraid']).toEqual({
       section: 'mgmt-sec-hardware',
-      pane: 'mgmt-pane-unraid'
+      pane: 'mgmt-pane-unraid',
     });
 
     // Network & Switch Standalone Section
     expect(SUBPANE_MAP['mgmt-sec-network']).toEqual({
       section: 'mgmt-sec-network',
-      pane: 'mgmt-pane-network'
+      pane: 'mgmt-pane-network',
     });
     expect(SUBPANE_MAP['mgmt-pane-network']).toEqual({
       section: 'mgmt-sec-network',
-      pane: 'mgmt-pane-network'
+      pane: 'mgmt-pane-network',
     });
 
     // Media Ingest Re-homing to Storage & Chassis
     expect(SUBPANE_MAP['mgmt-sec-copy']).toEqual({
       section: 'mgmt-sec-hardware', // with the Copy button (SET-22, ST6)
-      pane: 'mgmt-pane-copy'
+      pane: 'mgmt-pane-copy',
     });
     expect(SUBPANE_MAP['mgmt-pane-copy']).toEqual({
       section: 'mgmt-sec-hardware',
-      pane: 'mgmt-pane-copy'
+      pane: 'mgmt-pane-copy',
     });
     expect(SUBPANE_MAP['mgmt-pane-storage-ingest']).toEqual({
       section: 'mgmt-sec-hardware',
-      pane: 'mgmt-pane-copy'
+      pane: 'mgmt-pane-copy',
     });
   });
 
@@ -131,8 +131,8 @@ describe('Mission Control Navigation Restructure & Hardware Agnosticism', () => 
         { id: '1', name: 'immich', state: 'running' },
         { id: '2', name: 'plex', state: 'running' },
         { id: '3', name: 'vaultwarden', state: 'running' },
-        { id: '4', name: 'stopped_app', state: 'exited' }
-      ]
+        { id: '4', name: 'stopped_app', state: 'exited' },
+      ],
     };
 
     updateManagementTelemetry(mockStats);
@@ -156,8 +156,8 @@ describe('Mission Control Navigation Restructure & Hardware Agnosticism', () => 
         version: '6.12.10',
         disks: { total: 6, disabled: 0, invalid: 0 },
         parity_check: { active: false, errors: 0 },
-        mover: { active: false }
-      }
+        mover: { active: false },
+      },
     };
 
     updateManagementTelemetry(mockStats);
@@ -178,7 +178,7 @@ describe('Mission Control Navigation Restructure & Hardware Agnosticism', () => 
       os: { distro: 'Ubuntu 24.04 LTS' },
       system: { hostname: 'zettnas-homelab', uptime_str: '14 days' },
       cpu: { model: 'AMD Ryzen 7 5700X 8-Core', load_avg: ['0.42', '0.38', '0.29'] },
-      storage: { engine: 'Btrfs Native Subvolumes' }
+      storage: { engine: 'Btrfs Native Subvolumes' },
     };
 
     updateManagementTelemetry(mockStats);
@@ -214,9 +214,9 @@ describe('Mission Control Navigation Restructure & Hardware Agnosticism', () => 
           { iface: 'eth1', operstate: 'up' },
           { iface: 'docker0', operstate: 'up' },
           { iface: 'lo', operstate: 'up' },
-          { iface: 'eth2', operstate: 'down' }
-        ]
-      }
+          { iface: 'eth2', operstate: 'down' },
+        ],
+      },
     };
 
     updateManagementTelemetry(mockStats);
@@ -242,8 +242,8 @@ describe('Mission Control Navigation Restructure & Hardware Agnosticism', () => 
       vms: [
         { id: 'vm-ubuntu', name: 'Ubuntu Server', state: 'running' },
         { id: 'vm-win11', name: 'Windows 11', state: 'running' },
-        { id: 'vm-truenas', name: 'TrueNAS Backup', state: 'stopped' }
-      ]
+        { id: 'vm-truenas', name: 'TrueNAS Backup', state: 'stopped' },
+      ],
     };
 
     updateManagementTelemetry(mockStats);
@@ -267,8 +267,14 @@ describe('Mission Control Navigation Restructure & Hardware Agnosticism', () => 
     // Pillar 2: Storage & Disks
     expect(SUBPANE_MAP['storage']).toEqual({ section: 'mgmt-sec-storage', pane: 'mgmt-pane-chassis-twin' });
     expect(SUBPANE_MAP['mgmt-sec-storage']).toEqual({ section: 'mgmt-sec-storage', pane: 'mgmt-pane-chassis-twin' });
-    expect(SUBPANE_MAP['mgmt-pane-storage-shares']).toEqual({ section: 'mgmt-sec-shares', pane: 'mgmt-pane-storage-shares' }); // its own section (SET-22)
-    expect(SUBPANE_MAP['mgmt-pane-storage-disks']).toEqual({ section: 'mgmt-sec-storage', pane: 'mgmt-pane-storage-disks' });
+    expect(SUBPANE_MAP['mgmt-pane-storage-shares']).toEqual({
+      section: 'mgmt-sec-shares',
+      pane: 'mgmt-pane-storage-shares',
+    }); // its own section (SET-22)
+    expect(SUBPANE_MAP['mgmt-pane-storage-disks']).toEqual({
+      section: 'mgmt-sec-storage',
+      pane: 'mgmt-pane-storage-disks',
+    });
 
     // Pillar 3: Containers & Apps
     expect(SUBPANE_MAP['containers']).toEqual({ section: 'mgmt-sec-docker', pane: 'mgmt-pane-docker' });
@@ -284,15 +290,30 @@ describe('Mission Control Navigation Restructure & Hardware Agnosticism', () => 
 
     // Pillar 5: Network & Sharing
     expect(SUBPANE_MAP['network']).toEqual({ section: 'mgmt-sec-network', pane: 'mgmt-pane-network' });
-    expect(SUBPANE_MAP['mgmt-pane-network-services']).toEqual({ section: 'mgmt-sec-network', pane: 'mgmt-pane-network' }); // one page (SET-24)
-    expect(SUBPANE_MAP['mgmt-pane-network-wireguard']).toEqual({ section: 'mgmt-sec-away', pane: 'mgmt-pane-network-wireguard' }); // its own page (SET-24)
+    expect(SUBPANE_MAP['mgmt-pane-network-services']).toEqual({
+      section: 'mgmt-sec-network',
+      pane: 'mgmt-pane-network',
+    }); // one page (SET-24)
+    expect(SUBPANE_MAP['mgmt-pane-network-wireguard']).toEqual({
+      section: 'mgmt-sec-away',
+      pane: 'mgmt-pane-network-wireguard',
+    }); // its own page (SET-24)
     expect(SUBPANE_MAP['mgmt-pane-network-docker']).toBeUndefined(); // Docker networks are in the Apps window (SET-24)
 
     // Pillar 6: Hardware & Profiles
     expect(SUBPANE_MAP['hardware']).toEqual({ section: 'mgmt-sec-hardware', pane: 'mgmt-pane-unraid' });
-    expect(SUBPANE_MAP['mgmt-pane-hardware-fans']).toEqual({ section: 'mgmt-sec-hardware', pane: 'mgmt-pane-hardware-fans' });
-    expect(SUBPANE_MAP['mgmt-pane-hardware-led']).toEqual({ section: 'mgmt-sec-hardware', pane: 'mgmt-pane-hardware-led' });
-    expect(SUBPANE_MAP['mgmt-pane-hardware-lcd']).toEqual({ section: 'mgmt-sec-hardware', pane: 'mgmt-pane-hardware-lcd' });
+    expect(SUBPANE_MAP['mgmt-pane-hardware-fans']).toEqual({
+      section: 'mgmt-sec-hardware',
+      pane: 'mgmt-pane-hardware-fans',
+    });
+    expect(SUBPANE_MAP['mgmt-pane-hardware-led']).toEqual({
+      section: 'mgmt-sec-hardware',
+      pane: 'mgmt-pane-hardware-led',
+    });
+    expect(SUBPANE_MAP['mgmt-pane-hardware-lcd']).toEqual({
+      section: 'mgmt-sec-hardware',
+      pane: 'mgmt-pane-hardware-lcd',
+    });
 
     // Dedicated Power & Battery Cockpit
     expect(SUBPANE_MAP['power']).toEqual({ section: 'mgmt-sec-ups', pane: null });
@@ -302,17 +323,26 @@ describe('Mission Control Navigation Restructure & Hardware Agnosticism', () => 
 
     // Pillar 7: System & Identity
     expect(SUBPANE_MAP['system']).toEqual({ section: 'mgmt-sec-system-group', pane: 'mgmt-pane-security' });
-    expect(SUBPANE_MAP['mgmt-sec-system-group']).toEqual({ section: 'mgmt-sec-system-group', pane: 'mgmt-pane-security' });
+    expect(SUBPANE_MAP['mgmt-sec-system-group']).toEqual({
+      section: 'mgmt-sec-system-group',
+      pane: 'mgmt-pane-security',
+    });
     expect(SUBPANE_MAP['mgmt-sec-security']).toEqual({ section: 'mgmt-sec-system-group', pane: 'mgmt-pane-security' });
     expect(SUBPANE_MAP['mgmt-sec-users']).toEqual({ section: 'mgmt-sec-system-group', pane: 'mgmt-pane-users' });
     expect(SUBPANE_MAP['mgmt-sec-backups']).toEqual({ section: 'mgmt-sec-system-group', pane: 'mgmt-pane-backups' });
-    expect(SUBPANE_MAP['mgmt-sec-notifications']).toEqual({ section: 'mgmt-sec-system-group', pane: 'mgmt-pane-notifications' });
+    expect(SUBPANE_MAP['mgmt-sec-notifications']).toEqual({
+      section: 'mgmt-sec-system-group',
+      pane: 'mgmt-pane-notifications',
+    });
     expect(SUBPANE_MAP['mgmt-sec-events']).toEqual({ section: 'mgmt-sec-activity', pane: 'mgmt-pane-events' }); // History (SET-27)
     expect(SUBPANE_MAP['mgmt-sec-language']).toEqual({ section: 'mgmt-sec-system-group', pane: 'mgmt-pane-language' }); // Settings since APP-C
     expect(SUBPANE_MAP['mgmt-sec-about']).toEqual({ section: 'mgmt-sec-system-group', pane: 'mgmt-pane-about' });
 
     // Desktop Context Menu Aliases (Peer Review Directive 3)
-    expect(SUBPANE_MAP['mgmt-pane-screensaver']).toEqual({ section: 'mgmt-sec-wallpaper', pane: 'mgmt-pane-screensaver' });
+    expect(SUBPANE_MAP['mgmt-pane-screensaver']).toEqual({
+      section: 'mgmt-sec-wallpaper',
+      pane: 'mgmt-pane-screensaver',
+    });
     expect(SUBPANE_MAP['mgmt-pane-wallpaper']).toEqual({ section: 'mgmt-sec-wallpaper', pane: 'mgmt-pane-wallpaper' });
     expect(SUBPANE_MAP['mgmt-pane-theme']).toEqual({ section: 'mgmt-sec-wallpaper', pane: 'mgmt-pane-theme' });
     expect(SUBPANE_MAP['mgmt-pane-glass']).toEqual({ section: 'mgmt-sec-wallpaper', pane: 'mgmt-pane-glass' });

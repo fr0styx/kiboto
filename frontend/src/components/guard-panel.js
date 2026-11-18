@@ -29,7 +29,12 @@ function toggle(label, checked, onChange) {
 /** Turning a protection off asks first; turning it on does not (SET-14, Settings finding 23). */
 function saveOrAsk(changes, turningOff, title, question) {
   if (!turningOff) return save(changes);
-  showDangerConfirm(title, question, () => save(changes), () => renderGuardPanel());
+  showDangerConfirm(
+    title,
+    question,
+    () => save(changes),
+    () => renderGuardPanel()
+  );
 }
 
 async function save(changes) {
@@ -50,7 +55,12 @@ export async function renderGuardPanel() {
   try {
     [st, blocks] = await Promise.all([api.get('/api/security/ransomware'), api.get('/api/security/ip-blocks')]);
   } catch (err) {
-    host.replaceChildren(el('div', { class: 'kb-muted', text: t('guard.load_failed', 'Could not load the ransomware guard: {error}', { error: err.message }) }));
+    host.replaceChildren(
+      el('div', {
+        class: 'kb-muted',
+        text: t('guard.load_failed', 'Could not load the ransomware guard: {error}', { error: err.message }),
+      })
+    );
     return;
   }
   const title = el('div', { class: 'kb-title' });
@@ -58,7 +68,9 @@ export async function renderGuardPanel() {
   const parts = [title];
   if (st.frozen) {
     parts.push(
-      el('div', { class: 'kb-alert kb-alert--danger', role: 'alert' },
+      el(
+        'div',
+        { class: 'kb-alert kb-alert--danger', role: 'alert' },
         el('strong', { text: t('guard.frozen', 'Writes are frozen.') }),
         ' ',
         t('guard.frozen_reason', '{reason} ({when}). Source: {user} from {ip}.', {
@@ -72,42 +84,83 @@ export async function renderGuardPanel() {
           text: t('guard.unfreeze', 'Lift the freeze'),
           onclick: () => {
             // the app's own dialog, not the browser's (SET-14)
-            showDangerConfirm(t('guard.unfreeze', 'Lift the freeze'), t('guard.unfreeze_confirm', 'Only lift the freeze after the computer that made the changes is cleaned up. Continue?'), async () => {
-              try {
-                await api.post('/api/security/ransomware/unfreeze', {});
-                showToast(t('guard.unfrozen', 'Writes are allowed again'), 'success');
-              } catch (err) {
-                showToast(t('guard.unfreeze_failed', 'The freeze was not lifted: {error}', { error: err.message }), 'error');
+            showDangerConfirm(
+              t('guard.unfreeze', 'Lift the freeze'),
+              t(
+                'guard.unfreeze_confirm',
+                'Only lift the freeze after the computer that made the changes is cleaned up. Continue?'
+              ),
+              async () => {
+                try {
+                  await api.post('/api/security/ransomware/unfreeze', {});
+                  showToast(t('guard.unfrozen', 'Writes are allowed again'), 'success');
+                } catch (err) {
+                  showToast(
+                    t('guard.unfreeze_failed', 'The freeze was not lifted: {error}', { error: err.message }),
+                    'error'
+                  );
+                }
+                renderGuardPanel();
               }
-              renderGuardPanel();
-            });
+            );
           },
         })
       )
     );
   }
   parts.push(
-    el('div', { class: 'kb-muted', text: t('guard.desc', 'Stops all writes, snapshots pools that support it, blocks the address and alerts you when files are renamed or deleted en masse, renamed to ransomware extensions, or a guard file changes.') }),
+    el('div', {
+      class: 'kb-muted',
+      text: t(
+        'guard.desc',
+        'Stops all writes, snapshots pools that support it, blocks the address and alerts you when files are renamed or deleted en masse, renamed to ransomware extensions, or a guard file changes.'
+      ),
+    }),
     toggle(t('guard.enabled', 'Watch for ransomware'), st.enabled, (v) =>
-      saveOrAsk({ enabled: v }, !v, t('guard.off_title', 'Turn off the ransomware guard?'),
-        t('guard.off_q', 'Kiboto stops watching for mass renames and deletes, and nothing freezes writes during an attack.'))),
+      saveOrAsk(
+        { enabled: v },
+        !v,
+        t('guard.off_title', 'Turn off the ransomware guard?'),
+        t(
+          'guard.off_q',
+          'Kiboto stops watching for mass renames and deletes, and nothing freezes writes during an attack.'
+        )
+      )
+    ),
     toggle(
-      t('guard.canaries', 'Place guard files in shares ({count} placed). Catches attacks over SMB and NFS too.', { count: st.canary_count || 0 }),
+      t('guard.canaries', 'Place guard files in shares ({count} placed). Catches attacks over SMB and NFS too.', {
+        count: st.canary_count || 0,
+      }),
       st.canaries,
-      (v) => saveOrAsk({ canaries: v }, !v, t('guard.canaries_off_title', 'Remove the guard files?'),
-        t('guard.canaries_off_q', 'Attacks over SMB and NFS are then no longer noticed by the guard.'))
+      (v) =>
+        saveOrAsk(
+          { canaries: v },
+          !v,
+          t('guard.canaries_off_title', 'Remove the guard files?'),
+          t('guard.canaries_off_q', 'Attacks over SMB and NFS are then no longer noticed by the guard.')
+        )
     ),
     el('div', { class: 'kb-title kb-title--sub', text: t('guard.blocked_title', 'Blocked addresses') })
   );
   if (!blocks.length) {
-    parts.push(el('div', { class: 'kb-muted', text: t('guard.none_blocked', 'None. Addresses with 20 failed sign-ins in 15 minutes are blocked for an hour.') }));
+    parts.push(
+      el('div', {
+        class: 'kb-muted',
+        text: t('guard.none_blocked', 'None. Addresses with 20 failed sign-ins in 15 minutes are blocked for an hour.'),
+      })
+    );
   } else {
     const list = el('ul', { class: 'kb-list' });
     blocks.forEach((b) => {
       list.append(
-        el('li', {},
+        el(
+          'li',
+          {},
           el('code', { text: b.ip }),
-          el('span', { class: 'kb-muted', text: ` ${b.reason || ''}${b.until ? ` · ${t('guard.until', 'until {when}', { when: formatDateTime(b.until * 1000) })}` : ''}` }),
+          el('span', {
+            class: 'kb-muted',
+            text: ` ${b.reason || ''}${b.until ? ` · ${t('guard.until', 'until {when}', { when: formatDateTime(b.until * 1000) })}` : ''}`,
+          }),
           el('button', {
             class: 'btn-pill-toggle',
             text: t('guard.unblock', 'Unblock'),
@@ -117,7 +170,10 @@ export async function renderGuardPanel() {
                 await api.delete(`/api/security/ip-blocks/${encodeURIComponent(b.ip)}`);
                 showToast(t('guard.unblocked', '{ip} can sign in again', { ip: b.ip }), 'success');
               } catch (err) {
-                showToast(t('guard.unblock_failed', '{ip} is still blocked: {error}', { ip: b.ip, error: err.message }), 'error');
+                showToast(
+                  t('guard.unblock_failed', '{ip} is still blocked: {error}', { ip: b.ip, error: err.message }),
+                  'error'
+                );
               }
               renderGuardPanel();
             },

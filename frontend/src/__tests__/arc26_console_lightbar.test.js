@@ -1,7 +1,10 @@
 /** The console's light bar shows what the real bar does: the settings, or an alert, a copy or the night. */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-vi.mock('../api.js', () => ({ api: { get: vi.fn(async () => ({})), post: vi.fn(async () => ({})) }, auth: { hasToken: () => true } }));
+vi.mock('../api.js', () => ({
+  api: { get: vi.fn(async () => ({})), post: vi.fn(async () => ({})) },
+  auth: { hasToken: () => true },
+}));
 
 const { renderLightbar } = await import('../components/led-control.js');
 const { applyStats } = await import('../components/dashboard.js');
@@ -51,7 +54,9 @@ describe('light bar picture', () => {
 
   it('follows the stats, but not under the Yak theme', () => {
     state.lcdTheme = 'cyber';
-    applyStats({ lightbar: { power: 'on', mode: 'flashing', color: 'ff0000', brightness: 100, speed: 90, why: 'alert' } });
+    applyStats({
+      lightbar: { power: 'on', mode: 'flashing', color: 'ff0000', brightness: 100, speed: 90, why: 'alert' },
+    });
     expect(bar().style.animation).toContain('barFlash');
     applyStats({ lightbar: { power: 'off', why: 'night' } });
     expect(bar().style.opacity).toBe('0.15');

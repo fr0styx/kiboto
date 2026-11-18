@@ -1,9 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { api } from '../api.js';
 import { openContainerDeleteModal } from '../components/container-modal.js';
-import {
-  openDockerPruneModal
-} from '../components/management.js';
+import { openDockerPruneModal } from '../components/management.js';
 
 describe('Container Deletion and Docker Prune Subsystem', () => {
   beforeEach(() => {
@@ -82,7 +80,17 @@ describe('Container Deletion and Docker Prune Subsystem', () => {
 
     const postSpy = vi.spyOn(api, 'post').mockResolvedValue({
       started: true,
-      job: { id: 'j1', state: 'done', percent: 100, step: null, steps: [{ key: 'images', state: 'done', detail: '2 removed', freed_bytes: 1288490188 }], freed_human: '1.2 GB', errors: [], images_done: 2, images_total: 2 },
+      job: {
+        id: 'j1',
+        state: 'done',
+        percent: 100,
+        step: null,
+        steps: [{ key: 'images', state: 'done', detail: '2 removed', freed_bytes: 1288490188 }],
+        freed_human: '1.2 GB',
+        errors: [],
+        images_done: 2,
+        images_total: 2,
+      },
     });
 
     await openDockerPruneModal();
@@ -126,7 +134,17 @@ describe('Container Deletion and Docker Prune Subsystem', () => {
 
     const postSpy = vi.spyOn(api, 'post').mockResolvedValue({
       started: true,
-      job: { id: 'j1', state: 'done', percent: 100, step: null, steps: [{ key: 'images', state: 'done', detail: '2 removed', freed_bytes: 1288490188 }], freed_human: '1.2 GB', errors: [], images_done: 2, images_total: 2 },
+      job: {
+        id: 'j1',
+        state: 'done',
+        percent: 100,
+        step: null,
+        steps: [{ key: 'images', state: 'done', detail: '2 removed', freed_bytes: 1288490188 }],
+        freed_human: '1.2 GB',
+        errors: [],
+        images_done: 2,
+        images_total: 2,
+      },
     });
 
     await openDockerPruneModal();

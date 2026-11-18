@@ -23,19 +23,33 @@ const REMOTE_MODAL = `
     </div>
   </div>`;
 
-const ONEDRIVE = [{
-  type: 'onedrive', name: 'Microsoft OneDrive', category: 'Cloud Drives', authorize_cmd: 'rclone authorize "onedrive"',
-  fields: [{ name: 'token', label: 'Token', type: 'textarea', required: true }],
-}];
+const ONEDRIVE = [
+  {
+    type: 'onedrive',
+    name: 'Microsoft OneDrive',
+    category: 'Cloud Drives',
+    authorize_cmd: 'rclone authorize "onedrive"',
+    fields: [{ name: 'token', label: 'Token', type: 'textarea', required: true }],
+  },
+];
 
 describe('storage dialogs in German (NUX-20)', () => {
-  beforeAll(async () => { await setLanguage('de'); });
-  afterAll(async () => { await setLanguage('en'); });
-  afterEach(() => { document.body.innerHTML = ''; vi.restoreAllMocks(); });
+  beforeAll(async () => {
+    await setLanguage('de');
+  });
+  afterAll(async () => {
+    await setLanguage('en');
+  });
+  afterEach(() => {
+    document.body.innerHTML = '';
+    vi.restoreAllMocks();
+  });
 
   it('walks the cloud sign-in in German, failures included', async () => {
     document.body.innerHTML = REMOTE_MODAL;
-    vi.spyOn(api, 'get').mockImplementation((url) => (url === '/api/remotes/providers' ? Promise.resolve(ONEDRIVE) : Promise.resolve({ completed: false })));
+    vi.spyOn(api, 'get').mockImplementation((url) =>
+      url === '/api/remotes/providers' ? Promise.resolve(ONEDRIVE) : Promise.resolve({ completed: false })
+    );
     const post = vi.spyOn(api, 'post').mockRejectedValue(new Error('verweigert'));
     await openNewCloudRemoteModal();
 
@@ -52,9 +66,11 @@ describe('storage dialogs in German (NUX-20)', () => {
     expect(status.textContent).toBe('❌ Die Anmeldung konnte nicht gestartet werden: verweigert');
     expect(status.querySelector('[aria-hidden="true"]').textContent).toBe('❌');
 
-    post.mockImplementation((url) => (url === '/api/remotes/oauth/start'
-      ? Promise.resolve({ session_id: 's1', auth_url: 'https://login.example/' })
-      : Promise.reject(new Error('abgelaufen'))));
+    post.mockImplementation((url) =>
+      url === '/api/remotes/oauth/start'
+        ? Promise.resolve({ session_id: 's1', auth_url: 'https://login.example/' })
+        : Promise.reject(new Error('abgelaufen'))
+    );
     vi.spyOn(window, 'open').mockImplementation(() => null);
     document.getElementById('btn-oauth-browser').click();
     await tick();
@@ -68,7 +84,9 @@ describe('storage dialogs in German (NUX-20)', () => {
 
   it('says why a connection test failed', async () => {
     document.body.innerHTML = REMOTE_MODAL;
-    vi.spyOn(api, 'get').mockImplementation((url) => (url === '/api/remotes/providers' ? Promise.resolve(ONEDRIVE) : Promise.resolve({})));
+    vi.spyOn(api, 'get').mockImplementation((url) =>
+      url === '/api/remotes/providers' ? Promise.resolve(ONEDRIVE) : Promise.resolve({})
+    );
     const post = vi.spyOn(api, 'post').mockResolvedValue({ success: false });
     await openNewCloudRemoteModal();
     const testBtn = document.getElementById('new-remote-test-btn');
@@ -132,6 +150,8 @@ describe('storage dialogs in German (NUX-20)', () => {
     document.getElementById('rename-pool-new-name').value = 'vault';
     document.getElementById('rename-pool-form').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
     await tick();
-    expect(document.getElementById('rename-pool-error-box').textContent).toBe('Der Speicherpool konnte nicht umbenannt werden');
+    expect(document.getElementById('rename-pool-error-box').textContent).toBe(
+      'Der Speicherpool konnte nicht umbenannt werden'
+    );
   });
 });

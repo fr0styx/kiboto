@@ -22,10 +22,18 @@ export function storageItems(summary) {
 export function watchedDrives(chassis) {
   const out = [];
   for (const bay of chassis?.bays || []) {
-    if (bay?.disk?.verdict === 'watch') out.push({ model: bay.disk.model || bay.disk.dev || '', place: t('chassis.bay_n', 'Bay {n}', { n: (bay.slot_index ?? 0) + 1 }) });
+    if (bay?.disk?.verdict === 'watch')
+      out.push({
+        model: bay.disk.model || bay.disk.dev || '',
+        place: t('chassis.bay_n', 'Bay {n}', { n: (bay.slot_index ?? 0) + 1 }),
+      });
   }
   for (const [i, slot] of (chassis?.nvme_slots || []).entries()) {
-    if (slot?.disk?.verdict === 'watch') out.push({ model: slot.disk.model || slot.disk.name || '', place: t('storage.m2_n', 'M.2 slot {n}', { n: i + 1 }) });
+    if (slot?.disk?.verdict === 'watch')
+      out.push({
+        model: slot.disk.model || slot.disk.name || '',
+        place: t('storage.m2_n', 'M.2 slot {n}', { n: i + 1 }),
+      });
   }
   return out;
 }
@@ -36,13 +44,27 @@ export function storageSentence(summary, watched = []) {
   const items = storageItems(summary);
   if (items.length) {
     const tone = items.some((i) => i.level === 'critical') ? 'bad' : 'warn';
-    return [t('storage.sum_look', '{n, plural, one {# thing on your drives needs a look} other {# things on your drives need a look}}', { n: items.length }), tone];
+    return [
+      t(
+        'storage.sum_look',
+        '{n, plural, one {# thing on your drives needs a look} other {# things on your drives need a look}}',
+        { n: items.length }
+      ),
+      tone,
+    ];
   }
   if ((summary?.unchecked || []).some((c) => STORAGE_CHECKS.includes(c))) {
     return [t('storage.sum_unknown', "Kiboto couldn't check every drive just now."), 'warn'];
   }
   if (watched.length) {
-    return [t('storage.sum_watch', '{n, plural, one {All drives work. Drive Health keeps an eye on # drive.} other {All drives work. Drive Health keeps an eye on # drives.}}', { n: watched.length }), 'ok'];
+    return [
+      t(
+        'storage.sum_watch',
+        '{n, plural, one {All drives work. Drive Health keeps an eye on # drive.} other {All drives work. Drive Health keeps an eye on # drives.}}',
+        { n: watched.length }
+      ),
+      'ok',
+    ];
   }
   return [t('storage.sum_ok', 'All drives are fine.'), 'ok'];
 }
@@ -106,7 +128,10 @@ export async function renderStorageSummary(mount = document.getElementById('stor
   }
   if (watched.length && !items.length) {
     const list = el('ul', 'storage-sum-list');
-    for (const w of watched) list.append(el('li', 'storage-sum-item is-watch', t('storage.sum_watch_item', '{model} in {place}: keep an eye on it', w)));
+    for (const w of watched)
+      list.append(
+        el('li', 'storage-sum-item is-watch', t('storage.sum_watch_item', '{model} in {place}: keep an eye on it', w))
+      );
     parts.push(list);
   }
   parts.push(again);

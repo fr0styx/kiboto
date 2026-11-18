@@ -1,6 +1,12 @@
 /** SET-03: the Security and Notifications tabs load an administrator's set-up for administrators only. */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { loadAccountPane, loadBackupExtras, loadSecurityPane, loadNotificationsPane, loadConnectionsPane } from '../components/management/admin-panes.js';
+import {
+  loadAccountPane,
+  loadBackupExtras,
+  loadSecurityPane,
+  loadNotificationsPane,
+  loadConnectionsPane,
+} from '../components/management/admin-panes.js';
 import '../route-access.js';
 import { ZettEventBus } from '../event-bus.js';
 import { fetchAndRenderSecurityPosture } from '../components/management/security.js';
@@ -65,7 +71,8 @@ describe('the Security and Notifications tabs (SET-03)', () => {
 describe('My account (SET-19, decision X4)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    document.body.innerHTML = '<div id="mgmt-pane-account"><div id="api" data-admin-only></div><div id="pwd"></div></div>';
+    document.body.innerHTML =
+      '<div id="mgmt-pane-account"><div id="api" data-admin-only></div><div id="pwd"></div></div>';
   });
 
   it('every role gets their own sign-in things and data; only an administrator the API keys', async () => {
@@ -92,16 +99,19 @@ describe('cards moved from Network (SET-24)', () => {
   it('Home Assistant, API tokens, sign-in and Redfish load with Connections, for administrators only (SET-23)', async () => {
     const { loadHomeAssistantCard } = await import('../components/management/home-assistant.js');
     const { renderRedfishCard } = await import('../components/management/connections.js');
-    document.body.innerHTML = '<div id="mgmt-pane-connections"><p class="conn-admins"></p><div id="notif-ha-grid" data-admin-only></div></div>';
+    document.body.innerHTML =
+      '<div id="mgmt-pane-connections"><p class="conn-admins"></p><div id="notif-ha-grid" data-admin-only></div></div>';
     ZettEventBus.emit('session:user', { scopes: ['system:view'] });
     expect(loadConnectionsPane()).toBe(false);
     await flush();
-    for (const f of [loadHomeAssistantCard, renderApiTokens, renderSsoPanel, renderLdapPanel, renderRedfishCard]) expect(f).not.toHaveBeenCalled();
+    for (const f of [loadHomeAssistantCard, renderApiTokens, renderSsoPanel, renderLdapPanel, renderRedfishCard])
+      expect(f).not.toHaveBeenCalled();
     expect(/** @type {HTMLElement} */ (document.querySelector('.conn-admins')).hidden).toBe(false);
     ZettEventBus.emit('session:user', { scopes: ['*'] });
     expect(loadConnectionsPane()).toBe(true);
     await flush();
-    for (const f of [loadHomeAssistantCard, renderApiTokens, renderSsoPanel, renderLdapPanel, renderRedfishCard]) expect(f).toHaveBeenCalledTimes(1);
+    for (const f of [loadHomeAssistantCard, renderApiTokens, renderSsoPanel, renderLdapPanel, renderRedfishCard])
+      expect(f).toHaveBeenCalledTimes(1);
     expect(/** @type {HTMLElement} */ (document.querySelector('.conn-admins')).hidden).toBe(true);
     loadNotificationsPane();
     await flush();
@@ -127,4 +137,3 @@ describe('cards moved from Network (SET-24)', () => {
     expect(loadFleetCard).toHaveBeenCalledTimes(1);
   });
 });
-

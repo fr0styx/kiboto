@@ -1,13 +1,10 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import {
-  SUBPANE_MAP,
-  updateManagementTelemetry
-} from '../components/management.js';
+import { SUBPANE_MAP, updateManagementTelemetry } from '../components/management.js';
 import { openDrawer } from '../components/settings.js';
 import {
   initPersonalization,
   openPersonalizationWindow,
-  switchPersonalizationTab
+  switchPersonalizationTab,
 } from '../components/personalization.js';
 import { DockManager } from '../components/dock.js';
 
@@ -68,7 +65,7 @@ describe('Mission Control 6-Pillar Information Architecture & Hardware Agnostici
       'mgmt-sec-system-group',
       'mgmt-sec-wallpaper',
       'mgmt-sec-calendar', // its own section since APP-C
-      'mgmt-sec-ai'
+      'mgmt-sec-ai',
     ]);
 
     keys.forEach((key) => {
@@ -118,7 +115,7 @@ describe('Mission Control 6-Pillar Information Architecture & Hardware Agnostici
     // Scenario A: Headless host (No LCD, No LED)
     const headlessStats = {
       peripherals: { fb_active: false, led_ready: false, led_port: null },
-      hardware: { has_lcd: false, has_mcu: false }
+      hardware: { has_lcd: false, has_mcu: false },
     };
     updateManagementTelemetry(headlessStats);
 
@@ -128,7 +125,7 @@ describe('Mission Control 6-Pillar Information Architecture & Hardware Agnostici
     // Scenario B: Appliance hardware detected
     const applianceStats = {
       peripherals: { fb_active: true, led_ready: true, led_port: '/dev/ttyACM0' },
-      hardware: { has_lcd: true, has_mcu: true }
+      hardware: { has_lcd: true, has_mcu: true },
     };
     updateManagementTelemetry(applianceStats);
 

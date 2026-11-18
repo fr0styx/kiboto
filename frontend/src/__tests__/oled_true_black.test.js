@@ -13,7 +13,8 @@ describe('True black', () => {
 
   it('draws windows, bars, the dock, widgets and window headers solid, with no glass', () => {
     const rule = css.slice(css.indexOf('body.theme-oled:not(.theme-light) :is(.os-window'));
-    for (const sel of ['.management-window', '.suite-navbar', '.os-dock', '.desktop-widget', '.smart-modal-header']) expect(rule.split('{')[0]).toContain(sel);
+    for (const sel of ['.management-window', '.suite-navbar', '.os-dock', '.desktop-widget', '.smart-modal-header'])
+      expect(rule.split('{')[0]).toContain(sel);
     expect(rule).toContain('background: var(--c-bg) !important');
     expect(rule).toContain('backdrop-filter: none !important');
     expect(css).toContain('body.theme-oled:not(.theme-light) :is(.drawer-card, .network-card, .mgmt-app-card)');

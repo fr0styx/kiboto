@@ -20,9 +20,18 @@ vi.mock('../toast.js', () => ({
   showBottomSheet: () => {},
 }));
 
-const { appOf, mergeApps, appUpdateInfo, partIds, appMenu, runAppAction, doneSaid, askAppUpdate, isAppRow } = await import('../components/app-rows.js');
+const { appOf, mergeApps, appUpdateInfo, partIds, appMenu, runAppAction, doneSaid, askAppUpdate, isAppRow } =
+  await import('../components/app-rows.js');
 
-const part = (name, state, extra = {}) => ({ id: `id-${name}`, name, stack: 'immich', state, status: state === 'running' ? 'Up' : 'Exited (0)', ports: [], ...extra });
+const part = (name, state, extra = {}) => ({
+  id: `id-${name}`,
+  name,
+  stack: 'immich',
+  state,
+  status: state === 'running' ? 'Up' : 'Exited (0)',
+  ports: [],
+  ...extra,
+});
 
 beforeEach(() => {
   calls.length = 0;
@@ -33,7 +42,11 @@ beforeEach(() => {
 
 describe('one row per app', () => {
   it('folds a stack into one app and leaves apps on their own', () => {
-    const list = [part('db', 'running'), part('web', 'running', { webui_url: 'http://[HOST]:2283', primary_port: 2283 }), { id: 'j', name: 'jellyfin', state: 'running' }];
+    const list = [
+      part('db', 'running'),
+      part('web', 'running', { webui_url: 'http://[HOST]:2283', primary_port: 2283 }),
+      { id: 'j', name: 'jellyfin', state: 'running' },
+    ];
     const rows = mergeApps(list);
     expect(rows.map((r) => r.name)).toEqual(['immich', 'jellyfin']);
     const app = rows[0];
@@ -48,12 +61,18 @@ describe('one row per app', () => {
   it('is as well as its worst part', () => {
     expect(appOf('s', [part('a', 'running'), part('b', 'exited')]).status).toBe('1 of 2 parts running.');
     expect(appOf('s', [part('a', 'running'), part('b', 'exited')]).state).toBe('running');
-    expect(appOf('s', [part('a', 'running'), part('b', 'exited', { condition: 'crashed', exit_code: 1 })]).condition).toBe('crashed');
+    expect(
+      appOf('s', [part('a', 'running'), part('b', 'exited', { condition: 'crashed', exit_code: 1 })]).condition
+    ).toBe('crashed');
     expect(appOf('s', [part('a', 'exited'), part('b', 'paused')]).condition).toBe('paused');
     expect(appOf('s', [part('a', 'exited'), part('b', 'paused')]).state).toBe('paused');
     expect(appOf('s', [part('a', 'exited'), part('b', 'exited')]).state).toBe('exited');
-    expect(appOf('s', [part('a', 'running', { condition: 'starting' }), part('b', 'running')]).condition).toBe('starting');
-    expect(appOf('s', [part('a', 'running', { condition: 'unhealthy' }), part('b', 'running')]).condition).toBe('unhealthy');
+    expect(appOf('s', [part('a', 'running', { condition: 'starting' }), part('b', 'running')]).condition).toBe(
+      'starting'
+    );
+    expect(appOf('s', [part('a', 'running', { condition: 'unhealthy' }), part('b', 'running')]).condition).toBe(
+      'unhealthy'
+    );
     expect(appOf('s', [part('a', 'running', { condition: 'unhealthy' })]).status).toBe('1 part');
   });
 
@@ -98,7 +117,9 @@ describe('whole-app actions', () => {
   });
 
   it('backs up the whole app as one archive', async () => {
-    answers['POST /api/docker/stacks/immich/backup'] = { backup: { filename: 'immich_on-demand.tar.gz', size_human: '3 MB' } };
+    answers['POST /api/docker/stacks/immich/backup'] = {
+      backup: { filename: 'immich_on-demand.tar.gz', size_human: '3 MB' },
+    };
     await runAppAction(app, 'backup');
     expect(toasts.at(-1)).toEqual(['immich is backed up (immich_on-demand.tar.gz, 3 MB).', 'success']);
   });
@@ -110,7 +131,11 @@ describe('whole-app actions', () => {
     expect(follow).toHaveBeenCalledWith('job:1');
     expect(toasts.map((x) => x[0])).toEqual(['Updating immich: db, web…', 'immich is updated.']);
     toasts.length = 0;
-    expect(await runAppAction(app, 'update', { follow: async () => ({ status: 'error', error: 'web could not be updated: pull failed' }) })).toBe(false);
+    expect(
+      await runAppAction(app, 'update', {
+        follow: async () => ({ status: 'error', error: 'web could not be updated: pull failed' }),
+      })
+    ).toBe(false);
     expect(toasts.at(-1)).toEqual(['web could not be updated: pull failed', 'error']);
     answers['POST /api/docker/stacks/immich/update'] = { status: 'up_to_date', parts: [] };
     await runAppAction(app, 'update');

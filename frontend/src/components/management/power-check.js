@@ -14,9 +14,19 @@ const when = (ts) => formatDateTime(Number(ts) * (Number(ts) < 1e12 ? 1000 : 1))
 /** The line under "Test the battery". */
 export function batteryLine(s) {
   const last = s?.tests?.battery;
-  if (!s?.can?.self_test) return t('pwc.battery_cannot', 'This UPS cannot be asked for a battery test from here: only a UPS reached over the network (NUT) takes the command. Most UPSs test their battery by themselves every few weeks.');
-  if (!last || !last.at) return t('pwc.battery_never', 'Not tested from Kiboto yet. The UPS runs on its battery for about 10 seconds; its result shows on the UPS itself.');
-  return t('pwc.battery_last', 'Last test sent on {when}. Its result shows on the UPS itself.', { when: when(last.at) });
+  if (!s?.can?.self_test)
+    return t(
+      'pwc.battery_cannot',
+      'This UPS cannot be asked for a battery test from here: only a UPS reached over the network (NUT) takes the command. Most UPSs test their battery by themselves every few weeks.'
+    );
+  if (!last || !last.at)
+    return t(
+      'pwc.battery_never',
+      'Not tested from Kiboto yet. The UPS runs on its battery for about 10 seconds; its result shows on the UPS itself.'
+    );
+  return t('pwc.battery_last', 'Last test sent on {when}. Its result shows on the UPS itself.', {
+    when: when(last.at),
+  });
 }
 
 /**
@@ -46,6 +56,10 @@ export function renderPowerCheck(mount, s) {
       <p class="pwc-line">${escapeHtml(t('pwc.practice_what', 'Kiboto acts as if the power went out for 15 seconds and checks who would switch the NAS off. Nothing is switched off.'))}</p>
       <div id="ups-practice-line" class="ups-shutdown-line" hidden></div>
     </div>${admin ? '' : `<p class="pwc-line">${escapeHtml(t('pwc.admins_only', 'Only administrators can run these.'))}</p>`}`;
-  mount.querySelector('#pwc-battery')?.addEventListener('click', () => document.getElementById('btn-run-ups-selftest')?.click());
-  mount.querySelector('#pwc-practice')?.addEventListener('click', () => document.getElementById('btn-ups-simulate')?.click());
+  mount
+    .querySelector('#pwc-battery')
+    ?.addEventListener('click', () => document.getElementById('btn-run-ups-selftest')?.click());
+  mount
+    .querySelector('#pwc-practice')
+    ?.addEventListener('click', () => document.getElementById('btn-ups-simulate')?.click());
 }

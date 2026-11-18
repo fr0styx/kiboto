@@ -26,12 +26,29 @@ vi.mock('../toast.js', () => ({
 
 const TELEMETRY = {
   kvm: { state: 'active', badge: 'KVM Accelerated' },
-  memory_budget: { total_host_ram_gb: 32, allocated_vm_ram_gb: 4, host_reserve_gb: 3.2, safe_headroom_gb: 24.8, safe_max_vm_ram_gb: 28.8 },
+  memory_budget: {
+    total_host_ram_gb: 32,
+    allocated_vm_ram_gb: 4,
+    host_reserve_gb: 3.2,
+    safe_headroom_gb: 24.8,
+    safe_max_vm_ram_gb: 28.8,
+  },
   cpu_capacity: { host_threads: 8, allocated_vcpus: 4, overcommit_ratio: 0.5, status: 'nominal' },
 };
 
 const VMS = [
-  { id: 'v1', name: 'web1', state: 'running', vcpus: 4, ram_gb: 4, qemu_pid: 1234, ip_address: '192.168.1.50', vnc_port: 5902, description: 'Web server', boot_order: 'disk' },
+  {
+    id: 'v1',
+    name: 'web1',
+    state: 'running',
+    vcpus: 4,
+    ram_gb: 4,
+    qemu_pid: 1234,
+    ip_address: '192.168.1.50',
+    vnc_port: 5902,
+    description: 'Web server',
+    boot_order: 'disk',
+  },
   { id: 'v2', name: 'desk', state: 'running', vcpus: 2, ram_gb: 2, memory_mb: 4096 },
   { id: 'v3', name: 'idle', state: 'paused', vcpus: 1, ram_gb: 1 },
   { id: 'v4', name: 'setup', state: 'stopped', vcpus: 2, ram_gb: 2, iso_path: '/mnt/user/isos/debian.iso' },
@@ -70,7 +87,10 @@ describe('VM states and KVM checks in words (NUX-20)', () => {
     const checks = kvmChecks({});
     expect(checks.map((c) => c.text)).toEqual(['Turned off in the BIOS', 'Module missing', 'Missing', 'Denied']);
     expect(checks.map((c) => c.tone)).toEqual(['crit', 'warn', 'crit', 'crit']);
-    expect(kvmChecks({ amd_v: true, substate: 'container_restricted' })[3]).toMatchObject({ tone: 'warn', text: 'Blocked by the container (EPERM)' });
+    expect(kvmChecks({ amd_v: true, substate: 'container_restricted' })[3]).toMatchObject({
+      tone: 'warn',
+      text: 'Blocked by the container (EPERM)',
+    });
     expect(kvmChecks({ intel_vtx: true, cgroup_restricted: true })[0].text).toBe('Supported');
   });
 });
@@ -107,7 +127,8 @@ describe('VM manager window (NUX-20)', () => {
     expect(web.textContent).toContain('All ways to connect…');
     expect(web.querySelector('.btn-copy-vnc')).toBeNull();
     expect(web.querySelector('.btn-vm-join-toggle').textContent.trim()).toBe('Connect ▾');
-    for (const word of ['Restart', 'Shut down', 'Turn off now', 'Edit']) expect(web.querySelector('.vm-card-actions').textContent).toContain(word);
+    for (const word of ['Restart', 'Shut down', 'Turn off now', 'Edit'])
+      expect(web.querySelector('.vm-card-actions').textContent).toContain(word);
 
     const desk = card(grid, 'desk');
     expect(desk.textContent).toContain('QEMU active');
@@ -131,12 +152,22 @@ describe('VM manager window (NUX-20)', () => {
     const labels = () => showBottomSheet.mock.calls.at(-1)[0].items.map((i) => i.label);
 
     card(grid, 'web1').querySelector('.btn-vm-more-sheet').click();
-    expect(labels()).toEqual(expect.arrayContaining(['Restart VM', 'Shut down (ACPI)', 'Turn off now (like pulling the plug)', 'Edit VM settings']));
+    expect(labels()).toEqual(
+      expect.arrayContaining([
+        'Restart VM',
+        'Shut down (ACPI)',
+        'Turn off now (like pulling the plug)',
+        'Edit VM settings',
+      ])
+    );
     expect(showBottomSheet.mock.calls.at(-1)[0].subtitle).toBe('Running • 4 vCPU • 4 GB');
 
     api.post.mockResolvedValue({});
     // Restart, Shut down and Turn off now are asked about before anything is sent (SET-07)
-    showBottomSheet.mock.calls.at(-1)[0].items.find((i) => i.label === 'Restart VM').onClick();
+    showBottomSheet.mock.calls
+      .at(-1)[0]
+      .items.find((i) => i.label === 'Restart VM')
+      .onClick();
     expect(api.post).not.toHaveBeenCalled();
     expect(showDangerConfirm.mock.calls.at(-1)[0]).toBe('Restart web1?');
     showDangerConfirm.mock.calls.at(-1)[2]();
@@ -152,7 +183,9 @@ describe('VM manager window (NUX-20)', () => {
     expect(showBottomSheet.mock.calls.at(-1)[0].subtitle).toBe('Running • 2 vCPU • 2 GB');
 
     card(grid, 'idle').querySelector('.btn-vm-more-sheet').click();
-    expect(labels()).toEqual(expect.arrayContaining(['Shut down (ACPI)', 'Turn off now (like pulling the plug)', 'Edit VM settings']));
+    expect(labels()).toEqual(
+      expect.arrayContaining(['Shut down (ACPI)', 'Turn off now (like pulling the plug)', 'Edit VM settings'])
+    );
 
     card(grid, 'setup').querySelector('.btn-vm-more-sheet').click();
     expect(labels()).toEqual(expect.arrayContaining(['Start VM', 'Edit VM settings']));
@@ -171,7 +204,11 @@ describe('connect dialog and KVM checks (NUX-20)', () => {
 
   it('lists the ways to connect to a VM with an address', () => {
     openVmConnectModal('c1', {
-      id: 'c1', name: 'files', state: 'running', ip_address: '10.0.0.9', vnc_port: 5903,
+      id: 'c1',
+      name: 'files',
+      state: 'running',
+      ip_address: '10.0.0.9',
+      vnc_port: 5903,
       host_shares: [{ host_path: '/mnt/user/data', mount_tag: 'data' }],
     });
     const text = document.getElementById('modal-vm-connect').textContent;
@@ -202,7 +239,13 @@ describe('connect dialog and KVM checks (NUX-20)', () => {
   });
 
   it('shows the KVM checks on a working host', () => {
-    openKvmDiagnosticsModal({ state: 'active', hardware_virt: true, module_loaded: true, device_present: true, device_writable: true });
+    openKvmDiagnosticsModal({
+      state: 'active',
+      hardware_virt: true,
+      module_loaded: true,
+      device_present: true,
+      device_writable: true,
+    });
     const modal = document.getElementById('modal-kvm-diagnose');
     expect(modal.textContent).toContain('Virtualization checks (KVM)');
     expect(modal.textContent).toContain('Fast: hardware virtualization is on');
@@ -238,12 +281,18 @@ describe('VMs on a phone and missing numbers (VMs report 34)', () => {
 
   it('shows a dash for numbers the server did not send, and hides an empty CPU badge', async () => {
     api.get.mockImplementation(async (url) => {
-      if (url === '/api/vms/telemetry') return { kvm: { state: 'active' }, memory_budget: { total_host_ram_gb: 32 }, cpu_capacity: { host_threads: 8, allocated_vcpus: 2 } };
-      if (url === '/api/vms') return [
-        { id: 'd1', name: 'nodisk', state: 'stopped', vcpus: 1, ram_gb: 1 },
-        { id: 'd2', name: 'withdisk', state: 'stopped', vcpus: 1, ram_gb: 1, disk_size_gb: 32, disk_format: 'qcow2' },
-        { id: 'd3', name: 'noformat', state: 'stopped', vcpus: 1, ram_gb: 1, disk_size_gb: 16 },
-      ];
+      if (url === '/api/vms/telemetry')
+        return {
+          kvm: { state: 'active' },
+          memory_budget: { total_host_ram_gb: 32 },
+          cpu_capacity: { host_threads: 8, allocated_vcpus: 2 },
+        };
+      if (url === '/api/vms')
+        return [
+          { id: 'd1', name: 'nodisk', state: 'stopped', vcpus: 1, ram_gb: 1 },
+          { id: 'd2', name: 'withdisk', state: 'stopped', vcpus: 1, ram_gb: 1, disk_size_gb: 32, disk_format: 'qcow2' },
+          { id: 'd3', name: 'noformat', state: 'stopped', vcpus: 1, ram_gb: 1, disk_size_gb: 16 },
+        ];
       return [];
     });
     initVmManager();
@@ -263,7 +312,11 @@ describe('VMs on a phone and missing numbers (VMs report 34)', () => {
     document.body.classList.add('mobile-mode');
     console_.openVmConsole('vm-k', 'Keys VM', 'gui');
     const sent = [];
-    const rfb = { sendKey: (keysym, code, down) => { if (down !== false) sent.push(code); } };
+    const rfb = {
+      sendKey: (keysym, code, down) => {
+        if (down !== false) sent.push(code);
+      },
+    };
     const spy = vi.spyOn(console_, '_sendKeyToRfb');
     document.getElementById('btn-vnc-keys')?.click();
     const call = vi.mocked(showBottomSheet).mock.calls.at(-1)?.[0];
@@ -276,4 +329,3 @@ describe('VMs on a phone and missing numbers (VMs report 34)', () => {
     expect(spy).toBeDefined();
   });
 });
-

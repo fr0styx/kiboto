@@ -37,7 +37,8 @@ let _activeTermWs = null;
 let _termView = null;
 let _termViewCid = null;
 // the terminal's own lines, in the reader's language (SET-14)
-const termReady = () => t('ci.term_ready', '# Container terminal ready. Type a command below (for example ls -la, uname -a, ps aux).');
+const termReady = () =>
+  t('ci.term_ready', '# Container terminal ready. Type a command below (for example ls -la, uname -a, ps aux).');
 
 export function initContainerModal() {
   if (document.getElementById('container-inspector-overlay')) return;
@@ -241,7 +242,10 @@ export function initContainerModal() {
       const codeEl = document.getElementById('ci-compose-code');
       if (codeEl && codeEl.textContent) {
         copyText(codeEl.textContent).then(() => {
-          showToast(t('toast.docker_compose_yaml_copied_to_clipboard', 'Docker Compose YAML copied to clipboard!'), 'success');
+          showToast(
+            t('toast.docker_compose_yaml_copied_to_clipboard', 'Docker Compose YAML copied to clipboard!'),
+            'success'
+          );
         });
       }
     });
@@ -259,7 +263,10 @@ export function initContainerModal() {
       a.download = `${_activeCname || 'docker'}-compose.yml`;
       a.click();
       URL.revokeObjectURL(url);
-      showToast(t('toast.downloaded_compose_yml', 'Downloaded {activeCname}-compose.yml', { activeCname: _activeCname }), 'info');
+      showToast(
+        t('toast.downloaded_compose_yml', 'Downloaded {activeCname}-compose.yml', { activeCname: _activeCname }),
+        'info'
+      );
     });
   }
 
@@ -406,7 +413,9 @@ export function closeContainerInspector() {
     DockManager.unregister('container-inspector');
   }
   if (_activeTermWs) {
-    try { _activeTermWs.close(); } catch (_) {}
+    try {
+      _activeTermWs.close();
+    } catch (_) {}
     _activeTermWs = null;
   }
   stopLogStream();
@@ -446,7 +455,9 @@ function ensureContainerTermView() {
 export function connectContainerTerminalWs(cid) {
   if (typeof WebSocket === 'undefined') return;
   if (_activeTermWs) {
-    try { _activeTermWs.close(); } catch (_) {}
+    try {
+      _activeTermWs.close();
+    } catch (_) {}
     _activeTermWs = null;
   }
 
@@ -458,7 +469,7 @@ export function connectContainerTerminalWs(cid) {
     _termViewCid = cid;
   }
 
-  const proto = (typeof window !== 'undefined' && window.location.protocol === 'https:') ? 'wss:' : 'ws:';
+  const proto = typeof window !== 'undefined' && window.location.protocol === 'https:' ? 'wss:' : 'ws:';
   const host = typeof window !== 'undefined' ? window.location.host : '127.0.0.1:8082';
   const token = auth.getToken() || '';
   const wsUrl = `${proto}//${host}/api/docker/containers/${encodeURIComponent(cid)}/terminal/ws`;
@@ -499,7 +510,9 @@ export async function switchContainerTab(tabTarget) {
     const isActive = b.dataset.tab === tabTarget;
     b.classList.toggle('active', isActive);
     if (isActive && typeof b.scrollIntoView === 'function') {
-      try { b.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }); } catch (_) {}
+      try {
+        b.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      } catch (_) {}
     }
   });
   _activeTab = tabTarget;
@@ -560,7 +573,6 @@ export function clearTerminal() {
     view.writeln(`\x1b[90m${termReady()}\x1b[0m`);
   }
 }
-
 
 /** The detail tabs for everyone; the others come with "Show Docker details" (SET-25, Apps 4). */
 export const EVERYDAY_TABS = ['overview', 'mounts', 'logs'];
@@ -658,9 +670,10 @@ async function loadContainerDetails(cid) {
     }
 
     // Hardware badges HTML
-    const hwBadges = (details.hardware_badges || []).map(
-      (b) => `<span class="docker-hw-badge docker-hw-${escapeHtml(b.id)}">${escapeHtml(b.label)}</span>`
-    ).join(' ') || `<span class="ci-xs-muted-2">${t('ci.none', 'None')}</span>`;
+    const hwBadges =
+      (details.hardware_badges || [])
+        .map((b) => `<span class="docker-hw-badge docker-hw-${escapeHtml(b.id)}">${escapeHtml(b.label)}</span>`)
+        .join(' ') || `<span class="ci-xs-muted-2">${t('ci.none', 'None')}</span>`;
 
     // Stack pill HTML
     const stackHtml = details.stack
@@ -786,13 +799,22 @@ async function loadContainerDetails(cid) {
       backupActionBtn.addEventListener('click', async () => {
         backupActionBtn.disabled = true;
         setIconLabel(backupActionBtn, '⏳', t('ui.backing_up', 'Backing up...'));
-        showToast(t('toast.creating_backup_for', 'Creating backup for {activeCname}...', { activeCname: _activeCname }), 'info');
+        showToast(
+          t('toast.creating_backup_for', 'Creating backup for {activeCname}...', { activeCname: _activeCname }),
+          'info'
+        );
         try {
           const res = await api.post(`/api/docker/containers/${encodeURIComponent(cid)}/backup`);
           // the server names the file `filename` and its size `size_human`: every message said "archive.tar.gz" (SET-14)
           const archiveName = res?.backup?.filename || res?.backup?.archive_file || 'archive.tar.gz';
           const sizeStr = res?.backup?.size_human || res?.backup?.archive_size_formatted || '';
-          showToast(t('toast.app_backed_up', 'App "{name}" backed up ({archive}).', { name: _activeCname, archive: sizeStr ? `${archiveName}, ${sizeStr}` : archiveName }), 'success');
+          showToast(
+            t('toast.app_backed_up', 'App "{name}" backed up ({archive}).', {
+              name: _activeCname,
+              archive: sizeStr ? `${archiveName}, ${sizeStr}` : archiveName,
+            }),
+            'success'
+          );
         } catch (err) {
           showToast(t('toast.backup_failed', 'Backup failed: {error}', { error: err.message }), 'error');
         } finally {
@@ -821,10 +843,16 @@ async function loadContainerDetails(cid) {
             nano_cpus: isNaN(cpuVal) ? 0 : cpuVal,
             restart_policy: restartVal,
           });
-          showToast(t('toast.resource_limits_updated_with_zero_downtime', 'Resource limits updated with zero downtime!'), 'success');
+          showToast(
+            t('toast.resource_limits_updated_with_zero_downtime', 'Resource limits updated with zero downtime!'),
+            'success'
+          );
           await loadContainerDetails(cid);
         } catch (err) {
-          showToast(t('toast.resource_update_failed', 'Resource update failed: {error}', { error: err.message }), 'error');
+          showToast(
+            t('toast.resource_update_failed', 'Resource update failed: {error}', { error: err.message }),
+            'error'
+          );
         } finally {
           applyResBtn.disabled = false;
           setIconLabel(applyResBtn, '💾', t('ui.apply_tuning', 'Apply'));
@@ -849,7 +877,10 @@ async function loadContainerDetails(cid) {
         showToast(t('toast.restarting', 'Restarting {activeCname}...', { activeCname: _activeCname }), 'info');
         try {
           await api.post(`/api/docker/containers/${encodeURIComponent(cid)}/action`, { action: 'restart' });
-          showToast(t('toast.container_restarted', 'Container "{activeCname}" restarted.', { activeCname: _activeCname }), 'success');
+          showToast(
+            t('toast.container_restarted', 'Container "{activeCname}" restarted.', { activeCname: _activeCname }),
+            'success'
+          );
           await loadContainerDetails(cid);
         } catch (err) {
           showToast(t('toast.restart_failed', 'Restart failed: {error}', { error: err.message }), 'error');
@@ -868,7 +899,8 @@ async function loadContainerDetails(cid) {
     // Populate Environment Tab
     renderEnvTab(details);
   } catch (err) {
-    if (loadingEl) loadingEl.innerHTML = `<span class="ci-crit">${escapeHtml(t('ci.load_failed', 'Could not load the container details: {error}', { error: err.message }))}</span>`;
+    if (loadingEl)
+      loadingEl.innerHTML = `<span class="ci-crit">${escapeHtml(t('ci.load_failed', 'Could not load the container details: {error}', { error: err.message }))}</span>`;
   }
 }
 
@@ -878,9 +910,12 @@ function renderPortsTab(details) {
   const container = document.getElementById('ci-ports-content');
   if (!container) return;
 
-  const currentHost = typeof window !== 'undefined' && window.location.hostname ? window.location.hostname : 'localhost';
+  const currentHost =
+    typeof window !== 'undefined' && window.location.hostname ? window.location.hostname : 'localhost';
   const webUrl = details.webui_url ? details.webui_url.replace('[HOST]', currentHost) : null;
-  const isHostNet = details.overview?.network_mode === 'host' || (details.ports || []).some((p) => p.ip === 'host' || p.is_host_network);
+  const isHostNet =
+    details.overview?.network_mode === 'host' ||
+    (details.ports || []).some((p) => p.ip === 'host' || p.is_host_network);
 
   const hostBanner = isHostNet
     ? `
@@ -927,16 +962,19 @@ function renderPortsTab(details) {
             </tr>
           </thead>
           <tbody>
-            ${portsList.map((p) => {
-              const isWeb = p.public_port === details.primary_port;
-              const isHost = p.ip === 'host' || p.is_host_network;
-              const hostLabel = isHost
-                ? `<span class="ci-bold-accent">${t('ci.host_direct', 'Host direct (:{port})', { port: p.public_port })}</span>`
-                : (p.public_port ? `${escapeHtml(p.ip || '0.0.0.0')}:${p.public_port}` : `<span class="ci-muted">${t('ci.none', 'None')}</span>`);
-              const directLink = p.public_port
-                ? `<a href="http://${currentHost}:${p.public_port}/" target="_blank" rel="noopener noreferrer" style="color:var(--lt-ink-brand, var(--accent-cyan, #33cdb8)); font-size:var(--kb-fs-xs);">http://${currentHost}:${p.public_port} ↗</a>`
-                : '—';
-              return `
+            ${portsList
+              .map((p) => {
+                const isWeb = p.public_port === details.primary_port;
+                const isHost = p.ip === 'host' || p.is_host_network;
+                const hostLabel = isHost
+                  ? `<span class="ci-bold-accent">${t('ci.host_direct', 'Host direct (:{port})', { port: p.public_port })}</span>`
+                  : p.public_port
+                    ? `${escapeHtml(p.ip || '0.0.0.0')}:${p.public_port}`
+                    : `<span class="ci-muted">${t('ci.none', 'None')}</span>`;
+                const directLink = p.public_port
+                  ? `<a href="http://${currentHost}:${p.public_port}/" target="_blank" rel="noopener noreferrer" style="color:var(--lt-ink-brand, var(--accent-cyan, #33cdb8)); font-size:var(--kb-fs-xs);">http://${currentHost}:${p.public_port} ↗</a>`
+                  : '—';
+                return `
                 <tr>
                   <td class="ci-xs-mono-2">${hostLabel}</td>
                   <td class="ci-mono">${p.private_port || '—'}</td>
@@ -944,19 +982,23 @@ function renderPortsTab(details) {
                   <td>${isWeb ? `<span class="ci-xs-bold-ok">${ico('✓')} ${t('ci.primary_web', 'Main web page')}</span>` : directLink}</td>
                 </tr>
               `;
-            }).join('')}
+              })
+              .join('')}
           </tbody>
         </table>
       </div>
 
-      ${isHostNet ? `
+      ${
+        isHostNet
+          ? `
         <div class="ci-metric-card" style="margin-top:14px; background:rgba(79,216,196,0.04); border:1px solid rgba(79,216,196,0.2); padding:12px; border-radius:8px;">
           <div class="ci-xs-bold-accent-2">${ico('⚡')} ${t('ci.host_active', 'Host network in use')}</div>
           <p class="ci-xs-soft-2">
             ${t('ci.host_active_desc', 'Port forwarding does not apply in host mode. To map your own host ports (for example {example}), change {mode} to bridge mode in the compose file or the container settings.', { example: '<code>8085:8080</code>', mode: '<code>network_mode: host</code>' })}
           </p>
         </div>
-      ` : `
+      `
+          : `
         <!-- Port Reconfiguration Section (Phase 3) -->
         <div class="ci-metric-card ci-box-5">
           <div class="ci-row-8">
@@ -967,7 +1009,9 @@ function renderPortsTab(details) {
             ${t('ci.reconfigure_desc', 'Change the host ports. The container is stopped, copied and started with the new ports; every mounted folder stays.')}
           </p>
           <div class="ci-col">
-            ${portsList.map((p, idx) => `
+            ${portsList
+              .map(
+                (p, idx) => `
               <div class="ci-row-box-2">
                 <span class="ci-xs-strong-mono">${t('ci.container_port_row', 'Container :{port}/{proto}', { port: p.private_port, proto: p.type || 'tcp' })}</span>
                 <span class="ci-muted">➔</span>
@@ -975,7 +1019,9 @@ function renderPortsTab(details) {
                 <input type="number" class="tz-text-input ci-port-input ci-xs-8" data-idx="${idx}" data-cp="${p.private_port}" data-proto="${p.type || 'tcp'}" value="${p.public_port || ''}">
                 <span class="ci-xs-muted" id="ci-port-check-${idx}"></span>
               </div>
-            `).join('')}
+            `
+              )
+              .join('')}
             <div class="ci-x-6">
               <button class="btn-pill-toggle" id="ci-btn-apply-ports" style="color: var(--lt-ink-brand, var(--accent-cyan, #33cdb8)); border-color: var(--accent-cyan,#33cdb8); background: var(--lt-b-33cdb81f, rgba(51,205,184,0.12));">
                 ${ico('🚀')} ${t('ci.recreate_ports', 'Recreate the container with the new ports')}
@@ -983,7 +1029,8 @@ function renderPortsTab(details) {
             </div>
           </div>
         </div>
-      `}
+      `
+      }
     `;
   }
 
@@ -1001,7 +1048,10 @@ function renderPortsTab(details) {
       const statusEl = document.getElementById(`ci-port-check-${idx}`);
       if (!statusEl) return;
       if (isNaN(val) || val <= 0 || val > 65535) {
-        statusEl.innerHTML = '<span class="ci-port-badge badge-crit" style="color:var(--crit); font-size:var(--kb-fs-xs); padding:2px 6px; border-radius:4px; background:rgba(239,68,68,0.12);">' + t('ci.port_invalid', 'Invalid port') + '</span>';
+        statusEl.innerHTML =
+          '<span class="ci-port-badge badge-crit" style="color:var(--crit); font-size:var(--kb-fs-xs); padding:2px 6px; border-radius:4px; background:rgba(239,68,68,0.12);">' +
+          t('ci.port_invalid', 'Invalid port') +
+          '</span>';
         return;
       }
       statusEl.innerHTML = '<span class="ci-xs-muted-2">' + t('ci.checking', 'Checking…') + '</span>';
@@ -1013,9 +1063,10 @@ function renderPortsTab(details) {
           if (chk && chk.available) {
             statusEl.innerHTML = `<span class="ci-port-badge badge-ok" style="color:var(--ok2); font-weight:600; font-size:var(--kb-fs-xs); padding:2px 6px; border-radius:4px; background:rgba(34,197,94,0.12);">${ico('✓')} ${t('ci.port_free', 'Port {port} is free', { port: val })}</span>`;
           } else {
-            const taken = chk && chk.in_use_by
-              ? t('ci.port_used_by', 'Port {port} is in use by {name}', { port: val, name: chk.in_use_by })
-              : t('ci.port_used', 'Port {port} is in use', { port: val });
+            const taken =
+              chk && chk.in_use_by
+                ? t('ci.port_used_by', 'Port {port} is in use by {name}', { port: val, name: chk.in_use_by })
+                : t('ci.port_used', 'Port {port} is in use', { port: val });
             statusEl.innerHTML = `<span class="ci-port-badge badge-warn" style="color:var(--crit); font-weight:600; font-size:var(--kb-fs-xs); padding:2px 6px; border-radius:4px; background:rgba(239,68,68,0.15);">${ico('⚠️')} ${escapeHtml(taken)}</span>`;
           }
         } catch (err) {
@@ -1044,33 +1095,45 @@ function renderPortsTab(details) {
               container_port: cp,
               host_port: isNaN(hp) ? null : hp,
               proto: proto,
-              host_ip: '0.0.0.0'
+              host_ip: '0.0.0.0',
             });
           });
 
           applyPortsBtn.disabled = true;
           applyPortsBtn.textContent = t('ui.recreating_container', 'Recreating container...');
-          showToast(t('toast.recreating_container_with_new_ports', 'Recreating container "{cname}" with new ports...', { cname: cname }), 'info');
+          showToast(
+            t('toast.recreating_container_with_new_ports', 'Recreating container "{cname}" with new ports...', {
+              cname: cname,
+            }),
+            'info'
+          );
 
           try {
             const targetId = details.cid || details.overview?.id;
             await api.post(`/api/docker/containers/${encodeURIComponent(targetId)}/ports`, {
               ports: newPorts,
-              keep_backup: false
+              keep_backup: false,
             });
             showToast(t('ctr.ports_applied', 'The new ports are in place: the container was recreated.'), 'success');
             await loadContainerDetails(targetId);
           } catch (err) {
-            showToast(t('toast.port_reconfiguration_failed', 'Port reconfiguration failed: {error}', { error: err.message }), 'error');
+            showToast(
+              t('toast.port_reconfiguration_failed', 'Port reconfiguration failed: {error}', { error: err.message }),
+              'error'
+            );
           } finally {
             applyPortsBtn.disabled = false;
-            setIconLabel(applyPortsBtn, '🚀', t('ui.recreate_container_with_new_ports', 'Recreate Container with New Ports'));
+            setIconLabel(
+              applyPortsBtn,
+              '🚀',
+              t('ui.recreate_container_with_new_ports', 'Recreate Container with New Ports')
+            );
           }
         },
         null,
         {
           okText: '🚀 Recreate Container',
-          cancelText: t('common.cancel', 'Cancel')
+          cancelText: t('common.cancel', 'Cancel'),
         }
       );
     });
@@ -1083,7 +1146,10 @@ function renderMountsTab(details) {
 
   const mounts = details.mounts || [];
   if (mounts.length === 0) {
-    container.innerHTML = '<div class="ci-muted-center-3">' + escapeHtml(t('ci.no_mounts', 'No folders are mounted in this container.')) + '</div>';
+    container.innerHTML =
+      '<div class="ci-muted-center-3">' +
+      escapeHtml(t('ci.no_mounts', 'No folders are mounted in this container.')) +
+      '</div>';
     return;
   }
 
@@ -1100,16 +1166,19 @@ function renderMountsTab(details) {
           </tr>
         </thead>
         <tbody>
-          ${mounts.map((m) => {
-            const isFmNavigable = m.source && (m.source.startsWith('/mnt/') || m.source.startsWith('/'));
-            const appdataBadge = m.is_appdata
-              ? '<span style="display:inline-block; margin-left:4px; padding:1px 4px; border-radius:3px; font-size:var(--kb-fs-xs); font-weight:700; background:rgba(167, 139, 250, 0.2); color:var(--lt-t-c4b5fdff, #c4b5fd);">' + t('ci.appdata_badge', 'APP DATA') + '</span>'
-              : '';
-            const btnHtml = isFmNavigable
-              ? `<button class="btn-pill-toggle btn-reveal-fm is-small" data-path="${escapeHtml(m.source)}">${ico('📁')} ${t('ui.open_in_file_explorer', 'Open in File Explorer')}</button>`
-              : '—';
+          ${mounts
+            .map((m) => {
+              const isFmNavigable = m.source && (m.source.startsWith('/mnt/') || m.source.startsWith('/'));
+              const appdataBadge = m.is_appdata
+                ? '<span style="display:inline-block; margin-left:4px; padding:1px 4px; border-radius:3px; font-size:var(--kb-fs-xs); font-weight:700; background:rgba(167, 139, 250, 0.2); color:var(--lt-t-c4b5fdff, #c4b5fd);">' +
+                  t('ci.appdata_badge', 'APP DATA') +
+                  '</span>'
+                : '';
+              const btnHtml = isFmNavigable
+                ? `<button class="btn-pill-toggle btn-reveal-fm is-small" data-path="${escapeHtml(m.source)}">${ico('📁')} ${t('ui.open_in_file_explorer', 'Open in File Explorer')}</button>`
+                : '—';
 
-            return `
+              return `
               <tr>
                 <td class="ci-xs-strong-mono-2">
                   ${escapeHtml(m.source)} ${appdataBadge}
@@ -1120,7 +1189,8 @@ function renderMountsTab(details) {
                 <td class="ci-x-7">${btnHtml}</td>
               </tr>
             `;
-          }).join('')}
+            })
+            .join('')}
         </tbody>
       </table>
     </div>
@@ -1144,11 +1214,15 @@ function renderEnvTab(details) {
 
   const envs = details.env || [];
   if (statsEl) {
-    statsEl.textContent = t('ci.vars', '{count, plural, one {# variable} other {# variables}} ({hidden} hidden)', { count: envs.length, hidden: envs.filter((e) => e.is_secret).length });
+    statsEl.textContent = t('ci.vars', '{count, plural, one {# variable} other {# variables}} ({hidden} hidden)', {
+      count: envs.length,
+      hidden: envs.filter((e) => e.is_secret).length,
+    });
   }
 
   if (envs.length === 0) {
-    container.innerHTML = '<div class="ci-muted-center-3">' + escapeHtml(t('ci.no_env', 'No environment variables of its own.')) + '</div>';
+    container.innerHTML =
+      '<div class="ci-muted-center-3">' + escapeHtml(t('ci.no_env', 'No environment variables of its own.')) + '</div>';
     return;
   }
 
@@ -1195,10 +1269,13 @@ function renderEnvTab(details) {
           </tr>
         </thead>
         <tbody>
-          ${envs.map((e, idx) => {
-            const isSec = e.is_secret;
-            const secBadge = isSec ? '<span style="font-size:var(--kb-fs-xs); padding:1px 4px; border-radius:3px; background:rgba(239, 68, 68, 0.15); color:var(--kb-text-crit); margin-left:4px;">SECRET</span>' : '';
-            return `
+          ${envs
+            .map((e, idx) => {
+              const isSec = e.is_secret;
+              const secBadge = isSec
+                ? '<span style="font-size:var(--kb-fs-xs); padding:1px 4px; border-radius:3px; background:rgba(239, 68, 68, 0.15); color:var(--kb-text-crit); margin-left:4px;">SECRET</span>'
+                : '';
+              return `
               <tr>
                 <td class="ci-bold-strong-mono">
                   ${escapeHtml(e.key)} ${secBadge}
@@ -1212,7 +1289,8 @@ function renderEnvTab(details) {
                 </td>
               </tr>
             `;
-          }).join('')}
+            })
+            .join('')}
         </tbody>
       </table>
     </div>
@@ -1255,14 +1333,16 @@ function renderEnvTab(details) {
 
 async function loadContainerCompose(cid) {
   const codeEl = document.getElementById('ci-compose-code');
-  if (codeEl) codeEl.textContent = t('ui.generating_docker_compose_definition', 'Generating Docker Compose definition...');
+  if (codeEl)
+    codeEl.textContent = t('ui.generating_docker_compose_definition', 'Generating Docker Compose definition...');
 
   try {
     const data = await api.get(`/api/docker/containers/${encodeURIComponent(cid)}/compose`);
     _activeComposeData = data;
     renderComposeCode();
   } catch (err) {
-    if (codeEl) codeEl.textContent = `# ${t('ci.compose_failed', 'Could not make the compose file: {error}', { error: err.message })}`;
+    if (codeEl)
+      codeEl.textContent = `# ${t('ci.compose_failed', 'Could not make the compose file: {error}', { error: err.message })}`;
   }
 }
 
@@ -1272,7 +1352,10 @@ async function renderComposeCode() {
   if (!codeEl || !_activeComposeData) return;
 
   const mask = maskToggle ? maskToggle.checked : true;
-  if (!mask && (!_activeComposeData.compose_yaml || _activeComposeData.compose_yaml === _activeComposeData.masked_yaml)) {
+  if (
+    !mask &&
+    (!_activeComposeData.compose_yaml || _activeComposeData.compose_yaml === _activeComposeData.masked_yaml)
+  ) {
     try {
       const data = await api.get(`/api/docker/containers/${encodeURIComponent(_activeCid)}/compose?unmask=true`);
       _activeComposeData = data;
@@ -1280,7 +1363,9 @@ async function renderComposeCode() {
       showToast(t('toast.cannot_unmask_insufficient_permissions', 'Cannot unmask: insufficient permissions.'), 'error');
     }
   }
-  const shown = mask ? _activeComposeData.masked_yaml : (_activeComposeData.compose_yaml || _activeComposeData.masked_yaml);
+  const shown = mask
+    ? _activeComposeData.masked_yaml
+    : _activeComposeData.compose_yaml || _activeComposeData.masked_yaml;
   codeEl.textContent = shown;
   setComposeBadge(_activeComposeData, shown);
 }
@@ -1300,9 +1385,13 @@ export function setComposeBadge(data, shown) {
     badgeEl.style.background = 'rgba(79, 216, 196, 0.15)';
     badgeEl.title = data.compose_file_path || '';
   } else {
-    const label = data.source === 'disk'
-      ? t('ci.compose_rebuilt_masked', 'Rebuilt from the running app, secrets hidden (turn off the mask to see the file on disk)')
-      : t('ci.compose_rebuilt', 'Rebuilt from the running app');
+    const label =
+      data.source === 'disk'
+        ? t(
+            'ci.compose_rebuilt_masked',
+            'Rebuilt from the running app, secrets hidden (turn off the mask to see the file on disk)'
+          )
+        : t('ci.compose_rebuilt', 'Rebuilt from the running app');
     setIconLabel(badgeEl, '✨', label);
     badgeEl.style.color = 'var(--ok2)';
     badgeEl.style.background = 'rgba(51, 205, 184, 0.15)';
@@ -1331,7 +1420,8 @@ export function startLogStream(cid) {
   _activeLogLines = [];
   const terminal = document.getElementById('ci-logs-terminal');
   if (terminal) {
-    terminal.innerHTML = '<div class="ci-logs-note ci-muted-center-2">' + t('ci.connecting', 'Connecting to the live log…') + '</div>';
+    terminal.innerHTML =
+      '<div class="ci-logs-note ci-muted-center-2">' + t('ci.connecting', 'Connecting to the live log…') + '</div>';
   }
 
   try {
@@ -1394,10 +1484,13 @@ export function appendLogLine(l) {
     placeholder.remove();
   }
   if (_activeLogFilter) {
-    const textMatch = (l.msg || '').toLowerCase().includes(_activeLogFilter) || (l.ts || '').toLowerCase().includes(_activeLogFilter);
+    const textMatch =
+      (l.msg || '').toLowerCase().includes(_activeLogFilter) || (l.ts || '').toLowerCase().includes(_activeLogFilter);
     if (!textMatch) return;
   }
-  const tsHtml = l.ts ? `<span style="color:var(--lt-t-33cdb8ff, #33cdb8); opacity:0.6; margin-right:6px;">${escapeHtml(l.ts.slice(11, 19))}</span>` : '';
+  const tsHtml = l.ts
+    ? `<span style="color:var(--lt-t-33cdb8ff, #33cdb8); opacity:0.6; margin-right:6px;">${escapeHtml(l.ts.slice(11, 19))}</span>`
+    : '';
   const color = l.stream === 'stderr' ? '#f87171' : '#e6efef';
   const row = document.createElement('div');
   row.style.cssText = `white-space:pre-wrap; word-break:break-all; color:${color}; margin-bottom:2px;`;
@@ -1420,14 +1513,17 @@ async function loadContainerLogs(cid) {
   const tailSelect = document.getElementById('ci-logs-tail-select');
   const tail = tailSelect ? tailSelect.value : 200;
 
-  if (terminal) terminal.innerHTML = '<div class="ci-logs-note ci-muted-center-2">' + t('ci.fetching_logs', 'Fetching logs…') + '</div>';
+  if (terminal)
+    terminal.innerHTML =
+      '<div class="ci-logs-note ci-muted-center-2">' + t('ci.fetching_logs', 'Fetching logs…') + '</div>';
 
   try {
     const res = await api.get(`/api/docker/containers/${encodeURIComponent(cid)}/logs?tail=${tail}`);
     _activeLogLines = res.lines || [];
     renderLogsOutput();
   } catch (err) {
-    if (terminal) terminal.innerHTML = `<div class="ci-logs-note ci-crit-center">${escapeHtml(t('ci.logs_failed', 'Could not read the logs: {error}', { error: err.message }))}</div>`;
+    if (terminal)
+      terminal.innerHTML = `<div class="ci-logs-note ci-crit-center">${escapeHtml(t('ci.logs_failed', 'Could not read the logs: {error}', { error: err.message }))}</div>`;
   }
 }
 
@@ -1437,17 +1533,22 @@ function renderLogsOutput() {
 
   const lines = _activeLogLines.filter((l) => {
     if (!_activeLogFilter) return true;
-    return (l.msg || '').toLowerCase().includes(_activeLogFilter) || (l.ts || '').toLowerCase().includes(_activeLogFilter);
+    return (
+      (l.msg || '').toLowerCase().includes(_activeLogFilter) || (l.ts || '').toLowerCase().includes(_activeLogFilter)
+    );
   });
 
   if (lines.length === 0) {
-    terminal.innerHTML = '<div class="ci-logs-note ci-muted-center-2">' + t('ci.no_logs', 'No log lines for this period.') + '</div>';
+    terminal.innerHTML =
+      '<div class="ci-logs-note ci-muted-center-2">' + t('ci.no_logs', 'No log lines for this period.') + '</div>';
     return;
   }
 
   terminal.innerHTML = lines
     .map((l) => {
-      const tsHtml = l.ts ? `<span style="color:var(--lt-t-33cdb8ff, #33cdb8); opacity:0.6; margin-right:6px;">${escapeHtml(l.ts.slice(11, 19))}</span>` : '';
+      const tsHtml = l.ts
+        ? `<span style="color:var(--lt-t-33cdb8ff, #33cdb8); opacity:0.6; margin-right:6px;">${escapeHtml(l.ts.slice(11, 19))}</span>`
+        : '';
       const color = l.stream === 'stderr' ? '#f87171' : '#e6efef';
       return `<div style="white-space:pre-wrap; word-break:break-all; color:${color}; margin-bottom:2px;">${tsHtml}${escapeHtml(l.msg)}</div>`;
     })
@@ -1576,7 +1677,10 @@ export function openContainerDeleteModal(cid, cname, imageRef = '', onDeleted = 
         onDeleted();
       }
     } catch (err) {
-      showToast(t('toast.failed_to_destroy_container', 'Failed to destroy container: {error}', { error: err.message }), 'error');
+      showToast(
+        t('toast.failed_to_destroy_container', 'Failed to destroy container: {error}', { error: err.message }),
+        'error'
+      );
       confirmBtn.disabled = false;
       setIconLabel(confirmBtn, '💥', t('ui.destroy_container', 'Remove app'));
     }
@@ -1590,7 +1694,8 @@ async function renderContainerEditTab(cid) {
   // The form always starts from the real values (SET-07). It was filled from the details the
   // Overview had loaded, where secrets are dots: "Save and recreate" then wrote the dots of a
   // password inside an address into the new container.
-  hostEl.innerHTML = '<div class="ci-muted-center">' + t('ci.loading_config', 'Loading the container settings…') + '</div>';
+  hostEl.innerHTML =
+    '<div class="ci-muted-center">' + t('ci.loading_config', 'Loading the container settings…') + '</div>';
   let details;
   try {
     details = await api.get(`/api/docker/containers/${encodeURIComponent(cid)}/details?unmask=true`);
@@ -1604,7 +1709,9 @@ async function renderContainerEditTab(cid) {
   const currentImage = ov.image || '';
   const currentNetwork = ov.network_mode || 'bridge';
   const currentRestart = ov.restart_policy || 'unless-stopped';
-  const isToolkit = ['kiboto', 'zettnas-toolkit', 'zettnas'].includes(currentName) || (cid && window.location.hostname && cid.startsWith(window.location.hostname));
+  const isToolkit =
+    ['kiboto', 'zettnas-toolkit', 'zettnas'].includes(currentName) ||
+    (cid && window.location.hostname && cid.startsWith(window.location.hostname));
 
   const portsList = (details.ports || []).map((p) => ({
     container_port: p.private_port,
@@ -1617,7 +1724,7 @@ async function renderContainerEditTab(cid) {
     const isVolume = m.type === 'volume' && Boolean(m.name);
     return {
       // a volume is saved by its name (name:/path:rw), never by Docker's folder for it
-      source: isVolume ? m.name : (m.source || ''),
+      source: isVolume ? m.name : m.source || '',
       destination: m.destination || '',
       mode: m.mode === 'ro' || m.rw === false ? 'ro' : 'rw',
       kind: isVolume ? 'volume' : 'bind',
@@ -1643,11 +1750,15 @@ async function renderContainerEditTab(cid) {
         ${isToolkit ? `<span class="ci-badge" style="background:rgba(239,68,68,0.15); color:var(--lt-t-fca5a5ff, #fca5a5); font-size:var(--kb-fs-xs); padding:2px 8px; border-radius:4px; font-weight:700;">${t('ci.self_protected', 'SELF-PROTECTED')}</span>` : ''}
       </div>
 
-      ${isToolkit ? `
+      ${
+        isToolkit
+          ? `
         <div style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); border-radius:6px; padding:12px; margin-bottom:14px; color:var(--lt-t-fca5a5ff, #fca5a5); font-size:var(--kb-fs-xs);">
           ${ico('⚠️')} ${t('ci.self_note', 'Kiboto can’t recreate its own container from here. Change its settings in Docker Compose or the host’s template, so running connections are not cut.')}
         </div>
-      ` : ''}
+      `
+          : ''
+      }
 
       <!-- Section 1: General Settings -->
       <div class="ci-metric-card ci-box-6">
@@ -1743,7 +1854,8 @@ async function renderContainerEditTab(cid) {
   function addPortRow(p = {}) {
     const row = document.createElement('div');
     row.className = 'cie-port-row';
-    row.style.cssText = 'display:flex; align-items:center; gap:8px; background:rgba(255,255,255,0.03); padding:6px 10px; border-radius:6px;';
+    row.style.cssText =
+      'display:flex; align-items:center; gap:8px; background:rgba(255,255,255,0.03); padding:6px 10px; border-radius:6px;';
     row.innerHTML = `
       <span class="ci-xs-muted-6">${t('ci.row_container', 'Container:')}</span>
       <input type="number" class="tz-text-input cie-cp-input ci-xs-12" placeholder="80" value="${p.container_port || ''}">
@@ -1766,7 +1878,8 @@ async function renderContainerEditTab(cid) {
     const row = document.createElement('div');
     row.className = 'cie-mount-row';
     row.dataset.kind = m.kind || 'bind';
-    row.style.cssText = 'display:flex; align-items:center; gap:8px; background:rgba(255,255,255,0.03); padding:6px 10px; border-radius:6px;';
+    row.style.cssText =
+      'display:flex; align-items:center; gap:8px; background:rgba(255,255,255,0.03); padding:6px 10px; border-radius:6px;';
     const srcLabel = m.kind === 'volume' ? t('ci.row_volume', 'Volume:') : t('ci.row_host_path', 'Host path:');
     row.innerHTML = `
       <span class="ci-xs-muted-6">${escapeHtml(srcLabel)}</span>
@@ -1787,7 +1900,8 @@ async function renderContainerEditTab(cid) {
   function addEnvRow(e = {}) {
     const row = document.createElement('div');
     row.className = 'cie-env-row';
-    row.style.cssText = 'display:flex; align-items:center; gap:8px; background:rgba(255,255,255,0.03); padding:4px 8px; border-radius:6px;';
+    row.style.cssText =
+      'display:flex; align-items:center; gap:8px; background:rgba(255,255,255,0.03); padding:4px 8px; border-radius:6px;';
     row.innerHTML = `
       <input type="text" class="tz-text-input cie-key-input ci-xs-bold-mono" placeholder="KEY" value="${escapeHtml(e.key || '')}">
       <span class="ci-muted">=</span>
@@ -1884,7 +1998,10 @@ async function renderContainerEditTab(cid) {
         statusMsg.style.display = 'block';
         statusMsg.style.background = 'rgba(51,205,184,0.15)';
         statusMsg.style.color = '#4fd8c4';
-        statusMsg.textContent = t('ui.validating_configuration_creating_backup_and', 'Validating configuration, creating backup, and recreating container...');
+        statusMsg.textContent = t(
+          'ui.validating_configuration_creating_backup_and',
+          'Validating configuration, creating backup, and recreating container...'
+        );
 
         try {
           const res = await api.post(`/api/docker/containers/${encodeURIComponent(cid)}/recreate`, {
@@ -1902,7 +2019,12 @@ async function renderContainerEditTab(cid) {
           statusMsg.style.background = 'rgba(51,205,184,0.15)';
           statusMsg.style.color = 'var(--ok2, #33cdb8)';
           statusMsg.textContent = `✓ ${res.message || 'Container recreated successfully!'}`;
-          showToast(t('toast.container_successfully_recreated', 'Container "{target_name}" successfully recreated!', { target_name: res.target_name || name }), 'success');
+          showToast(
+            t('toast.container_successfully_recreated', 'Container "{target_name}" successfully recreated!', {
+              target_name: res.target_name || name,
+            }),
+            'success'
+          );
 
           // Refresh details
           _activeCid = res.new_id || name;
@@ -1932,7 +2054,7 @@ async function renderContainerEditTab(cid) {
       null,
       {
         okText: '💾 Save & Recreate',
-        cancelText: t('common.cancel', 'Cancel')
+        cancelText: t('common.cancel', 'Cancel'),
       }
     );
   };
@@ -1957,4 +2079,3 @@ export function _resetContainerModalForTesting() {
 if (typeof window !== 'undefined') {
   window.openContainerInspector = openContainerInspector;
 }
-

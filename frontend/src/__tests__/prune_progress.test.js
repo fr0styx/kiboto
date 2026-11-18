@@ -1,7 +1,16 @@
 import { describe, it, expect, vi } from 'vitest';
 
-vi.mock('../api.js', () => ({ api: { get: vi.fn(), post: vi.fn() }, auth: { getToken: () => '' }, ApiError: class extends Error {} }));
-vi.mock('../toast.js', () => ({ showToast: vi.fn(), showConfirmToast: vi.fn(), showPromptToast: vi.fn(), showBottomSheet: vi.fn() }));
+vi.mock('../api.js', () => ({
+  api: { get: vi.fn(), post: vi.fn() },
+  auth: { getToken: () => '' },
+  ApiError: class extends Error {},
+}));
+vi.mock('../toast.js', () => ({
+  showToast: vi.fn(),
+  showConfirmToast: vi.fn(),
+  showPromptToast: vi.fn(),
+  showBottomSheet: vi.fn(),
+}));
 
 describe('docker cleanup progress', () => {
   it('shows the bar, the step list and the image count', async () => {
@@ -9,7 +18,12 @@ describe('docker cleanup progress', () => {
     document.body.innerHTML = `<div id="dpm-progress" hidden><span id="dpm-progress-msg"></span><strong id="dpm-progress-pct"></strong>
       <div id="dpm-bar"><div id="dpm-bar-fill"></div></div><ul id="dpm-steps"></ul><div id="dpm-freed"></div></div>`;
     renderPruneJob({
-      state: 'running', percent: 42, step: 'images', images_done: 33, images_total: 133, freed_human: '1.2 GB',
+      state: 'running',
+      percent: 42,
+      step: 'images',
+      images_done: 33,
+      images_total: 133,
+      freed_human: '1.2 GB',
       steps: [
         { key: 'containers', state: 'done', detail: '2 removed', freed_bytes: 1048576 },
         { key: 'images', state: 'running', detail: '', freed_bytes: 0 },

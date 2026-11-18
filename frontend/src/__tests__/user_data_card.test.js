@@ -18,7 +18,9 @@ describe('Your data', () => {
   });
 
   it('shows your own card in Security and downloads your data', async () => {
-    api.get.mockImplementation(async (url) => (url === '/api/auth/me' ? { id: 'u-me', username: 'me' } : { format: 1 }));
+    api.get.mockImplementation(async (url) =>
+      url === '/api/auth/me' ? { id: 'u-me', username: 'me' } : { format: 1 }
+    );
     await installMyData(document);
     const card = document.getElementById('user-data-card');
     expect(card.textContent).toContain('Download what Kiboto keeps about you');
@@ -28,7 +30,7 @@ describe('Your data', () => {
     expect(URL.createObjectURL).toHaveBeenCalled();
   });
 
-  it('lets an administrator erase a kid\'s chats, log and search data', async () => {
+  it("lets an administrator erase a kid's chats, log and search data", async () => {
     api.post.mockResolvedValue({ status: 'ok' });
     installUserDataFor(document.getElementById('modal-edit-user'), LEA);
     const card = document.getElementById('user-data-card-edit');

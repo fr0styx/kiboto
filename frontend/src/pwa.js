@@ -19,7 +19,10 @@ export function sharedResultMessage(params) {
   const saved = parseInt(shared, 10) || 0;
   const failed = parseInt(params.get('failed') || '0', 10) || 0;
   if (failed) {
-    return { text: t('pwa.share_partial', '{saved} saved to your Inbox, {failed} failed.', { saved, failed }), type: 'warn' };
+    return {
+      text: t('pwa.share_partial', '{saved} saved to your Inbox, {failed} failed.', { saved, failed }),
+      type: 'warn',
+    };
   }
   return { text: t('pwa.share_saved', '{saved} saved to your Inbox folder.', { saved }), type: 'success' };
 }

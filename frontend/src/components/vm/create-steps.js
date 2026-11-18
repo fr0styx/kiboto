@@ -15,7 +15,10 @@ export function stepNames() {
 /** The step list at the top of the dialog. */
 export function stepsHtml() {
   return `<ol class="vm-steps" aria-label="${escapeHtml(t('vmst.steps', 'Steps'))}">${stepNames()
-    .map((name, i) => `<li data-vm-step-label="${i + 1}"><span class="vm-step-n" aria-hidden="true">${i + 1}</span> ${escapeHtml(name)}</li>`)
+    .map(
+      (name, i) =>
+        `<li data-vm-step-label="${i + 1}"><span class="vm-step-n" aria-hidden="true">${i + 1}</span> ${escapeHtml(name)}</li>`
+    )
     .join('')}</ol>`;
 }
 
@@ -48,7 +51,11 @@ export function showStep(modal, n) {
   if (back) back.hidden = step === 1;
   if (next) next.hidden = step === STEPS;
   if (create) create.hidden = step !== STEPS;
-  const first = /** @type {HTMLElement | null} */ (modal.querySelector(`[data-vm-step="${step}"] input:not([type="hidden"]), [data-vm-step="${step}"] select, [data-vm-step="${step}"] button`));
+  const first = /** @type {HTMLElement | null} */ (
+    modal.querySelector(
+      `[data-vm-step="${step}"] input:not([type="hidden"]), [data-vm-step="${step}"] select, [data-vm-step="${step}"] button`
+    )
+  );
   first?.focus();
   return step;
 }
@@ -58,9 +65,14 @@ export function installSteps(modal) {
   const footer = modal.querySelector('.smart-modal-footer');
   const create = modal.querySelector('#vm-create-submit');
   if (footer && create && !modal.querySelector('#vm-create-next')) {
-    create.insertAdjacentHTML('beforebegin', `<button type="button" id="vm-create-back" class="btn-pill-toggle">${escapeHtml(t('vmst.back', 'Back'))}</button><button type="button" id="vm-create-next" class="btn-pill-toggle is-primary">${escapeHtml(t('vmst.next', 'Next'))}</button>`);
+    create.insertAdjacentHTML(
+      'beforebegin',
+      `<button type="button" id="vm-create-back" class="btn-pill-toggle">${escapeHtml(t('vmst.back', 'Back'))}</button><button type="button" id="vm-create-next" class="btn-pill-toggle is-primary">${escapeHtml(t('vmst.next', 'Next'))}</button>`
+    );
   }
-  modal.querySelector('#vm-create-back')?.addEventListener('click', () => showStep(modal, Number(modal.dataset.vmAt || 1) - 1));
+  modal
+    .querySelector('#vm-create-back')
+    ?.addEventListener('click', () => showStep(modal, Number(modal.dataset.vmAt || 1) - 1));
   modal.querySelector('#vm-create-next')?.addEventListener('click', () => {
     const step = Number(modal.dataset.vmAt || 1);
     if (step === 1 && !checkName(modal)) return;

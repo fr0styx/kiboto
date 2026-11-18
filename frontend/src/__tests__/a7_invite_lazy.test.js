@@ -7,6 +7,9 @@ describe('invite landing off the first load (audit A7)', () => {
   it('main.js imports it on demand, for #/invite/ addresses only', () => {
     const main = readFileSync(resolve(__dirname, '../main.js'), 'utf8');
     expect(main).not.toMatch(/^import .*invites\.js/m);
-    expect(main).toContain("if (window.location.hash.startsWith('#/invite/')) import('./components/invites.js')");
+    // formatted code may break the line after the condition: compare with the spacing folded
+    expect(main.replace(/\s+/g, ' ')).toContain(
+      "if (window.location.hash.startsWith('#/invite/')) import('./components/invites.js')"
+    );
   });
 });

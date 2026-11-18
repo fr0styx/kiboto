@@ -53,7 +53,7 @@ describe('Desktop Context Menu, Dock Context Menu, and Wallpaper Engine', () => 
       bubbles: true,
       cancelable: true,
       clientX: 350,
-      clientY: 250
+      clientY: 250,
     });
     stage.dispatchEvent(evt);
 
@@ -74,7 +74,7 @@ describe('Desktop Context Menu, Dock Context Menu, and Wallpaper Engine', () => 
       bubbles: true,
       cancelable: true,
       clientX: 30,
-      clientY: 60
+      clientY: 60,
     });
     icon.dispatchEvent(evt);
 
@@ -126,7 +126,7 @@ describe('Desktop Context Menu, Dock Context Menu, and Wallpaper Engine', () => 
   it('loadWallpapers retrieves active wallpaper and invokes setWallpaper', async () => {
     vi.spyOn(api, 'get').mockResolvedValueOnce({
       files: ['bahia.jpg', 'sunset.png'],
-      active: 'bahia.jpg'
+      active: 'bahia.jpg',
     });
 
     await loadWallpapers();
@@ -149,12 +149,14 @@ describe('Desktop Context Menu, Dock Context Menu, and Wallpaper Engine', () => 
 
     // Trigger desktop context menu
     const stage = document.querySelector('.chassis-workbench-stage');
-    stage.dispatchEvent(new MouseEvent('contextmenu', {
-      bubbles: true,
-      cancelable: true,
-      clientX: 350,
-      clientY: 250
-    }));
+    stage.dispatchEvent(
+      new MouseEvent('contextmenu', {
+        bubbles: true,
+        cancelable: true,
+        clientX: 350,
+        clientY: 250,
+      })
+    );
 
     const sortBtn = document.getElementById('ctx-sort-name');
     expect(sortBtn).not.toBeNull();
@@ -191,7 +193,7 @@ describe('Desktop Context Menu, Dock Context Menu, and Wallpaper Engine', () => 
     await Promise.resolve();
     expect(apiSpy).toHaveBeenCalledWith('/api/wallpapers/rename', {
       old_name: 'bahia.jpg',
-      new_name: 'bahia_new.jpg'
+      new_name: 'bahia_new.jpg',
     });
   });
 
@@ -225,7 +227,7 @@ describe('Desktop Context Menu, Dock Context Menu, and Wallpaper Engine', () => 
       'containers-desktop-icon': { left: 24, top: 301 },
       'fm-desktop-icon': { left: 24, top: 301 },
       'rb-desktop-icon': { left: 24, top: 413 },
-      'chassis-desktop-icon': { left: 24, top: 525 }
+      'chassis-desktop-icon': { left: 24, top: 525 },
     };
     localStorage.setItem('kiboto_desktop_icon_positions_v3', JSON.stringify(legacyPositions));
 

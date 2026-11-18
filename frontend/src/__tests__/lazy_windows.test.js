@@ -24,7 +24,12 @@ describe('lazy windows (FE-02)', () => {
     const real = vi.fn();
     lazyWindow({
       id: 'y',
-      load: () => Promise.resolve({ initY: () => { window.openY = real; } }),
+      load: () =>
+        Promise.resolve({
+          initY: () => {
+            window.openY = real;
+          },
+        }),
       init: 'initY',
       globals: ['openY'],
       openGlobal: 'openY',

@@ -15,9 +15,39 @@ const { api } = await import('../api.js');
 const bell = await import('../components/dock/notifications.js');
 const { renderEventLog, initEvents } = await import('../components/events.js');
 
-const POWER = { id: 7, ts: 1791394000, level: 'info', title: 'Power is back', message: 'Mains power returned after 40 s.', kind: 'ups_power_back', link: 'power', details: { title_key: 'ev.ups_power_back.title', msg_key: 'ev.ups_power_back.msg', params: { secs: 40, charge: 97 } } };
-const BACKUP = { id: 8, ts: 1791394100, level: 'error', title: 'Backup failed: Photos', message: "Backup job 'Photos' failed: disk full", kind: 'backup_failed', link: 'backup', details: { title_key: 'alert.backup_failed.title', msg_key: 'alert.backup_failed.msg', params: { name: 'Photos', error: 'disk full' } } };
-const BLOCKED = { id: 9, ts: 1791394200, last_ts: 1791394800, count: 3, level: 'warning', title: 'Address blocked', message: '10.0.0.7 after 5 wrong passwords' };
+const POWER = {
+  id: 7,
+  ts: 1791394000,
+  level: 'info',
+  title: 'Power is back',
+  message: 'Mains power returned after 40 s.',
+  kind: 'ups_power_back',
+  link: 'power',
+  details: { title_key: 'ev.ups_power_back.title', msg_key: 'ev.ups_power_back.msg', params: { secs: 40, charge: 97 } },
+};
+const BACKUP = {
+  id: 8,
+  ts: 1791394100,
+  level: 'error',
+  title: 'Backup failed: Photos',
+  message: "Backup job 'Photos' failed: disk full",
+  kind: 'backup_failed',
+  link: 'backup',
+  details: {
+    title_key: 'alert.backup_failed.title',
+    msg_key: 'alert.backup_failed.msg',
+    params: { name: 'Photos', error: 'disk full' },
+  },
+};
+const BLOCKED = {
+  id: 9,
+  ts: 1791394200,
+  last_ts: 1791394800,
+  count: 3,
+  level: 'warning',
+  title: 'Address blocked',
+  message: '10.0.0.7 after 5 wrong passwords',
+};
 
 describe('one view of an entry', () => {
   afterEach(async () => {
@@ -25,7 +55,12 @@ describe('one view of an entry', () => {
   });
 
   it('gives the look, the word for the level and the text in the reader’s language', async () => {
-    expect(eventView(BACKUP)).toMatchObject({ look: 'error', icon: '❌', word: 'Problem', title: 'Backup failed: Photos' });
+    expect(eventView(BACKUP)).toMatchObject({
+      look: 'error',
+      icon: '❌',
+      word: 'Problem',
+      title: 'Backup failed: Photos',
+    });
     expect(eventView({ level: 'critical', title: 'x', message: 'y' }).look).toBe('error');
     expect(eventView(POWER).word).toBe('Information');
     expect(eventView({ level: 'success', title: 'x', message: 'y' }).word).toBe('Done');
@@ -85,7 +120,8 @@ describe('the bell', () => {
     localStorage.clear();
     bell.resetCheckedEventsState();
     vi.clearAllMocks();
-    document.body.innerHTML = '<span id="dock-notif-badge"></span><div id="notif-center-list"></div><div id="events-list"></div>';
+    document.body.innerHTML =
+      '<span id="dock-notif-badge"></span><div id="notif-center-list"></div><div id="events-list"></div>';
     state.latestStats = { events: [BLOCKED, BACKUP, POWER] };
   });
   afterEach(async () => {
@@ -100,7 +136,10 @@ describe('the bell', () => {
     expect(document.getElementById('dock-notif-badge').textContent).toBe('2');
     bell.renderNotificationCenter();
     const rows = () => [...document.querySelectorAll('.notif-center-item')];
-    expect(rows().map((r) => r.querySelector('.notif-center-title').textContent)).toEqual(['Address blocked', 'Backup failed: Photos']);
+    expect(rows().map((r) => r.querySelector('.notif-center-title').textContent)).toEqual([
+      'Address blocked',
+      'Backup failed: Photos',
+    ]);
     expect(rows()[0].querySelector('.notif-center-when').textContent).toContain('3 times, the last at');
     await setLanguage('de'); // the bell kept the server's English, and the old language until the next entry
     expect(rows()[1].querySelector('.notif-center-title').textContent).toBe('Sicherung fehlgeschlagen: Photos');

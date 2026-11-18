@@ -32,7 +32,13 @@ describe('Desktop Theme & LCD Screen Themer Isolation Suite', () => {
       expect(html).toContain(`desktop-theme-preset theme-preset-card`);
       expect(html).toContain(`data-theme-id="${tId}"`);
     });
-    for (const id of ['data-look-mode="dark"', 'data-look-mode="light"', 'data-look-mode="auto"', 'id="look-true-black"', 'id="look-tint"']) {
+    for (const id of [
+      'data-look-mode="dark"',
+      'data-look-mode="light"',
+      'data-look-mode="auto"',
+      'id="look-true-black"',
+      'id="look-tint"',
+    ]) {
       expect(html).toContain(id);
     }
     expect(html).not.toContain('desktop-theme-preset theme-preset-card" data-theme-id="yak"');
@@ -282,7 +288,7 @@ describe('Desktop Theme & LCD Screen Themer Isolation Suite', () => {
       'settings.theme_chip_light',
       'settings.theme_chip_yak',
       'settings.text_clarity_title',
-      'settings.text_clarity_desc'
+      'settings.text_clarity_desc',
     ];
 
     langs.forEach((lang) => {

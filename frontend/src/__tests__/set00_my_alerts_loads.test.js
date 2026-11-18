@@ -17,7 +17,10 @@ describe('"My alerts" loads and saves (SET-00)', () => {
   });
 
   it('asks the address the server serves and draws the form', async () => {
-    api.get.mockResolvedValue({ route: { ntfy_topic: 'dad-phone', email: '', events: ['ups'], min_level: 'warning' }, events: ['ups', 'backup'] });
+    api.get.mockResolvedValue({
+      route: { ntfy_topic: 'dad-phone', email: '', events: ['ups'], min_level: 'warning' },
+      events: ['ups', 'backup'],
+    });
     const mount = document.getElementById('mount');
     await renderMyAlerts(mount);
     expect(api.get).toHaveBeenCalledWith(SERVED);
@@ -26,7 +29,10 @@ describe('"My alerts" loads and saves (SET-00)', () => {
   });
 
   it('saves to the same address', async () => {
-    api.get.mockResolvedValue({ route: { ntfy_topic: '', email: '', events: [], min_level: 'warning' }, events: ['ups'] });
+    api.get.mockResolvedValue({
+      route: { ntfy_topic: '', email: '', events: [], min_level: 'warning' },
+      events: ['ups'],
+    });
     api.put.mockResolvedValue({ route: {} });
     const mount = document.getElementById('mount');
     await renderMyAlerts(mount);

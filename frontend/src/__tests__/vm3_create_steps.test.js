@@ -13,12 +13,18 @@ const m = () => document.getElementById('m');
 const $ = (id) => document.getElementById(id);
 
 describe('new machine in three steps (VMs stage 3)', () => {
-  beforeEach(() => { document.body.innerHTML = DIALOG(); });
+  beforeEach(() => {
+    document.body.innerHTML = DIALOG();
+  });
 
   it('names the three steps in order', () => {
     expect(STEPS).toBe(3);
     expect(stepNames()).toEqual(['What to install', 'How big', 'More']);
-    expect([...document.querySelectorAll('[data-vm-step-label]')].map((li) => li.textContent.trim())).toEqual(['1 What to install', '2 How big', '3 More']);
+    expect([...document.querySelectorAll('[data-vm-step-label]')].map((li) => li.textContent.trim())).toEqual([
+      '1 What to install',
+      '2 How big',
+      '3 More',
+    ]);
   });
 
   it('starts on step 1 with Next; Create waits for the last step', () => {

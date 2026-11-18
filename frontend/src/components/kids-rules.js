@@ -19,7 +19,8 @@ export function hoursText(hours, names = dayNames()) {
   const days = [...hours.days].sort((a, b) => a - b);
   let when;
   if (days.length === 7) when = t('kids.every_day', 'Every day');
-  else if (days.length > 2 && days[days.length - 1] - days[0] === days.length - 1) when = `${names[days[0]]}–${names[days[days.length - 1]]}`;
+  else if (days.length > 2 && days[days.length - 1] - days[0] === days.length - 1)
+    when = `${names[days[0]]}–${names[days[days.length - 1]]}`;
   else when = days.map((d) => names[d]).join(', ');
   return `${when} ${hours.start}–${hours.end}`;
 }
@@ -34,14 +35,16 @@ export function aiSwitchesHtml(access) {
     ${roles.map(
       (r) => html`<div class="kids-ai-row"><span class="kids-ai-role">${roleName(r.id)}</span>
         <label class="kb-toggle"><input type="checkbox" role="switch" data-kids-ai="roles" data-role="${r.id}" ${r.on ? 'checked' : ''}><span>${t('ai.access_ask', 'Ask Kib')}</span></label>
-        <label class="kb-toggle"><input type="checkbox" role="switch" data-kids-ai="search_roles" data-role="${r.id}" ${r.search !== false ? 'checked' : ''}><span>${t('ai.access_search', 'AI search')}</span></label></div>`,
+        <label class="kb-toggle"><input type="checkbox" role="switch" data-kids-ai="search_roles" data-role="${r.id}" ${r.search !== false ? 'checked' : ''}><span>${t('ai.access_search', 'AI search')}</span></label></div>`
     )}</div>`;
 }
 
 function filterText(people, username) {
   const saved = (people || {})[username];
   const n = saved?.devices?.length || 0;
-  return n ? t('ff.filtered', '{n, plural, one {# device filtered} other {# devices filtered}}', { n }) : t('ff.not_filtered', 'Not filtered');
+  return n
+    ? t('ff.filtered', '{n, plural, one {# device filtered} other {# devices filtered}}', { n })
+    : t('ff.not_filtered', 'Not filtered');
 }
 
 /** The card's contents: the accounts, then the AI switches. `filter` is null without AdGuard access. */
@@ -52,11 +55,13 @@ export function kidsRulesHtml(users, access, filter) {
         <th>${t('users.col_person', 'Person')}</th><th>${t('kids.col_hours', 'May sign in')}</th>
         <th>${t('kids.col_devices', 'Their devices')}</th><th></th></tr></thead>
       <tbody>${kids.map(
-        (u) => html`<tr data-kid="${u.id}"><td>${u.display_name || u.username} <span class="kb-muted">${roleName(u.role_id)}</span></td>
+        (
+          u
+        ) => html`<tr data-kid="${u.id}"><td>${u.display_name || u.username} <span class="kb-muted">${roleName(u.role_id)}</span></td>
           <td>${hoursText(u.signin_hours)}</td>
           <td>${filter ? filterText(filter.people, u.username) : '—'}</td>
           <td class="kids-actions"><button type="button" class="btn-pill-toggle is-small" data-kids-edit="${u.id}">${t('kids.change_hours', 'Change hours')}</button>
-            ${filter ? html`<button type="button" class="btn-pill-toggle is-small" data-kids-filter>${t('kids.change_devices', 'Filter devices')}</button>` : ''}</td></tr>`,
+            ${filter ? html`<button type="button" class="btn-pill-toggle is-small" data-kids-filter>${t('kids.change_devices', 'Filter devices')}</button>` : ''}</td></tr>`
       )}</tbody></table>`
     : html`<p class="kb-muted">${t('kids.none', 'No kid or guest accounts yet. Add a person with the Kid role to set their rules here.')}</p>`;
   void access; // the Kib switches are under Household rules (SET-19)
@@ -80,6 +85,7 @@ export async function renderKidsRules(mount, users, { onEdit } = {}) {
     const b = /** @type {HTMLElement} */ (e.target).closest('button');
     if (!b) return;
     if (b.dataset.kidsEdit && onEdit) onEdit(b.dataset.kidsEdit);
-    else if ('kidsFilter' in b.dataset) /** @type {any} */ (window).openContainersManager?.({ view: 'family', part: 'filter' }); // the filter lives in Apps (SET-19)
+    else if ('kidsFilter' in b.dataset)
+      /** @type {any} */ (window).openContainersManager?.({ view: 'family', part: 'filter' }); // the filter lives in Apps (SET-19)
   };
 }

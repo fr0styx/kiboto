@@ -3,10 +3,24 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { updateManagementTelemetry } from '../components/management.js';
 
 const ids = [
-  'mgmt-unraid-disks', 'mgmt-unraid-parity', 'mgmt-unraid-mover', 'mgmt-generic-os', 'mgmt-generic-cpu',
-  'mgmt-gpu-line', 'mgmt-npu-container', 'mgmt-npu-status-badge', 'mgmt-npu-name', 'mgmt-npu-driver',
-  'mgmt-npu-node', 'mgmt-npu-clock', 'mgmt-npu-accel', 'mgmt-npu-frameworks-list', 'mgmt-hub-storage-pill',
-  'mgmt-sidebar-storage-badge', 'mgmt-hub-vms-pill', 'mgmt-sidebar-vms-badge',
+  'mgmt-unraid-disks',
+  'mgmt-unraid-parity',
+  'mgmt-unraid-mover',
+  'mgmt-generic-os',
+  'mgmt-generic-cpu',
+  'mgmt-gpu-line',
+  'mgmt-npu-container',
+  'mgmt-npu-status-badge',
+  'mgmt-npu-name',
+  'mgmt-npu-driver',
+  'mgmt-npu-node',
+  'mgmt-npu-clock',
+  'mgmt-npu-accel',
+  'mgmt-npu-frameworks-list',
+  'mgmt-hub-storage-pill',
+  'mgmt-sidebar-storage-badge',
+  'mgmt-hub-vms-pill',
+  'mgmt-sidebar-vms-badge',
 ];
 const text = (id) => document.getElementById(id).textContent;
 
@@ -51,8 +65,23 @@ describe('Mission Control telemetry words (NUX-20)', () => {
         mover: { active: false },
       },
       cpu: { cores: 8 },
-      gpu: { ready: true, model: 'Arc', driver: 'i915', render_node: '/dev/dri/renderD128', acceleration: 'QSV', codecs: ['AV1'] },
-      npu: { ready: true, model: 'AI Boost', driver: 'intel_vpu', render_node: '/dev/accel/accel0', max_freq_mhz: 1400, acceleration: 'OpenVINO', frameworks: ['ONNX'] },
+      gpu: {
+        ready: true,
+        model: 'Arc',
+        driver: 'i915',
+        render_node: '/dev/dri/renderD128',
+        acceleration: 'QSV',
+        codecs: ['AV1'],
+      },
+      npu: {
+        ready: true,
+        model: 'AI Boost',
+        driver: 'intel_vpu',
+        render_node: '/dev/accel/accel0',
+        max_freq_mhz: 1400,
+        acceleration: 'OpenVINO',
+        frameworks: ['ONNX'],
+      },
       disks: [{}, {}],
       vms: [{ state: 'running' }, { state: 'stopped' }],
     });
@@ -66,7 +95,11 @@ describe('Mission Control telemetry words (NUX-20)', () => {
     expect(text('mgmt-hub-vms-pill')).toBe('1 Running');
     expect(text('mgmt-sidebar-vms-badge')).toBe('2 VMs');
     updateManagementTelemetry({
-      unraid: { available: true, parity_check: { active: true, action: 'Check', progress_pct: 40, errors: 1 }, mover: { active: true, remain_files: 3 } },
+      unraid: {
+        available: true,
+        parity_check: { active: true, action: 'Check', progress_pct: 40, errors: 1 },
+        mover: { active: true, remain_files: 3 },
+      },
     });
     expect(text('mgmt-unraid-parity')).toBe('Active (Check 40%) • 1 Error');
     expect(text('mgmt-unraid-mover')).toBe('Active (3 files left)');
@@ -76,6 +109,8 @@ describe('Mission Control telemetry words (NUX-20)', () => {
     updateManagementTelemetry({ system: {} });
     expect(text('mgmt-generic-os')).toBe('Linux');
     document.body.innerHTML = '';
-    expect(() => updateManagementTelemetry({ unraid: { available: true }, gpu: {}, npu: {}, disks: [], vms: [] })).not.toThrow();
+    expect(() =>
+      updateManagementTelemetry({ unraid: { available: true }, gpu: {}, npu: {}, disks: [], vms: [] })
+    ).not.toThrow();
   });
 });

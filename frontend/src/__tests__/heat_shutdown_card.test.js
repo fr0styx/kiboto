@@ -16,17 +16,28 @@ describe('switch off when too hot', () => {
   it('says what it does', () => {
     expect(heatStatus(ST)).toBe('Off');
     expect(heatStatus(null)).toBe('Off');
-    expect(heatStatus({ ...ST, enabled: true })).toBe('On: a hard drive at 60 °C or an NVMe drive at 80 °C for 3 minutes switches the NAS off.');
-    expect(heatStatus({ ...ST, enabled: true, can_power_off: false })).toMatch(/stops the apps and virtual machines\.$/);
-    expect(heatStatus({ ...ST, enabled: true, last: { at: 1795000000, outcome: 'off' } })).toMatch(/Last time \(.+\) it switched the NAS off\.$/);
-    expect(heatStatus({ ...ST, enabled: true, last: { at: 1795000000, outcome: 'by_hand' } })).toMatch(/switched off by hand\.$/);
+    expect(heatStatus({ ...ST, enabled: true })).toBe(
+      'On: a hard drive at 60 °C or an NVMe drive at 80 °C for 3 minutes switches the NAS off.'
+    );
+    expect(heatStatus({ ...ST, enabled: true, can_power_off: false })).toMatch(
+      /stops the apps and virtual machines\.$/
+    );
+    expect(heatStatus({ ...ST, enabled: true, last: { at: 1795000000, outcome: 'off' } })).toMatch(
+      /Last time \(.+\) it switched the NAS off\.$/
+    );
+    expect(heatStatus({ ...ST, enabled: true, last: { at: 1795000000, outcome: 'by_hand' } })).toMatch(
+      /switched off by hand\.$/
+    );
   });
 
   it('turns on and off from the card', async () => {
     document.body.innerHTML = '<section id="heat-shutdown-card" hidden></section>';
     let state = { ...ST };
     vi.spyOn(api, 'get').mockImplementation(async () => state);
-    const put = vi.spyOn(api, 'put').mockImplementation(async (_url, body) => { state = { ...state, ...body }; return state; });
+    const put = vi.spyOn(api, 'put').mockImplementation(async (_url, body) => {
+      state = { ...state, ...body };
+      return state;
+    });
     await renderHeatShutdownCard();
     const card = document.getElementById('heat-shutdown-card');
     expect(card.hidden).toBe(false);

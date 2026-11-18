@@ -1,5 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { fetchListeningPorts, renderListeningPortsTable, initNetworkPortsInspector } from '../components/network-manager.js';
+import {
+  fetchListeningPorts,
+  renderListeningPortsTable,
+  initNetworkPortsInspector,
+} from '../components/network-manager.js';
 import { api } from '../api.js';
 
 describe('Network Manager - Listening Ports Inspector', () => {
@@ -18,8 +22,22 @@ describe('Network Manager - Listening Ports Inspector', () => {
 
   it('renders listening ports and formats protocol and container badges correctly', () => {
     const mockPorts = [
-      { port: 8082, protocol: 'tcp', bind_address: '0.0.0.0', service: 'Kiboto Web Desktop', container: 'zettnas-toolkit', state: 'LISTEN' },
-      { port: 5353, protocol: 'udp', bind_address: '0.0.0.0', service: 'mDNS / Bonjour', container: '', state: 'ACTIVE' },
+      {
+        port: 8082,
+        protocol: 'tcp',
+        bind_address: '0.0.0.0',
+        service: 'Kiboto Web Desktop',
+        container: 'zettnas-toolkit',
+        state: 'LISTEN',
+      },
+      {
+        port: 5353,
+        protocol: 'udp',
+        bind_address: '0.0.0.0',
+        service: 'mDNS / Bonjour',
+        container: '',
+        state: 'ACTIVE',
+      },
     ];
 
     renderListeningPortsTable(mockPorts);
@@ -42,7 +60,14 @@ describe('Network Manager - Listening Ports Inspector', () => {
   it('filters listening ports by search query', () => {
     const mockPorts = [
       { port: 22, protocol: 'tcp', bind_address: '127.0.0.1', service: 'SSH', container: '', state: 'LISTEN' },
-      { port: 8096, protocol: 'tcp', bind_address: '0.0.0.0', service: 'Jellyfin Media Server', container: 'jellyfin', state: 'LISTEN' },
+      {
+        port: 8096,
+        protocol: 'tcp',
+        bind_address: '0.0.0.0',
+        service: 'Jellyfin Media Server',
+        container: 'jellyfin',
+        state: 'LISTEN',
+      },
     ];
 
     renderListeningPortsTable(mockPorts, 'jelly');
@@ -57,8 +82,15 @@ describe('Network Manager - Listening Ports Inspector', () => {
   it('fetches listening ports from API and updates table', async () => {
     const mockResponse = {
       ports: [
-        { port: 445, protocol: 'tcp', bind_address: '0.0.0.0', service: 'SMB / CIFS', container: 'zettnas-samba', state: 'LISTEN' }
-      ]
+        {
+          port: 445,
+          protocol: 'tcp',
+          bind_address: '0.0.0.0',
+          service: 'SMB / CIFS',
+          container: 'zettnas-samba',
+          state: 'LISTEN',
+        },
+      ],
     };
     vi.spyOn(api, 'get').mockResolvedValue(mockResponse);
 

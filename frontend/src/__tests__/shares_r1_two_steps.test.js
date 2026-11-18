@@ -21,7 +21,11 @@ describe('Share a folder in two steps (Shares R1)', () => {
             <button type="button" id="modal-create-share-cancel-btn"></button><button type="submit" id="create-share-submit-btn"></button>
           </form></div></div>`;
   });
-  afterEach(() => { vi.restoreAllMocks(); delete window.openFolderBrowser; document.getElementById('who-window')?.remove(); });
+  afterEach(() => {
+    vi.restoreAllMocks();
+    delete window.openFolderBrowser;
+    document.getElementById('who-window')?.remove();
+  });
 
   it('Choose… picks the folder and names the share after it', () => {
     window.openFolderBrowser = vi.fn((start, cb) => cb('/mnt/user/Family Photos/'));
@@ -44,8 +48,16 @@ describe('Share a folder in two steps (Shares R1)', () => {
 
   it('after the folder is made, step two asks who may open it', async () => {
     vi.spyOn(api, 'post').mockResolvedValue({ status: 'created' });
-    vi.spyOn(api, 'get').mockImplementation(async (url) => (url.endsWith('/who') ? { shares: [{ name: 'pics', people: [{ username: 'ben', name: 'Ben', level: 'none', role: 'share_user' }] }] } : { shares: [] }));
-    HTMLDialogElement.prototype.showModal = HTMLDialogElement.prototype.showModal || function () { this.setAttribute('open', ''); };
+    vi.spyOn(api, 'get').mockImplementation(async (url) =>
+      url.endsWith('/who')
+        ? { shares: [{ name: 'pics', people: [{ username: 'ben', name: 'Ben', level: 'none', role: 'share_user' }] }] }
+        : { shares: [] }
+    );
+    HTMLDialogElement.prototype.showModal =
+      HTMLDialogElement.prototype.showModal ||
+      function () {
+        this.setAttribute('open', '');
+      };
     openCreateNetworkShareModal();
     el('create-share-name').value = 'pics';
     el('create-share-form').dispatchEvent(new Event('submit', { cancelable: true }));

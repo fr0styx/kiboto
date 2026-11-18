@@ -1,6 +1,6 @@
 /**
  * Kiboto Client-Side Observability & Diagnostics Logger
- * 
+ *
  * Captures browser console warnings/errors, unhandled exceptions, and runtime
  * environment metrics into an in-memory circular ring buffer for inclusion in the
  * System Observability & Diagnostics Bundle.
@@ -31,7 +31,10 @@ export function scrubClientString(str) {
   sanitized = sanitized.replace(/Bearer\s+[a-zA-Z0-9_.-]+/gi, 'Bearer ***REDACTED***');
   sanitized = sanitized.replace(/Basic\s+[a-zA-Z0-9+/=]{8,}/gi, 'Basic ***REDACTED***');
   sanitized = sanitized.replace(/(password|passwd|token|secret|key|auth|api_key)=([^&\s"']+)/gi, '$1=***REDACTED***');
-  sanitized = sanitized.replace(/"(password|passwd|token|secret|key|auth|api_key)":\s*"([^"]+)"/gi, '"$1":"***REDACTED***"');
+  sanitized = sanitized.replace(
+    /"(password|passwd|token|secret|key|auth|api_key)":\s*"([^"]+)"/gi,
+    '"$1":"***REDACTED***"'
+  );
   return sanitized;
 }
 
@@ -135,9 +138,7 @@ export function collectClientEnvironment() {
   let activeWindowId = null;
   if (window.DockManager && window.DockManager.windows) {
     activeWindowId = window.DockManager.activeId || null;
-    openWindows = Object.keys(window.DockManager.windows).filter(
-      (id) => !window.DockManager.windows[id].closed
-    );
+    openWindows = Object.keys(window.DockManager.windows).filter((id) => !window.DockManager.windows[id].closed);
   }
 
   // Network connection telemetry
@@ -247,7 +248,9 @@ export function initClientLogger() {
   window.addEventListener('unhandledrejection', (event) => {
     try {
       const reason = event.reason;
-      const msg = reason?.message || (typeof reason === 'string' ? reason : JSON.stringify(reason) || 'Unhandled Promise Rejection');
+      const msg =
+        reason?.message ||
+        (typeof reason === 'string' ? reason : JSON.stringify(reason) || 'Unhandled Promise Rejection');
       pushLogEntry('unhandled_rejection', msg, {
         source: 'unhandledrejection',
         stack: reason?.stack || null,

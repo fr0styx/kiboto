@@ -18,7 +18,10 @@ export function connectHtml(share, a, { twoStep = false, host = '' } = {}) {
   const signIn = host
     ? t('sc.host_sign_in', 'Use the name and password you use for {host}.', { host })
     : twoStep
-      ? t('sc.two_step', 'You have two-step sign-in, so you need a separate password for shared folders. Sign in with your Kiboto name and that password.')
+      ? t(
+          'sc.two_step',
+          'You have two-step sign-in, so you need a separate password for shared folders. Sign in with your Kiboto name and that password.'
+        )
       : t('sc.sign_in', 'Sign in with your Kiboto name and password.');
   return `<h2 id="sc-title" class="account-h">${escapeHtml(t('sc.title', 'Connect to "{share}"', { share }))}</h2>
     ${row(t('sc.windows', 'Windows: in File Explorer, type'), a.windows, 'windows')}
@@ -31,8 +34,12 @@ export function connectHtml(share, a, { twoStep = false, host = '' } = {}) {
 /** The window for one folder. */
 export async function openConnect(share, host = '') {
   const [where, mfa] = await Promise.all([
-    Promise.resolve().then(() => api.get('/api/storage/connect')).catch(() => ({ address: '' })),
-    Promise.resolve().then(() => api.get('/api/auth/mfa/status')).catch(() => ({})),
+    Promise.resolve()
+      .then(() => api.get('/api/storage/connect'))
+      .catch(() => ({ address: '' })),
+    Promise.resolve()
+      .then(() => api.get('/api/auth/mfa/status'))
+      .catch(() => ({})),
   ]);
   const a = addresses(share, where?.address || '');
   document.getElementById('share-connect')?.remove();

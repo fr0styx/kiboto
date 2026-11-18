@@ -37,8 +37,8 @@ if (typeof HTMLCanvasElement !== 'undefined') {
 }
 
 // English strings load lazily in the app (first-load budget); tests read them right away
-const { loadLanguage } = await import("../i18n.js");
-await loadLanguage("en");
+const { loadLanguage } = await import('../i18n.js');
+await loadLanguage('en');
 
 // A timer or promise a test file left behind can still log after its last test. Vitest sends
 // each console line to the main process, and a line sent while the worker is closing fails the

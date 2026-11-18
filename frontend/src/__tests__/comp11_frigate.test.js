@@ -27,7 +27,7 @@ describe('camera alerts from Frigate (COMP-11)', () => {
 
   it('says whether it runs', () => {
     expect(stateText({ enabled: false })).toBe('Off');
-    expect(stateText({ enabled: true, last_error: 'Frigate didn\'t answer' })).toContain("didn't answer");
+    expect(stateText({ enabled: true, last_error: "Frigate didn't answer" })).toContain("didn't answer");
     expect(stateText({ enabled: true, last_check: 0 })).toContain('within a minute');
     expect(stateText(INFO, 1000 + 3 * 60)).toContain('3 minutes ago');
     expect(stateText(INFO, 1010)).toContain('just now');
@@ -59,23 +59,30 @@ describe('camera alerts from Frigate (COMP-11)', () => {
     document.body.append(mount);
     await renderFrigateEvents(mount);
     /** @type {HTMLElement} */ (mount.querySelector('[data-frigate="test"]')).click();
-    await vi.waitFor(() => expect(mount.querySelector('.frigate-test').textContent).toContain('2 cameras: back, front'));
+    await vi.waitFor(() =>
+      expect(mount.querySelector('.frigate-test').textContent).toContain('2 cameras: back, front')
+    );
     /** @type {HTMLElement} */ (mount.querySelector('[data-frigate="save"]')).click();
-    await vi.waitFor(() => expect(api.put).toHaveBeenCalledWith('/api/notifications/frigate', expect.objectContaining({ labels: ['person'] })));
+    await vi.waitFor(() =>
+      expect(api.put).toHaveBeenCalledWith(
+        '/api/notifications/frigate',
+        expect.objectContaining({ labels: ['person'] })
+      )
+    );
     expect(showToast).toHaveBeenCalledWith('Camera alert settings saved.', 'success');
   });
 
   it('shows a failed check and a failed load', async () => {
     api.get.mockResolvedValueOnce(INFO);
-    api.post.mockResolvedValue({ ok: false, error: 'Frigate didn\'t answer at http://frigate:5000' });
+    api.post.mockResolvedValue({ ok: false, error: "Frigate didn't answer at http://frigate:5000" });
     const mount = document.createElement('div');
     await renderFrigateEvents(mount);
     /** @type {HTMLElement} */ (mount.querySelector('[data-frigate="test"]')).click();
     await vi.waitFor(() => expect(mount.querySelector('.frigate-test').textContent).toContain("didn't answer"));
     api.get.mockRejectedValueOnce(new Error('forbidden'));
     await renderFrigateEvents(mount);
-    expect(mount.textContent).toContain("forbidden"); // with a sentence and Retry (NUX-14)
-    expect(mount.querySelector(".kb-load-error button")).not.toBeNull();
+    expect(mount.textContent).toContain('forbidden'); // with a sentence and Retry (NUX-14)
+    expect(mount.querySelector('.kb-load-error button')).not.toBeNull();
     await renderFrigateEvents(null);
   });
 });

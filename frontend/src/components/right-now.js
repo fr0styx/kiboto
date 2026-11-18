@@ -35,7 +35,9 @@ export async function refreshJobs(now = Date.now()) {
   _jobsAt = now;
   try {
     _jobs = runningJobs(await api.get('/api/jobs'));
-  } catch (_) { /* the Jobs list is not reachable: keep what was there */ }
+  } catch (_) {
+    /* the Jobs list is not reachable: keep what was there */
+  }
   return _jobs;
 }
 
@@ -67,8 +69,17 @@ export function rightNowSentences(stats) {
     const asleep = disks.filter((d) => d.standby).length;
     const awake = disks.length - asleep;
     if (!awake) out.push(t('now.drives_asleep', 'The drives are asleep.'));
-    else if (!asleep) out.push(t('now.drives_awake', '{n, plural, one {The drive is awake.} other {All # drives are awake.}}', { n: awake }));
-    else out.push(t('now.drives_some', '{awake} awake, {asleep} asleep.', { awake: t('now.n_drives', '{n, plural, one {# drive} other {# drives}}', { n: awake }), asleep }));
+    else if (!asleep)
+      out.push(
+        t('now.drives_awake', '{n, plural, one {The drive is awake.} other {All # drives are awake.}}', { n: awake })
+      );
+    else
+      out.push(
+        t('now.drives_some', '{awake} awake, {asleep} asleep.', {
+          awake: t('now.n_drives', '{n, plural, one {# drive} other {# drives}}', { n: awake }),
+          asleep,
+        })
+      );
   }
   return out;
 }
@@ -82,13 +93,24 @@ function el(tag, cls, text) {
 
 function jobsBlock(jobs) {
   const box = el('div', 'right-now-jobs');
-  box.append(el('h4', 'right-now-h', t('now.jobs_title', '{n, plural, one {# job running} other {# jobs running}}', { n: jobs.length })));
+  box.append(
+    el(
+      'h4',
+      'right-now-h',
+      t('now.jobs_title', '{n, plural, one {# job running} other {# jobs running}}', { n: jobs.length })
+    )
+  );
   const list = el('ul', 'right-now-apps');
   for (const j of jobs) {
     const li = el('li');
     li.append(el('span', 'right-now-name', jobName(j)));
     const pct = typeof j.percent === 'number' ? `${formatFixed(Math.max(0, Math.min(100, j.percent)), 0)}%` : '';
-    const what = j.status === 'queued' ? t('jobs.status_queued', 'Waiting') : j.status === 'paused' ? t('jobs.status_paused', 'Paused') : pct;
+    const what =
+      j.status === 'queued'
+        ? t('jobs.status_queued', 'Waiting')
+        : j.status === 'paused'
+          ? t('jobs.status_paused', 'Paused')
+          : pct;
     li.append(el('span', 'right-now-use', what));
     list.append(li);
   }
@@ -107,7 +129,9 @@ function jobsBlock(jobs) {
 export function loadLine(stats) {
   const l = stats && stats.cpu && stats.cpu.load_avg;
   if (!Array.isArray(l) || !l.length) return '';
-  return t('now.load', 'Load (1, 5, 15 min): {load}', { load: l.map((v) => formatFixed(Number(v) || 0, 2)).join(' · ') });
+  return t('now.load', 'Load (1, 5, 15 min): {load}', {
+    load: l.map((v) => formatFixed(Number(v) || 0, 2)).join(' · '),
+  });
 }
 
 export function renderRightNow(mount = document.getElementById('right-now'), stats = state.latestStats, jobs = _jobs) {
@@ -142,14 +166,18 @@ export function installRightNow(mount = document.getElementById('right-now')) {
   if (!mount) return false;
   renderRightNow(mount);
   _jobsAt = 0;
-  refreshJobs().then(() => renderRightNow(mount)).catch(() => {});
+  refreshJobs()
+    .then(() => renderRightNow(mount))
+    .catch(() => {});
   if (!_listening) {
     _listening = true;
     ZettEventBus.on('stats:updated', (stats) => {
       const m = document.getElementById('right-now');
       if (!m || m.offsetParent === null) return;
       renderRightNow(m, stats);
-      refreshJobs().then((jobs) => renderRightNow(m, stats, jobs)).catch(() => {});
+      refreshJobs()
+        .then((jobs) => renderRightNow(m, stats, jobs))
+        .catch(() => {});
     });
   }
   return true;

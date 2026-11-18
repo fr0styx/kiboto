@@ -36,7 +36,10 @@ describe('the chat request carries the file in focus', () => {
     const post = vi.spyOn(api, 'post').mockResolvedValueOnce({ reply: 'It says 42.', tools_called: [] });
     setAiChatFocus('/mnt/user/docs/plan.txt');
     await sendAiChatMessage('What is the budget?');
-    expect(post).toHaveBeenCalledWith('/api/media/chat', expect.objectContaining({ message: 'What is the budget?', focus_path: '/mnt/user/docs/plan.txt' }));
+    expect(post).toHaveBeenCalledWith(
+      '/api/media/chat',
+      expect.objectContaining({ message: 'What is the budget?', focus_path: '/mnt/user/docs/plan.txt' })
+    );
     post.mockRestore();
     setAiChatFocus(null);
   });

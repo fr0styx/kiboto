@@ -37,7 +37,8 @@ let primitiveUses = 0;
 let colours = 0;
 const coloursPerFile = {};
 const COLOUR = /#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3})?(?:[0-9a-fA-F]{2})?\b|\b(?:rgba?|hsla?)\((?!\s*var\()/g; // rgba(var(--token-rgb), a) is a token
-const COLOUR_HOMES = /(?:00-tokens|01-themes|light-theme|light-palette|yak-theme|lcd[^/]*)\.(?:css|js)$|\/lcd[^/]*\/|\/styles\/themes\//;
+const COLOUR_HOMES =
+  /(?:00-tokens|01-themes|light-theme|light-palette|yak-theme|lcd[^/]*)\.(?:css|js)$|\/lcd[^/]*\/|\/styles\/themes\//;
 for (const f of files) {
   const src = readFileSync(f, 'utf8');
   const rel = f.replaceAll('\\', '/');
@@ -64,7 +65,10 @@ const now = { important, buttonClasses: buttonClasses.size, inlineStyles, emojiI
 if (process.argv.includes('--update')) {
   const sorted = Object.fromEntries(Object.entries(importantPerFile).sort(([a], [b]) => a.localeCompare(b)));
   const coloursSorted = Object.fromEntries(Object.entries(coloursPerFile).sort(([a], [b]) => a.localeCompare(b)));
-  writeFileSync(BASELINE, JSON.stringify({ ...now, primitiveUses, importantPerFile: sorted, coloursPerFile: coloursSorted }, null, 2) + '\n');
+  writeFileSync(
+    BASELINE,
+    JSON.stringify({ ...now, primitiveUses, importantPerFile: sorted, coloursPerFile: coloursSorted }, null, 2) + '\n'
+  );
   console.log('css budget baseline updated:', { ...now, primitiveUses });
   process.exit(0);
 }
@@ -73,11 +77,15 @@ let failed = false;
 if (base.importantPerFile) {
   for (const [f, n] of Object.entries(importantPerFile)) {
     if ((base.importantPerFile[f] ?? 0) - n > SLACK_PER_FILE) {
-      console.error(`✗ ${f}: ${n} !important, budget still ${base.importantPerFile[f]}: run "npm run lint:css -- --update"`);
+      console.error(
+        `✗ ${f}: ${n} !important, budget still ${base.importantPerFile[f]}: run "npm run lint:css -- --update"`
+      );
       failed = true;
     }
     if (n > (base.importantPerFile[f] ?? 0)) {
-      console.error(`✗ ${f}: ${n} !important (budget ${base.importantPerFile[f] ?? 0}). Use a more specific selector or a token instead.`);
+      console.error(
+        `✗ ${f}: ${n} !important (budget ${base.importantPerFile[f] ?? 0}). Use a more specific selector or a token instead.`
+      );
       failed = true;
     }
   }
@@ -85,20 +93,26 @@ if (base.importantPerFile) {
 if (base.coloursPerFile) {
   for (const [f, n] of Object.entries(coloursPerFile)) {
     if (n > (base.coloursPerFile[f] ?? 0)) {
-      console.error(`✗ ${f}: ${n} hard-coded colours (budget ${base.coloursPerFile[f] ?? 0}). Use a colour token (var(--...)) instead.`);
+      console.error(
+        `✗ ${f}: ${n} hard-coded colours (budget ${base.coloursPerFile[f] ?? 0}). Use a colour token (var(--...)) instead.`
+      );
       failed = true;
     }
   }
 }
 if (primitiveUses < (base.primitiveUses ?? 0)) {
-  console.error(`✗ primitiveUses: ${primitiveUses} (at least ${base.primitiveUses}). Markup built with uiButton/uiField/uiCard/uiPaneHeader was replaced by hand-written markup.`);
+  console.error(
+    `✗ primitiveUses: ${primitiveUses} (at least ${base.primitiveUses}). Markup built with uiButton/uiField/uiCard/uiPaneHeader was replaced by hand-written markup.`
+  );
   failed = true;
 } else {
   console.log(`✓ primitiveUses: ${primitiveUses} (at least ${base.primitiveUses ?? 0})`);
 }
 for (const k of Object.keys(now)) {
   if (now[k] > (base[k] ?? 0)) {
-    console.error(`✗ ${k}: ${now[k]} (budget ${base[k] ?? 0}). Use a component class, a token or a more specific selector instead.`);
+    console.error(
+      `✗ ${k}: ${now[k]} (budget ${base[k] ?? 0}). Use a component class, a token or a more specific selector instead.`
+    );
     failed = true;
   } else if (base[k] - now[k] > SLACK) {
     console.error(`✗ ${k}: ${now[k]}, budget still ${base[k]}: run "npm run lint:css -- --update" to lower it`);

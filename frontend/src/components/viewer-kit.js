@@ -15,11 +15,19 @@ export const ICONS = {
   rotateRight: svg('<path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/>'),
   flip: svg('<path d="M12 3v18"/><path d="M8 7L3 12l5 5V7zM16 7l5 5-5 5V7z"/>'),
   info: svg('<circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/>'),
-  filmstrip: svg('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 5v14M17 5v14M3 9h4M3 15h4M17 9h4M17 15h4"/>'),
-  copy: svg('<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/>'),
+  filmstrip: svg(
+    '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 5v14M17 5v14M3 9h4M3 15h4M17 9h4M17 15h4"/>'
+  ),
+  copy: svg(
+    '<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/>'
+  ),
   download: svg('<path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 21h16"/>'),
-  maximize: svg('<path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M16 21h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>'),
-  restore: svg('<path d="M8 3v3a2 2 0 0 1-2 2H3M21 8h-3a2 2 0 0 1-2-2V3M3 16h3a2 2 0 0 1 2 2v3M16 21v-3a2 2 0 0 1 2-2h3"/>'),
+  maximize: svg(
+    '<path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M16 21h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>'
+  ),
+  restore: svg(
+    '<path d="M8 3v3a2 2 0 0 1-2 2H3M21 8h-3a2 2 0 0 1-2-2V3M3 16h3a2 2 0 0 1 2 2v3M16 21v-3a2 2 0 0 1 2-2h3"/>'
+  ),
   close: svg('<path d="M18 6L6 18M6 6l12 12"/>', 18),
   prev: svg('<path d="M15 18l-6-6 6-6"/>', 28),
   next: svg('<path d="M9 18l6-6-6-6"/>', 28),
@@ -40,7 +48,9 @@ export function displayImageUrl(path, maxDim) {
 }
 
 export const originalImageUrl = (path) =>
-  /\.(heic|heif|dng)$/i.test(path) ? `/api/fs/preview/image?path=${encodeURIComponent(path)}` : `/api/fs/download?path=${encodeURIComponent(path)}`;
+  /\.(heic|heif|dng)$/i.test(path)
+    ? `/api/fs/preview/image?path=${encodeURIComponent(path)}`
+    : `/api/fs/download?path=${encodeURIComponent(path)}`;
 
 /** Which files get a server thumbnail: 'image' (photos, HEIC, DNG), 'video' (a frame), 'vector' (shown as is), or null. */
 export function thumbKind(name) {
@@ -51,7 +61,8 @@ export function thumbKind(name) {
 }
 
 /** Screen-sized preview (photo or video frame) for panels larger than a thumbnail. */
-export const previewUrl = (path, maxDim = 480) => `/api/fs/preview/image?path=${encodeURIComponent(path)}&max_dim=${maxDim}`;
+export const previewUrl = (path, maxDim = 480) =>
+  `/api/fs/preview/image?path=${encodeURIComponent(path)}&max_dim=${maxDim}`;
 
 /** A thumbnail's address; with the file's version (its modification time) the browser keeps it for a year (NPERF-8). */
 export const thumbUrl = (path, version = null) =>
@@ -84,13 +95,18 @@ function inline(s) {
   out = out.replace(/`([^`]+)`/g, '<code>$1</code>');
   out = out.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
   out = out.replace(/(^|[^*])\*([^*\s][^*]*)\*/g, '$1<em>$2</em>');
-  out = out.replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+  out = out.replace(
+    /\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g,
+    '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>'
+  );
   return out;
 }
 
 /** Small, safe Markdown renderer: everything is escaped first, only http(s) links. */
 export function renderMarkdown(text) {
-  const lines = String(text || '').replace(/\r\n?/g, '\n').split('\n');
+  const lines = String(text || '')
+    .replace(/\r\n?/g, '\n')
+    .split('\n');
   const html = [];
   let list = null;
   let para = [];
@@ -184,7 +200,10 @@ export function setResume(path, t, duration, storage = globalThis.localStorage) 
     else all[path] = { t: Math.round(t), at: Date.now() };
     const keys = Object.keys(all);
     if (keys.length > 200) {
-      keys.sort((a, b) => all[a].at - all[b].at).slice(0, keys.length - 200).forEach((k) => delete all[k]);
+      keys
+        .sort((a, b) => all[a].at - all[b].at)
+        .slice(0, keys.length - 200)
+        .forEach((k) => delete all[k]);
     }
     storage.setItem(RESUME_KEY, JSON.stringify(all));
   } catch (e) {

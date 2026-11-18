@@ -50,7 +50,11 @@ export function loadKibExtras(paneId, user = currentUser()) {
       .catch(() => {});
   }
   if (paneId === CONFIG_PANE) {
-    import('../ai-apps-settings.js').then((m) => m.renderAiApps(document.getElementById('ai-apps-mount'), mayKib)).catch(() => {}); // COMP-07
-    import('../ai-pack-settings.js').then((m) => m.renderAiPack(document.getElementById('ai-pack-mount'), mayKib)).catch(() => {}); // AI-40
+    import('../ai-apps-settings.js')
+      .then((m) => m.renderAiApps(document.getElementById('ai-apps-mount'), mayKib))
+      .catch(() => {}); // COMP-07
+    import('../ai-pack-settings.js')
+      .then((m) => m.renderAiPack(document.getElementById('ai-pack-mount'), mayKib))
+      .catch(() => {}); // AI-40
   }
 }

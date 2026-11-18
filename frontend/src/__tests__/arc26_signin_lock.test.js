@@ -127,10 +127,22 @@ describe('sign-in and lock screen (auth.js)', () => {
     byId('login-toggle-manual').click();
     byId('login-username').value = ' carol ';
     byId('login-password').value = 'pw';
-    fetchMock.mockResolvedValueOnce(res({ status: 'ok', token: 'T', user: { id: 'u3', scopes: ['*'] }, must_change_password: true, is_default_password: true }));
+    fetchMock.mockResolvedValueOnce(
+      res({
+        status: 'ok',
+        token: 'T',
+        user: { id: 'u3', scopes: ['*'] },
+        must_change_password: true,
+        is_default_password: true,
+      })
+    );
     byId('login-btn').click();
     await vi.advanceTimersByTimeAsync(400);
-    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({ username: 'carol', password: 'pw', remember_me: true });
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({
+      username: 'carol',
+      password: 'pw',
+      remember_me: true,
+    });
     expect(auth.setToken).toHaveBeenCalledWith('T');
     expect(setCurrentUser).toHaveBeenCalledWith({ id: 'u3', scopes: ['*'] });
     expect(shown('login-overlay')).toBe('none');
@@ -266,7 +278,10 @@ describe('sign-in and lock screen (auth.js)', () => {
     sel.value = '1000';
     sel.dispatchEvent(new Event('change'));
     expect(localStorage.getItem('kiboto_auto_lock_timeout_ms')).toBe('1000');
-    expect(fetchMock).toHaveBeenCalledWith('/api/system/client-preferences', expect.objectContaining({ method: 'POST' }));
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/system/client-preferences',
+      expect.objectContaining({ method: 'POST' })
+    );
 
     vi.useFakeTimers();
     document.documentElement.classList.remove('auth-required');

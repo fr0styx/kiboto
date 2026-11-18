@@ -8,7 +8,14 @@ const posture = {
   score: 90,
   grade: 'A',
   checks: [
-    { id: 'share_access_family', name: 'Kids', passed: false, details: 'kiddo', fix: 'share_access_family', fix_label: 'Fix kids' },
+    {
+      id: 'share_access_family',
+      name: 'Kids',
+      passed: false,
+      details: 'kiddo',
+      fix: 'share_access_family',
+      fix_label: 'Fix kids',
+    },
     { id: 'https_transport', name: 'HTTPS', passed: true, details: 'ok' },
   ],
 };

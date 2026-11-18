@@ -33,13 +33,17 @@ export function shareChoicesHtml(shares) {
     read: t('share.level_read', 'Can view'),
     write: t('share.level_write', 'Can view and change'),
   };
-  return (shares || []).map((s) => `
+  return (shares || [])
+    .map(
+      (s) => `
     <div class="add-user-share-row">
       <span class="add-user-share-name" title="${escapeHtml(s.path || '')}">${escapeHtml(s.name)}</span>
       <select class="add-user-share-level" data-add-user-share="${escapeHtml(s.name)}" aria-label="${escapeHtml(s.name)}">
         ${LEVELS.map((l) => `<option value="${l}"${l === 'none' ? ' selected' : ''}>${escapeHtml(label[l])}</option>`).join('')}
       </select>
-    </div>`).join('');
+    </div>`
+    )
+    .join('');
 }
 
 function levelSelect(attrs, value, withInherit) {
@@ -52,15 +56,20 @@ function levelSelect(attrs, value, withInherit) {
 export function buildShareAccessHtml(data, users) {
   const userNames = users.map((u) => String(u.username || '').toLowerCase()).filter(Boolean);
   const head = userNames.map((u) => `<th class="sha-xs">${escapeHtml(u)}</th>`).join('');
-  const rows = (data.shares || []).map((s) => {
-    const cells = userNames
-      .map((u) => `<td class="sha-x">${levelSelect(`data-share="${escapeHtml(s.name)}" data-user="${escapeHtml(u)}"`, (s.users || {})[u] || 'inherit', true)}</td>`)
-      .join('');
-    return `<tr class="sha-box">
+  const rows = (data.shares || [])
+    .map((s) => {
+      const cells = userNames
+        .map(
+          (u) =>
+            `<td class="sha-x">${levelSelect(`data-share="${escapeHtml(s.name)}" data-user="${escapeHtml(u)}"`, (s.users || {})[u] || 'inherit', true)}</td>`
+        )
+        .join('');
+      return `<tr class="sha-box">
       <td class="sha-bold" title="${escapeHtml(s.path)}">${escapeHtml(s.name)}</td>
       <td class="sha-x">${levelSelect(`data-share-default="${escapeHtml(s.name)}"`, s.default || 'inherit', true)}</td>
       ${cells}</tr>`;
-  }).join('');
+    })
+    .join('');
   return `
     <div class="sha-row-xs">
       <span>${t('sa.everyone_else', 'Everyone else, on shares without a setting:')}</span>${levelSelect('id="share-access-global"', data.default_level || 'none', false)}
@@ -93,7 +102,10 @@ export async function openShareAccessModal() {
   try {
     [data, users] = await Promise.all([api.get('/api/storage/share-access'), api.get('/api/users')]);
   } catch (err) {
-    showToast(t('toast.could_not_load_share_access', 'Could not load share access: {error}', { error: err.message }), 'error');
+    showToast(
+      t('toast.could_not_load_share_access', 'Could not load share access: {error}', { error: err.message }),
+      'error'
+    );
     return;
   }
   const list = Array.isArray(users) ? users : users?.users || [];
@@ -125,7 +137,9 @@ export async function openShareAccessModal() {
   const close = () => backdrop.remove();
   backdrop.querySelector('#share-access-cancel').onclick = close;
   backdrop.querySelector('#share-access-close').onclick = close;
-  backdrop.addEventListener('click', (e) => { if (e.target === backdrop) close(); });
+  backdrop.addEventListener('click', (e) => {
+    if (e.target === backdrop) close();
+  });
   backdrop.querySelector('#share-access-save').onclick = async () => {
     try {
       await api.put('/api/storage/share-access', collectShareAccess(backdrop));

@@ -34,7 +34,8 @@ function* walk(dir) {
 
 const visible = readable; // text a person reads, as opposed to ids, file names or acronyms
 const UI_ATTR = /\s(title|placeholder|aria-label)="((?:[^"<>{}$]|\$\{[^{}]*\})*)"/g;
-const UI_ASSIGN = /\.(?:textContent|innerText|title|placeholder)\s*=\s*(['"`])((?:(?!\1)[^\\$]|\\.|\$\{[^{}`]*\})*)\1\s*;/g;
+const UI_ASSIGN =
+  /\.(?:textContent|innerText|title|placeholder)\s*=\s*(['"`])((?:(?!\1)[^\\$]|\\.|\$\{[^{}`]*\})*)\1\s*;/g;
 const holes = (text) => text.replace(/\$\{[^{}]*\}/g, '\u0000'); // ${...} is not text
 const LIST = process.argv.includes('--list'); // print each hard-coded string
 
@@ -58,8 +59,13 @@ function hardcodedUi(src, rel = '') {
 }
 
 const windowsDir = join(ROOT, 'frontend/src/windows');
-const files = [...walk(join(ROOT, 'frontend/src')), join(ROOT, 'frontend/index.html'),
-  ...readdirSync(windowsDir).filter((f) => f.endsWith('.html')).map((f) => join(windowsDir, f))];
+const files = [
+  ...walk(join(ROOT, 'frontend/src')),
+  join(ROOT, 'frontend/index.html'),
+  ...readdirSync(windowsDir)
+    .filter((f) => f.endsWith('.html'))
+    .map((f) => join(windowsDir, f)),
+];
 let rawToasts = 0;
 let rawDialogs = 0;
 let rawUi = 0;
@@ -77,27 +83,33 @@ for (const file of files) {
   }
   rawToasts += [...src.matchAll(/showToast\(\s*['"`]/g)].length;
   // confirmation, prompt and action dialogs: an English title, or English on their buttons
-  rawDialogs += [...src.matchAll(/show(?:Confirm|Prompt|Action)Toast\(\s*['"`][A-Za-z]/g)].length
-    + [...src.matchAll(/\b(?:okText|cancelText):\s*['"`][A-Za-z]/g)].length;
+  rawDialogs +=
+    [...src.matchAll(/show(?:Confirm|Prompt|Action)Toast\(\s*['"`][A-Za-z]/g)].length +
+    [...src.matchAll(/\b(?:okText|cancelText):\s*['"`][A-Za-z]/g)].length;
   const ui = hardcodedUi(src, rel);
   rawUi += ui;
   if (ui) perFile[rel] = ui;
   if (!rel.endsWith('format.js')) {
     for (const m of src.matchAll(/\.toLocale(?:Date|Time)?String\(/g)) {
       const line = src.slice(0, m.index).split('\n').length;
-      errors.push(`${rel}:${line}: use formatDateTime/formatDate/formatTime/formatNumber from format.js, not toLocale*String() (FE-14)`);
+      errors.push(
+        `${rel}:${line}: use formatDateTime/formatDate/formatTime/formatNumber from format.js, not toLocale*String() (FE-14)`
+      );
     }
   }
 }
 
 // {name} and the ICU plural {name, plural, ...} both count as the placeholder "name"
-const placeholders = (s) => [...new Set([...String(s).matchAll(/\{([a-zA-Z0-9_]+)(?:\}|, plural,)/g)].map((m) => m[1]))].sort().join(',');
+const placeholders = (s) =>
+  [...new Set([...String(s).matchAll(/\{([a-zA-Z0-9_]+)(?:\}|, plural,)/g)].map((m) => m[1]))].sort().join(',');
 for (const [lang, dict] of Object.entries(ALL_TRANSLATIONS)) {
   if (lang === 'en') continue;
   for (const key of Object.keys(en)) {
     if (!(key in dict)) errors.push(`locales/${lang}.js: missing "${key}"`);
     else if (placeholders(dict[key]) !== placeholders(en[key])) {
-      errors.push(`locales/${lang}.js: "${key}" has placeholders {${placeholders(dict[key])}}, en has {${placeholders(en[key])}}`);
+      errors.push(
+        `locales/${lang}.js: "${key}" has placeholders {${placeholders(dict[key])}}, en has {${placeholders(en[key])}}`
+      );
     }
   }
   for (const key of Object.keys(dict)) if (!(key in en)) errors.push(`locales/${lang}.js: "${key}" is not in en.js`);
@@ -107,7 +119,10 @@ for (const [lang, dict] of Object.entries(ALL_TRANSLATIONS)) {
 // (?<!\p{L}) and (?!\p{L}) instead of \b, which takes accented letters for word breaks
 const words = (alts) => new RegExp(`(?<!\\p{L})(?:${alts})(?!\\p{L})`, 'u');
 const ADDRESS = {
-  de: [words('du|Du|dein\\p{L}*|Dein\\p{L}*|dich|Dich|dir|Dir|euch|euer|eure\\p{L}*'), 'German speaks to people as "Sie"'],
+  de: [
+    words('du|Du|dein\\p{L}*|Dein\\p{L}*|dich|Dich|dir|Dir|euch|euer|eure\\p{L}*'),
+    'German speaks to people as "Sie"',
+  ],
   fr: [words("tu|Tu|ton|Ton|ta|tes|toi|te|t'(?=\\p{L})"), 'French speaks to people as "vous"'],
   es: [words('usted|Usted|ustedes|Ustedes'), 'Spanish speaks to people as "tú"'],
   zh: [/您/, 'Chinese uses 你, not 您'],
@@ -120,11 +135,14 @@ for (const [lang, [re, rule]] of Object.entries(ADDRESS)) {
 // "{count} files" reads wrong for one file in English and wrong in most languages: use
 // "{count, plural, one {# file} other {# files}}"
 const COUNTED = /\{(?:count|n|num|total|\w+_count|\w+Count)\}\s+[A-Za-z-]+(?:s|\(s\))(?![A-Za-z])/;
-const missingPlurals = Object.values(en).filter((v) => !String(v).includes(', plural,') && COUNTED.test(String(v))).length;
+const missingPlurals = Object.values(en).filter(
+  (v) => !String(v).includes(', plural,') && COUNTED.test(String(v))
+).length;
 const emojiStrings = Object.values(en).filter((v) => /\p{Extended_Pictographic}/u.test(String(v))).length;
 let toFixed = 0;
 for (const file of files) {
-  if (file.endsWith('.js') && !file.endsWith('format.js')) toFixed += (readFileSync(file, 'utf8').match(/\.toFixed\(/g) || []).length;
+  if (file.endsWith('.js') && !file.endsWith('format.js'))
+    toFixed += (readFileSync(file, 'utf8').match(/\.toFixed\(/g) || []).length;
 }
 
 let baseline = { raw_toasts: Infinity, hardcoded_ui: Infinity, per_file: null };
@@ -135,28 +153,56 @@ try {
 }
 if (process.argv.includes('--update-baseline')) {
   const sorted = Object.fromEntries(Object.entries(perFile).sort(([x], [y]) => x.localeCompare(y)));
-  writeFileSync(BASELINE, JSON.stringify({
-    raw_toasts: rawToasts, raw_dialogs: rawDialogs, hardcoded_ui: rawUi, missing_plurals: missingPlurals, to_fixed: toFixed,
-    emoji_strings: emojiStrings, per_file: sorted,
-  }, null, 2) + '\n');
+  writeFileSync(
+    BASELINE,
+    JSON.stringify(
+      {
+        raw_toasts: rawToasts,
+        raw_dialogs: rawDialogs,
+        hardcoded_ui: rawUi,
+        missing_plurals: missingPlurals,
+        to_fixed: toFixed,
+        emoji_strings: emojiStrings,
+        per_file: sorted,
+      },
+      null,
+      2
+    ) + '\n'
+  );
   console.log(`baseline: ${rawToasts} toasts and ${rawUi} UI strings with hard-coded text`);
 } else {
   if (rawToasts > baseline.raw_toasts) {
-    errors.push(`${rawToasts} toasts use hard-coded text (baseline ${baseline.raw_toasts}); use t('key', 'English text')`);
+    errors.push(
+      `${rawToasts} toasts use hard-coded text (baseline ${baseline.raw_toasts}); use t('key', 'English text')`
+    );
   }
   for (const [name, now, why] of [
     ['raw_dialogs', rawDialogs, 'confirmation or prompt dialogs have a hard-coded English title or button; use t()'],
-    ['missing_plurals', missingPlurals, 'English strings count something without a plural rule; use {count, plural, one {# file} other {# files}}'],
-    ['to_fixed', toFixed, 'toFixed() calls format numbers outside format.js; use formatNumber() so each language gets its own separators'],
-    ['emoji_strings', emojiStrings, 'strings carry emoji; put the icon in the markup (aria-hidden) and keep the words plain'],
+    [
+      'missing_plurals',
+      missingPlurals,
+      'English strings count something without a plural rule; use {count, plural, one {# file} other {# files}}',
+    ],
+    [
+      'to_fixed',
+      toFixed,
+      'toFixed() calls format numbers outside format.js; use formatNumber() so each language gets its own separators',
+    ],
+    [
+      'emoji_strings',
+      emojiStrings,
+      'strings carry emoji; put the icon in the markup (aria-hidden) and keep the words plain',
+    ],
   ]) {
     if (now > (baseline[name] ?? Infinity)) errors.push(`${now} ${why} (baseline ${baseline[name]})`);
   }
   // per file, so translating one screen can't hide new English in another (UX-21)
   for (const [rel, n] of Object.entries(perFile)) {
-    const allowed = baseline.per_file ? baseline.per_file[rel] ?? 0 : Infinity;
+    const allowed = baseline.per_file ? (baseline.per_file[rel] ?? 0) : Infinity;
     if (n > allowed) {
-      errors.push(`${rel}: ${n} hard-coded English strings (baseline ${allowed}); use t('key', 'English text'), data-i18n, or data-i18n-title / -placeholder / -aria-label (npm run lint:i18n -- --list shows them)`);
+      errors.push(
+        `${rel}: ${n} hard-coded English strings (baseline ${allowed}); use t('key', 'English text'), data-i18n, or data-i18n-title / -placeholder / -aria-label (npm run lint:i18n -- --list shows them)`
+      );
     }
   }
 }
@@ -166,4 +212,6 @@ if (errors.length) {
   console.error(`\n${errors.length} translation problem(s).`);
   process.exit(1);
 }
-console.log(`i18n lint: ${Object.keys(en).length} keys in 5 languages, all used keys defined, one form of address each; ${rawToasts} hard-coded toasts (baseline ${baseline.raw_toasts}); ${rawUi} hard-coded UI strings (baseline ${baseline.hardcoded_ui}); ${missingPlurals} counts without plurals, ${toFixed} toFixed(), ${emojiStrings} strings with emoji.`);
+console.log(
+  `i18n lint: ${Object.keys(en).length} keys in 5 languages, all used keys defined, one form of address each; ${rawToasts} hard-coded toasts (baseline ${baseline.raw_toasts}); ${rawUi} hard-coded UI strings (baseline ${baseline.hardcoded_ui}); ${missingPlurals} counts without plurals, ${toFixed} toFixed(), ${emojiStrings} strings with emoji.`
+);

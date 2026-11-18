@@ -8,7 +8,9 @@ export { passkeysAvailable } from './passkeys-check.js';
 
 /** base64url text → ArrayBuffer */
 export function fromB64(text) {
-  const s = String(text || '').replace(/-/g, '+').replace(/_/g, '/');
+  const s = String(text || '')
+    .replace(/-/g, '+')
+    .replace(/_/g, '/');
   const bin = atob(s + '==='.slice((s.length + 3) % 4));
   const out = new Uint8Array(bin.length);
   for (let i = 0; i < bin.length; i += 1) out[i] = bin.charCodeAt(i);
@@ -17,7 +19,8 @@ export function fromB64(text) {
 
 /** ArrayBuffer (or a view) → base64url text */
 export function toB64(buf) {
-  const bytes = buf instanceof ArrayBuffer ? new Uint8Array(buf) : new Uint8Array(buf.buffer, buf.byteOffset, buf.byteLength);
+  const bytes =
+    buf instanceof ArrayBuffer ? new Uint8Array(buf) : new Uint8Array(buf.buffer, buf.byteOffset, buf.byteLength);
   let bin = '';
   for (let i = 0; i < bytes.length; i += 1) bin += String.fromCharCode(bytes[i]);
   return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
@@ -56,7 +59,8 @@ export function credentialJSON(cred) {
     rawId: toB64(cred.rawId),
     type: cred.type,
     response,
-    clientExtensionResults: typeof cred.getClientExtensionResults === 'function' ? cred.getClientExtensionResults() : {},
+    clientExtensionResults:
+      typeof cred.getClientExtensionResults === 'function' ? cred.getClientExtensionResults() : {},
   };
 }
 
@@ -68,14 +72,23 @@ async function postJSON(fetchImpl, url, body) {
     body: JSON.stringify(body),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw Object.assign(new Error(data.detail || data.message || `HTTP ${res.status}`), { status: res.status, data });
+  if (!res.ok)
+    throw Object.assign(new Error(data.detail || data.message || `HTTP ${res.status}`), { status: res.status, data });
   return data;
 }
 
 /** Signs in with a passkey: alone, or with the token the password step gave (the second step).
  * Returns the sign-in answer (status ok, token, user), as /api/auth/login does. */
-export async function passkeySignIn({ mfaToken = '', rememberMe = true, fetchImpl = window.fetch.bind(window), credentials = navigator.credentials } = {}) {
-  const opts = await postJSON(fetchImpl, '/api/auth/passkey/login/options', { mfa_token: mfaToken, remember_me: rememberMe });
+export async function passkeySignIn({
+  mfaToken = '',
+  rememberMe = true,
+  fetchImpl = window.fetch.bind(window),
+  credentials = navigator.credentials,
+} = {}) {
+  const opts = await postJSON(fetchImpl, '/api/auth/passkey/login/options', {
+    mfa_token: mfaToken,
+    remember_me: rememberMe,
+  });
   const cred = await credentials.get({ publicKey: requestOptions(opts.options.publicKey) });
   if (!cred) throw new Error('No passkey was chosen.');
   return postJSON(fetchImpl, '/api/auth/passkey/login', { ticket: opts.ticket, credential: credentialJSON(cred) });

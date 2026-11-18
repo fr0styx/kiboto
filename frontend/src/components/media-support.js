@@ -12,9 +12,25 @@ const VIDEO_TYPES = {
 };
 const BROWSER_AUDIO = new Set(['aac', 'mp3', 'opus', 'vorbis', 'flac']);
 const CODEC_NAMES = {
-  h264: 'H.264', hevc: 'HEVC (H.265)', vp9: 'VP9', vp8: 'VP8', av1: 'AV1', mpeg4: 'MPEG-4', prores: 'ProRes',
-  mpeg2video: 'MPEG-2', aac: 'AAC', mp3: 'MP3', opus: 'Opus', vorbis: 'Vorbis', flac: 'FLAC', ac3: 'Dolby Digital (AC-3)',
-  eac3: 'Dolby Digital Plus', dts: 'DTS', truehd: 'Dolby TrueHD', alac: 'Apple Lossless', pcm_s16le: 'PCM',
+  h264: 'H.264',
+  hevc: 'HEVC (H.265)',
+  vp9: 'VP9',
+  vp8: 'VP8',
+  av1: 'AV1',
+  mpeg4: 'MPEG-4',
+  prores: 'ProRes',
+  mpeg2video: 'MPEG-2',
+  aac: 'AAC',
+  mp3: 'MP3',
+  opus: 'Opus',
+  vorbis: 'Vorbis',
+  flac: 'FLAC',
+  ac3: 'Dolby Digital (AC-3)',
+  eac3: 'Dolby Digital Plus',
+  dts: 'DTS',
+  truehd: 'Dolby TrueHD',
+  alac: 'Apple Lossless',
+  pcm_s16le: 'PCM',
 };
 
 export const mediaInfoUrl = (path) => `/api/fs/media/info?path=${encodeURIComponent(path)}`;
@@ -26,7 +42,11 @@ export const convertedUrl = (path, mode) => `/api/fs/video/converted?path=${enco
 export const SHORT_CLIP_S = 120;
 
 /** True when this browser can play the file as it is; false means use the converted stream. */
-export function canPlayHere(info, name = '', probe = typeof document !== 'undefined' ? document.createElement('video') : null) {
+export function canPlayHere(
+  info,
+  name = '',
+  probe = typeof document !== 'undefined' ? document.createElement('video') : null
+) {
   if (!info || !info.video || !probe || typeof probe.canPlayType !== 'function') return true;
   const container = String(info.container || '');
   const ext = (String(name).split('.').pop() || '').toLowerCase();
@@ -56,7 +76,8 @@ export function compatMode(info, probe = typeof document !== 'undefined' ? docum
 export function convertedPlan(info, path, probe) {
   const mode = compatMode(info, probe);
   const kept = Boolean(info && info.converted && info.converted[mode]);
-  if (kept || ((info && info.duration) || 0) <= SHORT_CLIP_S) return { src: convertedUrl(path, mode), live: false, mode };
+  if (kept || ((info && info.duration) || 0) <= SHORT_CLIP_S)
+    return { src: convertedUrl(path, mode), live: false, mode };
   return { src: compatStreamUrl(path, 0, mode), live: true, mode, prepare: convertedUrl(path, mode) };
 }
 
@@ -80,17 +101,32 @@ export function describeMedia(info, playsHere) {
   if (info.duration) rows.push([t('media.duration', 'Duration'), formatDuration(info.duration)]);
   const v = info.video;
   if (v) {
-    rows.push([t('media.resolution', 'Resolution'), `${v.width} × ${v.height}${v.fps ? ` · ${Math.round(v.fps * 100) / 100} fps` : ''}`]);
-    const extras = [v.profile, v.bit_depth > 8 ? `${v.bit_depth}-bit` : '', v.hdr ? 'HDR' : ''].filter(Boolean).join(', ');
+    rows.push([
+      t('media.resolution', 'Resolution'),
+      `${v.width} × ${v.height}${v.fps ? ` · ${Math.round(v.fps * 100) / 100} fps` : ''}`,
+    ]);
+    const extras = [v.profile, v.bit_depth > 8 ? `${v.bit_depth}-bit` : '', v.hdr ? 'HDR' : '']
+      .filter(Boolean)
+      .join(', ');
     rows.push([t('media.video', 'Video'), `${codecName(v.codec)}${extras ? ` (${extras})` : ''}`]);
   }
   if (info.audio) {
-    const ch = info.audio.channels === 1 ? 'mono' : info.audio.channels === 2 ? 'stereo' : info.audio.channels ? `${info.audio.channels} ch` : '';
+    const ch =
+      info.audio.channels === 1
+        ? 'mono'
+        : info.audio.channels === 2
+          ? 'stereo'
+          : info.audio.channels
+            ? `${info.audio.channels} ch`
+            : '';
     const rate = info.audio.sample_rate ? `${Math.round(info.audio.sample_rate / 100) / 10} kHz` : '';
     rows.push([t('media.audio', 'Audio'), [codecName(info.audio.codec), ch, rate].filter(Boolean).join(' · ')]);
   }
   if (v) {
-    rows.push([t('media.plays_here', 'In this browser'), playsHere ? t('media.plays_direct', 'Plays as is') : t('media.plays_converted', 'Converted while playing')]);
+    rows.push([
+      t('media.plays_here', 'In this browser'),
+      playsHere ? t('media.plays_direct', 'Plays as is') : t('media.plays_converted', 'Converted while playing'),
+    ]);
   }
   return rows;
 }

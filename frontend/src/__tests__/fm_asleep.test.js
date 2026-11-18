@@ -8,9 +8,11 @@ describe('a folder on a sleeping disk', () => {
     fm.list = document.createElement('div');
     fm.pathInput = document.createElement('input');
     fm.fileList = [{ name: 'x' }];
-    const get = vi.spyOn(api, 'get').mockRejectedValueOnce(new ApiError('Cancelled', { status: 428, error: 'cancelled' }));
+    const get = vi
+      .spyOn(api, 'get')
+      .mockRejectedValueOnce(new ApiError('Cancelled', { status: 428, error: 'cancelled' }));
     await fm.loadPath('/mnt/user/vault');
-    expect(fm.list.textContent).toContain("disk is asleep");
+    expect(fm.list.textContent).toContain('disk is asleep');
     expect(fm.pathInput.value).toBe('/mnt/user/vault');
     expect(fm.fileList).toEqual([]);
     get.mockRejectedValueOnce(new Error('stop'));

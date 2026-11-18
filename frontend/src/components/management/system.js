@@ -22,7 +22,6 @@ try {
 
 let _lastUpdateData = null;
 
-
 /** Starts the update; when work is still running (a backup, a restore, a sync), asks first and
  *  only then updates anyway (NREL-14). */
 async function postUpdate(channel) {
@@ -37,10 +36,11 @@ async function postUpdate(channel) {
         t('updates.busy_title', 'Some work is still running'),
         t('updates.busy_msg', '{list} Updating now cuts it off. Update anyway?', { list: err.body?.detail || '' }),
         () => resolve(true),
-        () => resolve(false),
-      ),
+        () => resolve(false)
+      )
     );
-    if (!go) throw new Error(t('updates.busy_later', 'Update postponed: try again when it has finished.'), { cause: err });
+    if (!go)
+      throw new Error(t('updates.busy_later', 'Update postponed: try again when it has finished.'), { cause: err });
     return api.post('/api/system/updates/apply', { ...body, anyway: true }, { confirmed: true });
   }
 }
@@ -126,11 +126,20 @@ export async function fetchAndRenderSystemAbout(force = false, channelOverride =
     const about = await api.get('/api/system/about');
     if (about) {
       const commitTag = about.commit ? ` (${about.commit})` : '';
-      const channelLabel = channel === 'edge' ? t('updates.channel_edge', 'Edge (Latest Commits)') : channel === 'beta' ? t('updates.channel_beta_label', 'Beta (3-day test)') : t('updates.channel_stable', 'Stable');
+      const channelLabel =
+        channel === 'edge'
+          ? t('updates.channel_edge', 'Edge (Latest Commits)')
+          : channel === 'beta'
+            ? t('updates.channel_beta_label', 'Beta (3-day test)')
+            : t('updates.channel_stable', 'Stable');
       if (versionBadge) versionBadge.textContent = `${about.tag || 'v' + about.version}${commitTag} • ${channelLabel}`;
       if (chassisEl) chassisEl.textContent = about.chassis_model || t('sysu.chassis_diy', 'Standard / DIY');
       if (hostEl) hostEl.textContent = `${about.hostname || 'NAS'} (${about.platform || 'Linux'})`;
-      if (runtimeEl) runtimeEl.textContent = t('sysu.runtime', '{where} (Python {version})', { where: about.containerized ? t('sysu.in_docker', 'Docker Container') : t('sysu.native', 'Native Host'), version: about.python_version || '3.12' });
+      if (runtimeEl)
+        runtimeEl.textContent = t('sysu.runtime', '{where} (Python {version})', {
+          where: about.containerized ? t('sysu.in_docker', 'Docker Container') : t('sysu.native', 'Native Host'),
+          version: about.python_version || '3.12',
+        });
       if (uptimeEl && about.uptime_secs != null) uptimeEl.textContent = formatUptime(about.uptime_secs);
     }
   } catch (err) {
@@ -164,15 +173,19 @@ export async function fetchAndRenderSystemAbout(force = false, channelOverride =
             : t('sysu.newer_release', 'A newer release of Kiboto is available on GitHub.');
         }
         if (detailsBox) detailsBox.style.display = 'block';
-        if (releaseTitle) releaseTitle.textContent = data.release_name || t('sysu.release', 'Release {tag}', { tag: data.latest_tag });
+        if (releaseTitle)
+          releaseTitle.textContent = data.release_name || t('sysu.release', 'Release {tag}', { tag: data.latest_tag });
         if (releaseLink) releaseLink.href = data.release_url || 'https://github.com/fr0styx/kiboto/releases';
-        if (releaseNotes) releaseNotes.textContent = data.release_notes || t('sysu.no_notes', 'No release notes provided.');
+        if (releaseNotes)
+          releaseNotes.textContent = data.release_notes || t('sysu.no_notes', 'No release notes provided.');
 
         if (applyBtn && applyText) {
           applyBtn.style.display = 'flex';
           applyText.textContent = isEdge
             ? t('sysu.install_commit', 'Install Latest Commit ({version})', { version: data.latest_version })
-            : t('sysu.install_release', 'Install Release {version}', { version: data.latest_tag || 'v' + data.latest_version });
+            : t('sysu.install_release', 'Install Release {version}', {
+                version: data.latest_tag || 'v' + data.latest_version,
+              });
         }
       } else if (checkFailed(data)) {
         // the check got no answer: that is not "up to date" (SET-10)
@@ -195,8 +208,12 @@ export async function fetchAndRenderSystemAbout(force = false, channelOverride =
         }
         if (statusDesc) {
           statusDesc.textContent = isEdge
-            ? t('sysu.latest_commit', 'You are running the latest commit on the main branch ({version}).', { version: data.latest_version || data.current_commit || 'latest' })
-            : t('sysu.latest_release', 'You are running the latest stable release ({version}).', { version: data.latest_tag || 'v' + data.current_version });
+            ? t('sysu.latest_commit', 'You are running the latest commit on the main branch ({version}).', {
+                version: data.latest_version || data.current_commit || 'latest',
+              })
+            : t('sysu.latest_release', 'You are running the latest stable release ({version}).', {
+                version: data.latest_tag || 'v' + data.current_version,
+              });
         }
         if (detailsBox) detailsBox.style.display = 'none';
         if (applyBtn) applyBtn.style.display = 'none';
@@ -267,10 +284,14 @@ export async function showLastUpdateResult() {
     if (r && (r.result === 'rolled_back' || r.result === 'not_applied')) {
       const when = r.at ? formatDateTime(r.at * 1000, undefined, '') : '';
       const key = r.result === 'rolled_back' ? 'updates.last_rolled_back' : 'updates.last_not_applied';
-      const fallback = r.result === 'rolled_back'
-        ? 'The last update ({when}) did not start cleanly and was rolled back: {reason}'
-        : 'The last update ({when}) was not applied: {reason}';
-      box.textContent = t(key, fallback, { when, reason: resolveParams({ reason: r.reason_text || r.reason || '' }).reason });
+      const fallback =
+        r.result === 'rolled_back'
+          ? 'The last update ({when}) did not start cleanly and was rolled back: {reason}'
+          : 'The last update ({when}) was not applied: {reason}';
+      box.textContent = t(key, fallback, {
+        when,
+        reason: resolveParams({ reason: r.reason_text || r.reason || '' }).reason,
+      });
       box.hidden = false;
     } else {
       box.hidden = true;
@@ -293,7 +314,9 @@ export async function refreshPreviousVersions() {
   keepRevertReachable(btn, document.getElementById('update-details-box'));
   btn.style.display = _previousVersion ? 'flex' : 'none';
   if (_previousVersion && label) {
-    label.textContent = _previousVersion.version ? t('sysu.revert_to', 'Revert to v{version}', { version: _previousVersion.version }) : t('sysu.revert_prev', 'Revert to previous version');
+    label.textContent = _previousVersion.version
+      ? t('sysu.revert_to', 'Revert to v{version}', { version: _previousVersion.version })
+      : t('sysu.revert_prev', 'Revert to previous version');
   }
   return _previousVersion;
 }
@@ -301,13 +324,20 @@ export async function refreshPreviousVersions() {
 export async function revertSystemUpdate() {
   const prev = _previousVersion || (await refreshPreviousVersions());
   if (!prev) {
-    showToast(t('toast.no_previous_version_is_available_on', 'No previous version is available on this host.'), 'error');
+    showToast(
+      t('toast.no_previous_version_is_available_on', 'No previous version is available on this host.'),
+      'error'
+    );
     return;
   }
   const name = prev.version ? `v${prev.version}` : t('sys.revert_prev', 'the previous version');
   showPromptToast(
     t('sys.revert_title', 'Revert to previous version'),
-    t('sys.revert_msg', 'Go back to {name}? Settings, users and other data return to how they were before the last update, so changes made since then are lost (a snapshot of the current data is kept). Enter your password to confirm.', { name }),
+    t(
+      'sys.revert_msg',
+      'Go back to {name}? Settings, users and other data return to how they were before the last update, so changes made since then are lost (a snapshot of the current data is kept). Enter your password to confirm.',
+      { name }
+    ),
     '',
     async (password) => {
       if (!password) return;
@@ -315,7 +345,11 @@ export async function revertSystemUpdate() {
       const title = document.getElementById('update-progress-title');
       const desc = document.getElementById('update-progress-desc');
       try {
-        await api.post('/api/system/updates/revert', { snapshot_id: prev.id, current_password: password }, { confirmed: true });
+        await api.post(
+          '/api/system/updates/revert',
+          { snapshot_id: prev.id, current_password: password },
+          { confirmed: true }
+        );
         if (overlay) overlay.style.display = 'block';
         if (title) title.textContent = t('sysu.reverting', 'Reverting to {name}...', { name });
         if (desc) desc.textContent = t('sysu.restoring', 'Restoring the previous version and reconnecting...');
@@ -333,7 +367,11 @@ export async function revertSystemUpdate() {
             wentDown = true;
             if (attempts >= 80) {
               clearInterval(timer);
-              if (desc) desc.textContent = t('ui.please_refresh_the_page_once', 'Please refresh the page once Kiboto has restarted.');
+              if (desc)
+                desc.textContent = t(
+                  'ui.please_refresh_the_page_once',
+                  'Please refresh the page once Kiboto has restarted.'
+                );
             }
           }
         }, 1500);
@@ -365,7 +403,11 @@ export async function applySystemUpdate() {
       if (applyBtn) applyBtn.disabled = true;
       if (progressOverlay) progressOverlay.style.display = 'block';
       if (progressTitle) progressTitle.textContent = t('updates.installing', 'Downloading & Applying Update...');
-      if (progressDesc) progressDesc.textContent = t('ui.pulling_container_image_layers_from', 'Pulling container image layers from GHCR...');
+      if (progressDesc)
+        progressDesc.textContent = t(
+          'ui.pulling_container_image_layers_from',
+          'Pulling container image layers from GHCR...'
+        );
 
       try {
         const res = await postUpdate(channel);
@@ -400,10 +442,18 @@ export async function applySystemUpdate() {
             }
           } catch (e) {
             hasGoneDown = true;
-            if (progressDesc) progressDesc.textContent = t('ui.container_restarting_with_updated_image', 'Container restarting with updated image...');
+            if (progressDesc)
+              progressDesc.textContent = t(
+                'ui.container_restarting_with_updated_image',
+                'Container restarting with updated image...'
+              );
             if (attempts >= maxAttempts) {
               clearInterval(interval);
-              if (progressDesc) progressDesc.textContent = t('ui.please_refresh_the_page_once_2', 'Please refresh the page once the container has restarted.');
+              if (progressDesc)
+                progressDesc.textContent = t(
+                  'ui.please_refresh_the_page_once_2',
+                  'Please refresh the page once the container has restarted.'
+                );
               if (applyBtn) applyBtn.disabled = false;
             }
           }
@@ -449,7 +499,10 @@ export async function downloadDiagnosticsBundle() {
       // Graceful fallback to GET if POST route is rejected by proxy
       filename = await api.downloadBlob('/api/system/diagnostics-bundle', 'kiboto_diagnostics.zip');
     }
-    showToast(t('diagnostics.download_success', 'Diagnostics bundle downloaded successfully') + ` (${filename}).`, 'success');
+    showToast(
+      t('diagnostics.download_success', 'Diagnostics bundle downloaded successfully') + ` (${filename}).`,
+      'success'
+    );
   } catch (err) {
     showToast(t('diagnostics.download_failed', 'Failed to download diagnostics') + `: ${err.message}`, 'error');
   } finally {
@@ -487,7 +540,10 @@ export function openDiagnosticsPreviewModal(data) {
     let badgeColor = 'var(--accent, #33cdb8)';
     let icon = '🟢';
     let title = t('diagnostics.status_healthy', 'Everything is healthy');
-    let desc = t('diagnostics.status_healthy_desc', 'All hardware parameters, storage arrays, and containers are operating normally.');
+    let desc = t(
+      'diagnostics.status_healthy_desc',
+      'All hardware parameters, storage arrays, and containers are operating normally.'
+    );
 
     if (status === 'CRITICAL') {
       borderColor = 'rgba(239, 68, 68, 0.5)';
@@ -495,14 +551,20 @@ export function openDiagnosticsPreviewModal(data) {
       badgeColor = '#ef4444';
       icon = '🚨';
       title = t('diagnostics.status_critical', 'Problems need attention now');
-      desc = t('diagnostics.status_critical_desc', 'Hardware failure, degraded drive arrays, or thermal clamp thresholds reached.');
+      desc = t(
+        'diagnostics.status_critical_desc',
+        'Hardware failure, degraded drive arrays, or thermal clamp thresholds reached.'
+      );
     } else if (status === 'ATTENTION_REQUIRED') {
       borderColor = 'rgba(245, 158, 11, 0.4)';
       bgColor = 'rgba(245, 158, 11, 0.1)';
       badgeColor = '#f59e0b';
       icon = '⚠️';
       title = t('diagnostics.status_attention', 'Needs attention');
-      desc = t('diagnostics.status_attention_desc', 'Non-critical system warnings, restarting containers, or hardware bus notices.');
+      desc = t(
+        'diagnostics.status_attention_desc',
+        'Non-critical system warnings, restarting containers, or hardware bus notices.'
+      );
     }
 
     let alertItemsHtml = '';
@@ -545,9 +607,10 @@ export function openDiagnosticsPreviewModal(data) {
     const docker = data.docker || {};
     const vms = data.vms || {};
 
-    const memPct = memory.pct !== undefined ? memory.pct : (memory.used_percent || 0);
-    const memTotalGb = memory.total_gb !== undefined ? memory.total_gb : Math.round((memory.total_bytes || 0) / (1024 ** 3));
-    const memUsedGb = memory.used_gb !== undefined ? memory.used_gb : Math.round((memory.used_bytes || 0) / (1024 ** 3));
+    const memPct = memory.pct !== undefined ? memory.pct : memory.used_percent || 0;
+    const memTotalGb =
+      memory.total_gb !== undefined ? memory.total_gb : Math.round((memory.total_bytes || 0) / 1024 ** 3);
+    const memUsedGb = memory.used_gb !== undefined ? memory.used_gb : Math.round((memory.used_bytes || 0) / 1024 ** 3);
 
     grid.innerHTML = `
       <div class="syj-box">
@@ -599,7 +662,12 @@ export async function previewDiagnosticsSummary() {
     const data = await api.get('/api/system/diagnostics-summary');
     openDiagnosticsPreviewModal(data);
   } catch (err) {
-    showToast(t('toast.failed_to_load_diagnostics_preview', 'Failed to load diagnostics preview: {error}', { error: err.message }), 'error');
+    showToast(
+      t('toast.failed_to_load_diagnostics_preview', 'Failed to load diagnostics preview: {error}', {
+        error: err.message,
+      }),
+      'error'
+    );
   } finally {
     if (btn) {
       btn.disabled = false;
@@ -611,12 +679,17 @@ export async function previewDiagnosticsSummary() {
 export async function copySupportMarkdown() {
   const btn = document.getElementById('btn-copy-support-md');
   const previewCopyBtn = document.getElementById('btn-diag-preview-copy');
-  const targetBtn = (previewCopyBtn && document.activeElement === previewCopyBtn) ? previewCopyBtn : btn;
+  const targetBtn = previewCopyBtn && document.activeElement === previewCopyBtn ? previewCopyBtn : btn;
   const origHtml = targetBtn ? targetBtn.innerHTML : '';
   try {
     const mdEl = document.getElementById('diagnostics-preview-md');
     let md = '';
-    if (mdEl && mdEl.textContent && mdEl.textContent.trim().length > 0 && mdEl.textContent !== t('sysu.no_summary', 'No summary generated.')) {
+    if (
+      mdEl &&
+      mdEl.textContent &&
+      mdEl.textContent.trim().length > 0 &&
+      mdEl.textContent !== t('sysu.no_summary', 'No summary generated.')
+    ) {
       md = mdEl.textContent;
     } else {
       if (targetBtn) {
@@ -635,7 +708,10 @@ export async function copySupportMarkdown() {
       throw new Error(t('diagnostics.clipboard_refused', 'the clipboard did not accept it'));
     }
   } catch (err) {
-    showToast(t('toast.failed_to_copy_support_markdown', 'Failed to copy support markdown: {error}', { error: err.message }), 'error');
+    showToast(
+      t('toast.failed_to_copy_support_markdown', 'Failed to copy support markdown: {error}', { error: err.message }),
+      'error'
+    );
   } finally {
     if (targetBtn) {
       targetBtn.disabled = false;

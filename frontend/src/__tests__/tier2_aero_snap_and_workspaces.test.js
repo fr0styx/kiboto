@@ -20,12 +20,7 @@ import {
   filterSpotlightResults,
   parseNaturalLanguageAction,
 } from '../components/spotlight.js';
-import {
-  applyWidgetConfig,
-  syncWidgetSettingsUI,
-  initWidgets,
-  loadWidgetConfig,
-} from '../components/widgets.js';
+import { applyWidgetConfig, syncWidgetSettingsUI, initWidgets, loadWidgetConfig } from '../components/widgets.js';
 import { ZettEventBus } from '../event-bus.js';
 
 describe('Tier 2: Aero Snap 2.0, Single Desktop Invariant, Spotlight Actions & Modular Widgets', () => {
@@ -338,8 +333,8 @@ describe('Tier 2: Aero Snap 2.0, Single Desktop Invariant, Spotlight Actions & M
         ],
         net: {
           rx_rate: 10485760, // 10 MB/s
-          tx_rate: 5242880,  // 5 MB/s
-          speed: 2500,       // 2.5 Gbps
+          tx_rate: 5242880, // 5 MB/s
+          speed: 2500, // 2.5 Gbps
         },
         ups: {
           battery_charge: 98,

@@ -53,7 +53,12 @@ describe('Phase 5: Mobile PWA, Responsive Touch & Haptics', () => {
     showToast('Deployment successful', 'success');
     expect(vibrateSpy).toHaveBeenCalledWith([15, 30, 20]);
 
-    showConfirmToast('Warning', 'Are you sure?', () => {}, () => {});
+    showConfirmToast(
+      'Warning',
+      'Are you sure?',
+      () => {},
+      () => {}
+    );
     expect(vibrateSpy).toHaveBeenCalledWith([30, 50, 30]);
   });
 });

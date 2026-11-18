@@ -24,7 +24,11 @@ export async function setAdvanced(on) {
   if (!on) leaveAdvancedPage();
   const saved = await saveAdvanced(on, api);
   // a failed save was silent, so the choice came back at the next sign-in
-  if (saved === false) showToast(t('mgmt.advanced_not_saved', 'That choice could not be saved to your account. It holds in this browser for now.'), 'error');
+  if (saved === false)
+    showToast(
+      t('mgmt.advanced_not_saved', 'That choice could not be saved to your account. It holds in this browser for now.'),
+      'error'
+    );
   return saved;
 }
 
@@ -70,11 +74,13 @@ export function installAdvancedSwitch(root = document) {
 }
 
 const MESSAGES = {
-  drive_failing: () => t('overview.drive_failing', 'Drive {subject} is failing. Copy what is on it elsewhere and replace it.'),
+  drive_failing: () =>
+    t('overview.drive_failing', 'Drive {subject} is failing. Copy what is on it elsewhere and replace it.'),
   drive_warning: () => t('overview.drive_warning', 'Drive {subject} shows early warning signs.'),
   drive_attention: () => t('overview.drive_attention', 'Drive {subject} needs attention: {detail}.'),
   storage_full: () => t('overview.storage_full', 'Storage is {subject} full.'),
-  pool_degraded: () => t('overview.pool_degraded', 'Storage pool {subject} is degraded: your data has less protection.'),
+  pool_degraded: () =>
+    t('overview.pool_degraded', 'Storage pool {subject} is degraded: your data has less protection.'),
   disk_disabled: () => t('overview.disk_disabled', 'Disk {subject} is out of the pool. Replace or reconnect it.'),
   disk_errors: () => t('overview.disk_errors', 'Disk {subject} reports read or write errors.'),
   pool_full: () => t('overview.pool_full', 'Storage pool {subject} is {detail} full.'),
@@ -82,19 +88,36 @@ const MESSAGES = {
   backup_overdue: () => t('overview.backup_overdue', 'Backup "{subject}" has not finished lately.'),
   snapshot_overdue: () => t('overview.snapshot_overdue', 'Snapshots of {subject} have not been taken lately.'),
   scrub_overdue: () => t('overview.scrub_overdue', '{subject} has not been checked for errors lately.'),
-  service_stalled: () => t('overview.service_stalled', 'The {subject} service has stopped responding. Restart Kiboto if it does not recover.'),
-  kit_not_saved: () => t('overview.kit_not_saved', 'Recovery kit not saved for "{subject}": without it the backup cannot be read.'),
+  service_stalled: () =>
+    t(
+      'overview.service_stalled',
+      'The {subject} service has stopped responding. Restart Kiboto if it does not recover.'
+    ),
+  kit_not_saved: () =>
+    t('overview.kit_not_saved', 'Recovery kit not saved for "{subject}": without it the backup cannot be read.'),
   writes_frozen: () => t('overview.writes_frozen', 'Changes to files are paused: something looked like ransomware.'),
   on_battery: () => t('overview.on_battery', 'The server is running on battery power.'),
-  ups_silent: () => t('overview.ups_silent', 'The UPS stopped answering during a power cut. Shut the NAS down by hand if the power stays off.'),
+  ups_silent: () =>
+    t(
+      'overview.ups_silent',
+      'The UPS stopped answering during a power cut. Shut the NAS down by hand if the power stays off.'
+    ),
   ups_unreadable: () => t('overview.ups_unreadable', 'A UPS was found, but Kiboto cannot read it.'),
   power_nobody: () => t('overview.power_nobody', 'Nothing can switch the NAS off when the UPS battery runs out.'),
-  too_hot: (i) => (i && i.hot
-    ? t('overview.too_hot_what', 'Too hot: {detail}. The fans run at full speed; check that nothing blocks the air around the NAS.')
-    : t('overview.too_hot', 'The server is too hot.')),
+  too_hot: (i) =>
+    i && i.hot
+      ? t(
+          'overview.too_hot_what',
+          'Too hot: {detail}. The fans run at full speed; check that nothing blocks the air around the NAS.'
+        )
+      : t('overview.too_hot', 'The server is too hot.'),
   default_password: () => t('overview.default_password', 'The first-time password is still in use.'),
   security_look: () => t('overview.security_look', 'The security check has findings to look at ({subject}).'),
-  timezone_unset: () => t('overview.timezone_unset_clock', "The server's time zone isn't set, so nightly work (backups, checks, AI indexing) runs at night by London winter time (UTC), which may be daytime where you are."),
+  timezone_unset: () =>
+    t(
+      'overview.timezone_unset_clock',
+      "The server's time zone isn't set, so nightly work (backups, checks, AI indexing) runs at night by London winter time (UTC), which may be daytime where you are."
+    ),
 };
 
 // The background services by what they do (NUX-19); an unknown one keeps its name
@@ -117,15 +140,23 @@ const SERVICES = {
 /** "drive sdb at 57 °C, the processor at 81 °C": what is too hot (status_summary._hot_parts). */
 export function hotWords(hot) {
   const h = hot || {};
-  const parts = (Array.isArray(h.drives) ? h.drives : []).map((d) => t('overview.hot_drive', 'drive {name} at {temp} °C', { name: d.name, temp: d.temp }));
+  const parts = (Array.isArray(h.drives) ? h.drives : []).map((d) =>
+    t('overview.hot_drive', 'drive {name} at {temp} °C', { name: d.name, temp: d.temp })
+  );
   if (h.cpu != null) parts.push(t('overview.hot_cpu', 'the processor at {temp} °C', { temp: h.cpu }));
   return parts.join(', ');
 }
 
 export function itemText(i) {
   const subject = i.kind === 'service_stalled' && SERVICES[i.subject] ? SERVICES[i.subject]() : i.subject || '';
-  const msg = MESSAGES[i.kind] ? MESSAGES[i.kind](i) : t('overview.unknown_item', 'Something needs attention: {subject}.');
-  const detail = i.hot ? hotWords(i.hot) : i.detail_key ? t(i.detail_key, i.detail || '', i.detail_params || {}) : i.detail || '';
+  const msg = MESSAGES[i.kind]
+    ? MESSAGES[i.kind](i)
+    : t('overview.unknown_item', 'Something needs attention: {subject}.');
+  const detail = i.hot
+    ? hotWords(i.hot)
+    : i.detail_key
+      ? t(i.detail_key, i.detail || '', i.detail_params || {})
+      : i.detail || '';
   const text = msg.replace('{subject}', subject || i.kind || '').replace('{detail}', detail);
   // someone who can't fix it is told who can (NUX-5)
   return i.tell_admin ? `${text} ${t('overview.tell_admin', 'Tell the person who manages Kiboto.')}` : text;
@@ -133,7 +164,9 @@ export function itemText(i) {
 
 /** The status box as markup: one box for the alerts and the copy outside the NAS (status-box.js). */
 export function statusHtml(summary, protection = null, user = currentUser()) {
-  return statusBoxHtml(statusState({ summary, protection, user, rowText: itemText, canOpen: (place) => Boolean(ROUTES[place]) }));
+  return statusBoxHtml(
+    statusState({ summary, protection, user, rowText: itemText, canOpen: (place) => Boolean(ROUTES[place]) })
+  );
 }
 
 /** REL-15: what the Recycle Bins hold, from the index (no disk is read). The copies outside the
@@ -174,7 +207,9 @@ export async function renderStatusSummary(root = document) {
     box.setAttribute('aria-label', t('overview.status_label', 'Status'));
     const head = hub.querySelector('.mgmt-hub-heading'); // the page's heading stays first (Overview 5)
     hub.insertBefore(box, head ? head.nextSibling : hub.firstChild);
-    hubTiles().then((m) => m.installHubTiles(root)).catch(() => {});
+    hubTiles()
+      .then((m) => m.installHubTiles(root))
+      .catch(() => {});
     box.addEventListener('click', (e) => {
       if (e.target.closest('[data-ov-protect]')) {
         import('../protect-nas.js').then((m) => m.openProtectGuide()).catch(() => {});
@@ -212,7 +247,9 @@ export async function renderStatusSummary(root = document) {
   }
   box.dataset.read = '1';
   box.innerHTML = statusHtml(summary, protection) + protectionHtml(protection);
-  hubTiles().then((m) => m.renderHubExtras(root, protection, summary)).catch(() => {});
+  hubTiles()
+    .then((m) => m.renderHubExtras(root, protection, summary))
+    .catch(() => {});
   announceChange('status-summary', statusSentence(summary, protection)); // UX-28: only when it changes
   return summary;
 }

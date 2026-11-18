@@ -20,7 +20,7 @@ export const defaultDashOrder = [
   'metric-mem',
   'metric-fans',
   'metric-net',
-  'metric-disks'
+  'metric-disks',
 ];
 
 export const defaultVis = {
@@ -29,7 +29,7 @@ export const defaultVis = {
   'metric-mem': true,
   'metric-fans': true,
   'metric-net': true,
-  'metric-disks': true
+  'metric-disks': true,
 };
 
 export const defaultSizes = {
@@ -38,7 +38,7 @@ export const defaultSizes = {
   'metric-mem': 'normal',
   'metric-fans': 'normal',
   'metric-net': 'normal',
-  'metric-disks': 'normal'
+  'metric-disks': 'normal',
 };
 
 export const ZOOM_PROFILES = [0.75, 0.85, 1.0, 1.15, 1.25, 1.5];
@@ -73,8 +73,8 @@ export function mergeDockerTelemetry(s, current) {
   const base = Array.isArray(rest.docker)
     ? rest.docker
     : current && Array.isArray(current.docker)
-    ? current.docker
-    : null;
+      ? current.docker
+      : null;
   if (base) rest.docker = base.map((c) => (c && tel[c.id] ? { ...c, ...tel[c.id] } : c));
   return rest;
 }
@@ -85,7 +85,11 @@ export const EVENTS_KEPT = 100;
 export function mergeNewEvents(s, current) {
   if (!s || !Array.isArray(s.events_new)) return s;
   const { events_new: fresh, ...rest } = s;
-  const base = Array.isArray(rest.events) ? rest.events : current && Array.isArray(current.events) ? current.events : [];
+  const base = Array.isArray(rest.events)
+    ? rest.events
+    : current && Array.isArray(current.events)
+      ? current.events
+      : [];
   const ids = new Set(fresh.map((e) => e.id));
   const seen = (e) => e.last_ts || e.ts || 0;
   rest.events = [...fresh, ...base.filter((e) => !ids.has(e.id))]
@@ -95,8 +99,14 @@ export function mergeNewEvents(s, current) {
 }
 
 export const state = {
-  isLcdDirect: typeof window !== 'undefined' && (window.location.search.includes('mode=lcd') || (typeof document !== 'undefined' && document.body && document.body.classList.contains('lcd-direct'))),
-  isVmConsoleDirect: typeof window !== 'undefined' && (window.location.search.includes('mode=vm-console') || (typeof document !== 'undefined' && document.body && document.body.classList.contains('vm-console-direct'))),
+  isLcdDirect:
+    typeof window !== 'undefined' &&
+    (window.location.search.includes('mode=lcd') ||
+      (typeof document !== 'undefined' && document.body && document.body.classList.contains('lcd-direct'))),
+  isVmConsoleDirect:
+    typeof window !== 'undefined' &&
+    (window.location.search.includes('mode=vm-console') ||
+      (typeof document !== 'undefined' && document.body && document.body.classList.contains('vm-console-direct'))),
   // APP-B: the person's look (look.js); the hidden Yak theme is kept on its own
   desktopTheme: _yakOn() ? 'yak' : loadLook().theme,
   desktopCustomAccent: loadLook().accent,
@@ -105,12 +115,24 @@ export const state = {
   lcdTextClarity: typeof localStorage !== 'undefined' ? localStorage.getItem('lcd_text_clarity') !== 'false' : true,
 
   // Compatibility accessors
-  get currentTheme() { return this.desktopTheme; },
-  set currentTheme(v) { this.desktopTheme = v; },
-  get customAccentColor() { return this.desktopCustomAccent; },
-  set customAccentColor(v) { this.desktopCustomAccent = v; },
-  get textClarity() { return this.lcdTextClarity; },
-  set textClarity(v) { this.lcdTextClarity = v; },
+  get currentTheme() {
+    return this.desktopTheme;
+  },
+  set currentTheme(v) {
+    this.desktopTheme = v;
+  },
+  get customAccentColor() {
+    return this.desktopCustomAccent;
+  },
+  set customAccentColor(v) {
+    this.desktopCustomAccent = v;
+  },
+  get textClarity() {
+    return this.lcdTextClarity;
+  },
+  set textClarity(v) {
+    this.lcdTextClarity = v;
+  },
 
   clockFormat: '24',
   currentTimezone: 'America/New_York',
@@ -123,7 +145,14 @@ export const state = {
   isLayoutLocked: localStorage.getItem('lcd_dash_cards_locked') !== 'false',
   currentZoomIdx: 2,
   selectedZoneFilter: 'all',
-  curvePoints: [[30, 0], [36, 32], [42, 48], [48, 65], [54, 85], [60, 100]],
+  curvePoints: [
+    [30, 0],
+    [36, 32],
+    [42, 48],
+    [48, 65],
+    [54, 85],
+    [60, 100],
+  ],
   lastCurveSaveTime: 0,
   copyToastMinimized: false,
 
@@ -174,11 +203,11 @@ export const state = {
     }
     ZettEventBus.emit('desktop_theme:changed', {
       theme: this.desktopTheme,
-      accent: this.desktopCustomAccent
+      accent: this.desktopCustomAccent,
     });
     ZettEventBus.emit('theme:changed', {
       theme: this.desktopTheme,
-      accent: this.desktopCustomAccent
+      accent: this.desktopCustomAccent,
     });
   },
 
@@ -191,12 +220,13 @@ export const state = {
     }
     if (textClarity !== null) {
       this.lcdTextClarity = Boolean(textClarity);
-      if (typeof localStorage !== 'undefined') localStorage.setItem('lcd_text_clarity', this.lcdTextClarity ? 'true' : 'false');
+      if (typeof localStorage !== 'undefined')
+        localStorage.setItem('lcd_text_clarity', this.lcdTextClarity ? 'true' : 'false');
     }
     ZettEventBus.emit('lcd_theme:changed', {
       theme: this.lcdTheme,
       accent: this.lcdCustomAccent,
-      textClarity: this.lcdTextClarity
+      textClarity: this.lcdTextClarity,
     });
   },
 
@@ -216,7 +246,7 @@ export const state = {
       order: this.dashOrder,
       vis: this.dashVis,
       sizes: this.dashSizes,
-      version: this.activeLayoutVersion
+      version: this.activeLayoutVersion,
     });
   },
 
@@ -238,7 +268,7 @@ export const state = {
       this.currentZoomIdx = idx;
       ZettEventBus.emit('zoom:changed', ZOOM_PROFILES[idx]);
     }
-  }
+  },
 };
 
 export default state;

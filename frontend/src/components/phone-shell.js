@@ -27,7 +27,8 @@ import { announceChange } from '../a11y.js';
 import { hideUnusable } from '../route-access.js';
 import { formatFixed } from '../format.js';
 
-const PAGE_SELECTOR = '.os-window, .file-manager-window, #management-window, #notif-center-panel, #containers-manager-window, #phone-alerts-page';
+const PAGE_SELECTOR =
+  '.os-window, .file-manager-window, #management-window, #notif-center-panel, #containers-manager-window, #phone-alerts-page';
 // A page on its way out is not open any more
 const CLOSING = /\b(window-closing|closing|window-minimized|is-closing|minimized)\b/;
 
@@ -107,7 +108,7 @@ export function launcherHtml() {
   return `${health}${statusHtml()}<div class="phone-widgets" id="phone-widgets"></div><section class="phone-settings" aria-labelledby="phone-settings-title">${title}<nav class="phone-launcher-grid" data-i18n-aria-label="mgmt.sidebar_system" aria-label="${escapeHtml(t('mgmt.sidebar_system', 'Settings'))}">${TILES()
     .map(
       ([route, name, icon, key]) =>
-        `<button type="button" class="phone-tile" data-phone-open="${route}"${isAdvancedRoute(route) && !advancedOn() ? ' hidden data-advanced-off' : ''}><svg class="ic" aria-hidden="true"><use href="${icon}"/></svg><span data-i18n="${key}">${escapeHtml(name)}</span></button>`,
+        `<button type="button" class="phone-tile" data-phone-open="${route}"${isAdvancedRoute(route) && !advancedOn() ? ' hidden data-advanced-off' : ''}><svg class="ic" aria-hidden="true"><use href="${icon}"/></svg><span data-i18n="${key}">${escapeHtml(name)}</span></button>`
     )
     .join('')}</nav></section>`;
 }
@@ -116,7 +117,7 @@ export function tabsHtml() {
   return TABS()
     .map(
       ([id, name, icon, key]) =>
-        `<button type="button" class="phone-tab" data-phone-tab="${id}"><svg class="ic" aria-hidden="true"><use href="${icon}"/></svg><span data-i18n="${key}">${escapeHtml(name)}</span></button>`,
+        `<button type="button" class="phone-tab" data-phone-tab="${id}"><svg class="ic" aria-hidden="true"><use href="${icon}"/></svg><span data-i18n="${key}">${escapeHtml(name)}</span></button>`
     )
     .join('');
 }
@@ -145,7 +146,9 @@ export function topPage(root = document) {
 
 function closePage(el) {
   if (!el) return;
-  const close = el.querySelector('.close-btn, [data-action="close"], .win-close, .notif-center-close, #management-close');
+  const close = el.querySelector(
+    '.close-btn, [data-action="close"], .win-close, .notif-center-close, #management-close'
+  );
   if (close) close.click();
   else el.style.display = 'none';
 }
@@ -318,7 +321,8 @@ export function updateStatus(stats, root = document) {
     const el = root.querySelector(`[data-phone-stat="${key}"]`);
     if (el && text != null) el.textContent = text;
   };
-  if (stats.cpu?.util != null) set('cpu', `${Math.round(stats.cpu.util)}%${stats.cpu.temp ? ` · ${Math.round(stats.cpu.temp)}°C` : ''}`);
+  if (stats.cpu?.util != null)
+    set('cpu', `${Math.round(stats.cpu.util)}%${stats.cpu.temp ? ` · ${Math.round(stats.cpu.temp)}°C` : ''}`);
   if (stats.mem?.pct != null) set('ram', `${Math.round(stats.mem.pct)}%`);
   if (stats.storage?.used) set('storage', `${stats.storage.used} / ${stats.storage.total}`);
   if (stats.net) set('net', `↓ ${fmtRate(stats.net.rx_bytes_sec)} ↑ ${fmtRate(stats.net.tx_bytes_sec)}`);

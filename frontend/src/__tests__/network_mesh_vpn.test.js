@@ -1,6 +1,11 @@
 /** SET-16 (D3, D5): the Tailscale details under "Use from anywhere": what stays, in plain words. */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { fetchAndRenderTailscaleDetails, homeInternetText, keyExpiryText, renderTailscalePeersTable } from '../components/management.js';
+import {
+  fetchAndRenderTailscaleDetails,
+  homeInternetText,
+  keyExpiryText,
+  renderTailscalePeersTable,
+} from '../components/management.js';
 import { api } from '../api.js';
 import * as toast from '../toast.js';
 
@@ -16,12 +21,27 @@ const PANE = `
     <button id="btn-refresh-wireguard"></button>
   </div>`;
 const ACTIVE = {
-  installed: true, active: true, ipv4: '100.64.0.1', tailnet: 'cat-dog.ts.net', hostname: 'kiboto', peers_count: 2,
-  key_expiry_days: 90, key_expiry: '2027-02-10T00:00:00Z', is_subnet_router: false, advertised_routes: [], detected_subnets: ['192.168.1.0/24'],
-  advertise_exit_node: false, exit_node_approved: false, is_exit_node: false,
-  peers: [{ hostname: 'phone', ip: '100.64.0.2', online: true, cur_addr: '1.2.3.4:41641' }, { hostname: 'laptop', ip: '100.64.0.3', online: false }],
+  installed: true,
+  active: true,
+  ipv4: '100.64.0.1',
+  tailnet: 'cat-dog.ts.net',
+  hostname: 'kiboto',
+  peers_count: 2,
+  key_expiry_days: 90,
+  key_expiry: '2027-02-10T00:00:00Z',
+  is_subnet_router: false,
+  advertised_routes: [],
+  detected_subnets: ['192.168.1.0/24'],
+  advertise_exit_node: false,
+  exit_node_approved: false,
+  is_exit_node: false,
+  peers: [
+    { hostname: 'phone', ip: '100.64.0.2', online: true, cur_addr: '1.2.3.4:41641' },
+    { hostname: 'laptop', ip: '100.64.0.3', online: false },
+  ],
 };
-const mesh = (tailscale) => vi.spyOn(api, 'get').mockImplementation(async (url) => (url === '/api/network/mesh-vpn' ? { tailscale } : {}));
+const mesh = (tailscale) =>
+  vi.spyOn(api, 'get').mockImplementation(async (url) => (url === '/api/network/mesh-vpn' ? { tailscale } : {}));
 
 describe('Tailscale details (SET-16)', () => {
   beforeEach(() => {
@@ -59,10 +79,17 @@ describe('Tailscale details (SET-16)', () => {
     await fetchAndRenderTailscaleDetails();
     byId('ts-subnet-router-toggle').checked = true;
     byId('ts-subnet-router-toggle').dispatchEvent(new Event('change'));
-    await vi.waitFor(() => expect(post).toHaveBeenCalledWith('/api/network/mesh-vpn/tailscale/set-routes', { routes: '192.168.1.0/24', enabled: true }));
+    await vi.waitFor(() =>
+      expect(post).toHaveBeenCalledWith('/api/network/mesh-vpn/tailscale/set-routes', {
+        routes: '192.168.1.0/24',
+        enabled: true,
+      })
+    );
     byId('ts-exit-node-toggle').checked = true;
     byId('ts-exit-node-toggle').dispatchEvent(new Event('change'));
-    await vi.waitFor(() => expect(post).toHaveBeenCalledWith('/api/network/mesh-vpn/tailscale/set-exit-node', { enabled: true }));
+    await vi.waitFor(() =>
+      expect(post).toHaveBeenCalledWith('/api/network/mesh-vpn/tailscale/set-exit-node', { enabled: true })
+    );
     post.mockRejectedValueOnce(new Error('nope'));
     byId('btn-ts-save-routes').click();
     await vi.waitFor(() => expect(toast.showToast).toHaveBeenCalledWith(expect.stringContaining('nope'), 'error'));
@@ -71,10 +98,15 @@ describe('Tailscale details (SET-16)', () => {
   it('signs in again: opens the sign-in page when one is needed', async () => {
     mesh(ACTIVE);
     const open = vi.spyOn(window, 'open').mockImplementation(() => null);
-    const post = vi.spyOn(api, 'post').mockResolvedValueOnce({ auth_url: 'https://login.tailscale.com/a/x' }).mockResolvedValueOnce({});
+    const post = vi
+      .spyOn(api, 'post')
+      .mockResolvedValueOnce({ auth_url: 'https://login.tailscale.com/a/x' })
+      .mockResolvedValueOnce({});
     await fetchAndRenderTailscaleDetails();
     byId('btn-ts-reauth').click();
-    await vi.waitFor(() => expect(open).toHaveBeenCalledWith('https://login.tailscale.com/a/x', '_blank', 'noopener,noreferrer'));
+    await vi.waitFor(() =>
+      expect(open).toHaveBeenCalledWith('https://login.tailscale.com/a/x', '_blank', 'noopener,noreferrer')
+    );
     byId('btn-ts-reauth').click();
     await vi.waitFor(() => expect(post).toHaveBeenCalledTimes(2));
   });
@@ -103,7 +135,16 @@ describe('Tailscale details (SET-16)', () => {
     const { readFileSync } = await import('node:fs');
     const { resolve } = await import('node:path');
     const html = readFileSync(resolve(__dirname, '../windows/management-window.html'), 'utf8');
-    for (const id of ['wg-conf-preview', 'ts-ssh-toggle', 'ts-serve-toggle', 'ts-taildrop-list', 'mesh-service-filter', 'btn-tailscale-up', 'ts-deploy-banner', 'mw.latency_ping']) {
+    for (const id of [
+      'wg-conf-preview',
+      'ts-ssh-toggle',
+      'ts-serve-toggle',
+      'ts-taildrop-list',
+      'mesh-service-filter',
+      'btn-tailscale-up',
+      'ts-deploy-banner',
+      'mw.latency_ping',
+    ]) {
       expect(html).not.toContain(id);
     }
   });

@@ -9,7 +9,10 @@ import { vmState } from './state.js';
 /** Reads the installer list into vmState.isos; on a failure the last list stays. */
 export async function loadIsos() {
   try {
-    const [isos, disks] = await Promise.all([api.get('/api/vms/isos'), api.get('/api/vms/disk-images').catch(() => vmState.diskImages)]);
+    const [isos, disks] = await Promise.all([
+      api.get('/api/vms/isos'),
+      api.get('/api/vms/disk-images').catch(() => vmState.diskImages),
+    ]);
     vmState.isos = Array.isArray(isos) ? isos : [];
     vmState.diskImages = Array.isArray(disks) ? disks : [];
   } catch (_) {
@@ -23,8 +26,13 @@ export function fillIsoSelect(select, selected = '') {
   if (!select) return;
   const keep = select.value || selected;
   const first = select.options[0] ? select.options[0].outerHTML : '';
-  select.innerHTML = first + vmState.isos
-    .map((iso) => `<option value="${escapeHtml(iso.path)}">${escapeHtml(iso.name)} (${escapeHtml(iso.size_formatted || '')})</option>`)
-    .join('');
+  select.innerHTML =
+    first +
+    vmState.isos
+      .map(
+        (iso) =>
+          `<option value="${escapeHtml(iso.path)}">${escapeHtml(iso.name)} (${escapeHtml(iso.size_formatted || '')})</option>`
+      )
+      .join('');
   if (keep) select.value = keep;
 }

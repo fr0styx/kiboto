@@ -5,7 +5,11 @@ import { describe, expect, it, vi } from 'vitest';
 
 vi.mock('../api.js', () => {
   const api = {
-    get: vi.fn(async (url) => (url === '/api/led' ? { power: 'on', mode: 'gradient', color: '00ffff', color2: 'ff0055', brightness: 40, speed: 47 } : {})),
+    get: vi.fn(async (url) =>
+      url === '/api/led'
+        ? { power: 'on', mode: 'gradient', color: '00ffff', color2: 'ff0055', brightness: 40, speed: 47 }
+        : {}
+    ),
     post: vi.fn(async () => ({ status: 'ok' })),
     put: vi.fn(async () => ({ status: 'ok' })),
     delete: vi.fn(async () => ({ status: 'ok' })),
@@ -53,7 +57,10 @@ describe('drawer controls are wired when the drawer arrives', () => {
     api.post.mockClear();
     document.querySelector('#tab-led .profile-pill[data-profile="stealth"]').click();
     await settle();
-    expect(api.post).toHaveBeenLastCalledWith('/api/led', expect.objectContaining({ mode: 'solid', color: '001428', brightness: 8 }));
+    expect(api.post).toHaveBeenLastCalledWith(
+      '/api/led',
+      expect.objectContaining({ mode: 'solid', color: '001428', brightness: 8 })
+    );
 
     // the Custom swatch never sends an empty colour
     api.post.mockClear();

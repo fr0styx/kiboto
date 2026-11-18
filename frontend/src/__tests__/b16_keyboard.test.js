@@ -8,7 +8,8 @@ describe('UX-31: Enter fires a data-action element once', () => {
   it('one activation path', () => {
     initA11y();
     installDomActions();
-    document.body.innerHTML = '<div id="act" role="button" tabindex="0" data-action="click-target" data-target="tgt">Go</div><button id="tgt">t</button>';
+    document.body.innerHTML =
+      '<div id="act" role="button" tabindex="0" data-action="click-target" data-target="tgt">Go</div><button id="tgt">t</button>';
     const tgt = document.getElementById('tgt');
     const clicks = vi.fn();
     tgt.addEventListener('click', clicks);
@@ -19,7 +20,7 @@ describe('UX-31: Enter fires a data-action element once', () => {
   });
 });
 
-describe('UX-29: Shift+F10 opens the focused thing\'s menu', () => {
+describe("UX-29: Shift+F10 opens the focused thing's menu", () => {
   it('sends a contextmenu event to the focused element', () => {
     document.body.innerHTML = '<div id="row" tabindex="0">file.txt</div>';
     const row = document.getElementById('row');
@@ -37,7 +38,9 @@ describe('UX-29: Shift+F10 opens the focused thing\'s menu', () => {
 });
 
 describe('UX-30: windows and fields', () => {
-  beforeEach(() => { document.body.innerHTML = ''; });
+  beforeEach(() => {
+    document.body.innerHTML = '';
+  });
 
   it('Esc in a field leaves the field first, a second Esc closes', () => {
     document.body.innerHTML = '<div id="win"><input id="name" value="half typed"><button id="b">ok</button></div>';
@@ -65,7 +68,8 @@ describe('UX-30: windows and fields', () => {
   });
 
   it('search boxes keep Esc for closing', () => {
-    document.body.innerHTML = '<input id="s" role="combobox"><input id="q" type="search"><input id="c" type="checkbox"><textarea id="t"></textarea>';
+    document.body.innerHTML =
+      '<input id="s" role="combobox"><input id="q" type="search"><input id="c" type="checkbox"><textarea id="t"></textarea>';
     expect(isEscSafeField(document.getElementById('s'))).toBe(false);
     expect(isEscSafeField(document.getElementById('q'))).toBe(false);
     expect(isEscSafeField(document.getElementById('c'))).toBe(false);

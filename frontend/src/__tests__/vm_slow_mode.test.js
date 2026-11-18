@@ -15,11 +15,17 @@ describe('slow mode (VMs decision 4 a)', () => {
     expect(isSlow({ state: 'stopped', acceleration: 'tcg' })).toBe(false);
     expect(isSlow({ state: 'running', acceleration: 'kvm' })).toBe(false);
     expect(isSlow(null)).toBe(false);
-    expect(slowNoteHtml({ state: 'running', acceleration: 'tcg' }, 'Enable VT-x <in BIOS>')).toContain('title="Enable VT-x &lt;in BIOS&gt;"');
+    expect(slowNoteHtml({ state: 'running', acceleration: 'tcg' }, 'Enable VT-x <in BIOS>')).toContain(
+      'title="Enable VT-x &lt;in BIOS&gt;"'
+    );
     expect(slowNoteHtml({ state: 'running', acceleration: 'tcg' })).not.toContain('title=');
     expect(slowNoteHtml({ state: 'running', acceleration: 'kvm' })).toBe('');
-    expect(slowStartText({ acceleration: 'tcg' }, 'web', 'Enable VT-x.')).toBe("web started in slow mode: this NAS can't use hardware virtualization. Enable VT-x.");
-    expect(slowStartText({ acceleration: 'tcg' }, 'web')).toBe("web started in slow mode: this NAS can't use hardware virtualization.");
+    expect(slowStartText({ acceleration: 'tcg' }, 'web', 'Enable VT-x.')).toBe(
+      "web started in slow mode: this NAS can't use hardware virtualization. Enable VT-x."
+    );
+    expect(slowStartText({ acceleration: 'tcg' }, 'web')).toBe(
+      "web started in slow mode: this NAS can't use hardware virtualization."
+    );
     expect(slowStartText({ acceleration: 'kvm' }, 'web')).toBe('');
     expect(slowStartText(null, 'web')).toBe('');
   });
@@ -31,10 +37,18 @@ describe('slow mode (VMs decision 4 a)', () => {
     const tel = { kvm: { state: 'disabled', remediation: 'Enable VT-x in the BIOS.' } };
     vi.spyOn(api, 'get').mockImplementation(async (url) => {
       if (url === '/api/vms/telemetry') return tel;
-      if (url === '/api/vms') return [{ id: 'a', name: 'web', state: 'running', acceleration: 'tcg' }, { id: 'b', name: 'db', state: 'stopped' }];
+      if (url === '/api/vms')
+        return [
+          { id: 'a', name: 'web', state: 'running', acceleration: 'tcg' },
+          { id: 'b', name: 'db', state: 'stopped' },
+        ];
       return {};
     });
-    try { initManagement(); } catch (_) { /* parts of the window this test doesn't build */ }
+    try {
+      initManagement();
+    } catch (_) {
+      /* parts of the window this test doesn't build */
+    }
     window.dispatchEvent(new Event('vm-updated'));
     await flush();
     const strip = document.getElementById('mgmt-vms-summary-strip')?.textContent || '';

@@ -31,7 +31,11 @@ export function initDesktopContextMenu() {
   document.addEventListener('contextmenu', (e) => {
     if (typeof e.target?.closest !== 'function') return;
     // 1. Allow native context menu in text inputs, textareas, contenteditable, monaco, code editors, and links
-    if (e.target.closest('input, textarea, select, [contenteditable="true"], .monaco-editor, #ci-logs-terminal, .terminal, .code-editor, a[href]')) {
+    if (
+      e.target.closest(
+        'input, textarea, select, [contenteditable="true"], .monaco-editor, #ci-logs-terminal, .terminal, .code-editor, a[href]'
+      )
+    ) {
       return;
     }
 
@@ -45,10 +49,12 @@ export function initDesktopContextMenu() {
     }
 
     // 3. Allow windows, modals, dock, navbar, and DESKTOP ICONS to handle their own context menus
-    if (e.target.closest(
-      '.os-window, .smart-modal-window, .notif-center-window, #os-dock, #os-dock-container, ' +
-      '.suite-navbar, .smart-modal-backdrop, .chassis-hero-box, #desktop-ctx-menu, .dock-context-menu'
-    )) {
+    if (
+      e.target.closest(
+        '.os-window, .smart-modal-window, .notif-center-window, #os-dock, #os-dock-container, ' +
+          '.suite-navbar, .smart-modal-backdrop, .chassis-hero-box, #desktop-ctx-menu, .dock-context-menu'
+      )
+    ) {
       return;
     }
 
@@ -286,7 +292,11 @@ export function executeContextAction(action) {
       } else if (typeof window.openManagementSection === 'function') {
         window.openManagementSection('mgmt-sec-wallpaper', 'mgmt-pane-wallpaper');
       } else {
-        ZettEventBus.emit('window:open', { id: 'management-window', section: 'mgmt-sec-wallpaper', pane: 'mgmt-pane-wallpaper' });
+        ZettEventBus.emit('window:open', {
+          id: 'management-window',
+          section: 'mgmt-sec-wallpaper',
+          pane: 'mgmt-pane-wallpaper',
+        });
       }
       break;
 
@@ -296,7 +306,11 @@ export function executeContextAction(action) {
       } else if (typeof window.openManagementSection === 'function') {
         window.openManagementSection('mgmt-sec-wallpaper', 'mgmt-pane-theme');
       } else {
-        ZettEventBus.emit('window:open', { id: 'management-window', section: 'mgmt-sec-wallpaper', pane: 'mgmt-pane-theme' });
+        ZettEventBus.emit('window:open', {
+          id: 'management-window',
+          section: 'mgmt-sec-wallpaper',
+          pane: 'mgmt-pane-theme',
+        });
       }
       break;
 
@@ -306,7 +320,11 @@ export function executeContextAction(action) {
       } else if (typeof window.openManagementSection === 'function') {
         window.openManagementSection('mgmt-sec-wallpaper', 'mgmt-pane-glass');
       } else {
-        ZettEventBus.emit('window:open', { id: 'management-window', section: 'mgmt-sec-wallpaper', pane: 'mgmt-pane-glass' });
+        ZettEventBus.emit('window:open', {
+          id: 'management-window',
+          section: 'mgmt-sec-wallpaper',
+          pane: 'mgmt-pane-glass',
+        });
       }
       break;
 
@@ -316,7 +334,11 @@ export function executeContextAction(action) {
       } else if (typeof window.openManagementSection === 'function') {
         window.openManagementSection('mgmt-sec-wallpaper', 'mgmt-pane-dock');
       } else {
-        ZettEventBus.emit('window:open', { id: 'management-window', section: 'mgmt-sec-wallpaper', pane: 'mgmt-pane-dock' });
+        ZettEventBus.emit('window:open', {
+          id: 'management-window',
+          section: 'mgmt-sec-wallpaper',
+          pane: 'mgmt-pane-dock',
+        });
       }
       break;
 
@@ -326,7 +348,11 @@ export function executeContextAction(action) {
       } else if (typeof window.openManagementSection === 'function') {
         window.openManagementSection('mgmt-sec-wallpaper', 'mgmt-pane-screensaver');
       } else {
-        ZettEventBus.emit('window:open', { id: 'management-window', section: 'mgmt-sec-wallpaper', pane: 'mgmt-pane-screensaver' });
+        ZettEventBus.emit('window:open', {
+          id: 'management-window',
+          section: 'mgmt-sec-wallpaper',
+          pane: 'mgmt-pane-screensaver',
+        });
       }
       break;
 
@@ -342,7 +368,10 @@ export function executeContextAction(action) {
           }
         }
       } catch (err) {
-        showToast(t('toast.fullscreen_toggle_not_supported_in_this', 'Fullscreen toggle not supported in this view'), 'info');
+        showToast(
+          t('toast.fullscreen_toggle_not_supported_in_this', 'Fullscreen toggle not supported in this view'),
+          'info'
+        );
       }
       break;
 
@@ -350,7 +379,11 @@ export function executeContextAction(action) {
       if (typeof window.openManagementSection === 'function') {
         window.openManagementSection('mgmt-sec-activity', 'mgmt-pane-metrics');
       } else {
-        ZettEventBus.emit('window:open', { id: 'management-window', section: 'mgmt-sec-activity', pane: 'mgmt-pane-metrics' });
+        ZettEventBus.emit('window:open', {
+          id: 'management-window',
+          section: 'mgmt-sec-activity',
+          pane: 'mgmt-pane-metrics',
+        });
       }
       break;
 

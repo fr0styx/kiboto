@@ -1,4 +1,4 @@
-import { showToast } from "./toast.js";
+import { showToast } from './toast.js';
 import { eventLook } from './event-level.js';
 import { agoText, eventView } from './event-view.js';
 import { eventPlace } from './event-view.js';
@@ -11,226 +11,260 @@ import { formatDateTime, formatFixed } from './format.js';
 // their own app, Drive Health (components/drive-health.js).
 
 let activeModalType = null;
-let smartOverlay, smartCloseBtn, smartTitle, smartModel, smartSerial, smartHealth, smartHours, smartRaw, smartLbl1, smartLbl2, smartLbl3, smartLbl4, smartRawTitle, smartRefreshBtn;
+let smartOverlay,
+  smartCloseBtn,
+  smartTitle,
+  smartModel,
+  smartSerial,
+  smartHealth,
+  smartHours,
+  smartRaw,
+  smartLbl1,
+  smartLbl2,
+  smartLbl3,
+  smartLbl4,
+  smartRawTitle,
+  smartRefreshBtn;
 let _unbindSmartTrap = null;
 let _eventDetailOverlay = null;
 let _unbindEventDetailTrap = null;
 let _currentEventDetailData = null;
 
 window.addEventListener('DOMContentLoaded', () => {
-    smartOverlay = document.getElementById("smart-modal-overlay");
-    smartCloseBtn = document.getElementById("smart-modal-close");
-    smartTitle = document.getElementById("smart-modal-title");
-    smartModel = document.getElementById("smart-meta-model");
-    smartSerial = document.getElementById("smart-meta-serial");
-    smartHealth = document.getElementById("smart-meta-health");
-    smartHours = document.getElementById("smart-meta-hours");
-    smartRaw = document.getElementById("smart-raw-output");
-    smartLbl1 = document.getElementById("smart-lbl-1");
-    smartLbl2 = document.getElementById("smart-lbl-2");
-    smartLbl3 = document.getElementById("smart-lbl-3");
-    smartLbl4 = document.getElementById("smart-lbl-4");
-    smartRawTitle = document.getElementById("smart-modal-raw-title");
-    smartRefreshBtn = document.getElementById("smart-modal-refresh");
-    const minBtn = document.getElementById("smart-min") || document.getElementById("smart-modal-min");
-    
-    if (smartRefreshBtn) {
-      smartRefreshBtn.addEventListener("click", () => {
-        if (activeModalType) {
-          openMetricModal(activeModalType);
-        }
-      });
-    }
-    if (smartCloseBtn) {
-      const handleClose = (e) => {
-        if (e && e.type === 'touchend') { e.preventDefault(); e.stopPropagation(); }
-        closeSmartModal();
-      };
-      smartCloseBtn.addEventListener("click", handleClose);
-      smartCloseBtn.addEventListener("touchend", handleClose);
-    }
-    if (minBtn) {
-      const handleMin = (e) => {
-        if (e && e.type === 'touchend') { e.preventDefault(); e.stopPropagation(); }
-        if (DockManager) DockManager.minimize("smart");
-      };
-      minBtn.addEventListener("click", handleMin);
-      minBtn.addEventListener("touchend", handleMin);
-    }
-    if (smartOverlay) {
-      smartOverlay.addEventListener("click", (e) => {
-        if (e.target === smartOverlay) closeSmartModal();
-      });
-    }
+  smartOverlay = document.getElementById('smart-modal-overlay');
+  smartCloseBtn = document.getElementById('smart-modal-close');
+  smartTitle = document.getElementById('smart-modal-title');
+  smartModel = document.getElementById('smart-meta-model');
+  smartSerial = document.getElementById('smart-meta-serial');
+  smartHealth = document.getElementById('smart-meta-health');
+  smartHours = document.getElementById('smart-meta-hours');
+  smartRaw = document.getElementById('smart-raw-output');
+  smartLbl1 = document.getElementById('smart-lbl-1');
+  smartLbl2 = document.getElementById('smart-lbl-2');
+  smartLbl3 = document.getElementById('smart-lbl-3');
+  smartLbl4 = document.getElementById('smart-lbl-4');
+  smartRawTitle = document.getElementById('smart-modal-raw-title');
+  smartRefreshBtn = document.getElementById('smart-modal-refresh');
+  const minBtn = document.getElementById('smart-min') || document.getElementById('smart-modal-min');
 
-    // Event Detail Modal Setup
-    _eventDetailOverlay = document.getElementById("event-detail-modal-overlay");
-    const eventDetailClose = document.getElementById("event-detail-close");
-    const eventDetailCloseBtn = document.getElementById("event-detail-close-btn");
-    const eventDetailCopyBtn = document.getElementById("event-detail-copy-btn");
-    const eventDetailHeader = document.getElementById("event-detail-header");
-    const eventDetailWindow = _eventDetailOverlay ? _eventDetailOverlay.querySelector(".smart-modal-window") : null;
+  if (smartRefreshBtn) {
+    smartRefreshBtn.addEventListener('click', () => {
+      if (activeModalType) {
+        openMetricModal(activeModalType);
+      }
+    });
+  }
+  if (smartCloseBtn) {
+    const handleClose = (e) => {
+      if (e && e.type === 'touchend') {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      closeSmartModal();
+    };
+    smartCloseBtn.addEventListener('click', handleClose);
+    smartCloseBtn.addEventListener('touchend', handleClose);
+  }
+  if (minBtn) {
+    const handleMin = (e) => {
+      if (e && e.type === 'touchend') {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      if (DockManager) DockManager.minimize('smart');
+    };
+    minBtn.addEventListener('click', handleMin);
+    minBtn.addEventListener('touchend', handleMin);
+  }
+  if (smartOverlay) {
+    smartOverlay.addEventListener('click', (e) => {
+      if (e.target === smartOverlay) closeSmartModal();
+    });
+  }
 
-    if (eventDetailClose) eventDetailClose.addEventListener("click", closeEventDetailModal);
-    if (eventDetailCloseBtn) eventDetailCloseBtn.addEventListener("click", closeEventDetailModal);
-    if (_eventDetailOverlay) {
-      _eventDetailOverlay.addEventListener("click", (e) => {
-        if (e.target === _eventDetailOverlay) closeEventDetailModal();
-      });
-    }
+  // Event Detail Modal Setup
+  _eventDetailOverlay = document.getElementById('event-detail-modal-overlay');
+  const eventDetailClose = document.getElementById('event-detail-close');
+  const eventDetailCloseBtn = document.getElementById('event-detail-close-btn');
+  const eventDetailCopyBtn = document.getElementById('event-detail-copy-btn');
+  const eventDetailHeader = document.getElementById('event-detail-header');
+  const eventDetailWindow = _eventDetailOverlay ? _eventDetailOverlay.querySelector('.smart-modal-window') : null;
 
-    if (eventDetailWindow && eventDetailHeader && makeDraggable) {
-      makeDraggable(eventDetailWindow, eventDetailHeader, "event-detail");
-    }
+  if (eventDetailClose) eventDetailClose.addEventListener('click', closeEventDetailModal);
+  if (eventDetailCloseBtn) eventDetailCloseBtn.addEventListener('click', closeEventDetailModal);
+  if (_eventDetailOverlay) {
+    _eventDetailOverlay.addEventListener('click', (e) => {
+      if (e.target === _eventDetailOverlay) closeEventDetailModal();
+    });
+  }
 
-    if (eventDetailCopyBtn) {
-      eventDetailCopyBtn.addEventListener("click", async () => {
-        if (!_currentEventDetailData) return;
-        let textToCopy = JSON.stringify(_currentEventDetailData, null, 2);
-        if (_currentEventDetailData?.details?.report_markdown) {
-          textToCopy = _currentEventDetailData.details.report_markdown;
-        }
-        try {
-          await copyText(textToCopy);
-          const copyLabel = document.getElementById("event-detail-copy-text");
-          const copyIcon = document.getElementById("event-detail-copy-icon");
-          if (copyLabel) copyLabel.textContent = t("event_detail.copied", "Copied!");
-          if (copyIcon) copyIcon.textContent = "✓";
-          eventDetailCopyBtn.style.borderColor = "var(--ok2, #10b981)";
-          eventDetailCopyBtn.style.color = "var(--ok2, #10b981)";
-          showToast(t('toast.event_details_copied_to_clipboard', "Event details copied to clipboard"), "info");
-          setTimeout(() => {
-            if (copyLabel) copyLabel.textContent = t("event_detail.copy", "Copy Details");
-            if (copyIcon) copyIcon.textContent = "📋";
-            eventDetailCopyBtn.style.borderColor = "rgba(255, 255, 255, 0.14)";
-            eventDetailCopyBtn.style.color = "#fff";
-          }, 2000);
-        } catch (err) {
-          console.warn("Copy details failed:", err);
-        }
-      });
-    }
+  if (eventDetailWindow && eventDetailHeader && makeDraggable) {
+    makeDraggable(eventDetailWindow, eventDetailHeader, 'event-detail');
+  }
+
+  if (eventDetailCopyBtn) {
+    eventDetailCopyBtn.addEventListener('click', async () => {
+      if (!_currentEventDetailData) return;
+      let textToCopy = JSON.stringify(_currentEventDetailData, null, 2);
+      if (_currentEventDetailData?.details?.report_markdown) {
+        textToCopy = _currentEventDetailData.details.report_markdown;
+      }
+      try {
+        await copyText(textToCopy);
+        const copyLabel = document.getElementById('event-detail-copy-text');
+        const copyIcon = document.getElementById('event-detail-copy-icon');
+        if (copyLabel) copyLabel.textContent = t('event_detail.copied', 'Copied!');
+        if (copyIcon) copyIcon.textContent = '✓';
+        eventDetailCopyBtn.style.borderColor = 'var(--ok2, #10b981)';
+        eventDetailCopyBtn.style.color = 'var(--ok2, #10b981)';
+        showToast(t('toast.event_details_copied_to_clipboard', 'Event details copied to clipboard'), 'info');
+        setTimeout(() => {
+          if (copyLabel) copyLabel.textContent = t('event_detail.copy', 'Copy Details');
+          if (copyIcon) copyIcon.textContent = '📋';
+          eventDetailCopyBtn.style.borderColor = 'rgba(255, 255, 255, 0.14)';
+          eventDetailCopyBtn.style.color = '#fff';
+        }, 2000);
+      } catch (err) {
+        console.warn('Copy details failed:', err);
+      }
+    });
+  }
 });
 
 let _smartFetchController = null;
 
 function updateMetricModalLive() {
-  const s = _latestStats; if (!smartOverlay || !smartOverlay.classList.contains("open") || !s || !activeModalType) return;
-  
-  if (activeModalType === "storage") {
+  const s = _latestStats;
+  if (!smartOverlay || !smartOverlay.classList.contains('open') || !s || !activeModalType) return;
+
+  if (activeModalType === 'storage') {
     smartModel.textContent = s.storage.used;
     smartSerial.textContent = s.storage.total;
     smartHealth.textContent = `${s.storage.pct}%`;
-    smartHealth.style.color = s.storage.pct >= 90 ? "var(--crit)" : "var(--ok)";
+    smartHealth.style.color = s.storage.pct >= 90 ? 'var(--crit)' : 'var(--ok)';
     smartRaw.textContent = JSON.stringify(s.disks, null, 2);
-  } else if (activeModalType === "cpu") {
+  } else if (activeModalType === 'cpu') {
     smartModel.textContent = `${s.cpu.temp}°C`;
     smartSerial.textContent = `${s.cpu.util}%`;
     smartHealth.textContent = s.cpu.temp >= 75 ? t('modal.heat_high', 'High') : t('modal.heat_ok', 'Normal');
-    smartHealth.style.color = s.cpu.temp >= 75 ? "var(--warn)" : "var(--ok)";
+    smartHealth.style.color = s.cpu.temp >= 75 ? 'var(--warn)' : 'var(--ok)';
     smartHours.textContent = s.uptime;
-    smartRaw.textContent = t('modal.raw_cpu', 'Host: {name}\nIP: {ip}\nTemperature: {temp}°C\nBusy: {util}%\nRunning for: {uptime}', { name: s.name, ip: s.ip, temp: s.cpu.temp, util: s.cpu.util, uptime: s.uptime });
-  } else if (activeModalType === "mem") {
+    smartRaw.textContent = t(
+      'modal.raw_cpu',
+      'Host: {name}\nIP: {ip}\nTemperature: {temp}°C\nBusy: {util}%\nRunning for: {uptime}',
+      { name: s.name, ip: s.ip, temp: s.cpu.temp, util: s.cpu.util, uptime: s.uptime }
+    );
+  } else if (activeModalType === 'mem') {
     smartModel.textContent = `${s.mem.used_gb} GB`;
     smartSerial.textContent = `${s.mem.total_gb} GB`;
     smartHealth.textContent = `${s.mem.pct}%`;
-    smartHealth.style.color = s.mem.pct >= 90 ? "var(--crit)" : "var(--ok)";
+    smartHealth.style.color = s.mem.pct >= 90 ? 'var(--crit)' : 'var(--ok)';
     smartHours.textContent = `${formatFixed(s.mem.total_gb - s.mem.used_gb, 1)} GB`;
     smartRaw.textContent = JSON.stringify(s.mem, null, 2);
-  } else if (activeModalType === "fans") {
+  } else if (activeModalType === 'fans') {
     const f = s.fans || [];
-    smartModel.textContent = f[0] ? `${f[0]} RPM` : "N/A";
-    smartSerial.textContent = f[1] ? `${f[1]} RPM` : "N/A";
-    smartHealth.textContent = f[2] ? `${f[2]} RPM` : "N/A";
-    smartRaw.textContent = t('modal.raw_fans', 'Fan 1 (disks): {f1} RPM\nFan 2 (disks): {f2} RPM\nFan 3 (processor): {f3} RPM\nSensors: /sys/class/hwmon\nDuty range: 0–183', { f1: f[0] || 0, f2: f[1] || 0, f3: f[2] || 0 });
-  } else if (activeModalType === "net") {
+    smartModel.textContent = f[0] ? `${f[0]} RPM` : 'N/A';
+    smartSerial.textContent = f[1] ? `${f[1]} RPM` : 'N/A';
+    smartHealth.textContent = f[2] ? `${f[2]} RPM` : 'N/A';
+    smartRaw.textContent = t(
+      'modal.raw_fans',
+      'Fan 1 (disks): {f1} RPM\nFan 2 (disks): {f2} RPM\nFan 3 (processor): {f3} RPM\nSensors: /sys/class/hwmon\nDuty range: 0–183',
+      { f1: f[0] || 0, f2: f[1] || 0, f3: f[2] || 0 }
+    );
+  } else if (activeModalType === 'net') {
     const idle = t('modal.no_traffic', '0 KB/s');
     smartModel.textContent = s.net ? s.net.tx : idle;
     smartSerial.textContent = s.net ? s.net.rx : idle;
     smartHealth.textContent = t('modal.link_up', 'Connected');
-    smartHealth.style.color = "var(--ok)";
+    smartHealth.style.color = 'var(--ok)';
     smartHours.textContent = s.ip;
-    smartRaw.textContent = t('modal.raw_net', 'Address: {ip}\nSending: {tx}\nReceiving: {rx}\nSource: /proc/net/dev', { ip: s.ip, tx: s.net ? s.net.tx : idle, rx: s.net ? s.net.rx : idle });
+    smartRaw.textContent = t('modal.raw_net', 'Address: {ip}\nSending: {tx}\nReceiving: {rx}\nSource: /proc/net/dev', {
+      ip: s.ip,
+      tx: s.net ? s.net.tx : idle,
+      rx: s.net ? s.net.rx : idle,
+    });
   }
 }
 
 function openMetricModal(type) {
   const s = _latestStats;
-  if (!smartOverlay) smartOverlay = document.getElementById("smart-modal-overlay");
+  if (!smartOverlay) smartOverlay = document.getElementById('smart-modal-overlay');
   if (!smartOverlay || !s) return;
   activeModalType = type;
-  smartOverlay.style.display = "flex";
-  smartOverlay.classList.remove("window-minimized");
-  smartOverlay.classList.add("open");
+  smartOverlay.style.display = 'flex';
+  smartOverlay.classList.remove('window-minimized');
+  smartOverlay.classList.add('open');
   if (DockManager) {
-    DockManager.register("smart", smartOverlay, "#i-disk", "Diagnostics");
-    DockManager.restore("smart");
+    DockManager.register('smart', smartOverlay, '#i-disk', 'Diagnostics');
+    DockManager.restore('smart');
   }
-  const modalWin = smartOverlay.querySelector(".smart-modal-window");
+  const modalWin = smartOverlay.querySelector('.smart-modal-window');
   if (modalWin && bringToFront) bringToFront(modalWin);
-  if (_unbindSmartTrap) { _unbindSmartTrap(); }
+  if (_unbindSmartTrap) {
+    _unbindSmartTrap();
+  }
   if (modalWin) _unbindSmartTrap = trapFocus(modalWin, closeSmartModal);
 
-  const actionsBox = document.getElementById("smart-actions-container");
-  if (actionsBox) actionsBox.style.display = "none";
+  const actionsBox = document.getElementById('smart-actions-container');
+  if (actionsBox) actionsBox.style.display = 'none';
 
-  const navTabs = document.getElementById("smart-nav-tabs");
-  if (navTabs) navTabs.style.display = "none";
-  const healthPane = document.getElementById("smart-pane-health");
-  const selftestPane = document.getElementById("smart-pane-selftest");
-  const rawPane = document.getElementById("smart-pane-raw");
+  const navTabs = document.getElementById('smart-nav-tabs');
+  if (navTabs) navTabs.style.display = 'none';
+  const healthPane = document.getElementById('smart-pane-health');
+  const selftestPane = document.getElementById('smart-pane-selftest');
+  const rawPane = document.getElementById('smart-pane-raw');
   if (healthPane) {
-    healthPane.classList.add("active");
-    healthPane.style.display = "block";
+    healthPane.classList.add('active');
+    healthPane.style.display = 'block';
   }
   if (selftestPane) {
-    selftestPane.classList.remove("active");
-    selftestPane.style.display = "none";
+    selftestPane.classList.remove('active');
+    selftestPane.style.display = 'none';
   }
   if (rawPane) {
-    rawPane.classList.add("active");
-    rawPane.style.display = "block";
+    rawPane.classList.add('active');
+    rawPane.style.display = 'block';
   }
-  const rawFilterWrap = document.querySelector(".smart-raw-toolbar");
-  if (rawFilterWrap) rawFilterWrap.style.display = "none";
+  const rawFilterWrap = document.querySelector('.smart-raw-toolbar');
+  if (rawFilterWrap) rawFilterWrap.style.display = 'none';
 
-  if (type === "storage") {
+  if (type === 'storage') {
     smartTitle.innerHTML = `<svg class="ic"><use href="#i-disk"/></svg> ${t('modal.storage_diag', 'Storage Array Diagnostics')}`;
-    smartLbl1.textContent = t('modal.used_space', "Used");
-    smartLbl2.textContent = t('modal.total_cap', "Total");
-    smartLbl3.textContent = t('modal.utilization', "In use");
-    smartLbl4.textContent = t('modal.target_pool', "Pool");
-    smartHours.textContent = "/mnt/user";
+    smartLbl1.textContent = t('modal.used_space', 'Used');
+    smartLbl2.textContent = t('modal.total_cap', 'Total');
+    smartLbl3.textContent = t('modal.utilization', 'In use');
+    smartLbl4.textContent = t('modal.target_pool', 'Pool');
+    smartHours.textContent = '/mnt/user';
     smartRawTitle.textContent = t('modal.raw_title_storage', 'Disks in use');
-  } else if (type === "cpu") {
+  } else if (type === 'cpu') {
     smartTitle.innerHTML = `<svg class="ic"><use href="#i-cpu"/></svg> ${t('modal.cpu_diag', 'Processor Diagnostics')}`;
-    smartLbl1.textContent = t('modal.core_temp', "Temperature");
-    smartLbl2.textContent = t('modal.active_util', "Busy");
-    smartLbl3.textContent = t('modal.thermal_state', "Heat");
-    smartLbl4.textContent = t('modal.system_uptime', "Running for");
+    smartLbl1.textContent = t('modal.core_temp', 'Temperature');
+    smartLbl2.textContent = t('modal.active_util', 'Busy');
+    smartLbl3.textContent = t('modal.thermal_state', 'Heat');
+    smartLbl4.textContent = t('modal.system_uptime', 'Running for');
     smartRawTitle.textContent = t('modal.raw_title_cpu', 'Processor details');
-  } else if (type === "mem") {
+  } else if (type === 'mem') {
     smartTitle.innerHTML = `<svg class="ic"><use href="#i-mem"/></svg> ${t('modal.mem_diag', 'Memory Distribution')}`;
-    smartLbl1.textContent = t('modal.ram_used', "Memory used");
-    smartLbl2.textContent = t('modal.ram_total', "Memory total");
-    smartLbl3.textContent = t('modal.usage', "Usage");
-    smartLbl4.textContent = t('modal.free_mem', "Free memory");
+    smartLbl1.textContent = t('modal.ram_used', 'Memory used');
+    smartLbl2.textContent = t('modal.ram_total', 'Memory total');
+    smartLbl3.textContent = t('modal.usage', 'Usage');
+    smartLbl4.textContent = t('modal.free_mem', 'Free memory');
     smartRawTitle.textContent = t('modal.raw_title_mem', 'Memory details');
-  } else if (type === "fans") {
+  } else if (type === 'fans') {
     smartTitle.innerHTML = `<svg class="ic"><use href="#i-fan"/></svg> ${t('modal.fans_diag', 'Cooling & Fan Tachometers')}`;
-    smartLbl1.textContent = t('modal.rear_fan_1', "Rear fan 1");
-    smartLbl2.textContent = t('modal.rear_fan_2', "Rear fan 2");
-    smartLbl3.textContent = t('modal.cpu_fan', "Processor fan");
-    smartHealth.style.color = "var(--ok2)";
-    smartLbl4.textContent = t('modal.hwmon_chip', "Sensor chip");
-    smartHours.textContent = "zettlab_d8_fans";
+    smartLbl1.textContent = t('modal.rear_fan_1', 'Rear fan 1');
+    smartLbl2.textContent = t('modal.rear_fan_2', 'Rear fan 2');
+    smartLbl3.textContent = t('modal.cpu_fan', 'Processor fan');
+    smartHealth.style.color = 'var(--ok2)';
+    smartLbl4.textContent = t('modal.hwmon_chip', 'Sensor chip');
+    smartHours.textContent = 'zettlab_d8_fans';
     smartRawTitle.textContent = t('modal.raw_title_fans', 'Fan sensors');
-  } else if (type === "net") {
+  } else if (type === 'net') {
     smartTitle.innerHTML = `<svg class="ic"><use href="#i-net"/></svg> ${t('modal.net_diag', 'Network Throughput Diagnostics')}`;
-    smartLbl1.textContent = t('modal.current_tx', "Sending now");
-    smartLbl2.textContent = t('modal.current_rx', "Receiving now");
-    smartLbl3.textContent = t('modal.link_state', "Connection");
-    smartLbl4.textContent = t('modal.primary_ip', "IP address");
+    smartLbl1.textContent = t('modal.current_tx', 'Sending now');
+    smartLbl2.textContent = t('modal.current_rx', 'Receiving now');
+    smartLbl3.textContent = t('modal.link_state', 'Connection');
+    smartLbl4.textContent = t('modal.primary_ip', 'IP address');
     smartRawTitle.textContent = t('modal.raw_title_net', 'Network interface');
   }
   updateMetricModalLive();
@@ -247,26 +281,23 @@ export function closeSmartModal() {
     _unbindSmartTrap = null;
   }
   if (smartOverlay) {
-    smartOverlay.classList.remove("open");
-    smartOverlay.style.display = "none";
+    smartOverlay.classList.remove('open');
+    smartOverlay.style.display = 'none';
   }
-  if (DockManager) DockManager.unregister("smart");
+  if (DockManager) DockManager.unregister('smart');
 }
-
-
-
 
 // --- EVENT BUS BINDINGS ---
 let _latestStats = null;
 ZettEventBus.addEventListener('stats_tick', (e) => {
-    _latestStats = e.detail;
-    if (typeof updateMetricModalLive === 'function') {
-        updateMetricModalLive();
-    }
+  _latestStats = e.detail;
+  if (typeof updateMetricModalLive === 'function') {
+    updateMetricModalLive();
+  }
 });
 
 ZettEventBus.addEventListener('modal:metric:open', (e) => {
-    openMetricModal(e.detail);
+  openMetricModal(e.detail);
 });
 
 ZettEventBus.addEventListener('modal:smart:close', () => closeSmartModal());
@@ -277,11 +308,11 @@ export function closeEventDetailModal() {
     _unbindEventDetailTrap = null;
   }
   if (!_eventDetailOverlay || !document.body.contains(_eventDetailOverlay)) {
-    _eventDetailOverlay = document.getElementById("event-detail-modal-overlay");
+    _eventDetailOverlay = document.getElementById('event-detail-modal-overlay');
   }
   if (_eventDetailOverlay) {
-    _eventDetailOverlay.classList.remove("open");
-    _eventDetailOverlay.style.display = "none";
+    _eventDetailOverlay.classList.remove('open');
+    _eventDetailOverlay.style.display = 'none';
   }
 }
 
@@ -289,54 +320,56 @@ export function openEventDetailModal(ev) {
   if (!ev) return;
   _currentEventDetailData = ev;
   if (!_eventDetailOverlay || !document.body.contains(_eventDetailOverlay)) {
-    _eventDetailOverlay = document.getElementById("event-detail-modal-overlay");
+    _eventDetailOverlay = document.getElementById('event-detail-modal-overlay');
   }
   if (!_eventDetailOverlay) return;
 
-  _eventDetailOverlay.style.display = "flex";
-  _eventDetailOverlay.classList.remove("window-minimized");
-  _eventDetailOverlay.classList.add("open");
+  _eventDetailOverlay.style.display = 'flex';
+  _eventDetailOverlay.classList.remove('window-minimized');
+  _eventDetailOverlay.classList.add('open');
 
-  const modalWin = _eventDetailOverlay.querySelector(".smart-modal-window");
+  const modalWin = _eventDetailOverlay.querySelector('.smart-modal-window');
   if (modalWin && bringToFront) bringToFront(modalWin);
-  if (_unbindEventDetailTrap) { _unbindEventDetailTrap(); }
+  if (_unbindEventDetailTrap) {
+    _unbindEventDetailTrap();
+  }
   if (modalWin) _unbindEventDetailTrap = trapFocus(modalWin, closeEventDetailModal);
 
-  const headerIcon = document.getElementById("event-detail-header-icon");
-  const badgeIcon = document.getElementById("event-detail-badge-icon");
-  const badgeText = document.getElementById("event-detail-badge-text");
-  const badgeEl = document.getElementById("event-detail-badge");
-  const subsystemEl = document.getElementById("event-detail-subsystem");
-  const relTimeEl = document.getElementById("event-detail-reltime");
-  const headlineEl = document.getElementById("event-detail-event-title");
-  const messageEl = document.getElementById("event-detail-event-message");
-  const localTimeEl = document.getElementById("event-detail-localtime");
-  const epochEl = document.getElementById("event-detail-epoch");
-  const rawEl = document.getElementById("event-detail-raw");
-  const contextBtn = document.getElementById("event-detail-context-btn");
+  const headerIcon = document.getElementById('event-detail-header-icon');
+  const badgeIcon = document.getElementById('event-detail-badge-icon');
+  const badgeText = document.getElementById('event-detail-badge-text');
+  const badgeEl = document.getElementById('event-detail-badge');
+  const subsystemEl = document.getElementById('event-detail-subsystem');
+  const relTimeEl = document.getElementById('event-detail-reltime');
+  const headlineEl = document.getElementById('event-detail-event-title');
+  const messageEl = document.getElementById('event-detail-event-message');
+  const localTimeEl = document.getElementById('event-detail-localtime');
+  const epochEl = document.getElementById('event-detail-epoch');
+  const rawEl = document.getElementById('event-detail-raw');
+  const contextBtn = document.getElementById('event-detail-context-btn');
 
   const lvl = eventLook(ev.level);
   const view = eventView(ev); // the reader's language: the dialog showed the server's English
-  let icon = "ℹ️";
-  let badgeColor = "#4fd8c4";
-  let badgeBg = "rgba(51, 205, 184, 0.2)";
-  let badgeBorder = "rgba(51, 205, 184, 0.4)";
+  let icon = 'ℹ️';
+  let badgeColor = '#4fd8c4';
+  let badgeBg = 'rgba(51, 205, 184, 0.2)';
+  let badgeBorder = 'rgba(51, 205, 184, 0.4)';
 
-  if (lvl === "error") {
-    icon = "❌";
-    badgeColor = "var(--crit, #ff5c5c)";
-    badgeBg = "rgba(239, 68, 68, 0.2)";
-    badgeBorder = "rgba(239, 68, 68, 0.4)";
-  } else if (lvl === "warning") {
-    icon = "⚠️";
-    badgeColor = "var(--warn, #f5a623)";
-    badgeBg = "rgba(245, 166, 35, 0.2)";
-    badgeBorder = "rgba(245, 166, 35, 0.4)";
-  } else if (lvl === "success") {
-    icon = "✅";
-    badgeColor = "var(--ok2, #10b981)";
-    badgeBg = "rgba(16, 185, 129, 0.2)";
-    badgeBorder = "rgba(16, 185, 129, 0.4)";
+  if (lvl === 'error') {
+    icon = '❌';
+    badgeColor = 'var(--crit, #ff5c5c)';
+    badgeBg = 'rgba(239, 68, 68, 0.2)';
+    badgeBorder = 'rgba(239, 68, 68, 0.4)';
+  } else if (lvl === 'warning') {
+    icon = '⚠️';
+    badgeColor = 'var(--warn, #f5a623)';
+    badgeBg = 'rgba(245, 166, 35, 0.2)';
+    badgeBorder = 'rgba(245, 166, 35, 0.4)';
+  } else if (lvl === 'success') {
+    icon = '✅';
+    badgeColor = 'var(--ok2, #10b981)';
+    badgeBg = 'rgba(16, 185, 129, 0.2)';
+    badgeBorder = 'rgba(16, 185, 129, 0.4)';
   }
 
   if (headerIcon) headerIcon.textContent = icon;
@@ -369,7 +402,7 @@ export function openEventDetailModal(ev) {
   if (epochEl) epochEl.textContent = `${ts} (${dt.toISOString()})`;
 
   if (headlineEl) headlineEl.textContent = view.title || t('mdx.notification', 'System Notification');
-  if (messageEl) messageEl.textContent = view.message || "--";
+  if (messageEl) messageEl.textContent = view.message || '--';
 
   if (rawEl) {
     if (ev.details && ev.details.report_markdown) {
@@ -386,10 +419,10 @@ export function openEventDetailModal(ev) {
   if (contextBtn) {
     if (actionLabel && actionFn) {
       contextBtn.textContent = actionLabel;
-      contextBtn.style.display = "inline-block";
+      contextBtn.style.display = 'inline-block';
       contextBtn.onclick = actionFn;
     } else {
-      contextBtn.style.display = "none";
+      contextBtn.style.display = 'none';
       contextBtn.onclick = null;
     }
   }
@@ -399,17 +432,17 @@ window.openEventDetailModal = openEventDetailModal;
 window.closeEventDetailModal = closeEventDetailModal;
 
 ZettEventBus.addEventListener('modal:event-detail:open', (e) => {
-    openEventDetailModal(e.detail);
+  openEventDetailModal(e.detail);
 });
 
 ZettEventBus.addEventListener('modal:event-detail:close', () => closeEventDetailModal());
 
 window.addEventListener('kiboto:lang-changed', () => {
-    if (_eventDetailOverlay && _eventDetailOverlay.classList.contains('open') && _currentEventDetailData) {
-        openEventDetailModal(_currentEventDetailData);
-    }
-    if (!smartOverlay || !smartOverlay.classList.contains('open') || !activeModalType) return;
-    openMetricModal(activeModalType);
+  if (_eventDetailOverlay && _eventDetailOverlay.classList.contains('open') && _currentEventDetailData) {
+    openEventDetailModal(_currentEventDetailData);
+  }
+  if (!smartOverlay || !smartOverlay.classList.contains('open') || !activeModalType) return;
+  openMetricModal(activeModalType);
 });
 
 window.closeSmartModal = closeSmartModal;

@@ -57,8 +57,7 @@ export function clearMobileInlineBounds(el) {
   }
 }
 
-let _wasNarrowScreen = typeof window !== 'undefined'
-  && (isCompact());
+let _wasNarrowScreen = typeof window !== 'undefined' && isCompact();
 
 // Phone layout clears window positions. When the screen widens past it (a narrow browser
 // window made wider, a tablet turned), put open windows back where they were saved, or at
@@ -89,13 +88,22 @@ export function applySavedBounds(dragEl, winId) {
   const id = winId || dragEl.id || dragEl.dataset.windowId;
   if (!id) return;
   const all = loadSavedWindowBounds();
-  const saved = all[id]
-    || (id === 'file-manager-window' ? all['fm'] : (id === 'fm' ? all['file-manager-window'] : null))
-    || (id === 'management-window' ? all['management'] : (id === 'management' ? all['management-window'] : null))
-    || (id === 'console-window' ? all['console'] : (id === 'console' ? all['console-window'] : null))
-    || (id === 'smart-modal-window' ? all['smart'] : (id === 'smart' ? all['smart-modal-window'] : null))
-    || (id === 'container-inspector-window' ? all['container-inspector'] : (id === 'container-inspector' ? all['container-inspector-window'] : null))
-    || (id === 'app-deploy-modal-window' ? all['app-deploy'] : (id === 'app-deploy' ? all['app-deploy-modal-window'] : null));
+  const saved =
+    all[id] ||
+    (id === 'file-manager-window' ? all['fm'] : id === 'fm' ? all['file-manager-window'] : null) ||
+    (id === 'management-window' ? all['management'] : id === 'management' ? all['management-window'] : null) ||
+    (id === 'console-window' ? all['console'] : id === 'console' ? all['console-window'] : null) ||
+    (id === 'smart-modal-window' ? all['smart'] : id === 'smart' ? all['smart-modal-window'] : null) ||
+    (id === 'container-inspector-window'
+      ? all['container-inspector']
+      : id === 'container-inspector'
+        ? all['container-inspector-window']
+        : null) ||
+    (id === 'app-deploy-modal-window'
+      ? all['app-deploy']
+      : id === 'app-deploy'
+        ? all['app-deploy-modal-window']
+        : null);
   if (!saved || saved.left == null || saved.top == null) return;
 
   const targetW = saved.width || dragEl.offsetWidth || 500;
@@ -110,7 +118,13 @@ export function applySavedBounds(dragEl, winId) {
   dragEl.style.top = `${clampedTop}px`;
   dragEl.style.transform = 'none';
 
-  if (id === 'console' || id === 'console-window' || dragEl.id === 'console-window' || id === 'copy-toast' || dragEl.id === 'copy-toast') {
+  if (
+    id === 'console' ||
+    id === 'console-window' ||
+    dragEl.id === 'console-window' ||
+    id === 'copy-toast' ||
+    dragEl.id === 'copy-toast'
+  ) {
     dragEl.style.removeProperty('width');
     dragEl.style.removeProperty('height');
     if (saved && (saved.width || saved.height)) {
@@ -165,13 +179,18 @@ export function setWindowRestorationComplete(val = true) {
 
 export function saveOpenWindowsState() {
   if (!isWindowRestorationComplete) return;
-  if (state.isVmConsoleDirect || (typeof window !== 'undefined' && window.location.search.includes('mode=vm-console')) || (typeof document !== 'undefined' && document.body && document.body.classList.contains('vm-console-direct'))) return;
+  if (
+    state.isVmConsoleDirect ||
+    (typeof window !== 'undefined' && window.location.search.includes('mode=vm-console')) ||
+    (typeof document !== 'undefined' && document.body && document.body.classList.contains('vm-console-direct'))
+  )
+    return;
   if (isCompact()) return;
   try {
     const stateObj = {
       activeId: DockManager.activeId,
       who: ownerName(), // SET-12: the list is one person's, not the browser's
-      windows: {}
+      windows: {},
     };
 
     if (DockManager && DockManager.windows) {
@@ -180,21 +199,23 @@ export function saveOpenWindowsState() {
         if (win && !win.closed && !win.transient) {
           stateObj.windows[id] = {
             minimized: !!win.minimized,
-            open: true
+            open: true,
           };
           if (id === 'management') {
             const hubView = document.getElementById('management-hub-view');
             const detailContainer = document.getElementById('management-detail-container');
-            const isDetailVisible = detailContainer && detailContainer.style.display !== 'none' && (!hubView || hubView.style.display === 'none');
+            const isDetailVisible =
+              detailContainer &&
+              detailContainer.style.display !== 'none' &&
+              (!hubView || hubView.style.display === 'none');
             if (isDetailVisible) {
               const visibleCard = Array.from(document.querySelectorAll('.mgmt-detail-card')).find(
                 (c) => c.style.display === 'block' || (c.style.display !== 'none' && c.style.display !== '')
               );
               if (visibleCard) {
                 const activeTab = visibleCard.querySelector('.mgmt-inner-tab.active');
-                stateObj.windows[id].activePane = (activeTab && activeTab.dataset.tabTarget)
-                  ? activeTab.dataset.tabTarget
-                  : visibleCard.id;
+                stateObj.windows[id].activePane =
+                  activeTab && activeTab.dataset.tabTarget ? activeTab.dataset.tabTarget : visibleCard.id;
               } else {
                 stateObj.windows[id].activePane = 'hub';
               }
@@ -212,7 +233,7 @@ export function saveOpenWindowsState() {
             if (titleId && titleId.textContent && titleId.textContent !== '--') {
               stateObj.windows[id].containerData = {
                 cid: titleId.textContent.trim(),
-                cname: titleName ? titleName.textContent.trim() : ''
+                cname: titleName ? titleName.textContent.trim() : '',
               };
             }
           } else if (id === 'smart') {
@@ -230,7 +251,7 @@ export function saveOpenWindowsState() {
     if (notifPanel && notifPanel.style.display !== 'none' && notifPanel.style.display !== '') {
       stateObj.windows['notif'] = {
         open: true,
-        minimized: false
+        minimized: false,
       };
     }
 
@@ -241,7 +262,15 @@ export function saveOpenWindowsState() {
 }
 
 export function restoreOpenWindowsState() {
-  if (state.isLcdDirect || (typeof window !== 'undefined' && window.location.search.includes('mode=lcd')) || (typeof document !== 'undefined' && document.body && document.body.classList.contains('lcd-direct')) || state.isVmConsoleDirect || (typeof window !== 'undefined' && window.location.search.includes('mode=vm-console')) || (typeof document !== 'undefined' && document.body && document.body.classList.contains('vm-console-direct')) || isCompact()) {
+  if (
+    state.isLcdDirect ||
+    (typeof window !== 'undefined' && window.location.search.includes('mode=lcd')) ||
+    (typeof document !== 'undefined' && document.body && document.body.classList.contains('lcd-direct')) ||
+    state.isVmConsoleDirect ||
+    (typeof window !== 'undefined' && window.location.search.includes('mode=vm-console')) ||
+    (typeof document !== 'undefined' && document.body && document.body.classList.contains('vm-console-direct')) ||
+    isCompact()
+  ) {
     isWindowRestorationComplete = true;
     return;
   }
@@ -347,9 +376,17 @@ export function restoreOpenWindowsState() {
         const activeWin = DockManager.windows[stateObj.activeId];
         if (activeWin && activeWin.el && !activeWin.minimized) {
           const el = activeWin.el;
-          const winEl = el.classList.contains('smart-modal-window') || el.classList.contains('chassis-front-panel') || el.classList.contains('os-window') || el.classList.contains('file-manager-window') || el.classList.contains('mgmt-app-window') || el.classList.contains('container-inspector-window')
-            ? el
-            : el.querySelector('.smart-modal-window, .chassis-front-panel, .os-window, .file-manager-window, .mgmt-app-window, .container-inspector-window') || el;
+          const winEl =
+            el.classList.contains('smart-modal-window') ||
+            el.classList.contains('chassis-front-panel') ||
+            el.classList.contains('os-window') ||
+            el.classList.contains('file-manager-window') ||
+            el.classList.contains('mgmt-app-window') ||
+            el.classList.contains('container-inspector-window')
+              ? el
+              : el.querySelector(
+                  '.smart-modal-window, .chassis-front-panel, .os-window, .file-manager-window, .mgmt-app-window, .container-inspector-window'
+                ) || el;
           bringToFront(winEl);
           DockManager.activeId = stateObj.activeId;
           DockManager.render();

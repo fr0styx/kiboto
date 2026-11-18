@@ -1,7 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 vi.mock('../toast.js', () => ({ showToast: vi.fn(), showConfirmToast: vi.fn(), showActionToast: vi.fn() }));
-vi.mock('../api.js', () => ({ api: { get: vi.fn(() => Promise.resolve({})), post: vi.fn(() => Promise.resolve({})) } }));
+vi.mock('../api.js', () => ({
+  api: { get: vi.fn(() => Promise.resolve({})), post: vi.fn(() => Promise.resolve({})) },
+}));
 import { showConfirmToast, showToast } from '../toast.js';
 import { api } from '../api.js';
 import { FIXED_PCT, askFixedSpeed, modeName } from '../components/fan-modes.js';
@@ -40,7 +42,8 @@ describe('the fan modes say what they do (SET-15, Hardware 1)', () => {
   });
 
   it('the Fans tab follows the live mode, except right after a change made there', () => {
-    document.body.innerHTML = '<button class="fan-profile-btn active" data-fan-profile="auto"></button><button class="fan-profile-btn" data-fan-profile="quiet"></button>';
+    document.body.innerHTML =
+      '<button class="fan-profile-btn active" data-fan-profile="auto"></button><button class="fan-profile-btn" data-fan-profile="quiet"></button>';
     expect(syncFanModeFromStream({ profile: 'quiet' })).toBe(true);
     expect(document.querySelector('[data-fan-profile="quiet"]').classList.contains('active')).toBe(true);
     expect(document.querySelector('[data-fan-profile="auto"]').classList.contains('active')).toBe(false);
@@ -50,7 +53,8 @@ describe('the fan modes say what they do (SET-15, Hardware 1)', () => {
   });
 
   it('the Host tab puts back the real mode when a change is refused', async () => {
-    document.body.innerHTML = '<span id="unraid-profile-current-pill"></span><button class="profile-btn" data-profile="auto"></button><button class="profile-btn" data-profile="quiet"></button>';
+    document.body.innerHTML =
+      '<span id="unraid-profile-current-pill"></span><button class="profile-btn" data-profile="auto"></button><button class="profile-btn" data-profile="quiet"></button>';
     const btns = [...document.querySelectorAll('.profile-btn')];
     await chooseHostMode('quiet', btns[1], btns);
     expect(api.post).toHaveBeenCalledWith('/api/system/profile', { profile: 'quiet' });

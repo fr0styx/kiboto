@@ -34,7 +34,7 @@ export function versionsHtml(name, versions) {
           <button type="button" class="btn-pill-toggle" data-act="copy">${escapeHtml(t('fm.versions_restore_copy', 'Restore a copy'))}</button>
           <button type="button" class="btn-pill-toggle" data-act="replace">${escapeHtml(t('fm.versions_replace', 'Replace current'))}</button>
         </div>
-      </li>`,
+      </li>`
     )
     .join('')}</ul>`;
 }
@@ -87,8 +87,12 @@ export async function openPreviousVersions(path, name, onChange = null) {
         showToast(
           overwrite
             ? t('fm.versions_replaced', '{name} is back to the earlier version', { name })
-            : t('fm.versions_copied', 'Restored as {file}', { file: String(res?.path || '').split('/').pop() }),
-          'success',
+            : t('fm.versions_copied', 'Restored as {file}', {
+                file: String(res?.path || '')
+                  .split('/')
+                  .pop(),
+              }),
+          'success'
         );
         done();
         onChange?.();
@@ -103,7 +107,7 @@ export async function openPreviousVersions(path, name, onChange = null) {
         t('fm.versions_replace_msg', 'The file as it is now is replaced by this earlier version.'),
         () => restore(true),
         null,
-        { okText: t('fm.versions_replace', 'Replace current'), destructive: true },
+        { okText: t('fm.versions_replace', 'Replace current'), destructive: true }
       );
     }
   });

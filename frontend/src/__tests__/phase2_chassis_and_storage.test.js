@@ -9,13 +9,12 @@ import {
   fetchAndRenderStorageTopology,
   fetchAndRenderNetworkShares,
   formatBytes,
-  formatNumber
+  formatNumber,
 } from '../components/chassis-visualizer.js';
 
 import { ZettEventBus } from '../event-bus.js';
 import { fetchAndRenderDisksInventory } from '../components/management.js';
 import { api } from '../api.js';
-
 
 describe('Phase 2: Thermal Heatmap Level Calculations', () => {
   it('correctly maps disk temperatures to 5-tier thermal heatmap tokens', () => {
@@ -60,7 +59,7 @@ describe('Phase 2: Parametric Chassis Twin & Locate Strobe', () => {
 
   afterEach(() => {
     container.remove();
-    document.querySelectorAll('#chassis-config-modal-overlay').forEach(el => el.remove());
+    document.querySelectorAll('#chassis-config-modal-overlay').forEach((el) => el.remove());
   });
 
   it('renders parametric bays for HDD and M.2 NVMe drives from raw disks list', () => {
@@ -68,7 +67,7 @@ describe('Phase 2: Parametric Chassis Twin & Locate Strobe', () => {
       { dev: 'sda', model: 'WDC WD140EDFZ', temp: 36, health: 'ok', size_formatted: '14 TB' },
       { dev: 'sdb', model: 'Seagate IronWolf', temp: 42, health: 'ok', size_formatted: '8 TB' },
       { dev: 'sdc', model: 'TOSHIBA MG08', temp: null, standby: true, health: 'standby', size_formatted: '16 TB' },
-      { dev: 'nvme0n1', model: 'Samsung 980 PRO', temp: 44, percentage_used: 12, health: 'ok' }
+      { dev: 'nvme0n1', model: 'Samsung 980 PRO', temp: 44, percentage_used: 12, health: 'ok' },
     ];
 
     renderChassisTwin(container, testDisks);
@@ -101,15 +100,15 @@ describe('Phase 2: Parametric Chassis Twin & Locate Strobe', () => {
             controller_driver: 'ahci',
             temp: 42,
             health: 'ok',
-            standby: false
-          }
+            standby: false,
+          },
         },
         {
           slot_index: 2,
           is_populated: false,
           custom_label: 'Spare Tray',
-          disk: null
-        }
+          disk: null,
+        },
       ],
       nvme_slots: [
         {
@@ -118,11 +117,11 @@ describe('Phase 2: Parametric Chassis Twin & Locate Strobe', () => {
             dev: 'nvme1n1',
             model: 'WD Black SN770 1TB',
             temp: 44,
-            wear: 5
-          }
-        }
+            wear: 5,
+          },
+        },
       ],
-      available_drives: []
+      available_drives: [],
     };
 
     renderChassisTwin(container, chassisConfig.bays, { chassisConfig });
@@ -159,11 +158,9 @@ describe('Phase 2: Parametric Chassis Twin & Locate Strobe', () => {
       total_bays: 4,
       available_drives: [
         { dev: 'sda', canonical_id: 'ata-ST22000NM_123', model: 'ST22000NM', serial: '123', size_formatted: '20 TB' },
-        { dev: 'sdb', canonical_id: 'ata-ST22000NM_456', model: 'ST22000NM', serial: '456', size_formatted: '20 TB' }
+        { dev: 'sdb', canonical_id: 'ata-ST22000NM_456', model: 'ST22000NM', serial: '456', size_formatted: '20 TB' },
       ],
-      bays: [
-        { slot_index: 1, canonical_id: 'ata-ST22000NM_123', custom_label: 'Parity' }
-      ]
+      bays: [{ slot_index: 1, canonical_id: 'ata-ST22000NM_123', custom_label: 'Parity' }],
     };
 
     openChassisConfigModal(config);
@@ -183,9 +180,12 @@ describe('Phase 2: Parametric Chassis Twin & Locate Strobe', () => {
     const saveBtn = modal.querySelector('#chassis-config-save-btn');
     await saveBtn.click();
 
-    expect(apiPostSpy).toHaveBeenCalledWith('/api/chassis/bay_map', expect.objectContaining({
-      method: 'POST'
-    }));
+    expect(apiPostSpy).toHaveBeenCalledWith(
+      '/api/chassis/bay_map',
+      expect.objectContaining({
+        method: 'POST',
+      })
+    );
 
     apiPostSpy.mockRestore();
   });
@@ -210,9 +210,9 @@ describe('Phase 2: Parametric Chassis Twin & Locate Strobe', () => {
               size_formatted: '12.0 TB',
               temp: 39,
               health: 'ok',
-              standby: false
-            }
-          }
+              standby: false,
+            },
+          },
         ],
         nvme_slots: [
           {
@@ -226,11 +226,11 @@ describe('Phase 2: Parametric Chassis Twin & Locate Strobe', () => {
               size_formatted: '1.8 TB',
               temp: 45,
               health: 'ok',
-              standby: false
-            }
-          }
-        ]
-      })
+              standby: false,
+            },
+          },
+        ],
+      }),
     });
 
     await fetchAndRenderDisksInventory();
@@ -278,11 +278,28 @@ describe('Sprint 3: Storage Pools Topology & Network Shares', () => {
           free_bytes: 8000000000000,
           used_pct: 63.6,
           members: [
-            { name: 'parity', device: 'sdb', role: 'parity', size_bytes: 22000000000000, spundown: true, status: 'STANDBY', temp_c: null },
-            { name: 'disk1', device: 'sda', role: 'data', size_bytes: 22000000000000, spundown: false, status: 'OK', temp_c: 41, num_reads: 500000 }
-          ]
-        }
-      ]
+            {
+              name: 'parity',
+              device: 'sdb',
+              role: 'parity',
+              size_bytes: 22000000000000,
+              spundown: true,
+              status: 'STANDBY',
+              temp_c: null,
+            },
+            {
+              name: 'disk1',
+              device: 'sda',
+              role: 'data',
+              size_bytes: 22000000000000,
+              spundown: false,
+              status: 'OK',
+              temp_c: 41,
+              num_reads: 500000,
+            },
+          ],
+        },
+      ],
     };
 
     renderStructuredPoolsTopology(container, mockData);
@@ -294,7 +311,7 @@ describe('Sprint 3: Storage Pools Topology & Network Shares', () => {
     expect(container.textContent).toContain('/dev/sda');
     expect(container.textContent).toContain('Asleep');
     expect(container.textContent).toContain('41°C');
-    expect(container.textContent).toContain("never changes them");
+    expect(container.textContent).toContain('never changes them');
     expect(container.querySelectorAll('.btn-locate-topo').length).toBe(2);
   });
 
@@ -323,9 +340,9 @@ describe('Sprint 3: Storage Pools Topology & Network Shares', () => {
               used_bytes: 183000000000,
               free_bytes: 815000000000,
               total_bytes: 998000000000,
-              used_pct: 18.3
-            }
-          ]
+              used_pct: 18.3,
+            },
+          ],
         };
       }
       if (url === '/api/webdav/status') return { enabled: true, running: true, port: 8084 };
@@ -333,7 +350,7 @@ describe('Sprint 3: Storage Pools Topology & Network Shares', () => {
         return {
           platform: 'unraid',
           is_busy: false,
-          capabilities: { is_observer_mode: true }
+          capabilities: { is_observer_mode: true },
         };
       }
       return {};
@@ -344,7 +361,7 @@ describe('Sprint 3: Storage Pools Topology & Network Shares', () => {
 
     await fetchAndRenderNetworkShares(container);
 
-    expect(badge.textContent).toContain("Managed by Unraid");
+    expect(badge.textContent).toContain('Managed by Unraid');
     expect(container.textContent).toContain('appdata');
     expect(container.textContent).toContain('application data');
     expect(container.textContent).toContain('No password'); // in words, not the raw value (SET-14)
@@ -359,14 +376,12 @@ describe('Sprint 3: Storage Pools Topology & Network Shares', () => {
     expect(eventSpy).toHaveBeenCalledWith(
       expect.objectContaining({
         id: 'file-manager-window',
-        path: '/mnt/user/appdata'
+        path: '/mnt/user/appdata',
       }),
       expect.anything()
     );
-
 
     apiSpy.mockRestore();
     badge.remove();
   });
 });
-

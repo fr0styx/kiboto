@@ -6,7 +6,14 @@ const { api } = await import('../api.js');
 const { showToast } = await import('../toast.js');
 const { loadPublicLinksCard, publicLinksStatus } = await import('../components/management/public-links.js');
 
-const BASE = { enabled: false, live: false, tailscale: true, base_url: 'https://nas.tail1.ts.net:8443', approval_url: '', error: '' };
+const BASE = {
+  enabled: false,
+  live: false,
+  tailscale: true,
+  base_url: 'https://nas.tail1.ts.net:8443',
+  approval_url: '',
+  error: '',
+};
 const q = (s) => document.querySelector(s);
 
 describe('share links from anywhere (NFEAT-2)', () => {
@@ -18,16 +25,22 @@ describe('share links from anywhere (NFEAT-2)', () => {
 
   it('says how it stands', () => {
     expect(publicLinksStatus(BASE)).toBe('Off: share links work at home and on your tailnet.');
-    expect(publicLinksStatus({ ...BASE, enabled: true, live: true })).toBe('On: share links work from anywhere, at https://nas.tail1.ts.net:8443.');
+    expect(publicLinksStatus({ ...BASE, enabled: true, live: true })).toBe(
+      'On: share links work from anywhere, at https://nas.tail1.ts.net:8443.'
+    );
     expect(publicLinksStatus({ ...BASE, enabled: true })).toBe('Starting…');
     expect(publicLinksStatus({ ...BASE, tailscale: false })).toMatch(/^Needs Tailscale/);
-    expect(publicLinksStatus({ ...BASE, approval_url: 'https://login.tailscale.com/f/funnel?x' })).toMatch(/allow Funnel first/);
+    expect(publicLinksStatus({ ...BASE, approval_url: 'https://login.tailscale.com/f/funnel?x' })).toMatch(
+      /allow Funnel first/
+    );
     expect(publicLinksStatus({ ...BASE, error: 'denied' })).toBe('denied');
   });
 
   it('turns on, shows an approval link, and off', async () => {
     vi.spyOn(api, 'get').mockResolvedValue(BASE);
-    const put = vi.spyOn(api, 'put').mockResolvedValue({ ...BASE, enabled: false, approval_url: 'https://login.tailscale.com/f/funnel?x' });
+    const put = vi
+      .spyOn(api, 'put')
+      .mockResolvedValue({ ...BASE, enabled: false, approval_url: 'https://login.tailscale.com/f/funnel?x' });
     await loadPublicLinksCard();
     expect(q('#pl-toggle').disabled).toBe(false);
     q('#pl-toggle').click();

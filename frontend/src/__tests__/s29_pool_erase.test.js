@@ -1,7 +1,12 @@
 /** S29: "Delete pool and erase its drives" shows the drives first, asks for the name and the password. */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-vi.mock('../toast.js', () => ({ showToast: vi.fn(), showConfirmToast: vi.fn(), showDangerConfirm: vi.fn(), showPromptToast: vi.fn() }));
+vi.mock('../toast.js', () => ({
+  showToast: vi.fn(),
+  showConfirmToast: vi.fn(),
+  showDangerConfirm: vi.fn(),
+  showPromptToast: vi.fn(),
+}));
 import { showToast, showDangerConfirm, showPromptToast } from '../toast.js';
 import { api } from '../api.js';
 import { eraseButtonHtml, erasePool } from '../components/chassis-visualizer.js';
@@ -27,7 +32,11 @@ describe('erase a pool (S29)', () => {
     showPromptToast.mockImplementation((title, msg, def, ok) => ok(' secret '));
     const done = vi.fn();
     expect(await erasePool('tank', done)).toBe(true);
-    expect(post).toHaveBeenCalledWith('/api/storage/pools/tank/erase', { confirm_name: 'tank', current_password: 'secret' }, { confirmed: true });
+    expect(post).toHaveBeenCalledWith(
+      '/api/storage/pools/tank/erase',
+      { confirm_name: 'tank', current_password: 'secret' },
+      { confirmed: true }
+    );
     expect(done).toHaveBeenCalled();
     expect(showToast).toHaveBeenCalledWith(expect.stringContaining('2 drives erased'), 'success');
   });

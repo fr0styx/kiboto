@@ -35,8 +35,8 @@ export function renderNasName(st) {
   old.textContent = old.hidden
     ? ''
     : t('nas_name.old', 'Also still answers to {names}, so older bookmarks keep working.', {
-      names: st.also_answers.map((n) => `${n}.local`).join(', '),
-    });
+        names: st.also_answers.map((n) => `${n}.local`).join(', '),
+      });
 }
 
 async function put(body) {

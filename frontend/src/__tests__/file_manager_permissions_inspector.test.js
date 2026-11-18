@@ -117,11 +117,14 @@ describe('Item 3.4: File Explorer Share Links & POSIX Permissions Inspector', ()
     expect(applyBtn).not.toBeNull();
     await applyBtn.click();
 
-    expect(api.put).toHaveBeenCalledWith('/api/fs/permissions', expect.objectContaining({
-      path: '/mnt/user/documents/report.pdf',
-      mode_octal: '0640',
-      owner: 'appuser',
-    }));
+    expect(api.put).toHaveBeenCalledWith(
+      '/api/fs/permissions',
+      expect.objectContaining({
+        path: '/mnt/user/documents/report.pdf',
+        mode_octal: '0640',
+        owner: 'appuser',
+      })
+    );
   });
 
   it('disables permission modifications on guarded paths such as /appdata', async () => {

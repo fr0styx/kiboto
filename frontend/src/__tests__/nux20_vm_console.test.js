@@ -17,7 +17,8 @@ vi.mock('../toast.js', () => ({
 
 const pill = () => document.getElementById('vm-console-status-pill');
 const bannerText = () => document.getElementById('vm-console-banner').textContent;
-const button = (label) => [...document.querySelectorAll('#vm-console-banner .btn-banner-act')].find((b) => b.textContent === label);
+const button = (label) =>
+  [...document.querySelectorAll('#vm-console-banner .btn-banner-act')].find((b) => b.textContent === label);
 
 describe('console status pill (NUX-20)', () => {
   it('names every state with its colour, and skips a missing pill', () => {
@@ -63,7 +64,9 @@ describe('console window (NUX-20)', () => {
     expect(win.querySelector('#btn-vnc-reconnect').textContent.trim()).toBe('↻ Reconnect');
     expect(win.querySelector('#btn-vnc-fullscreen').textContent.trim()).toBe('⛶ Full screen');
     setConsoleFocus(false);
-    expect(win.querySelector('#vm-console-kbd-pill').getAttribute('title')).toBe('Keyboard released to the desktop. Click the console to capture it.');
+    expect(win.querySelector('#vm-console-kbd-pill').getAttribute('title')).toBe(
+      'Keyboard released to the desktop. Click the console to capture it.'
+    );
     setConsoleFocus(true);
     expect(win.querySelector('#vm-console-kbd-pill').getAttribute('title')).toMatch(/^Keyboard captured/);
   });

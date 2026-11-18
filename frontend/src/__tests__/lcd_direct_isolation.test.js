@@ -74,11 +74,14 @@ describe('LCD Direct Hardware Display Isolation', () => {
 
   it('restoreOpenWindowsState exits early and does not restore windows in LCD mode', () => {
     state.isLcdDirect = true;
-    localStorage.setItem('kiboto_open_windows_v1', JSON.stringify({
-      windows: {
-        'mgmt-window': { x: 100, y: 100, w: 800, h: 600, z: 1001, minimized: false }
-      }
-    }));
+    localStorage.setItem(
+      'kiboto_open_windows_v1',
+      JSON.stringify({
+        windows: {
+          'mgmt-window': { x: 100, y: 100, w: 800, h: 600, z: 1001, minimized: false },
+        },
+      })
+    );
 
     restoreOpenWindowsState();
 

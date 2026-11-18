@@ -15,17 +15,23 @@ export function modeName(profile, manualPct) {
   if (p === 'auto') return t('hw.mode_auto', 'Automatic');
   if (p === 'quiet') return t('hw.mode_quiet', 'Quiet · fixed {pct} %', { pct: FIXED_PCT.quiet });
   if (p === 'balanced') return t('hw.mode_balanced', 'Balanced · fixed {pct} %', { pct: FIXED_PCT.balanced });
-  if (p === 'performance') return t('hw.mode_performance', 'Performance · fixed {pct} %', { pct: FIXED_PCT.performance });
+  if (p === 'performance')
+    return t('hw.mode_performance', 'Performance · fixed {pct} %', { pct: FIXED_PCT.performance });
   if (p === 'full') return t('hw.mode_full', 'Full speed');
   const pct = Number(manualPct);
-  return Number.isFinite(pct) ? t('hw.mode_manual', 'Fixed {pct} %', { pct: Math.round(pct) }) : t('hw.mode_manual_any', 'Set by hand');
+  return Number.isFinite(pct)
+    ? t('hw.mode_manual', 'Fixed {pct} %', { pct: Math.round(pct) })
+    : t('hw.mode_manual_any', 'Set by hand');
 }
 
 /** Asks before the fans run at a fixed speed; onYes runs only on a yes, onNo otherwise. */
 export function askFixedSpeed(pct, onYes, onNo = null) {
   showConfirmToast(
     t('fan.fixed_title', 'Keep the fans at a fixed {pct} %?', { pct }),
-    t('fan.fixed_msg', 'At a fixed speed the fans do not follow the temperature. They speed up only when a drive reaches 55 °C or the processor gets very hot. Automatic follows the temperature and is recommended.'),
+    t(
+      'fan.fixed_msg',
+      'At a fixed speed the fans do not follow the temperature. They speed up only when a drive reaches 55 °C or the processor gets very hot. Automatic follows the temperature and is recommended.'
+    ),
     onYes,
     onNo,
     { okText: t('fan.fixed_ok', 'Use {pct} %', { pct }), cancelText: t('common.cancel', 'Cancel') }

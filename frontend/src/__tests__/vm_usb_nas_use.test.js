@@ -14,7 +14,9 @@ describe('USB devices the NAS uses (VMs report 26)', () => {
   });
 
   it('adds a free device at once and asks first for one the NAS uses', () => {
-    const ask = vi.spyOn(toast, 'showConfirmToast').mockImplementation((msg, ok) => { ok(); });
+    const ask = vi.spyOn(toast, 'showConfirmToast').mockImplementation((msg, ok) => {
+      ok();
+    });
     const add = vi.fn();
     expect(confirmUsbUse({ nas_use: '' }, add)).toBe(false);
     expect(add).toHaveBeenCalledTimes(1);

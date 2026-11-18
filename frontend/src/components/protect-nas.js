@@ -26,8 +26,16 @@ const KINDS = [
   {
     kind: 'kiboto',
     label: () => t('protect.kiboto', 'Another Kiboto'),
-    help: () => t('protect.kiboto_help', "A Kiboto paired with this one, best in another home. The copy is encrypted: the other Kiboto can't read it."),
-    none: () => t('protect.none_kiboto', 'No other Kiboto is paired with this one. Pair one under Network → Backup buddy, then open this again.'),
+    help: () =>
+      t(
+        'protect.kiboto_help',
+        "A Kiboto paired with this one, best in another home. The copy is encrypted: the other Kiboto can't read it."
+      ),
+    none: () =>
+      t(
+        'protect.none_kiboto',
+        'No other Kiboto is paired with this one. Pair one under Network → Backup buddy, then open this again.'
+      ),
   },
   {
     kind: 'cloud',
@@ -54,7 +62,10 @@ export function guideHtml(dest, shares) {
     const options = ((dest && dest[k.kind]) || []).map(option);
     return html`<fieldset class="protect-kind"><legend>${k.label()}</legend><p class="snap-help">${k.help()}</p>${
       options.length
-        ? options.map((o) => html`<label class="offsite-check"><input type="radio" name="target" value="${k.kind}|${o.value}"> ${o.label}</label>`)
+        ? options.map(
+            (o) =>
+              html`<label class="offsite-check"><input type="radio" name="target" value="${k.kind}|${o.value}"> ${o.label}</label>`
+          )
         : html`<p class="offsite-meta">${k.none()}</p>`
     }</fieldset>`;
   });
@@ -69,7 +80,7 @@ export function guideHtml(dest, shares) {
   </details>`;
   const what = shares.map(
     (s) =>
-      html`<label class="offsite-check"><input type="checkbox" name="paths" value="${s.path}" ${UNTICKED_SHARES.has(String(s.name).toLowerCase()) ? '' : html`checked`}> ${s.name}</label>`,
+      html`<label class="offsite-check"><input type="checkbox" name="paths" value="${s.path}" ${UNTICKED_SHARES.has(String(s.name).toLowerCase()) ? '' : html`checked`}> ${s.name}</label>`
   );
   return html`<form class="offsite-form" data-protect-form>
     <p class="snap-help">${t('protect.intro', 'A copy of your shares outside this Kiboto, with versions and encryption, every night at 2:00.')}</p>
@@ -83,7 +94,10 @@ export function guideHtml(dest, shares) {
 /** The More options: the hour and the versions kept (empty fields keep the defaults). */
 export function scheduleOf(f) {
   const n = (k, d) => (f.get(k) === null || f.get(k) === '' ? d : Math.max(0, Math.round(Number(f.get(k)))));
-  return { hour: Math.min(23, n('hour', 2)), keep: { daily: n('daily', 7), weekly: n('weekly', 4), monthly: n('monthly', 12) } };
+  return {
+    hour: Math.min(23, n('hour', 2)),
+    keep: { daily: n('daily', 7), weekly: n('weekly', 4), monthly: n('monthly', 12) },
+  };
 }
 
 /** Turns the form into an off-site backup; returns its id. A paired Kiboto gives the space first. */
@@ -105,8 +119,16 @@ export async function protect(form, names = {}) {
     if (repo) await api.put('/api/offsite/repos', { id, name: repo.name, location: repo.location, paths, keep, hour });
   } else {
     id = `protect-${kind}-${Date.now().toString(36)}`;
-    const label = kind === 'custom' ? t('protect.custom_name', 'Backup') : (KINDS.find((k) => k.kind === kind) || KINDS[0]).label();
-    await api.put('/api/offsite/repos', { id, name: `${label}: ${names[place] || place}`, location: kind === 'custom' ? place : locationFor(kind, place), paths, keep, hour });
+    const label =
+      kind === 'custom' ? t('protect.custom_name', 'Backup') : (KINDS.find((k) => k.kind === kind) || KINDS[0]).label();
+    await api.put('/api/offsite/repos', {
+      id,
+      name: `${label}: ${names[place] || place}`,
+      location: kind === 'custom' ? place : locationFor(kind, place),
+      paths,
+      keep,
+      hour,
+    });
     await api.post(`/api/offsite/repos/${encodeURIComponent(id)}/init`, {});
   }
   await api.post(`/api/offsite/repos/${encodeURIComponent(id)}/backup`, {});
@@ -161,14 +183,25 @@ export async function openProtectGuide(preselect = '') {
     const [dest, sh, fleet] = await Promise.all([
       api.get('/api/offsite/destinations'),
       api.get('/api/storage/shares').catch(() => ({ shares: [] })),
-      Promise.resolve().then(() => api.get('/api/fleet')).catch(() => null), // only who may set the system up reads it
+      Promise.resolve()
+        .then(() => api.get('/api/fleet'))
+        .catch(() => null), // only who may set the system up reads it
     ]);
     const shares = (sh.shares || []).filter((s) => s.mountpoint).map((s) => ({ name: s.name, path: s.mountpoint }));
-    const peers = (fleet?.peers || []).map((p) => ({ value: p.id, label: p.name || t('protect.kiboto', 'Another Kiboto') }));
+    const peers = (fleet?.peers || []).map((p) => ({
+      value: p.id,
+      label: p.name || t('protect.kiboto', 'Another Kiboto'),
+    }));
     names = Object.fromEntries(peers.map((p) => [p.value, p.label]));
     body.innerHTML = guideHtml({ ...dest, kiboto: peers }, shares);
     // a disk just plugged in comes chosen (Backup 5); a value that is not offered chooses nothing
-    const chosen = preselect ? /** @type {HTMLInputElement | undefined} */ ([...body.querySelectorAll('input[name="target"]')].find((r) => /** @type {HTMLInputElement} */ (r).value === preselect)) : undefined;
+    const chosen = preselect
+      ? /** @type {HTMLInputElement | undefined} */ (
+          [...body.querySelectorAll('input[name="target"]')].find(
+            (r) => /** @type {HTMLInputElement} */ (r).value === preselect
+          )
+        )
+      : undefined;
     if (chosen) chosen.checked = true;
   } catch (err) {
     body.textContent = err.message || String(err);
@@ -179,7 +212,13 @@ export async function openProtectGuide(preselect = '') {
     try {
       const id = await protect(e.target, names);
       closeGuide(host);
-      showToast(t('protect.done', 'Protection is set up and the first backup has started; it shows in Jobs. Save the recovery kit now.'), 'success');
+      showToast(
+        t(
+          'protect.done',
+          'Protection is set up and the first backup has started; it shows in Jobs. Save the recovery kit now.'
+        ),
+        'success'
+      );
       await offerRecoveryKit({ id });
     } catch (err) {
       showToast(err.message || String(err), 'error');

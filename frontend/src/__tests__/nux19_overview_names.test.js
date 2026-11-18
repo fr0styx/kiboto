@@ -9,7 +9,7 @@ const { itemText, statusHtml } = await import('../components/management/overview
 describe('Overview items (NUX-19)', () => {
   it('names a stalled service by what it does', () => {
     expect(itemText({ kind: 'service_stalled', subject: 'SmartPoller' })).toBe(
-      'The drive health check service has stopped responding. Restart Kiboto if it does not recover.',
+      'The drive health check service has stopped responding. Restart Kiboto if it does not recover.'
     );
     expect(itemText({ kind: 'service_stalled', subject: 'NewThing' })).toContain('The NewThing service');
   });
@@ -21,6 +21,7 @@ describe('Overview items (NUX-19)', () => {
 
   it('labels each Open button with its item', () => {
     const html = statusHtml({ ok: false, items: [{ kind: 'on_battery', level: 'warning', open: 'power' }] });
-    if (html.includes('data-ov-open')) expect(html).toContain('aria-label="Open: The server is running on battery power."');
+    if (html.includes('data-ov-open'))
+      expect(html).toContain('aria-label="Open: The server is running on battery power."');
   });
 });

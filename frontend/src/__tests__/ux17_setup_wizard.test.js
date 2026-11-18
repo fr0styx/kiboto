@@ -19,14 +19,21 @@ const MARKUP = `
     <div><button id="setup-wizard-submit"></button></div>
   </div></div></div>`;
 
-const visibleStep = () => [...document.querySelectorAll('[data-setup-step]')].filter((b) => !b.hidden).map((b) => b.dataset.setupStep);
-const fill = (id, v) => { document.getElementById(id).value = v; };
+const visibleStep = () =>
+  [...document.querySelectorAll('[data-setup-step]')].filter((b) => !b.hidden).map((b) => b.dataset.setupStep);
+const fill = (id, v) => {
+  document.getElementById(id).value = v;
+};
 
 describe('six-step setup (UX-17)', () => {
   beforeEach(() => {
     document.body.innerHTML = MARKUP;
     vi.clearAllMocks();
-    api.get.mockImplementation(async (url) => (url.includes('platform') ? { platform: 'generic_linux', capabilities: { is_observer_mode: false } } : { pools: [{ name: 'tank' }] }));
+    api.get.mockImplementation(async (url) =>
+      url.includes('platform')
+        ? { platform: 'generic_linux', capabilities: { is_observer_mode: false } }
+        : { pools: [{ name: 'tank' }] }
+    );
   });
 
   it('walks name, password, storage, share, people, time zone', async () => {
@@ -38,14 +45,18 @@ describe('six-step setup (UX-17)', () => {
     expect(stepper.current).toBe(2);
     next.click(); // empty password: stays
     expect(stepper.current).toBe(2);
-    fill('setup-current-pwd', 'admin'); fill('setup-new-pwd', 'a-long-password'); fill('setup-confirm-pwd', 'a-long-password');
+    fill('setup-current-pwd', 'admin');
+    fill('setup-new-pwd', 'a-long-password');
+    fill('setup-confirm-pwd', 'a-long-password');
     next.click();
     expect(stepper.current).toBe(3);
     await new Promise((r) => setTimeout(r, 0));
     expect(document.getElementById('setup-storage-info').textContent).toContain('tank');
-    next.click(); next.click();
+    next.click();
+    next.click();
     expect(stepper.current).toBe(5);
-    fill('setup-person-name', 'mia'); fill('setup-person-pwd', 'short');
+    fill('setup-person-name', 'mia');
+    fill('setup-person-pwd', 'short');
     next.click(); // a person needs a real password
     expect(stepper.current).toBe(5);
     expect(document.getElementById('setup-wizard-err').textContent).toContain('8');
@@ -56,7 +67,9 @@ describe('six-step setup (UX-17)', () => {
   });
 
   it('on host-managed storage the share step points to the host', async () => {
-    api.get.mockImplementation(async (url) => (url.includes('platform') ? { platform: 'unraid', capabilities: { is_observer_mode: true } } : { pools: [] }));
+    api.get.mockImplementation(async (url) =>
+      url.includes('platform') ? { platform: 'unraid', capabilities: { is_observer_mode: true } } : { pools: [] }
+    );
     const res = await wiz.loadStorageStep();
     expect(res.observer).toBe(true);
     expect(document.getElementById('setup-share-form').hidden).toBe(true);
@@ -70,7 +83,8 @@ describe('six-step setup (UX-17)', () => {
     fill('setup-server-name', 'Home');
     wiz.fillTimezones(document.getElementById('setup-timezone'), 'Europe/Berlin');
     expect(document.getElementById('setup-timezone').value).toBe('Europe/Berlin');
-    fill('setup-person-name', 'mia'); fill('setup-person-pwd', 'long-enough-1');
+    fill('setup-person-name', 'mia');
+    fill('setup-person-pwd', 'long-enough-1');
     api.put.mockResolvedValue({ server_name: 'Home', timezone: 'Europe/Berlin' });
     api.post.mockResolvedValueOnce({}).mockRejectedValueOnce(new Error('taken'));
     await wiz.saveSetupExtras();

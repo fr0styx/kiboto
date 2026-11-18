@@ -79,7 +79,9 @@ export function squarify(items, x = 0, y = 0, w = W, h = H) {
 /** The folders directly inside `prefix` ('' = the share), with what lies loose in it. */
 export function childrenOf(result, prefix) {
   const depth = prefix ? prefix.split('/').length + 1 : 1;
-  const kids = (result.folders || []).filter((f) => f.path.split('/').length === depth && (prefix ? f.path.startsWith(`${prefix}/`) : true));
+  const kids = (result.folders || []).filter(
+    (f) => f.path.split('/').length === depth && (prefix ? f.path.startsWith(`${prefix}/`) : true)
+  );
   const parentBytes = prefix ? ((result.folders || []).find((f) => f.path === prefix)?.bytes ?? 0) : result.bytes || 0;
   const inKids = kids.reduce((s, f) => s + f.bytes, 0);
   const loose = parentBytes - inKids;
@@ -88,12 +90,19 @@ export function childrenOf(result, prefix) {
 
 function treemapSvg(result, prefix) {
   const cells = squarify(childrenOf(result, prefix));
-  if (!cells.length) return `<p class="immich-note">${escapeHtml(t('space.empty', 'Nothing in here takes space.'))}</p>`;
+  if (!cells.length)
+    return `<p class="immich-note">${escapeHtml(t('space.empty', 'Nothing in here takes space.'))}</p>`;
   const rects = cells.map(({ item, x, y, w, h }, i) => {
     const name = item.loose ? t('space.loose', 'Files here') : item.path.split('/').pop();
     const label = `${name} · ${formatBytes(item.bytes)}`;
-    const text = w > 70 && h > 22 ? `<text x="${r1(x + 6)}" y="${r1(y + 16)}" class="space-cell-label">${escapeHtml(name.length > w / 7 ? `${name.slice(0, Math.max(3, Math.floor(w / 7) - 1))}…` : name)}</text>` : '';
-    const drill = item.loose || !(result.folders || []).some((f) => f.path.startsWith(`${item.path}/`)) ? '' : ` data-space-open="${escapeHtml(item.path)}" role="button" tabindex="0"`;
+    const text =
+      w > 70 && h > 22
+        ? `<text x="${r1(x + 6)}" y="${r1(y + 16)}" class="space-cell-label">${escapeHtml(name.length > w / 7 ? `${name.slice(0, Math.max(3, Math.floor(w / 7) - 1))}…` : name)}</text>`
+        : '';
+    const drill =
+      item.loose || !(result.folders || []).some((f) => f.path.startsWith(`${item.path}/`))
+        ? ''
+        : ` data-space-open="${escapeHtml(item.path)}" role="button" tabindex="0"`;
     return `<g class="space-cell${drill ? ' is-open' : ''}"${drill}><rect x="${r1(x)}" y="${r1(y)}" width="${r1(Math.max(0, w - 2))}" height="${r1(Math.max(0, h - 2))}" rx="3" class="space-cell-rect space-tone-${i % 6}"><title>${escapeHtml(label)}</title></rect>${text}</g>`;
   });
   return `<svg class="space-treemap" viewBox="0 0 ${W} ${H}" role="img" aria-label="${escapeHtml(t('space.folders', 'Biggest folders'))}">${rects.join('')}</svg>`;
@@ -109,8 +118,12 @@ function kindsSvg(result) {
     const w = (v.bytes / total) * W;
     const tone = `space-kind-${KIND_NAMES[kind] ? kind : 'other'}`;
     const name = (KIND_NAMES[kind] || KIND_NAMES.other)();
-    bars.push(`<rect x="${r1(x)}" y="0" width="${r1(w)}" height="14" class="${tone}"><title>${escapeHtml(`${name}: ${formatBytes(v.bytes)}`)}</title></rect>`);
-    legend.push(`<li><svg class="space-swatch" viewBox="0 0 10 10" aria-hidden="true"><rect width="10" height="10" rx="2" class="${tone}"/></svg>${escapeHtml(name)} <span class="immich-note">${escapeHtml(formatBytes(v.bytes))}</span></li>`);
+    bars.push(
+      `<rect x="${r1(x)}" y="0" width="${r1(w)}" height="14" class="${tone}"><title>${escapeHtml(`${name}: ${formatBytes(v.bytes)}`)}</title></rect>`
+    );
+    legend.push(
+      `<li><svg class="space-swatch" viewBox="0 0 10 10" aria-hidden="true"><rect width="10" height="10" rx="2" class="${tone}"/></svg>${escapeHtml(name)} <span class="immich-note">${escapeHtml(formatBytes(v.bytes))}</span></li>`
+    );
     x += w;
   }
   return `<svg class="space-kinds" viewBox="0 0 ${W} 14" preserveAspectRatio="none" aria-hidden="true">${bars.join('')}</svg><ul class="space-legend">${legend.join('')}</ul>`;
@@ -127,7 +140,13 @@ export function analysisHtml(share, data, prefix = '') {
   const crumbs = prefix
     ? `<p class="space-crumbs"><button type="button" class="btn-pill-toggle is-small" data-space-up>${escapeHtml(t('space.up', 'Up'))}</button> <strong>${escapeHtml(`${share}/${prefix}`)}</strong></p>`
     : '';
-  const largest = (r.largest || []).slice(0, 20).map((f) => `<li><span class="space-path">${escapeHtml(f.path)}</span><span class="immich-note">${escapeHtml(formatBytes(f.bytes))}</span><button type="button" class="btn-pill-toggle is-small" data-space-show="${escapeHtml(f.path)}">${escapeHtml(t('space.show', 'Show'))}</button></li>`).join('');
+  const largest = (r.largest || [])
+    .slice(0, 20)
+    .map(
+      (f) =>
+        `<li><span class="space-path">${escapeHtml(f.path)}</span><span class="immich-note">${escapeHtml(formatBytes(f.bytes))}</span><button type="button" class="btn-pill-toggle is-small" data-space-show="${escapeHtml(f.path)}">${escapeHtml(t('space.show', 'Show'))}</button></li>`
+    )
+    .join('');
   return `<p class="immich-note">${escapeHtml(t('space.summary', '{files} files, {size}, analysed {when}', { files: formatNumber(r.files || 0), size: formatBytes(r.bytes || 0), when: formatDateTime((r.scanned_at || 0) * 1000) }))}</p>
     ${r.complete === false ? `<p class="immich-note">${escapeHtml(t('space.incomplete', 'Stopped before the end: these numbers are for part of the share.'))}</p>` : ''}
     <h4>${escapeHtml(t('space.kinds', 'Kinds of files'))}</h4>${kindsSvg(r)}

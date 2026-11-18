@@ -2,9 +2,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { api } from '../api.js';
 import { DockManager } from '../components/dock.js';
-import {
-  openAppDeployModal
-} from '../components/management.js';
+import { openAppDeployModal } from '../components/management.js';
 
 const wait = (ms = 320) => new Promise((r) => setTimeout(r, ms));
 let answers;
@@ -22,7 +20,11 @@ function routes(extra = {}) {
     if (url.includes('check_port')) return answers.port;
     return { apps: [{ id: 'uptime-kuma', name: 'Uptime Kuma', default_port: 3001 }] };
   });
-  vi.spyOn(api, 'request').mockResolvedValue({ ok: true, status: 200, json: async () => ({ default_port: 3001, compose_yaml: 'x: 1' }) });
+  vi.spyOn(api, 'request').mockResolvedValue({
+    ok: true,
+    status: 200,
+    json: async () => ({ default_port: 3001, compose_yaml: 'x: 1' }),
+  });
 }
 
 describe('install window checks (NUX-20)', () => {
@@ -74,8 +76,12 @@ describe('install window checks (NUX-20)', () => {
   it('offers to install alongside an existing copy, or to replace it', async () => {
     routes({
       resolve: {
-        app_id: 'uptime-kuma', default_port: 3001, suggested_port: 3002, conflict_detected: false,
-        existing_container: { name: 'uptime-kuma', state: 'running' }, suggested_container_name: 'uptime-kuma-2',
+        app_id: 'uptime-kuma',
+        default_port: 3001,
+        suggested_port: 3002,
+        conflict_detected: false,
+        existing_container: { name: 'uptime-kuma', state: 'running' },
+        suggested_container_name: 'uptime-kuma-2',
       },
     });
     await openAppDeployModal('uptime-kuma');
@@ -122,4 +128,3 @@ describe('install window checks (NUX-20)', () => {
     expect(DockManager.windows['app-deploy'].title).toBe('❌ UPTIME-KUMA failed to install');
   });
 });
-

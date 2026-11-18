@@ -24,7 +24,8 @@ export async function openVmSnapshotsModal(vmId, vmObj = null) {
     modal.className = 'smart-modal-backdrop';
   }
 
-  const targetVm = vmObj || vmState.list.find((v) => v.id === vmId) || { id: vmId, name: 'Virtual Machine', state: 'stopped' };
+  const targetVm = vmObj ||
+    vmState.list.find((v) => v.id === vmId) || { id: vmId, name: 'Virtual Machine', state: 'stopped' };
   let activeTab = 'snapshots';
 
   modal.innerHTML = `
@@ -123,7 +124,9 @@ export async function openVmSnapshotsModal(vmId, vmObj = null) {
     modal.classList.add('window-minimized');
     modal.style.setProperty('display', 'none', 'important');
     if (modal._unbindTrap) {
-      try { modal._unbindTrap(); } catch (_) {}
+      try {
+        modal._unbindTrap();
+      } catch (_) {}
       modal._unbindTrap = null;
     }
   };
@@ -135,7 +138,9 @@ export async function openVmSnapshotsModal(vmId, vmObj = null) {
   };
 
   if (modal._unbindTrap) {
-    try { modal._unbindTrap(); } catch (_) {}
+    try {
+      modal._unbindTrap();
+    } catch (_) {}
     modal._unbindTrap = null;
   }
   modal._unbindTrap = trapFocus(modal, close);
@@ -173,7 +178,8 @@ export async function openVmSnapshotsModal(vmId, vmObj = null) {
   const btnCancel = modal.querySelector('#btn-cancel-take-snapshot');
   const btnSubmit = modal.querySelector('#btn-submit-take-snapshot');
 
-  const defaultSnapName = () => `snap-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${new Date().toTimeString().slice(0, 8).replace(/:/g, '')}`;
+  const defaultSnapName = () =>
+    `snap-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${new Date().toTimeString().slice(0, 8).replace(/:/g, '')}`;
 
   if (btnTake) /** @type {HTMLButtonElement} */ (btnTake).disabled = !isOff(targetVm);
   if (btnTake && createForm) {
@@ -187,7 +193,9 @@ export async function openVmSnapshotsModal(vmId, vmObj = null) {
   }
 
   if (btnCancel && createForm) {
-    btnCancel.onclick = () => { createForm.style.display = 'none'; };
+    btnCancel.onclick = () => {
+      createForm.style.display = 'none';
+    };
   }
 
   async function loadSnapshotsList() {
@@ -218,7 +226,9 @@ export async function openVmSnapshotsModal(vmId, vmObj = null) {
             </tr>
           </thead>
           <tbody>
-            ${snaps.map((s) => `
+            ${snaps
+              .map(
+                (s) => `
               <tr style="border-bottom: 1px solid var(--lt-r-ffffff0a, rgba(255,255,255,0.04));">
                 <td class="vmsn-bold-strong">
                   <div>${escapeHtml(s.name)}</div>
@@ -244,27 +254,43 @@ export async function openVmSnapshotsModal(vmId, vmObj = null) {
                   </div>
                 </td>
               </tr>
-            `).join('')}
+            `
+              )
+              .join('')}
           </tbody>
         </table>
       `;
 
       if (!isOff(targetVm)) {
-        container.querySelectorAll('.btn-snap-revert, .btn-snap-del').forEach((b) => { /** @type {HTMLButtonElement} */ (b).disabled = true; });
+        container.querySelectorAll('.btn-snap-revert, .btn-snap-del').forEach((b) => {
+          /** @type {HTMLButtonElement} */ (b).disabled = true;
+        });
       }
       container.querySelectorAll('.btn-snap-revert').forEach((b) => {
         b.onclick = () => {
           const snapName = b.dataset.name;
           showDangerConfirm(
-            t('vsn.revert_q', 'Go back to the snapshot “{snap}” of {name}? Changes made since then are lost.', { snap: snapName, name: targetVm.name }),
+            t('vsn.revert_q', 'Go back to the snapshot “{snap}” of {name}? Changes made since then are lost.', {
+              snap: snapName,
+              name: targetVm.name,
+            }),
             async () => {
               try {
                 await api.post(`/api/vms/${vmId}/snapshots/${encodeURIComponent(snapName)}/revert`);
-                showToast(t('toast.rolled_back_vm_to_snapshot', 'Rolled back VM \'{name}\' to snapshot \'{snapName}\'.', { name: targetVm.name, snapName: snapName }), 'success');
+                showToast(
+                  t('toast.rolled_back_vm_to_snapshot', "Rolled back VM '{name}' to snapshot '{snapName}'.", {
+                    name: targetVm.name,
+                    snapName: snapName,
+                  }),
+                  'success'
+                );
                 loadSnapshotsList();
                 loadVmDashboard();
               } catch (err) {
-                showToast(t('toast.revert_failed', 'Revert failed: {error}', { error: err.message || err.detail }), 'error');
+                showToast(
+                  t('toast.revert_failed', 'Revert failed: {error}', { error: err.message || err.detail }),
+                  'error'
+                );
               }
             }
           );
@@ -279,10 +305,16 @@ export async function openVmSnapshotsModal(vmId, vmObj = null) {
             async () => {
               try {
                 await api.delete(`/api/vms/${vmId}/snapshots/${encodeURIComponent(snapName)}`, { confirmed: true });
-                showToast(t('toast.deleted_snapshot', 'Deleted snapshot \'{snapName}\'.', { snapName: snapName }), 'success');
+                showToast(
+                  t('toast.deleted_snapshot', "Deleted snapshot '{snapName}'.", { snapName: snapName }),
+                  'success'
+                );
                 loadSnapshotsList();
               } catch (err) {
-                showToast(t('toast.delete_failed', 'Delete failed: {error}', { error: err.message || err.detail }), 'error');
+                showToast(
+                  t('toast.delete_failed', 'Delete failed: {error}', { error: err.message || err.detail }),
+                  'error'
+                );
               }
             }
           );
@@ -321,7 +353,9 @@ export async function openVmSnapshotsModal(vmId, vmObj = null) {
             </tr>
           </thead>
           <tbody>
-            ${backups.map((b) => `
+            ${backups
+              .map(
+                (b) => `
               <tr style="border-bottom: 1px solid var(--lt-r-ffffff0a, rgba(255,255,255,0.04));">
                 <td class="vmsn-bold-strong">
                   <div>${escapeHtml(b.filename || b.id)}</div>
@@ -342,7 +376,9 @@ export async function openVmSnapshotsModal(vmId, vmObj = null) {
                   </div>
                 </td>
               </tr>
-            `).join('')}
+            `
+              )
+              .join('')}
           </tbody>
         </table>
       `;
@@ -351,15 +387,28 @@ export async function openVmSnapshotsModal(vmId, vmObj = null) {
         b.onclick = () => {
           const bId = b.dataset.id;
           showDangerConfirm(
-            t('vsn.restore_q', 'Restore {name} from the backup “{id}”? Its disks and settings are replaced by the backup’s.', { name: targetVm.name, id: bId }),
+            t(
+              'vsn.restore_q',
+              'Restore {name} from the backup “{id}”? Its disks and settings are replaced by the backup’s.',
+              { name: targetVm.name, id: bId }
+            ),
             async () => {
               try {
                 await api.post(`/api/vms/backups/${encodeURIComponent(bId)}/restore`, {}, { confirmed: true }); // asked just above
-                showToast(t('toast.restored_vm_from_backup', 'Restored VM \'{name}\' from backup \'{bId}\'.', { name: targetVm.name, bId: bId }), 'success');
+                showToast(
+                  t('toast.restored_vm_from_backup', "Restored VM '{name}' from backup '{bId}'.", {
+                    name: targetVm.name,
+                    bId: bId,
+                  }),
+                  'success'
+                );
                 loadBackupsList();
                 loadVmDashboard();
               } catch (err) {
-                showToast(t('toast.restore_failed', 'Restore failed: {error}', { error: err.message || err.detail }), 'error');
+                showToast(
+                  t('toast.restore_failed', 'Restore failed: {error}', { error: err.message || err.detail }),
+                  'error'
+                );
               }
             }
           );
@@ -374,10 +423,13 @@ export async function openVmSnapshotsModal(vmId, vmObj = null) {
             async () => {
               try {
                 await api.delete(`/api/vms/backups/${encodeURIComponent(bId)}`, { confirmed: true });
-                showToast(t('toast.deleted_backup', 'Deleted backup \'{bId}\'.', { bId: bId }), 'success');
+                showToast(t('toast.deleted_backup', "Deleted backup '{bId}'.", { bId: bId }), 'success');
                 loadBackupsList();
               } catch (err) {
-                showToast(t('toast.delete_failed', 'Delete failed: {error}', { error: err.message || err.detail }), 'error');
+                showToast(
+                  t('toast.delete_failed', 'Delete failed: {error}', { error: err.message || err.detail }),
+                  'error'
+                );
               }
             }
           );
@@ -396,10 +448,16 @@ export async function openVmSnapshotsModal(vmId, vmObj = null) {
       btnCreateBackup.textContent = t('ui.archiving', 'Archiving...');
       try {
         await api.post(`/api/vms/${vmId}/backup`, { reason: 'on-demand' });
-        showToast(t('toast.hyper_backup_created_for_vm', 'Backup of VM \'{name}\' saved.', { name: targetVm.name }), 'success');
+        showToast(
+          t('toast.hyper_backup_created_for_vm', "Backup of VM '{name}' saved.", { name: targetVm.name }),
+          'success'
+        );
         loadBackupsList();
       } catch (err) {
-        showToast(t('toast.failed_creating_hyper_backup', 'Backup failed: {error}', { error: err.message || err.detail }), 'error');
+        showToast(
+          t('toast.failed_creating_hyper_backup', 'Backup failed: {error}', { error: err.message || err.detail }),
+          'error'
+        );
       } finally {
         btnCreateBackup.disabled = false;
         btnCreateBackup.textContent = t('ui.create_hyper_backup', '+ Back up now');
@@ -418,19 +476,34 @@ export async function openVmSnapshotsModal(vmId, vmObj = null) {
       }
       // SNAPSHOT_NAME_PATTERN on the server (VMs report 24)
       if (!/^[a-zA-Z0-9_-]{1,64}$/.test(name)) {
-        showToast(t('vm.snap_name_rule_bad', '"{name}" can\'t be used. Use letters, numbers, - and _ only, up to 64 characters.', { name }), 'warning');
+        showToast(
+          t(
+            'vm.snap_name_rule_bad',
+            '"{name}" can\'t be used. Use letters, numbers, - and _ only, up to 64 characters.',
+            { name }
+          ),
+          'warning'
+        );
         return;
       }
       btnSubmit.disabled = true;
       btnSubmit.textContent = t('ui.saving', 'Saving...');
       try {
         await api.post(`/api/vms/${vmId}/snapshots`, { name, description });
-        showToast(t('toast.snapshot_created_successfully', 'Snapshot \'{name}\' created successfully.', { name: name }), 'success');
+        showToast(
+          t('toast.snapshot_created_successfully', "Snapshot '{name}' created successfully.", { name: name }),
+          'success'
+        );
         if (createForm) createForm.style.display = 'none';
         if (descInput) descInput.value = '';
         loadSnapshotsList();
       } catch (err) {
-        showToast(t('toast.failed_to_create_snapshot', 'Failed to create snapshot: {error}', { error: err.message || err.detail }), 'error');
+        showToast(
+          t('toast.failed_to_create_snapshot', 'Failed to create snapshot: {error}', {
+            error: err.message || err.detail,
+          }),
+          'error'
+        );
       } finally {
         btnSubmit.disabled = false;
         btnSubmit.textContent = t('ui.save_snapshot', 'Save Snapshot');

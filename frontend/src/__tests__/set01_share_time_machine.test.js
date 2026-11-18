@@ -52,7 +52,10 @@ describe('Time Machine is one request with a size limit (SET-01)', () => {
     el('create-share-quota-gb').value = '500';
     await submit();
     expect(post).toHaveBeenCalledTimes(1);
-    expect(post).toHaveBeenCalledWith('/api/storage/shares', expect.objectContaining({ name: 'macbackup', timemachine: true, quota_gb: 500 }));
+    expect(post).toHaveBeenCalledWith(
+      '/api/storage/shares',
+      expect.objectContaining({ name: 'macbackup', timemachine: true, quota_gb: 500 })
+    );
     expect(post.mock.calls.some((c) => c[0] === '/api/samba/shares')).toBe(false);
   });
 

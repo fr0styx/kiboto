@@ -28,15 +28,22 @@ export function phoneBackupHtml(s, qrSvg = '') {
       </ol>
     </div>
     <p class="kb-muted">${t('phone.away', 'Away from home, the phone backs up when it can reach this server, for example through Tailscale (Network).')}</p>
-    ${s.phone_done
-      ? html`<p class="kb-muted">✓ ${t('phone.done_note', 'You said your phone backs up here.')}</p>`
-      : html`<button type="button" class="btn-pill-toggle" data-phone-done>${t('phone.done', 'Done, my phone backs up')}</button>`}`;
+    ${
+      s.phone_done
+        ? html`<p class="kb-muted">✓ ${t('phone.done_note', 'You said your phone backs up here.')}</p>`
+        : html`<button type="button" class="btn-pill-toggle" data-phone-done>${t('phone.done', 'Done, my phone backs up')}</button>`
+    }`;
 }
 
 async function qrFor(url) {
   try {
     const { default: QRCode } = await import('qrcode');
-    return await QRCode.toString(url, { type: 'svg', margin: 1, width: 132, color: { dark: '#000000', light: '#ffffff' } });
+    return await QRCode.toString(url, {
+      type: 'svg',
+      margin: 1,
+      width: 132,
+      color: { dark: '#000000', light: '#ffffff' },
+    });
   } catch {
     return '';
   }
@@ -52,7 +59,11 @@ export async function renderPhoneBackup(card) {
   }
   const url = s.url || s.detected || '';
   const qr = url ? await qrFor(url) : '';
-  card.innerHTML = uiCard({ title: t('phone.title', 'Back up my phone'), body: String(phoneBackupHtml(s, qr)), variant: 'boxed' });
+  card.innerHTML = uiCard({
+    title: t('phone.title', 'Back up my phone'),
+    body: String(phoneBackupHtml(s, qr)),
+    variant: 'boxed',
+  });
   card.querySelector('[data-phone-done]')?.addEventListener('click', async () => {
     try {
       await api.put('/api/immich/phone', { done: true });

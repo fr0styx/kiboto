@@ -53,7 +53,7 @@ export function applyDashboardLayout() {
 
   const allDecks = [
     screenCanvasEl.querySelector('.sl-main-deck'),
-    ...document.querySelectorAll('.mini-preview-inner .sl-main-deck')
+    ...document.querySelectorAll('.mini-preview-inner .sl-main-deck'),
   ].filter(Boolean);
 
   allDecks.forEach((slDeck) => {
@@ -67,7 +67,7 @@ export function applyDashboardLayout() {
     });
 
     const parent = slDeck.parentElement;
-    const slBayRow = parent ? (parent.querySelector('#sl-bay-row') || parent.querySelector('.sl-bay-row')) : null;
+    const slBayRow = parent ? parent.querySelector('#sl-bay-row') || parent.querySelector('.sl-bay-row') : null;
     if (slBayRow && parent) {
       const disksIdx = state.dashOrder.indexOf('metric-disks');
       const firstCardIdx = state.dashOrder.findIndex((id) => id !== 'metric-disks' && slCardMap[id]);
@@ -124,7 +124,8 @@ export function applyDashboardLayout() {
   });
 
   if ($('clock-format-btn')) {
-    $('clock-format-btn').textContent = state.clockFormat === '12' ? t('settings.clock_12h', '12 Hours') : t('settings.clock_24h', '24 Hours');
+    $('clock-format-btn').textContent =
+      state.clockFormat === '12' ? t('settings.clock_12h', '12 Hours') : t('settings.clock_24h', '24 Hours');
   }
 
   evaluateActivePreset();
@@ -136,8 +137,22 @@ export function evaluateActivePreset() {
   const isVisMatch = (v) => Object.keys(v).every((k) => state.dashVis[k] === v[k]);
 
   const isDefault = isVisMatch(defaultVis);
-  const isThermal = isVisMatch({ 'metric-storage': false, 'metric-cpu': true, 'metric-mem': false, 'metric-fans': true, 'metric-net': false, 'metric-disks': true });
-  const isStorage = isVisMatch({ 'metric-storage': true, 'metric-cpu': false, 'metric-mem': false, 'metric-fans': false, 'metric-net': false, 'metric-disks': true });
+  const isThermal = isVisMatch({
+    'metric-storage': false,
+    'metric-cpu': true,
+    'metric-mem': false,
+    'metric-fans': true,
+    'metric-net': false,
+    'metric-disks': true,
+  });
+  const isStorage = isVisMatch({
+    'metric-storage': true,
+    'metric-cpu': false,
+    'metric-mem': false,
+    'metric-fans': false,
+    'metric-net': false,
+    'metric-disks': true,
+  });
 
   let activeKey = null;
   if (isDefault) activeKey = 'default';
@@ -149,7 +164,9 @@ export function evaluateActivePreset() {
   });
 
   if (presetBadge) {
-    presetBadge.textContent = (activeKey ? t(`settings.badge_${activeKey}`, activeKey) : t('settings.badge_custom', 'Custom')).toUpperCase();
+    presetBadge.textContent = (
+      activeKey ? t(`settings.badge_${activeKey}`, activeKey) : t('settings.badge_custom', 'Custom')
+    ).toUpperCase();
   }
 }
 
@@ -161,7 +178,7 @@ export async function persistDashboardLayout() {
       sizes: state.dashSizes,
       clock_format: state.clockFormat,
       timezone: state.currentTimezone,
-      style: state.screenLayoutStyle || 'classic'
+      style: state.screenLayoutStyle || 'classic',
     });
     if (resp.layout && resp.layout.version) {
       state.activeLayoutVersion = resp.layout.version;
@@ -387,7 +404,9 @@ export function setupMiniPreviewInteractivity() {
 
   let draggedMetricId = null;
 
-  const draggableItems = miniInner.querySelectorAll('.cards > .card, #diskRow, .disks, .sl-main-deck > .sl-card, .sl-bay-row');
+  const draggableItems = miniInner.querySelectorAll(
+    '.cards > .card, #diskRow, .disks, .sl-main-deck > .sl-card, .sl-bay-row'
+  );
   draggableItems.forEach((el) => {
     const metricId = el.dataset.metricId;
     if (!metricId) return;
@@ -435,7 +454,7 @@ export function setupMiniPreviewInteractivity() {
 
       const cardsEl = miniInner.querySelector('.cards');
       const refRect = cardsEl ? cardsEl.getBoundingClientRect() : miniInner.getBoundingClientRect();
-      const isLowerHalf = e.clientY > (refRect.top + refRect.height / 2);
+      const isLowerHalf = e.clientY > refRect.top + refRect.height / 2;
 
       if (draggedMetricId === 'metric-disks') {
         // Just swap the position of disks!
@@ -494,7 +513,7 @@ export function setupMiniPreviewInteractivity() {
         if (wasFirst) newOrder.push('metric-disks'); // move to bottom
         else newOrder.unshift('metric-disks'); // move to top
         state.dashOrder = newOrder;
-        
+
         isDraggingPreview = false;
         draggedMetricId = null;
         try {
@@ -505,7 +524,7 @@ export function setupMiniPreviewInteractivity() {
         persistDashboardLayout();
         return;
       }
-      
+
       if (e.target === miniCardsContainer) {
         e.preventDefault();
         const dropX = e.clientX;
@@ -645,4 +664,3 @@ if (typeof window !== 'undefined') {
   window.fetchDashboardLayout = fetchDashboardLayout;
   window.state = state;
 }
-

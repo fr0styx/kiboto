@@ -29,7 +29,16 @@ describe('the role in the Edit dialog', () => {
     const { roleOptionsHtml } = await import('../components/users.js');
     const { MAIN_ROLES, MORE_ROLES } = await import('../components/add-person.js');
     const flow = [...MAIN_ROLES(), ...MORE_ROLES()].map(([id]) => id);
-    for (const role of ['share_user', 'kid', 'guest', 'app_operator', 'storage_admin', 'backup_operator', 'auditor', 'superadmin']) {
+    for (const role of [
+      'share_user',
+      'kid',
+      'guest',
+      'app_operator',
+      'storage_admin',
+      'backup_operator',
+      'auditor',
+      'superadmin',
+    ]) {
       expect(roleOptionsHtml(), `the person page lacks ${role}`).toContain(`value="${role}"`);
       expect(flow, `Add a person lacks ${role}`).toContain(role);
     }

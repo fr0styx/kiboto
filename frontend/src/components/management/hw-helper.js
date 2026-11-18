@@ -13,13 +13,21 @@ const $ = (id) => document.getElementById(id);
 export function hwHelperStatus(st) {
   if (st.error) return st.error;
   if (!st.applies) return t('hwh.not_here', 'This box has no fan or button registers for the helper to serve.');
-  if (st.kept_until_update) return t('hwh.kept', 'Off: the helper keeps the fans running until the next update gives Kiboto its own access back.');
+  if (st.kept_until_update)
+    return t(
+      'hwh.kept',
+      'Off: the helper keeps the fans running until the next update gives Kiboto its own access back.'
+    );
   if (!st.enabled) return t('hwh.off', 'Off: Kiboto reaches the fan and button hardware itself.');
   if (!st.running) return t('hwh.starting', 'Starting…');
-  if (!st.answering) return t('hwh.not_answering', 'The helper doesn\'t answer: Kiboto uses the hardware itself for now.');
+  if (!st.answering)
+    return t('hwh.not_answering', "The helper doesn't answer: Kiboto uses the hardware itself for now.");
   return st.app_without_raw_access
     ? t('hwh.on_done', 'On: only the helper reaches the fan and button hardware; Kiboto no longer can.')
-    : t('hwh.on', 'On: the fans and the button go through the helper. The next update takes the hardware access away from Kiboto itself.');
+    : t(
+        'hwh.on',
+        'On: the fans and the button go through the helper. The next update takes the hardware access away from Kiboto itself.'
+      );
 }
 
 export function hwHelperHtml(st) {
@@ -31,7 +39,7 @@ export function hwHelperHtml(st) {
       </div>
       <button type="button" class="btn-pill-toggle${on ? ' active' : ''}" id="hwh-toggle" aria-pressed="${on}" aria-labelledby="hwh-title"${st.applies || on ? '' : ' disabled'}>${escapeHtml(on ? t('nas_name.btn_on', 'On') : t('nas_name.btn_off', 'Off'))}</button>
     </div>
-    <div class="nsv-xs-muted-2">${escapeHtml(t('hwh.help', 'Raw access to the hardware (/dev/mem) can read and change any of the computer\'s memory. With the helper, only a tiny container with no network holds it, and it answers just four questions: read the fans, set a fan, read the button, are you there.'))}</div>`;
+    <div class="nsv-xs-muted-2">${escapeHtml(t('hwh.help', "Raw access to the hardware (/dev/mem) can read and change any of the computer's memory. With the helper, only a tiny container with no network holds it, and it answers just four questions: read the fans, set a fan, read the button, are you there."))}</div>`;
 }
 
 async function put(enabled) {

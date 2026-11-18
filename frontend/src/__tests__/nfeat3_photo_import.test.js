@@ -17,7 +17,9 @@ describe('bring photos home (NFEAT-3)', () => {
 
   it('says what the export holds', () => {
     expect(foundText(INFO)).toMatch(/^A Google Photos export: 1,?200 photos and 1 video \(5 GB\)\.$/);
-    expect(foundText({ kind: 'icloud', photos: 1, videos: 0, bytes: 10 })).toMatch(/^An iCloud Photos export: 1 photo and 0 videos/);
+    expect(foundText({ kind: 'icloud', photos: 1, videos: 0, bytes: 10 })).toMatch(
+      /^An iCloud Photos export: 1 photo and 0 videos/
+    );
     expect(foundText({ kind: 'folder', photos: 2, videos: 2, bytes: 0 })).toMatch(/^A folder: 2 photos/);
     expect(foundText({ kind: 'folder', photos: 0, videos: 0 })).toBe('There are no photos or videos in it.');
   });
@@ -32,7 +34,10 @@ describe('bring photos home (NFEAT-3)', () => {
     q('#phi-dest').value = '/mnt/user/Photos ';
     q('#phi-start').click();
     await vi.waitFor(() => expect(q('#modal-photo-import')).toBeNull());
-    expect(post).toHaveBeenCalledWith('/api/media/photo-import', { source: '/mnt/user/Downloads/takeout', destination: '/mnt/user/Photos' });
+    expect(post).toHaveBeenCalledWith('/api/media/photo-import', {
+      source: '/mnt/user/Downloads/takeout',
+      destination: '/mnt/user/Photos',
+    });
     expect(showToast).toHaveBeenCalledWith('The import started. You can follow it in Jobs.', 'success');
   });
 

@@ -16,7 +16,8 @@ function withValue(key, english, name, value) {
 /** Where the NAS answers at home; the router, name servers and port under Details. */
 export function homeHtml(summary = {}) {
   const ip = summary.primary_ip === '?' ? '' : summary.primary_ip; // the host's mark for 'not found'
-  if (!ip) return `<p class="net-home-line">${escapeHtml(t('net.home_unknown', "Kiboto could not read this NAS's address."))}</p>`;
+  if (!ip)
+    return `<p class="net-home-line">${escapeHtml(t('net.home_unknown', "Kiboto could not read this NAS's address."))}</p>`;
   const dns = (summary.dns_servers || []).filter(Boolean).join(', ');
   return `<p class="net-home-line"><span>${withValue('net.home_at', 'At home, this NAS answers at {address}.', 'address', ip)}</span>
       <button type="button" class="btn-pill-toggle is-small" data-copy="${escapeHtml(ip)}">${escapeHtml(t('net.home_copy', 'Copy'))}</button></p>
@@ -35,14 +36,16 @@ export function homeHtml(summary = {}) {
 /** One row per port: its name, Connected or Not connected (a word, not only a colour), the speed;
  *  the hardware address, driver, bond and traffic under Details, with "Name this port". */
 export function portRowsHtml(physical = []) {
-  if (!physical.length) return `<li class="net-port-empty">${escapeHtml(t('net.no_nics', 'No network ports found.'))}</li>`;
+  if (!physical.length)
+    return `<li class="net-port-empty">${escapeHtml(t('net.no_nics', 'No network ports found.'))}</li>`;
   return physical
     .map((nic) => {
       const up = Boolean(nic.is_up);
       const name = nic.alias ? `${nic.alias} (${nic.name})` : nic.name;
       const state = up ? t('net.port_connected', 'Connected') : t('net.port_not_connected', 'Not connected');
       const speed = up && nic.speed_human && nic.speed_human !== 'Disconnected' ? nic.speed_human : ''; // the host's word for down
-      const traffic = nic.rx_bytes || nic.tx_bytes ? `${formatSize(nic.rx_bytes || 0)} / ${formatSize(nic.tx_bytes || 0)}` : '';
+      const traffic =
+        nic.rx_bytes || nic.tx_bytes ? `${formatSize(nic.rx_bytes || 0)} / ${formatSize(nic.tx_bytes || 0)}` : '';
       const facts = [
         [t('net.port_mac', 'Hardware address'), nic.mac],
         [t('net.port_driver', 'Driver'), nic.driver],
@@ -79,7 +82,9 @@ export function renderHome(box, summary) {
   copy?.addEventListener('click', () =>
     copyText(copy.dataset.copy || '')
       .then(() => showToast(t('net.home_copied', 'Address copied.'), 'success'))
-      .catch(() => showToast(t('net.home_copy_failed', 'Could not copy. Select the address and copy it yourself.'), 'error')),
+      .catch(() =>
+        showToast(t('net.home_copy_failed', 'Could not copy. Select the address and copy it yourself.'), 'error')
+      )
   );
 }
 
@@ -87,5 +92,9 @@ export function renderHome(box, summary) {
 export function renderPortRows(list, physical, onName) {
   if (!list) return;
   list.innerHTML = portRowsHtml(physical);
-  list.querySelectorAll('[data-name-port]').forEach((btn) => btn.addEventListener('click', () => onName(/** @type {HTMLElement} */ (btn).dataset.namePort || '')));
+  list
+    .querySelectorAll('[data-name-port]')
+    .forEach((btn) =>
+      btn.addEventListener('click', () => onName(/** @type {HTMLElement} */ (btn).dataset.namePort || ''))
+    );
 }

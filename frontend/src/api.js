@@ -89,7 +89,9 @@ export const auth = {
       const qs = params.toString();
       history.replaceState(null, '', window.location.pathname + (qs ? `?${qs}` : '') + window.location.hash);
     }
-  } catch (e) { /* non-browser context */ }
+  } catch (e) {
+    /* non-browser context */
+  }
 })();
 
 /**
@@ -107,10 +109,17 @@ export class ApiError extends Error {
 
   static async from(res) {
     let body = null;
-    try { body = await res.json(); } catch (e) { /* non-JSON body */ }
-    const detail = (body && typeof body.detail === 'string' && body.detail.trim())
-      ? body.detail.trim()
-      : (res.statusText ? `HTTP ${res.status}: ${res.statusText}` : `Request failed (HTTP ${res.status})`);
+    try {
+      body = await res.json();
+    } catch (e) {
+      /* non-JSON body */
+    }
+    const detail =
+      body && typeof body.detail === 'string' && body.detail.trim()
+        ? body.detail.trim()
+        : res.statusText
+          ? `HTTP ${res.status}: ${res.statusText}`
+          : `Request failed (HTTP ${res.status})`;
     const error = (body && body.error) || 'error';
     // UX-14: what happened (the server's words) and what to do next
     return new ApiError(explain(detail, error, body), { status: res.status, error, body });
@@ -151,7 +160,8 @@ async function request(endpoint, options = {}) {
     config.headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const isBinary = (typeof FormData !== 'undefined' && config.body instanceof FormData) ||
+  const isBinary =
+    (typeof FormData !== 'undefined' && config.body instanceof FormData) ||
     (typeof Blob !== 'undefined' && config.body instanceof Blob);
   if (config.body && typeof config.body === 'object' && !isBinary) {
     if (!config.headers['Content-Type']) {
@@ -162,7 +172,13 @@ async function request(endpoint, options = {}) {
 
   const isStream = String(config.headers.Accept || config.headers.accept || '').includes('text/event-stream');
   const timeoutMs =
-    options.timeout !== undefined ? options.timeout : isBinary || isStream ? 0 : method === 'GET' ? READ_TIMEOUT_MS : WRITE_TIMEOUT_MS;
+    options.timeout !== undefined
+      ? options.timeout
+      : isBinary || isStream
+        ? 0
+        : method === 'GET'
+          ? READ_TIMEOUT_MS
+          : WRITE_TIMEOUT_MS;
   let timer = null;
   let timedOut = false;
   if (timeoutMs > 0 && typeof AbortController !== 'undefined') {
@@ -184,7 +200,10 @@ async function request(endpoint, options = {}) {
     res = await window.fetch(url, config);
   } catch (netErr) {
     if (timedOut) {
-      throw new ApiError(explain(`The server did not answer within ${Math.round(timeoutMs / 1000)} s.`, 'timeout'), { status: 0, error: 'timeout' });
+      throw new ApiError(explain(`The server did not answer within ${Math.round(timeoutMs / 1000)} s.`, 'timeout'), {
+        status: 0,
+        error: 'timeout',
+      });
     }
     if (netErr && netErr.name !== 'AbortError') reportOffline();
     throw netErr;
@@ -198,10 +217,10 @@ async function request(endpoint, options = {}) {
     throw new ApiError('Unauthorized', { status: 401, error: 'unauthorized' });
   }
   if (res.status === 401) {
-    const isLcd = typeof window !== 'undefined' && (
-      window.location.search.includes('mode=lcd') ||
-      (typeof document !== 'undefined' && document.body && document.body.classList.contains('lcd-direct'))
-    );
+    const isLcd =
+      typeof window !== 'undefined' &&
+      (window.location.search.includes('mode=lcd') ||
+        (typeof document !== 'undefined' && document.body && document.body.classList.contains('lcd-direct')));
     if (!isLcd) {
       auth.clearToken();
       document.documentElement.classList.remove('has-auth-session');
@@ -305,9 +324,8 @@ export const api = {
     document.body.removeChild(a);
     window.URL.revokeObjectURL(blobUrl);
     return filename;
-  }
+  },
 };
 
 export { request, request as apiFetch };
 export default api;
-

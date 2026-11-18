@@ -10,7 +10,9 @@ describe('the bell (SET-27 rest)', () => {
     document.body.innerHTML = '<div id="notif-center-list"></div>';
     state.latestStats = { events: [{ id: 'a', ts: 1, level: 'info', title: 'Zip made' }] };
     renderNotificationCenter();
-    expect(document.getElementById('notif-center-list')?.textContent).toContain('Nothing needs a look. Everything that happened is in Activity.');
+    expect(document.getElementById('notif-center-list')?.textContent).toContain(
+      'Nothing needs a look. Everything that happened is in Activity.'
+    );
   });
 
   it('lists a problem, and has no filter code left without buttons', () => {

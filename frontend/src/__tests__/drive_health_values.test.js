@@ -10,10 +10,40 @@ afterEach(() => {
 });
 
 const attrs = {
-  '197': { name: 'Current_Pending_Sector', value: 100, worst: 100, thresh: 0, raw: 4, points: [[1, 0], [2, 4]], values: [] },
-  '9': { name: 'Power_On_Hours', value: 80, worst: 80, thresh: 0, raw: 900, points: [[1, 900], [2, 900]], values: [] },
+  '197': {
+    name: 'Current_Pending_Sector',
+    value: 100,
+    worst: 100,
+    thresh: 0,
+    raw: 4,
+    points: [
+      [1, 0],
+      [2, 4],
+    ],
+    values: [],
+  },
+  '9': {
+    name: 'Power_On_Hours',
+    value: 80,
+    worst: 80,
+    thresh: 0,
+    raw: 900,
+    points: [
+      [1, 900],
+      [2, 900],
+    ],
+    values: [],
+  },
   '3': { name: 'Spin_Up_Time', value: 20, worst: 20, thresh: 21, raw: 0, points: [[1, 0]], values: [] },
-  'nvme.media_errors': { name: 'media_errors', value: null, worst: null, thresh: null, raw: 0, points: [[1, 0]], values: [] },
+  'nvme.media_errors': {
+    name: 'media_errors',
+    value: null,
+    worst: null,
+    thresh: null,
+    raw: 0,
+    points: [[1, 0]],
+    values: [],
+  },
 };
 
 describe('Drive Health: every value', () => {
@@ -40,7 +70,20 @@ describe('Drive Health: every value', () => {
 describe('Drive Health: drives taken out', () => {
   it('lists them with their record and forgets one', () => {
     const forget = vi.fn();
-    const box = takenOutBox([{ serial: 'S1', model: 'Old Red', capacity_bytes: 2e12, label_key: 'watch', label: 'Keep an eye on it', last_seen: 1700000000 }], { S1: { warranty_until: '2020-01-01' } }, forget);
+    const box = takenOutBox(
+      [
+        {
+          serial: 'S1',
+          model: 'Old Red',
+          capacity_bytes: 2e12,
+          label_key: 'watch',
+          label: 'Keep an eye on it',
+          last_seen: 1700000000,
+        },
+      ],
+      { S1: { warranty_until: '2020-01-01' } },
+      forget
+    );
     expect(box.querySelector('summary').textContent).toBe('Taken out (1)');
     expect(box.textContent).toContain('Old Red');
     expect(box.textContent).toContain('Ended 2020-01-01');

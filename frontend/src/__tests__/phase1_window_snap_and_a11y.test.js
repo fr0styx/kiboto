@@ -5,7 +5,7 @@ import {
   applyWindowSnap,
   initSnapAssistFlyout,
   NAVBAR_OFFSET,
-  DOCK_MARGIN
+  DOCK_MARGIN,
 } from '../components/dock.js';
 import { initA11yAnnouncer, announceA11y, enhanceInteractiveElements } from '../a11y.js';
 

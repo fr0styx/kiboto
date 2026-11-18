@@ -15,7 +15,9 @@ describe('Add a desktop shortcut (NUX-15)', () => {
   });
 
   it('a shortcut without an icon gets the link emoji', () => {
-    expect(createShortcutElement({ id: 'sc-x', name: 'X', url: 'http://x.local' }).querySelector('.dss-emoji').textContent).toBe('🔗');
+    expect(
+      createShortcutElement({ id: 'sc-x', name: 'X', url: 'http://x.local' }).querySelector('.dss-emoji').textContent
+    ).toBe('🔗');
   });
 
   it("a custom shortcut's emoji is drawn with a class", () => {

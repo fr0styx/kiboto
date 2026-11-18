@@ -2,7 +2,9 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 
 const led = { power: 'off', mode: 'breathe' };
-vi.mock('../api.js', () => ({ api: { get: vi.fn(async (url) => (url === '/api/led' ? { ...led } : {})), post: vi.fn(async () => ({})) } }));
+vi.mock('../api.js', () => ({
+  api: { get: vi.fn(async (url) => (url === '/api/led' ? { ...led } : {})), post: vi.fn(async () => ({})) },
+}));
 
 const { setLanguage, t } = await import('../i18n.js');
 const { initLedControl } = await import('../components/led-control.js');

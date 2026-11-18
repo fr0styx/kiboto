@@ -9,8 +9,18 @@ import { api } from '../api.js';
 import { ZettEventBus } from '../event-bus.js';
 
 const running = {
-  id: 'a', status: 'running', action: 'copy', sources: ['/mnt/user/x', '/mnt/user/y'], destination: '/mnt/user/Movies',
-  total_files: 40, processed_files: 12, total_bytes: 4 * 1024 ** 3, processed_bytes: 1024 ** 3, percent: 25, speed_bps: 50 * 1024 ** 2, eta_seconds: 80,
+  id: 'a',
+  status: 'running',
+  action: 'copy',
+  sources: ['/mnt/user/x', '/mnt/user/y'],
+  destination: '/mnt/user/Movies',
+  total_files: 40,
+  processed_files: 12,
+  total_bytes: 4 * 1024 ** 3,
+  processed_bytes: 1024 ** 3,
+  percent: 25,
+  speed_bps: 50 * 1024 ** 2,
+  eta_seconds: 80,
 };
 
 describe('transfer center', () => {
@@ -42,9 +52,17 @@ describe('transfer center', () => {
     const refresh = vi.fn();
     ZettEventBus.on('fm:refresh', refresh);
     const onDone = vi.fn();
-    await transferCenter.startTransfer({ sources: ['/mnt/user/x'], destinationDir: '/mnt/user/Movies', action: 'copy', onDone });
+    await transferCenter.startTransfer({
+      sources: ['/mnt/user/x'],
+      destinationDir: '/mnt/user/Movies',
+      action: 'copy',
+      onDone,
+    });
     expect(api.post).toHaveBeenCalledWith('/api/fs/transfer/async', {
-      sources: ['/mnt/user/x'], destination_dir: '/mnt/user/Movies', action: 'copy', collision_policy: 'merge',
+      sources: ['/mnt/user/x'],
+      destination_dir: '/mnt/user/Movies',
+      action: 'copy',
+      collision_policy: 'merge',
     });
     expect(transferCenter.isOpen).toBe(false);
     vi.advanceTimersByTime(800);
@@ -52,7 +70,7 @@ describe('transfer center', () => {
 
     transferCenter.render();
     const bar = document.querySelector('[data-task-id="t1"] [role="progressbar"]');
-    expect(bar.getAttribute("aria-valuenow")).toBe("25");
+    expect(bar.getAttribute('aria-valuenow')).toBe('25');
 
     transferCenter.update({ id: 't1', status: 'completed', percent: 100, result: { skipped: 0 } });
     expect(showToast).toHaveBeenCalledWith('Copying 2 items to Movies: done', 'success');
@@ -71,7 +89,13 @@ describe('transfer center', () => {
 
   it('tracks browser-side work such as uploads, with cancel', () => {
     const cancel = vi.fn();
-    const job = transferCenter.startLocal({ kind: 'upload', label: 'Uploading 2 file(s) to Movies', totalFiles: 2, totalBytes: 2000, cancel });
+    const job = transferCenter.startLocal({
+      kind: 'upload',
+      label: 'Uploading 2 file(s) to Movies',
+      totalFiles: 2,
+      totalBytes: 2000,
+      cancel,
+    });
     job.progress({ files: 1, bytes: 1000, current: 'a.mkv' });
     transferCenter.toggle(true);
     transferCenter.render();

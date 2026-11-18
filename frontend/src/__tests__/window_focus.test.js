@@ -4,11 +4,25 @@ import { installWindowFocus } from '../window-focus.js';
 function makeDock() {
   const dock = {
     windows: {},
-    register(id, el) { this.windows[id] = { el, minimized: false, closed: false }; el.style.display = 'flex'; },
-    restore(id) { this.windows[id].minimized = false; this.windows[id].el.style.display = 'flex'; },
-    minimize(id) { this.windows[id].minimized = true; this.windows[id].el.style.display = 'none'; },
-    unregister(id) { this.windows[id].el.style.display = 'none'; delete this.windows[id]; },
-    closeWindow(id) { this.unregister(id); },
+    register(id, el) {
+      this.windows[id] = { el, minimized: false, closed: false };
+      el.style.display = 'flex';
+    },
+    restore(id) {
+      this.windows[id].minimized = false;
+      this.windows[id].el.style.display = 'flex';
+    },
+    minimize(id) {
+      this.windows[id].minimized = true;
+      this.windows[id].el.style.display = 'none';
+    },
+    unregister(id) {
+      this.windows[id].el.style.display = 'none';
+      delete this.windows[id];
+    },
+    closeWindow(id) {
+      this.unregister(id);
+    },
   };
   installWindowFocus(dock);
   return dock;
@@ -63,7 +77,8 @@ describe('window focus: Esc handled elsewhere', () => {
 });
 
 describe('window focus: Esc closes the top window only when nothing else used it', () => {
-  const press = (el) => el.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+  const press = (el) =>
+    el.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
   async function oneWindow(extra = '') {
     document.body.innerHTML = `<div id="w" class="os-window"><div class="os-window-body"><button id="b">b</button>
       <div id="menu" class="ctx-menu">menu</div></div></div>${extra}`;

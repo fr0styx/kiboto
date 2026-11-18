@@ -54,7 +54,22 @@ describe('Containers window (NUX-20)', () => {
   it('labels the toolbar, the bulk bar and the catalog filters', () => {
     initContainersManager();
     const text = byId('containers-manager-window').textContent;
-    for (const w of ['Total:', 'Running:', 'Stopped:', 'Updates:', 'Check for updates', 'Update all', 'Compose stacks', 'Clean up', 'selected', 'Pause', 'Resume', 'Smart home', 'Downloaders', 'Loading the app catalog…']) {
+    for (const w of [
+      'Total:',
+      'Running:',
+      'Stopped:',
+      'Updates:',
+      'Check for updates',
+      'Update all',
+      'Compose stacks',
+      'Clean up',
+      'selected',
+      'Pause',
+      'Resume',
+      'Smart home',
+      'Downloaders',
+      'Loading the app catalog…',
+    ]) {
       expect(text).toContain(w);
     }
     expect(document.querySelector('[data-bulk="start"]').textContent).toBe('▶ Start');
@@ -63,7 +78,12 @@ describe('Containers window (NUX-20)', () => {
   it('says it is checking, and asks before updating everything', async () => {
     initContainersManager();
     let done;
-    vi.spyOn(api, 'post').mockImplementation(() => new Promise((r) => { done = r; }));
+    vi.spyOn(api, 'post').mockImplementation(
+      () =>
+        new Promise((r) => {
+          done = r;
+        })
+    );
     const check = byId('btn-cw-check-updates');
     check.click();
     expect(check.textContent).toContain('Checking…');
@@ -86,7 +106,14 @@ describe('Containers window (NUX-20)', () => {
     rowButton('more-sheet').click();
     let sheet = showBottomSheet.mock.calls.at(-1)[0];
     const labels = sheet.items.map((i) => i.label);
-    expect(labels).toEqual(expect.arrayContaining(['Manage stack: site', 'Update to the latest image', 'Back up app data and settings', 'Delete “web”']));
+    expect(labels).toEqual(
+      expect.arrayContaining([
+        'Manage stack: site',
+        'Update to the latest image',
+        'Back up app data and settings',
+        'Delete “web”',
+      ])
+    );
     expect(sheet.subtitle).toBe('State: RUNNING • nginx');
 
     rowButton('more-sheet', 'bare', 'c2').click();

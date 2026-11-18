@@ -1,5 +1,13 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { pctToY, yToPct, tempToX, xToTemp, updateFanCurveWorkstation, expandTo6Points, renderCurveLines } from '../components/fan-control.js';
+import {
+  pctToY,
+  yToPct,
+  tempToX,
+  xToTemp,
+  updateFanCurveWorkstation,
+  expandTo6Points,
+  renderCurveLines,
+} from '../components/fan-control.js';
 import { state } from '../state.js';
 
 describe('Fan Curve Coordinate & Deadband Math', () => {
@@ -99,7 +107,7 @@ describe('Zero RPM Workstation UI Badges & Readouts', () => {
         ctrl_cpu_fan: true,
         disk_hold_remaining: 0,
         cpu_hold_remaining: 0,
-      }
+      },
     };
 
     updateFanCurveWorkstation(telemetry);
@@ -127,7 +135,7 @@ describe('Zero RPM Workstation UI Badges & Readouts', () => {
         ctrl_cpu_fan: true,
         disk_hold_remaining: 0,
         cpu_hold_remaining: 0,
-      }
+      },
     };
 
     updateFanCurveWorkstation(telemetry);
@@ -155,7 +163,7 @@ describe('Zero RPM Workstation UI Badges & Readouts', () => {
         ctrl_cpu_fan: true,
         disk_hold_remaining: 0,
         cpu_hold_remaining: 0,
-      }
+      },
     };
 
     updateFanCurveWorkstation(telemetry);
@@ -182,7 +190,7 @@ describe('Zero RPM Workstation UI Badges & Readouts', () => {
         ctrl_cpu_fan: true,
         disk_hold_remaining: 0,
         cpu_hold_remaining: 0,
-      }
+      },
     };
 
     updateFanCurveWorkstation(telemetry);
@@ -203,7 +211,7 @@ describe('Zero RPM Workstation UI Badges & Readouts', () => {
         ctrl_cpu_fan: true,
         disk_hold_remaining: 0,
         cpu_hold_remaining: 0,
-      }
+      },
     };
 
     updateFanCurveWorkstation(telemetry);
@@ -222,7 +230,12 @@ describe('Zero RPM Workstation UI Badges & Readouts', () => {
 
 describe('6-Point Dynamic Fan Curve Handles & Expansion', () => {
   it('expands a 4-point curve into exactly 6 monotonic points without distorting geometry', () => {
-    const original4 = [[30, 0], [38, 32], [51, 69], [60, 100]];
+    const original4 = [
+      [30, 0],
+      [38, 32],
+      [51, 69],
+      [60, 100],
+    ];
     const expanded6 = expandTo6Points(original4);
 
     expect(expanded6).toHaveLength(6);
@@ -238,7 +251,14 @@ describe('6-Point Dynamic Fan Curve Handles & Expansion', () => {
   });
 
   it('keeps an existing 6-point curve unchanged', () => {
-    const existing6 = [[30, 0], [36, 32], [42, 48], [48, 65], [54, 85], [60, 100]];
+    const existing6 = [
+      [30, 0],
+      [36, 32],
+      [42, 48],
+      [48, 65],
+      [54, 85],
+      [60, 100],
+    ];
     const result = expandTo6Points(existing6);
     expect(result).toEqual(existing6);
   });
@@ -257,7 +277,14 @@ describe('6-Point Dynamic Fan Curve Handles & Expansion', () => {
       </svg>
     `;
 
-    const pts6 = [[30, 0], [36, 32], [42, 48], [48, 65], [54, 85], [60, 100]];
+    const pts6 = [
+      [30, 0],
+      [36, 32],
+      [42, 48],
+      [48, 65],
+      [54, 85],
+      [60, 100],
+    ];
     state.setCurvePoints(pts6);
     renderCurveLines();
 

@@ -7,7 +7,12 @@ vi.mock('../toast.js', async (orig) => ({ ...(await orig()), showToast: vi.fn() 
 import { api } from '../api.js';
 import { showToast } from '../toast.js';
 import { refreshAndSay, showReadError } from '../components/refresh-say.js';
-import { fetchAndRenderChassisTwin, fetchAndRenderStorageTopology, foundPoolsHtml, lookForPools } from '../components/chassis-visualizer.js';
+import {
+  fetchAndRenderChassisTwin,
+  fetchAndRenderStorageTopology,
+  foundPoolsHtml,
+  lookForPools,
+} from '../components/chassis-visualizer.js';
 
 const POOLS = { pools: [{ id: 'tank', name: 'tank', fs_type: 'zfs', status: 'HEALTHY', members: [] }] };
 
@@ -16,7 +21,12 @@ describe('Refresh speaks after the answer', () => {
 
   it('says "refreshed" only once the data is there', async () => {
     let done;
-    const run = vi.fn(() => new Promise((resolve) => { done = resolve; }));
+    const run = vi.fn(
+      () =>
+        new Promise((resolve) => {
+          done = resolve;
+        })
+    );
     const said = refreshAndSay(run, 'Drive bays refreshed.');
     await Promise.resolve();
     expect(showToast).not.toHaveBeenCalled();
@@ -28,7 +38,15 @@ describe('Refresh speaks after the answer', () => {
   it('says when it could not refresh: a false answer or an error', async () => {
     expect(await refreshAndSay(async () => false, 'ok')).toBe(false);
     expect(showToast).toHaveBeenLastCalledWith('Could not refresh. What you see may be out of date.', 'error');
-    expect(await refreshAndSay(async () => { throw new Error('x'); }, 'ok', 'Not this time.')).toBe(false);
+    expect(
+      await refreshAndSay(
+        async () => {
+          throw new Error('x');
+        },
+        'ok',
+        'Not this time.'
+      )
+    ).toBe(false);
     expect(showToast).toHaveBeenLastCalledWith('Not this time.', 'error');
   });
 
@@ -71,7 +89,9 @@ describe('no invented picture, no scan on opening', () => {
   });
 
   it('says when there is no pool, and offers the look for pools only where the server allows it', async () => {
-    vi.spyOn(api, 'get').mockImplementation(async (url) => (url === '/api/storage/pools' ? { pools: [] } : { capabilities: {}, can_look_for_pools: true }));
+    vi.spyOn(api, 'get').mockImplementation(async (url) =>
+      url === '/api/storage/pools' ? { pools: [] } : { capabilities: {}, can_look_for_pools: true }
+    );
     const box = document.createElement('div');
     await fetchAndRenderStorageTopology(box);
     expect(box.textContent).toContain('No storage pool was found here.');
@@ -81,7 +101,9 @@ describe('no invented picture, no scan on opening', () => {
   it('looking for pools shows what was found once, or says that nothing was', async () => {
     const box = document.createElement('div');
     box.innerHTML = '<div class="external-pools-banner">old</div>';
-    const get = vi.spyOn(api, 'get').mockResolvedValue({ discovered_pools: [{ pool_id: 'backup<1>', fs_type: 'zfs', status: 'ONLINE' }] });
+    const get = vi
+      .spyOn(api, 'get')
+      .mockResolvedValue({ discovered_pools: [{ pool_id: 'backup<1>', fs_type: 'zfs', status: 'ONLINE' }] });
     await lookForPools(box, null);
     expect(get).toHaveBeenCalledWith('/api/storage/pools/discover');
     expect(box.querySelectorAll('.external-pools-banner')).toHaveLength(1); // they piled up, one per Refresh
@@ -91,7 +113,9 @@ describe('no invented picture, no scan on opening', () => {
     const post = vi.spyOn(api, 'post').mockResolvedValue({ status: 'imported' });
     get.mockResolvedValue({ pools: [] });
     box.querySelector('.btn-import-external-pool').click();
-    await vi.waitFor(() => expect(post).toHaveBeenCalledWith('/api/storage/pools/import', { pool_id: 'backup<1>', fs_type: 'zfs' }));
+    await vi.waitFor(() =>
+      expect(post).toHaveBeenCalledWith('/api/storage/pools/import', { pool_id: 'backup<1>', fs_type: 'zfs' })
+    );
     await vi.waitFor(() => expect(box.textContent).toContain('No storage pool was found here.'));
     box.innerHTML = '<div class="external-pools-banner">old</div>';
     get.mockResolvedValue({ discovered_pools: [{ pool_id: 'backup<1>', fs_type: 'zfs', status: 'ONLINE' }] });

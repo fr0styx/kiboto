@@ -2,7 +2,12 @@
 import { describe, it, expect, vi, beforeAll, beforeEach, afterEach } from 'vitest';
 
 vi.mock('../management-dom.js', () => ({ onManagementDom: (fn) => fn(), ensureManagementDom: async () => {} }));
-vi.mock('../toast.js', () => ({ showToast: vi.fn(), showActionToast: vi.fn(), showPromptToast: vi.fn(), showConfirmToast: vi.fn() }));
+vi.mock('../toast.js', () => ({
+  showToast: vi.fn(),
+  showActionToast: vi.fn(),
+  showPromptToast: vi.fn(),
+  showConfirmToast: vi.fn(),
+}));
 
 const { api } = await import('../api.js');
 const { showToast, showConfirmToast } = await import('../toast.js');
@@ -64,17 +69,24 @@ describe('credentials card', () => {
     expect(last()[1]).toBe('error');
   });
 
-  it('changes the signed-in person\'s own password and keeps this browser signed in (SET-10)', async () => {
+  it("changes the signed-in person's own password and keeps this browser signed in (SET-10)", async () => {
     localStorage.setItem('kiboto_signed_in', '1');
-    vi.spyOn(api, 'get').mockImplementation(async (url) => (url === '/api/auth/me' ? { id: 'usr_anna', username: 'anna', role: 'superadmin' } : {}));
+    vi.spyOn(api, 'get').mockImplementation(async (url) =>
+      url === '/api/auth/me' ? { id: 'usr_anna', username: 'anna', role: 'superadmin' } : {}
+    );
     const post = vi.spyOn(api, 'post').mockResolvedValue({ status: 'ok' });
     byId('sec-cur-pwd').value = 'old';
     byId('sec-new-pwd').value = 'a long new password';
     byId('sec-confirm-pwd').value = 'a long new password';
     byId('sec-save-btn').click();
-    await vi.waitFor(() => expect(showToast.mock.calls.some(([m, k]) => k === 'success' && /updated/i.test(m))).toBe(true));
+    await vi.waitFor(() =>
+      expect(showToast.mock.calls.some(([m, k]) => k === 'success' && /updated/i.test(m))).toBe(true)
+    );
     // her own account, not the built-in administrator's form
-    expect(post).toHaveBeenCalledWith('/api/users/usr_anna/password', { current_password: 'old', new_password: 'a long new password' });
+    expect(post).toHaveBeenCalledWith('/api/users/usr_anna/password', {
+      current_password: 'old',
+      new_password: 'a long new password',
+    });
     expect(post.mock.calls.map((c) => c[0])).not.toContain('/api/security');
     expect(byId('sec-save-btn').textContent).toBe('💾 Save');
     expect(byId('sec-cur-pwd').value).toBe('');

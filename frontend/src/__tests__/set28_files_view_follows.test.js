@@ -14,9 +14,26 @@ describe('the File Explorer view follows the person (SET-28 Files 4, Files decis
     expect(personFilesView({ preferences: { files: { view: 'icon' } } })).toEqual({ view: 'icon' });
     expect(personFilesView({ user: { preferences: {} } })).toBeNull();
     expect(personFilesView(null)).toBeNull();
-    expect(startingView({ view: 'icon', sort: 'mtime', sort_dir: 'desc', hidden: true }, { view: 'list' })).toEqual({ view: 'icon', sort: 'mtime', sort_dir: 'desc', hidden: true, seed: false });
-    expect(startingView(null, { view: 'compact', sort: 'size', sort_dir: 'asc', hidden: false })).toEqual({ view: 'compact', sort: 'size', sort_dir: 'asc', hidden: false, seed: true });
-    expect(startingView(null, { view: 'weird', sort: 'nope' })).toMatchObject({ view: 'list', sort: 'name', sort_dir: 'asc', hidden: false });
+    expect(startingView({ view: 'icon', sort: 'mtime', sort_dir: 'desc', hidden: true }, { view: 'list' })).toEqual({
+      view: 'icon',
+      sort: 'mtime',
+      sort_dir: 'desc',
+      hidden: true,
+      seed: false,
+    });
+    expect(startingView(null, { view: 'compact', sort: 'size', sort_dir: 'asc', hidden: false })).toEqual({
+      view: 'compact',
+      sort: 'size',
+      sort_dir: 'asc',
+      hidden: false,
+      seed: true,
+    });
+    expect(startingView(null, { view: 'weird', sort: 'nope' })).toMatchObject({
+      view: 'list',
+      sort: 'name',
+      sort_dir: 'asc',
+      hidden: false,
+    });
     localStorage.setItem('kiboto_fm_view_mode', 'icon');
     localStorage.setItem('kiboto_fm_hidden', '1');
     expect(startingView(null)).toMatchObject({ view: 'icon', hidden: true, seed: true });
@@ -33,7 +50,9 @@ describe('the File Explorer view follows the person (SET-28 Files 4, Files decis
     expect(user.preferences.files).toEqual({ view: 'compact', sort: 'mtime', sort_dir: 'desc', hidden: true });
     expect(put).not.toHaveBeenCalled();
     vi.advanceTimersByTime(700);
-    expect(put).toHaveBeenCalledWith('/api/auth/me/preferences', { files: { view: 'compact', sort: 'mtime', sort_dir: 'desc', hidden: true } });
+    expect(put).toHaveBeenCalledWith('/api/auth/me/preferences', {
+      files: { view: 'compact', sort: 'mtime', sort_dir: 'desc', hidden: true },
+    });
     /** @type {any} */ (globalThis).kibotoUser = null;
     expect(saveFilesView({ view: 'list', sort: 'name', sort_dir: 'asc', hidden: false })).toBeNull();
   });
@@ -52,8 +71,15 @@ describe('the File Explorer view follows the person (SET-28 Files 4, Files decis
     const btn = document.createElement('button');
     const fm = Object.assign(Object.create(P), {
       allEntries: [{ name: '.cache', is_dir: true }, { name: 'b.txt' }, { name: 'a.txt' }],
-      showHidden: false, viewMode: 'list', currentSortBy: 'name', currentSortDir: 'asc',
-      hiddenNote: note, btnHidden: btn, fileList: [], rawFileList: [], spacer: null,
+      showHidden: false,
+      viewMode: 'list',
+      currentSortBy: 'name',
+      currentSortDir: 'asc',
+      hiddenNote: note,
+      btnHidden: btn,
+      fileList: [],
+      rawFileList: [],
+      spacer: null,
       renderViewport: vi.fn(),
     });
     P.applyHidden.call(fm);

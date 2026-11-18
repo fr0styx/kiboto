@@ -368,4 +368,3 @@ describe('Desktop Widgets - Time Clock & Calendar Modal Interactivity', () => {
     });
   });
 });
-

@@ -1,7 +1,12 @@
 /** Network report C4: opening the Network page read the same things twice. */
 import { describe, it, expect, vi, afterEach } from 'vitest';
 
-vi.mock('../toast.js', () => ({ showToast: vi.fn(), showConfirmToast: vi.fn(), showActionToast: vi.fn(), showPromptToast: vi.fn() }));
+vi.mock('../toast.js', () => ({
+  showToast: vi.fn(),
+  showConfirmToast: vi.fn(),
+  showActionToast: vi.fn(),
+  showPromptToast: vi.fn(),
+}));
 const { api } = await import('../api.js');
 const net = await import('../components/management/network.js');
 
@@ -39,7 +44,14 @@ describe('one load at a time', () => {
 
   it('the section and its tab opening together read the layout once', async () => {
     document.body.innerHTML = '<table><tbody id="network-physical-tbody"></tbody></table>';
-    const get = vi.spyOn(api, 'get').mockResolvedValue({ status: 'ok', summary: {}, physical_interfaces: [], bonds: [], bridges: [], docker_networks: [] });
+    const get = vi.spyOn(api, 'get').mockResolvedValue({
+      status: 'ok',
+      summary: {},
+      physical_interfaces: [],
+      bonds: [],
+      bridges: [],
+      docker_networks: [],
+    });
     await Promise.all([net.fetchAndRenderNetworkTopology(), net.fetchAndRenderNetworkTopology()]);
     expect(get.mock.calls.filter(([url]) => url === '/api/system/network-topology')).toHaveLength(1);
     expect(get.mock.calls.some(([url]) => url === '/api/network/mesh-vpn')).toBe(false);

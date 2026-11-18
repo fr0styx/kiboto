@@ -20,7 +20,8 @@ describe('one place for each job (UX-25)', () => {
     expect(drawer).not.toMatch(/id="tz-select"/);
     expect(drawer).not.toMatch(/id="clock-format-btn"/);
     expect(drawer).toMatch(/id="btn-clock-open-settings"/);
-    const all = read('windows/management-window.html') + drawer + readFileSync(resolve(__dirname, '../../index.html'), 'utf8');
+    const all =
+      read('windows/management-window.html') + drawer + readFileSync(resolve(__dirname, '../../index.html'), 'utf8');
     expect(all.match(/id="tz-custom-input"/g)).toHaveLength(1); // the id was twice on the page before
   });
 
@@ -62,7 +63,10 @@ describe('one place for each job (UX-25)', () => {
 
   it('a backup job asks what, then where to, then when', () => {
     const mw = read('windows/management-window.html');
-    const form = mw.slice(mw.indexOf('id="create-backup-job-form"'), mw.indexOf('</form>', mw.indexOf('id="create-backup-job-form"')));
+    const form = mw.slice(
+      mw.indexOf('id="create-backup-job-form"'),
+      mw.indexOf('</form>', mw.indexOf('id="create-backup-job-form"'))
+    );
     const at = (id) => form.indexOf(`id="${id}"`);
     expect(form.indexOf('backup.step_what')).toBeLessThan(at('backup-job-subvolume'));
     expect(at('backup-job-subvolume')).toBeLessThan(form.indexOf('backup.step_where'));

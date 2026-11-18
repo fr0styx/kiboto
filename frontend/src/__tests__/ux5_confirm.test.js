@@ -18,7 +18,10 @@ describe('confirm dialog (UX-5, UX-6)', () => {
     expect(confirmButtonFor('Restart Samba', '')).toEqual({ label: 'Restart Samba', destructive: false });
     expect(confirmButtonFor('Confirm Action', 'Delete snapshot x?')).toEqual({ label: 'Continue', destructive: true });
     expect(confirmButtonFor('Benutzer löschen', '')).toMatchObject({ destructive: true });
-    expect(confirmButtonFor('Apply', '', { okText: 'Save', destructive: false })).toEqual({ label: 'Save', destructive: false });
+    expect(confirmButtonFor('Apply', '', { okText: 'Save', destructive: false })).toEqual({
+      label: 'Save',
+      destructive: false,
+    });
   });
 
   it('takes focus, keeps Tab inside, and gives focus back', () => {
@@ -39,12 +42,15 @@ describe('confirm dialog (UX-5, UX-6)', () => {
     showConfirmToast('Delete VM', 'Gone for good.', vi.fn());
     vi.advanceTimersByTime(20);
     expect(document.activeElement).toBe(cancel());
-    expect(ok().style.background).toContain("kb-confirm-danger"); // red, at 4.5:1 with white (NUX-16)
+    expect(ok().style.background).toContain('kb-confirm-danger'); // red, at 4.5:1 with white (NUX-16)
   });
 
   it('asks to type the name before a big delete', () => {
     const onConfirm = vi.fn();
-    showConfirmToast('Remove Share', 'The share goes away.', onConfirm, null, { typeToConfirm: 'media', destructive: true });
+    showConfirmToast('Remove Share', 'The share goes away.', onConfirm, null, {
+      typeToConfirm: 'media',
+      destructive: true,
+    });
     vi.advanceTimersByTime(20);
     const input = document.getElementById('confirm-toast-type-input');
     expect(document.activeElement).toBe(input);

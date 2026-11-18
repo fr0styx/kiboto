@@ -6,7 +6,11 @@ describe('Files asks nothing before it opens (SET-28, Files 5)', () => {
   afterEach(() => vi.restoreAllMocks());
 
   it('the sidebar draws at start-up without asking; opening reads the roots and the favourites', async () => {
-    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(/** @type {any} */ ({ ok: true, json: async () => ({ roots: [{ path: '/mnt/user', name: 'user' }] }) }));
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(
+        /** @type {any} */ ({ ok: true, json: async () => ({ roots: [{ path: '/mnt/user', name: 'user' }] }) })
+      );
     const get = vi.spyOn(api, 'get').mockResolvedValue({ favorites: [] });
     document.body.innerHTML = '<div id="tree"></div>';
     const fm = { currentPath: '/mnt/user', windowEl: document.body };
@@ -21,11 +25,14 @@ describe('Files asks nothing before it opens (SET-28, Files 5)', () => {
   });
 
   it('an announcement that Files opened does not open it a second time', async () => {
-    vi.spyOn(globalThis, 'fetch').mockResolvedValue(/** @type {any} */ ({ ok: true, json: async () => ({ roots: [] }) }));
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      /** @type {any} */ ({ ok: true, json: async () => ({ roots: [] }) })
+    );
     vi.spyOn(api, 'get').mockResolvedValue({ entries: [], favorites: [] });
     const { ZettEventBus } = await import('../event-bus.js');
     const fmMod = await import('../components/file-manager.js');
-    document.body.innerHTML = '<div id="fm-desktop-icon"></div><div id="file-manager-window" style="display:none"><div class="fm-sidebar-tree"></div></div>';
+    document.body.innerHTML =
+      '<div id="fm-desktop-icon"></div><div id="file-manager-window" style="display:none"><div class="fm-sidebar-tree"></div></div>';
     const heard = vi.fn();
     ZettEventBus.on('window:open', heard);
     fmMod.openFileManager('/mnt/user'); // builds the window and opens it

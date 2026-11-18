@@ -5,7 +5,8 @@ vi.mock('../toast.js', () => ({ showToast, showConfirmToast: vi.fn() }));
 const copyText = vi.fn(() => Promise.resolve());
 vi.mock('../utils.js', async (orig) => ({ ...(await orig()), copyText }));
 
-const { homeHtml, portRowsHtml, renderHome, renderPortRows, showTailscaleOptions } = await import('../components/management/network-home.js');
+const { homeHtml, portRowsHtml, renderHome, renderPortRows, showTailscaleOptions } =
+  await import('../components/management/network-home.js');
 
 describe('SET-24 m: This NAS at home and the port rows', () => {
   beforeEach(() => {
@@ -26,7 +27,9 @@ describe('SET-24 m: This NAS at home and the port rows', () => {
   it('says Unknown for what the host did not say', () => {
     const box = /** @type {HTMLElement} */ (document.getElementById('home'));
     box.innerHTML = homeHtml({ primary_ip: '10.0.0.5' });
-    expect(box.querySelector('.net-dl')?.textContent?.replace(/\s*\n\s*/g, '')).toBe('RouterUnknownName serversUnknownThroughUnknown');
+    expect(box.querySelector('.net-dl')?.textContent?.replace(/\s*\n\s*/g, '')).toBe(
+      'RouterUnknownName serversUnknownThroughUnknown'
+    );
   });
 
   it('Copy copies the address and says so; a failed copy says what to do', async () => {
@@ -37,7 +40,9 @@ describe('SET-24 m: This NAS at home and the port rows', () => {
     expect(copyText).toHaveBeenCalledWith('10.0.0.5');
     copyText.mockRejectedValueOnce(new Error('no'));
     /** @type {HTMLElement} */ (box.querySelector('[data-copy]')).click();
-    await vi.waitFor(() => expect(showToast).toHaveBeenCalledWith('Could not copy. Select the address and copy it yourself.', 'error'));
+    await vi.waitFor(() =>
+      expect(showToast).toHaveBeenCalledWith('Could not copy. Select the address and copy it yourself.', 'error')
+    );
     renderHome(null, {}); // no box, nothing to do
   });
 

@@ -21,7 +21,8 @@ describe('delegated DOM actions replace inline handlers (FE-06)', () => {
   });
 
   it('handles image fallbacks', () => {
-    document.body.innerHTML = '<img id="i" data-img-fallback="hide-show-next:flex"><span id="n" style="display:none"></span>';
+    document.body.innerHTML =
+      '<img id="i" data-img-fallback="hide-show-next:flex"><span id="n" style="display:none"></span>';
     document.getElementById('i').dispatchEvent(new Event('error'));
     expect(document.getElementById('i').style.display).toBe('none');
     expect(document.getElementById('n').style.display).toBe('flex');

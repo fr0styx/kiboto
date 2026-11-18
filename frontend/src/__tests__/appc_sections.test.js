@@ -45,20 +45,34 @@ describe('Mission Control tab groups (APP-C)', () => {
             <div class="mgmt-tab-pane" id="mgmt-pane-ai-chat"></div>
           </div>
         </div></div></div>`;
-    try { initManagement(); } catch (_) { /* parts of the window this test doesn't build */ }
+    try {
+      initManagement();
+    } catch (_) {
+      /* parts of the window this test doesn't build */
+    }
   });
 
   it('a link to a pane of a group opens its tab, shows the group and scrolls to the pane', () => {
     window.openManagementWindow('mgmt-sec-wallpaper', 'mgmt-pane-glass');
     expect(active('#look')).toBe(true);
-    expect(['mgmt-pane-theme', 'mgmt-pane-wallpaper', 'mgmt-pane-glass', 'mgmt-pane-dock'].map(shown)).toEqual(['block', 'block', 'block', 'none']);
+    expect(['mgmt-pane-theme', 'mgmt-pane-wallpaper', 'mgmt-pane-glass', 'mgmt-pane-dock'].map(shown)).toEqual([
+      'block',
+      'block',
+      'block',
+      'none',
+    ]);
     expect(document.getElementById('mgmt-pane-glass').scrollIntoView).toHaveBeenCalled();
   });
 
   it('a click shows the other group', () => {
     document.getElementById('desk').click();
     expect(active('#desk')).toBe(true);
-    expect(['mgmt-pane-dock', 'mgmt-pane-widgets', 'mgmt-pane-screensaver', 'mgmt-pane-theme'].map(shown)).toEqual(['block', 'block', 'block', 'none']);
+    expect(['mgmt-pane-dock', 'mgmt-pane-widgets', 'mgmt-pane-screensaver', 'mgmt-pane-theme'].map(shown)).toEqual([
+      'block',
+      'block',
+      'block',
+      'none',
+    ]);
   });
 
   it('opening Appearance by name shows Look (the link names the wallpaper pane)', () => {
@@ -68,7 +82,7 @@ describe('Mission Control tab groups (APP-C)', () => {
     expect(shown('mgmt-pane-dock')).toBe('none');
   });
 
-  it('a section opened without a pane shows its active tab\'s whole group', () => {
+  it("a section opened without a pane shows its active tab's whole group", () => {
     window.openManagementWindow('mgmt-sec-zz');
     expect(['zz-a', 'zz-b', 'zz-c'].map(shown)).toEqual(['none', 'block', 'block']);
   });

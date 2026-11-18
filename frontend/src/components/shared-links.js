@@ -48,23 +48,27 @@ export async function renderSharedLinks(mount, { me = '' } = {}) {
   try {
     links = await api.get('/api/fs/share-links');
   } catch (err) {
-    mount.innerHTML = emptyStateHtml(/** @type {any} */ ({
-      title: t('links.load_failed', 'The links could not be loaded.'),
-      body: err?.message || '',
-      action: { id: 'shared-links-retry', label: t('links.try_again', 'Try again') },
-      compact: true,
-    }));
+    mount.innerHTML = emptyStateHtml(
+      /** @type {any} */ ({
+        title: t('links.load_failed', 'The links could not be loaded.'),
+        body: err?.message || '',
+        action: { id: 'shared-links-retry', label: t('links.try_again', 'Try again') },
+        compact: true,
+      })
+    );
     mount.querySelector('#shared-links-retry')?.addEventListener('click', () => renderSharedLinks(mount, { me }));
     return;
   }
   const list = Array.isArray(links) ? links : [];
   if (!list.length) {
-    mount.innerHTML = emptyStateHtml(/** @type {any} */ ({
-      icon: '🔗',
-      title: t('links.empty', 'No shared links.'),
-      body: t('links.empty_body', 'A file or folder you share from the File Explorer shows up here.'),
-      compact: true,
-    }));
+    mount.innerHTML = emptyStateHtml(
+      /** @type {any} */ ({
+        icon: '🔗',
+        title: t('links.empty', 'No shared links.'),
+        body: t('links.empty_body', 'A file or folder you share from the File Explorer shows up here.'),
+        compact: true,
+      })
+    );
     return;
   }
   mount.innerHTML = list.map((link) => rowHtml(link, me)).join('');
@@ -79,7 +83,9 @@ export async function renderSharedLinks(mount, { me = '' } = {}) {
       const name = link.label || link.filename || link.path;
       showDangerConfirm(
         t('links.stop', 'Stop sharing'),
-        t('links.stop_q', 'Stop sharing “{name}”? The link stops working at once. The file stays where it is.', { name }),
+        t('links.stop_q', 'Stop sharing “{name}”? The link stops working at once. The file stays where it is.', {
+          name,
+        }),
         async () => {
           try {
             await api.delete(`/api/fs/share-links/${encodeURIComponent(link.token)}`);
@@ -90,7 +96,7 @@ export async function renderSharedLinks(mount, { me = '' } = {}) {
           renderSharedLinks(mount, { me });
         },
         null,
-        { okText: t('links.stop', 'Stop sharing') },
+        { okText: t('links.stop', 'Stop sharing') }
       );
     });
   });
@@ -129,7 +135,9 @@ export function openSharedLinks({ everyone = false, me = '' } = {}) {
   };
   document.addEventListener('keydown', onKey, true);
   backdrop.querySelector('#shared-links-close').addEventListener('click', close);
-  backdrop.addEventListener('click', (e) => { if (e.target === backdrop) close(); });
+  backdrop.addEventListener('click', (e) => {
+    if (e.target === backdrop) close();
+  });
   /** @type {HTMLElement} */ (backdrop.querySelector('#shared-links-close')).focus();
   return renderSharedLinks(backdrop.querySelector('#shared-links-list'), { me });
 }

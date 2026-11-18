@@ -7,7 +7,15 @@ const toast = await import('../toast.js');
 const { hwHelperStatus, hwHelperHtml, loadHwHelperCard } = await import('../components/management/hw-helper.js');
 
 const tick = () => new Promise((r) => setTimeout(r, 0));
-const BASE = { enabled: false, running: false, answering: false, applies: true, kept_until_update: false, app_without_raw_access: false, error: '' };
+const BASE = {
+  enabled: false,
+  running: false,
+  answering: false,
+  applies: true,
+  kept_until_update: false,
+  app_without_raw_access: false,
+  error: '',
+};
 
 describe('the hardware helper card (SEC-24)', () => {
   beforeEach(() => {
@@ -16,14 +24,16 @@ describe('the hardware helper card (SEC-24)', () => {
   });
 
   it('says how it stands', () => {
-    expect(hwHelperStatus({ ...BASE, error: 'Docker didn\'t answer' })).toContain('Docker');
+    expect(hwHelperStatus({ ...BASE, error: "Docker didn't answer" })).toContain('Docker');
     expect(hwHelperStatus({ ...BASE, applies: false })).toContain('no fan or button registers');
     expect(hwHelperStatus({ ...BASE, kept_until_update: true })).toContain('until the next update');
     expect(hwHelperStatus(BASE)).toContain('Kiboto reaches');
     expect(hwHelperStatus({ ...BASE, enabled: true })).toContain('Starting');
-    expect(hwHelperStatus({ ...BASE, enabled: true, running: true })).toContain('doesn\'t answer');
+    expect(hwHelperStatus({ ...BASE, enabled: true, running: true })).toContain("doesn't answer");
     expect(hwHelperStatus({ ...BASE, enabled: true, running: true, answering: true })).toContain('next update takes');
-    expect(hwHelperStatus({ ...BASE, enabled: true, running: true, answering: true, app_without_raw_access: true })).toContain('no longer can');
+    expect(
+      hwHelperStatus({ ...BASE, enabled: true, running: true, answering: true, app_without_raw_access: true })
+    ).toContain('no longer can');
     expect(hwHelperHtml({ ...BASE, applies: false })).toContain('disabled');
   });
 

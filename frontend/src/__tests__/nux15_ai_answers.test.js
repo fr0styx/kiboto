@@ -16,8 +16,12 @@ describe('AI answers on classes (NUX-15)', () => {
   it('shows a recipe card in a knowledge answer', async () => {
     document.body.innerHTML = windowPane('mgmt-pane-ai-rag'); // the real Search pane (SET-26)
     vi.spyOn(api, 'post').mockResolvedValue({
-      answer_markdown: 'Mix it.', citations: [],
-      structured_cards: [{ type: 'recipe', title: 'Pancakes', ingredients: ['flour'], steps: ['Fry'], prep_time: '5 min' }, { type: 'recipe' }],
+      answer_markdown: 'Mix it.',
+      citations: [],
+      structured_cards: [
+        { type: 'recipe', title: 'Pancakes', ingredients: ['flour'], steps: ['Fry'], prep_time: '5 min' },
+        { type: 'recipe' },
+      ],
     });
     await runAiRagAsk('pancakes');
     const html = document.body.innerHTML;
@@ -43,10 +47,21 @@ describe('AI answers on classes (NUX-15)', () => {
   it('shows photo cards in a saved chat, with and without a thumbnail', async () => {
     document.body.innerHTML = '<div id="ai-chat-active-title"></div><div id="ai-chat-messages-list"></div>';
     vi.spyOn(api, 'get').mockResolvedValue({
-      conversation: { id: 'p1', title: 'Beach', messages: [
-        { role: 'user', content: 'Beach photos?' },
-        { role: 'assistant', content: 'Two photos.', photos: [{ path: '/srv/a.jpg', name: 'a.jpg', file_id: 7 }, { path: '/srv/b.jpg', name: 'b.jpg' }] },
-      ] },
+      conversation: {
+        id: 'p1',
+        title: 'Beach',
+        messages: [
+          { role: 'user', content: 'Beach photos?' },
+          {
+            role: 'assistant',
+            content: 'Two photos.',
+            photos: [
+              { path: '/srv/a.jpg', name: 'a.jpg', file_id: 7 },
+              { path: '/srv/b.jpg', name: 'b.jpg' },
+            ],
+          },
+        ],
+      },
     });
     await selectAiConversation('p1');
     const cards = document.querySelectorAll('.ai-chat-photo-card');

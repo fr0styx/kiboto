@@ -65,8 +65,16 @@ describe('a text the server sends', () => {
   });
 
   it('is translated from its key and values when the server said how', async () => {
-    const body = { detail: 'This account can be signed in Mon-Fri 07:00-20:00 (server time).', text: { msg_key: 'srv.outside_hours_days', params: { start: '07:00', end: '20:00', days: { weekdays: [0, 1, 2, 3, 4] } } } };
-    expect(serverSaid(body)).toBe("You can sign in on Mon, Tue, Wed, Thu, Fri from 07:00 to 20:00 (the server's time).");
+    const body = {
+      detail: 'This account can be signed in Mon-Fri 07:00-20:00 (server time).',
+      text: {
+        msg_key: 'srv.outside_hours_days',
+        params: { start: '07:00', end: '20:00', days: { weekdays: [0, 1, 2, 3, 4] } },
+      },
+    };
+    expect(serverSaid(body)).toBe(
+      "You can sign in on Mon, Tue, Wed, Thu, Fri from 07:00 to 20:00 (the server's time)."
+    );
     expect(explain(body.detail, 'outside_signin_hours', body)).toBe(serverSaid(body));
     await i18n.setLanguage('de');
     expect(serverSaid(body)).toContain('07:00 bis 20:00');
@@ -85,8 +93,14 @@ describe('a text the server sends', () => {
   it('reads values that are texts or weekdays, and events the same way', () => {
     expect(weekdayNames([5, 6], 'en')).toBe('Sat, Sun');
     expect(weekdayNames([], 'en')).toBe('');
-    expect(resolveParams({ n: 3, when: { weekdays: [0] }, what: { key: 'common.cancel', default: 'Cancel' } })).toEqual({ n: 3, when: 'Mon', what: 'Cancel' });
-    const event = { title: 'T', message: 'M', details: { msg_key: 'srv.outside_hours_daily', params: { start: '08:00', end: '09:00' } } };
+    expect(resolveParams({ n: 3, when: { weekdays: [0] }, what: { key: 'common.cancel', default: 'Cancel' } })).toEqual(
+      { n: 3, when: 'Mon', what: 'Cancel' }
+    );
+    const event = {
+      title: 'T',
+      message: 'M',
+      details: { msg_key: 'srv.outside_hours_daily', params: { start: '08:00', end: '09:00' } },
+    };
     expect(eventText(event).message).toBe("You can sign in every day from 08:00 to 09:00 (the server's time).");
     expect(serverSaid(event)).toBe(eventText(event).message);
   });

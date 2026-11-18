@@ -8,7 +8,10 @@ import { showToast } from '../toast.js';
 import { convertShare, renderSnapshotSchedules, schedulesHtml } from '../components/snapshot-browser.js';
 
 const flush = () => new Promise((r) => setTimeout(r, 0));
-const sched = [{ share: 'photos', every: 'hourly', keep: 24 }, { share: 'docs', every: 'daily', keep: 7 }];
+const sched = [
+  { share: 'photos', every: 'hourly', keep: 24 },
+  { share: 'docs', every: 'daily', keep: 7 },
+];
 
 describe('making a folder share snapshot-ready (NREL-5)', () => {
   it('offers it only for the shares that need it', () => {
@@ -23,7 +26,9 @@ describe('making a folder share snapshot-ready (NREL-5)', () => {
   });
 
   it('converts from the schedule list and says where to follow it', async () => {
-    api.get.mockImplementation((url) => Promise.resolve(url.includes('schedules') ? { schedules: sched, convertible: ['docs'] } : { shares: [] }));
+    api.get.mockImplementation((url) =>
+      Promise.resolve(url.includes('schedules') ? { schedules: sched, convertible: ['docs'] } : { shares: [] })
+    );
     api.post.mockResolvedValue({ share: 'docs', job_id: 'job:1' });
     const mount = document.createElement('div');
     await renderSnapshotSchedules(mount);

@@ -24,7 +24,10 @@ describe('quieter at night', () => {
     document.body.innerHTML = '<section id="quiet-night-card" hidden></section>';
     let state = { ...ST };
     vi.spyOn(api, 'get').mockImplementation(async () => state);
-    const put = vi.spyOn(api, 'put').mockImplementation(async (_u, body) => { state = { ...state, ...body }; return state; });
+    const put = vi.spyOn(api, 'put').mockImplementation(async (_u, body) => {
+      state = { ...state, ...body };
+      return state;
+    });
     await renderQuietNightCard();
     expect(document.querySelector('.fw-why').textContent).toMatch(/4 °C cooler\. From 50 °C/);
     document.getElementById('qn-toggle').click();
@@ -32,7 +35,9 @@ describe('quieter at night', () => {
     expect(put).toHaveBeenLastCalledWith('/api/fans/quiet-night', { enabled: true, start: '23:00', end: '07:00' });
     document.getElementById('qn-start').value = '22:00';
     document.getElementById('qn-save').click();
-    await vi.waitFor(() => expect(put).toHaveBeenLastCalledWith('/api/fans/quiet-night', { enabled: true, start: '22:00', end: '07:00' }));
+    await vi.waitFor(() =>
+      expect(put).toHaveBeenLastCalledWith('/api/fans/quiet-night', { enabled: true, start: '22:00', end: '07:00' })
+    );
   });
 
   it('says why when saving fails, and hides when it cannot load', async () => {

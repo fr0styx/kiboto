@@ -30,7 +30,12 @@ describe('card copy settings (finding 18)', () => {
   let post;
   beforeEach(async () => {
     document.body.innerHTML = FIXTURE;
-    vi.spyOn(api, 'get').mockResolvedValue({ enabled: true, on_collision: 'overwrite', auto_ingest: true, require_confirmation: false });
+    vi.spyOn(api, 'get').mockResolvedValue({
+      enabled: true,
+      on_collision: 'overwrite',
+      auto_ingest: true,
+      require_confirmation: false,
+    });
     post = vi.spyOn(api, 'post').mockResolvedValue({});
     const settings = await import('../components/settings.js');
     settings.initSettings();
@@ -48,12 +53,20 @@ describe('card copy settings (finding 18)', () => {
 
   it('each setting saves the moment it changes', async () => {
     await vi.waitFor(() => expect($('btn-copy-collision').value).toBe('overwrite'));
-    change($('btn-copy-auto-ingest'), (el) => { el.checked = false; });
+    change($('btn-copy-auto-ingest'), (el) => {
+      el.checked = false;
+    });
     await vi.waitFor(() => expect(lastSaved(post)).toMatchObject({ auto_ingest: false }));
-    change($('btn-copy-require-confirm'), (el) => { el.checked = true; });
+    change($('btn-copy-require-confirm'), (el) => {
+      el.checked = true;
+    });
     await vi.waitFor(() => expect(lastSaved(post)).toMatchObject({ require_confirmation: true }));
-    expect($('btn-copy-overwrite-warn').textContent).toBe("Files with the same name already in the folder are replaced by the card's copy.");
-    change($('btn-copy-collision'), (el) => { el.value = 'skip'; });
+    expect($('btn-copy-overwrite-warn').textContent).toBe(
+      "Files with the same name already in the folder are replaced by the card's copy."
+    );
+    change($('btn-copy-collision'), (el) => {
+      el.value = 'skip';
+    });
     await vi.waitFor(() => expect(lastSaved(post)).toMatchObject({ on_collision: 'skip' }));
     expect($('btn-copy-overwrite-warn').hidden).toBe(true);
   });

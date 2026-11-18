@@ -41,7 +41,12 @@ export function loadConnectionsPane() {
   if (!adminToo) return false;
   import('./home-assistant.js').then((m) => m.loadHomeAssistantCard()).catch(() => {});
   import('../settings.js').then((m) => m.renderApiTokens && m.renderApiTokens()).catch(() => {});
-  import('../sso.js').then((m) => { m.renderSsoPanel(); m.renderLdapPanel(); }).catch(() => {});
+  import('../sso.js')
+    .then((m) => {
+      m.renderSsoPanel();
+      m.renderLdapPanel();
+    })
+    .catch(() => {});
   import('./connections.js').then((m) => m.renderRedfishCard()).catch(() => {});
   import('./snmp-card.js').then((m) => m.renderSnmpCard()).catch(() => {}); // SNMP v3, off by default
   return true;
@@ -59,8 +64,12 @@ export function loadNotificationsPane() {
 export function loadBackupExtras(doc = document) {
   if (!doc.getElementById('backup-fleet-grid')) return false;
   import('./fleet.js').then((m) => m.loadFleetCard()).catch(() => {});
-  import('../backup-verdict.js').then((m) => m.renderVerdict(doc.getElementById('backup-verdict-mount'))).catch(() => {}); // SET-21
-  import('../backup-folders.js').then((m) => m.renderFolders(doc.getElementById('backup-verdict-mount'))).catch(() => {}); // Backup 5
+  import('../backup-verdict.js')
+    .then((m) => m.renderVerdict(doc.getElementById('backup-verdict-mount')))
+    .catch(() => {}); // SET-21
+  import('../backup-folders.js')
+    .then((m) => m.renderFolders(doc.getElementById('backup-verdict-mount')))
+    .catch(() => {}); // Backup 5
   import('../restore-door.js')
     .then((m) => m.installRestoreDoor(doc.getElementById('backup-restore-mount'))) // SET-21 stage 2
     .then(() => import('../backup-needs.js'))
@@ -70,4 +79,3 @@ export function loadBackupExtras(doc = document) {
   if (add) add.onclick = () => import('../protect-nas.js').then((m) => m.openProtectGuide()).catch(() => {}); // SET-21 stage 3
   return true;
 }
-

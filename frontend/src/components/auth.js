@@ -24,7 +24,11 @@ let _clockInterval = null;
 const DEFAULT_IDLE_TIMEOUT_MS = 4 * 60 * 60 * 1000; // 4 hours default (can be set to Never / 7d in UI)
 
 export function isLcdMode() {
-  return !!(state?.isLcdDirect || (typeof window !== 'undefined' && window.location.search.includes('mode=lcd')) || (typeof document !== 'undefined' && document.body && document.body.classList.contains('lcd-direct')));
+  return !!(
+    state?.isLcdDirect ||
+    (typeof window !== 'undefined' && window.location.search.includes('mode=lcd')) ||
+    (typeof document !== 'undefined' && document.body && document.body.classList.contains('lcd-direct'))
+  );
 }
 
 export function isDesktopLocked() {
@@ -258,9 +262,10 @@ export async function renderLoginChooser(options = {}) {
     }
 
     // Render user tiles
-    chooserContainer.innerHTML = users.map((u) => {
-      const letter = (u.display_name?.[0] || u.username?.[0] || 'U').toUpperCase();
-      return `
+    chooserContainer.innerHTML = users
+      .map((u) => {
+        const letter = (u.display_name?.[0] || u.username?.[0] || 'U').toUpperCase();
+        return `
         <div class="login-user-card" data-username="${escapeHtml(u.username)}" data-display="${escapeHtml(u.display_name || u.username)}" style="cursor:pointer; background:var(--kb-glaze-4); border:1px solid var(--kb-line-10); border-radius:10px; padding:12px 14px; display:flex; align-items:center; gap:12px; transition:all 0.2s ease;">
           <div style="width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg, #0a7a70, #08695f); display:flex; align-items:center; justify-content:center; font-weight:800; color:#fff; font-size:14px; border:1px solid var(--kb-line-20);">
             ${escapeHtml(letter)}
@@ -272,7 +277,8 @@ export async function renderLoginChooser(options = {}) {
           <div style="color:var(--muted); font-size:14px;">➔</div>
         </div>
       `;
-    }).join('');
+      })
+      .join('');
 
     // Attach click handlers to user cards
     chooserContainer.querySelectorAll('.login-user-card').forEach((card) => {
@@ -308,7 +314,6 @@ export async function renderLoginChooser(options = {}) {
         setLoginMode('chooser');
       }
     }
-
   } catch (err) {
     console.warn('[LOGIN] Fallback to manual login mode:', err);
     setLoginMode('manual');
@@ -390,7 +395,7 @@ async function doLogin() {
 
   if (!loginPwd) return;
 
-  const username = _selectedUser ? _selectedUser.username : (loginUser?.value?.trim() || 'admin');
+  const username = _selectedUser ? _selectedUser.username : loginUser?.value?.trim() || 'admin';
   const password = loginPwd.value;
   const isRemembered = rememberMe ? rememberMe.checked : true;
 
@@ -404,9 +409,9 @@ async function doLogin() {
       body: JSON.stringify({
         username,
         password,
-        remember_me: isRemembered
+        remember_me: isRemembered,
       }),
-      credentials: 'include'
+      credentials: 'include',
     });
 
     const data = await res.json();
@@ -426,9 +431,10 @@ async function doLogin() {
       finishSignIn(data);
     } else {
       // The message stays on screen and is announced (role="alert") until the next attempt.
-      let msg = res.status === 401
-        ? t('login.invalid_msg', 'Wrong username or password.')
-        : (serverSaid(data) || t('login.invalid_msg', 'Wrong username or password.')); // in the reader's language where the server said how
+      let msg =
+        res.status === 401
+          ? t('login.invalid_msg', 'Wrong username or password.')
+          : serverSaid(data) || t('login.invalid_msg', 'Wrong username or password.'); // in the reader's language where the server said how
       if (res.status === 429) {
         const retry = parseInt(res.headers.get('Retry-After') || '0', 10);
         msg = t('login.too_many', 'Too many attempts. Try again in {seconds} s.', { seconds: Math.max(retry, 1) });
@@ -462,7 +468,10 @@ export function finishSignIn(data) {
   }
   ZettEventBus.emit('auth:login');
   // the setup wizard, the own-password dialog or two-step setup (SET-19)
-  setTimeout(() => afterSignIn(data, { wizard: () => openSetupWizard(null, false), mfa: (d) => promptRequiredMfa(d) }), 350);
+  setTimeout(
+    () => afterSignIn(data, { wizard: () => openSetupWizard(null, false), mfa: (d) => promptRequiredMfa(d) }),
+    350
+  );
 }
 
 /** Signs in with a passkey (RES-3): alone, or as the second step with the password step's token. */
@@ -530,7 +539,7 @@ async function submitMfaChallenge() {
   const payload = {
     mfa_token: _pendingMfaToken,
     code: isRecovery ? undefined : rawCode,
-    recovery_code: isRecovery ? rawCode : undefined
+    recovery_code: isRecovery ? rawCode : undefined,
   };
 
   if (btnSubmit) {
@@ -543,7 +552,7 @@ async function submitMfaChallenge() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
     });
 
     const data = await res.json();
@@ -577,7 +586,12 @@ async function submitMfaChallenge() {
       }
       ZettEventBus.emit('auth:login');
     } else {
-      showToast(t('toast.2fa_verification_failed', '2FA Verification Failed: {detail}', { detail: data.detail || 'Invalid code' }), 'error');
+      showToast(
+        t('toast.2fa_verification_failed', '2FA Verification Failed: {detail}', {
+          detail: data.detail || 'Invalid code',
+        }),
+        'error'
+      );
       codeInput.value = '';
       codeInput.focus();
     }
@@ -619,12 +633,14 @@ export function initLockOverlay() {
       const val = timeoutSelect.value;
       localStorage.setItem('kiboto_auto_lock_timeout_ms', val);
       resetInactivityTimer();
-      window.fetch('/api/system/client-preferences', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ auto_lock_timeout_ms: parseInt(val, 10) }),
-        credentials: 'include'
-      }).catch(() => {});
+      window
+        .fetch('/api/system/client-preferences', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ auto_lock_timeout_ms: parseInt(val, 10) }),
+          credentials: 'include',
+        })
+        .catch(() => {});
     });
   }
 
@@ -699,7 +715,7 @@ export async function unlockDesktop() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password, remember_me: true }),
-      credentials: 'include'
+      credentials: 'include',
     });
 
     const data = await res.json();

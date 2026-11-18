@@ -8,7 +8,9 @@ const src = (f) => fs.readFileSync(path.resolve(__dirname, '..', f), 'utf8');
 describe('the catalog opens in the Apps window (SET-25, Apps finding 14)', () => {
   it('Spotlight and the HTTPS guide no longer press buttons of the hidden Settings page', () => {
     expect(src('components/spotlight.js')).not.toContain('btn-view-docker-catalog');
-    expect(src('components/management.js')).not.toContain("openManagementWindow('mgmt-sec-docker', 'mgmt-pane-docker-catalog')");
+    expect(src('components/management.js')).not.toContain(
+      "openManagementWindow('mgmt-sec-docker', 'mgmt-pane-docker-catalog')"
+    );
   });
 
   it("Spotlight's App Catalog opens the Apps window on its catalog", async () => {
@@ -19,7 +21,9 @@ describe('the catalog opens in the Apps window (SET-25, Apps finding 14)', () =>
     initSpotlight();
     openSpotlight();
     filterSpotlightResults('App Catalog');
-    const item = [...document.querySelectorAll('.spotlight-result-item')].find((e) => e.textContent?.includes('App Catalog'));
+    const item = [...document.querySelectorAll('.spotlight-result-item')].find((e) =>
+      e.textContent?.includes('App Catalog')
+    );
     expect(item).toBeTruthy();
     /** @type {HTMLElement} */ (item).click();
     await vi.waitFor(() => expect(open).toHaveBeenCalledWith({ view: 'catalog' }));
@@ -32,7 +36,11 @@ describe('the catalog opens in the Apps window (SET-25, Apps finding 14)', () =>
     document.body.innerHTML = `<div id="management-modal-overlay"><div id="management-window"><div id="management-window-header"><span id="management-header-title-text"></span></div><div class="mgmt-content-pane"></div></div></div>
       <div id="modal-https-guide-overlay"><button id="modal-https-guide-close"></button><button id="btn-https-guide-apps">Apps</button></div>`;
     const { initManagement } = await import('../components/management.js');
-    try { initManagement(); } catch (_) { /* parts of the window this test doesn't build */ }
+    try {
+      initManagement();
+    } catch (_) {
+      /* parts of the window this test doesn't build */
+    }
     /** @type {HTMLElement} */ (document.getElementById('btn-https-guide-apps')).click();
     expect(open).toHaveBeenCalledWith({ view: 'catalog', search: 'reverse proxy' });
   });

@@ -29,9 +29,10 @@ export function inviteExtrasText(invite) {
 export function inviteSharesHtml(shares) {
   return shares
     .map(
-      (s) => `<label class="invite-share">${escapeHtml(s.name)}<select data-share="${escapeHtml(s.name)}">${LEVELS()
-        .map(([v, name]) => `<option value="${v}">${escapeHtml(name)}</option>`)
-        .join('')}</select></label>`,
+      (s) =>
+        `<label class="invite-share">${escapeHtml(s.name)}<select data-share="${escapeHtml(s.name)}">${LEVELS()
+          .map(([v, name]) => `<option value="${v}">${escapeHtml(name)}</option>`)
+          .join('')}</select></label>`
     )
     .join('');
 }
@@ -58,10 +59,10 @@ export function invitesHtml(invites, shares = []) {
           (i) => `<li class="invite-row${i.active ? '' : ' is-used'}">
         <span class="invite-role">${escapeHtml(names[i.role_id] || i.role_id)}</span>
         <span class="invite-meta">${escapeHtml(i.note || '')} · ${escapeHtml(t('invite.uses', '{u} of {m} used', { u: i.uses, m: i.max_uses }))} · ${escapeHtml(
-          t('invite.expires', 'until {d}', { d: formatDateTime(i.expires_at * 1000) }),
+          t('invite.expires', 'until {d}', { d: formatDateTime(i.expires_at * 1000) })
         )}${inviteExtrasText(i) ? ` · ${escapeHtml(inviteExtrasText(i))}` : ''}</span>
         ${i.active ? `<button type="button" class="btn-pill-toggle is-small is-danger" data-invite-revoke="${escapeHtml(i.id)}">${escapeHtml(t('invite.revoke', 'Revoke'))}</button>` : ''}
-      </li>`,
+      </li>`
         )
         .join('')
     : `<li class="invite-meta">${escapeHtml(t('invite.none', 'No invites yet.'))}</li>`;
@@ -83,7 +84,10 @@ export function invitesHtml(invites, shares = []) {
 export async function renderInvites(mount) {
   if (!mount) return;
   try {
-    const [{ invites }, access] = await Promise.all([api.get('/api/invites'), api.get('/api/storage/share-access').catch(() => null)]);
+    const [{ invites }, access] = await Promise.all([
+      api.get('/api/invites'),
+      api.get('/api/storage/share-access').catch(() => null),
+    ]);
     mount.innerHTML = invitesHtml(invites || [], access?.shares || []); // folders only for who manages them
   } catch (e) {
     mount.hidden = true; // not allowed to manage users
@@ -112,7 +116,8 @@ export async function renderInvites(mount) {
       box.innerHTML = `<p>${escapeHtml(t('invite.share_once', 'Send this link to them. It works once and is shown only now:'))}</p>
         <code>${escapeHtml(url)}</code>
         <button type="button" class="btn-pill-toggle is-small" data-invite-copy>${escapeHtml(t('ui.copy_url', 'Copy URL'))}</button>`;
-      box.querySelector('[data-invite-copy]').onclick = () => copyTextToClipboard(url).then(() => showToast(t('ui.copied', 'Copied'), 'info'));
+      box.querySelector('[data-invite-copy]').onclick = () =>
+        copyTextToClipboard(url).then(() => showToast(t('ui.copied', 'Copied'), 'info'));
     } catch (err) {
       showToast(err.message || String(err), 'error');
     }
@@ -121,6 +126,6 @@ export async function renderInvites(mount) {
     b.addEventListener('click', async () => {
       await api.delete(`/api/invites/${encodeURIComponent(b.dataset.inviteRevoke)}`);
       renderInvites(mount);
-    }),
+    })
   );
 }

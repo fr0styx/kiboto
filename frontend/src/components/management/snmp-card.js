@@ -10,7 +10,11 @@ import { escapeHtml } from '../../utils.js';
 export function snmpStatus(st) {
   if (!st || !st.enabled) return t('snmp.st_off', 'Off');
   if (st.error) return t('snmp.st_error', 'Not answering: {error}', { error: st.error });
-  if (st.running) return t('snmp.st_on', 'Answers SNMP v3 on UDP {port} as {user}.', { port: st.listening_port || st.port, user: st.user });
+  if (st.running)
+    return t('snmp.st_on', 'Answers SNMP v3 on UDP {port} as {user}.', {
+      port: st.listening_port || st.port,
+      user: st.user,
+    });
   return t('snmp.st_starting', 'On, starting…');
 }
 
@@ -62,7 +66,10 @@ export async function renderSnmpCard(mount = document.getElementById('conn-snmp-
   mount.innerHTML = html(st);
   const $ = (id) => /** @type {any} */ (mount.querySelector(`#${id}`));
   const err = $('snmp-error');
-  const say = (msg) => { err.textContent = msg; err.hidden = !msg; };
+  const say = (msg) => {
+    err.textContent = msg;
+    err.hidden = !msg;
+  };
   const send = async (enabled) => {
     say('');
     const auth = $('snmp-auth').value;
@@ -83,7 +90,10 @@ export async function renderSnmpCard(mount = document.getElementById('conn-snmp-
       say(e instanceof Error ? e.message : String(e));
     }
   };
-  $('snmp-form').addEventListener('submit', (e) => { e.preventDefault(); send(Boolean(st.enabled)); });
+  $('snmp-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    send(Boolean(st.enabled));
+  });
   $('snmp-toggle').addEventListener('click', () => send(!st.enabled));
   return st;
 }

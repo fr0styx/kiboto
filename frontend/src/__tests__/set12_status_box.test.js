@@ -1,6 +1,12 @@
 // SET-12: one status box with five states, an icon and a word in each row.
 import { describe, it, expect } from 'vitest';
-import { canProtect, protectionRow, statusBoxHtml, statusSaid, statusState } from '../components/management/status-box.js';
+import {
+  canProtect,
+  protectionRow,
+  statusBoxHtml,
+  statusSaid,
+  statusState,
+} from '../components/management/status-box.js';
 
 const rowText = (i) => `${i.kind} ${i.subject || ''}`.trim();
 const owner = { scopes: ['*'] };
@@ -31,7 +37,12 @@ describe('the state of the box', () => {
 
   it('says "Problem" for a critical row and "Needs a look" for a warning, in words', () => {
     const state = statusState({
-      summary: { items: [{ level: 'critical', kind: 'drive_failing', subject: 'sdb', open: 'drives' }, { level: 'warning', kind: 'backup_overdue', subject: 'Photos', open: 'nowhere' }] },
+      summary: {
+        items: [
+          { level: 'critical', kind: 'drive_failing', subject: 'sdb', open: 'drives' },
+          { level: 'warning', kind: 'backup_overdue', subject: 'Photos', open: 'nowhere' },
+        ],
+      },
       rowText,
       canOpen: (place) => place === 'drives',
     });
@@ -51,11 +62,18 @@ describe('the state of the box', () => {
   });
 
   it('counts a missing copy outside the NAS as a thing to look at, in the same list', () => {
-    const state = statusState({ summary: { ok: true, items: [] }, protection: { level: 'none', copies: 0 }, user: owner });
+    const state = statusState({
+      summary: { ok: true, items: [] },
+      protection: { level: 'none', copies: 0 },
+      user: owner,
+    });
     expect(state.level).toBe('look');
     expect(state.rows).toHaveLength(1);
     expect(statusBoxHtml(state)).toContain('data-ov-protect');
-    const good = statusState({ summary: { ok: true, items: [] }, protection: { level: 'good', copies: 1, last_good: 1793091600 } });
+    const good = statusState({
+      summary: { ok: true, items: [] },
+      protection: { level: 'good', copies: 1, last_good: 1793091600 },
+    });
     expect(good.level).toBe('fine');
     expect(statusBoxHtml(good)).toContain('1 current copy outside this NAS');
     expect(statusSaid(good)).toBe('All is well.');

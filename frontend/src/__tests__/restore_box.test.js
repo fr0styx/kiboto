@@ -40,13 +40,16 @@ describe('restore a whole box from its recovery kit (RES-7)', () => {
     const reload = vi.fn();
     expect(await waitForRestart({ fetchImpl, reload, sleep: async () => {}, tries: 10 })).toBe(true);
     expect(reload).toHaveBeenCalledTimes(1);
-    expect(await waitForRestart({ fetchImpl: async () => ({ ok: true }), reload, sleep: async () => {}, tries: 3 })).toBe(false);
+    expect(
+      await waitForRestart({ fetchImpl: async () => ({ ok: true }), reload, sleep: async () => {}, tries: 3 })
+    ).toBe(false);
   });
 
   it('connects a pasted kit, brings back the settings and waits for the restart', async () => {
     const done = vi.fn();
     const dlg = await openRestoreBox(null, done);
-    /** @type {HTMLTextAreaElement} */ (dlg.querySelector('#restorebox-kit')).value = 'Kiboto off-site backup: recovery kit';
+    /** @type {HTMLTextAreaElement} */ (dlg.querySelector('#restorebox-kit')).value =
+      'Kiboto off-site backup: recovery kit';
     api.post.mockResolvedValueOnce({ repo: REPO, versions: VERSIONS, settings: COPIES });
     click(dlg.querySelector('[data-rb="connect"]'));
     await tick();

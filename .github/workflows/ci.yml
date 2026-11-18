@@ -233,6 +233,11 @@ jobs:
       - name: ESLint (OPS-24)
         run: npm run lint:js
 
+      # oxfmt (pinned in package.json, settings in .oxfmtrc.json): the frontend's JavaScript keeps
+      # one layout; templates, strings and markup are never touched (embeddedLanguageFormatting off)
+      - name: Formatting (oxfmt)
+        run: npm run format:check
+
   # Starts at once, beside the unit tests, in two halves that run side by side (CI speed-up,
   # 12 Nov 2026). Nothing is published until every test job has passed (publish, below).
   e2e-integration:

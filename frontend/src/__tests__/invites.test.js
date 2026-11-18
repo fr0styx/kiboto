@@ -16,6 +16,10 @@ describe('invite links (Batch 6)', () => {
     ]);
     expect(document.querySelectorAll('[data-invite-revoke]').length).toBe(1);
     expect(document.querySelector('.invite-row.is-used')).not.toBeNull();
-    expect([...document.querySelectorAll('select[name=role_id] option')].map((o) => o.value)).toEqual(['share_user', 'kid', 'guest']);
+    expect([...document.querySelectorAll('select[name=role_id] option')].map((o) => o.value)).toEqual([
+      'share_user',
+      'kid',
+      'guest',
+    ]);
   });
 });

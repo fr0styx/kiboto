@@ -33,21 +33,33 @@ describe('snapshots and backups (NUX-20)', () => {
 
   it('lists snapshots by type and asks before going back or deleting', async () => {
     api.get.mockResolvedValue([
-        { name: 'before-update', date: '2026-11-01 10:00', size_formatted: '1 GB', is_live: true },
-        { name: 'clean', created_at: '2026-10-01', is_live: false },
-      ]);
+      { name: 'before-update', date: '2026-11-01 10:00', size_formatted: '1 GB', is_live: true },
+      { name: 'clean', created_at: '2026-10-01', is_live: false },
+    ]);
     await openVmSnapshotsModal('vm1', VM);
     await flush();
     const modal = document.getElementById('modal-vm-snapshots');
     const text = modal.textContent;
-    for (const w of ['Snapshots (QCOW2)', 'Backups (.tar.gz)', 'Snapshots of this VM', 'New snapshot', 'Taken', 'Type', 'Memory and disk', 'Disk only', 'Full VM backups']) {
+    for (const w of [
+      'Snapshots (QCOW2)',
+      'Backups (.tar.gz)',
+      'Snapshots of this VM',
+      'New snapshot',
+      'Taken',
+      'Type',
+      'Memory and disk',
+      'Disk only',
+      'Full VM backups',
+    ]) {
       expect(text).toContain(w);
     }
     expect(modal.querySelector('#btn-cancel-take-snapshot').textContent).toBe('Cancel');
     expect(modal.querySelector('#btn-submit-take-snapshot').textContent).toBe('Save Snapshot');
 
     modal.querySelector('.btn-snap-revert').click();
-    expect(showConfirmToast.mock.calls.at(-1)[0]).toBe('Go back to the snapshot “before-update” of files? Changes made since then are lost.');
+    expect(showConfirmToast.mock.calls.at(-1)[0]).toBe(
+      'Go back to the snapshot “before-update” of files? Changes made since then are lost.'
+    );
     modal.querySelector('.btn-snap-del').click();
     expect(showConfirmToast.mock.calls.at(-1)[0]).toBe('Delete the snapshot “before-update”? This can’t be undone.');
   });
@@ -56,11 +68,15 @@ describe('snapshots and backups (NUX-20)', () => {
     api.get.mockRejectedValueOnce(new Error('disk busy'));
     await openVmSnapshotsModal('vm1', VM);
     await flush();
-    expect(document.getElementById('vm-snapshots-container').textContent).toBe('Could not load the snapshots: disk busy');
+    expect(document.getElementById('vm-snapshots-container').textContent).toBe(
+      'Could not load the snapshots: disk busy'
+    );
     api.get.mockRejectedValueOnce({ detail: 'no qemu-img' });
     await openVmSnapshotsModal('vm1', VM);
     await flush();
-    expect(document.getElementById('vm-snapshots-container').textContent).toBe('Could not load the snapshots: no qemu-img');
+    expect(document.getElementById('vm-snapshots-container').textContent).toBe(
+      'Could not load the snapshots: no qemu-img'
+    );
   });
 
   it('lists backups, says when there are none, and asks before restoring or deleting', async () => {
@@ -72,9 +88,13 @@ describe('snapshots and backups (NUX-20)', () => {
     api.get.mockResolvedValueOnce({ backups: [] });
     modal.querySelector('#tab-btn-backups').click();
     await flush();
-    expect(modal.querySelector('#vm-backups-container').textContent.trim()).toContain('No backups of this VM yet. “Back up now” saves');
+    expect(modal.querySelector('#vm-backups-container').textContent.trim()).toContain(
+      'No backups of this VM yet. “Back up now” saves'
+    );
 
-    api.get.mockResolvedValueOnce({ backups: [{ id: 'bk-1', filename: 'files.tar.gz', created_at_iso: '2026-11-02', size_formatted: '3 GB' }] });
+    api.get.mockResolvedValueOnce({
+      backups: [{ id: 'bk-1', filename: 'files.tar.gz', created_at_iso: '2026-11-02', size_formatted: '3 GB' }],
+    });
     modal.querySelector('#tab-btn-backups').click();
     await flush();
     const box = modal.querySelector('#vm-backups-container');
@@ -83,7 +103,9 @@ describe('snapshots and backups (NUX-20)', () => {
     expect(box.querySelector('.btn-bk-restore').textContent.trim()).toBe('Restore');
     expect(box.querySelector('.btn-bk-del').textContent.trim()).toBe('Delete');
     box.querySelector('.btn-bk-restore').click();
-    expect(showConfirmToast.mock.calls.at(-1)[0]).toBe('Restore files from the backup “bk-1”? Its disks and settings are replaced by the backup’s.');
+    expect(showConfirmToast.mock.calls.at(-1)[0]).toBe(
+      'Restore files from the backup “bk-1”? Its disks and settings are replaced by the backup’s.'
+    );
     box.querySelector('.btn-bk-del').click();
     expect(showConfirmToast.mock.calls.at(-1)[0]).toBe('Delete the backup “bk-1”? This can’t be undone.');
 
@@ -119,7 +141,17 @@ describe('ISO library (NUX-20)', () => {
     await openIsoManagerModal('local');
     const modal = document.getElementById('modal-iso-manager');
     const text = modal.textContent;
-    for (const w of ['ISO library', 'Download catalog', 'On this NAS (/mnt/user/isos)', 'Drag ISO files here to upload them', 'Saved to:', '.iso and .img files up to 50 GB', 'Choose an ISO file…', 'Images in /mnt/user/isos', 'Refresh']) {
+    for (const w of [
+      'ISO library',
+      'Download catalog',
+      'On this NAS (/mnt/user/isos)',
+      'Drag ISO files here to upload them',
+      'Saved to:',
+      '.iso and .img files up to 50 GB',
+      'Choose an ISO file…',
+      'Images in /mnt/user/isos',
+      'Refresh',
+    ]) {
       expect(text).toContain(w);
     }
     expect(modal.querySelector('#local-iso-list').textContent).toBe('No ISO images in /mnt/user/isos yet.');
@@ -141,7 +173,9 @@ describe('ISO library (NUX-20)', () => {
     expect(card.querySelector('.btn-dl-catalog').textContent.trim()).toBe('✓ Ready');
     expect(modal.querySelector('.btn-boot-iso').textContent).toBe('▶ Create VM');
     modal.querySelector('.btn-delete-iso').click();
-    expect(showConfirmToast.mock.calls.at(-1)[1]).toBe(`Delete “${first.filename}” from storage? This can’t be undone.`);
+    expect(showConfirmToast.mock.calls.at(-1)[1]).toBe(
+      `Delete “${first.filename}” from storage? This can’t be undone.`
+    );
   });
 
   it('shows a download’s progress and why it failed', async () => {

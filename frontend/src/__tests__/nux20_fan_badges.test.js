@@ -7,7 +7,9 @@ const FC = { zone1_temp: 35, zone1_pwm: 0, zone2_temp: 36, zone2_pwm: 90, cpu_te
 
 describe('fan badges (NUX-20)', () => {
   beforeEach(() => {
-    document.body.innerHTML = ['zp-z1-pwm', 'zp-z2-pwm', 'zp-cpu-pwm', 'hysteresis-badge', 'fan-status-badge'].map((id) => `<span id="${id}"></span>`).join('');
+    document.body.innerHTML = ['zp-z1-pwm', 'zp-z2-pwm', 'zp-cpu-pwm', 'hysteresis-badge', 'fan-status-badge']
+      .map((id) => `<span id="${id}"></span>`)
+      .join('');
   });
 
   it('names passive zones, BIOS control, holds and the driver', () => {
@@ -17,7 +19,9 @@ describe('fan badges (NUX-20)', () => {
     expect(text('zp-cpu-pwm')).toBe('BIOS Auto');
     expect(text('hysteresis-badge')).toBe('HOLD: ACTIVE (30s)');
     expect(text('fan-status-badge')).toBe('MMIO FALLBACK');
-    updateFanCurveWorkstation({ fan_control: { ...FC, ctrl_cpu_fan: true, cpu_hold_remaining: 12, driver_mode: 'hwmon' } });
+    updateFanCurveWorkstation({
+      fan_control: { ...FC, ctrl_cpu_fan: true, cpu_hold_remaining: 12, driver_mode: 'hwmon' },
+    });
     expect(text('zp-cpu-pwm')).toBe('PWM: 100');
     expect(text('hysteresis-badge')).toBe('CPU HOLD (12s)');
     expect(text('fan-status-badge')).toBe('KERNEL HWMON');

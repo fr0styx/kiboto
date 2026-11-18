@@ -13,14 +13,25 @@ describe('small panels (NUX-20)', () => {
 
   it('titles every system shortcut', () => {
     const titles = SYSTEM_SHORTCUTS.map((s) => s.title);
-    for (const w of ['Apps & Containers', 'Storage & Chassis', 'Network & Virtual Switch', 'Activity & Telemetry', 'Hardware & Acoustic Profiles', 'Power', 'System & Security', 'Notifications & Alerts']) {
+    for (const w of [
+      'Apps & Containers',
+      'Storage & Chassis',
+      'Network & Virtual Switch',
+      'Activity & Telemetry',
+      'Hardware & Acoustic Profiles',
+      'Power',
+      'System & Security',
+      'Notifications & Alerts',
+    ]) {
       expect(titles).toContain(w);
     }
   });
 
   it('says when no disks were found or the list could not load', async () => {
     document.body.innerHTML = '<table><tbody id="mgmt-disks-inventory-tbody"></tbody></table>';
-    const req = vi.spyOn(api, 'request').mockResolvedValue({ ok: true, json: async () => ({ bays: [], nvme_slots: [] }) });
+    const req = vi
+      .spyOn(api, 'request')
+      .mockResolvedValue({ ok: true, json: async () => ({ bays: [], nvme_slots: [] }) });
     await fetchAndRenderDisksInventory();
     expect(byId('mgmt-disks-inventory-tbody').textContent).toBe('No physical disks discovered.');
     req.mockRejectedValue(new Error('down'));

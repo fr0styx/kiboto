@@ -23,13 +23,23 @@ describe('apps from anywhere (RES-6)', () => {
     expect(publicAppsHtml({ ...BASE, tailscale: false })).toContain('Needs Tailscale');
     expect(publicAppsHtml(BASE)).toContain('No app is on the internet');
     expect(publicAppsHtml({ ...BASE, apps: [] })).toContain('No running app');
-    const pub = { name: 'immich_server', funnel_port: 10000, url: 'https://a.ts.net:10000', live: true, controls_server: true };
+    const pub = {
+      name: 'immich_server',
+      funnel_port: 10000,
+      url: 'https://a.ts.net:10000',
+      live: true,
+      controls_server: true,
+    };
     const html = publicAppsHtml({ ...BASE, published: [pub], free_ports: [] });
     expect(html).toContain('https://a.ts.net:10000');
     expect(html).toContain('controls the server');
     expect(html).toContain('Every port Funnel can use');
-    expect(publicAppsHtml({ ...BASE, published: [{ ...pub, live: false, controls_server: false }] })).toContain('Starting');
-    expect(publicAppsHtml({ ...BASE, published: [{ ...pub, approval_url: 'https://login.tailscale.com/f/funnel' }] })).toContain('Allow Funnel');
+    expect(publicAppsHtml({ ...BASE, published: [{ ...pub, live: false, controls_server: false }] })).toContain(
+      'Starting'
+    );
+    expect(
+      publicAppsHtml({ ...BASE, published: [{ ...pub, approval_url: 'https://login.tailscale.com/f/funnel' }] })
+    ).toContain('Allow Funnel');
   });
 
   it('warns for apps that control the server, publishes and takes off', async () => {
@@ -43,11 +53,19 @@ describe('apps from anywhere (RES-6)', () => {
     select.value = 'dozzle|9999';
     select.dispatchEvent(new Event('change'));
     expect(warn.hidden).toBe(false);
-    const published = { ...BASE, published: [{ name: 'dozzle', funnel_port: 10000, url: 'https://a.ts.net:10000', live: true }], free_ports: [] };
+    const published = {
+      ...BASE,
+      published: [{ name: 'dozzle', funnel_port: 10000, url: 'https://a.ts.net:10000', live: true }],
+      free_ports: [],
+    };
     api.post.mockResolvedValue(published);
     card.querySelector('form').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
     await tick();
-    expect(api.post).toHaveBeenCalledWith('/api/network/public-apps', { name: 'dozzle', host_port: 9999, funnel_port: 10000 });
+    expect(api.post).toHaveBeenCalledWith('/api/network/public-apps', {
+      name: 'dozzle',
+      host_port: 9999,
+      funnel_port: 10000,
+    });
     api.delete.mockResolvedValue(BASE);
     card.querySelector('[data-pa-stop]').dispatchEvent(new MouseEvent('click', { bubbles: true }));
     await tick();

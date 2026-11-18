@@ -34,7 +34,18 @@ describe('dangerous questions are red in every language (SET-00)', () => {
   });
 
   it('knows destroy and forget in the five languages', () => {
-    for (const title of ['Destroy Pool', 'Pool zerstören', 'Détruire le pool', 'Destruir el pool', '销毁存储池', 'Forget', 'Vergessen', 'Oublier', 'Olvidar', '忘记']) {
+    for (const title of [
+      'Destroy Pool',
+      'Pool zerstören',
+      'Détruire le pool',
+      'Destruir el pool',
+      '销毁存储池',
+      'Forget',
+      'Vergessen',
+      'Oublier',
+      'Olvidar',
+      '忘记',
+    ]) {
       expect(confirmButtonFor(title, '').destructive, title).toBe(true);
     }
     expect(confirmButtonFor('Restart Samba', '').destructive).toBe(false);
@@ -42,7 +53,11 @@ describe('dangerous questions are red in every language (SET-00)', () => {
 
   it('marks the questions that lose or overwrite something in code, not by their words', () => {
     const marked = {
-      'components/chassis-visualizer.js': ['chassis.destroy_pool', 'chassis.force_eject_title', 'chassis.disks_have_data'],
+      'components/chassis-visualizer.js': [
+        'chassis.destroy_pool',
+        'chassis.force_eject_title',
+        'chassis.disks_have_data',
+      ],
       'components/management/backup.js': ['backup.app_restore_title'],
       'components/two-way-sync.js': ['sync2.forget_confirm'],
       'components/offsite-backup.js': ['offsite.forget_confirm'],
@@ -51,9 +66,11 @@ describe('dangerous questions are red in every language (SET-00)', () => {
     for (const [file, keys] of Object.entries(marked)) {
       const code = src(file);
       for (const key of keys) {
-        const at = code.indexOf(`t('${key}'`);
+        // formatted code may break the lines between showDangerConfirm( and t( : fold the spacing first
+        const flat = code.replace(/\(\s+/g, '(').replace(/\s+/g, ' ');
+        const at = flat.indexOf(`t('${key}'`);
         expect(at, `${file}: ${key}`).toBeGreaterThan(-1);
-        expect(code.slice(at - 60, at), `${file}: ${key}`).toContain('showDangerConfirm(');
+        expect(flat.slice(at - 60, at), `${file}: ${key}`).toContain('showDangerConfirm(');
       }
     }
   });

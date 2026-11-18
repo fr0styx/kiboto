@@ -1,6 +1,10 @@
 import { describe, it, expect, vi } from 'vitest';
 
-vi.mock('../api.js', () => ({ api: { get: vi.fn(), post: vi.fn() }, auth: { getToken: vi.fn() }, ApiError: class extends Error {} }));
+vi.mock('../api.js', () => ({
+  api: { get: vi.fn(), post: vi.fn() },
+  auth: { getToken: vi.fn() },
+  ApiError: class extends Error {},
+}));
 vi.mock('../toast.js', () => ({ showToast: vi.fn() }));
 
 import { api } from '../api.js';

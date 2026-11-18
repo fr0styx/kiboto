@@ -1,8 +1,15 @@
 /** SET-06: the recovery-kit window, the app-backup table and the snapshot schedule form. */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-vi.mock('../api.js', () => ({ api: { get: vi.fn(), post: vi.fn(), put: vi.fn(), delete: vi.fn(), downloadBlob: vi.fn() } }));
-vi.mock('../toast.js', () => ({ showToast: vi.fn(), showConfirmToast: vi.fn(), showDangerConfirm: vi.fn(), showPromptToast: vi.fn() }));
+vi.mock('../api.js', () => ({
+  api: { get: vi.fn(), post: vi.fn(), put: vi.fn(), delete: vi.fn(), downloadBlob: vi.fn() },
+}));
+vi.mock('../toast.js', () => ({
+  showToast: vi.fn(),
+  showConfirmToast: vi.fn(),
+  showDangerConfirm: vi.fn(),
+  showPromptToast: vi.fn(),
+}));
 const { api } = await import('../api.js');
 const toast = await import('../toast.js');
 const { offerRecoveryKit } = await import('../components/offsite-backup.js');
@@ -68,7 +75,20 @@ describe('the app-backup table (SET-06)', () => {
   });
 
   it('a virtual machine backup has its name too', async () => {
-    api.get.mockResolvedValueOnce({ backups: [{ id: 'vm_win11_1', type: 'vm', app_name: 'win11', vm_name: 'Windows 11', filename: 'vm_win11_1.tar.gz', size_formatted: '40 GB', created_at: 1791653600, reason: 'on_demand' }] });
+    api.get.mockResolvedValueOnce({
+      backups: [
+        {
+          id: 'vm_win11_1',
+          type: 'vm',
+          app_name: 'win11',
+          vm_name: 'Windows 11',
+          filename: 'vm_win11_1.tar.gz',
+          size_formatted: '40 GB',
+          created_at: 1791653600,
+          reason: 'on_demand',
+        },
+      ],
+    });
     const mount = document.createElement('div');
     await fetchAndRenderAppBackups(mount);
     expect(mount.textContent).toContain('Windows 11');
@@ -93,7 +113,9 @@ describe('the snapshot schedule form (SET-06)', () => {
     const html = schedulesHtml(schedules, ['photos', 'docs']);
     expect(html).toContain('keep 24');
     expect(html).toContain('plus one a day for 30 days');
-    expect(schedulesHtml([{ share: 'docs', every: 'daily', keep: 14, keep_daily: 0 }], ['docs'])).not.toContain('plus one a day');
+    expect(schedulesHtml([{ share: 'docs', every: 'daily', keep: 14, keep_daily: 0 }], ['docs'])).not.toContain(
+      'plus one a day'
+    );
   });
 
   it('the form shows the chosen share’s schedule, and the defaults for a share without one', () => {
@@ -101,10 +123,20 @@ describe('the snapshot schedule form (SET-06)', () => {
     const form = document.querySelector('[data-snap-form]');
     const value = (name) => form.elements.namedItem(name).value;
     fillScheduleForm(form, schedules);
-    expect([value('every'), value('keep'), value('keep_daily'), value('immutable_days')]).toEqual(['hourly', '24', '30', '7']);
+    expect([value('every'), value('keep'), value('keep_daily'), value('immutable_days')]).toEqual([
+      'hourly',
+      '24',
+      '30',
+      '7',
+    ]);
     form.elements.namedItem('share').value = 'docs';
     fillScheduleForm(form, schedules);
-    expect([value('every'), value('keep'), value('keep_daily'), value('immutable_days')]).toEqual(['daily', '14', '0', '0']);
+    expect([value('every'), value('keep'), value('keep_daily'), value('immutable_days')]).toEqual([
+      'daily',
+      '14',
+      '0',
+      '0',
+    ]);
     fillScheduleForm(null, schedules); // no form on screen: nothing to do
   });
 });

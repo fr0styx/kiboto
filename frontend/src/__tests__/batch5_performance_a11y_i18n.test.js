@@ -77,7 +77,7 @@ describe('Batch 5: Performance, WAI-ARIA, Keyboard Ergonomics & i18n Verificatio
     fm.list = win.querySelector('.fm-list');
     fm.fileList = [
       { name: 'document.pdf', path: '/mnt/user/document.pdf', is_dir: false, size: 2048 },
-      { name: 'photos', path: '/mnt/user/photos', is_dir: true, size: 4096 }
+      { name: 'photos', path: '/mnt/user/photos', is_dir: true, size: 4096 },
     ];
 
     // Grid / Icon view

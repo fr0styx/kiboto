@@ -46,14 +46,19 @@ export const canStart = (c) => !canStop(c) && conditionOf(c) !== 'removing';
 function reasonOf(c, condition) {
   if (condition === 'unhealthy') return t('appst.why_unhealthy', 'It runs, but its own health check fails.');
   if (condition === 'restarting') {
-    return t('appst.why_restarting', 'It stops and is started again, {count, plural, one {# time} other {# times}} so far.', { count: c.restart_count || 1 });
+    return t(
+      'appst.why_restarting',
+      'It stops and is started again, {count, plural, one {# time} other {# times}} so far.',
+      { count: c.restart_count || 1 }
+    );
   }
   if (condition === 'crashed' || condition === 'dead') {
     if (c.reason === 'out_of_memory') return t('appst.why_memory', 'It was ended for using more memory than it may.');
     if (c.exit_code != null) return t('appst.why_exit', 'It ended by itself with error {code}.', { code: c.exit_code });
     return t('appst.why_ended', 'It ended without anyone stopping it.');
   }
-  if (condition === 'stopped' && c.reason === 'stopped_outside') return t('appst.why_outside', 'It was stopped outside Kiboto.');
+  if (condition === 'stopped' && c.reason === 'stopped_outside')
+    return t('appst.why_outside', 'It was stopped outside Kiboto.');
   return '';
 }
 
@@ -68,7 +73,11 @@ export function conditionView(c) {
  *  docker_state; `failed` says that the list itself could not be read. */
 export function appsSummary(list, docker = null, failed = '') {
   const apps = Array.isArray(list) ? list : [];
-  if (failed) return { look: 'crit', text: t('appst.sum_failed', 'The list of apps could not be read: {error}', { error: failed }) };
+  if (failed)
+    return {
+      look: 'crit',
+      text: t('appst.sum_failed', 'The list of apps could not be read: {error}', { error: failed }),
+    };
   if (docker && docker.available === false) {
     return { look: 'muted', text: t('appst.sum_no_docker', 'Apps cannot run on this server: Docker was not found.') };
   }
@@ -76,28 +85,76 @@ export function appsSummary(list, docker = null, failed = '') {
     const time = docker.as_of ? formatTime(docker.as_of, undefined, '') : '';
     return {
       look: 'crit',
-      text: docker.stale && time
-        ? t('appst.sum_stale', 'Docker is not answering. This list is from {time} and may be out of date.', { time })
-        : t('appst.sum_silent', 'Docker is not answering, so the apps cannot be listed right now.'),
+      text:
+        docker.stale && time
+          ? t('appst.sum_stale', 'Docker is not answering. This list is from {time} and may be out of date.', { time })
+          : t('appst.sum_silent', 'Docker is not answering, so the apps cannot be listed right now.'),
     };
   }
   if (!apps.length) return { look: 'muted', text: t('appst.sum_none', 'No apps yet.') };
   const ended = apps.filter((c) => ['crashed', 'dead'].includes(conditionOf(c))).length;
-  if (ended) return { look: 'crit', text: t('appst.sum_ended', '{count, plural, one {# app stopped unexpectedly.} other {# apps stopped unexpectedly.}}', { count: ended }) };
+  if (ended)
+    return {
+      look: 'crit',
+      text: t(
+        'appst.sum_ended',
+        '{count, plural, one {# app stopped unexpectedly.} other {# apps stopped unexpectedly.}}',
+        { count: ended }
+      ),
+    };
   const look = apps.filter(needsLook).length;
-  if (look) return { look: 'warn', text: t('appst.sum_look', '{count, plural, one {# app needs a look.} other {# apps need a look.}}', { count: look }) };
+  if (look)
+    return {
+      look: 'warn',
+      text: t('appst.sum_look', '{count, plural, one {# app needs a look.} other {# apps need a look.}}', {
+        count: look,
+      }),
+    };
   const running = apps.filter((c) => UP.includes(conditionOf(c))).length;
-  if (running === apps.length) return { look: 'ok', text: t('appst.sum_all', '{count, plural, one {The app is running.} other {All # apps are running.}}', { count: running }) };
-  return { look: 'ok', text: t('appst.sum_some', '{running} of {total, plural, one {# app} other {# apps}} are running; the others are stopped.', { running, total: apps.length }) };
+  if (running === apps.length)
+    return {
+      look: 'ok',
+      text: t('appst.sum_all', '{count, plural, one {The app is running.} other {All # apps are running.}}', {
+        count: running,
+      }),
+    };
+  return {
+    look: 'ok',
+    text: t(
+      'appst.sum_some',
+      '{running} of {total, plural, one {# app} other {# apps}} are running; the others are stopped.',
+      { running, total: apps.length }
+    ),
+  };
 }
 
 // what an action on one app says: [while it runs, when it worked, when it failed]
 const SAID = {
-  start: [['appact.start_doing', 'Starting {name}…'], ['appact.start_done', '{name} is running.'], ['appact.start_failed', '{name} could not be started: {error}']],
-  stop: [['appact.stop_doing', 'Stopping {name}…'], ['appact.stop_done', '{name} is stopped.'], ['appact.stop_failed', '{name} could not be stopped: {error}']],
-  restart: [['appact.restart_doing', 'Restarting {name}…'], ['appact.restart_done', '{name} was restarted.'], ['appact.restart_failed', '{name} could not be restarted: {error}']],
-  pause: [['appact.pause_doing', 'Pausing {name}…'], ['appact.pause_done', '{name} is paused.'], ['appact.pause_failed', '{name} could not be paused: {error}']],
-  unpause: [['appact.resume_doing', 'Resuming {name}…'], ['appact.resume_done', '{name} runs again.'], ['appact.resume_failed', '{name} could not be resumed: {error}']],
+  start: [
+    ['appact.start_doing', 'Starting {name}…'],
+    ['appact.start_done', '{name} is running.'],
+    ['appact.start_failed', '{name} could not be started: {error}'],
+  ],
+  stop: [
+    ['appact.stop_doing', 'Stopping {name}…'],
+    ['appact.stop_done', '{name} is stopped.'],
+    ['appact.stop_failed', '{name} could not be stopped: {error}'],
+  ],
+  restart: [
+    ['appact.restart_doing', 'Restarting {name}…'],
+    ['appact.restart_done', '{name} was restarted.'],
+    ['appact.restart_failed', '{name} could not be restarted: {error}'],
+  ],
+  pause: [
+    ['appact.pause_doing', 'Pausing {name}…'],
+    ['appact.pause_done', '{name} is paused.'],
+    ['appact.pause_failed', '{name} could not be paused: {error}'],
+  ],
+  unpause: [
+    ['appact.resume_doing', 'Resuming {name}…'],
+    ['appact.resume_done', '{name} runs again.'],
+    ['appact.resume_failed', '{name} could not be resumed: {error}'],
+  ],
 };
 
 /** The message for an action on an app. The raw action word was pasted into every language:
@@ -110,11 +167,26 @@ export function actionSaid(action, phase, name, error = '') {
 
 // the same for a selection of apps
 const BULK = {
-  start: [['appbulk.start_doing', 'Starting {count, plural, one {# app} other {# apps}}…'], ['appbulk.start_done', '{successful} of {total} started.']],
-  stop: [['appbulk.stop_doing', 'Stopping {count, plural, one {# app} other {# apps}}…'], ['appbulk.stop_done', '{successful} of {total} stopped.']],
-  restart: [['appbulk.restart_doing', 'Restarting {count, plural, one {# app} other {# apps}}…'], ['appbulk.restart_done', '{successful} of {total} restarted.']],
-  pause: [['appbulk.pause_doing', 'Pausing {count, plural, one {# app} other {# apps}}…'], ['appbulk.pause_done', '{successful} of {total} paused.']],
-  unpause: [['appbulk.resume_doing', 'Resuming {count, plural, one {# app} other {# apps}}…'], ['appbulk.resume_done', '{successful} of {total} resumed.']],
+  start: [
+    ['appbulk.start_doing', 'Starting {count, plural, one {# app} other {# apps}}…'],
+    ['appbulk.start_done', '{successful} of {total} started.'],
+  ],
+  stop: [
+    ['appbulk.stop_doing', 'Stopping {count, plural, one {# app} other {# apps}}…'],
+    ['appbulk.stop_done', '{successful} of {total} stopped.'],
+  ],
+  restart: [
+    ['appbulk.restart_doing', 'Restarting {count, plural, one {# app} other {# apps}}…'],
+    ['appbulk.restart_done', '{successful} of {total} restarted.'],
+  ],
+  pause: [
+    ['appbulk.pause_doing', 'Pausing {count, plural, one {# app} other {# apps}}…'],
+    ['appbulk.pause_done', '{successful} of {total} paused.'],
+  ],
+  unpause: [
+    ['appbulk.resume_doing', 'Resuming {count, plural, one {# app} other {# apps}}…'],
+    ['appbulk.resume_done', '{successful} of {total} resumed.'],
+  ],
 };
 
 /** The message for an action on several apps: 'Executing bulk stop on 3 containers...' pasted the
@@ -127,9 +199,21 @@ export function bulkSaid(action, phase, values = {}) {
 
 // and for the apps of one stack
 const STACK = {
-  start: [['stkact.start_doing', 'Starting the apps of this stack…'], ['stkact.start_done', 'The apps of this stack are running.'], ['stkact.start_failed', 'The apps of this stack could not be started']],
-  stop: [['stkact.stop_doing', 'Stopping the apps of this stack…'], ['stkact.stop_done', 'The apps of this stack are stopped.'], ['stkact.stop_failed', 'The apps of this stack could not be stopped']],
-  restart: [['stkact.restart_doing', 'Restarting the apps of this stack…'], ['stkact.restart_done', 'The apps of this stack were restarted.'], ['stkact.restart_failed', 'The apps of this stack could not be restarted']],
+  start: [
+    ['stkact.start_doing', 'Starting the apps of this stack…'],
+    ['stkact.start_done', 'The apps of this stack are running.'],
+    ['stkact.start_failed', 'The apps of this stack could not be started'],
+  ],
+  stop: [
+    ['stkact.stop_doing', 'Stopping the apps of this stack…'],
+    ['stkact.stop_done', 'The apps of this stack are stopped.'],
+    ['stkact.stop_failed', 'The apps of this stack could not be stopped'],
+  ],
+  restart: [
+    ['stkact.restart_doing', 'Restarting the apps of this stack…'],
+    ['stkact.restart_done', 'The apps of this stack were restarted.'],
+    ['stkact.restart_failed', 'The apps of this stack could not be restarted'],
+  ],
 };
 
 /** The message for an action on a stack: 'Stack action \'redeploy\' completed!' and '“stop”

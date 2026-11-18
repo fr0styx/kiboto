@@ -37,7 +37,11 @@ describe('B11 (AI-26): Ask Kib and AI search per role', () => {
 
   it('the log says what kind of request it was', () => {
     const div = document.createElement('div');
-    div.innerHTML = String(logHtml([{ ts: 1700000000, username: 'lea', role: 'kid', kind: 'search', model: '', web: false, outcome: 'refused' }]));
+    div.innerHTML = String(
+      logHtml([
+        { ts: 1700000000, username: 'lea', role: 'kid', kind: 'search', model: '', web: false, outcome: 'refused' },
+      ])
+    );
     expect(div.textContent).toContain('Search');
   });
 });

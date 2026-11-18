@@ -99,7 +99,8 @@ export async function triggerLocateDisk(devName, targetElement = null) {
 /** A drive's stored Drive Health verdict as Drive Health words it, with its look; null without one. */
 export function verdictWord(d) {
   if (!d || !d.verdict || !d.verdict_label_key) return null;
-  const fallback = { now: 'Needs attention now', soon: 'Needs attention', watch: 'Keep an eye on it', ok: 'Healthy' }[d.verdict] || '';
+  const fallback =
+    { now: 'Needs attention now', soon: 'Needs attention', watch: 'Keep an eye on it', ok: 'Healthy' }[d.verdict] || '';
   const look = { now: 'bad', soon: 'warn', watch: 'warn', ok: 'ok' }[d.verdict] || 'muted';
   return { word: t(`dh.label.${d.verdict_label_key}`, fallback), look };
 }
@@ -138,21 +139,55 @@ export function getThermalLevel(tempC, isStandby = false, isNvme = false) {
       color: 'var(--muted, #6c8084)',
       glow: 'rgba(108, 128, 132, 0.3)',
       text: isStandby ? t('chassis.standby', 'Asleep') : t('chassis.unknown', 'Not known'),
-      toString() { return this.cls; }
+      toString() {
+        return this.cls;
+      },
     };
   }
   // one rule for every place that colours a temperature (temp-rule.js): it was 46 and 53 °C here
   const level = tempLevel(tempC, isNvme);
   if (level === 'hot') {
-    return { cls: 'crit', color: 'var(--crit, #f0553b)', glow: 'rgba(240, 85, 59, 0.45)', text: `${tempC}°C`, toString() { return this.cls; } };
+    return {
+      cls: 'crit',
+      color: 'var(--crit, #f0553b)',
+      glow: 'rgba(240, 85, 59, 0.45)',
+      text: `${tempC}°C`,
+      toString() {
+        return this.cls;
+      },
+    };
   }
   if (level === 'warm') {
-    return { cls: 'warn', color: 'var(--warn, #f5b731)', glow: 'rgba(245, 183, 49, 0.45)', text: `${tempC}°C`, toString() { return this.cls; } };
+    return {
+      cls: 'warn',
+      color: 'var(--warn, #f5b731)',
+      glow: 'rgba(245, 183, 49, 0.45)',
+      text: `${tempC}°C`,
+      toString() {
+        return this.cls;
+      },
+    };
   }
   if (tempC >= 35) {
-    return { cls: 'ok', color: 'var(--ok, #3bf58b)', glow: 'rgba(59, 245, 139, 0.35)', text: `${tempC}°C`, toString() { return this.cls; } };
+    return {
+      cls: 'ok',
+      color: 'var(--ok, #3bf58b)',
+      glow: 'rgba(59, 245, 139, 0.35)',
+      text: `${tempC}°C`,
+      toString() {
+        return this.cls;
+      },
+    };
   }
-  return { cls: 'cool', color: 'var(--brand, #4fd8c4)', glow: 'rgba(79, 216, 196, 0.35)', text: `${tempC}°C`, toString() { return this.cls; } };
+  return {
+    cls: 'cool',
+    color: 'var(--brand, #4fd8c4)',
+    glow: 'rgba(79, 216, 196, 0.35)',
+    text: `${tempC}°C`,
+    toString() {
+      return this.cls;
+    },
+  };
 }
 
 /**
@@ -174,7 +209,10 @@ export function renderChassisTwin(container, disks = [], options = {}) {
   if (isBayConfig) {
     profile = cfg.profile || 'auto';
     totalBays = cfg.total_bays || (cfg.bays ? cfg.bays.length : 4);
-    chassisModel = cfg.chassis_model || options.model || (totalBays <= 2 ? 'COMPACT DUAL' : totalBays <= 6 ? 'DESKTOP TOWER' : 'ENTERPRISE RACK');
+    chassisModel =
+      cfg.chassis_model ||
+      options.model ||
+      (totalBays <= 2 ? 'COMPACT DUAL' : totalBays <= 6 ? 'DESKTOP TOWER' : 'ENTERPRISE RACK');
     bays = cfg.bays || [];
     nvmes = (cfg.nvme_slots || []).map((s) => s.disk).filter(Boolean);
     availableDrives = cfg.available_drives || [];
@@ -187,7 +225,15 @@ export function renderChassisTwin(container, disks = [], options = {}) {
     else if (totalBays <= 6) profile = 'tower_desktop';
     else profile = 'rackmount_backplane';
 
-    chassisModel = options.model || (totalBays <= 4 ? 'ZETTLAB D4' : totalBays <= 6 ? 'ZETTLAB D6' : totalBays <= 8 ? 'ZETTLAB D8U' : 'DIY STORAGE CHASSIS');
+    chassisModel =
+      options.model ||
+      (totalBays <= 4
+        ? 'ZETTLAB D4'
+        : totalBays <= 6
+          ? 'ZETTLAB D6'
+          : totalBays <= 8
+            ? 'ZETTLAB D8U'
+            : 'DIY STORAGE CHASSIS');
     bays = [];
     for (let i = 0; i < totalBays; i++) {
       const d = hdds[i];
@@ -195,17 +241,19 @@ export function renderChassisTwin(container, disks = [], options = {}) {
         slot_index: i + 1,
         is_populated: Boolean(d),
         custom_label: null,
-        disk: d ? {
-          dev: d.name || d.dev || `sd${String.fromCharCode(97 + i)}`,
-          model: d.model,
-          serial: d.serial,
-          size_formatted: d.size_formatted || d.size,
-          transport: d.transport || 'sata',
-          controller_driver: d.controller_driver,
-          temp: d.temp,
-          health: d.health,
-          standby: Boolean(d.standby || d.health === 'standby'),
-        } : null
+        disk: d
+          ? {
+              dev: d.name || d.dev || `sd${String.fromCharCode(97 + i)}`,
+              model: d.model,
+              serial: d.serial,
+              size_formatted: d.size_formatted || d.size,
+              transport: d.transport || 'sata',
+              controller_driver: d.controller_driver,
+              temp: d.temp,
+              health: d.health,
+              standby: Boolean(d.standby || d.health === 'standby'),
+            }
+          : null,
       });
     }
   }
@@ -226,7 +274,9 @@ export function renderChassisTwin(container, disks = [], options = {}) {
   bays.forEach((bay) => {
     const slotNum = bay.slot_index;
     const isPopulated = bay.is_populated && bay.disk;
-    const customLabel = bay.custom_label ? `<span class="bay-custom-label" title="${escapeHtml(bay.custom_label)}">${escapeHtml(bay.custom_label)}</span>` : '';
+    const customLabel = bay.custom_label
+      ? `<span class="bay-custom-label" title="${escapeHtml(bay.custom_label)}">${escapeHtml(bay.custom_label)}</span>`
+      : '';
 
     if (!isPopulated) {
       baysHtml += `
@@ -372,9 +422,17 @@ export function renderChassisTwin(container, disks = [], options = {}) {
       e.stopPropagation();
       const slotNum = Number(/** @type {HTMLElement} */ (btn).dataset.bay);
       const bay = bays.find((b) => Number(b.slot_index) === slotNum) || {};
-      const platform = await api.get('/api/storage/platform').then((r) => r?.platform || '').catch(() => '');
+      const platform = await api
+        .get('/api/storage/platform')
+        .then((r) => r?.platform || '')
+        .catch(() => '');
       const { openDriveGuide } = await import('./drive-guide.js');
-      openDriveGuide({ kind: /** @type {HTMLElement} */ (btn).dataset.guide, platform, drive: bay.disk || {}, place: t('chassis.bay_n', 'Bay {n}', { n: slotNum }) });
+      openDriveGuide({
+        kind: /** @type {HTMLElement} */ (btn).dataset.guide,
+        platform,
+        drive: bay.disk || {},
+        place: t('chassis.bay_n', 'Bay {n}', { n: slotNum }),
+      });
     });
   });
 
@@ -396,7 +454,7 @@ export function renderChassisTwin(container, disks = [], options = {}) {
         profile,
         total_bays: totalBays,
         bays,
-        available_drives: availableDrives
+        available_drives: availableDrives,
       };
       openChassisConfigModal(activeCfg, () => {
         fetchAndRenderChassisTwin(container, options);
@@ -422,7 +480,9 @@ export async function fetchAndRenderChassisTwin(container, options = {}) {
   }
 
   // No picture drawn from guesses: it showed a layout named after the number of drives (SET-09)
-  showReadError(container, t('chassis.bays_failed', 'The drive bays could not be read.'), () => fetchAndRenderChassisTwin(container, options));
+  showReadError(container, t('chassis.bays_failed', 'The drive bays could not be read.'), () =>
+    fetchAndRenderChassisTwin(container, options)
+  );
   return false;
 }
 
@@ -478,7 +538,7 @@ export function openChassisConfigModal(currentConfig = {}, onSaved = null) {
 
         <div>
           <div class="cv-row-4">
-            <label class="cv-xs-bold-muted-2">${t('chassis.allocation', 'Each bay\'s drive and label')}</label>
+            <label class="cv-xs-bold-muted-2">${t('chassis.allocation', "Each bay's drive and label")}</label>
             <button id="chassis-auto-assign-btn" class="btn-pill-toggle">${ico('⚡')} ${t('chassis.auto_assign', 'Auto-assign in order')}</button>
           </div>
           <div class="cv-box">
@@ -554,7 +614,7 @@ export function openChassisConfigModal(currentConfig = {}, onSaved = null) {
       const autoMappings = availableDrives.slice(0, totalBays).map((d, idx) => ({
         slot_index: idx + 1,
         canonical_id: d.canonical_id,
-        custom_label: idx === 0 ? 'Parity / Primary' : `Disk ${idx}`
+        custom_label: idx === 0 ? 'Parity / Primary' : `Disk ${idx}`,
       }));
       renderRows(totalBays, autoMappings);
       showToast(t('toast.assigned_detected_drives_sequentially', 'Assigned detected drives sequentially.'), 'info');
@@ -580,7 +640,7 @@ export function openChassisConfigModal(currentConfig = {}, onSaved = null) {
         mappings.push({
           slot_index: slotIdx,
           canonical_id: cid,
-          custom_label: labelInp.value.trim() || null
+          custom_label: labelInp.value.trim() || null,
         });
       }
     });
@@ -588,23 +648,29 @@ export function openChassisConfigModal(currentConfig = {}, onSaved = null) {
     const payload = {
       profile: profileSelect.value,
       total_bays: parseInt(baysInput.value, 10),
-      mappings
+      mappings,
     };
 
     try {
       const res = await api.request('/api/chassis/bay_map', {
         method: 'POST',
-        body: payload
+        body: payload,
       });
       if (res.ok) {
-        showToast(t('toast.chassis_bay_mapping_updated_successfully', 'Chassis bay mapping updated successfully.'), 'success');
+        showToast(
+          t('toast.chassis_bay_mapping_updated_successfully', 'Chassis bay mapping updated successfully.'),
+          'success'
+        );
         closeModal();
         if (typeof onSaved === 'function') onSaved(payload);
       } else {
         showToast(t('toast.failed_to_save_chassis_bay_mapping', 'Failed to save chassis bay mapping.'), 'error');
       }
     } catch (err) {
-      showToast(t('toast.error_saving_bay_mapping', 'Error saving bay mapping: {error}', { error: err.message }), 'error');
+      showToast(
+        t('toast.error_saving_bay_mapping', 'Error saving bay mapping: {error}', { error: err.message }),
+        'error'
+      );
     }
   });
 
@@ -640,17 +706,21 @@ export function renderStructuredPoolsTopology(container, data) {
   if (!tree) {
     container.innerHTML = `
       <div class="storage-topology-tree">
-        ${isObserver ? `
+        ${
+          isObserver
+            ? `
           <div class="topo-observer-banner">
             <span class="observer-icon">ℹ️</span>
             <span>${escapeHtml(t('storage.mode_host_desc', '{platform} manages the storage pools, array and parity checks here. Kiboto shows them and never changes them.', { platform: platformName(platform) }))}</span>
           </div>
-        ` : `
+        `
+            : `
           <div class="topo-observer-banner" style="background:rgba(99,102,241,0.12); border-color:rgba(99,102,241,0.25);">
             <span class="observer-icon">⚡</span>
             <span>${escapeHtml(t('storage.mode_kiboto_desc', 'Kiboto manages the storage pools, RAID protection against bit rot, and snapshots on this machine.'))}</span>
           </div>
-        `}
+        `
+        }
         <div class="topo-pools-container"></div>
       </div>
     `;
@@ -682,21 +752,26 @@ function buildPoolBlockInner(pool, isObserver, can = { scrub: true }) {
   const totalStr = formatBytes(pool.total_bytes);
   const freeStr = formatBytes(pool.free_bytes);
   const pct = pool.used_pct || 0;
-  const barColor = pct > 90 ? 'var(--alert, #ef4444)' : (pct > 75 ? 'var(--warn, #f59e0b)' : 'var(--accent, #3bf58b)');
+  const barColor = pct > 90 ? 'var(--alert, #ef4444)' : pct > 75 ? 'var(--warn, #f59e0b)' : 'var(--accent, #3bf58b)';
 
   let statusClass = 'status-healthy';
   const statusLabel = poolStatusWord(pool.status);
   if (pool.status === 'SYNCING') statusClass = 'status-syncing';
   else if (pool.status === 'DEGRADED') statusClass = 'status-degraded';
 
-  const membersHtml = (pool.members || []).map((m) => {
-    const isStandby = m.spundown || m.status === 'STANDBY';
-    const tempDisplay = isStandby ? t('chassis.asleep', 'Asleep') : (m.temp_c != null ? `${m.temp_c}°C` : '--');
-    const tempLevel = isStandby ? 'standby' : (m.temp_c != null ? getThermalLevel(m.temp_c, false, isNvmeDrive(m)).cls : 'cool');
-    const readsStr = m.num_reads ? formatNumber(m.num_reads) : '0';
-    const writesStr = m.num_writes ? formatNumber(m.num_writes) : '0';
+  const membersHtml = (pool.members || [])
+    .map((m) => {
+      const isStandby = m.spundown || m.status === 'STANDBY';
+      const tempDisplay = isStandby ? t('chassis.asleep', 'Asleep') : m.temp_c != null ? `${m.temp_c}°C` : '--';
+      const tempLevel = isStandby
+        ? 'standby'
+        : m.temp_c != null
+          ? getThermalLevel(m.temp_c, false, isNvmeDrive(m)).cls
+          : 'cool';
+      const readsStr = m.num_reads ? formatNumber(m.num_reads) : '0';
+      const writesStr = m.num_writes ? formatNumber(m.num_writes) : '0';
 
-    return `
+      return `
       <div class="topo-disk-card role-${m.role || 'data'} ${isStandby ? 'disk-standby' : ''}">
         <div class="topo-disk-top">
           <span class="topo-role-badge role-${m.role || 'data'}">${escapeHtml(roleWord(m.role))}</span>
@@ -714,7 +789,8 @@ function buildPoolBlockInner(pool, isObserver, can = { scrub: true }) {
         </div>
       </div>
     `;
-  }).join('');
+    })
+    .join('');
 
   return `
     <div class="topo-pool-header">
@@ -780,13 +856,23 @@ function bindTopologyTreeEvents(tree, container) {
       // what is said afterwards is what the server answered (SET-06)
       showConfirmToast(
         t('chassis.scrub_q_title', 'Check this pool for errors'),
-        t('chassis.scrub_q', 'Check “{pool}” for errors now? Its drives spin up and stay busy until it is done, which can take hours.', { pool }),
+        t(
+          'chassis.scrub_q',
+          'Check “{pool}” for errors now? Its drives spin up and stay busy until it is done, which can take hours.',
+          { pool }
+        ),
         async () => {
           try {
             await api.post('/api/storage/scrub', { pool_id: pid, action: 'start' });
             showToast(t('chassis.scrub_started', 'The check of “{pool}” was started.', { pool }), 'info');
           } catch (err) {
-            showToast(t('chassis.scrub_failed', 'The check of “{pool}” was not started: {error}', { pool, error: err.message || '' }), 'error');
+            showToast(
+              t('chassis.scrub_failed', 'The check of “{pool}” was not started: {error}', {
+                pool,
+                error: err.message || '',
+              }),
+              'error'
+            );
           }
         },
         null,
@@ -821,7 +907,7 @@ function bindTopologyTreeEvents(tree, container) {
         async () => {
           try {
             await api.delete(`/api/storage/pools/${pid}`, { confirmed: true });
-            showToast(t('toast.pool_destroyed', 'Pool \'{pid}\' destroyed.', { pid: pid }), 'info');
+            showToast(t('toast.pool_destroyed', "Pool '{pid}' destroyed.", { pid: pid }), 'info');
             fetchAndRenderStorageTopology(container);
           } catch (err) {
             showToast(err.message || t('chassis.destroy_pool_failed', 'Could not destroy the pool'), 'error');
@@ -839,13 +925,20 @@ function bindTopologyTreeEvents(tree, container) {
       const pid = exportBtn.dataset.poolId;
       showConfirmToast(
         t('chassis.eject_pool', 'Safely Eject Pool'),
-        t('chassis.eject_pool_msg', 'Write everything to the disks and detach pool "{pool}"? Make sure no file copies are running.', { pool: pid }),
+        t(
+          'chassis.eject_pool_msg',
+          'Write everything to the disks and detach pool "{pool}"? Make sure no file copies are running.',
+          { pool: pid }
+        ),
         async () => {
           try {
             exportBtn.disabled = true;
             setIconLabel(exportBtn, '⏳', t('ui.ejecting', 'Ejecting...'));
             await api.post(`/api/storage/pools/${encodeURIComponent(pid)}/export`, { force: false });
-            showToast(t('chassis.pool_ejected_unplug', 'Pool "{pool}" was ejected. You can unplug it now.', { pool: pid }), 'success');
+            showToast(
+              t('chassis.pool_ejected_unplug', 'Pool "{pool}" was ejected. You can unplug it now.', { pool: pid }),
+              'success'
+            );
             fetchAndRenderStorageTopology(container);
           } catch (err) {
             if (err.message && err.message.includes('force=true')) {
@@ -887,7 +980,10 @@ function bindTopologyTreeEvents(tree, container) {
         importBtn.disabled = true;
         setIconLabel(importBtn, '⏳', t('ui.importing', 'Importing...'));
         await api.post('/api/storage/pools/import', { pool_id: pid, fs_type: fstype });
-        showToast(t('toast.successfully_imported_storage_pool', 'Successfully imported storage pool \'{pid}\'!', { pid: pid }), 'success');
+        showToast(
+          t('toast.successfully_imported_storage_pool', "Successfully imported storage pool '{pid}'!", { pid: pid }),
+          'success'
+        );
         fetchAndRenderStorageTopology(container);
       } catch (err) {
         showToast(err.message || `Failed to import pool '${pid}'`, 'error');
@@ -952,14 +1048,18 @@ export async function fetchAndRenderStorageTopology(container) {
   } catch (err) {
     console.warn('[Kiboto] Failed to load /api/storage/pools:', err);
     // no tree drawn from guesses: it labelled the system drive as parity, under a green "online"
-    showReadError(container, t('chassis.pools_failed', 'The storage pools could not be read.'), () => fetchAndRenderStorageTopology(container));
+    showReadError(container, t('chassis.pools_failed', 'The storage pools could not be read.'), () =>
+      fetchAndRenderStorageTopology(container)
+    );
     return false;
   }
 }
 
 /** What "Look for pools on other drives" found, as banners with an Import button each. */
 export function foundPoolsHtml(found) {
-  return (found || []).map((p) => `
+  return (found || [])
+    .map(
+      (p) => `
     <div class="external-pools-banner">
       <div class="cv-row-6">
         <span class="cv-fs20" aria-hidden="true">🔌</span>
@@ -972,7 +1072,9 @@ export function foundPoolsHtml(found) {
       <button class="btn-import-external-pool btn-pill-toggle" data-pool-id="${escapeHtml(p.pool_id)}" data-fs-type="${escapeHtml(p.fs_type || 'zfs')}">
         ${ico('📥')} ${t('chassis.import_pool', 'Import pool')}
       </button>
-    </div>`).join('');
+    </div>`
+    )
+    .join('');
 }
 
 /** Imports a pool that the look found, and draws the pools again. */
@@ -983,7 +1085,10 @@ export async function importFoundPool(container, importBtn) {
     importBtn.disabled = true;
     setIconLabel(importBtn, '⏳', t('ui.importing', 'Importing...'));
     await api.post('/api/storage/pools/import', { pool_id: pid, fs_type: fstype });
-    showToast(t('toast.successfully_imported_storage_pool', 'Successfully imported storage pool \'{pid}\'!', { pid: pid }), 'success');
+    showToast(
+      t('toast.successfully_imported_storage_pool', "Successfully imported storage pool '{pid}'!", { pid: pid }),
+      'success'
+    );
     await fetchAndRenderStorageTopology(container);
   } catch (err) {
     showToast(err.message || `Failed to import pool '${pid}'`, 'error');
@@ -1010,7 +1115,10 @@ export async function lookForPools(container, button) {
       });
     }
   } catch (err) {
-    showToast(t('chassis.look_failed', 'Could not look for pools: {error}', { error: err.message || String(err) }), 'error');
+    showToast(
+      t('chassis.look_failed', 'Could not look for pools: {error}', { error: err.message || String(err) }),
+      'error'
+    );
   } finally {
     if (button) button.disabled = false;
   }
@@ -1036,7 +1144,10 @@ export function buildSftpCardHtml(sftpStatus, usersCount = 0, sampleUser = '') {
 
   const finderCmd = `sftp://${user}@${hostIp}:${port}/`;
   const terminalCmd = `sftp -P ${port} ${user}@${hostIp}`;
-  const filezillaHint = t('sftp.filezilla_hint', 'Host: {host} · Port: {port} · Protocol: SFTP', { host: hostIp, port });
+  const filezillaHint = t('sftp.filezilla_hint', 'Host: {host} · Port: {port} · Protocol: SFTP', {
+    host: hostIp,
+    port,
+  });
   const sshfsCmd = `sshfs -p ${port} ${user}@${hostIp}:/ /mnt/sftp`;
 
   return `
@@ -1125,7 +1236,12 @@ export function bindSftpCardEvents(container, onRefresh) {
         const status = await api.get('/api/sftp/status').catch(() => ({ running: false }));
         const isRunning = Boolean(status.running);
         await api.post('/api/sftp/toggle', { enabled: !isRunning });
-        showToast(!isRunning ? t('toast.sftp_started', 'SFTP service started.') : t('toast.sftp_stopped', 'SFTP service stopped.'), 'success');
+        showToast(
+          !isRunning
+            ? t('toast.sftp_started', 'SFTP service started.')
+            : t('toast.sftp_stopped', 'SFTP service stopped.'),
+          'success'
+        );
         if (onRefresh) onRefresh();
       } catch (err) {
         showToast(t('toast.failed_to_toggle_sftp', 'Failed to toggle SFTP: {error}', { error: err.message }), 'error');
@@ -1164,7 +1280,8 @@ export function renderProtocolPills({ smb, sftp, webdav } = {}) {
     const el = document.getElementById(id);
     if (!el) return;
     const state = !status ? 'unknown' : status.running ? 'on' : 'off';
-    const word = state === 'on' ? t('proto.on', 'on') : state === 'off' ? t('proto.off', 'off') : t('proto.unknown', 'unknown');
+    const word =
+      state === 'on' ? t('proto.on', 'on') : state === 'off' ? t('proto.off', 'off') : t('proto.unknown', 'unknown');
     el.dataset.state = state;
     el.textContent = `${label}${state === 'on' && port ? ` :${port}` : ''} · ${word}`;
   };
@@ -1214,9 +1331,9 @@ export async function fetchAndRenderNetworkShares(container) {
     const shares = sharesData.shares || [];
     const isObserver = sharesData.is_observer_mode ?? true;
     const platform = platformData.platform || sharesData.platform || 'unraid';
-    const canManageShares = platformData?.capabilities?.can_manage_shares ?? (!isObserver);
+    const canManageShares = platformData?.capabilities?.can_manage_shares ?? !isObserver;
 
-    const sftpUsers = Array.isArray(sftpUsersRes) ? sftpUsersRes : (sftpUsersRes?.users || []);
+    const sftpUsers = Array.isArray(sftpUsersRes) ? sftpUsersRes : sftpUsersRes?.users || [];
     const sampleUser = sftpUsers[0]?.username || '';
 
     const btnCreateShare = document.getElementById('btn-create-network-share');
@@ -1230,12 +1347,19 @@ export async function fetchAndRenderNetworkShares(container) {
     if (badge) {
       if (isObserver) {
         badge.textContent = t('storage.mode_host', 'Managed by {platform}', { platform: platformName(platform) });
-        badge.title = t('storage.mode_host_desc', '{platform} manages the storage pools, array and parity checks here. Kiboto shows them and never changes them.', { platform: platformName(platform) });
+        badge.title = t(
+          'storage.mode_host_desc',
+          '{platform} manages the storage pools, array and parity checks here. Kiboto shows them and never changes them.',
+          { platform: platformName(platform) }
+        );
         badge.style.background = 'rgba(59,245,139,0.12)';
         badge.style.color = '#3bf58b';
       } else {
         badge.textContent = t('storage.mode_kiboto', 'Managed by Kiboto');
-        badge.title = t('storage.mode_kiboto_desc', 'Kiboto manages the storage pools, RAID protection against bit rot, and snapshots on this machine.');
+        badge.title = t(
+          'storage.mode_kiboto_desc',
+          'Kiboto manages the storage pools, RAID protection against bit rot, and snapshots on this machine.'
+        );
         badge.style.background = 'rgba(99,102,241,0.15)';
         badge.style.color = 'var(--lt-t-818cf8ff, #818cf8)';
       }
@@ -1267,16 +1391,26 @@ export async function fetchAndRenderNetworkShares(container) {
       }
     }
 
-    renderWebdavCard(document.getElementById('shares-webdav-mount'), webdavStatus, () => fetchAndRenderNetworkShares(container));
+    renderWebdavCard(document.getElementById('shares-webdav-mount'), webdavStatus, () =>
+      fetchAndRenderNetworkShares(container)
+    );
 
     if (shares.length === 0) {
       grid.innerHTML = emptyStateHtml({
         icon: '<svg viewBox="0 0 24 24" width="32" height="32"><use href="#i-storage"/></svg>',
         title: t('mgmt.shares_none_title', 'No shares yet'),
         body: canManageShares
-          ? t('mgmt.shares_none_desc', 'A share is a folder your computers and phones can open over the network (SMB for Windows and Mac, NFS for Linux).')
-          : t('mgmt.shares_none_observer', 'Shares are managed by the host system here; any it creates appear in this list.'),
-        action: canManageShares ? { id: 'btn-empty-create-share', label: t('mgmt.create_share', 'Create share') } : null,
+          ? t(
+              'mgmt.shares_none_desc',
+              'A share is a folder your computers and phones can open over the network (SMB for Windows and Mac, NFS for Linux).'
+            )
+          : t(
+              'mgmt.shares_none_observer',
+              'Shares are managed by the host system here; any it creates appear in this list.'
+            ),
+        action: canManageShares
+          ? { id: 'btn-empty-create-share', label: t('mgmt.create_share', 'Create share') }
+          : null,
       });
       const emptyCreateBtn = grid.querySelector('#btn-empty-create-share');
       if (emptyCreateBtn) {
@@ -1304,8 +1438,16 @@ export async function fetchAndRenderNetworkShares(container) {
       }
     );
     import('./share-who.js').then((m) => m.fillWhoLines(grid, PLATFORM_NAMES)).catch(() => {}); // who can open it (SET-22)
-    import('./share-connect.js').then((m) => m.addConnectButtons(grid, canManageShares ? '' : platformName(platform))).catch(() => {}); // how to connect (SET-22)
-    import('./share-time-machine.js').then((m) => m.renderTimeMachine(container, canManageShares ? '' : platformName(platform), () => openCreateNetworkShareModal(() => fetchAndRenderNetworkShares(container)))).catch(() => {}); // Shares R3
+    import('./share-connect.js')
+      .then((m) => m.addConnectButtons(grid, canManageShares ? '' : platformName(platform)))
+      .catch(() => {}); // how to connect (SET-22)
+    import('./share-time-machine.js')
+      .then((m) =>
+        m.renderTimeMachine(container, canManageShares ? '' : platformName(platform), () =>
+          openCreateNetworkShareModal(() => fetchAndRenderNetworkShares(container))
+        )
+      )
+      .catch(() => {}); // Shares R3
   } catch (err) {
     console.error('[Kiboto] Failed to fetch network shares:', err);
     container.innerHTML = `
@@ -1318,7 +1460,17 @@ export async function fetchAndRenderNetworkShares(container) {
 
 let _shareServices = {};
 
-const PLATFORM_NAMES = { unraid: 'Unraid', truenas: 'TrueNAS', truenas_scale: 'TrueNAS SCALE', omv: 'OpenMediaVault', openmediavault: 'OpenMediaVault', synology: 'Synology DSM', qnap: 'QNAP', proxmox: 'Proxmox', generic_linux: 'Linux' };
+const PLATFORM_NAMES = {
+  unraid: 'Unraid',
+  truenas: 'TrueNAS',
+  truenas_scale: 'TrueNAS SCALE',
+  omv: 'OpenMediaVault',
+  openmediavault: 'OpenMediaVault',
+  synology: 'Synology DSM',
+  qnap: 'QNAP',
+  proxmox: 'Proxmox',
+  generic_linux: 'Linux',
+};
 /** A platform id as people know it: "unraid" is Unraid. */
 export function platformName(id) {
   const k = String(id || '').toLowerCase();
@@ -1330,16 +1482,27 @@ export function platformName(id) {
  * on, off for this share, or turned on but not running.
  */
 export function shareProtocolTags(s, services = {}) {
-  const tag = (label, state, why) => `<span class="proto-tag proto-${state}" title="${escapeHtml(why)}">${escapeHtml(label)}</span>`;
+  const tag = (label, state, why) =>
+    `<span class="proto-tag proto-${state}" title="${escapeHtml(why)}">${escapeHtml(label)}</span>`;
   const svc = (status) => (status ? (status.running ? 'on' : 'down') : 'unknown');
   const out = [];
   const smb = svc(services.smb);
-  if (!s.export_smb) out.push(tag('SMB', 'off', t('share.proto_not_shared', 'Not shared over {proto}', { proto: 'SMB' })));
-  else if (smb === 'down') out.push(tag('SMB', 'down', t('share.proto_down', '{proto} is turned on for this share but its service is not running', { proto: 'SMB' })));
+  if (!s.export_smb)
+    out.push(tag('SMB', 'off', t('share.proto_not_shared', 'Not shared over {proto}', { proto: 'SMB' })));
+  else if (smb === 'down')
+    out.push(
+      tag(
+        'SMB',
+        'down',
+        t('share.proto_down', '{proto} is turned on for this share but its service is not running', { proto: 'SMB' })
+      )
+    );
   else out.push(tag('SMB', 'on', t('share.proto_on', 'Shared over {proto}', { proto: 'SMB' })));
-  out.push(s.export_nfs
-    ? tag('NFS', 'on', t('share.proto_on', 'Shared over {proto}', { proto: 'NFS' }))
-    : tag('NFS', 'off', t('share.proto_not_shared', 'Not shared over {proto}', { proto: 'NFS' })));
+  out.push(
+    s.export_nfs
+      ? tag('NFS', 'on', t('share.proto_on', 'Shared over {proto}', { proto: 'NFS' }))
+      : tag('NFS', 'off', t('share.proto_not_shared', 'Not shared over {proto}', { proto: 'NFS' }))
+  );
   // No WebDAV or SFTP tag per share: those services reach every share only for administrators
   // without two-step sign-in, everyone else just their own folder. The tags said every share was
   // served that way (SET-14); the services' own cards say whether they run.
@@ -1351,7 +1514,7 @@ function buildShareCardInner(s, canManageShares) {
   const totalStr = formatBytes(s.total_bytes);
   const freeStr = formatBytes(s.free_bytes);
   const pct = s.used_pct || 0;
-  const barColor = pct > 90 ? 'var(--alert, #ef4444)' : (pct > 75 ? 'var(--warn, #f59e0b)' : 'var(--accent, #3bf58b)');
+  const barColor = pct > 90 ? 'var(--alert, #ef4444)' : pct > 75 ? 'var(--warn, #f59e0b)' : 'var(--accent, #3bf58b)';
 
   return `
     <div class="share-card-header">
@@ -1367,12 +1530,19 @@ function buildShareCardInner(s, canManageShares) {
 
     <div class="share-protocols-row">
       ${shareProtocolTags(s, _shareServices)}
-      ${s.cache_mode && s.cache_mode !== 'none' ? `
+      ${
+        s.cache_mode && s.cache_mode !== 'none'
+          ? `
         <span class="share-cache-tag" title="${escapeHtml(t('chassis.cache_title', 'Cache tiering: {mode}', { mode: s.cache_mode }))}">${escapeHtml(t('chassis.cache', 'Cache: {mode}', { mode: s.cache_mode }))}${s.cache_pool ? ` (${escapeHtml(s.cache_pool)})` : ''}</span>
-      ` : ''}
+      `
+          : ''
+      }
     </div>
 
-    ${s.usage_is_own === false ? poolFreeLine(freeStr) : `<div class="share-usage-wrap">
+    ${
+      s.usage_is_own === false
+        ? poolFreeLine(freeStr)
+        : `<div class="share-usage-wrap">
       <div class="share-usage-labels">
         <span class="share-usage-text">${usedStr} / ${totalStr}</span>
         <span class="share-free-text">${t('chassis.used_free', '{pct}% used · {free} free', { pct, free: freeStr })}</span>
@@ -1380,13 +1550,16 @@ function buildShareCardInner(s, canManageShares) {
       <div class="share-progress-track">
         <div class="share-progress-fill" style="width: ${Math.min(100, Math.max(0, pct))}%; background: ${barColor};"></div>
       </div>
-    </div>`}
+    </div>`
+    }
 
     <div class="share-card-actions cv-row-2">
       <button class="btn-share-reveal" data-path="${escapeHtml(s.mountpoint || '')}" title="${t('ui.open_share_in_file_explorer', 'Open share in File Explorer')}">
         ${ico('📂')} ${t('ui.open_in_file_explorer', 'Open in File Explorer')}
       </button>
-      ${canManageShares ? `
+      ${
+        canManageShares
+          ? `
         <button class="btn-share-space btn-pill-toggle is-small" data-share-name="${escapeHtml(s.name)}" data-path="${escapeHtml(s.mountpoint || '')}" title="${t('space.button_title', "Where this share's space goes")}">
           ${t('space.button', 'Space')}
         </button>
@@ -1396,7 +1569,9 @@ function buildShareCardInner(s, canManageShares) {
         <button class="btn-share-delete btn-pill-toggle is-danger is-small" data-share-name="${escapeHtml(s.name)}" title="${t('ui.delete_network_share', 'Delete network share')}">
           ${ico('🗑️')} ${t('chassis.delete', 'Delete')}
         </button>
-      ` : ''}
+      `
+          : ''
+      }
     </div>
   `;
 }
@@ -1406,15 +1581,16 @@ function updateShareCard(card, s, canManageShares) {
   const totalStr = formatBytes(s.total_bytes);
   const freeStr = formatBytes(s.free_bytes);
   const pct = s.used_pct || 0;
-  const barColor = pct > 90 ? 'var(--alert, #ef4444)' : (pct > 75 ? 'var(--warn, #f59e0b)' : 'var(--accent, #3bf58b)');
+  const barColor = pct > 90 ? 'var(--alert, #ef4444)' : pct > 75 ? 'var(--warn, #f59e0b)' : 'var(--accent, #3bf58b)';
 
   const usageText = card.querySelector('.share-usage-text');
   if (usageText) usageText.textContent = `${usedStr} / ${totalStr}`;
   const freeText = card.querySelector('.share-free-text');
   if (freeText) {
-    freeText.textContent = s.usage_is_own === false
-      ? t('share.pool_free', '{free} free on its pool', { free: freeStr })
-      : t('chassis.used_free', '{pct}% used · {free} free', { pct, free: freeStr });
+    freeText.textContent =
+      s.usage_is_own === false
+        ? t('share.pool_free', '{free} free on its pool', { free: freeStr })
+        : t('chassis.used_free', '{pct}% used · {free} free', { pct, free: freeStr });
   }
   const fill = card.querySelector('.share-progress-fill');
   if (fill) {
@@ -1438,7 +1614,9 @@ function bindSharesGridEvents(grid, container) {
 
     const spaceBtn = e.target.closest('.btn-share-space');
     if (spaceBtn) {
-      import('./storage-analyzer.js').then((m) => m.openStorageAnalyzer(spaceBtn.dataset.shareName, spaceBtn.dataset.path || ''));
+      import('./storage-analyzer.js').then((m) =>
+        m.openStorageAnalyzer(spaceBtn.dataset.shareName, spaceBtn.dataset.path || '')
+      );
       return;
     }
 
@@ -1455,11 +1633,15 @@ function bindSharesGridEvents(grid, container) {
       const sName = delBtn.dataset.shareName;
       showConfirmToast(
         t('shares.remove_share', 'Remove Share'),
-        t('chassis.remove_share_files_stay', 'Stop sharing "{name}"? The folder and its files stay where they are, in Files; only the network sharing ends.', { name: sName }),
+        t(
+          'chassis.remove_share_files_stay',
+          'Stop sharing "{name}"? The folder and its files stay where they are, in Files; only the network sharing ends.',
+          { name: sName }
+        ),
         async () => {
           try {
             await api.delete(`/api/storage/shares/${sName}`, { confirmed: true });
-            showToast(t('toast.share_removed', 'Share \'{sName}\' removed.', { sName: sName }), 'info');
+            showToast(t('toast.share_removed', "Share '{sName}' removed.", { sName: sName }), 'info');
             fetchAndRenderNetworkShares(container);
           } catch (err) {
             showToast(err.message || t('chassis.remove_share_failed', 'Could not remove the share'), 'error');
@@ -1525,18 +1707,26 @@ export async function openSftpUsersModal(onSuccess) {
           toggleBtn.disabled = true;
           try {
             await api.post('/api/sftp/toggle', { enabled: !isRunning });
-            showToast(!isRunning ? t('toast.sftp_started', 'SFTP service started.') : t('toast.sftp_stopped', 'SFTP service stopped.'), 'success');
+            showToast(
+              !isRunning
+                ? t('toast.sftp_started', 'SFTP service started.')
+                : t('toast.sftp_stopped', 'SFTP service stopped.'),
+              'success'
+            );
             await refreshSftpUI();
             if (onSuccess) onSuccess();
           } catch (err) {
-            showToast(t('toast.failed_to_toggle_sftp', 'Failed to toggle SFTP: {error}', { error: err.message }), 'error');
+            showToast(
+              t('toast.failed_to_toggle_sftp', 'Failed to toggle SFTP: {error}', { error: err.message }),
+              'error'
+            );
           } finally {
             toggleBtn.disabled = false;
           }
         };
       }
 
-      const users = Array.isArray(usersRes) ? usersRes : (usersRes?.users || []);
+      const users = Array.isArray(usersRes) ? usersRes : usersRes?.users || [];
       const sampleUser = users[0]?.username || 'username';
       const port = status?.port || 2222;
       const command = `sftp -P ${port} ${sampleUser}@${hostIp}`; // a command, the same in every language
@@ -1556,7 +1746,9 @@ export async function openSftpUsersModal(onSuccess) {
         if (users.length === 0) {
           usersList.innerHTML = `<div class="cv-xs-muted-center">${t('chassis.sftp_no_users', 'No SFTP users yet. Create one below.')}</div>`;
         } else {
-          usersList.innerHTML = users.map((u) => `
+          usersList.innerHTML = users
+            .map(
+              (u) => `
             <div class="cv-row-xs-box">
               <div>
                 <span class="cv-bold-strong">${escapeHtml(u.username)}</span>
@@ -1571,7 +1763,9 @@ export async function openSftpUsersModal(onSuccess) {
                 ${t('chassis.delete', 'Delete')}
               </button>
             </div>
-          `).join('');
+          `
+            )
+            .join('');
 
           usersList.querySelectorAll('.btn-delete-sftp-user').forEach((btn) => {
             btn.onclick = () => {
@@ -1583,11 +1777,14 @@ export async function openSftpUsersModal(onSuccess) {
                   btn.disabled = true;
                   try {
                     await api.delete(`/api/sftp/users/${username}`);
-                    showToast(t('toast.user_deleted', 'User \'{username}\' deleted.', { username: username }), 'info');
+                    showToast(t('toast.user_deleted', "User '{username}' deleted.", { username: username }), 'info');
                     await refreshSftpUI();
                     if (onSuccess) onSuccess();
                   } catch (err) {
-                    showToast(t('toast.failed_to_delete_user', 'Failed to delete user: {error}', { error: err.message }), 'error');
+                    showToast(
+                      t('toast.failed_to_delete_user', 'Failed to delete user: {error}', { error: err.message }),
+                      'error'
+                    );
                     btn.disabled = false;
                   }
                 },
@@ -1616,13 +1813,16 @@ export async function openSftpUsersModal(onSuccess) {
 
       try {
         await api.post('/api/sftp/users', { username, password, read_only });
-        showToast(t('toast.sftp_user_created', 'SFTP user \'{username}\' created.', { username: username }), 'success');
+        showToast(t('toast.sftp_user_created', "SFTP user '{username}' created.", { username: username }), 'success');
         uInput.value = '';
         pInput.value = '';
         await refreshSftpUI();
         if (onSuccess) onSuccess();
       } catch (err) {
-        showToast(t('toast.failed_to_create_sftp_user', 'Failed to create SFTP user: {error}', { error: err.message }), 'error');
+        showToast(
+          t('toast.failed_to_create_sftp_user', 'Failed to create SFTP user: {error}', { error: err.message }),
+          'error'
+        );
       }
     };
   }
@@ -1641,7 +1841,7 @@ const PROVIDER_ICONS = {
   webdav: '📁',
   smb: '🔗',
   dropbox: '📦',
-  unknown: '☁️'
+  unknown: '☁️',
 };
 
 /**
@@ -1740,10 +1940,20 @@ export function renderWebdavCard(host, webdavStatus, onRefresh = () => {}) {
   container.querySelector('#btn-webdav-toggle')?.addEventListener('click', async () => {
     try {
       await api.post('/api/webdav/toggle', { enabled: !isRunning });
-      showToast(isRunning ? t('webdav.stopped_toast', 'WebDAV server stopped.') : t('webdav.started_toast', 'WebDAV server started on port {port}.', { port: webdavStatus.port }), 'info');
+      showToast(
+        isRunning
+          ? t('webdav.stopped_toast', 'WebDAV server stopped.')
+          : t('webdav.started_toast', 'WebDAV server started on port {port}.', { port: webdavStatus.port }),
+        'info'
+      );
       onRefresh();
     } catch (e) {
-      showToast(t('toast.failed_toggle_webdav', 'Failed to toggle WebDAV: {error}', { error: e.message || t('toast.unknown_error', 'Unknown error') }), 'error');
+      showToast(
+        t('toast.failed_toggle_webdav', 'Failed to toggle WebDAV: {error}', {
+          error: e.message || t('toast.unknown_error', 'Unknown error'),
+        }),
+        'error'
+      );
     }
   });
 
@@ -1754,7 +1964,12 @@ export function renderWebdavCard(host, webdavStatus, onRefresh = () => {}) {
       showToast(t('toast.webdav_server_restarted', 'WebDAV server restarted.'), 'info');
       onRefresh();
     } catch (e) {
-      showToast(t('toast.failed_restart_webdav', 'Failed to restart WebDAV: {error}', { error: e.message || t('toast.unknown_error', 'Unknown error') }), 'error');
+      showToast(
+        t('toast.failed_restart_webdav', 'Failed to restart WebDAV: {error}', {
+          error: e.message || t('toast.unknown_error', 'Unknown error'),
+        }),
+        'error'
+      );
     }
   });
 
@@ -1764,19 +1979,22 @@ export function renderWebdavCard(host, webdavStatus, onRefresh = () => {}) {
   });
 
   // Quick Connect copy buttons
-  container.querySelector('#mgmt-webdav-card')?.querySelectorAll('.btn-qc-copy').forEach((btn) => {
-    btn.addEventListener('click', async () => {
-      const text = btn.dataset.copy;
-      if (text) {
-        const ok = await copyTextToClipboard(text);
-        if (ok) {
-          showToast(t('toast.copied_to_clipboard_3', 'Copied to clipboard!'), 'info');
-        } else {
-          showToast(t('toast.failed_to_copy_to_clipboard', 'Failed to copy to clipboard'), 'warn');
+  container
+    .querySelector('#mgmt-webdav-card')
+    ?.querySelectorAll('.btn-qc-copy')
+    .forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const text = btn.dataset.copy;
+        if (text) {
+          const ok = await copyTextToClipboard(text);
+          if (ok) {
+            showToast(t('toast.copied_to_clipboard_3', 'Copied to clipboard!'), 'info');
+          } else {
+            showToast(t('toast.failed_to_copy_to_clipboard', 'Failed to copy to clipboard'), 'warn');
+          }
         }
-      }
+      });
     });
-  });
   return true;
 }
 
@@ -1808,13 +2026,16 @@ export async function fetchAndRenderRemoteStorage(container) {
         </div>
       `;
     } else {
-      const cards = remotes.map((r) => {
-        const icon = PROVIDER_ICONS[r.type] || PROVIDER_ICONS.unknown;
-        const isMounted = r.is_mounted;
-        const statusText = isMounted ? escapeHtml(t('chassis.connected_at', 'Connected at {path}', { path: r.mount_path })) : t('chassis.not_connected', 'Not connected');
-        const statusCls = isMounted ? 'mounted' : '';
+      const cards = remotes
+        .map((r) => {
+          const icon = PROVIDER_ICONS[r.type] || PROVIDER_ICONS.unknown;
+          const isMounted = r.is_mounted;
+          const statusText = isMounted
+            ? escapeHtml(t('chassis.connected_at', 'Connected at {path}', { path: r.mount_path }))
+            : t('chassis.not_connected', 'Not connected');
+          const statusCls = isMounted ? 'mounted' : '';
 
-        return `
+          return `
           <div class="remote-card" data-remote-name="${escapeHtml(r.name)}">
             <div class="remote-card-header">
               <div class="remote-title-wrap">
@@ -1833,22 +2054,30 @@ export async function fetchAndRenderRemoteStorage(container) {
 
             <div class="remote-card-actions">
               <div>
-                ${isMounted ? `
+                ${
+                  isMounted
+                    ? `
                   <button class="btn-remote-reveal btn-pill-toggle" data-path="${escapeHtml(r.mount_path)}" title="${t('ui.open_in_file_explorer', 'Open in File Explorer')}" style="background: rgba(51,205,184,0.15); color: var(--kb-text-accent); border-color: rgba(51,205,184,0.3);">
                     ${ico('📂')} ${t('ui.open_in_file_explorer', 'Open in File Explorer')}
                   </button>
-                ` : `
+                `
+                    : `
                   <button class="btn-remote-mount btn-pill-toggle" data-name="${escapeHtml(r.name)}" title="${t('ui.mount_to_mnt_remotes', 'Mount to /mnt/remotes')}" style="background: var(--lt-b-3bf58b1f, rgba(59,245,139,0.12)); color: var(--lt-t-3bf58bff, #3bf58b); border-color: var(--lt-r-3bf58b40, rgba(59,245,139,0.25));">
                     ${ico('▶')} ${t('chassis.mount', 'Mount')}
                   </button>
-                `}
+                `
+                }
               </div>
               <div class="cv-row-8">
-                ${isMounted ? `
+                ${
+                  isMounted
+                    ? `
                   <button class="btn-remote-unmount btn-pill-toggle" data-name="${escapeHtml(r.name)}" title="${t('ui.unmount_from_system', 'Unmount from system')}">
                     ${ico('⏹')} ${t('chassis.unmount', 'Unmount')}
                   </button>
-                ` : ''}
+                `
+                    : ''
+                }
                 <button class="btn-remote-delete btn-pill-toggle is-danger" data-name="${escapeHtml(r.name)}" title="${t('ui.delete_remote', 'Delete remote')}">
                   🗑
                 </button>
@@ -1856,7 +2085,8 @@ export async function fetchAndRenderRemoteStorage(container) {
             </div>
           </div>
         `;
-      }).join('');
+        })
+        .join('');
 
       remotesHtml = `
         <div class="remotes-grid">
@@ -1908,12 +2138,18 @@ export async function fetchAndRenderRemoteStorage(container) {
         btn.disabled = true;
         try {
           await api.post(`/api/remotes/${name}/mount`, {});
-          showToast(t('toast.remote_mounted_to_mnt_remotes', 'Remote \'{name}\' mounted to /mnt/remotes/{name}', { name: name }), 'info');
+          showToast(
+            t('toast.remote_mounted_to_mnt_remotes', "Remote '{name}' mounted to /mnt/remotes/{name}", { name: name }),
+            'info'
+          );
           fetchAndRenderRemoteStorage(container);
           ZettEventBus.emit('fm:refresh');
           ZettEventBus.emit('storage:mount_changed', { name, path: `/mnt/remotes/${name}`, action: 'mount' });
         } catch (e) {
-          showToast(t('toast.mount_failed', 'Mount failed: {message}', { message: e.message || t('ui.error', 'Error') }), 'error');
+          showToast(
+            t('toast.mount_failed', 'Mount failed: {message}', { message: e.message || t('ui.error', 'Error') }),
+            'error'
+          );
           fetchAndRenderRemoteStorage(container);
         }
       });
@@ -1927,12 +2163,15 @@ export async function fetchAndRenderRemoteStorage(container) {
         btn.disabled = true;
         try {
           await api.post(`/api/remotes/${name}/unmount`);
-          showToast(t('toast.remote_unmounted', 'Remote \'{name}\' unmounted.', { name: name }), 'info');
+          showToast(t('toast.remote_unmounted', "Remote '{name}' unmounted.", { name: name }), 'info');
           fetchAndRenderRemoteStorage(container);
           ZettEventBus.emit('fm:refresh');
           ZettEventBus.emit('storage:mount_changed', { name, path: `/mnt/remotes/${name}`, action: 'unmount' });
         } catch (e) {
-          showToast(t('toast.unmount_failed', 'Unmount failed: {message}', { message: e.message || t('ui.error', 'Error') }), 'error');
+          showToast(
+            t('toast.unmount_failed', 'Unmount failed: {message}', { message: e.message || t('ui.error', 'Error') }),
+            'error'
+          );
           fetchAndRenderRemoteStorage(container);
         }
       });
@@ -1946,7 +2185,10 @@ export async function fetchAndRenderRemoteStorage(container) {
         const name = btn.dataset.name;
         showConfirmToast(
           t('remotes.delete_confirm_title', 'Delete Cloud Remote'),
-          t('remotes.delete_confirm_msg', `Are you sure you want to remove remote '${name}'? This will unmount the filesystem and delete its stored credentials.`).replace('{name}', escapeHtml(name)),
+          t(
+            'remotes.delete_confirm_msg',
+            `Are you sure you want to remove remote '${name}'? This will unmount the filesystem and delete its stored credentials.`
+          ).replace('{name}', escapeHtml(name)),
           async () => {
             try {
               await api.delete(`/api/remotes/${name}`);
@@ -1962,12 +2204,11 @@ export async function fetchAndRenderRemoteStorage(container) {
           {
             okText: t('remotes.delete_btn', 'Delete Remote'),
             cancelText: t('common.cancel', 'Cancel'),
-            icon: '🗑️'
+            icon: '🗑️',
           }
         );
       });
     });
-
   } catch (err) {
     console.error('[Kiboto] Failed to fetch remote storage:', err);
     container.innerHTML = `
@@ -2015,7 +2256,7 @@ export function openWebdavConfigModal(currentConfig, onSuccess) {
         port: Number(portInput.value),
         root_path: rootInput.value.trim(),
         username: userInput.value.trim(),
-        read_only: roToggle.checked
+        read_only: roToggle.checked,
       };
       if (passInput.value.trim()) {
         payload.password = passInput.value.trim();
@@ -2023,10 +2264,21 @@ export function openWebdavConfigModal(currentConfig, onSuccess) {
       try {
         await api.post('/api/webdav/config', payload);
         close();
-        showToast(t('toast.webdav_configuration_saved_and_server_restarted', 'WebDAV configuration saved and server restarted!'), 'info');
+        showToast(
+          t(
+            'toast.webdav_configuration_saved_and_server_restarted',
+            'WebDAV configuration saved and server restarted!'
+          ),
+          'info'
+        );
         if (onSuccess) onSuccess();
       } catch (err) {
-        showToast(t('toast.error_saving_webdav', 'Error saving WebDAV config: {error}', { error: err.message || t('toast.unknown_error', 'Unknown error') }), 'error');
+        showToast(
+          t('toast.error_saving_webdav', 'Error saving WebDAV config: {error}', {
+            error: err.message || t('toast.unknown_error', 'Unknown error'),
+          }),
+          'error'
+        );
       }
     };
   }
@@ -2171,9 +2423,13 @@ export async function openNewCloudRemoteModal(onSuccess) {
     const providers = _providersCache || [];
 
     if (providerSelect) {
-      providerSelect.innerHTML = providers.map((p) => `
+      providerSelect.innerHTML = providers
+        .map(
+          (p) => `
         <option value="${p.type}">${p.name} (${p.category})</option>
-      `).join('');
+      `
+        )
+        .join('');
 
       const renderFields = () => {
         if (_oauthPollTimer) {
@@ -2196,25 +2452,35 @@ export async function openNewCloudRemoteModal(onSuccess) {
         if (errorBox) errorBox.style.display = 'none';
 
         if (dynamicFields && prov) {
-          const isOAuthProv = prov.type === 'onedrive' || prov.type === 'drive' || prov.type === 'dropbox' || prov.type === 'box' || Boolean(prov.authorize_cmd);
-          const provTitle = prov.type === 'onedrive'
-            ? 'Microsoft OneDrive'
-            : (prov.type === 'drive'
-              ? 'Google Drive'
-              : (prov.type === 'dropbox'
-                ? 'Dropbox'
-                : (prov.type === 'box' ? 'Box.com' : prov.name)));
-          const brandBtnLabel = prov.type === 'onedrive'
-            ? '1-Click Authorize with Microsoft'
-            : (prov.type === 'drive'
-              ? '1-Click Authorize with Google'
-              : (prov.type === 'dropbox'
-                ? '1-Click Authorize with Dropbox'
-                : (prov.type === 'box'
-                  ? '1-Click Authorize with Box'
-                  : `1-Click Authorize with ${prov.name}`)));
+          const isOAuthProv =
+            prov.type === 'onedrive' ||
+            prov.type === 'drive' ||
+            prov.type === 'dropbox' ||
+            prov.type === 'box' ||
+            Boolean(prov.authorize_cmd);
+          const provTitle =
+            prov.type === 'onedrive'
+              ? 'Microsoft OneDrive'
+              : prov.type === 'drive'
+                ? 'Google Drive'
+                : prov.type === 'dropbox'
+                  ? 'Dropbox'
+                  : prov.type === 'box'
+                    ? 'Box.com'
+                    : prov.name;
+          const brandBtnLabel =
+            prov.type === 'onedrive'
+              ? '1-Click Authorize with Microsoft'
+              : prov.type === 'drive'
+                ? '1-Click Authorize with Google'
+                : prov.type === 'dropbox'
+                  ? '1-Click Authorize with Dropbox'
+                  : prov.type === 'box'
+                    ? '1-Click Authorize with Box'
+                    : `1-Click Authorize with ${prov.name}`;
 
-          const oauthAssistantHtml = isOAuthProv ? `
+          const oauthAssistantHtml = isOAuthProv
+            ? `
             <div class="oauth-assistant-card" style="margin-bottom: 16px; padding: 14px 16px; background: rgba(51, 205, 184, 0.08); border: 1px solid rgba(51, 205, 184, 0.28); border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.25);">
               <div class="cv-row-box-2">
                 <div class="cv-row-3">
@@ -2283,12 +2549,16 @@ export async function openNewCloudRemoteModal(onSuccess) {
                 </button>
               </div>
             </div>
-          ` : '';
+          `
+            : '';
 
-          const fieldsHtml = (prov.fields || []).map((f) => {
-            if (f.type === 'select') {
-              const opts = (f.options || []).map((o) => `<option value="${o}" ${o === f.default ? 'selected' : ''}>${o}</option>`).join('');
-              return `
+          const fieldsHtml = (prov.fields || [])
+            .map((f) => {
+              if (f.type === 'select') {
+                const opts = (f.options || [])
+                  .map((o) => `<option value="${o}" ${o === f.default ? 'selected' : ''}>${o}</option>`)
+                  .join('');
+                return `
                 <div>
                   <label class="cv-xs-bold-muted-3">${escapeHtml(f.label.toUpperCase())}</label>
                   <select name="${escapeHtml(f.name)}" class="tz-select-input cv-size">
@@ -2296,18 +2566,22 @@ export async function openNewCloudRemoteModal(onSuccess) {
                   </select>
                 </div>
               `;
-            } else if (f.type === 'textarea') {
-              return `
+              } else if (f.type === 'textarea') {
+                return `
                 <div>
                   <div class="cv-row-9">
                     <label class="cv-xs-bold-muted-4">
                       ${escapeHtml(f.label.toUpperCase())} ${f.required ? '<span style="color:var(--crit,#ef4444);">*</span>' : ''}
                     </label>
-                    ${prov.authorize_cmd ? `
+                    ${
+                      prov.authorize_cmd
+                        ? `
                       <button type="button" class="remote-copy-cmd-btn" data-cmd="${escapeHtml(prov.authorize_cmd)}" style="background:rgba(51,205,184,0.15); border:1px solid rgba(51,205,184,0.3); color:var(--kb-text-accent); font-size:var(--kb-fs-xs); font-weight:600; padding:2px 8px; border-radius:4px; cursor:pointer;">
                         ${ico('📋')} ${escapeHtml(t('chassis.copy_cmd', 'Copy: {cmd}', { cmd: prov.authorize_cmd }))}
                       </button>
-                    ` : ''}
+                    `
+                        : ''
+                    }
                   </div>
                   <textarea
                     name="${escapeHtml(f.name)}"
@@ -2319,8 +2593,8 @@ export async function openNewCloudRemoteModal(onSuccess) {
                   ${f.help ? `<div class="cv-xs-muted-5">${escapeHtml(f.help)}</div>` : ''}
                 </div>
               `;
-            } else {
-              return `
+              } else {
+                return `
                 <div>
                   <label class="cv-xs-bold-muted-3">
                     ${escapeHtml(f.label.toUpperCase())} ${f.required ? '<span style="color:var(--crit,#ef4444);">*</span>' : ''}
@@ -2334,8 +2608,9 @@ export async function openNewCloudRemoteModal(onSuccess) {
                     ${f.required ? 'required' : ''} />
                 </div>
               `;
-            }
-          }).join('');
+              }
+            })
+            .join('');
 
           dynamicFields.innerHTML = oauthAssistantHtml + fieldsHtml;
 
@@ -2396,7 +2671,16 @@ export async function openNewCloudRemoteModal(onSuccess) {
                 nameInput.value = prov.type === 'onedrive' ? 'onedrive-personal' : `${prov.type}-cloud`;
               }
               if (statusEl) {
-                showNote(statusEl, 'ok', '✅', t('chassis.oauth_ok', 'Signed in.'), t('chassis.oauth_ok_desc', 'The sign-in is filled in below. Test the connection or save the cloud drive.'));
+                showNote(
+                  statusEl,
+                  'ok',
+                  '✅',
+                  t('chassis.oauth_ok', 'Signed in.'),
+                  t(
+                    'chassis.oauth_ok_desc',
+                    'The sign-in is filled in below. Test the connection or save the cloud drive.'
+                  )
+                );
               }
               const desktopP = dynamicFields.querySelector('#oauth-desktop-panel');
               const qrP = dynamicFields.querySelector('#oauth-qr-panel');
@@ -2405,20 +2689,29 @@ export async function openNewCloudRemoteModal(onSuccess) {
               if (tabDesktop && tabDesktop.parentElement) tabDesktop.parentElement.style.display = 'none';
               if (qrBox) qrBox.style.display = 'none';
               if (step2Box) step2Box.style.display = 'none';
-              showToast(t('toast.cloud_credentials_verified_token_auto_populated', 'Cloud credentials verified & token auto-populated!'), 'info');
+              showToast(
+                t(
+                  'toast.cloud_credentials_verified_token_auto_populated',
+                  'Cloud credentials verified & token auto-populated!'
+                ),
+                'info'
+              );
             };
 
             const renderQrCode = async (session) => {
               if (!qrTarget || !session) return;
               try {
-                const origin = (typeof window !== 'undefined' && window.location && window.location.origin) ? window.location.origin : 'http://127.0.0.1:8082';
+                const origin =
+                  typeof window !== 'undefined' && window.location && window.location.origin
+                    ? window.location.origin
+                    : 'http://127.0.0.1:8082';
                 const mobileUrl = `${origin}/api/remotes/oauth/mobile-page?sid=${encodeURIComponent(session.session_id)}`;
                 const { default: QRCode } = await import('qrcode');
                 const svgStr = await QRCode.toString(mobileUrl, {
                   type: 'svg',
                   margin: 1,
                   width: 170,
-                  color: { dark: '#000000', light: '#ffffff' }
+                  color: { dark: '#000000', light: '#ffffff' },
                 });
                 qrTarget.innerHTML = svgStr;
 
@@ -2426,7 +2719,8 @@ export async function openNewCloudRemoteModal(onSuccess) {
                 if (qrBox && !directLink) {
                   directLink = document.createElement('div');
                   directLink.className = 'oauth-direct-links';
-                  directLink.style.cssText = 'margin-top: 8px; font-size: var(--kb-fs-xs); text-align: center; line-height: 1.5;';
+                  directLink.style.cssText =
+                    'margin-top: 8px; font-size: var(--kb-fs-xs); text-align: center; line-height: 1.5;';
                   qrBox.appendChild(directLink);
                 }
                 if (directLink) {
@@ -2447,10 +2741,25 @@ export async function openNewCloudRemoteModal(onSuccess) {
               }
             };
 
-            const qrReadyNote = () => showNote(statusEl, 'info', '📱', t('chassis.qr_ready', 'QR code ready:'),
-              t('chassis.qr_ready_desc', 'Scan it with your phone camera to sign in there, or follow step 2 below.'));
-            const signInOpenedNote = () => showNote(statusEl, 'info', '🌐', t('chassis.signin_opened', 'Sign-in window opened:'),
-              t('chassis.signin_opened_desc', 'Sign in to your account. When the page says “This site can’t be reached”, copy the full address from the address bar and paste it in step 2 below.'));
+            const qrReadyNote = () =>
+              showNote(
+                statusEl,
+                'info',
+                '📱',
+                t('chassis.qr_ready', 'QR code ready:'),
+                t('chassis.qr_ready_desc', 'Scan it with your phone camera to sign in there, or follow step 2 below.')
+              );
+            const signInOpenedNote = () =>
+              showNote(
+                statusEl,
+                'info',
+                '🌐',
+                t('chassis.signin_opened', 'Sign-in window opened:'),
+                t(
+                  'chassis.signin_opened_desc',
+                  'Sign in to your account. When the page says “This site can’t be reached”, copy the full address from the address bar and paste it in step 2 below.'
+                )
+              );
 
             const startOAuth = async (isQr = false, forceNew = false) => {
               // Reuse existing active session if available
@@ -2484,7 +2793,11 @@ export async function openNewCloudRemoteModal(onSuccess) {
               }
               if (qrBtn) qrBtn.disabled = true;
               if (qrTarget && isQr) {
-                noteIn(qrTarget, t('chassis.qr_loading', 'Making the QR code…'), 'font-size: var(--kb-fs-xs); color: var(--lt-t-0a7a70ff, #0a7a70); font-weight: 600;');
+                noteIn(
+                  qrTarget,
+                  t('chassis.qr_loading', 'Making the QR code…'),
+                  'font-size: var(--kb-fs-xs); color: var(--lt-t-0a7a70ff, #0a7a70); font-weight: 600;'
+                );
               }
 
               showNote(statusEl, 'busy', '⏳', '', t('chassis.oauth_starting', 'Starting the sign-in…'));
@@ -2526,7 +2839,15 @@ export async function openNewCloudRemoteModal(onSuccess) {
                   }, 2500);
                 }
               } catch (err) {
-                showNote(statusEl, 'error', '❌', '', t('chassis.oauth_start_failed', 'Could not start the sign-in: {error}', { error: err.message || t('toast.unknown_error', 'Unknown error') }));
+                showNote(
+                  statusEl,
+                  'error',
+                  '❌',
+                  '',
+                  t('chassis.oauth_start_failed', 'Could not start the sign-in: {error}', {
+                    error: err.message || t('toast.unknown_error', 'Unknown error'),
+                  })
+                );
                 if (isQr && qrTarget) {
                   qrTarget.innerHTML = `
                     <div style="padding: 12px; text-align: center; color: var(--lt-t-ef4444ff, #ef4444); font-size: var(--kb-fs-xs);">
@@ -2605,11 +2926,26 @@ export async function openNewCloudRemoteModal(onSuccess) {
               try {
                 if (navigator.clipboard && navigator.clipboard.readText) {
                   const clip = await navigator.clipboard.readText();
-                  if (clip && (clip.includes('localhost:53682') || clip.includes('127.0.0.1:53682') || clip.includes('code='))) {
+                  if (
+                    clip &&
+                    (clip.includes('localhost:53682') || clip.includes('127.0.0.1:53682') || clip.includes('code='))
+                  ) {
                     if (urlInput && !urlInput.value.trim()) {
                       urlInput.value = clip.trim();
-                      showToast(t('toast.detected_oauth_redirect_url_from_clipboard', 'Detected OAuth redirect URL from clipboard!'), 'info');
-                      showNote(statusEl, 'ok', '📋', t('chassis.clip_found', 'Sign-in address found on the clipboard.'), t('chassis.clip_found_desc', 'It is filled in at step 2. Click “Finish sign-in” to finish.'));
+                      showToast(
+                        t(
+                          'toast.detected_oauth_redirect_url_from_clipboard',
+                          'Detected OAuth redirect URL from clipboard!'
+                        ),
+                        'info'
+                      );
+                      showNote(
+                        statusEl,
+                        'ok',
+                        '📋',
+                        t('chassis.clip_found', 'Sign-in address found on the clipboard.'),
+                        t('chassis.clip_found_desc', 'It is filled in at step 2. Click “Finish sign-in” to finish.')
+                      );
                       if (exchangeBtn) {
                         exchangeBtn.focus();
                       }
@@ -2626,11 +2962,20 @@ export async function openNewCloudRemoteModal(onSuccess) {
               exchangeBtn.onclick = async () => {
                 const rawUrl = urlInput.value.trim();
                 if (!rawUrl) {
-                  showToast(t('toast.please_paste_the_redirect_url_first', 'Please paste the redirect URL first'), 'warning');
+                  showToast(
+                    t('toast.please_paste_the_redirect_url_first', 'Please paste the redirect URL first'),
+                    'warning'
+                  );
                   return;
                 }
                 if (!_currentOAuthSession?.session_id) {
-                  showToast(t('toast.no_active_authorization_session_please_click', 'No active authorization session. Please click 1-Click Authorize first.'), 'warning');
+                  showToast(
+                    t(
+                      'toast.no_active_authorization_session_please_click',
+                      'No active authorization session. Please click 1-Click Authorize first.'
+                    ),
+                    'warning'
+                  );
                   return;
                 }
                 exchangeBtn.disabled = true;
@@ -2653,7 +2998,15 @@ export async function openNewCloudRemoteModal(onSuccess) {
                     throw new Error(exRes?.error || 'Token exchange failed');
                   }
                 } catch (err) {
-                  showNote(statusEl, 'error', '❌', '', t('chassis.oauth_finish_failed', 'Could not finish the sign-in: {error}', { error: err.message || t('toast.unknown_error', 'Unknown error') }));
+                  showNote(
+                    statusEl,
+                    'error',
+                    '❌',
+                    '',
+                    t('chassis.oauth_finish_failed', 'Could not finish the sign-in: {error}', {
+                      error: err.message || t('toast.unknown_error', 'Unknown error'),
+                    })
+                  );
                 } finally {
                   exchangeBtn.disabled = false;
                   setLabel(exchangeBtn, '✓', t('chassis.oauth_finish', 'Finish sign-in'));
@@ -2710,13 +3063,16 @@ export async function openNewCloudRemoteModal(onSuccess) {
         try {
           const res = await api.post('/api/remotes/test', {
             type: provType,
-            parameters
+            parameters,
           });
 
           if (res && res.success) {
             testBtn.classList.add('tested-green');
             testBtn.innerHTML = `<span><span aria-hidden="true">✅</span> ${t('remotes.test_btn_success', 'Connection Successful')}</span>`;
-            showToast(t('remotes.test_success', 'Connection test successful! Valid credentials and remote accessible.'), 'ok');
+            showToast(
+              t('remotes.test_success', 'Connection test successful! Valid credentials and remote accessible.'),
+              'ok'
+            );
             if (res.drive_id) {
               const driveIdInput = dynamicFields?.querySelector('input[name="drive_id"]');
               if (driveIdInput && !driveIdInput.value) {
@@ -2732,19 +3088,41 @@ export async function openNewCloudRemoteModal(onSuccess) {
               }
             }
             const found = (res.items_sample || []).slice(0, 3).join(', ');
-            showNote(testResult, 'ok', '✅', t('chassis.test_ok', 'Connection works.'), found
-              ? t('chassis.test_ok_files', 'The sign-in details are valid and the cloud drive answers. Files found: {files}.', { files: found })
-              : t('chassis.test_ok_desc', 'The sign-in details are valid and the cloud drive answers.'));
+            showNote(
+              testResult,
+              'ok',
+              '✅',
+              t('chassis.test_ok', 'Connection works.'),
+              found
+                ? t(
+                    'chassis.test_ok_files',
+                    'The sign-in details are valid and the cloud drive answers. Files found: {files}.',
+                    { files: found }
+                  )
+                : t('chassis.test_ok_desc', 'The sign-in details are valid and the cloud drive answers.')
+            );
           } else {
             testBtn.classList.remove('tested-green');
             setLabel(testBtn, '⚡', t('chassis.test_connection', 'Test connection'));
-            showNote(testResult, 'error', '❌', t('chassis.test_failed', 'Connection failed:'), res?.error || t('chassis.test_refused', 'The sign-in was refused'));
+            showNote(
+              testResult,
+              'error',
+              '❌',
+              t('chassis.test_failed', 'Connection failed:'),
+              res?.error || t('chassis.test_refused', 'The sign-in was refused')
+            );
             showToast(res?.error || 'Connection test failed', 'error');
           }
         } catch (err) {
           testBtn.classList.remove('tested-green');
           setLabel(testBtn, '⚡', t('chassis.test_connection', 'Test connection'));
-          showNote(testResult, 'error', '❌', t('chassis.test_failed', 'Connection failed:'), err.message || t('chassis.test_no_answer', 'No answer from the NAS'));
+          showNote(
+            testResult,
+            'error',
+            '❌',
+            t('chassis.test_failed', 'Connection failed:'),
+            err.message || t('chassis.test_no_answer', 'No answer from the NAS')
+          );
           showToast(err.message || 'Error testing connection', 'error');
         } finally {
           testBtn.disabled = false;
@@ -2792,7 +3170,7 @@ export async function openNewCloudRemoteModal(onSuccess) {
           await api.post('/api/remotes', {
             name,
             type: provType,
-            parameters
+            parameters,
           });
 
           if (autoMountToggle && autoMountToggle.checked) {
@@ -2804,7 +3182,12 @@ export async function openNewCloudRemoteModal(onSuccess) {
           }
 
           close();
-          showToast(t('toast.cloud_remote_connected_successfully', 'Cloud remote \'{name}\' connected successfully!', { name: name }), 'info');
+          showToast(
+            t('toast.cloud_remote_connected_successfully', "Cloud remote '{name}' connected successfully!", {
+              name: name,
+            }),
+            'info'
+          );
           ZettEventBus.emit('fm:refresh');
           ZettEventBus.emit('storage:mount_changed', { name, path: `/mnt/remotes/${name}`, action: 'create' });
           if (onSuccess) onSuccess();
@@ -2822,7 +3205,12 @@ export async function openNewCloudRemoteModal(onSuccess) {
       };
     }
   } catch (err) {
-    showToast(t('toast.failed_load_storage_providers', 'Failed to load storage providers: {error}', { error: err.message || t('toast.unknown_error', 'Unknown error') }), 'error');
+    showToast(
+      t('toast.failed_load_storage_providers', 'Failed to load storage providers: {error}', {
+        error: err.message || t('toast.unknown_error', 'Unknown error'),
+      }),
+      'error'
+    );
   }
 }
 
@@ -2835,7 +3223,14 @@ if (typeof window !== 'undefined') {
  */
 function askPoolPrompt(title, msg, inputType) {
   return new Promise((resolve) => {
-    showPromptToast(title, msg, '', (v) => resolve(v ? v.trim() : null), () => resolve(null), { inputType, okText: t('common.continue', 'Continue') });
+    showPromptToast(
+      title,
+      msg,
+      '',
+      (v) => resolve(v ? v.trim() : null),
+      () => resolve(null),
+      { inputType, okText: t('common.continue', 'Continue') }
+    );
   });
 }
 
@@ -2899,17 +3294,21 @@ export async function openCreateStoragePoolModal(onSuccess) {
 
   // Populate available physical disks
   if (disksContainer) {
-    noteIn(disksContainer, t('chassis.scanning_disks', 'Looking for free drives…'), 'color:var(--muted); font-size:var(--kb-fs-xs);');
+    noteIn(
+      disksContainer,
+      t('chassis.scanning_disks', 'Looking for free drives…'),
+      'color:var(--muted); font-size:var(--kb-fs-xs);'
+    );
     try {
       const overview = await api.get('/api/storage/overview').catch(() => null);
       let disksList = overview?.unassigned_disks;
       if (!disksList || disksList.length === 0) {
         const disksRes = await api.get('/api/storage/disks').catch(() => null);
-        disksList = Array.isArray(disksRes) ? disksRes : (disksRes?.disks || null);
+        disksList = Array.isArray(disksRes) ? disksRes : disksRes?.disks || null;
       }
       if (!disksList || disksList.length === 0) {
         const legacyRes = await api.get('/api/system/disks').catch(() => []);
-        disksList = Array.isArray(legacyRes) ? legacyRes : (legacyRes?.disks || []);
+        disksList = Array.isArray(legacyRes) ? legacyRes : legacyRes?.disks || [];
       }
       const filtered = (disksList || []).filter((d) => {
         const n = String(d.dev || d.name || '').toLowerCase();
@@ -2917,17 +3316,29 @@ export async function openCreateStoragePoolModal(onSuccess) {
       });
 
       if (filtered.length === 0) {
-        noteIn(disksContainer, t('chassis.no_free_disks', 'No free drives.'), 'color:var(--muted); font-size:var(--kb-fs-xs);');
+        noteIn(
+          disksContainer,
+          t('chassis.no_free_disks', 'No free drives.'),
+          'color:var(--muted); font-size:var(--kb-fs-xs);'
+        );
       } else {
-        disksContainer.innerHTML = filtered.map((d) => `
+        disksContainer.innerHTML = filtered
+          .map(
+            (d) => `
           <label class="cv-row-xs-strong">
             <input class="cv-x-9" type="checkbox" name="pool-disk" value="${escapeHtml(d.dev || d.name)}" />
             <span><strong>/dev/${escapeHtml(d.dev || d.name)}</strong> (${d.size || formatBytes(d.size_bytes)}) · ${escapeHtml(d.model || '')}</span>
           </label>
-        `).join('');
+        `
+          )
+          .join('');
       }
     } catch (dErr) {
-      noteIn(disksContainer, t('chassis.scan_failed', 'Could not look for drives.'), 'color:var(--muted); font-size:var(--kb-fs-xs);');
+      noteIn(
+        disksContainer,
+        t('chassis.scan_failed', 'Could not look for drives.'),
+        'color:var(--muted); font-size:var(--kb-fs-xs);'
+      );
     }
   }
 
@@ -2956,7 +3367,11 @@ export async function openCreateStoragePoolModal(onSuccess) {
       // second yes if the server finds existing data on them.
       const typed = await askPoolPrompt(
         t('chassis.erase_title', 'Erase and format disks'),
-        t('chassis.erase_msg', 'Every selected disk ({disks}) will be erased. Type the pool name "{name}" to confirm.', { disks: disks.join(', '), name }),
+        t(
+          'chassis.erase_msg',
+          'Every selected disk ({disks}) will be erased. Type the pool name "{name}" to confirm.',
+          { disks: disks.join(', '), name }
+        ),
         'text'
       );
       if (typed === null) return;
@@ -2972,7 +3387,15 @@ export async function openCreateStoragePoolModal(onSuccess) {
         submitBtn.textContent = t('ui.provisioning', 'Provisioning...');
       }
 
-      const body = { name, fs_type: fsType, profile, disks, mountpoint, confirm_name: typed, current_password: password };
+      const body = {
+        name,
+        fs_type: fsType,
+        profile,
+        disks,
+        mountpoint,
+        confirm_name: typed,
+        current_password: password,
+      };
       try {
         try {
           await api.post('/api/storage/pools', body, { confirmed: true });
@@ -2994,7 +3417,12 @@ export async function openCreateStoragePoolModal(onSuccess) {
         }
 
         close();
-        showToast(t('toast.storage_pool_provisioned_successfully', 'Storage pool \'{name}\' provisioned successfully!', { name: name }), 'info');
+        showToast(
+          t('toast.storage_pool_provisioned_successfully', "Storage pool '{name}' provisioned successfully!", {
+            name: name,
+          }),
+          'info'
+        );
         if (onSuccess) onSuccess();
       } catch (err) {
         if (errorBox) {
@@ -3019,9 +3447,15 @@ export function confirmOpenShare(guest, nfsEveryone) {
   if (!guest && !nfsEveryone) return Promise.resolve(true);
   const parts = [];
   if (guest) parts.push(t('share.confirm_guest', 'Anyone on your network can open this folder without a password.'));
-  if (nfsEveryone) parts.push(t('share.confirm_nfs_all', 'Any computer that can reach this NAS can mount it over NFS.'));
+  if (nfsEveryone)
+    parts.push(t('share.confirm_nfs_all', 'Any computer that can reach this NAS can mount it over NFS.'));
   return new Promise((resolve) => {
-    showConfirmToast(t('share.confirm_open_title', 'Open this folder to everyone?'), parts.join(' '), () => resolve(true), () => resolve(false));
+    showConfirmToast(
+      t('share.confirm_open_title', 'Open this folder to everyone?'),
+      parts.join(' '),
+      () => resolve(true),
+      () => resolve(false)
+    );
   });
 }
 
@@ -3038,7 +3472,9 @@ export function openCreateNetworkShareModal(onSuccess) {
   let _unbindTrap = null;
   const close = () => {
     if (_unbindTrap) {
-      try { _unbindTrap(); } catch (_) {}
+      try {
+        _unbindTrap();
+      } catch (_) {}
       _unbindTrap = null;
     }
     modal.classList.remove('open');
@@ -3109,7 +3545,10 @@ export function openCreateNetworkShareModal(onSuccess) {
       if (!name) return;
       if (isTm && !quotaGb) {
         if (errorBox) {
-          errorBox.textContent = t('chassis.tm_needs_limit', 'Give a Time Machine folder a size limit, so the backups cannot fill the storage.');
+          errorBox.textContent = t(
+            'chassis.tm_needs_limit',
+            'Give a Time Machine folder a size limit, so the backups cannot fill the storage.'
+          );
           errorBox.style.display = 'block';
         }
         return;
@@ -3142,7 +3581,10 @@ export function openCreateNetworkShareModal(onSuccess) {
         });
 
         close();
-        showToast(t('toast.share_created_successfully', 'Share \'{name}\' created successfully!', { name: name }), 'info');
+        showToast(
+          t('toast.share_created_successfully', "Share '{name}' created successfully!", { name: name }),
+          'info'
+        );
         if (onSuccess) onSuccess();
         // Shares R1, step 2: who may open it, in the same window the card's "Change" opens
         import('./share-who.js').then((m) => m.openWhoWindow(name, onSuccess)).catch(() => {});
@@ -3172,7 +3614,10 @@ export function pickShareFolder() {
     if (!clean) return;
     pathIn.value = clean;
     if (nameIn && !nameIn.value.trim()) {
-      nameIn.value = (clean.split('/').pop() || '').toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '');
+      nameIn.value = (clean.split('/').pop() || '')
+        .toLowerCase()
+        .replace(/[^a-z0-9_-]+/g, '-')
+        .replace(/^-+|-+$/g, '');
     }
   });
   return true;
@@ -3238,7 +3683,14 @@ export function openRenameStoragePoolModal(poolId, currentName, onSuccess) {
         });
 
         close();
-        showToast(t('toast.storage_pool_renamed_to_successfully', 'Storage pool \'{currentName}\' renamed to \'{newName}\' successfully!', { currentName: currentName, newName: newName }), 'info');
+        showToast(
+          t(
+            'toast.storage_pool_renamed_to_successfully',
+            "Storage pool '{currentName}' renamed to '{newName}' successfully!",
+            { currentName: currentName, newName: newName }
+          ),
+          'info'
+        );
         if (onSuccess) onSuccess();
       } catch (err) {
         if (errorBox) {
@@ -3273,21 +3725,44 @@ export async function erasePool(pid, done = () => {}) {
     showToast(err.message || t('chassis.erase_refused', 'This pool cannot be erased with certainty.'), 'error');
     return false;
   }
-  const shares = (plan.shares || []).length ? t('chassis.erase_shares', 'These shared folders stop working: {shares}.', { shares: plan.shares.join(', ') }) : '';
-  const msg = `${t('chassis.erase_pool_msg', 'Everything on these drives is lost: {drives}.', { drives: (plan.drives || []).join(', ') })} ${shares}`.trim();
+  const shares = (plan.shares || []).length
+    ? t('chassis.erase_shares', 'These shared folders stop working: {shares}.', { shares: plan.shares.join(', ') })
+    : '';
+  const msg =
+    `${t('chassis.erase_pool_msg', 'Everything on these drives is lost: {drives}.', { drives: (plan.drives || []).join(', ') })} ${shares}`.trim();
   const ok = await new Promise((resolve) =>
-    showDangerConfirm(t('chassis.erase_pool_title', 'Delete {pool} and erase its drives', { pool: pid }), msg, () => resolve(true), () => resolve(false), {
-      okText: t('chassis.erase_ok', 'Delete and erase'),
-      typeToConfirm: pid,
-      allowHtml: false,
-    }),
+    showDangerConfirm(
+      t('chassis.erase_pool_title', 'Delete {pool} and erase its drives', { pool: pid }),
+      msg,
+      () => resolve(true),
+      () => resolve(false),
+      {
+        okText: t('chassis.erase_ok', 'Delete and erase'),
+        typeToConfirm: pid,
+        allowHtml: false,
+      }
+    )
   );
   if (!ok) return false;
-  const password = await askPoolPrompt(t('chassis.confirm_pwd_title', 'Confirm with your password'), t('chassis.erase_pwd_msg', 'Enter your Kiboto password to erase the drives.'), 'password');
+  const password = await askPoolPrompt(
+    t('chassis.confirm_pwd_title', 'Confirm with your password'),
+    t('chassis.erase_pwd_msg', 'Enter your Kiboto password to erase the drives.'),
+    'password'
+  );
   if (password === null) return false;
   try {
-    const res = await api.post(`/api/storage/pools/${encodeURIComponent(pid)}/erase`, { confirm_name: pid, current_password: password }, { confirmed: true });
-    showToast(t('chassis.erased', '{pool} deleted; {n, plural, one {# drive} other {# drives}} erased.', { pool: pid, n: (res.drives || []).length }), 'success');
+    const res = await api.post(
+      `/api/storage/pools/${encodeURIComponent(pid)}/erase`,
+      { confirm_name: pid, current_password: password },
+      { confirmed: true }
+    );
+    showToast(
+      t('chassis.erased', '{pool} deleted; {n, plural, one {# drive} other {# drives}} erased.', {
+        pool: pid,
+        n: (res.drives || []).length,
+      }),
+      'success'
+    );
     done();
     return true;
   } catch (err) {

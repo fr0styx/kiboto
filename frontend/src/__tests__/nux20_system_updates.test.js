@@ -65,7 +65,10 @@ describe('updates panel words (NUX-20)', () => {
   });
 
   it('describes a tagged release, an up-to-date edge build and a failed check', async () => {
-    serve({ containerized: true, python_version: '3.13', chassis_model: 'D8' }, { channel: 'stable', update_available: true, latest_tag: 'v2.0.0', release_name: 'Two', release_notes: 'Notes' });
+    serve(
+      { containerized: true, python_version: '3.13', chassis_model: 'D8' },
+      { channel: 'stable', update_available: true, latest_tag: 'v2.0.0', release_name: 'Two', release_notes: 'Notes' }
+    );
     await fetchAndRenderSystemAbout(false, 'stable');
     expect(text('about-runtime-env')).toBe('Docker Container (Python 3.13)');
     expect(text('update-status-title')).toBe('Update Available: v2.0.0');
@@ -91,7 +94,9 @@ describe('updates panel words (NUX-20)', () => {
   });
 
   it('names the version a revert goes back to', async () => {
-    const get = vi.spyOn(api, 'get').mockResolvedValue({ previous: [{ id: 's1', version: '1.9.0', image_available: true }] });
+    const get = vi
+      .spyOn(api, 'get')
+      .mockResolvedValue({ previous: [{ id: 's1', version: '1.9.0', image_available: true }] });
     await refreshPreviousVersions();
     expect(text('btn-revert-update-text')).toBe('Revert to v1.9.0');
     get.mockResolvedValue({ previous: [{ id: 's2', image_available: true }] });
@@ -121,7 +126,9 @@ describe('updates panel words (NUX-20)', () => {
     await applySystemUpdate();
     const onOk = showConfirmToast.mock.calls.at(-1)[2];
     await onOk();
-    expect(byId('update-progress-desc').textContent).toBe('The new version is downloaded.Please restart the container in Unraid or Docker to finalize.');
+    expect(byId('update-progress-desc').textContent).toBe(
+      'The new version is downloaded.Please restart the container in Unraid or Docker to finalize.'
+    );
     post.mockResolvedValue({ auto_restarting: false, message: 'Pulled.' });
     await onOk();
     expect(byId('update-progress-desc').textContent).not.toContain('Pulled.'); // not the server's English
@@ -136,7 +143,8 @@ describe('updates panel words (NUX-20)', () => {
   });
 
   it('says when the diagnostics summary is empty', () => {
-    document.body.innerHTML = '<div id="diagnostics-preview-modal-overlay"><div class="smart-modal-window"></div></div><pre id="diagnostics-preview-md"></pre>';
+    document.body.innerHTML =
+      '<div id="diagnostics-preview-modal-overlay"><div class="smart-modal-window"></div></div><pre id="diagnostics-preview-md"></pre>';
     openDiagnosticsPreviewModal({});
     expect(text('diagnostics-preview-md')).toBe('No summary generated.');
     openDiagnosticsPreviewModal({ support_markdown: '# Report' });

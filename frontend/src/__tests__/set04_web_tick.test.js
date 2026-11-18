@@ -20,7 +20,9 @@ vi.mock('../toast.js', () => ({
 }));
 
 const box = () => document.getElementById('ai-chat-web-toggle');
-const tick = () => { box().checked = true; };
+const tick = () => {
+  box().checked = true;
+};
 
 describe('the Web tick in Ask Kib (SET-04)', () => {
   beforeEach(() => {

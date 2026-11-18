@@ -32,7 +32,8 @@ export function fromRows(on, school, weekend) {
   const rows = [];
   if (school.on) rows.push({ days: SCHOOL_DAYS, start: school.start, end: school.end });
   if (weekend.on) rows.push({ days: WEEKEND, start: weekend.start, end: weekend.end });
-  if (rows.length === 2 && rows[0].start === rows[1].start && rows[0].end === rows[1].end) return { days: [...SCHOOL_DAYS, ...WEEKEND], start: school.start, end: school.end };
+  if (rows.length === 2 && rows[0].start === rows[1].start && rows[0].end === rows[1].end)
+    return { days: [...SCHOOL_DAYS, ...WEEKEND], start: school.start, end: school.end };
   if (rows.length === 1) return rows[0];
   return { rows };
 }
@@ -71,45 +72,88 @@ export function installSigninHours(box, user, { canBeLimited = true } = {}) {
   const rowEl = (key, label, r) => {
     const tick = el('input', { type: 'checkbox', 'data-hours-row': key });
     tick.checked = r.on;
-    const start = el('input', { type: 'time', class: 'tz-select-input', 'data-hours-start': key, 'aria-label': `${label}: ${t('hours.from', 'From')}` });
+    const start = el('input', {
+      type: 'time',
+      class: 'tz-select-input',
+      'data-hours-start': key,
+      'aria-label': `${label}: ${t('hours.from', 'From')}`,
+    });
     start.value = r.start;
-    const end = el('input', { type: 'time', class: 'tz-select-input', 'data-hours-end': key, 'aria-label': `${label}: ${t('hours.until', 'Until')}` });
+    const end = el('input', {
+      type: 'time',
+      class: 'tz-select-input',
+      'data-hours-end': key,
+      'aria-label': `${label}: ${t('hours.until', 'Until')}`,
+    });
     end.value = r.end;
-    const times = el('div', { class: 'kb-hours-times' }, el('label', {}, t('hours.from', 'From'), ' ', start), el('label', {}, t('hours.until', 'Until'), ' ', end));
+    const times = el(
+      'div',
+      { class: 'kb-hours-times' },
+      el('label', {}, t('hours.from', 'From'), ' ', start),
+      el('label', {}, t('hours.until', 'Until'), ' ', end)
+    );
     times.hidden = !r.on;
-    tick.addEventListener('change', () => { times.hidden = !tick.checked; });
-    return el('div', { class: 'kb-hours-row', role: 'group', 'aria-label': label },
+    tick.addEventListener('change', () => {
+      times.hidden = !tick.checked;
+    });
+    return el(
+      'div',
+      { class: 'kb-hours-row', role: 'group', 'aria-label': label },
       el('label', { class: 'kb-hours-row-name' }, tick, el('span', { text: label })),
       times,
-      el('span', { class: 'kb-sub', 'data-hours-closed': key, text: t('hours.closed', 'No sign-in these days'), hidden: r.on }));
+      el('span', {
+        class: 'kb-sub',
+        'data-hours-closed': key,
+        text: t('hours.closed', 'No sign-in these days'),
+        hidden: r.on,
+      })
+    );
   };
   const school = t('hours.school', 'School days ({first}–{last})', { first: names[0], last: names[4] });
   const weekend = t('hours.weekend', 'Weekends ({first}–{last})', { first: names[5], last: names[6] });
-  const fields = el('div', { class: 'kb-hours', 'data-hours-fields': true },
+  const fields = el(
+    'div',
+    { class: 'kb-hours', 'data-hours-fields': true },
     rowEl('school', school, rows.school),
     rowEl('weekend', weekend, rows.weekend),
-    el('div', { class: 'kb-sub', text: serverTimeHint() }));
+    el('div', { class: 'kb-sub', text: serverTimeHint() })
+  );
   fields.addEventListener('change', (e) => {
     const key = /** @type {HTMLElement} */ (e.target).getAttribute('data-hours-row');
     const note = key && fields.querySelector(`[data-hours-closed="${key}"]`);
     if (note) /** @type {HTMLElement} */ (note).hidden = /** @type {HTMLInputElement} */ (e.target).checked;
   });
   fields.hidden = !hours;
-  box.replaceChildren(el('label', { class: 'kb-toggle' }, on, el('span', { text: t('hours.only_at', 'Only at these times') })), fields);
+  box.replaceChildren(
+    el('label', { class: 'kb-toggle' }, on, el('span', { text: t('hours.only_at', 'Only at these times') })),
+    fields
+  );
   let changed = false;
-  on.addEventListener('change', () => { fields.hidden = !on.checked; });
-  box.addEventListener('change', () => { changed = true; });
+  on.addEventListener('change', () => {
+    fields.hidden = !on.checked;
+  });
+  box.addEventListener('change', () => {
+    changed = true;
+  });
   return () => changed;
 }
 
 /** The hint names the server's zone and its time now, so "server time" means something (NUX-10). */
 export function serverTimeHint(zone = state.currentTimezone, now = Date.now()) {
-  if (!zone) return t('hours.hint', "Server time. Outside these hours this person can't sign in, and an open session stops until they start again.");
+  if (!zone)
+    return t(
+      'hours.hint',
+      "Server time. Outside these hours this person can't sign in, and an open session stops until they start again."
+    );
   let time;
   try {
     time = formatTime(now, { hour: '2-digit', minute: '2-digit', timeZone: zone });
   } catch {
     time = ''; // an unknown zone: no time shown
   }
-  return t('hours.hint_zone', "Server time ({zone}, now {time}). Outside these hours this person can't sign in, and an open session stops until they start again.", { zone, time });
+  return t(
+    'hours.hint_zone',
+    "Server time ({zone}, now {time}). Outside these hours this person can't sign in, and an open session stops until they start again.",
+    { zone, time }
+  );
 }

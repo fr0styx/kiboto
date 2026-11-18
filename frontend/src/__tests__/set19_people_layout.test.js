@@ -19,6 +19,9 @@ describe("People's layout (SET-19, Users report section 5)", () => {
     const advanced = /** @type {HTMLDetailsElement} */ (list.querySelector('.people-advanced'));
     expect(advanced.open).toBe(false);
     expect(advanced.querySelector('#btn-share-access')).not.toBeNull();
-    expect([...advanced.querySelectorAll('a')].map((a) => a.getAttribute('href'))).toEqual(['#/security', '#/security']);
+    expect([...advanced.querySelectorAll('a')].map((a) => a.getAttribute('href'))).toEqual([
+      '#/security',
+      '#/security',
+    ]);
   });
 });

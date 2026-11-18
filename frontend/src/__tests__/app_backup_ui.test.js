@@ -30,7 +30,7 @@ describe('Application Backups & Recovery UI (21a, 21b, 21c)', () => {
     await fetchAndRenderAppBackups(mount);
 
     expect(mount.innerHTML).toContain('No app backups yet');
-    expect(mount.innerHTML).toContain("An app backup is made when");
+    expect(mount.innerHTML).toContain('An app backup is made when');
   });
 
   it('renders application backups table with uninstall and on-demand badges, file details, and action buttons', async () => {
@@ -149,10 +149,7 @@ describe('Application Backups & Recovery UI (21a, 21b, 21c)', () => {
     confirmBtn.click();
 
     // Verify API called with archive_data=true
-    expect(deleteSpy).toHaveBeenCalledWith(
-      expect.stringContaining('archive_data=true'),
-      { confirmed: true }
-    );
+    expect(deleteSpy).toHaveBeenCalledWith(expect.stringContaining('archive_data=true'), { confirmed: true });
   });
 
   it('sends archive_data: false when archive checkbox is unchecked in destroy modal', async () => {
@@ -170,9 +167,6 @@ describe('Application Backups & Recovery UI (21a, 21b, 21c)', () => {
     const confirmBtn = document.getElementById('cdm-confirm-btn');
     confirmBtn.click();
 
-    expect(deleteSpy).toHaveBeenCalledWith(
-      expect.stringContaining('archive_data=false'),
-      { confirmed: true }
-    );
+    expect(deleteSpy).toHaveBeenCalledWith(expect.stringContaining('archive_data=false'), { confirmed: true });
   });
 });

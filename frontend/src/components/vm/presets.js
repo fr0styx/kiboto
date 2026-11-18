@@ -26,10 +26,16 @@ export function presetsHtml() {
 /** What to tell someone after choosing a preset. */
 export function presetNote(id) {
   if (id === 'homeassistant') {
-    return t('vmp.n_ha', 'Home Assistant OS comes as a ready-made disk. If "Ready-made disk" shows none, download Home Assistant OS from the ISO catalog first.');
+    return t(
+      'vmp.n_ha',
+      'Home Assistant OS comes as a ready-made disk. If "Ready-made disk" shows none, download Home Assistant OS from the ISO catalog first.'
+    );
   }
   if (id === 'windows11') {
-    return t('vmp.n_win11', 'Windows 11 needs UEFI and a TPM: both are set. Choose the Windows installer as the boot ISO, and virtio-win (from the ISO catalog) as the driver disc, so Windows Setup can see its disk.');
+    return t(
+      'vmp.n_win11',
+      'Windows 11 needs UEFI and a TPM: both are set. Choose the Windows installer as the boot ISO, and virtio-win (from the ISO catalog) as the driver disc, so Windows Setup can see its disk.'
+    );
   }
   return t('vmp.n_linux', 'Choose the installer as the boot ISO, or pick one from the ISO catalog.');
 }
@@ -71,7 +77,11 @@ export function applyPreset(modal, id) {
     tpm.checked = p.tpm;
     tpm.dispatchEvent(new Event('change', { bubbles: true }));
   }
-  modal.querySelectorAll('[data-vm-preset]').forEach((b) => b.setAttribute('aria-pressed', /** @type {HTMLElement} */ (b).dataset.vmPreset === id ? 'true' : 'false'));
+  modal
+    .querySelectorAll('[data-vm-preset]')
+    .forEach((b) =>
+      b.setAttribute('aria-pressed', /** @type {HTMLElement} */ (b).dataset.vmPreset === id ? 'true' : 'false')
+    );
   const note = /** @type {HTMLElement | null} */ (modal.querySelector('#vm-preset-note'));
   if (note) {
     note.textContent = presetNote(id);

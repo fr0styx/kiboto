@@ -4,7 +4,8 @@ import { ZettEventBus } from '../event-bus.js';
 import { isOffline } from '../connection.js';
 import { loadLanguage } from '../i18n.js';
 
-const ok = (body = {}) => new Response(JSON.stringify(body), { status: 200, headers: { 'Content-Type': 'application/json' } });
+const ok = (body = {}) =>
+  new Response(JSON.stringify(body), { status: 200, headers: { 'Content-Type': 'application/json' } });
 
 describe('API client resilience (FE-16)', () => {
   afterEach(() => {
@@ -19,9 +20,12 @@ describe('API client resilience (FE-16)', () => {
 
   it('times out reads after 15 s', async () => {
     vi.useFakeTimers();
-    vi.spyOn(window, 'fetch').mockImplementation((url, opts) => new Promise((_, reject) => {
-      opts.signal.addEventListener('abort', () => reject(new DOMException('aborted', 'AbortError')));
-    }));
+    vi.spyOn(window, 'fetch').mockImplementation(
+      (url, opts) =>
+        new Promise((_, reject) => {
+          opts.signal.addEventListener('abort', () => reject(new DOMException('aborted', 'AbortError')));
+        })
+    );
     const p = api.get('/api/slow').catch((e) => e);
     await vi.advanceTimersByTimeAsync(15001);
     const err = await p;
@@ -29,7 +33,9 @@ describe('API client resilience (FE-16)', () => {
   });
 
   it('shows the offline state on network errors and clears it on the next success', async () => {
-    vi.spyOn(window, 'fetch').mockRejectedValueOnce(new TypeError('Failed to fetch')).mockResolvedValueOnce(ok({ a: 1 }));
+    vi.spyOn(window, 'fetch')
+      .mockRejectedValueOnce(new TypeError('Failed to fetch'))
+      .mockResolvedValueOnce(ok({ a: 1 }));
     await api.get('/api/x').catch(() => {});
     expect(isOffline()).toBe(true);
     expect(document.getElementById('kb-offline-banner').hidden).toBe(false);
@@ -40,7 +46,8 @@ describe('API client resilience (FE-16)', () => {
   it('retries a write after the same user signs in again', async () => {
     auth.setToken('x');
     setSessionUserProvider(() => 'alice');
-    const fetchSpy = vi.spyOn(window, 'fetch')
+    const fetchSpy = vi
+      .spyOn(window, 'fetch')
       .mockResolvedValueOnce(new Response('{}', { status: 401 }))
       .mockResolvedValueOnce(ok({ saved: true }));
     const p = api.post('/api/notes', { text: 'hi' });

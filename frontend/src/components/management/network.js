@@ -24,22 +24,24 @@ export async function fetchAndRenderCopyHistory() {
   try {
     const history = await api.get('/api/copy/history?limit=30');
     if (!history || history.length === 0) {
-      tbody.innerHTML = '<tr><td class="nw-muted-center" colspan="7">' + t('net.no_imports', 'No imports recorded yet.') + '</td></tr>';
+      tbody.innerHTML =
+        '<tr><td class="nw-muted-center" colspan="7">' + t('net.no_imports', 'No imports recorded yet.') + '</td></tr>';
       return;
     }
-    tbody.innerHTML = history.map((item) => {
-      const d = new Date(item.ts * 1000);
-      const timeStr = formatDateTime(d);
-      const sizeMB = formatFixed(item.total_bytes / (1024 * 1024), 1);
-      const durStr = item.duration_sec ? `${formatFixed(item.duration_sec, 1)}s` : '--';
-      const isSuccess = item.status === 'success';
-      const statusColor = isSuccess ? 'var(--ok2)' : item.status === 'aborted' ? 'var(--warn)' : 'var(--crit)';
-      const checksumBadge = item.checksum_verified
-        ? '<span class="checksum-badge">✓ SHA-256</span>'
-        : '<span class="nw-xs-muted">' + t('ci.none', 'None') + '</span>';
-      const destName = item.dest ? item.dest.split('/').filter(Boolean).pop() || item.dest : '/';
+    tbody.innerHTML = history
+      .map((item) => {
+        const d = new Date(item.ts * 1000);
+        const timeStr = formatDateTime(d);
+        const sizeMB = formatFixed(item.total_bytes / (1024 * 1024), 1);
+        const durStr = item.duration_sec ? `${formatFixed(item.duration_sec, 1)}s` : '--';
+        const isSuccess = item.status === 'success';
+        const statusColor = isSuccess ? 'var(--ok2)' : item.status === 'aborted' ? 'var(--warn)' : 'var(--crit)';
+        const checksumBadge = item.checksum_verified
+          ? '<span class="checksum-badge">✓ SHA-256</span>'
+          : '<span class="nw-xs-muted">' + t('ci.none', 'None') + '</span>';
+        const destName = item.dest ? item.dest.split('/').filter(Boolean).pop() || item.dest : '/';
 
-      return `
+        return `
         <tr>
           <td class="nw-xs-muted-mono">${timeStr}</td>
           <td><strong>${(item.source || 'sd').toUpperCase()}</strong></td>
@@ -53,7 +55,8 @@ export async function fetchAndRenderCopyHistory() {
           </td>
         </tr>
       `;
-    }).join('');
+      })
+      .join('');
   } catch (e) {
     tbody.innerHTML = `<tr><td class="nw-crit-center" colspan="7">${escapeHtml(t('net.history_failed', 'Could not load the history: {error}', { error: e.message }))}</td></tr>`;
   }
@@ -133,7 +136,10 @@ export async function fetchAndRenderReplication() {
             btn.disabled = true;
             setIconLabel(btn, '⏳', t('ui.running_2', 'Running...'));
             await api.post(`/api/storage/replication/jobs/${encodeURIComponent(id)}/run`);
-            showToast(t('toast.replication_pipeline_dispatched', 'Replication pipeline \'{id}\' dispatched.', { id: id }), 'success');
+            showToast(
+              t('toast.replication_pipeline_dispatched', "Replication pipeline '{id}' dispatched.", { id: id }),
+              'success'
+            );
             setTimeout(fetchAndRenderReplication, 1000);
           } catch (e) {
             showToast(t('toast.replication_failed', 'Replication failed: {message}', { message: e.message }), 'error');
@@ -153,7 +159,7 @@ export async function fetchAndRenderReplication() {
             async () => {
               try {
                 await api.delete(`/api/storage/replication/jobs/${encodeURIComponent(id)}`);
-                showToast(t('toast.pipeline_deleted', 'Pipeline \'{id}\' deleted.', { id: id }), 'success');
+                showToast(t('toast.pipeline_deleted', "Pipeline '{id}' deleted.", { id: id }), 'success');
                 fetchAndRenderReplication();
               } catch (e) {
                 showToast(t('toast.delete_failed_2', 'Delete failed: {message}', { message: e.message }), 'error');
@@ -201,7 +207,7 @@ export function renderTailscalePeersTable(peers, filterQuery = '') {
   const peersArr = Array.isArray(peers) ? peers : [];
   const filtered = q
     ? peersArr.filter(
-        p =>
+        (p) =>
           (p.name || p.hostname || '').toLowerCase().includes(q) ||
           (p.ip || '').includes(q) ||
           (p.os || '').toLowerCase().includes(q)
@@ -209,18 +215,23 @@ export function renderTailscalePeersTable(peers, filterQuery = '') {
     : peersArr;
 
   if (countPill) {
-    const onlineCount = peersArr.filter(p => p.online).length;
-    countPill.textContent = t('net.peers_count', '{online} online / {total} total', { online: onlineCount, total: peersArr.length });
+    const onlineCount = peersArr.filter((p) => p.online).length;
+    countPill.textContent = t('net.peers_count', '{online} online / {total} total', {
+      online: onlineCount,
+      total: peersArr.length,
+    });
   }
 
   if (filtered.length === 0) {
     tbody.innerHTML =
-      '<tr><td class="nw-muted-center-3" colspan="5">' + t('net.no_peer_match', 'No devices match the search.') + '</td></tr>';
+      '<tr><td class="nw-muted-center-3" colspan="5">' +
+      t('net.no_peer_match', 'No devices match the search.') +
+      '</td></tr>';
     return;
   }
 
   tbody.innerHTML = filtered
-    .map(p => {
+    .map((p) => {
       const osLower = (p.os || '').toLowerCase();
       let osLabel = `🌐 ${p.os || 'Unknown'}`;
       if (osLower.includes('ios')) osLabel = '📱 iOS';
@@ -230,13 +241,19 @@ export function renderTailscalePeersTable(peers, filterQuery = '') {
       else if (osLower.includes('linux')) osLabel = '🐧 Linux';
 
       const routeBadge = p.cur_addr
-        ? '<span style="color:var(--lt-t-3bf58bff, #3bf58b); font-weight:600;">' + ico('⚡') + ' ' + t('net.direct', 'Direct (P2P)') + '</span>'
+        ? '<span style="color:var(--lt-t-3bf58bff, #3bf58b); font-weight:600;">' +
+          ico('⚡') +
+          ' ' +
+          t('net.direct', 'Direct (P2P)') +
+          '</span>'
         : p.relay
           ? `<span style="color:var(--lt-t-f59e0bff, #f59e0b);">🌐 DERP (${escapeHtml(p.relay)})</span>`
           : '<span class="nw-muted">--</span>';
 
       const statusPill = p.online
-        ? '<span class="mgmt-app-pill" style="color:var(--lt-t-3bf58bff, #3bf58b); background:var(--lt-b-3bf58b1f, rgba(59,245,139,0.12)); font-size:var(--kb-fs-xs); padding:2px 7px;">' + t('net.online', 'Online') + '</span>'
+        ? '<span class="mgmt-app-pill" style="color:var(--lt-t-3bf58bff, #3bf58b); background:var(--lt-b-3bf58b1f, rgba(59,245,139,0.12)); font-size:var(--kb-fs-xs); padding:2px 7px;">' +
+          t('net.online', 'Online') +
+          '</span>'
         : '<span class="mgmt-app-pill nw-xs-muted-box">' + t('net.offline', 'Offline') + '</span>';
 
       return `
@@ -259,8 +276,19 @@ export function renderTailscalePeersTable(peers, filterQuery = '') {
 export function keyExpiryText(ts) {
   const days = ts?.key_expiry_days;
   if (days === null || days === undefined) return { text: t('net.ts_key_no_expiry', 'Never expires'), tone: 'ok' };
-  if (days > 14) return { text: t('net.expiry_days', 'Expires in {count, plural, one {# day} other {# days}} ({date})', { count: days, date: (ts.key_expiry || '').slice(0, 10) }), tone: 'ok' };
-  if (days > 0) return { text: t('net.expiry_soon', 'Expires in {count, plural, one {# day} other {# days}}', { count: days }), tone: 'warn' };
+  if (days > 14)
+    return {
+      text: t('net.expiry_days', 'Expires in {count, plural, one {# day} other {# days}} ({date})', {
+        count: days,
+        date: (ts.key_expiry || '').slice(0, 10),
+      }),
+      tone: 'ok',
+    };
+  if (days > 0)
+    return {
+      text: t('net.expiry_soon', 'Expires in {count, plural, one {# day} other {# days}}', { count: days }),
+      tone: 'warn',
+    };
   return { text: t('net.ts_key_expired', 'Expired: sign in again'), tone: 'crit' };
 }
 
@@ -307,7 +335,10 @@ async function loadTailscaleDetails() {
   set('ts-ipv4-display', ts.ipv4 || '--');
   set('ts-tailnet-display', ts.tailnet || '--');
   set('ts-hostname-display', ts.hostname || '--');
-  set('ts-peers-display', t('net.ts_devices_n', '{n, plural, one {# device} other {# devices}}', { n: ts.peers_count || 0 }));
+  set(
+    'ts-peers-display',
+    t('net.ts_devices_n', '{n, plural, one {# device} other {# devices}}', { n: ts.peers_count || 0 })
+  );
   const copyIp = document.getElementById('btn-copy-ts-ip');
   if (copyIp) copyIp.style.display = ts.ipv4 ? '' : 'none';
   const expiry = keyExpiryText(ts);
@@ -359,24 +390,47 @@ function bindTailscaleDetails() {
       const res = await api.post('/api/network/mesh-vpn/tailscale/reauth');
       if (res?.auth_url) {
         window.open(res.auth_url, '_blank', 'noopener,noreferrer');
-        showToast(t('toast.re_authentication_initiated_complete_in_your', 'Re-authentication initiated. Complete in your browser.'), 'info');
+        showToast(
+          t(
+            'toast.re_authentication_initiated_complete_in_your',
+            'Re-authentication initiated. Complete in your browser.'
+          ),
+          'info'
+        );
       } else {
-        showToast(t('toast.tailscale_node_re_authenticated_successfully', 'Tailscale node re-authenticated successfully.'), 'success');
+        showToast(
+          t('toast.tailscale_node_re_authenticated_successfully', 'Tailscale node re-authenticated successfully.'),
+          'success'
+        );
       }
       fetchAndRenderTailscaleDetails();
     } catch (err) {
-      showToast(t('toast.re_authentication_failed', 'Re-authentication failed: {error}', { error: err.message }), 'error');
+      showToast(
+        t('toast.re_authentication_failed', 'Re-authentication failed: {error}', { error: err.message }),
+        'error'
+      );
     }
   });
   const saveRoutes = async () => {
-    const routes = /** @type {HTMLInputElement | null} */ (document.getElementById('ts-subnet-routes-input'))?.value.trim() || '';
-    const enabled = Boolean(/** @type {HTMLInputElement | null} */ (document.getElementById('ts-subnet-router-toggle'))?.checked);
+    const routes =
+      /** @type {HTMLInputElement | null} */ (document.getElementById('ts-subnet-routes-input'))?.value.trim() || '';
+    const enabled = Boolean(
+      /** @type {HTMLInputElement | null} */ (document.getElementById('ts-subnet-router-toggle'))?.checked
+    );
     try {
       await api.post('/api/network/mesh-vpn/tailscale/set-routes', { routes, enabled });
-      showToast(enabled ? t('net.ts_reach_home_on', 'Your devices can now reach {routes} through this NAS.', { routes }) : t('net.ts_reach_home_off', 'Reaching things at home is off.'), 'success');
+      showToast(
+        enabled
+          ? t('net.ts_reach_home_on', 'Your devices can now reach {routes} through this NAS.', { routes })
+          : t('net.ts_reach_home_off', 'Reaching things at home is off.'),
+        'success'
+      );
       fetchAndRenderTailscaleDetails();
     } catch (e) {
-      showToast(t('toast.failed_to_update_subnet_routes', 'Failed to update subnet routes: {message}', { message: e.message }), 'error');
+      showToast(
+        t('toast.failed_to_update_subnet_routes', 'Failed to update subnet routes: {message}', { message: e.message }),
+        'error'
+      );
     }
   };
   once('btn-ts-save-routes', 'click', saveRoutes);
@@ -385,13 +439,23 @@ function bindTailscaleDetails() {
     const enabled = Boolean(/** @type {HTMLInputElement} */ (e.currentTarget).checked);
     try {
       await api.post('/api/network/mesh-vpn/tailscale/set-exit-node', { enabled });
-      showToast(enabled ? t('net.ts_home_internet_on', 'This NAS now offers your home internet to your devices.') : t('net.ts_home_internet_off', 'Home internet when away is off.'), 'success');
+      showToast(
+        enabled
+          ? t('net.ts_home_internet_on', 'This NAS now offers your home internet to your devices.')
+          : t('net.ts_home_internet_off', 'Home internet when away is off.'),
+        'success'
+      );
       fetchAndRenderTailscaleDetails();
     } catch (err) {
-      showToast(t('toast.failed_to_set_exit_node', 'Failed to set exit node: {message}', { message: err.message }), 'error');
+      showToast(
+        t('toast.failed_to_set_exit_node', 'Failed to set exit node: {message}', { message: err.message }),
+        'error'
+      );
     }
   });
-  once('ts-peer-search', 'input', (e) => renderTailscalePeersTable(_tsPeers, /** @type {HTMLInputElement} */ (e.currentTarget).value));
+  once('ts-peer-search', 'input', (e) =>
+    renderTailscalePeersTable(_tsPeers, /** @type {HTMLInputElement} */ (e.currentTarget).value)
+  );
   once('btn-refresh-wireguard', 'click', () => fetchAndRenderTailscaleDetails());
 }
 
@@ -469,7 +533,10 @@ async function loadNetworkTopology() {
         `);
       });
 
-      bridgesContainer.innerHTML = items.length > 0 ? items.join('') : `<div class="nw-xs-muted-3">${t('net.no_bridges', 'No virtual bridges or bonds yet.')}</div>`;
+      bridgesContainer.innerHTML =
+        items.length > 0
+          ? items.join('')
+          : `<div class="nw-xs-muted-3">${t('net.no_bridges', 'No virtual bridges or bonds yet.')}</div>`;
 
       bridgesContainer.querySelectorAll('.btn-config-bridge').forEach((btn) => {
         btn.addEventListener('click', (e) => {
@@ -550,9 +617,10 @@ async function loadNetworkTopology() {
       if (dockerNets.length === 0) {
         dockerContainer.innerHTML = `<div class="nw-xs-muted-3">${t('net.no_docker_nets', 'No Docker bridge networks in use.')}</div>`;
       } else {
-        dockerContainer.innerHTML = dockerNets.map((net) => {
-          const containers = net.containers || [];
-          return `
+        dockerContainer.innerHTML = dockerNets
+          .map((net) => {
+            const containers = net.containers || [];
+            return `
             <div class="network-docker-card">
               <div class="network-docker-top">
                 <div class="network-docker-name nw-row-2">
@@ -568,18 +636,27 @@ async function loadNetworkTopology() {
                 </div>
               </div>
               <div class="network-docker-containers">
-                ${containers.length === 0 ? `<span class="nw-xs-muted-2">${t('net.no_containers', 'No containers attached')}</span>` : containers.map((c) => `
+                ${
+                  containers.length === 0
+                    ? `<span class="nw-xs-muted-2">${t('net.no_containers', 'No containers attached')}</span>`
+                    : containers
+                        .map(
+                          (c) => `
                   <div class="network-container-chip">
                     <span class="network-chip-dot"></span>
                     <span class="network-chip-name">${escapeHtml(c.name)}</span>
                     <span class="network-chip-ip">${escapeHtml(c.ipv4 || 'Host')}</span>
                     ${c.ports?.length ? `<span class="network-chip-ports">[${escapeHtml(c.ports.join(', '))}]</span>` : ''}
                   </div>
-                `).join('')}
+                `
+                        )
+                        .join('')
+                }
               </div>
             </div>
           `;
-        }).join('');
+          })
+          .join('');
 
         dockerContainer.querySelectorAll('.net-docker-delete-btn').forEach((btn) => {
           btn.addEventListener('click', (e) => {
@@ -587,15 +664,18 @@ async function loadNetworkTopology() {
             const netId = btn.dataset.netId;
             const netName = btn.dataset.netName;
             if (!netId) return;
-            showConfirmToast(`${t('net.delete_docker_confirm', 'Are you sure you want to delete Docker network')} "${netName}"?`, async () => {
-              try {
-                await api.delete(`/api/network/docker/${encodeURIComponent(netId)}`);
-                showToast(t('net.docker_deleted_toast', 'Docker network deleted successfully'), 'success');
-                fetchAndRenderNetworkTopology();
-              } catch (err) {
-                showToast(err.message || 'Failed to delete Docker network', 'error');
+            showConfirmToast(
+              `${t('net.delete_docker_confirm', 'Are you sure you want to delete Docker network')} "${netName}"?`,
+              async () => {
+                try {
+                  await api.delete(`/api/network/docker/${encodeURIComponent(netId)}`);
+                  showToast(t('net.docker_deleted_toast', 'Docker network deleted successfully'), 'success');
+                  fetchAndRenderNetworkTopology();
+                } catch (err) {
+                  showToast(err.message || 'Failed to delete Docker network', 'error');
+                }
               }
-            });
+            );
           });
         });
       }
@@ -721,7 +801,12 @@ export async function openNetworkPortModal(ifaceName) {
         const mac = nic.mac || roMac?.textContent;
         if (mac && mac !== '--') {
           copyText(mac)
-            .then(() => showToast(t('toast.mac_address_copied_to_clipboard', 'MAC address {mac} copied to clipboard!', { mac: mac }), 'info'))
+            .then(() =>
+              showToast(
+                t('toast.mac_address_copied_to_clipboard', 'MAC address {mac} copied to clipboard!', { mac: mac }),
+                'info'
+              )
+            )
             .catch(() => showToast(t('toast.failed_to_copy', 'Failed to copy'), 'error'));
         } else {
           showToast(t('toast.no_mac_address_available_to_copy', 'No MAC address available to copy'), 'warn');
@@ -730,14 +815,21 @@ export async function openNetworkPortModal(ifaceName) {
     }
     if (roDriver) roDriver.textContent = nic.driver || t('net.generic', 'Generic');
     if (roPci) roPci.textContent = nic.pci_slot || '--';
-    if (roLink) roLink.textContent = nic.is_up ? `${nic.speed_human || t('net.connected', 'Connected')} (${nic.duplex || 'full'})` : t('net.down', 'Down (disconnected)');
+    if (roLink)
+      roLink.textContent = nic.is_up
+        ? `${nic.speed_human || t('net.connected', 'Connected')} (${nic.duplex || 'full'})`
+        : t('net.down', 'Down (disconnected)');
   } catch (err) {
-    showToast(t('toast.failed_to_load_port_config', 'Failed to load port config: {error}', { error: err.message || err }), 'error');
+    showToast(
+      t('toast.failed_to_load_port_config', 'Failed to load port config: {error}', { error: err.message || err }),
+      'error'
+    );
   }
   applyNetCaps(overlay);
   const save = document.getElementById('net-port-cfg-save-btn');
   const wiring = canChange('mtu') || canChange('speed') || canChange('wake_on_lan');
-  if (save) save.textContent = wiring ? t('net.save_port_cfg', 'Save & Apply') : t('net.save_nickname', 'Save nickname');
+  if (save)
+    save.textContent = wiring ? t('net.save_port_cfg', 'Save & Apply') : t('net.save_nickname', 'Save nickname');
 }
 
 export function closeNetworkPortModal() {
@@ -775,7 +867,10 @@ export async function saveNetworkPortConfig() {
 
   try {
     // the nickname always; packet size, speed and Wake-on-LAN only where this host lets Kiboto change them
-    await api.post(`/api/network/port/${encodeURIComponent(_currentPortIface)}`, portPayload({ alias, mtu, wol_enabled, autoneg, speed }));
+    await api.post(
+      `/api/network/port/${encodeURIComponent(_currentPortIface)}`,
+      portPayload({ alias, mtu, wol_enabled, autoneg, speed })
+    );
     showToast(t('net.port_saved_toast', 'Port configuration saved successfully'), 'success');
     closeNetworkPortModal();
     fetchAndRenderNetworkTopology();
@@ -784,7 +879,10 @@ export async function saveNetworkPortConfig() {
   } finally {
     if (saveBtn) {
       saveBtn.disabled = false;
-      saveBtn.textContent = canChange('mtu') || canChange('speed') || canChange('wake_on_lan') ? t('net.save_port_cfg', 'Save & Apply') : t('net.save_nickname', 'Save nickname');
+      saveBtn.textContent =
+        canChange('mtu') || canChange('speed') || canChange('wake_on_lan')
+          ? t('net.save_port_cfg', 'Save & Apply')
+          : t('net.save_nickname', 'Save nickname');
     }
   }
 }
@@ -850,7 +948,6 @@ export async function submitDockerNetworkCreate() {
   }
 }
 
-
 export async function openHostIpConfigModal() {
   const overlay = document.getElementById('network-host-config-overlay');
   if (!overlay) return;
@@ -881,7 +978,10 @@ export async function openHostIpConfigModal() {
     if (ifaceSelect) {
       const ifaces = data.available_interfaces || ['br0', 'eth0'];
       ifaceSelect.innerHTML = ifaces
-        .map((iface) => `<option value="${escapeHtml(iface)}" ${iface === data.interface ? 'selected' : ''}>${escapeHtml(iface.toUpperCase())}</option>`)
+        .map(
+          (iface) =>
+            `<option value="${escapeHtml(iface)}" ${iface === data.interface ? 'selected' : ''}>${escapeHtml(iface.toUpperCase())}</option>`
+        )
         .join('');
     }
 
@@ -898,7 +998,12 @@ export async function openHostIpConfigModal() {
 
     showNetDialog(overlay, closeHostIpConfigModal);
   } catch (err) {
-    showToast(t('toast.failed_to_load_host_network_config', 'Failed to load host network config: {error}', { error: err.message || err }), 'error');
+    showToast(
+      t('toast.failed_to_load_host_network_config', 'Failed to load host network config: {error}', {
+        error: err.message || err,
+      }),
+      'error'
+    );
   }
   applyNetCaps(document.getElementById('network-host-config-overlay'));
 }
@@ -992,7 +1097,8 @@ export async function openBondConfigModal(bondName) {
     if (slavesContainer) {
       const candidates = data.candidate_slaves || [];
       if (candidates.length === 0) {
-        slavesContainer.innerHTML = '<div class="nw-xs-muted">' + t('net.no_adapters', 'No Ethernet adapters found.') + '</div>';
+        slavesContainer.innerHTML =
+          '<div class="nw-xs-muted">' + t('net.no_adapters', 'No Ethernet adapters found.') + '</div>';
       } else {
         slavesContainer.innerHTML = candidates
           .map((nic) => {
@@ -1012,7 +1118,12 @@ export async function openBondConfigModal(bondName) {
 
     showNetDialog(overlay, closeBondConfigModal);
   } catch (err) {
-    showToast(t('toast.failed_to_load_bond_configuration', 'Failed to load bond configuration: {error}', { error: err.message || err }), 'error');
+    showToast(
+      t('toast.failed_to_load_bond_configuration', 'Failed to load bond configuration: {error}', {
+        error: err.message || err,
+      }),
+      'error'
+    );
   }
   applyNetCaps(document.getElementById('network-bond-config-overlay'));
 }
@@ -1040,7 +1151,10 @@ export async function saveBondConfig() {
   });
 
   if (slaves.length === 0) {
-    showToast(t('toast.please_select_at_least_one_physical', 'Please select at least one physical interface for the bond'), 'error');
+    showToast(
+      t('toast.please_select_at_least_one_physical', 'Please select at least one physical interface for the bond'),
+      'error'
+    );
     return;
   }
 
@@ -1053,7 +1167,7 @@ export async function saveBondConfig() {
     await api.post(`/api/network/bond/${encodeURIComponent(_currentBondName)}`, {
       mode,
       slaves,
-      miimon
+      miimon,
     });
     showToast(t('net.bond_saved_toast', 'Bonding configuration saved successfully'), 'success');
     closeBondConfigModal();
@@ -1094,7 +1208,8 @@ export async function openBridgeConfigModal(brName) {
     if (membersContainer) {
       const candidates = data.candidate_members || [];
       if (candidates.length === 0) {
-        membersContainer.innerHTML = '<div class="nw-xs-muted">' + t('net.nothing_to_bridge', 'No ports available to bridge.') + '</div>';
+        membersContainer.innerHTML =
+          '<div class="nw-xs-muted">' + t('net.nothing_to_bridge', 'No ports available to bridge.') + '</div>';
       } else {
         membersContainer.innerHTML = candidates
           .map((cand) => {
@@ -1115,7 +1230,12 @@ export async function openBridgeConfigModal(brName) {
 
     showNetDialog(overlay, closeBridgeConfigModal);
   } catch (err) {
-    showToast(t('toast.failed_to_load_bridge_configuration', 'Failed to load bridge configuration: {error}', { error: err.message || err }), 'error');
+    showToast(
+      t('toast.failed_to_load_bridge_configuration', 'Failed to load bridge configuration: {error}', {
+        error: err.message || err,
+      }),
+      'error'
+    );
   }
   applyNetCaps(document.getElementById('network-bridge-config-overlay'));
 }
@@ -1151,7 +1271,7 @@ export async function saveBridgeConfig() {
     await api.post(`/api/network/bridge/${encodeURIComponent(_currentBridgeName)}`, {
       stp,
       forward_delay,
-      members
+      members,
     });
     showToast(t('net.bridge_saved_toast', 'Bridge configuration saved successfully'), 'success');
     closeBridgeConfigModal();
@@ -1188,11 +1308,17 @@ export async function openCreateVlanModal() {
       (topo.bridges || []).forEach((br) => parents.push({ name: br.name, type: 'Virtual Bridge' }));
 
       parentSelect.innerHTML = parents
-        .map((item) => `<option value="${escapeHtml(item.name)}">${escapeHtml(item.name)} (${escapeHtml(item.type)})</option>`)
+        .map(
+          (item) =>
+            `<option value="${escapeHtml(item.name)}">${escapeHtml(item.name)} (${escapeHtml(item.type)})</option>`
+        )
         .join('');
     }
   } catch (err) {
-    showToast(t('toast.failed_to_open_vlan_creator', 'Failed to open VLAN creator: {error}', { error: err.message || err }), 'error');
+    showToast(
+      t('toast.failed_to_open_vlan_creator', 'Failed to open VLAN creator: {error}', { error: err.message || err }),
+      'error'
+    );
   }
 }
 
@@ -1353,7 +1479,6 @@ export function initNetworkControls() {
     }
   });
 
-
   const portClose = document.getElementById('net-port-cfg-close-btn');
   if (portClose && !portClose.dataset.bound) {
     portClose.dataset.bound = '1';
@@ -1439,11 +1564,26 @@ export function initNetworkControls() {
   if (bondModeSelect && !bondModeSelect.dataset.bound) {
     bondModeSelect.dataset.bound = '1';
     const modeDescriptions = {
-      '0': t('net.bond_mode_desc_0', 'Round-robin policy: Transmit network packets sequentially from the first available slave through the last. Provides fault tolerance and load balancing across multiple links.'),
-      '1': t('net.bond_mode_desc_1', 'Active-backup policy: Only one slave interface is active. Another slave becomes active only if the primary fails. Recommended for unmanaged switch environments.'),
-      '2': t('net.bond_mode_desc_2', 'XOR balance policy: Transmits based on the selected transmit hash policy [(source MAC XOR dest MAC) modulo slave count]. Provides fault tolerance and load balancing.'),
-      '4': t('net.bond_mode_desc_4', 'Dynamic Link Aggregation (IEEE 802.3ad LACP): Requires a switch that supports IEEE 802.3ad dynamic aggregation. Shares identical speed and duplex settings for maximum aggregate bandwidth and resilience.'),
-      '6': t('net.bond_mode_desc_6', 'Adaptive Load Balancing (Balance-ALB): Includes balance-tlb plus receive load balancing (rlb) for IPv4 traffic. Does not require special switch support.')
+      '0': t(
+        'net.bond_mode_desc_0',
+        'Round-robin policy: Transmit network packets sequentially from the first available slave through the last. Provides fault tolerance and load balancing across multiple links.'
+      ),
+      '1': t(
+        'net.bond_mode_desc_1',
+        'Active-backup policy: Only one slave interface is active. Another slave becomes active only if the primary fails. Recommended for unmanaged switch environments.'
+      ),
+      '2': t(
+        'net.bond_mode_desc_2',
+        'XOR balance policy: Transmits based on the selected transmit hash policy [(source MAC XOR dest MAC) modulo slave count]. Provides fault tolerance and load balancing.'
+      ),
+      '4': t(
+        'net.bond_mode_desc_4',
+        'Dynamic Link Aggregation (IEEE 802.3ad LACP): Requires a switch that supports IEEE 802.3ad dynamic aggregation. Shares identical speed and duplex settings for maximum aggregate bandwidth and resilience.'
+      ),
+      '6': t(
+        'net.bond_mode_desc_6',
+        'Adaptive Load Balancing (Balance-ALB): Includes balance-tlb plus receive load balancing (rlb) for IPv4 traffic. Does not require special switch support.'
+      ),
     };
     bondModeSelect.addEventListener('change', () => {
       if (bondModeDesc) {

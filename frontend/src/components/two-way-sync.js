@@ -16,7 +16,11 @@ function el(tag, props = {}, ...children) {
 }
 
 function button(label, act, id, primary = false) {
-  const b = el('button', { type: 'button', className: `btn-pill-toggle is-small${primary ? ' is-primary' : ''}`, textContent: label });
+  const b = el('button', {
+    type: 'button',
+    className: `btn-pill-toggle is-small${primary ? ' is-primary' : ''}`,
+    textContent: label,
+  });
   b.dataset.sync = act;
   b.dataset.id = id;
   return b;
@@ -32,7 +36,14 @@ export function previewText(p) {
   ];
   const deletes = (p.delete_remote || 0) + (p.delete_local || 0);
   if (deletes) parts.push(t('sync2.deletes', '{n, plural, one {# deletion} other {# deletions}}', { n: deletes }));
-  if (p.conflicts) parts.push(t('sync2.conflicts', '{n, plural, one {# file changed on both sides (kept twice)} other {# files changed on both sides (kept twice)}}', { n: p.conflicts }));
+  if (p.conflicts)
+    parts.push(
+      t(
+        'sync2.conflicts',
+        '{n, plural, one {# file changed on both sides (kept twice)} other {# files changed on both sides (kept twice)}}',
+        { n: p.conflicts }
+      )
+    );
   const summary = parts.join(' · ');
   return p.first_run ? t('sync2.first_run_line', 'First run, copies only: {summary}', { summary }) : summary;
 }
@@ -46,10 +57,21 @@ export function deletionsList(p) {
   if (!names.length) return null;
   const total = (p.delete_remote || 0) + (p.delete_local || 0);
   const box = el('details', { className: 'offsite-meta sync2-deletions' });
-  box.append(el('summary', { textContent: t('sync2.show_deletes', 'Show what would be deleted ({n, plural, one {# file} other {# files}})', { n: total }) }));
+  box.append(
+    el('summary', {
+      textContent: t('sync2.show_deletes', 'Show what would be deleted ({n, plural, one {# file} other {# files}})', {
+        n: total,
+      }),
+    })
+  );
   const list = el('ul');
   for (const n of names) list.append(el('li', { textContent: n }));
-  if (total > names.length) list.append(el('li', { textContent: t('sync2.and_more', '…and {n, plural, one {# more} other {# more}}', { n: total - names.length }) }));
+  if (total > names.length)
+    list.append(
+      el('li', {
+        textContent: t('sync2.and_more', '…and {n, plural, one {# more} other {# more}}', { n: total - names.length }),
+      })
+    );
   box.append(list);
   return box;
 }
@@ -62,14 +84,20 @@ export function pairRow(p) {
   main.append(el('span', { className: 'offsite-meta', textContent: previewText(p.preview) }));
   const deletions = p.state !== 'active' ? deletionsList(p.preview) : null;
   if (deletions) main.append(deletions);
-  const state = p.state === 'active'
-    ? t('sync2.state_active', 'On, every {n} h · last run {when}', { n: p.every_hours, when: p.last_run ? formatDateTime(p.last_run * 1000) : t('offsite.never', 'never') })
-    : t('sync2.state_waiting', 'Waiting for you to check the preview and turn it on');
+  const state =
+    p.state === 'active'
+      ? t('sync2.state_active', 'On, every {n} h · last run {when}', {
+          n: p.every_hours,
+          when: p.last_run ? formatDateTime(p.last_run * 1000) : t('offsite.never', 'never'),
+        })
+      : t('sync2.state_waiting', 'Waiting for you to check the preview and turn it on');
   main.append(el('span', { className: 'offsite-meta', textContent: state }));
-  if (p.last_result && p.last_result !== 'ok') main.append(el('strong', { className: 'offsite-meta', textContent: p.last_result }));
+  if (p.last_result && p.last_result !== 'ok')
+    main.append(el('strong', { className: 'offsite-meta', textContent: p.last_result }));
   const actions = el('div', { className: 'offsite-actions' });
   actions.append(button(t('sync2.preview', 'Preview'), 'preview', p.id, p.state !== 'active'));
-  if (p.state === 'previewed' && p.preview && p.preview.ok) actions.append(button(t('sync2.approve', 'Turn on'), 'approve', p.id, true));
+  if (p.state === 'previewed' && p.preview && p.preview.ok)
+    actions.append(button(t('sync2.approve', 'Turn on'), 'approve', p.id, true));
   if (p.state === 'active') actions.append(button(t('sync2.run', 'Sync now'), 'run', p.id));
   actions.append(button(t('offsite.forget', 'Forget'), 'delete', p.id));
   row.append(main, actions);
@@ -81,7 +109,11 @@ function form() {
   f.dataset.syncForm = '1';
   const field = (label, name, extra = {}) => el('label', {}, label, el('input', { name, required: true, ...extra }));
   // pick the folder and the cloud instead of typing them (NUX-12)
-  const choose = el('button', { type: 'button', className: 'btn-pill-toggle is-small', textContent: t('sync2.choose', 'Choose…') });
+  const choose = el('button', {
+    type: 'button',
+    className: 'btn-pill-toggle is-small',
+    textContent: t('sync2.choose', 'Choose…'),
+  });
   choose.addEventListener('click', () => {
     const input = /** @type {HTMLInputElement} */ (f.querySelector('[name="local"]'));
     /** @type {any} */ (window).openFolderBrowser?.(input.value || '/mnt/user/', (path) => {
@@ -92,11 +124,20 @@ function form() {
   remoteNames().then((names) => clouds.replaceChildren(...names.map((n) => el('option', { value: `${n}:` }))));
   f.append(
     field(t('sync2.name', 'Name'), 'name', { maxLength: 80 }),
-    el('div', { className: 'sync2-local' }, field(t('sync2.local', 'Folder here'), 'local', { placeholder: '/mnt/user/documents' }), choose),
+    el(
+      'div',
+      { className: 'sync2-local' },
+      field(t('sync2.local', 'Folder here'), 'local', { placeholder: '/mnt/user/documents' }),
+      choose
+    ),
     field(t('sync2.remote', 'Cloud folder'), 'remote', { placeholder: 'gdrive:documents' }),
     clouds,
     field(t('sync2.every', 'Every (hours)'), 'every_hours', { type: 'number', min: 1, max: 168, value: '6' }),
-    el('button', { type: 'submit', className: 'btn-pill-toggle is-primary', textContent: t('sync2.add', 'Add two-way sync') }),
+    el('button', {
+      type: 'submit',
+      className: 'btn-pill-toggle is-primary',
+      textContent: t('sync2.add', 'Add two-way sync'),
+    })
   );
   /** @type {HTMLInputElement} */ (f.querySelector('[name="remote"]')).setAttribute('list', 'sync2-remotes');
   return f;
@@ -106,14 +147,22 @@ function form() {
 export async function remoteNames() {
   try {
     const list = await api.get('/api/remotes');
-    return (Array.isArray(list) ? list : list?.remotes || []).map((r) => (typeof r === 'string' ? r : r?.name)).filter(Boolean);
+    return (Array.isArray(list) ? list : list?.remotes || [])
+      .map((r) => (typeof r === 'string' ? r : r?.name))
+      .filter(Boolean);
   } catch {
     return []; // no right to list them, or none: the field still takes "name:folder"
   }
 }
 
 function slug(name) {
-  return String(name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'sync';
+  return (
+    String(name || '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 40) || 'sync'
+  );
 }
 
 export async function renderTwoWaySync(mount) {
@@ -126,13 +175,21 @@ export async function renderTwoWaySync(mount) {
   }
   const list = el('ul', { className: 'offsite-list' });
   for (const p of data.pairs || []) list.append(pairRow(p));
-  if (!(data.pairs || []).length) list.append(el('li', { className: 'offsite-note', textContent: t('sync2.none', 'No two-way sync yet.') }));
+  if (!(data.pairs || []).length)
+    list.append(el('li', { className: 'offsite-note', textContent: t('sync2.none', 'No two-way sync yet.') }));
   mount.replaceChildren(list, form());
   mount.querySelector('[data-sync-form]').addEventListener('submit', async (e) => {
     e.preventDefault();
     const f = new FormData(/** @type {HTMLFormElement} */ (e.target));
     try {
-      await api.put('/api/sync/pairs', { id: slug(f.get('name')), new: true, name: f.get('name'), local: f.get('local'), remote: f.get('remote'), every_hours: Number(f.get('every_hours') || 6) });
+      await api.put('/api/sync/pairs', {
+        id: slug(f.get('name')),
+        new: true,
+        name: f.get('name'),
+        local: f.get('local'),
+        remote: f.get('remote'),
+        every_hours: Number(f.get('every_hours') || 6),
+      });
       renderTwoWaySync(mount);
     } catch (err) {
       showToast(err.message || String(err), 'error');
@@ -145,14 +202,17 @@ export async function renderTwoWaySync(mount) {
     try {
       if (b.dataset.sync === 'delete') {
         // asked first, as Offsite's Forget is (NUX-23)
-        showDangerConfirm(t('sync2.forget_confirm', 'Forget this two-way sync? Files on both sides stay as they are.'), async () => {
-          try {
-            await api.delete(`/api/sync/pairs/${id}`);
-            renderTwoWaySync(mount);
-          } catch (err) {
-            showToast(err.message || String(err), 'error');
+        showDangerConfirm(
+          t('sync2.forget_confirm', 'Forget this two-way sync? Files on both sides stay as they are.'),
+          async () => {
+            try {
+              await api.delete(`/api/sync/pairs/${id}`);
+              renderTwoWaySync(mount);
+            } catch (err) {
+              showToast(err.message || String(err), 'error');
+            }
           }
-        });
+        );
         return;
       } else {
         b.disabled = true;

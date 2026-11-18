@@ -2,7 +2,14 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
 
-vi.mock('../api.js', () => ({ api: { get: vi.fn(async () => ({ ok: false, items: [{ kind: 'pool_full', level: 'warning', subject: 'tank', open: 'storage' }] })) } }));
+vi.mock('../api.js', () => ({
+  api: {
+    get: vi.fn(async () => ({
+      ok: false,
+      items: [{ kind: 'pool_full', level: 'warning', subject: 'tank', open: 'storage' }],
+    })),
+  },
+}));
 
 const { enablePhoneShell, onPhoneBack, openAlertsPage, setCompactBack } = await import('../components/phone-shell.js');
 const { BREAKPOINTS } = await import('../device.js');
@@ -39,8 +46,10 @@ describe('UX-37: phones and tablets', () => {
     fm.style.zIndex = '1000';
     fm.innerHTML = '<button class="close-btn"></button>';
     let depth = 2;
-    fm.zettBack = () => (depth > 0 ? (depth -= 1, true) : false);
-    fm.querySelector('.close-btn').onclick = () => { fm.style.display = 'none'; };
+    fm.zettBack = () => (depth > 0 ? ((depth -= 1), true) : false);
+    fm.querySelector('.close-btn').onclick = () => {
+      fm.style.display = 'none';
+    };
     document.body.appendChild(fm);
     await tick();
     onPhoneBack();
@@ -61,7 +70,9 @@ describe('UX-37: phones and tablets', () => {
     w.className = 'os-window';
     w.style.zIndex = '1000';
     w.innerHTML = '<button class="close-btn"></button>';
-    w.querySelector('.close-btn').onclick = () => { w.style.display = 'none'; };
+    w.querySelector('.close-btn').onclick = () => {
+      w.style.display = 'none';
+    };
     document.body.appendChild(w);
     await tick();
     expect(push).toHaveBeenCalled();
@@ -86,7 +97,9 @@ describe('UX-37: phones and tablets', () => {
 
 describe('UX-36: small text only in the LCD replica', () => {
   it('the tablet sheet keeps 7-11 px text to #console-window', () => {
-    const css = fs.readFileSync(path.join(STYLES, '24-tablet-bottom-sheet.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+    const css = fs
+      .readFileSync(path.join(STYLES, '24-tablet-bottom-sheet.css'), 'utf8')
+      .replace(/\/\*[\s\S]*?\*\//g, '');
     const small = [...css.matchAll(/([^{}]+)\{[^{}]*font-size:\s*(\d+(?:\.\d+)?)px/g)].filter((m) => Number(m[2]) < 12);
     const outside = small.filter((m) => !m[1].includes('#console-window')).map((m) => m[1].trim());
     expect(small.length).toBeGreaterThan(0);

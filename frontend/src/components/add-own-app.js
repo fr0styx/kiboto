@@ -13,14 +13,16 @@ export const NAME_RE = /^[a-z0-9][a-z0-9_-]{0,62}$/;
 /** Why a name cannot be used, or ''. */
 export function nameProblem(name) {
   if (!name) return t('own.name_needed', 'Give the app a name.');
-  if (!NAME_RE.test(name)) return t('own.name_bad', 'Use small letters, digits, hyphens and underscores, starting with a letter or digit.');
+  if (!NAME_RE.test(name))
+    return t('own.name_bad', 'Use small letters, digits, hyphens and underscores, starting with a letter or digit.');
   return '';
 }
 
 // examples in the fields: a name and file lines are the same in every language
 const NAME_EXAMPLE = 'my-app';
 const ENV_EXAMPLE = 'TZ=Europe/Berlin';
-const EXAMPLE = 'services:\n  web:\n    image: nginx:1.27\n    ports:\n      - "8088:80"\n    restart: unless-stopped\n';
+const EXAMPLE =
+  'services:\n  web:\n    image: nginx:1.27\n    ports:\n      - "8088:80"\n    restart: unless-stopped\n';
 
 /**
  * Opens the dialog; `done` runs after the app was created.
@@ -65,7 +67,12 @@ export function openAddOwnApp(opts = {}) {
     msg.textContent = problem;
     if (problem) return;
     $('own-app-go').disabled = true;
-    const ok = await applyStack(name, compose, $('own-app-envtext').value, { msg, create: true, wait: opts.wait, done: opts.done });
+    const ok = await applyStack(name, compose, $('own-app-envtext').value, {
+      msg,
+      create: true,
+      wait: opts.wait,
+      done: opts.done,
+    });
     $('own-app-go').disabled = false;
     if (ok) shut();
   });

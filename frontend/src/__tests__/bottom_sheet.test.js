@@ -20,8 +20,8 @@ describe('showBottomSheet - Mobile Bottom Sheet Component', () => {
       subtitle: 'Image: linuxserver/plex:latest',
       items: [
         { icon: '🔍', label: 'Inspect Container', onClick: item1Click },
-        { icon: '🗑️', label: 'Delete Container', destructive: true, onClick: item2Click }
-      ]
+        { icon: '🗑️', label: 'Delete Container', destructive: true, onClick: item2Click },
+      ],
     });
 
     const backdrop = document.getElementById('mobile-sheet-backdrop');
@@ -48,9 +48,7 @@ describe('showBottomSheet - Mobile Bottom Sheet Component', () => {
 
     showBottomSheet({
       title: 'Test Container',
-      items: [
-        { icon: '🔄', label: 'Restart', onClick: itemClick }
-      ]
+      items: [{ icon: '🔄', label: 'Restart', onClick: itemClick }],
     });
 
     const sheet = document.getElementById('mobile-bottom-sheet');
@@ -71,7 +69,7 @@ describe('showBottomSheet - Mobile Bottom Sheet Component', () => {
     showBottomSheet({
       title: 'Test Container',
       items: [{ icon: '🔍', label: 'Inspect' }],
-      onCancel
+      onCancel,
     });
 
     const cancelBtn = document.getElementById('sheet-cancel-btn');
@@ -92,7 +90,7 @@ describe('showBottomSheet - Mobile Bottom Sheet Component', () => {
     showBottomSheet({
       title: 'Test Container',
       items: [{ icon: '🔍', label: 'Inspect' }],
-      onCancel
+      onCancel,
     });
 
     const backdrop = document.getElementById('mobile-sheet-backdrop');
@@ -110,7 +108,7 @@ describe('showBottomSheet - Mobile Bottom Sheet Component', () => {
     showBottomSheet({
       title: 'Test Container',
       items: [{ icon: '🔍', label: 'Inspect' }],
-      onCancel
+      onCancel,
     });
 
     const escEvent = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true });
@@ -129,7 +127,7 @@ describe('showBottomSheet - Mobile Bottom Sheet Component', () => {
     showBottomSheet({
       title: 'Swipe Test',
       items: [{ icon: '🔍', label: 'Inspect' }],
-      onCancel
+      onCancel,
     });
 
     const sheet = document.getElementById('mobile-bottom-sheet');
@@ -153,7 +151,7 @@ describe('showBottomSheet - Mobile Bottom Sheet Component', () => {
     showBottomSheet({
       title: 'Short Swipe Test',
       items: [{ icon: '🔍', label: 'Inspect' }],
-      onCancel
+      onCancel,
     });
 
     const sheet = document.getElementById('mobile-bottom-sheet');
@@ -168,4 +166,3 @@ describe('showBottomSheet - Mobile Bottom Sheet Component', () => {
     expect(sheet.style.transform).toBe('');
   });
 });
-

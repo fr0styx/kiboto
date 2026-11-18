@@ -43,13 +43,19 @@ let _lastConsoleTouchTs = 0;
 export function toggleConsoleMaximize(e) {
   if (e) {
     if (e.type === 'click' && Date.now() - _lastConsoleTouchTs < 450) {
-      if (e.preventDefault) { e.preventDefault(); e.stopPropagation(); }
+      if (e.preventDefault) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
       return;
     }
     if (e.type === 'touchend') {
       _lastConsoleTouchTs = Date.now();
     }
-    if (e.preventDefault) { e.preventDefault(); e.stopPropagation(); }
+    if (e.preventDefault) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
   }
   const consoleModal = document.getElementById('console-window');
   if (!consoleModal) return;
@@ -61,7 +67,7 @@ export function toggleConsoleMaximize(e) {
       top: consoleModal.style.top,
       transform: consoleModal.style.transform,
       width: consoleModal.style.width,
-      height: consoleModal.style.height
+      height: consoleModal.style.height,
     };
     const availW = Math.max(320, window.innerWidth - 64);
     const availH = Math.max(200, window.innerHeight - 150);
@@ -75,7 +81,9 @@ export function toggleConsoleMaximize(e) {
     consoleModal.dataset.maximized = 'true';
     if (consoleMax) consoleMax.setAttribute('title', t('ui.restore_size', 'Restore'));
     _isConsoleMaximized = true;
-    setTimeout(() => { if (consoleModal) consoleModal.style.transition = ''; }, 260);
+    setTimeout(() => {
+      if (consoleModal) consoleModal.style.transition = '';
+    }, 260);
   } else {
     consoleModal.style.transition = 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), left 0.25s ease, top 0.25s ease';
     if (_consolePreMaxBounds && _consolePreMaxBounds.left && _consolePreMaxBounds.left !== '50%') {
@@ -94,7 +102,9 @@ export function toggleConsoleMaximize(e) {
     delete consoleModal.dataset.maximized;
     if (consoleMax) consoleMax.setAttribute('title', t('ui.maximize', 'Maximize'));
     _isConsoleMaximized = false;
-    setTimeout(() => { if (consoleModal) consoleModal.style.transition = ''; }, 260);
+    setTimeout(() => {
+      if (consoleModal) consoleModal.style.transition = '';
+    }, 260);
   }
 }
 if (typeof window !== 'undefined') {

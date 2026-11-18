@@ -4,13 +4,18 @@ import { batteryLine, renderPowerCheck } from '../components/management/power-ch
 
 describe('check that it works', () => {
   it('says what the battery test can do and when it was last sent', () => {
-    expect(batteryLine({ can: { self_test: false } })).toMatch(/^This UPS cannot be asked for a battery test from here/);
+    expect(batteryLine({ can: { self_test: false } })).toMatch(
+      /^This UPS cannot be asked for a battery test from here/
+    );
     expect(batteryLine({ can: { self_test: true }, tests: {} })).toMatch(/^Not tested from Kiboto yet/);
-    expect(batteryLine({ can: { self_test: true }, tests: { battery: { at: 1762900000 } } })).toMatch(/^Last test sent on .+\. Its result shows on the UPS itself\.$/);
+    expect(batteryLine({ can: { self_test: true }, tests: { battery: { at: 1762900000 } } })).toMatch(
+      /^Last test sent on .+\. Its result shows on the UPS itself\.$/
+    );
   });
 
   it('is shown with a UPS, greys the battery test where it cannot be sent, and presses the existing handlers', () => {
-    document.body.innerHTML = '<section id="pc" hidden></section><button id="btn-run-ups-selftest"></button><button id="btn-ups-simulate"></button>';
+    document.body.innerHTML =
+      '<section id="pc" hidden></section><button id="btn-run-ups-selftest"></button><button id="btn-ups-simulate"></button>';
     const mount = /** @type {HTMLElement} */ (document.getElementById('pc'));
     const test = vi.fn();
     const practice = vi.fn();

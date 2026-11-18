@@ -2,7 +2,12 @@ import { describe, it, expect, vi } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
 
-vi.mock('../toast.js', () => ({ showToast: vi.fn(), showActionToast: vi.fn(), showConfirmToast: vi.fn(), showPromptToast: vi.fn() }));
+vi.mock('../toast.js', () => ({
+  showToast: vi.fn(),
+  showActionToast: vi.fn(),
+  showConfirmToast: vi.fn(),
+  showPromptToast: vi.fn(),
+}));
 vi.mock('../components/dock.js', () => ({ applyDockSettings: vi.fn() }));
 import { showActionToast } from '../toast.js';
 import { applyDockSettings } from '../components/dock.js';
@@ -52,7 +57,10 @@ describe('theme files keep the dock as the dock stores it', () => {
     localStorage.setItem('kiboto_dock_scale', '1.6');
     let blob = null;
     const realCreate = URL.createObjectURL;
-    URL.createObjectURL = (b) => { blob = b; return 'blob:x'; };
+    URL.createObjectURL = (b) => {
+      blob = b;
+      return 'blob:x';
+    };
     URL.revokeObjectURL = () => {};
     exportThemeBundle();
     URL.createObjectURL = realCreate;
@@ -65,7 +73,16 @@ describe('theme files keep the dock as the dock stores it', () => {
 
   it('import passes position, magnify, scale, size and auto-hide in that order', async () => {
     applyDockSettings.mockClear();
-    const file = new File([JSON.stringify({ format: 'kiboto-theme', theme: 'lagoon', dock: { position: 'left', magnification: false, scale: 1.3, size: 'small', autohide: true } })], 't.json');
+    const file = new File(
+      [
+        JSON.stringify({
+          format: 'kiboto-theme',
+          theme: 'lagoon',
+          dock: { position: 'left', magnification: false, scale: 1.3, size: 'small', autohide: true },
+        }),
+      ],
+      't.json'
+    );
     importThemeBundle(file);
     await vi.waitFor(() => expect(applyDockSettings).toHaveBeenCalledWith('left', false, 1.3, 'small', true, true));
     applyDockSettings.mockClear();
@@ -73,7 +90,7 @@ describe('theme files keep the dock as the dock stores it', () => {
     await vi.waitFor(() => expect(applyDockSettings).toHaveBeenCalledWith('bottom', true, 1.45, 'medium', false, true));
   });
 
-  it('the desktop reset\'s Undo restores the stored dock, and does nothing without a snapshot', () => {
+  it("the desktop reset's Undo restores the stored dock, and does nothing without a snapshot", () => {
     localStorage.setItem('kiboto_dock_position', 'top');
     localStorage.setItem('kiboto_dock_magnification', 'false');
     localStorage.setItem('kiboto_dock_scale', '1.2');

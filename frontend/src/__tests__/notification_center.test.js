@@ -1,5 +1,24 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { makeDraggable, makeResizable, saveWindowBounds, loadSavedWindowBounds, DockManager, isEventChecked, markEventChecked, resetCheckedEventsState, getEventKey, openConsoleWindow, KNOWN_APPS, toggleConsoleMaximize, renderNotificationCenter, saveOpenWindowsState, restoreOpenWindowsState, applySavedBounds, OPEN_WINDOWS_KEY, initDesktopLasso } from '../components/dock.js';
+import {
+  makeDraggable,
+  makeResizable,
+  saveWindowBounds,
+  loadSavedWindowBounds,
+  DockManager,
+  isEventChecked,
+  markEventChecked,
+  resetCheckedEventsState,
+  getEventKey,
+  openConsoleWindow,
+  KNOWN_APPS,
+  toggleConsoleMaximize,
+  renderNotificationCenter,
+  saveOpenWindowsState,
+  restoreOpenWindowsState,
+  applySavedBounds,
+  OPEN_WINDOWS_KEY,
+  initDesktopLasso,
+} from '../components/dock.js';
 import { openEventDetailModal, closeEventDetailModal } from '../modals.js';
 import { initManagement } from '../components/management.js';
 import { state } from '../state.js';
@@ -95,7 +114,7 @@ describe('Notification Center Draggable Window & Event Detail Inspector', () => 
       width: 380,
       height: 480,
       right: 480,
-      bottom: 580
+      bottom: 580,
     });
 
     makeResizable(panel, resizer, 'notif-center', { minWidth: 320, minHeight: 240 });
@@ -118,7 +137,7 @@ describe('Notification Center Draggable Window & Event Detail Inspector', () => 
       width: 500,
       height: 650,
       right: 600,
-      bottom: 750
+      bottom: 750,
     });
     const pUp = new MouseEvent('pointerup', { clientX: 600, clientY: 750, bubbles: true });
     window.dispatchEvent(pUp);
@@ -136,7 +155,7 @@ describe('Notification Center Draggable Window & Event Detail Inspector', () => 
       title: 'CPU Fan Speed High',
       message: 'PWM duty reached 85% at 68°C',
       link: 'hardware',
-      details: { fan_idx: 1, rpm: 2250, target_rpm: 2300 }
+      details: { fan_idx: 1, rpm: 2250, target_rpm: 2300 },
     };
 
     openEventDetailModal(mockEvent);
@@ -172,7 +191,7 @@ describe('Notification Center Draggable Window & Event Detail Inspector', () => 
       title: 'Drive Health Degradation Alert',
       message: 'Uncorrectable pending sectors detected on sda',
       link: 'drives',
-      details: { dev: 'sda', pending_sectors: 16 }
+      details: { dev: 'sda', pending_sectors: 16 },
     };
 
     openEventDetailModal(mockEvent);
@@ -196,7 +215,7 @@ describe('Notification Center Draggable Window & Event Detail Inspector', () => 
       ts: 1791393200,
       level: 'info',
       title: 'Docker Telemetry Started',
-      message: 'Monitoring 12 container instances'
+      message: 'Monitoring 12 container instances',
     };
 
     openEventDetailModal(mockEvent);
@@ -210,7 +229,12 @@ describe('Notification Center Draggable Window & Event Detail Inspector', () => 
 
   it('correctly tracks and checks notification events with dimming state', () => {
     const event1 = { ts: 1791394000, level: 'warning', title: 'NVMe Temperature High', message: 'nvme0 reached 72C' };
-    const event2 = { ts: 1791394050, level: 'info', title: 'ZFS Scrub Completed', message: 'Pool storage scrub finished' };
+    const event2 = {
+      ts: 1791394050,
+      level: 'info',
+      title: 'ZFS Scrub Completed',
+      message: 'Pool storage scrub finished',
+    };
 
     expect(isEventChecked(event1)).toBe(false);
     expect(isEventChecked(event2)).toBe(false);
@@ -251,7 +275,7 @@ describe('Notification Center Draggable Window & Event Detail Inspector', () => 
 
     // Now test DOM rendering in Notification Center
     state.latestStats = {
-      events: [event1, event2, event3, event4]
+      events: [event1, event2, event3, event4],
     };
     const list = document.getElementById('notif-center-list');
     list._lastRenderedSignature = null;
@@ -450,8 +474,8 @@ describe('Notification Center Draggable Window & Event Detail Inspector', () => 
     state.latestStats = {
       events: [
         { ts: 1791395000, level: 'warning', title: 'Fan Alert', message: 'Fan 1 duty 90%' },
-        { ts: 1791394900, level: 'error', title: 'Service Stalled', message: 'The indexer stopped answering' }
-      ]
+        { ts: 1791394900, level: 'error', title: 'Service Stalled', message: 'The indexer stopped answering' },
+      ],
     };
 
     const list = document.getElementById('notif-center-list');
@@ -492,7 +516,7 @@ describe('Notification Center Draggable Window & Event Detail Inspector', () => 
   it('saves and restores open window states across simulated browser refreshes', () => {
     DockManager.windows = {
       fm: { closed: false, minimized: false },
-      management: { closed: false, minimized: true }
+      management: { closed: false, minimized: true },
     };
     DockManager.activeId = 'fm';
 
@@ -539,15 +563,18 @@ describe('Notification Center Draggable Window & Event Detail Inspector', () => 
 
   it('preserves open windows across page reload without minimizing to dock', () => {
     const { setWindowRestorationComplete } = window;
-    
+
     // Save state where management (Services/Docker) and fm are OPEN on desktop (not minimized)
-    localStorage.setItem(OPEN_WINDOWS_KEY, JSON.stringify({
-      activeId: 'management',
-      windows: {
-        management: { open: true, minimized: false, activePane: 'mgmt-pane-docker' },
-        fm: { open: true, minimized: false, activePath: '/mnt/user/appdata' }
-      }
-    }));
+    localStorage.setItem(
+      OPEN_WINDOWS_KEY,
+      JSON.stringify({
+        activeId: 'management',
+        windows: {
+          management: { open: true, minimized: false, activePane: 'mgmt-pane-docker' },
+          fm: { open: true, minimized: false, activePath: '/mnt/user/appdata' },
+        },
+      })
+    );
 
     // Simulate app boot sequence: guard is active
     setWindowRestorationComplete(false);
@@ -572,7 +599,7 @@ describe('Notification Center Draggable Window & Event Detail Inspector', () => 
 
     expect(mgmtOpenSpy).toHaveBeenCalledWith('mgmt-pane-docker');
     expect(fmOpenSpy).toHaveBeenCalledWith('/mnt/user/appdata');
-    
+
     // Verify windows did NOT get minimized
     expect(DockManager.windows['management']?.minimized).toBeFalsy();
     expect(DockManager.windows['fm']?.minimized).toBeFalsy();
@@ -603,16 +630,19 @@ describe('Notification Center Draggable Window & Event Detail Inspector', () => 
       { subpane: 'mgmt-pane-widgets', desc: 'Appearance -> Widgets' },
       { subpane: 'mgmt-pane-copy', desc: 'Activity Monitor -> Ingest History' },
       { subpane: 'mgmt-pane-docker', desc: 'Services -> Docker Containers' },
-      { subpane: 'mgmt-pane-about', desc: 'System -> About & Updates' }
+      { subpane: 'mgmt-pane-about', desc: 'System -> About & Updates' },
     ];
 
     testCases.forEach(({ subpane }) => {
-      localStorage.setItem(OPEN_WINDOWS_KEY, JSON.stringify({
-        activeId: 'management',
-        windows: {
-          management: { open: true, minimized: false, activePane: subpane }
-        }
-      }));
+      localStorage.setItem(
+        OPEN_WINDOWS_KEY,
+        JSON.stringify({
+          activeId: 'management',
+          windows: {
+            management: { open: true, minimized: false, activePane: subpane },
+          },
+        })
+      );
 
       const mgmtOpenSpy = vi.fn();
       window.openManagementWindow = mgmtOpenSpy;
@@ -738,8 +768,13 @@ describe('Notification Center Draggable Window & Event Detail Inspector', () => 
 
     state.latestStats = {
       events: [
-        { ts: Math.floor(Date.now() / 1000), level: 'warning', title: 'Backup Overdue', message: 'No backup for three days' }
-      ]
+        {
+          ts: Math.floor(Date.now() / 1000),
+          level: 'warning',
+          title: 'Backup Overdue',
+          message: 'No backup for three days',
+        },
+      ],
     };
 
     // First hover
@@ -775,4 +810,3 @@ describe('Notification Center Draggable Window & Event Detail Inspector', () => 
     expect(previewEl.textContent).toContain('Backup Overdue');
   });
 });
-

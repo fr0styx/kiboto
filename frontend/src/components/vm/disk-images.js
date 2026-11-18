@@ -15,9 +15,14 @@ export async function loadDiskImages(select) {
   }
   const keep = select.value;
   const first = select.options[0] ? select.options[0].outerHTML : '';
-  select.innerHTML = first + (Array.isArray(list) ? list : [])
-    .map((d) => `<option value="${escapeHtml(d.path)}">${escapeHtml(d.name)} (${escapeHtml(d.size_formatted || '')})</option>`)
-    .join('');
+  select.innerHTML =
+    first +
+    (Array.isArray(list) ? list : [])
+      .map(
+        (d) =>
+          `<option value="${escapeHtml(d.path)}">${escapeHtml(d.name)} (${escapeHtml(d.size_formatted || '')})</option>`
+      )
+      .join('');
   if (keep) select.value = keep;
   return list;
 }
@@ -28,7 +33,9 @@ export function bindDiskImages(modal) {
   if (!select) return Promise.resolve([]);
   select.addEventListener('change', () => {
     if (!select.value) return;
-    const disk = /** @type {HTMLInputElement | null} */ (modal.querySelector('input[name="vm-create-boot-order"][value="disk"]'));
+    const disk = /** @type {HTMLInputElement | null} */ (
+      modal.querySelector('input[name="vm-create-boot-order"][value="disk"]')
+    );
     if (disk) disk.checked = true;
   });
   return loadDiskImages(select);

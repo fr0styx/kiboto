@@ -33,9 +33,7 @@ export function initParabolicDockMagnification(dockEl) {
 
     items.forEach((item) => {
       const rect = item.getBoundingClientRect();
-      const center = isVertical
-        ? (rect.top + rect.height / 2)
-        : (rect.left + rect.width / 2);
+      const center = isVertical ? rect.top + rect.height / 2 : rect.left + rect.width / 2;
       const distance = Math.abs(pointerPos - center);
 
       let scale = 1;
@@ -55,7 +53,14 @@ export function initParabolicDockMagnification(dockEl) {
   });
 }
 
-export function applyDockSettings(position = 'bottom', magnification = true, maxScale = 1.45, iconSize = 'medium', autohide = false, persist = true) {
+export function applyDockSettings(
+  position = 'bottom',
+  magnification = true,
+  maxScale = 1.45,
+  iconSize = 'medium',
+  autohide = false,
+  persist = true
+) {
   _dockPosition = ['bottom', 'left', 'top'].includes(position) ? position : 'bottom';
   _magnificationEnabled = Boolean(magnification);
   _magnificationScale = Math.max(1.1, Math.min(1.8, parseFloat(maxScale) || 1.45));
@@ -165,7 +170,7 @@ export function getDockSettings() {
     magnification: _magnificationEnabled,
     scale: _magnificationScale,
     size: _dockSize,
-    autohide: _dockAutohide
+    autohide: _dockAutohide,
   };
 }
 
@@ -180,13 +185,13 @@ export function initDockSettingsControls() {
     const p = localStorage.getItem('kiboto_dock_position');
     if (p) savedPos = p;
     const m = localStorage.getItem('kiboto_dock_magnification');
-    if (m !== null) savedMag = (m === 'true');
+    if (m !== null) savedMag = m === 'true';
     const s = localStorage.getItem('kiboto_dock_scale');
     if (s !== null) savedScale = parseFloat(s) || 1.45;
     const sz = localStorage.getItem('kiboto_dock_size');
     if (sz) savedSize = sz;
     const ah = localStorage.getItem('kiboto_dock_autohide');
-    if (ah !== null) savedAutohide = (ah === 'true');
+    if (ah !== null) savedAutohide = ah === 'true';
   } catch (e) {}
 
   applyDockSettings(savedPos, savedMag, savedScale, savedSize, savedAutohide, false);
@@ -222,10 +227,24 @@ export function initDockSettingsControls() {
   const magSlider = document.getElementById('dock-magnification-slider');
   if (magSlider) {
     magSlider.addEventListener('input', (e) => {
-      applyDockSettings(_dockPosition, _magnificationEnabled, parseFloat(e.target.value), _dockSize, _dockAutohide, false);
+      applyDockSettings(
+        _dockPosition,
+        _magnificationEnabled,
+        parseFloat(e.target.value),
+        _dockSize,
+        _dockAutohide,
+        false
+      );
     });
     magSlider.addEventListener('change', (e) => {
-      applyDockSettings(_dockPosition, _magnificationEnabled, parseFloat(e.target.value), _dockSize, _dockAutohide, true);
+      applyDockSettings(
+        _dockPosition,
+        _magnificationEnabled,
+        parseFloat(e.target.value),
+        _dockSize,
+        _dockAutohide,
+        true
+      );
     });
   }
 

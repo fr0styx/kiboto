@@ -3,11 +3,20 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
 
-vi.mock('../management-dom.js', () => ({ ensureManagementDom: vi.fn(async () => {}), onManagementDom: (fn) => fn(), isManagementDomReady: () => true }));
-vi.mock('../components/management/ai.js', () => ({ fetchAndRenderAiStatus: vi.fn(), runAiVisualSearch: vi.fn(), _getActiveAiSearchQuery: vi.fn(() => '') }));
+vi.mock('../management-dom.js', () => ({
+  ensureManagementDom: vi.fn(async () => {}),
+  onManagementDom: (fn) => fn(),
+  isManagementDomReady: () => true,
+}));
+vi.mock('../components/management/ai.js', () => ({
+  fetchAndRenderAiStatus: vi.fn(),
+  runAiVisualSearch: vi.fn(),
+  _getActiveAiSearchQuery: vi.fn(() => ''),
+}));
 vi.mock('../components/management/kib-access.js', () => ({ loadKibExtras: vi.fn() }));
 
-const { openKibWindow, kibPane, isKibWindowPane, ensureKibWindow, adoptPanes, showKibPane, KIB_PANES, markKibAccess } = await import('../components/kib-window.js');
+const { openKibWindow, kibPane, isKibWindowPane, ensureKibWindow, adoptPanes, showKibPane, KIB_PANES, markKibAccess } =
+  await import('../components/kib-window.js');
 const { api } = await import('../api.js');
 const ai = await import('../components/management/ai.js');
 const access = await import('../components/management/kib-access.js');
@@ -23,15 +32,27 @@ describe('Kib window (AI 5)', () => {
   beforeEach(() => {
     document.body.innerHTML = SETTINGS;
     vi.clearAllMocks();
-    window.DockManager = { windows: {}, register: vi.fn(function (id) { this.windows[id] = {}; }), restore: vi.fn(), minimize: vi.fn(), closeWindow: vi.fn() };
+    window.DockManager = {
+      windows: {},
+      register: vi.fn(function (id) {
+        this.windows[id] = {};
+      }),
+      restore: vi.fn(),
+      minimize: vi.fn(),
+      closeWindow: vi.fn(),
+    };
   });
-  afterEach(() => { delete window.DockManager; });
+  afterEach(() => {
+    delete window.DockManager;
+  });
 
-  it('maps links to the window\'s two panes', () => {
+  it("maps links to the window's two panes", () => {
     expect(kibPane('mgmt-pane-ai-visual')).toBe('mgmt-pane-ai-rag');
     expect(kibPane('mgmt-pane-ai-rag')).toBe('mgmt-pane-ai-rag');
     expect(kibPane(undefined)).toBe('mgmt-pane-ai-chat');
-    expect(['mgmt-pane-ai-chat', 'mgmt-pane-ai-rag', 'mgmt-pane-ai-visual', 'mgmt-pane-ai-index'].map(isKibWindowPane)).toEqual([true, true, true, false]);
+    expect(
+      ['mgmt-pane-ai-chat', 'mgmt-pane-ai-rag', 'mgmt-pane-ai-visual', 'mgmt-pane-ai-index'].map(isKibWindowPane)
+    ).toEqual([true, true, true, false]);
     expect(KIB_PANES).toEqual(['mgmt-pane-ai-chat', 'mgmt-pane-ai-rag']);
   });
 
@@ -46,14 +67,16 @@ describe('Kib window (AI 5)', () => {
     expect(document.getElementById('mgmt-pane-ai-chat').style.display).toBe('flex');
     expect(document.getElementById('mgmt-pane-ai-rag').style.display).toBe('none');
     expect(window.DockManager.register).toHaveBeenCalledWith('kib', win, '#i-kib', 'Kib');
-    await flush(); await flush();
+    await flush();
+    await flush();
     expect(ai.fetchAndRenderAiStatus).toHaveBeenCalled();
     expect(document.activeElement.id).toBe('ai-chat-input');
     await openKibWindow('mgmt-pane-ai-visual'); // a second open reuses the window
     expect(document.querySelectorAll('#kib-window')).toHaveLength(1);
     expect(window.DockManager.register).toHaveBeenCalledTimes(1);
     expect(document.getElementById('mgmt-pane-ai-rag').style.display).toBe('block');
-    await flush(); await flush();
+    await flush();
+    await flush();
     expect(ai.runAiVisualSearch).toHaveBeenCalled();
     expect(access.loadKibExtras).toHaveBeenCalledWith('mgmt-pane-ai-rag');
   });
@@ -99,7 +122,9 @@ describe('Kib window (AI 5)', () => {
     document.body.innerHTML = `<div id="mgmt-pane-ai-chat"><textarea id="ai-chat-input"></textarea><button id="btn-ai-chat-send"></button></div>
       <div id="mgmt-pane-ai-rag"><input id="ai-visual-search-input"><button id="btn-ai-rag-ask"></button></div>`;
     markKibAccess({ allowed: false, search: true });
-    expect(document.querySelector('#mgmt-pane-ai-chat .kib-off-note').textContent).toContain('Kib is turned off for you.');
+    expect(document.querySelector('#mgmt-pane-ai-chat .kib-off-note').textContent).toContain(
+      'Kib is turned off for you.'
+    );
     expect(document.getElementById('ai-chat-input').disabled).toBe(true);
     expect(document.getElementById('btn-ai-chat-send').disabled).toBe(true);
     expect(document.querySelector('#mgmt-pane-ai-rag .kib-off-note')).toBeNull();

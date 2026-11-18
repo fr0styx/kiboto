@@ -22,26 +22,41 @@ import { canOpen, canRun, currentUser } from '../route-access.js';
 // Destructive actions always ask first (FE-07).
 function confirmThen(title, msg, action) {
   return new Promise((resolve, reject) => {
-    showConfirmToast(title, msg, async () => {
-      try {
-        await action();
-        resolve(true);
-      } catch (e) {
-        reject(e);
-      }
-    }, () => resolve(false));
+    showConfirmToast(
+      title,
+      msg,
+      async () => {
+        try {
+          await action();
+          resolve(true);
+        } catch (e) {
+          reject(e);
+        }
+      },
+      () => resolve(false)
+    );
   });
 }
 
 function emptyTrash() {
-  return confirmThen(t('confirm.fs_trash_empty.title', 'Empty the Recycle Bin'), t('confirm.fs_trash_empty.msg', 'Permanently delete everything in every Recycle Bin? This can\'t be undone.'), async () => {
-    try {
-      await api.delete('/api/fs/trash/empty', { confirmed: true });
-      showToast(t('toast.trash_emptied_storage_reclaimed', 'Recycle Bin emptied. The space is free again.'), 'success');
-    } catch (e) {
-      showToast(t('toast.failed_to_empty_trash', 'Could not empty the Recycle Bin: {message}', { message: e.message }), 'error');
+  return confirmThen(
+    t('confirm.fs_trash_empty.title', 'Empty the Recycle Bin'),
+    t('confirm.fs_trash_empty.msg', "Permanently delete everything in every Recycle Bin? This can't be undone."),
+    async () => {
+      try {
+        await api.delete('/api/fs/trash/empty', { confirmed: true });
+        showToast(
+          t('toast.trash_emptied_storage_reclaimed', 'Recycle Bin emptied. The space is free again.'),
+          'success'
+        );
+      } catch (e) {
+        showToast(
+          t('toast.failed_to_empty_trash', 'Could not empty the Recycle Bin: {message}', { message: e.message }),
+          'error'
+        );
+      }
     }
-  });
+  );
 }
 
 let _spotlightItems = [];
@@ -261,7 +276,7 @@ function _buildDefaultSpotlightItems() {
     {
       id: 'act-trash-empty',
       title: `${t('confirm.fs_trash_empty.title', 'Empty the Recycle Bin')} (${CMD.trash})`,
-      subtitle: t('spotlight.empty_bins_sub', 'Permanently delete what every share\'s Recycle Bin holds'),
+      subtitle: t('spotlight.empty_bins_sub', "Permanently delete what every share's Recycle Bin holds"),
       icon: '🗑️',
       category: 'action',
       keywords: ['trash', 'empty', 'recycle', 'purge', 'clean', '>trash'],
@@ -279,9 +294,10 @@ export function parseNaturalLanguageAction(rawQuery) {
   const snapMatch = clean.match(/^(?:snap|snapshot)(?:\s+(?:pool\s+)?(\S+))?/i);
   if (snapMatch) {
     const rawTarget = snapMatch[1];
-    const targetPool = (!rawTarget || rawTarget.toLowerCase() === 'pool')
-      ? (state.latestStats?.storage?.pool_id || (state.latestStats?.unraid ? 'unraid_array' : 'default'))
-      : rawTarget;
+    const targetPool =
+      !rawTarget || rawTarget.toLowerCase() === 'pool'
+        ? state.latestStats?.storage?.pool_id || (state.latestStats?.unraid ? 'unraid_array' : 'default')
+        : rawTarget;
     return {
       id: `dyn-snap-${targetPool}`,
       title: t('sp.snap_dyn', 'Snapshot pool: {pool}', { pool: targetPool }),
@@ -292,15 +308,32 @@ export function parseNaturalLanguageAction(rawQuery) {
       run: async () => {
         try {
           const res = await api.post(`/api/storage/pools/${encodeURIComponent(targetPool)}/snapshots`, {
-            name: `snap_${Date.now()}`
+            name: `snap_${Date.now()}`,
           });
           const snapName = res?.snapshot_name || res?.name || `snap_${Date.now()}`;
-          showToast(t('toast.snapshot_created_for_pool', 'Snapshot \'{snapName}\' created for pool \'{targetPool}\'', { snapName: snapName, targetPool: targetPool }), 'success', 3500);
+          showToast(
+            t('toast.snapshot_created_for_pool', "Snapshot '{snapName}' created for pool '{targetPool}'", {
+              snapName: snapName,
+              targetPool: targetPool,
+            }),
+            'success',
+            3500
+          );
         } catch (e) {
-          const errMsg = e?.detail || e?.message || t('storage.snapshots_by_host', 'The host system makes snapshots here, not Kiboto');
-          showToast(t('toast.snapshot_failed_for', 'Snapshot failed for \'{targetPool}\': {errMsg}', { targetPool: targetPool, errMsg: errMsg }), 'error', 4500);
+          const errMsg =
+            e?.detail ||
+            e?.message ||
+            t('storage.snapshots_by_host', 'The host system makes snapshots here, not Kiboto');
+          showToast(
+            t('toast.snapshot_failed_for', "Snapshot failed for '{targetPool}': {errMsg}", {
+              targetPool: targetPool,
+              errMsg: errMsg,
+            }),
+            'error',
+            4500
+          );
         }
-      }
+      },
     };
   }
 
@@ -318,12 +351,21 @@ export function parseNaturalLanguageAction(rawQuery) {
       run: async () => {
         try {
           await api.post('/api/disk/locate', { dev, duration: 15 });
-          showToast(t('toast.locate_led_strobing_on_drive_for', 'Locate LED strobing on drive {dev} for 15s', { dev: dev }), 'info');
+          showToast(
+            t('toast.locate_led_strobing_on_drive_for', 'Locate LED strobing on drive {dev} for 15s', { dev: dev }),
+            'info'
+          );
         } catch (e) {
           if (e?.error === 'cancelled') return; // a sleeping drive stays asleep
-          showToast(t('toast.failed_to_locate_drive', 'Failed to locate drive {dev}: {message}', { dev: dev, message: e.message }), 'error');
+          showToast(
+            t('toast.failed_to_locate_drive', 'Failed to locate drive {dev}: {message}', {
+              dev: dev,
+              message: e.message,
+            }),
+            'error'
+          );
         }
-      }
+      },
     };
   }
 
@@ -332,17 +374,16 @@ export function parseNaturalLanguageAction(rawQuery) {
     return {
       id: 'dyn-trash-empty',
       title: t('confirm.fs_trash_empty.title', 'Empty the Recycle Bin'),
-      subtitle: t('spotlight.empty_bins_sub', 'Permanently delete what every share\'s Recycle Bin holds'),
+      subtitle: t('spotlight.empty_bins_sub', "Permanently delete what every share's Recycle Bin holds"),
       icon: '🗑️',
       category: 'action',
       keywords: ['trash', 'empty', 'recycle'],
-      run: () => emptyTrash()
+      run: () => emptyTrash(),
     };
   }
 
   return null;
 }
-
 
 const CATEGORIES = {
   app: ['sp.cat_app', 'app'],
@@ -427,7 +468,9 @@ export function filterSpotlightResults(query = '') {
     if (cleanPrompt) {
       const aiDynamicItem = {
         id: `dyn-zettai-${isPhoto ? 'photo' : 'ask'}`,
-        title: isPhoto ? t('sp.photo_dyn', 'Photo search: “{q}”', { q: cleanPrompt }) : t('sp.ask_dyn', 'Ask Kib: “{q}”', { q: cleanPrompt }),
+        title: isPhoto
+          ? t('sp.photo_dyn', 'Photo search: “{q}”', { q: cleanPrompt })
+          : t('sp.ask_dyn', 'Ask Kib: “{q}”', { q: cleanPrompt }),
         subtitle: isPhoto
           ? t('sp.photo_dyn_sub', 'Find photos by scene, object or colour, without waking drives')
           : t('sp.ask_dyn_sub', 'An answer from your files, with its sources'),
@@ -436,10 +479,7 @@ export function filterSpotlightResults(query = '') {
         keywords: ['ai', 'rag', cleanPrompt],
         run: () => {
           if (typeof window.openManagementWindow === 'function') {
-            window.openManagementWindow(
-              'mgmt-sec-ai',
-              isPhoto ? 'mgmt-pane-ai-visual' : 'mgmt-pane-ai-rag'
-            );
+            window.openManagementWindow('mgmt-sec-ai', isPhoto ? 'mgmt-pane-ai-visual' : 'mgmt-pane-ai-rag');
             setTimeout(() => {
               if (isPhoto) {
                 const visIn = document.getElementById('ai-visual-query-input');
@@ -477,14 +517,18 @@ function renderSpotlightResults() {
   }
 
   if (_filteredItems.length === 0) {
-    resultsContainer.innerHTML = '<div style="padding:24px; text-align:center; color:var(--muted); font-size:var(--kb-fs-xs);">' + t('sp.no_results', 'Nothing found.') + '</div>';
+    resultsContainer.innerHTML =
+      '<div style="padding:24px; text-align:center; color:var(--muted); font-size:var(--kb-fs-xs);">' +
+      t('sp.no_results', 'Nothing found.') +
+      '</div>';
     return;
   }
 
-  resultsContainer.innerHTML = _filteredItems.map((item, idx) => {
-    const isSelected = idx === _selectedIndex;
-    const badgeClass = `spotlight-badge-${item.category || 'app'}`;
-    return `
+  resultsContainer.innerHTML = _filteredItems
+    .map((item, idx) => {
+      const isSelected = idx === _selectedIndex;
+      const badgeClass = `spotlight-badge-${item.category || 'app'}`;
+      return `
       <div class="spotlight-result-item ${isSelected ? 'active' : ''}" data-idx="${idx}" id="spotlight-opt-${idx}" role="option" aria-selected="${isSelected}">
         <div class="spotlight-item-left">
           <span class="spotlight-item-icon" aria-hidden="true">${item.icon || '⚡'}</span>
@@ -496,7 +540,8 @@ function renderSpotlightResults() {
         <span class="spotlight-badge ${badgeClass}">${escapeHtml(categoryWord(item.category))}</span>
       </div>
     `;
-  }).join('');
+    })
+    .join('');
 
   resultsContainer.querySelectorAll('.spotlight-result-item').forEach((el) => {
     el.addEventListener('click', () => {

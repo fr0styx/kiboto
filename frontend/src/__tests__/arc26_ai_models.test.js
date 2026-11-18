@@ -10,7 +10,15 @@ const sortBy = (v) => {
 };
 const MODELS = [
   { id: 'a', name: 'A', release_timestamp: 1_780_000_000, downloads: 10, est_ram_gb: 8, recommended: false },
-  { id: 'b', name: 'B', release_timestamp: 1_770_000_000, downloads: 900, est_ram_gb: 2, recommended: true, target_device: 'GPU (iGPU)/x' },
+  {
+    id: 'b',
+    name: 'B',
+    release_timestamp: 1_770_000_000,
+    downloads: 900,
+    est_ram_gb: 2,
+    recommended: true,
+    target_device: 'GPU (iGPU)/x',
+  },
   { id: 'c', name: 'C', release_timestamp: 1_775_000_000, downloads: 50, vram_or_ram_gb: 4 },
   { id: 'old', name: 'Old', release_timestamp: 1_740_000_000 },
   { id: 'big', name: 'Big', release_timestamp: 1_781_000_000, fits_hardware: false },

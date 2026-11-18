@@ -8,7 +8,14 @@ afterEach(() => {
   _test.reset();
 });
 
-const watch = { code: 'crc_errors', severity: 'watch', title: 'Cable errors', detail: '3 errors', action: 'Check the cable', params: { n: 3 } };
+const watch = {
+  code: 'crc_errors',
+  severity: 'watch',
+  title: 'Cable errors',
+  detail: '3 errors',
+  action: 'Check the cable',
+  params: { n: 3 },
+};
 
 describe('Drive Health acknowledgements', () => {
   it('offers "I know about this" only on findings to watch or plan for', () => {
@@ -36,7 +43,13 @@ describe('Drive Health acknowledgements', () => {
     const post = vi.spyOn(api, 'post').mockResolvedValue({ fingerprint: 'x' });
     const get = vi.spyOn(api, 'get').mockResolvedValue({ drives: [], notes: {} });
     await ackFinding('crc_errors', true);
-    expect(post).toHaveBeenCalledWith('/api/drives/acks', { serial: 'S1', code: 'crc_errors', params: { n: 3 }, severity: 'watch', title: 'Cable errors' });
+    expect(post).toHaveBeenCalledWith('/api/drives/acks', {
+      serial: 'S1',
+      code: 'crc_errors',
+      params: { n: 3 },
+      severity: 'watch',
+      title: 'Cable errors',
+    });
     expect(get).toHaveBeenCalledWith('/api/drives/health');
     await ackFinding('crc_errors', false);
     expect(post).toHaveBeenLastCalledWith('/api/drives/acks/forget', { serial: 'S1', code: 'crc_errors' });
@@ -51,7 +64,12 @@ describe('Drive Health acknowledgements', () => {
   });
 
   it('lists acknowledged findings in the full report', () => {
-    const text = driveReportText({ drive: { dev: 'sdb' }, detail: { drive_health: { verdict: 'ok', findings: [{ ...watch, severity: 'ok', acknowledged: { at: 1700000000 } }] } } });
+    const text = driveReportText({
+      drive: { dev: 'sdb' },
+      detail: {
+        drive_health: { verdict: 'ok', findings: [{ ...watch, severity: 'ok', acknowledged: { at: 1700000000 } }] },
+      },
+    });
     expect(text).toContain('Cable errors (acknowledged');
   });
 });

@@ -26,16 +26,38 @@ import { confirmTextFor } from './confirm-text.js';
 
 // Server-required confirmation for destructive actions (backend/confirmations.py), asked in the
 // person's language, red when it deletes or erases (NUX-2)
-setConfirmationHandler((info) => new Promise((resolve) => {
-  const { title, msg, options } = confirmTextFor(info);
-  showConfirmToast(title, msg, () => resolve(true), () => resolve(false), options);
-}));
+setConfirmationHandler(
+  (info) =>
+    new Promise((resolve) => {
+      const { title, msg, options } = confirmTextFor(info);
+      showConfirmToast(
+        title,
+        msg,
+        () => resolve(true),
+        () => resolve(false),
+        options
+      );
+    })
+);
 import './folder-browser.js';
 import './modals.js';
 
-import { initDockSystem, DockManager, makeDraggable, bringToFront, restoreOpenWindowsState, setWindowRestorationComplete } from './components/dock.js';
+import {
+  initDockSystem,
+  DockManager,
+  makeDraggable,
+  bringToFront,
+  restoreOpenWindowsState,
+  setWindowRestorationComplete,
+} from './components/dock.js';
 import { initAuth } from './components/auth.js';
-import { applyStats, applyTheme, applyDesktopTheme, applyLcdTheme, initDashboardClicks } from './components/dashboard.js';
+import {
+  applyStats,
+  applyTheme,
+  applyDesktopTheme,
+  applyLcdTheme,
+  initDashboardClicks,
+} from './components/dashboard.js';
 import { initFanControl } from './components/fan-control.js';
 import { initLedControl } from './components/led-control.js';
 import { applyDashboardLayout, fetchDashboardLayout, fitMiniPreviewScale } from './components/mini-preview.js';
@@ -102,7 +124,8 @@ function loadLater() {
     };
     btn.addEventListener('click', early, true);
   }
-  const idle = (fn) => (window.requestIdleCallback ? window.requestIdleCallback(fn, { timeout: 2000 }) : setTimeout(fn, 800));
+  const idle = (fn) =>
+    window.requestIdleCallback ? window.requestIdleCallback(fn, { timeout: 2000 }) : setTimeout(fn, 800);
   // only for someone signed in at the desktop: not on the sign-in screen or a phone (NPERF-5)
   const later = (fn) => idle(() => forDesktopUser(fn, document, desktopFlags()));
   later(() => {
@@ -238,7 +261,8 @@ function desktopFlags() {
   return { lcd: state.isLcdDirect, console: state.isVmConsoleDirect };
 }
 
-document.addEventListener('DOMContentLoaded', () => {  if (window.location.search.includes('mode=lcd') || document.body.classList.contains('lcd-direct')) {
+document.addEventListener('DOMContentLoaded', () => {
+  if (window.location.search.includes('mode=lcd') || document.body.classList.contains('lcd-direct')) {
     state.isLcdDirect = true;
     document.body.classList.add('lcd-direct');
     try {
@@ -320,7 +344,8 @@ document.addEventListener('DOMContentLoaded', () => {  if (window.location.searc
   installWindowFocus(DockManager);
   // the sign-up form for invite links, over the sign-in screen, in the person's language; loaded only
   // for an invite address, so the first load of everyone else stays small (audit A7)
-  if (window.location.hash.startsWith('#/invite/')) import('./components/invites.js').then((m) => m.initInviteLanding(textsReady)).catch(() => {});
+  if (window.location.hash.startsWith('#/invite/'))
+    import('./components/invites.js').then((m) => m.initInviteLanding(textsReady)).catch(() => {});
   initAuth();
   initDashboardClicks();
   // the fan and LED controls are in the settings drawer, whose markup arrives after the first
@@ -347,12 +372,29 @@ document.addEventListener('DOMContentLoaded', () => {  if (window.location.searc
   ZettEventBus.on('window:open', (payload) => {
     if (managementReady || !payload || (payload.id !== 'management' && payload.id !== 'management-window')) return;
     ensureManagement().then(() => {
-      if (!managementReady && window.openManagementWindow) window.openManagementWindow(payload.section || payload.pane, payload.pane, payload.subtab);
+      if (!managementReady && window.openManagementWindow)
+        window.openManagementWindow(payload.section || payload.pane, payload.pane, payload.subtab);
       managementReady = true;
     });
   });
   // Mission Control warms up once the first 10 s have passed (load-when.js: idleLoad, NPERF-5)
-  import('./load-when.js').then((m) => m.idleLoad(() => m.forDesktopUser(() => ensureManagement().then(() => { managementReady = true; }, () => {}), document, desktopFlags()), m.MISSION_CONTROL_WARMUP_MS));
+  import('./load-when.js').then((m) =>
+    m.idleLoad(
+      () =>
+        m.forDesktopUser(
+          () =>
+            ensureManagement().then(
+              () => {
+                managementReady = true;
+              },
+              () => {}
+            ),
+          document,
+          desktopFlags()
+        ),
+      m.MISSION_CONTROL_WARMUP_MS
+    )
+  );
   initCommandPalette();
   initJobsCentre();
   initDriveHealth(); // the drive view: everything that opened the S.M.A.R.T. window opens it
@@ -361,7 +403,10 @@ document.addEventListener('DOMContentLoaded', () => {  if (window.location.searc
   initPhoneShell();
   if (!state.isLcdDirect && !state.isVmConsoleDirect) watchServerBuild(); // offer a reload after an update
   // the desktop widgets (the largest module of the first load) come right after it (PERF-9)
-  import('./components/widgets.js').then((m) => m.initWidgets(), (err) => console.warn('[Widgets] not loaded:', err));
+  import('./components/widgets.js').then(
+    (m) => m.initWidgets(),
+    (err) => console.warn('[Widgets] not loaded:', err)
+  );
   // File Explorer loads on first use, or right after the first paint (B6 first-load budget)
   const ensureFiles = lazyWindow({
     id: 'file-manager-window',
@@ -371,7 +416,10 @@ document.addEventListener('DOMContentLoaded', () => {  if (window.location.searc
     globals: ['openFileManager', 'openNewFileManagerWindow', 'navigateToPath', 'openRecycleBin'],
     openGlobal: 'openFileManager',
   });
-  (window.requestIdleCallback || ((fn) => setTimeout(fn, 1500)))(() => forDesktopUser(() => ensureFiles(), document, desktopFlags()), { timeout: 3000 });
+  (window.requestIdleCallback || ((fn) => setTimeout(fn, 1500)))(
+    () => forDesktopUser(() => ensureFiles(), document, desktopFlags()),
+    { timeout: 3000 }
+  );
   // The VM manager (~220 kB) loads the first time it's opened (FE-02)
   lazyWindow({
     id: 'vm',

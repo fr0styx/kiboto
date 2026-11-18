@@ -15,7 +15,13 @@ describe('the shared page watcher', () => {
     stops.push(watchDom({ onRecords: () => {} }));
     expect(_test.options()).toEqual({ childList: true, subtree: true });
     const stopAttrs = watchDom({ attributes: ['class'], characterData: true, onRecords: () => {} });
-    expect(_test.options()).toEqual({ childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['class'] });
+    expect(_test.options()).toEqual({
+      childList: true,
+      subtree: true,
+      characterData: true,
+      attributes: true,
+      attributeFilter: ['class'],
+    });
     stopAttrs();
     expect(_test.options()).toEqual({ childList: true, subtree: true });
     stops.pop()();
@@ -42,7 +48,14 @@ describe('the shared page watcher', () => {
   it('a failing subscriber does not stop the others', async () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const ok = vi.fn();
-    stops.push(watchDom({ onRecords: () => { throw new Error('boom'); } }), watchDom({ onRecords: ok }));
+    stops.push(
+      watchDom({
+        onRecords: () => {
+          throw new Error('boom');
+        },
+      }),
+      watchDom({ onRecords: ok })
+    );
     document.body.appendChild(document.createElement('p'));
     await flush();
     expect(ok).toHaveBeenCalledTimes(1);

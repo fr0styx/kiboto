@@ -26,9 +26,15 @@ export function planHtml(state) {
   const copy = settings[0];
   const settingsLine = copy
     ? t('restorebox.settings_from', 'Settings saved {when}', { when: formatDateTime(copy.time) })
-    : t('restorebox.no_settings', 'This backup holds no copy of the settings (it was made before Kiboto 2.0). Restore an uploaded settings backup instead, or set people and shares up again.');
+    : t(
+        'restorebox.no_settings',
+        'This backup holds no copy of the settings (it was made before Kiboto 2.0). Restore an uploaded settings backup instead, or set people and shares up again.'
+      );
   const filesLine = newest
-    ? t('restorebox.files_from', 'Files backed up {when}: {paths}', { when: formatDateTime(newest.time), paths: (newest.paths || []).join(', ') })
+    ? t('restorebox.files_from', 'Files backed up {when}: {paths}', {
+        when: formatDateTime(newest.time),
+        paths: (newest.paths || []).join(', '),
+      })
     : t('restorebox.no_versions', 'This backup has no versions yet.');
   return `<p class="restorebox-name"><strong>${escapeHtml(repo.name || repo.id)}</strong> <span class="offsite-meta">${escapeHtml(repo.location || '')}</span></p>
     <ol class="restorebox-steps">
@@ -42,7 +48,12 @@ export function planHtml(state) {
 }
 
 /** Waits for Kiboto to go down and come back after the restart, then reloads the page. */
-export async function waitForRestart({ fetchImpl = fetch, reload = () => window.location.reload(), sleep = (ms) => new Promise((r) => setTimeout(r, ms)), tries = 90 } = {}) {
+export async function waitForRestart({
+  fetchImpl = fetch,
+  reload = () => window.location.reload(),
+  sleep = (ms) => new Promise((r) => setTimeout(r, ms)),
+  tries = 90,
+} = {}) {
   let wentDown = false;
   for (let i = 0; i < tries; i += 1) {
     await sleep(2000);
@@ -119,13 +130,26 @@ export async function openRestoreBox(repoId = null, onDone = null) {
         const r = await api.post(`/api/offsite/repos/${id}/restore-settings`, { snapshot: 'latest' });
         body().innerHTML = `<p>${escapeHtml(
           r.restarting
-            ? t('restorebox.restarting', 'The settings are back. Kiboto is restarting to apply them; this page reloads by itself. Then sign in with your old password and open Backup → Off-site → Bring back everything for the files.')
-            : t('restorebox.restart_needed', 'The settings are back. Restart the Kiboto container to apply them, then sign in with your old password and open Backup → Off-site → Bring back everything for the files.'),
+            ? t(
+                'restorebox.restarting',
+                'The settings are back. Kiboto is restarting to apply them; this page reloads by itself. Then sign in with your old password and open Backup → Off-site → Bring back everything for the files.'
+              )
+            : t(
+                'restorebox.restart_needed',
+                'The settings are back. Restart the Kiboto container to apply them, then sign in with your old password and open Backup → Off-site → Bring back everything for the files.'
+              )
         )}</p>`;
         if (r.restarting) waitForRestart();
       } else if (act === 'files') {
         const r = await api.post(`/api/offsite/repos/${id}/restore-all`, { snapshot: 'latest' });
-        showToast(t('restorebox.files_started', 'Bringing back {n, plural, one {# folder} other {# folders}}; it shows in Jobs.', { n: (r.paths || []).length }), 'info');
+        showToast(
+          t(
+            'restorebox.files_started',
+            'Bringing back {n, plural, one {# folder} other {# folders}}; it shows in Jobs.',
+            { n: (r.paths || []).length }
+          ),
+          'info'
+        );
         closeDialog(dlg);
       }
     } catch (err) {

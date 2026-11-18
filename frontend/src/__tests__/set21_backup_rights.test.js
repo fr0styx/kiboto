@@ -6,7 +6,15 @@ const PAGE = `<div id="p">
   <button data-rd="all"></button><button data-rd="file"></button>
   <div data-off-usb></div><button id="btn-backup-download"></button><div class="bk-upload"></div>
   <input data-scrub-pool="p1"></div>`;
-const hiddenOnes = (root) => [...root.querySelectorAll('[data-no-access]')].map((e) => e.getAttribute('data-off') || e.getAttribute('data-rd') || e.id || e.className || (e.hasAttribute('data-off-usb') ? 'usb' : 'scrub'));
+const hiddenOnes = (root) =>
+  [...root.querySelectorAll('[data-no-access]')].map(
+    (e) =>
+      e.getAttribute('data-off') ||
+      e.getAttribute('data-rd') ||
+      e.id ||
+      e.className ||
+      (e.hasAttribute('data-off-usb') ? 'usb' : 'scrub')
+  );
 
 describe('Backup buttons follow the rights (SET-21, Backup B9)', () => {
   it('a backup manager does not see what only answers "not allowed"', () => {

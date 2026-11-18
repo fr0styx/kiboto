@@ -2,13 +2,12 @@ import { isCompact } from '../../device.js';
 // Selecting several desktop icons with a lasso.
 // Part of dock.js, split out by ARC-5.
 
-
-
 export function initDesktopLasso() {
   if (typeof window === 'undefined' || document._desktopLassoInitialized) return;
 
   let isLassoing = false;
-  let startX = 0, startY = 0;
+  let startX = 0,
+    startY = 0;
   let lassoEl = null;
 
   document.addEventListener('pointerdown', (e) => {
@@ -18,15 +17,17 @@ export function initDesktopLasso() {
       typeof e.target?.closest === 'function' &&
       e.target.closest(
         '.smart-modal-window, .smart-modal-backdrop, .os-window, #console-window, #console-modal-overlay, ' +
-        '#notif-center-panel, .notif-center-window, #management-window, .management-window, #management-modal-overlay, ' +
-        '#file-manager-window, .file-manager-window, #container-inspector-window, .container-inspector-window, ' +
-        '#container-inspector-overlay, #user-profile-flyout, .user-profile-flyout, .os-context-menu, ' +
-        '#os-dock-container, .suite-navbar, .slide-drawer, .chassis-hero-box, .desktop-widget, ' +
-        '#spotlight-palette-overlay, .window-resizer-grip, [data-window-id]'
+          '#notif-center-panel, .notif-center-window, #management-window, .management-window, #management-modal-overlay, ' +
+          '#file-manager-window, .file-manager-window, #container-inspector-window, .container-inspector-window, ' +
+          '#container-inspector-overlay, #user-profile-flyout, .user-profile-flyout, .os-context-menu, ' +
+          '#os-dock-container, .suite-navbar, .slide-drawer, .chassis-hero-box, .desktop-widget, ' +
+          '#spotlight-palette-overlay, .window-resizer-grip, [data-window-id]'
       )
     ) {
       if (typeof e.target?.closest === 'function' && !e.target.closest('.chassis-hero-box')) {
-        document.querySelectorAll('.desktop-icon-selected').forEach((el) => el.classList.remove('desktop-icon-selected'));
+        document
+          .querySelectorAll('.desktop-icon-selected')
+          .forEach((el) => el.classList.remove('desktop-icon-selected'));
       }
       return;
     }

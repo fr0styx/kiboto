@@ -9,7 +9,12 @@ vi.mock('../api.js', () => ({
   auth: { getToken: vi.fn().mockReturnValue('') },
   ApiError: class ApiError extends Error {},
 }));
-vi.mock('../toast.js', () => ({ showToast: vi.fn(), showConfirmToast: vi.fn(), showPromptToast: vi.fn(), showBottomSheet: vi.fn() }));
+vi.mock('../toast.js', () => ({
+  showToast: vi.fn(),
+  showConfirmToast: vi.fn(),
+  showPromptToast: vi.fn(),
+  showBottomSheet: vi.fn(),
+}));
 
 describe('explorer uploads', () => {
   it('sends small files the way the upload API expects (folder and name in the query, file as body)', async () => {
@@ -20,7 +25,10 @@ describe('explorer uploads', () => {
     const file = new File(['hello'], 'holiday photo.jpg', { type: 'image/jpeg' });
     await fm.uploadFiles([file], '/mnt/user/Photos');
     // "ask": the server answers before it stores anything when the name is taken (SET-05)
-    expect(api.postRaw).toHaveBeenCalledWith('/api/fs/upload?path=%2Fmnt%2Fuser%2FPhotos&filename=holiday%20photo.jpg&on_conflict=ask', file);
+    expect(api.postRaw).toHaveBeenCalledWith(
+      '/api/fs/upload?path=%2Fmnt%2Fuser%2FPhotos&filename=holiday%20photo.jpg&on_conflict=ask',
+      file
+    );
     expect(fsUploadUrl('/a b', 'c&d')).toBe('/api/fs/upload?path=%2Fa%20b&filename=c%26d');
   });
 

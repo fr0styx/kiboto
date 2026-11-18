@@ -16,9 +16,7 @@ export function setCurrentUser(user) {
   updateUserInterfaceElements();
   if (user) {
     ZettEventBus.emit('session:user', user); // their own clock follows their account
-    import('../time-zone-prefs.js')
-      .then((m) => m.detectServerZone(user))
-      .catch(() => {});
+    import('../time-zone-prefs.js').then((m) => m.detectServerZone(user)).catch(() => {});
   }
 }
 
@@ -30,7 +28,11 @@ let _mfaPrompted = false;
 export function promptRequiredMfa(data) {
   if (!data?.mfa_setup_required || _mfaPrompted) return false;
   _mfaPrompted = true;
-  import('../toast.js').then((m) => m.showToast(t('mfa.required_now', 'Your role requires two-step sign-in. Set it up to continue.'), 'info')).catch(() => {});
+  import('../toast.js')
+    .then((m) =>
+      m.showToast(t('mfa.required_now', 'Your role requires two-step sign-in. Set it up to continue.'), 'info')
+    )
+    .catch(() => {});
   import('./users.js').then((m) => m.start2FASetup()).catch(() => {});
   return true;
 }
@@ -94,8 +96,9 @@ export function updateUserInterfaceElements() {
   // Dynamic privilege gating: hide Users tab for non-admins
   const usersTab = document.getElementById('mgmt-tab-users');
   if (usersTab) {
-    const isAdmin = ['superadmin', 'storage_admin'].includes(roleId) ||
-                    (_currentUser.scopes && (_currentUser.scopes.includes('*') || _currentUser.scopes.includes('users:read')));
+    const isAdmin =
+      ['superadmin', 'storage_admin'].includes(roleId) ||
+      (_currentUser.scopes && (_currentUser.scopes.includes('*') || _currentUser.scopes.includes('users:read')));
     usersTab.style.display = isAdmin ? '' : 'none';
   }
 }

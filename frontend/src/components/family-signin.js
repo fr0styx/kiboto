@@ -13,28 +13,34 @@ function offHtml(st) {
   const why = st.https_ready
     ? ''
     : `<div class="nsv-xs-muted-2">${esc(t('fs.needs_https', 'Passkeys need https: turn on HTTPS in Network → Use from anywhere first.'))}</div>`;
-  return `<p class="nsv-xs-muted">${esc(t('fs.intro', 'One sign-in with a passkey for the family\'s apps (Immich, Nextcloud, Paperless, Audiobookshelf, Jellyfin), run by Kiboto with Pocket ID.'))}</p>${why}
+  return `<p class="nsv-xs-muted">${esc(t('fs.intro', "One sign-in with a passkey for the family's apps (Immich, Nextcloud, Paperless, Audiobookshelf, Jellyfin), run by Kiboto with Pocket ID."))}</p>${why}
     <button type="button" class="btn-pill-toggle is-primary is-small" data-fs="on"${st.https_ready ? '' : ' disabled'}>${esc(t('fs.turn_on', 'Turn on family sign-in'))}</button>`;
 }
 
 function appsHtml(apps) {
-  if (!apps.length) return `<div class="nsv-xs-muted-2">${esc(t('fs.no_apps', 'None of the apps it can connect is running here yet.'))}</div>`;
+  if (!apps.length)
+    return `<div class="nsv-xs-muted-2">${esc(t('fs.no_apps', 'None of the apps it can connect is running here yet.'))}</div>`;
   return `<ul class="fs-apps">${apps
-    .map((a) => `<li><strong>${esc(a.name)}</strong> ${
-      a.connected
-        ? `<span class="nsv-xs-muted">${esc(t('fs.connected', 'connected'))}</span>
+    .map(
+      (a) =>
+        `<li><strong>${esc(a.name)}</strong> ${
+          a.connected
+            ? `<span class="nsv-xs-muted">${esc(t('fs.connected', 'connected'))}</span>
            <button type="button" class="btn-pill-toggle is-small" data-fs-connect="${esc(a.key)}">${esc(t('fs.new_secret', 'New secret'))}</button>
            <button type="button" class="btn-pill-toggle is-small is-danger" data-fs-disconnect="${esc(a.key)}">${esc(t('fs.disconnect', 'Disconnect'))}</button>`
-        : `<button type="button" class="btn-pill-toggle is-small is-primary" data-fs-connect="${esc(a.key)}">${esc(t('fs.connect', 'Connect'))}</button>`
-    }</li>`)
+            : `<button type="button" class="btn-pill-toggle is-small is-primary" data-fs-connect="${esc(a.key)}">${esc(t('fs.connect', 'Connect'))}</button>`
+        }</li>`
+    )
     .join('')}</ul>`;
 }
 
 function peopleHtml(users) {
   return `<ul class="fs-people">${users
     .filter((u) => u.status === 'active')
-    .map((u) => `<li><span>${esc(u.display_name || u.username)}</span>
-      <button type="button" class="btn-pill-toggle is-small" data-fs-link="${esc(String(u.id))}">${esc(t('fs.link', 'Send a sign-in link'))}</button></li>`)
+    .map(
+      (u) => `<li><span>${esc(u.display_name || u.username)}</span>
+      <button type="button" class="btn-pill-toggle is-small" data-fs-link="${esc(String(u.id))}">${esc(t('fs.link', 'Send a sign-in link'))}</button></li>`
+    )
     .join('')}</ul>`;
 }
 
@@ -42,7 +48,9 @@ function peopleHtml(users) {
 export function familySigninHtml(st, users) {
   if (!st.enabled) return offHtml(st);
   const state = st.running ? t('fs.running', 'Running') : t('fs.starting', 'Starting…');
-  const open = st.url ? ` · <a href="${esc(st.url)}" target="_blank" rel="noopener">${esc(t('fs.open', 'Open Pocket ID'))}</a>` : '';
+  const open = st.url
+    ? ` · <a href="${esc(st.url)}" target="_blank" rel="noopener">${esc(t('fs.open', 'Open Pocket ID'))}</a>`
+    : '';
   return `<div class="nsv-xs-muted">${esc(state)} · ${esc(t('fs.people', '{count, plural, one {# person} other {# people}}', { count: st.people }))}${open}</div>
     <h4 class="fs-h">${esc(t('fs.people_h', 'People'))}</h4>
     <div class="nsv-xs-muted-2">${esc(t('fs.people_help', 'Everyone with a Kiboto account has one here. Pocket ID has no passwords: send each person a link that signs them in once, to add a passkey on their phone.'))}</div>
@@ -86,7 +94,7 @@ async function copy(text) {
     await navigator.clipboard.writeText(text);
     showToast(t('fs.copied', 'Copied.'), 'success');
   } catch {
-    showToast(t('fs.copy_failed', 'Copying didn\'t work here; select the text and copy it.'), 'error');
+    showToast(t('fs.copy_failed', "Copying didn't work here; select the text and copy it."), 'error');
   }
 }
 

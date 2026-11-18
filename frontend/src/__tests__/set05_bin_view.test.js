@@ -40,7 +40,9 @@ describe('the Recycle Bin in the File Explorer (SET-05)', () => {
 
   it('says both rules, and how many items go in the next 7 days', () => {
     const rules = { keep_days: 30, max_percent_of_disk: 10, min_days: 1, soon_days: 7 };
-    expect(binNote(rules, 0)).toBe('Items stay here for 30 days after they are deleted, then they go for good. A bin that grows past 10% of its drive lets its oldest items go sooner, but never within a day.');
+    expect(binNote(rules, 0)).toBe(
+      'Items stay here for 30 days after they are deleted, then they go for good. A bin that grows past 10% of its drive lets its oldest items go sooner, but never within a day.'
+    );
     expect(binNote(rules, 3)).toMatch(/never within a day\. 3 items go in the next 7 days\.$/);
     expect(binNote(rules, 1)).toMatch(/1 item goes in the next 7 days\.$/);
     expect(binNote()).toContain('30 days'); // an older server that sends no rules
@@ -56,8 +58,19 @@ describe('the Recycle Bin in the File Explorer (SET-05)', () => {
   });
 
   it('the menu on a deleted item is short: Restore, Get info, Delete for good', () => {
-    const menu = new FmContextMenu({ selectedPaths: new Set([BIN]), currentPath: '/mnt/user/.RecycleBin', currentSortBy: 'name', currentSortDir: 'asc', _inBin: true });
-    menu.show(new MouseEvent('contextmenu', { clientX: 5, clientY: 5 }), { name: 'budget.csv', path: BIN, is_dir: false, trash_id: 't1' });
+    const menu = new FmContextMenu({
+      selectedPaths: new Set([BIN]),
+      currentPath: '/mnt/user/.RecycleBin',
+      currentSortBy: 'name',
+      currentSortDir: 'asc',
+      _inBin: true,
+    });
+    menu.show(new MouseEvent('contextmenu', { clientX: 5, clientY: 5 }), {
+      name: 'budget.csv',
+      path: BIN,
+      is_dir: false,
+      trash_id: 't1',
+    });
     const acts = [...document.querySelectorAll('#fm-context-menu [data-act]')].map((r) => r.dataset.act);
     expect(acts).toEqual(['restore', 'info', 'trash']);
     expect(document.getElementById('fm-context-menu').textContent).toContain('Delete for good');
@@ -65,7 +78,10 @@ describe('the Recycle Bin in the File Explorer (SET-05)', () => {
 
   it('a row and a card in the bin offer Restore and "Delete for good", and nothing else', () => {
     for (const act of ['download', 'share', 'rename', 'delete']) {
-      expect(page.match(new RegExp(`\\$\\{!this\\._inBin && [^\`]*\`<button class="fm-act-btn" data-act="${act}"`, 'g')), act).toHaveLength(2);
+      expect(
+        page.match(new RegExp(`\\$\\{!this\\._inBin && [^\`]*\`<button class="fm-act-btn" data-act="${act}"`, 'g')),
+        act
+      ).toHaveLength(2);
     }
     expect(page.match(/\$\{this\._inBin \? binRowActions\(escPath\) : ''\}/g)).toHaveLength(2);
     expect(page).toContain('data-act="restore"');
@@ -86,29 +102,55 @@ describe('the Recycle Bin in the File Explorer (SET-05)', () => {
   });
 
   it('the selection bar in the bin: Restore and "Delete for good" only', () => {
-    const el = (cls) => { const b = document.createElement('button'); b.className = cls; b.innerHTML = '<span class="fm-sel-label">Delete</span>'; return b; };
+    const el = (cls) => {
+      const b = document.createElement('button');
+      b.className = cls;
+      b.innerHTML = '<span class="fm-sel-label">Delete</span>';
+      return b;
+    };
     const fm = Object.create(FileManagerWindow.prototype);
     Object.assign(fm, {
-      selectionBar: document.createElement('div'), selectedCount: document.createElement('span'),
-      selectedPaths: new Set([BIN]), fileList: [], _inBin: true,
-      bulkRestoreBtn: el('r'), bulkZipBtn: el('z'), bulkMoveBtn: el('m'), bulkShareBtn: el('s'), bulkDeleteBtn: el('d'),
+      selectionBar: document.createElement('div'),
+      selectedCount: document.createElement('span'),
+      selectedPaths: new Set([BIN]),
+      fileList: [],
+      _inBin: true,
+      bulkRestoreBtn: el('r'),
+      bulkZipBtn: el('z'),
+      bulkMoveBtn: el('m'),
+      bulkShareBtn: el('s'),
+      bulkDeleteBtn: el('d'),
     });
     fm.bulkRestoreBtn.hidden = true;
     fm.updateSelectionToolbar();
-    expect([fm.bulkRestoreBtn.hidden, fm.bulkZipBtn.hidden, fm.bulkMoveBtn.hidden, fm.bulkShareBtn.hidden]).toEqual([false, true, true, true]);
+    expect([fm.bulkRestoreBtn.hidden, fm.bulkZipBtn.hidden, fm.bulkMoveBtn.hidden, fm.bulkShareBtn.hidden]).toEqual([
+      false,
+      true,
+      true,
+      true,
+    ]);
     expect(fm.bulkDeleteBtn.getAttribute('aria-label')).toBe('Delete for good');
     expect(fm.bulkDeleteBtn.textContent).toBe('Delete for good');
     fm._inBin = false;
     fm.updateSelectionToolbar();
-    expect([fm.bulkRestoreBtn.hidden, fm.bulkZipBtn.hidden, fm.bulkMoveBtn.hidden, fm.bulkShareBtn.hidden]).toEqual([true, false, false, false]);
+    expect([fm.bulkRestoreBtn.hidden, fm.bulkZipBtn.hidden, fm.bulkMoveBtn.hidden, fm.bulkShareBtn.hidden]).toEqual([
+      true,
+      false,
+      false,
+      false,
+    ]);
     expect(fm.bulkDeleteBtn.textContent).toBe('Delete');
   });
 
   it('a delete larger than the bin keeps asks first, and "no" leaves the folder where it is', async () => {
     const job = { progress: vi.fn(), finish: vi.fn() };
     vi.spyOn(transferCenter, 'startLocal').mockReturnValue(job);
-    const tooLarge = () => new ApiError('This is larger than the Recycle Bin keeps.', { status: 409, error: 'too_large_for_bin' });
-    const post = vi.spyOn(api, 'post').mockRejectedValueOnce(tooLarge()).mockResolvedValueOnce({ status: 'ok', trash_id: 't9' });
+    const tooLarge = () =>
+      new ApiError('This is larger than the Recycle Bin keeps.', { status: 409, error: 'too_large_for_bin' });
+    const post = vi
+      .spyOn(api, 'post')
+      .mockRejectedValueOnce(tooLarge())
+      .mockResolvedValueOnce({ status: 'ok', trash_id: 't9' });
     const fm = Object.create(FileManagerWindow.prototype);
     Object.assign(fm, { currentPath: '/mnt/user', loadPath: vi.fn(), offerUndo: vi.fn() });
     showDangerConfirm.mockImplementationOnce((title, msg, yes) => yes());
@@ -118,7 +160,10 @@ describe('the Recycle Bin in the File Explorer (SET-05)', () => {
     expect(msg).toContain('“Videos” is larger than a Recycle Bin keeps');
     expect(msg).toContain('stays for one day');
     expect(options.okText).toBe('Move to Recycle Bin');
-    expect(post.mock.calls).toEqual([['/api/fs/delete', { path: '/mnt/user/Videos' }], ['/api/fs/delete', { path: '/mnt/user/Videos', large_ok: true }]]);
+    expect(post.mock.calls).toEqual([
+      ['/api/fs/delete', { path: '/mnt/user/Videos' }],
+      ['/api/fs/delete', { path: '/mnt/user/Videos', large_ok: true }],
+    ]);
     expect(fm.offerUndo).toHaveBeenCalledWith(['t9']);
 
     post.mockReset().mockRejectedValueOnce(tooLarge());

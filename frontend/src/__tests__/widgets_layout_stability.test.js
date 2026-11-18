@@ -25,7 +25,7 @@ describe('Desktop Widgets Layout Stability & Positioning', () => {
   it('maintains default DOM order without thrashing child nodes if order matches', () => {
     const container = document.getElementById('desktop-widgets-container');
     const firstChildBefore = container.children[0];
-    
+
     applyWidgetConfig();
 
     // The first child should still be the exact same DOM node (no unnecessary re-append)
@@ -39,7 +39,7 @@ describe('Desktop Widgets Layout Stability & Positioning', () => {
 
   it('updates position classes correctly without leaving obsolete classes', () => {
     const container = document.getElementById('desktop-widgets-container');
-    
+
     saveWidgetConfig({ position: 'pos-top-left', scale: 'scale-compact', opacity: 'glass-subtle' });
 
     expect(container.classList.contains('pos-top-left')).toBe(true);
@@ -50,9 +50,21 @@ describe('Desktop Widgets Layout Stability & Positioning', () => {
 
   it('reorders DOM nodes only when custom order is specified', () => {
     const container = document.getElementById('desktop-widgets-container');
-    
+
     saveWidgetConfig({
-      order: ['system', 'storage', 'clock', 'ai_accelerator', 'weather', 'calendar', 'network', 'uptime', 'drive_temp', 'net_dial', 'ups_gauge']
+      order: [
+        'system',
+        'storage',
+        'clock',
+        'ai_accelerator',
+        'weather',
+        'calendar',
+        'network',
+        'uptime',
+        'drive_temp',
+        'net_dial',
+        'ups_gauge',
+      ],
     });
 
     expect(container.children[0].id).toBe('widget-system');
@@ -70,7 +82,7 @@ describe('Desktop Widgets Layout Stability & Positioning', () => {
         drive_temp: true,
         net_dial: true,
         ups_gauge: true,
-      }
+      },
     });
 
     expect(wDriveTemp.style.display).toBe('block');
@@ -82,7 +94,7 @@ describe('Desktop Widgets Layout Stability & Positioning', () => {
         drive_temp: false,
         net_dial: false,
         ups_gauge: false,
-      }
+      },
     });
 
     expect(wDriveTemp.style.display).toBe('none');

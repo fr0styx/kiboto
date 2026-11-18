@@ -6,7 +6,13 @@ function inspectorWith(item) {
   const pane = document.createElement('div');
   pane.innerHTML = '<div class="fm-inspector-content"></div>';
   document.body.append(pane);
-  const fm = { selectedPaths: new Set([item.path]), fileList: [item], currentPath: '/mnt/user', currentSortBy: 'name', currentSortDir: 'asc' };
+  const fm = {
+    selectedPaths: new Set([item.path]),
+    fileList: [item],
+    currentPath: '/mnt/user',
+    currentSortBy: 'name',
+    currentSortDir: 'asc',
+  };
   fm.inspector = new FmInspector(fm, pane);
   return fm;
 }
@@ -21,13 +27,17 @@ describe('Get info (folder size, files, folders)', () => {
   });
 
   it('opens the panel and counts a folder at once', async () => {
-    const post = vi.spyOn(api, 'post').mockResolvedValue({ size: 2048, files_count: 3, dirs_count: 1, is_standby: false });
+    const post = vi
+      .spyOn(api, 'post')
+      .mockResolvedValue({ size: 2048, files_count: 3, dirs_count: 1, is_standby: false });
     vi.spyOn(api, 'get').mockResolvedValue({});
     const fm = inspectorWith({ name: 'Photos', path: '/mnt/user/Photos', is_dir: true, mtime: 1 });
     const menu = new FmContextMenu(fm);
     menu.targetItem = fm.fileList[0];
     menu.handleAction('info');
-    await vi.waitFor(() => expect(post).toHaveBeenCalledWith('/api/fs/folder-size', { path: '/mnt/user/Photos', force_wake: false }));
+    await vi.waitFor(() =>
+      expect(post).toHaveBeenCalledWith('/api/fs/folder-size', { path: '/mnt/user/Photos', force_wake: false })
+    );
     const out = fm.inspector.container.querySelector('#fm-insp-folder-sz-res');
     await vi.waitFor(() => expect(out.textContent).toMatch(/3 files · 1 folder/));
     post.mockRestore();
@@ -43,7 +53,9 @@ describe('Get info (folder size, files, folders)', () => {
     expect(out.textContent).toContain('asleep');
     post.mockResolvedValueOnce({ size: 10, files_count: 1, dirs_count: 0, at_least: true });
     out.querySelector('button').click();
-    await vi.waitFor(() => expect(post).toHaveBeenLastCalledWith('/api/fs/folder-size', { path: '/mnt/user/Old', force_wake: true }));
+    await vi.waitFor(() =>
+      expect(post).toHaveBeenLastCalledWith('/api/fs/folder-size', { path: '/mnt/user/Old', force_wake: true })
+    );
     await vi.waitFor(() => expect(out.textContent).toMatch(/^At least /));
     post.mockRestore();
   });

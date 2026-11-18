@@ -27,7 +27,9 @@ describe('dialog-chrome: every pop-up gets the window title bar', () => {
   it('adds minimize and maximize and turns a text close button into the standard one', () => {
     const win = popup();
     let closed = 0;
-    document.getElementById('x-close').addEventListener('click', () => { closed += 1; });
+    document.getElementById('x-close').addEventListener('click', () => {
+      closed += 1;
+    });
     expect(upgradeDialog(win)).toBe(true);
 
     const btns = Array.from(win.querySelectorAll('.os-window-controls .win-btn'));
@@ -43,7 +45,8 @@ describe('dialog-chrome: every pop-up gets the window title bar', () => {
 
   it('leaves buttons a pop-up already has alone and does nothing the second time', () => {
     const win = popup({
-      closeHtml: '<div class="os-window-controls"><button class="win-btn min-btn" id="own-min"></button><button class="win-btn close-btn" id="own-close"></button></div>',
+      closeHtml:
+        '<div class="os-window-controls"><button class="win-btn min-btn" id="own-min"></button><button class="win-btn close-btn" id="own-close"></button></div>',
     });
     upgradeDialog(win);
     expect(upgradeDialog(win)).toBe(false);
@@ -107,10 +110,12 @@ describe('dialog-chrome: every pop-up gets the window title bar', () => {
     expect(host.classList.contains('window-minimized')).toBe(false);
   });
 
-  it('closing from the dock goes through the pop-up\'s own close button', () => {
+  it("closing from the dock goes through the pop-up's own close button", () => {
     const win = popup({ id: 'modal-dock-close' });
     let closed = 0;
-    document.getElementById('x-close').addEventListener('click', () => { closed += 1; });
+    document.getElementById('x-close').addEventListener('click', () => {
+      closed += 1;
+    });
     upgradeDialog(win);
     const id = minimizeDialog(win);
     DockManager.closeWindow(id);

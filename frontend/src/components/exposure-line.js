@@ -16,14 +16,17 @@ export function publicParts(x) {
   if (x.share_links) parts.push(t('exposure.part_links', 'share links'));
   if (x.apps) parts.push(t('exposure.part_apps', '{count, plural, one {# app} other {# apps}}', { count: x.apps }));
   const other = (x.unexpected || []).length;
-  if (other) parts.push(t('exposure.part_ports', '{count, plural, one {# other port} other {# other ports}}', { count: other }));
+  if (other)
+    parts.push(t('exposure.part_ports', '{count, plural, one {# other port} other {# other ports}}', { count: other }));
   return parts.join(', ');
 }
 
 /** When this NAS's Tailscale sign-in runs out. */
 export function keyNote(days) {
   if (!days) return t('exposure.key_today', "This NAS's Tailscale sign-in runs out today.");
-  return t('exposure.key', "This NAS's Tailscale sign-in runs out {count, plural, one {in # day} other {in # days}}.", { count: days });
+  return t('exposure.key', "This NAS's Tailscale sign-in runs out {count, plural, one {in # day} other {in # days}}.", {
+    count: days,
+  });
 }
 
 /** The word, the sentence and the note under it, for a summary from the server. */
@@ -35,11 +38,18 @@ export function exposureText(x) {
   }[x.level];
   let sentence;
   if (x.level === 'public') sentence = t('exposure.public', 'On the internet: {what}.', { what: publicParts(x) });
-  else if (x.level === 'private' && (x.via || []).includes('tailscale')) sentence = t('exposure.private_ts', 'From outside, only devices in your Tailscale network reach this NAS.');
-  else if (x.level === 'private') sentence = t('exposure.private_nb', 'From outside, only devices in your NetBird network reach this NAS.');
+  else if (x.level === 'private' && (x.via || []).includes('tailscale'))
+    sentence = t('exposure.private_ts', 'From outside, only devices in your Tailscale network reach this NAS.');
+  else if (x.level === 'private')
+    sentence = t('exposure.private_nb', 'From outside, only devices in your NetBird network reach this NAS.');
   else sentence = t('exposure.off', 'Through Kiboto, nothing reaches this NAS from outside.');
   const notes = [];
-  if (x.reason === 'unexpected_public') notes.push(t('exposure.unexpected', 'Kiboto did not put port {ports} on the internet. Check it in Tailscale.', { ports: (x.unexpected || []).join(', ') }));
+  if (x.reason === 'unexpected_public')
+    notes.push(
+      t('exposure.unexpected', 'Kiboto did not put port {ports} on the internet. Check it in Tailscale.', {
+        ports: (x.unexpected || []).join(', '),
+      })
+    );
   if (x.reason === 'sign_in') notes.push(t('exposure.sign_in', 'Tailscale needs you to sign in again.'));
   if (x.reason === 'key_expiring') notes.push(keyNote(x.key_days));
   if (x.checked === false) notes.push(t('exposure.unchecked', "Kiboto couldn't ask Tailscale what is public."));

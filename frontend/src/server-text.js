@@ -47,6 +47,7 @@ function numberWords(v) {
 export function serverSaid(body, fallback = '') {
   const how = body && typeof body === 'object' ? body.text || body.details : null;
   const own = fallback || (body && (body.detail || body.message)) || '';
-  if (how && typeof how === 'object' && how.msg_key) return t(how.msg_key, typeof own === 'string' ? own : '', resolveParams(how.params));
+  if (how && typeof how === 'object' && how.msg_key)
+    return t(how.msg_key, typeof own === 'string' ? own : '', resolveParams(how.params));
   return typeof own === 'string' ? own : '';
 }

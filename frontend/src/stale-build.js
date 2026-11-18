@@ -4,11 +4,12 @@
  * version, which the server no longer has, and the click did nothing. This notices those
  * failures and offers a reload instead.
  */
-import { showConfirmToast } from "./toast.js";
-import { t } from "./i18n.js";
+import { showConfirmToast } from './toast.js';
+import { t } from './i18n.js';
 
 // Chrome, Safari and Firefox word a failed module download differently
-const CHUNK_ERROR = /Failed to fetch dynamically imported module|Importing a module script failed|error loading dynamically imported module|Unable to preload CSS|Loading (CSS )?chunk [\w-]+ failed/i;
+const CHUNK_ERROR =
+  /Failed to fetch dynamically imported module|Importing a module script failed|error loading dynamically imported module|Unable to preload CSS|Loading (CSS )?chunk [\w-]+ failed/i;
 const QUIET_MS = 60000;
 let _shownAt = 0;
 let _loadedBuild = null;
@@ -25,22 +26,25 @@ export function offerReload(win = window) {
   if (now - _shownAt < QUIET_MS) return false; // one offer per minute, however many clicks fail
   _shownAt = now;
   showConfirmToast(
-    t("update.reload_title", "Kiboto was updated"),
-    t("update.reload_body", "This page is from the previous version, so some parts cannot open. Reload to use the new version."),
+    t('update.reload_title', 'Kiboto was updated'),
+    t(
+      'update.reload_body',
+      'This page is from the previous version, so some parts cannot open. Reload to use the new version.'
+    ),
     () => win.location.reload(),
     null,
-    { okText: t("update.reload_now", "Reload"), cancelText: t("update.reload_later", "Later") },
+    { okText: t('update.reload_now', 'Reload'), cancelText: t('update.reload_later', 'Later') }
   );
   return true;
 }
 
 export function installStaleBuildGuard(win = window) {
   // Vite reports a failed on-demand load here before the import rejects
-  win.addEventListener("vite:preloadError", (e) => {
+  win.addEventListener('vite:preloadError', (e) => {
     e.preventDefault?.();
     offerReload(win);
   });
-  win.addEventListener("unhandledrejection", (e) => {
+  win.addEventListener('unhandledrejection', (e) => {
     if (isStaleBuildError(e.reason)) {
       e.preventDefault?.();
       offerReload(win);
@@ -56,9 +60,9 @@ export function installStaleBuildGuard(win = window) {
 export async function checkServerBuild(fetchFn = (...a) => window.fetch(...a), win = window) {
   let build;
   try {
-    const res = await fetchFn("/api/health", { cache: "no-store" });
+    const res = await fetchFn('/api/health', { cache: 'no-store' });
     if (!res || !res.ok) return false;
-    build = String((await res.json())?.build || "");
+    build = String((await res.json())?.build || '');
   } catch (e) {
     return false; // offline or restarting: the connection banner covers that
   }
@@ -78,7 +82,7 @@ export function watchServerBuild(win = window, doc = document) {
   const timer = win.setInterval(() => {
     if (!doc.hidden) checkServerBuild(undefined, win);
   }, BUILD_CHECK_MS);
-  doc.addEventListener("visibilitychange", () => {
+  doc.addEventListener('visibilitychange', () => {
     if (!doc.hidden) checkServerBuild(undefined, win);
   });
   return timer;

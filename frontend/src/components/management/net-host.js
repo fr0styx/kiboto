@@ -48,7 +48,9 @@ export function applyNetCaps(root = document, caps = _caps) {
   if (!root) return;
   /** @type {NodeListOf<HTMLElement>} */ (root.querySelectorAll('[data-net-setting]')).forEach((el) => {
     const ok = canChange(el.dataset.netSetting, caps);
-    const fields = el.matches('input, select, button, textarea') ? [el] : Array.from(el.querySelectorAll('input, select, button, textarea'));
+    const fields = el.matches('input, select, button, textarea')
+      ? [el]
+      : Array.from(el.querySelectorAll('input, select, button, textarea'));
     fields.forEach((f) => {
       /** @type {HTMLInputElement} */ (f).disabled = !ok;
     });

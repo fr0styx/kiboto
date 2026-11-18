@@ -26,7 +26,8 @@ function fileRow(f, group) {
 }
 
 function groupHtml(g) {
-  const label = g.kind === 'photo' ? t('dup.photo_group', 'Photos that look the same') : t('dup.file_group', 'Identical files');
+  const label =
+    g.kind === 'photo' ? t('dup.photo_group', 'Photos that look the same') : t('dup.file_group', 'Identical files');
   return html`<section class="dup-group">
     <div class="kb-row kb-row--between"><strong>${label}</strong><span class="kb-muted">${t('dup.saves', '{size} to free', { size: formatBytes(g.wasted_bytes) })}</span></div>
     <ul class="dup-files">${g.files.map((f) => fileRow(f, g))}</ul>
@@ -36,7 +37,8 @@ function groupHtml(g) {
 export function duplicatesHtml(data) {
   if (!data) return html`<p class="kb-muted">${t('dup.load_failed', "Couldn't load the duplicates.")}</p>`;
   const groups = data.groups || [];
-  if (!groups.length) return html`<p class="kb-muted">${t('dup.none', 'No duplicates found. Copies are found as folders are indexed.')}</p>`;
+  if (!groups.length)
+    return html`<p class="kb-muted">${t('dup.none', 'No duplicates found. Copies are found as folders are indexed.')}</p>`;
   const more = (data.total_groups || 0) > groups.length;
   return html`<p>${t('dup.summary', '{groups, plural, one {# set of copies} other {# sets of copies}}; {size} could be freed.', { groups: data.total_groups, size: formatBytes(data.wasted_bytes) })}</p>
     ${more ? html`<p class="kb-muted">${t('dup.more', 'Showing the {shown} largest of {total}.', { shown: groups.length, total: data.total_groups })}</p>` : ''}
@@ -94,17 +96,31 @@ export function dropFile(data, path) {
       continue;
     }
     freed += g.files.find((f) => f.path === path)?.size || 0;
-    if (files.length > 1) groups.push({ ...g, files, wasted_bytes: files.reduce((s, f) => s + f.size, 0) - Math.max(...files.map((f) => f.size)) });
+    if (files.length > 1)
+      groups.push({
+        ...g,
+        files,
+        wasted_bytes: files.reduce((s, f) => s + f.size, 0) - Math.max(...files.map((f) => f.size)),
+      });
   }
   const gone = (data.groups || []).length - groups.length;
-  return { ...data, groups, total_groups: Math.max(0, (data.total_groups || 0) - gone), wasted_bytes: Math.max(0, (data.wasted_bytes || 0) - freed) };
+  return {
+    ...data,
+    groups,
+    total_groups: Math.max(0, (data.total_groups || 0) - gone),
+    wasted_bytes: Math.max(0, (data.wasted_bytes || 0) - freed),
+  };
 }
 
 function askToBin(host, path) {
   const name = path.slice(path.lastIndexOf('/') + 1);
   showConfirmToast(
     t('dup.confirm_title', 'Move to recycle bin?'),
-    t('dup.confirm_msg', '{name} goes to its share\'s recycle bin, where you can restore it for 30 days. The other copies stay.', { name }),
+    t(
+      'dup.confirm_msg',
+      "{name} goes to its share's recycle bin, where you can restore it for 30 days. The other copies stay.",
+      { name }
+    ),
     async () => {
       try {
         await api.post('/api/fs/delete', { path });
@@ -116,7 +132,7 @@ function askToBin(host, path) {
       }
     },
     null,
-    { okText: t('dup.to_bin', 'Move to recycle bin') },
+    { okText: t('dup.to_bin', 'Move to recycle bin') }
   );
 }
 
@@ -150,7 +166,11 @@ function buttonLabel(data) {
 export async function installDuplicatesButton(root = document) {
   const anchor = root.getElementById('ai-doc-filters') || root.getElementById('ai-search-sort-select')?.parentElement;
   if (!anchor || root.getElementById(BTN_ID)) return;
-  const btn = Object.assign(document.createElement('button'), { id: BTN_ID, type: 'button', className: 'btn-pill-toggle is-small' });
+  const btn = Object.assign(document.createElement('button'), {
+    id: BTN_ID,
+    type: 'button',
+    className: 'btn-pill-toggle is-small',
+  });
   btn.addEventListener('click', () => openDuplicates());
   placeFilter(btn, anchor, root);
   btn.innerHTML = buttonLabel(null);

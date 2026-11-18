@@ -1,10 +1,25 @@
 /** AI 3, findings 19 and 20: the Kib page reads what the server really answers. */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { learnReason, renderAiLearningResultsData, relearnAiFailedFiles, triggerInPlaceReindex, syncAiWatchedFolders, runAiPathIndex, renderAiWatchedFoldersAndShares, renderScheduleZone, changeReader } from '../components/management/ai.js';
+import {
+  learnReason,
+  renderAiLearningResultsData,
+  relearnAiFailedFiles,
+  triggerInPlaceReindex,
+  syncAiWatchedFolders,
+  runAiPathIndex,
+  renderAiWatchedFoldersAndShares,
+  renderScheduleZone,
+  changeReader,
+} from '../components/management/ai.js';
 import { api } from '../api.js';
 import { showToast, showConfirmToast } from '../toast.js';
 
-vi.mock('../toast.js', () => ({ showToast: vi.fn(), showConfirmToast: vi.fn(), showPromptToast: vi.fn(), showBottomSheet: vi.fn() }));
+vi.mock('../toast.js', () => ({
+  showToast: vi.fn(),
+  showConfirmToast: vi.fn(),
+  showPromptToast: vi.fn(),
+  showBottomSheet: vi.fn(),
+}));
 
 const byId = (id) => document.getElementById(id);
 const lastToast = () => showToast.mock.calls.at(-1);
@@ -18,7 +33,10 @@ describe('Kib re-index and learning results (AI 3)', () => {
       <div id="ai-learn-failed-list"></div><div id="ai-reindex-progress-container" style="display:none"></div>`;
     vi.spyOn(api, 'get').mockResolvedValue({ status: 'complete' });
   });
-  afterEach(() => { vi.useRealTimers(); vi.restoreAllMocks(); });
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
 
   it('names why a file could not be read', () => {
     expect(learnReason('parse_error')).toBe('Kib could not open this file.');
@@ -30,8 +48,13 @@ describe('Kib re-index and learning results (AI 3)', () => {
 
   it('shows the counts and files under the names the server sends', () => {
     renderAiLearningResultsData({
-      succeeded_count: 12, failed_count: 2, deferred_count: 3,
-      failed_files: [{ path: '/mnt/user/docs/a.pdf', name: 'a.pdf', reason: 'parse_error' }, { name: 'b.doc', reason: 'Password protected' }],
+      succeeded_count: 12,
+      failed_count: 2,
+      deferred_count: 3,
+      failed_files: [
+        { path: '/mnt/user/docs/a.pdf', name: 'a.pdf', reason: 'parse_error' },
+        { name: 'b.doc', reason: 'Password protected' },
+      ],
     });
     expect(byId('ai-learn-succeeded-count').textContent).toBe('12');
     expect(byId('ai-learn-failed-count').textContent).toBe('2');
@@ -46,7 +69,10 @@ describe('Kib re-index and learning results (AI 3)', () => {
   });
 
   it('Try again reports what was recovered and what is left', async () => {
-    vi.spyOn(api, 'post').mockResolvedValueOnce({ recovered: 4, failed_count: 1 }).mockResolvedValueOnce({ relearned: 2, still_failed: 0 }).mockResolvedValueOnce({});
+    vi.spyOn(api, 'post')
+      .mockResolvedValueOnce({ recovered: 4, failed_count: 1 })
+      .mockResolvedValueOnce({ relearned: 2, still_failed: 0 })
+      .mockResolvedValueOnce({});
     await relearnAiFailedFiles();
     expect(lastToast()).toEqual(['Relearned 4 files (1 left).', 'success']);
     await relearnAiFailedFiles();
@@ -81,11 +107,18 @@ describe('Kib re-index and learning results (AI 3)', () => {
   });
 
   it('one reading job: started, already running, or finished at once (finding 22)', async () => {
-    document.body.insertAdjacentHTML('beforeend', '<div id="ai-index-run-feedback"></div><button id="btn-ai-run-index"></button>');
+    document.body.insertAdjacentHTML(
+      'beforeend',
+      '<div id="ai-index-run-feedback"></div><button id="btn-ai-run-index"></button>'
+    );
     renderAiWatchedFoldersAndShares(['/mnt/user/docs', '/mnt/user/photos'], []);
-    const post = vi.spyOn(api, 'post').mockResolvedValueOnce({ status: 'started', sync_progress: { state: 'running' } });
+    const post = vi
+      .spyOn(api, 'post')
+      .mockResolvedValueOnce({ status: 'started', sync_progress: { state: 'running' } });
     await syncAiWatchedFolders();
-    expect(byId('ai-index-run-feedback').textContent).toBe('🔄 Kib started reading 2 folders. Sleeping drives are left asleep.');
+    expect(byId('ai-index-run-feedback').textContent).toBe(
+      '🔄 Kib started reading 2 folders. Sleeping drives are left asleep.'
+    );
     expect(post.mock.calls[0][1].background).toBe(true);
     renderAiWatchedFoldersAndShares(['/mnt/user/docs', '/mnt/user/photos'], []); // the status refresh reloads the list
     post.mockResolvedValueOnce({ status: 'already_running', state: 'running' });
@@ -94,17 +127,23 @@ describe('Kib re-index and learning results (AI 3)', () => {
     post.mockResolvedValueOnce({ status: 'started' });
     await runAiPathIndex('/mnt/user/docs');
     expect(post.mock.calls.at(-1)[1].background).toBe(true);
-    expect(byId('ai-index-run-feedback').textContent).toBe('🔄 Kib started reading /mnt/user/docs. Sleeping drives are left asleep.');
+    expect(byId('ai-index-run-feedback').textContent).toBe(
+      '🔄 Kib started reading /mnt/user/docs. Sleeping drives are left asleep.'
+    );
     post.mockResolvedValueOnce({ status: 'ok', indexed: 3, skipped_unchanged: 1, deferred_standby: 2 });
     await runAiPathIndex(['/a', '/b']);
-    expect(byId('ai-index-run-feedback').textContent).toBe('✓ Indexed 3 file(s), 1 unchanged (2 deferred to protect sleeping drives).');
+    expect(byId('ai-index-run-feedback').textContent).toBe(
+      '✓ Indexed 3 file(s), 1 unchanged (2 deferred to protect sleeping drives).'
+    );
     post.mockResolvedValueOnce({ status: 'ok', indexed_files: 1 });
     await runAiPathIndex('/a');
     expect(byId('ai-index-run-feedback').textContent).toBe('✓ Indexed 1 file(s) (0 unchanged) on /a.');
     renderAiWatchedFoldersAndShares(['/mnt/user/docs'], []);
     post.mockResolvedValueOnce({ status: 'started' });
     await syncAiWatchedFolders();
-    expect(byId('ai-index-run-feedback').textContent).toBe('🔄 Kib started reading /mnt/user/docs. Sleeping drives are left asleep.');
+    expect(byId('ai-index-run-feedback').textContent).toBe(
+      '🔄 Kib started reading /mnt/user/docs. Sleeping drives are left asleep.'
+    );
     await vi.advanceTimersByTimeAsync(3000);
   });
 
@@ -121,7 +160,10 @@ describe('Kib re-index and learning results (AI 3)', () => {
   });
 
   it('a new reader model is asked first and rebuilds, or is put back (finding 23)', async () => {
-    document.body.insertAdjacentHTML('beforeend', '<select id="emb"><option value="a">a</option><option value="b">b</option></select>');
+    document.body.insertAdjacentHTML(
+      'beforeend',
+      '<select id="emb"><option value="a">a</option><option value="b">b</option></select>'
+    );
     const sel = byId('emb');
     sel.dataset.saved = 'a';
     sel.value = 'b';

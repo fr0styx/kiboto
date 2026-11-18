@@ -121,7 +121,9 @@ describe('System About & Software Updates Frontend Component', () => {
     expect(document.getElementById('update-status-title').textContent).toContain('Update Available: v1.8.0');
     expect(document.getElementById('update-details-box').style.display).toBe('block');
     expect(document.getElementById('update-release-title').textContent).toBe('Kiboto v1.8.0 7-Pillar Architecture');
-    expect(document.getElementById('update-release-link').href).toBe('https://github.com/fr0styx/kiboto/releases/tag/v1.8.0');
+    expect(document.getElementById('update-release-link').href).toBe(
+      'https://github.com/fr0styx/kiboto/releases/tag/v1.8.0'
+    );
     expect(document.getElementById('update-release-notes').textContent).toContain('7-Pillar Mission Control');
     expect(document.getElementById('btn-apply-system-update').style.display).toBe('flex');
     expect(document.getElementById('btn-apply-update-text').textContent).toContain('Install Release v1.8.0');
@@ -129,9 +131,16 @@ describe('System About & Software Updates Frontend Component', () => {
 
   it('links to the releases page when an update names no release page', async () => {
     vi.spyOn(api, 'get').mockImplementation(async (url) => {
-      if (url === '/api/system/about') return { name: 'Kiboto', version: '1.7.0', tag: 'v1.7.0', release_channel: 'Stable', uptime_secs: 60 };
+      if (url === '/api/system/about')
+        return { name: 'Kiboto', version: '1.7.0', tag: 'v1.7.0', release_channel: 'Stable', uptime_secs: 60 };
       if (url.startsWith('/api/system/updates')) {
-        return { channel: 'stable', current_version: '1.7.0', latest_version: '1.8.0', latest_tag: 'v1.8.0', update_available: true };
+        return {
+          channel: 'stable',
+          current_version: '1.7.0',
+          latest_version: '1.8.0',
+          latest_tag: 'v1.8.0',
+          update_available: true,
+        };
       }
       return null;
     });
@@ -174,7 +183,9 @@ describe('System About & Software Updates Frontend Component', () => {
     expect(apiGetSpy).toHaveBeenCalledWith(expect.stringContaining('channel=edge'));
     expect(document.getElementById('about-version-badge').textContent).toContain('Edge (Latest Commits)');
     expect(document.getElementById('update-status-title').textContent).toContain('Update Available (Edge): 5c0639d');
-    expect(document.getElementById('update-release-notes').textContent).toContain('fix(ci): restore ruff target-version');
+    expect(document.getElementById('update-release-notes').textContent).toContain(
+      'fix(ci): restore ruff target-version'
+    );
     expect(document.getElementById('btn-apply-update-text').textContent).toContain('Install Latest Commit (5c0639d)');
   });
 
@@ -194,9 +205,13 @@ describe('System About & Software Updates Frontend Component', () => {
     if (okBtn) okBtn.click();
     await Promise.resolve();
 
-    expect(postSpy).toHaveBeenCalledWith('/api/system/updates/apply', {
-      channel: 'edge',
-    }, { confirmed: true });
+    expect(postSpy).toHaveBeenCalledWith(
+      '/api/system/updates/apply',
+      {
+        channel: 'edge',
+      },
+      { confirmed: true }
+    );
     expect(document.getElementById('update-progress-overlay').style.display).toBe('block');
   });
 

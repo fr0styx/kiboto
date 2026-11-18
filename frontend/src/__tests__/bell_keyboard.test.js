@@ -6,7 +6,9 @@ import { renderNotificationCenter } from '../components/dock/notifications.js';
 describe('the bell by keyboard', () => {
   it('rows take focus, say their level and open with Enter or Space', () => {
     document.body.innerHTML = '<div id="notif-center-list"></div>';
-    state.latestStats = { events: [{ id: 1, ts: 1762900000, level: 'critical', title: 'Drive failed', message: 'sda' }] };
+    state.latestStats = {
+      events: [{ id: 1, ts: 1762900000, level: 'critical', title: 'Drive failed', message: 'sda' }],
+    };
     const opened = [];
     /** @type {any} */ (window).openEventDetailModal = (e) => opened.push(e.id);
     renderNotificationCenter();

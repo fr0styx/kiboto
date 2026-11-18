@@ -49,7 +49,14 @@ describe('the Kib page when its status cannot be loaded (SET-04)', () => {
   it('shows a dash where the markup had a made-up value', async () => {
     vi.spyOn(api, 'get').mockRejectedValue(new Error('offline'));
     await ai.fetchAndRenderAiStatus();
-    for (const id of ['ai-chat-active-model-badge', 'ai-accel-active-label', 'ai-active-llm-label', 'ai-standby-guard-text', 'ai-watched-dropdown-count-badge', 'ai-hw-tier1-status']) {
+    for (const id of [
+      'ai-chat-active-model-badge',
+      'ai-accel-active-label',
+      'ai-active-llm-label',
+      'ai-standby-guard-text',
+      'ai-watched-dropdown-count-badge',
+      'ai-hw-tier1-status',
+    ]) {
       expect(text(id), id).toBe('—');
     }
     expect(document.getElementById('ai-standby-guard-text').hasAttribute('data-i18n')).toBe(false);
@@ -86,9 +93,15 @@ describe('a chat typed without "+ New Chat" (SET-04)', () => {
     vi.spyOn(api, 'get').mockResolvedValue({ conversations: [] });
     const post = vi.spyOn(api, 'post').mockResolvedValue({ status: 'ok', reply: 'hi', conversation_id: 'conv_new' });
     await ai.sendAiChatMessage('first words');
-    expect(post).toHaveBeenLastCalledWith('/api/media/chat', expect.objectContaining({ conversation_id: null, new_conversation: true }));
+    expect(post).toHaveBeenLastCalledWith(
+      '/api/media/chat',
+      expect.objectContaining({ conversation_id: null, new_conversation: true })
+    );
     await ai.sendAiChatMessage('second words');
-    expect(post).toHaveBeenLastCalledWith('/api/media/chat', expect.objectContaining({ conversation_id: 'conv_new', new_conversation: false }));
+    expect(post).toHaveBeenLastCalledWith(
+      '/api/media/chat',
+      expect.objectContaining({ conversation_id: 'conv_new', new_conversation: false })
+    );
     expect(api.get).toHaveBeenCalledWith('/api/ai/conversations', {}); // the list is drawn again: the chat is in it
   });
 });

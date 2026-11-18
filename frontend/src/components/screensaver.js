@@ -11,7 +11,11 @@ import { t } from '../i18n.js';
 import { formatDate, formatTime } from '../format.js';
 import { prefersReducedMotion } from '../motion.js';
 function isLcdMode() {
-  return !!(state?.isLcdDirect || (typeof window !== 'undefined' && window.location.search.includes('mode=lcd')) || (typeof document !== 'undefined' && document.body && document.body.classList.contains('lcd-direct')));
+  return !!(
+    state?.isLcdDirect ||
+    (typeof window !== 'undefined' && window.location.search.includes('mode=lcd')) ||
+    (typeof document !== 'undefined' && document.body && document.body.classList.contains('lcd-direct'))
+  );
 }
 
 let _screensaverInitialized = false;
@@ -36,7 +40,7 @@ export function getScreensaverSettings() {
     timeoutMinutes: _timeoutMinutes,
     mode: _mode,
     requireLock: _requireLock,
-    isActive: _isActive
+    isActive: _isActive,
   };
 }
 
@@ -99,8 +103,10 @@ export function initScreensaverSystem() {
     if (!_enabled || _timeoutMinutes <= 0 || _isActive) return;
 
     // Do not engage screensaver if desktop is already locked or initial setup overlay is open
-    if (document.documentElement.classList.contains('is-desktop-locked') ||
-        document.documentElement.classList.contains('auth-required')) {
+    if (
+      document.documentElement.classList.contains('is-desktop-locked') ||
+      document.documentElement.classList.contains('auth-required')
+    ) {
       return;
     }
 
@@ -280,7 +286,7 @@ function startRetroClock(clockEl) {
     { top: '45%', left: '52%' },
     { top: '42%', left: '46%' },
     { top: '38%', left: '54%' },
-    { top: '40%', left: '50%' }
+    { top: '40%', left: '50%' },
   ];
   let driftIdx = 0;
 
@@ -309,7 +315,7 @@ function startStarfield(canvas) {
     stars.push({
       x: (Math.random() - 0.5) * w * 2,
       y: (Math.random() - 0.5) * h * 2,
-      z: Math.random() * w
+      z: Math.random() * w,
     });
   }
 
@@ -427,7 +433,10 @@ export function initScreensaverSettingsControls() {
         c.classList.toggle('active', isMatrix);
         c.setAttribute('aria-checked', isMatrix ? 'true' : 'false');
       });
-      showToast(t('toast.screensaver_settings_restored_to_defaults', 'Screensaver settings restored to defaults'), 'success');
+      showToast(
+        t('toast.screensaver_settings_restored_to_defaults', 'Screensaver settings restored to defaults'),
+        'success'
+      );
     });
   }
 }

@@ -1,7 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 vi.mock('../api.js', () => ({ api: { get: vi.fn(), delete: vi.fn(), post: vi.fn() } }));
-vi.mock('../toast.js', () => ({ showToast: vi.fn(), showDangerConfirm: vi.fn(), showConfirmToast: vi.fn(), showPromptToast: vi.fn() }));
+vi.mock('../toast.js', () => ({
+  showToast: vi.fn(),
+  showDangerConfirm: vi.fn(),
+  showConfirmToast: vi.fn(),
+  showPromptToast: vi.fn(),
+}));
 vi.mock('../utils.js', async (orig) => ({ ...(await orig()), copyTextToClipboard: vi.fn() }));
 
 const { api } = await import('../api.js');
@@ -11,9 +16,40 @@ const { renderSharedLinks, openSharedLinks, linkState } = await import('../compo
 
 const flush = () => new Promise((r) => setTimeout(r, 0));
 const LINKS = [
-  { token: 'aaa', label: 'Holiday photos', url: '/api/fs/shared/aaa', public_url: null, created_by: 'anna', expires_at: 1900000000, has_password: true, download_count: 3, is_active: true },
-  { token: 'bbb', filename: 'inbox', url: '/api/fs/shared/bbb', public_url: 'https://nas.example/s/bbb', created_by: 'ben', expires_at: null, has_password: true, kind: 'upload', received_count: 2, is_active: true },
-  { token: 'ccc', filename: 'old.pdf', url: '/api/fs/shared/ccc', created_by: 'anna', expires_at: 1, has_password: false, download_count: 0, is_expired: true, is_active: false },
+  {
+    token: 'aaa',
+    label: 'Holiday photos',
+    url: '/api/fs/shared/aaa',
+    public_url: null,
+    created_by: 'anna',
+    expires_at: 1900000000,
+    has_password: true,
+    download_count: 3,
+    is_active: true,
+  },
+  {
+    token: 'bbb',
+    filename: 'inbox',
+    url: '/api/fs/shared/bbb',
+    public_url: 'https://nas.example/s/bbb',
+    created_by: 'ben',
+    expires_at: null,
+    has_password: true,
+    kind: 'upload',
+    received_count: 2,
+    is_active: true,
+  },
+  {
+    token: 'ccc',
+    filename: 'old.pdf',
+    url: '/api/fs/shared/ccc',
+    created_by: 'anna',
+    expires_at: 1,
+    has_password: false,
+    download_count: 0,
+    is_expired: true,
+    is_active: false,
+  },
 ];
 
 describe('Links I shared (SET-01)', () => {

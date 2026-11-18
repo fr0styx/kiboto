@@ -7,7 +7,8 @@ afterEach(() => vi.restoreAllMocks());
 
 describe('Set up a UPS', () => {
   it('opens the closed Advanced section', async () => {
-    document.body.innerHTML = '<div id="mgmt-sec-ups"><div id="ups-status-line"></div><details id="pw-advanced"><summary>Advanced</summary><div id="ups-cockpit-config-section"></div></details></div>';
+    document.body.innerHTML =
+      '<div id="mgmt-sec-ups"><div id="ups-status-line"></div><details id="pw-advanced"><summary>Advanced</summary><div id="ups-cockpit-config-section"></div></details></div>';
     vi.spyOn(api, 'get').mockResolvedValue({ available: false });
     await fetchAndRenderUpsTelemetry();
     const advanced = /** @type {HTMLDetailsElement} */ (document.getElementById('pw-advanced'));

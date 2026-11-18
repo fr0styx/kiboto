@@ -3,23 +3,58 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 vi.mock('../api.js', () => ({ api: { get: vi.fn(), post: vi.fn() }, auth: {}, ApiError: class extends Error {} }));
 vi.mock('../components/dock.js', () => ({
   // the real window manager shows a window with an inline display: flex
-  bringToFront: vi.fn((el) => { el.style.display = 'flex'; }),
+  bringToFront: vi.fn((el) => {
+    el.style.display = 'flex';
+  }),
   makeDraggable: vi.fn(),
-  applyWindowSnap: vi.fn((el, zone) => { el.dataset.snapped = zone; }),
-  restoreWindowSnap: vi.fn((el) => { el.dataset.snapped = ''; }),
+  applyWindowSnap: vi.fn((el, zone) => {
+    el.dataset.snapped = zone;
+  }),
+  restoreWindowSnap: vi.fn((el) => {
+    el.dataset.snapped = '';
+  }),
 }));
 vi.mock('../toast.js', () => ({ showToast: vi.fn() }));
 
 import { api } from '../api.js';
 import { applyWindowSnap, restoreWindowSnap } from '../components/dock.js';
-import { initJobsCentre, openJobsCentre, closeJobsCentre, _resetJobsCentreForTesting } from '../components/jobs-centre.js';
+import {
+  initJobsCentre,
+  openJobsCentre,
+  closeJobsCentre,
+  _resetJobsCentreForTesting,
+} from '../components/jobs-centre.js';
 
 const DATA = {
   active: [
-    { id: 'transfer:t1', kind: 'transfer', title: 'Copy 3 item(s) to /mnt/user/photos', status: 'running', percent: 42, detail: 'IMG_1.jpg', can_cancel: true },
-    { id: 'reindex:ai', kind: 'ai_reindex', title: 'Re-embedding the AI index', status: 'running', percent: null, can_cancel: false },
+    {
+      id: 'transfer:t1',
+      kind: 'transfer',
+      title: 'Copy 3 item(s) to /mnt/user/photos',
+      status: 'running',
+      percent: 42,
+      detail: 'IMG_1.jpg',
+      can_cancel: true,
+    },
+    {
+      id: 'reindex:ai',
+      kind: 'ai_reindex',
+      title: 'Re-embedding the AI index',
+      status: 'running',
+      percent: null,
+      can_cancel: false,
+    },
   ],
-  history: [{ id: 'job:x', kind: 'backup', title: 'Backup: photos', status: 'error', error: 'remote unreachable', finished_at: 1700000000 }],
+  history: [
+    {
+      id: 'job:x',
+      kind: 'backup',
+      title: 'Backup: photos',
+      status: 'error',
+      error: 'remote unreachable',
+      finished_at: 1700000000,
+    },
+  ],
 };
 
 describe('Jobs centre', () => {
@@ -65,9 +100,17 @@ describe('Jobs centre', () => {
     const windows = {};
     window.DockManager = {
       windows,
-      register: vi.fn((id, el) => { windows[id] = { el, minimized: false }; el.style.display = 'flex'; }),
-      minimize: vi.fn((id) => { windows[id].minimized = true; windows[id].el.style.setProperty('display', 'none', 'important'); }),
-      unregister: vi.fn((id) => { delete windows[id]; }),
+      register: vi.fn((id, el) => {
+        windows[id] = { el, minimized: false };
+        el.style.display = 'flex';
+      }),
+      minimize: vi.fn((id) => {
+        windows[id].minimized = true;
+        windows[id].el.style.setProperty('display', 'none', 'important');
+      }),
+      unregister: vi.fn((id) => {
+        delete windows[id];
+      }),
     };
     try {
       openJobsCentre();
@@ -114,14 +157,25 @@ describe('Clearing finished jobs', () => {
     expect(document.getElementById('jobs-active-list').querySelectorAll('.jobs-row').length).toBe(2);
   });
 
-  it('says so when clearing fails, and shows a detail in the reader\'s words', async () => {
+  it("says so when clearing fails, and shows a detail in the reader's words", async () => {
     const { showToast } = await import('../toast.js');
     const { jobRowHtml, clearJobHistory } = await import('../components/jobs-centre.js');
     api.post.mockRejectedValueOnce(new Error('offline'));
     api.get.mockResolvedValue(DATA);
     await clearJobHistory();
     expect(showToast).toHaveBeenCalledWith('The list could not be cleared.', 'error');
-    const row = jobRowHtml({ id: 'storage:parity', kind: 'storage_check', title: 'Parity check', status: 'running', detail: 'x', detail_id: 'jobs.d.parity_corrected', detail_params: { n: 1 } }, true);
+    const row = jobRowHtml(
+      {
+        id: 'storage:parity',
+        kind: 'storage_check',
+        title: 'Parity check',
+        status: 'running',
+        detail: 'x',
+        detail_id: 'jobs.d.parity_corrected',
+        detail_params: { n: 1 },
+      },
+      true
+    );
     expect(row).toContain('1 error corrected so far');
   });
 });
@@ -132,7 +186,10 @@ describe('Job progress', () => {
     expect(jobPercent(66.7)).toBe('66.7%');
     expect(jobPercent(42)).toBe('42%');
     expect(jobPercent(66.749)).toBe('66.7%');
-    const row = jobRowHtml({ id: 'storage:parity', kind: 'storage_check', title: 'Parity check', status: 'running', percent: 66.7 }, true);
+    const row = jobRowHtml(
+      { id: 'storage:parity', kind: 'storage_check', title: 'Parity check', status: 'running', percent: 66.7 },
+      true
+    );
     expect(row).toContain('66.7%');
   });
 });

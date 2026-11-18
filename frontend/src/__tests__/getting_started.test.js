@@ -12,7 +12,15 @@ describe('Getting started checklist', () => {
   });
 
   it('lists what is left with a button to the right place, and hides', async () => {
-    api.get.mockResolvedValueOnce({ items: [{ id: 'password', open: 'system', done: true }, { id: 'share', open: 'mgmt-pane-storage-shares', done: false }], done: 1, total: 2, complete: false });
+    api.get.mockResolvedValueOnce({
+      items: [
+        { id: 'password', open: 'system', done: true },
+        { id: 'share', open: 'mgmt-pane-storage-shares', done: false },
+      ],
+      done: 1,
+      total: 2,
+      complete: false,
+    });
     window.openManagementSection = vi.fn();
     await showGettingStarted();
     const card = document.getElementById('getting-started-card');
@@ -60,7 +68,14 @@ describe('Setup wizard steps', () => {
 describe('Getting started on a host that makes shares (UX-17)', () => {
   it('names the host in the share row', async () => {
     const { checklistHtml } = await import('../components/getting-started.js');
-    const html = checklistHtml({ items: [{ id: 'share_host', open: 'mgmt-pane-storage-shares', done: false, host: 'truenas' }, { id: 'share_host', open: 'x', done: true, host: 'unraid' }], done: 1, total: 2 });
+    const html = checklistHtml({
+      items: [
+        { id: 'share_host', open: 'mgmt-pane-storage-shares', done: false, host: 'truenas' },
+        { id: 'share_host', open: 'x', done: true, host: 'unraid' },
+      ],
+      done: 1,
+      total: 2,
+    });
     expect(html).toContain('Make a shared folder in TrueNAS');
     expect(html).toContain('Unraid creates shared folders');
   });

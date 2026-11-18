@@ -19,7 +19,8 @@ describe('the family set-ups live in Apps (SET-19 stage 5, decision 10)', () => 
 
   it('People keeps link rows, not the cards', () => {
     expect(html).toContain('id="people-family-links"');
-    for (const id of ['family-filter-mount', 'family-calendar-mount', 'family-signin-mount']) expect(html).not.toContain(`id="${id}"`);
+    for (const id of ['family-filter-mount', 'family-calendar-mount', 'family-signin-mount'])
+      expect(html).not.toContain(`id="${id}"`);
   });
 
   it('the Apps group fills its cards when it opens, and opens from a link row', async () => {
@@ -39,7 +40,8 @@ describe('the family set-ups live in Apps (SET-19 stage 5, decision 10)', () => 
 
   it('each row says its state, and a failed read says so', async () => {
     get.mockImplementation(async (url) => {
-      if (url === '/api/family-filter') return { user: 'admin', has_password: true, people: { mia: { devices: ['10.0.0.5'] }, leo: { devices: [] } } };
+      if (url === '/api/family-filter')
+        return { user: 'admin', has_password: true, people: { mia: { devices: ['10.0.0.5'] }, leo: { devices: [] } } };
       if (url.includes('office-suite')) return { installed: true, running: false };
       throw new Error('403');
     });

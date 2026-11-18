@@ -12,11 +12,23 @@ describe('power history', () => {
   });
 
   it('says each event as a sentence', () => {
-    expect(historySentence({ event_type: 'OUTAGE_RECOVERED', duration_sec: 120, start_battery_pct: 100, end_battery_pct: 85.4 }))
-      .toBe('The power was out for 2 minutes. The battery went from 100 % to 85 %.');
-    expect(historySentence({ event_type: 'OUTAGE_RECOVERED', duration_sec: 30 })).toBe('The power was out for 30 seconds.');
-    expect(historySentence({ event_type: 'FAILSAFE_SHUTDOWN', end_battery_pct: 9 })).toBe('The battery ran low (9 % left), and the NAS was shut down safely.');
-    expect(historySentence({ event_type: 'FAILSAFE_SHUTDOWN' })).toBe('The battery ran low, and the NAS was shut down safely.');
+    expect(
+      historySentence({
+        event_type: 'OUTAGE_RECOVERED',
+        duration_sec: 120,
+        start_battery_pct: 100,
+        end_battery_pct: 85.4,
+      })
+    ).toBe('The power was out for 2 minutes. The battery went from 100 % to 85 %.');
+    expect(historySentence({ event_type: 'OUTAGE_RECOVERED', duration_sec: 30 })).toBe(
+      'The power was out for 30 seconds.'
+    );
+    expect(historySentence({ event_type: 'FAILSAFE_SHUTDOWN', end_battery_pct: 9 })).toBe(
+      'The battery ran low (9 % left), and the NAS was shut down safely.'
+    );
+    expect(historySentence({ event_type: 'FAILSAFE_SHUTDOWN' })).toBe(
+      'The battery ran low, and the NAS was shut down safely.'
+    );
     expect(historySentence({ event_type: 'SELF_TEST' })).toBe('A battery test was sent to the UPS.');
     expect(historySentence({ event_type: 'OUTAGE_SIMULATION' })).toMatch(/^Practice run/);
     expect(historySentence({ event_type: 'SOMETHING', action_taken: 'Done.' })).toBe('Done.');

@@ -15,7 +15,8 @@ describe('VMs on a phone (VMs report 34)', () => {
 
   it('the phone key sheet has the arrows and Enter', () => {
     const c = src('components/vm/console.js');
-    for (const k of ["'ArrowUp'", "'ArrowDown'", "'ArrowLeft'", "'ArrowRight'", "_sendKeyToRfb(0xff0d, 'Enter')"]) expect(c).toContain(k);
+    for (const k of ["'ArrowUp'", "'ArrowDown'", "'ArrowLeft'", "'ArrowRight'", "_sendKeyToRfb(0xff0d, 'Enter')"])
+      expect(c).toContain(k);
   });
 
   it('missing numbers show a dash, not "undefined"', () => {

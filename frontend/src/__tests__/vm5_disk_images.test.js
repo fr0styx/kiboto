@@ -5,14 +5,18 @@ import { loadIsos } from '../components/vm/isos.js';
 import { vmState } from '../components/vm/state.js';
 import { api } from '../api.js';
 
-const FORM = '<select id="vm-create-disk-image"><option value="">None</option></select><input type="radio" name="vm-create-boot-order" value="iso" checked><input type="radio" name="vm-create-boot-order" value="disk">';
+const FORM =
+  '<select id="vm-create-disk-image"><option value="">None</option></select><input type="radio" name="vm-create-boot-order" value="iso" checked><input type="radio" name="vm-create-boot-order" value="disk">';
 
 describe('ready-made disks (VMs decision 5)', () => {
   afterEach(() => vi.restoreAllMocks());
 
   it('lists the disks from the server and keeps a choice', async () => {
     document.body.innerHTML = FORM;
-    vi.spyOn(api, 'get').mockResolvedValueOnce([{ name: 'haos_ova-18.4.qcow2', path: '/i/haos.qcow2', size_formatted: '1.4 GB' }]).mockRejectedValueOnce(new Error('offline')).mockResolvedValueOnce({});
+    vi.spyOn(api, 'get')
+      .mockResolvedValueOnce([{ name: 'haos_ova-18.4.qcow2', path: '/i/haos.qcow2', size_formatted: '1.4 GB' }])
+      .mockRejectedValueOnce(new Error('offline'))
+      .mockResolvedValueOnce({});
     const sel = document.getElementById('vm-create-disk-image');
     await loadDiskImages(sel);
     expect([...sel.options].map((o) => o.textContent)).toEqual(['None', 'haos_ova-18.4.qcow2 (1.4 GB)']);
@@ -38,7 +42,9 @@ describe('ready-made disks (VMs decision 5)', () => {
   });
 
   it('the installer list also reads the ready-made disks', async () => {
-    vi.spyOn(api, 'get').mockImplementation(async (url) => (url.includes('disk-images') ? [{ name: 'haos.qcow2' }] : [{ name: 'a.iso' }]));
+    vi.spyOn(api, 'get').mockImplementation(async (url) =>
+      url.includes('disk-images') ? [{ name: 'haos.qcow2' }] : [{ name: 'a.iso' }]
+    );
     await loadIsos();
     expect(vmState.isos.map((i) => i.name)).toEqual(['a.iso']);
     expect(vmState.diskImages.map((i) => i.name)).toEqual(['haos.qcow2']);

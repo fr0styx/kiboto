@@ -6,7 +6,8 @@
 import { t } from '../../i18n.js';
 import { showConfirmToast } from '../../toast.js';
 
-const FIRST = 'input:not([type="hidden"]):not([disabled]), select:not([disabled]), textarea:not([disabled]), .smart-modal-body button:not([disabled])';
+const FIRST =
+  'input:not([type="hidden"]):not([disabled]), select:not([disabled]), textarea:not([disabled]), .smart-modal-body button:not([disabled])';
 
 /** Marks the dialog, focuses its first field, starts change tracking; Escape presses its Close. */
 export function asDialog(backdrop, { modal = true, escape = true } = {}) {
@@ -20,7 +21,9 @@ export function asDialog(backdrop, { modal = true, escape = true } = {}) {
   backdrop.dataset.dirty = '';
   if (!backdrop.dataset.a11yWired) {
     backdrop.dataset.a11yWired = '1';
-    backdrop.addEventListener('input', () => { backdrop.dataset.dirty = '1'; });
+    backdrop.addEventListener('input', () => {
+      backdrop.dataset.dirty = '1';
+    });
     if (escape) {
       backdrop.addEventListener('keydown', (e) => {
         if (e.key !== 'Escape' || backdrop.style.display === 'none') return;

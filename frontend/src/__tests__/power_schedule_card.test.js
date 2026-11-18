@@ -4,10 +4,20 @@ import { api } from '../api.js';
 import { renderPowerScheduleCard, scheduleStatus } from '../components/power-schedule-card.js';
 
 const flush = () => new Promise((r) => setTimeout(r, 10));
-const OFF = { enabled: false, off_at: '01:00', wake_at: '07:00', days: [0, 1, 2, 3, 4, 5, 6], last_note: '', wake_possible: true };
+const OFF = {
+  enabled: false,
+  off_at: '01:00',
+  wake_at: '07:00',
+  days: [0, 1, 2, 3, 4, 5, 6],
+  last_note: '',
+  wake_possible: true,
+};
 
 describe('switch off at night (audit A10)', () => {
-  afterEach(() => { vi.restoreAllMocks(); document.body.innerHTML = ''; });
+  afterEach(() => {
+    vi.restoreAllMocks();
+    document.body.innerHTML = '';
+  });
 
   it('says off, the times, and what happened last time', () => {
     expect(scheduleStatus(null)).toBe('Off');
@@ -23,7 +33,10 @@ describe('switch off at night (audit A10)', () => {
     document.body.innerHTML = '<section id="power-schedule-card" hidden></section>';
     let st = { ...OFF };
     vi.spyOn(api, 'get').mockImplementation(async () => st);
-    const put = vi.spyOn(api, 'put').mockImplementation(async (_u, body) => { st = { ...st, ...body }; return st; });
+    const put = vi.spyOn(api, 'put').mockImplementation(async (_u, body) => {
+      st = { ...st, ...body };
+      return st;
+    });
     await renderPowerScheduleCard();
     const box = /** @type {HTMLElement} */ (document.getElementById('power-schedule-card'));
     expect(box.textContent).toContain('never switches off without one');
@@ -31,7 +44,12 @@ describe('switch off at night (audit A10)', () => {
     /** @type {HTMLInputElement} */ (box.querySelector('[data-ps-day="2"]')).checked = false;
     /** @type {HTMLButtonElement} */ (box.querySelector('#ps-toggle')).click();
     await flush();
-    expect(put).toHaveBeenLastCalledWith('/api/system/power-schedule', { enabled: true, off_at: '23:30', wake_at: '07:00', days: [0, 1, 3, 4, 5, 6] });
+    expect(put).toHaveBeenLastCalledWith('/api/system/power-schedule', {
+      enabled: true,
+      off_at: '23:30',
+      wake_at: '07:00',
+      days: [0, 1, 3, 4, 5, 6],
+    });
     expect(box.querySelector('#ps-status')?.textContent).toBe('Switches off at 23:30 and wakes at 07:00.');
     put.mockRejectedValueOnce(new Error('Choose at least one night.'));
     /** @type {HTMLButtonElement} */ (box.querySelector('#ps-save')).click();

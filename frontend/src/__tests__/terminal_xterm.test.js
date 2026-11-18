@@ -15,24 +15,48 @@ vi.mock('@xterm/xterm', () => {
       this.disposed = false;
       instances.push(this);
     }
-    loadAddon(a) { this.addon = a; }
+    loadAddon(a) {
+      this.addon = a;
+    }
     open(el) {
       if (failOpen) throw new Error('matchMedia missing');
       this.el = el;
     }
-    write(d) { this.writes.push(d); }
-    onData(cb) { this._data.push(cb); }
+    write(d) {
+      this.writes.push(d);
+    }
+    onData(cb) {
+      this._data.push(cb);
+    }
     onBinary() {}
-    onResize(cb) { this._resize.push(cb); }
-    reset() { this.writes = []; }
-    focus() { this.focused = true; }
-    dispose() { this.disposed = true; }
-    emitData(d) { this._data.forEach((cb) => cb(d)); }
-    emitResize(cols, rows) { this.cols = cols; this.rows = rows; this._resize.forEach((cb) => cb({ cols, rows })); }
+    onResize(cb) {
+      this._resize.push(cb);
+    }
+    reset() {
+      this.writes = [];
+    }
+    focus() {
+      this.focused = true;
+    }
+    dispose() {
+      this.disposed = true;
+    }
+    emitData(d) {
+      this._data.forEach((cb) => cb(d));
+    }
+    emitResize(cols, rows) {
+      this.cols = cols;
+      this.rows = rows;
+      this._resize.forEach((cb) => cb({ cols, rows }));
+    }
   }
   return { Terminal: FakeTerminal };
 });
-vi.mock('@xterm/addon-fit', () => ({ FitAddon: class { fit() {} } }));
+vi.mock('@xterm/addon-fit', () => ({
+  FitAddon: class {
+    fit() {}
+  },
+}));
 vi.mock('@xterm/xterm/css/xterm.css', () => ({}));
 
 import { createTerminalView, stripAnsi } from '../components/terminal-view.js';
@@ -118,8 +142,12 @@ describe('container terminal over WebSocket', () => {
         this.sent = [];
         sockets.push(this);
       }
-      send(d) { this.sent.push(d); }
-      close() { this.readyState = 3; }
+      send(d) {
+        this.sent.push(d);
+      }
+      close() {
+        this.readyState = 3;
+      }
     }
     FakeWs.OPEN = 1;
     vi.stubGlobal('WebSocket', FakeWs);

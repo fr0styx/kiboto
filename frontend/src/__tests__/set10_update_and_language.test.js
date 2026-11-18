@@ -33,7 +33,8 @@ describe('the Language menu', () => {
   it('a menu drawn after the start changes the language', async () => {
     i18n.bindLanguageMenus();
     const set = vi.spyOn(i18n, 'setLanguage');
-    document.body.innerHTML = '<select id="mgmt-lang-select" class="language-picker-select"><option value="en">English</option><option value="de">Deutsch</option></select><select id="other"><option value="x">x</option></select>';
+    document.body.innerHTML =
+      '<select id="mgmt-lang-select" class="language-picker-select"><option value="en">English</option><option value="de">Deutsch</option></select><select id="other"><option value="x">x</option></select>';
     const menu = document.getElementById('mgmt-lang-select');
     menu.value = 'de';
     menu.dispatchEvent(new Event('change', { bubbles: true }));

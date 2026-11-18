@@ -1,7 +1,10 @@
 /** NUX-15: Mission Control's lists drawn by widgets.js use classes, not inline styles. */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-vi.stubGlobal('fetch', vi.fn(() => Promise.reject(new Error('offline'))));
+vi.stubGlobal(
+  'fetch',
+  vi.fn(() => Promise.reject(new Error('offline')))
+);
 const { api } = await import('../api.js');
 const W = await import('../components/widgets.js');
 

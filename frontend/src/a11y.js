@@ -26,7 +26,7 @@ export function enhanceInteractiveElements(root) {
     '.fm-col-name',
     '.fm-col-size',
     '.fm-col-type',
-    '[data-action]'
+    '[data-action]',
   ];
 
   const matched = root.matches && selectors.some((s) => root.matches(s)) ? [root] : [];
@@ -72,7 +72,8 @@ export function initA11yAnnouncer() {
     announcer.className = 'sr-only';
     announcer.setAttribute('aria-live', 'polite');
     announcer.setAttribute('aria-atomic', 'true');
-    announcer.style.cssText = 'position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); border:0;';
+    announcer.style.cssText =
+      'position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); border:0;';
     document.body.appendChild(announcer);
   }
 }
@@ -114,18 +115,25 @@ const MENU_SEL = '[role="menu"], .context-menu, [id$="context-menu"], [id$="ctx-
 export function onMenuKey(e) {
   const isMenuKey = e.key === 'ContextMenu' || (e.key === 'F10' && e.shiftKey);
   if (!isMenuKey) return;
-  const el = document.activeElement && document.activeElement !== document.documentElement ? document.activeElement : document.body;
+  const el =
+    document.activeElement && document.activeElement !== document.documentElement
+      ? document.activeElement
+      : document.body;
   if (el.closest && el.closest('input, textarea, select, [contenteditable="true"]')) return; // the browser's own menu
   e.preventDefault();
   const r = el.getBoundingClientRect ? el.getBoundingClientRect() : { left: 0, top: 0, width: 0, height: 0 };
-  el.dispatchEvent(new MouseEvent('contextmenu', {
-    bubbles: true,
-    cancelable: true,
-    clientX: Math.round(r.left + Math.min(r.width / 2, 24)),
-    clientY: Math.round(r.top + Math.min(r.height / 2, 12)),
-  }));
+  el.dispatchEvent(
+    new MouseEvent('contextmenu', {
+      bubbles: true,
+      cancelable: true,
+      clientX: Math.round(r.left + Math.min(r.width / 2, 24)),
+      clientY: Math.round(r.top + Math.min(r.height / 2, 12)),
+    })
+  );
   requestAnimationFrame(() => {
-    const menus = Array.from(document.querySelectorAll(MENU_SEL)).filter((m) => m.style.display !== 'none' && !m.hidden && m.getClientRects().length);
+    const menus = Array.from(document.querySelectorAll(MENU_SEL)).filter(
+      (m) => m.style.display !== 'none' && !m.hidden && m.getClientRects().length
+    );
     const first = menus[menus.length - 1]?.querySelector('[role="menuitem"], .context-menu-item, button, [tabindex]');
     if (first) {
       if (!first.hasAttribute('tabindex') && !/^(BUTTON|A)$/.test(first.tagName)) first.setAttribute('tabindex', '-1');

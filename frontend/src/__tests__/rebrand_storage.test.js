@@ -23,7 +23,9 @@ describe('Rebrand storage move', () => {
     expect(localStorage.getItem('kiboto_language')).toBe('fr');
     expect(localStorage.getItem('lcd_theme')).toBe('dark');
     expect(sessionStorage.getItem('kiboto_fm_last_path')).toBe('/mnt/user');
-    const left = [...Array(localStorage.length).keys()].map((i) => localStorage.key(i)).filter((k) => k.startsWith('zettnas'));
+    const left = [...Array(localStorage.length).keys()]
+      .map((i) => localStorage.key(i))
+      .filter((k) => k.startsWith('zettnas'));
     expect(left).toEqual([]);
     new Function(early)(); // a second load changes nothing
     expect(localStorage.getItem('kiboto_dock_size')).toBe('large');

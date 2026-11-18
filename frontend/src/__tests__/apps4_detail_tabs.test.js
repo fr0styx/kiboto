@@ -44,4 +44,3 @@ describe('detail tabs by Docker details (SET-25)', () => {
     }
   });
 });
-

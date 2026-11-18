@@ -40,19 +40,29 @@ describe('download from iCloud Photos', () => {
   });
 
   it('clears a refused password, says why, and asks again after Apple ends the session', async () => {
-    vi.spyOn(api, 'get').mockResolvedValue({ ...OUT, apple_id: 'ana@icloud.com', error: 'Apple asks for a new sign-in.' });
+    vi.spyOn(api, 'get').mockResolvedValue({
+      ...OUT,
+      apple_id: 'ana@icloud.com',
+      error: 'Apple asks for a new sign-in.',
+    });
     vi.spyOn(api, 'post').mockRejectedValue(new Error("Apple didn't accept that Apple ID and password."));
     await openICloudPhotos('/mnt/user/Photos');
     expect(q('.phi-found').textContent).toBe('Apple asks you to sign in again.');
     expect(q('#ic-id').value).toBe('ana@icloud.com');
     q('#ic-pw').value = 'wrong';
     q('#ic-sign-in').click();
-    await vi.waitFor(() => expect(showToast).toHaveBeenCalledWith("Apple didn't accept that Apple ID and password.", 'error'));
+    await vi.waitFor(() =>
+      expect(showToast).toHaveBeenCalledWith("Apple didn't accept that Apple ID and password.", 'error')
+    );
     expect(q('#ic-pw').value).toBe('');
   });
 
   it('shows the last download, picks a folder, signs out', async () => {
-    vi.spyOn(api, 'get').mockResolvedValue({ ...READY, downloading: true, last_download: { at: 1700000000, imported: 5, duplicates: 2 } });
+    vi.spyOn(api, 'get').mockResolvedValue({
+      ...READY,
+      downloading: true,
+      last_download: { at: 1700000000, imported: 5, duplicates: 2 },
+    });
     vi.spyOn(api, 'delete').mockResolvedValue(OUT);
     await openICloudPhotos('/mnt/user/Photos');
     expect(q('#ic-start').disabled).toBe(true);

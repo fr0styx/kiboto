@@ -105,7 +105,9 @@ export function askNameTaken(name, dir) {
     const back = /** @type {HTMLElement | null} */ (document.activeElement);
     /** @param {Answer['choice']} choice */
     const done = (choice) => {
-      const forRest = Boolean(/** @type {HTMLInputElement | null} */ (modal.querySelector('.fm-upload-for-rest'))?.checked);
+      const forRest = Boolean(
+        /** @type {HTMLInputElement | null} */ (modal.querySelector('.fm-upload-for-rest'))?.checked
+      );
       modal.remove();
       back?.focus?.();
       resolve({ choice, forRest: choice === 'skip' && !forRest ? false : forRest });
@@ -137,10 +139,17 @@ export async function uploadAll(items, { ask = askNameTaken, label = '' } = {}) 
   let cancelled = false;
   const job = transferCenter.startLocal({
     kind: 'upload',
-    label: label || t('transfers.uploading', 'Uploading {count} file(s) to {dest}', { count: items.length, dest: (items[0]?.dir || '').split('/').pop() || '/' }),
+    label:
+      label ||
+      t('transfers.uploading', 'Uploading {count} file(s) to {dest}', {
+        count: items.length,
+        dest: (items[0]?.dir || '').split('/').pop() || '/',
+      }),
     totalFiles: items.length,
     totalBytes,
-    cancel: () => { cancelled = true; },
+    cancel: () => {
+      cancelled = true;
+    },
   });
   /** @type {Answer['choice'] | null} */
   let forRest = null;
@@ -157,12 +166,19 @@ export async function uploadAll(items, { ask = askNameTaken, label = '' } = {}) 
     let policy = forRest === 'replace' || forRest === 'keep_both' ? forRest : 'ask';
     for (;;) {
       try {
-        await sendOne(file, dir, policy, (sent) => job.progress({ bytes: doneBytes + sent }), () => cancelled);
+        await sendOne(
+          file,
+          dir,
+          policy,
+          (sent) => job.progress({ bytes: doneBytes + sent }),
+          () => cancelled
+        );
         uploaded++;
       } catch (err) {
         if (cancelled) break;
         if (isNameTaken(err) && policy === 'ask') {
-          const answer = forRest === 'skip' ? { choice: /** @type {const} */ ('skip'), forRest: true } : await ask(file.name, dir);
+          const answer =
+            forRest === 'skip' ? { choice: /** @type {const} */ ('skip'), forRest: true } : await ask(file.name, dir);
           if (answer.forRest) forRest = answer.choice;
           if (answer.choice !== 'skip') {
             policy = answer.choice;
@@ -182,10 +198,36 @@ export async function uploadAll(items, { ask = askNameTaken, label = '' } = {}) 
   const failed = errors.length;
   if (cancelled) job.finish('cancelled');
   else if (failed && !uploaded) job.finish('failed', errors[0]);
-  else job.finish('completed', failed ? t('fm.upload_some_failed', '{count, plural, one {# file could not be uploaded: {first}} other {# files could not be uploaded. The first: {first}}}', { count: failed, first: errors[0] }) : null);
+  else
+    job.finish(
+      'completed',
+      failed
+        ? t(
+            'fm.upload_some_failed',
+            '{count, plural, one {# file could not be uploaded: {first}} other {# files could not be uploaded. The first: {first}}}',
+            { count: failed, first: errors[0] }
+          )
+        : null
+    );
   // a failed upload says so, also when the transfer centre is closed
-  if (failed && !cancelled) showToast(t('fm.upload_some_failed', '{count, plural, one {# file could not be uploaded: {first}} other {# files could not be uploaded. The first: {first}}}', { count: failed, first: errors[0] }), 'error');
-  else if (skipped && !cancelled) showToast(t('fm.upload_skipped', '{count, plural, one {# file was skipped: its name was taken} other {# files were skipped: their names were taken}}', { count: skipped }), 'info');
+  if (failed && !cancelled)
+    showToast(
+      t(
+        'fm.upload_some_failed',
+        '{count, plural, one {# file could not be uploaded: {first}} other {# files could not be uploaded. The first: {first}}}',
+        { count: failed, first: errors[0] }
+      ),
+      'error'
+    );
+  else if (skipped && !cancelled)
+    showToast(
+      t(
+        'fm.upload_skipped',
+        '{count, plural, one {# file was skipped: its name was taken} other {# files were skipped: their names were taken}}',
+        { count: skipped }
+      ),
+      'info'
+    );
   return { uploaded, skipped, failed, cancelled };
 }
 
@@ -200,7 +242,10 @@ export function planDrop(entries, baseDir) {
   /** @type {Set<string>} */
   const dirs = new Set();
   const items = entries.map(({ file, relPath }) => {
-    const parts = String(relPath || file.name).split('/').filter(Boolean).slice(0, -1);
+    const parts = String(relPath || file.name)
+      .split('/')
+      .filter(Boolean)
+      .slice(0, -1);
     let dir = base;
     for (const part of parts) {
       dir = `${dir}/${part}`;

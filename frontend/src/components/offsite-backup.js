@@ -20,12 +20,18 @@ export function reposHtml(data) {
       <div class="offsite-repo-main">
         <span class="offsite-repo-name">${escapeHtml(r.name)}</span>
         <span class="offsite-meta">${escapeHtml(r.location)} · ${escapeHtml(t('offsite.folders_n', '{n} folders', { n: r.paths.length }))} · ${escapeHtml(
-          t('offsite.keep_rule', 'keeps {d} daily, {w} weekly, {m} monthly', { d: r.keep.daily, w: r.keep.weekly, m: r.keep.monthly }),
+          t('offsite.keep_rule', 'keeps {d} daily, {w} weekly, {m} monthly', {
+            d: r.keep.daily,
+            w: r.keep.weekly,
+            m: r.keep.monthly,
+          })
         )}</span>
         <span class="offsite-meta">${escapeHtml(t('offsite.last', 'Last backup {b} · last check {c}', { b: when(r.last_backup), c: when(r.last_check) }))}${
           r.last_result && r.last_result !== 'ok' ? ` · <strong>${escapeHtml(r.last_result)}</strong>` : ''
         }${r.initialized && !r.kit_saved_at ? ` · <strong class="offsite-kit-missing">${escapeHtml(t('offsite.kit_missing', 'Recovery kit not saved'))}</strong>` : ''}${
-          r.last_unreadable ? ` · <strong>${escapeHtml(t('offsite.unreadable', '{n} files could not be read', { n: r.last_unreadable }))}</strong>` : ''
+          r.last_unreadable
+            ? ` · <strong>${escapeHtml(t('offsite.unreadable', '{n} files could not be read', { n: r.last_unreadable }))}</strong>`
+            : ''
         }</span>
         ${lockLine(r)}
         ${r.append_only ? `<span class="offsite-meta">${escapeHtml(t('offsite.append_only', 'The backup server only adds versions (append-only), so old ones stay there until its owner removes them.'))}</span>` : ''}
@@ -41,7 +47,7 @@ export function reposHtml(data) {
         <button type="button" class="btn-pill-toggle is-small" data-off="everything" data-id="${escapeHtml(r.id)}">${escapeHtml(t('offsite.restore_everything', 'Bring back everything'))}</button>
         <button type="button" class="btn-pill-toggle is-small is-danger" data-off="forget" data-id="${escapeHtml(r.id)}">${escapeHtml(t('offsite.forget', 'Forget'))}</button>
       </div>
-    </li>`,
+    </li>`
     )
     .join('');
   return `<ul class="offsite-list">${rows || `<li class="offsite-note">${escapeHtml(t('offsite.none', 'No offsite backup yet.'))}</li>`}</ul>`;
@@ -69,7 +75,10 @@ export function formHtml(shares) {
       </div>
     </div>
     <fieldset><legend>${escapeHtml(t('offsite.what', 'Folders to back up'))}</legend>${shares
-      .map((s) => `<label class="offsite-check"><input type="checkbox" name="paths" value="${escapeHtml(s.path)}"> ${escapeHtml(s.name)}</label>`)
+      .map(
+        (s) =>
+          `<label class="offsite-check"><input type="checkbox" name="paths" value="${escapeHtml(s.path)}"> ${escapeHtml(s.name)}</label>`
+      )
       .join('')}</fieldset>
     <label>${escapeHtml(t('offsite.daily', 'Daily versions'))}<input name="daily" type="number" min="0" max="1000" value="7"></label>
     <label>${escapeHtml(t('offsite.weekly', 'Weekly'))}<input name="weekly" type="number" min="0" max="1000" value="4"></label>
@@ -85,18 +94,33 @@ export function lockLine(r) {
   const parts = [
     r.locked_until
       ? t('offsite.locked_until', 'Cloud copy locked until {date}', { date: formatDateTime(r.locked_until * 1000) })
-      : t('offsite.locked_days_after', 'Each copy is locked for {n, plural, one {# day} other {# days}}', { n: r.lock_days }),
+      : t('offsite.locked_days_after', 'Each copy is locked for {n, plural, one {# day} other {# days}}', {
+          n: r.lock_days,
+        }),
   ];
   const c = r.lock_check;
   let warn = false;
-  if (!c) parts.push(t('offsite.lock_not_checked', 'the bucket\'s lock is not checked yet'));
+  if (!c) parts.push(t('offsite.lock_not_checked', "the bucket's lock is not checked yet"));
   else if (c.error || !c.ok) {
     warn = true;
-    parts.push(t('offsite.lock_failed', 'the bucket is not confirmed as locked: {why}', { why: c.error || c.note || t('offsite.lock_off', 'Object Lock is off') }));
+    parts.push(
+      t('offsite.lock_failed', 'the bucket is not confirmed as locked: {why}', {
+        why: c.error || c.note || t('offsite.lock_off', 'Object Lock is off'),
+      })
+    );
   } else if (c.days < r.lock_days) {
     warn = true;
-    parts.push(t('offsite.lock_short', 'but the bucket locks for only {n, plural, one {# day} other {# days}}', { n: c.days }));
-  } else parts.push(t('offsite.lock_ok', 'bucket checked {when}: {mode}, {n, plural, one {# day} other {# days}}', { when: when(c.at), mode: c.mode || '', n: c.days }));
+    parts.push(
+      t('offsite.lock_short', 'but the bucket locks for only {n, plural, one {# day} other {# days}}', { n: c.days })
+    );
+  } else
+    parts.push(
+      t('offsite.lock_ok', 'bucket checked {when}: {mode}, {n, plural, one {# day} other {# days}}', {
+        when: when(c.at),
+        mode: c.mode || '',
+        n: c.days,
+      })
+    );
   const text = escapeHtml(parts.join(' · '));
   return `<span class="offsite-meta">${warn ? `<strong>${text}</strong>` : text}</span>`;
 }
@@ -111,11 +135,15 @@ export function usbSettingsHtml(settings) {
 }
 
 export function isLockable(value) {
-  return String(value || '').trim().startsWith('rclone:');
+  return String(value || '')
+    .trim()
+    .startsWith('rclone:');
 }
 
 export function isRestLocation(value) {
-  return String(value || '').trim().startsWith('rest:');
+  return String(value || '')
+    .trim()
+    .startsWith('rest:');
 }
 
 /** The REST server's user and password, sent only for a rest: destination. */
@@ -151,7 +179,10 @@ export async function offerRecoveryKit(repo, onSaved = null) {
   };
   showConfirmToast(
     t('offsite.kit_title', 'Save the recovery key now'),
-    t('offsite.kit_msg_full', 'Without this kit nobody can read the backup, not even you, if this NAS is lost or broken. It holds the key, where the backup is and how to restore it. Keep it outside the NAS: in a password manager, on a USB stick or printed.'),
+    t(
+      'offsite.kit_msg_full',
+      'Without this kit nobody can read the backup, not even you, if this NAS is lost or broken. It holds the key, where the backup is and how to restore it. Keep it outside the NAS: in a password manager, on a USB stick or printed.'
+    ),
     async () => {
       downloadText(kit.filename || `kiboto-recovery-${repo.id}.txt`, kit.text);
       await saved();
@@ -217,7 +248,9 @@ export async function renderOffsite(mount) {
     mount.textContent = e.message || String(e);
     return;
   }
-  mount.innerHTML = reposHtml(data) + (data.available ? connectKitHtml() + formHtml(shares) + usbSettingsHtml(usb && usb.settings) : '');
+  mount.innerHTML =
+    reposHtml(data) +
+    (data.available ? connectKitHtml() + formHtml(shares) + usbSettingsHtml(usb && usb.settings) : '');
   import('./backup-needs.js').then((m) => m.applyNeeds(mount)).catch(() => {}); // rights (SET-21, B9)
   mount.querySelector('[data-off-usb]')?.addEventListener('change', async (e) => {
     const box = /** @type {HTMLInputElement} */ (e.target);
@@ -278,17 +311,26 @@ export async function renderOffsite(mount) {
       } else if (act === 'lockcheck') {
         const c = await api.post(`/api/offsite/repos/${id}/lock-check`, {});
         showToast(
-          c.ok ? t('offsite.lock_confirmed', 'The bucket locks every copy for {n, plural, one {# day} other {# days}} ({mode}).', { n: c.days, mode: c.mode || '' }) : (c.error || c.note || t('offsite.lock_off', 'Object Lock is off')),
-          c.ok ? 'success' : 'error',
+          c.ok
+            ? t(
+                'offsite.lock_confirmed',
+                'The bucket locks every copy for {n, plural, one {# day} other {# days}} ({mode}).',
+                { n: c.days, mode: c.mode || '' }
+              )
+            : c.error || c.note || t('offsite.lock_off', 'Object Lock is off'),
+          c.ok ? 'success' : 'error'
         );
       } else if (act === 'kit') {
         await offerRecoveryKit({ id: b.dataset.id }, () => renderOffsite(mount));
         return;
       } else if (act === 'forget') {
-        showDangerConfirm(t('offsite.forget_confirm', 'Forget this backup in Kiboto? The backup itself stays where it is.'), async () => {
-          await api.delete(`/api/offsite/repos/${id}`);
-          renderOffsite(mount);
-        });
+        showDangerConfirm(
+          t('offsite.forget_confirm', 'Forget this backup in Kiboto? The backup itself stays where it is.'),
+          async () => {
+            await api.delete(`/api/offsite/repos/${id}`);
+            renderOffsite(mount);
+          }
+        );
         return;
       } else if (act === 'connect') {
         openRestoreBox(null, () => renderOffsite(mount)); // RES-7
@@ -316,8 +358,10 @@ export function connectKitHtml() {
 export function versionsHtml(versions) {
   return `<ul class="offsite-list">${versions
     .map(
-      (v) => `<li class="offsite-version"><span>${escapeHtml(formatDateTime(v.time))}</span><span class="offsite-meta">${escapeHtml(v.paths.join(', '))}</span>
-        <button type="button" class="btn-pill-toggle is-small" data-ver="${escapeHtml(v.id)}" data-path="${escapeHtml(v.paths[0] || '/')}">${escapeHtml(t('offsite.open', 'Open'))}</button></li>`,
+      (
+        v
+      ) => `<li class="offsite-version"><span>${escapeHtml(formatDateTime(v.time))}</span><span class="offsite-meta">${escapeHtml(v.paths.join(', '))}</span>
+        <button type="button" class="btn-pill-toggle is-small" data-ver="${escapeHtml(v.id)}" data-path="${escapeHtml(v.paths[0] || '/')}">${escapeHtml(t('offsite.open', 'Open'))}</button></li>`
     )
     .join('')}</ul>`;
 }
@@ -333,7 +377,7 @@ export function filesHtml(entries, path) {
             ? `<button type="button" class="snap-entry is-dir" data-open="${escapeHtml(e.path)}">${escapeHtml(e.name)}/</button>`
             : `<span class="snap-entry">${escapeHtml(e.name)} <span class="offsite-meta">${escapeHtml(formatBytes(e.size))}</span></span>`
         }
-        <button type="button" class="btn-pill-toggle is-small" data-restore="${escapeHtml(e.path)}">${escapeHtml(t('offsite.restore', 'Restore'))}</button></li>`,
+        <button type="button" class="btn-pill-toggle is-small" data-restore="${escapeHtml(e.path)}">${escapeHtml(t('offsite.restore', 'Restore'))}</button></li>`
       )
       .join('')}</ul>`;
 }
@@ -354,7 +398,9 @@ async function openVersions(repoId) {
     <div class="snap-body">${escapeHtml(t('ui.loading', 'Loading...'))}</div>`;
   const body = () => dlg.querySelector('.snap-body');
   const showFiles = async (path) => {
-    const { entries } = await api.get(`/api/offsite/repos/${id}/snapshots/${encodeURIComponent(version)}/browse?path=${encodeURIComponent(path)}`);
+    const { entries } = await api.get(
+      `/api/offsite/repos/${id}/snapshots/${encodeURIComponent(version)}/browse?path=${encodeURIComponent(path)}`
+    );
     body().innerHTML = filesHtml(entries, path);
   };
   dlg.onclick = async (e) => {
@@ -371,8 +417,14 @@ async function openVersions(repoId) {
         const path = rest.dataset.restore;
         const dir = path.split('/').slice(0, -1).join('/');
         const target = `${dir || ''}/Restored from backup ${new Date().toISOString().slice(0, 10)}`;
-        const r = await api.post(`/api/offsite/repos/${id}/snapshots/${encodeURIComponent(version)}/restore`, { path, target });
-        showToast(t('offsite.restore_started', 'Restoring into {path}; it shows in Jobs.', { path: r.restored_to }), 'info');
+        const r = await api.post(`/api/offsite/repos/${id}/snapshots/${encodeURIComponent(version)}/restore`, {
+          path,
+          target,
+        });
+        showToast(
+          t('offsite.restore_started', 'Restoring into {path}; it shows in Jobs.', { path: r.restored_to }),
+          'info'
+        );
       }
     } catch (err) {
       showToast(err.message || String(err), 'error');
@@ -382,7 +434,9 @@ async function openVersions(repoId) {
   else dlg.setAttribute('open', '');
   try {
     const { snapshots } = await api.get(`/api/offsite/repos/${id}/snapshots`);
-    body().innerHTML = snapshots.length ? versionsHtml(snapshots) : escapeHtml(t('offsite.no_versions', 'No versions yet: run a backup first.'));
+    body().innerHTML = snapshots.length
+      ? versionsHtml(snapshots)
+      : escapeHtml(t('offsite.no_versions', 'No versions yet: run a backup first.'));
   } catch (err) {
     body().textContent = err.message || String(err);
   }

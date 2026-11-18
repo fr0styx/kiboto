@@ -14,7 +14,10 @@ describe('who may open an encrypted folder (NSEC-5)', () => {
   });
 
   it('chooses people, or everyone with the share', async () => {
-    api.get.mockResolvedValue([{ username: 'Mum', display_name: 'Mum' }, { username: 'mia', display_name: 'Mia' }]);
+    api.get.mockResolvedValue([
+      { username: 'Mum', display_name: 'Mum' },
+      { username: 'mia', display_name: 'Mia' },
+    ]);
     api.put.mockResolvedValue({ people: ['Mum', 'mia'] });
     const mount = document.createElement('div');
     const row = document.createElement('div');

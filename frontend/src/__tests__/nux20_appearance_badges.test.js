@@ -7,7 +7,8 @@ const byId = (id) => document.getElementById(id);
 
 describe('appearance badges (NUX-20)', () => {
   beforeEach(() => {
-    document.body.innerHTML = '<span id="desktop-theme-active-badge"></span><span id="desktop-custom-hex-val"></span><span id="desktop-contrast-badge"></span><div id="wallpaper-extracted-chips"></div><div id="desktop-wallpaper"></div>';
+    document.body.innerHTML =
+      '<span id="desktop-theme-active-badge"></span><span id="desktop-custom-hex-val"></span><span id="desktop-contrast-badge"></span><div id="wallpaper-extracted-chips"></div><div id="desktop-wallpaper"></div>';
     state.desktopTheme = 'cyber';
   });
 

@@ -39,9 +39,9 @@ describe('Sprint 4: Remote & Cloud Storage Subsystem (Frontend)', () => {
           proxy_url: '/webdav/',
           quick_connect: {
             macos: "open 'http://admin@192.168.1.50:8084/'",
-            windows: "net use Z: http://192.168.1.50:8084/ /user:admin",
-            ios: "http://192.168.1.50:8084/",
-            linux: "gio mount dav://admin@192.168.1.50:8084/",
+            windows: 'net use Z: http://192.168.1.50:8084/ /user:admin',
+            ios: 'http://192.168.1.50:8084/',
+            linux: 'gio mount dav://admin@192.168.1.50:8084/',
           },
         });
       }
@@ -254,9 +254,9 @@ describe('Sprint 4: Remote & Cloud Storage Subsystem (Frontend)', () => {
             fields: [
               { name: 'token', label: 'OAuth2 Token', type: 'textarea', required: true, help: 'Authorize help' },
               { name: 'drive_type', label: 'Drive Type', type: 'select', options: ['personal', 'business'] },
-              { name: 'drive_id', label: 'Drive ID', type: 'text' }
-            ]
-          }
+              { name: 'drive_id', label: 'Drive ID', type: 'text' },
+            ],
+          },
         ]);
       }
       return Promise.reject(new Error(`Unknown url: ${url}`));
@@ -314,11 +314,14 @@ describe('Sprint 4: Remote & Cloud Storage Subsystem (Frontend)', () => {
     form.dispatchEvent(new Event('submit'));
     await new Promise((r) => setTimeout(r, 20));
 
-    expect(postSpy).toHaveBeenCalledWith('/api/remotes', expect.objectContaining({
-      name: 'my-onedrive',
-      type: 'onedrive',
-      parameters: expect.objectContaining({ token: '{"access_token":"mock"}' })
-    }));
+    expect(postSpy).toHaveBeenCalledWith(
+      '/api/remotes',
+      expect.objectContaining({
+        name: 'my-onedrive',
+        type: 'onedrive',
+        parameters: expect.objectContaining({ token: '{"access_token":"mock"}' }),
+      })
+    );
     expect(postSpy).toHaveBeenCalledWith('/api/remotes/my-onedrive/mount', {});
     expect(successCb).toHaveBeenCalled();
   });
@@ -356,9 +359,9 @@ describe('Sprint 4: Remote & Cloud Storage Subsystem (Frontend)', () => {
             authorize_cmd: 'rclone authorize "onedrive"',
             fields: [
               { name: 'token', label: 'OAuth2 Token', type: 'textarea', required: true },
-              { name: 'drive_type', label: 'Drive Type', type: 'select', options: ['personal', 'business'] }
-            ]
-          }
+              { name: 'drive_type', label: 'Drive Type', type: 'select', options: ['personal', 'business'] },
+            ],
+          },
         ]);
       }
       if (url.startsWith('/api/remotes/oauth/status/')) {
@@ -374,7 +377,7 @@ describe('Sprint 4: Remote & Cloud Storage Subsystem (Frontend)', () => {
           session_id: 'zos_test123',
           provider_type: 'onedrive',
           auth_url: 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=test',
-          redirect_port: 53682
+          redirect_port: 53682,
         });
       }
       if (url === '/api/remotes/oauth/exchange') {
@@ -382,7 +385,7 @@ describe('Sprint 4: Remote & Cloud Storage Subsystem (Frontend)', () => {
           status: 'ok',
           token: '{"access_token":"mock_exchanged_token","expiry":"2026-10-13T00:00:00Z"}',
           drive_type: 'personal',
-          session_id: body.session_id
+          session_id: body.session_id,
         });
       }
       return Promise.reject(new Error(`Unknown url: ${url}`));
@@ -426,7 +429,7 @@ describe('Sprint 4: Remote & Cloud Storage Subsystem (Frontend)', () => {
 
     expect(postSpy).toHaveBeenCalledWith('/api/remotes/oauth/exchange', {
       session_id: 'zos_test123',
-      redirect_url: 'http://localhost:53682/?code=M.R3_mock_code&state=mock_state'
+      redirect_url: 'http://localhost:53682/?code=M.R3_mock_code&state=mock_state',
     });
 
     // 4. Assert token textarea was auto-filled
@@ -509,9 +512,9 @@ describe('Sprint 4: Remote & Cloud Storage Subsystem (Frontend)', () => {
             name: 'Microsoft OneDrive',
             fields: [
               { name: 'token', label: 'Token', type: 'textarea' },
-              { name: 'drive_id', label: 'Drive ID', type: 'text' }
-            ]
-          }
+              { name: 'drive_id', label: 'Drive ID', type: 'text' },
+            ],
+          },
         ]);
       }
       return Promise.reject(new Error(`Unknown url: ${url}`));
@@ -546,4 +549,3 @@ describe('Sprint 4: Remote & Cloud Storage Subsystem (Frontend)', () => {
     expect(testBtn.textContent).toContain('Test connection');
   });
 });
-

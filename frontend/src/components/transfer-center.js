@@ -16,9 +16,22 @@ import { formatBytes } from '../format.js';
 
 const SHOW_AFTER_MS = 700; // quick operations finish without the panel popping up
 const ACTIVE = new Set(['pending', 'running', 'paused']);
-const ICON = { copy: '⧉', move: '➜', duplicate: '⧉', archive_create: '🗜️', archive_extract: '📦', upload: '⬆', delete: '🗑️', trash: '🗑️' };
+const ICON = {
+  copy: '⧉',
+  move: '➜',
+  duplicate: '⧉',
+  archive_create: '🗜️',
+  archive_extract: '📦',
+  upload: '⬆',
+  delete: '🗑️',
+  trash: '🗑️',
+};
 
-const baseName = (p) => String(p || '').replace(/\/+$/, '').split('/').pop() || '/';
+const baseName = (p) =>
+  String(p || '')
+    .replace(/\/+$/, '')
+    .split('/')
+    .pop() || '/';
 
 /** "1:05" or "1:02:05" */
 export function formatDuration(seconds) {
@@ -35,11 +48,16 @@ export function taskLabel(task) {
   const count = (task.sources || []).length || 1;
   const dest = baseName(task.destination);
   switch (task.kind || task.action) {
-    case 'move': return t('transfers.moving', 'Moving {count} item(s) to {dest}', { count, dest });
-    case 'duplicate': return t('transfers.duplicating', 'Duplicating {count} item(s)', { count });
-    case 'archive_create': return t('transfers.zipping', 'Creating {name}', { name: baseName(task.destination) });
-    case 'archive_extract': return t('transfers.extracting', 'Extracting {name}', { name: baseName((task.sources || [])[0]) });
-    default: return t('transfers.copying', 'Copying {count} item(s) to {dest}', { count, dest });
+    case 'move':
+      return t('transfers.moving', 'Moving {count} item(s) to {dest}', { count, dest });
+    case 'duplicate':
+      return t('transfers.duplicating', 'Duplicating {count} item(s)', { count });
+    case 'archive_create':
+      return t('transfers.zipping', 'Creating {name}', { name: baseName(task.destination) });
+    case 'archive_extract':
+      return t('transfers.extracting', 'Extracting {name}', { name: baseName((task.sources || [])[0]) });
+    default:
+      return t('transfers.copying', 'Copying {count} item(s) to {dest}', { count, dest });
   }
 }
 
@@ -48,7 +66,9 @@ export function taskStatus(task) {
   const s = task.status;
   if (s === 'completed') {
     const skipped = task.result?.skipped || 0;
-    const base = skipped ? t('transfers.done_skipped', 'Done, {count} skipped', { count: skipped }) : t('transfers.done', 'Done');
+    const base = skipped
+      ? t('transfers.done_skipped', 'Done, {count} skipped', { count: skipped })
+      : t('transfers.done', 'Done');
     return task.error ? `${base}. ${task.error}` : base;
   }
   if (s === 'failed') return t('transfers.failed', 'Failed: {error}', { error: task.error || '?' });
@@ -57,14 +77,25 @@ export function taskStatus(task) {
   const parts = [];
   if (s === 'paused') parts.push(t('transfers.paused', 'Paused'));
   if (task.total_files > 1) {
-    parts.push(t('transfers.progress_files', '{done} of {total} files', { done: task.processed_files || 0, total: task.total_files }));
+    parts.push(
+      t('transfers.progress_files', '{done} of {total} files', {
+        done: task.processed_files || 0,
+        total: task.total_files,
+      })
+    );
   }
   if (task.total_bytes > 0) {
-    parts.push(t('transfers.progress_bytes', '{done} of {total}', { done: formatBytes(task.processed_bytes || 0), total: formatBytes(task.total_bytes) }));
+    parts.push(
+      t('transfers.progress_bytes', '{done} of {total}', {
+        done: formatBytes(task.processed_bytes || 0),
+        total: formatBytes(task.total_bytes),
+      })
+    );
   }
   if (!parts.length && s !== 'paused') parts.push(t('transfers.counting', 'Counting files…'));
   if (s === 'running' && task.speed_bps > 1024) parts.push(`${formatBytes(task.speed_bps)}/s`);
-  if (s === 'running' && task.eta_seconds > 0) parts.push(t('transfers.time_left', '{time} left', { time: formatDuration(task.eta_seconds) }));
+  if (s === 'running' && task.eta_seconds > 0)
+    parts.push(t('transfers.time_left', '{time} left', { time: formatDuration(task.eta_seconds) }));
   return parts.join(' · ');
 }
 
@@ -148,7 +179,10 @@ class TransferCenter {
       return;
     }
     const failed = (err) =>
-      showToast(t('transfers.action_failed', 'Could not {action} this transfer: {error}', { action: act, error: err.message }), 'error');
+      showToast(
+        t('transfers.action_failed', 'Could not {action} this transfer: {error}', { action: act, error: err.message }),
+        'error'
+      );
     const run = async () => {
       const res = await api.post(`/api/fs/transfers/${encodeURIComponent(id)}/${act}`, {});
       if (this.tasks.get(id)?.status !== 'interrupted') return;
@@ -156,14 +190,22 @@ class TransferCenter {
       this.tasks.delete(id);
       if (res?.task) this.follow(res.task);
       if (act === 'undo' && res?.kept?.length) {
-        showToast(t('transfers.undo_kept', 'Undone. Kept, because they were merged into existing folders: {names}', { names: res.kept.join(', ') }), 'info');
+        showToast(
+          t('transfers.undo_kept', 'Undone. Kept, because they were merged into existing folders: {names}', {
+            names: res.kept.join(', '),
+          }),
+          'info'
+        );
       }
       this.render();
     };
     if (act === 'undo') {
       showConfirmToast(
-        t('transfers.undo_confirm', 'Undo this transfer? Copies go to the Recycle Bin and moved items go back. Items merged into folders that already existed stay where they are.'),
-        () => run().catch(failed),
+        t(
+          'transfers.undo_confirm',
+          'Undo this transfer? Copies go to the Recycle Bin and moved items go back. Items merged into folders that already existed stay where they are.'
+        ),
+        () => run().catch(failed)
       );
       return;
     }
@@ -196,7 +238,10 @@ class TransferCenter {
       body.innerHTML = `<div class="fm-transfers-empty">${escapeHtml(t('transfers.empty', 'No transfers'))}</div>`;
       return;
     }
-    body.innerHTML = list.slice(0, 20).map((task) => this.cardHtml(task)).join('');
+    body.innerHTML = list
+      .slice(0, 20)
+      .map((task) => this.cardHtml(task))
+      .join('');
   }
 
   cardHtml(task) {
@@ -219,8 +264,12 @@ class TransferCenter {
       if (task.can_undo) buttons += btn('undo', t('transfers.undo', 'Undo'), '↶');
       buttons += btn('dismiss', t('transfers.dismiss', 'Dismiss'), '✕');
     }
-    if (ACTIVE.has(s) && (!isLocal || this.local.get(task.id)?.cancel)) buttons += btn('cancel', t('transfers.cancel', 'Cancel'), '✕');
-    const current = ACTIVE.has(s) && task.current_file ? `<div class="fm-task-file" title="${escapeHtml(task.current_file)}">${escapeHtml(task.current_file)}</div>` : '';
+    if (ACTIVE.has(s) && (!isLocal || this.local.get(task.id)?.cancel))
+      buttons += btn('cancel', t('transfers.cancel', 'Cancel'), '✕');
+    const current =
+      ACTIVE.has(s) && task.current_file
+        ? `<div class="fm-task-file" title="${escapeHtml(task.current_file)}">${escapeHtml(task.current_file)}</div>`
+        : '';
     return `
       <div class="fm-task-card is-${escapeHtml(s)}" data-task-id="${id}">
         <div class="fm-task-head">
@@ -295,7 +344,10 @@ class TransferCenter {
     if (task.status === 'completed' && !task.error) {
       showToast(t('transfers.toast_done', '{label}: done', { label }), 'success');
     } else if (task.status === 'completed') {
-      showToast(t('transfers.toast_partial', '{label}: finished with problems. {error}', { label, error: task.error }), 'warning');
+      showToast(
+        t('transfers.toast_partial', '{label}: finished with problems. {error}', { label, error: task.error }),
+        'warning'
+      );
     } else if (task.status === 'failed') {
       showToast(t('transfers.toast_failed', '{label} failed: {error}', { label, error: task.error || '?' }), 'error');
     }
@@ -310,14 +362,26 @@ class TransferCenter {
   }
 
   /** Starts a background copy, move, merge or duplicate and follows it. */
-  async startTransfer({ sources, destinationDir, action = 'copy', policy = 'merge', targetNames = null, kind = '', label = '', onDone = null }) {
+  async startTransfer({
+    sources,
+    destinationDir,
+    action = 'copy',
+    policy = 'merge',
+    targetNames = null,
+    kind = '',
+    label = '',
+    onDone = null,
+  }) {
     this.connect();
     const body = { sources, destination_dir: destinationDir, action, collision_policy: policy };
     if (targetNames) body.target_names = targetNames;
     if (kind) body.kind = kind;
     try {
       const res = await api.post('/api/fs/transfer/async', body);
-      this.follow(res.task || { id: res.task_id, status: 'pending', action, sources, destination: destinationDir, kind }, { label, onDone });
+      this.follow(
+        res.task || { id: res.task_id, status: 'pending', action, sources, destination: destinationDir, kind },
+        { label, onDone }
+      );
       return res.task_id;
     } catch (err) {
       showToast(t('transfers.start_failed', 'Could not start: {error}', { error: err.message }), 'error');
@@ -338,8 +402,18 @@ class TransferCenter {
     const id = `local-${++this._seq}`;
     this.local.set(id, { cancel });
     const task = {
-      id, kind, action: kind, label, status: 'running', created_at: Date.now() / 1000,
-      total_files: totalFiles, processed_files: 0, total_bytes: totalBytes, processed_bytes: 0, percent: 0, current_file: '',
+      id,
+      kind,
+      action: kind,
+      label,
+      status: 'running',
+      created_at: Date.now() / 1000,
+      total_files: totalFiles,
+      processed_files: 0,
+      total_bytes: totalBytes,
+      processed_bytes: 0,
+      percent: 0,
+      current_file: '',
     };
     const started = Date.now();
     this.follow(task, { label });
@@ -365,7 +439,14 @@ class TransferCenter {
       finish(status = 'completed', error = null) {
         const tk = self.tasks.get(id);
         if (!tk) return;
-        self.update({ ...tk, status, error, percent: status === 'completed' ? 100 : tk.percent, speed_bps: 0, eta_seconds: null });
+        self.update({
+          ...tk,
+          status,
+          error,
+          percent: status === 'completed' ? 100 : tk.percent,
+          speed_bps: 0,
+          eta_seconds: null,
+        });
         self.local.set(id, {});
       },
     };

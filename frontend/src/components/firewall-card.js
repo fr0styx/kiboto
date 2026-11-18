@@ -20,18 +20,27 @@ const NAMES = () => ({
 
 /** Why the switch is off here, in words, or "" where Kiboto can manage the firewall. */
 export function whyNot(code) {
-  if (code === 'host') return t('fw.why_host', "Kiboto runs in a container on this NAS, so the NAS's own firewall applies (on Unraid or TrueNAS, set it there). Kiboto manages the firewall on its own system images.");
+  if (code === 'host')
+    return t(
+      'fw.why_host',
+      "Kiboto runs in a container on this NAS, so the NAS's own firewall applies (on Unraid or TrueNAS, set it there). Kiboto manages the firewall on its own system images."
+    );
   if (code === 'no_nft') return t('fw.why_nft', 'The nft tool is missing, so Kiboto cannot load firewall rules here.');
-  if (code === 'no_cap') return t('fw.why_cap', 'Kiboto lacks the network permission (NET_ADMIN) it needs to load firewall rules.');
+  if (code === 'no_cap')
+    return t('fw.why_cap', 'Kiboto lacks the network permission (NET_ADMIN) it needs to load firewall rules.');
   return '';
 }
 
 function html(st) {
   const names = NAMES();
   const lock = !st.possible;
-  const rows = Object.keys(names).map((id) => `
+  const rows = Object.keys(names)
+    .map(
+      (id) => `
       <label class="fw-row"><input type="checkbox" data-fw-svc="${id}"${st.services[id] ? ' checked' : ''}${id === 'web' ? ' disabled' : ''}>
-        <span>${escapeHtml(names[id])}${id === 'web' ? ` <span class="fw-note">${escapeHtml(t('fw.web_always', 'always reachable from home, so you can\'t lock yourself out'))}</span>` : ''}</span></label>`).join('');
+        <span>${escapeHtml(names[id])}${id === 'web' ? ` <span class="fw-note">${escapeHtml(t('fw.web_always', "always reachable from home, so you can't lock yourself out"))}</span>` : ''}</span></label>`
+    )
+    .join('');
   return `
     <div class="fw-head">
       <div>
@@ -69,7 +78,9 @@ export async function renderFirewallCard(mount = document.getElementById('firewa
   const send = async (enabled) => {
     err.hidden = true;
     const services = {};
-    mount.querySelectorAll('[data-fw-svc]').forEach((b) => { services[/** @type {HTMLInputElement} */ (b).dataset.fwSvc] = /** @type {HTMLInputElement} */ (b).checked; });
+    mount.querySelectorAll('[data-fw-svc]').forEach((b) => {
+      services[/** @type {HTMLInputElement} */ (b).dataset.fwSvc] = /** @type {HTMLInputElement} */ (b).checked;
+    });
     const from = /** @type {HTMLInputElement | null} */ (mount.querySelector('input[name="fw-from"]:checked'));
     try {
       await api.put('/api/security/firewall', { enabled, allow_from: from ? from.value : 'lan', services });

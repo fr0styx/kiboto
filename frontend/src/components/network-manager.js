@@ -12,7 +12,7 @@ let _portsBound = false;
 export async function fetchListeningPorts() {
   try {
     const res = await api.get('/api/network/ports/listening');
-    _cachedPorts = (res && res.ports) ? res.ports : [];
+    _cachedPorts = res && res.ports ? res.ports : [];
     renderListeningPortsTable(_cachedPorts);
     return _cachedPorts;
   } catch (err) {
@@ -30,7 +30,7 @@ export function renderListeningPortsTable(ports, filter = '') {
   if (!tbody) return;
 
   const q = (filter || '').toLowerCase().trim();
-  const filtered = (ports || []).filter(p => {
+  const filtered = (ports || []).filter((p) => {
     if (!q) return true;
     return (
       String(p.port).includes(q) ||
@@ -46,24 +46,25 @@ export function renderListeningPortsTable(ports, filter = '') {
     return;
   }
 
-  tbody.innerHTML = filtered.map(p => {
-    const isUdp = (p.protocol || '').toLowerCase() === 'udp';
-    const protoBadge = isUdp
-      ? `<span class="ci-badge" style="background: rgba(245,158,11,0.15); color: var(--lt-t-f59e0bff, #f59e0b); border: 1px solid rgba(245,158,11,0.3); font-size: var(--kb-fs-xs); font-weight: 700;">UDP</span>`
-      : `<span class="ci-badge" style="background: rgba(51,205,184,0.15); color: var(--ok2); border: 1px solid rgba(51,205,184,0.3); font-size: var(--kb-fs-xs); font-weight: 700;">TCP</span>`;
+  tbody.innerHTML = filtered
+    .map((p) => {
+      const isUdp = (p.protocol || '').toLowerCase() === 'udp';
+      const protoBadge = isUdp
+        ? `<span class="ci-badge" style="background: rgba(245,158,11,0.15); color: var(--lt-t-f59e0bff, #f59e0b); border: 1px solid rgba(245,158,11,0.3); font-size: var(--kb-fs-xs); font-weight: 700;">UDP</span>`
+        : `<span class="ci-badge" style="background: rgba(51,205,184,0.15); color: var(--ok2); border: 1px solid rgba(51,205,184,0.3); font-size: var(--kb-fs-xs); font-weight: 700;">TCP</span>`;
 
-    const stateBadge = isUdp
-      ? `<span class="ci-badge" style="background: rgba(59,130,246,0.15); color: var(--lt-t-3b82f6ff, #3b82f6); border: 1px solid rgba(59,130,246,0.3); font-size: var(--kb-fs-xs);">ACTIVE</span>`
-      : `<span class="ci-badge" style="background: rgba(51,205,184,0.15); color: var(--ok2); border: 1px solid rgba(51,205,184,0.3); font-size: var(--kb-fs-xs);">LISTEN</span>`;
+      const stateBadge = isUdp
+        ? `<span class="ci-badge" style="background: rgba(59,130,246,0.15); color: var(--lt-t-3b82f6ff, #3b82f6); border: 1px solid rgba(59,130,246,0.3); font-size: var(--kb-fs-xs);">ACTIVE</span>`
+        : `<span class="ci-badge" style="background: rgba(51,205,184,0.15); color: var(--ok2); border: 1px solid rgba(51,205,184,0.3); font-size: var(--kb-fs-xs);">LISTEN</span>`;
 
-    const containerCol = p.container
-      ? `<div style="display:flex; align-items:center; gap:6px;">
+      const containerCol = p.container
+        ? `<div style="display:flex; align-items:center; gap:6px;">
            <span style="font-size: var(--kb-fs-xs);">🐳</span>
            <span style="color: var(--lt-t-60a5faff, #60a5fa); font-weight: 600;">${escapeHtml(p.container)}</span>
          </div>`
-      : `<span style="color: var(--muted); font-size: var(--kb-fs-xs);">${t('nmx.host', 'Host System / Kernel')}</span>`;
+        : `<span style="color: var(--muted); font-size: var(--kb-fs-xs);">${t('nmx.host', 'Host System / Kernel')}</span>`;
 
-    return `
+      return `
       <tr data-port="${escapeHtml(String(p.port))}" data-proto="${escapeHtml(String(p.protocol))}">
         <td><strong style="font-family: monospace; font-size: 13px; color: var(--kb-text-strong);">:${escapeHtml(String(p.port))}</strong></td>
         <td>${protoBadge}</td>
@@ -73,7 +74,8 @@ export function renderListeningPortsTable(ports, filter = '') {
         <td style="text-align: right;">${stateBadge}</td>
       </tr>
     `;
-  }).join('');
+    })
+    .join('');
 }
 
 export function initNetworkPortsInspector() {

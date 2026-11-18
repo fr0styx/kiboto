@@ -20,10 +20,14 @@ export function checkFailedText(data) {
   return {
     icon: '⚠️',
     title: t('sysu.check_failed', 'Could not check for updates'),
-    desc: t('sysu.check_failed_desc', 'Kiboto {version} is running. The check did not get an answer ({error}), so a newer version may exist.', {
-      version: data?.current_version ? `v${data.current_version}` : '',
-      error: String(data?.error || '').slice(0, 120),
-    }),
+    desc: t(
+      'sysu.check_failed_desc',
+      'Kiboto {version} is running. The check did not get an answer ({error}), so a newer version may exist.',
+      {
+        version: data?.current_version ? `v${data.current_version}` : '',
+        error: String(data?.error || '').slice(0, 120),
+      }
+    ),
   };
 }
 

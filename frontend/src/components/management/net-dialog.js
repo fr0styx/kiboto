@@ -6,7 +6,8 @@
 import { trapFocus } from '../../utils.js';
 
 const OPEN = new Map(); // overlay -> { release, opener }
-const FIRST = 'input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), button:not([disabled])';
+const FIRST =
+  'input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), button:not([disabled])';
 
 /** Shows the dialog in `overlay`; `close` is what Escape runs (the dialog's own close). */
 export function showNetDialog(overlay, close) {

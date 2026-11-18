@@ -6,7 +6,9 @@ const json = (status, body) => ({
   ok: status >= 200 && status < 300,
   headers: new Headers(),
   json: async () => body,
-  clone() { return this; },
+  clone() {
+    return this;
+  },
 });
 
 describe('destructive-action confirm flow (428)', () => {
@@ -17,7 +19,12 @@ describe('destructive-action confirm flow (428)', () => {
       calls.push({ url, opts });
       if (url === '/api/confirmations') return json(200, { token: 'zcf_test' });
       if (opts.headers && opts.headers['X-Confirm-Token'] === 'zcf_test') return json(200, { status: 'ok' });
-      return json(428, { error: 'confirmation_required', action: 'fs.trash.empty', target: '', summary: 'Empty the trash' });
+      return json(428, {
+        error: 'confirmation_required',
+        action: 'fs.trash.empty',
+        target: '',
+        summary: 'Empty the trash',
+      });
     });
   });
 

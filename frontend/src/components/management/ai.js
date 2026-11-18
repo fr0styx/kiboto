@@ -68,7 +68,9 @@ function _loadAiSearchHistory() {
     localStorage.removeItem('kiboto_ai_search_history'); // the old shared list: whose it was is unknown
     const saved = key ? JSON.parse(localStorage.getItem(key) || '[]') : [];
     if (Array.isArray(saved)) _aiSearchHistory = saved.slice(0, 8);
-  } catch (_) { /* storage off: no history */ }
+  } catch (_) {
+    /* storage off: no history */
+  }
 }
 
 function _recordAiSearchHistory(query) {
@@ -79,7 +81,9 @@ function _recordAiSearchHistory(query) {
   const key = aiHistoryKey();
   try {
     if (key) localStorage.setItem(key, JSON.stringify(_aiSearchHistory));
-  } catch (_) { /* storage off: kept for this page only */ }
+  } catch (_) {
+    /* storage off: kept for this page only */
+  }
   renderAiSearchHistory();
 }
 
@@ -95,17 +99,23 @@ export function renderAiSearchHistory() {
   }
   bar.style.display = 'flex';
   // the newest five: older ones are still offered as the search box fills in
-  chipsContainer.innerHTML = _aiSearchHistory.slice(0, 5).map((q) => `
+  chipsContainer.innerHTML = _aiSearchHistory
+    .slice(0, 5)
+    .map(
+      (q) => `
     <button type="button" class="btn-pill-toggle ai-history-chip is-small aik-soft-box" data-query="${escapeHtml(q)}">
       ${escapeHtml(q)}
     </button>
-  `).join('');
+  `
+    )
+    .join('');
   chipsContainer.querySelectorAll('.ai-history-chip').forEach((chip) => {
     chip.addEventListener('click', () => {
       const q = chip.dataset.query || '';
       const askInput = document.getElementById('ai-rag-query-input');
       if (askInput) askInput.value = q;
-      const visInput = document.getElementById('ai-visual-search-input') || document.getElementById('ai-visual-query-input');
+      const visInput =
+        document.getElementById('ai-visual-search-input') || document.getElementById('ai-visual-query-input');
       if (visInput) visInput.value = q;
       runAiRagAsk(q, { unifiedMode: true });
       runAiVisualSearch(q);
@@ -126,7 +136,10 @@ function _ensureAiSyncPoll(shouldPoll) {
       _aiSyncPollTimer = setInterval(() => {
         // the timer stops with the window (SET-04); it used to ask the server every 1.5 s for
         // as long as reading ran or was paused, whatever was on screen
-        if (!_kibOnScreen()) { _ensureAiSyncPoll(false); return; }
+        if (!_kibOnScreen()) {
+          _ensureAiSyncPoll(false);
+          return;
+        }
         fetchAndRenderAiStatus().catch(() => {});
       }, 1500);
     }
@@ -146,9 +159,8 @@ export function setAiVisualFiltersDrawerOpen(forceOpen = null) {
   drawer.style.display = nextOpen ? 'flex' : 'none';
   if (toggleBtn) {
     toggleBtn.setAttribute('aria-expanded', nextOpen ? 'true' : 'false');
-    toggleBtn.style.borderColor = (nextOpen || _aiSelectedColor || _aiSelectedScene)
-      ? 'rgba(79,216,196,0.55)'
-      : 'rgba(79,216,196,0.3)';
+    toggleBtn.style.borderColor =
+      nextOpen || _aiSelectedColor || _aiSelectedScene ? 'rgba(79,216,196,0.55)' : 'rgba(79,216,196,0.3)';
   }
   if (caret) {
     caret.textContent = nextOpen ? '▴' : '▾';
@@ -181,7 +193,8 @@ const FIT_MARK = { best_match: '★ ', compatible: '✓ ' };
 
 /** A model's fit badge: the server's words in the reader's language, or ours when it sent none. */
 export function fitBadge(m, hasWarn, isRec) {
-  if (m.fit_badge_text) return `${hasWarn ? '⚠️ ' : FIT_MARK[m.fit_status] || ''}${said(m.fit_badge_text, m.fit_badge)}`;
+  if (m.fit_badge_text)
+    return `${hasWarn ? '⚠️ ' : FIT_MARK[m.fit_status] || ''}${said(m.fit_badge_text, m.fit_badge)}`;
   if (m.fit_badge) return m.fit_badge;
   if (hasWarn) return `⚠️ ${t('ait.badge_no_fit', "Doesn't fit this NAS")}`;
   return isRec ? `★ ${t('ait.badge_recommended', 'Recommended')}` : `✓ ${t('ait.badge_fits', 'Fits this NAS')}`;
@@ -194,7 +207,8 @@ export const activeWord = (hasWarn) =>
 /** Why a model suits (or does not suit) this NAS, and what it is for, in the reader's language. */
 export function modelWords(m) {
   return {
-    warning: said(m.warning_text || m.fit_reason_text, m.warning_message || m.fit_reason) ||
+    warning:
+      said(m.warning_text || m.fit_reason_text, m.warning_message || m.fit_reason) ||
       t('ait.warn_default', 'This model needs more memory than this NAS has.'),
     why: said(m.why_recommended_text, m.why_recommended),
     useCase: said(m.use_case_text, m.use_case),
@@ -247,7 +261,11 @@ export function renderAiLlmRecommendations(recData = {}, activeModel = '') {
 
     const isAct = m.id === currentActive || Boolean(m.active);
     const isHfSearch = m.source === 'huggingface_hub' && !m.pulled_from_hf;
-    const hasWarn = m.fits_hardware === false || Boolean(m.hardware_warning) || m.fit_status === 'insufficient_ram' || m.fit_status === 'insufficient_vram';
+    const hasWarn =
+      m.fits_hardware === false ||
+      Boolean(m.hardware_warning) ||
+      m.fit_status === 'insufficient_ram' ||
+      m.fit_status === 'insufficient_vram';
     return !hasWarn || isAct || isHfSearch;
   });
 
@@ -287,13 +305,19 @@ export function renderAiLlmRecommendations(recData = {}, activeModel = '') {
     activeLlmLabel.textContent = currentActive;
   }
   if (activeLlmPill) {
-    activeLlmPill.title = t('ait.model_in_use', 'Model in use: {model}. It answers in Ask Kib and AI search.', { model: currentActive });
+    activeLlmPill.title = t('ait.model_in_use', 'Model in use: {model}. It answers in Ask Kib and AI search.', {
+      model: currentActive,
+    });
   }
   const chatModelBadge = document.getElementById('ai-chat-active-model-badge');
   if (chatModelBadge) {
     const activeObj = allModels.find((m) => m.id === currentActive || m.active);
     const rawDev = activeObj?.target_device ? String(activeObj.target_device) : 'NPU Tier 1';
-    const devLabel = rawDev.replace(/\s*\([^)]*\)?/g, '').split('/')[0].trim() || 'NPU Tier 1';
+    const devLabel =
+      rawDev
+        .replace(/\s*\([^)]*\)?/g, '')
+        .split('/')[0]
+        .trim() || 'NPU Tier 1';
     chatModelBadge.textContent = `🤖 ${currentActive} (${devLabel})`;
   }
 
@@ -316,11 +340,13 @@ export function renderAiLlmRecommendations(recData = {}, activeModel = '') {
   }
 
   if (topSelect && allModels.length > 0) {
-    topSelect.innerHTML = allModels.map((m) => {
-      const isAct = m.id === currentActive || Boolean(m.active);
-      const prefix = m.recommended ? '★ ' : '✓ ';
-      return `<option value="${escapeHtml(m.id)}" ${isAct ? 'selected' : ''}>${prefix}${escapeHtml(m.name)} (${escapeHtml(m.quantization || 'INT4')})</option>`;
-    }).join('');
+    topSelect.innerHTML = allModels
+      .map((m) => {
+        const isAct = m.id === currentActive || Boolean(m.active);
+        const prefix = m.recommended ? '★ ' : '✓ ';
+        return `<option value="${escapeHtml(m.id)}" ${isAct ? 'selected' : ''}>${prefix}${escapeHtml(m.name)} (${escapeHtml(m.quantization || 'INT4')})</option>`;
+      })
+      .join('');
     topSelect.value = currentActive;
   }
 
@@ -333,43 +359,51 @@ export function renderAiLlmRecommendations(recData = {}, activeModel = '') {
     return;
   }
 
-  gridEl.innerHTML = filteredModels.map((m) => {
-    const isAct = m.id === currentActive || Boolean(m.active);
-    const isRec = Boolean(m.recommended);
-    const hasWarn = m.fits_hardware === false || Boolean(m.hardware_warning) || m.fit_status === 'insufficient_ram' || m.fit_status === 'insufficient_vram';
-    const isCritical = m.warning_severity === 'critical' || m.fit_status === 'insufficient_ram';
-    const hfRepo = m.hf_repo || m.id || '';
-    const hfUrl = m.hf_url || (hfRepo.includes('/') ? `https://huggingface.co/${hfRepo}` : 'https://huggingface.co/models');
-    const isLiveHfResult = m.source === 'huggingface_hub' && !m.pulled_from_hf;
-    const releaseDateText = m.release_date_str || m.release_date || 'Recent';
+  gridEl.innerHTML = filteredModels
+    .map((m) => {
+      const isAct = m.id === currentActive || Boolean(m.active);
+      const isRec = Boolean(m.recommended);
+      const hasWarn =
+        m.fits_hardware === false ||
+        Boolean(m.hardware_warning) ||
+        m.fit_status === 'insufficient_ram' ||
+        m.fit_status === 'insufficient_vram';
+      const isCritical = m.warning_severity === 'critical' || m.fit_status === 'insufficient_ram';
+      const hfRepo = m.hf_repo || m.id || '';
+      const hfUrl =
+        m.hf_url || (hfRepo.includes('/') ? `https://huggingface.co/${hfRepo}` : 'https://huggingface.co/models');
+      const isLiveHfResult = m.source === 'huggingface_hub' && !m.pulled_from_hf;
+      const releaseDateText = m.release_date_str || m.release_date || 'Recent';
 
-    const borderCol = isAct
-      ? 'rgba(52,211,153,0.65)'
-      : hasWarn
-        ? (isCritical ? 'rgba(239,68,68,0.62)' : 'rgba(245,158,11,0.62)')
+      const borderCol = isAct
+        ? 'rgba(52,211,153,0.65)'
+        : hasWarn
+          ? isCritical
+            ? 'rgba(239,68,68,0.62)'
+            : 'rgba(245,158,11,0.62)'
+          : isRec
+            ? 'rgba(79,216,196,0.45)'
+            : 'rgba(255,255,255,0.09)';
+      const bgCol = isAct
+        ? 'rgba(16,185,129,0.09)'
+        : hasWarn
+          ? isCritical
+            ? 'rgba(239,68,68,0.07)'
+            : 'rgba(245,158,11,0.07)'
+          : isRec
+            ? 'rgba(51,205,184,0.07)'
+            : 'rgba(255,255,255,0.025)';
+      const badgeBg = hasWarn
+        ? isCritical
+          ? 'rgba(239,68,68,0.22)'
+          : 'rgba(245,158,11,0.22)'
         : isRec
-          ? 'rgba(79,216,196,0.45)'
-          : 'rgba(255,255,255,0.09)';
-    const bgCol = isAct
-      ? 'rgba(16,185,129,0.09)'
-      : hasWarn
-        ? (isCritical ? 'rgba(239,68,68,0.07)' : 'rgba(245,158,11,0.07)')
-        : isRec
-          ? 'rgba(51,205,184,0.07)'
-          : 'rgba(255,255,255,0.025)';
-    const badgeBg = hasWarn
-      ? (isCritical ? 'rgba(239,68,68,0.22)' : 'rgba(245,158,11,0.22)')
-      : isRec
-        ? 'rgba(79,216,196,0.18)'
-        : 'rgba(16,185,129,0.15)';
-    const badgeColor = hasWarn
-      ? (isCritical ? '#fca5a5' : '#fcd34d')
-      : isRec
-        ? '#4fd8c4'
-        : '#6ee7b7';
-    const words = modelWords(m);
+          ? 'rgba(79,216,196,0.18)'
+          : 'rgba(16,185,129,0.15)';
+      const badgeColor = hasWarn ? (isCritical ? '#fca5a5' : '#fcd34d') : isRec ? '#4fd8c4' : '#6ee7b7';
+      const words = modelWords(m);
 
-    return `
+      return `
       <div class="ai-llm-rec-card ${hasWarn ? 'ai-llm-hw-warning' : 'ai-llm-hw-ok'}" data-model-id="${escapeHtml(m.id)}" data-hf-repo="${escapeHtml(hfRepo)}" data-recommended="${isRec ? '1' : '0'}" data-active="${isAct ? '1' : '0'}" data-fits-hardware="${hasWarn ? '0' : '1'}" data-hardware-warning="${hasWarn ? '1' : '0'}" style="background:${bgCol}; border:1px solid ${borderCol}; border-radius:9px; padding:10px 12px; display:flex; flex-direction:column; gap:6px;">
         <div class="aik-col">
           <div class="aik-xs-bold-strong" title="${escapeHtml(m.name)}">${escapeHtml(m.name)}</div>
@@ -389,33 +423,39 @@ export function renderAiLlmRecommendations(recData = {}, activeModel = '') {
           <span style="padding:1px 6px; border-radius:4px; background:var(--kb-shade-30); color:var(--lt-t-f5f9f9ff, #f5f9f9);" title="${escapeHtml(t('ait.release_date', 'Hugging Face Release Date: {date}', { date: releaseDateText }))}">📅 ${escapeHtml(releaseDateText)}</span>
           ${m.estimated_speed ? `<span style="padding:1px 6px; border-radius:4px; background:var(--kb-shade-30); color:var(--lt-t-fde68aff, #fde68a);">🚀 ${escapeHtml(m.estimated_speed)}</span>` : ''}
         </div>
-        ${hasWarn ? `
+        ${
+          hasWarn
+            ? `
           <div class="ai-model-hw-warning-banner" style="padding:6px 8px; border-radius:6px; background:${isCritical ? 'rgba(239,68,68,0.16)' : 'rgba(245,158,11,0.15)'}; border:1px solid ${isCritical ? 'rgba(248,113,113,0.45)' : 'rgba(251,191,36,0.45)'}; color:${isCritical ? '#fecaca' : '#fef08a'}; font-size:var(--kb-fs-xs); line-height:1.35; display:flex; align-items:flex-start; gap:6px;">
             <span class="aik-xs">⚠️</span>
             <span>${escapeHtml(words.warning)}</span>
           </div>
-        ` : `
+        `
+            : `
           <div class="aik-xs-soft" title="${escapeHtml(words.why || words.useCase)}">
             ${escapeHtml(words.useCase)}${words.why ? ` — ${escapeHtml(words.why)}` : ''}
           </div>
-        `}
+        `
+        }
         <div class="aik-row-box">
           <span class="ai-model-licence" style="font-size:var(--kb-fs-xs); color:${m.license_kind === 'non_commercial' ? '#fcd34d' : 'var(--kb-text-muted)'};" title="${escapeHtml(m.license_note || m.license || '')}">📜 ${escapeHtml(m.license || t('ai.licence_unknown', 'Licence not listed'))}${m.license_note ? ` • ${escapeHtml(t('ai.licence_non_commercial', 'Not for commercial use'))}` : ''}</span>
           <div class="aik-row-2">
-            ${isAct
-              ? `<span style="font-size:var(--kb-fs-xs); font-weight:800; color:${hasWarn ? '#fbbf24' : '#34d399'}; padding:2px 8px; border-radius:6px; background:${hasWarn ? 'rgba(245,158,11,0.18)' : 'rgba(16,185,129,0.18)'}; border:1px solid ${hasWarn ? 'rgba(245,158,11,0.45)' : 'rgba(16,185,129,0.4)'};">${activeWord(hasWarn)}</span>`
-              : (m.installed === false && m.ollama_tag)
-                ? `<button type="button" class="btn-pill-toggle btn-ai-install-model is-small" data-model-id="${escapeHtml(m.id)}" data-model-tag="${escapeHtml(m.ollama_tag)}" title="${escapeHtml(t('ai.install_model_title', 'Download this model into Ollama'))}" style="background: var(--lt-b-facc152e, rgba(250,204,21,0.18)); border: 1px solid var(--lt-r-facc157a, rgba(250,204,21,0.48)); color: var(--lt-t-fde047ff, #fde047);">⬇️ ${escapeHtml(t('ai.install_model', 'Install'))}</button>`
-              : isLiveHfResult
-                ? `<button type="button" class="btn-pill-toggle btn-ai-pull-hf-card" data-hf-repo="${escapeHtml(hfRepo)}" style="font-size:var(--kb-fs-xs); font-weight:700; padding:2px 9px; background:${hasWarn ? 'rgba(245,158,11,0.18)' : 'rgba(250,204,21,0.18)'}; border:1px solid ${hasWarn ? 'rgba(245,158,11,0.5)' : 'rgba(250,204,21,0.48)'}; color:${hasWarn ? '#fbbf24' : '#fde047'}; cursor:pointer;">${hasWarn ? '⚠️ Pull Anyway (Unfit)' : '⬇️ Pull from HF'}</button>`
-                : `<button type="button" class="btn-pill-toggle btn-ai-activate-model" data-model-id="${escapeHtml(m.id)}" style="font-size:var(--kb-fs-xs); font-weight:700; padding:2px 9px; background:${hasWarn ? 'rgba(245,158,11,0.16)' : 'rgba(51,205,184,0.18)'}; border:1px solid ${hasWarn ? 'rgba(245,158,11,0.45)' : 'rgba(51,205,184,0.45)'}; color:${hasWarn ? '#fbbf24' : '#4fd8c4'}; cursor:pointer;">${hasWarn ? '⚠️ Activate Anyway' : '⚡ Activate'}</button>`
+            ${
+              isAct
+                ? `<span style="font-size:var(--kb-fs-xs); font-weight:800; color:${hasWarn ? '#fbbf24' : '#34d399'}; padding:2px 8px; border-radius:6px; background:${hasWarn ? 'rgba(245,158,11,0.18)' : 'rgba(16,185,129,0.18)'}; border:1px solid ${hasWarn ? 'rgba(245,158,11,0.45)' : 'rgba(16,185,129,0.4)'};">${activeWord(hasWarn)}</span>`
+                : m.installed === false && m.ollama_tag
+                  ? `<button type="button" class="btn-pill-toggle btn-ai-install-model is-small" data-model-id="${escapeHtml(m.id)}" data-model-tag="${escapeHtml(m.ollama_tag)}" title="${escapeHtml(t('ai.install_model_title', 'Download this model into Ollama'))}" style="background: var(--lt-b-facc152e, rgba(250,204,21,0.18)); border: 1px solid var(--lt-r-facc157a, rgba(250,204,21,0.48)); color: var(--lt-t-fde047ff, #fde047);">⬇️ ${escapeHtml(t('ai.install_model', 'Install'))}</button>`
+                  : isLiveHfResult
+                    ? `<button type="button" class="btn-pill-toggle btn-ai-pull-hf-card" data-hf-repo="${escapeHtml(hfRepo)}" style="font-size:var(--kb-fs-xs); font-weight:700; padding:2px 9px; background:${hasWarn ? 'rgba(245,158,11,0.18)' : 'rgba(250,204,21,0.18)'}; border:1px solid ${hasWarn ? 'rgba(245,158,11,0.5)' : 'rgba(250,204,21,0.48)'}; color:${hasWarn ? '#fbbf24' : '#fde047'}; cursor:pointer;">${hasWarn ? '⚠️ Pull Anyway (Unfit)' : '⬇️ Pull from HF'}</button>`
+                    : `<button type="button" class="btn-pill-toggle btn-ai-activate-model" data-model-id="${escapeHtml(m.id)}" style="font-size:var(--kb-fs-xs); font-weight:700; padding:2px 9px; background:${hasWarn ? 'rgba(245,158,11,0.16)' : 'rgba(51,205,184,0.18)'}; border:1px solid ${hasWarn ? 'rgba(245,158,11,0.45)' : 'rgba(51,205,184,0.45)'}; color:${hasWarn ? '#fbbf24' : '#4fd8c4'}; cursor:pointer;">${hasWarn ? '⚠️ Activate Anyway' : '⚡ Activate'}</button>`
             }
             <button type="button" class="btn-pill-toggle btn-ai-remove-model is-danger is-small" data-model-id="${escapeHtml(m.id)}" data-model-name="${escapeHtml(m.name)}" title="${t('ui.remove_model_from_catalog_and', 'Remove model from catalog and disk')}" aria-label="${escapeHtml(t('aic.remove_model', 'Remove model {name}', { name: m.name }))}">🗑️</button>
           </div>
         </div>
       </div>
     `;
-  }).join('');
+    })
+    .join('');
 
   gridEl.querySelectorAll('.btn-ai-activate-model').forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -446,13 +486,9 @@ export function renderAiLlmRecommendations(recData = {}, activeModel = '') {
         'ai.remove_model_confirm',
         `Are you sure you want to remove model "${mName}" from your Kib catalog?`
       ).replace('{name}', mName);
-      showConfirmToast(
-        confirmTitle,
-        confirmMsg,
-        async () => {
-          await removeAiModel(mId);
-        }
-      );
+      showConfirmToast(confirmTitle, confirmMsg, async () => {
+        await removeAiModel(mId);
+      });
     });
   });
 }
@@ -460,7 +496,9 @@ export function renderAiLlmRecommendations(recData = {}, activeModel = '') {
 /** Downloads a model into Ollama and shows progress on the button; then offers Activate (AI-03). */
 export async function installAiModel(tag, btn = null, modelId = null, { pollMs = 1000 } = {}) {
   if (!tag) return null;
-  const label = (txt) => { if (btn) btn.textContent = txt; };
+  const label = (txt) => {
+    if (btn) btn.textContent = txt;
+  };
   try {
     if (btn) btn.disabled = true;
     let job = await api.post('/api/ai/models/install', { model: tag });
@@ -483,7 +521,10 @@ export async function installAiModel(tag, btn = null, modelId = null, { pollMs =
     return job;
   } catch (err) {
     showToast(t('toast.ai_install_failed', 'Could not install model: {error}', { error: err.message }), 'error');
-    if (btn) { btn.disabled = false; label(`⬇️ ${t('ai.install_model', 'Install')}`); }
+    if (btn) {
+      btn.disabled = false;
+      label(`⬇️ ${t('ai.install_model', 'Install')}`);
+    }
     return null;
   }
 }
@@ -528,7 +569,10 @@ export async function selectAiRecommendedModel(modelId) {
         renderAiLlmRecommendations(recs, res.active_model || cleanId);
       }
       if (res.hardware_warning && res.warning_message) {
-        showToast(t('toast.message_2', '{warning_message}', { warning_message: said(res.warning_text, res.warning_message) }), 'warn');
+        showToast(
+          t('toast.message_2', '{warning_message}', { warning_message: said(res.warning_text, res.warning_message) }),
+          'warn'
+        );
       } else {
         showToast(t('ai.model_selected_toast', 'Active Kib model switched to {model}', { model: cleanId }), 'success');
       }
@@ -576,7 +620,10 @@ export async function searchHuggingFaceModels(query = '') {
     if (statusEl) {
       statusEl.textContent = `⚠️ ${t('ait.hf_error', 'Hugging Face Hub search error: {error}', { error: err.message })}`;
     }
-    showToast(t('toast.hugging_face_search_failed', 'Hugging Face search failed: {error}', { error: err.message }), 'error');
+    showToast(
+      t('toast.hugging_face_search_failed', 'Hugging Face search failed: {error}', { error: err.message }),
+      'error'
+    );
     return null;
   }
 }
@@ -584,7 +631,13 @@ export async function searchHuggingFaceModels(query = '') {
 export async function pullHuggingFaceModel(repoId, activate = false) {
   const cleanRepo = String(repoId || '').trim();
   if (!cleanRepo) {
-    showToast(t('toast.enter_a_hugging_face_model_repo', 'Enter a Hugging Face model repo or URL (e.g. Qwen/Qwen2.5-7B-Instruct-GGUF)'), 'warn');
+    showToast(
+      t(
+        'toast.enter_a_hugging_face_model_repo',
+        'Enter a Hugging Face model repo or URL (e.g. Qwen/Qwen2.5-7B-Instruct-GGUF)'
+      ),
+      'warn'
+    );
     return null;
   }
   const statusEl = document.getElementById('ai-hf-search-status');
@@ -605,12 +658,21 @@ export async function pullHuggingFaceModel(repoId, activate = false) {
         if (statusEl) {
           statusEl.textContent = `⚠️ ${t('ait.pulled_warn', 'Pulled {repo} — {warning}', { repo: res.model?.hf_repo || cleanRepo, warning: said(res.warning_text, res.warning_message) })}`;
         }
-        showToast(t('toast.hf_pulled_warning', 'Added {model}: {warning}', { model: res.model?.name || cleanRepo, warning: said(res.warning_text, res.warning_message) }), 'warn');
+        showToast(
+          t('toast.hf_pulled_warning', 'Added {model}: {warning}', {
+            model: res.model?.name || cleanRepo,
+            warning: said(res.warning_text, res.warning_message),
+          }),
+          'warn'
+        );
       } else {
         if (statusEl) {
           statusEl.textContent = `✅ ${t('ait.pulled_ok', 'Pulled {repo} from Hugging Face (Fits your hardware).', { repo: res.model?.hf_repo || cleanRepo })}`;
         }
-        showToast(t('toast.hf_pulled', 'Added and selected {model} from Hugging Face', { model: res.model?.name || cleanRepo }), 'success');
+        showToast(
+          t('toast.hf_pulled', 'Added and selected {model} from Hugging Face', { model: res.model?.name || cleanRepo }),
+          'success'
+        );
       }
       await fetchAndRenderAiStatus();
     }
@@ -619,7 +681,12 @@ export async function pullHuggingFaceModel(repoId, activate = false) {
     if (statusEl) {
       statusEl.textContent = `⚠️ ${t('ait.pull_failed', 'Failed to pull from Hugging Face: {error}', { error: err.message })}`;
     }
-    showToast(t('toast.failed_to_pull_model_from_hugging', 'Failed to pull model from Hugging Face: {error}', { error: err.message }), 'error');
+    showToast(
+      t('toast.failed_to_pull_model_from_hugging', 'Failed to pull model from Hugging Face: {error}', {
+        error: err.message,
+      }),
+      'error'
+    );
     return null;
   }
 }
@@ -630,7 +697,13 @@ export async function updateAiServiceConfig(partialConfig = {}) {
     await fetchAndRenderAiStatus();
     return res;
   } catch (err) {
-    if (err?.error !== 'cancelled') showToast(t('toast.failed_to_update_kib_configuration', 'Failed to update Kib configuration: {error}', { error: err.message }), 'error');
+    if (err?.error !== 'cancelled')
+      showToast(
+        t('toast.failed_to_update_kib_configuration', 'Failed to update Kib configuration: {error}', {
+          error: err.message,
+        }),
+        'error'
+      );
     return null;
   }
 }
@@ -673,7 +746,9 @@ export function renderScheduleZone(zone) {
   const el = document.getElementById('ai-schedule-zone');
   if (!el) return;
   el.hidden = !zone;
-  el.textContent = zone ? t('ait.schedule_zone', 'Times are in {zone}, the time zone set under General.', { zone }) : '';
+  el.textContent = zone
+    ? t('ait.schedule_zone', 'Times are in {zone}, the time zone set under General.', { zone })
+    : '';
 }
 
 export function renderAiLearningResultsData(data = {}) {
@@ -691,12 +766,16 @@ export function renderAiLearningResultsData(data = {}) {
     if (failedFiles.length === 0) {
       listEl.innerHTML = `<div style="padding:8px 10px; border-radius:6px; background:rgba(34,197,94,0.08); color:var(--lt-t-86efacff, #86efac);">✓ ${t('ait.all_learned', 'All learned files succeeded with 0 errors.')}</div>`;
     } else {
-      listEl.innerHTML = failedFiles.map((f) => `
+      listEl.innerHTML = failedFiles
+        .map(
+          (f) => `
         <div class="aik-row-box-2">
           <span style="font-family:monospace; color:var(--lt-t-fca5a5ff, #fca5a5);">${escapeHtml(f.path || f.name || f.file_path || f.file_name || '')}</span>
           <span class="aik-xs-muted">${escapeHtml(learnReason(f.reason || f.error))}</span>
         </div>
-      `).join('');
+      `
+        )
+        .join('');
     }
   }
 }
@@ -705,7 +784,13 @@ export async function relearnAiFailedFiles() {
   try {
     const res = await api.post('/api/media/learning/relearn-failed', {});
     if (res) {
-      showToast(t('toast.relearned', 'Relearned {count} file(s) ({remaining} remaining).', { count: res.recovered ?? res.relearned ?? 0, remaining: res.failed_count ?? res.still_failed ?? 0 }), 'success');
+      showToast(
+        t('toast.relearned', 'Relearned {count} file(s) ({remaining} remaining).', {
+          count: res.recovered ?? res.relearned ?? 0,
+          remaining: res.failed_count ?? res.still_failed ?? 0,
+        }),
+        'success'
+      );
       await openAiLearningResults();
       await fetchAndRenderAiStatus();
     }
@@ -722,13 +807,20 @@ export function updateAiSyncProgressUi(syncProg = {}, standbyGuard = {}, kibStat
   const isPaused = state === 'paused' || Boolean(syncProg.is_paused);
   const isStopped = state === 'stopped';
   const isDisabled = String(kibStatus || '').toLowerCase() === 'disabled' || syncProg.enabled === false;
-  const isComplete = !isRunning && !isPaused && !isStopped && !isDisabled && (
-    state === 'completed' ||
-    Number(syncProg.indexed_files || 0) > 0 ||
-    Number(syncProg.skipped_unchanged || 0) > 0 ||
-    String(syncProg.last_message || '').toLowerCase().includes('synced') ||
-    String(syncProg.last_message || '').toLowerCase().includes('complete')
-  );
+  const isComplete =
+    !isRunning &&
+    !isPaused &&
+    !isStopped &&
+    !isDisabled &&
+    (state === 'completed' ||
+      Number(syncProg.indexed_files || 0) > 0 ||
+      Number(syncProg.skipped_unchanged || 0) > 0 ||
+      String(syncProg.last_message || '')
+        .toLowerCase()
+        .includes('synced') ||
+      String(syncProg.last_message || '')
+        .toLowerCase()
+        .includes('complete'));
 
   const stateBadge = document.getElementById('ai-sync-state-badge');
   const stateDot = document.getElementById('ai-sync-state-dot');
@@ -771,9 +863,9 @@ export function updateAiSyncProgressUi(syncProg = {}, standbyGuard = {}, kibStat
   const ribPause = document.getElementById('btn-ai-sync-pause');
   const ribResume = document.getElementById('btn-ai-sync-resume');
   const ribStop = document.getElementById('btn-ai-sync-stop');
-  if (ribPause) ribPause.style.display = (isRunning && !isPaused) ? 'inline-flex' : 'none';
+  if (ribPause) ribPause.style.display = isRunning && !isPaused ? 'inline-flex' : 'none';
   if (ribResume) ribResume.style.display = isPaused ? 'inline-flex' : 'none';
-  if (ribStop) ribStop.style.display = (isRunning || isPaused) ? 'inline-flex' : 'none';
+  if (ribStop) ribStop.style.display = isRunning || isPaused ? 'inline-flex' : 'none';
 
   // Indexer pane transport buttons
   const idxPause = document.getElementById('btn-ai-index-pause');
@@ -781,7 +873,7 @@ export function updateAiSyncProgressUi(syncProg = {}, standbyGuard = {}, kibStat
   const idxStop = document.getElementById('btn-ai-index-stop');
   if (idxPause) {
     idxPause.disabled = !(isRunning && !isPaused);
-    idxPause.style.opacity = (isRunning && !isPaused) ? '1' : '0.45';
+    idxPause.style.opacity = isRunning && !isPaused ? '1' : '0.45';
   }
   if (idxResume) {
     idxResume.disabled = !isPaused;
@@ -789,7 +881,7 @@ export function updateAiSyncProgressUi(syncProg = {}, standbyGuard = {}, kibStat
   }
   if (idxStop) {
     idxStop.disabled = !(isRunning || isPaused);
-    idxStop.style.opacity = (isRunning || isPaused) ? '1' : '0.45';
+    idxStop.style.opacity = isRunning || isPaused ? '1' : '0.45';
   }
 
   // Progress banner
@@ -805,7 +897,9 @@ export function updateAiSyncProgressUi(syncProg = {}, standbyGuard = {}, kibStat
             ? 'STOPPED'
             : isComplete
               ? 'COMPLETE'
-              : (kibStatus ? String(kibStatus).toUpperCase() : 'IDLE');
+              : kibStatus
+                ? String(kibStatus).toUpperCase()
+                : 'IDLE';
     statePill.textContent = pillLabel;
     statePill.style.background = isPaused
       ? 'rgba(245,158,11,0.22)'
@@ -816,12 +910,21 @@ export function updateAiSyncProgressUi(syncProg = {}, standbyGuard = {}, kibStat
           : isComplete
             ? 'rgba(16,185,129,0.22)'
             : 'rgba(149,168,171,0.18)';
-    statePill.style.color = isPaused ? '#fbbf24' : isRunning ? '#34d399' : isStopped ? '#f87171' : isComplete ? '#34d399' : '#e6efef';
+    statePill.style.color = isPaused
+      ? '#fbbf24'
+      : isRunning
+        ? '#34d399'
+        : isStopped
+          ? '#f87171'
+          : isComplete
+            ? '#34d399'
+            : '#e6efef';
   }
 
   const curPathEl = document.getElementById('ai-index-current-path');
   if (curPathEl) {
-    let msg = syncProg.last_message || syncProg.current_path || 'Ready — Waiting for sync command (Sleeping drives protected)';
+    let msg =
+      syncProg.last_message || syncProg.current_path || 'Ready — Waiting for sync command (Sleeping drives protected)';
     if (syncProg.updated_at && (!syncProg.state || syncProg.state === 'idle' || syncProg.state === 'completed')) {
       try {
         const timeStr = formatTime(syncProg.updated_at, { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -847,9 +950,15 @@ export function updateAiSyncProgressUi(syncProg = {}, standbyGuard = {}, kibStat
     const runCnt = Number(standbyGuard.running_disks_count || 0);
     if (sleepCnt > 0 || runCnt > 0) {
       // the real counts; nothing counts wake-ups, so no "0 wakeups" (SET-15, AI 2)
-      guardText.textContent = t('ait.guard', 'Drives: {running} awake, {sleeping} asleep', { running: runCnt, sleeping: sleepCnt });
+      guardText.textContent = t('ait.guard', 'Drives: {running} awake, {sleeping} asleep', {
+        running: runCnt,
+        sleeping: sleepCnt,
+      });
       if (guardBadge) {
-        guardBadge.title = t('ait.guard_title', 'Kib reads a sleeping drive the next time it is awake, unless you allow it to wake drives.');
+        guardBadge.title = t(
+          'ait.guard_title',
+          'Kib reads a sleeping drive the next time it is awake, unless you allow it to wake drives.'
+        );
       }
     }
   }
@@ -882,10 +991,17 @@ export async function forgetAiFolder(folderPath) {
     _aiWatchedPaths = _aiWatchedPaths.filter((p) => p !== folderPath);
     renderAiWatchedFoldersAndShares();
     const n = res?.removed?.files ?? 0;
-    showToast(t('ai.forget_folder_done', "Forgot {count} file(s) from {folder}. It won't be learned again.", { count: n, folder: folderPath }), 'success');
+    showToast(
+      t('ai.forget_folder_done', "Forgot {count} file(s) from {folder}. It won't be learned again.", {
+        count: n,
+        folder: folderPath,
+      }),
+      'success'
+    );
     return res;
   } catch (err) {
-    if (err?.error !== 'cancelled') showToast(t('toast.ai_forget_failed', 'Could not forget folder: {error}', { error: err.message }), 'error');
+    if (err?.error !== 'cancelled')
+      showToast(t('toast.ai_forget_failed', 'Could not forget folder: {error}', { error: err.message }), 'error');
     return null;
   }
 }
@@ -912,9 +1028,10 @@ export function renderAiWatchedFoldersAndShares(watchedPaths = null, availableFo
   const summaryEl = document.getElementById('ai-watched-dropdown-summary');
   const countBadgeEl = document.getElementById('ai-watched-dropdown-count-badge');
   if (summaryEl) {
-    summaryEl.textContent = _aiWatchedPaths.length > 0
-      ? _aiWatchedPaths.join(', ')
-      : t('ait.no_folders', 'No folders checked — click to select folders for RAG');
+    summaryEl.textContent =
+      _aiWatchedPaths.length > 0
+        ? _aiWatchedPaths.join(', ')
+        : t('ait.no_folders', 'No folders checked — click to select folders for RAG');
   }
   if (countBadgeEl) {
     countBadgeEl.textContent = t('ait.checked', '{count} Checked', { count: _aiWatchedPaths.length });
@@ -923,11 +1040,12 @@ export function renderAiWatchedFoldersAndShares(watchedPaths = null, availableFo
   // Render compact checked chips below dropdown
   const watchedContainer = document.getElementById('ai-watched-folders-list');
   if (watchedContainer) {
-    watchedContainer.innerHTML = _aiWatchedPaths.map((fp) => {
-      const info = folderMap.get(fp);
-      const inStandby = Boolean(info?.in_standby);
-      const dev = info?.backing_dev || '';
-      return `
+    watchedContainer.innerHTML = _aiWatchedPaths
+      .map((fp) => {
+        const info = folderMap.get(fp);
+        const inStandby = Boolean(info?.in_standby);
+        const dev = info?.backing_dev || '';
+        return `
         <div class="ai-watched-folder-chip" data-folder-path="${escapeHtml(fp)}" style="display:inline-flex; align-items:center; gap:7px; padding:4px 9px; border-radius:8px; background:rgba(51,205,184,0.14); border:1px solid rgba(51,205,184,0.38); font-size:var(--kb-fs-xs); color:var(--lt-t-f5f9f9ff, #f5f9f9);">
           <span aria-hidden="true">☑</span>
           <span class="aik-bold-mono">${escapeHtml(fp)}</span>
@@ -939,15 +1057,18 @@ export function renderAiWatchedFoldersAndShares(watchedPaths = null, availableFo
           <button type="button" class="btn-ai-forget-folder" data-folder-path="${escapeHtml(fp)}" title="${escapeHtml(t('ai.forget_folder_title', 'Forget: delete everything the AI learned from this folder'))}" aria-label="${escapeHtml(t('ai.forget_folder_title', 'Forget: delete everything the AI learned from this folder'))}" style="background:transparent; border:none; color:var(--lt-t-fca5a5ff, #fca5a5); cursor:pointer; font-size:var(--kb-fs-xs); padding:0 2px;">🗑</button>
         </div>
       `;
-    }).join('');
+      })
+      .join('');
 
     watchedContainer.querySelectorAll('.btn-ai-sync-single-folder').forEach((btn) => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
         const fp = btn.dataset.folderPath;
-        const respectCb = document.getElementById('ai-index-respect-standby') || document.getElementById('ai-respect-standby-cb');
+        const respectCb =
+          document.getElementById('ai-index-respect-standby') || document.getElementById('ai-respect-standby-cb');
         if (fp) {
-          const pathIn = document.getElementById('ai-index-target-path') || document.getElementById('ai-index-path-input');
+          const pathIn =
+            document.getElementById('ai-index-target-path') || document.getElementById('ai-index-path-input');
           if (pathIn) pathIn.value = fp;
           runAiPathIndex(fp, respectCb ? Boolean(respectCb.checked) : true);
         }
@@ -977,11 +1098,12 @@ export function renderAiWatchedFoldersAndShares(watchedPaths = null, availableFo
     if (mergedFolders.length === 0) {
       sharesContainer.innerHTML = `<span class="aik-xs-muted-2">${t('ait.no_shares', 'No NAS folders discovered yet. Use Browse or Add Folder below.')}</span>`;
     } else {
-      sharesContainer.innerHTML = mergedFolders.map((f) => {
-        const isWatched = _aiWatchedPaths.includes(f.path);
-        const inStandby = Boolean(f.in_standby);
-        const dev = f.backing_dev || '';
-        return `
+      sharesContainer.innerHTML = mergedFolders
+        .map((f) => {
+          const isWatched = _aiWatchedPaths.includes(f.path);
+          const inStandby = Boolean(f.in_standby);
+          const dev = f.backing_dev || '';
+          return `
           <div role="option" aria-selected="${isWatched ? 'true' : 'false'}" class="btn-pill-toggle ai-discovered-share-pill ai-watched-dropdown-item ${isWatched ? 'active' : ''}" data-folder-path="${escapeHtml(f.path)}" data-watched="${isWatched ? '1' : '0'}" style="display:flex; align-items:center; justify-content:space-between; gap:8px; width:100%; box-sizing:border-box; font-size:var(--kb-fs-xs); padding:7px 10px; border-radius:8px; background:${isWatched ? 'rgba(51,205,184,0.16)' : 'rgba(255,255,255,0.03)'}; border:1px solid ${isWatched ? 'rgba(51,205,184,0.48)' : 'rgba(255,255,255,0.08)'}; color:${isWatched ? '#fff' : '#c9d6d7'}; cursor:pointer; text-align:left;" title="${inStandby ? `Backing disk (${dev}) is in STANDBY — will only sync when disk is running` : `Backing disk (${dev || 'NVMe/Pool'}) is RUNNING — click to check/uncheck for RAG`}">
             <div class="aik-row-3">
               <span class="ai-folder-checkbox-icon" style="display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; border-radius:4px; background:${isWatched ? '#10b981' : 'rgba(255,255,255,0.08)'}; border:1px solid ${isWatched ? '#34d399' : 'rgba(255,255,255,0.28)'}; color:#042f2e; font-size:var(--kb-fs-xs); font-weight:900; flex-shrink:0;">${isWatched ? '✓' : ''}</span>
@@ -998,7 +1120,8 @@ export function renderAiWatchedFoldersAndShares(watchedPaths = null, availableFo
             </div>
           </div>
         `;
-      }).join('');
+        })
+        .join('');
 
       sharesContainer.querySelectorAll('.ai-discovered-share-pill').forEach((pill) => {
         pill.addEventListener('click', (e) => {
@@ -1018,7 +1141,9 @@ export function renderAiWatchedFoldersAndShares(watchedPaths = null, availableFo
 }
 
 export async function controlAiSync(action) {
-  const cleanAction = String(action || '').trim().toLowerCase();
+  const cleanAction = String(action || '')
+    .trim()
+    .toLowerCase();
   if (!cleanAction) return null;
   if (cleanAction === 'flush' || cleanAction === 'clear') {
     return flushAiIndex();
@@ -1029,17 +1154,24 @@ export async function controlAiSync(action) {
     if (res) {
       await fetchAndRenderAiStatus();
       updateAiSyncProgressUi(res.sync_progress || { state: res.sync_state || cleanAction });
-      const label = cleanAction === 'pause'
-        ? t('ai.sync_paused_toast', 'Indexing sync paused.')
-        : cleanAction === 'resume'
-          ? t('ai.sync_resumed_toast', 'Indexing sync resumed (standby disks protected).')
-          : t('ai.sync_stopped_toast', 'Indexing sync stopped.');
+      const label =
+        cleanAction === 'pause'
+          ? t('ai.sync_paused_toast', 'Indexing sync paused.')
+          : cleanAction === 'resume'
+            ? t('ai.sync_resumed_toast', 'Indexing sync resumed (standby disks protected).')
+            : t('ai.sync_stopped_toast', 'Indexing sync stopped.');
       if (feedbackEl) feedbackEl.textContent = `ℹ️ ${label}`;
       showToast(label, cleanAction === 'stop' ? 'warn' : 'info');
     }
     return res;
   } catch (err) {
-    showToast(t('toast.sync_control_failed', 'Sync control ({cleanAction}) failed: {error}', { cleanAction: cleanAction, error: err.message }), 'error');
+    showToast(
+      t('toast.sync_control_failed', 'Sync control ({cleanAction}) failed: {error}', {
+        cleanAction: cleanAction,
+        error: err.message,
+      }),
+      'error'
+    );
     return null;
   }
 }
@@ -1053,20 +1185,26 @@ export async function flushAiIndex() {
     ),
     async () => {
       const feedbackEl = document.getElementById('ai-index-run-feedback');
-      if (feedbackEl) setIconLabel(feedbackEl, '⏳', t('ui.flushing_rag_index_database', 'Emptying the AI search index...'));
+      if (feedbackEl)
+        setIconLabel(feedbackEl, '⏳', t('ui.flushing_rag_index_database', 'Emptying the AI search index...'));
       showToast(t('toast.flushing_rag_index_database', 'Emptying the AI search index...'), 'info');
       try {
         const res = await api.post('/api/ai/index/flush', {}, { confirmed: true }); // asked just above
         await fetchAndRenderAiStatus();
-        if (feedbackEl) feedbackEl.textContent = t('ui.rag_database_flushed_clean_ready', '✓ The AI search index is empty and will be rebuilt.');
-        showToast(
-          t('ai.flush_index_success_toast', 'The AI search index is empty and will be rebuilt.'),
-          'success'
-        );
+        if (feedbackEl)
+          feedbackEl.textContent = t(
+            'ui.rag_database_flushed_clean_ready',
+            '✓ The AI search index is empty and will be rebuilt.'
+          );
+        showToast(t('ai.flush_index_success_toast', 'The AI search index is empty and will be rebuilt.'), 'success');
         return res;
       } catch (err) {
-        if (feedbackEl) feedbackEl.textContent = `✕ ${t('ait.flush_failed', 'Flush failed: {error}', { error: err.message })}`;
-        showToast(t('toast.failed_to_flush_rag_index', 'Could not empty the AI search index: {error}', { error: err.message }), 'error');
+        if (feedbackEl)
+          feedbackEl.textContent = `✕ ${t('ait.flush_failed', 'Flush failed: {error}', { error: err.message })}`;
+        showToast(
+          t('toast.failed_to_flush_rag_index', 'Could not empty the AI search index: {error}', { error: err.message }),
+          'error'
+        );
         return null;
       }
     },
@@ -1156,7 +1294,9 @@ function _readNowSaid(res, feedbackEl, targetLabel) {
     return;
   }
   if (res.status === 'started') {
-    const msg = t('ait.read_started', 'Kib started reading {target}. Sleeping drives are left asleep.', { target: targetLabel });
+    const msg = t('ait.read_started', 'Kib started reading {target}. Sleeping drives are left asleep.', {
+      target: targetLabel,
+    });
     if (feedbackEl) feedbackEl.textContent = `🔄 ${msg}`;
     showToast(msg, 'info');
     _ensureAiSyncPoll(true);
@@ -1165,9 +1305,10 @@ function _readNowSaid(res, feedbackEl, targetLabel) {
   const indexedCount = res.indexed ?? res.indexed_files ?? 0;
   const skippedCount = res.skipped_unchanged ?? 0;
   const deferredCount = res.deferred_standby ?? 0;
-  const msg = deferredCount > 0
-    ? `Indexed ${indexedCount} file(s), ${skippedCount} unchanged (${deferredCount} deferred to protect sleeping drives).`
-    : `Indexed ${indexedCount} file(s) (${skippedCount} unchanged) on ${targetLabel}.`;
+  const msg =
+    deferredCount > 0
+      ? `Indexed ${indexedCount} file(s), ${skippedCount} unchanged (${deferredCount} deferred to protect sleeping drives).`
+      : `Indexed ${indexedCount} file(s) (${skippedCount} unchanged) on ${targetLabel}.`;
   if (feedbackEl) feedbackEl.textContent = `✓ ${msg}`;
   showToast(msg, 'success');
 }
@@ -1187,19 +1328,27 @@ export async function syncAiWatchedFolders(respectStandby = true, background = t
       background: Boolean(background),
     });
     if (res) {
-      _readNowSaid(res, feedbackEl, pathsToSync.length === 1 ? pathsToSync[0] : t('ait.n_folders', '{count, plural, one {# folder} other {# folders}}', { count: pathsToSync.length }));
+      _readNowSaid(
+        res,
+        feedbackEl,
+        pathsToSync.length === 1
+          ? pathsToSync[0]
+          : t('ait.n_folders', '{count, plural, one {# folder} other {# folders}}', { count: pathsToSync.length })
+      );
       await fetchAndRenderAiStatus();
     }
     return res;
   } catch (err) {
-    if (feedbackEl) feedbackEl.textContent = `⚠️ ${t('ait.sync_failed', 'Sync failed: {error}', { error: err.message })}`;
+    if (feedbackEl)
+      feedbackEl.textContent = `⚠️ ${t('ait.sync_failed', 'Sync failed: {error}', { error: err.message })}`;
     showToast(t('toast.sync_failed', 'Sync failed: {error}', { error: err.message }), 'error');
     return null;
   }
 }
 
 export function _getActiveAiSearchQuery() {
-  const visInput = document.getElementById('ai-visual-search-input') || document.getElementById('ai-visual-query-input');
+  const visInput =
+    document.getElementById('ai-visual-search-input') || document.getElementById('ai-visual-query-input');
   if (visInput && visInput.value.trim()) return visInput.value.trim();
   const askInput = document.getElementById('ai-rag-query-input');
   return askInput ? askInput.value.trim() : '';
@@ -1259,7 +1408,10 @@ export function initAiKnowledgeEngine() {
       showToast(
         enabled
           ? t('ai.service_enabled_toast', 'Kib reads your files again.')
-          : t('ai.service_disabled_toast', 'Kib no longer reads your files or describes your photos. Chat and search still work with what it knows.'),
+          : t(
+              'ai.service_disabled_toast',
+              'Kib no longer reads your files or describes your photos. Chat and search still work with what it knows.'
+            ),
         enabled ? 'success' : 'warn'
       );
     });
@@ -1355,7 +1507,12 @@ export function initAiKnowledgeEngine() {
     scopeModeSelect.dataset.bound = '1';
     scopeModeSelect.addEventListener('change', async () => {
       await updateAiServiceConfig({ scope_mode: scopeModeSelect.value });
-      showToast(t('toast.learning_scope_updated', 'Learning scope: {scope}', { scope: scopeModeSelect.options[scopeModeSelect.selectedIndex]?.text || scopeModeSelect.value }), 'info');
+      showToast(
+        t('toast.learning_scope_updated', 'Learning scope: {scope}', {
+          scope: scopeModeSelect.options[scopeModeSelect.selectedIndex]?.text || scopeModeSelect.value,
+        }),
+        'info'
+      );
     });
   }
 
@@ -1388,7 +1545,12 @@ export function initAiKnowledgeEngine() {
     clearHistBtn.dataset.bound = '1';
     clearHistBtn.addEventListener('click', () => {
       _aiSearchHistory = [];
-      try { const key = aiHistoryKey(); if (key) localStorage.removeItem(key); } catch (_) { /* storage off */ }
+      try {
+        const key = aiHistoryKey();
+        if (key) localStorage.removeItem(key);
+      } catch (_) {
+        /* storage off */
+      }
       renderAiSearchHistory();
     });
   }
@@ -1417,11 +1579,13 @@ export function initAiKnowledgeEngine() {
     if (syncBtn.dataset.bound) return;
     syncBtn.dataset.bound = '1';
     syncBtn.addEventListener('click', async () => {
-      const respectCb = document.getElementById('ai-index-respect-standby') || document.getElementById('ai-respect-standby-cb');
+      const respectCb =
+        document.getElementById('ai-index-respect-standby') || document.getElementById('ai-respect-standby-cb');
       const respect = respectCb ? Boolean(respectCb.checked) : true;
       syncBtn.disabled = true;
       const origHtml = syncBtn.innerHTML;
-      syncBtn.innerHTML = '<span aria-hidden="true">⏳</span> <span>' + escapeHtml(t('ait.syncing', 'Syncing Shares...')) + '</span>';
+      syncBtn.innerHTML =
+        '<span aria-hidden="true">⏳</span> <span>' + escapeHtml(t('ait.syncing', 'Syncing Shares...')) + '</span>';
       try {
         await syncAiWatchedFolders(respect, true);
       } finally {
@@ -1479,7 +1643,7 @@ export function initAiKnowledgeEngine() {
     browseBtn.dataset.bound = '1';
     browseBtn.addEventListener('click', () => {
       const pathIn = document.getElementById('ai-index-target-path') || document.getElementById('ai-index-path-input');
-      const startPath = (pathIn && pathIn.value.trim()) ? pathIn.value.trim() : '/mnt/user/';
+      const startPath = pathIn && pathIn.value.trim() ? pathIn.value.trim() : '/mnt/user/';
       if (typeof window.openFolderBrowser === 'function') {
         window.openFolderBrowser(startPath, (selectedPath) => {
           const clean = String(selectedPath || '').replace(/\/+$/, '') || '/mnt/user';
@@ -1507,7 +1671,8 @@ export function initAiKnowledgeEngine() {
   const askBtn = document.getElementById('btn-ai-rag-ask');
   const executeUnifiedOmniSearch = (rawQuery) => {
     const q = String(rawQuery || '').trim();
-    const visInputEl = document.getElementById('ai-visual-search-input') || document.getElementById('ai-visual-query-input');
+    const visInputEl =
+      document.getElementById('ai-visual-search-input') || document.getElementById('ai-visual-query-input');
     if (visInputEl) visInputEl.value = q;
     runAiRagAsk(q, { unifiedMode: true });
     if (document.getElementById('ai-visual-results-grid')) {
@@ -1539,7 +1704,8 @@ export function initAiKnowledgeEngine() {
       const isVisual = chip.dataset.switchVisual === '1' || chip.dataset.mode === 'visual';
       const currentAskIn = document.getElementById('ai-rag-query-input');
       if (currentAskIn) currentAskIn.value = q;
-      const visIn = document.getElementById('ai-visual-search-input') || document.getElementById('ai-visual-query-input');
+      const visIn =
+        document.getElementById('ai-visual-search-input') || document.getElementById('ai-visual-query-input');
       if (visIn) visIn.value = q;
       if (isVisual) {
         const visualTab = document.querySelector('.mgmt-inner-tab[data-tab-target="mgmt-pane-ai-visual"]');
@@ -1554,7 +1720,8 @@ export function initAiKnowledgeEngine() {
   });
 
   // Visual Search Input, Search Button & Clear Button
-  const visInput = document.getElementById('ai-visual-search-input') || document.getElementById('ai-visual-query-input');
+  const visInput =
+    document.getElementById('ai-visual-search-input') || document.getElementById('ai-visual-query-input');
   const visBtn = document.getElementById('btn-ai-visual-search');
   if (visBtn && !visBtn.dataset.bound) {
     visBtn.dataset.bound = '1';
@@ -1626,23 +1793,28 @@ export function initAiKnowledgeEngine() {
       _aiSelectedFileType = 'all';
       _aiSelectedMatchTab = 'semantic';
       _aiSelectedSortBy = 'relevance';
-      const activeVisInput = document.getElementById('ai-visual-search-input') || document.getElementById('ai-visual-query-input');
+      const activeVisInput =
+        document.getElementById('ai-visual-search-input') || document.getElementById('ai-visual-query-input');
       if (activeVisInput) activeVisInput.value = '';
       const activeAskInput = document.getElementById('ai-rag-query-input');
       if (activeAskInput) activeAskInput.value = '';
       const answerCard = document.getElementById('ai-rag-answer-card');
       if (answerCard) answerCard.style.display = 'none';
-      document.querySelectorAll('#ai-color-filter-bar .ai-color-chip, #ai-color-swatch-bar .ai-color-swatch').forEach((s) => {
-        s.classList.remove('active');
-        s.style.border = '';
-        s.style.boxShadow = '';
-      });
-      document.querySelectorAll('#ai-scene-filter-bar .ai-scene-chip, #ai-scene-pill-bar .ai-scene-pill').forEach((p) => {
-        p.classList.remove('active');
-        p.style.background = '';
-        p.style.borderColor = '';
-        p.style.color = '';
-      });
+      document
+        .querySelectorAll('#ai-color-filter-bar .ai-color-chip, #ai-color-swatch-bar .ai-color-swatch')
+        .forEach((s) => {
+          s.classList.remove('active');
+          s.style.border = '';
+          s.style.boxShadow = '';
+        });
+      document
+        .querySelectorAll('#ai-scene-filter-bar .ai-scene-chip, #ai-scene-pill-bar .ai-scene-pill')
+        .forEach((p) => {
+          p.classList.remove('active');
+          p.style.background = '';
+          p.style.borderColor = '';
+          p.style.color = '';
+        });
       document.querySelectorAll('#ai-search-filetype-bar .ai-filetype-chip').forEach((c) => {
         const isAll = c.dataset.filetype === 'all';
         c.classList.toggle('active', isAll);
@@ -1660,41 +1832,49 @@ export function initAiKnowledgeEngine() {
   }
 
   // 12-Color Swatch Chips (#ai-color-filter-bar .ai-color-chip and #ai-color-swatch-bar .ai-color-swatch)
-  document.querySelectorAll('#ai-color-filter-bar .ai-color-chip, #ai-color-swatch-bar .ai-color-swatch').forEach((swatch) => {
-    if (swatch.dataset.bound) return;
-    swatch.dataset.bound = '1';
-    swatch.addEventListener('click', () => {
-      const clickedColor = swatch.dataset.color || '';
-      _aiSelectedColor = (_aiSelectedColor === clickedColor && clickedColor !== '') ? '' : clickedColor;
-      document.querySelectorAll('#ai-color-filter-bar .ai-color-chip, #ai-color-swatch-bar .ai-color-swatch').forEach((s) => {
-        const active = (s.dataset.color || '') === _aiSelectedColor && (_aiSelectedColor !== '' || s === swatch);
-        s.classList.toggle('active', active);
-        s.style.border = active ? '2px solid #33cdb8' : '';
-        s.style.boxShadow = active ? '0 0 8px rgba(51,205,184,0.35)' : '';
+  document
+    .querySelectorAll('#ai-color-filter-bar .ai-color-chip, #ai-color-swatch-bar .ai-color-swatch')
+    .forEach((swatch) => {
+      if (swatch.dataset.bound) return;
+      swatch.dataset.bound = '1';
+      swatch.addEventListener('click', () => {
+        const clickedColor = swatch.dataset.color || '';
+        _aiSelectedColor = _aiSelectedColor === clickedColor && clickedColor !== '' ? '' : clickedColor;
+        document
+          .querySelectorAll('#ai-color-filter-bar .ai-color-chip, #ai-color-swatch-bar .ai-color-swatch')
+          .forEach((s) => {
+            const active = (s.dataset.color || '') === _aiSelectedColor && (_aiSelectedColor !== '' || s === swatch);
+            s.classList.toggle('active', active);
+            s.style.border = active ? '2px solid #33cdb8' : '';
+            s.style.boxShadow = active ? '0 0 8px rgba(51,205,184,0.35)' : '';
+          });
+        _updateAiVisualFilterBadge();
+        runAiVisualSearch(_getActiveAiSearchQuery());
       });
-      _updateAiVisualFilterBadge();
-      runAiVisualSearch(_getActiveAiSearchQuery());
     });
-  });
 
   // Scene & Object Filter Pills (#ai-scene-filter-bar .ai-scene-chip and #ai-scene-pill-bar .ai-scene-pill)
-  document.querySelectorAll('#ai-scene-filter-bar .ai-scene-chip, #ai-scene-pill-bar .ai-scene-pill').forEach((pill) => {
-    if (pill.dataset.bound) return;
-    pill.dataset.bound = '1';
-    pill.addEventListener('click', () => {
-      const clickedScene = pill.dataset.scene || '';
-      _aiSelectedScene = (_aiSelectedScene === clickedScene && clickedScene !== '') ? '' : clickedScene;
-      document.querySelectorAll('#ai-scene-filter-bar .ai-scene-chip, #ai-scene-pill-bar .ai-scene-pill').forEach((p) => {
-        const active = (p.dataset.scene || '') === _aiSelectedScene && (_aiSelectedScene !== '' || p === pill);
-        p.classList.toggle('active', active);
-        p.style.background = active ? 'rgba(79,216,196,0.22)' : '';
-        p.style.borderColor = active ? 'rgba(79,216,196,0.55)' : '';
-        p.style.color = active ? '#4fd8c4' : '';
+  document
+    .querySelectorAll('#ai-scene-filter-bar .ai-scene-chip, #ai-scene-pill-bar .ai-scene-pill')
+    .forEach((pill) => {
+      if (pill.dataset.bound) return;
+      pill.dataset.bound = '1';
+      pill.addEventListener('click', () => {
+        const clickedScene = pill.dataset.scene || '';
+        _aiSelectedScene = _aiSelectedScene === clickedScene && clickedScene !== '' ? '' : clickedScene;
+        document
+          .querySelectorAll('#ai-scene-filter-bar .ai-scene-chip, #ai-scene-pill-bar .ai-scene-pill')
+          .forEach((p) => {
+            const active = (p.dataset.scene || '') === _aiSelectedScene && (_aiSelectedScene !== '' || p === pill);
+            p.classList.toggle('active', active);
+            p.style.background = active ? 'rgba(79,216,196,0.22)' : '';
+            p.style.borderColor = active ? 'rgba(79,216,196,0.55)' : '';
+            p.style.color = active ? '#4fd8c4' : '';
+          });
+        _updateAiVisualFilterBadge();
+        runAiVisualSearch(_getActiveAiSearchQuery());
       });
-      _updateAiVisualFilterBadge();
-      runAiVisualSearch(_getActiveAiSearchQuery());
     });
-  });
 
   // Index Path Execution (#btn-ai-run-index and #btn-ai-run-index-path)
   document.querySelectorAll('#btn-ai-run-index, #btn-ai-run-index-path').forEach((runIdxBtn) => {
@@ -1702,12 +1882,10 @@ export function initAiKnowledgeEngine() {
     runIdxBtn.dataset.bound = '1';
     runIdxBtn.addEventListener('click', () => {
       const pathIn = document.getElementById('ai-index-target-path') || document.getElementById('ai-index-path-input');
-      const respectCb = document.getElementById('ai-index-respect-standby') || document.getElementById('ai-respect-standby-cb');
-      const explicitPath = (pathIn && pathIn.value && pathIn.value.trim()) ? pathIn.value.trim() : null;
-      runAiPathIndex(
-        explicitPath,
-        respectCb ? Boolean(respectCb.checked) : true
-      );
+      const respectCb =
+        document.getElementById('ai-index-respect-standby') || document.getElementById('ai-respect-standby-cb');
+      const explicitPath = pathIn && pathIn.value && pathIn.value.trim() ? pathIn.value.trim() : null;
+      runAiPathIndex(explicitPath, respectCb ? Boolean(respectCb.checked) : true);
     });
   });
 
@@ -1723,10 +1901,16 @@ export function initAiKnowledgeEngine() {
       });
       // not saved (refused, or the question was answered with No): the box goes back, so that
       // "Sync", which reads it, cannot run with a setting the server never took (SET-04)
-      if (!saved) { _setTick(respectStandbyCb, !enabled); return; }
+      if (!saved) {
+        _setTick(respectStandbyCb, !enabled);
+        return;
+      }
       showToast(
         enabled
-          ? t('ai.auto_learn_spinup_on', '⚡ Standby-Safe Auto-Learn enabled — sleeping drives are protected and automatically sync when they spin up.')
+          ? t(
+              'ai.auto_learn_spinup_on',
+              '⚡ Standby-Safe Auto-Learn enabled — sleeping drives are protected and automatically sync when they spin up.'
+            )
           : t('ai.auto_learn_spinup_off', 'Standby-Safe Auto-Learn disabled.'),
         'info'
       );
@@ -1780,7 +1964,7 @@ export function initAiKnowledgeEngine() {
       }
     });
   }
-    initAiConversationControls();
+  initAiConversationControls();
   if (chatClearBtn && !chatClearBtn.dataset.bound) {
     chatClearBtn.dataset.bound = '1';
     chatClearBtn.addEventListener('click', () => {
@@ -1833,7 +2017,11 @@ export function kibStatusActions() {
     stop: () => controlAiSync('stop'),
     why: () => openAiLearningResults(),
     on: () => updateAiServiceConfig({ enabled: true }),
-    folders: () => document.getElementById('ai-watched-dropdown-summary')?.closest('button, [role="button"], div')?.scrollIntoView({ block: 'center' }),
+    folders: () =>
+      document
+        .getElementById('ai-watched-dropdown-summary')
+        ?.closest('button, [role="button"], div')
+        ?.scrollIntoView({ block: 'center' }),
   };
 }
 
@@ -1841,7 +2029,8 @@ export function kibStatusActions() {
 export function kibFolderActions() {
   return {
     // each change redraws the list from the server, which says what Kib now reads
-    tick: (path, on) => (on ? addAiWatchedFolder(path) : removeAiWatchedFolder(path)).then(() => fetchAndRenderAiStatus()),
+    tick: (path, on) =>
+      (on ? addAiWatchedFolder(path) : removeAiWatchedFolder(path)).then(() => fetchAndRenderAiStatus()),
     read: (path) => runAiPathIndex(path),
     stop: (path) => removeAiWatchedFolder(path).then(() => fetchAndRenderAiStatus()),
     forget: (path) => forgetAiFolder(path).then(() => fetchAndRenderAiStatus()),
@@ -1850,7 +2039,10 @@ export function kibFolderActions() {
         await api.post('/api/ai/folders', { action: 'remove', target: 'excluded', path });
         await fetchAndRenderAiStatus();
       } catch (err) {
-        showToast(t('kibf.unforget_failed', 'Could not take the folder off the list: {error}', { error: err.message }), 'error');
+        showToast(
+          t('kibf.unforget_failed', 'Could not take the folder off the list: {error}', { error: err.message }),
+          'error'
+        );
       }
     },
     add: () => {
@@ -1875,7 +2067,9 @@ export async function fetchAndRenderAiStatus() {
     const stats = res.index_stats || {};
     const cats = res.categories || {};
     const cfg = res.config || {};
-    const tierNum = Number(hw.tier_number || hw.active_tier || (hw.has_npu ? 1 : (hw.has_igpu || hw.has_cuda || hw.has_rocm ? 2 : 3)));
+    const tierNum = Number(
+      hw.tier_number || hw.active_tier || (hw.has_npu ? 1 : hw.has_igpu || hw.has_cuda || hw.has_rocm ? 2 : 3)
+    );
     const tierBadge = tierNum === 1 ? 'NPU TIER 1' : tierNum === 2 ? 'GPU TIER 2' : 'CPU TIER 3';
     const tierShort = tierNum === 1 ? 'NPU' : tierNum === 2 ? 'GPU' : 'CPU';
     const hwName = hw.name || hw.device_label || (tierNum === 1 ? 'Intel AI Boost NPU (/dev/accel/accel0)' : tierBadge);
@@ -1912,7 +2106,10 @@ export async function fetchAndRenderAiStatus() {
       respectCbEl.checked = Boolean(cfg.respect_standby ?? res.standby_guard?.respect_standby ?? true);
     }
     const autoSpinupCbEl = document.getElementById('ai-auto-learn-spinup');
-    if (autoSpinupCbEl && (cfg.auto_learn_on_spinup !== undefined || res.standby_guard?.auto_learn_on_spinup !== undefined)) {
+    if (
+      autoSpinupCbEl &&
+      (cfg.auto_learn_on_spinup !== undefined || res.standby_guard?.auto_learn_on_spinup !== undefined)
+    ) {
       autoSpinupCbEl.checked = Boolean(cfg.auto_learn_on_spinup ?? res.standby_guard?.auto_learn_on_spinup ?? true);
     }
 
@@ -1926,7 +2123,10 @@ export async function fetchAndRenderAiStatus() {
             await api.post('/api/ai/config', { conversation_retention_days: parseInt(e.target.value, 10) || 0 });
             showToast(t('ai.retention_saved', 'Chat retention saved'), 'success');
           } catch (err) {
-            showToast(t('toast.ai_retention_failed', 'Could not save chat retention: {error}', { error: err.message }), 'error');
+            showToast(
+              t('toast.ai_retention_failed', 'Could not save chat retention: {error}', { error: err.message }),
+              'error'
+            );
           }
         });
       }
@@ -1943,9 +2143,15 @@ export async function fetchAndRenderAiStatus() {
       const progress = document.getElementById('ai-photo-vector-progress');
       if (host) host.value = cfg.photo_vector_host || '';
       if (progress && cfg.photo_vector_host) {
-        api.get('/api/ai/photo-vectors/status').then((st) => {
-          progress.textContent = t('ai.photo_vector_progress', '{done} of {total} photos can be found by meaning', { done: st.done, total: st.photos });
-        }, () => {});
+        api.get('/api/ai/photo-vectors/status').then(
+          (st) => {
+            progress.textContent = t('ai.photo_vector_progress', '{done} of {total} photos can be found by meaning', {
+              done: st.done,
+              total: st.photos,
+            });
+          },
+          () => {}
+        );
       }
       if (!pvForm.dataset.bound) {
         pvForm.dataset.bound = '1';
@@ -1953,7 +2159,10 @@ export async function fetchAndRenderAiStatus() {
           e.preventDefault();
           try {
             await api.post('/api/ai/config', { photo_vector_host: host.value.trim() });
-            showToast(t('ai.photo_vector_saved', 'Saved. Photos get their vectors in the background while the server is idle.'), 'success');
+            showToast(
+              t('ai.photo_vector_saved', 'Saved. Photos get their vectors in the background while the server is idle.'),
+              'success'
+            );
           } catch (err) {
             showToast(t('sso.save_failed', 'Could not save: {error}', { error: err.message }), 'error');
           }
@@ -1980,7 +2189,13 @@ export async function fetchAndRenderAiStatus() {
               transcribe_model: md.value.trim(),
               transcribe_video: !!vid.checked,
             });
-            showToast(t('ai.transcribe_saved', 'Speech to text saved. New and changed recordings are transcribed as they are indexed.'), 'success');
+            showToast(
+              t(
+                'ai.transcribe_saved',
+                'Speech to text saved. New and changed recordings are transcribed as they are indexed.'
+              ),
+              'success'
+            );
           } catch (err) {
             showToast(t('sso.save_failed', 'Could not save: {error}', { error: err.message }), 'error');
           }
@@ -2000,7 +2215,12 @@ export async function fetchAndRenderAiStatus() {
             showToast(t('ai.vision_saved', 'Photo captioning setting saved'), 'success');
             refreshVisionStatus();
           } catch (err) {
-            showToast(t('toast.ai_vision_failed', 'Could not save the photo captioning setting: {error}', { error: err.message }), 'error');
+            showToast(
+              t('toast.ai_vision_failed', 'Could not save the photo captioning setting: {error}', {
+                error: err.message,
+              }),
+              'error'
+            );
           }
         });
       }
@@ -2078,7 +2298,9 @@ export async function fetchAndRenderAiStatus() {
           try {
             await triggerInPlaceReindex();
           } finally {
-            setTimeout(() => { b.disabled = false; }, 2000);
+            setTimeout(() => {
+              b.disabled = false;
+            }, 2000);
           }
         });
       }
@@ -2104,7 +2326,11 @@ export async function fetchAndRenderAiStatus() {
       activeLlmLabel.textContent = activeModelId || '—';
     }
     if (activeLlmPill) {
-      activeLlmPill.title = t('ait.model_in_use_on', 'Model in use: {model} on {hw}. It answers in Ask Kib and AI search.', { model: activeModelId, hw: hwName });
+      activeLlmPill.title = t(
+        'ait.model_in_use_on',
+        'Model in use: {model} on {hw}. It answers in Ask Kib and AI search.',
+        { model: activeModelId, hw: hwName }
+      );
     }
     const chatModelBadge = document.getElementById('ai-chat-active-model-badge');
     if (chatModelBadge) {
@@ -2125,14 +2351,21 @@ export async function fetchAndRenderAiStatus() {
     const topDot = document.getElementById('topbar-ai-accel-dot');
     const topPill = document.getElementById('topbar-ai-accel-pill');
     const isReindexing = Boolean(reindexStatus && reindexStatus.status === 'running');
-    if (topText && !isReindexing) topText.textContent = cfg.respect_standby === false ? tierShort : t('ait.standby_safe', '{tier} • Standby Safe', { tier: tierShort });
+    if (topText && !isReindexing)
+      topText.textContent =
+        cfg.respect_standby === false ? tierShort : t('ait.standby_safe', '{tier} • Standby Safe', { tier: tierShort });
     if (topLabel) topLabel.textContent = `AI: ${tierShort}`;
     if (topDot && !isReindexing) {
       topDot.style.background = tierNum === 1 ? '#3bf58b' : tierNum === 2 ? '#4fd8c4' : '#a78bfa';
-      topDot.style.boxShadow = tierNum === 1 ? '0 0 6px #3bf58b' : tierNum === 2 ? '0 0 6px #4fd8c4' : '0 0 6px #a78bfa';
+      topDot.style.boxShadow =
+        tierNum === 1 ? '0 0 6px #3bf58b' : tierNum === 2 ? '0 0 6px #4fd8c4' : '0 0 6px #a78bfa';
     }
     if (topPill) {
-      topPill.title = t('ait.accel', 'Kib Active Accelerator: {hw} (NPU → GPU → CPU Priority) • {count, plural, one {# Indexed File} other {# Indexed Files}}', { hw: hwName, count: totalFiles });
+      topPill.title = t(
+        'ait.accel',
+        'Kib Active Accelerator: {hw} (NPU → GPU → CPU Priority) • {count, plural, one {# Indexed File} other {# Indexed Files}}',
+        { hw: hwName, count: totalFiles }
+      );
     }
 
     // Sidebar & Hub Badges
@@ -2140,17 +2373,27 @@ export async function fetchAndRenderAiStatus() {
     if (sideBadge && !isReindexing) sideBadge.textContent = tierShort;
     const hubPill = document.getElementById('mgmt-hub-ai-pill');
     if (hubPill) {
-      hubPill.textContent = t('ait.files', '{tier} • {count, plural, one {# File} other {# Files}}', { tier: tierBadge, count: totalFiles });
+      hubPill.textContent = t('ait.files', '{tier} • {count, plural, one {# File} other {# Files}}', {
+        tier: tierBadge,
+        count: totalFiles,
+      });
     }
 
     // Section Telemetry Ribbon (#ai-accel-active-label in index.html & #ai-active-tier-pill in tests)
     const activeLabel = document.getElementById('ai-accel-active-label');
     const accelChainPill = document.getElementById('ai-accel-chain-pill');
     if (activeLabel) {
-      const compactHwName = String(hwName).replace(/\s*\([^)]*\)/g, '').trim() || tierShort;
+      const compactHwName =
+        String(hwName)
+          .replace(/\s*\([^)]*\)/g, '')
+          .trim() || tierShort;
       activeLabel.textContent = t('ait.tier', 'Tier {n}: {hw}', { n: tierNum, hw: compactHwName });
       if (accelChainPill) {
-        accelChainPill.title = t('ait.tier_active', 'Tier {n}: {tier} Active ({hw})', { n: tierNum, tier: tierShort, hw: hwName });
+        accelChainPill.title = t('ait.tier_active', 'Tier {n}: {tier} Active ({hw})', {
+          n: tierNum,
+          tier: tierShort,
+          hw: hwName,
+        });
       }
     }
     const tierPill = document.getElementById('ai-active-tier-pill');
@@ -2186,32 +2429,47 @@ export async function fetchAndRenderAiStatus() {
     if (statPhotos) statPhotos.textContent = String(totalPhotos);
 
     // 3-Tier Cards in Indexer Tab (#ai-hw-tier1..3-status in index.html & #ai-tier1..3-status in tests)
-    const t1List = [document.getElementById('ai-hw-tier1-status'), document.getElementById('ai-tier1-status')].filter(Boolean);
-    const t2List = [document.getElementById('ai-hw-tier2-status'), document.getElementById('ai-tier2-status')].filter(Boolean);
-    const t3List = [document.getElementById('ai-hw-tier3-status'), document.getElementById('ai-tier3-status')].filter(Boolean);
+    const t1List = [document.getElementById('ai-hw-tier1-status'), document.getElementById('ai-tier1-status')].filter(
+      Boolean
+    );
+    const t2List = [document.getElementById('ai-hw-tier2-status'), document.getElementById('ai-tier2-status')].filter(
+      Boolean
+    );
+    const t3List = [document.getElementById('ai-hw-tier3-status'), document.getElementById('ai-tier3-status')].filter(
+      Boolean
+    );
 
     t1List.forEach((t1) => {
-      t1.textContent = tierNum === 1
-        ? `✓ ${t('ait.active_hw', 'ACTIVE: {hw}', { hw: hwName })}`
-        : t('ait.t1_standby', 'Standby / Not Detected — Automatically promoted when /dev/accel/accel0, /dev/rknpu, or /dev/hailo0 is present.');
+      t1.textContent =
+        tierNum === 1
+          ? `✓ ${t('ait.active_hw', 'ACTIVE: {hw}', { hw: hwName })}`
+          : t(
+              'ait.t1_standby',
+              'Standby / Not Detected — Automatically promoted when /dev/accel/accel0, /dev/rknpu, or /dev/hailo0 is present.'
+            );
       t1.style.color = tierNum === 1 ? '#3bf58b' : 'var(--muted)';
     });
 
     const secGpuLabel = hw.secondary_gpu || (hw.has_igpu ? 'Intel Arc / QuickSync iGPU (/dev/dri/renderD128)' : '');
     t2List.forEach((t2) => {
-      t2.textContent = tierNum === 2
-        ? `✓ ${t('ait.active_hw', 'ACTIVE: {hw}', { hw: hwName })}`
-        : tierNum === 1
-          ? `✓ ${t('ait.secondary', 'Ready as Secondary Fallback')}${secGpuLabel ? `: ${secGpuLabel}` : t('ait.secondary_npu', ' (Tier 1 NPU currently active)')}`
-          : t('ait.t2_standby', 'Standby / Not Detected — Automatically promoted when /dev/nvidia0 or /dev/dri/renderD128 is present.');
-      t2.style.color = (tierNum === 2 || (tierNum === 1 && secGpuLabel)) ? '#4fd8c4' : 'var(--muted)';
+      t2.textContent =
+        tierNum === 2
+          ? `✓ ${t('ait.active_hw', 'ACTIVE: {hw}', { hw: hwName })}`
+          : tierNum === 1
+            ? `✓ ${t('ait.secondary', 'Ready as Secondary Fallback')}${secGpuLabel ? `: ${secGpuLabel}` : t('ait.secondary_npu', ' (Tier 1 NPU currently active)')}`
+            : t(
+                'ait.t2_standby',
+                'Standby / Not Detected — Automatically promoted when /dev/nvidia0 or /dev/dri/renderD128 is present.'
+              );
+      t2.style.color = tierNum === 2 || (tierNum === 1 && secGpuLabel) ? '#4fd8c4' : 'var(--muted)';
     });
 
     t3List.forEach((t3) => {
       const dimFallback = stats.actual_embedding_dim || stats.embedding_dim || 768;
-      t3.textContent = tierNum === 3
-        ? `✓ ${t('ait.active_hw', 'ACTIVE: {hw}', { hw: hwName })} (${hw.execution_provider || 'CPUExecutionProvider'})`
-        : `✓ ${t('ait.universal', 'Ready as Universal Fallback ({dim}-d EmbeddingGemma 2 MRL Engine)', { dim: dimFallback })}`;
+      t3.textContent =
+        tierNum === 3
+          ? `✓ ${t('ait.active_hw', 'ACTIVE: {hw}', { hw: hwName })} (${hw.execution_provider || 'CPUExecutionProvider'})`
+          : `✓ ${t('ait.universal', 'Ready as Universal Fallback ({dim}-d EmbeddingGemma 2 MRL Engine)', { dim: dimFallback })}`;
       t3.style.color = tierNum === 3 ? '#c4b5fd' : 'var(--ok2, #33cdb8)';
     });
 
@@ -2220,9 +2478,12 @@ export async function fetchAndRenderAiStatus() {
       const sizeKb = stats.db_size_bytes ? formatFixed(stats.db_size_bytes / 1024, 1) : formatFixed(0, 1);
       const defItems = res.standby_guard?.deferred_queue || res.sync_progress?.deferred_queue || [];
       const defCount = stats.deferred_queue_count ?? defItems.length ?? 0;
-      const defDetail = defItems.length > 0
-        ? ` <span class="aik-warn">(${defItems.map((d) => `${escapeHtml(d.path)}${d.backing_dev ? ` [${escapeHtml(d.backing_dev)}]` : ''}`).join(', ')} — ${ico('⚡')} ${t('ait.auto_learns', 'auto-learns on spin-up')})</span>`
-        : (defCount > 0 ? ` <span style="color:var(--lt-t-6ee7b7ff, #6ee7b7);">(${ico('⚡')} ${t('ait.auto_learns', 'auto-learns on spin-up')})</span>` : '');
+      const defDetail =
+        defItems.length > 0
+          ? ` <span class="aik-warn">(${defItems.map((d) => `${escapeHtml(d.path)}${d.backing_dev ? ` [${escapeHtml(d.backing_dev)}]` : ''}`).join(', ')} — ${ico('⚡')} ${t('ait.auto_learns', 'auto-learns on spin-up')})</span>`
+          : defCount > 0
+            ? ` <span style="color:var(--lt-t-6ee7b7ff, #6ee7b7);">(${ico('⚡')} ${t('ait.auto_learns', 'auto-learns on spin-up')})</span>`
+            : '';
       const dimLabel = stats.actual_embedding_dim || stats.embedding_dim || 768;
       const modelRaw = stats.actual_embedding_model || stats.embedding_model || 'EmbeddingGemma 2';
       const modelDisplayName = modelRaw.includes('embeddinggemma') ? 'EmbeddingGemma 2 MRL' : modelRaw;
@@ -2244,12 +2505,13 @@ export async function fetchAndRenderAiStatus() {
     }
 
     // Update Sync Progress & Transport Controls
-    const syncProg = res.sync_progress || stats.sync_progress || {
-      state: res.sync_state || (res.is_paused ? 'paused' : (res.is_scanning ? 'running' : 'idle')),
-      is_scanning: Boolean(res.is_scanning),
-      is_paused: Boolean(res.is_paused),
-      enabled: res.enabled,
-    };
+    const syncProg = res.sync_progress ||
+      stats.sync_progress || {
+        state: res.sync_state || (res.is_paused ? 'paused' : res.is_scanning ? 'running' : 'idle'),
+        is_scanning: Boolean(res.is_scanning),
+        is_paused: Boolean(res.is_paused),
+        enabled: res.enabled,
+      };
     updateAiSyncProgressUi(syncProg, res.standby_guard || {}, res.kib_status || res.zettai_status || '');
 
     // Update Watched Folders & Discovered Shares
@@ -2285,7 +2547,9 @@ function _showAiStatusError(err) {
     retry.type = 'button';
     retry.className = 'btn-pill-toggle is-small';
     retry.textContent = t('links.try_again', 'Try again');
-    retry.addEventListener('click', () => { fetchAndRenderAiStatus(); });
+    retry.addEventListener('click', () => {
+      fetchAndRenderAiStatus();
+    });
     box.appendChild(retry);
     box.hidden = false;
   }
@@ -2311,8 +2575,14 @@ function renderStructuredCardHtml(card) {
   if (!card) return '';
   const cType = card.type || card.card_type || '';
   if (cType === 'recipe') {
-    const ings = (card.ingredients || []).slice(0, 12).map((i) => `<li>${escapeHtml(i)}</li>`).join('');
-    const steps = (card.steps || card.steps_summary || []).slice(0, 6).map((s) => `<li>${escapeHtml(s)}</li>`).join('');
+    const ings = (card.ingredients || [])
+      .slice(0, 12)
+      .map((i) => `<li>${escapeHtml(i)}</li>`)
+      .join('');
+    const steps = (card.steps || card.steps_summary || [])
+      .slice(0, 6)
+      .map((s) => `<li>${escapeHtml(s)}</li>`)
+      .join('');
     return `
       <div class="ai-structured-recipe-card" style="background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.28); border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 10px;">
         <div class="airg-row">
@@ -2338,7 +2608,9 @@ function renderStructuredCardHtml(card) {
 
 export async function runAiRagAsk(rawQuestion, options = {}) {
   const askInput = document.getElementById('ai-rag-query-input');
-  const q = (rawQuestion !== undefined && rawQuestion !== null ? String(rawQuestion) : (askInput ? askInput.value : '')).trim();
+  const q = (
+    rawQuestion !== undefined && rawQuestion !== null ? String(rawQuestion) : askInput ? askInput.value : ''
+  ).trim();
   if (!q) {
     showToast(t('ai.enter_question', 'Please enter a question or search query.'), 'warn');
     return null;
@@ -2359,7 +2631,8 @@ export async function runAiRagAsk(rawQuestion, options = {}) {
 
   if (askBtn) {
     askBtn.disabled = true;
-    askBtn.innerHTML = '<span aria-hidden="true">⏳</span> <span>' + escapeHtml(t('ait.thinking', 'Thinking...')) + '</span>';
+    askBtn.innerHTML =
+      '<span aria-hidden="true">⏳</span> <span>' + escapeHtml(t('ait.thinking', 'Thinking...')) + '</span>';
   }
   const loadingHtml = `
     <div class="airg-xs-muted-center">
@@ -2385,13 +2658,16 @@ export async function runAiRagAsk(rawQuestion, options = {}) {
 
     const cardsHtml = cards.map((c) => renderStructuredCardHtml(c)).join('');
 
-    const citationCardsListHtml = citations.map((c, idx) => {
-      const cIdx = c.index || c.citation_index || (idx + 1);
-      const fPath = c.file_path || c.path || '';
-      const fName = c.file_name || c.name || 'Document';
-      const secTitle = c.section_title || c.breadcrumb || fPath;
-      const cleanExcerpt = String(c.excerpt || '').replace(/\s+/g, ' ').trim();
-      return `
+    const citationCardsListHtml = citations
+      .map((c, idx) => {
+        const cIdx = c.index || c.citation_index || idx + 1;
+        const fPath = c.file_path || c.path || '';
+        const fName = c.file_name || c.name || 'Document';
+        const secTitle = c.section_title || c.breadcrumb || fPath;
+        const cleanExcerpt = String(c.excerpt || '')
+          .replace(/\s+/g, ' ')
+          .trim();
+        return `
         <div class="ai-citation-card" data-path="${escapeHtml(fPath)}" data-name="${escapeHtml(fName)}" data-file-id="${c.file_id}" data-excerpt="${escapeHtml(cleanExcerpt)}" style="background: var(--kb-glaze-3); border: 1px solid var(--lt-r-ffffff17, rgba(255,255,255,0.09)); border-radius: 8px; padding: 10px 12px; cursor: pointer; transition: border-color 0.2s;">
           <div class="airg-row-3">
             <span class="airg-xs-bold-accent">[${cIdx}] 📄 ${escapeHtml(fName)}</span>
@@ -2403,10 +2679,12 @@ export async function runAiRagAsk(rawQuestion, options = {}) {
           </div>
         </div>
       `;
-    }).join('');
+      })
+      .join('');
 
-    const citationsHtml = citations.length > 0
-      ? `
+    const citationsHtml =
+      citations.length > 0
+        ? `
         <div class="airg-col">
           <div class="airg-xs-bold-muted">
             ${t('aiq.citations', 'Grounded Document Citations ({count})', { count: citations.length })}
@@ -2416,10 +2694,11 @@ export async function runAiRagAsk(rawQuestion, options = {}) {
           </div>
         </div>
       `
-      : '';
+        : '';
 
-    const photosHtml = (photos.length > 0 && !(options.unifiedMode && hasUnifiedVisualGrid))
-      ? `
+    const photosHtml =
+      photos.length > 0 && !(options.unifiedMode && hasUnifiedVisualGrid)
+        ? `
         <div class="airg-col">
           <div class="airg-xs-bold-muted">
             ${t('aiq.visuals', 'Matching Visual Assets ({count})', { count: photos.length })}
@@ -2429,7 +2708,7 @@ export async function runAiRagAsk(rawQuestion, options = {}) {
           </div>
         </div>
       `
-      : '';
+        : '';
 
     const rawAnswerLines = String(res.answer || res.answer_markdown || 'No matching grounded context found.')
       .split('\n')
@@ -2480,12 +2759,13 @@ export async function runAiRagAsk(rawQuestion, options = {}) {
     if (answerCard) {
       const hasRecipeCard = cards.some((c) => (c.type || c.card_type) === 'recipe');
       const hasGroundedDocs = citations.length > 0 || hasRecipeCard;
-      const isPhotoModality = res.parsed_intent?.modality_hint === 'photos'
-        || _aiSelectedFileType === 'photos'
-        || _aiSelectedFileType === 'videos'
-        || _aiSelectedFileType === 'folders'
-        || Boolean(_aiSelectedColor)
-        || Boolean(_aiSelectedScene);
+      const isPhotoModality =
+        res.parsed_intent?.modality_hint === 'photos' ||
+        _aiSelectedFileType === 'photos' ||
+        _aiSelectedFileType === 'videos' ||
+        _aiSelectedFileType === 'folders' ||
+        Boolean(_aiSelectedColor) ||
+        Boolean(_aiSelectedScene);
       if (options.unifiedMode && hasUnifiedVisualGrid && (!hasGroundedDocs || (isPhotoModality && !hasRecipeCard))) {
         answerCard.style.display = 'none';
         answerCard.innerHTML = '';
@@ -2529,17 +2809,29 @@ function buildVisualPhotoCardHtml(item) {
   const isPhoto = fCat === 'photos' || (item.mime_type && String(item.mime_type).startsWith('image/'));
   const thumbUrl = item.thumbnail_url || `/api/media/thumbnail/${fId}`;
   const scenes = (item.scene_tags || []).slice(0, 4);
-  const colors = (item.object_colors && item.object_colors.length ? item.object_colors : (item.dominant_colors || [])).slice(0, 3);
+  const colors = (
+    item.object_colors && item.object_colors.length ? item.object_colors : item.dominant_colors || []
+  ).slice(0, 3);
   const matchReason = item.match_reason || (isPhoto ? 'Visual + Semantic Match' : 'Semantic Match');
-  const catIcon = fCat === 'videos' ? '🎬' : fCat === 'audio' ? '🎵' : fCat === 'documents' || fCat === 'recipes' ? '📄' : fCat === 'folders' ? '📁' : '📷';
+  const catIcon =
+    fCat === 'videos'
+      ? '🎬'
+      : fCat === 'audio'
+        ? '🎵'
+        : fCat === 'documents' || fCat === 'recipes'
+          ? '📄'
+          : fCat === 'folders'
+            ? '📁'
+            : '📷';
   const isFav = Boolean(item.is_favorite);
 
   return `
     <div class="ai-visual-photo-card" data-path="${escapeHtml(fPath)}" data-name="${escapeHtml(fName)}" data-file-id="${fId}" data-category="${escapeHtml(fCat)}" data-favorite="${isFav ? '1' : '0'}" data-excerpt="${escapeHtml(item.excerpt || '')}" style="background: var(--kb-glaze-3); border: 1px solid var(--lt-r-ffffff17, rgba(255,255,255,0.09)); border-radius: 9px; overflow: hidden; cursor: pointer; display: flex; flex-direction: column; transition: transform 0.15s, border-color 0.15s;">
       <div class="aik-row-box-3">
-        ${isPhoto
-          ? `<img class="aik-size" src="${escapeHtml(thumbUrl)}" alt="${escapeHtml(fName)}" loading="lazy" data-img-fallback="hide" />`
-          : `<div class="aik-col-center">
+        ${
+          isPhoto
+            ? `<img class="aik-size" src="${escapeHtml(thumbUrl)}" alt="${escapeHtml(fName)}" loading="lazy" data-img-fallback="hide" />`
+            : `<div class="aik-col-center">
                <span class="aik-fs30">${catIcon}</span>
                <span class="aik-xs-muted-3">${escapeHtml((item.excerpt || fPath).slice(0, 75))}</span>
              </div>`
@@ -2570,7 +2862,7 @@ export function renderAiPreviewInspector(item) {
   const fCat = item.file_category || 'photos';
   const isPhoto = fCat === 'photos';
   const thumbUrl = item.thumbnail_url || `/api/media/thumbnail/${fId}`;
-  const parentDir = fPath.includes('/') ? (fPath.substring(0, fPath.lastIndexOf('/')) || '/') : '/mnt/user';
+  const parentDir = fPath.includes('/') ? fPath.substring(0, fPath.lastIndexOf('/')) || '/' : '/mnt/user';
   const isFav = Boolean(item.is_favorite);
 
   pane.style.display = 'block';
@@ -2585,11 +2877,12 @@ export function renderAiPreviewInspector(item) {
       </div>
       <button type="button" id="btn-ai-inspector-close" class="btn-pill-toggle is-small">✕</button>
     </div>
-    ${isPhoto
-      ? `<div style="height:170px; border-radius:8px; background:var(--lt-b-00000073, rgba(0,0,0,0.45)); overflow:hidden; margin-bottom:10px; display:flex; align-items:center; justify-content:center;">
+    ${
+      isPhoto
+        ? `<div style="height:170px; border-radius:8px; background:var(--lt-b-00000073, rgba(0,0,0,0.45)); overflow:hidden; margin-bottom:10px; display:flex; align-items:center; justify-content:center;">
            <img class="aik-size" src="${escapeHtml(thumbUrl)}" alt="${escapeHtml(fName)}" data-img-fallback="hide" />
          </div>`
-      : ''
+        : ''
     }
     <div class="aik-col-xs-soft">
       <div><strong class="aik-muted">${t('aiq.location', 'Location:')}</strong> <code class="aik-xs-accent">${escapeHtml(fPath)}</code></div>
@@ -2647,7 +2940,10 @@ export function renderAiPreviewInspector(item) {
       } else {
         ZettEventBus.emit('window:open', { id: 'files', path: parentDir });
       }
-      showToast(t('toast.opened_folder_location', 'Opened folder location: {parentDir}', { parentDir: parentDir }), 'info');
+      showToast(
+        t('toast.opened_folder_location', 'Opened folder location: {parentDir}', { parentDir: parentDir }),
+        'info'
+      );
     });
   }
 
@@ -2671,10 +2967,18 @@ export function renderAiPreviewInspector(item) {
         if (favRes) {
           item.is_favorite = Boolean(favRes.is_favorite);
           renderAiPreviewInspector(item);
-          showToast(item.is_favorite ? t('aiq.fav_added', 'Added "{name}" to favorites', { name: fName }) : t('aiq.fav_removed', 'Removed "{name}" from favorites', { name: fName }), 'success');
+          showToast(
+            item.is_favorite
+              ? t('aiq.fav_added', 'Added "{name}" to favorites', { name: fName })
+              : t('aiq.fav_removed', 'Removed "{name}" from favorites', { name: fName }),
+            'success'
+          );
         }
       } catch (err) {
-        showToast(t('toast.failed_to_toggle_favorite', 'Failed to toggle favorite: {error}', { error: err.message }), 'error');
+        showToast(
+          t('toast.failed_to_toggle_favorite', 'Failed to toggle favorite: {error}', { error: err.message }),
+          'error'
+        );
       }
     });
   }
@@ -2685,7 +2989,12 @@ export function renderAiPreviewInspector(item) {
       const shareUrl = `${window.location.origin}/api/fs/download?path=${encodeURIComponent(fPath)}`;
       try {
         await copyText(shareUrl);
-        showToast(t('toast.copied_share_link_for_to_clipboard', 'Copied share link for {fName} to clipboard!', { fName: fName }), 'success');
+        showToast(
+          t('toast.copied_share_link_for_to_clipboard', 'Copied share link for {fName} to clipboard!', {
+            fName: fName,
+          }),
+          'success'
+        );
       } catch (_) {
         showToast(t('toast.share_path', 'Share path: {fPath}', { fPath: fPath }), 'info');
       }
@@ -2738,11 +3047,41 @@ function extractCategoryCount(groupObj) {
 
 function renderAiCategorySummaryCards(groups = {}) {
   const entries = [
-    { key: 'photos', mapGroup: 'images', icon: '📷', label: t('aic.images', 'Images'), count: extractCategoryCount(groups.images ?? groups.photos) },
-    { key: 'videos', mapGroup: 'videos', icon: '🎬', label: t('aic.videos', 'Videos'), count: extractCategoryCount(groups.videos) },
-    { key: 'audio', mapGroup: 'audio', icon: '🎵', label: t('aic.audio', 'Audio'), count: extractCategoryCount(groups.audio) },
-    { key: 'documents', mapGroup: 'documents', icon: '📄', label: t('aic.documents', 'Documents'), count: extractCategoryCount(groups.documents) },
-    { key: 'folders', mapGroup: 'folders', icon: '📁', label: t('aic.folders', 'Folders'), count: extractCategoryCount(groups.folders) },
+    {
+      key: 'photos',
+      mapGroup: 'images',
+      icon: '📷',
+      label: t('aic.images', 'Images'),
+      count: extractCategoryCount(groups.images ?? groups.photos),
+    },
+    {
+      key: 'videos',
+      mapGroup: 'videos',
+      icon: '🎬',
+      label: t('aic.videos', 'Videos'),
+      count: extractCategoryCount(groups.videos),
+    },
+    {
+      key: 'audio',
+      mapGroup: 'audio',
+      icon: '🎵',
+      label: t('aic.audio', 'Audio'),
+      count: extractCategoryCount(groups.audio),
+    },
+    {
+      key: 'documents',
+      mapGroup: 'documents',
+      icon: '📄',
+      label: t('aic.documents', 'Documents'),
+      count: extractCategoryCount(groups.documents),
+    },
+    {
+      key: 'folders',
+      mapGroup: 'folders',
+      icon: '📁',
+      label: t('aic.folders', 'Folders'),
+      count: extractCategoryCount(groups.folders),
+    },
   ];
 
   // Update live category counts directly inside the unified #ai-search-filetype-bar chips
@@ -2792,10 +3131,11 @@ export function renderAiRagInitialEmptyState() {
 export const _renderAiRagInitialEmptyState = renderAiRagInitialEmptyState;
 
 export async function runAiVisualSearch(rawQuery = null) {
-  const visInput = document.getElementById('ai-visual-search-input')
-    || document.getElementById('ai-visual-query-input')
-    || document.getElementById('ai-rag-query-input');
-  const q = (rawQuery !== null ? rawQuery : (visInput ? visInput.value : '')).trim();
+  const visInput =
+    document.getElementById('ai-visual-search-input') ||
+    document.getElementById('ai-visual-query-input') ||
+    document.getElementById('ai-rag-query-input');
+  const q = (rawQuery !== null ? rawQuery : visInput ? visInput.value : '').trim();
   const grid = document.getElementById('ai-visual-results-grid');
   if (!grid) return null;
 
@@ -2855,7 +3195,10 @@ export async function runAiVisualSearch(rawQuery = null) {
         degradedNote.setAttribute('role', 'status');
         grid.parentNode?.insertBefore(degradedNote, grid);
       }
-      degradedNote.textContent = t('ai.search_degraded', "The AI search model didn't answer, so these results match words only. Try again in a moment.");
+      degradedNote.textContent = t(
+        'ai.search_degraded',
+        "The AI search model didn't answer, so these results match words only. Try again in a moment."
+      );
       degradedNote.hidden = false;
     } else if (degradedNote) {
       degradedNote.hidden = true;
@@ -2863,17 +3206,32 @@ export async function runAiVisualSearch(rawQuery = null) {
 
     const results = res?.results || res?.photo_results || res?.items || [];
     _aiLastResultsList = results;
-    const immichStrip = document.getElementById('ai-immich-strip') || (() => {
-      const el = document.createElement('div');
-      el.id = 'ai-immich-strip';
-      grid.parentNode?.insertBefore(el, grid);
-      return el;
-    })();
+    const immichStrip =
+      document.getElementById('ai-immich-strip') ||
+      (() => {
+        const el = document.createElement('div');
+        el.id = 'ai-immich-strip';
+        grid.parentNode?.insertBefore(el, grid);
+        return el;
+      })();
     immichStrip.innerHTML = immichResultsHtml(res?.immich_results);
     if (results.length === 0) {
       grid.innerHTML = `
         <div class="aik-xs-muted-center-2">
-          ${escapeHtml(t('aiq.no_match', 'No matching files found for {q}. Click {sync} above or configure folders in the {config} tab.', { q: '\u0001', sync: '\u0002', config: '\u0003' })).replace('\u0001', () => `<strong>${escapeHtml(q || _aiSelectedColor || _aiSelectedScene || t('aiq.current_filter', 'current filter'))}</strong>`).replace('\u0002', () => `<strong>${escapeHtml(t('aiq.sync_shares', 'Sync Shares'))}</strong>`).replace('\u0003', () => `<em>⚙️ ${escapeHtml(t('aiq.ai_config', 'AI Configuration'))}</em>`)}
+          ${escapeHtml(
+            t(
+              'aiq.no_match',
+              'No matching files found for {q}. Click {sync} above or configure folders in the {config} tab.',
+              { q: '\u0001', sync: '\u0002', config: '\u0003' }
+            )
+          )
+            .replace(
+              '\u0001',
+              () =>
+                `<strong>${escapeHtml(q || _aiSelectedColor || _aiSelectedScene || t('aiq.current_filter', 'current filter'))}</strong>`
+            )
+            .replace('\u0002', () => `<strong>${escapeHtml(t('aiq.sync_shares', 'Sync Shares'))}</strong>`)
+            .replace('\u0003', () => `<em>⚙️ ${escapeHtml(t('aiq.ai_config', 'AI Configuration'))}</em>`)}
         </div>
       `;
       return res;
@@ -2889,13 +3247,19 @@ export async function runAiVisualSearch(rawQuery = null) {
 }
 
 export async function runAiPathIndex(targetPath = null, respectStandby = true) {
-  const runBtns = [document.getElementById('btn-ai-run-index'), document.getElementById('btn-ai-run-index-path')].filter(Boolean);
+  const runBtns = [
+    document.getElementById('btn-ai-run-index'),
+    document.getElementById('btn-ai-run-index-path'),
+  ].filter(Boolean);
   const feedbackEl = document.getElementById('ai-index-run-feedback');
-  const named = Array.isArray(targetPath) ? targetPath.filter(Boolean).length > 0 : Boolean(typeof targetPath === 'string' && targetPath.trim());
+  const named = Array.isArray(targetPath)
+    ? targetPath.filter(Boolean).length > 0
+    : Boolean(typeof targetPath === 'string' && targetPath.trim());
   if (!named && !(_aiWatchedPaths && _aiWatchedPaths.length > 0)) return _noFolderChosen(feedbackEl);
   runBtns.forEach((b) => {
     b.disabled = true;
-    b.innerHTML = '<span aria-hidden="true">⏳</span> <span>' + escapeHtml(t('aiq.indexing', 'Indexing...')) + '</span>';
+    b.innerHTML =
+      '<span aria-hidden="true">⏳</span> <span>' + escapeHtml(t('aiq.indexing', 'Indexing...')) + '</span>';
   });
 
   let targets;
@@ -2920,7 +3284,13 @@ export async function runAiPathIndex(targetPath = null, respectStandby = true) {
       background: true, // one reading job, in the background, with progress and Stop (AI finding 22)
     });
     if (res) {
-      _readNowSaid(res, feedbackEl, targets.length === 1 ? (res.path || targets[0]) : t('ait.n_folders', '{count, plural, one {# folder} other {# folders}}', { count: targets.length }));
+      _readNowSaid(
+        res,
+        feedbackEl,
+        targets.length === 1
+          ? res.path || targets[0]
+          : t('ait.n_folders', '{count, plural, one {# folder} other {# folders}}', { count: targets.length })
+      );
       await fetchAndRenderAiStatus();
     }
     return res;
@@ -2938,7 +3308,6 @@ export async function runAiPathIndex(targetPath = null, respectStandby = true) {
   }
 }
 
-
 // Kib proposes actions that change the system; they run only on this click (AI-01).
 let _aiConfirmHandlerBound = false;
 function _bindAiConfirmHandler() {
@@ -2950,7 +3319,9 @@ function _bindAiConfirmHandler() {
     const actionId = btn.dataset.actionId;
     const row = btn.closest('.ai-chat-action-proposal');
     const status = row?.querySelector('.ai-chat-action-status');
-    row?.querySelectorAll('button').forEach((b) => { b.disabled = true; });
+    row?.querySelectorAll('button').forEach((b) => {
+      b.disabled = true;
+    });
     if (btn.dataset.decision === 'cancel') {
       if (status) status.textContent = t('jobs.status_cancelled', 'Cancelled');
       return;
@@ -2959,8 +3330,16 @@ function _bindAiConfirmHandler() {
     try {
       const out = await api.post(`/api/ai/actions/${encodeURIComponent(actionId)}/confirm`, {});
       const ok = out && out.status === 'ok';
-      if (status) status.textContent = ok ? t('aiq.done', 'Done: {v}', { v: out.message || out.summary || 'OK' }) : t('aiq.not_run', 'Not run: {v}', { v: out?.error || out?.status || t('aiq.unknown_error', 'unknown error') });
-      showToast(ok ? `${out.summary || 'Action'} done` : `${out?.summary || 'Action'} failed: ${out?.error || ''}`, ok ? 'success' : 'error');
+      if (status)
+        status.textContent = ok
+          ? t('aiq.done', 'Done: {v}', { v: out.message || out.summary || 'OK' })
+          : t('aiq.not_run', 'Not run: {v}', {
+              v: out?.error || out?.status || t('aiq.unknown_error', 'unknown error'),
+            });
+      showToast(
+        ok ? `${out.summary || 'Action'} done` : `${out?.summary || 'Action'} failed: ${out?.error || ''}`,
+        ok ? 'success' : 'error'
+      );
     } catch (err) {
       if (status) status.textContent = t('aiq.not_run', 'Not run: {v}', { v: err.message });
       showToast(t('toast.action_failed_2', 'Action failed: {error}', { error: err.message }), 'error');
@@ -2972,13 +3351,17 @@ function _buildAiActionProposalsHtml(toolsCalled) {
   const proposals = toolsCalled.filter((tc) => tc && tc.action_id && tc.status === 'confirmation_required');
   if (!proposals.length) return '';
   _bindAiConfirmHandler();
-  return proposals.map((tc) => `
+  return proposals
+    .map(
+      (tc) => `
       <div class="ai-chat-action-proposal" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:8px 10px; border-radius:8px; background:rgba(245,158,11,0.10); border:1px solid rgba(251,191,36,0.38);">
         <span style="font-size:var(--kb-fs-xs); font-weight:700; color:var(--lt-t-fde68aff, #fde68a);">⏸️ ${escapeHtml(tc.action_summary || tc.tool)}</span>
         <button type="button" class="btn ai-chat-confirm-action aicm-xs" data-action-id="${escapeHtml(tc.action_id)}" data-decision="confirm">${t('aiq.confirm', 'Confirm')}</button>
         <button type="button" class="btn ai-chat-confirm-action aicm-xs-2" data-action-id="${escapeHtml(tc.action_id)}" data-decision="cancel">${t('common.cancel', 'Cancel')}</button>
         <span class="ai-chat-action-status aicm-xs-soft"></span>
-      </div>`).join('');
+      </div>`
+    )
+    .join('');
 }
 
 function _buildAiExternalNoteHtml(res) {
@@ -2996,7 +3379,9 @@ function _initAiWebToggle() {
   el.dataset.bound = '1';
   try {
     localStorage.removeItem('kiboto_ai_web');
-  } catch (e) { /* storage blocked */ }
+  } catch (e) {
+    /* storage blocked */
+  }
   _aiWebOff();
 }
 
@@ -3039,25 +3424,70 @@ function _buildAiAssistantMessageHtml(res, defaultModel) {
   const tokSec = llmTel.tokens_per_sec || null;
   const elapsedMs = res.elapsed_ms || llmTel.elapsed_ms || 0;
 
-  const toolsBadgesHtml = toolsCalled.length > 0
-    ? `
+  const toolsBadgesHtml =
+    toolsCalled.length > 0
+      ? `
       <div class="ai-chat-tools-trace aicm-row">
-        ${toolsCalled.map((tc) => {
-          const isWeb = tc.tool === 'browse_internet';
-          const isRag = tc.tool === 'search_nas_knowledge';
-          const isCalc = tc.tool === 'calculate';
-          const isStorage = tc.tool === 'get_storage_status';
-          const isNet = tc.tool === 'get_network_status';
-          const isWeather = tc.tool === 'get_weather';
-          const bg = isCalc ? 'rgba(245,158,11,0.16)' : (isWeather ? 'rgba(14,165,233,0.18)' : (isWeb ? 'rgba(56,189,248,0.16)' : (isRag ? 'rgba(168,85,247,0.16)' : (isNet ? 'rgba(14,165,233,0.16)' : 'rgba(16,185,129,0.16)'))));
-          const border = isCalc ? 'rgba(251,191,36,0.42)' : (isWeather ? 'rgba(56,189,248,0.45)' : (isWeb ? 'rgba(56,189,248,0.42)' : (isRag ? 'rgba(168,85,247,0.42)' : (isNet ? 'rgba(56,189,248,0.42)' : 'rgba(52,211,153,0.42)'))));
-          const color = isCalc ? '#fde68a' : (isWeather ? '#38bdf8' : (isWeb ? '#7dd3fc' : (isRag ? '#d8b4fe' : (isNet ? '#7dd3fc' : '#6ee7b7'))));
-          const icon = isCalc ? '🧮' : (isWeather ? '⛅' : (isWeb ? '🌐' : (isRag ? '📁' : (isStorage ? '💽' : (isNet ? '🔌' : '🛠️')))));
-          return `<span class="ai-chat-tool-pill" data-tool-name="${escapeHtml(tc.tool)}" style="font-size: var(--kb-fs-xs); font-weight: 700; padding: 2px 8px; border-radius: 999px; background: ${bg}; border: 1px solid ${border}; color: ${color};" title="${escapeHtml(tc.summary || tc.tool)}">${icon} ${escapeHtml(tc.tool)}: ${escapeHtml(tc.summary || 'OK')}</span>`;
-        }).join('')}
+        ${toolsCalled
+          .map((tc) => {
+            const isWeb = tc.tool === 'browse_internet';
+            const isRag = tc.tool === 'search_nas_knowledge';
+            const isCalc = tc.tool === 'calculate';
+            const isStorage = tc.tool === 'get_storage_status';
+            const isNet = tc.tool === 'get_network_status';
+            const isWeather = tc.tool === 'get_weather';
+            const bg = isCalc
+              ? 'rgba(245,158,11,0.16)'
+              : isWeather
+                ? 'rgba(14,165,233,0.18)'
+                : isWeb
+                  ? 'rgba(56,189,248,0.16)'
+                  : isRag
+                    ? 'rgba(168,85,247,0.16)'
+                    : isNet
+                      ? 'rgba(14,165,233,0.16)'
+                      : 'rgba(16,185,129,0.16)';
+            const border = isCalc
+              ? 'rgba(251,191,36,0.42)'
+              : isWeather
+                ? 'rgba(56,189,248,0.45)'
+                : isWeb
+                  ? 'rgba(56,189,248,0.42)'
+                  : isRag
+                    ? 'rgba(168,85,247,0.42)'
+                    : isNet
+                      ? 'rgba(56,189,248,0.42)'
+                      : 'rgba(52,211,153,0.42)';
+            const color = isCalc
+              ? '#fde68a'
+              : isWeather
+                ? '#38bdf8'
+                : isWeb
+                  ? '#7dd3fc'
+                  : isRag
+                    ? '#d8b4fe'
+                    : isNet
+                      ? '#7dd3fc'
+                      : '#6ee7b7';
+            const icon = isCalc
+              ? '🧮'
+              : isWeather
+                ? '⛅'
+                : isWeb
+                  ? '🌐'
+                  : isRag
+                    ? '📁'
+                    : isStorage
+                      ? '💽'
+                      : isNet
+                        ? '🔌'
+                        : '🛠️';
+            return `<span class="ai-chat-tool-pill" data-tool-name="${escapeHtml(tc.tool)}" style="font-size: var(--kb-fs-xs); font-weight: 700; padding: 2px 8px; border-radius: 999px; background: ${bg}; border: 1px solid ${border}; color: ${color};" title="${escapeHtml(tc.summary || tc.tool)}">${icon} ${escapeHtml(tc.tool)}: ${escapeHtml(tc.summary || 'OK')}</span>`;
+          })
+          .join('')}
       </div>
     `
-    : '';
+      : '';
 
   const folderBannerHtml = folderPath
     ? `
@@ -3068,39 +3498,62 @@ function _buildAiAssistantMessageHtml(res, defaultModel) {
           <code style="color: var(--lt-t-e9fbf8ff, #e9fbf8); font-size: var(--kb-fs-xs); background: var(--kb-shade-25); padding: 1px 5px; border-radius: 4px;">${escapeHtml(folderPath)}</code>
           ${folderManifest && folderManifest.total_files ? `<span class="aicm-xs-muted">${t('aiq.scope_files', '({count, plural, one {# file} other {# files}})', { count: folderManifest.total_files })}</span>` : ''}
         </div>
-        ${groundingScore === null ? `
+        ${
+          groundingScore === null
+            ? `
           <div class="aicm-row-2">
-            <span style="font-size: var(--kb-fs-xs); font-weight: 700; color: var(--kb-text-soft); background: rgba(149,168,171,0.14); border: 1px solid rgba(149,168,171,0.35); padding: 1px 7px; border-radius: 999px;" title="${t('ui.this_answer_s_support_in', 'This answer\'s support in the sources wasn\'t measured.')}">${t('aiq.unverified', 'Unverified')}</span>
+            <span style="font-size: var(--kb-fs-xs); font-weight: 700; color: var(--kb-text-soft); background: rgba(149,168,171,0.14); border: 1px solid rgba(149,168,171,0.35); padding: 1px 7px; border-radius: 999px;" title="${t('ui.this_answer_s_support_in', "This answer's support in the sources wasn't measured.")}">${t('aiq.unverified', 'Unverified')}</span>
           </div>
-        ` : ''}
-        ${groundingScore !== null ? `
+        `
+            : ''
+        }
+        ${
+          groundingScore !== null
+            ? `
           <div class="aicm-row-2">
-            <span style="font-size: var(--kb-fs-xs); font-weight: 800; color: ${groundingScore >= 80 ? '#34d399' : (groundingScore >= 50 ? '#fbbf24' : '#f87171')}; background: ${groundingScore >= 80 ? 'rgba(52,211,153,0.14)' : 'rgba(251,191,36,0.14)'}; border: 1px solid ${groundingScore >= 80 ? 'rgba(52,211,153,0.35)' : 'rgba(251,191,36,0.35)'}; padding: 1px 7px; border-radius: 999px;">
-              🎯 ${res.grounding_detail
-                ? escapeHtml(t('ai.grounded_sentences', '{n} of {total} sentences backed by the sources', { n: res.grounding_detail.supported, total: res.grounding_detail.total }))
-                : escapeHtml(t('aiq.grounded_grade', '{pct}% Grounded ({grade})', { pct: groundingScore, grade: cragGrade.toUpperCase() || 'HIGH' }))}
+            <span style="font-size: var(--kb-fs-xs); font-weight: 800; color: ${groundingScore >= 80 ? '#34d399' : groundingScore >= 50 ? '#fbbf24' : '#f87171'}; background: ${groundingScore >= 80 ? 'rgba(52,211,153,0.14)' : 'rgba(251,191,36,0.14)'}; border: 1px solid ${groundingScore >= 80 ? 'rgba(52,211,153,0.35)' : 'rgba(251,191,36,0.35)'}; padding: 1px 7px; border-radius: 999px;">
+              🎯 ${
+                res.grounding_detail
+                  ? escapeHtml(
+                      t('ai.grounded_sentences', '{n} of {total} sentences backed by the sources', {
+                        n: res.grounding_detail.supported,
+                        total: res.grounding_detail.total,
+                      })
+                    )
+                  : escapeHtml(
+                      t('aiq.grounded_grade', '{pct}% Grounded ({grade})', {
+                        pct: groundingScore,
+                        grade: cragGrade.toUpperCase() || 'HIGH',
+                      })
+                    )
+              }
             </span>
             ${unsupportedHtml(res.grounding_detail)}
           </div>
-        ` : ''}
+        `
+            : ''
+        }
       </div>
     `
     : '';
 
-  const docCitationsHtml = citations.length > 0
-    ? `
+  const docCitationsHtml =
+    citations.length > 0
+      ? `
       <details class="ai-chat-doc-citations aicm-xs-3">
         <summary style="cursor: pointer; color: var(--kb-text-accent); font-weight: 700; display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 6px; background: rgba(79,216,196,0.12); border: 1px solid rgba(79,216,196,0.32); width: fit-content; user-select: none;">
           <span>📚 ${escapeHtml(t('ai.sources_count', 'Sources ({n})', { n: citations.length }))}</span>
         </summary>
         <div class="aicm-col">
-          ${citations.map((c, idx) => {
-            const cname = c.name || (c.path ? c.path.split('/').pop() : 'Document');
-            const bcrumb = (c.breadcrumb ? ` > ${c.breadcrumb}` : '') + (citationPage(c) ? ` · ${citationPage(c)}` : '');
-            const scorePct = Math.round(Number(c.score || 0.9) * 100);
-            const escPath = escapeHtml(c.path || '');
-            const escName = escapeHtml(cname);
-            return `
+          ${citations
+            .map((c, idx) => {
+              const cname = c.name || (c.path ? c.path.split('/').pop() : 'Document');
+              const bcrumb =
+                (c.breadcrumb ? ` > ${c.breadcrumb}` : '') + (citationPage(c) ? ` · ${citationPage(c)}` : '');
+              const scorePct = Math.round(Number(c.score || 0.9) * 100);
+              const escPath = escapeHtml(c.path || '');
+              const escName = escapeHtml(cname);
+              return `
               <div class="ai-citation-card" style="padding: 7px 10px; border-radius: 7px; background: var(--lt-b-0e1c1ed9, rgba(14,28,30,0.85)); border: 1px solid rgba(79,216,196,0.22); font-size: var(--kb-fs-xs);">
                 <div class="aicm-row-3">
                   <button type="button" class="btn-preview-citation aicm-xs-bold-accent-box" data-action="open-file-preview" data-path="${escPath}" data-name="${escName}">
@@ -3111,42 +3564,53 @@ function _buildAiAssistantMessageHtml(res, defaultModel) {
                 ${c.excerpt ? `<div style="color: var(--kb-text-soft); font-size: var(--kb-fs-xs); line-height: 1.45; font-style: italic; background: var(--kb-shade-25); padding: 5px 8px; border-radius: 5px; border-left: 2px solid #4fd8c4;">"${escapeHtml(c.excerpt)}"</div>` : ''}
               </div>
             `;
-          }).join('')}
+            })
+            .join('')}
         </div>
       </details>
     `
-    : '';
+      : '';
 
-  const photosHtml = photos.length > 0
-    ? `
+  const photosHtml =
+    photos.length > 0
+      ? `
       <div class="ai-chat-photos-grid aicm-row-4">
-        ${photos.map((p) => {
-          const escP = escapeHtml(p.path || '');
-          const escN = escapeHtml(p.name || 'Photo');
-          const thumb = p.thumbnail_url || (p.file_id ? `/api/media/thumbnail/${p.file_id}` : '');
-          return `
+        ${photos
+          .map((p) => {
+            const escP = escapeHtml(p.path || '');
+            const escN = escapeHtml(p.name || 'Photo');
+            const thumb = p.thumbnail_url || (p.file_id ? `/api/media/thumbnail/${p.file_id}` : '');
+            return `
             <div class="ai-chat-photo-card" data-action="open-file-preview" data-path="${escP}" data-name="${escN}" style="cursor: pointer; width: 85px; border-radius: 6px; overflow: hidden; background: var(--kb-shade-40); border: 1px solid var(--kb-line-10); transition: transform 0.15s ease;" title="${escN}">
               ${thumb ? `<img class="aicm-size" src="${escapeHtml(thumb)}" alt="${escN}" />` : `<div class="aicm-row-fs20">🖼️</div>`}
               <div class="aicm-xs-soft-2">${escN}</div>
             </div>
           `;
-        }).join('')}
+          })
+          .join('')}
       </div>
     `
-    : '';
+      : '';
 
-  const webSourcesHtml = webSources.length > 0
-    ? `
+  const webSourcesHtml =
+    webSources.length > 0
+      ? `
       <details class="ai-chat-web-sources aicm-xs-4">
         <summary class="aicm-row-semi-muted-box">
           <span>🌐 ${t('aiq.sources', 'Sources ({count})', { count: webSources.length })}</span>
         </summary>
         <div class="aicm-row-5">
-          ${webSources.slice(0, 5).map((ws) => `<a href="${escapeHtml(ws.url)}" target="_blank" rel="noopener noreferrer" style="padding: 2px 8px; border-radius: 6px; background: rgba(79,216,196,0.12); border: 1px solid rgba(79,216,196,0.32); color: var(--kb-text-accent); text-decoration: none; font-weight: 600; font-size: var(--kb-fs-xs);">${escapeHtml(ws.title || ws.source || 'Source')} ↗</a>`).join('')}
+          ${webSources
+            .slice(0, 5)
+            .map(
+              (ws) =>
+                `<a href="${escapeHtml(ws.url)}" target="_blank" rel="noopener noreferrer" style="padding: 2px 8px; border-radius: 6px; background: rgba(79,216,196,0.12); border: 1px solid rgba(79,216,196,0.32); color: var(--kb-text-accent); text-decoration: none; font-weight: 600; font-size: var(--kb-fs-xs);">${escapeHtml(ws.title || ws.source || 'Source')} ↗</a>`
+            )
+            .join('')}
         </div>
       </details>
     `
-    : '';
+      : '';
 
   return `
     <div class="ai-chat-llm-proof-bar aicm-row-box">
@@ -3210,7 +3674,7 @@ function _groupConversationsChronologically(convs) {
       groups.pinned.push(c);
       return;
     }
-    const updatedMs = (c.updated_at || c.created_at || (now / 1000)) * 1000;
+    const updatedMs = (c.updated_at || c.created_at || now / 1000) * 1000;
     const diffMs = now - updatedMs;
     const diffDays = Math.floor(diffMs / oneDayMs);
 
@@ -3235,11 +3699,13 @@ export async function fetchAndRenderAiConversations(searchQuery = '') {
 
   try {
     const res = await api.get('/api/ai/conversations', searchQuery ? { search: searchQuery } : {});
-    const convs = (res && res.conversations) ? res.conversations : [];
+    const convs = res && res.conversations ? res.conversations : [];
     _aiConversations = convs;
 
     if (countBadge) {
-      countBadge.textContent = t('ai.chat_count', '{count, plural, one {# chat} other {# chats}}', { count: convs.length });
+      countBadge.textContent = t('ai.chat_count', '{count, plural, one {# chat} other {# chats}}', {
+        count: convs.length,
+      });
     }
 
     if (convs.length === 0) {
@@ -3286,7 +3752,8 @@ export async function fetchAndRenderAiConversations(searchQuery = '') {
         selectAiConversation(cid);
         // on a phone the list covers the chat: close it once a conversation is picked
         const sidebar = document.getElementById('ai-chat-sidebar');
-        if (document.body.classList.contains('phone-shell') && sidebar && !sidebar.classList.contains('collapsed')) toggleAiSidebar();
+        if (document.body.classList.contains('phone-shell') && sidebar && !sidebar.classList.contains('collapsed'))
+          toggleAiSidebar();
       });
     });
 
@@ -3360,7 +3827,8 @@ export async function selectAiConversation(convId) {
         const userMsgEl = document.createElement('div');
         userMsgEl.className = 'ai-chat-msg ai-chat-msg-user';
         userMsgEl.dataset.convId = convId;
-        userMsgEl.style.cssText = 'align-self: flex-end; max-width: 85%; padding: 9px 13px; border-radius: 10px; background: rgba(51, 205, 184, 0.22); border: 1px solid rgba(79, 216, 196, 0.45); color: #f5f9f9; font-size: var(--kb-fs-xs); line-height: 1.45;';
+        userMsgEl.style.cssText =
+          'align-self: flex-end; max-width: 85%; padding: 9px 13px; border-radius: 10px; background: rgba(51, 205, 184, 0.22); border: 1px solid rgba(79, 216, 196, 0.45); color: #f5f9f9; font-size: var(--kb-fs-xs); line-height: 1.45;';
         userMsgEl.innerHTML = `<div style="font-size:var(--kb-fs-xs); font-weight:700; color:var(--lt-t-93e6d9ff, #93e6d9); margin-bottom:3px;">🧑 ${t('aiq.you', 'You')}</div><div>${escapeHtml(m.content)}</div>`;
         listEl.appendChild(userMsgEl);
       } else if (m.role === 'assistant') {
@@ -3368,14 +3836,17 @@ export async function selectAiConversation(convId) {
         botMsgEl.className = 'ai-chat-msg ai-chat-msg-assistant';
         botMsgEl.dataset.convId = convId;
         const modelName = m.telemetry?.active_model || conv.model || '—';
-        botMsgEl.innerHTML = _buildAiAssistantMessageHtml({
-          reply: m.content,
-          llm_telemetry: m.telemetry,
-          tools_called: m.tools_called,
-          web_sources: m.web_sources,
-          citations: m.citations,
-          photos: m.photos,
-        }, modelName);
+        botMsgEl.innerHTML = _buildAiAssistantMessageHtml(
+          {
+            reply: m.content,
+            llm_telemetry: m.telemetry,
+            tools_called: m.tools_called,
+            web_sources: m.web_sources,
+            citations: m.citations,
+            photos: m.photos,
+          },
+          modelName
+        );
         listEl.appendChild(botMsgEl);
       }
     });
@@ -3407,7 +3878,10 @@ export async function createNewAiConversation() {
       if (inputEl) inputEl.focus();
     }
   } catch (err) {
-    showToast(t('toast.could_not_start_new_chat', 'Could not start new chat: {error}', { error: err.message }), 'error');
+    showToast(
+      t('toast.could_not_start_new_chat', 'Could not start new chat: {error}', { error: err.message }),
+      'error'
+    );
   }
 }
 
@@ -3548,14 +4022,21 @@ export async function exportActiveAiThread(format = 'markdown') {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    const cleanFileName = title.toLowerCase().replace(/[^a-z0-9_-]/g, '_').slice(0, 40) || 'chat';
+    const cleanFileName =
+      title
+        .toLowerCase()
+        .replace(/[^a-z0-9_-]/g, '_')
+        .slice(0, 40) || 'chat';
     a.download = `kib_${cleanFileName}.${ext}`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    showToast(t('toast.exported_conversation_as', 'Exported conversation as {ext}', { ext: ext.toUpperCase() }), 'success');
+    showToast(
+      t('toast.exported_conversation_as', 'Exported conversation as {ext}', { ext: ext.toUpperCase() }),
+      'success'
+    );
   } catch (err) {
     showToast(t('toast.export_failed', 'Export failed: {error}', { error: err.message }), 'error');
   }
@@ -3674,13 +4155,15 @@ let _aiChatHistory = [];
 
 export function isAiThinkingModel(modelName) {
   const m = String(modelName || '').toLowerCase();
-  return m.includes('r1') ||
-         m.includes('qwq') ||
-         m.includes('reason') ||
-         m.includes('thinking') ||
-         m.includes('saluki') ||
-         m.includes('cot') ||
-         m.includes('deepseek');
+  return (
+    m.includes('r1') ||
+    m.includes('qwq') ||
+    m.includes('reason') ||
+    m.includes('thinking') ||
+    m.includes('saluki') ||
+    m.includes('cot') ||
+    m.includes('deepseek')
+  );
 }
 
 // One citation style: [n] points at a web source when the answer has any, else at a document.
@@ -3688,7 +4171,8 @@ export function isAiThinkingModel(modelName) {
 function _citationChip(n, sources) {
   const web = (sources && sources.webSources) || [];
   const docs = (sources && sources.citations) || [];
-  const chip = 'display:inline-flex; align-items:center; font-size:11px; font-weight:700; color:#93e6d9; background:rgba(79,216,196,0.16); border:1px solid rgba(79,216,196,0.35); border-radius:999px; padding:0 6px; margin:0 2px; vertical-align:baseline; line-height:1.3; cursor:pointer; text-decoration:none;';
+  const chip =
+    'display:inline-flex; align-items:center; font-size:11px; font-weight:700; color:#93e6d9; background:rgba(79,216,196,0.16); border:1px solid rgba(79,216,196,0.35); border-radius:999px; padding:0 6px; margin:0 2px; vertical-align:baseline; line-height:1.3; cursor:pointer; text-decoration:none;';
   if (web.length) {
     const ws = web[n - 1];
     if (!ws || !/^https?:\/\//i.test(String(ws.url || ''))) return '';
@@ -3709,7 +4193,9 @@ export function _formatChatMarkdown(rawText, sources = null) {
   // Strip out any trailing verbose "Verified Web Sources" section
   text = text.replace(/#{2,4}\s*🌐?\s*Verified\s+Web\s+Sources[\s\S]*$/i, '').trim();
   // Strip out duplicate trailing text-based "Sources:\n[1] ... \n[2] ..." list
-  text = text.replace(/(?:\r?\n)+\s*(?:\*\*)?Sources:?(?:\*\*)?\s*(?:\r?\n)+(?:\s*\[\d+\][^\n]*(?:\n|$))+$/i, '').trim();
+  text = text
+    .replace(/(?:\r?\n)+\s*(?:\*\*)?Sources:?(?:\*\*)?\s*(?:\r?\n)+(?:\s*\[\d+\][^\n]*(?:\n|$))+$/i, '')
+    .trim();
 
   // Extract <think>...</think> if present
   let thoughtHtml = '';
@@ -3757,7 +4243,8 @@ export function _formatChatMarkdown(rawText, sources = null) {
       item.lang === 'yml' ||
       item.lang === 'compose' ||
       item.lang === 'docker-compose' ||
-      (item.code.includes('services:') && (item.code.includes('image:') || item.code.includes('build:') || item.code.includes('ports:')));
+      (item.code.includes('services:') &&
+        (item.code.includes('image:') || item.code.includes('build:') || item.code.includes('ports:')));
 
     const deployBtnHtml = isComposeYaml
       ? `<button type="button" class="btn-deploy-stack-code" data-action="deploy-compose-code" style="background: rgba(16, 185, 129, 0.22); border: 1px solid rgba(52, 211, 153, 0.45); border-radius: 4px; color: var(--lt-t-6ee7b7ff, #6ee7b7); font-size: var(--kb-fs-xs); font-weight: 700; padding: 2px 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; margin-right: 6px;">🚀 ${t('aiq.deploy', 'Deploy Stack')}</button>`
@@ -3776,14 +4263,32 @@ export function _formatChatMarkdown(rawText, sources = null) {
   });
 
   const formatted = escaped
-    .replace(/^####\s+(.+)$/gm, '<div style="font-size:var(--kb-fs-xs); font-weight:800; color:var(--lt-t-93e6d9ff, #93e6d9); margin:8px 0 3px;">$1</div>')
+    .replace(
+      /^####\s+(.+)$/gm,
+      '<div style="font-size:var(--kb-fs-xs); font-weight:800; color:var(--lt-t-93e6d9ff, #93e6d9); margin:8px 0 3px;">$1</div>'
+    )
     .replace(/^###\s+(.+)$/gm, '<div class="aimd-xs-bold-accent">$1</div>')
-    .replace(/^&gt;\s?(.*)$/gm, '<div style="border-left:2px solid rgba(168,85,247,0.55); padding-left:8px; margin:3px 0; color:var(--kb-text-soft); font-size:var(--kb-fs-xs); background:rgba(168,85,247,0.07); border-radius:0 4px 4px 0;">$1</div>')
-    .replace(/^[-*]\s+(.+)$/gm, '<div class="aimd-row-2"><span class="aimd-xs-accent">•</span><div class="aimd-grow">$1</div></div>')
-    .replace(/^(\d+)\.\s+(.+)$/gm, '<div class="aimd-row-2"><span class="aimd-xs-bold">$1.</span><div class="aimd-grow">$2</div></div>')
+    .replace(
+      /^&gt;\s?(.*)$/gm,
+      '<div style="border-left:2px solid rgba(168,85,247,0.55); padding-left:8px; margin:3px 0; color:var(--kb-text-soft); font-size:var(--kb-fs-xs); background:rgba(168,85,247,0.07); border-radius:0 4px 4px 0;">$1</div>'
+    )
+    .replace(
+      /^[-*]\s+(.+)$/gm,
+      '<div class="aimd-row-2"><span class="aimd-xs-accent">•</span><div class="aimd-grow">$1</div></div>'
+    )
+    .replace(
+      /^(\d+)\.\s+(.+)$/gm,
+      '<div class="aimd-row-2"><span class="aimd-xs-bold">$1.</span><div class="aimd-grow">$2</div></div>'
+    )
     .replace(/\*\*(.+?)\*\*/g, '<strong class="aimd-strong">$1</strong>')
-    .replace(/`([^`]+)`/g, '<code style="background:var(--lt-b-00000061, rgba(0,0,0,0.38)); padding:1px 5px; border-radius:4px; color:var(--lt-t-c8f3ecff, #c8f3ec); font-family:monospace; font-size:var(--kb-fs-xs);">$1</code>')
-    .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a class="aimd-accent" href="$2" target="_blank" rel="noopener noreferrer">$1 ↗</a>')
+    .replace(
+      /`([^`]+)`/g,
+      '<code style="background:var(--lt-b-00000061, rgba(0,0,0,0.38)); padding:1px 5px; border-radius:4px; color:var(--lt-t-c8f3ecff, #c8f3ec); font-family:monospace; font-size:var(--kb-fs-xs);">$1</code>'
+    )
+    .replace(
+      /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+      '<a class="aimd-accent" href="$2" target="_blank" rel="noopener noreferrer">$1 ↗</a>'
+    )
     .replace(/\[\^(\d+):\s*([^#\]]+)(?:#L?(\d+))?\]/g, (match, idx, path, line) => {
       const escP = escapeHtml(path.trim());
       const escN = escapeHtml(path.trim().split('/').pop() || 'File');
@@ -3857,7 +4362,8 @@ export function setAiChatFocus(path, name = '') {
 
 /** Opens Ask Kib with a file or folder in focus. */
 export function askKibAbout(path, name = '') {
-  if (typeof window.openManagementSection === 'function') window.openManagementSection('mgmt-sec-ai', 'mgmt-pane-ai-chat');
+  if (typeof window.openManagementSection === 'function')
+    window.openManagementSection('mgmt-sec-ai', 'mgmt-pane-ai-chat');
   setTimeout(() => {
     document.querySelector('.mgmt-inner-tab[data-tab-target="mgmt-pane-ai-chat"]')?.click();
     setAiChatFocus(path, name);
@@ -3875,7 +4381,9 @@ export async function sendAiChatMessage(rawMessage = null) {
   const sendBtn = document.getElementById('btn-ai-chat-send');
   const listEl = document.getElementById('ai-chat-messages-list');
 
-  const msg = (rawMessage !== null && rawMessage !== undefined ? String(rawMessage) : (inputEl ? inputEl.value : '')).trim();
+  const msg = (
+    rawMessage !== null && rawMessage !== undefined ? String(rawMessage) : inputEl ? inputEl.value : ''
+  ).trim();
   if (!msg) {
     showToast(t('ai.enter_question', 'Type a question first.'), 'warn');
     return null;
@@ -3884,7 +4392,10 @@ export async function sendAiChatMessage(rawMessage = null) {
   if (inputEl) inputEl.value = '';
   if (sendBtn) {
     sendBtn.disabled = true;
-    sendBtn.innerHTML = '<span><span class="ai-typing-dot aik-size-2"></span></span> <span>' + escapeHtml(t('aiq.generating', 'Generating...')) + '</span>';
+    sendBtn.innerHTML =
+      '<span><span class="ai-typing-dot aik-size-2"></span></span> <span>' +
+      escapeHtml(t('aiq.generating', 'Generating...')) +
+      '</span>';
   }
 
   // Web search and weather send the question outside the NAS: only when the user turns it on (AI-06).
@@ -3897,7 +4408,8 @@ export async function sendAiChatMessage(rawMessage = null) {
   if (listEl) {
     const userMsgEl = document.createElement('div');
     userMsgEl.className = 'ai-chat-msg ai-chat-msg-user';
-    userMsgEl.style.cssText = 'align-self: flex-end; max-width: 85%; padding: 9px 13px; border-radius: 10px; background: rgba(51, 205, 184, 0.22); border: 1px solid rgba(79, 216, 196, 0.45); color: #f5f9f9; font-size: var(--kb-fs-xs); line-height: 1.45;';
+    userMsgEl.style.cssText =
+      'align-self: flex-end; max-width: 85%; padding: 9px 13px; border-radius: 10px; background: rgba(51, 205, 184, 0.22); border: 1px solid rgba(79, 216, 196, 0.45); color: #f5f9f9; font-size: var(--kb-fs-xs); line-height: 1.45;';
     userMsgEl.innerHTML = `<div style="font-size:var(--kb-fs-xs); font-weight:700; color:var(--lt-t-93e6d9ff, #93e6d9); margin-bottom:3px;">🧑 ${t('aiq.you', 'You')}</div><div>${escapeHtml(msg)}</div>`;
     listEl.appendChild(userMsgEl);
 
@@ -3905,7 +4417,8 @@ export async function sendAiChatMessage(rawMessage = null) {
     pendingEl.className = 'ai-chat-msg ai-chat-msg-pending';
     pendingEl.dataset.isThinking = isThinking ? '1' : '0';
     if (isThinking) {
-      pendingEl.style.cssText = 'align-self: flex-start; max-width: 85%; padding: 10px 14px; border-radius: 10px; background: rgba(30, 20, 50, 0.75); border: 1px solid rgba(192, 132, 252, 0.4); display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(168, 85, 247, 0.15);';
+      pendingEl.style.cssText =
+        'align-self: flex-start; max-width: 85%; padding: 10px 14px; border-radius: 10px; background: rgba(30, 20, 50, 0.75); border: 1px solid rgba(192, 132, 252, 0.4); display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(168, 85, 247, 0.15);';
       pendingEl.innerHTML = `
         <span class="ai-thinking-brain aik-fs15">🧠</span>
         <span style="font-size: var(--kb-fs-xs); font-weight: 700; color: var(--lt-t-e9d5ffff, #e9d5ff);">${t('aiq.thinking', 'Thinking')}</span>
@@ -3915,7 +4428,8 @@ export async function sendAiChatMessage(rawMessage = null) {
         <span style="font-size: var(--kb-fs-xs); color: var(--lt-t-d8b4feff, #d8b4fe); margin-left: 6px; padding: 1px 7px; border-radius: 999px; background: rgba(168, 85, 247, 0.2); border: 1px solid rgba(192, 132, 252, 0.35);">${escapeHtml(activeModel)}</span>
       `;
     } else {
-      pendingEl.style.cssText = 'align-self: flex-start; max-width: 85%; padding: 10px 14px; border-radius: 10px; background: rgba(14, 28, 30, 0.75); border: 1px solid rgba(79, 216, 196, 0.35); display: flex; align-items: center; gap: 9px; box-shadow: 0 4px 14px rgba(51, 205, 184, 0.12);';
+      pendingEl.style.cssText =
+        'align-self: flex-start; max-width: 85%; padding: 10px 14px; border-radius: 10px; background: rgba(14, 28, 30, 0.75); border: 1px solid rgba(79, 216, 196, 0.35); display: flex; align-items: center; gap: 9px; box-shadow: 0 4px 14px rgba(51, 205, 184, 0.12);';
       pendingEl.innerHTML = `
         <div class="ai-typing-indicator aik-row-8">
           <span class="ai-typing-dot"></span>
@@ -3929,16 +4443,15 @@ export async function sendAiChatMessage(rawMessage = null) {
     listEl.scrollTop = listEl.scrollHeight;
   }
 
-
   try {
     const isTestEnv = window.__forceAiStreamingTest
       ? false
-      : (typeof vi !== 'undefined' ||
-         typeof vitest !== 'undefined' ||
-         (typeof process !== 'undefined' && process?.env?.NODE_ENV === 'test') ||
-         typeof window === 'undefined' ||
-         !window.fetch ||
-         !window.ReadableStream);
+      : typeof vi !== 'undefined' ||
+        typeof vitest !== 'undefined' ||
+        (typeof process !== 'undefined' && process?.env?.NODE_ENV === 'test') ||
+        typeof window === 'undefined' ||
+        !window.fetch ||
+        !window.ReadableStream;
 
     let res = null;
 
@@ -4023,7 +4536,8 @@ export async function sendAiChatMessage(rawMessage = null) {
           if (currentConvId) streamBotMsgEl.dataset.convId = currentConvId;
           streamBotMsgEl.dataset.activeModel = activeModel;
           streamBotMsgEl.dataset.isStreaming = '1';
-          streamBotMsgEl.style.cssText = 'display: flex; flex-direction: column; gap: 7px; padding: 11px 14px; border-radius: 10px; background: rgba(14, 28, 30, 0.78); border: 1px solid rgba(79, 216, 196, 0.28);';
+          streamBotMsgEl.style.cssText =
+            'display: flex; flex-direction: column; gap: 7px; padding: 11px 14px; border-radius: 10px; background: rgba(14, 28, 30, 0.78); border: 1px solid rgba(79, 216, 196, 0.28);';
 
           streamBotMsgEl.innerHTML = `
             <div class="ai-chat-llm-proof-bar aik-row-box-4">
@@ -4063,10 +4577,16 @@ export async function sendAiChatMessage(rawMessage = null) {
             if (trimmed.startsWith('data:')) {
               const dataStr = trimmed.slice(5).trim();
               let parsed = null;
-              try { parsed = JSON.parse(dataStr); } catch (_) { parsed = dataStr; }
+              try {
+                parsed = JSON.parse(dataStr);
+              } catch (_) {
+                parsed = dataStr;
+              }
 
               if (currentConvId && (_activeConversationId !== currentConvId || _aiActiveRequestId !== currentReqId)) {
-                try { reader.cancel(); } catch (_) {}
+                try {
+                  reader.cancel();
+                } catch (_) {}
                 return null;
               }
 
@@ -4075,7 +4595,9 @@ export async function sendAiChatMessage(rawMessage = null) {
                   _activeConversationTitle = parsed.title;
                   const titleEl = document.getElementById('ai-chat-active-title');
                   putTitle(titleEl, parsed.title);
-                  const tItem = document.querySelector(`.ai-thread-item[data-conv-id="${currentConvId}"] .ai-thread-title-text`);
+                  const tItem = document.querySelector(
+                    `.ai-thread-item[data-conv-id="${currentConvId}"] .ai-thread-title-text`
+                  );
                   if (tItem) tItem.textContent = parsed.title;
                 }
               } else if (currentEvent === 'tool_start') {
@@ -4085,7 +4607,8 @@ export async function sendAiChatMessage(rawMessage = null) {
                   const pill = document.createElement('span');
                   pill.className = 'ai-chat-tool-pill ai-chat-tool-running';
                   pill.dataset.toolName = toolName;
-                  pill.style.cssText = 'font-size: var(--kb-fs-xs); font-weight: 700; padding: 2px 8px; border-radius: 999px; background: rgba(79,216,196,0.16); border: 1px solid rgba(79,216,196,0.42); color: #93e6d9;';
+                  pill.style.cssText =
+                    'font-size: var(--kb-fs-xs); font-weight: 700; padding: 2px 8px; border-radius: 999px; background: rgba(79,216,196,0.16); border: 1px solid rgba(79,216,196,0.42); color: #93e6d9;';
                   pill.textContent = `⚡ ${t('aiq.running_tool', 'Running {tool}...', { tool: toolName })}`;
                   toolsTraceEl.appendChild(pill);
                 }
@@ -4094,17 +4617,61 @@ export async function sendAiChatMessage(rawMessage = null) {
                 toolsCollected.push(parsed);
                 partialTools = toolsCollected;
                 if (toolsTraceEl) {
-                  const existingPill = toolsTraceEl.querySelector(`.ai-chat-tool-pill[data-tool-name="${parsed?.tool}"]`);
+                  const existingPill = toolsTraceEl.querySelector(
+                    `.ai-chat-tool-pill[data-tool-name="${parsed?.tool}"]`
+                  );
                   const isWeb = parsed?.tool === 'browse_internet';
                   const isRag = parsed?.tool === 'search_nas_knowledge';
                   const isCalc = parsed?.tool === 'calculate';
                   const isStorage = parsed?.tool === 'get_storage_status';
                   const isNet = parsed?.tool === 'get_network_status';
                   const isWeather = parsed?.tool === 'get_weather';
-                  const bg = isCalc ? 'rgba(245,158,11,0.16)' : (isWeather ? 'rgba(14,165,233,0.18)' : (isWeb ? 'rgba(56,189,248,0.16)' : (isRag ? 'rgba(168,85,247,0.16)' : (isNet ? 'rgba(14,165,233,0.16)' : 'rgba(16,185,129,0.16)'))));
-                  const border = isCalc ? 'rgba(251,191,36,0.42)' : (isWeather ? 'rgba(56,189,248,0.45)' : (isWeb ? 'rgba(56,189,248,0.42)' : (isRag ? 'rgba(168,85,247,0.42)' : (isNet ? 'rgba(56,189,248,0.42)' : 'rgba(52,211,153,0.42)'))));
-                  const color = isCalc ? '#fde68a' : (isWeather ? '#38bdf8' : (isWeb ? '#7dd3fc' : (isRag ? '#d8b4fe' : (isNet ? '#7dd3fc' : '#6ee7b7'))));
-                  const icon = isCalc ? '🧮' : (isWeather ? '⛅' : (isWeb ? '🌐' : (isRag ? '📁' : (isStorage ? '💽' : (isNet ? '🔌' : '🛠️')))));
+                  const bg = isCalc
+                    ? 'rgba(245,158,11,0.16)'
+                    : isWeather
+                      ? 'rgba(14,165,233,0.18)'
+                      : isWeb
+                        ? 'rgba(56,189,248,0.16)'
+                        : isRag
+                          ? 'rgba(168,85,247,0.16)'
+                          : isNet
+                            ? 'rgba(14,165,233,0.16)'
+                            : 'rgba(16,185,129,0.16)';
+                  const border = isCalc
+                    ? 'rgba(251,191,36,0.42)'
+                    : isWeather
+                      ? 'rgba(56,189,248,0.45)'
+                      : isWeb
+                        ? 'rgba(56,189,248,0.42)'
+                        : isRag
+                          ? 'rgba(168,85,247,0.42)'
+                          : isNet
+                            ? 'rgba(56,189,248,0.42)'
+                            : 'rgba(52,211,153,0.42)';
+                  const color = isCalc
+                    ? '#fde68a'
+                    : isWeather
+                      ? '#38bdf8'
+                      : isWeb
+                        ? '#7dd3fc'
+                        : isRag
+                          ? '#d8b4fe'
+                          : isNet
+                            ? '#7dd3fc'
+                            : '#6ee7b7';
+                  const icon = isCalc
+                    ? '🧮'
+                    : isWeather
+                      ? '⛅'
+                      : isWeb
+                        ? '🌐'
+                        : isRag
+                          ? '📁'
+                          : isStorage
+                            ? '💽'
+                            : isNet
+                              ? '🔌'
+                              : '🛠️';
                   const pillHtml = `${icon} ${escapeHtml(parsed?.tool || 'tool')}: ${escapeHtml(parsed?.summary || 'OK')}`;
                   if (existingPill) {
                     existingPill.className = 'ai-chat-tool-pill';
@@ -4129,7 +4696,8 @@ export async function sendAiChatMessage(rawMessage = null) {
                   thoughtDetailsEl = document.createElement('details');
                   thoughtDetailsEl.className = 'ai-thought-disclosure';
                   thoughtDetailsEl.open = true;
-                  thoughtDetailsEl.style.cssText = 'margin: 4px 0 10px; border-radius: 8px; background: rgba(147, 51, 234, 0.08); border: 1px solid rgba(168, 85, 247, 0.28); padding: 7px 10px; font-size: var(--kb-fs-xs);';
+                  thoughtDetailsEl.style.cssText =
+                    'margin: 4px 0 10px; border-radius: 8px; background: rgba(147, 51, 234, 0.08); border: 1px solid rgba(168, 85, 247, 0.28); padding: 7px 10px; font-size: var(--kb-fs-xs);';
                   thoughtDetailsEl.innerHTML = `
                     <summary class="aik-row-bold">
                       <span>🧠 ${t('aiq.thoughts', 'Thought Process')}</span>
@@ -4197,20 +4765,20 @@ export async function sendAiChatMessage(rawMessage = null) {
             streamBotMsgEl.innerHTML = _buildAiAssistantMessageHtml(res, activeModel);
           }
         } else {
-        console.warn('[Kib] Streaming fell back to standard POST:', streamErr);
-        if (streamBotMsgEl) {
-          streamBotMsgEl.remove();
-          streamBotMsgEl = null;
-        }
-        res = await api.post('/api/media/chat', {
-          message: msg,
-          history: _aiChatHistory.slice(-10),
-          allow_web_search: allowWeb,
-          allow_nas_tools: allowTools,
-          conversation_id: _activeConversationId,
-          new_conversation: !_activeConversationId,
-          focus_path: _aiFocus?.path || undefined,
-        });
+          console.warn('[Kib] Streaming fell back to standard POST:', streamErr);
+          if (streamBotMsgEl) {
+            streamBotMsgEl.remove();
+            streamBotMsgEl = null;
+          }
+          res = await api.post('/api/media/chat', {
+            message: msg,
+            history: _aiChatHistory.slice(-10),
+            allow_web_search: allowWeb,
+            allow_nas_tools: allowTools,
+            conversation_id: _activeConversationId,
+            new_conversation: !_activeConversationId,
+            focus_path: _aiFocus?.path || undefined,
+          });
         }
       } finally {
         if (stopBtn) stopBtn.hidden = true;
@@ -4250,7 +4818,8 @@ export async function sendAiChatMessage(rawMessage = null) {
         botMsgEl.className = 'ai-chat-msg ai-chat-msg-assistant';
         botMsgEl.dataset.activeModel = usedModel;
         if (_activeConversationId) botMsgEl.dataset.convId = _activeConversationId;
-        botMsgEl.style.cssText = 'display: flex; flex-direction: column; gap: 7px; padding: 11px 14px; border-radius: 10px; background: rgba(14, 28, 30, 0.78); border: 1px solid rgba(79, 216, 196, 0.28);';
+        botMsgEl.style.cssText =
+          'display: flex; flex-direction: column; gap: 7px; padding: 11px 14px; border-radius: 10px; background: rgba(14, 28, 30, 0.78); border: 1px solid rgba(79, 216, 196, 0.28);';
         botMsgEl.innerHTML = _buildAiAssistantMessageHtml(res, activeModel);
         listEl.appendChild(botMsgEl);
       }
@@ -4264,7 +4833,8 @@ export async function sendAiChatMessage(rawMessage = null) {
       if (pending) pending.remove();
       const errEl = document.createElement('div');
       errEl.className = 'ai-chat-msg ai-chat-msg-error';
-      errEl.style.cssText = 'padding: 10px 14px; border-radius: 10px; background: rgba(239, 68, 68, 0.14); border: 1px solid rgba(248, 113, 113, 0.45); color: #fecaca; font-size: var(--kb-fs-xs);';
+      errEl.style.cssText =
+        'padding: 10px 14px; border-radius: 10px; background: rgba(239, 68, 68, 0.14); border: 1px solid rgba(248, 113, 113, 0.45); color: #fecaca; font-size: var(--kb-fs-xs);';
       errEl.textContent = `⚠️ ${t('aiq.no_answer', 'Kib could not answer: {error}', { error: err.message || String(err) })}`;
       listEl.appendChild(errEl);
       listEl.scrollTop = listEl.scrollHeight;
@@ -4405,10 +4975,15 @@ export function _pollReindexProgress() {
  */
 export function changeReader(select, change) {
   const before = select.dataset.saved ?? select.defaultValue ?? '';
-  const putBack = () => { select.value = before; };
+  const putBack = () => {
+    select.value = before;
+  };
   showConfirmToast(
     t('ait.reader_change_title', 'Change the model and rebuild the index?'),
-    t('ait.reader_change_desc', 'Kib reads what it knows again with the new setting. Search keeps working as before until it is done. No drive is read.'),
+    t(
+      'ait.reader_change_desc',
+      'Kib reads what it knows again with the new setting. Search keeps working as before until it is done. No drive is read.'
+    ),
     async () => {
       try {
         const res = await api.post('/api/ai/config', change);
@@ -4427,11 +5002,14 @@ export function changeReader(select, change) {
         }
       } catch (err) {
         putBack();
-        showToast(t('ait.reader_change_failed', 'The setting was not changed: {error}', { error: err.message }), 'error');
+        showToast(
+          t('ait.reader_change_failed', 'The setting was not changed: {error}', { error: err.message }),
+          'error'
+        );
       }
     },
     putBack,
-    { okText: t('ait.reader_change_ok', 'Change and rebuild'), cancelText: t('common.cancel', 'Cancel') },
+    { okText: t('ait.reader_change_ok', 'Change and rebuild'), cancelText: t('common.cancel', 'Cancel') }
   );
 }
 
@@ -4450,14 +5028,20 @@ export async function triggerInPlaceReindex() {
       _pollReindexProgress();
     } else {
       if (container) container.style.display = 'none';
-      showToast(t('toast.failed_trigger_reindex', 'Failed to start re-indexing: {error}', { error: resp?.detail || status || '?' }), 'error');
+      showToast(
+        t('toast.failed_trigger_reindex', 'Failed to start re-indexing: {error}', {
+          error: resp?.detail || status || '?',
+        }),
+        'error'
+      );
     }
   } catch (err) {
-    showToast(t('toast.failed_trigger_reindex', 'Failed to start re-indexing: {error}', { error: err.message }), 'error');
+    showToast(
+      t('toast.failed_trigger_reindex', 'Failed to start re-indexing: {error}', { error: err.message }),
+      'error'
+    );
   }
 }
-
-
 
 /** Shows how many photos the vision model has described (AI-14). */
 export async function refreshVisionStatus() {
@@ -4468,15 +5052,20 @@ export async function refreshVisionStatus() {
     if (st.mode === 'off') {
       el.textContent = '';
     } else if (st.state === 'no-model') {
-      el.textContent = t('ai.vision_no_model', 'Install a vision model (for example gemma3 or qwen2.5vl) under AI → Models.');
+      el.textContent = t(
+        'ai.vision_no_model',
+        'Install a vision model (for example gemma3 or qwen2.5vl) under AI → Models.'
+      );
     } else {
-      el.textContent = t('ai.vision_progress', '{done} of {total} photos described', { done: st.captioned, total: st.photos });
+      el.textContent = t('ai.vision_progress', '{done} of {total} photos described', {
+        done: st.captioned,
+        total: st.photos,
+      });
     }
   } catch {
     el.textContent = '';
   }
 }
-
 
 /** After Tailscale Serve is on: the address to open on a phone, with a QR code (M2). */
 export async function showServeLink(url, funnel = false) {
@@ -4488,8 +5077,14 @@ export async function showServeLink(url, funnel = false) {
     console.warn('QR code unavailable', e);
   }
   const how = funnel
-    ? t('ts.serve_how_funnel', 'Funnel is on: this address works from any browser on the internet, so keep strong passwords and 2FA.')
-    : t('ts.serve_how', 'On your phone, install the Tailscale app and sign in to the same tailnet. Then open this address, on Wi-Fi or mobile data. Add it to your home screen to use Kiboto like an app.');
+    ? t(
+        'ts.serve_how_funnel',
+        'Funnel is on: this address works from any browser on the internet, so keep strong passwords and 2FA.'
+      )
+    : t(
+        'ts.serve_how',
+        'On your phone, install the Tailscale app and sign in to the same tailnet. Then open this address, on Wi-Fi or mobile data. Add it to your home screen to use Kiboto like an app.'
+      );
   showConfirmToast(
     t('ts.serve_ready', 'Kiboto is reachable through Tailscale'),
     `${qr ? `<img src="${qr}" alt="${escapeHtml(t('ts.serve_qr_alt', 'QR code for {url}', { url }))}" width="180" height="180" style="display:block;margin:0 auto 10px;border-radius:8px;background:#fff;">` : ''}<a class="aik-bold-accent" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(url)}</a><br><br>${escapeHtml(how)}`,

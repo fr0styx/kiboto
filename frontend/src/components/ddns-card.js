@@ -36,7 +36,7 @@ function html(st) {
       </div>
       <button type="button" class="btn-pill-toggle" id="ddns-toggle" aria-pressed="${st.enabled ? 'true' : 'false'}" aria-labelledby="ddns-title">${escapeHtml(st.enabled ? t('nas_name.btn_on', 'On') : t('nas_name.btn_off', 'Off'))}</button>
     </div>
-    <div class="nsv-xs-muted-2">${escapeHtml(t('ddns.help', 'Keeps a name such as home.duckdns.org pointing at your home\'s internet address when it changes. A name alone opens nothing: reaching Kiboto from outside also needs a port forwarded on your router. For private access, Tailscale needs neither.'))}</div>
+    <div class="nsv-xs-muted-2">${escapeHtml(t('ddns.help', "Keeps a name such as home.duckdns.org pointing at your home's internet address when it changes. A name alone opens nothing: reaching Kiboto from outside also needs a port forwarded on your router. For private access, Tailscale needs neither."))}</div>
     <form class="ddns-form" id="ddns-form">
       <label class="ddns-field"><span>${escapeHtml(t('ddns.provider', 'Service'))}</span>
         <select id="ddns-provider">
@@ -69,7 +69,10 @@ export async function renderDdnsCard(mount = document.getElementById('ddns-card'
   mount.innerHTML = html(st);
   const $ = (id) => /** @type {any} */ (mount.querySelector(`#${id}`));
   const err = $('ddns-error');
-  const say = (msg) => { err.textContent = msg; err.hidden = !msg; };
+  const say = (msg) => {
+    err.textContent = msg;
+    err.hidden = !msg;
+  };
   const send = async (enabled) => {
     say('');
     const token = $('ddns-token').value;
@@ -92,7 +95,10 @@ export async function renderDdnsCard(mount = document.getElementById('ddns-card'
       ? t('ddns.cf_help', 'A Cloudflare API token with Zone: Read and DNS: Edit for this domain.')
       : t('ddns.duck_help', 'The token shown on duckdns.org after you sign in.');
   });
-  $('ddns-form').addEventListener('submit', (e) => { e.preventDefault(); send(st.enabled); });
+  $('ddns-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    send(st.enabled);
+  });
   $('ddns-toggle').addEventListener('click', () => send(!st.enabled));
   $('ddns-now').addEventListener('click', async () => {
     say('');

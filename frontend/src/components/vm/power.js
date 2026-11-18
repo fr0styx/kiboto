@@ -39,7 +39,10 @@ export function askPower(action, name, run) {
   if (action === 'stop' || action === 'acpi_shutdown') {
     showConfirmToast(
       t('vmp.shutdown_title', 'Shut down {name}?', { name }),
-      t('vmp.shutdown_msg', 'The system inside is asked to shut down, as if you pressed its power button. Kiboto waits for it and does not end it.'),
+      t(
+        'vmp.shutdown_msg',
+        'The system inside is asked to shut down, as if you pressed its power button. Kiboto waits for it and does not end it.'
+      ),
       run,
       null,
       { okText: t('vmm.shutdown', 'Shut down'), destructive: false }
@@ -49,7 +52,10 @@ export function askPower(action, name, run) {
   if (action === 'force_off') {
     showDangerConfirm(
       t('vmp.off_title', 'Turn off {name} now?', { name }),
-      t('vmp.off_msg', 'This is like pulling the plug. Work that was not saved inside is lost, and its disk can be damaged.'),
+      t(
+        'vmp.off_msg',
+        'This is like pulling the plug. Work that was not saved inside is lost, and its disk can be damaged.'
+      ),
       run,
       null,
       { okText: t('vmm.force_stop', 'Turn off now') }
@@ -59,7 +65,10 @@ export function askPower(action, name, run) {
   if (action === 'restart' || action === 'reboot') {
     showDangerConfirm(
       t('vmp.restart_title', 'Restart {name}?', { name }),
-      t('vmp.restart_msg', 'This presses its reset button. The system inside is not shut down first, so work that was not saved is lost.'),
+      t(
+        'vmp.restart_msg',
+        'This presses its reset button. The system inside is not shut down first, so work that was not saved is lost.'
+      ),
       run,
       null,
       { okText: t('vmm.restart', 'Restart') }
@@ -77,11 +86,14 @@ export function askPower(action, name, run) {
  * @returns {{ text: string, tone: string }}
  */
 export function powerToast(action, state, name) {
-  if (state === 'shutting_down') return { text: t('vmp.asked', '{name} was asked to shut down.', { name }), tone: 'info' };
-  if (action === 'stop' || action === 'acpi_shutdown') return { text: t('vmp.is_off', '{name} is off.', { name }), tone: 'success' };
+  if (state === 'shutting_down')
+    return { text: t('vmp.asked', '{name} was asked to shut down.', { name }), tone: 'info' };
+  if (action === 'stop' || action === 'acpi_shutdown')
+    return { text: t('vmp.is_off', '{name} is off.', { name }), tone: 'success' };
   if (action === 'force_off') return { text: t('vmp.turned_off', '{name} was turned off.', { name }), tone: 'success' };
   if (action === 'start') return { text: t('vmp.started', '{name} started.', { name }), tone: 'success' };
-  if (action === 'restart' || action === 'reboot') return { text: t('vmp.restarted', '{name} was restarted.', { name }), tone: 'success' };
+  if (action === 'restart' || action === 'reboot')
+    return { text: t('vmp.restarted', '{name} was restarted.', { name }), tone: 'success' };
   if (action === 'pause') return { text: t('vmp.paused', '{name} is paused.', { name }), tone: 'success' };
   if (action === 'resume') return { text: t('vmp.resumed', '{name} runs again.', { name }), tone: 'success' };
   return { text: t('toast.vm_action_completed', "VM action '{action}' completed", { action }), tone: 'success' };

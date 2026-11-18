@@ -7,22 +7,32 @@ import { t } from '../i18n.js';
 import { escapeHtml } from '../utils.js';
 
 const DAY_KEYS = [
-  ['ps.d_mon', 'Mon'], ['ps.d_tue', 'Tue'], ['ps.d_wed', 'Wed'], ['ps.d_thu', 'Thu'],
-  ['ps.d_fri', 'Fri'], ['ps.d_sat', 'Sat'], ['ps.d_sun', 'Sun'],
+  ['ps.d_mon', 'Mon'],
+  ['ps.d_tue', 'Tue'],
+  ['ps.d_wed', 'Wed'],
+  ['ps.d_thu', 'Thu'],
+  ['ps.d_fri', 'Fri'],
+  ['ps.d_sat', 'Sat'],
+  ['ps.d_sun', 'Sun'],
 ];
 
 /** The status line under the title. */
 export function scheduleStatus(st) {
   if (!st || !st.enabled) return t('ps.st_off', 'Off');
   const base = t('ps.st_on', 'Switches off at {off} and wakes at {wake}.', { off: st.off_at, wake: st.wake_at });
-  if (st.last_note === 'no_wake') return `${base} ${t('ps.note_no_wake', 'Last time it stayed on: the wake-up clock could not be set.')}`;
+  if (st.last_note === 'no_wake')
+    return `${base} ${t('ps.note_no_wake', 'Last time it stayed on: the wake-up clock could not be set.')}`;
   if (st.last_note === 'failed') return `${base} ${t('ps.note_failed', 'Last time switching off did not work.')}`;
-  if (String(st.last_note || '').startsWith('postponed')) return `${base} ${t('ps.note_postponed', 'Tonight it waits: something is still running.')}`;
+  if (String(st.last_note || '').startsWith('postponed'))
+    return `${base} ${t('ps.note_postponed', 'Tonight it waits: something is still running.')}`;
   return base;
 }
 
 function html(st) {
-  const days = DAY_KEYS.map(([k, en], i) => `<label class="ps-day"><input type="checkbox" data-ps-day="${i}"${st.days.includes(i) ? ' checked' : ''}> ${escapeHtml(t(k, en))}</label>`).join('');
+  const days = DAY_KEYS.map(
+    ([k, en], i) =>
+      `<label class="ps-day"><input type="checkbox" data-ps-day="${i}"${st.days.includes(i) ? ' checked' : ''}> ${escapeHtml(t(k, en))}</label>`
+  ).join('');
   return `
     <div class="fw-head">
       <div>
@@ -31,9 +41,14 @@ function html(st) {
       </div>
       <button type="button" class="btn-pill-toggle" id="ps-toggle" aria-pressed="${st.enabled ? 'true' : 'false'}" aria-labelledby="ps-title"${st.wake_possible ? '' : ' disabled'}>${escapeHtml(st.enabled ? t('nas_name.btn_on', 'On') : t('nas_name.btn_off', 'Off'))}</button>
     </div>
-    <p class="fw-why">${escapeHtml(st.wake_possible
-      ? t('ps.help', 'Saves power while nobody uses the NAS. It sets its wake-up clock first and never switches off without one; if a backup or a virtual machine is still running it waits up to two hours. Try it for one night first and check it came back in the morning.')
-      : t('ps.no_wake', "This NAS's wake-up clock can't be set from Kiboto, so it would not come back on by itself."))}</p>
+    <p class="fw-why">${escapeHtml(
+      st.wake_possible
+        ? t(
+            'ps.help',
+            'Saves power while nobody uses the NAS. It sets its wake-up clock first and never switches off without one; if a backup or a virtual machine is still running it waits up to two hours. Try it for one night first and check it came back in the morning.'
+          )
+        : t('ps.no_wake', "This NAS's wake-up clock can't be set from Kiboto, so it would not come back on by itself.")
+    )}</p>
     <div class="ps-times">
       <label class="ddns-field"><span>${escapeHtml(t('ps.off_at', 'Switch off at'))}</span><input type="time" id="ps-off" value="${escapeHtml(st.off_at)}"></label>
       <label class="ddns-field"><span>${escapeHtml(t('ps.wake_at', 'Wake up at'))}</span><input type="time" id="ps-wake" value="${escapeHtml(st.wake_at)}"></label>
@@ -57,7 +72,9 @@ export async function renderPowerScheduleCard(mount = document.getElementById('p
   const err = /** @type {HTMLElement} */ (mount.querySelector('#ps-error'));
   const send = async (enabled) => {
     err.hidden = true;
-    const days = [...mount.querySelectorAll('[data-ps-day]')].filter((b) => /** @type {HTMLInputElement} */ (b).checked).map((b) => Number(/** @type {HTMLInputElement} */ (b).dataset.psDay));
+    const days = [...mount.querySelectorAll('[data-ps-day]')]
+      .filter((b) => /** @type {HTMLInputElement} */ (b).checked)
+      .map((b) => Number(/** @type {HTMLInputElement} */ (b).dataset.psDay));
     try {
       await api.put('/api/system/power-schedule', {
         enabled,

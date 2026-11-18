@@ -11,17 +11,14 @@ import {
   updateStreamlineBayChips,
   initDashboardClicks,
   diskTile,
-  renderDisks
+  renderDisks,
 } from '../components/dashboard.js';
-import {
-  syncLcdStyleUI,
-  initLcdStyleControls
-} from '../components/settings.js';
+import { syncLcdStyleUI, initLcdStyleControls } from '../components/settings.js';
 import {
   applyDashboardLayout,
   syncMiniPreviewStructure,
   syncMiniPreviewTelemetry,
-  setupMiniPreviewInteractivity
+  setupMiniPreviewInteractivity,
 } from '../components/mini-preview.js';
 import fs from 'fs';
 import path from 'path';
@@ -191,8 +188,8 @@ describe('Streamline Minimalist / Big IP Screen Layout Suite', () => {
       mem: { pct: 18.0, used: '5.7GB', total: '31.1GB' },
       disks: [
         { name: 'sda', dev: '/dev/sda', temp: 35, health: 'ok' },
-        { name: 'nvme0n1', dev: '/dev/nvme0n1', temp: 38, health: 'ok' }
-      ]
+        { name: 'nvme0n1', dev: '/dev/nvme0n1', temp: 38, health: 'ok' },
+      ],
     };
 
     updateStreamlineLayout(stats, false);
@@ -228,7 +225,7 @@ describe('Streamline Minimalist / Big IP Screen Layout Suite', () => {
       storage: { pct: 82, used: '8TB', total: '10TB' },
       cpu: { util: 78, temp: 72 },
       mem: { pct: 76 },
-      disks: []
+      disks: [],
     };
     updateStreamlineLayout(warnStats, true);
     expect(document.getElementById('sl-status-ring').className).toContain('sl-status-ring warn');
@@ -239,7 +236,7 @@ describe('Streamline Minimalist / Big IP Screen Layout Suite', () => {
       storage: { pct: 95, used: '9.5TB', total: '10TB' },
       cpu: { util: 92, temp: 88 },
       mem: { pct: 92 },
-      disks: [{ name: 'sda', health: 'crit' }]
+      disks: [{ name: 'sda', health: 'crit' }],
     };
     updateStreamlineLayout(critStats, true);
     expect(document.getElementById('sl-status-ring').className).toContain('sl-status-ring crit');
@@ -256,7 +253,7 @@ describe('Streamline Minimalist / Big IP Screen Layout Suite', () => {
       { name: '/dev/sdg', dev: '/dev/sdg', temp: 36, health: 'ok' },
       { name: '/dev/sdh', dev: '/dev/sdh', temp: 35, health: 'ok' },
       { name: '/dev/nvme0n1', dev: '/dev/nvme0n1', temp: 40, health: 'ok' },
-      { name: '/dev/nvme1n1', dev: '/dev/nvme1n1', temp: 42, health: 'ok' }
+      { name: '/dev/nvme1n1', dev: '/dev/nvme1n1', temp: 42, health: 'ok' },
     ];
 
     updateStreamlineBayChips(disks);
@@ -265,16 +262,14 @@ describe('Streamline Minimalist / Big IP Screen Layout Suite', () => {
     const chips = bayRow.querySelectorAll('.sl-bay-chip');
     expect(chips.length).toBe(10);
 
-    const labels = Array.from(chips).map(c => c.querySelector('.slot-lbl').textContent);
-    expect(labels).toEqual([
-      'sda', 'sdb', 'sdc', 'sdd', 'sde', 'sdf', 'sdg', 'sdh', 'nv0', 'nv1'
-    ]);
+    const labels = Array.from(chips).map((c) => c.querySelector('.slot-lbl').textContent);
+    expect(labels).toEqual(['sda', 'sdb', 'sdc', 'sdd', 'sde', 'sdf', 'sdg', 'sdh', 'nv0', 'nv1']);
   });
 
   it('opens Drive Health straight away for sleeping drives too, since it never wakes them', () => {
     const disks = [
       { name: 'sda', dev: '/dev/sda', temp: 35, health: 'ok', standby: false },
-      { name: 'sdb', dev: '/dev/sdb', temp: null, health: 'standby', standby: true }
+      { name: 'sdb', dev: '/dev/sdb', temp: null, health: 'standby', standby: true },
     ];
     state.latestStats = { disks };
 
@@ -354,7 +349,9 @@ describe('Streamline Minimalist / Big IP Screen Layout Suite', () => {
     expect(lcdDirectCss).toContain('body.lcd-direct #console-window #screen.layout-streamline .cards');
     expect(lcdDirectCss).toContain('body.lcd-direct #console-window #screen.layout-streamline .disks');
     expect(lcdDirectCss).toContain('body.lcd-direct #console-window #screen.layout-streamline #streamline-container');
-    expect(lcdDirectCss).toContain('body.lcd-direct #console-window #screen:not(.layout-streamline) .streamline-container');
+    expect(lcdDirectCss).toContain(
+      'body.lcd-direct #console-window #screen:not(.layout-streamline) .streamline-container'
+    );
   });
 
   it('syncs layout classes and isolation between #screen, document.body, and mini-preview-inner', () => {
@@ -436,7 +433,14 @@ describe('Streamline Minimalist / Big IP Screen Layout Suite', () => {
     });
 
     it('renders clean disk tile in Classic Cards without redundant parity pill', () => {
-      const pTile = diskTile({ name: 'sdb', role: 'parity', is_parity: true, parity_label: 'P', temp: 34, health: 'ok' });
+      const pTile = diskTile({
+        name: 'sdb',
+        role: 'parity',
+        is_parity: true,
+        parity_label: 'P',
+        temp: 34,
+        health: 'ok',
+      });
       expect(pTile.classList.contains('disk-is-parity')).toBe(true);
       expect(pTile.classList.contains('r-parity')).toBe(true);
       expect(pTile.title).toContain('[PARITY]');
@@ -445,7 +449,15 @@ describe('Streamline Minimalist / Big IP Screen Layout Suite', () => {
       expect(pTile.querySelector('.dt .parity-pill')).toBeNull();
 
       // Parity drive in standby mode displays clean full-width standby badge without pill
-      const pStandbyTile = diskTile({ name: 'sdb', role: 'parity', is_parity: true, parity_label: 'P', temp: null, health: 'standby', standby: true });
+      const pStandbyTile = diskTile({
+        name: 'sdb',
+        role: 'parity',
+        is_parity: true,
+        parity_label: 'P',
+        temp: null,
+        health: 'standby',
+        standby: true,
+      });
       expect(pStandbyTile.classList.contains('disk-is-parity')).toBe(true);
       expect(pStandbyTile.querySelector('.dt .standby-badge')).not.toBeNull();
       expect(pStandbyTile.querySelector('.dt .parity-pill')).toBeNull();
@@ -503,7 +515,7 @@ describe('Streamline Minimalist / Big IP Screen Layout Suite', () => {
         'metric-mem': true,
         'metric-fans': true,
         'metric-net': true,
-        'metric-disks': true
+        'metric-disks': true,
       };
       state.dashSizes = {};
 
@@ -515,20 +527,20 @@ describe('Streamline Minimalist / Big IP Screen Layout Suite', () => {
       expect(miniDeck).not.toBeNull();
 
       // Default order: storage, compute, ip
-      let screenCards = Array.from(screenDeck.querySelectorAll('.sl-card')).map(c => c.dataset.metricId);
+      let screenCards = Array.from(screenDeck.querySelectorAll('.sl-card')).map((c) => c.dataset.metricId);
       expect(screenCards).toEqual(['metric-storage', 'metric-cpu', 'metric-net']);
 
-      let miniCards = Array.from(miniDeck.querySelectorAll('.sl-card')).map(c => c.dataset.metricId);
+      let miniCards = Array.from(miniDeck.querySelectorAll('.sl-card')).map((c) => c.dataset.metricId);
       expect(miniCards).toEqual(['metric-storage', 'metric-cpu', 'metric-net']);
 
       // Change order: IP first, then COMPUTE, then STORAGE
       state.dashOrder = ['metric-net', 'metric-cpu', 'metric-storage', 'metric-disks'];
       applyDashboardLayout();
 
-      screenCards = Array.from(screenDeck.querySelectorAll('.sl-card')).map(c => c.dataset.metricId);
+      screenCards = Array.from(screenDeck.querySelectorAll('.sl-card')).map((c) => c.dataset.metricId);
       expect(screenCards).toEqual(['metric-net', 'metric-cpu', 'metric-storage']);
 
-      miniCards = Array.from(miniDeck.querySelectorAll('.sl-card')).map(c => c.dataset.metricId);
+      miniCards = Array.from(miniDeck.querySelectorAll('.sl-card')).map((c) => c.dataset.metricId);
       expect(miniCards).toEqual(['metric-net', 'metric-cpu', 'metric-storage']);
 
       // Change order: Disks first, then IP, COMPUTE, STORAGE
@@ -558,8 +570,10 @@ describe('Streamline Minimalist / Big IP Screen Layout Suite', () => {
       const dragStartEvt = new Event('dragstart', { bubbles: true });
       dragStartEvt.dataTransfer = {
         effectAllowed: '',
-        setData: (k, v) => { dataStore[k] = v; },
-        getData: (k) => dataStore[k]
+        setData: (k, v) => {
+          dataStore[k] = v;
+        },
+        getData: (k) => dataStore[k],
       };
       slStorage.dispatchEvent(dragStartEvt);
       expect(slStorage.classList.contains('mini-dragging')).toBe(true);
@@ -574,10 +588,13 @@ describe('Streamline Minimalist / Big IP Screen Layout Suite', () => {
 
       // Verify state.dashOrder updated (storage swapped with compute)
       expect(state.dashOrder.indexOf('metric-cpu')).toBeLessThan(state.dashOrder.indexOf('metric-storage'));
-      expect(api.post).toHaveBeenCalledWith('/api/layout', expect.objectContaining({
-        order: state.dashOrder,
-        style: 'streamline'
-      }));
+      expect(api.post).toHaveBeenCalledWith(
+        '/api/layout',
+        expect.objectContaining({
+          order: state.dashOrder,
+          style: 'streamline',
+        })
+      );
 
       // Now drag disk row onto a card to swap disks position
       const miniBayRow = mini.querySelector('.sl-bay-row');
@@ -585,8 +602,10 @@ describe('Streamline Minimalist / Big IP Screen Layout Suite', () => {
       const diskDragStart = new Event('dragstart', { bubbles: true });
       diskDragStart.dataTransfer = {
         effectAllowed: '',
-        setData: (k, v) => { dataStore[k] = v; },
-        getData: (k) => dataStore[k]
+        setData: (k, v) => {
+          dataStore[k] = v;
+        },
+        getData: (k) => dataStore[k],
       };
       miniBayRow.dispatchEvent(diskDragStart);
       expect(miniBayRow.classList.contains('mini-dragging')).toBe(true);
@@ -632,9 +651,7 @@ describe('Streamline Minimalist / Big IP Screen Layout Suite', () => {
         cpu: { util: 50, temp: 48 },
         mem: { pct: 40, used: '8GB' },
         net: { tx: '1.2 MB/s', rx: '4.5 MB/s' },
-        disks: [
-          { name: 'sda', dev: '/dev/sda', temp: 33, health: 'ok' }
-        ]
+        disks: [{ name: 'sda', dev: '/dev/sda', temp: 33, health: 'ok' }],
       };
       updateStreamlineLayout(stats, false);
       syncMiniPreviewTelemetry();

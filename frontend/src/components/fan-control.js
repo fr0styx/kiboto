@@ -37,12 +37,18 @@ export function syncFanModeFromStream(fc, now = Date.now()) {
   const prof = fc && typeof fc.profile === 'string' ? fc.profile.toLowerCase() : '';
   if (!prof || prof === currentFanProfile || now - _localChangeAt < 3000) return false;
   currentFanProfile = prof;
-  document.querySelectorAll('.fan-profile-btn').forEach((b) => b.classList.toggle('active', /** @type {HTMLElement} */ (b).dataset.fanProfile === prof));
+  document
+    .querySelectorAll('.fan-profile-btn')
+    .forEach((b) => b.classList.toggle('active', /** @type {HTMLElement} */ (b).dataset.fanProfile === prof));
   return true;
 }
 
-export function tempToX(t) { return 38 + ((Math.max(30, Math.min(60, t)) - 30) / 30) * (285 - 38); }
-export function xToTemp(x) { return Math.round(30 + ((x - 38) / (285 - 38)) * 30); }
+export function tempToX(t) {
+  return 38 + ((Math.max(30, Math.min(60, t)) - 30) / 30) * (285 - 38);
+}
+export function xToTemp(x) {
+  return Math.round(30 + ((x - 38) / (285 - 38)) * 30);
+}
 export function pctToY(p) {
   const clamped = Math.max(0, Math.min(100, p));
   return 104 - (clamped / 100) * (104 - 20);
@@ -58,7 +64,14 @@ export function yToPct(y) {
 
 export function expandTo6Points(pts) {
   if (!pts || !Array.isArray(pts) || pts.length === 0) {
-    return [[30, 0], [36, 32], [42, 48], [48, 65], [54, 85], [60, 100]];
+    return [
+      [30, 0],
+      [36, 32],
+      [42, 48],
+      [48, 65],
+      [54, 85],
+      [60, 100],
+    ];
   }
   let current = pts.map((p) => [Number(p[0]), Number(p[1])]);
   if (current.length === 6) return current;
@@ -108,7 +121,10 @@ export function renderCurveLines() {
       if (i < svgCoords.length) {
         handle.setAttribute('cx', svgCoords[i][0]);
         handle.setAttribute('cy', svgCoords[i][1]);
-        handle.setAttribute('title', t('fan.node', 'Point {n}: {temp}°C → {pct}% PWM', { n: i + 1, temp: pts[i][0], pct: pts[i][1] }));
+        handle.setAttribute(
+          'title',
+          t('fan.node', 'Point {n}: {temp}°C → {pct}% PWM', { n: i + 1, temp: pts[i][0], pct: pts[i][1] })
+        );
         handle.style.display = 'block';
       } else {
         handle.style.display = 'none';
@@ -118,7 +134,12 @@ export function renderCurveLines() {
 
   const rangeVal = $('fan-curve-range-val');
   if (rangeVal && pts.length >= 2) {
-    rangeVal.textContent = t('fan.ramp', 'Ramp: {from}°C – {to}°C ({low}% – {high}%)', { from: pts[1][0], to: pts[pts.length - 2][0], low: pts[1][1], high: pts[pts.length - 2][1] });
+    rangeVal.textContent = t('fan.ramp', 'Ramp: {from}°C – {to}°C ({low}% – {high}%)', {
+      from: pts[1][0],
+      to: pts[pts.length - 2][0],
+      low: pts[1][1],
+      high: pts[pts.length - 2][1],
+    });
   }
 }
 
@@ -150,7 +171,8 @@ export function updateFanCurveWorkstation(s) {
     }
   }
   if ($('zp-cpu-temp')) $('zp-cpu-temp').textContent = `${fc.cpu_temp}°C`;
-  if ($('zp-cpu-pwm')) $('zp-cpu-pwm').textContent = fc.ctrl_cpu_fan ? `PWM: ${fc.cpu_pwm}` : t('fan.bios_auto', 'BIOS Auto');
+  if ($('zp-cpu-pwm'))
+    $('zp-cpu-pwm').textContent = fc.ctrl_cpu_fan ? `PWM: ${fc.cpu_pwm}` : t('fan.bios_auto', 'BIOS Auto');
 
   const hBadge = $('hysteresis-badge');
   if (hBadge) {
@@ -181,7 +203,10 @@ export function updateFanCurveWorkstation(s) {
       badgeZ1.style.color = '#4fd8c4';
       badgeZ1.style.borderColor = 'rgba(79, 216, 196, 0.4)';
     } else if (fc.zone1_standby) {
-      badgeZ1.textContent = t('fan.standby', 'Zone {zone}: Standby ({why})', { zone: 1, why: standbyReason(fc, fc.zone1_standby_rem) });
+      badgeZ1.textContent = t('fan.standby', 'Zone {zone}: Standby ({why})', {
+        zone: 1,
+        why: standbyReason(fc, fc.zone1_standby_rem),
+      });
       badgeZ1.style.background = 'rgba(245, 183, 49, 0.15)';
       badgeZ1.style.color = 'var(--warn)';
       badgeZ1.style.borderColor = 'rgba(245, 183, 49, 0.4)';
@@ -199,7 +224,10 @@ export function updateFanCurveWorkstation(s) {
       badgeZ2.style.color = '#4fd8c4';
       badgeZ2.style.borderColor = 'rgba(79, 216, 196, 0.4)';
     } else if (fc.zone2_standby) {
-      badgeZ2.textContent = t('fan.standby', 'Zone {zone}: Standby ({why})', { zone: 2, why: standbyReason(fc, fc.zone2_standby_rem) });
+      badgeZ2.textContent = t('fan.standby', 'Zone {zone}: Standby ({why})', {
+        zone: 2,
+        why: standbyReason(fc, fc.zone2_standby_rem),
+      });
       badgeZ2.style.background = 'rgba(245, 183, 49, 0.15)';
       badgeZ2.style.color = 'var(--warn)';
       badgeZ2.style.borderColor = 'rgba(245, 183, 49, 0.4)';
@@ -232,7 +260,10 @@ export function updateFanCurveWorkstation(s) {
   if (fanStatusBadge && fc.driver_mode) {
     if (fc.driver_mode === 'mmio') {
       fanStatusBadge.textContent = t('fan.mmio', 'MMIO FALLBACK');
-      fanStatusBadge.title = t('ui.direct_mmio_memory_access_userspace', 'Direct MMIO Memory Access (Userspace Fallback - No kernel module needed)');
+      fanStatusBadge.title = t(
+        'ui.direct_mmio_memory_access_userspace',
+        'Direct MMIO Memory Access (Userspace Fallback - No kernel module needed)'
+      );
       fanStatusBadge.style.background = 'rgba(79, 216, 196, 0.15)';
       fanStatusBadge.style.color = '#4fd8c4';
       fanStatusBadge.style.borderColor = 'rgba(79, 216, 196, 0.4)';
@@ -251,7 +282,7 @@ export function updateFanCurveWorkstation(s) {
     }
   }
 
-  const curveUpdateCooldown = (Date.now() - _lastCurveSaveTime) < 5000;
+  const curveUpdateCooldown = Date.now() - _lastCurveSaveTime < 5000;
   if (!isDraggingCurve && !curveUpdateCooldown) {
     if (fc.curve_points && fc.curve_points.length > 0) {
       const normalizedPts = expandTo6Points(fc.curve_points);
@@ -262,7 +293,14 @@ export function updateFanCurveWorkstation(s) {
     } else if (!_curveInitialized) {
       const tMin = fc.temp_min || 37;
       const tMax = fc.temp_max || 50;
-      state.setCurvePoints(expandTo6Points([[30, 32], [tMin, 32], [tMax, 100], [60, 100]]));
+      state.setCurvePoints(
+        expandTo6Points([
+          [30, 32],
+          [tMin, 32],
+          [tMax, 100],
+          [60, 100],
+        ])
+      );
       _curveInitialized = true;
     }
   }
@@ -288,29 +326,40 @@ export function updateFanCurveWorkstation(s) {
   if (dotZ1) {
     dotZ1.setAttribute('cx', svgZ1X);
     dotZ1.setAttribute('cy', svgZ1Y);
-    dotZ1.style.display = (state.selectedZoneFilter === 'all' || state.selectedZoneFilter === 'zone1') ? 'block' : 'none';
+    dotZ1.style.display = state.selectedZoneFilter === 'all' || state.selectedZoneFilter === 'zone1' ? 'block' : 'none';
   }
 
   if (dotZ2) {
     dotZ2.setAttribute('cx', svgZ2X);
     dotZ2.setAttribute('cy', svgZ2Y);
-    dotZ2.style.display = (state.selectedZoneFilter === 'all' || state.selectedZoneFilter === 'zone2') ? 'block' : 'none';
+    dotZ2.style.display = state.selectedZoneFilter === 'all' || state.selectedZoneFilter === 'zone2' ? 'block' : 'none';
   }
 
   if (dotCpu) {
     dotCpu.setAttribute('cx', svgCpuX);
     dotCpu.setAttribute('cy', svgCpuY);
-    dotCpu.style.display = (state.selectedZoneFilter === 'all' || state.selectedZoneFilter === 'cpu') ? 'block' : 'none';
+    dotCpu.style.display = state.selectedZoneFilter === 'all' || state.selectedZoneFilter === 'cpu' ? 'block' : 'none';
   }
 
   const readout = $('curve-readout-text');
   if (readout) {
     if (state.selectedZoneFilter === 'zone1') {
-      readout.textContent = t('fan.only_zone', 'Zone {zone} only: {temp}°C ({pwm} PWM)', { zone: 1, temp: fc.zone1_temp, pwm: fc.zone1_pwm });
+      readout.textContent = t('fan.only_zone', 'Zone {zone} only: {temp}°C ({pwm} PWM)', {
+        zone: 1,
+        temp: fc.zone1_temp,
+        pwm: fc.zone1_pwm,
+      });
     } else if (state.selectedZoneFilter === 'zone2') {
-      readout.textContent = t('fan.only_zone', 'Zone {zone} only: {temp}°C ({pwm} PWM)', { zone: 2, temp: fc.zone2_temp, pwm: fc.zone2_pwm });
+      readout.textContent = t('fan.only_zone', 'Zone {zone} only: {temp}°C ({pwm} PWM)', {
+        zone: 2,
+        temp: fc.zone2_temp,
+        pwm: fc.zone2_pwm,
+      });
     } else if (state.selectedZoneFilter === 'cpu') {
-      readout.textContent = t('fan.only_cpu', 'CPU only: {temp}°C ({pwm} PWM)', { temp: fc.cpu_temp, pwm: fc.cpu_pwm || t('fan.auto', 'Auto') });
+      readout.textContent = t('fan.only_cpu', 'CPU only: {temp}°C ({pwm} PWM)', {
+        temp: fc.cpu_temp,
+        pwm: fc.cpu_pwm || t('fan.auto', 'Auto'),
+      });
     } else {
       const maxDisk = Math.max(fc.zone1_temp, fc.zone2_temp);
       readout.textContent = t('fan.all_zones', 'All zones: hottest bay {temp}°C', { temp: maxDisk });
@@ -332,15 +381,24 @@ export function setZoneFilter(filterKey) {
   if (colCpu) colCpu.classList.toggle('active-zone-filter', filterKey === 'cpu');
 
   if (btnReset) {
-    btnReset.style.display = (filterKey !== 'all') ? 'inline-block' : 'none';
+    btnReset.style.display = filterKey !== 'all' ? 'inline-block' : 'none';
   }
 
   if (instruction) {
     if (filterKey === 'all') {
-      instruction.textContent = t('settings.fan_curve_desc', 'Displaying all thermal zones. Click a zone tachometer above or below to isolate.');
+      instruction.textContent = t(
+        'settings.fan_curve_desc',
+        'Displaying all thermal zones. Click a zone tachometer above or below to isolate.'
+      );
     } else {
-      const nameMap = { zone1: t('fan.zone1', 'Zone 1 (left bays)'), zone2: t('fan.zone2', 'Zone 2 (right bays)'), cpu: t('fan.cpu', 'CPU package') };
-      instruction.textContent = t('fan.filtered', 'Showing {zone} only. The other zones are hidden on the graph.', { zone: nameMap[filterKey] });
+      const nameMap = {
+        zone1: t('fan.zone1', 'Zone 1 (left bays)'),
+        zone2: t('fan.zone2', 'Zone 2 (right bays)'),
+        cpu: t('fan.cpu', 'CPU package'),
+      };
+      instruction.textContent = t('fan.filtered', 'Showing {zone} only. The other zones are hidden on the graph.', {
+        zone: nameMap[filterKey],
+      });
     }
   }
 
@@ -392,7 +450,7 @@ export function initFanControl() {
     }
     if (fanPwmVal) {
       if (profile === 'manual') {
-        const val = pct !== undefined ? pct : (fanPwmSlider ? fanPwmSlider.value : 60);
+        const val = pct !== undefined ? pct : fanPwmSlider ? fanPwmSlider.value : 60;
         fanPwmVal.textContent = t('fan.manual_active', 'Fixed {pct} %', { pct: val });
         fanPwmVal.style.color = 'var(--ok2)';
         fanPwmVal.style.opacity = '1';
@@ -439,7 +497,14 @@ export function initFanControl() {
       if (data.curve_points && data.curve_points.length > 0) {
         state.setCurvePoints(expandTo6Points(data.curve_points));
       } else {
-        state.setCurvePoints(expandTo6Points([[30, 32], [tMin, 32], [tMax, 100], [60, 100]]));
+        state.setCurvePoints(
+          expandTo6Points([
+            [30, 32],
+            [tMin, 32],
+            [tMax, 100],
+            [60, 100],
+          ])
+        );
       }
       renderCurveLines();
 
@@ -506,16 +571,21 @@ export function initFanControl() {
     // the number follows the slider; the speed is applied on release, after asking (Hardware 1)
     const slider = /** @type {HTMLInputElement} */ (fanPwmSlider);
     slider.addEventListener('input', () => {
-      if (fanPwmVal) fanPwmVal.textContent = t('fan.manual_active', 'Fixed {pct} %', { pct: parseInt(slider.value, 10) });
+      if (fanPwmVal)
+        fanPwmVal.textContent = t('fan.manual_active', 'Fixed {pct} %', { pct: parseInt(slider.value, 10) });
     });
     slider.addEventListener('change', () => {
       const val = parseInt(slider.value, 10);
       clearTimeout(fanPwmDebounce);
-      askFixedSpeed(val, () => {
-        _localChangeAt = Date.now();
-        updateFanUiState('manual', val);
-        saveChange(manualChange(val));
-      }, () => fetchFanState());
+      askFixedSpeed(
+        val,
+        () => {
+          _localChangeAt = Date.now();
+          updateFanUiState('manual', val);
+          saveChange(manualChange(val));
+        },
+        () => fetchFanState()
+      );
     });
   }
 
@@ -527,13 +597,17 @@ export function initFanControl() {
       }
     });
 
-    fanCurveSvg.addEventListener('touchstart', (e) => {
-      const touch = e.target;
-      if (touch.classList.contains('curve-handle')) {
-        isDraggingCurve = true;
-        dragIndex = parseInt(touch.id.replace('ch-', ''), 10);
-      }
-    }, { passive: false });
+    fanCurveSvg.addEventListener(
+      'touchstart',
+      (e) => {
+        const touch = e.target;
+        if (touch.classList.contains('curve-handle')) {
+          isDraggingCurve = true;
+          dragIndex = parseInt(touch.id.replace('ch-', ''), 10);
+        }
+      },
+      { passive: false }
+    );
 
     let _curveRafPending = false;
     function onCurveMove(e) {
@@ -569,7 +643,11 @@ export function initFanControl() {
 
         const readout = $('curve-readout-text');
         if (readout) {
-          readout.textContent = tr('fan.dragging', 'Moving point {n}: {temp}°C • {pct}% PWM', { n: dragIndex + 1, temp: t, pct: p });
+          readout.textContent = tr('fan.dragging', 'Moving point {n}: {temp}°C • {pct}% PWM', {
+            n: dragIndex + 1,
+            temp: t,
+            pct: p,
+          });
         }
       });
     }
@@ -582,11 +660,10 @@ export function initFanControl() {
       dragIndex = -1;
       _lastCurveSaveTime = Date.now();
       const savedPoints = state.curvePoints.map((p) => [...p]);
-      saveChange({ curve_points: savedPoints })
-        .finally(() => {
-          state.setCurvePoints(savedPoints);
-          isDraggingCurve = false;
-        });
+      saveChange({ curve_points: savedPoints }).finally(() => {
+        state.setCurvePoints(savedPoints);
+        isDraggingCurve = false;
+      });
     }
     window.addEventListener('mouseup', onCurveUp);
     window.addEventListener('touchend', onCurveUp);
@@ -604,12 +681,14 @@ export function initFanControl() {
       const presets = data.presets || {};
       const currentVal = presetSelect.value;
       presetSelect.innerHTML = `<option value="">${t('fan.select_preset', '-- Select Preset --')}</option>`;
-      Object.keys(presets).sort().forEach((name) => {
-        const opt = document.createElement('option');
-        opt.value = name;
-        opt.textContent = name;
-        presetSelect.appendChild(opt);
-      });
+      Object.keys(presets)
+        .sort()
+        .forEach((name) => {
+          const opt = document.createElement('option');
+          opt.value = name;
+          opt.textContent = name;
+          presetSelect.appendChild(opt);
+        });
       if (presets[currentVal]) {
         presetSelect.value = currentVal;
       }
@@ -661,7 +740,15 @@ export function initFanControl() {
       return;
     }
     try {
-      const pts = (state.curvePoints && state.curvePoints.length >= 2) ? state.curvePoints : expandTo6Points([[30, 32], [37, 32], [50, 100], [60, 100]]);
+      const pts =
+        state.curvePoints && state.curvePoints.length >= 2
+          ? state.curvePoints
+          : expandTo6Points([
+              [30, 32],
+              [37, 32],
+              [50, 100],
+              [60, 100],
+            ]);
       await api.post('/api/fans/presets', {
         name: cleanName,
         curve_points: pts,
@@ -670,9 +757,15 @@ export function initFanControl() {
       await loadFanPresets();
       if (presetSelect) presetSelect.value = cleanName;
       updatePresetButtons();
-      ZettEventBus.emit('toast', { message: t('fan.preset_saved', 'Preset "{name}" saved', { name: cleanName }), type: 'success' });
+      ZettEventBus.emit('toast', {
+        message: t('fan.preset_saved', 'Preset "{name}" saved', { name: cleanName }),
+        type: 'success',
+      });
     } catch (e) {
-      ZettEventBus.emit('toast', { message: t('fan.preset_save_failed', 'Failed to save preset: {error}', { error: e.message || e }), type: 'error' });
+      ZettEventBus.emit('toast', {
+        message: t('fan.preset_save_failed', 'Failed to save preset: {error}', { error: e.message || e }),
+        type: 'error',
+      });
     }
   }
 
@@ -700,9 +793,15 @@ export function initFanControl() {
       closeDeletePresetModal();
       await loadFanPresets();
       updatePresetButtons();
-      ZettEventBus.emit('toast', { message: t('fan.preset_deleted', 'Preset "{name}" deleted', { name }), type: 'info' });
+      ZettEventBus.emit('toast', {
+        message: t('fan.preset_deleted', 'Preset "{name}" deleted', { name }),
+        type: 'info',
+      });
     } catch (e) {
-      ZettEventBus.emit('toast', { message: t('fan.preset_delete_failed', 'Failed to delete preset: {error}', { error: e.message || e }), type: 'error' });
+      ZettEventBus.emit('toast', {
+        message: t('fan.preset_delete_failed', 'Failed to delete preset: {error}', { error: e.message || e }),
+        type: 'error',
+      });
     }
   }
 
@@ -724,7 +823,11 @@ export function initFanControl() {
     saveModal.addEventListener('click', (e) => {
       if (e.target.closest('#fan-preset-submit-btn')) {
         handleSavePreset();
-      } else if (e.target.closest('#fan-preset-cancel-btn') || e.target.closest('#fan-preset-close-btn') || e.target === saveModal) {
+      } else if (
+        e.target.closest('#fan-preset-cancel-btn') ||
+        e.target.closest('#fan-preset-close-btn') ||
+        e.target === saveModal
+      ) {
         closeSavePresetModal();
       }
     });
@@ -757,9 +860,15 @@ export function initFanControl() {
           }
           updateFanUiState(res.fan_config.profile || 'auto', res.fan_config.manual_pct);
         }
-        ZettEventBus.emit('toast', { message: t('fan.preset_applied', 'Preset "{name}" applied', { name }), type: 'success' });
+        ZettEventBus.emit('toast', {
+          message: t('fan.preset_applied', 'Preset "{name}" applied', { name }),
+          type: 'success',
+        });
       } catch (e) {
-        ZettEventBus.emit('toast', { message: t('fan.preset_apply_failed', 'Failed to apply preset: {error}', { error: e.message || e }), type: 'error' });
+        ZettEventBus.emit('toast', {
+          message: t('fan.preset_apply_failed', 'Failed to apply preset: {error}', { error: e.message || e }),
+          type: 'error',
+        });
       }
     });
   }
@@ -776,7 +885,11 @@ export function initFanControl() {
     deleteModal.addEventListener('click', (e) => {
       if (e.target.closest('#fan-delete-confirm-btn')) {
         handleDeletePreset();
-      } else if (e.target.closest('#fan-delete-cancel-btn') || e.target.closest('#fan-delete-close-btn') || e.target === deleteModal) {
+      } else if (
+        e.target.closest('#fan-delete-cancel-btn') ||
+        e.target.closest('#fan-delete-close-btn') ||
+        e.target === deleteModal
+      ) {
         closeDeletePresetModal();
       }
     });
@@ -877,7 +990,12 @@ export function initAcousticCalibration() {
         badge.style.borderColor = 'rgba(234,179,8,0.35)';
       }
       if (statusEl) statusEl.textContent = t('settings.sweep_running', 'Sweep Running...');
-      if (stepEl) stepEl.textContent = t('fan.step', 'Step {step}/{total} ({pwm} PWM)', { step: data.step || 0, total: data.total_steps || 0, pwm: data.current_pwm || 58 });
+      if (stepEl)
+        stepEl.textContent = t('fan.step', 'Step {step}/{total} ({pwm} PWM)', {
+          step: data.step || 0,
+          total: data.total_steps || 0,
+          pwm: data.current_pwm || 58,
+        });
     } else {
       btnStart.style.display = 'inline-flex';
       btnStop.style.display = 'none';
@@ -897,10 +1015,14 @@ export function initAcousticCalibration() {
         }
       }
       if (statusEl) {
-        statusEl.textContent = data.completed_at ? t('settings.sweep_complete', 'Calibration Complete') : t('fan.idle', 'Idle');
+        statusEl.textContent = data.completed_at
+          ? t('settings.sweep_complete', 'Calibration Complete')
+          : t('fan.idle', 'Idle');
       }
       if (stepEl && data.completed_at) {
-        stepEl.textContent = t('fan.steps', '{count, plural, one {# Step Analyzed} other {# Steps Analyzed}}', { count: data.results?.length || 0 });
+        stepEl.textContent = t('fan.steps', '{count, plural, one {# Step Analyzed} other {# Steps Analyzed}}', {
+          count: data.results?.length || 0,
+        });
       }
       if (wasRunning && data.completed_at) {
         wasRunning = false;
@@ -956,7 +1078,12 @@ export function initAcousticCalibration() {
       }
       startPolling();
     } catch (e) {
-      showToast(t('toast.failed_to_start_acoustic_sweep', 'Failed to start acoustic sweep: {message}', { message: e.message || e }), 'error');
+      showToast(
+        t('toast.failed_to_start_acoustic_sweep', 'Failed to start acoustic sweep: {message}', {
+          message: e.message || e,
+        }),
+        'error'
+      );
       renderAcousticResults({ running: false, completed_at: null, results: [] });
     } finally {
       btnStart.disabled = false;
@@ -975,7 +1102,12 @@ export function initAcousticCalibration() {
       renderAcousticResults(res || { running: false, completed_at: null });
       showToast(t('settings.sweep_stopped') || 'Acoustic calibration sweep stopped', 'warn');
     } catch (e) {
-      showToast(t('toast.failed_to_stop_acoustic_sweep', 'Failed to stop acoustic sweep: {message}', { message: e.message || e }), 'error');
+      showToast(
+        t('toast.failed_to_stop_acoustic_sweep', 'Failed to stop acoustic sweep: {message}', {
+          message: e.message || e,
+        }),
+        'error'
+      );
     } finally {
       btnStop.disabled = false;
     }

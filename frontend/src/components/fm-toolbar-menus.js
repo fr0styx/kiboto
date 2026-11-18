@@ -7,8 +7,10 @@
 import { t } from '../i18n.js';
 import { escapeHtml } from '../utils.js';
 
-const VIEW_SVG = '<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" aria-hidden="true"><line x1="4" y1="6" x2="20" y2="6"></line><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="18" x2="20" y2="18"></line></svg>';
-const MORE_SVG = '<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" aria-hidden="true"><circle cx="5" cy="12" r="1"></circle><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle></svg>';
+const VIEW_SVG =
+  '<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" aria-hidden="true"><line x1="4" y1="6" x2="20" y2="6"></line><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="18" x2="20" y2="18"></line></svg>';
+const MORE_SVG =
+  '<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" aria-hidden="true"><circle cx="5" cy="12" r="1"></circle><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle></svg>';
 
 /** The selectors a menu proxies, in menu order, with their names and how their state is read. */
 export function menuItems(kind) {
@@ -56,7 +58,10 @@ export function installToolbarMenus(windowEl) {
     b.setAttribute('aria-haspopup', 'menu');
     b.setAttribute('aria-expanded', 'false');
     b.innerHTML = svg;
-    b.addEventListener('click', (e) => { e.stopPropagation(); openMenu(bar, b, kind); });
+    b.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openMenu(bar, b, kind);
+    });
     return b;
   };
   const view = make('view', VIEW_SVG, t('fm.m_view', 'View'));
@@ -93,21 +98,40 @@ export function openMenu(bar, btn, kind) {
     }
     if (it.role !== 'menuitem') item.setAttribute('aria-checked', isOn(orig) ? 'true' : 'false');
     item.innerHTML = `<span class="fm-menu-check" aria-hidden="true">${it.role !== 'menuitem' && isOn(orig) ? '✓' : ''}</span><span>${escapeHtml(text)}</span>`;
-    item.addEventListener('click', (e) => { e.stopPropagation(); closeMenus(bar); orig.click(); btn.focus(); });
+    item.addEventListener('click', (e) => {
+      e.stopPropagation();
+      closeMenus(bar);
+      orig.click();
+      btn.focus();
+    });
     menu.append(item);
   }
   menu.addEventListener('keydown', (e) => {
     const items = /** @type {HTMLElement[]} */ ([...menu.querySelectorAll('.fm-menu-item')]);
     const i = items.indexOf(/** @type {HTMLElement} */ (document.activeElement));
-    if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeMenus(bar); btn.focus(); }
-    else if (e.key === 'ArrowDown') { e.preventDefault(); items[(i + 1) % items.length]?.focus(); }
-    else if (e.key === 'ArrowUp') { e.preventDefault(); items[(i - 1 + items.length) % items.length]?.focus(); }
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      e.stopPropagation();
+      closeMenus(bar);
+      btn.focus();
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      items[(i + 1) % items.length]?.focus();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      items[(i - 1 + items.length) % items.length]?.focus();
+    }
   });
   btn.after(menu);
   btn.setAttribute('aria-expanded', 'true');
   menu.style.left = `${Math.max(0, btn.offsetLeft + btn.offsetWidth - 220)}px`;
   /** @type {HTMLElement | null} */ (menu.querySelector('.fm-menu-item'))?.focus();
-  const away = (e) => { if (!menu.contains(/** @type {Node} */ (e.target))) { closeMenus(bar); document.removeEventListener('click', away, true); } };
+  const away = (e) => {
+    if (!menu.contains(/** @type {Node} */ (e.target))) {
+      closeMenus(bar);
+      document.removeEventListener('click', away, true);
+    }
+  };
   document.addEventListener('click', away, true);
   return menu;
 }

@@ -55,7 +55,9 @@ describe('wallpapers', () => {
   });
 
   it('uploads, applies and remembers a new wallpaper', async () => {
-    const post = vi.spyOn(api, 'post').mockImplementation(async (url) => (url.endsWith('/upload') ? { success: true, filename: 'sky.png' } : {}));
+    const post = vi
+      .spyOn(api, 'post')
+      .mockImplementation(async (url) => (url.endsWith('/upload') ? { success: true, filename: 'sky.png' } : {}));
     const data = await P.uploadAndApplyWallpaper(image());
     expect(data.filename).toBe('sky.png');
     expect(post.mock.calls[0][1].image).toMatch(/^data:image\/png;base64,/);
@@ -102,11 +104,15 @@ describe('wallpapers', () => {
     const drop = new Event('drop', { cancelable: true });
     drop.dataTransfer = { files: [image('drop.png')] };
     grid.dispatchEvent(drop);
-    await vi.waitFor(() => expect(post).toHaveBeenCalledWith('/api/wallpapers/upload', expect.objectContaining({ filename: 'drop.png' })));
+    await vi.waitFor(() =>
+      expect(post).toHaveBeenCalledWith('/api/wallpapers/upload', expect.objectContaining({ filename: 'drop.png' }))
+    );
 
     const input = document.getElementById('wallpaper-upload');
     Object.defineProperty(input, 'files', { value: [image('pick.png')] });
     input.dispatchEvent(new Event('change'));
-    await vi.waitFor(() => expect(post).toHaveBeenCalledWith('/api/wallpapers/upload', expect.objectContaining({ filename: 'pick.png' })));
+    await vi.waitFor(() =>
+      expect(post).toHaveBeenCalledWith('/api/wallpapers/upload', expect.objectContaining({ filename: 'pick.png' }))
+    );
   });
 });

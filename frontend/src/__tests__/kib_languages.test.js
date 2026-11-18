@@ -1,14 +1,25 @@
 // SET-26 five-language screenshots: what stayed English in the Kib window.
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { shownTitle, putTitle, initAiConversationControls, createNewAiConversation, renameAiConversation } from '../components/management/ai.js';
+import {
+  shownTitle,
+  putTitle,
+  initAiConversationControls,
+  createNewAiConversation,
+  renameAiConversation,
+} from '../components/management/ai.js';
 import { applyTranslations, setLanguage } from '../i18n.js';
 import { api } from '../api.js';
 
 describe('Kib window in other languages', () => {
-  beforeEach(async () => { await setLanguage('en'); });
-  afterEach(async () => { vi.restoreAllMocks(); await setLanguage('en'); });
+  beforeEach(async () => {
+    await setLanguage('en');
+  });
+  afterEach(async () => {
+    vi.restoreAllMocks();
+    await setLanguage('en');
+  });
 
-  it('shows the stored default title in the reader\'s language, and real titles as they are', async () => {
+  it("shows the stored default title in the reader's language, and real titles as they are", async () => {
     expect(shownTitle('New Conversation')).toBe('New Conversation');
     expect(shownTitle('')).toBe('New Conversation');
     await setLanguage('de');
@@ -30,14 +41,16 @@ describe('Kib window in other languages', () => {
     expect(document.getElementById('d').getAttribute('aria-label')).toBe('Unterhaltung'); // its own key wins
   });
 
-  it('a new chat, the count and a rename show in the reader\'s language', async () => {
+  it("a new chat, the count and a rename show in the reader's language", async () => {
     document.body.innerHTML = `<button id="btn-ai-chat-new"></button><button id="btn-ai-chat-rename"></button>
       <span id="ai-chat-active-title">New Conversation</span><div id="ai-chat-threads-list"></div>
       <span id="ai-chat-thread-count"></span><div id="ai-chat-messages-list"></div><input id="ai-chat-input">`;
     await setLanguage('de');
     let convs = [];
     vi.spyOn(api, 'get').mockImplementation(async () => ({ status: 'ok', conversations: convs }));
-    const post = vi.spyOn(api, 'post').mockImplementation(async () => ({ conversation: { id: 'n1', title: 'New Conversation' } }));
+    const post = vi
+      .spyOn(api, 'post')
+      .mockImplementation(async () => ({ conversation: { id: 'n1', title: 'New Conversation' } }));
     const patch = vi.spyOn(api, 'patch').mockImplementation(async () => ({ status: 'ok' }));
     initAiConversationControls();
     const title = document.getElementById('ai-chat-active-title');

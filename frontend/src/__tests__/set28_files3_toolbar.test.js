@@ -14,7 +14,10 @@ function win() {
 }
 
 describe('Files 3 toolbar, design B', () => {
-  afterEach(() => { vi.restoreAllMocks(); document.body.innerHTML = ''; });
+  afterEach(() => {
+    vi.restoreAllMocks();
+    document.body.innerHTML = '';
+  });
 
   it('moves the view buttons and the rest out of sight and adds View and More after New folder', () => {
     const w = win();
@@ -37,7 +40,12 @@ describe('Files 3 toolbar, design B', () => {
     w.querySelector('.fm-btn-view-icon')?.addEventListener('click', icon);
     view.click();
     const items = [...w.querySelectorAll('.fm-menu-item')];
-    expect(items.map((i) => i.textContent?.replace('✓', ''))).toEqual(['List', 'Compact list', 'Icons', 'Show hidden files']);
+    expect(items.map((i) => i.textContent?.replace('✓', ''))).toEqual([
+      'List',
+      'Compact list',
+      'Icons',
+      'Show hidden files',
+    ]);
     expect(items[0].getAttribute('aria-checked')).toBe('true');
     expect(items[3].getAttribute('role')).toBe('menuitemcheckbox');
     expect(view.getAttribute('aria-expanded')).toBe('true');

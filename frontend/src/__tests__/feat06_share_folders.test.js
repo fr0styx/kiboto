@@ -10,8 +10,14 @@ describe('an app folder on a share (FEAT-06)', () => {
 
   it('offers each share for the folders that can live on one', async () => {
     api.get.mockResolvedValue({
-      folders: [{ key: 'data', label: 'Synced folders', target: '/data1' }, { key: 'x', label: 'Odd name', target: '/x' }],
-      shares: [{ name: 'Family', path: '/mnt/user/Family' }, { name: 'Music', path: '/mnt/user/Music' }],
+      folders: [
+        { key: 'data', label: 'Synced folders', target: '/data1' },
+        { key: 'x', label: 'Odd name', target: '/x' },
+      ],
+      shares: [
+        { name: 'Family', path: '/mnt/user/Family' },
+        { name: 'Music', path: '/mnt/user/Music' },
+      ],
     });
     const mount = document.createElement('div');
     const changed = vi.fn();

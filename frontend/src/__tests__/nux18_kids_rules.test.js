@@ -8,16 +8,30 @@ import { hoursText, aiSwitchesHtml, kidsRulesHtml, renderKidsRules } from '../co
 const NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const USERS = [
   { id: 1, username: 'mum', role_id: 'superadmin' },
-  { id: 2, username: 'ana', display_name: 'Ana', role_id: 'kid', signin_hours: { days: [0, 1, 2, 3, 4], start: '07:00', end: '20:00' } },
+  {
+    id: 2,
+    username: 'ana',
+    display_name: 'Ana',
+    role_id: 'kid',
+    signin_hours: { days: [0, 1, 2, 3, 4], start: '07:00', end: '20:00' },
+  },
   { id: 3, username: 'visitor', role_id: 'guest' },
 ];
-const ACCESS = { roles: [{ id: 'superadmin', on: true, locked: true }, { id: 'kid', on: false, search: true }, { id: 'guest', on: false, search: false }] };
+const ACCESS = {
+  roles: [
+    { id: 'superadmin', on: true, locked: true },
+    { id: 'kid', on: false, search: true },
+    { id: 'guest', on: false, search: false },
+  ],
+};
 const FILTER = { people: { ana: { devices: ['192.168.1.20', 'aa:bb:cc:dd:ee:ff'] } } };
 
 describe('hoursText', () => {
   it('names a run of days, every day, single days and no limit', () => {
     expect(hoursText({ days: [0, 1, 2, 3, 4], start: '07:00', end: '20:00' }, NAMES)).toBe('Mon–Fri 07:00–20:00');
-    expect(hoursText({ days: [0, 1, 2, 3, 4, 5, 6], start: '08:00', end: '21:00' }, NAMES)).toBe('Every day 08:00–21:00');
+    expect(hoursText({ days: [0, 1, 2, 3, 4, 5, 6], start: '08:00', end: '21:00' }, NAMES)).toBe(
+      'Every day 08:00–21:00'
+    );
     expect(hoursText({ days: [5, 0], start: '09:00', end: '12:00' }, NAMES)).toBe('Mon, Sat 09:00–12:00');
     expect(hoursText(null, NAMES)).toBe('Any time');
   });
@@ -55,7 +69,10 @@ describe('kidsRulesHtml', () => {
     box.innerHTML = String(aiSwitchesHtml(ACCESS));
     const sw = [...box.querySelectorAll('[data-kids-ai]')];
     expect(sw.map((s) => `${s.dataset.role}:${s.dataset.kidsAi}:${s.checked}`)).toEqual([
-      'kid:roles:false', 'kid:search_roles:true', 'guest:roles:false', 'guest:search_roles:false',
+      'kid:roles:false',
+      'kid:search_roles:true',
+      'guest:roles:false',
+      'guest:search_roles:false',
     ]);
     expect(aiSwitchesHtml({ roles: [{ id: 'superadmin', on: true }] })).toBeNull();
   });

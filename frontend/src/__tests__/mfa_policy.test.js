@@ -1,6 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-vi.mock('../api.js', () => ({ api: { get: vi.fn(), put: vi.fn() }, apiFetch: vi.fn(), setSessionUserProvider: vi.fn(), auth: {} }));
+vi.mock('../api.js', () => ({
+  api: { get: vi.fn(), put: vi.fn() },
+  apiFetch: vi.fn(),
+  setSessionUserProvider: vi.fn(),
+  auth: {},
+}));
 vi.mock('../toast.js', () => ({ showToast: vi.fn() }));
 vi.mock('../components/users.js', () => ({ start2FASetup: vi.fn() }));
 

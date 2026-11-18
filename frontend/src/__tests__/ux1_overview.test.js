@@ -42,10 +42,13 @@ describe('Overview and Advanced (UX-1, UX-2)', () => {
     api.get.mockResolvedValueOnce({ ok: true, items: [] });
     await ov.renderStatusSummary();
     expect(document.getElementById('mgmt-status-summary').textContent).toContain('Everything is fine');
-    api.get.mockResolvedValueOnce({ ok: false, items: [
-      { id: 'drive:sdb', level: 'critical', kind: 'drive_failing', subject: 'sdb', open: 'storage' },
-      { id: 'x', level: 'warning', kind: 'something_new', subject: '', open: 'nowhere' },
-    ] });
+    api.get.mockResolvedValueOnce({
+      ok: false,
+      items: [
+        { id: 'drive:sdb', level: 'critical', kind: 'drive_failing', subject: 'sdb', open: 'storage' },
+        { id: 'x', level: 'warning', kind: 'something_new', subject: '', open: 'nowhere' },
+      ],
+    });
     await ov.renderStatusSummary();
     const box = document.getElementById('mgmt-status-summary');
     expect(box.textContent).toContain('Drive sdb is failing');

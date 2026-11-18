@@ -42,7 +42,7 @@ describe('AI chat streaming and Stop', () => {
         ok: true,
         status: 200,
         body: hangingStream(opts.signal, 'event: token\ndata: {"token":"Partial answer"}\n\n'),
-      }),
+      })
     );
 
     const pending = sendAiChatMessage('tell me a story');

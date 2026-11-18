@@ -2,14 +2,21 @@ import { describe, it, expect, vi } from 'vitest';
 
 vi.mock('../api.js', () => ({ api: { get: vi.fn(), post: vi.fn(), downloadBlob: vi.fn() } }));
 vi.mock('../toast.js', () => ({ showToast: vi.fn() }));
-vi.mock('../components/remote-access.js', () => ({ qrSvg: vi.fn(async (text) => `<svg xmlns="http://www.w3.org/2000/svg" data-text="${text}"><rect/></svg>`) }));
+vi.mock('../components/remote-access.js', () => ({
+  qrSvg: vi.fn(async (text) => `<svg xmlns="http://www.w3.org/2000/svg" data-text="${text}"><rect/></svg>`),
+}));
 
 import { api } from '../api.js';
 import { showToast } from '../toast.js';
 import { davLink, familyCalendarBody, fillQr, renderFamilyCalendar } from '../components/family-calendar.js';
 
 const flush = () => new Promise((r) => setTimeout(r, 0));
-const info = { installed: true, running: true, server: 'nas.local:8093', caldav: 'http://nas.local:8093/remote.php/dav' };
+const info = {
+  installed: true,
+  running: true,
+  server: 'nas.local:8093',
+  caldav: 'http://nas.local:8093/remote.php/dav',
+};
 
 describe('family calendar QR code and iPhone profile (NFEAT-7)', () => {
   it('turns the address into a DAVx⁵ link', () => {
@@ -30,7 +37,10 @@ describe('family calendar QR code and iPhone profile (NFEAT-7)', () => {
     const btn = [...box.querySelectorAll('button')].find((b) => b.textContent === 'Set up an iPhone or iPad');
     api.downloadBlob.mockResolvedValue('Kiboto family.mobileconfig');
     btn.click();
-    expect(api.downloadBlob).toHaveBeenCalledWith('/api/docker/catalog/office-suite/family/profile', 'Kiboto family.mobileconfig');
+    expect(api.downloadBlob).toHaveBeenCalledWith(
+      '/api/docker/catalog/office-suite/family/profile',
+      'Kiboto family.mobileconfig'
+    );
     api.downloadBlob.mockRejectedValue(new Error('nope'));
     btn.click();
     await flush();

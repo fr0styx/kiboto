@@ -12,7 +12,16 @@ import {
 
 const HOSTED = {
   cid: 'c1',
-  overview: { id: 'c1', full_id: 'c1full', name: 'pihole', image: 'pihole/pihole:2026.10', state: 'running', running: true, network_mode: 'host', restart_policy: 'always' },
+  overview: {
+    id: 'c1',
+    full_id: 'c1full',
+    name: 'pihole',
+    image: 'pihole/pihole:2026.10',
+    state: 'running',
+    running: true,
+    network_mode: 'host',
+    restart_policy: 'always',
+  },
   resources: {},
   primary_port: 80,
   webui_url: 'http://[HOST]:80/',
@@ -25,23 +34,52 @@ const BRIDGED = {
   ...HOSTED,
   overview: { ...HOSTED.overview, name: 'paperless', network_mode: 'bridge' },
   ports: [{ public_port: 8000, private_port: 8000, type: 'tcp', ip: '0.0.0.0' }],
-  env: [{ key: 'A', value: '1', masked_value: '1', is_secret: false }, { key: 'B', value: 'x', masked_value: '••', is_secret: true }],
+  env: [
+    { key: 'A', value: '1', masked_value: '1', is_secret: false },
+    { key: 'B', value: 'x', masked_value: '••', is_secret: true },
+  ],
 };
 
 describe('container details in German (NUX-20)', () => {
-  beforeAll(async () => { await setLanguage('de'); });
-  afterAll(async () => { await setLanguage('en'); });
-  beforeEach(() => { _resetContainerModalForTesting(); vi.restoreAllMocks(); });
+  beforeAll(async () => {
+    await setLanguage('de');
+  });
+  afterAll(async () => {
+    await setLanguage('en');
+  });
+  beforeEach(() => {
+    _resetContainerModalForTesting();
+    vi.restoreAllMocks();
+  });
 
   it('names the tabs, the log lengths and the terminal keys', () => {
     initContainerModal();
     const tabs = [...document.querySelectorAll('.ci-tab-btn')].map((b) => b.textContent.trim());
-    expect(tabs).toEqual(['📊 Übersicht', '🌐 Ports & Web', '📁 Ordner & Speicher', '🔑 Umgebung', '📜 Docker Compose', '📄 Live-Protokoll', '💻 Terminal', '✏️ Container bearbeiten']);
+    expect(tabs).toEqual([
+      '📊 Übersicht',
+      '🌐 Ports & Web',
+      '📁 Ordner & Speicher',
+      '🔑 Umgebung',
+      '📜 Docker Compose',
+      '📄 Live-Protokoll',
+      '💻 Terminal',
+      '✏️ Container bearbeiten',
+    ]);
     expect(document.querySelector('.ci-tab-btn [aria-hidden="true"]').textContent).toBe('📊');
     const lines = [...document.querySelectorAll('#ci-logs-tail-select option')].map((o) => o.textContent);
-    expect(lines).toEqual(['Letzte 50 Zeilen', 'Letzte 100 Zeilen', 'Letzte 200 Zeilen', 'Letzte 500 Zeilen', 'Letzte 1000 Zeilen']);
+    expect(lines).toEqual([
+      'Letzte 50 Zeilen',
+      'Letzte 100 Zeilen',
+      'Letzte 200 Zeilen',
+      'Letzte 500 Zeilen',
+      'Letzte 1000 Zeilen',
+    ]);
     expect(document.querySelector('#ci-logs-tail-select').value).toBe('200');
-    expect([...document.querySelectorAll('[data-cmd]')].map((b) => b.dataset.cmd)).toEqual(['ls -la', 'ps aux', 'df -h']);
+    expect([...document.querySelectorAll('[data-cmd]')].map((b) => b.dataset.cmd)).toEqual([
+      'ls -la',
+      'ps aux',
+      'df -h',
+    ]);
     expect(document.getElementById('ci-term-send-btn').textContent).toBe('Ausführen');
   });
 
@@ -58,7 +96,9 @@ describe('container details in German (NUX-20)', () => {
     expect(ports).toContain('Auf Port 80 (Host-Netzwerk)');
     expect(ports).toContain('Host direkt (:80)');
     expect(ports).toContain('Host-Netzwerk aktiv');
-    expect(document.getElementById('ci-mounts-content').textContent).toContain('In diesem Container sind keine Ordner eingebunden.');
+    expect(document.getElementById('ci-mounts-content').textContent).toContain(
+      'In diesem Container sind keine Ordner eingebunden.'
+    );
     expect(document.getElementById('ci-env-content').textContent).toContain('Keine eigenen Umgebungsvariablen.');
   });
 
@@ -93,11 +133,19 @@ describe('container details in German (NUX-20)', () => {
   it('says when details, logs or the compose file could not be read', async () => {
     vi.spyOn(api, 'get').mockRejectedValue(new Error('weg'));
     await openContainerInspector('c1', 'paperless');
-    expect(document.getElementById('ci-overview-loading').textContent).toBe('Container-Details konnten nicht geladen werden: weg');
+    expect(document.getElementById('ci-overview-loading').textContent).toBe(
+      'Container-Details konnten nicht geladen werden: weg'
+    );
     await switchContainerTab('logs');
-    await vi.waitFor(() => expect(document.getElementById('ci-logs-terminal').textContent).toBe('Protokoll konnte nicht gelesen werden: weg'));
+    await vi.waitFor(() =>
+      expect(document.getElementById('ci-logs-terminal').textContent).toBe('Protokoll konnte nicht gelesen werden: weg')
+    );
     await switchContainerTab('compose');
-    await vi.waitFor(() => expect(document.getElementById('ci-compose-code').textContent).toBe('# Compose-Datei konnte nicht erstellt werden: weg'));
+    await vi.waitFor(() =>
+      expect(document.getElementById('ci-compose-code').textContent).toBe(
+        '# Compose-Datei konnte nicht erstellt werden: weg'
+      )
+    );
   });
 
   it('asks before deleting a container', () => {

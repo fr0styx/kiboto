@@ -64,7 +64,9 @@ describe('B12b (FEAT-01): Protect this NAS', () => {
     const form = dlg.querySelector('[data-protect-form]');
     await expect(guide.protect(form)).rejects.toThrow('Pick where the copy goes.');
     dlg.querySelector('input[value="usb|/mnt/disks/usb1"]').checked = true;
-    dlg.querySelectorAll('input[name="paths"]').forEach((i) => { i.checked = false; });
+    dlg.querySelectorAll('input[name="paths"]').forEach((i) => {
+      i.checked = false;
+    });
     await expect(guide.protect(form)).rejects.toThrow('Pick at least one share.');
     form.dispatchEvent(new Event('submit', { cancelable: true }));
     await vi.waitFor(() => expect(toast.showToast).toHaveBeenCalledWith('Pick at least one share.', 'error'));
@@ -87,7 +89,6 @@ describe('B12b (FEAT-01): Protect this NAS', () => {
     expect(host.classList.contains('open')).toBe(false);
     expect(document.querySelectorAll('#protect-nas').length).toBe(1);
   });
-
 
   it('gets the drag handle, minimize and maximize from the shared window frame', async () => {
     const { upgradeDialog } = await import('../dialog-chrome.js');
@@ -128,7 +129,13 @@ describe('B12b (FEAT-01): Protect this NAS', () => {
 
   it('the Overview shows it under the status and opens the guide', async () => {
     document.body.innerHTML = '<div id="management-hub-view"></div>';
-    api.get.mockImplementation(async (url) => (url === '/api/system/status-summary' ? { ok: true, items: [] } : url === '/api/system/protection' ? { level: 'none', copies: 0 } : DEST));
+    api.get.mockImplementation(async (url) =>
+      url === '/api/system/status-summary'
+        ? { ok: true, items: [] }
+        : url === '/api/system/protection'
+          ? { level: 'none', copies: 0 }
+          : DEST
+    );
     await ov.renderStatusSummary();
     const box = document.getElementById('mgmt-status-summary');
     expect(box.textContent).toContain('No copy of your files outside this NAS yet.');

@@ -1,10 +1,6 @@
 /** SET-04: with no folder chosen the page sends nothing. It used to send the whole pool. */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import {
-  renderAiWatchedFoldersAndShares,
-  syncAiWatchedFolders,
-  runAiPathIndex,
-} from '../components/management/ai.js';
+import { renderAiWatchedFoldersAndShares, syncAiWatchedFolders, runAiPathIndex } from '../components/management/ai.js';
 import { api } from '../api.js';
 import { showToast } from '../toast.js';
 
@@ -51,7 +47,10 @@ describe('Kib with no folder chosen (SET-04)', () => {
 
   it('a folder that is named is still read', async () => {
     await runAiPathIndex('/mnt/user/docs');
-    expect(post).toHaveBeenCalledWith('/api/media/index', expect.objectContaining({ path: '/mnt/user/docs', paths: ['/mnt/user/docs'] }));
+    expect(post).toHaveBeenCalledWith(
+      '/api/media/index',
+      expect.objectContaining({ path: '/mnt/user/docs', paths: ['/mnt/user/docs'] })
+    );
   });
 
   it('the watched folders are read once one is chosen', async () => {

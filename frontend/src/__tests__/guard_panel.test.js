@@ -5,7 +5,15 @@ vi.mock('../api.js', () => ({
   api: {
     get: vi.fn(async (url) => {
       if (url === '/api/security/ransomware') {
-        return { enabled: true, canaries: false, canary_count: 0, frozen: true, frozen_at: 1761100000, reason: '150 renames or deletes in 60 seconds', source: { user: 'bob', ip: '192.168.1.50' } };
+        return {
+          enabled: true,
+          canaries: false,
+          canary_count: 0,
+          frozen: true,
+          frozen_at: 1761100000,
+          reason: '150 renames or deletes in 60 seconds',
+          source: { user: 'bob', ip: '192.168.1.50' },
+        };
       }
       return [{ ip: '192.168.1.50', reason: 'ransomware guard', until: 1761186400 }];
     }),

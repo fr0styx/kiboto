@@ -22,16 +22,20 @@ export function appsHtml(data) {
   const rows = keys.length
     ? `<ul class="ai-apps-keys">${keys
         .map(
-          (k) => `<li><span>${escapeHtml(k.name)} · <code>${escapeHtml(k.masked_key || '')}</code> · ${
-            k.last_used_at
-              ? escapeHtml(t('aiapps.last_used', 'last used {when}', { when: formatDateTime(k.last_used_at * 1000) }))
-              : escapeHtml(t('aiapps.never_used', 'not used yet'))
-          }</span> <button type="button" class="btn-pill-toggle is-small" data-ai-app-revoke="${escapeHtml(k.id)}">${escapeHtml(t('aiapps.revoke', 'Revoke'))}</button></li>`,
+          (k) =>
+            `<li><span>${escapeHtml(k.name)} · <code>${escapeHtml(k.masked_key || '')}</code> · ${
+              k.last_used_at
+                ? escapeHtml(t('aiapps.last_used', 'last used {when}', { when: formatDateTime(k.last_used_at * 1000) }))
+                : escapeHtml(t('aiapps.never_used', 'not used yet'))
+            }</span> <button type="button" class="btn-pill-toggle is-small" data-ai-app-revoke="${escapeHtml(k.id)}">${escapeHtml(t('aiapps.revoke', 'Revoke'))}</button></li>`
         )
         .join('')}</ul>`
     : '';
   return `<p class="immich-note">${escapeHtml(
-    t('aiapps.desc', 'Apps such as Paperless-ngx, Open WebUI and Home Assistant can use Kib\'s model through one OpenAI-compatible address. They cannot search your files. Give each app its own key; a key works on that address and nowhere else.'),
+    t(
+      'aiapps.desc',
+      "Apps such as Paperless-ngx, Open WebUI and Home Assistant can use Kib's model through one OpenAI-compatible address. They cannot search your files. Give each app its own key; a key works on that address and nowhere else."
+    )
   )}</p>
     <p class="immich-note">${escapeHtml(t('aiapps.address', 'Address'))}: <code>${escapeHtml(data.base_url || '')}</code></p>
     ${rows}
@@ -75,7 +79,7 @@ export async function renderAiApps(mount, isAdmin = false) {
       box.querySelector('[data-ai-app-copy]')?.addEventListener('click', () => {
         copyText(settingsText(r.settings)).then(
           () => showToast(t('aiapps.copied', 'Settings copied.'), 'success'),
-          () => showToast(t('aiapps.copy_failed', 'Could not copy; select the text instead.'), 'warning'),
+          () => showToast(t('aiapps.copy_failed', 'Could not copy; select the text instead.'), 'warning')
         );
       });
     } catch (err) {
@@ -94,7 +98,7 @@ export async function renderAiApps(mount, isAdmin = false) {
           } catch (err) {
             showToast(err.message || String(err), 'error');
           }
-        },
+        }
       );
     });
   });

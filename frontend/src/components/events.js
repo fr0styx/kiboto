@@ -117,8 +117,10 @@ function redraw() {
     const list = document.getElementById('events-list');
     const search = /** @type {HTMLElement | null} */ (document.querySelector('.history-search'));
     if (search) search.hidden = true; // each has its own search
-    if (list && _currentFilter === 'signins') import('./history-signins.js').then((m) => m.renderSignins(list)).catch(() => {});
-    if (list && _currentFilter === 'files') import('./file-activity.js').then((m) => m.renderFileActivity(list)).catch(() => {});
+    if (list && _currentFilter === 'signins')
+      import('./history-signins.js').then((m) => m.renderSignins(list)).catch(() => {});
+    if (list && _currentFilter === 'files')
+      import('./file-activity.js').then((m) => m.renderFileActivity(list)).catch(() => {});
     return;
   }
   const search = /** @type {HTMLElement | null} */ (document.querySelector('.history-search'));

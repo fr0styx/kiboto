@@ -2,9 +2,16 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 vi.mock('../api.js', () => ({ api: { get: vi.fn() } }));
 const { api } = await import('../api.js');
-const { installDocFilters, selectedTags, filtersHtml, tagLabel, _reset } = await import('../components/management/doc-filters.js');
+const { installDocFilters, selectedTags, filtersHtml, tagLabel, _reset } =
+  await import('../components/management/doc-filters.js');
 
-const TAGS = { kinds: [{ tag: 'bill', count: 12 }, { tag: 'tax', count: 3 }], years: [{ tag: 'year:2025', count: 9 }] };
+const TAGS = {
+  kinds: [
+    { tag: 'bill', count: 12 },
+    { tag: 'tax', count: 3 },
+  ],
+  years: [{ tag: 'year:2025', count: 9 }],
+};
 
 describe('Document filters', () => {
   beforeEach(() => {

@@ -1,12 +1,28 @@
 /** SET-16, decision D2: the network page follows what the host lets Kiboto change. */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { READ_ONLY, applyNetCaps, canChange, hostNote, netCaps, portPayload, setNetCaps } from '../components/management/net-host.js';
+import {
+  READ_ONLY,
+  applyNetCaps,
+  canChange,
+  hostNote,
+  netCaps,
+  portPayload,
+  setNetCaps,
+} from '../components/management/net-host.js';
 import { openNetworkPortModal, saveNetworkPortConfig } from '../components/management.js';
 import { api } from '../api.js';
 import * as toast from '../toast.js';
 
-const UNRAID = { managed: false, where: 'unraid', can_change: { address: false, mtu: false, speed: false, wake_on_lan: false, bond: false, bridge: false, vlan: false } };
-const MANAGED = { managed: true, where: 'system', can_change: { address: true, mtu: true, speed: true, wake_on_lan: true, bond: true, bridge: true, vlan: true } };
+const UNRAID = {
+  managed: false,
+  where: 'unraid',
+  can_change: { address: false, mtu: false, speed: false, wake_on_lan: false, bond: false, bridge: false, vlan: false },
+};
+const MANAGED = {
+  managed: true,
+  where: 'system',
+  can_change: { address: true, mtu: true, speed: true, wake_on_lan: true, bond: true, bridge: true, vlan: true },
+};
 
 describe('net-host', () => {
   beforeEach(() => setNetCaps(null));
@@ -19,7 +35,9 @@ describe('net-host', () => {
   });
 
   it('says where to change it, with a fallback for an unknown host', () => {
-    expect(hostNote(UNRAID)).toBe('This is set up in Unraid, under Settings → Network Settings. Kiboto shows it but does not change it.');
+    expect(hostNote(UNRAID)).toBe(
+      'This is set up in Unraid, under Settings → Network Settings. Kiboto shows it but does not change it.'
+    );
     expect(hostNote({ where: 'mars' })).toContain("the host system's own network settings");
     for (const where of ['truenas', 'proxmox', 'ugos']) expect(hostNote({ where })).not.toContain('host system');
   });
@@ -47,7 +65,14 @@ describe('net-host', () => {
   it('sends the nickname always and the wiring only where allowed', () => {
     const v = { alias: 'Uplink', mtu: 9000, wol_enabled: true, autoneg: false, speed: 1000 };
     expect(portPayload(v, UNRAID)).toEqual({ alias: 'Uplink' });
-    expect(portPayload(v, MANAGED)).toEqual({ alias: 'Uplink', mtu: 9000, wol_enabled: true, autoneg: false, speed: 1000, duplex: 'full' });
+    expect(portPayload(v, MANAGED)).toEqual({
+      alias: 'Uplink',
+      mtu: 9000,
+      wol_enabled: true,
+      autoneg: false,
+      speed: 1000,
+      duplex: 'full',
+    });
   });
 });
 
@@ -67,7 +92,14 @@ describe('the port dialog on a host Kiboto does not manage', () => {
         <button id="net-port-cfg-save-btn"></button>
       </div>`;
     setNetCaps(UNRAID);
-    vi.spyOn(api, 'get').mockResolvedValueOnce({ status: 'ok', interface: { name: 'eth0', is_up: true }, alias: '', mtu: 1500, wol_supported: true, autoneg: true });
+    vi.spyOn(api, 'get').mockResolvedValueOnce({
+      status: 'ok',
+      interface: { name: 'eth0', is_up: true },
+      alias: '',
+      mtu: 1500,
+      wol_supported: true,
+      autoneg: true,
+    });
     await openNetworkPortModal('eth0');
     expect(document.getElementById('net-port-mtu-input').disabled).toBe(true);
     expect(document.getElementById('net-port-cfg-save-btn').textContent).toBe('Save nickname');

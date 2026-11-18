@@ -6,12 +6,22 @@ import { fetchAndRenderUpsTelemetry } from '../components/management/ups.js';
 afterEach(() => vi.restoreAllMocks());
 const flush = () => new Promise((r) => setTimeout(r, 0));
 
-const ASK = { state: 'protected', numbers: {}, switch_off: { by: 'kiboto', ok: true }, rule: { minutes: 5, battery_pct: 20, timer_sec: 300 }, checks: [], comes_back: { answer: 'ask', at: 1762900000 } };
+const ASK = {
+  state: 'protected',
+  numbers: {},
+  switch_off: { by: 'kiboto', ok: true },
+  rule: { minutes: 5, battery_pct: 20, timer_sec: 300 },
+  checks: [],
+  comes_back: { answer: 'ask', at: 1762900000 },
+};
 
 describe('the answer about the last power cut', () => {
   it('is sent, and a refusal is said', async () => {
-    document.body.innerHTML = '<div id="mgmt-sec-ups"><div id="ups-status-line"></div><section id="power-check"></section></div>';
-    vi.spyOn(api, 'get').mockImplementation(async (url) => (url === '/api/power' ? ASK : url === '/api/ups' ? { available: true, status: 'OL' } : {}));
+    document.body.innerHTML =
+      '<div id="mgmt-sec-ups"><div id="ups-status-line"></div><section id="power-check"></section></div>';
+    vi.spyOn(api, 'get').mockImplementation(async (url) =>
+      url === '/api/power' ? ASK : url === '/api/ups' ? { available: true, status: 'OL' } : {}
+    );
     const post = vi.spyOn(api, 'post').mockResolvedValue({ answer: 'proven', at: 1762900000 });
     await fetchAndRenderUpsTelemetry();
     /** @type {HTMLElement} */ (document.querySelector('[data-back="yes"]')).click();

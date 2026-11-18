@@ -7,7 +7,7 @@ import {
   getSnapGeometry,
   showDockToast,
   NAVBAR_OFFSET,
-  DOCK_MARGIN
+  DOCK_MARGIN,
 } from '../components/dock.js';
 
 describe('Batch 3: Dock Magnification, Spatial Placement & Workspace Insets', () => {
@@ -198,15 +198,17 @@ describe('Batch 3: Dock Magnification, Spatial Placement & Workspace Insets', ()
         top: 800,
         bottom: 848,
         width: 48,
-        height: 48
+        height: 48,
       });
     });
 
     // Move pointer right over item 1 center (left: 160, center: 184)
-    dockEl.dispatchEvent(new MouseEvent('pointermove', {
-      clientX: 184,
-      clientY: 824
-    }));
+    dockEl.dispatchEvent(
+      new MouseEvent('pointermove', {
+        clientX: 184,
+        clientY: 824,
+      })
+    );
 
     // Item 1 should have maximum scale ~1.45
     const item1Scale = parseFloat(items[1].style.getPropertyValue('--dock-item-scale'));

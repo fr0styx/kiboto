@@ -6,6 +6,6 @@ describe('the Apprise dialog keeps its switch (SET-14, Settings 1)', () => {
   it('reads, saves and shows the switch', () => {
     expect(src).toContain('cfg.apprise_enabled = enabled;');
     expect(src).toMatch(/\.checked = cfg\.apprise_enabled !== false;/);
-    expect(src).toContain("rawCount > 0 && cfg.apprise_enabled !== false");
+    expect(src).toContain('rawCount > 0 && cfg.apprise_enabled !== false');
   });
 });

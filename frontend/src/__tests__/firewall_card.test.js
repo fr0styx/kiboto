@@ -7,7 +7,10 @@ const flush = () => new Promise((r) => setTimeout(r, 10));
 const SVC = { web: true, ssh: true, smb: true, nfs: false, webdav: false, sftp: false, tailscale: true, mdns: true };
 
 describe('firewall card (audit A13)', () => {
-  afterEach(() => { vi.restoreAllMocks(); document.body.innerHTML = ''; });
+  afterEach(() => {
+    vi.restoreAllMocks();
+    document.body.innerHTML = '';
+  });
 
   it('says why it cannot be managed here', () => {
     expect(whyNot('host')).toContain("the NAS's own firewall applies");
@@ -18,7 +21,14 @@ describe('firewall card (audit A13)', () => {
 
   it('in a container: the reason shown, the switch and choices locked', async () => {
     document.body.innerHTML = '<section id="firewall-card" hidden></section>';
-    vi.spyOn(api, 'get').mockResolvedValue({ enabled: false, allow_from: 'lan', services: SVC, possible: false, why_not: 'host', rules: 'table inet kiboto' });
+    vi.spyOn(api, 'get').mockResolvedValue({
+      enabled: false,
+      allow_from: 'lan',
+      services: SVC,
+      possible: false,
+      why_not: 'host',
+      rules: 'table inet kiboto',
+    });
     await renderFirewallCard();
     const box = /** @type {HTMLElement} */ (document.getElementById('firewall-card'));
     expect(box.hidden).toBe(false);
@@ -33,7 +43,10 @@ describe('firewall card (audit A13)', () => {
     document.body.innerHTML = '<section id="firewall-card" hidden></section>';
     let st = { enabled: false, allow_from: 'lan', services: { ...SVC }, possible: true, why_not: '', rules: '' };
     vi.spyOn(api, 'get').mockImplementation(async () => st);
-    const put = vi.spyOn(api, 'put').mockImplementation(async (_u, body) => { st = { ...st, ...body, services: { ...st.services, ...body.services } }; return st; });
+    const put = vi.spyOn(api, 'put').mockImplementation(async (_u, body) => {
+      st = { ...st, ...body, services: { ...st.services, ...body.services } };
+      return st;
+    });
     await renderFirewallCard();
     const box = /** @type {HTMLElement} */ (document.getElementById('firewall-card'));
     expect(box.querySelector('#fw-why')).toBeNull();

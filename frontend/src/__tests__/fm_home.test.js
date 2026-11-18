@@ -3,8 +3,8 @@ import { describe, it, expect, afterEach } from 'vitest';
 import { fmHome } from '../components/file-manager-helpers.js';
 
 afterEach(() => {
-  delete /** @type {any} */ (window)._fmHome;
-  delete /** @type {any} */ (window)._fmRoots;
+  delete (/** @type {any} */ (window)._fmHome);
+  delete (/** @type {any} */ (window)._fmRoots);
 });
 
 describe('the home folder of Files', () => {

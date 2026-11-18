@@ -9,7 +9,7 @@ describe('Right now: the load', () => {
     document.body.innerHTML = '';
   });
 
-  it('says the load over 1, 5 and 15 minutes, in the reader\'s numbers', async () => {
+  it("says the load over 1, 5 and 15 minutes, in the reader's numbers", async () => {
     expect(loadLine({ cpu: { load_avg: [0.52, 0.48, 0.4] } })).toBe('Load (1, 5, 15 min): 0.52 · 0.48 · 0.40');
     await setLanguage('de');
     expect(loadLine({ cpu: { load_avg: [1.5, 'x', 0] } })).toBe('Last (1, 5, 15 Min.): 1,50 · 0,00 · 0,00');

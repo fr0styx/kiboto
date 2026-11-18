@@ -2,7 +2,12 @@
  * backup passphrase hint, the clock button and the diagnostics counts. */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-vi.mock('../toast.js', () => ({ showToast: vi.fn(), showConfirmToast: vi.fn(), showPromptToast: vi.fn(), showBottomSheet: vi.fn() }));
+vi.mock('../toast.js', () => ({
+  showToast: vi.fn(),
+  showConfirmToast: vi.fn(),
+  showPromptToast: vi.fn(),
+  showBottomSheet: vi.fn(),
+}));
 
 const { api } = await import('../api.js');
 const { showPromptToast } = await import('../toast.js');
@@ -57,14 +62,15 @@ describe('settings words', () => {
   });
 
   it('the backup passphrase box always asks for a passphrase', async () => {
-    document.body.innerHTML = '<button id="btn-backup-download">Download</button><input type="file" id="backup-upload-input">';
+    document.body.innerHTML =
+      '<button id="btn-backup-download">Download</button><input type="file" id="backup-upload-input">';
     vi.spyOn(api, 'get').mockResolvedValue({});
     settings.initSystemTab();
     $('btn-backup-download').click();
     await vi.waitFor(() => expect(showPromptToast).toHaveBeenCalled());
     // a settings backup is always encrypted (SET-06): the box no longer offers to leave it empty
     expect(showPromptToast.mock.lastCall[5]).toMatchObject({ inputType: 'password', placeholder: 'Backup passphrase' });
-    showPromptToast.mock.lastCall[4]();  // cancel
+    showPromptToast.mock.lastCall[4](); // cancel
     const upload = $('backup-upload-input');
     const file = new File(['ZETTBAK2rest'], 'nas.zettbak');
     Object.defineProperty(upload, 'files', { value: [file] });
@@ -77,8 +83,9 @@ describe('settings words', () => {
 });
 
 describe('clock button', () => {
-  it('names the clock format in the reader\'s language', async () => {
-    document.body.innerHTML = '<div id="screen"></div><div id="dashboard-cards-container"></div><button id="clock-format-btn"></button>';
+  it("names the clock format in the reader's language", async () => {
+    document.body.innerHTML =
+      '<div id="screen"></div><div id="dashboard-cards-container"></div><button id="clock-format-btn"></button>';
     state.clockFormat = '12';
     applyDashboardLayout();
     expect($('clock-format-btn').textContent).toBe('12 Hours');

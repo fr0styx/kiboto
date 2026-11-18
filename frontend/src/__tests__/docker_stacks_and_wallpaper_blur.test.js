@@ -53,7 +53,6 @@ describe('Docker Stacks & Wallpaper Blur & Dock Labels', () => {
   });
 
   describe('Docker Container Updates, Action Button Styling & Header Layout', () => {
-
     it('verifies style.css contains light yellow highlight for edit pencil and rose/crimson for delete', () => {
       const cssContent = readStyleCss();
       // Edit button - light yellow
@@ -170,13 +169,10 @@ describe('Docker Stacks & Wallpaper Blur & Dock Labels', () => {
       const saveBtn = document.getElementById('stack-save-btn');
       saveBtn.click();
 
-      expect(postSpy).toHaveBeenCalledWith(
-        '/api/docker/stacks/immich/save',
-        {
-          compose_yaml: 'services:\n  server:\n    image: immich-server:v1.100\n',
-          env_content: 'TZ=America/New_York\n',
-        }
-      );
+      expect(postSpy).toHaveBeenCalledWith('/api/docker/stacks/immich/save', {
+        compose_yaml: 'services:\n  server:\n    image: immich-server:v1.100\n',
+        env_content: 'TZ=America/New_York\n',
+      });
     });
 
     it('triggers stack action (e.g. restart)', async () => {
@@ -204,10 +200,7 @@ describe('Docker Stacks & Wallpaper Blur & Dock Labels', () => {
       const restartBtn = document.getElementById('stack-action-restart');
       restartBtn.click();
 
-      expect(postSpy).toHaveBeenCalledWith(
-        '/api/docker/stacks/syncthing/action',
-        { action: 'restart' }
-      );
+      expect(postSpy).toHaveBeenCalledWith('/api/docker/stacks/syncthing/action', { action: 'restart' });
     });
   });
 });

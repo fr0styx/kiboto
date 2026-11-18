@@ -20,7 +20,8 @@ const LAST_DIR_PREF = 'kiboto_dh_report_dir';
 // with the server's English as the fallback
 export const findingText = (f, part) => t(`dh.f.${f.key || f.code}.${part}`, f[part] || '', f.params || {});
 export const labelText = (d) => (d.label_key ? t(`dh.label.${d.label_key}`, d.label || '') : d.label || '');
-export const summaryText = (d) => (d.summary_key ? t(`dh.f.${d.summary_key}.title`, d.summary || '', d.summary_params || {}) : d.summary || '');
+export const summaryText = (d) =>
+  d.summary_key ? t(`dh.f.${d.summary_key}.title`, d.summary || '', d.summary_params || {}) : d.summary || '';
 
 const today = () => new Date().toISOString().slice(0, 10);
 const when = (ts) => (ts ? formatDateTime(ts * 1000, undefined, '') : '');
@@ -48,7 +49,10 @@ export function warrantyText(until, from = new Date()) {
   if (end < from) return t('dh.warranty_ended', 'Ended {date}', { date: until });
   const left = monthsLeft(until, from);
   if (!left || left < 1) return t('dh.warranty_days', 'Until {date} (less than a month left)', { date: until });
-  return t('dh.warranty_left', 'Until {date} ({n, plural, one {# month} other {# months}} left)', { date: until, n: left });
+  return t('dh.warranty_left', 'Until {date} ({n, plural, one {# month} other {# months}} left)', {
+    date: until,
+    n: left,
+  });
 }
 
 /** True while the warranty runs. */
@@ -98,16 +102,39 @@ export function notesForm(host, serial, notes, onSaved) {
   const old = Array.from(host.childNodes);
   const form = document.createElement('form');
   form.className = 'dh-notes-form';
-  const bought = Object.assign(document.createElement('input'), { type: 'date', value: (notes && notes.bought) || '', name: 'bought' });
-  const until = Object.assign(document.createElement('input'), { type: 'date', value: (notes && notes.warranty_until) || '', name: 'warranty_until' });
-  const note = Object.assign(document.createElement('textarea'), { value: (notes && notes.note) || '', name: 'note', rows: 2, maxLength: 300 });
-  const limit = Object.assign(document.createElement('input'), { type: 'number', min: 30, max: 90, step: 1, name: 'temp_limit', value: notes && notes.temp_limit ? String(notes.temp_limit) : '' });
+  const bought = Object.assign(document.createElement('input'), {
+    type: 'date',
+    value: (notes && notes.bought) || '',
+    name: 'bought',
+  });
+  const until = Object.assign(document.createElement('input'), {
+    type: 'date',
+    value: (notes && notes.warranty_until) || '',
+    name: 'warranty_until',
+  });
+  const note = Object.assign(document.createElement('textarea'), {
+    value: (notes && notes.note) || '',
+    name: 'note',
+    rows: 2,
+    maxLength: 300,
+  });
+  const limit = Object.assign(document.createElement('input'), {
+    type: 'number',
+    min: 30,
+    max: 90,
+    step: 1,
+    name: 'temp_limit',
+    value: notes && notes.temp_limit ? String(notes.temp_limit) : '',
+  });
   limit.placeholder = t('dh.n_temp_hint', 'Usual: 50 for hard drives, 70 for NVMe');
   note.placeholder = t('dh.n_note_hint', 'Where it sits, where it was bought, the order number…');
   const years = document.createElement('div');
   years.className = 'dh-years';
   for (const y of [2, 3, 5]) {
-    const b = button(t('dh.n_years', '{n, plural, one {# year} other {# years}}', { n: y }), 'btn-pill-toggle is-small');
+    const b = button(
+      t('dh.n_years', '{n, plural, one {# year} other {# years}}', { n: y }),
+      'btn-pill-toggle is-small'
+    );
     b.addEventListener('click', () => {
       const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(bought.value);
       if (!m) return void bought.focus();
@@ -128,13 +155,19 @@ export function notesForm(host, serial, notes, onSaved) {
     years,
     field(t('dh.n_note', 'Note'), note),
     field(t('dh.n_temp_label', 'Counts as warm above (°C); too hot is 10 °C more'), limit),
-    row,
+    row
   );
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     save.disabled = true;
     try {
-      const res = await api.put('/api/drives/notes', { serial, bought: bought.value, warranty_until: until.value, note: note.value, temp_limit: limit.value ? Number(limit.value) : null });
+      const res = await api.put('/api/drives/notes', {
+        serial,
+        bought: bought.value,
+        warranty_until: until.value,
+        note: note.value,
+        temp_limit: limit.value ? Number(limit.value) : null,
+      });
       showToast(t('dh.n_saved', 'Saved.'), 'success');
       onSaved(res && res.notes ? res.notes : null);
     } catch (err) {
@@ -158,13 +191,42 @@ const csvCell = (v) => {
 
 /** A CSV report of every drive: for your records or a warranty claim. */
 export function reportCsv(drives, notesBySerial = {}) {
-  const head = ['device', 'model', 'serial', 'role', 'verdict', 'summary', 'temperature_c', 'power_on_hours', 'size_bytes', 'asleep', 'findings', 'bought', 'warranty_until', 'note'];
+  const head = [
+    'device',
+    'model',
+    'serial',
+    'role',
+    'verdict',
+    'summary',
+    'temperature_c',
+    'power_on_hours',
+    'size_bytes',
+    'asleep',
+    'findings',
+    'bought',
+    'warranty_until',
+    'note',
+  ];
   const rows = (drives || []).map((d) => {
     const n = (d.serial && notesBySerial[d.serial]) || {};
     return [
-      d.dev, d.model, d.serial, d.role, labelText(d), summaryText(d), d.temp ?? '', d.power_on_hours ?? '', d.capacity_bytes ?? '', d.asleep ? 'yes' : 'no',
-      (d.findings || []).filter((f) => f.severity !== 'ok').map((f) => findingText(f, 'title')).join('; '),
-      n.bought || '', n.warranty_until || '', n.note || '',
+      d.dev,
+      d.model,
+      d.serial,
+      d.role,
+      labelText(d),
+      summaryText(d),
+      d.temp ?? '',
+      d.power_on_hours ?? '',
+      d.capacity_bytes ?? '',
+      d.asleep ? 'yes' : 'no',
+      (d.findings || [])
+        .filter((f) => f.severity !== 'ok')
+        .map((f) => findingText(f, 'title'))
+        .join('; '),
+      n.bought || '',
+      n.warranty_until || '',
+      n.note || '',
     ];
   });
   return [head, ...rows].map((r) => r.map(csvCell).join(',')).join('\n') + '\n';
@@ -179,13 +241,20 @@ export function driveReportText({ drive, detail, tests, history, notes, now = ne
   const id = health.identity || {};
   const out = [];
   const rule = '-'.repeat(60);
-  out.push(t('dh.rep_title', 'Drive Health report: {name}', { name: d.model || d.dev || '' }), t('dh.rep_made', 'Made by Kiboto on {date}', { date: formatDateTime(now.getTime(), undefined, '') }), '');
+  out.push(
+    t('dh.rep_title', 'Drive Health report: {name}', { name: d.model || d.dev || '' }),
+    t('dh.rep_made', 'Made by Kiboto on {date}', { date: formatDateTime(now.getTime(), undefined, '') }),
+    ''
+  );
   out.push(
     ...[
       line(t('dh.r_model', 'Model'), d.model || detail?.model),
       line(t('dh.r_serial', 'Serial number'), d.serial || detail?.serial),
       line(t('dh.a_firmware', 'Firmware'), id.firmware),
-      line(t('dh.a_size', 'Size'), id.capacity_bytes || d.capacity_bytes ? formatBytes(id.capacity_bytes || d.capacity_bytes) : ''),
+      line(
+        t('dh.a_size', 'Size'),
+        id.capacity_bytes || d.capacity_bytes ? formatBytes(id.capacity_bytes || d.capacity_bytes) : ''
+      ),
       line(t('dh.rep_device', 'Device'), [d.dev, d.role].filter(Boolean).join(', ')),
       line(t('dh.r_hours', 'Hours powered on'), detail?.power_on_hours ?? d.power_on_hours),
       line(t('dh.r_temp', 'Temperature'), d.temp != null ? `${d.temp} °C` : ''),
@@ -193,33 +262,53 @@ export function driveReportText({ drive, detail, tests, history, notes, now = ne
       line(t('dh.n_warranty', 'Warranty'), notes?.warranty_until ? warrantyText(notes.warranty_until, now) : ''),
       line(t('dh.n_note', 'Note'), notes?.note),
       line(t('dh.n_temp', 'Warm above'), notes?.temp_limit ? `${notes.temp_limit} °C` : ''),
-    ].filter(Boolean),
+    ].filter(Boolean)
   );
   out.push('', rule, `${t('dh.verdict', 'What we found')}: ${labelText(health)}`, rule);
   const findings = (health.findings || []).filter((f) => f.severity !== 'ok');
   if (!findings.length) out.push(t('dh.all_good', 'No sign of trouble. Nothing to do.'));
   for (const f of findings) {
-    out.push(`* ${findingText(f, 'title')}`, `  ${findingText(f, 'detail')}`, `  ${t('dh.what_to_do', 'What to do:')} ${findingText(f, 'action')}`);
+    out.push(
+      `* ${findingText(f, 'title')}`,
+      `  ${findingText(f, 'detail')}`,
+      `  ${t('dh.what_to_do', 'What to do:')} ${findingText(f, 'action')}`
+    );
   }
   for (const f of (health.findings || []).filter((x) => x.acknowledged)) {
-    out.push(`* ${findingText(f, 'title')} (${t('dh.rep_acked', 'acknowledged {date}', { date: when(f.acknowledged.at) })})`);
+    out.push(
+      `* ${findingText(f, 'title')} (${t('dh.rep_acked', 'acknowledged {date}', { date: when(f.acknowledged.at) })})`
+    );
   }
   out.push('', rule, t('dh.self_tests', 'Self-tests'), rule);
   const runs = (tests && tests.history) || [];
   if (!runs.length) out.push(t('dh.no_tests', 'No self-test has been run from Kiboto yet.'));
-  for (const r of runs) out.push(`${when(r.ts)}  ${r.test_type || ''}  ${r.status || (r.passed ? 'passed' : 'failed')}`);
+  for (const r of runs)
+    out.push(`${when(r.ts)}  ${r.test_type || ''}  ${r.status || (r.passed ? 'passed' : 'failed')}`);
   if (history && history.samples) {
     out.push('', rule, t('dh.history', 'History (30 days)'), rule);
-    if (history.temp) out.push(t('dh.h_temp', 'Temperature: {min}–{max} °C, average {avg} °C', { min: Math.round(history.temp.min), max: Math.round(history.temp.max), avg: history.temp.avg }));
-    for (const [key, c] of Object.entries(history.counters || {})) out.push(`${counterName(key)}: ${c.first} → ${c.last}`);
+    if (history.temp)
+      out.push(
+        t('dh.h_temp', 'Temperature: {min}–{max} °C, average {avg} °C', {
+          min: Math.round(history.temp.min),
+          max: Math.round(history.temp.max),
+          avg: history.temp.avg,
+        })
+      );
+    for (const [key, c] of Object.entries(history.counters || {}))
+      out.push(`${counterName(key)}: ${c.first} → ${c.last}`);
   }
-  if (detail && detail.raw) out.push('', rule, t('dh.rep_raw', 'Full S.M.A.R.T. output'), rule, String(detail.raw).trimEnd());
+  if (detail && detail.raw)
+    out.push('', rule, t('dh.rep_raw', 'Full S.M.A.R.T. output'), rule, String(detail.raw).trimEnd());
   return out.join('\n') + '\n';
 }
 
 /** A file name without characters folders don't take. */
 export function safeName(name) {
-  return String(name || '').replace(/[\\/:*?"<>|\u0000-\u001f]+/g, '-').replace(/\s+/g, ' ').trim().slice(0, 120);
+  return String(name || '')
+    .replace(/[\\/:*?"<>|\u0000-\u001f]+/g, '-')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 120);
 }
 
 /** `name`, or "name (2).ext" and so on when the folder has it already. */
@@ -260,7 +349,10 @@ export async function saveTextToNas(dir, name, text, type = 'text/plain') {
   const listing = await api.get(`/api/browse?path=${encodeURIComponent(folder)}`);
   const taken = ((listing && listing.dirs) || []).map((e) => e.name);
   const file = freeName(safeName(name), taken);
-  const res = await api.postRaw(`/api/fs/upload?path=${encodeURIComponent(folder)}&filename=${encodeURIComponent(file)}`, new Blob([text], { type }));
+  const res = await api.postRaw(
+    `/api/fs/upload?path=${encodeURIComponent(folder)}&filename=${encodeURIComponent(file)}`,
+    new Blob([text], { type })
+  );
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
     throw new Error(body.detail || String(res.status));
@@ -290,7 +382,12 @@ export function openReportDialog(host, ctx, preset = 'all') {
   const choice = (value, text, hint, disabled) => {
     const label = document.createElement('label');
     label.className = 'dh-choice';
-    const input = Object.assign(document.createElement('input'), { type: 'radio', name: 'dh-kind', value, disabled: Boolean(disabled) });
+    const input = Object.assign(document.createElement('input'), {
+      type: 'radio',
+      name: 'dh-kind',
+      value,
+      disabled: Boolean(disabled),
+    });
     const span = document.createElement('span');
     const strong = document.createElement('strong');
     strong.textContent = text;
@@ -300,30 +397,56 @@ export function openReportDialog(host, ctx, preset = 'all') {
     label.append(input, span);
     return { label, input };
   };
-  const all = choice('all', t('dh.rep_all', 'All drives, as a spreadsheet (.csv)'), t('dh.rep_all_hint', 'One row per drive: health, temperature, age, findings, warranty.'));
+  const all = choice(
+    'all',
+    t('dh.rep_all', 'All drives, as a spreadsheet (.csv)'),
+    t('dh.rep_all_hint', 'One row per drive: health, temperature, age, findings, warranty.')
+  );
   const one = choice(
     'drive',
-    current ? t('dh.rep_one', '{name} in full (.txt)', { name: current.model || current.dev }) : t('dh.rep_one_none', 'One drive in full (.txt)'),
-    t('dh.rep_one_hint', 'Findings, self-tests, history and the full S.M.A.R.T. output: what a warranty claim asks for.'),
-    !current,
+    current
+      ? t('dh.rep_one', '{name} in full (.txt)', { name: current.model || current.dev })
+      : t('dh.rep_one_none', 'One drive in full (.txt)'),
+    t(
+      'dh.rep_one_hint',
+      'Findings, self-tests, history and the full S.M.A.R.T. output: what a warranty claim asks for.'
+    ),
+    !current
   );
   (preset === 'drive' && current ? one : all).input.checked = true;
 
   const defaultName = (kind) => {
-    if (kind === 'drive' && current) return safeName(`drive-${current.model || current.dev}-${current.serial || current.dev}-${today()}.txt`);
+    if (kind === 'drive' && current)
+      return safeName(`drive-${current.model || current.dev}-${current.serial || current.dev}-${today()}.txt`);
     return `drive-health-${today()}.csv`;
   };
-  const dir = Object.assign(document.createElement('input'), { type: 'text', value: lastDir(), name: 'dir', spellcheck: false });
+  const dir = Object.assign(document.createElement('input'), {
+    type: 'text',
+    value: lastDir(),
+    name: 'dir',
+    spellcheck: false,
+  });
   const choose = button(t('dh.rep_choose', 'Choose…'), 'btn-pill-toggle is-small');
   choose.addEventListener('click', () => {
     const open = /** @type {any} */ (window).openFolderBrowser;
-    if (typeof open === 'function') open(dir.value || '/mnt/user', (picked) => { dir.value = picked; });
+    if (typeof open === 'function')
+      open(dir.value || '/mnt/user', (picked) => {
+        dir.value = picked;
+      });
   });
   const dirRow = document.createElement('div');
   dirRow.className = 'dh-dir-row';
   dirRow.append(dir, choose);
-  const name = Object.assign(document.createElement('input'), { type: 'text', value: defaultName((preset === 'drive' && current) ? 'drive' : 'all'), name: 'name', spellcheck: false });
-  for (const c of [all, one]) c.input.addEventListener('change', () => { name.value = defaultName(c.input.value); });
+  const name = Object.assign(document.createElement('input'), {
+    type: 'text',
+    value: defaultName(preset === 'drive' && current ? 'drive' : 'all'),
+    name: 'name',
+    spellcheck: false,
+  });
+  for (const c of [all, one])
+    c.input.addEventListener('change', () => {
+      name.value = defaultName(c.input.value);
+    });
 
   const status = document.createElement('p');
   status.className = 'dh-hint';
@@ -346,18 +469,26 @@ export function openReportDialog(host, ctx, preset = 'all') {
   };
   host.addEventListener('keydown', onKey, true);
   cancel.addEventListener('click', close);
-  wrap.addEventListener('click', (e) => { if (e.target === wrap) close(); });
+  wrap.addEventListener('click', (e) => {
+    if (e.target === wrap) close();
+  });
 
   save.addEventListener('click', async () => {
     const kind = one.input.checked ? 'drive' : 'all';
     const now = ctx();
-    const text = kind === 'drive' && now.current
-      ? driveReportText({ ...now.current, notes: now.notes[now.current.drive?.serial] })
-      : reportCsv(now.drives, now.notes);
+    const text =
+      kind === 'drive' && now.current
+        ? driveReportText({ ...now.current, notes: now.notes[now.current.drive?.serial] })
+        : reportCsv(now.drives, now.notes);
     save.disabled = true;
     status.textContent = t('dh.rep_saving', 'Saving…');
     try {
-      const path = await saveTextToNas(dir.value.trim(), name.value.trim() || defaultName(kind), text, kind === 'drive' ? 'text/plain' : 'text/csv');
+      const path = await saveTextToNas(
+        dir.value.trim(),
+        name.value.trim() || defaultName(kind),
+        text,
+        kind === 'drive' ? 'text/plain' : 'text/csv'
+      );
       rememberDir(dir.value.trim());
       status.textContent = t('dh.rep_saved', 'Saved as {path}', { path });
       const show = button(t('dh.rep_show', 'Show in File Explorer'), 'btn-pill-toggle is-primary');
@@ -373,9 +504,10 @@ export function openReportDialog(host, ctx, preset = 'all') {
     } catch (err) {
       save.disabled = false;
       // "Cancel" on waking a sleeping folder's disk: nothing was saved
-      status.textContent = err?.error === 'cancelled'
-        ? t('dh.rep_cancelled', 'Not saved: that folder\'s disk is asleep.')
-        : t('dh.rep_failed', 'Could not save the report: {error}', { error: err?.message || '' });
+      status.textContent =
+        err?.error === 'cancelled'
+          ? t('dh.rep_cancelled', "Not saved: that folder's disk is asleep.")
+          : t('dh.rep_failed', 'Could not save the report: {error}', { error: err?.message || '' });
     }
   });
 
@@ -386,7 +518,7 @@ export function openReportDialog(host, ctx, preset = 'all') {
     field(t('dh.rep_folder', 'Folder on the NAS'), dirRow, dir),
     field(t('dh.rep_name', 'File name'), name),
     status,
-    actions,
+    actions
   );
   wrap.append(box);
   host.append(wrap);

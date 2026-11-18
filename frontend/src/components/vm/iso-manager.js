@@ -31,7 +31,7 @@ export const OFFICIAL_ISO_CATALOG = [
     kernel: 'Linux 6.8',
     url: 'https://old-releases.ubuntu.com/releases/24.04.1/ubuntu-24.04.1-live-server-amd64.iso',
     filename: 'ubuntu-24.04.1-live-server-amd64.iso',
-    desc: 'Enterprise grade cloud & container host. Pre-configured with cloud-init and OpenSSH.'
+    desc: 'Enterprise grade cloud & container host. Pre-configured with cloud-init and OpenSSH.',
   },
   {
     id: 'debian-12',
@@ -44,7 +44,7 @@ export const OFFICIAL_ISO_CATALOG = [
     kernel: 'Linux 6.1 LTS',
     url: 'https://cdimage.debian.org/cdimage/archive/12.7.0/amd64/iso-cd/debian-12.7.0-amd64-netinst.iso',
     filename: 'debian-12.7.0-amd64-netinst.iso',
-    desc: 'The universal operating system. Ultra-light memory footprint, rock solid package ecosystem.'
+    desc: 'The universal operating system. Ultra-light memory footprint, rock solid package ecosystem.',
   },
   {
     id: 'alpine-320',
@@ -57,7 +57,7 @@ export const OFFICIAL_ISO_CATALOG = [
     kernel: 'Linux 6.6 LTS',
     url: 'https://dl-cdn.alpinelinux.org/alpine/v3.20/releases/x86_64/alpine-standard-3.20.3-x86_64.iso',
     filename: 'alpine-standard-3.20.3-x86_64.iso',
-    desc: 'Musl libc and BusyBox based ultra-lean OS. Boots in 400ms, uses under 32MB host RAM.'
+    desc: 'Musl libc and BusyBox based ultra-lean OS. Boots in 400ms, uses under 32MB host RAM.',
   },
   {
     id: 'fedora-40',
@@ -70,7 +70,7 @@ export const OFFICIAL_ISO_CATALOG = [
     kernel: 'Linux 6.8',
     url: 'https://archives.fedoraproject.org/pub/archive/fedora/linux/releases/40/Server/x86_64/iso/Fedora-Server-dvd-x86_64-40-1.14.iso',
     filename: 'Fedora-Server-dvd-x86_64-40-1.14.iso',
-    desc: 'Leading-edge Linux platform with native systemd-nspawn, Podman, and Cockpit integration.'
+    desc: 'Leading-edge Linux platform with native systemd-nspawn, Podman, and Cockpit integration.',
   },
   {
     id: 'truenas-scale',
@@ -83,7 +83,7 @@ export const OFFICIAL_ISO_CATALOG = [
     kernel: 'Linux 6.6 LTS',
     url: 'https://download.sys.truenas.net/TrueNAS-SCALE-Dragonfish/24.04.2/TrueNAS-SCALE-24.04.2.iso',
     filename: 'TrueNAS-SCALE-24.04.2.iso',
-    desc: 'Debian-based open hyper-converged scale-out storage, ZFS pools, and containerized apps.'
+    desc: 'Debian-based open hyper-converged scale-out storage, ZFS pools, and containerized apps.',
   },
   {
     id: 'virtio-win',
@@ -96,7 +96,7 @@ export const OFFICIAL_ISO_CATALOG = [
     kernel: 'WHQL Signed',
     url: 'https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/archive-virtio/virtio-win-0.1.262-2/virtio-win-0.1.262.iso',
     filename: 'virtio-win-0.1.262.iso',
-    desc: 'Essential Red Hat signed VirtIO storage (viostor), network (NetKVM), and memory balloon drivers.'
+    desc: 'Essential Red Hat signed VirtIO storage (viostor), network (NetKVM), and memory balloon drivers.',
   },
   {
     id: 'haos',
@@ -110,8 +110,8 @@ export const OFFICIAL_ISO_CATALOG = [
     url: 'https://github.com/home-assistant/operating-system/releases/download/18.4/haos_ova-18.4.qcow2.xz',
     filename: 'haos_ova-18.4.qcow2',
     disk: true, // a ready-made disk, chosen under "Ready-made disk", never booted as an ISO
-    desc: 'Home Assistant\'s own system as a ready-made disk: no installer, it starts straight away (VMs decision 5).'
-  }
+    desc: "Home Assistant's own system as a ready-made disk: no installer, it starts straight away (VMs decision 5).",
+  },
 ];
 
 let _isoPollTimers = {};
@@ -222,7 +222,9 @@ export async function openIsoManagerModal(initialTab = 'catalog') {
           e.stopPropagation();
         }
         if (modal._unbindTrap) {
-          try { modal._unbindTrap(); } catch (_) {}
+          try {
+            modal._unbindTrap();
+          } catch (_) {}
           modal._unbindTrap = null;
         }
         modal.classList.add('window-minimized');
@@ -267,7 +269,9 @@ export async function openIsoManagerModal(initialTab = 'catalog') {
           e.stopPropagation();
         }
         if (modal._unbindTrap) {
-          try { modal._unbindTrap(); } catch (_) {}
+          try {
+            modal._unbindTrap();
+          } catch (_) {}
           modal._unbindTrap = null;
         }
         modal.classList.add('window-minimized');
@@ -353,7 +357,12 @@ export async function openIsoManagerModal(initialTab = 'catalog') {
       if (xhr.status >= 200 && xhr.status < 300) {
         if (progBar) progBar.style.width = '100%';
         if (progRate) progRate.textContent = t('ui.upload_complete', 'Upload Complete');
-        showToast(t('toast.iso_uploaded_successfully_to_mnt_user', 'ISO \'{name}\' uploaded successfully to /mnt/user/isos', { name: file.name }), 'success');
+        showToast(
+          t('toast.iso_uploaded_successfully_to_mnt_user', "ISO '{name}' uploaded successfully to /mnt/user/isos", {
+            name: file.name,
+          }),
+          'success'
+        );
         await Promise.all([loadVmDashboard(), loadIsos()]);
         renderLocalIsoList();
         renderCatalogCards();
@@ -388,7 +397,9 @@ export async function openIsoManagerModal(initialTab = 'catalog') {
     if (!vmState.isos || vmState.isos.length === 0) {
       localList.innerHTML = `<div class="vmi-xs-muted-3">${t('viso.none', 'No ISO images in {path} yet.', { path: '/mnt/user/isos' })}</div>`;
     } else {
-      localList.innerHTML = vmState.isos.map((iso) => `
+      localList.innerHTML = vmState.isos
+        .map(
+          (iso) => `
         <div class="vmi-row-box-2">
           <div class="vmi-row-3">
             <span class="vmi-fs18">💿</span>
@@ -403,7 +414,9 @@ export async function openIsoManagerModal(initialTab = 'catalog') {
             <button class="btn-pill-toggle btn-delete-iso is-danger" data-path="${escapeHtml(iso.path)}" data-name="${escapeHtml(iso.name)}" title="${t('ui.delete_iso_from_storage', 'Delete ISO from storage')}">🗑</button>
           </div>
         </div>
-      `).join('');
+      `
+        )
+        .join('');
 
       localList.querySelectorAll('.btn-boot-iso').forEach((btn) => {
         btn.onclick = () => {
@@ -426,13 +439,19 @@ export async function openIsoManagerModal(initialTab = 'catalog') {
             async () => {
               try {
                 await api.delete(`/api/vms/isos?path=${encodeURIComponent(path)}`);
-                showToast(t('toast.iso_deleted_successfully', 'ISO \'{name}\' deleted successfully.', { name: name }), 'info');
+                showToast(
+                  t('toast.iso_deleted_successfully', "ISO '{name}' deleted successfully.", { name: name }),
+                  'info'
+                );
                 await Promise.all([loadVmDashboard(), loadIsos()]);
                 renderLocalIsoList();
                 renderCatalogCards();
                 document.getElementById('fm-refresh-btn')?.click();
               } catch (err) {
-                showToast(t('toast.failed_to_delete_iso', 'Failed to delete ISO: {error}', { error: err.message }), 'error');
+                showToast(
+                  t('toast.failed_to_delete_iso', 'Failed to delete ISO: {error}', { error: err.message }),
+                  'error'
+                );
               }
             }
           );
@@ -462,7 +481,10 @@ export async function openIsoManagerModal(initialTab = 'catalog') {
 
         if (task.status === 'downloading') {
           if (targetStat) {
-            targetStat.textContent = t('viso.downloading', 'Downloading… {speed} MB/s ({pct}%)', { speed: task.speed_mb_s || 0, pct: task.progress_pct || 0 });
+            targetStat.textContent = t('viso.downloading', 'Downloading… {speed} MB/s ({pct}%)', {
+              speed: task.speed_mb_s || 0,
+              pct: task.progress_pct || 0,
+            });
             targetStat.style.color = '#4fd8c4';
           }
           if (btn) {
@@ -485,7 +507,12 @@ export async function openIsoManagerModal(initialTab = 'catalog') {
             btn.style.borderColor = '#34d399';
             btn.style.color = '#34d399';
           }
-          showToast(t('toast.downloaded_to_mnt_user_isos', 'Downloaded \'{name}\' to /mnt/user/isos', { name: task.name || catalogId }), 'success');
+          showToast(
+            t('toast.downloaded_to_mnt_user_isos', "Downloaded '{name}' to /mnt/user/isos", {
+              name: task.name || catalogId,
+            }),
+            'success'
+          );
           await Promise.all([loadVmDashboard(), loadIsos()]);
           renderCatalogCards();
           renderLocalIsoList();
@@ -494,7 +521,9 @@ export async function openIsoManagerModal(initialTab = 'catalog') {
           clearInterval(_isoPollTimers[catalogId]);
           delete _isoPollTimers[catalogId];
           if (targetStat) {
-            targetStat.textContent = t('viso.failed', 'Failed: {error}', { error: task.error || t('viso.checksum', 'the checksum did not match') });
+            targetStat.textContent = t('viso.failed', 'Failed: {error}', {
+              error: task.error || t('viso.checksum', 'the checksum did not match'),
+            });
             targetStat.style.color = '#ef4444';
           }
           if (btn) {
@@ -514,13 +543,15 @@ export async function openIsoManagerModal(initialTab = 'catalog') {
     if (!container) return;
 
     const list = catalogList || OFFICIAL_ISO_CATALOG;
-    container.innerHTML = list.map((item) => {
-      const inStorage = [...(vmState.isos || []), ...(vmState.diskImages || [])].some((iso) =>
-        iso.name.toLowerCase() === item.filename.toLowerCase() ||
-        (iso.path && iso.path.toLowerCase().endsWith(item.filename.toLowerCase()))
-      );
+    container.innerHTML = list
+      .map((item) => {
+        const inStorage = [...(vmState.isos || []), ...(vmState.diskImages || [])].some(
+          (iso) =>
+            iso.name.toLowerCase() === item.filename.toLowerCase() ||
+            (iso.path && iso.path.toLowerCase().endsWith(item.filename.toLowerCase()))
+        );
 
-      return `
+        return `
         <div class="catalog-card glassmorphic-card" style="padding: 14px; border-radius: 8px; border: 1px solid var(--kb-line-8); background: var(--lt-b-13222599, rgba(19,34,37,0.6));">
           <div class="vmi-row-5">
             <div>
@@ -546,23 +577,28 @@ export async function openIsoManagerModal(initialTab = 'catalog') {
           <div class="vmi-row-6">
             <span class="vmi-xs-muted-mono">${item.arch || item.architecture || 'x86_64'} • ${item.kernel || 'Linux'}</span>
             <div class="vmi-row-7">
-              ${inStorage ? `
+              ${
+                inStorage
+                  ? `
                 <button class="btn-pill-toggle btn-boot-catalog-iso" data-filename="${escapeHtml(item.filename)}"${item.disk ? ' hidden' : ''} style="background: rgba(51,205,184,0.18); color: var(--kb-text-accent); border-color: rgba(51,205,184,0.35);">
                   ${ico('▶')} ${t('viso.boot', 'Create VM')}
                 </button>
                 <button class="btn-save-preset btn-dl-catalog" data-id="${item.id}" disabled style="padding: 5px 10px; font-size: var(--kb-fs-xs); font-weight: 700; background: rgba(16,185,129,0.2); color: var(--kb-text-ok); border-color: #34d399;">
                   ${ico('✓')} ${t('viso.ready', 'Ready')}
                 </button>
-              ` : `
+              `
+                  : `
                 <button class="btn-save-preset btn-dl-catalog" data-id="${item.id}" style="padding: 5px 12px; font-size: var(--kb-fs-xs); font-weight: 700; background: var(--brand); color: var(--accent-contrast-fg);">
                   <span>${ico('⬇')} ${t('viso.download', 'Download')}</span>
                 </button>
-              `}
+              `
+              }
             </div>
           </div>
         </div>
       `;
-    }).join('');
+      })
+      .join('');
 
     // Bind 1-click Download buttons
     container.querySelectorAll('.btn-dl-catalog:not(:disabled)').forEach((btn) => {
@@ -590,7 +626,10 @@ export async function openIsoManagerModal(initialTab = 'catalog') {
           }
           trackDownload(id, res.task_id);
         } catch (err) {
-          showToast(t('toast.failed_to_initiate_download', 'Failed to initiate download: {error}', { error: err.message }), 'error');
+          showToast(
+            t('toast.failed_to_initiate_download', 'Failed to initiate download: {error}', { error: err.message }),
+            'error'
+          );
           if (targetStat) {
             targetStat.textContent = t('viso.error', 'Error: {error}', { error: err.message });
             targetStat.style.color = '#ef4444';
@@ -648,7 +687,9 @@ export async function openIsoManagerModal(initialTab = 'catalog') {
   bringToFront(modal);
 
   if (modal._unbindTrap) {
-    try { modal._unbindTrap(); } catch (_) {}
+    try {
+      modal._unbindTrap();
+    } catch (_) {}
     modal._unbindTrap = null;
   }
   modal._unbindTrap = trapFocus(modal, () => {

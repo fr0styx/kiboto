@@ -3,7 +3,12 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 const me = { current: { id: 'u1', username: 'alice' } };
 vi.mock('../api.js', () => ({ api: { get: vi.fn(), delete: vi.fn() }, auth: {}, apiFetch: vi.fn() }));
-vi.mock('../toast.js', () => ({ showToast: vi.fn(), showConfirmToast: vi.fn(), showPromptToast: vi.fn(), showBottomSheet: vi.fn() }));
+vi.mock('../toast.js', () => ({
+  showToast: vi.fn(),
+  showConfirmToast: vi.fn(),
+  showPromptToast: vi.fn(),
+  showBottomSheet: vi.fn(),
+}));
 vi.mock('../components/session.js', () => ({
   setCurrentUser: vi.fn(),
   getCurrentUser: () => me.current,
@@ -15,7 +20,10 @@ vi.mock('../components/dock.js', () => ({ initTopbarUserPill: vi.fn() }));
 vi.mock('../components/share-access.js', () => ({
   grantShares: vi.fn(async () => {}),
   openShareAccessModal: vi.fn(),
-  shareChoicesHtml: (shares) => shares.map((s) => `<select data-add-user-share="${s.name}"><option value="read" selected>r</option></select>`).join(''),
+  shareChoicesHtml: (shares) =>
+    shares
+      .map((s) => `<select data-add-user-share="${s.name}"><option value="read" selected>r</option></select>`)
+      .join(''),
 }));
 vi.mock('../components/invites-admin.js', () => ({ renderInvites: vi.fn() }));
 vi.mock('../management-dom.js', () => ({ onManagementDom: (fn) => fn() }));
@@ -54,8 +62,24 @@ const DOM = `
   </div>`;
 
 const PEOPLE = [
-  { id: 'u1', username: 'alice', display_name: 'Alice', role_id: 'superadmin', status: 'active', mfa_enabled: true, storage_quota_bytes: 0 },
-  { id: 'u2', username: 'bob', email: 'b@x', role_id: 'user', status: 'disabled', storage_quota_bytes: 5 * 1024 ** 3, quota_enforcement: { enforced: true } },
+  {
+    id: 'u1',
+    username: 'alice',
+    display_name: 'Alice',
+    role_id: 'superadmin',
+    status: 'active',
+    mfa_enabled: true,
+    storage_quota_bytes: 0,
+  },
+  {
+    id: 'u2',
+    username: 'bob',
+    email: 'b@x',
+    role_id: 'user',
+    status: 'disabled',
+    storage_quota_bytes: 5 * 1024 ** 3,
+    quota_enforcement: { enforced: true },
+  },
 ];
 
 describe('People pane (users.js)', () => {
@@ -85,7 +109,9 @@ describe('People pane (users.js)', () => {
 
   it('invited people are rows too, and an invite can be cancelled (SET-19)', async () => {
     apiFetch.mockResolvedValue(reply({ users: PEOPLE }));
-    api.get.mockResolvedValueOnce({ invites: [{ id: 'i9', role_id: 'kid', note: 'Grandma', expires_at: 2000000000, active: true }] });
+    api.get.mockResolvedValueOnce({
+      invites: [{ id: 'i9', role_id: 'kid', note: 'Grandma', expires_at: 2000000000, active: true }],
+    });
     api.delete.mockResolvedValue({});
     await users.loadUsersList();
     const rows = byId('users-table-body').querySelectorAll('.person-row');
@@ -146,11 +172,15 @@ describe('People pane (users.js)', () => {
     expect(opts).toMatchObject({ destructive: true, typeToConfirm: 'bob' });
     apiFetch.mockResolvedValueOnce(reply({ files: { files: 'kept', where: '/p/homes/bob-former-2026-11-13' } }));
     await onOk();
-    await vi.waitFor(() => expect(showToast).toHaveBeenCalledWith('User @bob deleted. Their files are in bob-former-2026-11-13.', 'success'));
+    await vi.waitFor(() =>
+      expect(showToast).toHaveBeenCalledWith('User @bob deleted. Their files are in bob-former-2026-11-13.', 'success')
+    );
     expect(apiFetch.mock.calls.find((c) => c[1]?.method === 'DELETE')[0]).toMatch(/\?files=keep$/);
     apiFetch.mockResolvedValueOnce(reply({ files: { files: 'error', error: 'busy' } }));
     await onOk();
-    await vi.waitFor(() => expect(showToast).toHaveBeenCalledWith('User @bob deleted. Their files could not be handled: busy', 'warning'));
+    await vi.waitFor(() =>
+      expect(showToast).toHaveBeenCalledWith('User @bob deleted. Their files could not be handled: busy', 'warning')
+    );
     apiFetch.mockResolvedValueOnce(reply({}));
     await onOk();
     await vi.waitFor(() => expect(showToast).toHaveBeenCalledWith('User @bob deleted.', 'success'));
@@ -175,7 +205,11 @@ describe('People pane (users.js)', () => {
     byId('reset-pwd-current').value = 'old';
     apiFetch.mockResolvedValueOnce(reply({}));
     await submit(byId('form-reset-password'));
-    expect(JSON.parse(apiFetch.mock.calls[0][1].body)).toEqual({ new_password: 'a', current_password: 'old', revoke_tokens: false });
+    expect(JSON.parse(apiFetch.mock.calls[0][1].body)).toEqual({
+      new_password: 'a',
+      current_password: 'old',
+      revoke_tokens: false,
+    });
     expect(showToast.mock.calls.at(-1)[0]).toContain('Your other sessions were signed out');
 
     users.showResetPasswordModal('u2', 'bob');
@@ -194,10 +228,14 @@ describe('People pane (users.js)', () => {
   });
 
   it('lists sign-ins and signs one or all others out', async () => {
-    apiFetch.mockResolvedValueOnce(reply({ sessions: [
-      { id: 's1', is_current: true, user_agent: 'Firefox', ip_address: '10.0.0.2' },
-      { id: 's2', is_current: false },
-    ] }));
+    apiFetch.mockResolvedValueOnce(
+      reply({
+        sessions: [
+          { id: 's1', is_current: true, user_agent: 'Firefox', ip_address: '10.0.0.2' },
+          { id: 's2', is_current: false },
+        ],
+      })
+    );
     await users.loadSessionsList();
     const rows = byId('sessions-table-body').querySelectorAll('tr');
     expect(rows[0].textContent).toContain('This browser');
@@ -249,7 +287,9 @@ describe('People pane (users.js)', () => {
     apiFetch.mockRejectedValueOnce(new Error('x'));
     await submit(byId('form-verify-2fa'));
     expect(showToast).toHaveBeenCalledWith('Error: x', 'error');
-    apiFetch.mockResolvedValueOnce(reply({ recovery_codes: ['aaa-111', 'bbb-222'] })).mockResolvedValue(reply({ mfa_enabled: true }));
+    apiFetch
+      .mockResolvedValueOnce(reply({ recovery_codes: ['aaa-111', 'bbb-222'] }))
+      .mockResolvedValue(reply({ mfa_enabled: true }));
     await submit(byId('form-verify-2fa'));
     expect(byId('mfa-step-success').style.display).toBe('block');
     expect(byId('mfa-recovery-codes-list').textContent).toContain('bbb-222');

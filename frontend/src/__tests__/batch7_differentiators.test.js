@@ -34,7 +34,7 @@ describe('Batch 7: Consumer-Grade Differentiators Frontend Tests', () => {
       fans: [1200, 1150],
       peripherals: {
         fb_active: true,
-      }
+      },
     };
     state.isLcdDirect = false;
   });

@@ -161,12 +161,14 @@ export async function openPersonPage(user, deps, doc = document) {
   /** @type {HTMLElement} */ (page.querySelector('#pp-title')).focus();
 
   /** @type {HTMLElement} */ (page.querySelector('[data-pp-back]')).onclick = () => closePersonPage(doc);
-  /** @type {HTMLElement} */ (page.querySelector('[data-pp-reset]')).onclick = () => deps.resetPassword(user.id, user.username);
+  /** @type {HTMLElement} */ (page.querySelector('[data-pp-reset]')).onclick = () =>
+    deps.resetPassword(user.id, user.username);
   const status = /** @type {HTMLElement | null} */ (page.querySelector('[data-pp-status]'));
-  if (status) status.onclick = async () => {
-    await deps.setStatus(user.id, status.dataset.ppStatus);
-    closePersonPage(doc);
-  };
+  if (status)
+    status.onclick = async () => {
+      await deps.setStatus(user.id, status.dataset.ppStatus);
+      closePersonPage(doc);
+    };
   const remove = /** @type {HTMLElement | null} */ (page.querySelector('[data-pp-remove]'));
   if (remove) remove.onclick = () => deps.remove(user.id, user.username);
 
@@ -178,7 +180,12 @@ export async function openPersonPage(user, deps, doc = document) {
     e.preventDefault();
     const body = saveBody(form, user, hours && hoursChanged() ? hours.readHours(hoursBox) : null);
     try {
-      const res = await apiFetch(`/api/users/${user.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(body) });
+      const res = await apiFetch(`/api/users/${user.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(body),
+      });
       if (!res.ok) throw new Error((await res.json().catch(() => ({}))).detail || `HTTP ${res.status}`);
       showToast(t('toast.user_updated_successfully', 'User updated successfully.'), 'success');
       deps.reload();

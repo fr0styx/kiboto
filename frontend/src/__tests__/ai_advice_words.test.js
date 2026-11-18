@@ -7,9 +7,11 @@ import { setLanguage } from '../i18n.js';
 const ram = (n) => ({ number: n, digits: 1 });
 
 describe("Kib's model advice", () => {
-  afterEach(async () => { await setLanguage('en'); });
+  afterEach(async () => {
+    await setLanguage('en');
+  });
 
-  it('writes numbers in the reader\'s language', async () => {
+  it("writes numbers in the reader's language", async () => {
     expect(resolveParams({ gb: ram(58.4), n: { number: 12345 } })).toEqual({ gb: '58.4', n: '12,345' });
     await setLanguage('de');
     expect(resolveParams({ gb: ram(58.4), n: { number: 12345, digits: 0 } })).toEqual({ gb: '58,4', n: '12.345' });
@@ -18,18 +20,39 @@ describe("Kib's model advice", () => {
   it('a headline made of parts, with a device word of its own', async () => {
     const how = {
       msg_key: 'srv.ai_head_npu',
-      params: { tier: { key: 'srv.ai_tier_one', params: { device: { key: 'srv.ai_label_npu', default: 'Onboard NPU' }, ram: ram(16) } } },
+      params: {
+        tier: {
+          key: 'srv.ai_tier_one',
+          params: { device: { key: 'srv.ai_label_npu', default: 'Onboard NPU' }, ram: ram(16) },
+        },
+      },
     };
     expect(serverSaid({ text: how }, 'NPU (Onboard NPU (16.0 GB RAM))')).toBe('NPU (Onboard NPU (16.0 GB memory))');
     await setLanguage('de');
     expect(serverSaid({ text: how }, '')).toBe('NPU (Integrierte NPU (16,0 GB Arbeitsspeicher))');
   });
 
-  it('fit badges: the server\'s words, its English, or ours', async () => {
-    expect(fitBadge({ fit_badge_text: { msg_key: 'srv.ai_badge_fits', params: {} }, fit_status: 'compatible' }, false, false)).toBe('✓ Fits this NAS');
-    expect(fitBadge({ fit_badge_text: { msg_key: 'srv.ai_badge_best_npu', params: {} }, fit_status: 'best_match' }, false, true)).toBe('★ Best for the onboard NPU');
-    expect(fitBadge({ fit_badge_text: { msg_key: 'srv.ai_badge_no_fit', params: { gb: 96 } }, fit_status: 'insufficient_ram' }, true, false)).toBe("⚠️ Doesn't fit this NAS (96 GB+ memory)");
-    expect(fitBadge({ fit_badge_text: { msg_key: 'srv.ai_badge_fits', params: {} }, fit_status: 'new' }, false, false)).toBe('Fits this NAS');
+  it("fit badges: the server's words, its English, or ours", async () => {
+    expect(
+      fitBadge({ fit_badge_text: { msg_key: 'srv.ai_badge_fits', params: {} }, fit_status: 'compatible' }, false, false)
+    ).toBe('✓ Fits this NAS');
+    expect(
+      fitBadge(
+        { fit_badge_text: { msg_key: 'srv.ai_badge_best_npu', params: {} }, fit_status: 'best_match' },
+        false,
+        true
+      )
+    ).toBe('★ Best for the onboard NPU');
+    expect(
+      fitBadge(
+        { fit_badge_text: { msg_key: 'srv.ai_badge_no_fit', params: { gb: 96 } }, fit_status: 'insufficient_ram' },
+        true,
+        false
+      )
+    ).toBe("⚠️ Doesn't fit this NAS (96 GB+ memory)");
+    expect(
+      fitBadge({ fit_badge_text: { msg_key: 'srv.ai_badge_fits', params: {} }, fit_status: 'new' }, false, false)
+    ).toBe('Fits this NAS');
     expect(fitBadge({ fit_badge: '✓ Fits Your Hardware' }, false, false)).toBe('✓ Fits Your Hardware');
     expect(fitBadge({}, true, false)).toBe("⚠️ Doesn't fit this NAS");
     expect(fitBadge({}, false, true)).toBe('★ Recommended');
@@ -59,7 +82,12 @@ describe("Kib's model advice", () => {
       device: 'Needs a discrete GPU with 24 GB',
     });
     // an older answer without how: its own words; with nothing at all, ours
-    expect(modelWords({ fit_reason: 'Too big', target_device: 'CPU' })).toEqual({ warning: 'Too big', why: '', useCase: '', device: 'CPU' });
+    expect(modelWords({ fit_reason: 'Too big', target_device: 'CPU' })).toEqual({
+      warning: 'Too big',
+      why: '',
+      useCase: '',
+      device: 'CPU',
+    });
     expect(modelWords({}).warning).toBe('This model needs more memory than this NAS has.');
     await setLanguage('de');
     expect(modelWords(m).useCase).toBe('Schnelle Unterhaltung und Datei-Schlagwörter');

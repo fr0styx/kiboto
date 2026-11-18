@@ -4,15 +4,24 @@ import { aiHistoryKey, renderAiSearchHistory, runAiRagAsk } from '../components/
 import { ZettEventBus } from '../event-bus.js';
 import { api } from '../api.js';
 
-vi.mock('../toast.js', () => ({ showToast: vi.fn(), showConfirmToast: vi.fn(), showPromptToast: vi.fn(), showBottomSheet: vi.fn() }));
+vi.mock('../toast.js', () => ({
+  showToast: vi.fn(),
+  showConfirmToast: vi.fn(),
+  showPromptToast: vi.fn(),
+  showBottomSheet: vi.fn(),
+}));
 
-const chips = () => [...document.querySelectorAll('#ai-history-chips button, #ai-history-chips [data-q]')].map((c) => c.textContent.trim());
+const chips = () =>
+  [...document.querySelectorAll('#ai-history-chips button, #ai-history-chips [data-q]')].map((c) =>
+    c.textContent.trim()
+  );
 const signIn = (user) => ZettEventBus.emit('session:user', user);
 
 describe('Kib search history per person (AI 3)', () => {
   beforeEach(() => {
     localStorage.clear();
-    document.body.innerHTML = '<div id="ai-history-bar"></div><div id="ai-history-chips"></div><input id="ai-rag-query-input"><div id="ai-rag-results"></div>';
+    document.body.innerHTML =
+      '<div id="ai-history-bar"></div><div id="ai-history-chips"></div><input id="ai-rag-query-input"><div id="ai-rag-results"></div>';
     vi.spyOn(api, 'post').mockResolvedValue({ status: 'ok', results: [] });
     vi.spyOn(api, 'get').mockResolvedValue({});
   });

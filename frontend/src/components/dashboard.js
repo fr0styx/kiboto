@@ -17,7 +17,16 @@ import { checkAndTriggerSetupWizard } from './setup-wizard-gate.js';
 import { t } from '../i18n.js';
 import { renderLightbar } from './led-control.js';
 import { formatFixed } from '../format.js';
-import { applyLook, clearLook, fromLegacy, loadLook, lookColour, lookFromAccount, normalizeLook, storeLook } from '../look.js';
+import {
+  applyLook,
+  clearLook,
+  fromLegacy,
+  loadLook,
+  lookColour,
+  lookFromAccount,
+  normalizeLook,
+  storeLook,
+} from '../look.js';
 
 const $ = (id) => document.getElementById(id);
 const FAN_LABELS = ['D1', 'D2', 'CPU', 'SYS'];
@@ -44,7 +53,7 @@ export function getLocalClock(tz, fmt) {
       timeZone: tz || 'America/New_York',
       hour: 'numeric',
       minute: '2-digit',
-      hour12: fmt === '12'
+      hour12: fmt === '12',
     });
     return formatter.format(new Date());
   } catch (e) {
@@ -53,11 +62,11 @@ export function getLocalClock(tz, fmt) {
   }
 }
 
-export const lvlDisk = (t) => t == null ? 'ok' : t >= 60 ? 'crit' : t >= 50 ? 'warn' : 'ok';
-export const lvlCpu = (t) => t == null ? 'ok' : t >= 85 ? 'crit' : t >= 70 ? 'warn' : 'ok';
-export const lvlUtil = (u) => u >= 90 ? 'crit' : u >= 75 ? 'warn' : 'ok';
-export const lvlFull = (p) => p >= 90 ? 'crit' : p >= 75 ? 'warn' : 'ok';
-export const cssVar = (lvl) => lvl === 'crit' ? 'var(--crit)' : lvl === 'warn' ? 'var(--warn)' : 'var(--ok)';
+export const lvlDisk = (t) => (t == null ? 'ok' : t >= 60 ? 'crit' : t >= 50 ? 'warn' : 'ok');
+export const lvlCpu = (t) => (t == null ? 'ok' : t >= 85 ? 'crit' : t >= 70 ? 'warn' : 'ok');
+export const lvlUtil = (u) => (u >= 90 ? 'crit' : u >= 75 ? 'warn' : 'ok');
+export const lvlFull = (p) => (p >= 90 ? 'crit' : p >= 75 ? 'warn' : 'ok');
+export const cssVar = (lvl) => (lvl === 'crit' ? 'var(--crit)' : lvl === 'warn' ? 'var(--warn)' : 'var(--ok)');
 
 export function setArc(el, pct, lvl) {
   if (!el) return;
@@ -86,22 +95,24 @@ export function renderFans(fans) {
     const existing = r.querySelectorAll('.fan');
 
     if (existing.length !== count) {
-      const html = fans.map((rpm, i) => {
-        const dur = rpm > 0 ? Math.max(0.25, 2.0 - (rpm / max) * 1.7).toFixed(2) : 0;
-        const label = FAN_LABELS[i] || (`F${i + 1}`);
-        const fc = state.latestStats?.fan_control || {};
-        const isPassive = (i === 0 && fc.zone1_zero_rpm) || (i === 1 && fc.zone2_zero_rpm);
-        const displayTxt = (rpm === 0 && isPassive) ? '0' : String(rpm);
-        const passiveStyle = (rpm === 0 && isPassive) ? ' style="color:var(--kb-text-accent)"' : '';
-        const passiveClass = (rpm === 0 && isPassive) ? ' fan-passive' : '';
-        return (
-          `<div class="fan${passiveClass}">` +
-          `<svg class="fan-ic${rpm > 0 ? ' spin' : ''}" style="--dur:${dur}s"><use href="#i-fan"/></svg>` +
-          `<span class="fv"${passiveStyle}>${displayTxt}</span>` +
-          `<span class="fl">${label}</span>` +
-          `</div>`
-        );
-      }).join('');
+      const html = fans
+        .map((rpm, i) => {
+          const dur = rpm > 0 ? Math.max(0.25, 2.0 - (rpm / max) * 1.7).toFixed(2) : 0;
+          const label = FAN_LABELS[i] || `F${i + 1}`;
+          const fc = state.latestStats?.fan_control || {};
+          const isPassive = (i === 0 && fc.zone1_zero_rpm) || (i === 1 && fc.zone2_zero_rpm);
+          const displayTxt = rpm === 0 && isPassive ? '0' : String(rpm);
+          const passiveStyle = rpm === 0 && isPassive ? ' style="color:var(--kb-text-accent)"' : '';
+          const passiveClass = rpm === 0 && isPassive ? ' fan-passive' : '';
+          return (
+            `<div class="fan${passiveClass}">` +
+            `<svg class="fan-ic${rpm > 0 ? ' spin' : ''}" style="--dur:${dur}s"><use href="#i-fan"/></svg>` +
+            `<span class="fv"${passiveStyle}>${displayTxt}</span>` +
+            `<span class="fl">${label}</span>` +
+            `</div>`
+          );
+        })
+        .join('');
       r.innerHTML = html;
     } else {
       fans.forEach((rpm, i) => {
@@ -113,9 +124,9 @@ export function renderFans(fans) {
         const fc = state.latestStats?.fan_control || {};
         const isPassive = (i === 0 && fc.zone1_zero_rpm) || (i === 1 && fc.zone2_zero_rpm);
         if (fv) {
-          const displayTxt = (rpm === 0 && isPassive) ? '0' : String(rpm);
+          const displayTxt = rpm === 0 && isPassive ? '0' : String(rpm);
           if (fv.textContent !== displayTxt) fv.textContent = displayTxt;
-          fv.style.color = (rpm === 0 && isPassive) ? '#4fd8c4' : '';
+          fv.style.color = rpm === 0 && isPassive ? '#4fd8c4' : '';
         }
         fanEl.classList.toggle('fan-passive', Boolean(rpm === 0 && isPassive));
         if (ic) {
@@ -155,7 +166,9 @@ export function renderFans(fans) {
 
 export function formatDiskDisplayName(name) {
   if (!name) return '';
-  const str = String(name).trim().replace(/^\/dev\//, '');
+  const str = String(name)
+    .trim()
+    .replace(/^\/dev\//, '');
   const nvMatch = str.match(/^nvme(\d+)(?:n(\d+))?$/i);
   if (nvMatch) {
     const ctrl = nvMatch[1];
@@ -170,9 +183,9 @@ export function formatDiskDisplayName(name) {
 
 const ROLE_META = {
   parity: { label: 'PARITY', icon: '#i-shield', cls: 'r-parity' },
-  data:  { label: 'DATA',  icon: '#i-disk', cls: 'r-data' },
+  data: { label: 'DATA', icon: '#i-disk', cls: 'r-data' },
   cache: { label: 'CACHE', icon: '#i-nvme', cls: 'r-cache' },
-  os:    { label: 'OS',    icon: '#i-nvme', cls: 'r-os' },
+  os: { label: 'OS', icon: '#i-nvme', cls: 'r-os' },
 };
 
 /** A drive's name in titles, marked when it holds parity (NUX-20). */
@@ -193,19 +206,29 @@ export function driveTileTitle(d, isParity, isStandby) {
 /** The hover text of a drive chip in the console's bay row. */
 export function driveChipTitle(d, isParity, isStandby, devPathName) {
   if (isStandby) return t('dash.drive_asleep', '{name} is asleep (spun down)', { name: driveLabel(d, isParity) });
-  return t('dash.chip_open', 'Drive {name} ({dev}): click to see its health', { name: driveLabel(d, isParity), dev: devPathName });
+  return t('dash.chip_open', 'Drive {name} ({dev}): click to see its health', {
+    name: driveLabel(d, isParity),
+    dev: devPathName,
+  });
 }
 
 export function diskTile(d) {
   const isStandby = Boolean(d.standby || d.health === 'standby');
   const isParity = Boolean(d.is_parity || d.role === 'parity');
   const parityLbl = d.parity_label || 'P';
-  const lvl = isStandby ? 'standby' : (d.health || lvlDisk(d.temp));
+  const lvl = isStandby ? 'standby' : d.health || lvlDisk(d.temp);
   const temp = d.temp;
   const meta = ROLE_META[d.role] || ROLE_META.data;
-  const w = isStandby ? 0 : (temp == null ? 0 : Math.max(8, Math.min(100, ((temp - 20) / 40) * 100)));
+  const w = isStandby ? 0 : temp == null ? 0 : Math.max(8, Math.min(100, ((temp - 20) / 40) * 100));
   const el = document.createElement('div');
-  el.className = 'disk ' + meta.cls + ' h-' + lvl + (d.active ? ' io-active' : '') + (isStandby ? ' disk-standby' : '') + (isParity ? ' disk-is-parity' : '');
+  el.className =
+    'disk ' +
+    meta.cls +
+    ' h-' +
+    lvl +
+    (d.active ? ' io-active' : '') +
+    (isStandby ? ' disk-standby' : '') +
+    (isParity ? ' disk-is-parity' : '');
   el.dataset.dev = d.dev || d.name;
   el.title = driveTileTitle(d, isParity, isStandby);
 
@@ -219,8 +242,10 @@ export function diskTile(d) {
     `<div class="dh"><svg class="disk-ic"><use href="${meta.icon}"/></svg>` +
     `<span class="dn">${escapeHtml(displayName)}</span>` +
     `<div class="disk-indicators">` +
-      (isStandby ? `<span class="standby-zzz" title="${t('dash.disk_asleep', 'Asleep (spun down)')}">zZz</span>` : `<span class="io-dot" title="${t('dash.disk_busy', 'Reading or writing')}"></span>`) +
-      `<span class="hdot ${'dot-' + lvl}"></span>` +
+    (isStandby
+      ? `<span class="standby-zzz" title="${t('dash.disk_asleep', 'Asleep (spun down)')}">zZz</span>`
+      : `<span class="io-dot" title="${t('dash.disk_busy', 'Reading or writing')}"></span>`) +
+    `<span class="hdot ${'dot-' + lvl}"></span>` +
     `</div></div>` +
     tempHtml +
     `<div class="db"><i class="${'bg-' + lvl}" style="width:${w}%"></i></div>`;
@@ -258,7 +283,7 @@ export function renderDisks(disks) {
     const groups = order
       .map((r) => ({ role: r, items: disks.filter((d) => d.role === r) }))
       .filter((g) => g.items.length);
-    const isYak = (state.lcdTheme === 'yak');
+    const isYak = state.lcdTheme === 'yak';
 
     groups.forEach((g, gi) => {
       const meta = ROLE_META[g.role] || ROLE_META.data;
@@ -302,12 +327,19 @@ export function renderDisks(disks) {
       const isStandby = Boolean(d.standby || d.health === 'standby');
       const isParity = Boolean(d.is_parity || d.role === 'parity');
       const parityLbl = d.parity_label || 'P';
-      const lvl = isStandby ? 'standby' : (d.health || lvlDisk(d.temp));
+      const lvl = isStandby ? 'standby' : d.health || lvlDisk(d.temp);
       const temp = d.temp;
       const meta = ROLE_META[d.role] || ROLE_META.data;
-      const w = isStandby ? 0 : (temp == null ? 0 : Math.max(8, Math.min(100, ((temp - 20) / 40) * 100)));
+      const w = isStandby ? 0 : temp == null ? 0 : Math.max(8, Math.min(100, ((temp - 20) / 40) * 100));
 
-      tile.className = 'disk ' + meta.cls + ' h-' + lvl + (d.active ? ' io-active' : '') + (isStandby ? ' disk-standby' : '') + (isParity ? ' disk-is-parity' : '');
+      tile.className =
+        'disk ' +
+        meta.cls +
+        ' h-' +
+        lvl +
+        (d.active ? ' io-active' : '') +
+        (isStandby ? ' disk-standby' : '') +
+        (isParity ? ' disk-is-parity' : '');
       tile.title = driveTileTitle({ ...d, risk: null }, isParity, isStandby);
 
       const nameEl = tile.querySelector('.dn');
@@ -323,7 +355,10 @@ export function renderDisks(disks) {
 
       const indEl = tile.querySelector('.disk-indicators');
       if (indEl) {
-        indEl.innerHTML = (isStandby ? `<span class="standby-zzz" title="${t('dash.disk_asleep', 'Asleep (spun down)')}">zZz</span>` : `<span class="io-dot" title="${t('dash.disk_busy', 'Reading or writing')}"></span>`) +
+        indEl.innerHTML =
+          (isStandby
+            ? `<span class="standby-zzz" title="${t('dash.disk_asleep', 'Asleep (spun down)')}">zZz</span>`
+            : `<span class="io-dot" title="${t('dash.disk_busy', 'Reading or writing')}"></span>`) +
           `<span class="hdot dot-${lvl}"></span>`;
       }
 
@@ -359,7 +394,10 @@ export function updateRowTelemetryBadges(s) {
     }
   }
   if (netBadge && s.net) netBadge.textContent = `▲${s.net.tx} ▼${s.net.rx}`;
-  if (dskBadge && s.disks) dskBadge.textContent = t('dash.drives_active', '{count, plural, one {# drive active} other {# drives active}}', { count: s.disks.length });
+  if (dskBadge && s.disks)
+    dskBadge.textContent = t('dash.drives_active', '{count, plural, one {# drive active} other {# drives active}}', {
+      count: s.disks.length,
+    });
 }
 
 export function updateChassisImageForTheme() {
@@ -369,13 +407,18 @@ export function updateChassisImageForTheme() {
   const modelMap = {
     'd4': 'img/chassis-d4.webp',
     'd8u': 'img/chassis-d8u.webp',
-    'd6u': 'img/chassis-d6u.webp'
+    'd6u': 'img/chassis-d6u.webp',
   };
-  const chassis = (state.latestStats && state.latestStats.chassis) ? state.latestStats.chassis : 'd6u';
+  const chassis = state.latestStats && state.latestStats.chassis ? state.latestStats.chassis : 'd6u';
   chassisImg.src = modelMap[chassis] || 'img/chassis-d6u.webp';
-  const label = (state.latestStats && state.latestStats.chassis_label)
-    ? state.latestStats.chassis_label
-    : (chassis === 'd4' ? 'Zettlab D4 (4-Bay)' : chassis === 'd8u' ? 'Zettlab D8 Ultra (8-Bay)' : 'Zettlab D6 Ultra (6-Bay)');
+  const label =
+    state.latestStats && state.latestStats.chassis_label
+      ? state.latestStats.chassis_label
+      : chassis === 'd4'
+        ? 'Zettlab D4 (4-Bay)'
+        : chassis === 'd8u'
+          ? 'Zettlab D8 Ultra (8-Bay)'
+          : 'Zettlab D6 Ultra (6-Bay)';
   chassisImg.alt = label;
   chassisImg.title = label;
 }
@@ -386,9 +429,12 @@ function _restoreNonYakWallpaper(wpLayer) {
     wpLayer.style.setProperty('background-image', wpLayer.dataset.previousWallpaper);
     delete wpLayer.dataset.previousWallpaper;
   } else if (wpLayer.style.backgroundImage && wpLayer.style.backgroundImage.includes('yak.webp')) {
-    const savedWp = (typeof localStorage !== 'undefined' ? localStorage.getItem('kiboto_active_wallpaper') : null);
+    const savedWp = typeof localStorage !== 'undefined' ? localStorage.getItem('kiboto_active_wallpaper') : null;
     if (savedWp) {
-      const wpUrl = savedWp.startsWith('/') || savedWp.startsWith('http') ? savedWp : `/api/wallpapers/download/${encodeURIComponent(savedWp)}`;
+      const wpUrl =
+        savedWp.startsWith('/') || savedWp.startsWith('http')
+          ? savedWp
+          : `/api/wallpapers/download/${encodeURIComponent(savedWp)}`;
       wpLayer.style.setProperty('background-image', `url('${wpUrl}')`);
     } else {
       wpLayer.style.removeProperty('background-image');
@@ -408,10 +454,13 @@ function _restoreNonYakWallpaper(wpLayer) {
  */
 export function applyDesktopTheme(themeName, customAccent = null) {
   const current = loadLook();
-  const look = themeName === 'yak' ? current : normalizeLook({
-    ...fromLegacy(themeName, current),
-    accent: customAccent === undefined || customAccent === null ? current.accent : customAccent,
-  });
+  const look =
+    themeName === 'yak'
+      ? current
+      : normalizeLook({
+          ...fromLegacy(themeName, current),
+          accent: customAccent === undefined || customAccent === null ? current.accent : customAccent,
+        });
   customAccent = look.accent;
   if (themeName !== 'yak') storeLook(look);
 
@@ -427,7 +476,11 @@ export function applyDesktopTheme(themeName, customAccent = null) {
       import('../styles/04-yak-theme.css').catch(() => null);
       document.body.classList.add('theme-yak');
       if (wpLayer) {
-        if (!wpLayer.dataset.previousWallpaper && wpLayer.style.backgroundImage && !wpLayer.style.backgroundImage.includes('yak.webp')) {
+        if (
+          !wpLayer.dataset.previousWallpaper &&
+          wpLayer.style.backgroundImage &&
+          !wpLayer.style.backgroundImage.includes('yak.webp')
+        ) {
           wpLayer.dataset.previousWallpaper = wpLayer.style.backgroundImage;
         }
         wpLayer.style.setProperty('background-image', 'url("/img/yak.webp")', 'important');
@@ -448,7 +501,11 @@ export function applyDesktopTheme(themeName, customAccent = null) {
     if (!hex || typeof hex !== 'string') return null;
     let clean = hex.replace('#', '').trim();
     if (!/^[0-9a-fA-F]{3}$|^[0-9a-fA-F]{6}$/.test(clean)) return null;
-    if (clean.length === 3) clean = clean.split('').map(c => c + c).join('');
+    if (clean.length === 3)
+      clean = clean
+        .split('')
+        .map((c) => c + c)
+        .join('');
     const num = parseInt(clean, 16);
     if (isNaN(num)) return null;
     return { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 };
@@ -519,10 +576,12 @@ export function applyDesktopTheme(themeName, customAccent = null) {
     }
   }
 
-  const isYak = (themeName === 'yak');
+  const isYak = themeName === 'yak';
   const yakEggBtn = $('yak-easter-egg-btn');
   if (yakEggBtn) {
-    yakEggBtn.title = isYak ? 'Yak Express Active! [Press Y or click to toggle]' : 'Trust in the Yak [Easter Egg Hot-key: Y]';
+    yakEggBtn.title = isYak
+      ? 'Yak Express Active! [Press Y or click to toggle]'
+      : 'Trust in the Yak [Easter Egg Hot-key: Y]';
   }
 
   const title = $('suite-brand-title');
@@ -545,8 +604,9 @@ export function syncDesktopTwinPreview(overrides = {}) {
   if (!vp) return;
 
   const curTheme = overrides.theme || state.desktopTheme || 'lagoon';
-  const curAccent = overrides.accent !== undefined ? overrides.accent : (state.desktopCustomAccent || '');
-  const activeColor = curTheme === 'yak' ? '#d48a37' : lookColour({ ...loadLook(), theme: curTheme, accent: curAccent });
+  const curAccent = overrides.accent !== undefined ? overrides.accent : state.desktopCustomAccent || '';
+  const activeColor =
+    curTheme === 'yak' ? '#d48a37' : lookColour({ ...loadLook(), theme: curTheme, accent: curAccent });
   const rgb = hexToRgb(activeColor);
 
   const badge = document.getElementById('dt-theme-badge');
@@ -609,10 +669,18 @@ if (typeof window !== 'undefined') {
 
 export function applyLcdTheme(themeName, customAccent = null, textClarity = null) {
   if (customAccent === undefined || customAccent === null) {
-    customAccent = state.lcdCustomAccent || (typeof localStorage !== 'undefined' ? localStorage.getItem('lcd_custom_accent') : '') || '';
+    customAccent =
+      state.lcdCustomAccent ||
+      (typeof localStorage !== 'undefined' ? localStorage.getItem('lcd_custom_accent') : '') ||
+      '';
   }
   if (textClarity === undefined || textClarity === null) {
-    textClarity = state.lcdTextClarity !== undefined ? state.lcdTextClarity : (typeof localStorage !== 'undefined' ? localStorage.getItem('lcd_text_clarity') !== 'false' : true);
+    textClarity =
+      state.lcdTextClarity !== undefined
+        ? state.lcdTextClarity
+        : typeof localStorage !== 'undefined'
+          ? localStorage.getItem('lcd_text_clarity') !== 'false'
+          : true;
   }
 
   state.setLcdTheme(themeName, customAccent, textClarity);
@@ -630,7 +698,16 @@ export function applyLcdTheme(themeName, customAccent = null, textClarity = null
     targets.push(document.body);
   }
 
-  const allLcdThemes = ['lcd-theme-cyber', 'lcd-theme-amber', 'lcd-theme-emerald', 'lcd-theme-sapphire', 'lcd-theme-amethyst', 'lcd-theme-crimson', 'lcd-theme-light', 'lcd-theme-yak'];
+  const allLcdThemes = [
+    'lcd-theme-cyber',
+    'lcd-theme-amber',
+    'lcd-theme-emerald',
+    'lcd-theme-sapphire',
+    'lcd-theme-amethyst',
+    'lcd-theme-crimson',
+    'lcd-theme-light',
+    'lcd-theme-yak',
+  ];
 
   targets.forEach((el) => {
     el.classList.remove(...allLcdThemes);
@@ -658,9 +735,12 @@ export function applyLcdTheme(themeName, customAccent = null, textClarity = null
     el.classList.toggle('text-clarity-off', !textClarity);
   });
 
-  const isYak = (themeName === 'yak');
+  const isYak = themeName === 'yak';
   const engraved = $('chassis-panel-engraved');
-  if (engraved) engraved.textContent = isYak ? 'YAK EXPRESS • TOASTIE LOGISTICS LAB' : t('console.engraved_title', 'KIBOTO • SYSTEM CONSOLE');
+  if (engraved)
+    engraved.textContent = isYak
+      ? 'YAK EXPRESS • TOASTIE LOGISTICS LAB'
+      : t('console.engraved_title', 'KIBOTO • SYSTEM CONSOLE');
 
   // Update module card titles inside #screen and #mini-lcd-canvas
   document.querySelectorAll('.card-storage .card-title-txt').forEach((el) => {
@@ -676,11 +756,22 @@ export function applyLcdTheme(themeName, customAccent = null, textClarity = null
     el.textContent = isYak ? 'TRANSIT I/O' : t('console.net', 'NETWORK I/O');
   });
 
-  if ($('lbl-module-storage')) $('lbl-module-storage').textContent = isYak ? 'Cargo Hold (Capacity & Donut)' : t('settings.mod_storage', 'Storage (Donut & Capacity)');
-  if ($('lbl-module-cpu')) $('lbl-module-cpu').textContent = isYak ? 'YAK64 Toastie CPU' : t('settings.mod_cpu', 'CPU Gauge');
-  if ($('lbl-module-fans')) $('lbl-module-fans').textContent = isYak ? 'Asthmatic Yak Airflow & Fans' : t('settings.mod_fans', 'Fans & Uptime');
-  if ($('lbl-module-disks')) $('lbl-module-disks').textContent = isYak ? 'Yak Parcel Bays (OS, Data, Cache)' : t('settings.mod_disks', 'Drives Tray (OS, Data, Cache)');
-  if ($('lbl-module-net')) $('lbl-module-net').textContent = isYak ? 'Transit Courier Throughput' : t('settings.mod_net', 'Network Throughput');
+  if ($('lbl-module-storage'))
+    $('lbl-module-storage').textContent = isYak
+      ? 'Cargo Hold (Capacity & Donut)'
+      : t('settings.mod_storage', 'Storage (Donut & Capacity)');
+  if ($('lbl-module-cpu'))
+    $('lbl-module-cpu').textContent = isYak ? 'YAK64 Toastie CPU' : t('settings.mod_cpu', 'CPU Gauge');
+  if ($('lbl-module-fans'))
+    $('lbl-module-fans').textContent = isYak ? 'Asthmatic Yak Airflow & Fans' : t('settings.mod_fans', 'Fans & Uptime');
+  if ($('lbl-module-disks'))
+    $('lbl-module-disks').textContent = isYak
+      ? 'Yak Parcel Bays (OS, Data, Cache)'
+      : t('settings.mod_disks', 'Drives Tray (OS, Data, Cache)');
+  if ($('lbl-module-net'))
+    $('lbl-module-net').textContent = isYak
+      ? 'Transit Courier Throughput'
+      : t('settings.mod_net', 'Network Throughput');
 
   const stageGlow = $('virtual-chassis-lightbar');
   if (stageGlow) {
@@ -767,14 +858,15 @@ export function updateStreamlineLayout(s, anyWarn) {
   // Header compat: Status Ring, NAS Name, Clock (for background sync & tests)
   const ring = $('sl-status-ring');
   if (ring) {
-    const isCrit = (s.storage && s.storage.pct >= 90) ||
+    const isCrit =
+      (s.storage && s.storage.pct >= 90) ||
       (s.cpu && s.cpu.temp >= 85) ||
       (s.cpu && s.cpu.util >= 90) ||
       (s.mem && s.mem.pct >= 90) ||
-      ((s.disks || []).some((d) => {
+      (s.disks || []).some((d) => {
         if (d.standby || d.health === 'standby') return false;
         return (d.health || lvlDisk(d.temp)) === 'crit';
-      }));
+      });
     ring.className = 'sl-status-ring ' + (isCrit ? 'crit' : anyWarn ? 'warn' : 'ok');
   }
 
@@ -855,7 +947,8 @@ export function updateStreamlineBayChips(disks) {
   }
 
   if (!disks || disks.length === 0) {
-    row.innerHTML = '<span style="color:var(--muted);font-size:10px;">' + t('dash.no_disks', 'No drives found') + '</span>';
+    row.innerHTML =
+      '<span style="color:var(--muted);font-size:10px;">' + t('dash.no_disks', 'No drives found') + '</span>';
     return;
   }
 
@@ -866,7 +959,7 @@ export function updateStreamlineBayChips(disks) {
   const buildChipInner = (d) => {
     const isStandby = Boolean(d.standby || d.health === 'standby');
     const isParity = Boolean(d.is_parity || d.role === 'parity');
-    const roleKey = isParity ? 'parity' : (d.role || 'data');
+    const roleKey = isParity ? 'parity' : d.role || 'data';
     const meta = ROLE_META[roleKey] || ROLE_META.data;
     const devPathName = formatDiskDisplayName(d.name);
     const roleLabel = isParity ? (d.parity_label === 'P2' ? 'PARITY 2' : 'PARITY') : meta.label;
@@ -874,17 +967,19 @@ export function updateStreamlineBayChips(disks) {
       ? `<span class="sl-chip-temp s-standby"><span class="standby-badge">${t('chassis.standby', 'Asleep')}</span></span>`
       : `<span class="sl-chip-temp">${d.temp == null ? '--' : d.temp + '°C'}</span>`;
 
-    return `<div class="sl-chip-top">` +
+    return (
+      `<div class="sl-chip-top">` +
       `<div class="sl-chip-ident">` +
-        `<svg class="sl-chip-ic"><use href="${meta.icon}"/></svg>` +
-        `<span class="slot-lbl">${escapeHtml(devPathName)}</span>` +
+      `<svg class="sl-chip-ic"><use href="${meta.icon}"/></svg>` +
+      `<span class="slot-lbl">${escapeHtml(devPathName)}</span>` +
       `</div>` +
       `<span class="slot-dot"></span>` +
-    `</div>` +
-    `<div class="sl-chip-bottom">` +
+      `</div>` +
+      `<div class="sl-chip-bottom">` +
       `<span class="sl-chip-role">${escapeHtml(roleLabel)}</span>` +
       tempHtml +
-    `</div>`;
+      `</div>`
+    );
   };
 
   if (structureChanged) {
@@ -892,11 +987,15 @@ export function updateStreamlineBayChips(disks) {
     disks.forEach((d) => {
       const isStandby = Boolean(d.standby || d.health === 'standby');
       const isParity = Boolean(d.is_parity || d.role === 'parity');
-      const roleKey = isParity ? 'parity' : (d.role || 'data');
+      const roleKey = isParity ? 'parity' : d.role || 'data';
       const meta = ROLE_META[roleKey] || ROLE_META.data;
-      const lvl = isStandby ? 'standby' : (d.health || lvlDisk(d.temp));
+      const lvl = isStandby ? 'standby' : d.health || lvlDisk(d.temp);
       const chip = document.createElement('div');
-      chip.className = `sl-bay-chip ${meta.cls} h-${lvl}` + (d.active ? ' io-active' : '') + (isStandby ? ' chip-standby' : '') + (isParity ? ' chip-parity' : '');
+      chip.className =
+        `sl-bay-chip ${meta.cls} h-${lvl}` +
+        (d.active ? ' io-active' : '') +
+        (isStandby ? ' chip-standby' : '') +
+        (isParity ? ' chip-parity' : '');
       chip.dataset.dev = d.dev || d.name;
       const devPathName = formatDiskDisplayName(d.name);
       chip.title = driveChipTitle(d, isParity, isStandby, devPathName);
@@ -910,10 +1009,14 @@ export function updateStreamlineBayChips(disks) {
       if (!chip) return;
       const isStandby = Boolean(d.standby || d.health === 'standby');
       const isParity = Boolean(d.is_parity || d.role === 'parity');
-      const roleKey = isParity ? 'parity' : (d.role || 'data');
+      const roleKey = isParity ? 'parity' : d.role || 'data';
       const meta = ROLE_META[roleKey] || ROLE_META.data;
-      const lvl = isStandby ? 'standby' : (d.health || lvlDisk(d.temp));
-      chip.className = `sl-bay-chip ${meta.cls} h-${lvl}` + (d.active ? ' io-active' : '') + (isStandby ? ' chip-standby' : '') + (isParity ? ' chip-parity' : '');
+      const lvl = isStandby ? 'standby' : d.health || lvlDisk(d.temp);
+      chip.className =
+        `sl-bay-chip ${meta.cls} h-${lvl}` +
+        (d.active ? ' io-active' : '') +
+        (isStandby ? ' chip-standby' : '') +
+        (isParity ? ' chip-parity' : '');
       const devPathName = formatDiskDisplayName(d.name);
       chip.title = driveChipTitle(d, isParity, isStandby, devPathName);
       chip.innerHTML = buildChipInner(d);
@@ -961,7 +1064,8 @@ export function applyStats(raw) {
       return;
     }
     // the console's light bar shows what the real one does: the settings, or an alert, a copy or the night
-    if (s.lightbar && state.lcdTheme !== 'yak') renderLightbar($('virtual-chassis-lightbar'), s.lightbar, { offOpacity: 0.15 });
+    if (s.lightbar && state.lcdTheme !== 'yak')
+      renderLightbar($('virtual-chassis-lightbar'), s.lightbar, { offOpacity: 0.15 });
     // Always refresh the clock to keep time accurate to the minute
     setText($('clock'), getLocalClock(state.currentTimezone, state.clockFormat));
 
@@ -971,7 +1075,11 @@ export function applyStats(raw) {
       const srvAccent = s.client_preferences.lcd_custom_accent || '';
       const srvClarity = s.client_preferences.lcd_text_clarity !== 'false';
       if (state.isLcdDirect) {
-        if (srvTheme !== state.lcdTheme || srvAccent !== (state.lcdCustomAccent || '') || srvClarity !== state.lcdTextClarity) {
+        if (
+          srvTheme !== state.lcdTheme ||
+          srvAccent !== (state.lcdCustomAccent || '') ||
+          srvClarity !== state.lcdTextClarity
+        ) {
           applyLcdTheme(srvTheme, srvAccent, srvClarity);
         }
       }
@@ -983,7 +1091,9 @@ export function applyStats(raw) {
       const styleChanged = Boolean(s.layout.style && s.layout.style !== state.screenLayoutStyle);
       const orderChanged = Boolean(
         s.layout.order &&
-        (!state.dashOrder || s.layout.order.length !== state.dashOrder.length || s.layout.order.some((id, idx) => id !== state.dashOrder[idx]))
+        (!state.dashOrder ||
+          s.layout.order.length !== state.dashOrder.length ||
+          s.layout.order.some((id, idx) => id !== state.dashOrder[idx]))
       );
       if (verChanged || styleChanged || orderChanged) {
         if (layoutVer) state.activeLayoutVersion = layoutVer;
@@ -995,7 +1105,9 @@ export function applyStats(raw) {
         if (s.layout.style) {
           state.screenLayoutStyle = s.layout.style;
           if (typeof localStorage !== 'undefined') {
-            try { localStorage.setItem('screen_layout_style', s.layout.style); } catch (e) {}
+            try {
+              localStorage.setItem('screen_layout_style', s.layout.style);
+            } catch (e) {}
           }
           syncScreenLayoutStyle();
         }
@@ -1014,7 +1126,13 @@ export function applyStats(raw) {
       if (warnEl) warnEl.style.display = 'block';
       if (!_defaultPwdWarned) {
         _defaultPwdWarned = true;
-        showToast(t('toast.default_pwd_alert', "Security Warning: Default password 'admin' is active! Please change it in Settings."), 'error');
+        showToast(
+          t(
+            'toast.default_pwd_alert',
+            "Security Warning: Default password 'admin' is active! Please change it in Settings."
+          ),
+          'error'
+        );
       }
       checkAndTriggerSetupWizard(s);
     }
@@ -1023,9 +1141,8 @@ export function applyStats(raw) {
     setText($('drawer-nas-name'), s.name ? s.name.toUpperCase() : '');
 
     if ($('statusText')) {
-      const statusVal = (state.lcdTheme === 'yak' && !s.status.includes('ALERT') && !s.status.includes('WARN'))
-        ? 'YAK OK'
-        : s.status;
+      const statusVal =
+        state.lcdTheme === 'yak' && !s.status.includes('ALERT') && !s.status.includes('WARN') ? 'YAK OK' : s.status;
       setText($('statusText'), statusVal);
     }
 
@@ -1066,8 +1183,11 @@ export function applyStats(raw) {
       memLvl = lvlUtil(s.mem.pct);
       setText($('memPct'), s.mem.pct);
       if ($('memPct') && $('memPct').parentElement) $('memPct').parentElement.className = 'arc-val s-' + memLvl;
-      setText($('memUsed'), s.mem.used_gb != null ? s.mem.used_gb.toFixed(1) + 'G' : (s.mem.used || ''));
-      setText($('memTotal'), s.mem.total_gb != null ? '/' + s.mem.total_gb.toFixed(0) + 'G' : (s.mem.total ? '/' + s.mem.total : ''));
+      setText($('memUsed'), s.mem.used_gb != null ? s.mem.used_gb.toFixed(1) + 'G' : s.mem.used || '');
+      setText(
+        $('memTotal'),
+        s.mem.total_gb != null ? '/' + s.mem.total_gb.toFixed(0) + 'G' : s.mem.total ? '/' + s.mem.total : ''
+      );
       if ($('memArc')) setArc($('memArc'), s.mem.pct, memLvl);
     }
 
@@ -1100,7 +1220,8 @@ export function applyStats(raw) {
     }
 
     // Kids and guests get no disks in their stats (SEC-33)
-    let anyWarn = [stLvl, cpuLvl, utilLvl, memLvl].includes('crit') ||
+    let anyWarn =
+      [stLvl, cpuLvl, utilLvl, memLvl].includes('crit') ||
       (s.disks || []).some((d) => {
         if (d.standby || d.health === 'standby') return false;
         const h = d.health || lvlDisk(d.temp);
@@ -1109,7 +1230,6 @@ export function applyStats(raw) {
     if ($('statusPill')) $('statusPill').className = 'pill' + (anyWarn ? ' warn' : '');
 
     updateStreamlineLayout(s, anyWarn);
-
   } catch (e) {
     console.error('Error applying stats:', e);
   }
@@ -1147,7 +1267,11 @@ export function updateUnraidTelemetry(unraid) {
     const dotEl = $('unraid-array-dot');
     if (statusEl) statusEl.textContent = unraid.state || t('dash.started', 'STARTED');
     if (dotEl) {
-      dotEl.style.background = unraid.is_healthy ? 'var(--ok2)' : unraid.color?.startsWith('yellow') ? 'var(--warn)' : 'var(--crit)';
+      dotEl.style.background = unraid.is_healthy
+        ? 'var(--ok2)'
+        : unraid.color?.startsWith('yellow')
+          ? 'var(--warn)'
+          : 'var(--crit)';
     }
   }
 
@@ -1169,7 +1293,10 @@ export function updateUnraidTelemetry(unraid) {
     if (m.active) {
       moverPill.classList.remove('hidden');
       const mStatus = $('unraid-mover-status');
-      if (mStatus) mStatus.textContent = m.remain_files ? t('dash.files_left', '{count, plural, one {# file left} other {# files left}}', { count: m.remain_files }) : t('net.active', 'Active');
+      if (mStatus)
+        mStatus.textContent = m.remain_files
+          ? t('dash.files_left', '{count, plural, one {# file left} other {# files left}}', { count: m.remain_files })
+          : t('net.active', 'Active');
     } else {
       moverPill.classList.add('hidden');
     }
@@ -1178,7 +1305,9 @@ export function updateUnraidTelemetry(unraid) {
   // Storage Card Badges
   if (storageBadge && storageText) {
     storageBadge.classList.remove('hidden');
-    storageText.textContent = t('dash.unraid_state', 'UNRAID: {state}', { state: unraid.state || t('dash.started', 'STARTED') });
+    storageText.textContent = t('dash.unraid_state', 'UNRAID: {state}', {
+      state: unraid.state || t('dash.started', 'STARTED'),
+    });
     if (storageDot) {
       storageDot.style.background = unraid.is_healthy ? 'var(--ok2)' : 'var(--warn)';
     }
@@ -1189,7 +1318,11 @@ export function updateUnraidTelemetry(unraid) {
     if (p.active) {
       parityBox.classList.remove('hidden');
       parityBar.style.width = `${p.progress_pct || 0}%`;
-      parityTxt.textContent = t('dash.parity_progress', 'Parity: {pct}% ({errors, plural, one {# error} other {# errors}})', { pct: p.progress_pct || 0, errors: p.errors || 0 });
+      parityTxt.textContent = t(
+        'dash.parity_progress',
+        'Parity: {pct}% ({errors, plural, one {# error} other {# errors}})',
+        { pct: p.progress_pct || 0, errors: p.errors || 0 }
+      );
     } else {
       parityBox.classList.add('hidden');
     }
@@ -1240,7 +1373,9 @@ export function updateHardwareTelemetry(s) {
   const upsText = $('topbar-ups-text');
   const upsDot = $('topbar-ups-dot');
   const ups = s?.ups || {};
-  const hasUps = Boolean(ups.available || ups.connected || (ups.charge != null) || (ups.battery_charge != null) || (ups.battery_charge_pct != null));
+  const hasUps = Boolean(
+    ups.available || ups.connected || ups.charge != null || ups.battery_charge != null || ups.battery_charge_pct != null
+  );
   setPowerMatters(hasUps || Boolean(ups.on_battery)); // Power shows with Advanced off then (SET-15)
 
   if (upsPill) {
@@ -1250,11 +1385,15 @@ export function updateHardwareTelemetry(s) {
       const cut = Boolean(ups.on_battery || (ups.status && (ups.status.includes('OB') || ups.status.includes('BATT'))));
       // an icon and words, not a dot's colour alone (SET-15, Power B10)
       if (upsText) upsText.textContent = charge != null ? `${cut ? '⚡ ' : ''}${charge}%` : t('upx.short', 'UPS');
-      const said = cut ? t('upx.say_cut', 'Power cut: the NAS runs on its battery.') : t('upx.pill_mains', 'On mains power');
+      const said = cut
+        ? t('upx.say_cut', 'Power cut: the NAS runs on its battery.')
+        : t('upx.pill_mains', 'On mains power');
       upsPill.title = charge != null ? `${said} (${charge}%)` : said;
       upsPill.setAttribute('aria-label', upsPill.title);
       if (upsDot) {
-        const onBatt = Boolean(ups.on_battery || (ups.status && (ups.status.includes('OB') || ups.status.includes('BATT'))));
+        const onBatt = Boolean(
+          ups.on_battery || (ups.status && (ups.status.includes('OB') || ups.status.includes('BATT')))
+        );
         if (onBatt) {
           upsDot.style.background = 'var(--warn, #f5a623)';
           upsDot.style.boxShadow = '0 0 6px var(--warn, #f5a623)';
@@ -1283,15 +1422,13 @@ export function updateHardwareTelemetry(s) {
   // The Kiboto desktop icon should ONLY be visible if the hardware is a Zettlabs D4/D6/D6U/D8U NAS appliance
   // OR another system with a similar physical LCD, taking display resolution into account for perfect data display.
   const vendor = String(hardware.sys_vendor || s?.motherboard?.vendor || '').toLowerCase();
-  const product = String(
-    hardware.product_name || s?.motherboard?.product || s?.motherboard?.board || ''
-  ).toLowerCase();
+  const product = String(hardware.product_name || s?.motherboard?.product || s?.motherboard?.board || '').toLowerCase();
 
   const isZettlabs = Boolean(
     hardware.is_zettlabs ||
-      vendor.includes('zettlab') ||
-      ['d4', 'd6', 'd6u', 'd8u', 'd8 ultra', 'zettbox', 'zettnas'].some((k) => product.includes(k)) ||
-      (hardware.is_custom_appliance && !vendor.includes('aoostar'))
+    vendor.includes('zettlab') ||
+    ['d4', 'd6', 'd6u', 'd8u', 'd8 ultra', 'zettbox', 'zettnas'].some((k) => product.includes(k)) ||
+    (hardware.is_custom_appliance && !vendor.includes('aoostar'))
   );
 
   const showKibotoIcon = isZettlabs || hasFb;
@@ -1339,13 +1476,13 @@ export function updateHardwareTelemetry(s) {
   // Viewable only when custom hardware features (LCD, COPY button, SD card slot, MCU, or known custom appliance) are detected.
   const hasCustomHardware = Boolean(
     hardware.has_custom_hardware ||
-      peripherals.has_custom_hardware ||
-      hasMcu ||
-      hasFb ||
-      hardware.has_copy_button ||
-      hardware.has_sd_slot ||
-      hardware.is_custom_appliance ||
-      isZettlabs
+    peripherals.has_custom_hardware ||
+    hasMcu ||
+    hasFb ||
+    hardware.has_copy_button ||
+    hardware.has_sd_slot ||
+    hardware.is_custom_appliance ||
+    isZettlabs
   );
 
   if (drawerBtn) {
@@ -1395,7 +1532,11 @@ export function updateLcdPages(s) {
   // Skip DOM reconstruction if console window is minimized or closed (unless in lcd-direct hardware mode)
   if (!state.isLcdDirect) {
     const consoleOverlay = $('console-modal-overlay');
-    const isVisible = consoleOverlay && consoleOverlay.classList.contains('open') && !consoleOverlay.classList.contains('window-minimized') && consoleOverlay.style.display !== 'none';
+    const isVisible =
+      consoleOverlay &&
+      consoleOverlay.classList.contains('open') &&
+      !consoleOverlay.classList.contains('window-minimized') &&
+      consoleOverlay.style.display !== 'none';
     if (!isVisible) return;
   }
 
@@ -1425,9 +1566,9 @@ export function updateLcdPages(s) {
         `;
       } else {
         const isStandby = !!d.standby;
-        const temp = isStandby ? '--' : (d.temp != null ? `${d.temp}°` : '--');
-        const hClass = isStandby ? 'standby' : (d.health || 'ok');
-        const hText = isStandby ? 'STBY' : (d.health ? d.health.toUpperCase() : 'OK');
+        const temp = isStandby ? '--' : d.temp != null ? `${d.temp}°` : '--';
+        const hClass = isStandby ? 'standby' : d.health || 'ok';
+        const hText = isStandby ? 'STBY' : d.health ? d.health.toUpperCase() : 'OK';
         const devName = d.name || d.dev || `sd${String.fromCharCode(97 + i)}`;
         const modelStr = d.model ? d.model.slice(0, 10) : devName;
 
@@ -1509,7 +1650,7 @@ export function updateLcdPages(s) {
   // Page 3: Unraid Array & Copy Hub
   const unraid = s.unraid || {};
   if ($('lcd-uc-array-badge')) {
-    $('lcd-uc-array-badge').textContent = unraid.available ? (unraid.state || 'STARTED') : 'STANDALONE';
+    $('lcd-uc-array-badge').textContent = unraid.available ? unraid.state || 'STARTED' : 'STANDALONE';
     $('lcd-uc-array-badge').style.background = unraid.is_healthy ? 'rgba(37,194,160,0.15)' : 'rgba(240,85,59,0.15)';
     $('lcd-uc-array-badge').style.color = unraid.is_healthy ? 'var(--ok2)' : 'var(--crit)';
   }
@@ -1518,11 +1659,13 @@ export function updateLcdPages(s) {
   }
   if ($('lcd-uc-disks-stat') && unraid.disks) {
     const d = unraid.disks;
-    $('lcd-uc-disks-stat').textContent = `Disks: ${d.total || 0} Assigned • ${d.disabled || 0} Disabled • ${d.missing || 0} Missing`;
+    $('lcd-uc-disks-stat').textContent =
+      `Disks: ${d.total || 0} Assigned • ${d.disabled || 0} Disabled • ${d.missing || 0} Missing`;
   }
   if (unraid.parity_check) {
     const p = unraid.parity_check;
-    if ($('lcd-uc-parity-action')) $('lcd-uc-parity-action').textContent = p.active ? (p.action || 'Parity Sync') : 'Parity Check';
+    if ($('lcd-uc-parity-action'))
+      $('lcd-uc-parity-action').textContent = p.active ? p.action || 'Parity Sync' : 'Parity Check';
     if ($('lcd-uc-parity-pct')) $('lcd-uc-parity-pct').textContent = p.active ? `${p.progress_pct}%` : 'Idle';
     if ($('lcd-uc-parity-bar')) $('lcd-uc-parity-bar').style.width = p.active ? `${p.progress_pct}%` : '0%';
   }
@@ -1543,9 +1686,13 @@ export function updateLcdPages(s) {
     const prog = copyState.progress;
     const total = prog.total || 0;
     const copied = prog.copied || 0;
-    const pct = total > 0 ? Math.min(100, Math.round((copied / total) * 100)) : (copyState.status === 'success' ? 100 : 0);
-    if ($('lcd-uc-copy-file')) $('lcd-uc-copy-file').textContent = prog.file || (copyState.status === 'success' ? 'Transfer complete' : 'No active transfer');
-    if ($('lcd-uc-copy-pct')) $('lcd-uc-copy-pct').textContent = copyState.active ? `${pct}%` : (copyState.status === 'success' ? '100%' : '--');
+    const pct =
+      total > 0 ? Math.min(100, Math.round((copied / total) * 100)) : copyState.status === 'success' ? 100 : 0;
+    if ($('lcd-uc-copy-file'))
+      $('lcd-uc-copy-file').textContent =
+        prog.file || (copyState.status === 'success' ? 'Transfer complete' : 'No active transfer');
+    if ($('lcd-uc-copy-pct'))
+      $('lcd-uc-copy-pct').textContent = copyState.active ? `${pct}%` : copyState.status === 'success' ? '100%' : '--';
     if ($('lcd-uc-copy-bar')) $('lcd-uc-copy-bar').style.width = `${pct}%`;
   }
 }
@@ -1722,7 +1869,10 @@ export function handlePendingIngest(pendingIngest) {
         await api.post('/api/copy/start', { source: pendingIngest.slot, dest: destPath });
         showToast(t('media.ingest_started', `Importing media from ${slotName}...`), 'info');
       } catch (err) {
-        showToast(t('toast.failed_to_start_ingest', 'Could not start copying: {error}', { error: err.message || err }), 'error');
+        showToast(
+          t('toast.failed_to_start_ingest', 'Could not start copying: {error}', { error: err.message || err }),
+          'error'
+        );
       }
     },
     async () => {
@@ -1749,7 +1899,7 @@ export function handlePendingIngest(pendingIngest) {
         } catch (err) {
           showToast(t('toast.eject_failed', 'Eject failed: {error}', { error: err.message || err }), 'error');
         }
-      }
+      },
     }
   );
 }
@@ -1783,11 +1933,18 @@ export function updateCopyToast(copyState) {
     const prog = copyState.progress || {};
     const total = prog.total || 0;
     const copied = prog.copied || 0;
-    const pct = total > 0 ? Math.min(100, Math.round((copied / total) * 100)) : (copyState.status === 'success' ? 100 : 0);
+    const pct =
+      total > 0 ? Math.min(100, Math.round((copied / total) * 100)) : copyState.status === 'success' ? 100 : 0;
 
-    if ($('copy-toast-pct')) $('copy-toast-pct').textContent = copyState.status === 'awaiting_confirmation' ? 'WAIT' : `${pct}%`;
+    if ($('copy-toast-pct'))
+      $('copy-toast-pct').textContent = copyState.status === 'awaiting_confirmation' ? 'WAIT' : `${pct}%`;
     if ($('copy-toast-bar')) $('copy-toast-bar').style.width = `${pct}%`;
-    if ($('copy-toast-file')) $('copy-toast-file').textContent = prog.file || (copyState.status === 'success' ? t('modal.copy_finished', 'Finished successfully.') : t('dash.preparing', 'Preparing files…'));
+    if ($('copy-toast-file'))
+      $('copy-toast-file').textContent =
+        prog.file ||
+        (copyState.status === 'success'
+          ? t('modal.copy_finished', 'Finished successfully.')
+          : t('dash.preparing', 'Preparing files…'));
 
     let statusText = 'COPYING...';
     let barColor = 'var(--ok2)';
@@ -1816,11 +1973,12 @@ export function updateCopyToast(copyState) {
     if ($('copy-toast-bar')) $('copy-toast-bar').style.background = barColor;
 
     if ($('copy-toast-pause')) {
-      $('copy-toast-pause').style.display = (copyState.status === 'copying' || copyState.status === 'paused') ? 'inline-block' : 'none';
+      $('copy-toast-pause').style.display =
+        copyState.status === 'copying' || copyState.status === 'paused' ? 'inline-block' : 'none';
     }
 
     if (copyState.status === 'copying' && total > 0 && prog.start > 0) {
-      const elapsed = (Date.now() / 1000) - prog.start;
+      const elapsed = Date.now() / 1000 - prog.start;
       if (elapsed > 2 && copied > 0) {
         const rate = copied / elapsed;
         const remaining = Math.max(0, total - copied) / rate;
@@ -1832,7 +1990,9 @@ export function updateCopyToast(copyState) {
           const left = Math.max(0, prog.files_total - (prog.files_done || 0));
           filesLeftStr = `${t('dash.files_left', '{count, plural, one {# file left} other {# files left}}', { count: left })} • `;
         }
-        if ($('copy-toast-time')) $('copy-toast-time').textContent = filesLeftStr + t('dash.eta', '{rate} MB/s • ~{mins} min {secs} s', { rate: mbps, mins, secs });
+        if ($('copy-toast-time'))
+          $('copy-toast-time').textContent =
+            filesLeftStr + t('dash.eta', '{rate} MB/s • ~{mins} min {secs} s', { rate: mbps, mins, secs });
       } else {
         if ($('copy-toast-time')) $('copy-toast-time').textContent = t('ui.estimating_time', 'Estimating time...');
       }
@@ -1883,7 +2043,9 @@ export function updateCopyToast(copyState) {
       } else {
         doneActionsDiv.style.display = 'flex';
         const dismissBtn = $('copy-toast-dismiss-btn');
-        if (dismissBtn) dismissBtn.textContent = copyState.status === 'success' ? t('btn.done', 'Done') : t('media.btn_dismiss', 'Dismiss');
+        if (dismissBtn)
+          dismissBtn.textContent =
+            copyState.status === 'success' ? t('btn.done', 'Done') : t('media.btn_dismiss', 'Dismiss');
       }
     } else {
       if (doneActionsDiv) doneActionsDiv.style.display = 'none';
@@ -1952,10 +2114,20 @@ export function updateMediaSlots(mediaSlots) {
 
   // Surface toast on card insertion (0 -> >0 transition) ONLY if not in ejected state
   if (_prevClientMediaSlots.sd !== null && _prevClientMediaSlots.sd === 0 && sdSize > 0 && !sdEjected) {
-    showToast(t('toast.sd_card_detected_gb_ready_for', 'SD Card Detected ({value} GB): Ready for import', { value: formatFixed(sdSize / 1e9, 1) }), 'info');
+    showToast(
+      t('toast.sd_card_detected_gb_ready_for', 'SD Card Detected ({value} GB): Ready for import', {
+        value: formatFixed(sdSize / 1e9, 1),
+      }),
+      'info'
+    );
   }
   if (_prevClientMediaSlots.tf !== null && _prevClientMediaSlots.tf === 0 && tfSize > 0 && !tfEjected) {
-    showToast(t('toast.tf_microsd_detected_gb_ready_for', 'TF (MicroSD) Detected ({value} GB): Ready for import', { value: formatFixed(tfSize / 1e9, 1) }), 'info');
+    showToast(
+      t('toast.tf_microsd_detected_gb_ready_for', 'TF (MicroSD) Detected ({value} GB): Ready for import', {
+        value: formatFixed(tfSize / 1e9, 1),
+      }),
+      'info'
+    );
   }
   _prevClientMediaSlots.sd = sdSize;
   _prevClientMediaSlots.tf = tfSize;
@@ -2018,11 +2190,21 @@ export function updateMediaSlots(mediaSlots) {
 export function initDashboardClicks() {
   const screen = $('screen');
   if (!screen) return;
-  screen.querySelectorAll('.card-storage').forEach((el) => el.addEventListener('click', () => ZettEventBus.emit('modal:metric:open', 'storage')));
-  screen.querySelectorAll('.card-cpu').forEach((el) => el.addEventListener('click', () => ZettEventBus.emit('modal:metric:open', 'cpu')));
-  screen.querySelectorAll('.card-mem').forEach((el) => el.addEventListener('click', () => ZettEventBus.emit('modal:metric:open', 'mem')));
-  screen.querySelectorAll('.card-fans').forEach((el) => el.addEventListener('click', () => ZettEventBus.emit('modal:metric:open', 'fans')));
-  screen.querySelectorAll('.card-net').forEach((el) => el.addEventListener('click', () => ZettEventBus.emit('modal:metric:open', 'net')));
+  screen
+    .querySelectorAll('.card-storage')
+    .forEach((el) => el.addEventListener('click', () => ZettEventBus.emit('modal:metric:open', 'storage')));
+  screen
+    .querySelectorAll('.card-cpu')
+    .forEach((el) => el.addEventListener('click', () => ZettEventBus.emit('modal:metric:open', 'cpu')));
+  screen
+    .querySelectorAll('.card-mem')
+    .forEach((el) => el.addEventListener('click', () => ZettEventBus.emit('modal:metric:open', 'mem')));
+  screen
+    .querySelectorAll('.card-fans')
+    .forEach((el) => el.addEventListener('click', () => ZettEventBus.emit('modal:metric:open', 'fans')));
+  screen
+    .querySelectorAll('.card-net')
+    .forEach((el) => el.addEventListener('click', () => ZettEventBus.emit('modal:metric:open', 'net')));
 
   const slStorage = $('sl-zone-storage');
   if (slStorage) slStorage.addEventListener('click', () => ZettEventBus.emit('modal:metric:open', 'storage'));
@@ -2056,7 +2238,11 @@ export function hexToRgb(hex) {
   if (!hex || typeof hex !== 'string') return null;
   let clean = hex.replace('#', '').trim();
   if (!/^[0-9a-fA-F]{3}$|^[0-9a-fA-F]{6}$/.test(clean)) return null;
-  if (clean.length === 3) clean = clean.split('').map(c => c + c).join('');
+  if (clean.length === 3)
+    clean = clean
+      .split('')
+      .map((c) => c + c)
+      .join('');
   const num = parseInt(clean, 16);
   if (isNaN(num)) return null;
   return { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 };
@@ -2091,6 +2277,3 @@ export function getContrastRatio(rgb1, rgb2) {
 if (typeof window !== 'undefined') {
   window.applyStats = applyStats;
 }
-
-
-

@@ -160,7 +160,9 @@ describe('Host IP & DNS dialog (SET-16: no trial; only a host Kiboto manages tak
     document.getElementById('net-host-ip-input').value = '192.168.1.51';
     document.getElementById('net-host-gateway-input').value = '192.168.1.1';
     const toastSpy = vi.spyOn(toast, 'showToast').mockImplementation(() => {});
-    vi.spyOn(api, 'post').mockRejectedValueOnce(new Error('This is changed in Unraid: Settings, Network Settings, not in Kiboto.'));
+    vi.spyOn(api, 'post').mockRejectedValueOnce(
+      new Error('This is changed in Unraid: Settings, Network Settings, not in Kiboto.')
+    );
     await applyHostIpConfig();
     expect(toastSpy).toHaveBeenCalledWith(expect.stringContaining('Unraid'), 'error');
   });

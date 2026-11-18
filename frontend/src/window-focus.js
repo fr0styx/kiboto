@@ -53,7 +53,9 @@ function winOf(entry) {
   if (!el) return null;
   return el.matches('.os-window, .smart-modal-window, .file-manager-window, .mgmt-app-window, .chassis-front-panel')
     ? el
-    : el.querySelector('.os-window, .smart-modal-window, .file-manager-window, .mgmt-app-window, .chassis-front-panel') || el;
+    : el.querySelector(
+        '.os-window, .smart-modal-window, .file-manager-window, .mgmt-app-window, .chassis-front-panel'
+      ) || el;
 }
 
 const TITLES = '.os-window-title, .smart-modal-title, .mgmt-window-title, [data-window-title]';
@@ -68,7 +70,8 @@ export function labelWindow(win) {
   if (!win.getAttribute('role')) win.setAttribute('role', 'region');
   if (title) {
     if (!title.id) title.id = `${win.id || 'win'}-title-${Math.random().toString(36).slice(2, 7)}`;
-    if (!win.getAttribute('aria-labelledby') && !win.getAttribute('aria-label')) win.setAttribute('aria-labelledby', title.id);
+    if (!win.getAttribute('aria-labelledby') && !win.getAttribute('aria-label'))
+      win.setAttribute('aria-labelledby', title.id);
     if (!/^H[1-6]$/.test(title.tagName) && !title.getAttribute('role')) {
       title.setAttribute('role', 'heading');
       title.setAttribute('aria-level', '2');
@@ -94,7 +97,9 @@ export function focusWindow(win) {
   const active = document.activeElement;
   if (active && active !== document.body && !win.contains(active)) _openers.set(win, active);
   const body = win.querySelector('.os-window-body, .modal-body, .fm-body') || win;
-  const target = Array.from(body.querySelectorAll(FOCUSABLE)).find((el) => visible(el) && !el.closest('.os-window-header'));
+  const target = Array.from(body.querySelectorAll(FOCUSABLE)).find(
+    (el) => visible(el) && !el.closest('.os-window-header')
+  );
   if (target) {
     target.focus({ preventScroll: true });
   } else {
@@ -154,11 +159,13 @@ export function installWindowFocus(dock) {
       return result;
     };
   };
-  wrap('restore', (d, id) => later(() => {
-    placeIfUnplaced(winOf(d.windows?.[id]));
-    labelWindow(winOf(d.windows?.[id]));
-    focusWindow(winOf(d.windows?.[id]));
-  }));
+  wrap('restore', (d, id) =>
+    later(() => {
+      placeIfUnplaced(winOf(d.windows?.[id]));
+      labelWindow(winOf(d.windows?.[id]));
+      focusWindow(winOf(d.windows?.[id]));
+    })
+  );
   wrap('register', (d, id, before, rest) => {
     later(() => labelWindow(winOf(d.windows?.[id])));
     if (!rest[3]) later(() => focusWindow(winOf(d.windows?.[id])));
@@ -180,7 +187,13 @@ export function installWindowFocus(dock) {
       escFocus = document.activeElement;
       if (escWatch) escWatch.disconnect();
       escWatch = typeof MutationObserver === 'function' ? new MutationObserver(() => {}) : null;
-      if (escWatch) escWatch.observe(document.documentElement, { subtree: true, childList: true, attributes: true, attributeFilter: ESC_WATCH });
+      if (escWatch)
+        escWatch.observe(document.documentElement, {
+          subtree: true,
+          childList: true,
+          attributes: true,
+          attributeFilter: ESC_WATCH,
+        });
     },
     true
   );
@@ -208,7 +221,11 @@ export function installWindowFocus(dock) {
       const open = Object.entries(dock.windows || {}).filter(([, w]) => !w.minimized && !w.closed && visible(winOf(w)));
       if (open.length < 2) return;
       e.preventDefault();
-      open.sort((a, b) => (parseInt(getComputedStyle(winOf(a[1])).zIndex, 10) || 0) - (parseInt(getComputedStyle(winOf(b[1])).zIndex, 10) || 0));
+      open.sort(
+        (a, b) =>
+          (parseInt(getComputedStyle(winOf(a[1])).zIndex, 10) || 0) -
+          (parseInt(getComputedStyle(winOf(b[1])).zIndex, 10) || 0)
+      );
       dock.restore(open[0][0]); // the one at the back comes to the front
     }
   });

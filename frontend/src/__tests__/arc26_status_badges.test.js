@@ -1,7 +1,12 @@
 /** NUX-20: the layout preset badge and the fan's manual label in the reader's language. */
 import { describe, it, expect, vi, afterEach } from 'vitest';
 
-vi.mock('../api.js', () => ({ api: { get: vi.fn(async (url) => (url === '/api/fans' ? { profile: 'manual', manual_pct: 70 } : {})), post: vi.fn(async () => ({})) } }));
+vi.mock('../api.js', () => ({
+  api: {
+    get: vi.fn(async (url) => (url === '/api/fans' ? { profile: 'manual', manual_pct: 70 } : {})),
+    post: vi.fn(async () => ({})),
+  },
+}));
 
 const { setLanguage } = await import('../i18n.js');
 const { state, defaultVis } = await import('../state.js');
@@ -18,7 +23,14 @@ describe('status badges', () => {
     state.dashVis = { ...defaultVis };
     evaluateActivePreset();
     expect(document.getElementById('preset-state-badge').textContent).toBe('DEFAULT');
-    state.dashVis = { 'metric-storage': false, 'metric-cpu': true, 'metric-mem': false, 'metric-fans': true, 'metric-net': false, 'metric-disks': true };
+    state.dashVis = {
+      'metric-storage': false,
+      'metric-cpu': true,
+      'metric-mem': false,
+      'metric-fans': true,
+      'metric-net': false,
+      'metric-disks': true,
+    };
     evaluateActivePreset();
     expect(document.getElementById('preset-state-badge').textContent).toBe('THERMAL');
     state.dashVis = { ...defaultVis, 'metric-cpu': !defaultVis['metric-cpu'], 'metric-net': !defaultVis['metric-net'] };

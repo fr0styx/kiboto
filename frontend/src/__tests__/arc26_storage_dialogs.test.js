@@ -4,7 +4,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 // showDangerConfirm is the same question, marked destructive (SET-00): one mock records both
 vi.mock('../toast.js', () => {
   const ask = vi.fn();
-  return { showToast: vi.fn(), showConfirmToast: ask, showDangerConfirm: ask, showPromptToast: vi.fn(), showBottomSheet: vi.fn() };
+  return {
+    showToast: vi.fn(),
+    showConfirmToast: ask,
+    showDangerConfirm: ask,
+    showPromptToast: vi.fn(),
+    showBottomSheet: vi.fn(),
+  };
 });
 const { api } = await import('../api.js');
 const { showToast, showConfirmToast } = await import('../toast.js');
@@ -13,7 +19,11 @@ const { renderStructuredPoolsTopology } = await import('../components/chassis-vi
 
 const lastToast = () => showToast.mock.calls.at(-1);
 const lastConfirm = () => showConfirmToast.mock.calls.at(-1);
-const POOLS = { is_observer_mode: false, platform: 'generic_linux', pools: [{ id: 'tank', name: 'tank', fs_type: 'btrfs', disks: [], status: 'ONLINE' }] };
+const POOLS = {
+  is_observer_mode: false,
+  platform: 'generic_linux',
+  pools: [{ id: 'tank', name: 'tank', fs_type: 'btrfs', disks: [], status: 'ONLINE' }],
+};
 
 describe('storage pool dialogs', () => {
   let box;

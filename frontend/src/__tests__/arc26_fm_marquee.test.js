@@ -11,11 +11,14 @@ function pointer(type, x, y, extra = {}) {
 }
 
 function setup(selected = []) {
-  document.body.innerHTML = '<div id="vp"><div class="fm-row" data-path="/a" data-name="a"></div><div class="fm-row" data-path="/b" data-name="b"></div><div class="fm-row" data-path="/up" data-name=".."></div><button class="fm-act-btn"></button></div><div id="box"></div>';
+  document.body.innerHTML =
+    '<div id="vp"><div class="fm-row" data-path="/a" data-name="a"></div><div class="fm-row" data-path="/b" data-name="b"></div><div class="fm-row" data-path="/up" data-name=".."></div><button class="fm-act-btn"></button></div><div id="box"></div>';
   const viewport = document.getElementById('vp');
   viewport.getBoundingClientRect = () => rect(0, 0, 300, 300);
   viewport.setPointerCapture = vi.fn();
-  viewport.releasePointerCapture = vi.fn(() => { throw new Error('not captured'); });
+  viewport.releasePointerCapture = vi.fn(() => {
+    throw new Error('not captured');
+  });
   const [a, b, up] = viewport.querySelectorAll('.fm-row');
   a.getBoundingClientRect = () => rect(10, 10, 100, 20);
   b.getBoundingClientRect = () => rect(10, 100, 100, 20);
@@ -24,7 +27,9 @@ function setup(selected = []) {
     viewport,
     marqueeBox: document.getElementById('box'),
     selectedPaths: new Set(selected),
-    clearSelection: vi.fn(function () { this.selectedPaths = new Set(); }),
+    clearSelection: vi.fn(function () {
+      this.selectedPaths = new Set();
+    }),
     updateRowSelectionUI: vi.fn(),
     updateSelectionToolbar: vi.fn(),
     inspector: { update: vi.fn() },

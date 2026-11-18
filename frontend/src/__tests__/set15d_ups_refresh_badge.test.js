@@ -31,6 +31,8 @@ describe('Power page refresh and badge (SET-15, Power B8 and B9)', () => {
 
   it('management.js no longer wires its own Refresh', async () => {
     const { readFileSync } = await import('node:fs');
-    expect(readFileSync('frontend/src/components/management.js', 'utf8')).not.toContain("getElementById('btn-refresh-ups')");
+    expect(readFileSync('frontend/src/components/management.js', 'utf8')).not.toContain(
+      "getElementById('btn-refresh-ups')"
+    );
   });
 });

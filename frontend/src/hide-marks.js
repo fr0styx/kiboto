@@ -33,7 +33,9 @@ export function mark(el, reason, on) {
 export function leavePage(reason, root = document) {
   const active = root.querySelector('.mgmt-sidebar-item.active');
   if (!active || !active.hasAttribute(reason)) return false;
-  /** @type {HTMLElement | null} */ (root.querySelector('.mgmt-sidebar-item[data-mgmt-target="management-hub-view"]'))?.click();
+  /** @type {HTMLElement | null} */ (
+    root.querySelector('.mgmt-sidebar-item[data-mgmt-target="management-hub-view"]')
+  )?.click();
   return true;
 }
 
@@ -42,10 +44,14 @@ export function tidyHeadings(root = document) {
   root.querySelectorAll('.mgmt-sidebar-category').forEach((heading) => {
     let any = false;
     let shown = false;
-    for (let el = heading.nextElementSibling; el && !el.classList.contains('mgmt-sidebar-category'); el = el.nextElementSibling) {
+    for (
+      let el = heading.nextElementSibling;
+      el && !el.classList.contains('mgmt-sidebar-category');
+      el = el.nextElementSibling
+    ) {
       if (!el.classList.contains('mgmt-sidebar-item')) continue;
       any = true;
-      if (!(/** @type {HTMLElement} */ (el)).hidden) shown = true;
+      if (!(/** @type {HTMLElement} */ (el).hidden)) shown = true;
     }
     mark(heading, EMPTY_GROUP, any && !shown);
   });

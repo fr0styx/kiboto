@@ -4,13 +4,21 @@ import { offersFor, handlePendingUsb, resetUsbOffer } from '../components/usb-of
 import { api } from '../api.js';
 import { showConfirmToast } from '../toast.js';
 
-vi.mock('../toast.js', () => ({ showToast: vi.fn(), showConfirmToast: vi.fn(), showPromptToast: vi.fn(), showBottomSheet: vi.fn() }));
+vi.mock('../toast.js', () => ({
+  showToast: vi.fn(),
+  showConfirmToast: vi.fn(),
+  showPromptToast: vi.fn(),
+  showBottomSheet: vi.fn(),
+}));
 const openProtectGuide = vi.fn(async () => {});
 vi.mock('../components/protect-nas.js', () => ({ openProtectGuide: (...a) => openProtectGuide(...a) }));
 const flush = () => new Promise((r) => setTimeout(r, 0));
 
 describe('Use this disk for backups? (Backup 5)', () => {
-  beforeEach(() => { vi.clearAllMocks(); resetUsbOffer(); });
+  beforeEach(() => {
+    vi.clearAllMocks();
+    resetUsbOffer();
+  });
   afterEach(() => vi.restoreAllMocks());
 
   it('offers setup for an empty disk, after the other offers', () => {

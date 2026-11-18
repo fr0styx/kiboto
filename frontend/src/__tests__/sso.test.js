@@ -3,7 +3,16 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 const puts = [];
 vi.mock('../api.js', () => ({
   api: {
-    get: vi.fn(async () => ({ enabled: false, issuer: '', client_id: '', client_secret: '', label: 'Single sign-on', admin_groups: [], public_url: '', redirect_uri: 'http://nas/api/auth/oidc/callback' })),
+    get: vi.fn(async () => ({
+      enabled: false,
+      issuer: '',
+      client_id: '',
+      client_secret: '',
+      label: 'Single sign-on',
+      admin_groups: [],
+      public_url: '',
+      redirect_uri: 'http://nas/api/auth/oidc/callback',
+    })),
     put: vi.fn(async (...a) => puts.push(a)),
   },
 }));
@@ -11,7 +20,8 @@ vi.mock('../toast.js', () => ({ showToast: vi.fn() }));
 
 describe('single sign-on (M6)', () => {
   beforeEach(() => {
-    document.body.innerHTML = '<button id="login-sso-btn" hidden></button><p id="login-sso-error" hidden></p><div id="sec-sso-card"></div>';
+    document.body.innerHTML =
+      '<button id="login-sso-btn" hidden></button><p id="login-sso-error" hidden></p><div id="sec-sso-card"></div>';
     puts.length = 0;
   });
 

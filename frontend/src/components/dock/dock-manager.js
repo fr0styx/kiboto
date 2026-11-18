@@ -10,7 +10,13 @@ import { formatTime } from '../../format.js';
 import { KNOWN_APPS, showDockItemContextMenu, toggleFmWindowSwitcher } from './apps.js';
 import { ADVANCED_DOCK_APPS, advancedOn } from '../../advanced.js';
 import { _dockPosition } from './dock-settings.js';
-import { DOCK_PINNED_KEY, bellEvents, isEventChecked, showDockToast, updateNotificationBadge } from './notifications.js';
+import {
+  DOCK_PINNED_KEY,
+  bellEvents,
+  isEventChecked,
+  showDockToast,
+  updateNotificationBadge,
+} from './notifications.js';
 import { bringToFront, keyboardFocused } from './window-drag.js';
 import { applySavedBounds, saveOpenWindowsState } from './window-state.js';
 
@@ -43,8 +49,10 @@ export const DockManager = {
       list.push(id);
       localStorage.setItem(DOCK_PINNED_KEY, JSON.stringify(list));
       this.render();
-      const appName = KNOWN_APPS[id]?.getTitle ? KNOWN_APPS[id].getTitle() : (this.windows[id]?.title || '');
-      const toastMsg = appName ? `${appName}: ${t('dock.pinned_toast', 'Pinned to Dock')}` : t('dock.pinned_toast', 'Pinned to Dock');
+      const appName = KNOWN_APPS[id]?.getTitle ? KNOWN_APPS[id].getTitle() : this.windows[id]?.title || '';
+      const toastMsg = appName
+        ? `${appName}: ${t('dock.pinned_toast', 'Pinned to Dock')}`
+        : t('dock.pinned_toast', 'Pinned to Dock');
       showDockToast(toastMsg, id);
     }
   },
@@ -59,8 +67,10 @@ export const DockManager = {
         delete this.windows[id];
       }
       this.render();
-      const appName = KNOWN_APPS[id]?.getTitle ? KNOWN_APPS[id].getTitle() : (this.windows[id]?.title || '');
-      const toastMsg = appName ? `${appName}: ${t('dock.unpinned_toast', 'Unpinned from Dock')}` : t('dock.unpinned_toast', 'Unpinned from Dock');
+      const appName = KNOWN_APPS[id]?.getTitle ? KNOWN_APPS[id].getTitle() : this.windows[id]?.title || '';
+      const toastMsg = appName
+        ? `${appName}: ${t('dock.unpinned_toast', 'Unpinned from Dock')}`
+        : t('dock.unpinned_toast', 'Unpinned from Dock');
       showDockToast(toastMsg, id);
     }
   },
@@ -88,14 +98,23 @@ export const DockManager = {
         return;
       }
       const fmClose = document.getElementById('fm-close');
-      if (fmClose) { fmClose.click(); return; }
+      if (fmClose) {
+        fmClose.click();
+        return;
+      }
     } else if (id && (id.startsWith('fm-') || id.startsWith('file-manager-window'))) {
       const win = this.windows[id]?.el;
       const closeBtn = win?.querySelector('.close-btn') || win?.querySelector('#fm-close');
-      if (closeBtn) { closeBtn.click(); return; }
+      if (closeBtn) {
+        closeBtn.click();
+        return;
+      }
     } else if (id === 'management') {
       const mgmtClose = document.getElementById('management-close');
-      if (mgmtClose) { mgmtClose.click(); return; }
+      if (mgmtClose) {
+        mgmtClose.click();
+        return;
+      }
     } else if (id === 'console') {
       const consoleOverlay = document.getElementById('console-modal-overlay');
       const consoleModal = document.getElementById('console-window');
@@ -111,16 +130,28 @@ export const DockManager = {
       return;
     } else if (id === 'smart') {
       const smartClose = document.getElementById('smart-modal-close');
-      if (smartClose) { smartClose.click(); return; }
+      if (smartClose) {
+        smartClose.click();
+        return;
+      }
     } else if (id === 'container-inspector') {
       const ciClose = document.getElementById('ci-close-btn');
-      if (ciClose) { ciClose.click(); return; }
+      if (ciClose) {
+        ciClose.click();
+        return;
+      }
     } else if (id === 'app-deploy') {
       const deployClose = document.getElementById('adm-close-btn');
-      if (deployClose) { deployClose.click(); return; }
+      if (deployClose) {
+        deployClose.click();
+        return;
+      }
     } else if (id === 'cloud-remote') {
       const crClose = document.getElementById('modal-remote-close-btn');
-      if (crClose) { crClose.click(); return; }
+      if (crClose) {
+        crClose.click();
+        return;
+      }
     } else if (id === 'vm-console') {
       const cw = document.getElementById('vm-console-window');
       if (cw) {
@@ -156,7 +187,9 @@ export const DockManager = {
       el.classList.add('window-minimized');
       el.classList.remove('open');
       el.style.setProperty('display', 'none', 'important');
-      const innerWin = el.querySelector('.smart-modal-window, .chassis-front-panel, .os-window, .mgmt-app-window, .file-manager-window');
+      const innerWin = el.querySelector(
+        '.smart-modal-window, .chassis-front-panel, .os-window, .mgmt-app-window, .file-manager-window'
+      );
       if (innerWin) {
         innerWin.classList.add('window-minimized');
         innerWin.style.setProperty('display', 'none', 'important');
@@ -175,14 +208,20 @@ export const DockManager = {
       if (title) this.windows[id].title = title;
       this.windows[id].closed = initialMinimized;
     }
-    const innerWin = el.querySelector('.smart-modal-window, .chassis-front-panel, .os-window, .mgmt-app-window, .file-manager-window');
+    const innerWin = el.querySelector(
+      '.smart-modal-window, .chassis-front-panel, .os-window, .mgmt-app-window, .file-manager-window'
+    );
     if (!initialMinimized) {
       this.windows[id].minimized = false;
       this.windows[id].closed = false;
       el.classList.remove('window-minimized');
       el.classList.add('open');
       el.style.removeProperty('display');
-      if (el.classList.contains('smart-modal-backdrop') || el.classList.contains('os-window') || el.classList.contains('file-manager-window')) {
+      if (
+        el.classList.contains('smart-modal-backdrop') ||
+        el.classList.contains('os-window') ||
+        el.classList.contains('file-manager-window')
+      ) {
         el.style.setProperty('display', 'flex');
       }
       if (innerWin) {
@@ -213,7 +252,9 @@ export const DockManager = {
         winObj.el.classList.add('window-minimized');
         winObj.el.classList.remove('open');
         winObj.el.style.setProperty('display', 'none', 'important');
-        const innerWin = winObj.el.querySelector('.smart-modal-window, .chassis-front-panel, .os-window, .mgmt-app-window, .file-manager-window');
+        const innerWin = winObj.el.querySelector(
+          '.smart-modal-window, .chassis-front-panel, .os-window, .mgmt-app-window, .file-manager-window'
+        );
         if (innerWin) {
           innerWin.classList.add('window-minimized');
           innerWin.style.setProperty('display', 'none', 'important');
@@ -237,7 +278,9 @@ export const DockManager = {
       this.windows[id].el.classList.add('window-minimized');
       this.windows[id].el.classList.remove('open');
       this.windows[id].el.style.setProperty('display', 'none', 'important');
-      const innerWin = this.windows[id].el.querySelector('.smart-modal-window, .chassis-front-panel, .os-window, .mgmt-app-window');
+      const innerWin = this.windows[id].el.querySelector(
+        '.smart-modal-window, .chassis-front-panel, .os-window, .mgmt-app-window'
+      );
       if (innerWin) {
         innerWin.classList.add('window-minimized');
         innerWin.style.setProperty('display', 'none', 'important');
@@ -257,13 +300,24 @@ export const DockManager = {
 
       const el = this.windows[id].el;
 
-      if (el.classList.contains('os-window') || el.classList.contains('file-manager-window') || el.classList.contains('smart-modal-backdrop')) {
+      if (
+        el.classList.contains('os-window') ||
+        el.classList.contains('file-manager-window') ||
+        el.classList.contains('smart-modal-backdrop')
+      ) {
         el.style.setProperty('display', 'flex', 'important');
       }
 
-      const winEl = el.classList.contains('smart-modal-window') || el.classList.contains('chassis-front-panel') || el.classList.contains('os-window') || el.classList.contains('file-manager-window') || el.classList.contains('mgmt-app-window')
-        ? el
-        : el.querySelector('.smart-modal-window, .chassis-front-panel, .os-window, .file-manager-window, .mgmt-app-window') || el;
+      const winEl =
+        el.classList.contains('smart-modal-window') ||
+        el.classList.contains('chassis-front-panel') ||
+        el.classList.contains('os-window') ||
+        el.classList.contains('file-manager-window') ||
+        el.classList.contains('mgmt-app-window')
+          ? el
+          : el.querySelector(
+              '.smart-modal-window, .chassis-front-panel, .os-window, .file-manager-window, .mgmt-app-window'
+            ) || el;
       if (winEl) {
         winEl.classList.remove('window-minimized');
         winEl.style.removeProperty('display');
@@ -284,9 +338,16 @@ export const DockManager = {
         this.restore(id);
       } else {
         const el = this.windows[id].el;
-        const winEl = el.classList.contains('smart-modal-window') || el.classList.contains('chassis-front-panel') || el.classList.contains('os-window') || el.classList.contains('file-manager-window') || el.classList.contains('mgmt-app-window')
-          ? el
-          : el.querySelector('.smart-modal-window, .chassis-front-panel, .os-window, .file-manager-window, .mgmt-app-window') || el;
+        const winEl =
+          el.classList.contains('smart-modal-window') ||
+          el.classList.contains('chassis-front-panel') ||
+          el.classList.contains('os-window') ||
+          el.classList.contains('file-manager-window') ||
+          el.classList.contains('mgmt-app-window')
+            ? el
+            : el.querySelector(
+                '.smart-modal-window, .chassis-front-panel, .os-window, .file-manager-window, .mgmt-app-window'
+              ) || el;
         if (winEl) {
           bringToFront(winEl);
         }
@@ -306,7 +367,8 @@ export const DockManager = {
     this.activeId = id;
     const dock = document.getElementById('os-dock');
     if (!dock) return;
-    const isFm = id === 'fm' || (typeof id === 'string' && (id.startsWith('fm-') || id.startsWith('file-manager-window')));
+    const isFm =
+      id === 'fm' || (typeof id === 'string' && (id.startsWith('fm-') || id.startsWith('file-manager-window')));
     dock.querySelectorAll('.dock-item').forEach((item) => {
       const winId = item.dataset.windowId;
       if (!winId) return;
@@ -375,13 +437,19 @@ export const DockManager = {
         return document.getElementById('management-window') || document.querySelector('.management-window');
       }
       if (id === 'containers') {
-        return document.getElementById('containers-manager-window') || document.querySelector('.containers-manager-window');
+        return (
+          document.getElementById('containers-manager-window') || document.querySelector('.containers-manager-window')
+        );
       }
       if (id === 'vm') {
         return document.getElementById('vm-manager-window') || document.querySelector('.vm-manager-window');
       }
       if (id === 'fm') {
-        return document.querySelector('.file-manager-window.active-window') || document.getElementById('file-manager-window') || document.querySelector('.file-manager-window');
+        return (
+          document.querySelector('.file-manager-window.active-window') ||
+          document.getElementById('file-manager-window') ||
+          document.querySelector('.file-manager-window')
+        );
       }
       if (id === 'console') {
         return document.getElementById('screen-window') || document.getElementById('screen');
@@ -406,11 +474,15 @@ export const DockManager = {
         return !DockManager.windows[id].closed;
       }
       if (id === 'fm') {
-        const isFmAppId = (wId) => wId === 'fm' || (typeof wId === 'string' && (wId.startsWith('fm-') || wId.startsWith('file-manager-window')));
+        const isFmAppId = (wId) =>
+          wId === 'fm' || (typeof wId === 'string' && (wId.startsWith('fm-') || wId.startsWith('file-manager-window')));
         return Object.entries(DockManager.windows).some(([k, v]) => isFmAppId(k) && !v.closed);
       }
       if (winEl) {
-        const overlay = winEl.closest?.('.os-modal-overlay, .smart-modal-overlay, #console-modal-overlay, #management-modal-overlay') || winEl;
+        const overlay =
+          winEl.closest?.(
+            '.os-modal-overlay, .smart-modal-overlay, #console-modal-overlay, #management-modal-overlay'
+          ) || winEl;
         return overlay.style.display !== 'none' || overlay.classList.contains('open');
       }
       return false;
@@ -428,7 +500,9 @@ export const DockManager = {
         }
         const winIds = Object.keys(DockManager.windows);
         const activeWins = winIds.filter((k) => !DockManager.windows[k].closed && !DockManager.windows[k].minimized);
-        const countStr = t('dock.active_windows', '{count, plural, one {# active window} other {# active windows}}', { count: activeWins.length });
+        const countStr = t('dock.active_windows', '{count, plural, one {# active window} other {# active windows}}', {
+          count: activeWins.length,
+        });
         container.innerHTML = `
           <div class="dock-desktop-home-card">
             <span class="dkp-e18">🖥️</span>
@@ -490,12 +564,14 @@ export const DockManager = {
           return container;
         }
 
-        const itemsHtml = events.slice(0, 2).map((ev) => {
-          const view = eventView(ev);
-          const nIcon = view.icon;
-          const col = view.color;
-          const timeStr = formatTime(view.when, undefined, '');
-          return `
+        const itemsHtml = events
+          .slice(0, 2)
+          .map((ev) => {
+            const view = eventView(ev);
+            const nIcon = view.icon;
+            const col = view.color;
+            const timeStr = formatTime(view.when, undefined, '');
+            return `
             <div class="dock-notif-feed-item">
               <span class="dkp-ico">${nIcon}</span>
               <div class="dkp-body">
@@ -507,7 +583,8 @@ export const DockManager = {
               </div>
             </div>
           `;
-        }).join('');
+          })
+          .join('');
 
         container.innerHTML = `
           <div class="dkp-head">
@@ -529,9 +606,13 @@ export const DockManager = {
       if (id === 'copy') {
         const container = document.createElement('div');
         container.className = 'dock-preview-summary';
-        const status = escapeHtml(document.getElementById('copy-toast-status')?.textContent || t('dock.copy_default', 'Copying'));
+        const status = escapeHtml(
+          document.getElementById('copy-toast-status')?.textContent || t('dock.copy_default', 'Copying')
+        );
         const pct = escapeHtml(document.getElementById('copy-toast-pct')?.textContent || '0%');
-        const file = escapeHtml(document.getElementById('copy-toast-file')?.textContent || t('dock.copy_preparing', 'Preparing…'));
+        const file = escapeHtml(
+          document.getElementById('copy-toast-file')?.textContent || t('dock.copy_preparing', 'Preparing…')
+        );
         container.innerHTML = `
           <div class="dkp-row-xs">
             <strong class="dkp-strong">${status}</strong>
@@ -550,7 +631,10 @@ export const DockManager = {
       const appRunning = isRunning || isAppWindowRunning(id, winEl);
 
       if (appRunning && winEl) {
-        const winCard = winEl.querySelector('.smart-modal-window, .os-window, .management-window, .containers-manager-window, .vm-manager-window, .file-manager-window, #screen') || winEl;
+        const winCard =
+          winEl.querySelector(
+            '.smart-modal-window, .os-window, .management-window, .containers-manager-window, .vm-manager-window, .file-manager-window, #screen'
+          ) || winEl;
 
         let origW = parseInt(winCard.style?.width, 10) || winCard.offsetWidth;
         let origH = parseInt(winCard.style?.height, 10) || winCard.offsetHeight;
@@ -612,7 +696,9 @@ export const DockManager = {
             dstC.height = srcC.height;
             const ctx = dstC.getContext('2d');
             if (ctx) {
-              try { ctx.drawImage(srcC, 0, 0); } catch {}
+              try {
+                ctx.drawImage(srcC, 0, 0);
+              } catch {}
             }
           }
         });
@@ -669,7 +755,7 @@ export const DockManager = {
         const container = document.createElement('div');
         container.className = 'dock-preview-app-splash';
         const appObj = KNOWN_APPS[id];
-        const appTitle = appObj?.getTitle ? appObj.getTitle() : (title || id);
+        const appTitle = appObj?.getTitle ? appObj.getTitle() : title || id;
         const appIcon = appObj?.icon || icon || '#i-chip';
         const appDesc = (APP_DESCRIPTIONS[id] ? APP_DESCRIPTIONS[id]() : '') || 'Application';
 
@@ -716,7 +802,9 @@ export const DockManager = {
         } else if (id === 'notif') {
           const unreadCount = bellEvents().filter((e) => !isEventChecked(e)).length;
           if (unreadCount > 0) {
-            badgeEl.textContent = t('dock.badge_unread', '{count} unread', { count: unreadCount > 99 ? '99+' : unreadCount }).toLocaleUpperCase();
+            badgeEl.textContent = t('dock.badge_unread', '{count} unread', {
+              count: unreadCount > 99 ? '99+' : unreadCount,
+            }).toLocaleUpperCase();
             badgeEl.className = 'dock-tooltip-status alert';
           } else {
             badgeEl.textContent = t('dock.badge_clear', 'All caught up').toLocaleUpperCase();
@@ -729,7 +817,9 @@ export const DockManager = {
           badgeEl.textContent = 'PINNED';
           badgeEl.className = 'dock-tooltip-status pinned';
         } else {
-          badgeEl.textContent = (isMinimized ? t('dock.badge_minimized', 'Minimized') : t('dock.badge_active', 'Active')).toLocaleUpperCase();
+          badgeEl.textContent = (
+            isMinimized ? t('dock.badge_minimized', 'Minimized') : t('dock.badge_active', 'Active')
+          ).toLocaleUpperCase();
           badgeEl.className = 'dock-tooltip-status ' + (isMinimized ? 'minimized' : 'active');
         }
       }
@@ -767,7 +857,8 @@ export const DockManager = {
         }
       }
 
-      const isAlreadyVisibleForThisItem = tooltip.classList.contains('visible') && tooltip.dataset.currentWindowId === id;
+      const isAlreadyVisibleForThisItem =
+        tooltip.classList.contains('visible') && tooltip.dataset.currentWindowId === id;
       tooltip.dataset.currentWindowId = id;
       tooltip.dataset.dockPos = _dockPosition;
 
@@ -780,19 +871,20 @@ export const DockManager = {
 
         if (_dockPosition === 'left') {
           const leftPos = dockRect ? Math.round(dockRect.right + 12) : Math.round(rect.right + 12);
-          let topPos = Math.round(rect.top + (rect.height / 2) - (tooltipH / 2));
+          let topPos = Math.round(rect.top + rect.height / 2 - tooltipH / 2);
           topPos = Math.max(56, Math.min(window.innerHeight - tooltipH - 16, topPos));
           tooltip.style.left = `${leftPos}px`;
           tooltip.style.top = `${topPos}px`;
           tooltip.style.bottom = 'auto';
 
-          const arrowY = Math.max(16, Math.min(tooltipH - 16, Math.round((rect.top + (rect.height / 2)) - topPos)));
+          const arrowY = Math.max(16, Math.min(tooltipH - 16, Math.round(rect.top + rect.height / 2 - topPos)));
           tooltip.style.setProperty('--arrow-y', `${arrowY}px`);
         } else if (_dockPosition === 'top') {
-          const centerX = (dockEl && dockRect && typeof dockItem.offsetLeft === 'number')
-            ? (dockRect.left + dockItem.offsetLeft - (dockEl.scrollLeft || 0) + (dockItem.offsetWidth / 2))
-            : (rect.left + (rect.width / 2));
-          let leftPos = Math.round(centerX - (tooltipW / 2));
+          const centerX =
+            dockEl && dockRect && typeof dockItem.offsetLeft === 'number'
+              ? dockRect.left + dockItem.offsetLeft - (dockEl.scrollLeft || 0) + dockItem.offsetWidth / 2
+              : rect.left + rect.width / 2;
+          let leftPos = Math.round(centerX - tooltipW / 2);
           leftPos = Math.max(16, Math.min(window.innerWidth - tooltipW - 16, leftPos));
           const topPos = dockRect ? Math.round(dockRect.bottom + 12) : Math.round(rect.bottom + 12);
           tooltip.style.left = `${leftPos}px`;
@@ -803,11 +895,12 @@ export const DockManager = {
           tooltip.style.setProperty('--arrow-x', `${arrowX}px`);
         } else {
           // Bottom (Default)
-          const centerX = (dockEl && dockRect && typeof dockItem.offsetLeft === 'number')
-            ? (dockRect.left + dockItem.offsetLeft - (dockEl.scrollLeft || 0) + (dockItem.offsetWidth / 2))
-            : (rect.left + (rect.width / 2));
+          const centerX =
+            dockEl && dockRect && typeof dockItem.offsetLeft === 'number'
+              ? dockRect.left + dockItem.offsetLeft - (dockEl.scrollLeft || 0) + dockItem.offsetWidth / 2
+              : rect.left + rect.width / 2;
 
-          let leftPos = Math.round(centerX - (tooltipW / 2));
+          let leftPos = Math.round(centerX - tooltipW / 2);
           leftPos = Math.max(16, Math.min(window.innerWidth - tooltipW - 16, leftPos));
           const bottomPos = dockRect
             ? Math.max(10, Math.round(window.innerHeight - dockRect.top + 14))
@@ -840,8 +933,15 @@ export const DockManager = {
     dashItem.className = 'dock-item';
     dashItem.setAttribute('aria-label', t('dock.home', 'Dashboard Home'));
     dashItem.innerHTML = `<svg><use href="#i-globe"/></svg>`;
-    dashItem.addEventListener('mouseenter', () => showDockTooltip(dashItem, 'home', t('dock.home', 'Dashboard Home'), '#i-globe', false));
-    dashItem.addEventListener('focus', () => keyboardFocused(dashItem) && showDockTooltip(dashItem, 'home', t('dock.home', 'Dashboard Home'), '#i-globe', false));
+    dashItem.addEventListener('mouseenter', () =>
+      showDockTooltip(dashItem, 'home', t('dock.home', 'Dashboard Home'), '#i-globe', false)
+    );
+    dashItem.addEventListener(
+      'focus',
+      () =>
+        keyboardFocused(dashItem) &&
+        showDockTooltip(dashItem, 'home', t('dock.home', 'Dashboard Home'), '#i-globe', false)
+    );
     dashItem.addEventListener('mouseleave', hideDockTooltip);
     dashItem.addEventListener('blur', hideDockTooltip);
     dashItem.addEventListener('click', () => {
@@ -856,8 +956,15 @@ export const DockManager = {
     spotItem.className = 'dock-item dock-item-spotlight';
     spotItem.setAttribute('aria-label', t('dock.palette', 'Search (Cmd+K)'));
     spotItem.innerHTML = `<span class="dkp-e15">🔍</span>`;
-    spotItem.addEventListener('mouseenter', () => showDockTooltip(spotItem, 'spotlight', t('dock.palette', 'Search (Cmd+K)'), '', false));
-    spotItem.addEventListener('focus', () => keyboardFocused(spotItem) && showDockTooltip(spotItem, 'spotlight', t('dock.palette', 'Search (Cmd+K)'), '', false));
+    spotItem.addEventListener('mouseenter', () =>
+      showDockTooltip(spotItem, 'spotlight', t('dock.palette', 'Search (Cmd+K)'), '', false)
+    );
+    spotItem.addEventListener(
+      'focus',
+      () =>
+        keyboardFocused(spotItem) &&
+        showDockTooltip(spotItem, 'spotlight', t('dock.palette', 'Search (Cmd+K)'), '', false)
+    );
     spotItem.addEventListener('mouseleave', hideDockTooltip);
     spotItem.addEventListener('blur', hideDockTooltip);
     spotItem.addEventListener('click', () => {
@@ -868,7 +975,8 @@ export const DockManager = {
 
     // Dynamic apps (pinned + running)
     const pinned = this.getPinnedApps();
-    const isFmAppId = (wId) => wId === 'fm' || (typeof wId === 'string' && (wId.startsWith('fm-') || wId.startsWith('file-manager-window')));
+    const isFmAppId = (wId) =>
+      wId === 'fm' || (typeof wId === 'string' && (wId.startsWith('fm-') || wId.startsWith('file-manager-window')));
 
     // Collect all open FM windows
     const fmWindows = Object.entries(this.windows)
@@ -878,7 +986,9 @@ export const DockManager = {
 
     const runningIds = Object.keys(this.windows).filter((id) => !this.windows[id].closed);
     // a pinned advanced app stays out of the dock while Advanced is off, unless it is open (UX-23)
-    const displayedIds = pinned.filter((id) => advancedOn() || !ADVANCED_DOCK_APPS.includes(id) || runningIds.includes(id));
+    const displayedIds = pinned.filter(
+      (id) => advancedOn() || !ADVANCED_DOCK_APPS.includes(id) || runningIds.includes(id)
+    );
 
     // If any FM window is running and 'fm' isn't already in displayedIds, add 'fm'
     if (fmRunning && !displayedIds.includes('fm')) {
@@ -897,12 +1007,16 @@ export const DockManager = {
       if (id === 'fm') {
         const isRunning = fmRunning;
         const isPinned = this.isPinned('fm');
-        const win = this.windows['fm'] || (KNOWN_APPS.fm ? {
-          icon: KNOWN_APPS.fm.icon,
-          title: KNOWN_APPS.fm.getTitle(),
-          minimized: !isRunning,
-          closed: !isRunning,
-        } : null);
+        const win =
+          this.windows['fm'] ||
+          (KNOWN_APPS.fm
+            ? {
+                icon: KNOWN_APPS.fm.icon,
+                title: KNOWN_APPS.fm.getTitle(),
+                minimized: !isRunning,
+                closed: !isRunning,
+              }
+            : null);
         if (!win) return;
 
         const item = document.createElement('button');
@@ -923,8 +1037,29 @@ export const DockManager = {
         item.innerHTML = innerContent;
 
         item.addEventListener('mousedown', (e) => e.stopPropagation());
-        item.addEventListener('mouseenter', () => showDockTooltip(item, 'fm', win.title, win.icon, !isRunning || fmWindows.every((w) => w.minimized), !isRunning));
-        item.addEventListener('focus', () => keyboardFocused(item) && showDockTooltip(item, 'fm', win.title, win.icon, !isRunning || fmWindows.every((w) => w.minimized), !isRunning));
+        item.addEventListener('mouseenter', () =>
+          showDockTooltip(
+            item,
+            'fm',
+            win.title,
+            win.icon,
+            !isRunning || fmWindows.every((w) => w.minimized),
+            !isRunning
+          )
+        );
+        item.addEventListener(
+          'focus',
+          () =>
+            keyboardFocused(item) &&
+            showDockTooltip(
+              item,
+              'fm',
+              win.title,
+              win.icon,
+              !isRunning || fmWindows.every((w) => w.minimized),
+              !isRunning
+            )
+        );
         item.addEventListener('mouseleave', hideDockTooltip);
         item.addEventListener('blur', hideDockTooltip);
 
@@ -954,12 +1089,16 @@ export const DockManager = {
 
       const isRunning = !!(this.windows[id] && !this.windows[id].closed);
       const isPinned = this.isPinned(id);
-      const win = this.windows[id] || (KNOWN_APPS[id] ? {
-        icon: KNOWN_APPS[id].icon,
-        title: KNOWN_APPS[id].getTitle(),
-        minimized: true,
-        closed: true,
-      } : null);
+      const win =
+        this.windows[id] ||
+        (KNOWN_APPS[id]
+          ? {
+              icon: KNOWN_APPS[id].icon,
+              title: KNOWN_APPS[id].getTitle(),
+              minimized: true,
+              closed: true,
+            }
+          : null);
 
       if (!win) return;
 
@@ -975,8 +1114,13 @@ export const DockManager = {
       item.innerHTML = `<svg><use href="${win.icon}"/></svg>`;
 
       item.addEventListener('mousedown', (e) => e.stopPropagation());
-      item.addEventListener('mouseenter', () => showDockTooltip(item, id, win.title, win.icon, win.minimized, !isRunning));
-      item.addEventListener('focus', () => keyboardFocused(item) && showDockTooltip(item, id, win.title, win.icon, win.minimized, !isRunning));
+      item.addEventListener('mouseenter', () =>
+        showDockTooltip(item, id, win.title, win.icon, win.minimized, !isRunning)
+      );
+      item.addEventListener(
+        'focus',
+        () => keyboardFocused(item) && showDockTooltip(item, id, win.title, win.icon, win.minimized, !isRunning)
+      );
       item.addEventListener('mouseleave', hideDockTooltip);
       item.addEventListener('blur', hideDockTooltip);
       item.addEventListener('click', () => {
@@ -1005,8 +1149,15 @@ export const DockManager = {
     notifItem.className = 'dock-item dock-notif-btn';
     notifItem.setAttribute('aria-label', t('dock.notifications', 'Notification Center'));
     notifItem.innerHTML = `<svg><use href="#i-bell"/></svg><span class="dock-badge" id="dock-notif-badge" aria-hidden="true">0</span>`;
-    notifItem.addEventListener('mouseenter', () => showDockTooltip(notifItem, 'notif', t('dock.notifications', 'Notification Center'), '#i-bell', false));
-    notifItem.addEventListener('focus', () => keyboardFocused(notifItem) && showDockTooltip(notifItem, 'notif', t('dock.notifications', 'Notification Center'), '#i-bell', false));
+    notifItem.addEventListener('mouseenter', () =>
+      showDockTooltip(notifItem, 'notif', t('dock.notifications', 'Notification Center'), '#i-bell', false)
+    );
+    notifItem.addEventListener(
+      'focus',
+      () =>
+        keyboardFocused(notifItem) &&
+        showDockTooltip(notifItem, 'notif', t('dock.notifications', 'Notification Center'), '#i-bell', false)
+    );
     notifItem.addEventListener('mouseleave', hideDockTooltip);
     notifItem.addEventListener('blur', hideDockTooltip);
     notifItem.addEventListener('click', () => {
@@ -1030,6 +1181,5 @@ export const DockManager = {
         item.style.setProperty('--dock-item-scale', '1');
       });
     }
-
-  }
+  },
 };

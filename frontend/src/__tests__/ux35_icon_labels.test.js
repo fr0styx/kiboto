@@ -1,7 +1,12 @@
 /** UX-35: icons stay out of the translated words; buttons and titles carry them in an aria-hidden span. */
 import { describe, it, expect, vi, afterEach } from 'vitest';
 
-vi.mock('../toast.js', () => ({ showToast: vi.fn(), showConfirmToast: vi.fn(), showPromptToast: vi.fn(), showBottomSheet: vi.fn() }));
+vi.mock('../toast.js', () => ({
+  showToast: vi.fn(),
+  showConfirmToast: vi.fn(),
+  showPromptToast: vi.fn(),
+  showBottomSheet: vi.fn(),
+}));
 
 const { api } = await import('../api.js');
 const { showToast } = await import('../toast.js');
@@ -22,13 +27,21 @@ describe('icons apart from the words', () => {
     const { renderLdapPanel } = await import('../components/sso.js');
     await renderPushCard().catch(() => {});
     await renderLdapPanel().catch(() => {});
-    expect(iconAndWords(document.querySelector('#push-device-card .kb-title'))).toEqual(['📱', '📱 Notifications on this device']);
-    expect(iconAndWords(document.querySelector('#sec-ldap-card .kb-title'))).toEqual(['🏢', '🏢 LDAP / Active Directory']);
+    expect(iconAndWords(document.querySelector('#push-device-card .kb-title'))).toEqual([
+      '📱',
+      '📱 Notifications on this device',
+    ]);
+    expect(iconAndWords(document.querySelector('#sec-ldap-card .kb-title'))).toEqual([
+      '🏢',
+      '🏢 LDAP / Active Directory',
+    ]);
   });
 
   it('a failed backup job', async () => {
     document.body.innerHTML = '<div id="backup-jobs-mount"></div>';
-    vi.spyOn(api, 'get').mockResolvedValue({ jobs: [{ id: 'j1', name: 'photos', last_status: 'error', last_error: 'disk full', schedule: 'daily' }] });
+    vi.spyOn(api, 'get').mockResolvedValue({
+      jobs: [{ id: 'j1', name: 'photos', last_status: 'error', last_error: 'disk full', schedule: 'daily' }],
+    });
     const { fetchAndRenderBackupJobs } = await import('../components/management/backup.js');
     await fetchAndRenderBackupJobs();
     expect(iconAndWords(document.querySelector('.kb-state--crit'))).toEqual(['⚠', '⚠ Failed']);
@@ -58,14 +71,35 @@ describe('icons apart from the words', () => {
     cm.initContainerModal();
     const details = {
       cid: 'c1',
-      overview: { id: 'c1', full_id: 'c1full', name: 'pihole', image: 'pihole/pihole:2026.10', state: 'running', running: true, network_mode: 'bridge', restart_policy: 'always' },
-      resources: {}, ports: [], mounts: [], env: [],
+      overview: {
+        id: 'c1',
+        full_id: 'c1full',
+        name: 'pihole',
+        image: 'pihole/pihole:2026.10',
+        state: 'running',
+        running: true,
+        network_mode: 'bridge',
+        restart_policy: 'always',
+      },
+      resources: {},
+      ports: [],
+      mounts: [],
+      env: [],
     };
     vi.spyOn(api, 'get').mockImplementation(async (url) =>
-      url.includes('/details') ? details : url.includes('/compose') ? { source: 'disk', compose_yaml: 'services: {disk: 1}', masked_yaml: 'services: {rebuilt: 1}' } : {},
+      url.includes('/details')
+        ? details
+        : url.includes('/compose')
+          ? { source: 'disk', compose_yaml: 'services: {disk: 1}', masked_yaml: 'services: {rebuilt: 1}' }
+          : {}
     );
     let done;
-    vi.spyOn(api, 'post').mockImplementation(() => new Promise((r) => { done = r; }));
+    vi.spyOn(api, 'post').mockImplementation(
+      () =>
+        new Promise((r) => {
+          done = r;
+        })
+    );
     await cm.openContainerInspector('c1', 'pihole');
     const btn = document.getElementById('ci-btn-backup-action');
     btn.click();
@@ -79,7 +113,9 @@ describe('icons apart from the words', () => {
     if (mask) {
       mask.checked = false;
       mask.dispatchEvent(new Event('change'));
-      await vi.waitFor(() => expect(iconAndWords(document.getElementById('ci-compose-source-badge'))).toEqual(['📄', '📄 Read from Disk']));
+      await vi.waitFor(() =>
+        expect(iconAndWords(document.getElementById('ci-compose-source-badge'))).toEqual(['📄', '📄 Read from Disk'])
+      );
     }
   });
 });

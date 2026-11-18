@@ -3,13 +3,19 @@ import { prefersReducedMotion, onReducedMotionChange } from '../motion.js';
 
 function fakeMedia(matches) {
   const listeners = [];
-  window.matchMedia = vi.fn(() => ({ matches, addEventListener: (_, f) => listeners.push(f), removeEventListener: vi.fn() }));
+  window.matchMedia = vi.fn(() => ({
+    matches,
+    addEventListener: (_, f) => listeners.push(f),
+    removeEventListener: vi.fn(),
+  }));
   return listeners;
 }
 
 describe('reduced motion in JS (UX-19)', () => {
   const original = window.matchMedia;
-  afterEach(() => { window.matchMedia = original; });
+  afterEach(() => {
+    window.matchMedia = original;
+  });
 
   it('reads the setting and follows changes', () => {
     const listeners = fakeMedia(true);
@@ -19,7 +25,9 @@ describe('reduced motion in JS (UX-19)', () => {
     listeners[0]({ matches: false });
     expect(cb).toHaveBeenCalledWith(false);
     stop();
-    window.matchMedia = () => { throw new Error('old browser'); };
+    window.matchMedia = () => {
+      throw new Error('old browser');
+    };
     expect(prefersReducedMotion()).toBe(false);
     window.matchMedia = undefined;
     expect(onReducedMotionChange(cb)()).toBeUndefined();
@@ -27,7 +35,8 @@ describe('reduced motion in JS (UX-19)', () => {
 
   it('the screensaver shows the still clock instead of moving pictures', async () => {
     fakeMedia(true);
-    document.body.innerHTML = '<div id="desktop-screensaver"><canvas id="screensaver-canvas"></canvas><div id="screensaver-clock-display" style="display:none"><span id="screensaver-time"></span><span id="screensaver-date"></span></div></div>';
+    document.body.innerHTML =
+      '<div id="desktop-screensaver"><canvas id="screensaver-canvas"></canvas><div id="screensaver-clock-display" style="display:none"><span id="screensaver-time"></span><span id="screensaver-date"></span></div></div>';
     const ss = await import('../components/screensaver.js');
     ss.applyScreensaverSettings(true, 5, 'starfield', false, false);
     ss.activateScreensaver(true);

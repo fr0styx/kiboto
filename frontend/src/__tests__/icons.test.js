@@ -7,7 +7,9 @@ import EMOJI_ICONS from '../icons/emoji-icons.json';
 const icons = (root) => [...root.querySelectorAll('svg.zi')].map((s) => s.dataset.zi);
 
 describe('Emoji drawn as icons (UX-14)', () => {
-  beforeEach(() => { document.body.innerHTML = ''; });
+  beforeEach(() => {
+    document.body.innerHTML = '';
+  });
   afterEach(() => stopIconizer());
 
   it('replaces mapped emoji with sprite icons and keeps the text', () => {
@@ -44,7 +46,8 @@ describe('Emoji drawn as icons (UX-14)', () => {
   });
 
   it('gives icon-only buttons a name', () => {
-    document.body.innerHTML = '<button id="t" title="Remove share">🗑️</button><button id="c">✕</button><button id="n" aria-label="Mine">🔄</button>';
+    document.body.innerHTML =
+      '<button id="t" title="Remove share">🗑️</button><button id="c">✕</button><button id="n" aria-label="Mine">🔄</button>';
     iconizeTree(document.body);
     expect(document.getElementById('t').getAttribute('aria-label')).toBe('Remove share');
     expect(document.getElementById('c').getAttribute('aria-label')).toBe('Close');
@@ -91,7 +94,9 @@ describe('Emoji drawn as icons (UX-14)', () => {
 });
 
 describe('Icons in flex and grid rows', () => {
-  beforeEach(() => { document.body.innerHTML = ''; });
+  beforeEach(() => {
+    document.body.innerHTML = '';
+  });
 
   it('keeps the icon and its words together where a row could spread them apart', () => {
     document.body.innerHTML =

@@ -9,7 +9,13 @@ vi.mock('../toast.js', () => ({ showToast }));
 const grantShares = vi.fn(() => Promise.resolve(true));
 vi.mock('../components/share-access.js', () => ({
   grantShares,
-  shareChoicesHtml: (shares) => shares.map((s) => `<select data-add-user-share="${s.name}"><option value="none">No access</option><option value="read">Can view</option><option value="write">Can view and change</option></select>`).join(''),
+  shareChoicesHtml: (shares) =>
+    shares
+      .map(
+        (s) =>
+          `<select data-add-user-share="${s.name}"><option value="none">No access</option><option value="read">Can view</option><option value="write">Can view and change</option></select>`
+      )
+      .join(''),
 }));
 vi.mock('../utils.js', async (orig) => ({ ...(await orig()), copyText: vi.fn(() => Promise.resolve()) }));
 
@@ -36,8 +42,22 @@ describe('Add a person in three steps (SET-19)', () => {
     expect(ap.suggestUsername('Zoé Martín')).toBe('zoemartin');
     expect(ap.suggestUsername('7 X')).toBe('');
     expect(ap.suggestUsername('')).toBe('');
-    const like = ap.newState({ role: 'kid', shares: { family: 'read' }, hours: { days: [0] }, quotaGb: 5, how: 'invite', name: 'Mia' });
-    expect(like).toMatchObject({ step: 1, name: '', role: 'kid', shares: { family: 'read' }, quotaGb: 5, how: 'invite' });
+    const like = ap.newState({
+      role: 'kid',
+      shares: { family: 'read' },
+      hours: { days: [0] },
+      quotaGb: 5,
+      how: 'invite',
+      name: 'Mia',
+    });
+    expect(like).toMatchObject({
+      step: 1,
+      name: '',
+      role: 'kid',
+      shares: { family: 'read' },
+      quotaGb: 5,
+      how: 'invite',
+    });
     expect(ap.canInvite('superadmin')).toBe(false);
     expect(ap.canLimit('kid')).toBe(true);
     expect(ap.inviteMessage('Mia', 'https://x/#/invite/t')).toContain('https://x/#/invite/t');
@@ -62,13 +82,23 @@ describe('Add a person in three steps (SET-19)', () => {
     expect(form().textContent).toContain('Step 3 of 3: How they get in');
     expect(/** @type {HTMLInputElement} */ (form().querySelector('[data-ap-username]')).value).toBe('miaolz');
     await submit(); // no password
-    expect(showToast).toHaveBeenLastCalledWith('Choose a sign-in name and a password of 8 characters or more.', 'error');
+    expect(showToast).toHaveBeenLastCalledWith(
+      'Choose a sign-in name and a password of 8 characters or more.',
+      'error'
+    );
     set('[data-ap-password]', 'First-Pass-123');
     apiFetch.mockResolvedValueOnce({ ok: true, json: async () => ({ user: { id: 'u9' } }) });
     await submit();
     await vi.waitFor(() => expect(onDone).toHaveBeenCalled());
     const body = JSON.parse(apiFetch.mock.calls[0][1].body);
-    expect(body).toEqual({ username: 'miaolz', display_name: 'Mia Ölz', password: 'First-Pass-123', role_id: 'kid', storage_quota_bytes: 20 * 1024 ** 3, must_change_password: true });
+    expect(body).toEqual({
+      username: 'miaolz',
+      display_name: 'Mia Ölz',
+      password: 'First-Pass-123',
+      role_id: 'kid',
+      storage_quota_bytes: 20 * 1024 ** 3,
+      must_change_password: true,
+    });
     expect(grantShares).toHaveBeenCalledWith('miaolz', { family: 'write' });
     expect(form().textContent).toContain('Mia Ölz was added.');
     /** @type {HTMLElement} */ (form().querySelector('[data-ap-again]')).click();
@@ -94,7 +124,18 @@ describe('Add a person in three steps (SET-19)', () => {
     set('[data-ap-days]', '3');
     await submit();
     await vi.waitFor(() => expect(post).toHaveBeenCalled());
-    expect(post.mock.calls[0]).toEqual(['/api/invites', { role_id: 'guest', note: 'Grandma', days: 3, quota_gb: 0, max_uses: 1, shares: { media: 'read' }, signin_hours: null }]);
+    expect(post.mock.calls[0]).toEqual([
+      '/api/invites',
+      {
+        role_id: 'guest',
+        note: 'Grandma',
+        days: 3,
+        quota_gb: 0,
+        max_uses: 1,
+        shares: { media: 'read' },
+        signin_hours: null,
+      },
+    ]);
     expect(form().querySelector('.ap-link')?.textContent).toContain('#/invite/tok123');
     /** @type {HTMLElement} */ (form().querySelector('[data-ap-copy="message"]')).click();
     await vi.waitFor(() => expect(showToast).toHaveBeenCalledWith('Copied.', 'info'));
@@ -114,7 +155,11 @@ describe('Add a person in three steps (SET-19)', () => {
     await submit();
     await submit();
     set('[data-ap-password]', 'First-Pass-123');
-    apiFetch.mockResolvedValueOnce({ ok: false, status: 409, json: async () => ({ detail: "User 'sam' already exists." }) });
+    apiFetch.mockResolvedValueOnce({
+      ok: false,
+      status: 409,
+      json: async () => ({ detail: "User 'sam' already exists." }),
+    });
     await submit();
     await vi.waitFor(() => expect(showToast).toHaveBeenCalledWith("User 'sam' already exists.", 'error'));
   });

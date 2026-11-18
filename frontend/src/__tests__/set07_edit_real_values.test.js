@@ -4,7 +4,10 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 const src = readFileSync(resolve(__dirname, '..', 'components/container-modal.js'), 'utf8');
-const edit = src.slice(src.indexOf('async function renderContainerEditTab(cid) {'), src.indexOf('const portsList = (details.ports || [])'));
+const edit = src.slice(
+  src.indexOf('async function renderContainerEditTab(cid) {'),
+  src.indexOf('const portsList = (details.ports || [])')
+);
 
 describe('the Edit tab of an app (SET-07)', () => {
   it('asks for the real values every time, and never reuses the Overview’s hidden ones', () => {

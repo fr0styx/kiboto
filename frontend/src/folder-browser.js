@@ -7,80 +7,80 @@ import { trapFocus } from './utils.js';
 
 import { t } from './i18n.js';
 window.addEventListener('DOMContentLoaded', () => {
-    const $ = (id) => document.getElementById(id);
+  const $ = (id) => document.getElementById(id);
   // Folder Browser Modal Logic
-  const btnBrowseDst = $("btn-browse-dst");
-  const btnCopyDst = $("btn-copy-dst");
-  const fbModal = $("folder-browser-modal");
-  const fbCurrentPath = $("fb-current-path");
-  const fbList = $("fb-list");
-  const fbCancel = $("fb-cancel");
-  const fbClose = $("fb-close");
-  const fbSelect = $("fb-select");
-  const fbCreateFolderBtn = $("fb-create-folder");
-  const fbNewFolderName = $("fb-new-folder-name");
+  const btnBrowseDst = $('btn-browse-dst');
+  const btnCopyDst = $('btn-copy-dst');
+  const fbModal = $('folder-browser-modal');
+  const fbCurrentPath = $('fb-current-path');
+  const fbList = $('fb-list');
+  const fbCancel = $('fb-cancel');
+  const fbClose = $('fb-close');
+  const fbSelect = $('fb-select');
+  const fbCreateFolderBtn = $('fb-create-folder');
+  const fbNewFolderName = $('fb-new-folder-name');
 
-  let currentBrowsePath = "/mnt/user/";
+  let currentBrowsePath = '/mnt/user/';
   let currentBrowseDirs = [];
-  let browseRoots = ["/mnt/user"];
+  let browseRoots = ['/mnt/user'];
 
   // Only paths inside an allowed root (enforced server-side) are navigable.
   const isWithinRoots = (p) => {
-    const norm = p.replace(/\/+$/, "") || "/";
-    return browseRoots.some(r => {
-      const root = r.replace(/\/+$/, "") || "/";
-      return norm === root || norm.startsWith(root + "/");
+    const norm = p.replace(/\/+$/, '') || '/';
+    return browseRoots.some((r) => {
+      const root = r.replace(/\/+$/, '') || '/';
+      return norm === root || norm.startsWith(root + '/');
     });
   };
   let fbSortReverse = false;
 
-  const fbSearchBar = $("fb-search-bar");
-  const fbSortBtn = $("fb-sort-btn");
+  const fbSearchBar = $('fb-search-bar');
+  const fbSortBtn = $('fb-sort-btn');
 
-  if (fbSearchBar) fbSearchBar.addEventListener("input", renderBrowseList);
+  if (fbSearchBar) fbSearchBar.addEventListener('input', renderBrowseList);
   if (fbSortBtn) {
-    fbSortBtn.addEventListener("click", () => {
+    fbSortBtn.addEventListener('click', () => {
       fbSortReverse = !fbSortReverse;
-      fbSortBtn.textContent = fbSortReverse ? "Z-A" : "A-Z";
+      fbSortBtn.textContent = fbSortReverse ? 'Z-A' : 'A-Z';
       renderBrowseList();
     });
   }
 
   function renderBrowseBreadcrumbs(fullPath) {
     if (!fbCurrentPath) return;
-    fbCurrentPath.innerHTML = "";
-    const parts = fullPath.split("/").filter(p => p.length > 0);
-    let builtPath = "/";
-    
-    const rootLink = document.createElement("span");
-    rootLink.textContent = "/";
-    rootLink.style.padding = "2px 4px";
-    rootLink.style.borderRadius = "4px";
-    rootLink.style.color = "var(--muted)";
+    fbCurrentPath.innerHTML = '';
+    const parts = fullPath.split('/').filter((p) => p.length > 0);
+    let builtPath = '/';
+
+    const rootLink = document.createElement('span');
+    rootLink.textContent = '/';
+    rootLink.style.padding = '2px 4px';
+    rootLink.style.borderRadius = '4px';
+    rootLink.style.color = 'var(--muted)';
     fbCurrentPath.appendChild(rootLink);
 
     parts.forEach((part, i) => {
-      builtPath += part + "/";
+      builtPath += part + '/';
       const p = builtPath;
-      const span = document.createElement("span");
+      const span = document.createElement('span');
       span.textContent = part;
-      span.style.padding = "2px 4px";
-      span.style.borderRadius = "4px";
+      span.style.padding = '2px 4px';
+      span.style.borderRadius = '4px';
       if (isWithinRoots(p)) {
-        span.style.cursor = "pointer";
-        span.onmouseover = () => span.style.background = "rgba(255,255,255,0.1)";
-        span.onmouseout = () => span.style.background = "transparent";
+        span.style.cursor = 'pointer';
+        span.onmouseover = () => (span.style.background = 'rgba(255,255,255,0.1)');
+        span.onmouseout = () => (span.style.background = 'transparent');
         span.onclick = () => loadBrowsePath(p);
       } else {
-        span.style.color = "var(--muted)";
+        span.style.color = 'var(--muted)';
       }
-      
+
       fbCurrentPath.appendChild(span);
-      
+
       if (i < parts.length - 1) {
-        const sep = document.createElement("span");
-        sep.textContent = "/";
-        sep.style.color = "var(--muted)";
+        const sep = document.createElement('span');
+        sep.textContent = '/';
+        sep.style.color = 'var(--muted)';
         fbCurrentPath.appendChild(sep);
       }
     });
@@ -88,56 +88,56 @@ window.addEventListener('DOMContentLoaded', () => {
 
   function renderBrowseList() {
     if (!fbList) return;
-    fbList.innerHTML = "";
-    const filterText = (fbSearchBar ? fbSearchBar.value.toLowerCase() : "");
-    let upDir = currentBrowseDirs.find(d => d.name === "..");
-    let otherDirs = currentBrowseDirs.filter(d => d.name !== "..");
-    
+    fbList.innerHTML = '';
+    const filterText = fbSearchBar ? fbSearchBar.value.toLowerCase() : '';
+    let upDir = currentBrowseDirs.find((d) => d.name === '..');
+    let otherDirs = currentBrowseDirs.filter((d) => d.name !== '..');
+
     if (filterText) {
-      otherDirs = otherDirs.filter(d => d.name.toLowerCase().includes(filterText));
+      otherDirs = otherDirs.filter((d) => d.name.toLowerCase().includes(filterText));
     }
     if (fbSortReverse) {
       otherDirs.reverse();
     }
-    
+
     let displayDirs = [];
     if (upDir && !filterText) displayDirs.push(upDir);
     displayDirs = displayDirs.concat(otherDirs);
 
     if (displayDirs.length === 0) {
-      const none = document.createElement("div");
-      none.style.cssText = "padding: 10px 14px; color: var(--muted); font-size: var(--kb-fs-xs);";
-      none.textContent = t("modal.fb_none", "No folders found.");
+      const none = document.createElement('div');
+      none.style.cssText = 'padding: 10px 14px; color: var(--muted); font-size: var(--kb-fs-xs);';
+      none.textContent = t('modal.fb_none', 'No folders found.');
       fbList.appendChild(none);
       return;
     }
 
-    displayDirs.forEach(d => {
-      const div = document.createElement("div");
-      div.style.padding = "10px 14px";
-      div.style.borderBottom = "1px solid rgba(255,255,255,0.05)";
-      div.style.cursor = "pointer";
-      div.style.display = "flex";
-      div.style.alignItems = "center";
-      div.style.gap = "10px";
-      div.onmouseover = () => div.style.background = "rgba(255,255,255,0.03)";
-      div.onmouseout = () => div.style.background = "transparent";
-      
-      const icon = document.createElement("span");
-      icon.textContent = d.name === ".." ? "⤴️" : "📁";
-      icon.style.fontSize = "14px";
-      icon.style.opacity = d.name === ".." ? "0.6" : "1";
-      
-      const text = document.createElement("span");
+    displayDirs.forEach((d) => {
+      const div = document.createElement('div');
+      div.style.padding = '10px 14px';
+      div.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+      div.style.cursor = 'pointer';
+      div.style.display = 'flex';
+      div.style.alignItems = 'center';
+      div.style.gap = '10px';
+      div.onmouseover = () => (div.style.background = 'rgba(255,255,255,0.03)');
+      div.onmouseout = () => (div.style.background = 'transparent');
+
+      const icon = document.createElement('span');
+      icon.textContent = d.name === '..' ? '⤴️' : '📁';
+      icon.style.fontSize = '14px';
+      icon.style.opacity = d.name === '..' ? '0.6' : '1';
+
+      const text = document.createElement('span');
       text.textContent = d.name;
-      text.style.fontSize = "var(--kb-fs-xs)";
-      text.style.color = d.name === ".." ? "var(--muted)" : "#fff";
-      
+      text.style.fontSize = 'var(--kb-fs-xs)';
+      text.style.color = d.name === '..' ? 'var(--muted)' : '#fff';
+
       div.appendChild(icon);
       div.appendChild(text);
-      
-      div.addEventListener("click", () => {
-        if (fbSearchBar) fbSearchBar.value = "";
+
+      div.addEventListener('click', () => {
+        if (fbSearchBar) fbSearchBar.value = '';
         loadBrowsePath(d.path);
       });
       fbList.appendChild(div);
@@ -146,7 +146,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   async function loadBrowsePath(targetPath, isFallback = false) {
     try {
-      const res = await api.request(`/api/browse?path=${encodeURIComponent(targetPath || "")}`);
+      const res = await api.request(`/api/browse?path=${encodeURIComponent(targetPath || '')}`);
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data.roots) && data.roots.length) browseRoots = data.roots;
@@ -156,13 +156,17 @@ window.addEventListener('DOMContentLoaded', () => {
         renderBrowseList();
       } else if (!isFallback) {
         // Path missing or outside the allowed folders: fall back to the default root.
-        loadBrowsePath("", true);
+        loadBrowsePath('', true);
       } else {
         const err = await res.json().catch(() => ({}));
-        showToast(t("toast.failed_to_load_folder", "Failed to load folder: {error}", { error: err.detail || res.status }), "error");
+        showToast(
+          t('toast.failed_to_load_folder', 'Failed to load folder: {error}', { error: err.detail || res.status }),
+          'error'
+        );
       }
     } catch (e) {
-      if (typeof showToast === "function") showToast(t("toast.failed_to_load_folder", "Failed to load folder: {error}", { error: String(e) }), "error");
+      if (typeof showToast === 'function')
+        showToast(t('toast.failed_to_load_folder', 'Failed to load folder: {error}', { error: String(e) }), 'error');
       else console.error(e);
     }
   }
@@ -171,21 +175,23 @@ window.addEventListener('DOMContentLoaded', () => {
   let _unbindFbTrap = null;
 
   function openFbModal(initialPath, onSelect = null) {
-    customSelectCallback = typeof onSelect === "function" ? onSelect : null;
-    loadBrowsePath(initialPath || "/mnt/user/");
+    customSelectCallback = typeof onSelect === 'function' ? onSelect : null;
+    loadBrowsePath(initialPath || '/mnt/user/');
     if (fbModal) {
-      fbModal.classList.remove("window-minimized");
-      fbModal.style.removeProperty("display");
-      fbModal.classList.add("open");
-      if (DockManager) DockManager.register("fb", fbModal, "#i-storage", "Folder Browser");
-      const modalWin = fbModal.querySelector(".smart-modal-window") || fbModal;
+      fbModal.classList.remove('window-minimized');
+      fbModal.style.removeProperty('display');
+      fbModal.classList.add('open');
+      if (DockManager) DockManager.register('fb', fbModal, '#i-storage', 'Folder Browser');
+      const modalWin = fbModal.querySelector('.smart-modal-window') || fbModal;
       if (bringToFront) bringToFront(modalWin);
       if (_unbindFbTrap) {
-        try { _unbindFbTrap(); } catch (_) {}
+        try {
+          _unbindFbTrap();
+        } catch (_) {}
         _unbindFbTrap = null;
       }
       _unbindFbTrap = trapFocus(modalWin, closeFbModal);
-      const searchInput = fbModal.querySelector("#fb-search-bar");
+      const searchInput = fbModal.querySelector('#fb-search-bar');
       if (searchInput) setTimeout(() => searchInput.focus(), 60);
     }
   }
@@ -194,58 +200,70 @@ window.addEventListener('DOMContentLoaded', () => {
 
   function closeFbModal() {
     if (_unbindFbTrap) {
-      try { _unbindFbTrap(); } catch (_) {}
+      try {
+        _unbindFbTrap();
+      } catch (_) {}
       _unbindFbTrap = null;
     }
     customSelectCallback = null;
-    if (DockManager) DockManager.unregister("fb");
+    if (DockManager) DockManager.unregister('fb');
     if (fbModal) {
-      fbModal.classList.remove("open");
-      fbModal.classList.add("window-minimized");
-      fbModal.style.setProperty("display", "none", "important");
+      fbModal.classList.remove('open');
+      fbModal.classList.add('window-minimized');
+      fbModal.style.setProperty('display', 'none', 'important');
     }
   }
 
   if (btnBrowseDst) {
     const handleBrowse = (e) => {
       if (e) e.preventDefault();
-      const currentDst = (btnCopyDst && btnCopyDst.value) ? btnCopyDst.value : "/mnt/user/";
-      openFbModal(currentDst || "/mnt/user/", null);
+      const currentDst = btnCopyDst && btnCopyDst.value ? btnCopyDst.value : '/mnt/user/';
+      openFbModal(currentDst || '/mnt/user/', null);
     };
-    btnBrowseDst.addEventListener("click", handleBrowse);
-    btnBrowseDst.addEventListener("touchend", handleBrowse);
+    btnBrowseDst.addEventListener('click', handleBrowse);
+    btnBrowseDst.addEventListener('touchend', handleBrowse);
   }
 
   if (fbCancel) {
-    fbCancel.addEventListener("click", closeFbModal);
-    fbCancel.addEventListener("touchend", (e) => { e.preventDefault(); closeFbModal(); });
+    fbCancel.addEventListener('click', closeFbModal);
+    fbCancel.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      closeFbModal();
+    });
   }
   if (fbClose) {
-    fbClose.addEventListener("click", closeFbModal);
-    fbClose.addEventListener("touchend", (e) => { e.preventDefault(); closeFbModal(); });
+    fbClose.addEventListener('click', closeFbModal);
+    fbClose.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      closeFbModal();
+    });
   }
   if (fbModal) {
-    fbModal.addEventListener("click", (e) => {
+    fbModal.addEventListener('click', (e) => {
       if (e.target === fbModal) closeFbModal();
     });
   }
-  const minBtn = document.getElementById("fb-min");
+  const minBtn = document.getElementById('fb-min');
   if (minBtn) {
     const handleMin = (e) => {
-      if (e && e.type === "touchend") e.preventDefault();
-      if (DockManager) DockManager.minimize("fb");
+      if (e && e.type === 'touchend') e.preventDefault();
+      if (DockManager) DockManager.minimize('fb');
     };
-    minBtn.addEventListener("click", handleMin);
-    minBtn.addEventListener("touchend", handleMin);
+    minBtn.addEventListener('click', handleMin);
+    minBtn.addEventListener('touchend', handleMin);
   }
 
   if (fbSelect) {
-    fbSelect.addEventListener("click", () => {
+    fbSelect.addEventListener('click', () => {
       const cb = customSelectCallback;
       const selected = currentBrowsePath;
       if (cb) {
         closeFbModal();
-        try { cb(selected); } catch (err) { console.error(err); }
+        try {
+          cb(selected);
+        } catch (err) {
+          console.error(err);
+        }
         ZettEventBus.dispatchEvent(new CustomEvent('folder_selected', { detail: selected }));
         return;
       }
@@ -254,48 +272,48 @@ window.addEventListener('DOMContentLoaded', () => {
       }
       closeFbModal();
       ZettEventBus.dispatchEvent(new CustomEvent('folder_selected', { detail: selected }));
-      
     });
   }
 
   if (fbCreateFolderBtn && fbNewFolderName) {
-    fbCreateFolderBtn.addEventListener("click", async () => {
+    fbCreateFolderBtn.addEventListener('click', async () => {
       const folderName = fbNewFolderName.value.trim();
       if (!folderName) return;
-      if (folderName.includes("/") || folderName.includes("..")) return;
-      
-      const newPath = currentBrowsePath + (currentBrowsePath.endsWith("/") ? "" : "/") + folderName;
+      if (folderName.includes('/') || folderName.includes('..')) return;
+
+      const newPath = currentBrowsePath + (currentBrowsePath.endsWith('/') ? '' : '/') + folderName;
       try {
-        fbCreateFolderBtn.textContent = "...";
-        const res = await api.request("/api/mkdir", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: { path: newPath }
+        fbCreateFolderBtn.textContent = '...';
+        const res = await api.request('/api/mkdir', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: { path: newPath },
         });
         if (res.ok) {
-          fbNewFolderName.value = "";
+          fbNewFolderName.value = '';
           fbNewFolderName.placeholder = t('modal.fb_new_folder', 'New folder name...');
           loadBrowsePath(currentBrowsePath); // Reload current path to show the new folder in the list
         } else {
           const errData = await res.json().catch(() => ({}));
-          fbNewFolderName.value = "";
-          fbNewFolderName.placeholder = t("modal.fb_create_failed", "Could not create the folder: {error}", { error: errData.detail || errData.error || res.status });
+          fbNewFolderName.value = '';
+          fbNewFolderName.placeholder = t('modal.fb_create_failed', 'Could not create the folder: {error}', {
+            error: errData.detail || errData.error || res.status,
+          });
         }
-      } catch(e) {
-        fbNewFolderName.value = "";
+      } catch (e) {
+        fbNewFolderName.value = '';
         fbNewFolderName.placeholder = t('ui.network_error', 'Network Error');
       } finally {
         fbCreateFolderBtn.textContent = t('modal.fb_create', '+ Create');
       }
     });
-    
+
     // allow enter key
-    fbNewFolderName.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
+    fbNewFolderName.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
         e.preventDefault();
         fbCreateFolderBtn.click();
       }
     });
   }
-
 });

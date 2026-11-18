@@ -11,8 +11,13 @@ import { showToast } from '../../toast.js';
 export function haStatus(cfg) {
   const st = cfg?.status || {};
   if (!cfg?.enabled) return t('ha.off', 'Off. Set the broker Home Assistant uses, then turn it on.');
-  if (st.last_ok === false) return t('ha.failed', "The last send didn't reach the broker: {error}", { error: st.last_error || '' });
-  if (st.last_ok) return t('ha.ok', '{count, plural, one {# sensor sent} other {# sensors sent}}, last at {when}.', { count: st.sensors || 0, when: formatDateTime((st.last_at || 0) * 1000) });
+  if (st.last_ok === false)
+    return t('ha.failed', "The last send didn't reach the broker: {error}", { error: st.last_error || '' });
+  if (st.last_ok)
+    return t('ha.ok', '{count, plural, one {# sensor sent} other {# sensors sent}}, last at {when}.', {
+      count: st.sensors || 0,
+      when: formatDateTime((st.last_at || 0) * 1000),
+    });
   return t('ha.waiting', 'On: the first send comes within a minute.');
 }
 
@@ -97,7 +102,12 @@ export async function loadHomeAssistantCard() {
       if (form && !(await put(haFormValues(form)))) return;
       try {
         const res = await api.post('/api/integrations/home-assistant/test', {});
-        showToast(t('ha.test_ok', '{count, plural, one {# sensor sent} other {# sensors sent}} to Home Assistant.', { count: res?.sensors || 0 }), 'success');
+        showToast(
+          t('ha.test_ok', '{count, plural, one {# sensor sent} other {# sensors sent}} to Home Assistant.', {
+            count: res?.sensors || 0,
+          }),
+          'success'
+        );
       } catch (err) {
         showToast(/** @type {Error} */ (err).message, 'error');
       }

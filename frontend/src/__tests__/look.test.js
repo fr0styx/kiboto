@@ -3,13 +3,29 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 vi.mock('../api.js', () => ({ api: { put: vi.fn(() => Promise.resolve({ ok: true })) } }));
 import { api } from '../api.js';
 import {
-  DEFAULT_LOOK, applyLook, clearLook, fromLegacy, hasOwnLook, loadLook, lookColour, lookFromAccount,
-  normalizeLook, saveLookToAccount, storeLook, tintFactor, _resetForTests,
+  DEFAULT_LOOK,
+  applyLook,
+  clearLook,
+  fromLegacy,
+  hasOwnLook,
+  loadLook,
+  lookColour,
+  lookFromAccount,
+  normalizeLook,
+  saveLookToAccount,
+  storeLook,
+  tintFactor,
+  _resetForTests,
 } from '../look.js';
 
 function memoryStorage(init = {}) {
   const m = new Map(Object.entries(init));
-  return { getItem: (k) => (m.has(k) ? m.get(k) : null), setItem: (k, v) => m.set(k, String(v)), removeItem: (k) => m.delete(k), _m: m };
+  return {
+    getItem: (k) => (m.has(k) ? m.get(k) : null),
+    setItem: (k, v) => m.set(k, String(v)),
+    removeItem: (k) => m.delete(k),
+    _m: m,
+  };
 }
 
 beforeEach(() => {
@@ -22,10 +38,20 @@ afterEach(() => vi.useRealTimers());
 
 describe('the look (APP-B)', () => {
   it('keeps valid fields and replaces the rest with the default', () => {
-    expect(normalizeLook({ mode: 'auto', theme: 'moss', tint: 0.333, trueBlack: true, accent: '#AABBCC' }))
-      .toEqual({ mode: 'auto', theme: 'moss', tint: 0.33, trueBlack: true, accent: '#aabbcc' });
-    expect(normalizeLook({ mode: 'sepia', theme: 'sapphire', tint: 7, trueBlack: 'yes', accent: 'red' }))
-      .toEqual({ mode: 'dark', theme: 'lagoon', tint: 1, trueBlack: false, accent: '' });
+    expect(normalizeLook({ mode: 'auto', theme: 'moss', tint: 0.333, trueBlack: true, accent: '#AABBCC' })).toEqual({
+      mode: 'auto',
+      theme: 'moss',
+      tint: 0.33,
+      trueBlack: true,
+      accent: '#aabbcc',
+    });
+    expect(normalizeLook({ mode: 'sepia', theme: 'sapphire', tint: 7, trueBlack: 'yes', accent: 'red' })).toEqual({
+      mode: 'dark',
+      theme: 'lagoon',
+      tint: 1,
+      trueBlack: false,
+      accent: '',
+    });
     expect(normalizeLook(null)).toEqual({ ...DEFAULT_LOOK });
   });
 
@@ -45,7 +71,10 @@ describe('the look (APP-B)', () => {
   });
 
   it('reads the saved look, else the old theme and accent, without writing the old keys', () => {
-    expect(loadLook(memoryStorage({ kiboto_look: JSON.stringify({ theme: 'heather', mode: 'auto' }) }))).toMatchObject({ theme: 'heather', mode: 'auto' });
+    expect(loadLook(memoryStorage({ kiboto_look: JSON.stringify({ theme: 'heather', mode: 'auto' }) }))).toMatchObject({
+      theme: 'heather',
+      mode: 'auto',
+    });
     const old = memoryStorage({ desktop_theme: 'amethyst', desktop_custom_accent: '#123456' });
     expect(loadLook(old)).toMatchObject({ theme: 'heather', accent: '#123456' });
     expect(hasOwnLook(old)).toBe(false);
@@ -80,7 +109,12 @@ describe('the look (APP-B)', () => {
 
   it('Auto follows the device', () => {
     let listener = null;
-    const mq = { matches: false, addEventListener: (_e, fn) => { listener = fn; } };
+    const mq = {
+      matches: false,
+      addEventListener: (_e, fn) => {
+        listener = fn;
+      },
+    };
     const win = { matchMedia: () => mq };
     expect(applyLook({ mode: 'auto' }, document, win)).toBe('light');
     mq.matches = true;
@@ -107,7 +141,10 @@ describe('the look (APP-B)', () => {
     await done;
     expect(api.put).toHaveBeenCalledTimes(1);
     expect(api.put.mock.calls[0][1].look).toMatchObject({ theme: 'fjord', tint: 0.4 });
-    expect(lookFromAccount({ preferences: { look: { theme: 'moss' } } })).toMatchObject({ theme: 'moss', mode: 'dark' });
+    expect(lookFromAccount({ preferences: { look: { theme: 'moss' } } })).toMatchObject({
+      theme: 'moss',
+      mode: 'dark',
+    });
     expect(lookFromAccount({ preferences: {} })).toBeNull();
     expect(lookFromAccount(null)).toBeNull();
   });

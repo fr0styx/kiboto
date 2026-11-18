@@ -73,12 +73,17 @@ describe('Security Advisor Hardening Checklist - Interactive Configuration Routi
       score: 85,
       grade: 'B',
       checks: [
-        { id: 'default_password', name: 'Default Administrator Password', passed: false, details: 'Default password detected' },
+        {
+          id: 'default_password',
+          name: 'Default Administrator Password',
+          passed: false,
+          details: 'Default password detected',
+        },
         { id: 'admin_mfa', name: 'Administrator Two-Factor Authentication (2FA)', passed: false, details: 'Lacks 2FA' },
         { id: 'https_transport', name: 'HTTPS Transport Encryption', passed: true, details: 'TLS active' },
         { id: 'smb_guest_access', name: 'SMB Network Share Guest Access', passed: true, details: 'No guest access' },
-        { id: 'stale_api_tokens', name: 'API Token Hygiene', passed: true, details: 'Tokens active' }
-      ]
+        { id: 'stale_api_tokens', name: 'API Token Hygiene', passed: true, details: 'Tokens active' },
+      ],
     });
 
     await fetchAndRenderSecurityPosture();
