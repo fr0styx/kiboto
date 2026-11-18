@@ -212,6 +212,7 @@
 #modal-new-cloud-remote .ncr-x { cursor: move; }
 #modal-new-cloud-remote .ncr-x-2 { align-items: center; gap: 8px; }
 #modal-new-cloud-remote .ncr-row { display: flex; gap: 6px; align-items: center; }
+#modal-new-cloud-remote .os-window-controls.ncr-row { gap: 18px; } /* as every window: 24px clear around each dot */
 #modal-new-cloud-remote .ncr-size { width: 100%; }
 #modal-new-cloud-remote .ncr-xs-muted { font-size: var(--kb-fs-xs); color: var(--kb-text-muted); margin-top: 6px; line-height: 1.45; }
 #modal-new-cloud-remote .ncr-xs-muted-2 { font-size: var(--kb-fs-xs); color: var(--kb-text-muted); margin-top: 4px; }

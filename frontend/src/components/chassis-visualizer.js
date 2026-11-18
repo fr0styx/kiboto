@@ -313,7 +313,7 @@ export function renderChassisTwin(container, disks = [], options = {}) {
       const driverStr = d.controller_driver ? ` • ${d.controller_driver}` : '';
 
       baysHtml += `
-        <div class="chassis-bay-slot populated ${thermal.cls}" data-bay="${slotNum}" data-dev="${devName}" role="button" tabindex="0" aria-label="${escapeHtml(t('chassis.bay_aria', 'Bay {n}: {model}, {state}', { n: slotNum, model: modelStr, state: thermal.text }))}">
+        <div class="chassis-bay-slot populated ${thermal.cls}" data-bay="${slotNum}" data-dev="${devName}" role="group" aria-label="${escapeHtml(t('chassis.bay_aria', 'Bay {n}: {model}, {state}', { n: slotNum, model: modelStr, state: thermal.text }))}">
           <div class="bay-header">
             <div class="cv-row">
               <span class="bay-num">${t('chassis.bay_n', 'Bay {n}', { n: slotNum })}</span>
@@ -322,16 +322,16 @@ export function renderChassisTwin(container, disks = [], options = {}) {
             </div>
             <span class="bay-temp-pill" style="color: ${thermal.color}; border-color: ${thermal.color};">${thermal.text}</span>
           </div>
-          <div class="bay-tray-handle">
+          <button type="button" class="bay-tray-handle bay-open-btn" title="${escapeHtml(t('chassis.open_health', 'Open Drive Health for this drive'))}" data-i18n-title="chassis.open_health">
             <div class="bay-led-lens ${isStandby ? 'standby-pulse' : 'online'}"></div>
             <div class="bay-drive-info">
               <span class="bay-drive-model" title="${escapeHtml(d.model || devName)}">${escapeHtml(modelStr)}</span>
               <span class="bay-drive-dev">/dev/${devName} ${sizeStr ? '• ' + sizeStr : ''}</span>
               <span class="bay-sub-badge">${transportStr}${driverStr}</span>
             </div>
-          </div>
+          </button>
           <div class="bay-footer">
-            <button class="bay-locate-btn" data-dev="${devName}" title="${t('ui.locate_drive_blink_bay_led', 'Locate Drive (Blink Bay LED)')}" data-i18n-title="ui.locate_drive_blink_bay_led" aria-label="${t('chassis.locate_bay_aria', 'Locate the drive in bay {n}', { n: slotNum })}">
+            <button class="bay-locate-btn" data-dev="${devName}" title="${t('ui.locate_drive_blink_bay_led', 'Locate Drive (Blink Bay LED)')}" data-i18n-title="ui.locate_drive_blink_bay_led" aria-label="${escapeHtml(`${t('chassis.find_drive', 'Find this drive')} (${t('chassis.bay_n', 'Bay {n}', { n: slotNum })})`)}">
               <svg class="locate-icon" viewBox="0 0 24 24" width="12" height="12"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" fill="currentColor"/></svg>
               <span>${t('chassis.find_drive', 'Find this drive')}</span>
             </button>
@@ -364,7 +364,8 @@ export function renderChassisTwin(container, disks = [], options = {}) {
       const thermal = getThermalLevel(nv.temp, isStandby, true);
       const wear = nv.percentage_used != null ? `${nv.percentage_used}%` : nv.wear != null ? `${nv.wear}%` : '--';
       m2Html += `
-        <div class="m2-slot-card ${thermal.cls}" data-dev="${devName}" role="button" tabindex="0">
+        <div class="m2-slot-card ${thermal.cls}" data-dev="${devName}" role="group" aria-label="${escapeHtml(t('chassis.m2_slot', 'M.2 slot {n}', { n: idx + 1 }))}">
+          <button type="button" class="m2-open-btn bay-open-btn" title="${escapeHtml(t('chassis.open_health', 'Open Drive Health for this drive'))}" data-i18n-title="chassis.open_health">
           <div class="m2-header">
             <span class="m2-name">${t('chassis.m2_slot', 'M.2 slot {n}', { n: idx + 1 })} • /dev/${devName}</span>
             <span class="m2-temp" style="color:${thermal.color};">${thermal.text}</span>
@@ -373,6 +374,7 @@ export function renderChassisTwin(container, disks = [], options = {}) {
             <span class="m2-model">${escapeHtml(nv.model || 'PCIe NVMe SSD')}</span>
             <span class="m2-wear">${t('chassis.endurance_used', 'Endurance used:')} <strong>${wear}</strong></span>
           </div>
+          </button>
           <button class="m2-locate-btn bay-locate-btn" data-dev="${devName}">
             <svg viewBox="0 0 24 24" width="11" height="11"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" fill="currentColor"/></svg>
             <span>${t('chassis.find_drive', 'Find this drive')}</span>
@@ -2560,8 +2562,8 @@ export async function openNewCloudRemoteModal(onSuccess) {
                   .join('');
                 return `
                 <div>
-                  <label class="cv-xs-bold-muted-3">${escapeHtml(f.label.toUpperCase())}</label>
-                  <select name="${escapeHtml(f.name)}" class="tz-select-input cv-size">
+                  <label class="cv-xs-bold-muted-3" for="ncr-f-${escapeHtml(f.name)}">${escapeHtml(f.label.toUpperCase())}</label>
+                  <select name="${escapeHtml(f.name)}" id="ncr-f-${escapeHtml(f.name)}" class="tz-select-input cv-size">
                     ${opts}
                   </select>
                 </div>
@@ -2570,7 +2572,7 @@ export async function openNewCloudRemoteModal(onSuccess) {
                 return `
                 <div>
                   <div class="cv-row-9">
-                    <label class="cv-xs-bold-muted-4">
+                    <label class="cv-xs-bold-muted-4" for="ncr-f-${escapeHtml(f.name)}">
                       ${escapeHtml(f.label.toUpperCase())} ${f.required ? '<span style="color:var(--crit,#ef4444);">*</span>' : ''}
                     </label>
                     ${
@@ -2585,6 +2587,7 @@ export async function openNewCloudRemoteModal(onSuccess) {
                   </div>
                   <textarea
                     name="${escapeHtml(f.name)}"
+                    id="ncr-f-${escapeHtml(f.name)}"
                     placeholder="${escapeHtml(f.placeholder || '')}"
                     class="tz-select-input cv-mono"
                     rows="4"
@@ -2596,11 +2599,12 @@ export async function openNewCloudRemoteModal(onSuccess) {
               } else {
                 return `
                 <div>
-                  <label class="cv-xs-bold-muted-3">
+                  <label class="cv-xs-bold-muted-3" for="ncr-f-${escapeHtml(f.name)}">
                     ${escapeHtml(f.label.toUpperCase())} ${f.required ? '<span style="color:var(--crit,#ef4444);">*</span>' : ''}
                   </label>
                   <input type="${f.type === 'password' ? 'password' : 'text'}"
                     name="${escapeHtml(f.name)}"
+                    id="ncr-f-${escapeHtml(f.name)}"
                     placeholder="${escapeHtml(f.placeholder || '')}"
                     value="${escapeHtml(f.default != null ? String(f.default) : '')}"
                     class="tz-select-input cv-size"

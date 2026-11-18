@@ -37,7 +37,7 @@ export function hwHelperHtml(st) {
         <div class="nsv-fs13-bold-strong" id="hwh-title">${escapeHtml(t('hwh.title', 'Hardware helper'))}</div>
         <div class="nsv-xs-muted" id="hwh-status" aria-live="polite">${escapeHtml(hwHelperStatus(st))}</div>
       </div>
-      <button type="button" class="btn-pill-toggle${on ? ' active' : ''}" id="hwh-toggle" aria-pressed="${on}" aria-labelledby="hwh-title"${st.applies || on ? '' : ' disabled'}>${escapeHtml(on ? t('nas_name.btn_on', 'On') : t('nas_name.btn_off', 'Off'))}</button>
+      <button type="button" class="btn-pill-toggle${on ? ' active' : ''}" id="hwh-toggle" aria-pressed="${on}" aria-labelledby="hwh-title hwh-toggle"${st.applies || on ? '' : ' disabled'}>${escapeHtml(on ? t('nas_name.btn_on', 'On') : t('nas_name.btn_off', 'Off'))}</button>
     </div>
     <div class="nsv-xs-muted-2">${escapeHtml(t('hwh.help', "Raw access to the hardware (/dev/mem) can read and change any of the computer's memory. With the helper, only a tiny container with no network holds it, and it answers just four questions: read the fans, set a fan, read the button, are you there."))}</div>`;
 }

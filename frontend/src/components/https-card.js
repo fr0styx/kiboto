@@ -35,7 +35,7 @@ function html(st) {
           <div class="nsv-xs-muted" id="https-status" aria-live="polite">${escapeHtml(httpsStatus(st))}</div>
         </div>
       </div>
-      <button type="button" class="btn-pill-toggle" id="https-toggle" aria-pressed="${st.enabled ? 'true' : 'false'}" aria-labelledby="https-title"${st.ddns_ready ? '' : ' disabled'}>${escapeHtml(st.enabled ? t('nas_name.btn_on', 'On') : t('nas_name.btn_off', 'Off'))}</button>
+      <button type="button" class="btn-pill-toggle" id="https-toggle" aria-pressed="${st.enabled ? 'true' : 'false'}" aria-labelledby="https-title https-toggle"${st.ddns_ready ? '' : ' disabled'}>${escapeHtml(st.enabled ? t('nas_name.btn_on', 'On') : t('nas_name.btn_off', 'Off'))}</button>
     </div>
     <div class="nsv-xs-muted-2">${escapeHtml(
       st.ddns_ready

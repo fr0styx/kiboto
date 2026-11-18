@@ -43,7 +43,8 @@ describe('chassis and storage text in German (NUX-20)', () => {
     expect(c.textContent).toContain('Kein Laufwerk in Einschub 2');
     expect(c.textContent).toContain('Bereit für ein Laufwerk');
     expect(c.querySelector('[data-bay="1"]').getAttribute('aria-label')).toMatch(/^Einschub 1: IronWolf 8TB, /);
-    expect(c.querySelector('.bay-locate-btn').getAttribute('aria-label')).toBe('Laufwerk in Einschub 1 finden');
+    // the name starts with what the button shows, then says which bay (axe: label-content-name-mismatch)
+    expect(c.querySelector('.bay-locate-btn').getAttribute('aria-label')).toBe('Dieses Laufwerk finden (Einschub 1)');
     expect(c.textContent).toContain('M.2-Steckplatz 1 • /dev/nvme0n1');
     expect(c.textContent).toContain('Verschleiß:');
     expect(c.textContent).toContain('Welches Laufwerk in welchem Einschub steckt');

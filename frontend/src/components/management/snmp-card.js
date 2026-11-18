@@ -30,7 +30,7 @@ function html(st) {
           <div class="nsv-xs-muted" id="snmp-status" aria-live="polite">${escapeHtml(snmpStatus(st))}</div>
         </div>
       </div>
-      <button type="button" class="btn-pill-toggle" id="snmp-toggle" aria-pressed="${st.enabled ? 'true' : 'false'}" aria-labelledby="snmp-title">${escapeHtml(st.enabled ? t('nas_name.btn_on', 'On') : t('nas_name.btn_off', 'Off'))}</button>
+      <button type="button" class="btn-pill-toggle" id="snmp-toggle" aria-pressed="${st.enabled ? 'true' : 'false'}" aria-labelledby="snmp-title snmp-toggle">${escapeHtml(st.enabled ? t('nas_name.btn_on', 'On') : t('nas_name.btn_off', 'Off'))}</button>
     </div>
     <div class="nsv-xs-muted-2">${escapeHtml(t('snmp.help', 'Lets tools such as LibreNMS, Zabbix or PRTG read uptime, memory, storage, processor load and network traffic. Version 3 only: a tool needs the user name and both passwords, and nothing can be changed over SNMP. Kiboto must be reachable on UDP {port} (map it in the container settings if Kiboto runs in its own network).', { port: st.port }))}</div>
     <form class="ddns-form" id="snmp-form">

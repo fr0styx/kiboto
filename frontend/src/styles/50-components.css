@@ -135,7 +135,7 @@ body.theme-light button.catalog-deploy:focus-visible { color: #fff; background: 
 .cat-chip { display: inline-flex; align-items: center; gap: 6px; }
 .cat-chip-count {
   font-size: var(--kb-fs-xs); font-weight: 700; padding: 0 6px; border-radius: 999px;
-  background: var(--kb-glaze-8); color: var(--kb-text-muted); font-variant-numeric: tabular-nums;
+  background: var(--kb-glaze-8); color: var(--kb-text-soft); font-variant-numeric: tabular-nums; /* muted read 3.7:1 on a hovered chip */
 }
 .cat-chip.active .cat-chip-count { background: rgba(var(--c-primary-text-rgb), 0.25); color: var(--lt-t-e9fbf8ff, #e9fbf8); }
 .cat-empty { grid-column: 1 / -1; text-align: center; color: var(--muted); padding: 30px; }
@@ -301,3 +301,12 @@ body.theme-light button.catalog-deploy:focus-visible { color: #fff; background: 
 .kb-state--busy { display: inline-flex; align-items: center; gap: 4px; color: var(--kb-text-accent); }
 .kb-spinner-sm { width: 10px; height: 10px; }
 .kb-spinner-xs { width: 8px; height: 8px; }
+
+/* Accessibility sweep, 18 Nov: the drive card's details are a button (not the whole card holding the
+   Find button), the Find button is tall enough to hit, the remote-access choices too */
+.bay-open-btn { all: unset; box-sizing: border-box; display: flex; width: 100%; cursor: pointer; text-align: left; border-radius: 6px; }
+.m2-open-btn { flex-direction: column; }
+.bay-open-btn:focus-visible { outline: 2px solid var(--lt-ink-brand, var(--brand, #33cdb8)); outline-offset: 2px; }
+.bay-locate-btn { min-height: 24px; }
+.remote-choice input[type='radio'] { width: 20px; height: 20px; margin: 2px 6px 2px 0; flex-shrink: 0; }
+.remote-choice { padding: 3px 0; }

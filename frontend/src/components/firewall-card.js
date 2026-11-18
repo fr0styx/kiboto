@@ -47,7 +47,7 @@ function html(st) {
         <h3 class="account-h" id="fw-title">${escapeHtml(t('fw.title', 'Firewall'))}</h3>
         <p class="fw-status" id="fw-status">${escapeHtml(st.enabled ? t('fw.on', 'On: only the services below can be reached.') : t('fw.off', 'Off: every service on this NAS can be reached.'))}</p>
       </div>
-      <button type="button" class="btn-pill-toggle" id="fw-toggle" aria-pressed="${st.enabled ? 'true' : 'false'}" aria-labelledby="fw-title"${lock ? ' disabled' : ''}>${escapeHtml(st.enabled ? t('nas_name.btn_on', 'On') : t('nas_name.btn_off', 'Off'))}</button>
+      <button type="button" class="btn-pill-toggle" id="fw-toggle" aria-pressed="${st.enabled ? 'true' : 'false'}" aria-labelledby="fw-title fw-toggle"${lock ? ' disabled' : ''}>${escapeHtml(st.enabled ? t('nas_name.btn_on', 'On') : t('nas_name.btn_off', 'Off'))}</button>
     </div>
     ${lock ? `<p class="fw-why" id="fw-why">${escapeHtml(whyNot(st.why_not))}</p>` : ''}
     <fieldset class="fw-set"${lock ? ' disabled' : ''}>

@@ -170,6 +170,17 @@ export function binConfirmText(paths, files = []) {
       });
 }
 
+/** A message inside the file grid: a grid holds rows of cells, also when it shows a sentence (axe, 18 Nov). */
+function gridMessage(content) {
+  const row = document.createElement('div');
+  row.setAttribute('role', 'row');
+  const cell = document.createElement('div');
+  cell.setAttribute('role', 'gridcell');
+  cell.append(content);
+  row.append(cell);
+  return row;
+}
+
 export class FileManagerWindow {
   constructor(id, dockId, initialPath, isPrimary = false) {
     this.id = id;
@@ -2518,13 +2529,18 @@ export class FileManagerWindow {
         this.handleSearchInput('');
       });
       box.append(p, clear);
-      list.replaceChildren(box);
+      list.setAttribute('role', 'grid');
+      list.setAttribute('aria-label', t('fmx.files', 'Files'));
+      list.replaceChildren(gridMessage(box));
       return;
     }
     if (this.fileList.length === 0) {
       if (this.spacer) this.spacer.style.height = '0px';
       this.list.style.transform = 'none';
-      this.list.innerHTML = `<div class="fmx-fs13-muted-center">${escapeHtml(t('fm.empty_folder', 'This folder is empty.'))}</div>`;
+      // a grid also when it holds one sentence: the row needs its grid (axe, 18 Nov)
+      this.list.setAttribute('role', 'grid');
+      this.list.setAttribute('aria-label', t('fmx.files', 'Files'));
+      this.list.innerHTML = `<div role="row"><div role="gridcell" class="fmx-fs13-muted-center">${escapeHtml(t('fm.empty_folder', 'This folder is empty.'))}</div></div>`;
       return;
     }
 

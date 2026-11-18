@@ -21,7 +21,7 @@ function html(st) {
         <h3 class="account-h" id="qn-title">${escapeHtml(t('qn.title', 'Quieter at night'))}</h3>
         <p class="fw-status" id="qn-status" aria-live="polite">${escapeHtml(quietStatus(st))}</p>
       </div>
-      <button type="button" class="btn-pill-toggle" id="qn-toggle" aria-pressed="${st.enabled ? 'true' : 'false'}" aria-labelledby="qn-title">${escapeHtml(st.enabled ? t('nas_name.btn_on', 'On') : t('nas_name.btn_off', 'Off'))}</button>
+      <button type="button" class="btn-pill-toggle" id="qn-toggle" aria-pressed="${st.enabled ? 'true' : 'false'}" aria-labelledby="qn-title qn-toggle">${escapeHtml(st.enabled ? t('nas_name.btn_on', 'On') : t('nas_name.btn_off', 'Off'))}</button>
     </div>
     <p class="fw-why">${escapeHtml(t('qn.help', 'In Automatic, the drive fans turn a little slower at night: they act as if the drives were {shift} °C cooler. From {warm} °C they follow the normal curve, and at the safety limits they still run at full speed.', { shift: st.shift_c, warm: st.warm_c }))}</p>
     <div class="ps-times">

@@ -34,7 +34,7 @@ function html(st) {
           <div class="nsv-xs-muted" id="ddns-status" aria-live="polite">${escapeHtml(ddnsStatus(st))}</div>
         </div>
       </div>
-      <button type="button" class="btn-pill-toggle" id="ddns-toggle" aria-pressed="${st.enabled ? 'true' : 'false'}" aria-labelledby="ddns-title">${escapeHtml(st.enabled ? t('nas_name.btn_on', 'On') : t('nas_name.btn_off', 'Off'))}</button>
+      <button type="button" class="btn-pill-toggle" id="ddns-toggle" aria-pressed="${st.enabled ? 'true' : 'false'}" aria-labelledby="ddns-title ddns-toggle">${escapeHtml(st.enabled ? t('nas_name.btn_on', 'On') : t('nas_name.btn_off', 'Off'))}</button>
     </div>
     <div class="nsv-xs-muted-2">${escapeHtml(t('ddns.help', "Keeps a name such as home.duckdns.org pointing at your home's internet address when it changes. A name alone opens nothing: reaching Kiboto from outside also needs a port forwarded on your router. For private access, Tailscale needs neither."))}</div>
     <form class="ddns-form" id="ddns-form">

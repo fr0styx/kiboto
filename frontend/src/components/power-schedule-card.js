@@ -39,7 +39,7 @@ function html(st) {
         <h3 class="account-h" id="ps-title">${escapeHtml(t('ps.title', 'Switch off at night'))}</h3>
         <p class="fw-status" id="ps-status" aria-live="polite">${escapeHtml(scheduleStatus(st))}</p>
       </div>
-      <button type="button" class="btn-pill-toggle" id="ps-toggle" aria-pressed="${st.enabled ? 'true' : 'false'}" aria-labelledby="ps-title"${st.wake_possible ? '' : ' disabled'}>${escapeHtml(st.enabled ? t('nas_name.btn_on', 'On') : t('nas_name.btn_off', 'Off'))}</button>
+      <button type="button" class="btn-pill-toggle" id="ps-toggle" aria-pressed="${st.enabled ? 'true' : 'false'}" aria-labelledby="ps-title ps-toggle"${st.wake_possible ? '' : ' disabled'}>${escapeHtml(st.enabled ? t('nas_name.btn_on', 'On') : t('nas_name.btn_off', 'Off'))}</button>
     </div>
     <p class="fw-why">${escapeHtml(
       st.wake_possible

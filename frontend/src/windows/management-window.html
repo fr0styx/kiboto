@@ -1177,8 +1177,8 @@
                   <div class="cal-col-box-2">
                     <div class="cal-row-6">
                       <input class="cal-xs-strong-box-grow" type="text" id="cal-new-note-title" placeholder="Add a note, reminder, or task for this day..." data-i18n-placeholder="ui.add_a_note_reminder_or" aria-label="Add a note, reminder, or task for this day..." data-i18n-aria-label="ui.add_a_note_reminder_or" />
-                      <input class="cal-xs-strong-box-3" type="time" id="cal-new-note-time" value="12:00" />
-                      <select class="cal-xs-strong-box-4" id="cal-new-note-type">
+                      <input class="cal-xs-strong-box-3" type="time" id="cal-new-note-time" value="12:00" aria-label="Time" data-i18n-aria-label="cal.note_time" />
+                      <select class="cal-xs-strong-box-4" id="cal-new-note-type" aria-label="Kind" data-i18n-aria-label="cal.note_kind">
                         <option value="note" data-i18n="wid.note_type_note">Note</option>
                         <option value="reminder" data-i18n="wid.note_type_reminder">Reminder</option>
                         <option value="task" data-i18n="wid.note_type_task">Task</option>
@@ -1452,7 +1452,7 @@
                           <div class="nsv-xs-muted" id="pl-status" aria-live="polite">…</div>
                         </div>
                       </div>
-                      <button type="button" class="btn-pill-toggle" id="pl-toggle" aria-pressed="false" aria-labelledby="pl-title" data-i18n="nas_name.btn_off">Off</button>
+                      <button type="button" class="btn-pill-toggle" id="pl-toggle" aria-pressed="false" aria-labelledby="pl-title pl-toggle" data-i18n="nas_name.btn_off">Off</button>
                     </div>
                     <div class="nsv-xs-muted-2" data-i18n="pl.help">Only the share links are published, through Tailscale Funnel: the rest of the NAS stays private. No router changes. Big downloads go through Tailscale's relays, so they are slower than at home.</div>
                     <a class="nsv-xs-muted-2" id="pl-approve" href="#" target="_blank" rel="noopener" hidden data-i18n="pl.approve_link">Allow Funnel in Tailscale, then turn it on again</a>

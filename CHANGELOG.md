@@ -547,6 +547,10 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Windows in your language after a reload**: a window that reopens after a reload no longer shows in English, and
   button names for screen readers (Close, Delete, Edit and others) follow your language.
 
+- **Accessibility**: switches on cards say their state to screen readers, drive cards no longer hold a button inside a
+  button, small buttons and choices are easier to hit, the cloud drive form and calendar fields are labelled, and a few
+  badges and counts are readable in every theme.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

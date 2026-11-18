@@ -36,7 +36,7 @@ function html(st) {
         <h3 class="account-h" id="heat-title">${escapeHtml(t('heat.title', 'Switch off when too hot'))}</h3>
         <p class="fw-status" id="heat-status" aria-live="polite">${escapeHtml(heatStatus(st))}</p>
       </div>
-      <button type="button" class="btn-pill-toggle" id="heat-toggle" aria-pressed="${st.enabled ? 'true' : 'false'}" aria-labelledby="heat-title">${escapeHtml(st.enabled ? t('nas_name.btn_on', 'On') : t('nas_name.btn_off', 'Off'))}</button>
+      <button type="button" class="btn-pill-toggle" id="heat-toggle" aria-pressed="${st.enabled ? 'true' : 'false'}" aria-labelledby="heat-title heat-toggle">${escapeHtml(st.enabled ? t('nas_name.btn_on', 'On') : t('nas_name.btn_off', 'Off'))}</button>
     </div>
     <p class="fw-why">${escapeHtml(
       st.can_power_off

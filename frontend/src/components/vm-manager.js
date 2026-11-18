@@ -152,7 +152,7 @@ export function initVmManager() {
             <div class="vmm-box-2">
               <div class="vmm-row-xs">
                 <span class="vmm-semi-muted">${t('vmm.vcpu_alloc', 'vCPU threads in use')}</span>
-                <span id="vm-cpu-ratio-badge" style="font-size: var(--kb-fs-xs); padding: 1px 6px; border-radius: 4px; background: rgba(16,185,129,0.2); color: var(--kb-text-ok);">${t('vmm.ratio_default', '1:1 physical')}</span>
+                <span id="vm-cpu-ratio-badge" class="vm-ratio-badge" style="font-size: var(--kb-fs-xs); padding: 1px 6px; border-radius: 4px; background: rgba(16,185,129,0.2); color: var(--kb-text-ok);">${t('vmm.ratio_default', '1:1 physical')}</span>
               </div>
               <div class="vmm-row-3">
                 <span class="vmm-fs18-bold-strong" id="vm-cpu-allocated">0</span>
@@ -315,7 +315,7 @@ function renderTelemetry(tel) {
     kvmBadge.style.cursor = 'default';
     kvmBadge.onclick = null;
     kvmBadge.style.background = 'rgba(245,158,11,0.15)';
-    kvmBadge.style.color = '#fbbf24';
+    kvmBadge.style.color = 'var(--kb-text-warn)';
     kvmBadge.style.borderColor = 'rgba(245,158,11,0.3)';
   } else if (kvmBadge && tel.kvm) {
     kvmBadge.innerHTML = `<span aria-hidden="true">⚡</span> <span>${escapeHtml(kvmWords(tel.kvm))}</span> <span class="vmm-xs" title="${t('ui.view_kvm_diagnostics_fix', 'View KVM Diagnostics & Fix')}" data-i18n-title="ui.view_kvm_diagnostics_fix">ℹ️</span>`;
@@ -323,11 +323,11 @@ function renderTelemetry(tel) {
     kvmBadge.onclick = () => openKvmDiagnosticsModal(tel.kvm);
     if (tel.kvm.state === 'active') {
       kvmBadge.style.background = 'rgba(16,185,129,0.15)';
-      kvmBadge.style.color = '#34d399';
+      kvmBadge.style.color = 'var(--kb-text-ok)';
       kvmBadge.style.borderColor = 'rgba(16,185,129,0.3)';
     } else if (tel.kvm.state === 'restricted') {
       kvmBadge.style.background = 'rgba(245,158,11,0.15)';
-      kvmBadge.style.color = '#fbbf24';
+      kvmBadge.style.color = 'var(--kb-text-warn)';
       kvmBadge.style.borderColor = 'rgba(245,158,11,0.3)';
     } else {
       kvmBadge.style.background = 'rgba(239,68,68,0.15)';
@@ -384,7 +384,7 @@ function renderTelemetry(tel) {
       elRatioBadge.hidden = !elRatioBadge.textContent; // an empty pill was drawn without a value
       if (cpu.status === 'nominal') {
         elRatioBadge.style.background = 'rgba(16,185,129,0.2)';
-        elRatioBadge.style.color = '#34d399';
+        elRatioBadge.style.color = 'var(--kb-text-ok)';
         if (elNote)
           elNote.textContent = t(
             'ui.optimal_execution_dedicated_physical_thread',
@@ -392,7 +392,7 @@ function renderTelemetry(tel) {
           );
       } else if (cpu.status === 'moderate_overcommit') {
         elRatioBadge.style.background = 'rgba(245,158,11,0.2)';
-        elRatioBadge.style.color = '#fbbf24';
+        elRatioBadge.style.color = 'var(--kb-text-warn)';
         if (elNote)
           elNote.textContent = t(
             'ui.moderate_overcommit_bursty_workloads_normal',
