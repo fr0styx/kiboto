@@ -15,6 +15,15 @@ import { renderPowerCheck } from './power-check.js';
 import { renderPowerSwitch } from './power-switch.js';
 import { isAdministrator } from '../../admin-only.js';
 
+
+/** The UPS's state in words (sweep, 18 Nov: "ONLINE" stayed English in every language). */
+export function upsStateWord(ups, permissionError = false) {
+  const u = ups || {};
+  if (permissionError) return t('upx.perm', 'Permission Required');
+  if (!u.available) return t('upx.offline', 'Offline');
+  return u.on_battery ? t('upx.state_battery', 'On battery') : t('upx.state_mains', 'On mains power');
+}
+
 export function renderUpsTelemetry(ups) {
   if (!ups) return;
   const isPermErr = Boolean(ups.permission_error);
@@ -64,7 +73,8 @@ export function renderUpsTelemetry(ups) {
   const policyEl = document.getElementById('mgmt-ups-policy');
 
   if (statusEl) {
-    statusEl.textContent = isPermErr ? t('upx.perm', 'Permission Required') : (ups.status || (ups.available ? t('upx.online', 'ONLINE') : t('upx.offline', 'Offline')));
+    statusEl.textContent = upsStateWord(ups, isPermErr);
+    statusEl.title = ups.status || ''; // the UPS's own word (ONLINE, OB DISCHRG) for whoever knows it
     statusEl.style.color = isPermErr
       ? 'var(--err, #eb5757)'
       : (ups.available ? (ups.on_battery ? 'var(--warn)' : 'var(--ok2)') : 'var(--muted)');

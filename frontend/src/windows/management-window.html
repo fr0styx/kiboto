@@ -169,7 +169,7 @@
               </div>
               <div style="display:flex; align-items:center; gap: 6px;">
                 <span id="dt-theme-badge" class="desktop-twin-badge" style="font-size: var(--kb-fs-xs); font-weight: 600; padding: 2px 8px; border-radius: 12px; background: var(--lt-b-33cdb826, rgba(51,205,184,0.15)); color: var(--lt-ink-brand, var(--brand, #33cdb8)); border: 1px solid var(--lt-r-33cdb84c, rgba(51,205,184,0.3));" data-sample>—</span>
-                <span style="font-size: var(--kb-fs-xs); color: var(--muted); font-family: var(--font-mono, monospace);" data-sample>16:9 PREVIEW</span>
+                <span style="font-size: var(--kb-fs-xs); color: var(--muted); font-family: var(--font-mono, monospace);" data-i18n="mgmt.preview_ratio">16:9 preview</span>
               </div>
             </div>
 
@@ -391,9 +391,9 @@
                       </div>
                       <input type="range" id="wallpaper-dim-slider" min="0" max="70" value="15" step="1" class="tz-range-slider wlp-size-3" aria-label="Wallpaper Dimming Percentage" data-i18n-aria-label="ui.wallpaper_dimming_percentage">
                       <div class="wlp-row-xs-muted">
-                        <span data-sample>0% (Off)</span>
-                        <span data-sample>35% (Medium)</span>
-                        <span data-sample>70% (Dark)</span>
+                        <span data-i18n="gls.dim_0">0% (Off)</span>
+                        <span data-i18n="gls.dim_mid">35% (Medium)</span>
+                        <span data-i18n="gls.dim_max">70% (Dark)</span>
                       </div>
                     </div>
 
@@ -405,9 +405,9 @@
                       </div>
                       <input type="range" id="wallpaper-blur-slider" min="0" max="30" value="0" step="1" class="tz-range-slider wlp-size-3" aria-label="Desktop Blur Radius" data-i18n-aria-label="ui.desktop_blur_radius">
                       <div class="wlp-row-xs-muted">
-                        <span data-sample>0px (Crisp)</span>
-                        <span data-sample>15px (Soft)</span>
-                        <span data-sample>30px (Frosted)</span>
+                        <span data-i18n="gls.wblur_0">0 px (Sharp)</span>
+                        <span data-i18n="gls.wblur_15">15 px (Soft)</span>
+                        <span data-i18n="gls.wblur_30">30 px (Frosted)</span>
                       </div>
                     </div>
                   </div>
@@ -487,9 +487,9 @@
                       </div>
                       <input type="range" id="glass-blur-slider" min="0" max="40" value="24" step="2" class="tz-range-slider gls-size" aria-label="Acrylic Blur Radius" data-i18n-aria-label="ui.acrylic_blur_radius">
                       <div class="gls-row-xs-muted">
-                        <span data-sample>0px (Transparent)</span>
-                        <span data-sample>24px (Standard)</span>
-                        <span data-sample>40px (Ultra-Deep)</span>
+                        <span data-i18n="gls.gblur_0">0 px (Clear)</span>
+                        <span data-i18n="gls.gblur_24">24 px (Standard)</span>
+                        <span data-i18n="gls.gblur_40">40 px (Very soft)</span>
                       </div>
                     </div>
 
@@ -501,9 +501,9 @@
                       </div>
                       <input type="range" id="glass-opacity-slider" min="30" max="95" value="72" step="1" class="tz-range-slider gls-size" aria-label="Glass Surface Opacity" data-i18n-aria-label="ui.glass_surface_opacity">
                       <div class="gls-row-xs-muted">
-                        <span data-sample>30% (High Sheer)</span>
-                        <span data-sample>72% (Balanced)</span>
-                        <span data-sample>95% (Near Solid)</span>
+                        <span data-i18n="gls.op_30">30% (See-through)</span>
+                        <span data-i18n="gls.op_72">72% (Balanced)</span>
+                        <span data-i18n="gls.op_95">95% (Almost solid)</span>
                       </div>
                     </div>
                   </div>
@@ -1945,7 +1945,7 @@
                 <div class="unraid-details-grid">
                   <div class="unraid-detail-item">
                     <span class="udi-label" data-i18n="mgmt.ups_daemon_status">Power monitor</span>
-                    <span class="udi-val ups-ok" id="mgmt-ups-status">ONLINE</span>
+                    <span class="udi-val ups-ok" id="mgmt-ups-status" data-sample>—</span>
                   </div>
                   <div class="unraid-detail-item">
                     <span class="udi-label" data-i18n="mgmt.ups_model">UPS Model</span>
@@ -2072,7 +2072,7 @@
                 <!-- Collapsed Policy Summary Bar -->
                 <div class="ups-xs-muted-box-2" id="ups-policy-summary" style="display: none;">
                   <span id="ups-policy-summary-text" data-sample>—</span>
-                  <span class="suite-badge" style="font-size:var(--kb-fs-xs); color:var(--ok2); border-color:rgba(51,205,184,0.3);">ACTIVE</span>
+                  <span class="suite-badge" style="font-size:var(--kb-fs-xs); color:var(--ok2); border-color:rgba(51,205,184,0.3);" data-i18n="upx.policy_on">On</span>
                 </div>
 
                 <!-- Collapsible Policy Body -->

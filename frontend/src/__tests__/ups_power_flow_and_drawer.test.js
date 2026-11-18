@@ -145,7 +145,9 @@ describe('UPS Power Flow Digital Twin & Drawer Controls', () => {
 
     renderUpsTelemetry(ups);
 
-    expect(document.getElementById('mgmt-ups-status').textContent).toBe('ONLINE');
+    // the state in words; the UPS's own word stays in the hover text
+    expect(document.getElementById('mgmt-ups-status').textContent).toBe('On mains power');
+    expect(document.getElementById('mgmt-ups-status').title).toBe('ONLINE');
     expect(document.getElementById('mgmt-ups-model').textContent).toBe('Smart-UPS 1500');
     expect(document.getElementById('mgmt-ups-charge').textContent).toBe('100%');
     expect(document.getElementById('mgmt-ups-runtime').textContent).toBe('45 min');
@@ -178,7 +180,8 @@ describe('UPS Power Flow Digital Twin & Drawer Controls', () => {
 
     renderUpsTelemetry(ups);
 
-    expect(document.getElementById('mgmt-ups-status').textContent).toBe('ONBATT');
+    expect(document.getElementById('mgmt-ups-status').textContent).toBe('On battery');
+    expect(document.getElementById('mgmt-ups-status').title).toBe('ONBATT');
     const banner = document.getElementById('ups-emergency-banner');
     expect(banner.style.display).toBe('flex');
     expect(document.getElementById('ups-emergency-countdown').textContent).toBe('~18m remaining');

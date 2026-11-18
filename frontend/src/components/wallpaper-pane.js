@@ -122,7 +122,7 @@ export function renderWallpaperGallery(files, active, version) {
       <div class="wallpaper-gradient-preview"></div>
       <div class="wallpaper-card-active-indicator" style="${isDefaultActive ? 'display:flex;' : 'display:none;'}">
         <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-        <span>ACTIVE</span>
+        <span>${escapeHtml(t('wp.in_use', 'In use'))}</span>
       </div>
     </div>
     <div class="wallpaper-card-footer">

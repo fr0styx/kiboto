@@ -37,7 +37,7 @@ describe('UPS panel words (NUX-20)', () => {
 
     renderUpsTelemetry({ available: true, on_battery: true, time_left_min: 12 });
     expect(byId('mgmt-hub-ups-pill').textContent).toBe('Active');
-    expect(byId('mgmt-ups-status').textContent).toBe('ONLINE');
+    expect(byId('mgmt-ups-status').textContent).toBe('On battery'); // it said ONLINE while on battery
     expect(byId('mgmt-ups-model').textContent).toBe('Generic UPS');
     expect(byId('mgmt-ups-policy').textContent).toBe('Runtime < 5m');
     expect(byId('ups-twin-grid-status').textContent).toBe('AC Mains Disconnected');
@@ -50,7 +50,8 @@ describe('UPS panel words (NUX-20)', () => {
 
     renderUpsTelemetry({ available: true, status: 'OL', battery_charge_pct: 90, model: 'Back-UPS', active_policy: 'battery_pct', line_freq_hz: 50 });
     expect(byId('mgmt-hub-ups-pill').textContent).toBe('90%');
-    expect(byId('mgmt-ups-status').textContent).toBe('OL');
+    expect(byId('mgmt-ups-status').textContent).toBe('On mains power');
+    expect(byId('mgmt-ups-status').title).toBe('OL');
     expect(byId('mgmt-ups-policy').textContent).toBe('Policy: battery_pct');
     expect(byId('ups-twin-grid-status').textContent).toBe('50 Hz Nominal');
     renderUpsTelemetry({ available: true });

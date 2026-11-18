@@ -534,6 +534,9 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   files with the same name are replaced (and that it happens without asking when copying starts by itself); the
   button that did nothing is gone.
 
+- **Appearance and Power in your language**: the slider scales under Appearance, the UPS state ("On mains power", "On
+  battery") and the "in use" badges no longer stay in English.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 
