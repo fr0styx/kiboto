@@ -26,6 +26,7 @@ from backend.api.file_versions import router as file_versions_router  # noqa: E4
 from backend.api.firewall import router as firewall_router
 from backend.api.fleet import router as fleet_router
 from backend.api.fs import router as fs_router
+from backend.api.heat_shutdown import router as heat_shutdown_router
 from backend.api.home_assistant import router as home_assistant_router
 from backend.api.https import router as https_router
 from backend.api.hw_helper import router as hw_helper_router  # noqa: E402
@@ -169,5 +170,6 @@ api_router.include_router(update_watch_router)  # the daily update check (Settin
 api_router.include_router(ddns_router)  # Dynamic DNS, off by default (audit A8)
 api_router.include_router(firewall_router)  # host firewall, off by default (audit A13)
 api_router.include_router(power_schedule_router)  # scheduled power off and wake-up, off by default (audit A10)
+api_router.include_router(heat_shutdown_router)  # switch off when too hot, off by default (hardware extra)
 api_router.include_router(https_router)  # HTTPS at home via ACME over DNS, off by default (audit A9)
 api_router.include_router(snmp_router)  # SNMP v3 agent, off by default

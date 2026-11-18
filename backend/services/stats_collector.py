@@ -60,6 +60,7 @@ from backend.hardware.storage import (
 )
 from backend.hardware.unraid import read_unraid_status
 from backend.hardware.ups import read_ups_status
+from backend.ignored_errors import ignored
 from backend.services import memory_watch
 from backend.services.alert_rules import evaluate_system_alerts
 from backend.services.broadcaster import broadcaster
@@ -594,6 +595,14 @@ def stats_collector_daemon():
             z2_all_standby = _r["z2_all_standby"]
             z2_eligible = _r["z2_eligible"]
             z2_rem = _r["z2_rem"]
+
+            # switch off when too hot, if turned on (backend/services/heat_guard.py); the fans are not touched
+            try:
+                from backend.services import heat_guard
+
+                heat_guard.check(disks)
+            except (OSError, ValueError, TypeError, KeyError):
+                ignored("stats_collector.heat_guard")
 
             # Screen Backlight Management
             target_bl = get_effective_brightness()

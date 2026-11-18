@@ -69,6 +69,7 @@ LINKS: tuple[tuple[str, str], ...] = (
     ("smart_", "drives"),
     ("sched_", "drives"),
     ("fan_", "hardware"),
+    ("heat_", "power"),  # switch off when too hot: its card is on Power
     ("cpu_hot", "hardware"),
     ("fm_", "files"),
     ("family_shares", "shares"),

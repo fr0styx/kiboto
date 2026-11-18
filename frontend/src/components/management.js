@@ -1043,6 +1043,7 @@ export function initManagement() {
         fetchAndRenderUpsTelemetry();
         if (typeof loadUpsConfigToDrawer === 'function') loadUpsConfigToDrawer();
         import('./power-schedule-card.js').then((m) => m.renderPowerScheduleCard()).catch(() => {}); // audit A10
+        import('./heat-shutdown-card.js').then((m) => m.renderHeatShutdownCard()).catch(() => {}); // hardware extra
       } else if (targetId === 'mgmt-sec-system-group') {
         sectionName = t('mgmt.system_title', 'System & Identity');
       } else if (targetId === 'mgmt-sec-ai') {

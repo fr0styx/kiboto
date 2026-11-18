@@ -47,6 +47,10 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Add your own app**: in Apps → Get apps, paste a Docker Compose file and give it a name. Kiboto shows what it will
   create and asks first; if a part does not come up, everything it started is removed again.
 
+- **Switch off when too hot** (Power, off by default): if a hard drive stays at 60 °C (NVMe 80 °C) for three minutes,
+  Kiboto warns you, stops the virtual machines and apps, saves what is in memory and switches the NAS off. Where it
+  can't switch the NAS off itself, it stops what it can and asks you to.
+
 #### Changes
 
 - **The Security check says it in words**: "Everything is fine" or "2 things need a look", with what needs a

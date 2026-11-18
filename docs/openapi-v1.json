@@ -22975,6 +22975,17 @@
     "title": "HealthSignalIn",
     "type": "object"
    },
+   "HeatShutdownIn": {
+    "properties": {
+     "enabled": {
+      "default": false,
+      "title": "Enabled",
+      "type": "boolean"
+     }
+    },
+    "title": "HeatShutdownIn",
+    "type": "object"
+   },
    "HomeAssistantIn": {
     "properties": {
      "discovery_prefix": {
@@ -68561,6 +68572,81 @@
     ],
     "x-required-scopes": [
      "system:config"
+    ]
+   }
+  },
+  "/api/v1/system/heat-shutdown": {
+   "get": {
+    "operationId": "get_heat_shutdown_api_v1_system_heat_shutdown_get",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Get Heat Shutdown Api V1 System Heat Shutdown Get",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Get Heat Shutdown",
+    "tags": [
+     "System"
+    ],
+    "x-required-scopes": [
+     "system:view"
+    ]
+   },
+   "put": {
+    "operationId": "put_heat_shutdown_api_v1_system_heat_shutdown_put",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/HeatShutdownIn"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Put Heat Shutdown Api V1 System Heat Shutdown Put",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Put Heat Shutdown",
+    "tags": [
+     "System"
+    ],
+    "x-required-scopes": [
+     "system:power"
     ]
    }
   },
