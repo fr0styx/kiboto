@@ -81,4 +81,33 @@ describe('electricity on Power', () => {
     expect(document.getElementById('power-energy').hidden).toBe(true);
     expect(await renderPowerEnergy(null)).toBeNull();
   });
+
+  it('a UPS that reports only a percentage asks for its rated power, saves it and goes on', async () => {
+    document.body.innerHTML = '<section id="power-energy" hidden></section>';
+    const loadOnly = { measuring: false, load_only: true, rated_watts: null, price: null };
+    expect(energyNodes(loadOnly)[0].textContent).toContain('reports its load only as a percentage');
+    const get = vi
+      .spyOn(api, 'get')
+      .mockResolvedValueOnce(loadOnly)
+      .mockResolvedValueOnce({ ...loadOnly, rated_watts: 900 })
+      .mockResolvedValue({ ...loadOnly, rated_watts: 900 });
+    const put = vi.spyOn(api, 'put').mockResolvedValueOnce({}).mockRejectedValueOnce(new Error('no right'));
+    await renderPowerEnergy();
+    const box = document.getElementById('power-energy');
+    const inputs = box.querySelectorAll('input');
+    expect(inputs.length).toBe(2); // the rated power, then the price
+    expect(box.querySelectorAll('label')[0].textContent).toContain('Rated power of the UPS');
+    inputs[0].value = '900';
+    inputs[0].dispatchEvent(new Event('change'));
+    await vi.waitFor(() => expect(get).toHaveBeenCalledTimes(2));
+    expect(put).toHaveBeenCalledWith('/api/ups/energy/rated-power', { watts: 900 });
+    // with the rated power known the page waits for the first readings, and the field stays to change it
+    await vi.waitFor(() => expect(box.textContent).toContain('Nothing has been measured yet'));
+    const again = box.querySelectorAll('input')[0];
+    expect(again.value).toBe('900');
+    again.value = '';
+    again.dispatchEvent(new Event('change'));
+    await vi.waitFor(() => expect(box.textContent).toContain("rated power couldn't be saved: no right"));
+    expect(put).toHaveBeenLastCalledWith('/api/ups/energy/rated-power', { watts: null });
+  });
 });

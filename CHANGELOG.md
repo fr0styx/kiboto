@@ -472,6 +472,9 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 
 - **Device lists** (your own page, People) name the device ("Safari on iPhone") instead of a technical line.
 
+- **Electricity with a UPS that reports only a percentage**: enter the UPS's rated power in watts (Settings →
+  Power → Electricity) and Kiboto works out the electricity from its load.
+
 #### Fixes
 
 - **The File Explorer's details panel no longer hides file names**: it lies over the list instead of

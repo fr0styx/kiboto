@@ -108,3 +108,29 @@ def test_every_stats_round_passes_the_ups_power_on(monkeypatch):
     stats_collector._note_energy({})
     stats_collector._note_energy(None)
     assert seen == [42.5, None, None]
+
+
+def test_a_ups_that_reports_only_a_percentage_can_be_given_its_rated_power(client, monkeypatch):
+    from backend.api import ups as ups_api
+
+    saved = {}
+    monkeypatch.setattr(ups_api, "read_ups_status", lambda: {"load_pct": 2.0, "power_watts": None})
+    monkeypatch.setattr(ups_api, "load_ups_config", lambda: dict(saved))
+    monkeypatch.setattr(ups_api, "save_ups_config", lambda cfg: saved.update(cfg) or saved)
+    h = {"Authorization": f"Bearer {client.post('/api/auth/login', json={'password': 'admin'}).json()['token']}"}
+    view = client.get("/api/ups/energy", headers=h).json()
+    assert view["load_only"] is True and view["rated_watts"] is None
+    res = client.put("/api/ups/energy/rated-power", headers=h, json={"watts": 900})
+    assert res.status_code == 200 and res.json()["rated_watts"] == 900.0 and saved == {"nominal_power_watts": 900.0}
+    assert client.put("/api/ups/energy/rated-power", headers=h, json={"watts": None}).json()["rated_watts"] is None
+    assert client.put("/api/ups/energy/rated-power", headers=h, json={"watts": 3}).status_code == 422
+    # a UPS that gives watts itself needs nothing; one that cannot be read does not break the page
+    monkeypatch.setattr(ups_api, "read_ups_status", lambda: {"load_pct": 20.0, "power_watts": 180.0})
+    assert client.get("/api/ups/energy", headers=h).json()["load_only"] is False
+
+    def gone():
+        raise OSError("no UPS")
+
+    monkeypatch.setattr(ups_api, "read_ups_status", gone)
+    view = client.get("/api/ups/energy", headers=h).json()
+    assert view["load_only"] is False and view["rated_watts"] is None

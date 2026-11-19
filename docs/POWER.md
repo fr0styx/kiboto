@@ -76,3 +76,8 @@ Only time that was really measured is counted. Readings more than 120 seconds ap
 joined, so the hours when the NAS was off or the UPS did not answer add nothing, and nothing is
 guessed. The daily totals are kept for 400 days. Without a UPS that reports its power the
 section says that nothing has been measured.
+
+Some UPS models report their load only as a percentage. The section then asks for the UPS's
+rated power in watts, which is on its label or in its manual (not the VA figure: a 1500 VA unit
+is often 900 W). Kiboto works out the watts from the percentage and that number; it never
+guesses it.

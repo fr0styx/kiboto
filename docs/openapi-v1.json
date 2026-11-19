@@ -34185,6 +34185,25 @@
     "title": "RagWatchedFoldersRequest",
     "type": "object"
    },
+   "RatedPowerIn": {
+    "properties": {
+     "watts": {
+      "anyOf": [
+       {
+        "maximum": 100000.0,
+        "minimum": 10.0,
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Watts"
+     }
+    },
+    "title": "RatedPowerIn",
+    "type": "object"
+   },
    "RedfishSwitch": {
     "properties": {
      "enabled": {
@@ -70754,6 +70773,52 @@
      }
     },
     "summary": "Put Energy Price",
+    "tags": [
+     "UPS & Power Integrity"
+    ],
+    "x-required-scopes": [
+     "system:config"
+    ]
+   }
+  },
+  "/api/v1/ups/energy/rated-power": {
+   "put": {
+    "description": "The UPS's rated power in watts, as its label says: with it, a load in percent becomes watts.\nEntered by the owner, never guessed. No value clears it.",
+    "operationId": "put_rated_power_api_v1_ups_energy_rated_power_put",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RatedPowerIn"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Put Rated Power Api V1 Ups Energy Rated Power Put",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Put Rated Power",
     "tags": [
      "UPS & Power Integrity"
     ],

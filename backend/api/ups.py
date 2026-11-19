@@ -220,12 +220,38 @@ class EnergyPriceIn(BaseModel):
     price: float | None = Field(default=None, ge=0, le=1000)
 
 
+class RatedPowerIn(BaseModel):
+    watts: float | None = Field(default=None, ge=10, le=100000)
+
+
+def _energy_view() -> dict[str, Any]:
+    """The totals, plus what the page needs to explain an empty result: a UPS that reports its load
+    only in percent needs its rated power (from its label) before watts can be worked out."""
+    from backend.services import energy_use
+
+    out = energy_use.summary()
+    try:
+        ups = read_ups_status() or {}
+        rated = load_ups_config().get("nominal_power_watts")
+    except (OSError, ValueError, RuntimeError):
+        ups, rated = {}, None
+    out["load_only"] = ups.get("load_pct") is not None and ups.get("power_watts") is None
+    out["rated_watts"] = float(rated) if rated else None
+    return out
+
+
 @router.get("/ups/energy", dependencies=[Depends(require_scope("hardware:read", "system:view"))])
 def get_energy_use() -> dict[str, Any]:
     """The electricity the UPS fed today, in the last 7 and 30 days, and the cost of a month."""
-    from backend.services import energy_use
+    return _energy_view()
 
-    return energy_use.summary()
+
+@router.put("/ups/energy/rated-power", dependencies=[Depends(require_scope("system:config"))])
+def put_rated_power(req: RatedPowerIn) -> dict[str, Any]:
+    """The UPS's rated power in watts, as its label says: with it, a load in percent becomes watts.
+    Entered by the owner, never guessed. No value clears it."""
+    save_ups_config({"nominal_power_watts": req.watts})
+    return _energy_view()
 
 
 @router.put("/ups/energy/price", dependencies=[Depends(require_scope("system:config"))])
@@ -233,7 +259,7 @@ def put_energy_price(req: EnergyPriceIn) -> dict[str, Any]:
     from backend.services import energy_use
 
     energy_use.set_price(req.price)
-    return energy_use.summary()
+    return _energy_view()
 
 
 @router.get("/ups/events", dependencies=[Depends(require_scope("hardware:read", "system:view"))])

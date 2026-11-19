@@ -18,6 +18,18 @@ export function kwh(value) {
 }
 
 export function energyNodes(s) {
+  if (s && !s.measuring && s.load_only && !s.rated_watts) {
+    return [
+      el(
+        'p',
+        'kb-muted',
+        t(
+          'pwe.load_only',
+          'Your UPS reports its load only as a percentage. Enter its rated power in watts below (it is on its label or in its manual; a 1500 VA unit is often 900 W) and Kiboto works out the electricity from that.'
+        )
+      ),
+    ];
+  }
   if (!s || !s.measuring) {
     return [
       el(
@@ -86,6 +98,28 @@ export async function renderPowerEnergy(box = document.getElementById('power-ene
       );
     }
   });
-  box.replaceChildren(title, body, label);
+  const rows = [title, body, label];
+  if (s.load_only || s.rated_watts) {
+    const rated = Object.assign(el('input', 'tz-text-input pwe-price'), { type: 'number', min: '10', step: '1' });
+    rated.value = s.rated_watts != null ? String(s.rated_watts) : '';
+    const ratedLabel = el('label', 'pwe-price-row');
+    ratedLabel.append(el('span', '', t('pwe.rated', 'Rated power of the UPS, in watts')), rated);
+    rated.addEventListener('change', async () => {
+      try {
+        await api.put('/api/ups/energy/rated-power', { watts: rated.value === '' ? null : Number(rated.value) });
+        await renderPowerEnergy(box);
+      } catch (e) {
+        body.append(
+          el(
+            'p',
+            'kb-muted',
+            t('pwe.rated_failed', "The rated power couldn't be saved: {error}", { error: e?.message || '' })
+          )
+        );
+      }
+    });
+    rows.splice(2, 0, ratedLabel);
+  }
+  box.replaceChildren(...rows);
   return s;
 }
