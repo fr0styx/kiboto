@@ -279,8 +279,94 @@ def test_the_file_server_check_and_the_address():
         finally:
             socket.create_connection = real
     assert not m.smb_open("192.0.2.1") or True  # unreachable test address: no answer within a second
-    ip = m.default_ip()
-    assert socket.inet_aton(ip)
+
+
+class _Routed:
+    """A UDP socket as default_ip uses it: connect() picks the route, getsockname() names our end."""
+
+    def __init__(self, ip):
+        self.ip = ip
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+    def connect(self, addr):
+        if self.ip is None:
+            raise OSError(101, "Network is unreachable")
+
+    def getsockname(self):
+        return (self.ip, 40000)
+
+
+def test_the_address_is_read_without_the_network_and_waited_for(monkeypatch, capsys):
+    """This test once asked the machine for its route, and failed on a machine with no network."""
+    answers = iter([None, None, "192.0.2.7"])
+    monkeypatch.setattr(m.socket, "socket", lambda *a, **k: _Routed(next(answers)))
+    naps = []
+    assert m.wait_for_ip(pause=5.0, sleep=naps.append) == "192.0.2.7"
+    assert naps == [5.0, 5.0]
+    assert capsys.readouterr().out.count("no network yet") == 1  # said once, not every five seconds
+    monkeypatch.setattr(m.socket, "socket", lambda *a, **k: _Routed("192.0.2.9"))
+    assert m.default_ip() == "192.0.2.9" and m.current_ip() == "192.0.2.9"
+    monkeypatch.setattr(m.socket, "socket", lambda *a, **k: _Routed(None))
+    assert m.current_ip() is None
+
+
+class _Quiet:
+    """A link nobody talks on: every read times out."""
+
+    def __init__(self, packets=()):
+        self.packets, self.sent, self.timeout = list(packets), [], None
+
+    def settimeout(self, t):
+        self.timeout = t
+
+    def recvfrom(self, n):
+        if self.packets:
+            return self.packets.pop(0)
+        raise TimeoutError
+
+    def sendto(self, data, addr):
+        self.sent.append((data, addr))
+
+
+def test_the_name_follows_a_new_address(monkeypatch, capsys):
+    r = m.Responder(["kiboto"], "192.0.2.7", 80, "Kiboto")
+    ips = iter(["192.0.2.7", None, "192.0.2.50"])  # the same, then no network for a while, then a new lease
+    monkeypatch.setattr(m, "current_ip", lambda: next(ips))
+    ticks = iter(range(0, 100000, 61))  # every look at the clock is a minute later
+    link = _Quiet()
+    assert m.serve(link, r, "192.0.2.7", follow=True, clock=lambda: next(ticks)) == m.ADDRESS_CHANGED
+    assert link.timeout == m.ADDRESS_CHECK_SECS
+    assert "the address changed from 192.0.2.7 to 192.0.2.50" in capsys.readouterr().out
+
+
+def test_an_address_given_by_hand_is_not_followed_and_questions_are_still_answered(monkeypatch):
+    r = m.Responder(["kiboto"], "192.0.2.7", 80, "Kiboto")
+    asked = []
+    monkeypatch.setattr(m, "current_ip", lambda: asked.append(1) or "192.0.2.99")
+    monkeypatch.setattr(r, "reply", lambda data, port: b"answer" if data == b"question" else None)
+
+    class Done(Exception):
+        pass
+
+    class Link(_Quiet):
+        def recvfrom(self, n):
+            if not self.packets:
+                raise Done  # the test's way out of a loop that never ends by itself
+            return self.packets.pop(0)
+
+    link = Link(
+        [(b"question", ("192.0.2.20", 5353)), (b"noise", ("192.0.2.21", 40001)), (b"question", ("192.0.2.22", 40002))]
+    )
+    ticks = iter(range(0, 100000, 61))
+    with pytest.raises(Done):
+        m.serve(link, r, "192.0.2.7", follow=False, clock=lambda: next(ticks))
+    assert asked == []  # --ip: the address is the person's choice
+    assert link.sent == [(b"answer", (m.GROUP, m.PORT)), (b"answer", ("192.0.2.22", 40002))]
 
 
 class FakeSocket:

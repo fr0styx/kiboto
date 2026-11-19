@@ -9,6 +9,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Kib makes up no CPU numbers**: in the first seconds after a start, before the first reading, Kib answered
   "8.5 % at 42 °C", and an idle CPU at 0 % was reported as 8.5 %. It now says the CPU has not been read yet.
 
+- **The NAS's name follows its address**: when the router gave the NAS a new address, `kiboto.local` kept
+  pointing at the old one until the name service was restarted. It now notices within a minute and announces
+  the new address. Started before the network is up (after a power cut the NAS is often faster than the
+  router), it waits for an address instead of stopping with an error.
+
 #### Changes
 
 - **Ask Kib about the NAS in your language**: questions about free space, drives, fans, apps, the network and

@@ -245,6 +245,54 @@ def default_ip() -> str:
         return s.getsockname()[0]
 
 
+def current_ip() -> str | None:
+    """default_ip, or None while the NAS has no route (cable out, or the router is still starting)."""
+    try:
+        return default_ip()
+    except OSError:
+        return None
+
+
+def wait_for_ip(pause: float = 5.0, sleep: Any = time.sleep) -> str:
+    """The NAS's address, waited for: after a power cut the NAS is often up before the router."""
+    said = False
+    while True:
+        ip = current_ip()
+        if ip:
+            return ip
+        if not said:
+            print("[mdns] no network yet; waiting for an address", flush=True)
+            said = True
+        sleep(pause)
+
+
+ADDRESS_CHECK_SECS = 60.0
+ADDRESS_CHANGED = 3  # the exit code: the container starts again and announces the new address
+
+
+def serve(sock: Any, r: "Responder", ip: str, follow: bool, clock: Any = time.time) -> int:
+    """Answers questions for the name. When the router gives the NAS another address, it stops
+    (ADDRESS_CHANGED), so the name does not keep pointing at the old one. An address given by
+    hand (--ip) is not followed."""
+    sock.settimeout(ADDRESS_CHECK_SECS)
+    next_check = clock() + ADDRESS_CHECK_SECS
+    while True:
+        try:
+            data, (addr, src_port) = sock.recvfrom(MAX_PACKET)
+        except OSError:
+            data = None
+        if data:
+            out = r.reply(data, src_port)
+            if out:
+                sock.sendto(out, (addr, src_port) if src_port != PORT else (GROUP, PORT))
+        if follow and clock() >= next_check:
+            next_check = clock() + ADDRESS_CHECK_SECS
+            now_ip = current_ip()
+            if now_ip and now_ip != ip:
+                print(f"[mdns] the address changed from {ip} to {now_ip}; starting again", flush=True)
+                return ADDRESS_CHANGED
+
+
 def smb_open(ip: str) -> bool:
     try:
         with socket.create_connection((ip, 445), timeout=1.0):
@@ -319,7 +367,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--timemachine", action="append", default=[], help="a Time Machine share (repeat for more)")
     args = ap.parse_args(argv)
     names = [n.strip() for n in args.names.split(",") if n.strip()]
-    ip = args.ip or default_ip()
+    ip = args.ip or wait_for_ip()
     port = args.http_port
     r = Responder(names, ip, port, args.label, smb=smb_open(ip), timemachine=args.timemachine)
     sock = open_socket(ip)
@@ -342,14 +390,7 @@ def main(argv: list[str] | None = None) -> int:
 
     signal.signal(signal.SIGTERM, bye)
     signal.signal(signal.SIGINT, bye)
-    while True:
-        try:
-            data, (addr, src_port) = sock.recvfrom(MAX_PACKET)
-        except OSError:
-            continue
-        out = r.reply(data, src_port)
-        if out:
-            sock.sendto(out, (addr, src_port) if src_port != PORT else (GROUP, PORT))
+    return serve(sock, r, ip, follow=not args.ip)
 
 
 if __name__ == "__main__":
