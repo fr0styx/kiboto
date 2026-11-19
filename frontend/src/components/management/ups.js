@@ -219,6 +219,7 @@ export async function fetchAndRenderUpsEvents() {
   } catch (err) {
     console.debug('Failed to fetch UPS events:', err);
   }
+  import('./power-energy.js').then((m) => m.renderPowerEnergy()).catch(() => {});
 }
 
 /** The state in one word: none (no UPS), unreadable, cut (on battery), look (low or replace), mains. */

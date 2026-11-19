@@ -609,3 +609,6 @@
 .sec-oc-row { display: flex; gap: 10px; align-items: flex-start; }
 .sec-oc-row input { width: 24px; height: 24px; margin: 0; flex: none; }
 .sec-oc-words { display: flex; flex-direction: column; gap: 2px; }
+/* Power: electricity (re-audit R9) */
+.pwe-price-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; font-size: var(--kb-fs-sm); }
+.pwe-price { max-width: 120px; }

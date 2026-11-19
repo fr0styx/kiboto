@@ -87,6 +87,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Damaged files are named**: when a check of a ZFS pool finds damage it cannot repair, the alert and the
   Overview say which files, and to restore them from a backup or a snapshot.
 
+- **Electricity used** (Settings → Power): with a UPS that reports its power, Kiboto adds up the kWh for today,
+  the last 7 and 30 days, and with your price per kWh what a month costs.
+- **Bring a virtual machine over**: a new machine can start from a disk made by VMware (.vmdk), Hyper-V (.vhdx,
+  .vhd) or VirtualBox (.vdi). The original file stays as it is.
+
 #### Changes
 
 - **The Security check says it in words**: "Everything is fine" or "2 things need a look", with what needs a

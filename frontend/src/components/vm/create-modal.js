@@ -156,7 +156,7 @@ export function openVmCreateModal() {
             <select id="vm-create-disk-image" class="tz-select" style="width: 100%; padding: 8px 10px; border-radius: 6px; background: var(--lt-b-1a2629ff, #1a2629); border: 1px solid var(--kb-line-12); color: var(--kb-text-strong); font-size: var(--kb-fs-xs); box-sizing: border-box;" aria-describedby="vm-create-disk-image-help">
               <option value="">${t('vmd.disk_image_none', 'None: install from the boot ISO')}</option>
             </select>
-            <div class="vmc-xs-muted" id="vm-create-disk-image-help">${t('vmd.disk_image_help', 'A system that comes as a disk, such as Home Assistant OS from the ISO catalog. It is copied for this machine.')}</div>
+            <div class="vmc-xs-muted" id="vm-create-disk-image-help">${t('vmd.disk_image_help', 'A system that comes as a disk: Home Assistant OS from the ISO catalog, or the disk of a machine from VMware (.vmdk), Hyper-V (.vhdx, .vhd) or VirtualBox (.vdi) that you put in an installer folder. It is copied for this machine; the original stays as it is.')}</div>
           </div>
           <div>
             <label class="vmc-xs-bold-muted-2" for="vm-create-driver-iso">${t('vmd.driver_iso_label', 'Driver disc (optional)')}</label>

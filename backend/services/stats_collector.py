@@ -471,6 +471,13 @@ def _build_payload(
     return {"data": data}
 
 
+def _note_energy(ups: Any) -> None:
+    """The UPS's power reading of this round goes to the electricity totals (Power page)."""
+    from backend.services import energy_use
+
+    energy_use.note(ups.get("power_watts") if isinstance(ups, dict) else None)
+
+
 def _publish(data, disks, fans, net, now):
     data["docker_state"] = docker_state()  # whether the list of apps can be trusted (SET-14)
     """Alerts, the UPS watchdog, the cached copy, the SSE broadcast and the 5-minute metrics log."""
@@ -483,6 +490,7 @@ def _publish(data, disks, fans, net, now):
         check_ups_power_watchdog(data["ups"], now)
     except Exception as ue:
         logger.debug(f"[UPS Watchdog] Evaluation error: {ue}")
+    _note_energy(data["ups"])
 
     with Z_STATE.lock:
         Z_STATE.cached_stats = data

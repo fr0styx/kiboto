@@ -314,6 +314,19 @@ def unpack_xz(path: str) -> str:
     return out
 
 
+def _virtual_size(run: Any, qemu_img: str, disk_path: str) -> int:
+    """The size the machine sees, in bytes; 0 when qemu-img cannot say."""
+    import json
+
+    try:
+        info = run(
+            [qemu_img, "info", "--output=json", disk_path], check=True, capture_output=True, text=True, timeout=60
+        )
+        return int(json.loads(info.stdout).get("virtual-size") or 0)
+    except (AttributeError, TypeError, ValueError, OSError):
+        return 0
+
+
 def make_primary_disk(target_vm: dict[str, Any], disk_path: str, qemu_img: str, run: Any = None) -> None:
     """Makes a machine's own disk at its first start: a copy of its ready-made disk (Home Assistant OS,
     VMs decision 5) grown to the size chosen, or an empty disk of that size. Raises on failure."""
@@ -326,7 +339,11 @@ def make_primary_disk(target_vm: dict[str, Any], disk_path: str, qemu_img: str, 
     if image and not (source and os.path.exists(source)):
         raise ValueError("The ready-made disk is missing or outside the installer folders.")
     if source:
+        # qemu-img reads the source's own format (qcow2, VMware, Hyper-V, VirtualBox); the original stays
         run([qemu_img, "convert", "-O", "qcow2", source, disk_path], check=True, capture_output=True, timeout=1800)
-        run([qemu_img, "resize", disk_path, size], check=True, capture_output=True, timeout=120)
+        # grow to the size chosen, never shrink: a disk brought from another system keeps its size
+        wanted = int(size[:-1]) * 1024**3
+        if wanted > _virtual_size(run, qemu_img, disk_path):
+            run([qemu_img, "resize", disk_path, size], check=True, capture_output=True, timeout=120)
     else:
         run([qemu_img, "create", "-f", "qcow2", disk_path, size], check=True, capture_output=True, timeout=120)

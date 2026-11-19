@@ -359,9 +359,13 @@ def _asleep(d: str) -> bool:
     return rag_standby.is_backing_disk_in_standby(rag_standby.resolve_path_backing_dev(d) or d)
 
 
+DISK_IMAGE_EXTS = (".qcow2", ".vmdk", ".vhdx", ".vhd", ".vdi")
+
+
 def scan_disk_images(asleep=_asleep) -> list[dict[str, Any]]:
-    """Ready-made disks (.qcow2) in the installer folders, such as Home Assistant OS (VMs decision 5)."""
-    return scan_isos(asleep, (".qcow2",))
+    """Ready-made disks in the installer folders: Home Assistant OS (.qcow2, VMs decision 5) and the
+    disks of machines made elsewhere: VMware (.vmdk), Hyper-V (.vhdx, .vhd), VirtualBox (.vdi)."""
+    return scan_isos(asleep, DISK_IMAGE_EXTS)
 
 
 def scan_isos(asleep=_asleep, exts: tuple[str, ...] = (".iso", ".img")) -> list[dict[str, Any]]:

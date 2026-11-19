@@ -35,3 +35,13 @@ container not allowed to open `/dev/kvm`) and what to do; machines still run, sl
 
 When the NAS restarts or shuts down (the buttons, or a UPS shutdown), running machines are
 asked to shut down first.
+
+## Bring a machine from VMware, Hyper-V or VirtualBox
+
+Copy the machine's disk file into an installer folder (the `isos` share): a `.vmdk` from VMware,
+a `.vhdx` or `.vhd` from Hyper-V, a `.vdi` from VirtualBox, or a `.qcow2`. In **New machine**,
+choose it under **Ready-made disk**. At the first start Kiboto makes the machine's own copy in
+its own format; the file you brought stays as it is, so you can keep it until the machine has
+proved itself. The disk keeps its size, or grows to the size you chose if that is bigger; it is
+never made smaller. Give the machine the same kind of firmware (UEFI or BIOS) it had before, or
+it will not find its system.

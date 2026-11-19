@@ -41,6 +41,7 @@ def test_the_first_disk_is_a_grown_copy_of_the_ready_made_disk(tmp_path, monkeyp
     )
     assert calls == [
         ["qemu-img", "convert", "-O", "qcow2", str(image), str(tmp_path / "disk.qcow2")],
+        ["qemu-img", "info", "--output=json", str(tmp_path / "disk.qcow2")],  # never shrink (re-audit R8)
         ["qemu-img", "resize", str(tmp_path / "disk.qcow2"), "40G"],
     ]
     calls.clear()

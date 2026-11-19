@@ -216,6 +216,26 @@ async def post_ups_self_test():
         ) from e
 
 
+class EnergyPriceIn(BaseModel):
+    price: float | None = Field(default=None, ge=0, le=1000)
+
+
+@router.get("/ups/energy", dependencies=[Depends(require_scope("hardware:read", "system:view"))])
+def get_energy_use() -> dict[str, Any]:
+    """The electricity the UPS fed today, in the last 7 and 30 days, and the cost of a month."""
+    from backend.services import energy_use
+
+    return energy_use.summary()
+
+
+@router.put("/ups/energy/price", dependencies=[Depends(require_scope("system:config"))])
+def put_energy_price(req: EnergyPriceIn) -> dict[str, Any]:
+    from backend.services import energy_use
+
+    energy_use.set_price(req.price)
+    return energy_use.summary()
+
+
 @router.get("/ups/events", dependencies=[Depends(require_scope("hardware:read", "system:view"))])
 async def get_ups_event_history(page: PageParams = Depends()):
     """Returns historical power events, outages, brownouts, and diagnostic logs from SQLite."""

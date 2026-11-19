@@ -38,7 +38,7 @@ request and response schemas.
 
 <!-- BEGIN generated endpoints: python scripts/api_reference.py --update -->
 
-763 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
+765 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
 
 ### AI Conversation History
 
@@ -967,6 +967,8 @@ request and response schemas.
 | `GET` | `/api/v1/ups/config` | `system:view` | Returns persistent UPS configuration with secret passwords masked |
 | `POST` | `/api/v1/ups/config` | `system:config` | Saves persistent UPS configuration and reloads power watchdog parameters |
 | `POST` | `/api/v1/ups/discover` | `system:config` | Auto-discovers connected USB HID power devices and active LAN power daemons |
+| `GET` | `/api/v1/ups/energy` | any of `hardware:read`, `system:view` | The electricity the UPS fed today, in the last 7 and 30 days, and the cost of a month |
+| `PUT` | `/api/v1/ups/energy/price` | `system:config` | Put Energy Price |
 | `GET` | `/api/v1/ups/events` | any of `hardware:read`, `system:view` | Returns historical power events, outages, brownouts, and diagnostic logs from SQLite |
 | `GET` | `/api/v1/ups/nut-server` | `system:view` | The NUT server for the family's PCs: on or off, port, monitor user, PCs watching (FEAT-11) |
 | `PUT` | `/api/v1/ups/nut-server` | `system:config` | Put Nut Server |

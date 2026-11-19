@@ -6855,6 +6855,25 @@
     "title": "EnabledIn",
     "type": "object"
    },
+   "EnergyPriceIn": {
+    "properties": {
+     "price": {
+      "anyOf": [
+       {
+        "maximum": 1000.0,
+        "minimum": 0.0,
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Price"
+     }
+    },
+    "title": "EnergyPriceIn",
+    "type": "object"
+   },
    "EraseRequest": {
     "properties": {
      "parts": {
@@ -70480,6 +70499,85 @@
      }
     },
     "summary": "Post Ups Discover",
+    "tags": [
+     "UPS & Power Integrity"
+    ],
+    "x-required-scopes": [
+     "system:config"
+    ]
+   }
+  },
+  "/api/v1/ups/energy": {
+   "get": {
+    "description": "The electricity the UPS fed today, in the last 7 and 30 days, and the cost of a month.",
+    "operationId": "get_energy_use_api_v1_ups_energy_get",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Get Energy Use Api V1 Ups Energy Get",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Get Energy Use",
+    "tags": [
+     "UPS & Power Integrity"
+    ],
+    "x-required-scopes": [
+     "hardware:read",
+     "system:view"
+    ]
+   }
+  },
+  "/api/v1/ups/energy/price": {
+   "put": {
+    "operationId": "put_energy_price_api_v1_ups_energy_price_put",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/EnergyPriceIn"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Put Energy Price Api V1 Ups Energy Price Put",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Put Energy Price",
     "tags": [
      "UPS & Power Integrity"
     ],
