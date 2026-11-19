@@ -75,6 +75,21 @@ const ACTIONS = {
     'Read the whole surface of drive {target}? It takes hours, and the drive stays awake and busy until it ends. Nothing is written to it.',
     false,
   ],
+  'iscsi.enable': [
+    'Turn on iSCSI',
+    'Offer disks to other computers on your network? Each disk needs its user name and password.',
+    false,
+  ],
+  'iscsi.save': [
+    'Save the disk',
+    'Save this disk? The service restarts, so a computer that is using a disk is cut off for a moment.',
+    false,
+  ],
+  'iscsi.delete': [
+    'Remove the disk',
+    'Remove this disk from the list? Its file stays in its folder, and the computer that uses it can no longer reach it.',
+    true,
+  ],
   'scripts.enable': [
     'Turn on scripts',
     'Let administrators run their own scripts on this NAS? A script can read and change every file Kiboto can.',

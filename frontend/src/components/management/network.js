@@ -1389,6 +1389,7 @@ export async function deleteVlanSubinterface(vlanName) {
 export function loadNetworkPage() {
   fetchAndRenderNetworkTopology();
   import('./nas-name.js').then((m) => m.loadNasNameCard()).catch(() => {});
+  import('./iscsi-card.js').then((m) => m.renderIscsiCard()).catch(() => {}); // disks for other computers, off by default
   fetchListeningPorts();
   fetchAndRenderTailscaleDetails(); // its options are a section of this page (SET-24 n)
   import('./internet-speed.js').then((m) => m.showInternetSpeed()).catch(() => {});

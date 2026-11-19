@@ -6150,6 +6150,49 @@
     "title": "DiskDetailResponseDriveHealth",
     "type": "object"
    },
+   "DiskIn": {
+    "properties": {
+     "allow": {
+      "default": "",
+      "maxLength": 64,
+      "title": "Allow",
+      "type": "string"
+     },
+     "folder": {
+      "default": "",
+      "maxLength": 4096,
+      "title": "Folder",
+      "type": "string"
+     },
+     "name": {
+      "default": "",
+      "maxLength": 64,
+      "title": "Name",
+      "type": "string"
+     },
+     "secret": {
+      "default": "",
+      "maxLength": 64,
+      "title": "Secret",
+      "type": "string"
+     },
+     "size_gb": {
+      "title": "Size Gb",
+      "type": "integer"
+     },
+     "user": {
+      "maxLength": 64,
+      "title": "User",
+      "type": "string"
+     }
+    },
+    "required": [
+     "size_gb",
+     "user"
+    ],
+    "title": "DiskIn",
+    "type": "object"
+   },
    "DiskLocateEndpointResponse": {
     "additionalProperties": true,
     "description": "POST /disk/locate",
@@ -56951,6 +56994,249 @@
     ],
     "x-required-scopes": [
      "users:write"
+    ]
+   }
+  },
+  "/api/v1/iscsi": {
+   "get": {
+    "description": "Whether the service is on and running, and the disks (never their passwords).",
+    "operationId": "iscsi_view_api_v1_iscsi_get",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Iscsi View Api V1 Iscsi Get",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Iscsi View",
+    "tags": [
+     "iSCSI"
+    ],
+    "x-required-scopes": [
+     "storage:admin"
+    ]
+   }
+  },
+  "/api/v1/iscsi/disks": {
+   "post": {
+    "description": "Adds a disk: makes its file in the folder (it takes no space until it is written to).",
+    "operationId": "iscsi_add_api_v1_iscsi_disks_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/DiskIn"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Iscsi Add Api V1 Iscsi Disks Post",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Iscsi Add",
+    "tags": [
+     "iSCSI"
+    ],
+    "x-required-scopes": [
+     "storage:admin"
+    ]
+   }
+  },
+  "/api/v1/iscsi/disks/{disk_id}": {
+   "delete": {
+    "description": "Takes a disk off the list. Its file is kept unless with_file is true.",
+    "operationId": "iscsi_remove_api_v1_iscsi_disks__disk_id__delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "disk_id",
+      "required": true,
+      "schema": {
+       "title": "Disk Id",
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "with_file",
+      "required": false,
+      "schema": {
+       "default": false,
+       "title": "With File",
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Iscsi Remove Api V1 Iscsi Disks  Disk Id  Delete",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "404": {
+      "$ref": "#/components/responses/NotFound"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Iscsi Remove",
+    "tags": [
+     "iSCSI"
+    ],
+    "x-required-scopes": [
+     "storage:admin"
+    ]
+   },
+   "put": {
+    "description": "Changes a disk: a larger size, another user name or password, another allowed address.",
+    "operationId": "iscsi_change_api_v1_iscsi_disks__disk_id__put",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "disk_id",
+      "required": true,
+      "schema": {
+       "title": "Disk Id",
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/DiskIn"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Iscsi Change Api V1 Iscsi Disks  Disk Id  Put",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "404": {
+      "$ref": "#/components/responses/NotFound"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Iscsi Change",
+    "tags": [
+     "iSCSI"
+    ],
+    "x-required-scopes": [
+     "storage:admin"
+    ]
+   }
+  },
+  "/api/v1/iscsi/enabled": {
+   "put": {
+    "description": "Turns the service on or off. Turning it on asks for confirmation; off never does.",
+    "operationId": "iscsi_switch_api_v1_iscsi_enabled_put",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SwitchIn"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Iscsi Switch Api V1 Iscsi Enabled Put",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Iscsi Switch",
+    "tags": [
+     "iSCSI"
+    ],
+    "x-required-scopes": [
+     "storage:admin"
     ]
    }
   },

@@ -75,6 +75,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   itself before and after. It then says "good to use", "do not trust it with data", or "the cable or the bay".
   It only reads, you start it by hand, it can be stopped, and it stops itself if the drive gets too hot.
 
+- **Disks for other computers (iSCSI)** (Settings → Network): lend a virtualisation host, a PC or a backup
+  program a disk over the network. On the NAS it is one file in a folder you choose, which takes no space until
+  it is written to. Every disk has a user name and a password, and can be limited to one address. Off until
+  you turn it on; it needs nothing loaded into the system's kernel. Guide: docs/ISCSI.md.
+
 ## v2.0.4 (2026-11-19)
 ### 🏡 Apps that go back on their own, a way to move in, and Kiboto in your language everywhere
 

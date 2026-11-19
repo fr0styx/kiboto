@@ -38,7 +38,7 @@ request and response schemas.
 
 <!-- BEGIN generated endpoints: python scripts/api_reference.py --update -->
 
-780 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
+785 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
 
 ### AI Conversation History
 
@@ -1082,6 +1082,16 @@ request and response schemas.
 | :--- | :--- | :--- | :--- |
 | `GET` | `/api/v1/protection/jobs` | any of `backup:read`, `storage:read`, `system:view` | List Protection Jobs |
 | `PUT` | `/api/v1/protection/scrub/{pool_id}` | `storage:admin` | Set Monthly Scrub |
+
+### iSCSI
+
+| Method | Path | Access | What it does |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/v1/iscsi` | `storage:admin` | Whether the service is on and running, and the disks (never their passwords) |
+| `POST` | `/api/v1/iscsi/disks` | `storage:admin` | Adds a disk: makes its file in the folder (it takes no space until it is written to) |
+| `DELETE` | `/api/v1/iscsi/disks/{disk_id}` | `storage:admin` | Takes a disk off the list |
+| `PUT` | `/api/v1/iscsi/disks/{disk_id}` | `storage:admin` | Changes a disk: a larger size, another user name or password, another allowed address |
+| `PUT` | `/api/v1/iscsi/enabled` | `storage:admin` | Turns the service on or off |
 
 ### users
 

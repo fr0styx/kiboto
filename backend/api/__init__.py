@@ -33,6 +33,7 @@ from backend.api.https import router as https_router
 from backend.api.hw_helper import router as hw_helper_router  # noqa: E402
 from backend.api.immich import router as immich_router  # noqa: E402
 from backend.api.invites import router as invites_router  # noqa: E402
+from backend.api.iscsi import router as iscsi_router
 from backend.api.jobs import router as jobs_router  # noqa: E402
 from backend.api.led import router as led_router
 from backend.api.malware_scan import router as malware_scan_router
@@ -179,3 +180,4 @@ api_router.include_router(speedtest_router)  # speed between a device and the NA
 api_router.include_router(snmp_router)  # SNMP v3 agent, off by default
 api_router.include_router(user_scripts_router)  # an administrator's own scripts on a timer, off by default
 api_router.include_router(drive_check_router)  # the check for a new drive, started by hand
+api_router.include_router(iscsi_router)  # disks for other computers over iSCSI, off by default

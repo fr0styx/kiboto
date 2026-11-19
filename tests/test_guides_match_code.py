@@ -117,3 +117,16 @@ def test_new_drive_check_guide():
     assert set(dc.WATCHED) == {"realloc", "pending", "offline", "crc", "nvme_media_err"}
     for said in ("**Good to use**", "**Do not trust it with data**", "**The cable or the bay**"):
         assert said in text, said
+
+
+def test_iscsi_guide_numbers():
+    """docs/ISCSI.md says what the service does: its limits, its port, and that a file is never replaced."""
+    from backend.services import iscsi_target as it
+
+    text = _doc("ISCSI.md")
+    assert f"from {it.MIN_GB} to {it.MAX_GB}" in text and f"Up to {it.MAX_DISKS} disks" in text
+    assert f"port {it.PORT}" in text and it.PORT == 3260
+    assert "12 to 16 characters without spaces" in text and it.SECRET.pattern.endswith("{12,16}$")
+    assert f"ends in `{it.FILE_SUFFIX}`" in text and it.IQN_PREFIX in text
+    assert "never replaces a file that is already there" in text and "never smaller" in text
+    assert f"(`{it.CONTAINER}`)" in text and "has no special rights" in text

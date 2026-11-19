@@ -46,7 +46,8 @@ RUN printf '%s\n' \
     'path-exclude=/usr/share/locale/*' 'path-include=/usr/share/locale/locale.alias' \
     > /etc/dpkg/dpkg.cfg.d/01-kiboto-nodoc
 
-# Core: disks, SMART, UPS, USB, cloud remotes (OPS-11), btrfs and software RAID (REL-4, D2), XFS project quotas (FEAT-10)
+# Core: disks, SMART, UPS, USB, cloud remotes (OPS-11), btrfs and software RAID (REL-4, D2), XFS project quotas (FEAT-10),
+# and tgt, the iSCSI target that runs without kernel modules (disks for other computers, off by default)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     smartmontools \
     btrfs-progs \
@@ -61,6 +62,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     restic \
     fuse3 \
     gocryptfs \
+    tgt \
     && rm -rf /var/lib/apt/lists/*
 
 # Multi-arch Playwright support (linux/amd64 and linux/arm64)
