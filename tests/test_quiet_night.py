@@ -2,16 +2,17 @@
 lower between two times; warm drives, the full-speed override and the fixed modes are untouched."""
 
 import datetime as dt
+import importlib
 
 import pytest
-
-from backend.services import quiet_night
 
 
 @pytest.fixture
 def qn(monkeypatch, tmp_path):
-    monkeypatch.setattr(quiet_night, "SETTINGS_FILE", str(tmp_path / "qn.json"))
-    return quiet_night
+    # the module the fan loop imports now: a test elsewhere may have reloaded it (random order, seed 652131)
+    module = importlib.import_module("backend.services.quiet_night")
+    monkeypatch.setattr(module, "SETTINGS_FILE", str(tmp_path / "qn.json"))
+    return module
 
 
 NIGHT = dt.datetime(2026, 11, 18, 2, 30)

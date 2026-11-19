@@ -328,11 +328,15 @@ def folder_asleep(path: str) -> bool:
     standby (Unraid's spin state or the SMART cache; no disk is touched to find out). A folder
     whose disk can't be told (a remote, a USB stick) isn't held up."""
     try:
-        real = _contained(path or ALLOWED_BROWSE_ROOTS[0])
+        # only a look: must_exist would create a missing .RecycleBin as a side effect (the
+        # random-order runs of 18 Nov: asking about /mnt/user/.RecycleBin made /mnt/user appear)
+        real = _contained(path or ALLOWED_BROWSE_ROOTS[0], must_exist=False)
     except HTTPException:
         return False
     if os.path.basename(real.rstrip("/")) == ".RecycleBin":
         return False  # the bin view skips sleeping bins itself (NREL-16)
+    if not os.path.exists(real):
+        return False  # the listing answers "does not exist"; nothing to wake
     from backend.services.rag_standby import UNKNOWN_BACKING_DEV, is_backing_disk_in_standby, resolve_path_backing_dev
 
     try:

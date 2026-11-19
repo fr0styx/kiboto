@@ -223,6 +223,10 @@ def _fresh_hardware_state():
 
     Z_STATE.fan_state_tracker.clear()
     Z_STATE.critical_temp_active = False
+    Z_STATE.pending_ingest = None  # a card insert one test announced is not the next test's
+    from backend.services import copy_engine
+
+    copy_engine._EJECTED_SLOTS.clear()  # a slot one test ejected skipped the next test's card (random order)
     Z_STATE.critical_alert_at = 0.0
     Z_STATE.thermal_watchdog_engaged = False
     Z_STATE.cached_smart_data.clear()
