@@ -113,6 +113,7 @@ def test_other_referrers_such_as_sboms_are_skipped():
     assert sig.fetch_bundles(DIGEST, _registry(_bundle(), extra=[sbom])) == [_bundle()]
 
 
+@pytest.mark.real_network
 def test_live_registry_signature():
     """Against GHCR: a published build verifies (skipped without network)."""
     try:

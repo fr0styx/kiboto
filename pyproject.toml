@@ -35,7 +35,7 @@ python_files = ["test_*.py"]
 addopts = "-v --tb=short"
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
-markers = ["real_confirmations: run the real destructive-action confirm flow", "real_signatures: run the real update-signature check", "real_storage_tools: see the btrfs/ZFS/mdadm tools of the machine running the tests"]
+markers = ["real_confirmations: run the real destructive-action confirm flow", "real_signatures: run the real update-signature check", "real_storage_tools: see the btrfs/ZFS/mdadm tools of the machine running the tests", "real_network: looks names up and reaches the internet; skips itself when it cannot"]
 filterwarnings = [
     "ignore::DeprecationWarning:starlette.testclient",
     "ignore::starlette.exceptions.StarletteDeprecationWarning",

@@ -598,6 +598,54 @@ def _no_host_flush(tmp_path_factory):
     os.environ["PATH"], os.sync = old_path, old_sync
 
 
+class OutsideLookup(AssertionError):
+    """A test asked this machine's DNS for a name: it would pass or fail with the network."""
+
+
+# Public names tests use as examples, at fixed addresses: no test asks the network for them.
+KNOWN_NAMES = {
+    "en.wikipedia.org": "208.80.154.224",
+    "api.github.com": "140.82.112.5",
+    "discord.com": "162.159.128.233",
+    "ntfy.sh": "159.203.148.75",
+}
+
+
+@pytest.fixture(autouse=True)
+def _no_outside_lookups(request, monkeypatch):
+    """No test looks a name up on the network. Addresses and this machine's own names resolve as
+    always; the names in KNOWN_NAMES resolve to fixed addresses; a name without a dot (a container
+    on a Docker network, such as a model server) does not resolve, on every machine; any other
+    name is an error that says so. Two guard tests resolved wikipedia and github for real, and a
+    lookup that failed for a moment failed the gate (19 Nov 2026).
+    Tests marked @pytest.mark.real_network reach the internet and skip themselves when they can't."""
+    import ipaddress
+    import socket
+
+    if request.node.get_closest_marker("real_network"):
+        return
+    real = socket.getaddrinfo
+    own = {"", "localhost", "testserver", "ip6-localhost", socket.gethostname().lower()}
+
+    def lookup(host, port=None, *args, **kwargs):
+        name = host.decode("ascii", "replace") if isinstance(host, bytes) else host
+        low = str(name).lower()
+        if name is None or low in own:
+            return real(host, port, *args, **kwargs)
+        try:
+            ipaddress.ip_address(low.split("%")[0])
+            return real(host, port, *args, **kwargs)
+        except ValueError:
+            pass
+        if low in KNOWN_NAMES:
+            return real(KNOWN_NAMES[low], port, *args, **kwargs)
+        if "." not in low:
+            raise socket.gaierror(socket.EAI_NONAME, "Name or service not known")
+        raise OutsideLookup(f"a test looked up {name!r} on the network; give it an address or add it to KNOWN_NAMES")
+
+    monkeypatch.setattr(socket, "getaddrinfo", lookup)
+
+
 @pytest.fixture
 def fixed_dns(monkeypatch):
     """Names resolve from a fixed table for the address guard: a test must not depend on this
@@ -607,13 +655,7 @@ def fixed_dns(monkeypatch):
 
     from backend.services import ssrf_guard
 
-    table = {
-        "en.wikipedia.org": "208.80.154.224",
-        "api.github.com": "140.82.112.5",
-        "discord.com": "162.159.128.233",
-        "localhost": "127.0.0.1",
-        "metadata.google.internal": "169.254.169.254",
-    }
+    table = {**KNOWN_NAMES, "localhost": "127.0.0.1", "metadata.google.internal": "169.254.169.254"}
 
     def resolve(hostname):
         try:
