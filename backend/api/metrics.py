@@ -18,6 +18,22 @@ def _safe_float(val):
         return 0.0
 
 
+def _add_energy(add_gauge) -> None:
+    """The electricity totals of the Power page, once a UPS has been measured."""
+    from backend.services import energy_use
+
+    try:
+        seen = energy_use.summary()
+    except (OSError, ValueError, TypeError):
+        return
+    if not seen.get("measuring"):
+        return
+    add_gauge("kiboto_energy_today_kwh", "Electricity used today", seen.get("today_kwh"))
+    add_gauge("kiboto_energy_7d_kwh", "Electricity used in the last 7 days", seen.get("week_kwh"))
+    add_gauge("kiboto_energy_30d_kwh", "Electricity used in the last 30 days", seen.get("month_kwh"))
+    add_gauge("kiboto_energy_average_watts", "Average power over the measured time", seen.get("avg_watts"))
+
+
 @router.get("/metrics", response_class=PlainTextResponse, dependencies=[Depends(require_scope("system:view"))])
 def prometheus_metrics():
     """Prometheus exposition format for Kiboto telemetry."""
@@ -120,6 +136,8 @@ def prometheus_metrics():
         add_gauge("kiboto_ups_load_percent", "UPS Load", ups.get("load_pct"))
         add_gauge("kiboto_ups_line_volts", "UPS Line Voltage", ups.get("line_volts"))
         add_gauge("kiboto_ups_battery_volts", "UPS Battery Voltage", ups.get("battery_volts"))
+        add_gauge("kiboto_ups_power_watts", "Power drawn through the UPS", ups.get("power_watts"))
+    _add_energy(add_gauge)
 
     # Unraid
     unraid = stats.get("unraid", {})

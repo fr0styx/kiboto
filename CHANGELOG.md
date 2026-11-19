@@ -23,6 +23,10 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Kib without a model says them too**: when no AI model is running, Kib writes its answers about the NAS
   itself; those now include the electricity used and any damaged files.
 
+- **Electricity on the metrics page**: for a Grafana or Home Assistant dashboard of your own, `/api/metrics`
+  now carries the power drawn through the UPS and the electricity totals of the Power page (today, 7 days,
+  30 days, the average).
+
 ## v2.0.4 (2026-11-19)
 ### 🏡 Apps that go back on their own, a way to move in, and Kiboto in your language everywhere
 

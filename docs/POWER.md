@@ -81,3 +81,7 @@ Some UPS models report their load only as a percentage. The section then asks fo
 rated power in watts, which is on its label or in its manual (not the VA figure: a 1500 VA unit
 is often 900 W). Kiboto works out the watts from the percentage and that number; it never
 guesses it.
+
+For a dashboard of your own, the same numbers are on the metrics page (`/api/metrics`, Prometheus
+format): `kiboto_ups_power_watts`, `kiboto_energy_today_kwh`, `kiboto_energy_7d_kwh`,
+`kiboto_energy_30d_kwh` and `kiboto_energy_average_watts`.
