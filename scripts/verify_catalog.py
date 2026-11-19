@@ -40,6 +40,11 @@ WAIT_SECONDS = {
     "immich": 420,
     "iobroker": 480,
     "tandoor": 300,
+    "linkwarden": 420,
+    "bookstack": 300,
+    "docmost": 300,
+    "joplin": 300,
+    "planka": 300,
     "kimai": 300,
     "crafty": 300,
     "netdata": 300,
@@ -150,7 +155,7 @@ def verify(app: dict, root: str, keep_images: bool, taken: set[int]) -> dict:
     try:
         final = None
         for ev in app_catalog.stream_deploy_catalog_app(
-            app["id"], host_port=port, storage_root=root, container_name=service
+            app["id"], host_port=port, storage_root=root, container_name=service, browser_host="127.0.0.1"
         ):
             if ev.get("done"):
                 final = ev

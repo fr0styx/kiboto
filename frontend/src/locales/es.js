@@ -6391,6 +6391,7 @@ export default {
   "ci.compose_failed": "No se pudo crear el archivo compose: {error}",
   "ci.connecting": "Conectando con el registro en vivo…",
   "install.preparing_service": "Preparando {name} ({image})…",
+  "install.needs_address": "{app} necesita saber la dirección con la que se abre. Instálala desde la página de Kiboto en un navegador: se usa la dirección del navegador.",
   "install.started_service": "{name} iniciado.",
   "install.set_aside": "Apartando el “{name}” existente. Vuelve si el nuevo no arranca.",
   "install.created": "Contenedor creado (ID {id}).",

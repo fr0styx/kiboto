@@ -6391,6 +6391,7 @@ export default {
   "ci.compose_failed": "无法生成 compose 文件：{error}",
   "ci.connecting": "正在连接实时日志…",
   "install.preparing_service": "正在准备 {name}（{image}）…",
+  "install.needs_address": "{app} 需要知道人们打开它时使用的地址。请在浏览器中从 Kiboto 页面安装：会使用浏览器中的地址。",
   "install.started_service": "{name} 已启动。",
   "install.set_aside": "正在将现有的“{name}”放到一边。如果新的无法启动，它会恢复。",
   "install.created": "容器已创建（ID {id}）。",

@@ -1008,6 +1008,56 @@ def generate_compose_for_app(
 _SECRET_RE = re.compile(r"\{\{secret:([a-z0-9_]{1,32})\}\}")
 
 
+ADDRESS_RE = re.compile(r"\{\{(host|port)\}\}")
+
+
+def needs_address(app: dict[str, Any]) -> bool:
+    """Whether the app's settings (its own or a companion's) use the address people reach it at."""
+    envs = [app.get("env") or {}] + [(s.get("env") or {}) for s in (app.get("stack_services") or {}).values()]
+    return any(ADDRESS_RE.search(str(v)) for env in envs for v in env.values())
+
+
+def with_address(app: dict[str, Any], host: str, port: int) -> dict[str, Any]:
+    """A copy of the template with {{host}} and {{port}} in its settings filled in: some apps
+    (BookStack, Joplin Server, Planka...) build their links and check sign-ins against the address
+    they are told. It is the address of the browser that installs the app, so it must be the one
+    the household uses; if the NAS's address changes later, the app is installed again over its data."""
+
+    def fill(env: dict[str, Any]) -> dict[str, Any]:
+        return {
+            k: ADDRESS_RE.sub(lambda m: host if m.group(1) == "host" else str(port), str(v)) for k, v in env.items()
+        }
+
+    out = dict(app)
+    out["env"] = fill(app.get("env") or {})
+    if app.get("stack_services"):
+        out["stack_services"] = {
+            name: ({**s, "env": fill(s["env"])} if s.get("env") else s) for name, s in app["stack_services"].items()
+        }
+    return out
+
+
+class AddressNeeded(ValueError):
+    """The app must be told the address people open it at, and the install came without one."""
+
+
+NEEDS_ADDRESS = "{app} must know the address people open it at. Install it from Kiboto's page in a browser: the address in the browser is used."
+
+
+def app_for_install(app_id: str, browser_host: str = "", host_port: int | None = None) -> dict[str, Any] | None:
+    """The catalog app as it will be installed: with {{host}} and {{port}} in its settings filled in
+    when it uses them. Raises AddressNeeded when it does and the install has no usable address."""
+    app = get_catalog_app(app_id)
+    if not app or not needs_address(app):
+        return app
+    from backend.services.app_after_start import valid_host
+
+    address = valid_host(browser_host)
+    if not address:
+        raise AddressNeeded(NEEDS_ADDRESS.format(app=app.get("name") or app_id))
+    return with_address(app, address, host_port or int(app.get("default_port", 8080)))
+
+
 def _stack_secrets(app_dir: str) -> dict[str, str]:
     """Generated passwords for a stack, kept so a redeploy reuses them (M3)."""
     path = os.path.join(app_dir, ".zettnas-secrets.json")
@@ -1556,7 +1606,7 @@ def _deploy_steps(
     Deploys a curated application stack from the catalog, streaming real-time progress
     events (pre-flight checks, storage creation, image pulling, container creation, and startup).
     """
-    app = get_catalog_app(app_id)
+    app = app_for_install(app_id, browser_host, host_port)
     if not app:
         yield {
             "step": "error",
@@ -1939,6 +1989,7 @@ INSTALL_SAID: dict[str, str] = {
     "created": "Container created successfully (ID: {id}).",
     "starting": "Starting container '{name}'...",
     "not_found": "Application '{app}' was not found in the curated catalog.",
+    "needs_address": "{app} must know the address people open it at. Install it from Kiboto's page in a browser: the address in the browser is used.",
     "init": "Initializing deployment for {app} as '{name}' (Port :{port})...",
     "storage": "Preparing persistent storage directories under {path}...",
     "unsafe_folders": "The template asks for host folders ({folders}); only folders inside the app's own folder are allowed.",
@@ -1982,8 +2033,11 @@ def with_text(event: dict[str, Any]) -> dict[str, Any]:
 
 def stream_deploy_catalog_app(*args: Any, **kwargs: Any) -> Iterator[dict[str, Any]]:
     """Deploys a curated app (see _deploy_steps), each progress event carrying how it was said."""
-    for event in _deploy_steps(*args, **kwargs):
-        yield with_text(event)
+    try:
+        for event in _deploy_steps(*args, **kwargs):
+            yield with_text(event)
+    except AddressNeeded as e:  # raised before anything is made
+        yield with_text({"step": "error", "percent": 0, "message": str(e), "error": "Address needed", "done": True})
 
 
 # shared with the stack apply (Apps decision 4b)

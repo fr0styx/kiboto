@@ -200,7 +200,14 @@ def test_e2e_live_desktop_session_and_badge():
             timeout=12000,
         )
         if page.is_visible("#login-toggle-manual"):
-            page.click("#login-toggle-manual", timeout=5000)
+            try:
+                page.click("#login-toggle-manual", timeout=5000)
+            except Exception as swapped:  # noqa: BLE001 (Playwright's timeout, whichever API raised it)
+                # the form swapped to the full one between the look and the click (CI, 19 Nov 2026):
+                # the click then waits on a button that is gone. The field must be there now.
+                if "Timeout" not in type(swapped).__name__:
+                    raise
+                page.wait_for_selector("#login-username", state="visible", timeout=5000)
         if page.is_visible("#login-username"):
             page.fill("#login-username", "admin")
         page.fill("#login-password", os.environ.get("KIBOTO_E2E_PASSWORD") or os.environ.get("WEB_PASSWORD", "admin"))

@@ -109,6 +109,10 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 
 - **Tandoor Recipes, Jellystat and Kimai** in the catalog (147 apps in all), each installed with its database.
 
+- **BookStack, Linkwarden, Joplin Server, Planka, Docmost and wallabag** in the catalog (153 apps in all), each
+  with its database. They are set up for the address you install them from; the Apps guide says what to do if
+  that address changes.
+
 #### Changes
 
 - **The Security check says it in words**: "Everything is fine" or "2 things need a look", with what needs a

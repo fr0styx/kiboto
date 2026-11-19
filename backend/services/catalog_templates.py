@@ -18,6 +18,8 @@ Each template is deployed by backend/services/app_catalog.py through the Docker 
   probe             "tcp" when the app has no web UI (game servers); webui_path is None
   host_network      True: the app shares the host's network (TVs find a DLNA server by multicast);
                     no port is mapped, the app answers on its own default_port
+  address_bound     True when env (the app's or a companion's) uses {{host}} or {{port}}: the address
+                    people open the app at, filled in from the installing browser (app_catalog.with_address)
   logo              icon name from the dashboard-icons set (cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons)
 
 Every template here was deployed on a real host and its web UI answered before it was added
@@ -2521,6 +2523,203 @@ MORE_APPS: list[dict[str, Any]] = [
         },
         "tags": ["time tracking"],
         "logo": "kimai",
+    },
+    # ---------------- Added 19 Nov 2026, fourth batch: apps that must know their address (address_bound) ----------------
+    {
+        "id": "bookstack",
+        "name": "BookStack",
+        "category": "productivity",
+        "description": "A wiki laid out as shelves, books and pages; the first sign-in is admin@admin.com / "
+        "password, change it at once.",
+        "image": "lscr.io/linuxserver/bookstack:latest",
+        "default_port": 6875,
+        "ports": ["6875:80"],
+        "webui_path": "/",
+        "env": {
+            "PUID": "1000",
+            "PGID": "100",
+            "TZ": "UTC",
+            "APP_URL": "http://{{host}}:{{port}}",
+            "APP_KEY": "{{secret:app_key}}",
+            "DB_HOST": "db",
+            "DB_PORT": "3306",
+            "DB_USERNAME": "bookstack",
+            "DB_PASSWORD": "{{secret:db_password}}",
+            "DB_DATABASE": "bookstack",
+        },
+        "volumes": {"config": "/config"},
+        "stack_services": {
+            "db": {
+                "image": "mariadb:lts",
+                "env": {
+                    "MYSQL_RANDOM_ROOT_PASSWORD": "yes",
+                    "MYSQL_USER": "bookstack",
+                    "MYSQL_PASSWORD": "{{secret:db_password}}",
+                    "MYSQL_DATABASE": "bookstack",
+                },
+                "volumes": {"db": "/var/lib/mysql"},
+            }
+        },
+        "tags": ["wiki", "documentation"],
+        "address_bound": True,
+        "logo": "bookstack",
+    },
+    {
+        "id": "linkwarden",
+        "name": "Linkwarden",
+        "category": "productivity",
+        "description": "Bookmarks that keep a copy of every page as a screenshot and a PDF, shared in collections.",
+        "image": "ghcr.io/linkwarden/linkwarden:latest",
+        "default_port": 3018,
+        "ports": ["3018:3000"],
+        "webui_path": "/",
+        "env": {
+            "NEXTAUTH_URL": "http://{{host}}:{{port}}/api/v1/auth",
+            "NEXTAUTH_SECRET": "{{secret:auth_secret}}",
+            "DATABASE_URL": "postgresql://postgres:{{secret:db_password}}@db:5432/postgres",
+        },
+        "volumes": {"data": "/data/data"},
+        "stack_services": {
+            "db": {
+                "image": "postgres:16-alpine",
+                "env": {
+                    "POSTGRES_DB": "postgres",
+                    "POSTGRES_USER": "postgres",
+                    "POSTGRES_PASSWORD": "{{secret:db_password}}",
+                },
+                "volumes": {"pgdata": "/var/lib/postgresql/data"},
+            }
+        },
+        "tags": ["bookmarks", "archive"],
+        "address_bound": True,
+        "logo": "linkwarden",
+    },
+    {
+        "id": "joplin",
+        "name": "Joplin Server",
+        "category": "productivity",
+        "description": "Keeps the notes of the Joplin apps in step across phones and computers; the first sign-in "
+        "is admin@localhost / admin, change it at once.",
+        "image": "joplin/server:latest",
+        "default_port": 22300,
+        "webui_path": "/",
+        "env": {
+            "APP_PORT": "22300",
+            "APP_BASE_URL": "http://{{host}}:{{port}}",
+            "DB_CLIENT": "pg",
+            "POSTGRES_HOST": "db",
+            "POSTGRES_PORT": "5432",
+            "POSTGRES_DATABASE": "joplin",
+            "POSTGRES_USER": "joplin",
+            "POSTGRES_PASSWORD": "{{secret:db_password}}",
+        },
+        "volumes": {},
+        "stack_services": {
+            "db": {
+                "image": "postgres:16-alpine",
+                "env": {
+                    "POSTGRES_DB": "joplin",
+                    "POSTGRES_USER": "joplin",
+                    "POSTGRES_PASSWORD": "{{secret:db_password}}",
+                },
+                "volumes": {"pgdata": "/var/lib/postgresql/data"},
+            }
+        },
+        "tags": ["notes", "sync"],
+        "address_bound": True,
+        "logo": "joplin",
+    },
+    {
+        "id": "planka",
+        "name": "Planka",
+        "category": "productivity",
+        "description": "Boards, lists and cards for projects, updated live for everyone looking at them.",
+        "image": "ghcr.io/plankanban/planka:latest",
+        "default_port": 3019,
+        "ports": ["3019:1337"],
+        "webui_path": "/",
+        "env": {
+            "BASE_URL": "http://{{host}}:{{port}}",
+            "DATABASE_URL": "postgresql://postgres:{{secret:db_password}}@db/planka",
+            "SECRET_KEY": "{{secret:secret_key}}",
+            "DEFAULT_ADMIN_EMAIL": "admin@example.com",
+            "DEFAULT_ADMIN_PASSWORD": "{{secret:admin_password}}",
+            "DEFAULT_ADMIN_NAME": "Admin",
+            "DEFAULT_ADMIN_USERNAME": "admin",
+        },
+        "credentials": {"user": "admin", "password": "{{secret:admin_password}}"},
+        "volumes": {
+            "favicons": "/app/public/favicons",
+            "user-avatars": "/app/public/user-avatars",
+            "background-images": "/app/public/background-images",
+            "attachments": "/app/private/attachments",
+        },
+        "stack_services": {
+            "db": {
+                "image": "postgres:16-alpine",
+                "env": {
+                    "POSTGRES_DB": "planka",
+                    "POSTGRES_USER": "postgres",
+                    "POSTGRES_PASSWORD": "{{secret:db_password}}",
+                },
+                "volumes": {"pgdata": "/var/lib/postgresql/data"},
+            }
+        },
+        "tags": ["kanban", "projects"],
+        "address_bound": True,
+        "logo": "planka",
+    },
+    {
+        "id": "docmost",
+        "name": "Docmost",
+        "category": "productivity",
+        "description": "A shared wiki and documents written together at the same time, with spaces, comments and "
+        "diagrams.",
+        "image": "docmost/docmost:latest",
+        "default_port": 3020,
+        "ports": ["3020:3000"],
+        "webui_path": "/",
+        "env": {
+            "APP_URL": "http://{{host}}:{{port}}",
+            "APP_SECRET": "{{secret:app_secret}}",
+            "DATABASE_URL": "postgresql://docmost:{{secret:db_password}}@db:5432/docmost?schema=public",
+            "REDIS_URL": "redis://redis:6379",
+        },
+        "volumes": {"storage": "/app/data/storage"},
+        "stack_services": {
+            "db": {
+                "image": "postgres:16-alpine",
+                "env": {
+                    "POSTGRES_DB": "docmost",
+                    "POSTGRES_USER": "docmost",
+                    "POSTGRES_PASSWORD": "{{secret:db_password}}",
+                },
+                "volumes": {"pgdata": "/var/lib/postgresql/data"},
+            },
+            "redis": {"image": "redis:7.2-alpine", "volumes": {"redis": "/data"}},
+        },
+        "tags": ["wiki", "documents"],
+        "address_bound": True,
+        "logo": "docmost",
+    },
+    {
+        "id": "wallabag",
+        "name": "wallabag",
+        "category": "productivity",
+        "description": "Save articles to read later without ads, on any device; the first sign-in is wallabag / "
+        "wallabag, change it at once.",
+        "image": "wallabag/wallabag:latest",
+        "default_port": 8143,
+        "ports": ["8143:80"],
+        "webui_path": "/",
+        "env": {
+            "SYMFONY__ENV__DOMAIN_NAME": "http://{{host}}:{{port}}",
+            "SYMFONY__ENV__SECRET": "{{secret:app_secret}}",
+        },
+        "volumes": {"data": "/var/www/wallabag/data", "images": "/var/www/wallabag/web/assets/images"},
+        "tags": ["read later"],
+        "address_bound": True,
+        "logo": "wallabag",
     },
 ]
 
