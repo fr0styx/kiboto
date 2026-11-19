@@ -65,6 +65,7 @@ from backend.api.system import router as system_router
 from backend.api.update_watch import router as update_watch_router
 from backend.api.ups import router as ups_router
 from backend.api.user_data import router as user_data_router
+from backend.api.user_scripts import router as user_scripts_router
 from backend.api.vms import router as vms_router
 from backend.api.wallpapers import router as wallpapers_router
 from backend.api.webdav import router as webdav_router
@@ -175,3 +176,4 @@ api_router.include_router(heat_shutdown_router)  # switch off when too hot, off 
 api_router.include_router(https_router)  # HTTPS at home via ACME over DNS, off by default (audit A9)
 api_router.include_router(speedtest_router)  # speed between a device and the NAS (re-audit R2)
 api_router.include_router(snmp_router)  # SNMP v3 agent, off by default
+api_router.include_router(user_scripts_router)  # an administrator's own scripts on a timer, off by default

@@ -70,6 +70,12 @@ const ACTIONS = {
     true,
   ],
   'webdav.config': ['Save WebDAV', 'Change who can reach files over WebDAV and which folder it shares?', false],
+  'scripts.enable': [
+    'Turn on scripts',
+    'Let administrators run their own scripts on this NAS? A script can read and change every file Kiboto can.',
+    true,
+  ],
+  'scripts.save': ['Save script', "Save this script? It runs with Kiboto's rights when its time comes.", false],
   'security.rotate_key': [
     'Replace the key',
     'Replace the secret key? Everyone signs in to WebDAV and two-factor again.',

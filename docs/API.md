@@ -38,7 +38,7 @@ request and response schemas.
 
 <!-- BEGIN generated endpoints: python scripts/api_reference.py --update -->
 
-769 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
+777 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
 
 ### AI Conversation History
 
@@ -639,6 +639,19 @@ request and response schemas.
 | `POST` | `/api/v1/samba/shares` | `shares:manage` | Creates or updates a Samba share |
 | `DELETE` | `/api/v1/samba/shares/{name}` | `shares:manage` | Deletes a configured Samba share |
 | `GET` | `/api/v1/samba/status` | any of `shares:manage`, `storage:read`, `system:view` | Returns current runtime status of Samba service and sidecar |
+
+### Scripts
+
+| Method | Path | Access | What it does |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/v1/scripts` | `*` | Whether scheduled scripts are on, whether this system can limit one to a folder, and the scripts |
+| `POST` | `/api/v1/scripts` | `*` | Adds a script |
+| `PUT` | `/api/v1/scripts/enabled` | `*` | Turns scheduled scripts on or off |
+| `DELETE` | `/api/v1/scripts/{script_id}` | `*` | Takes a script away, with the record of its runs |
+| `PUT` | `/api/v1/scripts/{script_id}` | `*` | Changes a script: its text, its schedule, its folder limit or its time limit |
+| `POST` | `/api/v1/scripts/{script_id}/run` | `*` | Starts a script now |
+| `GET` | `/api/v1/scripts/{script_id}/runs` | `*` | The last runs of a script, newest first, each with the end of what it printed |
+| `POST` | `/api/v1/scripts/{script_id}/stop` | `*` | Stops a run that is going, with everything the script started |
 
 ### Security
 

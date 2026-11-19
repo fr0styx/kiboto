@@ -243,6 +243,16 @@ def _run_weakness_feed(now: float) -> None:
         weakness_feed.refresh(now)
 
 
+def _run_user_scripts(now: float) -> None:
+    """An administrator's own scripts that are due this minute (off unless turned on)."""
+    try:
+        from backend.services import user_scripts
+
+        user_scripts.run_due(now)
+    except (OSError, RuntimeError, ValueError) as e:
+        logger.warning("[Scheduler] Scheduled scripts failed: %s", e)
+
+
 def _run_route_check(now: float) -> None:
     """Every 10 minutes: a route another device offers over the NAS's own network is not accepted
     (it would cut the NAS off). It used to run inside every status read (SET-16 stage 2)."""
@@ -285,6 +295,7 @@ def _run_scheduled_tasks():
         _run_usb_disks()
         _run_upload_sweep(now)
         _run_route_check(now)
+        _run_user_scripts(now)
         on_its_own("weakness feed", _run_weakness_feed, now)
         cfg = get_smart_schedule()
 

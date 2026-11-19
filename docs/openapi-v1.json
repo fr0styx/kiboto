@@ -36119,66 +36119,6 @@
     "title": "ScanSettings",
     "type": "object"
    },
-   "ScheduleIn": {
-    "properties": {
-     "every": {
-      "default": "daily",
-      "enum": [
-       "hourly",
-       "daily",
-       "weekly"
-      ],
-      "title": "Every",
-      "type": "string"
-     },
-     "immutable_days": {
-      "anyOf": [
-       {
-        "maximum": 3650.0,
-        "minimum": 0.0,
-        "type": "integer"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "description": "Days each snapshot can't be deleted",
-      "title": "Immutable Days"
-     },
-     "keep": {
-      "default": 14,
-      "maximum": 1000.0,
-      "minimum": 1.0,
-      "title": "Keep",
-      "type": "integer"
-     },
-     "keep_daily": {
-      "anyOf": [
-       {
-        "maximum": 3650.0,
-        "minimum": 0.0,
-        "type": "integer"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "description": "Also keep one a day for this many days",
-      "title": "Keep Daily"
-     },
-     "share": {
-      "maxLength": 128,
-      "minLength": 1,
-      "title": "Share",
-      "type": "string"
-     }
-    },
-    "required": [
-     "share"
-    ],
-    "title": "ScheduleIn",
-    "type": "object"
-   },
    "ScreenConfigRequest": {
     "properties": {
      "brightness": {
@@ -36258,6 +36198,48 @@
      }
     },
     "title": "ScreenConfigRequest",
+    "type": "object"
+   },
+   "ScriptIn": {
+    "properties": {
+     "body": {
+      "maxLength": 131072,
+      "title": "Body",
+      "type": "string"
+     },
+     "enabled": {
+      "default": true,
+      "title": "Enabled",
+      "type": "boolean"
+     },
+     "limit_folder": {
+      "default": "",
+      "maxLength": 4096,
+      "title": "Limit Folder",
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 200,
+      "title": "Name",
+      "type": "string"
+     },
+     "schedule": {
+      "$ref": "#/components/schemas/backend__api__user_scripts__ScheduleIn",
+      "default": {
+       "kind": "manual"
+      }
+     },
+     "timeout_min": {
+      "default": 30,
+      "title": "Timeout Min",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "name",
+     "body"
+    ],
+    "title": "ScriptIn",
     "type": "object"
    },
    "ScrubSwitch": {
@@ -37521,6 +37503,19 @@
      "keys"
     ],
     "title": "Subscription",
+    "type": "object"
+   },
+   "SwitchIn": {
+    "properties": {
+     "enabled": {
+      "title": "Enabled",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "enabled"
+    ],
+    "title": "SwitchIn",
     "type": "object"
    },
    "SyncAllCalendarFeedsResponse": {
@@ -41982,6 +41977,114 @@
      "path"
     ],
     "title": "RestoreIn",
+    "type": "object"
+   },
+   "backend__api__snapshots__ScheduleIn": {
+    "properties": {
+     "every": {
+      "default": "daily",
+      "enum": [
+       "hourly",
+       "daily",
+       "weekly"
+      ],
+      "title": "Every",
+      "type": "string"
+     },
+     "immutable_days": {
+      "anyOf": [
+       {
+        "maximum": 3650.0,
+        "minimum": 0.0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "Days each snapshot can't be deleted",
+      "title": "Immutable Days"
+     },
+     "keep": {
+      "default": 14,
+      "maximum": 1000.0,
+      "minimum": 1.0,
+      "title": "Keep",
+      "type": "integer"
+     },
+     "keep_daily": {
+      "anyOf": [
+       {
+        "maximum": 3650.0,
+        "minimum": 0.0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "Also keep one a day for this many days",
+      "title": "Keep Daily"
+     },
+     "share": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Share",
+      "type": "string"
+     }
+    },
+    "required": [
+     "share"
+    ],
+    "title": "ScheduleIn",
+    "type": "object"
+   },
+   "backend__api__user_scripts__ScheduleIn": {
+    "properties": {
+     "at": {
+      "anyOf": [
+       {
+        "maxLength": 5,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "At"
+     },
+     "days": {
+      "anyOf": [
+       {
+        "items": {
+         "type": "integer"
+        },
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Days"
+     },
+     "kind": {
+      "default": "manual",
+      "title": "Kind",
+      "type": "string"
+     },
+     "minute": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Minute"
+     }
+    },
+    "title": "ScheduleIn",
     "type": "object"
    }
   },
@@ -64914,6 +65017,387 @@
     ]
    }
   },
+  "/api/v1/scripts": {
+   "get": {
+    "description": "Whether scheduled scripts are on, whether this system can limit one to a folder, and the scripts.",
+    "operationId": "list_scripts_api_v1_scripts_get",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response List Scripts Api V1 Scripts Get",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "List Scripts",
+    "tags": [
+     "Scripts"
+    ],
+    "x-required-scopes": [
+     "*"
+    ]
+   },
+   "post": {
+    "description": "Adds a script.",
+    "operationId": "add_script_api_v1_scripts_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ScriptIn"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Add Script Api V1 Scripts Post",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Add Script",
+    "tags": [
+     "Scripts"
+    ],
+    "x-required-scopes": [
+     "*"
+    ]
+   }
+  },
+  "/api/v1/scripts/enabled": {
+   "put": {
+    "description": "Turns scheduled scripts on or off. Turning them on asks for confirmation; off never does.",
+    "operationId": "switch_scripts_api_v1_scripts_enabled_put",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SwitchIn"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Switch Scripts Api V1 Scripts Enabled Put",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Switch Scripts",
+    "tags": [
+     "Scripts"
+    ],
+    "x-required-scopes": [
+     "*"
+    ]
+   }
+  },
+  "/api/v1/scripts/{script_id}": {
+   "delete": {
+    "description": "Takes a script away, with the record of its runs.",
+    "operationId": "remove_script_api_v1_scripts__script_id__delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "script_id",
+      "required": true,
+      "schema": {
+       "title": "Script Id",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Remove Script Api V1 Scripts  Script Id  Delete",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "404": {
+      "$ref": "#/components/responses/NotFound"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Remove Script",
+    "tags": [
+     "Scripts"
+    ],
+    "x-required-scopes": [
+     "*"
+    ]
+   },
+   "put": {
+    "description": "Changes a script: its text, its schedule, its folder limit or its time limit.",
+    "operationId": "change_script_api_v1_scripts__script_id__put",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "script_id",
+      "required": true,
+      "schema": {
+       "title": "Script Id",
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ScriptIn"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Change Script Api V1 Scripts  Script Id  Put",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "404": {
+      "$ref": "#/components/responses/NotFound"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Change Script",
+    "tags": [
+     "Scripts"
+    ],
+    "x-required-scopes": [
+     "*"
+    ]
+   }
+  },
+  "/api/v1/scripts/{script_id}/run": {
+   "post": {
+    "description": "Starts a script now. Its end is written to the security log like a scheduled run's.",
+    "operationId": "run_script_api_v1_scripts__script_id__run_post",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "script_id",
+      "required": true,
+      "schema": {
+       "title": "Script Id",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Run Script Api V1 Scripts  Script Id  Run Post",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "404": {
+      "$ref": "#/components/responses/NotFound"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Run Script",
+    "tags": [
+     "Scripts"
+    ],
+    "x-required-scopes": [
+     "*"
+    ]
+   }
+  },
+  "/api/v1/scripts/{script_id}/runs": {
+   "get": {
+    "description": "The last runs of a script, newest first, each with the end of what it printed.",
+    "operationId": "script_runs_api_v1_scripts__script_id__runs_get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "script_id",
+      "required": true,
+      "schema": {
+       "title": "Script Id",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Script Runs Api V1 Scripts  Script Id  Runs Get",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "404": {
+      "$ref": "#/components/responses/NotFound"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Script Runs",
+    "tags": [
+     "Scripts"
+    ],
+    "x-required-scopes": [
+     "*"
+    ]
+   }
+  },
+  "/api/v1/scripts/{script_id}/stop": {
+   "post": {
+    "description": "Stops a run that is going, with everything the script started.",
+    "operationId": "stop_script_api_v1_scripts__script_id__stop_post",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "script_id",
+      "required": true,
+      "schema": {
+       "title": "Script Id",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Stop Script Api V1 Scripts  Script Id  Stop Post",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "404": {
+      "$ref": "#/components/responses/NotFound"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Stop Script",
+    "tags": [
+     "Scripts"
+    ],
+    "x-required-scopes": [
+     "*"
+    ]
+   }
+  },
   "/api/v1/security": {
    "get": {
     "operationId": "get_security_api_v1_security_get",
@@ -66293,7 +66777,7 @@
      "content": {
       "application/json": {
        "schema": {
-        "$ref": "#/components/schemas/ScheduleIn"
+        "$ref": "#/components/schemas/backend__api__snapshots__ScheduleIn"
        }
       }
      },

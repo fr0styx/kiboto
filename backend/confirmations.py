@@ -55,6 +55,8 @@ ACTIONS: dict[str, str] = {
     "ai.index.forget": "Delete what the AI index learned from a folder",
     "ai.index.flush": "Make Kib forget everything it knows about your files. The files are not touched",
     "webdav.config": "Change who can reach files over WebDAV and which folder it shares",
+    "scripts.enable": "Let administrators run their own scripts on this NAS. A script can read and change every file Kiboto can",
+    "scripts.save": "Save this script. It runs with Kiboto's rights when its time comes",
     "security.rotate_key": "Replace the install's secret key; everyone signs in to WebDAV and two-factor again",
     "docker.container.recreate.elevated": "Recreate container {target} with access to the host system",
     "docker.stack.apply.elevated": "Apply the stack {target}, whose file gives containers access to the host system",
