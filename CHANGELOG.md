@@ -57,6 +57,9 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Quieter at night** (Hardware, off by default): in Automatic, the drive fans turn a little slower between two
   times; warm drives get the normal curve and the safety limits still run the fans at full speed.
 
+- **Speed test** (Settings → Network): measures the link between the device you are using and the NAS, both
+  directions and the answer time, and says in a sentence what it is good for. Nothing leaves your connection.
+
 #### Changes
 
 - **The Security check says it in words**: "Everything is fine" or "2 things need a look", with what needs a

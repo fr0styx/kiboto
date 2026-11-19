@@ -61563,6 +61563,113 @@
     ]
    }
   },
+  "/api/v1/network/speedtest/download": {
+   "get": {
+    "description": "`mb` megabytes of random bytes; the browser times how fast they arrive and may stop early.",
+    "operationId": "speedtest_download_api_v1_network_speedtest_download_get",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "mb",
+      "required": false,
+      "schema": {
+       "default": 25,
+       "maximum": 200,
+       "minimum": 1,
+       "title": "Mb",
+       "type": "integer"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Speedtest Download",
+    "tags": [
+     "Network & Switching"
+    ]
+   }
+  },
+  "/api/v1/network/speedtest/ping": {
+   "get": {
+    "description": "A small answer to time (the delay to the NAS and back).",
+    "operationId": "speedtest_ping_api_v1_network_speedtest_ping_get",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": {
+          "type": "number"
+         },
+         "title": "Response Speedtest Ping Api V1 Network Speedtest Ping Get",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Speedtest Ping",
+    "tags": [
+     "Network & Switching"
+    ]
+   }
+  },
+  "/api/v1/network/speedtest/upload": {
+   "post": {
+    "description": "Reads what the browser sends and throws it away (the usual body limit applies).",
+    "operationId": "speedtest_upload_api_v1_network_speedtest_upload_post",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": {
+          "type": "number"
+         },
+         "title": "Response Speedtest Upload Api V1 Network Speedtest Upload Post",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Speedtest Upload",
+    "tags": [
+     "Network & Switching"
+    ]
+   }
+  },
   "/api/v1/network/topology": {
    "get": {
     "description": "Retrieve full host network topology, physical NICs, bridges, bonds, and Docker networks.",

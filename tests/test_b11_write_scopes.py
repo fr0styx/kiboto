@@ -41,6 +41,7 @@ OWN_OR_SIGN_IN = {
     "/api/v1/jobs/{job_id}/cancel": "their own job (checked in the route)",
     "/api/v1/mcp": "MCP calls; each tool checks the caller's scopes",
     "/api/v1/notifications/notifications/me": "their own alert route",
+    "/api/v1/network/speedtest/upload": "the speed of their own link to the NAS (the bytes are thrown away)",
     "/api/v1/push/subscribe": "their own phone",
     "/api/v1/push/unsubscribe": "their own phone",
     "/api/v1/{unmatched_path:path}": "answers 404",

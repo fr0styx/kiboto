@@ -1395,6 +1395,13 @@ export function loadNetworkPage() {
 
 export function initNetworkControls() {
   installNeedsTailscale();
+  const speed = document.getElementById('btn-speed-test');
+  if (speed && !speed.dataset.bound) {
+    speed.dataset.bound = '1';
+    speed.addEventListener('click', () => {
+      import('./speed-test.js').then((m) => m.runSpeedTest()).catch(() => {});
+    });
+  }
   initNetworkPortsInspector();
   const btnOpenHostIp = document.getElementById('btn-open-host-ip-modal');
   if (btnOpenHostIp && !btnOpenHostIp.dataset.bound) {

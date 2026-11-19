@@ -18,6 +18,8 @@ ANY_SIGNED_IN = {
     "/api/v1/ai/access/me": "what they may ask Kib",
     "/api/v1/ai/actions/{action_id}": "an action they started",
     "/api/v1/notifications/notifications/me": "their own alert route",
+    "/api/v1/network/speedtest/ping": "the speed of their own link to the NAS",
+    "/api/v1/network/speedtest/download": "the speed of their own link to the NAS (random bytes)",
     "/api/v1/push/devices": "their own phones",
     "/api/v1/push/vapid-public-key": "the key their phone subscribes with",
     "/api/v1/immich": "their own Immich link",

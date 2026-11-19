@@ -26,6 +26,7 @@ describe('SET-24 l: Network is one page, Away from home its own', () => {
     const titles = [...sec.querySelectorAll('.net-page-section h3')].map((h) => h.getAttribute('data-i18n'));
     expect(titles).toEqual([
       'net.home_title',
+      'net.speed_title', // re-audit R2: the speed to this device, right under the address
       'net.ports_hw_title',
       'net.ts_opts_title',
       'net.wiring_title',

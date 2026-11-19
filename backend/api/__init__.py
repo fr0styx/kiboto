@@ -58,6 +58,7 @@ from backend.api.setup import router as setup_router  # noqa: E402
 from backend.api.sftp import router as sftp_router
 from backend.api.snapshots import router as snapshots_router  # noqa: E402
 from backend.api.snmp import router as snmp_router
+from backend.api.speedtest import router as speedtest_router
 from backend.api.stats import router as stats_router
 from backend.api.storage import router as storage_router
 from backend.api.system import router as system_router
@@ -172,4 +173,5 @@ api_router.include_router(firewall_router)  # host firewall, off by default (aud
 api_router.include_router(power_schedule_router)  # scheduled power off and wake-up, off by default (audit A10)
 api_router.include_router(heat_shutdown_router)  # switch off when too hot, off by default (hardware extra)
 api_router.include_router(https_router)  # HTTPS at home via ACME over DNS, off by default (audit A9)
+api_router.include_router(speedtest_router)  # speed between a device and the NAS (re-audit R2)
 api_router.include_router(snmp_router)  # SNMP v3 agent, off by default
