@@ -160,3 +160,11 @@ def test_minidlna_shares_the_host_network_and_maps_no_port(monkeypatch, tmp_path
     body = fake.created["minidlna"]
     assert body["HostConfig"]["NetworkMode"] == "host"
     assert "PortBindings" not in body["HostConfig"] and "ExposedPorts" not in body
+
+
+def test_the_readme_says_how_many_apps_there_are():
+    """The count in the README was 78 for a catalog of 85 and then 108: it follows the catalog now."""
+    import pathlib
+
+    readme = (pathlib.Path(__file__).parent.parent / "README.md").read_text(encoding="utf-8")
+    assert f"{len(CURATED_APP_CATALOG)} tested one-click apps" in readme

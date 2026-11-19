@@ -98,6 +98,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Labels in Files**: give a file or folder one of six colours and say what the colour means to you. The sidebar
   lists your colours; one click shows everything that carries it. Labels are your own and change nothing on disk.
 
+- **36 more apps in the catalog** (144 in all), each tested on a real engine: MakeMKV, MKVToolNix, Czkawka,
+  QDirStat, Firefox, ioBroker, evcc, Homebridge, Domoticz, Netdata, Glances, InfluxDB, LubeLogger, Spoolman,
+  OctoPrint, Kanboard, An Otter Wiki, Radicale, Shiori, RSS-Bridge, CommaFeed, Crafty Controller, SmokePing,
+  Mailpit, Apprise, pyLoad, AriaNg, slskd, TubeSync, Stump, Podgrab, Adminer, Dashy, Maintainerr, Wizarr, Unmanic.
+
 #### Changes
 
 - **The Security check says it in words**: "Everything is fine" or "2 things need a look", with what needs a

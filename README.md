@@ -32,12 +32,14 @@ is written down and tested ([safe AI](docs/SAFE_AI.md)).
 - **Ask Kib**: search and questions over your own files in five languages, on the NAS's own GPU or
   NPU; answers are checked against your files and cite them. Claude, Cursor and other AI clients can
   use it over MCP.
-- **Files**: a File Explorer with several windows, drag and drop, a Recycle Bin, share links and
-  "send me files" links, a photo and video viewer, and verified import from the front card reader.
-- **Apps**: 78 tested one-click apps (Immich, Jellyfin, Nextcloud and more), Docker Compose stacks,
+- **Files**: a File Explorer with several windows, drag and drop, a Recycle Bin, coloured labels,
+  share links and "send me files" links, a photo and video viewer, verified import from the front
+  card reader, and a guided, checked copy of your folders from another NAS or a PC.
+- **Apps**: 144 tested one-click apps (Immich, Jellyfin, Nextcloud and more), Docker Compose stacks,
   Unraid, CasaOS and Umbrel templates marked "community, untested", logs, a web terminal and update checks.
 - **Storage**: pools, disks and SMART health on ZFS, Btrfs, mdadm and Unraid arrays; disks likely to
-  fail turn amber before SMART calls them failed; sleeping disks stay asleep.
+  fail turn amber before SMART calls them failed; a check that finds damage names the files;
+  sleeping disks stay asleep.
 - **Snapshots and backup**: snapshot schedules with file restore and Windows "Previous Versions",
   encrypted off-site backup with restic, a recovery kit that restores a whole box, and backups to a
   second Kiboto box (append-only, so ransomware can't wipe them).
@@ -48,11 +50,14 @@ is written down and tested ([safe AI](docs/SAFE_AI.md)).
   a guided invite for each family member, and share links or chosen apps on the internet without
   opening a port. Kiboto's own pages never go on the internet.
 - **Virtual machines**: KVM with UEFI and TPM 2.0, an ISO catalog and a console in the browser.
-- **Hardware**: fan curves, UPS monitoring with safe shutdown, the front LCD and light bar, and alerts
-  by e-mail, Telegram, Discord, ntfy and more. Raw hardware access can live in a small helper
+- **Hardware**: fan curves, UPS monitoring with safe shutdown and the electricity used, the front
+  LCD and light bar, a speed test between any device and the NAS, and alerts by e-mail, Telegram,
+  Discord, ntfy and more. Raw hardware access can live in a small helper
   container instead of Kiboto itself.
 - **Safety**: a ransomware guard that freezes writes and snapshots the pool, an allow-list in front of
-  Docker, and updates that check the image signature and roll back on their own.
+  Docker, updates that check the image signature and roll back on their own, an alert when an
+  account signs in from a new device, and optional checks (off until you turn them on) for leaked
+  passwords and for apps with a weakness that is being attacked.
 - **Everywhere**: an installable phone app (PWA), light and dark themes, and English, German, French,
   Spanish and Chinese.
 
