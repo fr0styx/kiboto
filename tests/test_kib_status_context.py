@@ -151,6 +151,61 @@ def test_the_network_block_gives_the_address_even_without_interfaces():
     assert "No interfaces" not in block
 
 
+def test_the_network_tool_reads_the_reading_as_it_is(monkeypatch):
+    """The reading has physical_interfaces and a summary; the tool once asked for other names."""
+    reading = {
+        "status": "ok",
+        "physical_interfaces": [
+            {"name": "eth0", "state": "down", "is_up": False, "speed_human": "Disconnected", "master": "bond0"},
+            {"name": "eth1", "state": "up", "is_up": True, "speed_human": "10 Gbps", "master": "bond0"},
+            {"name": "eth2", "state": "up", "is_up": True, "speed_human": "1 Gbps", "ip": "192.0.2.7"},
+        ],
+        "summary": {
+            "primary_ip": "192.0.2.10",
+            "default_gateway": "192.0.2.1",
+            "dns_servers": ["192.0.2.1"],
+            "primary_interface": "br0",
+            "max_speed": "10 Gbps",
+        },
+    }
+    monkeypatch.setattr("backend.hardware.network.get_network_topology", lambda: reading)
+    monkeypatch.setattr("backend.hardware.network.read_ip", lambda: "192.0.2.10")
+    res = chat_nas_tools.tool_get_network_status()
+    assert res["status"] == "ok" and res["default_gateway"] == res["gateway"] == "192.0.2.1"
+    assert res["dns_servers"] == ["192.0.2.1"] and res["interface_count"] == 2 and res["hostname"] is None
+    assert res["summary"] == "IP: 192.0.2.10 (2 active link(s), max 10 Gbps)"
+    assert _build_structured_llm_context([res]).splitlines() == [
+        "## NAS Network Status:",
+        "- IP address: 192.0.2.10",
+        "- Main connection: br0",
+        "- Default Gateway: 192.0.2.1",
+        "- DNS: 192.0.2.1",
+        "- eth1: 10 Gbps, Status: up, part of bond0",
+        "- eth2: 192.0.2.7 (1 Gbps, Status: up)",
+    ]
+    # nothing known: no speed is made up, and the address falls back to the reading's own
+    monkeypatch.setattr(
+        "backend.hardware.network.get_network_topology", lambda: {"summary": {"primary_ip": "192.0.2.9"}}
+    )
+    monkeypatch.setattr("backend.hardware.network.read_ip", lambda: None)
+    res = chat_nas_tools.tool_get_network_status()
+    assert res["ip_address"] == "192.0.2.9" and res["summary"] == "IP: unknown (0 active link(s), max Unknown)"
+    assert res["interfaces"] == [] and res["dns_servers"] == [] and res["gateway"] is None
+    # the older shape of the reading still reads
+    monkeypatch.setattr(
+        "backend.hardware.network.get_network_topology",
+        lambda: {
+            "hostname": "nas",
+            "gateway": "192.0.2.1",
+            "dns_servers": ["192.0.2.2"],
+            "interfaces": [{"name": "lan", "is_up": True, "speed_label": "2.5 Gbps", "state": "up"}],
+        },
+    )
+    res = chat_nas_tools.tool_get_network_status()
+    assert (res["hostname"], res["gateway"], res["dns_servers"]) == ("nas", "192.0.2.1", ["192.0.2.2"])
+    assert res["summary"].endswith("max 2.5 Gbps)")
+
+
 def test_electricity_reaches_the_model_only_once_it_is_measured(monkeypatch, tmp_path):
     monkeypatch.setattr(energy_use, "STATE_FILE", str(tmp_path / "energy.json"))
     energy_use.reset_for_tests()

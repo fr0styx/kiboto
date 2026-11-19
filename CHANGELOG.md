@@ -645,6 +645,9 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   "0.0 GB", and its notes on disks and fans carried no names or settings. It now reads each pool's size and
   free space, every disk by name with its temperature, the fan profile and the NAS's address.
 
+- **Kib knows the network**: asked for the gateway, the DNS servers or the link speed, Kib had nothing to read
+  and said so. It now reads the ports that are connected, their speed, the main connection, the gateway and DNS.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

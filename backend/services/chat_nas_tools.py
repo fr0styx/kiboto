@@ -992,28 +992,35 @@ def tool_get_network_status() -> dict[str, Any]:
 
         topo = get_network_topology()
         ip_addr = read_ip()
-        ifaces = topo.get("interfaces", [])
+        # The reading keeps its ports under physical_interfaces and the gateway and DNS under
+        # summary. This tool once read names the reading never had, and answered with nothing.
+        sent = topo.get("summary")
+        seen: dict[str, Any] = sent if isinstance(sent, dict) else {}
+        ifaces = topo.get("physical_interfaces") or topo.get("interfaces") or []
         active_ifaces = [
             {
                 "name": iface.get("name"),
                 "ip": iface.get("ip"),
-                "speed": iface.get("speed_label") or iface.get("speed"),
+                "speed": iface.get("speed_human") or iface.get("speed_label") or iface.get("speed"),
                 "state": iface.get("state"),
                 "is_up": iface.get("is_up"),
+                "part_of": iface.get("master") or None,
             }
             for iface in ifaces
             if iface.get("is_up")
         ]
-        main_speed = active_ifaces[0].get("speed", "1 Gbps") if active_ifaces else "Unknown"
+        gateway = seen.get("default_gateway") or topo.get("gateway")
+        main_speed = seen.get("max_speed") or (active_ifaces[0].get("speed") if active_ifaces else None) or "Unknown"
         summary = f"IP: {ip_addr or 'unknown'} ({len(active_ifaces)} active link(s), max {main_speed})"
         return {
             "tool": "get_network_status",
             "status": "ok",
-            "hostname": topo.get("hostname", "NAS"),
-            "ip_address": ip_addr,
-            "gateway": topo.get("gateway"),
-            "default_gateway": topo.get("gateway"),
-            "dns_servers": topo.get("dns_servers", []),
+            "hostname": topo.get("hostname"),
+            "ip_address": ip_addr or seen.get("primary_ip"),
+            "gateway": gateway,
+            "default_gateway": gateway,
+            "dns_servers": list(seen.get("dns_servers") or topo.get("dns_servers") or []),
+            "primary_interface": seen.get("primary_interface"),
             "interfaces": active_ifaces,
             "active_interfaces": active_ifaces,
             "interface_count": len(active_ifaces),

@@ -143,14 +143,18 @@ def network_block(tr: dict[str, Any]) -> str:
         lines.append(f"- Name on the network: {tr['hostname']}")
     if tr.get("ip_address"):
         lines.append(f"- IP address: {tr['ip_address']}")
+    if tr.get("primary_interface"):
+        lines.append(f"- Main connection: {tr['primary_interface']}")
     lines.append(f"- Default Gateway: {tr.get('default_gateway') or 'N/A'}")
     lines.append(f"- DNS: {', '.join(tr.get('dns_servers') or []) or 'N/A'}")
     ifaces = tr.get("interfaces") or []
     for iface in ifaces[:6]:
-        lines.append(
-            f"- {iface.get('name')}: {iface.get('ip') or 'No IP'} "
-            f"({iface.get('speed') or 'Unknown speed'}, Status: {iface.get('state', 'up')})"
-        )
+        speed, state = iface.get("speed") or "Unknown speed", iface.get("state", "up")
+        if iface.get("ip"):
+            line = f"- {iface.get('name')}: {iface['ip']} ({speed}, Status: {state})"
+        else:  # a port inside a bond or a bridge has no address of its own
+            line = f"- {iface.get('name')}: {speed}, Status: {state}"
+        lines.append(line + (f", part of {iface['part_of']}" if iface.get("part_of") else ""))
     if not ifaces:
         lines.append("- No interfaces reported.")
     return "\n".join(lines)
