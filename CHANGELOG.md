@@ -14,6 +14,9 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   the new address. Started before the network is up (after a power cut the NAS is often faster than the
   router), it waits for an address instead of stopping with an error.
 
+- **Kib does not call an empty pool healthy**: a pool that reports no size (an empty slot, or one that is not
+  mounted) was described to Kib as "healthy, 0.0 GB free". Kib is now told that it has no size.
+
 #### Changes
 
 - **Ask Kib about the NAS in your language**: questions about free space, drives, fans, apps, the network and

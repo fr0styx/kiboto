@@ -69,7 +69,9 @@ def electricity_marked(tr: dict[str, Any]) -> str:
 def storage_marked(tr: dict[str, Any]) -> str:
     """The storage section of the answer written without a model: each pool, then any damaged files."""
     lines = [
-        f"  - **{p.get('name')}** ({p.get('type', 'storage')}): `{p.get('used_gb', 0):.1f} GB` used of "
+        f"  - **{p.get('name')}** ({p.get('type', 'storage')}): no size reported; it is empty or not mounted"
+        if sizeless(p)
+        else f"  - **{p.get('name')}** ({p.get('type', 'storage')}): `{p.get('used_gb', 0):.1f} GB` used of "
         f"`{p.get('total_gb', 0):.1f} GB` (`{p.get('used_pct', 0)}%`), `{p.get('free_gb', 0):.1f} GB` free "
         f"(Health: `{p.get('health', 'ONLINE')}`)"
         for p in tr.get("pools") or []
@@ -82,6 +84,12 @@ def storage_marked(tr: dict[str, Any]) -> str:
             + ". Restore them from a backup or a snapshot."
         )
     return "### 🗄️ NAS Storage Pools Status (0 Disk Wakeups)\n" + ("\n".join(lines) or "- No storage pools discovered.")
+
+
+def sizeless(pool: dict[str, Any]) -> bool:
+    """True for a pool that reports a size of nothing: an empty slot, or a pool that is not mounted."""
+    sizes = [pool.get(k) for k in ("total_tib", "total_gb") if isinstance(pool.get(k), (int, float))]
+    return bool(sizes) and not any(sizes)
 
 
 def telemetry_block(tr: dict[str, Any]) -> str:
@@ -161,6 +169,10 @@ def storage_block(tr: dict[str, Any]) -> str:
     for p in pools[:6]:
         kind = _first(p, "fs_type", "type") or "storage"
         health = _first(p, "health", "status") or "ONLINE"
+        if sizeless(p):
+            # a pool with no size is empty or not mounted: its "healthy" says nothing, so it is not repeated
+            lines.append(f"- Pool '{p.get('name')}': no size reported; it is empty or not mounted (Type: {kind})")
+            continue
         lines.append(
             f"- Pool '{p.get('name')}': {health} ({p.get('used_pct', 0)}% used of {size(p, 'total')}, "
             f"Free: {size(p, 'free')}, Type: {kind})"

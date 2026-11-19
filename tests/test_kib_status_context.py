@@ -375,3 +375,30 @@ def test_a_turn_without_a_model_says_them(platform, monkeypatch, tmp_path):
     reply = out.get("response") or out.get("reply") or out.get("answer") or ""
     assert "Damaged files in Tank" in reply and "Electricity used:" in reply, reply[:600]
     energy_use.reset_for_tests()
+
+
+def test_a_pool_with_no_size_is_not_called_healthy(platform):
+    """Seen on a real NAS: an empty pool slot read "HEALTHY (0.0% used of 0.0 GB, Free: 0.0 GB)"."""
+    empty = types.SimpleNamespace(
+        id="boot",
+        name="Spare",
+        fs_type="auto",
+        status="HEALTHY",
+        total_bytes=0,
+        used_bytes=0,
+        free_bytes=0,
+        used_pct=0.0,
+    )
+    platform([_pool("tank", "Tank", "zfs", 8 * TIB, 2 * TIB), empty])
+    res = chat_nas_tools.tool_get_storage_status()
+    block = _build_structured_llm_context([res])
+    assert "- Pool 'Spare': no size reported; it is empty or not mounted (Type: auto)" in block
+    assert "- Pool 'Tank': HEALTHY (25.0% used of 8.0 TiB, Free: 6.0 TiB, Type: zfs)" in block
+    assert "0.0 GB" not in block
+    said = chat_status_blocks.storage_marked(res)
+    assert "  - **Spare** (auto): no size reported; it is empty or not mounted" in said
+    assert "**Tank** (zfs): `2048.0 GB` used of `8192.0 GB`" in said
+    assert chat_status_blocks.sizeless({"name": "old shape, no size fields"}) is False
+    assert chat_status_blocks.sizeless({"total_gb": 0}) and not chat_status_blocks.sizeless(
+        {"total_tib": 0.0, "total_gb": 2.5}
+    )
