@@ -261,3 +261,23 @@ def test_a_limited_script_is_not_started_where_the_limit_cannot_be_made(fresh, m
 
     monkeypatch.setattr(us.subprocess, "run", refuses)
     assert us.limit_available(now=time.time() + 2000) is False
+
+
+def test_a_run_counts_as_running_until_its_result_is_on_record(monkeypatch):
+    """Found in a real browser: for a moment a finished run was neither running nor on record,
+    and a screen that looks again only while something runs stopped looking."""
+    us.set_enabled(True)
+    made = us.save(_script())
+    seen = []
+    real = us._note_run
+
+    def note(script_id, run):
+        seen.append((script_id in us.running(), us.last_run(script_id)))
+        real(script_id, run)
+        seen.append((script_id in us.running(), bool(us.last_run(script_id))))
+
+    monkeypatch.setattr(us, "_note_run", note)
+    us.start(made["id"], "by_hand")
+    _wait(made["id"])
+    assert seen == [(True, None), (True, True)]
+    assert made["id"] not in us.running()

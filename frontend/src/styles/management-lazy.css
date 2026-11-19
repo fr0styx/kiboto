@@ -612,3 +612,19 @@
 /* Power: electricity (re-audit R9) */
 .pwe-price-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; font-size: var(--kb-fs-sm); }
 .pwe-price { max-width: 120px; }
+/* Security: your own scripts (owner's decision, 19 Nov 2026) */
+.scr-head { display: flex; gap: 12px; align-items: flex-start; justify-content: space-between; }
+.scr-head h4 { margin: 0; }
+.scr-words { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.scr-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+.scr-row { display: flex; flex-direction: column; gap: 8px; }
+.scr-acts { display: flex; flex-wrap: wrap; gap: 8px; }
+.scr-form { width: 100%; }
+.scr-form [hidden] { display: none; }
+.scr-body, .scr-out { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: var(--kb-fs-sm); }
+.scr-body { width: 100%; min-height: 160px; resize: vertical; }
+.scr-days { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+.scr-day { display: flex; gap: 8px; align-items: center; }
+.scr-day input { width: 24px; height: 24px; margin: 0; flex: none; appearance: auto; }
+.scr-runs { display: flex; flex-direction: column; gap: 6px; }
+.scr-out { margin: 0; padding: 8px; max-height: 240px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; border: 1px solid currentColor; border-radius: 6px; }

@@ -300,6 +300,8 @@ export async function fetchAndRenderSecurityPosture() {
     .then((m) => m.renderMfaPolicy())
     .then(() => import('./outside-checks.js'))
     .then((m) => m.renderOutsideChecks())
+    .then(() => import('./scripts-card.js')) // an administrator's own scripts, off by default
+    .then((m) => m.renderScriptsCard())
     .catch(() => {});
   import('./malware-scan.js').then((m) => m.renderMalwareScan()).catch(() => {}); // NFEAT-11
   const badge = document.getElementById('sec-advisor-score-badge');

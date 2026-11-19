@@ -394,9 +394,8 @@ def _run(script: dict[str, Any], entry: dict[str, Any]) -> None:
         seen[0] += len(tail[-1])
     finally:
         shutil.rmtree(work, ignore_errors=True)
-        with _LOCK:
-            stopped = bool(entry.get("stopped"))
-            _RUNNING.pop(sid, None)
+    with _LOCK:
+        stopped = bool(entry.get("stopped"))
     output = b"".join(tail)[-OUTPUT_KEPT_BYTES:].decode("utf-8", "replace")
     run = {
         "started": started,
@@ -411,7 +410,14 @@ def _run(script: dict[str, Any], entry: dict[str, Any]) -> None:
         "output_bytes": seen[0],
     }
     run["ok"] = code == 0 and not timed_out and not run["stopped"]
-    _finish(script, run)
+    try:
+        _finish(script, run)
+    finally:
+        # only now is it no longer running: someone who asks in between sees "running", never
+        # "not running, and no result yet" (a screen that looks again only while something runs
+        # would stop looking and miss the result)
+        with _LOCK:
+            _RUNNING.pop(sid, None)
 
 
 def _finish(script: dict[str, Any], run: dict[str, Any]) -> None:

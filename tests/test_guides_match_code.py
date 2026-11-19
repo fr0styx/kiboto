@@ -81,3 +81,25 @@ def test_reaudit_guide_numbers():
     assert "LIMIT_MS = 4000" in speed and "i < 5" in speed
     network = _doc("NETWORK.md")
     assert "for up to 4 seconds" in network and "times five small requests" in network
+
+
+def test_scripts_guide_numbers():
+    """docs/SCRIPTS.md says what the service does: its limits and what a limited script cannot reach."""
+    from backend.services import user_scripts as us
+
+    text = _doc("SCRIPTS.md")
+    assert f"30 unless you change it, at most {us.MAX_TIMEOUT_MIN}" in text and us.DEFAULT_TIMEOUT_MIN == 30
+    assert f"Up to {us.MAX_SCRIPTS} scripts, each up to {us.MAX_BODY_BYTES // 1024} KB of text" in text
+    assert f"the last {us.OUTPUT_KEPT_BYTES // 1024} KB" in text and f"The last {us.RUNS_KEPT} runs" in text
+    assert us.MAX_AT_ONCE == 2 and "Two scripts run at the same time at most" in text
+    # each thing the guide says a limited script cannot do is a step of the limit
+    for said, step in [
+        ("scratch folder (`/tmp`)", "tmpfs /tmp"),
+        ("cannot see Kiboto's own settings", 'tmpfs "$DATA"'),
+        ("cannot reach the drives themselves", "tmpfs /dev"),
+        ("cannot start or change your apps", "docker.sock"),
+        ("Everything else is read-only", "remount,bind,ro"),
+        ("cannot give itself the rights back", "setpriv"),
+    ]:
+        assert said in text and step in us.LIMIT_WRAP, said
+    assert "is not started rather than started without its limit" in text and "exit 97" in us.LIMIT_WRAP

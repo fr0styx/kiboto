@@ -64,6 +64,12 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   1 showing wear, 2 failing) and whether it sleeps; Home Assistant gets a "needs a look" sensor per drive and
   one for all of them, so an automation can tell you the day a drive starts to fail.
 
+- **Your own scripts on a timer** (Settings → Security): the main administrator can add scripts that run every
+  hour, every day, on chosen weekdays, or when you press Run. Off until you turn it on. A script can be limited
+  to one folder: it can then change files only there, and cannot reach Kiboto's settings, the drives or your
+  apps. Every run is written to the security log with how it ended, and a scheduled run that fails raises an
+  alert. Guide: docs/SCRIPTS.md.
+
 ## v2.0.4 (2026-11-19)
 ### 🏡 Apps that go back on their own, a way to move in, and Kiboto in your language everywhere
 
