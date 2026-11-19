@@ -12,6 +12,7 @@ from backend.services.chat_context import (  # noqa: F401
     _grounding_or_none,
     estimate_tokens,
 )
+from backend.services.chat_status_blocks import STATUS_BLOCKS
 from backend.services.chat_web_tools import (  # noqa: F401
     _clean_complete_snippet,
     _extract_clean_first_sentences,
@@ -1029,45 +1030,8 @@ def _build_structured_llm_context(tool_results: list[dict[str, Any]]) -> str:
                     f"{_as_data(_clean_complete_snippet(tr['answer'], max_chars=400))}\n</web_source>\n</web_sources>"
                 )
 
-        elif tname == "get_system_telemetry":
-            cpu_util = (
-                tr.get("cpu_load_pct")
-                if tr.get("cpu_load_pct") is not None
-                else (tr.get("cpu", {}).get("util") if isinstance(tr.get("cpu"), dict) else None)
-            )
-            cpu_temp = (
-                tr.get("cpu_temp_c")
-                if tr.get("cpu_temp_c") is not None
-                else (tr.get("cpu", {}).get("temp") if isinstance(tr.get("cpu"), dict) else None)
-            )
-            mem_pct = (
-                tr.get("ram_used_pct")
-                if tr.get("ram_used_pct") is not None
-                else (tr.get("memory", {}).get("used_pct") if isinstance(tr.get("memory"), dict) else None)
-            )
-            ram_used = tr.get("ram_used_gb")
-            ram_tot = tr.get("ram_total_gb")
-            temp_str = f", Temp: {cpu_temp}°C" if cpu_temp is not None else ""
-            ram_detail = f" ({ram_used}/{ram_tot} GB)" if ram_used and ram_tot else ""
-            blocks.append(
-                f"## NAS System Telemetry:\n- CPU Utilization: {_pct(cpu_util)}{temp_str}\n- RAM Usage: {_pct(mem_pct)}{ram_detail}"
-            )
-
-        elif tname == "get_disks_and_standby_status":
-            disks = tr.get("disks") or []
-            disk_lines = [
-                f"- {d.get('name', 'Disk')}: {d.get('temp', 'N/A')}°C ({d.get('power_state', 'active')})"
-                for d in disks[:8]
-            ]
-            blocks.append("## Storage Disks Status:\n" + "\n".join(disk_lines))
-
-        elif tname == "get_fan_and_thermal_status":
-            fans = tr.get("fans") or []
-            fan_lines = [
-                f"- Fan {f.get('zone', idx)}: {f.get('rpm', 'N/A')} RPM ({f.get('pwm_pct', 0)}%)"
-                for idx, f in enumerate(fans, start=1)
-            ]
-            blocks.append("## Cooling Fans Status:\n" + "\n".join(fan_lines))
+        elif tname in STATUS_BLOCKS:
+            blocks.append(STATUS_BLOCKS[tname](tr))
 
         elif tname == "list_docker_containers":
             containers = tr.get("containers") or []
@@ -1169,30 +1133,6 @@ def _build_structured_llm_context(tool_results: list[dict[str, Any]]) -> str:
             res_val = tr.get("formatted", tr.get("result"))
             blocks.append(
                 f"## Calculation Result:\n- Mathematical Expression: `{expr}`\n- Exact Calculated Value: **`{res_val}`**"
-            )
-
-        elif tname == "get_storage_status":
-            pools = tr.get("pools") or []
-            pool_lines = [
-                f"- Pool '{p.get('name')}': {p.get('health', 'ONLINE')} ({p.get('used_pct', 0)}% used of {p.get('total_gb', 0):.1f} GB, Free: {p.get('free_gb', 0):.1f} GB, Type: {p.get('type', 'storage')})"
-                for p in pools[:6]
-            ]
-            blocks.append(
-                "## NAS Storage Pools Status:\n"
-                + ("\n".join(pool_lines) if pool_lines else "- No storage pools reported.")
-            )
-
-        elif tname == "get_network_status":
-            ifaces = tr.get("interfaces") or []
-            iface_lines = [
-                f"- {iface.get('name')}: {iface.get('ip') or 'No IP'} ({iface.get('speed') or 'Unknown speed'}, Status: {iface.get('state', 'up')})"
-                for iface in ifaces[:6]
-            ]
-            gw = tr.get("default_gateway") or "N/A"
-            dns = ", ".join(tr.get("dns_servers") or []) or "N/A"
-            blocks.append(
-                f"## NAS Network Status:\n- Default Gateway: {gw}\n- DNS: {dns}\n"
-                + ("\n".join(iface_lines) if iface_lines else "- No interfaces reported.")
             )
 
         else:

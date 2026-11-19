@@ -311,7 +311,7 @@ OPENAI_TOOL_DEFINITIONS: list[dict[str, Any]] = [
         "type": "function",
         "function": {
             "name": "get_system_telemetry",
-            "description": "Reads live host CPU load, CPU temperature, system RAM usage, uptime, and NPU/GPU hardware acceleration status.",
+            "description": "Reads live host CPU load, CPU temperature, system RAM usage, uptime, NPU/GPU hardware acceleration status, and the electricity the NAS used (kWh, average watts) when a UPS measures it.",
             "parameters": {
                 "type": "object",
                 "properties": {},
@@ -489,7 +489,7 @@ OPENAI_TOOL_DEFINITIONS: list[dict[str, Any]] = [
         "type": "function",
         "function": {
             "name": "get_storage_status",
-            "description": "Reads live NAS storage pools, filesystem types, capacity, and pool health without waking sleeping HDDs.",
+            "description": "Reads live NAS storage pools, filesystem types, capacity, pool health, and any damaged files the last check found, without waking sleeping HDDs.",
             "parameters": {
                 "type": "object",
                 "properties": {},
@@ -573,6 +573,51 @@ def _mentions(text: str, words: tuple[str, ...] | list[str]) -> bool:
     "program", "lan" is not in "plan" (AI-7)."""
     return any(re.search(r"(?<![\w])" + re.escape(w) + r"(?![\w])", text) for w in words)
 
+
+# Words in a question that send it to the status tool that can answer it. Electricity is read
+# with the system's numbers and damaged files with the pools, so neither needs a tool of its own.
+STORAGE_WORDS = (
+    "storage pool",
+    "storage pools",
+    "zpool",
+    "pools",
+    "pool status",
+    "array status",
+    "storage status",
+    "storage capacity",
+    "how much storage",
+    "free space",
+    "usable space",
+    "disk space",
+    "btrfs raid",
+    "zfs pool",
+    "damaged file",
+    "damaged files",
+    "corrupted file",
+    "corrupted files",
+    "corrupt files",
+)
+TELEMETRY_WORDS = (
+    "cpu",
+    "ram",
+    "memory",
+    "npu",
+    "gpu",
+    "hardware",
+    "telemetry",
+    "uptime",
+    "system load",
+    "system status",
+    "electricity",
+    "kwh",
+    "watts",
+    "power use",
+    "power usage",
+    "power draw",
+    "power consumption",
+    "energy use",
+    "energy usage",
+)
 
 _HARDWARE_TEMP_RE = re.compile(
     r"\b(?:cpu|gpu|npu|nas|server|system|disk|disks|drive|drives|hdd|ssd|nvme|hardware|board|chassis|box)\b.{0,40}\btemp(?:erature)?s?\b"
@@ -938,25 +983,7 @@ def _turn_run_requested_tools(
             tools_called.append("calculate")
 
         # 1d. Storage pools & capacity status
-        if "get_storage_status" not in tools_called and _mentions(
-            msg_lower,
-            (
-                "storage pool",
-                "storage pools",
-                "zpool",
-                "pools",
-                "pool status",
-                "array status",
-                "storage status",
-                "storage capacity",
-                "how much storage",
-                "free space",
-                "usable space",
-                "disk space",
-                "btrfs raid",
-                "zfs pool",
-            ),
-        ):
+        if "get_storage_status" not in tools_called and _mentions(msg_lower, STORAGE_WORDS):
             res_stor = _routed("get_storage_status", principal)
             tool_results.append(res_stor)
             tools_called.append("get_storage_status")
@@ -1007,21 +1034,7 @@ def _turn_run_requested_tools(
         # 1d. System Telemetry (CPU, RAM, NPU/GPU, Uptime, Status)
         if (
             "get_system_telemetry" not in tools_called
-            and _mentions(
-                msg_lower,
-                (
-                    "cpu",
-                    "ram",
-                    "memory",
-                    "npu",
-                    "gpu",
-                    "hardware",
-                    "telemetry",
-                    "uptime",
-                    "system load",
-                    "system status",
-                ),
-            )
+            and _mentions(msg_lower, TELEMETRY_WORDS)
             or _HARDWARE_TEMP_RE.search(msg_lower)
         ):
             res_sys = _routed("get_system_telemetry", principal)

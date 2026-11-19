@@ -46,6 +46,27 @@ def _core():
     return ai_chat_agent
 
 
+def _electricity() -> dict[str, Any] | None:
+    """What the NAS used (kWh today, 7 and 30 days, average watts), once a UPS has been measured."""
+    from backend.services import energy_use
+
+    try:
+        seen = energy_use.summary()
+    except (OSError, ValueError, TypeError):
+        return None
+    return seen if seen.get("measuring") else None
+
+
+def _damaged_files() -> list[dict[str, Any]]:
+    """Pools whose last check found damaged files, with the first names (no drive is woken)."""
+    from backend.services import pool_alerts
+
+    return [
+        {"pool": d.get("pool"), "count": d.get("count"), "files": list(d.get("files") or [])[:5]}
+        for d in pool_alerts.damaged_files()
+    ]
+
+
 def tool_get_system_telemetry() -> dict[str, Any]:
     """Reads live host CPU, RAM, temperature, uptime, and NPU/GPU accelerator status."""
     ram_total_b = read_total_ram_bytes()
@@ -88,6 +109,7 @@ def tool_get_system_telemetry() -> dict[str, Any]:
         "ram_used_pct": ram_pct,
         "uptime_seconds": uptime_s,
         "active_ai_model": rag_cfg.get("active_model") or DEFAULT_CHAT_MODEL,
+        "electricity": _electricity(),
         "hardware_accelerator": {
             "active_tier": accel.get("active_tier", 1),
             "device_label": accel.get("device_label", "CPU"),
@@ -928,10 +950,19 @@ def tool_get_storage_status() -> dict[str, Any]:
                 "total_tib": round((p.total_bytes or 0) / (1024**4), 2),
                 "free_tib": round(getattr(p, "free_bytes", (p.total_bytes or 0) - (p.used_bytes or 0)) / (1024**4), 2),
                 "used_pct": getattr(p, "used_pct", 0.0),
+                # the same in GB, and the type under its older name: the answer written without a
+                # model reads these, and showed 0.0 GB for every pool while they were missing
+                "type": p.fs_type,
+                "total_gb": round((p.total_bytes or 0) / (1024**3), 1),
+                "used_gb": round((p.used_bytes or 0) / (1024**3), 1),
+                "free_gb": round(getattr(p, "free_bytes", (p.total_bytes or 0) - (p.used_bytes or 0)) / (1024**3), 1),
             }
             for p in pools
         ]
+        damaged = _damaged_files()
         summary = f"{len(pools)} pool(s): {free_tib} TiB free / {total_tib} TiB total"
+        if damaged:
+            summary += f"; damaged files in {', '.join(str(d['pool']) for d in damaged)}"
         return {
             "tool": "get_storage_status",
             "status": "ok",
@@ -940,6 +971,7 @@ def tool_get_storage_status() -> dict[str, Any]:
             "total_tib": total_tib,
             "used_tib": used_tib,
             "free_tib": free_tib,
+            "damaged_files": damaged,
             "zero_disk_wakeups": True,
             "summary": summary,
         }

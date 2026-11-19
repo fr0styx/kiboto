@@ -485,6 +485,10 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **A label stays with a file you move**: moving a file or folder in Files keeps its colour, and so do the
   labelled things inside a moved folder. After a rename or a move the colours on screen follow at once.
 
+- **Ask Kib about electricity and damaged files**: "how much electricity does the NAS use" answers from the
+  UPS measurement (today, 7 and 30 days, average watts), and questions about storage mention files the last
+  check found damaged.
+
 #### Fixes
 
 - **The File Explorer's details panel no longer hides file names**: it lies over the list instead of
@@ -636,6 +640,10 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 
 - **Apps with a weakness under attack**: an app whose image merely shares a common word with a listed product
   (such as "backup") is no longer taken for that product.
+
+- **Kib answers about the NAS with its real numbers**: asked about storage, Kib was told every pool had
+  "0.0 GB", and its notes on disks and fans carried no names or settings. It now reads each pool's size and
+  free space, every disk by name with its temperature, the fan profile and the NAS's address.
 
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words

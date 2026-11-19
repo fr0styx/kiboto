@@ -34,6 +34,14 @@ Someone for whom Kib is off sees that before they type.
 **Kib answers with**: **Automatic** (recommended: Kiboto picks the model that fits this NAS),
 **Fast** (short answers, quickly), **Balanced** (good answers at reading speed) or **Best**.
 
+## Asking about the NAS itself
+
+Kib also answers from the NAS's own readings, taken at the moment you ask: how full each
+storage pool is and whether the last check found damaged files, which drives are awake and
+how warm they are, the fan profile, the apps that are running, the NAS's address, and how
+much electricity it used (once a UPS measures it, see [POWER.md](POWER.md)). No drive is
+woken for these answers.
+
 ## Privacy
 
 The Privacy section lists, from the real settings, what leaves the NAS and to which host,
