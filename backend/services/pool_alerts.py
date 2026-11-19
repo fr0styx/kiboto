@@ -59,6 +59,34 @@ def _state_file() -> str:
 from backend.hardware.pal.scrub_parse import parse_btrfs_scrub, parse_zpool_scan  # noqa: E402,F401
 
 
+def _names(files: list[str], count: int, shown: int = 3) -> str:
+    """The first few damaged files by name, and how many more there are."""
+    names = ", ".join(os.path.basename(f.rstrip("/")) or f for f in files[:shown])
+    return f"{names} (+{count - shown})" if count > shown else names
+
+
+def damaged_files() -> list[dict[str, Any]]:
+    """Per pool with damaged files: the list ZFS gives (read now; no disk is woken)."""
+    try:
+        pools, scrubs = _read()
+    except (OSError, RuntimeError, ValueError):
+        logger.debug("[PoolAlerts] could not read the pools", exc_info=True)
+        return []
+    out = []
+    for p in pools:
+        damaged = (scrubs.get(p.id) or {}).get("damaged") or {}
+        if int(damaged.get("count") or 0) > 0:
+            out.append(
+                {
+                    "pool": getattr(p, "name", "") or p.id,
+                    "count": int(damaged["count"]),
+                    "other": int(damaged.get("other") or 0),
+                    "files": list(damaged.get("files") or []),
+                }
+            )
+    return out
+
+
 # --- what is wrong -----------------------------------------------------------------------------
 def problems(pools: list[Any], scrubs: dict[str, dict[str, Any] | None] | None = None) -> list[dict[str, Any]]:
     """[{id, level, kind, subject, pool, detail}] for the pools and their last scrubs."""
@@ -123,6 +151,18 @@ def problems(pools: list[Any], scrubs: dict[str, dict[str, Any] | None] | None =
                     "detail": str(int(scrub["errors"])),
                 }
             )
+        damaged = (scrub or {}).get("damaged") or {}
+        if int(damaged.get("count") or 0) > 0:
+            out.append(
+                {
+                    "id": f"pool:{pid}:damaged",
+                    "level": "critical",
+                    "kind": "damaged_files",
+                    "subject": name,
+                    "detail": str(int(damaged["count"])),
+                    "files": _names(damaged.get("files") or [], int(damaged["count"])),
+                }
+            )
     out.sort(key=lambda i: 0 if i["level"] == "critical" else 1)
     return out
 
@@ -169,6 +209,7 @@ TITLES = {
     "disk_errors": "Disk {subject} reports {detail} errors",
     "pool_full": "Storage pool {subject} is {detail} full",
     "scrub_errors": "The last check of {subject} found {detail} errors",
+    "damaged_files": "Damaged files in {subject}: {detail}",
 }
 ADVICE = {
     "pool_degraded": "Your data has less protection until it is fixed. Open Storage and check the disks.",
@@ -176,6 +217,7 @@ ADVICE = {
     "disk_errors": "Keep an eye on it in Drive Health; replace it if the errors keep growing.",
     "pool_full": "Delete or move files, or add a disk, before it fills up completely.",
     "scrub_errors": "Some data could not be read back correctly. Check Drive Health and your backups.",
+    "damaged_files": "Restore them from a backup or a snapshot, then run the check again: {files}",
 }
 
 

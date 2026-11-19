@@ -39,6 +39,8 @@
  "alert.offsite_failed.title": "异地备份失败",
  "alert.offsite_ok.msg": "异地备份“{name}”已完成。",
  "alert.offsite_ok.title": "异地备份完成：{name}",
+ "alert.pool.damaged_files.advice": "请从备份或快照中恢复这些文件，然后重新运行检查：{files}",
+ "alert.pool.damaged_files.title": "{subject} 中有损坏的文件：{detail}",
  "alert.pool.disk_disabled.advice": "请尽快更换或重新连接它；在此之前，再坏一块就可能丢失数据。",
  "alert.pool.disk_disabled.title": "硬盘 {subject} 处于{detail}状态",
  "alert.pool.disk_errors.advice": "请在硬盘健康中留意它；如果错误持续增加，请更换。",

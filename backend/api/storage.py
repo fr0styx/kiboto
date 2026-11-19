@@ -972,6 +972,15 @@ def update_smart_test_schedule(req: SmartScheduleUpdateRequest) -> dict[str, Any
     return save_smart_schedule(payload)
 
 
+@router.get("/damaged-files", dependencies=[Depends(require_scope("storage:read", "system:view"))])
+def get_damaged_files() -> dict[str, Any]:
+    """The files the last check (scrub) found damaged, per pool, as ZFS names them. Empty when
+    nothing is damaged or the pools cannot be read."""
+    from backend.services import pool_alerts
+
+    return {"pools": pool_alerts.damaged_files()}
+
+
 @router.get("/smart/failure-predictions", dependencies=[Depends(require_scope("storage:read", "system:view"))])
 def get_smart_failure_predictions() -> list[dict[str, Any]]:
     """

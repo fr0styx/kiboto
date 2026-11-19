@@ -39,6 +39,8 @@
  "alert.offsite_failed.title": "Off-site backup failed",
  "alert.offsite_ok.msg": "The off-site backup “{name}” finished.",
  "alert.offsite_ok.title": "Off-site backup finished: {name}",
+ "alert.pool.damaged_files.advice": "Restore them from a backup or a snapshot, then run the check again: {files}",
+ "alert.pool.damaged_files.title": "Damaged files in {subject}: {detail}",
  "alert.pool.disk_disabled.advice": "Replace or reconnect it soon; until then a second failure can lose data.",
  "alert.pool.disk_disabled.title": "Disk {subject} is {detail}",
  "alert.pool.disk_errors.advice": "Keep an eye on it in Drive Health; replace it if the errors keep growing.",

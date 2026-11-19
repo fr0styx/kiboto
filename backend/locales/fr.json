@@ -39,6 +39,8 @@
  "alert.offsite_failed.title": "La sauvegarde externe a échoué",
  "alert.offsite_ok.msg": "La sauvegarde externe « {name} » est terminée.",
  "alert.offsite_ok.title": "Sauvegarde externe terminée : {name}",
+ "alert.pool.damaged_files.advice": "Restaurez-les depuis une sauvegarde ou un instantané, puis relancez la vérification : {files}",
+ "alert.pool.damaged_files.title": "Fichiers endommagés dans {subject} : {detail}",
  "alert.pool.disk_disabled.advice": "Remplacez-le ou rebranchez-le bientôt ; d’ici là, une deuxième panne peut faire perdre des données.",
  "alert.pool.disk_disabled.title": "Le disque {subject} est {detail}",
  "alert.pool.disk_errors.advice": "Surveillez-le dans Santé des disques ; remplacez-le si les erreurs continuent d’augmenter.",

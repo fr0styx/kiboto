@@ -39,6 +39,8 @@
  "alert.offsite_failed.title": "La copia externa ha fallado",
  "alert.offsite_ok.msg": "La copia externa «{name}» terminó.",
  "alert.offsite_ok.title": "Copia externa terminada: {name}",
+ "alert.pool.damaged_files.advice": "Restáuralos desde una copia de seguridad o una instantánea y vuelve a ejecutar la comprobación: {files}",
+ "alert.pool.damaged_files.title": "Archivos dañados en {subject}: {detail}",
  "alert.pool.disk_disabled.advice": "Sustitúyelo o vuelve a conectarlo pronto; hasta entonces, un segundo fallo puede perder datos.",
  "alert.pool.disk_disabled.title": "El disco {subject} está {detail}",
  "alert.pool.disk_errors.advice": "Vigílalo en Salud de los discos; sustitúyelo si los errores siguen aumentando.",

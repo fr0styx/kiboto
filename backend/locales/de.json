@@ -39,6 +39,8 @@
  "alert.offsite_failed.title": "Externe Sicherung fehlgeschlagen",
  "alert.offsite_ok.msg": "Die externe Sicherung „{name}“ ist durchgelaufen.",
  "alert.offsite_ok.title": "Externe Sicherung abgeschlossen: {name}",
+ "alert.pool.damaged_files.advice": "Stellen Sie sie aus einer Sicherung oder einem Snapshot wieder her und starten Sie die Prüfung danach erneut: {files}",
+ "alert.pool.damaged_files.title": "Beschädigte Dateien in {subject}: {detail}",
  "alert.pool.disk_disabled.advice": "Ersetzen oder verbinden Sie sie bald neu; bis dahin kann ein zweiter Ausfall Daten kosten.",
  "alert.pool.disk_disabled.title": "Festplatte {subject} ist {detail}",
  "alert.pool.disk_errors.advice": "Behalten Sie sie in Laufwerkszustand im Auge; ersetzen Sie sie, wenn die Fehler weiter zunehmen.",

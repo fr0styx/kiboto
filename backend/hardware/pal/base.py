@@ -225,11 +225,17 @@ class StoragePlatformAdapter(ABC):
     def scrub_result(self, pool: "StoragePool") -> dict[str, Any] | None:
         """The last scrub of a pool, {state, errors, finished_at}, from what ZFS or btrfs keep
         (no disk is read); None when the pool has no scrub to report (REL-11)."""
-        from backend.hardware.pal.scrub_parse import parse_btrfs_scrub, parse_zpool_scan
+        from backend.hardware.pal.scrub_parse import parse_btrfs_scrub, parse_zpool_damaged, parse_zpool_scan
 
         if pool.fs_type == "zfs" or pool.pool_type == "zfs_pool":
-            code, out, _ = self._run_cmd(["zpool", "status", pool.id])
-            return parse_zpool_scan(out) if code == 0 else None
+            # -v names the damaged files when a check found some (re-audit R6); still no disk read
+            code, out, _ = self._run_cmd(["zpool", "status", "-v", pool.id])
+            if code != 0:
+                return None
+            scan = parse_zpool_scan(out)
+            if scan is not None:
+                scan["damaged"] = parse_zpool_damaged(out)
+            return scan
         if pool.fs_type == "btrfs" and pool.mountpoint:
             code, out, _ = self._run_cmd(["btrfs", "scrub", "status", "-R", pool.mountpoint])
             return parse_btrfs_scrub(out) if code == 0 else None

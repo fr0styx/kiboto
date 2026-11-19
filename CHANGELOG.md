@@ -84,6 +84,9 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   Pinchflat, PiGallery2, OpenSpeedTest, MySpeed, draw.io, CyberChef, ConvertX, DocuSeal, Z-Wave JS UI,
   DDNS Updater, KitchenOwl, go2rtc, Prometheus, Opengist, flatnotes, Owncast, Heimdall, Baby Buddy, Whoogle.
 
+- **Damaged files are named**: when a check of a ZFS pool finds damage it cannot repair, the alert and the
+  Overview say which files, and to restore them from a backup or a snapshot.
+
 #### Changes
 
 - **The Security check says it in words**: "Everything is fine" or "2 things need a look", with what needs a

@@ -32,6 +32,32 @@ def parse_zpool_scan(text: str) -> dict[str, Any] | None:
     return None
 
 
+MAX_DAMAGED_LISTED = 100
+
+
+def parse_zpool_damaged(text: str) -> dict[str, Any]:
+    """The files `zpool status -v` names after "Permanent errors have been detected": up to
+    MAX_DAMAGED_LISTED of them, how many in all, and how many damaged things have no file name
+    (metadata, objects ZFS can only give a number for)."""
+    files: list[str] = []
+    count = other = 0
+    listing = False
+    for raw in (text or "").splitlines():
+        line = raw.strip()
+        if line.startswith("errors:"):
+            listing = "Permanent errors" in line
+            continue
+        if not listing or not line:
+            continue
+        if "<" in line and ">" in line:  # <metadata>:<0x1a>, tank/vm:<0x8>
+            other += 1
+            continue
+        count += 1
+        if len(files) < MAX_DAMAGED_LISTED:
+            files.append(line)
+    return {"files": files, "count": count, "other": other}
+
+
 _BTRFS_COUNTS = ("read_errors", "csum_errors", "verify_errors", "super_errors", "uncorrectable_errors")
 
 

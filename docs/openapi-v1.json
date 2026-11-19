@@ -66652,6 +66652,40 @@
     ]
    }
   },
+  "/api/v1/storage/damaged-files": {
+   "get": {
+    "description": "The files the last check (scrub) found damaged, per pool, as ZFS names them. Empty when\nnothing is damaged or the pools cannot be read.",
+    "operationId": "get_damaged_files_api_v1_storage_damaged_files_get",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Get Damaged Files Api V1 Storage Damaged Files Get",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Get Damaged Files",
+    "tags": [
+     "Storage Subsystem & PAL"
+    ],
+    "x-required-scopes": [
+     "storage:read",
+     "system:view"
+    ]
+   }
+  },
   "/api/v1/storage/disks": {
    "get": {
     "description": "Returns detected physical disks discovered via DiskDiscoveryHAL.",

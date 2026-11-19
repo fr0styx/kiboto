@@ -87,6 +87,11 @@ const MESSAGES = {
   disk_errors: () => t('overview.disk_errors', 'Disk {subject} reports read or write errors.'),
   pool_full: () => t('overview.pool_full', 'Storage pool {subject} is {detail} full.'),
   scrub_errors: () => t('overview.scrub_errors', 'The last check of {subject} found errors in the data.'),
+  damaged_files: () =>
+    t(
+      'overview.damaged_files',
+      'Damaged files in {subject} ({detail}): {files}. Restore them from a backup or a snapshot.'
+    ),
   backup_overdue: () => t('overview.backup_overdue', 'Backup "{subject}" has not finished lately.'),
   snapshot_overdue: () => t('overview.snapshot_overdue', 'Snapshots of {subject} have not been taken lately.'),
   scrub_overdue: () => t('overview.scrub_overdue', '{subject} has not been checked for errors lately.'),
@@ -159,7 +164,10 @@ export function itemText(i) {
     : i.detail_key
       ? t(i.detail_key, i.detail || '', i.detail_params || {})
       : i.detail || '';
-  const text = msg.replace('{subject}', subject || i.kind || '').replace('{detail}', detail);
+  const text = msg
+    .replace('{subject}', subject || i.kind || '')
+    .replace('{detail}', detail)
+    .replace('{files}', i.files || '');
   // someone who can't fix it is told who can (NUX-5)
   return i.tell_admin ? `${text} ${t('overview.tell_admin', 'Tell the person who manages Kiboto.')}` : text;
 }
