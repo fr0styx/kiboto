@@ -58,6 +58,8 @@ ACTIONS: dict[str, str] = {
     "iscsi.enable": "Offer disks to other computers on your network over iSCSI. Each disk needs its user name and password",
     "iscsi.save": "Save this disk. The iSCSI service restarts, so a computer that is using a disk is cut off for a moment",
     "iscsi.delete": "Remove this disk from the list. Its file stays in its folder, and the computer that uses it can no longer reach it",
+    "tiering.enable": "Move the files of {target} that nobody has opened for a long time to the hard drives, at night. Kiboto first watches the folder for that long, and a file that has moved stays on the hard drives",
+    "tiering.run": "Move the old files of {target} to the hard drives now. The hard drives wake up for it",
     "scripts.enable": "Let administrators run their own scripts on this NAS. A script can read and change every file Kiboto can",
     "scripts.save": "Save this script. It runs with Kiboto's rights when its time comes",
     "security.rotate_key": "Replace the install's secret key; everyone signs in to WebDAV and two-factor again",

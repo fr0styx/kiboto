@@ -64,6 +64,7 @@ from backend.api.speedtest import router as speedtest_router
 from backend.api.stats import router as stats_router
 from backend.api.storage import router as storage_router
 from backend.api.system import router as system_router
+from backend.api.tiering import router as tiering_router
 from backend.api.update_watch import router as update_watch_router
 from backend.api.ups import router as ups_router
 from backend.api.user_data import router as user_data_router
@@ -181,3 +182,4 @@ api_router.include_router(snmp_router)  # SNMP v3 agent, off by default
 api_router.include_router(user_scripts_router)  # an administrator's own scripts on a timer, off by default
 api_router.include_router(drive_check_router)  # the check for a new drive, started by hand
 api_router.include_router(iscsi_router)  # disks for other computers over iSCSI, off by default
+api_router.include_router(tiering_router)  # old files move to the slow pool at night, off for every folder

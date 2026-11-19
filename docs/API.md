@@ -38,7 +38,7 @@ request and response schemas.
 
 <!-- BEGIN generated endpoints: python scripts/api_reference.py --update -->
 
-785 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
+788 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
 
 ### AI Conversation History
 
@@ -975,6 +975,14 @@ request and response schemas.
 | `POST` | `/api/v1/fans/presets/{preset_name}/apply` | `hardware:fans` | Applies a custom named preset to the active fan curve |
 | `GET` | `/api/v1/fans/quiet-night` | any of `hardware:read`, `system:view` | Quieter at night (hardware extra, off by default): backend/services/quiet_night.py |
 | `PUT` | `/api/v1/fans/quiet-night` | `hardware:fans` | Put Quiet Night |
+
+### Tiering
+
+| Method | Path | Access | What it does |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/v1/tiering` | `storage:admin` | Each shared folder: whether tiering fits it, whether it is on, and how its last run went |
+| `PUT` | `/api/v1/tiering/folders/{name}` | `storage:admin` | Turns tiering on for a shared folder (confirmed), changes its days, or turns it off |
+| `POST` | `/api/v1/tiering/folders/{name}/run` | `storage:admin` | Moves the folder's old files now |
 
 ### UPS & Power Integrity
 

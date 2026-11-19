@@ -619,6 +619,11 @@
 .scr-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
 .scr-row { display: flex; flex-direction: column; gap: 8px; }
 .scr-acts { display: flex; flex-wrap: wrap; gap: 8px; }
+.tier-days-label { display: inline-flex; align-items: center; gap: 8px; font-size: var(--kb-fs-xs); color: var(--muted); }
+.tier-days { width: 84px; }
+#tiering-card .scr-list { margin-top: 12px; }
+.tier-unfit-box { margin-top: 10px; font-size: var(--kb-fs-xs); }
+.tier-unfit { margin: 6px 0 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
 .scr-form { width: 100%; }
 .scr-form [hidden] { display: none; }
 .scr-body, .scr-out { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: var(--kb-fs-sm); }

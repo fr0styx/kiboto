@@ -90,6 +90,16 @@ const ACTIONS = {
     'Remove this disk from the list? Its file stays in its folder, and the computer that uses it can no longer reach it.',
     true,
   ],
+  'tiering.enable': [
+    'Move old files',
+    'Move the files of {target} that nobody has opened for a long time to the slower drives, at night? Kiboto first watches the folder for that long, and a file that has moved stays there.',
+    false,
+  ],
+  'tiering.run': [
+    'Move now',
+    'Move the old files of {target} to the slower drives now? The drives wake up for it.',
+    false,
+  ],
   'scripts.enable': [
     'Turn on scripts',
     'Let administrators run their own scripts on this NAS? A script can read and change every file Kiboto can.',

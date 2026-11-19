@@ -73,6 +73,7 @@ LINKS: tuple[tuple[str, str], ...] = (
     ("cpu_hot", "hardware"),
     ("fm_", "files"),
     ("family_shares", "shares"),
+    ("tiering_", "shares"),
     ("files_received", "files"),
     ("guard_", "settings"),
     ("malware_", "settings"),

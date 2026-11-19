@@ -135,3 +135,19 @@ def test_iscsi_guide_numbers():
         recipe = fh.read()
     assert "./usr/sbin/tgtd ./usr/sbin/tgtadm" in recipe and "\n    tgt \\\n" not in recipe
     assert "tgt-admin" not in it.START and it.SETUP in it.START
+
+
+def test_tiering_guide_numbers():
+    """docs/TIERING.md says what tiering does: its days, its hour, its nightly limit, and that the
+    mover sees only the folder and has no network."""
+    from backend.services import tier_mover, tiering
+
+    text = _doc("TIERING.md")
+    assert f"({tiering.DEFAULT_DAYS} unless you change it, from {tiering.MIN_DAYS} to {tiering.MAX_DAYS})" in text
+    assert f"At {tiering.RUN_AT} Kiboto" in text and f"spin up at {tiering.RUN_AT}" in text
+    assert f"at most {tiering.MAX_FILES_PER_RUN} files a night" in text
+    assert f"(`{tiering.CONTAINER}`)" in text and "has no network" in text
+    assert "for more than an hour" in text and tiering.MAX_UNWATCHED_SECS == 3600
+    assert "is never replaced" in text and "its name starts with a dot" in text
+    assert "counts as someone opening the files" in text and "One way only" in text
+    assert tier_mover.PART.startswith(".kiboto-") and "under a temporary name" in text

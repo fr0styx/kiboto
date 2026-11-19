@@ -129,6 +129,9 @@ def _start_network_services() -> None:
     from backend.services import iscsi_target
 
     iscsi_target.ensure_soon()  # disks for other computers: its container on the app's current image (off by default)
+    from backend.services import tiering
+
+    tiering.watch_soon()  # listens for file opens in the folders that have tiering on (none by default)
     from backend.services import hw_helper_container
 
     hw_helper_container.ensure_soon()  # SEC-24 step 2: the hardware helper on the app's current image

@@ -13,6 +13,7 @@ HOMES = {
     "backend/users_db.py",  # users.db
     "backend/services/ai_conversations_db.py",  # ai_conversations.db
     "backend/services/rag_schema.py",  # rag_index.db
+    "backend/services/open_watch.py",  # tiering_opens.db: which files were opened, and when
     "backend/db_schema.py",  # migrations
 }
 CREATE = re.compile(r"CREATE\s+(VIRTUAL\s+)?(TABLE|INDEX|TRIGGER)", re.I)

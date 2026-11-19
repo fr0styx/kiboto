@@ -7954,6 +7954,24 @@
     "title": "FolderAuditRequest",
     "type": "object"
    },
+   "FolderIn": {
+    "properties": {
+     "days": {
+      "default": 90,
+      "title": "Days",
+      "type": "integer"
+     },
+     "enabled": {
+      "title": "Enabled",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "enabled"
+    ],
+    "title": "FolderIn",
+    "type": "object"
+   },
    "FolderSizeRequest": {
     "properties": {
      "force_wake": {
@@ -71317,6 +71335,149 @@
     "x-required-scopes": [
      "system:power",
      "system:manage"
+    ]
+   }
+  },
+  "/api/v1/tiering": {
+   "get": {
+    "description": "Each shared folder: whether tiering fits it, whether it is on, and how its last run went.",
+    "operationId": "tiering_view_api_v1_tiering_get",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Tiering View Api V1 Tiering Get",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Tiering View",
+    "tags": [
+     "Tiering"
+    ],
+    "x-required-scopes": [
+     "storage:admin"
+    ]
+   }
+  },
+  "/api/v1/tiering/folders/{name}": {
+   "put": {
+    "description": "Turns tiering on for a shared folder (confirmed), changes its days, or turns it off.",
+    "operationId": "tiering_set_api_v1_tiering_folders__name__put",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "name",
+      "required": true,
+      "schema": {
+       "title": "Name",
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/FolderIn"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Tiering Set Api V1 Tiering Folders  Name  Put",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "404": {
+      "$ref": "#/components/responses/NotFound"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Tiering Set",
+    "tags": [
+     "Tiering"
+    ],
+    "x-required-scopes": [
+     "storage:admin"
+    ]
+   }
+  },
+  "/api/v1/tiering/folders/{name}/run": {
+   "post": {
+    "description": "Moves the folder's old files now. Returns at once; the view shows when it has ended.",
+    "operationId": "tiering_run_api_v1_tiering_folders__name__run_post",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "name",
+      "required": true,
+      "schema": {
+       "title": "Name",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Tiering Run Api V1 Tiering Folders  Name  Run Post",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "404": {
+      "$ref": "#/components/responses/NotFound"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Tiering Run",
+    "tags": [
+     "Tiering"
+    ],
+    "x-required-scopes": [
+     "storage:admin"
     ]
    }
   },

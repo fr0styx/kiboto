@@ -80,6 +80,15 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   it is written to. Every disk has a user name and a password, and can be limited to one address. Off until
   you turn it on; it needs nothing loaded into the system's kernel. Guide: docs/ISCSI.md.
 
+- **Old files move to the slower drives** (Storage → Shared folders): per shared folder, files that nobody has
+  opened or changed for a number of days (90 unless you change it) move from the SSD pool to the array at
+  03:00, and the folder still shows every file in one place. Kiboto watches which files are opened itself,
+  without changing how any drive is mounted, and watches a folder for its full number of days before it moves
+  anything. A file that has moved stays there. The move runs in a short-lived container that sees only the
+  folder and has no network; a file that is open, has a second name or is already on the array is left where
+  it is. For Unraid shares that stay on their pool; off for every folder until you turn it on. Guide:
+  docs/TIERING.md.
+
 ## v2.0.4 (2026-11-19)
 ### 🏡 Apps that go back on their own, a way to move in, and Kiboto in your language everywhere
 

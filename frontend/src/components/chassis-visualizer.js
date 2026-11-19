@@ -1444,6 +1444,7 @@ export async function fetchAndRenderNetworkShares(container) {
     import('./share-connect.js')
       .then((m) => m.addConnectButtons(grid, canManageShares ? '' : platformName(platform)))
       .catch(() => {}); // how to connect (SET-22)
+    import('./tiering-card.js').then((m) => m.renderTieringCard()).catch(() => {}); // old files move to the slower drives, off for every folder
     import('./share-time-machine.js')
       .then((m) =>
         m.renderTimeMachine(container, canManageShares ? '' : platformName(platform), () =>
