@@ -30,6 +30,12 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   now carries the power drawn through the UPS and the electricity totals of the Power page (today, 7 days,
   30 days, the average).
 
+#### New
+
+- **The NAS in Home Assistant's Energy dashboard**: with Home Assistant connected and a UPS that is measured,
+  Kiboto now sends the UPS's power and an electricity meter that only grows. Add it under Energy → Add
+  consumption. The same meter is on the metrics page as `kiboto_energy_total_kwh`.
+
 ## v2.0.4 (2026-11-19)
 ### 🏡 Apps that go back on their own, a way to move in, and Kiboto in your language everywhere
 

@@ -84,4 +84,6 @@ guesses it.
 
 For a dashboard of your own, the same numbers are on the metrics page (`/api/metrics`, Prometheus
 format): `kiboto_ups_power_watts`, `kiboto_energy_today_kwh`, `kiboto_energy_7d_kwh`,
-`kiboto_energy_30d_kwh` and `kiboto_energy_average_watts`.
+`kiboto_energy_30d_kwh`, `kiboto_energy_average_watts` and `kiboto_energy_total_kwh` (a meter that
+only grows). With Home Assistant connected, the NAS also appears there as a power sensor and an
+energy meter (see [HOME_ASSISTANT.md](HOME_ASSISTANT.md)).

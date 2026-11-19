@@ -39,6 +39,7 @@ def test_power_and_totals_once_measured(page, monkeypatch):
     assert seen["kiboto_energy_average_watts"] == 90.0
     assert seen["kiboto_energy_30d_kwh"] == pytest.approx(0.18, abs=0.002)
     assert seen["kiboto_energy_7d_kwh"] == seen["kiboto_energy_30d_kwh"] >= seen["kiboto_energy_today_kwh"]
+    assert seen["kiboto_energy_total_kwh"] == pytest.approx(0.18, abs=0.002)
     # no UPS now: the power gauge goes, the totals of what was measured stay
     seen = page({"available": False})
     assert "kiboto_ups_power_watts" not in seen and seen["kiboto_energy_30d_kwh"] > 0

@@ -36,8 +36,13 @@ def _load() -> dict[str, Any]:
     if _state is None:
         data = read_json(STATE_FILE, {})
         data = data if isinstance(data, dict) else {}
-        days = data.get("days") if isinstance(data.get("days"), dict) else {}
-        _state = {"days": days, "price": data.get("price")}
+        kept = data.get("days")
+        days: dict[str, Any] = kept if isinstance(kept, dict) else {}
+        total = data.get("total_wh")
+        if not isinstance(total, (int, float)) or isinstance(total, bool):
+            # kept since before the counter: it starts at what the days on record add up to
+            total = sum(float(d[0]) for d in days.values() if isinstance(d, list) and d)
+        _state = {"days": days, "price": data.get("price"), "total_wh": round(float(total), 4)}
     return _state
 
 
@@ -71,6 +76,8 @@ def note(power_watts: Any, now: float | None = None) -> None:
             dt = now - _last_at
             day = st["days"].setdefault(_day(now), [0.0, 0.0])
             day[0] = round(day[0] + watts * dt / 3600.0, 4)  # watt-hours
+            # everything ever measured: it only grows, while the days fall off after KEEP_DAYS
+            st["total_wh"] = round(st["total_wh"] + watts * dt / 3600.0, 4)
             day[1] = round(day[1] + dt, 1)  # seconds measured
         _last_at = now
         if now - _saved_at >= SAVE_EVERY_SECS:
@@ -96,6 +103,7 @@ def summary(now: float | None = None) -> dict[str, Any]:
         st = _load()
         days = dict(st["days"])
         price = st.get("price")
+        total_wh = float(st.get("total_wh") or 0.0)
     keys = [_day(now - i * 86400) for i in range(30)]
 
     def total(n: int) -> float:
@@ -110,6 +118,7 @@ def summary(now: float | None = None) -> dict[str, Any]:
         "today_kwh": round(total(1) / 1000.0, 3),
         "week_kwh": round(total(7) / 1000.0, 3),
         "month_kwh": round(month_wh / 1000.0, 3),
+        "total_kwh": round(total_wh / 1000.0, 3),
         "avg_watts": round(avg_watts, 1),
         "price": price,
         # a month at the measured average, so a new install has an answer after its first hours

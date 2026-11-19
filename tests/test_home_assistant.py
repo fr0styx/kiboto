@@ -88,6 +88,51 @@ def test_the_sensors_come_from_the_live_stats():
     assert "ups_battery" not in {s["key"] for s in ha.sensors({"ups": {"available": False}})}
 
 
+def test_power_and_an_energy_meter_for_the_energy_dashboard(monkeypatch):
+    monkeypatch.setattr(ha, "node_id", lambda: "nas")
+    monkeypatch.setattr(ha, "_electricity", lambda: None)
+    plain = {s["key"] for s in ha.sensors(STATS)}
+    assert "ups_power" not in plain and "energy_total" not in plain  # nothing measured: nothing claimed
+    monkeypatch.setattr(ha, "_electricity", lambda: 12.345)
+    stats = {**STATS, "ups": {**STATS["ups"], "power_watts": 87.5}}
+    found = {s["key"]: s for s in ha.sensors(stats)}
+    assert (found["ups_power"]["value"], found["ups_power"]["unit"], found["ups_power"]["device_class"]) == (
+        87.5,
+        "W",
+        "power",
+    )
+    assert found["energy_total"]["value"] == 12.345 and found["energy_total"]["state_class"] == "total_increasing"
+    confs = {t: json.loads(p) for t, p, _ in ha.messages({}, stats) if t.endswith("/config")}
+    meter = confs["homeassistant/sensor/kiboto_nas/energy_total/config"]
+    assert (meter["device_class"], meter["unit_of_measurement"], meter["state_class"]) == (
+        "energy",
+        "kWh",
+        "total_increasing",
+    )
+    assert confs["homeassistant/sensor/kiboto_nas/ups_power/config"]["state_class"] == "measurement"
+    assert confs["homeassistant/sensor/kiboto_nas/cpu_usage/config"]["state_class"] == "measurement"
+    # the meter stays when the UPS is not answering: what was measured was measured
+    assert "energy_total" in {s["key"] for s in ha.sensors({"ups": {"available": False}})}
+
+
+def test_the_meter_reads_the_electricity_record(monkeypatch, tmp_path):
+    from backend.services import energy_use
+
+    monkeypatch.setattr(energy_use, "STATE_FILE", str(tmp_path / "energy.json"))
+    energy_use.reset_for_tests()
+    assert ha._electricity() is None
+    for i in range(0, 3601, 60):
+        energy_use.note(200, 1_800_000_000.0 + i)
+    assert ha._electricity() == pytest.approx(0.2, abs=0.001)
+
+    def gone():
+        raise OSError("unreadable")
+
+    monkeypatch.setattr(energy_use, "summary", gone)
+    assert ha._electricity() is None
+    energy_use.reset_for_tests()
+
+
 def test_discovery_announces_each_sensor_and_one_state_message(monkeypatch):
     monkeypatch.setattr(ha, "node_id", lambda: "nas")
     msgs = ha.messages({"discovery_prefix": "homeassistant", "interval_s": 60}, STATS)

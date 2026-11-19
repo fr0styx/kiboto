@@ -25,7 +25,14 @@ Assistant marks the sensors unavailable after three minutes instead of showing a
 | UPS battery, UPS load | % |
 | UPS time left | min |
 | UPS on battery | on/off |
+| UPS power (with a UPS that reports it) | W |
+| Electricity used (a meter that only grows) | kWh |
 | Ransomware guard froze writes | on/off (a problem) |
+
+**Electricity used** can go into Home Assistant's Energy dashboard: Settings → Dashboards → Energy →
+Add consumption → choose the Kiboto sensor. It counts everything plugged into the UPS, the same
+numbers as Kiboto's own Power page (see [POWER.md](POWER.md)), and appears once the UPS has been
+measured.
 
 The values are published retained on `kiboto/<nas-name>/state`, one JSON message, so automations
 can also read them directly. The broker password is stored encrypted in Kiboto's data folder.

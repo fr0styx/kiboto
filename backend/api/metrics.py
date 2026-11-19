@@ -32,6 +32,7 @@ def _add_energy(add_gauge) -> None:
     add_gauge("kiboto_energy_7d_kwh", "Electricity used in the last 7 days", seen.get("week_kwh"))
     add_gauge("kiboto_energy_30d_kwh", "Electricity used in the last 30 days", seen.get("month_kwh"))
     add_gauge("kiboto_energy_average_watts", "Average power over the measured time", seen.get("avg_watts"))
+    add_gauge("kiboto_energy_total_kwh", "All the electricity measured so far (only grows)", seen.get("total_kwh"))
 
 
 @router.get("/metrics", response_class=PlainTextResponse, dependencies=[Depends(require_scope("system:view"))])

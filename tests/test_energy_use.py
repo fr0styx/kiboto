@@ -42,6 +42,7 @@ def test_no_reading_ends_the_stretch_and_nonsense_is_ignored():
         "today_kwh": 0.0,
         "week_kwh": 0.0,
         "month_kwh": 0.0,
+        "total_kwh": 0.0,
         "avg_watts": 0.0,
         "price": None,
         "month_cost": None,
@@ -134,3 +135,36 @@ def test_a_ups_that_reports_only_a_percentage_can_be_given_its_rated_power(clien
     monkeypatch.setattr(ups_api, "read_ups_status", gone)
     view = client.get("/api/ups/energy", headers=h).json()
     assert view["load_only"] is False and view["rated_watts"] is None
+
+
+def test_the_meter_only_grows_while_old_days_fall_off(monkeypatch):
+    """A dashboard's energy meter must never go down: the days are kept for a while, the total for good."""
+    monkeypatch.setattr(energy_use, "KEEP_DAYS", 3)
+    monkeypatch.setattr(energy_use, "SAVE_EVERY_SECS", 0.0)  # every reading is saved, so old days are dropped
+    seen = []
+    for day in range(6):  # six days, one hour a day at 100 W
+        start = NOON + day * 86400
+        for i in range(0, 3601, 60):
+            energy_use.note(100, start + i)
+        energy_use.note(None, start + 3700)
+        seen.append(energy_use.summary(start + 3700)["total_kwh"])
+    assert seen == sorted(seen) and seen[-1] == pytest.approx(0.6, abs=0.002)
+    last = energy_use.summary(NOON + 5 * 86400 + 3700)
+    assert last["month_kwh"] == pytest.approx(0.3, abs=0.002)  # only three days are still on record
+    assert last["total_kwh"] == pytest.approx(0.6, abs=0.002)
+    # it is kept across a restart
+    energy_use.reset_for_tests()  # memory only: the file stays
+    assert energy_use.summary(NOON + 5 * 86400 + 3700)["total_kwh"] == pytest.approx(0.6, abs=0.002)
+
+
+def test_a_record_from_before_the_meter_starts_at_what_its_days_add_up_to(tmp_path):
+    import json
+
+    with open(energy_use.STATE_FILE, "w") as f:
+        json.dump({"days": {"2026-11-18": [250.0, 9000.0], "2026-11-19": [150.0, 5400.0]}, "price": 0.2}, f)
+    energy_use.reset_for_tests()  # memory only: the file stays
+    assert energy_use.summary(NOON)["total_kwh"] == 0.4
+    with open(energy_use.STATE_FILE, "w") as f:
+        json.dump({"days": {"2026-11-19": [150.0, 5400.0]}, "total_wh": True}, f)  # nonsense is not a number
+    energy_use.reset_for_tests()  # memory only: the file stays
+    assert energy_use.summary(NOON)["total_kwh"] == 0.15

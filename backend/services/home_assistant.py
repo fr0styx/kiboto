@@ -82,7 +82,7 @@ def sensors(stats: dict[str, Any]) -> list[dict[str, Any]]:
     """What Kiboto reports, from its live stats: (key, name, unit, device_class, value, component)."""
     out: list[dict[str, Any]] = []
 
-    def add(key, name, value, unit=None, device_class=None, component="sensor", icon=None):
+    def add(key, name, value, unit=None, device_class=None, component="sensor", icon=None, state_class="measurement"):
         if value is None:
             return
         out.append(
@@ -94,6 +94,7 @@ def sensors(stats: dict[str, Any]) -> list[dict[str, Any]]:
                 "device_class": device_class,
                 "component": component,
                 "icon": icon,
+                "state_class": state_class,
             }
         )
 
@@ -122,6 +123,11 @@ def sensors(stats: dict[str, Any]) -> list[dict[str, Any]]:
         add("ups_runtime", "UPS time left", ups.get("time_left_min"), "min", "duration")
         add("ups_load", "UPS load", ups.get("load_pct"), "%", None, icon="mdi:flash")
         add("ups_on_battery", "UPS on battery", bool(ups.get("on_battery")), None, "power", component="binary_sensor")
+        add("ups_power", "UPS power", ups.get("power_watts"), "W", "power")
+    used = _electricity()
+    if used is not None:
+        # a meter that only grows: Home Assistant's Energy dashboard takes it as a device's consumption
+        add("energy_total", "Electricity used", used, "kWh", "energy", state_class="total_increasing")
     try:
         from backend.services.ransomware_guard import get_guard
 
@@ -136,6 +142,18 @@ def sensors(stats: dict[str, Any]) -> list[dict[str, Any]]:
     except (AttributeError, ImportError, OSError, RuntimeError):  # the guard may not be set up yet
         logger.debug("home_assistant: guard state unavailable", exc_info=True)
     return out
+
+
+def _electricity() -> float | None:
+    """All the electricity measured so far in kWh, or None before a UPS has been measured."""
+    from backend.services import energy_use
+
+    try:
+        seen = energy_use.summary()
+    except (OSError, ValueError, TypeError):
+        return None
+    total = seen.get("total_kwh")
+    return float(total) if total else None
 
 
 def _template(key: str, binary: bool) -> str:
@@ -175,7 +193,7 @@ def messages(cfg: dict[str, Any], stats: dict[str, Any], announce: bool = True) 
             if s["icon"]:
                 conf["icon"] = s["icon"]
             if not binary:
-                conf["state_class"] = "measurement"
+                conf["state_class"] = s.get("state_class") or "measurement"
             out.append((f"{prefix}/{s['component']}/kiboto_{node}/{s['key']}/config", json.dumps(conf), True))
     out.append((state_topic, json.dumps({s["key"]: s["value"] for s in found}), True))
     return out
