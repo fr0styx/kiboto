@@ -1,6 +1,7 @@
 """Ransomware guard, IP block-list and two-step sign-in policy endpoints (M4, M5)."""
 
 import ipaddress
+import threading
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -96,6 +97,49 @@ def _mfa_policy_view() -> dict[str, Any]:
         if u.get("status", "active") == "active" and not protected and u.get("idp_type") != "oidc":
             people[u["role_id"]] = people.get(u["role_id"], 0) + 1
     return {"required_roles": sorted(mfa_policy.required_roles()), "without_two_step": people}
+
+
+class OutsideCheckIn(BaseModel):
+    name: str = Field(min_length=1, max_length=40)
+    enabled: bool
+
+
+def _outside_checks_view() -> dict[str, Any]:
+    from backend import outside_checks
+
+    st = outside_checks.state()
+    return {"checks": [{"name": name, "enabled": st[name]} for name in outside_checks.CHECKS]}
+
+
+@router.get("/outside-checks", dependencies=[Depends(require_scope("system:config"))])
+def get_outside_checks() -> dict[str, Any]:
+    """The checks that ask a service outside the home, and whether each is on (all off by default)."""
+    return _outside_checks_view()
+
+
+@router.put("/outside-checks", dependencies=[Depends(require_scope("system:config"))])
+def put_outside_check(
+    req: OutsideCheckIn, principal: AuthenticatedPrincipal = Depends(get_current_principal)
+) -> dict[str, Any]:
+    from backend import outside_checks
+    from backend.users_db import log_security_event
+
+    try:
+        outside_checks.set_enabled(req.name, req.enabled)
+    except KeyError:
+        raise HTTPException(status_code=400, detail=f"Unknown check: {req.name}") from None
+    if req.name == "weakness_feed" and req.enabled:
+        from backend.services import weakness_feed
+
+        threading.Thread(target=weakness_feed.refresh, name="weakness-feed", daemon=True).start()
+    log_security_event(
+        "security.outside_check.changed",
+        "success",
+        actor_id=principal.user_id,
+        actor_username=principal.username,
+        details={"name": req.name, "enabled": req.enabled},
+    )
+    return _outside_checks_view()
 
 
 @router.get("/mfa-policy", dependencies=[Depends(require_scope("system:config"))])

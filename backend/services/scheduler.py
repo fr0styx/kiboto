@@ -235,6 +235,14 @@ def _check_tailscale_routes() -> None:
         logger.warning("[Scheduler] Tailscale route check failed: %s", e)
 
 
+def _run_weakness_feed(now: float) -> None:
+    """Once a day, and only when turned on: the public list of weaknesses under attack."""
+    from backend.services import weakness_feed
+
+    if weakness_feed.due(now):
+        weakness_feed.refresh(now)
+
+
 def _run_route_check(now: float) -> None:
     """Every 10 minutes: a route another device offers over the NAS's own network is not accepted
     (it would cut the NAS off). It used to run inside every status read (SET-16 stage 2)."""
@@ -277,6 +285,7 @@ def _run_scheduled_tasks():
         _run_usb_disks()
         _run_upload_sweep(now)
         _run_route_check(now)
+        on_its_own("weakness feed", _run_weakness_feed, now)
         cfg = get_smart_schedule()
 
         if not cfg.get("enabled", True):

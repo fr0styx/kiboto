@@ -1391,6 +1391,7 @@ export function loadNetworkPage() {
   import('./nas-name.js').then((m) => m.loadNasNameCard()).catch(() => {});
   fetchListeningPorts();
   fetchAndRenderTailscaleDetails(); // its options are a section of this page (SET-24 n)
+  import('./internet-speed.js').then((m) => m.showInternetSpeed()).catch(() => {});
 }
 
 export function initNetworkControls() {

@@ -29728,6 +29728,26 @@
     "title": "OpenaiModelsResponseDataItem",
     "type": "object"
    },
+   "OutsideCheckIn": {
+    "properties": {
+     "enabled": {
+      "title": "Enabled",
+      "type": "boolean"
+     },
+     "name": {
+      "maxLength": 40,
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+     }
+    },
+    "required": [
+     "name",
+     "enabled"
+    ],
+    "title": "OutsideCheckIn",
+    "type": "object"
+   },
    "OverviewResponse": {
     "additionalProperties": true,
     "description": "GET /offsite",
@@ -61685,6 +61705,66 @@
     ]
    }
   },
+  "/api/v1/network/speedtest/internet": {
+   "get": {
+    "description": "Whether the internet speed test is turned on (Security -> Checks that use the internet), and the last result.",
+    "operationId": "internet_speed_view_api_v1_network_speedtest_internet_get",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Internet Speed View Api V1 Network Speedtest Internet Get",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Internet Speed View",
+    "tags": [
+     "Network & Switching"
+    ],
+    "x-required-scopes": [
+     "system:config"
+    ]
+   },
+   "post": {
+    "description": "Measures the home's internet line against Cloudflare's speed test. Only when turned on.",
+    "operationId": "internet_speed_measure_api_v1_network_speedtest_internet_post",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Internet Speed Measure",
+    "tags": [
+     "Network & Switching"
+    ],
+    "x-required-scopes": [
+     "system:config"
+    ]
+   }
+  },
   "/api/v1/network/speedtest/ping": {
    "get": {
     "description": "A small answer to time (the delay to the NAS and back).",
@@ -65178,6 +65258,82 @@
      }
     },
     "summary": "Put Mfa Policy",
+    "tags": [
+     "Security"
+    ],
+    "x-required-scopes": [
+     "system:config"
+    ]
+   }
+  },
+  "/api/v1/security/outside-checks": {
+   "get": {
+    "description": "The checks that ask a service outside the home, and whether each is on (all off by default).",
+    "operationId": "get_outside_checks_api_v1_security_outside_checks_get",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Get Outside Checks Api V1 Security Outside Checks Get",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Get Outside Checks",
+    "tags": [
+     "Security"
+    ],
+    "x-required-scopes": [
+     "system:config"
+    ]
+   },
+   "put": {
+    "operationId": "put_outside_check_api_v1_security_outside_checks_put",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/OutsideCheckIn"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Put Outside Check Api V1 Security Outside Checks Put",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Put Outside Check",
     "tags": [
      "Security"
     ],

@@ -29,4 +29,7 @@ def password_problem(password: str) -> str | None:
         return "Please choose a password other than the default."
     if pw.lower() in _common():
         return "That password is one of the 10,000 most used ones, so it is guessed first. Please choose another."
-    return None
+    # known data leaks, only when an administrator turned that check on (it asks an outside service)
+    from backend import leaked_passwords
+
+    return leaked_passwords.problem(pw)

@@ -6,13 +6,17 @@ bytes from here, sends some back and times a few small requests. Nothing is stor
 reaches an outside service, and every signed-in person may run it: it measures their own link.
 """
 
+import asyncio
 import os
 import time
+from typing import Any
 
+import httpx
 from fastapi import APIRouter, Depends, Query, Request
-from fastapi.responses import StreamingResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 
-from backend.auth import AuthenticatedPrincipal, get_current_principal
+from backend.auth import AuthenticatedPrincipal, get_current_principal, require_scope
+from backend.errors import error_response
 
 router = APIRouter(tags=["Network & Switching"])
 
@@ -70,3 +74,28 @@ async def speedtest_upload(
     async for piece in request.stream():
         received += len(piece)
     return {"bytes": received, "seconds": round(time.perf_counter() - started, 4)}
+
+
+@router.get("/network/speedtest/internet", dependencies=[Depends(require_scope("system:config"))])
+def internet_speed_view() -> dict[str, Any]:
+    """Whether the internet speed test is turned on (Security -> Checks that use the internet), and the last result."""
+    from backend.services import internet_speed
+
+    return internet_speed.view()
+
+
+@router.post("/network/speedtest/internet", response_model=None, dependencies=[Depends(require_scope("system:config"))])
+async def internet_speed_measure() -> dict[str, Any] | JSONResponse:
+    """Measures the home's internet line against Cloudflare's speed test. Only when turned on."""
+    from backend.services import internet_speed
+
+    try:
+        return await asyncio.to_thread(internet_speed.measure)
+    except internet_speed.TurnedOff as e:
+        return error_response(409, str(e), error="turned_off")
+    except internet_speed.Busy as e:
+        return error_response(409, str(e), error="busy")
+    except (httpx.HTTPError, OSError) as e:
+        return error_response(
+            502, f"The speed test service could not be reached ({type(e).__name__}).", error="unreachable"
+        )

@@ -279,6 +279,44 @@ def _check_ai_runtimes(checks: list[dict[str, Any]], issues: list[dict[str, Any]
         )
 
 
+def _check_app_weaknesses(checks: list[dict[str, Any]], issues: list[dict[str, Any]]) -> None:
+    """evaluate_security_posture: apps whose software is on the list of weaknesses under attack and
+    whose copy predates the warning (weight 15). Only when the administrator turned the check on."""
+    from backend import outside_checks
+    from backend.services import weakness_feed
+
+    if not outside_checks.enabled("weakness_feed"):
+        return
+    found = weakness_feed.findings()
+    apps = ", ".join(f"{f['app']} ({f['cve']})" for f in found)
+    checks.append(
+        {
+            "id": "app_weaknesses",
+            "params": {"apps": apps, "count": len(found)},
+            "name": "Apps with a weakness under attack",
+            "category": "Apps",
+            "passed": not found,
+            "penalty": 15 if found else 0,
+            "severity": "high" if found else "info",
+            "details": "No installed app is on the list of weaknesses under attack"
+            if not found
+            else "May be affected, update them: " + apps,
+        }
+    )
+    if found:
+        issues.append(
+            {
+                "id": "sec-issue-app-weaknesses",
+                "title": "An app has a weakness that is being attacked",
+                "severity": "high",
+                "description": "These apps run software on the public list of weaknesses that attackers use, and "
+                "their copy was built before the warning: " + apps,
+                "remediation": "Update these apps (Apps -> Updates). If no update is offered yet, stop the app "
+                "or keep it away from the internet until one is.",
+            }
+        )
+
+
 def _check_safe_defaults(checks: list[dict[str, Any]], issues: list[dict[str, Any]]) -> None:
     """evaluate_security_posture: settings looser than the B11 defaults, each with a one-click fix."""
     from backend.services.safe_defaults_advisor import findings
@@ -372,6 +410,7 @@ def evaluate_security_posture(request: Request | None = None) -> dict[str, Any]:
     _check_guest_shares(checks, issues)
     _check_stale_tokens(checks, issues, now)
     _check_ai_runtimes(checks, issues)
+    _check_app_weaknesses(checks, issues)
     _check_safe_defaults(checks, issues)
     _check_admin_accounts(checks)
 

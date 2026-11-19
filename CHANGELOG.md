@@ -14,6 +14,14 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Sign-in from a new device**: the first time an account signs in from a kind of device it has not used before,
   Kiboto records it, alerts the administrators and sends a notification to that person's own devices.
 
+- **Leaked-password check** (Settings → Security → Checks that use the internet, off until you turn it on):
+  a new password that appears in known data leaks is refused. Only 5 characters of a fingerprint leave the NAS,
+  never the password.
+
+- **Apps with a weakness under attack** (off until you turn it on under Settings → Security → Checks that use
+  the internet): once a day Kiboto compares your apps with the public list of weaknesses attackers are using
+  and tells you which to update. Nothing about your NAS is sent.
+
 #### New
 
 - **Drive replacement guide**: a drive Drive Health says to replace now or soon gets "Replace this drive", and an
@@ -68,6 +76,9 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 
 - **Bring your files over** (Settings → Shared folders): copy folders from another NAS or a PC on your network
   into a shared folder, see first what would be copied, and have Kiboto check afterwards that every file arrived.
+
+- **Internet speed test** (off until you turn it on under Settings → Security → Checks that use the internet):
+  a button on the Network page measures your internet line from the NAS, both directions.
 
 #### Changes
 

@@ -38,7 +38,7 @@ request and response schemas.
 
 <!-- BEGIN generated endpoints: python scripts/api_reference.py --update -->
 
-758 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
+762 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
 
 ### AI Conversation History
 
@@ -490,6 +490,8 @@ request and response schemas.
 | `GET` | `/api/v1/network/snmp` | `system:view` | Get Snmp |
 | `PUT` | `/api/v1/network/snmp` | `system:config` | Saves the settings; turning the agent on is confirmed first (428 until then): it opens a port on the home network |
 | `GET` | `/api/v1/network/speedtest/download` | signed in | `mb` megabytes of random bytes; the browser times how fast they arrive and may stop early |
+| `GET` | `/api/v1/network/speedtest/internet` | `system:config` | Whether the internet speed test is turned on (Security -> Checks that use the internet), and the last result |
+| `POST` | `/api/v1/network/speedtest/internet` | `system:config` | Measures the home's internet line against Cloudflare's speed test |
 | `GET` | `/api/v1/network/speedtest/ping` | signed in | A small answer to time (the delay to the NAS and back) |
 | `POST` | `/api/v1/network/speedtest/upload` | signed in | Reads what the browser sends and throws it away (the usual body limit applies) |
 | `GET` | `/api/v1/network/topology` | any of `system:view`, `system:config` | Retrieve full host network topology, physical NICs, bridges, bonds, and Docker networks |
@@ -650,6 +652,8 @@ request and response schemas.
 | `POST` | `/api/v1/security/malware-scan/quarantine/{qid}/restore` | `system:config` | Puts a quarantined file back where it came from (confirmed first: ClamAV flagged it) |
 | `GET` | `/api/v1/security/mfa-policy` | `system:config` | Which roles must use two-step sign-in; per role, how many people still have to set it up |
 | `PUT` | `/api/v1/security/mfa-policy` | `system:config` | Put Mfa Policy |
+| `GET` | `/api/v1/security/outside-checks` | `system:config` | The checks that ask a service outside the home, and whether each is on (all off by default) |
+| `PUT` | `/api/v1/security/outside-checks` | `system:config` | Put Outside Check |
 | `GET` | `/api/v1/security/ransomware` | `system:config` | Ransomware Status |
 | `PUT` | `/api/v1/security/ransomware` | `system:config` | Ransomware Settings |
 | `POST` | `/api/v1/security/ransomware/unfreeze` | `system:config` | Ransomware Unfreeze |
