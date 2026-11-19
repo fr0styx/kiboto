@@ -38,6 +38,22 @@ def size(item: dict[str, Any], what: str) -> str:
     return f"{round(tib * 1024, 1)} GB" if isinstance(tib, (int, float)) else "size unknown"
 
 
+def cpu_said(tr: dict[str, Any]) -> str:
+    """The CPU's load and temperature in a few words, without a number that was not read."""
+    load, temp = tr.get("cpu_load_pct"), tr.get("cpu_temp_c")
+    if load is None:
+        return "CPU not read yet" if temp is None else f"CPU {temp}°C"
+    return f"CPU {load}%" + (f" ({temp}°C)" if temp is not None else "")
+
+
+def cpu_marked(tr: dict[str, Any]) -> str:
+    """The same for the answer written without a model, in its code marks."""
+    load, temp = tr.get("cpu_load_pct"), tr.get("cpu_temp_c")
+    if load is None:
+        return "not read yet" if temp is None else f"`{temp}°C`"
+    return f"`{load}%`" + (f" at `{temp}°C`" if temp is not None else "")
+
+
 def telemetry_block(tr: dict[str, Any]) -> str:
     cpu = tr.get("cpu") if isinstance(tr.get("cpu"), dict) else {}
     mem = tr.get("memory") if isinstance(tr.get("memory"), dict) else {}

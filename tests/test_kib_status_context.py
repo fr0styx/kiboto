@@ -289,3 +289,31 @@ def test_the_model_is_told_what_the_two_tools_now_cover():
     said = {d["function"]["name"]: d["function"]["description"] for d in ai_chat_agent.OPENAI_TOOL_DEFINITIONS}
     assert "electricity" in said["get_system_telemetry"] and "damaged files" in said["get_storage_status"]
     assert pool_alerts.damaged_files() == [] or isinstance(pool_alerts.damaged_files(), list)
+
+
+def test_no_cpu_number_is_made_up(monkeypatch):
+    """Before the first reading the tool once said 8.5 % at 42 °C, and it turned a real 0 % into 8.5 %."""
+    from backend.services.chat_tool_registry import _format_tool_trace_summary as said
+
+    monkeypatch.setattr(Z_STATE, "cached_stats", {})
+    res = chat_nas_tools.tool_get_system_telemetry()
+    assert res["cpu_load_pct"] is None and res["cpu_temp_c"] is None
+    block = _build_structured_llm_context([res])
+    assert "- CPU Utilization: unknown" in block and "8.5" not in block and "42°C" not in block
+    assert said(res, "get_system_telemetry").startswith("CPU not read yet, RAM ")
+
+    monkeypatch.setattr(Z_STATE, "cached_stats", {"cpu": {"util": 0, "temp": 39}})
+    res = chat_nas_tools.tool_get_system_telemetry()
+    assert (res["cpu_load_pct"], res["cpu_temp_c"]) == (0, 39)  # an idle CPU is 0 %, not a default
+    assert said(res, "get_system_telemetry").startswith("CPU 0% (39°C), RAM ")
+
+    monkeypatch.setattr(Z_STATE, "cached_stats", {"cpu": 17.5, "cpu_temp": 51})
+    res = chat_nas_tools.tool_get_system_telemetry()
+    assert (res["cpu_load_pct"], res["cpu_temp_c"]) == (17.5, 51)
+    monkeypatch.setattr(Z_STATE, "cached_stats", {"cpu_pct": 3, "cpu": {"util": 99}})
+    assert chat_nas_tools.tool_get_system_telemetry()["cpu_load_pct"] == 3
+    assert chat_status_blocks.cpu_said({"cpu_temp_c": 40}) == "CPU 40°C"
+    assert chat_status_blocks.cpu_said({"cpu_load_pct": 5}) == "CPU 5%"
+    marked = chat_status_blocks.cpu_marked
+    assert [marked({}), marked({"cpu_temp_c": 40}), marked({"cpu_load_pct": 5})] == ["not read yet", "`40°C`", "`5%`"]
+    assert marked({"cpu_load_pct": 5, "cpu_temp_c": 40}) == "`5%` at `40°C`"

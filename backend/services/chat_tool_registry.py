@@ -13,6 +13,7 @@ from backend.ignored_errors import ignored
 from backend.services.chat_context import (  # noqa: F401
     _grounding_label,
 )
+from backend.services.chat_status_blocks import cpu_said
 
 
 def _core():
@@ -173,7 +174,7 @@ def _format_tool_trace_summary(tr: dict[str, Any], tool_name: str) -> str:
     """Produces a concise 1-line telemetry summary for a completed tool call."""
     tname = str(tr.get("tool") or tool_name)
     if tname == "get_system_telemetry":
-        return f"CPU {tr.get('cpu_load_pct')}% ({tr.get('cpu_temp_c')}°C), RAM {tr.get('ram_used_gb')}/{tr.get('ram_total_gb')} GB"
+        return f"{cpu_said(tr)}, RAM {tr.get('ram_used_gb')}/{tr.get('ram_total_gb')} GB"
     elif tname == "get_disks_and_standby_status":
         return f"{tr.get('running_disks_count', 0)} awake, {tr.get('sleeping_disks_count', 0)} asleep"
     elif tname == "get_fan_and_thermal_status":

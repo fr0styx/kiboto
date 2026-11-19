@@ -86,13 +86,13 @@ def tool_get_system_telemetry() -> dict[str, Any]:
     ram_pct = round((ram_used_gb / max(1.0, ram_total_gb)) * 100.0, 1)
 
     cached = Z_STATE.cached_stats if isinstance(Z_STATE.cached_stats, dict) else {}
+    # Before the first reading there is no number, and none is made up: this once answered
+    # 8.5 % and 42 °C, and turned a real 0 % into 8.5 %.
     cpu_raw = cached.get("cpu")
-    if isinstance(cpu_raw, dict):
-        cpu_pct = cached.get("cpu_pct") if cached.get("cpu_pct") is not None else (cpu_raw.get("util") or 8.5)
-        cpu_temp = cached.get("cpu_temp") if cached.get("cpu_temp") is not None else (cpu_raw.get("temp") or 42)
-    else:
-        cpu_pct = cached.get("cpu_pct") or cpu_raw or 8.5
-        cpu_temp = cached.get("cpu_temp") or 42
+    cpu = cpu_raw if isinstance(cpu_raw, dict) else {}
+    plain = cpu_raw if isinstance(cpu_raw, (int, float)) and not isinstance(cpu_raw, bool) else None
+    cpu_pct = next((v for v in (cached.get("cpu_pct"), cpu.get("util"), plain) if v is not None), None)
+    cpu_temp = next((v for v in (cached.get("cpu_temp"), cpu.get("temp")) if v is not None), None)
     uptime_s = int(time.time() - getattr(Z_STATE, "boot_time", time.time()))
 
     accel = detect_hardware_accelerator()

@@ -2,6 +2,13 @@
 
 Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep that name.
 
+## Unreleased
+
+#### Fixes
+
+- **Kib makes up no CPU numbers**: in the first seconds after a start, before the first reading, Kib answered
+  "8.5 % at 42 °C", and an idle CPU at 0 % was reported as 8.5 %. It now says the CPU has not been read yet.
+
 ## v2.0.4 (2026-11-19)
 ### 🏡 Apps that go back on their own, a way to move in, and Kiboto in your language everywhere
 

@@ -87,6 +87,7 @@ from backend.services.chat_nas_tools import (  # noqa: E402, F401
     tool_set_fan_profile,
     tool_trigger_ai_sync,
 )
+from backend.services.chat_status_blocks import cpu_marked, cpu_said  # noqa: E402
 from backend.services.chat_synthesis import (  # noqa: E402, F401
     _as_data,
     _attr,
@@ -1689,7 +1690,7 @@ def _turn_fallback_reply(
                     hw_info = tr.get("hardware_accelerator") or {}
                     sections.append(
                         f"### 📊 Live NAS System & AI Accelerator Telemetry\n"
-                        f"- **CPU Load & Temp:** `{tr.get('cpu_load_pct')}%` at `{tr.get('cpu_temp_c')}°C`\n"
+                        f"- **CPU Load & Temp:** {cpu_marked(tr)}\n"
                         f"- **System Memory:** `{tr.get('ram_used_gb')} GB / {tr.get('ram_total_gb')} GB` (`{tr.get('ram_used_pct')}%` used, `{tr.get('ram_available_gb')} GB` available)\n"
                         f"- **Active AI Accelerator:** **Tier {hw_info.get('active_tier', 1)} — {hw_info.get('device_label')}**"
                         + (f" + Secondary `{hw_info.get('secondary_gpu')}`" if hw_info.get("secondary_gpu") else "")
@@ -1850,7 +1851,7 @@ def _turn_trace(
     for idx, tr in enumerate(tool_results):
         tname = str(tr.get("tool") or (tools_called[idx] if idx < len(tools_called) else "tool"))
         if tname == "get_system_telemetry":
-            summary = f"CPU {tr.get('cpu_load_pct')}% ({tr.get('cpu_temp_c')}°C), RAM {tr.get('ram_used_gb')}/{tr.get('ram_total_gb')} GB"
+            summary = f"{cpu_said(tr)}, RAM {tr.get('ram_used_gb')}/{tr.get('ram_total_gb')} GB"
         elif tname == "get_disks_and_standby_status":
             summary = f"{tr.get('running_disks_count', 0)} active, {tr.get('sleeping_disks_count', 0)} sleeping in standby (0 wakeups)"
         elif tname == "get_fan_and_thermal_status":
