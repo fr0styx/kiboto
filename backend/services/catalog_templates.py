@@ -2423,6 +2423,105 @@ MORE_APPS: list[dict[str, Any]] = [
         "tags": ["video", "convert"],
         "logo": "unmanic",
     },
+    # ---------------- Added 19 Nov 2026, third batch (re-audit R7): apps with a database or a companion ----------------
+    {
+        "id": "tandoor",
+        "name": "Tandoor Recipes",
+        "category": "productivity",
+        "description": "Recipes, meal plans and shopping lists for the household, with import from recipe sites.",
+        "image": "vabene1111/recipes:latest",
+        "default_port": 8142,
+        "ports": ["8142:80"],
+        "webui_path": "/",
+        "env": {
+            "SECRET_KEY": "{{secret:secret_key}}",
+            "DB_ENGINE": "django.db.backends.postgresql",
+            "POSTGRES_HOST": "db",
+            "POSTGRES_PORT": "5432",
+            "POSTGRES_USER": "tandoor",
+            "POSTGRES_PASSWORD": "{{secret:db_password}}",
+            "POSTGRES_DB": "tandoor",
+            "ALLOWED_HOSTS": "*",
+            "TZ": "UTC",
+        },
+        "volumes": {"staticfiles": "/opt/recipes/staticfiles", "mediafiles": "/opt/recipes/mediafiles"},
+        "stack_services": {
+            "db": {
+                "image": "postgres:16-alpine",
+                "env": {
+                    "POSTGRES_DB": "tandoor",
+                    "POSTGRES_USER": "tandoor",
+                    "POSTGRES_PASSWORD": "{{secret:db_password}}",
+                },
+                "volumes": {"pgdata": "/var/lib/postgresql/data"},
+            }
+        },
+        "tags": ["recipes", "meal plan"],
+        "logo": "tandoor-recipes",
+    },
+    {
+        "id": "jellystat",
+        "name": "Jellystat",
+        "category": "media",
+        "description": "Who watched what on Jellyfin: plays, hours and the most-watched films and shows.",
+        "image": "cyfershepard/jellystat:latest",
+        "default_port": 3022,
+        "ports": ["3022:3000"],
+        "webui_path": "/",
+        "env": {
+            "POSTGRES_USER": "postgres",
+            "POSTGRES_PASSWORD": "{{secret:db_password}}",
+            "POSTGRES_IP": "db",
+            "POSTGRES_PORT": "5432",
+            "JWT_SECRET": "{{secret:jwt_secret}}",
+            "TZ": "UTC",
+        },
+        "volumes": {"backup": "/app/backend/backup-data"},
+        "stack_services": {
+            "db": {
+                "image": "postgres:16-alpine",
+                "env": {
+                    "POSTGRES_DB": "jfstat",
+                    "POSTGRES_USER": "postgres",
+                    "POSTGRES_PASSWORD": "{{secret:db_password}}",
+                },
+                "volumes": {"pgdata": "/var/lib/postgresql/data"},
+            }
+        },
+        "tags": ["jellyfin", "statistics"],
+        "logo": "jellystat",
+    },
+    {
+        "id": "kimai",
+        "name": "Kimai",
+        "category": "productivity",
+        "description": "Time tracking for projects and customers, with timesheets and invoices.",
+        "image": "kimai/kimai2:apache",
+        "default_port": 8146,
+        "ports": ["8146:8001"],
+        "webui_path": "/",
+        "env": {
+            "DATABASE_URL": "mysql://kimai:{{secret:db_password}}@db/kimai?charset=utf8mb4&serverVersion=11.4.0-MariaDB",
+            "ADMINMAIL": "admin@example.com",
+            "ADMINPASS": "{{secret:admin_password}}",
+        },
+        "credentials": {"user": "admin@example.com", "password": "{{secret:admin_password}}"},
+        "volumes": {"data": "/opt/kimai/var/data", "plugins": "/opt/kimai/var/plugins"},
+        "stack_services": {
+            "db": {
+                "image": "mariadb:lts",
+                "env": {
+                    "MYSQL_RANDOM_ROOT_PASSWORD": "yes",
+                    "MYSQL_USER": "kimai",
+                    "MYSQL_PASSWORD": "{{secret:db_password}}",
+                    "MYSQL_DATABASE": "kimai",
+                },
+                "volumes": {"db": "/var/lib/mysql"},
+            }
+        },
+        "tags": ["time tracking"],
+        "logo": "kimai",
+    },
 ]
 
 CURATED_APP_CATALOG.extend(MORE_APPS)

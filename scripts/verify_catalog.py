@@ -39,6 +39,8 @@ WAIT_SECONDS = {
     "miniflux": 240,
     "immich": 420,
     "iobroker": 480,
+    "tandoor": 300,
+    "kimai": 300,
     "crafty": 300,
     "netdata": 300,
     "open-webui": 420,

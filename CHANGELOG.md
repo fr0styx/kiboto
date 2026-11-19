@@ -107,6 +107,8 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   Power, Storage, Apps and Privacy guides cover electricity, damaged files, space per app and the checks that
   use the internet.
 
+- **Tandoor Recipes, Jellystat and Kimai** in the catalog (147 apps in all), each installed with its database.
+
 #### Changes
 
 - **The Security check says it in words**: "Everything is fine" or "2 things need a look", with what needs a
