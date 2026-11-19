@@ -105,6 +105,8 @@
  "alert.ups_shutdown_now.title": "UPS：开始安全关机",
  "alert.ups_silent.msg": "停电 {secs} 秒后，UPS 不再响应。Kiboto 看不到电池状态，无法自行及时关闭 NAS。请检查 UPS 连接，或手动关闭 NAS。",
  "alert.ups_silent.title": "停电期间 UPS 不再响应",
+ "alert.weakness.msg": "请更新这些应用（应用，更新）：{apps}。它们的软件在攻击者正在利用的漏洞公开列表上，而且副本早于该警告。",
+ "alert.weakness.title": "有应用存在正被攻击的漏洞",
  "alert.weekly.attention": "{n, plural, other {有 # 项需要注意。}}",
  "alert.weekly.backups_late": "- 备份：已逾期：{list}",
  "alert.weekly.backups_ok": "- 备份：全部按时",

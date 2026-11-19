@@ -82,6 +82,7 @@ turning one on or off is written to the security log.
   presses the button on the Network page.
 - **Warn about apps with a weakness that is being attacked**: once a day Kiboto downloads the
   public list from CISA and compares it with your apps on the NAS. Nothing about the NAS is sent.
+  An app flagged for the first time is announced once, through your alerts.
 
 ## Your controls
 

@@ -3114,6 +3114,8 @@ export default {
   "alert.weekly.backups_ok": "- 备份：全部按时",
   "alert.weekly.backups_late": "- 备份：已逾期：{list}",
   "alert.security.title": "Kiboto 安全：{what}",
+  "alert.weakness.title": "有应用存在正被攻击的漏洞",
+  "alert.weakness.msg": "请更新这些应用（应用，更新）：{apps}。它们的软件在攻击者正在利用的漏洞公开列表上，而且副本早于该警告。",
   "alert.security.signin_lockout": "多次失败后登录已被锁定",
   "alert.security.signin_login_blocked": "有人尝试登录已停用的账户",
   "alert.security.signin_login_new_device": "从新设备登录",

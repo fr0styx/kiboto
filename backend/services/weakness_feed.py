@@ -95,8 +95,36 @@ def refresh(now: float | None = None, fetch: Callable[[], dict[str, Any]] | None
     except (httpx.HTTPError, OSError, ValueError) as e:
         logger.info("weakness feed: the list could not be fetched (%s)", type(e).__name__)
         return None
-    atomic_write_json(STATE_FILE, {"fetched_at": now, "entries": rows})
+    atomic_write_json(STATE_FILE, {**stored(), "fetched_at": now, "entries": rows})
+    tell_about_new(now)
     return len(rows)
+
+
+def tell_about_new(now: float | None = None, send: Callable[..., Any] | None = None) -> list[str]:
+    """After a download: an alert for each app flagged for the first time (once per app and
+    weakness), so "Warn about apps..." warns, and does not wait for someone to open Security.
+    Returns the apps told about."""
+    found = findings()
+    state = stored()
+    told = set(state.get("told") or [])
+    fresh = [f for f in found if f"{f['app']}:{f['cve']}" not in told]
+    if not fresh:
+        return []
+    apps = ", ".join(f"{f['app']} ({f['cve']})" for f in fresh)
+    if send is None:
+        from backend.services.notifications import send_notification as send
+    send(
+        "An app has a weakness that is being attacked",
+        f"Update these apps (Apps, Updates): {apps}. Their software is on the public list of weaknesses "
+        "attackers use and their copy is older than the warning.",
+        level="warning",
+        event_type="security",
+        dedup_key="weakness:" + apps,
+        text={"title_key": "alert.weakness.title", "msg_key": "alert.weakness.msg", "params": {"apps": apps}},
+    )
+    state["told"] = sorted(told | {f"{f['app']}:{f['cve']}" for f in fresh})[-500:]
+    atomic_write_json(STATE_FILE, state)
+    return [f["app"] for f in fresh]
 
 
 def image_name(image: str) -> str:

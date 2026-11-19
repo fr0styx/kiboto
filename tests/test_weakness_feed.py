@@ -191,3 +191,51 @@ def test_the_security_page_names_the_apps_only_when_the_check_is_on(monkeypatch)
     checks, issues = [], []
     security_advisor._check_app_weaknesses(checks, issues)
     assert checks[0]["passed"] is True and checks[0]["penalty"] == 0 and issues == []
+
+
+def test_a_newly_flagged_app_is_announced_once(monkeypatch):
+    outside_checks.set_enabled("weakness_feed", True)
+    monkeypatch.setattr(
+        weakness_feed, "installed_apps", lambda: [{"name": "grafana", "image": "grafana/grafana", "built": 1}]
+    )
+    sent = []
+    send = lambda title, message, **kw: sent.append((title, message, kw))  # noqa: E731
+    from backend.services import notifications
+
+    monkeypatch.setattr(notifications, "send_notification", send)
+    assert weakness_feed.refresh(now=1000.0, fetch=lambda: FEED) == 5  # the download announces by itself
+    assert len(sent) == 1
+    title, message, kw = sent[0]
+    assert title == "An app has a weakness that is being attacked"
+    assert "grafana (CVE-2026-1111)" in message and kw["event_type"] == "security" and kw["level"] == "warning"
+    assert kw["text"] == {
+        "title_key": "alert.weakness.title",
+        "msg_key": "alert.weakness.msg",
+        "params": {"apps": "grafana (CVE-2026-1111)"},
+    }
+    # the next day's download says nothing new; the list and what was told are both kept
+    assert weakness_feed.refresh(now=1000.0 + weakness_feed.EVERY_SECS, fetch=lambda: FEED) == 5
+    assert len(sent) == 1 and weakness_feed.stored()["told"] == ["grafana:CVE-2026-1111"]
+    assert weakness_feed.tell_about_new(send=send) == []
+    # another app that turns up later is announced on its own
+    monkeypatch.setattr(
+        weakness_feed,
+        "installed_apps",
+        lambda: [
+            {"name": "grafana", "image": "grafana/grafana", "built": 1},
+            {"name": "plex", "image": "lscr.io/linuxserver/plex", "built": 1},
+        ],
+    )
+    assert weakness_feed.tell_about_new(send=send) == ["plex"]
+    assert "plex (CVE-2026-3333)" in sent[-1][1] and "grafana" not in sent[-1][1]
+
+
+def test_nothing_flagged_nothing_announced(monkeypatch):
+    outside_checks.set_enabled("weakness_feed", True)
+    monkeypatch.setattr(weakness_feed, "installed_apps", lambda: [])
+
+    def never(*a, **k):
+        raise AssertionError("announced without a finding")
+
+    assert weakness_feed.refresh(now=1000.0, fetch=lambda: FEED) == 5
+    assert weakness_feed.tell_about_new(send=never) == []

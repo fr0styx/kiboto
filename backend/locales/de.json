@@ -105,6 +105,8 @@
  "alert.ups_shutdown_now.title": "USV: Das sichere Herunterfahren beginnt",
  "alert.ups_silent.msg": "Die USV antwortet seit {secs} Sekunden nach Beginn eines Stromausfalls nicht mehr. Kiboto sieht die Batterie nicht mehr und kann das NAS nicht selbst rechtzeitig herunterfahren. Prüfen Sie die Verbindung zur USV, oder fahren Sie das NAS von Hand herunter.",
  "alert.ups_silent.title": "USV antwortet während eines Stromausfalls nicht mehr",
+ "alert.weakness.msg": "Aktualisieren Sie diese Apps (Apps, Updates): {apps}. Ihre Software steht auf der öffentlichen Liste der Schwachstellen, die Angreifer ausnutzen, und ihre Kopie ist älter als die Warnung.",
+ "alert.weakness.title": "Eine App hat eine Schwachstelle, die gerade angegriffen wird",
  "alert.weekly.attention": "{n, plural, one {# Punkt braucht Aufmerksamkeit.} other {# Punkte brauchen Aufmerksamkeit.}}",
  "alert.weekly.backups_late": "- Sicherungen: überfällig: {list}",
  "alert.weekly.backups_ok": "- Sicherungen: alle pünktlich",

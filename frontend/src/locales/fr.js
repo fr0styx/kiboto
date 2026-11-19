@@ -3114,6 +3114,8 @@ export default {
   "alert.weekly.backups_ok": "- Sauvegardes : toutes à l’heure",
   "alert.weekly.backups_late": "- Sauvegardes : en retard : {list}",
   "alert.security.title": "Sécurité Kiboto : {what}",
+  "alert.weakness.title": "Une app a une faille en cours d'attaque",
+  "alert.weakness.msg": "Mettez à jour ces apps (Apps, Mises à jour) : {apps}. Leur logiciel figure sur la liste publique des failles exploitées et leur copie est antérieure à l'avertissement.",
   "alert.security.signin_lockout": "Connexion bloquée après plusieurs échecs",
   "alert.security.signin_login_blocked": "Tentative de connexion sur un compte désactivé",
   "alert.security.signin_login_new_device": "Connexion depuis un nouvel appareil",

@@ -3114,6 +3114,8 @@ export default {
   "alert.weekly.backups_ok": "- Sicherungen: alle pünktlich",
   "alert.weekly.backups_late": "- Sicherungen: überfällig: {list}",
   "alert.security.title": "Kiboto-Sicherheit: {what}",
+  "alert.weakness.title": "Eine App hat eine Schwachstelle, die gerade angegriffen wird",
+  "alert.weakness.msg": "Aktualisieren Sie diese Apps (Apps, Updates): {apps}. Ihre Software steht auf der öffentlichen Liste der Schwachstellen, die Angreifer ausnutzen, und ihre Kopie ist älter als die Warnung.",
   "alert.security.signin_lockout": "Anmeldung nach wiederholten Fehlversuchen gesperrt",
   "alert.security.signin_login_blocked": "Anmeldeversuch bei einem deaktivierten Konto",
   "alert.security.signin_login_new_device": "Anmeldung von einem neuen Gerät",

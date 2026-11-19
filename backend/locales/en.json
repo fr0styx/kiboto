@@ -105,6 +105,8 @@
  "alert.ups_shutdown_now.title": "UPS: the safe shutdown starts",
  "alert.ups_silent.msg": "The UPS stopped answering {secs} seconds into a power cut. Kiboto can no longer see the battery, so it cannot shut the NAS down in time by itself. Check the UPS connection, or shut the NAS down by hand.",
  "alert.ups_silent.title": "UPS stopped answering during a power cut",
+ "alert.weakness.msg": "Update these apps (Apps, Updates): {apps}. Their software is on the public list of weaknesses attackers use and their copy is older than the warning.",
+ "alert.weakness.title": "An app has a weakness that is being attacked",
  "alert.weekly.attention": "{n, plural, one {# thing needs attention.} other {# things need attention.}}",
  "alert.weekly.backups_late": "- Backups: overdue: {list}",
  "alert.weekly.backups_ok": "- Backups: all on time",

@@ -3114,6 +3114,8 @@ export default {
   "alert.weekly.backups_ok": "- Copias: todas a tiempo",
   "alert.weekly.backups_late": "- Copias: atrasadas: {list}",
   "alert.security.title": "Seguridad de Kiboto: {what}",
+  "alert.weakness.title": "Una app tiene un fallo que se está atacando",
+  "alert.weakness.msg": "Actualiza estas apps (Apps, Actualizaciones): {apps}. Su software está en la lista pública de fallos que usan los atacantes y su copia es anterior al aviso.",
   "alert.security.signin_lockout": "Inicio de sesión bloqueado tras varios fallos",
   "alert.security.signin_login_blocked": "Intento de inicio de sesión en una cuenta desactivada",
   "alert.security.signin_login_new_device": "Inicio de sesión desde un dispositivo nuevo",

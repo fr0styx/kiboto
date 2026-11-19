@@ -105,6 +105,8 @@
  "alert.ups_shutdown_now.title": "SAI: empieza el apagado seguro",
  "alert.ups_silent.msg": "El SAI ha dejado de responder a los {secs} segundos de un corte de luz. Kiboto ya no ve la batería, así que no puede apagar el NAS a tiempo por sí mismo. Comprueba la conexión del SAI o apaga el NAS a mano.",
  "alert.ups_silent.title": "El SAI dejó de responder durante un corte de luz",
+ "alert.weakness.msg": "Actualiza estas apps (Apps, Actualizaciones): {apps}. Su software está en la lista pública de fallos que usan los atacantes y su copia es anterior al aviso.",
+ "alert.weakness.title": "Una app tiene un fallo que se está atacando",
  "alert.weekly.attention": "{n, plural, one {# cosa necesita atención.} other {# cosas necesitan atención.}}",
  "alert.weekly.backups_late": "- Copias: atrasadas: {list}",
  "alert.weekly.backups_ok": "- Copias: todas a tiempo",

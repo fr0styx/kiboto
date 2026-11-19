@@ -3114,6 +3114,8 @@ export default {
   "alert.weekly.backups_ok": "- Backups: all on time",
   "alert.weekly.backups_late": "- Backups: overdue: {list}",
   "alert.security.title": "Kiboto security: {what}",
+  "alert.weakness.title": "An app has a weakness that is being attacked",
+  "alert.weakness.msg": "Update these apps (Apps, Updates): {apps}. Their software is on the public list of weaknesses attackers use and their copy is older than the warning.",
   "alert.security.signin_lockout": "Sign-in locked after repeated failures",
   "alert.security.signin_login_blocked": "Sign-in attempt on a disabled account",
   "alert.security.signin_login_new_device": "Sign-in from a new device",

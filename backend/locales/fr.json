@@ -105,6 +105,8 @@
  "alert.ups_shutdown_now.title": "Onduleur : l’arrêt sécurisé commence",
  "alert.ups_silent.msg": "L’onduleur ne répond plus, {secs} secondes après le début d’une coupure de courant. Kiboto ne voit plus la batterie et ne peut donc pas éteindre le NAS à temps par lui-même. Vérifiez la connexion à l’onduleur ou éteignez le NAS à la main.",
  "alert.ups_silent.title": "L’onduleur ne répond plus pendant une coupure de courant",
+ "alert.weakness.msg": "Mettez à jour ces apps (Apps, Mises à jour) : {apps}. Leur logiciel figure sur la liste publique des failles exploitées et leur copie est antérieure à l'avertissement.",
+ "alert.weakness.title": "Une app a une faille en cours d'attaque",
  "alert.weekly.attention": "{n, plural, one {# point demande votre attention.} other {# points demandent votre attention.}}",
  "alert.weekly.backups_late": "- Sauvegardes : en retard : {list}",
  "alert.weekly.backups_ok": "- Sauvegardes : toutes à l’heure",
