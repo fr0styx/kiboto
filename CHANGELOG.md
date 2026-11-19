@@ -80,6 +80,10 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Internet speed test** (off until you turn it on under Settings → Security → Checks that use the internet):
   a button on the Network page measures your internet line from the NAS, both directions.
 
+- **23 more apps in the catalog** (108 in all), each tested on a real engine: Homebox, Baikal, Readeck, PrivateBin,
+  Pinchflat, PiGallery2, OpenSpeedTest, MySpeed, draw.io, CyberChef, ConvertX, DocuSeal, Z-Wave JS UI,
+  DDNS Updater, KitchenOwl, go2rtc, Prometheus, Opengist, flatnotes, Owncast, Heimdall, Baby Buddy, Whoogle.
+
 #### Changes
 
 - **The Security check says it in words**: "Everything is fine" or "2 things need a look", with what needs a
