@@ -95,7 +95,12 @@ from backend.services.chat_route_words import (  # noqa: E402, F401
     STORAGE_WORDS,
     TELEMETRY_WORDS,
 )
-from backend.services.chat_status_blocks import cpu_marked, cpu_said  # noqa: E402
+from backend.services.chat_status_blocks import (  # noqa: E402
+    cpu_marked,
+    cpu_said,
+    electricity_marked,
+    storage_marked,
+)
 from backend.services.chat_synthesis import (  # noqa: E402, F401
     _as_data,
     _attr,
@@ -1618,6 +1623,7 @@ def _turn_fallback_reply(
                         f"- **Active AI Accelerator:** **Tier {hw_info.get('active_tier', 1)} — {hw_info.get('device_label')}**"
                         + (f" + Secondary `{hw_info.get('secondary_gpu')}`" if hw_info.get("secondary_gpu") else "")
                         + f"\n- **Active Selected Model:** `{tr.get('active_ai_model')}`"
+                        + electricity_marked(tr)
                     )
 
                 elif tname == "trigger_ai_sync":
@@ -1634,15 +1640,7 @@ def _turn_fallback_reply(
                     )
 
                 elif tname == "get_storage_status":
-                    pools = tr.get("pools") or []
-                    pool_lines = [
-                        f"  - **{p.get('name')}** ({p.get('type', 'storage')}): `{p.get('used_gb', 0):.1f} GB` used of `{p.get('total_gb', 0):.1f} GB` (`{p.get('used_pct', 0)}%`), `{p.get('free_gb', 0):.1f} GB` free (Health: `{p.get('health', 'ONLINE')}`)"
-                        for p in pools
-                    ]
-                    sections.append(
-                        "### 🗄️ NAS Storage Pools Status (0 Disk Wakeups)\n"
-                        + ("\n".join(pool_lines) if pool_lines else "- No storage pools discovered.")
-                    )
+                    sections.append(storage_marked(tr))
 
                 elif tname == "get_network_status":
                     ifaces = tr.get("interfaces") or []

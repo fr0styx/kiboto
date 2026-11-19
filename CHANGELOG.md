@@ -15,6 +15,9 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   electricity now reach the NAS's own readings when asked in German, Spanish, French or Chinese. Before, only
   English wording did, and other languages depended on the model's guess.
 
+- **Kib without a model says them too**: when no AI model is running, Kib writes its answers about the NAS
+  itself; those now include the electricity used and any damaged files.
+
 ## v2.0.4 (2026-11-19)
 ### 🏡 Apps that go back on their own, a way to move in, and Kiboto in your language everywhere
 

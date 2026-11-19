@@ -324,7 +324,7 @@
   "backend.hardware.ups._query_direct_usb": 219,
   "backend.hardware.ups.read_ups_status": 271,
   "backend.services.ai_chat_agent._run_agentic_chat_turn": 181,
-  "backend.services.ai_chat_agent._turn_fallback_reply": 193,
+  "backend.services.ai_chat_agent._turn_fallback_reply": 186,
   "backend.services.ai_chat_agent._turn_run_requested_tools": 222,
   "backend.services.ai_chat_agent.stream_agentic_chat": 191,
   "backend.services.app_catalog._deploy_steps": 384,

@@ -54,6 +54,36 @@ def cpu_marked(tr: dict[str, Any]) -> str:
     return f"`{load}%`" + (f" at `{temp}°C`" if temp is not None else "")
 
 
+def electricity_marked(tr: dict[str, Any]) -> str:
+    """One more line for the answer written without a model, once a UPS is measured; else nothing."""
+    el = tr.get("electricity")
+    if not isinstance(el, dict) or not el.get("measuring"):
+        return ""
+    cost = f"; a month costs about `{el['month_cost']}`" if el.get("month_cost") is not None else ""
+    return (
+        f"\n- **Electricity used:** `{el.get('today_kwh')} kWh` today, `{el.get('week_kwh')} kWh` in 7 days, "
+        f"`{el.get('month_kwh')} kWh` in 30 days (average `{el.get('avg_watts')} W`){cost}"
+    )
+
+
+def storage_marked(tr: dict[str, Any]) -> str:
+    """The storage section of the answer written without a model: each pool, then any damaged files."""
+    lines = [
+        f"  - **{p.get('name')}** ({p.get('type', 'storage')}): `{p.get('used_gb', 0):.1f} GB` used of "
+        f"`{p.get('total_gb', 0):.1f} GB` (`{p.get('used_pct', 0)}%`), `{p.get('free_gb', 0):.1f} GB` free "
+        f"(Health: `{p.get('health', 'ONLINE')}`)"
+        for p in tr.get("pools") or []
+    ]
+    for d in tr.get("damaged_files") or []:
+        names = ", ".join(f"`{f}`" for f in (d.get("files") or [])[:5])
+        lines.append(
+            f"- **⚠️ Damaged files in {d.get('pool')}:** `{d.get('count')}`"
+            + (f" ({names})" if names else "")
+            + ". Restore them from a backup or a snapshot."
+        )
+    return "### 🗄️ NAS Storage Pools Status (0 Disk Wakeups)\n" + ("\n".join(lines) or "- No storage pools discovered.")
+
+
 def telemetry_block(tr: dict[str, Any]) -> str:
     cpu = tr.get("cpu") if isinstance(tr.get("cpu"), dict) else {}
     mem = tr.get("memory") if isinstance(tr.get("memory"), dict) else {}

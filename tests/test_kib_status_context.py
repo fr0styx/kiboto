@@ -317,3 +317,61 @@ def test_no_cpu_number_is_made_up(monkeypatch):
     marked = chat_status_blocks.cpu_marked
     assert [marked({}), marked({"cpu_temp_c": 40}), marked({"cpu_load_pct": 5})] == ["not read yet", "`40°C`", "`5%`"]
     assert marked({"cpu_load_pct": 5, "cpu_temp_c": 40}) == "`5%` at `40°C`"
+
+
+def test_the_answer_without_a_model_carries_electricity_and_damaged_files(platform):
+    """With no model running, Kib writes the answer itself: it reads the same tool results."""
+    files = ["/tank/a.jpg", "/tank/b.jpg"]
+    platform([_pool("tank", "Tank", "zfs", 8 * TIB, 2 * TIB)], {"tank": {"count": 2, "other": 0, "files": files}})
+    said = chat_status_blocks.storage_marked(chat_nas_tools.tool_get_storage_status())
+    assert said.splitlines() == [
+        "### 🗄️ NAS Storage Pools Status (0 Disk Wakeups)",
+        "  - **Tank** (zfs): `2048.0 GB` used of `8192.0 GB` (`25.0%`), `6144.0 GB` free (Health: `HEALTHY`)",
+        "- **⚠️ Damaged files in Tank:** `2` (`/tank/a.jpg`, `/tank/b.jpg`). Restore them from a backup or a snapshot.",
+    ]
+    assert chat_status_blocks.storage_marked({}).endswith("- No storage pools discovered.")
+    assert chat_status_blocks.storage_marked({"damaged_files": [{"pool": "P", "count": 1}]}).endswith(
+        "- **⚠️ Damaged files in P:** `1`. Restore them from a backup or a snapshot."
+    )
+    line = chat_status_blocks.electricity_marked
+    assert line({}) == "" and line({"electricity": {"measuring": False}}) == ""
+    el = {
+        "measuring": True,
+        "today_kwh": 0.9,
+        "week_kwh": 6.1,
+        "month_kwh": 25.4,
+        "avg_watts": 38.0,
+        "month_cost": None,
+    }
+    assert line({"electricity": el}) == (
+        "\n- **Electricity used:** `0.9 kWh` today, `6.1 kWh` in 7 days, `25.4 kWh` in 30 days (average `38.0 W`)"
+    )
+    assert line({"electricity": {**el, "month_cost": 6.84}}).endswith("; a month costs about `6.84`")
+
+
+def test_a_turn_without_a_model_says_them(platform, monkeypatch, tmp_path):
+    import types
+
+    platform(
+        [_pool("tank", "Tank", "zfs", 8 * TIB, 2 * TIB)], {"tank": {"count": 1, "other": 0, "files": ["/tank/a.jpg"]}}
+    )
+    monkeypatch.setattr(energy_use, "STATE_FILE", str(tmp_path / "energy.json"))
+    energy_use.reset_for_tests()
+    now = 1_800_000_000.0
+    for i in range(0, 3601, 60):
+        energy_use.note(100, now=now + i)
+    monkeypatch.setattr(energy_use.time, "time", lambda: now + 3600)
+    monkeypatch.setattr(ai_chat_agent, "_try_local_llm_completion", lambda *a, **k: ("", "", 0, 0.0, {}, None))
+    monkeypatch.setattr(
+        ai_chat_agent, "detect_hardware_accelerator", lambda *a, **k: {"has_npu": False, "has_gpu": False}
+    )
+    from backend import users_db
+
+    monkeypatch.setattr(users_db, "log_security_event", lambda *a, **k: None)
+    owner = types.SimpleNamespace(scopes=["*"], role_id="superadmin", username="admin", user_id="a1", id="a1")
+    out = ai_chat_agent._run_agentic_chat_turn(
+        "any damaged files? and how much electricity", [], False, True, None, owner
+    )
+    reply = out.get("response") or out.get("reply") or out.get("answer") or ""
+    assert "Damaged files in Tank" in reply and "Electricity used:" in reply, reply[:600]
+    energy_use.reset_for_tests()
