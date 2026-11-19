@@ -8927,4 +8927,5 @@ export default {
   "iscsi.failed": "That didn't work: {error}",
   "iscsi.st_engine": "Not running: Kiboto cannot reach the app engine on this system to start the service.",
   "iscsi.st_folder": "Not running: a disk's folder is not one the service can be given.",
+  "srv.iscsi_user_taken": "Another disk uses that user name with another password. Choose another user name, or use the same password.",
 };

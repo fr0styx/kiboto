@@ -14,6 +14,7 @@ import ipaddress
 import json
 import os
 import re
+import shlex
 import socket
 import threading
 import time
@@ -28,7 +29,7 @@ from backend.services.path_access import ALLOWED_BROWSE_ROOTS
 
 STATE_FILE = os.path.join(DATA_DIR, "iscsi.json")
 CONF_DIR = os.path.join(DATA_DIR, "iscsi")
-CONF_NAME = "kiboto.conf"
+CONF_NAME = "setup.sh"
 CONTAINER = "kiboto-iscsi"
 PORT = 3260
 IQN_PREFIX = "iqn.2026-11.net.kiboto"
@@ -122,7 +123,7 @@ def _clean_allow(raw: Any) -> str:
 
 def _clean_folder(raw: Any) -> str:
     real = resolve_within(str(raw or "").strip(), ALLOWED_BROWSE_ROOTS)
-    if real is None or not os.path.isdir(real) or any(c in real for c in '"\n\r'):
+    if real is None or not os.path.isdir(real) or any(c in real for c in "\n\r"):
         raise DiskError("bad_folder", "That folder is not one of the NAS's shared folders.")
     data = os.path.realpath(DATA_DIR)
     if real == data or real.startswith(data.rstrip(os.sep) + os.sep):
@@ -163,6 +164,15 @@ def clean(raw: dict[str, Any], old: dict[str, Any] | None = None) -> dict[str, A
     }
 
 
+def _same_password(disk: dict[str, Any], others: list[dict[str, Any]]) -> None:
+    """The service knows each user name once: two disks may share one only with the same password."""
+    for other in others:
+        if other["user"] == disk["user"] and unseal(other["secret"]) != unseal(disk["secret"]):
+            raise DiskError(
+                "user_taken", "Another disk uses that user name with another password. Choose another user name."
+            )
+
+
 def _make_file(disk: dict[str, Any], grow_only: bool) -> None:
     """The disk's file at its size. A new one must not replace a file that is already there; it takes
     no space until the other computer writes to it."""
@@ -200,6 +210,7 @@ def save(raw: dict[str, Any], disk_id: str | None = None) -> dict[str, Any]:
         fresh = clean(raw)
         if any(d["name"] == fresh["name"] for d in data["disks"]):
             raise DiskError("name_taken", "There is already a disk by that name.")
+        _same_password(fresh, data["disks"])
         fresh["id"] = uuid.uuid4().hex[:12]
         fresh["created"] = time.time()
         _make_file(fresh, grow_only=False)
@@ -209,6 +220,7 @@ def save(raw: dict[str, Any], disk_id: str | None = None) -> dict[str, Any]:
         if old is None:
             raise KeyError(disk_id)
         fresh = {**clean(raw, old), "id": old["id"], "created": old.get("created")}
+        _same_password(fresh, [d for d in data["disks"] if d["id"] != disk_id])
         _make_file(fresh, grow_only=True)
         data["disks"][data["disks"].index(old)] = fresh
     atomic_write_json(STATE_FILE, data)
@@ -234,19 +246,24 @@ def delete(disk_id: str, with_file: bool = False) -> dict[str, Any] | None:
 
 # --- the service's own file -----------------------------------------------------------------------
 def conf_text(kept: list[dict[str, Any]]) -> str:
-    """What tgtd is told: each disk, its file, who may open it. Every value was checked when it was
-    saved (names, user names and passwords have no spaces or quotes; a folder has no quote or new line)."""
-    out = ["# written by Kiboto; changes made here are lost", "default-driver iscsi", ""]
-    for d in kept:
-        out.append(f"<target {iqn(d['name'])}>")
-        out.append(f'    backing-store "{file_of(d)}"')
-        out.append(f"    incominguser {d['user']} {unseal(d['secret'])}")
-        if d.get("allow"):
-            out.append(f"    initiator-address {d['allow']}")
-        out.append("    write-cache off")  # what the other computer wrote is on the drive when it is told so
-        out.append("</target>")
-        out.append("")
-    return "\n".join(out)
+    """What the service is told when it starts: one tgtadm command after another. Each disk, its
+    file (written through to the drive before the other computer is told it is saved), who may
+    open it and from where. Every value is quoted for the shell."""
+    q = shlex.quote
+    out = ["#!/bin/sh", "# written by Kiboto; changes made here are lost", "set -e", "t='tgtadm --lld iscsi'"]
+    accounts: dict[str, str] = {}
+    for tid, d in enumerate(kept, start=1):
+        user, secret = d["user"], unseal(d["secret"])
+        out.append(f"$t --mode target --op new --tid {tid} --targetname {q(iqn(d['name']))}")
+        out.append(
+            f"$t --mode logicalunit --op new --tid {tid} --lun 1 --backing-store {q(file_of(d))} --bsoflags sync"
+        )
+        if user not in accounts:
+            accounts[user] = secret
+            out.append(f"$t --mode account --op new --user {q(user)} --password {q(secret)}")
+        out.append(f"$t --mode account --op bind --tid {tid} --user {q(user)}")
+        out.append(f"$t --mode target --op bind --tid {tid} --initiator-address {q(d.get('allow') or 'ALL')}")
+    return "\n".join(out) + "\n"
 
 
 def write_conf() -> str:
@@ -262,10 +279,11 @@ def write_conf() -> str:
 
 
 # --- the container --------------------------------------------------------------------------------
+SETUP = "/etc/kiboto-iscsi/" + CONF_NAME
 START = (
     "tgtd -f & pid=$!; i=0; "
     "until tgtadm --lld iscsi --mode sys --op show >/dev/null 2>&1 || [ $i -ge 50 ]; do i=$((i+1)); sleep 0.2; done; "
-    "tgt-admin --execute || exit 1; wait $pid"
+    f"sh {SETUP} || exit 1; wait $pid"
 )
 
 
@@ -319,7 +337,7 @@ def desired(me: dict[str, Any], kept: list[dict[str, Any]], conf_hash: str) -> d
             "RestartPolicy": {"Name": "unless-stopped"},
             "ReadonlyRootfs": True,
             "Tmpfs": {"/run": "", "/tmp": ""},
-            "Binds": [f"{conf}:/etc/tgt/conf.d/{CONF_NAME}:ro", *[f"{outside[f]}:{f}" for f in folders]],
+            "Binds": [f"{conf}:{SETUP}:ro", *[f"{outside[f]}:{f}" for f in folders]],
         },
     }
     mark = hashlib.sha256((json.dumps(want, sort_keys=True) + conf_hash).encode()).hexdigest()[:16]

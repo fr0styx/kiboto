@@ -8927,4 +8927,5 @@ export default {
   "iscsi.failed": "No ha funcionado: {error}",
   "iscsi.st_engine": "No está en marcha: Kiboto no llega al motor de aplicaciones de este sistema para iniciar el servicio.",
   "iscsi.st_folder": "No está en marcha: la carpeta de un disco no se le puede dar al servicio.",
+  "srv.iscsi_user_taken": "Otro disco usa ese nombre de usuario con otra contraseña. Elige otro nombre de usuario o usa la misma contraseña.",
 };

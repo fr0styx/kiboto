@@ -90,10 +90,10 @@ def test_what_a_disk_may_be(box):
     ok = it.clean(_disk(folder=folder, name=" VM-Disk ", allow="192.168.1.0/24"))
     assert (ok["name"], ok["allow"], ok["folder"]) == ("vm-disk", "192.168.1.0/24", folder)
     assert it.clean(_disk(folder=folder, allow=" 192.168.1.20 "))["allow"] == "192.168.1.20"
-    quoted = box["tmp"] / "pool" / 'odd"name'
-    quoted.mkdir()
-    with pytest.raises(it.DiskError):  # a quote would end the path early in the service's file
-        it.clean(_disk(folder=str(quoted)))
+    broken = box["tmp"] / "pool" / "two\nlines"
+    broken.mkdir()
+    with pytest.raises(it.DiskError):  # a new line in a folder's name is refused
+        it.clean(_disk(folder=str(broken)))
 
 
 def test_a_disk_keeps_its_place_grows_and_never_shrinks(box):
@@ -138,27 +138,51 @@ def test_the_most_disks_and_taking_one_off(box, monkeypatch):
 
 def test_the_services_file(box):
     folder = str(box["share"])
+    odd = box["tmp"] / "pool" / "it's odd"
+    odd.mkdir()
     it.save(_disk(folder=folder))
-    it.save(_disk(folder=folder, name="only-me", user="ben", secret="anothersecret1", allow="192.0.2.5"))
+    it.save(_disk(folder=str(odd), name="only-me", user="ben", secret="p'ss\"word$1234", allow="192.0.2.5"))
+    it.save(_disk(folder=folder, name="second"))  # the same user name and password as the first
     mark = it.write_conf()
     path = os.path.join(it.CONF_DIR, it.CONF_NAME)
     assert oct(os.stat(path).st_mode & 0o777) == "0o600" and oct(os.stat(it.CONF_DIR).st_mode & 0o777) == "0o700"
     with open(path, encoding="utf-8") as f:
         text = f.read()
-    assert text.splitlines()[1] == "default-driver iscsi"
-    assert "<target iqn.2026-11.net.kiboto:nas:vm-disk>" in text
-    assert f'    backing-store "{folder}/vm-disk.iscsi.img"' in text  # quoted: the folder has a space
-    assert "    incominguser ana secretsecret12" in text and "    incominguser ben anothersecret1" in text
-    assert text.count("initiator-address") == 1 and "    initiator-address 192.0.2.5" in text
-    assert text.count("write-cache off") == 2 and text.count("</target>") == 2
+    lines = text.splitlines()
+    assert lines[0] == "#!/bin/sh" and lines[2] == "set -e" and lines[3] == "t='tgtadm --lld iscsi'"
+    assert "$t --mode target --op new --tid 1 --targetname iqn.2026-11.net.kiboto:nas:vm-disk" in lines
+    # quoted for the shell: a space, an apostrophe, a quote and a dollar sign are only text
+    assert (
+        f"$t --mode logicalunit --op new --tid 1 --lun 1 --backing-store '{folder}/vm-disk.iscsi.img' --bsoflags sync"
+        in lines
+    )
+    assert "it'\"'\"'s odd/only-me.iscsi.img' --bsoflags sync" in text
+    assert "$t --mode account --op new --user ben --password 'p'\"'\"'ss\"word$1234'" in lines
+    assert text.count("--mode account --op new") == 2  # ana once, though two disks use the name
+    assert text.count("--mode account --op bind") == 3
+    assert "$t --mode target --op bind --tid 2 --initiator-address 192.0.2.5" in lines
+    assert text.count("--initiator-address ALL") == 2
     assert it.write_conf() == mark  # the same disks: the same mark, so the service is not restarted
-    it.save(_disk(size_gb=1, secret="newsecretnew12"), it.disks()[0]["id"])
+    it.save(_disk(size_gb=1, user="carl", secret="newsecretnew12"), it.disks()[0]["id"])
     assert it.write_conf() != mark  # a new password: a new mark
+
+
+def test_one_user_name_has_one_password(box):
+    folder = str(box["share"])
+    first = it.save(_disk(folder=folder))
+    with pytest.raises(it.DiskError) as clash:
+        it.save(_disk(folder=folder, name="other", secret="differentpass12"))
+    assert clash.value.key == "user_taken" and not os.path.exists(box["share"] / "other.iscsi.img")
+    second = it.save(_disk(folder=folder, name="other"))  # the same password: fine
+    with pytest.raises(it.DiskError):
+        it.save(_disk(size_gb=1, secret="differentpass12"), second["id"])  # would split from the first
+    assert it.save(_disk(size_gb=1, user="ben", secret="differentpass12"), second["id"])["user"] == "ben"
+    assert it.save(_disk(size_gb=1, secret=""), first["id"])["user"] == "ana"  # itself is not "another disk"
 
 
 def test_where_a_path_is_on_the_host():
     assert it.host_path(ME, "/mnt/user/My Files") == "/mnt/user/My Files"
-    assert it.host_path(ME, "/data/iscsi/kiboto.conf") == "/host/appdata/kiboto/iscsi/kiboto.conf"
+    assert it.host_path(ME, "/data/iscsi/setup.sh") == "/host/appdata/kiboto/iscsi/setup.sh"
     assert it.host_path(ME, "/data/deep/x") == "/host/appdata/kiboto/deep/x"  # the longest mount that holds it
     assert it.host_path(ME, "/database") is None and it.host_path({}, "/data") is None
 
@@ -169,14 +193,15 @@ def test_the_container(box, monkeypatch):
     want = it.desired(ME, kept, "abc")
     host = want["HostConfig"]
     assert want["Image"] == "ghcr.io/example/kiboto:sha-abc" and want["Entrypoint"] == ["sh", "-c"]
-    assert "tgtd -f" in want["Cmd"][0] and "tgt-admin --execute" in want["Cmd"][0]
+    assert "tgtd -f" in want["Cmd"][0] and "sh /etc/kiboto-iscsi/setup.sh" in want["Cmd"][0]
+    assert "tgt-admin" not in want["Cmd"][0]  # the package's Perl helper is not in the image
     assert (
         host["NetworkMode"] == "host"
         and host["ReadonlyRootfs"] is True
         and host["RestartPolicy"] == {"Name": "unless-stopped"}
     )
     assert host["Binds"] == [
-        "/host/appdata/kiboto/iscsi/kiboto.conf:/etc/tgt/conf.d/kiboto.conf:ro",
+        "/host/appdata/kiboto/iscsi/setup.sh:/etc/kiboto-iscsi/setup.sh:ro",
         "/mnt/user/My Files:/mnt/user/My Files",
     ]
     assert "Privileged" not in host and "CapAdd" not in host  # it needs no special rights

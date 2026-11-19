@@ -46,8 +46,7 @@ RUN printf '%s\n' \
     'path-exclude=/usr/share/locale/*' 'path-include=/usr/share/locale/locale.alias' \
     > /etc/dpkg/dpkg.cfg.d/01-kiboto-nodoc
 
-# Core: disks, SMART, UPS, USB, cloud remotes (OPS-11), btrfs and software RAID (REL-4, D2), XFS project quotas (FEAT-10),
-# and tgt, the iSCSI target that runs without kernel modules (disks for other computers, off by default)
+# Core: disks, SMART, UPS, USB, cloud remotes (OPS-11), btrfs and software RAID (REL-4, D2), XFS project quotas (FEAT-10)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     smartmontools \
     btrfs-progs \
@@ -62,8 +61,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     restic \
     fuse3 \
     gocryptfs \
-    tgt \
     && rm -rf /var/lib/apt/lists/*
+
+# tgtd and tgtadm: the iSCSI target that runs without kernel modules (disks for other computers, off by
+# default). Only the two programs are taken from Debian's tgt package: installing it would bring in Perl
+# for a helper script Kiboto does not use (12 MB more to download). The three libraries are what the two
+# programs load.
+RUN apt-get update && apt-get install -y --no-install-recommends libaio1t64 libibverbs1 librdmacm1t64 \
+    && cd /tmp && apt-get download tgt \
+    && dpkg-deb --fsys-tarfile tgt_*.deb | tar -x -C / ./usr/sbin/tgtd ./usr/sbin/tgtadm \
+    && rm -f /tmp/tgt_*.deb && rm -rf /var/lib/apt/lists/* \
+    && tgtd --version && tgtadm --version
 
 # Multi-arch Playwright support (linux/amd64 and linux/arm64)
 ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1

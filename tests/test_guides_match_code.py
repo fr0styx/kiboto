@@ -130,3 +130,8 @@ def test_iscsi_guide_numbers():
     assert f"ends in `{it.FILE_SUFFIX}`" in text and it.IQN_PREFIX in text
     assert "never replaces a file that is already there" in text and "never smaller" in text
     assert f"(`{it.CONTAINER}`)" in text and "has no special rights" in text
+    # the image carries the two programs only: the package itself would bring in Perl and break the size budget
+    with open(os.path.join(ROOT, "Dockerfile"), encoding="utf-8") as fh:
+        recipe = fh.read()
+    assert "./usr/sbin/tgtd ./usr/sbin/tgtadm" in recipe and "\n    tgt \\\n" not in recipe
+    assert "tgt-admin" not in it.START and it.SETUP in it.START

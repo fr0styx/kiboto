@@ -8927,4 +8927,5 @@ export default {
   "iscsi.failed": "Das hat nicht geklappt: {error}",
   "iscsi.st_engine": "Läuft nicht: Kiboto erreicht auf diesem System die App-Engine nicht, um den Dienst zu starten.",
   "iscsi.st_folder": "Läuft nicht: Der Ordner eines Datenträgers kann dem Dienst nicht übergeben werden.",
+  "srv.iscsi_user_taken": "Ein anderer Datenträger verwendet diesen Benutzernamen mit einem anderen Passwort. Wählen Sie einen anderen Benutzernamen oder dasselbe Passwort.",
 };

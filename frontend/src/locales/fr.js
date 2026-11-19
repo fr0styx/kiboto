@@ -8927,4 +8927,5 @@ export default {
   "iscsi.failed": "Cela n'a pas fonctionné : {error}",
   "iscsi.st_engine": "Ne fonctionne pas : Kiboto n'arrive pas à joindre le moteur d'applications de ce système pour démarrer le service.",
   "iscsi.st_folder": "Ne fonctionne pas : le dossier d'un disque ne peut pas être confié au service.",
+  "srv.iscsi_user_taken": "Un autre disque utilise ce nom d'utilisateur avec un autre mot de passe. Choisissez un autre nom d'utilisateur ou le même mot de passe.",
 };

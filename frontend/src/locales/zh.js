@@ -8927,4 +8927,5 @@ export default {
   "iscsi.failed": "没有成功：{error}",
   "iscsi.st_engine": "未在运行：Kiboto 无法连接此系统上的应用引擎来启动服务。",
   "iscsi.st_folder": "未在运行：某个磁盘所在的文件夹无法交给该服务。",
+  "srv.iscsi_user_taken": "另一个磁盘用这个用户名搭配了不同的密码。请换一个用户名，或使用相同的密码。",
 };
