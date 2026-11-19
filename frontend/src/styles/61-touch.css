@@ -38,6 +38,15 @@
   .suite-navbar .suite-toolkit-btn {
     padding: 0 9px;
   }
+  /* The bar's line below gets an unseen match above, so the controls sit in the middle of what is
+     seen (the owner measured more room below than above), and the jobs arrows sit in the middle
+     of their button. */
+  .suite-navbar {
+    border-top: 1px solid transparent;
+  }
+  .suite-navbar .topbar-jobs-btn {
+    justify-content: center;
+  }
   .suite-navbar #suite-lang-select,
   .suite-navbar #suite-lang-select:hover,
   .suite-navbar #suite-lang-select:focus {

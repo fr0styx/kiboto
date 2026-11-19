@@ -63,6 +63,9 @@ describe('one definition of each kind of screen', () => {
       /#suite-lang-select:focus \{[^}]*height: 44px;[^}]*border: 4px solid transparent;[^}]*border-radius: 14px;/
     );
     expect(css).not.toMatch(/\.suite-navbar[^{]*\{[^}]*display:/); // a hidden control stays hidden
+    // equal room above and below: the bar's bottom line has an unseen match above
+    expect(bar).toMatch(/\.suite-navbar \{\s*border-top: 1px solid transparent;/);
+    expect(bar).toMatch(/\.suite-navbar \.topbar-jobs-btn \{\s*justify-content: center;/);
     expect(fs.readFileSync(path.resolve(__dirname, '..', 'style.css'), 'utf8')).toContain('styles/61-touch.css');
   });
 });
