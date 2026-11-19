@@ -30,6 +30,13 @@ ASKS = [
     ("Was machen die Lüfter gerade?", "get_fan_and_thermal_status"),
     ("Welche Apps laufen gerade?", "list_docker_containers"),
     ("Wie lautet meine IP-Adresse im Netzwerk?", "get_network_status"),
+    ("Wie lang ist die Betriebszeit vom NAS?", "get_system_telemetry"),
+    ("How long has the NAS been up?", "get_system_telemetry"),
+    ("What is the hostname of this NAS?", "get_network_status"),
+    ("¿Cuánto tiempo lleva encendido el NAS?", "get_system_telemetry"),
+    ("Quel est le temps de fonctionnement du NAS ?", "get_system_telemetry"),
+    ("NAS开机多久了？", "get_system_telemetry"),
+    ("这台NAS的主机名是什么？", "get_network_status"),
     # Spanish
     ("¿Cuánto espacio libre queda?", "get_storage_status"),
     ("¿Hay archivos dañados?", "get_storage_status"),

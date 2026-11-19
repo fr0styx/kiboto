@@ -77,7 +77,11 @@ TELEMETRY_WORDS = (
     "power consumption",
     "energy use",
     "energy usage",
+    "been up",
+    "been running",
     # German
+    "laufzeit",
+    "betriebszeit",
     "prozessor",
     "arbeitsspeicher",
     "auslastung",
@@ -89,7 +93,10 @@ TELEMETRY_WORDS = (
     "consumo electrico",
     "consumo de energía",
     "consumo de energia",
+    "lleva encendido",
+    "tiempo encendido",
     # French
+    "temps de fonctionnement",
     "processeur",
     "mémoire vive",
     "électricité",
@@ -101,6 +108,7 @@ TELEMETRY_WORDS = (
     "耗电",
     "用电",
     "运行时间",
+    "开机多久",
 )
 
 DISK_WORDS = (
@@ -198,6 +206,7 @@ NETWORK_WORDS = (
     "link speed",
     "subnet",
     "network card",
+    "hostname",
     # German
     "netzwerk",
     "ip-adresse",
@@ -212,6 +221,7 @@ NETWORK_WORDS = (
     "passerelle",
     # Chinese
     "ip地址",
+    "主机名",
     "网关",
     "网速",
     "网络状态",

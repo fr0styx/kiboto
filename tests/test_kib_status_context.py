@@ -170,6 +170,7 @@ def test_the_network_tool_reads_the_reading_as_it_is(monkeypatch):
     }
     monkeypatch.setattr("backend.hardware.network.get_network_topology", lambda: reading)
     monkeypatch.setattr("backend.hardware.network.read_ip", lambda: "192.0.2.10")
+    monkeypatch.setattr(chat_nas_tools, "get_server_hostname", lambda: "")
     res = chat_nas_tools.tool_get_network_status()
     assert res["status"] == "ok" and res["default_gateway"] == res["gateway"] == "192.0.2.1"
     assert res["dns_servers"] == ["192.0.2.1"] and res["interface_count"] == 2 and res["hostname"] is None
@@ -402,3 +403,31 @@ def test_a_pool_with_no_size_is_not_called_healthy(platform):
     assert chat_status_blocks.sizeless({"total_gb": 0}) and not chat_status_blocks.sizeless(
         {"total_tib": 0.0, "total_gb": 2.5}
     )
+
+
+def test_kib_knows_the_nas_by_name_and_how_long_it_has_been_up(monkeypatch, tmp_path):
+    """The telemetry said how long Kiboto had run (it restarts with every update), never the NAS."""
+    (tmp_path / "uptime").write_text("330000.25 1200000.00\n")
+    monkeypatch.setattr(chat_nas_tools, "HOST_PROC", str(tmp_path))
+    res = chat_nas_tools.tool_get_system_telemetry()
+    assert res["nas_uptime_seconds"] == 330000.25
+    assert "- The NAS has been up for: 3 days 19 hours" in _build_structured_llm_context([res])
+    (tmp_path / "uptime").write_text("soon\n")
+    assert chat_nas_tools.tool_get_system_telemetry()["nas_uptime_seconds"] is None
+    monkeypatch.setattr(chat_nas_tools, "HOST_PROC", str(tmp_path / "nowhere"))
+    res = chat_nas_tools.tool_get_system_telemetry()
+    assert res["nas_uptime_seconds"] is None and "The NAS has been up" not in _build_structured_llm_context([res])
+
+    monkeypatch.setattr("backend.hardware.network.get_network_topology", lambda: {"summary": {}})
+    monkeypatch.setattr("backend.hardware.network.read_ip", lambda: "192.0.2.10")
+    monkeypatch.setattr(chat_nas_tools, "get_server_hostname", lambda: " Tower ")
+    res = chat_nas_tools.tool_get_network_status()
+    assert res["hostname"] == "Tower" and "- Name on the network: Tower" in _build_structured_llm_context([res])
+
+    def unknown():
+        raise OSError("no name")
+
+    monkeypatch.setattr(chat_nas_tools, "get_server_hostname", unknown)
+    assert chat_nas_tools.tool_get_network_status()["hostname"] is None  # no name is made up
+    monkeypatch.setattr("backend.hardware.network.get_network_topology", lambda: {"hostname": "from-the-reading"})
+    assert chat_nas_tools.tool_get_network_status()["hostname"] == "from-the-reading"

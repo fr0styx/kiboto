@@ -13,6 +13,8 @@ from typing import (  # noqa: F401
 from backend.ai_defaults import DEFAULT_CHAT_MODEL
 from backend.config import (  # noqa: F401
     FAN_STATE_FILE,
+    HOST_PROC,
+    get_server_hostname,
     logger,
 )
 from backend.fsutil import (  # noqa: F401
@@ -44,6 +46,24 @@ def _core():
     from backend.services import ai_chat_agent
 
     return ai_chat_agent
+
+
+def _nas_uptime_seconds() -> float | None:
+    """How long the NAS itself has been up (not Kiboto, which restarts with every update)."""
+    try:
+        with open(os.path.join(HOST_PROC, "uptime"), encoding="utf-8") as f:
+            return float(f.read().split()[0])
+    except (OSError, ValueError, IndexError):
+        return None
+
+
+def _nas_name() -> str | None:
+    """The NAS's own name, as the rest of Kiboto shows it; None rather than a made-up one."""
+    try:
+        name = str(get_server_hostname() or "").strip()
+    except (OSError, ValueError, RuntimeError):
+        return None
+    return name or None
 
 
 def _electricity() -> dict[str, Any] | None:
@@ -108,6 +128,7 @@ def tool_get_system_telemetry() -> dict[str, Any]:
         "ram_available_gb": ram_avail_gb,
         "ram_used_pct": ram_pct,
         "uptime_seconds": uptime_s,
+        "nas_uptime_seconds": _nas_uptime_seconds(),
         "active_ai_model": rag_cfg.get("active_model") or DEFAULT_CHAT_MODEL,
         "electricity": _electricity(),
         "hardware_accelerator": {
@@ -1015,7 +1036,7 @@ def tool_get_network_status() -> dict[str, Any]:
         return {
             "tool": "get_network_status",
             "status": "ok",
-            "hostname": topo.get("hostname"),
+            "hostname": topo.get("hostname") or _nas_name(),
             "ip_address": ip_addr or seen.get("primary_ip"),
             "gateway": gateway,
             "default_gateway": gateway,

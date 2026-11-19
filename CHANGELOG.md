@@ -34,6 +34,10 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   now carries the power drawn through the UPS and the electricity totals of the Power page (today, 7 days,
   30 days, the average).
 
+- **Kib knows the NAS by name, and how long it has been up**: asked how long the NAS has been running, Kib
+  could only say how long Kiboto itself had (it restarts with every update). It now reads the NAS's own
+  uptime, and its name on the network.
+
 #### New
 
 - **The NAS in Home Assistant's Energy dashboard**: with Home Assistant connected and a UPS that is measured,

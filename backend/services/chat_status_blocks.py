@@ -106,6 +106,9 @@ def telemetry_block(tr: dict[str, Any]) -> str:
         f"- CPU Utilization: {_pct(cpu_util)}{temp_str}",
         f"- RAM Usage: {_pct(mem_pct)}{ram_detail}",
     ]
+    nas_up = tr.get("nas_uptime_seconds")
+    if isinstance(nas_up, (int, float)) and nas_up > 0:
+        lines.append(f"- The NAS has been up for: {span(nas_up)}")
     up = tr.get("uptime_seconds")
     if isinstance(up, (int, float)) and up > 0:
         lines.append(f"- Kiboto has been running for: {span(up)} (since it last started, not since the NAS did)")
