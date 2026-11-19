@@ -43,3 +43,15 @@ and keeps a report you can save. It only reads drives that are awake.
 
 Under **Advanced**: creating a pool and the bay setup, for people who manage the pools
 themselves.
+
+## When a check finds damaged files
+
+A check (scrub) reads everything on a pool and compares it with its checksums. When it finds
+data it cannot repair, a ZFS pool knows which files are hit. Kiboto then sends an alert and
+shows a line on the Overview with the pool, how many files and the first names, for example
+"Damaged files in tank (3): IMG_0001.jpg, IMG_0002.jpg, report.pdf".
+
+Restore those files from a backup or a snapshot, then run the check again: the list empties
+when nothing damaged is left. Up to 100 files are listed. Damage that has no file name (the
+pool's own bookkeeping) is counted but not listed. Btrfs pools report how many errors a check
+found but not which files, so for them Kiboto shows the count only.

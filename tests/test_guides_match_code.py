@@ -62,3 +62,22 @@ def test_hardware_guide_quiet_night_numbers(monkeypatch, tmp_path):
         f"a hard drive reaches {config.HDD_CRITICAL_TEMP} °C, an NVMe drive {config.NVME_CRITICAL_TEMP} °C or the processor {CPU_CRITICAL_C} °C"
         in text
     )
+
+
+def test_reaudit_guide_numbers():
+    """The sections the 19 Nov re-audit added: electricity, damaged files, space per app, speed tests."""
+    from backend.hardware.pal import scrub_parse
+    from backend.services import app_storage, energy_use
+
+    power = _doc("POWER.md")
+    assert f"more than {int(energy_use.MAX_GAP_SECS)} seconds apart" in power
+    assert f"kept for {energy_use.KEEP_DAYS} days" in power
+    assert f"Up to {scrub_parse.MAX_DAMAGED_LISTED} files are listed" in _doc("STORAGE.md")
+    assert f"stops after {int(app_storage.WALK_SECONDS)} seconds" in _doc("APPS.md")
+    with open(
+        os.path.join(ROOT, "frontend", "src", "components", "management", "speed-test.js"), encoding="utf-8"
+    ) as fh:
+        speed = fh.read()
+    assert "LIMIT_MS = 4000" in speed and "i < 5" in speed
+    network = _doc("NETWORK.md")
+    assert "for up to 4 seconds" in network and "times five small requests" in network

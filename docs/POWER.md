@@ -64,3 +64,15 @@ example when a fan has failed or a vent is blocked. The fans already run at full
   again; after acting, it is ready again once every drive is 5 °C under its limit.
 
 The card shows what it will do on your NAS and what it did last time.
+
+## Electricity
+
+With a UPS that reports its power, Settings → Power shows the electricity used: today, the last
+7 days, the last 30 days, and the average in watts. It is everything plugged into the UPS, this
+NAS included. Enter your price per kWh and Kiboto says what a month costs at the measured
+average.
+
+Only time that was really measured is counted. Readings more than 120 seconds apart are not
+joined, so the hours when the NAS was off or the UPS did not answer add nothing, and nothing is
+guessed. The daily totals are kept for 400 days. Without a UPS that reports its power the
+section says that nothing has been measured.

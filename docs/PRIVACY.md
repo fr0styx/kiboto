@@ -69,6 +69,20 @@ you click, such as a photo's place on OpenStreetMap, open in a new tab.
 `tests/test_sec38_privacy.py` lists every outside address in the code and fails when one is
 missing from this page.
 
+## Checks that use the internet
+
+Three checks ask a service outside your home. Each is off until an administrator turns it on in
+Settings → Security → Checks that use the internet, each line there says what is sent, and
+turning one on or off is written to the security log.
+
+- **Refuse passwords found in known data leaks**: the first 5 of the 40 characters of a
+  fingerprint of a new password go to Have I Been Pwned; the password never leaves the NAS, and
+  if the service cannot be reached the password is accepted.
+- **Test the internet line**: test data to and from Cloudflare's speed test, only when someone
+  presses the button on the Network page.
+- **Warn about apps with a weakness that is being attacked**: once a day Kiboto downloads the
+  public list from CISA and compares it with your apps on the NAS. Nothing about the NAS is sent.
+
 ## Your controls
 
 - The **Web** switch in the chat, off until you turn it on; your browser remembers it.

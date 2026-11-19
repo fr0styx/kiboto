@@ -116,6 +116,7 @@ work and goes up one patch number at a time: see [releasing](docs/RELEASING.md).
 | Notifications: e-mail, Telegram, Discord, ntfy; what you are told about | [NOTIFICATIONS.md](docs/NOTIFICATIONS.md) |
 | Power: outages, coming back by itself, Restart, nights off, too hot | [POWER.md](docs/POWER.md) |
 | Hardware: cooling, quieter at night, where the facts about your NAS are | [HARDWARE.md](docs/HARDWARE.md) |
+| Network: the speed to your device and of your internet line | [NETWORK.md](docs/NETWORK.md) |
 | Virtual machines: Linux, Windows 11, Home Assistant | [VMS.md](docs/VMS.md) |
 | SNMP for monitoring tools | [SNMP.md](docs/SNMP.md) |
 | Kib: which folders it reads, who can use it, privacy | [KIB.md](docs/KIB.md) |

@@ -103,6 +103,10 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   OctoPrint, Kanboard, An Otter Wiki, Radicale, Shiori, RSS-Bridge, CommaFeed, Crafty Controller, SmokePing,
   Mailpit, Apprise, pyLoad, AriaNg, slskd, TubeSync, Stump, Podgrab, Adminer, Dashy, Maintainerr, Wizarr, Unmanic.
 
+- **A guide to Network** (docs/NETWORK.md): the two speed tests and which one answers which complaint. The
+  Power, Storage, Apps and Privacy guides cover electricity, damaged files, space per app and the checks that
+  use the internet.
+
 #### Changes
 
 - **The Security check says it in words**: "Everything is fine" or "2 things need a look", with what needs a

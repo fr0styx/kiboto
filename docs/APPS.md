@@ -60,3 +60,13 @@ healthy); a part that exits or keeps restarting sends the whole app back to how 
 - Remove a stopped app during clean-up unless you tick it; the clean-up names each app.
 - Give an app new access to the host (devices, host network, privileged mode) when it
   applies a Compose file or changes an app, without asking you first.
+
+## What takes the space
+
+Apps → Docker cleanup lists **Space each app uses**: each app's data (what it wrote inside its
+container, its Docker volumes and its own folders) and the size of the program, biggest first.
+
+Docker's own numbers appear at once. An app's folders on the NAS are measured only when you
+press **Measure the folders too**: a folder on a sleeping drive is left alone and the line says
+so, shared media folders are not counted because they are not the app's data, and the measuring
+stops after 20 seconds (a folder cut short is counted in part and says so).
