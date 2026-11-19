@@ -9,6 +9,7 @@ a file moved elsewhere loses it.
 
 import os
 import threading
+import time
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -17,7 +18,7 @@ from pydantic import BaseModel, Field
 import backend.config as config
 from backend.auth import AuthenticatedPrincipal, get_current_principal, require_scope
 from backend.fsutil import atomic_write_json, json_locked, read_json, resolve_within
-from backend.services import fs_transfer
+from backend.services import fs_transfer, recycle_bin
 from backend.services.path_access import ALLOWED_BROWSE_ROOTS, check_user_path_access
 
 router = APIRouter()
@@ -54,7 +55,9 @@ def _save(principal: AuthenticatedPrincipal | None, mine: dict[str, Any]) -> Non
     data = read_json(_file(), {})
     if not isinstance(data, dict):
         data = {}
-    data[_key(principal)] = mine
+    was = data.get(_key(principal))
+    # only the labels and their names are replaced: what waits in the Recycle Bin stays on record
+    data[_key(principal)] = {**(was if isinstance(was, dict) else {}), **mine}
     atomic_write_json(_file(), data)
 
 
@@ -143,6 +146,95 @@ def moved(old: str, new: str, username: str | None) -> int:
         with _LOCK:
             return _move_labels((username or "_shared").lower(), old, new)
     except OSError:
+        return 0
+
+
+# --- deleted files -----------------------------------------------------------------------------
+# A label goes into the Recycle Bin with its file and comes back with it. It is kept a little
+# longer than the bin keeps anything, then forgotten.
+BINNED_KEEP_SECS = (recycle_bin.KEEP_DAYS + 2) * 86400
+
+
+def _people(data: Any) -> list[dict[str, Any]]:
+    """Each person's record that has labels, with a place for the ones in the bin."""
+    out = []
+    for mine in data.values() if isinstance(data, dict) else []:
+        if isinstance(mine, dict) and isinstance(mine.get("items"), dict):
+            if not isinstance(mine.get("binned"), dict):
+                mine["binned"] = {}
+            out.append(mine)
+    return out
+
+
+def _waiting(entry: Any) -> bool:
+    """A well-formed record of a label in the bin: [colour, when it went there]."""
+    return (
+        isinstance(entry, list)
+        and len(entry) == 2
+        and isinstance(entry[1], (int, float))
+        and not isinstance(entry[1], bool)
+    )
+
+
+@json_locked(lambda *a, **k: _file())
+def _to_bin(path: str, kept_as: str, now: float) -> int:
+    data = read_json(_file(), {})
+    hits = dropped = 0
+    for mine in _people(data):
+        items, binned = mine["items"], mine["binned"]
+        for p in [p for p in items if p == path or p.startswith(path + "/")]:
+            binned[kept_as + p[len(path) :]] = [items.pop(p), now]
+            hits += 1
+        for p in [p for p, v in binned.items() if not _waiting(v)]:
+            del binned[p]
+            dropped += 1
+        for p in [p for p, v in binned.items() if now - float(v[1]) >= BINNED_KEEP_SECS]:
+            del binned[p]  # the bin emptied itself long ago
+            dropped += 1
+    if hits or dropped:
+        atomic_write_json(_file(), data)
+    return hits
+
+
+@json_locked(lambda *a, **k: _file())
+def _from_bin(was: str, now_at: str) -> int:
+    data = read_json(_file(), {})
+    hits = 0
+    for mine in _people(data):
+        items, binned = mine["items"], mine["binned"]
+        for p in [p for p in binned if p == was or p.startswith(was + "/")]:
+            entry = binned.pop(p)
+            colour = entry[0] if isinstance(entry, list) and entry else None
+            if colour in COLOURS:
+                items.setdefault(now_at + p[len(was) :], colour)  # a label put there meanwhile stays
+                hits += 1
+    if hits:
+        atomic_write_json(_file(), data)
+    return hits
+
+
+def deleted(path: str, kept_as: str | None = None, now: float | None = None) -> int:
+    """A file or folder went to the Recycle Bin: its labels (everyone's, and those of what is inside)
+    leave the lists and wait. `kept_as` is the path the bin will restore it to. Never raises."""
+    path, kept_as = path.rstrip("/"), (kept_as or path).rstrip("/")
+    if not path or not kept_as:
+        return 0
+    try:
+        with _LOCK:
+            return _to_bin(path, kept_as, time.time() if now is None else now)
+    except (OSError, ValueError, TypeError):
+        return 0
+
+
+def restored(was: str, now_at: str) -> int:
+    """It came back from the bin, to where it was or somewhere else: its labels come back with it."""
+    was, now_at = was.rstrip("/"), now_at.rstrip("/")
+    if not was or not now_at:
+        return 0
+    try:
+        with _LOCK:
+            return _from_bin(was, now_at)
+    except (OSError, ValueError, TypeError):
         return 0
 
 

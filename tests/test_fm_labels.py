@@ -145,3 +145,65 @@ def test_a_follow_up_that_fails_does_not_fail_the_move(monkeypatch):
     monkeypatch.setattr(fs_transfer, "MOVED_HOOKS", [broken, lambda o, n, w: seen.append((o, n, w))])
     fs_transfer._tell_moved([("/a", "/b")], "ana")
     assert seen == [("/a", "/b", "ana")]
+
+
+def test_a_label_goes_to_the_bin_with_its_file_and_comes_back(area):
+    import json
+
+    client, h, root = area
+    docs, tax = str(root / "docs"), str(root / "docs" / "tax.pdf")
+    for p, c in ((docs, "blue"), (tax, "red")):
+        client.put("/api/fs/labels", headers=h, json={"path": p, "colour": c})
+    client.put("/api/fs/labels/names", headers=h, json={"colour": "red", "name": "Taxes"})
+
+    assert labels.deleted(docs + "/", now=1000.0) == 2
+    view = client.get("/api/fs/labels", headers=h).json()
+    assert view["items"] == {} and view["names"] == {"red": "Taxes"} and "binned" not in view
+    # a label put on something else meanwhile does not lose what waits in the bin
+    (root / "other.txt").write_bytes(b"x")
+    client.put("/api/fs/labels", headers=h, json={"path": str(root / "other.txt"), "colour": "green"})
+    stored = json.loads((root.parent / "data" / "fm_labels.json").read_text())
+    assert len(next(iter(stored.values()))["binned"]) == 2
+
+    assert labels.restored(docs, docs) == 2
+    assert client.get("/api/fs/labels", headers=h).json()["items"] == {
+        str(root / "other.txt"): "green",
+        docs: "blue",
+        tax: "red",
+    }
+    assert labels.restored(docs, docs) == 0  # nothing waits any more
+
+
+def test_restored_somewhere_else_and_what_the_bin_forgot(area):
+    import json
+
+    client, h, root = area
+    tax = str(root / "docs" / "tax.pdf")
+    client.put("/api/fs/labels", headers=h, json={"path": tax, "colour": "red"})
+    # the bin restores to the path it recorded, which may be spelled differently from the label's
+    assert labels.deleted(tax, kept_as="/real/share/docs/tax.pdf", now=1000.0) == 1
+    assert labels.restored(tax, tax) == 0
+    back = str(root / "restored_1_tax.pdf")
+    assert labels.restored("/real/share/docs/tax.pdf", back) == 1
+    assert client.get("/api/fs/labels", headers=h).json()["items"] == {back: "red"}
+
+    # a label put on the restored place meanwhile stays
+    labels.deleted(back, now=2000.0)
+    (root / "restored_1_tax.pdf").write_bytes(b"x")
+    client.put("/api/fs/labels", headers=h, json={"path": back, "colour": "blue"})
+    assert labels.restored(back, back) == 1
+    assert client.get("/api/fs/labels", headers=h).json()["items"] == {back: "blue"}
+
+    # after the bin has emptied itself, what waited is forgotten, and damaged records with it
+    labels.deleted(back, now=3000.0)
+    path = root.parent / "data" / "fm_labels.json"
+    data = json.loads(path.read_text())
+    mine = next(iter(data.values()))
+    mine["binned"]["/x/damaged"] = "red"
+    mine["binned"]["/x/no-time"] = ["red", "soon"]
+    path.write_text(json.dumps(data))
+    later = 3000.0 + labels.BINNED_KEEP_SECS + 1
+    assert labels.deleted("/nothing/labelled", now=later) == 0
+    assert next(iter(json.loads(path.read_text()).values()))["binned"] == {}
+    assert labels.BINNED_KEEP_SECS > labels.recycle_bin.KEEP_DAYS * 86400
+    assert labels.deleted("", now=1.0) == 0 and labels.restored("", "/a") == 0 and labels.restored("/a", "") == 0

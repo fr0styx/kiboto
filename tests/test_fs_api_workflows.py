@@ -118,6 +118,19 @@ class TestTransfers:
         items = ok(client.get("/api/fs/labels", headers=auth_headers))["items"]
         assert items == {os.path.join(os.path.realpath(dest), "a.txt"): "green"}
 
+    def test_delete_and_restore_keep_the_label(self, client, auth_headers, work, tmp_path, monkeypatch):
+        from backend.api.files import labels
+
+        monkeypatch.setattr(labels.config, "DATA_DIR", str(tmp_path))
+        src = os.path.join(work, "a.txt")
+        ok(client.put("/api/fs/labels", json={"path": src, "colour": "purple"}, headers=auth_headers))
+        gone = ok(client.post("/api/fs/delete", json={"path": src}, headers=auth_headers))
+        assert not os.path.exists(src) and gone.get("trash_id")
+        assert ok(client.get("/api/fs/labels", headers=auth_headers))["items"] == {}  # it left the list
+        back = ok(client.post("/api/fs/trash/restore", json={"item_id": gone["trash_id"]}, headers=auth_headers))
+        assert os.path.exists(back["path"])
+        assert ok(client.get("/api/fs/labels", headers=auth_headers))["items"] == {back["path"]: "purple"}
+
     def test_move(self, client, auth_headers, work):
         ok(
             client.post(

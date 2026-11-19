@@ -152,6 +152,9 @@ async def fs_delete(req: DeleteRequest, principal: AuthenticatedPrincipal = Depe
                 detail="This disk has no Recycle Bin of its own, so this can only be deleted permanently.",
             )
         await asyncio.to_thread(record_activity, "delete", target_unresolved, principal, detail="to the Recycle Bin")
+        from backend.api.files import labels
+
+        await asyncio.to_thread(labels.deleted, req.path, target_unresolved)  # the labels wait in the bin too
 
         return {
             "status": "ok",

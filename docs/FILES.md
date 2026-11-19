@@ -49,4 +49,5 @@ Labels are your own: they are kept with your account, not in the files, so nothi
 changes and other people do not see them. Renaming or moving a file or folder in Files keeps its
 label, and so do the labelled things inside a folder you move. A copy starts without one, and so
 does anything that lands on a name already taken (merged into a folder that was there, or kept
-under a second name).
+under a second name). A label goes into the Recycle Bin with its file and comes back with it
+when you restore it; once the bin has let the file go, the label is forgotten too.

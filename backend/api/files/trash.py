@@ -124,6 +124,10 @@ def _restore(req: TrashRestoreRequest, principal: AuthenticatedPrincipal) -> dic
     if os.path.lexists(dest):
         dest = os.path.join(dest_dir, f"restored_{int(time.time())}_{orig_name}")
     shutil.move(source, dest)
+    if orig:
+        from backend.api.files import labels
+
+        labels.restored(orig, dest)  # its coloured labels come back with it
     info = os.path.join(b, "info", f"{name}.trashinfo")
     if os.path.exists(info):
         os.remove(info)

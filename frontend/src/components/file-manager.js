@@ -29,7 +29,7 @@ import { openFilePreview as openFilePreviewModal } from '../file-preview-loader.
 import { transferCenter } from './transfer-center.js';
 import { uploadAll, planDrop, uploadUrl } from './fm-upload.js';
 import { favorites, isFavorite, toggleFavorite, closestPath } from './fm-favorites.js';
-import { markLabel } from './fm-labels.js';
+import { markLabel, labelsMayHaveMoved, loadLabels } from './fm-labels.js';
 import { thumbKind, thumbUrl } from './viewer-kit.js';
 
 /** Asks the server to make this folder's photo and video thumbnails ahead of the scroll (NPERF-8). */
@@ -3565,6 +3565,7 @@ export class FileManagerWindow {
     else if (errors.length && !success) job.finish('failed', errors[0]);
     else job.finish('completed', errors.length ? `${errors.length} item(s) failed: ${errors[0]}` : null);
     this.loadPath(this.currentPath);
+    labelsMayHaveMoved(); // a deleted file's label leaves the sidebar with it
     if (trashIds.length) this.offerUndo(trashIds);
     return { success, failed: errors.length };
   }
@@ -3611,6 +3612,7 @@ export class FileManagerWindow {
         'success'
       );
     this.loadPath(this.currentPath);
+    if (restored) loadLabels(true); // its label comes back with it, even when no label was left
     return restored;
   }
 
@@ -3641,6 +3643,7 @@ export class FileManagerWindow {
             'success'
           );
         this.loadPath(this.currentPath);
+        if (restored) loadLabels(true);
       }
     );
   }

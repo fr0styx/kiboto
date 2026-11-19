@@ -17,6 +17,10 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Kib does not call an empty pool healthy**: a pool that reports no size (an empty slot, or one that is not
   mounted) was described to Kib as "healthy, 0.0 GB free". Kib is now told that it has no size.
 
+- **Labels of deleted files**: a file you deleted stayed in its colour's list, and the count in the sidebar
+  kept it. The label now goes into the Recycle Bin with the file, comes back when you restore it, and is
+  forgotten once the bin lets the file go.
+
 #### Changes
 
 - **Ask Kib about the NAS in your language**: questions about free space, drives, fans, apps, the network and
