@@ -4109,7 +4109,7 @@ export default {
   "ha.ok": "{count, plural, one {# capteur envoyé} other {# capteurs envoyés}}, dernier envoi {when}.",
   "ha.waiting": "Activé : le premier envoi arrive dans la minute.",
   "ha.password_saved": "Enregistré : laissez vide pour le garder",
-  "ha.desc": "Envoie le processeur, la mémoire, la température des disques, l'onduleur et la protection anti-ransomware à Home Assistant sous forme de capteurs, via son broker MQTT (Mosquitto). Ils apparaissent d'eux-mêmes parmi les appareils MQTT.",
+  "ha.desc": "Envoie le processeur, la mémoire, le taux de remplissage du stockage, la température et l'état de chaque disque, l'onduleur avec l'électricité consommée et la protection anti-ransomware à Home Assistant sous forme de capteurs, via son broker MQTT (Mosquitto). Ils apparaissent d'eux-mêmes parmi les appareils MQTT.",
   "ha.host": "Adresse du broker",
   "ha.port": "Port",
   "ha.username": "Nom d'utilisateur",

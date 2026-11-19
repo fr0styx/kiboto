@@ -4109,7 +4109,7 @@ export default {
   "ha.ok": "已发送 {count, plural, other {# 个传感器}}，最近一次在 {when}。",
   "ha.waiting": "已开启：首次发送将在一分钟内进行。",
   "ha.password_saved": "已保存：留空即保留",
-  "ha.desc": "通过 Home Assistant 的 MQTT 消息代理（Mosquitto），把 CPU、内存、磁盘温度、UPS 和勒索软件防护作为传感器发送给 Home Assistant。它们会自动出现在 MQTT 设备下。",
+  "ha.desc": "通过 Home Assistant 的 MQTT 消息代理（Mosquitto），把 CPU、内存、存储空间的使用情况、每块磁盘的温度和健康状况、UPS 及用电量，以及勒索软件防护作为传感器发送给 Home Assistant。它们会自动出现在 MQTT 设备下。",
   "ha.host": "消息代理地址",
   "ha.port": "端口",
   "ha.username": "用户名",

@@ -4109,7 +4109,7 @@ export default {
   "ha.ok": "{count, plural, one {# sensor enviado} other {# sensores enviados}}, el último {when}.",
   "ha.waiting": "Activado: el primer envío llega en menos de un minuto.",
   "ha.password_saved": "Guardada: déjala vacía para conservarla",
-  "ha.desc": "Envía la CPU, la memoria, la temperatura de los discos, el SAI y la protección contra ransomware a Home Assistant como sensores, a través de su broker MQTT (Mosquitto). Aparecen solos entre los dispositivos MQTT.",
+  "ha.desc": "Envía la CPU, la memoria, lo lleno que está el almacenamiento, la temperatura y el estado de cada disco, el SAI con la electricidad consumida y la protección contra ransomware a Home Assistant como sensores, a través de su broker MQTT (Mosquitto). Aparecen solos entre los dispositivos MQTT.",
   "ha.host": "Dirección del broker",
   "ha.port": "Puerto",
   "ha.username": "Usuario",

@@ -4109,7 +4109,7 @@ export default {
   "ha.ok": "{count, plural, one {# Sensor gesendet} other {# Sensoren gesendet}}, zuletzt {when}.",
   "ha.waiting": "Ein: Das erste Senden folgt innerhalb einer Minute.",
   "ha.password_saved": "Gespeichert: leer lassen, um es zu behalten",
-  "ha.desc": "Sendet CPU, Arbeitsspeicher, Festplattentemperaturen, die USV und den Ransomware-Schutz als Sensoren an Home Assistant, über dessen MQTT-Broker (Mosquitto). Sie erscheinen von selbst unter den MQTT-Geräten.",
+  "ha.desc": "Sendet CPU, Arbeitsspeicher, den Füllstand des Speichers, Temperatur und Zustand jeder Festplatte, die USV mit dem verbrauchten Strom und den Ransomware-Schutz als Sensoren an Home Assistant, über dessen MQTT-Broker (Mosquitto). Sie erscheinen von selbst unter den MQTT-Geräten.",
   "ha.host": "Broker-Adresse",
   "ha.port": "Port",
   "ha.username": "Benutzername",

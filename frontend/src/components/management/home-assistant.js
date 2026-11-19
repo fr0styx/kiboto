@@ -28,7 +28,7 @@ export function haCardHtml(cfg) {
       <strong>${escapeHtml(t('ha.title', 'Home Assistant'))}</strong>
       <div class="immich-note" data-ha-status>${escapeHtml(haStatus(c))}</div></div></div>
       <button type="button" class="btn-pill-toggle${c.enabled ? ' active' : ''}" data-ha-toggle aria-pressed="${c.enabled ? 'true' : 'false'}">${escapeHtml(c.enabled ? t('nas_name.btn_on', 'On') : t('nas_name.btn_off', 'Off'))}</button></div>
-    <p class="immich-note">${escapeHtml(t('ha.desc', 'Sends CPU, memory, disk temperatures, the UPS and the ransomware guard to Home Assistant as sensors, through its MQTT broker (Mosquitto). They show up on their own under MQTT devices.'))}</p>
+    <p class="immich-note">${escapeHtml(t('ha.desc', "Sends CPU, memory, how full the storage is, each drive's temperature and health, the UPS with the electricity used, and the ransomware guard to Home Assistant as sensors, through its MQTT broker (Mosquitto). They show up on their own under MQTT devices."))}</p>
     <form class="immich-form" data-ha-form>
       <label>${escapeHtml(t('ha.host', 'Broker address'))}<input name="host" value="${escapeHtml(c.host || '')}" placeholder="homeassistant.local" autocomplete="off"></label>
       <label>${escapeHtml(t('ha.port', 'Port'))}<input name="port" type="number" min="1" max="65535" value="${escapeHtml(String(c.port || 1883))}"></label>

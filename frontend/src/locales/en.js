@@ -4109,7 +4109,7 @@ export default {
   "ha.ok": "{count, plural, one {# sensor sent} other {# sensors sent}}, last at {when}.",
   "ha.waiting": "On: the first send comes within a minute.",
   "ha.password_saved": "Saved: leave empty to keep it",
-  "ha.desc": "Sends CPU, memory, disk temperatures, the UPS and the ransomware guard to Home Assistant as sensors, through its MQTT broker (Mosquitto). They show up on their own under MQTT devices.",
+  "ha.desc": "Sends CPU, memory, how full the storage is, each drive's temperature and health, the UPS with the electricity used, and the ransomware guard to Home Assistant as sensors, through its MQTT broker (Mosquitto). They show up on their own under MQTT devices.",
   "ha.host": "Broker address",
   "ha.port": "Port",
   "ha.username": "User name",
