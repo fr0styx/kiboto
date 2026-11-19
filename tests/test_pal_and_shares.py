@@ -338,3 +338,36 @@ def test_pal_get_pool_path_implementations(tmp_path):
     linux_adapter = GenericLinuxStorageAdapter(pool_path=fake_pool)
     assert linux_adapter.get_pool_path("default_pool") == fake_pool
     assert linux_adapter.get_pool_path("") == fake_pool
+
+
+def test_unraid_slow_places_are_the_array_drives_a_share_may_use(tmp_path):
+    """Data tiering writes to one array drive by its own path; which ones a share may use is Unraid's to say."""
+    emhttp_dir = tmp_path / "emhttp"
+    emhttp_dir.mkdir()
+    (emhttp_dir / "shares.ini").write_text(
+        '["Films"]\nname="Films"\nuseCache="only"\ninclude=""\nexclude=""\nfloor="1048576"\n'
+        '["Photos"]\nname="Photos"\nuseCache="only"\ninclude="disk1,disk3"\nexclude="disk3"\nfloor="0"\n'
+    )
+    disk = '["{n}"]\nname="{n}"\ntype="{t}"\nstatus="{s}"\nfsStatus="{f}"\nfsFree="{free}"\n'
+    (emhttp_dir / "disks.ini").write_text(
+        disk.format(n="parity", t="Parity", s="DISK_OK", f="-", free="0")
+        + disk.format(n="disk1", t="Data", s="DISK_OK", f="Mounted", free="1000")
+        + disk.format(n="disk2", t="Data", s="DISK_OK", f="Mounted", free="3000")
+        + disk.format(n="disk3", t="Data", s="DISK_OK", f="Mounted", free="9000")
+        + disk.format(n="disk4", t="Data", s="DISK_NP", f="-", free="0")  # an empty slot
+        + disk.format(n="disk5", t="Data", s="DISK_DSBL", f="Mounted", free="8000")  # failed, emulated
+        + disk.format(n="cache", t="Cache", s="DISK_OK", f="Mounted", free="7000")
+    )
+    adapter = UnraidStorageAdapter()
+    adapter._emhttp_dir = str(emhttp_dir)
+    films = adapter.slow_places("Films")
+    assert [(p["name"], p["path"], p["free_bytes"]) for p in films] == [
+        ("disk3", "/mnt/disk3", 9000 * 1024),
+        ("disk2", "/mnt/disk2", 3000 * 1024),
+        ("disk1", "/mnt/disk1", 1000 * 1024),
+    ]
+    assert {p["keep_free_bytes"] for p in films} == {1048576 * 1024}  # the share's minimum free space
+    assert [p["name"] for p in adapter.slow_places("Photos")] == ["disk1"]  # included, and not excluded
+    (emhttp_dir / "var.ini").write_text('shareUserInclude=""\nshareUserExclude="disk2,disk3"\n')
+    assert [p["name"] for p in adapter.slow_places("Films")] == ["disk1"]  # the system's own list counts too
+    assert adapter.slow_places("Nope") == []

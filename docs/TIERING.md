@@ -60,6 +60,13 @@ turn tiering off. To have it on the fast pool again, copy it there yourself.
 
 "Move now" on the page does the same run at once, for one folder.
 
+On Unraid the files go to **one drive of the array**, written to that drive directly (parity is
+kept as for any write to the array). Kiboto uses the drive the folder's files went to last while it
+has room, so a folder's old files stay together and fewer drives wake up; otherwise the drive with
+the most free space. It only uses drives the share may use (its included and excluded drives, and
+the system's), and it leaves the share's minimum free space on the drive. When no drive has room,
+nothing is started and the page says so.
+
 ## Which folders fit
 
 On Unraid, a shared folder shows the files of the SSD pool and of the array together. Tiering fits
@@ -74,6 +81,7 @@ a folder whose new files stay on the pool: **Primary storage: the pool, Secondar
   not appear in it. Turn exclusive access off for that share in Unraid.
 - Kiboto cannot see the pool: its container needs the pool's path (for example `/mnt/cache`) as
   well as `/mnt/user`.
+- The array has no drive the folder may use.
 
 On a system where a folder lives on one pool only, there is no slower place for its files and the
 page says so.

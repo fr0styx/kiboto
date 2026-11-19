@@ -39,6 +39,20 @@ def _cache_pool_compression(meta: dict, pool_key: str) -> str | None:
     return pool_compression(meta.get("fs_type", "btrfs"), meta.get("mountpoint", f"/mnt/{pool_key}"), pool_key)
 
 
+def _flat_ini(path: str) -> dict[str, str]:
+    """A file of key="value" lines without sections (Unraid's var.ini)."""
+    out: dict[str, str] = {}
+    try:
+        with open(path, encoding="utf-8", errors="replace") as f:
+            for line in f:
+                key, eq, value = line.strip().partition("=")
+                if eq and not key.startswith(("#", "[")):
+                    out[key.strip()] = value.strip().strip('"')
+    except OSError:
+        logger.debug("[PAL] %s could not be read", path, exc_info=True)
+    return out
+
+
 class UnraidStorageAdapter(StoragePlatformAdapter):
     """
     Unraid OS Storage Platform Adapter.
@@ -296,6 +310,45 @@ class UnraidStorageAdapter(StoragePlatformAdapter):
             )
 
         return pools
+
+    def slow_places(self, share: str) -> list[dict[str, Any]]:
+        """The array's data drives this share may use: mounted and healthy, and allowed by the
+        share's own and the system's included and excluded drives. The share's minimum free space
+        is kept. A drive is addressed by its own path: Unraid does not create a share that lives
+        on a pool only on the array through /mnt/user0."""
+        emhttp_dir = self._emhttp_dir or pal_base._find_emhttp_dir()
+        if not emhttp_dir:
+            return []
+
+        def listed(text: Any) -> set[str]:
+            return {d.strip() for d in str(text or "").split(",") if d.strip()}
+
+        def number(text: Any) -> int:
+            return int(text) if str(text or "").isdigit() else 0
+
+        shares = _parse_ini_sections(os.path.join(emhttp_dir, "shares.ini"))
+        rules = shares.get(share) or next((s for s in shares.values() if s.get("name") == share), None)
+        if rules is None:
+            return []
+        system = _flat_ini(os.path.join(emhttp_dir, "var.ini"))
+        only = [listed(rules.get("include")), listed(system.get("shareUserInclude"))]
+        never = listed(rules.get("exclude")) | listed(system.get("shareUserExclude"))
+        out = []
+        for d in _parse_ini_sections(os.path.join(emhttp_dir, "disks.ini")).values():
+            name = str(d.get("name") or "")
+            if d.get("type") != "Data" or d.get("status") != "DISK_OK" or d.get("fsStatus") != "Mounted":
+                continue
+            if name in never or any(allowed and name not in allowed for allowed in only):
+                continue
+            out.append(
+                {
+                    "name": name,
+                    "path": f"/mnt/{name}",
+                    "free_bytes": number(d.get("fsFree")) * 1024,
+                    "keep_free_bytes": number(rules.get("floor")) * 1024,
+                }
+            )
+        return sorted(out, key=lambda p: (-p["free_bytes"], p["name"]))
 
     def list_shares(self) -> list[NetworkShare]:
         emhttp_dir = self._emhttp_dir or pal_base._find_emhttp_dir()

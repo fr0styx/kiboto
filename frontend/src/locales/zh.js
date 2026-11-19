@@ -8974,4 +8974,6 @@ export default {
   "confirm.tiering_enable.msg": "要在夜间把 {target} 中长时间没有人打开的文件移到较慢的硬盘吗？Kiboto 会先观察这个文件夹同样长的时间，移走的文件会留在那里。",
   "confirm.tiering_run.title": "立即移动",
   "confirm.tiering_run.msg": "要现在把 {target} 的旧文件移到较慢的硬盘吗？硬盘会为此唤醒。",
+  "tier.why.no_slow_drive": "阵列中没有这个文件夹可以使用的硬盘。",
+  "tier.last_nodrive": "上次运行 {when}：没有移动任何文件，因为阵列中没有硬盘能容纳这个文件夹。",
 };

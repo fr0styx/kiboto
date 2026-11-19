@@ -8974,4 +8974,6 @@ export default {
   "confirm.tiering_enable.msg": "Move the files of {target} that nobody has opened for a long time to the slower drives, at night? Kiboto first watches the folder for that long, and a file that has moved stays there.",
   "confirm.tiering_run.title": "Move now",
   "confirm.tiering_run.msg": "Move the old files of {target} to the slower drives now? The drives wake up for it.",
+  "tier.why.no_slow_drive": "The array has no drive this folder may use.",
+  "tier.last_nodrive": "Last run {when}: nothing moved, because no drive of the array has room for this folder.",
 };

@@ -41,7 +41,7 @@ RETRY_WATCH_SECS = 600
 SETTLE_SECS = 2.0  # for the watcher to have read the mover's last opens
 STOP_WAIT_SECS = 60  # the mover ends cleanly when asked; a file in hand stays where it was
 MNT = "/mnt"
-UNRAID_SLOW = "/mnt/user0"  # the array alone, on the host
+ROOM_KEPT = 64 * 1024 * 1024  # a slower drive is never filled to the last byte
 # what the mover may do as root, and nothing else: read and write other people's files, keep their
 # owner and mode, and ask whether a file is open (LEASE)
 MOVER_MAY = ["CHOWN", "DAC_OVERRIDE", "DAC_READ_SEARCH", "FOWNER", "FSETID", "LEASE"]
@@ -91,7 +91,7 @@ def candidates() -> list[dict[str, Any]]:
         return []
     out = []
     for s in shares:
-        entry: dict[str, Any] = {"name": s.name, "why": "", "fast": "", "merged": "", "slow_host": ""}
+        entry: dict[str, Any] = {"name": s.name, "why": "", "fast": "", "merged": ""}
         if kind != PlatformType.UNRAID:
             entry["why"] = "no_merged_folder"  # Kiboto's own pools: see merged folders
         elif s.cache_mode == "yes":
@@ -107,8 +107,10 @@ def candidates() -> list[dict[str, Any]]:
                 entry["why"] = "exclusive"  # Unraid points the folder straight at the pool: the array would not show
             elif not os.path.isdir(fast):
                 entry["why"] = "fast_not_visible"
+            elif not plat.slow_places(s.name):
+                entry["why"] = "no_slow_drive"
             else:
-                entry.update(fast=fast, merged=merged, slow_host=os.path.join(UNRAID_SLOW, s.name))
+                entry.update(fast=fast, merged=merged)
         out.append(entry)
     return out
 
@@ -134,7 +136,7 @@ def set_folder(name: str, enabled: bool, days: int = DEFAULT_DAYS, now: float | 
     if fit["why"]:
         raise NotNow("no_fit", "Tiering does not fit this shared folder.")
     if old is not None:
-        old.update(days=days, fast=fit["fast"], merged=fit["merged"], slow_host=fit["slow_host"])
+        old.update(days=days, fast=fit["fast"], merged=fit["merged"])
         fresh = old
     else:
         fresh = {
@@ -142,7 +144,7 @@ def set_folder(name: str, enabled: bool, days: int = DEFAULT_DAYS, now: float | 
             "name": name,
             "fast": fit["fast"],
             "merged": fit["merged"],
-            "slow_host": fit["slow_host"],
+            "slow_host": "",  # the drive its files went to last, once a run has moved some
             "days": days,
             "since": time.time() if now is None else now,  # nothing is known about opens before this
             "last_run": None,
@@ -153,11 +155,13 @@ def set_folder(name: str, enabled: bool, days: int = DEFAULT_DAYS, now: float | 
 
 
 @json_locked(lambda *a, **k: STATE_FILE)
-def _note_run(folder_id: str, run: dict[str, Any]) -> None:
+def _note_run(folder_id: str, run: dict[str, Any], slow_host: str = "") -> None:
     data = _read()
     for f in data["folders"]:
         if f["id"] == folder_id:
             f["last_run"] = run
+            if slow_host and run.get("moved"):
+                f["slow_host"] = slow_host
     atomic_write_json(STATE_FILE, data)
 
 
@@ -221,7 +225,27 @@ def _self() -> dict[str, Any]:
     return {}
 
 
-def desired(me: dict[str, Any], folder: dict[str, Any], job_dir: str) -> dict[str, Any] | None:
+def slow_side(folder: dict[str, Any], need: int) -> tuple[str, int] | None:
+    """Where tonight's files go, as the host knows it, and the free space to leave there: the drive
+    used last while it has room (a folder's files stay together, and fewer drives wake up),
+    otherwise the one with the most free space. None when no drive may be used or all are full."""
+    from backend.hardware.pal_storage import get_storage_platform
+
+    try:
+        places = get_storage_platform().slow_places(folder["name"])
+    except (OSError, RuntimeError, ValueError):
+        logger.debug("[Tiering] the slower drives could not be read", exc_info=True)
+        return None
+    for p in places:
+        p["keep"] = max(int(p.get("keep_free_bytes") or 0), ROOM_KEPT)
+        p["host"] = os.path.join(p["path"], folder["name"])
+    whole = [p for p in places if p["free_bytes"] - p["keep"] > need]
+    some = whole or [p for p in places if p["free_bytes"] > p["keep"]]  # the run ends when that drive is full
+    best = next((p for p in some if p["host"] == folder.get("slow_host")), some[0] if some else None)
+    return (best["host"], best["keep"]) if best else None
+
+
+def desired(me: dict[str, Any], folder: dict[str, Any], job_dir: str, slow_host: str) -> dict[str, Any] | None:
     """The mover's container: Kiboto's image, the folder's two sides and the job, no network."""
     from backend.services.iscsi_target import host_path
 
@@ -239,7 +263,7 @@ def desired(me: dict[str, Any], folder: dict[str, Any], job_dir: str) -> dict[st
             "ReadonlyRootfs": True,
             "CapDrop": ["ALL"],
             "CapAdd": MOVER_MAY,
-            "Binds": [f"{fast}:/fast", f"{folder['slow_host']}:/slow", f"{job}:/job"],
+            "Binds": [f"{fast}:/fast", f"{slow_host}:/slow", f"{job}:/job"],
         },
     }
 
@@ -302,23 +326,25 @@ def run_soon(name: str, how: str = "hand") -> None:
     threading.Thread(target=work, name="tiering-run", daemon=True).start()
 
 
-def _hand_to_mover(folder: dict[str, Any], job_dir: str, files: list[str]) -> str:
+def _hand_to_mover(folder: dict[str, Any], job_dir: str, files: list[str], slow: tuple[str, int]) -> str:
     """Writes the job and runs the mover's container until it ends. Returns why it could not, or ""."""
     os.makedirs(job_dir, mode=0o700, exist_ok=True)
     for leftover in ("job.json", "result.json"):
         if os.path.exists(os.path.join(job_dir, leftover)):
             os.remove(os.path.join(job_dir, leftover))
-    atomic_write_json(os.path.join(job_dir, "job.json"), {"fast": "/fast", "slow": "/slow", "files": files})
+    job = {"fast": "/fast", "slow": "/slow", "keep_free": slow[1], "files": files}
+    atomic_write_json(os.path.join(job_dir, "job.json"), job)
     me = _self()
-    want = desired(me, folder, job_dir) if me else None
+    want = desired(me, folder, job_dir, slow[0]) if me else None
     if want is None:
         return "no_engine" if not me else "no_path"
     why = ""
     _docker("DELETE", f"/containers/{CONTAINER}?force=true")
     created, _resp = _docker("POST", f"/containers/create?name={CONTAINER}", want, ELEVATED)
-    started, _ = _docker("POST", f"/containers/{CONTAINER}/start") if created in (200, 201) else (0, None)
+    started, said = _docker("POST", f"/containers/{CONTAINER}/start") if created in (200, 201) else (0, _resp)
     if started not in (200, 204, 304):
         why = "no_start"
+        logger.warning("[Tiering] the mover for %s did not start: %s %s", folder["name"], created, said)
     elif not _wait(RUN_LIMIT_SECS):
         why = "too_long"
         _docker("POST", f"/containers/{CONTAINER}/stop?t={STOP_WAIT_SECS}")
@@ -331,9 +357,12 @@ def _run(folder: dict[str, Any], how: str, now: float | None) -> dict[str, Any]:
     chosen = select(folder, now)
     result: dict[str, Any] = {"started": started, "how": how, "learning": chosen["learning"], "more": chosen["more"]}
     result.update(chosen=len(chosen["files"]), moved=0, bytes=0, counts={}, errors=[], why=chosen["why"])
-    if chosen["files"]:
+    slow = slow_side(folder, chosen["bytes"]) if chosen["files"] else None
+    if chosen["files"] and slow is None:
+        result["why"] = "no_slow_drive"  # none may be used, or all are full: nothing is woken for it
+    elif chosen["files"] and slow is not None:
         job_dir = os.path.join(JOBS_DIR, folder["id"])
-        result["why"] = _hand_to_mover(folder, job_dir, chosen["files"])
+        result["why"] = _hand_to_mover(folder, job_dir, chosen["files"], slow)
         if result["why"] not in ("no_engine", "no_path"):
             done = read_json(os.path.join(job_dir, "result.json"), None)
             if isinstance(done, dict):
@@ -350,7 +379,7 @@ def _run(folder: dict[str, Any], how: str, now: float | None) -> dict[str, Any]:
             open_watch.forget_files([os.path.join(folder["fast"], rel) for rel in chosen["files"]])
         shutil.rmtree(job_dir, ignore_errors=True)
     result["ended"] = time.time()
-    _note_run(folder["id"], result)
+    _note_run(folder["id"], result, slow[0] if slow else "")
     _tell(folder, result)
     return result
 

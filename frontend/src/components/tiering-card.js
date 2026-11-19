@@ -31,6 +31,7 @@ const WHY = {
     'Unraid shows this folder straight from its pool (exclusive access), so files on the array would not appear in it.',
   ],
   fast_not_visible: ['tier.why.fast_not_visible', "Kiboto cannot see this folder's fast pool."],
+  no_slow_drive: ['tier.why.no_slow_drive', 'The array has no drive this folder may use.'],
   no_merged_folder: [
     'tier.why.no_merged_folder',
     'On this system a folder lives on one pool, so there is no slower place to move its files to.',
@@ -67,6 +68,16 @@ export function tieringLastRun(run) {
       t('tier.last_blind', 'Last run {when}: nothing moved, because Kiboto was not seeing which files are opened.', {
         when,
       })
+    );
+  else if (run.why === 'no_slow_drive')
+    said.push(
+      t(
+        'tier.last_nodrive',
+        'Last run {when}: nothing moved, because no drive of the array has room for this folder.',
+        {
+          when,
+        }
+      )
     );
   else if (run.why)
     said.push(

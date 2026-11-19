@@ -20,12 +20,25 @@ DAY = 86400
 class Platform:
     def __init__(self, kind, shares):
         self.kind, self.shares = kind, shares
+        self.places = {"*": [_drive("disk1", 500)]}
 
     def get_platform_type(self):
         return self.kind
 
     def list_shares(self):
         return self.shares
+
+    def slow_places(self, share):
+        return [dict(p) for p in self.places.get(share, self.places["*"])]
+
+
+def _drive(name, free_gib, keep_gib=0):
+    return {
+        "name": name,
+        "path": f"/mnt/{name}",
+        "free_bytes": free_gib * 1024**3,
+        "keep_free_bytes": keep_gib * 1024**3,
+    }
 
 
 def _share(name, mode, pool="ssd"):
@@ -65,7 +78,8 @@ def nas(tmp_path, monkeypatch):
             {"Source": "/host/appdata/kiboto", "Destination": str(data)},
         ],
     }
-    here = {"/host/ssd": str(mnt / "ssd"), "/host/appdata/kiboto": str(data), "/mnt/user0": str(array)}
+    here = {"/host/ssd": str(mnt / "ssd"), "/host/appdata/kiboto": str(data), "/mnt/disk1": str(array)}
+    here["/mnt/disk2"] = str(tmp_path / "array2")
 
     def local(host_path):
         for outside, inside in here.items():
@@ -89,7 +103,8 @@ def nas(tmp_path, monkeypatch):
             os.makedirs(binds["/slow"], exist_ok=True)  # Docker makes a folder that is not there yet
             with open(os.path.join(binds["/job"], "job.json"), encoding="utf-8") as f:
                 job = json.load(f)
-            assert (job["fast"], job["slow"]) == ("/fast", "/slow")
+            assert (job["fast"], job["slow"]) == ("/fast", "/slow") and job["keep_free"] >= tr.ROOM_KEPT
+            state["job"] = job
             out = tier_mover.run({"fast": binds["/fast"], "slow": binds["/slow"], "files": job["files"]})
             with open(os.path.join(binds["/job"], "result.json"), "w", encoding="utf-8") as f:
                 json.dump(out, f)
@@ -124,7 +139,9 @@ def _later(days=200):
 def test_only_a_folder_that_stays_on_the_fast_pool_fits(nas):
     os.symlink(nas["mnt"] / "ssd" / "Films", nas["mnt"] / "user" / "Linked")
     (nas["mnt"] / "ssd" / "Linked").mkdir()
-    nas["plat"].shares += [_share("Linked", "only"), _share("Elsewhere", "only", "nvme")]
+    (nas["mnt"] / "ssd" / "NoDrive").mkdir()
+    nas["plat"].shares += [_share("Linked", "only"), _share("Elsewhere", "only", "nvme"), _share("NoDrive", "only")]
+    nas["plat"].places["NoDrive"] = []  # the array has no drive this share may use
     why = {c["name"]: c["why"] for c in tr.candidates()}
     assert why == {
         "Films": "",
@@ -133,9 +150,10 @@ def test_only_a_folder_that_stays_on_the_fast_pool_fits(nas):
         "Backups": "not_on_fast",
         "Linked": "exclusive",
         "Elsewhere": "fast_not_visible",
+        "NoDrive": "no_slow_drive",
     }
     films = next(c for c in tr.candidates() if c["name"] == "Films")
-    assert films["fast"] == str(nas["mnt"] / "ssd" / "Films") and films["slow_host"] == "/mnt/user0/Films"
+    assert films["fast"] == str(nas["mnt"] / "ssd" / "Films")
     nas["plat"].kind = PlatformType.GENERIC_LINUX
     assert {c["why"] for c in tr.candidates()} == {"no_merged_folder"}
 
@@ -224,12 +242,13 @@ def test_a_run_moves_the_old_files_in_a_container_that_sees_only_the_folder(nas)
     assert host["NetworkMode"] == "none" and host["CapDrop"] == ["ALL"] and "SYS_ADMIN" not in host["CapAdd"]
     assert host["Binds"] == [
         "/host/ssd/Films:/fast",
-        "/mnt/user0/Films:/slow",
+        "/mnt/disk1/Films:/slow",  # one array drive, by its own path
         f"/host/appdata/kiboto/tiering/{folder['id']}:/job",
     ]
     assert nas["mover"] is None and not os.path.exists(os.path.join(tr.JOBS_DIR, folder["id"]))  # tidied up
     assert open_watch.last_opened(folder["fast"]) == {}  # the moved file's opens are no longer kept
     assert tr.get("Films")["last_run"]["moved"] == 1 and tr.view()["folders"][0]["last_run"]["how"] == "hand"
+    assert tr.get("Films")["slow_host"] == "/mnt/disk1/Films"  # remembered: the next files go beside these
     assert [e[0] for e in nas["events"]] == ["info"]
 
 
@@ -337,3 +356,36 @@ def test_the_screen_is_told_how_each_folder_stands(nas):
     }
     assert view["folders"][1] == {"name": "Downloads", "why": "unraid_moves_all", "enabled": False}
     assert (view["run_at"], view["default_days"], view["moving"], view["watch_error"]) == ("03:00", 90, False, "")
+
+
+def test_the_drive_used_last_is_kept_while_it_has_room(nas):
+    folder = tr.set_folder("Films", True, 90)
+    gib = 1024**3
+    nas["plat"].places["Films"] = [_drive("disk2", 900), _drive("disk1", 300, keep_gib=100)]
+    assert tr.slow_side(folder, 10 * gib) == ("/mnt/disk2/Films", tr.ROOM_KEPT)  # the most free space
+    folder["slow_host"] = "/mnt/disk1/Films"
+    assert tr.slow_side(folder, 10 * gib) == ("/mnt/disk1/Films", 100 * gib)  # where its files already are
+    assert tr.slow_side(folder, 250 * gib) == ("/mnt/disk2/Films", tr.ROOM_KEPT)  # 300 free, 100 to keep: no room
+    # more than any drive holds: the one with room takes what fits, and the mover stops when it is full
+    assert tr.slow_side(folder, 5000 * gib) == ("/mnt/disk1/Films", 100 * gib)
+    nas["plat"].places["Films"] = [_drive("disk1", 50, keep_gib=100)]
+    assert tr.slow_side(folder, 1) is None
+
+
+def test_no_drive_with_room_means_nothing_is_started(nas):
+    tr.set_folder("Films", True, 90)
+    old = _file(nas, "old.mkv")
+    nas["plat"].places["Films"] = [_drive("disk1", 1, keep_gib=10)]
+    out = tr.run("Films", "schedule", _later())
+    assert (out["why"], out["chosen"], out["moved"]) == ("no_slow_drive", 1, 0) and os.path.exists(old)
+    assert not [c for c in nas["calls"] if c[0] == "POST"]  # no container, so no drive woke up for it
+    assert [e[0] for e in nas["events"]] == ["warning"]
+
+
+def test_the_share_s_minimum_free_space_goes_to_the_mover(nas):
+    tr.set_folder("Films", True, 90)
+    _file(nas, "old.mkv")
+    nas["plat"].places["Films"] = [_drive("disk2", 900, keep_gib=20)]
+    out = tr.run("Films", "schedule", _later())
+    assert out["moved"] == 1 and nas["job"]["keep_free"] == 20 * 1024**3
+    assert nas["made"]["HostConfig"]["Binds"][1] == "/mnt/disk2/Films:/slow"

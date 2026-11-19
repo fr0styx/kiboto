@@ -8974,4 +8974,6 @@ export default {
   "confirm.tiering_enable.msg": "Die Dateien von {target}, die lange niemand geöffnet hat, nachts auf die langsameren Laufwerke verschieben? Kiboto beobachtet den Ordner zuerst so lange, und eine verschobene Datei bleibt dort.",
   "confirm.tiering_run.title": "Jetzt verschieben",
   "confirm.tiering_run.msg": "Die alten Dateien von {target} jetzt auf die langsameren Laufwerke verschieben? Die Laufwerke wachen dafür auf.",
+  "tier.why.no_slow_drive": "Das Array hat kein Laufwerk, das dieser Ordner benutzen darf.",
+  "tier.last_nodrive": "Letzter Lauf {when}: Nichts wurde verschoben, weil kein Laufwerk des Arrays Platz für diesen Ordner hat.",
 };

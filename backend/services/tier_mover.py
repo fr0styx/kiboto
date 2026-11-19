@@ -75,7 +75,7 @@ def _folders_like(fast_root: str, slow_root: str, rel_dir: str) -> None:
             os.chmod(target, stat.S_IMODE(like.st_mode))
 
 
-def move_one(fast_root: str, slow_root: str, rel: str) -> tuple[str, int]:
+def move_one(fast_root: str, slow_root: str, rel: str, keep_free: int = ROOM_KEPT) -> tuple[str, int]:
     """Moves one file; returns how it went ("moved", or why not) and the bytes moved."""
     src, dst = os.path.join(fast_root, rel), os.path.join(slow_root, rel)
     real_fast = os.path.realpath(fast_root)
@@ -93,7 +93,7 @@ def move_one(fast_root: str, slow_root: str, rel: str) -> tuple[str, int]:
     if in_use(src):
         return "in_use", 0
     room = os.statvfs(slow_root)
-    if room.f_bavail * room.f_frsize < before.st_size + ROOM_KEPT:
+    if room.f_bavail * room.f_frsize < before.st_size + max(keep_free, ROOM_KEPT):
         return "no_room", 0
     part = dst + PART
     try:
@@ -131,7 +131,7 @@ def run(job: dict[str, Any]) -> dict[str, Any]:
             os.chmod(slow, stat.S_IMODE(like.st_mode))
     for rel in job.get("files") or []:
         try:
-            how, size = move_one(fast, slow, rel)
+            how, size = move_one(fast, slow, rel, int(job.get("keep_free") or 0))
         except Stopped:
             out["stopped"] = "asked"
             break

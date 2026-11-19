@@ -8974,4 +8974,6 @@ export default {
   "confirm.tiering_enable.msg": "Déplacer la nuit vers les disques plus lents les fichiers de {target} que personne n'a ouverts depuis longtemps ? Kiboto observe d'abord le dossier pendant cette durée, et un fichier déplacé y reste.",
   "confirm.tiering_run.title": "Déplacer maintenant",
   "confirm.tiering_run.msg": "Déplacer maintenant les anciens fichiers de {target} vers les disques plus lents ? Les disques se réveillent pour cela.",
+  "tier.why.no_slow_drive": "L'array n'a aucun disque que ce dossier puisse utiliser.",
+  "tier.last_nodrive": "Dernier passage {when} : rien n'a été déplacé, car aucun disque de l'array n'a de place pour ce dossier.",
 };

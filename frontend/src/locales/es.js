@@ -8974,4 +8974,6 @@ export default {
   "confirm.tiering_enable.msg": "¿Mover por la noche a los discos más lentos los archivos de {target} que nadie ha abierto en mucho tiempo? Kiboto observa primero la carpeta durante ese tiempo, y un archivo que se ha movido se queda allí.",
   "confirm.tiering_run.title": "Mover ahora",
   "confirm.tiering_run.msg": "¿Mover ahora los archivos antiguos de {target} a los discos más lentos? Los discos se despiertan para ello.",
+  "tier.why.no_slow_drive": "El array no tiene ningún disco que esta carpeta pueda usar.",
+  "tier.last_nodrive": "Última vez {when}: no se movió nada, porque ningún disco del array tiene sitio para esta carpeta.",
 };

@@ -151,3 +151,4 @@ def test_tiering_guide_numbers():
     assert "is never replaced" in text and "its name starts with a dot" in text
     assert "counts as someone opening the files" in text and "One way only" in text
     assert tier_mover.PART.startswith(".kiboto-") and "under a temporary name" in text
+    assert "one drive of the array" in text and "leaves the share's minimum free space" in text

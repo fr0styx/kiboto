@@ -212,6 +212,12 @@ class StoragePlatformAdapter(ABC):
         """Discovers and returns all active network shares."""
         ...
 
+    def slow_places(self, share: str) -> list[dict[str, Any]]:
+        """Where a shared folder's old files may move to (data tiering): the slower drives that may
+        hold this share, the one with the most free space first. Each is {"name", "path" (as the
+        host knows it), "free_bytes", "keep_free_bytes"}. None where a folder lives on one pool."""
+        return []
+
     @abstractmethod
     def is_storage_busy(self) -> bool:
         """Returns True if scrub, resilver, parity check, or mover is active."""

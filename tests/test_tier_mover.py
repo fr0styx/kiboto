@@ -113,10 +113,10 @@ def test_a_run_counts_each_outcome_and_goes_on_after_an_error(sides, monkeypatch
         _put(fast, name, name)
     real = tm.move_one
 
-    def one(fast_root, slow_root, rel):
+    def one(fast_root, slow_root, rel, keep_free=0):
         if rel == "b.txt":
             raise OSError(errno.EIO, "Input/output error")
-        return real(fast_root, slow_root, rel)
+        return real(fast_root, slow_root, rel, keep_free)
 
     monkeypatch.setattr(tm, "move_one", one)
     out = tm.run({"fast": str(fast), "slow": str(slow), "files": ["a.txt", "b.txt", "c.txt", "gone.txt"]})
@@ -131,7 +131,7 @@ def test_a_full_slow_side_ends_the_run_without_touching_the_rest(sides, monkeypa
         _put(fast, name)
     tried = []
 
-    def one(fast_root, slow_root, rel):
+    def one(fast_root, slow_root, rel, keep_free=0):
         tried.append(rel)
         if rel == "b.txt":
             raise OSError(errno.ENOSPC, "No space left on device")
@@ -171,3 +171,19 @@ def test_in_use_says_no_for_a_file_nobody_has_open(sides):
     path = _put(fast, "idle.txt")
     assert tm.in_use(str(path)) is False
     assert tm.in_use(str(fast / "never-was.txt")) is True  # cannot be opened: not to be moved
+
+
+def test_the_free_space_the_share_asks_for_is_left_on_the_drive(sides, monkeypatch):
+    fast, slow = sides
+    _put(fast, "a.bin", "x" * 1000)
+    room = os.statvfs(str(slow))
+    gib = 1024**3
+
+    class Drive:
+        f_bavail, f_frsize = 5 * gib // room.f_frsize, room.f_frsize
+
+    monkeypatch.setattr(tm.os, "statvfs", lambda path: Drive)
+    job = {"fast": str(fast), "slow": str(slow), "files": ["a.bin"]}
+    out = tm.run({**job, "keep_free": 6 * gib})  # the share keeps 6 GiB free; the drive has 5
+    assert out["counts"] == {"no_room": 1} and out["stopped"] == "full" and (fast / "a.bin").exists()
+    assert tm.run({**job, "keep_free": 4 * gib})["moved"] == ["a.bin"]
