@@ -60,6 +60,9 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Speed test** (Settings → Network): measures the link between the device you are using and the NAS, both
   directions and the answer time, and says in a sentence what it is good for. Nothing leaves your connection.
 
+- **Save History as a file**: Activity → History can save the list on screen, and the whole security log for
+  people who may read it, as a file any spreadsheet opens.
+
 #### Changes
 
 - **The Security check says it in words**: "Everything is fine" or "2 things need a look", with what needs a

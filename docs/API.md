@@ -38,7 +38,7 @@ request and response schemas.
 
 <!-- BEGIN generated endpoints: python scripts/api_reference.py --update -->
 
-756 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
+757 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
 
 ### AI Conversation History
 
@@ -102,6 +102,7 @@ request and response schemas.
 | Method | Path | Access | What it does |
 | :--- | :--- | :--- | :--- |
 | `GET` | `/api/v1/auth/audit` | `audit:read` | Get Security Audit Logs |
+| `GET` | `/api/v1/auth/audit/export` | `audit:read` | The security log as a CSV file, to keep a record outside the NAS |
 | `POST` | `/api/v1/auth/login` | public ⏱ | Login |
 | `POST` | `/api/v1/auth/logout` | signed in | Logout |
 | `GET` | `/api/v1/auth/me` | signed in | Get Current User Profile |

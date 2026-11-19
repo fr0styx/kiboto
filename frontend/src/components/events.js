@@ -83,7 +83,8 @@ function ensureControls(list) {
       <button type="button" class="btn-pill-toggle history-chip" data-filter="files" aria-pressed="false" hidden>${escapeHtml(t('act.chip_files', 'Files'))}</button>
       <button type="button" class="btn-pill-toggle history-chip" data-filter="signins" aria-pressed="false" hidden>${escapeHtml(t('act.chip_signins', 'Sign-ins'))}</button>
     </div>
-    <input type="search" class="tz-text-input history-search" placeholder="${escapeHtml(t('act.search', 'Search the history'))}" aria-label="${escapeHtml(t('act.search', 'Search the history'))}" data-i18n-aria-label="act.search">`;
+    <input type="search" class="tz-text-input history-search" placeholder="${escapeHtml(t('act.search', 'Search the history'))}" aria-label="${escapeHtml(t('act.search', 'Search the history'))}" data-i18n-aria-label="act.search">
+    <button type="button" class="btn-pill-toggle is-small history-export">${escapeHtml(t('act.export', 'Save as a file'))}</button>`;
   list.before(bar);
   // Sign-ins for people who may read the security log (Activity report section 4, row 5)
   import('./history-signins.js')
@@ -105,6 +106,17 @@ function ensureControls(list) {
     });
     redraw();
   });
+  bar.querySelector('.history-export')?.addEventListener('click', () => {
+    import('./history-export.js')
+      .then((m) =>
+        m.exportHistory({
+          filter: _currentFilter,
+          events: filterEvents(_events, _currentFilter, _query),
+          view: eventView,
+        })
+      )
+      .catch(() => {});
+  });
   bar.querySelector('.history-search')?.addEventListener('input', (ev) => {
     _query = /** @type {HTMLInputElement} */ (ev.target).value;
     redraw();
@@ -113,6 +125,8 @@ function ensureControls(list) {
 
 function redraw() {
   _lastEventHash = '';
+  const save = /** @type {HTMLElement | null} */ (document.querySelector('.history-export'));
+  if (save) save.hidden = _currentFilter === 'files'; // file activity has no file to save yet
   if (_currentFilter === 'signins' || _currentFilter === 'files') {
     const list = document.getElementById('events-list');
     const search = /** @type {HTMLElement | null} */ (document.querySelector('.history-search'));

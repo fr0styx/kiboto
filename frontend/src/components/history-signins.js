@@ -21,6 +21,7 @@ const WORDS = {
   'auth.lockout': ['signin.blocked', '{ip} was blocked after failed sign-ins'],
   'auth.login.outside_hours': ['signin.hours', '{user} tried to sign in outside their hours'],
   'auth.logout': ['signin.out', '{user} signed out'],
+  'audit.exported': ['signin.exported', '{user} saved the security log as a file'],
   'auth.mfa.enabled': ['signin.mfa_on', '{user} turned on two-step sign-in'],
   'auth.mfa.disabled': ['signin.mfa_off', 'Two-step sign-in was turned off for {user}'],
   'auth.mfa.failure': ['signin.mfa_failed', 'A two-step code for {user} was wrong'],

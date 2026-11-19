@@ -45191,6 +45191,35 @@
     ]
    }
   },
+  "/api/v1/auth/audit/export": {
+   "get": {
+    "description": "The security log as a CSV file, to keep a record outside the NAS. The export itself is logged.",
+    "operationId": "export_security_audit_logs_api_v1_auth_audit_export_get",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Export Security Audit Logs",
+    "tags": [
+     "Authentication & Security"
+    ],
+    "x-required-scopes": [
+     "audit:read"
+    ]
+   }
+  },
   "/api/v1/auth/ldap/settings": {
    "get": {
     "operationId": "ldap_settings_api_v1_auth_ldap_settings_get",

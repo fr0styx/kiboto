@@ -1685,6 +1685,29 @@ def get_security_audit_logs(request: Request, page: PageParams = Depends()):
     return {"audit_logs": logs, "count": len(logs), **page.meta(page.offset + len(rows))}
 
 
+@router.get("/auth/audit/export", dependencies=[Depends(require_scope("audit:read"))])
+def export_security_audit_logs(request: Request) -> Response:
+    """The security log as a CSV file, to keep a record outside the NAS. The export itself is logged."""
+    from backend.services import audit_export
+
+    rows = query_security_audit_logs(limit=audit_export.MAX_ROWS, offset=0)
+    user = _get_authenticated_user(request) or {}
+    log_security_event(
+        "audit.exported",
+        "success",
+        actor_id=user.get("id"),
+        actor_username=user.get("username"),
+        actor_ip=_client_ip(request),
+        details={"rows": len(rows)},
+    )
+    name = f"kiboto-security-log-{time.strftime('%Y-%m-%d', time.gmtime())}.csv"
+    return Response(
+        content=audit_export.csv_of(rows),
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="{name}"', "Cache-Control": "no-store"},
+    )
+
+
 # ==============================================================================
 # Legacy Security Compatibility
 # ==============================================================================
