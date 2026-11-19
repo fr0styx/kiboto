@@ -325,7 +325,7 @@
   "backend.hardware.ups.read_ups_status": 271,
   "backend.services.ai_chat_agent._run_agentic_chat_turn": 181,
   "backend.services.ai_chat_agent._turn_fallback_reply": 193,
-  "backend.services.ai_chat_agent._turn_run_requested_tools": 269,
+  "backend.services.ai_chat_agent._turn_run_requested_tools": 222,
   "backend.services.ai_chat_agent.stream_agentic_chat": 191,
   "backend.services.app_catalog._deploy_steps": 384,
   "backend.services.app_catalog.sideload_app_manifest": 156,

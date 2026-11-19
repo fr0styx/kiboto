@@ -40,7 +40,8 @@ Kib also answers from the NAS's own readings, taken at the moment you ask: how f
 storage pool is and whether the last check found damaged files, which drives are awake and
 how warm they are, the fan profile, the apps that are running, the NAS's address, and how
 much electricity it used (once a UPS measures it, see [POWER.md](POWER.md)). No drive is
-woken for these answers.
+woken for these answers. Ask in English, German, Spanish, French or Chinese: the question
+reaches the same readings.
 
 ## Privacy
 

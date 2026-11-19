@@ -87,6 +87,14 @@ from backend.services.chat_nas_tools import (  # noqa: E402, F401
     tool_set_fan_profile,
     tool_trigger_ai_sync,
 )
+from backend.services.chat_route_words import (  # noqa: E402, F401
+    APP_WORDS,
+    DISK_WORDS,
+    FAN_WORDS,
+    NETWORK_WORDS,
+    STORAGE_WORDS,
+    TELEMETRY_WORDS,
+)
 from backend.services.chat_status_blocks import cpu_marked, cpu_said  # noqa: E402
 from backend.services.chat_synthesis import (  # noqa: E402, F401
     _as_data,
@@ -569,56 +577,18 @@ _SMALLTALK = frozenset(
 )
 
 
+_UNSPACED_RE = re.compile(r"[\u2e80-\u9fff\uf900-\ufaff]")  # Chinese, Japanese: written without spaces
+
+
 def _mentions(text: str, words: tuple[str, ...] | list[str]) -> bool:
     """True when text contains one of the words or phrases as whole words: "ram" is not in
-    "program", "lan" is not in "plan" (AI-7)."""
-    return any(re.search(r"(?<![\w])" + re.escape(w) + r"(?![\w])", text) for w in words)
+    "program", "lan" is not in "plan" (AI-7). A Chinese word is looked for anywhere: there are
+    no spaces around it to make it a whole word."""
+    return any(
+        (w in text) if _UNSPACED_RE.search(w) else bool(re.search(r"(?<![\w])" + re.escape(w) + r"(?![\w])", text))
+        for w in words
+    )
 
-
-# Words in a question that send it to the status tool that can answer it. Electricity is read
-# with the system's numbers and damaged files with the pools, so neither needs a tool of its own.
-STORAGE_WORDS = (
-    "storage pool",
-    "storage pools",
-    "zpool",
-    "pools",
-    "pool status",
-    "array status",
-    "storage status",
-    "storage capacity",
-    "how much storage",
-    "free space",
-    "usable space",
-    "disk space",
-    "btrfs raid",
-    "zfs pool",
-    "damaged file",
-    "damaged files",
-    "corrupted file",
-    "corrupted files",
-    "corrupt files",
-)
-TELEMETRY_WORDS = (
-    "cpu",
-    "ram",
-    "memory",
-    "npu",
-    "gpu",
-    "hardware",
-    "telemetry",
-    "uptime",
-    "system load",
-    "system status",
-    "electricity",
-    "kwh",
-    "watts",
-    "power use",
-    "power usage",
-    "power draw",
-    "power consumption",
-    "energy use",
-    "energy usage",
-)
 
 _HARDWARE_TEMP_RE = re.compile(
     r"\b(?:cpu|gpu|npu|nas|server|system|disk|disks|drive|drives|hdd|ssd|nvme|hardware|board|chassis|box)\b.{0,40}\btemp(?:erature)?s?\b"
@@ -930,9 +900,7 @@ def _turn_run_requested_tools(
             res_fan_set = execute_nas_tool("set_fan_profile", {"profile": target_prof}, principal=principal)
             tool_results.append(res_fan_set)
             tools_called.append("set_fan_profile")
-        elif "get_fan_and_thermal_status" not in tools_called and _mentions(
-            msg_lower, ("fan", "fans", "rpm", "pwm", "cooling", "thermal", "zero rpm", "acoustic")
-        ):
+        elif "get_fan_and_thermal_status" not in tools_called and _mentions(msg_lower, FAN_WORDS):
             res_fan = _routed("get_fan_and_thermal_status", principal)
             tool_results.append(res_fan)
             tools_called.append("get_fan_and_thermal_status")
@@ -958,21 +926,7 @@ def _turn_run_requested_tools(
                 tool_results.append(res_dctrl)
                 tools_called.append("control_docker_container")
 
-        if "list_docker_containers" not in tools_called and _mentions(
-            msg_lower,
-            (
-                "docker",
-                "dockers",
-                "container",
-                "containers",
-                "running apps",
-                "services",
-                "sonarr",
-                "radarr",
-                "immich",
-                "plex",
-            ),
-        ):
+        if "list_docker_containers" not in tools_called and _mentions(msg_lower, APP_WORDS):
             res_dlist = _routed("list_docker_containers", principal)
             tool_results.append(res_dlist)
             tools_called.append("list_docker_containers")
@@ -990,44 +944,13 @@ def _turn_run_requested_tools(
             tools_called.append("get_storage_status")
 
         # 1e. Network status & interface topology
-        if "get_network_status" not in tools_called and _mentions(
-            msg_lower,
-            (
-                "network",
-                "interfaces",
-                "ip address",
-                "my ip",
-                "ethernet",
-                "lan",
-                "gateway",
-                "default gateway",
-                "dns",
-                "link speed",
-                "subnet",
-                "network card",
-            ),
-        ):
+        if "get_network_status" not in tools_called and _mentions(msg_lower, NETWORK_WORDS):
             res_net = _routed("get_network_status", principal)
             tool_results.append(res_net)
             tools_called.append("get_network_status")
 
         # 1f. Disks & Standby Guard status
-        if "get_disks_and_standby_status" not in tools_called and _mentions(
-            msg_lower,
-            (
-                "disk",
-                "disks",
-                "drive",
-                "drives",
-                "hdd",
-                "nvme",
-                "standby",
-                "sleeping",
-                "spun down",
-                "spinup",
-                "smart",
-            ),
-        ):
+        if "get_disks_and_standby_status" not in tools_called and _mentions(msg_lower, DISK_WORDS):
             res_disks = _routed("get_disks_and_standby_status", principal)
             tool_results.append(res_disks)
             tools_called.append("get_disks_and_standby_status")
