@@ -10,6 +10,7 @@ import os
 from typing import Annotated, Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Path
+from fastapi.responses import JSONResponse
 from pydantic import AfterValidator, BaseModel, Field
 
 from backend import config
@@ -322,10 +323,11 @@ def update_storage_schedule_config(req: dict[str, Any]) -> dict[str, Any]:
 @router.post(
     "/pools",
     dependencies=[Depends(require_scope("storage:admin")), Depends(require_confirmation("storage.pool.create"))],
+    response_model=None,  # a dict, or the refusal as its own JSON response
 )
 def create_storage_pool(
     req: StoragePoolCreateRequest, principal: AuthenticatedPrincipal = Depends(get_current_principal)
-) -> dict[str, Any]:
+) -> dict[str, Any] | JSONResponse:
     """
     Creates a new storage pool. In Observer Mode (e.g. Unraid, TrueNAS),
     this operation is strictly rejected to protect host array parity.

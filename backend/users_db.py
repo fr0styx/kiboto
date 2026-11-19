@@ -607,16 +607,17 @@ def create_user(
         )
 
     ret = get_user_by_id(user_id, db_path)
-    if ret:
-        try:
-            from backend.services.samba_engine import get_samba_engine
+    if ret is None:  # the row was written a moment ago; nothing to sync or hand back
+        raise LookupError(f"user {user_id} is missing right after it was created")
+    try:
+        from backend.services.samba_engine import get_samba_engine
 
-            get_samba_engine().sync_samba_user(username=username_clean, password=password)
-        except Exception:
-            ignored("backend.users_db.create_user")
-        from backend.services.samba_engine import refresh_access
+        get_samba_engine().sync_samba_user(username=username_clean, password=password)
+    except Exception:
+        ignored("backend.users_db.create_user")
+    from backend.services.samba_engine import refresh_access
 
-        refresh_access()  # a new person is in, or out of, each share's network list at once (SET-01)
+    refresh_access()  # a new person is in, or out of, each share's network list at once (SET-01)
     _people_changed()  # the family sign-in for other apps follows (SET-19)
     return ret
 

@@ -66463,11 +66463,7 @@
      "200": {
       "content": {
        "application/json": {
-        "schema": {
-         "additionalProperties": true,
-         "title": "Response Create Storage Pool Api V1 Storage Pools Post",
-         "type": "object"
-        }
+        "schema": {}
        }
       },
       "description": "Successful Response"
