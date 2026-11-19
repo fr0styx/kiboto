@@ -49,6 +49,34 @@ def test_the_list_is_cut_down_to_names_and_days():
     assert len(rows) == 5 and weakness_feed.compact({}) == []
 
 
+def test_a_first_word_only_counts_when_it_is_the_makers_name():
+    """Found on a real NAS: "Backup Exec" (Veritas) made every image called "backup" a match."""
+    rows = weakness_feed.compact(
+        {
+            "vulnerabilities": [
+                {"cveID": "CVE-1", "vendorProject": "Veritas", "product": "Backup Exec", "dateAdded": "2026-01-01"},
+                {
+                    "cveID": "CVE-2",
+                    "vendorProject": "Roundcube",
+                    "product": "Roundcube Webmail",
+                    "dateAdded": "2026-01-01",
+                },
+                {"cveID": "CVE-3", "vendorProject": "Gitea", "product": "Gitea", "dateAdded": "2026-01-01"},
+            ]
+        }
+    )
+    by = {r["cve"]: r["keys"] for r in rows}
+    assert by == {"CVE-1": ["backupexec"], "CVE-2": ["roundcube", "roundcubewebmail"], "CVE-3": ["gitea"]}
+    apps = [
+        {"name": "nightly", "image": "me/backup:1", "built": 1},
+        {"name": "mail", "image": "roundcube/roundcubemail", "built": 1},
+    ]
+    assert weakness_feed.matches(apps, rows) == []  # "backup" is no product; "roundcubemail" is not its listed name
+    assert [f["app"] for f in weakness_feed.matches([{"name": "git", "image": "gitea/gitea:1", "built": 1}], rows)] == [
+        "git"
+    ]
+
+
 def test_an_app_is_named_by_its_image():
     assert weakness_feed.image_name("lscr.io/linuxserver/plex:latest") == "plex"
     assert weakness_feed.image_name("grafana/grafana@sha256:abc") == "grafana"

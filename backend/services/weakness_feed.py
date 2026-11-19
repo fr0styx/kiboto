@@ -50,8 +50,11 @@ def compact(feed: dict[str, Any]) -> list[dict[str, Any]]:
     rows = []
     for v in feed.get("vulnerabilities") or []:
         product = str(v.get("product") or "")
+        vendor = _norm(str(v.get("vendorProject") or "").split(" ")[0])
         first = _norm(product.split(" ")[0]) if product else ""
-        keys = sorted({k for k in (_norm(product), first if len(first) >= 4 else "") if len(k) >= MIN_NAME})
+        # the whole product name, and its first word only when that is the maker's own name
+        # ("Plex Media Server" by Plex): "Backup Exec" must not match every image called "backup"
+        keys = sorted({k for k in (_norm(product), first if first == vendor else "") if len(k) >= MIN_NAME})
         if not keys or not v.get("cveID"):
             continue
         rows.append(
