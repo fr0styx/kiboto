@@ -14,6 +14,9 @@ vi.mock('../api.js', () => {
 import { api } from '../api.js';
 import { COMPACT_MAX, isCompact, isTouch } from '../device.js';
 import { enablePhoneShell, refreshHealth } from '../components/phone-shell.js';
+// the card's words come from this module, which the phone shell loads when it needs it: loaded here
+// first, so the card is drawn within a tick on a slow machine too (it took one only on a fast one)
+import '../components/management/overview.js';
 
 const setWidth = (w) => Object.defineProperty(window, 'innerWidth', { value: w, configurable: true });
 const settle = () => new Promise((r) => setTimeout(r, 0));
@@ -50,6 +53,16 @@ describe('one definition of each kind of screen', () => {
     const block = css.slice(css.indexOf('@media (pointer: coarse)'));
     expect(block).toMatch(/button,[\s\S]*min-height: 44px/);
     expect(block).toMatch(/\.win-btn::after[\s\S]*inset:/);
+    // the top bar's controls are drawn 36px tall inside the 48px bar and keep a finger-sized area (19 Nov 2026)
+    const bar = css.slice(css.indexOf('.suite-navbar :is('));
+    expect(bar).toMatch(
+      /\.suite-navbar :is\(\.topbar-user-pill, \.topbar-jobs-btn, \.suite-toolkit-btn\) \{[^}]*height: 36px;[^}]*border-radius: 10px;/
+    );
+    expect(bar).toMatch(/::after \{[^}]*inset: -4px -2px;/); // 36 + 4 + 4
+    expect(bar).toMatch(
+      /#suite-lang-select:focus \{[^}]*height: 44px;[^}]*border: 4px solid transparent;[^}]*border-radius: 14px;/
+    );
+    expect(css).not.toMatch(/\.suite-navbar[^{]*\{[^}]*display:/); // a hidden control stays hidden
     expect(fs.readFileSync(path.resolve(__dirname, '..', 'style.css'), 'utf8')).toContain('styles/61-touch.css');
   });
 });

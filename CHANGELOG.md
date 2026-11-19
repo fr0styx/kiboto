@@ -89,6 +89,12 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   it is. For Unraid shares that stay on their pool; off for every folder until you turn it on. Guide:
   docs/TIERING.md.
 
+#### Fixed
+
+- **The top bar on a phone or tablet**: the account button, the jobs button, the language list and the settings
+  button nearly filled the bar from edge to edge, each with its own shape. They are now the same height with
+  the same corners and a margin above and below; the area that answers a finger is as large as before.
+
 ## v2.0.4 (2026-11-19)
 ### 🏡 Apps that go back on their own, a way to move in, and Kiboto in your language everywhere
 
