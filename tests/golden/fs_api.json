@@ -900,6 +900,53 @@
    "deps": [
     "require_scope"
    ],
+   "endpoint": "fs_list_labels",
+   "methods": [
+    "GET"
+   ],
+   "params": [
+    "principal"
+   ],
+   "path": "/fs/labels",
+   "response_model": "dict",
+   "status": null
+  },
+  {
+   "deps": [
+    "require_scope"
+   ],
+   "endpoint": "fs_set_label",
+   "methods": [
+    "PUT"
+   ],
+   "params": [
+    "principal",
+    "req"
+   ],
+   "path": "/fs/labels",
+   "response_model": "dict",
+   "status": null
+  },
+  {
+   "deps": [
+    "require_scope"
+   ],
+   "endpoint": "fs_name_label",
+   "methods": [
+    "PUT"
+   ],
+   "params": [
+    "principal",
+    "req"
+   ],
+   "path": "/fs/labels/names",
+   "response_model": "dict",
+   "status": null
+  },
+  {
+   "deps": [
+    "require_scope"
+   ],
    "endpoint": "fs_activity",
    "methods": [
     "GET"

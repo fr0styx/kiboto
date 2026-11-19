@@ -23606,6 +23606,53 @@
     "title": "KitSavedResponse",
     "type": "object"
    },
+   "LabelIn": {
+    "properties": {
+     "colour": {
+      "anyOf": [
+       {
+        "maxLength": 12,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Colour"
+     },
+     "path": {
+      "maxLength": 4096,
+      "minLength": 1,
+      "title": "Path",
+      "type": "string"
+     }
+    },
+    "required": [
+     "path"
+    ],
+    "title": "LabelIn",
+    "type": "object"
+   },
+   "LabelNameIn": {
+    "properties": {
+     "colour": {
+      "maxLength": 12,
+      "title": "Colour",
+      "type": "string"
+     },
+     "name": {
+      "default": "",
+      "maxLength": 40,
+      "title": "Name",
+      "type": "string"
+     }
+    },
+    "required": [
+     "colour"
+    ],
+    "title": "LabelNameIn",
+    "type": "object"
+   },
    "LayoutRequest": {
     "properties": {
      "clock_format": {
@@ -53875,6 +53922,135 @@
      "shares:user_write",
      "storage:write",
      "storage:admin"
+    ]
+   }
+  },
+  "/api/v1/fs/labels": {
+   "get": {
+    "description": "The signed-in person's labels: the colours, the names they gave them, and path -> colour.",
+    "operationId": "fs_list_labels_api_v1_fs_labels_get",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Fs List Labels Api V1 Fs Labels Get",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Fs List Labels",
+    "tags": [
+     "File System & Shares"
+    ],
+    "x-required-scopes": [
+     "shares:read",
+     "storage:read",
+     "system:view"
+    ]
+   },
+   "put": {
+    "description": "Puts a colour on a file or folder; no colour takes the label off.",
+    "operationId": "fs_set_label_api_v1_fs_labels_put",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/LabelIn"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Fs Set Label Api V1 Fs Labels Put",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Fs Set Label",
+    "tags": [
+     "File System & Shares"
+    ],
+    "x-required-scopes": [
+     "shares:read",
+     "storage:read",
+     "system:view"
+    ]
+   }
+  },
+  "/api/v1/fs/labels/names": {
+   "put": {
+    "description": "Gives a colour a name of the person's own; an empty name goes back to the colour's own word.",
+    "operationId": "fs_name_label_api_v1_fs_labels_names_put",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/LabelNameIn"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Fs Name Label Api V1 Fs Labels Names Put",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Fs Name Label",
+    "tags": [
+     "File System & Shares"
+    ],
+    "x-required-scopes": [
+     "shares:read",
+     "storage:read",
+     "system:view"
     ]
    }
   },

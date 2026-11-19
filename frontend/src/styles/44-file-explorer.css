@@ -244,3 +244,24 @@
 .shared-link-what { flex: 1 1 220px; min-width: 0; }
 .shared-link-name { font-weight: 600; overflow-wrap: anywhere; }
 .shared-link-meta { color: var(--kb-text-muted); font-size: var(--kb-fs-xs); }
+
+/* Coloured labels (re-audit R11): a dot before the name; the colour's name is said to screen readers */
+.fm-label-dot, .fm-row[data-label] .fm-name-text::before, .fm-grid-card[data-label] .fm-card-name::before {
+  content: ''; display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; flex: none; background: var(--fm-label, transparent);
+}
+[data-label='red'], [data-colour='red'] { --fm-label: #e5484d; }
+[data-label='orange'], [data-colour='orange'] { --fm-label: #f76b15; }
+[data-label='yellow'], [data-colour='yellow'] { --fm-label: #e2a400; }
+[data-label='green'], [data-colour='green'] { --fm-label: #30a46c; }
+[data-label='blue'], [data-colour='blue'] { --fm-label: #3e8eed; }
+[data-label='purple'], [data-colour='purple'] { --fm-label: #8e4ec6; }
+.fm-tree-count { margin-left: auto; opacity: 0.7; font-size: var(--kb-fs-xs); }
+.fm-label-body { display: flex; flex-direction: column; gap: 12px; min-width: min(360px, 86vw); }
+.fm-label-choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.fm-label-choice { display: flex; align-items: center; gap: 4px; min-height: 36px; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--kb-line-12); background: transparent; color: inherit; cursor: pointer; text-align: left; }
+.fm-label-choice[aria-pressed='true'] { border-color: var(--lt-ink-brand, var(--brand)); box-shadow: 0 0 0 1px var(--lt-ink-brand, var(--brand)); }
+.fm-label-name { display: flex; flex-direction: column; gap: 4px; font-size: var(--kb-fs-sm); }
+.fm-label-name[hidden] { display: none; }
+.fm-label-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.fm-label-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; max-height: 50vh; overflow-y: auto; }
+.fm-label-open { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--kb-line-12); background: transparent; color: inherit; cursor: pointer; text-align: left; }

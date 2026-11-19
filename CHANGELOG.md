@@ -95,6 +95,9 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Bring a virtual machine over**: a new machine can start from a disk made by VMware (.vmdk), Hyper-V (.vhdx,
   .vhd) or VirtualBox (.vdi). The original file stays as it is.
 
+- **Labels in Files**: give a file or folder one of six colours and say what the colour means to you. The sidebar
+  lists your colours; one click shows everything that carries it. Labels are your own and change nothing on disk.
+
 #### Changes
 
 - **The Security check says it in words**: "Everything is fine" or "2 things need a look", with what needs a

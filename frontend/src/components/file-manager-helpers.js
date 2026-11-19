@@ -17,6 +17,7 @@ import { showToast } from '../toast.js';
 import { formatDateTime } from '../format.js';
 import { transferCenter } from './transfer-center.js';
 import { favorites, loadFavorites, removeFavorite, isFavorite, toggleFavorite } from './fm-favorites.js';
+import { loadLabels, labelsInUse, labelName, openLabelPicker, openLabelList } from './fm-labels.js';
 /** Where this server keeps its files: the main pool it reported (/api/fs/roots), else the first
  *  folder Files may show, else Unraid's /mnt/user. Files used /mnt/user everywhere, which does not
  *  exist on Kiboto's own OS images (Files finding 28). */
@@ -274,6 +275,12 @@ export class FmSidebarTree {
     this._onMountChanged = () => this.refresh();
     this._onFavorites = () => this.render();
     ZettEventBus.on('fm:favorites', this._onFavorites);
+    // a label put on or taken off: the sidebar's colours and the rows on screen follow
+    this._onLabels = () => {
+      this.render();
+      this.fm.renderViewport?.();
+    };
+    ZettEventBus.on('fm:labels', this._onLabels);
     ZettEventBus.on('fm:refresh', this._onMountChanged);
     ZettEventBus.on('storage:mount_changed', this._onMountChanged);
     this.init();
@@ -288,7 +295,7 @@ export class FmSidebarTree {
 
   /** Reads the roots (and the favourites, once) and draws; open() calls this. */
   async refresh() {
-    await Promise.all([this.loadRoots(), loadFavorites()]);
+    await Promise.all([this.loadRoots(), loadFavorites(), loadLabels()]);
     this.render();
     this.updateActive(this.fm.currentPath);
   }
@@ -297,6 +304,10 @@ export class FmSidebarTree {
     if (this._onFavorites) {
       ZettEventBus.off('fm:favorites', this._onFavorites);
       this._onFavorites = null;
+    }
+    if (this._onLabels) {
+      ZettEventBus.off('fm:labels', this._onLabels);
+      this._onLabels = null;
     }
     if (this._onMountChanged) {
       ZettEventBus.off('fm:refresh', this._onMountChanged);
@@ -403,6 +414,25 @@ export class FmSidebarTree {
           : ''
       }
 
+      ${
+        labelsInUse().length
+          ? `
+      <div class="fm-tree-group fm-tree-labels fmh-x">
+        <div class="fm-tree-group-title">${t('fm.labels', 'Labels')}</div>
+        ${labelsInUse()
+          .map(
+            (l) => `
+          <div class="fm-tree-item fm-label-item" data-label-colour="${l.colour}">
+            <span class="fm-label-dot" data-colour="${l.colour}" aria-hidden="true"></span>
+            <span class="fm-tree-label" role="button" tabindex="0">${escapeHtml(labelName(l.colour))}</span>
+            <span class="fm-tree-count">${l.count}</span>
+          </div>`
+          )
+          .join('')}
+      </div>`
+          : ''
+      }
+
       <div class="fm-tree-group fmh-x">
         <div class="fm-tree-group-title">${t('fm.storage_remotes', 'Storage and remotes')}</div>
         ${place('/mnt/remotes', '☁️', t('fm.cloud_mounts', 'Cloud folders'), isCloudActive)}
@@ -450,6 +480,7 @@ export class FmSidebarTree {
         const p = item.dataset.path;
         if (p) this.fm.loadPath(p);
         else if ('sharedLinks' in item.dataset) import('./shared-links.js').then((m) => m.openSharedLinks());
+        else if (item.dataset.labelColour) openLabelList(item.dataset.labelColour, this.fm);
       });
 
       item.addEventListener('dragover', (e) => {
@@ -1177,6 +1208,7 @@ export class FmContextMenu {
           it('photo-import', '🏠', t('fm.ctx_photo_import', 'Bring photos home…')),
         one && isDir && it('icloud-photos', '☁️', t('fm.ctx_icloud_photos', 'Download from iCloud Photos…')),
         one && it('share', '🔗', t('fm.ctx_share', 'Share a link…')),
+        one && !inBin && fileItem.name !== '..' && it('label', '🏷️', t('fm.ctx_label', 'Label…')),
         one && !isDir && it('checksum', '🛡️', t('fm.ctx_checksum', 'Show its SHA-256 checksum')),
         one && !isDir && it('versions', '🕘', t('fm.versions_menu', 'Previous versions…')),
         one && it('ask-kib', '✨', t('fm.ask_kib', 'Ask Kib about this')),
@@ -1337,6 +1369,9 @@ export class FmContextMenu {
             m.openPreviousVersions(item.path, item.name, () => this.fm.loadPath(this.fm.currentPath))
           );
         }
+        break;
+      case 'label':
+        if (item) openLabelPicker(item);
         break;
       case 'ask-kib':
         if (item) window.askKibAbout?.(item.path, item.name);

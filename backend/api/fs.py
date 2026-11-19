@@ -14,6 +14,7 @@ from backend.api.files import (
     common,
     details,
     favorites,
+    labels,
     operations,
     preview,
     search,
@@ -176,6 +177,7 @@ for _area in (
     preview,
     share_links,
     favorites,
+    labels,
     activity,
 ):
     router.include_router(_area.router)

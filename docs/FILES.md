@@ -37,3 +37,14 @@ the Recycle Bin and **Keep Both** keeps both.
 
 **Organize Media** sorts downloaded films and series into the folder layout Plex, Jellyfin
 and Emby expect. It shows what it will do first.
+
+## Labels
+
+Right-click a file or folder and choose **Label…** to give it one of six colours. You can say what
+a colour means to you ("Taxes", "To sort"); the name shows wherever the colour does. A coloured
+dot marks the file in every view, and the sidebar lists the colours in use: click one to see
+everything that carries it and jump to its folder.
+
+Labels are your own: they are kept with your account, not in the files, so nothing on disk
+changes and other people do not see them. Renaming a file or folder in Files keeps its label; a
+file moved to another folder loses it.

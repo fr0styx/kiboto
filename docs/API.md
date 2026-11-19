@@ -38,7 +38,7 @@ request and response schemas.
 
 <!-- BEGIN generated endpoints: python scripts/api_reference.py --update -->
 
-765 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
+768 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
 
 ### AI Conversation History
 
@@ -283,6 +283,9 @@ request and response schemas.
 | `POST` | `/api/v1/fs/folder-size` | any of `shares:read`, `storage:read`, `system:view` | Fs Folder Size |
 | `GET` | `/api/v1/fs/inbox` | any of `shares:user_write`, `storage:write`, `storage:admin` | Fs Inbox |
 | `POST` | `/api/v1/fs/inbox` | any of `shares:user_write`, `storage:write`, `storage:admin` | Saves one shared file into the Inbox under a name that doesn't overwrite anything (M1) |
+| `GET` | `/api/v1/fs/labels` | any of `shares:read`, `storage:read`, `system:view` | The signed-in person's labels: the colours, the names they gave them, and path -> colour |
+| `PUT` | `/api/v1/fs/labels` | any of `shares:read`, `storage:read`, `system:view` | Puts a colour on a file or folder; no colour takes the label off |
+| `PUT` | `/api/v1/fs/labels/names` | any of `shares:read`, `storage:read`, `system:view` | Gives a colour a name of the person's own; an empty name goes back to the colour's own word |
 | `GET` | `/api/v1/fs/media/info` | any of `shares:read`, `storage:read`, `system:view` | Duration, resolution, codecs, frame rate and rotation of a video or audio file |
 | `GET` | `/api/v1/fs/permissions` | any of `shares:read`, `storage:read`, `system:view` | Fs Get Permissions |
 | `PUT` | `/api/v1/fs/permissions` | any of `shares:manage`, `storage:admin` | Fs Update Permissions |

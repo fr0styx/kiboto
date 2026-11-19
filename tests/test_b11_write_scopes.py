@@ -55,6 +55,8 @@ READ_LIKE = {
     "/api/v1/fs/folder-size": "reads a folder (asks before waking a drive)",
     "/api/v1/fs/thumbs/prefetch": "makes previews of a folder it may read; changes no file",
     "/api/v1/fs/favorites": "their own favourites",
+    "/api/v1/fs/labels": "their own coloured labels (kept with the account; no file changes)",
+    "/api/v1/fs/labels/names": "the names they give their own label colours",
     "/api/v1/network/mesh-vpn/tailscale/ping": "a ping; changes nothing",
     "/api/v1/media/organize/preview": "a preview; changes nothing",
     "/api/v1/ai/actions/{action_id}/confirm": "their own proposed action; the tool checks its own scope",

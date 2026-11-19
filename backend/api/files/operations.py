@@ -75,6 +75,12 @@ async def fs_rename(req: RenameRequest, principal: AuthenticatedPrincipal = Depe
     try:
         await asyncio.to_thread(os.rename, target_unresolved, dst)
         await asyncio.to_thread(record_activity, "rename", target_unresolved, principal, target=dst)
+        from backend.api.files import labels
+
+        # the person's coloured label follows the new name (and those of what is inside a folder)
+        await asyncio.to_thread(
+            labels.moved, req.path, os.path.join(os.path.dirname(req.path.rstrip("/")), new_name), principal.username
+        )
         return {"status": "ok"}
     except Exception as e:
         logger.error(f"[FS] Rename failed: {e}")

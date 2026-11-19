@@ -29,6 +29,7 @@ import { openFilePreview as openFilePreviewModal } from '../file-preview-loader.
 import { transferCenter } from './transfer-center.js';
 import { uploadAll, planDrop, uploadUrl } from './fm-upload.js';
 import { favorites, isFavorite, toggleFavorite, closestPath } from './fm-favorites.js';
+import { markLabel } from './fm-labels.js';
 import { thumbKind, thumbUrl } from './viewer-kit.js';
 
 /** Asks the server to make this folder's photo and video thumbnails ahead of the scroll (NPERF-8). */
@@ -2591,6 +2592,7 @@ export class FileManagerWindow {
         const card = document.createElement('div');
         card.className = 'fm-grid-card';
         card.dataset.path = file.path;
+        markLabel(card, file.path);
         card.dataset.name = file.name;
         card.dataset.index = String(i);
         card.setAttribute('role', 'row');
@@ -2676,6 +2678,7 @@ export class FileManagerWindow {
       const row = document.createElement('div');
       row.className = isCompact ? 'fm-row fm-row-compact' : 'fm-row';
       row.dataset.path = file.path;
+      markLabel(row, file.path);
       row.dataset.name = file.name;
       row.dataset.index = String(i);
       row.setAttribute('role', 'row');

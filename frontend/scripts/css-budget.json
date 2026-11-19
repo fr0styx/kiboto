@@ -3,7 +3,7 @@
   "buttonClasses": 75,
   "inlineStyles": 1243,
   "emojiIcons": 3,
-  "colours": 3697,
+  "colours": 3703,
   "primitiveUses": 4,
   "importantPerFile": {
     "frontend/index.html": 64,
@@ -142,7 +142,7 @@
     "frontend/src/styles/41-vm-config.css": 17,
     "frontend/src/styles/42-ai-workspace.css": 1,
     "frontend/src/styles/43-security-advisor.css": 4,
-    "frontend/src/styles/44-file-explorer.css": 10,
+    "frontend/src/styles/44-file-explorer.css": 16,
     "frontend/src/styles/45-ai-history.css": 10,
     "frontend/src/styles/46-time-picker.css": 7,
     "frontend/src/styles/47-containers-bulk.css": 13,
