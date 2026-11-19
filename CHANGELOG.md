@@ -66,6 +66,9 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Space each app uses** (Apps → Docker cleanup): each app's data and program size, biggest first. Its folders
   are measured when you ask, and a sleeping drive is never woken for it.
 
+- **Bring your files over** (Settings → Shared folders): copy folders from another NAS or a PC on your network
+  into a shared folder, see first what would be copied, and have Kiboto check afterwards that every file arrived.
+
 #### Changes
 
 - **The Security check says it in words**: "Everything is fine" or "2 things need a look", with what needs a
@@ -575,6 +578,8 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 
 - **Card copy**: with card copy off, its settings are inactive (skipped by the keyboard and screen readers)
   instead of only faded.
+
+- **Remote storage**: listing the folders of a remote failed every time; it works now.
 
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words

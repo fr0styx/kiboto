@@ -328,6 +328,22 @@ CURATED_PROVIDERS = [
 ]
 
 
+def _apply_stats(job: dict[str, Any], stats: dict[str, Any]) -> None:
+    """rclone's running totals into the job; a dry run counts what it would copy the same way."""
+    b = stats.get("bytes", 0)
+    tb = stats.get("totalBytes", 0)
+    job["bytes_transferred"] = b
+    job["total_bytes"] = tb
+    job["files_transferred"] = stats.get("transfers", 0)
+    job["total_files"] = stats.get("totalTransfers", 0)
+    if tb > 0:
+        job["percent"] = round((b / tb) * 100.0, 1)
+    elif b > 0 and tb == 0:
+        job["percent"] = 100.0
+    job["speed_mbps"] = round(stats.get("speed", 0.0) / (1024 * 1024), 2)
+    job["eta_seconds"] = stats.get("eta")
+
+
 def _tell_sync_done(job: dict[str, Any], action: str, src: str, dst: str, job_id: str) -> None:
     """A finished or failed cloud sync: the event log gets its entry either way, the alert goes
     out when the job asks for one (SET-13)."""
@@ -955,28 +971,20 @@ class RcloneEngine:
                 raise RuntimeError(f"Could not unmount {mount_path}; resource may be busy.")
 
     def list_remote_files(self, name: str, path: str = "") -> list[dict[str, Any]]:
-        """Lists files and folders inside a remote using rclone lsf --json."""
+        """Files and folders one level inside a remote (rclone lsjson), folders first."""
         check_remote_name(name)
         rclone_bin = self._get_rclone_bin()
         target = f"{name}:{path}" if path else f"{name}:"
-        cmd = [
-            rclone_bin,
-            "lsf",
-            target,
-            "--config",
-            self.config_file,
-            "--json",
-            "--max-depth",
-            "1",
-        ]
-        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=15)
+        cmd = [rclone_bin, "lsjson", target, "--config", self.config_file, "--max-depth", "1", "--no-modtime"]
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
         if proc.returncode != 0:
             err = proc.stderr.strip()
             raise RuntimeError(f"Failed to list remote files: {err}")
         try:
-            return json.loads(proc.stdout)
+            items = json.loads(proc.stdout)
         except json.JSONDecodeError:
             return []
+        return sorted(items, key=lambda i: (not i.get("IsDir"), str(i.get("Path") or "").lower()))
 
     def _run_rclone(self, args: list[str], timeout: int = 300) -> str:
         cmd = [self._get_rclone_bin(), *args[:1], "--config", self.config_file, *args[1:]]
@@ -1065,6 +1073,8 @@ class RcloneEngine:
             "completed_at": None,
             "bytes_transferred": 0,
             "total_bytes": 0,
+            "files_transferred": 0,
+            "total_files": 0,
             "percent": 0.0,
             "speed_mbps": 0.0,
             "eta_seconds": None,
@@ -1119,18 +1129,7 @@ class RcloneEngine:
                             # 1. Parse stats payload
                             stats = data.get("stats")
                             if isinstance(stats, dict):
-                                b = stats.get("bytes", 0)
-                                tb = stats.get("totalBytes", 0)
-                                job["bytes_transferred"] = b
-                                job["total_bytes"] = tb
-                                if tb > 0:
-                                    job["percent"] = round((b / tb) * 100.0, 1)
-                                elif b > 0 and tb == 0:
-                                    job["percent"] = 100.0
-
-                                spd = stats.get("speed", 0.0)
-                                job["speed_mbps"] = round(spd / (1024 * 1024), 2)
-                                job["eta_seconds"] = stats.get("eta")
+                                _apply_stats(job, stats)
 
                             # 2. Parse file log items
                             msg = data.get("msg", "")

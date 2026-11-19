@@ -1698,6 +1698,12 @@ export function initManagement() {
   // shares cannot be made; a second listener here opened the dialog twice per click (SET-14)
 
   // every link shared from this NAS, with "Stop sharing" (SET-01)
+  const moveInBtn = document.getElementById('btn-move-in');
+  if (moveInBtn) {
+    moveInBtn.addEventListener('click', () => {
+      import('./move-in.js').then((m) => m.openMoveIn()).catch(() => {});
+    });
+  }
   const sharedLinksBtn = document.getElementById('btn-show-shared-links');
   if (sharedLinksBtn) {
     sharedLinksBtn.addEventListener('click', () =>
