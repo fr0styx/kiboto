@@ -2,7 +2,32 @@
 
 Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep that name.
 
-## Unreleased
+## v2.0.4 (2026-11-19)
+### 🏡 Apps that go back on their own, a way to move in, and Kiboto in your language everywhere
+
+Apps are one row each: an update keeps the app running or goes back, a whole app can be backed up,
+restored and removed in one step, catalog apps update to tested versions, and the catalog has 153
+apps, each started once on a real engine. Virtual machines start from a preset in three steps
+(Windows 11 and Home Assistant included) or from a disk made by VMware, Hyper-V or VirtualBox.
+Power is rebuilt around one shutdown rule, can prove the NAS comes back by itself, switches off at
+night or when too hot if you ask, and adds up the electricity used. Activity opens on a History
+you can read by day, filter and save as a file. Files has coloured labels and "Bring your files
+over", a guided, checked copy from another NAS or a PC. Storage names the damaged files a check
+finds. Kib has its own window, settings that read top to bottom, and answers about the NAS from
+its real readings. Security gains a firewall,
+HTTPS at home, an alert for a sign-in from a new device and three optional checks that use the
+internet. Every page, refusal and alert reads in five languages, and there is a guide for every
+household page.
+
+#### Before you upgrade
+
+- **Nothing to do.** Everything that reaches outside your home or changes how the NAS behaves is off
+  until you turn it on: the firewall, Dynamic DNS, HTTPS at home, SNMP, "Switch off at night",
+  "Switch off when too hot", "Quieter at night", and the three checks that use the internet (leaked
+  passwords, the internet speed test, apps with a weakness under attack).
+- **Kib's settings are for administrators only** now; everyone keeps Ask Kib and their own
+  favourites and recent searches.
+
 
 #### Security
 
