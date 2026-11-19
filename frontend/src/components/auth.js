@@ -447,6 +447,8 @@ export function finishSignIn(data) {
   const dock = document.getElementById('os-dock-container');
   if (data.token) auth.setToken(data.token);
   if (data.user) setCurrentUser(data.user);
+  if (data.previous_signin)
+    import('./last-signin.js').then((m) => m.sayLastSignIn(data.previous_signin)).catch(() => {});
   document.documentElement.classList.remove('auth-required');
   document.documentElement.classList.add('has-auth-session');
   if (dock) dock.style.display = '';

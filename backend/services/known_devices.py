@@ -110,6 +110,26 @@ def note_signin(
     return {"device": describe(user_agent) or "?", "outside": outside_home(ip)}
 
 
+def previous_signin(user_id: str, db_path: str | None = None) -> dict[str, Any] | None:
+    """When and from what this account last signed in (asked before the new sign-in is logged), so
+    the page can say "Last sign-in: ..."; None for a first sign-in or an unreadable log."""
+    from backend import users_db
+
+    try:
+        with users_db.users_db_session(db_path, readonly=True) as conn:
+            row = conn.execute(
+                "SELECT timestamp, actor_ip, actor_user_agent FROM security_audit_log "
+                "WHERE actor_id = ? AND event_type = 'auth.login.success' ORDER BY timestamp DESC LIMIT 1",
+                (user_id,),
+            ).fetchone()
+    except (sqlite3.Error, OSError):
+        ignored("backend.services.known_devices.previous_signin")
+        return None
+    if not row:
+        return None
+    return {"at": float(row[0]), "ip": str(row[1] or ""), "user_agent": str(row[2] or "")}
+
+
 def tell_person(username: str, device: str, ip: str) -> None:
     """A push to the person's own devices, in the household's language; never blocks the sign-in."""
 

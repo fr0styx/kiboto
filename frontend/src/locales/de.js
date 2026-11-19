@@ -2351,6 +2351,8 @@ export default {
   "login.too_many": "Zu viele Versuche. Erneut versuchen in {seconds} s.",
   "login.error_network": "Kiboto ist nicht erreichbar. Verbindung prüfen und erneut versuchen.",
   "login.btn": "Anmelden",
+  "login.last_signin": "Letzte Anmeldung: {when}, {device}.",
+  "login.last_signin_plain": "Letzte Anmeldung: {when}.",
   "login.authenticating": "AUTHENTIFIZIERUNG...",
   "login.invalid": "UNGÜLTIGES PASSWORT",
   "login.error": "FEHLER",

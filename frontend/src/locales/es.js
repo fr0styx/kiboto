@@ -2351,6 +2351,8 @@ export default {
   "login.too_many": "Demasiados intentos. Vuelve a intentarlo en {seconds} s.",
   "login.error_network": "No se pudo conectar con Kiboto. Comprueba la conexión e inténtalo de nuevo.",
   "login.btn": "Iniciar sesión",
+  "login.last_signin": "Último inicio de sesión: {when}, {device}.",
+  "login.last_signin_plain": "Último inicio de sesión: {when}.",
   "login.authenticating": "AUTENTICANDO...",
   "login.invalid": "CONTRASEÑA INVÁLIDA",
   "login.error": "ERROR",

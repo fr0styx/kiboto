@@ -103,5 +103,5 @@ describe('HTML templates escape what they insert (ARC-31)', () => {
       .filter(([f, n]) => n > (base[f] ?? 0))
       .map(([f, n]) => `${f}: ${n} (baseline ${base[f] ?? 0})`);
     expect(grown, 'escape the new ${...} with escapeHtml() or set textContent instead').toEqual([]);
-  });
+  }, 30000); // reads every source file: about 3 s alone, more on a busy machine
 });

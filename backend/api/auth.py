@@ -411,6 +411,7 @@ def _build_session_response(
     from backend.services import known_devices
 
     known_devices.signed_in(user, ip, ua, method)  # before the session exists: it is not yet "known"
+    previous = known_devices.previous_signin(user["id"])  # before this one is logged
     token = create_session(user["username"], is_remembered=remember_me, ip=ip, user_agent=ua)
     record_successful_login(user["id"], ip)
 
@@ -449,6 +450,8 @@ def _build_session_response(
         # the person's own "choose your password" (SET-19), apart from the built-in account's default
         "choose_own_password": bool(user.get("must_change_password")),
         "mfa_setup_required": mfa_policy.account_needs_setup(user),
+        # when and from what the account was last signed in: the page says it (someone else's sign-in shows)
+        "previous_signin": previous,
     }
     response = JSONResponse(content=response_data)
 

@@ -22,6 +22,9 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   the internet): once a day Kiboto compares your apps with the public list of weaknesses attackers are using
   and tells you which to update. Nothing about your NAS is sent.
 
+- **Last sign-in shown**: after signing in, Kiboto says when and from which device the account was last signed
+  in, so a sign-in that wasn't yours stands out.
+
 #### New
 
 - **Drive replacement guide**: a drive Drive Health says to replace now or soon gets "Replace this drive", and an

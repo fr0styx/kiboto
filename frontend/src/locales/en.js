@@ -2351,6 +2351,8 @@ export default {
   "login.too_many": "Too many attempts. Try again in {seconds} s.",
   "login.error_network": "Couldn't reach Kiboto. Check the connection and try again.",
   "login.btn": "Sign in",
+  "login.last_signin": "Last sign-in: {when}, {device}.",
+  "login.last_signin_plain": "Last sign-in: {when}.",
   "login.authenticating": "Signing in...",
   "login.invalid": "Wrong password",
   "login.error": "Something went wrong",

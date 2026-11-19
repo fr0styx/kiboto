@@ -2351,6 +2351,8 @@ export default {
   "login.too_many": "尝试次数过多，请在 {seconds} 秒后重试。",
   "login.error_network": "无法连接 Kiboto。请检查网络后重试。",
   "login.btn": "登录",
+  "login.last_signin": "上次登录：{when}，{device}。",
+  "login.last_signin_plain": "上次登录：{when}。",
   "login.authenticating": "正在验证...",
   "login.invalid": "密码无效",
   "login.error": "错误",
