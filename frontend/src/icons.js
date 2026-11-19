@@ -113,6 +113,7 @@ function convertTextNode(node) {
   // "👁️ QuickLook" was one piece of text. In a flex or grid row the icon and the words would
   // become separate items and could be spread apart (space-between), so they stay together.
   const hasWords = Array.from(frag.childNodes).some((n) => n.nodeType === Node.TEXT_NODE && n.nodeValue.trim());
+  /** @type {DocumentFragment | HTMLElement} */
   let replacement = frag;
   if (hasWords && FLEX_OR_GRID.test(String(window.getComputedStyle(parent).display))) {
     replacement = document.createElement('span');
@@ -158,7 +159,7 @@ export function iconizeTree(root) {
   for (let n = walker.nextNode(); n; n = walker.nextNode()) {
     if (n.nodeType === Node.TEXT_NODE) {
       if (HAS_EMOJI.test(n.nodeValue)) texts.push(n);
-    } else if (n.attributes.length) {
+    } else if (/** @type {Element} */ (n).attributes.length) {
       cleanAttributes(n);
     }
   }

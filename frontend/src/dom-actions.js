@@ -67,7 +67,8 @@ function onImgError(e) {
     img.style.display = 'none';
   } else if (rule.startsWith('hide-show-next')) {
     img.style.display = 'none';
-    if (img.nextElementSibling) img.nextElementSibling.style.display = rule.split(':')[1] || 'inline';
+    if (img.nextElementSibling)
+      /** @type {HTMLElement} */ (img.nextElementSibling).style.display = rule.split(':')[1] || 'inline';
   } else {
     delete img.dataset.imgFallback; // try the fallback once
     img.src = rule;

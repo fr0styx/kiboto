@@ -27,6 +27,7 @@ export function photoFiltersHtml(data) {
   }${hasPhotoFilters() ? html`<button type="button" class="btn-pill-toggle is-small" data-photo-clear>${t('tags.clear', 'Clear')}</button>` : ''}`;
 }
 
+/** @param {(filters: any) => void} [onChange] */
 export async function installPhotoFilters(root = document, onChange = () => {}) {
   const anchor = root.getElementById('ai-doc-filters') || root.getElementById('ai-search-sort-select')?.parentElement;
   if (!anchor) return;

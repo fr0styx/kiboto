@@ -57,6 +57,7 @@ async function open(path) {
 
 describe('folder picker', () => {
   it('opens on the copy destination and lists its folders with the way up first', async () => {
+    $('btn-copy-dst').value = '/mnt/user/media/'; // picking a folder in another test changes it
     $('btn-browse-dst').click();
     await vi.waitFor(() => expect(rows().length).toBe(4));
     expect(request).toHaveBeenCalledWith('/api/browse?path=%2Fmnt%2Fuser%2Fmedia%2F');

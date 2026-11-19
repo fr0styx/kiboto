@@ -62,6 +62,8 @@ describe('detail windows (modals.js)', () => {
   afterEach(() => vi.useRealTimers());
 
   it('opens each metric window and keeps it live', () => {
+    ZettEventBus.emit('modal:smart:close'); // other tests leave a window open and numbers in
+    tick(null);
     ZettEventBus.emit('modal:metric:open', 'cpu'); // no stats yet: stays shut
     expect(byId('smart-modal-overlay').classList.contains('open')).toBe(false);
     tick(STATS);
@@ -101,6 +103,7 @@ describe('detail windows (modals.js)', () => {
   });
 
   it('closes, minimises and ignores clicks inside', () => {
+    tick(STATS); // the windows open only once numbers have arrived
     ZettEventBus.emit('modal:metric:open', 'cpu');
     byId('smart-modal-min').click();
     expect(DockManager.minimize).toHaveBeenCalledWith('smart');

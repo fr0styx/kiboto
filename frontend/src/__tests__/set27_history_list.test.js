@@ -24,6 +24,8 @@ const EVENTS = [
 
 beforeEach(() => {
   document.body.innerHTML = '<div><div id="events-list"></div></div>';
+  // the list skips a redraw of the same entries: draw a placeholder so each test's own list is drawn
+  renderEventLog([{ id: -1, ts: 1, level: 'info', title: 'placeholder', message: '' }]);
 });
 
 describe('Activity -> History reads by day (SET-27 Activity 2b)', () => {

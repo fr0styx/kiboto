@@ -290,14 +290,14 @@ export function closeSmartModal() {
 // --- EVENT BUS BINDINGS ---
 let _latestStats = null;
 ZettEventBus.addEventListener('stats_tick', (e) => {
-  _latestStats = e.detail;
+  _latestStats = /** @type {CustomEvent} */ (e).detail;
   if (typeof updateMetricModalLive === 'function') {
     updateMetricModalLive();
   }
 });
 
 ZettEventBus.addEventListener('modal:metric:open', (e) => {
-  openMetricModal(e.detail);
+  openMetricModal(/** @type {CustomEvent} */ (e).detail);
 });
 
 ZettEventBus.addEventListener('modal:smart:close', () => closeSmartModal());
@@ -432,7 +432,7 @@ window.openEventDetailModal = openEventDetailModal;
 window.closeEventDetailModal = closeEventDetailModal;
 
 ZettEventBus.addEventListener('modal:event-detail:open', (e) => {
-  openEventDetailModal(e.detail);
+  openEventDetailModal(/** @type {CustomEvent} */ (e).detail);
 });
 
 ZettEventBus.addEventListener('modal:event-detail:close', () => closeEventDetailModal());

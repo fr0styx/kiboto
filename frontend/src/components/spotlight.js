@@ -310,8 +310,7 @@ export function parseNaturalLanguageAction(rawQuery) {
               snapName: snapName,
               targetPool: targetPool,
             }),
-            'success',
-            3500
+            'success'
           );
         } catch (e) {
           const errMsg =
@@ -323,8 +322,7 @@ export function parseNaturalLanguageAction(rawQuery) {
               targetPool: targetPool,
               errMsg: errMsg,
             }),
-            'error',
-            4500
+            'error'
           );
         }
       },

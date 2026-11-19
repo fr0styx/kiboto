@@ -420,6 +420,7 @@ class TransferCenter {
     const self = this;
     return {
       id,
+      /** @param {{ files?: number, bytes?: number, current?: string }} [p] */
       progress({ files, bytes, current } = {}) {
         const tk = self.tasks.get(id);
         if (!tk || !ACTIVE.has(tk.status)) return;

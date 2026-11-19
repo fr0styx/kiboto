@@ -38,7 +38,7 @@ export function leaveAdvancedPage(root = document) {
   return leavePage(ADVANCED_OFF, root);
 }
 
-ZettEventBus.on?.('advanced:changed', ({ on } = {}) => applyAdvanced(on));
+ZettEventBus.on?.('advanced:changed', (d) => applyAdvanced(d?.on));
 
 /** Shows or hides the advanced places in the sidebar and on the Overview. */
 export function applyAdvanced(on = advancedOn(), root = document) {

@@ -1995,7 +1995,7 @@ export function initManagement() {
   }
   const saveNotifBtn = document.getElementById('btn-save-notifications'); // gone: the fields save themselves (SET-14)
   if (saveNotifBtn) {
-    saveNotifBtn.addEventListener('click', saveNotificationsConfig);
+    saveNotifBtn.addEventListener('click', () => saveNotificationsConfig());
   }
   document.querySelectorAll('.notif-cfg-btn').forEach((btn) => {
     btn.addEventListener('click', (e) => {

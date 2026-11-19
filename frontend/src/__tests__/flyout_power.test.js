@@ -15,6 +15,8 @@ const flush = () => new Promise((r) => setTimeout(r, 0));
 
 describe('restart or shut down in the person menu', () => {
   it('shows for someone who may switch the NAS and opens Power', async () => {
+    scopes = ['system:power'];
+    document.getElementById('user-profile-flyout')?.remove();
     vi.useFakeTimers({ toFake: ['setTimeout'] });
     document.body.innerHTML = '<button id="pill"></button><section id="power-switch"></section>';
     const opened = [];

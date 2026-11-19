@@ -9,6 +9,11 @@ if (typeof globalThis.ResizeObserver === 'undefined') {
   };
 }
 
+// jsdom has no scrollIntoView; code that scrolls a row into view would throw in whichever test runs next
+if (typeof Element !== 'undefined' && !Element.prototype.scrollIntoView) {
+  Element.prototype.scrollIntoView = function scrollIntoView() {};
+}
+
 // 2. Global HTMLCanvasElement 2D Context mock to eliminate jsdom canvas warning spam
 if (typeof HTMLCanvasElement !== 'undefined') {
   HTMLCanvasElement.prototype.getContext = vi.fn(() => ({

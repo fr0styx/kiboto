@@ -23,7 +23,6 @@ export function appsFamilyHtml() {
 /** Fills the three cards (each module and its sheet load only now). @param {ParentNode} [root] */
 export function renderFamilyCards(root = document) {
   const mount = (id) => root.querySelector(`#${id}`);
-  // @ts-expect-error a style sheet has no types; Vite loads it with the cards
   import('../styles/users-lazy.css').catch(() => {});
   if (mount('family-filter-mount'))
     import('./family-filter.js').then((m) => m.renderFamilyFilter(mount('family-filter-mount'))).catch(() => {});

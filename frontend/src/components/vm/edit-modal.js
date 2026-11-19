@@ -592,7 +592,7 @@ export function openVmEditModal(vmId, vmObj = null) {
           if (overridePill) overridePill.style.display = 'inline-block';
         } else {
           ramSlider.max = budget.safe_slider_max_gb || 28;
-          if (parseFloat(ramSlider.value) > ramSlider.max) {
+          if (parseFloat(ramSlider.value) > parseFloat(ramSlider.max)) {
             ramSlider.value = ramSlider.max;
             ramDisplay.textContent = `${ramSlider.value} GB`;
           }

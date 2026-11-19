@@ -29,6 +29,8 @@ import {
   applyTerminalStream,
 } from '../components/vm-manager.js';
 import { api } from '../api.js';
+import { vmState } from '../components/vm/state.js';
+import { resetConsoleForTesting } from '../components/vm/console.js';
 import { showToast, showPromptToast } from '../toast.js';
 
 vi.mock('../api.js', () => ({
@@ -51,7 +53,13 @@ vi.mock('../toast.js', () => ({
 
 describe('VM Manager & Dynamic Elastic Headroom Budgeting', () => {
   beforeEach(() => {
+    // a console an earlier test opened would keep reporting its connection into this one
+    document.getElementById('vm-console-close')?.click();
+    resetConsoleForTesting();
     vi.clearAllMocks();
+    // clearAllMocks keeps the answers an earlier test set (a rejection, a missing reply): start from plain ones
+    for (const m of [api.get, api.post, api.put, api.delete]) m.mockReset().mockResolvedValue([]);
+    vmState.telemetry = {}; // without numbers the new-VM window asks for them first and opens later
     document.body.innerHTML = `
       <div id="vm-desktop-icon"></div>
     `;

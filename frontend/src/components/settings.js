@@ -627,6 +627,16 @@ export function initSettings() {
     btnCopyWarn.hidden = !text;
   };
 
+  // Card copy off: its settings stay visible but inactive. `inert` takes them out of
+  // the tab order and the accessibility tree (an inactive control has no contrast
+  // requirement), so the dimming no longer reads as low-contrast text.
+  function setCopyOptionsActive(on) {
+    if (!btnCopyOptions) return;
+    btnCopyOptions.toggleAttribute('inert', !on);
+    btnCopyOptions.style.opacity = on ? '1' : '0.45';
+    btnCopyOptions.style.transition = 'opacity 0.2s ease';
+  }
+
   async function loadButtonConfig() {
     try {
       const data = await api.get('/api/buttons');
@@ -639,11 +649,7 @@ export function initSettings() {
       if (btnCopyCollision) btnCopyCollision.value = data.on_collision || 'skip';
       showOverwriteWarning();
 
-      if (btnCopyOptions) {
-        btnCopyOptions.style.opacity = data.enabled ? '1' : '0.3';
-        btnCopyOptions.style.pointerEvents = data.enabled ? 'auto' : 'none';
-        btnCopyOptions.style.transition = 'opacity 0.2s ease';
-      }
+      setCopyOptionsActive(!!data.enabled);
       const statusText = $('btn-copy-status-text');
       if (statusText) {
         statusText.textContent = data.enabled ? t('stg.copy_on', 'ENABLED') : t('stg.copy_off', 'DISABLED');
@@ -676,10 +682,7 @@ export function initSettings() {
   if (btnCopyToggle) {
     btnCopyToggle.addEventListener('change', (e) => {
       const isEnabled = /** @type {HTMLInputElement} */ (e.target).checked;
-      if (btnCopyOptions) {
-        btnCopyOptions.style.opacity = isEnabled ? '1' : '0.3';
-        btnCopyOptions.style.pointerEvents = isEnabled ? 'auto' : 'none';
-      }
+      setCopyOptionsActive(isEnabled);
       const statusText = $('btn-copy-status-text');
       if (statusText) {
         statusText.textContent = isEnabled ? t('stg.copy_on', 'ENABLED') : t('stg.copy_off', 'DISABLED');
@@ -1398,7 +1401,7 @@ export function importThemeBundle(file) {
   const reader = new FileReader();
   reader.onload = (e) => {
     try {
-      const data = JSON.parse(e.target.result);
+      const data = JSON.parse(String(e.target.result));
       if (!data || (!['kiboto-theme', 'zett-theme'].includes(data.format) && !data.theme)) {
         // zett-theme: saved before the rebrand
         throw new Error('Invalid theme file format. Expected a .kiboto-theme.json bundle.');

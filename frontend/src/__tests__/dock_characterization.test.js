@@ -151,6 +151,7 @@ describe('Dock characterization (ARC-5)', () => {
 
     dock.applyDockSettings('left', true, 1.6, 'large', true, false);
     pieces.settings = `${document.body.className} | ${document.getElementById('os-dock-container').className} | ${JSON.stringify(dock.getDockSettings())}`;
+    dock.applyDockSettings('bottom', true, 1.45, 'medium', false, false); // back to the defaults the geometry test reads
 
     state.latestStats = {
       events: [

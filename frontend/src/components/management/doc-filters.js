@@ -48,6 +48,7 @@ export function filtersHtml(data) {
   }`;
 }
 
+/** @param {(tags: string[]) => void} [onChange] */
 export async function installDocFilters(root = document, onChange = () => {}) {
   const anchor = root.getElementById('ai-search-sort-select')?.parentElement;
   if (!anchor) return;

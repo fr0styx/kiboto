@@ -163,6 +163,18 @@ export function failedNote(canvas, vmName, mode, reason = '') {
 export let _activeRfb = null;
 export let _activeSerialWs = null;
 export let _reconnectTimer = null;
+
+/** Forgets the open display and terminal connections; tests open consoles one after another. */
+export function resetConsoleForTesting() {
+  try {
+    _activeRfb?.disconnect?.();
+  } catch (_) {}
+  try {
+    _activeSerialWs?.close?.();
+  } catch (_) {}
+  _activeRfb = null;
+  _activeSerialWs = null;
+}
 export const _serialBuffers = new Map(); // keyed by VM id; a Map, so an id can't reach Object's own properties
 let _serialView = null;
 let _serialViewVmId = null;
@@ -659,6 +671,7 @@ async function initRealVncClient(container, vmId, vmName) {
     const host = window.location.host || '127.0.0.1:8082';
     const wsUrl = `${protocol}//${host}/api/vms/${vmId}/console/ws?ticket=${ticket}`;
 
+    /** @type {any} */
     let RFB = null;
     try {
       const mod = await import('@novnc/novnc');

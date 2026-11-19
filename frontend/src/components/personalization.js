@@ -136,7 +136,7 @@ function syncPersonalizationPanes() {
     const dst = document.getElementById(targetId);
     if (src && dst && !dst.hasChildNodes()) {
       // Clone children into the personalization pane
-      const clone = src.cloneNode(true);
+      const clone = /** @type {HTMLElement} */ (src.cloneNode(true));
       clone.style.display = 'block';
       clone.id = `${targetId}-content`;
       // Safeguard 2: Prefix IDs on cloned children so there are NEVER duplicate DOM IDs in the document

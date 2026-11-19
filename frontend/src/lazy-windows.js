@@ -47,11 +47,12 @@ export function lazyWindow({ id, iconId, load, init, globals = [], openGlobal })
   globals.forEach((name) => {
     const stub = async (...args) => {
       await ensure();
-      if (window[name] && window[name] !== stub) return window[name](...args);
+      const w = /** @type {any} */ (window);
+      if (w[name] && w[name] !== stub) return w[name](...args);
       return undefined;
     };
     stubs[name] = stub;
-    window[name] = stub;
+    /** @type {any} */ (window)[name] = stub;
   });
   const EVENTS = ['click', 'dblclick', 'touchend', 'keydown'];
   const icon = iconId ? document.getElementById(iconId) : null;
@@ -59,14 +60,16 @@ export function lazyWindow({ id, iconId, load, init, globals = [], openGlobal })
     if (e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') return;
     if (e.type === 'touchend' || e.type === 'keydown') e.preventDefault();
     await ensure();
-    if (openGlobal && typeof window[openGlobal] === 'function') window[openGlobal]();
+    const w = /** @type {any} */ (window);
+    if (openGlobal && typeof w[openGlobal] === 'function') w[openGlobal]();
   }
   if (icon) {
     EVENTS.forEach((ev) => icon.addEventListener(ev, onIcon));
     icon.addEventListener('pointerenter', () => ensure(), { once: true });
   }
   if (id && wasOpen(id)) {
-    ensure().then(() => openGlobal && window[openGlobal] && window[openGlobal]());
+    const w = /** @type {any} */ (window);
+    ensure().then(() => openGlobal && w[openGlobal] && w[openGlobal]());
   }
   _entries[id || iconId] = { ensure };
   return ensure;

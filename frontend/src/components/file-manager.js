@@ -1512,8 +1512,8 @@ export class FileManagerWindow {
         document.activeElement.tagName === 'TEXTAREA' ||
         document.activeElement.tagName === 'SELECT' ||
         /** @type {HTMLElement} */ (document.activeElement).isContentEditable) &&
-      /** @type {HTMLElement} */ (document.activeElement).type !== 'checkbox' &&
-      /** @type {HTMLElement} */ (document.activeElement).type !== 'radio'
+      /** @type {HTMLInputElement} */ (document.activeElement).type !== 'checkbox' &&
+      /** @type {HTMLInputElement} */ (document.activeElement).type !== 'radio'
     ) {
       return;
     }
@@ -2224,7 +2224,7 @@ export class FileManagerWindow {
     };
     const onResize = () => close();
     const onKey = (ev) => {
-      const i = items.indexOf(document.activeElement);
+      const i = items.indexOf(/** @type {HTMLElement} */ (document.activeElement));
       if (ev.key === 'Escape') {
         ev.preventDefault();
         ev.stopPropagation();

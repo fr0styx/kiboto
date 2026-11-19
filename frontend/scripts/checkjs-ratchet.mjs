@@ -63,6 +63,14 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     console.log(`checkjs baseline: ${total} errors in ${Object.keys(now).length} files`);
     process.exit(0);
   }
+  // an error tied to no file (a broken jsconfig, a missing lib) means no file was checked at all;
+  // with the baseline at zero, "0 errors" would otherwise pass (NARC-5)
+  const unattributed = out.split('\n').filter((l) => /^error TS\d+/.test(l));
+  if (unattributed.length) {
+    console.error('✗ tsc could not check the files:');
+    for (const l of unattributed.slice(0, 10)) console.error(l);
+    process.exit(2);
+  }
   const base = JSON.parse(readFileSync(BASELINE, 'utf8'));
   const baseTotal = Object.values(base).reduce((a, b) => a + b, 0);
   if (total === 0 && baseTotal > 100) {

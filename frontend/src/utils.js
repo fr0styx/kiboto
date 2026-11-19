@@ -204,7 +204,8 @@ export function reconcileKeyedTable(parentEl, items, keyFn, createRowFn, updateR
   // 1. Pre-prune stale nodes before insertion to eliminate cascading shift mutations
   for (let i = children.length - 1; i >= 0; i--) {
     const child = children[i];
-    const key = child.dataset?.key ?? child.dataset?.dev ?? child.dataset?.id;
+    const ds = /** @type {HTMLElement} */ (child).dataset;
+    const key = ds?.key ?? ds?.dev ?? ds?.id;
     if (key != null) {
       const keyStr = String(key);
       if (!incomingKeys.has(keyStr)) {

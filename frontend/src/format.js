@@ -81,11 +81,13 @@ function _valid(d) {
   return d instanceof Date && !Number.isNaN(d.getTime());
 }
 
+/** @param {Intl.DateTimeFormatOptions} [options] */
 export function formatDateTime(value, options = { dateStyle: 'medium', timeStyle: 'short' }, empty = '--') {
   const d = toDate(value);
   return _valid(d) ? _fmt('date', options).format(d) : empty;
 }
 
+/** @param {Intl.DateTimeFormatOptions} [options] */
 export function formatDate(value, options = { dateStyle: 'medium' }, empty = '--') {
   const d = toDate(value);
   return _valid(d) ? _fmt('date', options).format(d) : empty;

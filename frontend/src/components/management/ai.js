@@ -4983,7 +4983,7 @@ export function _pollReindexProgress() {
  * @param {Record<string, unknown>} change
  */
 export function changeReader(select, change) {
-  const before = select.dataset.saved ?? select.defaultValue ?? '';
+  const before = select.dataset.saved ?? ('defaultValue' in select ? String(select.defaultValue) : '');
   const putBack = () => {
     select.value = before;
   };

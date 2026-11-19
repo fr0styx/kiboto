@@ -57,7 +57,7 @@ export function installStaleBuildGuard(win = window) {
  * (/api/health "build"); when it differs from the one this page loaded with, a reload is
  * offered once for that version. Checked every few minutes and when the tab is shown again.
  */
-export async function checkServerBuild(fetchFn = (...a) => window.fetch(...a), win = window) {
+export async function checkServerBuild(fetchFn = (input, init) => window.fetch(input, init), win = window) {
   let build;
   try {
     const res = await fetchFn('/api/health', { cache: 'no-store' });

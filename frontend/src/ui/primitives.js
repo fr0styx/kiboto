@@ -24,6 +24,10 @@ function icon(name) {
   return name ? html`<svg class="ic" aria-hidden="true"><use href="#i-${name}"/></svg>` : '';
 }
 
+/**
+ * @param {{ label?: any, variant?: string, small?: boolean, block?: boolean, iconName?: string,
+ *   type?: string, id?: string, i18n?: string, extra?: Record<string, unknown> }} [opts]
+ */
 export function uiButton({
   label = '',
   variant = '',
@@ -43,6 +47,7 @@ export function uiButton({
   return String(html`<button${raw(a)}>${icon(iconName)}${label ? html`<span>${label}</span>` : ''}</button>`);
 }
 
+/** @param {{ label?: any, control?: any, hint?: any, id?: string }} [opts] */
 export function uiField({ label = '', control = '', hint = '', id } = {}) {
   const forAttr = id ? html` for="${id}"` : '';
   const hintHtml = hint ? html`<span class="kb-muted">${hint}</span>` : '';

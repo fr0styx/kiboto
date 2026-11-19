@@ -208,7 +208,7 @@ export function updateNotificationBadge() {
   const unreadCount = bellEvents().filter((e) => !isEventChecked(e)).length;
 
   if (unreadCount > 0) {
-    badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+    badge.textContent = unreadCount > 99 ? '99+' : String(unreadCount);
     badge.style.display = 'block';
   } else {
     badge.style.display = 'none';

@@ -40,6 +40,8 @@ describe('fan presets', () => {
 
   it('applies the chosen preset', async () => {
     const sel = byId('fan-preset-select');
+    sel.value = ''; // another test may have left a preset chosen
+    sel.dispatchEvent(new Event('change'));
     expect(byId('btn-apply-fan-preset').disabled).toBe(true);
     sel.value = 'Quiet';
     sel.dispatchEvent(new Event('change'));

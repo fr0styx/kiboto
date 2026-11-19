@@ -559,6 +559,9 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Screen readers**: the card copy settings, the widget switches and the theme badge in light mode are named and
   readable; the Kib access switches are easier to hit.
 
+- **Card copy**: with card copy off, its settings are inactive (skipped by the keyboard and screen readers)
+  instead of only faded.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

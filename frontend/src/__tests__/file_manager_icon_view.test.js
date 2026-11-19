@@ -46,6 +46,8 @@ describe('File Manager Icon View & Grid Mode', () => {
     window._fmInitialized = false;
     delete document._fmDocKbBound;
     initFileManager();
+    getActiveFmInstance()?.setViewMode('list'); // the window outlives a test; an earlier one may leave icon view
+    localStorage.clear();
 
     const fmWin = document.getElementById('file-manager-window');
     if (fmWin) {

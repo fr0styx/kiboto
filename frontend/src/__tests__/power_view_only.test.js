@@ -13,6 +13,7 @@ const { renderPowerTop } = await import('../components/management/power-top.js')
 
 describe('view-only Power', () => {
   it('greys the checks, hides Restart or shut down, and asks no question', async () => {
+    scopes = ['hardware:read'];
     document.body.innerHTML = '<section id="pc"></section><section id="ps"></section><div id="top"></div>';
     renderPowerCheck(document.getElementById('pc'), {
       state: 'protected',

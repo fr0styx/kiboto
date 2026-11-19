@@ -277,7 +277,7 @@ const UNDO_RE = /undo|rückgängig|deshacer|annuler|撤销|↺/i;
 
 function _onUndoKey(e) {
   if (!(e.ctrlKey || e.metaKey) || e.shiftKey || e.altKey || String(e.key).toLowerCase() !== 'z') return;
-  const el = document.activeElement;
+  const el = /** @type {HTMLElement | null} */ (document.activeElement);
   if (el && (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName))) return;
   const offers = document.querySelectorAll('#top-toast-container .top-toast-item[data-undo] .top-toast-action-btn');
   const newest = offers[offers.length - 1];
@@ -475,7 +475,7 @@ function _showTopConfirm(title, msg, onConfirm, onCancel, options = {}) {
     typeInput.addEventListener('input', sync);
     sync();
   }
-  const returnFocusTo = document.activeElement;
+  const returnFocusTo = /** @type {HTMLElement | null} */ (document.activeElement);
 
   if (options.onEject && ejectBtn) {
     ejectBtn.style.display = 'block';

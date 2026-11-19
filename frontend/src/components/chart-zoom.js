@@ -43,7 +43,7 @@ function setWindow(chart, lo, hi) {
       hi = last;
     }
   }
-  const x = (chart.options.scales.x = chart.options.scales.x || {});
+  const x = /** @type {{ min?: number, max?: number }} */ (chart.options.scales.x = chart.options.scales.x || {});
   const full = Math.round(lo) <= 0 && Math.round(hi) >= last;
   x.min = full ? undefined : Math.round(lo);
   x.max = full ? undefined : Math.round(hi);

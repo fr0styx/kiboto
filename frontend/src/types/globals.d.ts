@@ -174,6 +174,7 @@ declare global {
     _userClosing?: any;
     _vmId?: any;
     _vmName?: any;
+    zettBack?: any; // the file manager's Back for the phone's back gesture
   }
 
   // A string selector in this frontend finds HTML elements: typed so, as TypeScript's own
@@ -197,7 +198,19 @@ declare global {
     indeterminate?: boolean;
     placeholder?: string;
     select?: () => void;
+    // <details> and <dialog> found by id
+    open?: boolean;
+    showModal?: () => void;
+    close?: (returnValue?: string) => void;
   };
+  // Old Internet Explorer's name for navigator.language, still read as a fallback
+  interface Navigator {
+    userLanguage?: string;
+  }
+  // Newer than TypeScript's DOM library: focus without the focus ring
+  interface FocusOptions {
+    focusVisible?: boolean;
+  }
   // Test runners the code checks for with typeof before touching them (never present in a browser)
   var vi: unknown;
   var vitest: unknown;

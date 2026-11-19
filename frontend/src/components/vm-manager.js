@@ -481,7 +481,7 @@ function renderVmGrid(vms) {
     (vm) => vm.id,
     (vm) => {
       const card = vmCardFromHtml(buildVmCardHtml(vm, vms));
-      card.dataset.structKey = vmCardStructKey(vm, vms);
+      /** @type {HTMLElement} */ (card).dataset.structKey = vmCardStructKey(vm, vms);
       needsBinding = true;
       return card;
     },

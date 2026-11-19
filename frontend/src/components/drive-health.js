@@ -503,7 +503,7 @@ export function initDriveHealth() {
   if (typeof window === 'undefined') return;
   // everything that opened the old S.M.A.R.T. window (the event, with a drive or null) opens this
   ZettEventBus.addEventListener('modal:smart:open', (e) => {
-    const d = e.detail;
+    const d = /** @type {CustomEvent} */ (e).detail;
     openDriveHealth(d && typeof d === 'object' ? d.dev : d);
   });
 }

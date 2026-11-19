@@ -1259,6 +1259,7 @@ function bindCwTableEvents(tbody) {
           showBottomSheet(/** @type {any} */ ({ title: cname, items: householdMenu(c, actBtn, hasUpdate) }));
           return;
         }
+        /** @type {Array<{ onClick?: () => unknown } & Record<string, unknown>>} */
         const items = [
           {
             icon: '🔍',

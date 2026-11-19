@@ -16,6 +16,7 @@ describe('LED preview state', () => {
   });
 
   it('says off, or on with the effect, in the reader language', async () => {
+    led.power = 'off';
     document.body.innerHTML = '<span id="preview-state-txt"></span><div id="led-preview-bar"></div>';
     initLedControl();
     await vi.waitFor(() => expect(txt()).toBe('OFF'));

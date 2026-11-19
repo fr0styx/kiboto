@@ -44,7 +44,7 @@ describe('Activity -> Right now (SET-27 Activity 3)', () => {
   it('draws the sentence and the apps, and keeps current while on screen', () => {
     document.body.innerHTML = '<section id="right-now" hidden></section>';
     const mount = /** @type {HTMLElement} */ (document.getElementById('right-now'));
-    expect(renderRightNow(mount, { cpu: { util: 80 }, docker: DOCKER })).toBe(true);
+    expect(renderRightNow(mount, { cpu: { util: 80 }, docker: DOCKER }, [])).toBe(true); // no jobs: another test may have read some
     expect(mount.hidden).toBe(false);
     expect(mount.textContent).toContain('Apps by use');
     expect(mount.querySelectorAll('li').length).toBe(2);

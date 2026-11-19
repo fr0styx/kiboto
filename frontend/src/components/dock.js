@@ -291,7 +291,7 @@ export function initDockSystem() {
     dock.setAttribute('data-i18n-aria-label', 'dock.label'); // set before the language file loads: translated with the page
     dock.addEventListener('keydown', (e) => {
       const items = Array.from(dock.querySelectorAll('.dock-item'));
-      const activeIdx = items.indexOf(document.activeElement);
+      const activeIdx = items.indexOf(/** @type {HTMLElement} */ (document.activeElement));
       if (activeIdx === -1) return;
 
       if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {

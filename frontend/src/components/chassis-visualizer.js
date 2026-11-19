@@ -1277,6 +1277,7 @@ export function bindSftpCardEvents(container, onRefresh) {
  * Fetches and renders Network Shares & Protocols
  */
 /** The sharing-protocol pills show what each service is doing now, never a fixed "Active" (UX-4). */
+/** @param {{ smb?: any, sftp?: any, webdav?: any }} [protocols] */
 export function renderProtocolPills({ smb, sftp, webdav } = {}) {
   const set = (id, label, status, port) => {
     const el = document.getElementById(id);
@@ -2288,6 +2289,11 @@ export function openWebdavConfigModal(currentConfig, onSuccess) {
 
 let _providersCache = null;
 
+/** Tests give different provider lists; the list is otherwise read once per page. */
+export function resetRemoteProvidersForTesting() {
+  _providersCache = null;
+}
+
 export async function openNewCloudRemoteModal(onSuccess) {
   const modal = document.getElementById('modal-new-cloud-remote');
   if (!modal) return;
@@ -3050,7 +3056,7 @@ export async function openNewCloudRemoteModal(onSuccess) {
         const formEl = document.getElementById('new-remote-form');
         if (!formEl) return;
         const provType = providerSelect.value;
-        const formData = new FormData(formEl);
+        const formData = new FormData(/** @type {HTMLFormElement} */ (formEl));
         const parameters = {};
 
         formData.forEach((val, key) => {
@@ -3155,7 +3161,7 @@ export async function openNewCloudRemoteModal(onSuccess) {
         e.preventDefault();
         const name = nameInput.value.trim();
         const provType = providerSelect.value;
-        const formData = new FormData(form);
+        const formData = new FormData(/** @type {HTMLFormElement} */ (form));
         const parameters = {};
 
         formData.forEach((val, key) => {

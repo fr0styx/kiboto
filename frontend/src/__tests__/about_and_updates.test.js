@@ -3,7 +3,12 @@ import { fetchAndRenderSystemAbout, setUpdateChannel, applySystemUpdate } from '
 import { api } from '../api.js';
 
 describe('System About & Software Updates Frontend Component', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
+    // the chosen channel lives in the module: an earlier Edge test leaves it on Edge
+    document.body.innerHTML = '';
+    vi.spyOn(api, 'get').mockResolvedValue(null);
+    await setUpdateChannel('stable').catch(() => {});
+    vi.restoreAllMocks();
     localStorage.clear();
     document.body.innerHTML = `
       <div id="mgmt-pane-about">

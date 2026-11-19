@@ -4,6 +4,7 @@ import {
   renderWebdavCard,
   openWebdavConfigModal,
   openNewCloudRemoteModal,
+  resetRemoteProvidersForTesting,
 } from '../components/chassis-visualizer.js';
 import { ZettEventBus } from '../event-bus.js';
 import { api } from '../api.js';
@@ -13,6 +14,7 @@ describe('Sprint 4: Remote & Cloud Storage Subsystem (Frontend)', () => {
   let container;
 
   beforeEach(() => {
+    resetRemoteProvidersForTesting();
     container = document.createElement('div');
     document.body.appendChild(container);
   });

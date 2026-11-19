@@ -70,8 +70,7 @@ export function applyDesktopTheme(themeName, customAccent = null) {
 
     if (themeName === 'yak') {
       clearLook(document);
-      // the hidden Yak theme loads only when it is chosen (first-load budget); a stylesheet has no types
-      // @ts-ignore
+      // the hidden Yak theme loads only when it is chosen (first-load budget)
       import('../styles/04-yak-theme.css').catch(() => null);
       document.body.classList.add('theme-yak');
       if (wpLayer) {

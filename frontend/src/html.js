@@ -30,8 +30,9 @@ function part(value) {
   return escapeHtml(value);
 }
 
+/** @returns {SafeHtml & string} a SafeHtml that stands wherever a string goes (innerHTML, concatenation) */
 export function html(strings, ...values) {
   let out = strings[0];
   for (let i = 0; i < values.length; i++) out += part(values[i]) + strings[i + 1];
-  return new SafeHtml(out);
+  return /** @type {SafeHtml & string} */ (new SafeHtml(out));
 }

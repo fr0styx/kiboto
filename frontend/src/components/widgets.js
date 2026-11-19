@@ -779,7 +779,7 @@ export function updateClock() {
   let tzAbbr = '';
 
   try {
-    const opts = {
+    /** @type {Intl.DateTimeFormatOptions} */ const opts = {
       hour: 'numeric',
       minute: 'numeric',
       second: 'numeric',
@@ -828,7 +828,7 @@ export function updateClock() {
   }
   if (dateEl) {
     try {
-      const dateOpts = {
+      /** @type {Intl.DateTimeFormatOptions} */ const dateOpts = {
         weekday: 'long',
         month: 'short',
         day: 'numeric',
@@ -2714,7 +2714,7 @@ export function updateTzModalPreview() {
   let tzAbbr = '';
 
   try {
-    const opts = {
+    /** @type {Intl.DateTimeFormatOptions} */ const opts = {
       hour: 'numeric',
       minute: 'numeric',
       second: 'numeric',
@@ -2754,7 +2754,12 @@ export function updateTzModalPreview() {
 
   if (dateEl) {
     try {
-      const dateOpts = { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' };
+      /** @type {Intl.DateTimeFormatOptions} */ const dateOpts = {
+        weekday: 'long',
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      };
       if (tz && tz !== 'auto') dateOpts.timeZone = tz;
       dateEl.textContent = formatDate(now, dateOpts);
     } catch (e) {
@@ -2828,7 +2833,12 @@ export function renderTimezoneList() {
     let timeStr = '--:--';
     let tzAbbr = '';
     try {
-      const opts = { hour: 'numeric', minute: 'numeric', hour12: is12H, timeZone: tz.id };
+      /** @type {Intl.DateTimeFormatOptions} */ const opts = {
+        hour: 'numeric',
+        minute: 'numeric',
+        hour12: is12H,
+        timeZone: tz.id,
+      };
       timeStr = new Intl.DateTimeFormat(currentLocale(), opts).format(now);
       const tzPart = new Intl.DateTimeFormat(currentLocale(), { timeZone: tz.id, timeZoneName: 'short' })
         .formatToParts(now)

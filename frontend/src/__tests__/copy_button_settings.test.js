@@ -86,3 +86,40 @@ describe('card copy settings (finding 18)', () => {
     expect(MW).not.toContain('btn-open-copy-drawer');
   });
 });
+
+describe('card copy off: its settings are inactive, not only faded', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+    document.body.innerHTML = '';
+  });
+
+  it('opens inert when card copy is off, and comes back when switched on', async () => {
+    document.body.innerHTML = FIXTURE;
+    vi.spyOn(api, 'get').mockResolvedValue({ enabled: false });
+    vi.spyOn(api, 'post').mockResolvedValue({});
+    const settings = await import('../components/settings.js');
+    settings.initSettings();
+    await vi.waitFor(() => expect($('btn-copy-options').hasAttribute('inert')).toBe(true));
+    change($('btn-copy-toggle'), (el) => {
+      el.checked = true;
+    });
+    expect($('btn-copy-options').hasAttribute('inert')).toBe(false);
+    expect($('btn-copy-options').style.opacity).toBe('1');
+    change($('btn-copy-toggle'), (el) => {
+      el.checked = false;
+    });
+    expect($('btn-copy-options').hasAttribute('inert')).toBe(true);
+  });
+
+  it('does nothing when the page has no settings block', async () => {
+    document.body.innerHTML = FIXTURE.replace('<div id="btn-copy-options"></div>', '');
+    vi.spyOn(api, 'get').mockResolvedValue({ enabled: true });
+    vi.spyOn(api, 'post').mockResolvedValue({});
+    const settings = await import('../components/settings.js');
+    settings.initSettings();
+    change($('btn-copy-toggle'), (el) => {
+      el.checked = false;
+    });
+    await vi.waitFor(() => expect($('btn-copy-status-text').textContent).not.toBe(''));
+  });
+});

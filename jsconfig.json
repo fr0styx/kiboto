@@ -12,6 +12,7 @@
       "DOM.Iterable"
     ],
     "skipLibCheck": true,
+    "maxNodeModuleJsDepth": 0,
     "types": []
   },
   "include": [

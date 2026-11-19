@@ -26,3 +26,4 @@ def test_the_type_ratchet_needs_tsc():
     with open(os.path.join(ROOT, "frontend", "scripts", "checkjs-ratchet.mjs"), encoding="utf-8") as f:
         src = f.read()
     assert "TypeScript is not installed" in src and "did not run properly" in src
+    assert "could not check the files" in src  # an error tied to no file fails, with the baseline at zero

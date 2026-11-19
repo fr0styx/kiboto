@@ -52,15 +52,10 @@ const LEGACY = {
 const LOOK_KEY = 'kiboto_look';
 // a theme's stylesheet loads when it is chosen, not with the first page (first-load budget)
 const SHEETS = {
-  // @ts-ignore: a stylesheet has no types
   lagoon: () => import('./styles/themes/lagoon.css'),
-  // @ts-ignore
   fjord: () => import('./styles/themes/fjord.css'),
-  // @ts-ignore
   moss: () => import('./styles/themes/moss.css'),
-  // @ts-ignore
   heather: () => import('./styles/themes/heather.css'),
-  // @ts-ignore
   canyon: () => import('./styles/themes/canyon.css'),
 };
 

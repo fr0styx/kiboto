@@ -1,11 +1,12 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { api } from '../api.js';
-import { FmSidebarTree } from '../components/file-manager-helpers.js';
 
 describe('Files asks nothing before it opens (SET-28, Files 5)', () => {
   afterEach(() => vi.restoreAllMocks());
 
   it('the sidebar draws at start-up without asking; opening reads the roots and the favourites', async () => {
+    vi.resetModules(); // the favourites are kept in the module once read
+    const { api } = await import('../api.js');
+    const { FmSidebarTree } = await import('../components/file-manager-helpers.js');
     const fetchSpy = vi
       .spyOn(globalThis, 'fetch')
       .mockResolvedValue(
@@ -25,6 +26,8 @@ describe('Files asks nothing before it opens (SET-28, Files 5)', () => {
   });
 
   it('an announcement that Files opened does not open it a second time', async () => {
+    vi.resetModules();
+    const { api } = await import('../api.js');
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(
       /** @type {any} */ ({ ok: true, json: async () => ({ roots: [] }) })
     );

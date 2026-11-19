@@ -1,10 +1,12 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { handlePendingIngest } from '../components/dashboard.js';
+import { handlePendingIngest, clearSlotEjected } from '../components/dashboard.js';
 import { showConfirmToast, hideConfirmToast } from '../toast.js';
 import { api } from '../api.js';
 
 describe('Media Slot Auto-Ingest Confirmation Dialog', () => {
   beforeEach(() => {
+    clearSlotEjected(); // an earlier Eject leaves the slot marked
+    handlePendingIngest(null); // and forgets the prompt an earlier test showed
     document.body.innerHTML = `
       <div id="confirm-toast-backdrop"></div>
       <div id="confirm-toast-modal"></div>
