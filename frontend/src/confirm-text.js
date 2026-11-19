@@ -70,6 +70,11 @@ const ACTIONS = {
     true,
   ],
   'webdav.config': ['Save WebDAV', 'Change who can reach files over WebDAV and which folder it shares?', false],
+  'disk.surface_check': [
+    'Check the drive',
+    'Read the whole surface of drive {target}? It takes hours, and the drive stays awake and busy until it ends. Nothing is written to it.',
+    false,
+  ],
   'scripts.enable': [
     'Turn on scripts',
     'Let administrators run their own scripts on this NAS? A script can read and change every file Kiboto can.',

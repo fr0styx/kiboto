@@ -70,6 +70,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   apps. Every run is written to the security log with how it ended, and a scheduled run that fails raises an
   alert. Guide: docs/SCRIPTS.md.
 
+- **Check a new drive before you trust it** (Drive Health): for a drive that is not in use yet, Kiboto reads the
+  whole surface once, shows how far it is and how long is left, and compares what the drive reports about
+  itself before and after. It then says "good to use", "do not trust it with data", or "the cable or the bay".
+  It only reads, you start it by hand, it can be stopped, and it stops itself if the drive gets too hot.
+
 ## v2.0.4 (2026-11-19)
 ### 🏡 Apps that go back on their own, a way to move in, and Kiboto in your language everywhere
 

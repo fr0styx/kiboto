@@ -38,7 +38,7 @@ request and response schemas.
 
 <!-- BEGIN generated endpoints: python scripts/api_reference.py --update -->
 
-777 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
+780 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
 
 ### AI Conversation History
 
@@ -257,12 +257,15 @@ request and response schemas.
 | `POST` | `/api/v1/drives/acks` | any of `storage:write`, `storage:admin` | Marks a finding as known: it stops setting the drive's verdict (and its alerts) until its numbers change |
 | `POST` | `/api/v1/drives/acks/forget` | any of `storage:write`, `storage:admin` | Shows an acknowledged finding again, and lets it set the verdict |
 | `GET` | `/api/v1/drives/attributes` | any of `storage:read`, `system:view` | Every S.M.A.R.T |
+| `GET` | `/api/v1/drives/check` | any of `storage:read`, `system:view` | Every drive with whether it may be checked, the check that is going, and its last result |
 | `GET` | `/api/v1/drives/health` | any of `storage:read`, `system:view` | Every drive with its verdict, reason and what to do; worst first |
 | `GET` | `/api/v1/drives/history` | any of `storage:read`, `system:view` | A drive's temperature and error counters over time, and its age and wear outlook, from the stored readings: a sleeping drive is not touch… |
 | `GET` | `/api/v1/drives/notes` | any of `storage:read`, `system:view` | When each drive was bought, until when its warranty runs and a note, by serial number |
 | `PUT` | `/api/v1/drives/notes` | any of `storage:write`, `storage:admin` | Stores a drive's purchase date, warranty end and note; all empty removes them |
 | `GET` | `/api/v1/drives/retired` | any of `storage:read`, `system:view` | Drives seen before that aren't in the box now: model, size, last verdict, when last seen |
 | `POST` | `/api/v1/drives/retired/forget` | any of `storage:write`, `storage:admin` | Drops the record of a drive that was taken out |
+| `POST` | `/api/v1/drives/{dev}/check` | `storage:admin` | Starts reading the whole surface of a drive that is not in use |
+| `POST` | `/api/v1/drives/{dev}/check/stop` | `storage:admin` | Stops a check that is going |
 
 ### File System & Shares
 

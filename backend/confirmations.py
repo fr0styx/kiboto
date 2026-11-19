@@ -62,6 +62,7 @@ ACTIONS: dict[str, str] = {
     "docker.stack.apply.elevated": "Apply the stack {target}, whose file gives containers access to the host system",
     "docker.stack.remove": "Remove the app {target} and all its parts",
     "ai.read_sleeping": "Let Kib read folders on sleeping drives. They spin up for it, and for every later reading while this is on",
+    "disk.surface_check": "Read the whole surface of drive {target}. It takes hours and the drive stays awake and busy until it ends. Nothing is written to it",
     "disk.wake": "Wake sleeping drive {target}. It spins up now and goes back to sleep on its own later",
     "folder.wake": "Open {target}: its disk is asleep and spins up to show it, then goes back to sleep on its own later",
     "snapshot.rollback": "Put the whole share back as it was in snapshot {target}. How it is now is kept as a snapshot first",

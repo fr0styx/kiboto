@@ -44,6 +44,34 @@ and keeps a report you can save. It only reads drives that are awake.
 Under **Advanced**: creating a pool and the bay setup, for people who manage the pools
 themselves.
 
+## Checking a new drive
+
+Before you trust a new drive with data, Kiboto can read it from start to end once. Open **Drive
+Health**, choose the drive, and press **Check this drive**. The section is there for a drive
+that is not in use: not in a pool, with nothing mounted from it, and not the system's own
+drive. Kiboto never starts this check by itself.
+
+The check only reads; nothing is written to the drive. It takes hours (a large hard drive can
+take most of a day), and the drive stays awake and busy until it ends. You can close the window
+and come back: the section shows how far it is, how fast it reads and about how long is left,
+and **Stop the check** ends it at any time. Two drives can be checked at once.
+
+It is not the drive's own long self-test. That test runs inside the drive; this one reads every
+part of the drive through the cable and the controller, so it also finds a bad cable or bay, and
+it shows where the drive is slow. When it ends, Kiboto compares what the drive reports about
+itself (moved sectors, sectors waiting to be moved, sectors it could not read, damaged
+transfers) with what it reported before, and says one of:
+
+- **Good to use**: every part was read and nothing got worse.
+- **Do not trust it with data**: parts could not be read, or the drive reported damage while it
+  was read. Send it back if you can.
+- **The cable or the bay**: the drive read to the end, but data was damaged on the way. Reseat
+  the drive and check it again.
+
+If the drive gets within 3 °C of the temperature Kiboto treats as critical, the check stops
+itself and says so; let the drive cool and see to its airflow before starting again. The last
+5 results of each drive are kept, and the end of every check is written to the activity log.
+
 ## Watching it from your own dashboard
 
 How full the NAS is can be read outside Kiboto, without waking a drive. The metrics page

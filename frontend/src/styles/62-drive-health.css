@@ -113,3 +113,6 @@ th[aria-sort] .dh-sort { text-decoration: underline; text-underline-offset: 3px;
 .dh-retired-list { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
 .dh-retired-list li { display: flex; flex-direction: column; gap: 4px; padding: 8px 10px; border-radius: 10px; background: var(--card); }
 .dh-retired-list .btn-pill-toggle { align-self: flex-start; }
+/* Check this new drive (owner's decision, 19 Nov 2026) */
+.dc-bar { width: 100%; height: 10px; }
+.dc-verdict { margin: 8px 0 2px; font-weight: 600; }

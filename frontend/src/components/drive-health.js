@@ -251,6 +251,7 @@ export function detailHtml(drive, detail, tests) {
       </div>
       <ul class="dh-tests">${testRowsHtml(tests && tests.history)}</ul>
     </section>
+    <section class="dh-section" id="dh-newcheck" hidden></section>
     <div class="dh-schedule" id="dh-schedule"></div>
     <section class="dh-section" id="dh-about">${aboutSectionHtml((health && health.identity) || {}, null, serial)}</section>
     <details class="dh-section dh-more" id="dh-history">
@@ -329,6 +330,8 @@ async function loadDetail(dev, wake = false) {
     };
     pane.innerHTML = detailHtml(drive || { dev }, detail, tests);
     loadExtras(dev, (detail && detail.drive_health && detail.drive_health.identity) || {});
+    // the check for a drive that is not in use yet (shown only for such a drive, or one with a result)
+    import('./drive-check.js').then((m) => m.mountDriveCheck(pane.querySelector('#dh-newcheck'), dev)).catch(() => {});
     clearInterval(_testTimer);
     if (tests && tests.active_test) _testTimer = setInterval(() => refreshTests(dev), TEST_POLL_MS);
   } catch (e) {

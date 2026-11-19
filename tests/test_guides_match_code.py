@@ -103,3 +103,17 @@ def test_scripts_guide_numbers():
     ]:
         assert said in text and step in us.LIMIT_WRAP, said
     assert "is not started rather than started without its limit" in text and "exit 97" in us.LIMIT_WRAP
+
+
+def test_new_drive_check_guide():
+    """docs/STORAGE.md, "Checking a new drive": its numbers and its three answers are the code's."""
+    from backend.services import drive_check as dc
+
+    text = _doc("STORAGE.md")
+    assert f"within {dc.HEAT_MARGIN_C} °C of the temperature Kiboto treats as critical" in text
+    assert f"The last {dc.RESULTS_KEPT} results of each drive are kept" in text
+    assert dc.MAX_AT_ONCE == 2 and "Two drives can be checked at once" in text
+    assert "Kiboto never starts this check by itself" in text and "nothing is written to the drive" in text
+    assert set(dc.WATCHED) == {"realloc", "pending", "offline", "crc", "nvme_media_err"}
+    for said in ("**Good to use**", "**Do not trust it with data**", "**The cable or the bay**"):
+        assert said in text, said

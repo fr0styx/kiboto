@@ -51337,6 +51337,40 @@
     ]
    }
   },
+  "/api/v1/drives/check": {
+   "get": {
+    "description": "Every drive with whether it may be checked, the check that is going, and its last result.\nNever wakes a drive.",
+    "operationId": "drive_checks_api_v1_drives_check_get",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Drive Checks Api V1 Drives Check Get",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Drive Checks",
+    "tags": [
+     "Drive Health"
+    ],
+    "x-required-scopes": [
+     "storage:read",
+     "system:view"
+    ]
+   }
+  },
   "/api/v1/drives/health": {
    "get": {
     "description": "Every drive with its verdict, reason and what to do; worst first. Never wakes a drive.",
@@ -51600,6 +51634,108 @@
     ],
     "x-required-scopes": [
      "storage:write",
+     "storage:admin"
+    ]
+   }
+  },
+  "/api/v1/drives/{dev}/check": {
+   "post": {
+    "description": "Starts reading the whole surface of a drive that is not in use. It only reads.",
+    "operationId": "start_drive_check_api_v1_drives__dev__check_post",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "dev",
+      "required": true,
+      "schema": {
+       "pattern": "^(sd[a-z]{1,2}|nvme[0-9]+n[0-9]+)$",
+       "title": "Dev",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Start Drive Check Api V1 Drives  Dev  Check Post",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "404": {
+      "$ref": "#/components/responses/NotFound"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Start Drive Check",
+    "tags": [
+     "Drive Health"
+    ],
+    "x-required-scopes": [
+     "storage:admin"
+    ]
+   }
+  },
+  "/api/v1/drives/{dev}/check/stop": {
+   "post": {
+    "description": "Stops a check that is going. What it found so far is kept as an unfinished result.",
+    "operationId": "stop_drive_check_api_v1_drives__dev__check_stop_post",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "dev",
+      "required": true,
+      "schema": {
+       "pattern": "^(sd[a-z]{1,2}|nvme[0-9]+n[0-9]+)$",
+       "title": "Dev",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Stop Drive Check Api V1 Drives  Dev  Check Stop Post",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "404": {
+      "$ref": "#/components/responses/NotFound"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Stop Drive Check",
+    "tags": [
+     "Drive Health"
+    ],
+    "x-required-scopes": [
      "storage:admin"
     ]
    }

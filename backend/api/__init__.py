@@ -16,6 +16,7 @@ from backend.api.chassis import router as chassis_router
 from backend.api.ddns import router as ddns_router
 from backend.api.diagnostics import router as diagnostics_router
 from backend.api.docker import router as docker_router
+from backend.api.drive_check import router as drive_check_router
 from backend.api.drives import router as drives_router
 from backend.api.encrypted_folders import router as encrypted_folders_router
 from backend.api.family_access import router as family_access_router
@@ -177,3 +178,4 @@ api_router.include_router(https_router)  # HTTPS at home via ACME over DNS, off 
 api_router.include_router(speedtest_router)  # speed between a device and the NAS (re-audit R2)
 api_router.include_router(snmp_router)  # SNMP v3 agent, off by default
 api_router.include_router(user_scripts_router)  # an administrator's own scripts on a timer, off by default
+api_router.include_router(drive_check_router)  # the check for a new drive, started by hand
