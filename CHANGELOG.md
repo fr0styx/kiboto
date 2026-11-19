@@ -25,6 +25,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   in size, a failing one too, so a monitoring tool watching it would never have raised an alarm. Drives now
   report their real health (and the array its worst drive), their size, and whether they are an SSD.
 
+- **Redfish tells one NAS from another, and names the machine it runs on**: every Kiboto answered with the same
+  system ID, said it was made by Zettlab whatever the hardware, and called the D6 Ultra a rack-mount. Each
+  install now has its own ID, the maker and model come from the machine itself, and the chassis reports its
+  worst drive's health.
+
 #### Changes
 
 - **Ask Kib about the NAS in your language**: questions about free space, drives, fans, apps, the network and

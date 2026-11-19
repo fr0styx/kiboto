@@ -89,6 +89,28 @@ def _media_type(d: dict[str, Any], dev: str) -> str:
     return "SSD" if _sys_block(dev, "queue/rotational") == "0" else "HDD"
 
 
+def _system_uuid() -> str:
+    from backend.services import redfish_access
+
+    return redfish_access.system_uuid()
+
+
+def _made_by(stats: dict[str, Any]) -> tuple[str | None, str | None, str]:
+    """(manufacturer, model, name) of the machine Kiboto runs on. A Zettlab chassis says so; any
+    other machine is named by its own board, not called a Zettlab."""
+    from backend.hardware.storage import get_chassis_friendly_name
+
+    slug = str(stats.get("chassis") or "")
+    label = str(stats.get("chassis_label") or "") or (get_chassis_friendly_name(slug) if slug else "")
+    if label.lower().startswith("zettlab"):
+        return "Zettlab", slug.upper(), label
+    sent = stats.get("motherboard")
+    board: dict[str, Any] = sent if isinstance(sent, dict) else {}
+    vendor = str(board.get("vendor") or "") or None
+    model = str(board.get("product") or board.get("board") or "") or None
+    return vendor, model, " ".join(x for x in (vendor, model) if x) or "Kiboto NAS"
+
+
 def _worst(healths: list[str | None]) -> str:
     """The roll-up for the whole array: its worst drive."""
     return "Critical" if "Critical" in healths else "Warning" if "Warning" in healths else "OK"
@@ -105,7 +127,7 @@ def get_service_root():
         "Id": "RootService",
         "Name": "Kiboto Redfish Service Root",
         "RedfishVersion": "1.15.0",
-        "UUID": "e7b0a701-9988-4444-a1a2-589255892500",
+        "UUID": _system_uuid(),
         "Product": "Kiboto Appliance Management Suite",
         "Vendor": "Zettlab",
         "SoftwareVersion": __version__,
@@ -140,8 +162,7 @@ def list_chassis():
 def get_chassis_detail():
     """Redfish Chassis/1 Detail."""
     stats = _get_stats()
-    chassis_model = stats.get("chassis", "d4")
-    model_name = f"Zettlab {chassis_model.upper()} NAS Appliance"
+    maker, model, model_name = _made_by(stats)
 
     return {
         "@odata.context": "/redfish/v1/$metadata#Chassis.Chassis",
@@ -149,12 +170,13 @@ def get_chassis_detail():
         "@odata.type": "#Chassis.v1_22_0.Chassis",
         "Id": "1",
         "Name": model_name,
-        "ChassisType": "RackMount" if "u" in chassis_model.lower() else "StandAlone",
-        "Manufacturer": "Zettlab",
-        "Model": chassis_model.upper(),
+        # a NAS on a desk or a shelf; the "u" in a model name (D6 Ultra) never meant a rack unit
+        "ChassisType": "StandAlone",
+        "Manufacturer": maker,
+        "Model": model,
         "Status": {
             "State": "Enabled",
-            "Health": "OK",
+            "Health": _worst([_drive_health(d) for d in stats.get("disks") or []]),
         },
         "PowerState": "On",
         "Thermal": {"@odata.id": "/redfish/v1/Chassis/1/Thermal"},
@@ -267,8 +289,8 @@ def get_system_detail():
         "Id": "1",
         "Name": "Kiboto Host System",
         "SystemType": "Physical",
-        "Manufacturer": "Zettlab",
-        "Model": stats.get("chassis", "d4").upper(),
+        "Manufacturer": _made_by(stats)[0],
+        "Model": _made_by(stats)[1],
         "PowerState": "On",
         "Status": {"State": "Enabled", "Health": "OK"},
         "ProcessorSummary": {

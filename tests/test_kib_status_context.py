@@ -301,7 +301,9 @@ def test_no_cpu_number_is_made_up(monkeypatch):
     res = chat_nas_tools.tool_get_system_telemetry()
     assert res["cpu_load_pct"] is None and res["cpu_temp_c"] is None
     block = _build_structured_llm_context([res])
-    assert "- CPU Utilization: unknown" in block and "8.5" not in block and "42°C" not in block
+    # only the CPU's own line is looked at: the memory line is this machine's, and read 48.5 % once
+    cpu_line = next(line for line in block.splitlines() if line.startswith("- CPU Utilization"))
+    assert cpu_line == "- CPU Utilization: unknown"
     assert said(res, "get_system_telemetry").startswith("CPU not read yet, RAM ")
 
     monkeypatch.setattr(Z_STATE, "cached_stats", {"cpu": {"util": 0, "temp": 39}})

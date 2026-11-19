@@ -67,7 +67,10 @@ def test_redfish_chassis_and_thermal(client, auth_headers):
     chassis = res.json()
     assert chassis["Id"] == "1"
     assert chassis["PowerState"] == "On"
-    assert chassis["ChassisType"] == "RackMount"
+    assert chassis["ChassisType"] == "StandAlone"  # the D6 Ultra stands on a desk: its "u" is not a rack unit
+    assert (
+        chassis["Manufacturer"] == "Zettlab" and chassis["Model"] == "D6U" and chassis["Name"].startswith("Zettlab D6")
+    )
 
     # 2. Chassis/1/Thermal
     res = client.get("/redfish/v1/Chassis/1/Thermal", headers=auth_headers)
@@ -159,3 +162,48 @@ def test_redfish_drive_helpers():
     assert redfish._drive_health({"smart_fail": True}) == "Critical" and redfish._drive_health({}) == "OK"
     assert redfish._sys_block("../etc/passwd", "size") is None and redfish._sys_block("", "size") is None
     assert redfish._capacity({"size_bytes": 5}) == 5 and redfish._capacity({"dev": "nope", "size_bytes": 0}) is None
+
+
+def test_each_install_has_its_own_id_and_keeps_it(client, auth_headers, tmp_path, monkeypatch):
+    """Every Kiboto answered with the same UUID, so two NAS looked like one to a monitoring tool."""
+    import json
+    import uuid
+
+    from backend.services import redfish_access
+
+    first = client.get("/redfish/v1/", headers=auth_headers).json()["UUID"]
+    assert str(uuid.UUID(first)) == first and first != "e7b0a701-9988-4444-a1a2-589255892500"
+    assert client.get("/redfish/v1/", headers=auth_headers).json()["UUID"] == first  # kept
+    redfish_access.set_enabled(False)
+    redfish_access.set_enabled(True)  # the switch does not forget it
+    assert redfish_access.system_uuid() == first
+    from pathlib import Path
+
+    assert json.loads(Path(redfish_access.SETTINGS_FILE).read_text()) == {"enabled": True, "uuid": first}
+    # another install (another data folder) has another one; a damaged record gets a new one
+    monkeypatch.setattr(redfish_access, "SETTINGS_FILE", str(tmp_path / "other.json"))
+    assert redfish_access.system_uuid() != first
+    (tmp_path / "other.json").write_text(json.dumps({"enabled": True, "uuid": "not-a-uuid"}))
+    made = redfish_access.system_uuid()
+    assert str(uuid.UUID(made)) == made and redfish_access.enabled() is True
+    (tmp_path / "other.json").write_text("[]")
+    assert redfish_access.enabled() is False and redfish_access.system_uuid()
+
+
+def test_a_machine_that_is_not_a_zettlab_is_not_called_one(client, auth_headers, monkeypatch):
+    live = {"name": "sda", "dev": "sda", "temp": 35, "health": "warn", "standby": False}
+    stats = {
+        "chassis": "generic",
+        "chassis_label": "Standard / DIY Enclosure",
+        "motherboard": {"vendor": "ASRock", "product": "N100DC-ITX", "board": "N100DC-ITX"},
+        "disks": [live],
+    }
+    monkeypatch.setattr(Z_STATE, "cached_stats", stats)
+    chassis = client.get("/redfish/v1/Chassis/1", headers=auth_headers).json()
+    assert (chassis["Manufacturer"], chassis["Model"], chassis["Name"]) == ("ASRock", "N100DC-ITX", "ASRock N100DC-ITX")
+    assert chassis["ChassisType"] == "StandAlone" and chassis["Status"]["Health"] == "Warning"  # its worst drive
+    system = client.get("/redfish/v1/Systems/1", headers=auth_headers).json()
+    assert system["Manufacturer"] == "ASRock" and system["Model"] == "N100DC-ITX"
+    monkeypatch.setattr(Z_STATE, "cached_stats", {"chassis": "generic", "chassis_label": "Standard / DIY Enclosure"})
+    bare = client.get("/redfish/v1/Chassis/1", headers=auth_headers).json()
+    assert (bare["Manufacturer"], bare["Model"], bare["Name"]) == (None, None, "Kiboto NAS")  # nothing is made up
