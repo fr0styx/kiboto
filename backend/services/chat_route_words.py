@@ -123,6 +123,8 @@ DISK_WORDS = (
     "spun down",
     "spinup",
     "smart",
+    "drive health",
+    "disk health",
     # German
     "festplatte",
     "festplatten",

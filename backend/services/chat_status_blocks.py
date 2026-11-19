@@ -128,6 +128,16 @@ def telemetry_block(tr: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+# A drive's health word, as the sentence about the drive ends. A sleeping drive (standby) and a
+# drive with no word say nothing: its state already tells that it sleeps.
+HEALTH_SAID = {
+    "ok": ", health good",
+    "warn": ", health: WARNING, it shows signs of wear",
+    "crit": ", health: CRITICAL, it is failing",
+    "unknown": ", health not read lately",
+}
+
+
 def disks_block(tr: dict[str, Any]) -> str:
     lines = ["## Storage Disks Status:"]
     if tr.get("running_disks_count") is not None or tr.get("sleeping_disks_count") is not None:
@@ -135,11 +145,25 @@ def disks_block(tr: dict[str, Any]) -> str:
             f"- {tr.get('running_disks_count', 0)} awake, {tr.get('sleeping_disks_count', 0)} asleep "
             "(no sleeping drive was woken to read this)"
         )
+    worn, failing, read = [], [], 0
     for d in (tr.get("disks") or [])[:12]:
         name = _first(d, "device", "name") or "Disk"
         temp = _first(d, "temp_c", "temp")
         state = _first(d, "state", "power_state") or "active"
-        lines.append(f"- {name}: {state}, " + (f"{temp}°C" if temp is not None else "temperature not read"))
+        word = str(d.get("health") or "").lower()
+        health = HEALTH_SAID.get(word, "")
+        read += word in ("ok", "warn", "crit")
+        if word == "warn":
+            worn.append(name)
+        elif word == "crit":
+            failing.append(name)
+        lines.append(f"- {name}: {state}, " + (f"{temp}°C" if temp is not None else "temperature not read") + health)
+    if failing:
+        lines.append(f"- Failing, replace soon: {', '.join(failing)}")
+    if worn:
+        lines.append(f"- Showing wear, keep an eye on: {', '.join(worn)}")
+    if read and not failing and not worn:
+        lines.append("- Every drive whose health was read reports good health.")
     return "\n".join(lines)
 
 

@@ -152,7 +152,8 @@ def tool_get_disks_and_standby_status() -> dict[str, Any]:
     with Z_STATE.lock:
         for dev, val in (Z_STATE.cached_smart_data or {}).items():
             if isinstance(val, (tuple, list)) and len(val) >= 2:
-                smart_cache[dev] = {"temp_c": val[0], "power_state": val[1]}
+                # the second value is the drive's health word (ok, warn, crit, unknown, standby)
+                smart_cache[dev] = {"temp_c": val[0], "health": val[1]}
             elif isinstance(val, dict):
                 smart_cache[dev] = val
 
@@ -164,6 +165,7 @@ def tool_get_disks_and_standby_status() -> dict[str, Any]:
                 "device": d,
                 "state": "active/running",
                 "temp_c": info.get("temp_c"),
+                "health": info.get("health"),
             }
         )
     for d in sleeping:
@@ -173,6 +175,7 @@ def tool_get_disks_and_standby_status() -> dict[str, Any]:
                 "device": d,
                 "state": "standby (sleeping — protected)",
                 "temp_c": info.get("temp_c"),
+                "health": info.get("health"),
             }
         )
 

@@ -42,6 +42,9 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   could only say how long Kiboto itself had (it restarts with every update). It now reads the NAS's own
   uptime, and its name on the network.
 
+- **Ask Kib whether your drives are healthy**: Kib was told each drive's state and temperature but not its
+  health. It now knows which drives are good, which show wear and which are failing, and says so.
+
 #### New
 
 - **The NAS in Home Assistant's Energy dashboard**: with Home Assistant connected and a UPS that is measured,

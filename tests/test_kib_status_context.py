@@ -101,7 +101,8 @@ def test_the_disk_block_names_each_disk(monkeypatch):
     block = _build_structured_llm_context([chat_nas_tools.tool_get_disks_and_standby_status()])
     assert "- 2 awake, 1 asleep (no sleeping drive was woken to read this)" in block
     assert "- nvme0n1: active/running, temperature not read" in block
-    assert "- sda: active/running, 34°C" in block
+    assert "- sda: active/running, 34°C" in block  # its second value here is not a health word: nothing is claimed
+    assert "health" not in block
     assert "- sdb: standby (sleeping — protected), 29°C" in block
     assert "N/A" not in block
     # the older shape still reads
@@ -431,3 +432,40 @@ def test_kib_knows_the_nas_by_name_and_how_long_it_has_been_up(monkeypatch, tmp_
     assert chat_nas_tools.tool_get_network_status()["hostname"] is None  # no name is made up
     monkeypatch.setattr("backend.hardware.network.get_network_topology", lambda: {"hostname": "from-the-reading"})
     assert chat_nas_tools.tool_get_network_status()["hostname"] == "from-the-reading"
+
+
+def test_kib_is_told_each_drives_health(monkeypatch):
+    """Asked "are my drives healthy?", Kib was told each drive's state and temperature, never its health."""
+    monkeypatch.setattr(chat_nas_tools, "get_running_disks_list", lambda: ["sda", "sdb", "sdc", "nvme0n1"])
+    monkeypatch.setattr(chat_nas_tools, "get_sleeping_disks_list", lambda: ["sdd"])
+    cache = {
+        "sda": (34, "ok"),
+        "sdb": (41, "warn"),
+        "sdc": (45, "crit"),
+        "nvme0n1": (None, "unknown"),
+        "sdd": (29, "standby"),
+    }
+    monkeypatch.setattr(Z_STATE, "cached_smart_data", cache)
+    res = chat_nas_tools.tool_get_disks_and_standby_status()
+    assert {d["device"]: d["health"] for d in res["disks"]} == {
+        "sda": "ok",
+        "sdb": "warn",
+        "sdc": "crit",
+        "nvme0n1": "unknown",
+        "sdd": "standby",
+    }
+    block = _build_structured_llm_context([res]).splitlines()
+    assert "- sda: active/running, 34°C, health good" in block
+    assert "- sdb: active/running, 41°C, health: WARNING, it shows signs of wear" in block
+    assert "- sdc: active/running, 45°C, health: CRITICAL, it is failing" in block
+    assert "- nvme0n1: active/running, temperature not read, health not read lately" in block
+    assert "- sdd: standby (sleeping — protected), 29°C" in block
+    assert block[-2:] == ["- Failing, replace soon: sdc", "- Showing wear, keep an eye on: sdb"]
+
+    monkeypatch.setattr(Z_STATE, "cached_smart_data", {"sda": (34, "ok"), "sdd": (29, "standby")})
+    monkeypatch.setattr(chat_nas_tools, "get_running_disks_list", lambda: ["sda"])
+    block = _build_structured_llm_context([chat_nas_tools.tool_get_disks_and_standby_status()]).splitlines()
+    assert block[-1] == "- Every drive whose health was read reports good health."
+    # nothing read at all: nothing is said about health
+    monkeypatch.setattr(Z_STATE, "cached_smart_data", {})
+    assert "health" not in _build_structured_llm_context([chat_nas_tools.tool_get_disks_and_standby_status()])
