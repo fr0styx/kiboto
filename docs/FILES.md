@@ -46,5 +46,7 @@ dot marks the file in every view, and the sidebar lists the colours in use: clic
 everything that carries it and jump to its folder.
 
 Labels are your own: they are kept with your account, not in the files, so nothing on disk
-changes and other people do not see them. Renaming a file or folder in Files keeps its label; a
-file moved to another folder loses it.
+changes and other people do not see them. Renaming or moving a file or folder in Files keeps its
+label, and so do the labelled things inside a folder you move. A copy starts without one, and so
+does anything that lands on a name already taken (merged into a folder that was there, or kept
+under a second name).

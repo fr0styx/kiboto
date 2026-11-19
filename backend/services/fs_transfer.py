@@ -547,6 +547,20 @@ def _same_or_inside(path: str, folder: str) -> bool:
     return p == f or p.startswith(f.rstrip(os.sep) + os.sep)
 
 
+# Called with (old path, new path, owner) for each item a background move carried whole to a place
+# where nothing by that name was. The layer above registers here (labels follow their files).
+MOVED_HOOKS: list[Callable[[str, str, str], Any]] = []
+
+
+def _tell_moved(carried: list[tuple[str, str]], owner: str) -> None:
+    for old, new in carried:
+        for hook in MOVED_HOOKS:
+            try:
+                hook(old, new, owner)
+            except (OSError, ValueError, TypeError, KeyError) as err:  # the files did move
+                logger.warning("[FS Transfer] A follow-up to moving %s failed: %s", old, err)
+
+
 def execute_transfer(
     sources: list[str],
     destination_dir: str,
@@ -554,11 +568,14 @@ def execute_transfer(
     policy: str = "merge",
     progress: TransferProgress | None = None,
     target_names: list[str] | None = None,
+    carried: list[tuple[str, str]] | None = None,
 ) -> dict[str, Any]:
     """
     Main transfer entry point.
     Processes a list of source paths (files or directories) into destination_dir.
     `target_names` (same length as `sources`) gives each item a new name, e.g. for duplicates.
+    `carried` collects (old, new) for each item a move took whole to a name that was free: a merge
+    into a folder already there, or a file kept under another name, is not listed.
     """
     collision_policy = CollisionPolicy(policy.lower())
     try:
@@ -593,6 +610,7 @@ def execute_transfer(
             summary["errors"].append({"path": src, "error": "Source and destination are the same"})
             continue
 
+        fresh = action == "move" and carried is not None and not os.path.lexists(dst_target)
         try:
             if os.path.isdir(src) and not os.path.islink(src):
                 merge_directory_tree(
@@ -620,6 +638,9 @@ def execute_transfer(
         except Exception as err:
             logger.error("[FS Transfer] Failed to transfer %s -> %s: %s", src, dst_target, err)
             summary["errors"].append({"path": src, "error": str(err)})
+        else:
+            if fresh and carried is not None and not os.path.lexists(src) and os.path.lexists(dst_target):
+                carried.append((src, dst_target))
 
     return {
         "status": "ok" if not summary["errors"] else "partial",
@@ -1168,6 +1189,7 @@ class TransferTaskManager:
             self._notify_update(task)
 
             # 2. Copy or move with the same rules as the direct transfer
+            carried: list[tuple[str, str]] = []
             res = execute_transfer(
                 task.sources,
                 task.destination,
@@ -1175,7 +1197,9 @@ class TransferTaskManager:
                 task.collision_policy,
                 progress=progress,
                 target_names=task.target_names or None,
+                carried=carried,
             )
+            _tell_moved(carried, task.owner)
             task.result = {k: res.get(k) for k in ("transferred", "skipped", "merged_dirs")}
             errors = res.get("errors") or []
             task.result["errors"] = errors[:20]

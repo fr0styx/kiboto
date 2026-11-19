@@ -217,9 +217,16 @@ async def fs_transfer(req: FsTransferRequest, principal: AuthenticatedPrincipal 
         if req.action == "move" and not is_admin and os.path.basename(src.rstrip("/")) == "homes":
             raise HTTPException(status_code=403, detail="Cannot move root homes directory.")
 
-    res = await asyncio.to_thread(execute_transfer, req.sources, dest_canonical, req.action, req.collision_policy)
+    carried: list[tuple[str, str]] = []
+    res = await asyncio.to_thread(
+        execute_transfer, req.sources, dest_canonical, req.action, req.collision_policy, None, None, carried
+    )
     for src in req.sources:
         await asyncio.to_thread(record_activity, req.action, src, principal, target=dest_canonical)
+    from backend.api.files import labels
+
+    for old, new in carried:  # a moved file keeps its coloured label
+        await asyncio.to_thread(labels.moved, old, new, principal.username)
     return res
 
 

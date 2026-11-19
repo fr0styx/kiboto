@@ -83,3 +83,65 @@ def test_damaged_or_foreign_data_is_ignored(area, tmp_path):
     (tmp_path / "data" / "fm_labels.json").write_text("[]")
     assert client.get("/api/fs/labels", headers=h).json()["items"] == {}
     assert labels.moved("/a", "/b", "admin") == 0
+
+
+def test_a_label_follows_a_move_but_not_a_copy_or_a_merge(area):
+    from backend.services import fs_transfer
+
+    client, h, root = area
+    docs, tax = str(root / "docs"), str(root / "docs" / "tax.pdf")
+    for p, c in ((docs, "blue"), (tax, "red")):
+        assert client.put("/api/fs/labels", headers=h, json={"path": p, "colour": c}).status_code == 200
+    (root / "old").mkdir()
+    (root / "keep").mkdir()
+    (root / "keep" / "docs").mkdir()
+
+    # a copy leaves the label where it was
+    carried: list[tuple[str, str]] = []
+    fs_transfer.execute_transfer([tax], str(root / "old"), "copy", "merge", carried=carried)
+    assert carried == [] and (root / "old" / "tax.pdf").exists()
+
+    # a move into a folder that already holds one by that name is a merge: nothing is told
+    fs_transfer.execute_transfer([docs], str(root / "keep"), "move", "merge", carried=carried)
+    assert carried == [] and (root / "keep" / "docs" / "tax.pdf").exists()
+
+    # a move to a free name is told, with the new name when one was given
+    (root / "keep" / "docs" / "tax.pdf").rename(root / "tax.pdf")
+    fs_transfer.execute_transfer(
+        [str(root / "tax.pdf")], str(root / "old"), "move", "merge", target_names=["tax 2025.pdf"], carried=carried
+    )
+    assert carried == [(str(root / "tax.pdf"), str(root / "old" / "tax 2025.pdf"))]
+    # something that is not there is an error, not a move
+    res = fs_transfer.execute_transfer([str(root / "gone")], str(root / "old"), "move", "merge", carried=carried)
+    assert res["status"] == "partial" and len(carried) == 1
+
+
+def test_the_background_engine_tells_the_labels(area):
+    from backend.services import fs_transfer
+
+    client, h, root = area
+    assert labels.moved in fs_transfer.MOVED_HOOKS
+    user = client.get("/api/auth/me", headers=h).json()
+    username = (user.get("user") or user).get("username")
+    docs, tax = str(root / "docs"), str(root / "docs" / "tax.pdf")
+    for p, c in ((docs, "blue"), (tax, "red")):
+        client.put("/api/fs/labels", headers=h, json={"path": p, "colour": c})
+    (root / "archive").mkdir()
+    carried: list[tuple[str, str]] = []
+    fs_transfer.execute_transfer([docs], str(root / "archive"), "move", "merge", carried=carried)
+    fs_transfer._tell_moved(carried, username)
+    items = client.get("/api/fs/labels", headers=h).json()["items"]
+    assert items == {str(root / "archive" / "docs"): "blue", str(root / "archive" / "docs" / "tax.pdf"): "red"}
+
+
+def test_a_follow_up_that_fails_does_not_fail_the_move(monkeypatch):
+    from backend.services import fs_transfer
+
+    seen = []
+
+    def broken(old, new, owner):
+        raise OSError("disk full")
+
+    monkeypatch.setattr(fs_transfer, "MOVED_HOOKS", [broken, lambda o, n, w: seen.append((o, n, w))])
+    fs_transfer._tell_moved([("/a", "/b")], "ana")
+    assert seen == [("/a", "/b", "ana")]

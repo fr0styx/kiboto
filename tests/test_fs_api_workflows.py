@@ -102,6 +102,22 @@ class TestTransfers:
             assert content == "other"
         assert os.path.exists(os.path.join(work, "a.txt"))  # a copy keeps the source
 
+    def test_a_move_carries_the_label(self, client, auth_headers, work, tmp_path, monkeypatch):
+        from backend.api.files import labels
+
+        monkeypatch.setattr(labels.config, "DATA_DIR", str(tmp_path))
+        src, dest = os.path.join(work, "a.txt"), os.path.join(work, "sub")
+        ok(client.put("/api/fs/labels", json={"path": src, "colour": "green"}, headers=auth_headers))
+        ok(
+            client.post(
+                "/api/fs/transfer",
+                json={"sources": [src], "destination_dir": dest, "action": "move"},
+                headers=auth_headers,
+            )
+        )
+        items = ok(client.get("/api/fs/labels", headers=auth_headers))["items"]
+        assert items == {os.path.join(os.path.realpath(dest), "a.txt"): "green"}
+
     def test_move(self, client, auth_headers, work):
         ok(
             client.post(

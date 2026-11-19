@@ -17,6 +17,7 @@ import {
   openLabelPicker,
   openLabelList,
   resetLabelsForTesting,
+  labelsMayHaveMoved,
 } from '../components/fm-labels.js';
 
 vi.mock('../toast.js', async (orig) => ({ ...(await orig()), showToast: vi.fn() }));
@@ -161,5 +162,24 @@ describe('file labels', () => {
     expect(fm.loadPath).toHaveBeenCalledWith('/mnt/user/docs');
     expect(document.getElementById('fm-label-list')).toBeNull();
     expect(openLabelList('yellow', fm).textContent).toContain('Nothing carries this label.');
+  });
+
+  it('reads the labels again after a move, but only for someone who has labels', async () => {
+    const { ZettEventBus } = await import('../event-bus.js');
+    const get = vi.spyOn(api, 'get').mockResolvedValue({ names: {}, items: {} });
+    expect(await labelsMayHaveMoved()).toBe(null); // nothing loaded yet: nothing to refresh
+    await loadLabels();
+    get.mockClear();
+    await labelsMayHaveMoved();
+    expect(get).not.toHaveBeenCalled(); // no labels: no request
+    resetLabelsForTesting();
+    get.mockResolvedValue({ names: {}, items: { '/mnt/user/a.txt': 'red' } });
+    await loadLabels();
+    get.mockClear();
+    get.mockResolvedValue({ names: {}, items: { '/mnt/user/old/a.txt': 'red' } });
+    ZettEventBus.emit('fm:refresh'); // what a finished move or a rename sends
+    await vi.waitFor(() => expect(labelOf('/mnt/user/old/a.txt')).toBe('red'));
+    expect(get).toHaveBeenCalledWith('/api/fs/labels');
+    expect(labelOf('/mnt/user/a.txt')).toBeFalsy();
   });
 });

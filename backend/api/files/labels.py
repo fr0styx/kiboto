@@ -17,6 +17,7 @@ from pydantic import BaseModel, Field
 import backend.config as config
 from backend.auth import AuthenticatedPrincipal, get_current_principal, require_scope
 from backend.fsutil import atomic_write_json, json_locked, read_json, resolve_within
+from backend.services import fs_transfer
 from backend.services.path_access import ALLOWED_BROWSE_ROOTS, check_user_path_access
 
 router = APIRouter()
@@ -133,7 +134,7 @@ def _move_labels(key: str, old: str, new: str) -> int:
 
 
 def moved(old: str, new: str, username: str | None) -> int:
-    """A file or folder was renamed: its label, and the labels of what is inside it, follow.
+    """A file or folder was renamed or moved: its label, and the labels of what is inside it, follow.
     Returns how many labels moved. Never raises: a label must not fail a rename."""
     old, new = old.rstrip("/"), new.rstrip("/")
     if not old or not new or old == new:
@@ -143,3 +144,8 @@ def moved(old: str, new: str, username: str | None) -> int:
             return _move_labels((username or "_shared").lower(), old, new)
     except OSError:
         return 0
+
+
+# a move made in the background (Files → Move to, cut and paste, drag) carries the label along
+if moved not in fs_transfer.MOVED_HOOKS:
+    fs_transfer.MOVED_HOOKS.append(moved)

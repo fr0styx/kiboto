@@ -72,6 +72,14 @@ export function loadLabels(force = false) {
   return _loading;
 }
 
+/** Files were renamed or moved: the server carried their labels along, so read the list again.
+ *  Only for someone who has labels; nobody else pays a request for it. */
+export function labelsMayHaveMoved() {
+  if (!_state || !Object.keys(_state.items).length) return Promise.resolve(_state);
+  return loadLabels(true);
+}
+ZettEventBus.on('fm:refresh', labelsMayHaveMoved);
+
 /** Puts a colour on a path; no colour takes the label off. */
 export async function setLabel(path, colour) {
   try {

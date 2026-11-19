@@ -482,6 +482,9 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Apps with a weakness under attack** are announced: an app flagged for the first time goes out as an alert,
   once, instead of waiting on the Security page.
 
+- **A label stays with a file you move**: moving a file or folder in Files keeps its colour, and so do the
+  labelled things inside a moved folder. After a rename or a move the colours on screen follow at once.
+
 #### Fixes
 
 - **The File Explorer's details panel no longer hides file names**: it lies over the list instead of
