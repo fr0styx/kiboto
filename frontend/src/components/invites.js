@@ -61,7 +61,7 @@ export async function initInviteLanding(textsReady) {
   const err = dlg.querySelector('.invite-error');
   dlg.querySelector('[data-invite-accept]').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const f = new FormData(e.target);
+    const f = new FormData(/** @type {HTMLFormElement} */ (e.target));
     if (f.get('password') !== f.get('password2')) {
       err.hidden = false;
       err.textContent = t('setup.err_no_match', 'New password and confirmation do not match.');

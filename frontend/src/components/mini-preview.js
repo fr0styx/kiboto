@@ -589,7 +589,7 @@ export function setupMiniPreviewInteractivity() {
         return;
       }
 
-      if (e.target === miniSlDeck || miniSlDeck.contains(e.target)) {
+      if (e.target === miniSlDeck || miniSlDeck.contains(/** @type {Node} */ (e.target))) {
         e.preventDefault();
         const dropX = e.clientX;
         const cards = Array.from(miniSlDeck.querySelectorAll('.sl-card'));

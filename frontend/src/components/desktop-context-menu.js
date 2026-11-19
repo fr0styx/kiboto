@@ -27,7 +27,7 @@ export function initDesktopContextMenu() {
 
   // Global right-click handler
   document.addEventListener('contextmenu', (e) => {
-    if (typeof e.target?.closest !== 'function') return;
+    if (typeof (/** @type {HTMLElement} */ (e.target)?.closest) !== 'function') return;
     // 1. Allow native context menu in text inputs, textareas, contenteditable, monaco, code editors, and links
     if (
       /** @type {HTMLElement} */ (e.target).closest(
@@ -68,8 +68,8 @@ export function initDesktopContextMenu() {
   document.addEventListener('pointerdown', (e) => {
     const menu = document.getElementById('desktop-context-menu');
     const widgetMenu = document.getElementById('widget-context-menu');
-    const inMenu = menu && menu.contains(e.target);
-    const inWidgetMenu = widgetMenu && widgetMenu.contains(e.target);
+    const inMenu = menu && menu.contains(/** @type {Node} */ (e.target));
+    const inWidgetMenu = widgetMenu && widgetMenu.contains(/** @type {Node} */ (e.target));
     if (!inMenu && !inWidgetMenu) {
       hideDesktopContextMenu();
       hideWidgetContextMenu();

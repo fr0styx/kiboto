@@ -692,11 +692,11 @@
     <div id="btn-sections-container" class="drawer-cards-flow locked">
       <div class="draggable-card drawer-card drw-x-9" data-btn-card-id="sec-copybtn">
         <div class="card-headline">
-          <span class="card-head-title"><span class="drag-handle" title="Drag to reorder" data-i18n-title="ui.drag_to_reorder">⋮⋮</span> <svg class="ic ic-sm drw-x-2"><use href="#i-storage"/></svg><span data-i18n="settings.copy_btn_title">Front-Panel COPY Button</span><button class="btn-minimize" title="Minimize/Expand" data-i18n-title="ui.minimize_expand" aria-label="Minimize/Expand card" data-i18n-aria-label="ui.minimize_expand_card">▼</button></span>
+          <span class="card-head-title"><span class="drag-handle" title="Drag to reorder" data-i18n-title="ui.drag_to_reorder">⋮⋮</span> <svg class="ic ic-sm drw-x-2"><use href="#i-storage"/></svg><span id="btn-copy-title" data-i18n="settings.copy_btn_title">Front-Panel COPY Button</span><button class="btn-minimize" title="Minimize/Expand" data-i18n-title="ui.minimize_expand" aria-label="Minimize/Expand card" data-i18n-aria-label="ui.minimize_expand_card">▼</button></span>
           <div class="drw-row-3">
             <span class="drw-xs-bold-3" id="btn-copy-status-text" data-sample>ENABLED</span>
             <label class="switch">
-            <input type="checkbox" id="btn-copy-toggle">
+            <input type="checkbox" id="btn-copy-toggle" aria-labelledby="btn-copy-title">
             <span class="toggle-slider"></span>
             </label>
           </div>
@@ -706,7 +706,7 @@
         <div class="drw-box-4" id="btn-copy-options">
           <div class="slider-row drw-x-10">
             <div class="drw-row-10">
-              <span class="slider-label drw-xs-bold-4" data-i18n="settings.media_slot">Source Media Slot</span>
+              <span class="slider-label drw-xs-bold-4" id="btn-copy-src-label" data-i18n="settings.media_slot">Source Media Slot</span>
               <div class="drw-row-11">
                 <span id="media-slot-info-badge" class="suite-badge drw-xs-2" data-sample>SLOTS EMPTY</span>
                 <button id="btn-media-rescan" type="button" class="btn-pill-toggle is-small drw-x-11" title="Rescan and re-detect inserted cards" data-i18n-title="ui.rescan_and_re_detect_inserted"><span aria-hidden="true">🔄</span> <span data-i18n="ui.scan">Scan</span></button>
@@ -714,7 +714,7 @@
                 <button id="btn-media-eject" type="button" class="btn-pill-toggle is-danger is-small drw-x-11" title="Safely unmount and eject card" data-i18n-title="ui.safely_unmount_and_eject_card"><span aria-hidden="true">⏏</span> <span data-i18n="media.eject_btn">Eject</span></button>
               </div>
             </div>
-            <select id="btn-copy-src" class="tz-text-input drw-size-5">
+            <select id="btn-copy-src" class="tz-text-input drw-size-5" aria-labelledby="btn-copy-src-label">
               <option value="sd" data-i18n="dr.sd_4_0_slot">SD 4.0 Slot</option>
               <option value="tf" data-i18n="dr.tf_4_0_slot_microsd">TF 4.0 Slot (MicroSD)</option>
             </select>
@@ -731,31 +731,31 @@
 
           <div class="slider-row drw-row-13">
             <div class="drw-col-3">
-              <span class="slider-label drw-xs-bold-4" data-i18n="settings.auto_sort_exif">Auto-Sort by EXIF Date</span>
-              <span class="drw-xs-muted-3" data-i18n="settings.auto_sort_exif_desc">Organize copied photos into YYYY:MM:DD subfolders automatically.</span>
+              <span class="slider-label drw-xs-bold-4" id="btn-copy-exif-label" data-i18n="settings.auto_sort_exif">Auto-Sort by EXIF Date</span>
+              <span class="drw-xs-muted-3" id="btn-copy-exif-desc" data-i18n="settings.auto_sort_exif_desc">Organize copied photos into YYYY:MM:DD subfolders automatically.</span>
             </div>
-            <label class="switch"><input type="checkbox" id="btn-copy-exif" checked><span class="toggle-slider"></span></label>
+            <label class="switch"><input type="checkbox" id="btn-copy-exif" aria-labelledby="btn-copy-exif-label" aria-describedby="btn-copy-exif-desc" checked><span class="toggle-slider"></span></label>
           </div>
 
           <div class="slider-row drw-row-13">
             <div class="drw-col-3">
-              <span class="slider-label drw-xs-bold-4" data-i18n="settings.auto_ingest">Copy automatically</span>
-              <span class="drw-xs-muted-3" data-i18n="settings.auto_ingest_desc">Start copying as soon as an SD or microSD card is inserted.</span>
+              <span class="slider-label drw-xs-bold-4" id="btn-copy-auto-ingest-label" data-i18n="settings.auto_ingest">Copy automatically</span>
+              <span class="drw-xs-muted-3" id="btn-copy-auto-ingest-desc" data-i18n="settings.auto_ingest_desc">Start copying as soon as an SD or microSD card is inserted.</span>
             </div>
-            <label class="switch"><input type="checkbox" id="btn-copy-auto-ingest"><span class="toggle-slider"></span></label>
+            <label class="switch"><input type="checkbox" id="btn-copy-auto-ingest" aria-labelledby="btn-copy-auto-ingest-label" aria-describedby="btn-copy-auto-ingest-desc"><span class="toggle-slider"></span></label>
           </div>
 
           <div class="slider-row drw-row-13">
             <div class="drw-col-3">
-              <span class="slider-label drw-xs-bold-4" data-i18n="settings.ingest_prompt">Ask before copying</span>
-              <span class="drw-xs-muted-3" data-i18n="settings.ingest_prompt_desc">Show confirmation dialog before starting card copy.</span>
+              <span class="slider-label drw-xs-bold-4" id="btn-copy-require-confirm-label" data-i18n="settings.ingest_prompt">Ask before copying</span>
+              <span class="drw-xs-muted-3" id="btn-copy-require-confirm-desc" data-i18n="settings.ingest_prompt_desc">Show confirmation dialog before starting card copy.</span>
             </div>
-            <label class="switch"><input type="checkbox" id="btn-copy-require-confirm" checked><span class="toggle-slider"></span></label>
+            <label class="switch"><input type="checkbox" id="btn-copy-require-confirm" aria-labelledby="btn-copy-require-confirm-label" aria-describedby="btn-copy-require-confirm-desc" checked><span class="toggle-slider"></span></label>
           </div>
 
           <div class="slider-row drw-x-12">
-            <span class="slider-label drw-xs-bold-4" data-i18n="settings.collision_rule">If a file with the same name is already there</span>
-            <select id="btn-copy-collision" class="tz-text-input drw-size-5">
+            <span class="slider-label drw-xs-bold-4" id="btn-copy-collision-label" data-i18n="settings.collision_rule">If a file with the same name is already there</span>
+            <select id="btn-copy-collision" class="tz-text-input drw-size-5" aria-labelledby="btn-copy-collision-label">
               <option value="skip" selected data-i18n="settings.collision_skip">Keep the one that is there</option>
               <option value="overwrite" data-i18n="settings.collision_overwrite">Replace it with the card's copy</option>
               <option value="ask" data-i18n="settings.collision_ask">Ask me each time</option>

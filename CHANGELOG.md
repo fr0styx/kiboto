@@ -556,6 +556,9 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 
 - **Slow connections**: when the language arrives late, Getting started and the desktop's tooltips still switch to it.
 
+- **Screen readers**: the card copy settings, the widget switches and the theme badge in light mode are named and
+  readable; the Kib access switches are easier to hit.
+
 ## v2.0.3 (2026-11-16)
 ### 🏡 People, Backup and Notifications rebuilt, a home screen on phones, and Storage in plain words
 

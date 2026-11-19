@@ -14,7 +14,7 @@ export function initDesktopLasso() {
     if (e.button !== 0) return;
     if (isCompact()) return;
     if (
-      typeof e.target?.closest === 'function' &&
+      typeof (/** @type {HTMLElement} */ (e.target)?.closest) === 'function' &&
       /** @type {HTMLElement} */ (e.target).closest(
         '.smart-modal-window, .smart-modal-backdrop, .os-window, #console-window, #console-modal-overlay, ' +
           '#notif-center-panel, .notif-center-window, #management-window, .management-window, #management-modal-overlay, ' +
@@ -25,7 +25,7 @@ export function initDesktopLasso() {
       )
     ) {
       if (
-        typeof e.target?.closest === 'function' &&
+        typeof (/** @type {HTMLElement} */ (e.target)?.closest) === 'function' &&
         !(/** @type {HTMLElement} */ (e.target).closest('.chassis-hero-box'))
       ) {
         document

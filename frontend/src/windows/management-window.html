@@ -739,11 +739,11 @@
                 <div class="drawer-card wdg-box">
                   <div class="wdg-row">
                     <div>
-                      <div class="wdg-fs135-bold-strong" data-i18n="mw.desktop_widget_overlay">Desktop Widget Overlay</div>
+                      <div class="wdg-fs135-bold-strong" id="widget-toggle-master-label" data-i18n="mw.desktop_widget_overlay">Desktop Widget Overlay</div>
                       <div class="wdg-xs-muted" data-i18n="mw.display_floating_live_telemetry_status_cards">Display floating live telemetry status cards on the desktop workspace.</div>
                     </div>
                     <label class="switch-toggle wdg-size">
-                      <input class="wdg-size-2" type="checkbox" id="widget-toggle-master" checked>
+                      <input class="wdg-size-2" type="checkbox" id="widget-toggle-master" aria-labelledby="widget-toggle-master-label" checked>
                       <span class="slider-round" style="position:absolute; inset:0; background:var(--kb-glaze-15); border-radius:24px; transition:0.3s;"></span>
                     </label>
                   </div>
@@ -788,7 +788,7 @@
                     <!-- Widget: AI Accelerators -->
                     <div class="widget-sortable-item" data-widget-id="ai_accelerator" draggable="true">
                       <div class="widget-sortable-left">
-                        <div class="widget-drag-handle" title="Drag to reorder" data-i18n-title="ui.drag_to_reorder" aria-label="Drag to reorder" data-i18n-aria-label="ui.drag_to_reorder">
+                        <div class="widget-drag-handle" title="Drag to reorder" data-i18n-title="ui.drag_to_reorder" aria-hidden="true">
                           <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
                             <circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/>
                             <circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/>
@@ -797,17 +797,17 @@
                         </div>
                         <span class="wdg-fs18">⚡</span>
                         <div>
-                          <div class="wdg-xs-bold-strong" data-i18n="widget.ai_accelerator">AI Chips</div>
+                          <div class="wdg-xs-bold-strong" id="w-cfg-ai-accelerator-label" data-i18n="widget.ai_accelerator">AI Chips</div>
                           <div class="wdg-xs-muted-3" data-i18n="widget.ai_accelerator_desc">Real-time Intel AI Boost NPU & Arc GPU utilization dials and clock speeds.</div>
                         </div>
                       </div>
-                      <input class="wdg-size-3" type="checkbox" id="w-cfg-ai-accelerator" checked>
+                      <input class="wdg-size-3" type="checkbox" id="w-cfg-ai-accelerator" aria-labelledby="w-cfg-ai-accelerator-label" checked>
                     </div>
 
                     <!-- Widget 1: System Status -->
                     <div class="widget-sortable-item" data-widget-id="system" draggable="true">
                       <div class="widget-sortable-left">
-                        <div class="widget-drag-handle" title="Drag to reorder" data-i18n-title="ui.drag_to_reorder" aria-label="Drag to reorder" data-i18n-aria-label="ui.drag_to_reorder">
+                        <div class="widget-drag-handle" title="Drag to reorder" data-i18n-title="ui.drag_to_reorder" aria-hidden="true">
                           <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
                             <circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/>
                             <circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/>
@@ -816,17 +816,17 @@
                         </div>
                         <span class="wdg-fs18">🧠</span>
                         <div>
-                          <div class="wdg-xs-bold-strong" data-i18n="mw.system_status_cpu_and_ram">System Status (CPU & RAM)</div>
+                          <div class="wdg-xs-bold-strong" id="w-cfg-system-label" data-i18n="mw.system_status_cpu_and_ram">System Status (CPU & RAM)</div>
                           <div class="wdg-xs-muted-3" data-i18n="mw.real_time_cpu_processor_load_and">Real-time CPU processor load and RAM memory utilization meters.</div>
                         </div>
                       </div>
-                      <input class="wdg-size-3" type="checkbox" id="w-cfg-system" checked>
+                      <input class="wdg-size-3" type="checkbox" id="w-cfg-system" aria-labelledby="w-cfg-system-label" checked>
                     </div>
 
                     <!-- Widget 2: Network IO -->
                     <div class="widget-sortable-item" data-widget-id="network" draggable="true">
                       <div class="widget-sortable-left">
-                        <div class="widget-drag-handle" title="Drag to reorder" data-i18n-title="ui.drag_to_reorder" aria-label="Drag to reorder" data-i18n-aria-label="ui.drag_to_reorder">
+                        <div class="widget-drag-handle" title="Drag to reorder" data-i18n-title="ui.drag_to_reorder" aria-hidden="true">
                           <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
                             <circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/>
                             <circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/>
@@ -835,17 +835,17 @@
                         </div>
                         <span class="wdg-fs18">🌐</span>
                         <div>
-                          <div class="wdg-xs-bold-strong" data-i18n="mw.network_io_bandwidth">Network IO (Bandwidth)</div>
+                          <div class="wdg-xs-bold-strong" id="w-cfg-network-label" data-i18n="mw.network_io_bandwidth">Network IO (Bandwidth)</div>
                           <div class="wdg-xs-muted-3" data-i18n="mw.live_network_download_rx_and_upload">Live network download (Rx) and upload (Tx) bandwidth throughput.</div>
                         </div>
                       </div>
-                      <input class="wdg-size-3" type="checkbox" id="w-cfg-network" checked>
+                      <input class="wdg-size-3" type="checkbox" id="w-cfg-network" aria-labelledby="w-cfg-network-label" checked>
                     </div>
 
                     <!-- Widget 3: Storage Pool -->
                     <div class="widget-sortable-item" data-widget-id="storage" draggable="true">
                       <div class="widget-sortable-left">
-                        <div class="widget-drag-handle" title="Drag to reorder" data-i18n-title="ui.drag_to_reorder" aria-label="Drag to reorder" data-i18n-aria-label="ui.drag_to_reorder">
+                        <div class="widget-drag-handle" title="Drag to reorder" data-i18n-title="ui.drag_to_reorder" aria-hidden="true">
                           <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
                             <circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/>
                             <circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/>
@@ -854,17 +854,17 @@
                         </div>
                         <span class="wdg-fs18">💾</span>
                         <div>
-                          <div class="wdg-xs-bold-strong" data-i18n="mw.storage_capacity_and_pool_health">Storage Capacity & Pool Health</div>
+                          <div class="wdg-xs-bold-strong" id="w-cfg-storage-label" data-i18n="mw.storage_capacity_and_pool_health">Storage Capacity & Pool Health</div>
                           <div class="wdg-xs-muted-3" data-i18n="mw.main_data_pool_allocated_storage_free">Main data pool allocated storage, free capacity, and health status.</div>
                         </div>
                       </div>
-                      <input class="wdg-size-3" type="checkbox" id="w-cfg-storage" checked>
+                      <input class="wdg-size-3" type="checkbox" id="w-cfg-storage" aria-labelledby="w-cfg-storage-label" checked>
                     </div>
 
                     <!-- Widget 4: Host Info & Uptime -->
                     <div class="widget-sortable-item" data-widget-id="uptime" draggable="true">
                       <div class="widget-sortable-left">
-                        <div class="widget-drag-handle" title="Drag to reorder" data-i18n-title="ui.drag_to_reorder" aria-label="Drag to reorder" data-i18n-aria-label="ui.drag_to_reorder">
+                        <div class="widget-drag-handle" title="Drag to reorder" data-i18n-title="ui.drag_to_reorder" aria-hidden="true">
                           <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
                             <circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/>
                             <circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/>
@@ -873,17 +873,17 @@
                         </div>
                         <span class="wdg-fs18">⏱️</span>
                         <div>
-                          <div class="wdg-xs-bold-strong" data-i18n="mw.host_name_and_system_uptime">Host Name & System Uptime</div>
+                          <div class="wdg-xs-bold-strong" id="w-cfg-uptime-label" data-i18n="mw.host_name_and_system_uptime">Host Name & System Uptime</div>
                           <div class="wdg-xs-muted-3" data-i18n="mw.server_hostname_identity_and_cumulative_uninterr">Server hostname identity and cumulative uninterrupted system uptime.</div>
                         </div>
                       </div>
-                      <input class="wdg-size-3" type="checkbox" id="w-cfg-uptime">
+                      <input class="wdg-size-3" type="checkbox" id="w-cfg-uptime" aria-labelledby="w-cfg-uptime-label">
                     </div>
 
                     <!-- Widget 5: Time Clock -->
                     <div class="widget-sortable-item" data-widget-id="clock" draggable="true">
                       <div class="widget-sortable-left">
-                        <div class="widget-drag-handle" title="Drag to reorder" data-i18n-title="ui.drag_to_reorder" aria-label="Drag to reorder" data-i18n-aria-label="ui.drag_to_reorder">
+                        <div class="widget-drag-handle" title="Drag to reorder" data-i18n-title="ui.drag_to_reorder" aria-hidden="true">
                           <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
                             <circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/>
                             <circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/>
@@ -892,17 +892,17 @@
                         </div>
                         <span class="wdg-fs18">⏰</span>
                         <div>
-                          <div class="wdg-xs-bold-strong" data-i18n="widget.clock">Time Clock</div>
+                          <div class="wdg-xs-bold-strong" id="w-cfg-clock-label" data-i18n="widget.clock">Time Clock</div>
                           <div class="wdg-xs-muted-3" data-i18n="widget.clock_desc">Real-time digital clock with seconds, 12h/24h format, and timezone.</div>
                         </div>
                       </div>
-                      <input class="wdg-size-3" type="checkbox" id="w-cfg-clock" checked>
+                      <input class="wdg-size-3" type="checkbox" id="w-cfg-clock" aria-labelledby="w-cfg-clock-label" checked>
                     </div>
 
                     <!-- Widget 6: Calendar -->
                     <div class="widget-sortable-item" data-widget-id="calendar" draggable="true">
                       <div class="widget-sortable-left">
-                        <div class="widget-drag-handle" title="Drag to reorder" data-i18n-title="ui.drag_to_reorder" aria-label="Drag to reorder" data-i18n-aria-label="ui.drag_to_reorder">
+                        <div class="widget-drag-handle" title="Drag to reorder" data-i18n-title="ui.drag_to_reorder" aria-hidden="true">
                           <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
                             <circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/>
                             <circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/>
@@ -911,17 +911,17 @@
                         </div>
                         <span class="wdg-fs18">📅</span>
                         <div>
-                          <div class="wdg-xs-bold-strong" data-i18n="widget.calendar">Calendar</div>
+                          <div class="wdg-xs-bold-strong" id="w-cfg-calendar-label" data-i18n="widget.calendar">Calendar</div>
                           <div class="wdg-xs-muted-3" data-i18n="widget.calendar_desc">Interactive monthly calendar with today's date and month navigation.</div>
                         </div>
                       </div>
-                      <input class="wdg-size-3" type="checkbox" id="w-cfg-calendar">
+                      <input class="wdg-size-3" type="checkbox" id="w-cfg-calendar" aria-labelledby="w-cfg-calendar-label">
                     </div>
 
                     <!-- Widget 7: Weather -->
                     <div class="widget-sortable-item" data-widget-id="weather" draggable="true">
                       <div class="widget-sortable-left">
-                        <div class="widget-drag-handle" title="Drag to reorder" data-i18n-title="ui.drag_to_reorder" aria-label="Drag to reorder" data-i18n-aria-label="ui.drag_to_reorder">
+                        <div class="widget-drag-handle" title="Drag to reorder" data-i18n-title="ui.drag_to_reorder" aria-hidden="true">
                           <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
                             <circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/>
                             <circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/>
@@ -930,17 +930,17 @@
                         </div>
                         <span class="wdg-fs18">⛅</span>
                         <div>
-                          <div class="wdg-xs-bold-strong" data-i18n="widget.weather">Local Weather</div>
+                          <div class="wdg-xs-bold-strong" id="w-cfg-weather-label" data-i18n="widget.weather">Local Weather</div>
                           <div class="wdg-xs-muted-3" data-i18n="widget.weather_desc">Current temperature, weather condition, high/low, and humidity.</div>
                         </div>
                       </div>
-                      <input class="wdg-size-3" type="checkbox" id="w-cfg-weather" checked>
+                      <input class="wdg-size-3" type="checkbox" id="w-cfg-weather" aria-labelledby="w-cfg-weather-label" checked>
                     </div>
 
                     <!-- Widget 8: Drive Thermals Heatmap -->
                     <div class="widget-sortable-item" data-widget-id="drive_temp" draggable="true">
                       <div class="widget-sortable-left">
-                        <div class="widget-drag-handle" title="Drag to reorder" data-i18n-title="ui.drag_to_reorder" aria-label="Drag to reorder" data-i18n-aria-label="ui.drag_to_reorder">
+                        <div class="widget-drag-handle" title="Drag to reorder" data-i18n-title="ui.drag_to_reorder" aria-hidden="true">
                           <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
                             <circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/>
                             <circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/>
@@ -949,17 +949,17 @@
                         </div>
                         <span class="wdg-fs18">🌡️</span>
                         <div>
-                          <div class="wdg-xs-bold-strong" data-i18n="widget.drive_temp">Drive Thermals</div>
+                          <div class="wdg-xs-bold-strong" id="w-cfg-drive-temp-label" data-i18n="widget.drive_temp">Drive Thermals</div>
                           <div class="wdg-xs-muted-3" data-i18n="widget.drive_temp_desc">Real-time per-bay thermal heatmap and spindown status.</div>
                         </div>
                       </div>
-                      <input class="wdg-size-3" type="checkbox" id="w-cfg-drive-temp" checked>
+                      <input class="wdg-size-3" type="checkbox" id="w-cfg-drive-temp" aria-labelledby="w-cfg-drive-temp-label" checked>
                     </div>
 
                     <!-- Widget 9: Network Throughput Dial -->
                     <div class="widget-sortable-item" data-widget-id="net_dial" draggable="true">
                       <div class="widget-sortable-left">
-                        <div class="widget-drag-handle" title="Drag to reorder" data-i18n-title="ui.drag_to_reorder" aria-label="Drag to reorder" data-i18n-aria-label="ui.drag_to_reorder">
+                        <div class="widget-drag-handle" title="Drag to reorder" data-i18n-title="ui.drag_to_reorder" aria-hidden="true">
                           <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
                             <circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/>
                             <circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/>
@@ -968,17 +968,17 @@
                         </div>
                         <span class="wdg-fs18">🎛️</span>
                         <div>
-                          <div class="wdg-xs-bold-strong" data-i18n="widget.net_dial">Network Dial</div>
+                          <div class="wdg-xs-bold-strong" id="w-cfg-net-dial-label" data-i18n="widget.net_dial">Network Dial</div>
                           <div class="wdg-xs-muted-3" data-i18n="widget.net_dial_desc">Real-time network throughput dial and bandwidth utilization.</div>
                         </div>
                       </div>
-                      <input class="wdg-size-3" type="checkbox" id="w-cfg-net-dial" checked>
+                      <input class="wdg-size-3" type="checkbox" id="w-cfg-net-dial" aria-labelledby="w-cfg-net-dial-label" checked>
                     </div>
 
                     <!-- Widget 10: UPS Power Gauge -->
                     <div class="widget-sortable-item" data-widget-id="ups_gauge" draggable="true">
                       <div class="widget-sortable-left">
-                        <div class="widget-drag-handle" title="Drag to reorder" data-i18n-title="ui.drag_to_reorder" aria-label="Drag to reorder" data-i18n-aria-label="ui.drag_to_reorder">
+                        <div class="widget-drag-handle" title="Drag to reorder" data-i18n-title="ui.drag_to_reorder" aria-hidden="true">
                           <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
                             <circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/>
                             <circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/>
@@ -987,11 +987,11 @@
                         </div>
                         <span class="wdg-fs18">🔋</span>
                         <div>
-                          <div class="wdg-xs-bold-strong" data-i18n="widget.ups_gauge">UPS Power</div>
+                          <div class="wdg-xs-bold-strong" id="w-cfg-ups-gauge-label" data-i18n="widget.ups_gauge">UPS Power</div>
                           <div class="wdg-xs-muted-3" data-i18n="widget.ups_gauge_desc">Battery integrity, load wattage, and runtime monitor.</div>
                         </div>
                       </div>
-                      <input class="wdg-size-3" type="checkbox" id="w-cfg-ups-gauge" checked>
+                      <input class="wdg-size-3" type="checkbox" id="w-cfg-ups-gauge" aria-labelledby="w-cfg-ups-gauge-label" checked>
                     </div>
                   </div>
                 </div>

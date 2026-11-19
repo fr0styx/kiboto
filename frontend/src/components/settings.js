@@ -325,7 +325,7 @@ export function initSettings() {
 
     function setLockState(locked) {
       isLocked = locked;
-      localStorage.setItem(storageLockKey, isLocked);
+      localStorage.setItem(storageLockKey, String(isLocked));
       container.classList.toggle('locked', isLocked);
       if (lockBtn) {
         setIconLabel(
@@ -336,7 +336,7 @@ export function initSettings() {
         lockBtn.classList.toggle('unlocked', !isLocked);
       }
       container.querySelectorAll('.draggable-card').forEach((card) => {
-        card.setAttribute('draggable', !isLocked);
+        card.setAttribute('draggable', String(!isLocked));
       });
     }
 
@@ -466,7 +466,7 @@ export function initSettings() {
   let lastNonZeroBrightness = 100;
 
   function updateScreenPowerUI() {
-    const bri = parseInt(screenBriSlider ? screenBriSlider.value : 100, 10);
+    const bri = parseInt(screenBriSlider ? screenBriSlider.value : '100', 10);
     if (bri > 0) {
       lastNonZeroBrightness = bri;
     }
@@ -502,14 +502,14 @@ export function initSettings() {
   }
 
   async function postScreenState() {
-    const bri = parseInt(screenBriSlider ? screenBriSlider.value : 100, 10);
+    const bri = parseInt(screenBriSlider ? screenBriSlider.value : '100', 10);
     const payload = {
       power: screenPower && bri > 0,
       brightness: bri,
       night_mode: screenNightToggle ? screenNightToggle.checked : false,
       night_start: screenNightStart ? screenNightStart.value : '23:00',
       night_end: screenNightEnd ? screenNightEnd.value : '07:00',
-      night_brightness: parseInt(screenNightBri ? screenNightBri.value : 10, 10),
+      night_brightness: parseInt(screenNightBri ? screenNightBri.value : '10', 10),
     };
     try {
       await api.post('/api/screen', payload);
@@ -552,7 +552,7 @@ export function initSettings() {
 
   if (screenPowerBtn) {
     screenPowerBtn.addEventListener('click', async () => {
-      const bri = parseInt(screenBriSlider ? screenBriSlider.value : 100, 10);
+      const bri = parseInt(screenBriSlider ? screenBriSlider.value : '100', 10);
       const currentlyOff = !screenPower || bri <= 0;
       if (currentlyOff) {
         screenPower = true;
@@ -1027,10 +1027,10 @@ export function initSettings() {
       activeTag === 'input' ||
       activeTag === 'select' ||
       activeTag === 'textarea' ||
-      document.activeElement?.isContentEditable ||
+      /** @type {HTMLElement} */ (document.activeElement)?.isContentEditable ||
       isConsoleActive
     ) {
-      if (e.key === 'Escape' && activeTag !== 'canvas') document.activeElement?.blur?.();
+      if (e.key === 'Escape' && activeTag !== 'canvas') /** @type {HTMLElement} */ (document.activeElement)?.blur?.();
       return;
     }
 
@@ -1144,7 +1144,7 @@ export function syncDesktopThemeUI() {
   const badge = $('desktop-theme-active-badge');
   if (badge) {
     badge.textContent = lookCaption(look);
-    badge.style.color = lookColour(look);
+    badge.style.setProperty('--badge-colour', lookColour(look));
     badge.style.borderColor = lookColour(look);
   }
 
@@ -1742,7 +1742,7 @@ export function syncLcdThemeUI() {
   if (badge) {
     const localized = t('settings.theme_' + curTheme, THEME_NAMES[curTheme] || curTheme.toUpperCase());
     badge.textContent = localized.toUpperCase();
-    badge.style.color = curAccent || 'var(--brand, #33cdb8)';
+    badge.style.setProperty('--badge-colour', curAccent || 'var(--brand, #33cdb8)');
     badge.style.borderColor = curAccent || 'var(--brand, #33cdb8)';
   }
 

@@ -419,7 +419,7 @@ export function initWallpaperPane() {
       galleryEl.classList.add('dragover');
     });
     galleryEl.addEventListener('dragleave', (e) => {
-      if (!galleryEl.contains(e.relatedTarget)) {
+      if (!galleryEl.contains(/** @type {Node} */ (e.relatedTarget))) {
         galleryEl.classList.remove('dragover');
       }
     });

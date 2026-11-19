@@ -113,8 +113,8 @@ export function initLedControl() {
       mode: currentMode,
       color: currentColor,
       color2: currentColor2,
-      brightness: parseInt(slider ? slider.value : 25, 10),
-      speed: parseInt(speedSlider ? speedSlider.value : 50, 10),
+      brightness: parseInt(slider ? slider.value : '25', 10),
+      speed: parseInt(speedSlider ? speedSlider.value : '50', 10),
     };
     if (previewTxt) {
       previewTxt.textContent =
@@ -138,11 +138,11 @@ export function initLedControl() {
     updateLivePreview();
     const payload = {
       power: powerState,
-      brightness: parseInt(slider ? slider.value : 25, 10),
+      brightness: parseInt(slider ? slider.value : '25', 10),
       color: currentColor,
       color2: currentColor2,
       mode: currentMode,
-      speed: parseInt(speedSlider ? speedSlider.value : 50, 10),
+      speed: parseInt(speedSlider ? speedSlider.value : '50', 10),
       reactive: reactiveToggle ? reactiveToggle.checked : true,
       night_mode: ledNightToggle ? ledNightToggle.checked : false,
       night_start: ledNightStart ? ledNightStart.value : '23:00',
@@ -220,21 +220,21 @@ export function initLedControl() {
       if (pr === 'clean') {
         currentMode = 'solid';
         currentColor = '25c2a0';
-        if (slider) slider.value = 25;
+        if (slider) slider.value = '25';
       } else if (pr === 'cyberpunk') {
         currentMode = 'gradient';
         currentColor = '00ffff';
         currentColor2 = 'ff0055';
-        if (slider) slider.value = 40;
-        if (speedSlider) speedSlider.value = 65;
+        if (slider) slider.value = '40';
+        if (speedSlider) speedSlider.value = '65';
       } else if (pr === 'stealth') {
         currentMode = 'solid';
         currentColor = '001428';
-        if (slider) slider.value = 8;
+        if (slider) slider.value = '8';
       } else if (pr === 'rainbow') {
         currentMode = 'rainbow';
-        if (slider) slider.value = 35;
-        if (speedSlider) speedSlider.value = 70;
+        if (slider) slider.value = '35';
+        if (speedSlider) speedSlider.value = '70';
       }
       if (valDisplay && slider) valDisplay.textContent = slider.value + '%';
       if (speedValDisplay && speedSlider) speedValDisplay.textContent = formatSpeedText(speedSlider.value);

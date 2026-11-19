@@ -143,6 +143,11 @@ async function _askToConfirm(info) {
   return false;
 }
 
+/**
+ * @param {string} endpoint
+ * @param {{ method?: string, headers?: Record<string, string>, body?: any, signal?: AbortSignal, timeout?: number,
+ *   confirmed?: boolean, _confirmRetry?: boolean, _reauthRetry?: boolean, [key: string]: any }} [options]
+ */
 async function request(endpoint, options = {}) {
   const url = endpoint;
   const config = { ...options };

@@ -132,7 +132,7 @@ export function renderFans(fans) {
           const hasSpin = ic.classList.contains('spin');
           if (wantSpin !== hasSpin) ic.classList.toggle('spin', wantSpin);
           const curDur = parseFloat(ic.style.getPropertyValue('--dur') || '0');
-          if (Math.abs(curDur - parseFloat(dur)) > 0.03) {
+          if (Math.abs(curDur - Number(dur)) > 0.03) {
             ic.style.setProperty('--dur', `${dur}s`);
           }
         }

@@ -31,6 +31,7 @@ export function scrubClientString(str) {
 
 export function pushLogEntry(level, message, extra = {}) {
   const sanitizedMessage = scrubClientString(message);
+  /** @type {{ ts: string, level: string, message: string, stack?: string, [key: string]: any }} */
   const entry = {
     ts: new Date().toISOString(),
     level: level || 'info',
@@ -65,7 +66,9 @@ export function getWebGLGPUInfo() {
     const canvas = document.createElement('canvas');
     canvas.width = 1;
     canvas.height = 1;
-    const gl = canvas.getContext('webgl2') || canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    const gl = /** @type {WebGLRenderingContext | null} */ (
+      canvas.getContext('webgl2') || canvas.getContext('webgl') || canvas.getContext('experimental-webgl')
+    );
     if (!gl) {
       return {
         supported: false,
@@ -120,6 +123,7 @@ export function collectClientEnvironment() {
     return { environment: 'Server/Non-browser' };
   }
 
+  /** @type {Partial<Navigator> & { connection?: any, deviceMemory?: number }} */
   const nav = window.navigator || {};
   const screen = window.screen || {};
   const docEl = document.documentElement;

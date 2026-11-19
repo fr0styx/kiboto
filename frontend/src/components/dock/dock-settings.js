@@ -62,7 +62,7 @@ export function applyDockSettings(
 ) {
   _dockPosition = ['bottom', 'left', 'top'].includes(position) ? position : 'bottom';
   _magnificationEnabled = Boolean(magnification);
-  _magnificationScale = Math.max(1.1, Math.min(1.8, parseFloat(maxScale) || 1.45));
+  _magnificationScale = Math.max(1.1, Math.min(1.8, Number(maxScale) || 1.45));
   _dockSize = ['small', 'medium', 'large'].includes(iconSize) ? iconSize : 'medium';
   _dockAutohide = Boolean(autohide);
 

@@ -5,6 +5,10 @@
  */
 import { escapeHtml } from '../utils.js';
 
+/**
+ * @param {{ icon?: string, title?: string, body?: string, compact?: boolean,
+ *   action?: { label?: string, target?: string, id?: string, [key: string]: any } | null }} [opts]
+ */
 export function emptyStateHtml({ icon = '', title, body = '', action = null, compact = false } = {}) {
   let button = '';
   if (action && action.label) {

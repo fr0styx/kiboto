@@ -119,8 +119,8 @@ export function renderCurveLines() {
     const handle = $(`ch-${i}`);
     if (handle) {
       if (i < svgCoords.length) {
-        handle.setAttribute('cx', svgCoords[i][0]);
-        handle.setAttribute('cy', svgCoords[i][1]);
+        handle.setAttribute('cx', String(svgCoords[i][0]));
+        handle.setAttribute('cy', String(svgCoords[i][1]));
         handle.setAttribute(
           'title',
           t('fan.node', 'Point {n}: {temp}°C → {pct}% PWM', { n: i + 1, temp: pts[i][0], pct: pts[i][1] })
@@ -324,20 +324,20 @@ export function updateFanCurveWorkstation(s) {
   const dotCpu = $('curve-dot-cpu');
 
   if (dotZ1) {
-    dotZ1.setAttribute('cx', svgZ1X);
-    dotZ1.setAttribute('cy', svgZ1Y);
+    dotZ1.setAttribute('cx', String(svgZ1X));
+    dotZ1.setAttribute('cy', String(svgZ1Y));
     dotZ1.style.display = state.selectedZoneFilter === 'all' || state.selectedZoneFilter === 'zone1' ? 'block' : 'none';
   }
 
   if (dotZ2) {
-    dotZ2.setAttribute('cx', svgZ2X);
-    dotZ2.setAttribute('cy', svgZ2Y);
+    dotZ2.setAttribute('cx', String(svgZ2X));
+    dotZ2.setAttribute('cy', String(svgZ2Y));
     dotZ2.style.display = state.selectedZoneFilter === 'all' || state.selectedZoneFilter === 'zone2' ? 'block' : 'none';
   }
 
   if (dotCpu) {
-    dotCpu.setAttribute('cx', svgCpuX);
-    dotCpu.setAttribute('cy', svgCpuY);
+    dotCpu.setAttribute('cx', String(svgCpuX));
+    dotCpu.setAttribute('cy', String(svgCpuY));
     dotCpu.style.display = state.selectedZoneFilter === 'all' || state.selectedZoneFilter === 'cpu' ? 'block' : 'none';
   }
 
@@ -600,7 +600,7 @@ export function initFanControl() {
     fanCurveSvg.addEventListener(
       'touchstart',
       (e) => {
-        const touch = e.target;
+        const touch = /** @type {Element} */ (e.target);
         if (touch.classList.contains('curve-handle')) {
           isDraggingCurve = true;
           dragIndex = parseInt(touch.id.replace('ch-', ''), 10);

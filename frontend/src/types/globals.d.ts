@@ -179,10 +179,43 @@ declare global {
   // A string selector in this frontend finds HTML elements: typed so, as TypeScript's own
   // tag-name lookups are (querySelector('svg') and the like keep their exact types).
   interface ParentNode {
-    querySelector<E extends Element = HTMLElement>(selectors: string): E | null;
-    querySelectorAll<E extends Element = HTMLElement>(selectors: string): NodeListOf<E>;
+    querySelector<E extends Element = KibotoFieldElement>(selectors: string): E | null;
+    querySelectorAll<E extends Element = KibotoFieldElement>(selectors: string): NodeListOf<E>;
   }
   interface Element {
-    closest<E extends Element = HTMLElement>(selectors: string): E | null;
+    closest<E extends Element = KibotoFieldElement>(selectors: string): E | null;
+  }
+
+  // getElementById in this frontend mostly finds form controls (inputs, selects, checkboxes,
+  // buttons) by their id, and the code reads .value, .checked and .disabled on them directly.
+  // Typed so, the way querySelector is above: an instanceof test still narrows to the exact
+  // element, and a wrong value type (a number into .value) is still an error.
+  type KibotoFieldElement = HTMLElement & {
+    value?: string;
+    checked?: boolean;
+    disabled?: boolean;
+    indeterminate?: boolean;
+    placeholder?: string;
+    select?: () => void;
+  };
+  // Test runners the code checks for with typeof before touching them (never present in a browser)
+  var vi: unknown;
+  var vitest: unknown;
+  var process: { env?: Record<string, string | undefined> } | undefined;
+
+  // Vite fills import.meta.env at build time
+  interface ImportMeta {
+    env?: Record<string, any>;
+  }
+  interface HTMLCanvasElement {
+    _blinkInterval?: any;
+  }
+
+  interface Document {
+    // set once per page so a module binds its document-wide keys only once
+    _desktopLassoInitialized?: boolean;
+    _fmDocKbBound?: boolean;
+    _znUndoKey?: boolean;
+    getElementById(elementId: string): KibotoFieldElement | null;
   }
 }

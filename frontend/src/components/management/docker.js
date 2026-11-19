@@ -399,7 +399,7 @@ export async function openAppDeployModal(appId) {
     nameInput.style.borderColor = '';
   }
   if (portInput) {
-    portInput.value = 8080;
+    portInput.value = '8080';
     portInput.style.borderColor = '';
   }
 
@@ -452,7 +452,7 @@ export async function openAppDeployModal(appId) {
       // Default to Deploy Alongside
       replaceExisting = false;
       if (nameInput) nameInput.value = suggestedContainerName;
-      if (portInput) portInput.value = suggestedPort;
+      if (portInput) portInput.value = String(suggestedPort);
 
       if (resolveData.conflict_detected) {
         banner.style.background = 'rgba(245, 166, 35, 0.12)';
@@ -466,20 +466,20 @@ export async function openAppDeployModal(appId) {
       if (deployConfirmBtn) setIconLabel(deployConfirmBtn, '🚀', t('ui.deploy_new_instance', 'Install a second copy'));
     } else if (resolveData.conflict_detected) {
       if (nameInput) nameInput.value = appId;
-      if (portInput) portInput.value = suggestedPort;
+      if (portInput) portInput.value = String(suggestedPort);
       banner.style.background = 'rgba(245, 166, 35, 0.12)';
       banner.style.border = '1px solid var(--warn, #f5a623)';
       banner.innerHTML = portTakenHtml(defaultPort, suggestedPort, resolveData.in_use_by);
     } else {
       if (nameInput) nameInput.value = appId;
-      if (portInput) portInput.value = suggestedPort;
+      if (portInput) portInput.value = String(suggestedPort);
       banner.style.background = 'rgba(51, 205, 184, 0.12)';
       banner.style.border = '1px solid var(--ok2, #33cdb8)';
       banner.innerHTML = `<span style="color:var(--ok2, #33cdb8); font-weight:bold;">✓ ${escapeHtml(t('catalog.install_ready', 'Ready to install'))}</span> ${escapeHtml(t('catalog.install_ready_detail', '{name} will open on port {port}.', { name: appId, port: suggestedPort }))}`;
     }
   } catch (e) {
     if (nameInput) nameInput.value = appId;
-    if (portInput) portInput.value = 8080;
+    if (portInput) portInput.value = '8080';
     banner.replaceChildren(
       Object.assign(document.createElement('span'), {
         className: 'muted',
@@ -495,7 +495,7 @@ export async function openAppDeployModal(appId) {
       nameInput.style.borderColor = '';
     }
     if (portInput) {
-      portInput.value = defaultPort;
+      portInput.value = String(defaultPort);
       portInput.style.borderColor = '';
     }
 
@@ -534,7 +534,7 @@ export async function openAppDeployModal(appId) {
       nameInput.style.borderColor = '';
     }
     if (portInput) {
-      portInput.value = suggestedPort;
+      portInput.value = String(suggestedPort);
       portInput.style.borderColor = '';
     }
 

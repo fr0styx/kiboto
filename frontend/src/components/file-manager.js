@@ -1136,7 +1136,7 @@ export class FileManagerWindow {
       });
 
       this.viewport.addEventListener('dragleave', (e) => {
-        if (!this.viewport.contains(e.relatedTarget)) {
+        if (!this.viewport.contains(/** @type {Node} */ (e.relatedTarget))) {
           this.viewport.classList.remove('fm-drop-hover');
           if (this._currentHoveredFolder) {
             this._currentHoveredFolder.classList.remove('fm-drop-hover');
@@ -1511,9 +1511,9 @@ export class FileManagerWindow {
       (document.activeElement.tagName === 'INPUT' ||
         document.activeElement.tagName === 'TEXTAREA' ||
         document.activeElement.tagName === 'SELECT' ||
-        document.activeElement.isContentEditable) &&
-      document.activeElement.type !== 'checkbox' &&
-      document.activeElement.type !== 'radio'
+        /** @type {HTMLElement} */ (document.activeElement).isContentEditable) &&
+      /** @type {HTMLElement} */ (document.activeElement).type !== 'checkbox' &&
+      /** @type {HTMLElement} */ (document.activeElement).type !== 'radio'
     ) {
       return;
     }
@@ -2592,7 +2592,7 @@ export class FileManagerWindow {
         card.className = 'fm-grid-card';
         card.dataset.path = file.path;
         card.dataset.name = file.name;
-        card.dataset.index = i;
+        card.dataset.index = String(i);
         card.setAttribute('role', 'row');
         const isCardSelected = this.selectedPaths.has(file.path);
         card.setAttribute('tabindex', isCardSelected ? '0' : '-1');
@@ -2677,7 +2677,7 @@ export class FileManagerWindow {
       row.className = isCompact ? 'fm-row fm-row-compact' : 'fm-row';
       row.dataset.path = file.path;
       row.dataset.name = file.name;
-      row.dataset.index = i;
+      row.dataset.index = String(i);
       row.setAttribute('role', 'row');
       const isRowSelected = this.selectedPaths.has(file.path);
       row.setAttribute('tabindex', isRowSelected ? '0' : '-1');

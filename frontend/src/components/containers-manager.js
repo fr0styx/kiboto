@@ -866,23 +866,23 @@ export function renderContainersWindowTable(containersList = null) {
   }).length;
 
   const cAll = document.getElementById('cw-count-all');
-  if (cAll) cAll.textContent = totalCount;
+  if (cAll) cAll.textContent = String(totalCount);
   const cRun = document.getElementById('cw-count-running');
-  if (cRun) cRun.textContent = runningCount;
+  if (cRun) cRun.textContent = String(runningCount);
   const cStop = document.getElementById('cw-count-stopped');
-  if (cStop) cStop.textContent = stoppedCount;
+  if (cStop) cStop.textContent = String(stoppedCount);
   const cUpd = document.getElementById('cw-count-updates');
-  if (cUpd) cUpd.textContent = updatesCount;
+  if (cUpd) cUpd.textContent = String(updatesCount);
   const pAll = document.getElementById('cw-pill-all');
-  if (pAll) pAll.textContent = totalCount;
+  if (pAll) pAll.textContent = String(totalCount);
   const pRun = document.getElementById('cw-pill-running');
-  if (pRun) pRun.textContent = runningCount;
+  if (pRun) pRun.textContent = String(runningCount);
   const pStop = document.getElementById('cw-pill-stopped');
-  if (pStop) pStop.textContent = stoppedCount;
+  if (pStop) pStop.textContent = String(stoppedCount);
   const pComp = document.getElementById('cw-pill-compose');
-  if (pComp) pComp.textContent = composeCount;
+  if (pComp) pComp.textContent = String(composeCount);
   const pStand = document.getElementById('cw-pill-standalone');
-  if (pStand) pStand.textContent = standaloneCount;
+  if (pStand) pStand.textContent = String(standaloneCount);
 
   updateCwUpdatesUI(updatesCount);
 
@@ -1446,7 +1446,7 @@ export function updateCwBulkBar() {
   if (bar) {
     if (count > 0) {
       bar.style.display = 'flex';
-      if (countEl) countEl.textContent = count;
+      if (countEl) countEl.textContent = String(count);
     } else {
       bar.style.display = 'none';
     }

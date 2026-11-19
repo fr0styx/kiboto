@@ -1632,7 +1632,7 @@ export function initAiKnowledgeEngine() {
     document.addEventListener('click', (e) => {
       const container = document.getElementById('ai-watched-folders-dropdown-container');
       const menu = document.getElementById('ai-watched-folders-dropdown-menu');
-      if (menu && menu.style.display !== 'none' && container && !container.contains(e.target)) {
+      if (menu && menu.style.display !== 'none' && container && !container.contains(/** @type {Node} */ (e.target))) {
         setAiWatchedFoldersDropdownOpen(false);
       }
     });
@@ -3317,7 +3317,7 @@ function _bindAiConfirmHandler() {
   if (_aiConfirmHandlerBound || typeof document === 'undefined') return;
   _aiConfirmHandlerBound = true;
   document.addEventListener('click', async (e) => {
-    const btn = e.target?.closest?.('.ai-chat-confirm-action');
+    const btn = /** @type {HTMLElement} */ (e.target)?.closest?.('.ai-chat-confirm-action');
     if (!btn || btn.disabled) return;
     const actionId = btn.dataset.actionId;
     const row = btn.closest('.ai-chat-action-proposal');
@@ -4409,6 +4409,7 @@ export async function sendAiChatMessage(rawMessage = null) {
   const allowTools = true;
   const activeModel = _aiLastActiveModel || '—';
   const isThinking = isAiThinkingModel(activeModel);
+  /** @type {HTMLElement | null} */
   let streamBotMsgEl = null;
 
   if (listEl) {
@@ -4527,9 +4528,11 @@ export async function sendAiChatMessage(rawMessage = null) {
         let streamedTokens = '';
 
         streamBotMsgEl = null;
+        /** @type {HTMLElement | null} */
         let replyBodyEl = null;
         let thoughtDetailsEl = null;
         let thoughtBodyEl = null;
+        /** @type {HTMLElement | null} */
         let toolsTraceEl = null;
 
         const setupStreamBotEl = () => {

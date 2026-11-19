@@ -217,7 +217,7 @@ export function initDraggableDesktopIcons() {
   };
 
   document.body.addEventListener('contextmenu', (e) => {
-    if (typeof e.target?.closest !== 'function') return;
+    if (typeof (/** @type {HTMLElement} */ (e.target)?.closest) !== 'function') return;
     if (
       /** @type {HTMLElement} */ (e.target).closest('.smart-modal-window') ||
       /** @type {HTMLElement} */ (e.target).closest('.os-window') ||

@@ -336,7 +336,8 @@ body.lcd-direct.lcd-theme-light.text-clarity-on #screen {
   font-weight: 800;
   letter-spacing: 0.8px;
   text-transform: uppercase;
-  color: var(--lt-ink-brand, var(--brand));
+  /* the look's own colour on dark; the theme's dark ink on light, where the bright colour is too faint */
+  color: var(--lt-ink-brand, var(--badge-colour, var(--lt-ink-brand, var(--brand))));
   display: inline-block;
   line-height: 1.2;
 }

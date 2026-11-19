@@ -1818,7 +1818,7 @@ function initWeatherCityAutocomplete() {
 
   // Close when clicking outside
   document.addEventListener('click', (e) => {
-    if (!cityInput.contains(e.target) && !dropdown.contains(e.target)) {
+    if (!cityInput.contains(/** @type {Node} */ (e.target)) && !dropdown.contains(/** @type {Node} */ (e.target))) {
       closeDropdown();
     }
   });

@@ -48,6 +48,7 @@ export function wireTablist(list) {
   });
 }
 
+/** @param {ParentNode} [root] */
 export function wireTablists(root = document) {
   root.querySelectorAll('[role="tablist"]').forEach(wireTablist);
 }

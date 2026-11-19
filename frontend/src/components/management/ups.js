@@ -171,7 +171,7 @@ export function renderUpsTelemetry(ups) {
     const known = ups.battery_charge_pct != null;
     const pct = known ? Math.max(0, Math.min(100, ups.battery_charge_pct)) : 0;
     const offset = 175.93 * (1 - pct / 100);
-    radialFill.style.strokeDashoffset = offset;
+    radialFill.style.strokeDashoffset = String(offset);
     radialFill.style.stroke = !known
       ? 'var(--muted, #8a9a9c)'
       : pct <= 20
@@ -894,9 +894,9 @@ export function initUpsDrawerControls() {
               if (cand.port && cand.port > 0) {
                 portEl.value = cand.port;
               } else if (targetMode === 'apcupsd_client') {
-                portEl.value = 3551;
+                portEl.value = '3551';
               } else if (targetMode === 'nut_client') {
-                portEl.value = 3493;
+                portEl.value = '3493';
               }
             }
             if (nameEl && cand.ups_name) nameEl.value = cand.ups_name;

@@ -952,10 +952,12 @@ export function openVmConsole(vmId, vmName = 'Virtual Machine', initialMode = 'g
     consoleWin.addEventListener('mousedown', (e) => {
       bringToFront(consoleWin);
       setConsoleFocus(true);
-      const tag = e.target?.tagName?.toLowerCase();
+      const tag = /** @type {HTMLElement} */ (e.target)?.tagName?.toLowerCase();
       if (
         ['button', 'input', 'select', 'textarea'].includes(tag) ||
-        e.target?.closest?.('button, input, select, textarea, .dropdown-sendkey-wrap, .os-window-controls')
+        /** @type {HTMLElement} */ (e.target)?.closest?.(
+          'button, input, select, textarea, .dropdown-sendkey-wrap, .os-window-controls'
+        )
       ) {
         return;
       }
@@ -964,7 +966,7 @@ export function openVmConsole(vmId, vmName = 'Virtual Machine', initialMode = 'g
 
     document.addEventListener('mousedown', (e) => {
       const cw = document.getElementById('vm-console-window');
-      if (cw && !cw.contains(e.target)) {
+      if (cw && !cw.contains(/** @type {Node} */ (e.target))) {
         setConsoleFocus(false);
       }
     });
@@ -986,10 +988,10 @@ export function openVmConsole(vmId, vmName = 'Virtual Machine', initialMode = 'g
     const viewport = consoleWin.querySelector('#vm-console-viewport');
     if (viewport) {
       viewport.addEventListener('click', (e) => {
-        const tag = e.target?.tagName?.toLowerCase();
+        const tag = /** @type {HTMLElement} */ (e.target)?.tagName?.toLowerCase();
         if (
           ['button', 'input', 'select', 'textarea'].includes(tag) ||
-          e.target?.closest?.('button, input, select, textarea')
+          /** @type {HTMLElement} */ (e.target)?.closest?.('button, input, select, textarea')
         ) {
           return;
         }
@@ -1560,7 +1562,7 @@ if (typeof window !== 'undefined' && !window._vmConsoleGlobalCaptureBound) {
         // Serial TTY mode
         const cliContainer = cw.querySelector('#vm-cli-container');
         if (cliContainer && cliContainer.style.display !== 'none') {
-          if (cliContainer === document.activeElement || cliContainer.contains(e.target)) {
+          if (cliContainer === document.activeElement || cliContainer.contains(/** @type {Node} */ (e.target))) {
             return;
           }
           try {
@@ -1575,7 +1577,7 @@ if (typeof window !== 'undefined' && !window._vmConsoleGlobalCaptureBound) {
         }
         const simCanvas = cw.querySelector('#vm-console-canvas');
         if (simCanvas && simCanvas.style.display !== 'none') {
-          if (document.activeElement === simCanvas || simCanvas.contains(e.target)) {
+          if (document.activeElement === simCanvas || simCanvas.contains(/** @type {Node} */ (e.target))) {
             return;
           }
           if (simCanvas.onkeydown) {

@@ -1110,7 +1110,7 @@ export class FmContextMenu {
     document.addEventListener(
       'pointerdown',
       (e) => {
-        if (this.menuEl && !this.menuEl.contains(e.target)) this.hide();
+        if (this.menuEl && !this.menuEl.contains(/** @type {Node} */ (e.target))) this.hide();
       },
       true
     );

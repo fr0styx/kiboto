@@ -446,6 +446,7 @@ export function attachGlassTimePicker(inputEl) {
 /**
  * Scans the DOM and enhances all time inputs into glassmorphic time pickers.
  */
+/** @param {ParentNode} [root] */
 export function initGlassTimePickers(root = document) {
   if (!root || typeof root.querySelectorAll !== 'function') return;
 

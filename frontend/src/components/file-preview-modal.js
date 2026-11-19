@@ -281,7 +281,11 @@ function bindModalGlobalEvents(overlay) {
   _previewKeydownListener = (e) => {
     // Ignore keybindings if the user is typing in an active text input or textarea
     const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
-    if (activeTag === 'input' || activeTag === 'textarea' || document.activeElement?.isContentEditable) {
+    if (
+      activeTag === 'input' ||
+      activeTag === 'textarea' ||
+      /** @type {HTMLElement} */ (document.activeElement)?.isContentEditable
+    ) {
       if (e.key === 'Escape') closeFilePreviewModal();
       return;
     }

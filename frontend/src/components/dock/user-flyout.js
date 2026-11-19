@@ -136,9 +136,12 @@ export function toggleUserProfileFlyout(anchorEl) {
 
     // Click outside to close
     document.addEventListener('click', (evt) => {
-      if (flyout.style.display !== 'none' && !flyout.contains(evt.target)) {
+      if (flyout.style.display !== 'none' && !flyout.contains(/** @type {Node} */ (evt.target))) {
         const topbarPill = document.getElementById('topbar-user-pill');
-        if ((!anchorEl || !anchorEl.contains(evt.target)) && (!topbarPill || !topbarPill.contains(evt.target))) {
+        if (
+          (!anchorEl || !anchorEl.contains(/** @type {Node} */ (evt.target))) &&
+          (!topbarPill || !topbarPill.contains(/** @type {Node} */ (evt.target)))
+        ) {
           flyout.style.display = 'none';
           resetFlyoutTrigger();
         }
