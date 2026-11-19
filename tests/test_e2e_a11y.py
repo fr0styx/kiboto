@@ -65,6 +65,20 @@ PANES = [
     "mgmt-pane-about",
     "mgmt-pane-wallpaper",
     "mgmt-pane-language",
+    # the rest of Settings (18 Nov: a sweep of every page in every theme found 33 issues these
+    # panes did not cover; each opens like the ones above, in dark and in light)
+    "mgmt-sec-storage",
+    "mgmt-sec-away",
+    "mgmt-sec-ups",
+    "mgmt-pane-unraid",
+    "mgmt-pane-hardware-copy",
+    "mgmt-sec-activity",
+    "mgmt-sec-ai",
+    "mgmt-pane-connections",
+    "mgmt-pane-theme",
+    "mgmt-pane-glass",
+    "mgmt-pane-widgets",
+    "mgmt-sec-calendar",
 ]
 MGMT = "#management-window"
 
@@ -247,6 +261,17 @@ def test_main_views_have_no_serious_accessibility_issues():
             ]
         page.wait_for_timeout(400)
         _panes(page, results, "")
+        # the cloud drive dialog: a form built from each provider's fields
+        _open(
+            page,
+            results,
+            "cloud-remote",
+            "window.openNewCloudRemoteModal && window.openNewCloudRemoteModal()",
+            "#modal-new-cloud-remote",
+        )
+        page.keyboard.press("Escape")
+        page.evaluate("() => document.getElementById('modal-remote-close-btn')?.click()")
+        page.wait_for_timeout(400)
         # the light theme
         page.evaluate("() => document.body.classList.add('theme-light')")
         page.wait_for_timeout(400)

@@ -7,7 +7,8 @@
   "emoji_strings": 0,
   "per_file": {
     "frontend/index.html": 1,
-    "frontend/src/components/dashboard.js": 32,
+    "frontend/src/components/dashboard.js": 17,
+    "frontend/src/components/desktop-theme.js": 15,
     "frontend/src/components/dock/user-flyout.js": 1,
     "frontend/src/components/encrypted-folders.js": 1,
     "frontend/src/components/fan-control.js": 1,

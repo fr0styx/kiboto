@@ -3,7 +3,7 @@
 import os
 
 from backend import config
-from backend.services import compose_apply, docker_updates, offsite_backup, recycle_bin
+from backend.services import compose_apply, docker_updates, heat_guard, offsite_backup, quiet_night, recycle_bin
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -34,3 +34,31 @@ def test_files_guide_numbers():
 
 def test_people_guide_numbers():
     assert f"first password of {config.MIN_PASSWORD_LENGTH} characters or more" in _doc("PEOPLE.md")
+
+
+def test_power_guide_too_hot_numbers():
+    text = _doc("POWER.md")
+    assert (
+        f"An awake hard drive at {heat_guard.HDD_LIMIT_C} °C, or an NVMe drive at {heat_guard.NVME_LIMIT_C} °C" in text
+    )
+    assert f"stays that hot for {heat_guard.HOLD_SECS // 60} minutes" in text
+    assert f"every drive is {heat_guard.REARM_MARGIN_C} °C under its limit" in text
+    assert f"full speed from {config.HDD_CRITICAL_TEMP} °C (NVMe drives {config.NVME_CRITICAL_TEMP} °C)" in text
+
+
+def test_hardware_guide_quiet_night_numbers(monkeypatch, tmp_path):
+    from backend.services.fan_control import CPU_CRITICAL_C
+
+    text = _doc("HARDWARE.md")
+    monkeypatch.setattr(quiet_night, "SETTINGS_FILE", str(tmp_path / "none.json"))
+    st = quiet_night.state()  # no settings file: the defaults
+    assert f"between two times ({st['start']} to {st['end']} unless you change them)" in text
+    assert f"as if the drives were {int(quiet_night.SHIFT_C)} °C cooler" in text
+    assert (
+        f"From {int(quiet_night.FULL_SHIFT_BELOW_C)} °C the difference shrinks, and from {int(quiet_night.NO_SHIFT_FROM_C)} °C"
+        in text
+    )
+    assert (
+        f"a hard drive reaches {config.HDD_CRITICAL_TEMP} °C, an NVMe drive {config.NVME_CRITICAL_TEMP} °C or the processor {CPU_CRITICAL_C} °C"
+        in text
+    )

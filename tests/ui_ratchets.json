@@ -61,7 +61,7 @@
  },
  "frontend/src/components/dashboard.js": {
   "buttons": 0,
-  "globals": 4,
+  "globals": 3,
   "styles": 17,
   "templates": 5
  },
@@ -82,6 +82,12 @@
   "globals": 0,
   "styles": 9,
   "templates": 2
+ },
+ "frontend/src/components/desktop-theme.js": {
+  "buttons": 0,
+  "globals": 1,
+  "styles": 0,
+  "templates": 0
  },
  "frontend/src/components/dock.js": {
   "buttons": 0,

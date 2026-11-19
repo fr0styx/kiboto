@@ -49,7 +49,18 @@ import {
   setWindowRestorationComplete,
 } from './components/dock.js';
 import { initAuth } from './components/auth.js';
-import { applyStats, applyDesktopTheme, applyLcdTheme, initDashboardClicks } from './components/dashboard.js';
+import { applyDesktopTheme, applyLcdTheme } from './components/desktop-theme.js';
+// the telemetry dashboard (~20 kB) loads with the first stats or click wiring, not with the page
+let _dashboard = null;
+const dashboard = () => (_dashboard ||= import('./components/dashboard.js'));
+const applyStats = (s) =>
+  dashboard()
+    .then((m) => m.applyStats(s))
+    .catch(() => {});
+const initDashboardClicks = () =>
+  dashboard()
+    .then((m) => m.initDashboardClicks())
+    .catch(() => {});
 import { initFanControl } from './components/fan-control.js';
 import { initLedControl } from './components/led-control.js';
 import { applyDashboardLayout, fetchDashboardLayout, fitMiniPreviewScale } from './components/mini-preview.js';

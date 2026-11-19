@@ -412,6 +412,9 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **"Too hot" says what**: the Overview names the drive or the processor that is too hot and its temperature, and
   what to check. A sleeping drive is never woken for it.
 
+- **Guides**: "Switch off when too hot" in the Power guide, and a new Hardware guide (cooling, quieter at night, where
+  the facts about your NAS are). The desktop loads a little less code at start.
+
 #### Fixes
 
 - **The File Explorer's details panel no longer hides file names**: it lies over the list instead of

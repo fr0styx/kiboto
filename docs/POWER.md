@@ -48,3 +48,19 @@ Kiboto can switch the NAS off at night and wake it in the morning, on the nights
 choose. Waking needs the board's wake-up clock (`/sys/class/rtc/rtc0/wakealarm`); when
 Kiboto cannot set it, it refuses to switch off, because the NAS would not come back by
 itself. The activity log notes each night's switch-off and the wake time.
+
+## Switch off when too hot
+
+Off until you turn it on. It is a last line of defence for when the fans cannot keep up, for
+example when a fan has failed or a vent is blocked. The fans already run at full speed from
+55 °C (NVMe drives 75 °C); this acts one step later:
+
+- An awake hard drive at 60 °C, or an NVMe drive at 80 °C, sends a warning at once.
+- If one stays that hot for 3 minutes, Kiboto stops the virtual machines and the apps, saves
+  what is in memory and switches the NAS off.
+- Where Kiboto cannot switch the host off itself (Kiboto in a container on Unraid), it stops
+  what it can and asks you to switch the NAS off by hand.
+- Sleeping drives are never woken or counted. A drive that cools down in time starts the count
+  again; after acting, it is ready again once every drive is 5 °C under its limit.
+
+The card shows what it will do on your NAS and what it did last time.
