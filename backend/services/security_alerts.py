@@ -20,6 +20,7 @@ logger = logging.getLogger("Kiboto")
 ALERT_EVENTS: dict[str, tuple] = {
     "auth.lockout": ("Sign-in locked after repeated failures", "warning"),
     "auth.login.blocked": ("Sign-in attempt on a disabled account", "warning"),
+    "auth.login.new_device": ("Sign-in from a new device", "normal"),
     "auth.mfa.disabled": ("Two-factor sign-in turned off", "warning"),
     "user.created": ("User account created", "normal"),
     "user.deleted": ("User account deleted", "warning"),
@@ -42,7 +43,7 @@ def _describe(event_type: str, actor: str | None, ip: str | None, details: dict[
         parts.append(f"by {actor}")
     if ip:
         parts.append(f"from {ip}")
-    for key in ("target", "target_user_id", "username", "role", "new_role", "name", "key"):
+    for key in ("target", "target_user_id", "username", "role", "new_role", "name", "key", "device"):
         if details.get(key):
             parts.append(f"{key.replace('_', ' ')}: {details[key]}")
     return ", ".join(parts) or event_type

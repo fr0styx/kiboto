@@ -1,6 +1,7 @@
 // A person's page (SET-19 stage 4b, Users report section 5): opened from their row in People. It
 // replaces the "Edit person" dialog and the row's icons: who they are, what they can use, their
 // limits, how they sign in, their data, and turning off or removing them, in one place.
+import { deviceName } from '../device-name.js';
 import { api, apiFetch } from '../api.js';
 import { escapeHtml, copyText } from '../utils.js';
 import { t } from '../i18n.js';
@@ -78,7 +79,7 @@ export function devicesHtml(sessions) {
   return sessions
     .map((s) => {
       const when = s.last_active_at ? formatDateTime(s.last_active_at * 1000) : '';
-      return `<li class="pp-device"><span>${escapeHtml(s.user_agent || t('pp.unknown_device', 'Unknown browser'))}</span><span class="pp-line">${escapeHtml([s.ip_address, when].filter(Boolean).join(' · '))}</span></li>`;
+      return `<li class="pp-device"><span>${escapeHtml(deviceName(s.user_agent) || t('pp.unknown_device', 'Unknown browser'))}</span><span class="pp-line">${escapeHtml([s.ip_address, when].filter(Boolean).join(' · '))}</span></li>`;
     })
     .join('');
 }

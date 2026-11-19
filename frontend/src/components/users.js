@@ -3,6 +3,7 @@
  * Handles User inventory, Role assignment, Session revocation, and TOTP 2FA setup.
  */
 
+import { deviceName } from '../device-name.js';
 import { onManagementDom } from '../management-dom.js';
 import { api, apiFetch } from '../api.js';
 import {
@@ -505,7 +506,7 @@ export async function loadSessionsList() {
           <td class="is-bold">
             <span aria-hidden="true">${isCurrent ? '💻' : '🌐'}</span> ${escapeHtml(isCurrent ? t('users.this_browser', 'This browser') : t('users.other_device', 'Another device'))}
             ${isCurrent ? '<span style="font-size: var(--kb-fs-xs); background:rgba(51,205,184,0.2); color:var(--ok2); padding:2px 6px; border-radius:4px; margin-left:6px;">' + escapeHtml(t('users.this_device', 'This device')) + '</span>' : ''}
-            <div class="kb-sub is-spaced">${escapeHtml(s.user_agent || t('users.unknown_browser', 'Unknown browser'))}</div>
+            <div class="kb-sub is-spaced">${escapeHtml(deviceName(s.user_agent) || t('users.unknown_browser', 'Unknown browser'))}</div>
           </td>
           <td class="is-soft is-mono">${escapeHtml(s.ip_address || '127.0.0.1')}</td>
           <td class="is-dim">${createdStr}</td>

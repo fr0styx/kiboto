@@ -11,6 +11,9 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   internals) stays in the server log instead of reaching the page; the logo proxy fetches only image files from its
   two hosts.
 
+- **Sign-in from a new device**: the first time an account signs in from a kind of device it has not used before,
+  Kiboto records it, alerts the administrators and sends a notification to that person's own devices.
+
 #### New
 
 - **Drive replacement guide**: a drive Drive Health says to replace now or soon gets "Replace this drive", and an
@@ -414,6 +417,8 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 
 - **Guides**: "Switch off when too hot" in the Power guide, and a new Hardware guide (cooling, quieter at night, where
   the facts about your NAS are). The desktop loads a little less code at start.
+
+- **Device lists** (your own page, People) name the device ("Safari on iPhone") instead of a technical line.
 
 #### Fixes
 

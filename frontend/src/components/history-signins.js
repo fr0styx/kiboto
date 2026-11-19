@@ -15,6 +15,7 @@ export function maySeeSignins(user = /** @type {any} */ (globalThis).kibotoUser)
 
 const WORDS = {
   'auth.login.success': ['signin.ok', '{user} signed in'],
+  'auth.login.new_device': ['signin.new_device', '{user} signed in from a new device: {device}'],
   'auth.login.failure': ['signin.failed', 'A sign-in as {user} failed'],
   'auth.login.blocked': ['signin.blocked', '{ip} was blocked after failed sign-ins'],
   'auth.lockout': ['signin.blocked', '{ip} was blocked after failed sign-ins'],
@@ -35,7 +36,11 @@ const WORDS = {
 /** One entry as a sentence; an unknown kind says what the log calls it. */
 export function signinSentence(row) {
   const words = WORDS[row.event_type];
-  const params = { user: row.actor_username || t('signin.someone', 'Someone'), ip: row.actor_ip || '?' };
+  const params = {
+    user: row.actor_username || t('signin.someone', 'Someone'),
+    ip: row.actor_ip || '?',
+    device: row.details?.device || '?',
+  };
   return words ? t(words[0], words[1], params) : `${row.event_type} (${params.user})`;
 }
 

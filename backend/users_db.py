@@ -137,6 +137,21 @@ DEFAULT_ROLES = [
 ]
 
 
+def _create_known_devices(conn: Any) -> None:
+    """The kinds of device each person has signed in from (services/known_devices.py)."""
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS known_devices (
+            user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            device_key TEXT NOT NULL,
+            label TEXT DEFAULT '',
+            first_seen REAL NOT NULL,
+            last_seen REAL NOT NULL,
+            first_ip TEXT DEFAULT '',
+            PRIMARY KEY (user_id, device_key)
+        );
+    """)
+
+
 def init_users_db(db_path: str | None = None) -> None:
     """Initialize SQLite tables for users, roles, sessions, API tokens, and audit logs."""
     target_path = db_path or USERS_DB_PATH
@@ -196,6 +211,7 @@ def init_users_db(db_path: str | None = None) -> None:
         """)
         conn.execute("CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id);")
         conn.execute("CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at);")
+        _create_known_devices(conn)
 
         # 4. Scoped API tokens table
         conn.execute("""

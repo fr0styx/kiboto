@@ -51,3 +51,12 @@ helps run one part of the NAS without being an administrator.
 **Household rules** sets whether adults must use two-step sign-in (off, everyone but kids and
 guests, or chosen roles) and shows who has not set it up yet. People with two-step sign-in
 use a separate password for network folders, which they choose when they turn it on.
+
+## A sign-in from a new device
+
+Kiboto remembers the kinds of device each person signs in from, by browser and system
+("Chrome on Windows"). The first sign-in from another kind is written to History → Sign-ins,
+sent to the administrators with the other security alerts, and sent as a notification to that
+person's own devices (where they turned notifications on). If it wasn't them: change the
+password and sign out the other devices from their own page. The first device of an account,
+and devices that were signed in before this feature arrived, are not reported.

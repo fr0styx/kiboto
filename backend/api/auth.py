@@ -408,6 +408,9 @@ def _build_session_response(
         return refused
     ip = _client_ip(request)
     ua = request.headers.get("user-agent", "")
+    from backend.services import known_devices
+
+    known_devices.signed_in(user, ip, ua, method)  # before the session exists: it is not yet "known"
     token = create_session(user["username"], is_remembered=remember_me, ip=ip, user_agent=ua)
     record_successful_login(user["id"], ip)
 
