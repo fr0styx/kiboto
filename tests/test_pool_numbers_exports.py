@@ -102,3 +102,60 @@ def test_home_assistant_gets_them(pools, monkeypatch):
     confs = {t: json.loads(p) for t, p, _ in ha.messages({}, {}) if t.endswith("/config")}
     assert confs["homeassistant/sensor/kiboto_nas/pool_tank_free/config"]["unit_of_measurement"] == "GiB"
     assert "homeassistant/binary_sensor/kiboto_nas/pool_fast_problem/config" in confs
+
+
+# the record the collector makes for a drive (backend/hardware/disks.py), with nothing added
+def _drive(name, health, temp=35, standby=False):
+    return {
+        "name": name,
+        "dev": name,
+        "temp": temp,
+        "role": "data",
+        "health": health,
+        "risk": "low",
+        "risk_advice": "",
+        "standby": standby,
+        "active": False,
+        "is_nvme": name.startswith("nvme"),
+        "is_parity": False,
+        "parity_label": "",
+    }
+
+
+DRIVES = [
+    _drive("sda", "ok"),
+    _drive("sdb", "warn"),
+    _drive("sdc", "crit"),
+    _drive("sdd", "standby", None, True),
+    _drive("nvme0n1", "unknown"),
+]
+
+
+def test_each_drives_health_for_dashboards(pools, monkeypatch):
+    pools([])
+    assert [pn.drive_level(d) for d in DRIVES] == [0, 1, 2, 0, None]
+    monkeypatch.setattr(Z_STATE, "cached_stats", {"cpu": {"temp": 40}, "disks": DRIVES})
+    text = metrics.prometheus_metrics()
+    assert 'kiboto_disk_health{device="sda",role="data"} 0.0' in text
+    assert 'kiboto_disk_health{device="sdb",role="data"} 1.0' in text
+    assert 'kiboto_disk_health{device="sdc",role="data"} 2.0' in text
+    assert 'kiboto_disk_health{device="nvme0n1"' not in text  # not read: nothing is claimed
+    assert (
+        'kiboto_disk_standby{device="sdd",role="data"} 1.0' in text
+        and 'kiboto_disk_standby{device="sda",role="data"} 0.0' in text
+    )
+    assert 'kiboto_disk_temp_celsius{device="sdd"' not in text  # a sleeping drive has no temperature
+    assert "kiboto_disk_io_ticks" not in text  # the record has no such field
+
+    monkeypatch.setattr(ha, "_electricity", lambda: None)
+    found = {s["key"]: s for s in ha.sensors({"disks": DRIVES})}
+    assert (
+        found["disk_sda_problem"]["value"],
+        found["disk_sdb_problem"]["value"],
+        found["disk_sdc_problem"]["value"],
+    ) == (False, True, True)
+    assert found["disk_sdd_problem"]["value"] is False and "disk_nvme0n1_problem" not in found
+    assert found["drives_problem"]["value"] is True and found["drives_problem"]["component"] == "binary_sensor"
+    good = {s["key"]: s for s in ha.sensors({"disks": DRIVES[:1]})}
+    assert good["drives_problem"]["value"] is False
+    assert "drives_problem" not in {s["key"] for s in ha.sensors({"disks": [DRIVES[4]]})}

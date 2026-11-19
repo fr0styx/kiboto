@@ -53,6 +53,10 @@ How full the NAS is can be read outside Kiboto, without waking a drive. The metr
 Assistant connected, the same numbers arrive there as sensors (see
 [HOME_ASSISTANT.md](HOME_ASSISTANT.md)), so an automation can warn you when a pool passes 90 %.
 
+Each drive's health is there too: `kiboto_disk_health` is 0 for a good drive, 1 for one showing
+wear and 2 for one that is failing, with `kiboto_disk_temp_celsius` and `kiboto_disk_standby`
+beside it; Home Assistant gets a "needs a look" sensor per drive.
+
 ## When a check finds damaged files
 
 A check (scrub) reads everything on a pool and compares it with its checksums. When it finds

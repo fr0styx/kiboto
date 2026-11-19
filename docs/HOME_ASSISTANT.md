@@ -22,6 +22,7 @@ Assistant marks the sensors unavailable after three minutes instead of showing a
 |---|---|
 | CPU usage, memory usage | % |
 | CPU temperature, each disk's temperature, the hottest disk | °C |
+| Each drive needs a look, and "a drive needs a look" for all of them | on/off (a problem) |
 | Storage used, and each pool's | % |
 | Storage free, and each pool's | GiB |
 | Each pool needs a look | on/off (a problem) |

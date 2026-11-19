@@ -55,6 +55,10 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   neither did: how full each pool is, its free space and whether it needs a look, and all pools together. An
   automation can warn you when a pool passes 90 %. No drive is woken to read it.
 
+- **Drive health in your own dashboard**: the metrics page has `kiboto_disk_health` for each drive (0 good,
+  1 showing wear, 2 failing) and whether it sleeps; Home Assistant gets a "needs a look" sensor per drive and
+  one for all of them, so an automation can tell you the day a drive starts to fail.
+
 ## v2.0.4 (2026-11-19)
 ### 🏡 Apps that go back on their own, a way to move in, and Kiboto in your language everywhere
 

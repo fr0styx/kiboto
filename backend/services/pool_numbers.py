@@ -55,3 +55,14 @@ def totals(pools: list[dict[str, Any]]) -> dict[str, Any] | None:
         return None
     used = sum(p["used"] for p in pools)
     return {"total": total, "used": used, "free": sum(p["free"] for p in pools), "pct": round(used * 100.0 / total, 1)}
+
+
+def drive_level(drive: dict[str, Any]) -> int | None:
+    """A drive's health as a number a dashboard can alert on: 0 good, 1 showing wear, 2 failing.
+    None while its health has not been read (a drive that sleeps keeps its last good word)."""
+    word = str(drive.get("health") or "").lower()
+    if word in ("crit", "critical", "fail", "failed", "failing"):
+        return 2
+    if word in ("warn", "warning"):
+        return 1
+    return 0 if word in ("ok", "standby") else None

@@ -117,6 +117,7 @@ def sensors(stats: dict[str, Any]) -> list[dict[str, Any]]:
         )
         hottest = max(hottest or d["temp"], d["temp"])
     add("hottest_disk_temperature", "Hottest disk", hottest, "°C", "temperature")
+    _drive_health_sensors(add, stats.get("disks") or [])
     _storage_sensors(add)
     ups = stats.get("ups") or {}
     if ups.get("available"):
@@ -143,6 +144,28 @@ def sensors(stats: dict[str, Any]) -> list[dict[str, Any]]:
     except (AttributeError, ImportError, OSError, RuntimeError):  # the guard may not be set up yet
         logger.debug("home_assistant: guard state unavailable", exc_info=True)
     return out
+
+
+def _drive_health_sensors(add: Any, disks: list[dict[str, Any]]) -> None:
+    """A "needs a look" sensor per drive whose health was read, and one for all of them."""
+    from backend.services.pool_numbers import drive_level
+
+    worst = None
+    for d in disks:
+        name, level = str(d.get("name") or ""), drive_level(d)
+        if not name or level is None:
+            continue
+        worst = max(worst or 0, level)
+        add(
+            f"disk_{re.sub(r'[^a-z0-9]', '_', name.lower())}_problem",
+            f"Disk {name} needs a look",
+            level > 0,
+            None,
+            "problem",
+            component="binary_sensor",
+        )
+    if worst is not None:
+        add("drives_problem", "A drive needs a look", worst > 0, None, "problem", component="binary_sensor")
 
 
 def _storage_sensors(add: Any) -> None:

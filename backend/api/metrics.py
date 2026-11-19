@@ -23,6 +23,22 @@ def _label(text: str) -> str:
     return str(text).replace("\\", "\\\\").replace('"', '\\"').replace("\n", " ")
 
 
+def _add_disks(add_gauge, disks: list[dict]) -> None:
+    """Each drive's temperature, health, and whether it sleeps. (This page once offered
+    kiboto_disk_io_ticks from a field the drive's record never had, so it was never sent.)"""
+    from backend.services.pool_numbers import drive_level
+
+    for d in disks:
+        labels = {"device": _label(d.get("name") or d.get("dev") or ""), "role": _label(d.get("role", "data"))}
+        add_gauge("kiboto_disk_temp_celsius", "Disk Temperature", d.get("temp"), labels)
+        add_gauge("kiboto_disk_io_ticks", "Disk IO Ticks", d.get("io_ticks"), labels)
+        add_gauge("kiboto_disk_health", "Drive health: 0 good, 1 showing wear, 2 failing", drive_level(d), labels)
+        if "standby" in d:
+            add_gauge("kiboto_disk_standby", "1 while the drive sleeps", int(bool(d["standby"])), labels)
+        if "active" in d:
+            add_gauge("kiboto_disk_active", "1 while the drive is reading or writing", int(bool(d["active"])), labels)
+
+
 def _add_storage(add_gauge) -> None:
     """How full the NAS is: each pool that has a size, and all of them together."""
     from backend.services.pool_numbers import pool_numbers, totals
@@ -145,10 +161,7 @@ def prometheus_metrics():
         )
 
     # Disks
-    for d in stats.get("disks", []):
-        labels = {"device": d.get("name"), "role": d.get("role", "data")}
-        add_gauge("kiboto_disk_temp_celsius", "Disk Temperature", d.get("temp"), labels)
-        add_gauge("kiboto_disk_io_ticks", "Disk IO Ticks", d.get("io_ticks"), labels)
+    _add_disks(add_gauge, stats.get("disks") or [])
 
     # Fans
     fans = stats.get("fans", [])
