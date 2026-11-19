@@ -117,6 +117,7 @@ def sensors(stats: dict[str, Any]) -> list[dict[str, Any]]:
         )
         hottest = max(hottest or d["temp"], d["temp"])
     add("hottest_disk_temperature", "Hottest disk", hottest, "°C", "temperature")
+    _storage_sensors(add)
     ups = stats.get("ups") or {}
     if ups.get("available"):
         add("ups_battery", "UPS battery", ups.get("battery_charge_pct"), "%", "battery")
@@ -142,6 +143,30 @@ def sensors(stats: dict[str, Any]) -> list[dict[str, Any]]:
     except (AttributeError, ImportError, OSError, RuntimeError):  # the guard may not be set up yet
         logger.debug("home_assistant: guard state unavailable", exc_info=True)
     return out
+
+
+def _storage_sensors(add: Any) -> None:
+    """How full the NAS is, and each pool: what most people want an alert for."""
+    from backend.services.pool_numbers import pool_numbers, totals
+
+    pools = pool_numbers()
+    whole = totals(pools)
+    if not whole:
+        return
+    gib = 1024**3
+    add("storage_usage", "Storage used", whole["pct"], "%", None, icon="mdi:harddisk")
+    add("storage_free", "Storage free", round(whole["free"] / gib, 1), "GiB", "data_size")
+    for p in pools:
+        add(f"pool_{p['key']}_usage", f"{p['name']} used", p["pct"], "%", None, icon="mdi:database")
+        add(f"pool_{p['key']}_free", f"{p['name']} free", round(p["free"] / gib, 1), "GiB", "data_size")
+        add(
+            f"pool_{p['key']}_problem",
+            f"{p['name']} needs a look",
+            not p["healthy"],
+            None,
+            "problem",
+            component="binary_sensor",
+        )
 
 
 def _electricity() -> float | None:

@@ -40,6 +40,10 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   Kiboto now sends the UPS's power and an electricity meter that only grows. Add it under Energy → Add
   consumption. The same meter is on the metrics page as `kiboto_energy_total_kwh`.
 
+- **How full the NAS is, in your own dashboard**: the metrics page and Home Assistant now carry storage, which
+  neither did: how full each pool is, its free space and whether it needs a look, and all pools together. An
+  automation can warn you when a pool passes 90 %. No drive is woken to read it.
+
 ## v2.0.4 (2026-11-19)
 ### 🏡 Apps that go back on their own, a way to move in, and Kiboto in your language everywhere
 

@@ -22,6 +22,9 @@ Assistant marks the sensors unavailable after three minutes instead of showing a
 |---|---|
 | CPU usage, memory usage | % |
 | CPU temperature, each disk's temperature, the hottest disk | °C |
+| Storage used, and each pool's | % |
+| Storage free, and each pool's | GiB |
+| Each pool needs a look | on/off (a problem) |
 | UPS battery, UPS load | % |
 | UPS time left | min |
 | UPS on battery | on/off |

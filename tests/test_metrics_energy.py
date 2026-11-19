@@ -15,9 +15,9 @@ def page(monkeypatch, tmp_path):
     def read(ups):
         monkeypatch.setattr(Z_STATE, "cached_stats", {"cpu": {"temp": 40, "util": 5}, "ups": ups})
         text = metrics.prometheus_metrics()
-        return {
-            line.split(" ")[0]: float(line.split(" ")[1]) for line in text.splitlines() if line.startswith("kiboto_")
-        }
+        # the value is what follows the last space: a label (a pool's name) may have spaces in it
+        lines = [line for line in text.splitlines() if line.startswith("kiboto_")]
+        return {line.rsplit(" ", 1)[0]: float(line.rsplit(" ", 1)[1]) for line in lines}
 
     yield read
     energy_use.reset_for_tests()

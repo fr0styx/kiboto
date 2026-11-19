@@ -44,6 +44,15 @@ and keeps a report you can save. It only reads drives that are awake.
 Under **Advanced**: creating a pool and the bay setup, for people who manage the pools
 themselves.
 
+## Watching it from your own dashboard
+
+How full the NAS is can be read outside Kiboto, without waking a drive. The metrics page
+(`/api/metrics`, Prometheus format) has `kiboto_pool_usage_percent`, `kiboto_pool_free_bytes`,
+`kiboto_pool_used_bytes`, `kiboto_pool_total_bytes` and `kiboto_pool_healthy` for each pool, and
+`kiboto_storage_usage_percent` and `kiboto_storage_free_bytes` for all of them together. With Home
+Assistant connected, the same numbers arrive there as sensors (see
+[HOME_ASSISTANT.md](HOME_ASSISTANT.md)), so an automation can warn you when a pool passes 90 %.
+
 ## When a check finds damaged files
 
 A check (scrub) reads everything on a pool and compares it with its checksums. When it finds

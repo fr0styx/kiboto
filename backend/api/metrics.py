@@ -18,6 +18,33 @@ def _safe_float(val):
         return 0.0
 
 
+def _label(text: str) -> str:
+    """A label value as Prometheus wants it: a pool may be named with a quote or a backslash."""
+    return str(text).replace("\\", "\\\\").replace('"', '\\"').replace("\n", " ")
+
+
+def _add_storage(add_gauge) -> None:
+    """How full the NAS is: each pool that has a size, and all of them together."""
+    from backend.services.pool_numbers import pool_numbers, totals
+
+    pools = pool_numbers()
+    for p in pools:
+        labels = {"pool": _label(p["name"]), "type": _label(p["type"])}
+        add_gauge("kiboto_pool_total_bytes", "Size of a storage pool", p["total"], labels)
+        add_gauge("kiboto_pool_used_bytes", "Space used in a storage pool", p["used"], labels)
+        add_gauge("kiboto_pool_free_bytes", "Space free in a storage pool", p["free"], labels)
+        add_gauge("kiboto_pool_usage_percent", "How full a storage pool is", p["pct"], labels)
+        add_gauge(
+            "kiboto_pool_healthy", "1 when the pool is healthy, 0 when it needs a look", int(p["healthy"]), labels
+        )
+    whole = totals(pools)
+    if whole:
+        add_gauge("kiboto_storage_total_bytes", "Size of all storage pools", whole["total"])
+        add_gauge("kiboto_storage_used_bytes", "Space used in all storage pools", whole["used"])
+        add_gauge("kiboto_storage_free_bytes", "Space free in all storage pools", whole["free"])
+        add_gauge("kiboto_storage_usage_percent", "How full the storage is", whole["pct"])
+
+
 def _add_energy(add_gauge) -> None:
     """The electricity totals of the Power page, once a UPS has been measured."""
     from backend.services import energy_use
@@ -139,6 +166,7 @@ def prometheus_metrics():
         add_gauge("kiboto_ups_battery_volts", "UPS Battery Voltage", ups.get("battery_volts"))
         add_gauge("kiboto_ups_power_watts", "Power drawn through the UPS", ups.get("power_watts"))
     _add_energy(add_gauge)
+    _add_storage(add_gauge)
 
     # Unraid
     unraid = stats.get("unraid", {})
