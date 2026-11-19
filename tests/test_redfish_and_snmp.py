@@ -41,6 +41,11 @@ def _seeded_stats(monkeypatch, tmp_path):
     redfish_access.set_enabled(True)
 
     monkeypatch.setattr(Z_STATE, "cached_stats", copy.deepcopy(SEEDED_STATS))
+    # the kernel's drive table of the machine running the tests must not show through
+    from backend.api import redfish
+
+    monkeypatch.setattr(redfish, "HOST_SYS", str(tmp_path / "sys"))
+    monkeypatch.setattr(redfish, "_SIZES", {})
 
 
 def test_redfish_chassis_and_thermal(client, auth_headers):
@@ -103,3 +108,54 @@ def test_redfish_systems_and_storage(client, auth_headers):
     assert drive["Id"] == "sda"
     assert drive["MediaType"] == "HDD"
     assert drive["Protocol"] == "SATA"
+
+
+def test_a_drive_page_reads_the_live_record(client, auth_headers, tmp_path, monkeypatch):
+    """The record the collector really makes has no size_bytes and no smart_fail: every drive was
+    0 bytes and "OK", a failing one too (found 19 Nov 2026 by reading both sides)."""
+    for dev, sectors, rotational in (("sda", "7814037168", "1"), ("sdb", "1953525168", "0")):
+        d = tmp_path / "sys" / "block" / dev / "queue"
+        d.mkdir(parents=True)
+        (d.parent / "size").write_text(sectors + "\n")
+        (d / "rotational").write_text(rotational + "\n")
+    live = {"temp": 35, "role": "data", "risk": "low", "standby": False, "active": False, "is_nvme": False}
+    monkeypatch.setattr(
+        Z_STATE,
+        "cached_stats",
+        {
+            "cpu": {"model": "Intel N100", "temp": 40},
+            "disks": [
+                {**live, "name": "sda", "dev": "sda", "health": "crit"},
+                {**live, "name": "sdb", "dev": "sdb", "health": "warn"},
+                {**live, "name": "sdc", "dev": "sdc", "health": "unknown"},
+                {**live, "name": "sdd", "dev": "sdd", "health": "standby", "standby": True},
+                {**live, "name": "nvme0n1", "dev": "nvme0n1", "health": "ok", "is_nvme": True},
+            ],
+        },
+    )
+
+    def drive(dev):
+        res = client.get(f"/redfish/v1/Storage/1/Drives/{dev}", headers=auth_headers)
+        assert res.status_code == 200, res.text
+        return res.json()
+
+    sda, sdb, sdc, sdd = drive("sda"), drive("sdb"), drive("sdc"), drive("sdd")
+    assert (sda["CapacityBytes"], sda["MediaType"], sda["Status"]["Health"]) == (7814037168 * 512, "HDD", "Critical")
+    assert (sdb["CapacityBytes"], sdb["MediaType"], sdb["Status"]["Health"]) == (1953525168 * 512, "SSD", "Warning")
+    assert sdc["CapacityBytes"] is None and sdc["Status"]["Health"] is None  # not known is not 0 and not OK
+    assert sdd["Status"] == {"State": "StandbyOffline", "Health": "OK"}
+    assert drive("nvme0n1")["MediaType"] == "SSD" and drive("nvme0n1")["Status"]["Health"] == "OK"
+    array = client.get("/redfish/v1/Storage/1", headers=auth_headers).json()
+    assert array["Status"]["Health"] == "Critical"  # its worst drive
+    system = client.get("/redfish/v1/Systems/1", headers=auth_headers).json()
+    assert system["MemorySummary"]["TotalSystemMemoryGiB"] is None  # no 32 GiB made up
+    assert system["ProcessorSummary"]["Model"] == "Intel N100"
+
+
+def test_redfish_drive_helpers():
+    from backend.api import redfish
+
+    assert redfish._worst(["OK", None, "Warning"]) == "Warning" and redfish._worst([]) == "OK"
+    assert redfish._drive_health({"smart_fail": True}) == "Critical" and redfish._drive_health({}) == "OK"
+    assert redfish._sys_block("../etc/passwd", "size") is None and redfish._sys_block("", "size") is None
+    assert redfish._capacity({"size_bytes": 5}) == 5 and redfish._capacity({"dev": "nope", "size_bytes": 0}) is None

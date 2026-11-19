@@ -21,6 +21,10 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   kept it. The label now goes into the Recycle Bin with the file, comes back when you restore it, and is
   forgotten once the bin lets the file go.
 
+- **Redfish reports a failing drive**: on the Redfish monitoring API every drive read as healthy and 0 bytes
+  in size, a failing one too, so a monitoring tool watching it would never have raised an alarm. Drives now
+  report their real health (and the array its worst drive), their size, and whether they are an SSD.
+
 #### Changes
 
 - **Ask Kib about the NAS in your language**: questions about free space, drives, fans, apps, the network and

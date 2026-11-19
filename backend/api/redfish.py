@@ -4,12 +4,15 @@ Provides high-performance, DMTF-compliant RESTful telemetry (< 2ms response time
 served directly from in-memory system state without blocking disk or subprocess I/O.
 """
 
+import os
+import re
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Response
 
 from backend import __version__
 from backend.auth import require_scope
+from backend.config import HOST_SYS
 from backend.state import Z_STATE
 
 
@@ -35,6 +38,60 @@ REDFISH_HEADERS = {
 
 def _get_stats() -> dict[str, Any]:
     return getattr(Z_STATE, "cached_stats", {}) or {}
+
+
+# --- what a drive's record really holds --------------------------------------------------------
+# The live record of a drive has dev, temp, health, risk and standby. These pages once read
+# size_bytes and smart_fail, which it never had: every drive was 0 bytes and "OK", a failing one too.
+_SIZES: dict[str, int] = {}
+
+
+def _sys_block(dev: str, leaf: str) -> str | None:
+    """A value the kernel keeps for a drive (/sys/block): read from memory, so no drive is woken."""
+    if not re.fullmatch(r"[A-Za-z0-9_.:-]+", dev or ""):
+        return None
+    try:
+        with open(os.path.join(HOST_SYS, "block", dev, leaf), encoding="ascii") as f:
+            return f.read().strip()
+    except OSError:
+        return None
+
+
+def _capacity(d: dict[str, Any]) -> int | None:
+    """The drive's size in bytes, or None when it is not known (never 0 for a drive that is there)."""
+    given = d.get("size_bytes")
+    if isinstance(given, (int, float)) and not isinstance(given, bool) and given > 0:
+        return int(given)
+    dev = str(d.get("dev") or d.get("name") or "")
+    if dev not in _SIZES:
+        sectors = _sys_block(dev, "size")
+        if not (sectors and sectors.isdigit() and int(sectors) > 0):
+            return None
+        _SIZES[dev] = int(sectors) * 512  # the kernel counts in 512-byte sectors whatever the drive's own size
+    return _SIZES[dev]
+
+
+def _drive_health(d: dict[str, Any]) -> str | None:
+    """Redfish's word for the drive's health: Critical, Warning, OK, or None while SMART has not answered."""
+    word = str(d.get("health") or "").lower()
+    if d.get("smart_fail") or word in ("crit", "critical", "fail", "failed", "failing"):
+        return "Critical"
+    if word in ("warn", "warning"):
+        return "Warning"
+    if word == "unknown":
+        return None
+    return "OK"  # ok, or asleep: a sleeping drive keeps its last word
+
+
+def _media_type(d: dict[str, Any], dev: str) -> str:
+    if "nvme" in dev.lower() or d.get("is_nvme"):
+        return "SSD"
+    return "SSD" if _sys_block(dev, "queue/rotational") == "0" else "HDD"
+
+
+def _worst(healths: list[str | None]) -> str:
+    """The roll-up for the whole array: its worst drive."""
+    return "Critical" if "Critical" in healths else "Warning" if "Warning" in healths else "OK"
 
 
 @router.get("", include_in_schema=True)
@@ -216,11 +273,12 @@ def get_system_detail():
         "Status": {"State": "Enabled", "Health": "OK"},
         "ProcessorSummary": {
             "Count": 1,
-            "Model": "x86_64 Multi-Core Processor",
+            "Model": str(cpu.get("model") or "") or "x86_64 Multi-Core Processor",
             "Status": {"State": "Enabled", "Health": "OK"},
         },
         "MemorySummary": {
-            "TotalSystemMemoryGiB": float(mem.get("total_gb", 32.0)),
+            # no 32 GiB is made up while the first reading is not in
+            "TotalSystemMemoryGiB": float(mem["total_gb"]) if mem.get("total_gb") is not None else None,
             "Status": {"State": "Enabled", "Health": "OK"},
         },
         "Storage": {"@odata.id": "/redfish/v1/Storage"},
@@ -259,7 +317,7 @@ def get_storage_detail():
         "@odata.type": "#Storage.v1_16_0.Storage",
         "Id": "1",
         "Name": "Kiboto Storage Array",
-        "Status": {"State": "Enabled", "Health": "OK"},
+        "Status": {"State": "Enabled", "Health": _worst([_drive_health(d) for d in disks])},
         "Drives@odata.count": len(drives_members),
         "Drives": drives_members,
     }
@@ -283,6 +341,7 @@ def get_drive_detail(drive_id: str):
 
     is_standby = target.get("standby", False)
     is_nvme = "nvme" in drive_id.lower()
+    dev = str(target.get("dev") or target.get("name") or drive_id)
 
     return {
         "@odata.context": "/redfish/v1/$metadata#Drive.Drive",
@@ -290,11 +349,11 @@ def get_drive_detail(drive_id: str):
         "@odata.type": "#Drive.v1_17_0.Drive",
         "Id": drive_id,
         "Name": f"Physical Drive {drive_id}",
-        "MediaType": "SSD" if is_nvme else "HDD",
+        "MediaType": _media_type(target, dev),
         "Protocol": "NVMe" if is_nvme else "SATA",
-        "CapacityBytes": target.get("size_bytes", 0),
+        "CapacityBytes": _capacity(target),
         "Status": {
             "State": "StandbyOffline" if is_standby else "Enabled",
-            "Health": "OK" if not target.get("smart_fail") else "Critical",
+            "Health": _drive_health(target),
         },
     }
