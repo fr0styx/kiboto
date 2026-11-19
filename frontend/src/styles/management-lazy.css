@@ -593,3 +593,6 @@
 /* the status line says it: the old banner repeated it in capitals */
 #ups-emergency-banner { display: none !important; }
 .ups-rule-head { margin: 0 0 8px; font-size: var(--kb-fs-xs); color: var(--kb-text-soft); line-height: 1.45; }
+/* Docker cleanup: space each app uses (re-audit R4) */
+.dpm-space-list { list-style: none; margin: 6px 0; padding: 0; display: flex; flex-direction: column; gap: 4px; max-height: 180px; overflow-y: auto; }
+.dpm-space-row { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: var(--kb-fs-xs); }

@@ -48335,6 +48335,56 @@
     ]
    }
   },
+  "/api/v1/docker/apps/space": {
+   "get": {
+    "description": "How much space each app uses: Docker's own numbers, and with `folders` the app's folders on\nthe NAS, measured now (never on a sleeping drive, and for 20 seconds at most).",
+    "operationId": "get_apps_space_api_v1_docker_apps_space_get",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "folders",
+      "required": false,
+      "schema": {
+       "default": false,
+       "title": "Folders",
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Get Apps Space Api V1 Docker Apps Space Get",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Get Apps Space",
+    "tags": [
+     "Docker Containers & Stacks"
+    ],
+    "x-required-scopes": [
+     "containers:read",
+     "containers:manage",
+     "system:view"
+    ]
+   }
+  },
   "/api/v1/docker/catalog": {
    "get": {
     "operationId": "get_docker_catalog_api_v1_docker_catalog_get",

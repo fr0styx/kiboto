@@ -63,6 +63,9 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 - **Save History as a file**: Activity → History can save the list on screen, and the whole security log for
   people who may read it, as a file any spreadsheet opens.
 
+- **Space each app uses** (Apps → Docker cleanup): each app's data and program size, biggest first. Its folders
+  are measured when you ask, and a sleeping drive is never woken for it.
+
 #### Changes
 
 - **The Security check says it in words**: "Everything is fine" or "2 things need a look", with what needs a

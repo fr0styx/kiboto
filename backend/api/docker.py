@@ -946,6 +946,21 @@ async def get_system_df():
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
+@router.get(
+    "/docker/apps/space",
+    dependencies=[Depends(require_scope("containers:read", "containers:manage", "system:view"))],
+)
+async def get_apps_space(folders: bool = False) -> dict[str, Any]:
+    """How much space each app uses: Docker's own numbers, and with `folders` the app's folders on
+    the NAS, measured now (never on a sleeping drive, and for 20 seconds at most)."""
+    from backend.services import app_storage
+
+    try:
+        return await asyncio.to_thread(app_storage.measure, folders)
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=f"Docker did not answer: {e}") from e
+
+
 class DockerPruneRequest(BaseModel):
     # off unless it is sent: "Clean up" removed every stopped app by default, also the copy an
     # edit keeps for going back (SET-07, the owner's decision S22)

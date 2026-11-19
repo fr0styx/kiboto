@@ -1167,6 +1167,10 @@ export async function openDockerPruneModal() {
               </div>
             </div>
 
+            <section id="dpm-app-space" class="dkd-col-box" aria-labelledby="dpm-app-space-title">
+              <strong id="dpm-app-space-title">${t('dk.space_title', 'Space each app uses')}</strong>
+            </section>
+
             <!-- Prune Options -->
             <div class="dpm-opts dkd-col-box">
               <label class="dkd-row-xs">
@@ -1267,6 +1271,8 @@ export async function openDockerPruneModal() {
 
   modal.classList.add('open');
   modal.style.display = 'flex';
+
+  import('./app-space.js').then((m) => m.loadAppSpace()).catch(() => {});
 
   // Fetch live system df metrics
   try {

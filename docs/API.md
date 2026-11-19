@@ -38,7 +38,7 @@ request and response schemas.
 
 <!-- BEGIN generated endpoints: python scripts/api_reference.py --update -->
 
-757 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
+758 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
 
 ### AI Conversation History
 
@@ -211,6 +211,7 @@ request and response schemas.
 
 | Method | Path | Access | What it does |
 | :--- | :--- | :--- | :--- |
+| `GET` | `/api/v1/docker/apps/space` | any of `containers:read`, `containers:manage`, `system:view` | How much space each app uses: Docker's own numbers, and with `folders` the app's folders on the NAS, measured now (never on a sleeping dr… |
 | `GET` | `/api/v1/docker/check_port` | any of `containers:read`, `containers:manage`, `system:view` | Get Check Port |
 | `GET` | `/api/v1/docker/containers` | any of `containers:read`, `containers:manage`, `system:view` | Get Docker Containers |
 | `POST` | `/api/v1/docker/containers/bulk-action` | any of `containers:write`, `containers:manage` | Post Docker Bulk Action |
