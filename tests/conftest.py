@@ -596,3 +596,30 @@ def _no_host_flush(tmp_path_factory):
     os.sync = lambda: None
     yield
     os.environ["PATH"], os.sync = old_path, old_sync
+
+
+@pytest.fixture
+def fixed_dns(monkeypatch):
+    """Names resolve from a fixed table for the address guard: a test must not depend on this
+    machine's DNS. Two guard tests looked up wikipedia, github and discord for real, and a
+    lookup that failed for a moment failed the gate (19 Nov 2026)."""
+    import ipaddress
+
+    from backend.services import ssrf_guard
+
+    table = {
+        "en.wikipedia.org": "208.80.154.224",
+        "api.github.com": "140.82.112.5",
+        "discord.com": "162.159.128.233",
+        "localhost": "127.0.0.1",
+        "metadata.google.internal": "169.254.169.254",
+    }
+
+    def resolve(hostname):
+        try:
+            return [ipaddress.ip_address(table.get(str(hostname).lower(), hostname))]
+        except ValueError:
+            return []  # a name nobody listed does not resolve
+
+    monkeypatch.setattr(ssrf_guard, "_resolve_host_ips", resolve)
+    return table

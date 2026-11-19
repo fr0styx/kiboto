@@ -170,7 +170,7 @@ def test_validate_websocket_origin():
 # ============================================================================
 
 
-def test_ssrf_guard_public_vs_notification_policies():
+def test_ssrf_guard_public_vs_notification_policies(fixed_dns):
     # 1. Cloud metadata must be blocked across BOTH policies
     ok_pub, _ = validate_public_url("http://169.254.169.254/latest/meta-data")
     assert ok_pub is False

@@ -20,7 +20,7 @@ def client():
     return TestClient(app)
 
 
-def test_ssrf_safe_url_validation():
+def test_ssrf_safe_url_validation(fixed_dns):
     # Loopback and private/link-local should be blocked
     assert _is_safe_public_url("http://127.0.0.1:8080") is False
     assert _is_safe_public_url("http://localhost:3000") is False
@@ -30,6 +30,8 @@ def test_ssrf_safe_url_validation():
 
     # Valid public domain should pass
     assert _is_safe_public_url("https://en.wikipedia.org/wiki/Python") is True
+    # a name that does not resolve is not safe to fetch
+    assert _is_safe_public_url("https://no-such-host.invalid/") is False
 
 
 def test_tool_browse_internet_ssrf_blocked(monkeypatch):
