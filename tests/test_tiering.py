@@ -7,10 +7,12 @@ import json
 import os
 import threading
 import time
+from types import SimpleNamespace
 
 import pytest
 
-from backend.hardware.pal.base import NetworkShare, PlatformType
+from backend import merged_folders
+from backend.hardware.pal.base import NetworkShare, PlatformType, StoragePool
 from backend.services import open_watch, tier_mover
 from backend.services import tiering as tr
 
@@ -21,6 +23,8 @@ class Platform:
     def __init__(self, kind, shares):
         self.kind, self.shares = kind, shares
         self.places = {"*": [_drive("disk1", 500)]}
+        self.can = SimpleNamespace(can_manage_shares=False, is_observer_mode=True)  # Unraid: Kiboto only watches
+        self.pools = []
 
     def get_platform_type(self):
         return self.kind
@@ -30,6 +34,12 @@ class Platform:
 
     def slow_places(self, share):
         return [dict(p) for p in self.places.get(share, self.places["*"])]
+
+    def get_capabilities(self):
+        return self.can
+
+    def list_pools(self):
+        return self.pools
 
 
 def _drive(name, free_gib, keep_gib=0):
@@ -57,6 +67,7 @@ def nas(tmp_path, monkeypatch):
     monkeypatch.setattr(tr, "STATE_FILE", str(data / "tiering.json"))
     monkeypatch.setattr(tr, "JOBS_DIR", str(data / "tiering"))
     monkeypatch.setattr(tr, "SETTLE_SECS", 0)
+    monkeypatch.setattr(merged_folders, "STATE_FILE", str(data / "tier_merge.json"))
     monkeypatch.setattr(open_watch, "DB_FILE", str(data / "opens.db"))
     open_watch._seen.clear()
     plat = Platform(
@@ -75,11 +86,13 @@ def nas(tmp_path, monkeypatch):
         "Config": {"Image": "ghcr.io/example/kiboto:sha-abc"},
         "Mounts": [
             {"Source": "/host/ssd", "Destination": str(mnt / "ssd")},
+            {"Source": "/host/hdd", "Destination": str(mnt / "hdd")},
             {"Source": "/host/appdata/kiboto", "Destination": str(data)},
         ],
     }
     here = {"/host/ssd": str(mnt / "ssd"), "/host/appdata/kiboto": str(data), "/mnt/disk1": str(array)}
     here["/mnt/disk2"] = str(tmp_path / "array2")
+    here["/host/hdd"] = str(mnt / "hdd")
 
     def local(host_path):
         for outside, inside in here.items():
@@ -154,7 +167,7 @@ def test_only_a_folder_that_stays_on_the_fast_pool_fits(nas):
     }
     films = next(c for c in tr.candidates() if c["name"] == "Films")
     assert films["fast"] == str(nas["mnt"] / "ssd" / "Films")
-    nas["plat"].kind = PlatformType.GENERIC_LINUX
+    nas["plat"].kind = PlatformType.TRUENAS  # another system that manages its own storage: nowhere slower
     assert {c["why"] for c in tr.candidates()} == {"no_merged_folder"}
 
 
@@ -389,3 +402,125 @@ def test_the_share_s_minimum_free_space_goes_to_the_mover(nas):
     out = tr.run("Films", "schedule", _later())
     assert out["moved"] == 1 and nas["job"]["keep_free"] == 20 * 1024**3
     assert nas["made"]["HostConfig"]["Binds"][1] == "/mnt/disk2/Films:/slow"
+
+
+# --- on a system whose pools Kiboto manages: the folder becomes a merged one ----------------------
+@pytest.fixture
+def own_pools(nas, monkeypatch):
+    """Two pools of Kiboto's own, a fast and a slow one, and three shared folders on the fast one."""
+    ssd, hdd = nas["mnt"] / "ssd", nas["mnt"] / "hdd"
+    hdd.mkdir()
+    plat = nas["plat"]
+    plat.kind = PlatformType.GENERIC_LINUX
+    plat.can = SimpleNamespace(can_manage_shares=True, is_observer_mode=False)
+    plat.pools = [
+        StoragePool(id="p-ssd", name="Fast", pool_type="btrfs_raid", mountpoint=str(ssd), free_bytes=5 * 1024**3),
+        StoragePool(id="p-hdd", name="Big", pool_type="btrfs_raid", mountpoint=str(hdd), free_bytes=900 * 1024**3),
+    ]
+    plat.shares = [
+        NetworkShare(name="Films", mountpoint=str(ssd / "Films")),
+        NetworkShare(name="Downloads", mountpoint=str(ssd / "Downloads"), export_nfs=True),
+        NetworkShare(name="Archive", mountpoint=str(hdd / "Archive")),
+    ]
+    made = []
+
+    def add(name, path, slow_mount, slow_pool):
+        fast, slow = tr.tier_merge.sides(path, slow_mount)
+        os.makedirs(os.path.dirname(fast), exist_ok=True)
+        os.rename(path, fast)
+        os.makedirs(path)
+        os.makedirs(slow)
+        merge = {"name": name, "path": path, "fast": fast, "slow": slow, "slow_pool": slow_pool, "made": 1.0}
+        made.append(merge)
+        with open(merged_folders.STATE_FILE, "w", encoding="utf-8") as f:
+            f.write(json.dumps({"merges": made}))
+        return merge
+
+    nas["missing"], nas["mounted"], nas["undone"] = "", True, []
+    monkeypatch.setattr(tr.tier_merge, "missing", lambda path: nas["missing"])
+    monkeypatch.setattr(tr.tier_merge, "add", add)
+    monkeypatch.setattr(tr.tier_merge, "mounted", lambda path: nas["mounted"])
+    monkeypatch.setattr(tr.tier_merge, "remove_if_empty", lambda path: nas["undone"].append(path) or True)
+    (hdd / "Archive").mkdir()
+    return nas
+
+
+def test_on_kibotos_own_pools_a_folder_fits_when_another_pool_can_take_its_old_files(own_pools):
+    fits = {c["name"]: c for c in tr.candidates()}
+    films = fits["Films"]
+    assert (films["why"], films["kind"], films["slow_pool"]) == ("", "merged", "")
+    assert films["slow_choices"] == [{"id": "p-hdd", "name": "Big", "free_bytes": 900 * 1024**3}]
+    assert films["fast"] == str(own_pools["mnt"] / "ssd" / ".kiboto-tier" / "Films")
+    assert fits["Downloads"]["why"] == "nfs" and fits["Archive"]["slow_choices"][0]["id"] == "p-ssd"
+    own_pools["missing"] = "not_shared"
+    assert {c["why"] for c in tr.candidates()} == {
+        "needs_shared_mounts",
+        "nfs",
+    }  # the install file without shared mounts
+    own_pools["missing"] = "no_tool"
+    assert tr.candidates()[0]["why"] == "no_merge_tool"
+    own_pools["missing"] = ""
+    own_pools["plat"].pools.pop()
+    assert {c["why"] for c in tr.candidates()} == {"one_pool"}
+
+
+def test_turning_it_on_there_makes_the_folder_a_merged_one_with_the_pool_chosen(own_pools):
+    for slow in ("", "p-ssd", "p-nope"):  # none chosen, its own pool, no such pool
+        with pytest.raises(tr.NotNow) as e:
+            tr.set_folder("Films", True, 90, slow=slow)
+        assert e.value.key == "no_slow"
+    made = tr.set_folder("Films", True, 30, slow="p-hdd")
+    ssd, hdd = own_pools["mnt"] / "ssd", own_pools["mnt"] / "hdd"
+    assert (made["kind"], made["fast"], made["merged"]) == (
+        "merged",
+        str(ssd / ".kiboto-tier" / "Films"),
+        str(ssd / "Films"),
+    )
+    assert made["slow"] == str(hdd / ".kiboto-tier" / "Films")
+    view = tr.view()["folders"][0]
+    assert (view["kind"], view["slow_pool"], view["mounted"], view["enabled"]) == ("merged", "p-hdd", True, True)
+    again = tr.set_folder("Films", True, 60)  # other days: it is merged already, no pool is asked for
+    assert (again["id"], again["days"], again["slow"]) == (made["id"], 60, made["slow"])
+    assert tr.set_folder("Films", False) is None and own_pools["undone"] == [str(ssd / "Films")]
+    still = tr.view()["folders"][0]  # off, and still a merged folder while it shows files of its slow side
+    assert (still["enabled"], still["kind"], still["slow_pool"]) == (False, "merged", "p-hdd")
+
+
+def test_a_run_there_moves_old_files_between_the_two_hidden_folders(own_pools):
+    folder = tr.set_folder("Films", True, 90, slow="p-hdd")
+    own_pools["watching"] = {"watching": True, "folders": [folder["fast"]], "error": ""}
+    old = os.path.join(folder["fast"], "old.mkv")
+    with open(old, "w") as f:
+        f.write("o" * 50)
+    os.utime(old, (1_600_000_000, 1_600_000_000))
+    own_pools["mounted"] = False
+    out = tr.run("Films", "schedule", _later())
+    assert (out["why"], out["moved"]) == ("not_mounted", 0) and os.path.exists(old)  # it would vanish from the folder
+    assert not [c for c in own_pools["calls"] if c[0] == "POST"]
+    own_pools["mounted"] = True
+    out = tr.run("Films", "schedule", _later())
+    assert (out["why"], out["moved"], out["bytes"]) == ("", 1, 50) and not os.path.exists(old)
+    with open(os.path.join(folder["slow"], "old.mkv")) as f:
+        assert f.read() == "o" * 50
+    assert own_pools["made"]["HostConfig"]["Binds"][:2] == [
+        "/host/ssd/.kiboto-tier/Films:/fast",
+        "/host/hdd/.kiboto-tier/Films:/slow",
+    ]
+
+
+def test_a_merged_folders_snapshot_takes_its_own_files_and_its_pools_stay(own_pools, tmp_path, monkeypatch):
+    from backend.hardware.pal.generic_linux import GenericLinuxStorageAdapter
+
+    folder = tr.set_folder("Films", True, 90, slow="p-hdd")
+    adapter = GenericLinuxStorageAdapter(pool_path=str(own_pools["mnt"] / "ssd"))
+    ran = []
+    monkeypatch.setattr(adapter, "_run_cmd", lambda cmd, **k: ran.append(cmd) or (0, "", ""))
+    monkeypatch.setattr("backend.hardware.pal.generic_linux.zfs_dataset_at", lambda path: "")
+    monkeypatch.setattr("backend.hardware.pal.generic_linux.fs_of", lambda path: "btrfs")
+    made = adapter.create_snapshot("p-ssd", "Films", "films-1")
+    assert made["source"] == folder["fast"] and ran[-1][:4] == ["btrfs", "subvolume", "snapshot", "-r"]
+    assert ran[-1][4] == folder["fast"]  # not the folder's path, where the merge is mounted
+    for pool in own_pools["plat"].pools:
+        with pytest.raises(RuntimeError, match="holds part of the merged folder Films"):
+            adapter._no_merged_folder(pool)
+    adapter._no_merged_folder(StoragePool(id="x", name="Other", pool_type="single", mountpoint="/mnt/other"))

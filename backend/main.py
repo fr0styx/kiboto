@@ -129,8 +129,9 @@ def _start_network_services() -> None:
     from backend.services import iscsi_target
 
     iscsi_target.ensure_soon()  # disks for other computers: its container on the app's current image (off by default)
-    from backend.services import tiering
+    from backend.services import tier_merge, tiering
 
+    tier_merge.ensure_soon()  # the merged folders' container, when there are any (none by default)
     tiering.watch_soon()  # listens for file opens in the folders that have tiering on (none by default)
     from backend.services import hw_helper_container
 

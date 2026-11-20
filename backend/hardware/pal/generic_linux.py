@@ -1082,10 +1082,22 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
             "compat_symlink": None,
         }
 
+    def _no_merged_folder(self, pool: StoragePool) -> None:
+        """A pool that holds one side of a merged folder is not taken away (data tiering)."""
+        from backend import merged_folders
+
+        held = merged_folders.held_on(pool.mountpoint or "")
+        if held:
+            raise RuntimeError(
+                f"{pool.name} holds part of the merged folder {held[0]}: files of that folder are on it. "
+                "It cannot be removed while that is so."
+            )
+
     def destroy_pool(self, pool_id: str) -> dict[str, Any]:
         """Unmounts the pool that is named. It unmounted "<pool folder>/<id>", which for most
         pools is no folder at all, and answered "destroyed" whatever happened."""
         pool = self.resolve_pool(pool_id)
+        self._no_merged_folder(pool)
         if not pool.mountpoint:
             raise RuntimeError(f"{pool.name} is not mounted, so there is nothing to remove.")
         code, out, err = self._run_cmd(["umount", "-f", pool.mountpoint])
@@ -1106,6 +1118,7 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
         """Deletes the pool and erases exactly the drives the plan confirmed (S29)."""
         from backend.hardware.pal import pool_erase
 
+        self._no_merged_folder(self.resolve_pool(pool_id))
         try:
             p = pool_erase.plan(self.resolve_pool(pool_id), self._run_cmd)
             erased = pool_erase.execute(p, self._run_cmd)
@@ -1117,6 +1130,7 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
     def export_pool(self, pool_id: str, force: bool = False) -> dict[str, Any]:
         """Safely flushes dirty write cache, checks active file handles, and exports or unmounts a storage pool."""
         pool = self.resolve_pool(pool_id)
+        self._no_merged_folder(pool)
         pool_id = pool.id
         is_zfs = pool.fs_type == "zfs"
 
@@ -1350,6 +1364,11 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
         src_path = child_path(os.path.join(self._pool_path, "@shares"), subvol_name)
         if not os.path.exists(src_path):
             src_path = child_path(self._pool_path, subvol_name)
+        from backend import merged_folders
+
+        merge = merged_folders.of(src_path)
+        if merge is not None:  # a merged folder: its own files are in the hidden folder beside it
+            src_path = merge["fast"]
 
         snaps_dir = os.path.join(self._pool_path, "@snapshots")
         try:

@@ -232,6 +232,7 @@
     "_make_share_dir": "(self, full_path: str) -> str",
     "_must": "(self, cmd: list[str], what: str) -> str",
     "_nested_subvolumes": "(self, path: str) -> bool",
+    "_no_merged_folder": "(self, pool: StoragePool) -> None",
     "_read_worm": "(self, item: dict[str, typing.Any]) -> None",
     "_release_view": "(self, zfs_name: str) -> None",
     "_resolve_disk_path": "(self, disk: str) -> str",

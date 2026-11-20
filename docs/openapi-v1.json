@@ -7964,6 +7964,12 @@
      "enabled": {
       "title": "Enabled",
       "type": "boolean"
+     },
+     "slow": {
+      "default": "",
+      "maxLength": 128,
+      "title": "Slow",
+      "type": "string"
      }
     },
     "required": [
@@ -71373,7 +71379,7 @@
   },
   "/api/v1/tiering/folders/{name}": {
    "put": {
-    "description": "Turns tiering on for a shared folder (confirmed), changes its days, or turns it off.",
+    "description": "Turns tiering on for a shared folder (confirmed), changes its days, or turns it off. On one\nof Kiboto's own pools turning it on makes the folder a merged one, which is confirmed in its own words.",
     "operationId": "tiering_set_api_v1_tiering_folders__name__put",
     "parameters": [
      {

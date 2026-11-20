@@ -21,10 +21,11 @@ ADMIN = Depends(require_scope("storage:admin"))
 class FolderIn(BaseModel):
     enabled: bool
     days: int = Field(tiering.DEFAULT_DAYS)
+    slow: str = Field("", max_length=128)  # on one of Kiboto's own pools: the pool its old files move to
 
 
 def _refused(e: tiering.NotNow) -> ApiError:
-    status = 409 if e.key == "busy" else 404 if e.key == "no_folder" else 400
+    status = 409 if e.key in ("busy", "merge_failed") else 404 if e.key == "no_folder" else 400
     return ApiError(status, str(e), f"tiering_{e.key}", text=said(f"tiering_{e.key}", **e.params))
 
 
@@ -51,11 +52,15 @@ async def tiering_view() -> dict[str, Any]:
 async def tiering_set(
     name: str, req: FolderIn, request: Request, principal: AuthenticatedPrincipal = Depends(get_current_principal)
 ) -> dict[str, Any]:
-    """Turns tiering on for a shared folder (confirmed), changes its days, or turns it off."""
+    """Turns tiering on for a shared folder (confirmed), changes its days, or turns it off. On one
+    of Kiboto's own pools turning it on makes the folder a merged one, which is confirmed in its own words."""
     if req.enabled and tiering.get(name) is None:
-        confirm_or_raise(request, principal, "tiering.enable", target=name)
+        fits = await asyncio.to_thread(tiering.candidates)
+        fit = next((c for c in fits if c["name"] == name), {})
+        becomes_merged = fit.get("kind") == "merged" and not fit.get("slow_pool")
+        confirm_or_raise(request, principal, "tiering.merge" if becomes_merged else "tiering.enable", target=name)
     try:
-        await asyncio.to_thread(tiering.set_folder, name, req.enabled, req.days)
+        await asyncio.to_thread(tiering.set_folder, name, req.enabled, req.days, None, req.slow)
     except tiering.NotNow as e:
         raise _refused(e) from e
     _note(principal, request, "set", folder=name, enabled=req.enabled, days=req.days if req.enabled else None)

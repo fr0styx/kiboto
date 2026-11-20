@@ -59,6 +59,7 @@ ACTIONS: dict[str, str] = {
     "iscsi.save": "Save this disk. The iSCSI service restarts, so a computer that is using a disk is cut off for a moment",
     "iscsi.delete": "Remove this disk from the list. Its file stays in its folder, and the computer that uses it can no longer reach it",
     "tiering.enable": "Move the files of {target} that nobody has opened for a long time to the hard drives, at night. Kiboto first watches the folder for that long, and a file that has moved stays on the hard drives",
+    "tiering.merge": "Make {target} a merged folder and move its old files to the slower pool at night. Its own files move to a hidden folder on the same pool, and the folder is away for a few seconds. Snapshots of it then hold only the files still on the fast pool",
     "tiering.run": "Move the old files of {target} to the hard drives now. The hard drives wake up for it",
     "scripts.enable": "Let administrators run their own scripts on this NAS. A script can read and change every file Kiboto can",
     "scripts.save": "Save this script. It runs with Kiboto's rights when its time comes",

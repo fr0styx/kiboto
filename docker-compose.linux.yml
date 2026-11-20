@@ -31,8 +31,9 @@ services:
       - /dev/fuse:/dev/fuse:rw
       - /etc/hostname:/host/etc/hostname:ro
       
-      # Storage root with bidirectional mount propagation
-      - ${STORAGE_POOL_PATH:-/mnt/storage}:/mnt/storage:rw
+      # Storage root. "rslave": a mount made on the host under it shows up here too, which a merged
+      # folder (old files on a slower pool, docs/TIERING.md) needs. The SMB container below has it as well.
+      - ${STORAGE_POOL_PATH:-/mnt/storage}:/mnt/storage:rw,rslave
       - /mnt/user:/mnt/user:rw
       - /zettos:/zettos:rw
       - /var/local/emhttp:/var/local/emhttp:ro
@@ -102,7 +103,7 @@ services:
         max-file: "3"
     network_mode: host                    # Line-rate 10GbE throughput + Windows (WSD) discovery
     volumes:
-      - /mnt/storage:/mnt/storage:rw
+      - ${STORAGE_POOL_PATH:-/mnt/storage}:/mnt/storage:rw,rslave   # the same folder Kiboto has, merged folders included
       - ./data/samba:/etc/samba/kiboto:ro
       - ./data/samba/private:/var/lib/samba/private:rw
     entrypoint: ["/bin/sh", "-c"]

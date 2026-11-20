@@ -36,7 +36,24 @@ const WHY = {
     'tier.why.no_merged_folder',
     'On this system a folder lives on one pool, so there is no slower place to move its files to.',
   ],
+  one_pool: ['tier.why.one_pool', 'There is no second pool its old files could move to.'],
+  nfs: ['tier.why.nfs', 'This folder is shared over NFS; a folder on two pools is not offered over NFS yet.'],
+  own_mount: [
+    'tier.why.own_mount',
+    'This folder is mounted on its own (a ZFS dataset, for example); that is not supported yet.',
+  ],
+  needs_shared_mounts: [
+    'tier.why.needs_shared_mounts',
+    "Kiboto's install file has to share mounts between its containers first. The guide (docs/TIERING.md) shows the two lines to change.",
+  ],
+  no_merge_tool: ['tier.why.no_merge_tool', 'This system cannot show two pools as one folder.'],
 };
+
+/** The name of the pool a merged folder's old files go to. */
+function slowName(f) {
+  const pool = (f.slow_choices || []).find((p) => p.id === f.slow_pool);
+  return pool ? pool.name : f.slow_pool;
+}
 
 /** Why moving old files does not fit a folder, in words. */
 export function tieringWhy(why) {
@@ -68,6 +85,14 @@ export function tieringLastRun(run) {
       t('tier.last_blind', 'Last run {when}: nothing moved, because Kiboto was not seeing which files are opened.', {
         when,
       })
+    );
+  else if (run.why === 'not_mounted')
+    said.push(
+      t(
+        'tier.last_unmounted',
+        'Last run {when}: nothing moved, because the two pools were not shown as one at that time.',
+        { when }
+      )
     );
   else if (run.why === 'no_slow_drive')
     said.push(
@@ -111,6 +136,16 @@ export function tieringLastRun(run) {
 
 /** A folder's status line. */
 export function tieringStatus(f, view) {
+  if (f.kind === 'merged' && f.slow_pool && f.mounted === false)
+    return t(
+      'tier.st_unmounted',
+      'The two pools are not shown as one right now: the files on {pool} are missing from the folder until that is running again. Nothing is lost.',
+      { pool: slowName(f) }
+    );
+  if (!f.enabled && f.kind === 'merged' && f.slow_pool)
+    return t('tier.st_off_merged', 'Off. Its old files stay on {pool} and keep showing in the folder.', {
+      pool: slowName(f),
+    });
   if (!f.enabled) return t('tier.st_off', 'Off.');
   if (!f.watching)
     return t('tier.st_blind', 'On, but Kiboto cannot see which files are opened on this system, so nothing moves.');
@@ -158,8 +193,31 @@ function row(f) {
       el('span', { textContent: t('tier.days_label', 'Days not opened') }),
       days
     ),
-    toggle,
   ];
+  if (f.kind === 'merged' && !f.slow_pool) {
+    // on one of Kiboto's own pools: which pool takes the old files is chosen once, when it is turned on
+    const slow = el('select', { className: 'tz-select-input tier-slow' });
+    slow.dataset.tierSlow = f.name;
+    for (const p of f.slow_choices || [])
+      slow.append(
+        el('option', {
+          value: p.id,
+          textContent: t('tier.slow_option', '{name} ({free} free)', {
+            name: p.name,
+            free: formatBytes(p.free_bytes || 0),
+          }),
+        })
+      );
+    acts.push(
+      el(
+        'label',
+        { className: 'tier-days-label' },
+        el('span', { textContent: t('tier.slow_label', 'Slower pool') }),
+        slow
+      )
+    );
+  }
+  acts.push(toggle);
   if (f.enabled && f.watching && !f.learning && !_view.moving) {
     const run = el('button', { type: 'button', className: 'btn-pill-toggle', textContent: t('tier.run', 'Move now') });
     run.dataset.tierAct = 'run';
@@ -173,7 +231,13 @@ function row(f) {
       'div',
       { className: 'scr-words' },
       el('strong', { textContent: f.name }),
-      el('span', { className: 'immich-note', textContent: tieringStatus(f, _view) })
+      el('span', { className: 'immich-note', textContent: tieringStatus(f, _view) }),
+      f.enabled && f.kind === 'merged' && f.slow_pool && f.mounted !== false
+        ? el('span', {
+            className: 'immich-note',
+            textContent: t('tier.slow_to', 'Old files go to {pool}.', { pool: slowName(f) }),
+          })
+        : null
     ),
     el('div', { className: 'scr-acts' }, ...acts)
   );
@@ -269,7 +333,14 @@ async function onClick(e) {
     if (action === 'toggle') {
       const turnOn = !(folder && folder.enabled);
       const days = daysOf(name);
-      _view = await api.put(path(name), { enabled: turnOn, days }); // the server asks to confirm turning it on
+      const payload = { enabled: turnOn, days };
+      const slow = /** @type {HTMLSelectElement | null} */ (
+        [...document.querySelectorAll('#tiering-card select[data-tier-slow]')].find(
+          (s) => /** @type {HTMLElement} */ (s).dataset.tierSlow === name
+        )
+      );
+      if (turnOn && slow) payload.slow = slow.value;
+      _view = await api.put(path(name), payload); // the server asks to confirm turning it on
       showToast(
         turnOn
           ? t(

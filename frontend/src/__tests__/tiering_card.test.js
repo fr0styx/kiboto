@@ -203,6 +203,42 @@ describe('old files move to the slower drives', () => {
     ]);
   });
 
+  it("on Kiboto's own pools, asks which pool is the slower one and sends it", async () => {
+    const POOLS = [
+      { id: 'p-hdd', name: 'Big', free_bytes: 900 * 1024 ** 3 },
+      { id: 'p-old', name: 'Old', free_bytes: 100 * 1024 ** 3 },
+    ];
+    const off = { name: 'Films', why: '', enabled: false, kind: 'merged', slow_pool: '', slow_choices: POOLS };
+    const on = { ...FILMS, kind: 'merged', slow_pool: 'p-old', slow_choices: POOLS, mounted: true, learning: true };
+    vi.spyOn(api, 'get').mockResolvedValue(view([off, { name: 'Notes', why: 'one_pool', enabled: false }]));
+    const put = vi.spyOn(api, 'put').mockResolvedValue(view([on]));
+    await renderTieringCard();
+    const slow = card().querySelector('select[data-tier-slow="Films"]');
+    expect([...slow.options].map((o) => o.textContent)).toEqual(['Big (900 GB free)', 'Old (100 GB free)']);
+    expect(card().querySelector('details').textContent).toContain(`Notes: ${tieringWhy('one_pool')}`);
+    slow.value = 'p-old';
+    await press('[data-tier-act="toggle"]');
+    expect(put).toHaveBeenLastCalledWith('/api/tiering/folders/Films', { enabled: true, days: 90, slow: 'p-old' });
+    // merged now: the pool is no longer asked for, and the row says where the old files go
+    expect(card().querySelector('select[data-tier-slow]')).toBeNull();
+    expect(card().querySelector('[data-tier-row="Films"]').textContent).toContain('Old files go to Old.');
+  });
+
+  it('says so when the two pools are not shown as one, and when a merged folder is off', () => {
+    const merged = { ...FILMS, kind: 'merged', slow_pool: 'p-hdd', slow_choices: [{ id: 'p-hdd', name: 'Big' }] };
+    const v = view([merged]);
+    expect(tieringStatus({ ...merged, mounted: false }, v)).toBe(
+      'The two pools are not shown as one right now: the files on Big are missing from the folder until that is running again. Nothing is lost.'
+    );
+    expect(tieringStatus({ ...merged, mounted: true, enabled: false }, v)).toBe(
+      'Off. Its old files stay on Big and keep showing in the folder.'
+    );
+    expect(tieringLastRun(run({ why: 'not_mounted', moved: 0 }))).toMatch(
+      /nothing moved, because the two pools were not shown as one at that time\.$/
+    );
+    expect(tieringWhy('needs_shared_mounts')).toContain('docs/TIERING.md');
+  });
+
   it('stays away for someone who does not manage the storage', async () => {
     vi.spyOn(api, 'get').mockRejectedValue({ status: 403 });
     expect(await renderTieringCard()).toBe(false);

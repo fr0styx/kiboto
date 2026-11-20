@@ -13,10 +13,10 @@ def service(monkeypatch):
     calls = []
     state = {"on": None, "calls": calls, "refuse": None}
 
-    def set_folder(name, enabled, days=90, now=None):
+    def set_folder(name, enabled, days=90, now=None, slow=""):
         if state["refuse"]:
             raise tr.NotNow(state["refuse"], "Refused.", value=3650)
-        calls.append(("set", name, enabled, days))
+        calls.append(("set", name, enabled, days, slow) if slow else ("set", name, enabled, days))
         state["on"] = {"name": name} if enabled else None
 
     def run_soon(name, how="hand"):
@@ -25,6 +25,7 @@ def service(monkeypatch):
         calls.append(("run", name))
 
     monkeypatch.setattr(tr, "view", lambda now=None: VIEW)
+    monkeypatch.setattr(tr, "candidates", lambda: state.get("fits", [{"name": "Films", "why": ""}]))
     monkeypatch.setattr(tr, "get", lambda name: state["on"])
     monkeypatch.setattr(tr, "set_folder", set_folder)
     monkeypatch.setattr(tr, "run_soon", run_soon)
@@ -92,10 +93,27 @@ def test_turning_a_folder_on_and_moving_now_ask_first(client, auth_headers, serv
         assert "Films" in made.json()["summary"]
 
 
-@pytest.mark.parametrize("key,status", [("no_fit", 400), ("bad_days", 400), ("no_folder", 404), ("busy", 409)])
+@pytest.mark.parametrize(
+    "key,status",
+    [("no_fit", 400), ("bad_days", 400), ("no_folder", 404), ("busy", 409), ("no_slow", 400), ("merge_failed", 409)],
+)
 def test_a_refusal_says_which_one_in_the_readers_language(client, auth_headers, service, key, status):
     service["refuse"] = key
     res = client.put("/api/tiering/folders/Films", json={"enabled": True}, headers=auth_headers)
     assert res.status_code == status and res.json()["error"] == f"tiering_{key}"
     assert res.json()["text"]["msg_key"] == f"srv.tiering_{key}"
     assert client.post("/api/tiering/folders/Films/run", headers=auth_headers).status_code == status
+
+
+def test_making_a_folder_a_merged_one_is_confirmed_in_its_own_words(client, auth_headers, service, monkeypatch):
+    logged = []
+    monkeypatch.setattr("backend.users_db.log_security_event", lambda event, *a, **k: logged.append(event))
+    service["fits"] = [{"name": "Films", "why": "", "kind": "merged", "slow_pool": "", "slow_choices": []}]
+    body = {"enabled": True, "days": 30, "slow": "p-hdd"}
+    assert client.put("/api/tiering/folders/Films", json=body, headers=auth_headers).status_code == 200
+    assert service["calls"][0] == ("set", "Films", True, 30, "p-hdd")
+    assert [e for e in logged if e.startswith("confirm.")] == ["confirm.tiering.merge"]
+    # merged already (tiering was off for it): turning it on again is the ordinary question
+    service["on"], service["fits"][0]["slow_pool"] = None, "p-hdd"
+    assert client.put("/api/tiering/folders/Films", json={"enabled": True}, headers=auth_headers).status_code == 200
+    assert [e for e in logged if e.startswith("confirm.")][-1] == "confirm.tiering.enable"

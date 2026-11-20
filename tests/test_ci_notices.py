@@ -30,6 +30,8 @@ def test_finds_version_and_deprecation_notices_and_skips_noise():
         "2026-11-16T18:33:00.2Z [gw0] [ 39%] PASSED tests/test_fast_json.py::test_app_default_response_is_not_deprecated ",
         "2026-11-16T18:33:00.3Z [gw1] [ 92%] PASSED tests/test_update_reasons_in_language.py::test_each_recorded_reason_has_its_words[the new version did not start-not_started-params5] ",
         "2026-11-16T18:33:00.4Z tests/test_vm.py::test_spawn: DeprecationWarning: fork() is deprecated here",
+        # a commit message printed with the build's event: its words are not a notice
+        '2026-11-20T00:12:00.0Z     "message": "Notices: a test name with deprecated in it is skipped\\n\\nMore words",',
         '"Node.js 20 is deprecated"',
     ]
     assert cn.find_notices(log) == [

@@ -61,6 +61,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     restic \
     fuse3 \
     gocryptfs \
+    mergerfs \
     && rm -rf /var/lib/apt/lists/*
 
 # tgtd and tgtadm: the iSCSI target that runs without kernel modules (disks for other computers, off by

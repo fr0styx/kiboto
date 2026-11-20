@@ -103,6 +103,15 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   it is. For Unraid shares that stay on their pool; off for every folder until you turn it on. Guide:
   docs/TIERING.md.
 
+- **Old files move to a slower pool on Kiboto's own pools too** (Storage → Shared folders, Linux install):
+  where Kiboto manages the pools, a shared folder can become a merged folder. You choose the slower pool;
+  the folder's own files move to a hidden folder beside it (one rename, nothing is copied), old files go
+  to the slower pool at night, and the folder shows both as one. The merge runs in a small container of its
+  own, comes back by itself if it stops, and Kiboto puts the folder back as it was if it cannot be set up.
+  Snapshots of a merged folder hold the files still on the fast pool. It needs two changed lines in the
+  install file (docs/TIERING.md shows them; new installs have them); until then the page says so. Tried
+  with throwaway containers only: there is no machine with pools of Kiboto's own to try it on.
+
 #### Security
 
 - **App logos**: Kiboto fetches a logo only when an app in the catalog names that exact address. Before, any

@@ -95,6 +95,11 @@ const ACTIONS = {
     'Move the files of {target} that nobody has opened for a long time to the slower drives, at night? Kiboto first watches the folder for that long, and a file that has moved stays there.',
     false,
   ],
+  'tiering.merge': [
+    'Make it a merged folder',
+    'Make {target} a merged folder and move its old files to the slower pool at night? Its own files move to a hidden folder on the same pool, and the folder is away for a few seconds. Snapshots of it then hold only the files still on the fast pool.',
+    false,
+  ],
   'tiering.run': [
     'Move now',
     'Move the old files of {target} to the slower drives now? The drives wake up for it.',

@@ -83,8 +83,61 @@ a folder whose new files stay on the pool: **Primary storage: the pool, Secondar
   well as `/mnt/user`.
 - The array has no drive the folder may use.
 
-On a system where a folder lives on one pool only, there is no slower place for its files and the
-page says so.
+On another system that manages its own storage (TrueNAS, for example), a folder lives on one pool
+only: there is no slower place for its files, and the page says so.
+
+## On pools that Kiboto manages: a merged folder
+
+Where Kiboto manages the pools itself (the Linux install), a shared folder lives on one pool. For
+its old files to move to a slower pool and still show in the same folder, the folder becomes a
+**merged folder** when you turn this on, and you choose the slower pool:
+
+- its own files move to a hidden folder beside it on the same pool, `.kiboto-tier/<name>`. That is
+  one rename: nothing is copied, and it takes a moment whatever the folder's size;
+- the slower pool gets a hidden folder of the same name, `.kiboto-tier/<name>`, for the old files;
+- at the folder's own path the two are shown as one. New files are written to the fast pool.
+
+The folder is away for a few seconds while this happens. If the merge does not come up, Kiboto
+puts the folder back exactly as it was.
+
+The merge runs in a small container of its own (`kiboto-merge`), so restarting or updating Kiboto
+does not interrupt it. While it is not running, the folder's path is an empty folder nobody can
+write to and the page says that the two pools are not shown as one. **Nothing is lost then**: the
+files are in the two hidden folders, and they show again as soon as the merge is back, which
+Kiboto sees to when it starts.
+
+What changes for a merged folder:
+
+- **Snapshots** of it hold the files that are still on the fast pool. A file that has moved to the
+  slower pool is not in snapshots taken after that.
+- **A pool that holds one side cannot be removed, ejected or erased** while that is so.
+- **Turning it off** stops the moving. The folder stays a merged one while files are on its slower
+  side, so they keep showing; with nothing there, it becomes an ordinary folder again.
+- A program of Kiboto's own that reads through the folder (a backup that reads every file) counts
+  as someone opening the files here, because Kiboto cannot tell who asked the merge for a file.
+
+It is not offered for a folder that is shared over NFS, nor for one that is mounted on its own (a
+ZFS dataset): the page says which.
+
+### The install file has to share mounts
+
+What the merge mounts must be seen by Kiboto and by the container that serves SMB. Installs made
+from the install file of 2.0.5 or later have this. On an older install, change two lines in
+`docker-compose.linux.yml` and start the containers again (`docker compose up -d`). The line that
+gives a service the storage, under `volumes:`, becomes this one, both in Kiboto's own service and
+in the service whose container is `kiboto-samba`:
+
+```yaml
+      - ${STORAGE_POOL_PATH:-/mnt/storage}:/mnt/storage:rw,rslave
+```
+
+Until then the page says that the install file has to share mounts first, and offers no folder.
+
+This part was tried with throwaway containers only (the merge seen from the host and from a second
+container, a killed merge coming back, files moving between the two sides): there is no machine
+with pools of Kiboto's own to try it on. To undo it by hand at any time: stop the `kiboto-merge`
+container, remove the empty folder at the share's path, and move `.kiboto-tier/<name>` back to that
+path; the old files are in `.kiboto-tier/<name>` on the slower pool.
 
 ## What Kiboto needs
 

@@ -152,3 +152,14 @@ def test_tiering_guide_numbers():
     assert "counts as someone opening the files" in text and "One way only" in text
     assert tier_mover.PART.startswith(".kiboto-") and "under a temporary name" in text
     assert "one drive of the array" in text and "leaves the share's minimum free space" in text
+    # on pools Kiboto manages: the merged folder, its container, its hidden folders, and the install file
+    from backend.services import tier_merge
+
+    assert f"(`{tier_merge.CONTAINER}`)" in text and f"`{tier_merge.HIDDEN}/<name>`" in text
+    assert "puts the folder back exactly as it was" in text and "Nothing is lost then" in text
+    with open(os.path.join(ROOT, "docker-compose.linux.yml"), encoding="utf-8") as fh:
+        install = fh.read()
+    line = "- ${STORAGE_POOL_PATH:-/mnt/storage}:/mnt/storage:rw,rslave"
+    assert install.count(line) == 2 and text.count(line) == 1  # Kiboto and the SMB container; the guide shows the line
+    with open(os.path.join(ROOT, "Dockerfile"), encoding="utf-8") as fh:
+        assert f"\n    {tier_merge.TOOL} \\\n" in fh.read()

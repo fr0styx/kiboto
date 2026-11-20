@@ -25,7 +25,7 @@ from typing import Any
 from backend import legacy_names, product
 from backend.config import DATA_DIR, logger
 from backend.fsutil import atomic_write_json, json_locked, read_json
-from backend.services import open_watch
+from backend.services import open_watch, tier_merge
 
 STATE_FILE = os.path.join(DATA_DIR, "tiering.json")
 JOBS_DIR = os.path.join(DATA_DIR, "tiering")
@@ -86,6 +86,9 @@ def candidates() -> list[dict[str, Any]]:
     try:
         plat = get_storage_platform()
         kind, shares = plat.get_platform_type(), list(plat.list_shares())
+        can = plat.get_capabilities()
+        manages = kind != PlatformType.UNRAID and can.can_manage_shares and not can.is_observer_mode
+        pools = list(plat.list_pools()) if manages else []
     except (OSError, RuntimeError, ValueError):
         logger.debug("[Tiering] the shared folders could not be read", exc_info=True)
         return []
@@ -93,7 +96,8 @@ def candidates() -> list[dict[str, Any]]:
     for s in shares:
         entry: dict[str, Any] = {"name": s.name, "why": "", "fast": "", "merged": ""}
         if kind != PlatformType.UNRAID:
-            entry["why"] = "no_merged_folder"  # Kiboto's own pools: see merged folders
+            # where Kiboto manages the pools a folder can become a merged one; elsewhere there is no slower place
+            entry.update(_own_pools_fit(s, pools) if manages else {"why": "no_merged_folder"})
         elif s.cache_mode == "yes":
             entry["why"] = "unraid_moves_all"
         elif s.cache_mode == "prefer":
@@ -115,11 +119,56 @@ def candidates() -> list[dict[str, Any]]:
     return out
 
 
+def _own_pools_fit(share: Any, pools: list[Any]) -> dict[str, Any]:
+    """On a system whose pools Kiboto manages: a folder fits when another pool can take its old
+    files and the system can show the two pools as one folder (tier_merge.py)."""
+    path = (share.mountpoint or "").rstrip("/")
+    mounts = [((p.mountpoint or "").rstrip("/"), p) for p in pools if p.mountpoint]
+    own = max((m for m, _p in mounts if path.startswith(m + "/")), key=len, default="")
+    others = [
+        {"id": p.id, "name": p.name, "free_bytes": p.free_bytes}
+        for m, p in mounts
+        if m != own and not path.startswith(m + "/")
+    ]
+    merge = tier_merge.of(path) if path else None
+    if merge is not None:  # merged already (tiering may be off for it: its old files still show)
+        choice = {"slow_pool": merge["slow_pool"], "slow_choices": others}
+        return {"why": "", "kind": "merged", "fast": merge["fast"], "merged": path, **choice}
+    if not path or not own or not others:
+        return {"why": "one_pool"}
+    if share.export_nfs:
+        return {"why": "nfs"}  # a merged folder is not offered over NFS yet
+    if not os.path.isdir(path) or os.path.islink(path) or os.path.ismount(path):
+        return {"why": "own_mount"}
+    why = tier_merge.missing(path)
+    if why:
+        return {"why": "needs_shared_mounts" if why in ("not_shared", "smb_not_shared") else "no_merge_tool"}
+    fast = tier_merge.sides(path, own)[0]
+    return {"why": "", "kind": "merged", "fast": fast, "merged": path, "slow_pool": "", "slow_choices": others}
+
+
+def _merge(name: str, fit: dict[str, Any], slow: str) -> dict[str, Any]:
+    """Turns a folder on one of Kiboto's own pools into a merged one with the slower pool chosen."""
+    from backend.hardware.pal_storage import get_storage_platform
+
+    if slow not in {c["id"] for c in fit["slow_choices"]}:
+        raise NotNow("no_slow", "Choose the slower pool this folder's old files move to.")
+    mount = next((p.mountpoint for p in get_storage_platform().list_pools() if p.id == slow), None)
+    try:
+        made = tier_merge.add(name, fit["merged"], mount or "", slow)
+    except tier_merge.MergeError as e:
+        raise NotNow("merge_failed", str(e)) from e
+    return {**fit, "fast": made["fast"], "slow_pool": slow}
+
+
 # --- turning it on and off ------------------------------------------------------------------------
 @json_locked(lambda *a, **k: STATE_FILE)
-def set_folder(name: str, enabled: bool, days: int = DEFAULT_DAYS, now: float | None = None) -> dict[str, Any] | None:
+def set_folder(
+    name: str, enabled: bool, days: int = DEFAULT_DAYS, now: float | None = None, slow: str = ""
+) -> dict[str, Any] | None:
     """Turns tiering on for a shared folder (watching starts now), changes its days, or turns it off
-    (its record of opens is forgotten). NotNow when the folder does not fit."""
+    (its record of opens is forgotten). On one of Kiboto's own pools turning it on makes the folder
+    a merged one with the pool `slow`. NotNow when the folder does not fit."""
     data = _read()
     old = next((f for f in data["folders"] if f["name"] == name), None)
     if not enabled:
@@ -127,6 +176,8 @@ def set_folder(name: str, enabled: bool, days: int = DEFAULT_DAYS, now: float | 
             data["folders"] = [f for f in data["folders"] if f["name"] != name]
             atomic_write_json(STATE_FILE, data)
             open_watch.forget(old["fast"])
+            if old.get("kind") == "merged":
+                tier_merge.remove_if_empty(old["merged"])  # an ordinary folder again, unless files are on its slow side
         return None
     if not isinstance(days, int) or isinstance(days, bool) or not MIN_DAYS <= days <= MAX_DAYS:
         raise NotNow("bad_days", f"The number of days must be between {MIN_DAYS} and {MAX_DAYS}.", value=MAX_DAYS)
@@ -135,15 +186,21 @@ def set_folder(name: str, enabled: bool, days: int = DEFAULT_DAYS, now: float | 
         raise NotNow("no_folder", "There is no such shared folder.")
     if fit["why"]:
         raise NotNow("no_fit", "Tiering does not fit this shared folder.")
+    merged = fit.get("kind") == "merged"
+    if merged and not fit.get("slow_pool"):
+        fit = _merge(name, fit, slow)
+    slow_branch = (tier_merge.of(fit["merged"]) or {}).get("slow", "") if merged else ""
     if old is not None:
-        old.update(days=days, fast=fit["fast"], merged=fit["merged"])
+        old.update(days=days, fast=fit["fast"], merged=fit["merged"], kind=fit.get("kind", "unraid"), slow=slow_branch)
         fresh = old
     else:
         fresh = {
             "id": uuid.uuid4().hex[:12],
             "name": name,
+            "kind": fit.get("kind", "unraid"),
             "fast": fit["fast"],
             "merged": fit["merged"],
+            "slow": slow_branch,  # a merged folder's slow side, as Kiboto knows it
             "slow_host": "",  # the drive its files went to last, once a run has moved some
             "days": days,
             "since": time.time() if now is None else now,  # nothing is known about opens before this
@@ -231,6 +288,8 @@ def slow_side(folder: dict[str, Any], need: int) -> tuple[str, int] | None:
     otherwise the one with the most free space. None when no drive may be used or all are full."""
     from backend.hardware.pal_storage import get_storage_platform
 
+    if folder.get("kind") == "merged":
+        return _merged_slow_side(folder)
     try:
         places = get_storage_platform().slow_places(folder["name"])
     except (OSError, RuntimeError, ValueError):
@@ -243,6 +302,19 @@ def slow_side(folder: dict[str, Any], need: int) -> tuple[str, int] | None:
     some = whole or [p for p in places if p["free_bytes"] > p["keep"]]  # the run ends when that drive is full
     best = next((p for p in some if p["host"] == folder.get("slow_host")), some[0] if some else None)
     return (best["host"], best["keep"]) if best else None
+
+
+def _merged_slow_side(folder: dict[str, Any]) -> tuple[str, int] | None:
+    """A merged folder's slow side as the host knows it; None when it is full or cannot be found."""
+    from backend.services.iscsi_target import host_path
+
+    slow = folder.get("slow") or ""
+    try:
+        free = shutil.disk_usage(slow).free
+    except OSError:
+        return None
+    host = host_path(_self(), slow)
+    return (host, ROOM_KEPT) if host and free > ROOM_KEPT else None
 
 
 def desired(me: dict[str, Any], folder: dict[str, Any], job_dir: str, slow_host: str) -> dict[str, Any] | None:
@@ -357,8 +429,12 @@ def _run(folder: dict[str, Any], how: str, now: float | None) -> dict[str, Any]:
     chosen = select(folder, now)
     result: dict[str, Any] = {"started": started, "how": how, "learning": chosen["learning"], "more": chosen["more"]}
     result.update(chosen=len(chosen["files"]), moved=0, bytes=0, counts={}, errors=[], why=chosen["why"])
-    slow = slow_side(folder, chosen["bytes"]) if chosen["files"] else None
-    if chosen["files"] and slow is None:
+    # a file moved while the merge is down would be gone from the folder until it is back
+    unmounted = folder.get("kind") == "merged" and not tier_merge.mounted(folder["merged"])
+    slow = slow_side(folder, chosen["bytes"]) if chosen["files"] and not unmounted else None
+    if chosen["files"] and unmounted:
+        result["why"] = "not_mounted"
+    elif chosen["files"] and slow is None:
         result["why"] = "no_slow_drive"  # none may be used, or all are full: nothing is woken for it
     elif chosen["files"] and slow is not None:
         job_dir = os.path.join(JOBS_DIR, folder["id"])
@@ -510,6 +586,10 @@ def view(now: float | None = None) -> dict[str, Any]:
     for c in candidates():
         on = kept.get(c["name"])
         entry: dict[str, Any] = {"name": c["name"], "why": c["why"], "enabled": on is not None}
+        if c.get("kind") == "merged":  # on one of Kiboto's own pools: which pool is the slower one
+            entry.update(kind="merged", slow_pool=c["slow_pool"], slow_choices=c["slow_choices"])
+            if c["slow_pool"]:
+                entry["mounted"] = tier_merge.mounted(c["merged"])
         if on is not None:
             entry.update(
                 days=on["days"], since=on["since"], learning_until=learning_until(on), last_run=on.get("last_run")
