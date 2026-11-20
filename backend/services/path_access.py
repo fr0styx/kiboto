@@ -147,6 +147,31 @@ def refuse_encrypted_mount(path: str) -> None:
         )
 
 
+# Unraid's system shares; Kiboto's own installs keep the same names at a pool's top
+SYSTEM_FOLDERS = ("appdata", "system", "domains", "isos")
+
+
+def refuse_system_folder(path: str) -> None:
+    """Files never deletes, renames or moves a mounted drive, pool or remote (its folder in /mnt),
+    the system's folders at a pool's top (appdata, system, domains and isos: every app's
+    settings, Docker's disk, the virtual machines' disks), or a folder that holds Kiboto's own
+    data. Renaming appdata stopped every app and Kiboto itself at once. What is inside them, and
+    copying from them, stay as they were."""
+    if not path:
+        return
+    from backend.fsutil import protected_dirs
+
+    real = os.path.realpath(path).rstrip(os.sep) or os.sep
+    parts = real.split(os.sep)
+    top = len(parts) == 4 and parts[1] == "mnt" and parts[3].lower() in SYSTEM_FOLDERS
+    holds_ours = any(d == real or d.startswith(real + os.sep) for d in protected_dirs())
+    if top or holds_ours or os.path.ismount(real):
+        raise HTTPException(
+            status_code=403,
+            detail="This is one of the system's own folders, or a drive. It can't be deleted, renamed or moved here.",
+        )
+
+
 def without_folders(principal: Any) -> Any:
     """The same principal without its folder limit, to apply the other rules on their own."""
     return AuthenticatedPrincipal({**getattr(principal, "raw_data", {}), "folders": []})

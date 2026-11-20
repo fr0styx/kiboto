@@ -118,6 +118,8 @@ On a laptop screen the Drive Health icon could sit partly over the Recycle Bin o
 
 Apps such as Radarr, Sonarr, qBittorrent and Mylar3 could not write to their own downloads, TV or comics folder when it was not on a shared folder. Kiboto now hands those folders to the user the app runs as when it installs it.
 
+Files no longer lets anyone delete, rename or move the system's own folders (appdata, system, domains, isos), a drive's folder or the folder that holds Kiboto's data. Renaming appdata by mistake would have stopped every app and Kiboto itself.
+
 #### Changes
 
 - **Ask Kib about the NAS in your language**: questions about free space, drives, fans, apps, the network and
