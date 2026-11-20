@@ -485,8 +485,16 @@ export function initDraggableDesktopIcons() {
       let clampedLeft = Math.max(24, Math.min(maxLeft, curLeft));
       let clampedTop = Math.max(77, Math.min(maxTop, curTop));
 
+      // An icon pushed up from below the window lands off the grid, where the test for icons a
+      // person placed (which allows them close together) let it sit a few pixels into the icon
+      // above: Drive Health over the Recycle Bin on a 768 px high window.
+      const tall = el.offsetHeight || 90;
+      const intoAnother =
+        clampedTop !== curTop &&
+        placedIcons.some((p) => Math.abs(clampedLeft - p.left) < 80 && Math.abs(clampedTop - p.top) < tall + 8);
+
       // Automatic collision avoidance & resolution against already placed icons
-      if (isPositionOccupied(clampedLeft, clampedTop, placedIcons, id)) {
+      if (intoAnother || isPositionOccupied(clampedLeft, clampedTop, placedIcons, id)) {
         const freeSlot = findNextFreeSlot(clampedLeft, clampedTop, placedIcons, maxLeft, maxTop, id);
         clampedLeft = freeSlot.left;
         clampedTop = freeSlot.top;

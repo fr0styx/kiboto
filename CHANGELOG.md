@@ -114,6 +114,8 @@ On a laptop screen the Getting started card lay over the last one or two desktop
 
 The sign-in screen could jump back to the list of people, or to the person it had picked, while you were typing a name or a password. It now stays as you left it.
 
+On a laptop screen the Drive Health icon could sit partly over the Recycle Bin on a new install. It now takes a free place.
+
 #### Changes
 
 - **Ask Kib about the NAS in your language**: questions about free space, drives, fans, apps, the network and

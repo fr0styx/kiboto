@@ -298,6 +298,30 @@ describe('Drive Health', () => {
   });
 });
 
+describe('desktop icons on a low window', () => {
+  it('an icon pushed up from below the window takes a free place, not one a few pixels into the icon above', async () => {
+    const { initDraggableDesktopIcons } = await import('../components/dock/desktop-icons.js');
+    const ids = [
+      'management-desktop-icon',
+      'containers-desktop-icon',
+      'fm-desktop-icon',
+      'rb-desktop-icon',
+      'dh-desktop-icon',
+      'chassis-desktop-icon',
+    ];
+    document.body.innerHTML = `<div id="desktop-icons-container">${ids.map((id) => `<div class="chassis-hero-box" id="${id}"><span class="icon-text">${id}</span></div>`).join('')}</div>`;
+    localStorage.removeItem('kiboto_desktop_icon_positions_v3');
+    // the lowest place is 608 here: 83 px under the Recycle Bin's 525, which is 90 px tall
+    Object.defineProperty(window, 'innerHeight', { value: 814, configurable: true });
+    Object.defineProperty(window, 'innerWidth', { value: 1366, configurable: true });
+    initDraggableDesktopIcons();
+    const pos = (id) => [document.getElementById(id).style.left, document.getElementById(id).style.top].join(',');
+    expect(pos('rb-desktop-icon')).toBe('24px,525px');
+    expect(pos('dh-desktop-icon')).toBe('164px,77px');
+    expect(pos('chassis-desktop-icon')).toBe('164px,189px');
+  });
+});
+
 describe("Drive Health in the reader's language", () => {
   afterEach(async () => {
     await setLanguage('en');
