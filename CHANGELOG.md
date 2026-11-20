@@ -84,6 +84,8 @@ Kib can say how much space each app uses, from the last time it was measured und
 
 On a phone, a row of buttons that continues beyond the edge of the screen now shows an arrow on the side where more is hidden (Apps: the buttons and the filters).
 
+On a phone: the row of tabs inside Settings and wide tables show an arrow where more is hidden; a History entry's buttons sit under its text instead of squeezing it into a narrow column; lines that open something ("Advanced", "Technical details") are easier to hit.
+
 #### New
 
 - **The NAS in Home Assistant's Energy dashboard**: with Home Assistant connected and a UPS that is measured,

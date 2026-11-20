@@ -18,6 +18,9 @@ export function sidesWithMore(row) {
 export function watchSideScroll(row) {
   if (!row || row.dataset.sideWatch) return () => {};
   row.dataset.sideWatch = '1';
+  // a row of buttons carries the arrow as one of its items; anything else (a wide table in a box)
+  // gets it laid over its top corner
+  if (!String(getComputedStyle(row).display).includes('flex')) row.dataset.moreBlock = '1';
   const say = () => {
     const more = sidesWithMore(row);
     if (row.dataset.more !== more) row.dataset.more = more;
@@ -49,5 +52,21 @@ export function watchSideScroll(row) {
     changed.disconnect();
     delete row.dataset.sideWatch;
     delete row.dataset.more;
+    delete row.dataset.moreBlock;
   };
+}
+
+/** The rows and boxes in Settings that scroll sideways on a narrow screen. */
+export const SIDE_SCROLLERS = '.mgmt-inner-tabs, .srep-box, .srep-box-2, #network-vlan-table-wrap, [data-side-scroll]';
+
+/** Watches every such row inside `root`, also those drawn later. Returns a function that stops looking for new ones. */
+export function watchSideScrollIn(root, selector = SIDE_SCROLLERS) {
+  if (!root) return () => {};
+  const look = () => {
+    for (const row of root.querySelectorAll(selector)) watchSideScroll(row);
+  };
+  look();
+  const added = new MutationObserver(look);
+  added.observe(root, { childList: true, subtree: true });
+  return () => added.disconnect();
 }

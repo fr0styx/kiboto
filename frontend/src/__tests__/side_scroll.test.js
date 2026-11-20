@@ -1,6 +1,6 @@
 // A row that scrolls sideways says so: buttons hidden beyond the edge had no sign of them.
 import { describe, it, expect, afterEach } from 'vitest';
-import { sidesWithMore, watchSideScroll } from '../side-scroll.js';
+import { sidesWithMore, watchSideScroll, watchSideScrollIn, SIDE_SCROLLERS } from '../side-scroll.js';
 
 function row(scrollWidth, clientWidth, scrollLeft = 0) {
   const el = document.createElement('div');
@@ -97,5 +97,47 @@ describe('a row that scrolls sideways', () => {
     } finally {
       globalThis.ResizeObserver = had;
     }
+  });
+  it('tells a row of buttons from a box with a wide table', () => {
+    const buttons = row(700, 400);
+    buttons.style.display = 'flex';
+    const box = row(700, 400);
+    const stop = watchSideScroll(buttons);
+    const stopBox = watchSideScroll(box);
+    expect(buttons.dataset.moreBlock).toBeUndefined();
+    expect(box.dataset.moreBlock).toBe('1');
+    stop();
+    stopBox();
+    expect(box.dataset.moreBlock).toBeUndefined();
+  });
+
+  it('watches the rows in a window, also those drawn later', async () => {
+    const win = document.createElement('div');
+    document.body.append(win);
+    const tabs = row(700, 400);
+    tabs.className = 'mgmt-inner-tabs';
+    const plain = row(700, 400);
+    win.append(tabs, plain);
+    const stop = watchSideScrollIn(win);
+    expect(tabs.dataset.more).toBe('end');
+    expect(plain.dataset.more).toBeUndefined(); // not one of the rows that scroll
+    const table = row(900, 400);
+    table.className = 'srep-box';
+    win.append(table);
+    await flush();
+    expect(table.dataset.more).toBe('end');
+    stop();
+    const late = row(900, 400);
+    late.dataset.sideScroll = '';
+    win.append(late);
+    await flush();
+    expect(late.dataset.more).toBeUndefined(); // no longer looking
+    expect(watchSideScrollIn(null)()).toBeUndefined();
+    expect(SIDE_SCROLLERS).toContain('[data-side-scroll]');
+    const other = row(700, 400);
+    other.className = 'mine';
+    win.append(other);
+    watchSideScrollIn(win, '.mine')();
+    expect(other.dataset.more).toBe('end');
   });
 });

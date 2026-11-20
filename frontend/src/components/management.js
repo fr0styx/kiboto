@@ -87,6 +87,7 @@ import {
   setAiVisualFiltersDrawerOpen,
 } from './management/ai.js';
 import { formatFixed } from '../format.js';
+import { watchSideScrollIn } from '../side-scroll.js';
 import { slowNoteHtml } from './vm/slow-mode.js';
 import { FIXED_PCT, askFixedSpeed, modeName } from './fan-modes.js';
 
@@ -631,6 +632,8 @@ export function initManagement() {
   const overlay = document.getElementById('management-modal-overlay');
   const win = document.getElementById('management-window');
   const header = document.getElementById('management-window-header');
+  // on a phone the tab strip and a few wide tables scroll sideways: they say so at the edge
+  watchSideScrollIn(win);
   const hubView = document.getElementById('management-hub-view');
   const detailContainer = document.getElementById('management-detail-container');
   const backBtn = document.getElementById('management-back-btn');

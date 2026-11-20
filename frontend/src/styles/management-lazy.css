@@ -395,6 +395,11 @@
 .history-word { font-weight: 600; color: var(--muted); margin-left: 4px; }
 .history-time { color: var(--muted); }
 .history-actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+/* on a phone the buttons go under the text: beside it they left the text a column of a few words */
+@media (max-width: 600px) {
+  .history-line { flex-wrap: wrap; }
+  .history-actions { flex: 1 1 100%; justify-content: flex-start; padding-left: 26px; }
+}
 .history-details { margin: 8px 0 0 26px; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
 .history-details pre { margin: 0; padding: 10px; width: 100%; box-sizing: border-box; background: var(--kb-shade-25); border-radius: 6px; font-size: var(--kb-fs-xs); white-space: pre-wrap; word-break: break-all; }
 .history-pinned { border: 1px solid var(--crit, #f0553b); border-radius: 10px; margin-bottom: 10px; padding-bottom: 4px; }
