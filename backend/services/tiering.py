@@ -22,7 +22,7 @@ import time
 import uuid
 from typing import Any
 
-from backend import legacy_names, product
+from backend import legacy_names, product, timing
 from backend.config import DATA_DIR, logger
 from backend.fsutil import atomic_write_json, json_locked, read_json
 from backend.services import open_watch, tier_merge
@@ -487,10 +487,9 @@ def run_due(now: float | None = None) -> list[str]:
     if now - _tried["watch"] >= RETRY_WATCH_SECS and folders() and not open_watch.status()["watching"]:
         _tried["watch"] = now
         watch_soon()  # the listener ended, or could not start: try again
-    t = time.localtime(now)
-    if f"{t.tm_hour:02d}:{t.tm_min:02d}" != RUN_AT:
+    day = timing.day_of(RUN_AT, now)
+    if not day:
         return []
-    day = time.strftime("%Y-%m-%d", t)
     due = []
     for folder in folders():
         if _ran.get(folder["id"]) != day:

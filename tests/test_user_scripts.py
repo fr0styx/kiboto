@@ -281,3 +281,26 @@ def test_a_run_counts_as_running_until_its_result_is_on_record(monkeypatch):
     _wait(made["id"])
     assert seen == [(True, None), (True, True)]
     assert made["id"] not in us.running()
+
+
+def test_a_minute_the_scheduler_never_looked_at_still_starts_the_script(fresh, monkeypatch):
+    started = []
+    monkeypatch.setattr(us, "start", lambda sid, how, who="": started.append((sid, how)) or {"started": 0})
+    us.set_enabled(True)
+    daily = us.save(_script(name="Nightly", body="true", schedule={"kind": "daily", "at": "03:30"}))
+    hourly = us.save(_script(name="Hourly", body="true", schedule={"kind": "hourly", "minute": 30}))
+    weekly = us.save(_script(name="Tuesdays", body="true", schedule={"kind": "weekly", "at": "03:30", "days": [1]}))
+    us._FIRED.clear()
+    assert us.run_due(MONDAY_0330 - 5) == []
+    assert sorted(us.run_due(MONDAY_0330 + 65)) == sorted([daily["id"], hourly["id"]])  # looked at 03:31, not 03:30
+    assert us.run_due(MONDAY_0330 + 125) == []  # once for that minute
+    assert us.run_due(MONDAY_0330 + 3600 + 70) == [hourly["id"]]
+    assert us.run_due(MONDAY_0330 + 86400 + 200) and weekly["id"] in [s for s, _ in started]
+    # after a restart nothing is remembered in memory: the run that was noted is not started again
+    us._FIRED.clear()
+    started.clear()
+    monkeypatch.setattr(us, "last_run", lambda sid: {"started": MONDAY_0330 + 2 * 86400 + 4, "how": "schedule"})
+    assert us.run_due(MONDAY_0330 + 2 * 86400 + 90) == [] and started == []
+    us._FIRED.clear()
+    monkeypatch.setattr(us, "last_run", lambda sid: {"started": MONDAY_0330 + 2 * 86400 + 4, "how": "by_hand"})
+    assert daily["id"] in us.run_due(MONDAY_0330 + 2 * 86400 + 90)  # a run by hand is not the night's run

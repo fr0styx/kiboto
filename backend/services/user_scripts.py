@@ -22,6 +22,7 @@ import time
 import uuid
 from typing import Any
 
+from backend import timing
 from backend.config import DATA_DIR, logger
 from backend.fsutil import atomic_write_json, json_locked, read_json, resolve_within
 from backend.services.path_access import ALLOWED_BROWSE_ROOTS
@@ -472,19 +473,46 @@ def due(script: dict[str, Any], t: time.struct_time) -> bool:
     return kind == "daily" or t.tm_wday in (sched.get("days") or [])
 
 
+def came_due(script: dict[str, Any], now: float) -> float:
+    """When the minute of this script's schedule that is due now came: the one that has just come,
+    or passed a few minutes ago (the scheduler does not look at every minute); 0 when none."""
+    sched = script.get("schedule") or {}
+    kind = sched.get("kind")
+    if not script.get("enabled") or kind not in ("hourly", "daily", "weekly"):
+        return 0.0
+    if kind == "hourly":
+        came = timing.minute_of_hour(int(sched.get("minute") or 0), now)
+    else:
+        came = timing.moment(str(sched.get("at") or ""), now)
+    if came and kind == "weekly" and time.localtime(came).tm_wday not in (sched.get("days") or []):
+        return 0.0
+    return came
+
+
+def _ran_for(script_id: str, came: float) -> bool:
+    """Whether a run on the schedule began for that minute already: after a restart the list of
+    what was started is empty, and the same minute must not start a script a second time."""
+    last = last_run(script_id) or {}
+    began = float(last.get("started") or 0)
+    return last.get("how") == "schedule" and came <= began <= came + timing.WINDOW + 60
+
+
 def run_due(now: float | None = None) -> list[str]:
-    """Called every minute by the scheduler: starts what is due, once per minute. Returns the ids started."""
+    """Called about every minute by the scheduler: starts what is due, once for each minute a
+    schedule names. Returns the ids started."""
     state = _read()
     if not state["enabled"]:
         return []
     now = time.time() if now is None else now
-    t = time.localtime(now)
-    minute = time.strftime("%Y-%m-%d %H:%M", t)
     started = []
     for script in state["scripts"]:
-        if not due(script, t) or _FIRED.get(script["id"]) == minute:
+        came = came_due(script, now)
+        minute = time.strftime("%Y-%m-%d %H:%M", time.localtime(came)) if came else ""
+        if not minute or _FIRED.get(script["id"]) == minute:
             continue
         _FIRED[script["id"]] = minute
+        if _ran_for(script["id"], came):
+            continue
         try:
             start(script["id"], "schedule")
             started.append(script["id"])

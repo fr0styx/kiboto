@@ -131,6 +131,12 @@ def test_the_second_nas_fetches_once_a_night(net, monkeypatch):
     at = time.mktime((2026, 11, 20, 2, 30, 10, 0, 0, -1))
     assert hs.run_due(at - 60) is False and hs.run_due(at) is True and hs.run_due(at + 20) is False
     assert hs.run_due(at + 86400) is True and started == [1, 1]
+    # the look at 02:30 never came (each look is a little later than the one before): 02:31 fetches
+    hs._state["ran"] = ""
+    assert hs.run_due(at + 2 * 86400 - 15) is False and hs.run_due(at + 2 * 86400 + 55) is True
+    assert hs.run_due(at + 2 * 86400 + 115) is False and started == [1, 1, 1]
+    hs._state["ran"] = ""
+    assert hs.run_due(at + 3 * 86400 + 3600) is False  # a box that starts an hour late does not catch up
     net.on(A)
     hs._state["ran"] = ""
     assert hs.run_due(at) is False  # the first NAS fetches nothing

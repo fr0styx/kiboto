@@ -21,7 +21,7 @@ import time
 import zipfile
 from typing import Any
 
-from backend import __version__, secret_box
+from backend import __version__, secret_box, timing
 from backend.config import DATA_DIR, logger
 from backend.fsutil import atomic_write_json, json_locked, read_json
 from backend.services import ha_link
@@ -257,9 +257,8 @@ def fetch_soon() -> bool:
 def run_due(now: float | None = None) -> bool:
     """Called every minute: on the second NAS, once a night at FETCH_AT."""
     now = time.time() if now is None else now
-    t = time.localtime(now)
-    day = time.strftime("%Y-%m-%d", t)
-    if f"{t.tm_hour:02d}:{t.tm_min:02d}" != FETCH_AT or _state["ran"] == day or ha_link.role() != "second":
+    day = timing.day_of(FETCH_AT, now)
+    if not day or _state["ran"] == day or ha_link.role() != "second":
         return False
     _state["ran"] = day
     return fetch_soon()
@@ -289,9 +288,8 @@ def say_if_stale(now: float | None = None) -> bool:
     """Called every minute: once a day at SAY_AT, a pair whose copy is old says so in History and,
     as a warning, through the alerts. A fetch that fails for a night or two is not worth a word."""
     now = time.time() if now is None else now
-    t = time.localtime(now)
-    day = time.strftime("%Y-%m-%d", t)
-    if f"{t.tm_hour:02d}:{t.tm_min:02d}" != SAY_AT or _state.get("said") == day:
+    day = timing.day_of(SAY_AT, now)
+    if not day or _state.get("said") == day:
         return False
     _state["said"] = day
     old = stale(now)

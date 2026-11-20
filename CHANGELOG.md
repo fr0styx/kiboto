@@ -72,6 +72,8 @@ On a tablet held upright, windows opened a little wider than the screen, so the 
 
 **Second NAS: folders made by a fetch can be used by the folder's people.** A folder the fetch created inside a kept shared folder belonged to the system and was writable by nobody else, so after a takeover people could open the files in it and not add, rename or delete any. Such folders now get the shared folder's own owner and rights.
 
+**Nightly jobs are no longer skipped now and then.** Scheduled scripts, the nightly move of old files to slower drives, and a second NAS's nightly fetch waited for the clock to read their exact minute. The scheduler looks a little later each time, so on some days that minute was never looked at and the job did not run, without a word. A job now runs when its time has come or passed by up to five minutes, once.
+
 #### Changes
 
 - **Ask Kib about the NAS in your language**: questions about free space, drives, fans, apps, the network and

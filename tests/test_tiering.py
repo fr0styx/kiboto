@@ -321,6 +321,9 @@ def test_the_night_run_starts_once_a_day_at_its_time(nas, monkeypatch):
             t.join(5)
     assert ran == [("Films", "schedule")]
     assert tr.run_due(at + DAY) == ["Films"]
+    # a night on which 03:00 was never looked at: the look at 03:01 starts the run, once
+    assert tr.run_due(at + 2 * DAY - 20) == [] and tr.run_due(at + 2 * DAY + 62) == ["Films"]
+    assert tr.run_due(at + 2 * DAY + 122) == [] and tr.run_due(at + 3 * DAY + 3600) == []
 
 
 def test_a_listener_that_ended_is_started_again(nas, monkeypatch):
