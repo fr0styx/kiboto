@@ -103,7 +103,7 @@ def _inside(folder: str, filename: str) -> str:
     the routes already keep only a plain file name)."""
     root = os.path.normpath(folder)
     path = os.path.normpath(os.path.join(root, filename))
-    if os.path.dirname(path) != root:
+    if not path.startswith(root.rstrip(os.sep) + os.sep) or os.path.dirname(path) != root:
         raise HTTPException(status_code=400, detail="Invalid filename")
     return path
 

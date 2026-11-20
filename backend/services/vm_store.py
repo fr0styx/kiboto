@@ -310,7 +310,7 @@ def unpack_xz(path: str) -> str:
             os.remove(part)
         raise
     os.remove(path)
-    os.chmod(out, 0o644)
+    os.chmod(out, 0o600)  # it becomes a machine's disk: for Kiboto, which runs QEMU, and nobody else
     return out
 
 

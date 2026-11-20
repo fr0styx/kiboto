@@ -142,6 +142,8 @@ Apps on a phone: each app is a short card with its name, its state, one button (
   image file on the two logo hosts could be asked for through Kiboto by a signed-in user.
 - **New-drive check**: the drive to check is taken from the system's own list of drives, not from the request.
 
+A ready-made disk image that Kiboto unpacks for a virtual machine is readable by Kiboto alone; it was readable by every account on the box. The Redfish pages take a drive's name from the kernel's own list.
+
 ## v2.0.4 (2026-11-19)
 ### 🏡 Apps that go back on their own, a way to move in, and Kiboto in your language everywhere
 

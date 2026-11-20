@@ -67,7 +67,9 @@ async def fs_rename(req: RenameRequest, principal: AuthenticatedPrincipal = Depe
     if not is_admin and os.path.basename(parent_canonical.rstrip("/")) == "homes":
         raise HTTPException(status_code=403, detail="Cannot rename user home directory root.")
 
-    dst = os.path.join(parent_canonical, new_name)
+    dst = os.path.normpath(os.path.join(parent_canonical, new_name))
+    if not dst.startswith(os.path.normpath(parent_canonical).rstrip(os.sep) + os.sep):
+        raise ApiError(400, "Invalid new name", "bad_name", text=said("fm_bad_name"))  # never out of its folder
     await asyncio.to_thread(check_user_path_access, dst, principal, write=True)
     if os.path.lexists(dst):
         raise ApiError(400, "Destination already exists", "name_taken", text=said("fm_name_taken", name=new_name))

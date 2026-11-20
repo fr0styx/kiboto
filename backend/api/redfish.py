@@ -51,7 +51,12 @@ def _sys_block(dev: str, leaf: str) -> str | None:
     if not re.fullmatch(r"[A-Za-z0-9_.:-]+", dev or ""):
         return None
     try:
-        with open(os.path.join(HOST_SYS, "block", dev, leaf), encoding="ascii") as f:
+        # the kernel's own name for the drive, never the string a request brought: ".." matched the
+        # pattern above, and a list of drives has no such entry (CodeQL py/path-injection)
+        name = next((n for n in os.listdir(os.path.join(HOST_SYS, "block")) if n == dev), None)
+        if name is None:
+            return None
+        with open(os.path.join(HOST_SYS, "block", name, leaf), encoding="ascii") as f:
             return f.read().strip()
     except OSError:
         return None

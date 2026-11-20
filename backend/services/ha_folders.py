@@ -294,7 +294,7 @@ def _fetch_file(
             os.fsync(f.fileno())
         if got != size:
             raise LinkError("changed", "The file changed while it was fetched.")
-        os.chmod(part, (mode & 0o777) or 0o664)
+        os.chmod(part, (mode & 0o777) or 0o600)  # no mode told: the owner's alone, not everyone's
         if os.geteuid() == 0:
             os.chown(part, like.st_uid, like.st_gid)
         os.utime(part, ns=(mtime_ns, mtime_ns))

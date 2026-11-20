@@ -811,7 +811,10 @@ def _forget_process(vm_id: str) -> None:
     """What a machine that is off leaves behind: the monitor connection and its sockets."""
     vm_guest._forget_vm_ip(vm_id)
     _QMP_ENGINE.close(vm_id)
-    for s in (f"/tmp/{vm_id}-serial.sock", f"/tmp/{vm_id}-qmp.sock", vm_guest._qga_socket_path(vm_id)):
+    for made in (f"/tmp/{vm_id}-serial.sock", f"/tmp/{vm_id}-qmp.sock", vm_guest._qga_socket_path(vm_id)):
+        s = os.path.normpath(made)
+        if not s.startswith("/tmp/") or os.path.dirname(s) != "/tmp":
+            continue  # an id is checked long before; a path that leaves /tmp is never a socket of ours
         if os.path.exists(s):
             try:
                 os.remove(s)
