@@ -23,9 +23,13 @@ def _lines(share="media", **kw):
     return access_lines(SambaShareConfig(name=share, path=f"/mnt/user/{share}", **kw))
 
 
-def test_everyone_may_write_so_samba_needs_no_list(people):
+def test_everyone_may_write_and_the_people_are_still_named(people):
+    # left to Samba's default, an account that stayed in Samba's own list after its person was
+    # removed here kept opening the folder
     share_access.save_config({"default_level": "write", "shares": {}})
-    assert _lines() == []
+    lines = _lines()
+    assert len(lines) == 1 and lines[0].startswith("   valid users = ")
+    assert {"admin", "smb_kim", "smb_sam"} <= set(lines[0].split("=", 1)[1].split())
 
 
 def test_people_kept_out_or_read_only_are_left_out_or_listed(people):
@@ -197,3 +201,52 @@ def test_the_endpoint_needs_the_password_and_two_factor(client, people, passdb, 
         _two_factor(sam, on=False)
     client.cookies.clear()
     assert client.post(url, json={"current_password": "x"}).status_code == 401
+
+
+def test_a_shared_folder_kiboto_made_goes_to_the_file_servers_user(people, tmp_path, monkeypatch):
+    """Its file server writes as the share's forced user, so a folder that stays root's cannot be
+    written to over the network (tried with the real file server on 20 Nov 2026)."""
+    handed = []
+    monkeypatch.setattr(samba_engine, "SAMBA_CONF_FILE", str(tmp_path / "smb.conf"))
+    monkeypatch.setattr(samba_engine, "validate_share", lambda s: None)
+    monkeypatch.setattr(samba_engine.owned, "to_people", lambda folder, *who, **how: handed.append((folder, who, how)))
+    homes = tmp_path / "homes"
+    (homes / "kim").mkdir(parents=True)
+    monkeypatch.setattr("backend.services.user_spaces.homes_root", lambda: str(homes))
+    engine = samba_engine.SambaEngine.__new__(samba_engine.SambaEngine)
+    engine._shares = {
+        "media": SambaShareConfig(name="media", path=str(tmp_path / "media")),
+        "plain": SambaShareConfig(name="plain", path=str(tmp_path / "plain"), force_user="", force_group=""),
+    }
+    monkeypatch.setattr(samba_engine, "_serves_files", lambda: True)
+    conf = engine.generate_and_save_conf()
+    assert (str(tmp_path / "media"), ("nobody", "users"), {}) in handed
+    assert not [h for h in handed if h[0] == str(tmp_path / "plain")]  # no forced user: whoever signs in writes
+    # a private folder is written as the shared folders are, and is handed over the same way
+    homes_section = conf.split("[homes]", 1)[1].split("[", 1)[0]
+    assert "force user = nobody" in homes_section and "force group = users" in homes_section
+    assert "valid users = %S" in homes_section
+    assert (str(homes / "kim"), (), {"mode": 0o770}) in handed
+    # on Unraid or another host that serves the files itself, nothing is handed over
+    handed.clear()
+    monkeypatch.setattr(samba_engine, "_serves_files", lambda: False)
+    engine.generate_and_save_conf()
+    assert handed == []
+
+
+def test_whether_the_shared_folders_are_kibotos_own_to_make(monkeypatch):
+    class Platform:
+        def __init__(self, can):
+            self.can = can
+
+        def get_capabilities(self):
+            if self.can is None:
+                raise RuntimeError("no storage platform")
+            return type("C", (), {"can_manage_shares": self.can})()
+
+    for can, want in ((True, True), (False, False), (None, False)):
+        monkeypatch.setattr("backend.hardware.pal_storage.get_storage_platform", lambda can=can: Platform(can))
+        assert samba_engine._serves_files() is want
+        from backend.services import user_spaces
+
+        assert user_spaces._serves_files() is want

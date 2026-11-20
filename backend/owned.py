@@ -15,7 +15,9 @@ A filesystem without owners (exFAT or NTFS on a USB drive) refuses; that is not 
 
 from __future__ import annotations
 
+import grp
 import os
+import pwd
 import stat
 
 from backend.config import logger
@@ -81,6 +83,42 @@ def umask_in(folder: str) -> int:
         return 0o022 & ~stat.S_IMODE(os.stat(folder).st_mode)
     except OSError:
         return 0o022
+
+
+def _ids(user: str, group: str) -> tuple[int, int]:
+    """The numbers of a user and a group by name. The file server's container looks the names up
+    itself; the usual numbers (nobody 65534, users 100) are the same there and here."""
+    try:
+        uid = pwd.getpwnam(user).pw_uid
+    except KeyError:
+        uid = 65534
+    try:
+        gid = grp.getgrnam(group).gr_gid
+    except KeyError:
+        gid = 100
+    return uid, gid
+
+
+def to_people(folder: str, user: str = "nobody", group: str = "users", mode: int = 0o775) -> bool:
+    """A shared folder Kiboto made is root's, and its file server writes as the share's forced
+    user: nothing could be written to it over the network. The folder itself (not what is in it)
+    goes to that user and group, while it is still root's and closed to others. A folder someone
+    gave another owner, or opened to everyone, is left as it is. True when it was handed over."""
+    try:
+        st = os.stat(folder)
+    except OSError:
+        return False
+    if _me() != 0 or st.st_uid != 0 or not stat.S_ISDIR(st.st_mode) or stat.S_IMODE(st.st_mode) & 0o002:
+        return False
+    uid, gid = _ids(user, group)
+    try:
+        os.chown(folder, uid, gid)
+        os.chmod(folder, mode)
+    except OSError as e:
+        logger.warning("[Files] the shared folder %s stays the system's: %s", folder, e)
+        return False
+    logger.info("[Files] the shared folder %s now belongs to %s:%s, as its file server writes", folder, user, group)
+    return True
 
 
 def _hand(path: str, uid: int, gid: int) -> None:

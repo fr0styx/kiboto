@@ -82,6 +82,8 @@ On a tablet held upright, windows opened a little wider than the screen, so the 
 
 **Files that arrive over WebDAV or SFTP can be changed over the network share.** They were written so that only the system could change them. They now get the folder's right to write: in a shared folder that is open to its group or to everyone, as on Unraid, the same people can change them over SMB. They still belong to the system.
 
+**Kiboto's own file server: shared folders and private folders can be written to over the network.** On an install where Kiboto runs the file server itself (not on Unraid), a shared folder Kiboto created belonged to the system, so every attempt to save, rename or delete over the network share was refused; a person's private folder could not be opened at all. Both now belong to the file server's own user. Tried from start to finish with the real file server and a client: saving, making a folder, renaming a file made in Files, and the private folder all work, and another person is refused.
+
 #### Changes
 
 - **Ask Kib about the NAS in your language**: questions about free space, drives, fans, apps, the network and
@@ -195,6 +197,8 @@ Windows PCs list the NAS under **Network** in File Explorer, where Kiboto serves
 A ready-made disk image that Kiboto unpacks for a virtual machine is readable by Kiboto alone; it was readable by every account on the box. The Redfish pages take a drive's name from the kernel's own list.
 
 **The listing for Windows PCs cannot be stopped by one odd message.** The part that lists the NAS under "Network" on Windows read messages in any text encoding; one message from the home network in an encoding the reader does not know ended it until the next restart, and a message in UTF-16 got past the check that refuses document types. It now reads plain UTF-8 only, and a caller that connects and sends nothing is dropped after ten seconds.
+
+**A shared folder always names who may open it.** Where everyone had the right to write, Kiboto left it to the file server's default: anyone with an account there. An account that stayed in the file server's own list after its person was removed or switched off in Kiboto could then still open the folder. The people are now always written out. Only on installs where Kiboto runs the file server itself.
 
 ## v2.0.4 (2026-11-19)
 ### 🏡 Apps that go back on their own, a way to move in, and Kiboto in your language everywhere

@@ -21,7 +21,7 @@ import time
 from datetime import UTC, datetime
 from typing import Any
 
-from backend import config
+from backend import config, owned
 from backend.config import logger
 from backend.fsutil import atomic_write_json, read_json, root_for
 
@@ -368,8 +368,8 @@ def move_to_bin(
     if not recycle_dir:
         return None
     files_dir, info_dir = os.path.join(recycle_dir, "files"), os.path.join(recycle_dir, "info")
-    os.makedirs(files_dir, exist_ok=True)
-    os.makedirs(info_dir, exist_ok=True)
+    owned.make_dirs(files_dir)  # like the shared folder: the file server puts what it deletes there too
+    owned.make_dirs(info_dir)
     name = _slot(files_dir, os.path.basename(path.rstrip("/")), time.time())
     info = os.path.join(info_dir, f"{name}.trashinfo")
     stamp = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")

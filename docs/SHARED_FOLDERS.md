@@ -35,6 +35,11 @@ Each folder's **How to connect** shows the address with a Copy button:
   first and stays out when the box is listed already. On Unraid, Unraid's own service does that.
 - **Mac**: in Finder, press ⌘K and enter `smb://name.local/folder`.
 
+Where Kiboto serves the files itself, a shared folder and each private folder belong to the
+file server's own user, and everyone who may open the folder reads and writes as that user. Who
+may open it is what the folder's card says: the file server is told those names and lets nobody
+else in.
+
 You sign in with your Kiboto user name and password. Someone with two-step sign-in uses a
 separate password for network folders; they make it right there, on the folder's card.
 

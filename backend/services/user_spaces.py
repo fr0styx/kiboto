@@ -14,7 +14,7 @@ import threading
 import time
 from typing import Any
 
-from backend import config
+from backend import config, owned
 from backend.config import logger
 from backend.fsutil import atomic_write_json, json_locked, read_json
 from backend.hardware import fs_quota
@@ -150,6 +150,16 @@ def retire_home(username: str, files: str, give_to: str = "", home: str | None =
     return {"files": "kept", "where": dest}
 
 
+def _serves_files() -> bool:
+    """Whether Kiboto's own file server serves the private folders (not Unraid's or another host's)."""
+    from backend.hardware.pal_storage import get_storage_platform
+
+    try:
+        return bool(get_storage_platform().get_capabilities().can_manage_shares)
+    except (OSError, RuntimeError, ValueError):
+        return False
+
+
 def ensure_home(username: str, quota_bytes: int = 0) -> dict[str, Any]:
     """Creates the person's folder (a Btrfs subvolume when the pool is Btrfs) and applies the quota."""
     home = home_of(username)
@@ -165,6 +175,8 @@ def ensure_home(username: str, quota_bytes: int = 0) -> dict[str, Any]:
             os.chmod(home, 0o770)
         except OSError:
             logger.debug("user_spaces: chmod failed", exc_info=True)
+        if _serves_files():  # Kiboto's own file server writes as nobody:users: the folder is theirs
+            owned.to_people(home, mode=0o770)
     held = apply_fs_quota(home, quota_bytes) if quota_bytes else False
     return {"home": home, "subvolume": created, "fs_quota": held}
 

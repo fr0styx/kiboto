@@ -187,3 +187,47 @@ def test_the_umask_for_a_helper_that_makes_files_in_a_folder(tmp_path):
         os.chmod(share, mode)
         assert owned.umask_in(str(share)) == want, oct(mode)
     assert owned.umask_in(str(tmp_path / "missing")) == 0o022
+
+
+def test_a_shared_folder_goes_to_the_file_servers_user(tmp_path, monkeypatch):
+    share = tmp_path / "Films"
+    share.mkdir()
+    os.chmod(share, 0o755)
+    given = []
+    real = os.stat
+    owner = {"uid": 0}
+    monkeypatch.setattr(owned.os, "stat", lambda path, *a, **k: _as(real(path, *a, **k), owner["uid"], 0))
+    monkeypatch.setattr(owned.os, "chown", lambda path, uid, gid: given.append((path, uid, gid)))
+    monkeypatch.setattr(owned, "_ids", lambda user, group: (65534, 100))
+    monkeypatch.setattr(owned, "_me", lambda: 1000)
+    assert owned.to_people(str(share)) is False and given == []  # only root can hand a folder over
+    monkeypatch.setattr(owned, "_me", lambda: 0)
+    assert owned.to_people(str(share)) is True
+    assert given == [(str(share), 65534, 100)] and _mode(share) == "0o775"
+    os.chmod(share, 0o755)
+    assert owned.to_people(str(share), mode=0o770) is True and _mode(share) == "0o770"  # a private folder
+    given.clear()
+    # left as they are: a folder someone gave another owner, one open to everyone, a file, a missing one
+    os.chmod(share, 0o755)
+    owner["uid"] = 1000
+    assert owned.to_people(str(share)) is False
+    owner["uid"] = 0
+    os.chmod(share, 0o777)
+    assert owned.to_people(str(share)) is False
+    a_file = tmp_path / "a.txt"
+    a_file.write_text("a")
+    assert owned.to_people(str(a_file)) is False and owned.to_people(str(tmp_path / "missing")) is False
+    assert given == []
+
+    def refuses(path, uid, gid):
+        raise PermissionError(1, "Operation not permitted")
+
+    os.chmod(share, 0o755)
+    monkeypatch.setattr(owned.os, "chown", refuses)
+    assert owned.to_people(str(share)) is False and _mode(share) == "0o755"
+
+
+def test_the_numbers_of_a_user_and_a_group():
+    uid, gid = owned._ids("root", "root")
+    assert (uid, gid) == (0, 0)
+    assert owned._ids("no-such-user-here", "no-such-group-here") == (65534, 100)  # the usual nobody and users

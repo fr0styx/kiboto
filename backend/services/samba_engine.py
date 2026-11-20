@@ -16,7 +16,7 @@ from typing import Any, Optional
 
 from pydantic import BaseModel, Field
 
-from backend import legacy_names
+from backend import legacy_names, owned
 from backend import settings as _settings
 from backend.config import DATA_DIR, POOL_PATH, docker_sock, logger
 from backend.config import docker_sock as _docker_sock_path
@@ -164,6 +164,16 @@ class SambaStatus(BaseModel):
     sidecar_status: str = "not_found"
     config_path: str = Field(default_factory=lambda: SAMBA_CONF_FILE)  # not in the API schema: it depends on the host
     native_samba_active: bool = False
+
+
+def _serves_files() -> bool:
+    """Whether the shared folders are Kiboto's own to make (not Unraid's or another host's)."""
+    from backend.hardware.pal_storage import get_storage_platform
+
+    try:
+        return bool(get_storage_platform().get_capabilities().can_manage_shares)
+    except (OSError, RuntimeError, ValueError):
+        return False
 
 
 class SambaEngine:
@@ -351,7 +361,10 @@ class SambaEngine:
         frozen = get_guard().frozen  # M4: every share read-only while frozen
         conf_lines.append("")
 
-        # Private folders (Batch 6): each signed-in person sees only their own as a share named after them
+        # Private folders (Batch 6): each signed-in person sees only their own as a share named after them.
+        # Written as the shared folders are (as nobody:users), so the folder and what the Files app puts
+        # in it have one owner; who may open it is decided by "valid users", as before.
+        ours = _serves_files()
         try:
             from backend.services.user_spaces import homes_root
 
@@ -365,9 +378,13 @@ class SambaEngine:
                         f"   read only = {'yes' if frozen else 'no'}",
                         "   create mask = 0660",
                         "   directory mask = 0770",
+                        "   force user = nobody",
+                        "   force group = users",
                         "",
                     ]
                 )
+                for person in os.listdir(homes_root()) if ours else []:
+                    owned.to_people(os.path.join(homes_root(), person), mode=0o770)
         except Exception:
             logger.debug("[SambaEngine] homes section skipped", exc_info=True)
 
@@ -377,6 +394,8 @@ class SambaEngine:
             except ValueError as e:
                 logger.error("[SambaEngine] Skipping share '%s' with unsafe settings: %s", share.name, e)
                 continue
+            if ours and share.force_user:  # the file server writes as that user: the folder is theirs
+                owned.to_people(share.path, share.force_user, share.force_group or "users")
             conf_lines.append(f"[{share.name}]")
             conf_lines.append(f"   path = {share.path}")
             if share.comment:
@@ -742,7 +761,8 @@ SMB_NAME = re.compile(r"^[a-zA-Z0-9_\-\.]{1,32}$")
 def access_lines(share: "SambaShareConfig") -> list[str]:
     """smb.conf lines that make SMB follow share access (B11, SEC-28; warned in 1.11, written since
     1.12 per D11). Lists set on the share itself win, as they do in share access; a guest share
-    stays open; a share nobody may open is switched off."""
+    stays open; a share nobody may open is switched off. The people who may open it are always
+    named: nobody else's account opens it."""
     if share.guest_ok or share.valid_users or share.read_list or share.write_list:
         return []
     from backend.services.share_access import load_config, share_level
@@ -763,8 +783,9 @@ def access_lines(share: "SambaShareConfig") -> list[str]:
             levels[name] = "write"
         else:
             levels[name] = share_level(cfg, share.name, name, role)
-    if levels and all(v == "write" for v in levels.values()):
-        return []  # everyone may write: Samba's default
+    # Written out also when everyone may write. Left to Samba's default ("anyone with an account"),
+    # an account that stayed in Samba's own list after its person was removed or switched off here
+    # (the file server could not be told at that moment) kept opening the folder.
     allowed = sorted(u for u, v in levels.items() if v in ("read", "write"))
     if not allowed:
         return ["   available = no"]
