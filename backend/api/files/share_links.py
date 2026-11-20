@@ -612,7 +612,13 @@ async def _serve_shared_item(token: str, request: Request, info: bool, provided_
     async with _SHARE_LOCK:
         cur_links = _load_share_links()
         if token in cur_links:
-            cur_links[token]["download_count"] = cur_links[token].get("download_count", 0) + 1
+            cur = cur_links[token]
+            # again here: downloads started side by side all passed the check at the top
+            if cur.get("max_downloads") and cur.get("download_count", 0) >= cur["max_downloads"]:
+                if is_dir:
+                    _release_share_zip_slot(slot)
+                raise HTTPException(status_code=410, detail="Download limit reached for this share link")
+            cur["download_count"] = cur.get("download_count", 0) + 1
             try:
                 _save_share_links(cur_links)
             except HTTPException:

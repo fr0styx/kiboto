@@ -116,6 +116,31 @@ def test_share_link_expiration_and_download_limit(client, auth_headers, share_sa
     assert "limit reached" in res2.text.lower()
 
 
+@pytest.mark.parametrize("folder", [False, True])
+def test_downloads_started_side_by_side_keep_to_the_limit(client, auth_headers, share_sandbox, monkeypatch, folder):
+    from backend.api.files import share_links
+
+    path = os.path.dirname(share_sandbox["test_file"]) if folder else share_sandbox["test_file"]
+    res = client.post("/api/fs/share-links", json={"path": path, "max_downloads": 1}, headers=auth_headers)
+    token = res.json()["token"]
+    real_ip = share_links._get_client_ip
+    calls = []
+
+    def another_download_was_counted_meanwhile(request):
+        calls.append(1)
+        if len(calls) == 2:  # past the check at the top, before this one is counted
+            links = share_links._load_share_links()
+            links[token]["download_count"] = 1
+            share_links._save_share_links(links)
+        return real_ip(request)
+
+    monkeypatch.setattr(share_links, "_get_client_ip", another_download_was_counted_meanwhile)
+    r = client.get(f"/api/fs/shared/{token}")
+    assert r.status_code == 410 and len(calls) >= 2
+    assert share_links._load_share_links()[token]["download_count"] == 1
+    assert share_links._SHARE_ZIP_ACTIVE == {}  # a refused folder download gave its slot back
+
+
 def test_share_link_revoke_and_list(client, auth_headers, share_sandbox):
     test_file = share_sandbox["test_file"]
 
