@@ -224,6 +224,8 @@ Windows PCs list the NAS under **Network** in File Explorer, where Kiboto serves
 
 Six more apps in Get apps, each tried on a real install: Ghostfolio (savings and investments), Mattermost (team chat), Etherpad (writing together), Photoview (a gallery for a photo folder), Flowise (AI workflows) and WeKan (boards). 159 apps in all.
 
+Seven more apps in Get apps, each tried on a real install: Grist and NocoDB (spreadsheets that are databases), Backrest and Kopia (backups), Healthchecks (alerts when a scheduled job did not run), HedgeDoc (notes written together) and LanguageTool (spelling and grammar checks on your own server). 166 apps in all.
+
 #### Security
 
 - **App logos**: Kiboto fetches a logo only when an app in the catalog names that exact address. Before, any
