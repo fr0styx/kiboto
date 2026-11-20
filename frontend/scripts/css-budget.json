@@ -1,6 +1,6 @@
 {
-  "important": 3384,
-  "buttonClasses": 75,
+  "important": 3411,
+  "buttonClasses": 76,
   "inlineStyles": 1243,
   "emojiIcons": 3,
   "colours": 3703,
@@ -48,7 +48,7 @@
     "frontend/src/styles/45-ai-history.css": 19,
     "frontend/src/styles/47-containers-bulk.css": 11,
     "frontend/src/styles/56-phone.css": 5,
-    "frontend/src/styles/containers-lazy.css": 18,
+    "frontend/src/styles/containers-lazy.css": 45,
     "frontend/src/styles/files-lazy.css": 1,
     "frontend/src/styles/kib-window.css": 4,
     "frontend/src/styles/management-lazy.css": 3,

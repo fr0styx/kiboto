@@ -48,6 +48,8 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   search box. It is now in the title row, where the folder's name used to be repeated, so the file list starts
   one row higher. Tapping a part of the path still goes there.
 
+Apps on a phone: each app is a short card with its name, its state, one button (Open, Start or Resume) and the menu. With the Docker details there is one more line for the load and the ports. The list no longer runs off the side of the screen, and the Docker details switch stays in view.
+
 #### Changes
 
 - **Ask Kib about the NAS in your language**: questions about free space, drives, fans, apps, the network and

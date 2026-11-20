@@ -114,7 +114,7 @@ export function partIds(rows) {
 export function appMenu(app, hasUpdate, run, openPart) {
   const items = [];
   if (app.condition === 'paused')
-    items.push({ icon: '⏵', label: t('appmenu.resume', 'Resume'), onClick: () => run('unpause') });
+    items.push({ icon: '▶', label: t('appmenu.resume', 'Resume'), onClick: () => run('unpause') });
   else if (UP.includes(app.condition) || app.condition === 'restarting') {
     items.push({ icon: '🔄', label: t('appmenu.restart', 'Restart'), onClick: () => run('restart') });
     items.push({ icon: '⏹', label: t('appmenu.stop', 'Stop'), onClick: () => run('stop') });

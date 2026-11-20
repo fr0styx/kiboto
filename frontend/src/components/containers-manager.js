@@ -139,8 +139,8 @@ export function initContainersManager() {
               <button id="btn-cw-catalog" class="btn-pill-toggle is-primary">
                 <span aria-hidden="true">📦</span> <span>${t('apps.get_apps', 'Get apps')}</span>
               </button>
-              <label class="cw-details-switch" for="cw-details-toggle"><input type="checkbox" id="cw-details-toggle"> <span>${t('apps.show_details', 'Show Docker details')}</span></label>
             </div>
+            <label class="cw-details-switch" for="cw-details-toggle"><input type="checkbox" id="cw-details-toggle"> <span>${t('apps.show_details', 'Show Docker details')}</span></label>
           </div>
 
           <!-- Filter Pills and Search Bar -->
@@ -1261,6 +1261,7 @@ function bindCwTableEvents(tbody) {
         }
         /** @type {Array<{ onClick?: () => unknown } & Record<string, unknown>>} */
         const items = [
+          ...runItems(c, actBtn), // a phone's card shows one button; the rest is here
           {
             icon: '🔍',
             label: t('docker.inspect', 'Details'),
@@ -1484,17 +1485,27 @@ export function applyAppsDetails(on, root = document) {
   if (box) box.checked = Boolean(on);
 }
 
-/** The "..." menu of the simple view, in the report's order (SET-25, section 4). */
-export function householdMenu(c, actBtn, hasUpdate) {
+/** What starts and stops an app, as menu items. They press the row's own buttons, so a menu
+ *  does what the row does; on a phone the row shows one of them and leaves the rest to its menu.
+ *  @returns {Array<{ icon: string, label: string, onClick: () => unknown, destructive?: boolean }>} */
+export function runItems(c, actBtn) {
   const press = (action) => () => actBtn.parentElement?.querySelector(`[data-action="${action}"]`)?.click();
   const items = [];
-  if (canResume(c)) items.push({ icon: '⏵', label: t('appmenu.resume', 'Resume'), onClick: press('unpause') });
+  // "▶" is drawn as an icon; "⏵" was an empty box where the font has no such sign
+  if (canResume(c)) items.push({ icon: '▶', label: t('appmenu.resume', 'Resume'), onClick: press('unpause') });
   if (canStop(c)) {
     items.push({ icon: '🔄', label: t('appmenu.restart', 'Restart'), onClick: press('restart') });
     items.push({ icon: '⏹', label: t('appmenu.stop', 'Stop'), onClick: press('stop') });
   } else {
     items.push({ icon: '▶', label: t('appmenu.start', 'Start'), onClick: press('start') });
   }
+  return items;
+}
+
+/** The "..." menu of the simple view, in the report's order (SET-25, section 4). */
+export function householdMenu(c, actBtn, hasUpdate) {
+  const press = (action) => () => actBtn.parentElement?.querySelector(`[data-action="${action}"]`)?.click();
+  const items = runItems(c, actBtn);
   if (hasUpdate) items.push({ icon: '⬆️', label: t('appmenu.update', 'Update'), onClick: press('update-single') });
   items.push({ icon: '💾', label: t('appmenu.backup', 'Back up now'), onClick: press('backup') });
   items.push({
