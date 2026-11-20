@@ -208,14 +208,44 @@ def _denied(section: str) -> set[str]:
     return set(found.group(1).split()) if found else set()
 
 
+def _people(section: str) -> tuple[set[str] | None, set[str], list[str]]:
+    """A share's section as (who may open it, or None when it does not say; who may only read; the other lines)."""
+    valid: set[str] | None = None
+    readers: set[str] = set()
+    rest = []
+    for line in section.splitlines():
+        if line.startswith("valid users = "):
+            valid = set(line.split("=", 1)[1].split())
+        elif line.startswith("read list = "):
+            readers = set(line.split("=", 1)[1].split())
+        else:
+            rest.append(line)
+    return valid, readers, rest
+
+
+def only_lets_more_in(was: str, now: str) -> bool:
+    """Whether a share's new section takes nothing from anyone: it differs only in people added
+    to those who may open it (a new person), or in someone who may now write. The connections
+    that are open stay right, so they need not be closed."""
+    valid0, read0, rest0 = _people(was)
+    valid1, read1, rest1 = _people(now)
+    if rest0 != rest1 or valid0 is None or valid1 is None:
+        return False
+    return valid0 <= valid1 and read1 <= read0 | (valid1 - valid0)
+
+
 def what_changed(old: str, new: str) -> dict[str, Any]:
-    """What a new smb.conf changes against the one before: the shared folders whose section is
-    different or gone ("shares"), the addresses blocked now and not before ("ips"), and whether
-    the private folders' section changed ("homes": they are shares named after each person, so
-    they cannot be closed by name)."""
+    """What a new smb.conf changes against the one before: the shared folders to close ("shares":
+    the section is gone, or different in a way that takes something from someone), the addresses
+    blocked now and not before ("ips"), and whether the private folders' section changed
+    ("homes": they are shares named after each person, so they cannot be closed by name)."""
     was, now = conf_sections(old), conf_sections(new)
     special = ("global", "homes")
-    shares = sorted(n for n in was.keys() | now.keys() if n not in special and was.get(n) != now.get(n) and n in was)
+    shares = sorted(
+        n
+        for n in was
+        if n not in special and was[n] != now.get(n) and not (n in now and only_lets_more_in(was[n], now[n]))
+    )
     return {
         "shares": shares,
         "ips": sorted(_denied(now.get("global", "")) - _denied(was.get("global", ""))),

@@ -8,7 +8,7 @@ import subprocess
 import pytest
 
 from backend.services import samba_engine
-from backend.services.samba_engine import SambaShareConfig, conf_sections, what_changed
+from backend.services.samba_engine import SambaShareConfig, conf_sections, only_lets_more_in, what_changed
 
 OLD = """[global]
    workgroup = WORKGROUP
@@ -187,3 +187,26 @@ def test_settings_written_twice_before_one_reload_close_what_either_changed(engi
         "ips": ["1.1.1.1"],
         "homes": True,
     }
+
+
+def test_a_shared_folder_is_closed_only_when_someone_loses_something():
+    base = "path = /mnt/storage/Films\nread only = no\nvalid users = admin ana"
+
+    def with_people(valid, readers=""):
+        return f"path = /mnt/storage/Films\nread only = no\nvalid users = {valid}" + (
+            f"\nread list = {readers}" if readers else ""
+        )
+
+    assert only_lets_more_in(base, with_people("admin ana kim")) is True  # a new person
+    assert only_lets_more_in(base, with_people("admin ana kim", "kim")) is True  # who may only read
+    assert only_lets_more_in(with_people("admin ana", "ana"), base) is True  # ana may write now
+    assert only_lets_more_in(base, with_people("admin")) is False  # ana is out
+    assert only_lets_more_in(base, with_people("admin ana", "ana")) is False  # ana may only read now
+    assert only_lets_more_in(base, base.replace("read only = no", "read only = yes")) is False  # frozen
+    assert only_lets_more_in("path = /x", "path = /x\nvalid users = admin") is False  # it named nobody before
+    assert only_lets_more_in(base, "path = /mnt/storage/Films\nread only = no") is False
+    # adding a person changes every share's list and closes none of them
+    new = OLD.replace("valid users = ana kim", "valid users = ana kim leo").replace(
+        "valid users = ana\n", "valid users = ana leo\n"
+    )
+    assert new != OLD and what_changed(OLD, new) == {"shares": [], "ips": [], "homes": False}

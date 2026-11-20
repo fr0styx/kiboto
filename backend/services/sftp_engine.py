@@ -442,10 +442,10 @@ Match Group sftpusers
             mode = "disabled"
         elif sidecar_status == "running":
             mode = "native_sidecar"
+        elif subprocess_running:
+            mode = "subprocess"  # Kiboto's own server answers on the port: not the host's
         elif port_open:
             mode = "host_sshd"
-        elif subprocess_running:
-            mode = "subprocess"
         else:
             mode = "configured"
 

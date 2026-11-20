@@ -280,6 +280,7 @@ def _move_file_resilient(src: str, dst: str, progress: TransferProgress | None =
     except OSError as err:
         logger.debug("[FS Transfer] Rename %s failed (%s); copying instead", src, err)
     _copy_file_resilient(src, dst, progress, durable=True)
+    owned.like_source(src, dst)  # moved, not made: it keeps its owner, as on the same drive
     try:
         os.unlink(src)
     except OSError as err:

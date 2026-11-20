@@ -76,3 +76,24 @@ def test_what_an_archive_holds(share, tmp_path):
             owned.below(str(share), z.extract(info, str(share)), seen)
     assert (_mode(share / "zipped"), _mode(share / "zipped" / "dir")) == ("0o777", "0o777")
     assert (_mode(share / "zipped" / "dir" / "z.txt"), _mode(share / "top.txt")) == ("0o666", "0o666")
+
+
+def test_a_file_moved_across_drives_keeps_its_owner(share, tmp_path, monkeypatch):
+    """On the same drive a move is a rename and nothing changes. Across drives it is a copy, and
+    the copy gets the owner and rights the file had, not the destination folder's."""
+    src = tmp_path / "src.txt"
+    src.write_text("m")
+    os.chmod(src, 0o640)
+    kept = []
+    monkeypatch.setattr(owned, "like_source", lambda s, d: kept.append((s, d)))
+    real = os.replace
+
+    def other_drive(a, b):
+        if a == str(src):
+            raise OSError(18, "Invalid cross-device link")
+        return real(a, b)
+
+    monkeypatch.setattr(ft.os, "replace", other_drive)
+    ft._move_file_resilient(str(src), str(share / "moved.txt"))
+    assert kept == [(str(src), str(share / "moved.txt"))]
+    assert not src.exists() and (share / "moved.txt").read_text() == "m"

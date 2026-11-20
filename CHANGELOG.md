@@ -94,6 +94,8 @@ Kiboto's own file server: when its settings were written twice before they were 
 
 **Files a two-way sync brings from the cloud can be changed over the network share.** They were written so that only the system could change them. They now get the group and the right to write of the folder they are synced into.
 
+Kiboto's own file server: adding a person, or letting someone write who could only read, no longer closes anyone's open shared folder. A folder is closed only when someone loses access to it or loses the right to write. A file moved in Files from one drive to another keeps its owner, as it does on one drive.
+
 #### Changes
 
 - **Ask Kib about the NAS in your language**: questions about free space, drives, fans, apps, the network and
