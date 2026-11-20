@@ -9109,4 +9109,6 @@ export default {
   "ev.backup_second_nas_stale.msg": "Dieses NAS hat seit {days, plural, one {# Tag} other {# Tagen}} nichts von {name} abgeholt. Eine Übernahme brächte Personen und Dateien auf dem damaligen Stand. Prüfen Sie, ob beide Geräte eingeschaltet sind und einander erreichen.",
   "ev.backup_second_nas_quiet.title": "Das zweite NAS hat nichts abgeholt",
   "ev.backup_second_nas_quiet.msg": "{name} hat seit {days, plural, one {# Tag} other {# Tagen}} nichts von diesem NAS abgeholt und hat daher keine aktuelle Kopie mehr. Prüfen Sie, ob es eingeschaltet ist und dieses NAS erreicht.",
+  "nas_name.windows": "Windows-PCs zeigen es unter Netzwerk an.",
+  "nas_name.held": "Zurückgehalten: Das zweite NAS hat übernommen und antwortet auf diesen Namen. Holen Sie den Namen unter Sicherung zurück.",
 };

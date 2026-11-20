@@ -58,6 +58,8 @@ A label on a file that was deleted over the network, outside the File Explorer, 
 
 On a phone, an app's card showed dark bands behind its name after it was touched.
 
+A first NAS that holds its name back for a second NAS said "Starting" under Find this NAS by name; it now says that the name is held back.
+
 #### Changes
 
 - **Ask Kib about the NAS in your language**: questions about free space, drives, fans, apps, the network and
@@ -155,6 +157,8 @@ A second NAS that takes over can bring the first one's backups along. Tick **Als
 After a second NAS has taken over, it lists the **apps of the first NAS**, and **Add here** sets one up with this NAS's copy of its folders. An app can be added when the folders it keeps its files in are among the folders kept in step (keep `appdata` in step if you want apps to follow); otherwise the card names the folder that is missing. If a part of the app does not come up, everything is taken back. See docs/HA.md.
 
 A pair of NAS boxes warns once a day when the second NAS has not been able to fetch for three days, on both boxes.
+
+Windows PCs list the NAS under **Network** in File Explorer, where Kiboto serves the files itself and **Find this NAS by name** is on. On Unraid, Unraid's own service does that and nothing changes.
 
 #### Security
 

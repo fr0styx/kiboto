@@ -9109,4 +9109,6 @@ export default {
   "ev.backup_second_nas_stale.msg": "这台 NAS 已有 {days, plural, other {# 天}}没有从 {name} 获取内容。此时接替，带来的用户和文件将是当时的状态。请检查两台设备是否都已开机并能互相连接。",
   "ev.backup_second_nas_quiet.title": "第二台 NAS 没有获取内容",
   "ev.backup_second_nas_quiet.msg": "{name} 已有 {days, plural, other {# 天}}没有从这台 NAS 获取内容，因此它不再有最新的副本。请检查它是否已开机并能连接这台 NAS。",
+  "nas_name.windows": "Windows 电脑会在“网络”中列出它。",
+  "nas_name.held": "已保留：第二台 NAS 已接替并响应这个名称。请在“备份”中取回名称。",
 };

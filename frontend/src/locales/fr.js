@@ -9109,4 +9109,6 @@ export default {
   "ev.backup_second_nas_stale.msg": "Ce NAS n'a rien récupéré de {name} depuis {days, plural, one {# jour} other {# jours}}. Une prise de relais reprendrait les personnes et les fichiers tels qu'ils étaient alors. Vérifiez que les deux appareils sont allumés et se joignent.",
   "ev.backup_second_nas_quiet.title": "Le second NAS n'a rien récupéré",
   "ev.backup_second_nas_quiet.msg": "{name} n'a rien récupéré de ce NAS depuis {days, plural, one {# jour} other {# jours}} : il n'a donc plus de copie à jour. Vérifiez qu'il est allumé et qu'il joint ce NAS.",
+  "nas_name.windows": "Les PC Windows l'affichent dans Réseau.",
+  "nas_name.held": "Retenu : le second NAS a pris le relais et répond à ce nom. Reprenez le nom dans Sauvegarde.",
 };

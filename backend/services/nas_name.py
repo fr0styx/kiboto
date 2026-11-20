@@ -162,12 +162,39 @@ def timemachine_shares() -> list[str]:
     return sorted(s.name for s in engine.list_shares() if s.timemachine)
 
 
+def serves_windows() -> bool:
+    """Whether this box should answer Windows' own search (PCs then list it under Network): only
+    where Kiboto serves the files over SMB itself. A host with its own file server (Unraid) has
+    its own answerer, and two would fight over one port."""
+    from backend.hardware.pal_storage import get_storage_platform
+
+    try:
+        return bool(get_storage_platform().get_capabilities().can_manage_shares)
+    except (OSError, RuntimeError, ValueError, AttributeError):
+        return False
+
+
+def device_seed() -> str:
+    """What this box's address for Windows is made from: its data folder's own mark, so the same
+    box keeps the same address, and a second box with the same name is another device."""
+    from backend.config import DATA_DIR
+    from backend.fsutil import DATA_MARKER
+
+    try:
+        with open(os.path.join(DATA_DIR, DATA_MARKER), encoding="utf-8") as f:
+            return f.read().strip()[:80]
+    except OSError:
+        return ""
+
+
 def desired(me: dict[str, Any], cfg: dict[str, Any]) -> dict[str, Any]:
     """The container: the app's image, the responder, the host's network, nothing mounted."""
     names = answering_names(cfg)
     cmd = [RESPONDER, "--names", ",".join(names), "--label", label(cfg["name"]), "--http-port", str(web_port(me))]
     for share in timemachine_shares():
         cmd += ["--timemachine", share]
+    if serves_windows():
+        cmd += ["--windows", "--workgroup", "WORKGROUP", "--device", device_seed() or names[0]]
     image = (me.get("Config") or {}).get("Image") or product.IMAGE + ":latest"
     want: dict[str, Any] = {
         "Image": image,
@@ -255,6 +282,7 @@ def status(
         "name": cfg["name"],
         "held": cfg["held"],
         "also_answers": answering_names(cfg)[1:],
+        "windows": serves_windows(),  # Windows PCs list it under Network too
         "running": running,
         "address": host,
         "url": f"http://{host}" + ("" if port == 80 else f":{port}"),

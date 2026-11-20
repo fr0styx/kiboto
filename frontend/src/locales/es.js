@@ -9109,4 +9109,6 @@ export default {
   "ev.backup_second_nas_stale.msg": "Este NAS no ha traído nada de {name} desde hace {days, plural, one {# día} other {# días}}. Un relevo traería a las personas y los archivos tal como estaban entonces. Comprueba que los dos equipos están encendidos y se alcanzan.",
   "ev.backup_second_nas_quiet.title": "El segundo NAS no ha traído nada",
   "ev.backup_second_nas_quiet.msg": "{name} no ha traído nada de este NAS desde hace {days, plural, one {# día} other {# días}}, así que ya no tiene una copia actual. Comprueba que está encendido y alcanza este NAS.",
+  "nas_name.windows": "Los PC con Windows lo muestran en Red.",
+  "nas_name.held": "Retenido: el segundo NAS tomó el relevo y responde a este nombre. Recupera el nombre en Copia de seguridad.",
 };

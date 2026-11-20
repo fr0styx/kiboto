@@ -73,4 +73,13 @@ describe('find this NAS by name (NFEAT-8)', () => {
     document.body.innerHTML = '';
     await loadNasNameCard(); // no card on the page: nothing happens
   });
+  it('says when Windows PCs list the NAS, and when the name is held back for a second NAS', () => {
+    const on = { enabled: true, running: true, address: 'familynas.local' };
+    expect(nasNameStatus(on)).toBe('On: familynas.local on this network.');
+    expect(nasNameStatus({ ...on, windows: true })).toBe(
+      'On: familynas.local on this network. Windows PCs list it under Network.'
+    );
+    expect(nasNameStatus({ ...on, running: false, held: true })).toMatch(/^Held back: the second NAS took over/);
+    expect(nasNameStatus({ ...on, enabled: false, held: true })).toMatch(/^Off:/); // off is off
+  });
 });

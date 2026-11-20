@@ -145,6 +145,7 @@ class FakeDocker:
 def docker(monkeypatch, tmp_path):
     monkeypatch.setattr(nas_name, "STATE_FILE", str(tmp_path / "nas_name.json"))
     monkeypatch.delenv("KIBOTO_NAS_NAME", raising=False)
+    monkeypatch.setattr(nas_name, "serves_windows", lambda: False)  # as on a host with its own file server
     fake = FakeDocker()
     monkeypatch.setattr(nas_name, "_docker", fake)
     monkeypatch.setattr(nas_name, "timemachine_shares", lambda: [])
@@ -161,6 +162,7 @@ def test_off_until_turned_on_then_with_the_products_name(docker):
         "name": "kiboto",
         "held": False,
         "also_answers": [],
+        "windows": False,
         "running": True,
         "address": "kiboto.local",
         "url": "http://kiboto.local:8090",
@@ -588,3 +590,86 @@ def test_a_held_name_is_not_announced(tmp_path, monkeypatch):
         json.dump({"enabled": True, "name": "familynas", "previous": []}, f)
     nas_name.give_up("familynas", "not a name!", True)
     assert nas_name.config()["name"] == nas_name.DEFAULT_NAME
+
+
+def test_windows_is_answered_only_where_kiboto_serves_the_files(tmp_path, monkeypatch):
+    from types import SimpleNamespace
+
+    from backend.hardware import pal_storage
+
+    def platform(can):
+        return lambda: SimpleNamespace(get_capabilities=lambda: SimpleNamespace(can_manage_shares=can))
+
+    monkeypatch.setattr(nas_name, "timemachine_shares", lambda: [])
+    monkeypatch.setattr(nas_name, "web_port", lambda me: 8090)
+    cfg = {"enabled": True, "name": "familynas", "previous": [], "held": False}
+    monkeypatch.setattr(pal_storage, "get_storage_platform", platform(False))  # a host with its own file server
+    assert nas_name.serves_windows() is False and "--windows" not in nas_name.desired({}, cfg)["Cmd"]
+    monkeypatch.setattr(pal_storage, "get_storage_platform", platform(True))
+    monkeypatch.setattr("backend.config.DATA_DIR", str(tmp_path))
+    cmd = nas_name.desired({}, cfg)["Cmd"]
+    assert cmd[-5:] == ["--windows", "--workgroup", "WORKGROUP", "--device", "familynas"]  # no mark yet: the name
+    (tmp_path / ".zettnas-data-id").write_text("box-1234\n")
+    assert nas_name.device_seed() == "box-1234" and nas_name.desired({}, cfg)["Cmd"][-1] == "box-1234"
+
+    def broken():
+        raise RuntimeError("no storage")
+
+    monkeypatch.setattr(pal_storage, "get_storage_platform", broken)
+    assert nas_name.serves_windows() is False
+
+
+def test_the_responder_starts_the_windows_answerer_when_asked_and_stops_it(monkeypatch):
+    from backend.services import mdns_responder as m
+
+    class Sock:
+        def sendto(self, data, addr):
+            return len(data)
+
+        def settimeout(self, value):
+            return None
+
+        def recvfrom(self, size):
+            raise TimeoutError
+
+    started, stopped, handlers = [], [], {}
+
+    class Answerer:
+        def stop(self):
+            stopped.append(1)
+
+    fake = type(
+        "W",
+        (),
+        {
+            "start": staticmethod(
+                lambda name, ip, group, seed, port: started.append((name, ip, group, seed, port)) or Answerer()
+            )
+        },
+    )
+    monkeypatch.setattr(m, "windows_answerer", lambda: fake)
+    monkeypatch.setattr(m, "open_socket", lambda ip: Sock())
+    monkeypatch.setattr(m, "probe", lambda sock, r: True)
+    monkeypatch.setattr(m, "serve", lambda sock, r, ip, follow: 0)
+    monkeypatch.setattr(m.time, "sleep", lambda s: None)
+    monkeypatch.setattr(m.signal, "signal", lambda sig, fn: handlers.__setitem__(sig, fn))
+    monkeypatch.setattr(m, "smb_open", lambda ip: True)
+    args = ["--names", "familynas", "--ip", "192.168.1.10", "--windows", "--workgroup", "HOME", "--device", "box-1"]
+    assert m.main(args) == 0 and started == [("familynas", "192.168.1.10", "HOME", "box-1", 80)]
+    with pytest.raises(SystemExit):
+        handlers[m.signal.SIGTERM]()
+    assert stopped == [1]
+    # no SMB on this box, or not asked: Windows is not answered
+    monkeypatch.setattr(m, "smb_open", lambda ip: False)
+    assert m.main(args) == 0 and len(started) == 1
+    monkeypatch.setattr(m, "smb_open", lambda ip: True)
+    assert m.main(args[:4]) == 0 and len(started) == 1
+    with pytest.raises(SystemExit):
+        handlers[m.signal.SIGTERM]()  # nothing to stop
+    assert stopped == [1]
+
+
+def test_the_windows_answerer_is_found_beside_the_responder():
+    from backend.services import mdns_responder as m
+
+    assert m.windows_answerer().__name__.endswith("wsd_responder")

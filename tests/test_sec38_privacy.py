@@ -139,6 +139,10 @@ NOT_CONTACTED = {
     "graph.microsoft.com",
     "apps.apple.com",  # store links on the family invite page, opened by the visitor (NFEAT-1)
     "play.google.com",
+    # names of XML vocabularies in the messages Windows uses to find computers (wsd_responder.py):
+    # they are written into the messages, never opened
+    "schemas.xmlsoap.org",
+    "schemas.microsoft.com",
 }
 
 

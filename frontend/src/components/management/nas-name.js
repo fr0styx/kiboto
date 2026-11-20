@@ -12,8 +12,14 @@ const $ = (id) => document.getElementById(id);
 export function nasNameStatus(st) {
   if (st.error) return st.error;
   if (!st.enabled) return t('nas_name.off', 'Off: computers find the NAS only by its address.');
+  if (st.held)
+    return t(
+      'nas_name.held',
+      'Held back: the second NAS took over and answers to this name. Take the name back under Backup.'
+    );
   if (!st.running) return t('nas_name.starting', 'Starting…');
-  return t('nas_name.on', 'On: {address} on this network.', { address: st.address });
+  const on = t('nas_name.on', 'On: {address} on this network.', { address: st.address });
+  return st.windows ? `${on} ${t('nas_name.windows', 'Windows PCs list it under Network.')}` : on;
 }
 
 export function renderNasName(st) {

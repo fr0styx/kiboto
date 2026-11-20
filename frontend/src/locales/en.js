@@ -9109,4 +9109,6 @@ export default {
   "ev.backup_second_nas_stale.msg": "This NAS has not fetched from {name} for {days, plural, one {# day} other {# days}}. A takeover would bring people and files as they were then. Check that both boxes are on and reach each other.",
   "ev.backup_second_nas_quiet.title": "The second NAS has not fetched",
   "ev.backup_second_nas_quiet.msg": "{name} has not fetched from this NAS for {days, plural, one {# day} other {# days}}, so it no longer has a current copy. Check that it is on and reaches this NAS.",
+  "nas_name.windows": "Windows PCs list it under Network.",
+  "nas_name.held": "Held back: the second NAS took over and answers to this name. Take the name back under Backup.",
 };

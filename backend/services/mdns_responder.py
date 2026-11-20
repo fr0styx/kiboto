@@ -13,10 +13,12 @@ may already run (Unraid's avahi).
 
 Arguments: --names (first is the name, the rest still answer), --label (shown in Finder),
 --http-port, --ip (else the address of the default route), --timemachine (a Time Machine share;
-repeat it for more).
+repeat it for more), --windows (also answer Windows' own search, so PCs list the NAS under
+Network: wsd_responder.py, with --workgroup and --device).
 """
 
 import argparse
+import importlib
 import signal
 import socket
 import struct
@@ -358,6 +360,15 @@ def probe(sock: Any, r: Responder) -> bool:
     return True
 
 
+def windows_answerer() -> Any:
+    """The answerer for Windows' search, from beside this file: in its container this script runs
+    on its own, without the package around it."""
+    try:
+        return importlib.import_module("wsd_responder")
+    except ImportError:
+        return importlib.import_module("backend.services.wsd_responder")
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Answers <name>.local on the home network.")
     ap.add_argument("--names", default="kiboto", help="the name, then older names that still answer")
@@ -365,6 +376,9 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--http-port", type=int, default=80)
     ap.add_argument("--ip", default="")
     ap.add_argument("--timemachine", action="append", default=[], help="a Time Machine share (repeat for more)")
+    ap.add_argument("--windows", action="store_true", help="also answer Windows' search (WS-Discovery)")
+    ap.add_argument("--workgroup", default="WORKGROUP")
+    ap.add_argument("--device", default="", help="what the Windows device address is made from")
     args = ap.parse_args(argv)
     names = [n.strip() for n in args.names.split(",") if n.strip()]
     ip = args.ip or wait_for_ip()
@@ -381,10 +395,17 @@ def main(argv: list[str] | None = None) -> int:
         sock.sendto(r.announcement(), (GROUP, PORT))
         time.sleep(1)
     print(f"[mdns] {', '.join(n + '.local' for n in r.names)} -> {ip}, web on port {port}, smb={r.smb}", flush=True)
+    # Windows lists a computer, so only where files are served over SMB; a host that has its own
+    # answerer keeps it (the port is taken, and this one says so and stays out)
+    windows = None
+    if args.windows and r.smb:
+        windows = windows_answerer().start(r.names[0], ip, args.workgroup, args.device, port)
 
     def bye(*_a: object) -> None:
         try:
             sock.sendto(r.announcement(goodbye=True), (GROUP, PORT))
+            if windows is not None:
+                windows.stop()
         finally:
             sys.exit(0)
 
