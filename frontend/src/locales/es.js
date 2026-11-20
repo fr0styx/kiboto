@@ -9112,6 +9112,6 @@ export default {
   "nas_name.windows": "Los PC con Windows lo muestran en Red.",
   "nas_name.held": "Retenido: el segundo NAS tomó el relevo y responde a este nombre. Recupera el nombre en Copia de seguridad.",
   "fm.i_give": "Dar a las personas de esta carpeta",
-  "fm.i_give_hint": "Los archivos y carpetas de aquí que aún pertenecen al sistema reciben el propietario de esta carpeta, para que sus personas puedan cambiarlos también por el recurso de red. Lo que pertenece a otra persona no cambia.",
+  "fm.i_give_hint": "Los archivos y carpetas de aquí que aún pertenecen al sistema reciben el propietario de esta carpeta, para que sus personas puedan cambiarlos también a través del recurso compartido. Lo que pertenece a otra persona no cambia.",
   "toast.given_back": "{count, plural, =0 {Aquí ya nada pertenecía al sistema.} one {# elemento pertenece ahora a las personas de esta carpeta.} other {# elementos pertenecen ahora a las personas de esta carpeta.}}",
 };
