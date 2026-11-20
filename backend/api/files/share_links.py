@@ -665,11 +665,15 @@ async def upload_to_shared_folder(token: str, request: Request):
     folder = await asyncio.to_thread(_upload_folder, item)
     if not await asyncio.to_thread(_share_creator_can_write, item.get("created_by"), folder):
         raise HTTPException(status_code=410, detail="This link is no longer available.")
-    name, size = await upload_links.receive(item, folder, request)
-    async with _SHARE_LOCK:
-        links = _load_share_links()
-        if token in links:
-            links[token] = upload_links.counted(links[token], size)
-            _save_share_links(links)
+    declared = request.headers.get("content-length") or ""
+    if not declared.isdigit():
+        raise HTTPException(status_code=411, detail="The upload needs its size (Content-Length).")
+    with upload_links.room(token, item, int(declared), folder):  # held until it is counted
+        name, size = await upload_links.receive(item, folder, request)
+        async with _SHARE_LOCK:
+            links = _load_share_links()
+            if token in links:
+                links[token] = upload_links.counted(links[token], size)
+                _save_share_links(links)
     await asyncio.to_thread(upload_links.note, item, name, size, ip)
     return {"name": name, "size": size}

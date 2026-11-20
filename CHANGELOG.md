@@ -120,6 +120,8 @@ Apps such as Radarr, Sonarr, qBittorrent and Mylar3 could not write to their own
 
 Files no longer lets anyone delete, rename or move the system's own folders (appdata, system, domains, isos), a drive's folder or the folder that holds Kiboto's data. Renaming appdata by mistake would have stopped every app and Kiboto itself.
 
+"Send me files" links: when two people sent a file with the same name at the same moment, one could replace the other. The second now gets its own name. Files sent side by side also count against the link's size limit as they arrive, so the limit can no longer be passed by sending several at once.
+
 #### Changes
 
 - **Ask Kib about the NAS in your language**: questions about free space, drives, fans, apps, the network and

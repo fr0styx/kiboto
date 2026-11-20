@@ -138,6 +138,42 @@ def test_the_page_script_is_the_one_its_policy_allows():
     assert base64.b64encode(hashlib.sha256(script.encode()).digest()).decode() == upload_links._SCRIPT_HASH
 
 
+def test_two_files_of_one_name_never_land_on_each_other(tmp_path, monkeypatch):
+    (tmp_path / "a.part").write_text("first")
+    (tmp_path / "b.part").write_text("second")
+    # both senders looked at the folder before either file was in: the name was free for both
+    real_open = upload_links.os.open
+    seen = []
+
+    def claim(path, flags, mode=0o777):
+        seen.append(path)
+        return real_open(path, flags, mode)
+
+    monkeypatch.setattr(upload_links.os, "open", claim)
+    first = upload_links.land(str(tmp_path / "a.part"), str(tmp_path), "scan.pdf")
+    second = upload_links.land(str(tmp_path / "b.part"), str(tmp_path), "scan.pdf")
+    assert first.endswith("scan.pdf") and second.endswith("scan (2).pdf")
+    assert (tmp_path / "scan.pdf").read_text() == "first" and (tmp_path / "scan (2).pdf").read_text() == "second"
+    assert not list(tmp_path.glob("*.part"))
+
+
+def test_files_sent_side_by_side_share_the_links_allowance(tmp_path):
+    item = {"max_upload_mb": 10, "received_bytes": 0}
+    mb = 1024**2
+    with upload_links.room("t1", item, 6 * mb, str(tmp_path)):
+        with pytest.raises(upload_links.HTTPException) as e:  # a second one while the first arrives
+            with upload_links.room("t1", item, 6 * mb, str(tmp_path)):
+                pass
+        assert e.value.status_code == 413
+        with upload_links.room("t1", item, 4 * mb, str(tmp_path)):  # what is left still fits
+            pass
+        with upload_links.room("t2", item, 6 * mb, str(tmp_path)):  # another link has its own
+            pass
+    with upload_links.room("t1", item, 10 * mb, str(tmp_path)):  # released when done
+        pass
+    assert upload_links._ARRIVING == {}
+
+
 def test_a_stopped_upload_leaves_nothing(tmp_path):
     import asyncio
 

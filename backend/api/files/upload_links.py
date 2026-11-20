@@ -16,7 +16,10 @@ import os
 import re
 import secrets
 import shutil
+import threading
 import time
+from collections.abc import Iterator
+from contextlib import contextmanager
 from typing import Any
 from urllib.parse import unquote
 
@@ -111,13 +114,50 @@ def safe_name(raw: str) -> str:
     return name[:200]
 
 
-def unique_path(folder: str, name: str) -> str:
+def land(part: str, folder: str, name: str) -> str:
+    """Puts the finished part file in the folder under the first free name. The name is claimed
+    with O_EXCL before the file is moved onto it: two senders' "scan.pdf" arriving at the same
+    moment both saw the name free, and the second replaced the first."""
     stem, ext = os.path.splitext(name)
     for n in range(1, 10000):
         candidate = os.path.join(folder, name if n == 1 else f"{stem} ({n}){ext}")
-        if not os.path.lexists(candidate):
-            return candidate
+        try:
+            os.close(os.open(candidate, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600))
+        except FileExistsError:
+            continue
+        os.replace(part, candidate)
+        return candidate
     raise HTTPException(status_code=409, detail="Too many files with that name.")
+
+
+# Bytes of files still arriving, per link: the link's allowance and the disk's room are checked
+# against them too, or uploads sent side by side each passed the check and together went past it.
+_ARRIVING: dict[str, int] = {}
+_ARRIVING_LOCK = threading.Lock()
+
+
+@contextmanager
+def room(key: str, item: dict[str, Any], size: int, folder: str) -> Iterator[None]:
+    """Holds `size` bytes of the link's allowance and of the folder's disk while a file arrives and
+    until it is counted; 413 when the link has no room left, 507 when the disk has none."""
+    limit = int(item.get("max_upload_mb") or DEFAULT_LIMIT_MB) * 1024**2
+    free = shutil.disk_usage(folder).free
+    with _ARRIVING_LOCK:
+        held = _ARRIVING.get(key, 0)
+        if size > limit - int(item.get("received_bytes") or 0) - held:
+            raise HTTPException(status_code=413, detail="This link has no room left for that file.")
+        if size + FREE_MARGIN > free - sum(_ARRIVING.values()):
+            raise HTTPException(status_code=507, detail="The NAS doesn't have room for that file.")
+        _ARRIVING[key] = held + size
+    try:
+        yield
+    finally:
+        with _ARRIVING_LOCK:
+            left = _ARRIVING.get(key, 0) - size
+            if left > 0:
+                _ARRIVING[key] = left
+            else:
+                _ARRIVING.pop(key, None)
 
 
 async def receive(item: dict[str, Any], folder: str, request: Request) -> tuple[str, int]:
@@ -144,8 +184,7 @@ async def receive(item: dict[str, Any], folder: str, request: Request) -> tuple[
                 await f.write(chunk)
         if written != size:
             raise HTTPException(status_code=400, detail="The upload stopped before the end.")
-        final = await asyncio.to_thread(unique_path, folder, name)
-        await asyncio.to_thread(os.replace, part, final)
+        final = await asyncio.to_thread(land, part, folder, name)
         part = ""
         await asyncio.to_thread(owned.like_folder, final)
         malware_scan.queue_scan(final, "upload_link", str(item.get("created_by") or ""))  # NFEAT-11
