@@ -223,6 +223,17 @@ def what_changed(old: str, new: str) -> dict[str, Any]:
     }
 
 
+def _both(first: dict[str, Any] | None, second: dict[str, Any] | None) -> dict[str, Any] | None:
+    """Two sets of changes as one; unknown when either is."""
+    if first is None or second is None:
+        return None
+    return {
+        "shares": sorted(set(first["shares"]) | set(second["shares"])),
+        "ips": sorted(set(first["ips"]) | set(second["ips"])),
+        "homes": first["homes"] or second["homes"],
+    }
+
+
 def _serves_files() -> bool:
     """Whether the shared folders are Kiboto's own to make (not Unraid's or another host's)."""
     from backend.hardware.pal_storage import get_storage_platform
@@ -522,9 +533,12 @@ class SambaEngine:
         full_conf = "\n".join(conf_lines)
         try:
             with open(SAMBA_CONF_FILE, encoding="utf-8") as f:
-                self._changed = what_changed(f.read(), full_conf)  # for reload_service: what to close
+                now: dict[str, Any] | None = what_changed(f.read(), full_conf)  # for reload_service: what to close
         except OSError:
-            self._changed = None  # no settings before: nothing is known, the server is restarted
+            now = None  # no settings before: nothing is known, the server is restarted
+        # settings written twice before one reload: what the first writing changed still counts
+        self._changed = _both(self._changed, now) if getattr(self, "_pending", False) else now
+        self._pending = True
         try:
             atomic_write_text(SAMBA_CONF_FILE, full_conf)  # Samba never reads half a file (REL-22)
             logger.info("[SambaEngine] Generated and saved smb.conf with %s shares", len(self._shares))
@@ -606,7 +620,7 @@ class SambaEngine:
             pass
 
         # 2. The sidecar container: its settings reloaded in place where that is enough, else a restart
-        changed, self._changed = getattr(self, "_changed", None), None
+        changed, self._changed, self._pending = getattr(self, "_changed", None), None, False
         docker_sock = _docker_sock_path()
         sidecar_info = self.check_sidecar()
         if os.path.exists(docker_sock) and sidecar_info.get("detected"):

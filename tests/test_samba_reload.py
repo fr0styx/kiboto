@@ -122,6 +122,8 @@ def _docker(monkeypatch, **how):
 def test_a_change_to_one_shared_folder_closes_that_one_and_restarts_nothing(engine, monkeypatch):
     engine.generate_and_save_conf()  # the first settings: nothing to compare with
     assert engine._changed is None
+    docker = _docker(monkeypatch)
+    assert engine.reload_service() is True and "/restart" in docker.calls[0][0]  # so the server is restarted
     engine._shares["Films"].comment = "ana"  # kim loses Films
     engine.generate_and_save_conf()
     assert engine._changed == {"shares": ["Films"], "ips": [], "homes": False}
@@ -161,3 +163,27 @@ def test_the_script_names_what_samba_understands():
     assert "/etc/samba/kiboto/smb.conf" in script  # where docker-compose.linux.yml mounts Kiboto's settings
     with open("docker-compose.linux.yml", encoding="utf-8") as f:
         assert "/etc/samba/kiboto/smb.conf" in f.read()
+
+
+def test_settings_written_twice_before_one_reload_close_what_either_changed(engine, monkeypatch):
+    engine.generate_and_save_conf()
+    docker = _docker(monkeypatch)
+    engine.reload_service()  # the first settings are in place
+    engine._shares["Films"].comment = "ana"
+    engine.generate_and_save_conf()  # Films changed, and nobody reloaded
+    engine._shares["Music"].comment = "ana kim"
+    engine.generate_and_save_conf()  # then Music changed
+    assert engine._changed == {"shares": ["Films", "Music"], "ips": [], "homes": False}
+    docker = _docker(monkeypatch)
+    assert engine.reload_service() is True
+    assert docker.calls[0][1]["Cmd"][3:] == ["--", "Films", "Music", "--ips"]
+    engine.generate_and_save_conf()  # nothing new after the reload
+    assert engine._changed == {"shares": [], "ips": [], "homes": False}
+    assert samba_engine._both(None, {"shares": [], "ips": [], "homes": False}) is None  # unknown stays unknown
+    assert samba_engine._both(
+        {"shares": ["a"], "ips": ["1.1.1.1"], "homes": False}, {"shares": [], "ips": [], "homes": True}
+    ) == {
+        "shares": ["a"],
+        "ips": ["1.1.1.1"],
+        "homes": True,
+    }
