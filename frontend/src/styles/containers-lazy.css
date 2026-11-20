@@ -116,6 +116,6 @@
 .own-app-title { margin: 0; font-size: 18px; }
 .own-app-help, .own-app-msg { margin: 0; font-size: var(--kb-fs-xs); color: var(--muted); line-height: 1.45; }
 .own-app-field { display: flex; flex-direction: column; gap: 4px; font-size: var(--kb-fs-xs); color: var(--muted); }
-.own-app-field input, .own-app-field textarea, .own-app-env textarea { font-family: var(--font-mono, monospace); font-size: var(--kb-fs-xs); }
+.own-app-field input, .own-app-field textarea, .own-app-env textarea { font-family: var(--font-mono, monospace); font-size: var(--kb-fs-xs); background: var(--kb-shade-25); color: var(--kb-text-strong); border: 1px solid var(--kb-line-10); border-radius: 8px; padding: 8px 10px; box-sizing: border-box; width: 100%; }
 .own-app-env summary { cursor: pointer; font-size: var(--kb-fs-xs); min-height: 32px; }
 .own-app-actions { display: flex; justify-content: flex-end; gap: 8px; }

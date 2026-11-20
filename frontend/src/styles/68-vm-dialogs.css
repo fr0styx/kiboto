@@ -90,6 +90,10 @@
 #modal-vm-create .vmc-row-xs-strong-2 { font-size: var(--kb-fs-xs); color: var(--kb-text-strong); cursor: pointer; display: flex; align-items: center; gap: 6px; }
 #modal-vm-create .vmc-x-2 { flex-direction: column; gap: 6px; }
 #modal-vm-create .vmc-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+/* on a phone one field per row: in two columns the choices were cut off and a hint ran to nine lines */
+@media (max-width: 600px) {
+  #modal-vm-create :is(.vmc-grid, .vmc-grid-2) { grid-template-columns: minmax(0, 1fr); }
+}
 #modal-vm-create .vmc-xs-muted-2 { display: block; font-size: var(--kb-fs-xs); color: var(--muted); margin-bottom: 4px; }
 #modal-vm-create .vmc-row-xs-strong-3 { display: flex; align-items: center; gap: 6px; margin-top: 6px; font-size: var(--kb-fs-xs); color: var(--kb-text-strong); cursor: pointer; }
 #modal-vm-create .vmc-box-2 { background: var(--kb-glaze-2); border: 1px solid var(--kb-line-6); border-radius: 8px; padding: 12px; flex-shrink: 0; }

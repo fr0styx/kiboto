@@ -62,6 +62,8 @@ A first NAS that holds its name back for a second NAS said "Starting" under Find
 
 On a phone, the buttons of a shared folder ran into each other, and the Security check squeezed each finding's text into a column one word wide. Both now use the full width.
 
+On a phone, the forms for a new virtual machine and a new shared folder show one field per row; in two columns their choices were cut off.
+
 #### Changes
 
 - **Ask Kib about the NAS in your language**: questions about free space, drives, fans, apps, the network and
