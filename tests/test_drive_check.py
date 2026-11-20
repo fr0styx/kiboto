@@ -254,3 +254,18 @@ def test_starting_is_confirmed(box, client, auth_headers):
     ).json()["token"]
     assert client.post("/api/drives/sdc/check", headers={**auth_headers, "X-Confirm-Token": token}).status_code == 200
     _wait("sdc")
+
+
+def test_the_drive_is_named_by_the_kernel_not_by_the_request(tmp_path, monkeypatch):
+    """Code scanning 531-534: what goes into a path is the kernel's own name for the drive."""
+    from backend.services import drive_check as dc
+
+    (tmp_path / "block" / "sdb").mkdir(parents=True)
+    monkeypatch.setattr(dc, "HOST_SYS", str(tmp_path))
+    asked = "sd" + "b"
+    assert dc.kernel_name(asked) == "sdb"
+    assert dc.kernel_name("sdc") is None  # a valid name, no such drive
+    for bad in ("../sdb", "sdb/../sdb", "sdb1", "", "SDB", "sdb\n"):
+        assert dc.kernel_name(bad) is None, bad
+    monkeypatch.setattr(dc, "HOST_SYS", str(tmp_path / "nowhere"))
+    assert dc.kernel_name("sdb") is None

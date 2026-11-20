@@ -192,10 +192,24 @@ def active() -> dict[str, dict[str, Any]]:
 
 
 # --- the reading ----------------------------------------------------------------------------------
+def kernel_name(dev: str) -> str | None:
+    """The drive's name as the kernel lists it, or None when there is no such drive. What follows
+    uses the kernel's own string, never the one the request brought (CodeQL py/path-injection)."""
+    if not VALID_DEV.match(dev):
+        return None
+    try:
+        names = os.listdir(os.path.join(HOST_SYS, "block"))
+    except OSError:
+        return None
+    return next((name for name in names if name == dev), None)
+
+
 def start(dev: str, who: str = "") -> dict[str, Any]:
     """Starts the check in the background. Raises NotNow: no such drive, in use, running, or too many."""
-    if not VALID_DEV.match(dev) or size_bytes(dev) <= 0 or not os.path.exists(os.path.join(DEV_DIR, dev)):
+    name = kernel_name(dev)
+    if name is None or size_bytes(name) <= 0 or not os.path.exists(os.path.join(DEV_DIR, name)):
         raise NotNow("no_drive", "There is no such drive.")
+    dev = name
     why = in_use(dev)
     if why:
         raise NotNow(f"in_use_{why}", "This drive is in use, so it is not checked this way.")

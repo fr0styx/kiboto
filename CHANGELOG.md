@@ -30,6 +30,10 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   install now has its own ID, the maker and model come from the machine itself, and the chassis reports its
   worst drive's health.
 
+- **The top bar on a phone or tablet**: the account button, the jobs button, the language list and the settings
+  button nearly filled the bar from edge to edge, each with its own shape. They are now the same height with
+  the same corners and a margin above and below; the area that answers a finger is as large as before.
+
 #### Changes
 
 - **Ask Kib about the NAS in your language**: questions about free space, drives, fans, apps, the network and
@@ -89,11 +93,11 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   it is. For Unraid shares that stay on their pool; off for every folder until you turn it on. Guide:
   docs/TIERING.md.
 
-#### Fixed
+#### Security
 
-- **The top bar on a phone or tablet**: the account button, the jobs button, the language list and the settings
-  button nearly filled the bar from edge to edge, each with its own shape. They are now the same height with
-  the same corners and a margin above and below; the area that answers a finger is as large as before.
+- **App logos**: Kiboto fetches a logo only when an app in the catalog names that exact address. Before, any
+  image file on the two logo hosts could be asked for through Kiboto by a signed-in user.
+- **New-drive check**: the drive to check is taken from the system's own list of drives, not from the request.
 
 ## v2.0.4 (2026-11-19)
 ### 🏡 Apps that go back on their own, a way to move in, and Kiboto in your language everywhere

@@ -18,6 +18,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from collections.abc import Callable
+from typing import Any
 
 from backend.config import DATA_DIR, logger
 
@@ -27,6 +28,9 @@ MAX_BYTES = 512 * 1024
 # (a query is dropped when the address is rebuilt)
 LOGO_PATH = re.compile(r"/[A-Za-z0-9 ._~@+/()-]{1,300}\.(?:png|jpe?g|gif|webp)", re.IGNORECASE)
 TIMEOUT = 8.0
+KNOWN_SECS = 60.0  # how long the catalog's list of logo addresses is kept
+MISS_RELOAD_SECS = 5.0  # an address not on the list: the list is read again, but not on every request
+_known: dict[str, Any] = {"at": 0.0, "urls": frozenset()}
 MISS_SECS = 24 * 3600  # a logo that couldn't be fetched isn't asked for again for a day
 TYPES = {  # what the server says it is -> the bytes it must start with
     "image/png": b"\x89PNG\r\n\x1a\n",
@@ -38,6 +42,18 @@ TYPES = {  # what the server says it is -> the bytes it must start with
 
 def cache_dir() -> str:
     return os.path.join(DATA_DIR, "cache", "logos")
+
+
+def from_catalog(url: str, apps: Callable[[], list[dict[str, Any]]]) -> str | None:
+    """The catalog's own copy of this logo address, when one of its apps has it. Kiboto then fetches
+    an address the catalog names, never one the caller wrote: the two logo hosts serve anyone's
+    files, so "a path on those hosts" was still the caller's choice (CodeQL py/partial-ssrf)."""
+    now = time.time()
+    age = now - _known["at"]
+    if age > KNOWN_SECS or (url not in _known["urls"] and age > MISS_RELOAD_SECS):
+        listed = frozenset(str(a.get("logo") or "") for a in apps() if isinstance(a, dict))
+        _known.update(at=now, urls=listed)
+    return next((own for own in _known["urls"] if own and own == url), None)
 
 
 def allowed(url: str) -> bool:

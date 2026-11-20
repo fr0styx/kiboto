@@ -104,9 +104,11 @@ def get_catalog_logo(url: str):
     """An app's logo, fetched once by Kiboto so the browser doesn't ask a third party (SEC-38)."""
     from fastapi import Response
 
-    from backend.services.catalog_logos import logo
+    from backend.services import app_catalog
+    from backend.services.catalog_logos import from_catalog, logo
 
-    found = logo(url)
+    own = from_catalog(url, app_catalog.get_all_catalog_apps)  # only a logo the catalog names
+    found = logo(own) if own else None
     if not found:
         raise HTTPException(status_code=404, detail="No logo.")
     data, ctype = found

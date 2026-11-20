@@ -90,8 +90,16 @@ def test_a_host_outside_the_list_is_never_asked(cache):
 
 
 def test_the_route(cache, monkeypatch, client, auth_headers):
-    monkeypatch.setattr(catalog_logos, "fetch", lambda url: (PNG, "image/png"))
+    fetched = []
+    monkeypatch.setattr(catalog_logos, "fetch", lambda url: fetched.append(url) or (PNG, "image/png"))
+    monkeypatch.setattr(catalog_logos, "_known", {"at": 0.0, "urls": frozenset()})
+    monkeypatch.setattr("backend.services.app_catalog.get_all_catalog_apps", lambda: [{"id": "a", "logo": ICON}, {}])
     headers = auth_headers
+    # a file on a logo host that no app in the catalog names: not fetched (code scanning 494)
+    stray = ICON.rsplit("/", 1)[0] + "/someone-elses-file.png"
+    assert catalog_logos.allowed(stray)
+    assert client.get("/api/docker/catalog/logo", params={"url": stray}, headers=headers).status_code == 404
+    assert fetched == []
     r = client.get("/api/docker/catalog/logo", params={"url": ICON}, headers=headers)
     assert r.status_code == 200 and r.content == PNG and r.headers["content-type"] == "image/png"
     assert r.headers["x-content-type-options"] == "nosniff"
@@ -161,3 +169,20 @@ def test_every_outside_host_is_in_the_privacy_doc():
         "these hosts can be contacted but docs/PRIVACY.md doesn't say when; add them to its table "
         f"(or to NOT_CONTACTED if the code only links to them): {undocumented}"
     )
+
+
+def test_a_logo_address_is_taken_from_the_catalog(monkeypatch):
+    monkeypatch.setattr(catalog_logos, "_known", {"at": 0.0, "urls": frozenset()})
+    reads = []
+
+    def apps():
+        reads.append(1)
+        return [{"logo": ICON}, {"logo": ""}, {"name": "no logo"}, "not an app"]
+
+    own = catalog_logos.from_catalog(str(ICON), apps)
+    assert (
+        own == ICON and catalog_logos.from_catalog(ICON, apps) == ICON and len(reads) == 1
+    )  # the list is kept a while
+    assert catalog_logos.from_catalog("", apps) is None
+    assert catalog_logos.from_catalog("https://cdn.jsdelivr.net/gh/x/y/z.png", apps) is None
+    assert len(reads) == 1  # an unknown address does not make Kiboto read the catalog on every request

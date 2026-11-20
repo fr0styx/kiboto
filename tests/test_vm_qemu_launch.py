@@ -1,6 +1,7 @@
 """Starting QEMU (test shortcut off): the command line for each VM setting, and every way a start fails."""
 
 import os
+import subprocess
 import uuid
 
 import pytest
@@ -233,7 +234,9 @@ class TestProcessState:
         import signal
 
         # a process whose command line names this machine's monitor socket is the machine
-        engine = os.spawnv(os.P_NOWAIT, "/bin/sh", ["sh", "-c", "sleep 30; : /tmp/pidvm-qmp.sock"])
+        # started without fork(): Python warns about fork() in a many-threaded run (issue 63), and the
+        # fixture replaces subprocess.Popen
+        engine = os.posix_spawn("/bin/sh", ["sh", "-c", "sleep 30; : /tmp/pidvm-qmp.sock"], os.environ)
         try:
             for _ in range(100):  # until the new process is the shell and no longer a copy of this one
                 with open(f"/proc/{engine}/cmdline", "rb") as f:

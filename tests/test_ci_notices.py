@@ -25,12 +25,18 @@ def test_finds_version_and_deprecation_notices_and_skips_noise():
         "2026-10-22T18:32:00.0Z ##[notice]The ubuntu-latest label will migrate to Ubuntu 26 beginning October 19, 2026.",
         "2026-10-22T18:33:00.0Z all tests passed",
         "2026-10-22T18:33:00.1Z tests/test_x.py::test_skips_deprecation_noise PASSED [ 26%]",
+        # issue 63: test names from a parallel run, reported as notices because of a word in them
+        "2026-11-16T18:33:00.1Z tests/test_fast_json.py::test_app_default_response_is_not_deprecated ",
+        "2026-11-16T18:33:00.2Z [gw0] [ 39%] PASSED tests/test_fast_json.py::test_app_default_response_is_not_deprecated ",
+        "2026-11-16T18:33:00.3Z [gw1] [ 92%] PASSED tests/test_update_reasons_in_language.py::test_each_recorded_reason_has_its_words[the new version did not start-not_started-params5] ",
+        "2026-11-16T18:33:00.4Z tests/test_vm.py::test_spawn: DeprecationWarning: fork() is deprecated here",
         '"Node.js 20 is deprecated"',
     ]
     assert cn.find_notices(log) == [
         "- Version 0.76.1 of Trivy is now available, current version is 0.70.0",
         "app.py:152: FastAPIDeprecationWarning: ORJSONResponse is deprecated",
         "The ubuntu-latest label will migrate to Ubuntu 26 beginning October 19, 2026.",
+        "tests/test_vm.py::test_spawn: DeprecationWarning: fork() is deprecated here",  # a real warning stays
         "Node.js 20 is deprecated",
     ]
 

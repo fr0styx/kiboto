@@ -48,7 +48,10 @@ NOISE_RE = re.compile(
     r"|NODE_OPTIONS: --no-deprecation"
     r"|running outdated (binaries|hypervisor)"  # needrestart's all-clear
     r"|To suppress version checks"
-    r"|::test_\w+.*\b(PASSED|FAILED|SKIPPED|ERROR|XFAIL|XPASS)\b",  # a test's name in pytest -v output
+    r"|::test_\w+.*\b(PASSED|FAILED|SKIPPED|ERROR|XFAIL|XPASS)\b"  # a test's name in pytest -v output
+    # the same from parallel runs ("[gw0] [ 39%] PASSED tests/x.py::test_y", or the name alone): a test
+    # called test_..._is_not_deprecated is not a notice. A warning printed with its test keeps "Warning".
+    r"|tests/[\w/.-]+\.py::\w+(?!.*Warning)",
     re.IGNORECASE,
 )
 TIMESTAMP_RE = re.compile(r"^﻿?\d{4}-\d\d-\d\dT[\d:.]+Z\s?")
