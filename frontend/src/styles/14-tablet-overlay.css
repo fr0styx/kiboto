@@ -7,3 +7,15 @@
   }
 }
 
+/* A tablet held upright gets the desktop layout (the phone layout ends at 768 px). There a window
+   opened 24 px from the left and 98 % of the screen wide, so its right edge with the close button
+   was cut off; and the top bar was wider than the screen, with "Hardware settings" cut in half. */
+@media (min-width: 769px) and (max-width: 1100px) {
+  .os-window:not(.maximized) {
+    max-width: calc(100vw - 48px) !important;
+  }
+  .suite-navbar #drawer-toggle-btn .btn-txt,
+  .suite-navbar #yak-easter-egg-btn {
+    display: none;
+  }
+}

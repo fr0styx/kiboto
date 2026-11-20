@@ -8,6 +8,8 @@
 .cw-details-switch { display: inline-flex; align-items: center; gap: 6px; font-size: var(--kb-fs-xs); font-weight: 600; min-height: 32px; margin-left: auto; cursor: pointer; }
 .docker-open-cell { white-space: nowrap; }
 .cw-open-btn { text-decoration: none; }
+/* the count on the chosen filter: brand colour on the tinted button was 3.65:1 */
+.cw-filter-btn.active .docker-count-badge { color: var(--kb-text-strong); }
 .cw-simple .docker-stack-cell, .cw-simple .docker-hw-cell, .cw-simple .docker-telemetry-cell, .cw-simple .docker-ports-cell,
 .cw-simple th[data-sort-col="stack"], .cw-simple th[data-sort-col="hardware"], .cw-simple th[data-sort-col="cpu"], .cw-simple th[data-sort-col="ports"],
 .cw-simple .docker-row-select, .cw-simple #cw-docker-select-all, .cw-simple .docker-name-cell code,

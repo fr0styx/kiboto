@@ -1,5 +1,5 @@
 {
-  "important": 3418,
+  "important": 3419,
   "buttonClasses": 76,
   "inlineStyles": 1243,
   "emojiIcons": 3,
@@ -19,6 +19,7 @@
     "frontend/src/styles/10-lcd-preview.css": 1,
     "frontend/src/styles/11-fans-smart.css": 57,
     "frontend/src/styles/12-cloud-remote.css": 123,
+    "frontend/src/styles/14-tablet-overlay.css": 1,
     "frontend/src/styles/15-studio-mobile.css": 13,
     "frontend/src/styles/16-dock.css": 4,
     "frontend/src/styles/17-dock-preview.css": 8,

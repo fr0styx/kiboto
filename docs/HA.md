@@ -94,6 +94,11 @@ first NAS is broken, stolen or being repaired. It asks you to confirm, then:
    answering to one. Its old name still works too.
 4. It restarts, and you sign in with an account of the first NAS.
 
+**A second NAS on Unraid.** Kiboto does not run the file server there, Unraid does. The people
+and their sign-in to Kiboto follow as described; their sign-in to shared folders over the network
+does not, because those are Unraid's own users. The folders kept in step must exist as Unraid
+shares first (Kiboto cannot make them there).
+
 What the second NAS keeps of its own: its network address, its drives and their settings, its
 apps, virtual machines and backup jobs. Those belong to the hardware, and the first NAS's copies
 of them are not applied. Apps do not move: install on the second NAS the ones you need.

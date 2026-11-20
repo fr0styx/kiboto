@@ -64,6 +64,8 @@ On a phone, the buttons of a shared folder ran into each other, and the Security
 
 On a phone, the forms for a new virtual machine and a new shared folder show one field per row; in two columns their choices were cut off.
 
+On a tablet held upright, windows opened a little wider than the screen, so the close button was cut off, and the top bar's last button was cut in half. Both fit now. The count on the chosen Apps filter is easier to read.
+
 #### Changes
 
 - **Ask Kib about the NAS in your language**: questions about free space, drives, fans, apps, the network and
