@@ -9084,4 +9084,8 @@ export default {
   "srv.ha_bad_copy": "Die aufbewahrte Kopie der Personen des ersten NAS konnte nicht verwendet werden.",
   "srv.ha_not_held": "Dieses NAS hält seinen Namen nicht zurück.",
   "srv.ha_second_unreachable": "Das zweite NAS hat nicht geantwortet, es verwendet den Namen also vielleicht noch.",
+  "standby.bring_backups": "Auch die Sicherungen des ersten NAS mitnehmen, ausgeschaltet",
+  "standby.bring_backups_note": "Eine Sicherung kommt mit, wenn ihr Ordner zu den hier aufbewahrten Ordnern gehört, samt Passwort und Cloud-Anmeldung. Sie schalten jede einzelne unter Sicherung ein, nachdem Sie sie angesehen haben. Eine Sicherung auf ein Laufwerk des ersten NAS bleibt zurück.",
+  "standby.bring_backups_count": "Die Kopie enthält {jobs, plural, one {# Kopierauftrag} other {# Kopieraufträge}} und {offsite, plural, one {# externe Sicherung} other {# externe Sicherungen}}.",
+  "standby.brought_backups": "{came, plural, one {# Sicherung kam mit, ausgeschaltet} other {# Sicherungen kamen mit, ausgeschaltet}}; {left, plural, one {# blieb zurück} other {# blieben zurück}}.",
 };

@@ -38244,6 +38244,15 @@
    },
    "TakeoverIn": {
     "properties": {
+     "bring": {
+      "items": {
+       "const": "backups",
+       "type": "string"
+      },
+      "maxItems": 4,
+      "title": "Bring",
+      "type": "array"
+     },
      "even_if_answering": {
       "default": false,
       "title": "Even If Answering",

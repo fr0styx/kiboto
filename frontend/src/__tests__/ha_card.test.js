@@ -284,13 +284,13 @@ describe('a second NAS that can take over', () => {
     expect(card().querySelector('#ha-takeover').textContent).toContain('It keeps its own network address');
     expect(card().querySelector('[data-ha-act="takeover_anyway"]')).toBeNull();
     await press('takeover');
-    expect(post).toHaveBeenCalledWith('/api/ha/takeover', { even_if_answering: false });
+    expect(post).toHaveBeenCalledWith('/api/ha/takeover', { even_if_answering: false, bring: [] });
     expect(showToast).not.toHaveBeenCalled(); // a question, not a failure
     expect(card().querySelector('#ha-answers').textContent).toMatch(/^The first NAS still answers/);
     const took = { at: 1763700000, from: 'First NAS', name: 'familynas', people: 4 };
     post.mockResolvedValueOnce({ ...NONE, role: 'took_over', peer: PEER, took_over: took, restarting: true });
     await press('takeover_anyway');
-    expect(post).toHaveBeenLastCalledWith('/api/ha/takeover', { even_if_answering: true });
+    expect(post).toHaveBeenLastCalledWith('/api/ha/takeover', { even_if_answering: true, bring: [] });
     expect(vi.mocked(showToast).mock.calls.at(-1)[0]).toMatch(/^Taking over\. This NAS restarts now/);
     expect(card().querySelector('#ha-role').textContent).toMatch(
       /^This NAS took over from First NAS on .+\. It answers to familynas\.local\.$/
@@ -359,6 +359,50 @@ describe('a second NAS that can take over', () => {
     vi.mocked(api.get).mockResolvedValue(first);
     await renderHaCard();
     expect(card().querySelector('#ha-held')).toBeNull();
+  });
+
+  it('the backups come along only when the box is ticked, and the card says how many came', async () => {
+    const copy = {
+      name: 'First NAS',
+      made: 1763600000,
+      fetched: 1763600100,
+      size: 1024,
+      holds: { backup_jobs: 2, offsite: 1 },
+    };
+    vi.spyOn(api, 'get').mockResolvedValue({ ...NONE, role: 'second', peer: PEER, copy, fetching: false });
+    const took = {
+      at: 1763700000,
+      from: 'First NAS',
+      name: '',
+      people: 3,
+      brought: { jobs: 2, jobs_left: 1, offsite: 0, offsite_left: 0 },
+    };
+    const post = vi
+      .spyOn(api, 'post')
+      .mockResolvedValue({ ...NONE, role: 'took_over', peer: PEER, took_over: took, restarting: true });
+    await renderHaCard();
+    const tick = card().querySelector('#ha-bring-backups');
+    expect(tick.checked).toBe(false); // a choice, off until ticked
+    expect(card().querySelector('#ha-bring-note').textContent).toMatch(
+      /stays behind\. The copy holds 2 copy jobs and 1 off-site backup\.$/
+    );
+    tick.checked = true;
+    tick.dispatchEvent(new Event('change'));
+    tick.checked = false;
+    tick.dispatchEvent(new Event('change'));
+    tick.checked = true;
+    tick.dispatchEvent(new Event('change'));
+    await press('takeover');
+    expect(post).toHaveBeenCalledWith('/api/ha/takeover', { even_if_answering: false, bring: ['backups'] });
+    expect(card().querySelector('#ha-role').textContent).toMatch(
+      /^This NAS took over from First NAS on .+\. 2 backups came along, switched off; 1 stayed behind\.$/
+    );
+    expect(haRole({ role: 'took_over', peer: PEER, took_over: { ...took, brought: {} } })).not.toContain('came along');
+    resetHaCardForTesting();
+    vi.mocked(api.get).mockResolvedValue({ ...NONE, role: 'second', peer: PEER, copy: { ...copy, holds: undefined } });
+    await renderHaCard();
+    expect(card().querySelector('#ha-bring-backups').checked).toBe(false); // the tick does not outlive the card
+    expect(card().querySelector('#ha-bring-note').textContent).toMatch(/stays behind\.$/); // an older copy: no count
   });
 
   it('stays away for someone who may not change the system', async () => {

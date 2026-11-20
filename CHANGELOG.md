@@ -140,6 +140,8 @@ Replacing the install's secret key (Security) no longer ends the pairing of two 
 
 A second NAS that can take over, fourth step: the takeover. **Take over now** on the second NAS takes the first one's people (their sign-in and two-factor), who may open the folders kept in step, and the name the family types; it keeps its own network address, apps and backups. It is refused while the first NAS still answers, unless you say so. A first NAS that comes back holds its name until you press **Take the name back** on it. Going back is by hand: files and people changed on the second NAS meanwhile are not copied back. See docs/HA.md.
 
+A second NAS that takes over can bring the first one's backups along. Tick **Also bring the first NAS's backups, switched off** under Take over now. A backup comes along when its folder is one of the folders kept in step, with its password and its cloud sign-in; you turn each one on under Backup after a look. A backup onto a drive of the first NAS stays behind. See docs/HA.md.
+
 #### Security
 
 - **App logos**: Kiboto fetches a logo only when an app in the catalog names that exact address. Before, any

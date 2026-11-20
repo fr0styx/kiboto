@@ -15,6 +15,7 @@ let _mode = ''; // '', 'code' (a pairing key is on screen) or 'pair' (the form)
 let _folders = null; // on the second NAS: the first one's shared folders, once asked
 let _code = '';
 let _answers = false; // the second NAS asked to take over, and the first one still answers
+const _bring = new Set(); // what else the person ticked to come along at the takeover
 let _unreached = false; // the first NAS asked for its name back, and the second one did not answer
 
 const el = (tag, props = {}, ...kids) => {
@@ -174,9 +175,18 @@ export function haRole(view) {
       name: took.from || words.name,
       when: formatDateTime((took.at || 0) * 1000),
     });
-    return took.name
-      ? `${said} ${t('standby.took_over_name', 'It answers to {host}.', { host: `${took.name}.local` })}`
-      : said;
+    const parts = [said];
+    if (took.name) parts.push(t('standby.took_over_name', 'It answers to {host}.', { host: `${took.name}.local` }));
+    const b = took.brought || {};
+    if (b.jobs || b.offsite || b.jobs_left || b.offsite_left)
+      parts.push(
+        t(
+          'standby.brought_backups',
+          '{came, plural, one {# backup came along, switched off} other {# backups came along, switched off}}; {left, plural, one {# stayed behind} other {# stayed behind}}.',
+          { came: (b.jobs || 0) + (b.offsite || 0), left: (b.jobs_left || 0) + (b.offsite_left || 0) }
+        )
+      );
+    return parts.join(' ');
   }
   return view.role === 'first'
     ? t('standby.is_first', 'This is the first NAS. The second one is {name} at {address}.', words)
@@ -198,6 +208,33 @@ function takeoverPart() {
         : t('standby.takeover_no_copy', 'Taking over needs the copy of people and settings. Fetch it first.'),
     })
   );
+  if (_view.copy) {
+    // a choice, because a backup acts on its own once it runs: it arrives switched off
+    const holds = _view.copy.holds || {};
+    const tick = el('input', { type: 'checkbox', id: 'ha-bring-backups', checked: _bring.has('backups') });
+    tick.dataset.haBring = 'backups';
+    tick.addEventListener('change', () => (tick.checked ? _bring.add('backups') : _bring.delete('backups')));
+    box.append(
+      el(
+        'label',
+        { className: 'ha-folder' },
+        tick,
+        el('span', { textContent: t('standby.bring_backups', "Also bring the first NAS's backups, switched off") })
+      ),
+      el('p', {
+        className: 'immich-note',
+        id: 'ha-bring-note',
+        textContent: `${t(
+          'standby.bring_backups_note',
+          'A backup comes along when its folder is one of the folders kept here, with its password and its cloud sign-in. You turn each one on under Backup after a look. A backup onto a drive of the first NAS stays behind.'
+        )}${
+          holds.backup_jobs || holds.offsite
+            ? ` ${t('standby.bring_backups_count', 'The copy holds {jobs, plural, one {# copy job} other {# copy jobs}} and {offsite, plural, one {# off-site backup} other {# off-site backups}}.', { jobs: holds.backup_jobs || 0, offsite: holds.offsite || 0 })}`
+            : ''
+        }`,
+      })
+    );
+  }
   if (_answers)
     box.append(
       el('p', {
@@ -420,8 +457,12 @@ async function onClick(e) {
       showToast(t('standby.fetch_started', 'Fetching. The card shows the copy when it has arrived.'), 'success');
     } else if (action === 'takeover' || action === 'takeover_anyway') {
       // the server asks to confirm; it refuses while the first NAS answers, unless told it is known
-      _view = await api.post('/api/ha/takeover', { even_if_answering: action === 'takeover_anyway' });
+      _view = await api.post('/api/ha/takeover', {
+        even_if_answering: action === 'takeover_anyway',
+        bring: [..._bring],
+      });
       _answers = false;
+      _bring.clear();
       showToast(
         _view.restarting
           ? t(
@@ -493,4 +534,5 @@ export function resetHaCardForTesting() {
   _folders = null;
   _answers = false;
   _unreached = false;
+  _bring.clear();
 }

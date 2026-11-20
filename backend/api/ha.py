@@ -7,7 +7,7 @@ and every later message is sealed with the key the two boxes share."""
 from __future__ import annotations
 
 import asyncio
-from typing import Any
+from typing import Any, Literal
 
 from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel, Field
@@ -34,6 +34,8 @@ class FoldersIn(BaseModel):
 
 class TakeoverIn(BaseModel):
     even_if_answering: bool = False
+    # what else comes along, switched off: "backups" (the first NAS's backups of the kept folders)
+    bring: list[Literal["backups"]] = Field(default_factory=list, max_length=4)
 
 
 class TakeBackIn(BaseModel):
@@ -166,7 +168,9 @@ async def ha_take_over(
         request, principal, "ha.takeover_anyway" if req.even_if_answering else "ha.takeover", target=str(first)
     )
     try:
-        said = await asyncio.to_thread(ha_takeover.take_over, _actor(principal), req.even_if_answering)
+        said = await asyncio.to_thread(
+            ha_takeover.take_over, _actor(principal), req.even_if_answering, tuple(req.bring)
+        )
     except ha_link.LinkError as e:
         raise _refused(e, 400 if e.key == "bad_copy" else 409) from e
     return {**await asyncio.to_thread(_status), "restarting": bool(said.get("restarting"))}

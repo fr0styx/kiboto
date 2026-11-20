@@ -13,10 +13,12 @@ from __future__ import annotations
 
 import base64
 import hashlib
+import io
 import os
 import secrets
 import threading
 import time
+import zipfile
 from typing import Any
 
 from backend import __version__, secret_box
@@ -130,7 +132,20 @@ def info() -> dict[str, Any] | None:
     kept = read_json(os.path.join(DIR, INFO), {})
     if not isinstance(kept, dict) or not kept.get("sha256") or not os.path.isfile(os.path.join(DIR, COPY)):
         return None
-    return {k: kept.get(k) for k in ("made", "fetched", "size", "name", "version")}
+    return {k: kept.get(k) for k in ("made", "fetched", "size", "name", "version", "holds")}
+
+
+def _holds(path: str, opens: str) -> dict[str, int]:
+    """What else the copy holds that a takeover brings along when asked: how many backups."""
+    from backend.services import backup_engine, ha_bring
+
+    try:
+        with open(path, "rb") as f:
+            plain = backup_engine.decrypt_backup(f.read(), opens)
+        with zipfile.ZipFile(io.BytesIO(plain)) as z:
+            return ha_bring.counts(set(z.namelist()), z.read)
+    except (OSError, ValueError, zipfile.BadZipFile):
+        return {}
 
 
 def passphrase() -> str:
@@ -189,6 +204,7 @@ def fetch(send: ha_link.Sender | None = None) -> dict[str, Any]:
         "name": str(begun.get("name") or "")[:64],
         "version": str(begun.get("version") or "")[:32],
         "pass": secret_box.seal(str(begun["pass"])),
+        "holds": _holds(target, str(begun["pass"])),
     }
     atomic_write_json(os.path.join(DIR, INFO), kept)
     try:

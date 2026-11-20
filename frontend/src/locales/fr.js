@@ -9084,4 +9084,8 @@ export default {
   "srv.ha_bad_copy": "La copie conservée des personnes du premier NAS n'a pas pu être utilisée.",
   "srv.ha_not_held": "Ce NAS ne retient pas son nom.",
   "srv.ha_second_unreachable": "Le second NAS n'a pas répondu : il utilise peut-être encore le nom.",
+  "standby.bring_backups": "Reprendre aussi les sauvegardes du premier NAS, désactivées",
+  "standby.bring_backups_note": "Une sauvegarde est reprise quand son dossier fait partie des dossiers conservés ici, avec son mot de passe et sa connexion au cloud. Vous activez chacune dans Sauvegarde après l'avoir vérifiée. Une sauvegarde vers un disque du premier NAS reste là-bas.",
+  "standby.bring_backups_count": "La copie contient {jobs, plural, one {# tâche de copie} other {# tâches de copie}} et {offsite, plural, one {# sauvegarde externe} other {# sauvegardes externes}}.",
+  "standby.brought_backups": "{came, plural, one {# sauvegarde reprise, désactivée} other {# sauvegardes reprises, désactivées}} ; {left, plural, one {# est restée là-bas} other {# sont restées là-bas}}.",
 };

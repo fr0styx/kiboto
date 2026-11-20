@@ -9084,4 +9084,8 @@ export default {
   "srv.ha_bad_copy": "No se pudo usar la copia guardada de las personas del primer NAS.",
   "srv.ha_not_held": "Este NAS no está reteniendo su nombre.",
   "srv.ha_second_unreachable": "El segundo NAS no respondió, así que puede que todavía use el nombre.",
+  "standby.bring_backups": "Traer también las copias de seguridad del primer NAS, apagadas",
+  "standby.bring_backups_note": "Una copia de seguridad viene cuando su carpeta es una de las carpetas guardadas aquí, con su contraseña y su inicio de sesión en la nube. Tú activas cada una en Copia de seguridad después de revisarla. Una copia en una unidad del primer NAS se queda atrás.",
+  "standby.bring_backups_count": "La copia contiene {jobs, plural, one {# tarea de copia} other {# tareas de copia}} y {offsite, plural, one {# copia externa} other {# copias externas}}.",
+  "standby.brought_backups": "{came, plural, one {Vino # copia de seguridad, apagada} other {Vinieron # copias de seguridad, apagadas}}; {left, plural, one {# se quedó atrás} other {# se quedaron atrás}}.",
 };

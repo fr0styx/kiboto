@@ -94,6 +94,26 @@ What the second NAS keeps of its own: its network address, its drives and their 
 apps, virtual machines and backup jobs. Those belong to the hardware, and the first NAS's copies
 of them are not applied. Apps do not move: install on the second NAS the ones you need.
 
+### What else can come along
+
+Under the button there is a box to tick: **Also bring the first NAS's backups, switched off.**
+It is a choice because a backup acts by itself once it runs: a copy job that mirrors makes its
+destination look like the folder it copies. So what comes along arrives **switched off**, and you
+turn each one on under Backup after a look.
+
+- A **copy job** comes along when its folder is one of the folders kept in step here. It is
+  pointed at this NAS's folder of that name.
+- An **off-site backup** comes along when it backs up such folders; its paths are pointed at the
+  folders here, its hour is cleared, and its recovery key comes with it. The backups already at
+  the destination stay as they are and can be restored from here.
+- The **cloud sign-in** a backup needs comes with it. If this NAS already has a different
+  sign-in of the same name, that one is not replaced and the backup stays behind.
+- **Stays behind:** a backup onto a drive of the first NAS, a job for a folder this NAS does not
+  keep, and the backup of the first NAS's own settings.
+
+Passwords that the first NAS kept sealed are sealed again with this NAS's own key. After the
+takeover the card says how many backups came along and how many stayed behind.
+
 After a takeover the second NAS fetches nothing more from the first one. The folders hold what
 the last nightly fetch brought, so at worst a day of changes is missing.
 

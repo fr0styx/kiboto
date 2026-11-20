@@ -16,7 +16,7 @@ import pytest
 
 from backend import config, secret_box
 from backend.services import backup_engine as be
-from backend.services import box_restore, ha_folders, nas_name
+from backend.services import box_restore, ha_bring, ha_folders, nas_name
 from backend.services import ha_link as ha
 from backend.services import ha_state as hs
 from backend.services import ha_takeover as ht
@@ -42,7 +42,72 @@ def first_nas_backup(folder) -> bytes:
     conn.execute("INSERT INTO users VALUES ('u2', 'ben', '')")
     conn.commit()
     conn.close()
+
+    def sealed_by_first(text):
+        n = b"\x03" * 12
+        return secret_box.PREFIX + base64.urlsafe_b64encode(
+            n + secret_box.AESGCM(key).encrypt(n, text.encode(), secret_box._AAD)
+        ).decode("ascii")
+
+    job = {
+        "kind": "data",
+        "source_pool": "pool-of-the-first",
+        "enabled": True,
+        "last_status": "success",
+        "schedule": "daily",
+    }
+    jobs = [
+        {
+            **job,
+            "id": "j1",
+            "source_subvolume": "photos",
+            "destination_type": "remote",
+            "remote_name": "cloud",
+            "encryption_password": sealed_by_first("job-pass"),
+        },
+        {**job, "id": "j2", "source_subvolume": "taxes", "destination_type": "remote", "remote_name": "cloud"},
+        {
+            **job,
+            "id": "j3",
+            "kind": "config",
+            "source_subvolume": "",
+            "destination_type": "remote",
+            "remote_name": "cloud",
+        },
+        {
+            **job,
+            "id": "j4",
+            "source_subvolume": "photos",
+            "destination_type": "local_snapshot",
+            "encryption_password": "",
+        },
+        {**job, "id": "j5", "source_subvolume": "photos", "destination_type": "remote", "remote_name": "clash"},
+    ]
+    repo = {"keep": 7, "hour": 3, "initialized": True, "last_backup": 1763600000, "last_result": "ok"}
+    repos = {
+        "r1": {
+            **repo,
+            "id": "r1",
+            "location": "rclone:cloud:restic",
+            "paths": ["/mnt/first/photos", "/mnt/first/taxes"],
+        },
+        "r2": {**repo, "id": "r2", "location": "/mnt/first/usb/restic", "paths": ["/mnt/first/photos"]},
+        "r3": {**repo, "id": "r3", "location": "rest:https://backup.example/r3", "paths": ["/mnt/first/taxes"]},
+        "r4": {
+            **repo,
+            "id": "r4",
+            "location": "rest:https://backup.example/r4",
+            "paths": ["/mnt/first/photos/2019"],
+            "rest_user": "u",
+            "rest_password": sealed_by_first("rest-pass"),
+        },
+    }
+    remotes = "[base]\ntype = b2\naccount = A1\n\n[cloud]\ntype = crypt\nremote = base:bucket\npassword = obscured\n\n[clash]\ntype = s3\n"
     files = {
+        "backup_jobs.json": json.dumps(jobs).encode(),
+        "offsite_repos.json": json.dumps({"repos": repos}).encode(),
+        **{f"offsite_keys/{r}.key": f"key-of-{r}".encode() for r in repos},
+        "rclone/rclone.conf": remotes.encode(),
         "users.db": db.read_bytes(),
         "secret.key": FIRST_KEY.encode(),
         "vapid.json": b'{"private": "p"}',
@@ -100,6 +165,7 @@ class Net:
         self.me = box
         self.patch.setattr(ha, "STATE_FILE", str(self.dirs[box] / "ha.json"))
         self.patch.setattr(hs, "DIR", str(self.dirs[box] / "ha"))
+        self.patch.setattr(ha_folders, "DIR", str(self.dirs[box] / "ha"))
         self.patch.setattr(be, "DATA_DIR", str(self.dirs[box]))
         self.patch.setattr(nas_name, "STATE_FILE", str(self.dirs[box] / "nas_name.json"))
 
@@ -347,16 +413,150 @@ def test_over_the_api(client, auth_headers, tmp_path, monkeypatch):
     assert res.json()["text"]["msg_key"] == "srv.ha_not_held"
     asked = []
     monkeypatch.setattr(
-        ht, "take_over", lambda actor, anyway: asked.append(anyway) or {"restarting": True, "took_over": {}}
+        ht,
+        "take_over",
+        lambda actor, anyway, bring: asked.append((anyway, bring)) or {"restarting": True, "took_over": {}},
     )
-    said = client.post("/api/ha/takeover", json={"even_if_answering": True}, headers=auth_headers)
-    assert said.status_code == 200 and said.json()["restarting"] is True and asked == [True]
+    said = client.post("/api/ha/takeover", json={"even_if_answering": True, "bring": ["backups"]}, headers=auth_headers)
+    assert said.status_code == 200 and said.json()["restarting"] is True and asked == [(True, ("backups",))]
+    assert (
+        client.post("/api/ha/takeover", json={"bring": ["the kitchen sink"]}, headers=auth_headers).status_code == 422
+    )
     monkeypatch.setattr(ht, "take_back", lambda actor, anyway: asked.append(("back", anyway)))
     assert client.post("/api/ha/take-back", json={}, headers=auth_headers).status_code == 200
     assert asked[-1] == ("back", False)
 
-    def bad(actor, anyway):
+    def bad(actor, anyway, bring):
         raise ha.LinkError("bad_copy", "The kept copy could not be used: damaged")
 
     monkeypatch.setattr(ht, "take_over", bad)
     assert client.post("/api/ha/takeover", json={}, headers=auth_headers).status_code == 400
+
+
+HERE = {
+    "shares": {"photos": "/mnt/tank/photos", "music": "/mnt/tank/music"},
+    "pools": [("/mnt", "wrong"), ("/mnt/tank", "tank")],
+    "first_paths": {"photos": "/mnt/first/photos", "taxes": "/mnt/first/taxes"},
+}
+
+
+def test_the_backups_come_along_switched_off_when_asked(net, monkeypatch):
+    """The owner, 20 Nov 2026: "give the option to the user"."""
+    assert hs.info()["holds"] == {"backup_jobs": 4, "offsite": 4}  # what the card can say before
+    monkeypatch.setattr(ha_bring, "here", lambda: HERE)
+    (net.dirs[B] / "backup_jobs.json").write_text(json.dumps([{"id": "own1", "enabled": True}]))
+    (net.dirs[B] / "rclone").mkdir()
+    (net.dirs[B] / "rclone" / "rclone.conf").write_text("[clash]\ntype = sftp\n")
+    net.down.add(A)
+    said = ht.take_over("own", bring=("backups", "the kitchen sink"), send=net.send)
+    assert said["took_over"]["brought"] == {"jobs": 2, "jobs_left": 2, "offsite": 2, "offsite_left": 2}
+    assert ht.view()["took_over"]["brought"]["jobs"] == 2
+    staged = staged_dir(net)
+    kept = json.loads((staged / be.STAGED_MANIFEST).read_text())
+    assert kept[4:] == [
+        "backup_jobs.json",
+        "offsite_repos.json",
+        "offsite_keys/r1.key",
+        "offsite_keys/r4.key",
+        "rclone/rclone.conf",
+    ]
+    jobs = {j["id"]: j for j in json.loads((staged / "backup_jobs.json").read_text())}
+    assert list(jobs) == ["own1", "j1", "j4"] and jobs["own1"] == {"id": "own1", "enabled": True}
+    # switched off, pointed at this box's pool, its password sealed with this box's key
+    assert (
+        jobs["j1"]["enabled"] is False and jobs["j1"]["source_pool"] == "tank" and jobs["j1"]["last_status"] == "idle"
+    )
+    assert (
+        secret_box.unseal(jobs["j1"]["encryption_password"]) == "job-pass" and jobs["j4"]["encryption_password"] == ""
+    )
+    repos = json.loads((staged / "offsite_repos.json").read_text())["repos"]
+    assert sorted(repos) == ["r1", "r4"]  # r2 is on a drive of the first NAS, r3 backs up a folder not kept here
+    assert (
+        repos["r1"]["paths"] == ["/mnt/tank/photos"]
+        and repos["r1"]["hour"] is None
+        and repos["r1"]["last_backup"] is None
+    )
+    assert (
+        repos["r4"]["paths"] == ["/mnt/tank/photos/2019"]
+        and secret_box.unseal(repos["r4"]["rest_password"]) == "rest-pass"
+    )
+    assert (staged / "offsite_keys" / "r1.key").read_text() == "key-of-r1"
+    assert oct((staged / "offsite_keys" / "r1.key").stat().st_mode & 0o777) == "0o600"
+    assert not (staged / "offsite_keys" / "r2.key").exists()
+    conf = (staged / "rclone" / "rclone.conf").read_text()
+    # the sign-in a backup needs comes with the one it builds on; this box's own "clash" is not replaced
+    assert "[cloud]" in conf and "[base]" in conf and "account = A1" in conf
+    assert conf.count("[clash]") == 1 and "type = sftp" in conf and "type = s3" not in conf
+    assert sorted(be.apply_staged_restore(str(net.dirs[B]))) == sorted(kept)
+
+
+def test_nothing_of_the_backups_comes_unless_asked(net, monkeypatch):
+    monkeypatch.setattr(ha_bring, "here", lambda: HERE)
+    net.down.add(A)
+    said = ht.take_over("own", send=net.send)
+    assert said["took_over"]["brought"] == {}
+    staged = staged_dir(net)
+    for name in ("backup_jobs.json", "offsite_repos.json", "offsite_keys", "rclone"):
+        assert not (staged / name).exists() or not any((staged / name).iterdir())
+
+
+def test_a_box_that_cannot_place_a_backup_leaves_it_behind(net, monkeypatch):
+    """No pool known for the folder, no word of where the first NAS has its folders, sign-ins that cannot be read."""
+    monkeypatch.setattr(ha_bring, "here", lambda: {"shares": HERE["shares"], "pools": [], "first_paths": {}})
+    net.down.add(A)
+    said = ht.take_over("own", bring=("backups",), send=net.send)
+    assert said["took_over"]["brought"] == {"jobs": 0, "jobs_left": 4, "offsite": 0, "offsite_left": 4}
+    assert json.loads((staged_dir(net) / be.STAGED_MANIFEST).read_text())[4:] == []
+    assert ha_bring._pool_of("/mnt/tank/photos", HERE["pools"]) == "tank" and ha_bring._pool_of("", HERE["pools"]) == ""
+    assert ha_bring._mapped("/mnt/first/photos", [("/mnt/first/photos", "/mnt/tank/photos")]) == "/mnt/tank/photos"
+    assert ha_bring._mapped("/mnt/first/photos-old/x", [("/mnt/first/photos", "/mnt/tank/photos")]) == ""
+    assert ha_bring.counts({"backup_jobs.json"}, lambda name: b"not json") == {}
+    assert ha_bring.counts(set(), lambda name: b"") == {"backup_jobs": 0, "offsite": 0}
+    assert ha_bring._parse("no section header\nx = 1\n").sections() == []
+    plan, counted = ha_bring.plan_backups(
+        {
+            "jobs": [
+                {"id": "j", "source_subvolume": "photos", "remote_name": "cloud", "encryption_password": "enc1:AAAA"}
+            ],
+            "repos": {},
+            "remotes": "[cloud]\ntype = s3\n",
+            "keys": {},
+        },
+        {"jobs": [], "repos": {}, "remotes": "", "keys": {}},
+        "wrong-key",
+        ["photos"],
+        HERE,
+    )
+    assert counted["jobs_left"] == 1 and plan["jobs"] == []  # a password that cannot be opened
+
+
+def test_the_second_nas_learns_where_the_first_one_has_its_folders(net, monkeypatch):
+    monkeypatch.setattr(ha_folders, "shares", lambda: {"photos": "/mnt/first/photos", "odd": "relative"})
+    assert ha_folders.first_paths() == {}
+    ha_folders.learn_paths(send=net.send)
+    assert ha_folders.first_paths() == {"photos": "/mnt/first/photos"}
+    net.down.add(A)
+    ha_folders.learn_paths(send=net.send)  # not reached: what is known stays
+    assert ha_folders.first_paths() == {"photos": "/mnt/first/photos"} and ha_folders.chosen() == ["photos", "films"]
+
+
+def test_this_boxes_folders_and_pools(monkeypatch):
+    from types import SimpleNamespace
+
+    from backend.hardware import pal_storage
+
+    pools = [SimpleNamespace(id="tank", mountpoint="/mnt/tank/"), SimpleNamespace(id="none", mountpoint=None)]
+    monkeypatch.setattr(pal_storage, "get_storage_platform", lambda: SimpleNamespace(list_pools=lambda: pools))
+    monkeypatch.setattr(ha_folders, "shares", lambda: {"photos": "/mnt/tank/photos"})
+    monkeypatch.setattr(ha_folders, "first_paths", lambda: {"photos": "/mnt/first/photos"})
+    assert ha_bring.here() == {
+        "shares": {"photos": "/mnt/tank/photos"},
+        "pools": [("/mnt/tank", "tank")],
+        "first_paths": {"photos": "/mnt/first/photos"},
+    }
+
+    def broken():
+        raise OSError("no storage")
+
+    monkeypatch.setattr(pal_storage, "get_storage_platform", lambda: SimpleNamespace(list_pools=broken))
+    assert ha_bring.here()["pools"] == []

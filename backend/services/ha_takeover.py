@@ -27,7 +27,7 @@ from typing import Any
 from backend import secret_box
 from backend.config import logger
 from backend.fsutil import atomic_write_json, read_json
-from backend.services import ha_link, ha_state
+from backend.services import ha_bring, ha_link, ha_state
 from backend.services.ha_link import LinkError
 
 # what a takeover takes out of the copy; the rest of it stays the first NAS's own
@@ -121,9 +121,10 @@ def _read_staged(staged: str, manifest: str) -> dict[str, Any]:
     }
 
 
-def _stage(folders: list[str]) -> dict[str, Any]:
-    """Stages the first NAS's people out of the kept copy, for the next start to apply. Returns the
-    name the first NAS answered to, whether it did, and how many people and two-factor secrets came."""
+def _stage(folders: list[str], bring: tuple[str, ...] = ()) -> dict[str, Any]:
+    """Stages the first NAS's people out of the kept copy, for the next start to apply, and what
+    else was asked for (`bring`: see ha_bring). Returns the name the first NAS answered to, whether
+    it did, how many people and two-factor secrets came, and what was brought along."""
     from backend.services import backup_engine as be
 
     opens = ha_state.passphrase()
@@ -138,23 +139,43 @@ def _stage(folders: list[str]) -> dict[str, Any]:
         found = _read_staged(staged, manifest)
         if "users.db" not in found["keep"]:
             raise ValueError("it has no people in it")
+        theirs = ha_bring.read_backups(staged) if "backups" in bring else None
         for rel in found["listed"]:
             if rel not in found["keep"]:
                 os.remove(os.path.join(staged, rel))  # the first NAS's own: its key, network, apps
         resealed = _reseal_two_factor(os.path.join(staged, "users.db"), found["key"])
         people = _people(os.path.join(staged, "users.db"))
+        extra: list[str] = []
+        brought: dict[str, int] = {}
+        if theirs is not None:
+            plan, brought = ha_bring.plan_backups(
+                theirs, ha_bring.read_backups(data_dir), found["key"], folders, ha_bring.here()
+            )
+            extra = ha_bring.write_backups(staged, plan, brought)
         atomic_write_json(os.path.join(staged, ACCESS), _access(data_dir, found["access"], folders))
-        atomic_write_json(manifest, [*found["keep"], ACCESS])
+        atomic_write_json(manifest, [*found["keep"], ACCESS, *extra])
     except (OSError, ValueError, sqlite3.Error, zipfile.BadZipFile) as e:
         be.discard_staged_restore(data_dir)
         raise LinkError("bad_copy", f"The kept copy could not be used: {e}") from e
-    return {"name": found["name"], "name_on": found["name_on"], "people": people, "two_factor": resealed}
+    return {
+        "name": found["name"],
+        "name_on": found["name_on"],
+        "people": people,
+        "two_factor": resealed,
+        "brought": brought,
+    }
 
 
 # --- on the second NAS: taking over ----------------------------------------------------------------
-def take_over(actor: str = "", even_if_answering: bool = False, send: ha_link.Sender = ha_link._post) -> dict[str, Any]:
+def take_over(
+    actor: str = "",
+    even_if_answering: bool = False,
+    bring: tuple[str, ...] = (),
+    send: ha_link.Sender = ha_link._post,
+) -> dict[str, Any]:
     """The second NAS becomes the one the family uses. Refused while the first NAS still answers,
-    unless that is said to be known: two boxes would answer to one name."""
+    unless that is said to be known: two boxes would answer to one name. `bring` names what else
+    the person asked to come along (ha_bring.CHOICES); it arrives switched off."""
     from backend.services import box_restore, ha_folders, nas_name
 
     if ha_link.role() != "second":
@@ -165,7 +186,7 @@ def take_over(actor: str = "", even_if_answering: bool = False, send: ha_link.Se
     if answers and not even_if_answering:
         raise LinkError("first_answers", "The first NAS still answers. Turn it off first, or take over anyway.")
     first = ha_link.peer() or {}
-    staged = _stage(ha_folders.chosen())
+    staged = _stage(ha_folders.chosen(), tuple(b for b in bring if b in ha_bring.CHOICES))
     if answers:
         try:
             ha_link.call("stand_down", send=send)  # it stops answering to the name, at once
@@ -180,6 +201,7 @@ def take_over(actor: str = "", even_if_answering: bool = False, send: ha_link.Se
         "own_enabled": own["enabled"],
         "by": actor,
         "people": staged["people"],
+        "brought": staged["brought"],
     }
     ha_link._change(lambda d: d.update(took_over=took))
     if took["name"]:
@@ -296,7 +318,7 @@ def view() -> dict[str, Any]:
     """What the screen adds to the link's status."""
     took, held = took_over(), stood_down()
     return {
-        "took_over": {k: took.get(k) for k in ("at", "from", "name", "people")} if took else None,
+        "took_over": {k: took.get(k) for k in ("at", "from", "name", "people", "brought")} if took else None,
         "stood_down": {"at": held.get("at")} if held else None,
     }
 

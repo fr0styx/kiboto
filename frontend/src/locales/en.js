@@ -9084,4 +9084,8 @@ export default {
   "srv.ha_bad_copy": "The kept copy of the first NAS's people could not be used.",
   "srv.ha_not_held": "This NAS is not holding its name back.",
   "srv.ha_second_unreachable": "The second NAS did not answer, so it may still use the name.",
+  "standby.bring_backups": "Also bring the first NAS's backups, switched off",
+  "standby.bring_backups_note": "A backup comes along when its folder is one of the folders kept here, with its password and its cloud sign-in. You turn each one on under Backup after a look. A backup onto a drive of the first NAS stays behind.",
+  "standby.bring_backups_count": "The copy holds {jobs, plural, one {# copy job} other {# copy jobs}} and {offsite, plural, one {# off-site backup} other {# off-site backups}}.",
+  "standby.brought_backups": "{came, plural, one {# backup came along, switched off} other {# backups came along, switched off}}; {left, plural, one {# stayed behind} other {# stayed behind}}.",
 };

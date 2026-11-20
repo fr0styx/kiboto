@@ -102,6 +102,12 @@ def _list(_args: dict[str, Any]) -> dict[str, Any]:
     return {"folders": sorted(shares())}
 
 
+def _paths(_args: dict[str, Any]) -> dict[str, Any]:
+    """Where this box has its shared folders: a backup that comes along at a takeover names them."""
+    _first()
+    return {"paths": shares()}
+
+
 def _walk(root: str) -> Any:
     """Each ordinary file under root: (path from root, size, changed at, mode). No links, no hidden removal folder."""
     for at, dirs, names in os.walk(root):
@@ -205,7 +211,12 @@ def _file_piece(args: dict[str, Any]) -> dict[str, Any]:
 
 
 ha_link.HANDLERS.update(
-    folders_list=_list, tree_begin=_tree_begin, tree_piece=_tree_piece, tree_end=_tree_end, file_piece=_file_piece
+    folders_list=_list,
+    folder_paths=_paths,
+    tree_begin=_tree_begin,
+    tree_piece=_tree_piece,
+    tree_end=_tree_end,
+    file_piece=_file_piece,
 )
 
 
@@ -214,12 +225,25 @@ def _kept() -> dict[str, Any]:
     data = read_json(os.path.join(DIR, STATE), {})
     data = data if isinstance(data, dict) else {}
     chosen = [n for n in data.get("chosen") or [] if isinstance(n, str)]
-    return {"chosen": chosen, "last": data.get("last") if isinstance(data.get("last"), dict) else {}}
+    had = data.get("paths")
+    paths: dict[str, Any] = had if isinstance(had, dict) else {}
+    return {
+        "chosen": chosen,
+        "last": data.get("last") if isinstance(data.get("last"), dict) else {},
+        "paths": {str(k): str(v) for k, v in paths.items()},
+    }
 
 
 @json_locked(lambda *a, **k: os.path.join(DIR, STATE))
-def _keep(chosen: list[str] | None = None, name: str = "", result: dict[str, Any] | None = None) -> None:
+def _keep(
+    chosen: list[str] | None = None,
+    name: str = "",
+    result: dict[str, Any] | None = None,
+    paths: dict[str, str] | None = None,
+) -> None:
     data = _kept()
+    if paths is not None:
+        data["paths"] = paths
     if chosen is not None:
         data["chosen"] = chosen
         data["last"] = {n: r for n, r in data["last"].items() if n in chosen}
@@ -231,6 +255,23 @@ def _keep(chosen: list[str] | None = None, name: str = "", result: dict[str, Any
 
 def chosen() -> list[str]:
     return _kept()["chosen"]
+
+
+def first_paths() -> dict[str, str]:
+    """Where the first NAS has its shared folders, as it said at the last fetch: name -> path."""
+    return _kept()["paths"]
+
+
+def learn_paths(send: ha_link.Sender | None = None) -> None:
+    """Asks the first NAS where its shared folders are, and keeps the answer. A first NAS from
+    before this question refuses; then nothing is known and nothing changes."""
+    try:
+        said = ha_link.call("folder_paths", send=send) if send else ha_link.call("folder_paths")
+    except LinkError:
+        return
+    found = (said or {}).get("paths")
+    if isinstance(found, dict):
+        _keep(paths={str(k): str(v) for k, v in found.items() if str(v).startswith("/")})
 
 
 def choose(names: list[str], send: ha_link.Sender | None = None) -> list[str]:
@@ -451,7 +492,10 @@ def fetch_all(send: ha_link.Sender | None = None) -> dict[str, dict[str, Any]]:
     out: dict[str, dict[str, Any]] = {}
     if ha_link.role() != "second":
         return out
-    for name in chosen():
+    names = chosen()
+    if names:
+        learn_paths(send)  # nothing is asked of the first NAS when no folder is kept
+    for name in names:
         try:
             result = fetch_folder(name, send=send)
         except LinkError as e:

@@ -9084,4 +9084,8 @@ export default {
   "srv.ha_bad_copy": "无法使用保存的第一台 NAS 用户副本。",
   "srv.ha_not_held": "此 NAS 没有在保留它的名称。",
   "srv.ha_second_unreachable": "第二台 NAS 没有响应，所以它可能仍在使用该名称。",
+  "standby.bring_backups": "同时带上第一台 NAS 的备份（保持关闭）",
+  "standby.bring_backups_note": "当备份的文件夹属于保存在这里的文件夹时，它会连同密码和云端登录一起带过来。你查看之后，在“备份”中逐个开启。备份到第一台 NAS 硬盘上的任务会留在原处。",
+  "standby.bring_backups_count": "副本中有 {jobs, plural, other {# 个复制任务}}和 {offsite, plural, other {# 个异地备份}}。",
+  "standby.brought_backups": "{came, plural, other {带来了 # 个备份（已关闭）}}；{left, plural, other {# 个留在原处}}。",
 };
