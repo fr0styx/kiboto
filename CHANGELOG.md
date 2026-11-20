@@ -96,6 +96,8 @@ Kiboto's own file server: when its settings were written twice before they were 
 
 Kiboto's own file server: adding a person, or letting someone write who could only read, no longer closes anyone's open shared folder. A folder is closed only when someone loses access to it or loses the right to write. A file moved in Files from one drive to another keeps its owner, as it does on one drive.
 
+**The settings backup works while Kiboto's own file server runs.** On an install where Kiboto runs the file server itself, the settings backup failed as soon as that file server was running: it tried to pack the file server's live connections, which are not files. The same failure stopped a second NAS from fetching the first one's people and settings. The backup now packs ordinary files only. Tried from start to finish with two boxes and the real file server: after a takeover a person signs in to the second NAS's file server with the password she had and writes to the folder that was kept in step.
+
 #### Changes
 
 - **Ask Kib about the NAS in your language**: questions about free space, drives, fans, apps, the network and

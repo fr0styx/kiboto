@@ -111,3 +111,31 @@ def test_auth_rate_limiting_ttl_pruning():
     # Registering a failure should trigger pruning
     _register_failure("new_active_ip")
     assert len(_failures) < 500, "Expired failures must be pruned when cache exceeds 1000"
+
+
+def test_the_settings_backup_packs_ordinary_files_only(tmp_path, monkeypatch):
+    """Samba keeps its sockets next to its list of accounts. Packing one failed with "No such
+    device or address", and with it the whole settings backup of an install that runs Kiboto's
+    own file server (found with the real file server on 20 Nov 2026)."""
+    import socket
+
+    from backend.services import backup_engine
+
+    data = tmp_path / "data"
+    private = data / "samba" / "private"
+    (private / "msg.sock").mkdir(parents=True)
+    (private / "passdb.tdb").write_bytes(b"accounts")
+    (data / "settings.json").write_text("{}")
+    listener = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    listener.bind(str(private / "msg.sock" / "51"))
+    os.mkfifo(private / "a-pipe")
+    os.symlink(data / "settings.json", data / "a-link.json")
+    monkeypatch.setattr(backup_engine, "DATA_DIR", str(data))
+    try:
+        stream = backup_engine.generate_backup_zip_stream()
+    finally:
+        listener.close()
+    with zipfile.ZipFile(stream, "r") as z:
+        names = set(z.namelist())
+    assert "samba/private/passdb.tdb" in names and "settings.json" in names
+    assert not [n for n in names if "msg.sock" in n or "a-pipe" in n or "a-link" in n]

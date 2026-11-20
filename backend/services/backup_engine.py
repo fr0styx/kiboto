@@ -11,6 +11,7 @@ import os
 import re
 import shutil
 import sqlite3
+import stat
 import tempfile
 import threading
 import time
@@ -184,13 +185,17 @@ def generate_backup_zip_stream(passphrase: str = "") -> Any:
             dirs[:] = [d for d in dirs if d not in HEAVY_BACKUP_DIRS and not os.path.islink(os.path.join(root, d))]
             for name in names:
                 file_path = os.path.join(root, name)
-                if os.path.islink(file_path):
-                    continue
-                rel_path = os.path.relpath(file_path, DATA_DIR)
                 try:
-                    size = os.path.getsize(file_path)
+                    st = os.lstat(file_path)
                 except OSError:
                     continue
+                # Ordinary files only. Not links, and not what a running service keeps beside its
+                # settings: Samba has its sockets next to its list of accounts (samba/private/msg.sock),
+                # and one of them made the whole backup fail.
+                if not stat.S_ISREG(st.st_mode):
+                    continue
+                rel_path = os.path.relpath(file_path, DATA_DIR)
+                size = st.st_size
                 if not _wanted(rel_path, size):
                     continue
                 if rel_path in KEY_FILES and not passphrase:
