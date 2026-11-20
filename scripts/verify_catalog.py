@@ -52,6 +52,10 @@ WAIT_SECONDS = {
     "paperless-ngx": 300,
     "nextcloud": 300,
     "homeassistant": 300,
+    "flowise": 420,
+    "mattermost": 300,
+    "ghostfolio": 300,
+    "wekan": 300,
 }
 
 

@@ -222,6 +222,8 @@ Windows PCs list the NAS under **Network** in File Explorer, where Kiboto serves
 
 **Give a folder's files back to its people.** In Files, a folder's details have a new button on the Permissions tab: **Give to this folder's people**. Files and folders in it that still belong to the system (made by an earlier version of Kiboto, or left by a tool) get the folder's owner, so they can be changed over the network share. Nothing that belongs to someone else is changed, and app folders are left out. It runs only when you press it.
 
+Six more apps in Get apps, each tried on a real install: Ghostfolio (savings and investments), Mattermost (team chat), Etherpad (writing together), Photoview (a gallery for a photo folder), Flowise (AI workflows) and WeKan (boards). 159 apps in all.
+
 #### Security
 
 - **App logos**: Kiboto fetches a logo only when an app in the catalog names that exact address. Before, any

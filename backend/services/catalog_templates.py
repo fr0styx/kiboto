@@ -2721,6 +2721,209 @@ MORE_APPS: list[dict[str, Any]] = [
         "address_bound": True,
         "logo": "wallabag",
     },
+    {
+        "id": "ghostfolio",
+        "name": "Ghostfolio",
+        "category": "productivity",
+        "description": "Keep track of savings, shares and funds in one place, with their performance over time. "
+        "The first person to get started becomes its administrator.",
+        "image": "ghostfolio/ghostfolio:latest",
+        "default_port": 3023,
+        "ports": ["3023:3333"],
+        "webui_path": "/",
+        "env": {
+            "DATABASE_URL": "postgresql://ghostfolio:{{secret:db_password}}@db:5432/ghostfolio?connect_timeout=300&sslmode=disable",
+            "REDIS_HOST": "redis",
+            "REDIS_PORT": "6379",
+            "ACCESS_TOKEN_SALT": "{{secret:token_salt}}",
+            "JWT_SECRET_KEY": "{{secret:jwt_secret}}",
+        },
+        "volumes": {},
+        "stack_services": {
+            "db": {
+                "image": "postgres:16-alpine",
+                "env": {
+                    "POSTGRES_DB": "ghostfolio",
+                    "POSTGRES_USER": "ghostfolio",
+                    "POSTGRES_PASSWORD": "{{secret:db_password}}",
+                },
+                "volumes": {"pgdata": "/var/lib/postgresql/data"},
+            },
+            "redis": {"image": "redis:7.2-alpine", "volumes": {"redis": "/data"}},
+        },
+        "tags": ["finance", "investments"],
+        "logo": "ghostfolio",
+    },
+    {
+        "id": "mattermost",
+        "name": "Mattermost",
+        "category": "productivity",
+        "description": "Team chat with channels, threads, direct messages and file sharing. The first account "
+        "made becomes its administrator.",
+        "image": "mattermost/mattermost-team-edition:latest",
+        "default_port": 8065,
+        "ports": ["8065:8065"],
+        "webui_path": "/",
+        "env": {
+            "MM_SQLSETTINGS_DRIVERNAME": "postgres",
+            "MM_SQLSETTINGS_DATASOURCE": "postgres://mattermost:{{secret:db_password}}@db:5432/mattermost?sslmode=disable&connect_timeout=10",
+            "MM_SERVICESETTINGS_SITEURL": "http://{{host}}:{{port}}",
+            "MM_BLEVESETTINGS_INDEXDIR": "/mattermost/bleve-indexes",
+        },
+        "volumes": {
+            "config": "/mattermost/config",
+            "data": "/mattermost/data",
+            "logs": "/mattermost/logs",
+            "plugins": "/mattermost/plugins",
+            "client-plugins": "/mattermost/client/plugins",
+            "bleve-indexes": "/mattermost/bleve-indexes",
+        },
+        "volume_owner": "2000:2000",
+        "stack_services": {
+            "db": {
+                "image": "postgres:16-alpine",
+                "env": {
+                    "POSTGRES_DB": "mattermost",
+                    "POSTGRES_USER": "mattermost",
+                    "POSTGRES_PASSWORD": "{{secret:db_password}}",
+                },
+                "volumes": {"pgdata": "/var/lib/postgresql/data"},
+            }
+        },
+        "tags": ["chat", "team"],
+        "address_bound": True,
+        "logo": "mattermost",
+    },
+    {
+        "id": "etherpad",
+        "name": "Etherpad",
+        "category": "productivity",
+        "description": "Write in the same document together and see each other's typing as it happens, with "
+        "its full history.",
+        "image": "etherpad/etherpad:latest",
+        "default_port": 9001,
+        "webui_path": "/",
+        "env": {
+            "ADMIN_PASSWORD": "{{secret:admin_password}}",
+            "DB_TYPE": "postgres",
+            "DB_HOST": "db",
+            "DB_PORT": "5432",
+            "DB_NAME": "etherpad",
+            "DB_USER": "etherpad",
+            "DB_PASS": "{{secret:db_password}}",
+            "TRUST_PROXY": "true",
+        },
+        "volumes": {"var": "/opt/etherpad-lite/var"},
+        "volume_owner": "5001:0",
+        "credentials": {"user": "admin", "password": "{{secret:admin_password}}"},
+        "stack_services": {
+            "db": {
+                "image": "postgres:16-alpine",
+                "env": {
+                    "POSTGRES_DB": "etherpad",
+                    "POSTGRES_USER": "etherpad",
+                    "POSTGRES_PASSWORD": "{{secret:db_password}}",
+                },
+                "volumes": {"pgdata": "/var/lib/postgresql/data"},
+            }
+        },
+        "tags": ["documents", "writing"],
+        "logo": "etherpad",
+    },
+    {
+        "id": "photoview",
+        "name": "Photoview",
+        "category": "photos",
+        "description": "A simple photo gallery for the pictures already in a folder, sorted by album, date and "
+        "place. Set the first account and the photo folder (/photos) on first visit.",
+        "image": "photoview/photoview:latest",
+        "default_port": 3024,
+        "ports": ["3024:80"],
+        "webui_path": "/",
+        "env": {
+            "PHOTOVIEW_DATABASE_DRIVER": "sqlite",
+            "PHOTOVIEW_SQLITE_PATH": "/home/photoview/database/photoview.db",
+            "PHOTOVIEW_LISTEN_IP": "0.0.0.0",
+            "PHOTOVIEW_LISTEN_PORT": "80",
+            "PHOTOVIEW_MEDIA_CACHE": "/home/photoview/media-cache",
+        },
+        "volumes": {
+            "database": "/home/photoview/database",
+            "media-cache": "/home/photoview/media-cache",
+            "photos": "/photos",
+        },
+        "share_folders": {"photos": "Photo library"},
+        "volume_owner": "999:999",
+        "tags": ["gallery"],
+        "logo": "photoview",
+    },
+    {
+        "id": "flowise",
+        "name": "Flowise",
+        "category": "ai",
+        "description": "Build chat assistants and AI workflows by connecting blocks on a canvas, with your own "
+        "documents and models. Make the first account on first visit.",
+        "image": "flowiseai/flowise:latest",
+        "default_port": 3025,
+        "ports": ["3025:3000"],
+        "webui_path": "/",
+        "env": {
+            "PORT": "3000",
+            "DATABASE_TYPE": "postgres",
+            "DATABASE_HOST": "db",
+            "DATABASE_PORT": "5432",
+            "DATABASE_NAME": "flowise",
+            "DATABASE_USER": "flowise",
+            "DATABASE_PASSWORD": "{{secret:db_password}}",
+            "SECRETKEY_PATH": "/home/node/.flowise",
+            "LOG_PATH": "/home/node/.flowise/logs",
+            "BLOB_STORAGE_PATH": "/home/node/.flowise/storage",
+        },
+        "volumes": {"data": "/home/node/.flowise"},
+        "volume_owner": "1000:1000",
+        "stack_services": {
+            "db": {
+                "image": "postgres:16-alpine",
+                "env": {
+                    "POSTGRES_DB": "flowise",
+                    "POSTGRES_USER": "flowise",
+                    "POSTGRES_PASSWORD": "{{secret:db_password}}",
+                },
+                "volumes": {"pgdata": "/var/lib/postgresql/data"},
+            }
+        },
+        "tags": ["llm", "workflows"],
+        "logo": "flowise",
+    },
+    {
+        "id": "wekan",
+        "name": "WeKan",
+        "category": "productivity",
+        "description": "Boards with lists, cards, checklists and due dates for projects and chores. The first "
+        "account made becomes its administrator.",
+        "image": "ghcr.io/wekan/wekan:latest",
+        "default_port": 3026,
+        "ports": ["3026:8080"],
+        "webui_path": "/",
+        "env": {
+            "MONGO_URL": "mongodb://db:27017/wekan",
+            "ROOT_URL": "http://{{host}}:{{port}}",
+            "WRITABLE_PATH": "/data",
+            "WITH_API": "true",
+        },
+        "volumes": {"files": "/data"},
+        "volume_owner": "999:999",
+        "stack_services": {
+            "db": {
+                "image": "mongo:7",
+                "command": ["mongod", "--oplogSize", "128", "--quiet"],
+                "volumes": {"db": "/data/db"},
+            }
+        },
+        "tags": ["kanban", "projects"],
+        "address_bound": True,
+        "logo": "wekan",
+    },
 ]
 
 CURATED_APP_CATALOG.extend(MORE_APPS)
