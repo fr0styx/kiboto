@@ -93,6 +93,8 @@ def engine(tmp_path, monkeypatch):
     sock.write_text("")
     monkeypatch.setattr(samba_engine, "_docker_sock_path", lambda: str(sock))
     monkeypatch.setattr(samba_engine, "SAMBA_CONF_FILE", str(tmp_path / "smb.conf"))
+    monkeypatch.setattr(samba_engine, "PASSDB_FILE", str(tmp_path / "private" / "passdb.tdb"))
+    monkeypatch.setattr(samba_engine, "PASSDB_SEEN_FILE", str(tmp_path / "passdb.seen"))
     monkeypatch.setattr(samba_engine, "validate_share", lambda s: None)
     monkeypatch.setattr(samba_engine, "access_lines", lambda share: [f"   valid users = {share.comment}"])
     monkeypatch.setattr(samba_engine, "_serves_files", lambda: False)
@@ -210,3 +212,47 @@ def test_a_shared_folder_is_closed_only_when_someone_loses_something():
         "valid users = ana\n", "valid users = ana leo\n"
     )
     assert new != OLD and what_changed(OLD, new) == {"shares": [], "ips": [], "homes": False}
+
+
+def test_a_replaced_list_of_accounts_is_noticed_and_a_changed_one_is_not(tmp_path, monkeypatch):
+    passdb, seen = tmp_path / "private" / "passdb.tdb", tmp_path / "passdb.seen"
+    monkeypatch.setattr(samba_engine, "PASSDB_FILE", str(passdb))
+    monkeypatch.setattr(samba_engine, "PASSDB_SEEN_FILE", str(seen))
+    assert samba_engine.accounts_file_replaced() is False  # no file server accounts here at all
+    passdb.parent.mkdir()
+    passdb.write_bytes(b"ana")
+    assert samba_engine.accounts_file_replaced() is True  # the first look: nothing is known yet
+    assert samba_engine.accounts_file_replaced() is False
+    with open(passdb, "r+b") as f:  # Samba adds an account: the same file, changed in place
+        f.write(b"ana leo")
+    assert samba_engine.accounts_file_replaced() is False
+    new = tmp_path / "private" / "passdb.tdb.new"  # a restore: a new file put in its place
+    new.write_bytes(b"leo")
+    new.replace(passdb)
+    assert samba_engine.accounts_file_replaced() is True
+    assert samba_engine.accounts_file_replaced() is False
+    passdb.unlink()
+    assert samba_engine.accounts_file_replaced() is False  # gone: nothing to restart for
+
+
+def test_a_replaced_list_of_accounts_restarts_the_file_server(engine, tmp_path, monkeypatch):
+    """After a settings restore or a takeover: tried with the real smbd, which keeps using the
+    list it has open until it is started again."""
+    passdb = tmp_path / "private" / "passdb.tdb"
+    passdb.parent.mkdir()
+    passdb.write_bytes(b"ana")
+    engine.generate_and_save_conf()
+    _docker(monkeypatch)
+    engine.reload_service()  # the first settings and the first look at the accounts
+    engine._shares["Films"].comment = "ana"
+    engine.generate_and_save_conf()
+    docker = _docker(monkeypatch)
+    assert engine.reload_service() is True
+    assert [path for path, _body in docker.calls] == ["/containers/abc123/exec", "/exec/e1/start"]  # in place
+    new = tmp_path / "private" / "passdb.tdb.new"
+    new.write_bytes(b"leo")
+    new.replace(passdb)  # the list that came along
+    engine.generate_and_save_conf()
+    docker = _docker(monkeypatch)
+    assert engine.reload_service() is True
+    assert [path for path, _body in docker.calls] == ["/containers/abc123/restart?t=2"]

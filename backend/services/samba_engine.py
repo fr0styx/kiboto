@@ -26,6 +26,8 @@ from backend.ignored_errors import ignored
 
 SAMBA_DIR = os.path.join(DATA_DIR, "samba")
 SAMBA_CONF_FILE = os.path.join(SAMBA_DIR, "smb.conf")
+PASSDB_FILE = os.path.join(SAMBA_DIR, "private", "passdb.tdb")  # Samba's own list of accounts
+PASSDB_SEEN_FILE = os.path.join(SAMBA_DIR, "passdb.seen")  # which file that was at the last reload
 SAMBA_SHARES_FILE = os.path.join(SAMBA_DIR, "shares.json")
 
 
@@ -251,6 +253,31 @@ def what_changed(old: str, new: str) -> dict[str, Any]:
         "ips": sorted(_denied(now.get("global", "")) - _denied(was.get("global", ""))),
         "homes": was.get("homes") != now.get("homes") and "homes" in was,
     }
+
+
+def accounts_file_replaced() -> bool:
+    """Whether Samba's list of accounts (passdb.tdb) is another file than at the last look. A
+    settings restore or a takeover puts a new file in its place, and the running file server
+    keeps the old one open: after a reload a person from the new list is refused and one who is
+    no longer in it still gets in (tried with the real smbd). Only a restart makes it use the new
+    list. Samba itself changes the file in place, which this does not count. The first look on an
+    install that has such a list counts as replaced: nothing is known about it yet."""
+    try:
+        st = os.stat(PASSDB_FILE)
+        mark = f"{st.st_dev}:{st.st_ino}"
+    except OSError:
+        mark = ""
+    try:
+        with open(PASSDB_SEEN_FILE, encoding="utf-8") as f:
+            was: str | None = f.read().strip()
+    except OSError:
+        was = None
+    if was != mark:
+        try:
+            atomic_write_text(PASSDB_SEEN_FILE, mark)
+        except OSError:
+            logger.debug("[SambaEngine] could not note the accounts file", exc_info=True)
+    return bool(mark) and was != mark
 
 
 def _both(first: dict[str, Any] | None, second: dict[str, Any] | None) -> dict[str, Any] | None:
@@ -651,6 +678,8 @@ class SambaEngine:
 
         # 2. The sidecar container: its settings reloaded in place where that is enough, else a restart
         changed, self._changed, self._pending = getattr(self, "_changed", None), None, False
+        if accounts_file_replaced():
+            changed = None  # a new list of accounts: the file server has to start again to use it
         docker_sock = _docker_sock_path()
         sidecar_info = self.check_sidecar()
         if os.path.exists(docker_sock) and sidecar_info.get("detected"):
