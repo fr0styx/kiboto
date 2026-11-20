@@ -107,3 +107,7 @@
 /* Permissions tab of a folder: "Give to this folder's people" sits apart from the form above it */
 :is(#file-manager-window, .file-manager-window) #fm-insp-give-box { display: grid; gap: 8px; justify-items: start; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--kb-line-5); }
 :is(#file-manager-window, .file-manager-window) #fm-insp-give-box .fmh-xs-muted-2 { margin-bottom: 0; line-height: 1.4; }
+
+/* Permissions tab, the mode row: the number field shrinks, so the letters beside it stay inside the pane on a phone */
+:is(#file-manager-window, .file-manager-window) .fm-inspector-perms-pane .fmh-xs-strong-mono-box-grow { min-width: 0; }
+:is(#file-manager-window, .file-manager-window) #fm-insp-human-mode { flex: 0 0 auto; white-space: nowrap; }

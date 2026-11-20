@@ -277,7 +277,10 @@ def test_what_is_still_the_systems_in_a_folder_goes_to_its_people(tmp_path, monk
 
     out = owned.give_back(str(share), keep_out)
     # each from the top down, so a folder is its people's before what is in it is looked at
-    assert given == ["old", "link", "old/deep", "old/a.mkv", "old/deep/b.mkv"]
+    # (the order inside one folder is the disk's own, and differs from machine to machine)
+    assert sorted(given) == ["link", "old", "old/a.mkv", "old/deep", "old/deep/b.mkv"]
+    assert given.index("old") < given.index("old/a.mkv") and given.index("old") < given.index("old/deep")
+    assert given.index("old/deep") < given.index("old/deep/b.mkv")
     assert out == {"seen": 6, "given": 5}  # theirs.txt was seen and left alone; apps was not entered
     assert "theirs.txt" not in given and not [g for g in given if g.startswith("apps")]
     assert owned.give_back(str(share), keep_out)["given"] == 0  # nothing left to hand over

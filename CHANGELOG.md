@@ -102,6 +102,8 @@ Kiboto's own file server: after a settings restore or a takeover it is started a
 
 Files: the nine tick boxes on a file's Permissions tab are named for screen readers ("Owner: may read" and so on), and the letters R, W and X say what they stand for when pointed at.
 
+Files on a phone: on a file's Permissions tab the letters beside the mode number (for example drwxr-xr-x) were cut off at the edge. They are shown whole.
+
 #### Changes
 
 - **Ask Kib about the NAS in your language**: questions about free space, drives, fans, apps, the network and
