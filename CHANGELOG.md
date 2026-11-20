@@ -106,6 +106,8 @@ Files on a phone: on a file's Permissions tab the letters beside the mode number
 
 **The Getting started card fits the window.** On a laptop screen 768 or 800 pixels high its last steps ran past the bottom and could not be reached; it now scrolls inside the window. On a tablet and on narrower windows it lay over the first widgets; it now stops where they begin.
 
+**Keyboard and screen readers: the closed side drawer is skipped.** With the drawer for the front panel closed, its buttons were off the screen and still took the Tab key's focus one after the other: on the desktop most of the first sixty Tab presses went to something that could not be seen. A screen reader read them as well. Closed, the drawer is now left out; opened, it works as before.
+
 #### Changes
 
 - **Ask Kib about the NAS in your language**: questions about free space, drives, fans, apps, the network and
