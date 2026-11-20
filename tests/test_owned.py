@@ -178,3 +178,12 @@ def test_a_file_put_back_over_itself_keeps_its_owner(tmp_path, as_root):
     as_root.clear()
     owned.like_before(str(put_back), None)  # it was not there: like the folder it is in
     assert as_root == [(str(put_back), 99, 100)]
+
+
+def test_the_umask_for_a_helper_that_makes_files_in_a_folder(tmp_path):
+    share = tmp_path / "Films"
+    share.mkdir()
+    for mode, want in ((0o777, 0o000), (0o775, 0o002), (0o755, 0o022), (0o700, 0o022), (0o2777, 0o000)):
+        os.chmod(share, mode)
+        assert owned.umask_in(str(share)) == want, oct(mode)
+    assert owned.umask_in(str(tmp_path / "missing")) == 0o022

@@ -239,6 +239,9 @@ class WebdavEngine:
                 cmd.append("--read-only")
 
             logger.info("[WEBDAV] Launching: %s ... (proxy=%s)", " ".join(cmd[:5]), os.path.exists(proxy_script))
+            from backend import owned
+
+            served = config.POOL_PATH if os.path.exists(proxy_script) else root
             try:
                 self._proc = subprocess.Popen(
                     cmd,
@@ -246,6 +249,7 @@ class WebdavEngine:
                     stdout=subprocess.DEVNULL,
                     stderr=subprocess.PIPE,
                     text=True,
+                    umask=owned.umask_in(served),  # what it makes can be changed over the network share too
                 )
                 self._started_at = time.time()
                 self._last_error = None

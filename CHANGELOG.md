@@ -80,6 +80,8 @@ On a tablet held upright, windows opened a little wider than the screen, so the 
 
 **The NAS is listed once under Network on Windows.** An install with Kiboto's own file server already has a service that lists it for Windows PCs, and the new one in Kiboto's name service could list it a second time. Kiboto's now searches first, and every five minutes, and stays out when the box is listed already.
 
+**Files that arrive over WebDAV or SFTP can be changed over the network share.** They were written so that only the system could change them. They now get the folder's right to write: in a shared folder that is open to its group or to everyone, as on Unraid, the same people can change them over SMB. They still belong to the system.
+
 #### Changes
 
 - **Ask Kib about the NAS in your language**: questions about free space, drives, fans, apps, the network and

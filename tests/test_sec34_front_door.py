@@ -169,6 +169,7 @@ def test_the_engine_starts_rclone_on_loopback_and_the_front_on_the_port(tmp_path
 
         def __init__(self, cmd, **kw):
             launched.append(cmd)
+            how.update(kw)
 
         def poll(self):
             return None
@@ -179,7 +180,9 @@ def test_the_engine_starts_rclone_on_loopback_and_the_front_on_the_port(tmp_path
         def wait(self, timeout=None):
             return 0
 
+    how = {}
     monkeypatch.setattr(webdav_engine.subprocess, "Popen", Proc)
+    monkeypatch.setattr("backend.owned.umask_in", lambda folder: 0o002)
     engine = webdav_engine.WebdavEngine()
     fronts = []
     monkeypatch.setattr(engine._front, "start", lambda public, internal, gate: fronts.append((public, internal)))
@@ -189,6 +192,7 @@ def test_the_engine_starts_rclone_on_loopback_and_the_front_on_the_port(tmp_path
     assert cmd[cmd.index("--addr") + 1] == "127.0.0.1:18084"
     assert cmd[cmd.index("--auth-proxy") + 1].startswith(f"{sys.executable} ")
     assert fronts == [(8084, 18084)] and engine.internal_port() == 18084
+    assert how["umask"] == 0o002  # the served folder's right to write goes to what rclone makes
     engine.stop()
     assert fronts[-1] == "stopped"
 

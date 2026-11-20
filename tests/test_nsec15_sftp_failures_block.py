@@ -107,12 +107,16 @@ def test_main_gives_rclone_the_log(monkeypatch, tmp_path):
         def poll(self):
             return 0
 
-    monkeypatch.setattr(sf.subprocess, "Popen", lambda cmd, env=None: seen.update(env=env) or Proc())
+    monkeypatch.setattr(
+        sf.subprocess, "Popen", lambda cmd, env=None, umask=-1: seen.update(env=env, umask=umask) or Proc()
+    )
+    monkeypatch.setattr("backend.owned.umask_in", lambda folder: 0o002)
     monkeypatch.setattr(sf, "rclone_command", lambda internal, cache: ["rclone"])
     monkeypatch.setattr(sf, "internal_port", lambda p: 1)
     monkeypatch.setattr(sf.asyncio, "run", lambda coro: coro.close() or 0)
     assert sf.main(["2222", str(tmp_path)]) == 0
     assert seen["env"][sf.FAIL_LOG_ENV] == str(tmp_path / "auth-failures.log")
+    assert seen["umask"] == 0o002  # the served folder's right to write goes to what rclone makes
 
 
 def _run_proxy(monkeypatch, user, password):

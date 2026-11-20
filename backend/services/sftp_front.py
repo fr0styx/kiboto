@@ -216,7 +216,13 @@ def main(argv: list[str]) -> int:
     internal = internal_port(port)
     os.makedirs(cache_dir, exist_ok=True)
     fail_log = os.path.join(cache_dir, "auth-failures.log")
-    proc = subprocess.Popen(rclone_command(internal, cache_dir), env={**os.environ, FAIL_LOG_ENV: fail_log})
+    from backend import owned
+    from backend.config import POOL_PATH
+
+    # the umask: what it makes in a shared folder can be changed over the network share too
+    proc = subprocess.Popen(
+        rclone_command(internal, cache_dir), env={**os.environ, FAIL_LOG_ENV: fail_log}, umask=owned.umask_in(POOL_PATH)
+    )
     return asyncio.run(_run(port, internal, proc, fail_log))
 
 
