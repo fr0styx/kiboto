@@ -27,6 +27,7 @@ from backend.api.file_versions import router as file_versions_router  # noqa: E4
 from backend.api.firewall import router as firewall_router
 from backend.api.fleet import router as fleet_router
 from backend.api.fs import router as fs_router
+from backend.api.ha import router as ha_router
 from backend.api.heat_shutdown import router as heat_shutdown_router
 from backend.api.home_assistant import router as home_assistant_router
 from backend.api.https import router as https_router
@@ -119,6 +120,7 @@ api_router.include_router(nas_name_router)  # NFEAT-8
 api_router.include_router(public_links_router)  # NFEAT-2
 api_router.include_router(family_access_router)  # NFEAT-1
 api_router.include_router(fleet_router)  # RES-9
+api_router.include_router(ha_router)  # high availability: the link between two boxes
 api_router.include_router(family_signin_router)  # NFEAT-6
 api_router.include_router(malware_scan_router)  # NFEAT-11
 api_router.include_router(home_assistant_router)  # RES-5

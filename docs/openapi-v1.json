@@ -6917,6 +6917,34 @@
     "title": "EnergyPriceIn",
     "type": "object"
    },
+   "EnvelopeIn": {
+    "properties": {
+     "c": {
+      "maxLength": 12000000,
+      "minLength": 24,
+      "title": "C",
+      "type": "string"
+     },
+     "from": {
+      "pattern": "^[a-f0-9]{16}$",
+      "title": "From",
+      "type": "string"
+     },
+     "n": {
+      "maxLength": 24,
+      "minLength": 16,
+      "title": "N",
+      "type": "string"
+     }
+    },
+    "required": [
+     "from",
+     "n",
+     "c"
+    ],
+    "title": "EnvelopeIn",
+    "type": "object"
+   },
    "EraseRequest": {
     "properties": {
      "parts": {
@@ -30345,28 +30373,6 @@
     "title": "PackUseResponseReindex",
     "type": "object"
    },
-   "PairIn": {
-    "properties": {
-     "address": {
-      "maxLength": 255,
-      "minLength": 8,
-      "title": "Address",
-      "type": "string"
-     },
-     "code": {
-      "maxLength": 32,
-      "minLength": 16,
-      "title": "Code",
-      "type": "string"
-     }
-    },
-    "required": [
-     "address",
-     "code"
-    ],
-    "title": "PairIn",
-    "type": "object"
-   },
    "PasswordIn": {
     "properties": {
      "password": {
@@ -30399,48 +30405,6 @@
      }
     },
     "title": "PauseCopyResponse",
-    "type": "object"
-   },
-   "PeerPairIn": {
-    "properties": {
-     "address": {
-      "maxLength": 255,
-      "minLength": 8,
-      "title": "Address",
-      "type": "string"
-     },
-     "box_id": {
-      "maxLength": 16,
-      "minLength": 16,
-      "title": "Box Id",
-      "type": "string"
-     },
-     "code": {
-      "maxLength": 32,
-      "minLength": 16,
-      "title": "Code",
-      "type": "string"
-     },
-     "name": {
-      "default": "",
-      "maxLength": 64,
-      "title": "Name",
-      "type": "string"
-     },
-     "token": {
-      "maxLength": 64,
-      "minLength": 32,
-      "title": "Token",
-      "type": "string"
-     }
-    },
-    "required": [
-     "code",
-     "box_id",
-     "address",
-     "token"
-    ],
-    "title": "PeerPairIn",
     "type": "object"
    },
    "PeopleIn": {
@@ -41927,6 +41891,139 @@
     "title": "KeyIn",
     "type": "object"
    },
+   "backend__api__fleet__PairIn": {
+    "properties": {
+     "address": {
+      "maxLength": 255,
+      "minLength": 8,
+      "title": "Address",
+      "type": "string"
+     },
+     "code": {
+      "maxLength": 32,
+      "minLength": 16,
+      "title": "Code",
+      "type": "string"
+     }
+    },
+    "required": [
+     "address",
+     "code"
+    ],
+    "title": "PairIn",
+    "type": "object"
+   },
+   "backend__api__fleet__PeerPairIn": {
+    "properties": {
+     "address": {
+      "maxLength": 255,
+      "minLength": 8,
+      "title": "Address",
+      "type": "string"
+     },
+     "box_id": {
+      "maxLength": 16,
+      "minLength": 16,
+      "title": "Box Id",
+      "type": "string"
+     },
+     "code": {
+      "maxLength": 32,
+      "minLength": 16,
+      "title": "Code",
+      "type": "string"
+     },
+     "name": {
+      "default": "",
+      "maxLength": 64,
+      "title": "Name",
+      "type": "string"
+     },
+     "token": {
+      "maxLength": 64,
+      "minLength": 32,
+      "title": "Token",
+      "type": "string"
+     }
+    },
+    "required": [
+     "code",
+     "box_id",
+     "address",
+     "token"
+    ],
+    "title": "PeerPairIn",
+    "type": "object"
+   },
+   "backend__api__ha__PairIn": {
+    "properties": {
+     "address": {
+      "maxLength": 255,
+      "minLength": 8,
+      "title": "Address",
+      "type": "string"
+     },
+     "code": {
+      "maxLength": 40,
+      "minLength": 16,
+      "title": "Code",
+      "type": "string"
+     },
+     "my_address": {
+      "maxLength": 255,
+      "minLength": 8,
+      "title": "My Address",
+      "type": "string"
+     }
+    },
+    "required": [
+     "address",
+     "code",
+     "my_address"
+    ],
+    "title": "PairIn",
+    "type": "object"
+   },
+   "backend__api__ha__PeerPairIn": {
+    "properties": {
+     "address": {
+      "maxLength": 255,
+      "minLength": 8,
+      "title": "Address",
+      "type": "string"
+     },
+     "box_id": {
+      "pattern": "^[a-f0-9]{16}$",
+      "title": "Box Id",
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 128,
+      "title": "Name",
+      "type": "string"
+     },
+     "proof": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Proof",
+      "type": "string"
+     },
+     "public": {
+      "maxLength": 64,
+      "minLength": 40,
+      "title": "Public",
+      "type": "string"
+     }
+    },
+    "required": [
+     "box_id",
+     "name",
+     "address",
+     "public",
+     "proof"
+    ],
+    "title": "PeerPairIn",
+    "type": "object"
+   },
    "backend__api__immich__KeyIn": {
     "properties": {
      "api_key": {
@@ -53260,7 +53357,7 @@
      "content": {
       "application/json": {
        "schema": {
-        "$ref": "#/components/schemas/PeerPairIn"
+        "$ref": "#/components/schemas/backend__api__fleet__PeerPairIn"
        }
       }
      },
@@ -53369,7 +53466,7 @@
      "content": {
       "application/json": {
        "schema": {
-        "$ref": "#/components/schemas/PairIn"
+        "$ref": "#/components/schemas/backend__api__fleet__PairIn"
        }
       }
      },
@@ -56317,6 +56414,274 @@
      "storage:read",
      "system:view"
     ]
+   }
+  },
+  "/api/v1/ha": {
+   "delete": {
+    "description": "Forgets the other box, and tells it to forget this one when it can be reached.",
+    "operationId": "ha_unpair_api_v1_ha_delete",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Ha Unpair Api V1 Ha Delete",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Ha Unpair",
+    "tags": [
+     "High availability"
+    ],
+    "x-required-scopes": [
+     "system:config"
+    ]
+   },
+   "get": {
+    "description": "This box's part (first, second or none), the other box, and how the last contact went.",
+    "operationId": "ha_status_api_v1_ha_get",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Ha Status Api V1 Ha Get",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Ha Status",
+    "tags": [
+     "High availability"
+    ],
+    "x-required-scopes": [
+     "system:config"
+    ]
+   }
+  },
+  "/api/v1/ha/check": {
+   "post": {
+    "description": "Asks the other box whether it is there.",
+    "operationId": "ha_check_api_v1_ha_check_post",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Ha Check Api V1 Ha Check Post",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Ha Check",
+    "tags": [
+     "High availability"
+    ],
+    "x-required-scopes": [
+     "system:config"
+    ]
+   }
+  },
+  "/api/v1/ha/code": {
+   "post": {
+    "description": "On the first NAS: a pairing key to type into the second one. Shown once, good for ten minutes.",
+    "operationId": "ha_code_api_v1_ha_code_post",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Ha Code Api V1 Ha Code Post",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Ha Code",
+    "tags": [
+     "High availability"
+    ],
+    "x-required-scopes": [
+     "system:config"
+    ]
+   }
+  },
+  "/api/v1/ha/pair": {
+   "post": {
+    "description": "On the second NAS: pairs with the first one, using the pairing key shown there. Confirmed.",
+    "operationId": "ha_pair_api_v1_ha_pair_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/backend__api__ha__PairIn"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Ha Pair Api V1 Ha Pair Post",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Ha Pair",
+    "tags": [
+     "High availability"
+    ],
+    "x-required-scopes": [
+     "system:config"
+    ]
+   }
+  },
+  "/api/v1/ha/peer/call": {
+   "post": {
+    "description": "A sealed message from the paired box; the answer is sealed too.",
+    "operationId": "ha_peer_call_api_v1_ha_peer_call_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/EnvelopeIn"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": {
+          "type": "string"
+         },
+         "title": "Response Ha Peer Call Api V1 Ha Peer Call Post",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     },
+     "429": {
+      "$ref": "#/components/responses/TooManyRequests"
+     }
+    },
+    "security": [],
+    "summary": "Ha Peer Call",
+    "tags": [
+     "High availability"
+    ],
+    "x-rate-limit": {
+     "requests": 240,
+     "seconds": 60
+    }
+   }
+  },
+  "/api/v1/ha/peer/pair": {
+   "post": {
+    "description": "The second NAS pairs with this one: it proves that it has the pairing key shown here.",
+    "operationId": "ha_peer_pair_api_v1_ha_peer_pair_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/backend__api__ha__PeerPairIn"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Ha Peer Pair Api V1 Ha Peer Pair Post",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     },
+     "429": {
+      "$ref": "#/components/responses/TooManyRequests"
+     }
+    },
+    "security": [],
+    "summary": "Ha Peer Pair",
+    "tags": [
+     "High availability"
+    ],
+    "x-rate-limit": {
+     "requests": 10,
+     "seconds": 600
+    }
    }
   },
   "/api/v1/hardware/helper": {

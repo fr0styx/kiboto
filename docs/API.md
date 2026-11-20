@@ -38,7 +38,7 @@ request and response schemas.
 
 <!-- BEGIN generated endpoints: python scripts/api_reference.py --update -->
 
-788 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
+795 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
 
 ### AI Conversation History
 
@@ -361,6 +361,18 @@ request and response schemas.
 | :--- | :--- | :--- | :--- |
 | `GET` | `/api/v1/hardware/helper` | `system:view` | Whether the helper runs and answers, and whether this box has the registers it serves |
 | `PUT` | `/api/v1/hardware/helper` | `system:config` | Turns the helper on (confirmed first: 428 until then) or off |
+
+### High availability
+
+| Method | Path | Access | What it does |
+| :--- | :--- | :--- | :--- |
+| `DELETE` | `/api/v1/ha` | `system:config` | Forgets the other box, and tells it to forget this one when it can be reached |
+| `GET` | `/api/v1/ha` | `system:config` | This box's part (first, second or none), the other box, and how the last contact went |
+| `POST` | `/api/v1/ha/check` | `system:config` | Asks the other box whether it is there |
+| `POST` | `/api/v1/ha/code` | `system:config` | On the first NAS: a pairing key to type into the second one |
+| `POST` | `/api/v1/ha/pair` | `system:config` | On the second NAS: pairs with the first one, using the pairing key shown there |
+| `POST` | `/api/v1/ha/peer/call` | public ⏱ | A sealed message from the paired box; the answer is sealed too |
+| `POST` | `/api/v1/ha/peer/pair` | public ⏱ | The second NAS pairs with this one: it proves that it has the pairing key shown here |
 
 ### Immich
 

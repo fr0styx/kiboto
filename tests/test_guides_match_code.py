@@ -163,3 +163,15 @@ def test_tiering_guide_numbers():
     assert install.count(line) == 2 and text.count(line) == 1  # Kiboto and the SMB container; the guide shows the line
     with open(os.path.join(ROOT, "Dockerfile"), encoding="utf-8") as fh:
         assert f"\n    {tier_merge.TOOL} \\\n" in fh.read()
+
+
+def test_ha_guide_numbers():
+    """docs/HA.md says what pairing two boxes takes and how the link is protected."""
+    from backend.services import ha_link
+
+    text = _doc("HA.md")
+    assert f"A key of {ha_link.CODE_SIGNS} signs" in text and f"good for {ha_link.CODE_SECONDS // 60} minutes" in text
+    assert f"After {ha_link.CODE_TRIES} tries" in text and f"is {ha_link.CODE_SIGNS * 5} random bits" in text
+    assert f"within {ha_link.CLOCK_SLACK_SECS // 60} minutes" in text and "AES-256-GCM" in text
+    assert "What works today is the first step: pairing the two boxes" in text
+    assert "refuses an address on the internet" in text and "does not look names up" in text

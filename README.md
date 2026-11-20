@@ -120,6 +120,7 @@ work and goes up one patch number at a time: see [releasing](docs/RELEASING.md).
 | Your own scripts on a timer | [SCRIPTS.md](docs/SCRIPTS.md) |
 | Disks for other computers (iSCSI) | [ISCSI.md](docs/ISCSI.md) |
 | Old files move to the slower drives (data tiering) | [TIERING.md](docs/TIERING.md) |
+| A second NAS that can take over (high availability) | [HA.md](docs/HA.md) |
 | Virtual machines: Linux, Windows 11, Home Assistant | [VMS.md](docs/VMS.md) |
 | SNMP for monitoring tools | [SNMP.md](docs/SNMP.md) |
 | Kib: which folders it reads, who can use it, privacy | [KIB.md](docs/KIB.md) |

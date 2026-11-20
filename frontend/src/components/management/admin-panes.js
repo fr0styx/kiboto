@@ -64,6 +64,7 @@ export function loadNotificationsPane() {
 export function loadBackupExtras(doc = document) {
   if (!doc.getElementById('backup-fleet-grid')) return false;
   import('./fleet.js').then((m) => m.loadFleetCard()).catch(() => {});
+  import('./ha-card.js').then((m) => m.renderHaCard()).catch(() => {}); // a second NAS that can take over
   import('../backup-verdict.js')
     .then((m) => m.renderVerdict(doc.getElementById('backup-verdict-mount')))
     .catch(() => {}); // SET-21

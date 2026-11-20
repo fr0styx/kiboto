@@ -34,6 +34,8 @@ OWN_OR_SIGN_IN = {
     "/api/v1/fleet/peer/pair": "a paired Kiboto box pairing (RES-9); the one-time code is the credential",
     "/api/v1/fleet/peer/buddy": "a paired Kiboto box asking for space; its peer token is the credential",
     "/api/v1/fleet/peer/unpair": "a paired Kiboto box unpairing; its peer token is the credential",
+    "/api/v1/ha/peer/pair": "the second NAS pairing (high availability); the one-time pairing key is the credential",
+    "/api/v1/ha/peer/call": "the paired NAS's sealed message; the key the two boxes share is the credential",
     "/api/v1/remotes/oauth/mobile-exchange": "cloud sign-in on a phone; the state is the credential",
     "/api/v1/immich/me": "their own Immich link",
     "/api/v1/immich/phone": "their own phone backup",

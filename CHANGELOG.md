@@ -116,6 +116,12 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   install file (docs/TIERING.md shows them; new installs have them); until then the page says so. Tried
   with throwaway containers only: there is no machine with pools of Kiboto's own to try it on.
 
+- **A second NAS that can take over, first step: pairing** (Backup → A second NAS that can take over): two
+  Kiboto boxes at home can be paired as the first and the second NAS. The first shows a pairing key once;
+  the second is given it with the first one's address. Everything the two send each other afterwards is
+  encrypted with a key that never travels, also on a home network without Tailscale. Keeping folders,
+  people and settings in step, and the takeover button, come next. Guide: docs/HA.md.
+
 #### Security
 
 - **App logos**: Kiboto fetches a logo only when an app in the catalog names that exact address. Before, any

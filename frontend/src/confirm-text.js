@@ -197,6 +197,16 @@ const ACTIONS = {
     'Let the family sign in to {target} with Pocket ID? A client secret for it is shown once.',
     false,
   ],
+  'ha.pair': [
+    'Pair as the second NAS',
+    "Make this NAS the second NAS of the one at {target}? It can then keep a copy of that NAS's folders, people and settings and take over for it.",
+    false,
+  ],
+  'ha.unpair': [
+    'Unpair',
+    'Unpair this NAS from the other one? Neither stands in for the other any more; what was copied stays where it is.',
+    true,
+  ],
   'fleet.pair': [
     'Pair the boxes',
     "Pair with the Kiboto box at {target}? Each box then sees the other's name, version, free space and backups.",

@@ -412,6 +412,11 @@ _PUBLIC_API_PATHS = {
     "/api/v1/fleet/peer/buddy",
     "/api/fleet/peer/unpair",
     "/api/v1/fleet/peer/unpair",
+    # the paired NAS of high availability: the pairing key, then the key the two boxes share, is the credential
+    "/api/ha/peer/pair",
+    "/api/v1/ha/peer/pair",
+    "/api/ha/peer/call",
+    "/api/v1/ha/peer/call",
     "/api/remotes/oauth/mobile-page",
     "/api/remotes/oauth/mobile-exchange",
 }
