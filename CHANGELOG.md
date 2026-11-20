@@ -104,6 +104,8 @@ Files: the nine tick boxes on a file's Permissions tab are named for screen read
 
 Files on a phone: on a file's Permissions tab the letters beside the mode number (for example drwxr-xr-x) were cut off at the edge. They are shown whole.
 
+**The Getting started card fits the window.** On a laptop screen 768 or 800 pixels high its last steps ran past the bottom and could not be reached; it now scrolls inside the window. On a tablet and on narrower windows it lay over the first widgets; it now stops where they begin.
+
 #### Changes
 
 - **Ask Kib about the NAS in your language**: questions about free space, drives, fans, apps, the network and

@@ -15,6 +15,16 @@
   font-size: 14px;
 }
 .getting-started-card[hidden] { display: none; }
+/* Never taller than the window: on a 768 px high screen the last steps ran past the bottom, out of reach */
+.getting-started-card { max-height: calc(100vh - 72px - 96px); overflow-y: auto; }
+/* Never over the widgets: its right edge stops where they begin (they take one column or two, by
+   the window's height, so a width in pixels cannot say where that is) */
+@supports (anchor-name: --kb-widgets) {
+  #desktop-widgets-container { anchor-name: --kb-widgets; }
+  @media (min-width: 769px) {
+    .getting-started-card { right: anchor(--kb-widgets left); margin-right: 12px; width: auto; min-width: 240px; max-width: 380px; }
+  }
+}
 .gs-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
 .gs-heading { flex: 1; margin: 0; font-size: 16px; font-weight: 700; }
 .gs-progress { font-size: 13px; color: var(--muted); }
