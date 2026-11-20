@@ -92,6 +92,30 @@ def test_hello_and_bye_and_what_is_not_answered(device):
         assert w.parse(junk) is None and device.answer(junk) is None and device.describe(junk) is None
 
 
+def test_only_plain_utf8_is_parsed():
+    plain = b'<?xml version="1.0" encoding="UTF-8"?><a/>'
+    assert w.parse(plain) is not None and w.parse(b"<a/>") is not None
+    assert w.parse(b"<?xml version='1.0' encoding='utf-8' ?><a/>") is not None
+    for other in (
+        b'<?xml version="1.0" encoding="x-foo"?><a/>',  # the parser answers this with a LookupError
+        b'<?xml version="1.0" encoding="shift_jis"?><a/>',  # and this with a ValueError
+        b'<?xml version="1.0" encoding="utf-7"?><a/>',
+        b'<?xml version="1.0" encoding="iso-8859-1"?><a/>',
+        "<a/>".encode("utf-16"),  # a document type in UTF-16 would pass the check for one
+        '<!DOCTYPE a [<!ENTITY b "c">]><a>&b;</a>'.encode("utf-16-le"),
+        b"<a>\x00</a>",
+        b"<a>",
+        b"",
+    ):
+        assert w.parse(other) is None, other
+
+
+def test_a_message_in_another_encoding_does_not_end_the_listener(device):
+    for odd in (b'<?xml version="1.0" encoding="x-foo"?><a/>', b'<?xml version="1.0" encoding="shift_jis"?><a/>'):
+        assert device.answer(odd) is None and device.describe(odd) is None
+    assert device.answer(probe(message_id="urn:uuid:21")) is not None  # the next real question is answered
+
+
 def test_who_are_you_is_answered_with_the_name_and_the_workgroup(device):
     get = message(w.ACTION_GET, "", "urn:uuid:7", to=device.address)
     reply = device.describe(get)

@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import http.server
 import ipaddress
+import re
 import socket
 import threading
 import time
@@ -49,6 +50,8 @@ ACTION_GET = NS["wsf"] + "/Get"
 ACTION_GET_RESPONSE = NS["wsf"] + "/GetResponse"
 TYPES = "wsdp:Device pub:Computer"
 REMEMBERED = 64  # message ids already answered: a question is sent several times
+HTTP_PATIENCE = 10  # seconds a caller on port 5357 may take to send its question
+_DECLARED = re.compile(rb"""^\s*<\?xml[^>]*?encoding\s*=\s*["']([A-Za-z0-9._-]+)["']""")
 
 
 def device_id(seed: str) -> str:
@@ -71,12 +74,19 @@ def _envelope(action: str, to: str, body: str, relates_to: str = "", sequence: t
 
 
 def parse(data: bytes) -> ET.Element | None:
-    """A message as a tree, or None for anything that is not a small plain XML document."""
+    """A message as a tree, or None for anything that is not a small plain XML document in
+    UTF-8. Another encoding is refused before parsing: in UTF-16 the check for a document type
+    would not see one, and the parser answers some encodings with errors of other kinds."""
     if not data or len(data) > MAX_BODY or b"<!DOCTYPE" in data or b"<!ENTITY" in data:
+        return None
+    declared = _DECLARED.match(data[:200])
+    if b"\x00" in data or data[:2] in (b"\xff\xfe", b"\xfe\xff"):
+        return None
+    if declared and declared.group(1).lower() not in (b"utf-8", b"utf8"):
         return None
     try:
         return ET.fromstring(data)
-    except ET.ParseError:
+    except (ET.ParseError, ValueError, LookupError):
         return None
 
 
@@ -203,6 +213,7 @@ def _handler(device: Device) -> type[http.server.BaseHTTPRequestHandler]:
     class Handler(http.server.BaseHTTPRequestHandler):
         server_version = "Kiboto-WSD"
         sys_version = ""
+        timeout = HTTP_PATIENCE  # a caller that sends nothing does not hold a thread
 
         def log_message(self, *args: Any) -> None:
             return  # nothing is written for a question from the home network

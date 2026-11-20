@@ -184,6 +184,8 @@ Windows PCs list the NAS under **Network** in File Explorer, where Kiboto serves
 
 A ready-made disk image that Kiboto unpacks for a virtual machine is readable by Kiboto alone; it was readable by every account on the box. The Redfish pages take a drive's name from the kernel's own list.
 
+**The listing for Windows PCs cannot be stopped by one odd message.** The part that lists the NAS under "Network" on Windows read messages in any text encoding; one message from the home network in an encoding the reader does not know ended it until the next restart, and a message in UTF-16 got past the check that refuses document types. It now reads plain UTF-8 only, and a caller that connects and sends nothing is dropped after ten seconds.
+
 ## v2.0.4 (2026-11-19)
 ### 🏡 Apps that go back on their own, a way to move in, and Kiboto in your language everywhere
 
