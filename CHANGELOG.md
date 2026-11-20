@@ -78,6 +78,8 @@ On a tablet held upright, windows opened a little wider than the screen, so the 
 
 **Restored files keep their owner; files copied from another NAS belong to the folder they land in.** A file or folder restored from a snapshot came back owned by the system, so over the network share its people could no longer change it; it now keeps the owner it has in the snapshot, and an earlier version put back keeps the owner of the file it replaces. Files copied from another NAS or PC, or downloaded from a cloud remote into a folder here, and the folders the film and series tidy-up makes, get the owner of the folder they land in.
 
+**The NAS is listed once under Network on Windows.** An install with Kiboto's own file server already has a service that lists it for Windows PCs, and the new one in Kiboto's name service could list it a second time. Kiboto's now searches first, and every five minutes, and stays out when the box is listed already.
+
 #### Changes
 
 - **Ask Kib about the NAS in your language**: questions about free space, drives, fans, apps, the network and

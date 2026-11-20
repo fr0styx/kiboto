@@ -36,6 +36,14 @@ def device():
     return w.Device("familynas", "192.168.1.10", "HOME", seed="box-1")
 
 
+@pytest.fixture(autouse=True)
+def alone(monkeypatch):
+    """No test searches the real network: this box has no other answerer unless a test says so."""
+    found = {"other": False}
+    monkeypatch.setattr(w, "other_here", lambda device, *a, **k: found["other"])
+    return found
+
+
 def said(data, path):
     return w._text(w.parse(data), path)
 
@@ -286,3 +294,90 @@ def test_a_real_socket_is_opened_and_closed_again():
     port = s.getsockname()[1]
     assert port > 0
     s.close()
+
+
+# --- one answerer for one box ---------------------------------------------------------------------------
+def match(address, message_id="urn:uuid:x"):
+    body = (
+        f"<wsd:ProbeMatches><wsd:ProbeMatch><wsa:EndpointReference><wsa:Address>{address}</wsa:Address>"
+        "</wsa:EndpointReference><wsd:Types>wsdp:Device pub:Computer</wsd:Types></wsd:ProbeMatch></wsd:ProbeMatches>"
+    )
+    return message(w.DISCOVERY + "/ProbeMatches", body, message_id, to=w.TO_ASKER)
+
+
+class Asker:
+    def __init__(self, answers, fails=False):
+        self.answers, self.sent, self.closed, self.fails = list(answers), [], False, fails
+
+    def sendto(self, data, addr):
+        if self.fails:
+            raise OSError(101, "Network is unreachable")
+        self.sent.append((data, addr))
+
+    def settimeout(self, value):
+        assert value > 0
+
+    def recvfrom(self, size):
+        if not self.answers:
+            raise TimeoutError()
+        return self.answers.pop(0)
+
+    def close(self):
+        self.closed = True
+
+
+REAL_OTHER_HERE = w.other_here
+
+
+def test_another_answerer_on_this_box_is_found_by_searching_as_windows_does(device):
+    here, elsewhere = (device.ip, 3702), ("192.168.1.99", 3702)
+    other = "urn:uuid:11111111-2222-3333-4444-555555555555"
+
+    def asked(answers, **how):
+        made = Asker(answers, **how)
+        return REAL_OTHER_HERE(device, wait=0.2, open_socket=lambda ip: made), made
+
+    found, made = asked([(match(other), here)])
+    assert found is True and made.closed
+    assert made.sent[0][1] == (w.GROUP, w.PORT) and said(made.sent[0][0], ".//wsd:Probe/wsd:Types") == "wsdp:Device"
+    assert asked([(match(device.address), here)])[0] is False  # its own answer
+    assert asked([(match(other), elsewhere)])[0] is False  # another computer on the network
+    assert asked([(b"junk", here), (match(device.address), here), (match(other), here)])[0] is True
+    assert asked([])[0] is False  # nobody answers
+    assert asked([], fails=True)[0] is False  # no network
+
+    def no_socket(ip):
+        raise OSError(99, "Cannot assign requested address")
+
+    assert REAL_OTHER_HERE(device, open_socket=no_socket) is False
+
+
+def test_it_stays_out_when_the_box_is_listed_already(alone, capsys, monkeypatch):
+    alone["other"] = True
+    monkeypatch.setattr(w, "Answerer", lambda device: pytest.fail("it was started beside another answerer"))
+    assert w.start("familynas", "192.168.1.10", "HOME", "box-1") is None
+    assert "already lists it for Windows; staying out" in capsys.readouterr().out
+
+
+def test_it_stands_aside_when_another_answerer_comes_up_later(device, alone, capsys, monkeypatch):
+    monkeypatch.setattr(w.time, "sleep", lambda s: None)
+    monkeypatch.setattr(w, "CHECK_EVERY", 0.0)  # look at every turn
+    alone["other"] = True
+    rx, tx = Wire([(probe(), ("192.168.1.7", 51000))]), Wire()
+    made = bare(device, rx, tx)
+    made._listen()
+    said_bye = [said(data, "./soap:Header/wsa:Action") for data, _to in tx.sent]
+    assert said_bye and all(action.endswith("/Bye") for action in said_bye)  # no answer to the search any more
+    assert made.stopping.is_set() and rx.closed and tx.closed
+    assert "lists it for Windows now; staying out" in capsys.readouterr().out
+    sent = len(tx.sent)
+    made.stop()  # the name service going away later says nothing a second time
+    assert len(tx.sent) == sent
+
+
+def test_a_real_asking_socket_is_opened_and_closed_again():
+    s = w._asker("127.0.0.1")
+    assert s.getsockname()[1] > 0
+    s.close()
+    with pytest.raises(OSError):
+        w._asker("203.0.113.250")  # not an address of this machine

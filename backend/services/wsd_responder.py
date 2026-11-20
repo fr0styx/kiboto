@@ -12,6 +12,11 @@ What it does, and no more:
   computer's name and workgroup.
 Windows opens \\\\NAME from that; the name itself is answered by the name responder.
 
+One answerer for one box: the Samba container Kiboto's own install runs brings one (wsdd2), and
+a host may have its own. Two would list the box twice. So before it starts, and every few minutes
+while it runs, this one searches as Windows does; when another answerer at this box's address
+answers, this one says Bye and stays out.
+
 Messages come from the home network and are not trusted: nothing larger than a small packet is
 read, a document type or entity declaration is refused before parsing, and HTTP is answered only
 to private addresses.
@@ -51,6 +56,8 @@ ACTION_GET_RESPONSE = NS["wsf"] + "/GetResponse"
 TYPES = "wsdp:Device pub:Computer"
 REMEMBERED = 64  # message ids already answered: a question is sent several times
 HTTP_PATIENCE = 10  # seconds a caller on port 5357 may take to send its question
+CHECK_EVERY = 300.0  # seconds between looks for another answerer on this box
+CHECK_WAIT = 1.0  # how long an answer to that search is waited for
 _DECLARED = re.compile(rb"""^\s*<\?xml[^>]*?encoding\s*=\s*["']([A-Za-z0-9._-]+)["']""")
 
 
@@ -201,6 +208,44 @@ class Device:
         return _envelope(ACTION_GET_RESPONSE, TO_ASKER, body, _text(root, "./soap:Header/wsa:MessageID"))
 
 
+def _asker(ip: str) -> socket.socket:
+    """A socket of its own to search from: answers to a search come back to the port that asked."""
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+    try:
+        s.bind((ip, 0))
+        s.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_IF, socket.inet_aton(ip))
+        s.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 1)
+    except OSError:
+        s.close()
+        raise
+    return s
+
+
+def other_here(device: Device, wait: float = CHECK_WAIT, open_socket: Any = _asker) -> bool:
+    """Whether another answerer on this box lists it already: a search for devices, as Windows
+    sends it, answered from this box's own address by a device that is not this one."""
+    search = _envelope(DISCOVERY + "/Probe", TO_ALL, "<wsd:Probe><wsd:Types>wsdp:Device</wsd:Types></wsd:Probe>")
+    try:
+        s = open_socket(device.ip)
+    except OSError:
+        return False
+    try:
+        s.sendto(search, (GROUP, PORT))
+        until = time.monotonic() + wait
+        while (left := until - time.monotonic()) > 0:
+            s.settimeout(left)
+            data, asker = s.recvfrom(MAX_PACKET)
+            root = parse(data) if asker[0] == device.ip else None
+            named = _text(root, ".//wsd:ProbeMatch/wsa:EndpointReference/wsa:Address") if root is not None else ""
+            if named and named != device.address:
+                return True
+    except OSError:  # nobody answered in time (TimeoutError is one), or the network is down
+        return False
+    finally:
+        s.close()
+    return False
+
+
 def _from_home(address: str) -> bool:
     try:
         ip = ipaddress.ip_address(address)
@@ -297,7 +342,13 @@ class Answerer:
             time.sleep(0.1)
 
     def _listen(self) -> None:
+        look_again = time.monotonic() + CHECK_EVERY
         while not self.stopping.is_set():
+            if time.monotonic() >= look_again:
+                look_again = time.monotonic() + CHECK_EVERY
+                if other_here(self.device):  # it came up after this one: the box is not listed twice
+                    print("[wsd] another answerer on this box lists it for Windows now; staying out", flush=True)
+                    return self.stop()
             try:
                 data, asker = self.rx.recvfrom(MAX_PACKET)
             except TimeoutError:
@@ -318,6 +369,8 @@ class Answerer:
         return self
 
     def stop(self) -> None:
+        if self.stopping.is_set():
+            return  # it stood aside for another answerer already
         self._say(self.device.bye())
         self.stopping.set()
         self.http.shutdown()
@@ -325,10 +378,14 @@ class Answerer:
 
 
 def start(name: str, ip: str, workgroup: str = "WORKGROUP", seed: str = "", web_port: int = 0) -> Answerer | None:
-    """Starts answering, or says why not and returns None: another answerer already has the port
-    (the host's own), which is left alone."""
+    """Starts answering, or says why not and returns None: another answerer on this box lists it
+    already, or has the port; that one is left alone."""
+    device = Device(name, ip, workgroup, seed, web_port)
+    if other_here(device):
+        print("[wsd] another answerer on this box already lists it for Windows; staying out", flush=True)
+        return None
     try:
-        made = Answerer(Device(name, ip, workgroup, seed, web_port)).start()
+        made = Answerer(device).start()
     except OSError as e:
         print(
             f"[wsd] not started ({e}); if the host has its own answerer, Windows finds the NAS through that", flush=True

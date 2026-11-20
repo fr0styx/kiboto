@@ -30,8 +30,9 @@ Each folder's **How to connect** shows the address with a Copy button:
 
 - **Windows**: map a network drive to `\\name.local\folder`. Where Kiboto serves the files itself
   (its own OS, or an install that runs Kiboto's file server) and **Find this NAS by name** is on,
-  Windows PCs also list the NAS under **Network** in File Explorer. On Unraid, Unraid's own
-  service does that.
+  Windows PCs also list the NAS under **Network** in File Explorer. One service answers for
+  that: the file server's own where it runs one, otherwise Kiboto's name service, which searches
+  first and stays out when the box is listed already. On Unraid, Unraid's own service does that.
 - **Mac**: in Finder, press ⌘K and enter `smb://name.local/folder`.
 
 You sign in with your Kiboto user name and password. Someone with two-step sign-in uses a
