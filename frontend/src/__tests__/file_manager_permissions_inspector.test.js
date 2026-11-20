@@ -151,4 +151,48 @@ describe('Item 3.4: File Explorer Share Links & POSIX Permissions Inspector', ()
     const applyBtn = containerEl.querySelector('#fm-insp-apply-perms-btn');
     expect(applyBtn.disabled).toBe(true);
   });
+  describe("a folder: what is still the system's goes to the folder's people", () => {
+    async function open(path, isDir = true) {
+      mockFm.selectedPaths = new Set([path]);
+      mockFm.fileList = [{ name: path.split('/').pop(), path, size: 0, is_dir: isDir, mode: '0755' }];
+      const inspector = new FmInspector(mockFm, containerEl);
+      inspector.toggle(true);
+      inspector.activeTab = 'permissions';
+      await inspector.update();
+      return containerEl.querySelector('#fm-insp-give-btn');
+    }
+
+    it("hands what is still the system's to the folder's people and says how many", async () => {
+      const { showToast } = await import('../toast.js');
+      api.post.mockResolvedValueOnce({ status: 'ok', seen: 12, given: 3 });
+      const btn = await open('/mnt/user/documents/Holiday');
+      expect(btn).not.toBeNull();
+      expect(containerEl.querySelector('#fm-insp-give-box').textContent).toContain('still belong to the system');
+      btn.click();
+      await vi.waitFor(() => expect(showToast).toHaveBeenCalled());
+      expect(api.post).toHaveBeenCalledWith('/api/fs/permissions/like-folder', { path: '/mnt/user/documents/Holiday' });
+      expect(showToast.mock.calls[0][0]).toContain("3 items now belong to this folder's people");
+      expect(showToast.mock.calls[0][1]).toBe('success');
+      expect(btn.disabled).toBe(false);
+    });
+
+    it("says so when nothing was the system's, and when it could not be done", async () => {
+      const { showToast } = await import('../toast.js');
+      api.post.mockResolvedValueOnce({ status: 'ok', seen: 4, given: 0 });
+      const btn = await open('/mnt/user/documents/Holiday');
+      btn.click();
+      await vi.waitFor(() => expect(showToast).toHaveBeenCalledTimes(1));
+      expect(showToast.mock.calls[0][0]).toContain('Nothing in here still belonged to the system');
+      api.post.mockRejectedValueOnce(new Error('forbidden'));
+      btn.click();
+      await vi.waitFor(() => expect(showToast).toHaveBeenCalledTimes(2));
+      expect(showToast.mock.calls[1]).toEqual(['Failed updating permissions: forbidden', 'error']);
+      expect(btn.disabled).toBe(false);
+    });
+
+    it('is offered for a folder only, and not for a protected one', async () => {
+      expect(await open('/mnt/user/documents/report.pdf', false)).toBeNull();
+      expect(await open('/mnt/user/appdata/mysql')).toBeNull();
+    });
+  });
 });

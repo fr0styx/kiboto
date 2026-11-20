@@ -9111,4 +9111,7 @@ export default {
   "ev.backup_second_nas_quiet.msg": "{name} has not fetched from this NAS for {days, plural, one {# day} other {# days}}, so it no longer has a current copy. Check that it is on and reaches this NAS.",
   "nas_name.windows": "Windows PCs list it under Network.",
   "nas_name.held": "Held back: the second NAS took over and answers to this name. Take the name back under Backup.",
+  "fm.i_give": "Give to this folder's people",
+  "fm.i_give_hint": "Files and folders in here that still belong to the system get this folder's owner, so its people can change them over the network share too. Nothing that belongs to someone else is changed.",
+  "toast.given_back": "{count, plural, =0 {Nothing in here still belonged to the system.} one {# item now belongs to this folder's people.} other {# items now belong to this folder's people.}}",
 };

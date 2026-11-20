@@ -103,3 +103,7 @@
 #modal-media-organizer .mor-box { max-height: 240px; overflow-y: auto; border: 1px solid var(--kb-line-8); border-radius: 6px; background: var(--kb-shade-25); }
 #modal-media-organizer .mor-xs-muted-center { color: var(--muted); text-align: center; padding: 25px; font-size: var(--kb-fs-xs); }
 #modal-media-organizer .mor-row-3 { display: flex; justify-content: flex-end; gap: 10px; margin-top: 6px; }
+
+/* Permissions tab of a folder: "Give to this folder's people" sits apart from the form above it */
+:is(#file-manager-window, .file-manager-window) #fm-insp-give-box { display: grid; gap: 8px; justify-items: start; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--kb-line-5); }
+:is(#file-manager-window, .file-manager-window) #fm-insp-give-box .fmh-xs-muted-2 { margin-bottom: 0; line-height: 1.4; }

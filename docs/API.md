@@ -38,7 +38,7 @@ request and response schemas.
 
 <!-- BEGIN generated endpoints: python scripts/api_reference.py --update -->
 
-802 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
+803 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
 
 ### AI Conversation History
 
@@ -292,6 +292,7 @@ request and response schemas.
 | `GET` | `/api/v1/fs/media/info` | any of `shares:read`, `storage:read`, `system:view` | Duration, resolution, codecs, frame rate and rotation of a video or audio file |
 | `GET` | `/api/v1/fs/permissions` | any of `shares:read`, `storage:read`, `system:view` | Fs Get Permissions |
 | `PUT` | `/api/v1/fs/permissions` | any of `shares:manage`, `storage:admin` | Fs Update Permissions |
+| `POST` | `/api/v1/fs/permissions/like-folder` | any of `shares:manage`, `storage:admin` | Hands what still belongs to the system inside a folder to the folder's people: each such file and folder gets the owner and group of the… |
 | `GET` | `/api/v1/fs/preview` | any of `shares:read`, `storage:read`, `system:view` | Universal Quick Look preview generator |
 | `GET` | `/api/v1/fs/preview/image` | any of `shares:read`, `storage:read`, `system:view` | Thumbnails and screen-sized previews as WebP: photos (including Apple HEIC/HEIF) and video frames, cached on disk (backend/services/thumb… |
 | `POST` | `/api/v1/fs/rename` | any of `shares:manage`, `shares:user_write`, `storage:write`, `storage:admin` | Fs Rename |

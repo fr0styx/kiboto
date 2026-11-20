@@ -35,6 +35,31 @@ class FolderSizeRequest(BaseModel):
     force_wake: bool = False
 
 
+class LikeFolderRequest(BaseModel):
+    path: str
+
+
+# where owners and rights are never changed from here: the system's own folders and the apps' data
+PROTECTED_PREFIXES = (
+    "/boot",
+    "/etc",
+    "/sys",
+    "/proc",
+    "/dev",
+    "/usr",
+    "/bin",
+    "/sbin",
+    "/var",
+    "/appdata",
+    "/mnt/user/appdata",
+)
+
+
+def _protected(path: str) -> bool:
+    normalized = os.path.abspath(path)
+    return any(normalized == p or normalized.startswith(p + "/") for p in PROTECTED_PREFIXES)
+
+
 class PermissionsUpdateRequest(BaseModel):
     path: str
     mode_octal: str | None = None
@@ -226,21 +251,7 @@ async def fs_update_permissions(
     target = _contained(req.path, must_exist=True)
 
     # Guard against modifying sensitive system directories and appdata root
-    normalized = os.path.abspath(target)
-    protected_system_prefixes = [
-        "/boot",
-        "/etc",
-        "/sys",
-        "/proc",
-        "/dev",
-        "/usr",
-        "/bin",
-        "/sbin",
-        "/var",
-        "/appdata",
-        "/mnt/user/appdata",
-    ]
-    if any(normalized == p or normalized.startswith(p + "/") for p in protected_system_prefixes):
+    if _protected(target):
         raise HTTPException(
             status_code=403,
             detail="Modifying permissions on protected system roots or /appdata is forbidden",
@@ -292,3 +303,35 @@ async def fs_update_permissions(
 
     await asyncio.to_thread(_apply_permissions)
     return {"status": "ok", "path": req.path, "recursive": req.recursive}
+
+
+@router.post(
+    "/fs/permissions/like-folder",
+    dependencies=[Depends(require_scope("shares:manage", "storage:admin"))],
+)
+async def fs_like_folder(
+    req: LikeFolderRequest,
+    principal: AuthenticatedPrincipal = Depends(get_current_principal),
+):
+    """Hands what still belongs to the system inside a folder to the folder's people: each such
+    file and folder gets the owner and group of the folder it is in, and its right to write.
+    What belongs to anyone else is not touched. Returns how many items were looked at ("seen")
+    and how many were handed over ("given")."""
+    await asyncio.to_thread(check_user_path_access, req.path, principal, write=True)
+    target = _contained(req.path, must_exist=True)
+    counts = await asyncio.to_thread(_hand_folder_back, target)
+    return {"status": "ok", "path": req.path, **counts}
+
+
+def _hand_folder_back(target: str) -> dict[str, int]:
+    """The work of fs_like_folder, off the event loop: a folder that is not protected, walked."""
+    from backend import owned
+
+    if _protected(target):
+        raise HTTPException(
+            status_code=403,
+            detail="Modifying permissions on protected system roots or /appdata is forbidden",
+        )
+    if not os.path.isdir(target) or os.path.islink(target):
+        raise HTTPException(status_code=400, detail="This is done for a folder.")
+    return owned.give_back(target, prune_protected)

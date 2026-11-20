@@ -97,3 +97,26 @@ def test_a_file_moved_across_drives_keeps_its_owner(share, tmp_path, monkeypatch
     ft._move_file_resilient(str(src), str(share / "moved.txt"))
     assert kept == [(str(src), str(share / "moved.txt"))]
     assert not src.exists() and (share / "moved.txt").read_text() == "m"
+
+
+def test_the_route_that_hands_a_folder_back(client, auth_headers, tmp_path, monkeypatch):
+    from backend.api.files import details
+
+    folder = tmp_path / "Films"
+    folder.mkdir()
+    (folder / "a.mkv").write_text("a")
+    asked = []
+    monkeypatch.setattr(details, "check_user_path_access", lambda path, principal, write=False: None)
+    monkeypatch.setattr(details, "_contained", lambda path, must_exist=False: path)
+    monkeypatch.setattr(
+        owned, "give_back", lambda top, keep_out=None: asked.append((top, keep_out)) or {"seen": 1, "given": 1}
+    )
+    res = client.post("/api/fs/permissions/like-folder", json={"path": str(folder)}, headers=auth_headers)
+    assert res.status_code == 200 and res.json() == {"status": "ok", "path": str(folder), "seen": 1, "given": 1}
+    assert asked == [(str(folder), details.prune_protected)]  # app folders inside are not entered
+    # a file, and a protected folder, are refused before anything is touched
+    res = client.post("/api/fs/permissions/like-folder", json={"path": str(folder / "a.mkv")}, headers=auth_headers)
+    assert res.status_code == 400
+    res = client.post("/api/fs/permissions/like-folder", json={"path": "/mnt/user/appdata/mysql"}, headers=auth_headers)
+    assert res.status_code == 403 and len(asked) == 1
+    assert client.post("/api/fs/permissions/like-folder", json={"path": str(folder)}).status_code in (401, 403)

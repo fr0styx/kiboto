@@ -24153,6 +24153,19 @@
     "title": "LeftOutUpdate",
     "type": "object"
    },
+   "LikeFolderRequest": {
+    "properties": {
+     "path": {
+      "title": "Path",
+      "type": "string"
+     }
+    },
+    "required": [
+     "path"
+    ],
+    "title": "LikeFolderRequest",
+    "type": "object"
+   },
    "ListAllVirtualMachineBackupsResponse": {
     "additionalProperties": true,
     "description": "GET /vms/backups",
@@ -54650,6 +54663,49 @@
      }
     },
     "summary": "Fs Update Permissions",
+    "tags": [
+     "File System & Shares"
+    ],
+    "x-required-scopes": [
+     "shares:manage",
+     "storage:admin"
+    ]
+   }
+  },
+  "/api/v1/fs/permissions/like-folder": {
+   "post": {
+    "description": "Hands what still belongs to the system inside a folder to the folder's people: each such\nfile and folder gets the owner and group of the folder it is in, and its right to write.\nWhat belongs to anyone else is not touched. Returns how many items were looked at (\"seen\")\nand how many were handed over (\"given\").",
+    "operationId": "fs_like_folder_api_v1_fs_permissions_like_folder_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/LikeFolderRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Fs Like Folder",
     "tags": [
      "File System & Shares"
     ],

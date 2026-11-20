@@ -9111,4 +9111,7 @@ export default {
   "ev.backup_second_nas_quiet.msg": "{name} no ha traído nada de este NAS desde hace {days, plural, one {# día} other {# días}}, así que ya no tiene una copia actual. Comprueba que está encendido y alcanza este NAS.",
   "nas_name.windows": "Los PC con Windows lo muestran en Red.",
   "nas_name.held": "Retenido: el segundo NAS tomó el relevo y responde a este nombre. Recupera el nombre en Copia de seguridad.",
+  "fm.i_give": "Dar a las personas de esta carpeta",
+  "fm.i_give_hint": "Los archivos y carpetas de aquí que aún pertenecen al sistema reciben el propietario de esta carpeta, para que sus personas puedan cambiarlos también por el recurso de red. Lo que pertenece a otra persona no cambia.",
+  "toast.given_back": "{count, plural, =0 {Aquí ya nada pertenecía al sistema.} one {# elemento pertenece ahora a las personas de esta carpeta.} other {# elementos pertenecen ahora a las personas de esta carpeta.}}",
 };

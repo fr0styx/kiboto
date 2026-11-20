@@ -19,6 +19,7 @@ import grp
 import os
 import pwd
 import stat
+from collections.abc import Callable
 
 from backend.config import logger
 
@@ -173,6 +174,26 @@ def like_before(path: str, before: os.stat_result | None) -> None:
         like_folder(path)
     elif _me() == 0:
         _hand(path, before.st_uid, before.st_gid)
+
+
+def give_back(top: str, keep_out: Callable[[str, list[str]], object] | None = None) -> dict[str, int]:
+    """Hands what is still root's in the folder `top` to the folder's people: files and folders
+    Kiboto made before it did this itself, or that a tool running as root left there. Each takes
+    the owner and group of the folder it is in and that folder's right to write, from the top
+    down, `top` itself first. What belongs to anyone else is left alone, and links are not
+    followed. `keep_out(folder, names)` may take folders out of the walk (the protected ones).
+    Returns how many were looked at and how many were handed over."""
+    seen = given = 0
+    if _me() != 0:
+        return {"seen": 0, "given": 0}
+    given += like_folder(top)
+    for at, dirs, files in os.walk(top):
+        if keep_out is not None:
+            keep_out(at, dirs)
+        for name in dirs + files:
+            seen += 1
+            given += like_folder(os.path.join(at, name))
+    return {"seen": seen, "given": given}
 
 
 def below(top: str, path: str, done: set[str] | None = None) -> None:

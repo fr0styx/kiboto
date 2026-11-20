@@ -9111,4 +9111,7 @@ export default {
   "ev.backup_second_nas_quiet.msg": "{name} n'a rien récupéré de ce NAS depuis {days, plural, one {# jour} other {# jours}} : il n'a donc plus de copie à jour. Vérifiez qu'il est allumé et qu'il joint ce NAS.",
   "nas_name.windows": "Les PC Windows l'affichent dans Réseau.",
   "nas_name.held": "Retenu : le second NAS a pris le relais et répond à ce nom. Reprenez le nom dans Sauvegarde.",
+  "fm.i_give": "Donner aux personnes de ce dossier",
+  "fm.i_give_hint": "Les fichiers et dossiers qui appartiennent encore au système reçoivent le propriétaire de ce dossier : ses personnes peuvent alors les modifier aussi par le partage réseau. Ce qui appartient à quelqu'un d'autre ne change pas.",
+  "toast.given_back": "{count, plural, =0 {Plus rien ici n'appartenait au système.} one {# élément appartient maintenant aux personnes de ce dossier.} other {# éléments appartiennent maintenant aux personnes de ce dossier.}}",
 };

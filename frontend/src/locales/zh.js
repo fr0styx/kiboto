@@ -9111,4 +9111,7 @@ export default {
   "ev.backup_second_nas_quiet.msg": "{name} 已有 {days, plural, other {# 天}}没有从这台 NAS 获取内容，因此它不再有最新的副本。请检查它是否已开机并能连接这台 NAS。",
   "nas_name.windows": "Windows 电脑会在“网络”中列出它。",
   "nas_name.held": "已保留：第二台 NAS 已接替并响应这个名称。请在“备份”中取回名称。",
+  "fm.i_give": "交给此文件夹的使用者",
+  "fm.i_give_hint": "此处仍属于系统的文件和文件夹将归此文件夹的所有者所有，这样它的使用者也能通过网络共享修改它们。属于其他人的内容不会改变。",
+  "toast.given_back": "{count, plural, =0 {这里已没有属于系统的内容。} other {# 项现在归此文件夹的使用者所有。}}",
 };

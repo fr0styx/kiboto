@@ -200,6 +200,8 @@ A pair of NAS boxes warns once a day when the second NAS has not been able to fe
 
 Windows PCs list the NAS under **Network** in File Explorer, where Kiboto serves the files itself and **Find this NAS by name** is on. On Unraid, Unraid's own service does that and nothing changes.
 
+**Give a folder's files back to its people.** In Files, a folder's details have a new button on the Permissions tab: **Give to this folder's people**. Files and folders in it that still belong to the system (made by an earlier version of Kiboto, or left by a tool) get the folder's owner, so they can be changed over the network share. Nothing that belongs to someone else is changed, and app folders are left out. It runs only when you press it.
+
 #### Security
 
 - **App logos**: Kiboto fetches a logo only when an app in the catalog names that exact address. Before, any

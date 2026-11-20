@@ -243,3 +243,41 @@ def test_how_a_helper_that_makes_files_is_started(tmp_path, monkeypatch):
     monkeypatch.setattr(owned, "_me", lambda: 1000)
     assert owned.for_helper(str(pool), ours=True) == {"umask": 0o002}
     assert owned.for_helper(str(pool), ours=False) == {"umask": 0o022}
+
+
+def test_what_is_still_the_systems_in_a_folder_goes_to_its_people(tmp_path, monkeypatch):
+    share = tmp_path / "Films"
+    (share / "old" / "deep").mkdir(parents=True)
+    (share / "old" / "a.mkv").write_text("a")
+    (share / "old" / "deep" / "b.mkv").write_text("b")
+    (share / "theirs.txt").write_text("t")
+    (share / "apps" / "db").mkdir(parents=True)
+    os.symlink(tmp_path, share / "link")
+    owner = {str(share): 99, str(share / "theirs.txt"): 1001}  # everything else was made by root
+    real_stat, real_lstat = os.stat, os.lstat
+    given = []
+
+    def uid_of(path):
+        return owner.get(str(path), 0)
+
+    def lchown(path, uid, gid):
+        owner[str(path)] = uid
+        given.append(os.path.relpath(path, share))
+
+    monkeypatch.setattr(owned.os, "lstat", lambda p, *a, **k: _as(real_lstat(p, *a, **k), uid_of(p), 100))
+    monkeypatch.setattr(owned.os, "stat", lambda p, *a, **k: _as(real_stat(p, *a, **k), uid_of(p), 100))
+    monkeypatch.setattr(owned.os, "lchown", lchown)
+    monkeypatch.setattr(owned, "_me", lambda: 1000)
+    assert owned.give_back(str(share)) == {"seen": 0, "given": 0}  # only root can hand anything over
+    monkeypatch.setattr(owned, "_me", lambda: 0)
+
+    def keep_out(folder, names):
+        if "apps" in names:
+            names.remove("apps")  # a protected folder: not entered
+
+    out = owned.give_back(str(share), keep_out)
+    # each from the top down, so a folder is its people's before what is in it is looked at
+    assert given == ["old", "link", "old/deep", "old/a.mkv", "old/deep/b.mkv"]
+    assert out == {"seen": 6, "given": 5}  # theirs.txt was seen and left alone; apps was not entered
+    assert "theirs.txt" not in given and not [g for g in given if g.startswith("apps")]
+    assert owned.give_back(str(share), keep_out)["given"] == 0  # nothing left to hand over

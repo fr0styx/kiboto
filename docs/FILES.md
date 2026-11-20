@@ -29,9 +29,11 @@ What is **restored** is put back as it was: a file or folder from a snapshot kee
 has there, and an earlier version put back keeps the owner of the file it replaces.
 
 Kiboto only does this for what it has just made. A file that was there before keeps its owner,
-also one made here by an earlier version (those belong to the system, and can be read over the
-network and not changed there; the **Permissions** tab in the details of the file or folder sets
-the owner, also for everything inside a folder).
+also one made here by an earlier version: those belong to the system, and can be read over the
+network and not changed there. For those, open the folder's details, go to **Permissions** and
+press **Give to this folder's people**: everything in the folder that still belongs to the system
+gets the folder's owner. What belongs to someone else is not changed, and app folders are left
+out. It reads the whole folder, so on a large one it takes a while and wakes the drives it is on.
 
 ## Deleting and the Recycle Bin
 

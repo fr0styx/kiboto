@@ -352,6 +352,22 @@
    "status": null
   },
   {
+   "deps": [
+    "require_scope"
+   ],
+   "endpoint": "fs_like_folder",
+   "methods": [
+    "POST"
+   ],
+   "params": [
+    "principal",
+    "req"
+   ],
+   "path": "/fs/permissions/like-folder",
+   "response_model": null,
+   "status": null
+  },
+  {
    "deps": [],
    "endpoint": "fs_download",
    "methods": [

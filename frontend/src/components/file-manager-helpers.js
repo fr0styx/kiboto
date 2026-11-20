@@ -809,6 +809,22 @@ export class FmInspector {
           <button type="button" id="fm-insp-apply-perms-btn" class="btn-pill-toggle active" ${isGuarded ? `disabled title="${escapeHtml(t('fm.why_guarded', 'System folder: its permissions are protected'))}" data-i18n-title="fm.why_guarded"` : ''} style="width: 100%; font-size: var(--kb-fs-xs); font-weight: 700; padding: 6px 12px; background: #0a7a70; color: #fff;">
             ${escapeHtml(t('ui.apply_permissions', 'Apply Permissions'))}
           </button>
+
+          ${
+            item.is_dir && !isGuarded
+              ? `
+            <div class="fmh-x-4" id="fm-insp-give-box">
+              <span class="fmh-xs-muted-2">${escapeHtml(
+                t(
+                  'fm.i_give_hint',
+                  "Files and folders in here that still belong to the system get this folder's owner, so its people can change them over the network share too. Nothing that belongs to someone else is changed."
+                )
+              )}</span>
+              <button type="button" id="fm-insp-give-btn" class="btn-pill-toggle">${escapeHtml(t('fm.i_give', "Give to this folder's people"))}</button>
+            </div>
+          `
+              : ''
+          }
         </div>
       `;
 
@@ -936,6 +952,32 @@ export class FmInspector {
             applyBtn.disabled = false;
             applyBtn.textContent = t('ui.apply_permissions', 'Apply Permissions');
           }
+        });
+      }
+
+      // What is still the system's in this folder goes to the folder's people (files an earlier
+      // version made here, or a tool running as root). The server leaves everyone else's alone.
+      const giveBtn = /** @type {HTMLButtonElement | null} */ (content.querySelector('#fm-insp-give-btn'));
+      if (giveBtn) {
+        giveBtn.addEventListener('click', async () => {
+          giveBtn.disabled = true;
+          try {
+            const said = await api.post('/api/fs/permissions/like-folder', { path: item.path });
+            showToast(
+              t(
+                'toast.given_back',
+                "{count, plural, =0 {Nothing in here still belonged to the system.} one {# item now belongs to this folder's people.} other {# items now belong to this folder's people.}}",
+                { count: Number(said?.given) || 0 }
+              ),
+              'success'
+            );
+          } catch (err) {
+            showToast(
+              t('toast.failed_updating_permissions', 'Failed updating permissions: {error}', { error: err.message }),
+              'error'
+            );
+          }
+          giveBtn.disabled = false;
         });
       }
       return;
