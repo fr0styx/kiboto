@@ -1,6 +1,7 @@
 """Audit A10: scheduled power off with an RTC wake-up, off by default, never off without a wake-up."""
 
 import datetime as dt
+import functools
 
 import pytest
 
@@ -76,12 +77,16 @@ def test_only_on_chosen_nights_and_at_the_time():
     assert ps.tick(sunday + dt.timedelta(days=7), busy=lambda: "", power_off=lambda: True) == ""
 
 
-def test_a_failed_power_off_is_noted_and_the_wake_up_is_set_for_the_next_morning():
+def test_a_failed_power_off_is_noted_and_the_wake_up_is_set_for_the_next_morning(monkeypatch):
     ps.save(True, "01:00", "07:00", list(range(7)))
     assert ps.tick(NIGHT, busy=lambda: "", power_off=lambda: False) == "failed"
     assert ps.state()["last_note"] == "failed"
     late = dt.datetime(2026, 11, 16, 6, 55)
     assert ps.next_wake(late, "07:00").date() == dt.date(2026, 11, 17)
+    # at any other time the loop does nothing. The time is given: with the real clock this failed
+    # whenever the tests ran in the minutes after 01:00 (19 Nov 2026, 01:02 UTC)
+    at_noon = functools.partial(ps.tick, dt.datetime(2026, 11, 16, 12, 0))
+    monkeypatch.setattr(ps, "tick", at_noon)
     assert ps.loop_once() == ""
 
 

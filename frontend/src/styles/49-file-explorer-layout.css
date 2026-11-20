@@ -113,6 +113,15 @@
   }
 }
 
+/* On a phone the path sits in the title row, next to the window's name (the owner, 19 Nov 2026): it
+   had a row of its own. The folder's name after the title would say the same thing twice. */
+.fm-path-in-title .os-window-title { flex: 1 1 auto; min-width: 0; }
+.fm-path-in-title .os-window-title .fm-title-main { flex: none; }
+.fm-path-in-title .os-window-title .fm-title-folder { display: none; }
+.fm-path-in-title .os-window-title .fm-path-container { flex: 1 1 0; min-width: 0; height: 34px; min-height: 34px; margin: 0; order: 0; }
+.fm-path-in-title .os-window-title :is(.fm-path-input, .fm-path-breadcrumbs) { height: 34px; min-height: 34px; }
+.fm-path-in-title .os-window-header { cursor: default; }
+
 /* Video thumbnails in icon view get a small play badge */
 .fm-card-preview { position: relative; }
 .fm-thumb-play {

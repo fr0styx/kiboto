@@ -44,6 +44,10 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   stood out by its word alone, and while a page was loading the bar jumped back to Home. Now only the current
   tab is coloured, with a line above it, from the moment you tap it.
 
+- **On a phone: the File Explorer's path sits next to its title**. The path had a row of its own under the
+  search box. It is now in the title row, where the folder's name used to be repeated, so the file list starts
+  one row higher. Tapping a part of the path still goes there.
+
 #### Changes
 
 - **Ask Kib about the NAS in your language**: questions about free space, drives, fans, apps, the network and

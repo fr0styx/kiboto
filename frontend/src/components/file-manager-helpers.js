@@ -1429,3 +1429,23 @@ export async function extractDataTransferEntries(dataTransfer) {
   await Promise.all(promises);
   return filesToUpload;
 }
+
+/**
+ * On a phone the path sits in the title row, next to the window's name: one row less (the owner,
+ * 19 Nov 2026). On a wider screen it is back in the toolbar, before the Refresh button. Returns
+ * whether it is in the title now.
+ */
+export function placePath(windowEl, inTitle) {
+  const path = windowEl?.querySelector('.fm-path-container');
+  const title = windowEl?.querySelector('.os-window-title');
+  const toolbar = windowEl?.querySelector('.fm-toolbar');
+  if (!path || !title || !toolbar) return false;
+  path.dataset.noDrag = ''; // in the title row a tap on it is a tap, not the start of dragging the window
+  if (inTitle && path.parentElement !== title) title.appendChild(path);
+  else if (!inTitle && path.parentElement === title) {
+    const refresh = toolbar.querySelector(':scope > .fm-refresh-btn');
+    toolbar.insertBefore(path, refresh);
+  }
+  windowEl.classList.toggle('fm-path-in-title', Boolean(inTitle));
+  return Boolean(inTitle);
+}

@@ -6,6 +6,7 @@ import {
   FmTransfersCockpit,
   FmContextMenu,
   extractDataTransferEntries,
+  placePath,
 } from './file-manager-helpers.js';
 import { api } from '../api.js';
 import { escapeHtml, copyTextToClipboard } from '../utils.js';
@@ -774,7 +775,9 @@ export class FileManagerWindow {
 
     this._onSaveBounds = () => this.saveBounds();
     this._wasNarrow = isCompact();
+    placePath(this.windowEl, isCompact());
     this._onResize = () => {
+      placePath(this.windowEl, isCompact()); // a phone turned on its side, a window made narrow
       this.renderViewport();
       this.restoreAfterWiden();
     };

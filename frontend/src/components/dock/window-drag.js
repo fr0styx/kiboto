@@ -283,7 +283,8 @@ export function makeDraggable(dragEl, handleEl, customId) {
       e.button !== 0 ||
       e.target.closest('button') ||
       e.target.closest('input') ||
-      e.target.closest('.modal-ctrl-btn')
+      e.target.closest('.modal-ctrl-btn') ||
+      e.target.closest('[data-no-drag]') // something to tap inside the title row (the File Explorer's path on a phone)
     )
       return;
     bringToFront(dragEl);
