@@ -3,6 +3,8 @@ does not look at every minute."""
 
 import time
 
+import pytest
+
 from backend import timing
 
 
@@ -40,3 +42,40 @@ def test_a_minute_of_the_hour():
     assert timing.minute_of_hour(30, _at(2, 29, 59)) == 0.0
     assert timing.minute_of_hour(58, _at(3, 1)) == _at(2, 58)  # passed in the hour before
     assert timing.minute_of_hour(58, _at(3, 4)) == 0.0
+
+
+def test_the_scheduler_looks_just_after_each_minute_begins():
+    from backend.services import scheduler
+
+    minute = _at(2, 30)
+    assert scheduler.until_next_look(minute) == 60.5  # a look at the very start of a minute: the next one
+    assert scheduler.until_next_look(minute + 0.5) == 60.0
+    assert scheduler.until_next_look(minute + 3.5) == 57.0  # a look that took three seconds does not push the next
+    assert scheduler.until_next_look(minute + 59.9) == pytest.approx(0.6)
+    # looks one after the other, each taking a while: every minute is looked at once
+    now, seen = minute + 0.5, []
+    for took in (0.2, 4.0, 0.1, 12.0, 0.3, 0.3, 30.0, 0.2):
+        seen.append(time.strftime("%H:%M", time.localtime(now)))
+        now += took
+        now += scheduler.until_next_look(now)
+    assert seen == ["02:30", "02:31", "02:32", "02:33", "02:34", "02:35", "02:36", "02:37"]
+    assert 0.5 <= scheduler.until_next_look() <= 60.5
+
+
+def test_the_loop_waits_until_the_next_minute(monkeypatch):
+    from backend.services import scheduler
+
+    waited = []
+
+    class Stop:
+        def is_set(self):
+            return False
+
+        def wait(self, seconds):
+            waited.append(seconds)
+            return True  # asked to stop: the loop ends before its first look
+
+    monkeypatch.setattr(scheduler, "_SCHEDULER_STOP_EVENT", Stop())
+    monkeypatch.setattr("backend.services.supervisor.beat", lambda name: None)
+    scheduler._run_scheduled_tasks()
+    assert len(waited) == 1 and 0.5 <= waited[0] <= 60.5

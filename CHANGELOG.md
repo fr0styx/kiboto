@@ -108,6 +108,8 @@ On a phone, a row of buttons that continues beyond the edge of the screen now sh
 
 On a phone: the row of tabs inside Settings and wide tables show an arrow where more is hidden; a History entry's buttons sit under its text instead of squeezing it into a narrow column; lines that open something ("Advanced", "Technical details") are easier to hit.
 
+The scheduler looks at its jobs once a minute, just after the minute begins, instead of 60 seconds after its last look: timed jobs start within the first second of their minute.
+
 #### New
 
 - **The NAS in Home Assistant's Energy dashboard**: with Home Assistant connected and a UPS that is measured,

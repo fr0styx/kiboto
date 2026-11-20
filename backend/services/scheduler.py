@@ -284,13 +284,21 @@ def _run_route_check(now: float) -> None:
     on_its_own("Tailscale routes", _check_tailscale_routes)
 
 
+def until_next_look(now: float | None = None) -> float:
+    """Seconds until the scheduler looks again: once a minute, half a second after the minute
+    begins. Waiting a fixed 60 seconds after each look drifts by the time a look takes, and now
+    and then a whole minute is never looked at."""
+    now = time.time() if now is None else now
+    return 60.5 - now % 60.0
+
+
 def _run_scheduled_tasks():
     logger.info("[Scheduler] System background scheduler started.")
     from backend.services.supervisor import beat
 
     while not _SCHEDULER_STOP_EVENT.is_set():
         beat("TaskScheduler")
-        if _SCHEDULER_STOP_EVENT.wait(60):
+        if _SCHEDULER_STOP_EVENT.wait(until_next_look()):
             break
 
         now = time.time()
