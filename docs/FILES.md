@@ -19,9 +19,11 @@ be changed, renamed and deleted over the network share by the same people as eve
 it. A file that only its owner may read keeps that when it is copied. The same goes for files
 copied from another NAS or PC and for the folders the film and series tidy-up makes.
 
-Files that arrive over **WebDAV or SFTP** stay the system's, and get the folder's right to write:
-where the folder is open to its group or to everyone (as shared folders on Unraid are), they can
-be changed over the network share too.
+Files that arrive over **WebDAV or SFTP**, and files a **two-way sync** brings from the cloud,
+stay the system's and get the shared folders' group and right to write. The people who may use
+the folder can change them over the network share too.
+
+A file you **move** keeps its owner, also when it goes to another drive.
 
 What is **restored** is put back as it was: a file or folder from a snapshot keeps the owner it
 has there, and an earlier version put back keeps the owner of the file it replaces.
