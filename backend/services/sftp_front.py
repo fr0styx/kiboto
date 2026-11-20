@@ -218,10 +218,19 @@ def main(argv: list[str]) -> int:
     fail_log = os.path.join(cache_dir, "auth-failures.log")
     from backend import owned
     from backend.config import POOL_PATH
+    from backend.hardware.pal_storage import get_storage_platform
 
-    # the umask: what it makes in a shared folder can be changed over the network share too
+    try:
+        ours = bool(get_storage_platform().get_capabilities().can_manage_shares)
+    except (OSError, RuntimeError, ValueError):
+        ours = False
+    # its umask and group: what it makes in a shared folder can be changed over the network share too
+    how = owned.for_helper(POOL_PATH, ours)
     proc = subprocess.Popen(
-        rclone_command(internal, cache_dir), env={**os.environ, FAIL_LOG_ENV: fail_log}, umask=owned.umask_in(POOL_PATH)
+        rclone_command(internal, cache_dir),
+        env={**os.environ, FAIL_LOG_ENV: fail_log},
+        umask=how["umask"],
+        group=how.get("group"),
     )
     return asyncio.run(_run(port, internal, proc, fail_log))
 

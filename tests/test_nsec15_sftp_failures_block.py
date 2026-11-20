@@ -107,16 +107,22 @@ def test_main_gives_rclone_the_log(monkeypatch, tmp_path):
         def poll(self):
             return 0
 
+    def no_platform():
+        raise RuntimeError("no storage platform here")
+
+    monkeypatch.setattr(sf.subprocess, "Popen", lambda cmd, env=None, **how: seen.update(env=env, **how) or Proc())
     monkeypatch.setattr(
-        sf.subprocess, "Popen", lambda cmd, env=None, umask=-1: seen.update(env=env, umask=umask) or Proc()
+        "backend.owned.for_helper", lambda folder, ours: seen.update(ours=ours) or {"umask": 0o002, "group": 100}
     )
-    monkeypatch.setattr("backend.owned.umask_in", lambda folder: 0o002)
+    monkeypatch.setattr("backend.hardware.pal_storage.get_storage_platform", no_platform)
     monkeypatch.setattr(sf, "rclone_command", lambda internal, cache: ["rclone"])
     monkeypatch.setattr(sf, "internal_port", lambda p: 1)
     monkeypatch.setattr(sf.asyncio, "run", lambda coro: coro.close() or 0)
     assert sf.main(["2222", str(tmp_path)]) == 0
     assert seen["env"][sf.FAIL_LOG_ENV] == str(tmp_path / "auth-failures.log")
-    assert seen["umask"] == 0o002  # the served folder's right to write goes to what rclone makes
+    # the shared folders' group and right to write go to what rclone makes; a box whose platform
+    # cannot be read counts as not Kiboto's own
+    assert (seen["umask"], seen["group"], seen["ours"]) == (0o002, 100, False)
 
 
 def _run_proxy(monkeypatch, user, password):

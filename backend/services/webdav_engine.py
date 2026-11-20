@@ -50,6 +50,16 @@ def gate() -> Any:
     )
 
 
+def _serves_files() -> bool:
+    """Whether the shared folders are Kiboto's own to make (not Unraid's or another host's)."""
+    from backend.hardware.pal_storage import get_storage_platform
+
+    try:
+        return bool(get_storage_platform().get_capabilities().can_manage_shares)
+    except (OSError, RuntimeError, ValueError):
+        return False
+
+
 class WebdavEngine:
     """Orchestrates the rclone WebDAV server process and lifecycle."""
 
@@ -242,6 +252,7 @@ class WebdavEngine:
             from backend import owned
 
             served = config.POOL_PATH if os.path.exists(proxy_script) else root
+            how = owned.for_helper(served, _serves_files())  # what it makes can be changed over SMB too
             try:
                 self._proc = subprocess.Popen(
                     cmd,
@@ -249,7 +260,8 @@ class WebdavEngine:
                     stdout=subprocess.DEVNULL,
                     stderr=subprocess.PIPE,
                     text=True,
-                    umask=owned.umask_in(served),  # what it makes can be changed over the network share too
+                    umask=how["umask"],
+                    group=how.get("group"),
                 )
                 self._started_at = time.time()
                 self._last_error = None

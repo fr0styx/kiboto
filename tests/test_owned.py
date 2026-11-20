@@ -231,3 +231,24 @@ def test_the_numbers_of_a_user_and_a_group():
     uid, gid = owned._ids("root", "root")
     assert (uid, gid) == (0, 0)
     assert owned._ids("no-such-user-here", "no-such-group-here") == (65534, 100)  # the usual nobody and users
+
+
+def test_how_a_helper_that_makes_files_is_started(tmp_path, monkeypatch):
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    os.chmod(pool, 0o777)
+    real = os.stat
+    monkeypatch.setattr(owned.os, "stat", lambda path, *a, **k: _as(real(path, *a, **k), 99, 100))
+    monkeypatch.setattr(owned, "_ids", lambda user, group: (65534, 100))
+    monkeypatch.setattr(owned, "_me", lambda: 0)
+    # Unraid: the folder that is served says the group and the right to write
+    assert owned.for_helper(str(pool), ours=False) == {"umask": 0o000, "group": 100}
+    os.chmod(pool, 0o755)
+    assert owned.for_helper(str(pool), ours=False) == {"umask": 0o022, "group": 100}
+    assert owned.for_helper(str(tmp_path / "missing"), ours=False) == {"umask": 0o022}
+    # Kiboto's own file server: the shared folders are nobody:users, written by the group
+    assert owned.for_helper(str(pool), ours=True) == {"umask": 0o002, "group": 100}
+    # only root may choose a group
+    monkeypatch.setattr(owned, "_me", lambda: 1000)
+    assert owned.for_helper(str(pool), ours=True) == {"umask": 0o002}
+    assert owned.for_helper(str(pool), ours=False) == {"umask": 0o022}

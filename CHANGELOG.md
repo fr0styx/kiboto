@@ -86,6 +86,8 @@ On a tablet held upright, windows opened a little wider than the screen, so the 
 
 **Linux install: Windows PCs are told the right workgroup.** The file server's own service that lists the NAS under Network on Windows announced the workgroup "MYGROUP", a default of its image. It now announces the workgroup Kiboto set. The change is in `docker-compose.linux.yml`: an existing install takes it by replacing that file.
 
+**Files that arrive over WebDAV or SFTP also get the shared folders' group.** With the right to write alone they still belonged to the system and its group; on an install with Kiboto's own file server they could then not be changed over the network share. They now carry the group the shared folders have.
+
 #### Changes
 
 - **Ask Kib about the NAS in your language**: questions about free space, drives, fans, apps, the network and

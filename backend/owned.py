@@ -121,6 +121,27 @@ def to_people(folder: str, user: str = "nobody", group: str = "users", mode: int
     return True
 
 
+def for_helper(folder: str, ours: bool) -> dict[str, int]:
+    """How a helper program that makes files in shared folders is started (rclone's WebDAV and
+    SFTP servers), as arguments for subprocess.Popen: its umask, and as root its group. It stays
+    root, because it reads Kiboto's own data to check a sign-in; what it makes is root's, with the
+    shared folders' group and their right to write, so their people can change it.
+
+    `ours`: Kiboto's own file server writes the shared folders as nobody:users, so the group is
+    "users" and it may write. Elsewhere (Unraid) the folder that is served says both."""
+    if ours:
+        how = {"umask": 0o002, "group": _ids("nobody", "users")[1]}
+    else:
+        try:
+            st = os.stat(folder)
+        except OSError:
+            return {"umask": 0o022}
+        how = {"umask": 0o022 & ~stat.S_IMODE(st.st_mode), "group": st.st_gid}
+    if _me() != 0:
+        how.pop("group")  # only root may choose a group
+    return how
+
+
 def _hand(path: str, uid: int, gid: int) -> None:
     try:
         os.lchown(path, uid, gid)
