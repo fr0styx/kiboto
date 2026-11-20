@@ -124,6 +124,8 @@ Files no longer lets anyone delete, rename or move the system's own folders (app
 
 Share links with "at most N downloads" could be downloaded more often than that when several downloads started at once. The limit now holds.
 
+An invite link for one person stopped working when they first chose a username Kiboto could not take (one letter long, say). They can now choose another and carry on.
+
 #### Changes
 
 - **Ask Kib about the NAS in your language**: questions about free space, drives, fans, apps, the network and

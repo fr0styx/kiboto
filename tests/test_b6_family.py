@@ -81,6 +81,29 @@ def test_invite_link_creates_a_kid_account_once(family):
     assert users_db.lookup_invite(old, db_path=db) is None
 
 
+def test_a_refused_name_leaves_a_single_use_invite_usable(family, monkeypatch):
+    db = family["db"]
+    token, _ = users_db.create_invite("kid", 7, 1, "", "mum", db_path=db)
+    for bad in ("m", ".max", "max/../x", "x" * 40):
+        with pytest.raises(ValueError):
+            users_db.accept_invite(token, bad, "Max", "Max-Pass-123", db_path=db)
+    with pytest.raises(ValueError):  # taken
+        users_db.accept_invite(token, "dad", "Max", "Max-Pass-123", db_path=db)
+    # taken a moment after the look: the account is not made and the use comes back
+    real = users_db.create_user
+
+    def raced(**kw):
+        raise ValueError("That username is taken.")
+
+    monkeypatch.setattr(users_db, "create_user", raced)
+    with pytest.raises(ValueError):
+        users_db.accept_invite(token, "maxi", "Max", "Max-Pass-123", db_path=db)
+    monkeypatch.setattr(users_db, "create_user", real)
+    assert users_db.accept_invite(token, "max", "Max", "Max-Pass-123", db_path=db)["username"] == "max"
+    with pytest.raises(LookupError):  # and then it is used up
+        users_db.accept_invite(token, "max3", "Max", "Max-Pass-123", db_path=db)
+
+
 def test_taken_usernames_are_refused(family):
     token, _ = users_db.create_invite("guest", 7, 2, "", "mum", db_path=family["db"])
     with pytest.raises(ValueError):

@@ -563,6 +563,18 @@ def unsafe_username(name: str) -> bool:
     return name.startswith(".") or any(ch in name for ch in "/\\\x00") or any(ord(ch) < 32 for ch in name)
 
 
+def checked_username(username: str) -> str:
+    """The username as it is kept (trimmed, lower case); SaidError when it can't be one."""
+    from backend.errors import SaidError
+
+    username_clean = username.strip().lower()
+    if len(username_clean) < 2 or len(username_clean) > 32:
+        raise SaidError("Username must be between 2 and 32 characters.", "username_length")
+    if unsafe_username(username_clean):
+        raise SaidError("A username can't start with a dot or contain slashes.", "username_unsafe")
+    return username_clean
+
+
 def create_user(
     username: str,
     display_name: str,
@@ -576,13 +588,7 @@ def create_user(
     home_directory: str | None = None,
     must_change_password: bool = False,
 ) -> dict[str, Any]:
-    username_clean = username.strip().lower()
-    from backend.errors import SaidError
-
-    if len(username_clean) < 2 or len(username_clean) > 32:
-        raise SaidError("Username must be between 2 and 32 characters.", "username_length")
-    if unsafe_username(username_clean):
-        raise SaidError("A username can't start with a dot or contain slashes.", "username_unsafe")
+    username_clean = checked_username(username)
 
     now = time.time()
     user_id = str(uuid.uuid4())
@@ -1727,6 +1733,7 @@ def accept_invite(
     inv = lookup_invite(token, db_path)
     if not inv:
         raise LookupError("invite")
+    checked_username(username)  # before the use is counted: a single-use invite stays usable
     if get_user_by_username(username, db_path=db_path):
         raise ValueError("That username is taken.")
     with users_db_session(db_path) as conn:
@@ -1736,14 +1743,21 @@ def accept_invite(
         )
         if cur.rowcount != 1:
             raise LookupError("invite")
-    user = create_user(
-        username=username,
-        display_name=display_name,
-        password=password,
-        role_id=inv["role_id"],
-        storage_quota_bytes=int(inv.get("quota_bytes") or 0),
-        db_path=db_path,
-    )
+    made = False
+    try:
+        user = create_user(
+            username=username,
+            display_name=display_name,
+            password=password,
+            role_id=inv["role_id"],
+            storage_quota_bytes=int(inv.get("quota_bytes") or 0),
+            db_path=db_path,
+        )
+        made = True
+    finally:
+        if not made:  # no account came of it (the name was taken a moment before, say): the use is given back
+            with users_db_session(db_path) as conn:
+                conn.execute("UPDATE invites SET uses = uses - 1 WHERE id = ? AND uses > 0", (inv["id"],))
     log_security_event(
         "user.created_by_invite",
         "success",
