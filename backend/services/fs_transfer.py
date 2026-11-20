@@ -19,7 +19,7 @@ from collections.abc import Callable
 from enum import Enum, StrEnum
 from typing import Any, Optional
 
-from backend import legacy_names
+from backend import legacy_names, owned
 from backend.config import DATA_DIR, logger
 from backend.fsutil import atomic_write_json, is_protected, prune_protected, read_json
 from backend.ignored_errors import ignored
@@ -236,6 +236,7 @@ def _copy_file_resilient(src: str, dst: str, progress: TransferProgress | None =
         if os.path.lexists(dst) and not os.path.isdir(dst):
             _set_aside(dst)
         shutil.copy2(src, dst, follow_symlinks=False)
+        owned.like_folder(dst)
         return
     part = _part_path(dst)
     try:
@@ -247,6 +248,7 @@ def _copy_file_resilient(src: str, dst: str, progress: TransferProgress | None =
         if os.path.lexists(dst) and not os.path.isdir(dst):
             _set_aside(dst, delete=False)
         os.replace(part, dst)
+        owned.like_folder(dst)  # a copy is the destination folder's, not root's
         if durable:
             _fsync_dir(os.path.dirname(dst) or ".")
     except BaseException:
@@ -308,7 +310,7 @@ def _transfer_single_file(
         elif policy in (CollisionPolicy.OVERWRITE, CollisionPolicy.MERGE):
             final_dst = dst
 
-    os.makedirs(os.path.dirname(final_dst), exist_ok=True)
+    owned.make_dirs(os.path.dirname(final_dst))
 
     if action == "move":
         _move_file_resilient(src, final_dst, progress)
@@ -367,7 +369,7 @@ def merge_directory_tree(
             except OSError:
                 # Cross-device move or FUSE/rclone remote: continue with recursive leaf transfer
                 pass
-        os.makedirs(dst_dir, exist_ok=True)
+        owned.make_dirs(dst_dir)
     else:
         stats["merged_dirs"] += 1
 
@@ -410,6 +412,7 @@ def merge_directory_tree(
             shutil.copystat(src_dir, dst_dir)  # a folder we created keeps the source's times and mode
         except OSError as err:
             logger.debug(f"[FS Transfer] Times/mode not kept for {dst_dir}: {err}")
+        owned.rights_again(dst_dir)  # the source's mode came with it; the right to write is the new folder's
 
     # If action is move, clean up empty source directory
     if action == "move":
@@ -579,7 +582,7 @@ def execute_transfer(
     """
     collision_policy = CollisionPolicy(policy.lower())
     try:
-        os.makedirs(destination_dir, exist_ok=True)
+        owned.make_dirs(destination_dir)
     except OSError:
         pass
 
@@ -1258,7 +1261,7 @@ class TransferTaskManager:
         task.total_files = len(file_list)
         task.total_bytes = sum(f[2] for f in file_list)
         out_path = os.path.join(task.destination, archive_name)
-        os.makedirs(task.destination, exist_ok=True)
+        owned.make_dirs(task.destination)
 
         try:
             if fmt == "zip" or archive_name.endswith(".zip"):
@@ -1308,6 +1311,7 @@ class TransferTaskManager:
                             task._last_notify_ts = now
                             self._notify_update(task)
 
+            owned.like_folder(out_path)
             task.status = TransferTaskStatus.COMPLETED
             task.percent = 100.0
             task.speed_bps = 0.0
@@ -1342,7 +1346,8 @@ class TransferTaskManager:
         self._notify_update(task)
 
         dest_dir = os.path.abspath(task.destination)
-        os.makedirs(dest_dir, exist_ok=True)
+        owned.make_dirs(dest_dir)
+        seen_to: set[str] = set()  # folders the archive made, already given to the destination's people
         archive_size = os.path.getsize(archive_path)
 
         try:
@@ -1376,7 +1381,7 @@ class TransferTaskManager:
                             time.sleep(0.2)
 
                         task.current_file = info.filename
-                        zf.extract(info, dest_dir)
+                        owned.below(dest_dir, zf.extract(info, dest_dir), seen_to)
                         task.processed_files += 1
                         task.processed_bytes += info.file_size
                         now = time.time()
@@ -1429,6 +1434,7 @@ class TransferTaskManager:
                         task.current_file = m.name
                         # "data" filter: re-checks links at write time, drops setuid bits.
                         tf.extract(m, dest_dir, filter="data")
+                        owned.below(dest_dir, os.path.join(dest_dir, m.name), seen_to)
                         task.processed_files += 1
                         task.processed_bytes += m.size
                         now = time.time()

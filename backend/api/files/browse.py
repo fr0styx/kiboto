@@ -14,6 +14,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, Request
 
 import backend.config as config
+from backend import owned
 from backend.api.files.common import _contained
 from backend.auth import AuthenticatedPrincipal, get_current_principal, require_scope
 from backend.config import logger
@@ -543,7 +544,7 @@ def _do_mkdir(path: str):
     if resolve_within(target, ALLOWED_BROWSE_ROOTS) is None:
         raise HTTPException(status_code=403, detail="Path is outside the allowed folders.")
     try:
-        os.makedirs(target, exist_ok=True)
+        owned.make_dirs(target)  # like the folder it is made in, so its people can put files in it
     except OSError as e:
         logger.warning(f"[MKDIR] Failed to create {target}: {e}")
         raise HTTPException(status_code=500, detail="Unable to create folder.") from e

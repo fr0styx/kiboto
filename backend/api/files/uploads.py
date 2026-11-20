@@ -16,6 +16,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
+from backend import owned
 from backend.api.files.common import _contained, _observe, _safe_fs_target, _user_file_headers, record_activity
 from backend.auth import AuthenticatedPrincipal, get_current_principal, require_scope
 from backend.config import POOL_PATH, logger
@@ -67,7 +68,7 @@ async def fs_inbox_upload(
     name = os.path.basename(str(filename or "").replace("\\", "/")).strip() or "shared-file"
     if name in (".", "..") or name.startswith("."):
         name = f"shared{name}"
-    await asyncio.to_thread(os.makedirs, inbox, exist_ok=True)
+    await asyncio.to_thread(owned.make_dirs, inbox)
     stem, ext = os.path.splitext(name)
     target = os.path.join(inbox, name)
     n = 1
@@ -81,6 +82,7 @@ async def fs_inbox_upload(
                 if chunk:
                     await f_out.write(chunk)
         os.replace(staging, target)
+        owned.like_folder(target)
     finally:
         if os.path.exists(staging):
             os.remove(staging)
@@ -153,6 +155,7 @@ def _land(staged: str, folder: str, filename: str, on_conflict: str, principal: 
             if recycle_dir and recycle_bin.move_to_bin(target, recycle_dir, target, True):
                 record_activity("delete", target, principal, detail="to the Recycle Bin, replaced by an upload")
     os.replace(staged, target)
+    owned.like_folder(target)  # the folder's people can change it over the network too
     return target
 
 

@@ -10,6 +10,19 @@ hidden by default; **Show hidden files** shows them (with a count of how many th
 **Quick Look** previews a file without opening it; its Copy button copies the text, the
 image or the path, whichever fits the file.
 
+## Who owns what you make here
+
+A file you upload, a folder you make, a copy and what comes out of an archive belong to the
+folder they land in: they get that folder's owner and group. Where the folder lets its group or
+everyone write, they may change the new file too. So what you put into a shared folder here can
+be changed, renamed and deleted over the network share by the same people as everything else in
+it. A file that only its owner may read keeps that when it is copied.
+
+Kiboto only does this for what it has just made. A file that was there before keeps its owner,
+also one made here by an earlier version (those belong to the system, and can be read over the
+network and not changed there; the **Permissions** tab in the details of the file or folder sets
+the owner, also for everything inside a folder).
+
 ## Deleting and the Recycle Bin
 
 Deleting moves a file to the **Recycle Bin** of its shared folder, where you can put it

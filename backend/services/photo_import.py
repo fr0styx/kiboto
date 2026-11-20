@@ -28,6 +28,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import IO, Any
 
+from backend import owned
 from backend.services import thumbs
 
 logger = logging.getLogger("kiboto.photo_import")
@@ -270,7 +271,7 @@ def _safe_name(name: str) -> str:
 
 def _copy_in(e: Entry, folder: str) -> tuple[str, str, bytes]:
     """Copies the entry into a hidden part file in `folder`: (part path, sha256, first bytes)."""
-    os.makedirs(folder, exist_ok=True)
+    owned.make_dirs(folder)
     part = os.path.join(folder, f".kb-import-{secrets.token_hex(6)}.part")
     h, head = hashlib.sha256(), b""
     with e.open() as src, open(part, "wb") as dst:
@@ -293,6 +294,7 @@ def _place(part: str, digest: str, folder: str, name: str, known: set[str]) -> s
         target = os.path.join(folder, name if n == 1 else f"{stem} ({n}){ext}")
         if not os.path.exists(target):
             os.replace(part, target)
+            owned.like_folder(target)
             known.add(digest)
             return target
         if os.path.getsize(target) == os.path.getsize(part) and _sha256_file(target) == digest:
@@ -316,7 +318,7 @@ def file_entry(e: Entry, when: float | None, destination: str, known: set[str]) 
         when = when if when is not None else e.mtime
         local = time.localtime(when)
         folder = os.path.join(destination, f"{local.tm_year:04d}", f"{local.tm_mon:02d}")
-        os.makedirs(folder, exist_ok=True)
+        owned.make_dirs(folder)
         final = _place(part, digest, folder, name, known)
         part = None
         if final is None:

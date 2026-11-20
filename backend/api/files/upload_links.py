@@ -24,6 +24,7 @@ import aiofiles
 from fastapi import HTTPException, Request
 from fastapi.responses import Response
 
+from backend import owned
 from backend.config import logger
 from backend.services import malware_scan
 
@@ -146,6 +147,7 @@ async def receive(item: dict[str, Any], folder: str, request: Request) -> tuple[
         final = await asyncio.to_thread(unique_path, folder, name)
         await asyncio.to_thread(os.replace, part, final)
         part = ""
+        await asyncio.to_thread(owned.like_folder, final)
         malware_scan.queue_scan(final, "upload_link", str(item.get("created_by") or ""))  # NFEAT-11
         return os.path.basename(final), written
     finally:

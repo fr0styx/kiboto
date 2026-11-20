@@ -74,6 +74,8 @@ On a tablet held upright, windows opened a little wider than the screen, so the 
 
 **Nightly jobs are no longer skipped now and then.** Scheduled scripts, the nightly move of old files to slower drives, and a second NAS's nightly fetch waited for the clock to read their exact minute. The scheduler looks a little later each time, so on some days that minute was never looked at and the job did not run, without a word. A job now runs when its time has come or passed by up to five minutes, once.
 
+**What you make in Files can be changed over the network share.** A file uploaded in the File Explorer, a folder made there, a copy and the contents of an unpacked archive belonged to the system: over the network share (SMB) the folder's people could open them and not change, rename or delete them, and could put nothing into such a folder. They now get the owner and group of the folder they land in, and the folder's right to write. Files made by earlier versions keep the owner they have; the Permissions tab in a file's or folder's details sets it, also for everything inside a folder. See the Files guide.
+
 #### Changes
 
 - **Ask Kib about the NAS in your language**: questions about free space, drives, fans, apps, the network and
