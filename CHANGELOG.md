@@ -100,6 +100,8 @@ Kiboto's own file server: adding a person, or letting someone write who could on
 
 Kiboto's own file server: after a settings restore or a takeover it is started again, so the people who came with it can sign in over the network and those who are no longer there cannot. Loading the settings in place is not enough for that: the running file server keeps the list of accounts it had.
 
+Files: the nine tick boxes on a file's Permissions tab are named for screen readers ("Owner: may read" and so on), and the letters R, W and X say what they stand for when pointed at.
+
 #### Changes
 
 - **Ask Kib about the NAS in your language**: questions about free space, drives, fans, apps, the network and

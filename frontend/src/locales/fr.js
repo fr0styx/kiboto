@@ -9114,4 +9114,7 @@ export default {
   "fm.i_give": "Donner aux personnes de ce dossier",
   "fm.i_give_hint": "Les fichiers et dossiers qui appartiennent encore au système reçoivent le propriétaire de ce dossier : ses personnes peuvent alors les modifier aussi par le partage réseau. Ce qui appartient à quelqu'un d'autre ne change pas.",
   "toast.given_back": "{count, plural, =0 {Plus rien ici n'appartenait au système.} one {# élément appartient maintenant aux personnes de ce dossier.} other {# éléments appartiennent maintenant aux personnes de ce dossier.}}",
+  "fm.i_may_read": "peut lire",
+  "fm.i_may_write": "peut modifier",
+  "fm.i_may_run": "peut l'exécuter ou ouvrir le dossier",
 };

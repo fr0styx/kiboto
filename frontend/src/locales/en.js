@@ -9114,4 +9114,7 @@ export default {
   "fm.i_give": "Give to this folder's people",
   "fm.i_give_hint": "Files and folders in here that still belong to the system get this folder's owner, so its people can change them over the network share too. Nothing that belongs to someone else is changed.",
   "toast.given_back": "{count, plural, =0 {Nothing in here still belonged to the system.} one {# item now belongs to this folder's people.} other {# items now belong to this folder's people.}}",
+  "fm.i_may_read": "may read",
+  "fm.i_may_write": "may change",
+  "fm.i_may_run": "may run it, or open the folder",
 };

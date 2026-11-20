@@ -195,4 +195,18 @@ describe('Item 3.4: File Explorer Share Links & POSIX Permissions Inspector', ()
       expect(await open('/mnt/user/appdata/mysql')).toBeNull();
     });
   });
+  it('every tick box says who and what they may do', async () => {
+    const inspector = new FmInspector(mockFm, containerEl);
+    inspector.toggle(true);
+    inspector.activeTab = 'permissions';
+    await inspector.update();
+    const names = [...containerEl.querySelectorAll('.fm-perms-grid input[type="checkbox"]')].map((c) =>
+      c.getAttribute('aria-label')
+    );
+    expect(names).toHaveLength(9);
+    expect(names[0]).toBe('Owner: may read');
+    expect(names[4]).toBe('Group: may change');
+    expect(names[8]).toBe('Everyone else: may run it, or open the folder');
+    expect(new Set(names).size).toBe(9);
+  });
 });

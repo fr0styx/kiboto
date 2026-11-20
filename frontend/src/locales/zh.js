@@ -9114,4 +9114,7 @@ export default {
   "fm.i_give": "交给此文件夹的使用者",
   "fm.i_give_hint": "此处仍属于系统的文件和文件夹将归此文件夹的所有者所有，这样它的使用者也能通过网络共享修改它们。属于其他人的内容不会改变。",
   "toast.given_back": "{count, plural, =0 {这里已没有属于系统的内容。} other {# 项现在归此文件夹的使用者所有。}}",
+  "fm.i_may_read": "可读取",
+  "fm.i_may_write": "可修改",
+  "fm.i_may_run": "可运行，或打开文件夹",
 };

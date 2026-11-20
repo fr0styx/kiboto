@@ -734,6 +734,15 @@ export class FmInspector {
     `;
 
     if (this.activeTab === 'permissions') {
+      // the names of the nine tick boxes: who, and what they may do (a screen reader had only "R W X")
+      const who = {
+        owner: t('fm.i_owner', 'Owner'),
+        group: t('fm.i_group', 'Group'),
+        others: t('fm.i_others', 'Everyone else'),
+      };
+      const mayRead = t('fm.i_may_read', 'may read');
+      const mayWrite = t('fm.i_may_write', 'may change');
+      const mayRun = t('fm.i_may_run', 'may run it, or open the folder');
       content.innerHTML = `
         ${tabsHeaderHtml}
         <div class="fm-inspector-perms-pane fmh-xs">
@@ -762,24 +771,24 @@ export class FmInspector {
 
           <div class="fm-perms-grid fmh-grid-xs-center">
             <div></div>
-            <div class="fmh-bold-muted">R</div>
-            <div class="fmh-bold-muted">W</div>
-            <div class="fmh-bold-muted">X</div>
+            <div class="fmh-bold-muted" title="${escapeHtml(mayRead)}">R</div>
+            <div class="fmh-bold-muted" title="${escapeHtml(mayWrite)}">W</div>
+            <div class="fmh-bold-muted" title="${escapeHtml(mayRun)}">X</div>
 
             <div class="fmh-semi-soft">${escapeHtml(t('fm.i_owner', 'Owner'))}</div>
-            <input type="checkbox" id="fm-perm-ur" data-perm="256" ${isGuarded ? 'disabled' : ''} />
-            <input type="checkbox" id="fm-perm-uw" data-perm="128" ${isGuarded ? 'disabled' : ''} />
-            <input type="checkbox" id="fm-perm-ux" data-perm="64" ${isGuarded ? 'disabled' : ''} />
+            <input type="checkbox" id="fm-perm-ur" data-perm="256" aria-label="${escapeHtml(`${who.owner}: ${mayRead}`)}" ${isGuarded ? 'disabled' : ''} />
+            <input type="checkbox" id="fm-perm-uw" data-perm="128" aria-label="${escapeHtml(`${who.owner}: ${mayWrite}`)}" ${isGuarded ? 'disabled' : ''} />
+            <input type="checkbox" id="fm-perm-ux" data-perm="64" aria-label="${escapeHtml(`${who.owner}: ${mayRun}`)}" ${isGuarded ? 'disabled' : ''} />
 
             <div class="fmh-semi-soft">${escapeHtml(t('fm.i_group', 'Group'))}</div>
-            <input type="checkbox" id="fm-perm-gr" data-perm="32" ${isGuarded ? 'disabled' : ''} />
-            <input type="checkbox" id="fm-perm-gw" data-perm="16" ${isGuarded ? 'disabled' : ''} />
-            <input type="checkbox" id="fm-perm-gx" data-perm="8" ${isGuarded ? 'disabled' : ''} />
+            <input type="checkbox" id="fm-perm-gr" data-perm="32" aria-label="${escapeHtml(`${who.group}: ${mayRead}`)}" ${isGuarded ? 'disabled' : ''} />
+            <input type="checkbox" id="fm-perm-gw" data-perm="16" aria-label="${escapeHtml(`${who.group}: ${mayWrite}`)}" ${isGuarded ? 'disabled' : ''} />
+            <input type="checkbox" id="fm-perm-gx" data-perm="8" aria-label="${escapeHtml(`${who.group}: ${mayRun}`)}" ${isGuarded ? 'disabled' : ''} />
 
             <div class="fmh-semi-soft">${escapeHtml(t('fm.i_others', 'Everyone else'))}</div>
-            <input type="checkbox" id="fm-perm-or" data-perm="4" ${isGuarded ? 'disabled' : ''} />
-            <input type="checkbox" id="fm-perm-ow" data-perm="2" ${isGuarded ? 'disabled' : ''} />
-            <input type="checkbox" id="fm-perm-ox" data-perm="1" ${isGuarded ? 'disabled' : ''} />
+            <input type="checkbox" id="fm-perm-or" data-perm="4" aria-label="${escapeHtml(`${who.others}: ${mayRead}`)}" ${isGuarded ? 'disabled' : ''} />
+            <input type="checkbox" id="fm-perm-ow" data-perm="2" aria-label="${escapeHtml(`${who.others}: ${mayWrite}`)}" ${isGuarded ? 'disabled' : ''} />
+            <input type="checkbox" id="fm-perm-ox" data-perm="1" aria-label="${escapeHtml(`${who.others}: ${mayRun}`)}" ${isGuarded ? 'disabled' : ''} />
           </div>
 
           <div class="fmh-grid">

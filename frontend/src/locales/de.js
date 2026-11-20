@@ -9114,4 +9114,7 @@ export default {
   "fm.i_give": "An die Personen dieses Ordners geben",
   "fm.i_give_hint": "Dateien und Ordner darin, die noch dem System gehören, erhalten den Besitzer dieses Ordners. So können seine Personen sie auch über die Netzwerkfreigabe ändern. Was jemand anderem gehört, bleibt unverändert.",
   "toast.given_back": "{count, plural, =0 {Hier gehörte nichts mehr dem System.} one {# Element gehört jetzt den Personen dieses Ordners.} other {# Elemente gehören jetzt den Personen dieses Ordners.}}",
+  "fm.i_may_read": "darf lesen",
+  "fm.i_may_write": "darf ändern",
+  "fm.i_may_run": "darf es ausführen oder den Ordner öffnen",
 };

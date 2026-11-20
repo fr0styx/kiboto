@@ -9114,4 +9114,7 @@ export default {
   "fm.i_give": "Dar a las personas de esta carpeta",
   "fm.i_give_hint": "Los archivos y carpetas de aquí que aún pertenecen al sistema reciben el propietario de esta carpeta, para que sus personas puedan cambiarlos también a través del recurso compartido. Lo que pertenece a otra persona no cambia.",
   "toast.given_back": "{count, plural, =0 {Aquí ya nada pertenecía al sistema.} one {# elemento pertenece ahora a las personas de esta carpeta.} other {# elementos pertenecen ahora a las personas de esta carpeta.}}",
+  "fm.i_may_read": "puede leer",
+  "fm.i_may_write": "puede cambiar",
+  "fm.i_may_run": "puede ejecutarlo o abrir la carpeta",
 };
