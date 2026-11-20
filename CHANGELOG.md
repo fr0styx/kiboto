@@ -238,6 +238,8 @@ A ready-made disk image that Kiboto unpacks for a virtual machine is readable by
 
 Files: "Give to this folder's people" works only on a shared folder or a folder inside one. Pressed on a drive's top folder it could have reached the system's own folders (app settings, Docker and virtual machine disks).
 
+Files, Permissions: a change no longer passes through a shortcut (symbolic link) to whatever it points at, and "Also to everything inside it" works only on a shared folder or a folder inside one.
+
 ## v2.0.4 (2026-11-19)
 ### 🏡 Apps that go back on their own, a way to move in, and Kiboto in your language everywhere
 

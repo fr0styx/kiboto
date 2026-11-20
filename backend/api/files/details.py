@@ -283,6 +283,11 @@ async def fs_update_permissions(
         except Exception:
             raise HTTPException(status_code=400, detail=f"Group {req.group} not found") from None
 
+    if not await asyncio.to_thread(_may_change_inside, target, req.recursive):
+        raise HTTPException(
+            status_code=403, detail="Everything inside is changed only in a shared folder or a folder in one."
+        )
+
     def _apply_permissions():
         paths_to_update = [target]
         if req.recursive and os.path.isdir(target):
@@ -294,10 +299,12 @@ async def fs_update_permissions(
                     paths_to_update.append(os.path.join(root, f))
         for p in paths_to_update:
             try:
-                if mode_int is not None:
+                # a link is never followed: it could point anywhere, Kiboto's own settings included
+                link = os.path.islink(p)
+                if mode_int is not None and not link:
                     os.chmod(p, mode_int)
                 if uid != -1 or gid != -1:
-                    os.chown(p, uid, gid)
+                    os.lchown(p, uid, gid)
             except OSError as e:
                 logger.warning(f"[FS Permissions] Could not chmod/chown {p}: {e}")
 
@@ -336,6 +343,11 @@ def _in_a_shared_folder(target: str) -> bool:
         return False
     real = os.path.realpath(target)
     return any(root and (real == root or real.startswith(root + os.sep)) for root in roots)
+
+
+def _may_change_inside(target: str, recursive: bool) -> bool:
+    """A change to everything inside a folder walks it: only in a shared folder (see above)."""
+    return not recursive or os.path.islink(target) or not os.path.isdir(target) or _in_a_shared_folder(target)
 
 
 def _hand_folder_back(target: str) -> dict[str, int]:

@@ -185,15 +185,39 @@ class TestPermissions:
         ok(client.put("/api/fs/permissions", json={"path": target, "mode_octal": "640"}, headers=auth_headers))
         assert stat.S_IMODE(os.stat(target).st_mode) == 0o640
 
-    def test_recursive(self, client, auth_headers, work):
-        ok(
-            client.put(
+    def test_recursive(self, client, auth_headers, work, monkeypatch):
+        from backend.services import app_catalog
+
+        monkeypatch.setattr(app_catalog, "share_mounts", lambda: {"Work": work})
+        elsewhere = os.path.join(os.path.dirname(work), "elsewhere-" + os.path.basename(work))
+        with open(elsewhere, "w") as f:
+            f.write("not in the folder")
+        os.chmod(elsewhere, 0o600)
+        os.symlink(elsewhere, os.path.join(work, "sub", "link"))
+        try:
+            ok(
+                client.put(
+                    "/api/fs/permissions",
+                    json={"path": os.path.join(work, "sub"), "mode_octal": "750", "recursive": True},
+                    headers=auth_headers,
+                )
+            )
+            assert stat.S_IMODE(os.stat(os.path.join(work, "sub")).st_mode) == 0o750
+            assert stat.S_IMODE(os.stat(os.path.join(work, "sub", "b.txt")).st_mode) == 0o750
+            assert stat.S_IMODE(os.stat(elsewhere).st_mode) == 0o600  # what a link points at is left alone
+            # above the shared folders (a pool's top holds appdata and system) nothing is walked
+            r = client.put(
                 "/api/fs/permissions",
-                json={"path": os.path.join(work, "sub"), "mode_octal": "750", "recursive": True},
+                json={"path": os.path.dirname(work), "mode_octal": "777", "recursive": True},
                 headers=auth_headers,
             )
-        )
-        assert stat.S_IMODE(os.stat(os.path.join(work, "sub")).st_mode) == 0o750
+            assert r.status_code == 403
+            assert stat.S_IMODE(os.stat(os.path.join(work, "a.txt")).st_mode) != 0o777
+            # one item there may still be changed, as before
+            ok(client.put("/api/fs/permissions", json={"path": elsewhere, "mode_octal": "640"}, headers=auth_headers))
+            assert stat.S_IMODE(os.stat(elsewhere).st_mode) == 0o640
+        finally:
+            os.remove(elsewhere)
 
     @pytest.mark.parametrize("mode", ["999", "abc", "77777"])
     def test_bad_modes(self, client, auth_headers, work, mode):
