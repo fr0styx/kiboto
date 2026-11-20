@@ -173,5 +173,9 @@ def test_ha_guide_numbers():
     assert f"A key of {ha_link.CODE_SIGNS} signs" in text and f"good for {ha_link.CODE_SECONDS // 60} minutes" in text
     assert f"After {ha_link.CODE_TRIES} tries" in text and f"is {ha_link.CODE_SIGNS * 5} random bits" in text
     assert f"within {ha_link.CLOCK_SLACK_SECS // 60} minutes" in text and "AES-256-GCM" in text
-    assert "What works today is the first step: pairing the two boxes" in text
+    assert "What works today: pairing the two boxes" in text
+    from backend.services import ha_state
+
+    assert f"every night at {ha_state.FETCH_AT}" in text and "keeps this copy and does nothing with it" in text
+    assert "Unpairing removes it" in text and "It does not hold your files" in text
     assert "refuses an address on the internet" in text and "does not look names up" in text

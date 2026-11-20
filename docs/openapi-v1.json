@@ -56418,7 +56418,7 @@
   },
   "/api/v1/ha": {
    "delete": {
-    "description": "Forgets the other box, and tells it to forget this one when it can be reached.",
+    "description": "Forgets the other box and the copy kept of it, and tells it to forget this one when it can be reached.",
     "operationId": "ha_unpair_api_v1_ha_delete",
     "responses": {
      "200": {
@@ -56449,7 +56449,7 @@
     ]
    },
    "get": {
-    "description": "This box's part (first, second or none), the other box, and how the last contact went.",
+    "description": "This box's part (first, second or none), the other box, how the last contact went, and\nthe copy of the first NAS's people and settings the second one keeps.",
     "operationId": "ha_status_api_v1_ha_get",
     "responses": {
      "200": {
@@ -56538,6 +56538,39 @@
      }
     },
     "summary": "Ha Code",
+    "tags": [
+     "High availability"
+    ],
+    "x-required-scopes": [
+     "system:config"
+    ]
+   }
+  },
+  "/api/v1/ha/fetch": {
+   "post": {
+    "description": "On the second NAS: fetches the first one's people and settings now (it also does every night).",
+    "operationId": "ha_fetch_api_v1_ha_fetch_post",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Ha Fetch Api V1 Ha Fetch Post",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Ha Fetch",
     "tags": [
      "High availability"
     ],

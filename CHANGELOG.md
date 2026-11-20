@@ -122,6 +122,12 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   encrypted with a key that never travels, also on a home network without Tailscale. Keeping folders,
   people and settings in step, and the takeover button, come next. Guide: docs/HA.md.
 
+- **A second NAS that can take over, second step: people and settings**: once paired, the second NAS keeps a
+  copy of the first one's people and settings (the same encrypted settings backup the Backup page makes). It
+  fetches it right after pairing, every night at 02:30, and when you press Fetch now. The copy is kept and not
+  applied: the second NAS keeps its own sign-ins and settings until the day it takes over. Unpairing removes
+  it.
+
 #### Security
 
 - **App logos**: Kiboto fetches a logo only when an app in the catalog names that exact address. Before, any

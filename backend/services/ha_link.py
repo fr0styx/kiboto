@@ -357,6 +357,8 @@ def _forget_me(_args: dict[str, Any]) -> dict[str, Any]:
 
 # what the other box may ask for; later parts of high availability add theirs
 HANDLERS: dict[str, Callable[[dict[str, Any]], Any]] = {"hello": _hello, "unpair": _forget_me}
+# what else is forgotten when the boxes are unpaired (the copy of the other box's people and settings)
+ON_UNPAIR: list[Callable[[], None]] = []
 
 
 def call(op: str, args: dict[str, Any] | None = None, send: Sender = _post) -> Any:
@@ -417,6 +419,9 @@ def unpair(actor: str = "", tell: bool = True, send: Sender = _post) -> dict[str
 
     _change(change)
     _last.update(at=0.0, ok=None, error="")
+    _last.pop("said", None)
+    for also in ON_UNPAIR:
+        also()
     if found is not None:
         audit("unpaired", f"unpaired from {found.get('name')}", actor)
     return status()

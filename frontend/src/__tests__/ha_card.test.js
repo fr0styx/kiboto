@@ -2,7 +2,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { api } from '../api.js';
 import { showToast } from '../toast.js';
-import { renderHaCard, resetHaCardForTesting, haReach, haRole } from '../components/management/ha-card.js';
+import { renderHaCard, resetHaCardForTesting, haReach, haRole, haCopy } from '../components/management/ha-card.js';
 
 vi.mock('../toast.js', async (orig) => ({ ...(await orig()), showToast: vi.fn() }));
 
@@ -154,6 +154,42 @@ describe('a second NAS that can take over', () => {
     await flush();
     expect(alert.hidden).toBe(false);
     expect(alert.textContent).toBe("That didn't work: ");
+  });
+
+  it('says what the second NAS keeps of people and settings, and fetches when asked', async () => {
+    const copy = { name: 'First NAS', made: 1763600000, fetched: 1763600100, size: 3 * 1024 * 1024, version: '2.0.5' };
+    expect(haCopy({ role: 'second', copy: null })).toBe("No copy of the first NAS's people and settings yet.");
+    expect(haCopy({ role: 'second', copy })).toMatch(
+      /^People and settings of First NAS: a copy from .+ \(3(\.0)? MB\)\. It is applied only when this NAS takes over\.$/
+    );
+    expect(haCopy({ role: 'second', copy, fetch_error: 'unreachable' })).toMatch(
+      /takes over\. The last fetch did not work\.$/
+    );
+    expect(haCopy({ role: 'second', copy, fetching: true })).toBe('Fetching people and settings from the first NAS…');
+    expect(haCopy({ role: 'first', served: null })).toBe('The second NAS has not fetched people and settings yet.');
+    expect(haCopy({ role: 'first', served: 1763600000 })).toMatch(
+      /^The second NAS last fetched people and settings .+\.$/
+    );
+    vi.spyOn(api, 'get').mockResolvedValue({ ...NONE, role: 'second', peer: PEER, copy: null, fetching: false });
+    const post = vi
+      .spyOn(api, 'post')
+      .mockResolvedValue({ ...NONE, role: 'second', peer: PEER, copy: null, fetching: true });
+    await renderHaCard();
+    expect(card().querySelector('#ha-copy').textContent).toBe("No copy of the first NAS's people and settings yet.");
+    await press('fetch');
+    expect(post).toHaveBeenCalledWith('/api/ha/fetch', {});
+    expect(card().querySelector('[data-ha-act="fetch"]')).toBeNull(); // not twice at once
+    expect(card().querySelector('#ha-copy').textContent).toBe('Fetching people and settings from the first NAS…');
+    expect(vi.mocked(showToast).mock.calls[0][0]).toBe('Fetching. The card shows the copy when it has arrived.');
+  });
+
+  it('the first NAS has no Fetch button', async () => {
+    vi.spyOn(api, 'get').mockResolvedValue({ ...NONE, role: 'first', peer: PEER, served: null });
+    await renderHaCard();
+    expect(card().querySelector('[data-ha-act="fetch"]')).toBeNull();
+    expect(card().querySelector('#ha-copy').textContent).toBe(
+      'The second NAS has not fetched people and settings yet.'
+    );
   });
 
   it('stays away for someone who may not change the system', async () => {

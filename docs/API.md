@@ -38,7 +38,7 @@ request and response schemas.
 
 <!-- BEGIN generated endpoints: python scripts/api_reference.py --update -->
 
-795 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
+796 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
 
 ### AI Conversation History
 
@@ -366,10 +366,11 @@ request and response schemas.
 
 | Method | Path | Access | What it does |
 | :--- | :--- | :--- | :--- |
-| `DELETE` | `/api/v1/ha` | `system:config` | Forgets the other box, and tells it to forget this one when it can be reached |
-| `GET` | `/api/v1/ha` | `system:config` | This box's part (first, second or none), the other box, and how the last contact went |
+| `DELETE` | `/api/v1/ha` | `system:config` | Forgets the other box and the copy kept of it, and tells it to forget this one when it can be reached |
+| `GET` | `/api/v1/ha` | `system:config` | This box's part (first, second or none), the other box, how the last contact went, and the copy of the first NAS's people and settings th… |
 | `POST` | `/api/v1/ha/check` | `system:config` | Asks the other box whether it is there |
 | `POST` | `/api/v1/ha/code` | `system:config` | On the first NAS: a pairing key to type into the second one |
+| `POST` | `/api/v1/ha/fetch` | `system:config` | On the second NAS: fetches the first one's people and settings now (it also does every night) |
 | `POST` | `/api/v1/ha/pair` | `system:config` | On the second NAS: pairs with the first one, using the pairing key shown there |
 | `POST` | `/api/v1/ha/peer/call` | public ⏱ | A sealed message from the paired box; the answer is sealed too |
 | `POST` | `/api/v1/ha/peer/pair` | public ⏱ | The second NAS pairs with this one: it proves that it has the pairing key shown here |

@@ -7,7 +7,7 @@
 import { api } from '../../api.js';
 import { showToast } from '../../toast.js';
 import { t } from '../../i18n.js';
-import { formatDateTime } from '../../format.js';
+import { formatBytes, formatDateTime } from '../../format.js';
 
 let _view = null;
 let _mode = ''; // '', 'code' (a pairing key is on screen) or 'pair' (the form)
@@ -38,6 +38,29 @@ export function haReach(peer) {
     when: formatDateTime((peer.last_contact || 0) * 1000),
     why: t(why[0], why[1]),
   });
+}
+
+/** The copy of the first NAS's people and settings: what the second NAS keeps, or when the first was asked. */
+export function haCopy(view) {
+  if (view.role === 'first')
+    return view.served
+      ? t('standby.served', 'The second NAS last fetched people and settings {when}.', {
+          when: formatDateTime(view.served * 1000),
+        })
+      : t('standby.served_never', 'The second NAS has not fetched people and settings yet.');
+  if (view.fetching) return t('standby.fetching', 'Fetching people and settings from the first NAS…');
+  const said = view.copy
+    ? t(
+        'standby.copy_have',
+        'People and settings of {name}: a copy from {when} ({size}). It is applied only when this NAS takes over.',
+        {
+          name: view.copy.name || '?',
+          when: formatDateTime((view.copy.made || 0) * 1000),
+          size: formatBytes(view.copy.size || 0),
+        }
+      )
+    : t('standby.copy_none', "No copy of the first NAS's people and settings yet.");
+  return view.fetch_error ? `${said} ${t('standby.fetch_failed', 'The last fetch did not work.')}` : said;
 }
 
 /** Which part this NAS has, and who the other one is. */
@@ -144,17 +167,19 @@ function draw() {
     parts.push(
       el('p', { className: 'immich-note', id: 'ha-role', textContent: haRole(_view) }),
       el('p', { className: 'immich-note', id: 'ha-reach', textContent: haReach(_view.peer) }),
+      el('p', { className: 'immich-note', id: 'ha-copy', textContent: haCopy(_view) }),
       el(
         'div',
         { className: 'ddns-actions' },
         button('check', t('standby.check', 'Check now')),
+        _view.role === 'second' && !_view.fetching ? button('fetch', t('standby.fetch', 'Fetch now')) : null,
         button('unpair', t('standby.unpair', 'Unpair'))
       ),
       el('p', {
         className: 'immich-note',
         textContent: t(
           'standby.next_note',
-          'Pairing is the first step. Keeping folders, people and settings in step, and the takeover button, come with the next updates and will show here.'
+          'Pairing and the copy of people and settings work. The chosen folders and the takeover button come with the next updates and will show here.'
         ),
       })
     );
@@ -201,6 +226,9 @@ async function onClick(e) {
       _view = await api.get('/api/ha'); // the first NAS: the second one may have paired meanwhile
     } else if (action === 'check') {
       _view = await api.post('/api/ha/check', {});
+    } else if (action === 'fetch') {
+      _view = await api.post('/api/ha/fetch', {});
+      showToast(t('standby.fetch_started', 'Fetching. The card shows the copy when it has arrived.'), 'success');
     } else if (action === 'unpair') {
       _view = await api.delete('/api/ha'); // the server asks to confirm
       showToast(t('standby.unpaired_toast', 'Unpaired.'), 'success');

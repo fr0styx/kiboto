@@ -342,13 +342,15 @@ def test_the_owner_makes_a_key_pairs_checks_and_unpairs(client, auth_headers, tm
     made = client.post("/api/ha/code", headers=auth_headers).json()
     assert len(made["code"]) == 19 and made["valid_seconds"] == 600
     assert client.get("/api/ha", headers=auth_headers).json()["code_waiting"] is True
-    asked = []
-    monkeypatch.setattr(
-        ha, "pair_with", lambda address, code, mine, actor="": asked.append((address, code, mine)) or {"role": "second"}
-    )
+    asked, fetched = [], []
+    monkeypatch.setattr(ha, "pair_with", lambda address, code, mine, actor="": asked.append((address, code, mine)))
+    monkeypatch.setattr("backend.services.ha_state.fetch_soon", lambda: fetched.append(1) or True)
     body = {"address": A + "/", "code": made["code"], "my_address": B}
-    assert client.post("/api/ha/pair", json=body, headers=auth_headers).json() == {"role": "second"}
-    assert asked == [(A, made["code"], B)]
+    paired = client.post("/api/ha/pair", json=body, headers=auth_headers)
+    assert paired.status_code == 200 and {"role", "peer", "copy", "fetching"} <= set(paired.json())
+    assert asked == [(A, made["code"], B)] and fetched == [
+        1
+    ]  # the first copy of people and settings is fetched at once
     bad = client.post("/api/ha/pair", json=dict(body, address="http://8.8.8.8:8082"), headers=auth_headers)
     assert (
         bad.status_code == 400

@@ -16,7 +16,7 @@ from backend.auth import AuthenticatedPrincipal, get_current_principal, require_
 from backend.confirmations import confirm_or_raise, require_confirmation
 from backend.errors import ApiError, said
 from backend.rate_limit import rate_limit
-from backend.services import ha_link
+from backend.services import ha_link, ha_state
 
 router = APIRouter(tags=["High availability"])
 ADMIN = Depends(require_scope("system:config"))
@@ -50,10 +50,16 @@ def _actor(principal: AuthenticatedPrincipal) -> str:
     return getattr(principal, "username", "") or ""
 
 
+def _status() -> dict[str, Any]:
+    """The link's status, and the copy of people and settings that goes with it."""
+    return {**ha_link.status(), **ha_state.view()}
+
+
 @router.get("/ha", dependencies=[ADMIN])
 async def ha_status() -> dict[str, Any]:
-    """This box's part (first, second or none), the other box, and how the last contact went."""
-    return await asyncio.to_thread(ha_link.status)
+    """This box's part (first, second or none), the other box, how the last contact went, and
+    the copy of the first NAS's people and settings the second one keeps."""
+    return await asyncio.to_thread(_status)
 
 
 @router.post("/ha/code", dependencies=[ADMIN])
@@ -76,21 +82,34 @@ async def ha_pair(
         raise _refused(e) from e
     confirm_or_raise(request, principal, "ha.pair", target=target)
     try:
-        return await asyncio.to_thread(ha_link.pair_with, target, req.code, req.my_address, _actor(principal))
+        await asyncio.to_thread(ha_link.pair_with, target, req.code, req.my_address, _actor(principal))
     except ha_link.LinkError as e:
         raise _refused(e, 409 if e.key in ("paired", "unreachable", "refused") else 400) from e
+    await asyncio.to_thread(ha_state.fetch_soon)  # the first copy of people and settings, right away
+    return await asyncio.to_thread(_status)
 
 
 @router.delete("/ha", dependencies=[ADMIN, Depends(require_confirmation("ha.unpair"))])
 async def ha_unpair(principal: AuthenticatedPrincipal = Depends(get_current_principal)) -> dict[str, Any]:
-    """Forgets the other box, and tells it to forget this one when it can be reached."""
-    return await asyncio.to_thread(ha_link.unpair, _actor(principal))
+    """Forgets the other box and the copy kept of it, and tells it to forget this one when it can be reached."""
+    await asyncio.to_thread(ha_link.unpair, _actor(principal))
+    return await asyncio.to_thread(_status)
 
 
 @router.post("/ha/check", dependencies=[ADMIN])
 async def ha_check() -> dict[str, Any]:
     """Asks the other box whether it is there."""
-    return await asyncio.to_thread(ha_link.check)
+    await asyncio.to_thread(ha_link.check)
+    return await asyncio.to_thread(_status)
+
+
+@router.post("/ha/fetch", dependencies=[ADMIN])
+async def ha_fetch() -> dict[str, Any]:
+    """On the second NAS: fetches the first one's people and settings now (it also does every night)."""
+    if ha_link.role() != "second":
+        raise _refused(ha_link.LinkError("not_second", "Only the second NAS fetches people and settings."), 409)
+    await asyncio.to_thread(ha_state.fetch_soon)
+    return await asyncio.to_thread(_status)
 
 
 @router.post("/ha/peer/pair", dependencies=[Depends(rate_limit("ha.pair", 10, 600, per="ip"))])

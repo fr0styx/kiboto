@@ -5,9 +5,10 @@ uses. The **second NAS** keeps a copy of chosen folders, people and settings, an
 you press a button on it. Only the name the family uses for the NAS moves to the second one; going
 back to the first is done by hand.
 
-This is being built in steps. **What works today is the first step: pairing the two boxes**, with a
-link between them that nobody else on your network can read. Keeping folders, people and settings
-in step, and the takeover button, come with the next updates and will be described here.
+This is being built in steps. **What works today: pairing the two boxes**, with a link between
+them that nobody else on your network can read, **and the second NAS keeping a copy of the first
+one's people and settings**. The chosen folders and the takeover button come with the next updates
+and will be described here.
 
 ## Pairing the two boxes
 
@@ -30,6 +31,22 @@ After 5 tries with a wrong pairing key the key is gone; make a new one.
 
 **Unpair** on either box ends it and tells the other box, if it can be reached. A box that could not
 be told keeps its part until it is unpaired there too.
+
+## The copy of people and settings
+
+Once paired, the second NAS asks the first for its people and settings: right away, then every
+night at 02:30, and when you press **Fetch now** on the second NAS's card. What it gets is the same
+encrypted settings backup the Backup page makes: the people with their sign-ins and two-step
+sign-in, the settings, the shares, the apps' definitions, and the key the sealed parts need. It
+does not hold your files.
+
+The second NAS **keeps this copy and does nothing with it**. Its own people and settings stay as
+they are until the day it takes over; a mistake made on the first NAS is not carried over at once.
+The copy is kept encrypted, and what opens it is sealed with the second NAS's own key. Each fetch
+replaces the copy before. Unpairing removes it.
+
+The card on the second NAS says from when its copy is; the card on the first says when the second
+last fetched.
 
 ## How the link is protected
 

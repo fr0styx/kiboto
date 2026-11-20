@@ -253,6 +253,16 @@ def _run_user_scripts(now: float) -> None:
         logger.warning("[Scheduler] Scheduled scripts failed: %s", e)
 
 
+def _run_ha(now: float) -> None:
+    """The second NAS of a pair fetches the first one's people and settings once a night (none by default)."""
+    try:
+        from backend.services import ha_state
+
+        ha_state.run_due(now)
+    except (OSError, RuntimeError, ValueError) as e:
+        logger.warning("[Scheduler] High availability failed: %s", e)
+
+
 def _run_tiering(now: float) -> None:
     """Old files of the folders that have tiering on move to the slow pool at night (none by default)."""
     try:
@@ -307,6 +317,7 @@ def _run_scheduled_tasks():
         _run_route_check(now)
         _run_user_scripts(now)
         _run_tiering(now)
+        _run_ha(now)
         on_its_own("weakness feed", _run_weakness_feed, now)
         cfg = get_smart_schedule()
 
