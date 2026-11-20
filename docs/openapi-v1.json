@@ -56528,6 +56528,90 @@
     ]
    }
   },
+  "/api/v1/ha/apps": {
+   "get": {
+    "description": "The first NAS's apps as the second one was told: each with whether it can be added here\n(its folders are kept here) and how adding it went. Never the set-up itself.",
+    "operationId": "ha_apps_list_api_v1_ha_apps_get",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Ha Apps List Api V1 Ha Apps Get",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Ha Apps List",
+    "tags": [
+     "High availability"
+    ],
+    "x-required-scopes": [
+     "system:config"
+    ]
+   }
+  },
+  "/api/v1/ha/apps/{name}/add": {
+   "post": {
+    "description": "After a takeover: sets one of the first NAS's apps up on this box, with this box's copy of its\nfolders, in the background. Confirmed. Everything is taken back if a part does not come up.",
+    "operationId": "ha_app_add_api_v1_ha_apps__name__add_post",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "name",
+      "required": true,
+      "schema": {
+       "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$",
+       "title": "Name",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Ha App Add Api V1 Ha Apps  Name  Add Post",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "404": {
+      "$ref": "#/components/responses/NotFound"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Ha App Add",
+    "tags": [
+     "High availability"
+    ],
+    "x-required-scopes": [
+     "system:config"
+    ]
+   }
+  },
   "/api/v1/ha/check": {
    "post": {
     "description": "Asks the other box whether it is there.",

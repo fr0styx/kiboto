@@ -441,7 +441,7 @@ HERE = {
 
 
 def test_the_backups_come_along_switched_off_when_asked(net, monkeypatch):
-    """The owner, 20 Nov 2026: "give the option to the user"."""
+    """Ticked at the takeover: backups of the kept folders arrive, switched off."""
     assert hs.info()["holds"] == {"backup_jobs": 4, "offsite": 4}  # what the card can say before
     monkeypatch.setattr(ha_bring, "here", lambda: HERE)
     (net.dirs[B] / "backup_jobs.json").write_text(json.dumps([{"id": "own1", "enabled": True}]))

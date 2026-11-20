@@ -114,6 +114,31 @@ turn each one on under Backup after a look.
 Passwords that the first NAS kept sealed are sealed again with this NAS's own key. After the
 takeover the card says how many backups came along and how many stayed behind.
 
+### The apps
+
+An app is not a setting: its set-up lives in Docker on the first NAS, and its files in a folder.
+So with every fetch the first NAS also tells the second one how each of its apps is set up (a
+Compose file rebuilt from the app's containers). The second NAS keeps that sealed, because a
+set-up holds the app's passwords, and does nothing with it. Kiboto itself is never in the list.
+
+After a takeover the card lists **Apps of the first NAS**. **Add here** on one sets it up on
+this NAS and starts it, after you confirm. It is your choice app by app:
+
+- An app **can be added** when every folder it uses is inside a folder kept in step. It is then
+  pointed at this NAS's copy of that folder. Keep the folder the apps store their files in (often
+  `appdata`) in step if you want apps to follow.
+- An app whose files are in a folder that is **not kept here** cannot be added, and the card
+  names the folder. Nothing is set up empty.
+- The files are **last night's**. A database that was being written while it was copied may
+  need the app's own repair.
+- If a part of the app does not come up, everything is **taken back**, and the card says why.
+- An app that asks for **host-level access** (for example a privileged container) is not added
+  from here. Add it under Apps if you want it; that is a decision for a person.
+- Images are downloaded when an app is added, so the second NAS needs the internet for it.
+
+Apps added this way are this NAS's own afterwards: taking the name back or unpairing leaves
+them where they are.
+
 After a takeover the second NAS fetches nothing more from the first one. The folders hold what
 the last nightly fetch brought, so at worst a day of changes is missing.
 
@@ -129,7 +154,7 @@ is called what it was called before, and the first NAS answers again. If the sec
 be told, the button is refused, and **Take it back anyway** goes ahead; turn the second NAS off
 or unpair it, or two boxes answer to one name.
 
-Going back is done by hand, as you decided: **files and people changed on the second NAS while it
+Going back is done by hand: **files and people changed on the second NAS while it
 stood in are not copied back by themselves.** Copy the changed files to the first NAS (the
 second one's shared folders hold them), and make account changes again on the first NAS. After
 that the second NAS is the second NAS again and fetches every night; files it changed itself are

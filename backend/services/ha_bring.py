@@ -1,5 +1,5 @@
-"""High availability: what else a takeover brings along when the person asks for it (the owner,
-20 Nov 2026: "give the option to the user"). So far: the first NAS's backups.
+"""High availability: what else a takeover brings along when the person asks for it. So far: the
+first NAS's backups.
 
 A takeover always brings the people (ha_takeover.py). Backups are a choice, because they act on
 their own once they run: a copy job that mirrors would make its destination look like this box's

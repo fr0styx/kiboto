@@ -223,10 +223,14 @@ def fetch_soon() -> bool:
         _state.update(fetching=True, error="")
 
     def work() -> None:
-        from backend.services import ha_folders
+        from backend.services import ha_apps, ha_folders
 
         try:
             fetch()
+            try:
+                ha_apps.fetch()  # how the first NAS's apps are set up, for after a takeover
+            except LinkError as e:  # a first NAS from before this question refuses it
+                logger.info("[HA] the first NAS did not tell how its apps are set up: %s", e)
         except LinkError as e:
             _state["error"] = e.key
             logger.warning("[HA] people and settings were not fetched: %s", e)

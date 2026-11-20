@@ -227,6 +227,11 @@ def topological_sort_stack_containers(
     return ordered_containers
 
 
+def stack_of(labels: dict[str, Any]) -> str:
+    """The app (a Compose project or its like) a container belongs to, by its labels; "" for one on its own."""
+    return str(_classify_stack(labels or {})[0] or "")
+
+
 def list_all_stacks() -> list[dict[str, Any]]:
     """
     Discovers and groups all containers by their Compose / Orchestrator stack.

@@ -16,6 +16,10 @@ let _folders = null; // on the second NAS: the first one's shared folders, once 
 let _code = '';
 let _answers = false; // the second NAS asked to take over, and the first one still answers
 const _bring = new Set(); // what else the person ticked to come along at the takeover
+let _apps = null; // after a takeover: the first NAS's apps, once asked
+let _poll = 0;
+/** How often the list is read again while an app is being added (a test makes it 0). */
+export const haTiming = { poll: 4000 };
 let _unreached = false; // the first NAS asked for its name back, and the second one did not answer
 
 const el = (tag, props = {}, ...kids) => {
@@ -235,6 +239,18 @@ function takeoverPart() {
       })
     );
   }
+  if (_view.apps_known)
+    box.append(
+      el('p', {
+        className: 'immich-note',
+        id: 'ha-apps-known',
+        textContent: t(
+          'standby.apps_known',
+          'The first NAS also told this one how its {count, plural, one {# app is} other {# apps are}} set up. After taking over you can add them here one by one, where their folders are kept in step.',
+          { count: _view.apps_known }
+        ),
+      })
+    );
   if (_answers)
     box.append(
       el('p', {
@@ -256,6 +272,81 @@ function takeoverPart() {
       )
     );
   return box;
+}
+
+/** What is said of one app of the first NAS, after a takeover. */
+export function haAppLine(app) {
+  if (app.state === 'adding') return t('standby.app_adding', 'Being added…');
+  if (app.state === 'added') return t('standby.app_added', 'Added. It is under Apps.');
+  if (app.state === 'here') return t('standby.app_here', 'On this NAS already.');
+  if (app.why?.why === 'folder_not_kept')
+    return t('standby.app_not_kept', 'Not possible: it keeps files in “{folder}”, which is not kept on this NAS.', {
+      folder: app.why.folder || '',
+    });
+  if (app.why)
+    return t('standby.app_missing', 'Not possible: it uses {path}, which this NAS does not have.', {
+      path: app.why.path || '',
+    });
+  if (app.state === 'needs_review')
+    return t(
+      'standby.app_review',
+      'Not added from here: it asks for host-level access. Add it under Apps if you want it.'
+    );
+  if (app.state === 'failed') return t('standby.app_failed', 'Not added: {error}', { error: app.error || '' });
+  return t('standby.app_can', 'Can be added: its folders are kept here.');
+}
+
+/** After a takeover: the first NAS's apps, each with what is true of it and a button where it can be added. */
+function appsPart() {
+  const box = el('div', { className: 'ha-folders', id: 'ha-apps' });
+  box.append(
+    el('div', { className: 'nsv-fs13-bold-strong', textContent: t('standby.apps_title', 'Apps of the first NAS') }),
+    el('p', {
+      className: 'immich-note',
+      textContent: t(
+        'standby.apps_note',
+        "Add here sets an app up on this NAS with this NAS's copy of its folders, as they were at the last fetch. If a part of it does not come up, everything is taken back."
+      ),
+    })
+  );
+  if (_apps && !_apps.length)
+    box.append(
+      el('p', {
+        className: 'immich-note',
+        id: 'ha-apps-none',
+        textContent: t('standby.apps_none', 'The first NAS told of no apps.'),
+      })
+    );
+  for (const app of _apps || []) {
+    const can = !app.why && !['adding', 'added', 'here', 'needs_review'].includes(app.state);
+    const add = can ? button('app_add', t('standby.app_add', 'Add here')) : null;
+    if (add) {
+      add.dataset.haApp = app.name;
+      add.setAttribute('aria-label', `${t('standby.app_add', 'Add here')}: ${app.name}`);
+    }
+    box.append(
+      el(
+        'div',
+        { className: 'ha-app' },
+        el('strong', { textContent: app.name }),
+        el('span', { className: 'immich-note', textContent: haAppLine(app) }),
+        add
+      )
+    );
+  }
+  return box;
+}
+
+/** Reads the apps again; while one is being added, again a little later. */
+async function loadApps() {
+  clearTimeout(_poll);
+  try {
+    _apps = (await api.get('/api/ha/apps')).apps || [];
+  } catch {
+    _apps = [];
+  }
+  draw();
+  if (_apps.some((a) => a.state === 'adding')) _poll = setTimeout(loadApps, haTiming.poll);
 }
 
 /** On a first NAS whose second one took over: that it is silent, and the way back. */
@@ -394,6 +485,7 @@ function draw() {
         : el('p', { className: 'immich-note', id: 'ha-copy', textContent: haCopy(_view) }),
       _view.role === 'second' ? foldersPart() : null,
       _view.role === 'first' && _view.stood_down ? heldPart() : null,
+      _view.role === 'took_over' ? appsPart() : null,
       el(
         'div',
         { className: 'ddns-actions' },
@@ -479,6 +571,12 @@ async function onClick(e) {
       _view = await api.post('/api/ha/take-back', { even_if_unreachable: action === 'takeback_anyway' });
       _unreached = false;
       showToast(t('standby.took_back', 'This NAS answers to its name again.'), 'success');
+    } else if (action === 'app_add') {
+      const name = /** @type {HTMLElement} */ (e.target).dataset.haApp || '';
+      // the server asks to confirm; the app is set up in the background, so the list is read again
+      _apps = (await api.post(`/api/ha/apps/${encodeURIComponent(name)}/add`, {})).apps || [];
+      clearTimeout(_poll);
+      _poll = setTimeout(loadApps, haTiming.poll);
     } else if (action === 'unpair') {
       _view = await api.delete('/api/ha'); // the server asks to confirm
       showToast(t('standby.unpaired_toast', 'Unpaired.'), 'success');
@@ -523,6 +621,7 @@ export async function renderHaCard() {
     }
     draw();
   }
+  if (_view.role === 'took_over') await loadApps();
   return true;
 }
 
@@ -535,4 +634,6 @@ export function resetHaCardForTesting() {
   _answers = false;
   _unreached = false;
   _bring.clear();
+  _apps = null;
+  clearTimeout(_poll);
 }

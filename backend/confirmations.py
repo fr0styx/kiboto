@@ -90,6 +90,7 @@ ACTIONS: dict[str, str] = {
     "ha.takeover_anyway": "Take over although {target} still answers: two boxes may answer to one name until it is turned off. This NAS takes its people, their access to the kept folders and its name, and restarts",
     "ha.take_back": "This NAS answers to its name again and the second NAS stops. What changed on the second NAS meanwhile is not copied back",
     "ha.take_back_anyway": "Take the name back although the second NAS does not answer: it may still answer to the name until it is turned off or unpaired",
+    "ha.app_add": "Set the app {target} of the first NAS up on this NAS and start it. It uses this NAS's copy of its folders, as they were at the last fetch",
     "ha.unpair": "Unpair this NAS from the other one. Neither stands in for the other any more; what was copied stays where it is",
     "fleet.pair": "Pair with the Kiboto box at {target}. Each box then sees the other's name, version, free space and backups",
     "fleet.offer_space": "Let {target} back up to this box. Its backups are append-only and encrypted with its own key; they use space here",

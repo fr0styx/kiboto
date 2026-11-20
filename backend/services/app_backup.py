@@ -291,6 +291,12 @@ def _stack_compose(details: dict[str, Any], inspects: list[dict[str, Any]]) -> s
     return yaml.safe_dump({"services": services}, sort_keys=False)
 
 
+def compose_of(inspects: list[dict[str, Any]]) -> str:
+    """A Compose file rebuilt from an app's containers: every folder in it is a full path, and
+    nothing depends on a file the box keeps elsewhere (a second NAS is told this, ha_apps)."""
+    return _stack_compose({}, inspects)
+
+
 def create_stack_backup(stack: str, reason: str = "on-demand") -> dict[str, Any]:
     """One archive for a whole app of several containers (Apps decision 2): its Compose file and
     the folders of all its parts. Running parts are paused while their folders are read."""

@@ -38,7 +38,7 @@ request and response schemas.
 
 <!-- BEGIN generated endpoints: python scripts/api_reference.py --update -->
 
-800 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
+802 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
 
 ### AI Conversation History
 
@@ -368,6 +368,8 @@ request and response schemas.
 | :--- | :--- | :--- | :--- |
 | `DELETE` | `/api/v1/ha` | `system:config` | Forgets the other box and the copy kept of it, and tells it to forget this one when it can be reached |
 | `GET` | `/api/v1/ha` | `system:config` | This box's part (first, second or none), the other box, how the last contact went, and the copy of the first NAS's people and settings th… |
+| `GET` | `/api/v1/ha/apps` | `system:config` | The first NAS's apps as the second one was told: each with whether it can be added here (its folders are kept here) and how adding it went |
+| `POST` | `/api/v1/ha/apps/{name}/add` | `system:config` | After a takeover: sets one of the first NAS's apps up on this box, with this box's copy of its folders, in the background |
 | `POST` | `/api/v1/ha/check` | `system:config` | Asks the other box whether it is there |
 | `POST` | `/api/v1/ha/code` | `system:config` | On the first NAS: a pairing key to type into the second one |
 | `POST` | `/api/v1/ha/fetch` | `system:config` | On the second NAS: fetches the first one's people and settings now (it also does every night) |

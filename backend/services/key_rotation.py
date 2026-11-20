@@ -97,6 +97,9 @@ def rotate_secret_key() -> dict[str, Any]:
 
     # a pair's link key and what opens the kept copy: without this a new key ended the pair
     resealed_backups += ha_link.reseal() + ha_state.reseal()
+    from backend.services import ha_apps
+
+    resealed_backups += ha_apps.reseal()  # how the first NAS's apps are set up, kept by the second
 
     os.remove(previous_key_file())
     result = {"rotated_at": time.time(), "mfa_secrets": resealed_mfa, "backup_passphrases": resealed_backups}

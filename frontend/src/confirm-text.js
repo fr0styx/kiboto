@@ -227,6 +227,11 @@ const ACTIONS = {
     'Take the name back although the second NAS does not answer? It may still answer to the name until it is turned off or unpaired.',
     true,
   ],
+  'ha.app_add': [
+    'Add the app',
+    "Set {target} up on this NAS and start it? It uses this NAS's copy of its folders, as they were at the last fetch. If a part of it does not come up, everything is taken back.",
+    false,
+  ],
   'ha.unpair': [
     'Unpair',
     'Unpair this NAS from the other one? Neither stands in for the other any more; what was copied stays where it is.',

@@ -9,14 +9,14 @@ from __future__ import annotations
 import asyncio
 from typing import Any, Literal
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Path, Request
 from pydantic import BaseModel, Field
 
 from backend.auth import AuthenticatedPrincipal, get_current_principal, require_scope
 from backend.confirmations import confirm_or_raise, require_confirmation
 from backend.errors import ApiError, said
 from backend.rate_limit import rate_limit
-from backend.services import ha_folders, ha_link, ha_state, ha_takeover
+from backend.services import ha_apps, ha_folders, ha_link, ha_state, ha_takeover
 
 router = APIRouter(tags=["High availability"])
 ADMIN = Depends(require_scope("system:config"))
@@ -66,7 +66,13 @@ def _actor(principal: AuthenticatedPrincipal) -> str:
 
 def _status() -> dict[str, Any]:
     """The link's status, and the copy of people and settings that goes with it."""
-    return {**ha_link.status(), **ha_state.view(), **ha_folders.view(), **ha_takeover.view()}
+    return {
+        **ha_link.status(),
+        **ha_state.view(),
+        **ha_folders.view(),
+        **ha_takeover.view(),
+        **ha_apps.view(),
+    }
 
 
 @router.get("/ha", dependencies=[ADMIN])
@@ -174,6 +180,29 @@ async def ha_take_over(
     except ha_link.LinkError as e:
         raise _refused(e, 400 if e.key == "bad_copy" else 409) from e
     return {**await asyncio.to_thread(_status), "restarting": bool(said.get("restarting"))}
+
+
+@router.get("/ha/apps", dependencies=[ADMIN])
+async def ha_apps_list() -> dict[str, Any]:
+    """The first NAS's apps as the second one was told: each with whether it can be added here
+    (its folders are kept here) and how adding it went. Never the set-up itself."""
+    return {"apps": await asyncio.to_thread(ha_apps.listing), "at": ha_apps.kept_at()}
+
+
+@router.post("/ha/apps/{name}/add", dependencies=[ADMIN])
+async def ha_app_add(
+    request: Request,
+    name: str = Path(pattern=r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$"),
+    principal: AuthenticatedPrincipal = Depends(get_current_principal),
+) -> dict[str, Any]:
+    """After a takeover: sets one of the first NAS's apps up on this box, with this box's copy of its
+    folders, in the background. Confirmed. Everything is taken back if a part does not come up."""
+    confirm_or_raise(request, principal, "ha.app_add", target=name)
+    try:
+        await asyncio.to_thread(ha_apps.add, name, _actor(principal))
+    except ha_link.LinkError as e:
+        raise _refused(e, 409) from e
+    return {"apps": await asyncio.to_thread(ha_apps.listing), "at": ha_apps.kept_at()}
 
 
 @router.post("/ha/take-back", dependencies=[ADMIN])

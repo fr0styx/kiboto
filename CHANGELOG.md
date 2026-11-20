@@ -142,6 +142,8 @@ A second NAS that can take over, fourth step: the takeover. **Take over now** on
 
 A second NAS that takes over can bring the first one's backups along. Tick **Also bring the first NAS's backups, switched off** under Take over now. A backup comes along when its folder is one of the folders kept in step, with its password and its cloud sign-in; you turn each one on under Backup after a look. A backup onto a drive of the first NAS stays behind. See docs/HA.md.
 
+After a second NAS has taken over, it lists the **apps of the first NAS**, and **Add here** sets one up with this NAS's copy of its folders. An app can be added when the folders it keeps its files in are among the folders kept in step (keep `appdata` in step if you want apps to follow); otherwise the card names the folder that is missing. If a part of the app does not come up, everything is taken back. See docs/HA.md.
+
 #### Security
 
 - **App logos**: Kiboto fetches a logo only when an app in the catalog names that exact address. Before, any

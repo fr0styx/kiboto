@@ -9,6 +9,8 @@ import {
   haRole,
   haCopy,
   haFolderLine,
+  haAppLine,
+  haTiming,
 } from '../components/management/ha-card.js';
 
 vi.mock('../toast.js', async (orig) => ({ ...(await orig()), showToast: vi.fn() }));
@@ -403,6 +405,104 @@ describe('a second NAS that can take over', () => {
     await renderHaCard();
     expect(card().querySelector('#ha-bring-backups').checked).toBe(false); // the tick does not outlive the card
     expect(card().querySelector('#ha-bring-note').textContent).toMatch(/stays behind\.$/); // an older copy: no count
+  });
+
+  it('says what is true of each app of the first NAS', () => {
+    expect(haAppLine({ name: 'a', state: '', why: null })).toBe('Can be added: its folders are kept here.');
+    expect(haAppLine({ name: 'a', state: 'adding' })).toBe('Being added…');
+    expect(haAppLine({ name: 'a', state: 'added' })).toBe('Added. It is under Apps.');
+    expect(haAppLine({ name: 'a', state: 'here' })).toBe('On this NAS already.');
+    expect(haAppLine({ name: 'a', state: 'failed', error: 'the image was not found' })).toBe(
+      'Not added: the image was not found'
+    );
+    expect(haAppLine({ name: 'a', state: 'failed' })).toBe('Not added: ');
+    expect(haAppLine({ name: 'a', state: 'needs_review' })).toMatch(
+      /^Not added from here: it asks for host-level access/
+    );
+    expect(haAppLine({ name: 'a', state: '', why: { why: 'folder_not_kept', folder: 'appdata' } })).toBe(
+      'Not possible: it keeps files in “appdata”, which is not kept on this NAS.'
+    );
+    expect(haAppLine({ name: 'a', state: '', why: { why: 'folder_missing', path: '/srv/x' } })).toBe(
+      'Not possible: it uses /srv/x, which this NAS does not have.'
+    );
+    expect(haAppLine({ name: 'a', state: '', why: { why: 'folder_not_kept' } })).toContain('“”');
+    expect(haAppLine({ name: 'a', state: '', why: { why: 'something new' } })).toContain('it uses ,');
+  });
+
+  it('after a takeover the apps of the first NAS are listed, and one is added when asked', async () => {
+    const took = { ...NONE, role: 'took_over', peer: PEER, took_over: { at: 1763700000, from: 'First NAS', name: '' } };
+    const apps = [
+      { name: 'jellyfin', state: '', why: null },
+      { name: 'taxes', state: '', why: { why: 'folder_not_kept', folder: 'taxes' } },
+      { name: 'grafana', state: 'here', why: null },
+    ];
+    const get = vi.spyOn(api, 'get').mockImplementation(async (url) => (url === '/api/ha/apps' ? { apps } : took));
+    const adding = apps.map((a) => (a.name === 'jellyfin' ? { ...a, state: 'adding' } : a));
+    const post = vi.spyOn(api, 'post').mockResolvedValue({ apps: adding });
+    haTiming.poll = 0;
+    await renderHaCard();
+    const rows = () => [...card().querySelectorAll('#ha-apps .ha-app')].map((r) => r.textContent);
+    expect(rows()).toEqual([
+      'jellyfinCan be added: its folders are kept here.Add here',
+      'taxesNot possible: it keeps files in “taxes”, which is not kept on this NAS.',
+      'grafanaOn this NAS already.',
+    ]);
+    const add = card().querySelector('[data-ha-act="app_add"]');
+    expect(add.getAttribute('aria-label')).toBe('Add here: jellyfin');
+    // the list is read again while the app is being added, until it is
+    get.mockImplementation(async (url) =>
+      url === '/api/ha/apps' ? { apps: apps.map((a) => (a.name === 'jellyfin' ? { ...a, state: 'added' } : a)) } : took
+    );
+    add.click();
+    await flush();
+    expect(post).toHaveBeenCalledWith('/api/ha/apps/jellyfin/add', {});
+    await flush();
+    await flush();
+    await flush();
+    expect(rows()[0]).toBe('jellyfinAdded. It is under Apps.');
+    expect(card().querySelector('[data-ha-act="app_add"]')).toBeNull();
+    haTiming.poll = 4000;
+  });
+
+  it('an app that is still being added is asked about again, and a list that cannot be read is empty', async () => {
+    const took = { ...NONE, role: 'took_over', peer: PEER, took_over: { at: 1763700000, from: 'First NAS', name: '' } };
+    let asked = 0;
+    vi.spyOn(api, 'get').mockImplementation(async (url) => {
+      if (url !== '/api/ha/apps') return took;
+      asked += 1;
+      return { apps: [{ name: 'jellyfin', state: asked < 3 ? 'adding' : 'failed', error: 'no room', why: null }] };
+    });
+    haTiming.poll = 0;
+    await renderHaCard();
+    for (let i = 0; i < 6; i += 1) await flush();
+    expect(asked).toBe(3);
+    expect(card().querySelector('#ha-apps .ha-app').textContent).toBe('jellyfinNot added: no roomAdd here'); // can be tried again
+    haTiming.poll = 4000;
+    resetHaCardForTesting();
+    vi.mocked(api.get).mockImplementation(async (url) => {
+      if (url === '/api/ha/apps') throw new Error('offline');
+      return took;
+    });
+    await renderHaCard();
+    expect(card().querySelector('#ha-apps-none').textContent).toBe('The first NAS told of no apps.');
+    resetHaCardForTesting();
+    vi.mocked(api.get).mockImplementation(async (url) => (url === '/api/ha/apps' ? {} : took));
+    await renderHaCard();
+    expect(card().querySelector('#ha-apps-none')).not.toBeNull();
+  });
+
+  it('the second NAS says how many apps it was told about, before a takeover', async () => {
+    const copy = { name: 'First NAS', made: 1763600000, fetched: 1763600100, size: 1024 };
+    vi.spyOn(api, 'get').mockResolvedValue({ ...NONE, role: 'second', peer: PEER, copy, apps_known: 2 });
+    await renderHaCard();
+    expect(card().querySelector('#ha-apps-known').textContent).toMatch(
+      /^The first NAS also told this one how its 2 apps are set up\./
+    );
+    expect(card().querySelector('#ha-apps')).toBeNull(); // the list comes after the takeover
+    resetHaCardForTesting();
+    vi.mocked(api.get).mockResolvedValue({ ...NONE, role: 'second', peer: PEER, copy, apps_known: 0 });
+    await renderHaCard();
+    expect(card().querySelector('#ha-apps-known')).toBeNull();
   });
 
   it('stays away for someone who may not change the system', async () => {
