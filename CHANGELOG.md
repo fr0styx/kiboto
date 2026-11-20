@@ -52,6 +52,10 @@ Apps on a phone: each app is a short card with its name, its state, one button (
 
 Replacing the install's secret key (Security) no longer ends the pairing of two NAS boxes: the link's key is sealed again with the new one.
 
+The card for a second NAS showed the word "null" where a part of it was not drawn.
+
+A label on a file that was deleted over the network, outside the File Explorer, stayed for good. It now goes the next time its folder is opened.
+
 #### Changes
 
 - **Ask Kib about the NAS in your language**: questions about free space, drives, fans, apps, the network and
@@ -71,6 +75,8 @@ Replacing the install's secret key (Security) no longer ends the pairing of two 
 
 - **Ask Kib whether your drives are healthy**: Kib was told each drive's state and temperature but not its
   health. It now knows which drives are good, which show wear and which are failing, and says so.
+
+Kib can say how much space each app uses, from the last time it was measured under Apps, and says when that was. It no longer has to leave the question unanswered.
 
 #### New
 

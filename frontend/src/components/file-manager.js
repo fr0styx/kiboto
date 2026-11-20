@@ -30,7 +30,7 @@ import { openFilePreview as openFilePreviewModal } from '../file-preview-loader.
 import { transferCenter } from './transfer-center.js';
 import { uploadAll, planDrop, uploadUrl } from './fm-upload.js';
 import { favorites, isFavorite, toggleFavorite, closestPath } from './fm-favorites.js';
-import { markLabel, labelsMayHaveMoved, loadLabels } from './fm-labels.js';
+import { markLabel, labelsMayHaveMoved, labelsAfterListing, loadLabels } from './fm-labels.js';
 import { thumbKind, thumbUrl } from './viewer-kit.js';
 
 /** Asks the server to make this folder's photo and video thumbnails ahead of the scroll (NPERF-8). */
@@ -2332,6 +2332,7 @@ export class FileManagerWindow {
         signal: this.abortController.signal,
       });
       this.currentPath = res.current;
+      labelsAfterListing(res);
       prefetchThumbs(res);
       if (this.isPrimary) {
         try {

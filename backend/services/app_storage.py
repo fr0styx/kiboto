@@ -11,9 +11,13 @@ import os
 import time
 from typing import Any
 
+from backend.config import DATA_DIR, logger
+from backend.fsutil import atomic_write_json, read_json
 from backend.services.app_backup import BULK_STORAGE_PREFIXES, SYSTEM_MOUNT_PREFIXES
 
 WALK_SECONDS = 20.0  # all folders together
+LAST_FILE = os.path.join(DATA_DIR, "app_space_last.json")
+WALKED_GOOD_FOR = 86400.0  # a measurement with the folders is not replaced by one without for a day
 
 
 def _under(path: str, prefixes: tuple[str, ...]) -> bool:
@@ -118,4 +122,38 @@ def measure(walk: bool = False) -> dict[str, Any]:
     if status != 200 or not isinstance(df, dict):
         message = df.get("message") if isinstance(df, dict) else ""
         raise RuntimeError(message or f"Docker answered {status}")
-    return summarize(df, walk)
+    result = summarize(df, walk)
+    remember(result)
+    return result
+
+
+def last() -> dict[str, Any] | None:
+    """The last measurement, as kept: {at, walked, apps: {name: {data_bytes, program_bytes}}}. For
+    whoever must not measure again to answer (the assistant: measuring takes seconds and reads disks)."""
+    kept = read_json(LAST_FILE, None)
+    if not isinstance(kept, dict) or not isinstance(kept.get("apps"), dict) or not kept.get("at"):
+        return None
+    return kept
+
+
+def remember(result: dict[str, Any], now: float | None = None) -> bool:
+    """Keeps a measurement for later answers. One without the folders does not replace a recent one with them."""
+    now = time.time() if now is None else now
+    walked = bool(result.get("folders_measured"))
+    had = last()
+    if not walked and had and had.get("walked") and now - float(had["at"]) < WALKED_GOOD_FOR:
+        return False
+    apps = {
+        str(a.get("name")): {
+            "data_bytes": int(a.get("data_bytes") or 0),
+            "program_bytes": int(a.get("program_bytes") or 0),
+        }
+        for a in result.get("apps") or []
+        if a.get("name")
+    }
+    try:
+        atomic_write_json(LAST_FILE, {"at": now, "walked": walked, "apps": apps})
+    except OSError:
+        logger.debug("[Apps] the space measurement could not be kept", exc_info=True)
+        return False
+    return True

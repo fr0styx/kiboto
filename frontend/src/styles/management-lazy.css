@@ -623,7 +623,7 @@
 .tier-days { width: 84px; }
 .ha-folders { margin: 10px 0; display: flex; flex-direction: column; gap: 6px; }
 .ha-folder-list { display: flex; flex-wrap: wrap; gap: 6px 16px; }
-.ha-folder { display: inline-flex; align-items: center; gap: 8px; font-size: var(--kb-fs-sm); }
+.ha-folder { display: inline-flex; align-items: center; gap: 8px; min-height: 32px; font-size: var(--kb-fs-sm); }
 .ha-app { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; font-size: var(--kb-fs-sm); }
 .ha-app > .immich-note { flex: 1 1 220px; margin: 0; }
 .ha-code { display: inline-block; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--kb-line-14); background: var(--kb-shade-25); font-size: 18px; letter-spacing: 2px; user-select: all; }

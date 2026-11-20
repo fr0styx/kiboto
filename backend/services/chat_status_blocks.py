@@ -38,6 +38,48 @@ def size(item: dict[str, Any], what: str) -> str:
     return f"{round(tib * 1024, 1)} GB" if isinstance(tib, (int, float)) else "size unknown"
 
 
+def _bytes_said(n: Any) -> str:
+    n = float(n or 0)
+    for unit, step in (("TiB", 1024**4), ("GiB", 1024**3), ("MiB", 1024**2)):
+        if n >= step:
+            return f"{n / step:.1f} {unit}"
+    return f"{n / 1024:.0f} KiB"
+
+
+def app_space_lines(tr: dict[str, Any]) -> list[str]:
+    """What the model is told about space per app: the last measurement and its date, or that
+    there is none, so it never makes a size up. Nothing when the tool result has no word on it."""
+    import time
+
+    if "space_at" not in tr:
+        return []
+    if not tr.get("space_at"):
+        return [
+            "- App sizes: not measured yet. They are measured when someone opens Apps and asks for the space "
+            "apps use. Do not state any app's size."
+        ]
+    when = time.strftime("%Y-%m-%d %H:%M", time.localtime(float(tr["space_at"])))
+    what = (
+        "app data with the app's own folders"
+        if tr.get("space_walked")
+        else "app data as Docker counts it; the app's folders on the NAS were not measured"
+    )
+    lines = [f"- App sizes below were measured {when} ({what}); they are not live."]
+    largest = tr.get("largest") or []
+    if largest:
+        lines.append(
+            "- Largest by data: " + ", ".join(f"{a['name']} ({_bytes_said(a['data_bytes'])})" for a in largest)
+        )
+    return lines
+
+
+def app_space_said(c: dict[str, Any]) -> str:
+    """One app's sizes for its line, or nothing when they were not measured."""
+    if c.get("data_bytes") is None:
+        return ""
+    return f", data {_bytes_said(c.get('data_bytes'))}, program {_bytes_said(c.get('program_bytes'))}"
+
+
 def cpu_said(tr: dict[str, Any]) -> str:
     """The CPU's load and temperature in a few words, without a number that was not read."""
     load, temp = tr.get("cpu_load_pct"), tr.get("cpu_temp_c")
@@ -245,7 +287,27 @@ def network_block(tr: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def docker_block(tr: dict[str, Any]) -> str:
+    """The apps as the model is told: each with its state, and its size when it was measured."""
+    longest = tr.get("longest_running")
+    c_lines = [
+        f"- {c.get('name')}: {c.get('state', 'unknown')}, Status/Uptime: {c.get('status', 'N/A')} (Image: {c.get('image', 'N/A')})"
+        f"{app_space_said(c)}"
+        for c in (tr.get("containers") or [])[:25]
+    ]
+    longest_str = (
+        f"\n- ⏱️ Longest-running container: {longest['name']} (Status/Uptime: {longest.get('status')})"
+        if longest
+        else ""
+    )
+    return (
+        f"## Docker Containers ({tr.get('running', 0)} running / {tr.get('total', 0)} total):{longest_str}\n"
+        + "\n".join([*app_space_lines(tr), *c_lines])
+    )
+
+
 STATUS_BLOCKS: dict[str, Callable[[dict[str, Any]], str]] = {
+    "list_docker_containers": docker_block,
     "get_system_telemetry": telemetry_block,
     "get_disks_and_standby_status": disks_block,
     "get_fan_and_thermal_status": fans_block,

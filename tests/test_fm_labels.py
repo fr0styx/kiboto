@@ -207,3 +207,53 @@ def test_restored_somewhere_else_and_what_the_bin_forgot(area):
     assert next(iter(json.loads(path.read_text()).values()))["binned"] == {}
     assert labels.BINNED_KEEP_SECS > labels.recycle_bin.KEEP_DAYS * 86400
     assert labels.deleted("", now=1.0) == 0 and labels.restored("", "/a") == 0 and labels.restored("/a", "") == 0
+
+
+def test_a_label_goes_when_its_file_is_gone_from_a_listed_folder(area):
+    """A file deleted over SMB never passes the File Explorer: its label stayed for good."""
+    from types import SimpleNamespace
+
+    client, h, root = area
+    user = client.get("/api/auth/me", headers=h).json()
+    me = SimpleNamespace(username=(user.get("user") or user).get("username"))
+    docs = root / "docs"
+    (docs / "old").mkdir()
+    (docs / "old" / "note.txt").write_bytes(b"x")
+    (docs / "keep.txt").write_bytes(b"x")
+    paths = [docs / "tax.pdf", docs / "keep.txt", docs / "old", docs / "old" / "note.txt"]
+    for p in paths:
+        assert client.put("/api/fs/labels", headers=h, json={"path": str(p), "colour": "red"}).status_code == 200
+    names = {"tax.pdf", "keep.txt", "old"}
+    assert labels.gone_from(me, str(docs), names) == 0  # everything is there
+    # deleted behind the File Explorer's back: one file, and a folder with a labelled file in it
+    assert labels.gone_from(me, str(docs) + "/", {"keep.txt"}) == 3
+    assert client.get("/api/fs/labels", headers=h).json()["items"] == {str(docs / "keep.txt"): "red"}
+    # an empty listing proves nothing (a pool that is not mounted looks like that), nor does nobody
+    assert labels.gone_from(me, str(docs), set()) == 0 and labels.gone_from(None, str(docs), {"x"}) == 0
+    assert labels.gone_from(me, str(root / "elsewhere"), {"x"}) == 0
+    assert client.get("/api/fs/labels", headers=h).json()["items"] == {str(docs / "keep.txt"): "red"}
+
+
+def test_listing_a_folder_drops_the_labels_of_what_is_gone(area, monkeypatch):
+    from types import SimpleNamespace
+
+    from backend.api.files import browse
+
+    client, h, root = area
+    user = client.get("/api/auth/me", headers=h).json()
+    me = SimpleNamespace(
+        username=(user.get("user") or user).get("username"), role_id="superadmin", has_scope=lambda s: True
+    )
+    tax = root / "docs" / "tax.pdf"
+    client.put("/api/fs/labels", headers=h, json={"path": str(tax), "colour": "green"})
+    (root / "docs" / "other.txt").write_bytes(b"x")
+    from backend.api.files import common
+
+    monkeypatch.setattr(browse, "ALLOWED_BROWSE_ROOTS", [str(root)])
+    monkeypatch.setattr(common, "ALLOWED_BROWSE_ROOTS", [str(root)])
+    said = browse._handle_browse_logic_unfiltered(str(root / "docs"), False, me)
+    assert "labels_gone" not in said  # nothing is gone
+    tax.unlink()  # as a delete over SMB would
+    said = browse._handle_browse_logic_unfiltered(str(root / "docs"), False, me)
+    assert said["labels_gone"] == 1 and client.get("/api/fs/labels", headers=h).json()["items"] == {}
+    assert "labels_gone" not in browse._handle_browse_logic_unfiltered(str(root / "docs"), False, None)

@@ -1033,23 +1033,6 @@ def _build_structured_llm_context(tool_results: list[dict[str, Any]]) -> str:
         elif tname in STATUS_BLOCKS:
             blocks.append(STATUS_BLOCKS[tname](tr))
 
-        elif tname == "list_docker_containers":
-            containers = tr.get("containers") or []
-            longest = tr.get("longest_running")
-            c_lines = [
-                f"- {c.get('name')}: {c.get('state', 'unknown')}, Status/Uptime: {c.get('status', 'N/A')} (Image: {c.get('image', 'N/A')})"
-                for c in containers[:25]
-            ]
-            longest_str = (
-                f"\n- ⏱️ Longest-running container: {longest['name']} (Status/Uptime: {longest.get('status')})"
-                if longest
-                else ""
-            )
-            blocks.append(
-                f"## Docker Containers ({tr.get('running', 0)} running / {tr.get('total', 0)} total):{longest_str}\n"
-                + "\n".join(c_lines)
-            )
-
         elif tname == "search_nas_knowledge":
             fpath = tr.get("folder_path")
             manifest = tr.get("folder_manifest") or {}

@@ -505,6 +505,24 @@ describe('a second NAS that can take over', () => {
     expect(card().querySelector('#ha-apps-known')).toBeNull();
   });
 
+  it('a part that is not drawn leaves nothing behind, in every state of the card', async () => {
+    const copy = { name: 'First NAS', made: 1763600000, fetched: 1763600100, size: 1024 };
+    const states = [
+      { ...NONE, role: 'first', peer: PEER, served: null },
+      { ...NONE, role: 'first', peer: PEER, served: 1763600000, stood_down: { at: 1763700000 } },
+      { ...NONE, role: 'second', peer: PEER, copy: null },
+      { ...NONE, role: 'second', peer: PEER, copy, fetching: true },
+      { ...NONE, role: 'took_over', peer: PEER, took_over: { at: 1763700000, from: 'First NAS', name: '' } },
+    ];
+    for (const state of states) {
+      resetHaCardForTesting();
+      vi.spyOn(api, 'get').mockImplementation(async (url) => (url === '/api/ha/apps' ? { apps: [] } : state));
+      await renderHaCard();
+      expect(card().textContent).not.toMatch(/null|undefined/);
+      expect([...card().childNodes].every((n) => n.nodeType === 1)).toBe(true); // elements only, no stray text
+    }
+  });
+
   it('stays away for someone who may not change the system', async () => {
     vi.spyOn(api, 'get').mockRejectedValue({ status: 403 });
     expect(await renderHaCard()).toBe(false);

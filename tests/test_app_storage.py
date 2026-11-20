@@ -119,3 +119,86 @@ def test_the_route_and_a_docker_that_does_not_answer(client, monkeypatch):
     monkeypatch.setattr(docker_client, "request", gone)
     res = client.get("/api/docker/apps/space", headers=h)
     assert res.status_code == 503 and "socket is missing" in res.text
+
+
+def test_the_last_measurement_is_kept_for_the_assistant(tmp_path, monkeypatch):
+    monkeypatch.setattr(app_storage, "LAST_FILE", str(tmp_path / "last.json"))
+    assert app_storage.last() is None
+    walked = {
+        "folders_measured": True,
+        "apps": [{"name": "jellyfin", "data_bytes": 5 * 1024**3, "program_bytes": 900 * 1024**2}, {"name": ""}],
+    }
+    assert app_storage.remember(walked, now=1000.0) is True
+    assert app_storage.last() == {
+        "at": 1000.0,
+        "walked": True,
+        "apps": {"jellyfin": {"data_bytes": 5 * 1024**3, "program_bytes": 900 * 1024**2}},
+    }
+    quick = {"folders_measured": False, "apps": [{"name": "jellyfin", "data_bytes": 1, "program_bytes": 2}]}
+    assert app_storage.remember(quick, now=2000.0) is False  # the fuller one is kept for a day
+    assert app_storage.last()["at"] == 1000.0
+    assert app_storage.remember(quick, now=1000.0 + app_storage.WALKED_GOOD_FOR + 1) is True
+    assert app_storage.last()["walked"] is False and app_storage.last()["apps"]["jellyfin"]["data_bytes"] == 1
+    (tmp_path / "a-file").write_text("x")
+    monkeypatch.setattr(app_storage, "LAST_FILE", str(tmp_path / "a-file" / "last.json"))
+    assert app_storage.remember(walked) is False and app_storage.last() is None  # cannot be kept: no error
+
+
+def test_a_measurement_is_remembered_when_it_is_made(tmp_path, monkeypatch):
+    from backend.services import docker_client
+
+    monkeypatch.setattr(app_storage, "LAST_FILE", str(tmp_path / "last.json"))
+    df = {
+        "Containers": [{"Names": ["/web"], "ImageID": "i1", "SizeRw": 2048, "Mounts": [], "State": "running"}],
+        "Images": [{"Id": "i1", "Size": 4096}],
+        "Volumes": [],
+    }
+    monkeypatch.setattr(docker_client, "request", lambda *a, **k: (200, df))
+    out = app_storage.measure()
+    assert out["apps"][0]["name"] == "web"
+    assert app_storage.last()["apps"] == {"web": {"data_bytes": 2048, "program_bytes": 4096}}
+
+
+def test_the_assistant_is_told_the_sizes_and_their_date_or_that_there_are_none(tmp_path, monkeypatch):
+    from backend.hardware import docker_stats
+    from backend.services import chat_nas_tools, chat_status_blocks
+
+    monkeypatch.setattr(app_storage, "LAST_FILE", str(tmp_path / "last.json"))
+    listed = [{"name": "jellyfin", "state": "running", "status": "Up 2 days"}, {"name": "pihole", "state": "exited"}]
+    monkeypatch.setattr(docker_stats, "read_docker_containers", lambda force=False: listed)
+    monkeypatch.setattr(chat_nas_tools, "test_mode", lambda: False)  # the real tool, not its canned answer
+    said = chat_nas_tools.tool_list_docker_containers()
+    assert said["space_at"] is None and said["largest"] == [] and "data_bytes" not in said["containers"][0]
+    lines = chat_status_blocks.app_space_lines(said)
+    assert len(lines) == 1 and "not measured yet" in lines[0] and "Do not state" in lines[0]
+    assert chat_status_blocks.app_space_said(said["containers"][0]) == ""
+    app_storage.remember(
+        {
+            "folders_measured": True,
+            "apps": [{"name": "jellyfin", "data_bytes": 5 * 1024**3, "program_bytes": 900 * 1024**2}],
+        },
+        now=1763600000.0,
+    )
+    said = chat_nas_tools.tool_list_docker_containers()
+    assert said["space_at"] == 1763600000.0 and said["space_walked"] is True
+    assert said["largest"] == [{"name": "jellyfin", "data_bytes": 5 * 1024**3}]
+    lines = chat_status_blocks.app_space_lines(said)
+    assert "were measured 2025-" in lines[0] or "were measured 20" in lines[0]
+    assert "with the app's own folders" in lines[0] and lines[1] == "- Largest by data: jellyfin (5.0 GiB)"
+    assert chat_status_blocks.app_space_said(said["containers"][0]) == ", data 5.0 GiB, program 900.0 MiB"
+    assert chat_status_blocks.app_space_said(said["containers"][1]) == ""  # not in the measurement
+    quick = {**said, "space_walked": False}
+    assert "folders on the NAS were not measured" in chat_status_blocks.app_space_lines(quick)[0]
+    assert chat_status_blocks.app_space_lines({"containers": []}) == []  # an older tool result: nothing is claimed
+    assert chat_status_blocks._bytes_said(3 * 1024**4) == "3.0 TiB" and chat_status_blocks._bytes_said(2048) == "2 KiB"
+    block = chat_status_blocks.docker_block(said)
+    assert (
+        block.startswith("## Docker Containers (1 running / 2 total):")
+        and "\n- App sizes below were measured " in block
+    )
+    assert "- jellyfin: running, Status/Uptime: Up 2 days (Image: ), data 5.0 GiB, program 900.0 MiB" in block
+    assert chat_status_blocks.STATUS_BLOCKS["list_docker_containers"] is chat_status_blocks.docker_block
+    with_longest = chat_status_blocks.docker_block(
+        {"containers": [], "longest_running": {"name": "a", "status": "Up 9 days"}}
+    )
+    assert "Longest-running container: a (Status/Uptime: Up 9 days)" in with_longest

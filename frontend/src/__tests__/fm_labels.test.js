@@ -18,6 +18,7 @@ import {
   openLabelList,
   resetLabelsForTesting,
   labelsMayHaveMoved,
+  labelsAfterListing,
 } from '../components/fm-labels.js';
 
 vi.mock('../toast.js', async (orig) => ({ ...(await orig()), showToast: vi.fn() }));
@@ -181,5 +182,17 @@ describe('file labels', () => {
     await vi.waitFor(() => expect(labelOf('/mnt/user/old/a.txt')).toBe('red'));
     expect(get).toHaveBeenCalledWith('/api/fs/labels');
     expect(labelOf('/mnt/user/a.txt')).toBeFalsy();
+  });
+  it('reads the list again when a listing says labels of deleted things were dropped', async () => {
+    const get = vi.spyOn(api, 'get').mockResolvedValue({ names: {}, items: { '/a/b.txt': 'red' } });
+    await loadLabels(true);
+    expect(get).toHaveBeenCalledTimes(1);
+    await labelsAfterListing({ current: '/a', dirs: [] }); // nothing was dropped: no request
+    await labelsAfterListing(null);
+    expect(get).toHaveBeenCalledTimes(1);
+    get.mockResolvedValue({ names: {}, items: {} });
+    const state = await labelsAfterListing({ current: '/a', dirs: [], labels_gone: 1 });
+    expect(get).toHaveBeenCalledTimes(2);
+    expect(state.items).toEqual({});
   });
 });

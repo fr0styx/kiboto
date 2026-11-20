@@ -149,6 +149,24 @@ def moved(old: str, new: str, username: str | None) -> int:
         return 0
 
 
+def gone_from(principal: AuthenticatedPrincipal | None, folder: str, names: set[str]) -> int:
+    """A folder was just listed: labels on things that are no longer in it are dropped, with those
+    inside a folder that is gone. A file deleted over SMB or by an app never passes the File
+    Explorer, so its label stayed for good. Only the listing is used: no disk is asked anything
+    more. An empty listing changes nothing: a pool that is not mounted looks like that."""
+    if principal is None or not names or not os.path.exists(_file()):
+        return 0
+    base = folder.rstrip("/") + "/"
+    with _LOCK:
+        mine = _load(principal)
+        gone = [p for p in mine["items"] if p.startswith(base) and p[len(base) :].split("/")[0] not in names]
+        for p in gone:
+            del mine["items"][p]
+        if gone:
+            _save(principal, mine)
+    return len(gone)
+
+
 # --- deleted files -----------------------------------------------------------------------------
 # A label goes into the Recycle Bin with its file and comes back with it. It is kept a little
 # longer than the bin keeps anything, then forgotten.

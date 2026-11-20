@@ -80,6 +80,12 @@ export function labelsMayHaveMoved() {
 }
 ZettEventBus.on('fm:refresh', labelsMayHaveMoved);
 
+/** A folder was listed: when the server dropped labels of things that are gone from it (deleted
+ *  over the network, outside these pages), the list is read again. */
+export function labelsAfterListing(listing) {
+  return listing && listing.labels_gone ? loadLabels(true) : Promise.resolve(_state);
+}
+
 /** Puts a colour on a path; no colour takes the label off. */
 export async function setLabel(path, colour) {
   try {

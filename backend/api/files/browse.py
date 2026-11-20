@@ -320,7 +320,19 @@ def _handle_browse_logic_unfiltered(path: str, dirs_only: bool, principal: Authe
         except Exception:
             ignored("backend.api.fs._handle_browse_logic_unfiltered")
 
-    return {"current": real, "roots": list(ALLOWED_BROWSE_ROOTS), "dirs": out}
+    return _listing(principal, real, out, {e.name if use_scandir else str(e) for e in scanned_entries})
+
+
+def _listing(principal: AuthenticatedPrincipal | None, real: str, out: list[Any], names: set[str]) -> dict[str, Any]:
+    """A folder as the page gets it. Labels of things deleted outside the File Explorer (over SMB, by
+    an app) go with this listing, and the page is told how many (`labels_gone`)."""
+    from backend.api.files import labels
+
+    listing: dict[str, Any] = {"current": real, "roots": list(ALLOWED_BROWSE_ROOTS), "dirs": out}
+    gone = labels.gone_from(principal, real, names)
+    if gone:
+        listing["labels_gone"] = gone
+    return listing
 
 
 def folder_asleep(path: str) -> bool:

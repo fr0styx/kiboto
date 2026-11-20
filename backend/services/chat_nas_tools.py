@@ -368,6 +368,14 @@ def tool_list_docker_containers(limit: int = 40) -> dict[str, Any]:
         }
 
     running_cnt = len(running)
+    # space per app: what was measured last (Apps measures it when asked), never measured for an answer
+    from backend.services import app_storage
+
+    space = app_storage.last()
+    for c in containers:
+        known = (space or {}).get("apps", {}).get(str(c.get("name")))
+        if isinstance(known, dict):
+            c["data_bytes"], c["program_bytes"] = known.get("data_bytes"), known.get("program_bytes")
     return {
         "tool": "list_docker_containers",
         "status": "ok",
@@ -376,6 +384,13 @@ def tool_list_docker_containers(limit: int = 40) -> dict[str, Any]:
         "stopped": len(containers) - running_cnt,
         "longest_running": longest_running_info,
         "containers": containers[: max(1, min(int(limit or 40), 60))],
+        "space_at": space.get("at") if space else None,
+        "space_walked": bool(space.get("walked")) if space else False,
+        "largest": [
+            {"name": c["name"], "data_bytes": c["data_bytes"]}
+            for c in sorted(containers, key=lambda c: -(c.get("data_bytes") or 0))[:5]
+            if c.get("data_bytes")
+        ],
     }
 
 

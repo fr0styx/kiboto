@@ -520,7 +520,7 @@ function draw() {
       )
     );
   }
-  card.replaceChildren(...parts);
+  card.replaceChildren(...parts.filter(Boolean)); // a part that is not drawn is null: it was shown as the word
 }
 
 async function onClick(e) {
