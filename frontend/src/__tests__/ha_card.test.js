@@ -123,6 +123,39 @@ describe('a second NAS that can take over', () => {
     expect(card().querySelector('[data-ha-act="first"]')).not.toBeNull();
   });
 
+  it('says when the other box was reached, and what went wrong with a step', async () => {
+    vi.spyOn(api, 'get').mockResolvedValue({ ...NONE, role: 'second', peer: PEER });
+    const post = vi
+      .spyOn(api, 'post')
+      .mockRejectedValueOnce({ error: 'ha_unreachable', message: 'The other NAS did not answer.' })
+      .mockRejectedValueOnce({ error: 'cancelled' });
+    await renderHaCard();
+    expect(card().querySelector('#ha-reach').textContent).toMatch(/^Reached .+\.$/);
+    await press('check');
+    expect(vi.mocked(showToast).mock.calls[0]).toEqual(["That didn't work: The other NAS did not answer.", 'error']);
+    await press('check'); // a confirmation that was cancelled is not an error
+    expect(showToast).toHaveBeenCalledTimes(1);
+    expect(post).toHaveBeenCalledTimes(2);
+  });
+
+  it('a pairing that fails without words still says so, and a cancelled one says nothing', async () => {
+    vi.spyOn(api, 'get').mockResolvedValue(NONE);
+    vi.spyOn(api, 'post').mockRejectedValueOnce({ error: 'cancelled' }).mockRejectedValueOnce({});
+    await renderHaCard();
+    await press('second');
+    const form = card().querySelector('#ha-pair-form');
+    const alert = card().querySelector('[role="alert"]');
+    form.dispatchEvent(new Event('submit', { cancelable: true }));
+    await flush();
+    await flush();
+    expect(alert.hidden).toBe(true);
+    form.dispatchEvent(new Event('submit', { cancelable: true }));
+    await flush();
+    await flush();
+    expect(alert.hidden).toBe(false);
+    expect(alert.textContent).toBe("That didn't work: ");
+  });
+
   it('stays away for someone who may not change the system', async () => {
     vi.spyOn(api, 'get').mockRejectedValue({ status: 403 });
     expect(await renderHaCard()).toBe(false);

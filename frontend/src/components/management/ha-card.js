@@ -20,21 +20,21 @@ const el = (tag, props = {}, ...kids) => {
 };
 
 const WHY = {
-  unreachable: ['ha2.why.unreachable', 'it did not answer'],
-  refused: ['ha2.why.refused', 'it refused'],
-  bad_message: ['ha2.why.bad_message', 'its answer could not be read'],
-  clock: ['ha2.why.clock', 'the two boxes do not agree on the time'],
-  not_paired: ['ha2.why.not_paired', 'it is no longer paired with this NAS'],
+  unreachable: ['standby.why.unreachable', 'it did not answer'],
+  refused: ['standby.why.refused', 'it refused'],
+  bad_message: ['standby.why.bad_message', 'its answer could not be read'],
+  clock: ['standby.why.clock', 'the two boxes do not agree on the time'],
+  not_paired: ['standby.why.not_paired', 'it is no longer paired with this NAS'],
 };
 
 /** How the last contact with the other NAS went, in a sentence. */
 export function haReach(peer) {
   if (!peer || peer.reachable === null || peer.reachable === undefined)
-    return t('ha2.unchecked', 'Not checked since this NAS started.');
+    return t('standby.unchecked', 'Not checked since this NAS started.');
   if (peer.reachable)
-    return t('ha2.reached', 'Reached {when}.', { when: formatDateTime((peer.last_contact || 0) * 1000) });
+    return t('standby.reached', 'Reached {when}.', { when: formatDateTime((peer.last_contact || 0) * 1000) });
   const why = WHY[peer.error] || WHY.unreachable;
-  return t('ha2.unreached', 'Not reached {when}: {why}.', {
+  return t('standby.unreached', 'Not reached {when}: {why}.', {
     when: formatDateTime((peer.last_contact || 0) * 1000),
     why: t(why[0], why[1]),
   });
@@ -45,13 +45,13 @@ export function haRole(view) {
   const peer = view.peer || {};
   const words = { name: peer.name || '?', address: peer.address || '' };
   return view.role === 'first'
-    ? t('ha2.is_first', 'This is the first NAS. The second one is {name} at {address}.', words)
-    : t('ha2.is_second', 'This is the second NAS. The first one is {name} at {address}.', words);
+    ? t('standby.is_first', 'This is the first NAS. The second one is {name} at {address}.', words)
+    : t('standby.is_second', 'This is the second NAS. The first one is {name} at {address}.', words);
 }
 
 function failed(err) {
   if (err?.error === 'cancelled') return;
-  showToast(t('ha2.failed', "That didn't work: {error}", { error: err?.message || '' }), 'error');
+  showToast(t('standby.failed', "That didn't work: {error}", { error: err?.message || '' }), 'error');
 }
 
 function button(action, text, primary = false) {
@@ -84,22 +84,22 @@ function pairForm() {
   const f = el(
     'form',
     { className: 'ddns-form', id: 'ha-pair-form' },
-    field(t('ha2.f_address', "The first NAS's address"), address),
+    field(t('standby.f_address', "The first NAS's address"), address),
     field(
-      t('ha2.f_code', 'The pairing key shown on the first NAS'),
+      t('standby.f_code', 'The pairing key shown on the first NAS'),
       code,
-      t('ha2.code_hint', 'On the first NAS, open this card and choose "This is the first NAS".')
+      t('standby.code_hint', 'On the first NAS, open this card and choose "This is the first NAS".')
     ),
     field(
-      t('ha2.f_mine', "This NAS's own address"),
+      t('standby.f_mine', "This NAS's own address"),
       mine,
-      t('ha2.mine_hint', 'Where the first NAS reaches this one: its number address on your home network.')
+      t('standby.mine_hint', 'Where the first NAS reaches this one: its number address on your home network.')
     ),
     el(
       'div',
       { className: 'ddns-actions' },
-      el('button', { type: 'submit', className: 'btn-pill-toggle is-primary', textContent: t('ha2.pair', 'Pair') }),
-      button('cancel', t('ha2.cancel', 'Cancel'))
+      el('button', { type: 'submit', className: 'btn-pill-toggle is-primary', textContent: t('standby.pair', 'Pair') }),
+      button('cancel', t('standby.cancel', 'Cancel'))
     ),
     error
   );
@@ -112,11 +112,11 @@ function pairForm() {
         my_address: mine.value.trim(),
       }); // the server asks to confirm
       _mode = '';
-      showToast(t('ha2.paired_toast', 'Paired. This is the second NAS now.'), 'success');
+      showToast(t('standby.paired_toast', 'Paired. This is the second NAS now.'), 'success');
       draw();
     } catch (err) {
       if (err?.error === 'cancelled') return;
-      error.textContent = err?.message || t('ha2.failed', "That didn't work: {error}", { error: '' });
+      error.textContent = err?.message || t('standby.failed', "That didn't work: {error}", { error: '' });
       error.hidden = false;
     }
   });
@@ -130,12 +130,12 @@ function draw() {
     el('h3', {
       className: 'offsite-title',
       id: 'ha-title',
-      textContent: t('ha2.title', 'A second NAS that can take over'),
+      textContent: t('standby.title', 'A second NAS that can take over'),
     }),
     el('p', {
       className: 'offsite-note',
       textContent: t(
-        'ha2.intro',
+        'standby.intro',
         'Two Kiboto boxes at home: the first is the one you use, the second keeps a copy of chosen folders, people and settings and takes over when you say so. The two are paired with a key that is shown once; everything they send each other is encrypted, also without Tailscale.'
       ),
     }),
@@ -147,13 +147,13 @@ function draw() {
       el(
         'div',
         { className: 'ddns-actions' },
-        button('check', t('ha2.check', 'Check now')),
-        button('unpair', t('ha2.unpair', 'Unpair'))
+        button('check', t('standby.check', 'Check now')),
+        button('unpair', t('standby.unpair', 'Unpair'))
       ),
       el('p', {
         className: 'immich-note',
         textContent: t(
-          'ha2.next_note',
+          'standby.next_note',
           'Pairing is the first step. Keeping folders, people and settings in step, and the takeover button, come with the next updates and will show here.'
         ),
       })
@@ -162,14 +162,14 @@ function draw() {
     parts.push(
       el('p', {
         className: 'immich-note',
-        textContent: t('ha2.code_title', 'The pairing key. Type it into the second NAS:'),
+        textContent: t('standby.code_title', 'The pairing key. Type it into the second NAS:'),
       }),
       el('code', { className: 'ha-code', id: 'ha-code', textContent: _code }),
       el('p', {
         className: 'immich-note',
-        textContent: t('ha2.code_note', 'It is good for 10 minutes and for one pairing, and it is shown only now.'),
+        textContent: t('standby.code_note', 'It is good for 10 minutes and for one pairing, and it is shown only now.'),
       }),
-      el('div', { className: 'ddns-actions' }, button('cancel', t('ha2.done', 'Done')))
+      el('div', { className: 'ddns-actions' }, button('cancel', t('standby.done', 'Done')))
     );
   } else if (_mode === 'pair') {
     parts.push(pairForm());
@@ -178,8 +178,8 @@ function draw() {
       el(
         'div',
         { className: 'ddns-actions' },
-        button('first', t('ha2.first_btn', 'This is the first NAS: show a pairing key')),
-        button('second', t('ha2.second_btn', 'This is the second NAS: pair with the first'))
+        button('first', t('standby.first_btn', 'This is the first NAS: show a pairing key')),
+        button('second', t('standby.second_btn', 'This is the second NAS: pair with the first'))
       )
     );
   }
@@ -203,7 +203,7 @@ async function onClick(e) {
       _view = await api.post('/api/ha/check', {});
     } else if (action === 'unpair') {
       _view = await api.delete('/api/ha'); // the server asks to confirm
-      showToast(t('ha2.unpaired_toast', 'Unpaired.'), 'success');
+      showToast(t('standby.unpaired_toast', 'Unpaired.'), 'success');
     }
   } catch (err) {
     failed(err);
