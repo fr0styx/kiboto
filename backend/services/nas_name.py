@@ -57,6 +57,8 @@ def config() -> dict[str, Any]:
         "enabled": bool(data.get("enabled", False)),
         "name": name if valid(name) else DEFAULT_NAME,
         "previous": previous,
+        # a first NAS whose second one took over keeps its setting, and is silent until taken back
+        "held": bool(data.get("held", False)),
     }
 
 
@@ -87,6 +89,29 @@ def save(enabled: bool | None = None, name: str | None = None) -> dict[str, Any]
                 ]
                 cfg["name"] = name
         if enabled is not None:
+            cfg["enabled"] = bool(enabled)
+        atomic_write_json(STATE_FILE, cfg)
+    return ensure()
+
+
+def hold(on: bool) -> dict[str, Any]:
+    """High availability: a first NAS whose second one took over does not answer to its name
+    (two boxes would), until the name is taken back. The setting itself stays as it is."""
+    with _lock:
+        cfg = config()
+        cfg["held"] = bool(on)
+        atomic_write_json(STATE_FILE, cfg)
+    return ensure()
+
+
+def give_up(name: str, back_to: str, enabled: bool) -> dict[str, Any]:
+    """High availability: a second NAS that took over stops answering to the first one's name, for
+    good (not kept among the names it had before), and is called what it was called."""
+    with _lock:
+        cfg = config()
+        cfg["previous"] = [p for p in cfg["previous"] if p not in (name, back_to)]
+        if cfg["name"] == name:
+            cfg["name"] = back_to if valid(back_to) else DEFAULT_NAME
             cfg["enabled"] = bool(enabled)
         atomic_write_json(STATE_FILE, cfg)
     return ensure()
@@ -185,10 +210,10 @@ def ensure() -> dict[str, Any]:
         _remove_old_container()
         code, info = _docker("GET", f"/containers/{CONTAINER}/json")
         exists = code == 200 and isinstance(info, dict)
-        if not cfg["enabled"]:
+        if not cfg["enabled"] or cfg["held"]:
             if exists:
                 _remove()
-                logger.info("[NasName] Turned off; %s removed", CONTAINER)
+                logger.info("[NasName] %s; %s removed", "Held back" if cfg["held"] else "Turned off", CONTAINER)
             return status(cfg, running=False)
         me = _self()
         if not me:
@@ -228,6 +253,7 @@ def status(
     return {
         "enabled": cfg["enabled"],
         "name": cfg["name"],
+        "held": cfg["held"],
         "also_answers": answering_names(cfg)[1:],
         "running": running,
         "address": host,

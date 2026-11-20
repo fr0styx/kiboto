@@ -123,9 +123,11 @@ def _start_network_services() -> None:
     from backend.services.nut_server import start_if_enabled as start_nut_server
 
     start_nut_server()
-    from backend.services import nas_name
+    from backend.services import ha_takeover
 
-    nas_name.ensure_soon()  # NFEAT-8: <name>.local, its container on the app's current image
+    # NFEAT-8: <name>.local, its container on the app's current image. A first NAS of a pair asks
+    # its second one first: if that took over, this box holds the name back (two would answer).
+    ha_takeover.name_at_start()
     from backend.services import iscsi_target
 
     iscsi_target.ensure_soon()  # disks for other computers: its container on the app's current image (off by default)

@@ -50,6 +50,8 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 
 Apps on a phone: each app is a short card with its name, its state, one button (Open, Start or Resume) and the menu. With the Docker details there is one more line for the load and the ports. The list no longer runs off the side of the screen, and the Docker details switch stays in view.
 
+Replacing the install's secret key (Security) no longer ends the pairing of two NAS boxes: the link's key is sealed again with the new one.
+
 #### Changes
 
 - **Ask Kib about the NAS in your language**: questions about free space, drives, fans, apps, the network and
@@ -135,6 +137,8 @@ Apps on a phone: each app is a short card with its name, its state, one button (
   folders of the same names. Only new and changed files travel. A file deleted on the first NAS is kept on
   the second for 30 days in a hidden folder. The second NAS never touches files of its own: it only replaces
   or puts away files it fetched itself.
+
+A second NAS that can take over, fourth step: the takeover. **Take over now** on the second NAS takes the first one's people (their sign-in and two-factor), who may open the folders kept in step, and the name the family types; it keeps its own network address, apps and backups. It is refused while the first NAS still answers, unless you say so. A first NAS that comes back holds its name until you press **Take the name back** on it. Going back is by hand: files and people changed on the second NAS meanwhile are not copied back. See docs/HA.md.
 
 #### Security
 

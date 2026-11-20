@@ -93,6 +93,10 @@ def rotate_secret_key() -> dict[str, Any]:
     from backend.services.family_signin import reseal as reseal_signin
 
     resealed_backups += reseal_signin()  # Pocket ID's keys (NFEAT-6)
+    from backend.services import ha_link, ha_state
+
+    # a pair's link key and what opens the kept copy: without this a new key ended the pair
+    resealed_backups += ha_link.reseal() + ha_state.reseal()
 
     os.remove(previous_key_file())
     result = {"rotated_at": time.time(), "mfa_secrets": resealed_mfa, "backup_passphrases": resealed_backups}

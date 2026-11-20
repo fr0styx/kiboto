@@ -256,9 +256,10 @@ def _run_user_scripts(now: float) -> None:
 def _run_ha(now: float) -> None:
     """The second NAS of a pair fetches the first one's people and settings once a night (none by default)."""
     try:
-        from backend.services import ha_state
+        from backend.services import ha_state, ha_takeover
 
         ha_state.run_due(now)
+        ha_takeover.watch(now)  # a first NAS asks its second one now and then whether it took over
     except (OSError, RuntimeError, ValueError) as e:
         logger.warning("[Scheduler] High availability failed: %s", e)
 

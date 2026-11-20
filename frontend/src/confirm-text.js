@@ -207,6 +207,26 @@ const ACTIONS = {
     "Keep a copy of these folders of the first NAS on this NAS: {target}? They are fetched every night into shared folders of the same names here. Files of this NAS's own are left alone.",
     false,
   ],
+  'ha.takeover': [
+    'Take over',
+    'Take over for {target}? This NAS takes its people, their access to the kept folders and its name, and restarts. The people this NAS has now are replaced (they are saved first). You sign in again with an account of {target}.',
+    true,
+  ],
+  'ha.takeover_anyway': [
+    'Take over anyway',
+    'Take over although {target} still answers? Two boxes may answer to one name until it is turned off. This NAS takes its people, their access to the kept folders and its name, and restarts.',
+    true,
+  ],
+  'ha.take_back': [
+    'Take the name back',
+    'Should this NAS answer to its name again? The second NAS stops. What changed on the second NAS meanwhile is not copied back.',
+    false,
+  ],
+  'ha.take_back_anyway': [
+    'Take it back anyway',
+    'Take the name back although the second NAS does not answer? It may still answer to the name until it is turned off or unpaired.',
+    true,
+  ],
   'ha.unpair': [
     'Unpair',
     'Unpair this NAS from the other one? Neither stands in for the other any more; what was copied stays where it is.',

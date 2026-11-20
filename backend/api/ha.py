@@ -16,7 +16,7 @@ from backend.auth import AuthenticatedPrincipal, get_current_principal, require_
 from backend.confirmations import confirm_or_raise, require_confirmation
 from backend.errors import ApiError, said
 from backend.rate_limit import rate_limit
-from backend.services import ha_folders, ha_link, ha_state
+from backend.services import ha_folders, ha_link, ha_state, ha_takeover
 
 router = APIRouter(tags=["High availability"])
 ADMIN = Depends(require_scope("system:config"))
@@ -30,6 +30,14 @@ class PairIn(BaseModel):
 
 class FoldersIn(BaseModel):
     names: list[str] = Field(max_length=64)
+
+
+class TakeoverIn(BaseModel):
+    even_if_answering: bool = False
+
+
+class TakeBackIn(BaseModel):
+    even_if_unreachable: bool = False
 
 
 class PeerPairIn(BaseModel):
@@ -56,7 +64,7 @@ def _actor(principal: AuthenticatedPrincipal) -> str:
 
 def _status() -> dict[str, Any]:
     """The link's status, and the copy of people and settings that goes with it."""
-    return {**ha_link.status(), **ha_state.view(), **ha_folders.view()}
+    return {**ha_link.status(), **ha_state.view(), **ha_folders.view(), **ha_takeover.view()}
 
 
 @router.get("/ha", dependencies=[ADMIN])
@@ -143,6 +151,39 @@ async def ha_folders_set(
         raise _refused(e, 409 if e.key in ("not_second", "unreachable", "refused") else 400) from e
     ha_link.audit("folders", f"folders kept in step: {', '.join(names) or 'none'}", _actor(principal))
     await asyncio.to_thread(ha_state.fetch_soon)
+    return await asyncio.to_thread(_status)
+
+
+@router.post("/ha/takeover", dependencies=[ADMIN])
+async def ha_take_over(
+    req: TakeoverIn, request: Request, principal: AuthenticatedPrincipal = Depends(get_current_principal)
+) -> dict[str, Any]:
+    """On the second NAS: it takes the first one's people, their access to the kept folders, and its
+    name, and restarts. Refused (409 ha_first_answers) while the first NAS answers, unless asked again
+    with even_if_answering. Confirmed either way."""
+    first = (ha_link.peer() or {}).get("name") or ""
+    confirm_or_raise(
+        request, principal, "ha.takeover_anyway" if req.even_if_answering else "ha.takeover", target=str(first)
+    )
+    try:
+        said = await asyncio.to_thread(ha_takeover.take_over, _actor(principal), req.even_if_answering)
+    except ha_link.LinkError as e:
+        raise _refused(e, 400 if e.key == "bad_copy" else 409) from e
+    return {**await asyncio.to_thread(_status), "restarting": bool(said.get("restarting"))}
+
+
+@router.post("/ha/take-back", dependencies=[ADMIN])
+async def ha_take_back(
+    req: TakeBackIn, request: Request, principal: AuthenticatedPrincipal = Depends(get_current_principal)
+) -> dict[str, Any]:
+    """On a first NAS that holds its name back: it answers to it again, and the second one stops.
+    Refused (409 ha_second_unreachable) when the second NAS cannot be told, unless asked again with
+    even_if_unreachable."""
+    confirm_or_raise(request, principal, "ha.take_back_anyway" if req.even_if_unreachable else "ha.take_back")
+    try:
+        await asyncio.to_thread(ha_takeover.take_back, _actor(principal), req.even_if_unreachable)
+    except ha_link.LinkError as e:
+        raise _refused(e, 409) from e
     return await asyncio.to_thread(_status)
 
 

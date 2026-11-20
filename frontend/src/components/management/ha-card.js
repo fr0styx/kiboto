@@ -1,8 +1,9 @@
 /**
  * Backup: "A second NAS that can take over" (high availability, the owner's decisions of
  * 19 Nov 2026). This card pairs the two boxes: the first NAS shows a pairing key, the second one
- * is given it together with the first one's address. What the second NAS keeps in step and the
- * takeover button build on this pairing.
+ * is given it together with the first one's address. The second NAS keeps a copy of people,
+ * settings and chosen folders, and takes over by a button here; the first NAS then holds its name
+ * back until it is taken back on it.
  */
 import { api } from '../../api.js';
 import { showToast } from '../../toast.js';
@@ -13,6 +14,8 @@ let _view = null;
 let _mode = ''; // '', 'code' (a pairing key is on screen) or 'pair' (the form)
 let _folders = null; // on the second NAS: the first one's shared folders, once asked
 let _code = '';
+let _answers = false; // the second NAS asked to take over, and the first one still answers
+let _unreached = false; // the first NAS asked for its name back, and the second one did not answer
 
 const el = (tag, props = {}, ...kids) => {
   const node = Object.assign(document.createElement(tag), props);
@@ -165,9 +168,92 @@ function foldersPart() {
 export function haRole(view) {
   const peer = view.peer || {};
   const words = { name: peer.name || '?', address: peer.address || '' };
+  if (view.role === 'took_over') {
+    const took = view.took_over || {};
+    const said = t('standby.took_over', 'This NAS took over from {name} on {when}.', {
+      name: took.from || words.name,
+      when: formatDateTime((took.at || 0) * 1000),
+    });
+    return took.name
+      ? `${said} ${t('standby.took_over_name', 'It answers to {host}.', { host: `${took.name}.local` })}`
+      : said;
+  }
   return view.role === 'first'
     ? t('standby.is_first', 'This is the first NAS. The second one is {name} at {address}.', words)
     : t('standby.is_second', 'This is the second NAS. The first one is {name} at {address}.', words);
+}
+
+/** On the second NAS: what taking over does, and the button; a second button once the first NAS answered. */
+function takeoverPart() {
+  const box = el('div', { className: 'ha-folders', id: 'ha-takeover' });
+  box.append(
+    el('div', { className: 'nsv-fs13-bold-strong', textContent: t('standby.takeover_title', 'Taking over') }),
+    el('p', {
+      className: 'immich-note',
+      textContent: _view.copy
+        ? t(
+            'standby.takeover_note',
+            'When the first NAS is broken or gone, this NAS takes its people and their sign-in, who may open the folders kept here, and its name. It keeps its own network address, apps and backups. It restarts, and you sign in with an account of the first NAS.'
+          )
+        : t('standby.takeover_no_copy', 'Taking over needs the copy of people and settings. Fetch it first.'),
+    })
+  );
+  if (_answers)
+    box.append(
+      el('p', {
+        className: 'immich-note',
+        id: 'ha-answers',
+        textContent: t(
+          'standby.answers_note',
+          'The first NAS still answers, so two boxes would answer to one name. Turn the first NAS off and try again, or take over anyway.'
+        ),
+      })
+    );
+  if (_view.copy)
+    box.append(
+      el(
+        'div',
+        { className: 'ddns-actions' },
+        button('takeover', t('standby.takeover_btn', 'Take over now')),
+        _answers ? button('takeover_anyway', t('standby.takeover_anyway', 'Take over although it answers')) : null
+      )
+    );
+  return box;
+}
+
+/** On a first NAS whose second one took over: that it is silent, and the way back. */
+function heldPart() {
+  const box = el('div', { className: 'ha-folders', id: 'ha-held' });
+  box.append(
+    el('p', {
+      className: 'immich-note',
+      textContent: t(
+        'standby.held',
+        'The second NAS took over ({when}). This NAS does not answer to its name until you take the name back here. Files and people changed on the second NAS meanwhile are not copied back by themselves.',
+        { when: formatDateTime(((_view.stood_down || {}).at || 0) * 1000) }
+      ),
+    })
+  );
+  if (_unreached)
+    box.append(
+      el('p', {
+        className: 'immich-note',
+        id: 'ha-unreached',
+        textContent: t(
+          'standby.unreached_note',
+          'The second NAS did not answer, so it may still answer to the name. Turn it off and try again, or take the name back anyway.'
+        ),
+      })
+    );
+  box.append(
+    el(
+      'div',
+      { className: 'ddns-actions' },
+      button('takeback', t('standby.take_back', 'Take the name back')),
+      _unreached ? button('takeback_anyway', t('standby.take_back_anyway', 'Take it back anyway')) : null
+    )
+  );
+  return box;
 }
 
 function failed(err) {
@@ -265,8 +351,12 @@ function draw() {
     parts.push(
       el('p', { className: 'immich-note', id: 'ha-role', textContent: haRole(_view) }),
       el('p', { className: 'immich-note', id: 'ha-reach', textContent: haReach(_view.peer) }),
-      el('p', { className: 'immich-note', id: 'ha-copy', textContent: haCopy(_view) }),
+      // a box that took over has applied the copy: there is nothing more to say about it
+      _view.role === 'took_over'
+        ? null
+        : el('p', { className: 'immich-note', id: 'ha-copy', textContent: haCopy(_view) }),
       _view.role === 'second' ? foldersPart() : null,
+      _view.role === 'first' && _view.stood_down ? heldPart() : null,
       el(
         'div',
         { className: 'ddns-actions' },
@@ -274,13 +364,7 @@ function draw() {
         _view.role === 'second' && !_view.fetching ? button('fetch', t('standby.fetch', 'Fetch now')) : null,
         button('unpair', t('standby.unpair', 'Unpair'))
       ),
-      el('p', {
-        className: 'immich-note',
-        textContent: t(
-          'standby.next_note',
-          'Pairing, the copy of people and settings, and the folders work. The takeover button comes with the next update and will show here.'
-        ),
-      })
+      _view.role === 'second' ? takeoverPart() : null
     );
   } else if (_mode === 'code') {
     parts.push(
@@ -334,12 +418,35 @@ async function onClick(e) {
     } else if (action === 'fetch') {
       _view = await api.post('/api/ha/fetch', {});
       showToast(t('standby.fetch_started', 'Fetching. The card shows the copy when it has arrived.'), 'success');
+    } else if (action === 'takeover' || action === 'takeover_anyway') {
+      // the server asks to confirm; it refuses while the first NAS answers, unless told it is known
+      _view = await api.post('/api/ha/takeover', { even_if_answering: action === 'takeover_anyway' });
+      _answers = false;
+      showToast(
+        _view.restarting
+          ? t(
+              'standby.takeover_started',
+              'Taking over. This NAS restarts now; sign in with an account of the first NAS.'
+            )
+          : t(
+              'standby.takeover_restart',
+              'Taking over. Restart Kiboto to finish, then sign in with an account of the first NAS.'
+            ),
+        'success'
+      );
+    } else if (action === 'takeback' || action === 'takeback_anyway') {
+      _view = await api.post('/api/ha/take-back', { even_if_unreachable: action === 'takeback_anyway' });
+      _unreached = false;
+      showToast(t('standby.took_back', 'This NAS answers to its name again.'), 'success');
     } else if (action === 'unpair') {
       _view = await api.delete('/api/ha'); // the server asks to confirm
       showToast(t('standby.unpaired_toast', 'Unpaired.'), 'success');
     }
   } catch (err) {
-    failed(err);
+    // two refusals are questions, not failures: the card then offers the second button
+    if (err?.error === 'ha_first_answers') _answers = true;
+    else if (err?.error === 'ha_second_unreachable') _unreached = true;
+    else failed(err);
   }
   draw();
 }
@@ -384,4 +491,6 @@ export function resetHaCardForTesting() {
   _mode = '';
   _code = '';
   _folders = null;
+  _answers = false;
+  _unreached = false;
 }

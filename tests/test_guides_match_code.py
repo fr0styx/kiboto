@@ -173,7 +173,14 @@ def test_ha_guide_numbers():
     assert f"A key of {ha_link.CODE_SIGNS} signs" in text and f"good for {ha_link.CODE_SECONDS // 60} minutes" in text
     assert f"After {ha_link.CODE_TRIES} tries" in text and f"is {ha_link.CODE_SIGNS * 5} random bits" in text
     assert f"within {ha_link.CLOCK_SLACK_SECS // 60} minutes" in text and "AES-256-GCM" in text
-    assert "What works today: pairing the two boxes" in text
+    from backend.services import ha_takeover
+
+    assert "## Taking over" in text and "## When the first NAS comes back" in text
+    assert ha_takeover.ASK_EVERY == 15 * 60 and "asks again every quarter of an hour" in text
+    assert "holds its name back" in text and "are not copied back by themselves" in text
+    # what a takeover leaves alone is said, and is what the code leaves out of the staged people
+    assert "its network address" in text and "apps, virtual machines and backup jobs" in text
+    assert ha_takeover.PEOPLE_FILES == ("users.db", "vapid.json") and ha_takeover.PEOPLE_FOLDERS == ("samba/private/",)
     from backend.services import ha_state
 
     assert f"every night at {ha_state.FETCH_AT}" in text and "keeps this copy and does nothing with it" in text

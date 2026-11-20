@@ -1,5 +1,6 @@
 """NFEAT-8: find the NAS by name (<name>.local) on the home network."""
 
+import json
 import socket
 import struct
 
@@ -158,6 +159,7 @@ def test_off_until_turned_on_then_with_the_products_name(docker):
     assert st == {
         "enabled": True,
         "name": "kiboto",
+        "held": False,
         "also_answers": [],
         "running": True,
         "address": "kiboto.local",
@@ -556,3 +558,33 @@ def test_the_shares_reach_the_container_whose_health_check_is_off(docker, monkey
 class _NoThread:
     def start(self):
         pass
+
+
+def test_a_held_name_is_not_announced(tmp_path, monkeypatch):
+    """High availability: a first NAS whose second one took over keeps its setting and is silent;
+    a second NAS that gives a name up forgets it for good."""
+    monkeypatch.setattr(nas_name, "STATE_FILE", str(tmp_path / "nas_name.json"))
+    calls = []
+    monkeypatch.setattr(nas_name, "_remove_old_container", lambda: None)
+    monkeypatch.setattr(nas_name, "_remove", lambda: calls.append("removed"))
+    monkeypatch.setattr(nas_name, "_self", lambda: {})
+    monkeypatch.setattr(
+        nas_name, "_docker", lambda method, path, body=None, headers=None: (200, {"State": {"Running": True}})
+    )
+    with open(nas_name.STATE_FILE, "w") as f:
+        json.dump({"enabled": True, "name": "familynas", "previous": ["spare"]}, f)
+    said = nas_name.hold(True)
+    assert calls == ["removed"] and said["running"] is False and said["held"] is True and said["enabled"] is True
+    assert nas_name.config()["held"] is True and nas_name.config()["name"] == "familynas"
+    nas_name.hold(False)
+    assert nas_name.config()["held"] is False
+    # giving the name up: back to the own name, and the given-up one does not answer any more
+    nas_name.give_up("familynas", "spare", False)
+    cfg = nas_name.config()
+    assert (cfg["name"], cfg["enabled"], cfg["previous"]) == ("spare", False, [])
+    nas_name.give_up("familynas", "not a name!", True)  # renamed since: the name it has now stays
+    assert nas_name.config()["name"] == "spare"
+    with open(nas_name.STATE_FILE, "w") as f:
+        json.dump({"enabled": True, "name": "familynas", "previous": []}, f)
+    nas_name.give_up("familynas", "not a name!", True)
+    assert nas_name.config()["name"] == nas_name.DEFAULT_NAME

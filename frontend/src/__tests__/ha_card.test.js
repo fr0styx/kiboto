@@ -275,6 +275,92 @@ describe('a second NAS that can take over', () => {
     );
   });
 
+  it('the second NAS takes over by a button, and is asked again when the first one still answers', async () => {
+    const copy = { name: 'First NAS', made: 1763600000, fetched: 1763600100, size: 1024, version: '2.0.5' };
+    const second = { ...NONE, role: 'second', peer: PEER, copy, fetching: false };
+    vi.spyOn(api, 'get').mockResolvedValue(second);
+    const post = vi.spyOn(api, 'post').mockRejectedValueOnce({ error: 'ha_first_answers', message: 'It answers.' });
+    await renderHaCard();
+    expect(card().querySelector('#ha-takeover').textContent).toContain('It keeps its own network address');
+    expect(card().querySelector('[data-ha-act="takeover_anyway"]')).toBeNull();
+    await press('takeover');
+    expect(post).toHaveBeenCalledWith('/api/ha/takeover', { even_if_answering: false });
+    expect(showToast).not.toHaveBeenCalled(); // a question, not a failure
+    expect(card().querySelector('#ha-answers').textContent).toMatch(/^The first NAS still answers/);
+    const took = { at: 1763700000, from: 'First NAS', name: 'familynas', people: 4 };
+    post.mockResolvedValueOnce({ ...NONE, role: 'took_over', peer: PEER, took_over: took, restarting: true });
+    await press('takeover_anyway');
+    expect(post).toHaveBeenLastCalledWith('/api/ha/takeover', { even_if_answering: true });
+    expect(vi.mocked(showToast).mock.calls.at(-1)[0]).toMatch(/^Taking over\. This NAS restarts now/);
+    expect(card().querySelector('#ha-role').textContent).toMatch(
+      /^This NAS took over from First NAS on .+\. It answers to familynas\.local\.$/
+    );
+    expect(card().querySelector('#ha-takeover')).toBeNull();
+    expect(card().querySelector('#ha-copy')).toBeNull();
+    expect(card().querySelector('[data-ha-act="fetch"]')).toBeNull();
+  });
+
+  it('taking over waits for the copy, and says when Kiboto has to be restarted by hand', async () => {
+    const second = { ...NONE, role: 'second', peer: PEER, copy: null, fetching: false };
+    const get = vi.spyOn(api, 'get').mockResolvedValue(second);
+    await renderHaCard();
+    expect(card().querySelector('#ha-takeover').textContent).toContain('Fetch it first.');
+    expect(card().querySelector('[data-ha-act="takeover"]')).toBeNull();
+    resetHaCardForTesting();
+    const copy = { name: 'First NAS', made: 1763600000, fetched: 1763600100, size: 1024, version: '2.0.5' };
+    get.mockResolvedValue({ ...second, copy });
+    vi.spyOn(api, 'post').mockResolvedValue({
+      ...NONE,
+      role: 'took_over',
+      peer: { ...PEER, name: '' },
+      took_over: { at: 1763700000, from: '', name: '', people: 1 },
+      restarting: false,
+    });
+    await renderHaCard();
+    await press('takeover');
+    expect(vi.mocked(showToast).mock.calls.at(-1)[0]).toMatch(/^Taking over\. Restart Kiboto to finish/);
+    expect(card().querySelector('#ha-role').textContent).toMatch(/^This NAS took over from \? on .+\.$/);
+    expect(haRole({ role: 'took_over', peer: PEER })).toMatch(/^This NAS took over from First NAS on /);
+  });
+
+  it('a first NAS whose second one took over says so, and takes its name back', async () => {
+    const held = { ...NONE, role: 'first', peer: PEER, served: 1763600000, stood_down: { at: 1763700000 } };
+    vi.spyOn(api, 'get').mockResolvedValue(held);
+    const post = vi
+      .spyOn(api, 'post')
+      .mockRejectedValueOnce({ error: 'ha_second_unreachable', message: 'It did not answer.' });
+    await renderHaCard();
+    expect(card().querySelector('#ha-held').textContent).toMatch(
+      /^The second NAS took over \(.+\)\. This NAS does not/
+    );
+    expect(card().querySelector('#ha-takeover')).toBeNull(); // only a second NAS takes over
+    await press('takeback');
+    expect(post).toHaveBeenCalledWith('/api/ha/take-back', { even_if_unreachable: false });
+    expect(card().querySelector('#ha-unreached').textContent).toMatch(/^The second NAS did not answer/);
+    post.mockResolvedValueOnce({ ...held, stood_down: null });
+    await press('takeback_anyway');
+    expect(post).toHaveBeenLastCalledWith('/api/ha/take-back', { even_if_unreachable: true });
+    expect(vi.mocked(showToast).mock.calls.at(-1)[0]).toBe('This NAS answers to its name again.');
+    expect(card().querySelector('#ha-held')).toBeNull();
+  });
+
+  it('a first NAS that holds nothing back has no such part, and another failure is said as one', async () => {
+    const first = { ...NONE, role: 'first', peer: PEER, served: null, stood_down: null };
+    vi.spyOn(api, 'get').mockResolvedValue({ ...first, stood_down: { at: 0 } });
+    vi.spyOn(api, 'post').mockRejectedValue({
+      error: 'ha_not_held',
+      message: 'This NAS is not holding its name back.',
+    });
+    await renderHaCard();
+    await press('takeback');
+    expect(vi.mocked(showToast).mock.calls.at(-1)[0]).toBe("That didn't work: This NAS is not holding its name back.");
+    expect(card().querySelector('#ha-unreached')).toBeNull();
+    resetHaCardForTesting();
+    vi.mocked(api.get).mockResolvedValue(first);
+    await renderHaCard();
+    expect(card().querySelector('#ha-held')).toBeNull();
+  });
+
   it('stays away for someone who may not change the system', async () => {
     vi.spyOn(api, 'get').mockRejectedValue({ status: 403 });
     expect(await renderHaCard()).toBe(false);

@@ -38,7 +38,7 @@ request and response schemas.
 
 <!-- BEGIN generated endpoints: python scripts/api_reference.py --update -->
 
-798 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
+800 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
 
 ### AI Conversation History
 
@@ -376,6 +376,8 @@ request and response schemas.
 | `POST` | `/api/v1/ha/pair` | `system:config` | On the second NAS: pairs with the first one, using the pairing key shown there |
 | `POST` | `/api/v1/ha/peer/call` | public ⏱ | A sealed message from the paired box; the answer is sealed too |
 | `POST` | `/api/v1/ha/peer/pair` | public ⏱ | The second NAS pairs with this one: it proves that it has the pairing key shown here |
+| `POST` | `/api/v1/ha/take-back` | `system:config` | On a first NAS that holds its name back: it answers to it again, and the second one stops |
+| `POST` | `/api/v1/ha/takeover` | `system:config` | On the second NAS: it takes the first one's people, their access to the kept folders, and its name, and restarts |
 
 ### Immich
 

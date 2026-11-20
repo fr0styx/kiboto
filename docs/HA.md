@@ -5,10 +5,10 @@ uses. The **second NAS** keeps a copy of chosen folders, people and settings, an
 you press a button on it. Only the name the family uses for the NAS moves to the second one; going
 back to the first is done by hand.
 
-This is being built in steps. **What works today: pairing the two boxes**, with a link between
-them that nobody else on your network can read, **the second NAS keeping a copy of the first
-one's people and settings, and keeping the folders you choose in step**. The takeover button comes
-with the next update and will be described here.
+Pairing, the copy of people and settings, the folders kept in step and the takeover are all
+described below. Two things happen by themselves: the nightly fetch on the second NAS, and a
+first NAS keeping quiet about its name when it finds that the second one took over. Taking over
+and going back are buttons you press.
 
 ## Pairing the two boxes
 
@@ -71,6 +71,52 @@ the network. The first fetch of a large folder can take many hours; the nightly 
 what changed.
 
 Unpairing forgets which folders were chosen. The copies themselves stay where they are.
+
+## Taking over
+
+On the **second NAS**, **Take over now** makes it the box the family uses. It is for the day the
+first NAS is broken, stolen or being repaired. It asks you to confirm, then:
+
+1. It asks the first NAS whether it is there. While the first NAS still answers, the takeover is
+   refused: two boxes would answer to one name. Turn the first NAS off and try again. If you know
+   it answers and want to go ahead (it is about to be unplugged), **Take over although it answers**
+   does it; the first NAS is told and stops answering to the name at once.
+2. It takes the first NAS's **people** out of the kept copy: their accounts, passwords, roles and
+   two-factor (everyone keeps the authenticator app they have), and their sign-in for shared
+   folders over the network. For the folders kept in step it also takes **who may open them**.
+   The people the second NAS had before are replaced; they are saved first, as before any
+   settings restore.
+3. It takes the **name** the family types (for example `kiboto.local`), when the first NAS was
+   answering to one. Its old name still works too.
+4. It restarts, and you sign in with an account of the first NAS.
+
+What the second NAS keeps of its own: its network address, its drives and their settings, its
+apps, virtual machines and backup jobs. Those belong to the hardware, and the first NAS's copies
+of them are not applied. Apps do not move: install on the second NAS the ones you need.
+
+After a takeover the second NAS fetches nothing more from the first one. The folders hold what
+the last nightly fetch brought, so at worst a day of changes is missing.
+
+## When the first NAS comes back
+
+Before it answers to its name at start, the first NAS asks the second one. If the second one
+took over, the first NAS **holds its name back**: it runs, you can reach it at its number
+address, and it does not announce the name. It asks again every quarter of an hour, so a first
+NAS that was started while the second one was off notices later.
+
+**Take the name back** on the first NAS ends this: the second NAS stops answering to the name and
+is called what it was called before, and the first NAS answers again. If the second NAS cannot
+be told, the button is refused, and **Take it back anyway** goes ahead; turn the second NAS off
+or unpair it, or two boxes answer to one name.
+
+Going back is done by hand, as you decided: **files and people changed on the second NAS while it
+stood in are not copied back by themselves.** Copy the changed files to the first NAS (the
+second one's shared folders hold them), and make account changes again on the first NAS. After
+that the second NAS is the second NAS again and fetches every night; files it changed itself are
+its own and are left alone by the fetch.
+
+Unpairing ends all of it: neither box holds anything for the other, and each keeps the name it
+has at that moment.
 
 ## How the link is protected
 

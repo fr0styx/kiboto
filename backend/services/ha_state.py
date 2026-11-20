@@ -21,7 +21,7 @@ from typing import Any
 
 from backend import __version__, secret_box
 from backend.config import DATA_DIR, logger
-from backend.fsutil import atomic_write_json, read_json
+from backend.fsutil import atomic_write_json, json_locked, read_json
 from backend.services import ha_link
 from backend.services.ha_link import LinkError
 
@@ -137,6 +137,18 @@ def passphrase() -> str:
     """What opens the kept copy; for the takeover only."""
     kept = read_json(os.path.join(DIR, INFO), {})
     return secret_box.unseal(kept["pass"]) if isinstance(kept, dict) and kept.get("pass") else ""
+
+
+@json_locked(lambda *a, **k: os.path.join(DIR, INFO))
+def reseal() -> int:
+    """After the install's secret key was replaced: what opens the kept copy, sealed with the new one."""
+    path = os.path.join(DIR, INFO)
+    kept = read_json(path, {})
+    if not isinstance(kept, dict) or not secret_box.is_sealed(str(kept.get("pass") or "")):
+        return 0
+    kept["pass"] = secret_box.seal(secret_box.unseal(kept["pass"]))
+    atomic_write_json(path, kept)
+    return 1
 
 
 def fetch(send: ha_link.Sender | None = None) -> dict[str, Any]:

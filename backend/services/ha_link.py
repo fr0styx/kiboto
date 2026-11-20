@@ -107,9 +107,13 @@ def peer() -> dict[str, Any] | None:
 
 
 def role() -> str:
-    """This box's part: "first", "second", or nothing when it is not paired."""
+    """This box's part: "first", "second", "took_over" (a second NAS that took over, and so
+    fetches nothing any more), or nothing when it is not paired."""
     state = _state()
-    return str(state.get("role") or "") if peer() is not None else ""
+    if peer() is None:
+        return ""
+    part = str(state.get("role") or "")
+    return "took_over" if part == "second" and isinstance(state.get("took_over"), dict) else part
 
 
 def my_name() -> str:
@@ -359,6 +363,8 @@ def _forget_me(_args: dict[str, Any]) -> dict[str, Any]:
 HANDLERS: dict[str, Callable[[dict[str, Any]], Any]] = {"hello": _hello, "unpair": _forget_me}
 # what else is forgotten when the boxes are unpaired (the copy of the other box's people and settings)
 ON_UNPAIR: list[Callable[[], None]] = []
+# who else hears what the other box said to a hello (a first NAS learns that the second took over)
+ON_HELLO: list[Callable[[dict[str, Any]], None]] = []
 
 
 def call(op: str, args: dict[str, Any] | None = None, send: Sender = _post) -> Any:
@@ -435,7 +441,25 @@ def check(send: Sender = _post) -> dict[str, Any]:
         return status()
     if isinstance(said, dict):
         _last["said"] = {k: said.get(k) for k in ("name", "version", "role")}
+        for also in ON_HELLO:
+            also(said)
     return status()
+
+
+def reseal() -> int:
+    """After the install's secret key was replaced: the link's key, and a pairing key that waits,
+    sealed with the new one. How many."""
+    done = 0
+
+    def change(data: dict[str, Any]) -> None:
+        nonlocal done
+        for holder, field in ((data.get("peer"), "key"), (data.get("code"), "sealed")):
+            if isinstance(holder, dict) and secret_box.is_sealed(str(holder.get(field) or "")):
+                holder[field] = secret_box.seal(secret_box.unseal(holder[field]))
+                done += 1
+
+    _change(change)
+    return done
 
 
 def status() -> dict[str, Any]:

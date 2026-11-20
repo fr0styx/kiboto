@@ -38231,6 +38231,28 @@
     "title": "TailscaleSetRoutesRequest",
     "type": "object"
    },
+   "TakeBackIn": {
+    "properties": {
+     "even_if_unreachable": {
+      "default": false,
+      "title": "Even If Unreachable",
+      "type": "boolean"
+     }
+    },
+    "title": "TakeBackIn",
+    "type": "object"
+   },
+   "TakeoverIn": {
+    "properties": {
+     "even_if_answering": {
+      "default": false,
+      "title": "Even If Answering",
+      "type": "boolean"
+     }
+    },
+    "title": "TakeoverIn",
+    "type": "object"
+   },
    "TestCandidateRemoteResponse": {
     "additionalProperties": true,
     "description": "POST /remotes/test",
@@ -56809,6 +56831,98 @@
      "requests": 10,
      "seconds": 600
     }
+   }
+  },
+  "/api/v1/ha/take-back": {
+   "post": {
+    "description": "On a first NAS that holds its name back: it answers to it again, and the second one stops.\nRefused (409 ha_second_unreachable) when the second NAS cannot be told, unless asked again with\neven_if_unreachable.",
+    "operationId": "ha_take_back_api_v1_ha_take_back_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/TakeBackIn"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Ha Take Back Api V1 Ha Take Back Post",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Ha Take Back",
+    "tags": [
+     "High availability"
+    ],
+    "x-required-scopes": [
+     "system:config"
+    ]
+   }
+  },
+  "/api/v1/ha/takeover": {
+   "post": {
+    "description": "On the second NAS: it takes the first one's people, their access to the kept folders, and its\nname, and restarts. Refused (409 ha_first_answers) while the first NAS answers, unless asked again\nwith even_if_answering. Confirmed either way.",
+    "operationId": "ha_take_over_api_v1_ha_takeover_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/TakeoverIn"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Ha Take Over Api V1 Ha Takeover Post",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Ha Take Over",
+    "tags": [
+     "High availability"
+    ],
+    "x-required-scopes": [
+     "system:config"
+    ]
    }
   },
   "/api/v1/hardware/helper": {

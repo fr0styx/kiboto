@@ -73,6 +73,18 @@ def unseal(value: str) -> str:
     raise SecretBoxError("Could not decrypt a stored secret (was SECRET_KEY changed?)")
 
 
+def unseal_with(value: str, secret: str) -> str:
+    """Opens a value sealed on another install, with that install's key: a second NAS that takes
+    over reads the first one's two-factor secrets this way. Plain values pass, as in unseal()."""
+    if not value or not is_sealed(value):
+        return value or ""
+    try:
+        raw = base64.urlsafe_b64decode(value[len(PREFIX) :].encode("ascii"))
+        return AESGCM(_key(secret)).decrypt(raw[:12], raw[12:], _AAD).decode("utf-8")
+    except (InvalidTag, ValueError) as e:
+        raise SecretBoxError("A secret from the other NAS could not be opened") from e
+
+
 def migrate_plaintext_mfa_secrets(db_path: str = "") -> int:
     """Seals every TOTP seed still stored in plain text. Returns how many were sealed."""
     from backend.users_db import users_db_session
