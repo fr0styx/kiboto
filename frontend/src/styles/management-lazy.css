@@ -621,6 +621,9 @@
 .scr-acts { display: flex; flex-wrap: wrap; gap: 8px; }
 .tier-days-label { display: inline-flex; align-items: center; gap: 8px; font-size: var(--kb-fs-xs); color: var(--muted); }
 .tier-days { width: 84px; }
+.ha-folders { margin: 10px 0; display: flex; flex-direction: column; gap: 6px; }
+.ha-folder-list { display: flex; flex-wrap: wrap; gap: 6px 16px; }
+.ha-folder { display: inline-flex; align-items: center; gap: 8px; font-size: var(--kb-fs-sm); }
 .ha-code { display: inline-block; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--kb-line-14); background: var(--kb-shade-25); font-size: 18px; letter-spacing: 2px; user-select: all; }
 .tier-slow { max-width: 220px; }
 #tiering-card .scr-list { margin-top: 12px; }

@@ -195,6 +195,8 @@ def fetch_soon() -> bool:
         _state.update(fetching=True, error="")
 
     def work() -> None:
+        from backend.services import ha_folders
+
         try:
             fetch()
         except LinkError as e:
@@ -203,6 +205,10 @@ def fetch_soon() -> bool:
         except (OSError, ValueError, KeyError, TypeError):
             _state["error"] = "failed"
             logger.warning("[HA] people and settings were not fetched", exc_info=True)
+        try:
+            ha_folders.fetch_all()  # then the chosen folders, one after the other
+        except (OSError, ValueError, KeyError, TypeError):
+            logger.warning("[HA] the folders were not fetched", exc_info=True)
         finally:
             _state["fetching"] = False
 

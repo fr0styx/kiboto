@@ -202,6 +202,11 @@ const ACTIONS = {
     "Make this NAS the second NAS of the one at {target}? It can then keep a copy of that NAS's folders, people and settings and take over for it.",
     false,
   ],
+  'ha.folders': [
+    'Keep these folders',
+    "Keep a copy of these folders of the first NAS on this NAS: {target}? They are fetched every night into shared folders of the same names here. Files of this NAS's own are left alone.",
+    false,
+  ],
   'ha.unpair': [
     'Unpair',
     'Unpair this NAS from the other one? Neither stands in for the other any more; what was copied stays where it is.',

@@ -2,7 +2,14 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { api } from '../api.js';
 import { showToast } from '../toast.js';
-import { renderHaCard, resetHaCardForTesting, haReach, haRole, haCopy } from '../components/management/ha-card.js';
+import {
+  renderHaCard,
+  resetHaCardForTesting,
+  haReach,
+  haRole,
+  haCopy,
+  haFolderLine,
+} from '../components/management/ha-card.js';
 
 vi.mock('../toast.js', async (orig) => ({ ...(await orig()), showToast: vi.fn() }));
 
@@ -181,6 +188,82 @@ describe('a second NAS that can take over', () => {
     expect(card().querySelector('[data-ha-act="fetch"]')).toBeNull(); // not twice at once
     expect(card().querySelector('#ha-copy').textContent).toBe('Fetching people and settings from the first NAS…');
     expect(vi.mocked(showToast).mock.calls[0][0]).toBe('Fetching. The card shows the copy when it has arrived.');
+  });
+
+  it('says how the last fetch of a folder went', () => {
+    const last = {
+      at: 1763600000,
+      fetched: 3,
+      bytes: 5 * 1024 ** 3,
+      same: 120,
+      kept_yours: 0,
+      removed: 0,
+      errors: [],
+      why: '',
+    };
+    expect(haFolderLine('Films', null)).toBe('Films: not fetched yet.');
+    expect(haFolderLine('Films', last)).toMatch(
+      /^Films, fetched .+: 3 files new or changed \(5(\.0)? GB\), 120 unchanged\.$/
+    );
+    expect(haFolderLine('Films', { ...last, fetched: 1, removed: 2, kept_yours: 1, errors: [{}] })).toMatch(
+      /1 file new or changed .+ 2 files are gone on the first NAS and were put away here\. 1 file of this NAS's own was left alone\. 1 file could not be fetched\.$/
+    );
+    expect(haFolderLine('Films', { ...last, why: 'full' })).toMatch(/It stopped because this NAS is full\.$/);
+    expect(haFolderLine('Films', { at: 1763600000, why: 'make_folder', fetched: 0, same: 0 })).toMatch(
+      /^Films: not fetched .+: make a shared folder of that name on this NAS first\.$/
+    );
+    expect(haFolderLine('Films', { at: 1763600000, why: 'something new', fetched: 0, same: 0 })).toMatch(
+      /: it did not work\.$/
+    );
+  });
+
+  it('the second NAS ticks the folders to keep, and saves the choice', async () => {
+    const paired = {
+      ...NONE,
+      role: 'second',
+      peer: PEER,
+      copy: null,
+      folders: ['Films'],
+      folders_last: {},
+      keep_removed_days: 30,
+    };
+    vi.spyOn(api, 'get').mockImplementation(async (url) =>
+      url === '/api/ha/folders' ? { available: ['Films', 'Music', 'Photos'], error: '', folders: ['Films'] } : paired
+    );
+    const put = vi.spyOn(api, 'put').mockResolvedValue({ ...paired, folders: ['Films', 'Photos'], fetching: true });
+    await renderHaCard();
+    const boxes = [...card().querySelectorAll('input[data-ha-folder]')];
+    expect(boxes.map((b) => [b.dataset.haFolder, b.checked])).toEqual([
+      ['Films', true],
+      ['Music', false],
+      ['Photos', false],
+    ]);
+    expect(card().querySelector('#ha-folders').textContent).toContain('kept here for 30 days');
+    expect(card().querySelector('#ha-folders').textContent).toContain('Films: not fetched yet.');
+    boxes[2].checked = true;
+    await press('folders');
+    expect(put).toHaveBeenCalledWith('/api/ha/folders', { names: ['Films', 'Photos'] });
+    expect(vi.mocked(showToast).mock.calls[0][0]).toBe('Saved. The folders are fetched now, and every night.');
+    expect([...card().querySelectorAll('input[data-ha-folder]')].filter((b) => b.checked).length).toBe(2);
+  });
+
+  it('keeps the chosen folders on screen when the first NAS cannot be asked', async () => {
+    const paired = {
+      ...NONE,
+      role: 'second',
+      peer: PEER,
+      copy: null,
+      folders: ['Films'],
+      folders_last: {},
+      keep_removed_days: 30,
+    };
+    vi.spyOn(api, 'get').mockImplementation(async (url) => {
+      if (url === '/api/ha/folders') throw { status: 409 };
+      return paired;
+    });
+    await renderHaCard();
+    expect(card().querySelector('#ha-folders-unasked')).not.toBeNull();
+    expect([...card().querySelectorAll('input[data-ha-folder]')].map((b) => b.dataset.haFolder)).toEqual(['Films']);
   });
 
   it('the first NAS has no Fetch button', async () => {

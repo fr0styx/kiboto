@@ -6,9 +6,9 @@ you press a button on it. Only the name the family uses for the NAS moves to the
 back to the first is done by hand.
 
 This is being built in steps. **What works today: pairing the two boxes**, with a link between
-them that nobody else on your network can read, **and the second NAS keeping a copy of the first
-one's people and settings**. The chosen folders and the takeover button come with the next updates
-and will be described here.
+them that nobody else on your network can read, **the second NAS keeping a copy of the first
+one's people and settings, and keeping the folders you choose in step**. The takeover button comes
+with the next update and will be described here.
 
 ## Pairing the two boxes
 
@@ -47,6 +47,30 @@ replaces the copy before. Unpairing removes it.
 
 The card on the second NAS says from when its copy is; the card on the first says when the second
 last fetched.
+
+## The folders
+
+On the second NAS's card, tick the first NAS's shared folders that the second one should keep.
+They are fetched right away, then every night after people and settings, and when you press
+**Fetch now**. Each folder lands in a **shared folder of the same name** on the second NAS; one
+that is not there yet is made (where this system's shared folders are Kiboto's to make; otherwise
+the card asks you to make it).
+
+- Only files that are new or changed travel. A file's date, and who may read it, come along.
+- **A file deleted on the first NAS is kept on the second for 30 days**, in the hidden folder
+  `.kiboto-removed` inside the share, under the day it was put away. Then it goes.
+- **The second NAS never touches files of its own.** It only replaces or puts away files it
+  fetched itself and that nobody changed there since. A file of the second NAS's own under the
+  same name stays as it is, and the card counts it.
+- Links are not followed and not copied. At most 20 folders, and 1000000 files in one.
+- When the second NAS is full the fetch stops and says so; what it has stays.
+- Fetching wakes the drives of both boxes: the first one's to read, the second one's to write.
+
+Everything travels through the encrypted link in pieces, which is slower than a plain copy over
+the network. The first fetch of a large folder can take many hours; the nightly ones only carry
+what changed.
+
+Unpairing forgets which folders were chosen. The copies themselves stay where they are.
 
 ## How the link is protected
 

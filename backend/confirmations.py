@@ -85,6 +85,7 @@ ACTIONS: dict[str, str] = {
     "users.family_signin": "Start Pocket ID in {target}, give it an https address in your tailnet and an account for each Kiboto user, so the family can sign in to apps with a passkey",
     "users.family_signin_app": "Let the family sign in to {target} with Pocket ID; a client secret for it is shown once",
     "ha.pair": "Make this NAS the second NAS of the one at {target}. It can then keep a copy of that NAS's folders, people and settings and take over for it",
+    "ha.folders": "Keep a copy of these folders of the first NAS on this NAS: {target}. They are fetched every night into shared folders of the same names here. Files of this NAS's own are left alone",
     "ha.unpair": "Unpair this NAS from the other one. Neither stands in for the other any more; what was copied stays where it is",
     "fleet.pair": "Pair with the Kiboto box at {target}. Each box then sees the other's name, version, free space and backups",
     "fleet.offer_space": "Let {target} back up to this box. Its backups are append-only and encrypted with its own key; they use space here",

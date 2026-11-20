@@ -8024,6 +8024,23 @@
     "title": "FolderSizeRequest",
     "type": "object"
    },
+   "FoldersIn": {
+    "properties": {
+     "names": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 64,
+      "title": "Names",
+      "type": "array"
+     }
+    },
+    "required": [
+     "names"
+    ],
+    "title": "FoldersIn",
+    "type": "object"
+   },
    "ForgetFolderRequest": {
     "properties": {
      "path": {
@@ -56571,6 +56588,83 @@
      }
     },
     "summary": "Ha Fetch",
+    "tags": [
+     "High availability"
+    ],
+    "x-required-scopes": [
+     "system:config"
+    ]
+   }
+  },
+  "/api/v1/ha/folders": {
+   "get": {
+    "description": "On the second NAS: the first one's shared folders (asked now), and the ones chosen to be kept.",
+    "operationId": "ha_folders_view_api_v1_ha_folders_get",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Ha Folders View Api V1 Ha Folders Get",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Ha Folders View",
+    "tags": [
+     "High availability"
+    ],
+    "x-required-scopes": [
+     "system:config"
+    ]
+   },
+   "put": {
+    "description": "On the second NAS: which of the first one's folders are kept in step. Confirmed; the first fetch starts at once.",
+    "operationId": "ha_folders_set_api_v1_ha_folders_put",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/FoldersIn"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Ha Folders Set Api V1 Ha Folders Put",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Ha Folders Set",
     "tags": [
      "High availability"
     ],

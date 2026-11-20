@@ -11,6 +11,7 @@ import { formatBytes, formatDateTime } from '../../format.js';
 
 let _view = null;
 let _mode = ''; // '', 'code' (a pairing key is on screen) or 'pair' (the form)
+let _folders = null; // on the second NAS: the first one's shared folders, once asked
 let _code = '';
 
 const el = (tag, props = {}, ...kids) => {
@@ -61,6 +62,103 @@ export function haCopy(view) {
       )
     : t('standby.copy_none', "No copy of the first NAS's people and settings yet.");
   return view.fetch_error ? `${said} ${t('standby.fetch_failed', 'The last fetch did not work.')}` : said;
+}
+
+const FOLDER_WHY = {
+  full: ['standby.fw_full', 'this NAS is full'],
+  make_folder: ['standby.fw_make', 'make a shared folder of that name on this NAS first'],
+  no_folder: ['standby.fw_gone', 'the first NAS no longer has it'],
+  unreachable: ['standby.fw_unreachable', 'the first NAS did not answer'],
+};
+
+/** How the last fetch of one folder went, in a sentence or two. */
+export function haFolderLine(name, last) {
+  if (!last) return t('standby.f_never', '{name}: not fetched yet.', { name });
+  const when = formatDateTime((last.at || 0) * 1000);
+  if (last.why && last.why !== 'full' && !last.fetched && !last.same) {
+    const why = FOLDER_WHY[last.why] || ['standby.fw_other', 'it did not work'];
+    return t('standby.f_failed', '{name}: not fetched {when}: {why}.', { name, when, why: t(why[0], why[1]) });
+  }
+  const said = [
+    t(
+      'standby.f_last',
+      '{name}, fetched {when}: {fetched, plural, one {# file new or changed} other {# files new or changed}} ({size}), {same, plural, one {# unchanged} other {# unchanged}}.',
+      { name, when, fetched: last.fetched || 0, size: formatBytes(last.bytes || 0), same: last.same || 0 }
+    ),
+  ];
+  if (last.removed)
+    said.push(
+      t(
+        'standby.f_removed',
+        '{count, plural, one {# file is gone on the first NAS and was put away here} other {# files are gone on the first NAS and were put away here}}.',
+        {
+          count: last.removed,
+        }
+      )
+    );
+  if (last.kept_yours)
+    said.push(
+      t(
+        'standby.f_kept',
+        "{count, plural, one {# file of this NAS's own was left alone} other {# files of this NAS's own were left alone}}.",
+        {
+          count: last.kept_yours,
+        }
+      )
+    );
+  if ((last.errors || []).length)
+    said.push(
+      t(
+        'standby.f_errors',
+        '{count, plural, one {# file could not be fetched} other {# files could not be fetched}}.',
+        {
+          count: last.errors.length,
+        }
+      )
+    );
+  if (last.why === 'full') said.push(t('standby.f_full', 'It stopped because this NAS is full.'));
+  return said.join(' ');
+}
+
+function foldersPart() {
+  const chosen = new Set(_view.folders || []);
+  const names = [...new Set([...((_folders && _folders.available) || []), ...chosen])].sort();
+  const box = el('div', { className: 'ha-folders', id: 'ha-folders' });
+  box.append(
+    el('div', { className: 'nsv-fs13-bold-strong', textContent: t('standby.folders_title', 'Folders kept in step') }),
+    el('p', {
+      className: 'immich-note',
+      textContent: t(
+        'standby.folders_hint',
+        'The folders you tick are fetched from the first NAS every night into shared folders of the same names on this NAS. A file deleted on the first NAS is kept here for {days, plural, one {# day} other {# days}} in a hidden folder. Fetching wakes the drives of both boxes.',
+        { days: _view.keep_removed_days || 30 }
+      ),
+    })
+  );
+  if (_folders && _folders.available === null)
+    box.append(
+      el('p', {
+        className: 'immich-note',
+        id: 'ha-folders-unasked',
+        textContent: t('standby.folders_unasked', 'The first NAS could not be asked for its folders just now.'),
+      })
+    );
+  const list = el('div', { className: 'ha-folder-list' });
+  for (const name of names) {
+    const check = el('input', { type: 'checkbox', checked: chosen.has(name) });
+    check.dataset.haFolder = name;
+    list.append(el('label', { className: 'ha-folder' }, check, el('span', { textContent: name })));
+  }
+  box.append(list);
+  if (names.length)
+    box.append(
+      el('div', { className: 'ddns-actions' }, button('folders', t('standby.folders_save', 'Save the choice')))
+    );
+  for (const name of [...chosen].sort())
+    box.append(
+      el('p', { className: 'immich-note', textContent: haFolderLine(name, (_view.folders_last || {})[name]) })
+    );
+  return box;
 }
 
 /** Which part this NAS has, and who the other one is. */
@@ -168,6 +266,7 @@ function draw() {
       el('p', { className: 'immich-note', id: 'ha-role', textContent: haRole(_view) }),
       el('p', { className: 'immich-note', id: 'ha-reach', textContent: haReach(_view.peer) }),
       el('p', { className: 'immich-note', id: 'ha-copy', textContent: haCopy(_view) }),
+      _view.role === 'second' ? foldersPart() : null,
       el(
         'div',
         { className: 'ddns-actions' },
@@ -179,7 +278,7 @@ function draw() {
         className: 'immich-note',
         textContent: t(
           'standby.next_note',
-          'Pairing and the copy of people and settings work. The chosen folders and the takeover button come with the next updates and will show here.'
+          'Pairing, the copy of people and settings, and the folders work. The takeover button comes with the next update and will show here.'
         ),
       })
     );
@@ -226,6 +325,12 @@ async function onClick(e) {
       _view = await api.get('/api/ha'); // the first NAS: the second one may have paired meanwhile
     } else if (action === 'check') {
       _view = await api.post('/api/ha/check', {});
+    } else if (action === 'folders') {
+      const names = [...document.querySelectorAll('#ha-card input[data-ha-folder]')]
+        .filter((c) => /** @type {HTMLInputElement} */ (c).checked)
+        .map((c) => /** @type {HTMLElement} */ (c).dataset.haFolder);
+      _view = await api.put('/api/ha/folders', { names }); // the server asks to confirm
+      showToast(t('standby.folders_saved', 'Saved. The folders are fetched now, and every night.'), 'success');
     } else if (action === 'fetch') {
       _view = await api.post('/api/ha/fetch', {});
       showToast(t('standby.fetch_started', 'Fetching. The card shows the copy when it has arrived.'), 'success');
@@ -261,6 +366,15 @@ export async function renderHaCard() {
     card.addEventListener('click', onClick);
   }
   draw();
+  if (_view.role === 'second') {
+    // the first NAS's folders are asked for after the card is up: it may take a moment, or not answer
+    try {
+      _folders = await api.get('/api/ha/folders');
+    } catch {
+      _folders = { available: null };
+    }
+    draw();
+  }
   return true;
 }
 
@@ -269,4 +383,5 @@ export function resetHaCardForTesting() {
   _view = null;
   _mode = '';
   _code = '';
+  _folders = null;
 }

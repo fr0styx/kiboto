@@ -178,4 +178,9 @@ def test_ha_guide_numbers():
 
     assert f"every night at {ha_state.FETCH_AT}" in text and "keeps this copy and does nothing with it" in text
     assert "Unpairing removes it" in text and "It does not hold your files" in text
+    from backend.services import ha_folders
+
+    assert f"kept on the second for {ha_folders.KEEP_REMOVED_DAYS} days" in text and f"`{ha_folders.REMOVED}`" in text
+    assert f"At most {ha_folders.MAX_FOLDERS} folders, and {ha_folders.MAX_FILES} files in one" in text
+    assert "never touches files of its own" in text and "shared folder of the same name" in text
     assert "refuses an address on the internet" in text and "does not look names up" in text

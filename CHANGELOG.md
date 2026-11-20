@@ -128,6 +128,12 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   applied: the second NAS keeps its own sign-ins and settings until the day it takes over. Unpairing removes
   it.
 
+- **A second NAS that can take over, third step: the folders**: on the second NAS you tick which of the first
+  one's shared folders it keeps. They are fetched right away, every night, and on Fetch now, into shared
+  folders of the same names. Only new and changed files travel. A file deleted on the first NAS is kept on
+  the second for 30 days in a hidden folder. The second NAS never touches files of its own: it only replaces
+  or puts away files it fetched itself.
+
 #### Security
 
 - **App logos**: Kiboto fetches a logo only when an app in the catalog names that exact address. Before, any

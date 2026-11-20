@@ -16,7 +16,7 @@ from backend.auth import AuthenticatedPrincipal, get_current_principal, require_
 from backend.confirmations import confirm_or_raise, require_confirmation
 from backend.errors import ApiError, said
 from backend.rate_limit import rate_limit
-from backend.services import ha_link, ha_state
+from backend.services import ha_folders, ha_link, ha_state
 
 router = APIRouter(tags=["High availability"])
 ADMIN = Depends(require_scope("system:config"))
@@ -26,6 +26,10 @@ class PairIn(BaseModel):
     address: str = Field(min_length=8, max_length=255)  # the first NAS
     code: str = Field(min_length=16, max_length=40)
     my_address: str = Field(min_length=8, max_length=255)  # where the first NAS reaches this one
+
+
+class FoldersIn(BaseModel):
+    names: list[str] = Field(max_length=64)
 
 
 class PeerPairIn(BaseModel):
@@ -52,7 +56,7 @@ def _actor(principal: AuthenticatedPrincipal) -> str:
 
 def _status() -> dict[str, Any]:
     """The link's status, and the copy of people and settings that goes with it."""
-    return {**ha_link.status(), **ha_state.view()}
+    return {**ha_link.status(), **ha_state.view(), **ha_folders.view()}
 
 
 @router.get("/ha", dependencies=[ADMIN])
@@ -108,6 +112,36 @@ async def ha_fetch() -> dict[str, Any]:
     """On the second NAS: fetches the first one's people and settings now (it also does every night)."""
     if ha_link.role() != "second":
         raise _refused(ha_link.LinkError("not_second", "Only the second NAS fetches people and settings."), 409)
+    await asyncio.to_thread(ha_state.fetch_soon)
+    return await asyncio.to_thread(_status)
+
+
+@router.get("/ha/folders", dependencies=[ADMIN])
+async def ha_folders_view() -> dict[str, Any]:
+    """On the second NAS: the first one's shared folders (asked now), and the ones chosen to be kept."""
+    if ha_link.role() != "second":
+        raise _refused(ha_link.LinkError("not_second", "Only the second NAS keeps the first one's folders."), 409)
+    try:
+        there: list[str] | None = await asyncio.to_thread(ha_folders.available)
+        error = ""
+    except ha_link.LinkError as e:
+        there, error = None, e.key
+    return {"available": there, "error": error, **ha_folders.view()}
+
+
+@router.put("/ha/folders", dependencies=[ADMIN])
+async def ha_folders_set(
+    req: FoldersIn, request: Request, principal: AuthenticatedPrincipal = Depends(get_current_principal)
+) -> dict[str, Any]:
+    """On the second NAS: which of the first one's folders are kept in step. Confirmed; the first fetch starts at once."""
+    names = sorted({n.strip() for n in req.names if n.strip()})
+    if names:
+        confirm_or_raise(request, principal, "ha.folders", target=", ".join(names))
+    try:
+        await asyncio.to_thread(ha_folders.choose, names)
+    except ha_link.LinkError as e:
+        raise _refused(e, 409 if e.key in ("not_second", "unreachable", "refused") else 400) from e
+    ha_link.audit("folders", f"folders kept in step: {', '.join(names) or 'none'}", _actor(principal))
     await asyncio.to_thread(ha_state.fetch_soon)
     return await asyncio.to_thread(_status)
 
