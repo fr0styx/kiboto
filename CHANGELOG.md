@@ -110,6 +110,8 @@ Files on a phone: on a file's Permissions tab the letters beside the mode number
 
 Keyboard: the notice for the front panel's copy button took the Tab key's focus on three buttons while it was not shown. It is skipped until a copy runs.
 
+On a laptop screen the Getting started card lay over the last one or two desktop icons (Drive Health and the Kiboto front panel) on a new install. It now sits beside them.
+
 #### Changes
 
 - **Ask Kib about the NAS in your language**: questions about free space, drives, fans, apps, the network and
