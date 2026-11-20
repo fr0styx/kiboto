@@ -13,6 +13,7 @@ from typing import Any, Optional
 
 from pydantic import BaseModel, Field
 
+from backend import owned
 from backend.config import POOL_PATH, logger
 from backend.fsutil import prune_protected
 from backend.settings import test_mode
@@ -304,6 +305,7 @@ def _copy_new(src: str, dst: str) -> None:
     with open(src, "rb") as fi, open(dst, "xb") as fo:
         shutil.copyfileobj(fi, fo, 1 << 20)
     shutil.copystat(src, dst)
+    owned.like_folder(dst)
 
 
 def _place(src: str, dst: str, action: str, hardlink: bool) -> str:
@@ -311,7 +313,7 @@ def _place(src: str, dst: str, action: str, hardlink: bool) -> str:
     already there, "no_link" when a link was asked for and cannot be made."""
     if os.path.lexists(dst):
         return "kept"
-    os.makedirs(os.path.dirname(dst), exist_ok=True)
+    owned.make_dirs(os.path.dirname(dst))
     try:
         if hardlink:
             try:

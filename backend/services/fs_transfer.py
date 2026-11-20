@@ -481,6 +481,7 @@ def replace_with_copy(src: str, dest: str) -> None:
         except BaseException:
             shutil.rmtree(stage, ignore_errors=True)
             raise
+        owned.like_source(src, stage)  # put back as it was, its owners too
         if os.path.lexists(dest):
             _set_aside(dest)
         os.rename(stage, dest)
@@ -488,6 +489,7 @@ def replace_with_copy(src: str, dest: str) -> None:
     if os.path.isdir(dest) and not os.path.islink(dest):
         _set_aside(dest)
     _copy_file_resilient(src, dest)
+    owned.like_source(src, dest)
 
 
 def _sweep_entry(dirpath: str, name: str, action: str, counts: dict[str, int]) -> bool:

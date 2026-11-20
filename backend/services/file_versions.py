@@ -13,6 +13,7 @@ import tempfile
 import time
 from typing import Any
 
+from backend import owned
 from backend.config import logger
 from backend.fsutil import resolve_within
 
@@ -134,11 +135,16 @@ def restore_version(path: str, version_id: str, overwrite: bool = False, binned:
     if real is None:
         raise PermissionError("That file leads outside the shared folders.")
     folder = os.path.dirname(real)
+    try:
+        before: os.stat_result | None = os.lstat(real)  # whose the file is now: the version kept is root's
+    except OSError:
+        before = None
     if overwrite:
         fd, tmp = tempfile.mkstemp(prefix=".kiboto-restore-", dir=folder)
         os.close(fd)
         try:
             shutil.copy2(src, tmp)
+            owned.like_before(tmp, before)
             recycle_dir = recycle_bin.bin_for(real) or recycle_bin.same_disk_bin(real)
             if recycle_dir and os.path.lexists(real) and not os.path.islink(real):
                 kept = recycle_bin.move_to_bin(real, recycle_dir, real, True)
@@ -158,4 +164,5 @@ def restore_version(path: str, version_id: str, overwrite: bool = False, binned:
         dest = os.path.join(folder, f"{stem} (version {stamp}) {n}{ext}")
         n += 1
     shutil.copy2(src, dest)
+    owned.like_before(dest, before)
     return dest

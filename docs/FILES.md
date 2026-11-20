@@ -16,7 +16,11 @@ A file you upload, a folder you make, a copy and what comes out of an archive be
 folder they land in: they get that folder's owner and group. Where the folder lets its group or
 everyone write, they may change the new file too. So what you put into a shared folder here can
 be changed, renamed and deleted over the network share by the same people as everything else in
-it. A file that only its owner may read keeps that when it is copied.
+it. A file that only its owner may read keeps that when it is copied. The same goes for files
+copied from another NAS or PC and for the folders the film and series tidy-up makes.
+
+What is **restored** is put back as it was: a file or folder from a snapshot keeps the owner it
+has there, and an earlier version put back keeps the owner of the file it replaces.
 
 Kiboto only does this for what it has just made. A file that was there before keeps its owner,
 also one made here by an earlier version (those belong to the system, and can be read over the

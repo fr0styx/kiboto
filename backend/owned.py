@@ -72,6 +72,50 @@ def rights_again(path: str) -> None:
         logger.debug("[Files] %s keeps the rights it was made with: %s", path, e)
 
 
+def _hand(path: str, uid: int, gid: int) -> None:
+    try:
+        os.lchown(path, uid, gid)
+    except OSError as e:
+        logger.debug("[Files] %s keeps the owner it was made with: %s", path, e)
+
+
+def like_source(src: str, dst: str) -> None:
+    """A restored copy keeps the owner it had: `dst`, which Kiboto copied from `src`, gets the
+    owner and group of `src`, and so does everything in it. Copying keeps rights and dates, and
+    as root it makes root the owner."""
+    if _me() != 0:
+        return
+    try:
+        st = os.lstat(src)
+    except OSError:
+        return
+    _hand(dst, st.st_uid, st.st_gid)
+    if not stat.S_ISLNK(st.st_mode):
+        try:
+            os.chmod(dst, stat.S_IMODE(st.st_mode))  # and its rights, where the copy was first made like its folder
+        except OSError as e:
+            logger.debug("[Files] %s keeps the rights it was made with: %s", dst, e)
+    if not stat.S_ISDIR(st.st_mode):
+        return
+    for at, dirs, files in os.walk(src):
+        there = os.path.join(dst, os.path.relpath(at, src))
+        for name in dirs + files:
+            try:
+                had = os.lstat(os.path.join(at, name))
+            except OSError:
+                continue
+            _hand(os.path.join(there, name), had.st_uid, had.st_gid)
+
+
+def like_before(path: str, before: os.stat_result | None) -> None:
+    """A file put back over itself keeps the owner it had (`before`: what it was a moment ago);
+    one that was not there is like the folder it is in."""
+    if before is None:
+        like_folder(path)
+    elif _me() == 0:
+        _hand(path, before.st_uid, before.st_gid)
+
+
 def below(top: str, path: str, done: set[str] | None = None) -> None:
     """`path` was just made somewhere below the folder `top`, perhaps with folders made on the
     way: each of those, from the top down, and then `path`. `done` remembers folders already

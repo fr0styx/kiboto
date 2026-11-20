@@ -20,6 +20,7 @@ import uuid
 from typing import Any, Optional
 
 import backend.config as config
+from backend import owned
 from backend.ignored_errors import ignored
 from backend.proc import run_bounded
 from backend.services.webdav_engine import ensure_fuse_device
@@ -1084,6 +1085,10 @@ class RcloneEngine:
             "transfer_log": [],
         }
         self._sync_jobs[job_id] = job
+        # A folder here as the destination: rclone makes its files as root. With its list of what
+        # it copied, each file and the folders made for it go to the destination's people.
+        lands_here = not dry_run and dst.startswith("/")
+        seen_to: set[str] = set()
 
         def _run_sync():
             try:
@@ -1103,12 +1108,14 @@ class RcloneEngine:
                 ]
                 if ignore_errors:
                     cmd.append("--ignore-errors")
-                if verbose:
+                if verbose or lands_here:
                     cmd.append("-v")
                 if dry_run:
                     cmd.append("--dry-run")
                 cmd += [str(f) for f in (extra_flags or [])]
                 cmd += ["--", src, dst]  # locations are never read as options
+                if lands_here:
+                    owned.make_dirs(dst)
 
                 logger.info("[RCLONE] Starting async sync job %s: %s", job_id, " ".join(cmd))
                 proc = subprocess.Popen(
@@ -1132,29 +1139,10 @@ class RcloneEngine:
                                 _apply_stats(job, stats)
 
                             # 2. Parse file log items
-                            msg = data.get("msg", "")
-                            obj = data.get("object") or data.get("source")
-                            level = data.get("level", "info")
-
-                            log_entry = {
-                                "time": round(time.time(), 2),
-                                "level": level,
-                                "message": msg,
-                                "object": obj,
-                            }
-                            if len(job["transfer_log"]) < 200:
-                                job["transfer_log"].append(log_entry)
-                            else:
-                                job["transfer_log"] = job["transfer_log"][-199:] + [log_entry]
-
-                            if level == "error" or "failed" in msg.lower():
-                                if obj and obj not in [f.get("file") for f in job["failed_files"]]:
-                                    job["failed_files"].append(
-                                        {"file": obj, "error": msg, "time": round(time.time(), 2)}
-                                    )
-                            elif "copied" in msg.lower() or (obj and "done" in msg.lower()):
-                                if obj and obj not in [f.get("file") for f in job["successful_files"]]:
-                                    job["successful_files"].append({"file": obj, "time": round(time.time(), 2)})
+                            if lands_here and data.get("object") and "copied" in str(data.get("msg", "")).lower():
+                                owned.below(dst, os.path.join(dst, str(data["object"])), seen_to)
+                            if verbose or data.get("level", "info") != "info":
+                                _note_line(job, data)  # lines asked of rclone for the owners only are not kept
 
                         except json.JSONDecodeError:
                             if len(job["transfer_log"]) < 200:
@@ -1194,6 +1182,24 @@ class RcloneEngine:
     def get_sync_jobs(self) -> list[dict[str, Any]]:
         """Returns list of tracked synchronization jobs."""
         return list(self._sync_jobs.values())
+
+
+def _note_line(job: dict[str, Any], data: dict[str, Any]) -> None:
+    """One line of rclone's log in the job: the last 200 lines, and which files failed or arrived."""
+    msg = data.get("msg", "")
+    obj = data.get("object") or data.get("source")
+    level = data.get("level", "info")
+    log_entry = {"time": round(time.time(), 2), "level": level, "message": msg, "object": obj}
+    if len(job["transfer_log"]) < 200:
+        job["transfer_log"].append(log_entry)
+    else:
+        job["transfer_log"] = job["transfer_log"][-199:] + [log_entry]
+    if level == "error" or "failed" in msg.lower():
+        if obj and obj not in [f.get("file") for f in job["failed_files"]]:
+            job["failed_files"].append({"file": obj, "error": msg, "time": round(time.time(), 2)})
+    elif "copied" in msg.lower() or (obj and "done" in msg.lower()):
+        if obj and obj not in [f.get("file") for f in job["successful_files"]]:
+            job["successful_files"].append({"file": obj, "time": round(time.time(), 2)})
 
 
 # Singleton instance

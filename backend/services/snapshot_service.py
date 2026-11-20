@@ -14,6 +14,7 @@ import time
 from collections.abc import Callable
 from typing import Any
 
+from backend import owned
 from backend.config import DATA_DIR, logger
 from backend.fsutil import ENCRYPTED_HIDDEN, atomic_write_json, child_path, json_locked, read_json, resolve_within
 
@@ -309,15 +310,17 @@ def restore(
     if os.path.lexists(dest) and not overwrite:
         stem, ext = os.path.splitext(dest) if os.path.isfile(src) else (dest, "")
         dest = f"{stem} (restored {time.strftime('%Y-%m-%d %H%M')}){ext}"
-    os.makedirs(os.path.dirname(dest), exist_ok=True)
+    owned.make_dirs(os.path.dirname(dest))
     if overwrite and os.path.lexists(dest):
         from backend.services.fs_transfer import replace_with_copy
 
         replace_with_copy(src, dest)  # the current version goes to the Recycle Bin (REL-14)
     elif os.path.isdir(src) and not os.path.islink(src):
         shutil.copytree(src, dest, symlinks=True)
+        owned.like_source(src, dest)  # as it was in the snapshot: its owners too, not root's
     else:
         shutil.copy2(src, dest, follow_symlinks=False)
+        owned.like_source(src, dest)
     return {"restored": os.path.relpath(dest, live_root).replace(os.sep, "/"), "overwrote": overwrite}
 
 
@@ -392,6 +395,7 @@ def _rollback_copy(src_root: str, live_root: str, wanted: list[str], progress: C
             shutil.copytree(src, dest, symlinks=True)
         else:
             shutil.copy2(src, dest, follow_symlinks=False)
+        owned.like_source(src, dest)
         progress(i, len(wanted))
     return {"restored": len(wanted), "removed": removed}
 

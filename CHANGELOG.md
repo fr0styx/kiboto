@@ -76,6 +76,8 @@ On a tablet held upright, windows opened a little wider than the screen, so the 
 
 **What you make in Files can be changed over the network share.** A file uploaded in the File Explorer, a folder made there, a copy and the contents of an unpacked archive belonged to the system: over the network share (SMB) the folder's people could open them and not change, rename or delete them, and could put nothing into such a folder. They now get the owner and group of the folder they land in, and the folder's right to write. Files made by earlier versions keep the owner they have; the Permissions tab in a file's or folder's details sets it, also for everything inside a folder. See the Files guide.
 
+**Restored files keep their owner; files copied from another NAS belong to the folder they land in.** A file or folder restored from a snapshot came back owned by the system, so over the network share its people could no longer change it; it now keeps the owner it has in the snapshot, and an earlier version put back keeps the owner of the file it replaces. Files copied from another NAS or PC, or downloaded from a cloud remote into a folder here, and the folders the film and series tidy-up makes, get the owner of the folder they land in.
+
 #### Changes
 
 - **Ask Kib about the NAS in your language**: questions about free space, drives, fans, apps, the network and

@@ -130,3 +130,51 @@ def test_folders_made_on_the_way_are_seen_to_from_the_top_down(tmp_path, monkeyp
         owned.below(str(share), str(tmp_path / "elsewhere"))
     finally:
         os.umask(old_umask)
+
+
+def test_a_restored_copy_keeps_the_owners_it_had(tmp_path, monkeypatch):
+    src, dst = tmp_path / "snapshot" / "album", tmp_path / "live" / "album"
+    (src / "deep").mkdir(parents=True)
+    (src / "one.txt").write_text("1")
+    (src / "deep" / "two.txt").write_text("2")
+    (dst / "deep").mkdir(parents=True)
+    (dst / "one.txt").write_text("1")  # two.txt is missing in the copy: skipped without a word
+    owners = {"album": (1000, 100), "one.txt": (1001, 100), "deep": (1002, 100), "two.txt": (1003, 100)}
+    real, given = os.lstat, []
+
+    def lstat(path, *a, **k):
+        return _as(real(path, *a, **k), *owners[os.path.basename(str(path))])
+
+    def lchown(path, uid, gid):
+        if not os.path.lexists(path):
+            raise FileNotFoundError(2, "No such file", path)
+        given.append((os.path.relpath(path, tmp_path / "live"), uid, gid))
+
+    monkeypatch.setattr(owned.os, "lstat", lstat)
+    monkeypatch.setattr(owned.os, "lchown", lchown)
+    monkeypatch.setattr(owned, "_me", lambda: 1000)
+    owned.like_source(str(src), str(dst))
+    assert given == []  # only root can hand a file to someone
+    monkeypatch.setattr(owned, "_me", lambda: 0)
+    owned.like_source(str(src), str(dst))
+    assert sorted(given) == [("album", 1000, 100), ("album/deep", 1002, 100), ("album/one.txt", 1001, 100)]
+    given.clear()
+    os.chmod(src / "one.txt", 0o640)
+    os.chmod(dst / "one.txt", 0o666)  # the copy was first made like its folder
+    owned.like_source(str(src / "one.txt"), str(dst / "one.txt"))  # one file
+    assert given == [("album/one.txt", 1001, 100)] and _mode(dst / "one.txt") == "0o640"
+    monkeypatch.setattr(owned.os, "lstat", real)
+    owned.like_source(str(tmp_path / "gone"), str(dst))  # no source: nothing happens
+    assert len(given) == 1
+
+
+def test_a_file_put_back_over_itself_keeps_its_owner(tmp_path, as_root):
+    share = tmp_path / "Films"
+    share.mkdir()
+    put_back = share / "a.txt"
+    put_back.write_text("a")
+    owned.like_before(str(put_back), _as(os.lstat(put_back), 1005, 100))
+    assert as_root == [(str(put_back), 1005, 100)]
+    as_root.clear()
+    owned.like_before(str(put_back), None)  # it was not there: like the folder it is in
+    assert as_root == [(str(put_back), 99, 100)]

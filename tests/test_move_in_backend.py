@@ -75,4 +75,69 @@ def test_a_dry_run_counts_the_files_it_would_copy_and_the_copy_then_leaves_none(
     assert not (dst / "sub").exists()  # a dry run writes nothing
     done = run(False)
     assert done["files_transferred"] == 1 and (dst / "sub" / "b.txt").read_text() == "hi"
+    # the list of files, asked of rclone for the owners only, is not kept in the job
+    assert done["successful_files"] == [] and [e for e in done["transfer_log"] if e["level"] == "info"] == []
     assert run(True)["total_files"] == 0  # the check after the copy: nothing left
+
+
+def test_what_a_copy_brings_here_is_the_destinations(tmp_path, monkeypatch):
+    """rclone makes its files as root. For a folder here it is asked for the list of what it
+    copied, and each file and the folders made for it follow the destination (backend/owned.py)."""
+    import os
+    from unittest.mock import MagicMock
+
+    from backend import owned
+
+    dst = tmp_path / "Films"
+    (dst / "album" / "deep").mkdir(parents=True)
+    (dst / "album" / "deep" / "b.txt").write_text("hi")
+    os.chmod(dst / "album" / "deep" / "b.txt", 0o644)
+    for folder in (dst / "album" / "deep", dst / "album"):
+        os.chmod(folder, 0o755)
+    os.chmod(dst, 0o777)  # as a shared folder on Unraid is
+    monkeypatch.setattr(owned, "_me", lambda: os.lstat(dst).st_uid)
+    monkeypatch.setattr(owned.os, "lchown", lambda *a: None)
+    monkeypatch.setattr(rclone_engine, "_tell_sync_done", lambda *a, **k: None)
+    lines = [
+        json.dumps({"level": "info", "msg": "Copied (new)", "object": "album/deep/b.txt"}),
+        json.dumps({"level": "info", "msg": "There was nothing to transfer"}),
+        json.dumps({"level": "warning", "msg": "stats", "stats": {"bytes": 2, "totalBytes": 2, "transfers": 1}}),
+    ]
+    started = []
+
+    def popen(cmd, **kw):
+        started.append(cmd)
+        proc = MagicMock()
+        proc.stdout.readline.side_effect = [line + "\n" for line in lines] + [""]
+        proc.returncode = 0
+        return proc
+
+    monkeypatch.setattr(subprocess, "Popen", popen)
+    eng = _engine(tmp_path)
+
+    def run(**how):
+        job = eng.start_sync_job("oldnas:Films", str(dst), action="copy", notify=False, **how)
+        deadline = time.time() + 10
+        while job["status"] == "running" and time.time() < deadline:
+            time.sleep(0.02)
+        assert job["status"] == "success", job
+        return job
+
+    job = run()
+    assert "-v" in started[-1]  # asked for the list, though the person did not ask to see it
+    assert [(e["level"], e["message"]) for e in job["transfer_log"]] == [("warning", "stats")]
+    assert job["successful_files"] == []
+    modes = [
+        oct(os.stat(p).st_mode & 0o777)
+        for p in (dst / "album", dst / "album" / "deep", dst / "album" / "deep" / "b.txt")
+    ]
+    assert modes == ["0o777", "0o777", "0o666"]
+    # a dry run writes nothing, so nothing is asked for; a copy to another machine is not this box's to settle
+    run(dry_run=True)
+    assert "-v" not in started[-1]
+    job = eng.start_sync_job(str(dst), "cloud:Films", action="copy", notify=False)
+    deadline = time.time() + 10
+    while job["status"] == "running" and time.time() < deadline:
+        time.sleep(0.02)
+    assert "-v" not in started[-1]
+    assert run(verbose=True)["successful_files"][0]["file"] == "album/deep/b.txt"  # asked to see it: kept as before
