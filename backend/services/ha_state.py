@@ -172,7 +172,11 @@ def fetch(send: ha_link.Sender | None = None) -> dict[str, Any]:
     """Asks the first NAS for its people and settings and keeps the copy. Raises LinkError."""
     if ha_link.role() != "second":
         raise LinkError("not_second", "Only the second NAS fetches the first one's people and settings.")
-    ask = (lambda op, args=None: ha_link.call(op, args, send=send)) if send else ha_link.call
+    ask = (
+        (lambda op, args=None: ha_link.call(op, args, send=send, patient=True))
+        if send
+        else (lambda op, args=None: ha_link.call(op, args, patient=True))
+    )
     begun = ask("settings_begin")
     size, want = int(begun.get("size") or 0), str(begun.get("sha256") or "")
     if not 0 < size <= MAX_BYTES or len(want) != 64 or not begun.get("pass"):

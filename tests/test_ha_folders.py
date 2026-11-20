@@ -116,6 +116,28 @@ def test_a_folder_is_fetched_whole_into_a_shared_folder_of_the_same_name(net):
     assert [n for n in os.listdir(hf.DIR) if n.startswith("tree-")] == []  # the first NAS kept no list lying around
 
 
+def test_folders_a_fetch_makes_are_like_the_shared_folder(net, monkeypatch):
+    net.put(A, "Films", "2019/summer/a.mkv", "a")
+    net.put(A, "Films", "2019/b.mkv", "b")
+    there = net.make_share("Films")
+    os.chmod(there, 0o2770)  # as a shared folder is: its group may write, new files keep the group
+    owned = []
+    monkeypatch.setattr(hf.os, "geteuid", lambda: 0)
+    monkeypatch.setattr(hf.os, "chown", lambda path, uid, gid: owned.append((os.path.relpath(path, there), uid, gid)))
+    hf.choose(["Films"], send=net.send)
+    assert hf.fetch_folder("Films", send=net.send)["fetched"] == 2
+    for folder in ("2019", "2019/summer"):
+        assert oct(os.stat(os.path.join(there, folder)).st_mode & 0o7777) == "0o2770", folder
+    like = os.stat(there)
+    made = [o for o in owned if not o[0].endswith(hf.PART)]
+    assert sorted(made) == [("2019", like.st_uid, like.st_gid), ("2019/summer", like.st_uid, like.st_gid)]
+    # a folder that is there keeps what it has
+    os.chmod(os.path.join(there, "2019"), 0o700)
+    net.put(A, "Films", "2019/c.mkv", "c")
+    assert hf.fetch_folder("Films", send=net.send)["fetched"] == 1
+    assert oct(os.stat(os.path.join(there, "2019")).st_mode & 0o7777) == "0o700"
+
+
 def test_a_changed_file_is_fetched_again_and_a_deleted_one_is_kept_for_a_while(net):
     net.put(A, "Films", "a.txt", "one")
     net.put(A, "Films", "gone.txt", "soon gone")

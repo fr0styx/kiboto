@@ -9,17 +9,20 @@ from __future__ import annotations
 import asyncio
 from typing import Any, Literal
 
-from fastapi import APIRouter, Depends, Path, Request
+from fastapi import APIRouter, Depends, HTTPException, Path, Request
 from pydantic import BaseModel, Field
 
-from backend.auth import AuthenticatedPrincipal, get_current_principal, require_scope
+from backend.auth import AuthenticatedPrincipal, client_ip, get_current_principal, require_scope
 from backend.confirmations import confirm_or_raise, require_confirmation
 from backend.errors import ApiError, said
-from backend.rate_limit import rate_limit
+from backend.rate_limit import hit, rate_limit, waiting
 from backend.services import ha_apps, ha_folders, ha_link, ha_state, ha_takeover
 
 router = APIRouter(tags=["High availability"])
 ADMIN = Depends(require_scope("system:config"))
+# Messages that cannot be read, per address: (how many, in how many seconds). Readable ones are not
+# counted: fetching a folder is one message for every file and one for every 4 MiB of it.
+PEER_UNREADABLE = (30, 60.0)
 
 
 class PairIn(BaseModel):
@@ -229,10 +232,18 @@ async def ha_peer_pair(req: PeerPairIn) -> dict[str, Any]:
         raise _refused(e, 403) from e
 
 
-@router.post("/ha/peer/call", dependencies=[Depends(rate_limit("ha.peer", 240, 60, per="ip"))])
-async def ha_peer_call(req: EnvelopeIn) -> dict[str, str]:
-    """A sealed message from the paired box; the answer is sealed too."""
+@router.post("/ha/peer/call")
+async def ha_peer_call(req: EnvelopeIn, request: Request) -> dict[str, str]:
+    """A sealed message from the paired box; the answer is sealed too. An address that sent too many
+    messages that could not be read gets 429 for a while."""
+    who = "ha.peer.unreadable:ip:" + client_ip(request)
+    wait = waiting(who, *PEER_UNREADABLE)
+    if wait:
+        raise HTTPException(
+            status_code=429, detail=f"Too many requests. Try again in {wait}s.", headers={"Retry-After": str(wait)}
+        )
     try:
         return await asyncio.to_thread(ha_link.handle_call, {"from": req.sender, "n": req.n, "c": req.c})
     except ha_link.LinkError as e:
+        hit(who, *PEER_UNREADABLE)
         raise _refused(e, 403) from e

@@ -59,6 +59,8 @@ PAIR_PATH = "/api/ha/peer/pair"
 CALL_PATH = "/api/ha/peer/call"
 TIMEOUT = 10.0
 MAX_REPLY = 8 * 1024 * 1024
+BUSY_TRIES = 8  # how often a fetch asks again when the other box says "later" (429)
+BUSY_WAIT_MAX = 65.0
 BAD_ADDRESS = "Use the other NAS's number address, like http://192.168.1.20:8082."
 _TS4 = ipaddress.ip_network("100.64.0.0/10")
 _TS6 = ipaddress.ip_network("fd7a:115c:a1e0::/48")
@@ -73,9 +75,10 @@ Sender = Callable[[str, dict[str, Any]], dict[str, Any]]
 class LinkError(RuntimeError):
     """Something that cannot be done; `key` names the sentence for the screen."""
 
-    def __init__(self, key: str, message: str):
+    def __init__(self, key: str, message: str, wait: float = 0.0):
         super().__init__(message)
         self.key = key
+        self.wait = wait  # the other box said "later": in how many seconds
 
 
 # --- what is kept -------------------------------------------------------------------------------
@@ -297,6 +300,16 @@ def _their_reason(e: urllib.error.HTTPError) -> str:
     return key[3:] if key.startswith("ha_") and key[3:] in THEIR_REASONS else "refused"
 
 
+def _later(e: urllib.error.HTTPError) -> float:
+    """In how many seconds the other box wants to be asked again (429); 0 for any other refusal."""
+    if e.code != 429:
+        return 0.0
+    try:
+        return min(max(float(e.headers.get("Retry-After") or 1), 1.0), BUSY_WAIT_MAX)
+    except (TypeError, ValueError):
+        return BUSY_WAIT_MAX
+
+
 def _post(url: str, body: dict[str, Any]) -> dict[str, Any]:
     """One request to the other box, no redirects followed, a bounded answer."""
 
@@ -311,7 +324,7 @@ def _post(url: str, body: dict[str, Any]) -> dict[str, Any]:
         with urllib.request.build_opener(_Stay).open(req, timeout=TIMEOUT) as r:  # noqa: S310 (an address clean_address let through)
             said = json.loads(r.read(MAX_REPLY + 1)[:MAX_REPLY])
     except urllib.error.HTTPError as e:
-        raise LinkError(_their_reason(e), f"The other NAS refused ({e.code}).") from e
+        raise LinkError(_their_reason(e), f"The other NAS refused ({e.code}).", wait=_later(e)) from e
     except (urllib.error.URLError, OSError, ValueError) as e:
         raise LinkError("unreachable", "The other NAS did not answer.") from e
     if not isinstance(said, dict):
@@ -367,19 +380,27 @@ ON_UNPAIR: list[Callable[[], None]] = []
 ON_HELLO: list[Callable[[dict[str, Any]], None]] = []
 
 
-def call(op: str, args: dict[str, Any] | None = None, send: Sender = _post) -> Any:
-    """Asks the other box for something, sealed both ways."""
+def call(op: str, args: dict[str, Any] | None = None, send: Sender = _post, patient: bool = False) -> Any:
+    """Asks the other box for something, sealed both ways. A `patient` caller (a fetch in the
+    background) waits and asks again when the other box says "later"; a person does not wait."""
     found = peer()
     if found is None:
         raise LinkError("not_paired", "This NAS is not paired with another one.")
     key, mine = _key_of(found), box_id()
-    envelope = seal(key, mine, found["id"], {"op": op, "args": args or {}})
-    try:
-        said = send(found["address"] + CALL_PATH, envelope)
-        answer = unseal(key, found["id"], mine, said, reply_to=envelope["n"])
-    except LinkError as e:
-        _last.update(at=time.time(), ok=False, error=e.key)
-        raise
+    tries = BUSY_TRIES if patient else 0
+    while True:
+        envelope = seal(key, mine, found["id"], {"op": op, "args": args or {}})
+        try:
+            said = send(found["address"] + CALL_PATH, envelope)
+            answer = unseal(key, found["id"], mine, said, reply_to=envelope["n"])
+            break
+        except LinkError as e:
+            if e.wait and tries > 0:
+                tries -= 1
+                time.sleep(e.wait)
+                continue
+            _last.update(at=time.time(), ok=False, error=e.key)
+            raise
     _last.update(at=time.time(), ok=True, error="")
     if isinstance(answer, dict) and answer.get("error"):
         raise LinkError("refused", str(answer["error"]))

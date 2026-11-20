@@ -56836,7 +56836,7 @@
   },
   "/api/v1/ha/peer/call": {
    "post": {
-    "description": "A sealed message from the paired box; the answer is sealed too.",
+    "description": "A sealed message from the paired box; the answer is sealed too. An address that sent too many\nmessages that could not be read gets 429 for a while.",
     "operationId": "ha_peer_call_api_v1_ha_peer_call_post",
     "requestBody": {
      "content": {
@@ -56876,8 +56876,7 @@
      "High availability"
     ],
     "x-rate-limit": {
-     "requests": 240,
-     "seconds": 60
+     "description": "30 messages a minute per address that cannot be read; readable ones are not counted."
     }
    }
   },

@@ -187,6 +187,9 @@ not depend on Tailscale or on a certificate:
   for later or meant for another box is refused. An answer only counts for the question it
   belongs to.
 - The two routes the other box calls need no sign-in, and give nothing to anyone without the
-  pairing key or the shared key. They are limited to a number of tries a minute.
+  pairing key or the shared key. An address that sends
+  messages that cannot be read is refused for a while after 30 of them in a minute; pairing tries are
+  limited too. Messages from the paired box are not held back, so a large folder is fetched as fast
+  as the network allows.
 
 The clocks of the two boxes must agree to within 2 minutes; if they do not, the card says so.

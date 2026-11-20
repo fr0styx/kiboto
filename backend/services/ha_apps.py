@@ -42,7 +42,8 @@ _adding: dict[str, dict[str, Any]] = {}
 # --- on the first NAS: how its apps are set up ------------------------------------------------------
 def setups() -> list[dict[str, Any]]:
     """Every app of this box that is not Kiboto itself: {name, compose, folders, images}. The
-    Compose text is rebuilt from the containers, so every folder in it is a full path."""
+    Compose text is rebuilt from the containers, so every folder in it is a full path.
+    RuntimeError when Docker does not answer: that is not the same as having no apps."""
     from backend.hardware.docker_stats import is_kiboto_own
     from backend.services.app_backup import compose_of
     from backend.services.container_mutator import docker_request
@@ -50,7 +51,7 @@ def setups() -> list[dict[str, Any]]:
 
     status, listed = docker_request("GET", "/containers/json?all=1")
     if status != 200 or not isinstance(listed, list):
-        return []
+        raise RuntimeError(f"Docker did not list its containers ({status})")
     groups: dict[str, list[str]] = {}
     for c in listed:
         cid = str(c.get("Id") or "")
@@ -86,7 +87,10 @@ def setups() -> list[dict[str, Any]]:
 def _list(_args: dict[str, Any]) -> dict[str, Any]:
     if ha_link.role() != "first":
         raise LinkError("refused", "Only a first NAS tells how its apps are set up.")
-    return {"apps": setups()}
+    try:
+        return {"apps": setups()}
+    except RuntimeError as e:  # the second NAS then keeps what it was told before
+        raise LinkError("refused", "Docker does not answer on the first NAS.") from e
 
 
 # --- on the second NAS: keeping what the first one said ---------------------------------------------
@@ -202,7 +206,10 @@ def _here_already() -> set[str]:
     from backend.services.container_mutator import docker_request
     from backend.services.docker_stacks import stack_of
 
-    status, listed = docker_request("GET", "/containers/json?all=1")
+    try:
+        status, listed = docker_request("GET", "/containers/json?all=1")
+    except RuntimeError:  # no Docker here: nothing has a name yet, and adding an app will say why it cannot
+        return set()
     names: set[str] = set()
     for c in listed if status == 200 and isinstance(listed, list) else []:
         names.add(str((c.get("Names") or [""])[0]).lstrip("/"))
@@ -286,11 +293,11 @@ def add(name: str, actor: str = "") -> dict[str, Any]:
     where, why = placed(app, ha_bring.here(), ha_folders.chosen())
     if why:
         raise LinkError("app_folders", "A folder this app uses is not on this NAS.")
+    compose = repointed(str(app.get("compose") or ""), where)
     with _lock:
         if name in _adding or name in _here_already():
             raise LinkError("app_here", f"An app named {name} is on this NAS already.")
         _adding[name] = {"state": "adding", "error": "", "at": time.time()}
-    compose = repointed(str(app.get("compose") or ""), where)
     threading.Thread(target=_add, args=(name, compose, actor), name="ha-app-add", daemon=True).start()
     return {"state": "adding"}
 

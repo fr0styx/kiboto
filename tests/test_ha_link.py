@@ -369,3 +369,99 @@ def test_pairing_and_unpairing_ask_first(client, auth_headers, tmp_path, monkeyp
     assert client.delete("/api/ha", headers=auth_headers).status_code == 428
     made = client.post("/api/confirmations", json={"action": "ha.pair", "target": A}, headers=auth_headers)
     assert made.status_code == 200 and A in made.json()["summary"]
+
+
+# --- how many messages the other box may send ---------------------------------------------------------
+def _paired_over_the_api(client, tmp_path, monkeypatch):
+    """This process is the first NAS behind the real route; the second one is played by hand.
+    Returns (key, the first's id, the second's id)."""
+    net = Net(tmp_path, monkeypatch)
+    net.pair()
+    net.on(B)
+    key, second, first = ha._key_of(ha.peer()), ha.box_id(), ha.peer()["id"]
+    net.on(A)
+    return key, first, second
+
+
+def test_readable_messages_are_not_held_back(client, tmp_path, monkeypatch):
+    from backend import rate_limit
+
+    rate_limit.reset()
+    key, first, second = _paired_over_the_api(client, tmp_path, monkeypatch)
+    for _ in range(300):  # a folder of 300 files is 300 messages within seconds
+        res = client.post("/api/ha/peer/call", json=ha.seal(key, second, first, {"op": "hello", "args": {}}))
+        assert res.status_code == 200, res.text
+
+
+def test_unreadable_messages_are_limited_per_address(client, tmp_path, monkeypatch):
+    from backend import rate_limit
+    from backend.api.ha import PEER_UNREADABLE
+
+    rate_limit.reset()
+    key, first, second = _paired_over_the_api(client, tmp_path, monkeypatch)
+    bad = {"from": second, "n": "A" * 16, "c": "A" * 40}
+    for _ in range(PEER_UNREADABLE[0]):
+        assert client.post("/api/ha/peer/call", json=bad).status_code == 403
+    res = client.post("/api/ha/peer/call", json=bad)
+    assert res.status_code == 429 and int(res.headers["Retry-After"]) >= 1
+    # the paired box at that address waits too, and is let in again afterwards
+    good = ha.seal(key, second, first, {"op": "hello", "args": {}})
+    assert client.post("/api/ha/peer/call", json=good).status_code == 429
+    rate_limit.reset()
+    assert client.post("/api/ha/peer/call", json=good).status_code == 200
+
+
+def test_waiting_counts_nothing():
+    from backend import rate_limit
+
+    rate_limit.reset()
+    assert rate_limit.waiting("t:x", 2, 60) == 0
+    assert rate_limit.hit("t:x", 2, 60) == 0 and rate_limit.hit("t:x", 2, 60) == 0
+    assert rate_limit.waiting("t:x", 2, 60) >= 1 and rate_limit.waiting("t:x", 3, 60) == 0
+    assert rate_limit.waiting("t:x", 2, 0) == 0  # the window has passed
+    rate_limit.reset()
+
+
+def test_a_patient_call_asks_again_when_told_later(tmp_path, monkeypatch):
+    net = Net(tmp_path, monkeypatch)
+    net.pair()
+    net.on(B)
+    slept, turned_away = [], [3]
+
+    def busy(url, body):
+        if turned_away[0]:
+            turned_away[0] -= 1
+            raise ha.LinkError("refused", "The other NAS refused (429).", wait=7.0)
+        return net.send(url, body)
+
+    monkeypatch.setattr(ha.time, "sleep", slept.append)
+    assert ha.call("hello", send=busy, patient=True)["name"] == "First NAS"
+    assert slept == [7.0, 7.0, 7.0] and ha.status()["peer"]["reachable"] is True
+    # a person does not wait: the refusal comes at once
+    turned_away[0] = 1
+    with pytest.raises(ha.LinkError) as e:
+        ha.call("hello", send=busy)
+    assert e.value.key == "refused" and slept == [7.0, 7.0, 7.0]
+    # and patience ends
+    turned_away[0] = ha.BUSY_TRIES + 1
+    with pytest.raises(ha.LinkError):
+        ha.call("hello", send=busy, patient=True)
+    assert len(slept) == 3 + ha.BUSY_TRIES and ha.status()["peer"]["reachable"] is False
+
+
+def test_how_long_to_wait_is_read_from_the_refusal():
+    import io
+    import urllib.error
+    from email.message import Message
+
+    def refusal(code, later=None):
+        headers = Message()
+        if later is not None:
+            headers["Retry-After"] = later
+        return urllib.error.HTTPError("http://x", code, "no", headers, io.BytesIO(b"{}"))
+
+    assert ha._later(refusal(403, "30")) == 0.0
+    assert ha._later(refusal(429, "30")) == 30.0
+    assert ha._later(refusal(429)) == 1.0
+    assert ha._later(refusal(429, "9999")) == ha.BUSY_WAIT_MAX
+    assert ha._later(refusal(429, "soon")) == ha.BUSY_WAIT_MAX

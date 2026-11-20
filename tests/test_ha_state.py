@@ -101,8 +101,8 @@ def test_a_copy_that_does_not_arrive_whole_is_not_kept_and_the_old_one_stays(net
     net.archive = b"ZETTBAK2" + b"new" * 900
     real = ha.call
 
-    def short_piece(op, args=None, send=ha._post):
-        said = real(op, args, send=send)
+    def short_piece(op, args=None, send=ha._post, **how):
+        said = real(op, args, send=send, **how)
         if op == "settings_piece" and args["n"] == 1:
             said = {"data": said["data"][:-8]}  # a piece that lost its end
         return said

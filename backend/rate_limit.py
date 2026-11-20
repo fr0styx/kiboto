@@ -37,6 +37,19 @@ def hit(key: str, limit: int, window: float) -> int:
         return 0
 
 
+def waiting(key: str, limit: int, window: float) -> int:
+    """Seconds until `key` may try again, without counting a request; 0 when it may now. For
+    routes that count only what went wrong (with `hit`) and so cannot use the dependency."""
+    now = time.time()
+    with _lock:
+        q = _hits.get(key)
+        if not q:
+            return 0
+        while q and now - q[0] > window:
+            q.popleft()
+        return max(1, int(window - (now - q[0])) + 1) if len(q) >= limit else 0
+
+
 def reset() -> None:
     with _lock:
         _hits.clear()

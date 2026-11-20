@@ -96,6 +96,7 @@ OWN_RATE_LIMITS = {
     "POST /shared/{token}": "120 requests a minute per address; 5 wrong passwords in 10 minutes block the address.",
     "POST /fs/shared/{token}/upload": "200 files an hour per address; 5 wrong passwords in 10 minutes block the address.",
     "POST /shared/{token}/upload": "200 files an hour per address; 5 wrong passwords in 10 minutes block the address.",
+    "POST /ha/peer/call": "30 messages a minute per address that cannot be read; readable ones are not counted.",
     "GET /stats/stream": "At most 32 live telemetry streams at once.",
     "GET /fs/download-zip": "At most two archives are prepared at once.",
     "POST /ai/openai/chat/completions": "One request at a time per app key.",

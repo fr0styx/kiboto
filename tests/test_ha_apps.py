@@ -15,6 +15,7 @@ from backend.services import ha_link as ha
 from backend.services import ha_state as hs
 
 A, B = "http://192.168.1.10:8082", "http://192.168.1.20:8082"
+REAL_SETUPS = hp.setups
 JELLY = "services:\n  jellyfin:\n    image: example/jellyfin\n    volumes:\n    - /mnt/first/appdata/jellyfin:/config:rw\n    - /mnt/first/films:/media:ro\n"
 SETUPS = [
     {
@@ -144,7 +145,8 @@ def test_the_first_nas_tells_how_its_apps_are_set_up_without_kiboto_itself(monke
     monkeypatch.setattr(hp, "MAX_TEXT", 10)
     assert hp.setups() == []  # more text than one answer may carry: left out, not cut
     monkeypatch.setattr("backend.services.container_mutator.docker_request", lambda *a, **k: (0, None))
-    assert hp.setups() == []  # Docker does not answer
+    with pytest.raises(RuntimeError):
+        hp.setups()  # Docker does not answer: not the same as having no apps
 
 
 def test_the_second_nas_keeps_the_set_ups_sealed(net):
@@ -265,6 +267,27 @@ def test_the_names_this_box_has_already(monkeypatch):
     assert hp._here_already() == {"media-jellyfin-1", "media", "solo"}
     monkeypatch.setattr("backend.services.container_mutator.docker_request", lambda *a, **k: (0, None))
     assert hp._here_already() == set()
+
+    def no_docker(*a, **k):
+        raise RuntimeError("Docker socket not reachable")
+
+    monkeypatch.setattr("backend.services.container_mutator.docker_request", no_docker)
+    assert hp._here_already() == set()
+
+
+def test_a_first_nas_whose_docker_does_not_answer_says_so_and_the_second_keeps_what_it_has(net, monkeypatch):
+    assert hp.fetch(send=net.send) == 3
+
+    def no_docker(*a, **k):
+        raise RuntimeError("Docker socket not reachable")
+
+    for docker in (no_docker, lambda *a, **k: (500, None)):
+        monkeypatch.setattr(hp, "setups", REAL_SETUPS)
+        monkeypatch.setattr("backend.services.container_mutator.docker_request", docker)
+        with pytest.raises(ha.LinkError) as e:
+            hp.fetch(send=net.send)
+        assert e.value.key == "refused" and "Docker" in str(e.value)
+        assert [a["name"] for a in hp.kept()] == ["jellyfin", "taxes", "odd"]  # not replaced by "no apps"
 
 
 def test_a_new_secret_key_and_unpairing(net, tmp_path, monkeypatch):

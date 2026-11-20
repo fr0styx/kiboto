@@ -345,6 +345,21 @@ def _fetch_file(
             os.remove(part)
 
 
+def _make_folders(root: str, folder: str, like: os.stat_result) -> None:
+    """The folders between the shared folder and a fetched file, made with the shared folder's own
+    owner and rights. Made as the server makes them (root, not writable by others), the people who
+    may use the shared folder could read what is in them and change nothing."""
+    missing = []
+    while len(folder) > len(root) and not os.path.isdir(folder):
+        missing.append(folder)
+        folder = os.path.dirname(folder)
+    for path in reversed(missing):
+        os.mkdir(path)
+        os.chmod(path, stat.S_IMODE(like.st_mode) & 0o2777)
+        if os.geteuid() == 0:
+            os.chown(path, like.st_uid, like.st_gid)
+
+
 def _put_away(root: str, rel: str, day: str) -> None:
     """A file that is gone on the first NAS: kept in the hidden folder for a while."""
     target = os.path.join(root, REMOVED, day, *rel.split("/"))
@@ -374,7 +389,11 @@ def prune_removed(root: str, now: float | None = None) -> int:
 def fetch_folder(name: str, send: ha_link.Sender | None = None, now: float | None = None) -> dict[str, Any]:
     """Brings this box's copy of one folder in step with the first NAS. Returns how it went."""
     now = time.time() if now is None else now
-    ask = (lambda op, args=None: ha_link.call(op, args, send=send)) if send else ha_link.call
+    ask = (
+        (lambda op, args=None: ha_link.call(op, args, send=send, patient=True))
+        if send
+        else (lambda op, args=None: ha_link.call(op, args, patient=True))
+    )
     result: dict[str, Any] = {
         "at": now,
         "fetched": 0,
@@ -481,6 +500,7 @@ def _one(
         if was is not None:
             record.write(json.dumps([rel, *was]) + "\n")
         return
+    _make_folders(root, os.path.dirname(local), like)
     _fetch_file(ask, name, rel, size, mtime_ns, mode, local, like)
     result["fetched"] += 1
     result["bytes"] += size

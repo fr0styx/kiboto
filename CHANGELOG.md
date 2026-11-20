@@ -66,6 +66,12 @@ On a phone, the forms for a new virtual machine and a new shared folder show one
 
 On a tablet held upright, windows opened a little wider than the screen, so the close button was cut off, and the top bar's last button was cut in half. Both fit now. The count on the chosen Apps filter is easier to read.
 
+**A second NAS fetches large folders in one go.** The first NAS allowed the second one 240 requests a minute, and a folder fetch is one request for every file, so the first fetch of a folder with more than a few hundred files was refused part-way and caught up only over the following nights. Messages from the paired box are no longer held back; only messages that cannot be read are limited (30 a minute for each address). A second NAS paired with a first one on an older version waits and asks again instead of giving up.
+
+**Second NAS: a first NAS whose Docker is stopped no longer wipes the list of its apps.** It now says that Docker does not answer, and the second NAS keeps the set-ups it was told before. The list of the first NAS's apps also no longer fails on a box without Docker.
+
+**Second NAS: folders made by a fetch can be used by the folder's people.** A folder the fetch created inside a kept shared folder belonged to the system and was writable by nobody else, so after a takeover people could open the files in it and not add, rename or delete any. Such folders now get the shared folder's own owner and rights.
+
 #### Changes
 
 - **Ask Kib about the NAS in your language**: questions about free space, drives, fans, apps, the network and
