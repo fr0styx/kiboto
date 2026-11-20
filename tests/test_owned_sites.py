@@ -111,6 +111,9 @@ def test_the_route_that_hands_a_folder_back(client, auth_headers, tmp_path, monk
     monkeypatch.setattr(
         owned, "give_back", lambda top, keep_out=None: asked.append((top, keep_out)) or {"seen": 1, "given": 1}
     )
+    from backend.services import app_catalog
+
+    monkeypatch.setattr(app_catalog, "share_mounts", lambda: {"Films": str(folder)})
     res = client.post("/api/fs/permissions/like-folder", json={"path": str(folder)}, headers=auth_headers)
     assert res.status_code == 200 and res.json() == {"status": "ok", "path": str(folder), "seen": 1, "given": 1}
     assert asked == [(str(folder), details.prune_protected)]  # app folders inside are not entered
@@ -119,4 +122,22 @@ def test_the_route_that_hands_a_folder_back(client, auth_headers, tmp_path, monk
     assert res.status_code == 400
     res = client.post("/api/fs/permissions/like-folder", json={"path": "/mnt/user/appdata/mysql"}, headers=auth_headers)
     assert res.status_code == 403 and len(asked) == 1
+    # above the shared folders (a pool's top, where appdata and system lie) nothing is walked
+    res = client.post("/api/fs/permissions/like-folder", json={"path": str(tmp_path)}, headers=auth_headers)
+    assert res.status_code == 403 and len(asked) == 1
+    (tmp_path / "Films-old").mkdir()  # a name that only starts like the share's
+    res = client.post(
+        "/api/fs/permissions/like-folder", json={"path": str(tmp_path / "Films-old")}, headers=auth_headers
+    )
+    assert res.status_code == 403 and len(asked) == 1
+    (folder / "2019").mkdir()  # inside a shared folder it is done
+    res = client.post("/api/fs/permissions/like-folder", json={"path": str(folder / "2019")}, headers=auth_headers)
+    assert res.status_code == 200 and asked[-1][0] == str(folder / "2019")
+
+    def no_answer():
+        raise OSError(5, "the storage did not answer")
+
+    monkeypatch.setattr(app_catalog, "share_mounts", no_answer)
+    res = client.post("/api/fs/permissions/like-folder", json={"path": str(folder)}, headers=auth_headers)
+    assert res.status_code == 403 and len(asked) == 2
     assert client.post("/api/fs/permissions/like-folder", json={"path": str(folder)}).status_code in (401, 403)

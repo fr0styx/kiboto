@@ -236,6 +236,8 @@ A ready-made disk image that Kiboto unpacks for a virtual machine is readable by
 
 **A shared folder always names who may open it.** Where everyone had the right to write, Kiboto left it to the file server's default: anyone with an account there. An account that stayed in the file server's own list after its person was removed or switched off in Kiboto could then still open the folder. The people are now always written out. Only on installs where Kiboto runs the file server itself.
 
+Files: "Give to this folder's people" works only on a shared folder or a folder inside one. Pressed on a drive's top folder it could have reached the system's own folders (app settings, Docker and virtual machine disks).
+
 ## v2.0.4 (2026-11-19)
 ### 🏡 Apps that go back on their own, a way to move in, and Kiboto in your language everywhere
 

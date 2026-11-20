@@ -33,7 +33,8 @@ also one made here by an earlier version: those belong to the system, and can be
 network and not changed there. For those, open the folder's details, go to **Permissions** and
 press **Give to this folder's people**: everything in the folder that still belongs to the system
 gets the folder's owner. What belongs to someone else is not changed, and app folders are left
-out. It reads the whole folder, so on a large one it takes a while and wakes the drives it is on.
+out. It works on a shared folder or a folder inside one, not above them (a drive's or pool's
+top folder holds appdata and system, which stay the system's). It reads the whole folder, so on a large one it takes a while and wakes the drives it is on.
 
 ## Deleting and the Recycle Bin
 

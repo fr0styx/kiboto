@@ -323,6 +323,21 @@ async def fs_like_folder(
     return {"status": "ok", "path": req.path, **counts}
 
 
+def _in_a_shared_folder(target: str) -> bool:
+    """Whether `target` is one of the household's shared folders or inside one. Files may browse
+    all of /mnt, and below a pool's top lie appdata, system, domains and isos, whose files belong
+    to the system on purpose (other apps' settings, docker.img, VM disks). share_mounts leaves
+    those out, and the share that holds Kiboto's own data."""
+    from backend.services.app_catalog import share_mounts
+
+    try:
+        roots = [os.path.realpath(mp).rstrip(os.sep) for mp in share_mounts().values()]
+    except (OSError, RuntimeError, ValueError):  # the storage platform did not answer: refuse
+        return False
+    real = os.path.realpath(target)
+    return any(root and (real == root or real.startswith(root + os.sep)) for root in roots)
+
+
 def _hand_folder_back(target: str) -> dict[str, int]:
     """The work of fs_like_folder, off the event loop: a folder that is not protected, walked."""
     from backend import owned
@@ -334,4 +349,6 @@ def _hand_folder_back(target: str) -> dict[str, int]:
         )
     if not os.path.isdir(target) or os.path.islink(target):
         raise HTTPException(status_code=400, detail="This is done for a folder.")
+    if not _in_a_shared_folder(target):
+        raise HTTPException(status_code=403, detail="This is done for a shared folder or a folder in one.")
     return owned.give_back(target, prune_protected)
