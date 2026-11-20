@@ -108,6 +108,8 @@ Files on a phone: on a file's Permissions tab the letters beside the mode number
 
 **Keyboard and screen readers: the closed side drawer is skipped.** With the drawer for the front panel closed, its buttons were off the screen and still took the Tab key's focus one after the other: on the desktop most of the first sixty Tab presses went to something that could not be seen. A screen reader read them as well. Closed, the drawer is now left out; opened, it works as before.
 
+Keyboard: the notice for the front panel's copy button took the Tab key's focus on three buttons while it was not shown. It is skipped until a copy runs.
+
 #### Changes
 
 - **Ask Kib about the NAS in your language**: questions about free space, drives, fans, apps, the network and

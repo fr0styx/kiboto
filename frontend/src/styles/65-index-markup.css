@@ -58,6 +58,10 @@
 #copy-toast-backdrop { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--lt-b-00000099, rgba(0,0,0,0.6)); backdrop-filter: blur(4px); z-index: 10000; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
 #copy-toast { position: fixed; bottom: 20px; right: 20px; width: 360px; max-width: 90vw; height: auto; min-height: 0; resize: none; z-index: 10001; opacity: 0; pointer-events: none; transition: opacity 0.3s ease, transform 0.3s ease; transform: translateY(20px); border-color: var(--kb-line-10); }
 #copy-toast-bar { background: var(--ok2); height: 100%; width: 0%; transition: width 0.5s ease; }
+/* The copy notice is see-through while there is nothing to copy, and its three buttons still took the
+   keyboard's focus. Hidden then, after it has faded out; the code shows it by setting pointer-events. */
+#copy-toast { visibility: hidden; transition: opacity 0.3s ease, transform 0.3s ease, visibility 0s linear 0.3s; }
+#copy-toast[style*="pointer-events: auto"] { visibility: visible; transition: opacity 0.3s ease, transform 0.3s ease, visibility 0s; }
 #notif-center-panel { position:fixed; width:380px; min-width:320px; min-height:240px; max-width:calc(100vw - 24px); max-height:calc(100vh - 90px); background:var(--lt-b-151e1ff5, rgba(21,30,31,0.96)); backdrop-filter:blur(24px); border:1px solid var(--kb-line-12); border-radius:12px; z-index:9999; flex-direction:column; box-shadow:0 14px 40px rgba(0,0,0,0.85); overflow:hidden; user-select:none; }
 #notif-center-header .ixnch-svg1 { width:14px; height:14px; fill:currentColor; color:var(--lt-ink-brand, var(--brand)); }
 #notif-mark-read { background:none; border:none; color:var(--lt-ink-brand, var(--brand)); cursor:pointer; font-size:var(--kb-fs-xs); font-weight:600; padding:2px 4px; }
