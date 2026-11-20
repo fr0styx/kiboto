@@ -212,7 +212,18 @@ def test_e2e_live_desktop_session_and_badge():
             page.fill("#login-username", "admin")
         page.fill("#login-password", os.environ.get("KIBOTO_E2E_PASSWORD") or os.environ.get("WEB_PASSWORD", "admin"))
         page.click("#login-btn")
-        page.wait_for_function("() => localStorage.getItem('kiboto_signed_in') === '1'", timeout=8000)
+        try:
+            page.wait_for_function("() => localStorage.getItem('kiboto_signed_in') === '1'", timeout=8000)
+        except Exception as slow:  # noqa: BLE001 (Playwright's timeout, whichever API raised it)
+            if "Timeout" not in type(slow).__name__:
+                raise
+            form = page.evaluate(
+                "() => ({error: document.querySelector('#login-error')?.textContent || '',"
+                " button: document.querySelector('#login-btn')?.textContent || '',"
+                " name: document.querySelector('#login-username')?.value || '',"
+                " second_step: !!document.querySelector('#login-step-mfa')?.offsetParent})"
+            )
+            raise AssertionError(f"not signed in after 8 s; the sign-in form shows {form}") from slow
 
         cookies = {c["name"]: c for c in context.cookies()}
         assert "kiboto_session" in cookies and cookies["kiboto_session"]["httpOnly"]

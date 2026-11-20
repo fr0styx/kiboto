@@ -319,6 +319,26 @@ describe('sign-in and lock screen (auth.js)', () => {
     expect(shown('login-overlay')).toBe('flex');
   });
 
+  it('draws the sign-in form once, however many requests find nobody signed in', async () => {
+    const asked = () => fetchMock.mock.calls.filter(([url]) => url === '/api/auth/users-list').length;
+    ZettEventBus.emit('auth:login'); // signed in: the next sign-out draws the form
+    vi.clearAllMocks();
+    byId('login-users-chooser').innerHTML = '';
+    ZettEventBus.emit('auth:required');
+    ZettEventBus.emit('auth:required');
+    ZettEventBus.emit('auth:required');
+    await vi.waitFor(() => expect(byId('login-users-chooser').children.length).toBe(2));
+    expect(asked()).toBe(1);
+
+    byId('login-toggle-manual').click();
+    byId('login-username').value = 'bob';
+    ZettEventBus.emit('auth:required'); // a late answer while the person types
+    await new Promise((done) => setTimeout(done, 0));
+    expect(asked()).toBe(1);
+    expect(shown('login-manual-fields')).toBe('block');
+    expect(byId('login-username').value).toBe('bob');
+  });
+
   it('the front LCD never signs in or locks', async () => {
     const { state } = await import('../state.js');
     state.isLcdDirect = true;

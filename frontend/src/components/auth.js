@@ -17,6 +17,10 @@ import { passkeysAvailable } from '../passkeys-check.js';
 import { formatDate, formatTime } from '../format.js';
 let _pendingMfaToken = null;
 let _selectedUser = null;
+// The sign-in form is on screen and drawn. Every background request that finds nobody signed in
+// raises auth:required; drawing the form again at each one put the chooser back while a person
+// was typing a name or a password.
+let _formDrawn = false;
 let _autoLockTimer = null;
 let _isLocked = false;
 let _clockInterval = null;
@@ -58,13 +62,17 @@ export function initAuth() {
     if (overlay) {
       overlay.style.removeProperty('opacity');
       overlay.style.display = 'flex';
-      renderLoginChooser();
+      if (!_formDrawn) {
+        _formDrawn = true;
+        renderLoginChooser();
+      }
     }
     if (dock) dock.style.display = 'none';
   });
 
   // Handle auth:login
   ZettEventBus.on('auth:login', () => {
+    _formDrawn = false;
     fetchCurrentProfile();
     resetInactivityTimer();
   });
@@ -798,6 +806,7 @@ export function switchUser() {
   if (overlay) {
     overlay.style.removeProperty('opacity');
     overlay.style.display = 'flex';
+    _formDrawn = true;
     renderLoginChooser({ forceChooser: true });
   }
   if (dock) dock.style.display = 'none';
@@ -832,6 +841,7 @@ export async function logout() {
   if (overlay) {
     overlay.style.removeProperty('opacity');
     overlay.style.display = 'flex';
+    _formDrawn = true;
     renderLoginChooser({ forceChooser: true });
   }
   if (dock) dock.style.display = 'none';

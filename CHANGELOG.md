@@ -112,6 +112,8 @@ Keyboard: the notice for the front panel's copy button took the Tab key's focus 
 
 On a laptop screen the Getting started card lay over the last one or two desktop icons (Drive Health and the Kiboto front panel) on a new install. It now sits beside them.
 
+The sign-in screen could jump back to the list of people, or to the person it had picked, while you were typing a name or a password. It now stays as you left it.
+
 #### Changes
 
 - **Ask Kib about the NAS in your language**: questions about free space, drives, fans, apps, the network and
