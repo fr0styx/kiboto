@@ -166,6 +166,63 @@ class SambaStatus(BaseModel):
     native_samba_active: bool = False
 
 
+# Run inside the file server's container when its settings changed. Restarting the container
+# cut every connection, also for a change that concerned one shared folder or one blocked address.
+# Samba applies reloaded settings to new connections only, so the shared folders whose section
+# changed are closed (their clients connect again, under the new settings) and the connections of
+# newly blocked addresses are ended; everything else stays connected. The first lines make the
+# accounts Samba's own list has and the container lacks (after a restore), as its start does.
+# Arguments: the shared folders to close, then "--ips" and the addresses to end.
+RELOAD_SCRIPT = """
+CONF=/etc/samba/kiboto/smb.conf
+pdbedit -L 2>/dev/null | while IFS=: read -r user uid _; do
+  [ -n "$user" ] && ! id -u "$user" >/dev/null 2>&1 && { adduser -D -H -u "$uid" "$user" 2>/dev/null || adduser -D -H "$user"; }
+done
+smbcontrol --configfile="$CONF" all reload-config || exit 1
+kind=share
+for a in "$@"; do
+  if [ "$a" = "--ips" ]; then kind=ip; continue; fi
+  if [ "$kind" = share ]; then smbcontrol --configfile="$CONF" all close-share "$a"
+  else smbcontrol --configfile="$CONF" all kill-client-ip "$a"; fi
+done
+exit 0
+"""
+
+
+def conf_sections(text: str) -> dict[str, str]:
+    """An smb.conf text by section: name -> its lines."""
+    out: dict[str, list[str]] = {}
+    name = ""
+    for line in text.splitlines():
+        head = re.fullmatch(r"\[([^\]]+)\]", line.strip())
+        if head:
+            name = head.group(1)
+            out[name] = []
+        elif name and line.strip():
+            out[name].append(line.strip())
+    return {n: "\n".join(lines) for n, lines in out.items()}
+
+
+def _denied(section: str) -> set[str]:
+    found = re.search(r"^hosts deny = (.*)$", section, re.M)
+    return set(found.group(1).split()) if found else set()
+
+
+def what_changed(old: str, new: str) -> dict[str, Any]:
+    """What a new smb.conf changes against the one before: the shared folders whose section is
+    different or gone ("shares"), the addresses blocked now and not before ("ips"), and whether
+    the private folders' section changed ("homes": they are shares named after each person, so
+    they cannot be closed by name)."""
+    was, now = conf_sections(old), conf_sections(new)
+    special = ("global", "homes")
+    shares = sorted(n for n in was.keys() | now.keys() if n not in special and was.get(n) != now.get(n) and n in was)
+    return {
+        "shares": shares,
+        "ips": sorted(_denied(now.get("global", "")) - _denied(was.get("global", ""))),
+        "homes": was.get("homes") != now.get("homes") and "homes" in was,
+    }
+
+
 def _serves_files() -> bool:
     """Whether the shared folders are Kiboto's own to make (not Unraid's or another host's)."""
     from backend.hardware.pal_storage import get_storage_platform
@@ -464,6 +521,11 @@ class SambaEngine:
 
         full_conf = "\n".join(conf_lines)
         try:
+            with open(SAMBA_CONF_FILE, encoding="utf-8") as f:
+                self._changed = what_changed(f.read(), full_conf)  # for reload_service: what to close
+        except OSError:
+            self._changed = None  # no settings before: nothing is known, the server is restarted
+        try:
             atomic_write_text(SAMBA_CONF_FILE, full_conf)  # Samba never reads half a file (REL-22)
             logger.info("[SambaEngine] Generated and saved smb.conf with %s shares", len(self._shares))
         except Exception as e:
@@ -543,7 +605,8 @@ class SambaEngine:
         except (FileNotFoundError, subprocess.SubprocessError):
             pass
 
-        # 2. Try docker restart on sidecar container if available
+        # 2. The sidecar container: its settings reloaded in place where that is enough, else a restart
+        changed, self._changed = getattr(self, "_changed", None), None
         docker_sock = _docker_sock_path()
         sidecar_info = self.check_sidecar()
         if os.path.exists(docker_sock) and sidecar_info.get("detected"):
@@ -551,7 +614,14 @@ class SambaEngine:
                 import httpx
 
                 transport = httpx.HTTPTransport(uds=docker_sock)
-                with httpx.Client(transport=transport, timeout=3.0) as client:
+                with httpx.Client(transport=transport, timeout=20.0) as client:
+                    cid = sidecar_info.get("id") or "kiboto-samba"
+                    if changed is not None and not changed["homes"] and _reload_in_place(client, cid, changed):
+                        logger.info(
+                            "[SambaEngine] settings reloaded without a restart; closed: %s",
+                            ", ".join(changed["shares"]) or "nothing",
+                        )
+                        return True
                     r = client.post(
                         f"http://localhost/containers/{sidecar_info.get('id') or 'kiboto-samba'}/restart?t=2"
                     )
@@ -814,6 +884,24 @@ def _files_admin_roles() -> set[str]:
         if "superadmin" in scopes or has_scope(scopes, "storage:admin") or has_scope(scopes, "shares:manage"):
             out.add(row["id"])
     return out
+
+
+def _reload_in_place(client: Any, cid: str, changed: dict[str, Any]) -> bool:
+    """Runs RELOAD_SCRIPT in the file server's container; True when it ended well."""
+    made = client.post(
+        f"http://localhost/containers/{cid}/exec",
+        json={
+            "Cmd": ["sh", "-c", RELOAD_SCRIPT, "--", *changed["shares"], "--ips", *changed["ips"]],
+            "AttachStdout": True,
+            "AttachStderr": True,
+        },
+    )
+    if made.status_code != 201:
+        return False
+    exec_id = made.json().get("Id")
+    client.post(f"http://localhost/exec/{exec_id}/start", json={"Detach": False, "Tty": False})
+    said = client.get(f"http://localhost/exec/{exec_id}/json")
+    return said.status_code == 200 and said.json().get("ExitCode") == 0
 
 
 def refresh_access() -> None:

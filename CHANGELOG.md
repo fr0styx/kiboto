@@ -88,6 +88,8 @@ On a tablet held upright, windows opened a little wider than the screen, so the 
 
 **Files that arrive over WebDAV or SFTP also get the shared folders' group.** With the right to write alone they still belonged to the system and its group; on an install with Kiboto's own file server they could then not be changed over the network share. They now carry the group the shared folders have.
 
+**Kiboto's own file server is no longer restarted for every change.** Changing who may open a shared folder, adding a person, or an address being blocked after wrong passwords restarted the whole file server: everyone's open folders and running copies were cut. The new settings are now loaded in place. Only the shared folder that changed is closed, so its clients connect again under the new settings, and a newly blocked address is disconnected; everything else stays connected. Tried with the real file server: a person removed from a folder loses it at once, while another folder being copied to is not interrupted. Only on installs where Kiboto runs the file server itself.
+
 #### Changes
 
 - **Ask Kib about the NAS in your language**: questions about free space, drives, fans, apps, the network and

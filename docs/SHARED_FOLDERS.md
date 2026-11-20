@@ -38,7 +38,9 @@ Each folder's **How to connect** shows the address with a Copy button:
 Where Kiboto serves the files itself, a shared folder and each private folder belong to the
 file server's own user, and everyone who may open the folder reads and writes as that user. Who
 may open it is what the folder's card says: the file server is told those names and lets nobody
-else in.
+else in. A change to who may open a folder counts at once: connections to that folder are closed
+and connect again under the new settings, while other folders stay connected and a copy that is
+running there goes on.
 
 You sign in with your Kiboto user name and password. Someone with two-step sign-in uses a
 separate password for network folders; they make it right there, on the folder's card.
