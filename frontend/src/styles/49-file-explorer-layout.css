@@ -102,6 +102,14 @@
     .fm-path-input, .fm-path-breadcrumbs { min-height: 36px; }
     .fm-col-check { width: 44px; min-width: 44px; max-width: 44px; }
     .fm-checkbox { opacity: 0.8; }
+    /* The row of buttons stays one row at any phone width: the buttons share it, instead of the
+       last one ("…") landing on a line of its own (the owner's phone, 19 Nov 2026). */
+    :is(#file-manager-window, .file-manager-window) .fm-toolbar .fm-nav-btn-group { display: contents; }
+    .fm-toolbar > .fm-tool-btn,
+    .fm-toolbar .fm-nav-btn-group > .fm-tool-btn { flex: 1 1 0; min-width: 34px; max-width: 56px; }
+  }
+  @container fmwin (max-width: 380px) {
+    .fm-toolbar .fm-fwd-btn { display: none; } /* the narrowest phones: Back stays, Forward gives its place */
   }
 }
 

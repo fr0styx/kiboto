@@ -60,8 +60,8 @@ const TABS = () => [
   ['settings', t('mgmt.sidebar_system', 'Settings'), '#i-shield', 'mgmt.sidebar_system'],
 ];
 
-// What each tab opens (alerts: what needs attention, with the full activity log one tap away;
-// home and settings: the launcher's two views)
+// What each tab opens (alerts: the history, where what is new and unread is on top; home and
+// settings: the launcher's two views)
 const TAB_ROUTES = { files: 'files', apps: 'apps' };
 let launcherView = 'home';
 
@@ -155,6 +155,8 @@ function closePage(el) {
 
 // The tab a page belongs to: the one it was opened from, else by what the page is
 let openedFrom = 'home';
+const PAGE_WAIT_MS = 8000;
+let awaitingPage = 0; // until when the tab just tapped is still opening its page
 
 export function tabForPage(page) {
   if (!page) return launcherView;
@@ -178,15 +180,22 @@ function closeAllPages() {
 
 function openTab(id) {
   openedFrom = id;
+  // a tab's page may be loaded first and open a moment later: until then the bar already shows the
+  // tab that was tapped, and "no page open" does not yet mean "back on the launcher"
+  awaitingPage = id === 'home' || id === 'settings' ? 0 : Date.now() + PAGE_WAIT_MS;
+  if (awaitingPage) setTimeout(schedule, PAGE_WAIT_MS + 50);
   closeAllPages();
-  if (id === 'alerts') openAlertsPage();
+  // Alerts opens the history right away (the owner, 19 Nov 2026: it used to show what needs
+  // attention with the history one more tap away; that list is on Home). Where the history
+  // cannot be opened, the list of what needs attention is what there is.
+  if (id === 'alerts') typeof ROUTES.events === 'function' ? ROUTES.events() : openAlertsPage();
   else if (id === 'home' || id === 'settings') showView(id);
   else ROUTES[TAB_ROUTES[id]]?.();
   schedule();
 }
 
-/** The Alerts tab: what needs attention now, each with its Open button, and the activity log
- *  one tap away (UX-37). */
+/** What needs attention now, each with its Open button, and the history one tap away (UX-37).
+ *  The Alerts tab opens the history itself; this page is for where that cannot be opened. */
 export async function openAlertsPage() {
   let page = document.getElementById('phone-alerts-page');
   if (!page) {
@@ -285,11 +294,13 @@ function sync() {
   if (back && back.hidden !== !page) back.hidden = !page;
   document.body.classList.toggle('phone-page-open', Boolean(page));
   adoptWidgets(true); // the widget layer may be drawn after the shell
-  if (!page) {
+  if (page) awaitingPage = 0;
+  const opening = !page && Date.now() < awaitingPage;
+  if (!page && !opening) {
     openedFrom = launcherView;
     refreshHealth(); // back on the launcher: the summary is at most a minute old
   }
-  const current = tabForPage(page);
+  const current = opening ? openedFrom : tabForPage(page);
   document.querySelectorAll('[data-phone-tab]').forEach((b) => {
     const on = b.dataset.phoneTab === current;
     b.classList.toggle('is-current', on);

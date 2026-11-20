@@ -34,6 +34,16 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   button nearly filled the bar from edge to edge, each with its own shape. They are now the same height with
   the same corners and a margin above and below; the area that answers a finger is as large as before.
 
+- **On a phone: the File Explorer's buttons stay on one row**. The last button ("…") sat alone on a line of
+  its own on some phones. The buttons now share the row.
+
+- **On a phone: Alerts opens the history right away**, with what is new and unread on top. It used to open a
+  page with one more button to tap. What needs attention is on Home.
+
+- **On a phone: the bottom bar shows where you are**. Every icon was in the accent colour, so the current tab
+  stood out by its word alone, and while a page was loading the bar jumped back to Home. Now only the current
+  tab is coloured, with a line above it, from the moment you tap it.
+
 #### Changes
 
 - **Ask Kib about the NAS in your language**: questions about free space, drives, fans, apps, the network and

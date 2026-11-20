@@ -60,8 +60,13 @@ html.has-auth-session body.phone-shell #phone-widgets #desktop-widgets-container
 
 .phone-tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10050; display: grid; grid-template-columns: repeat(5, 1fr); padding-bottom: env(safe-area-inset-bottom); background: var(--lt-b-0a1113f5, rgba(10, 17, 19, 0.96)); border-top: 1px solid var(--kb-line-strong); }
 .phone-tab { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 60px; background: none; border: none; color: var(--muted); font-size: var(--kb-fs-xs); }
-.phone-tab .ic { width: 22px; height: 22px; }
-.phone-tab.is-current { color: var(--lt-ink-brand, var(--brand)); }
+/* The icon follows its tab: grey like the word under it, and only the current tab in the brand
+   colour, with a line above it (every icon used to be in the brand colour, so the current tab
+   stood out by its word alone). */
+.phone-tab { position: relative; }
+.phone-tab .ic { width: 22px; height: 22px; color: inherit; }
+.phone-tab.is-current { color: var(--lt-ink-brand, var(--brand)); font-weight: 700; }
+.phone-tab.is-current::before { content: ""; position: absolute; top: 0; left: 28%; right: 28%; height: 3px; border-radius: 0 0 3px 3px; background: currentColor; }
 
 /* Back takes the brand's place in the top bar while a page is open */
 .phone-back { position: fixed; top: 4px; left: 8px; z-index: 10060; min-height: 40px; padding: 0 var(--kb-space-3); border-radius: 20px; border: 1px solid var(--kb-line-strong); background: var(--lt-b-0a1113eb, rgba(10, 17, 19, 0.92)); color: var(--fg); font-size: var(--kb-fs); font-weight: 600; }

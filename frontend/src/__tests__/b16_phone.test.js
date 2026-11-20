@@ -22,13 +22,67 @@ describe('UX-37: phones and tablets', () => {
     setCompactBack(false);
   });
 
-  it('the Alerts tab shows what needs attention, with the activity log one tap away', async () => {
+  it('the Alerts tab opens the history right away', async () => {
     document.body.innerHTML = '';
-    window.openManagementSection = vi.fn();
+    window.openManagementSection = vi.fn(() => {
+      const win = document.createElement('div');
+      win.id = 'management-window';
+      win.style.zIndex = '900';
+      document.body.appendChild(win);
+    });
     enablePhoneShell(true);
     document.querySelector('[data-phone-tab="alerts"]').click();
     await tick();
-    const page = document.getElementById('phone-alerts-page');
+    expect(window.openManagementSection).toHaveBeenCalledWith('mgmt-pane-events');
+    expect(document.getElementById('phone-alerts-page')).toBeNull(); // no page in between
+    // and the bar keeps saying where you are while the history is open
+    expect(document.querySelector('.phone-tab.is-current').dataset.phoneTab).toBe('alerts');
+    expect(document.querySelector('[data-phone-tab="alerts"]').getAttribute('aria-current')).toBe('page');
+    expect(document.querySelectorAll('.phone-tab.is-current').length).toBe(1);
+  });
+
+  it('the bar marks the tab at once, also while its page is still loading', async () => {
+    document.body.innerHTML = '';
+    // the history is loaded when it is first opened: its window comes a moment later
+    window.openManagementSection = vi.fn(() => {
+      setTimeout(() => {
+        const win = document.createElement('div');
+        win.id = 'management-window';
+        win.style.zIndex = '900';
+        document.body.appendChild(win);
+      }, 120);
+    });
+    enablePhoneShell(true);
+    document.querySelector('[data-phone-tab="alerts"]').click();
+    await tick();
+    expect(document.getElementById('management-window')).toBeNull();
+    expect(document.querySelector('.phone-tab.is-current').dataset.phoneTab).toBe('alerts'); // it showed Home here
+    await vi.waitFor(() => expect(document.getElementById('management-window')).not.toBeNull());
+    await tick();
+    expect(document.querySelector('.phone-tab.is-current').dataset.phoneTab).toBe('alerts');
+    document.getElementById('management-window').remove();
+    await tick();
+    await tick();
+    expect(document.querySelector('.phone-tab.is-current').dataset.phoneTab).toBe('home'); // closed: back where the launcher is
+  });
+
+  it('the current tab is marked by its icon and a line, not by its word alone', () => {
+    const css = fs.readFileSync(path.join(STYLES, '56-phone.css'), 'utf8');
+    expect(css).toMatch(/\.phone-tab \.ic \{[^}]*color: inherit;/);
+    expect(css).toMatch(/\.phone-tab\.is-current::before \{[^}]*background: currentColor;/);
+  });
+
+  it("the File Explorer's buttons share one row on a phone", () => {
+    const css = fs.readFileSync(path.join(STYLES, '49-file-explorer-layout.css'), 'utf8');
+    expect(css).toMatch(/\.file-manager-window\) \.fm-toolbar \.fm-nav-btn-group \{ display: contents; \}/);
+    expect(css).toMatch(/\.fm-nav-btn-group > \.fm-tool-btn \{ flex: 1 1 0; min-width: 34px; max-width: 56px; \}/);
+  });
+
+  it('what needs attention is still a page of its own, with the history one tap away', async () => {
+    document.body.innerHTML = '';
+    window.openManagementSection = vi.fn();
+    enablePhoneShell(true);
+    const page = await openAlertsPage();
     expect(page.hidden).toBe(false);
     // the status box comes from a module loaded on demand: wait for it, not one tick (it failed run alone)
     await vi.waitFor(() => expect(page.querySelector('[data-ov-open="storage"]')).not.toBeNull());
