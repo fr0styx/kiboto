@@ -27,6 +27,15 @@
   outline: none;
 }
 
+/* on a phone: the finding's text over its buttons. Beside them it was a column one word wide,
+   and its title was cut off (the widths are set in the row's own markup, hence !important) */
+@media (max-width: 600px) {
+  .sec-advisor-item { flex-wrap: wrap; gap: 8px; }
+  .sec-advisor-item > div:first-child { flex: 1 1 100% !important; align-items: flex-start !important; }
+  .sec-advisor-item > div:first-child > div > div:first-child { white-space: normal !important; }
+  .sec-advisor-item > div:last-child { flex: 1 1 100% !important; flex-wrap: wrap; padding-left: 24px; }
+}
+
 .sec-advisor-item:active {
   transform: translateY(0);
 }

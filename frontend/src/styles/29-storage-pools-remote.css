@@ -415,6 +415,8 @@
 
 .share-card-actions {
   display: flex;
+  flex-wrap: wrap; /* five buttons in one row ran into each other on a phone */
+  gap: 6px 8px;
   justify-content: flex-end;
   padding-top: 4px;
 }
