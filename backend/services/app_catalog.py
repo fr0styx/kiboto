@@ -1280,14 +1280,29 @@ def _write_seed_files(app: dict[str, Any], app_dir: str) -> None:
                 fh.write(str(content))
 
 
+def runs_as(app: dict[str, Any]) -> tuple[int, int] | None:
+    """The user and group the app's image runs as, where the template says: its volume_owner
+    ("1000:1000" for Node-RED), else PUID and PGID in its settings, which the linuxserver images
+    switch to. Those hand only /config to that user themselves: a downloads, books or TV folder of
+    the app's own stayed root's and could not be written."""
+    m = re.fullmatch(r"(\d+):(\d+)", str(app.get("volume_owner") or ""))
+    if m:
+        return int(m.group(1)), int(m.group(2))
+    if app.get("volume_owner"):
+        return None  # named otherwise ("root"): left as made
+    env = app.get("env") or {}
+    uid, gid = str(env.get("PUID", "")), str(env.get("PGID", ""))
+    return (int(uid), int(gid)) if uid.isdigit() and gid.isdigit() else None
+
+
 def _own_volumes(app: dict[str, Any], app_dir: str) -> None:
-    """Hands the app's folders to the user its image runs as (e.g. "1000:1000" for Node-RED).
+    """Hands the app's folders to the user its image runs as (see runs_as).
 
     Only each folder itself and the files we seeded; existing data inside is never re-owned."""
-    m = re.fullmatch(r"(\d+):(\d+)", str(app.get("volume_owner") or ""))
-    if not m:
+    who = runs_as(app)
+    if who is None:
         return
-    uid, gid = int(m.group(1)), int(m.group(2))
+    uid, gid = who
     for vol_key in app.get("volumes") or {}:
         path = os.path.join(app_dir, vol_key)
         if not os.path.isdir(path):

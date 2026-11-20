@@ -116,6 +116,8 @@ The sign-in screen could jump back to the list of people, or to the person it ha
 
 On a laptop screen the Drive Health icon could sit partly over the Recycle Bin on a new install. It now takes a free place.
 
+Apps such as Radarr, Sonarr, qBittorrent and Mylar3 could not write to their own downloads, TV or comics folder when it was not on a shared folder. Kiboto now hands those folders to the user the app runs as when it installs it.
+
 #### Changes
 
 - **Ask Kib about the NAS in your language**: questions about free space, drives, fans, apps, the network and
@@ -225,6 +227,8 @@ Windows PCs list the NAS under **Network** in File Explorer, where Kiboto serves
 Six more apps in Get apps, each tried on a real install: Ghostfolio (savings and investments), Mattermost (team chat), Etherpad (writing together), Photoview (a gallery for a photo folder), Flowise (AI workflows) and WeKan (boards). 159 apps in all.
 
 Seven more apps in Get apps, each tried on a real install: Grist and NocoDB (spreadsheets that are databases), Backrest and Kopia (backups), Healthchecks (alerts when a scheduled job did not run), HedgeDoc (notes written together) and LanguageTool (spelling and grammar checks on your own server). 166 apps in all.
+
+Ten more apps in Get apps, each tried on a real install: Redmine, openHAB, Music Assistant, Mumble, Mylar3, LazyLibrarian, ErsatzTV, Threadfin, FileFlows and RomM. 176 apps in all.
 
 #### Security
 

@@ -52,6 +52,10 @@ WAIT_SECONDS = {
     "paperless-ngx": 300,
     "nextcloud": 300,
     "homeassistant": 300,
+    "openhab": 420,
+    "redmine": 300,
+    "romm": 300,
+    "fileflows": 300,
     "flowise": 420,
     "mattermost": 300,
     "ghostfolio": 300,
@@ -105,7 +109,9 @@ def probe(url: str, seconds: int) -> tuple[int | None, str]:
             with urllib.request.urlopen(req, timeout=8, context=ctx) as r:
                 return r.status, ""
         except urllib.error.HTTPError as e:
-            if e.code < 500:
+            # 404 is what a web server says before the app behind it has started (openHAB answers 404
+            # at 24 s and its page at 35 s): keep waiting, and fail if it never turns into the page
+            if e.code < 500 and e.code != 404:
                 return e.code, ""
             last = f"HTTP {e.code}"
         except Exception as e:  # not up yet

@@ -35,7 +35,7 @@ is written down and tested ([safe AI](docs/SAFE_AI.md)).
 - **Files**: a File Explorer with several windows, drag and drop, a Recycle Bin, coloured labels,
   share links and "send me files" links, a photo and video viewer, verified import from the front
   card reader, and a guided, checked copy of your folders from another NAS or a PC.
-- **Apps**: 166 tested one-click apps (Immich, Jellyfin, Nextcloud and more), Docker Compose stacks,
+- **Apps**: 176 tested one-click apps (Immich, Jellyfin, Nextcloud and more), Docker Compose stacks,
   Unraid, CasaOS and Umbrel templates marked "community, untested", logs, a web terminal and update checks.
 - **Storage**: pools, disks and SMART health on ZFS, Btrfs, mdadm and Unraid arrays; disks likely to
   fail turn amber before SMART calls them failed; a check that finds damage names the files;

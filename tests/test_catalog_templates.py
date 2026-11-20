@@ -123,6 +123,24 @@ def test_volume_owner_hands_new_folders_to_the_app_user(tmp_path, monkeypatch):
     assert calls == []
 
 
+def test_an_app_that_runs_as_puid_gets_its_own_folders(tmp_path, monkeypatch):
+    calls = []
+    monkeypatch.setattr(app_catalog.os, "chown", lambda p, u, g: calls.append((p.replace(str(tmp_path), ""), u, g)))
+    for name in ("config", "comics"):
+        (tmp_path / name).mkdir()
+    mylar = next(a for a in CURATED_APP_CATALOG if a["id"] == "mylar3")
+    app_catalog._own_volumes(mylar, str(tmp_path))  # downloads was not made: nothing to hand over
+    assert calls == [("/config", 1000, 100), ("/comics", 1000, 100)]
+    calls.clear()
+    assert app_catalog.runs_as({"env": {"PUID": "99", "PGID": "100"}, "volume_owner": "472:0"}) == (472, 0)
+    assert app_catalog.runs_as({"env": {"PUID": "99", "PGID": "100"}, "volume_owner": "root"}) is None
+    assert app_catalog.runs_as({"env": {"PUID": "1000"}}) is None  # both or neither
+    assert app_catalog.runs_as({"env": {"PUID": "{{secret:x}}", "PGID": "100"}}) is None
+    # a share picked at install is never re-owned (only folders under the app's own folder)
+    app_catalog._own_volumes({"env": {"PUID": "1000", "PGID": "100"}, "volumes": {"tv": "/tv"}}, str(tmp_path))
+    assert calls == []
+
+
 def test_templates_that_run_as_a_user_own_their_folders():
     by_id = {a["id"]: a for a in CURATED_APP_CATALOG}
     assert by_id["nodered"]["volume_owner"] == "1000:1000"
