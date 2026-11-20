@@ -35,6 +35,8 @@ PIECE = 1024 * 1024  # how much of the backup travels in one sealed message
 MAX_BYTES = 256 * 1024 * 1024  # what a settings backup may be at most (as when one is uploaded)
 OFFER_SECS = 900  # how long the first NAS keeps a backup it made for the second one to collect
 FETCH_AT = "02:30"
+STALE_DAYS = 3  # a copy older than this is said: the nightly fetch has failed that often
+SAY_AT = "09:00"  # when it is said, once a day
 
 _lock = threading.Lock()
 _offers: dict[str, dict[str, Any]] = {}  # on the first NAS: backups waiting to be collected
@@ -257,6 +259,58 @@ def run_due(now: float | None = None) -> bool:
         return False
     _state["ran"] = day
     return fetch_soon()
+
+
+def stale(now: float | None = None) -> dict[str, Any] | None:
+    """How old the copy is when it is older than STALE_DAYS, as {"days", "name"}; None when all is
+    well or the box is not in a pair. On the second NAS: its own copy (or that it never got one).
+    On the first NAS: how long the second one has not fetched."""
+    now = time.time() if now is None else now
+    part, found = ha_link.role(), ha_link.peer() or {}
+    if part == "second":
+        kept = info()
+        last = float((kept or {}).get("fetched") or 0)
+    elif part == "first":
+        if isinstance(ha_link._state().get("stood_down"), dict):
+            return None  # the second NAS took over: it fetches nothing, and that is as it should be
+        last = float(served() or 0)
+    else:
+        return None
+    since = last or float(found.get("paired_at") or now)  # never fetched: counted from the pairing
+    days = int((now - since) // 86400)
+    return {"days": days, "name": str(found.get("name") or "")} if days >= STALE_DAYS else None
+
+
+def say_if_stale(now: float | None = None) -> bool:
+    """Called every minute: once a day at SAY_AT, a pair whose copy is old says so in History and,
+    as a warning, through the alerts. A fetch that fails for a night or two is not worth a word."""
+    now = time.time() if now is None else now
+    t = time.localtime(now)
+    day = time.strftime("%Y-%m-%d", t)
+    if f"{t.tm_hour:02d}:{t.tm_min:02d}" != SAY_AT or _state.get("said") == day:
+        return False
+    _state["said"] = day
+    old = stale(now)
+    if old is None:
+        return False
+    from backend.state import add_event, event_text
+
+    if ha_link.role() == "second":
+        add_event(
+            "warning",
+            "The second NAS's copy is old",
+            f"This NAS has not fetched from {old['name']} for {old['days']} days. A takeover would bring "
+            "people and files as they were then.",
+            event_text("backup_second_nas_stale", days=old["days"], name=old["name"]),
+        )
+    else:
+        add_event(
+            "warning",
+            "The second NAS has not fetched",
+            f"{old['name']} has not fetched from this NAS for {old['days']} days. It no longer has a current copy.",
+            event_text("backup_second_nas_quiet", days=old["days"], name=old["name"]),
+        )
+    return True
 
 
 def forget() -> None:

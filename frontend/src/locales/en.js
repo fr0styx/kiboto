@@ -9105,4 +9105,8 @@ export default {
   "srv.ha_no_app": "The first NAS has no such app.",
   "srv.ha_app_folders": "A folder this app uses is not on this NAS.",
   "srv.ha_app_here": "An app of that name is on this NAS already.",
+  "ev.backup_second_nas_stale.title": "The second NAS's copy is old",
+  "ev.backup_second_nas_stale.msg": "This NAS has not fetched from {name} for {days, plural, one {# day} other {# days}}. A takeover would bring people and files as they were then. Check that both boxes are on and reach each other.",
+  "ev.backup_second_nas_quiet.title": "The second NAS has not fetched",
+  "ev.backup_second_nas_quiet.msg": "{name} has not fetched from this NAS for {days, plural, one {# day} other {# days}}, so it no longer has a current copy. Check that it is on and reaches this NAS.",
 };

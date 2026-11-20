@@ -71,3 +71,42 @@
     inset: -14px -6px;
   }
 }
+
+/* A row that scrolls sideways says so (side-scroll.js sets data-more): an arrow in a round badge
+   at the edge where more is hidden. It was a row cut off at the screen edge, with no sign of the
+   buttons beyond it. The badge takes no room and lets a tap through to what is under it. */
+[data-more='end']::after,
+[data-more='both']::after,
+[data-more='start']::before,
+[data-more='both']::before {
+  position: sticky;
+  z-index: 2;
+  flex: 0 0 30px;
+  align-self: center;
+  box-sizing: border-box;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--kb-line-20);
+  border-radius: 50%;
+  background: var(--card);
+  color: var(--kb-text-strong);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1;
+  pointer-events: none;
+}
+[data-more='end']::after,
+[data-more='both']::after {
+  content: '\203A';
+  right: 2px;
+  margin-left: -30px;
+}
+[data-more='start']::before,
+[data-more='both']::before {
+  content: '\2039';
+  left: 2px;
+  margin-right: -30px;
+}

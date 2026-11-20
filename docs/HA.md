@@ -48,6 +48,10 @@ replaces the copy before. Unpairing removes it.
 The card on the second NAS says from when its copy is; the card on the first says when the second
 last fetched.
 
+If the fetch has not worked for three days, both boxes say so once a day, in History and as a
+warning through your alerts: the second NAS that its copy is old, the first NAS that the second
+one has not fetched. A night or two without a fetch (a box that was off) is not reported.
+
 ## The folders
 
 On the second NAS's card, tick the first NAS's shared folders that the second one should keep.

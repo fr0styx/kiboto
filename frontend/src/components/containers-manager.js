@@ -27,6 +27,7 @@ import { openContainerInspector, openContainerDeleteModal } from './container-mo
 import { openStackModal, openStackPickerModal } from './stack-modal.js';
 import { appMenu, appUpdateInfo, askAppUpdate, isAppRow, mergeApps, partIds, runAppAction } from './app-rows.js';
 import { openNetworkMap } from './container-network-map.js';
+import { watchSideScroll } from '../side-scroll.js';
 import { appsDockerNetsHtml, installAppsDockerNets } from './apps-docker-nets.js';
 import { appsFamilyHtml, installAppsFamily, openFamily } from './apps-family.js';
 import {
@@ -363,6 +364,11 @@ export function initContainersManager() {
 
   // "Show Docker details" (SET-25, Apps decision 1): the simple household view, or everything
   applyAppsDetails(appsDetailsOn());
+  // on a phone these rows scroll sideways: they say so at the edge where more is hidden
+  for (const row of document.querySelectorAll(
+    '#containers-manager-window :is(.cw-action-btns-wrap, .cw-docker-filter-pills, .cw-catalog-one-row)'
+  ))
+    watchSideScroll(row);
   document.getElementById('cw-details-toggle')?.addEventListener('change', (e) => {
     const on = /** @type {HTMLInputElement} */ (e.target).checked;
     saveAppsDetails(on);

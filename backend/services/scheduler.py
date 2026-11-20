@@ -259,6 +259,7 @@ def _run_ha(now: float) -> None:
         from backend.services import ha_state, ha_takeover
 
         ha_state.run_due(now)
+        ha_state.say_if_stale(now)  # a copy that has not been fetched for days is said, once a day
         ha_takeover.watch(now)  # a first NAS asks its second one now and then whether it took over
     except (OSError, RuntimeError, ValueError) as e:
         logger.warning("[Scheduler] High availability failed: %s", e)

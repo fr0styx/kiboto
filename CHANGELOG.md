@@ -56,6 +56,8 @@ The card for a second NAS showed the word "null" where a part of it was not draw
 
 A label on a file that was deleted over the network, outside the File Explorer, stayed for good. It now goes the next time its folder is opened.
 
+On a phone, an app's card showed dark bands behind its name after it was touched.
+
 #### Changes
 
 - **Ask Kib about the NAS in your language**: questions about free space, drives, fans, apps, the network and
@@ -77,6 +79,8 @@ A label on a file that was deleted over the network, outside the File Explorer, 
   health. It now knows which drives are good, which show wear and which are failing, and says so.
 
 Kib can say how much space each app uses, from the last time it was measured under Apps, and says when that was. It no longer has to leave the question unanswered.
+
+On a phone, a row of buttons that continues beyond the edge of the screen now shows an arrow on the side where more is hidden (Apps: the buttons and the filters).
 
 #### New
 
@@ -149,6 +153,8 @@ A second NAS that can take over, fourth step: the takeover. **Take over now** on
 A second NAS that takes over can bring the first one's backups along. Tick **Also bring the first NAS's backups, switched off** under Take over now. A backup comes along when its folder is one of the folders kept in step, with its password and its cloud sign-in; you turn each one on under Backup after a look. A backup onto a drive of the first NAS stays behind. See docs/HA.md.
 
 After a second NAS has taken over, it lists the **apps of the first NAS**, and **Add here** sets one up with this NAS's copy of its folders. An app can be added when the folders it keeps its files in are among the folders kept in step (keep `appdata` in step if you want apps to follow); otherwise the card names the folder that is missing. If a part of the app does not come up, everything is taken back. See docs/HA.md.
+
+A pair of NAS boxes warns once a day when the second NAS has not been able to fetch for three days, on both boxes.
 
 #### Security
 

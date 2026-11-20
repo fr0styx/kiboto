@@ -103,6 +103,7 @@ def test_the_first_nas_tells_how_its_apps_are_set_up_without_kiboto_itself(monke
         {"Id": "b" * 12, "Names": ["/media-db-1"], "Labels": {"com.docker.compose.project": "media"}},
         {"Id": "c" * 12, "Names": ["/solo"], "Labels": {}},
         {"Id": "d" * 12, "Names": ["/gone"], "Labels": {}},
+        {"Id": "e" * 12, "Names": ["/kiboto-sftp"], "Labels": {"managed-by": "kiboto"}},
         {"Id": "", "Names": ["/nameless"], "Labels": {}},
     ]
     inspects = {
@@ -129,13 +130,14 @@ def test_the_first_nas_tells_how_its_apps_are_set_up_without_kiboto_itself(monke
         return (200, inspects[cid]) if cid in inspects else (404, {})
 
     monkeypatch.setattr("backend.services.container_mutator.docker_request", docker)
-    monkeypatch.setattr("backend.hardware.docker_stats.is_kiboto_own", lambda cid, name: name.startswith("kiboto"))
+    monkeypatch.setattr("backend.hardware.docker_stats.is_kiboto_own", lambda cid, name: name == "kiboto")
     monkeypatch.setattr(
         "backend.services.app_backup.compose_of",
         lambda found: "services: {" + ", ".join(str(i["Name"]).lstrip("/") + ": {}" for i in found) + "}",
     )
     said = hp.setups()
-    assert [a["name"] for a in said] == ["media", "solo"]  # Kiboto itself is not an app, a vanished one neither
+    # Kiboto itself is not an app, nor a helper it makes for itself, nor a container that vanished
+    assert [a["name"] for a in said] == ["media", "solo"]
     media = said[0]
     assert media["folders"] == ["/mnt/first/appdata/db", "/mnt/first/appdata/jellyfin"]  # binds only
     assert media["images"] == ["example/db", "example/jellyfin"] and "media-db-1" in media["compose"]

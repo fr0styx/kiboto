@@ -100,6 +100,9 @@
   /* nothing to list: the note stands in the middle (it hung to the right) */
   #containers-manager-window .docker-table tbody tr:not(.cw-virtual-spacer):has(> td[colspan]) { display: block !important; padding: 0 !important; }
   #containers-manager-window .docker-table tbody tr:not(.cw-virtual-spacer) > td[colspan] { display: block !important; width: 100% !important; padding: 16px 0 !important; text-align: center !important; }
+  /* a card is one thing: the table's row hover (which stays after a touch) darkened each cell */
+  #containers-manager-window .docker-table tbody tr:not(.cw-stack-head, :has(> [colspan])) > td { background: transparent !important; }
+  #containers-manager-window .docker-table tbody tr.cw-stack-head th.cw-stack-head-cell { background: transparent !important; }
   /* a stack's heading is a line of text at the cards' left edge, not an empty card */
   #containers-manager-window .docker-table tbody tr.cw-stack-head { padding: 0 !important; border: 0 !important; background: transparent !important; box-shadow: none !important; }
   #containers-manager-window .docker-table tbody tr.cw-stack-head th.cw-stack-head-cell { padding: 8px 2px 0; border-bottom: 0; }

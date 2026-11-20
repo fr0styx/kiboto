@@ -23,7 +23,7 @@ from typing import Any
 
 import yaml
 
-from backend import secret_box
+from backend import product, secret_box
 from backend.config import DATA_DIR, logger
 from backend.fsutil import atomic_write_json, json_locked, read_json
 from backend.services import ha_link
@@ -55,7 +55,9 @@ def setups() -> list[dict[str, Any]]:
     for c in listed:
         cid = str(c.get("Id") or "")
         name = str((c.get("Names") or [""])[0]).lstrip("/")
-        if not cid or not name or is_kiboto_own(cid, name):
+        labels = c.get("Labels") or {}
+        # Kiboto itself, and the helpers it makes (name service, SFTP, iSCSI...): every box makes its own
+        if not cid or not name or is_kiboto_own(cid, name) or labels.get("managed-by") == product.CONTAINER:
             continue
         groups.setdefault(stack_of(c.get("Labels") or {}) or name, []).append(cid)
     out: list[dict[str, Any]] = []

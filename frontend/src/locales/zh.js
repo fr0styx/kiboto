@@ -9105,4 +9105,8 @@ export default {
   "srv.ha_no_app": "第一台 NAS 没有这个应用。",
   "srv.ha_app_folders": "这个应用使用的某个文件夹不在这台 NAS 上。",
   "srv.ha_app_here": "这台 NAS 上已经有同名的应用。",
+  "ev.backup_second_nas_stale.title": "第二台 NAS 的副本已过旧",
+  "ev.backup_second_nas_stale.msg": "这台 NAS 已有 {days, plural, other {# 天}}没有从 {name} 获取内容。此时接替，带来的用户和文件将是当时的状态。请检查两台设备是否都已开机并能互相连接。",
+  "ev.backup_second_nas_quiet.title": "第二台 NAS 没有获取内容",
+  "ev.backup_second_nas_quiet.msg": "{name} 已有 {days, plural, other {# 天}}没有从这台 NAS 获取内容，因此它不再有最新的副本。请检查它是否已开机并能连接这台 NAS。",
 };

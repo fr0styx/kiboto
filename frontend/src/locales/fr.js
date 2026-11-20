@@ -9105,4 +9105,8 @@ export default {
   "srv.ha_no_app": "Le premier NAS n'a pas cette application.",
   "srv.ha_app_folders": "Un dossier utilisé par cette application n'est pas sur ce NAS.",
   "srv.ha_app_here": "Une application de ce nom est déjà sur ce NAS.",
+  "ev.backup_second_nas_stale.title": "La copie du second NAS est ancienne",
+  "ev.backup_second_nas_stale.msg": "Ce NAS n'a rien récupéré de {name} depuis {days, plural, one {# jour} other {# jours}}. Une prise de relais reprendrait les personnes et les fichiers tels qu'ils étaient alors. Vérifiez que les deux appareils sont allumés et se joignent.",
+  "ev.backup_second_nas_quiet.title": "Le second NAS n'a rien récupéré",
+  "ev.backup_second_nas_quiet.msg": "{name} n'a rien récupéré de ce NAS depuis {days, plural, one {# jour} other {# jours}} : il n'a donc plus de copie à jour. Vérifiez qu'il est allumé et qu'il joint ce NAS.",
 };

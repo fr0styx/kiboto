@@ -172,3 +172,39 @@ def test_over_the_api_only_the_second_nas_fetches(client, auth_headers, tmp_path
     started = []
     monkeypatch.setattr(hs, "fetch_soon", lambda: started.append(1) or True)
     assert client.post("/api/ha/fetch", headers=auth_headers).status_code == 200 and started == [1]
+
+
+def test_a_copy_that_gets_old_is_said_once_a_day(net, monkeypatch):
+    said = []
+    monkeypatch.setattr(
+        "backend.state.add_event", lambda level, title, message, details=None: said.append((level, title, details))
+    )
+    hs.fetch(send=net.send)
+    fetched = hs.info()["fetched"]
+    nine = time.mktime((*time.localtime(fetched + 4 * 86400)[:3], 9, 0, 5, 0, 0, -1))
+    assert hs.stale(fetched + 2 * 86400) is None  # a night or two without a fetch is not worth a word
+    assert hs.stale(nine)["days"] >= 3 and hs.stale(nine)["name"] == "First NAS"
+    assert hs.say_if_stale(nine - 120) is False and said == []  # not the hour
+    assert hs.say_if_stale(nine) is True and hs.say_if_stale(nine + 20) is False  # once a day
+    level, title, details = said[0]
+    assert level == "warning" and details["msg_key"] == "ev.backup_second_nas_stale.msg"
+    assert details["params"]["name"] == "First NAS" and details["params"]["days"] >= 3
+    # the first NAS says that the second one has not fetched
+    net.on(A)
+    hs._state["said"] = ""
+    assert hs.say_if_stale(nine) is True and said[1][2]["msg_key"] == "ev.backup_second_nas_quiet.msg"
+    assert said[1][2]["params"]["name"] == "Second NAS"
+    # a fresh copy: nothing to say
+    net.on(B)
+    hs._state["said"] = ""
+    assert hs.say_if_stale(time.mktime((*time.localtime(fetched)[:3], 9, 0, 5, 0, 0, -1)) + 86400) is False
+    # a pair that never fetched is counted from the pairing; a box on its own says nothing
+    hs.forget()
+    assert hs.stale(nine)["days"] >= 3
+    net.on(A)
+    ha._change(lambda d: d.update(stood_down={"at": nine}))
+    assert hs.stale(nine + 30 * 86400) is None  # the second NAS took over: it is not expected to fetch
+    ha._change(lambda d: d.pop("stood_down"))
+    net.on(B)
+    ha.unpair("ana", send=net.send)
+    assert hs.stale(nine) is None

@@ -9105,4 +9105,8 @@ export default {
   "srv.ha_no_app": "El primer NAS no tiene esa app.",
   "srv.ha_app_folders": "Una carpeta que usa esta app no está en este NAS.",
   "srv.ha_app_here": "Ya hay una app con ese nombre en este NAS.",
+  "ev.backup_second_nas_stale.title": "La copia del segundo NAS es antigua",
+  "ev.backup_second_nas_stale.msg": "Este NAS no ha traído nada de {name} desde hace {days, plural, one {# día} other {# días}}. Un relevo traería a las personas y los archivos tal como estaban entonces. Comprueba que los dos equipos están encendidos y se alcanzan.",
+  "ev.backup_second_nas_quiet.title": "El segundo NAS no ha traído nada",
+  "ev.backup_second_nas_quiet.msg": "{name} no ha traído nada de este NAS desde hace {days, plural, one {# día} other {# días}}, así que ya no tiene una copia actual. Comprueba que está encendido y alcanza este NAS.",
 };
