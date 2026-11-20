@@ -124,7 +124,9 @@ services:
           [ -n "$$user" ] && ! id -u "$$user" >/dev/null 2>&1 && { adduser -D -H -u "$$uid" "$$user" 2>/dev/null || adduser -D -H "$$user"; }
         done
         nmbd --daemon --configfile="$$CONF" || echo "[Kiboto Samba] nmbd did not start (NetBIOS names only)"
-        wsdd2 -d -w || echo "[Kiboto Samba] wsdd2 did not start (Windows network discovery only)"
+        # the workgroup Kiboto wrote, not the image's own default (it would say MYGROUP)
+        GROUP=$$(testparm -s --parameter-name=workgroup "$$CONF" 2>/dev/null | tail -n 1)
+        wsdd2 -d -w -G "$${GROUP:-WORKGROUP}" || echo "[Kiboto Samba] wsdd2 did not start (Windows network discovery only)"
         exec smbd --foreground --no-process-group --debug-stdout --configfile="$$CONF"
     depends_on:
       - zettnas-toolkit

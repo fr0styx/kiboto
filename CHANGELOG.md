@@ -84,6 +84,8 @@ On a tablet held upright, windows opened a little wider than the screen, so the 
 
 **Kiboto's own file server: shared folders and private folders can be written to over the network.** On an install where Kiboto runs the file server itself (not on Unraid), a shared folder Kiboto created belonged to the system, so every attempt to save, rename or delete over the network share was refused; a person's private folder could not be opened at all. Both now belong to the file server's own user. Tried from start to finish with the real file server and a client: saving, making a folder, renaming a file made in Files, and the private folder all work, and another person is refused.
 
+**Linux install: Windows PCs are told the right workgroup.** The file server's own service that lists the NAS under Network on Windows announced the workgroup "MYGROUP", a default of its image. It now announces the workgroup Kiboto set. The change is in `docker-compose.linux.yml`: an existing install takes it by replacing that file.
+
 #### Changes
 
 - **Ask Kib about the NAS in your language**: questions about free space, drives, fans, apps, the network and
