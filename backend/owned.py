@@ -74,17 +74,6 @@ def rights_again(path: str) -> None:
         logger.debug("[Files] %s keeps the rights it was made with: %s", path, e)
 
 
-def umask_in(folder: str) -> int:
-    """The umask for a helper program that makes files inside `folder` for its people (rclone's
-    WebDAV and SFTP servers): the right to write is kept for the group and for everyone where the
-    folder itself gives it. 022, the server's own, where it does not or cannot be read. The files
-    are still root's; with this their people can change them."""
-    try:
-        return 0o022 & ~stat.S_IMODE(os.stat(folder).st_mode)
-    except OSError:
-        return 0o022
-
-
 def _ids(user: str, group: str) -> tuple[int, int]:
     """The numbers of a user and a group by name. The file server's container looks the names up
     itself; the usual numbers (nobody 65534, users 100) are the same there and here."""

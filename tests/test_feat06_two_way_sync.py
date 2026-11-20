@@ -206,3 +206,31 @@ def test_api(client, auth_headers, store, monkeypatch):
     assert client.post("/api/sync/pairs/nope/approve", headers=auth_headers).status_code == 404
     assert client.delete("/api/sync/pairs/docs", headers=auth_headers).status_code == 200
     assert client.delete("/api/sync/pairs/docs", headers=auth_headers).status_code == 404
+
+
+def test_what_the_sync_brings_here_follows_the_folder(store, tmp_path, monkeypatch):
+    """rclone makes its files as root: it is started with the local folder's group and right to
+    write, so the folder's people can change what the sync brought (backend/owned.py)."""
+    import subprocess
+
+    from backend import owned
+
+    local = tmp_path / "Photos"
+    local.mkdir()
+    monkeypatch.setattr(tws, "WORKDIR", str(tmp_path / "bisync"))
+    monkeypatch.setattr(owned, "for_helper", lambda folder, ours: {"umask": 0o002, "group": 100, "for": folder})
+    pair = {"id": "p", "name": "Photos", "local": str(local), "remote": "cloud:Photos", "max_delete": 25}
+    ran = []
+
+    def run(cmd, **how):
+        ran.append((cmd[1], how))
+        return subprocess.CompletedProcess(cmd, 0, "", "")
+
+    assert tws._run(pair, True, run)["ok"] is True
+    assert ran[-1][0] == "bisync" and "umask" not in ran[-1][1]  # a preview writes nothing
+    ran.clear()
+    assert tws._run(pair, False, run)["ok"] is True  # a first run: the newer files each way, then bisync
+    assert [name for name, _how in ran] == ["copy", "copy", "bisync"]
+    for _name, how in ran:
+        assert (how["umask"], how["group"], how["for"]) == (0o002, 100, str(local))
+    assert oct(os.stat(tmp_path / "bisync").st_mode & 0o777) == "0o700"

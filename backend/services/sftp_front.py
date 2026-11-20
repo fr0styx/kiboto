@@ -215,6 +215,7 @@ def main(argv: list[str]) -> int:
     port, cache_dir = int(argv[0]), argv[1]
     internal = internal_port(port)
     os.makedirs(cache_dir, exist_ok=True)
+    os.chmod(cache_dir, 0o700)  # files on their way in wait here: nobody else's, whatever rclone's umask
     fail_log = os.path.join(cache_dir, "auth-failures.log")
     from backend import owned
     from backend.config import POOL_PATH

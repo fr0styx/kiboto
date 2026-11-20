@@ -92,6 +92,8 @@ On a tablet held upright, windows opened a little wider than the screen, so the 
 
 Kiboto's own file server: when its settings were written twice before they were loaded once, only the second change closed its shared folder. Both now do.
 
+**Files a two-way sync brings from the cloud can be changed over the network share.** They were written so that only the system could change them. They now get the group and the right to write of the folder they are synced into.
+
 #### Changes
 
 - **Ask Kib about the NAS in your language**: questions about free space, drives, fans, apps, the network and

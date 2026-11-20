@@ -20,6 +20,7 @@ import time
 from collections.abc import Callable
 from typing import Any
 
+from backend import owned
 from backend.config import DATA_DIR, RCLONE_CONFIG_FILE, logger
 from backend.fsutil import atomic_write_json, json_locked, read_json
 from backend.proc import run_bounded
@@ -201,7 +202,7 @@ def _newer_wins(pair: dict[str, Any], run: Callable) -> str | None:
     the image predates --resync-mode newer). Returns why it failed, or None."""
     for src, dst in ((pair["local"], pair["remote"]), (pair["remote"], pair["local"])):
         cmd = ["rclone", "copy", src, dst, "--update", "--config", RCLONE_CONFIG_FILE, "-v"]
-        res = run(cmd, timeout=RUN_TIMEOUT, capture_output=True, text=True)
+        res = run(cmd, timeout=RUN_TIMEOUT, capture_output=True, text=True, **_as_the_folder(pair))
         if res.returncode != 0:
             text = (res.stdout or "") + (res.stderr or "")
             tail = [line for line in text.splitlines() if "ERROR" in line]
@@ -209,13 +210,24 @@ def _newer_wins(pair: dict[str, Any], run: Callable) -> str | None:
     return None
 
 
+def _as_the_folder(pair: dict[str, Any]) -> dict[str, Any]:
+    """How rclone is started for a pair: with the local folder's group and its right to write, so
+    what the sync brings here can be changed by the folder's people over the network share. rclone
+    makes its files as root (see backend/owned.py)."""
+    return dict(owned.for_helper(pair["local"], ours=False))
+
+
 def _run(pair: dict[str, Any], dry_run: bool, run: Callable = run_bounded) -> dict[str, Any]:
     os.makedirs(WORKDIR, exist_ok=True)
+    os.chmod(WORKDIR, 0o700)  # rclone's own notes on the pair: nobody else's, whatever its umask
     if not dry_run and not pair.get("baseline"):
         failed = _newer_wins(pair, run)
         if failed:
             return {**parse(""), "ok": False, "error": failed}
-    res = run(command(pair, dry_run), timeout=RUN_TIMEOUT if not dry_run else 1800, capture_output=True, text=True)
+    how = {} if dry_run else _as_the_folder(pair)
+    res = run(
+        command(pair, dry_run), timeout=RUN_TIMEOUT if not dry_run else 1800, capture_output=True, text=True, **how
+    )
     text = (res.stdout or "") + (res.stderr or "")
     summary = parse(text)
     summary["ok"] = res.returncode == 0
