@@ -170,6 +170,8 @@ ENV BUILD_DATE=${BUILD_DATE}
 COPY pyproject.toml .
 COPY app.py .
 COPY backend/ ./backend/
+# the units and the install script of a machine of its own: a version taken from this image brings them
+COPY packaging/ ./packaging/
 COPY static/ ./static/
 
 # Persist build commit into filesystem for non-Docker-socket runtime inspection

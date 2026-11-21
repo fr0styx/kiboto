@@ -868,11 +868,25 @@ jobs:
         id: extract_notes
         run: python3 scripts/extract_release_notes.py
 
+      # The install script for a machine of its own, naming this release's image by its digest
+      - name: Download the digest
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: digest-full
+      - name: Stamp the install script
+        run: |
+          d=$(cat digest.txt)
+          sh scripts/stamp_installer.sh "${{ env.IMAGE }}@$d" > install.sh
+          grep -c '^KIBOTO_IMAGE="${{ env.IMAGE }}@sha256:' install.sh
+          sh -n install.sh
+
       - name: Create Release
         uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3
         with:
           name: ${{ steps.extract_notes.outputs.title }} (beta)
           body_path: RELEASE_NOTES.md
+          files: install.sh
+          fail_on_unmatched_files: true
           generate_release_notes: true
           draft: false
           # Beta until the promote workflow publishes it as :latest after the 3-day soak (OPS-07)

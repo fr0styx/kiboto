@@ -60,6 +60,8 @@ On a machine of its own, Kiboto shows a setup code on the machine's screen (and 
 
 On a machine of its own, Kiboto can now update itself: the new version is made ready beside the running one, and if it does not start properly Kiboto goes back to the version before, with your settings as they were.
 
+- **Kiboto on a machine of its own (preview)**: the install script for a fresh Debian 13 now takes Kiboto from a published release, named by its digest, and every release from here on carries its own `install.sh`. The install guide says what it sets up, what it changes on the machine and what is not there yet.
+
 ## v2.0.5 (2026-11-20)
 ### 🏡 A second NAS that can take over, files you can change over the network, and 176 tested apps
 

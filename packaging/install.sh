@@ -1,7 +1,9 @@
 #!/bin/sh
 # Kiboto on a machine of its own: turns a fresh, minimal Debian 13 into a Kiboto-managed host.
 #
-#   sh install.sh --from <folder with Kiboto's code>      install
+#   sh install.sh                                         install the version this script was released with
+#   sh install.sh --image <image>@sha256:<digest>         install that published version
+#   sh install.sh --from <folder with Kiboto's code>      install from a folder (for development)
 #   sh install.sh --uninstall [--purge]                   take Kiboto off again (--purge: its settings too)
 #
 # Debian keeps doing what it does: boot, drivers, and its own updates through apt, which stays yours
@@ -11,6 +13,9 @@
 # Storage pools and what is on them are never touched by this script, in either direction.
 set -eu
 
+# The version this script installs when it is given none: written in when a version is released,
+# with its digest, so what is installed is exactly what the release named.
+KIBOTO_IMAGE=""
 PREFIX=/opt/kiboto
 DATA=/var/lib/kiboto
 ETC=/etc/kiboto
@@ -47,6 +52,13 @@ must_be_fresh() {
   fi
 }
 
+# the packages of a list that are not installed
+missing() {
+  for p in "$@"; do
+    dpkg -s "$p" 2>/dev/null | grep -q '^Status: .* installed$' || printf '%s ' "$p"
+  done
+}
+
 packages() {
   say "Installing the tools Kiboto drives (this takes a few minutes; ZFS is built for this kernel)..."
   export DEBIAN_FRONTEND=noninteractive
@@ -55,12 +67,27 @@ packages() {
     [ -f "$f" ] && sed -i 's/^Components: main$/Components: main contrib non-free-firmware/' "$f"
   done
   apt-get update -qq
+  # Only what is not there yet is installed: a second run of this script leaves the held
+  # packages at the version they have, as the hold promises.
+  # ZFS is built against the headers of the kernel that is running, not of the newest one.
+  headers="linux-headers-$(uname -r)"
+  if ! dpkg -s "$headers" >/dev/null 2>&1; then
+    apt-get install -y -qq --no-install-recommends "$headers" >/dev/null 2>&1 \
+      || die "Debian no longer offers the files for the kernel this machine is running ($(uname -r)). Update Debian (apt full-upgrade), restart, and run this again."
+  fi
   # shellcheck disable=SC2086
-  apt-get install -y -qq --no-install-recommends linux-headers-amd64 $TOOLS >/dev/null
-  if grep -rqs 'trixie-backports' /etc/apt/sources.list /etc/apt/sources.list.d; then
-    apt-get install -y -qq --no-install-recommends -t trixie-backports zfs-dkms zfsutils-linux >/dev/null
-  else
-    apt-get install -y -qq --no-install-recommends zfs-dkms zfsutils-linux >/dev/null
+  need=$(missing linux-headers-amd64 $TOOLS)
+  # shellcheck disable=SC2086
+  [ -z "$need" ] || apt-get install -y -qq --no-install-recommends $need >/dev/null
+  need=$(missing zfs-dkms zfsutils-linux)
+  if [ -n "$need" ]; then
+    if grep -rqs 'trixie-backports' /etc/apt/sources.list /etc/apt/sources.list.d; then
+      # shellcheck disable=SC2086
+      apt-get install -y -qq --no-install-recommends -t trixie-backports $need >/dev/null
+    else
+      # shellcheck disable=SC2086
+      apt-get install -y -qq --no-install-recommends $need >/dev/null
+    fi
   fi
   modprobe zfs || die "ZFS was built but does not load on this kernel."
   # shellcheck disable=SC2086
@@ -91,7 +118,7 @@ code() {
   rel="$PREFIX/releases/${version:-dev}-$(date +%Y%m%d%H%M%S)"
   say "Putting Kiboto ${version:-} in $rel..."
   mkdir -p "$rel"
-  for part in backend static app.py requirements.lock packaging; do
+  for part in backend static app.py requirements.lock packaging build.env; do
     [ -e "$src/$part" ] && cp -a "$src/$part" "$rel/"
   done
   # the Python environment is kept by its requirements, as an update keeps it (native_update.lock_key):
@@ -109,6 +136,34 @@ code() {
   ln -sfn "$rel" "$PREFIX/current"
   [ -n "$previous" ] && printf '%s\n' "$previous" > "$PREFIX/previous"
   return 0
+}
+
+# Kiboto's own files out of a published image. The image is named by its digest, so Docker itself
+# checks that what arrives is what was named; nothing of the image runs.
+must_be_a_digest() {
+  case "$1" in
+    *@sha256:*) ;;
+    *) die "name the version by its digest (image@sha256:...), so that exactly that version is installed." ;;
+  esac
+}
+
+code_from_image() {
+  image=$1
+  say "Fetching Kiboto ($image)..."
+  docker pull -q "$image" >/dev/null || die "that version could not be downloaded."
+  cid=$(docker create "$image" true) || die "that version could not be opened."
+  tmp=$(mktemp -d)
+  for part in backend static app.py requirements.lock packaging; do
+    if ! docker cp "$cid:/app/$part" "$tmp/" 2>/dev/null; then
+      docker rm "$cid" >/dev/null; rm -rf "$tmp"
+      die "that image is not a Kiboto version for a machine of its own (it has no $part)."
+    fi
+  done
+  docker inspect "$cid" --format '{{range .Config.Env}}{{println .}}{{end}}' \
+    | grep -E '^(BUILD_COMMIT|BUILD_DATE|KIBOTO_IMAGE_VARIANT)=' > "$tmp/build.env" || true
+  docker rm "$cid" >/dev/null
+  code "$tmp"
+  rm -rf "$tmp"
 }
 
 service() {
@@ -133,8 +188,14 @@ wait_up() {
   addr=$(ip -4 route get 1.1.1.1 2>/dev/null | sed -n 's/.* src \([0-9.]*\).*/\1/p' | head -1)
   say ""
   say "Kiboto is running. Open http://${addr:-this-machine}:8082 in a browser."
-  say "The first sign-in is the user admin with the password in $DATA/initial-admin-password"
-  say "(only root can read it); you choose your own at once."
+  if [ -r "$DATA/initial-admin-password" ]; then
+    say "The first sign-in is the user  admin  with this code:"
+    say ""
+    say "    $(cat "$DATA/initial-admin-password")"
+    say ""
+    say "You then choose your own password. Until then this machine also shows the code on its"
+    say "own screen and to whoever signs in to it over SSH."
+  fi
 }
 
 uninstall() {
@@ -158,7 +219,12 @@ case "${1:-}" in
   --from)
     [ -n "${2:-}" ] || die "say where Kiboto's code is: --from <folder>"
     must_be_this_machine; must_be_fresh
-    packages; docker_setup; code "$2"; service "$2"; wait_up ;;
+    packages; docker_setup; code "$2"; service "$PREFIX/current"; wait_up ;;
+  --image | "")
+    image=${2:-$KIBOTO_IMAGE}
+    [ -n "$image" ] || { sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//'; exit 2; }
+    must_be_a_digest "$image"; must_be_this_machine; must_be_fresh
+    packages; docker_setup; code_from_image "$image"; service "$PREFIX/current"; wait_up ;;
   --uninstall) uninstall "${2:-}" ;;
-  *) sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;
+  *) sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;
 esac

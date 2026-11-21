@@ -15,6 +15,7 @@ This document provides complete, step-by-step instructions for installing and ru
    - [Option E: UGOS (Ugreen NAS) & Observer Platforms](#option-e-ugos-ugreen-nas--observer-platforms)
    - [Option F: Standalone Docker CLI (`docker run`)](#option-f-standalone-docker-cli-docker-run)
    - [Option G: Building the Production Image from Source](#option-g-building-the-production-image-from-source)
+   - [Option H: A machine of its own (Debian 13, preview)](#option-h-a-machine-of-its-own-debian-13-preview)
 4. [Hardware Device & Capability Mappings](#hardware-device--capability-mappings)
 5. [Headless Server Deployments (No LCD / ARGB)](#headless-server-deployments-no-lcd--argb)
 6. [Environment Variables Reference](#environment-variables-reference)
@@ -430,6 +431,55 @@ For developers, homelab maintainers, and air-gapped homelabs building custom ima
    docker compose ps
    curl -s http://localhost:8082/api/health
    ```
+
+---
+
+### Option H: A machine of its own (Debian 13, preview)
+
+Here Kiboto is the system of the machine instead of an app on another NAS system: it makes the storage pools, shares the folders, runs the apps and updates itself. Underneath is a plain Debian 13, which keeps doing what it does (boot, drivers, its own updates with `apt`).
+
+This is a preview. It is tested on a virtual machine with real disks handed to it, not yet on a range of real hardware. Use it on a machine whose disks hold nothing you need.
+
+**What you need**
+
+- A 64-bit PC with a fresh, minimal Debian 13 on its own system disk (in the Debian installer, choose "SSH server" and "standard system utilities" only). 4 GB of memory or more.
+- No Samba, NFS server or containers set up on it yet. The install script stops if it finds them, because Kiboto writes those settings itself.
+
+**Install**
+
+Every release from 2.0.6 on carries an `install.sh` that names that release's image by its digest. Download it from the release page, read it if you like, then run it as root:
+
+```bash
+sh install.sh
+```
+
+It installs the tools Kiboto drives (ZFS, btrfs and ext4 tools, Samba, the NFS server, Docker, QEMU), takes Kiboto's own files out of the release image and starts Kiboto as a service. On a small machine this takes about ten minutes, most of it building the ZFS module. At the end it prints the address to open and a one-time code for the first sign-in. The same code is on the machine's own screen and in its SSH greeting until you have chosen your password.
+
+**What it changes on the machine**
+
+- Kiboto's files are in `/opt/kiboto`, its settings in `/var/lib/kiboto`, and `/etc/kiboto/kiboto.env` takes extra settings (one `NAME=value` per line).
+- Two services: `kiboto` and `kiboto-pools`, which brings your pools back at start before anything that uses them.
+- Pools are mounted under `/mnt/storage`.
+- The kernel, ZFS and Docker are held at the versions Kiboto was tested with (`apt-mark showhold` lists them). Everything else updates with `apt` as on any Debian, and you can install your own packages.
+- `/etc/samba/smb.conf` is replaced by a line that points at Kiboto's own settings; the file Debian shipped is kept beside it as `smb.conf.debian`.
+
+**Updates**
+
+Kiboto updates itself from the Updates page as it does elsewhere. A new version is put beside the running one and switched to; if it does not start, the machine goes back to the version before and says so.
+
+**What is not there yet**
+
+- Network settings (address, DNS), the host name and the clock are still set with Debian's own tools.
+- The SFTP server, iSCSI, merged folders and showing up in the network list of Windows and macOS.
+- An install image. For now you install Debian first.
+
+**Taking it off again**
+
+```bash
+sh /opt/kiboto/current/packaging/install.sh --uninstall
+```
+
+Kiboto's service and files go; your pools, shared folders and apps are not touched, and the packages stay installed. Add `--purge` to remove Kiboto's settings as well.
 
 ---
 

@@ -70,3 +70,65 @@ def test_the_install_script_keeps_its_promises():
     un = sh[sh.index("uninstall() {") : sh.index('case "${1:-}" in')]
     assert "zpool" not in un and "wipefs" not in un and "mkfs" not in un
     assert un.index('rm -rf "$DATA" "$ETC"') > un.index('"--purge"')
+
+
+def test_a_published_version_is_installed_by_its_digest_only():
+    sh = _read("install.sh")
+    assert "name the version by its digest" in sh and "*@sha256:*) ;;" in sh
+    assert 'must_be_a_digest "$image"; must_be_this_machine' in sh  # said before anything is installed
+    took = sh[sh.index("code_from_image() {") : sh.index("service() {")]
+    assert "docker create" in took and "docker run" not in took and "docker start" not in took  # nothing of it runs
+    # the service files come with the version: the image carries them, and the release is where the units are read from
+    with open(os.path.join(ROOT, "Dockerfile"), encoding="utf-8") as f:
+        assert "COPY packaging/ ./packaging/" in f.read()
+    with open(os.path.join(ROOT, ".dockerignore"), encoding="utf-8") as f:
+        assert "!packaging/" in f.read().splitlines()
+    assert 'service "$PREFIX/current"' in sh
+
+
+def _stamp(image):
+    import subprocess
+
+    return subprocess.run(  # noqa: S603
+        ["sh", os.path.join(ROOT, "scripts", "stamp_installer.sh"), image],  # noqa: S607
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+
+def test_a_release_carries_an_install_script_that_names_its_own_image():
+    image = "ghcr.io/fr0styx/kiboto@sha256:" + "ab12" * 16
+    done = _stamp(image)
+    assert done.returncode == 0, done.stderr
+    lines = done.stdout.splitlines()
+    assert lines.count(f'KIBOTO_IMAGE="{image}"') == 1
+    # nothing else differs from the script in the repository
+    assert [ln for ln in lines if not ln.startswith("KIBOTO_IMAGE=")] == [
+        ln for ln in _read("install.sh").splitlines() if not ln.startswith("KIBOTO_IMAGE=")
+    ]
+    with open(os.path.join(ROOT, ".github", "workflows", "ci.yml"), encoding="utf-8") as f:
+        ci = f.read()
+    assert "sh scripts/stamp_installer.sh" in ci and "files: install.sh" in ci
+
+
+def test_an_image_named_by_a_tag_or_with_odd_characters_is_not_stamped():
+    for image in (
+        "ghcr.io/fr0styx/kiboto:latest",
+        "",
+        "x@sha256:abc",
+        "a|b@sha256:" + "0" * 64,
+        "a b@sha256:" + "0" * 64,
+    ):
+        done = _stamp(image)
+        assert done.returncode == 2, image
+        assert done.stdout == ""
+
+
+def test_a_second_run_leaves_the_held_packages_as_they_are():
+    sh = _read("install.sh")
+    step = sh[sh.index("packages() {") : sh.index("docker_setup() {")]
+    # every install line takes only what is missing: none names a held package outright
+    installs = [ln for ln in step.splitlines() if "apt-get install" in ln]
+    assert installs and all(("$need" in ln or '"$headers"' in ln) for ln in installs), installs
+    assert 'headers="linux-headers-$(uname -r)"' in step  # ZFS is built for the kernel that runs
