@@ -54,9 +54,9 @@ def test_the_install_script_keeps_its_promises():
     sh = _read("install.sh")
     assert subprocess.run(["sh", "-n", os.path.join(ROOT, "packaging", "install.sh")]).returncode == 0
     # the mark that makes a machine Kiboto's (backend/runtime.py) is the one the script leaves
-    from backend import runtime
-
-    assert runtime.MANAGED_MARK == "/etc/kiboto/managed" and '"$ETC/managed"' in sh and "ETC=/etc/kiboto" in sh
+    with open(os.path.join(ROOT, "backend", "runtime.py"), encoding="utf-8") as f:
+        assert 'MANAGED_MARK = "/etc/kiboto/managed"' in f.read()  # read from the file: tests pin the mark itself
+    assert '"$ETC/managed"' in sh and "ETC=/etc/kiboto" in sh
     # it refuses a machine that already serves files or runs containers
     for said in ("Samba is already set up", "Docker already has containers", "NFS exports are already set up"):
         assert said in sh

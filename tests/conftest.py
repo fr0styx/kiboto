@@ -250,6 +250,17 @@ def _no_host_storage_tools(request, monkeypatch):
 
 
 @pytest.fixture(autouse=True)
+def _in_a_container_everywhere(monkeypatch):
+    """Tests see Kiboto in a container on every machine, and never a managed host: the test image is
+    a container, CI's runner and a developer's machine are not, and a test machine may carry the
+    managed-host mark. The tests about a native or a managed host switch it themselves."""
+    from backend import runtime
+
+    monkeypatch.setattr(runtime, "CONTAINER_MARKS", (ROOT,))  # a path that is there on every machine
+    monkeypatch.setattr(runtime, "MANAGED_MARK", os.path.join(ROOT, "no-such-mark"))
+
+
+@pytest.fixture(autouse=True)
 def _a_pool_record_of_its_own(monkeypatch, tmp_path):
     """Each test starts with no recorded pools: the record is a file in the data folder, which the
     whole run shares."""
