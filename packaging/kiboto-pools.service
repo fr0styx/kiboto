@@ -1,0 +1,22 @@
+# Mounts or imports the pools Kiboto made, before Docker and the file servers start. Debian brings
+# a ZFS pool back by itself; nothing else mounts a btrfs or ext4 pool.
+[Unit]
+Description=Kiboto: storage pools
+After=local-fs.target zfs-import.target zfs-mount.service systemd-udev-settle.service
+Before=docker.service smbd.service nfs-server.service
+ConditionPathExists=/var/lib/kiboto/storage/pools.json
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+Environment=DATA_DIR=/var/lib/kiboto
+Environment=HOST_PROC=/proc
+Environment=HOST_SYS=/sys
+Environment=HOST_DEV=/dev
+Environment=POOL_PATH=/mnt/storage
+EnvironmentFile=-/etc/kiboto/kiboto.env
+WorkingDirectory=/opt/kiboto/current
+ExecStart=/opt/kiboto/current/venv/bin/python -m backend.services.pools_at_boot
+
+[Install]
+WantedBy=multi-user.target

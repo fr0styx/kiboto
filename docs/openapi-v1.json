@@ -539,7 +539,7 @@
       "title": "Stack Services"
      },
      "storage_root": {
-      "default": "/mnt/user/appdata",
+      "default": "",
       "title": "Storage Root",
       "type": "string"
      },
@@ -617,7 +617,7 @@
       "title": "Share Folders"
      },
      "storage_root": {
-      "default": "/mnt/user/appdata",
+      "default": "",
       "title": "Storage Root",
       "type": "string"
      }
@@ -30255,7 +30255,7 @@
       "title": "Preset"
      },
      "storage_root": {
-      "default": "/mnt/user/appdata",
+      "default": "",
       "title": "Storage Root",
       "type": "string"
      }

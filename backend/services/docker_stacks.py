@@ -33,6 +33,13 @@ from backend.services.compose_synthesizer import (
 )
 
 
+def _stack_dir(stack_name: str) -> str:
+    """Where a stack Kiboto makes keeps its files: with the other apps of this system."""
+    from backend.services.app_catalog import default_storage_root
+
+    return os.path.join(default_storage_root(), stack_name)
+
+
 def _docker_request(method: str, path: str, body: bytes | None = None, timeout: float = 6.0) -> tuple[int, bytes]:
     """Raw Docker request (see backend.services.docker_client); 503 when the socket is missing."""
     from backend.services.docker_client import DockerUnavailable, raw_request
@@ -605,7 +612,7 @@ def save_stack_config(stack_name: str, compose_yaml: str, env_content: str | Non
         return {"success": True, "message": "Stack configuration saved into Dockhand volume"}
 
     # C. Synthesized / new stack on host
-    default_dir = f"/mnt/user/appdata/{stack_name}"
+    default_dir = _stack_dir(stack_name)
     try:
         os.makedirs(default_dir, exist_ok=True)
         target_file = os.path.join(default_dir, "docker-compose.yml")
@@ -799,7 +806,7 @@ def _apply_inputs(stack_name: str, compose_yaml: str, env_content: str | None) -
         compose_yaml, env_content = _restore_masked_stack_secrets(compose_yaml, env_content, old_compose, old_env)
     except ValueError as e:
         raise compose_apply.ComposeError(str(e)) from e
-    base = details.get("working_dir") or f"/mnt/user/appdata/{stack_name}"
+    base = details.get("working_dir") or _stack_dir(stack_name)
     current = []
     for c in details.get("containers") or []:
         st, info = docker_request("GET", f"/containers/{c.get('id')}/json")
@@ -959,7 +966,7 @@ def new_stack_name_check(stack_name: str) -> tuple[str, str, dict[str, Any]] | N
             "own_app_name_taken",
             {"name": stack_name},
         )
-    folder = f"/mnt/user/appdata/{stack_name}"
+    folder = _stack_dir(stack_name)
     if any(os.path.exists(os.path.join(folder, n)) for n in ("docker-compose.yml", "compose.yaml", "compose.yml")):
         return (
             f"{folder} already holds an app file. Choose another name, or remove that file first.",

@@ -50,6 +50,8 @@ Virtual machines: a disk, an installer image or a shared folder can no longer re
 
 Eight more apps in Get apps, each tried on a real install: Homarr (a start page), Speedtest Tracker (your internet speed over time), Gatus (a status page), Monica (the people in your life), Lychee (a photo gallery), HortusFox (plant care), Zipline (file and screenshot sharing), and rsync over SSH, a place other computers can back up to with rsync. 184 apps in all.
 
+A first step towards Kiboto on a machine of its own: an install script turns a fresh Debian 13 into a machine that Kiboto runs as its service, without a container. Storage pools are mounted before apps start. This is for trying in a virtual machine, not yet for real data.
+
 ## v2.0.5 (2026-11-20)
 ### 🏡 A second NAS that can take over, files you can change over the network, and 176 tested apps
 

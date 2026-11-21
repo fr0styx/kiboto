@@ -10,7 +10,8 @@ FILE = "services:\n  web:\n    image: nginx:1.27\n"
 @pytest.fixture
 def stacks(monkeypatch):
     monkeypatch.setattr(ds, "list_all_stacks", lambda: [{"name": "immich"}])
-    monkeypatch.setattr(ds.os.path, "exists", lambda p: p == "/mnt/user/appdata/oldapp/compose.yaml")
+    monkeypatch.setattr(ds, "_stack_dir", lambda name: f"/srv/apps/{name}")  # where this system keeps apps
+    monkeypatch.setattr(ds.os.path, "exists", lambda p: p == "/srv/apps/oldapp/compose.yaml")
 
 
 @pytest.mark.parametrize(

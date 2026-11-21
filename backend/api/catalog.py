@@ -14,6 +14,12 @@ from backend.config import logger
 router = APIRouter(tags=["Docker App Catalog"])
 
 
+def _apps_root() -> str:
+    from backend.services.app_catalog import default_storage_root
+
+    return default_storage_root()
+
+
 class AppSourceCreateRequest(BaseModel):
     name: str
     url: str
@@ -30,7 +36,7 @@ class AppSideloadRequest(BaseModel):
 
 class AppComposeRequest(BaseModel):
     host_port: int | None = None
-    storage_root: str = "/mnt/user/appdata"
+    storage_root: str = ""  # empty: where this system keeps apps (default_storage_root)
     container_name: str | None = None
     env_overrides: dict[str, str] | None = None
     volume_overrides: dict[str, str] | None = None
@@ -231,7 +237,7 @@ async def post_docker_catalog_compose(app_id: str, req: AppComposeRequest | None
     from backend.services.app_catalog import generate_compose_for_app, get_catalog_app, share_folder_paths
 
     host_port = req.host_port if req else None
-    storage_root = req.storage_root if req else "/mnt/user/appdata"
+    storage_root = (req.storage_root if req else "") or _apps_root()
     container_name = req.container_name if req else None
     env_overrides = req.env_overrides if req else None
     volume_overrides = req.volume_overrides if req else None
@@ -259,7 +265,7 @@ async def post_docker_catalog_compose(app_id: str, req: AppComposeRequest | None
 
 class AppDeployRequest(BaseModel):
     host_port: int | None = None
-    storage_root: str = "/mnt/user/appdata"
+    storage_root: str = ""  # empty: where this system keeps apps (default_storage_root)
     container_name: str | None = None
     replace_existing: bool = False
     share_folders: dict[str, str] | None = None  # FEAT-06: {app folder: share name}
@@ -314,7 +320,7 @@ async def post_docker_catalog_deploy(app_id: str, req: AppDeployRequest | None =
     from backend.services.app_catalog import stream_deploy_catalog_app
 
     host_port = req.host_port if req else None
-    storage_root = req.storage_root if req else "/mnt/user/appdata"
+    storage_root = (req.storage_root if req else "") or _apps_root()
     container_name = req.container_name if req else None
     replace_existing = req.replace_existing if req else False
     share_folders = req.share_folders if req else None

@@ -21,7 +21,7 @@ from fastapi.responses import FileResponse, JSONResponse, Response, StreamingRes
 from pydantic import BaseModel, Field
 
 import backend.config as config
-from backend import __version__, legacy_names
+from backend import __version__, legacy_names, runtime
 from backend import settings as _settings
 from backend.api_tokens import load_tokens, revoke_token
 from backend.auth import AuthenticatedPrincipal, get_current_principal, require_scope
@@ -1209,7 +1209,7 @@ def get_system_about():
         "platform": platform.platform(),
         "python_version": sys.version.split()[0],
         "uptime_secs": uptime_secs,
-        "containerized": os.path.exists("/.dockerenv") or config.SETTINGS.containerized or os.path.exists("/app"),
+        "containerized": runtime.in_container(),
         "github_repo": "https://github.com/fr0styx/kiboto",
     }
 

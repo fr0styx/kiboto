@@ -165,7 +165,9 @@ def get_storage_platform_info() -> dict[str, Any]:
 
 
 def _in_container() -> bool:
-    return os.path.exists("/.dockerenv") or bool(config.SETTINGS.containerized)
+    from backend import runtime
+
+    return runtime.in_container()
 
 
 @router.get("/pools", dependencies=[Depends(require_scope("storage:read", "system:view"))])

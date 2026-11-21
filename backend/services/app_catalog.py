@@ -1368,15 +1368,23 @@ _STORAGE_ROOT: dict[str, str] = {}
 def default_storage_root() -> str:
     """Where this host keeps apps' data: the folder that holds Kiboto's own data folder on the
     host (from its container's mounts), so it fits TrueNAS or a plain Linux box too; Unraid's
-    /mnt/user/appdata when that can't be told (NUX-12)."""
+    /mnt/user/appdata when that can't be told (NUX-12). As a process of the machine itself Kiboto
+    has no container to ask: apps then live beside the shared folders, in the main storage folder."""
     if "root" in _STORAGE_ROOT:
+        return _STORAGE_ROOT["root"]
+    from backend import runtime
+
+    if runtime.native():
+        from backend import config
+
+        _STORAGE_ROOT["root"] = os.path.join(config.POOL_PATH, "appdata")
         return _STORAGE_ROOT["root"]
     import socket
 
     root = "/mnt/user/appdata"
     try:
         st, me = _docker_request("GET", f"/containers/{socket.gethostname()}/json")
-    except (OSError, ValueError):
+    except (OSError, ValueError, RuntimeError):  # RuntimeError: Docker does not answer
         logger.debug("app_catalog: own mounts unknown", exc_info=True)
         st, me = 0, None
     if st == 200 and isinstance(me, dict):

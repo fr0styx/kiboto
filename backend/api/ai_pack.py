@@ -15,7 +15,7 @@ router = APIRouter(tags=["AI pack"])
 
 class PackInstallRequest(BaseModel):
     preset: str | None = Field(default=None, pattern="^(small|standard|large)$")
-    storage_root: str = "/mnt/user/appdata"
+    storage_root: str = ""  # empty: where this system keeps apps
 
 
 @router.get("/ai/pack", dependencies=[Depends(require_scope(KIB_MANAGE))])
@@ -31,9 +31,10 @@ def pack_install(req: PackInstallRequest | None = None):
     req = req or PackInstallRequest()
 
     def events():
+        from backend.services.app_catalog import default_storage_root
         from backend.services.jobs import follow
 
-        stream = ai_pack.stream_install(req.preset, req.storage_root)
+        stream = ai_pack.stream_install(req.preset, req.storage_root or default_storage_root())
         for e in follow(stream, "app_install", "Installing AI pack", "jobs.t.app_install", {"name": "AI pack"}):
             yield json.dumps(e) + "\n"
 

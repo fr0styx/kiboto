@@ -118,7 +118,9 @@ def app_dir() -> str:
                     return os.path.dirname(m["Source"].rstrip("/"))
     except (OSError, ValueError, RuntimeError, KeyError):
         logger.debug("immich_sso: immich container not found", exc_info=True)
-    return "/mnt/user/appdata/immich"
+    from backend.services.app_catalog import default_storage_root
+
+    return os.path.join(default_storage_root(), "immich")
 
 
 def follow_move(new_url: str) -> dict[str, Any]:
