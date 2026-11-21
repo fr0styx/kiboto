@@ -315,7 +315,7 @@
   "backend.hardware.hal.DiskDiscoveryHAL.discover_physical_disks": 152,
   "backend.hardware.net.topology.get_network_topology": 277,
   "backend.hardware.pal.detect.StoragePlatformDetector.detect": 165,
-  "backend.hardware.pal.generic_linux.GenericLinuxStorageAdapter.list_pools": 278,
+  "backend.hardware.pal.generic_linux.GenericLinuxStorageAdapter.list_pools": 234,
   "backend.hardware.pal.unraid.UnraidStorageAdapter.list_pools": 196,
   "backend.hardware.pal.zettos.ZettOSStorageAdapter.list_pools": 264,
   "backend.hardware.smart_engine.SmartTelemetryEngine.decode_smart_json": 155,

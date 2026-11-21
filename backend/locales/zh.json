@@ -53,6 +53,8 @@
  "alert.pool.pool_degraded.title": "存储池 {subject} 已降级",
  "alert.pool.pool_full.advice": "请在它完全写满之前删除或移动文件，或添加一块硬盘。",
  "alert.pool.pool_full.title": "存储池 {subject} 已用 {detail}",
+ "alert.pool.pool_missing.advice": "它的硬盘未连接，或无法打开。在它恢复之前，其共享文件夹保持为空，也不会在原位置写入任何内容。请检查硬盘，然后重启 NAS。",
+ "alert.pool.pool_missing.title": "找不到存储池 {subject}",
  "alert.pool.scrub_errors.advice": "有些数据无法被正确读回。请检查硬盘健康和你的备份。",
  "alert.pool.scrub_errors.title": "对 {subject} 的上次检查发现了 {detail} 个错误",
  "alert.pool.still": "Kiboto：仍未解决 — {title}",

@@ -22,6 +22,7 @@ from backend.config import HOST_DEV, HOST_PROC, HOST_SYS, POOL_PATH, logger
 from backend.fsutil import atomic_write_json, child_path
 from backend.hardware import fs_quota
 from backend.hardware.pal import base as pal_base
+from backend.hardware.pal import pool_registry
 from backend.hardware.pal.base import (
     NetworkShare,
     PlatformCapabilities,
@@ -145,6 +146,7 @@ def _tree_bytes(path: str) -> int:
 
 # The kinds of pool Kiboto makes. Pools of other kinds (XFS, for one) are still read and shown.
 POOL_KINDS = ("zfs", "btrfs", "ext4")
+BTRFS_MOUNT_OPTIONS = "compress=zstd:1,noatime,space_cache=v2"
 
 
 class GenericLinuxStorageAdapter(StoragePlatformAdapter):
@@ -497,6 +499,8 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
         their own; the answer says so and nothing is started."""
         self._busy_cache_ts = 0.0
         pool = self.resolve_pool(pool_id)
+        if pool.status == "MISSING":
+            raise RuntimeError(f"{pool.name} was not found: its drives are not connected, or it could not be opened.")
         base = {"pool_id": pool.id, "pool": pool.name, "action": action if action in ("start", "cancel") else "status"}
         if pool.fs_type == "zfs":
             cmd = {"start": ["zpool", "scrub", pool.id], "cancel": ["zpool", "scrub", "-s", pool.id]}.get(action)
@@ -552,6 +556,125 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
             if str(m.get("target") or m.get("mountpoint") or "").rstrip("/") == self._pool_path.rstrip("/"):
                 return str(m.get("fstype") or m.get("fs_type") or "unknown"), ""
         return "unknown", ""
+
+    def _recorded_pool(
+        self, row: dict[str, Any], hal_disks: dict[str, PoolMember], there: bool | None = None
+    ) -> StoragePool:
+        """One pool from its record: its real size and state when it is there, else MISSING."""
+        if there is None:
+            there = pool_registry.is_there(row, self._run_cmd)
+        members: list[PoolMember] = []
+        for path in row.get("members") or []:
+            dev = os.path.basename(os.path.realpath(path)) if os.path.exists(path) else ""
+            known = hal_disks.get(_whole_disk(dev)) if dev else None
+            if known:
+                members.append(known)
+            else:
+                members.append(
+                    PoolMember(
+                        name=os.path.basename(path),
+                        device=dev,
+                        id=os.path.basename(path),
+                        status="OK" if dev else "MISSING",
+                    )
+                )
+        profile = row.get("profile") or "single"
+        fs = row["fs_type"]
+        protected = profile in ("raid1", "raid10", "mirror", "raidz1", "raidz2", "raidz3")
+        kind = (
+            ("zfs_raid" if profile.startswith("raidz") else "zfs_mirror" if profile == "mirror" else "zfs_single")
+            if fs == "zfs"
+            else ("btrfs_raid" if fs == "btrfs" and profile != "single" else "single")
+        )
+        pool = StoragePool(
+            id=row["name"],
+            name=row["name"],
+            pool_type=kind,
+            fs_type=fs,
+            fs_profile=profile,
+            status="MISSING",
+            mountpoint=row["mountpoint"],
+            members=members,
+            parity_protected=protected,
+        )
+        if not there:
+            return pool
+        try:
+            u = shutil.disk_usage(row["mountpoint"])
+            pool.total_bytes, pool.used_bytes, pool.free_bytes = u.total, u.used, u.free
+            pool.used_pct = round(u.used / u.total * 100, 1) if u.total else 0.0
+        except OSError:
+            ignored("backend.hardware.pal_storage.GenericLinuxStorageAdapter._recorded_pool")
+        gone = any(m.status == "MISSING" for m in members)
+        if fs == "btrfs" and not gone:  # a pool mounted without one of its drives says so itself
+            _code, shown, _err = self._run_cmd(["btrfs", "filesystem", "show", row["mountpoint"]])
+            gone = "missing" in shown.lower()
+        pool.status = "DEGRADED" if gone else "HEALTHY"
+        pool.compression = pool_compression(fs, row["mountpoint"])
+        return pool
+
+    def _zfs_pools(self) -> list[StoragePool]:
+        """Every imported ZFS pool, as zpool reports it."""
+        pools: list[StoragePool] = []
+        code, zout, _ = self._run_cmd(["zpool", "list", "-Hp", "-o", "name,size,alloc,free,health"])
+        if code == 0 and zout.strip():
+            for line in zout.strip().splitlines():
+                parts = line.split("\t")
+                if len(parts) >= 5:
+                    zp_name = parts[0].strip()
+                    zp_size, zp_alloc, zp_free, zp_health = (
+                        parts[1].strip(),
+                        parts[2].strip(),
+                        parts[3].strip(),
+                        parts[4].strip(),
+                    )
+                    try:
+                        z_total = int(zp_size) if zp_size.isdigit() else 0
+                        z_used = int(zp_alloc) if zp_alloc.isdigit() else 0
+                        z_free = int(zp_free) if zp_free.isdigit() else 0
+                        z_pct = round(z_used / z_total * 100, 1) if z_total > 0 else 0.0
+                    except Exception:
+                        z_total, z_used, z_free, z_pct = 0, 0, 0, 0.0
+
+                    _, zmnt, _ = self._run_cmd(["zfs", "get", "-Hp", "-o", "value", "mountpoint", zp_name])
+                    z_mount = zmnt.strip() if zmnt.strip() and zmnt.strip() != "none" else f"/{zp_name}"
+
+                    _, zstat, _ = self._run_cmd(["zpool", "status", zp_name])
+                    z_profile = "single"
+                    zstat_l = zstat.lower()
+                    if "raidz3" in zstat_l:
+                        z_profile = "raidz3"
+                    elif "raidz2" in zstat_l:
+                        z_profile = "raidz2"
+                    elif "raidz1" in zstat_l:
+                        z_profile = "raidz1"
+                    elif "mirror" in zstat_l:
+                        z_profile = "mirror"
+
+                    z_members = self._parse_zpool_members(zp_name)
+
+                    pools.append(
+                        StoragePool(
+                            id=zp_name,
+                            name=zp_name,
+                            pool_type="zfs_raid"
+                            if z_profile in ("raidz1", "raidz2", "raidz3")
+                            else ("zfs_mirror" if z_profile == "mirror" else "zfs_single"),
+                            fs_type="zfs",
+                            fs_profile=z_profile,
+                            status="HEALTHY" if zp_health == "ONLINE" else zp_health,
+                            mountpoint=z_mount,
+                            total_bytes=z_total,
+                            used_bytes=z_used,
+                            free_bytes=z_free,
+                            used_pct=z_pct,
+                            members=z_members,
+                            parity_protected=z_profile in ("raidz1", "raidz2", "raidz3", "mirror"),
+                            autotrim=True,
+                            compression=pool_compression("zfs", z_mount, zp_name),
+                        )
+                    )
+        return pools
 
     def list_pools(self) -> list[StoragePool]:
         pools: list[StoragePool] = []
@@ -655,6 +778,14 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
                 )
             )
 
+        # 1b. The pools Kiboto made or imported here, from their record: never guessed from drive
+        # names or sizes, and listed as missing when they are not there
+        recorded = [r for r in pool_registry.load() if not r.get("ejected")]
+        for row in recorded:
+            if row["fs_type"] != "zfs":
+                pools.append(self._recorded_pool(row, hal_disks))
+                claimed_mount_paths.add(row["mountpoint"])
+
         # 2. Discover bcache and block device mounts
         for m in mounts:
             dev = m.get("device", "")
@@ -711,64 +842,12 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
                 )
 
         # 3. Discover OpenZFS pools
-        code, zout, _ = self._run_cmd(["zpool", "list", "-Hp", "-o", "name,size,alloc,free,health"])
-        if code == 0 and zout.strip():
-            for line in zout.strip().splitlines():
-                parts = line.split("\t")
-                if len(parts) >= 5:
-                    zp_name = parts[0].strip()
-                    zp_size, zp_alloc, zp_free, zp_health = (
-                        parts[1].strip(),
-                        parts[2].strip(),
-                        parts[3].strip(),
-                        parts[4].strip(),
-                    )
-                    try:
-                        z_total = int(zp_size) if zp_size.isdigit() else 0
-                        z_used = int(zp_alloc) if zp_alloc.isdigit() else 0
-                        z_free = int(zp_free) if zp_free.isdigit() else 0
-                        z_pct = round(z_used / z_total * 100, 1) if z_total > 0 else 0.0
-                    except Exception:
-                        z_total, z_used, z_free, z_pct = 0, 0, 0, 0.0
+        pools.extend(self._zfs_pools())
 
-                    _, zmnt, _ = self._run_cmd(["zfs", "get", "-Hp", "-o", "value", "mountpoint", zp_name])
-                    z_mount = zmnt.strip() if zmnt.strip() and zmnt.strip() != "none" else f"/{zp_name}"
-
-                    _, zstat, _ = self._run_cmd(["zpool", "status", zp_name])
-                    z_profile = "single"
-                    zstat_l = zstat.lower()
-                    if "raidz3" in zstat_l:
-                        z_profile = "raidz3"
-                    elif "raidz2" in zstat_l:
-                        z_profile = "raidz2"
-                    elif "raidz1" in zstat_l:
-                        z_profile = "raidz1"
-                    elif "mirror" in zstat_l:
-                        z_profile = "mirror"
-
-                    z_members = self._parse_zpool_members(zp_name)
-
-                    pools.append(
-                        StoragePool(
-                            id=zp_name,
-                            name=zp_name,
-                            pool_type="zfs_raid"
-                            if z_profile in ("raidz1", "raidz2", "raidz3")
-                            else ("zfs_mirror" if z_profile == "mirror" else "zfs_single"),
-                            fs_type="zfs",
-                            fs_profile=z_profile,
-                            status="HEALTHY" if zp_health == "ONLINE" else zp_health,
-                            mountpoint=z_mount,
-                            total_bytes=z_total,
-                            used_bytes=z_used,
-                            free_bytes=z_free,
-                            used_pct=z_pct,
-                            members=z_members,
-                            parity_protected=z_profile in ("raidz1", "raidz2", "raidz3", "mirror"),
-                            autotrim=True,
-                            compression=pool_compression("zfs", z_mount, zp_name),
-                        )
-                    )
+        # 3b. A recorded ZFS pool that is not imported is missing, not gone
+        for row in recorded:
+            if row["fs_type"] == "zfs" and not any(p.id == row["name"] for p in pools):
+                pools.append(self._recorded_pool(row, hal_disks, there=False))
 
         # 4. Standard pool at self._pool_path
         if not is_overlay:
@@ -971,6 +1050,8 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
             os.makedirs(target_mount, exist_ok=True)
         except OSError as e:
             logger.warning(f"[PAL] Could not pre-create target mount dir {target_mount}: {e}")
+        if fs_lower != "zfs":  # ZFS makes and mounts its own folder
+            pool_registry.protect(target_mount, self._run_cmd)
 
         if fs_lower == "zfs":
             # ashift=12 (4Kn/512e modern sector alignment), zstd compression, posixacl, xattr=sa
@@ -1001,7 +1082,7 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
             self._must(cmd, "mkfs.btrfs")
 
             # Mount with modern zstd compression and fast noatime
-            mount_cmd = ["mount", "-o", "compress=zstd:1,noatime,space_cache=v2", resolved_disks[0], target_mount]
+            mount_cmd = ["mount", "-o", BTRFS_MOUNT_OPTIONS, resolved_disks[0], target_mount]
             self._must(mount_cmd, "mount")
 
             # Create default subvolumes for shares and snapshots
@@ -1012,6 +1093,15 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
             self._must(["mkfs.ext4", "-F", "-L", name, resolved_disks[0]], "mkfs.ext4")
             self._must(["mount", resolved_disks[0], target_mount], "mount")
 
+        pool_registry.record(
+            name,
+            fs_lower,
+            profile_lower,
+            pool_registry.read_uuid(fs_lower, name, resolved_disks[0], self._run_cmd),
+            resolved_disks,
+            target_mount,
+            options=BTRFS_MOUNT_OPTIONS if fs_lower == "btrfs" else "",
+        )
         return {
             "status": "provisioned",
             "name": name,
@@ -1023,6 +1113,13 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
         }
 
     def rename_pool(self, pool_id: str, new_name: str) -> dict[str, Any]:
+        """Renames a pool; its record takes the new name with it."""
+        res = self._rename_pool(pool_id, new_name)
+        if res.get("status") == "renamed":
+            pool_registry.rename(str(res.get("pool_id") or pool_id), str(res.get("name") or new_name).strip())
+        return res
+
+    def _rename_pool(self, pool_id: str, new_name: str) -> dict[str, Any]:
         """Renames a storage pool (ZFS export/import, Btrfs label) and creates compatibility symlink."""
         if not new_name or not new_name.strip():
             raise ValueError("New pool name cannot be empty")
@@ -1112,6 +1209,9 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
         code, out, err = self._run_cmd(cmd)
         if code != 0:
             raise RuntimeError(f"{pool.name} could not be disconnected: {(err or out or 'it is in use').strip()}")
+        pool_registry.set_ejected(pool.id, True)
+        if pool.fs_type != "zfs" and pool.mountpoint:
+            pool_registry.protect(pool.mountpoint, self._run_cmd)
         return {"status": "disconnected", "pool_id": pool.id, "mountpoint": pool.mountpoint}
 
     def erase_plan(self, pool_id: str) -> dict[str, Any]:
@@ -1134,6 +1234,14 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
         except pool_erase.EraseRefused as e:
             raise RuntimeError(str(e)) from e
         logger.warning("[Storage] pool %s deleted, drives erased: %s", p["pool"], erased)
+        pool_registry.forget(p["pool"])
+        mp = p.get("mountpoint") or ""
+        if mp and os.path.isdir(mp) and not os.path.ismount(mp):
+            pool_registry.unprotect(mp, self._run_cmd)
+            try:
+                os.rmdir(mp)  # only when empty
+            except OSError:
+                ignored("backend.hardware.pal_storage.GenericLinuxStorageAdapter.erase_pool")
         return {"status": "erased", "pool_id": p["pool"], "drives": erased}
 
     def export_pool(self, pool_id: str, force: bool = False) -> dict[str, Any]:
@@ -1178,7 +1286,9 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
             if c_um != 0:
                 raise RuntimeError(f"Failed to unmount pool '{pool_id}': {err_um or 'busy or in use'}")
             fs_type = "generic"
+            pool_registry.protect(target_mount, self._run_cmd)
 
+        pool_registry.set_ejected(pool_id, True)  # away on purpose: not mounted at start, not missing
         return {
             "status": "exported",
             "pool_id": pool_id,
@@ -1191,10 +1301,36 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
     def import_pool(self, pool_id: str, fs_type: str = "zfs", target_mount: str | None = None) -> dict[str, Any]:
         """Imports an external storage pool from an attached enclosure."""
         fs_lower = fs_type.lower()
+        row = pool_registry.find(pool_id)
+        if row and row["fs_type"] != "zfs":  # a pool Kiboto knows: mounted where and how it was
+            why = pool_registry.bring_back(row, self._run_cmd)
+            if why:
+                raise RuntimeError(f"{pool_id} could not be mounted: {why}")
+            pool_registry.set_ejected(pool_id, False)
+            return {
+                "status": "imported",
+                "pool_id": pool_id,
+                "fs_type": row["fs_type"],
+                "mountpoint": row["mountpoint"],
+                "message": f"Pool '{pool_id}' imported at {row['mountpoint']}",
+            }
         if fs_lower == "zfs":
             code, out, err = self._run_cmd(["zpool", "import", "-f", pool_id])
             if code != 0:
                 raise RuntimeError(f"Failed to import zpool '{pool_id}': {err or out}")
+            if row:
+                pool_registry.set_ejected(pool_id, False)
+            else:
+                _c, zmnt, _e = self._run_cmd(["zfs", "get", "-Hp", "-o", "value", "mountpoint", pool_id])
+                pool_registry.record(
+                    pool_id,
+                    "zfs",
+                    "",
+                    pool_registry.read_uuid("zfs", pool_id, "", self._run_cmd),
+                    [],
+                    zmnt.strip() or f"/{pool_id}",
+                    origin="imported",
+                )
             return {
                 "status": "imported",
                 "pool_id": pool_id,
@@ -1205,9 +1341,16 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
             self._run_cmd(["btrfs", "device", "scan"])
             mnt = target_mount or os.path.join(self._pool_path, pool_id)
             os.makedirs(mnt, exist_ok=True)
+            pool_registry.protect(mnt, self._run_cmd)
             code, out, err = self._run_cmd(["mount", "-L", pool_id, mnt])
             if code != 0:
                 code, out, err = self._run_cmd(["mount", f"/dev/disk/by-label/{pool_id}", mnt])
+            if code == 0 and fs_lower in pool_registry.KINDS:
+                _c, uuid, _e = self._run_cmd(["findmnt", "-rno", "UUID", "-M", mnt])
+                _c, src, _e = self._run_cmd(["findmnt", "-rno", "SOURCE", "-M", mnt])
+                pool_registry.record(
+                    pool_id, fs_lower, "", uuid.strip(), [src.strip()] if src.strip() else [], mnt, origin="imported"
+                )
             return {
                 "status": "imported" if code == 0 else "error",
                 "pool_id": pool_id,
@@ -1240,6 +1383,14 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
             if current_pool.get("pool_id"):
                 discovered.append(current_pool)
 
+        # a btrfs or ext4 pool that was ejected here can be found again by its record
+        for row in pool_registry.load():
+            if row.get("ejected") and row["fs_type"] != "zfs" and row.get("uuid"):
+                code, _, _ = self._run_cmd(["blkid", "-U", row["uuid"]])
+                if code == 0:
+                    discovered.append(
+                        {"pool_id": row["name"], "fs_type": row["fs_type"], "status": "EJECTED", "detachable": True}
+                    )
         return discovered
 
     def create_share(

@@ -53,6 +53,8 @@
  "alert.pool.pool_degraded.title": "Speicherpool {subject} ist beeinträchtigt",
  "alert.pool.pool_full.advice": "Löschen oder verschieben Sie Dateien oder fügen Sie eine Festplatte hinzu, bevor er ganz voll ist.",
  "alert.pool.pool_full.title": "Speicherpool {subject} ist zu {detail} voll",
+ "alert.pool.pool_missing.advice": "Seine Laufwerke sind nicht angeschlossen, oder er ließ sich nicht öffnen. Seine Freigaben bleiben leer, bis er wieder da ist, und an seiner Stelle wird nichts geschrieben. Prüfen Sie die Laufwerke und starten Sie dann das NAS neu.",
+ "alert.pool.pool_missing.title": "Speicherpool {subject} wurde nicht gefunden",
  "alert.pool.scrub_errors.advice": "Einige Daten ließen sich nicht korrekt zurücklesen. Prüfen Sie Laufwerkszustand und Ihre Sicherungen.",
  "alert.pool.scrub_errors.title": "Die letzte Prüfung von {subject} hat {detail} Fehler gefunden",
  "alert.pool.still": "Kiboto: weiterhin — {title}",

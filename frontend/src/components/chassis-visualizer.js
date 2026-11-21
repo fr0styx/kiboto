@@ -120,6 +120,7 @@ export function poolStatusWord(status) {
   if (s === 'HEALTHY' || s === 'ONLINE' || s === 'OK') return t('chassis.pool_healthy', 'Healthy');
   if (s === 'SYNCING') return t('chassis.pool_syncing', 'Rebuilding protection');
   if (s === 'DEGRADED') return t('chassis.pool_degraded', 'Needs attention');
+  if (s === 'MISSING') return t('chassis.pool_missing', 'Not found');
   return String(status);
 }
 
@@ -759,7 +760,7 @@ function buildPoolBlockInner(pool, isObserver, can = { scrub: true }) {
   let statusClass = 'status-healthy';
   const statusLabel = poolStatusWord(pool.status);
   if (pool.status === 'SYNCING') statusClass = 'status-syncing';
-  else if (pool.status === 'DEGRADED') statusClass = 'status-degraded';
+  else if (pool.status === 'DEGRADED' || pool.status === 'MISSING') statusClass = 'status-degraded';
 
   const membersHtml = (pool.members || [])
     .map((m) => {

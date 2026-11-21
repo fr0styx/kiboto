@@ -83,6 +83,7 @@ const MESSAGES = {
   storage_full: () => t('overview.storage_full', 'Storage is {subject} full.'),
   pool_degraded: () =>
     t('overview.pool_degraded', 'Storage pool {subject} is degraded: your data has less protection.'),
+  pool_missing: () => t('overview.pool_missing', "Storage pool {subject} was not found: its files can't be reached."),
   disk_disabled: () => t('overview.disk_disabled', 'Disk {subject} is out of the pool. Replace or reconnect it.'),
   disk_errors: () => t('overview.disk_errors', 'Disk {subject} reports read or write errors.'),
   pool_full: () => t('overview.pool_full', 'Storage pool {subject} is {detail} full.'),

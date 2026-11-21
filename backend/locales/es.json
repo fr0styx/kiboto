@@ -53,6 +53,8 @@
  "alert.pool.pool_degraded.title": "El grupo de almacenamiento {subject} está degradado",
  "alert.pool.pool_full.advice": "Borra o mueve archivos, o añade un disco, antes de que se llene del todo.",
  "alert.pool.pool_full.title": "El grupo de almacenamiento {subject} está lleno al {detail}",
+ "alert.pool.pool_missing.advice": "Sus unidades no están conectadas o no se pudo abrir. Sus carpetas compartidas quedan vacías hasta que vuelva, y no se escribe nada en su lugar. Revisa las unidades y luego reinicia el NAS.",
+ "alert.pool.pool_missing.title": "No se encontró el grupo de almacenamiento {subject}",
  "alert.pool.scrub_errors.advice": "Algunos datos no se pudieron volver a leer bien. Revisa Salud de los discos y tus copias.",
  "alert.pool.scrub_errors.title": "La última comprobación de {subject} encontró {detail} errores",
  "alert.pool.still": "Kiboto: sigue — {title}",

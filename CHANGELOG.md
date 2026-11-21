@@ -28,6 +28,8 @@ Deleting or bringing back a snapshot no longer says it worked when the file syst
 
 An install that has no NFS server no longer shows a folder as shared over NFS. The NFS box in the new-folder dialog is greyed out there and says why, and a folder that already had NFS turned on shows it as not running.
 
+On a system where Kiboto makes the storage pools itself, a btrfs or ext4 pool is now listed after it is made, mounted again after a restart, and shown as "Not found", with an alert, when its drives are away. While a pool is away nothing can be written into its empty folder, and a btrfs mirror that lost a drive comes up read-only so its files stay readable.
+
 #### Security
 
 Apps, Docker clean-up: deleting unused volumes now asks for a confirmation that Kiboto checks itself, so it can't happen without your say-so.

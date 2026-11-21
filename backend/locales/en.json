@@ -53,6 +53,8 @@
  "alert.pool.pool_degraded.title": "Storage pool {subject} is degraded",
  "alert.pool.pool_full.advice": "Delete or move files, or add a disk, before it fills up completely.",
  "alert.pool.pool_full.title": "Storage pool {subject} is {detail} full",
+ "alert.pool.pool_missing.advice": "Its drives are not connected, or it could not be opened. Its shared folders stay empty until it is back, and nothing is written in its place. Check the drives, then restart the NAS.",
+ "alert.pool.pool_missing.title": "Storage pool {subject} was not found",
  "alert.pool.scrub_errors.advice": "Some data could not be read back correctly. Check Drive Health and your backups.",
  "alert.pool.scrub_errors.title": "The last check of {subject} found {detail} errors",
  "alert.pool.still": "Kiboto: still — {title}",

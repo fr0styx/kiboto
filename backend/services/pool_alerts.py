@@ -96,6 +96,17 @@ def problems(pools: list[Any], scrubs: dict[str, dict[str, Any] | None] | None =
         name = getattr(p, "name", "") or getattr(p, "id", "")
         pid = getattr(p, "id", name)
         status = str(getattr(p, "status", "HEALTHY") or "HEALTHY").upper()
+        if status == "MISSING":  # its drives say nothing more: one alert for the pool, none per drive
+            out.append(
+                {
+                    "id": f"pool:{pid}:missing",
+                    "level": "critical",
+                    "kind": "pool_missing",
+                    "subject": name,
+                    "detail": "",
+                }
+            )
+            continue
         if status not in GOOD_POOL:
             out.append(
                 {
@@ -205,6 +216,7 @@ def current(max_age: float = CACHE_S, now: float | None = None) -> list[dict[str
 # --- alerts ------------------------------------------------------------------------------------
 TITLES = {
     "pool_degraded": "Storage pool {subject} is degraded",
+    "pool_missing": "Storage pool {subject} was not found",
     "disk_disabled": "Disk {subject} is {detail}",
     "disk_errors": "Disk {subject} reports {detail} errors",
     "pool_full": "Storage pool {subject} is {detail} full",
@@ -213,6 +225,8 @@ TITLES = {
 }
 ADVICE = {
     "pool_degraded": "Your data has less protection until it is fixed. Open Storage and check the disks.",
+    "pool_missing": "Its drives are not connected, or it could not be opened. Its shared folders stay empty until "
+    "it is back, and nothing is written in its place. Check the drives, then restart the NAS.",
     "disk_disabled": "Replace or reconnect it soon; until then a second failure can lose data.",
     "disk_errors": "Keep an eye on it in Drive Health; replace it if the errors keep growing.",
     "pool_full": "Delete or move files, or add a disk, before it fills up completely.",

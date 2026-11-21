@@ -376,6 +376,7 @@ def startup_system():
         apply_staged_restore(DATA_DIR)
     except Exception as e:
         logger.error(f"[Main] Could not apply the staged settings restore: {e}")
+    _bring_pools_back()
 
     # Refuse databases written by a newer Kiboto before touching them (OPS-03).
     from backend.db_schema import NewerDatabaseError, check_versions, stamp_versions
@@ -468,6 +469,23 @@ def _start_home_assistant() -> None:
     from backend.services import home_assistant
 
     home_assistant.start()
+
+
+def _bring_pools_back() -> None:
+    """The pools Kiboto made are imported or mounted again after a restart; nothing else mounts a
+    btrfs or ext4 pool. Before shares and apps are looked at, so none of them sees an empty folder."""
+    from backend.hardware.pal import pool_registry
+
+    if not pool_registry.load():
+        return
+    try:
+        from backend.hardware.pal_storage import get_storage_platform
+
+        run = getattr(get_storage_platform(), "_run_cmd", None)
+        if run:
+            pool_registry.bring_back_all(run)
+    except (OSError, RuntimeError, ValueError) as e:
+        logger.error("[Main] The recorded pools could not be brought back: %s", e)
 
 
 def _reapply_firewall() -> None:

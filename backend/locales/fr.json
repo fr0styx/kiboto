@@ -53,6 +53,8 @@
  "alert.pool.pool_degraded.title": "Le pool de stockage {subject} est dégradé",
  "alert.pool.pool_full.advice": "Supprimez ou déplacez des fichiers, ou ajoutez un disque, avant qu’il ne soit complètement plein.",
  "alert.pool.pool_full.title": "Le pool de stockage {subject} est plein à {detail}",
+ "alert.pool.pool_missing.advice": "Ses disques ne sont pas connectés, ou il n'a pas pu être ouvert. Ses dossiers partagés restent vides jusqu'à son retour, et rien n'est écrit à sa place. Vérifiez les disques, puis redémarrez le NAS.",
+ "alert.pool.pool_missing.title": "Le pool de stockage {subject} est introuvable",
  "alert.pool.scrub_errors.advice": "Certaines données n’ont pas pu être relues correctement. Vérifiez Santé des disques et vos sauvegardes.",
  "alert.pool.scrub_errors.title": "La dernière vérification de {subject} a trouvé {detail} erreurs",
  "alert.pool.still": "Kiboto : toujours — {title}",

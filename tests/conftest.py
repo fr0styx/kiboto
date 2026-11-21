@@ -250,6 +250,15 @@ def _no_host_storage_tools(request, monkeypatch):
 
 
 @pytest.fixture(autouse=True)
+def _a_pool_record_of_its_own(monkeypatch, tmp_path):
+    """Each test starts with no recorded pools: the record is a file in the data folder, which the
+    whole run shares."""
+    from backend.hardware.pal import pool_registry
+
+    monkeypatch.setattr(pool_registry, "_file", lambda: str(tmp_path / "kb-pools" / "pools.json"))
+
+
+@pytest.fixture(autouse=True)
 def _an_nfs_server_everywhere(monkeypatch):
     """Tests see an NFS server on every machine (the test image has no exportfs, a developer's
     machine may). The tests about an install without one switch it off themselves."""
