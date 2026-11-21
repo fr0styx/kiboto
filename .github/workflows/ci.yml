@@ -170,6 +170,42 @@ jobs:
             exit 1
           fi
 
+  storage-real:
+    name: Real storage tools (ZFS, btrfs, ext4)
+    # Every other storage test hands the adapter a pretend command runner. This one makes real pools
+    # of each kind on loop devices over files, in a runner that is thrown away afterwards.
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Until the job has proved itself on the runners (their kernel must carry the ZFS module), a
+    # failure here is shown but does not fail the run.
+    continue-on-error: true
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies and the storage tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install --require-hashes -r requirements.lock
+          pip install --require-hashes -r requirements-dev.lock
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends -o Acquire::Retries=3 zfsutils-linux btrfs-progs e2fsprogs
+          sudo modprobe zfs
+          zfs version
+
+      - name: Pools of each kind, made, lost and deleted for real
+        run: |
+          sudo env "PATH=$PATH" KIBOTO_REAL_DISKS=1 TESTING=1 DATA_DIR=/tmp/kb-real-data \
+            python -m pytest -p no:cacheprovider -rs tests/test_real_disks.py
+
   frontend:
     name: Frontend Build & Test
     runs-on: ubuntu-latest

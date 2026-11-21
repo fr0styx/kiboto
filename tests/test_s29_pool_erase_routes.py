@@ -154,5 +154,10 @@ def test_generic_linux_turns_refusals_into_errors(monkeypatch):
         pool_erase, "plan", lambda p, run: {"pool": "tank", "drives": ["/dev/sdb1"], "kind": "zfs", "name": "tank"}
     )
     monkeypatch.setattr(pool_erase, "execute", lambda p, run: ["/dev/sdb1"])
-    assert a.erase_pool("tank") == {"status": "erased", "pool_id": "tank", "drives": ["/dev/sdb1"]}
+    assert a.erase_pool("tank") == {
+        "status": "erased",
+        "pool_id": "tank",
+        "drives": ["/dev/sdb1"],
+        "whole_disks": [],
+    }
     assert a.erase_plan("tank")["drives"] == ["/dev/sdb1"]

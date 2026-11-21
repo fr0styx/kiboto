@@ -613,6 +613,22 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
         pool.compression = pool_compression(fs, row["mountpoint"])
         return pool
 
+    def _main_pool_members(self, hal_disks: dict[str, PoolMember]) -> list[PoolMember]:
+        """The drives under the main folder's own file system. Every drive of the machine used to be
+        listed there, also the drives of other pools and drives that are in no pool at all."""
+        code, out, _ = self._run_cmd(["findmnt", "-rno", "SOURCE,FSTYPE", "--target", self._pool_path])
+        found = out.split()
+        if code != 0 or not found:
+            return []
+        devices: list[str] = []
+        if len(found) > 1 and found[1] == "btrfs":  # a btrfs file system names all its drives itself
+            _c, shown, _e = self._run_cmd(["btrfs", "filesystem", "show", self._pool_path])
+            devices = re.findall(r"\spath\s+(\S+)", shown)
+        if not devices and found[0].startswith("/dev/"):
+            devices = [found[0].split("[")[0]]  # "/dev/sda1[/subvol]" names a subvolume after the device
+        names = sorted({_whole_disk(os.path.basename(os.path.realpath(d))) for d in devices})
+        return [hal_disks[n] for n in names if n in hal_disks]
+
     def _zfs_pools(self) -> list[StoragePool]:
         """Every imported ZFS pool, as zpool reports it."""
         pools: list[StoragePool] = []
@@ -635,6 +651,15 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
                         z_pct = round(z_used / z_total * 100, 1) if z_total > 0 else 0.0
                     except Exception:
                         z_total, z_used, z_free, z_pct = 0, 0, 0, 0.0
+
+                    # zpool counts the drives whole, parity included: a raidz1 of three 8 GB drives is
+                    # "24 GB" there. What can be stored is what the pool's own dataset has used and free.
+                    u_code, u_out, _ = self._run_cmd(["zfs", "list", "-Hp", "-o", "used,avail", zp_name])
+                    usable = u_out.split()
+                    if u_code == 0 and len(usable) == 2 and all(x.isdigit() for x in usable):
+                        z_used, z_free = int(usable[0]), int(usable[1])
+                        z_total = z_used + z_free
+                        z_pct = round(z_used / z_total * 100, 1) if z_total > 0 else 0.0
 
                     _, zmnt, _ = self._run_cmd(["zfs", "get", "-Hp", "-o", "value", "mountpoint", zp_name])
                     z_mount = zmnt.strip() if zmnt.strip() and zmnt.strip() != "none" else f"/{zp_name}"
@@ -859,7 +884,7 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
                 ignored("backend.hardware.pal_storage.GenericLinuxStorageAdapter.list_pools")
             pct = round(used / total * 100, 1) if total > 0 else 0.0
 
-            members = list(hal_disks.values()) if hal_disks else self._discover_hal_disks()
+            members = self._main_pool_members(hal_disks)
 
             fs_type, profile = self._main_pool_facts()
             parity_protected = profile in ("raid1", "raid10", "raid5", "raid6")
@@ -1242,7 +1267,7 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
                 os.rmdir(mp)  # only when empty
             except OSError:
                 ignored("backend.hardware.pal_storage.GenericLinuxStorageAdapter.erase_pool")
-        return {"status": "erased", "pool_id": p["pool"], "drives": erased}
+        return {"status": "erased", "pool_id": p["pool"], "drives": erased, "whole_disks": p.get("whole_disks") or []}
 
     def export_pool(self, pool_id: str, force: bool = False) -> dict[str, Any]:
         """Safely flushes dirty write cache, checks active file handles, and exports or unmounts a storage pool."""

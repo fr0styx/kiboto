@@ -6,7 +6,8 @@ The danger is erasing a drive that is not in the pool, so nothing here guesses:
   of thumb, and every one is checked on disk: its label must carry this pool's id;
 - one drive that cannot be confirmed refuses the whole erase, before anything changes;
 - other kinds of pool (Unraid's array and pools, a plain disk) are not offered: the host's own
-  settings delete them (decision B).
+  settings delete them (decision B). An ext4 pool is the exception when Kiboto made or imported it:
+  its record names the file system, and on a machine Kiboto manages there are no other settings.
 
 `run(cmd) -> (code, out, err)` is the caller's command runner, so tests use image files instead of
 drives (decision A): mkfs.btrfs, blkid and wipefs work on files.
@@ -16,9 +17,13 @@ import re
 from collections.abc import Callable
 from typing import Any
 
+from backend.hardware.pal import pool_registry
+
 Run = Callable[[list[str]], tuple[int, str, str]]
 
-ERASABLE_KINDS = ("zfs", "btrfs", "md")
+ERASABLE_KINDS = ("zfs", "btrfs", "md", "ext4")
+# the small partition ZFS makes beside its own when it is given a whole drive
+ZFS_RESERVED = "6a945a3b-1dd2-11b2-99a6-080020736631"
 
 
 class EraseRefused(Exception):
@@ -26,13 +31,15 @@ class EraseRefused(Exception):
 
 
 def kind_of(pool: Any) -> str:
-    """'zfs', 'btrfs' or 'md' for a pool Kiboto can erase with certainty, else ''."""
+    """'zfs', 'btrfs', 'md' or 'ext4' for a pool Kiboto can erase with certainty, else ''."""
     fs = str(getattr(pool, "fs_type", "") or "").lower()
     ptype = str(getattr(pool, "pool_type", "") or "").lower()
     if fs == "zfs" or ptype == "zfs_pool":
         return "zfs"
     if fs == "btrfs":
         return "btrfs"
+    if fs == "ext4" and pool_registry.find(str(getattr(pool, "id", ""))):
+        return "ext4"
     if ptype in ("mdadm", "md_raid", "raid") or str(getattr(pool, "id", "")).startswith("md"):
         return "md"
     return ""
@@ -68,6 +75,13 @@ def pool_id_and_devices(pool: Any, kind: str, run: Run) -> tuple[str, list[str]]
             raise EraseRefused(f"mdadm did not give the id of {name}: {(err or out).strip()[:200]}")
         devs = [v for k, v in info.items() if re.fullmatch(r"MD_DEVICE_\w+_DEV", k)]
         return info["MD_UUID"], devs
+    if kind == "ext4":
+        where = str(getattr(pool, "mountpoint", "") or "")
+        code, out, _err = run(["findmnt", "-rno", "UUID,SOURCE", "-M", where])
+        found = out.split()
+        if code != 0 or len(found) != 2 or found[0] != (pool_registry.find(name) or {}).get("uuid"):
+            raise EraseRefused(f"{name} is not mounted as the pool Kiboto recorded, so nothing is erased.")
+        return found[0], [found[1]]
     raise EraseRefused("Kiboto deletes only ZFS, Btrfs and mdadm pools; delete this one in the host's own settings.")
 
 
@@ -77,14 +91,30 @@ def label_of(dev: str, kind: str, run: Run) -> str:
         code, out, _ = run(["zdb", "-l", dev])
         m = re.search(r"^\s*pool_guid:\s*(\d+)", out or "", re.M) if code == 0 else None
         return m.group(1) if m else ""
-    if kind == "btrfs":
+    if kind in ("btrfs", "ext4"):
         code, out, _ = run(["blkid", "-p", "-o", "export", dev])
         info = _kv(out) if code == 0 else {}
-        return info.get("UUID", "") if info.get("TYPE") == "btrfs" else ""
+        return info.get("UUID", "") if info.get("TYPE") == kind else ""
     if kind == "md":
         code, out, _ = run(["mdadm", "--examine", "--export", dev])
         return _kv(out).get("MD_UUID", "") if code == 0 else ""
     return ""
+
+
+def emptied_disks(devices: list[str], run: Run) -> list[str]:
+    """The whole drives that hold nothing but this pool's partitions and the small one ZFS reserves
+    beside them. Their partition table is erased too, or the drive would still read as holding data."""
+    disks: list[str] = []
+    for dev in devices:
+        code, parent, _ = run(["lsblk", "-ndo", "PKNAME", dev])
+        disk = f"/dev/{parent.strip()}" if code == 0 and parent.strip() else ""
+        if not disk or disk in disks:
+            continue
+        code, kids, _ = run(["lsblk", "-rno", "PATH,TYPE,PARTTYPE", disk])
+        parts = [line.split() for line in kids.splitlines() if " part" in line] if code == 0 else []
+        if parts and all(p[0] in devices or (len(p) > 2 and p[2].lower() == ZFS_RESERVED) for p in parts):
+            disks.append(disk)
+    return disks
 
 
 def plan(pool: Any, run: Run) -> dict[str, Any]:
@@ -107,6 +137,7 @@ def plan(pool: Any, run: Run) -> dict[str, Any]:
         "kind": kind,
         "id": pid,
         "drives": [d["device"] for d in drives],
+        "whole_disks": emptied_disks(devices, run) if kind == "zfs" else [],
         "mountpoint": getattr(pool, "mountpoint", "") or "",
     }
 
@@ -135,4 +166,6 @@ def execute(p: dict[str, Any], run: Run) -> list[str]:
         if code != 0:
             raise EraseRefused(f"{dev} was not erased: {(err or out).strip()[:200]}; the drives before it were.")
         erased.append(dev)
+    for disk in p.get("whole_disks") or []:  # after its partitions: the table that named them
+        run(["wipefs", "-a", disk])
     return erased

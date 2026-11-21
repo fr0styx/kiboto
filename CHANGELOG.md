@@ -18,6 +18,8 @@ Storage no longer has a "Destroy" button on a pool. It only disconnected the poo
 
 A new storage pool is ZFS, btrfs or ext4. XFS is no longer offered for new pools; XFS drives you already have are still read and shown.
 
+Storage pools are now also tested with the real tools on every change: a pool of each kind is made, checked, ejected, imported, lost and deleted on pretend drives.
+
 #### Fixes
 
 A person with a storage limit could go over it by sending several files at once. Files still arriving now count against the limit.
@@ -29,6 +31,8 @@ Deleting or bringing back a snapshot no longer says it worked when the file syst
 An install that has no NFS server no longer shows a folder as shared over NFS. The NFS box in the new-folder dialog is greyed out there and says why, and a folder that already had NFS turned on shows it as not running.
 
 On a system where Kiboto makes the storage pools itself, a btrfs or ext4 pool is now listed after it is made, mounted again after a restart, and shown as "Not found", with an alert, when its drives are away. While a pool is away nothing can be written into its empty folder, and a btrfs mirror that lost a drive comes up read-only so its files stay readable.
+
+An ext4 pool that Kiboto made can now be deleted with "Delete and erase drives", and after a ZFS pool is deleted its drives read as empty. A ZFS pool with parity (raidz) shows the space you can really store, and the main storage pool lists only the drives it is on.
 
 #### Security
 
