@@ -38,6 +38,27 @@ def _extract(archive, dest):
     return task
 
 
+def test_a_zip_does_not_follow_a_link_already_in_the_destination(tmp_path):
+    import zipfile
+
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    dest = tmp_path / "dest"
+    dest.mkdir()
+    os.symlink(str(outside), str(dest / "photos"))  # made over the share earlier
+    archive = tmp_path / "a.zip"
+    with zipfile.ZipFile(archive, "w") as zf:
+        zf.writestr("photos/pwn.txt", "x")
+        zf.writestr("fine.txt", "y")
+    task = _extract(archive, dest)
+    assert task.status == TransferTaskStatus.FAILED
+    assert os.listdir(outside) == [] and not (dest / "fine.txt").exists()  # checked before anything is written
+    os.unlink(dest / "photos")
+    task = _extract(archive, dest)
+    assert task.status == TransferTaskStatus.COMPLETED
+    assert (dest / "photos" / "pwn.txt").read_text() == "x"
+
+
 @pytest.mark.parametrize(
     "entries",
     [

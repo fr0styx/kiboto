@@ -1366,10 +1366,13 @@ class TransferTaskManager:
                     if archive_size > 0 and (total_uncompressed / archive_size) > 100:
                         raise ValueError("Archive exceeds safe compression ratio (> 100:1 potential zip bomb)")
 
-                    # 2. Zip-Slip Path Traversal defense
+                    # 2. Zip-Slip Path Traversal defense. Real paths: a link already in the
+                    # destination (made over the network share) would carry an entry under its
+                    # name to wherever it points; zipfile follows it.
+                    real_dest = os.path.realpath(dest_dir)
                     for info in infolist:
-                        target = os.path.abspath(os.path.join(dest_dir, info.filename))
-                        if os.path.commonpath([dest_dir, target]) != dest_dir:
+                        target = os.path.realpath(os.path.join(dest_dir, info.filename))
+                        if os.path.commonpath([real_dest, target]) != real_dest:
                             raise ValueError(f"Zip-Slip path traversal attempt detected in: {info.filename}")
 
                     task.total_files = len(infolist)

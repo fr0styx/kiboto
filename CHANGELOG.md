@@ -262,6 +262,8 @@ Cloud sync: a sync from the cloud, a move to it and a two-way sync only work on 
 
 Second NAS: keeping the appdata folder in step no longer copies Kiboto's own data (its keys and database) from the first NAS into the second one's. People and settings still come over in the sealed copy.
 
+Files: unpacking a zip into a folder that holds a shortcut (symbolic link) to another place could put files in that other place. Such a zip is now refused before anything is written.
+
 ## v2.0.4 (2026-11-19)
 ### 🏡 Apps that go back on their own, a way to move in, and Kiboto in your language everywhere
 
