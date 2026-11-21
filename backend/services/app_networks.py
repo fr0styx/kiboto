@@ -19,7 +19,7 @@ import socket
 import urllib.parse
 from typing import Any
 
-from backend import legacy_names, product
+from backend import legacy_names, product, runtime
 from backend.config import logger
 from backend.services import docker_client
 
@@ -59,11 +59,13 @@ def _join(me: dict[str, Any], name: str) -> bool:
 
 
 def private_network(app_id: str) -> str | None:
-    """The app's own network with Kiboto on it, made when missing; None when Kiboto isn't in a
-    container or Docker refuses (the app then installs on Docker's default network)."""
+    """The app's own network with Kiboto on it, made when missing; None when Kiboto's container
+    cannot be found or Docker refuses (the app then installs on Docker's default network)."""
     me = _me()
-    if not me:
+    if not me and not runtime.native():
         return None
+    # As a service of the machine Kiboto joins nothing: the machine reaches every container by its
+    # address (app_hosts keeps the names). The app still gets a network of its own, away from the others.
     name = network_name(app_id)
     try:
         status, _ = docker_client.request("GET", f"/networks/{urllib.parse.quote(name)}")
@@ -71,7 +73,7 @@ def private_network(app_id: str) -> str | None:
             old = legacy_names.OLD_APP_NETWORK_PREFIX + name[len(PREFIX) :]  # the app's network made before
             old_status, _ = docker_client.request("GET", f"/networks/{urllib.parse.quote(old)}")
             if old_status == 200:
-                return old if _join(me, old) else None
+                return old if (me is None or _join(me, old)) else None
             labels = {**legacy_names.managed_labels(), APP_LABEL: str(app_id), legacy_names.OLD_APP_LABEL: str(app_id)}
             body = {"Name": name, "Driver": "bridge", "Labels": labels}
             status, _ = docker_client.request("POST", "/networks/create", body=body)
@@ -79,7 +81,7 @@ def private_network(app_id: str) -> str | None:
                 return None
         elif status != 200:
             return None
-        return name if _join(me, name) else None
+        return name if (me is None or _join(me, name)) else None
     except docker_client.DockerUnavailable:
         logger.warning("app_networks: Docker went away while making %s", name)
         return None

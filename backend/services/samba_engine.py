@@ -23,6 +23,7 @@ from backend.config import docker_sock as _docker_sock_path
 from backend.errors import SaidError
 from backend.fsutil import atomic_write_json, atomic_write_text
 from backend.ignored_errors import ignored
+from backend.services import samba_host
 
 SAMBA_DIR = os.path.join(DATA_DIR, "samba")
 SAMBA_CONF_FILE = os.path.join(SAMBA_DIR, "smb.conf")
@@ -360,6 +361,10 @@ class SambaEngine:
         self._load_shares()
         self.sync_sidecar_policy()
         self._ensure_default_conf()
+        # On a managed host the machine's Samba reads Kiboto's settings from the first moment: a
+        # password set before that would go into Debian's own list of accounts and be lost.
+        if samba_host.active() and samba_host.point_samba_here(SAMBA_CONF_FILE):
+            samba_host.reload(None, _host_numbers())
 
     def sync_sidecar_policy(self) -> tuple[bool, str]:
         """Ensures disable_sidecar marker exists when host has native Samba active or is a turnkey OS."""
@@ -381,6 +386,8 @@ class SambaEngine:
 
     def can_run_sidecar(self) -> tuple[bool, str]:
         """Pre-flight check to verify if zettnas-samba sidecar can bind port 445."""
+        if samba_host.active():
+            return False, "This machine serves files itself."
         from backend.hardware.pal.base import PlatformType
         from backend.hardware.pal.detect import StoragePlatformDetector
 
@@ -492,6 +499,8 @@ class SambaEngine:
         if not any(getattr(s, "guest_ok", False) for s in self._shares.values()):
             # B11 (SEC-22): no guest share, so a wrong password is refused, never mapped to guest
             glob = glob.replace("map to guest = Bad User", "map to guest = Never")
+        if samba_host.active():  # the machine's own smbd: told what the container's image sets
+            glob += "\n" + "\n".join(samba_host.global_lines(SAMBA_DIR))
         conf_lines = [glob]
         from backend.services import ip_block
         from backend.services.ransomware_guard import get_guard
@@ -686,6 +695,11 @@ class SambaEngine:
 
     def reload_service(self) -> bool:
         """Attempts to signal smbd or restart the Samba sidecar (kiboto-samba, or zettnas-samba from before)."""
+        if samba_host.active():  # the machine's own file server, driven directly
+            changed, self._changed, self._pending = getattr(self, "_changed", None), None, False
+            if accounts_file_replaced() or samba_host.point_samba_here(SAMBA_CONF_FILE):
+                changed = None
+            return samba_host.reload(changed, _host_numbers())
         # 1. Try smbcontrol if available in container/host
         try:
             res = subprocess.run(["smbcontrol", "all", "reload-config"], capture_output=True, timeout=2)
@@ -737,6 +751,14 @@ class SambaEngine:
         if not re.fullmatch(r"^[a-zA-Z0-9_\-\.]{1,32}$", username):
             logger.warning("[SambaEngine] Rejected invalid username for passdb sync: '%s'", username)
             return False
+        if samba_host.active():
+            if delete:
+                return samba_host.remove(username)
+            if not password:
+                return False
+            from backend.services import smb_accounts
+
+            return samba_host.set_password(username, smb_accounts.uid_of(username), password)
 
         sidecar_info = self.check_sidecar()
         docker_sock = _docker_sock_path()
@@ -845,6 +867,8 @@ class SambaEngine:
         the network: only the web session was ended (SET-10)."""
         if not re.fullmatch(r"^[a-zA-Z0-9_\-\.]{1,32}$", username):
             return False
+        if samba_host.active():
+            return samba_host.set_enabled(username, enabled)
         cmd = ["smbpasswd", "-e" if enabled else "-d", username]
         try:
             if subprocess.run(cmd, capture_output=True, timeout=3).returncode == 0:
@@ -879,6 +903,17 @@ class SambaEngine:
     def get_status(self) -> SambaStatus:
         """Returns comprehensive status of Samba file sharing service."""
         port_open = self.check_port_445()
+        if samba_host.active():
+            return SambaStatus(
+                running=samba_host.running(),
+                mode="host_native",
+                port_445_open=port_open,
+                shares_count=len(self._shares),
+                sidecar_detected=False,
+                sidecar_status="not_needed",
+                config_path=SAMBA_CONF_FILE,
+                native_samba_active=True,
+            )
         sidecar_info = self.check_sidecar()
         sidecar_detected = sidecar_info.get("detected", False)
         is_sidecar_running = sidecar_detected and sidecar_info.get("state") == "running"
@@ -994,6 +1029,16 @@ def _people_names() -> set[str]:
     from backend.users_db import list_users
 
     return {str(u.get("username") or "").lower() for u in list_users() if u.get("username")}
+
+
+def _host_numbers() -> dict[str, int]:
+    """Every person's account number, for the machine's own users."""
+    from backend.services import smb_accounts
+
+    try:
+        return smb_accounts.numbers(_people_names())
+    except (OSError, ValueError, sqlite3.Error):
+        return {}
 
 
 def _accounts_env() -> list[str]:

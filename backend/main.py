@@ -488,6 +488,17 @@ def _bring_pools_back() -> None:
         logger.error("[Main] The recorded pools could not be brought back: %s", e)
 
 
+def _start_app_names() -> None:
+    """On a managed host apps are reached by name through /etc/hosts (services/app_hosts)."""
+    from backend import runtime
+
+    if runtime.managed_host():
+        from backend.services import app_hosts
+        from backend.services.supervisor import supervise
+
+        supervise("AppNames", app_hosts.keep_in_step)
+
+
 def _reapply_firewall() -> None:
     """The host firewall (audit A13) loads again after a restart, where Kiboto manages it."""
     from backend.services import firewall
@@ -651,6 +662,7 @@ async def lifespan(app: FastAPI):
     threading.Thread(target=_refresh_share_access, name="ShareAccess", daemon=True).start()
     threading.Thread(target=_reapply_tailscale_options, name="TailscaleOptions", daemon=True).start()
     _start_home_assistant()
+    _start_app_names()
     threading.Thread(target=_reapply_firewall, name="Firewall", daemon=True).start()
     from backend.api.update_watch import watch_loop
 
