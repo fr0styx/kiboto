@@ -259,6 +259,28 @@ _PROTECTED: list[str] | None = None
 _PROTECTED_LOCK = threading.Lock()
 
 
+def move_to_free_name(src: str, folder: str, name: str, tries: int = 10000) -> str | None:
+    """Moves the finished file `src` into `folder` as `name`, or "name (2)", "name (3)"... and
+    returns where it went; None when all `tries` names are taken. Each name is claimed with an
+    empty file made with O_EXCL before the file is moved onto it, so two files of one name
+    arriving together never land on each other (both saw the name free, and the second replaced
+    the first)."""
+    stem, ext = os.path.splitext(name)
+    for n in range(1, tries + 1):
+        candidate = os.path.join(folder, name if n == 1 else f"{stem} ({n}){ext}")
+        try:
+            os.close(os.open(candidate, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600))
+        except FileExistsError:
+            continue
+        try:
+            os.replace(src, candidate)
+        except OSError:
+            os.unlink(candidate)  # the claim, never someone's file
+            raise
+        return candidate
+    return None
+
+
 def _inside(path: str, folder: str) -> bool:
     return path == folder or path.startswith(folder.rstrip(os.sep) + os.sep)
 

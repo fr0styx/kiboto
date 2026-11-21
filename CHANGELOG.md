@@ -126,6 +126,8 @@ Share links with "at most N downloads" could be downloaded more often than that 
 
 An invite link for one person stopped working when they first chose a username Kiboto could not take (one letter long, say). They can now choose another and carry on.
 
+Files and the Inbox: two uploads with the same name finishing at the same moment could leave only one of them. Each now keeps its own name.
+
 #### Changes
 
 - **Ask Kib about the NAS in your language**: questions about free space, drives, fans, apps, the network and

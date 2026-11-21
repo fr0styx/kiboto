@@ -29,6 +29,7 @@ from fastapi.responses import Response
 
 from backend import owned
 from backend.config import logger
+from backend.fsutil import move_to_free_name
 from backend.services import malware_scan
 
 DEFAULT_LIMIT_MB = 5 * 1024
@@ -115,19 +116,12 @@ def safe_name(raw: str) -> str:
 
 
 def land(part: str, folder: str, name: str) -> str:
-    """Puts the finished part file in the folder under the first free name. The name is claimed
-    with O_EXCL before the file is moved onto it: two senders' "scan.pdf" arriving at the same
-    moment both saw the name free, and the second replaced the first."""
-    stem, ext = os.path.splitext(name)
-    for n in range(1, 10000):
-        candidate = os.path.join(folder, name if n == 1 else f"{stem} ({n}){ext}")
-        try:
-            os.close(os.open(candidate, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600))
-        except FileExistsError:
-            continue
-        os.replace(part, candidate)
-        return candidate
-    raise HTTPException(status_code=409, detail="Too many files with that name.")
+    """Puts the finished part file in the folder under the first free name (two senders'
+    "scan.pdf" arriving at the same moment both stay)."""
+    final = move_to_free_name(part, folder, name)
+    if final is None:
+        raise HTTPException(status_code=409, detail="Too many files with that name.")
+    return final
 
 
 # Bytes of files still arriving, per link: the link's allowance and the disk's room are checked

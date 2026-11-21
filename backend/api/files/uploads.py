@@ -20,7 +20,7 @@ from backend import owned
 from backend.api.files.common import _contained, _observe, _safe_fs_target, _user_file_headers, record_activity
 from backend.auth import AuthenticatedPrincipal, get_current_principal, require_scope
 from backend.config import POOL_PATH, logger
-from backend.fsutil import resolve_within
+from backend.fsutil import move_to_free_name, resolve_within
 from backend.ignored_errors import ignored
 from backend.services import malware_scan, recycle_bin
 from backend.services.path_access import ALLOWED_BROWSE_ROOTS, check_user_path_access
@@ -69,19 +69,17 @@ async def fs_inbox_upload(
     if name in (".", "..") or name.startswith("."):
         name = f"shared{name}"
     await asyncio.to_thread(owned.make_dirs, inbox)
-    stem, ext = os.path.splitext(name)
     target = os.path.join(inbox, name)
-    n = 1
-    while os.path.lexists(target):
-        n += 1
-        target = os.path.join(inbox, f"{stem} ({n}){ext}")
     staging = os.path.join(inbox, f".kiboto_tmp_{secrets.token_hex(8)}")
     try:
         async with aiofiles.open(staging, "wb") as f_out:
             async for chunk in request.stream():
                 if chunk:
                     await f_out.write(chunk)
-        os.replace(staging, target)
+        landed = await asyncio.to_thread(move_to_free_name, staging, inbox, name)
+        if landed is None:
+            raise HTTPException(status_code=409, detail="Too many files with that name in the Inbox.")
+        target = landed
         owned.like_folder(target)
     finally:
         if os.path.exists(staging):
@@ -147,14 +145,18 @@ def _land(staged: str, folder: str, filename: str, on_conflict: str, principal: 
     is there goes to the Recycle Bin first, where the disk has one; with "keep_both" a name taken
     while the bytes came in gets the next free one."""
     target = os.path.join(folder, filename)
-    if os.path.lexists(target):
-        if on_conflict != "replace":
-            target = os.path.join(folder, _free_name(folder, filename))
-        elif not os.path.islink(target):
+    if on_conflict != "replace":
+        # a name taken while the bytes came in, or by an upload of the same name finishing now
+        landed = move_to_free_name(staged, folder, filename)
+        if landed is None:
+            raise _name_taken(filename)
+        target = landed
+    else:
+        if os.path.lexists(target) and not os.path.islink(target):
             recycle_dir = recycle_bin.bin_for(target) or recycle_bin.same_disk_bin(target)
             if recycle_dir and recycle_bin.move_to_bin(target, recycle_dir, target, True):
                 record_activity("delete", target, principal, detail="to the Recycle Bin, replaced by an upload")
-    os.replace(staged, target)
+        os.replace(staged, target)
     owned.like_folder(target)  # the folder's people can change it over the network too
     return target
 
