@@ -34309,6 +34309,21 @@
     "title": "RatedPowerIn",
     "type": "object"
    },
+   "RecoveryKeyIn": {
+    "properties": {
+     "recovery_key": {
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Recovery Key",
+      "type": "string"
+     }
+    },
+    "required": [
+     "recovery_key"
+    ],
+    "title": "RecoveryKeyIn",
+    "type": "object"
+   },
    "RedfishSwitch": {
     "properties": {
      "enabled": {
@@ -71365,6 +71380,184 @@
      }
     },
     "summary": "Put Machine",
+    "tags": [
+     "System"
+    ],
+    "x-required-scopes": [
+     "system:config"
+    ]
+   }
+  },
+  "/api/v1/system/machine/key": {
+   "get": {
+    "description": "Whether this machine keeps its data key sealed to itself, to what (its security chip or its\nsystem disk), whether it could open it, and whether the recovery key still has to be written\ndown. Never a key. Where Kiboto is a guest only `managed: false`.",
+    "operationId": "get_machine_key_api_v1_system_machine_key_get",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Get Machine Key Api V1 System Machine Key Get",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Get Machine Key",
+    "tags": [
+     "System"
+    ],
+    "x-required-scopes": [
+     "system:config"
+    ]
+   }
+  },
+  "/api/v1/system/machine/key/new-recovery-key": {
+   "post": {
+    "description": "Makes a new recovery key; the one before stops working. Confirmed first (428 until then).",
+    "operationId": "new_recovery_key_api_v1_system_machine_key_new_recovery_key_post",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response New Recovery Key Api V1 System Machine Key New Recovery Key Post",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "New Recovery Key",
+    "tags": [
+     "System"
+    ],
+    "x-required-scopes": [
+     "system:config"
+    ]
+   }
+  },
+  "/api/v1/system/machine/key/recovery-key": {
+   "post": {
+    "description": "The recovery key, while it is waiting to be written down (409 afterwards: Kiboto no longer has it).",
+    "operationId": "show_recovery_key_api_v1_system_machine_key_recovery_key_post",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Show Recovery Key Api V1 System Machine Key Recovery Key Post",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Show Recovery Key",
+    "tags": [
+     "System"
+    ],
+    "x-required-scopes": [
+     "system:config"
+    ]
+   }
+  },
+  "/api/v1/system/machine/key/unlock": {
+   "post": {
+    "description": "Opens the data key with the recovery key after a new board or a restored system, seals it to\nthe machine as it is now, and starts Kiboto again so the AI data opens.",
+    "operationId": "unlock_machine_key_api_v1_system_machine_key_unlock_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RecoveryKeyIn"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Unlock Machine Key Api V1 System Machine Key Unlock Post",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Unlock Machine Key",
+    "tags": [
+     "System"
+    ],
+    "x-required-scopes": [
+     "system:config"
+    ]
+   }
+  },
+  "/api/v1/system/machine/key/written-down": {
+   "post": {
+    "description": "The person has the recovery key: Kiboto forgets it.",
+    "operationId": "recovery_key_written_down_api_v1_system_machine_key_written_down_post",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Recovery Key Written Down Api V1 System Machine Key Written Down Post",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Recovery Key Written Down",
     "tags": [
      "System"
     ],

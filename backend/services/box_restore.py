@@ -203,8 +203,11 @@ def restore_settings(repo_id: str, snapshot_id: str = "latest") -> dict[str, Any
 def restart_to_apply(delay: float = 2.0) -> dict[str, Any]:
     """Restarts Kiboto so a staged restore is applied, when Docker will start it again by itself
     (restart policy always or unless-stopped). Otherwise says that someone has to."""
-    from backend.services import nas_name
+    from backend import runtime
+    from backend.services import host_basics, nas_name
 
+    if runtime.managed_host():  # a service of the machine: the machine starts it again
+        return {"restarting": host_basics.restart_kiboto(int(delay))}
     policy = ((nas_name._self().get("HostConfig") or {}).get("RestartPolicy") or {}).get("Name", "")
     if policy not in ("always", "unless-stopped"):
         return {"restarting": False}

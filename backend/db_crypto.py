@@ -74,12 +74,30 @@ def _key_text() -> str:
     if not path:
         path = _credential_path()
     if not path:
-        return ""
+        return _machine_key()
     try:
         with open(path, encoding="utf-8") as f:
             return f.read().strip()
     except OSError as e:
         raise DataKeyError(f"Could not read the data key from {path}: {e}") from None
+
+
+def _machine_key() -> str:
+    """On a machine set up for Kiboto: the key that machine made and sealed to itself; '' elsewhere."""
+    from backend import machine_key
+
+    if not (HAVE_SQLCIPHER and machine_key.wanted()):
+        return ""
+    try:
+        return machine_key.key_text()
+    except machine_key.MachineKeyError as e:
+        raise DataKeyError(str(e)) from None
+
+
+def _own_key_wanted() -> bool:
+    from backend import machine_key
+
+    return HAVE_SQLCIPHER and machine_key.wanted()
 
 
 def _credential_path() -> str:
@@ -93,7 +111,9 @@ def _credential_path() -> str:
 
 
 def enabled() -> bool:
-    return bool(legacy_names.getenv(KEY_ENV) or legacy_names.getenv(KEY_FILE_ENV) or _credential_path())
+    return bool(
+        legacy_names.getenv(KEY_ENV) or legacy_names.getenv(KEY_FILE_ENV) or _credential_path() or _own_key_wanted()
+    )
 
 
 @functools.lru_cache(maxsize=4)

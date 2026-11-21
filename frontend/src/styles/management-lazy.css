@@ -487,6 +487,8 @@
 .fw-note { color: var(--muted); font-size: var(--kb-fs-xs); }
 .fw-rules pre { max-height: 220px; overflow: auto; font-size: var(--kb-fs-xs); }
 .fw-error { color: var(--kb-text-danger, var(--crit)); font-size: var(--kb-fs-xs); }
+/* the recovery key, large enough to copy by hand */
+.rkey-code { display: block; margin: 4px 0 10px; font-family: var(--font-mono, monospace); font-size: var(--kb-fs-lg, 18px); letter-spacing: 0.06em; overflow-wrap: anywhere; user-select: all; }
 /* Switch off at night (audit A10) */
 .ps-times { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 6px; }
 .ps-days { display: flex; flex-wrap: wrap; gap: 4px 12px; }

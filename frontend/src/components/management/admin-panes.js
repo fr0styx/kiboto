@@ -13,6 +13,7 @@ export function loadSecurityPane() {
   if (adminToo) {
     import('../guard-panel.js').then((m) => m.renderGuardPanel()).catch(() => {});
     import('../file-activity.js').then((m) => m.renderFileActivity()).catch(() => {}); // FEAT-12
+    import('../recovery-key-card.js').then((m) => m.renderRecoveryKeyCard()).catch(() => {}); // a machine of its own
     fetchAndRenderSecurityPosture();
   }
   return adminToo;

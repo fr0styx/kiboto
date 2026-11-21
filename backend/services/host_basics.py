@@ -171,3 +171,17 @@ def status(do: Run | None = None) -> dict[str, Any]:
         "clock": clock(do),
         "ssh": ssh(do),
     }
+
+
+def restart_kiboto(delay: int = 2, do: Run | None = None) -> bool:
+    """Kiboto is started again by the machine, a moment after the answer has left. False where
+    Kiboto is a guest: there its container's restart policy decides."""
+    do = do or run
+    if not runtime.managed_host():
+        return False
+    code, said = do(
+        ["systemd-run", "--quiet", "--collect", f"--on-active={delay}", "systemctl", "restart", "kiboto.service"]
+    )
+    if code != 0:
+        logger.warning("[Machine] Kiboto could not be restarted by the machine: %s", said)
+    return code == 0

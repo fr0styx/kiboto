@@ -4,8 +4,9 @@ import asyncio
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
+from backend import machine_key
 from backend.auth import AuthenticatedPrincipal, get_current_principal, require_scope
 from backend.confirmations import confirm_or_raise
 from backend.services import host_basics
@@ -45,3 +46,66 @@ async def put_machine(
     if not done:
         raise HTTPException(status_code=502, detail="The machine did not take the change.")
     return await asyncio.to_thread(host_basics.status)
+
+
+# --- the data key and its recovery key -----------------------------------------------------------
+class RecoveryKeyIn(BaseModel):
+    recovery_key: str = Field(min_length=1, max_length=64)
+
+
+def _key_or_404() -> None:
+    if not machine_key.active():
+        raise HTTPException(status_code=404, detail="Not found")
+
+
+@router.get("/system/machine/key", dependencies=[Depends(require_scope("system:config"))])
+async def get_machine_key() -> dict[str, Any]:
+    """Whether this machine keeps its data key sealed to itself, to what (its security chip or its
+    system disk), whether it could open it, and whether the recovery key still has to be written
+    down. Never a key. Where Kiboto is a guest only `managed: false`."""
+    return await asyncio.to_thread(machine_key.status)
+
+
+@router.post("/system/machine/key/recovery-key", dependencies=[Depends(require_scope("system:config"))])
+async def show_recovery_key() -> dict[str, Any]:
+    """The recovery key, while it is waiting to be written down (409 afterwards: Kiboto no longer has it)."""
+    _key_or_404()
+    key = await asyncio.to_thread(machine_key.recovery_key_to_write_down)
+    if not key:
+        raise HTTPException(status_code=409, detail="The recovery key was written down; Kiboto no longer has it.")
+    return {"recovery_key": key}
+
+
+@router.post("/system/machine/key/written-down", dependencies=[Depends(require_scope("system:config"))])
+async def recovery_key_written_down() -> dict[str, Any]:
+    """The person has the recovery key: Kiboto forgets it."""
+    _key_or_404()
+    await asyncio.to_thread(machine_key.written_down)
+    return await asyncio.to_thread(machine_key.status)
+
+
+@router.post("/system/machine/key/unlock", dependencies=[Depends(require_scope("system:config"))])
+async def unlock_machine_key(req: RecoveryKeyIn) -> dict[str, Any]:
+    """Opens the data key with the recovery key after a new board or a restored system, seals it to
+    the machine as it is now, and starts Kiboto again so the AI data opens."""
+    _key_or_404()
+    try:
+        await asyncio.to_thread(machine_key.unlock, req.recovery_key)
+    except machine_key.MachineKeyError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from None
+    restarting = await asyncio.to_thread(host_basics.restart_kiboto)
+    return {**await asyncio.to_thread(machine_key.status), "restarting": restarting}
+
+
+@router.post("/system/machine/key/new-recovery-key", dependencies=[Depends(require_scope("system:config"))])
+async def new_recovery_key(
+    request: Request, principal: AuthenticatedPrincipal = Depends(get_current_principal)
+) -> dict[str, Any]:
+    """Makes a new recovery key; the one before stops working. Confirmed first (428 until then)."""
+    _key_or_404()
+    confirm_or_raise(request, principal, "system.new_recovery_key", host_basics.host_name())
+    try:
+        await asyncio.to_thread(machine_key.renew_recovery_key)
+    except machine_key.MachineKeyError as e:
+        raise HTTPException(status_code=409, detail=str(e)) from None
+    return await asyncio.to_thread(machine_key.status)

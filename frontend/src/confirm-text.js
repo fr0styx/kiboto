@@ -176,6 +176,11 @@ const ACTIONS = {
     'Let monitoring tools read how the NAS is doing over SNMP v3 on {target}? Only someone with the user name and both passwords gets an answer.',
     false,
   ],
+  'system.new_recovery_key': [
+    'Make a new key',
+    'Make a new recovery key for {target}? The recovery key you wrote down before stops working.',
+    false,
+  ],
   'system.ssh_on': [
     'Turn on',
     'Let people sign in to the command line of {target} over the network (SSH)? Anyone with an account on the machine and its password or key gets in.',

@@ -412,6 +412,7 @@ def startup_system():
 
     _data_key_problem = ""
     try:
+        _make_machine_key()
         db_crypto.prepare(_conv_db_path())
     except Exception as e:
         _data_key_problem = str(e)
@@ -469,6 +470,15 @@ def _start_home_assistant() -> None:
     from backend.services import home_assistant
 
     home_assistant.start()
+
+
+def _make_machine_key() -> None:
+    """A machine set up for Kiboto makes its data key at the first start and keeps it sealed to
+    itself (machine_key.py), so the AI chats and the search index are always encrypted there."""
+    from backend import db_crypto, machine_key
+
+    if db_crypto.HAVE_SQLCIPHER:
+        machine_key.ensure()
 
 
 def _bring_pools_back() -> None:

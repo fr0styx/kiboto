@@ -68,6 +68,8 @@ On a machine of its own, Kiboto can now update itself: the new version is made r
 
 - **Network settings on a machine of its own (preview)**: on a Debian machine set up for Kiboto you can give the machine a fixed address or let the router choose, and set its DNS servers, from Network. New settings are tried for 60 seconds: keep them from the page, or by opening Kiboto at its new address through the link shown. If nobody does, the machine goes back to the settings from before by itself, so a wrong address locks nobody out.
 
+- **A machine of its own keeps your AI data encrypted by itself (preview)**: on a Debian machine set up for Kiboto, the AI chats and the search index are always encrypted. The machine makes the key at its first start and seals it to its security chip (TPM), or to its system disk where there is no chip. Security has a new **Recovery key** card: write the key down once, and it opens the AI data again after a repair or when the machine is set up again.
+
 ## v2.0.5 (2026-11-20)
 ### 🏡 A second NAS that can take over, files you can change over the network, and 176 tested apps
 

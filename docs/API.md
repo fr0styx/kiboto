@@ -38,7 +38,7 @@ request and response schemas.
 
 <!-- BEGIN generated endpoints: python scripts/api_reference.py --update -->
 
-808 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
+813 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
 
 ### AI Conversation History
 
@@ -896,6 +896,11 @@ request and response schemas.
 | `PUT` | `/api/v1/system/heat-shutdown` | `system:power` | Put Heat Shutdown |
 | `GET` | `/api/v1/system/machine` | `system:config` | On a machine set up for Kiboto: its name and time zone, whether its clock is set from the internet and whether SSH takes sign-ins |
 | `PUT` | `/api/v1/system/machine` | `system:config` | Turns SSH or setting the clock from the internet on or off |
+| `GET` | `/api/v1/system/machine/key` | `system:config` | Whether this machine keeps its data key sealed to itself, to what (its security chip or its system disk), whether it could open it, and w… |
+| `POST` | `/api/v1/system/machine/key/new-recovery-key` | `system:config` | Makes a new recovery key; the one before stops working |
+| `POST` | `/api/v1/system/machine/key/recovery-key` | `system:config` | The recovery key, while it is waiting to be written down (409 afterwards: Kiboto no longer has it) |
+| `POST` | `/api/v1/system/machine/key/unlock` | `system:config` | Opens the data key with the recovery key after a new board or a restored system, seals it to the machine as it is now, and starts Kiboto… |
+| `POST` | `/api/v1/system/machine/key/written-down` | `system:config` | The person has the recovery key: Kiboto forgets it |
 | `GET` | `/api/v1/system/power-schedule` | `system:view` | Get Power Schedule |
 | `PUT` | `/api/v1/system/power-schedule` | `system:power` | Put Power Schedule |
 | `GET` | `/api/v1/system/update-watch` | `system:view` | Get Update Watch |
