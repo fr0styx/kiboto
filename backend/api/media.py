@@ -1927,6 +1927,19 @@ async def preview_media_organization(
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
+def _organize_stays_in_shares(items: list[dict[str, Any]], action: str, hardlink: bool) -> bool:
+    """Every film goes into a shared folder, and one that is moved comes out of one: run on
+    /mnt/user, the preview also listed videos in appdata (an app's recordings and trailers), and
+    moving them broke the app."""
+    from backend.services.shared_folders import in_a_shared_folder
+
+    moves = action == "move" and not hardlink
+    return all(
+        in_a_shared_folder(it["destination_path"]) and (not moves or in_a_shared_folder(it["source_path"]))
+        for it in items
+    )
+
+
 @router.post(
     "/media/organize/apply",
     dependencies=[Depends(require_scope("storage:write", "storage:admin"))],
@@ -1945,6 +1958,10 @@ async def apply_media_organization(
         clean_it["source_path"] = _validate_media_path(src, principal, must_exist=True)
         clean_it["destination_path"] = _validate_media_path(dst, principal, must_exist=False)
         validated_items.append(clean_it)
+    if not await asyncio.to_thread(_organize_stays_in_shares, validated_items, req.action, req.hardlink):
+        raise HTTPException(
+            status_code=403, detail="Tidy films inside shared folders: a film is moved from one and put into one."
+        )
 
     try:
         return await asyncio.to_thread(

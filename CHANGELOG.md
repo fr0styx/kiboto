@@ -128,6 +128,8 @@ An invite link for one person stopped working when they first chose a username K
 
 Files and the Inbox: two uploads with the same name finishing at the same moment could leave only one of them. Each now keeps its own name.
 
+Tidying films moves them only out of and into shared folders. Run on a drive's top folder, it could have taken an app's own video files (recordings, trailers) away from it.
+
 #### Changes
 
 - **Ask Kib about the NAS in your language**: questions about free space, drives, fans, apps, the network and
