@@ -176,6 +176,11 @@ const ACTIONS = {
     'Let monitoring tools read how the NAS is doing over SNMP v3 on {target}? Only someone with the user name and both passwords gets an answer.',
     false,
   ],
+  'system.ssh_on': [
+    'Turn on',
+    'Let people sign in to the command line of {target} over the network (SSH)? Anyone with an account on the machine and its password or key gets in.',
+    false,
+  ],
   'network.nas_name': [
     'Turn on',
     "Let the NAS answer to {target} on the home network? A small helper on the host's network does it and only answers name lookups.",

@@ -23,6 +23,7 @@ HELD="linux-image-amd64 linux-headers-amd64 zfs-dkms zfsutils-linux docker.io"
 # what Kiboto drives: disks and SMART, the three kinds of pool, sharing, apps, virtual machines
 TOOLS="smartmontools nvme-cli sg3-utils usbutils btrfs-progs e2fsprogs parted gdisk fuse3 gocryptfs mergerfs \
 rclone restic samba nfs-kernel-server docker.io docker-cli qemu-system-x86 qemu-utils ovmf swtpm \
+systemd-timesyncd \
 python3-venv ca-certificates curl"
 
 say() { printf '%s\n' "$*"; }

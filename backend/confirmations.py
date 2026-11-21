@@ -99,6 +99,7 @@ ACTIONS: dict[str, str] = {
     "network.publish_app": "Put {target} on the internet through Tailscale Funnel. Anyone with its address reaches its own sign-in page; Kiboto's page stays private",
     "hardware.helper": "Move the fan and button hardware access into {target}, a small container with no network that alone opens /dev/mem. The next update takes that access away from Kiboto itself",
     "network.snmp": "Let monitoring tools read how the NAS is doing over SNMP v3 on {target}. Only someone with the user name and both passwords gets an answer",
+    "system.ssh_on": "Let people sign in to the command line of {target} over the network (SSH). Anyone with an account on the machine and its password or key gets in",
     "network.nas_name": "Let the NAS answer to {target} on the home network. A small helper on the host's network does it and only answers name lookups",
 }
 

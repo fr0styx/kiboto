@@ -38,7 +38,7 @@ request and response schemas.
 
 <!-- BEGIN generated endpoints: python scripts/api_reference.py --update -->
 
-805 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
+807 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
 
 ### AI Conversation History
 
@@ -893,6 +893,8 @@ request and response schemas.
 | :--- | :--- | :--- | :--- |
 | `GET` | `/api/v1/system/heat-shutdown` | `system:view` | Get Heat Shutdown |
 | `PUT` | `/api/v1/system/heat-shutdown` | `system:power` | Put Heat Shutdown |
+| `GET` | `/api/v1/system/machine` | `system:config` | On a machine set up for Kiboto: its name and time zone, whether its clock is set from the internet and whether SSH takes sign-ins |
+| `PUT` | `/api/v1/system/machine` | `system:config` | Turns SSH or setting the clock from the internet on or off |
 | `GET` | `/api/v1/system/power-schedule` | `system:view` | Get Power Schedule |
 | `PUT` | `/api/v1/system/power-schedule` | `system:power` | Put Power Schedule |
 | `GET` | `/api/v1/system/update-watch` | `system:view` | Get Update Watch |

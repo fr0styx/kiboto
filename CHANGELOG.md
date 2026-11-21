@@ -64,6 +64,8 @@ On a machine of its own, Kiboto can now update itself: the new version is made r
 
 - **A machine of its own is found by name (preview)**: on a Debian machine set up for Kiboto, the NAS answers to `name.local` and is listed in Finder and under Network in Windows from the first start, with no helper container. The machine's own host name and time zone follow what you choose in Kiboto.
 
+- **This machine (preview)**: on a Debian machine set up for Kiboto, Network shows what the machine is called, its time zone, whether its clock is set from the internet, and a switch for signing in to its command line over the network (SSH). Turning SSH on asks first.
+
 ## v2.0.5 (2026-11-20)
 ### 🏡 A second NAS that can take over, files you can change over the network, and 176 tested apps
 

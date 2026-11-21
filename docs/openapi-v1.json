@@ -26703,6 +26703,34 @@
     "title": "LostDeviceRequest",
     "type": "object"
    },
+   "MachineUpdate": {
+    "properties": {
+     "clock_automatic": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Clock Automatic"
+     },
+     "ssh": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Ssh"
+     }
+    },
+    "title": "MachineUpdate",
+    "type": "object"
+   },
    "McpEndpointResponse": {
     "additionalProperties": true,
     "description": "POST /mcp",
@@ -71212,6 +71240,83 @@
     "summary": "Post Detected Timezone",
     "tags": [
      "System & Storage"
+    ],
+    "x-required-scopes": [
+     "system:config"
+    ]
+   }
+  },
+  "/api/v1/system/machine": {
+   "get": {
+    "description": "On a machine set up for Kiboto: its name and time zone, whether its clock is set from the\ninternet and whether SSH takes sign-ins. Elsewhere only `managed: false`: these belong to the host.\nAn administrator's set-up, so only an administrator reads it.",
+    "operationId": "get_machine_api_v1_system_machine_get",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Get Machine Api V1 System Machine Get",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Get Machine",
+    "tags": [
+     "System"
+    ],
+    "x-required-scopes": [
+     "system:config"
+    ]
+   },
+   "put": {
+    "description": "Turns SSH or setting the clock from the internet on or off. Turning SSH on is confirmed\nfirst (428 until then): it opens the machine's command line to the network.",
+    "operationId": "put_machine_api_v1_system_machine_put",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/MachineUpdate"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Put Machine Api V1 System Machine Put",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Put Machine",
+    "tags": [
+     "System"
     ],
     "x-required-scopes": [
      "system:config"

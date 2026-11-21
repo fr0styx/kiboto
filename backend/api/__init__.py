@@ -37,6 +37,7 @@ from backend.api.invites import router as invites_router  # noqa: E402
 from backend.api.iscsi import router as iscsi_router
 from backend.api.jobs import router as jobs_router  # noqa: E402
 from backend.api.led import router as led_router
+from backend.api.machine import router as machine_router
 from backend.api.malware_scan import router as malware_scan_router
 from backend.api.mcp import router as mcp_router
 from backend.api.media import router as media_router
@@ -117,6 +118,7 @@ api_router.include_router(encrypted_folders_router)
 api_router.include_router(media_router)
 api_router.include_router(photo_import_router)  # NFEAT-3
 api_router.include_router(nas_name_router)  # NFEAT-8
+api_router.include_router(machine_router)  # a machine of its own: clock and SSH
 api_router.include_router(public_links_router)  # NFEAT-2
 api_router.include_router(family_access_router)  # NFEAT-1
 api_router.include_router(fleet_router)  # RES-9
@@ -160,6 +162,7 @@ __all__ = [
     "encrypted_folders_router",
     "media_router",
     "photo_import_router",
+    "machine_router",
     "nas_name_router",
     "public_links_router",
     "family_access_router",

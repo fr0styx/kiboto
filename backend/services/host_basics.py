@@ -11,6 +11,7 @@ import re
 import socket
 import subprocess
 from collections.abc import Callable
+from typing import Any
 
 from backend import runtime
 from backend.config import logger
@@ -98,3 +99,75 @@ def set_time_zone(zone: str, do: Run | None = None) -> bool:
         return False
     logger.info("[Machine] This machine now keeps the time of %s", zone)
     return True
+
+
+def _told(text: str) -> dict[str, str]:
+    return dict(line.split("=", 1) for line in text.splitlines() if "=" in line)
+
+
+def clock(do: Run | None = None) -> dict[str, bool]:
+    """Whether the machine can set its clock from the internet, does, and is in step."""
+    do = do or run
+    code, said = do(["timedatectl", "show", "-p", "CanNTP", "-p", "NTP", "-p", "NTPSynchronized"])
+    told = _told(said) if code == 0 else {}
+    return {
+        "can": told.get("CanNTP") == "yes",
+        "automatic": told.get("NTP") == "yes",
+        "in_step": told.get("NTPSynchronized") == "yes",
+    }
+
+
+def set_clock_automatic(on: bool, do: Run | None = None) -> bool:
+    do = do or run
+    if not runtime.managed_host():
+        return False
+    code, said = do(["timedatectl", "set-ntp", "true" if on else "false"])
+    if code != 0:
+        logger.warning("[Machine] Setting the clock from the internet could not be turned %s: %s", _word(on), said)
+        return False
+    logger.info("[Machine] Setting the clock from the internet is %s", _word(on))
+    return True
+
+
+SSHD = "/usr/sbin/sshd"
+SSH_UNITS = ("ssh.service", "ssh.socket")  # Debian starts it as a service, or on demand by the socket
+
+
+def _word(on: bool) -> str:
+    return "on" if on else "off"
+
+
+def ssh(do: Run | None = None) -> dict[str, bool]:
+    """Whether the machine has an SSH server and it takes sign-ins now."""
+    do = do or run
+    if not os.path.exists(SSHD):
+        return {"installed": False, "on": False}
+    _, said = do(["systemctl", "is-active", *SSH_UNITS])
+    return {"installed": True, "on": any(line.strip() == "active" for line in said.splitlines())}
+
+
+def set_ssh(on: bool, do: Run | None = None) -> bool:
+    """Turns signing in over SSH on or off, now and at every start. Sessions that are open stay."""
+    do = do or run
+    if not runtime.managed_host() or not os.path.exists(SSHD):
+        return False
+    cmd = ["systemctl", "enable", "--now", SSH_UNITS[0]] if on else ["systemctl", "disable", "--now", *SSH_UNITS]
+    code, said = do(cmd)
+    if code != 0:
+        logger.warning("[Machine] SSH could not be turned %s: %s", _word(on), said)
+        return False
+    logger.info("[Machine] SSH is %s", _word(on))
+    return True
+
+
+def status(do: Run | None = None) -> dict[str, Any]:
+    """What the page shows. A guest says only that these belong to its host."""
+    if not runtime.managed_host():
+        return {"managed": False}
+    return {
+        "managed": True,
+        "host_name": host_name(),
+        "time_zone": time_zone(),
+        "clock": clock(do),
+        "ssh": ssh(do),
+    }

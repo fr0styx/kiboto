@@ -1389,6 +1389,7 @@ export async function deleteVlanSubinterface(vlanName) {
 export function loadNetworkPage() {
   fetchAndRenderNetworkTopology();
   import('./nas-name.js').then((m) => m.loadNasNameCard()).catch(() => {});
+  import('./machine-card.js').then((m) => m.renderMachineCard()).catch(() => {}); // hidden where Kiboto is a guest
   import('./iscsi-card.js').then((m) => m.renderIscsiCard()).catch(() => {}); // disks for other computers, off by default
   fetchListeningPorts();
   fetchAndRenderTailscaleDetails(); // its options are a section of this page (SET-24 n)
