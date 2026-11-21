@@ -9117,4 +9117,6 @@ export default {
   "fm.i_may_read": "darf lesen",
   "fm.i_may_write": "darf ändern",
   "fm.i_may_run": "darf es ausführen oder den Ordner öffnen",
+  "confirm.docker_prune_volumes.title": "Unbenutzte Volumes löschen",
+  "confirm.docker_prune_volumes.msg": "Jedes Docker-Volume löschen, das keine App nutzt? Was darin ist, geht verloren. Das lässt sich nicht rückgängig machen.",
 };

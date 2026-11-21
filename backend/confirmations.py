@@ -42,6 +42,7 @@ ACTIONS: dict[str, str] = {
     "users.erase_data": "Erase the chats, Kib log and search data of user {target}",
     "users.export_data": "Download the chats, Kib log and search data of user {target}. They are told",
     "docker.container.delete": "Delete container {target}",
+    "docker.prune.volumes": "Delete every Docker volume that no app uses. What is in them is lost",
     "vm.delete": "Delete virtual machine {target}",
     "vm.restore": "Restore backup {target} over its virtual machine, replacing its disks and settings",
     "backup.delete": "Delete backup {target}",

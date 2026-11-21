@@ -14,7 +14,7 @@ from pydantic import BaseModel, Field
 
 from backend.auth import AuthenticatedPrincipal, get_current_principal, require_scope, session_cookie
 from backend.config import docker_sock, logger
-from backend.confirmations import require_confirmation
+from backend.confirmations import confirm_or_raise, require_confirmation
 from backend.errors import ApiError, said
 from backend.hardware.docker_stats import container_action, read_docker_containers
 from backend.ignored_errors import ignored
@@ -972,12 +972,24 @@ class DockerPruneRequest(BaseModel):
     prune_build_cache: bool = True
 
 
+def _volumes_confirmed(p: "DockerPruneRequest", request: Request, principal: AuthenticatedPrincipal) -> None:
+    """Unused volumes hold app data that nothing else keeps: deleting them needs a confirmation
+    the server checks (428 until then), as emptying the Recycle Bin does, not only the page's tick."""
+    if p.prune_volumes:
+        confirm_or_raise(request, principal, "docker.prune.volumes")
+
+
 @router.post("/docker/system/prune/jobs", dependencies=[Depends(require_scope("containers:manage"))])
-async def post_system_prune_job(req: DockerPruneRequest | None = None):
+async def post_system_prune_job(
+    request: Request,
+    req: DockerPruneRequest | None = None,
+    principal: AuthenticatedPrincipal = Depends(get_current_principal),
+):
     """Starts the cleanup in the background; poll the job for progress. A running job is returned as is."""
     from backend.services.docker_cleanup import start_prune_job
 
     p = req or DockerPruneRequest()
+    _volumes_confirmed(p, request, principal)
     job, started = start_prune_job(
         prune_containers=p.prune_containers,
         prune_images=p.prune_images or p.all_images,
@@ -1016,10 +1028,15 @@ async def cancel_prune_job_route(job_id: str):
 
 
 @router.post("/docker/system/prune", dependencies=[Depends(require_scope("containers:manage"))])
-async def post_system_prune(req: DockerPruneRequest | None = None):
+async def post_system_prune(
+    request: Request,
+    req: DockerPruneRequest | None = None,
+    principal: AuthenticatedPrincipal = Depends(get_current_principal),
+):
     from backend.services.docker_cleanup import prune_docker_system
 
     payload = req or DockerPruneRequest()
+    _volumes_confirmed(payload, request, principal)
     try:
         res = await asyncio.to_thread(
             prune_docker_system,

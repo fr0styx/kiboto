@@ -75,6 +75,11 @@ const ACTIONS = {
     'Read the whole surface of drive {target}? It takes hours, and the drive stays awake and busy until it ends. Nothing is written to it.',
     false,
   ],
+  'docker.prune.volumes': [
+    'Delete unused volumes',
+    "Delete every Docker volume that no app uses? What is in them is lost. This can't be undone.",
+    true,
+  ],
   'iscsi.enable': [
     'Turn on iSCSI',
     'Offer disks to other computers on your network? Each disk needs its user name and password.',

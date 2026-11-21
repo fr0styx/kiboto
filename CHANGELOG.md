@@ -16,6 +16,10 @@ Kiboto's own file server: each person signs in to their private folder as a syst
 
 A person with a storage limit could go over it by sending several files at once. Files still arriving now count against the limit.
 
+#### Security
+
+Apps, Docker clean-up: deleting unused volumes now asks for a confirmation that Kiboto checks itself, so it can't happen without your say-so.
+
 ## v2.0.5 (2026-11-20)
 ### 🏡 A second NAS that can take over, files you can change over the network, and 176 tested apps
 

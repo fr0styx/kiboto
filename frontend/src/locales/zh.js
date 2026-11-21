@@ -9117,4 +9117,6 @@ export default {
   "fm.i_may_read": "可读取",
   "fm.i_may_write": "可修改",
   "fm.i_may_run": "可运行，或打开文件夹",
+  "confirm.docker_prune_volumes.title": "删除未使用的卷",
+  "confirm.docker_prune_volumes.msg": "要删除所有没有应用使用的 Docker 卷吗？其中的内容将丢失，且无法撤销。",
 };

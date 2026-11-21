@@ -9117,4 +9117,6 @@ export default {
   "fm.i_may_read": "may read",
   "fm.i_may_write": "may change",
   "fm.i_may_run": "may run it, or open the folder",
+  "confirm.docker_prune_volumes.title": "Delete unused volumes",
+  "confirm.docker_prune_volumes.msg": "Delete every Docker volume that no app uses? What is in them is lost. This can't be undone.",
 };

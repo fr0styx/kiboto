@@ -9117,4 +9117,6 @@ export default {
   "fm.i_may_read": "puede leer",
   "fm.i_may_write": "puede cambiar",
   "fm.i_may_run": "puede ejecutarlo o abrir la carpeta",
+  "confirm.docker_prune_volumes.title": "Eliminar volúmenes sin usar",
+  "confirm.docker_prune_volumes.msg": "¿Eliminar todos los volúmenes de Docker que ninguna app usa? Lo que contienen se pierde. No se puede deshacer.",
 };
