@@ -16,6 +16,8 @@ Files suggests the folders this server really has when you type a path, and the 
 
 Storage no longer has a "Destroy" button on a pool. It only disconnected the pool, while its question said the data would be lost. "Safely eject" disconnects a pool and "Delete and erase drives" deletes one.
 
+A new storage pool is ZFS, btrfs or ext4. XFS is no longer offered for new pools; XFS drives you already have are still read and shown.
+
 #### Fixes
 
 A person with a storage limit could go over it by sending several files at once. Files still arriving now count against the limit.

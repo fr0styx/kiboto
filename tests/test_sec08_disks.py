@@ -122,7 +122,7 @@ def test_failed_format_is_an_error_not_provisioned(monkeypatch, tmp_path):
     adapter._pool_path = str(tmp_path)
     monkeypatch.setattr(adapter, "_resolve_disk_path", lambda d: d, raising=False)
     monkeypatch.setattr(adapter, "_run_cmd", lambda cmd: (1, "", "Device /dev/zza is busy"), raising=False)
-    with pytest.raises(RuntimeError, match="mkfs.xfs failed.*busy"):
+    with pytest.raises(RuntimeError, match="mkfs.ext4 failed.*busy"):
         adapter.create_pool(
-            name="p1", fs_type="xfs", profile="single", disks=["/dev/zza"], mountpoint=str(tmp_path / "p1")
+            name="p1", fs_type="ext4", profile="single", disks=["/dev/zza"], mountpoint=str(tmp_path / "p1")
         )

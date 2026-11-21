@@ -37,8 +37,7 @@
      "zpool": false
     },
     "supported_filesystems": [
-     "ext4",
-     "xfs"
+     "ext4"
     ]
    },
    "GenericObserverStorageAdapter": {

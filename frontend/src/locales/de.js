@@ -7371,7 +7371,6 @@ export default {
   "mw.btrfs_bitrot_protection_snapshots": "Btrfs (Schutz vor Bitfäule + Snapshots)",
   "mw.openzfs_enterprise_raidz_and_arc_cache": "OpenZFS (RAIDZ & ARC-Cache)",
   "mw.ext4_standard_linux_volume": "ext4 (übliches Linux-Volume)",
-  "mw.xfs_high_performance_storage": "XFS (schneller Speicher)",
   "mw.raid_profile": "RAID-PROFIL",
   "mw.raid_1_mirroring_2_drives": "RAID 1 (Spiegelung – ab 2 Laufwerken)",
   "mw.raid_10_striped_mirrors_4_drives": "RAID 10 (gestreifte Spiegel – ab 4 Laufwerken)",

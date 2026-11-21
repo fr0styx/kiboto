@@ -143,6 +143,10 @@ def _tree_bytes(path: str) -> int:
     return total
 
 
+# The kinds of pool Kiboto makes. Pools of other kinds (XFS, for one) are still read and shown.
+POOL_KINDS = ("zfs", "btrfs", "ext4")
+
+
 class GenericLinuxStorageAdapter(StoragePlatformAdapter):
     """
     Generic Linux Storage Platform Adapter.
@@ -329,7 +333,7 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
             can_trigger_scrub=has_cow or tools["mdadm"],
             can_snapshot=snapshots,
             storage_tools=tools,
-            supported_filesystems=[f for f in ("btrfs", "ext4", "xfs", "zfs") if f in ("ext4", "xfs") or tools[f]],
+            supported_filesystems=[f for f in ("btrfs", "ext4", "zfs") if f == "ext4" or tools[f]],
             description="Active Provisioner Mode: Bare-metal Linux host detected. Pool and share management enabled."
             + (f" Not available here: {', '.join(missing)} tools are missing." if missing else ""),
         )
@@ -941,6 +945,8 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
         resolved_disks = [self._resolve_disk_path(d) for d in disks]
         profile_lower = profile.lower()
         fs_lower = fs_type.lower()
+        if fs_lower not in POOL_KINDS:  # also keeps an unknown kind from answering "provisioned" with nothing made
+            raise ValueError(f"Kiboto makes {', '.join(POOL_KINDS)} pools, not {fs_type}.")
 
         # Validate drive counts for RAID profiles
         if fs_lower == "zfs":
@@ -1002,10 +1008,6 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
 
         elif fs_lower == "ext4":
             self._must(["mkfs.ext4", "-F", "-L", name, resolved_disks[0]], "mkfs.ext4")
-            self._must(["mount", resolved_disks[0], target_mount], "mount")
-
-        elif fs_lower == "xfs":
-            self._must(["mkfs.xfs", "-f", "-L", name, resolved_disks[0]], "mkfs.xfs")
             self._must(["mount", resolved_disks[0], target_mount], "mount")
 
         return {

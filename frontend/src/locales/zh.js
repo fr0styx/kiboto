@@ -7371,7 +7371,6 @@ export default {
   "mw.btrfs_bitrot_protection_snapshots": "Btrfs（防位衰减 + 快照）",
   "mw.openzfs_enterprise_raidz_and_arc_cache": "OpenZFS（企业级 RAIDZ 和 ARC 缓存）",
   "mw.ext4_standard_linux_volume": "ext4（标准 Linux 卷）",
-  "mw.xfs_high_performance_storage": "XFS（高性能存储）",
   "mw.raid_profile": "RAID 配置",
   "mw.raid_1_mirroring_2_drives": "RAID 1（镜像 — 2 块以上硬盘）",
   "mw.raid_10_striped_mirrors_4_drives": "RAID 10（条带化镜像 — 4 块以上硬盘）",

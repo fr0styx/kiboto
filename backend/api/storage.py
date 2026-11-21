@@ -351,8 +351,8 @@ def create_storage_pool(
         raise HTTPException(
             status_code=400, detail="Pool name: letters, digits, - and _ (max 32), starting with a letter."
         )
-    if req.fs_type.lower() not in ("btrfs", "zfs", "ext4", "xfs"):
-        raise HTTPException(status_code=400, detail="Unsupported filesystem.")
+    if req.fs_type.lower() not in ("btrfs", "zfs", "ext4"):
+        raise HTTPException(status_code=400, detail="Kiboto makes ZFS, btrfs and ext4 pools.")
     if req.confirm_name != req.name:
         raise HTTPException(status_code=400, detail="Type the pool name to confirm that the disks will be erased.")
     user = get_user_by_id(principal.user_id) if principal and principal.user_id else None

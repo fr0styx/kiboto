@@ -383,7 +383,7 @@ def test_generic_linux_offers_only_what_its_tools_can_do(monkeypatch):
     monkeypatch.setattr(shutil, "which", lambda name: None)
     caps = GenericLinuxStorageAdapter().get_capabilities()
     assert caps.can_trigger_scrub is False and caps.can_snapshot is False
-    assert caps.supported_filesystems == ["ext4", "xfs"] and "missing" in caps.description
+    assert caps.supported_filesystems == ["ext4"] and "missing" in caps.description
     monkeypatch.setattr(shutil, "which", lambda name: "/usr/sbin/btrfs" if name == "btrfs" else None)
     monkeypatch.setattr("backend.hardware.pal.generic_linux.fs_of", lambda path: "btrfs")
     caps = GenericLinuxStorageAdapter().get_capabilities()
