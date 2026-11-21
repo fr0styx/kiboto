@@ -3550,13 +3550,13 @@ export function openCreateNetworkShareModal(onSuccess) {
       const exportNfs =
         /** @type {HTMLInputElement} */ (document.getElementById('create-share-export-nfs'))?.checked ?? false;
       const nfsSquash =
-        /** @type {HTMLSelectElement} */ (document.getElementById('create-share-nfs-squash'))?.value || 'root_squash';
+        /** @type {HTMLSelectElement} */ (document.getElementById('create-share-nfs-squash'))?.value || 'all_squash';
       const nfsAnonuid =
         parseInt(/** @type {HTMLInputElement} */ (document.getElementById('create-share-nfs-anonuid'))?.value, 10) ||
-        1000;
+        65534;
       const nfsAnongid =
         parseInt(/** @type {HTMLInputElement} */ (document.getElementById('create-share-nfs-anongid'))?.value, 10) ||
-        1000;
+        100;
       const nfsSync =
         (/** @type {HTMLSelectElement} */ (document.getElementById('create-share-nfs-sync'))?.value || 'sync') ===
         'sync';

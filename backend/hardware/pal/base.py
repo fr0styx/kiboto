@@ -285,9 +285,9 @@ class StoragePlatformAdapter(ABC):
         export_nfs: bool = False,
         quota_gb: int = 0,
         user_permissions: dict[str, str] | None = None,
-        nfs_squash: str = "no_root_squash",
-        nfs_anonuid: int = 1000,
-        nfs_anongid: int = 1000,
+        nfs_squash: str = "all_squash",
+        nfs_anonuid: int = 65534,
+        nfs_anongid: int = 100,
         nfs_sync: bool = True,
         nfs_clients: str = "*",
     ) -> dict[str, Any]:

@@ -1244,9 +1244,9 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
         export_nfs: bool = False,
         quota_gb: int = 0,
         user_permissions: dict[str, str] | None = None,
-        nfs_squash: str = "root_squash",
-        nfs_anonuid: int = 1000,
-        nfs_anongid: int = 1000,
+        nfs_squash: str = "all_squash",
+        nfs_anonuid: int = 65534,
+        nfs_anongid: int = 100,
         nfs_sync: bool = True,
         nfs_clients: str = "",
     ) -> dict[str, Any]:
@@ -1262,7 +1262,7 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
                     name=name,
                     path=full_path,
                     clients=nfs_clients.strip() or home_network(),
-                    squash=nfs_squash or "root_squash",
+                    squash=nfs_squash or "all_squash",
                     comment=comment,
                 )
             except Exception as e:
@@ -1302,7 +1302,7 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
                     path=full_path,
                     clients=nfs_clients.strip() or home_network(),
                     permission="ro" if read_only else "rw",
-                    squash=nfs_squash or "root_squash",
+                    squash=nfs_squash or "all_squash",
                     anonuid=nfs_anonuid,
                     anongid=nfs_anongid,
                     sync_mode="sync" if nfs_sync else "async",

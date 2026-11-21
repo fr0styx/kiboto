@@ -109,7 +109,12 @@ def test_saving_shares_alone_keeps_the_default_and_role_defaults(client, auth_he
 def test_a_new_share_is_private_and_nfs_is_squashed_and_local_by_default():
     req = StorageShareCreateRequest(name="photos")
     assert req.security == "private"
-    assert req.nfs_squash == "root_squash"
+    # NFS clients write as the file server's user, as SMB does: the shared folders are its
+    assert (req.nfs_squash, req.nfs_anonuid, req.nfs_anongid) == ("all_squash", 65534, 100)
+    rule = NfsExportRule(name="x", path="/mnt/user/x")
+    assert (rule.squash, rule.anonuid, rule.anongid) == ("all_squash", 65534, 100)
+    opts = nfs_engine.get_nfs_engine().generate_export_options(rule)
+    assert "all_squash" in opts and "anonuid=65534" in opts and "anongid=100" in opts
     assert req.nfs_clients == "" and req.nfs_allow_everyone is False
     assert NfsExportRule(name="x", path="/mnt/user/x").insecure is False
 

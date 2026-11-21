@@ -96,9 +96,10 @@ class StorageShareCreateRequest(BaseModel):
     user_permissions: dict[str, str] | None = Field(
         default_factory=dict, description="User permission matrix: {username: 'rw'|'ro'|'deny'}"
     )
-    nfs_squash: str = Field(default="root_squash", description="'root_squash', 'all_squash' or 'no_root_squash'")
-    nfs_anonuid: int = Field(default=1000, description="Mapped UID for anonymous/squashed users")
-    nfs_anongid: int = Field(default=1000, description="Mapped GID for anonymous/squashed users")
+    # every NFS client writes as the file server's user, as SMB does (nfs_engine.FILE_SERVER_UID)
+    nfs_squash: str = Field(default="all_squash", description="'all_squash', 'root_squash' or 'no_root_squash'")
+    nfs_anonuid: int = Field(default=65534, description="UID squashed clients write as (the file server's user)")
+    nfs_anongid: int = Field(default=100, description="GID squashed clients write as (the file server's group)")
     nfs_sync: bool = Field(default=True, description="True for synchronous commits (ACID), False for async")
     nfs_clients: str = Field(default="", description="Allowed client host or CIDR subnet; empty = this home network")
     timemachine: bool = Field(default=False, description="A Time Machine destination; needs SMB and a size limit")

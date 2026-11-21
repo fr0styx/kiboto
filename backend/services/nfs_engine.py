@@ -46,17 +46,23 @@ def home_network() -> str:
     return "127.0.0.1"
 
 
+# The shared folders belong to the file server's user (nobody:users, see backend/owned.py). An NFS
+# client writes as its own user number, which owns nothing there, so a new export maps every
+# client to that user, as SMB writes; the other choices stay for those who need them.
+FILE_SERVER_UID, FILE_SERVER_GID = 65534, 100
+
+
 class NfsExportRule(BaseModel):
     name: str = Field(..., description="Unique identifier or share name")
     path: str = Field(..., description="Filesystem directory path to export")
     clients: str = Field(default="*", description="Allowed client hosts, subnets (CIDR), or wildcard (*)")
     permission: str = Field(default="rw", description="'rw' (read-write) or 'ro' (read-only)")
     squash: str = Field(
-        default="root_squash",
+        default="all_squash",
         description="Root squash policy: 'no_root_squash', 'root_squash', or 'all_squash'",
     )
-    anonuid: int = Field(default=1000, description="Anonymous UID for squashed credentials (K8s/DB pod mapping)")
-    anongid: int = Field(default=1000, description="Anonymous GID for squashed credentials (K8s/DB pod mapping)")
+    anonuid: int = Field(default=FILE_SERVER_UID, description="UID squashed clients write as (the file server's user)")
+    anongid: int = Field(default=FILE_SERVER_GID, description="GID squashed clients write as (the file server's group)")
     sync_mode: str = Field(default="sync", description="'sync' (safe ACID persistence) or 'async' (maximum throughput)")
     no_subtree_check: bool = Field(
         default=True, description="Disable subtree checking for improved reliability and speed"

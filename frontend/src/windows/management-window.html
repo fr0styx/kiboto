@@ -4858,8 +4858,8 @@
             <label class="nshare-xs-bold-muted-2" for="create-share-nfs-squash" data-i18n="storage.nfs_squash_label">Root Squash Policy</label>
             <select id="create-share-nfs-squash" class="tz-select-input nshare-xs-strong-box-2">
               <option value="no_root_squash" data-i18n="storage.nfs_no_root_squash">no_root_squash (Kubernetes / Databases / Root)</option>
-              <option value="root_squash" selected data-i18n="storage.nfs_root_squash">root_squash (Squash root to anonymous UID)</option>
-              <option value="all_squash" data-i18n="storage.nfs_all_squash">all_squash (Map all users to anonymous UID)</option>
+              <option value="root_squash" data-i18n="storage.nfs_root_squash">root_squash (Squash root to anonymous UID)</option>
+              <option value="all_squash" selected data-i18n="storage.nfs_all_squash">all_squash (Map all users to anonymous UID)</option>
             </select>
           </div>
           <div>
@@ -4874,11 +4874,11 @@
         <div class="nshare-grid-2">
           <div>
             <label class="nshare-xs-bold-muted-2" for="create-share-nfs-anonuid" data-i18n="storage.nfs_anonuid_label">Anon UID (Pod User)</label>
-            <input type="number" id="create-share-nfs-anonuid" value="1000" min="0" max="65535" class="tz-select-input nshare-xs-strong-box-2" />
+            <input type="number" id="create-share-nfs-anonuid" value="65534" min="0" max="65535" class="tz-select-input nshare-xs-strong-box-2" />
           </div>
           <div>
             <label class="nshare-xs-bold-muted-2" for="create-share-nfs-anongid" data-i18n="storage.nfs_anongid_label">Anon GID (Pod Group)</label>
-            <input type="number" id="create-share-nfs-anongid" value="1000" min="0" max="65535" class="tz-select-input nshare-xs-strong-box-2" />
+            <input type="number" id="create-share-nfs-anongid" value="100" min="0" max="65535" class="tz-select-input nshare-xs-strong-box-2" />
           </div>
         </div>
 

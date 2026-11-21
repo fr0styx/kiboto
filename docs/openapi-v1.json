@@ -37355,14 +37355,14 @@
       "type": "boolean"
      },
      "nfs_anongid": {
-      "default": 1000,
-      "description": "Mapped GID for anonymous/squashed users",
+      "default": 100,
+      "description": "GID squashed clients write as (the file server's group)",
       "title": "Nfs Anongid",
       "type": "integer"
      },
      "nfs_anonuid": {
-      "default": 1000,
-      "description": "Mapped UID for anonymous/squashed users",
+      "default": 65534,
+      "description": "UID squashed clients write as (the file server's user)",
       "title": "Nfs Anonuid",
       "type": "integer"
      },
@@ -37373,8 +37373,8 @@
       "type": "string"
      },
      "nfs_squash": {
-      "default": "root_squash",
-      "description": "'root_squash', 'all_squash' or 'no_root_squash'",
+      "default": "all_squash",
+      "description": "'all_squash', 'root_squash' or 'no_root_squash'",
       "title": "Nfs Squash",
       "type": "string"
      },

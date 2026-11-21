@@ -8,6 +8,8 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 
 Keyboard: while a window is open, the Tab key moves only through the windows, the top bar and the dock, not the desktop's icons and widgets behind them. The desktop comes back when no window is open; you can still click it beside a window.
 
+NFS on Kiboto's own file server: a new export lets the Linux computers it names write as the file server does, so what they save can be changed over SMB and the other way round. Existing exports keep their settings; the other choices stay on the folder's NFS settings.
+
 ## v2.0.5 (2026-11-20)
 ### 🏡 A second NAS that can take over, files you can change over the network, and 176 tested apps
 

@@ -42,6 +42,11 @@ else in. A change to who may open a folder counts at once: connections to that f
 and connect again under the new settings, while other folders stay connected and a copy that is
 running there goes on.
 
+**NFS** (for Linux computers) has no sign-in: an export says which computers may reach it. A new
+export lets those computers write as the file server's user too, so what they save can be
+changed over SMB and the other way round. The choice of how NFS maps users stays on the
+folder's NFS settings for those who need another (a database in a container, for example).
+
 You sign in with your Kiboto user name and password. Someone with two-step sign-in uses a
 separate password for network folders; they make it right there, on the folder's card.
 
