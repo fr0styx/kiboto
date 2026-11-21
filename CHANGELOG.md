@@ -12,6 +12,10 @@ NFS on Kiboto's own file server: a new export lets the Linux computers it names 
 
 Kiboto's own file server: each person signs in to their private folder as a system account of their own, and what they save there is theirs on disk. Shared folders work as before. Nothing changes on Unraid.
 
+#### Fixes
+
+A person with a storage limit could go over it by sending several files at once. Files still arriving now count against the limit.
+
 ## v2.0.5 (2026-11-20)
 ### 🏡 A second NAS that can take over, files you can change over the network, and 176 tested apps
 

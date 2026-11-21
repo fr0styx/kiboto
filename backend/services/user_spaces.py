@@ -216,8 +216,12 @@ def usage(username: str, fresh: bool = False) -> int:
         if hit and not fresh and now - hit[0] < _USAGE_TTL:
             return hit[1]
     total = 0
-    for root, _dirs, files in os.walk(home):
+    for root, dirs, files in os.walk(home):
+        # an upload still arriving counts by the size it holds (hold_upload), not by what is written
+        dirs[:] = [d for d in dirs if not d.startswith(_ARRIVING)]
         for name in files:
+            if name.startswith(_ARRIVING):
+                continue
             try:
                 total += os.lstat(os.path.join(root, name)).st_size
             except OSError:
@@ -227,9 +231,27 @@ def usage(username: str, fresh: bool = False) -> int:
     return total
 
 
-def check_upload(username: str, target_path: str, incoming: int) -> int | None:
-    """Raises QuotaExceeded when an upload into the person's own home would exceed the quota.
-    Returns the bytes still allowed (None when no quota applies to this target)."""
+# Uploads arriving into a home: Kiboto's part files and chunk folders, and the bytes each upload
+# holds until it lands. Several uploads at once each saw the room on disk at their start, and
+# together went over the quota.
+_ARRIVING = (".kiboto_tmp_", ".kiboto_staging_")
+_held: dict[str, dict[str, int]] = {}
+
+
+def release_upload(username: str, key: str) -> None:
+    """The upload `key` landed, failed or expired: what it held is free again."""
+    with _lock:
+        mine = _held.get((username or "").lower(), {})
+        mine.pop(key, None)
+        if not mine:
+            _held.pop((username or "").lower(), None)
+
+
+def check_upload(username: str, target_path: str, incoming: int, key: str = "") -> int | None:
+    """Raises QuotaExceeded when an upload into the person's own home would exceed the quota,
+    counting what their other uploads still arriving hold. With `key`, the upload holds
+    `incoming` bytes until release_upload(key). Returns the bytes still allowed (None when no
+    quota applies to this target)."""
     quota = quota_of(username)
     if not quota or not username:
         return None
@@ -238,9 +260,14 @@ def check_upload(username: str, target_path: str, incoming: int) -> int | None:
     if not (real == home or real.startswith(home.rstrip(os.sep) + os.sep)):
         return None
     used = usage(username, fresh=True)
-    if used + max(0, incoming) > quota:
-        raise QuotaExceeded(used, quota, incoming)
-    return quota - used
+    who = username.lower()
+    with _lock:
+        others = sum(n for k, n in _held.get(who, {}).items() if k != key)
+        if used + others + max(0, incoming) > quota:
+            raise QuotaExceeded(used + others, quota, incoming)
+        if key:
+            _held.setdefault(who, {})[key] = max(0, incoming)
+    return quota - used - others
 
 
 def summary(username: str) -> dict[str, Any]:

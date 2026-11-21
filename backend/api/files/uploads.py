@@ -191,15 +191,16 @@ async def fs_upload(
     file_path = os.path.join(target_canonical, landing)
 
     # Personal space quota (Batch 6): refuse up front when the size is known, stop when it isn't
-    from backend.services.user_spaces import QuotaExceeded, check_upload
+    from backend.services.user_spaces import QuotaExceeded, check_upload, release_upload
 
     declared = int(request.headers.get("content-length") or 0)
+    hold = secrets.token_hex(8)  # the declared size is held against the quota until it lands
     try:
-        allowed = check_upload(principal.username, file_path, declared)
+        allowed = check_upload(principal.username, file_path, declared, key=hold)
     except QuotaExceeded as e:
         raise HTTPException(status_code=507, detail=str(e)) from None
 
-    staging_file = os.path.join(target_canonical, f".kiboto_tmp_{secrets.token_hex(8)}_{filename}")
+    staging_file = os.path.join(target_canonical, f".kiboto_tmp_{hold}_{filename}")
     try:
         written = 0
         async with aiofiles.open(staging_file, "wb") as f_out:
@@ -233,6 +234,8 @@ async def fs_upload(
                 ignored("backend.api.fs.fs_upload")
         logger.error(f"[FS] Upload failed: {e}")
         raise HTTPException(status_code=500, detail="Failed to upload file") from e
+    finally:
+        release_upload(principal.username, hold)
 
 
 UPLOAD_CHUNK_SIZE = 16 * 1024 * 1024
@@ -309,8 +312,11 @@ async def fs_upload_init(
 
     from backend.services.user_spaces import QuotaExceeded, check_upload
 
-    try:
-        check_upload(principal.username, os.path.join(target_canonical, filename), int(req.total_size or 0))
+    upload_id = secrets.token_hex(16)
+    try:  # held against the quota until the upload is finished or expires
+        check_upload(
+            principal.username, os.path.join(target_canonical, filename), int(req.total_size or 0), key=upload_id
+        )
     except QuotaExceeded as e:
         raise HTTPException(status_code=507, detail=str(e)) from None
 
@@ -319,6 +325,9 @@ async def fs_upload_init(
     except OSError:
         free = None
     if free is not None and free - int(req.total_size) < UPLOAD_FREE_FLOOR:
+        from backend.services.user_spaces import release_upload
+
+        release_upload(principal.username, upload_id)
         raise HTTPException(status_code=507, detail="Not enough free space for this file.")
 
     upload_id = secrets.token_hex(16)
@@ -361,10 +370,12 @@ async def _expire_uploads() -> None:
         for u in stale:
             _CHUNKED_UPLOADS.pop(u["upload_id"], None)
     from backend.services import upload_staging
+    from backend.services.user_spaces import release_upload
 
     for u in stale:
         await asyncio.to_thread(shutil.rmtree, u.get("staging_dir", ""), True)  # off the event loop
         await asyncio.to_thread(upload_staging.forget, u["upload_id"])
+        release_upload(str(u.get("created_by") or ""), u["upload_id"])
 
 
 @router.post(
@@ -467,6 +478,9 @@ async def fs_upload_complete(
         await asyncio.to_thread(upload_staging.forget, req.upload_id)
         async with _CHUNKED_UPLOADS_LOCK:
             _CHUNKED_UPLOADS.pop(req.upload_id, None)
+        from backend.services.user_spaces import release_upload
+
+        release_upload(str(upload_info.get("created_by") or ""), req.upload_id)  # it is on disk now
 
         final_size = os.path.getsize(final_target)
         await asyncio.to_thread(record_activity, "upload", final_target, principal)

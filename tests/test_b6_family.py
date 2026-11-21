@@ -66,6 +66,25 @@ def test_the_kids_quota_holds(family):
     assert user_spaces.check_upload("lea", str(family["pool"] / "family" / "x"), 10**9) is None
 
 
+def test_uploads_side_by_side_share_the_quota(family):
+    home = family["pool"] / "homes" / "lea"  # a quota of 1 MiB, nothing used
+    kb = 1024
+    assert user_spaces.check_upload("lea", str(home / "a.mp4"), 600 * kb, key="a") is not None
+    with pytest.raises(user_spaces.QuotaExceeded):  # a second one while the first arrives
+        user_spaces.check_upload("lea", str(home / "b.mp4"), 600 * kb, key="b")
+    assert user_spaces.check_upload("lea", str(home / "c.txt"), 300 * kb, key="c") is not None
+    # what arrives is counted by what it holds, not twice: a part file is left out of the usage
+    (home / ".kiboto_tmp_a_a.mp4").write_bytes(b"x" * 500 * kb)
+    (home / ".kiboto_staging_c_c.txt").mkdir()
+    (home / ".kiboto_staging_c_c.txt" / "chunk_000000").write_bytes(b"x" * 200 * kb)
+    assert user_spaces.usage("lea", fresh=True) == 0
+    user_spaces.release_upload("lea", "a")
+    user_spaces.release_upload("lea", "c")
+    assert user_spaces.check_upload("lea", str(home / "b.mp4"), 600 * kb, key="b") is not None
+    user_spaces.release_upload("lea", "b")
+    assert user_spaces._held == {}
+
+
 def test_invite_link_creates_a_kid_account_once(family):
     db = family["db"]
     token, inv = users_db.create_invite("kid", 7, 1, "for Max", "mum", quota_bytes=2 * 1024**3, db_path=db)
