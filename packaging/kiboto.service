@@ -17,6 +17,8 @@ Environment=POOL_PATH=/mnt/storage
 Environment=PORT=8082
 Environment=PYTHONUNBUFFERED=1
 # what the person changes goes here, so an update never overwrites it
+# which build this is (written when a version is taken from its image)
+EnvironmentFile=-/opt/kiboto/current/build.env
 EnvironmentFile=-/etc/kiboto/kiboto.env
 WorkingDirectory=/opt/kiboto/current
 ExecStart=/opt/kiboto/current/venv/bin/python -m backend.main

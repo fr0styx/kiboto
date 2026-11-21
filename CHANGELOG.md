@@ -58,6 +58,8 @@ On a machine of its own, Kiboto now serves shared folders with the machine's own
 
 On a machine of its own, Kiboto shows a setup code on the machine's screen (and when you sign in to it over SSH). You sign in with that code the first time and choose your own password. The sign-in page now says where the first password is found, on every kind of install.
 
+On a machine of its own, Kiboto can now update itself: the new version is made ready beside the running one, and if it does not start properly Kiboto goes back to the version before, with your settings as they were.
+
 ## v2.0.5 (2026-11-20)
 ### 🏡 A second NAS that can take over, files you can change over the network, and 176 tested apps
 

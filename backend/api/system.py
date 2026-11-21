@@ -1596,6 +1596,24 @@ def _image_version_label(image_ref: str) -> str:
     return str(((img.get("Config") or {}).get("Labels") or {}).get("org.opencontainers.image.version") or "")
 
 
+async def _apply_natively(target_img: str, version: str, channel: str, signature: Any) -> dict[str, Any]:
+    from backend.services import native_update
+
+    await asyncio.to_thread(machines_first)  # virtual machines are shut down cleanly before the restart
+    try:
+        await asyncio.to_thread(native_update.start, target_img, version, config.DATA_DIR, config.PORT)
+    except native_update.UpdateFailed as e:
+        raise HTTPException(status_code=502, detail=f"The update was not applied: {e}") from e
+    return {
+        "status": "restarting",
+        "channel": channel,
+        "target_image": target_img,
+        "auto_restarting": True,
+        "signature": signature,
+        "message": "Update downloaded. Kiboto is switching to the new version now and will reconnect shortly.",
+    }
+
+
 @router.post(
     "/system/updates/apply",
     dependencies=[
@@ -1687,6 +1705,11 @@ async def post_apply_system_update(req: ApplySystemUpdateRequest):
 
     # 1c. The image must be signed by this project's CI (cosign keyless, Sigstore bundle)
     signature = await _check_update_signature(target_img, expected_digest, pulled)
+
+    # 2a. On a machine Kiboto runs on without a container: the new version is made ready beside
+    #     this one and a helper switches to it (and back, if it does not hold)
+    if runtime.managed_host():
+        return await _apply_natively(target_img, label or tag, channel, signature)
 
     # 2. Check if running inside container with docker socket access
     sock_path = docker_sock()

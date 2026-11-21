@@ -91,12 +91,20 @@ code() {
   rel="$PREFIX/releases/${version:-dev}-$(date +%Y%m%d%H%M%S)"
   say "Putting Kiboto ${version:-} in $rel..."
   mkdir -p "$rel"
-  for part in backend static app.py requirements.lock; do
+  for part in backend static app.py requirements.lock packaging; do
     [ -e "$src/$part" ] && cp -a "$src/$part" "$rel/"
   done
-  python3 -m venv "$rel/venv"
-  "$rel/venv/bin/pip" -q install --upgrade pip
-  "$rel/venv/bin/pip" -q install --no-compile --require-hashes -r "$rel/requirements.lock"
+  # the Python environment is kept by its requirements, as an update keeps it (native_update.lock_key):
+  # versions with the same requirements share one
+  key=$( (cat "$rel/requirements.lock"; printf '|py%s' "$(python3 -c 'import sys; print(f"{sys.version_info[0]}.{sys.version_info[1]}")')") | sha256sum | cut -c1-16)
+  venv="$PREFIX/venvs/$key"
+  if [ ! -f "$venv/.ready" ]; then
+    rm -rf "$venv"
+    python3 -m venv "$venv"
+    "$venv/bin/python" -m pip -q install --no-compile --require-hashes -r "$rel/requirements.lock"
+    date > "$venv/.ready"
+  fi
+  ln -sfn "$venv" "$rel/venv"
   previous=$(readlink "$PREFIX/current" 2>/dev/null || true)
   ln -sfn "$rel" "$PREFIX/current"
   [ -n "$previous" ] && printf '%s\n' "$previous" > "$PREFIX/previous"
