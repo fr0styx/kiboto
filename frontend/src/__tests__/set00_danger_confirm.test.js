@@ -53,11 +53,7 @@ describe('dangerous questions are red in every language (SET-00)', () => {
 
   it('marks the questions that lose or overwrite something in code, not by their words', () => {
     const marked = {
-      'components/chassis-visualizer.js': [
-        'chassis.destroy_pool',
-        'chassis.force_eject_title',
-        'chassis.disks_have_data',
-      ],
+      'components/chassis-visualizer.js': ['chassis.force_eject_title', 'chassis.disks_have_data'],
       'components/management/backup.js': ['backup.app_restore_title'],
       'components/two-way-sync.js': ['sync2.forget_confirm'],
       'components/offsite-backup.js': ['offsite.forget_confirm'],

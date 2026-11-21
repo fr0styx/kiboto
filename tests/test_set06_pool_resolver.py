@@ -119,9 +119,9 @@ def test_a_scrub_that_did_not_start_does_not_say_it_did(system):
 def test_remove_unmounts_the_named_pool_and_fails_when_it_cannot(system):
     adapter, ran, fail = system
     res = adapter.destroy_pool("md0")
-    assert ran == [["umount", "-f", "/mnt/pools/archive"]] and res["status"] == "destroyed"
+    assert ran == [["umount", "-f", "/mnt/pools/archive"]] and res["status"] == "disconnected"
     fail.add("umount")
-    with pytest.raises(RuntimeError, match="archive could not be unmounted"):
+    with pytest.raises(RuntimeError, match="archive could not be disconnected"):
         adapter.destroy_pool("md0")
 
 
@@ -164,7 +164,7 @@ def test_the_routes_answer_what_happened(client, auth_headers, system, monkeypat
     assert r.status_code == 409 and "could not be renamed" in r.json()["detail"]
     fail.add("umount")
     r = client.delete("/api/storage/pools/md0", headers=auth_headers)
-    assert r.status_code == 409 and "could not be unmounted" in r.json()["detail"]
+    assert r.status_code == 409 and "could not be disconnected" in r.json()["detail"]
 
 
 class _Caps:

@@ -1094,16 +1094,21 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
             )
 
     def destroy_pool(self, pool_id: str) -> dict[str, Any]:
-        """Unmounts the pool that is named. It unmounted "<pool folder>/<id>", which for most
-        pools is no folder at all, and answered "destroyed" whatever happened."""
+        """Disconnects the pool that is named, at once and without export_pool's open-file check.
+        Nothing on its drives changes, so the answer is "disconnected", not "destroyed". A ZFS pool
+        is exported: an unmount alone leaves it imported, with its other datasets still mounted."""
         pool = self.resolve_pool(pool_id)
         self._no_merged_folder(pool)
-        if not pool.mountpoint:
-            raise RuntimeError(f"{pool.name} is not mounted, so there is nothing to remove.")
-        code, out, err = self._run_cmd(["umount", "-f", pool.mountpoint])
+        if pool.fs_type == "zfs":
+            cmd = ["zpool", "export", "-f", pool.id]
+        elif not pool.mountpoint:
+            raise RuntimeError(f"{pool.name} is not mounted, so there is nothing to disconnect.")
+        else:
+            cmd = ["umount", "-f", pool.mountpoint]
+        code, out, err = self._run_cmd(cmd)
         if code != 0:
-            raise RuntimeError(f"{pool.name} could not be unmounted: {(err or out or 'it is in use').strip()}")
-        return {"status": "destroyed", "pool_id": pool.id, "mountpoint": pool.mountpoint, "unmount_code": code}
+            raise RuntimeError(f"{pool.name} could not be disconnected: {(err or out or 'it is in use').strip()}")
+        return {"status": "disconnected", "pool_id": pool.id, "mountpoint": pool.mountpoint}
 
     def erase_plan(self, pool_id: str) -> dict[str, Any]:
         """The drives a pool's own tool lists, each confirmed by its on-disk label (S29)."""
@@ -1599,18 +1604,22 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
             target_path = zsnap["path"]
         else:
             code, out, err = self._run_cmd(["btrfs", "subvolume", "delete", target_path])
-        if os.path.isfile(meta_path) and code in (0, 127):
+        if os.path.isfile(meta_path) and code == 0:
             try:
                 os.remove(meta_path)
             except OSError:
                 pass
 
-        return {
-            "status": "deleted" if code in (0, 127) else "error",
+        # a missing tool (127) deleted nothing: it is an error like any other
+        res: dict[str, Any] = {
+            "status": "deleted" if code == 0 else "error",
             "snapshot": snapshot_name,
             "path": target_path,
             "code": code,
         }
+        if code != 0:
+            res["message"] = (err or out or "").strip() or "The snapshot could not be deleted."
+        return res
 
     def restore_snapshot(self, pool_id: str, snapshot_name: str, target_subvol: str = "") -> dict[str, Any]:
         """Restores or rolls back a Btrfs subvolume snapshot into active subvolume path."""
@@ -1641,9 +1650,15 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
         # Btrfs snapshot restore creates a writable subvolume clone from the read-only snapshot
         cmd = ["btrfs", "subvolume", "snapshot", snap_path, dest_path]
         code, out, err = self._run_cmd(cmd)
+        if code != 0 and archived_path and not os.path.exists(dest_path):
+            try:  # nothing was restored: the folder that was set aside goes back to its place
+                os.rename(archived_path, dest_path)
+                archived_path = None
+            except OSError as e:
+                logger.warning("[PAL] Could not put %s back after a failed restore: %s", archived_path, e)
 
         return {
-            "status": "restored" if code in (0, 127) else "error",
+            "status": "restored" if code == 0 else "error",
             "snapshot": snap_path,
             "target": dest_path,
             "archived_previous": archived_path,

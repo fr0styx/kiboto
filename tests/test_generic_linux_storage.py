@@ -120,7 +120,7 @@ def test_btrfs_pool_creation_and_destruction(monkeypatch, tmp_path):
     )
     monkeypatch.setattr(adapter, "list_pools", lambda: [vault])
     destroy_res = adapter.destroy_pool("vault")
-    assert destroy_res["status"] == "destroyed"
+    assert destroy_res["status"] == "disconnected"
     assert any("umount" in cmd[0] for cmd in recorded_cmds)
 
 
@@ -372,7 +372,7 @@ def test_api_pool_snapshots_and_lifecycle(client, auth_headers, monkeypatch, tmp
     _listed(generic_adapter, "datapool", "btrfs", mount_dir)
     del_pool_res = client.delete("/api/storage/pools/datapool", headers=auth_headers)
     assert del_pool_res.status_code == 200
-    assert del_pool_res.json()["status"] == "destroyed"
+    assert del_pool_res.json()["status"] == "disconnected"
 
 
 @pytest.mark.real_storage_tools

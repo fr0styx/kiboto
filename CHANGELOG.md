@@ -14,11 +14,15 @@ Kiboto's own file server: each person signs in to their private folder as a syst
 
 Files suggests the folders this server really has when you type a path, and the folder picker opens on its main folder, on Unraid and on any other system.
 
+Storage no longer has a "Destroy" button on a pool. It only disconnected the pool, while its question said the data would be lost. "Safely eject" disconnects a pool and "Delete and erase drives" deletes one.
+
 #### Fixes
 
 A person with a storage limit could go over it by sending several files at once. Files still arriving now count against the limit.
 
 The install guide and the Unraid template said the first password is shown in the container log. It is not: it is saved as a file only root can read, and the guide now says so. SECURITY.md names 2.0 as the supported version.
+
+Deleting or bringing back a snapshot no longer says it worked when the file system's tool is missing or failed, and a restore that fails puts the folder back as it was.
 
 #### Security
 

@@ -66,9 +66,7 @@ describe('Sprint 5: Generic Linux Active Provisioner & Samba Engine (Frontend)',
 
     expect(container.querySelector('.btn-pool-snaps')).toBeNull(); // snapshots are on the Backup page (SET-06)
 
-    const destroyBtn = container.querySelector('.btn-pool-destroy');
-    expect(destroyBtn).not.toBeNull();
-    expect(destroyBtn.textContent).toContain('Destroy');
+    expect(container.querySelector('.btn-pool-destroy')).toBeNull(); // it only disconnected; Safely eject does that
   });
 
   it('shows create pool and snapshots buttons when can_create_pools capability is true', async () => {

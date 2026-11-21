@@ -66,7 +66,7 @@
  "alert.security.api_token_created": "API-Token erstellt",
  "alert.security.confirm_network_netbird_install": "NetBird gestartet",
  "alert.security.confirm_storage_pool_create": "Speicherpool angelegt (Festplatten gelöscht)",
- "alert.security.confirm_storage_pool_delete": "Speicherpool gelöscht",
+ "alert.security.confirm_storage_pool_delete": "Speicherpool getrennt",
  "alert.security.confirm_storage_pool_erase": "Speicherpool gelöscht und Laufwerke geleert",
  "alert.security.confirm_system_restore": "Einstellungen aus einer Sicherung wiederhergestellt",
  "alert.security.confirm_updates_revert": "Kiboto auf eine frühere Version zurückgesetzt",

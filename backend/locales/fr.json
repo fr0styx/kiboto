@@ -66,7 +66,7 @@
  "alert.security.api_token_created": "Jeton d’API créé",
  "alert.security.confirm_network_netbird_install": "NetBird démarré",
  "alert.security.confirm_storage_pool_create": "Pool de stockage créé (disques effacés)",
- "alert.security.confirm_storage_pool_delete": "Pool de stockage supprimé",
+ "alert.security.confirm_storage_pool_delete": "Pool de stockage déconnecté",
  "alert.security.confirm_storage_pool_erase": "Pool de stockage supprimé et disques effacés",
  "alert.security.confirm_system_restore": "Réglages restaurés depuis une sauvegarde",
  "alert.security.confirm_updates_revert": "Kiboto est revenu à une version précédente",

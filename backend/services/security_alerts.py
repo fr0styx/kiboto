@@ -30,7 +30,7 @@ ALERT_EVENTS: dict[str, tuple] = {
     "admin.account.disabled": ("Admin account disabled", "warning"),
     "worm_break_glass_delete": ("Protected (WORM) data deleted", "critical"),
     "confirm.storage.pool.create": ("Storage pool created (disks erased)", "warning"),
-    "confirm.storage.pool.delete": ("Storage pool deleted", "critical"),
+    "confirm.storage.pool.delete": ("Storage pool disconnected", "critical"),
     "confirm.system.restore": ("Settings restored from a backup", "warning"),
     "confirm.updates.revert": ("Kiboto reverted to a previous version", "warning"),
     "confirm.users.delete": ("User account deleted", "warning"),

@@ -830,7 +830,6 @@ function buildPoolBlockInner(pool, isObserver, can = { scrub: true }) {
       ${can.scrub ? `<button class="btn-pool-scrub btn-pill-toggle" data-pool-id="${escapeHtml(pool.id)}" data-pool-name="${escapeHtml(poolName(pool.name) || pool.id)}" title="${t('ui.trigger_filesystem_scrub_or_parity', 'Trigger filesystem scrub or parity check')}" data-i18n-title="ui.trigger_filesystem_scrub_or_parity">${ico('⚡')} ${t('chassis.scrub_pool', 'Check for errors')}</button>` : ''}
       ${!isObserver ? `<button class="btn-pool-rename btn-pill-toggle" data-pool-id="${escapeHtml(pool.id)}" data-pool-name="${escapeHtml(pool.name)}" title="${t('ui.rename_storage_pool', 'Rename storage pool')}" data-i18n-title="ui.rename_storage_pool">${ico('✏️')} ${t('chassis.rename', 'Rename')}</button>` : ''}
       ${(!isObserver || pool.fs_type === 'zfs') && pool.id !== 'unraid_array' && pool.id !== 'default_pool' ? `<button class="btn-pool-export btn-pill-toggle" data-pool-id="${escapeHtml(pool.id)}" style="background: rgba(245,158,11,0.15); border-color: rgba(245,158,11,0.3); color: var(--kb-text-warn);" title="${t('ui.safely_flush_dirty_cache_and', 'Safely flush dirty cache and detach pool')}" data-i18n-title="ui.safely_flush_dirty_cache_and">${ico('⏏️')} ${t('chassis.eject', 'Safely eject')}</button>` : ''}
-      ${!isObserver && pool.id !== 'default_pool' ? `<button class="btn-pool-destroy btn-pill-toggle is-danger" data-pool-id="${escapeHtml(pool.id)}" title="${t('ui.destroy_storage_pool', 'Destroy storage pool')}" data-i18n-title="ui.destroy_storage_pool">${ico('🗑️')} ${t('chassis.destroy', 'Destroy')}</button>` : ''}
       ${eraseButtonHtml(pool)}
     </div>
   `;
@@ -896,28 +895,6 @@ function bindTopologyTreeEvents(tree, container) {
     if (eraseBtn) {
       e.stopPropagation();
       erasePool(eraseBtn.dataset.poolId, () => fetchAndRenderStorageTopology(container));
-      return;
-    }
-
-    const destroyBtn = e.target.closest('.btn-pool-destroy');
-    if (destroyBtn) {
-      e.stopPropagation();
-      const pid = destroyBtn.dataset.poolId;
-      showDangerConfirm(
-        t('chassis.destroy_pool', 'Destroy Pool'),
-        t('chassis.destroy_pool_msg', 'Destroy pool "{pool}"? Its data is unmounted.', { pool: pid }),
-        async () => {
-          try {
-            await api.delete(`/api/storage/pools/${pid}`, { confirmed: true });
-            showToast(t('toast.pool_destroyed', "Pool '{pid}' destroyed.", { pid: pid }), 'info');
-            fetchAndRenderStorageTopology(container);
-          } catch (err) {
-            showToast(err.message || t('chassis.destroy_pool_failed', 'Could not destroy the pool'), 'error');
-          }
-        },
-        null,
-        { okText: t('chassis.destroy_pool', 'Destroy Pool'), cancelText: t('common.cancel', 'Cancel') }
-      );
       return;
     }
 

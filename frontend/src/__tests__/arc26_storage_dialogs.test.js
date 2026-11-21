@@ -37,18 +37,9 @@ describe('storage pool dialogs', () => {
     await setLanguage('en');
   });
 
-  it('destroys a pool after asking, and says why it could not', async () => {
-    box.querySelector('.btn-pool-destroy').click();
-    const [title, msg, onOk, , opts] = lastConfirm();
-    expect(title).toBe('Destroy Pool');
-    expect(msg).toBe('Destroy pool "tank"? Its data is unmounted.');
-    expect(opts.okText).toBe('Destroy Pool');
-    const del = vi.spyOn(api, 'delete').mockRejectedValueOnce(new Error(''));
-    await onOk();
-    expect(lastToast()).toEqual(['Could not destroy the pool', 'error']);
-    del.mockResolvedValueOnce({});
-    await onOk();
-    expect(lastToast()[1]).toBe('info');
+  it('has no Destroy button: it only disconnected, and Safely eject does that', () => {
+    expect(box.querySelector('.btn-pool-destroy')).toBeNull();
+    expect(box.querySelector('.btn-pool-export')).not.toBeNull();
   });
 
   it('ejects a pool, and offers to force it when the pool is busy', async () => {
@@ -81,8 +72,7 @@ describe('storage pool dialogs', () => {
 
   it('asks in German', async () => {
     await setLanguage('de');
-    box.querySelector('.btn-pool-destroy').click();
-    expect(lastConfirm()[0]).toBe('Pool zerstören');
-    expect(lastConfirm()[1]).toBe('Pool „tank“ zerstören? Seine Daten werden ausgehängt.');
+    box.querySelector('.btn-pool-export').click();
+    expect(lastConfirm()[0]).toBe('Pool sicher auswerfen');
   });
 });

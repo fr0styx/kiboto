@@ -911,9 +911,12 @@ def delete_storage_snapshot(pool_id: PoolId, snapshot_name: str) -> dict[str, An
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     try:
-        return adapter.delete_snapshot(pool_id=pool_id, snapshot_name=snapshot_name)
+        res = adapter.delete_snapshot(pool_id=pool_id, snapshot_name=snapshot_name)
     except PlatformCapabilityError as e:
         raise HTTPException(status_code=403, detail=str(e)) from e
+    if res.get("status") == "error":  # nothing was deleted, so this is not a 200
+        raise HTTPException(status_code=409, detail=res.get("message") or "The snapshot could not be deleted.")
+    return res
 
 
 @router.post("/pools/{pool_id}/snapshots/break-glass-delete", dependencies=[Depends(require_scope("storage:admin"))])
