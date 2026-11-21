@@ -300,6 +300,11 @@ def _inside(path: str, folder: str) -> bool:
     return path == folder or path.startswith(folder.rstrip(os.sep) + os.sep)
 
 
+def data_id(data_dir: str) -> str:
+    """The data folder's own mark (made on first use): which install a folder belongs to."""
+    return _data_marker(data_dir)
+
+
 def _data_marker(data_dir: str) -> str:
     marker = os.path.join(data_dir, DATA_MARKER)
     try:

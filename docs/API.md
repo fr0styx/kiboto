@@ -38,7 +38,7 @@ request and response schemas.
 
 <!-- BEGIN generated endpoints: python scripts/api_reference.py --update -->
 
-813 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
+815 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
 
 ### AI Conversation History
 
@@ -903,6 +903,8 @@ request and response schemas.
 | `POST` | `/api/v1/system/machine/key/written-down` | `system:config` | The person has the recovery key: Kiboto forgets it |
 | `GET` | `/api/v1/system/power-schedule` | `system:view` | Get Power Schedule |
 | `PUT` | `/api/v1/system/power-schedule` | `system:power` | Put Power Schedule |
+| `GET` | `/api/v1/system/settings-copy` | `system:config` | Per pool, when the copy of Kiboto's settings on it was last written and whether the last try failed |
+| `POST` | `/api/v1/system/settings-copy/now` | `system:config` | Writes the copy now to every pool whose drives are awake; a sleeping pool is left asleep and keeps the copy it has |
 | `GET` | `/api/v1/system/update-watch` | `system:view` | Get Update Watch |
 | `PUT` | `/api/v1/system/update-watch` | `system:config` | Put Update Watch |
 

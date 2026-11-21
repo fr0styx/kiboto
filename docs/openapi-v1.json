@@ -72186,6 +72186,72 @@
     ]
    }
   },
+  "/api/v1/system/settings-copy": {
+   "get": {
+    "description": "Per pool, when the copy of Kiboto's settings on it was last written and whether the last\ntry failed. No pool is touched to answer. Where Kiboto is a guest only `managed: false`.",
+    "operationId": "get_settings_copy_api_v1_system_settings_copy_get",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Get Settings Copy Api V1 System Settings Copy Get",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Get Settings Copy",
+    "tags": [
+     "System"
+    ],
+    "x-required-scopes": [
+     "system:config"
+    ]
+   }
+  },
+  "/api/v1/system/settings-copy/now": {
+   "post": {
+    "description": "Writes the copy now to every pool whose drives are awake; a sleeping pool is left asleep\nand keeps the copy it has. Says per pool what happened.",
+    "operationId": "copy_settings_now_api_v1_system_settings_copy_now_post",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Copy Settings Now Api V1 System Settings Copy Now Post",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Copy Settings Now",
+    "tags": [
+     "System"
+    ],
+    "x-required-scopes": [
+     "system:config"
+    ]
+   }
+  },
   "/api/v1/system/shutdown": {
    "post": {
     "description": "Trigger system poweroff (requires system:power scope).",

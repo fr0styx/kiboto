@@ -9172,4 +9172,13 @@ export default {
   "rkey.failed": "That did not work.",
   "confirm.system_new_recovery_key.title": "Make a new key",
   "confirm.system_new_recovery_key.msg": "Make a new recovery key for {target}? The recovery key you wrote down before stops working.",
+  "pcopy.title": "Settings copy on your pools",
+  "pcopy.help": "Kiboto keeps an encrypted copy of its settings on every pool. If the system disk fails, a fresh Kiboto and your recovery key bring your people, shared folders and apps back. A sleeping pool is not woken for it.",
+  "pcopy.none": "No pools yet. The copy starts with your first pool.",
+  "pcopy.at": "Copied {when}",
+  "pcopy.never": "No copy yet",
+  "pcopy.failed": "Last try failed: {error}",
+  "pcopy.asleep": "Asleep: it keeps the copy it has",
+  "pcopy.now": "Copy now",
+  "pcopy.locked": "No copy can be written until the recovery key has opened this machine's data key (Security).",
 };

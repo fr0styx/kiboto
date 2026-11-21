@@ -9172,4 +9172,13 @@ export default {
   "rkey.failed": "没有成功。",
   "confirm.system_new_recovery_key.title": "生成新密钥",
   "confirm.system_new_recovery_key.msg": "要为 {target} 生成新的恢复密钥吗？你之前抄下的恢复密钥将失效。",
+  "pcopy.title": "存储池上的设置副本",
+  "pcopy.help": "Kiboto 在每个存储池上保存一份加密的设置副本。如果系统盘坏了，重新安装的 Kiboto 加上你的恢复密钥，就能找回你的人员、共享文件夹和应用。不会为此唤醒休眠的存储池。",
+  "pcopy.none": "还没有存储池。有了第一个存储池后就会开始保存副本。",
+  "pcopy.at": "已于 {when} 复制",
+  "pcopy.never": "还没有副本",
+  "pcopy.failed": "上次尝试失败：{error}",
+  "pcopy.asleep": "休眠中：保留现有副本",
+  "pcopy.now": "立即复制",
+  "pcopy.locked": "在用恢复密钥打开这台机器的数据密钥之前，无法写入副本（见“安全”）。",
 };

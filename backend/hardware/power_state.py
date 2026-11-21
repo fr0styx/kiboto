@@ -26,7 +26,10 @@ from backend.state import Z_STATE
 STANDBY, ACTIVE, UNREACHABLE, UNKNOWN = "standby", "active", "unreachable", "unknown"
 DEFER, CHECK = "defer", "check"  # what an unknown disk counts as: asleep, or awake
 PROBE_TTL_S = 10.0
-NEVER_SLEEP = ("nvme", "loop", "ram", "zram")
+# Drives that have no sleep to ask about. A virtual disk (virtio vd*, Xen xvd*) answers the ATA
+# question with nonsense that smartctl reads as "in SLEEP mode": every drive of a Kiboto running in
+# a virtual machine then passed for asleep, and whatever waits for an awake drive never ran.
+NEVER_SLEEP = ("nvme", "loop", "ram", "zram", "vd", "xvd")
 _PROBES: dict[str, tuple[float, str]] = {}  # dev -> (when, state)
 
 

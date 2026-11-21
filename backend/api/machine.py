@@ -109,3 +109,25 @@ async def new_recovery_key(
     except machine_key.MachineKeyError as e:
         raise HTTPException(status_code=409, detail=str(e)) from None
     return await asyncio.to_thread(machine_key.status)
+
+
+# --- the settings copy on the pools ----------------------------------------------------------------
+@router.get("/system/settings-copy", dependencies=[Depends(require_scope("system:config"))])
+async def get_settings_copy() -> dict[str, Any]:
+    """Per pool, when the copy of Kiboto's settings on it was last written and whether the last
+    try failed. No pool is touched to answer. Where Kiboto is a guest only `managed: false`."""
+    from backend.services import pool_copy
+
+    return await asyncio.to_thread(pool_copy.status)
+
+
+@router.post("/system/settings-copy/now", dependencies=[Depends(require_scope("system:config"))])
+async def copy_settings_now() -> dict[str, Any]:
+    """Writes the copy now to every pool whose drives are awake; a sleeping pool is left asleep
+    and keeps the copy it has. Says per pool what happened."""
+    from backend.services import pool_copy
+
+    if not machine_key.active():
+        raise HTTPException(status_code=404, detail="Not found")
+    done = await asyncio.to_thread(pool_copy.copy_if_due, None, True)
+    return {**await asyncio.to_thread(pool_copy.status), "done": done}

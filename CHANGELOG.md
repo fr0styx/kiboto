@@ -42,6 +42,8 @@ Installing an app from the catalog failed with "invalid reference format" on sys
 
 On a machine of its own, Kiboto can reach the apps it works with (its AI servers, the office suite, the camera recorder) by name, as it does inside a container.
 
+- **Kiboto in a virtual machine no longer takes every drive for asleep**: virtual disks answered the "are you asleep?" question with nonsense, so file listings and the AI index waited for drives that were awake.
+
 #### Security
 
 Apps, Docker clean-up: deleting unused volumes now asks for a confirmation that Kiboto checks itself, so it can't happen without your say-so.
@@ -69,6 +71,8 @@ On a machine of its own, Kiboto can now update itself: the new version is made r
 - **Network settings on a machine of its own (preview)**: on a Debian machine set up for Kiboto you can give the machine a fixed address or let the router choose, and set its DNS servers, from Network. New settings are tried for 60 seconds: keep them from the page, or by opening Kiboto at its new address through the link shown. If nobody does, the machine goes back to the settings from before by itself, so a wrong address locks nobody out.
 
 - **A machine of its own keeps your AI data encrypted by itself (preview)**: on a Debian machine set up for Kiboto, the AI chats and the search index are always encrypted. The machine makes the key at its first start and seals it to its security chip (TPM), or to its system disk where there is no chip. Security has a new **Recovery key** card: write the key down once, and it opens the AI data again after a repair or when the machine is set up again.
+
+- **Your settings survive a dead system disk (preview)**: on a Debian machine set up for Kiboto, an encrypted copy of Kiboto's settings is kept on every pool, written at most once a day and never by waking a sleeping pool. Backup shows when each pool got its copy.
 
 ## v2.0.5 (2026-11-20)
 ### 🏡 A second NAS that can take over, files you can change over the network, and 176 tested apps

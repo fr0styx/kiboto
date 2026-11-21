@@ -9172,4 +9172,13 @@ export default {
   "rkey.failed": "Eso no funcionó.",
   "confirm.system_new_recovery_key.title": "Crear una clave nueva",
   "confirm.system_new_recovery_key.msg": "¿Crear una nueva clave de recuperación para {target}? La clave que apuntaste antes deja de funcionar.",
+  "pcopy.title": "Copia de la configuración en tus grupos de almacenamiento",
+  "pcopy.help": "Kiboto guarda una copia cifrada de su configuración en cada grupo de almacenamiento. Si falla el disco del sistema, un Kiboto recién instalado y tu clave de recuperación devuelven tus personas, carpetas compartidas y aplicaciones. No se despierta un grupo dormido para ello.",
+  "pcopy.none": "Aún no hay grupos de almacenamiento. La copia empieza con el primero.",
+  "pcopy.at": "Copiada {when}",
+  "pcopy.never": "Aún sin copia",
+  "pcopy.failed": "El último intento falló: {error}",
+  "pcopy.asleep": "Dormido: conserva la copia que tiene",
+  "pcopy.now": "Copiar ahora",
+  "pcopy.locked": "No se puede escribir ninguna copia hasta que la clave de recuperación haya abierto la clave de datos de este equipo (Seguridad).",
 };

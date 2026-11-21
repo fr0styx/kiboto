@@ -475,10 +475,9 @@ def _start_home_assistant() -> None:
 def _make_machine_key() -> None:
     """A machine set up for Kiboto makes its data key at the first start and keeps it sealed to
     itself (machine_key.py), so the AI chats and the search index are always encrypted there."""
-    from backend import db_crypto, machine_key
+    from backend import machine_key
 
-    if db_crypto.HAVE_SQLCIPHER:
-        machine_key.ensure()
+    machine_key.ensure()  # also what the settings copy on the pools is encrypted with
 
 
 def _bring_pools_back() -> None:

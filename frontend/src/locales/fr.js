@@ -9172,4 +9172,13 @@ export default {
   "rkey.failed": "Cela n'a pas fonctionné.",
   "confirm.system_new_recovery_key.title": "Créer une nouvelle clé",
   "confirm.system_new_recovery_key.msg": "Créer une nouvelle clé de récupération pour {target} ? La clé que vous avez notée auparavant ne fonctionnera plus.",
+  "pcopy.title": "Copie des réglages sur vos pools",
+  "pcopy.help": "Kiboto garde une copie chiffrée de ses réglages sur chaque pool. Si le disque système tombe en panne, un Kiboto fraîchement installé et votre clé de récupération ramènent vos personnes, vos dossiers partagés et vos applications. Un pool en veille n'est pas réveillé pour cela.",
+  "pcopy.none": "Pas encore de pool. La copie commence avec votre premier pool.",
+  "pcopy.at": "Copiée {when}",
+  "pcopy.never": "Pas encore de copie",
+  "pcopy.failed": "Le dernier essai a échoué : {error}",
+  "pcopy.asleep": "En veille : il garde la copie qu'il a",
+  "pcopy.now": "Copier maintenant",
+  "pcopy.locked": "Aucune copie ne peut être écrite tant que la clé de récupération n'a pas ouvert la clé de données de cette machine (Sécurité).",
 };

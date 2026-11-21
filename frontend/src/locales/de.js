@@ -9172,4 +9172,13 @@ export default {
   "rkey.failed": "Das hat nicht funktioniert.",
   "confirm.system_new_recovery_key.title": "Neuen Schlüssel erstellen",
   "confirm.system_new_recovery_key.msg": "Einen neuen Wiederherstellungsschlüssel für {target} erstellen? Der Schlüssel, den Sie zuvor aufgeschrieben haben, funktioniert dann nicht mehr.",
+  "pcopy.title": "Kopie der Einstellungen auf Ihren Pools",
+  "pcopy.help": "Kiboto legt auf jedem Pool eine verschlüsselte Kopie seiner Einstellungen ab. Fällt die Systemplatte aus, bringen ein frisches Kiboto und Ihr Wiederherstellungsschlüssel Ihre Personen, Freigaben und Apps zurück. Ein schlafender Pool wird dafür nicht geweckt.",
+  "pcopy.none": "Noch keine Pools. Die Kopie beginnt mit Ihrem ersten Pool.",
+  "pcopy.at": "Kopiert {when}",
+  "pcopy.never": "Noch keine Kopie",
+  "pcopy.failed": "Letzter Versuch fehlgeschlagen: {error}",
+  "pcopy.asleep": "Schläft: behält die vorhandene Kopie",
+  "pcopy.now": "Jetzt kopieren",
+  "pcopy.locked": "Es kann keine Kopie geschrieben werden, bis der Wiederherstellungsschlüssel den Datenschlüssel dieses Geräts geöffnet hat (Sicherheit).",
 };

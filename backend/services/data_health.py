@@ -311,6 +311,16 @@ def warn_if_on_spinning_disk(folder: str, sysbase: str | None = None, st_dev: in
     return True
 
 
+def _copy_to_pools() -> None:
+    """On a machine set up for Kiboto: the settings copy on every pool that is due and awake."""
+    try:
+        from backend.services import pool_copy
+
+        pool_copy.copy_if_due()
+    except (OSError, RuntimeError, ValueError):
+        logger.warning("[DataHealth] the settings copy on the pools failed", exc_info=True)
+
+
 def data_guard_daemon(data_dir: str | None = None, sleep=time.sleep) -> None:
     """Supervised: takes the daily snapshot when it is due."""
     from backend import config
@@ -328,4 +338,5 @@ def data_guard_daemon(data_dir: str | None = None, sleep=time.sleep) -> None:
             take_daily_snapshot_if_due(folder)
         except Exception:
             logger.warning("[DataHealth] daily snapshot failed", exc_info=True)
+        _copy_to_pools()
         sleep(CHECK_EVERY_SECS)
