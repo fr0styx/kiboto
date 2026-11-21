@@ -26,6 +26,8 @@ The install guide and the Unraid template said the first password is shown in th
 
 Deleting or bringing back a snapshot no longer says it worked when the file system's tool is missing or failed, and a restore that fails puts the folder back as it was.
 
+An install that has no NFS server no longer shows a folder as shared over NFS. The NFS box in the new-folder dialog is greyed out there and says why, and a folder that already had NFS turned on shows it as not running.
+
 #### Security
 
 Apps, Docker clean-up: deleting unused volumes now asks for a confirmation that Kiboto checks itself, so it can't happen without your say-so.

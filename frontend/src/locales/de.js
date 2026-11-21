@@ -2318,6 +2318,7 @@ export default {
   "srv.backup_choose_remote": "Wählen Sie ein rclone-Ziel für die Sicherung der Einstellungen.",
   "srv.backup_settings_where": "Eine Sicherung der Einstellungen geht in einen Ordner im Pool oder zu einem rclone-Ziel.",
   "srv.share_kiboto_folder": "Das ist Kibotos eigener Datenordner. Wählen Sie einen anderen Ordner.",
+  "srv.nfs_no_server": "Diese Installation hat keinen NFS-Server, deshalb können Ordner hier nicht über NFS freigegeben werden.",
   "srv.share_outside": "Wählen Sie einen Ordner in {places}.",
   "srv.share_bad_name": "Geben Sie dem freigegebenen Ordner einen Namen: Buchstaben, Ziffern, Punkte, Bindestriche oder Unterstriche (nicht global, homes oder printers).",
   "srv.username_length": "Ein Benutzername hat 2 bis 32 Zeichen.",

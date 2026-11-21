@@ -2318,6 +2318,7 @@ export default {
   "srv.backup_choose_remote": "Choose an rclone remote for the settings backup.",
   "srv.backup_settings_where": "A settings backup goes to a folder in the pool or to an rclone remote.",
   "srv.share_kiboto_folder": "That is Kiboto's own data folder. Choose another folder.",
+  "srv.nfs_no_server": "This install has no NFS server, so folders can't be shared over NFS here.",
   "srv.share_outside": "Choose a folder inside {places}.",
   "srv.share_bad_name": "Give the shared folder a name: letters, digits, dots, hyphens or underscores (not global, homes or printers).",
   "srv.username_length": "A user name has 2 to 32 characters.",

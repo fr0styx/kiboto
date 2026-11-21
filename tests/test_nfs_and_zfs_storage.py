@@ -33,7 +33,7 @@ def isolated_nfs_and_storage_env(monkeypatch, tmp_path):
     test_storage.mkdir()
     test_data = tmp_path / "data"
     test_data.mkdir()
-    test_nfs_exports_d = tmp_path / "exports.d" / "zettnas.exports"
+    test_nfs_exports_d = tmp_path / "exports.d" / "kiboto.exports"
 
     monkeypatch.setattr("backend.hardware.pal.base.POOL_PATH", str(test_storage))
     monkeypatch.setattr("backend.config.POOL_PATH", str(test_storage))
@@ -41,7 +41,7 @@ def isolated_nfs_and_storage_env(monkeypatch, tmp_path):
     monkeypatch.setattr("backend.services.nfs_engine.DATA_DIR", str(test_data))
     monkeypatch.setattr("backend.services.nfs_engine.NFS_DIR", str(test_data / "nfs"))
     monkeypatch.setattr("backend.services.nfs_engine.NFS_EXPORTS_FILE", str(test_data / "nfs" / "exports.json"))
-    monkeypatch.setattr("backend.services.nfs_engine.ZETTNAS_EXPORTS_D_FILE", str(test_nfs_exports_d))
+    monkeypatch.setattr("backend.services.nfs_engine.EXPORTS_D_FILE", str(test_nfs_exports_d))
     monkeypatch.setattr("backend.services.samba_engine.DATA_DIR", str(test_data))
     monkeypatch.setattr("backend.services.samba_engine.SAMBA_DIR", str(test_data / "samba"))
     monkeypatch.setattr("backend.services.samba_engine.SAMBA_CONF_FILE", str(test_data / "samba" / "smb.conf"))
@@ -107,7 +107,7 @@ def test_nfs_export_options_generation():
 
 
 def test_nfs_engine_lifecycle(tmp_path):
-    exports_d_file = str(tmp_path / "exports.d" / "zettnas.exports")
+    exports_d_file = str(tmp_path / "exports.d" / "kiboto.exports")
     engine = NfsEngine(exports_d_path=exports_d_file)
 
     rule = NfsExportRule(

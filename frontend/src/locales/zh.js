@@ -2318,6 +2318,7 @@ export default {
   "srv.backup_choose_remote": "请为设置备份选择一个 rclone 远程。",
   "srv.backup_settings_where": "设置备份会保存到存储池中的文件夹或 rclone 远程。",
   "srv.share_kiboto_folder": "那是 Kiboto 自己的数据文件夹。请选择其他文件夹。",
+  "srv.nfs_no_server": "此安装没有 NFS 服务器，因此这里无法通过 NFS 共享文件夹。",
   "srv.share_outside": "请选择 {places} 中的文件夹。",
   "srv.share_bad_name": "请为共享文件夹命名：字母、数字、点、连字符或下划线（不能是 global、homes 或 printers）。",
   "srv.username_length": "用户名为 2 到 32 个字符。",

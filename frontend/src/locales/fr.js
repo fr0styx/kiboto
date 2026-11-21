@@ -2318,6 +2318,7 @@ export default {
   "srv.backup_choose_remote": "Choisissez un distant rclone pour la sauvegarde des réglages.",
   "srv.backup_settings_where": "Une sauvegarde des réglages va dans un dossier du pool ou vers un distant rclone.",
   "srv.share_kiboto_folder": "C'est le dossier de données de Kiboto lui-même. Choisissez un autre dossier.",
+  "srv.nfs_no_server": "Cette installation n'a pas de serveur NFS : les dossiers ne peuvent donc pas être partagés en NFS ici.",
   "srv.share_outside": "Choisissez un dossier dans {places}.",
   "srv.share_bad_name": "Donnez un nom au dossier partagé : lettres, chiffres, points, tirets ou tirets bas (pas global, homes ni printers).",
   "srv.username_length": "Un nom d'utilisateur compte de 2 à 32 caractères.",

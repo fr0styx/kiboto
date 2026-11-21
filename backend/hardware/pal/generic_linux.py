@@ -316,6 +316,7 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
 
     def get_capabilities(self) -> PlatformCapabilities:
         from backend.hardware.pal.base import storage_tools
+        from backend.services.nfs_engine import can_serve
 
         tools = storage_tools()
         has_cow = tools["btrfs"] or tools["zfs"]
@@ -333,6 +334,7 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
             can_trigger_scrub=has_cow or tools["mdadm"],
             can_snapshot=snapshots,
             storage_tools=tools,
+            nfs_served=can_serve(),
             supported_filesystems=[f for f in ("btrfs", "ext4", "zfs") if f == "ext4" or tools[f]],
             description="Active Provisioner Mode: Bare-metal Linux host detected. Pool and share management enabled."
             + (f" Not available here: {', '.join(missing)} tools are missing." if missing else ""),
@@ -1260,6 +1262,14 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
         """Provisions a network share and syncs with SambaEngine and NfsEngine."""
         from backend.services.samba_engine import validate_share_path
 
+        if export_nfs:
+            from backend.errors import SaidError
+            from backend.services.nfs_engine import can_serve
+
+            if not can_serve():  # no setting that nothing serves
+                raise SaidError(
+                    "This install has no NFS server, so folders can't be shared over NFS here.", "nfs_no_server"
+                )
         full_path = validate_share_path(path if path else os.path.join(self._pool_path, name))
         if export_nfs:  # refuse bad NFS settings before anything is created
             from backend.services.nfs_engine import NfsExportRule, home_network

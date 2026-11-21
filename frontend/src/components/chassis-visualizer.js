@@ -1305,7 +1305,13 @@ export async function fetchAndRenderNetworkShares(container) {
       api.get('/api/samba/status').catch(() => null),
       api.get('/api/webdav/status').catch(() => null),
     ]);
-    _shareServices = { smb: sambaStatus, webdav: webdavStatus, sftp: sftpStatus };
+    const nfsServed = platformData?.capabilities?.nfs_served;
+    _shareServices = {
+      smb: sambaStatus,
+      webdav: webdavStatus,
+      sftp: sftpStatus,
+      nfs: typeof nfsServed === 'boolean' ? { running: nfsServed } : null, // null: the host serves NFS, or unknown
+    };
     renderProtocolPills({ smb: sambaStatus, sftp: sftpStatus, webdav: webdavStatus });
 
     const shares = sharesData.shares || [];
@@ -1479,11 +1485,17 @@ export function shareProtocolTags(s, services = {}) {
       )
     );
   else out.push(tag('SMB', 'on', t('share.proto_on', 'Shared over {proto}', { proto: 'SMB' })));
-  out.push(
-    s.export_nfs
-      ? tag('NFS', 'on', t('share.proto_on', 'Shared over {proto}', { proto: 'NFS' }))
-      : tag('NFS', 'off', t('share.proto_not_shared', 'Not shared over {proto}', { proto: 'NFS' }))
-  );
+  if (!s.export_nfs)
+    out.push(tag('NFS', 'off', t('share.proto_not_shared', 'Not shared over {proto}', { proto: 'NFS' })));
+  else if (svc(services.nfs) === 'down')
+    out.push(
+      tag(
+        'NFS',
+        'down',
+        t('share.proto_down', '{proto} is turned on for this share but its service is not running', { proto: 'NFS' })
+      )
+    );
+  else out.push(tag('NFS', 'on', t('share.proto_on', 'Shared over {proto}', { proto: 'NFS' })));
   // No WebDAV or SFTP tag per share: those services reach every share only for administrators
   // without two-step sign-in, everyone else just their own folder. The tags said every share was
   // served that way (SET-14); the services' own cards say whether they run.
@@ -3492,6 +3504,11 @@ export function openCreateNetworkShareModal(onSuccess) {
       nfsOpts.style.display = exportNfsCb.checked ? 'flex' : 'none';
     };
     exportNfsCb.onchange = toggleNfs;
+    const noNfs = _shareServices?.nfs?.running === false; // this install has no NFS server
+    exportNfsCb.disabled = noNfs;
+    if (noNfs) exportNfsCb.checked = false;
+    const nfsOff = document.getElementById('create-share-nfs-off');
+    if (nfsOff) nfsOff.hidden = !noNfs;
     toggleNfs();
   }
 

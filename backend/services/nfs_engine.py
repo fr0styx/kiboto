@@ -24,7 +24,14 @@ NFS_DIR = os.path.join(DATA_DIR, "nfs")
 NFS_EXPORTS_FILE = os.path.join(NFS_DIR, "exports.json")
 SYSTEM_EXPORTS_D_DIR = "/etc/exports.d"
 SYSTEM_EXPORTS_FILE = "/etc/exports"
-ZETTNAS_EXPORTS_D_FILE = os.path.join(SYSTEM_EXPORTS_D_DIR, "zettnas.exports")
+EXPORTS_D_FILE = os.path.join(SYSTEM_EXPORTS_D_DIR, "kiboto.exports")
+OLD_EXPORTS_NAME = "zettnas.exports"  # the file from before the rebrand: removed once the new one is written
+
+
+def can_serve() -> bool:
+    """True when this system has the tool that hands exports to an NFS server. Kiboto's container
+    has none, so there an export is only a saved setting and nothing serves it."""
+    return shutil.which("exportfs") is not None
 
 
 _NFS_CTRL = re.compile(r"[\x00-\x1f\x7f]")
@@ -123,6 +130,7 @@ class NfsStatus(BaseModel):
     exports_count: int
     exports_file: str
     kernel_nfs_supported: bool
+    served: bool = True  # False: this install has no NFS server tools, so nothing serves the exports
 
 
 class NfsEngine:
@@ -133,7 +141,7 @@ class NfsEngine:
 
     def __init__(self, exports_d_path: str | None = None):
         os.makedirs(NFS_DIR, exist_ok=True)
-        self._exports_d_file = exports_d_path or ZETTNAS_EXPORTS_D_FILE
+        self._exports_d_file = exports_d_path or EXPORTS_D_FILE
         self._exports: dict[str, NfsExportRule] = {}
         self._load_exports()
 
@@ -232,7 +240,7 @@ class NfsEngine:
         return f'"{rule.path}" {clients}({opts})'
 
     def generate_exports_file_content(self) -> str:
-        """Generates full /etc/exports.d/zettnas.exports content."""
+        """Generates full /etc/exports.d/kiboto.exports content."""
         lines = [
             "# ==============================================================================",
             "# Kiboto - Auto-Generated NFS Export Rules",
@@ -252,13 +260,13 @@ class NfsEngine:
 
     def apply_exports(self) -> bool:
         """
-        Writes export rules to /etc/exports.d/zettnas.exports (or /etc/exports) and runs exportfs -ra.
-        Gracefully handles environments without root write access or missing exportfs.
+        Writes export rules to /etc/exports.d/kiboto.exports (or /etc/exports) and runs exportfs -ra.
+        True only when exportfs took them: a file that no NFS server reads is not an applied export.
         """
         content = self.generate_exports_file_content()
         written = False
 
-        # 1. Try writing to /etc/exports.d/zettnas.exports
+        # 1. Try writing to /etc/exports.d/kiboto.exports
         try:
             d = os.path.dirname(self._exports_d_file)
             if not os.path.isdir(d):
@@ -266,6 +274,9 @@ class NfsEngine:
             with open(self._exports_d_file, "w", encoding="utf-8") as f:
                 f.write(content)
             written = True
+            old = os.path.join(os.path.dirname(self._exports_d_file), OLD_EXPORTS_NAME)
+            if old != self._exports_d_file and os.path.isfile(old):
+                os.remove(old)  # else every folder is exported twice, and a removed one stays exported
         except Exception as e:
             logger.debug("[NFS] Could not write to %s: %s", self._exports_d_file, e)
 
@@ -297,7 +308,7 @@ class NfsEngine:
         except (FileNotFoundError, subprocess.SubprocessError) as ex:
             logger.debug("[NFS] exportfs execution skipped or unavailable: %s", ex)
 
-        return written
+        return False
 
     def get_status(self) -> NfsStatus:
         """Audits current host NFS server status and port 2049 availability."""
@@ -316,7 +327,8 @@ class NfsEngine:
         kernel_supported = os.path.exists("/proc/fs/nfsd") or os.path.exists("/proc/net/rpc/nfsd")
 
         return NfsStatus(
-            running=port_open or len(self._exports) > 0,
+            running=port_open,  # a saved export is not a running server
+            served=can_serve(),
             port_2049_open=port_open,
             exports_count=len(self._exports),
             exports_file=self._exports_d_file,

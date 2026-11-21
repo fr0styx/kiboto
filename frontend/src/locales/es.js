@@ -2318,6 +2318,7 @@ export default {
   "srv.backup_choose_remote": "Elige un remoto de rclone para la copia de los ajustes.",
   "srv.backup_settings_where": "Una copia de los ajustes va a una carpeta del grupo o a un remoto de rclone.",
   "srv.share_kiboto_folder": "Esa es la carpeta de datos del propio Kiboto. Elige otra carpeta.",
+  "srv.nfs_no_server": "Esta instalación no tiene servidor NFS, así que aquí no se pueden compartir carpetas por NFS.",
   "srv.share_outside": "Elige una carpeta dentro de {places}.",
   "srv.share_bad_name": "Pon un nombre a la carpeta compartida: letras, dígitos, puntos, guiones o guiones bajos (no global, homes ni printers).",
   "srv.username_length": "Un nombre de usuario tiene de 2 a 32 caracteres.",

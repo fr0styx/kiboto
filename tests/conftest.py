@@ -250,6 +250,15 @@ def _no_host_storage_tools(request, monkeypatch):
 
 
 @pytest.fixture(autouse=True)
+def _an_nfs_server_everywhere(monkeypatch):
+    """Tests see an NFS server on every machine (the test image has no exportfs, a developer's
+    machine may). The tests about an install without one switch it off themselves."""
+    from backend.services import nfs_engine
+
+    monkeypatch.setattr(nfs_engine, "can_serve", lambda: True)
+
+
+@pytest.fixture(autouse=True)
 def _auto_confirm_destructive_actions(request, monkeypatch):
     """Most API tests call destructive routes directly; treat them as confirmed.
 

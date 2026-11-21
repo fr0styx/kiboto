@@ -51,6 +51,8 @@ class PlatformCapabilities(BaseModel):
     can_export_pools: bool = True
     can_import_pools: bool = True
     supported_filesystems: list[str] = Field(default_factory=list)
+    # False: Kiboto would have to serve NFS itself and this install cannot. None: the host does it, or unknown
+    nfs_served: bool | None = None
     description: str = ""
 
 
