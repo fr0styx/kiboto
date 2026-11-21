@@ -243,7 +243,13 @@ def list_sync_pairs():
 def put_sync_pair(req: SyncPairIn):
     """Adds or changes a two-way sync; it does nothing until its dry run was seen and approved."""
     from backend.services import two_way_sync
+    from backend.services.shared_folders import in_a_shared_folder
 
+    # a two-way sync deletes here what was deleted in the cloud: only inside a shared folder
+    if req.local.startswith("/") and not in_a_shared_folder(req.local):
+        raise HTTPException(
+            status_code=400, detail="The folder on this NAS must be a shared folder or a folder in one."
+        )
     return _sync_errors(
         two_way_sync.save_pair, req.id, req.name, req.local, req.remote, req.every_hours, req.max_delete, None, req.new
     )
@@ -280,6 +286,28 @@ async def run_sync_pair(pair_id: str):
     return await asyncio.to_thread(_sync_errors, two_way_sync.run_now, pair_id)
 
 
+def _local_sides(src: str, dst: str, action: str) -> list[str]:
+    """The folders here a job deletes from must be shared folders: a sync deletes from its
+    destination what the source has not, and a move empties its source. A sync from the cloud into
+    /mnt/user or a drive's top folder would have deleted every other share and app folder there.
+    Returns rclone filters that leave Kiboto's own data out on every local side."""
+    from backend.fsutil import protected_rclone_excludes
+    from backend.services.shared_folders import in_a_shared_folder
+
+    for local, deletes in ((dst, action == "sync"), (src, action == "move")):
+        if deletes and local.startswith("/") and not in_a_shared_folder(local):
+            raise HTTPException(
+                status_code=403,
+                detail="A sync deletes from its destination, and a move from its source: "
+                "that folder must be a shared folder or a folder in one.",
+            )
+    flags: list[str] = []
+    for local in (src, dst):
+        if local.startswith("/"):
+            flags += protected_rclone_excludes(local)
+    return flags
+
+
 @router.post("/remotes/sync", dependencies=[Depends(require_scope("backup:write", "storage:write", "storage:admin"))])
 async def start_remote_sync(req: RemoteSyncRequest, principal: AuthenticatedPrincipal = Depends(get_current_principal)):
     """Triggers an asynchronous cloud sync/copy/move operation."""
@@ -289,6 +317,7 @@ async def start_remote_sync(req: RemoteSyncRequest, principal: AuthenticatedPrin
     try:
         src = engine.checked_location(req.src, confine_local=confine)
         dst = engine.checked_location(req.dst, confine_local=confine)
+        flags = await asyncio.to_thread(_local_sides, src, dst, req.action)
         return engine.start_sync_job(
             src=src,
             dst=dst,
@@ -298,7 +327,10 @@ async def start_remote_sync(req: RemoteSyncRequest, principal: AuthenticatedPrin
             retries=req.retries,
             verbose=req.verbose,
             notify=req.notify,
+            extra_flags=flags or None,
         )
+    except HTTPException:
+        raise
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     except Exception as e:

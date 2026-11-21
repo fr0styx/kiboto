@@ -256,6 +256,8 @@ Files: "Give to this folder's people" works only on a shared folder or a folder 
 
 Files, Permissions: a change no longer passes through a shortcut (symbolic link) to whatever it points at, and "Also to everything inside it" works only on a shared folder or a folder inside one.
 
+Cloud sync: a sync from the cloud, a move to it and a two-way sync only work on a shared folder or a folder inside one here. Pointed at a drive's top folder, a sync could have deleted every other shared folder and the apps' folders there. Kiboto's own data is always left out.
+
 ## v2.0.4 (2026-11-19)
 ### 🏡 Apps that go back on their own, a way to move in, and Kiboto in your language everywhere
 

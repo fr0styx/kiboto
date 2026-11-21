@@ -137,6 +137,9 @@ both directions, every few hours.
   other side, and you get an alert; check the preview before turning it on again.
 - A sync is not a backup: a file you delete on purpose is deleted on both sides. Keep an
   off-site backup as well.
+- **The folder here is a shared folder** or a folder inside one. A sync deletes here what was
+  deleted in the cloud, so a drive's top folder (with appdata and system beside the shares) is
+  refused. The same holds for a one-way sync from the cloud and for a move to it, on Cloud Drives.
 
 ## Keep a PC or phone in sync with the NAS
 

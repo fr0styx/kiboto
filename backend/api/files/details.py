@@ -331,18 +331,11 @@ async def fs_like_folder(
 
 
 def _in_a_shared_folder(target: str) -> bool:
-    """Whether `target` is one of the household's shared folders or inside one. Files may browse
-    all of /mnt, and below a pool's top lie appdata, system, domains and isos, whose files belong
-    to the system on purpose (other apps' settings, docker.img, VM disks). share_mounts leaves
-    those out, and the share that holds Kiboto's own data."""
-    from backend.services.app_catalog import share_mounts
+    """Whether `target` is one of the household's shared folders or inside one (other apps'
+    settings, docker.img and VM disks lie beside them, and stay the system's)."""
+    from backend.services.shared_folders import in_a_shared_folder
 
-    try:
-        roots = [os.path.realpath(mp).rstrip(os.sep) for mp in share_mounts().values()]
-    except (OSError, RuntimeError, ValueError):  # the storage platform did not answer: refuse
-        return False
-    real = os.path.realpath(target)
-    return any(root and (real == root or real.startswith(root + os.sep)) for root in roots)
+    return in_a_shared_folder(target)
 
 
 def _may_change_inside(target: str, recursive: bool) -> bool:

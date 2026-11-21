@@ -195,7 +195,12 @@ def test_api(client, auth_headers, store, monkeypatch):
             return spec
 
     monkeypatch.setattr(rclone_engine, "get_rclone_engine", lambda: Eng())
+    from backend.services import app_catalog
+
+    monkeypatch.setattr(app_catalog, "share_mounts", lambda: {"docs": "/mnt/user/docs"})
     body = {"id": "docs", "name": "Docs", "local": "/mnt/user/docs", "remote": "gdrive:docs"}
+    for above in ("/mnt/user", "/mnt/user/appdata", "/mnt/cache"):  # it deletes here what the cloud lost
+        assert client.put("/api/sync/pairs", json={**body, "local": above}, headers=auth_headers).status_code == 400
     assert client.put("/api/sync/pairs", json=body, headers=auth_headers).json()["state"] == "new"
     assert client.put("/api/sync/pairs", json={**body, "local": "gdrive:x"}, headers=auth_headers).status_code == 400
     assert client.get("/api/sync/pairs", headers=auth_headers).json()["pairs"][0]["id"] == "docs"
