@@ -36,6 +36,8 @@ On a system where Kiboto makes the storage pools itself, a btrfs or ext4 pool is
 
 An ext4 pool that Kiboto made can now be deleted with "Delete and erase drives", and after a ZFS pool is deleted its drives read as empty. A ZFS pool with parity (raidz) shows the space you can really store, and the main storage pool lists only the drives it is on.
 
+On systems with an older Linux kernel, a setting saved twice within a few thousandths of a second could be read back in its first form for a moment. Kiboto now notices such a change every time.
+
 #### Security
 
 Apps, Docker clean-up: deleting unused volumes now asks for a confirmation that Kiboto checks itself, so it can't happen without your say-so.

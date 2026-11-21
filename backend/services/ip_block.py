@@ -18,7 +18,7 @@ from typing import Any
 
 from backend import config
 from backend.config import DATA_DIR, logger
-from backend.fsutil import atomic_write_json
+from backend.fsutil import atomic_write_json, file_stamp
 
 STORE = os.path.join(DATA_DIR, "ip_blocks.json")
 FAIL_WINDOW_S = 15 * 60
@@ -46,9 +46,10 @@ def _trusted(ip: str) -> bool:
     return False
 
 
-def _mtime() -> int | None:
+def _mtime() -> tuple[int, int, int] | None:
+    """The store's stamp (time, size and file number: the time alone repeats on some kernels)."""
     try:
-        return os.stat(STORE).st_mtime_ns
+        return file_stamp(STORE)
     except OSError:
         return None
 

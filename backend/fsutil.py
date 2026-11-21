@@ -17,7 +17,19 @@ from typing import Any
 
 from backend import legacy_names
 
-_JSON_CACHE: dict[str, tuple[float | None, Any, float]] = {}  # mtime None: the file was missing
+Stamp = tuple[int, int, int]
+_JSON_CACHE: dict[str, tuple[Stamp | None, Any, float]] = {}  # stamp None: the file was missing
+
+
+def file_stamp(path: str) -> Stamp:
+    """What tells one state of a file from the next: its change time, size and file number together.
+    The time alone is not enough. On Linux before 6.13 it moves only every few milliseconds, so a
+    file saved twice in quick succession keeps one time, and a cache that goes by the time serves
+    the older content. A file written by atomic_write_json is a new file each time, with a new
+    number. Raises OSError as os.stat does."""
+    st = os.stat(path)
+    return st.st_mtime_ns, st.st_size, st.st_ino
+
 
 # Settings files the app writes itself: atomic_write_json refreshes the cached copy, so hot
 # loops only need to look at the file now and then for edits made outside the app. On hosts
@@ -68,7 +80,10 @@ def atomic_write_json(path: str, data: Any, indent: int | None = None) -> None:
         os.replace(tmp_path, path)
         _fsync_dir(directory)  # the rename itself survives a power cut (NARC-7)
         now = time.time()
-        _JSON_CACHE[path] = (now, data, now)
+        try:
+            _JSON_CACHE[path] = (file_stamp(path), data, now)
+        except OSError:
+            _JSON_CACHE.pop(path, None)  # read from the file next time
     except BaseException:
         try:
             os.unlink(tmp_path)
@@ -223,20 +238,20 @@ def read_json_cached(path: str, default: Any = None, max_age: float = 3.0) -> An
         now = time.time()
         cached = _JSON_CACHE.get(path)
         if cached:
-            cached_mtime, cached_data, checked_at = cached
+            cached_stamp, cached_data, checked_at = cached
             if (now - checked_at) < max_age:
                 # a file that was missing stays missing until the next check (PERF-22)
-                return default if cached_mtime is None else cached_data
-            stat = os.stat(path)
-            if stat.st_mtime == cached_mtime:
-                _JSON_CACHE[path] = (cached_mtime, cached_data, now)
+                return default if cached_stamp is None else cached_data
+            stamp = file_stamp(path)
+            if stamp == cached_stamp:
+                _JSON_CACHE[path] = (cached_stamp, cached_data, now)
                 return cached_data
             data = read_json(path, default)
-            _JSON_CACHE[path] = (stat.st_mtime, data, now)
+            _JSON_CACHE[path] = (stamp, data, now)
             return data
-        stat = os.stat(path)
+        stamp = file_stamp(path)
         data = read_json(path, default)
-        _JSON_CACHE[path] = (stat.st_mtime, data, now)
+        _JSON_CACHE[path] = (stamp, data, now)
         return data
     except FileNotFoundError:
         # optional settings files are often absent: remember it, instead of a stat on every

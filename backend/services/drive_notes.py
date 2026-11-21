@@ -18,7 +18,7 @@ import threading
 from typing import Any
 
 from backend.config import DATA_DIR, logger
-from backend.fsutil import atomic_write_json
+from backend.fsutil import atomic_write_json, file_stamp
 
 NOTES_FILE = os.path.join(DATA_DIR, "drive_notes.json")
 SERIAL_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9 ._:/+-]{0,63}$")
@@ -26,7 +26,7 @@ NOTE_MAX = 300
 MAX_DRIVES = 500
 TEMP_MIN, TEMP_MAX = 30, 90
 _lock = threading.Lock()
-_cache: dict[str, Any] = {"key": None, "data": {}}  # the file as last read, by (path, mtime)
+_cache: dict[str, Any] = {"key": None, "data": {}}  # the file as last read, by (path, file_stamp)
 
 
 class BadNotes(ValueError):
@@ -35,7 +35,7 @@ class BadNotes(ValueError):
 
 def _load() -> dict[str, dict[str, Any]]:
     try:
-        key = (NOTES_FILE, os.stat(NOTES_FILE).st_mtime_ns)
+        key = (NOTES_FILE, file_stamp(NOTES_FILE))
     except FileNotFoundError:
         return {}
     except OSError:

@@ -8,26 +8,26 @@ import time
 import uuid
 
 from backend.config import DATA_DIR, logger
-from backend.fsutil import atomic_write_json
+from backend.fsutil import atomic_write_json, file_stamp
 
 TOKENS_FILE = os.path.join(DATA_DIR, "api_tokens.json")
 # Format: { "<token_id>": { "hash": "<sha256>", "masked_token": "zat_...", "name": "...", "created": ts } }
 
 _TOKENS_CACHE = {}
-_tokens_file_mtime_ns = 0
+_tokens_file_mtime_ns: tuple[int, int, int] | None = None
 _tokens_lock = threading.RLock()
 
 
 def load_tokens() -> dict:
-    """Thread-safe cached token loader with st_mtime_ns invalidation and legacy format migration."""
+    """Thread-safe cached token loader with file-stamp invalidation and legacy format migration."""
     global _TOKENS_CACHE, _tokens_file_mtime_ns
     with _tokens_lock:
         try:
             if not os.path.exists(TOKENS_FILE):
                 _TOKENS_CACHE = {}
-                _tokens_file_mtime_ns = 0
+                _tokens_file_mtime_ns = None
                 return {}
-            mtime = os.stat(TOKENS_FILE).st_mtime_ns
+            mtime = file_stamp(TOKENS_FILE)
             if mtime == _tokens_file_mtime_ns and _TOKENS_CACHE:
                 return _TOKENS_CACHE
             with open(TOKENS_FILE) as f:
@@ -57,7 +57,7 @@ def load_tokens() -> dict:
             if migrated:
                 atomic_write_json(TOKENS_FILE, normalized)
                 if os.path.exists(TOKENS_FILE):
-                    mtime = os.stat(TOKENS_FILE).st_mtime_ns
+                    mtime = file_stamp(TOKENS_FILE)
 
             _TOKENS_CACHE = normalized
             _tokens_file_mtime_ns = mtime
@@ -65,7 +65,7 @@ def load_tokens() -> dict:
         except Exception as e:
             logger.warning(f"Failed to load API tokens: {e}")
             _TOKENS_CACHE = {}
-            _tokens_file_mtime_ns = 0
+            _tokens_file_mtime_ns = None
             return {}
 
 
@@ -77,7 +77,7 @@ def save_tokens(tokens: dict) -> None:
         _TOKENS_CACHE = dict(tokens)
         if os.path.exists(TOKENS_FILE):
             try:
-                _tokens_file_mtime_ns = os.stat(TOKENS_FILE).st_mtime_ns
+                _tokens_file_mtime_ns = file_stamp(TOKENS_FILE)
             except OSError:
                 pass
 

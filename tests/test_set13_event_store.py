@@ -128,7 +128,9 @@ def test_the_file_is_the_list_when_the_store_cannot_be_read(log, monkeypatch):
             ]
         )
     )
-    monkeypatch.setattr(db, "DB_PATH", "/nonexistent-folder/history.db")
+    blocked = pathlib.Path(state.EVENTS_FILE).parent / "a-file"
+    blocked.write_text("")  # a folder cannot be made under a file, by root either
+    monkeypatch.setattr(db, "DB_PATH", str(blocked / "history.db"))
     monkeypatch.setattr(event_store, "_state", {"table_in": "", "pruned": 0.0, "said": 0.0})
     state._load_events()
     assert [(e["id"], e["title"]) for e in state.events_snapshot()] == [(2, "B"), (1, "A")]
