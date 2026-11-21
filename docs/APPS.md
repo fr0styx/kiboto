@@ -74,7 +74,8 @@ stops after 20 seconds (a folder cut short is counted in part and says so).
 ## Apps that must know their address
 
 A few apps build their links and check sign-ins against the address they are told: BookStack,
-Linkwarden, Joplin Server, Planka, Docmost, wallabag, Mattermost, WeKan, Healthchecks and HedgeDoc.
+Linkwarden, Joplin Server, Planka, Docmost, wallabag, Mattermost, WeKan, Healthchecks, HedgeDoc,
+Monica and Lychee.
 Kiboto gives them the address in your browser at the moment you install them, so install them
 from the address the household uses (the NAS's name, or the address you use away from home, not a one-off one). If
 that address changes later, install the app again over its data ("Stop & replace"): its files

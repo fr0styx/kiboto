@@ -1,3 +1,4 @@
+import base64
 import json
 import os
 import re
@@ -1069,10 +1070,21 @@ def _stack_secrets(app_dir: str) -> dict[str, str]:
         return {}
 
 
+def new_secret(name: str) -> str:
+    """A new secret for {{secret:<name>}}; its kind follows the name's ending, for apps that check
+    the form of their key: _hex is 64 hexadecimal characters (Homarr), _appkey a Laravel key,
+    "base64:" and 32 random bytes (Speedtest Tracker, Monica, Lychee); else 32 URL-safe characters."""
+    if name.endswith("_hex"):
+        return secrets.token_hex(32)
+    if name.endswith("_appkey"):
+        return "base64:" + base64.b64encode(secrets.token_bytes(32)).decode()
+    return secrets.token_urlsafe(24)
+
+
 def _fill_secrets(value: str, secrets_map: dict[str, str]) -> str:
     def sub(m: re.Match) -> str:
         if m.group(1) not in secrets_map:
-            secrets_map[m.group(1)] = secrets.token_urlsafe(24)
+            secrets_map[m.group(1)] = new_secret(m.group(1))
         return secrets_map[m.group(1)]
 
     return _SECRET_RE.sub(sub, value)

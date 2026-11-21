@@ -15,6 +15,7 @@ Each template is deployed by backend/services/app_catalog.py through the Docker 
   seed_files        {volume: {relative path: content}} written once, before first start
   volume_owner      "uid:gid" the app runs as; its folders are handed to it on install
   credentials       login shown after deploy; "{{secret:name}}" makes and keeps a password
+                    (a name ending in _hex: 64 hex characters; in _appkey: a Laravel base64: key)
   probe             "tcp" when the app has no web UI (game servers); webui_path is None
   host_network      True: the app shares the host's network (TVs find a DLNA server by multicast);
                     no port is mapped, the app answers on its own default_port
@@ -27,6 +28,8 @@ Every template here was deployed on a real host and its web UI answered before i
 """
 
 from typing import Any
+
+GATUS_CONFIG = 'endpoints:\n  - name: Gatus itself\n    url: http://localhost:8080/health\n    interval: 5m\n    conditions:\n      - "[STATUS] == 200"\n'
 
 PUID = {"PUID": "1000", "PGID": "100", "TZ": "UTC"}
 
@@ -3281,6 +3284,229 @@ MORE_APPS: list[dict[str, Any]] = [
         },
         "tags": ["retro", "emulation"],
         "logo": "romm",
+    },
+    {
+        "id": "homarr",
+        "name": "Homarr",
+        "category": "utilities",
+        "description": "A start page for your home server: tiles for your apps with their status, and widgets "
+        "for weather, calendars and downloads. Make the first account on first visit.",
+        "image": "ghcr.io/homarr-labs/homarr:latest",
+        "default_port": 7575,
+        "webui_path": "/",
+        "env": {"SECRET_ENCRYPTION_KEY": "{{secret:encryption_key_hex}}"},
+        "volumes": {"appdata": "/appdata"},
+        "tags": ["dashboard"],
+        "logo": "homarr",
+    },
+    {
+        "id": "rsync-ssh",
+        "name": "rsync over SSH",
+        "category": "utilities",
+        "description": 'A place other computers can back up to with rsync over SSH (rsync -e "ssh -p 2224"), '
+        "kept in a folder of its own. Sign in as backup.",
+        "image": "lscr.io/linuxserver/openssh-server:latest",
+        "default_port": 2224,
+        "ports": ["2224:2222"],
+        "webui_path": None,
+        "probe": "tcp",
+        "env": {
+            **PUID,
+            "USER_NAME": "backup",
+            "PASSWORD_ACCESS": "true",
+            "USER_PASSWORD": "{{secret:user_password}}",
+            "SUDO_ACCESS": "false",
+            "DOCKER_MODS": "linuxserver/mods:openssh-server-rsync",
+        },
+        "volumes": {"config": "/config", "backups": "/backups"},
+        "share_folders": {"backups": "Files"},
+        "credentials": {"user": "backup", "password": "{{secret:user_password}}"},
+        "tags": ["backup", "rsync"],
+        "logo": "terminal",
+    },
+    {
+        "id": "speedtest-tracker",
+        "name": "Speedtest Tracker",
+        "category": "monitoring",
+        "description": "Measures your internet speed on a schedule and keeps the history, so you can show your "
+        "provider what you really get.",
+        "image": "lscr.io/linuxserver/speedtest-tracker:latest",
+        "default_port": 3033,
+        "ports": ["3033:80"],
+        "webui_path": "/",
+        "env": {
+            **PUID,
+            "APP_KEY": "{{secret:app_appkey}}",
+            "DB_CONNECTION": "sqlite",
+            "ADMIN_EMAIL": "admin@example.com",
+            "ADMIN_PASSWORD": "{{secret:admin_password}}",
+        },
+        "volumes": {"config": "/config"},
+        "credentials": {"user": "admin@example.com", "password": "{{secret:admin_password}}"},
+        "tags": ["internet", "speed"],
+        "logo": "speedtest-tracker",
+    },
+    {
+        "id": "gatus",
+        "name": "Gatus",
+        "category": "monitoring",
+        "description": "A status page that checks your websites and services on a schedule and says when one "
+        "stops answering. What it checks is set in config/config.yaml.",
+        "image": "twinproduction/gatus:latest",
+        "default_port": 3034,
+        "ports": ["3034:8080"],
+        "webui_path": "/",
+        "env": {"GATUS_CONFIG_PATH": "/config/config.yaml"},
+        "volumes": {"config": "/config"},
+        "seed_files": {"config": {"config.yaml": GATUS_CONFIG}},
+        "tags": ["status", "uptime"],
+        "logo": "gatus",
+    },
+    {
+        "id": "monica",
+        "name": "Monica",
+        "category": "productivity",
+        "description": "Remember what matters about the people in your life: birthdays, conversations, gifts and "
+        "how you know them. Make the first account on first visit.",
+        "image": "monica:latest",
+        "default_port": 3035,
+        "ports": ["3035:80"],
+        "webui_path": "/",
+        "env": {
+            "APP_KEY": "{{secret:app_appkey}}",
+            "APP_URL": "http://{{host}}:{{port}}",
+            "DB_HOST": "db",
+            "DB_DATABASE": "monica",
+            "DB_USERNAME": "monica",
+            "DB_PASSWORD": "{{secret:db_password}}",
+        },
+        "volumes": {"storage": "/var/www/html/storage"},
+        "volume_owner": "33:33",
+        "stack_services": {
+            "db": {
+                "image": "mariadb:11",
+                "env": {
+                    "MARIADB_RANDOM_ROOT_PASSWORD": "true",
+                    "MARIADB_DATABASE": "monica",
+                    "MARIADB_USER": "monica",
+                    "MARIADB_PASSWORD": "{{secret:db_password}}",
+                },
+                "volumes": {"mysql": "/var/lib/mysql"},
+            }
+        },
+        "tags": ["contacts", "crm"],
+        "address_bound": True,
+        "logo": "monica",
+    },
+    {
+        "id": "lychee",
+        "name": "Lychee",
+        "category": "photos",
+        "description": "A photo gallery with albums you can share by link, made for uploading and showing "
+        "pictures. Make the first account on first visit.",
+        "image": "lycheeorg/lychee:latest",
+        "default_port": 3036,
+        "ports": ["3036:8000"],
+        "webui_path": "/",
+        "env": {
+            **PUID,
+            "APP_KEY": "{{secret:app_appkey}}",
+            "APP_URL": "http://{{host}}:{{port}}",
+            "DB_CONNECTION": "mysql",
+            "DB_HOST": "db",
+            "DB_PORT": "3306",
+            "DB_DATABASE": "lychee",
+            "DB_USERNAME": "lychee",
+            "DB_PASSWORD": "{{secret:db_password}}",
+        },
+        "volumes": {"conf": "/conf", "uploads": "/uploads", "sym": "/sym"},
+        "stack_services": {
+            "db": {
+                "image": "mariadb:11",
+                "env": {
+                    "MARIADB_RANDOM_ROOT_PASSWORD": "true",
+                    "MARIADB_DATABASE": "lychee",
+                    "MARIADB_USER": "lychee",
+                    "MARIADB_PASSWORD": "{{secret:db_password}}",
+                },
+                "volumes": {"mysql": "/var/lib/mysql"},
+            }
+        },
+        "tags": ["gallery", "albums"],
+        "address_bound": True,
+        "logo": "lychee",
+    },
+    {
+        "id": "hortusfox",
+        "name": "HortusFox",
+        "category": "productivity",
+        "description": "Look after your plants together: where each one stands, when it was watered, and "
+        "reminders for what is due.",
+        "image": "ghcr.io/danielbrendel/hortusfox-web:latest",
+        "default_port": 3037,
+        "ports": ["3037:80"],
+        "webui_path": "/",
+        "env": {
+            "APP_ADMIN_EMAIL": "admin@example.com",
+            "APP_ADMIN_PASSWORD": "{{secret:admin_password}}",
+            "DB_HOST": "db",
+            "DB_PORT": "3306",
+            "DB_DATABASE": "hortusfox",
+            "DB_USERNAME": "hortusfox",
+            "DB_PASSWORD": "{{secret:db_password}}",
+            "DB_CHARSET": "utf8mb4",
+        },
+        "volumes": {
+            "images": "/var/www/html/public/img",
+            "logs": "/var/www/html/app/logs",
+            "backup": "/var/www/html/public/backup",
+            "themes": "/var/www/html/public/themes",
+            "migrate": "/var/www/html/app/migrations",
+        },
+        "credentials": {"user": "admin@example.com", "password": "{{secret:admin_password}}"},
+        "stack_services": {
+            "db": {
+                "image": "mariadb:11",
+                "env": {
+                    "MARIADB_RANDOM_ROOT_PASSWORD": "true",
+                    "MARIADB_DATABASE": "hortusfox",
+                    "MARIADB_USER": "hortusfox",
+                    "MARIADB_PASSWORD": "{{secret:db_password}}",
+                },
+                "volumes": {"mysql": "/var/lib/mysql"},
+            }
+        },
+        "tags": ["plants", "household"],
+        "logo": "hortusfox",
+    },
+    {
+        "id": "zipline",
+        "name": "Zipline",
+        "category": "utilities",
+        "description": "Share files, screenshots and short links from your own server, with upload from "
+        "ShareX and the browser. Make the first account on first visit.",
+        "image": "ghcr.io/diced/zipline:latest",
+        "default_port": 3038,
+        "ports": ["3038:3000"],
+        "webui_path": "/",
+        "env": {
+            "DATABASE_URL": "postgres://zipline:{{secret:db_password}}@db:5432/zipline",
+            "CORE_SECRET": "{{secret:core_secret}}",
+        },
+        "volumes": {"uploads": "/zipline/uploads", "public": "/zipline/public"},
+        "stack_services": {
+            "db": {
+                "image": "postgres:16-alpine",
+                "env": {
+                    "POSTGRES_DB": "zipline",
+                    "POSTGRES_USER": "zipline",
+                    "POSTGRES_PASSWORD": "{{secret:db_password}}",
+                },
+                "volumes": {"pgdata": "/var/lib/postgresql/data"},
+            }
+        },
+        "tags": ["sharing", "screenshots"],
+        "logo": "zipline",
     },
 ]
 
