@@ -18,6 +18,8 @@ Files suggests the folders this server really has when you type a path, and the 
 
 A person with a storage limit could go over it by sending several files at once. Files still arriving now count against the limit.
 
+The install guide and the Unraid template said the first password is shown in the container log. It is not: it is saved as a file only root can read, and the guide now says so. SECURITY.md names 2.0 as the supported version.
+
 #### Security
 
 Apps, Docker clean-up: deleting unused volumes now asks for a confirmation that Kiboto checks itself, so it can't happen without your say-so.

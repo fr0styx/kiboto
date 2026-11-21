@@ -310,8 +310,8 @@ def _shared_default_allowed() -> bool:
 def _first_time_password() -> str:
     """A per-install first sign-in password instead of the shared default 'admin'.
 
-    Saved (mode 0600) in DATA_DIR and written to the log once, so only someone with
-    access to the server or its logs can claim a fresh install.
+    Saved (mode 0600) in DATA_DIR. The log names the file and never the password, so only
+    someone who can read the server's data folder as root can claim a fresh install.
     """
     import secrets
 

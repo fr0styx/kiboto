@@ -101,7 +101,7 @@ your compose file or Unraid template and recreate the container.
 
 - **Web Desktop URL**: `http://<server-ip>:8082`
 - **Username**: `admin`
-- **First-time password**: if you leave `WEB_PASSWORD` empty, Kiboto generates one on first start. It is written to the container log (`docker logs kiboto`) and saved as `initial-admin-password` in the app data folder (readable by root only). It works once: you choose your own password at first sign-in, and the file is then deleted.
+- **First-time password**: if you leave `WEB_PASSWORD` empty, Kiboto generates one on first start and saves it as `initial-admin-password` in the app data folder (readable by root only). It is never written to the log; the log only names the file. It works once: you choose your own password at first sign-in, and the file is then deleted.
 
 > [!WARNING]  
 > Upon your first login, immediately navigate to **Mission Control** → **Settings** → **Security** (or press `Cmd+K` and type `>password`) to set a strong master password or provision a new user account.
@@ -162,7 +162,7 @@ Recommended for custom DIY homelab builds (Jonsbo N1/N2/N3/N4, Fractal Node 804,
          - "8084:8084"   # Universal WebDAV Server
        environment:
          - PORT=8082
-         - WEB_PASSWORD=   # empty: a first-time password is generated (see the log)
+         - WEB_PASSWORD=   # empty: a first-time password is generated (saved in the data folder)
          - DATA_DIR=/app/data
          - STORAGE_POOL_PATH=/mnt/storage
          - HOST_PROC=/host/proc
@@ -252,7 +252,7 @@ FygoOS provides a modern, turnkey private cloud OS with native Docker support.
          - /var/run/docker.sock:/var/run/docker.sock:ro
        environment:
          - PORT=8082
-         - WEB_PASSWORD=   # empty: a first-time password is generated (see the log)
+         - WEB_PASSWORD=   # empty: a first-time password is generated (saved in the data folder)
          - NAS_NAME=FygoNAS
          - POOL_PATH=/mnt/storage
          - HOST_PROC=/host/proc
@@ -491,7 +491,7 @@ Kiboto accesses physical hardware through Linux device nodes and `cgroup` rules:
 | Variable | Default | Description |
 | :--- | :--- | :--- |
 | `PORT` | `8082` | HTTP port for the Web Desktop and REST API |
-| `WEB_PASSWORD` | (empty) | First-time admin password. Empty or `admin`: a random one is generated and shown in the log. Ignored once `users.db` exists |
+| `WEB_PASSWORD` | (empty) | First-time admin password. Empty or `admin`: a random one is generated and saved as `initial-admin-password` in the data folder. Ignored once `users.db` exists |
 | `KIBOTO_DATA_KEY` | *(empty)* | Optional. Encrypts the AI search index and chat history at rest (SQLCipher, 16+ characters, e.g. `openssl rand -base64 32`). Keep it outside the data folder (Unraid template, or `.env` next to the compose file) and in a password manager. See SECURITY.md |
 | `LOGIN_USER_CHOOSER` | `0` | Show user tiles on the login screen. Off by default because it lists account names to anyone who can open the login page |
 | `CSRF_TRUSTED_ORIGINS` | *(empty)* | Extra origins (comma-separated, e.g. `https://nas.example.com`) allowed to make changes with the session cookie, for reverse proxies that rewrite the `Host` header |

@@ -4,9 +4,8 @@
 
 | Version | Supported |
 | ------- | --------- |
-| 1.10.x (latest patch) | ✅ On beta now; Stable on the Tuesday after its 3-day soak |
-| 1.9.4 | ✅ Until 1.10 reaches Stable |
-| < 1.9.2 | ❌ Upgrade: earlier versions have known critical issues (see below). |
+| 2.0.x | ✅ The release on Stable and the newest beta |
+| 1.x | ❌ Upgrade to 2.0: fixes are no longer made for 1.x, and versions before 1.9.2 have known critical issues. |
 
 Security fixes go to the release on Stable (`:latest` / `:stable`) and to the newest beta. The `:edge` channel follows `main` and may contain unreleased fixes.
 
