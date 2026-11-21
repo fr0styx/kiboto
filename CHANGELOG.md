@@ -20,6 +20,8 @@ A person with a storage limit could go over it by sending several files at once.
 
 Apps, Docker clean-up: deleting unused volumes now asks for a confirmation that Kiboto checks itself, so it can't happen without your say-so.
 
+Virtual machines: a disk, an installer image or a shared folder can no longer reach Kiboto's own data (its people and keys) through the storage path.
+
 ## v2.0.5 (2026-11-20)
 ### 🏡 A second NAS that can take over, files you can change over the network, and 176 tested apps
 

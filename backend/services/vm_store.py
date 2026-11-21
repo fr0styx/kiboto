@@ -72,7 +72,17 @@ def _confined(path: Any, roots: list[str], want: str = "file") -> str | None:
         return None
     data = os.path.realpath(DATA_DIR)
     vms_dir = os.path.join(data, "vms")
-    if (real == data or real.startswith(data + "/")) and not (real == vms_dir or real.startswith(vms_dir + "/")):
+    in_vms = real == vms_dir or real.startswith(vms_dir + "/")
+    if (real == data or real.startswith(data + "/")) and not in_vms:
+        return None
+    # Kiboto's data folder also shows under the storage path (/mnt/user/appdata/kiboto/data is the
+    # same folder as DATA_DIR): its database as a VM's raw disk, or appdata as a VM's shared
+    # folder, handed a machine Kiboto's keys and people
+    from backend.fsutil import is_protected, protected_dirs
+
+    if not in_vms and is_protected(real):
+        return None
+    if want == "dir" and any(d == real or d.startswith(real.rstrip("/") + "/") for d in protected_dirs()):
         return None
     if os.path.exists(real):
         if want == "file" and not os.path.isfile(real):
