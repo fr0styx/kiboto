@@ -248,8 +248,34 @@ export function initAuth() {
   fetchCurrentProfile();
 }
 
+/** Says on the sign-in page where the first-time password is found, while nobody has signed in yet. */
+export async function showFirstRunHint() {
+  const line = document.getElementById('login-first-run');
+  if (!line) return;
+  let state;
+  try {
+    const res = await window.fetch('/api/auth/first-run');
+    state = res.ok ? await res.json() : null;
+  } catch (e) {
+    state = null; // the page works without the hint
+  }
+  line.hidden = !state?.waiting;
+  if (!state?.waiting) return;
+  line.textContent =
+    state.where === 'machine'
+      ? t(
+          'login.first_run_machine',
+          "First time here? Sign in as admin with the code shown on this machine's screen. It is also shown when you sign in to the machine over SSH. You then choose your own password."
+        )
+      : t(
+          'login.first_run_file',
+          "First time here? Sign in as admin with the password in the file initial-admin-password in Kiboto's data folder. You then choose your own password."
+        );
+}
+
 export async function renderLoginChooser(options = {}) {
   const { forceChooser = false } = options;
+  showFirstRunHint();
   const chooserContainer = document.getElementById('login-users-chooser');
 
   if (!chooserContainer) return;

@@ -321,9 +321,13 @@ def _first_time_password() -> str:
             existing = f.read().strip()
     except FileNotFoundError:
         existing = ""
+    from backend import first_run, runtime
+
     if existing:
+        first_run.show(existing)
         return existing
-    password = secrets.token_urlsafe(15)
+    # on a machine of its own the person types it from the machine's screen: a code made for that
+    password = first_run.new_code() if runtime.managed_host() else secrets.token_urlsafe(15)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
     with os.fdopen(fd, "w", encoding="utf-8") as f:
@@ -334,10 +338,14 @@ def _first_time_password() -> str:
         "You will be asked to choose your own password.",
         path,
     )
+    first_run.show(password)
     return password
 
 
 def _forget_first_time_password() -> None:
+    from backend import first_run
+
+    first_run.clear()  # the code on the machine's screen is of no use any more
     path = config.initial_password_file()
     if not os.path.exists(path):
         return

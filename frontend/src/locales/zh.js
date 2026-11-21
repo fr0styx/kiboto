@@ -9128,4 +9128,6 @@ export default {
   "chassis.pool_elsewhere_msg": "仅当那个系统已关机，或其硬盘已永久移到这里时，才导入“{pool}”。两个系统同时使用同一个存储池会毁掉它。",
   "chassis.import_anyway": "仍然导入",
   "srv.pool_used_elsewhere": "{pool} 上次由另一个系统使用。",
+  "login.first_run_machine": "第一次使用？请以 admin 身份登录，使用这台机器屏幕上显示的代码。通过 SSH 登录这台机器时也会显示该代码。之后你可以设置自己的密码。",
+  "login.first_run_file": "第一次使用？请以 admin 身份登录，密码在 Kiboto 数据文件夹中的 initial-admin-password 文件里。之后你可以设置自己的密码。",
 };

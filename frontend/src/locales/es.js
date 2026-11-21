@@ -9128,4 +9128,6 @@ export default {
   "chassis.pool_elsewhere_msg": "Importa «{pool}» solo si ese sistema está apagado o si sus unidades se trasladaron aquí definitivamente. Dos sistemas que usan un mismo grupo a la vez lo destruyen.",
   "chassis.import_anyway": "Importar de todos modos",
   "srv.pool_used_elsewhere": "{pool} lo usó por última vez otro sistema.",
+  "login.first_run_machine": "¿Primera vez aquí? Inicia sesión como admin con el código que aparece en la pantalla de este equipo. También se muestra al entrar en el equipo por SSH. Después eliges tu propia contraseña.",
+  "login.first_run_file": "¿Primera vez aquí? Inicia sesión como admin con la contraseña del archivo initial-admin-password de la carpeta de datos de Kiboto. Después eliges tu propia contraseña.",
 };

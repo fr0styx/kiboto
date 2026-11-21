@@ -397,6 +397,8 @@ _PUBLIC_API_PATHS = {
     "/api/v1/auth/passkey/login",
     "/api/auth/users-list",
     "/api/v1/auth/users-list",
+    "/api/auth/first-run",
+    "/api/v1/auth/first-run",
     "/api/health",
     "/api/v1/health",
     "/api/auth/oidc/config",

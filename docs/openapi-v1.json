@@ -45664,6 +45664,31 @@
     ]
    }
   },
+  "/api/v1/auth/first-run": {
+   "get": {
+    "description": "Whether the first sign-in is still waiting, and where its password is found: so the sign-in\npage can say it. Tells nothing an attempt to sign in would not.",
+    "operationId": "first_run_state_api_v1_auth_first_run_get",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response First Run State Api V1 Auth First Run Get",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     }
+    },
+    "security": [],
+    "summary": "First Run State",
+    "tags": [
+     "Authentication & Security"
+    ]
+   }
+  },
   "/api/v1/auth/ldap/settings": {
    "get": {
     "operationId": "ldap_settings_api_v1_auth_ldap_settings_get",

@@ -53,6 +53,7 @@ ANY_SIGNED_IN = {
 PUBLIC = {
     "/api/v1/health": "health check",
     "/api/v1/auth/users-list": "the sign-in page",
+    "/api/v1/auth/first-run": "the sign-in page: whether the first sign-in is waiting, and where its password is",
     "/api/v1/auth/oidc/config": "the sign-in page",
     "/api/v1/auth/oidc/login": "single sign-on",
     "/api/v1/auth/oidc/callback": "single sign-on",

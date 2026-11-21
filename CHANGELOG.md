@@ -56,6 +56,8 @@ A first step towards Kiboto on a machine of its own: an install script turns a f
 
 On a machine of its own, Kiboto now serves shared folders with the machine's own file servers: people sign in over the network with their own password, and folders shared over NFS are served by the system itself.
 
+On a machine of its own, Kiboto shows a setup code on the machine's screen (and when you sign in to it over SSH). You sign in with that code the first time and choose your own password. The sign-in page now says where the first password is found, on every kind of install.
+
 ## v2.0.5 (2026-11-20)
 ### 🏡 A second NAS that can take over, files you can change over the network, and 176 tested apps
 

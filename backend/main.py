@@ -663,6 +663,9 @@ async def lifespan(app: FastAPI):
     threading.Thread(target=_reapply_tailscale_options, name="TailscaleOptions", daemon=True).start()
     _start_home_assistant()
     _start_app_names()
+    from backend import first_run
+
+    first_run.refresh()  # the first-time code is on the machine's screen while it is waiting
     threading.Thread(target=_reapply_firewall, name="Firewall", daemon=True).start()
     from backend.api.update_watch import watch_loop
 

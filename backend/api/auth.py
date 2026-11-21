@@ -513,6 +513,14 @@ async def login(req: LoginRequest, request: Request):
     if user and user.get("password_hash") and not is_ldap_user:
         ok = await run_in_threadpool(verify_password, req.password, user["password_hash"])
 
+    # the first-time code may be typed in small letters, or without its dashes
+    if not ok and user and user.get("password_hash") and user.get("must_change_password"):
+        from backend import first_run
+
+        typed = first_run.tidy(req.password)
+        if typed != req.password and first_run.waiting():
+            ok = await run_in_threadpool(verify_password, typed, user["password_hash"])
+
     # Directory accounts (and new names) check against LDAP / Active Directory (M6)
     if not ok and (not user or is_ldap_user):
         from backend.services import ldap_auth
@@ -1094,6 +1102,15 @@ def _apply_quota(username: str, quota_bytes: int) -> None:
         set_quota(username, quota_bytes)
     except OSError as e:
         logger.warning("[Users] %s: the new limit didn't reach the filesystem: %s", username, e)
+
+
+@router.get("/auth/first-run")
+def first_run_state() -> dict[str, Any]:
+    """Whether the first sign-in is still waiting, and where its password is found: so the sign-in
+    page can say it. Tells nothing an attempt to sign in would not."""
+    from backend import first_run
+
+    return {"waiting": first_run.waiting(), "where": first_run.where()}
 
 
 @router.get("/auth/users-list")
