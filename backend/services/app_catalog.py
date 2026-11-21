@@ -1097,6 +1097,16 @@ def _save_stack_secrets(app_dir: str, secrets_map: dict[str, str]) -> None:
     atomic_write_json(path, secrets_map)  # owner-only (0600)
 
 
+def _pull_path(image: str) -> str:
+    """The Docker request that pulls an image. A pinned one is "name:tag@sha256:...": it is pulled
+    by its digest. Cut at the last colon it became "name:tag@sha256" and a bare hash, which
+    Docker 26 refuses."""
+    from backend.services.image_ref import pull_params
+
+    repo, tag = (urllib.parse.quote(x) for x in pull_params(image))
+    return f"/images/create?fromImage={repo}&tag={tag}"
+
+
 def _pull_image_blocking(image: str) -> tuple[bool, str]:
     st, _ = _docker_request("GET", f"/images/{image}/json")
     if st == 200:
@@ -1802,10 +1812,6 @@ def _deploy_steps(
             "message": f"Pulling {image_name} from registry (downloading layers)...",
             "done": False,
         }
-        if ":" in image_name:
-            repo, tag = image_name.rsplit(":", 1)
-        else:
-            repo, tag = image_name, "latest"
 
         sock_path = docker_sock()
         if not os.path.exists(sock_path):
@@ -1821,7 +1827,7 @@ def _deploy_steps(
         pull_conn = None
         try:
             pull_conn = UnixHTTPConnection(sock_path, timeout=600.0)
-            pull_conn.request("POST", f"/images/create?fromImage={repo}&tag={tag}")
+            pull_conn.request("POST", _pull_path(image_name))
             pull_res = pull_conn.getresponse()
 
             if pull_res.status != 200:

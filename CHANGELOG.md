@@ -38,6 +38,8 @@ An ext4 pool that Kiboto made can now be deleted with "Delete and erase drives",
 
 On systems with an older Linux kernel, a setting saved twice within a few thousandths of a second could be read back in its first form for a moment. Kiboto now notices such a change every time.
 
+Installing an app from the catalog failed with "invalid reference format" on systems with Docker 26 (Debian 13 and others). Apps now install there too.
+
 #### Security
 
 Apps, Docker clean-up: deleting unused volumes now asks for a confirmation that Kiboto checks itself, so it can't happen without your say-so.
