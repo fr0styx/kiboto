@@ -264,6 +264,8 @@ Second NAS: keeping the appdata folder in step no longer copies Kiboto's own dat
 
 Files: unpacking a zip into a folder that holds a shortcut (symbolic link) to another place could put files in that other place. Such a zip is now refused before anything is written.
 
+Files: copying or moving a folder onto a shortcut (symbolic link) of the same name put its files wherever the shortcut pointed. The folder now goes beside it under a new name.
+
 ## v2.0.4 (2026-11-19)
 ### 🏡 Apps that go back on their own, a way to move in, and Kiboto in your language everywhere
 

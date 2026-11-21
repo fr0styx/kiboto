@@ -344,6 +344,10 @@ def merge_directory_tree(
     prog.checkpoint()
 
     dst_exists = os.path.lexists(dst_dir)
+    if dst_exists and os.path.islink(dst_dir) and policy == CollisionPolicy.MERGE:
+        # a link where the folder would go (made over the network share): merging into it put
+        # the folder's files wherever it points. The folder goes beside it, as with keep both.
+        policy = CollisionPolicy.KEEP_BOTH
 
     if dst_exists:
         if policy == CollisionPolicy.SKIP:
