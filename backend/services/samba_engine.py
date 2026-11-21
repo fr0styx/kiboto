@@ -175,7 +175,22 @@ class SambaStatus(BaseModel):
 # newly blocked addresses are ended; everything else stays connected. The first lines make the
 # accounts Samba's own list has and the container lacks (after a restore), as its start does.
 # Arguments: the shared folders to close, then "--ips" and the addresses to end.
-RELOAD_SCRIPT = """
+# Each person's own account in the file server's container (KB_UIDS: "name:number ..."), so they
+# sign in as themselves and their private folder can be theirs: made with that number in the
+# users group, or made again when an older one had another number.
+ACCOUNTS_SCRIPT = """
+for pair in $KB_UIDS; do
+  user=${pair%%:*}; want=${pair##*:}
+  have=$(id -u "$user" 2>/dev/null)
+  [ "$have" = "$want" ] && continue
+  [ -n "$have" ] && deluser "$user" 2>/dev/null
+  adduser -D -H -u "$want" -G users "$user" 2>/dev/null || adduser -D -H -u "$want" "$user" 2>/dev/null
+done
+"""
+
+RELOAD_SCRIPT = (
+    ACCOUNTS_SCRIPT
+    + """
 CONF=/etc/samba/kiboto/smb.conf
 pdbedit -L 2>/dev/null | while IFS=: read -r user uid _; do
   [ -n "$user" ] && ! id -u "$user" >/dev/null 2>&1 && { adduser -D -H -u "$uid" "$user" 2>/dev/null || adduser -D -H "$user"; }
@@ -189,6 +204,7 @@ for a in "$@"; do
 done
 exit 0
 """
+)
 
 
 def conf_sections(text: str) -> dict[str, str]:
@@ -501,15 +517,18 @@ class SambaEngine:
                         "   valid users = %S",
                         "   browseable = no",
                         f"   read only = {'yes' if frozen else 'no'}",
-                        "   create mask = 0660",
-                        "   directory mask = 0770",
-                        "   force user = nobody",
-                        "   force group = users",
+                        "   create mask = 0600",
+                        "   directory mask = 0700",
                         "",
                     ]
                 )
-                for person in os.listdir(homes_root()) if ours else []:
-                    owned.to_people(os.path.join(homes_root(), person), mode=0o770)
+                if ours:  # each person signs in as their own account, and their folder is theirs
+                    from backend.services import smb_accounts
+
+                    known = _people_names()
+                    for person in os.listdir(homes_root()):
+                        if person.lower() in known:
+                            owned.to_person(os.path.join(homes_root(), person), smb_accounts.uid_of(person))
         except Exception:
             logger.debug("[SambaEngine] homes section skipped", exc_info=True)
 
@@ -689,12 +708,15 @@ class SambaEngine:
                 transport = httpx.HTTPTransport(uds=docker_sock)
                 with httpx.Client(transport=transport, timeout=20.0) as client:
                     cid = sidecar_info.get("id") or "kiboto-samba"
-                    if changed is not None and not changed["homes"] and _reload_in_place(client, cid, changed):
+                    env = _accounts_env()
+                    if changed is not None and not changed["homes"] and _reload_in_place(client, cid, changed, env):
                         logger.info(
                             "[SambaEngine] settings reloaded without a restart; closed: %s",
                             ", ".join(changed["shares"]) or "nothing",
                         )
                         return True
+                    if env:
+                        _run_accounts(client, cid, env)
                     r = client.post(
                         f"http://localhost/containers/{sidecar_info.get('id') or 'kiboto-samba'}/restart?t=2"
                     )
@@ -718,6 +740,11 @@ class SambaEngine:
 
         sidecar_info = self.check_sidecar()
         docker_sock = _docker_sock_path()
+        person_env: list[str] = []
+        if _serves_files() and not delete:  # their own account, by their fixed number
+            from backend.services import smb_accounts
+
+            person_env = [f"KB_UIDS={username.lower()}:{smb_accounts.uid_of(username)}"]
 
         # 1. Try local execution if smbpasswd exists on the system
         try:
@@ -770,7 +797,10 @@ class SambaEngine:
                                     'id -u "$1" >/dev/null 2>&1 || adduser -D -H -u 1000 "$1" 2>/dev/null || adduser -D -H "$1"',  # 1000 once, then the next free id
                                     "--",
                                     username,
-                                ],
+                                ]
+                                if not person_env
+                                else ["sh", "-c", ACCOUNTS_SCRIPT],
+                                "Env": person_env,
                                 "AttachStdout": True,
                                 "AttachStderr": True,
                             },
@@ -959,16 +989,46 @@ def _files_admin_roles() -> set[str]:
     return out
 
 
-def _reload_in_place(client: Any, cid: str, changed: dict[str, Any]) -> bool:
-    """Runs RELOAD_SCRIPT in the file server's container; True when it ended well."""
+def _people_names() -> set[str]:
+    """The Kiboto accounts there are now (lower case)."""
+    from backend.users_db import list_users
+
+    return {str(u.get("username") or "").lower() for u in list_users() if u.get("username")}
+
+
+def _accounts_env() -> list[str]:
+    """KB_UIDS for the scripts: every person's account number where Kiboto serves the files."""
+    if not _serves_files():
+        return []
+    from backend.services import smb_accounts
+
+    try:
+        pairs = smb_accounts.numbers(_people_names())
+    except (OSError, ValueError, sqlite3.Error):
+        return []
+    return ["KB_UIDS=" + " ".join(f"{name}:{uid}" for name, uid in pairs.items())] if pairs else []
+
+
+def _run_accounts(client: Any, cid: str, env: list[str]) -> None:
+    """The people's accounts in the container, before it starts again (a restart keeps them)."""
     made = client.post(
         f"http://localhost/containers/{cid}/exec",
-        json={
-            "Cmd": ["sh", "-c", RELOAD_SCRIPT, "--", *changed["shares"], "--ips", *changed["ips"]],
-            "AttachStdout": True,
-            "AttachStderr": True,
-        },
+        json={"Cmd": ["sh", "-c", ACCOUNTS_SCRIPT], "Env": env, "AttachStdout": True, "AttachStderr": True},
     )
+    if made.status_code == 201:
+        client.post(f"http://localhost/exec/{made.json().get('Id')}/start", json={"Detach": False, "Tty": False})
+
+
+def _reload_in_place(client: Any, cid: str, changed: dict[str, Any], env: list[str] | None = None) -> bool:
+    """Runs RELOAD_SCRIPT in the file server's container; True when it ended well."""
+    body: dict[str, Any] = {
+        "Cmd": ["sh", "-c", RELOAD_SCRIPT, "--", *changed["shares"], "--ips", *changed["ips"]],
+        "AttachStdout": True,
+        "AttachStderr": True,
+    }
+    if env:
+        body["Env"] = env
+    made = client.post(f"http://localhost/containers/{cid}/exec", json=body)
     if made.status_code != 201:
         return False
     exec_id = made.json().get("Id")

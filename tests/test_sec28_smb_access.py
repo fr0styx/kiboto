@@ -213,6 +213,13 @@ def test_a_shared_folder_kiboto_made_goes_to_the_file_servers_user(people, tmp_p
     homes = tmp_path / "homes"
     (homes / "kim").mkdir(parents=True)
     monkeypatch.setattr("backend.services.user_spaces.homes_root", lambda: str(homes))
+    from backend.services import smb_accounts
+
+    monkeypatch.setattr(smb_accounts, "_file", lambda: str(tmp_path / "smb_accounts.json"))
+    monkeypatch.setattr(samba_engine, "_people_names", lambda: {"kim"})
+    (homes / "gone").mkdir()  # the folder of someone no longer here keeps its owner
+    given = []
+    monkeypatch.setattr(samba_engine.owned, "to_person", lambda folder, uid, **how: given.append((folder, uid)))
     engine = samba_engine.SambaEngine.__new__(samba_engine.SambaEngine)
     engine._shares = {
         "media": SambaShareConfig(name="media", path=str(tmp_path / "media")),
@@ -222,16 +229,17 @@ def test_a_shared_folder_kiboto_made_goes_to_the_file_servers_user(people, tmp_p
     conf = engine.generate_and_save_conf()
     assert (str(tmp_path / "media"), ("nobody", "users"), {}) in handed
     assert not [h for h in handed if h[0] == str(tmp_path / "plain")]  # no forced user: whoever signs in writes
-    # a private folder is written as the shared folders are, and is handed over the same way
+    # a private folder is its person's: they sign in as their own account, and the folder is theirs
     homes_section = conf.split("[homes]", 1)[1].split("[", 1)[0]
-    assert "force user = nobody" in homes_section and "force group = users" in homes_section
-    assert "valid users = %S" in homes_section
-    assert (str(homes / "kim"), (), {"mode": 0o770}) in handed
+    assert "force user" not in homes_section and "force group" not in homes_section
+    assert "valid users = %S" in homes_section and "directory mask = 0700" in homes_section
+    assert given == [(str(homes / "kim"), smb_accounts.FIRST_UID)]
     # on Unraid or another host that serves the files itself, nothing is handed over
     handed.clear()
+    given.clear()
     monkeypatch.setattr(samba_engine, "_serves_files", lambda: False)
     engine.generate_and_save_conf()
-    assert handed == []
+    assert handed == [] and given == []
 
 
 def test_whether_the_shared_folders_are_kibotos_own_to_make(monkeypatch):

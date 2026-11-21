@@ -111,6 +111,30 @@ def to_people(folder: str, user: str = "nobody", group: str = "users", mode: int
     return True
 
 
+def to_person(folder: str, uid: int, gid: int = 100, mode: int = 0o700) -> bool:
+    """A person's private folder on Kiboto's own file server goes to their own account. Handed
+    over while it is root's or still the file server's user's (how private folders were written
+    before each person had an account); a folder someone gave another owner is left as it is.
+    What is inside is not changed: it stays readable and writable through the group. True when
+    it was handed over."""
+    try:
+        st = os.stat(folder)
+    except OSError:
+        return False
+    file_server_uid, _ = _ids("nobody", "users")
+    if _me() != 0 or not stat.S_ISDIR(st.st_mode) or st.st_uid not in (0, file_server_uid, uid):
+        return False
+    if (st.st_uid, st.st_gid, stat.S_IMODE(st.st_mode)) == (uid, gid, mode):
+        return False
+    try:
+        os.chown(folder, uid, gid)
+        os.chmod(folder, mode)
+    except OSError as e:
+        logger.warning("[Files] the private folder %s keeps its owner: %s", folder, e)
+        return False
+    return True
+
+
 def for_helper(folder: str, ours: bool) -> dict[str, int]:
     """How a helper program that makes files in shared folders is started (rclone's WebDAV and
     SFTP servers), as arguments for subprocess.Popen: its umask, and as root its group. It stays

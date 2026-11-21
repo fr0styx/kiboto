@@ -217,20 +217,22 @@ def test_ext4_without_prjquota_or_tools_says_why(tmp_path):
     assert "prjquota" in fq._ext4(str(tmp_path), str(tmp_path), "rw", 1, Tools())["reason"]
 
 
-def test_a_private_folder_goes_to_the_file_servers_user_where_kiboto_serves_the_files(tmp_path, monkeypatch):
+def test_a_private_folder_goes_to_its_persons_own_account_where_kiboto_serves_the_files(tmp_path, monkeypatch):
     from backend import owned
+    from backend.services import smb_accounts
     from backend.services import user_spaces as spaces
 
+    monkeypatch.setattr(smb_accounts, "_file", lambda: str(tmp_path / "smb_accounts.json"))
     handed = []
     monkeypatch.setattr(spaces, "home_of", lambda u: str(tmp_path / "homes" / u))
     monkeypatch.setattr(spaces, "_btrfs", lambda args: False)
     monkeypatch.setattr(spaces.fs_quota, "zfs_child_dataset", lambda parent, name: None)
-    monkeypatch.setattr(owned, "to_people", lambda folder, **how: handed.append((folder, how)))
+    monkeypatch.setattr(owned, "to_person", lambda folder, uid, **how: handed.append((folder, uid)))
     monkeypatch.setattr(spaces, "_serves_files", lambda: False)  # Unraid: its own file server, its own owners
     spaces.ensure_home("kim")
     assert handed == []
     monkeypatch.setattr(spaces, "_serves_files", lambda: True)
     spaces.ensure_home("sam")
-    assert handed == [(str(tmp_path / "homes" / "sam"), {"mode": 0o770})]
+    assert handed == [(str(tmp_path / "homes" / "sam"), smb_accounts.FIRST_UID)]
     spaces.ensure_home("sam")  # there already: nothing is handed over again
     assert len(handed) == 1

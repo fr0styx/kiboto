@@ -175,8 +175,10 @@ def ensure_home(username: str, quota_bytes: int = 0) -> dict[str, Any]:
             os.chmod(home, 0o770)
         except OSError:
             logger.debug("user_spaces: chmod failed", exc_info=True)
-        if _serves_files():  # Kiboto's own file server writes as nobody:users: the folder is theirs
-            owned.to_people(home, mode=0o770)
+        if _serves_files():  # on Kiboto's own file server each person has their own account
+            from backend.services import smb_accounts
+
+            owned.to_person(home, smb_accounts.uid_of(username))
     held = apply_fs_quota(home, quota_bytes) if quota_bytes else False
     return {"home": home, "subvolume": created, "fs_quota": held}
 
