@@ -260,6 +260,8 @@ Files, Permissions: a change no longer passes through a shortcut (symbolic link)
 
 Cloud sync: a sync from the cloud, a move to it and a two-way sync only work on a shared folder or a folder inside one here. Pointed at a drive's top folder, a sync could have deleted every other shared folder and the apps' folders there. Kiboto's own data is always left out.
 
+Second NAS: keeping the appdata folder in step no longer copies Kiboto's own data (its keys and database) from the first NAS into the second one's. People and settings still come over in the sealed copy.
+
 ## v2.0.4 (2026-11-19)
 ### 🏡 Apps that go back on their own, a way to move in, and Kiboto in your language everywhere
 

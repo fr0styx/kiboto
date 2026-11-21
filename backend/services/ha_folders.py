@@ -24,7 +24,7 @@ import time
 from typing import Any
 
 from backend.config import DATA_DIR, logger
-from backend.fsutil import atomic_write_json, json_locked, read_json
+from backend.fsutil import atomic_write_json, is_protected, json_locked, prune_protected, read_json
 from backend.services import ha_link
 from backend.services.ha_link import LinkError
 
@@ -88,7 +88,12 @@ def _inside(root: str, rel: str) -> str:
         or "\x00" in rel
     ):
         raise LinkError("bad_path", "The other NAS named a file outside the folder.")
-    return os.path.join(root, *parts)
+    path = os.path.join(root, *parts)
+    if is_protected(os.path.realpath(path)):
+        # Kiboto's own data (keys, tokens, its database): the sealed copy carries what a takeover
+        # needs, and this box's own must never be written over
+        raise LinkError("bad_path", "Kiboto's own data is not sent or written by the folder copy.")
+    return path
 
 
 # --- on the first NAS: what the second one may ask for -----------------------------------------------
@@ -114,6 +119,7 @@ def _walk(root: str) -> Any:
         dirs[:] = sorted(
             d for d in dirs if not os.path.islink(os.path.join(at, d)) and not (at == root and d == REMOVED)
         )
+        prune_protected(os.path.realpath(at), dirs)  # Kiboto's own data, inside appdata
         for name in sorted(names):
             path = os.path.join(at, name)
             try:

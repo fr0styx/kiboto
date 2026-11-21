@@ -197,6 +197,25 @@ def test_the_first_nas_hands_out_only_files_inside_its_shared_folders(net):
         ha.call("folders_list", send=net.send)  # the second NAS hands nothing out
 
 
+def test_kibotos_own_data_in_appdata_is_never_listed_sent_or_written(net, monkeypatch):
+    import backend.fsutil as fsutil
+
+    net.put(A, "appdata", "plex/Preferences.xml", "<prefs/>")
+    net.put(A, "appdata", "kiboto/data/keys.json", "first NAS keys")
+    net.put(B, "appdata", "kiboto/data/users.db", "second NAS people")
+    ours = [os.path.realpath(os.path.join(net.shares[box]["appdata"], "kiboto")) for box in (A, B)]
+    monkeypatch.setattr(fsutil, "protected_dirs", lambda: ours)
+    hf.choose(["appdata"], send=net.send)
+    out = hf.fetch_folder("appdata", send=net.send)
+    assert (out["fetched"], out["errors"]) == (1, [])
+    there = net.shares[B]["appdata"]
+    assert _tree(there) == {"plex/Preferences.xml": "<prefs/>", "kiboto/data/users.db": "second NAS people"}
+    with pytest.raises(ha.LinkError):  # asked for by name, it is refused too
+        ha.call("file_piece", {"name": "appdata", "rel": "kiboto/data/keys.json", "offset": 0}, send=net.send)
+    with pytest.raises(ha.LinkError):  # and never written here
+        hf._inside(there, "kiboto/data/users.db")
+
+
 def test_a_name_from_the_other_box_cannot_leave_the_folder_here_either(tmp_path):
     for rel in ("../x", "/abs", "a//b", "a/./b", f"{hf.REMOVED}/2026-01-01/x", "a\x00b", ""):
         with pytest.raises(ha.LinkError):
