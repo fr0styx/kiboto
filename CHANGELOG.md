@@ -2,6 +2,12 @@
 
 Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep that name.
 
+## Unreleased
+
+#### Changes
+
+Keyboard: while a window is open, the Tab key moves only through the windows, the top bar and the dock, not the desktop's icons and widgets behind them. The desktop comes back when no window is open; you can still click it beside a window.
+
 ## v2.0.5 (2026-11-20)
 ### 🏡 A second NAS that can take over, files you can change over the network, and 176 tested apps
 

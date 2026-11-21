@@ -19,6 +19,7 @@ import {
 } from './notifications.js';
 import { bringToFront, keyboardFocused } from './window-drag.js';
 import { applySavedBounds, saveOpenWindowsState } from './window-state.js';
+import { syncDesktopTabOrder } from './desktop-tab-order.js';
 
 export const DockManager = {
   windows: {},
@@ -380,6 +381,7 @@ export const DockManager = {
   },
 
   render() {
+    syncDesktopTabOrder(this.windows);
     const dockContainer = document.getElementById('os-dock-container');
     const dock = document.getElementById('os-dock');
     if (!dock || !dockContainer) return;
