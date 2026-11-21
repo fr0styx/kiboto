@@ -38,7 +38,7 @@ request and response schemas.
 
 <!-- BEGIN generated endpoints: python scripts/api_reference.py --update -->
 
-803 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
+804 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
 
 ### AI Conversation History
 
@@ -859,6 +859,7 @@ request and response schemas.
 | `GET` | `/api/v1/storage/pools/discover` | any of `storage:admin`, `storage:read` | Discovers unimported or detachable external storage pools (e.g |
 | `POST` | `/api/v1/storage/pools/import` | `storage:admin` | Imports an external storage pool into the platform |
 | `DELETE` | `/api/v1/storage/pools/{pool_id}` | `storage:admin` | Destroys/unmounts a storage pool |
+| `POST` | `/api/v1/storage/pools/{pool_id}/allow-changes` | `storage:admin` | Opens for writing a pool that was imported read-only; it is then one of this system's pools |
 | `POST` | `/api/v1/storage/pools/{pool_id}/erase` | `storage:admin` | Deletes the pool and erases its drives: only drives its own tool lists and whose labels carry its id; one that cannot be confirmed refuse… |
 | `GET` | `/api/v1/storage/pools/{pool_id}/erase-plan` | `storage:admin` | Which drives "Delete pool and erase its drives" would erase, each confirmed on disk (S29) |
 | `POST` | `/api/v1/storage/pools/{pool_id}/export` | `storage:admin` | Gracefully flushes dirty write cache, terminates active handles, and exports/unmounts a storage pool for safe physical detachment |

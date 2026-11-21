@@ -181,3 +181,21 @@ def test_a_pool_whose_only_drive_is_gone_is_missing_and_says_why(nas, drives):
     assert why and _listed(nas, name).status == "MISSING"
     with pytest.raises(OSError):
         pathlib.Path(mount, "stray.txt").write_text("x")
+
+
+def test_a_zfs_pool_from_elsewhere_is_only_read_until_changes_are_allowed(nas, drives):
+    name, mount = _make(nas, drives, "zfs", "mirror", 2)
+    sh("zpool", "export", name)
+    pool_registry.forget(name)  # as on a system that has never seen it
+    found = next(p for p in nas.discover_external_pools() if p["pool_id"] == name)
+    assert nas.import_pool(name, fs_type="zfs", guid=found["numeric_id"])["read_only"] is True
+    pool = _listed(nas, name)
+    assert pool.read_only is True and pool.status == "HEALTHY"
+    assert pathlib.Path(mount, "kept.txt").read_text() == "still here"
+    with pytest.raises(OSError):
+        pathlib.Path(mount, "new.txt").write_text("x")
+    assert pool_registry.find(name) is None  # not one of this system's pools yet
+    assert nas.allow_changes(name)["status"] == "writable"
+    pathlib.Path(mount, "new.txt").write_text("now it can change")
+    assert _listed(nas, name).read_only is False
+    assert pool_registry.find(name)["origin"] == "imported"

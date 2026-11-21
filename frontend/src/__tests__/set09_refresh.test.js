@@ -114,7 +114,7 @@ describe('no invented picture, no scan on opening', () => {
     get.mockResolvedValue({ pools: [] });
     box.querySelector('.btn-import-external-pool').click();
     await vi.waitFor(() =>
-      expect(post).toHaveBeenCalledWith('/api/storage/pools/import', { pool_id: 'backup<1>', fs_type: 'zfs' })
+      expect(post).toHaveBeenCalledWith('/api/storage/pools/import', { pool_id: 'backup<1>', fs_type: 'zfs', guid: '' })
     );
     await vi.waitFor(() => expect(box.textContent).toContain('No storage pool was found here.'));
     box.innerHTML = '<div class="external-pools-banner">old</div>';

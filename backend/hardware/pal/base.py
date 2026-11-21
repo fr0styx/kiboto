@@ -162,6 +162,7 @@ class StoragePool(BaseModel):
     parity_protected: bool = False
     autotrim: bool = False
     compression: str | None = "off"
+    read_only: bool = False  # imported for a look: nothing on it changes until changes are allowed
 
 
 class NetworkShare(BaseModel):
@@ -189,6 +190,11 @@ class PlatformCapabilityError(Exception):
     """Raised when an operation is disallowed by the current platform's capabilities (e.g. in observer mode)."""
 
     pass
+
+
+class PoolUsedElsewhere(RuntimeError):
+    """ZFS says the pool was last in use by another system. Importing it then needs the person's
+    word: two systems using one pool at the same time destroy it."""
 
 
 class StoragePlatformAdapter(ABC):

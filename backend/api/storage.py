@@ -16,8 +16,9 @@ from pydantic import AfterValidator, BaseModel, Field
 from backend import config
 from backend.auth import AuthenticatedPrincipal, get_current_principal, require_scope
 from backend.confirmations import require_confirmation
-from backend.errors import ApiError, error_response
+from backend.errors import ApiError, error_response, said
 from backend.fsutil import single_name
+from backend.hardware.pal.base import PoolUsedElsewhere
 from backend.hardware.pal_storage import (
     PlatformCapabilityError,
     get_storage_platform,
@@ -82,6 +83,8 @@ class StoragePoolImportRequest(BaseModel):
     pool_id: str = Field(..., pattern=POOL_NAME_PATTERN)  # a name, never an option or a path
     fs_type: str = Field("zfs", pattern=r"^[a-z0-9]{1,16}$")
     target_mount: Annotated[str | None, AfterValidator(_mount_point)] = None
+    guid: str = Field("", pattern=r"^[0-9]{0,24}$")  # the id "look for pools" showed: two pools can share a name
+    force: bool = False  # only after the person was told the pool was last used by another system
 
 
 class StorageShareCreateRequest(BaseModel):
@@ -793,6 +796,24 @@ def export_storage_pool(pool_id: PoolId, req: StoragePoolExportRequest = Storage
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
+@router.post(
+    "/pools/{pool_id}/allow-changes",
+    dependencies=[Depends(require_scope("storage:admin"))],
+)
+def allow_pool_changes(pool_id: PoolId) -> dict[str, Any]:
+    """Opens for writing a pool that was imported read-only; it is then one of this system's pools."""
+    adapter = get_storage_platform()
+    allow = getattr(adapter, "allow_changes", None)
+    if allow is None or adapter.get_capabilities().is_observer_mode:
+        raise HTTPException(status_code=403, detail=f"Not available on {adapter.get_platform_type().value}.")
+    try:
+        return allow(pool_id)
+    except LookupError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
+    except RuntimeError as e:
+        raise HTTPException(status_code=409, detail=str(e)) from e
+
+
 @router.get(
     "/pools/discover",
     dependencies=[Depends(require_scope("storage:admin", "storage:read"))],
@@ -827,8 +848,11 @@ def import_storage_pool(req: StoragePoolImportRequest) -> dict[str, Any]:
             status_code=403,
             detail=f"Pool import is disabled on {adapter.get_platform_type().value} in Observer Mode.",
         )
+    more: dict[str, Any] = {k: v for k, v in (("guid", req.guid), ("force", req.force)) if v}
     try:
-        return adapter.import_pool(pool_id=req.pool_id, fs_type=req.fs_type, target_mount=req.target_mount)
+        return adapter.import_pool(pool_id=req.pool_id, fs_type=req.fs_type, target_mount=req.target_mount, **more)
+    except PoolUsedElsewhere as e:
+        raise ApiError(409, str(e), "pool_used_elsewhere", text=said("pool_used_elsewhere", pool=req.pool_id)) from e
     except PlatformCapabilityError as e:
         raise HTTPException(status_code=403, detail=str(e)) from e
     except Exception as e:

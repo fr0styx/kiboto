@@ -267,14 +267,10 @@ def test_an_ejected_pool_is_away_on_purpose_and_can_be_found_again(nas, tools, t
 
 
 def test_an_imported_pool_is_written_down(nas, tools, tmp_path):
-    tools.answers["zpool get"] = (0, "77\n", "")
-    tools.answers["zfs get"] = (0, "/mnt/tank\n", "")
+    # a ZFS pool from elsewhere is only looked at; it is written down when changes are allowed
+    # (tests/test_pool_import_careful.py). A btrfs or ext4 pool is mounted, and written down at once.
     nas.import_pool("tank", fs_type="zfs")
-    row = reg.find("tank")
-    assert (row["uuid"], row["mountpoint"], row["origin"]) == ("77", "/mnt/tank", "imported")
-    reg.set_ejected("tank", True)
-    nas.import_pool("tank", fs_type="zfs")  # known already: only no longer away
-    assert reg.find("tank")["ejected"] is False
+    assert reg.find("tank") is None
     tools.answers["findmnt -rno UUID -M"] = (0, "b-5\n", "")
     tools.answers["findmnt -rno SOURCE -M"] = (0, "/dev/sdq1\n", "")
     res = nas.import_pool("backup", fs_type="btrfs", target_mount=str(tmp_path / "pools" / "backup"))

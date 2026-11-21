@@ -207,7 +207,9 @@ def test_import_pool_zfs():
     res = adapter.import_pool("ext_das_vault", fs_type="zfs")
     assert res["status"] == "imported"
     assert res["pool_id"] == "ext_das_vault"
-    assert recorded_cmds[0] == ["zpool", "import", "-f", "ext_das_vault"]
+    # a pool Kiboto has no record of is opened for reading only, and never forced unasked
+    assert recorded_cmds[0] == ["zpool", "import", "-o", "readonly=on", "-o", "cachefile=none", "ext_das_vault"]
+    assert res["read_only"] is True
 
 
 # ==============================================================================

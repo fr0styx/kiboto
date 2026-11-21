@@ -807,6 +807,7 @@ function buildPoolBlockInner(pool, isObserver, can = { scrub: true }) {
       <div class="topo-pool-badges">
         ${pool.parity_protected ? '<span class="topo-parity-badge" title="' + t('ui.protected_against_disk_failure', 'Protected against disk failure') + '">' + ico('🛡️') + ' ' + t('chassis.parity_protected', 'Parity protected') + '</span>' : ''}
         <span class="topo-status-pill ${statusClass}">${escapeHtml(statusLabel)}</span>
+        ${pool.read_only ? `<span class="topo-status-pill status-syncing">${escapeHtml(t('chassis.pool_read_only', 'Read-only'))}</span>` : ''}
       </div>
     </div>
 
@@ -830,6 +831,7 @@ function buildPoolBlockInner(pool, isObserver, can = { scrub: true }) {
     <div class="topo-pool-actions cv-row-5">
       ${can.scrub ? `<button class="btn-pool-scrub btn-pill-toggle" data-pool-id="${escapeHtml(pool.id)}" data-pool-name="${escapeHtml(poolName(pool.name) || pool.id)}" title="${t('ui.trigger_filesystem_scrub_or_parity', 'Trigger filesystem scrub or parity check')}" data-i18n-title="ui.trigger_filesystem_scrub_or_parity">${ico('⚡')} ${t('chassis.scrub_pool', 'Check for errors')}</button>` : ''}
       ${!isObserver ? `<button class="btn-pool-rename btn-pill-toggle" data-pool-id="${escapeHtml(pool.id)}" data-pool-name="${escapeHtml(pool.name)}" title="${t('ui.rename_storage_pool', 'Rename storage pool')}" data-i18n-title="ui.rename_storage_pool">${ico('✏️')} ${t('chassis.rename', 'Rename')}</button>` : ''}
+      ${pool.read_only ? `<button class="btn-pool-writable btn-pill-toggle" data-pool-id="${escapeHtml(pool.id)}">${escapeHtml(t('chassis.allow_changes', 'Allow changes'))}</button>` : ''}
       ${(!isObserver || pool.fs_type === 'zfs') && pool.id !== 'unraid_array' && pool.id !== 'default_pool' ? `<button class="btn-pool-export btn-pill-toggle" data-pool-id="${escapeHtml(pool.id)}" style="background: rgba(245,158,11,0.15); border-color: rgba(245,158,11,0.3); color: var(--kb-text-warn);" title="${t('ui.safely_flush_dirty_cache_and', 'Safely flush dirty cache and detach pool')}" data-i18n-title="ui.safely_flush_dirty_cache_and">${ico('⏏️')} ${t('chassis.eject', 'Safely eject')}</button>` : ''}
       ${eraseButtonHtml(pool)}
     </div>
@@ -951,25 +953,36 @@ function bindTopologyTreeEvents(tree, container) {
       return;
     }
 
+    const writableBtn = e.target.closest('.btn-pool-writable');
+    if (writableBtn) {
+      e.stopPropagation();
+      const pid = writableBtn.dataset.poolId;
+      showConfirmToast(
+        t('chassis.allow_changes_title', 'Allow changes to this pool'),
+        t(
+          'chassis.allow_changes_msg',
+          'Kiboto opened “{pool}” without changing anything on it. Allow changes now? Kiboto can then write files, take snapshots and repair it.',
+          { pool: pid }
+        ),
+        async () => {
+          try {
+            await api.post(`/api/storage/pools/${encodeURIComponent(pid)}/allow-changes`, {});
+            showToast(t('toast.pool_changes_allowed', '“{pid}” can now be changed.', { pid }), 'success');
+            fetchAndRenderStorageTopology(container);
+          } catch (err) {
+            showToast(err.message || t('chassis.allow_changes_failed', 'Could not allow changes'), 'error');
+          }
+        },
+        null,
+        { okText: t('chassis.allow_changes', 'Allow changes'), cancelText: t('common.cancel', 'Cancel') }
+      );
+      return;
+    }
+
     const importBtn = e.target.closest('.btn-import-external-pool');
     if (importBtn) {
       e.stopPropagation();
-      const pid = importBtn.dataset.poolId;
-      const fstype = importBtn.dataset.fsType || 'zfs';
-      try {
-        importBtn.disabled = true;
-        setIconLabel(importBtn, '⏳', t('ui.importing', 'Importing...'));
-        await api.post('/api/storage/pools/import', { pool_id: pid, fs_type: fstype });
-        showToast(
-          t('toast.successfully_imported_storage_pool', "Successfully imported storage pool '{pid}'!", { pid: pid }),
-          'success'
-        );
-        fetchAndRenderStorageTopology(container);
-      } catch (err) {
-        showToast(err.message || `Failed to import pool '${pid}'`, 'error');
-        importBtn.disabled = false;
-        setIconLabel(importBtn, '📥', t('ui.import_pool', 'Import Pool'));
-      }
+      await importFoundPool(container, /** @type {HTMLButtonElement} */ (importBtn));
       return;
     }
   });
@@ -1049,7 +1062,7 @@ export function foundPoolsHtml(found) {
           <span class="cv-xs-muted-2">(${escapeHtml((p.fs_type || 'zfs').toUpperCase())}${p.status ? ` · ${escapeHtml(p.status)}` : ''})</span>
         </div>
       </div>
-      <button class="btn-import-external-pool btn-pill-toggle" data-pool-id="${escapeHtml(p.pool_id)}" data-fs-type="${escapeHtml(p.fs_type || 'zfs')}">
+      <button class="btn-import-external-pool btn-pill-toggle" data-pool-id="${escapeHtml(p.pool_id)}" data-fs-type="${escapeHtml(p.fs_type || 'zfs')}" data-guid="${escapeHtml(p.numeric_id || '')}">
         ${ico('📥')} ${t('chassis.import_pool', 'Import pool')}
       </button>
     </div>`
@@ -1060,20 +1073,48 @@ export function foundPoolsHtml(found) {
 /** Imports a pool that the look found, and draws the pools again. */
 export async function importFoundPool(container, importBtn) {
   const pid = importBtn.dataset.poolId;
-  const fstype = importBtn.dataset.fsType || 'zfs';
-  try {
+  const body = { pool_id: pid, fs_type: importBtn.dataset.fsType || 'zfs', guid: importBtn.dataset.guid || '' };
+  const reset = () => {
+    importBtn.disabled = false;
+    setIconLabel(importBtn, '📥', t('ui.import_pool', 'Import Pool'));
+  };
+  const run = async (force) => {
     importBtn.disabled = true;
     setIconLabel(importBtn, '⏳', t('ui.importing', 'Importing...'));
-    await api.post('/api/storage/pools/import', { pool_id: pid, fs_type: fstype });
+    const res = await api.post('/api/storage/pools/import', force ? { ...body, force: true } : body);
     showToast(
-      t('toast.successfully_imported_storage_pool', "Successfully imported storage pool '{pid}'!", { pid: pid }),
+      res?.read_only
+        ? t(
+            'toast.pool_imported_read_only',
+            '“{pid}” is open for reading. Nothing on it was changed. Choose “Allow changes” when you want to use it.',
+            { pid }
+          )
+        : t('toast.successfully_imported_storage_pool', "Successfully imported storage pool '{pid}'!", { pid }),
       'success'
     );
     await fetchAndRenderStorageTopology(container);
-  } catch (err) {
+  };
+  const failed = (err) => {
     showToast(err.message || `Failed to import pool '${pid}'`, 'error');
-    importBtn.disabled = false;
-    setIconLabel(importBtn, '📥', t('ui.import_pool', 'Import Pool'));
+    reset();
+  };
+  try {
+    await run(false);
+  } catch (err) {
+    if (err.error !== 'pool_used_elsewhere') return failed(err);
+    reset();
+    // forcing is offered only here, after saying what it risks
+    showDangerConfirm(
+      t('chassis.pool_elsewhere_title', 'This pool was last used by another system'),
+      t(
+        'chassis.pool_elsewhere_msg',
+        'Import “{pool}” only if that system is switched off, or its drives were moved here for good. Two systems using one pool at the same time destroy it.',
+        { pool: pid }
+      ),
+      () => run(true).catch(failed),
+      null,
+      { okText: t('chassis.import_anyway', 'Import anyway'), cancelText: t('common.cancel', 'Cancel') }
+    );
   }
 }
 

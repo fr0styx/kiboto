@@ -176,9 +176,6 @@ jobs:
     # of each kind on loop devices over files, in a runner that is thrown away afterwards.
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    # Until the job has proved itself on the runners (their kernel must carry the ZFS module), a
-    # failure here is shown but does not fail the run.
-    continue-on-error: true
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -765,7 +762,7 @@ jobs:
 
   publish:
     name: Sign & publish image tags (${{ matrix.variant }})
-    needs: [lint, lint-and-test, frontend, e2e-integration, still-latest, build-image, check-image, update-test, smoke-arm64]
+    needs: [lint, lint-and-test, storage-real, frontend, e2e-integration, still-latest, build-image, check-image, update-test, smoke-arm64]
     strategy:
       fail-fast: false
       matrix:

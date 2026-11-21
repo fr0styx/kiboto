@@ -37263,10 +37263,21 @@
    },
    "StoragePoolImportRequest": {
     "properties": {
+     "force": {
+      "default": false,
+      "title": "Force",
+      "type": "boolean"
+     },
      "fs_type": {
       "default": "zfs",
       "pattern": "^[a-z0-9]{1,16}$",
       "title": "Fs Type",
+      "type": "string"
+     },
+     "guid": {
+      "default": "",
+      "pattern": "^[0-9]{0,24}$",
+      "title": "Guid",
       "type": "string"
      },
      "pool_id": {
@@ -68884,6 +68895,57 @@
      }
     },
     "summary": "Delete Storage Pool",
+    "tags": [
+     "Storage Subsystem & PAL"
+    ],
+    "x-required-scopes": [
+     "storage:admin"
+    ]
+   }
+  },
+  "/api/v1/storage/pools/{pool_id}/allow-changes": {
+   "post": {
+    "description": "Opens for writing a pool that was imported read-only; it is then one of this system's pools.",
+    "operationId": "allow_pool_changes_api_v1_storage_pools__pool_id__allow_changes_post",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "pool_id",
+      "required": true,
+      "schema": {
+       "pattern": "^[A-Za-z0-9_/][A-Za-z0-9_./:-]{0,127}$",
+       "title": "Pool Id",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Allow Pool Changes Api V1 Storage Pools  Pool Id  Allow Changes Post",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "404": {
+      "$ref": "#/components/responses/NotFound"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Allow Pool Changes",
     "tags": [
      "Storage Subsystem & PAL"
     ],

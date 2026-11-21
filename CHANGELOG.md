@@ -20,6 +20,8 @@ A new storage pool is ZFS, btrfs or ext4. XFS is no longer offered for new pools
 
 Storage pools are now also tested with the real tools on every change: a pool of each kind is made, checked, ejected, imported, lost and deleted on pretend drives.
 
+A storage pool from another system is now opened read-only first, so nothing on it changes until you choose "Allow changes". If the pool was last used by another system, Kiboto says what importing it risks and asks before it goes on.
+
 #### Fixes
 
 A person with a storage limit could go over it by sending several files at once. Files still arriving now count against the limit.

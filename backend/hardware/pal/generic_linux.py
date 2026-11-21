@@ -29,6 +29,7 @@ from backend.hardware.pal.base import (
     PlatformCapabilityError,
     PlatformType,
     PoolMember,
+    PoolUsedElsewhere,
     StoragePlatformAdapter,
     StoragePool,
     _whole_disk,
@@ -147,6 +148,11 @@ def _tree_bytes(path: str) -> int:
 # The kinds of pool Kiboto makes. Pools of other kinds (XFS, for one) are still read and shown.
 POOL_KINDS = ("zfs", "btrfs", "ext4")
 BTRFS_MOUNT_OPTIONS = "compress=zstd:1,noatime,space_cache=v2"
+
+
+def _used_elsewhere(said: str) -> bool:
+    """True for zpool's refusal of a pool that another system last had open."""
+    return "another system" in said or "import -f" in said
 
 
 class GenericLinuxStorageAdapter(StoragePlatformAdapter):
@@ -677,6 +683,7 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
                         z_profile = "mirror"
 
                     z_members = self._parse_zpool_members(zp_name)
+                    _, z_ro, _ = self._run_cmd(["zpool", "get", "-H", "-o", "value", "readonly", zp_name])
 
                     pools.append(
                         StoragePool(
@@ -697,6 +704,7 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
                             parity_protected=z_profile in ("raidz1", "raidz2", "raidz3", "mirror"),
                             autotrim=True,
                             compression=pool_compression("zfs", z_mount, zp_name),
+                            read_only=z_ro.strip() == "on",
                         )
                     )
         return pools
@@ -1323,7 +1331,32 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
             "message": f"Storage pool '{pool_id}' safely exported and flushed. Safe to disconnect cable.",
         }
 
-    def import_pool(self, pool_id: str, fs_type: str = "zfs", target_mount: str | None = None) -> dict[str, Any]:
+    def allow_changes(self, pool_id: str) -> dict[str, Any]:
+        """Opens for writing a ZFS pool that was imported read-only, and writes it down as one of
+        this system's pools. The person answered the "used by another system" question at import,
+        so that refusal is passed here."""
+        pool = self.resolve_pool(pool_id)
+        if pool.fs_type != "zfs" or not pool.read_only:
+            return {"status": "unchanged", "pool_id": pool.id}
+        guid = pool_registry.read_uuid("zfs", pool.id, "", self._run_cmd) or pool.id
+        code, out, err = self._run_cmd(["zpool", "export", pool.id])
+        if code != 0:
+            raise RuntimeError(f"{pool.name} is in use and could not be reopened: {(err or out).strip()}")
+        code, out, err = self._run_cmd(["zpool", "import", guid])
+        if code != 0 and _used_elsewhere(err or out):
+            code, out, err = self._run_cmd(["zpool", "import", "-f", guid])
+        if code != 0:
+            self._run_cmd(["zpool", "import", "-o", "readonly=on", "-o", "cachefile=none", "-f", guid])  # as it was
+            raise RuntimeError(f"{pool.name} could not be opened for changes: {(err or out).strip()}")
+        _c, zmnt, _e = self._run_cmd(["zfs", "get", "-Hp", "-o", "value", "mountpoint", pool.id])
+        pool_registry.record(
+            pool.id, "zfs", pool.fs_profile or "", guid, [], zmnt.strip() or f"/{pool.id}", origin="imported"
+        )
+        return {"status": "writable", "pool_id": pool.id}
+
+    def import_pool(
+        self, pool_id: str, fs_type: str = "zfs", target_mount: str | None = None, force: bool = False, guid: str = ""
+    ) -> dict[str, Any]:
         """Imports an external storage pool from an attached enclosure."""
         fs_lower = fs_type.lower()
         row = pool_registry.find(pool_id)
@@ -1340,27 +1373,33 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
                 "message": f"Pool '{pool_id}' imported at {row['mountpoint']}",
             }
         if fs_lower == "zfs":
-            code, out, err = self._run_cmd(["zpool", "import", "-f", pool_id])
-            if code != 0:
-                raise RuntimeError(f"Failed to import zpool '{pool_id}': {err or out}")
-            if row:
+            if row:  # ejected here: it comes back as it was
+                why = pool_registry.bring_back(row, self._run_cmd)
+                if why:
+                    raise RuntimeError(f"Failed to import zpool '{pool_id}': {why}")
                 pool_registry.set_ejected(pool_id, False)
-            else:
-                _c, zmnt, _e = self._run_cmd(["zfs", "get", "-Hp", "-o", "value", "mountpoint", pool_id])
-                pool_registry.record(
-                    pool_id,
-                    "zfs",
-                    "",
-                    pool_registry.read_uuid("zfs", pool_id, "", self._run_cmd),
-                    [],
-                    zmnt.strip() or f"/{pool_id}",
-                    origin="imported",
-                )
+                return {
+                    "status": "imported",
+                    "pool_id": pool_id,
+                    "fs_type": "zfs",
+                    "read_only": False,
+                    "message": f"OpenZFS pool '{pool_id}' successfully imported.",
+                }
+            # A pool from elsewhere is opened for reading only and is not kept across a restart:
+            # nothing on it changes until the person allows changes (allow_changes).
+            cmd = ["zpool", "import", "-o", "readonly=on", "-o", "cachefile=none"]
+            code, out, err = self._run_cmd(cmd + (["-f"] if force else []) + [guid or pool_id])
+            if code != 0:
+                why = (err or out).strip()
+                if not force and _used_elsewhere(why):
+                    raise PoolUsedElsewhere(f"{pool_id} was last used by another system.")
+                raise RuntimeError(f"Failed to import zpool '{pool_id}': {why}")
             return {
                 "status": "imported",
                 "pool_id": pool_id,
                 "fs_type": "zfs",
-                "message": f"OpenZFS pool '{pool_id}' successfully imported.",
+                "read_only": True,
+                "message": f"OpenZFS pool '{pool_id}' is open for reading. Nothing on it was changed.",
             }
         else:
             self._run_cmd(["btrfs", "device", "scan"])

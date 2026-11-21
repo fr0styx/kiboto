@@ -209,6 +209,7 @@ describe('Batch 3 Community Features Suite', () => {
         expect(postSpy).toHaveBeenCalledWith('/api/storage/pools/import', {
           pool_id: 'usb_backup_vault',
           fs_type: 'zfs',
+          guid: '',
         });
       });
     });
