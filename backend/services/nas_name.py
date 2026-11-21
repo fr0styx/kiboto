@@ -17,10 +17,11 @@ import json
 import os
 import re
 import socket
+import sys
 import threading
 from typing import Any
 
-from backend import legacy_names, product
+from backend import legacy_names, product, runtime
 from backend.config import DATA_DIR, logger
 from backend.fsutil import atomic_write_json, read_json
 
@@ -30,6 +31,7 @@ PREVIOUS_NAMES: tuple[str, ...] = ()  # product names that still answer (none si
 KEEP_OLD = 3  # names the family used before that still answer
 CONTAINER = "kiboto-name"
 RESPONDER = "/app/backend/services/mdns_responder.py"
+UNIT = "kiboto-name.service"  # the same responder as a service, on a machine set up for Kiboto
 STATE_FILE = os.path.join(DATA_DIR, "nas_name.json")
 ELEVATED = {"X-Kiboto-Elevated": "1"}
 _NAME = re.compile(r"^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$")
@@ -54,7 +56,8 @@ def config() -> dict[str, Any]:
         p for p in data.get("previous", []) if isinstance(p, str) and valid(p) and p != legacy_names.OLD_NAS_NAME
     ]
     return {
-        "enabled": bool(data.get("enabled", False)),
+        # a guest stays silent until asked; a machine set up for Kiboto is found by name from the start
+        "enabled": bool(data.get("enabled", runtime.managed_host())),
         "name": name if valid(name) else DEFAULT_NAME,
         "previous": previous,
         # a first NAS whose second one took over keeps its setting, and is silent until taken back
@@ -187,14 +190,20 @@ def device_seed() -> str:
         return ""
 
 
+def responder_args(cfg: dict[str, Any], port: int) -> list[str]:
+    """What the responder is told: the names, the web page's port, the backup disks, Windows."""
+    names = answering_names(cfg)
+    args = ["--names", ",".join(names), "--label", label(cfg["name"]), "--http-port", str(port)]
+    for share in timemachine_shares():
+        args += ["--timemachine", share]
+    if serves_windows():
+        args += ["--windows", "--workgroup", "WORKGROUP", "--device", device_seed() or names[0]]
+    return args
+
+
 def desired(me: dict[str, Any], cfg: dict[str, Any]) -> dict[str, Any]:
     """The container: the app's image, the responder, the host's network, nothing mounted."""
-    names = answering_names(cfg)
-    cmd = [RESPONDER, "--names", ",".join(names), "--label", label(cfg["name"]), "--http-port", str(web_port(me))]
-    for share in timemachine_shares():
-        cmd += ["--timemachine", share]
-    if serves_windows():
-        cmd += ["--windows", "--workgroup", "WORKGROUP", "--device", device_seed() or names[0]]
+    cmd = [RESPONDER, *responder_args(cfg, web_port(me))]
     image = (me.get("Config") or {}).get("Image") or product.IMAGE + ":latest"
     want: dict[str, Any] = {
         "Image": image,
@@ -229,10 +238,87 @@ def _remove_old_container() -> None:
         logger.info("[NasName] Removed %s, the name service from before the rebrand", old)
 
 
+# --- as a service of the machine ---------------------------------------------------------------------
+def _own_port() -> int:
+    from backend import settings
+
+    return int(settings.current("port") or 8082)
+
+
+def _unit(*args: str) -> tuple[int, str]:
+    from backend.services.host_basics import run
+
+    return run(["systemctl", *args])
+
+
+def _unit_running() -> bool:
+    return _unit("is-active", UNIT)[1] == "active"
+
+
+def service_command(cfg: dict[str, Any]) -> list[str]:
+    """The responder as a short-lived user of its own that can write nowhere: it only answers
+    name lookups. It is restarted when it ends, and made again at every start of Kiboto."""
+    here = os.path.join(os.path.dirname(os.path.realpath(__file__)), "mdns_responder.py")
+    responder = [sys.executable, here, *responder_args(cfg, _own_port())]
+    mark = hashlib.sha256(json.dumps(responder).encode()).hexdigest()[:16]
+    return [
+        "systemd-run",
+        "--quiet",
+        "--collect",
+        "--unit",
+        UNIT,
+        "--description",
+        f"Kiboto name service {mark}",
+        *[x for prop in SERVICE_LIMITS for x in ("-p", prop)],
+        *responder,
+    ]
+
+
+SERVICE_LIMITS = (
+    "Restart=always",
+    "RestartSec=5",
+    "DynamicUser=yes",
+    "ProtectSystem=strict",
+    "ProtectHome=yes",
+    "PrivateTmp=yes",
+    "PrivateDevices=yes",
+    "NoNewPrivileges=yes",
+)
+
+
+def _ensure_service(cfg: dict[str, Any]) -> dict[str, Any]:
+    """On a machine set up for Kiboto: the unit matches the setting, and the machine has the name."""
+    from backend.services import host_basics
+
+    port = _own_port()
+    running = _unit_running()
+    if not cfg["enabled"] or cfg["held"]:
+        if running:
+            _unit("stop", UNIT)
+            logger.info("[NasName] %s; %s stopped", "Held back" if cfg["held"] else "Turned off", UNIT)
+        return status(cfg, running=False, port=port)
+    host_basics.set_host_name(cfg["name"])
+    cmd = service_command(cfg)
+    described = cmd[cmd.index("--description") + 1]
+    if running and _unit("show", UNIT, "-p", "Description", "--value")[1] == described:
+        return status(cfg, running=True, port=port)
+    _unit("stop", UNIT)
+    _unit("reset-failed", UNIT)
+    code, said = host_basics.run(cmd)
+    if code != 0:
+        logger.warning("[NasName] %s could not be started: %s", UNIT, said)
+        return status(cfg, running=False, port=port, error="The name service could not be started.")
+    logger.info("[NasName] %s answers for %s", UNIT, ", ".join(f"{n}.local" for n in answering_names(cfg)))
+    return status(cfg, running=True, port=port)
+
+
 def ensure() -> dict[str, Any]:
     """Makes the container match the setting (started, recreated after an update or a rename, or
     removed) and says how it stands."""
     cfg = config()
+    if runtime.managed_host():
+        with _lock:
+            return _ensure_service(cfg)
     with _lock:
         _remove_old_container()
         code, info = _docker("GET", f"/containers/{CONTAINER}/json")
@@ -269,6 +355,9 @@ def status(
     cfg: dict[str, Any] | None = None, running: bool | None = None, port: int | None = None, error: str = ""
 ) -> dict[str, Any]:
     cfg = cfg or config()
+    if runtime.managed_host():
+        running = _unit_running() if running is None else running
+        port = _own_port() if port is None else port
     if running is None:
         code, info = _docker("GET", f"/containers/{CONTAINER}/json")
         running = code == 200 and bool(((info or {}).get("State") or {}).get("Running"))

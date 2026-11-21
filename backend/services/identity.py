@@ -70,6 +70,10 @@ def apply_timezone(tz: str) -> bool:
     os.environ["TZ"] = tz
     if hasattr(time, "tzset"):
         time.tzset()
+    # on a machine set up for Kiboto the machine keeps this time too (a guest leaves its host alone)
+    from backend.services import host_basics
+
+    host_basics.set_time_zone(tz)
     return True
 
 
