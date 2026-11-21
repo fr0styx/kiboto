@@ -20,9 +20,12 @@ window.addEventListener('DOMContentLoaded', () => {
   const fbCreateFolderBtn = $('fb-create-folder');
   const fbNewFolderName = /** @type {HTMLInputElement} */ ($('fb-new-folder-name'));
 
-  let currentBrowsePath = '/mnt/user/';
+  // the server's main folder once Files has asked (/api/fs/roots); else the server's own default
+  // (an empty path): /mnt/user is Unraid's and missing on Kiboto's own OS
+  const home = () => String(/** @type {any} */ (window)._fmHome || '');
+  let currentBrowsePath = '';
   let currentBrowseDirs = [];
-  let browseRoots = ['/mnt/user'];
+  let browseRoots = [];
 
   // Only paths inside an allowed root (enforced server-side) are navigable.
   const isWithinRoots = (p) => {
@@ -176,7 +179,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   function openFbModal(initialPath, onSelect = null) {
     customSelectCallback = typeof onSelect === 'function' ? onSelect : null;
-    loadBrowsePath(initialPath || '/mnt/user/');
+    loadBrowsePath(initialPath || home());
     if (fbModal) {
       fbModal.classList.remove('window-minimized');
       fbModal.style.removeProperty('display');
@@ -217,8 +220,8 @@ window.addEventListener('DOMContentLoaded', () => {
   if (btnBrowseDst) {
     const handleBrowse = (e) => {
       if (e) e.preventDefault();
-      const currentDst = btnCopyDst && btnCopyDst.value ? btnCopyDst.value : '/mnt/user/';
-      openFbModal(currentDst || '/mnt/user/', null);
+      const currentDst = btnCopyDst && btnCopyDst.value ? btnCopyDst.value : home();
+      openFbModal(currentDst, null);
     };
     btnBrowseDst.addEventListener('click', handleBrowse);
     btnBrowseDst.addEventListener('touchend', handleBrowse);

@@ -254,6 +254,11 @@ describe('folder picker', () => {
     touch($('btn-browse-dst'));
     $('btn-copy-dst').value = '';
     $('btn-browse-dst').click();
-    expect(request).toHaveBeenLastCalledWith('/api/browse?path=%2Fmnt%2Fuser%2F');
+    // no destination yet: the server's main folder once Files knows it, else the server's own default
+    expect(request).toHaveBeenLastCalledWith('/api/browse?path=');
+    window._fmHome = '/mnt/storage';
+    $('btn-browse-dst').click();
+    expect(request).toHaveBeenLastCalledWith('/api/browse?path=%2Fmnt%2Fstorage');
+    delete window._fmHome;
   });
 });

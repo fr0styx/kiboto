@@ -21,6 +21,34 @@ import { loadLabels, labelsInUse, labelName, openLabelPicker, openLabelList } fr
 /** Where this server keeps its files: the main pool it reported (/api/fs/roots), else the first
  *  folder Files may show, else Unraid's /mnt/user. Files used /mnt/user everywhere, which does not
  *  exist on Kiboto's own OS images (Files finding 28). */
+/** The path box's suggestions, from the places the server reported (/api/fs/roots): its main
+ *  folder and that folder's Recycle Bin, the pools and the special folders; appdata, system and
+ *  /boot only where they exist, on Unraid. They were Unraid's five paths on every system. */
+export function pathSuggestions(places = {}) {
+  const home = places.array?.path || fmHome();
+  const paths = [home, `${home}/.RecycleBin`];
+  for (const group of [places.pools, places.special]) {
+    for (const p of Array.isArray(group) ? group : []) if (p && p.path) paths.push(p.path);
+  }
+  if (home === '/mnt/user') paths.push('/mnt/user/appdata', '/mnt/user/system', '/boot');
+  return [...new Set(paths)];
+}
+
+/** Fills every Files window's path suggestions. */
+export function fillPathLists(places = {}) {
+  if (typeof document === 'undefined') return;
+  const paths = pathSuggestions(places);
+  for (const list of document.querySelectorAll('datalist.fm-path-list')) {
+    list.replaceChildren(
+      ...paths.map((p) => {
+        const option = document.createElement('option');
+        option.value = p;
+        return option;
+      })
+    );
+  }
+}
+
 export function fmHome() {
   const w = /** @type {any} */ (typeof window !== 'undefined' ? window : {});
   const first = Array.isArray(w._fmRoots) && w._fmRoots.length ? w._fmRoots[0] : '';
@@ -330,6 +358,7 @@ export class FmSidebarTree {
         this.remotes = data.remotes || [];
         this.pools = data.pools || [];
         this.special = data.special || [];
+        fillPathLists(this);
       }
     } catch (_) {
       this.roots = [];

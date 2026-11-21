@@ -318,13 +318,7 @@ export class FileManagerWindow {
               <div class="fm-path-container fmx-row-2">
                 <input type="text" id="fm-path-input" class="fm-path-input fmx-size" aria-label="${escapeHtml(t('fm.path_input_label', 'Folder path'))}" data-i18n-aria-label="fm.path_input_label" spellcheck="false" list="fm-path-list" />
                 <div id="fm-path-breadcrumbs" class="fm-path-breadcrumbs fmx-x" style="display: flex;"></div>
-                <datalist id="fm-path-list">
-                  <option value="/mnt/user"></option>
-                  <option value="/mnt/user/.RecycleBin"></option>
-                  <option value="/boot"></option>
-                  <option value="/mnt/user/appdata"></option>
-                  <option value="/mnt/user/system"></option>
-                </datalist>
+                <datalist id="fm-path-list" class="fm-path-list"></datalist>
               </div>
               <button id="fm-refresh-btn" class="fm-tool-btn fm-refresh-btn" title="${t('fm.refresh', 'Refresh')}" data-i18n-title="fm.refresh" aria-label="${t('vm.refresh', 'Refresh')}" data-i18n-aria-label="vm.refresh">
                 <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
@@ -441,13 +435,7 @@ export class FileManagerWindow {
             <div class="fm-path-container fmx-row-2">
               <input type="text" class="fm-path-input fmx-size" aria-label="${escapeHtml(t('fm.path_input_label', 'Folder path'))}" data-i18n-aria-label="fm.path_input_label" spellcheck="false" list="${this.id}-path-list" />
               <div class="fm-path-breadcrumbs fmx-row-6"></div>
-              <datalist id="${this.id}-path-list">
-                <option value="/mnt/user"></option>
-                <option value="/mnt/user/.RecycleBin"></option>
-                <option value="/boot"></option>
-                <option value="/mnt/user/appdata"></option>
-                <option value="/mnt/user/system"></option>
-              </datalist>
+              <datalist id="${this.id}-path-list" class="fm-path-list"></datalist>
             </div>
             <button class="fm-tool-btn fm-refresh-btn" title="${t('fm.refresh', 'Refresh')}" data-i18n-title="fm.refresh" aria-label="${t('vm.refresh', 'Refresh')}" data-i18n-aria-label="vm.refresh">
               <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
