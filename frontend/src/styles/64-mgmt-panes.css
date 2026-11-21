@@ -1069,3 +1069,8 @@
 
 /* Card copies: what Overwrite does, under the existing-file rule (hardware report, finding 18) */
 .copy-overwrite-warn { margin: var(--kb-space-2) 0 0; font-size: var(--kb-fs-xs); color: var(--warn); }
+
+/* The trial of new address settings: a small dialog, not a window to resize */
+.net-trial-window { width: min(480px, 92vw); height: auto; min-width: 0; min-height: 0; resize: none; }
+.net-trial-text { margin: 0; font-size: var(--kb-fs-sm); line-height: 1.5; }
+.net-trial-link { font-family: var(--font-mono, monospace); font-size: var(--kb-fs-sm); overflow-wrap: anywhere; }

@@ -399,6 +399,9 @@ _PUBLIC_API_PATHS = {
     "/api/v1/auth/users-list",
     "/api/auth/first-run",
     "/api/v1/auth/first-run",
+    # a trial of new network settings: the trial's own key is the credential (hardware/net/managed.py)
+    "/api/network/host/keep",
+    "/api/v1/network/host/keep",
     "/api/health",
     "/api/v1/health",
     "/api/auth/oidc/config",

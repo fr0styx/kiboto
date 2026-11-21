@@ -38,7 +38,7 @@ request and response schemas.
 
 <!-- BEGIN generated endpoints: python scripts/api_reference.py --update -->
 
-807 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
+808 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
 
 ### AI Conversation History
 
@@ -496,6 +496,7 @@ request and response schemas.
 | `POST` | `/api/v1/network/host/apply` | `system:config` | Change the host's address: only on a host Kiboto manages (409 not_on_this_host elsewhere) |
 | `GET` | `/api/v1/network/host/config` | any of `system:view`, `system:config` | Retrieve host IP assignment mode, primary interface, netmask, gateway, and DNS servers |
 | `POST` | `/api/v1/network/host/confirm` | `system:config` | Keep a trial address: only on a host Kiboto manages (409 not_on_this_host elsewhere) |
+| `POST` | `/api/v1/network/host/keep` | public | Keeps a trial address from the machine's new address, where nobody is signed in yet: the trial's own key, which only the link shown to th… |
 | `POST` | `/api/v1/network/host/revert` | `system:config` | Go back from a trial address: only on a host Kiboto manages (409 not_on_this_host elsewhere) |
 | `GET` | `/api/v1/network/https` | `system:view` | Get Https |
 | `PUT` | `/api/v1/network/https` | `system:config` | Put Https |

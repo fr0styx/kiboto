@@ -477,6 +477,7 @@ async function loadNetworkTopology() {
     }
 
     setNetCaps(topo.host); // what this host lets Kiboto change (SET-16, D2)
+    if (topo.host?.trial) showTrial(topo.host.trial); // a page opened in the middle of a trial says so
     const summary = topo.summary || {};
     const physical = topo.physical_interfaces || [];
     const bonds = topo.bonds || [];
@@ -948,6 +949,13 @@ export async function submitDockerNetworkCreate() {
   }
 }
 
+/** New address settings are a trial: the dialog that keeps them or goes back (net-trial.js). */
+function showTrial(trial) {
+  return import('./net-trial.js')
+    .then((m) => m.showNetTrial(trial, () => fetchAndRenderNetworkTopology()))
+    .catch(() => {});
+}
+
 export async function openHostIpConfigModal() {
   const overlay = document.getElementById('network-host-config-overlay');
   if (!overlay) return;
@@ -1057,7 +1065,8 @@ export async function applyHostIpConfig() {
 
     // only a host Kiboto manages takes the change (SET-16, D2); elsewhere the server says where to make it
     closeHostIpConfigModal();
-    showToast(res?.message || t('ui.saved', 'Saved!'), 'success');
+    if (res?.status === 'trial') showTrial(res);
+    else showToast(res?.message || t('ui.saved', 'Saved!'), 'success');
     fetchAndRenderNetworkTopology();
   } catch (err) {
     showToast(err.message || 'Failed to apply host network configuration', 'error');

@@ -32,6 +32,7 @@ OWN_OR_SIGN_IN = {
     "/api/v1/shared/{token}/upload": "a send-me-files link; the token (and password) is the credential",
     "/api/v1/invite/{token}/accept": "an invite; the token is the credential",
     "/api/v1/fleet/peer/pair": "a paired Kiboto box pairing (RES-9); the one-time code is the credential",
+    "/api/v1/network/host/keep": "keeping a trial of network settings from the new address; the trial's key is the credential",
     "/api/v1/fleet/peer/buddy": "a paired Kiboto box asking for space; its peer token is the credential",
     "/api/v1/fleet/peer/unpair": "a paired Kiboto box unpairing; its peer token is the credential",
     "/api/v1/ha/peer/pair": "the second NAS pairing (high availability); the one-time pairing key is the credential",

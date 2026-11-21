@@ -489,14 +489,20 @@ def _bring_pools_back() -> None:
 
 
 def _start_app_names() -> None:
-    """On a managed host apps are reached by name through /etc/hosts (services/app_hosts)."""
+    """On a managed host apps are reached by name through /etc/hosts (services/app_hosts), and a
+    trial of network settings that a restart cut short is put back."""
     from backend import runtime
 
     if runtime.managed_host():
+        from backend.hardware.net import managed
         from backend.services import app_hosts
         from backend.services.supervisor import supervise
 
         supervise("AppNames", app_hosts.keep_in_step)
+        try:
+            managed.settle()
+        except (OSError, ValueError) as e:
+            logger.error("[Main] A trial of network settings could not be settled: %s", e)
 
 
 def _reapply_firewall() -> None:

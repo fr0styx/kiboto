@@ -2,48 +2,12 @@
 
 Part of backend/hardware/network.py, split out by ARC-5."""
 
-import ipaddress
 from typing import Any
 
 from backend.hardware.net import common, topology
 from backend.hardware.net import unraid_cfg as unraid_file
-
-
-def _validate_ipv4(val: str, field_name: str) -> str:
-    val = (val or "").strip()
-    if not val:
-        raise ValueError(f"{field_name} is required")
-    try:
-        ip = ipaddress.IPv4Address(val)
-    except ValueError:
-        raise ValueError(f"Invalid IPv4 address for {field_name}: {val}") from None
-    if ip.is_loopback:
-        raise ValueError(f"{field_name} cannot be a loopback address (127.0.0.0/8)")
-    if ip.is_multicast:
-        raise ValueError(f"{field_name} cannot be a multicast address")
-    if ip.is_unspecified:
-        raise ValueError(f"{field_name} cannot be 0.0.0.0")
-    if str(ip) == "255.255.255.255":
-        raise ValueError(f"{field_name} cannot be broadcast address")
-    return str(ip)
-
-
-def _validate_netmask(val: str) -> str:
-    val = (val or "").strip()
-    if not val:
-        return "255.255.255.0"
-    if val.startswith("/"):
-        val = val[1:]
-    if val.isdigit():
-        prefix = int(val)
-        if 1 <= prefix <= 32:
-            return str(ipaddress.IPv4Network(f"0.0.0.0/{prefix}").netmask)
-        raise ValueError(f"Invalid CIDR prefix: /{prefix}")
-    try:
-        net = ipaddress.IPv4Network(f"0.0.0.0/{val}")
-        return str(net.netmask)
-    except Exception:
-        raise ValueError(f"Invalid netmask: {val}") from None
+from backend.hardware.net.ipv4 import validate_ipv4 as _validate_ipv4  # noqa: F401 - kept under the old names
+from backend.hardware.net.ipv4 import validate_netmask as _validate_netmask  # noqa: F401
 
 
 def get_host_ip_config() -> dict[str, Any]:
@@ -91,11 +55,22 @@ def get_host_ip_config() -> dict[str, Any]:
     if unraid_cfg.get("DNS_SERVER2") and unraid_cfg["DNS_SERVER2"] not in dns_servers:
         dns_servers.append(unraid_cfg["DNS_SERVER2"])
 
+    trial = None
+    from backend import runtime
+
+    if runtime.managed_host():  # the machine's own network service says, not a guess from the address
+        from backend.hardware.net import managed
+
+        mode = managed.mode_of(primary_iface)
+        dns_servers = managed.dns_servers() or dns_servers
+        trial = managed.trial_status()
+
     dns1 = dns_servers[0] if len(dns_servers) > 0 else ""
     dns2 = dns_servers[1] if len(dns_servers) > 1 else ""
 
     return {
         "status": "ok",
+        "trial": trial,  # a change being tried: {interface, seconds_left, url}
         "mode": mode,
         "interface": primary_iface,
         "available_interfaces": available_ifaces,

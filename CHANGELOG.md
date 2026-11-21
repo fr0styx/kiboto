@@ -66,6 +66,8 @@ On a machine of its own, Kiboto can now update itself: the new version is made r
 
 - **This machine (preview)**: on a Debian machine set up for Kiboto, Network shows what the machine is called, its time zone, whether its clock is set from the internet, and a switch for signing in to its command line over the network (SSH). Turning SSH on asks first.
 
+- **Network settings on a machine of its own (preview)**: on a Debian machine set up for Kiboto you can give the machine a fixed address or let the router choose, and set its DNS servers, from Network. New settings are tried for 60 seconds: keep them from the page, or by opening Kiboto at its new address through the link shown. If nobody does, the machine goes back to the settings from before by itself, so a wrong address locks nobody out.
+
 ## v2.0.5 (2026-11-20)
 ### 🏡 A second NAS that can take over, files you can change over the network, and 176 tested apps
 

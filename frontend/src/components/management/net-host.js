@@ -28,6 +28,7 @@ const WHERE = {
   proxmox: () => t('net.where_proxmox', "Proxmox, under the node's System → Network"),
   ugos: () => t('net.where_ugos', 'UGOS, under Control Panel → Network'),
   system: () => t('net.where_system', "the host system's own network settings"),
+  debian: () => t('net.where_debian', "Debian's own network settings on this machine"),
 };
 
 /** "This is set up in Unraid, under Settings → Network Settings. Kiboto shows it but does not change it." */

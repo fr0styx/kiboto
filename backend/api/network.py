@@ -33,6 +33,10 @@ def _change(setting: str, target: str, changes: dict) -> dict:
         return current_host().apply(setting, target, changes)
     except NotOnThisHost as e:
         raise ApiError(409, str(e), "not_on_this_host") from None
+    except ValueError as e:  # what was asked cannot be: said as it is
+        raise HTTPException(status_code=400, detail=str(e)) from None
+    except RuntimeError as e:  # the machine could not do it
+        raise HTTPException(status_code=502, detail=str(e)) from None
 
 
 @router.get("/network/capabilities", dependencies=[Depends(require_scope("system:view", "system:config"))])
@@ -179,6 +183,27 @@ async def confirm_host_ip_config_endpoint(req: HostIpConfirmRequest | None = Non
 async def revert_host_ip_config_endpoint(req: HostIpRevertRequest | None = None):
     """Go back from a trial address: only on a host Kiboto manages (409 not_on_this_host elsewhere)."""
     return await asyncio.to_thread(_change, "address", "", {"revert": req.canary_id if req else None})
+
+
+class HostKeepRequest(BaseModel):
+    canary_id: str = Field(min_length=16, max_length=128, description="The key of the change being tried")
+
+
+@router.post("/network/host/keep")
+async def keep_host_ip_config_endpoint(req: HostKeepRequest):
+    """Keeps a trial address from the machine's new address, where nobody is signed in yet: the
+    trial's own key, which only the link shown to the administrator carries, is the credential.
+    It can do nothing else, and nothing at all when no change is being tried."""
+    from backend import runtime
+
+    if not runtime.managed_host():
+        raise HTTPException(status_code=404, detail="Not found")
+    from backend.hardware.net import managed
+
+    try:
+        return await asyncio.to_thread(managed.keep, req.canary_id)
+    except ValueError as e:
+        raise HTTPException(status_code=403, detail=str(e)) from None
 
 
 @router.get("/network/bond/{bond_name}", dependencies=[Depends(require_scope("system:view", "system:config"))])

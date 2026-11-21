@@ -240,7 +240,8 @@
     "ip_address": "192.168.1.10",
     "mode": "static",
     "netmask": "255.255.255.0",
-    "status": "ok"
+    "status": "ok",
+    "trial": null
    }
   },
   {
@@ -2339,6 +2340,9 @@
   },
   "_validate_netmask": {
    "function": "(val: str) -> str"
+  },
+  "cached_mesh_vpn_status": {
+   "function": "() -> dict[str, typing.Any]"
   },
   "create_docker_network": {
    "function": "(name: str, driver: str = 'bridge', subnet: str = '', gateway: str = '') -> dict[str, typing.Any]"

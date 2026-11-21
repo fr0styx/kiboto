@@ -246,6 +246,39 @@ export function initAuth() {
 
   // Try fetching current profile if we have active session
   fetchCurrentProfile();
+  keepNetworkFromLink();
+}
+
+/**
+ * A trial of new address settings is kept by opening the machine at its new address: the link
+ * shown to the administrator carries the trial's key (Network). It works before anyone has
+ * signed in there, and the key does not stay in the address bar.
+ */
+export async function keepNetworkFromLink(win = window) {
+  const params = new URLSearchParams(win.location.search);
+  const key = params.get('keep-network');
+  if (!key) return null;
+  params.delete('keep-network');
+  const rest = params.toString();
+  win.history.replaceState(null, '', win.location.pathname + (rest ? `?${rest}` : '') + win.location.hash);
+  let kept;
+  try {
+    const res = await win.fetch('/api/network/host/keep', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ canary_id: key }),
+    });
+    kept = res.ok && Boolean((await res.json()).kept);
+  } catch (e) {
+    kept = false; // said below
+  }
+  showToast(
+    kept
+      ? t('net.trial_kept', 'The new network settings are kept.')
+      : t('net.trial_over', 'These network settings were not kept: the trial was already over.'),
+    kept ? 'success' : 'error'
+  );
+  return kept;
 }
 
 /** Says on the sign-in page where the first-time password is found, while nobody has signed in yet. */

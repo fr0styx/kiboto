@@ -23356,6 +23356,22 @@
     "title": "HostIpRevertRequest",
     "type": "object"
    },
+   "HostKeepRequest": {
+    "properties": {
+     "canary_id": {
+      "description": "The key of the change being tried",
+      "maxLength": 128,
+      "minLength": 16,
+      "title": "Canary Id",
+      "type": "string"
+     }
+    },
+    "required": [
+     "canary_id"
+    ],
+    "title": "HostKeepRequest",
+    "type": "object"
+   },
    "HttpsIn": {
     "properties": {
      "enabled": {
@@ -62137,6 +62153,40 @@
     ],
     "x-required-scopes": [
      "system:config"
+    ]
+   }
+  },
+  "/api/v1/network/host/keep": {
+   "post": {
+    "description": "Keeps a trial address from the machine's new address, where nobody is signed in yet: the\ntrial's own key, which only the link shown to the administrator carries, is the credential.\nIt can do nothing else, and nothing at all when no change is being tried.",
+    "operationId": "keep_host_ip_config_endpoint_api_v1_network_host_keep_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/HostKeepRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "security": [],
+    "summary": "Keep Host Ip Config Endpoint",
+    "tags": [
+     "Network & Switching"
     ]
    }
   },
