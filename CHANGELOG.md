@@ -2,7 +2,33 @@
 
 Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep that name.
 
-## Unreleased
+## v2.0.5 (2026-11-20)
+### 🏡 A second NAS that can take over, files you can change over the network, and 176 tested apps
+
+A second NAS can now stand in for the first: the two pair over an encrypted link, the second keeps a
+sealed copy of the people and settings and the folders you tick, warns when it falls behind, and
+can take over the people, the name, the backups and the apps when the first is gone. Scheduled
+scripts, a check for new drives, iSCSI disks for other computers and moving old files to slower
+drives arrive, each off until you turn it on. What you make in Files, receive over WebDAV or SFTP,
+or bring from the cloud now belongs to the folder it lands in, so it can be changed over the
+network share; Kiboto's own file server is reloaded instead of restarted, and its shared and
+private folders can be written over the network. Files can no longer rename or delete the
+system's folders, and sync, tidy-up, unzip and copy stay inside your shared folders. Kib answers
+about the NAS in five languages from its real readings. The catalog has 176 apps, every one
+installed again on a real engine for this release.
+
+#### Before you upgrade
+
+- **Nothing to do for most installs.** Scheduled scripts, iSCSI, moving old files to slower drives,
+  the new-drive check and the second NAS are all off until you turn them on.
+- **Files Kiboto made in your shared folders with an earlier version** still belong to the system.
+  To hand them to the folder's people, open the folder's details in Files, **Permissions**, **Give to
+  this folder's people**. It reads the whole folder, so it wakes the drives it is on.
+- **Apps such as Radarr, Sonarr or qBittorrent** installed earlier whose own downloads or media
+  folder is not a shared folder: install them again over their data (**Stop & replace**) so the app
+  can write to that folder.
+- **Linux install with Kiboto's own file server:** take the new `docker-compose.linux.yml` for the
+  right workgroup on Windows PCs and for folders that move old files to slower drives.
 
 #### Fixes
 
@@ -48,87 +74,87 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
   search box. It is now in the title row, where the folder's name used to be repeated, so the file list starts
   one row higher. Tapping a part of the path still goes there.
 
-Apps on a phone: each app is a short card with its name, its state, one button (Open, Start or Resume) and the menu. With the Docker details there is one more line for the load and the ports. The list no longer runs off the side of the screen, and the Docker details switch stays in view.
+- Apps on a phone: each app is a short card with its name, its state, one button (Open, Start or Resume) and the menu. With the Docker details there is one more line for the load and the ports. The list no longer runs off the side of the screen, and the Docker details switch stays in view.
 
-Replacing the install's secret key (Security) no longer ends the pairing of two NAS boxes: the link's key is sealed again with the new one.
+- Replacing the install's secret key (Security) no longer ends the pairing of two NAS boxes: the link's key is sealed again with the new one.
 
-The card for a second NAS showed the word "null" where a part of it was not drawn.
+- The card for a second NAS showed the word "null" where a part of it was not drawn.
 
-A label on a file that was deleted over the network, outside the File Explorer, stayed for good. It now goes the next time its folder is opened.
+- A label on a file that was deleted over the network, outside the File Explorer, stayed for good. It now goes the next time its folder is opened.
 
-On a phone, an app's card showed dark bands behind its name after it was touched.
+- On a phone, an app's card showed dark bands behind its name after it was touched.
 
-A first NAS that holds its name back for a second NAS said "Starting" under Find this NAS by name; it now says that the name is held back.
+- A first NAS that holds its name back for a second NAS said "Starting" under Find this NAS by name; it now says that the name is held back.
 
-On a phone, the buttons of a shared folder ran into each other, and the Security check squeezed each finding's text into a column one word wide. Both now use the full width.
+- On a phone, the buttons of a shared folder ran into each other, and the Security check squeezed each finding's text into a column one word wide. Both now use the full width.
 
-On a phone, the forms for a new virtual machine and a new shared folder show one field per row; in two columns their choices were cut off.
+- On a phone, the forms for a new virtual machine and a new shared folder show one field per row; in two columns their choices were cut off.
 
-On a tablet held upright, windows opened a little wider than the screen, so the close button was cut off, and the top bar's last button was cut in half. Both fit now. The count on the chosen Apps filter is easier to read.
+- On a tablet held upright, windows opened a little wider than the screen, so the close button was cut off, and the top bar's last button was cut in half. Both fit now. The count on the chosen Apps filter is easier to read.
 
-**A second NAS fetches large folders in one go.** The first NAS allowed the second one 240 requests a minute, and a folder fetch is one request for every file, so the first fetch of a folder with more than a few hundred files was refused part-way and caught up only over the following nights. Messages from the paired box are no longer held back; only messages that cannot be read are limited (30 a minute for each address). A second NAS paired with a first one on an older version waits and asks again instead of giving up.
+- **A second NAS fetches large folders in one go.** The first NAS allowed the second one 240 requests a minute, and a folder fetch is one request for every file, so the first fetch of a folder with more than a few hundred files was refused part-way and caught up only over the following nights. Messages from the paired box are no longer held back; only messages that cannot be read are limited (30 a minute for each address). A second NAS paired with a first one on an older version waits and asks again instead of giving up.
 
-**Second NAS: a first NAS whose Docker is stopped no longer wipes the list of its apps.** It now says that Docker does not answer, and the second NAS keeps the set-ups it was told before. The list of the first NAS's apps also no longer fails on a box without Docker.
+- **Second NAS: a first NAS whose Docker is stopped no longer wipes the list of its apps.** It now says that Docker does not answer, and the second NAS keeps the set-ups it was told before. The list of the first NAS's apps also no longer fails on a box without Docker.
 
-**Second NAS: folders made by a fetch can be used by the folder's people.** A folder the fetch created inside a kept shared folder belonged to the system and was writable by nobody else, so after a takeover people could open the files in it and not add, rename or delete any. Such folders now get the shared folder's own owner and rights.
+- **Second NAS: folders made by a fetch can be used by the folder's people.** A folder the fetch created inside a kept shared folder belonged to the system and was writable by nobody else, so after a takeover people could open the files in it and not add, rename or delete any. Such folders now get the shared folder's own owner and rights.
 
-**Nightly jobs are no longer skipped now and then.** Scheduled scripts, the nightly move of old files to slower drives, and a second NAS's nightly fetch waited for the clock to read their exact minute. The scheduler looks a little later each time, so on some days that minute was never looked at and the job did not run, without a word. A job now runs when its time has come or passed by up to five minutes, once.
+- **Nightly jobs are no longer skipped now and then.** Scheduled scripts, the nightly move of old files to slower drives, and a second NAS's nightly fetch waited for the clock to read their exact minute. The scheduler looks a little later each time, so on some days that minute was never looked at and the job did not run, without a word. A job now runs when its time has come or passed by up to five minutes, once.
 
-**What you make in Files can be changed over the network share.** A file uploaded in the File Explorer, a folder made there, a copy and the contents of an unpacked archive belonged to the system: over the network share (SMB) the folder's people could open them and not change, rename or delete them, and could put nothing into such a folder. They now get the owner and group of the folder they land in, and the folder's right to write. Files made by earlier versions keep the owner they have; the Permissions tab in a file's or folder's details sets it, also for everything inside a folder. See the Files guide.
+- **What you make in Files can be changed over the network share.** A file uploaded in the File Explorer, a folder made there, a copy and the contents of an unpacked archive belonged to the system: over the network share (SMB) the folder's people could open them and not change, rename or delete them, and could put nothing into such a folder. They now get the owner and group of the folder they land in, and the folder's right to write. Files made by earlier versions keep the owner they have; the Permissions tab in a file's or folder's details sets it, also for everything inside a folder. See the Files guide.
 
-**Restored files keep their owner; files copied from another NAS belong to the folder they land in.** A file or folder restored from a snapshot came back owned by the system, so over the network share its people could no longer change it; it now keeps the owner it has in the snapshot, and an earlier version put back keeps the owner of the file it replaces. Files copied from another NAS or PC, or downloaded from a cloud remote into a folder here, and the folders the film and series tidy-up makes, get the owner of the folder they land in.
+- **Restored files keep their owner; files copied from another NAS belong to the folder they land in.** A file or folder restored from a snapshot came back owned by the system, so over the network share its people could no longer change it; it now keeps the owner it has in the snapshot, and an earlier version put back keeps the owner of the file it replaces. Files copied from another NAS or PC, or downloaded from a cloud remote into a folder here, and the folders the film and series tidy-up makes, get the owner of the folder they land in.
 
-**The NAS is listed once under Network on Windows.** An install with Kiboto's own file server already has a service that lists it for Windows PCs, and the new one in Kiboto's name service could list it a second time. Kiboto's now searches first, and every five minutes, and stays out when the box is listed already.
+- **The NAS is listed once under Network on Windows.** An install with Kiboto's own file server already has a service that lists it for Windows PCs, and the new one in Kiboto's name service could list it a second time. Kiboto's now searches first, and every five minutes, and stays out when the box is listed already.
 
-**Files that arrive over WebDAV or SFTP can be changed over the network share.** They were written so that only the system could change them. They now get the folder's right to write: in a shared folder that is open to its group or to everyone, as on Unraid, the same people can change them over SMB. They still belong to the system.
+- **Files that arrive over WebDAV or SFTP can be changed over the network share.** They were written so that only the system could change them. They now get the folder's right to write: in a shared folder that is open to its group or to everyone, as on Unraid, the same people can change them over SMB. They still belong to the system.
 
-**Kiboto's own file server: shared folders and private folders can be written to over the network.** On an install where Kiboto runs the file server itself (not on Unraid), a shared folder Kiboto created belonged to the system, so every attempt to save, rename or delete over the network share was refused; a person's private folder could not be opened at all. Both now belong to the file server's own user. Tried from start to finish with the real file server and a client: saving, making a folder, renaming a file made in Files, and the private folder all work, and another person is refused.
+- **Kiboto's own file server: shared folders and private folders can be written to over the network.** On an install where Kiboto runs the file server itself (not on Unraid), a shared folder Kiboto created belonged to the system, so every attempt to save, rename or delete over the network share was refused; a person's private folder could not be opened at all. Both now belong to the file server's own user. Tried from start to finish with the real file server and a client: saving, making a folder, renaming a file made in Files, and the private folder all work, and another person is refused.
 
-**Linux install: Windows PCs are told the right workgroup.** The file server's own service that lists the NAS under Network on Windows announced the workgroup "MYGROUP", a default of its image. It now announces the workgroup Kiboto set. The change is in `docker-compose.linux.yml`: an existing install takes it by replacing that file.
+- **Linux install: Windows PCs are told the right workgroup.** The file server's own service that lists the NAS under Network on Windows announced the workgroup "MYGROUP", a default of its image. It now announces the workgroup Kiboto set. The change is in `docker-compose.linux.yml`: an existing install takes it by replacing that file.
 
-**Files that arrive over WebDAV or SFTP also get the shared folders' group.** With the right to write alone they still belonged to the system and its group; on an install with Kiboto's own file server they could then not be changed over the network share. They now carry the group the shared folders have.
+- **Files that arrive over WebDAV or SFTP also get the shared folders' group.** With the right to write alone they still belonged to the system and its group; on an install with Kiboto's own file server they could then not be changed over the network share. They now carry the group the shared folders have.
 
-**Kiboto's own file server is no longer restarted for every change.** Changing who may open a shared folder, adding a person, or an address being blocked after wrong passwords restarted the whole file server: everyone's open folders and running copies were cut. The new settings are now loaded in place. Only the shared folder that changed is closed, so its clients connect again under the new settings, and a newly blocked address is disconnected; everything else stays connected. Tried with the real file server: a person removed from a folder loses it at once, while another folder being copied to is not interrupted. Only on installs where Kiboto runs the file server itself.
+- **Kiboto's own file server is no longer restarted for every change.** Changing who may open a shared folder, adding a person, or an address being blocked after wrong passwords restarted the whole file server: everyone's open folders and running copies were cut. The new settings are now loaded in place. Only the shared folder that changed is closed, so its clients connect again under the new settings, and a newly blocked address is disconnected; everything else stays connected. Tried with the real file server: a person removed from a folder loses it at once, while another folder being copied to is not interrupted. Only on installs where Kiboto runs the file server itself.
 
-Kiboto's own file server: when its settings were written twice before they were loaded once, only the second change closed its shared folder. Both now do.
+- Kiboto's own file server: when its settings were written twice before they were loaded once, only the second change closed its shared folder. Both now do.
 
-**Files a two-way sync brings from the cloud can be changed over the network share.** They were written so that only the system could change them. They now get the group and the right to write of the folder they are synced into.
+- **Files a two-way sync brings from the cloud can be changed over the network share.** They were written so that only the system could change them. They now get the group and the right to write of the folder they are synced into.
 
-Kiboto's own file server: adding a person, or letting someone write who could only read, no longer closes anyone's open shared folder. A folder is closed only when someone loses access to it or loses the right to write. A file moved in Files from one drive to another keeps its owner, as it does on one drive.
+- Kiboto's own file server: adding a person, or letting someone write who could only read, no longer closes anyone's open shared folder. A folder is closed only when someone loses access to it or loses the right to write. A file moved in Files from one drive to another keeps its owner, as it does on one drive.
 
-**The settings backup works while Kiboto's own file server runs.** On an install where Kiboto runs the file server itself, the settings backup failed as soon as that file server was running: it tried to pack the file server's live connections, which are not files. The same failure stopped a second NAS from fetching the first one's people and settings. The backup now packs ordinary files only. Tried from start to finish with two boxes and the real file server: after a takeover a person signs in to the second NAS's file server with the password she had and writes to the folder that was kept in step.
+- **The settings backup works while Kiboto's own file server runs.** On an install where Kiboto runs the file server itself, the settings backup failed as soon as that file server was running: it tried to pack the file server's live connections, which are not files. The same failure stopped a second NAS from fetching the first one's people and settings. The backup now packs ordinary files only. Tried from start to finish with two boxes and the real file server: after a takeover a person signs in to the second NAS's file server with the password she had and writes to the folder that was kept in step.
 
-Kiboto's own file server: after a settings restore or a takeover it is started again, so the people who came with it can sign in over the network and those who are no longer there cannot. Loading the settings in place is not enough for that: the running file server keeps the list of accounts it had.
+- Kiboto's own file server: after a settings restore or a takeover it is started again, so the people who came with it can sign in over the network and those who are no longer there cannot. Loading the settings in place is not enough for that: the running file server keeps the list of accounts it had.
 
-Files: the nine tick boxes on a file's Permissions tab are named for screen readers ("Owner: may read" and so on), and the letters R, W and X say what they stand for when pointed at.
+- Files: the nine tick boxes on a file's Permissions tab are named for screen readers ("Owner: may read" and so on), and the letters R, W and X say what they stand for when pointed at.
 
-Files on a phone: on a file's Permissions tab the letters beside the mode number (for example drwxr-xr-x) were cut off at the edge. They are shown whole.
+- Files on a phone: on a file's Permissions tab the letters beside the mode number (for example drwxr-xr-x) were cut off at the edge. They are shown whole.
 
-**The Getting started card fits the window.** On a laptop screen 768 or 800 pixels high its last steps ran past the bottom and could not be reached; it now scrolls inside the window. On a tablet and on narrower windows it lay over the first widgets; it now stops where they begin.
+- **The Getting started card fits the window.** On a laptop screen 768 or 800 pixels high its last steps ran past the bottom and could not be reached; it now scrolls inside the window. On a tablet and on narrower windows it lay over the first widgets; it now stops where they begin.
 
-**Keyboard and screen readers: the closed side drawer is skipped.** With the drawer for the front panel closed, its buttons were off the screen and still took the Tab key's focus one after the other: on the desktop most of the first sixty Tab presses went to something that could not be seen. A screen reader read them as well. Closed, the drawer is now left out; opened, it works as before.
+- **Keyboard and screen readers: the closed side drawer is skipped.** With the drawer for the front panel closed, its buttons were off the screen and still took the Tab key's focus one after the other: on the desktop most of the first sixty Tab presses went to something that could not be seen. A screen reader read them as well. Closed, the drawer is now left out; opened, it works as before.
 
-Keyboard: the notice for the front panel's copy button took the Tab key's focus on three buttons while it was not shown. It is skipped until a copy runs.
+- Keyboard: the notice for the front panel's copy button took the Tab key's focus on three buttons while it was not shown. It is skipped until a copy runs.
 
-On a laptop screen the Getting started card lay over the last one or two desktop icons (Drive Health and the Kiboto front panel) on a new install. It now sits beside them.
+- On a laptop screen the Getting started card lay over the last one or two desktop icons (Drive Health and the Kiboto front panel) on a new install. It now sits beside them.
 
-The sign-in screen could jump back to the list of people, or to the person it had picked, while you were typing a name or a password. It now stays as you left it.
+- The sign-in screen could jump back to the list of people, or to the person it had picked, while you were typing a name or a password. It now stays as you left it.
 
-On a laptop screen the Drive Health icon could sit partly over the Recycle Bin on a new install. It now takes a free place.
+- On a laptop screen the Drive Health icon could sit partly over the Recycle Bin on a new install. It now takes a free place.
 
-Apps such as Radarr, Sonarr, qBittorrent and Mylar3 could not write to their own downloads, TV or comics folder when it was not on a shared folder. Kiboto now hands those folders to the user the app runs as when it installs it.
+- Apps such as Radarr, Sonarr, qBittorrent and Mylar3 could not write to their own downloads, TV or comics folder when it was not on a shared folder. Kiboto now hands those folders to the user the app runs as when it installs it.
 
-Files no longer lets anyone delete, rename or move the system's own folders (appdata, system, domains, isos), a drive's folder or the folder that holds Kiboto's data. Renaming appdata by mistake would have stopped every app and Kiboto itself.
+- Files no longer lets anyone delete, rename or move the system's own folders (appdata, system, domains, isos), a drive's folder or the folder that holds Kiboto's data. Renaming appdata by mistake would have stopped every app and Kiboto itself.
 
-"Send me files" links: when two people sent a file with the same name at the same moment, one could replace the other. The second now gets its own name. Files sent side by side also count against the link's size limit as they arrive, so the limit can no longer be passed by sending several at once.
+- "Send me files" links: when two people sent a file with the same name at the same moment, one could replace the other. The second now gets its own name. Files sent side by side also count against the link's size limit as they arrive, so the limit can no longer be passed by sending several at once.
 
-Share links with "at most N downloads" could be downloaded more often than that when several downloads started at once. The limit now holds.
+- Share links with "at most N downloads" could be downloaded more often than that when several downloads started at once. The limit now holds.
 
-An invite link for one person stopped working when they first chose a username Kiboto could not take (one letter long, say). They can now choose another and carry on.
+- An invite link for one person stopped working when they first chose a username Kiboto could not take (one letter long, say). They can now choose another and carry on.
 
-Files and the Inbox: two uploads with the same name finishing at the same moment could leave only one of them. Each now keeps its own name.
+- Files and the Inbox: two uploads with the same name finishing at the same moment could leave only one of them. Each now keeps its own name.
 
-Tidying films moves them only out of and into shared folders. Run on a drive's top folder, it could have taken an app's own video files (recordings, trailers) away from it.
+- Tidying films moves them only out of and into shared folders. Run on a drive's top folder, it could have taken an app's own video files (recordings, trailers) away from it.
 
 #### Changes
 
@@ -150,13 +176,13 @@ Tidying films moves them only out of and into shared folders. Run on a drive's t
 - **Ask Kib whether your drives are healthy**: Kib was told each drive's state and temperature but not its
   health. It now knows which drives are good, which show wear and which are failing, and says so.
 
-Kib can say how much space each app uses, from the last time it was measured under Apps, and says when that was. It no longer has to leave the question unanswered.
+- Kib can say how much space each app uses, from the last time it was measured under Apps, and says when that was. It no longer has to leave the question unanswered.
 
-On a phone, a row of buttons that continues beyond the edge of the screen now shows an arrow on the side where more is hidden (Apps: the buttons and the filters).
+- On a phone, a row of buttons that continues beyond the edge of the screen now shows an arrow on the side where more is hidden (Apps: the buttons and the filters).
 
-On a phone: the row of tabs inside Settings and wide tables show an arrow where more is hidden; a History entry's buttons sit under its text instead of squeezing it into a narrow column; lines that open something ("Advanced", "Technical details") are easier to hit.
+- On a phone: the row of tabs inside Settings and wide tables show an arrow where more is hidden; a History entry's buttons sit under its text instead of squeezing it into a narrow column; lines that open something ("Advanced", "Technical details") are easier to hit.
 
-The scheduler looks at its jobs once a minute, just after the minute begins, instead of 60 seconds after its last look: timed jobs start within the first second of their minute.
+- The scheduler looks at its jobs once a minute, just after the minute begins, instead of 60 seconds after its last look: timed jobs start within the first second of their minute.
 
 #### New
 
@@ -224,23 +250,23 @@ The scheduler looks at its jobs once a minute, just after the minute begins, ins
   the second for 30 days in a hidden folder. The second NAS never touches files of its own: it only replaces
   or puts away files it fetched itself.
 
-A second NAS that can take over, fourth step: the takeover. **Take over now** on the second NAS takes the first one's people (their sign-in and two-factor), who may open the folders kept in step, and the name the family types; it keeps its own network address, apps and backups. It is refused while the first NAS still answers, unless you say so. A first NAS that comes back holds its name until you press **Take the name back** on it. Going back is by hand: files and people changed on the second NAS meanwhile are not copied back. See docs/HA.md.
+- A second NAS that can take over, fourth step: the takeover. **Take over now** on the second NAS takes the first one's people (their sign-in and two-factor), who may open the folders kept in step, and the name the family types; it keeps its own network address, apps and backups. It is refused while the first NAS still answers, unless you say so. A first NAS that comes back holds its name until you press **Take the name back** on it. Going back is by hand: files and people changed on the second NAS meanwhile are not copied back. See docs/HA.md.
 
-A second NAS that takes over can bring the first one's backups along. Tick **Also bring the first NAS's backups, switched off** under Take over now. A backup comes along when its folder is one of the folders kept in step, with its password and its cloud sign-in; you turn each one on under Backup after a look. A backup onto a drive of the first NAS stays behind. See docs/HA.md.
+- A second NAS that takes over can bring the first one's backups along. Tick **Also bring the first NAS's backups, switched off** under Take over now. A backup comes along when its folder is one of the folders kept in step, with its password and its cloud sign-in; you turn each one on under Backup after a look. A backup onto a drive of the first NAS stays behind. See docs/HA.md.
 
-After a second NAS has taken over, it lists the **apps of the first NAS**, and **Add here** sets one up with this NAS's copy of its folders. An app can be added when the folders it keeps its files in are among the folders kept in step (keep `appdata` in step if you want apps to follow); otherwise the card names the folder that is missing. If a part of the app does not come up, everything is taken back. See docs/HA.md.
+- After a second NAS has taken over, it lists the **apps of the first NAS**, and **Add here** sets one up with this NAS's copy of its folders. An app can be added when the folders it keeps its files in are among the folders kept in step (keep `appdata` in step if you want apps to follow); otherwise the card names the folder that is missing. If a part of the app does not come up, everything is taken back. See docs/HA.md.
 
-A pair of NAS boxes warns once a day when the second NAS has not been able to fetch for three days, on both boxes.
+- A pair of NAS boxes warns once a day when the second NAS has not been able to fetch for three days, on both boxes.
 
-Windows PCs list the NAS under **Network** in File Explorer, where Kiboto serves the files itself and **Find this NAS by name** is on. On Unraid, Unraid's own service does that and nothing changes.
+- Windows PCs list the NAS under **Network** in File Explorer, where Kiboto serves the files itself and **Find this NAS by name** is on. On Unraid, Unraid's own service does that and nothing changes.
 
-**Give a folder's files back to its people.** In Files, a folder's details have a new button on the Permissions tab: **Give to this folder's people**. Files and folders in it that still belong to the system (made by an earlier version of Kiboto, or left by a tool) get the folder's owner, so they can be changed over the network share. Nothing that belongs to someone else is changed, and app folders are left out. It runs only when you press it.
+- **Give a folder's files back to its people.** In Files, a folder's details have a new button on the Permissions tab: **Give to this folder's people**. Files and folders in it that still belong to the system (made by an earlier version of Kiboto, or left by a tool) get the folder's owner, so they can be changed over the network share. Nothing that belongs to someone else is changed, and app folders are left out. It runs only when you press it.
 
-Six more apps in Get apps, each tried on a real install: Ghostfolio (savings and investments), Mattermost (team chat), Etherpad (writing together), Photoview (a gallery for a photo folder), Flowise (AI workflows) and WeKan (boards). 159 apps in all.
+- Six more apps in Get apps, each tried on a real install: Ghostfolio (savings and investments), Mattermost (team chat), Etherpad (writing together), Photoview (a gallery for a photo folder), Flowise (AI workflows) and WeKan (boards). 159 apps in all.
 
-Seven more apps in Get apps, each tried on a real install: Grist and NocoDB (spreadsheets that are databases), Backrest and Kopia (backups), Healthchecks (alerts when a scheduled job did not run), HedgeDoc (notes written together) and LanguageTool (spelling and grammar checks on your own server). 166 apps in all.
+- Seven more apps in Get apps, each tried on a real install: Grist and NocoDB (spreadsheets that are databases), Backrest and Kopia (backups), Healthchecks (alerts when a scheduled job did not run), HedgeDoc (notes written together) and LanguageTool (spelling and grammar checks on your own server). 166 apps in all.
 
-Ten more apps in Get apps, each tried on a real install: Redmine, openHAB, Music Assistant, Mumble, Mylar3, LazyLibrarian, ErsatzTV, Threadfin, FileFlows and RomM. 176 apps in all.
+- Ten more apps in Get apps, each tried on a real install: Redmine, openHAB, Music Assistant, Mumble, Mylar3, LazyLibrarian, ErsatzTV, Threadfin, FileFlows and RomM. 176 apps in all.
 
 #### Security
 
@@ -248,23 +274,23 @@ Ten more apps in Get apps, each tried on a real install: Redmine, openHAB, Music
   image file on the two logo hosts could be asked for through Kiboto by a signed-in user.
 - **New-drive check**: the drive to check is taken from the system's own list of drives, not from the request.
 
-A ready-made disk image that Kiboto unpacks for a virtual machine is readable by Kiboto alone; it was readable by every account on the box. The Redfish pages take a drive's name from the kernel's own list.
+- A ready-made disk image that Kiboto unpacks for a virtual machine is readable by Kiboto alone; it was readable by every account on the box. The Redfish pages take a drive's name from the kernel's own list.
 
-**The listing for Windows PCs cannot be stopped by one odd message.** The part that lists the NAS under "Network" on Windows read messages in any text encoding; one message from the home network in an encoding the reader does not know ended it until the next restart, and a message in UTF-16 got past the check that refuses document types. It now reads plain UTF-8 only, and a caller that connects and sends nothing is dropped after ten seconds.
+- **The listing for Windows PCs cannot be stopped by one odd message.** The part that lists the NAS under "Network" on Windows read messages in any text encoding; one message from the home network in an encoding the reader does not know ended it until the next restart, and a message in UTF-16 got past the check that refuses document types. It now reads plain UTF-8 only, and a caller that connects and sends nothing is dropped after ten seconds.
 
-**A shared folder always names who may open it.** Where everyone had the right to write, Kiboto left it to the file server's default: anyone with an account there. An account that stayed in the file server's own list after its person was removed or switched off in Kiboto could then still open the folder. The people are now always written out. Only on installs where Kiboto runs the file server itself.
+- **A shared folder always names who may open it.** Where everyone had the right to write, Kiboto left it to the file server's default: anyone with an account there. An account that stayed in the file server's own list after its person was removed or switched off in Kiboto could then still open the folder. The people are now always written out. Only on installs where Kiboto runs the file server itself.
 
-Files: "Give to this folder's people" works only on a shared folder or a folder inside one. Pressed on a drive's top folder it could have reached the system's own folders (app settings, Docker and virtual machine disks).
+- Files: "Give to this folder's people" works only on a shared folder or a folder inside one. Pressed on a drive's top folder it could have reached the system's own folders (app settings, Docker and virtual machine disks).
 
-Files, Permissions: a change no longer passes through a shortcut (symbolic link) to whatever it points at, and "Also to everything inside it" works only on a shared folder or a folder inside one.
+- Files, Permissions: a change no longer passes through a shortcut (symbolic link) to whatever it points at, and "Also to everything inside it" works only on a shared folder or a folder inside one.
 
-Cloud sync: a sync from the cloud, a move to it and a two-way sync only work on a shared folder or a folder inside one here. Pointed at a drive's top folder, a sync could have deleted every other shared folder and the apps' folders there. Kiboto's own data is always left out.
+- Cloud sync: a sync from the cloud, a move to it and a two-way sync only work on a shared folder or a folder inside one here. Pointed at a drive's top folder, a sync could have deleted every other shared folder and the apps' folders there. Kiboto's own data is always left out.
 
-Second NAS: keeping the appdata folder in step no longer copies Kiboto's own data (its keys and database) from the first NAS into the second one's. People and settings still come over in the sealed copy.
+- Second NAS: keeping the appdata folder in step no longer copies Kiboto's own data (its keys and database) from the first NAS into the second one's. People and settings still come over in the sealed copy.
 
-Files: unpacking a zip into a folder that holds a shortcut (symbolic link) to another place could put files in that other place. Such a zip is now refused before anything is written.
+- Files: unpacking a zip into a folder that holds a shortcut (symbolic link) to another place could put files in that other place. Such a zip is now refused before anything is written.
 
-Files: copying or moving a folder onto a shortcut (symbolic link) of the same name put its files wherever the shortcut pointed. The folder now goes beside it under a new name.
+- Files: copying or moving a folder onto a shortcut (symbolic link) of the same name put its files wherever the shortcut pointed. The folder now goes beside it under a new name.
 
 ## v2.0.4 (2026-11-19)
 ### 🏡 Apps that go back on their own, a way to move in, and Kiboto in your language everywhere
