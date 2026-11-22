@@ -41,7 +41,9 @@ def is_self_container(cid: str, name: str = "") -> bool:
     Checks if the container is Kiboto's own container (kiboto, or zettnas-toolkit from before)
     to prevent accidental self-destruction.
     """
-    self_hostname = socket.gethostname()
+    from backend import runtime
+
+    self_hostname = runtime.own_container_hostname()
     clean_name = (name or "").lstrip("/").lower()
     if legacy_names.is_app_container(clean_name):
         return True

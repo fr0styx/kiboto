@@ -440,7 +440,9 @@ def update_single_container(cid: str, keep_backup: bool = False) -> dict[str, An
         raise ValueError(f"Container '{cid}' not found.")
 
     orig_name = inspect_data.get("Name", "").lstrip("/")
-    self_hostname = socket.gethostname()
+    from backend import runtime
+
+    self_hostname = runtime.own_container_hostname()
     if (self_hostname and cid.startswith(self_hostname)) or legacy_names.is_app_container(orig_name):
         raise ValueError(
             "Cannot update the active Kiboto container from within the app. "

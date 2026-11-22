@@ -64,6 +64,8 @@ On a machine of its own, Kiboto can reach the apps it works with (its AI servers
 
 - **A btrfs pool that lost a drive says which**: it said it needed attention while every drive read OK; the missing drive is now named.
 
+- **Apps on a machine of its own named like "cafe" or "bead"**: with such a name, some apps passed for Kiboto itself and could not be updated or removed.
+
 #### Security
 
 Apps, Docker clean-up: deleting unused volumes now asks for a confirmation that Kiboto checks itself, so it can't happen without your say-so.

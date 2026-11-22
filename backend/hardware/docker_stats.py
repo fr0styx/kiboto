@@ -171,7 +171,9 @@ def is_kiboto_own(cid: str, name: str) -> bool:
     clean = (name or "").lstrip("/").lower()
     if clean in (NAME_RESPONDER, f"{legacy_names.OLD_NAS_NAME}-name") or legacy_names.is_app_container(clean):
         return True
-    host = socket.gethostname()
+    from backend import runtime
+
+    host = runtime.own_container_hostname()
     return bool(host and cid and (cid.startswith(host) or host.startswith(cid)))
 
 
@@ -676,11 +678,9 @@ def read_docker_containers(force: bool = False) -> list[dict[str, Any]]:
 def is_kiboto_itself(container_id: str, name: str = "") -> bool:
     """True for Kiboto's own container: by one of its names, or by its id (a container's hostname
     is the start of its id unless someone set another)."""
-    import socket
+    from backend import legacy_names, runtime
 
-    from backend import legacy_names
-
-    cid, host = str(container_id or ""), socket.gethostname()
+    cid, host = str(container_id or ""), runtime.own_container_hostname()
     if legacy_names.is_app_container(name) or legacy_names.is_app_container(cid):
         return True
     return len(host) >= 12 and len(cid) >= 12 and (cid.startswith(host) or host.startswith(cid))

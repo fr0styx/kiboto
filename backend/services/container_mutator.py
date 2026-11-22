@@ -14,7 +14,7 @@ import time
 import urllib.parse
 from typing import Any, Optional
 
-from backend import legacy_names
+from backend import legacy_names, runtime
 from backend.config import docker_sock, logger
 from backend.ignored_errors import ignored
 from backend.services.compose_synthesizer import fetch_container_raw_inspect
@@ -456,7 +456,7 @@ def recreate_container(
     # a one-shot container may end with exit code 0; one that was running must keep running
     was_running = bool((inspect_data.get("State") or {}).get("Running"))
 
-    self_hostname = socket.gethostname()
+    self_hostname = runtime.own_container_hostname()
     if (self_hostname and cid.startswith(self_hostname)) or legacy_names.is_app_container(orig_name):
         raise ValueError(
             "Cannot recreate the active Kiboto container from within the app. "

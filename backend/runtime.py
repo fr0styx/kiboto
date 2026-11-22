@@ -27,3 +27,12 @@ def native() -> bool:
 def managed_host() -> bool:
     """This machine was set up for Kiboto and Kiboto is its interface."""
     return native() and os.path.exists(MANAGED_MARK)
+
+
+def own_container_hostname() -> str:
+    """The start of Kiboto's own container id, as Docker sets it for the host name; "" when Kiboto runs
+    natively. There the host name is the NAS's name (a name like "cafe" is also the start of container
+    ids), and every container whose id began with it passed for Kiboto itself."""
+    import socket
+
+    return socket.gethostname() if in_container() else ""
