@@ -106,6 +106,8 @@ On a machine of its own, Kiboto can now update itself: the new version is made r
 
 - **Data tiering on a machine of its own (preview)**: on a Debian machine set up for Kiboto, a shared folder can show two pools as one, so old files move to the slower pool and stay in the same folder. It keeps working while Kiboto restarts.
 
+- **Kiboto's own install image (preview)**: a build script turns Debian 13's official installer into Kiboto's install image. It asks two things only, which disk becomes the system disk and a root password, touches no other disk, and Kiboto installs itself at the first start.
+
 ## v2.0.5 (2026-11-20)
 ### 🏡 A second NAS that can take over, files you can change over the network, and 176 tested apps
 

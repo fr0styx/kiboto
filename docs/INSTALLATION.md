@@ -445,7 +445,11 @@ This is a preview. It is tested on a virtual machine with real disks handed to i
 - A 64-bit PC with a fresh, minimal Debian 13 on its own system disk (in the Debian installer, choose "SSH server" and "standard system utilities" only). 4 GB of memory or more.
 - No Samba, NFS server or containers set up on it yet. The install script stops if it finds them, because Kiboto writes those settings itself.
 
-**Install**
+**Install from Kiboto's image**
+
+`packaging/image/build-image.sh` turns Debian's official 13 netinst image into Kiboto's install image (`sh packaging/image/build-image.sh debian-13-netinst.iso <kiboto image>@sha256:<digest> kiboto.iso`, needs `xorriso`). Write it to a USB stick and start the machine from it. "Install Kiboto" is chosen after ten seconds: Debian's own installer, which asks two things only, which disk becomes the system disk (it shows them with size and model, then asks before writing) and a root password. No other disk is touched. When the machine starts again, Kiboto installs itself (about ten minutes) and the screen shows the code for the first sign-in. Root may sign in over SSH with that password until you turn SSH off in Kiboto (Network, This machine). `KIBOTO_ROOT_KEYS=<file>` puts SSH keys on the image that may sign in as root too.
+
+**Install on a Debian you set up yourself**
 
 Every release from 2.0.6 on carries an `install.sh` that names that release's image by its digest. Download it from the release page, read it if you like, then run it as root:
 
@@ -456,6 +460,8 @@ sh install.sh
 It installs the tools Kiboto drives (ZFS, btrfs and ext4 tools, Samba, the NFS server, Docker, QEMU), takes Kiboto's own files out of the release image, checks that Kiboto's own build service signed that image (against the public Sigstore log), and starts Kiboto as a service. A version that is not signed is taken out again and nothing changes; `--unsigned` after the image installs a build of your own without that check. On a small machine this takes about ten minutes, most of it building the ZFS module. At the end it prints the address to open and a one-time code for the first sign-in. The same code is on the machine's own screen and in its SSH greeting until you have chosen your password.
 
 **What it changes on the machine**
+
+- A Debian installed with Debian's own installer runs its network with ifupdown. At the end of the install the script moves the same settings to systemd-networkd, so Kiboto can change the address under Network. If the machine cannot reach its router afterwards, it goes back to ifupdown by itself after 90 seconds; ifupdown's file is kept as `/etc/network/interfaces.kiboto-before`.
 
 - Kiboto's files are in `/opt/kiboto`, its settings in `/var/lib/kiboto`, and `/etc/kiboto/kiboto.env` takes extra settings (one `NAME=value` per line).
 - Two services: `kiboto` and `kiboto-pools`, which brings your pools back at start before anything that uses them.
@@ -471,9 +477,7 @@ Kiboto updates itself from the Updates page as it does elsewhere. A new version 
 
 **What is not there yet**
 
-- Network settings are changed in Kiboto only where systemd-networkd runs the network. A Debian installed with its own installer uses ifupdown: there the address is shown but set with Debian's tools.
 - Bonds and VLANs.
-- An install image. For now you install Debian first.
 
 **Taking it off again**
 
