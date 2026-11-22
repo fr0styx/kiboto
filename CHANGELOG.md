@@ -108,6 +108,8 @@ On a machine of its own, Kiboto can now update itself: the new version is made r
 
 - **Kiboto's own install image (preview)**: a build script turns Debian 13's official installer into Kiboto's install image. It asks two things only, which disk becomes the system disk and a root password, touches no other disk, and Kiboto installs itself at the first start.
 
+- **Every release carries Kiboto's install image (preview)**: built from Debian's official installer, checked against Debian's signing key.
+
 ## v2.0.5 (2026-11-20)
 ### 🏡 A second NAS that can take over, files you can change over the network, and 176 tested apps
 

@@ -74,3 +74,16 @@ def test_the_scripts_are_valid_shell():
     for name in ("build-image.sh", "late.sh"):
         done = subprocess.run(["sh", "-n", os.path.join(IMAGE, name)], capture_output=True, text=True, check=False)  # noqa: S603,S607
         assert done.returncode == 0, (name, done.stderr)
+
+
+def test_a_release_builds_the_install_image_from_checked_debian_files():
+    with open(os.path.join(ROOT, "scripts", "build_release_image.sh"), encoding="utf-8") as f:
+        build = f.read()
+    assert "DEBIAN_CD_KEY=DF9B9C49EAA9298432589D76DA87E80D6294BE9B" in build  # pinned public fingerprint gitleaks:allow
+    assert "VALIDSIG $DEBIAN_CD_KEY" in build and "sha256sum -c" in build
+    assert build.index("sha256sum -c") < build.index("build-image.sh")  # nothing is built from an unchecked file
+    with open(os.path.join(ROOT, ".github", "workflows", "ci.yml"), encoding="utf-8") as f:
+        ci = f.read()
+    step = ci[ci.index("- name: Build the install image") : ci.index("- name: Create Release")]
+    assert "continue-on-error: true" in step and "scripts/build_release_image.sh" in step
+    assert "gh release upload" in ci

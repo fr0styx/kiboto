@@ -880,6 +880,16 @@ jobs:
           grep -c '^KIBOTO_IMAGE="${{ env.IMAGE }}@sha256:' install.sh
           sh -n install.sh
 
+      # Kiboto's install image (packaging/image), from Debian's current netinst image, checked
+      # against Debian's CD signing key. Debian's servers being down must not stop a release.
+      - name: Build the install image
+        id: install_image
+        continue-on-error: true
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq xorriso
+          d=$(cat digest.txt)
+          sh scripts/build_release_image.sh "${{ env.IMAGE }}@$d" "kiboto-${GITHUB_REF_NAME}-install.iso"
+
       - name: Create Release
         uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3
         with:
@@ -893,3 +903,10 @@ jobs:
           prerelease: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Attach the install image
+        if: steps.install_image.outcome == 'success'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "$GITHUB_REF_NAME" "kiboto-${GITHUB_REF_NAME}-install.iso" --repo "$GITHUB_REPOSITORY"
