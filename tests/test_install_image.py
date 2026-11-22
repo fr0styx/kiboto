@@ -29,6 +29,8 @@ def test_the_two_questions_are_left_to_the_person():
     said = _answers()
     # which disk becomes the system disk, and whether to write to it: asked every time
     assert "partman-auto/disk" not in said and "partman/confirm" not in said
+    assert "partman/confirm_nooverwrite" not in said  # the confirmation for an empty disk is asked too
+    assert said["partman-auto/init_automatically_partition"] == "some_device"  # the whole disk, no method question
     # the root password: typed during the install, never on the image
     assert "passwd/root-password" not in said and "passwd/root-password-crypted" not in said
     assert said["passwd/root-login"] == "true" and said["passwd/make-user"] == "false"
