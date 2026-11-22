@@ -122,6 +122,19 @@ def is_there(row: dict[str, Any], run: Runner) -> bool:
     return code == 0 and bool(out.strip()) and (not row.get("uuid") or out.strip() == row["uuid"])
 
 
+def away_pool_of(path: str, rows: list[dict[str, Any]] | None = None) -> str:
+    """The recorded pool a folder is on, when that pool is not mounted now ("" otherwise). No drive
+    is read: only whether something is mounted on the pool's folder."""
+    if not path:
+        return ""
+    real = os.path.realpath(path)
+    for row in rows if rows is not None else load():
+        mp = os.path.realpath(row.get("mountpoint") or "")
+        if mp not in ("", "/") and (real == mp or real.startswith(mp + os.sep)) and not os.path.ismount(mp):
+            return str(row["name"])
+    return ""
+
+
 def protect(mountpoint: str, run: Runner) -> None:
     """Makes the empty folder a pool is mounted on unwritable, for the time nothing is mounted there.
     Where the file system below has no such flag, the folder stays as it is."""

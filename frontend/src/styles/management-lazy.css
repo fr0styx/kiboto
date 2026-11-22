@@ -660,3 +660,6 @@
 .scr-day input { width: 24px; height: 24px; margin: 0; flex: none; appearance: auto; }
 .scr-runs { display: flex; flex-direction: column; gap: 6px; }
 .scr-out { margin: 0; padding: 8px; max-height: 240px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; border: 1px solid currentColor; border-radius: 6px; }
+
+/* a shared folder whose pool is away: it shows empty, and says why */
+.share-away { margin: 6px 0; padding: 8px 10px; border-radius: 8px; font-size: var(--kb-fs-xs); line-height: 1.45; color: var(--kb-text-warn, var(--warn)); background: var(--kb-warn-bg, rgba(245, 158, 11, 0.1)); }

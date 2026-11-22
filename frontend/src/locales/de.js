@@ -9217,4 +9217,5 @@ export default {
   "machine.bridge_on": "An: Virtuelle Maschinen erhalten über {port} eine Adresse in Ihrem Heimnetz.",
   "machine.bridge_off": "Aus: Virtuelle Maschinen erreichen das Netzwerk nur über dieses Gerät.",
   "machine.bridge_cannot": "Das Netzwerk dieses Geräts wird außerhalb von Kiboto eingerichtet; Kiboto lässt es unverändert.",
+  "share.pool_away": "Sein Pool {pool} ist nicht da, deshalb ist der Ordner leer, bis der Pool zurück ist. Nichts darin ist verloren.",
 };

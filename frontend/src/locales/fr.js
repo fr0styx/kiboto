@@ -9217,4 +9217,5 @@ export default {
   "machine.bridge_on": "Activé : les machines virtuelles obtiennent une adresse sur le réseau de la maison, via {port}.",
   "machine.bridge_off": "Désactivé : les machines virtuelles n'accèdent au réseau qu'à travers cette machine.",
   "machine.bridge_cannot": "Le réseau de cette machine est réglé en dehors de Kiboto, qui n'y touche donc pas.",
+  "share.pool_away": "Son pool {pool} n'est pas là : le dossier reste vide jusqu'au retour du pool. Rien n'est perdu.",
 };

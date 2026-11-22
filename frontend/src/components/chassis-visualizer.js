@@ -1575,9 +1575,11 @@ function buildShareCardInner(s, canManageShares) {
     </div>
 
     ${
-      s.usage_is_own === false
-        ? poolFreeLine(freeStr)
-        : `<div class="share-usage-wrap">
+      s.pool_away
+        ? `<div class="share-away" role="status">${escapeHtml(t('share.pool_away', 'Its pool {pool} is not here, so the folder is empty until the pool is back. Nothing in it is lost.', { pool: s.pool_away }))}</div>`
+        : s.usage_is_own === false
+          ? poolFreeLine(freeStr)
+          : `<div class="share-usage-wrap">
       <div class="share-usage-labels">
         <span class="share-usage-text">${usedStr} / ${totalStr}</span>
         <span class="share-free-text">${t('chassis.used_free', '{pct}% used · {free} free', { pct, free: freeStr })}</span>

@@ -960,6 +960,15 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
         pct = round(usd / tot * 100, 1) if tot > 0 else 0.0
         return {"used_bytes": usd, "free_bytes": fre, "total_bytes": tot, "used_pct": pct, "usage_is_own": bool(own)}
 
+    @staticmethod
+    def _mark_away(shares: list[NetworkShare]) -> list[NetworkShare]:
+        """A folder on a pool that is away says so: it shows empty, not lost."""
+        rows = pool_registry.load()
+        if rows:
+            for share in shares:
+                share.pool_away = pool_registry.away_pool_of(share.mountpoint, rows)
+        return shares
+
     def list_shares(self) -> list[NetworkShare]:
         shares_map: dict[str, NetworkShare] = {}
         # 1. Inspect Samba Engine shares
@@ -1013,7 +1022,7 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
             logger.debug("[PAL] NfsEngine exports query fallback: %s", e)
 
         if shares_map:
-            return list(shares_map.values())
+            return self._mark_away(list(shares_map.values()))
 
         # 3. Filesystem directory fallback
         if os.path.isdir(self._pool_path):

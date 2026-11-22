@@ -50,6 +50,8 @@ On a machine of its own, Kiboto can reach the apps it works with (its AI servers
 
 - **Going back to the previous version works on a machine of its own (preview)**: it switches back to the version before the last update, with the data as it was then. A failed download of an update now says why instead of "Something went wrong".
 
+- **A shared folder whose pool is away says so**: instead of an empty folder with the system disk's space, its card names the pool that is missing and says nothing in it is lost.
+
 #### Security
 
 Apps, Docker clean-up: deleting unused volumes now asks for a confirmation that Kiboto checks itself, so it can't happen without your say-so.
