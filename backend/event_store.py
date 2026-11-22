@@ -45,6 +45,7 @@ LINKS: tuple[tuple[str, str], ...] = (
     ("alert_unsent", "alerts"),
     ("api_access_", "settings"),
     ("app_", "apps"),
+    ("apps_back", "apps"),  # apps started again after a restore, or waiting for an OK
     ("prune_", "apps"),
     ("stack_", "apps"),
     ("backup_", "backup"),

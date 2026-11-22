@@ -37,6 +37,7 @@ MAX_ARCHIVE = 256 * 1024 * 1024
 ADOPT_FLAG = ".adopt-restored-pools"  # in the data folder: the next start takes the restored pools as its own
 _KEY = re.compile(r"^[a-z0-9]{1,16}-[a-z0-9]{1,40}$")
 _lock = threading.Lock()
+_restored_at_start = [False]
 
 
 def _state_file() -> str:
@@ -310,7 +311,13 @@ def drop_index_after_restore(data_dir: str = "") -> bool:
         if os.path.exists(path):
             os.remove(path)
     logger.info("[PoolCopy] The search index of the install before is dropped; it is built again")
+    _restored_at_start[0] = True
     return True
+
+
+def restored_at_this_start() -> bool:
+    """Whether settings came back from a pool copy at this start (the apps are then started again)."""
+    return _restored_at_start[0]
 
 
 def restore(key: str, typed_recovery_key: str) -> dict[str, Any]:

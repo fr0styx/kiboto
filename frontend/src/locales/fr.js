@@ -9192,4 +9192,10 @@ export default {
   "pcopy.restore_key": "La clé de récupération de {name}",
   "pcopy.restore_go": "Récupérer les réglages",
   "pcopy.restore_done": "Les réglages de {name} reviennent. Kiboto redémarre ; connectez-vous avec un mot de passe que vous utilisiez là-bas.",
+  "ev.apps_back.title": "Applications redémarrées",
+  "ev.apps_back.msg": "Après le retour des réglages, ces applications ont été redémarrées : {apps}",
+  "ev.apps_back_held.title": "Applications en attente de votre accord",
+  "ev.apps_back_held.msg": "{apps} demandent un accès à la machine elle-même, elles n'ont donc pas été démarrées. Démarrez-les dans Applications.",
+  "ev.apps_back_failed.title": "Une application n'a pas démarré",
+  "ev.apps_back_failed.msg": "{app} : {error}",
 };

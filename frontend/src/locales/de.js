@@ -9192,4 +9192,10 @@ export default {
   "pcopy.restore_key": "Der Wiederherstellungsschlüssel von {name}",
   "pcopy.restore_go": "Einstellungen zurückholen",
   "pcopy.restore_done": "Die Einstellungen von {name} kommen zurück. Kiboto startet neu; melden Sie sich mit einem Passwort an, das Sie dort verwendet haben.",
+  "ev.apps_back.title": "Apps wieder gestartet",
+  "ev.apps_back.msg": "Nachdem die Einstellungen zurückgekommen sind, wurden diese Apps wieder gestartet: {apps}",
+  "ev.apps_back_held.title": "Apps warten auf Ihr OK",
+  "ev.apps_back_held.msg": "{apps} verlangen Zugriff auf das Gerät selbst und wurden deshalb nicht gestartet. Starten Sie sie unter Apps.",
+  "ev.apps_back_failed.title": "Eine App ist nicht gestartet",
+  "ev.apps_back_failed.msg": "{app}: {error}",
 };

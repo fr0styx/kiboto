@@ -9192,4 +9192,10 @@ export default {
   "pcopy.restore_key": "The recovery key of {name}",
   "pcopy.restore_go": "Bring the settings back",
   "pcopy.restore_done": "The settings of {name} are coming back. Kiboto is starting again; sign in with a password you used there.",
+  "ev.apps_back.title": "Apps started again",
+  "ev.apps_back.msg": "After the settings came back, these apps were started again: {apps}",
+  "ev.apps_back_held.title": "Apps waiting for your OK",
+  "ev.apps_back_held.msg": "{apps} ask for access to the machine itself, so they were not started. Start them under Apps.",
+  "ev.apps_back_failed.title": "An app did not start",
+  "ev.apps_back_failed.msg": "{app}: {error}",
 };

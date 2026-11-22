@@ -78,6 +78,8 @@ On a machine of its own, Kiboto can now update itself: the new version is made r
 
 - **A new system disk, the same Kiboto (preview)**: on a Debian machine set up for Kiboto, Backup can look on the drives for the settings of the Kiboto before and bring them back with its recovery key: people, passwords, shared folders, pools and the AI chats. Pools are only read while looking.
 
+- **Apps come back with the settings (preview)**: after the settings of a machine of its own are brought back from its pools, its apps start again by themselves. An app that needs access to the machine itself waits for your OK and is named in the activity log.
+
 ## v2.0.5 (2026-11-20)
 ### 🏡 A second NAS that can take over, files you can change over the network, and 176 tested apps
 

@@ -514,6 +514,10 @@ def _start_app_names() -> None:
         from backend.services.supervisor import supervise
 
         supervise("AppNames", app_hosts.keep_in_step)
+        from backend.services import apps_back, pool_copy
+
+        if pool_copy.restored_at_this_start():  # the apps' files came back; their containers did not
+            apps_back.start_soon()
         try:
             managed.settle()
         except (OSError, ValueError) as e:

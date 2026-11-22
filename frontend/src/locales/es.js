@@ -9192,4 +9192,10 @@ export default {
   "pcopy.restore_key": "La clave de recuperación de {name}",
   "pcopy.restore_go": "Recuperar la configuración",
   "pcopy.restore_done": "La configuración de {name} está volviendo. Kiboto se está reiniciando; entra con una contraseña que usabas allí.",
+  "ev.apps_back.title": "Aplicaciones iniciadas de nuevo",
+  "ev.apps_back.msg": "Tras recuperar la configuración, se iniciaron de nuevo estas aplicaciones: {apps}",
+  "ev.apps_back_held.title": "Aplicaciones a la espera de tu permiso",
+  "ev.apps_back_held.msg": "{apps} piden acceso al propio equipo, así que no se iniciaron. Inícialas en Aplicaciones.",
+  "ev.apps_back_failed.title": "Una aplicación no se inició",
+  "ev.apps_back_failed.msg": "{app}: {error}",
 };

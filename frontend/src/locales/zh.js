@@ -9192,4 +9192,10 @@ export default {
   "pcopy.restore_key": "{name} 的恢复密钥",
   "pcopy.restore_go": "找回设置",
   "pcopy.restore_done": "{name} 的设置正在恢复。Kiboto 正在重新启动；请用你在那里用过的密码登录。",
+  "ev.apps_back.title": "应用已重新启动",
+  "ev.apps_back.msg": "设置恢复后，这些应用已重新启动：{apps}",
+  "ev.apps_back_held.title": "应用等待你的确认",
+  "ev.apps_back_held.msg": "{apps} 需要访问机器本身，因此没有启动。请在“应用”中启动它们。",
+  "ev.apps_back_failed.title": "有应用未能启动",
+  "ev.apps_back_failed.msg": "{app}：{error}",
 };
