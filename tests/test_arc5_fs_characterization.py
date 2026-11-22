@@ -438,7 +438,38 @@ def work(pool_tree):
     yield d
 
 
-def test_fs_api_routes_and_behaviour_match_the_recording(client, auth_headers, work, paths, monkeypatch, tmp_path):
+# Pools and mounts the machine running the tests may have of its own; the recording is of a
+# host whose /mnt holds none of them, so "roots" reads the same on every machine.
+HOST_ONLY = ("/mnt/user", "/mnt/storage", "/mnt/remotes", "/mnt/cache", "/mnt/fast", "/mnt/ssd", "/mnt/disks")
+
+
+def _host_only(path) -> bool:
+    path = os.fspath(path)
+    return any(path == h or path.startswith(h + "/") for h in HOST_ONLY)
+
+
+@pytest.fixture
+def recorded_host(monkeypatch):
+    import types
+
+    import backend.config as config
+    from backend.api.files import browse
+
+    real = os.path
+    fake_path = types.SimpleNamespace(**{k: getattr(real, k) for k in dir(real) if not k.startswith("__")})
+    fake_path.exists = lambda p: not _host_only(p) and real.exists(p)
+    fake_path.isdir = lambda p: not _host_only(p) and real.isdir(p)
+    fake_os = types.SimpleNamespace(**{k: getattr(os, k) for k in dir(os) if not k.startswith("__")})
+    fake_os.path = fake_path
+    fake_os.listdir = lambda p=".": [] if os.fspath(p) == "/mnt" else os.listdir(p)
+    monkeypatch.setattr(browse, "os", fake_os)
+    roots = getattr(config, "ALLOWED_BROWSE_ROOTS", [])
+    monkeypatch.setattr(config, "ALLOWED_BROWSE_ROOTS", [r for r in roots if not _host_only(r)])
+
+
+def test_fs_api_routes_and_behaviour_match_the_recording(
+    client, auth_headers, work, paths, monkeypatch, tmp_path, recorded_host
+):
     from backend.api.files import uploads
 
     inbox = str(tmp_path / "inbox")

@@ -18,6 +18,7 @@ import pytest
 
 from backend import __version__
 from backend.services import ai_chat_agent as agent
+from backend.services import chat_llm_runtime, media_engine
 
 GOLDEN = os.path.join(os.path.dirname(__file__), "golden", "chat_turn.json")
 ADMIN = types.SimpleNamespace(scopes=["*"], role="superadmin", username="admin", user_id="admin", id="admin")
@@ -97,7 +98,9 @@ def _stub(monkeypatch, tools, mode, seen):
     # since SET-04 the keyword router reaches its tools through execute_nas_tool as well
     monkeypatch.setattr(agent, "execute_nas_tool", execute)
     monkeypatch.setattr(agent, "detect_hardware_accelerator", lambda *a, **k: {"has_npu": False, "has_gpu": False})
-    monkeypatch.setattr(agent, "read_total_ram_bytes", lambda *a, **k: 16 * 1024**3)
+    # the model-fit check reads the RAM size where it lives too: the recording is of a 16 GB machine
+    for module in (agent, chat_llm_runtime, media_engine):
+        monkeypatch.setattr(module, "read_total_ram_bytes", lambda *a, **k: 16 * 1024**3)
     monkeypatch.setattr(
         agent,
         "resolve_model_runtime_accelerator",
