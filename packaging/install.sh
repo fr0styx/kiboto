@@ -2,7 +2,8 @@
 # Kiboto on a machine of its own: turns a fresh, minimal Debian 13 into a Kiboto-managed host.
 #
 #   sh install.sh                                         install the version this script was released with
-#   sh install.sh --image <image>@sha256:<digest>         install that published version
+#   sh install.sh --image <image>@sha256:<digest>         install that published version (its signature is checked)
+#   sh install.sh --image <image>@sha256:<digest> --unsigned   install a build of your own, without that check
 #   sh install.sh --from <folder with Kiboto's code>      install from a folder (for development)
 #   sh install.sh --uninstall [--purge]                   take Kiboto off again (--purge: its settings too)
 #
@@ -169,6 +170,29 @@ code_from_image() {
   rm -rf "$tmp"
 }
 
+# The version just unpacked must be signed by Kiboto's own CI (checked with its own code, against the
+# public Sigstore log). If it is not, it is taken out again and the machine stays as it was.
+must_be_signed() {
+  image=$1
+  [ "${2:-}" = "--unsigned" ] && { say "Not checking the signature of $image, as asked."; return 0; }
+  say "Checking that Kiboto's own build service signed this version..."
+  # verify_image, not the module run as a program: a release from before that entry would end with 0 unasked
+  check='import sys; from backend.services.image_signature import verify_image as v; r = v(sys.argv[1]); print(r.reason); sys.exit(0 if r.ok else 1)'
+  if said=$(cd "$PREFIX/current" && ./venv/bin/python -c "$check" "${image#*@}" 2>&1); then
+    say "  $(printf '%s\n' "$said" | tail -1)"
+    return 0
+  fi
+  said=$(printf '%s\n' "$said" | tail -1)  # its last line says why (no pipe above: it would hide the answer)
+  rel=$(readlink "$PREFIX/current")
+  if [ -s "$PREFIX/previous" ]; then
+    ln -sfn "$(cat "$PREFIX/previous")" "$PREFIX/current"
+  else
+    rm -f "$PREFIX/current"
+  fi
+  rm -rf "$rel"
+  die "this version is not signed by Kiboto's build service ($said). Nothing was changed."
+}
+
 service() {
   src=$1
   mkdir -p "$DATA" "$ETC" /mnt/storage
@@ -227,7 +251,8 @@ case "${1:-}" in
     image=${2:-$KIBOTO_IMAGE}
     [ -n "$image" ] || { sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//'; exit 2; }
     must_be_a_digest "$image"; must_be_this_machine; must_be_fresh
-    packages; docker_setup; code_from_image "$image"; service "$PREFIX/current"; wait_up ;;
+    packages; docker_setup; code_from_image "$image"; must_be_signed "$image" "${3:-}"
+    service "$PREFIX/current"; wait_up ;;
   --uninstall) uninstall "${2:-}" ;;
   *) sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;
 esac

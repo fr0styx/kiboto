@@ -132,3 +132,24 @@ def test_a_second_run_leaves_the_held_packages_as_they_are():
     installs = [ln for ln in step.splitlines() if "apt-get install" in ln]
     assert installs and all(("$need" in ln or '"$headers"' in ln) for ln in installs), installs
     assert 'headers="linux-headers-$(uname -r)"' in step  # ZFS is built for the kernel that runs
+
+
+def test_a_version_not_signed_by_kibotos_build_service_is_taken_out_again():
+    sh = _read("install.sh")
+    assert 'code_from_image "$image"; must_be_signed "$image"' in sh  # before the service is switched
+    check = sh[sh.index("must_be_signed() {") : sh.index("service() {")]
+    assert "from backend.services.image_signature import verify_image" in check and 'rm -rf "$rel"' in check
+    assert "-m backend.services.image_signature" not in check  # an older release has no such entry
+    assert "Nothing was changed" in check and "--unsigned" in check
+
+
+def test_the_signature_check_answers_with_its_exit_code(monkeypatch, capsys):
+    from backend.services import image_signature as sig
+
+    monkeypatch.setattr(
+        sig, "verify_image", lambda digest: sig.SignatureResult(True, "signed by this project's CI", "ci.yml@main")
+    )
+    assert sig.main(["x", "sha256:" + "a" * 64]) == 0 and "ci.yml@main" in capsys.readouterr().out
+    monkeypatch.setattr(sig, "verify_image", lambda digest: sig.SignatureResult(False, "the image has no signature"))
+    assert sig.main(["x", "sha256:" + "a" * 64]) == 1 and "no signature" in capsys.readouterr().out
+    assert sig.main(["x"]) == 2

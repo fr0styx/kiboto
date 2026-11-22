@@ -453,7 +453,7 @@ Every release from 2.0.6 on carries an `install.sh` that names that release's im
 sh install.sh
 ```
 
-It installs the tools Kiboto drives (ZFS, btrfs and ext4 tools, Samba, the NFS server, Docker, QEMU), takes Kiboto's own files out of the release image and starts Kiboto as a service. On a small machine this takes about ten minutes, most of it building the ZFS module. At the end it prints the address to open and a one-time code for the first sign-in. The same code is on the machine's own screen and in its SSH greeting until you have chosen your password.
+It installs the tools Kiboto drives (ZFS, btrfs and ext4 tools, Samba, the NFS server, Docker, QEMU), takes Kiboto's own files out of the release image, checks that Kiboto's own build service signed that image (against the public Sigstore log), and starts Kiboto as a service. A version that is not signed is taken out again and nothing changes; `--unsigned` after the image installs a build of your own without that check. On a small machine this takes about ten minutes, most of it building the ZFS module. At the end it prints the address to open and a one-time code for the first sign-in. The same code is on the machine's own screen and in its SSH greeting until you have chosen your password.
 
 **What it changes on the machine**
 
@@ -462,15 +462,17 @@ It installs the tools Kiboto drives (ZFS, btrfs and ext4 tools, Samba, the NFS s
 - Pools are mounted under `/mnt/storage`.
 - The kernel, ZFS and Docker are held at the versions Kiboto was tested with (`apt-mark showhold` lists them). Everything else updates with `apt` as on any Debian, and you can install your own packages.
 - `/etc/samba/smb.conf` is replaced by a line that points at Kiboto's own settings; the file Debian shipped is kept beside it as `smb.conf.debian`.
+- The key that encrypts the AI chats and search index is made at the first start and sealed to the machine's security chip (or its system disk without one), in `/etc/kiboto/keys`. Write down the recovery key under Settings, Security.
+- A copy of the settings, encrypted, is kept on every pool (`.kiboto` at the pool's root), and apps keep their data on the first pool. After a new system disk, install again and choose "Look on this machine's drives" in setup.
 
 **Updates**
 
-Kiboto updates itself from the Updates page as it does elsewhere. A new version is put beside the running one and switched to; if it does not start, the machine goes back to the version before and says so.
+Kiboto updates itself from the Updates page as it does elsewhere. A new version is put beside the running one and switched to; if it does not start, the machine goes back to the version before and says so. "Revert" goes back to the version before the last update, with the settings as they were then. The kernel, ZFS and Docker move only when a Kiboto release was tested with newer ones: Updates then offers them.
 
 **What is not there yet**
 
-- Network settings (address, DNS), the host name and the clock are still set with Debian's own tools.
-- The SFTP server, iSCSI, merged folders and showing up in the network list of Windows and macOS.
+- Network settings are changed in Kiboto only where systemd-networkd runs the network. A Debian installed with its own installer uses ifupdown: there the address is shown but set with Debian's tools.
+- Bonds and VLANs.
 - An install image. For now you install Debian first.
 
 **Taking it off again**

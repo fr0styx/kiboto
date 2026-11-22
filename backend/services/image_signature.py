@@ -243,3 +243,20 @@ def verify_image(digest: str) -> SignatureResult:
         except Exception as exc:
             problems.append(str(exc) or type(exc).__name__)
     return SignatureResult(False, "the signature did not verify: " + "; ".join(problems))
+
+
+def main(argv: list[str]) -> int:
+    """`python -m backend.services.image_signature sha256:<digest>`: 0 when this project's CI signed
+    it, 1 when not, saying why. The install script runs it with the code it has just unpacked."""
+    if len(argv) != 2:
+        print("usage: python -m backend.services.image_signature sha256:<digest>")
+        return 2
+    result = verify_image(argv[1])
+    print(result.reason + (f" ({result.identity})" if result.identity else ""))
+    return 0 if result.ok else 1
+
+
+if __name__ == "__main__":
+    import sys
+
+    raise SystemExit(main(sys.argv))

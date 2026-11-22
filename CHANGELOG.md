@@ -26,6 +26,8 @@ A storage pool from another system is now opened read-only first, so nothing on 
 
 - **Setup of a machine of its own looks for the Kiboto before (preview)**: on a fresh install the first-run wizard offers to look on the machine's drives for the settings of the Kiboto that was there before, next to the recovery kit.
 
+- **The install script for a machine of its own checks the signature (preview)**: it installs a version only when Kiboto's own build service signed it; anything else is taken out again and nothing changes.
+
 #### Fixes
 
 A person with a storage limit could go over it by sending several files at once. Files still arriving now count against the limit.
