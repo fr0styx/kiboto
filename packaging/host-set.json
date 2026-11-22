@@ -1,0 +1,10 @@
+{
+ "_about": "The versions of the held packages this release was tested with on a Debian 13 machine. A Kiboto update brings a machine's held packages to exactly these, never past them.",
+ "tested_with": {
+  "linux-image-amd64": "6.12.117-1",
+  "linux-headers-amd64": "6.12.117-1",
+  "zfs-dkms": "2.4.4-1~bpo13+1",
+  "zfsutils-linux": "2.4.4-1~bpo13+1",
+  "docker.io": "26.1.5+dfsg1-9+deb13u1+b1"
+ }
+}

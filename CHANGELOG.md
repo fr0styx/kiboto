@@ -84,6 +84,8 @@ On a machine of its own, Kiboto can now update itself: the new version is made r
 
 - **Apps come back with the settings (preview)**: after the settings of a machine of its own are brought back from its pools, its apps start again by themselves. An app that needs access to the machine itself waits for your OK and is named in the activity log.
 
+- **Kernel, ZFS and Docker on a machine of its own (preview)**: Updates shows the three held packages and brings them to the versions this Kiboto was tested with, never past them. ZFS is checked to be built for a new kernel before a restart is suggested, and apps keep running while Docker is updated.
+
 ## v2.0.5 (2026-11-20)
 ### 🏡 A second NAS that can take over, files you can change over the network, and 176 tested apps
 

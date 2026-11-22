@@ -176,6 +176,11 @@ const ACTIONS = {
     'Let monitoring tools read how the NAS is doing over SNMP v3 on {target}? Only someone with the user name and both passwords gets an answer.',
     false,
   ],
+  'system.host_set': [
+    'Install',
+    'Bring the kernel, ZFS and Docker of {target} to the versions this Kiboto was tested with? Apps keep running; a new kernel takes effect at the next restart.',
+    false,
+  ],
   'system.new_recovery_key': [
     'Make a new key',
     'Make a new recovery key for {target}? The recovery key you wrote down before stops working.',

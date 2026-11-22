@@ -148,6 +148,7 @@ export async function fetchAndRenderSystemAbout(force = false, channelOverride =
 
   // 2. How the last update ended: a rollback is shown until the next successful update (OPS-7)
   showLastUpdateResult();
+  import('../host-set-card.js').then((m) => m.renderHostSetCard()).catch(() => {}); // a machine of its own
 
   // 3. Fetch update status
   try {

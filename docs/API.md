@@ -38,7 +38,7 @@ request and response schemas.
 
 <!-- BEGIN generated endpoints: python scripts/api_reference.py --update -->
 
-818 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
+821 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
 
 ### AI Conversation History
 
@@ -894,6 +894,9 @@ request and response schemas.
 | :--- | :--- | :--- | :--- |
 | `GET` | `/api/v1/system/heat-shutdown` | `system:view` | Get Heat Shutdown |
 | `PUT` | `/api/v1/system/heat-shutdown` | `system:power` | Put Heat Shutdown |
+| `GET` | `/api/v1/system/host-set` | `system:config` | The held packages: installed, offered by Debian and tested with this release; which can move now and which wait for a tested release |
+| `POST` | `/api/v1/system/host-set/apply` | `system:config` | Brings the held packages to the versions this release was tested with |
+| `POST` | `/api/v1/system/host-set/check` | `system:config` | Asks Debian what it offers now, then answers as GET does |
 | `GET` | `/api/v1/system/machine` | `system:config` | On a machine set up for Kiboto: its name and time zone, whether its clock is set from the internet and whether SSH takes sign-ins |
 | `PUT` | `/api/v1/system/machine` | `system:config` | Turns SSH or setting the clock from the internet on or off |
 | `GET` | `/api/v1/system/machine/key` | `system:config` | Whether this machine keeps its data key sealed to itself, to what (its security chip or its system disk), whether it could open it, and w… |

@@ -71222,6 +71222,105 @@
     ]
    }
   },
+  "/api/v1/system/host-set": {
+   "get": {
+    "description": "The held packages: installed, offered by Debian and tested with this release; which can move\nnow and which wait for a tested release. Where Kiboto is a guest only `managed: false`.",
+    "operationId": "get_host_set_api_v1_system_host_set_get",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Get Host Set Api V1 System Host Set Get",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Get Host Set",
+    "tags": [
+     "System"
+    ],
+    "x-required-scopes": [
+     "system:config"
+    ]
+   }
+  },
+  "/api/v1/system/host-set/apply": {
+   "post": {
+    "description": "Brings the held packages to the versions this release was tested with. Confirmed first.",
+    "operationId": "apply_host_set_api_v1_system_host_set_apply_post",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Apply Host Set Api V1 System Host Set Apply Post",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Apply Host Set",
+    "tags": [
+     "System"
+    ],
+    "x-required-scopes": [
+     "system:config"
+    ]
+   }
+  },
+  "/api/v1/system/host-set/check": {
+   "post": {
+    "description": "Asks Debian what it offers now, then answers as GET does.",
+    "operationId": "check_host_set_api_v1_system_host_set_check_post",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Check Host Set Api V1 System Host Set Check Post",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Check Host Set",
+    "tags": [
+     "System"
+    ],
+    "x-required-scopes": [
+     "system:config"
+    ]
+   }
+  },
   "/api/v1/system/identity": {
    "get": {
     "description": "The server's name and time zone (UX-17).",

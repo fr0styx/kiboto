@@ -170,3 +170,40 @@ async def restore_found_settings(req: SettingsRestoreIn) -> dict[str, Any]:
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from None
     return {**done, "restarting": await asyncio.to_thread(host_basics.restart_kiboto)}
+
+
+# --- the held kernel, ZFS and Docker ---------------------------------------------------------------
+@router.get("/system/host-set", dependencies=[Depends(require_scope("system:config"))])
+async def get_host_set() -> dict[str, Any]:
+    """The held packages: installed, offered by Debian and tested with this release; which can move
+    now and which wait for a tested release. Where Kiboto is a guest only `managed: false`."""
+    from backend.services import host_set
+
+    return await asyncio.to_thread(host_set.status)
+
+
+@router.post("/system/host-set/check", dependencies=[Depends(require_scope("system:config"))])
+async def check_host_set() -> dict[str, Any]:
+    """Asks Debian what it offers now, then answers as GET does."""
+    from backend.services import host_set
+
+    if not machine_key.active():
+        raise HTTPException(status_code=404, detail="Not found")
+    if not await asyncio.to_thread(host_set.check):
+        raise HTTPException(status_code=502, detail="Debian's package lists could not be read. Is the machine online?")
+    return await asyncio.to_thread(host_set.status)
+
+
+@router.post("/system/host-set/apply", dependencies=[Depends(require_scope("system:config"))])
+async def apply_host_set(
+    request: Request, principal: AuthenticatedPrincipal = Depends(get_current_principal)
+) -> dict[str, Any]:
+    """Brings the held packages to the versions this release was tested with. Confirmed first."""
+    from backend.services import host_set
+
+    if not machine_key.active():
+        raise HTTPException(status_code=404, detail="Not found")
+    confirm_or_raise(request, principal, "system.host_set", host_basics.host_name())
+    if not await asyncio.to_thread(host_set.start):
+        raise HTTPException(status_code=409, detail="There is nothing to bring up to date, or it is already running.")
+    return await asyncio.to_thread(host_set.status)
