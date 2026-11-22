@@ -355,12 +355,41 @@ def _forget_first_time_password() -> None:
         logger.warning(f"Could not remove the first-time password file: {e}")
 
 
+def _default_home(username: str) -> str:
+    """Where a person's home folder is made: under the storage folder of this install."""
+    return f"{getattr(config, 'POOL_PATH', '/mnt/user')}/homes/{username}"
+
+
+UNRAID_HOMES = "/mnt/user/homes/"
+
+
+def _fix_unraid_homes(conn: Any) -> int:
+    """The first admin was given Unraid's home folder on every install. Where the storage folder is
+    elsewhere and that path does not exist, the record follows the storage folder. Returns how many."""
+    if getattr(config, "POOL_PATH", "/mnt/user") == "/mnt/user":
+        return 0
+    fixed = 0
+    rows = conn.execute(
+        "SELECT id, username, home_directory FROM users WHERE home_directory LIKE ?", (UNRAID_HOMES + "%",)
+    )
+    for row in rows.fetchall():
+        if row["home_directory"] == UNRAID_HOMES + row["username"] and not os.path.exists(row["home_directory"]):
+            conn.execute(
+                "UPDATE users SET home_directory = ? WHERE id = ?", (_default_home(row["username"]), row["id"])
+            )
+            fixed += 1
+    if fixed:
+        logger.info("[Users] %s home folder record(s) moved from Unraid's path to %s/homes", fixed, config.POOL_PATH)
+    return fixed
+
+
 def migrate_legacy_data(db_path: str | None = None) -> None:
     """Seamlessly migrates existing security.json, sessions.json, and api_tokens.json."""
     target_path = db_path or USERS_DB_PATH
     now = time.time()
 
     with users_db_session(target_path) as conn:
+        _fix_unraid_homes(conn)
         user_count = conn.execute("SELECT COUNT(*) AS c FROM users").fetchone()["c"]
 
         admin_id = "admin-00000000-0000-0000-0000-000000000001"
@@ -409,7 +438,7 @@ def migrate_legacy_data(db_path: str | None = None) -> None:
                     "superadmin",
                     "active",
                     1 if generated or verify_password("admin", password_hash) else 0,
-                    f"/mnt/user/homes/{admin_username}",
+                    _default_home(admin_username),
                     now,
                     now,
                 ),
@@ -602,7 +631,7 @@ def create_user(
     user_id = str(uuid.uuid4())
     pwd_hash = hash_password(password)
 
-    resolved_home = home_directory or f"{getattr(config, 'POOL_PATH', '/mnt/user')}/homes/{username_clean}"
+    resolved_home = home_directory or _default_home(username_clean)
 
     with users_db_session(db_path) as conn:
         # Check role exists

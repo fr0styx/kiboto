@@ -52,6 +52,8 @@ On a machine of its own, Kiboto can reach the apps it works with (its AI servers
 
 - **A shared folder whose pool is away says so**: instead of an empty folder with the system disk's space, its card names the pool that is missing and says nothing in it is lost.
 
+- **The first administrator's home folder outside Unraid**: it pointed at Unraid's folder on every system; it is now in the storage folder of this install, like everyone else's.
+
 #### Security
 
 Apps, Docker clean-up: deleting unused volumes now asks for a confirmation that Kiboto checks itself, so it can't happen without your say-so.
