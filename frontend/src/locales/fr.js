@@ -9218,4 +9218,5 @@ export default {
   "machine.bridge_off": "Désactivé : les machines virtuelles n'accèdent au réseau qu'à travers cette machine.",
   "machine.bridge_cannot": "Le réseau de cette machine est réglé en dehors de Kiboto, qui n'y touche donc pas.",
   "share.pool_away": "Son pool {pool} n'est pas là : le dossier reste vide jusqu'au retour du pool. Rien n'est perdu.",
+  "hwh.native": "Inutile : Kiboto est le système même de cette machine ; il n'y a pas de conteneur dont tenir l'accès au matériel à l'écart.",
 };

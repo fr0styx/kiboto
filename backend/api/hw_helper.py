@@ -3,7 +3,7 @@
 import asyncio
 from typing import Any
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 
 from backend.auth import AuthenticatedPrincipal, get_current_principal, require_scope
@@ -30,4 +30,7 @@ async def put_hw_helper(
     """Turns the helper on (confirmed first: 428 until then) or off."""
     if req.enabled:
         confirm_or_raise(request, principal, "hardware.helper", hw_helper_container.CONTAINER)
-    return await asyncio.to_thread(hw_helper_container.save, req.enabled)
+    try:
+        return await asyncio.to_thread(hw_helper_container.save, req.enabled)
+    except ValueError as e:  # a machine of its own has no container to keep the access out of
+        raise HTTPException(status_code=409, detail=str(e)) from None

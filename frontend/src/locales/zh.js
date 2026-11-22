@@ -9218,4 +9218,5 @@ export default {
   "machine.bridge_off": "已关闭：虚拟机只能通过这台机器访问网络。",
   "machine.bridge_cannot": "这台机器的网络是在 Kiboto 之外设置的，所以 Kiboto 不会改动它。",
   "share.pool_away": "它所在的存储池 {pool} 不在，所以在存储池回来之前文件夹是空的。里面的内容都没有丢失。",
+  "hwh.native": "不需要：Kiboto 就是这台机器本身的系统，没有需要隔离硬件访问的容器。",
 };

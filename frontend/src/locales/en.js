@@ -9218,4 +9218,5 @@ export default {
   "machine.bridge_off": "Off: virtual machines reach the network through this machine only.",
   "machine.bridge_cannot": "This machine's network is set up outside Kiboto, so Kiboto leaves it alone.",
   "share.pool_away": "Its pool {pool} is not here, so the folder is empty until the pool is back. Nothing in it is lost.",
+  "hwh.native": "Not needed: Kiboto is this machine's own system, with no container to keep the hardware access out of.",
 };

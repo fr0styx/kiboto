@@ -52,9 +52,14 @@ def _self() -> dict[str, Any]:
 
 
 def applies() -> bool:
-    """Only Zettlab boxes have the fan and button registers the helper serves."""
+    """Only Zettlab boxes have the fan and button registers the helper serves, and only where Kiboto
+    runs in a container: on a machine of its own Kiboto is the system, with no container to keep the
+    hardware access out of."""
+    from backend import runtime
     from backend.hardware.fans import ZettlabMmioFanController
 
+    if runtime.native():
+        return False
     try:
         return hw_client.available() or ZettlabMmioFanController().is_available()
     except (OSError, ValueError, RuntimeError):
@@ -95,6 +100,10 @@ def desired(me: dict[str, Any]) -> dict[str, Any]:
 
 def status(running: bool | None = None, error: str = "") -> dict[str, Any]:
     cfg = config()
+    from backend import runtime
+
+    if runtime.native():  # nothing to ask Docker about: there is no helper here
+        running = False
     if running is None:
         code, info = _docker("GET", f"/containers/{CONTAINER}/json")
         running = code == 200 and isinstance(info, dict) and bool((info.get("State") or {}).get("Running"))
@@ -106,6 +115,7 @@ def status(running: bool | None = None, error: str = "") -> dict[str, Any]:
         "running": bool(running),
         "answering": hw_client.available(force=True) if running else False,
         "applies": applies(),
+        "native": runtime.native(),
         "error": error,
     }
 
@@ -123,6 +133,10 @@ def _remove() -> None:
 def ensure() -> dict[str, Any]:
     """Makes the helper container match the setting: started, recreated after an update, or removed."""
     cfg = config()
+    from backend import runtime
+
+    if runtime.native():
+        return status()
     with _lock:
         code, info = _docker("GET", f"/containers/{CONTAINER}/json")
         exists = code == 200 and isinstance(info, dict)
@@ -167,6 +181,12 @@ def ensure() -> dict[str, Any]:
 
 
 def save(enabled: bool) -> dict[str, Any]:
+    from backend import runtime
+
+    if enabled and runtime.native():
+        raise ValueError(
+            "Kiboto is this machine's own system here: there is no container to keep the hardware access out of."
+        )
     atomic_write_json(CONFIG_FILE, {**config(), "enabled": bool(enabled)})
     return ensure()
 

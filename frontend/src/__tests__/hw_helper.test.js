@@ -65,4 +65,9 @@ describe('the hardware helper card (SEC-24)', () => {
     await loadHwHelperCard();
     expect(api.get).not.toHaveBeenCalled();
   });
+
+  it('says it is not needed on a machine of its own', () => {
+    expect(hwHelperStatus({ native: true, applies: false })).toContain("Kiboto is this machine's own system");
+    expect(hwHelperStatus({ native: true, error: 'x' })).toBe('x');
+  });
 });

@@ -12,6 +12,11 @@ const $ = (id) => document.getElementById(id);
 /** The status line under the title. */
 export function hwHelperStatus(st) {
   if (st.error) return st.error;
+  if (st.native)
+    return t(
+      'hwh.native',
+      "Not needed: Kiboto is this machine's own system, with no container to keep the hardware access out of."
+    );
   if (!st.applies) return t('hwh.not_here', 'This box has no fan or button registers for the helper to serve.');
   if (st.kept_until_update)
     return t(
