@@ -225,6 +225,70 @@ wait_up() {
   fi
 }
 
+# A Debian set up with Debian's own installer runs its network with ifupdown. Kiboto changes the
+# network only through systemd-networkd, so the same settings move there, as a trial: a timer of the
+# machine puts ifupdown back after a while unless this script still reaches the router afterwards.
+network_to_networkd() {
+  systemctl is-active -q networking 2>/dev/null || return 0
+  iface=$(ip -4 route show default | sed -n 's/.* dev \([^ ]*\).*/\1/p' | head -1)
+  [ -n "$iface" ] || { say "The network was left with ifupdown: no default route to move."; return 0; }
+  # networkd may run without managing anything (it starts when anything asks it): what counts is
+  # whether it manages the port the default route goes through
+  [ "$(networkctl list --no-legend "$iface" 2>/dev/null | awk '{print $NF}')" = configured ] && return 0
+  gw=$(ip -4 route show default dev "$iface" | sed -n 's/^default via \([0-9.]*\).*/\1/p' | head -1)
+  say "Moving this machine's network ($iface) to systemd-networkd, so Kiboto can change it..."
+  # what ifupdown has, kept before anything changes: installing systemd-resolved replaces resolv.conf
+  cp -L /etc/network/interfaces /etc/network/interfaces.kiboto-before
+  [ -f /etc/resolv.conf.kiboto-before ] || cp -L /etc/resolv.conf /etc/resolv.conf.kiboto-before 2>/dev/null || true
+  apt-get install -y -qq --no-install-recommends systemd-resolved >/dev/null 2>&1 \
+    || { say "  systemd-resolved could not be installed; the network stays with ifupdown."; return 0; }
+  file="/etc/systemd/network/05-kiboto-$iface.network"
+  mkdir -p /etc/systemd/network "$ETC"
+  {
+    printf '# Written by Kiboto at install: the settings ifupdown had for %s.\n[Match]\nName=%s\n\n[Network]\n' "$iface" "$iface"
+    if grep -Eqs "^iface[[:space:]]+$iface[[:space:]]+inet[[:space:]]+dhcp" /etc/network/interfaces /etc/network/interfaces.d/*; then
+      printf 'DHCP=yes\n'
+    else
+      ip -4 -o addr show dev "$iface" scope global | awk '{print "Address=" $4}' | head -1
+      [ -n "$gw" ] && printf 'Gateway=%s\n' "$gw"
+      sed -n 's/^nameserver[[:space:]]\{1,\}\([0-9.]\{7,15\}\)$/DNS=\1/p' /etc/resolv.conf.kiboto-before /etc/resolv.conf 2>/dev/null | grep -v '=127\.' | sort -u | head -3
+    fi
+  } > "$file"
+  cat > "$ETC/network-back.sh" <<BACK
+#!/bin/sh
+# Written by Kiboto's install script: ifupdown back, as it was before the move.
+systemctl disable -q --now systemd-networkd.service systemd-networkd.socket systemd-resolved.service 2>/dev/null
+rm -f "$file"
+cp /etc/network/interfaces.kiboto-before /etc/network/interfaces
+[ -f /etc/resolv.conf.kiboto-before ] && { rm -f /etc/resolv.conf; cp /etc/resolv.conf.kiboto-before /etc/resolv.conf; }
+ip addr flush dev "$iface" scope global
+systemctl enable -q networking; systemctl restart networking
+ifup "$iface"  # an allow-hotplug port (what Debian's installer writes) is not brought up by the restart
+BACK
+  chmod 700 "$ETC/network-back.sh"
+  systemd-run --quiet --collect --unit kiboto-network-back --on-active=90 sh "$ETC/network-back.sh" \
+    || { rm -f "$file"; say "  No way back could be set up; the network stays with ifupdown."; return 0; }
+  printf 'auto lo\niface lo inet loopback\n' > /etc/network/interfaces
+  systemctl disable -q networking
+  ip addr flush dev "$iface" scope global
+  systemctl enable -q --now systemd-networkd systemd-resolved
+  ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
+  networkctl reconfigure "$iface" 2>/dev/null || true
+  i=0
+  until [ -n "$gw" ] && ping -c1 -W2 "$gw" >/dev/null 2>&1; do
+    i=$((i + 1))
+    if [ "$i" -gt 20 ]; then
+      say "  The router did not answer on systemd-networkd: going back to ifupdown now."
+      systemctl stop kiboto-network-back.timer 2>/dev/null
+      sh "$ETC/network-back.sh"
+      return 0
+    fi
+    sleep 2
+  done
+  systemctl stop kiboto-network-back.timer 2>/dev/null
+  say "  Done: Kiboto can now change this machine's address under Network. ifupdown's settings are kept in /etc/network/interfaces.kiboto-before."
+}
+
 uninstall() {
   must_be_this_machine
   systemctl disable -q --now kiboto.service kiboto-pools.service 2>/dev/null || true
@@ -246,13 +310,13 @@ case "${1:-}" in
   --from)
     [ -n "${2:-}" ] || die "say where Kiboto's code is: --from <folder>"
     must_be_this_machine; must_be_fresh
-    packages; docker_setup; code "$2"; service "$PREFIX/current"; wait_up ;;
+    packages; docker_setup; code "$2"; service "$PREFIX/current"; wait_up; network_to_networkd ;;
   --image | "")
     image=${2:-$KIBOTO_IMAGE}
     [ -n "$image" ] || { sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//'; exit 2; }
     must_be_a_digest "$image"; must_be_this_machine; must_be_fresh
     packages; docker_setup; code_from_image "$image"; must_be_signed "$image" "${3:-}"
-    service "$PREFIX/current"; wait_up ;;
+    service "$PREFIX/current"; wait_up; network_to_networkd ;;
   --uninstall) uninstall "${2:-}" ;;
   *) sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;
 esac

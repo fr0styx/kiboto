@@ -225,10 +225,13 @@ def test_the_streamline_layout_is_drawn_when_chosen():
         "net": {"rx_bytes_sec": 2048, "tx_bytes_sec": 1024},
         "disks": [{"name": "sda", "temp": 41}],
     }
-    classic = lcd_pil.render_frame({**stats, "layout": {"style": "classic"}}, page=0).tobytes()
-    streamline = lcd_pil.render_frame({**stats, "layout": {"style": "streamline"}}, page=0).tobytes()
+    from datetime import datetime
+
+    at = datetime(2026, 1, 1, 12, 0)  # one moment for every drawing: the page shows the clock
+    classic = lcd_pil.render_frame({**stats, "layout": {"style": "classic"}}, page=0, now=at).tobytes()
+    streamline = lcd_pil.render_frame({**stats, "layout": {"style": "streamline"}}, page=0, now=at).tobytes()
     assert classic != streamline
     # other pages are the same in both styles
-    assert lcd_pil.render_frame({**stats, "layout": {"style": "streamline"}}, page=1).tobytes() == (
-        lcd_pil.render_frame({**stats, "layout": {"style": "classic"}}, page=1).tobytes()
+    assert lcd_pil.render_frame({**stats, "layout": {"style": "streamline"}}, page=1, now=at).tobytes() == (
+        lcd_pil.render_frame({**stats, "layout": {"style": "classic"}}, page=1, now=at).tobytes()
     )

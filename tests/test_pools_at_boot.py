@@ -153,3 +153,17 @@ def test_the_signature_check_answers_with_its_exit_code(monkeypatch, capsys):
     monkeypatch.setattr(sig, "verify_image", lambda digest: sig.SignatureResult(False, "the image has no signature"))
     assert sig.main(["x", "sha256:" + "a" * 64]) == 1 and "no signature" in capsys.readouterr().out
     assert sig.main(["x"]) == 2
+
+
+def test_a_machine_on_ifupdown_moves_to_networkd_with_a_timed_way_back():
+    sh = _read("install.sh")
+    step = sh[sh.index("network_to_networkd() {") : sh.index("uninstall() {")]
+    assert step.index("systemd-run --quiet --collect --unit kiboto-network-back --on-active=90") < step.index(
+        "systemctl disable -q networking"
+    )  # the way back is armed before anything changes
+    assert (
+        "interfaces.kiboto-before" in step and "ping -c1" in step and "systemctl stop kiboto-network-back.timer" in step
+    )
+    assert sh.count("wait_up; network_to_networkd") == 2  # after both kinds of install
+    assert 'ifup "$iface"' in step  # the way back brings an allow-hotplug port up again
+    assert step.index("resolv.conf.kiboto-before") < step.index("apt-get install")  # kept before resolved replaces it
