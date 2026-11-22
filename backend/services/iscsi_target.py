@@ -345,6 +345,63 @@ def desired(me: dict[str, Any], kept: list[dict[str, Any]], conf_hash: str) -> d
     return want
 
 
+# --- as a service of the machine (runtime.managed_host) --------------------------------------------
+UNIT = "kiboto-iscsi"
+
+
+def _unit(*args: str) -> tuple[int, str]:
+    from backend.services.host_basics import run
+
+    return run(list(args), timeout=30)
+
+
+def _unit_running() -> bool:
+    return _unit("systemctl", "is-active", UNIT)[1] == "active"
+
+
+def unit_command(conf_hash: str) -> list[str]:
+    """tgtd as a unit of the machine, reading the service's file where Kiboto keeps it. The file's
+    hash is in the description, so a change of disks or passwords starts it anew."""
+    start = START.replace(SETUP, os.path.join(CONF_DIR, CONF_NAME))
+    return [
+        "systemd-run",
+        "--quiet",
+        "--collect",
+        "--unit",
+        UNIT,
+        "--description",
+        f"Kiboto iSCSI {conf_hash}",
+        "-p",
+        "Restart=on-failure",
+        "-p",
+        "RestartSec=5",
+        "sh",
+        "-c",
+        start,
+    ]
+
+
+def _ensure_unit(state: dict[str, Any]) -> dict[str, Any]:
+    running = _unit_running()
+    if not state["enabled"] or not state["disks"]:
+        if running:
+            _unit("systemctl", "stop", UNIT)
+            logger.info("[iSCSI] %s stopped: turned off, or no disk is left", UNIT)
+        return status(running=False)
+    cmd = unit_command(write_conf())
+    described = cmd[cmd.index("--description") + 1]
+    if running and _unit("systemctl", "show", UNIT, "-p", "Description", "--value")[1] == described:
+        return status(running=True)
+    _unit("systemctl", "stop", UNIT)
+    _unit("systemctl", "reset-failed", UNIT)
+    code, said = _unit(*cmd)
+    if code != 0:
+        logger.warning("[iSCSI] %s could not be started: %s", UNIT, said)
+        return status(running=False, error="The iSCSI service could not be started.", why="start")
+    logger.info("[iSCSI] %s serves %d disk(s) on port %d", UNIT, len(state["disks"]), PORT)
+    return status(running=True)
+
+
 def _remove() -> None:
     _docker("POST", f"/containers/{CONTAINER}/stop?t=5")
     _docker("DELETE", f"/containers/{CONTAINER}?force=true")
@@ -353,6 +410,11 @@ def _remove() -> None:
 def ensure() -> dict[str, Any]:
     """Makes the container match what is kept: started, made anew after a change, or removed."""
     state = _read()
+    from backend import runtime
+
+    if runtime.managed_host():  # the machine is Kiboto's: tgtd is a service of it, not a container
+        with _lock:
+            return _ensure_unit(state)
     with _lock:
         code, info = _docker("GET", f"/containers/{CONTAINER}/json")
         exists = code == 200 and isinstance(info, dict)
@@ -387,6 +449,13 @@ def status(running: bool | None = None, error: str = "", why: str = "") -> dict[
     """How the service stands. `why` names the reason it is not running, for the screen's own words:
     engine (no app engine to start it), folder (a disk's folder cannot be handed to it), start, down."""
     state = _read()
+    from backend import runtime
+
+    if running is None and runtime.managed_host():  # a service of the machine, not a container
+        running = _unit_running()
+        if state["enabled"] and state["disks"] and not running:
+            error = error or "The iSCSI service is not running. Port 3260 may be in use by another program."
+            why = why or "down"
     if running is None:
         code, info = _docker("GET", f"/containers/{CONTAINER}/json")
         box = (info or {}).get("State") or {} if isinstance(info, dict) else {}

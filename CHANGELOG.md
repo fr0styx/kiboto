@@ -96,6 +96,8 @@ On a machine of its own, Kiboto can now update itself: the new version is made r
 
 - **Virtual machines on your home network (preview)**: on a Debian machine set up for Kiboto, Network, This machine has a switch that puts virtual machines on the home network, each with its own address. It is tried for 60 seconds like any network change, and goes back by itself if this page stops working.
 
+- **Disks for other computers (iSCSI) on a machine of its own (preview)**: on a Debian machine set up for Kiboto, iSCSI runs as a service of the machine. Tried with a real initiator: the disk was found, signed in with its user and password, and used as a drive.
+
 ## v2.0.5 (2026-11-20)
 ### 🏡 A second NAS that can take over, files you can change over the network, and 176 tested apps
 
