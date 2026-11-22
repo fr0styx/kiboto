@@ -155,6 +155,21 @@ def _used_elsewhere(said: str) -> bool:
     return "another system" in said or "import -f" in said
 
 
+def btrfs_missing_members(members: list[PoolMember], shown: str) -> list[PoolMember]:
+    """The members, with the ones `btrfs filesystem show` does not list as present marked MISSING.
+    A missing drive shows as "devid 2 size 0 used 0 path  MISSING"; present ones by their path."""
+    present = {
+        _whole_disk(os.path.basename(m.group(1)))
+        for m in re.finditer(r"^\s*devid\s+\d+\s.*?\spath\s+(/dev/\S+)\s*$", shown, re.M)
+    }
+    if not present:
+        return members
+    return [
+        m if (m.device and _whole_disk(m.device) in present) else m.model_copy(update={"status": "MISSING"})
+        for m in members
+    ]
+
+
 class GenericLinuxStorageAdapter(StoragePlatformAdapter):
     """
     Generic Linux Storage Platform Adapter.
@@ -615,6 +630,8 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
         if fs == "btrfs" and not gone:  # a pool mounted without one of its drives says so itself
             _code, shown, _err = self._run_cmd(["btrfs", "filesystem", "show", row["mountpoint"]])
             gone = "missing" in shown.lower()
+            if gone:  # which one: a drive of the record that btrfs no longer lists
+                pool.members = members = btrfs_missing_members(members, shown)
         pool.status = "DEGRADED" if gone else "HEALTHY"
         pool.compression = pool_compression(fs, row["mountpoint"])
         return pool

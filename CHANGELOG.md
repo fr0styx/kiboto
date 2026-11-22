@@ -58,6 +58,8 @@ On a machine of its own, Kiboto can reach the apps it works with (its AI servers
 
 - **SFTP sign-in with a key works**: a key added to an SFTP account was never accepted; only passwords worked.
 
+- **A btrfs pool that lost a drive says which**: it said it needed attention while every drive read OK; the missing drive is now named.
+
 #### Security
 
 Apps, Docker clean-up: deleting unused volumes now asks for a confirmation that Kiboto checks itself, so it can't happen without your say-so.
