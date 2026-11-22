@@ -9198,4 +9198,5 @@ export default {
   "ev.apps_back_held.msg": "{apps} ask for access to the machine itself, so they were not started. Start them under Apps.",
   "ev.apps_back_failed.title": "An app did not start",
   "ev.apps_back_failed.msg": "{app}: {error}",
+  "setup.restore_drives": "Look on this machine's drives",
 };

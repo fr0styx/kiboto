@@ -325,11 +325,21 @@ export function initSetupWizard() {
   const stepper = initWizardStepper(modal);
   // RES-7: a temporary password first (the API answers nothing else until then), then the kit
   let restoreAfter = false;
+  let drivesAfter = false;
   document.getElementById('setup-restore-box')?.addEventListener('click', () => {
     restoreAfter = true;
     showRestoreNote();
     stepper.show(2);
   });
+  const drives = document.getElementById('setup-restore-drives');
+  if (drives) {
+    offerDrives(drives);
+    drives.addEventListener('click', () => {
+      drivesAfter = true;
+      showRestoreNote();
+      stepper.show(2);
+    });
+  }
 
   if (btnSubmit) {
     btnSubmit.addEventListener('click', async () => {
@@ -424,6 +434,7 @@ export function initSetupWizard() {
           'success'
         );
         if (restoreAfter) openRestoreAfterSetup();
+        else if (drivesAfter) lookOnDrivesAfterSetup();
         else if (typeof window.openGettingStarted === 'function') window.openGettingStarted();
       } catch (err) {
         setErr(err.message || 'Failed to update password. Check current password.');
@@ -434,6 +445,25 @@ export function initSetupWizard() {
       }
     });
   }
+}
+
+/** A machine set up for Kiboto keeps a copy of its settings on its pools: after the system disk was
+ *  replaced, setup offers to look for it there. Shown only on such a machine. */
+export async function offerDrives(button) {
+  try {
+    const machine = await api.get('/api/system/machine');
+    button.hidden = !machine?.managed;
+  } catch {
+    button.hidden = true; // the button stays away: the recovery kit is still offered
+  }
+}
+
+/** Once setup has saved the password: Backup opens and looks on the drives for the earlier settings. */
+export function lookOnDrivesAfterSetup() {
+  return import('./pool-copy-card.js').then((m) => {
+    m.lookWhenShown();
+    /** @type {any} */ (window).openManagementSection?.('mgmt-pane-backups');
+  });
 }
 
 /** RES-7: says on the password step that the restore brings the old password back. */

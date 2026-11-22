@@ -9198,4 +9198,5 @@ export default {
   "ev.apps_back_held.msg": "{apps} piden acceso al propio equipo, así que no se iniciaron. Inícialas en Aplicaciones.",
   "ev.apps_back_failed.title": "Una aplicación no se inició",
   "ev.apps_back_failed.msg": "{app}: {error}",
+  "setup.restore_drives": "Buscar en los discos de este equipo",
 };

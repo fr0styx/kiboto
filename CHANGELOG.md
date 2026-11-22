@@ -24,6 +24,8 @@ A storage pool from another system is now opened read-only first, so nothing on 
 
 - **Apps on a machine of its own keep their data on a pool (preview)**: on a Debian machine set up for Kiboto, apps store their data on the first pool instead of the system disk, so a failed system disk no longer takes it with it.
 
+- **Setup of a machine of its own looks for the Kiboto before (preview)**: on a fresh install the first-run wizard offers to look on the machine's drives for the settings of the Kiboto that was there before, next to the recovery kit.
+
 #### Fixes
 
 A person with a storage limit could go over it by sending several files at once. Files still arriving now count against the limit.

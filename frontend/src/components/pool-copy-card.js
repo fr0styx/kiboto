@@ -13,6 +13,12 @@ import { html } from '../html.js';
 import { t } from '../i18n.js';
 
 const when = (seconds) => formatDateTime(new Date(seconds * 1000));
+let _lookWhenShown = false;
+
+/** The next time the card is drawn it looks on the drives at once (asked for in setup). */
+export function lookWhenShown() {
+  _lookWhenShown = true;
+}
 
 /** What a pool's line says; `done` is what "Copy now" just answered for it. */
 export function poolCopyLine(pool, done = '') {
@@ -158,6 +164,10 @@ export async function renderPoolCopyCard(
       $('pcopy-look').textContent = t('pcopy.look', 'Look on the drives');
     }
   });
+  if (_lookWhenShown) {
+    _lookWhenShown = false;
+    $('pcopy-look').click();
+  }
   let chosen = null;
   mount.querySelectorAll('.pcopy-bring').forEach((b) =>
     b.addEventListener('click', () => {

@@ -105,6 +105,17 @@ describe('Settings copy on your pools', () => {
 });
 
 describe('Settings from an earlier Kiboto', () => {
+  it('looks at once when setup asked for it, and only that once', async () => {
+    const { lookWhenShown } = await import('../components/pool-copy-card.js');
+    lookWhenShown();
+    await renderPoolCopyCard();
+    await flush();
+    expect(posts).toEqual([['/api/system/settings-copy/look', {}]]);
+    await renderPoolCopyCard();
+    await flush();
+    expect(posts).toHaveLength(1);
+  });
+
   it('looks only when asked and says so when nothing was found', async () => {
     await renderPoolCopyCard();
     expect(posts).toEqual([]);

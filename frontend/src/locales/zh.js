@@ -9198,4 +9198,5 @@ export default {
   "ev.apps_back_held.msg": "{apps} 需要访问机器本身，因此没有启动。请在“应用”中启动它们。",
   "ev.apps_back_failed.title": "有应用未能启动",
   "ev.apps_back_failed.msg": "{app}：{error}",
+  "setup.restore_drives": "在这台机器的硬盘上查找",
 };

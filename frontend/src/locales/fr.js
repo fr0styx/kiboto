@@ -9198,4 +9198,5 @@ export default {
   "ev.apps_back_held.msg": "{apps} demandent un accès à la machine elle-même, elles n'ont donc pas été démarrées. Démarrez-les dans Applications.",
   "ev.apps_back_failed.title": "Une application n'a pas démarré",
   "ev.apps_back_failed.msg": "{app} : {error}",
+  "setup.restore_drives": "Chercher sur les disques de cette machine",
 };

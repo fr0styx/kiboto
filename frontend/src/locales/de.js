@@ -9198,4 +9198,5 @@ export default {
   "ev.apps_back_held.msg": "{apps} verlangen Zugriff auf das Gerät selbst und wurden deshalb nicht gestartet. Starten Sie sie unter Apps.",
   "ev.apps_back_failed.title": "Eine App ist nicht gestartet",
   "ev.apps_back_failed.msg": "{app}: {error}",
+  "setup.restore_drives": "Auf den Laufwerken dieses Geräts suchen",
 };
