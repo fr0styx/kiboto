@@ -70,6 +70,8 @@ Nextcloud's Kiboto sign-in is set up with Kiboto's real address again, and on a 
 
 On a machine of its own, a NAS named like the start of a container id no longer makes Kiboto mistake an app's container for itself.
 
+On a machine of its own, the malware scan and family sign-in can be turned on (they stopped with "Docker didn't answer").
+
 #### Security
 
 Apps, Docker clean-up: deleting unused volumes now asks for a confirmation that Kiboto checks itself, so it can't happen without your say-so.

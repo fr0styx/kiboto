@@ -67,7 +67,12 @@ def applies() -> bool:
 
 
 def host_data_dir(me: dict[str, Any]) -> str:
-    """Where Kiboto's data folder is on the host (the helper's socket folder sits inside it)."""
+    """Where Kiboto's data folder is on the host (the helper's socket folder sits inside it). Run
+    natively it is a folder of the host already."""
+    from backend import runtime
+
+    if runtime.native():
+        return DATA_DIR
     for m in me.get("Mounts") or []:
         if m.get("Destination") == DATA_DIR and m.get("Type") == "bind" and str(m.get("Source", "")).startswith("/"):
             return str(m["Source"])

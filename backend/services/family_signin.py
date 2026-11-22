@@ -27,7 +27,7 @@ import urllib.error
 import urllib.request
 from typing import Any
 
-from backend import product, secret_box
+from backend import product, runtime, secret_box
 from backend.config import DATA_DIR, logger
 from backend.fsutil import atomic_write_json, read_json
 from backend.services import tailnet_ports
@@ -177,7 +177,7 @@ def _ensure_container(data: dict[str, Any], url: str) -> None:
     from backend.services.hw_helper_container import host_data_dir
 
     me = _self()
-    if not me:
+    if not me and not runtime.native():  # natively Kiboto has no container: Pocket ID's host port
         raise SignInError(NO_DOCKER)
     if not host_data_dir(me):
         raise SignInError("Kiboto's data folder isn't a folder on the host, so Pocket ID can't keep its data there.")
