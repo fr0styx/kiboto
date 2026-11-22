@@ -22,7 +22,7 @@ from backend import product
 from backend.config import logger
 
 HOST_RE = re.compile(r"^[A-Za-z0-9.-]{1,253}$|^\[[0-9A-Fa-f:]{2,45}\]$")
-PLACEHOLDER = re.compile(r"\{\{(secret:[a-z_]+|host|port|zettnas|arch)\}\}")
+PLACEHOLDER = re.compile(r"\{\{(secret:[a-z_]+|host|port|kiboto|zettnas|arch)\}\}")
 
 
 def valid_host(host: str | None) -> str:
@@ -58,9 +58,15 @@ def exec_in(container: str, cmd: list[str], user: str = "", timeout: float = 300
     return code, demux(raw if isinstance(raw, bytes) else str(raw or "").encode())
 
 
-def own_name() -> str:
-    """Kiboto's own container name, which other containers on its network resolve."""
+def own_name(container: str = "") -> str:
+    """How the app's container reaches Kiboto: Kiboto's own container name, which other containers
+    on its network resolve. Run natively Kiboto is the machine itself: the container reaches it at
+    its network's gateway."""
+    from backend import runtime
     from backend.services import docker_client
+
+    if runtime.native():
+        return _gateway_of(container) or product.CONTAINER
 
     try:
         status, me = docker_client.request("GET", f"/containers/{socket.gethostname()}/json")
@@ -81,13 +87,32 @@ def fill(value: str, ctx: dict[str, str], secrets: dict[str, str]) -> str:
     return PLACEHOLDER.sub(one, str(value))
 
 
-def context(host: str, port: int) -> dict[str, str]:
+def _gateway_of(container: str) -> str:
+    """The address the machine has on the container's first network ("" when it cannot be told)."""
+    from backend.services import docker_client
+
+    try:
+        status, info = docker_client.request("GET", f"/containers/{container or 'none'}/json")
+    except (OSError, ValueError, RuntimeError, docker_client.DockerUnavailable):
+        return ""
+    nets = (
+        ((info.get("NetworkSettings") or {}).get("Networks") or {}) if status == 200 and isinstance(info, dict) else {}
+    )
+    for _name, cfg in sorted(nets.items()):
+        gw = str((cfg or {}).get("Gateway") or "")
+        if gw:
+            return gw
+    return ""
+
+
+def context(host: str, port: int, container: str = "") -> dict[str, str]:
     arm = platform.machine().lower() in ("aarch64", "arm64")
+    kiboto = own_name(container)
     return {
         "host": valid_host(host) or "localhost",
         "port": str(port),
-        "kiboto": own_name(),
-        "zettnas": own_name(),  # a template saved before the rebrand (legacy_names)
+        "kiboto": kiboto,
+        "zettnas": kiboto,  # a template saved before the rebrand (legacy_names)
         "arch": "_arm64" if arm else "",
     }
 
@@ -106,7 +131,7 @@ def run_steps(
     steps = app.get("after_start") or []
     if not steps or app.get("source_id", "builtin") != "builtin":
         return []
-    ctx = ctx if ctx is not None else context(host, port)
+    ctx = ctx if ctx is not None else context(host, port, container)
     unfinished: list[str] = []
     for i, step in enumerate(steps):
         label = str(step.get("label") or "Setting up")

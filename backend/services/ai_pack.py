@@ -151,7 +151,15 @@ def recommend(b: dict[str, Any]) -> dict[str, Any]:
 
 
 def own_network() -> str | None:
-    """The Docker network Kiboto itself is on (its container's first user network)."""
+    """The Docker network Kiboto itself is on (its container's first user network). Run natively
+    Kiboto is on none: the pack gets a network of its own, and Kiboto reaches it by its name, which
+    the machine's hosts file keeps for every app (services/app_hosts.py)."""
+    from backend import runtime
+
+    if runtime.native():
+        from backend.services import app_networks
+
+        return app_networks.private_network(pack_name())
     st, me = _docker("GET", f"/containers/{socket.gethostname()}/json")
     if st != 200 or not isinstance(me, dict):
         return None

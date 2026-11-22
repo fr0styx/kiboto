@@ -66,6 +66,8 @@ On a machine of its own, Kiboto can reach the apps it works with (its AI servers
 
 - **Apps on a machine of its own named like "cafe" or "bead"**: with such a name, some apps passed for Kiboto itself and could not be updated or removed.
 
+Nextcloud's Kiboto sign-in is set up with Kiboto's real address again, and on a machine of its own apps and the AI pack reach Kiboto too.
+
 #### Security
 
 Apps, Docker clean-up: deleting unused volumes now asks for a confirmation that Kiboto checks itself, so it can't happen without your say-so.
