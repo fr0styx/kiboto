@@ -16,6 +16,7 @@ import hashlib
 import io
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -138,10 +139,35 @@ def prepare(image: str, version: str, prefix: str = PREFIX, run: Any = None) -> 
         shutil.rmtree(os.path.join(rel, ".check"), ignore_errors=True)
         if code != 0:
             raise UpdateFailed(f"the new version does not load here: {said}")
+        rel = _named_by_its_build(rel)
     except (UpdateFailed, OSError, tarfile.TarError, docker_client.DockerError) as e:
         shutil.rmtree(rel, ignore_errors=True)
         raise UpdateFailed(str(e)) from e
     return rel
+
+
+def _named_by_its_build(rel: str) -> str:
+    """The folder takes the name of what it holds, version and build (2.0.5-cdfc428-<when>), so a
+    person going back sees which version, not the channel's tag it came by."""
+    text = ""
+    for part in ("backend/__init__.py", "build.env"):
+        try:
+            with open(os.path.join(rel, part), encoding="utf-8") as f:
+                text += f.read() + "\n"
+        except OSError:
+            continue
+    version = re.search(r'^__version__ = "([0-9A-Za-z.+]+)"', text, re.M)
+    commit = re.search(r"^BUILD_COMMIT=([0-9a-f]{7})", text, re.M)
+    if not version:
+        return rel
+    named = os.path.join(
+        os.path.dirname(rel),
+        "-".join([version.group(1), *([commit.group(1)] if commit else []), time.strftime("%Y%m%d%H%M%S")]),
+    )
+    if os.path.exists(named):
+        return rel
+    os.rename(rel, named)  # its venv link points into venvs/ by full path and still holds
+    return named
 
 
 def point_at(rel: str, prefix: str = PREFIX) -> str:
@@ -237,8 +263,14 @@ def apply(rel: str, data_dir: str, port: int, image: str = "", prefix: str = PRE
 
     run = run or _run
     run(["systemctl", "stop", SERVICE], timeout=180)
+    running = os.path.realpath(os.path.join(prefix, "current"))
     try:
-        snapshot = take_snapshot(data_dir, label="before-update", extra={"kind": "update", "to": os.path.basename(rel)})
+        snapshot = take_snapshot(
+            data_dir,
+            label="before-update",
+            # the version this data belongs to: going back takes both together
+            extra={"kind": "update", "to": os.path.basename(rel), "from_release": os.path.basename(running)},
+        )
     except OSError as e:
         run(["systemctl", "start", SERVICE], timeout=120)
         write_update_result(data_dir, "not_applied", f"could not snapshot the data folder: {e}", to_image=image)
@@ -265,6 +297,100 @@ def apply(rel: str, data_dir: str, port: int, image: str = "", prefix: str = PRE
     run(["systemctl", "start", SERVICE], timeout=120)
     write_update_result(data_dir, "rolled_back", why, to_image=image)
     return "rolled_back"
+
+
+# --- going back to the version before ---------------------------------------------------------------
+def versions_to_go_back_to(data_dir: str, prefix: str = PREFIX) -> list[dict[str, Any]]:
+    """The versions this machine can go back to: an update's snapshot whose release is still here,
+    with the data as it was before that update. Newest first."""
+    from backend.services.data_snapshot import list_snapshots
+
+    current = os.path.basename(os.path.realpath(os.path.join(prefix, "current")))
+    out = []
+    for snap in list_snapshots(data_dir):
+        name = str(snap.get("from_release") or "")
+        if snap.get("kind") != "update" or not name or name == current or "/" in name:
+            continue
+        out.append(
+            {
+                "id": snap["id"],
+                "created_at": snap.get("created_at"),
+                "version": _shown(name),
+                "image": "",
+                "tag": name,
+                "image_available": os.path.isdir(os.path.join(prefix, "releases", name)),
+            }
+        )
+    return out
+
+
+def _shown(name: str) -> str:
+    """2.0.5 (cdfc428) for 2.0.5-cdfc428-20261122171949; the first part of an older name."""
+    parts = name.split("-")
+    if len(parts) >= 3 and re.fullmatch(r"[0-9a-f]{7}", parts[1]):
+        return f"{parts[0]} ({parts[1]})"
+    return parts[0]
+
+
+def back(snapshot: str, data_dir: str, port: int, prefix: str = PREFIX, run: Any = None) -> str:
+    """The helper's work for going back: the release the snapshot belongs to and the data as it
+    was, together. The data of now is saved first. Returns "reverted" or "not_reverted"."""
+    from backend.services.data_snapshot import restore_snapshot, take_snapshot
+    from backend.services.self_updater import write_update_result
+
+    run = run or _run
+    with open(os.path.join(snapshot, "manifest.json"), encoding="utf-8") as f:
+        name = str(json.load(f).get("from_release") or "")
+    rel = os.path.join(prefix, "releases", name)
+    if not name or "/" in name or not os.path.isdir(rel):
+        write_update_result(data_dir, "not_reverted", "the version to go back to is no longer here")
+        return "not_reverted"
+    run(["systemctl", "stop", SERVICE], timeout=180)
+    try:
+        take_snapshot(data_dir, label="before-revert", extra={"kind": "revert"})
+        restore_snapshot(snapshot, data_dir)
+    except (OSError, ValueError) as e:
+        run(["systemctl", "start", SERVICE], timeout=120)
+        write_update_result(data_dir, "not_reverted", f"the earlier data could not be put back: {e}")
+        return "not_reverted"
+    point_at(rel, prefix)
+    run(["systemctl", "reset-failed", SERVICE], timeout=30)
+    run(["systemctl", "start", SERVICE], timeout=120)
+    ok, why = healthy(port, stopped=lambda: restarts(run))
+    write_update_result(data_dir, "reverted" if ok else "not_reverted", why)
+    return "reverted" if ok else "not_reverted"
+
+
+def start_back(snapshot_id: str, data_dir: str, port: int, prefix: str = PREFIX, run: Any = None) -> None:
+    """Hands going back to a helper that outlives the restart. Raises UpdateFailed when it cannot."""
+    from backend.services.data_snapshot import list_snapshots
+
+    run = run or _run
+    snap = next((s for s in list_snapshots(data_dir) if s["id"] == snapshot_id), None)
+    if not snap:
+        raise UpdateFailed("that earlier version is not available")
+    current = os.path.realpath(os.path.join(prefix, "current"))
+    code, said = run(
+        [
+            "systemd-run",
+            "--unit",
+            f"kiboto-revert-{int(time.time())}",
+            "--collect",
+            "--quiet",
+            f"--working-directory={current}",
+            f"--setenv=DATA_DIR={data_dir}",
+            os.path.join(current, "venv", "bin", "python"),
+            "-m",
+            "backend.services.native_update",
+            "back",
+            snap["path"],
+            data_dir,
+            str(port),
+        ],
+        timeout=30,
+    )
+    if code != 0:
+        raise UpdateFailed(f"going back could not be handed over: {said}")
 
 
 def start(image: str, version: str, data_dir: str, port: int, prefix: str = PREFIX, run: Any = None) -> str:
@@ -306,6 +432,11 @@ def main(argv: list[str]) -> int:
         result = apply(argv[2], argv[3], int(argv[4]), argv[5] if len(argv) > 5 else "")
         print(result)
         return 0 if result == "updated" else 1
+    if len(argv) == 5 and argv[1] == "back":
+        time.sleep(2.5)
+        result = back(argv[2], argv[3], int(argv[4]))
+        print(result)
+        return 0 if result == "reverted" else 1
     print("usage: python -m backend.services.native_update apply <release> <data dir> <port> [image]")
     return 2
 

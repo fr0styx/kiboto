@@ -220,8 +220,11 @@ def machine(tmp_path, monkeypatch):
     results = []
     from backend.services import data_snapshot, self_updater
 
+    snapshots = []
     monkeypatch.setattr(
-        data_snapshot, "take_snapshot", lambda d, **k: steps.append("snapshot") or str(tmp_path / "snap")
+        data_snapshot,
+        "take_snapshot",
+        lambda d, **k: steps.append("snapshot") or snapshots.append(k.get("extra") or {}) or str(tmp_path / "snap"),
     )
     monkeypatch.setattr(data_snapshot, "restore_snapshot", lambda s, d: steps.append("restore") or [])
     monkeypatch.setattr(
@@ -237,13 +240,23 @@ def machine(tmp_path, monkeypatch):
         )
         return 0, ""
 
-    return {"prefix": str(tmp_path), "a": a, "b": b, "data": str(data), "steps": steps, "results": results, "run": run}
+    return {
+        "prefix": str(tmp_path),
+        "a": a,
+        "b": b,
+        "data": str(data),
+        "steps": steps,
+        "results": results,
+        "run": run,
+        "snapshots": snapshots,
+    }
 
 
 def test_the_helper_switches_and_keeps_the_new_version_when_it_holds(machine, monkeypatch):
     monkeypatch.setattr(nu, "healthy", lambda port, **k: (True, "ok for 20 s"))
     assert nu.apply(machine["b"], machine["data"], 8082, "img", machine["prefix"], machine["run"]) == "updated"
     assert machine["steps"] == ["systemctl stop", "snapshot", "systemctl start:b"]  # data saved while nothing runs
+    assert machine["snapshots"][0]["from_release"] == "a"  # the data belongs to the version before
     assert machine["results"] == [("updated", "ok for 20 s")]
     assert os.path.realpath(os.path.join(machine["prefix"], "current")) == os.path.realpath(machine["b"])
 
@@ -341,3 +354,106 @@ def test_the_runner_answers_for_a_missing_or_stuck_tool():
     assert nu._run(["true"]) == (0, "")
     assert nu._run(["no-such-tool-kb"])[0] == 127
     assert nu._run(["sleep", "5"], timeout=0.2)[0] == 124
+
+
+def _snapshot(tmp_path, from_release, kind="update", name="20261122-171952-before-update"):
+    snap = tmp_path / "data" / "backups" / "pre-update" / name
+    snap.mkdir(parents=True)
+    (snap / "manifest.json").write_text(
+        json.dumps({"kind": kind, "from_release": from_release, "created_at": 5.0, "files": []})
+    )
+    return str(snap)
+
+
+def test_the_versions_to_go_back_to_are_releases_still_here(machine, tmp_path, monkeypatch):
+    from backend.services import data_snapshot
+
+    monkeypatch.setattr(data_snapshot, "snapshot_root", lambda d: str(tmp_path / "data" / "backups" / "pre-update"))
+    nu.point_at(machine["b"], machine["prefix"])
+    _snapshot(tmp_path, "a", name="3-before-update")
+    _snapshot(tmp_path, "gone-1", name="2-before-update")
+    _snapshot(tmp_path, "b", name="1-before-update")  # the version running now is not one to go back to
+    _snapshot(tmp_path, "a", kind="revert", name="0-before-revert")
+    _snapshot(tmp_path, "../etc", name="00-odd")
+    got = nu.versions_to_go_back_to(machine["data"], machine["prefix"])
+    assert [(v["id"], v["tag"], v["image_available"]) for v in got] == [
+        ("3-before-update", "a", True),
+        ("2-before-update", "gone-1", False),
+    ]
+    assert got[1]["version"] == "gone"
+
+
+def test_going_back_puts_the_release_and_its_data_back_together(machine, tmp_path, monkeypatch):
+    nu.point_at(machine["b"], machine["prefix"])
+    snap = _snapshot(tmp_path, "a")
+    monkeypatch.setattr(nu, "healthy", lambda port, **k: (True, "ok for 20 s"))
+    assert nu.back(snap, machine["data"], 8082, machine["prefix"], machine["run"]) == "reverted"
+    assert machine["steps"] == ["systemctl stop", "snapshot", "restore", "systemctl reset-failed", "systemctl start:a"]
+    assert machine["snapshots"][-1] == {"kind": "revert"}  # the data of now is kept too
+    assert machine["results"] == [("reverted", "ok for 20 s")]
+
+
+def test_going_back_to_a_release_that_is_gone_changes_nothing(machine, tmp_path):
+    snap = _snapshot(tmp_path, "gone-1")
+    assert nu.back(snap, machine["data"], 8082, machine["prefix"], machine["run"]) == "not_reverted"
+    assert machine["steps"] == [] and "no longer here" in machine["results"][0][1]
+
+
+def test_going_back_says_when_the_data_could_not_be_put_back_or_it_did_not_hold(machine, tmp_path, monkeypatch):
+    from backend.services import data_snapshot
+
+    snap = _snapshot(tmp_path, "a")
+
+    def broken(s, d):
+        raise OSError("read error")
+
+    monkeypatch.setattr(data_snapshot, "restore_snapshot", broken)
+    assert nu.back(snap, machine["data"], 8082, machine["prefix"], machine["run"]) == "not_reverted"
+    assert machine["steps"][-1] == "systemctl start:a" and "read error" in machine["results"][-1][1]
+    monkeypatch.setattr(data_snapshot, "restore_snapshot", lambda s, d: [])
+    monkeypatch.setattr(nu, "healthy", lambda port, **k: (False, "the new version did not answer"))
+    assert nu.back(snap, machine["data"], 8082, machine["prefix"], machine["run"]) == "not_reverted"
+
+
+def test_going_back_is_handed_to_a_helper(machine, tmp_path, monkeypatch):
+    from backend.services import data_snapshot
+
+    monkeypatch.setattr(data_snapshot, "snapshot_root", lambda d: str(tmp_path / "data" / "backups" / "pre-update"))
+    snap = _snapshot(tmp_path, "a")
+    seen = []
+    nu.start_back(
+        "20261122-171952-before-update",
+        machine["data"],
+        8082,
+        machine["prefix"],
+        lambda cmd, timeout=60: seen.append(cmd) or (0, ""),
+    )
+    assert seen[0][0] == "systemd-run" and seen[0][-4:] == ["back", snap, machine["data"], "8082"]
+    with pytest.raises(nu.UpdateFailed, match="not available"):
+        nu.start_back("nope", machine["data"], 8082, machine["prefix"], lambda cmd, timeout=60: (0, ""))
+    with pytest.raises(nu.UpdateFailed, match="could not be handed over"):
+        nu.start_back(
+            "20261122-171952-before-update", machine["data"], 8082, machine["prefix"], lambda cmd, timeout=60: (1, "no")
+        )
+
+
+def test_the_helpers_entry_for_going_back(monkeypatch):
+    monkeypatch.setattr(nu.time, "sleep", lambda s: None)
+    monkeypatch.setattr(nu, "back", lambda snap, data, port: "reverted")
+    assert nu.main(["x", "back", "/snap", "/var/lib/kiboto", "8082"]) == 0
+    monkeypatch.setattr(nu, "back", lambda snap, data, port: "not_reverted")
+    assert nu.main(["x", "back", "/snap", "/var/lib/kiboto", "8082"]) == 1
+
+
+def test_a_new_release_names_itself_by_its_build(tmp_path):
+    rel = tmp_path / "releases" / "edge-20261122171949"
+    (rel / "backend").mkdir(parents=True)
+    (rel / "backend" / "__init__.py").write_text('__version__ = "2.0.6"\n')
+    (rel / "build.env").write_text("BUILD_COMMIT=cdfc4287aba5ecfca797b1ee501096cab774758e\n")
+    named = nu._named_by_its_build(str(rel))
+    assert os.path.basename(named).startswith("2.0.6-cdfc428-") and os.path.isdir(named) and not rel.exists()
+    assert nu._shown(os.path.basename(named)) == "2.0.6 (cdfc428)"
+    assert nu._shown("edge-20261122171949") == "edge"
+    bare = tmp_path / "releases" / "new-1"
+    bare.mkdir()
+    assert nu._named_by_its_build(str(bare)) == str(bare)  # nothing to name it by

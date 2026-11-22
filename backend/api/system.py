@@ -1676,7 +1676,8 @@ async def post_apply_system_update(req: ApplySystemUpdateRequest):
         await asyncio.to_thread(pull_container_image, target_img, 300.0)
     except Exception as exc:
         logger.error(f"[System Update] Image pull failed: {exc}")
-        raise HTTPException(status_code=500, detail=f"Failed to pull image: {exc}") from exc
+        # 502, not 500: the person is told that the download failed and why, not "something went wrong"
+        raise HTTPException(status_code=502, detail=f"The new version could not be downloaded: {exc}") from exc
 
     # 1b. The pulled image must carry a digest from our registry repository.
     try:
@@ -1751,6 +1752,12 @@ async def post_apply_system_update(req: ApplySystemUpdateRequest):
 
 
 def _previous_versions() -> list[dict[str, Any]]:
+    from backend import runtime
+
+    if runtime.managed_host():  # versions are folders beside each other, not images
+        from backend.services import native_update
+
+        return native_update.versions_to_go_back_to(config.DATA_DIR)
     from backend.services.container_mutator import _docker_request
     from backend.services.data_snapshot import list_snapshots
 
@@ -1828,6 +1835,28 @@ async def post_revert_system_update(
         raise HTTPException(status_code=404, detail="That previous version is not available.")
     if not match["image_available"]:
         raise HTTPException(status_code=409, detail="The previous image is no longer on this host.")
+    from backend import runtime
+
+    if runtime.managed_host():
+        from backend.services import native_update
+
+        await asyncio.to_thread(machines_first)
+        try:
+            await asyncio.to_thread(native_update.start_back, match["id"], config.DATA_DIR, config.PORT)
+        except native_update.UpdateFailed as e:
+            raise HTTPException(status_code=502, detail=f"Could not go back: {e}") from e
+        add_event(
+            "warning",
+            "Updates",
+            f"Reverting to {match['version'] or 'the previous version'}",
+            event_text("update_revert" if match["version"] else "update_revert_prev", version=match["version"] or ""),
+        )
+        return {
+            "status": "restarting",
+            "version": match["version"],
+            "auto_restarting": True,
+            "message": "Reverting. Kiboto is restoring the previous version and its data and will reconnect shortly.",
+        }
 
     target_container = product.CONTAINER
     try:

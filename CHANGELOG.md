@@ -48,6 +48,8 @@ On a machine of its own, Kiboto can reach the apps it works with (its AI servers
 
 - **Kiboto in a virtual machine no longer takes every drive for asleep**: virtual disks answered the "are you asleep?" question with nonsense, so file listings and the AI index waited for drives that were awake.
 
+- **Going back to the previous version works on a machine of its own (preview)**: it switches back to the version before the last update, with the data as it was then. A failed download of an update now says why instead of "Something went wrong".
+
 #### Security
 
 Apps, Docker clean-up: deleting unused volumes now asks for a confirmation that Kiboto checks itself, so it can't happen without your say-so.
