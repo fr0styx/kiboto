@@ -22,6 +22,8 @@ Storage pools are now also tested with the real tools on every change: a pool of
 
 A storage pool from another system is now opened read-only first, so nothing on it changes until you choose "Allow changes". If the pool was last used by another system, Kiboto says what importing it risks and asks before it goes on.
 
+- **Apps on a machine of its own keep their data on a pool (preview)**: on a Debian machine set up for Kiboto, apps store their data on the first pool instead of the system disk, so a failed system disk no longer takes it with it.
+
 #### Fixes
 
 A person with a storage limit could go over it by sending several files at once. Files still arriving now count against the limit.

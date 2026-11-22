@@ -1369,11 +1369,19 @@ def default_storage_root() -> str:
     """Where this host keeps apps' data: the folder that holds Kiboto's own data folder on the
     host (from its container's mounts), so it fits TrueNAS or a plain Linux box too; Unraid's
     /mnt/user/appdata when that can't be told (NUX-12). As a process of the machine itself Kiboto
-    has no container to ask: apps then live beside the shared folders, in the main storage folder."""
+    has no container to ask: apps then live beside the shared folders, in the main storage folder; on
+    a machine set up for Kiboto, on its first pool (apps_place.py)."""
     if "root" in _STORAGE_ROOT:
         return _STORAGE_ROOT["root"]
     from backend import runtime
 
+    if runtime.managed_host():
+        from backend.services import apps_place
+
+        root, settled = apps_place.root()
+        if settled:  # a folder on a pool stays; the fallback is asked again once a pool exists
+            _STORAGE_ROOT["root"] = root
+        return root
     if runtime.native():
         from backend import config
 
