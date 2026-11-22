@@ -115,7 +115,18 @@ def test_kvm_status_restricted_when_cgroup_eperm():
         assert "Docker cgroup restricted" in status["badge"]
 
 
+def _a_roomy_host(monkeypatch):
+    """A host with room for the test's machines, whatever machine the tests run on (a 4 GB
+    Debian refused the 2 GB guest; another storage folder refused /mnt/user)."""
+    from backend.services import vm_host, vm_store
+
+    monkeypatch.setattr(vm_host, "_get_host_memory_bytes", lambda: 64 * 1024**3)
+    monkeypatch.setattr(vm_host, "disk_free_bytes", lambda *a, **k: 2 * 1024**4)
+    monkeypatch.setattr(vm_store, "_vm_share_roots", lambda: ["/mnt/user"])
+
+
 def test_vms_api_crud_and_validation(client, auth_headers, monkeypatch):
+    _a_roomy_host(monkeypatch)
     # 1. Telemetry endpoint
     res = client.get("/api/vms/telemetry", headers=auth_headers)
     assert res.status_code == 200
@@ -514,8 +525,9 @@ def test_host_usb_devices_discovery(client, auth_headers):
         assert "is_root_hub" in dev
 
 
-def test_vm_advanced_config_crud(client, auth_headers):
+def test_vm_advanced_config_crud(client, auth_headers, monkeypatch):
     """Verifies creation and update of VM with firmware, video adapter, TPM, and USB passthrough."""
+    _a_roomy_host(monkeypatch)
     payload = {
         "name": "adv-cfg-vm",
         "vcpus": 2,

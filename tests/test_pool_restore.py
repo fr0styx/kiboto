@@ -250,7 +250,8 @@ def test_a_pool_that_fails_for_another_reason_is_not_forced(tmp_path, monkeypatc
 
 
 # --- the routes -----------------------------------------------------------------------------------
-def test_a_guest_has_nothing_to_look_for(client, auth_headers):
+def test_a_guest_has_nothing_to_look_for(client, auth_headers, tmp_path, monkeypatch):
+    monkeypatch.setattr(pool_copy, "FOUND", str(tmp_path / "found"))  # not the machine's own list
     assert client.get("/api/system/settings-copy/found", headers=auth_headers).json() == {"found": []}
     assert client.post("/api/system/settings-copy/look", headers=auth_headers).status_code == 404
     r = client.post(

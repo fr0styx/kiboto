@@ -457,7 +457,7 @@ def test_unraid_shfs_share_standby_detection_never_wakes_hdd(tmp_path):
         assert defer_res["deferred_standby"] == 1
 
 
-def test_hardware_aware_npu_gpu_llm_recommendations(tmp_path):
+def test_hardware_aware_npu_gpu_llm_recommendations(tmp_path, monkeypatch):
     """
     Verifies that `build_llm_recommendations()` dynamically tailors recommended Hugging Face LLMs & multi-modal
     models based on onboard NPU (/dev/accel/accel0), iGPU/dGPU (/dev/dri/renderD128, CUDA), and system RAM,
@@ -529,6 +529,10 @@ def test_hardware_aware_npu_gpu_llm_recommendations(tmp_path):
     assert gpu_models["deepseek-r1:14b"]["hardware_warning"] is True
 
     # Case 3: Pull & Search Hugging Face release models with hardware warning evaluation
+    # on a 16 GB machine without an accelerator, whatever machine the tests run on
+    from backend.services import media_engine
+
+    monkeypatch.setattr(media_engine, "read_total_ram_bytes", lambda: 16 * 1024**3)
     cfg_file = str(tmp_path / "rag_hf_pull_config.json")
     with patch("backend.services.rag_engine.RAG_CONFIG_PATH", cfg_file):
         search_res = search_huggingface_models("70B", limit=10, min_release_year=None)

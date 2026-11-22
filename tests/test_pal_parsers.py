@@ -80,7 +80,11 @@ class TestParsers:
         assert md["md1"]["degraded"] and md["md1"]["sync_action"] == "recovery" and md["md1"]["progress_pct"] == 22.4
         assert md["md2"]["size_bytes"] == 2048 * 512
 
-    def test_mounts_skip_pseudo_filesystems(self, adapter, proc):
+    def test_mounts_skip_pseudo_filesystems(self, adapter, proc, monkeypatch):
+        real_isfile = pal.base.os.path.isfile
+        # only the mounts written here: the machine's own /proc/mounts is read too, and a machine
+        # with pools of its own under /mnt has more
+        monkeypatch.setattr(pal.base.os.path, "isfile", lambda p: p != "/proc/mounts" and real_isfile(p))
         (proc / "1").mkdir()
         (proc / "1" / "mounts").write_text(
             "proc /proc proc rw 0 0\n/dev/sdb1 /mnt/disk1 xfs rw,noatime 0 0\noverlay / overlay rw 0 0\n"
