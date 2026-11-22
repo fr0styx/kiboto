@@ -17,6 +17,17 @@ export function clockStatus(clock) {
     : t('machine.clock_waiting', 'On: waiting for the first answer.');
 }
 
+/** The line under "Virtual machines on the home network". */
+export function bridgeStatus(bridge) {
+  if (!bridge || !bridge.can)
+    return t('machine.bridge_cannot', "This machine's network is set up outside Kiboto, so Kiboto leaves it alone.");
+  return bridge.on
+    ? t('machine.bridge_on', 'On: virtual machines get an address on your home network, through {port}.', {
+        port: bridge.port || '-',
+      })
+    : t('machine.bridge_off', 'Off: virtual machines reach the network through this machine only.');
+}
+
 /** The line under "Command line over the network (SSH)". */
 export function sshStatus(ssh) {
   if (!ssh || !ssh.installed) return t('machine.ssh_missing', 'SSH is not installed on this machine.');
@@ -57,6 +68,7 @@ function html(st) {
     <div class="nsv-xs-muted-2">${escapeHtml(t('machine.help', 'The name is the one in the card above. The time zone is the one chosen for Kiboto.'))}</div>
     ${row('machine-clock', '🕒', t('machine.clock', 'Set the clock from the internet'), clockStatus(clock), Boolean(clock.automatic), Boolean(clock.can))}
     ${row('machine-ssh', '⌨️', t('machine.ssh', 'Command line over the network (SSH)'), sshStatus(ssh), Boolean(ssh.on), Boolean(ssh.installed))}
+    ${row('machine-bridge', '🖧', t('machine.bridge', 'Virtual machines on the home network'), bridgeStatus(st.bridge), Boolean(st.bridge?.on), Boolean(st.bridge?.can))}
     <div class="ddns-error" id="machine-error" role="alert" hidden></div>`;
 }
 
@@ -92,5 +104,18 @@ export async function renderMachineCard(mount = document.getElementById('machine
   };
   $('machine-clock-toggle').addEventListener('click', () => send({ clock_automatic: !st.clock.automatic }));
   $('machine-ssh-toggle').addEventListener('click', () => send({ ssh: !st.ssh.on }));
+  // a bridge changes where the machine's address lives: a trial, kept or undone like an address change
+  $('machine-bridge-toggle').addEventListener('click', async () => {
+    try {
+      const trial = await api.post('/api/network/host/bridge', { on: !st.bridge?.on });
+      const m = await import('./net-trial.js');
+      m.showNetTrial(trial, () => renderMachineCard(mount));
+    } catch (e) {
+      const err = $('machine-error');
+      err.textContent =
+        e instanceof Error && e.message ? e.message : t('machine.failed', 'The machine did not take the change.');
+      err.hidden = false;
+    }
+  });
   return st;
 }

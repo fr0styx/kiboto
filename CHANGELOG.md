@@ -86,6 +86,8 @@ On a machine of its own, Kiboto can now update itself: the new version is made r
 
 - **Kernel, ZFS and Docker on a machine of its own (preview)**: Updates shows the three held packages and brings them to the versions this Kiboto was tested with, never past them. ZFS is checked to be built for a new kernel before a restart is suggested, and apps keep running while Docker is updated.
 
+- **Virtual machines on your home network (preview)**: on a Debian machine set up for Kiboto, Network, This machine has a switch that puts virtual machines on the home network, each with its own address. It is tried for 60 seconds like any network change, and goes back by itself if this page stops working.
+
 ## v2.0.5 (2026-11-20)
 ### 🏡 A second NAS that can take over, files you can change over the network, and 176 tested apps
 

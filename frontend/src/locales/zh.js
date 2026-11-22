@@ -9213,4 +9213,8 @@ export default {
   "hset.apply": "安装测试过的版本",
   "confirm.system_host_set.title": "安装",
   "confirm.system_host_set.msg": "要把 {target} 的内核、ZFS 和 Docker 更新到这个 Kiboto 测试过的版本吗？应用会继续运行；新内核在下次重启后生效。",
+  "machine.bridge": "让虚拟机加入家庭网络",
+  "machine.bridge_on": "已开启：虚拟机通过 {port} 获得家庭网络上的地址。",
+  "machine.bridge_off": "已关闭：虚拟机只能通过这台机器访问网络。",
+  "machine.bridge_cannot": "这台机器的网络是在 Kiboto 之外设置的，所以 Kiboto 不会改动它。",
 };

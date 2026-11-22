@@ -170,7 +170,15 @@ def status(do: Run | None = None) -> dict[str, Any]:
         "time_zone": time_zone(),
         "clock": clock(do),
         "ssh": ssh(do),
+        "bridge": _bridge(),
     }
+
+
+def _bridge() -> dict[str, Any]:
+    """The bridge virtual machines join, where the machine's network is Kiboto's to change."""
+    from backend.hardware.net import managed
+
+    return {**managed.bridge_status(), "can": managed.networkd_runs()}
 
 
 def restart_kiboto(delay: int = 2, do: Run | None = None) -> bool:

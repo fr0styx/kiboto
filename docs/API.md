@@ -38,7 +38,7 @@ request and response schemas.
 
 <!-- BEGIN generated endpoints: python scripts/api_reference.py --update -->
 
-821 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
+822 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
 
 ### AI Conversation History
 
@@ -494,6 +494,7 @@ request and response schemas.
 | `DELETE` | `/api/v1/network/docker/{net_id_or_name}` | `containers:manage` | Delete a custom Docker network |
 | `GET` | `/api/v1/network/exposure` | `system:view` | What reaches this NAS from outside, read from the live settings: off, private (Tailscale or NetBird) or public (what Funnel publishes), w… |
 | `POST` | `/api/v1/network/host/apply` | `system:config` | Change the host's address: only on a host Kiboto manages (409 not_on_this_host elsewhere) |
+| `POST` | `/api/v1/network/host/bridge` | `system:config` | On a machine set up for Kiboto: puts the main port into the bridge virtual machines join, or takes it away |
 | `GET` | `/api/v1/network/host/config` | any of `system:view`, `system:config` | Retrieve host IP assignment mode, primary interface, netmask, gateway, and DNS servers |
 | `POST` | `/api/v1/network/host/confirm` | `system:config` | Keep a trial address: only on a host Kiboto manages (409 not_on_this_host elsewhere) |
 | `POST` | `/api/v1/network/host/keep` | public | Keeps a trial address from the machine's new address, where nobody is signed in yet: the trial's own key, which only the link shown to th… |

@@ -9213,4 +9213,8 @@ export default {
   "hset.apply": "Installer les versions testées",
   "confirm.system_host_set.title": "Installer",
   "confirm.system_host_set.msg": "Mettre le noyau, ZFS et Docker de {target} aux versions avec lesquelles ce Kiboto a été testé ? Les applications continuent de tourner ; un nouveau noyau prend effet au prochain redémarrage.",
+  "machine.bridge": "Machines virtuelles sur le réseau de la maison",
+  "machine.bridge_on": "Activé : les machines virtuelles obtiennent une adresse sur le réseau de la maison, via {port}.",
+  "machine.bridge_off": "Désactivé : les machines virtuelles n'accèdent au réseau qu'à travers cette machine.",
+  "machine.bridge_cannot": "Le réseau de cette machine est réglé en dehors de Kiboto, qui n'y touche donc pas.",
 };

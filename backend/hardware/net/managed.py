@@ -186,19 +186,39 @@ def _forget() -> None:
         os.remove(STATE)
 
 
-def _reload(iface: str, do: Run) -> None:
+def _reload(ifaces: list[str], do: Run) -> None:
     do(["networkctl", "reload"])
-    do(["networkctl", "reconfigure", iface])
+    for iface in ifaces:
+        if os.path.isdir(os.path.join(SYS_NET, iface)):
+            do(["networkctl", "reconfigure", iface])
+
+
+def _link_of(netdev_text: str | None) -> str:
+    found = re.search(r"^Name=(\S+)", netdev_text or "", re.M)
+    return found.group(1) if found and _IFACE.match(found.group(1)) else ""
+
+
+def _write_files(files: dict[str, str | None], ifaces: list[str], do: Run) -> None:
+    """Writes each file (None removes it), lets networkd read them, and removes a bridge whose
+    file went: networkd makes a bridge from its file but never takes one away."""
+    gone_links = []
+    for path, text in files.items():
+        if text is None:
+            if path.endswith(".netdev"):
+                gone_links.append(_link_of(_text(path)))
+            if os.path.exists(path):
+                os.remove(path)
+        else:
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            atomic_write_text(path, text)
+    for link in filter(None, gone_links):
+        do(["ip", "link", "delete", link])
+    _reload(ifaces, do)
 
 
 def _put_back(trial: dict[str, Any], do: Run) -> None:
-    path = trial["path"]
-    if trial.get("before") is None:
-        if os.path.exists(path):
-            os.remove(path)
-    else:
-        atomic_write_text(path, trial["before"])
-    _reload(trial["iface"], do)
+    before = trial.get("files") or {trial["path"]: trial.get("before")}  # a trial from before several files
+    _write_files(before, trial.get("ifaces") or [trial["iface"]], do)
 
 
 def settle(do: Run | None = None) -> bool:
@@ -220,26 +240,36 @@ def start_trial(
     changes: dict[str, Any], do: Run | None = None, later: Callable[[float, Callable[[], None]], None] | None = None
 ) -> dict[str, Any]:
     """Arms the way back, then makes the change a moment later. Says how to keep it."""
-    do, later = do or run, later or after
     want = checked(changes)
+    from backend import settings
+
+    port = int(settings.current("port") or 8082)
+    plain = f"http://{want['address']}:{port}" if want["mode"] == "static" else ""
+    return _begin({file_for(want["iface"]): network_file(want)}, [want["iface"]], want["timeout"], plain, do, later)
+
+
+def _begin(
+    files: dict[str, str | None],
+    ifaces: list[str],
+    timeout: int,
+    plain: str,
+    do: Run | None = None,
+    later: Callable[[float, Callable[[], None]], None] | None = None,
+) -> dict[str, Any]:
+    """A trial of new files: arms the machine's own way back, then writes them a moment later."""
+    do, later = do or run, later or after
     settle(do)
     with _lock:
         if _trial():
             raise ValueError(BUSY)
-        path = file_for(want["iface"])
-        before = _text(path)
-        from backend import settings
-
-        port = int(settings.current("port") or 8082)
         key = secrets.token_urlsafe(24)
-        plain = f"http://{want['address']}:{port}" if want["mode"] == "static" else ""
         trial = {
             "id": key,
-            "iface": want["iface"],
-            "path": path,
-            "before": before,
+            "iface": ifaces[0],
+            "ifaces": ifaces,
+            "files": {path: _text(path) for path in files},
             "started": time.time(),
-            "timeout": want["timeout"],
+            "timeout": timeout,
             "plain_url": plain,
         }
         os.makedirs(os.path.dirname(STATE), exist_ok=True)
@@ -253,7 +283,7 @@ def start_trial(
                 "--collect",
                 "--unit",
                 REVERT_UNIT,
-                f"--on-active={int(want['timeout'] + APPLY_DELAY)}",
+                f"--on-active={int(timeout + APPLY_DELAY)}",
                 "--description",
                 "Kiboto: back to the network settings from before the trial",
                 "-p",
@@ -270,26 +300,127 @@ def start_trial(
             _forget()
             logger.warning("[Network] The way back could not be set up: %s", said)
             raise RuntimeError("The way back could not be set up, so nothing was changed.")
-    text = network_file(want)
 
     def change() -> None:
         with _lock:
             if (_trial() or {}).get("id") != key:
                 return  # taken back in the meantime
-            os.makedirs(DIR, exist_ok=True)
-            atomic_write_text(path, text)
-            _reload(want["iface"], do)
-            logger.info("[Network] %s is on trial with new settings for %s s", want["iface"], want["timeout"])
+            _write_files(files, ifaces, do)
+            logger.info("[Network] %s is on trial with new settings for %s s", ", ".join(ifaces), timeout)
 
     later(APPLY_DELAY, change)
     return {
         "status": "trial",
         "canary_id": key,
-        "interface": want["iface"],
-        "timeout_sec": want["timeout"],
+        "interface": ifaces[0],
+        "timeout_sec": timeout,
         "url": f"{plain}/?keep-network={key}" if plain else "",
         "message": "The new settings are being tried.",
     }
+
+
+# --- a bridge for virtual machines -----------------------------------------------------------------
+BRIDGE = "br0"
+QEMU_BRIDGES = "/etc/qemu/bridge.conf"
+
+
+def netdev_for(link: str) -> str:
+    return os.path.join(DIR, f"{PREFIX}{link}.netdev")
+
+
+def bridge_status() -> dict[str, Any]:
+    """Whether the bridge virtual machines join is there, and which port it holds."""
+    port = re.search(r"^Name=(\S+)", "", re.M)
+    on = os.path.exists(netdev_for(BRIDGE))
+    for name in sorted(os.listdir(DIR)) if os.path.isdir(DIR) else []:
+        text = _text(os.path.join(DIR, name)) or ""
+        if name.startswith(PREFIX) and name.endswith(".network") and f"Bridge={BRIDGE}" in text:
+            port = re.search(r"^Name=(\S+)", text, re.M)
+    return {"on": on, "port": port.group(1) if (on and port) else "", "name": BRIDGE}
+
+
+def _mac(iface: str) -> str:
+    mac = (_text(os.path.join(SYS_NET, iface, "address")) or "").strip()
+    return mac if re.fullmatch(r"[0-9a-f]{2}(:[0-9a-f]{2}){5}", mac) else ""
+
+
+def _address_settings_of(port: str, now: dict[str, Any]) -> str:
+    """The [Network] settings the port has now, as a file for the bridge: Kiboto's own file if there
+    is one, else what the machine shows (`now`: an address from the router, or the fixed one it has)."""
+    own = _text(file_for(port))
+    if own and "Bridge=" not in own:
+        return re.sub(r"^Name=\S+$", f"Name={BRIDGE}", own, count=1, flags=re.M)
+    want = {"iface": BRIDGE, "mode": mode_of(port), "address": "", "prefix": 0, "gateway": "", "dns": []}
+    if want["mode"] == "static":
+        if not now.get("ip_address"):
+            raise ValueError("The address of this machine could not be read, so it cannot be moved to a bridge.")
+        want.update(address=now["ip_address"], prefix=int(now.get("cidr") or 24), gateway=now.get("gateway") or "")
+        want["dns"] = [d for d in (now.get("dns1"), now.get("dns2")) if d]
+    return network_file(want)
+
+
+def _let_qemu_use(bridge: str) -> None:
+    """QEMU's bridge helper only joins bridges listed in its settings."""
+    text = _text(QEMU_BRIDGES) or ""
+    if f"allow {bridge}" in text.split("\n"):
+        return
+    os.makedirs(os.path.dirname(QEMU_BRIDGES), exist_ok=True)
+    atomic_write_text(QEMU_BRIDGES, text + ("" if not text or text.endswith("\n") else "\n") + f"allow {bridge}\n")
+
+
+def start_bridge_trial(
+    on: bool,
+    port: str = "",
+    now: dict[str, Any] | None = None,
+    timeout: int = DEFAULT_TRIAL,
+    do: Run | None = None,
+    later: Callable[[float, Callable[[], None]], None] | None = None,
+) -> dict[str, Any]:
+    """Puts the main port into a bridge that virtual machines join, the address moving to the
+    bridge (with the port's own hardware address, so the router hands out the same one), or takes
+    the bridge away again. A trial like any address change. `now` is the address the machine shows
+    (host_ip.get_host_ip_config), for a port whose settings are not in Kiboto's own file."""
+    if not networkd_runs(do):
+        raise RuntimeError("This machine's network is not run by systemd-networkd.")
+    there = bridge_status()
+    if on == there["on"]:
+        raise ValueError("The bridge is already there." if on else "There is no bridge to take away.")
+    if on:
+        if not is_a_port(port):
+            raise ValueError(f"{port or 'That'} is not a network port of this machine.")
+        _let_qemu_use(BRIDGE)
+        mac = _mac(port)
+        netdev = "\n".join(
+            [
+                "# Written by Kiboto: the bridge virtual machines join (Network, This machine).",
+                "[NetDev]",
+                f"Name={BRIDGE}",
+                "Kind=bridge",
+                *([f"MACAddress={mac}"] if mac else []),
+                "",
+                "[Bridge]",
+                "STP=no",
+                "",
+            ]
+        )
+        files: dict[str, str | None] = {
+            netdev_for(BRIDGE): netdev,
+            file_for(BRIDGE): _address_settings_of(port, now or {}),
+            file_for(
+                port
+            ): f"# Written by Kiboto: this port belongs to the bridge {BRIDGE}.\n[Match]\nName={port}\n\n[Network]\nBridge={BRIDGE}\n",
+        }
+        return _begin(files, [port, BRIDGE], timeout, "", do, later)
+    port = there["port"]
+    settings_now = _text(file_for(BRIDGE)) or network_file(
+        {"iface": port, "mode": "dhcp", "address": "", "prefix": 0, "gateway": "", "dns": []}
+    )
+    files: dict[str, str | None] = {
+        file_for(port): re.sub(rf"^Name={BRIDGE}$", f"Name={port}", settings_now, count=1, flags=re.M),
+        file_for(BRIDGE): None,
+        netdev_for(BRIDGE): None,
+    }
+    return _begin(files, [port], timeout, "", do, later)
 
 
 def keep(key: str | None, do: Run | None = None) -> dict[str, Any]:

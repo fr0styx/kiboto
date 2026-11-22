@@ -9213,4 +9213,8 @@ export default {
   "hset.apply": "Install the tested versions",
   "confirm.system_host_set.title": "Install",
   "confirm.system_host_set.msg": "Bring the kernel, ZFS and Docker of {target} to the versions this Kiboto was tested with? Apps keep running; a new kernel takes effect at the next restart.",
+  "machine.bridge": "Virtual machines on the home network",
+  "machine.bridge_on": "On: virtual machines get an address on your home network, through {port}.",
+  "machine.bridge_off": "Off: virtual machines reach the network through this machine only.",
+  "machine.bridge_cannot": "This machine's network is set up outside Kiboto, so Kiboto leaves it alone.",
 };

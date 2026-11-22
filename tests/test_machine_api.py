@@ -18,6 +18,11 @@ def managed(tmp_path, monkeypatch):
     monkeypatch.setattr(host_basics, "SSHD", str(sshd))
     monkeypatch.setattr(host_basics, "host_name", lambda: "attic")
     monkeypatch.setattr(host_basics, "time_zone", lambda link="": "Europe/Berlin")
+    from backend.hardware.net import managed as net
+
+    # whether the test runner itself runs systemd-networkd must not matter (CI runners do)
+    monkeypatch.setattr(net, "networkd_runs", lambda do=None: False)
+    monkeypatch.setattr(net, "DIR", str(tmp_path / "network"))
 
 
 class Machine:
@@ -63,6 +68,7 @@ def test_the_machine_says_how_it_stands(managed, client, auth_headers, monkeypat
         "time_zone": "Europe/Berlin",
         "clock": {"can": True, "automatic": True, "in_step": False},
         "ssh": {"installed": True, "on": True},
+        "bridge": {"on": False, "port": "", "name": "br0", "can": False},
     }
 
 

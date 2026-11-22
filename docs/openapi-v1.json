@@ -23219,6 +23219,26 @@
     "title": "HomeAssistantIn",
     "type": "object"
    },
+   "HostBridgeRequest": {
+    "properties": {
+     "interface": {
+      "default": "",
+      "description": "The port the bridge takes (when turning it on)",
+      "maxLength": 15,
+      "title": "Interface",
+      "type": "string"
+     },
+     "on": {
+      "title": "On",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "on"
+    ],
+    "title": "HostBridgeRequest",
+    "type": "object"
+   },
    "HostIpConfigApplyRequest": {
     "properties": {
      "dns1": {
@@ -62102,6 +62122,48 @@
      }
     },
     "summary": "Apply Host Ip Config Endpoint",
+    "tags": [
+     "Network & Switching"
+    ],
+    "x-required-scopes": [
+     "system:config"
+    ]
+   }
+  },
+  "/api/v1/network/host/bridge": {
+   "post": {
+    "description": "On a machine set up for Kiboto: puts the main port into the bridge virtual machines join,\nor takes it away. A trial like an address change (409 not_on_this_host elsewhere).",
+    "operationId": "host_bridge_endpoint_api_v1_network_host_bridge_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/HostBridgeRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Host Bridge Endpoint",
     "tags": [
      "Network & Switching"
     ],

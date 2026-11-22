@@ -185,6 +185,34 @@ async def revert_host_ip_config_endpoint(req: HostIpRevertRequest | None = None)
     return await asyncio.to_thread(_change, "address", "", {"revert": req.canary_id if req else None})
 
 
+class HostBridgeRequest(BaseModel):
+    on: bool
+    interface: str = Field(default="", max_length=15, description="The port the bridge takes (when turning it on)")
+
+
+@router.post("/network/host/bridge", dependencies=[Depends(require_scope("system:config"))])
+async def host_bridge_endpoint(req: HostBridgeRequest):
+    """On a machine set up for Kiboto: puts the main port into the bridge virtual machines join,
+    or takes it away. A trial like an address change (409 not_on_this_host elsewhere)."""
+    from backend import runtime
+
+    if not runtime.managed_host():
+        raise ApiError(
+            409, "This is changed in the host system's own network settings, not in Kiboto.", "not_on_this_host"
+        )
+    from backend.hardware.net import host_ip, managed
+
+    now = await asyncio.to_thread(host_ip.get_host_ip_config)
+    try:
+        return await asyncio.to_thread(
+            managed.start_bridge_trial, req.on, req.interface or now.get("interface", ""), now
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from None
+    except RuntimeError as e:
+        raise HTTPException(status_code=502, detail=str(e)) from None
+
+
 class HostKeepRequest(BaseModel):
     canary_id: str = Field(min_length=16, max_length=128, description="The key of the change being tried")
 

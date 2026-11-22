@@ -10,6 +10,11 @@ vi.mock('../api.js', () => ({
       if (state instanceof Error) throw state;
       return state;
     },
+    post: async (url, body) => {
+      puts.push([url, body]);
+      if (putFails) throw putFails;
+      return { status: 'trial', canary_id: 'k', timeout_sec: 60, url: '' };
+    },
     put: async (url, body) => {
       puts.push([url, body]);
       if (putFails) throw putFails;
@@ -20,7 +25,10 @@ vi.mock('../api.js', () => ({
   },
 }));
 
-const { renderMachineCard, clockStatus, sshStatus } = await import('../components/management/machine-card.js');
+const { renderMachineCard, clockStatus, sshStatus, bridgeStatus } =
+  await import('../components/management/machine-card.js');
+const trial = vi.hoisted(() => ({ showNetTrial: vi.fn() }));
+vi.mock('../components/management/net-trial.js', () => trial);
 
 const flush = () => new Promise((r) => setTimeout(r, 0));
 const mount = () => /** @type {HTMLElement} */ (document.getElementById('machine-card'));
@@ -35,6 +43,7 @@ beforeEach(() => {
     time_zone: 'Europe/Berlin',
     clock: { can: true, automatic: true, in_step: true },
     ssh: { installed: true, on: true },
+    bridge: { on: false, port: '', can: true },
   };
   document.body.innerHTML = '<div id="machine-card" hidden></div>';
 });
@@ -122,5 +131,34 @@ describe('This machine', () => {
     el('machine-clock-toggle').click();
     await flush();
     expect(mount().querySelector('#machine-error')?.textContent).toBe('The machine did not take the change.');
+  });
+
+  it('says how the bridge for virtual machines stands', () => {
+    expect(bridgeStatus(null)).toContain('set up outside Kiboto');
+    expect(bridgeStatus({ can: false })).toContain('set up outside Kiboto');
+    expect(bridgeStatus({ can: true, on: true, port: 'enp1s0' })).toContain('through enp1s0');
+    expect(bridgeStatus({ can: true, on: true })).toContain('through -');
+    expect(bridgeStatus({ can: true, on: false })).toContain('through this machine only');
+  });
+
+  it('turns the bridge on as a trial of the new network settings', async () => {
+    await renderMachineCard();
+    expect(el('machine-bridge-toggle').getAttribute('aria-pressed')).toBe('false');
+    el('machine-bridge-toggle').click();
+    await flush();
+    await flush();
+    expect(puts.at(-1)).toEqual(['/api/network/host/bridge', { on: true }]);
+    expect(trial.showNetTrial).toHaveBeenCalledWith(
+      { status: 'trial', canary_id: 'k', timeout_sec: 60, url: '' },
+      expect.any(Function)
+    );
+    putFails = new Error("This machine's network is not run by systemd-networkd.");
+    el('machine-bridge-toggle').click();
+    await flush();
+    expect(el('machine-error').textContent).toContain('systemd-networkd');
+    putFails = {};
+    el('machine-bridge-toggle').click();
+    await flush();
+    expect(el('machine-error').textContent).toBe('The machine did not take the change.');
   });
 });
