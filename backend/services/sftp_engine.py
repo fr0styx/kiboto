@@ -29,6 +29,7 @@ SFTP_CONF_FILE = os.path.join(SFTP_DIR, "sshd_config")
 # what a stored password is shown as; never a password itself
 PASSWORD_MASK = "********"
 FRONT_SCRIPT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sftp_front.py")
+UNIT = "kiboto-sftp"  # the same front as a service of the machine, on a machine set up for Kiboto
 SIDECAR_FRONT = "/app/backend/services/sftp_front.py"
 
 
@@ -395,6 +396,47 @@ Match Group sftpusers
             logger.warning(f"[SFTP] Exception in _start_sidecar: {e}")
             return False
 
+    # --- as a service of the machine (runtime.managed_host) ------------------------------------------
+    @staticmethod
+    def _unit(*args: str) -> tuple[int, str]:
+        from backend.services.host_basics import run
+
+        return run(list(args), timeout=30)
+
+    def _unit_running(self) -> bool:
+        return self._unit("systemctl", "is-active", UNIT)[1] == "active"
+
+    def _start_unit(self, port: int) -> bool:
+        """The front as a unit of the machine: it outlives a restart of Kiboto and comes back
+        when it ends. Kiboto starts it again at its own start when SFTP is on."""
+        cache_dir = os.path.join(SFTP_DIR, "cache")
+        os.makedirs(cache_dir, exist_ok=True)
+        if self._unit_running():
+            self._unit("systemctl", "stop", UNIT)
+        self._unit("systemctl", "reset-failed", UNIT)
+        code, said = self._unit(
+            "systemd-run",
+            "--quiet",
+            "--collect",
+            "--unit",
+            UNIT,
+            "--description",
+            "Kiboto SFTP",
+            "-p",
+            "Restart=always",
+            "-p",
+            "RestartSec=3",
+            "--setenv",
+            f"DATA_DIR={DATA_DIR}",
+            sys.executable,
+            FRONT_SCRIPT,
+            str(port),
+            cache_dir,
+        )
+        if code != 0:
+            logger.warning("[SFTP] The SFTP service could not be started: %s", said)
+        return code == 0
+
     def _start_subprocess(self, port: int) -> bool:
         """Starts the SFTP front and its rclone here, as a fallback (SEC-34)."""
         cache_dir = os.path.join(SFTP_DIR, "cache")
@@ -436,10 +478,16 @@ Match Group sftpusers
                 ignored("backend.services.sftp_engine.SFTPEngine.get_status")
 
         subprocess_running = bool(hasattr(self, "_proc") and self._proc and self._proc.poll() is None)
+        from backend import runtime
+
+        if runtime.managed_host() and self._unit_running():
+            sidecar_status = "running"  # a service of the machine stands where a helper container would
         running = enabled and (port_open or sidecar_status == "running" or subprocess_running)
 
         if not enabled:
             mode = "disabled"
+        elif runtime.managed_host() and sidecar_status == "running":
+            mode = "service"
         elif sidecar_status == "running":
             mode = "native_sidecar"
         elif subprocess_running:
@@ -494,7 +542,11 @@ Match Group sftpusers
         # 1. Try Docker sidecar first if Docker socket exists
         started_sidecar = False
         sock_path = docker_sock()
-        if os.path.exists(sock_path):
+        from backend import runtime
+
+        if runtime.managed_host():  # the machine is Kiboto's: a service of its own, not a container
+            started_sidecar = self._start_unit(port)
+        elif os.path.exists(sock_path):
             try:
                 started_sidecar = self._start_sidecar(port)
             except Exception as e:
@@ -515,9 +567,33 @@ Match Group sftpusers
 
         return self.get_status()
 
+    def shutdown(self) -> None:
+        """Kiboto is stopping: only the server running inside this process goes with it. The setting
+        stays as it is, and a helper container or a service of the machine keeps serving."""
+        if hasattr(self, "_proc") and self._proc:
+            try:
+                self._proc.terminate()
+                self._proc.wait(timeout=2)
+            except (OSError, subprocess.SubprocessError):
+                self._proc.kill()
+            self._proc = None
+
+    def resume(self) -> bool:
+        """At Kiboto's start: SFTP that is on is serving again (a machine that restarted has lost
+        its service; the fallback process went with the Kiboto before)."""
+        cfg = self.get_config()
+        if not cfg.get("enabled") or self._check_port(int(cfg.get("port", 2222))):
+            return False
+        self.start()
+        return True
+
     def stop(self) -> SFTPStatus:
         self.save_config({"enabled": False})
         logger.info("[SFTP] Stopping SFTP service...")
+        from backend import runtime
+
+        if runtime.managed_host():
+            self._unit("systemctl", "stop", UNIT)
 
         # 1. Stop Docker sidecar if Docker socket exists
         sock_path = docker_sock()

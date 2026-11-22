@@ -54,6 +54,10 @@ On a machine of its own, Kiboto can reach the apps it works with (its AI servers
 
 - **The first administrator's home folder outside Unraid**: it pointed at Unraid's folder on every system; it is now in the storage folder of this install, like everyone else's.
 
+- **SFTP stays on**: every restart or update of Kiboto turned SFTP off, and it stayed off. It now keeps serving, and comes back by itself after a restart.
+
+- **SFTP sign-in with a key works**: a key added to an SFTP account was never accepted; only passwords worked.
+
 #### Security
 
 Apps, Docker clean-up: deleting unused volumes now asks for a confirmation that Kiboto checks itself, so it can't happen without your say-so.

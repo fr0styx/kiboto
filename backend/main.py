@@ -503,6 +503,16 @@ def _bring_pools_back() -> None:
         logger.error("[Main] The recorded pools could not be brought back: %s", e)
 
 
+def _resume_sftp() -> None:
+    """SFTP that is on serves again after Kiboto (or the machine) started again."""
+    try:
+        from backend.services.sftp_engine import get_sftp_engine
+
+        get_sftp_engine().resume()
+    except (OSError, RuntimeError, ValueError) as e:
+        logger.warning("[Main] SFTP could not be started again: %s", e)
+
+
 def _start_app_names() -> None:
     """On a managed host apps are reached by name through /etc/hosts (services/app_hosts), and a
     trial of network settings that a restart cut short is put back."""
@@ -688,6 +698,7 @@ async def lifespan(app: FastAPI):
     threading.Thread(target=_reapply_tailscale_options, name="TailscaleOptions", daemon=True).start()
     _start_home_assistant()
     _start_app_names()
+    threading.Thread(target=_resume_sftp, name="SFTP", daemon=True).start()
     from backend import first_run
 
     first_run.refresh()  # the first-time code is on the machine's screen while it is waiting
@@ -739,7 +750,7 @@ async def lifespan(app: FastAPI):
         try:
             from backend.services.sftp_engine import get_sftp_engine
 
-            get_sftp_engine().stop()
+            get_sftp_engine().shutdown()  # the setting stays; SFTP serves again at the next start
         except Exception:
             ignored("backend.main.lifespan")
         if not Z_STATE.fans_locked:

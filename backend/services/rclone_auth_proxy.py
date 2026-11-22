@@ -62,6 +62,16 @@ def _note_failure() -> None:
         ignored("backend.services.rclone_auth_proxy._note_failure")
 
 
+def key_data(key: str) -> str:
+    """The key itself, the base64 part, from "ssh-ed25519 AAAA... comment" or from "AAAA..." alone:
+    rclone hands over only the base64 part, while a person pastes the whole line."""
+    parts = key.strip().split()
+    if not parts:
+        return ""
+    blob = parts[1] if len(parts) >= 2 and not parts[0].startswith("AAAA") else parts[0]
+    return blob if blob.startswith("AAAA") else ""
+
+
 def main():
     try:
         raw = sys.stdin.read()
@@ -100,12 +110,9 @@ def main():
                     if u.get("username", "").strip().lower() == username.lower() and u.get("enabled", True):
                         if _sftp_password_ok(str(u.get("password") or ""), password):
                             authenticated = True
-                        u_key = str(u.get("pubkey") or "").strip()
-                        if u_key and public_key:
-                            u_parts = u_key.split()[:2]
-                            p_parts = str(public_key).strip().split()[:2]
-                            if u_parts and u_parts == p_parts:
-                                authenticated = True
+                        u_key = key_data(str(u.get("pubkey") or ""))
+                        if u_key and u_key == key_data(public_key):
+                            authenticated = True
                         if authenticated:
                             is_read_only = bool(u.get("read_only", False))
                             # only folders the serve rules allow; an account left with none is refused
