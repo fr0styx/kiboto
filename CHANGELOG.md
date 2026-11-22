@@ -98,6 +98,8 @@ On a machine of its own, Kiboto can now update itself: the new version is made r
 
 - **Disks for other computers (iSCSI) on a machine of its own (preview)**: on a Debian machine set up for Kiboto, iSCSI runs as a service of the machine. Tried with a real initiator: the disk was found, signed in with its user and password, and used as a drive.
 
+- **Data tiering on a machine of its own (preview)**: on a Debian machine set up for Kiboto, a shared folder can show two pools as one, so old files move to the slower pool and stay in the same folder. It keeps working while Kiboto restarts.
+
 ## v2.0.5 (2026-11-20)
 ### 🏡 A second NAS that can take over, files you can change over the network, and 176 tested apps
 

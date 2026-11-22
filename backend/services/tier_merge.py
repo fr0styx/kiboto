@@ -163,6 +163,10 @@ def missing(path: str) -> str:
         return "no_fuse"
     if not receives_mounts(path):
         return "not_shared"
+    from backend import runtime
+
+    if runtime.managed_host():  # the machine's own Samba sees the machine's own mounts
+        return ""
     engine = _engine()
     if not engine["me"]:
         return "no_engine"
@@ -246,11 +250,60 @@ def desired(me: dict[str, Any], kept: list[dict[str, Any]], conf_hash: str) -> d
     }
 
 
+# --- as a service of the machine (runtime.managed_host) --------------------------------------------
+UNIT = "kiboto-merge"
+
+
+def _unit(*args: str) -> tuple[int, str]:
+    from backend.services.host_basics import run
+
+    return run(list(args), timeout=60)
+
+
+def _write_script(text: str) -> str:
+    os.makedirs(CONF_DIR, mode=0o700, exist_ok=True)
+    target = os.path.join(CONF_DIR, CONF_NAME)
+    with open(target + ".new", "w", encoding="utf-8") as f:
+        f.write(text)
+    os.chmod(target + ".new", 0o700)
+    os.replace(target + ".new", target)
+    return target
+
+
+def _ensure_unit(kept: list[dict[str, Any]], text: str, conf_hash: str) -> str:
+    """The merges as a unit of the machine: they outlive a restart of Kiboto, and the unit starts
+    again when one of them ends (the script then exits with an error)."""
+    running = _unit("systemctl", "is-active", UNIT)[1] == "active"
+    if not kept:
+        if running:
+            _unit("systemctl", "stop", UNIT)  # the script unmounts what it mounted
+        return ""
+    described = f"Kiboto merged folders {conf_hash}"
+    if running and _unit("systemctl", "show", UNIT, "-p", "Description", "--value")[1] == described:
+        return ""
+    target = _write_script(text)
+    _unit("systemctl", "stop", UNIT)
+    _unit("systemctl", "reset-failed", UNIT)
+    code, said = _unit(
+        "systemd-run", "--quiet", "--collect", "--unit", UNIT, "--description", described,
+        "-p", "Restart=on-failure", "-p", "RestartSec=5", "-p", "KillMode=mixed", "sh", target,
+    )  # fmt: skip
+    if code != 0:
+        logger.warning("[Merge] %s did not start: %s", UNIT, said)
+        return "no_start"
+    logger.info("[Merge] %s keeps %d merged folder(s) mounted", UNIT, len(kept))
+    return ""
+
+
 def ensure() -> str:
     """Makes the container match the merges that are kept: none, no container. Returns "" or why not."""
     kept = merges()
     text = script(kept)
     conf_hash = hashlib.sha256((text + OPTIONS).encode()).hexdigest()[:16]
+    from backend import runtime
+
+    if runtime.managed_host():  # the machine is Kiboto's: a unit of it, not a container
+        return _ensure_unit(kept, text, conf_hash)
     code, info = _docker("GET", f"/containers/{CONTAINER}/json")
     there = code == 200 and isinstance(info, dict)
     if not kept:
