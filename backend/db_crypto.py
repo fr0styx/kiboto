@@ -20,11 +20,13 @@ is given), so callers see one set of exception classes.
 
 from __future__ import annotations
 
+import contextlib
 import functools
 import hashlib
 import logging
 import os
 import threading
+from collections.abc import Iterator
 from typing import TYPE_CHECKING, Any
 
 from backend import legacy_names
@@ -56,6 +58,7 @@ _KDF_SALT = b"zettnas-data-key-v1"  # never changes: existing databases were key
 _KDF_ROUNDS = 200_000
 
 _ready: dict[str, threading.Event] = {}
+_override = threading.local()  # key_for_this_thread
 _failed: dict[str, str] = {}
 _ready_lock = threading.Lock()
 
@@ -64,9 +67,22 @@ class DataKeyError(RuntimeError):
     """An encrypted AI database cannot be opened (key missing, too short or wrong)."""
 
 
+@contextlib.contextmanager
+def key_for_this_thread(text: str) -> Iterator[None]:
+    """While a backup of another install is checked, its AI databases open with that install's key
+    (settings brought back from a pool copy, services/pool_copy.py). Only on this thread."""
+    _override.text = text
+    try:
+        yield
+    finally:
+        _override.text = ""
+
+
 def _key_text() -> str:
     """The key from KIBOTO_DATA_KEY, else the file KIBOTO_DATA_KEY_FILE names, else the systemd
     credential `zettnas-data-key` ($CREDENTIALS_DIRECTORY, e.g. sealed to the TPM with systemd-creds)."""
+    if getattr(_override, "text", ""):
+        return _override.text
     value = legacy_names.getenv(KEY_ENV, "")
     if value:
         return value
@@ -112,7 +128,11 @@ def _credential_path() -> str:
 
 def enabled() -> bool:
     return bool(
-        legacy_names.getenv(KEY_ENV) or legacy_names.getenv(KEY_FILE_ENV) or _credential_path() or _own_key_wanted()
+        getattr(_override, "text", "")
+        or legacy_names.getenv(KEY_ENV)
+        or legacy_names.getenv(KEY_FILE_ENV)
+        or _credential_path()
+        or _own_key_wanted()
     )
 
 

@@ -232,6 +232,20 @@ def unlock(typed: str, do: Run | None = None) -> str:
     return where
 
 
+def adopt(data_key: str, box: dict[str, Any], do: Run | None = None) -> str:
+    """Takes the data key of the install whose settings are being brought back: sealed to this
+    machine, and that install's recovery key stays the recovery key (the person just typed it)."""
+    do = do or run
+    os.makedirs(DIR, mode=0o700, exist_ok=True)
+    atomic_write_json(_path(WRAPPED), box)
+    os.chmod(_path(WRAPPED), 0o600)
+    if os.path.exists(_path(SHOWN)):
+        os.remove(_path(SHOWN))  # the key this machine made for itself opens nothing any more
+    where = _seal(data_key, do)
+    _note(written_down_at=time.time())
+    return where
+
+
 def renew_recovery_key(do: Run | None = None) -> bool:
     """A new recovery key; the one before stops working. For a key that was lost or seen by someone."""
     data_key = key_text(do)

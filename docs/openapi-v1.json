@@ -36500,6 +36500,28 @@
     "title": "SetSystemProfileResponseFan",
     "type": "object"
    },
+   "SettingsRestoreIn": {
+    "properties": {
+     "key": {
+      "maxLength": 64,
+      "minLength": 3,
+      "title": "Key",
+      "type": "string"
+     },
+     "recovery_key": {
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Recovery Key",
+      "type": "string"
+     }
+    },
+    "required": [
+     "key",
+     "recovery_key"
+    ],
+    "title": "SettingsRestoreIn",
+    "type": "object"
+   },
    "SetupMfaResponse": {
     "additionalProperties": true,
     "description": "POST /auth/mfa/setup",
@@ -72219,6 +72241,72 @@
     ]
    }
   },
+  "/api/v1/system/settings-copy/found": {
+   "get": {
+    "description": "The settings of other installs that the last look found on the drives. No drive is touched.",
+    "operationId": "get_found_settings_api_v1_system_settings_copy_found_get",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Get Found Settings Api V1 System Settings Copy Found Get",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Get Found Settings",
+    "tags": [
+     "System"
+    ],
+    "x-required-scopes": [
+     "system:config"
+    ]
+   }
+  },
+  "/api/v1/system/settings-copy/look": {
+   "post": {
+    "description": "Looks on every pool, in use or not, for the settings an earlier Kiboto left there. Reads the\ndrives, so it wakes them. Pools this system does not use are opened read-only and closed again.",
+    "operationId": "look_for_settings_api_v1_system_settings_copy_look_post",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Look For Settings Api V1 System Settings Copy Look Post",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Look For Settings",
+    "tags": [
+     "System"
+    ],
+    "x-required-scopes": [
+     "system:config"
+    ]
+   }
+  },
   "/api/v1/system/settings-copy/now": {
    "post": {
     "description": "Writes the copy now to every pool whose drives are awake; a sleeping pool is left asleep\nand keeps the copy it has. Says per pool what happened.",
@@ -72244,6 +72332,52 @@
      }
     },
     "summary": "Copy Settings Now",
+    "tags": [
+     "System"
+    ],
+    "x-required-scopes": [
+     "system:config"
+    ]
+   }
+  },
+  "/api/v1/system/settings-copy/restore": {
+   "post": {
+    "description": "Brings back the settings of a found copy with the recovery key of the install that wrote it,\nand starts Kiboto again. The settings this install has now are saved first.",
+    "operationId": "restore_found_settings_api_v1_system_settings_copy_restore_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SettingsRestoreIn"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Restore Found Settings Api V1 System Settings Copy Restore Post",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Restore Found Settings",
     "tags": [
      "System"
     ],

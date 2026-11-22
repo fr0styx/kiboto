@@ -21,6 +21,7 @@ from backend.fsutil import atomic_write_json
 Runner = Callable[[list[str]], tuple[int, str, str]]
 KINDS = ("zfs", "btrfs", "ext4", "xfs")  # xfs: only ever imported, never made
 BTRFS_SURVIVES_A_DRIVE = ("raid1", "raid1c3", "raid1c4", "raid10")
+ADOPT_FLAG = ".adopt-restored-pools"  # left in the data folder by a settings restore; read once at the next start
 
 
 def _file() -> str:
@@ -139,14 +140,18 @@ def unprotect(mountpoint: str, run: Runner) -> None:
         run(["chattr", "-i", mountpoint])
 
 
-def bring_back(row: dict[str, Any], run: Runner) -> str:
-    """Imports or mounts one recorded pool. "" when it is there afterwards, else why not."""
+def bring_back(row: dict[str, Any], run: Runner, force: bool = False) -> str:
+    """Imports or mounts one recorded pool. "" when it is there afterwards, else why not. `force`
+    takes a ZFS pool that another system used last: right after that system's settings were restored."""
     if is_there(row, run):
         return ""
     if not row.get("uuid"):
         return "its record has no id to find it by"
     if row["fs_type"] == "zfs":
         code, out, err = run(["zpool", "import", row["uuid"]])
+        if code != 0 and force and "another system" in (err + out):
+            # the system that used it last is the one whose settings were just brought back here
+            code, out, err = run(["zpool", "import", "-f", row["uuid"]])
         return "" if code == 0 else (err or out or "zpool import failed").strip()
     mp = row["mountpoint"]
     try:
@@ -172,10 +177,14 @@ def bring_back(row: dict[str, Any], run: Runner) -> str:
 def bring_back_all(run: Runner) -> dict[str, str]:
     """At start: every expected pool that is not there is imported or mounted. {name: "" or why not}."""
     done: dict[str, str] = {}
+    flag = os.path.join(DATA_DIR, ADOPT_FLAG)
+    adopting = os.path.exists(flag)  # settings were brought back from a copy on the pools (services/pool_copy.py)
+    if adopting:
+        os.remove(flag)
     for row in load():
         if row.get("ejected"):
             continue
-        why = bring_back(row, run)
+        why = bring_back(row, run, force=adopting)
         done[row["name"]] = why
         if why:
             logger.error("[Storage] Pool %s is not there and could not be brought back: %s", row["name"], why)

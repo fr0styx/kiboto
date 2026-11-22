@@ -14,6 +14,7 @@ moved aside, into .kiboto/earlier/<its id>/, where it stays until someone remove
 import hashlib
 import json
 import os
+import re
 import shutil
 import threading
 import time
@@ -31,6 +32,10 @@ ABOUT = "about.json"
 EARLIER = "earlier"
 EVERY = 24 * 3600
 FORMAT = 1
+FOUND = "/run/kiboto/found"  # copies found on the drives, kept in memory until the machine restarts
+MAX_ARCHIVE = 256 * 1024 * 1024
+ADOPT_FLAG = ".adopt-restored-pools"  # in the data folder: the next start takes the restored pools as its own
+_KEY = re.compile(r"^[a-z0-9]{1,16}-[a-z0-9]{1,40}$")
 _lock = threading.Lock()
 
 
@@ -191,6 +196,7 @@ def status() -> dict[str, Any]:
     return {
         "managed": True,
         "locked": machine_key.status().get("locked", False),
+        "found": found(),  # the settings of other installs that the last look turned up
         "pools": [
             {
                 "name": row["name"],
@@ -200,3 +206,152 @@ def status() -> dict[str, Any]:
             for row in pools()
         ],
     }
+
+
+# --- bringing the settings back from a copy --------------------------------------------------------
+def _plain(text: Any, limit: int = 64) -> str:
+    return "".join(ch for ch in str(text or "") if ch.isprintable())[:limit]
+
+
+def _sets_in(root: str) -> list[tuple[str, dict[str, Any]]]:
+    """The copies under a pool's root: its own and those set aside. [(folder, its note)]."""
+    base = os.path.join(root, FOLDER)
+    folders = [base]
+    try:
+        folders += [os.path.join(base, EARLIER, name) for name in sorted(os.listdir(os.path.join(base, EARLIER)))]
+    except OSError:
+        folders = [base]  # nothing was set aside here
+    out = []
+    for folder in folders:
+        about = _about(folder)
+        whole = all(os.path.isfile(os.path.join(folder, name)) for name in (ARCHIVE, WRAPPED))
+        if about and whole and os.path.getsize(os.path.join(folder, ARCHIVE)) <= MAX_ARCHIVE:
+            out.append((folder, about))
+    return out
+
+
+def _take(root: str, pool: str, mine: str) -> list[str]:
+    """Copies every other install's settings copy found under `root` into FOUND; returns their keys."""
+    keys = []
+    for folder, about in _sets_in(root):
+        theirs = "".join(ch for ch in str(about.get("install") or "") if ch.isalnum()).lower()[:16]
+        if not theirs or theirs == mine:
+            continue
+        key = f"{theirs}-{''.join(ch for ch in pool.lower() if ch.isalnum())[:40] or 'pool'}"
+        into = os.path.join(FOUND, key)
+        shutil.rmtree(into, ignore_errors=True)
+        os.makedirs(into, mode=0o700)
+        for name in (ARCHIVE, WRAPPED):
+            shutil.copyfile(os.path.join(folder, name), os.path.join(into, name))
+            os.chmod(os.path.join(into, name), 0o600)
+        note = {
+            "key": key,
+            "install": theirs,
+            "name": _plain(about.get("name")) or "Kiboto",
+            "version": _plain(about.get("version"), 24),
+            "at": float(about.get("at") or 0),
+            "pool": _plain(pool),
+        }
+        atomic_write_json(os.path.join(into, ABOUT), note)
+        keys.append(key)
+    return keys
+
+
+def found() -> list[dict[str, Any]]:
+    """The copies the last look turned up, newest first. No drive is touched."""
+    out = []
+    try:
+        names = sorted(os.listdir(FOUND))
+    except OSError:
+        return []
+    for name in names:
+        note = _about(os.path.join(FOUND, name))
+        if note.get("key") == name and _KEY.match(name):
+            out.append(note)
+    return sorted(out, key=lambda n: -float(n.get("at") or 0))
+
+
+def look(run: Any = None) -> list[dict[str, Any]]:
+    """Looks on every pool, in use or not, for the settings of another install. This reads the
+    drives, so it wakes them: only ever at a person's request. Pools this system does not use are
+    opened read-only and closed again (hardware/pal/pool_probe.py)."""
+    if not runtime.managed_host():
+        return []
+    from backend.hardware.pal import pool_probe
+
+    if run is None:
+        from backend.hardware.pal_storage import get_storage_platform
+
+        run = get_storage_platform()._run_cmd  # type: ignore[attr-defined]
+    with _lock:
+        shutil.rmtree(FOUND, ignore_errors=True)
+        os.makedirs(FOUND, mode=0o700, exist_ok=True)
+        mine = install_id()
+        for row in pools():
+            _take(row["mountpoint"], row["name"], mine)
+        for candidate in pool_probe.candidates(run):
+            try:
+                pool_probe.look_into(candidate, run, lambda root, c=candidate: _take(root, c["name"], mine))
+            except OSError as e:
+                logger.warning("[PoolCopy] %s could not be looked into: %s", candidate["name"], e)
+    return found()
+
+
+def drop_index_after_restore(data_dir: str = "") -> bool:
+    """At the start after settings were brought back from a pool copy: the AI search index of the
+    install they replaced is encrypted under a key this machine no longer has. It is dropped, and
+    Kiboto builds it again. Its files were not in the copy; the running Kiboto may have written to
+    it until the restart, so this happens at the start, not at the restore."""
+    data_dir = data_dir or DATA_DIR
+    if not os.path.exists(os.path.join(data_dir, ADOPT_FLAG)):
+        return False
+    for end in ("", "-wal", "-shm"):
+        path = os.path.join(data_dir, "rag_index.db" + end)
+        if os.path.exists(path):
+            os.remove(path)
+    logger.info("[PoolCopy] The search index of the install before is dropped; it is built again")
+    return True
+
+
+def restore(key: str, typed_recovery_key: str) -> dict[str, Any]:
+    """Brings back the settings of a found copy: opened with the recovery key of the install that
+    wrote it, staged, and applied at the next start. That install's data key and recovery key
+    become this machine's. Raises ValueError with a sentence for the person."""
+    from backend import config, first_run
+    from backend.services.backup_engine import restore_backup_archive
+
+    folder = os.path.join(FOUND, key) if _KEY.match(key or "") else ""
+    note = _about(folder) if folder else {}
+    if not note:
+        raise ValueError("That copy is no longer at hand. Look for it again.")
+    recovery = machine_key.tidy(typed_recovery_key)
+    box = read_json(os.path.join(folder, WRAPPED), None)
+    if not recovery or not isinstance(box, dict):
+        raise ValueError(machine_key.NOT_THE_KEY)
+    try:
+        data_key = machine_key.unwrap(box, recovery)
+    except machine_key.MachineKeyError as e:
+        raise ValueError(str(e)) from None
+    from backend import db_crypto
+    from backend.services.data_snapshot import take_snapshot
+
+    try:  # today's settings first, under this machine's own key
+        saved = take_snapshot(DATA_DIR, label="pre-restore", extra={"kind": "restore"})
+    except (OSError, RuntimeError, ValueError) as e:
+        raise ValueError(f"Could not save the current data before restoring: {e}") from e
+    # the copy's AI databases are encrypted with its own data key, which becomes this machine's below
+    with open(os.path.join(folder, ARCHIVE), "rb") as f, db_crypto.key_for_this_thread(data_key):
+        result = restore_backup_archive(f, passphrase=passphrase(data_key), snapshot=False, staged=True)
+    result["snapshot"] = saved
+    machine_key.adopt(data_key, box)
+    first_run.clear()  # the settings coming back have their own people and passwords
+    if os.path.exists(config.initial_password_file()):
+        os.remove(config.initial_password_file())
+    with open(os.path.join(DATA_DIR, ADOPT_FLAG), "w", encoding="utf-8") as f:
+        f.write(note.get("install", ""))
+    logger.warning(
+        "[PoolCopy] The settings of %s (from pool %s) are staged; they apply at the next start",
+        note["name"],
+        note["pool"],
+    )
+    return {"restored": result.get("restored"), "name": note["name"], "pool": note["pool"]}

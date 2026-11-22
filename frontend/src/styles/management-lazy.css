@@ -490,6 +490,7 @@
 /* one line per pool: its name, then when its settings copy was written */
 .pcopy-list { list-style: none; margin: 0 0 10px; padding: 0; display: grid; gap: 4px; font-size: var(--kb-fs-sm); }
 .pcopy-list span { color: var(--muted); }
+.pcopy-list li { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
 /* the recovery key, large enough to copy by hand */
 .rkey-code { display: block; margin: 4px 0 10px; font-family: var(--font-mono, monospace); font-size: var(--kb-fs-lg, 18px); letter-spacing: 0.06em; overflow-wrap: anywhere; user-select: all; }
 /* Switch off at night (audit A10) */

@@ -376,6 +376,12 @@ def startup_system():
         apply_staged_restore(DATA_DIR)
     except Exception as e:
         logger.error(f"[Main] Could not apply the staged settings restore: {e}")
+    try:
+        from backend.services.pool_copy import drop_index_after_restore
+
+        drop_index_after_restore(DATA_DIR)  # before the pool record is read (it clears the flag)
+    except OSError as e:
+        logger.error("[Main] The search index of the install before could not be dropped: %s", e)
     _bring_pools_back()
 
     # Refuse databases written by a newer Kiboto before touching them (OPS-03).

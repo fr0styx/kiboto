@@ -38,7 +38,7 @@ request and response schemas.
 
 <!-- BEGIN generated endpoints: python scripts/api_reference.py --update -->
 
-815 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
+818 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
 
 ### AI Conversation History
 
@@ -904,7 +904,10 @@ request and response schemas.
 | `GET` | `/api/v1/system/power-schedule` | `system:view` | Get Power Schedule |
 | `PUT` | `/api/v1/system/power-schedule` | `system:power` | Put Power Schedule |
 | `GET` | `/api/v1/system/settings-copy` | `system:config` | Per pool, when the copy of Kiboto's settings on it was last written and whether the last try failed |
+| `GET` | `/api/v1/system/settings-copy/found` | `system:config` | The settings of other installs that the last look found on the drives |
+| `POST` | `/api/v1/system/settings-copy/look` | `system:config` | Looks on every pool, in use or not, for the settings an earlier Kiboto left there |
 | `POST` | `/api/v1/system/settings-copy/now` | `system:config` | Writes the copy now to every pool whose drives are awake; a sleeping pool is left asleep and keeps the copy it has |
+| `POST` | `/api/v1/system/settings-copy/restore` | `system:config` | Brings back the settings of a found copy with the recovery key of the install that wrote it, and starts Kiboto again |
 | `GET` | `/api/v1/system/update-watch` | `system:view` | Get Update Watch |
 | `PUT` | `/api/v1/system/update-watch` | `system:config` | Put Update Watch |
 

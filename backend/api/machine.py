@@ -131,3 +131,42 @@ async def copy_settings_now() -> dict[str, Any]:
         raise HTTPException(status_code=404, detail="Not found")
     done = await asyncio.to_thread(pool_copy.copy_if_due, None, True)
     return {**await asyncio.to_thread(pool_copy.status), "done": done}
+
+
+class SettingsRestoreIn(BaseModel):
+    key: str = Field(min_length=3, max_length=64)
+    recovery_key: str = Field(min_length=1, max_length=64)
+
+
+@router.get("/system/settings-copy/found", dependencies=[Depends(require_scope("system:config"))])
+async def get_found_settings() -> dict[str, Any]:
+    """The settings of other installs that the last look found on the drives. No drive is touched."""
+    from backend.services import pool_copy
+
+    return {"found": await asyncio.to_thread(pool_copy.found)}
+
+
+@router.post("/system/settings-copy/look", dependencies=[Depends(require_scope("system:config"))])
+async def look_for_settings() -> dict[str, Any]:
+    """Looks on every pool, in use or not, for the settings an earlier Kiboto left there. Reads the
+    drives, so it wakes them. Pools this system does not use are opened read-only and closed again."""
+    from backend.services import pool_copy
+
+    if not machine_key.active():
+        raise HTTPException(status_code=404, detail="Not found")
+    return {"found": await asyncio.to_thread(pool_copy.look)}
+
+
+@router.post("/system/settings-copy/restore", dependencies=[Depends(require_scope("system:config"))])
+async def restore_found_settings(req: SettingsRestoreIn) -> dict[str, Any]:
+    """Brings back the settings of a found copy with the recovery key of the install that wrote it,
+    and starts Kiboto again. The settings this install has now are saved first."""
+    from backend.services import pool_copy
+
+    if not machine_key.active():
+        raise HTTPException(status_code=404, detail="Not found")
+    try:
+        done = await asyncio.to_thread(pool_copy.restore, req.key, req.recovery_key)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from None
+    return {**done, "restarting": await asyncio.to_thread(host_basics.restart_kiboto)}
