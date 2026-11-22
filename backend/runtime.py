@@ -36,3 +36,13 @@ def own_container_hostname() -> str:
     import socket
 
     return socket.gethostname() if in_container() else ""
+
+
+def own_container_refs() -> tuple[str, ...]:
+    """The names to look Kiboto's own container up by: its id start, then its names (an older one too).
+    None natively, where there is no container of its own and the host name could be anyone's."""
+    if not in_container():
+        return ()
+    from backend import legacy_names
+
+    return (own_container_hostname(), *legacy_names.app_container_names())

@@ -959,6 +959,17 @@ def _get_current_build_info() -> dict[str, Any]:
     return _get_current_build_info_cached()
 
 
+def _own_container_info() -> dict[str, Any] | None:
+    """Kiboto's own container as Docker describes it; None natively, where it runs in none."""
+    from backend.services.compose_synthesizer import fetch_container_raw_inspect
+
+    for ref in runtime.own_container_refs():
+        info = fetch_container_raw_inspect(ref)
+        if info:
+            return info
+    return None
+
+
 def _get_current_build_info_impl() -> dict[str, Any]:
     """Returns detected build commit, build date, and container revision."""
     commit = _settings.current("build_commit")
@@ -967,15 +978,9 @@ def _get_current_build_info_impl() -> dict[str, Any]:
     # Try inspecting self container and image for authoritative OCI revision label
     if not commit:
         try:
-            from backend.services.compose_synthesizer import fetch_container_raw_inspect
             from backend.services.container_mutator import _docker_request
 
-            cid = socket.gethostname()
-            data = (
-                fetch_container_raw_inspect(cid)
-                or fetch_container_raw_inspect(product.CONTAINER)
-                or fetch_container_raw_inspect(legacy_names.OLD_APP_CONTAINER)
-            )
+            data = _own_container_info()
             if data and isinstance(data, dict):
                 # 1. Authoritative check on underlying image metadata
                 img_id = data.get("Image")
@@ -1279,15 +1284,9 @@ async def _registry_digest_in(tag: str, image_repo: str) -> str | None:
 
 def _running_repo_digests() -> list[str]:
     """Registry digests of the image this container runs (empty for a locally built image)."""
-    from backend.services.compose_synthesizer import fetch_container_raw_inspect
     from backend.services.container_mutator import _docker_request
 
-    info = (
-        fetch_container_raw_inspect(socket.gethostname())
-        or fetch_container_raw_inspect(product.CONTAINER)
-        or fetch_container_raw_inspect(legacy_names.OLD_APP_CONTAINER)
-        or {}
-    )
+    info = _own_container_info() or {}
     image_id = info.get("Image")
     if not image_id:
         return []
@@ -1717,13 +1716,7 @@ async def post_apply_system_update(req: ApplySystemUpdateRequest):
     if os.path.exists(sock_path):
         target_container = product.CONTAINER
         try:
-            from backend.services.compose_synthesizer import fetch_container_raw_inspect
-
-            self_info = (
-                fetch_container_raw_inspect(socket.gethostname())
-                or fetch_container_raw_inspect(product.CONTAINER)
-                or fetch_container_raw_inspect(legacy_names.OLD_APP_CONTAINER)
-            )
+            self_info = _own_container_info()
             if self_info and self_info.get("Name"):
                 target_container = self_info["Name"].lstrip("/")
         except Exception:
@@ -1860,13 +1853,7 @@ async def post_revert_system_update(
 
     target_container = product.CONTAINER
     try:
-        from backend.services.compose_synthesizer import fetch_container_raw_inspect
-
-        self_info = (
-            fetch_container_raw_inspect(socket.gethostname())
-            or fetch_container_raw_inspect(product.CONTAINER)
-            or fetch_container_raw_inspect(legacy_names.OLD_APP_CONTAINER)
-        )
+        self_info = _own_container_info()
         if self_info and self_info.get("Name"):
             target_container = self_info["Name"].lstrip("/")
     except Exception:

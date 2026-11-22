@@ -148,11 +148,11 @@ def _app_networks() -> tuple[Any, ...]:
         return _app_net["net"]
     found = []
     try:
-        import socket
-
+        from backend import runtime
         from backend.services import docker_client
 
-        status, me = docker_client.request("GET", f"/containers/{socket.gethostname()}/json")
+        ref = runtime.own_container_hostname()
+        status, me = docker_client.request("GET", f"/containers/{ref}/json") if ref else (0, None)
         nets = ((me or {}).get("NetworkSettings") or {}).get("Networks") or {} if status == 200 else {}
         for name, info in nets.items():
             if name not in ("host", "bridge", "none") and info.get("IPAddress") and info.get("IPPrefixLen"):

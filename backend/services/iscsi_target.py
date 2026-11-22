@@ -21,7 +21,7 @@ import time
 import uuid
 from typing import Any
 
-from backend import legacy_names, product
+from backend import legacy_names, product, runtime
 from backend.config import DATA_DIR, logger
 from backend.fsutil import atomic_write_json, json_locked, read_json, resolve_within
 from backend.secret_box import seal, unseal
@@ -298,7 +298,7 @@ def _docker(method: str, path: str, body: dict | None = None, headers: dict | No
 
 
 def _self() -> dict[str, Any]:
-    for ref in (socket.gethostname(), *legacy_names.app_container_names()[:2]):
+    for ref in runtime.own_container_refs():
         code, info = _docker("GET", f"/containers/{ref}/json")
         if code == 200 and isinstance(info, dict):
             return info

@@ -188,6 +188,7 @@ def test_get_current_build_info_authoritative_image_inspect(monkeypatch):
         patch("backend.services.compose_synthesizer.fetch_container_raw_inspect", return_value=mock_container),
         patch("backend.services.container_mutator._docker_request", return_value=(200, mock_image_data)),
         patch("os.path.exists", return_value=False),
+        patch("backend.runtime.in_container", return_value=True),  # the container is asked about
     ):
         info = _get_current_build_info()
         assert info["commit"] == "authori"

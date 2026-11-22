@@ -17,7 +17,7 @@ from typing import Any, Optional
 
 from pydantic import BaseModel, Field
 
-from backend import legacy_names, product
+from backend import legacy_names, product, runtime
 from backend.config import DATA_DIR, POOL_PATH, docker_sock, logger
 from backend.fsutil import atomic_write_json, protected_rclone_excludes, read_json
 from backend.ignored_errors import ignored
@@ -319,7 +319,7 @@ Match Group sftpusers
 
             # 2. Inspect parent container for image and host volume bindings
             code_tk, tk_info = 0, {}
-            for ref in (socket.gethostname(), *legacy_names.app_container_names()[:2]):
+            for ref in runtime.own_container_refs():
                 code_tk, tk_info = _docker_request("GET", f"/containers/{ref}/json")
                 if code_tk == 200:
                     break

@@ -35,8 +35,11 @@ def network_name(app_id: str) -> str:
 
 def _me() -> dict[str, Any] | None:
     """Kiboto's own container, or None when it doesn't run in one (or Docker is out of reach)."""
+    ref = runtime.own_container_hostname()
+    if not ref:
+        return None
     try:
-        status, me = docker_client.request("GET", f"/containers/{socket.gethostname()}/json")
+        status, me = docker_client.request("GET", f"/containers/{ref}/json")
     except docker_client.DockerUnavailable:
         return None
     return me if status == 200 and isinstance(me, dict) else None
