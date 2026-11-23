@@ -7,6 +7,7 @@ and network shares (Samba/NFS/WebDAV).
 import asyncio
 import logging
 import os
+import shutil
 from typing import Annotated, Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Path
@@ -545,7 +546,10 @@ def create_storage_share(req: StorageShareCreateRequest) -> dict[str, Any]:
         grant_many(req.name, people)  # Shares R4: the one access list, for the network and Files
         refresh_access()
     if req.timemachine:
+        # no default snapshots: Time Machine deletes its own old backups to make room, and a
+        # snapshot would keep what it deleted until the pool is full
         _make_time_machine(req.name, int(req.quota_gb or 0))
+        return created
     try:
         from backend.services import snapshot_service
 
@@ -553,6 +557,29 @@ def create_storage_share(req: StorageShareCreateRequest) -> dict[str, Any]:
     except Exception as e:
         logger.warning(f"[Storage] No default snapshots for {one_line(req.name)}: {one_line(e)}")
     return created
+
+
+GIB = 1024**3
+
+
+def _time_machine_too_big(share: Any, size_gb: int) -> str:
+    """Why this Time Machine size limit can't hold on the folder's pool: more than the pool can
+    give it, so Time Machine would fill the pool (and every folder and app on it) first. "" when
+    it fits, or when the folder's room can't be told."""
+    path = str(getattr(share, "path", "") or "")
+    if not size_gb or not path or not os.path.isdir(path):
+        return ""
+    try:
+        room = shutil.disk_usage(path).total  # what this folder has used plus what it may still use
+    except OSError:
+        return ""
+    if size_gb * GIB <= room:
+        return ""
+    most = max(1, int(room // GIB))
+    return (
+        f"the pool it is on holds about {most} GB, so Time Machine would fill it before reaching "
+        f"{size_gb} GB. Give it at most {most} GB"
+    )
 
 
 def _make_time_machine(name: str, size_gb: int) -> None:
@@ -567,6 +594,9 @@ def _make_time_machine(name: str, size_gb: int) -> None:
     problem = f"The folder {name} is shared, but Time Machine could not be turned on for it"
     if share is None:
         raise HTTPException(status_code=400, detail=f"{problem}.")
+    why = _time_machine_too_big(share, size_gb)
+    if why:
+        raise HTTPException(status_code=400, detail=f"{problem}: {why}.")
     try:
         engine.add_or_update_share(share.model_copy(update={"timemachine": True, "timemachine_quota_gb": size_gb}))
     except ValueError as e:
@@ -607,6 +637,9 @@ def put_time_machine(name: str, req: TimeMachineUpdate) -> dict[str, Any]:
     share = engine.get_share(name)
     if share is None:
         raise HTTPException(status_code=404, detail=f"There is no shared folder {name}.")
+    why = _time_machine_too_big(share, req.size_gb)
+    if why:
+        raise HTTPException(status_code=400, detail=f"The size limit was not changed: {why}.")
     update = (
         {"timemachine": True, "timemachine_quota_gb": req.size_gb}
         if req.size_gb

@@ -78,3 +78,31 @@ def test_stopping_and_the_refusals(client, auth_headers, managed):
         client.put("/api/storage/shares/macs/time-machine", json={"size_gb": 5}, headers=auth_headers).status_code
         == 403
     )
+
+
+def test_a_limit_bigger_than_the_pool_is_refused(client, auth_headers, managed, tmp_path, monkeypatch):
+    """On a 7.5 GB pool a 200 GB limit let Time Machine fill the whole pool (the Mac trial)."""
+    folder = tmp_path / "macs"
+    folder.mkdir()
+    managed.shares["macs"].path = str(folder)
+    monkeypatch.setattr(storage.shutil, "disk_usage", lambda p: SimpleNamespace(total=8 * storage.GIB, used=0, free=0))
+    r = client.put("/api/storage/shares/macs/time-machine", json={"size_gb": 200}, headers=auth_headers)
+    assert r.status_code == 400 and "at most 8 GB" in r.json()["detail"]
+    r = client.put("/api/storage/shares/macs/time-machine", json={"size_gb": 8}, headers=auth_headers)
+    assert r.status_code == 200 and managed.saved[-1].timemachine_quota_gb == 8
+    assert (
+        client.put("/api/storage/shares/macs/time-machine", json={"size_gb": 0}, headers=auth_headers).status_code
+        == 200
+    )
+
+
+def test_the_room_check_leaves_what_it_cannot_tell_alone(tmp_path, monkeypatch):
+    assert storage._time_machine_too_big(SimpleNamespace(path=""), 500) == ""
+    assert storage._time_machine_too_big(SimpleNamespace(path=str(tmp_path / "gone")), 500) == ""
+    assert storage._time_machine_too_big(SimpleNamespace(path=str(tmp_path)), 0) == ""
+
+    def broken(p):
+        raise OSError("no")
+
+    monkeypatch.setattr(storage.shutil, "disk_usage", broken)
+    assert storage._time_machine_too_big(SimpleNamespace(path=str(tmp_path)), 500) == ""

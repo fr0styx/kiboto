@@ -59,6 +59,22 @@ def test_time_machine_keeps_the_people_lists_and_gets_the_limit(client, auth_hea
     announced.assert_called_once()
 
 
+def test_a_time_machine_folder_gets_no_default_snapshots_and_a_too_big_limit_is_refused(client, auth_headers, tmp_path):
+    engine = MagicMock()
+    engine.get_share.return_value = SambaShareConfig(name="tm", path=str(tmp_path), read_only=False)
+    with (
+        patch.object(storage, "get_storage_platform", return_value=_platform()),
+        patch("backend.services.samba_engine.get_samba_engine", return_value=engine),
+        patch("backend.services.nas_name.refresh"),
+        patch("backend.services.snapshot_service.ensure_default") as snapshots,
+        patch.object(storage.shutil, "disk_usage", return_value=type("U", (), {"total": 600 * storage.GIB})()),
+    ):
+        assert _post(client, auth_headers, timemachine=True, quota_gb=500).status_code == 200
+        snapshots.assert_not_called()  # Time Machine keeps its own history
+        too_big = _post(client, auth_headers, timemachine=True, quota_gb=900)
+    assert too_big.status_code == 400 and "at most 600 GB" in too_big.json()["detail"]
+
+
 def test_a_time_machine_failure_is_told(client, auth_headers):
     engine = MagicMock()
     engine.get_share.return_value = None

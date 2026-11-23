@@ -16,6 +16,8 @@ On a machine of its own, Macs now find its Time Machine folders by themselves; t
 
 Copying a folder from a Mac onto one of Kiboto's own shared folders no longer fails with "you don't have permission": the new folder was made, then nothing could be put in it. Folders a Mac made before this fix may need their permissions set again.
 
+A Time Machine folder can no longer be given a size limit larger than its storage pool (Time Machine filled the whole pool first), and a new Time Machine folder no longer gets automatic snapshots, which would have kept the old backups Time Machine deletes.
+
 #### Security
 
 On a machine of its own, failed sign-ins to shared folders over the network now count like web sign-ins: 20 in 15 minutes block the address for an hour, and they show under History, Sign-ins.
