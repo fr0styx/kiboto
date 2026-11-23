@@ -44,6 +44,8 @@ On a machine of its own, a separate system service (the host door) now changes t
 
 Kib on the desktop is now a small moving character, the Kiboto mark with Kib's eyes, that perks up when you point at it; Kib's window is no longer see-through.
 
+On a phone, messages such as "Last sign-in" now appear at the top of the screen, under the top bar.
+
 ## v2.0.6 (2026-11-23)
 ### 🖥️ Kiboto on a machine of its own (preview), with its settings kept safe on every pool
 

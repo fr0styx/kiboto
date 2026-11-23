@@ -1,5 +1,5 @@
 {
-  "important": 3421,
+  "important": 3422,
   "buttonClasses": 76,
   "inlineStyles": 1243,
   "emojiIcons": 4,
@@ -48,7 +48,7 @@
     "frontend/src/styles/44-file-explorer.css": 17,
     "frontend/src/styles/45-ai-history.css": 19,
     "frontend/src/styles/47-containers-bulk.css": 11,
-    "frontend/src/styles/56-phone.css": 7,
+    "frontend/src/styles/56-phone.css": 8,
     "frontend/src/styles/containers-lazy.css": 47,
     "frontend/src/styles/files-lazy.css": 1,
     "frontend/src/styles/kib-window.css": 4,

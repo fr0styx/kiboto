@@ -77,10 +77,11 @@ body.theme-light .phone-tabs, body.theme-light .phone-back { background: rgba(25
 /* A quieter top bar: the stacked-layout switch and the easter egg are desktop things */
 body.phone-shell #mobile-view-toggle-btn, body.phone-shell #yak-easter-egg-btn, body.phone-shell .suite-badge { display: none; }
 
-/* Messages sit above the tabs, whatever their height (phone-shell.js measures it), and in front of
-   them: the stacked layout's "66px from the bottom" put a message half under taller tabs */
+/* Messages come in at the top, just under the top bar (phone-shell.js measures where it ends), in
+   front of everything; the stacked layout's "66px from the bottom" put them under the tabs */
 body.phone-shell #top-toast-container {
-  bottom: calc(var(--phone-tabs-h, calc(61px + env(safe-area-inset-bottom))) + var(--kb-space-2, 8px)) !important;
+  top: calc(var(--phone-top-h, calc(56px + env(safe-area-inset-top))) + var(--kb-space-2, 8px)) !important;
+  bottom: auto !important;
   z-index: 10070 !important;
 }
 

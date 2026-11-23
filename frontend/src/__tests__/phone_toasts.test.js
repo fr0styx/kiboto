@@ -1,15 +1,15 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { followTabsHeight } from '../components/phone-shell.js';
+import { followTopBar } from '../components/phone-shell.js';
 
-describe('messages above the phone tabs', () => {
+describe('messages at the top on a phone', () => {
   afterEach(() => {
-    followTabsHeight(null);
+    followTopBar(null);
     vi.unstubAllGlobals();
   });
 
-  it('keeps the tabs real height for the CSS and follows it as it changes', () => {
+  it('keeps where the top bar ends for the CSS and follows it as it changes', () => {
     let seen = null;
     vi.stubGlobal(
       'ResizeObserver',
@@ -21,22 +21,23 @@ describe('messages above the phone tabs', () => {
         disconnect() {}
       }
     );
-    const tabs = document.createElement('nav');
-    let h = 61.4;
-    tabs.getBoundingClientRect = () => /** @type {DOMRect} */ ({ height: h });
-    followTabsHeight(tabs);
-    expect(document.documentElement.style.getPropertyValue('--phone-tabs-h')).toBe('62px');
-    h = 96;
+    const bar = document.createElement('header');
+    let bottom = 55.2;
+    bar.getBoundingClientRect = () => /** @type {DOMRect} */ ({ bottom });
+    followTopBar(bar);
+    expect(document.documentElement.style.getPropertyValue('--phone-top-h')).toBe('56px');
+    bottom = 80;
     seen();
-    expect(document.documentElement.style.getPropertyValue('--phone-tabs-h')).toBe('96px');
-    followTabsHeight(null);
-    expect(document.documentElement.style.getPropertyValue('--phone-tabs-h')).toBe('');
+    expect(document.documentElement.style.getPropertyValue('--phone-top-h')).toBe('80px');
+    followTopBar(null);
+    expect(document.documentElement.style.getPropertyValue('--phone-top-h')).toBe('');
   });
 
-  it('puts messages above and in front of the tabs, over the stacked layout rule', () => {
+  it('puts messages under the top bar and in front, over the stacked layout rule', () => {
     const css = readFileSync(resolve(__dirname, '..', 'styles/56-phone.css'), 'utf8');
     const rule = css.slice(css.indexOf('body.phone-shell #top-toast-container {'));
-    expect(rule).toMatch(/bottom: calc\(var\(--phone-tabs-h[^;]*!important/);
+    expect(rule).toMatch(/top: calc\(var\(--phone-top-h[^;]*!important/);
+    expect(rule).toMatch(/bottom: auto !important/);
     expect(rule).toMatch(/z-index: 10070 !important/); // the tabs are at 10050
   });
 });

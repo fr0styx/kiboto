@@ -385,23 +385,23 @@ export function setCompactBack(on) {
   }
 }
 
-let tabsSize = null;
+let barSize = null;
 
-/** Messages sit above the tabs, which grow with the phone's text size: their real height, kept in
- * --phone-tabs-h for the CSS (56-phone.css). */
-export function followTabsHeight(tabs) {
-  tabsSize?.disconnect();
-  tabsSize = null;
+/** Messages sit just under the top bar, which grows with the phone's text size: where it ends,
+ * kept in --phone-top-h for the CSS (56-phone.css). */
+export function followTopBar(bar) {
+  barSize?.disconnect();
+  barSize = null;
   const root = document.documentElement;
-  if (!tabs) {
-    root.style.removeProperty('--phone-tabs-h');
+  if (!bar) {
+    root.style.removeProperty('--phone-top-h');
     return;
   }
-  const set = () => root.style.setProperty('--phone-tabs-h', `${Math.ceil(tabs.getBoundingClientRect().height)}px`);
+  const set = () => root.style.setProperty('--phone-top-h', `${Math.ceil(bar.getBoundingClientRect().bottom)}px`);
   set();
   if (typeof ResizeObserver === 'function') {
-    tabsSize = new ResizeObserver(set);
-    tabsSize.observe(tabs);
+    barSize = new ResizeObserver(set);
+    barSize.observe(bar);
   }
 }
 
@@ -409,7 +409,7 @@ export function enablePhoneShell(on) {
   document.body.classList.toggle('phone-shell', on);
   let shell = document.getElementById('phone-shell');
   if (!on) {
-    followTabsHeight(null);
+    followTopBar(null);
     adoptWidgets(false); // before the shell goes, or the widgets would go with it
     shell?.remove();
     unwatch?.();
@@ -428,7 +428,7 @@ export function enablePhoneShell(on) {
     <div id="phone-launcher" class="phone-launcher" data-view="home">${launcherHtml()}</div>
     <nav id="phone-tabs" class="phone-tabs" data-i18n-aria-label="phone.tabs" aria-label="${escapeHtml(t('phone.tabs', 'Main sections'))}">${tabsHtml()}</nav>`;
   document.body.appendChild(shell);
-  followTabsHeight(shell.querySelector('#phone-tabs'));
+  followTopBar(document.querySelector('.suite-navbar'));
   adoptWidgets(true);
   import('./session.js') // the account may be known already
     .then((m) => hideUnusable(shell, m.getCurrentUser()))
