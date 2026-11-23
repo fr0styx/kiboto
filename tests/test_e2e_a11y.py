@@ -201,18 +201,8 @@ def test_main_views_have_no_serious_accessibility_issues():
     folder = _photos()
     results = {}
     with sync_playwright() as p:
-        try:
-            browser = p.chromium.launch(
-                headless=True,
-                args=["--no-sandbox", "--disable-dev-shm-usage"],
-                executable_path=os.environ.get("PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH"),
-            )
-        except Exception as e:
-            _skip_or_fail(f"Playwright chromium not available: {e}")
-        # axe is injected as a script, so the page's CSP must not block it in this test only
-        context = browser.new_context(viewport={"width": 1440, "height": 900}, bypass_csp=True)
-        context.add_init_script(STILL)
-        page = context.new_page()
+        browser = _browser(p)
+        context, page = _desktop(browser)
         results["login"] = _login(page)
         for name, opener, selector in VIEWS:
             _open(page, results, name, opener, selector)
@@ -272,12 +262,6 @@ def test_main_views_have_no_serious_accessibility_issues():
         page.keyboard.press("Escape")
         page.evaluate("() => document.getElementById('modal-remote-close-btn')?.click()")
         page.wait_for_timeout(400)
-        # the light theme
-        page.evaluate("() => document.body.classList.add('theme-light')")
-        page.wait_for_timeout(400)
-        results["light-desktop"] = _axe(page, "body")
-        _panes(page, results, "light-")
-        page.evaluate("() => document.body.classList.remove('theme-light')")
         context.close()
 
         # A touch phone: where small targets hurt most
@@ -294,13 +278,68 @@ def test_main_views_have_no_serious_accessibility_issues():
         phone.close()
         browser.close()
 
+    _check(results)
+
+
+def test_settings_in_the_light_theme_have_no_serious_accessibility_issues():
+    """Every Settings page again in the light theme. Its own test so CI can run it beside the idle
+    minute while the other half runs elsewhere; it starts where the other half's dark pages end
+    (Settings open on its last page), so the desktop is measured as before."""
+    if not os.path.exists(AXE):
+        _skip_or_fail("axe-core is not installed (npm ci)")
+    from playwright.sync_api import sync_playwright
+
+    results = {}
+    with sync_playwright() as p:
+        browser = _browser(p)
+        context, page = _desktop(browser)
+        _login(page)  # the sign-in page is checked by the other half
+        last = PANES[-1]
+        page.evaluate(f"() => (window.openManagementSection || window.openManagementWindow)({json.dumps(last)})")
+        page.wait_for_timeout(900)
+        page.evaluate("() => document.body.classList.add('theme-light')")
+        page.wait_for_timeout(400)
+        results["light-desktop"] = _axe(page, "body")
+        _panes(page, results, "light-")
+        context.close()
+        browser.close()
+    _check(results)
+
+
+def _browser(p):
+    try:
+        return p.chromium.launch(
+            headless=True,
+            args=["--no-sandbox", "--disable-dev-shm-usage"],
+            executable_path=os.environ.get("PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH"),
+        )
+    except Exception as e:
+        _skip_or_fail(f"Playwright chromium not available: {e}")
+
+
+def _desktop(browser):
+    # axe is injected as a script, so the page's CSP must not block it in this test only
+    context = browser.new_context(viewport={"width": 1440, "height": 900}, bypass_csp=True)
+    context.add_init_script(STILL)
+    return context, context.new_page()
+
+
+def _check(results):
+    """Fails on issues the baseline does not list for these views. KIBOTO_A11Y_UPDATE=1 writes this
+    test's views into the baseline and leaves the other test's as they are."""
     print(json.dumps(results, indent=1))
     known = {}
     if os.path.exists(BASELINE):
         with open(BASELINE, encoding="utf-8") as f:
             known = json.load(f)
     if UPDATE:
-        found = {k: sorted({v["id"] for v in vs}) for k, vs in results.items() if vs}
+        found = dict(known)
+        for k, vs in results.items():
+            ids = sorted({v["id"] for v in vs})
+            if ids:
+                found[k] = ids
+            else:
+                found.pop(k, None)
         with open(BASELINE, "w", encoding="utf-8") as f:
             json.dump(found, f, indent=1, sort_keys=True)
             f.write("\n")

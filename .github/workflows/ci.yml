@@ -289,11 +289,14 @@ jobs:
             tests: tests/test_e2e_journeys.py
             idle: false
           - shard: "2 of 2"
-            tests: tests/test_e2e_integration.py tests/test_e2e_a11y.py tests/test_e2e_keyboard_german.py
+            tests: >-
+              tests/test_e2e_integration.py tests/test_e2e_keyboard_german.py
+              tests/test_e2e_a11y.py::test_main_views_have_no_serious_accessibility_issues
             idle: false
-          # the idle minute (PERF-10, 90 s) beside the two halves, on the same server setup
+          # the idle minute (PERF-10, 90 s) beside the two halves, on the same server setup; the
+          # accessibility check of the light theme runs after it, so the three take about as long
           - shard: "idle minute"
-            tests: ""
+            tests: tests/test_e2e_a11y.py::test_settings_in_the_light_theme_have_no_serious_accessibility_issues
             idle: true
     runs-on: ubuntu-latest
     timeout-minutes: 25  # ARC-26: a hung step fails the run instead of holding a runner for 6 hours
@@ -338,13 +341,20 @@ jobs:
             getent hosts security.ubuntu.com archive.ubuntu.com || echo "::warning::ubuntu.com still does not resolve"
           fi
 
-      # The browser download is kept between runs, keyed by the locked Playwright version; the
-      # system packages are still installed every run (they live outside the cache)
-      - name: Cache the Playwright browser
+      # The browser download and the system packages Playwright adds (on the runner image only
+      # fonts: one slow mirror made them three of a run's four minutes) are kept between runs,
+      # keyed by the runner image and the locked Playwright version
+      - name: Which Playwright and runner image
+        id: pw
+        run: echo "key=${ImageOS:-ubuntu}-${ImageVersion:-0}-$(grep -oE '^playwright==[0-9.]+' requirements.lock)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache the Playwright browser and its packages
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('requirements-dev.lock') }}
+          path: |
+            ~/.cache/ms-playwright
+            ~/.cache/kb-playwright-debs
+          key: playwright-${{ steps.pw.outputs.key }}
 
       - name: Install Python dependencies & Playwright
         run: |
@@ -352,10 +362,19 @@ jobs:
           pip install --require-hashes -r requirements.lock
           pip install --require-hashes -r requirements-dev.lock
           python scripts/check_lock_versions.py
-          python -m playwright install --with-deps chromium || {
+          debs=~/.cache/kb-playwright-debs
+          # what apt downloads stays in its archive, to be kept for the next run
+          echo 'APT::Keep-Downloaded-Packages "true"; Binary::apt-get::APT::Keep-Downloaded-Packages "true";' \
+            | sudo tee /etc/apt/apt.conf.d/99kb-keep-debs >/dev/null
+          # --no-download: a package the cache lacks makes apt refuse before it changes anything
+          if ls "$debs"/*.deb >/dev/null 2>&1 && sudo apt-get install -y -qq --no-download "$debs"/*.deb >/dev/null; then
+            python -m playwright install chromium  # its packages came from the cache
+          elif python -m playwright install --with-deps chromium; then
+            mkdir -p "$debs" && cp /var/cache/apt/archives/*.deb "$debs"/ 2>/dev/null || true
+          else
             echo "::warning::Playwright's system packages did not install: the browser alone (the runner image carries its libraries)"
             python -m playwright install chromium
-          }
+          fi
           # Run Playwright on the patched Node.js from setup-node, not its bundled copy
           echo "PLAYWRIGHT_NODEJS_PATH=$(command -v node)" >> "$GITHUB_ENV"
 
