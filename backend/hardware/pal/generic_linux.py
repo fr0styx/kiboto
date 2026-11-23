@@ -173,6 +173,19 @@ def btrfs_missing_members(members: list[PoolMember], shown: str) -> list[PoolMem
 _BUSY_WAIT_SECS = 1.0  # between tries of an export ZFS calls busy
 
 
+def _through_door(op: str, here: Any, **args: Any) -> Any:
+    """`here(**args)`, or the same in the host door where it runs (ADR 0006). The door runs this
+    adapter too, so what it answers is what `here` would; a platform refusal comes back as one."""
+    from backend import door
+
+    try:
+        return door.via(op, here, **args)
+    except door.DoorError as e:
+        if e.kind == "capability":
+            raise PlatformCapabilityError(str(e)) from None
+        raise
+
+
 class GenericLinuxStorageAdapter(StoragePlatformAdapter):
     """
     Generic Linux Storage Platform Adapter.
@@ -522,7 +535,11 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
     def trigger_scrub(self, pool_id: str, action: str = "start") -> dict[str, Any]:
         """Starts, stops or reads the check of the pool that is named: `zpool scrub` for ZFS,
         `btrfs scrub` on the pool's own folder for btrfs. Other file systems have no check of
-        their own; the answer says so and nothing is started."""
+        their own; the answer says so and nothing is started. Through the host door where it
+        runs (ADR 0006)."""
+        return _through_door("storage.scrub", self._trigger_scrub_here, pool_id=pool_id, action=str(action))
+
+    def _trigger_scrub_here(self, pool_id: str, action: str = "start") -> dict[str, Any]:
         self._busy_cache_ts = 0.0
         pool = self.resolve_pool(pool_id)
         if pool.status == "MISSING":
@@ -1698,7 +1715,28 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
         worm_mode: str | None = None,
         retention_days: int | None = None,
     ) -> dict[str, Any]:
-        """Creates an atomic Btrfs subvolume snapshot with optional Two-Tier WORM immutability."""
+        """Creates an atomic Btrfs subvolume snapshot with optional Two-Tier WORM immutability;
+        through the host door where it runs (ADR 0006)."""
+        return _through_door(
+            "storage.create_snapshot",
+            self._create_snapshot_here,
+            pool_id=pool_id,
+            subvol_name=subvol_name,
+            snapshot_name=snapshot_name,
+            readonly=bool(readonly),
+            worm_mode=None if worm_mode is None else str(worm_mode),
+            retention_days=None if retention_days is None else int(retention_days),
+        )
+
+    def _create_snapshot_here(
+        self,
+        pool_id: str,
+        subvol_name: str,
+        snapshot_name: str,
+        readonly: bool = True,
+        worm_mode: str | None = None,
+        retention_days: int | None = None,
+    ) -> dict[str, Any]:
         pool_id = self.snapshot_pool_of(subvol_name) or pool_id  # the share's own pool, where known
         root = self.get_pool_path(pool_id)
         src_path = child_path(os.path.join(root, "@shares"), subvol_name)
@@ -1903,7 +1941,24 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
         break_glass: bool = False,
         reason: str = "",
     ) -> dict[str, Any]:
-        """Deletes a Btrfs subvolume snapshot, strictly enforcing Two-Tier WORM immutability."""
+        """Deletes a Btrfs subvolume snapshot, strictly enforcing Two-Tier WORM immutability;
+        through the host door where it runs (ADR 0006)."""
+        return _through_door(
+            "storage.delete_snapshot",
+            self._delete_snapshot_here,
+            pool_id=pool_id,
+            snapshot_name=snapshot_name,
+            break_glass=bool(break_glass),
+            reason=str(reason or ""),
+        )
+
+    def _delete_snapshot_here(
+        self,
+        pool_id: str,
+        snapshot_name: str,
+        break_glass: bool = False,
+        reason: str = "",
+    ) -> dict[str, Any]:
         snaps_dir = os.path.join(self.get_pool_path(pool_id), "@snapshots")
         target_path = child_path(snaps_dir, snapshot_name)  # never a live subvolume via ../ (WORM)
         meta_path = os.path.join(snaps_dir, f".{snapshot_name}.worm.json")

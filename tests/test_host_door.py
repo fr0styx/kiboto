@@ -368,3 +368,75 @@ def test_samba_and_nfs_go_through_the_door_where_it_runs(monkeypatch):
     monkeypatch.setattr(door, "call", refused)
     assert samba_host.reload(None, {"ana": 5}) is False  # said in the log, answered as a failed run
     assert eng.apply_exports() is False
+
+
+def test_snapshots_and_scrubs_go_through_the_door_where_it_runs(monkeypatch):
+    from backend.hardware.pal.base import PlatformCapabilityError
+    from backend.hardware.pal.generic_linux import GenericLinuxStorageAdapter
+
+    adapter = GenericLinuxStorageAdapter.__new__(GenericLinuxStorageAdapter)
+    calls = []
+    monkeypatch.setattr(door, "available", lambda sock=door.SOCK: True)
+    monkeypatch.setattr(door, "call", lambda op, **a: calls.append((op, a)) or {"status": "done"})
+    assert adapter.create_snapshot("tank", "media", "media_1", retention_days=7.0)["status"] == "done"
+    assert adapter.delete_snapshot("tank", "media_1", reason=None)["status"] == "done"
+    assert adapter.trigger_scrub("tank", "start")["status"] == "done"
+    assert calls == [
+        (
+            "storage.create_snapshot",
+            {
+                "pool_id": "tank",
+                "subvol_name": "media",
+                "snapshot_name": "media_1",
+                "readonly": True,
+                "worm_mode": None,
+                "retention_days": 7,
+            },
+        ),
+        (
+            "storage.delete_snapshot",
+            {"pool_id": "tank", "snapshot_name": "media_1", "break_glass": False, "reason": ""},
+        ),
+        ("storage.scrub", {"pool_id": "tank", "action": "start"}),
+    ]
+    # the arguments the adapter sends are the ones the door takes
+    for op, args in calls:
+        host_door._checked({"op": op, "args": args})
+
+    def locked(op, **a):
+        raise door.DoorError("WORM compliance lock: this snapshot can't be deleted yet", "capability")
+
+    monkeypatch.setattr(door, "call", locked)
+    with pytest.raises(PlatformCapabilityError, match="WORM"):
+        adapter.delete_snapshot("tank", "media_1")
+
+    monkeypatch.setattr(door, "available", lambda sock=door.SOCK: False)
+    monkeypatch.setattr(adapter, "_trigger_scrub_here", lambda pool_id, action: {"here": pool_id})
+    assert adapter.trigger_scrub("tank") == {"here": "tank"}
+
+
+def test_the_door_runs_the_adapters_own_storage_code_for_a_pool_name_only(audit, monkeypatch):
+    from backend.hardware import pal_storage
+    from backend.hardware.pal.base import PlatformCapabilityError
+
+    seen = []
+
+    class Adapter:
+        def trigger_scrub(self, pool_id, action):
+            seen.append((pool_id, action))
+            return {"status": "started"}
+
+        def delete_snapshot(self, **kw):
+            raise PlatformCapabilityError("WORM compliance lock")
+
+    monkeypatch.setattr(pal_storage, "get_storage_platform", lambda: Adapter())
+    reply = host_door.handle({"op": "storage.scrub", "args": {"pool_id": "tank", "action": "start"}}, 0)
+    assert reply == {"ok": True, "result": {"status": "started"}} and seen == [("tank", "start")]
+    for pool in ("", "/etc", "../x", "tank/../.."):
+        reply = host_door.handle({"op": "storage.scrub", "args": {"pool_id": pool, "action": "start"}}, 0)
+        assert reply["ok"] is False and reply["kind"] == "value", pool
+    assert len(seen) == 1
+    args = {"pool_id": "tank", "snapshot_name": "a", "break_glass": False, "reason": ""}
+    reply = host_door.handle({"op": "storage.delete_snapshot", "args": args}, 0)
+    assert reply["ok"] is False and reply["kind"] == "capability" and "WORM" in reply["error"]
+    assert door.DoorError(reply["error"], reply["kind"]).as_error().kind == "capability"

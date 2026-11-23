@@ -27,6 +27,7 @@ from typing import Any
 
 from backend import door
 from backend.config import DATA_DIR, logger
+from backend.hardware.pal.base import PlatformCapabilityError
 
 AUDIT = os.path.join(DATA_DIR, "door-audit.log")
 MAX_REQUEST = 64 * 1024
@@ -87,6 +88,22 @@ def _nfs_apply() -> bool:
     return nfs_engine.NfsEngine().apply_exports(inside_storage_only=True)  # the saved rules, read again
 
 
+def _storage(name: str) -> Callable[..., Any]:
+    """The storage adapter's own method, for a pool named by its name: the adapter keeps every
+    snapshot and subvolume name to one folder name (fsutil.child_path) and the pool's folder to
+    its storage roots (get_pool_path)."""
+
+    def run(**kw: Any) -> Any:
+        from backend.hardware.pal_storage import get_storage_platform
+
+        pool = kw["pool_id"]
+        if not pool or pool.startswith("/") or ".." in pool.split("/"):
+            raise ValueError("pool_id must be a pool's name")
+        return getattr(get_storage_platform(), name)(**kw)
+
+    return run
+
+
 def _firewall_apply(st: dict[str, Any]) -> None:
     from backend.services import firewall
 
@@ -119,6 +136,25 @@ OPERATIONS: dict[str, Operation] = {
     "samba.remove": Operation(_samba("remove"), {"name": TEXT}, max_len=64),
     "samba.set_enabled": Operation(_samba("set_enabled"), {"name": TEXT, "enabled": ON}, max_len=64),
     "nfs.apply": Operation(_nfs_apply, {}),
+    # storage (ADR 0006 step 4)
+    "storage.create_snapshot": Operation(
+        _storage("create_snapshot"),
+        {
+            "pool_id": TEXT,
+            "subvol_name": TEXT,
+            "snapshot_name": TEXT,
+            "readonly": ON,
+            "worm_mode": MAYBE_TEXT,
+            "retention_days": (int, type(None)),
+        },
+        max_len=128,
+    ),
+    "storage.delete_snapshot": Operation(
+        _storage("delete_snapshot"),
+        {"pool_id": TEXT, "snapshot_name": TEXT, "break_glass": ON, "reason": TEXT},
+        max_len=512,
+    ),
+    "storage.scrub": Operation(_storage("trigger_scrub"), {"pool_id": TEXT, "action": TEXT}, max_len=128),
 }
 
 
@@ -151,13 +187,22 @@ def handle(request: Any, uid: int) -> dict[str, Any]:
         return {"ok": False, "error": str(e)}
     try:
         result = op.run(**args)
-    except (OSError, ValueError, RuntimeError, TypeError, LookupError) as e:  # told; the door keeps serving
+    except (OSError, ValueError, RuntimeError, TypeError, LookupError, PlatformCapabilityError) as e:  # told
         logger.warning("[Door] %s failed: %s", name, e)
         _audit(uid, name, "failed", str(e))
-        kind = "value" if isinstance(e, ValueError) else "runtime" if isinstance(e, RuntimeError) else "other"
+        kind = _kind(e)
         return {"ok": False, "error": str(e), "kind": kind, "text": getattr(e, "text", None)}
     _audit(uid, name, "done", "")
     return {"ok": True, "result": result}
+
+
+def _kind(e: Exception) -> str:
+    """What the caller raises again on its side (door.DoorError.as_error)."""
+    if isinstance(e, ValueError):
+        return "value"
+    if isinstance(e, RuntimeError):
+        return "runtime"
+    return "capability" if isinstance(e, PlatformCapabilityError) else "other"
 
 
 def _audit(uid: int, op: str, outcome: str, why: str) -> None:
