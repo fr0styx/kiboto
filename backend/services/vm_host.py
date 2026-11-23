@@ -306,7 +306,9 @@ def _image_variant() -> str:
 
 def _get_target_iso_dir() -> str:
     """Returns the primary writable directory for storing ISO images."""
-    candidates = []
+    from backend.services import pool_places
+
+    candidates = [d for d in [pool_places.iso_dir(DATA_DIR)] if d]  # with the machines, on a pool
     if VM_ISO_DIR and VM_ISO_DIR not in candidates:
         candidates.append(VM_ISO_DIR)
     for d in [
@@ -334,8 +336,11 @@ def iso_dirs() -> list[str]:
     """Every folder installer images are kept in: the scan reads these and a delete may act in them.
     The delete check had its own list without VM_ISO_DIR, where downloads and uploads go by
     default, so those images could not be deleted (SET-14, VMs 13)."""
+    from backend.services import pool_places
+
     dirs: list[str] = []
     for d in [
+        pool_places.iso_dir(DATA_DIR),
         VM_ISO_DIR,
         "/mnt/user/isos",
         "/mnt/user/system/isos",

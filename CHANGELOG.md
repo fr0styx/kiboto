@@ -36,6 +36,8 @@ Setup on a machine set up for Kiboto asks for a storage pool before the first sh
 
 On a machine set up for Kiboto, people's home folders are made on the first pool instead of the system disk; home folders that were never used move there once a pool exists.
 
+On a machine set up for Kiboto, new virtual machines and downloaded installer images are kept on the first pool instead of the system disk.
+
 #### Fixes
 
 A person with a storage limit could go over it by sending several files at once. Files still arriving now count against the limit.

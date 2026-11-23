@@ -20,6 +20,7 @@ from typing import Any, Optional
 from backend.config import DATA_DIR, POOL_PATH, logger
 from backend.fsutil import atomic_write_json, read_json
 from backend.ignored_errors import ignored
+from backend.services import pool_places
 from backend.services.compose_synthesizer import format_compose_yaml, synthesize_compose_spec
 from backend.services.container_mutator import _docker_request
 
@@ -823,7 +824,7 @@ def create_vm_backup(
 
     raw_name = target_vm.get("name", "vm")
     vname = custom_name or raw_name
-    vm_dir = target_vm.get("vm_dir") or os.path.join(DATA_DIR, "vms", vm_id)
+    vm_dir = target_vm.get("vm_dir") or os.path.join(pool_places.vms_root(DATA_DIR), vm_id)
 
     backup_dir = get_vm_backup_dir(vname)
     ts = time.strftime("%Y%m%d_%H%M%S")
@@ -933,7 +934,7 @@ def _checked_vm_restore(vm_config: dict[str, Any], record: dict[str, Any]) -> tu
         raise ValueError("This backup archive belongs to a different VM.")
     if not vm_store._VM_ID_RE.fullmatch(vm_id):
         raise ValueError("The backup has an invalid VM id.")
-    vm_dir = os.path.join(DATA_DIR, "vms", vm_id)
+    vm_dir = os.path.join(pool_places.vms_root(DATA_DIR), vm_id)
     cfg = dict(vm_config)
     if cfg:
         cfg["id"] = vm_id

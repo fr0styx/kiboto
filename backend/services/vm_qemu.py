@@ -29,7 +29,7 @@ from backend.config import DATA_DIR, HOST_PROC, POOL_PATH, VM_ISO_DIR, logger
 from backend.confirmations import require_confirmation
 from backend.fsutil import atomic_write_json, read_json, resolve_within
 from backend.ignored_errors import ignored
-from backend.services import vm_guest, vm_host, vm_store
+from backend.services import pool_places, vm_guest, vm_host, vm_store
 from backend.services.vm_engine import QmpEngine
 from backend.settings import test_mode
 from backend.state import Z_STATE, add_event, event_text
@@ -190,7 +190,7 @@ def _reconcile_vm_states(vms: list[dict[str, Any]]) -> bool:
         is_alive = _is_qemu_process_alive(vm_id)
 
         # Check for recorded error logs
-        vm_dir = os.path.join(DATA_DIR, "vms", vm_id)
+        vm_dir = os.path.join(pool_places.vms_root(DATA_DIR), vm_id)
         err_log = os.path.join(vm_dir, "qemu_last_error.log")
         if os.path.exists(err_log):
             try:
@@ -402,7 +402,7 @@ def _start_qemu(target_vm: dict[str, Any], vnc_port: int) -> tuple[bool, str | N
     if _is_qemu_process_alive(vm_id):
         return True, None
 
-    vm_dir = os.path.join(DATA_DIR, "vms", vm_id)
+    vm_dir = os.path.join(pool_places.vms_root(DATA_DIR), vm_id)
     os.makedirs(vm_dir, exist_ok=True)
     err_log_path = os.path.join(vm_dir, "qemu_last_error.log")
     full_log_path = os.path.join(vm_dir, "qemu.log")

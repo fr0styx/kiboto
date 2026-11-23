@@ -27,6 +27,7 @@ from backend.auth import AuthenticatedPrincipal, get_current_principal, require_
 from backend.config import DATA_DIR, HOST_PROC, POOL_PATH, VM_ISO_DIR, logger
 from backend.confirmations import require_confirmation
 from backend.fsutil import atomic_write_json, read_json, resolve_within
+from backend.services import pool_places
 from backend.services.vm_engine import QmpEngine
 from backend.state import Z_STATE, add_event
 
@@ -46,12 +47,12 @@ _DISK_FORMATS = {"qcow2", "raw"}
 def _vm_disk_roots() -> list[str]:
     from backend.services.path_access import ALLOWED_BROWSE_ROOTS
 
-    roots = [os.path.join(DATA_DIR, "vms")] + [r for r in ALLOWED_BROWSE_ROOTS if r]
+    roots = [pool_places.vms_root(DATA_DIR)] + [r for r in ALLOWED_BROWSE_ROOTS if r]
     return [os.path.realpath(r) for r in roots]
 
 
 def _vm_iso_roots() -> list[str]:
-    return [os.path.realpath(r) for r in [VM_ISO_DIR, *(_vm_disk_roots())] if r]
+    return [os.path.realpath(r) for r in [pool_places.iso_dir(DATA_DIR), VM_ISO_DIR, *(_vm_disk_roots())] if r]
 
 
 def _vm_share_roots() -> list[str]:
@@ -71,7 +72,7 @@ def _confined(path: Any, roots: list[str], want: str = "file") -> str | None:
     if not any(real == r or real.startswith(r.rstrip("/") + "/") for r in roots):
         return None
     data = os.path.realpath(DATA_DIR)
-    vms_dir = os.path.join(data, "vms")
+    vms_dir = os.path.realpath(pool_places.vms_root(DATA_DIR))
     in_vms = real == vms_dir or real.startswith(vms_dir + "/")
     if (real == data or real.startswith(data + "/")) and not in_vms:
         return None
@@ -107,7 +108,7 @@ def checked_vm_id(vm_id: Any) -> str:
 
 def vm_file(vm_id: Any, name: str) -> str:
     """DATA_DIR/vms/<vm_id>/<name>, refused when it would leave the VM's own folder."""
-    root = os.path.realpath(os.path.join(DATA_DIR, "vms"))
+    root = os.path.realpath(pool_places.vms_root(DATA_DIR))
     path = os.path.normpath(os.path.join(root, checked_vm_id(vm_id), name))
     if not path.startswith(root + os.sep):
         raise ValueError("Not a virtual machine file.")
