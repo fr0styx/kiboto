@@ -12,6 +12,8 @@ On a machine of its own, an update now also installs the system tools the new ve
 
 "Allow changes" on a storage pool brought in from another system no longer fails with "pool is busy" when it is pressed right after the pool was opened.
 
+On a machine of its own, Macs now find its Time Machine folders by themselves; they were never announced there.
+
 #### Security
 
 On a machine of its own, failed sign-ins to shared folders over the network now count like web sign-ins: 20 in 15 minutes block the address for an hour, and they show under History, Sign-ins.

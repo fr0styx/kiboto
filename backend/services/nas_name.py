@@ -155,12 +155,15 @@ def web_port(me: dict[str, Any]) -> int:
 
 
 def timemachine_shares() -> list[str]:
-    """Kiboto's own Time Machine shares, while its own Samba serves them. A host's Samba (Unraid's,
-    TrueNAS's) announces its Time Machine shares itself."""
+    """Kiboto's own Time Machine shares, while its own Samba serves them: its container, or on a
+    machine Kiboto runs the machine's own smbd (there is no container there, and the shares were
+    never announced to Macs). A host's Samba (Unraid's, TrueNAS's) announces its own."""
+    from backend.services import samba_host
     from backend.services.samba_engine import get_samba_engine
 
     engine = get_samba_engine()
-    if engine.check_sidecar().get("state") != "running":
+    serving = samba_host.running() if samba_host.active() else engine.check_sidecar().get("state") == "running"
+    if not serving:
         return []
     return sorted(s.name for s in engine.list_shares() if s.timemachine)
 
