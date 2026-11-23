@@ -90,6 +90,7 @@ SMART_POLL_INTERVAL_NVME = SETTINGS.smart_poll_nvme
 APP_MEMORY_WARN_MB = SETTINGS.app_memory_warn_mb
 LCD_RENDERER = SETTINGS.lcd_renderer
 UPDATE_SIGNATURES = SETTINGS.update_signatures
+ACCEPT_MAIN_BUILDS = SETTINGS.accept_main_builds
 LCD_FORMAT = SETTINGS.lcd_format  # jpeg: cheaper to encode than png (PERF-2)
 PORT = SETTINGS.port
 SHOW_OS_DISK = SETTINGS.show_os_disk

@@ -12,6 +12,11 @@ An image passes when a bundle for it
 - was issued by GitHub Actions to .github/workflows/ci.yml of this repository, on main
   or a version tag (the same identity the release notes tell people to check), and
 - names exactly this digest as its subject.
+
+A machine Kiboto runs takes only releases: there the signature must be one made for a version
+tag (`tags_only`), which waits for the owner's approval in CI, so a push to main alone cannot
+sign what such machines install. KIBOTO_ACCEPT_MAIN_BUILDS=1 lets a test machine take main
+builds too.
 """
 
 from __future__ import annotations
@@ -39,6 +44,7 @@ IDENTITY_RE = re.compile(
     + "|".join(re.escape(r) for r in (product.GITHUB_REPO, legacy_names.OLD_GITHUB_REPO))
     + r")/\.github/workflows/ci\.yml@refs/(heads/main|tags/v[0-9][^/\s]*)$"
 )
+_TAG_RE = re.compile(r"@refs/tags/v[0-9][^/\s]*$")
 _DIGEST_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
 _BUNDLE_PREFIX = "application/vnd.dev.sigstore.bundle"
 _INDEX = "application/vnd.oci.image.index.v1+json"
@@ -165,7 +171,11 @@ def _san_uris(cert) -> list[str]:
 
 
 class CiIdentity:
-    """Sigstore policy: issued by GitHub Actions to this repository's CI workflow (main or a version tag)."""
+    """Sigstore policy: issued by GitHub Actions to this repository's CI workflow (main or a version
+    tag; a version tag only with tags_only)."""
+
+    def __init__(self, tags_only: bool = False):
+        self.tags_only = tags_only
 
     def verify(self, cert) -> None:
         from sigstore.errors import VerificationError
@@ -173,8 +183,11 @@ class CiIdentity:
 
         policy.OIDCIssuerV2(ISSUER).verify(cert)
         uris = _san_uris(cert)
-        if not any(IDENTITY_RE.match(u) for u in uris):
+        ours = [u for u in uris if IDENTITY_RE.match(u)]
+        if not ours:
             raise VerificationError(f"signed by {', '.join(uris) or 'an unknown identity'}, not this project's CI")
+        if self.tags_only and not any(_TAG_RE.search(u) for u in ours):
+            raise VerificationError("signed for the main branch, not for a release: this machine takes only releases")
 
 
 _verifier_lock = threading.Lock()
@@ -201,12 +214,12 @@ STATEMENT_TYPE = "https://in-toto.io/Statement/v1"
 PREDICATE_TYPE = "https://sigstore.dev/cosign/sign/v1"
 
 
-def verify_bundle(bundle_json: bytes, digest: str, verifier=None) -> str:
+def verify_bundle(bundle_json: bytes, digest: str, verifier=None, tags_only: bool = False) -> str:
     """Verifies one bundle for a digest. Returns the signer identity; raises on any problem."""
     from sigstore.models import Bundle
 
     bundle = Bundle.from_json(bundle_json)
-    payload_type, payload = (verifier or _verifier()).verify_dsse(bundle, CiIdentity())
+    payload_type, payload = (verifier or _verifier()).verify_dsse(bundle, CiIdentity(tags_only))
     if payload_type != "application/vnd.in-toto+json":
         raise SignatureError(f"unexpected signed content ({payload_type})")
     statement = json.loads(payload)
@@ -221,8 +234,8 @@ def verify_bundle(bundle_json: bytes, digest: str, verifier=None) -> str:
     return uris[0] if uris else ""
 
 
-def verify_image(digest: str) -> SignatureResult:
-    """Whether CI signed this image digest. Never raises."""
+def verify_image(digest: str, tags_only: bool = False) -> SignatureResult:
+    """Whether CI signed this image digest (for a version tag, with tags_only). Never raises."""
     if not _DIGEST_RE.match(str(digest or "")):
         return SignatureResult(False, "no image digest to check")
     try:
@@ -238,20 +251,30 @@ def verify_image(digest: str) -> SignatureResult:
     problems = []
     for bundle_json in bundles:
         try:
-            identity = verify_bundle(bundle_json, digest, verifier)
+            identity = verify_bundle(bundle_json, digest, verifier, tags_only)
             return SignatureResult(True, "signed by this project's CI", identity)
         except Exception as exc:
             problems.append(str(exc) or type(exc).__name__)
     return SignatureResult(False, "the signature did not verify: " + "; ".join(problems))
 
 
+def releases_only() -> bool:
+    """Whether this machine takes only images signed for a release: a machine Kiboto runs, unless
+    KIBOTO_ACCEPT_MAIN_BUILDS is set (a test machine)."""
+    from backend import config, runtime
+
+    return runtime.managed_host() and not config.ACCEPT_MAIN_BUILDS
+
+
 def main(argv: list[str]) -> int:
-    """`python -m backend.services.image_signature sha256:<digest>`: 0 when this project's CI signed
-    it, 1 when not, saying why. The install script runs it with the code it has just unpacked."""
+    """`python -m backend.services.image_signature [--tags-only] sha256:<digest>`: 0 when this
+    project's CI signed it (for a release, with --tags-only), 1 when not, saying why."""
+    tags_only = "--tags-only" in argv
+    argv = [a for a in argv if a != "--tags-only"]
     if len(argv) != 2:
-        print("usage: python -m backend.services.image_signature sha256:<digest>")
+        print("usage: python -m backend.services.image_signature [--tags-only] sha256:<digest>")
         return 2
-    result = verify_image(argv[1])
+    result = verify_image(argv[1], tags_only)
     print(result.reason + (f" ({result.identity})" if result.identity else ""))
     return 0 if result.ok else 1
 

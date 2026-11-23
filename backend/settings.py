@@ -216,6 +216,13 @@ class Settings:
         choices=("enforce", "warn", "off"),
         group="Updates",
     )
+    accept_main_builds: bool = _s(
+        "KIBOTO_ACCEPT_MAIN_BUILDS",
+        False,
+        "On a machine Kiboto runs, also take images signed for the main branch, not only releases "
+        "(a test machine). Elsewhere main builds are taken anyway.",
+        group="Updates",
+    )
     image_variant: str = _s(
         "KIBOTO_IMAGE_VARIANT",
         "full",

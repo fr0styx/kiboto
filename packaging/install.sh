@@ -177,8 +177,16 @@ must_be_signed() {
   [ "${2:-}" = "--unsigned" ] && { say "Not checking the signature of $image, as asked."; return 0; }
   say "Checking that Kiboto's own build service signed this version..."
   # verify_image, not the module run as a program: a release from before that entry would end with 0 unasked
-  check='import sys; from backend.services.image_signature import verify_image as v; r = v(sys.argv[1]); print(r.reason); sys.exit(0 if r.ok else 1)'
-  if said=$(cd "$PREFIX/current" && ./venv/bin/python -c "$check" "${image#*@}" 2>&1); then
+  # a release only, signed for its version tag; KIBOTO_ACCEPT_MAIN_BUILDS=1 takes a main build too
+  check='import inspect, sys
+from backend.services.image_signature import verify_image as v
+main_too = sys.argv[2] == "1"
+new = "tags_only" in inspect.signature(v).parameters
+r = v(sys.argv[1], tags_only=not main_too) if new else v(sys.argv[1])
+ok = r.ok and (main_too or new or "@refs/tags/v" in r.identity)
+print(r.reason if ok or not r.ok else "signed for the main branch, not for a release")
+sys.exit(0 if ok else 1)'
+  if said=$(cd "$PREFIX/current" && ./venv/bin/python -c "$check" "${image#*@}" "${KIBOTO_ACCEPT_MAIN_BUILDS:-0}" 2>&1); then
     say "  $(printf '%s\n' "$said" | tail -1)"
     return 0
   fi

@@ -332,7 +332,7 @@ def _signed_updates(request, monkeypatch):
     monkeypatch.setattr(
         image_signature,
         "verify_image",
-        lambda digest: image_signature.SignatureResult(True, "test", "https://github.com/test"),
+        lambda digest, tags_only=False: image_signature.SignatureResult(True, "test", "https://github.com/test"),
     )
 
 

@@ -174,8 +174,10 @@ machine's own service instead of a container. What changes for security:
   which leaves the held packages alone).
 - **What is checked:** the install image is built from Debian's netinst image only after its
   checksum file is verified against Debian's CD signing key. `install.sh` and every update
-  install only an image this project's CI signed, named by its digest; anything else is removed
-  again and nothing changes.
+  install only an image this project's CI signed **for a release** (a version tag, signed only
+  after the owner approves it in CI), named by its digest; anything else is removed again and
+  nothing changes. A push to the main branch alone cannot sign what such a machine installs.
+  `KIBOTO_ACCEPT_MAIN_BUILDS=1` in `/etc/kiboto/kiboto.env` lets a test machine take main builds.
 
 Hardening on such a machine:
 

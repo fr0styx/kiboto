@@ -16,6 +16,8 @@ On a machine of its own, an update now also installs the system tools the new ve
 
 On a machine of its own, failed sign-ins to shared folders over the network now count like web sign-ins: 20 in 15 minutes block the address for an hour, and they show under History, Sign-ins.
 
+On a machine of its own, Kiboto installs only release versions, and a release is signed only after the project owner approves it, so a change pushed to the main branch alone can no longer reach those machines.
+
 #### New
 
 Kiboto lists the third-party software it bundles and its licences at /third-party-licences.txt, and the install image says which Debian image it is made from and where Debian publishes its sources.

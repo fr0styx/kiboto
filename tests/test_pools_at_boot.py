@@ -147,12 +147,23 @@ def test_the_signature_check_answers_with_its_exit_code(monkeypatch, capsys):
     from backend.services import image_signature as sig
 
     monkeypatch.setattr(
-        sig, "verify_image", lambda digest: sig.SignatureResult(True, "signed by this project's CI", "ci.yml@main")
+        sig,
+        "verify_image",
+        lambda digest, tags_only=False: sig.SignatureResult(True, "signed by this project's CI", "ci.yml@main"),
     )
     assert sig.main(["x", "sha256:" + "a" * 64]) == 0 and "ci.yml@main" in capsys.readouterr().out
-    monkeypatch.setattr(sig, "verify_image", lambda digest: sig.SignatureResult(False, "the image has no signature"))
+    monkeypatch.setattr(
+        sig, "verify_image", lambda digest, tags_only=False: sig.SignatureResult(False, "the image has no signature")
+    )
     assert sig.main(["x", "sha256:" + "a" * 64]) == 1 and "no signature" in capsys.readouterr().out
     assert sig.main(["x"]) == 2
+
+
+def test_the_install_script_takes_only_a_release():
+    sh = _read("install.sh")
+    step = sh[sh.index("must_be_signed() {") :]
+    assert "tags_only=not main_too" in step and "KIBOTO_ACCEPT_MAIN_BUILDS:-0" in step
+    assert "@refs/tags/v" in step  # an older version without tags_only must still have found a tag
 
 
 def test_a_machine_on_ifupdown_moves_to_networkd_with_a_timed_way_back():

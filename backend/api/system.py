@@ -1366,7 +1366,10 @@ async def _check_update_signature(target_img: str, expected_digest: str | None, 
         digest = target_img.split("@", 1)[1]
     else:
         digest = expected_digest or (pulled[0] if pulled else "")
-    result = await asyncio.to_thread(verify_image, digest) if digest else SignatureResult(False, "no digest")
+    from backend.services.image_signature import releases_only
+
+    tags_only = releases_only()  # a machine Kiboto runs takes only releases
+    result = await asyncio.to_thread(verify_image, digest, tags_only) if digest else SignatureResult(False, "no digest")
     if result.ok:
         logger.info("[System Update] Signature verified for %s (%s).", one_line(digest), one_line(result.identity))
         return {"checked": True, **result.as_dict()}

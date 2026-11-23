@@ -170,8 +170,9 @@ def test_update_endpoint_follows_the_signature_mode(update_env, monkeypatch, mod
     client, headers = update_env
     calls = []
 
-    def fake_verify(digest):
+    def fake_verify(digest, tags_only=False):
         calls.append(digest)
+        assert tags_only is False  # a container: main builds count
         return sig.SignatureResult(ok, "fine" if ok else "the image has no signature", "id" if ok else "")
 
     monkeypatch.setattr(config, "UPDATE_SIGNATURES", mode)
@@ -198,3 +199,32 @@ def test_only_the_cosign_signature_statement_counts(verifier, monkeypatch):
     monkeypatch.setattr(verifier, "verify_dsse", other_predicate)
     with pytest.raises(sig.SignatureError, match="unexpected signed statement"):
         sig.verify_bundle(_bundle(), DIGEST, verifier)
+
+
+def test_a_machine_kiboto_runs_takes_only_a_release(verifier):
+    """A push to main alone must not be able to sign what such a machine installs: the bundle above
+    was made for main, so it passes for a container and is refused when only releases count."""
+    assert sig.verify_bundle(_bundle(), DIGEST, verifier, tags_only=False)
+    with pytest.raises(Exception, match="not for a release"):
+        sig.verify_bundle(_bundle(), DIGEST, verifier, tags_only=True)
+
+
+def test_who_takes_only_releases(monkeypatch):
+    from backend import config, runtime
+
+    monkeypatch.setattr(runtime, "managed_host", lambda: True)
+    monkeypatch.setattr(config, "ACCEPT_MAIN_BUILDS", False)
+    assert sig.releases_only() is True
+    monkeypatch.setattr(config, "ACCEPT_MAIN_BUILDS", True)
+    assert sig.releases_only() is False  # a test machine
+    monkeypatch.setattr(runtime, "managed_host", lambda: False)
+    monkeypatch.setattr(config, "ACCEPT_MAIN_BUILDS", False)
+    assert sig.releases_only() is False  # a container follows its channel, main builds included
+
+
+def test_the_command_line_asks_for_a_release_when_told(monkeypatch, capsys):
+    seen = []
+    monkeypatch.setattr(sig, "verify_image", lambda d, t=False: seen.append((d, t)) or sig.SignatureResult(False, "no"))
+    assert sig.main(["x", "--tags-only", DIGEST]) == 1 and seen[-1] == (DIGEST, True)
+    assert sig.main(["x", DIGEST]) == 1 and seen[-1] == (DIGEST, False)
+    assert sig.main(["x"]) == 2

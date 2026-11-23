@@ -62,6 +62,8 @@ def test_every_gate_runs_before_the_image_is_signed_and_tagged():
             run = str(s.get("run", ""))
             assert "cosign sign" not in run and "imagetools create" not in run, (name, s.get("name"))
     assert jobs["create-release"]["needs"] == ["publish"]
+    # a release is signed only after the owner's approval; main keeps publishing without one
+    assert jobs["publish"]["environment"] == "${{ startsWith(github.ref, 'refs/tags/v') && 'release' || '' }}"
 
 
 def test_smoke_script_runs_each_platform_by_its_own_manifest():

@@ -797,6 +797,11 @@ jobs:
           - variant: core
             suffix: "-core"
     if: github.event_name == 'push' && needs.still-latest.outputs.latest == 'true' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/tags/stable')
+    # A release is signed only after the owner approves it (the "release" environment requires their
+    # review and takes version tags only). Machines Kiboto runs accept only release signatures, so a
+    # push to main alone cannot sign what they install. On main no environment: containers on the edge
+    # channel take main builds as before.
+    environment: ${{ startsWith(github.ref, 'refs/tags/v') && 'release' || '' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15  # ARC-26: a hung step fails the run instead of holding a runner for 6 hours
     permissions:

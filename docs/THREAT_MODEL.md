@@ -73,7 +73,7 @@ machine's own service, not a container. What is above still holds; this is what 
 | Boundary | Defences |
 | -------- | -------- |
 | Install image → machine | Debian's official netinst image, unchanged, checked against Debian's CD signing key before Kiboto's files are added; it asks for the system disk and touches no other disk |
-| Release → machine | `install.sh` and every update install only an image signed by this project's CI, named by its digest; anything else is removed again and nothing changes. An update is tried beside the running version and goes back by itself when the new one does not stay healthy |
+| Release → machine | `install.sh` and every update install only an image signed by this project's CI for a version tag, named by its digest; a release is signed only after the owner approves it in CI, so a push to main alone cannot sign what such a machine installs. Anything else is removed again and nothing changes. An update is tried beside the running version and goes back by itself when the new one does not stay healthy |
 | First sign-in | A one-time code on the machine's screen and SSH greeting, in files only root can read, removed once the admin chooses a password |
 | Network → shared folders | The machine's own Samba and NFS serve the folders; each person signs in to their private folder as their own system account. Failed SMB sign-ins count toward the block list like web ones (20 in 15 minutes block the address for an hour); blocked addresses are in Samba's `hosts deny` |
 | Account names → system tools | A Kiboto username that would read as an option (starting with a dash) never reaches `useradd`, `userdel` or `smbpasswd` |
