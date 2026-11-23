@@ -537,6 +537,20 @@ def _start_app_names() -> None:
             managed.ensure_fallback()  # reachable after a network card moved or was replaced
         except (OSError, ValueError) as e:
             logger.error("[Main] A trial of network settings could not be settled: %s", e)
+        threading.Thread(target=_drive_sleep_at_start, name="DriveSleep", daemon=True).start()
+
+
+def _drive_sleep_at_start() -> None:
+    """A drive forgets its sleep timer when it loses power, so the setting is put back at each start."""
+    from backend.services import drive_sleep
+
+    try:
+        rows = drive_sleep.at_start()
+    except (OSError, ValueError) as e:
+        logger.warning("[Main] Drive sleep timers were not set: %s", e)
+        return
+    if rows:
+        logger.info("[Main] Drive sleep timers: %s", rows)
 
 
 def _reapply_firewall() -> None:

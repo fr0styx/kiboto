@@ -10,7 +10,7 @@ from pydantic import BaseModel, Field
 
 from backend.auth import require_scope
 from backend.errors import ApiError
-from backend.services import power_schedule
+from backend.services import drive_sleep, power_schedule
 
 router = APIRouter(tags=["System"])
 
@@ -31,6 +31,23 @@ def get_power_schedule() -> dict[str, Any]:
 def put_power_schedule(req: PowerScheduleIn) -> dict[str, Any]:
     try:
         return power_schedule.save(req.enabled, req.off_at, req.wake_at, req.days)
+    except ValueError as e:
+        raise ApiError(400, str(e), "invalid_settings", text=getattr(e, "text", None)) from e
+
+
+class DriveSleepIn(BaseModel):
+    minutes: int = Field(0, ge=0, le=600)
+
+
+@router.get("/system/drive-sleep", dependencies=[Depends(require_scope("system:view"))])
+def get_drive_sleep() -> dict[str, Any]:
+    return drive_sleep.public_state()
+
+
+@router.put("/system/drive-sleep", dependencies=[Depends(require_scope("system:power"))])
+def put_drive_sleep(req: DriveSleepIn) -> dict[str, Any]:
+    try:
+        return drive_sleep.save(req.minutes)
     except ValueError as e:
         raise ApiError(400, str(e), "invalid_settings", text=getattr(e, "text", None)) from e
 

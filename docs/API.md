@@ -38,7 +38,7 @@ request and response schemas.
 
 <!-- BEGIN generated endpoints: python scripts/api_reference.py --update -->
 
-824 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
+826 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
 
 ### AI Conversation History
 
@@ -893,6 +893,8 @@ request and response schemas.
 
 | Method | Path | Access | What it does |
 | :--- | :--- | :--- | :--- |
+| `GET` | `/api/v1/system/drive-sleep` | `system:view` | Get Drive Sleep |
+| `PUT` | `/api/v1/system/drive-sleep` | `system:power` | Put Drive Sleep |
 | `GET` | `/api/v1/system/heat-shutdown` | `system:view` | Get Heat Shutdown |
 | `PUT` | `/api/v1/system/heat-shutdown` | `system:power` | Put Heat Shutdown |
 | `GET` | `/api/v1/system/host-set` | `system:config` | The held packages: installed, offered by Debian and tested with this release; which can move now and which wait for a tested release |

@@ -138,6 +138,8 @@ On a machine of its own, Kiboto can now update itself: the new version is made r
 
 On a machine set up for Kiboto, plugged-in USB disks are listed on the Backup page with Use this disk and Eject, so backups to a USB disk and the camera import work there.
 
+On a machine Kiboto runs, the Power page can let spinning hard drives sleep after 10 minutes to 3 hours with nothing to do (off by default). A drive that is already asleep is never woken to set it.
+
 ## v2.0.5 (2026-11-20)
 ### 🏡 A second NAS that can take over, files you can change over the network, and 176 tested apps
 
