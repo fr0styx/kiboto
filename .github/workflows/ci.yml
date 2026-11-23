@@ -143,9 +143,15 @@ jobs:
         # Failing tests are also posted as an annotation, readable without log access
         # Four parallel workers (pytest-xdist; the runner has 4 cores): about 2 min instead of 6.
         # Coverage is combined from every worker, so the floor and diff coverage are unchanged.
+        # COVERAGE_CORE=sysmon: coverage through Python 3.12's sys.monitoring instead of a trace
+        # function, about a third faster for the same line coverage (branch coverage, which this
+        # does not measure, would need Python 3.14). --dist loadgroup keeps the tests that scan the
+        # whole backend on one worker, which parses it once.
+        env:
+          COVERAGE_CORE: sysmon
         run: |
           set -o pipefail
-          if ! pytest -n 4 --cov=backend --cov=app --cov-report=xml --cov-fail-under=81 -v -rfEs 2>&1 | tee /tmp/kb-unit.log; then
+          if ! pytest -n 4 --dist loadgroup --cov=backend --cov=app --cov-report=xml --cov-fail-under=81 -v -rfEs 2>&1 | tee /tmp/kb-unit.log; then
             body=$( (grep -E '^(FAILED|ERROR)|^E  |Required test coverage|Coverage failure' /tmp/kb-unit.log | tail -n 40) | sed 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
             echo "::error title=Unit tests::$body"
             exit 1

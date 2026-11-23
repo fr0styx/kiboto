@@ -7,9 +7,15 @@ asyncio.to_thread. This counts the direct calls per file; a file may only go dow
 """
 
 import ast
+import functools
 import pathlib
 
+import pytest
+
+from tests.source_trees import files, text
+
 ROOT = pathlib.Path(__file__).resolve().parent.parent
+pytestmark = pytest.mark.xdist_group("source_scan")  # one worker parses the backend once (tests/source_trees.py)
 BLOCKING_NAMES = {
     "check_user_path_access",
     "record_activity",
@@ -87,10 +93,11 @@ def blocking_calls(src):
     return out
 
 
+@functools.cache
 def counts():
     found = {}
-    for path in sorted((ROOT / "backend").rglob("*.py")):
-        n = len(blocking_calls(path.read_text(encoding="utf-8")))
+    for path in files("backend"):
+        n = len(blocking_calls(text(path)))
         if n:
             found[str(path.relative_to(ROOT))] = n
     return found

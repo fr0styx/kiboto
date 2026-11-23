@@ -5,9 +5,13 @@ import ast
 import pathlib
 import threading
 
+import pytest
+
 from backend.state import Z_STATE, SmartState, clear_events, events_snapshot
+from tests.source_trees import files, tree
 
 ROOT = pathlib.Path(__file__).resolve().parents[1] / "backend"
+pytestmark = pytest.mark.xdist_group("source_scan")  # one worker parses the backend once (tests/source_trees.py)
 FLAT = {
     "cached_smart_data",
     "cached_smart_time",
@@ -56,11 +60,10 @@ def _writes(tree: ast.AST):
 
 def test_no_module_writes_the_shared_maps_directly():
     found = []
-    for path in ROOT.rglob("*.py"):
+    for path in files("backend"):
         if path.name == "state.py" and path.parent == ROOT:
             continue
-        tree = ast.parse(path.read_text(encoding="utf-8"))
-        found += [f"{path.relative_to(ROOT.parent)}:{line}" for line in _writes(tree)]
+        found += [f"{path.relative_to(ROOT.parent)}:{line}" for line in _writes(tree(path))]
     assert not found, (
         "write through Z_STATE.smart.set_*/start_test/end_test or the event helpers instead:\n" + "\n".join(found)
     )

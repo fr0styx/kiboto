@@ -12,16 +12,21 @@ other's changes.
 import ast
 import pathlib
 
+import pytest
+
+from tests.source_trees import files, tree
+
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 ROUTE_METHODS = {"get", "post", "put", "delete", "patch", "api_route", "websocket"}
 ASYNC_ROUTES_WITHOUT_AWAIT_BASELINE = 21
 UNLOCKED_JSON_RMW_BASELINE = 7
+pytestmark = pytest.mark.xdist_group("source_scan")  # one worker parses the backend once (tests/source_trees.py)
 
 
 def _async_routes_without_await() -> list[str]:
     out = []
-    for p in sorted((ROOT / "backend" / "api").rglob("*.py")):
-        for node in ast.walk(ast.parse(p.read_text(encoding="utf-8"))):
+    for p in files("backend/api"):
+        for node in ast.walk(tree(p)):
             if not isinstance(node, ast.AsyncFunctionDef):
                 continue
             is_route = any(
@@ -36,10 +41,10 @@ def _async_routes_without_await() -> list[str]:
 def _unlocked_json_rmw() -> list[str]:
     readers = {"read_json", "read_json_cached", "load_config", "get_backup_jobs"}
     out = []
-    for p in sorted((ROOT / "backend").rglob("*.py")):
+    for p in files("backend"):
         if p.name == "fsutil.py" or "fuse_hidden" in p.name:
             continue
-        for fn in ast.walk(ast.parse(p.read_text(encoding="utf-8"))):
+        for fn in ast.walk(tree(p)):
             if not isinstance(fn, (ast.FunctionDef, ast.AsyncFunctionDef)):
                 continue
             calls = {
@@ -97,9 +102,8 @@ def test_no_password_hashing_on_the_event_loop():
     """ARC-18: Argon2 takes 64 MB and real CPU time; in an async route it freezes every user's UI.
     Call it through asyncio.to_thread (or make the route a plain def)."""
     found = []
-    for p in sorted((ROOT / "backend" / "api").rglob("*.py")):
-        tree = ast.parse(p.read_text(encoding="utf-8"))
-        for fn in ast.walk(tree):
+    for p in files("backend/api"):
+        for fn in ast.walk(tree(p)):
             if not isinstance(fn, ast.AsyncFunctionDef):
                 continue
             for node in ast.walk(fn):

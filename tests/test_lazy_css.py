@@ -6,6 +6,7 @@ those has a rule of the same specificity for the same properties on the same cla
 move changes nothing.
 """
 
+import functools
 import os
 import re
 
@@ -67,12 +68,21 @@ def target_classes(sel):
     return set(re.findall(r"[.#]([A-Za-z_][\w-]*)", last)) - GENERIC
 
 
+@functools.cache
+def _facts(path):
+    """Each rule of the sheet at `path` with what the comparison needs, worked out once."""
+    name = os.path.relpath(path, STYLES)
+    return [(s, p, target_classes(s), specificity(s)) for s, p in rules(name)]
+
+
 def collisions(moved, later):
     found = []
-    for s1, p1 in rules(moved):
-        t1 = target_classes(s1)
-        for s2, p2 in rules(later):
-            if t1 & target_classes(s2) and specificity(s1) == specificity(s2) and p1 & p2:
+    later_facts = _facts(os.path.join(STYLES, later))
+    for s1, p1, t1, sp1 in _facts(os.path.join(STYLES, moved)):
+        if not t1:
+            continue
+        for s2, p2, t2, sp2 in later_facts:
+            if t1 & t2 and sp1 == sp2 and p1 & p2:
                 found.append(f"{moved} `{s1}` vs {later} `{s2}` on {sorted(p1 & p2)}")
     return found
 

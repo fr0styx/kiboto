@@ -1,20 +1,25 @@
 """ARC-22, ARC-23: layering, private-name imports and function size may only get better
 (scripts/arch_ratchets.py; tests/arch_baseline.json)."""
 
+import functools
 import importlib.util
 import pathlib
+
+import pytest
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 spec = importlib.util.spec_from_file_location("arch_ratchets", ROOT / "scripts" / "arch_ratchets.py")
 ar = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(ar)
+pytestmark = pytest.mark.xdist_group("source_scan")  # one worker parses the backend once (tests/source_trees.py)
+_measure = functools.cache(ar.measure)  # both baseline tests read the same measurement
 
 
 def test_nothing_is_worse_than_the_baseline():
     import json
 
     base = json.loads((ROOT / "tests" / "arch_baseline.json").read_text(encoding="utf-8"))
-    found = ar.problems(ar.measure(), base)
+    found = ar.problems(_measure(), base)
     assert not found, "\n".join(found)
 
 
@@ -43,7 +48,7 @@ def test_the_baseline_is_tight():
     import json
 
     base = json.loads((ROOT / "tests" / "arch_baseline.json").read_text(encoding="utf-8"))
-    loose = ar.slack(ar.measure(), base)
+    loose = ar.slack(_measure(), base)
     assert not loose, "\n".join(loose)
 
 

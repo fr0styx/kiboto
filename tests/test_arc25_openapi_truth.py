@@ -2,6 +2,7 @@
 which operations are public, the scopes and the 401/403/404/422/429 answers."""
 
 import ast
+import functools
 import inspect
 import os
 import re
@@ -21,22 +22,27 @@ from backend import __version__  # noqa: E402
 from backend.api_docs import OWN_RATE_LIMITS, canonical_key, finish_schema, iter_routes, route_facts  # noqa: E402
 from backend.auth import is_public_path  # noqa: E402
 
-SCHEMA = app.openapi()
 REF = "#/components/responses/"
 
 
+@functools.cache
+def _schema() -> dict:
+    """Built on first use: at import it cost every test worker seconds while collecting."""
+    return app.openapi()
+
+
 def _ops():
-    for path, ops in SCHEMA["paths"].items():
+    for path, ops in _schema()["paths"].items():
         for method, op in ops.items():
             yield path, method, op
 
 
 def test_the_document_carries_the_running_version():
-    assert SCHEMA["info"]["version"] == __version__
+    assert _schema()["info"]["version"] == __version__
 
 
 def test_one_error_body_and_no_fastapi_default_422():
-    schemas = SCHEMA["components"]["schemas"]
+    schemas = _schema()["components"]["schemas"]
     assert "HTTPValidationError" not in schemas and "ValidationError" not in schemas
     assert schemas["Error"]["required"] == ["error", "detail", "code"]
     for path, method, op in _ops():
@@ -47,12 +53,12 @@ def test_one_error_body_and_no_fastapi_default_422():
 def test_security_schemes_match_what_the_server_reads():
     from backend import auth
 
-    schemes = SCHEMA["components"]["securitySchemes"]
+    schemes = _schema()["components"]["securitySchemes"]
     assert schemes["bearerAuth"] == {**schemes["bearerAuth"], "type": "http", "scheme": "bearer"}
     src = inspect.getsource(auth.extract_token)
     assert schemes["cookieAuth"]["name"] == auth.SESSION_COOKIE and "session_cookie(request.cookies)" in src
     assert set(schemes) == {"bearerAuth", "cookieAuth"}  # extract_token reads nothing else (URL tickets are single-use)
-    assert SCHEMA["security"]
+    assert _schema()["security"]
 
 
 def test_public_operations_are_exactly_the_ones_the_middleware_lets_through():
@@ -69,7 +75,7 @@ def test_public_operations_are_exactly_the_ones_the_middleware_lets_through():
 
 
 def test_scopes_come_from_the_routes_dependencies():
-    op = SCHEMA["paths"]["/api/v1/invites"]["post"]
+    op = _schema()["paths"]["/api/v1/invites"]["post"]
     assert op["x-required-scopes"] == ["users:write"]
     scoped = sum(1 for _, _, op in _ops() if op.get("x-required-scopes"))
     assert scoped > 400
@@ -181,9 +187,9 @@ def client():
 
 
 def _is_error(body: dict, code: int) -> None:
-    assert set(SCHEMA["components"]["schemas"]["Error"]["required"]) <= set(body)
+    assert set(_schema()["components"]["schemas"]["Error"]["required"]) <= set(body)
     assert body["code"] == code and isinstance(body["error"], str) and isinstance(body["detail"], str)
-    assert set(body) <= set(SCHEMA["components"]["schemas"]["Error"]["properties"])
+    assert set(body) <= set(_schema()["components"]["schemas"]["Error"]["properties"])
 
 
 def test_a_401_has_the_error_body(client):
@@ -205,7 +211,7 @@ def test_a_422_has_the_error_body_with_fields(client):
 
 def test_api_md_endpoint_list_is_generated_from_this_schema():
     doc = api_reference.current_doc()
-    assert api_reference.updated(doc, api_reference.render(SCHEMA)) == doc, (
+    assert api_reference.updated(doc, api_reference.render(_schema())) == doc, (
         "docs/API.md is out of date: python scripts/api_reference.py --update"
     )
 
