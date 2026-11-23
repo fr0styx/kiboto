@@ -36,6 +36,8 @@ Kib's face now floats in a corner of the desktop: click it to ask Kib, without g
 
 On a machine of its own, a separate system service (the host door) now changes the machine's name, time zone, clock and SSH setting for Kiboto, from a fixed list of operations: the first step towards Kiboto's web service running without full system rights (docs/adr/0006-web-without-root.md).
 
+Kib on the desktop is now a small moving character, the Kiboto mark with Kib's eyes, that perks up when you point at it; Kib's window is no longer see-through.
+
 ## v2.0.6 (2026-11-23)
 ### 🖥️ Kiboto on a machine of its own (preview), with its settings kept safe on every pool
 

@@ -308,40 +308,34 @@
   background: var(--lt-b-0a1113ff, #0a1113);
 }
 
-
-/* Kib on the desktop (components/kib-buddy.js): its face in the bottom-left corner, above the
-   desktop icons (z 30) and below every window (z 1000); the bottom-right when the dock is on the left */
+/* Kib on the desktop (components/kib-buddy.js): the Kiboto mark as a small character in the
+   bottom-left corner, above the desktop icons (z 30) and below every window (z 1000); the
+   bottom-right when the dock is on the left */
 .kib-buddy {
   position: fixed;
-  left: 24px;
-  bottom: 24px;
+  left: 20px;
+  bottom: 16px;
   z-index: 40;
   display: block;
-  padding: 6px;
+  padding: 4px;
   border: 0;
-  border-radius: 16px;
+  border-radius: 18px;
   background: transparent;
   cursor: pointer;
   color: var(--text, #e6f1f0);
   font: inherit;
 }
-body:has(.os-dock-container.dock-pos-left) .kib-buddy { left: auto; right: 24px; }
+body:has(.os-dock-container.dock-pos-left) .kib-buddy { left: auto; right: 20px; }
 body:has(.os-dock-container.dock-pos-left) .kib-buddy-label { left: auto; right: calc(100% + 4px); transform: translateX(6px); }
-.kib-buddy-face {
-  display: block;
-  width: 80px;
-  height: 45px;
-  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.45));
-  transition: transform 0.18s ease;
-  animation: kib-buddy-float 6s ease-in-out infinite;
-}
-.kib-buddy-tile { fill: #0e1c1e; stroke: #2b393d; stroke-width: 1.5; }
-.kib-buddy-eye {
-  fill: #4fd8c4;
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: kib-buddy-blink 7s infinite;
-}
+.kib-buddy-art { display: block; width: 64px; height: 74px; overflow: visible; }
+.kib-buddy-case { fill: #0a7a70; }
+.kib-buddy-screen { fill: #0e1c1e; }
+.kib-buddy-eye { fill: #4fd8c4; transform-box: fill-box; transform-origin: center; animation: kib-buddy-blink 6.5s infinite; }
+.kib-buddy-light { fill: #f6b44c; animation: kib-buddy-breathe 3.2s ease-in-out infinite; }
+.kib-buddy-shadow { fill: rgba(0, 0, 0, 0.45); transform-box: fill-box; transform-origin: center; animation: kib-buddy-shadow 3.6s ease-in-out infinite; }
+/* the body bobs and sways, lands with a little squash, and hops every so often */
+.kib-buddy-body { transform-box: fill-box; transform-origin: 50% 100%; animation: kib-buddy-bob 3.6s ease-in-out infinite, kib-buddy-hop 11s ease-in-out infinite; filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.35)); }
+.kib-buddy-eyes { animation: kib-buddy-look 9s ease-in-out infinite; }
 .kib-buddy-label {
   position: absolute;
   left: calc(100% + 4px);
@@ -357,12 +351,39 @@ body:has(.os-dock-container.dock-pos-left) .kib-buddy-label { left: auto; right:
   pointer-events: none;
   transition: opacity 0.15s ease, transform 0.15s ease;
 }
-.kib-buddy:hover .kib-buddy-face, .kib-buddy:focus-visible .kib-buddy-face { transform: translateY(-3px) scale(1.06); }
+/* pointed at: it perks up, hops and smiles with its eyes */
+.kib-buddy:hover .kib-buddy-body, .kib-buddy:focus-visible .kib-buddy-body { animation: kib-buddy-perk 0.9s ease-in-out infinite; }
+.kib-buddy:hover .kib-buddy-eye, .kib-buddy:focus-visible .kib-buddy-eye { animation: none; transform: scaleY(0.45) translateY(-2px); }
+.kib-buddy:hover .kib-buddy-light, .kib-buddy:focus-visible .kib-buddy-light { animation-duration: 0.9s; }
 .kib-buddy:hover .kib-buddy-label, .kib-buddy:focus-visible .kib-buddy-label { opacity: 1; transform: none; }
+.kib-buddy.is-tapped .kib-buddy-body { animation: kib-buddy-tap 0.45s ease-out; }
 .kib-buddy:focus-visible { outline: 2px solid var(--accent, #4fd8c4); outline-offset: 2px; }
-@keyframes kib-buddy-blink { 0%, 94%, 100% { transform: scaleY(1); } 96% { transform: scaleY(0.12); } }
-@keyframes kib-buddy-float { 0%, 100% { translate: 0 0; } 50% { translate: 0 -3px; } }
+@keyframes kib-buddy-bob {
+  0%, 100% { transform: translateY(0) rotate(-2deg) scale(1.02, 0.97); }
+  25% { transform: translateY(-4px) rotate(0deg) scale(1, 1); }
+  50% { transform: translateY(-6px) rotate(2deg) scale(0.99, 1.02); }
+  75% { transform: translateY(-3px) rotate(0deg) scale(1, 1); }
+}
+@keyframes kib-buddy-hop {
+  0%, 88%, 100% { translate: 0 0; }
+  91% { translate: 0 -12px; }
+  94% { translate: 0 0; }
+  96% { translate: 0 -5px; }
+  98% { translate: 0 0; }
+}
+@keyframes kib-buddy-shadow { 0%, 100% { transform: scaleX(1); opacity: 1; } 50% { transform: scaleX(0.78); opacity: 0.7; } }
+@keyframes kib-buddy-look {
+  0%, 30%, 100% { transform: translateX(0); }
+  36%, 46% { transform: translateX(-2.5px); }
+  52%, 62% { transform: translateX(2.5px); }
+  68% { transform: translateX(0); }
+}
+@keyframes kib-buddy-blink { 0%, 93%, 97%, 100% { transform: scaleY(1); } 95% { transform: scaleY(0.12); } }
+@keyframes kib-buddy-breathe { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
+@keyframes kib-buddy-perk { 0%, 100% { transform: translateY(-2px) rotate(-4deg); } 50% { transform: translateY(-9px) rotate(4deg) scale(1.03); } }
+@keyframes kib-buddy-tap { 0% { transform: scale(1.12, 0.86); } 45% { transform: translateY(-14px) scale(0.94, 1.08); } 100% { transform: none; } }
 @media (prefers-reduced-motion: reduce) {
-  .kib-buddy-face, .kib-buddy-eye { animation: none; }
+  .kib-buddy-body, .kib-buddy-eyes, .kib-buddy-eye, .kib-buddy-light, .kib-buddy-shadow,
+  .kib-buddy:hover .kib-buddy-body, .kib-buddy.is-tapped .kib-buddy-body { animation: none; }
 }
 body.mobile-mode .kib-buddy, body.phone-shell .kib-buddy { display: none; }

@@ -6,3 +6,6 @@
 .kib-window-body > .mgmt-tab-pane { flex: 1 1 auto; min-height: 0; }
 @media (max-width: 600px) { .kib-window { width: 100vw; height: calc(100vh - 36px - 72px); left: 0; top: 36px; } }
 .kib-off-note { margin: 0 0 10px; padding: 10px 12px; border: 1px solid var(--kb-line-10); border-radius: 8px; font-size: var(--kb-fs-xs); color: var(--kb-text); }
+/* The window frame is glass like every window, but its tabs and body are the solid surface of Settings' content
+   pane: with panels inside a padded body, the wallpaper showed through around them */
+.kib-window-tabs, .kib-window-body { background: var(--lt-b-0e1b1dff, #0e1b1d); }

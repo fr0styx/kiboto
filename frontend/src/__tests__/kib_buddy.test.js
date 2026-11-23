@@ -18,11 +18,35 @@ describe('Kib on the desktop', () => {
     expect(document.querySelectorAll('#kib-buddy')).toHaveLength(1);
   });
 
-  it("opens Kib's own window on its chat, not Settings", () => {
+  it("opens Kib's own window on its chat, not Settings, and hops", () => {
     const open = vi.fn();
     /** @type {any} */ (window).openKibWindow = open;
-    initKibBuddy().click();
+    const btn = initKibBuddy();
+    btn.click();
     expect(open).toHaveBeenCalledWith('mgmt-pane-ai-chat');
+    expect(btn.classList.contains('is-tapped')).toBe(true);
+    const end = new Event('animationend');
+    Object.defineProperty(end, 'animationName', { value: 'kib-buddy-tap' });
+    btn.dispatchEvent(end);
+    expect(btn.classList.contains('is-tapped')).toBe(false);
+    const other = new Event('animationend');
+    Object.defineProperty(other, 'animationName', { value: 'kib-buddy-bob' });
+    btn.classList.add('is-tapped');
+    btn.dispatchEvent(other);
+    expect(btn.classList.contains('is-tapped')).toBe(true);
+  });
+
+  it('is the whole mark: case, screen, eyes and the amber light', () => {
+    const btn = initKibBuddy();
+    for (const part of [
+      '.kib-buddy-case',
+      '.kib-buddy-screen',
+      '.kib-buddy-light',
+      '.kib-buddy-shadow',
+      '.kib-buddy-body',
+    ]) {
+      expect(btn.querySelector(part)).not.toBeNull();
+    }
   });
 
   it('does nothing before Kib can be opened', () => {
