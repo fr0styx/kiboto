@@ -63,6 +63,43 @@ def networkd_runs(do: Run | None = None) -> bool:
     return said.split() == ["active", "active"]
 
 
+FALLBACK = os.path.join(DIR, "99-kiboto-any-wired.network")
+FALLBACK_TEXT = """# Written by Kiboto: a wired port that no other file names gets an address by DHCP, so the machine
+# can still be reached after its network card moved to another slot or was replaced (the port then
+# has a new name, and the file with its settings no longer matches it).
+[Match]
+Type=ether
+Kind=!*
+
+[Link]
+RequiredForOnline=no
+
+[Network]
+DHCP=yes
+
+[DHCPv4]
+RouteMetric=2048
+"""
+
+
+def ensure_fallback(do: Run | None = None) -> bool:
+    """Writes the fallback for wired ports (FALLBACK) where networkd runs the network. True when written."""
+    do = do or run
+    if not networkd_runs(do):
+        return False
+    try:
+        with open(FALLBACK, encoding="utf-8") as f:
+            if f.read() == FALLBACK_TEXT:
+                return False
+    except OSError:  # not there yet
+        logger.debug("[Network] %s is missing; writing it", FALLBACK)
+    os.makedirs(DIR, exist_ok=True)
+    atomic_write_text(FALLBACK, FALLBACK_TEXT)
+    do(["networkctl", "reload"])
+    logger.info("[Network] Wired ports without settings get an address by DHCP (%s)", FALLBACK)
+    return True
+
+
 def file_for(iface: str) -> str:
     return os.path.join(DIR, f"{PREFIX}{iface}.network")
 

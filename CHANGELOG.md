@@ -86,6 +86,8 @@ On a machine set up for Kiboto, snapshots work for shared folders on its btrfs a
 
 On a machine set up for Kiboto, the AI pages no longer wait about 25 seconds when no AI runtime is installed.
 
+A machine set up for Kiboto can still be reached after its network card moved to another slot or was replaced: the port gets an address by DHCP.
+
 #### Security
 
 Apps, Docker clean-up: deleting unused volumes now asks for a confirmation that Kiboto checks itself, so it can't happen without your say-so.

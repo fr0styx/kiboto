@@ -534,6 +534,7 @@ def _start_app_names() -> None:
             apps_back.start_soon()
         try:
             managed.settle()
+            managed.ensure_fallback()  # reachable after a network card moved or was replaced
         except (OSError, ValueError) as e:
             logger.error("[Main] A trial of network settings could not be settled: %s", e)
 

@@ -254,6 +254,25 @@ network_to_networkd() {
       sed -n 's/^nameserver[[:space:]]\{1,\}\([0-9.]\{7,15\}\)$/DNS=\1/p' /etc/resolv.conf.kiboto-before /etc/resolv.conf 2>/dev/null | grep -v '=127\.' | sort -u | head -3
     fi
   } > "$file"
+  # a wired port no file names (the card moved to another slot, or was replaced) still gets an
+  # address, so the machine can be reached; the same file Kiboto keeps (hardware/net/managed.py)
+  cat > /etc/systemd/network/99-kiboto-any-wired.network <<'ANY'
+# Written by Kiboto: a wired port that no other file names gets an address by DHCP, so the machine
+# can still be reached after its network card moved to another slot or was replaced (the port then
+# has a new name, and the file with its settings no longer matches it).
+[Match]
+Type=ether
+Kind=!*
+
+[Link]
+RequiredForOnline=no
+
+[Network]
+DHCP=yes
+
+[DHCPv4]
+RouteMetric=2048
+ANY
   cat > "$ETC/network-back.sh" <<BACK
 #!/bin/sh
 # Written by Kiboto's install script: ifupdown back, as it was before the move.
