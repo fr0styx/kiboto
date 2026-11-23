@@ -2320,6 +2320,8 @@ export default {
   "srv.share_kiboto_folder": "那是 Kiboto 自己的数据文件夹。请选择其他文件夹。",
   "srv.nfs_no_server": "此安装没有 NFS 服务器，因此这里无法通过 NFS 共享文件夹。",
   "srv.share_outside": "请选择 {places} 中的文件夹。",
+  "srv.share_system_disk": "Kiboto 不会把共享文件夹放在系统盘上。请在某个存储池中选择文件夹。",
+  "srv.share_no_pool": "请先创建一个存储池。Kiboto 不会把共享文件夹放在系统盘上。",
   "srv.share_bad_name": "请为共享文件夹命名：字母、数字、点、连字符或下划线（不能是 global、homes 或 printers）。",
   "srv.username_length": "用户名为 2 到 32 个字符。",
   "srv.username_unsafe": "用户名不能以点开头，也不能包含斜杠。",

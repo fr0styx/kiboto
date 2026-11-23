@@ -22,7 +22,7 @@ from backend.config import HOST_DEV, HOST_PROC, HOST_SYS, POOL_PATH, logger
 from backend.fsutil import atomic_write_json, child_path
 from backend.hardware import fs_quota
 from backend.hardware.pal import base as pal_base
-from backend.hardware.pal import pool_registry
+from backend.hardware.pal import pool_registry, system_disk
 from backend.hardware.pal.base import (
     NetworkShare,
     PlatformCapabilities,
@@ -899,8 +899,8 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
             if row["fs_type"] == "zfs" and not any(p.id == row["name"] for p in pools):
                 pools.append(self._recorded_pool(row, hal_disks, there=False))
 
-        # 4. Standard pool at self._pool_path
-        if not is_overlay:
+        # 4. Standard pool at self._pool_path (on a managed host the system disk holds none: system_disk.py)
+        if not is_overlay and (os.path.ismount(self._pool_path) or not system_disk.applies()):
             total, used, free = 0, 0, 0
             try:
                 u = shutil.disk_usage(self._pool_path if os.path.exists(self._pool_path) else "/")
@@ -980,10 +980,13 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
     @staticmethod
     def _mark_away(shares: list[NetworkShare]) -> list[NetworkShare]:
         """A folder on a pool that is away says so: it shows empty, not lost."""
+        from backend.hardware.pal import system_disk
+
         rows = pool_registry.load()
-        if rows:
-            for share in shares:
-                share.pool_away = pool_registry.away_pool_of(share.mountpoint, rows)
+        managed = system_disk.applies()
+        for share in shares:
+            share.pool_away = pool_registry.away_pool_of(share.mountpoint, rows) if rows else ""
+            share.on_system_disk = managed and system_disk.on_it(share.mountpoint, rows)
         return shares
 
     def list_shares(self) -> list[NetworkShare]:
@@ -1483,6 +1486,25 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
                     )
         return discovered
 
+    def _default_share_folder(self, name: str) -> str:
+        if not system_disk.applies():
+            return os.path.join(self._pool_path, name)
+        folder = system_disk.default_folder(name)  # on a machine set up for Kiboto: on the first pool
+        if not folder:
+            from backend.errors import SaidError
+
+            raise SaidError(*system_disk.NO_POOL)
+        return folder
+
+    @staticmethod
+    def _not_on_the_system_disk(full_path: str) -> str:
+        problem = system_disk.new_share_problem(full_path)
+        if problem:
+            from backend.errors import SaidError
+
+            raise SaidError(*problem)
+        return full_path
+
     def create_share(
         self,
         name: str,
@@ -1511,7 +1533,7 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
                 raise SaidError(
                     "This install has no NFS server, so folders can't be shared over NFS here.", "nfs_no_server"
                 )
-        full_path = validate_share_path(path if path else os.path.join(self._pool_path, name))
+        full_path = self._not_on_the_system_disk(validate_share_path(path or self._default_share_folder(name)))
         if export_nfs:  # refuse bad NFS settings before anything is created
             from backend.services.nfs_engine import NfsExportRule, home_network
 

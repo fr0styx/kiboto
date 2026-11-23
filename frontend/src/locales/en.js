@@ -2320,6 +2320,8 @@ export default {
   "srv.share_kiboto_folder": "That is Kiboto's own data folder. Choose another folder.",
   "srv.nfs_no_server": "This install has no NFS server, so folders can't be shared over NFS here.",
   "srv.share_outside": "Choose a folder inside {places}.",
+  "srv.share_system_disk": "Kiboto keeps no shared folders on the system disk. Choose a folder on one of the pools.",
+  "srv.share_no_pool": "Make a storage pool first. Kiboto keeps no shared folders on the system disk.",
   "srv.share_bad_name": "Give the shared folder a name: letters, digits, dots, hyphens or underscores (not global, homes or printers).",
   "srv.username_length": "A user name has 2 to 32 characters.",
   "srv.username_unsafe": "A user name can't start with a dot or contain slashes.",

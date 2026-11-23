@@ -29,22 +29,14 @@ def recorded() -> str:
     return root if isinstance(root, str) and root.startswith("/") else ""
 
 
-def _first_pool() -> str:
-    from backend.hardware.pal import pool_registry
-
-    for row in pool_registry.load():  # oldest first
-        mp = row.get("mountpoint") or ""
-        if not row.get("ejected") and mp and os.path.ismount(mp):
-            return mp
-    return ""
-
-
 def root() -> tuple[str, bool]:
     """(the apps' folder, whether it is settled on a pool)."""
     known = recorded()
     if known:
         return known, True
-    pool = _first_pool()
+    from backend.hardware.pal import system_disk
+
+    pool = system_disk.first_pool()
     if not pool:
         return os.path.join(config.POOL_PATH, FOLDER), False
     chosen = os.path.join(pool, FOLDER)

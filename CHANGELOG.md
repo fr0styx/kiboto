@@ -30,6 +30,8 @@ A storage pool from another system is now opened read-only first, so nothing on 
 
 - **Network settings also on a Debian installed with Debian's own installer (preview)**: the install script moves such a machine's network to systemd-networkd, so Kiboto can change its address. If the machine cannot reach its router afterwards, it goes back to its old settings by itself.
 
+On a machine set up for Kiboto, shared folders live only on pools: the system disk is no longer listed as a pool, a new shared folder goes on the first pool, and the first pool gets the starting "storage" folder.
+
 #### Fixes
 
 A person with a storage limit could go over it by sending several files at once. Files still arriving now count against the limit.

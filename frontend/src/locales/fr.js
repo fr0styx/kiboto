@@ -2320,6 +2320,8 @@ export default {
   "srv.share_kiboto_folder": "C'est le dossier de données de Kiboto lui-même. Choisissez un autre dossier.",
   "srv.nfs_no_server": "Cette installation n'a pas de serveur NFS : les dossiers ne peuvent donc pas être partagés en NFS ici.",
   "srv.share_outside": "Choisissez un dossier dans {places}.",
+  "srv.share_system_disk": "Kiboto ne garde aucun dossier partagé sur le disque système. Choisissez un dossier sur l'un des pools.",
+  "srv.share_no_pool": "Créez d'abord un pool de stockage. Kiboto ne garde aucun dossier partagé sur le disque système.",
   "srv.share_bad_name": "Donnez un nom au dossier partagé : lettres, chiffres, points, tirets ou tirets bas (pas global, homes ni printers).",
   "srv.username_length": "Un nom d'utilisateur compte de 2 à 32 caractères.",
   "srv.username_unsafe": "Un nom d'utilisateur ne peut pas commencer par un point ni contenir de barres obliques.",

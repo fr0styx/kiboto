@@ -18,6 +18,7 @@ from backend.auth import AuthenticatedPrincipal, get_current_principal, require_
 from backend.confirmations import require_confirmation
 from backend.errors import ApiError, error_response, said
 from backend.fsutil import single_name
+from backend.hardware.pal import system_disk
 from backend.hardware.pal.base import PoolUsedElsewhere
 from backend.hardware.pal_storage import (
     PlatformCapabilityError,
@@ -186,6 +187,7 @@ def get_storage_pools() -> dict[str, Any]:
         "can_export_pools": bool(adapter.get_capabilities().can_export_pools),
         "is_busy": adapter.is_storage_busy(),
         "pools": [_with_erasable(p.model_dump(), p, adapter) for p in pools],
+        "system_disk_kept_free": system_disk.applies(),  # no shares there: Setup asks for a pool
     }
 
 
@@ -386,18 +388,33 @@ def create_storage_pool(
         "[Storage] Creating pool '%s' (%s) on %s", one_line(req.name), one_line(req.fs_type), one_line(", ".join(disks))
     )
     try:
-        return adapter.create_pool(
+        made = adapter.create_pool(
             name=req.name,
             fs_type=req.fs_type,
             profile=req.profile,
             disks=req.disks,
             mountpoint=mountpoint,
         )
+        _first_share_on_the_pool(adapter)
+        return made
     except PlatformCapabilityError as e:
         raise HTTPException(status_code=403, detail=str(e)) from e
     except RuntimeError as e:
         logger.error(f"[Storage] Pool '{one_line(req.name)}' was not created: {one_line(e)}")
         raise HTTPException(status_code=500, detail=f"The pool was not created: {e}") from e
+
+
+def _first_share_on_the_pool(adapter: Any) -> None:
+    """On a machine set up for Kiboto the first pool gets the shared folder other installs start with."""
+    from backend.services.samba_engine import get_samba_engine
+
+    try:
+        made = system_disk.default_share_after_pool(adapter, bool(get_samba_engine().list_shares()))
+    except (ValueError, OSError, RuntimeError) as e:
+        logger.warning("[Storage] The first shared folder was not made on the new pool: %s", one_line(e))
+        return
+    if made:
+        logger.info("[Storage] Shared folder %s made on the first pool", made)
 
 
 class ShareAccessUpdate(BaseModel):

@@ -431,8 +431,12 @@ class SambaEngine:
             except Exception as e:
                 logger.debug(f"[SambaEngine] Failed loading shares JSON: {e}")
 
-        # If no shares exist yet and default pool path exists, configure a default share
-        if not self._shares:
+        # If no shares exist yet and default pool path exists, configure a default share. Not on a
+        # machine set up for Kiboto: its main storage folder is on the system disk, and the first
+        # share is made on the first pool when that is made (system_disk.default_share_after_pool)
+        from backend import runtime
+
+        if not self._shares and not runtime.managed_host():
             default_path = os.path.join(POOL_PATH, "shares") if POOL_PATH else "/mnt/storage"
             default_share = SambaShareConfig(
                 name="storage",

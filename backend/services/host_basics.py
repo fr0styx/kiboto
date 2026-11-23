@@ -171,7 +171,14 @@ def status(do: Run | None = None) -> dict[str, Any]:
         "clock": clock(do),
         "ssh": ssh(do),
         "bridge": _bridge(),
+        "system_disk": _system_disk(),
     }
+
+
+def _system_disk() -> dict[str, Any]:
+    from backend.hardware.pal import system_disk
+
+    return system_disk.usage()
 
 
 def _bridge() -> dict[str, Any]:

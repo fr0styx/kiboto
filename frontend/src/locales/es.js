@@ -2320,6 +2320,8 @@ export default {
   "srv.share_kiboto_folder": "Esa es la carpeta de datos del propio Kiboto. Elige otra carpeta.",
   "srv.nfs_no_server": "Esta instalación no tiene servidor NFS, así que aquí no se pueden compartir carpetas por NFS.",
   "srv.share_outside": "Elige una carpeta dentro de {places}.",
+  "srv.share_system_disk": "Kiboto no guarda carpetas compartidas en el disco del sistema. Elige una carpeta en uno de los grupos de almacenamiento.",
+  "srv.share_no_pool": "Crea primero un grupo de almacenamiento. Kiboto no guarda carpetas compartidas en el disco del sistema.",
   "srv.share_bad_name": "Pon un nombre a la carpeta compartida: letras, dígitos, puntos, guiones o guiones bajos (no global, homes ni printers).",
   "srv.username_length": "Un nombre de usuario tiene de 2 a 32 caracteres.",
   "srv.username_unsafe": "Un nombre de usuario no puede empezar por un punto ni contener barras.",

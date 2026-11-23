@@ -10,6 +10,7 @@ from fastapi import APIRouter, Depends, HTTPException, Response
 
 from backend.auth import require_scope
 from backend.confirmations import require_confirmation
+from backend.errors import SaidError
 from backend.hardware.pal_storage import (
     PlatformType,
     StoragePlatformDetector,
@@ -56,8 +57,13 @@ def create_or_update_samba_share(share: SambaShareConfig) -> SambaShareConfig:
             status_code=403,
             detail=f"Observer Mode active: Samba shares on {pal.get_platform_type().value} must be configured in host OS.",
         )
+    from backend.hardware.pal import system_disk
+
     try:
         engine = get_samba_engine()
+        problem = system_disk.new_share_problem(share.path) if engine.get_share(share.name) is None else None
+        if problem:
+            raise SaidError(*problem)
         saved = engine.add_or_update_share(share)
         nas_name.refresh()  # a Time Machine share is announced to Macs (FEAT-09)
         return saved

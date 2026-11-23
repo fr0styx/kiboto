@@ -184,6 +184,8 @@ class NetworkShare(BaseModel):
     usage_is_own: bool = False
     # the pool the folder is on, while that pool is away: its folder shows empty until the pool is back
     pool_away: str = ""
+    # on a machine set up for Kiboto, a folder shared on the system disk before it kept none there
+    on_system_disk: bool = False
     allocator: str = "highwater"
     cow: str = "auto"
 

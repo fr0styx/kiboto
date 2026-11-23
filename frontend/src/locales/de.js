@@ -2320,6 +2320,8 @@ export default {
   "srv.share_kiboto_folder": "Das ist Kibotos eigener Datenordner. Wählen Sie einen anderen Ordner.",
   "srv.nfs_no_server": "Diese Installation hat keinen NFS-Server, deshalb können Ordner hier nicht über NFS freigegeben werden.",
   "srv.share_outside": "Wählen Sie einen Ordner in {places}.",
+  "srv.share_system_disk": "Kiboto legt keine freigegebenen Ordner auf der Systemfestplatte an. Wählen Sie einen Ordner auf einem der Pools.",
+  "srv.share_no_pool": "Legen Sie zuerst einen Speicherpool an. Kiboto legt keine freigegebenen Ordner auf der Systemfestplatte an.",
   "srv.share_bad_name": "Geben Sie dem freigegebenen Ordner einen Namen: Buchstaben, Ziffern, Punkte, Bindestriche oder Unterstriche (nicht global, homes oder printers).",
   "srv.username_length": "Ein Benutzername hat 2 bis 32 Zeichen.",
   "srv.username_unsafe": "Ein Benutzername darf nicht mit einem Punkt beginnen und keine Schrägstriche enthalten.",

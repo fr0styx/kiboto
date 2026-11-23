@@ -61,7 +61,10 @@ def test_a_guest_says_these_belong_to_its_host_and_changes_nothing(client, auth_
 
 
 def test_the_machine_says_how_it_stands(managed, client, auth_headers, monkeypatch):
+    from backend.hardware.pal import system_disk
+
     monkeypatch.setattr(host_basics, "run", Machine(ssh=True, ntp=True, in_step=False))
+    monkeypatch.setattr(system_disk, "usage", lambda: {"total_bytes": 100, "free_bytes": 40})
     assert client.get("/api/system/machine", headers=auth_headers).json() == {
         "managed": True,
         "host_name": "attic",
@@ -69,6 +72,7 @@ def test_the_machine_says_how_it_stands(managed, client, auth_headers, monkeypat
         "clock": {"can": True, "automatic": True, "in_step": False},
         "ssh": {"installed": True, "on": True},
         "bridge": {"on": False, "port": "", "name": "br0", "can": False},
+        "system_disk": {"total_bytes": 100, "free_bytes": 40},
     }
 
 
