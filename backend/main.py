@@ -10,6 +10,7 @@ import json
 import os
 import re
 import secrets
+import signal
 import sys
 import threading
 import time
@@ -74,6 +75,8 @@ def _start_docker_proxy(supervise) -> None:
         env.pop("KIBOTO_DOCKER_SOCK", None)
         env.pop(legacy_names.old_env_name("KIBOTO_DOCKER_SOCK") or "", None)
         rc = subprocess.run([sys.executable, "-m", "backend.docker_proxy"], env=env).returncode  # runs until stopped
+        if rc == -signal.SIGTERM:
+            time.sleep(3)  # Kiboto being stopped ends this process too before then: that is no crash
         raise RuntimeError(f"docker proxy exited with code {rc}")
 
     supervise("DockerProxy", run)
@@ -557,6 +560,10 @@ def _door_of_this_version() -> None:
         native_update.ensure_units(os.path.join(native_update.PREFIX, "current"))
     except OSError as e:
         logger.warning("[Main] The service files were not checked: %s", e)
+    from backend import door
+
+    if os.path.exists(os.path.join(native_update.UNIT_DIR, "kiboto-door.service")) and not door.wait_open():
+        logger.warning("[Main] The host door did not open; what it does is done by Kiboto itself for now")
 
 
 def _machine_at_start() -> None:

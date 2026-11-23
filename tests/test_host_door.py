@@ -851,3 +851,34 @@ def test_the_door_keeps_the_key_to_a_machine_kiboto_runs(audit, monkeypatch):
     monkeypatch.setattr(runtime, "managed_host", lambda: True)
     assert host_door.handle({"op": "keys.unlock", "args": {"typed": "ABCD"}}, 0) == {"ok": True, "result": "disk"}
     assert all("ABCD" not in line for line in audit.read_text().splitlines())  # never an argument in the log
+
+
+def test_kiboto_waits_for_the_door_it_restarted(monkeypatch, tmp_path):
+    from backend import main
+    from backend.services import native_update
+
+    monkeypatch.setattr(native_update, "ensure_units", lambda rel: [])
+    monkeypatch.setattr(native_update, "UNIT_DIR", str(tmp_path))
+    waited = []
+    monkeypatch.setattr(door, "wait_open", lambda: waited.append(1) or False)
+    main._door_of_this_version()
+    assert waited == []  # no door on this machine
+    (tmp_path / "kiboto-door.service").write_text("[Unit]\n")
+    main._door_of_this_version()
+    assert waited == [1]
+
+
+def test_wait_open_asks_until_the_door_answers(monkeypatch):
+    answers = [OSError("no socket yet"), door.DoorError("starting"), "pong"]
+
+    def call(op, **kw):
+        a = answers.pop(0)
+        if isinstance(a, Exception):
+            raise a
+        return a
+
+    monkeypatch.setattr(door, "call", call)
+    monkeypatch.setattr(door.time, "sleep", lambda s: None)
+    assert door.wait_open(timeout=5) is True and answers == []
+    monkeypatch.setattr(door, "call", lambda op, **kw: (_ for _ in ()).throw(OSError("gone")))
+    assert door.wait_open(timeout=0) is False

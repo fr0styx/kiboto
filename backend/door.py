@@ -12,6 +12,7 @@ from __future__ import annotations
 import json
 import os
 import socket
+import time
 from collections.abc import Callable
 from typing import Any
 
@@ -89,6 +90,24 @@ def _exchange(s: socket.socket, request: bytes) -> bytes:
         if len(data) > MAX_REPLY:
             raise DoorError("the door's answer was too long")
     return data
+
+
+def wait_open(timeout: float = 10.0, sock: str = SOCK) -> bool:
+    """Whether the door answers within `timeout` seconds. Right after it was (re)started its socket
+    comes a moment later, and an operation asked in that moment would be done here instead."""
+    end = time.monotonic() + timeout
+    while not _answers(sock):
+        if time.monotonic() >= end:
+            return False
+        time.sleep(0.2)
+    return True
+
+
+def _answers(sock: str) -> bool:
+    try:
+        return call("door.ping", timeout=2, sock=sock) == "pong"
+    except (OSError, DoorError):  # not open yet
+        return False
 
 
 def via(op: str, here: Callable[..., Any], **args: Any) -> Any:
