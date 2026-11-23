@@ -119,6 +119,54 @@ def venv_for(rel: str, prefix: str = PREFIX, run: Any = None) -> str:
     return venv
 
 
+_SHELL_LIST = r'^{name}="((?:[^"\\]|\\\n)*)"'
+_PACKAGE = re.compile(r"^[a-z0-9][a-z0-9.+-]+$")
+
+
+def _shell_list(text: str, name: str) -> list[str]:
+    m = re.search(_SHELL_LIST.format(name=name), text, re.M)
+    words = m.group(1).replace("\\\n", " ").split() if m else []
+    return [w for w in words if _PACKAGE.match(w)]
+
+
+def tools_of(rel: str) -> list[str]:
+    """The machine's packages this version's install script installs (TOOLS in packaging/install.sh),
+    less the held ones (HELD), which only the held-set step brings to their tested versions."""
+    try:
+        with open(os.path.join(rel, "packaging", "install.sh"), encoding="utf-8") as f:
+            text = f.read()
+    except OSError:
+        return []
+    held = set(_shell_list(text, "HELD"))
+    return [p for p in _shell_list(text, "TOOLS") if p not in held]
+
+
+def add_missing_tools(rel: str, run: Any = None) -> list[str]:
+    """A newer version can need a package an install made by an older one does not have (hdparm, for
+    drive sleep, came with 2.0.6). What is missing is installed from Debian before the switch; when
+    that fails the update goes on, and what needs the package says it can't be used. Returns what was
+    missing."""
+    run = run or _run
+    missing = []
+    for pkg in tools_of(rel):
+        code, said = run(["dpkg-query", "-W", "-f=${Status}", pkg], timeout=20)
+        if code != 0 or "ok installed" not in said:
+            missing.append(pkg)
+    if not missing:
+        return []
+    apt = ["apt-get", "install", "-y", "-qq", "--no-install-recommends", *missing]
+    env = {**os.environ, "DEBIAN_FRONTEND": "noninteractive"}
+    code, said = run(apt, timeout=900, env=env)
+    if code != 0:  # the package lists may be out of date: once more after reading them again
+        run(["apt-get", "update", "-qq"], timeout=300, env=env)
+        code, said = run(apt, timeout=900, env=env)
+    if code != 0:
+        logger.warning("[Update] %s could not be installed, so what needs it waits: %s", " ".join(missing), said)
+    else:
+        logger.info("[Update] installed what this version needs from Debian: %s", " ".join(missing))
+    return missing
+
+
 def prepare(image: str, version: str, prefix: str = PREFIX, run: Any = None) -> str:
     """Makes the new version ready beside the running one. Returns its folder."""
     run = run or _run
@@ -126,6 +174,7 @@ def prepare(image: str, version: str, prefix: str = PREFIX, run: Any = None) -> 
     try:
         extract(image, rel)
         venv_for(rel, prefix, run)
+        add_missing_tools(rel, run)
         code, said = run(
             [
                 os.path.join(rel, "venv", "bin", "python"),

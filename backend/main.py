@@ -524,6 +524,9 @@ def _start_app_names() -> None:
         from backend.services.supervisor import supervise
 
         supervise("AppNames", app_hosts.keep_in_step)
+        from backend.services import smb_signins
+
+        supervise("SmbSignIns", smb_signins.keep_watching)  # failed SMB sign-ins count like the web ones
         from backend.services import apps_back, pool_copy, pool_places
 
         try:

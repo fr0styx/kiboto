@@ -9248,4 +9248,5 @@ export default {
   "hdsleep.asleep": "En veille, donc laissés tranquilles jusqu'au prochain démarrage : {list}.",
   "srv.drive_sleep_not_here": "Sur cette machine, son propre système décide quand les disques se mettent en veille.",
   "srv.drive_sleep_choice": "Choisissez l'une des durées de la liste.",
+  "signin.smb_failed": "Partage de fichiers : {count, plural, one {# connexion échouée} other {# connexions échouées}} en tant que {user}",
 };

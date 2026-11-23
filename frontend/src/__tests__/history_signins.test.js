@@ -25,6 +25,12 @@ describe('History -> Sign-ins (Activity report section 4, row 5)', () => {
     );
     expect(signinSentence({ event_type: 'auth.login.failure' })).toBe('A sign-in as Someone failed');
     expect(signinSentence({ event_type: 'odd.thing', actor_username: 'ben' })).toBe('odd.thing (ben)');
+    expect(signinSentence({ event_type: 'smb.login.failure', actor_username: 'ana', details: { count: 20 } })).toBe(
+      'File sharing: 20 failed sign-ins as ana'
+    );
+    expect(signinSentence({ event_type: 'smb.login.failure', actor_username: 'ana' })).toBe(
+      'File sharing: 1 failed sign-in as ana'
+    );
   });
 
   it('draws the log by day, says when there is none, and when it cannot be read', async () => {

@@ -457,3 +457,66 @@ def test_a_new_release_names_itself_by_its_build(tmp_path):
     bare = tmp_path / "releases" / "new-1"
     bare.mkdir()
     assert nu._named_by_its_build(str(bare)) == str(bare)  # nothing to name it by
+
+
+INSTALL_SH = """#!/bin/sh
+HELD="linux-image-amd64 zfs-dkms docker.io"
+TOOLS="smartmontools hdparm nvme-cli \\
+docker.io samba \\
+python3-venv"
+say() { :; }
+"""
+
+
+class Dpkg(Runs):
+    def __init__(self, installed, apt_fails=0):
+        super().__init__()
+        self.installed, self.apt_fails = set(installed), apt_fails
+
+    def __call__(self, cmd, timeout=60, cwd=None, env=None):
+        self.ran.append(cmd)
+        if cmd[0] == "dpkg-query":
+            return (
+                (0, "install ok installed")
+                if cmd[-1] in self.installed
+                else (1, f"no packages found matching {cmd[-1]}")
+            )
+        if cmd[:2] == ["apt-get", "install"]:
+            assert env and env.get("DEBIAN_FRONTEND") == "noninteractive"
+            if self.apt_fails:
+                self.apt_fails -= 1
+                return 100, "E: Unable to locate package"
+            self.installed.update(c for c in cmd[5:])
+        return 0, ""
+
+
+def _with_install_sh(tmp_path, text=INSTALL_SH):
+    rel = tmp_path / "rel"
+    (rel / "packaging").mkdir(parents=True)
+    (rel / "packaging" / "install.sh").write_text(text)
+    return str(rel)
+
+
+def test_the_tools_a_version_installs_are_read_from_its_install_script(tmp_path):
+    rel = _with_install_sh(tmp_path)
+    assert nu.tools_of(rel) == ["smartmontools", "hdparm", "nvme-cli", "samba", "python3-venv"]  # docker.io is held
+    assert nu.tools_of(str(tmp_path / "nothing")) == []
+    assert nu.tools_of(_with_install_sh(tmp_path / "x", 'TOOLS="ok $(reboot) -y bad;name"\n')) == ["ok"]
+
+
+def test_a_tool_the_new_version_needs_is_installed_before_the_switch(tmp_path):
+    rel = _with_install_sh(tmp_path)
+    run = Dpkg({"smartmontools", "nvme-cli", "samba", "python3-venv"})
+    assert nu.add_missing_tools(rel, run) == ["hdparm"]
+    assert run.did("apt-get install") == [["apt-get", "install", "-y", "-qq", "--no-install-recommends", "hdparm"]]
+    assert nu.add_missing_tools(rel, run) == [] and len(run.did("apt-get install")) == 1  # nothing missing now
+
+
+def test_out_of_date_package_lists_are_read_again_and_a_failure_does_not_stop_the_update(tmp_path):
+    rel = _with_install_sh(tmp_path)
+    run = Dpkg({"smartmontools", "nvme-cli", "samba", "python3-venv"}, apt_fails=1)
+    assert nu.add_missing_tools(rel, run) == ["hdparm"]
+    assert run.did("apt-get update") and len(run.did("apt-get install")) == 2 and "hdparm" in run.installed
+    run = Dpkg(set(), apt_fails=2)
+    assert nu.add_missing_tools(rel, run) == ["smartmontools", "hdparm", "nvme-cli", "samba", "python3-venv"]
+    assert not run.installed  # said in the log; the update goes on

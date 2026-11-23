@@ -9248,4 +9248,5 @@ export default {
   "hdsleep.asleep": "它们正在休眠，所以下次启动前不会动它们：{list}。",
   "srv.drive_sleep_not_here": "在这台机器上，由它自己的系统决定硬盘何时休眠。",
   "srv.drive_sleep_choice": "请从列表中选择一个时间。",
+  "signin.smb_failed": "文件共享：以 {user} 登录失败 {count, plural, other {# 次}}",
 };

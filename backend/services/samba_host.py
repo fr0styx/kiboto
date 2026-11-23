@@ -19,6 +19,7 @@ from backend.config import logger
 from backend.settings import test_mode
 
 ETC_CONF = "/etc/samba/smb.conf"
+AUTH_LOG = "/var/log/samba/kiboto-auth.json"  # failed sign-ins, read by services/smb_signins.py
 # "include", not "config file": with the latter Samba's own tools kept the default "private dir"
 # while smbd took Kiboto's, so a password was stored where the server did not look.
 POINTER = (
@@ -74,7 +75,12 @@ def _runner(do: "Run | None") -> "Run":
 def global_lines(samba_dir: str) -> list[str]:
     """What the machine's smbd must be told that the container was given by its image: where the
     accounts are kept (in Kiboto's data folder, so they travel with a settings backup)."""
-    return [f"   private dir = {os.path.join(samba_dir, 'private')}", "   passdb backend = tdbsam"]
+    return [
+        f"   private dir = {os.path.join(samba_dir, 'private')}",
+        "   passdb backend = tdbsam",
+        # failed sign-ins (level 2: failures only) as JSON lines, read by services/smb_signins.py
+        f"   log level = 0 auth_json_audit:2@{AUTH_LOG}",
+    ]
 
 
 def point_samba_here(conf: str, etc_conf: str = ETC_CONF) -> bool:

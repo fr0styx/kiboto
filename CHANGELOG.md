@@ -8,6 +8,12 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 
 Releases now carry the install image: it was built, but saved in a folder that was removed before the upload, so v2.0.6 went out without it.
 
+On a machine of its own, an update now also installs the system tools the new version needs, such as the one drive sleep uses.
+
+#### Security
+
+On a machine of its own, failed sign-ins to shared folders over the network now count like web sign-ins: 20 in 15 minutes block the address for an hour, and they show under History, Sign-ins.
+
 ## v2.0.6 (2026-11-23)
 ### 🖥️ Kiboto on a machine of its own (preview), with its settings kept safe on every pool
 

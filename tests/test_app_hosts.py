@@ -133,4 +133,4 @@ def test_the_names_follow_the_containers_on_a_managed_host_only(monkeypatch):
     assert started == []
     monkeypatch.setattr(runtime, "managed_host", lambda: True)
     main._start_app_names()
-    assert started == ["AppNames"]
+    assert started == ["AppNames", "SmbSignIns"]

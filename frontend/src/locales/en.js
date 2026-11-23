@@ -9248,4 +9248,5 @@ export default {
   "hdsleep.asleep": "Asleep, so left alone until the next start: {list}.",
   "srv.drive_sleep_not_here": "On this machine its own system decides when drives sleep.",
   "srv.drive_sleep_choice": "Choose one of the times in the list.",
+  "signin.smb_failed": "File sharing: {count, plural, one {# failed sign-in} other {# failed sign-ins}} as {user}",
 };

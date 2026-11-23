@@ -9248,4 +9248,5 @@ export default {
   "hdsleep.asleep": "Sie schliefen und bleiben bis zum nächsten Start unberührt: {list}.",
   "srv.drive_sleep_not_here": "Auf diesem Rechner entscheidet sein eigenes System, wann Festplatten schlafen.",
   "srv.drive_sleep_choice": "Wählen Sie eine der Zeiten aus der Liste.",
+  "signin.smb_failed": "Dateifreigabe: {count, plural, one {# fehlgeschlagene Anmeldung} other {# fehlgeschlagene Anmeldungen}} als {user}",
 };

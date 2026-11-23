@@ -19,6 +19,10 @@ const WORDS = {
   'auth.login.failure': ['signin.failed', 'A sign-in as {user} failed'],
   'auth.login.blocked': ['signin.blocked', '{ip} was blocked after failed sign-ins'],
   'auth.lockout': ['signin.blocked', '{ip} was blocked after failed sign-ins'],
+  'smb.login.failure': [
+    'signin.smb_failed',
+    'File sharing: {count, plural, one {# failed sign-in} other {# failed sign-ins}} as {user}',
+  ],
   'auth.login.outside_hours': ['signin.hours', '{user} tried to sign in outside their hours'],
   'auth.logout': ['signin.out', '{user} signed out'],
   'audit.exported': ['signin.exported', '{user} saved the security log as a file'],
@@ -41,6 +45,7 @@ export function signinSentence(row) {
     user: row.actor_username || t('signin.someone', 'Someone'),
     ip: row.actor_ip || '?',
     device: row.details?.device || '?',
+    count: Number(row.details?.count) || 1,
   };
   return words ? t(words[0], words[1], params) : `${row.event_type} (${params.user})`;
 }

@@ -9248,4 +9248,5 @@ export default {
   "hdsleep.asleep": "Estaban dormidos, así que no se tocan hasta el próximo arranque: {list}.",
   "srv.drive_sleep_not_here": "En esta máquina su propio sistema decide cuándo duermen los discos.",
   "srv.drive_sleep_choice": "Elige uno de los tiempos de la lista.",
+  "signin.smb_failed": "Archivos compartidos: {count, plural, one {# inicio de sesión fallido} other {# inicios de sesión fallidos}} como {user}",
 };
