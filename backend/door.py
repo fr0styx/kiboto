@@ -24,6 +24,9 @@ LONG = {  # seconds an operation may take, where the default is too short
     "storage.export_pool": 600,
     "storage.erase_pool": 900,
     "storage.allow_changes": 600,
+    "update.start": 900,  # downloads nothing (the image is there) but makes a Python environment
+    "packages.add_missing": 1800,
+    "packages.check": 360,
 }
 
 

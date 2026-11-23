@@ -694,3 +694,98 @@ def test_the_door_starts_a_self_test_only_on_a_drive(audit, monkeypatch, tmp_pat
     assert started == []
     monkeypatch.setattr(host_door.os, "stat", lambda p: os.stat_result((0o060660,) + (0,) * 9))
     assert test("sdb")["ok"] is True and started == ["sdb"]
+
+
+def test_updates_and_packages_go_through_the_door(monkeypatch):
+    from backend.services import host_set, native_update
+
+    calls = []
+    monkeypatch.setattr(door, "available", lambda sock=door.SOCK: True)
+    monkeypatch.setattr(door, "call", lambda op, **a: calls.append((op, a)) or "/opt/kiboto/releases/x")
+    assert native_update.start("ghcr.io/fr0styx/kiboto:2.0.7", "2.0.7", "/elsewhere", 1) == "/opt/kiboto/releases/x"
+    native_update.start_back("snap-1", "/elsewhere", 1)
+    native_update.add_missing_tools_now()
+    assert host_set.check() is True and host_set.start() is True
+    assert calls == [
+        ("update.start", {"image": "ghcr.io/fr0styx/kiboto:2.0.7", "version": "2.0.7"}),
+        ("update.back", {"snapshot_id": "snap-1"}),
+        ("packages.add_missing", {}),
+        ("packages.check", {}),
+        ("packages.host_set", {}),
+    ]
+    for op, args in calls:
+        host_door._checked({"op": op, "args": args})
+
+    def refused(op, **a):
+        raise door.DoorError("Not updating: the image's signature could not be verified (no signature).", "value")
+
+    monkeypatch.setattr(door, "call", refused)
+    with pytest.raises(native_update.UpdateFailed, match="signature"):
+        native_update.start("ghcr.io/fr0styx/kiboto:2.0.7", "2.0.7", "/elsewhere", 1)
+    with pytest.raises(native_update.UpdateFailed):
+        native_update.start_back("snap-1", "/elsewhere", 1)
+
+    monkeypatch.setattr(door, "available", lambda sock=door.SOCK: False)
+    here = []
+    monkeypatch.setattr(native_update, "_start_here", lambda *a, **k: here.append(a) or "rel")
+    assert native_update.start("img", "v", "/data", 8082) == "rel" and here == [("img", "v", "/data", 8082)]
+
+
+def test_the_door_checks_the_image_before_it_installs_it(audit, monkeypatch):
+    from backend import config
+    from backend.services import host_set, image_signature, native_update
+
+    started, checked = [], []
+    monkeypatch.setattr(image_signature, "install_allowed", lambda image: checked.append(image) or "sha256:" + "a" * 64)
+    monkeypatch.setattr(native_update, "start", lambda *a: started.append(a) or "rel")
+    monkeypatch.setattr(native_update, "start_back", lambda *a: started.append(a))
+    monkeypatch.setattr(native_update, "add_missing_tools", lambda rel: [rel])
+    monkeypatch.setattr(host_set, "check", lambda: True)
+    monkeypatch.setattr(host_set, "start", lambda: False)
+
+    def op(name, **args):
+        return host_door.handle({"op": name, "args": args}, 0)
+
+    assert op("update.start", image="ghcr.io/fr0styx/kiboto:2.0.7", version="2.0.7")["result"] == "rel"
+    assert started == [("ghcr.io/fr0styx/kiboto:2.0.7", "2.0.7", config.DATA_DIR, config.PORT)]
+    assert op("update.start", image="x", version="-rf /")["ok"] is False and len(checked) == 1
+    assert op("update.back", snapshot_id="../x")["ok"] is False
+    assert op("update.back", snapshot_id="snap-1")["ok"] is True and started[-1][0] == "snap-1"
+    assert op("packages.add_missing")["result"] == [os.path.join(native_update.PREFIX, "current")]
+    assert op("packages.check")["result"] is True and op("packages.host_set")["result"] is False
+
+
+def test_install_allowed(monkeypatch):
+    from backend import config
+    from backend.services import docker_client, image_signature
+
+    good = "sha256:" + "b" * 64
+    seen = {}
+    monkeypatch.setattr(
+        docker_client,
+        "request",
+        lambda m, path, *a, **k: (
+            200,
+            {"RepoDigests": [f"ghcr.io/fr0styx/kiboto@{good}", "other/x@sha256:" + "c" * 64]},
+        ),
+    )
+    monkeypatch.setattr(config, "UPDATE_SIGNATURES", "enforce")
+    monkeypatch.setattr(
+        image_signature,
+        "verify_image",
+        lambda d, tags: seen.setdefault("v", (d, tags)) and image_signature.SignatureResult(True, "ok", "ci"),
+    )
+    assert image_signature.install_allowed("ghcr.io/fr0styx/kiboto:2.0.7") == good and seen["v"][0] == good
+    for bad in ("../../containers/json", "UPPER", "ghcr.io/fr0styx/kiboto@sha256:" + "c" * 64):
+        with pytest.raises(ValueError):
+            image_signature.install_allowed(bad)
+    monkeypatch.setattr(
+        image_signature, "verify_image", lambda d, tags: image_signature.SignatureResult(False, "no sig")
+    )
+    with pytest.raises(ValueError, match="no sig"):
+        image_signature.install_allowed("ghcr.io/fr0styx/kiboto:2.0.7")
+    monkeypatch.setattr(config, "UPDATE_SIGNATURES", "warn")  # the machine's own setting, not the caller's
+    assert image_signature.install_allowed("ghcr.io/fr0styx/kiboto:2.0.7") == good
+    monkeypatch.setattr(docker_client, "request", lambda *a, **k: (404, None))
+    with pytest.raises(ValueError, match="downloaded"):
+        image_signature.install_allowed("ghcr.io/fr0styx/kiboto:2.0.7")

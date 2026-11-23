@@ -138,13 +138,31 @@ def status(do: Run | None = None) -> dict[str, Any]:
 
 
 def check(do: Run | None = None) -> bool:
-    """Asks Debian what it offers now (apt-get update). The person asked for it."""
+    """Asks Debian what it offers now (apt-get update). The person asked for it. Through the host
+    door where it runs (ADR 0006)."""
+    if do is None:
+        from backend import door
+
+        return bool(door.via("packages.check", _check_here))
+    return _check_here(do)
+
+
+def _check_here(do: Run | None = None) -> bool:
     do = do or run
     return runtime.managed_host() and do(["apt-get", "update", "-qq"], timeout=300)[0] == 0
 
 
 def start(do: Run | None = None) -> bool:
-    """Hands the move to a unit of its own. False when there is nothing to move or one already runs."""
+    """Hands the move to a unit of its own. False when there is nothing to move or one already runs.
+    Through the host door where it runs (ADR 0006)."""
+    if do is None:
+        from backend import door
+
+        return bool(door.via("packages.host_set", _start_here))
+    return _start_here(do)
+
+
+def _start_here(do: Run | None = None) -> bool:
     do = do or run
     st = status(do)
     if not st.get("managed") or st["running"] or not st["move"]:

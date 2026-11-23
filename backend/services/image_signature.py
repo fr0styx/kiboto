@@ -258,6 +258,43 @@ def verify_image(digest: str, tags_only: bool = False) -> SignatureResult:
     return SignatureResult(False, "the signature did not verify: " + "; ".join(problems))
 
 
+IMAGE_REPOS = ("ghcr.io/" + product.IMAGE_REPO, "ghcr.io/" + legacy_names.OLD_IMAGE_REPO)
+_LOCAL_REF = re.compile(r"^[a-z0-9][a-z0-9./:_-]{0,255}(?:@sha256:[0-9a-f]{64})?$")
+
+
+def local_digests(image: str) -> list[str]:
+    """The registry digests of a local image that belong to Kiboto's repository."""
+    from backend.services import docker_client
+
+    st, img = docker_client.request("GET", f"/images/{image}/json")
+    if st != 200 or not isinstance(img, dict):
+        return []
+    return [d.split("@", 1)[1] for d in img.get("RepoDigests") or [] if d.split("@", 1)[0] in IMAGE_REPOS]
+
+
+def install_allowed(image: str) -> str:
+    """The host door's own check before it installs an image (ADR 0006): a downloaded image from
+    Kiboto's repository and, unless this machine's settings say otherwise (UPDATE_SIGNATURES),
+    signed by its CI, for a release on a machine Kiboto runs. Returns the digest; ValueError says
+    why not."""
+    from backend import config
+
+    if not _LOCAL_REF.match(image or "") or ".." in image:
+        raise ValueError("Not updating: that is not an image name.")
+    digests = local_digests(image)
+    if not digests:
+        raise ValueError("Not updating: the image is not a downloaded one from Kiboto's repository.")
+    digest = image.split("@", 1)[1] if "@" in image else digests[0]
+    if digest not in digests:
+        raise ValueError("Not updating: the image is not from Kiboto's repository.")
+    if config.UPDATE_SIGNATURES in ("off", "warn"):
+        return digest
+    result = verify_image(digest, releases_only())
+    if not result.ok:
+        raise ValueError(f"Not updating: the image's signature could not be verified ({result.reason}).")
+    return digest
+
+
 def releases_only() -> bool:
     """Whether this machine takes only images signed for a release: a machine Kiboto runs, unless
     KIBOTO_ACCEPT_MAIN_BUILDS is set (a test machine)."""

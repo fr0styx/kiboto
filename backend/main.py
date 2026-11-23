@@ -566,8 +566,8 @@ def _machine_at_start() -> None:
     from backend.services import drive_sleep, native_update
 
     try:
-        native_update.add_missing_tools(os.path.join(native_update.PREFIX, "current"))
-    except OSError as e:
+        native_update.add_missing_tools_now()
+    except (OSError, native_update.UpdateFailed) as e:
         logger.warning("[Main] The machine's tools were not checked: %s", e)
     try:
         rows = drive_sleep.at_start()

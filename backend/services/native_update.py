@@ -446,8 +446,34 @@ def back(snapshot: str, data_dir: str, port: int, prefix: str = PREFIX, run: Any
     return "reverted" if ok else "not_reverted"
 
 
+def _door(op: str, here: Any, **args: Any) -> Any:
+    """`op` in the host door where it runs (ADR 0006), else `here`; a failure is UpdateFailed."""
+    from backend import door
+
+    try:
+        return door.via(op, here, **args)
+    except UpdateFailed:
+        raise
+    except (RuntimeError, ValueError) as e:  # the door's refusal or failure, said as it was
+        raise UpdateFailed(str(e)) from None
+
+
+def add_missing_tools_now() -> list[str]:
+    """What the running version needs from Debian (add_missing_tools), at start; through the door
+    where it runs."""
+    return _door("packages.add_missing", lambda: add_missing_tools(os.path.join(PREFIX, "current")))
+
+
 def start_back(snapshot_id: str, data_dir: str, port: int, prefix: str = PREFIX, run: Any = None) -> None:
-    """Hands going back to a helper that outlives the restart. Raises UpdateFailed when it cannot."""
+    """Hands going back to a helper that outlives the restart. Raises UpdateFailed when it cannot.
+    Through the host door where it runs (ADR 0006), with the door's own data folder and port."""
+    if run is None and prefix == PREFIX:
+        _door("update.back", lambda snapshot_id: _start_back_here(snapshot_id, data_dir, port), snapshot_id=snapshot_id)
+        return
+    _start_back_here(snapshot_id, data_dir, port, prefix, run)
+
+
+def _start_back_here(snapshot_id: str, data_dir: str, port: int, prefix: str = PREFIX, run: Any = None) -> None:
     from backend.services.data_snapshot import list_snapshots
 
     run = run or _run
@@ -480,7 +506,20 @@ def start_back(snapshot_id: str, data_dir: str, port: int, prefix: str = PREFIX,
 
 def start(image: str, version: str, data_dir: str, port: int, prefix: str = PREFIX, run: Any = None) -> str:
     """Makes the new version ready, then hands the switch to a helper that outlives the restart.
-    Returns the new version's folder. Raises UpdateFailed when it could not be made ready."""
+    Returns the new version's folder. Raises UpdateFailed when it could not be made ready.
+    Through the host door where it runs (ADR 0006): the door checks the image's signature itself
+    (image_signature.install_allowed) and uses its own data folder and port."""
+    if run is None and prefix == PREFIX:
+        return _door(
+            "update.start",
+            lambda image, version: _start_here(image, version, data_dir, port),
+            image=image,
+            version=version,
+        )
+    return _start_here(image, version, data_dir, port, prefix, run)
+
+
+def _start_here(image: str, version: str, data_dir: str, port: int, prefix: str = PREFIX, run: Any = None) -> str:
     run = run or _run
     rel = prepare(image, version, prefix, run)
     python = os.path.join(os.path.realpath(os.path.join(prefix, "current")), "venv", "bin", "python")

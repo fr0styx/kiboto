@@ -178,6 +178,38 @@ def _sleep_after(minutes: int) -> list[dict[str, Any]]:
     return drive_sleep.apply(minutes)
 
 
+def _update_start(image: str, version: str) -> str:
+    """An update, after the door's own check of the image's signature; the data folder and port
+    are the door's."""
+    from backend import config
+    from backend.services import image_signature, native_update
+
+    if version and not re.match(r"^[A-Za-z0-9][A-Za-z0-9._+-]{0,39}$", version):
+        raise ValueError("version must be a version's name")
+    image_signature.install_allowed(image)
+    return native_update.start(image, version, config.DATA_DIR, config.PORT)
+
+
+def _update_back(snapshot_id: str) -> None:
+    from backend import config
+    from backend.services import native_update
+
+    if not re.match(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,99}$", snapshot_id):
+        raise ValueError("snapshot_id must be a saved version's id")
+    native_update.start_back(snapshot_id, config.DATA_DIR, config.PORT)
+
+
+def _packages(name: str) -> Callable[[], Any]:
+    def run() -> Any:
+        from backend.services import host_set, native_update
+
+        if name == "add_missing":
+            return native_update.add_missing_tools(os.path.join(native_update.PREFIX, "current"))
+        return host_set.check() if name == "check" else host_set.start()
+
+    return run
+
+
 def _renamed(kw: dict[str, Any]) -> None:
     from backend.hardware.pal import pool_rules
 
@@ -252,6 +284,12 @@ OPERATIONS: dict[str, Operation] = {
     "storage.destroy_pool": Operation(_storage("destroy_pool"), {"pool_id": TEXT}, max_len=128),
     "storage.erase_pool": Operation(_storage("erase_pool"), {"pool_id": TEXT}, max_len=128),
     "storage.allow_changes": Operation(_storage("allow_changes"), {"pool_id": TEXT}, max_len=128),
+    # updates and packages (ADR 0006 step 5)
+    "update.start": Operation(_update_start, {"image": TEXT, "version": TEXT}, max_len=320),
+    "update.back": Operation(_update_back, {"snapshot_id": TEXT}, max_len=128),
+    "packages.add_missing": Operation(_packages("add_missing"), {}),
+    "packages.check": Operation(_packages("check"), {}),
+    "packages.host_set": Operation(_packages("host_set"), {}),
     "smart.self_test": Operation(_self_test, {"dev_name": TEXT, "action": TEXT}, max_len=32),
     "drives.sleep_after": Operation(_sleep_after, {"minutes": NUMBER}),
     "storage.share_folder": Operation(
