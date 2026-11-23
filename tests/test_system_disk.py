@@ -124,8 +124,12 @@ def test_samba_makes_no_default_share_on_a_managed_host(box, tmp_path, monkeypat
 
 
 def test_the_routes(box, client, auth_headers, monkeypatch):
-    from backend.api import storage
+    from backend.api import samba, storage
 
+    adapter = GenericLinuxStorageAdapter(pool_path=box.main)  # whatever adapter earlier tests left
+    monkeypatch.setattr(adapter, "list_pools", lambda: [])
+    monkeypatch.setattr(samba, "get_storage_platform", lambda: adapter)
+    monkeypatch.setattr(storage, "get_storage_platform", lambda: adapter)
     monkeypatch.setattr(samba_engine, "validate_share", lambda share: None)
     r = client.post(
         "/api/samba/shares", headers=auth_headers, json={"name": "loose", "path": os.path.join(box.main, "loose")}

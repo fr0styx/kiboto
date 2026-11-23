@@ -32,6 +32,8 @@ A storage pool from another system is now opened read-only first, so nothing on 
 
 On a machine set up for Kiboto, shared folders live only on pools: the system disk is no longer listed as a pool, a new shared folder goes on the first pool, and the first pool gets the starting "storage" folder.
 
+Setup on a machine set up for Kiboto asks for a storage pool before the first shared folder, a folder left on the system disk says its files are at risk, and This machine shows the system disk's space.
+
 #### Fixes
 
 A person with a storage limit could go over it by sending several files at once. Files still arriving now count against the limit.

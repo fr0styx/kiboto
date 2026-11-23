@@ -1575,6 +1575,11 @@ function buildShareCardInner(s, canManageShares) {
     </div>
 
     ${
+      s.on_system_disk && !s.pool_away
+        ? `<div class="share-away share-system-disk" role="status">${escapeHtml(t('share.on_system_disk', 'This folder is on the system disk. If that disk fails, its files are lost: move them into a folder on a pool.'))}</div>`
+        : ''
+    }
+    ${
       s.pool_away
         ? `<div class="share-away" role="status">${escapeHtml(t('share.pool_away', 'Its pool {pool} is not here, so the folder is empty until the pool is back. Nothing in it is lost.', { pool: s.pool_away }))}</div>`
         : s.usage_is_own === false

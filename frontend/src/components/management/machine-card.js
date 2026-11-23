@@ -6,7 +6,7 @@
  */
 import { api } from '../../api.js';
 import { t } from '../../i18n.js';
-import { escapeHtml } from '../../utils.js';
+import { escapeHtml, formatBytes } from '../../utils.js';
 
 /** The line under "Set the clock from the internet". */
 export function clockStatus(clock) {
@@ -36,6 +36,16 @@ export function sshStatus(ssh) {
     : t('machine.ssh_off', 'Off: the command line can be used only at the machine itself.');
 }
 
+/** How full the system disk is, and what is (not) on it; "" when it could not be read. */
+export function systemDiskStatus(disk) {
+  if (!disk || !disk.total_bytes) return '';
+  return t(
+    'machine.system_disk_status',
+    "{free} free of {total}. It holds the system and Kiboto's settings; shared folders and apps live on the pools.",
+    { free: formatBytes(disk.free_bytes || 0), total: formatBytes(disk.total_bytes) }
+  );
+}
+
 function row(id, icon, title, status, on, usable) {
   const label = on ? t('nas_name.btn_on', 'On') : t('nas_name.btn_off', 'Off');
   return `
@@ -57,6 +67,7 @@ function html(st) {
     : t('machine.called_only', 'Called {name}.', { name: st.host_name });
   const clock = st.clock || {};
   const ssh = st.ssh || {};
+  const disk = systemDiskStatus(st.system_disk);
   return `
     <div class="nsv-row-4">
       <span class="nsv-fs18" aria-hidden="true">🖥️</span>
@@ -66,6 +77,17 @@ function html(st) {
       </div>
     </div>
     <div class="nsv-xs-muted-2">${escapeHtml(t('machine.help', 'The name is the one in the card above. The time zone is the one chosen for Kiboto.'))}</div>
+    ${
+      disk
+        ? `<div class="nsv-row-4">
+      <span class="nsv-fs18" aria-hidden="true">💽</span>
+      <div>
+        <div class="nsv-fs13-bold-strong">${escapeHtml(t('machine.system_disk', 'System disk'))}</div>
+        <div class="nsv-xs-muted" id="machine-system-disk">${escapeHtml(disk)}</div>
+      </div>
+    </div>`
+        : ''
+    }
     ${row('machine-clock', '🕒', t('machine.clock', 'Set the clock from the internet'), clockStatus(clock), Boolean(clock.automatic), Boolean(clock.can))}
     ${row('machine-ssh', '⌨️', t('machine.ssh', 'Command line over the network (SSH)'), sshStatus(ssh), Boolean(ssh.on), Boolean(ssh.installed))}
     ${row('machine-bridge', '🖧', t('machine.bridge', 'Virtual machines on the home network'), bridgeStatus(st.bridge), Boolean(st.bridge?.on), Boolean(st.bridge?.can))}

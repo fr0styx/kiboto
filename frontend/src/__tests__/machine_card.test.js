@@ -25,7 +25,7 @@ vi.mock('../api.js', () => ({
   },
 }));
 
-const { renderMachineCard, clockStatus, sshStatus, bridgeStatus } =
+const { renderMachineCard, clockStatus, sshStatus, bridgeStatus, systemDiskStatus } =
   await import('../components/management/machine-card.js');
 const trial = vi.hoisted(() => ({ showNetTrial: vi.fn() }));
 vi.mock('../components/management/net-trial.js', () => trial);
@@ -55,6 +55,17 @@ describe('This machine', () => {
     expect(clockStatus({ can: true, automatic: false })).toBe('Off: the clock is not checked and can drift.');
     expect(clockStatus({ can: true, automatic: true, in_step: false })).toBe('On: waiting for the first answer.');
     expect(clockStatus({ can: true, automatic: true, in_step: true })).toBe('On: the clock is in step.');
+  });
+
+  it('says how full the system disk is and what lives elsewhere', async () => {
+    expect(systemDiskStatus(null)).toBe('');
+    expect(systemDiskStatus({ total_bytes: 0 })).toBe('');
+    expect(systemDiskStatus({ total_bytes: 32 * 1024 ** 3, free_bytes: 20 * 1024 ** 3 })).toContain(
+      'shared folders and apps live on the pools'
+    );
+    state = { ...state, system_disk: { total_bytes: 32 * 1024 ** 3, free_bytes: 20 * 1024 ** 3 } };
+    await renderMachineCard();
+    expect(mount().querySelector('#machine-system-disk')?.textContent).toContain('20');
   });
 
   it('says how SSH stands', () => {

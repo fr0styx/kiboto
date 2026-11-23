@@ -12,7 +12,7 @@ const MARKUP = `
     <div data-setup-step="1">welcome</div>
     <div data-setup-step="1"><input id="setup-server-name"></div>
     <div data-setup-step="2"><input id="setup-current-pwd"><input id="setup-new-pwd"><input id="setup-confirm-pwd"><div id="setup-wizard-err"></div></div>
-    <div data-setup-step="3"><div id="setup-storage-info"></div></div>
+    <div data-setup-step="3"><div id="setup-storage-info"></div><button id="setup-make-pool" hidden></button></div>
     <div data-setup-step="4"><div id="setup-share-host" hidden></div><div id="setup-share-form"><input type="checkbox" id="setup-share-create" checked><input id="setup-share-name" value="Family"></div></div>
     <div data-setup-step="5"><input id="setup-person-name"><input id="setup-person-pwd"><select id="setup-person-role"><option value="kid">kid</option></select></div>
     <div data-setup-step="6"><select id="setup-timezone"></select></div>
@@ -77,6 +77,30 @@ describe('six-step setup (UX-17)', () => {
     expect(document.getElementById('setup-storage-info').textContent).toContain('Unraid');
     api.get.mockRejectedValue(new Error('down'));
     expect((await wiz.loadStorageStep()).observer).toBe(false);
+  });
+
+  it('on a machine set up for Kiboto with no pool, asks for a pool before the shared folder', async () => {
+    api.get.mockImplementation(async (url) =>
+      url.includes('platform')
+        ? { platform: 'generic_linux', capabilities: { is_observer_mode: false } }
+        : { pools: [], system_disk_kept_free: true }
+    );
+    await wiz.loadStorageStep();
+    const make = /** @type {HTMLButtonElement} */ (document.getElementById('setup-make-pool'));
+    expect(make.hidden).toBe(false);
+    expect(document.getElementById('setup-storage-info').textContent).toContain('make a pool from the drives first');
+    expect(document.getElementById('setup-share-form').hidden).toBe(true);
+    expect(document.getElementById('setup-share-host').textContent).toContain('made on the first pool');
+    api.get.mockImplementation(async (url) =>
+      url.includes('platform')
+        ? { platform: 'generic_linux', capabilities: { is_observer_mode: false } }
+        : { pools: [{ id: 'tank', name: 'tank' }], system_disk_kept_free: true }
+    );
+    await wiz.loadStorageStep(); // after the pool was made
+    expect(make.hidden).toBe(true);
+    expect(document.getElementById('setup-share-form').hidden).toBe(false);
+    expect(document.getElementById('setup-share-host').hidden).toBe(true);
+    expect(typeof make.onclick).toBe('function');
   });
 
   it('saves the name, time zone, share and person, and says what failed', async () => {

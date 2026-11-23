@@ -102,6 +102,15 @@ export function fillTimezones(select, current = '') {
   );
 }
 
+/** With no pool on a machine set up for Kiboto: a button that opens Storage's pool dialog here. */
+function showMakePool(needed) {
+  const btn = document.getElementById('setup-make-pool');
+  if (!btn) return;
+  btn.hidden = !needed;
+  btn.onclick = () =>
+    import('./chassis-visualizer.js').then((m) => m.openCreateStoragePoolModal(() => loadStorageStep()));
+}
+
 /** Step 3 and 4: what the storage is, and whether Kiboto or the host makes shares. */
 export async function loadStorageStep() {
   const info = document.getElementById('setup-storage-info');
@@ -115,6 +124,8 @@ export async function loadStorageStep() {
     const host = String(platform?.platform || '').replace(/^\w/, (c) => c.toUpperCase());
     const list = Array.isArray(pools?.pools) ? pools.pools : [];
     const observer = Boolean(platform?.capabilities?.is_observer_mode);
+    // a machine set up for Kiboto keeps no shared folders on its system disk (system_disk.py)
+    const needPool = Boolean(pools?.system_disk_kept_free) && !list.length;
     if (info) {
       const names = list
         .map((p) => p.name || p.id)
@@ -127,16 +138,26 @@ export async function loadStorageStep() {
           })
         : list.length
           ? t('setup.storage_pools', 'Storage ready: {names}.', { names })
-          : t('setup.storage_none', 'No storage pool yet. You can create one later in Storage.');
+          : needPool
+            ? t(
+                'setup.storage_pool_needed',
+                'No storage pool yet. Kiboto keeps no shared folders on the system disk, so make a pool from the drives first.'
+              )
+            : t('setup.storage_none', 'No storage pool yet. You can create one later in Storage.');
     }
-    if (observer && shareHost && shareForm) {
-      shareHost.hidden = false;
-      shareHost.textContent = t(
-        'setup.share_host',
-        'Shared folders are made in {host} itself; Kiboto lists them under Shares.',
-        { host }
-      );
-      shareForm.hidden = true;
+    showMakePool(needPool);
+    if (shareHost && shareForm) {
+      const said = observer
+        ? t('setup.share_host', 'Shared folders are made in {host} itself; Kiboto lists them under Shares.', { host })
+        : needPool
+          ? t(
+              'setup.share_after_pool',
+              'The shared folder is made on the first pool. Make one in the step before, or later in Storage.'
+            )
+          : '';
+      shareHost.hidden = !said;
+      shareHost.textContent = said;
+      shareForm.hidden = Boolean(said);
     }
     return { observer };
   } catch {

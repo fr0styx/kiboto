@@ -47,4 +47,28 @@ describe('a shared folder whose pool is away', () => {
     );
     expect(away[0].getAttribute('role')).toBe('status');
   });
+
+  it('a folder on the system disk of a machine set up for Kiboto says its files are at risk', async () => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    vi.spyOn(api, 'get').mockImplementation((url) => {
+      if (url === '/api/storage/shares')
+        return Promise.resolve({
+          platform: 'generic_linux',
+          is_observer_mode: false,
+          shares: [share('storage', { on_system_disk: true, mountpoint: '/mnt/storage/shares' }), share('music')],
+        });
+      if (url === '/api/storage/platform')
+        return Promise.resolve({
+          platform: 'generic_linux',
+          capabilities: { is_observer_mode: false, can_manage_shares: true },
+        });
+      return Promise.resolve({});
+    });
+    await fetchAndRenderNetworkShares(container);
+    const warned = container.querySelectorAll('.share-system-disk');
+    expect(warned).toHaveLength(1);
+    expect(warned[0].textContent).toContain('This folder is on the system disk.');
+    expect(container.querySelectorAll('.share-usage-wrap').length).toBeGreaterThan(0); // its space still shows
+  });
 });
