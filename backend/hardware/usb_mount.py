@@ -93,7 +93,7 @@ def open_disk(device: str, do: Runner | None = None) -> str:
     opts = "nosuid,nodev,noexec"
     if disk["fs"] in ("vfat", "exfat"):
         opts += ",uid=0,gid=100,umask=0002"  # no owners of their own: the users group may write
-    cmd = ["mount", "-o", opts] + (["-t", "ntfs3"] if disk["fs"] == "ntfs" else []) + [device, target]
+    cmd = ["mount", "-o", opts] + (["-t", "ntfs3"] if disk["fs"] == "ntfs" else []) + [disk["device"], target]
     code, out, err = do(cmd)
     if code:
         _drop_folder(target)
@@ -104,14 +104,29 @@ def open_disk(device: str, do: Runner | None = None) -> str:
 def eject(path: str, do: Runner | None = None) -> None:
     """Unmounts a USB disk opened under /mnt/disks, after everything is written to it."""
     do = do or run
-    real = os.path.realpath(path)
-    if os.path.dirname(real) != ROOT or not os.path.ismount(real):
+    real = _open_disk_folder(path)
+    if not real:
         raise ValueError("That is not an open USB disk.")
     do(["sync"])
     code, out, err = do(["umount", real])
     if code:
         raise RuntimeError(f"The disk is still in use, so it was not ejected: {(err or out).strip()}")
     _drop_folder(real)
+
+
+def _open_disk_folder(path: str) -> str:
+    """The folder of /mnt/disks that `path` names, as /mnt/disks lists it, when a disk is mounted
+    there; "" for anything else."""
+    real = os.path.realpath(path)
+    if os.path.dirname(real) != ROOT:
+        return ""
+    try:
+        names = os.listdir(ROOT)
+    except OSError:
+        return ""
+    name = next((n for n in names if n == os.path.basename(real)), "")
+    folder = os.path.join(ROOT, name) if name else ""
+    return folder if folder and os.path.ismount(folder) else ""
 
 
 def _drop_folder(path: str) -> None:

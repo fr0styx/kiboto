@@ -165,3 +165,18 @@ def test_elsewhere_nothing_of_the_machine_is_touched(tmp_path, monkeypatch, tool
     monkeypatch.setattr(samba_host, "point_samba_here", never)
     conf = samba_engine.SambaEngine().generate_and_save_conf()
     assert "private dir" not in conf and tools.ran == []
+
+
+@pytest.mark.parametrize("name", ["-x", "--help", "a b", "ann/../root", ""])
+def test_a_name_that_reads_as_an_option_reaches_no_account_tool(tools, name):
+    samba_host.ensure_accounts({name: 20001}, tools)
+    assert samba_host.set_password(name, 20001, "pw", tools) is False
+    assert samba_host.remove(name, tools) is False
+    assert samba_host.set_enabled(name, True, tools) is False
+    assert tools.ran == []
+
+
+def test_a_share_or_address_that_reads_as_an_option_is_not_passed_on(tools):
+    assert samba_host.reload({"shares": ["-x", "media"], "ips": ["--help", "10.0.0.9"]}, {}, tools) is True
+    assert tools.did("smbcontrol all close-share") == [["smbcontrol", "all", "close-share", "media"]]
+    assert tools.did("smbcontrol all kill-client-ip") == [["smbcontrol", "all", "kill-client-ip", "10.0.0.9"]]

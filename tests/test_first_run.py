@@ -125,3 +125,14 @@ def test_the_code_signs_in_however_it_is_typed_and_only_while_waiting(client, ma
     assert (
         client.post("/api/auth/login", json={"username": "firstadmin", "password": "abcd-efgh-jkmx"}).status_code == 401
     )
+
+
+def test_only_root_reads_the_code_on_the_machine(machine):
+    os.makedirs(os.path.dirname(first_run.ISSUE), exist_ok=True)
+    with open(first_run.ISSUE, "w", encoding="utf-8") as f:
+        f.write("old")
+    os.chmod(first_run.ISSUE, 0o644)
+    assert first_run.show("ABCD-EFGH-JKMN") is True
+    for path in (first_run.ISSUE, first_run.MOTD):
+        assert os.stat(path).st_mode & 0o777 == 0o600
+        assert "ABCD-EFGH-JKMN" in _text(path)

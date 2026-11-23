@@ -9,6 +9,7 @@ reloading, closing the shared folders that changed and ending blocked addresses'
 `run` is the command runner; tests hand in their own."""
 
 import os
+import re
 import subprocess
 from collections.abc import Callable
 from typing import Any
@@ -26,6 +27,16 @@ POINTER = (
     "[global]\n   include = {conf}\n"
 )
 Run = Callable[..., tuple[int, str, str]]
+# what useradd, userdel and smbpasswd take as an account name. Kiboto's own usernames may start with
+# a dash, which these tools read as an option: such a person gets no account of the machine.
+ACCOUNT = re.compile(r"^[a-z_][a-z0-9_.-]{0,31}$")
+
+
+def _account_ok(name: str) -> bool:
+    if ACCOUNT.fullmatch((name or "").lower()):
+        return True
+    logger.warning("[Samba] %r can't be an account of this machine, so it gets none", name)
+    return False
 
 
 def active() -> bool:
@@ -90,6 +101,8 @@ def ensure_accounts(numbers: dict[str, int], do: Run | None = None) -> None:
     their own: made, or made again when an older one had another number."""
     do = _runner(do)
     for name, want in numbers.items():
+        if not _account_ok(name):
+            continue
         code, have, _ = do(["id", "-u", name])
         if code == 0 and have.strip() == str(want):
             continue
@@ -120,14 +133,18 @@ def reload(changed: dict[str, Any] | None, numbers: dict[str, int], do: Run | No
     if do(["smbcontrol", "all", "reload-config"])[0] != 0:
         return do(["systemctl", "restart", "smbd"], timeout=60)[0] == 0
     for share in changed.get("shares") or []:
-        do(["smbcontrol", "all", "close-share", share])
+        if not str(share).startswith("-"):
+            do(["smbcontrol", "all", "close-share", share])
     for ip in changed.get("ips") or []:
-        do(["smbcontrol", "all", "kill-client-ip", ip])
+        if not str(ip).startswith("-"):
+            do(["smbcontrol", "all", "kill-client-ip", ip])
     return True
 
 
 def set_password(name: str, number: int, password: str, do: Run | None = None) -> bool:
     do = _runner(do)
+    if not _account_ok(name.lower()):
+        return False
     ensure_accounts({name.lower(): number}, do)
     code, _, err = do(["smbpasswd", "-s", "-a", name], feed=f"{password}\n{password}\n")
     if code != 0:
@@ -137,6 +154,8 @@ def set_password(name: str, number: int, password: str, do: Run | None = None) -
 
 def remove(name: str, do: Run | None = None) -> bool:
     do = _runner(do)
+    if not _account_ok(name):
+        return False
     ok = do(["smbpasswd", "-x", name])[0] == 0
     do(["userdel", name])
     return ok
@@ -144,4 +163,4 @@ def remove(name: str, do: Run | None = None) -> bool:
 
 def set_enabled(name: str, enabled: bool, do: Run | None = None) -> bool:
     do = _runner(do)
-    return do(["smbpasswd", "-e" if enabled else "-d", name])[0] == 0
+    return _account_ok(name) and do(["smbpasswd", "-e" if enabled else "-d", name])[0] == 0

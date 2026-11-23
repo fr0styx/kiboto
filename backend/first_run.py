@@ -53,9 +53,10 @@ def show(code: str) -> bool:
     for path, place in ((ISSUE, "\\4"), (MOTD, "this machine's address")):
         try:
             os.makedirs(os.path.dirname(path), exist_ok=True)
-            with open(path, "w", encoding="utf-8") as f:
+            fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+            os.fchmod(fd, 0o600)  # also when the file was there before
+            with os.fdopen(fd, "w", encoding="utf-8") as f:
                 f.write(_TEXT.format(where=place, code=code))
-            os.chmod(path, 0o644)
         except OSError as e:
             logger.warning("The first-time code could not be shown in %s: %s", path, e)
     return True

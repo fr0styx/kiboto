@@ -131,3 +131,9 @@ def test_routes(client, auth_headers, setting, monkeypatch):
     monkeypatch.setattr(svc.runtime, "managed_host", lambda: False)
     bad = client.put("/api/system/drive-sleep", headers=auth_headers, json={"minutes": 10})
     assert bad.status_code == 400 and "srv.drive_sleep_not_here" in bad.text
+
+
+def test_only_a_listed_time_reaches_hdparm():
+    with pytest.raises(ValueError):
+        hw.apply(7, Host(), probe=lambda name: "active")
+    assert hw.CODES[180] == 246

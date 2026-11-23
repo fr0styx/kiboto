@@ -184,3 +184,19 @@ def test_the_routes(box, client, auth_headers, monkeypatch, tmp_path):
 def test_the_real_runner():
     assert usb_mount.run(["true"])[0] == 0
     assert usb_mount.run(["/no/such/tool"])[0] == 1
+
+
+def test_eject_takes_only_a_disk_folder_of_its_own(box, tmp_path):
+    where = usb_mount.open_disk("/dev/sda1", box.do)
+    elsewhere = tmp_path / "elsewhere"
+    elsewhere.mkdir()
+    box.mounted.add(str(elsewhere))
+    link = os.path.join(box.root, "link")
+    os.symlink(str(elsewhere), link)
+    for bad in (link, str(elsewhere), os.path.join(box.root, "never-opened"), box.root):
+        with pytest.raises(ValueError):
+            usb_mount.eject(bad, box.do)
+    os.rename(box.root, box.root + "-gone")
+    assert usb_mount._open_disk_folder(where) == ""
+    os.rename(box.root + "-gone", box.root)
+    assert usb_mount._open_disk_folder(where) == where

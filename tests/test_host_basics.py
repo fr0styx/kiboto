@@ -94,7 +94,9 @@ def test_the_time_zone_is_read_from_the_link(tmp_path):
     assert host_basics.time_zone(str(tmp_path / "missing")) == ""
 
 
-@pytest.mark.parametrize("zone", ["", "Europe/../../etc", "x; reboot", "/etc/passwd", "a/b/c/d"])
+@pytest.mark.parametrize(
+    "zone", ["", "Europe/../../etc", "x; reboot", "/etc/passwd", "a/b/c/d", "-h", "-Hx/y", "--help"]
+)
 def test_a_zone_that_is_not_a_zone_reaches_no_command(managed, zone):
     do = Calls()
     assert host_basics.set_time_zone(zone, do=do) is False

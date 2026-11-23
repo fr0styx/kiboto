@@ -96,6 +96,10 @@ Apps, Docker clean-up: deleting unused volumes now asks for a confirmation that 
 
 Virtual machines: a disk, an installer image or a shared folder can no longer reach Kiboto's own data (its people and keys) through the storage path.
 
+Snapshots: a pool name sent to the snapshot pages can no longer point outside the storage folder.
+
+On a machine of its own, a username starting with a dash no longer reaches the machine's account tools, and the first-time sign-in code on its screen is readable only by the system.
+
 #### New
 
 Eight more apps in Get apps, each tried on a real install: Homarr (a start page), Speedtest Tracker (your internet speed over time), Gatus (a status page), Monica (the people in your life), Lychee (a photo gallery), HortusFox (plant care), Zipline (file and screenshot sharing), and rsync over SSH, a place other computers can back up to with rsync. 184 apps in all.

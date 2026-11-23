@@ -20,7 +20,7 @@ from backend.fsutil import atomic_write_text
 HOSTS = "/etc/hosts"
 OWN_ADDRESS = "127.0.1.1"  # Debian's line for the machine's own name
 _NAME = re.compile(r"^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$")
-_ZONE = re.compile(r"^[A-Za-z0-9_+-]+(?:/[A-Za-z0-9_+-]+){0,2}$")
+_ZONE = re.compile(r"^[A-Za-z0-9_][A-Za-z0-9_+-]*(?:/[A-Za-z0-9_+-]+){0,2}$")
 Run = Callable[..., tuple[int, str]]
 
 

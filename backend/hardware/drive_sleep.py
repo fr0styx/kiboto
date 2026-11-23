@@ -59,6 +59,9 @@ def refused(said: str) -> bool:
     return fmt in ("72", "73") and b1 & 0x0F == 5
 
 
+CODES = {m: timer_code(m) for m in CHOICES}
+
+
 def _mounts(node: dict[str, Any]) -> list[str]:
     found = [m for m in (node.get("mountpoints") or []) if m]
     for child in node.get("children") or []:
@@ -88,6 +91,8 @@ def spinning_drives(do: Run | None = None) -> list[str]:
 def apply(minutes: int, do: Run | None = None, probe: Callable[[str], str] | None = None) -> list[dict[str, Any]]:
     """Sets every spinning data drive's timer to minutes (0 clears it). One row per drive: set,
     asleep (left alone) or failed, with what hdparm said."""
+    if minutes not in CODES:
+        raise ValueError(f"{minutes} minutes is not one of the choices")
     do = do or run
     ask = probe or (lambda name: power_state.probe(name, max_age=0))
     rows = []
@@ -95,7 +100,7 @@ def apply(minutes: int, do: Run | None = None, probe: Callable[[str], str] | Non
         if ask(name) == power_state.STANDBY:
             rows.append({"drive": name, "state": "asleep"})
             continue
-        code, said = do(["hdparm", "-S", str(timer_code(minutes)), power_state.dev_path(name)])
+        code, said = do(["hdparm", "-S", str(CODES[minutes]), power_state.dev_path(name)])
         ok = code == 0 and not refused(said)
         rows.append({"drive": name, "state": "set" if ok else "failed", "said": "" if ok else said.strip()[-200:]})
     return rows

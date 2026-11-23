@@ -2005,5 +2005,9 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
         row = pool_registry.find(pool_id)
         if row and row.get("mountpoint") and os.path.isdir(row["mountpoint"]):
             return str(row["mountpoint"])
-        cand = os.path.join(self._pool_path, pool_id)
+        # a folder of the storage folder by its single name: "../etc" or "/etc" is no pool of it
+        base = os.path.normpath(self._pool_path)
+        cand = os.path.normpath(os.path.join(base, pool_id))
+        if not cand.startswith(base.rstrip(os.sep) + os.sep) or os.sep in pool_id:
+            return self._pool_path
         return cand if os.path.exists(cand) else self._pool_path

@@ -372,6 +372,7 @@ def create_storage_pool(
         real_mp = os.path.realpath(mountpoint)
         if not real_mp.startswith(pool_root.rstrip("/") + "/") or _re.search(r"[\x00-\x1f,]", mountpoint):
             raise HTTPException(status_code=400, detail=f"The mount point must be inside {pool_root}.")
+        mountpoint = real_mp
 
     resolve = getattr(adapter, "_resolve_disk_path", None)
     disks = [resolve(d) if resolve else (d if d.startswith("/") else f"/dev/{d}") for d in req.disks]

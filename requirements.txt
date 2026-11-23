@@ -3,7 +3,7 @@ apprise>=2.2.0
 argon2-cffi>=25.1.0
 cryptography>=50.0.2
 exifread==3.5.1
-fastapi>=0.162.5
+fastapi>=0.165.0
 http-ece>=1.2.1
 httpx>=0.28.1
 ldap3>=2.9.1
@@ -12,7 +12,7 @@ Pillow==13.0.0
 pillow-heif>=1.8.1
 # Video thumbnails: the ffmpeg libraries (HEVC, H.264, VP9, AV1, ProRes), amd64 and arm64 wheels
 av>=19.0.2
-playwright==1.65.1
+playwright==1.65.2
 # SNMP v3 agent (off by default); AES and SHA-256 come from cryptography
 pysnmp==7.1.33
 PyYAML>=6.0.3
@@ -25,6 +25,6 @@ uvicorn==0.54.0
 websockets>=17.4
 pypdfium2>=5.15.2
 # iCloud Photos with an Apple ID sign-in (NFEAT-3, D14): MIT, reads the session, never stores the password
-pyicloud==2026.11.1
+pyicloud==2026.11.2
 # Passkeys (RES-3): Yubico's WebAuthn server, BSD-2; already pinned and hashed in the lock (it came with pyicloud)
 fido2==2.2.1
