@@ -11,6 +11,7 @@ On other hosts (Unraid, TrueNAS and the rest) the host's own spin-down setting d
 from __future__ import annotations
 
 import json
+import re
 from collections.abc import Callable
 from typing import Any
 
@@ -22,6 +23,10 @@ SYSTEM_MOUNTS = ("/", "/boot", "/boot/efi", "/usr", "/var", "[SWAP]")
 LSBLK = ["lsblk", "-J", "-o", "NAME,TYPE,ROTA,TRAN,MOUNTPOINTS"]
 
 Run = Callable[[list[str]], tuple[int, str]]
+# hdparm prints the drive's answer when a command fails at the drive, and still exits 0: "SG_IO: bad/missing
+# sense data, sb[]:  70 00 05 ...". Sense key 5 is "illegal request": the drive did not take the timer
+# (SAS drives and some controllers don't know the ATA command).
+SENSE = re.compile(r"sb\[\]:\s*([0-9a-f]{2}) ([0-9a-f]{2}) ([0-9a-f]{2})", re.I)
 
 
 def run(cmd: list[str]) -> tuple[int, str]:
@@ -41,6 +46,17 @@ def timer_code(minutes: int) -> int:
     if minutes <= 20:
         return minutes * 12
     return 240 + min(11, max(1, minutes // 30))
+
+
+def refused(said: str) -> bool:
+    """Whether hdparm's output carries an "illegal request" answer from the drive."""
+    m = SENSE.search(said or "")
+    if not m:
+        return False
+    fmt, b1, b2 = m.group(1).lower(), int(m.group(2), 16), int(m.group(3), 16)
+    if fmt in ("70", "71"):
+        return b2 & 0x0F == 5
+    return fmt in ("72", "73") and b1 & 0x0F == 5
 
 
 def _mounts(node: dict[str, Any]) -> list[str]:
@@ -80,7 +96,6 @@ def apply(minutes: int, do: Run | None = None, probe: Callable[[str], str] | Non
             rows.append({"drive": name, "state": "asleep"})
             continue
         code, said = do(["hdparm", "-S", str(timer_code(minutes)), power_state.dev_path(name)])
-        rows.append(
-            {"drive": name, "state": "set" if code == 0 else "failed", "said": "" if code == 0 else said[-200:]}
-        )
+        ok = code == 0 and not refused(said)
+        rows.append({"drive": name, "state": "set" if ok else "failed", "said": "" if ok else said.strip()[-200:]})
     return rows

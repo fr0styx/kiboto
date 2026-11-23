@@ -72,6 +72,26 @@ def test_a_sleeping_drive_is_left_alone_and_a_refusal_is_said():
     assert {c[2] for c in host.hdparm()} == {"0"}
 
 
+VM_SAID = (
+    "\n/dev/sda:\n setting standby to 120 (10 minutes)\n"
+    "SG_IO: bad/missing sense data, sb[]:  70 00 05 00 00 00 00 0a 00 00 00 00 20 00 00 00 00 00"
+)
+
+
+def test_a_drive_that_answers_illegal_request_did_not_take_the_timer():
+    assert hw.refused(VM_SAID)
+    assert hw.refused("sb[]:  72 05 20 00")
+    assert not hw.refused("sb[]:  70 00 06 00") and not hw.refused("sb[]:  72 06 00") and not hw.refused("")
+    assert not hw.refused("sb[]:  00 00 05")
+    host = Host()
+
+    def host_run(cmd):
+        return (0, VM_SAID) if cmd[0] == "hdparm" else host(cmd)
+
+    rows = hw.apply(10, host_run, probe=lambda name: "active")
+    assert [r["state"] for r in rows] == ["failed", "failed"] and rows[0]["said"].endswith("00 00")
+
+
 def test_run_says_what_happened(monkeypatch):
     assert hw.run(["true"])[0] == 0
     assert hw.run(["/nonexistent/hdparm"])[0] == 127
