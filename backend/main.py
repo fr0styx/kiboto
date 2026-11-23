@@ -540,13 +540,19 @@ def _start_app_names() -> None:
             managed.ensure_fallback()  # reachable after a network card moved or was replaced
         except (OSError, ValueError) as e:
             logger.error("[Main] A trial of network settings could not be settled: %s", e)
-        threading.Thread(target=_drive_sleep_at_start, name="DriveSleep", daemon=True).start()
+        threading.Thread(target=_machine_at_start, name="MachineTools", daemon=True).start()
 
 
-def _drive_sleep_at_start() -> None:
-    """A drive forgets its sleep timer when it loses power, so the setting is put back at each start."""
-    from backend.services import drive_sleep
+def _machine_at_start() -> None:
+    """The machine's packages this version needs, then the drive sleep timers. An update is made
+    ready by the version that was running, which may not know a package the new one needs; and a
+    drive forgets its sleep timer when it loses power."""
+    from backend.services import drive_sleep, native_update
 
+    try:
+        native_update.add_missing_tools(os.path.join(native_update.PREFIX, "current"))
+    except OSError as e:
+        logger.warning("[Main] The machine's tools were not checked: %s", e)
     try:
         rows = drive_sleep.at_start()
     except (OSError, ValueError) as e:
