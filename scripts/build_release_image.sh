@@ -8,6 +8,7 @@
 # anything is built from it. Needs curl, gpg and xorriso.
 set -eu
 image=$1 out=$2
+case $out in /*) ;; *) out=$PWD/$out ;; esac  # written here, not in the work folder deleted at the end
 BASE=https://cdimage.debian.org/debian-cd/current/amd64/iso-cd
 DEBIAN_CD_KEY=DF9B9C49EAA9298432589D76DA87E80D6294BE9B  # Debian CD signing key, a public fingerprint gitleaks:allow
 here=$(cd "$(dirname "$0")/.." && pwd)
