@@ -18,6 +18,8 @@ Copying a folder from a Mac onto one of Kiboto's own shared folders no longer fa
 
 A Time Machine folder can no longer be given a size limit larger than its storage pool (Time Machine filled the whole pool first), and a new Time Machine folder no longer gets automatic snapshots, which would have kept the old backups Time Machine deletes.
 
+Kib's window looks like the other app windows: the wallpaper no longer shows through it.
+
 #### Security
 
 On a machine of its own, failed sign-ins to shared folders over the network now count like web sign-ins: 20 in 15 minutes block the address for an hour, and they show under History, Sign-ins.

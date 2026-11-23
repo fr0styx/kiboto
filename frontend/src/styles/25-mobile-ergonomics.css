@@ -695,7 +695,8 @@ body.mobile-mode #vm-grid .glassmorphic-card {
 /* File Manager Window - Solid, Premium Dark Explorer Surface */
 #file-manager-window.file-manager-window,
 .file-manager-window,
-.os-window.drive-health-window {
+.os-window.drive-health-window,
+.os-window.kib-window {
   display: flex;
   flex-direction: column;
   background: var(--lt-b-0e1c1efa, rgba(14, 28, 30, 0.98)) !important;
@@ -705,7 +706,8 @@ body.mobile-mode #vm-grid .glassmorphic-card {
   box-shadow: 0 25px 65px rgba(0, 0, 0, 0.85) !important;
 }
 .file-manager-window .os-window-header,
-.drive-health-window .os-window-header {
+.drive-health-window .os-window-header,
+.kib-window .os-window-header {
   background: var(--lt-b-17292dfa, rgba(23, 41, 45, 0.98)) !important;
   border-bottom: 1px solid var(--kb-line-8);
 }
