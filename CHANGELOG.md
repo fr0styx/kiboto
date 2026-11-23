@@ -76,6 +76,8 @@ On a machine of its own, a NAS named like the start of a container id no longer 
 
 On a machine of its own, the malware scan and family sign-in can be turned on (they stopped with "Docker didn't answer").
 
+On a machine set up for Kiboto, snapshots work for shared folders on its btrfs and ZFS pools, and a folder on an ext4 pool says it keeps no snapshots.
+
 #### Security
 
 Apps, Docker clean-up: deleting unused volumes now asks for a confirmation that Kiboto checks itself, so it can't happen without your say-so.

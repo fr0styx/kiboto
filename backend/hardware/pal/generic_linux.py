@@ -346,6 +346,8 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
         # NREL-5: btrfs subvolume or ZFS dataset snapshots, so the pool must be one of those
         pool_fs = fs_of(self._pool_path)
         snapshots = (tools["btrfs"] and pool_fs == "btrfs") or (tools["zfs"] and pool_fs == "zfs")
+        # pools inside the main storage folder (a machine set up for Kiboto) have snapshots of their own
+        snapshots = snapshots or any(tools.get(r.get("fs_type") or "") for r in pool_registry.load())
         missing = [n for n in ("btrfs", "zfs", "mdadm") if not tools[n]]
         return PlatformCapabilities(
             platform=PlatformType.GENERIC_LINUX,
@@ -1631,6 +1633,42 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
 
         return {"status": "deleted", "name": name}
 
+    def snapshot_pool_of(self, share: str) -> str:
+        """The pool a share's folder is on, by Kiboto's record of its pools ("" when on none of
+        them: then the main storage folder is meant)."""
+        rows = [r for r in pool_registry.load() if r.get("mountpoint") and not r.get("ejected")]
+        if not rows or not share:
+            return ""
+        where = next((s.mountpoint for s in self.list_shares() if s.name == share and s.mountpoint), "")
+        real = os.path.realpath(where) if where else ""
+        best = ("", 0)
+        for row in rows:
+            mp = os.path.realpath(row["mountpoint"])
+            if real and (real == mp or real.startswith(mp + "/")) and len(mp) > best[1]:
+                best = (str(row["name"]), len(mp))
+        return best[0]
+
+    def share_can_snapshot(self, share: str) -> bool:
+        """Whether the share's own folder is on btrfs or ZFS (an ext4 pool keeps no snapshots)."""
+        from backend.hardware.pal.base import storage_tools
+
+        where = next((s.mountpoint for s in self.list_shares() if s.name == share and s.mountpoint), "")
+        if not where or not os.path.exists(where):
+            return True  # not made yet: the pool decides, as before
+        return bool(storage_tools().get(fs_of(where)))
+
+    def _snap_roots(self, pool_id: str) -> list[tuple[str, str]]:
+        """(pool, folder) pairs a snapshot listing covers: one pool; for the default pool the main
+        storage folder and every pool Kiboto mounted."""
+        if pool_id and pool_id not in ("default_pool", "default"):
+            return [(pool_id, self.get_pool_path(pool_id))]
+        roots = [(pool_id or "default", self._pool_path)]
+        for row in pool_registry.load():
+            mp = row.get("mountpoint") or ""
+            if mp and not row.get("ejected") and os.path.isdir(mp) and mp != self._pool_path:
+                roots.append((str(row["name"]), mp))
+        return roots
+
     def create_snapshot(
         self,
         pool_id: str,
@@ -1641,16 +1679,18 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
         retention_days: int | None = None,
     ) -> dict[str, Any]:
         """Creates an atomic Btrfs subvolume snapshot with optional Two-Tier WORM immutability."""
-        src_path = child_path(os.path.join(self._pool_path, "@shares"), subvol_name)
+        pool_id = self.snapshot_pool_of(subvol_name) or pool_id  # the share's own pool, where known
+        root = self.get_pool_path(pool_id)
+        src_path = child_path(os.path.join(root, "@shares"), subvol_name)
         if not os.path.exists(src_path):
-            src_path = child_path(self._pool_path, subvol_name)
+            src_path = child_path(root, subvol_name)
         from backend import merged_folders
 
         merge = merged_folders.of(src_path)
         if merge is not None:  # a merged folder: its own files are in the hidden folder beside it
             src_path = merge["fast"]
 
-        snaps_dir = os.path.join(self._pool_path, "@snapshots")
+        snaps_dir = os.path.join(root, "@snapshots")
         try:
             os.makedirs(snaps_dir, exist_ok=True)
         except OSError as e:
@@ -1677,6 +1717,8 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
                 "",
                 f"{subvol_name} is a folder, not a ZFS dataset of its own; it can't be snapshotted alone.",
             )
+        elif fs_of(src_path) not in ("btrfs", ""):
+            code, out, err = 1, "", f"{subvol_name} is on {fs_of(src_path)}, which keeps no snapshots."
         else:
             cmd = ["btrfs", "subvolume", "snapshot"]
             if readonly:
@@ -1716,7 +1758,13 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
 
     def list_snapshots(self, pool_id: str) -> list[dict[str, Any]]:
         """Lists active Btrfs subvolume snapshots with WORM immutability metadata."""
-        snaps_dir = os.path.join(self._pool_path, "@snapshots")
+        roots = self._snap_roots(pool_id)
+        snapshots: list[dict[str, Any]] = []
+        for pid, root in roots:
+            snapshots += self._btrfs_snapshots(pid, os.path.join(root, "@snapshots"))
+        return snapshots + self._zfs_snapshots(pool_id, roots)
+
+    def _btrfs_snapshots(self, pool_id: str, snaps_dir: str) -> list[dict[str, Any]]:
         snapshots: list[dict[str, Any]] = []
         if os.path.isdir(snaps_dir):
             try:
@@ -1739,11 +1787,12 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
                         snapshots.append(item)
             except Exception as e:
                 logger.debug(f"[PAL] Snapshot list error: {e}")
-        return snapshots + self._zfs_snapshots(pool_id)
+        return snapshots
 
     def _read_worm(self, item: dict[str, Any]) -> None:
         """Fills in a snapshot's WORM lock from its metadata file, when it has one."""
-        meta_path = os.path.join(self._pool_path, "@snapshots", f".{item['name']}.worm.json")
+        root = self.get_pool_path(str(item.get("pool_id") or ""))
+        meta_path = os.path.join(root, "@snapshots", f".{item['name']}.worm.json")
         if not os.path.isfile(meta_path):
             return
         try:
@@ -1755,7 +1804,7 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
         except Exception:
             ignored("backend.hardware.pal_storage.GenericLinuxStorageAdapter.list_snapshots")
 
-    def _zfs_snapshots(self, pool_id: str) -> list[dict[str, Any]]:
+    def _zfs_snapshots(self, pool_id: str, roots: list[tuple[str, str]] | None = None) -> list[dict[str, Any]]:
         """Snapshots of the ZFS datasets mounted inside this pool, under their own names, with
         the path ZFS shows them at (.zfs/snapshot in the dataset)."""
         from backend.hardware.pal.base import storage_tools
@@ -1767,7 +1816,8 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
         )
         if code:
             return []
-        mounts, root = zfs_mounts(), os.path.realpath(self._pool_path).rstrip("/")
+        mounts = zfs_mounts()
+        where = [(pid, os.path.realpath(r).rstrip("/")) for pid, r in (roots or self._snap_roots(pool_id))]
         items = []
         for line in out.splitlines():
             parts = line.split("\t")
@@ -1775,13 +1825,14 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
                 continue
             dataset, part = parts[0].split("@", 1)
             mnt = mounts.get(dataset, "")
-            if not (mnt == root or mnt.startswith(root + "/")):
+            held = [(len(r), pid) for pid, r in where if mnt and (mnt == r or mnt.startswith(r + "/"))]
+            if not held:
                 continue
             item = {
                 "name": parts[2] if parts[2] not in ("", "-") else part,
                 "path": os.path.join(mnt, ".zfs", "snapshot", part),
                 "created_at": float(parts[1]) if parts[1].isdigit() else 0.0,
-                "pool_id": pool_id,
+                "pool_id": max(held)[1],
                 "worm_mode": None,
                 "retention_until": None,
                 "is_immutable": False,
@@ -1833,7 +1884,7 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
         reason: str = "",
     ) -> dict[str, Any]:
         """Deletes a Btrfs subvolume snapshot, strictly enforcing Two-Tier WORM immutability."""
-        snaps_dir = os.path.join(self._pool_path, "@snapshots")
+        snaps_dir = os.path.join(self.get_pool_path(pool_id), "@snapshots")
         target_path = child_path(snaps_dir, snapshot_name)  # never a live subvolume via ../ (WORM)
         meta_path = os.path.join(snaps_dir, f".{snapshot_name}.worm.json")
 
@@ -1898,7 +1949,8 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
 
     def restore_snapshot(self, pool_id: str, snapshot_name: str, target_subvol: str = "") -> dict[str, Any]:
         """Restores or rolls back a Btrfs subvolume snapshot into active subvolume path."""
-        snap_path = child_path(os.path.join(self._pool_path, "@snapshots"), snapshot_name)
+        root = self.get_pool_path(pool_id)
+        snap_path = child_path(os.path.join(root, "@snapshots"), snapshot_name)
         if not os.path.exists(snap_path):
             return {"status": "error", "message": f"Snapshot {snapshot_name} not found at {snap_path}", "code": 1}
 
@@ -1906,7 +1958,7 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
         if not subvol:
             subvol = snapshot_name.split("_")[0] if "_" in snapshot_name else "restored_" + snapshot_name
 
-        dest_dir = os.path.join(self._pool_path, "@shares")
+        dest_dir = os.path.join(root, "@shares")
         try:
             os.makedirs(dest_dir, exist_ok=True)
         except OSError:
@@ -1945,5 +1997,8 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
         """Returns root mountpoint for a generic Linux storage pool."""
         if not pool_id or pool_id in ("default_pool", "default"):
             return self._pool_path
+        row = pool_registry.find(pool_id)
+        if row and row.get("mountpoint") and os.path.isdir(row["mountpoint"]):
+            return str(row["mountpoint"])
         cand = os.path.join(self._pool_path, pool_id)
         return cand if os.path.exists(cand) else self._pool_path

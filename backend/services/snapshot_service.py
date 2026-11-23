@@ -41,6 +41,15 @@ def _default_pool_id(pal: Any) -> str:
     return "default"
 
 
+def _pool_of(share_or_snapshot: str, pal: Any) -> str:
+    """The pool a share (or one of its snapshots, "<share>@...") is on: the platform says where it
+    can (a machine with several pools inside its main storage folder), else the first pool."""
+    share = share_or_snapshot.split("@", 1)[0]
+    where = getattr(pal, "snapshot_pool_of", None)
+    found = where(share) if callable(where) and share else ""
+    return str(found or "") or _default_pool_id(pal)
+
+
 def availability(pal: Any = None) -> tuple[bool, str]:
     """Whether this host can take snapshots, and why not (REL-4)."""
     try:
@@ -113,6 +122,9 @@ def ensure_default(share: str) -> bool:
     ok, _ = availability()
     if not ok or any(s.get("share") == share for s in list_schedules()):
         return False
+    can = getattr(_pal(), "share_can_snapshot", None)
+    if callable(can) and not can(share):  # a share on an ext4 pool: no schedule that fails every hour
+        return False
     save_schedule(share, DEFAULT_SCHEDULE["every"], DEFAULT_SCHEDULE["keep"], keep_daily=DEFAULT_SCHEDULE["keep_daily"])
     return True
 
@@ -139,7 +151,7 @@ def take(share: str, schedule: dict[str, Any] | None = None, pal: Any = None) ->
     """Takes one snapshot of a share now and prunes old scheduled ones beyond `keep`."""
     pal = pal or _pal()
     schedule = schedule or next((s for s in list_schedules() if s["share"] == share), {"keep": 30, "immutable_days": 0})
-    pool_id = schedule.get("pool_id") or _default_pool_id(pal)
+    pool_id = schedule.get("pool_id") or _pool_of(share, pal)
     name = snapshot_name(share)
     days = int(schedule.get("immutable_days") or 0)
     kwargs: dict[str, Any] = {"readonly": True}
@@ -218,7 +230,7 @@ def run_due(now: float | None = None, pal: Any = None) -> list[dict[str, Any]]:
 
 # --- browse and restore -------------------------------------------------------
 def _snapshot(name: str, pal: Any, pool_id: str | None = None) -> dict[str, Any]:
-    pool_id = pool_id or _default_pool_id(pal)
+    pool_id = pool_id or _pool_of(name, pal)
     snap = next((s for s in pal.list_snapshots(pool_id) if s.get("name") == name), None)
     if not snap or not snap.get("path"):
         raise FileNotFoundError("No such snapshot.")
@@ -262,7 +274,7 @@ def browse(
     if principal is not None:
         from backend.services.path_access import user_can_access_path
 
-        live = _live_root(name, pal, pool_id or _default_pool_id(pal))
+        live = _live_root(name, pal, pool_id or _pool_of(name, pal))
         here = os.path.join(live, os.path.relpath(target, root))
         if not user_can_access_path(here, principal, allow_list=True):
             raise PermissionError("You don't have access to this folder.")
@@ -297,7 +309,7 @@ def restore(
     """Copies a file or folder out of a snapshot. By default it lands beside the original as
     "<name> (restored YYYY-MM-DD HHMM)"; overwrite=True replaces the current version."""
     pal = pal or _pal()
-    pool_id = pool_id or _default_pool_id(pal)
+    pool_id = pool_id or _pool_of(name, pal)
     snap = _snapshot(name, pal, pool_id)
     src_root = os.path.realpath(snap["path"])
     src = resolve_within(os.path.join(src_root, rel.lstrip("/")), src_root)
@@ -427,7 +439,7 @@ def rollback(
     if "@" not in name:
         raise ValueError("Only one of a share's own snapshots can roll that share back.")
     pal = pal or _pal()
-    pool_id = pool_id or _default_pool_id(pal)
+    pool_id = pool_id or _pool_of(name, pal)
     snap = _snapshot(name, pal, pool_id)
     share = name.split("@", 1)[0]
     src_root = os.path.realpath(snap["path"])
@@ -472,7 +484,7 @@ def rollback(
 def share_root(share: str, pal: Any = None, pool_id: str | None = None) -> str:
     """Where a share's files are."""
     pal = pal or _pal()
-    return os.path.realpath(_live_root(f"{share}@", pal, pool_id or _default_pool_id(pal)))
+    return os.path.realpath(_live_root(f"{share}@", pal, pool_id or _pool_of(share, pal)))
 
 
 def convertible(pal: Any = None) -> list[str]:
