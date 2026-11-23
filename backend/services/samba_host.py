@@ -15,6 +15,7 @@ from typing import Any
 
 from backend import runtime
 from backend.config import logger
+from backend.settings import test_mode
 
 ETC_CONF = "/etc/samba/smb.conf"
 # "include", not "config file": with the latter Samba's own tools kept the default "private dir"
@@ -39,6 +40,24 @@ def run(cmd: list[str], feed: str | None = None, timeout: float = 20) -> tuple[i
     except subprocess.TimeoutExpired:
         return 124, "", f"{cmd[0]} did not answer"
     return res.returncode, res.stdout.strip(), res.stderr.strip()
+
+
+_REAL_RUN = run
+
+
+def _refuse(cmd: list[str], feed: str | None = None, timeout: float = 20) -> tuple[int, str, str]:
+    return 1, "", "the test suite does not change this machine's accounts"
+
+
+def _runner(do: "Run | None") -> "Run":
+    """The tool runner to use. The test suite, run as root on a machine set up for Kiboto, made real
+    system accounts through tests that make the host look managed: in test mode the real runner
+    refuses unless a test passed or patched its own."""
+    if do is not None:
+        return do
+    if run is _REAL_RUN and test_mode():
+        return _refuse
+    return run
 
 
 def global_lines(samba_dir: str) -> list[str]:
@@ -69,7 +88,7 @@ def point_samba_here(conf: str, etc_conf: str = ETC_CONF) -> bool:
 def ensure_accounts(numbers: dict[str, int], do: Run | None = None) -> None:
     """Each person as a user of the machine, with the number Kiboto gave them and no sign-in of
     their own: made, or made again when an older one had another number."""
-    do = do or run
+    do = _runner(do)
     for name, want in numbers.items():
         code, have, _ = do(["id", "-u", name])
         if code == 0 and have.strip() == str(want):
@@ -82,7 +101,7 @@ def ensure_accounts(numbers: dict[str, int], do: Run | None = None) -> None:
 
 
 def running(do: Run | None = None) -> bool:
-    do = do or run
+    do = _runner(do)
     return do(["systemctl", "is-active", "--quiet", "smbd"])[0] == 0
 
 
@@ -91,7 +110,7 @@ def reload(changed: dict[str, Any] | None, numbers: dict[str, int], do: Run | No
     folders whose section changed are closed and blocked addresses' connections ended; everyone
     else stays connected. A change it cannot tell apart (`changed` is None), a change to the private
     folders, or a server that is not running: the server starts again."""
-    do = do or run
+    do = _runner(do)
     ensure_accounts(numbers, do)
     if changed is None or changed.get("homes") or not running(do):
         code, _, err = do(["systemctl", "restart", "smbd"], timeout=60)
@@ -108,7 +127,7 @@ def reload(changed: dict[str, Any] | None, numbers: dict[str, int], do: Run | No
 
 
 def set_password(name: str, number: int, password: str, do: Run | None = None) -> bool:
-    do = do or run
+    do = _runner(do)
     ensure_accounts({name.lower(): number}, do)
     code, _, err = do(["smbpasswd", "-s", "-a", name], feed=f"{password}\n{password}\n")
     if code != 0:
@@ -117,12 +136,12 @@ def set_password(name: str, number: int, password: str, do: Run | None = None) -
 
 
 def remove(name: str, do: Run | None = None) -> bool:
-    do = do or run
+    do = _runner(do)
     ok = do(["smbpasswd", "-x", name])[0] == 0
     do(["userdel", name])
     return ok
 
 
 def set_enabled(name: str, enabled: bool, do: Run | None = None) -> bool:
-    do = do or run
+    do = _runner(do)
     return do(["smbpasswd", "-e" if enabled else "-d", name])[0] == 0
