@@ -1,6 +1,7 @@
 # ADR 0006: The web process without root, behind a host door
 
-- **Status:** Proposed
+- **Status:** Accepted (23 Nov 2026: the owner chose group and ACL access for people's files)
+- **Progress:** step 1 (the door) and step 2 (the machine's settings, the network, the firewall) built
 - **Date:** 2026-11-23
 - **Decides:** how a machine Kiboto runs keeps a bug in the web app from becoming root on the machine
 
@@ -53,7 +54,7 @@ resolved inside the storage roots) and writes an audit line.
 The web process needs to read and write every shared folder and every person's private folder.
 Two ways were weighed:
 
-1. **Group and ACL access (recommended).** Shared folders already belong to the file server's
+1. **Group and ACL access (chosen).** Shared folders already belong to the file server's
    group `users`; the `kiboto` user joins that group. The folder that holds the private homes gets
    a default ACL giving `kiboto` access, so the web process can enter each home while other people
    still cannot. Handing a new file to the folder's owner (today `owned.py`, a `chown`) becomes a

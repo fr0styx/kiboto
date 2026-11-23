@@ -14,6 +14,7 @@ import shutil
 import subprocess
 from typing import Any
 
+from backend import door
 from backend.config import DATA_DIR
 from backend.fsutil import atomic_write_json, read_json
 
@@ -117,8 +118,29 @@ def ruleset(st: dict[str, Any]) -> str:
     return "\n".join(lines) + "\n"
 
 
+def cleaned(st: dict[str, Any]) -> dict[str, Any]:
+    """Only what the page offers, from whatever was sent: on or off, from where, which services."""
+    raw = st.get("services")
+    services: dict[str, Any] = raw if isinstance(raw, dict) else {}
+    out = {
+        "enabled": st.get("enabled") is True,
+        "allow_from": "anywhere" if st.get("allow_from") == "anywhere" else "lan",
+        "services": {k: bool(services.get(k, v)) for k, v in DEFAULT_ON.items()},
+    }
+    out["services"]["web"] = True
+    return out
+
+
 def apply(st: dict[str, Any], run=subprocess.run) -> None:
-    """Loads the table (on) or removes it (off). Only called where capability() allows."""
+    """Loads the table (on) or removes it (off), through the host door where it runs (ADR 0006).
+    Only called where capability() allows."""
+    if run is subprocess.run:
+        door.via("firewall.apply", _load, st=st)
+    else:
+        _load(st, run)
+
+
+def _load(st: dict[str, Any], run=subprocess.run) -> None:
     script = ruleset(st) if st["enabled"] else f"table inet {TABLE}\ndelete table inet {TABLE}\n"
     res = run(["nft", "-f", "-"], input=script, text=True, capture_output=True, timeout=15)
     if res.returncode != 0:

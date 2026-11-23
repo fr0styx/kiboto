@@ -90,11 +90,14 @@ class ManagedHostNetwork(HostNetwork):
 
         if setting != "address" or not managed.networkd_runs():
             raise NotOnThisHost(setting, self.where())
+        from backend import door
+
+        # through the host door where it runs (ADR 0006)
         if "confirm" in changes:
-            return managed.keep(changes["confirm"])
+            return door.via("network.keep", managed.keep, key=changes["confirm"])
         if "revert" in changes:
-            return managed.go_back(changes["revert"])
-        return managed.start_trial(changes)
+            return door.via("network.go_back", managed.go_back, key=changes["revert"])
+        return door.via("network.try_address", managed.start_trial, changes=changes)
 
 
 def current_host() -> HostNetwork:

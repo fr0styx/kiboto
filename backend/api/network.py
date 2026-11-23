@@ -204,8 +204,15 @@ async def host_bridge_endpoint(req: HostBridgeRequest):
 
     now = await asyncio.to_thread(host_ip.get_host_ip_config)
     try:
+        from backend import door
+
         return await asyncio.to_thread(
-            managed.start_bridge_trial, req.on, req.interface or now.get("interface", ""), now
+            door.via,
+            "network.try_bridge",
+            managed.start_bridge_trial,
+            on=req.on,
+            port=req.interface or now.get("interface", ""),
+            now=now,
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from None
@@ -229,7 +236,9 @@ async def keep_host_ip_config_endpoint(req: HostKeepRequest):
     from backend.hardware.net import managed
 
     try:
-        return await asyncio.to_thread(managed.keep, req.canary_id)
+        from backend import door
+
+        return await asyncio.to_thread(door.via, "network.keep", managed.keep, key=req.canary_id)
     except ValueError as e:
         raise HTTPException(status_code=403, detail=str(e)) from None
 

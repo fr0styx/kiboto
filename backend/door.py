@@ -12,6 +12,7 @@ from __future__ import annotations
 import json
 import os
 import socket
+from collections.abc import Callable
 from typing import Any
 
 SOCK = "/run/kiboto-door/door.sock"
@@ -20,7 +21,22 @@ MAX_REPLY = 1 << 20
 
 
 class DoorError(RuntimeError):
-    """The door refused or failed an operation; the message says why."""
+    """The door refused or failed an operation; the message says why. `kind` is what the operation
+    raised there ("value" for a refusal, "runtime" for a failure), `text` a refusal's words in the
+    reader's language (SaidError), so the caller can raise the same kind of error here."""
+
+    def __init__(self, message: str, kind: str = "", text: Any = None):
+        super().__init__(message)
+        self.kind, self.text = kind, text
+
+    def as_error(self) -> Exception:
+        if self.kind == "value":
+            err = ValueError(str(self))
+            err.text = self.text  # type: ignore[attr-defined]  # read as getattr(e, "text", None)
+            return err
+        if self.kind == "runtime":
+            return RuntimeError(str(self))
+        return self
 
 
 def inside() -> bool:
@@ -53,4 +69,18 @@ def call(op: str, *, timeout: float = 120, sock: str = SOCK, **args: Any) -> Any
         raise DoorError("the door gave no answer") from e
     if reply.get("ok"):
         return reply.get("result")
-    raise DoorError(str(reply.get("error") or "the door refused it"))
+    raise DoorError(str(reply.get("error") or "the door refused it"), str(reply.get("kind") or ""), reply.get("text"))
+
+
+def via(op: str, here: Callable[..., Any], **args: Any) -> Any:
+    """`op` in the door where it runs, else `here(**args)` in this process. A refusal or failure in
+    the door comes back as the same kind of error; a door that does not answer means doing it
+    here (the web process keeps root until the door has every operation, ADR 0006)."""
+    if not available():
+        return here(**args)
+    try:
+        return call(op, **args)
+    except DoorError as e:
+        raise e.as_error() from None
+    except OSError:
+        return here(**args)

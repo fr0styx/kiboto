@@ -49,7 +49,7 @@ def test_an_operation_runs_kibotos_own_function_and_a_failure_is_said(audit, mon
 
     monkeypatch.setattr(host_basics, "set_host_name", broken)
     reply = host_door.handle({"op": "host.set_name", "args": {"name": "nas"}}, 0)
-    assert reply == {"ok": False, "error": "host.set_name failed: hostnamectl is missing"}
+    assert reply == {"ok": False, "error": "hostnamectl is missing", "kind": "other", "text": None}
     assert _lines(audit)[-1]["outcome"] == "failed"
 
 
@@ -189,3 +189,97 @@ def test_the_service_files_follow_the_running_version(tmp_path):
     ran.clear()
     assert native_update.ensure_units(str(rel), run, str(units)) == []
     assert ran == [["systemctl", "restart", "kiboto-door.service"]]  # the door runs this version again
+
+
+def test_a_refusal_comes_back_as_the_same_kind_with_its_words(audit, monkeypatch):
+    from backend.errors import SaidError
+    from backend.hardware.net import managed
+
+    def refuses(key=None):
+        raise SaidError("That is not the change being tried.", "net_not_this")
+
+    monkeypatch.setattr(managed, "keep", refuses)
+    reply = host_door.handle({"op": "network.keep", "args": {"key": "k" * 20}}, 0)
+    assert reply["ok"] is False and reply["kind"] == "value" and reply["text"]["msg_key"] == "srv.net_not_this"
+    err = door.DoorError(reply["error"], reply["kind"], reply["text"]).as_error()
+    assert (
+        isinstance(err, ValueError) and err.text == reply["text"] and str(err) == "That is not the change being tried."
+    )
+    assert isinstance(door.DoorError("x", "runtime").as_error(), RuntimeError)
+    other = door.DoorError("x", "other")
+    assert other.as_error() is other
+    assert host_door.handle({"op": "network.keep", "args": {"key": None}}, 0)["kind"] == "value"  # None is allowed
+    assert "must be str or NoneType" in host_door.handle({"op": "network.keep", "args": {"key": 5}}, 0)["error"]
+
+
+def test_via_uses_the_door_where_it_runs_and_this_process_elsewhere(monkeypatch):
+    here = []
+    monkeypatch.setattr(door, "available", lambda sock=door.SOCK: False)
+    assert door.via("network.settle", lambda: here.append(1) or True) is True and here == [1]
+    monkeypatch.setattr(door, "available", lambda sock=door.SOCK: True)
+    monkeypatch.setattr(door, "call", lambda op, **a: {"op": op, **a})
+    assert door.via("network.keep", lambda key: "here", key="abc") == {"op": "network.keep", "key": "abc"}
+
+    def refused(op, **a):
+        raise door.DoorError("The bridge is already there.", "value")
+
+    monkeypatch.setattr(door, "call", refused)
+    with pytest.raises(ValueError, match="already there"):
+        door.via("network.try_bridge", lambda **a: None, on=True, port="eth0", now={})
+
+    def gone(op, **a):
+        raise FileNotFoundError("no socket")
+
+    monkeypatch.setattr(door, "call", gone)
+    assert door.via("network.settle", lambda: "done here") == "done here"
+
+
+def test_the_network_and_firewall_operations_run_kibotos_own_code(audit, monkeypatch):
+    from backend.hardware.net import managed
+    from backend.services import firewall
+
+    seen = []
+    monkeypatch.setattr(managed, "start_trial", lambda changes: seen.append(("trial", changes)) or {"status": "trying"})
+    monkeypatch.setattr(managed, "start_bridge_trial", lambda on, port, now: seen.append(("bridge", on, port)) or {})
+    monkeypatch.setattr(managed, "go_back", lambda key: seen.append(("back", key)) or {"reverted": True})
+    monkeypatch.setattr(managed, "settle", lambda: seen.append(("settle",)) or False)
+    monkeypatch.setattr(managed, "ensure_fallback", lambda: seen.append(("fallback",)) or True)
+    monkeypatch.setattr(firewall, "apply", lambda st: seen.append(("fw", st)))
+    assert host_door.handle({"op": "network.try_address", "args": {"changes": {"iface": "eth0"}}}, 0)["ok"]
+    assert host_door.handle({"op": "network.try_bridge", "args": {"on": True, "port": "eth0", "now": {}}}, 0)["ok"]
+    assert host_door.handle({"op": "network.go_back", "args": {"key": None}}, 0)["ok"]
+    assert host_door.handle({"op": "network.settle", "args": {}}, 0)["ok"]
+    assert host_door.handle({"op": "network.ensure_fallback", "args": {}}, 0)["ok"]
+    sent = {"enabled": True, "allow_from": "everywhere; drop table", "services": {"smb": False, "evil": True}, "x": 1}
+    assert host_door.handle({"op": "firewall.apply", "args": {"st": sent}}, 0)["ok"]
+    fw = seen[-1][1]
+    assert fw["enabled"] is True and fw["allow_from"] == "lan" and "evil" not in fw["services"] and "x" not in fw
+    assert fw["services"]["smb"] is False and fw["services"]["web"] is True
+    assert [x[0] for x in seen] == ["trial", "bridge", "back", "settle", "fallback", "fw"]
+
+
+def test_the_firewall_and_the_network_page_go_through_the_door(monkeypatch):
+    import subprocess
+
+    from backend.hardware.net import host
+    from backend.services import firewall
+
+    calls = []
+    monkeypatch.setattr(door, "via", lambda op, here, **a: calls.append((op, sorted(a))) or {"status": "ok"})
+    firewall.apply({"enabled": False}, run=subprocess.run)
+    assert calls[-1] == ("firewall.apply", ["st"])
+    loaded = []
+    firewall.apply(
+        {"enabled": False, "allow_from": "lan", "services": {}},
+        run=lambda *a, **k: loaded.append(1) or subprocess.CompletedProcess(a, 0, "", ""),
+    )
+    assert loaded == [1] and len(calls) == 1  # a test's runner: never the door
+    monkeypatch.setattr("backend.hardware.net.managed.networkd_runs", lambda do=None: True)
+    page = host.ManagedHostNetwork()
+    for changes, op in (
+        ({"confirm": "k"}, "network.keep"),
+        ({"revert": "k"}, "network.go_back"),
+        ({"iface": "eth0"}, "network.try_address"),
+    ):
+        page.apply("address", "", changes)
+        assert calls[-1][0] == op

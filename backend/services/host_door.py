@@ -36,7 +36,7 @@ USER = "kiboto"  # the user the web process will run as
 @dataclass(frozen=True)
 class Operation:
     run: Callable[..., Any]
-    args: dict[str, type]  # every argument, required, with its type
+    args: dict[str, tuple[type, ...]]  # every argument, required, with the types it may have
     max_len: int = 256  # for text arguments
 
 
@@ -49,12 +49,37 @@ def _host(name: str) -> Callable[..., Any]:
     return run
 
 
+def _net(name: str) -> Callable[..., Any]:
+    def run(**kw: Any) -> Any:
+        from backend.hardware.net import managed
+
+        return getattr(managed, name)(**kw)
+
+    return run
+
+
+def _firewall_apply(st: dict[str, Any]) -> None:
+    from backend.services import firewall
+
+    firewall.apply(firewall.cleaned(st))  # only the settings the page offers, whatever was sent
+
+
+TEXT, ON, MAYBE_TEXT, MAP = (str,), (bool,), (str, type(None)), (dict,)
 OPERATIONS: dict[str, Operation] = {
     "door.ping": Operation(lambda: "pong", {}),
-    "host.set_name": Operation(_host("set_host_name"), {"name": str}, max_len=63),
-    "host.set_time_zone": Operation(_host("set_time_zone"), {"zone": str}, max_len=64),
-    "host.set_clock_automatic": Operation(_host("set_clock_automatic"), {"on": bool}),
-    "host.set_ssh": Operation(_host("set_ssh"), {"on": bool}),
+    "host.set_name": Operation(_host("set_host_name"), {"name": TEXT}, max_len=63),
+    "host.set_time_zone": Operation(_host("set_time_zone"), {"zone": TEXT}, max_len=64),
+    "host.set_clock_automatic": Operation(_host("set_clock_automatic"), {"on": ON}),
+    "host.set_ssh": Operation(_host("set_ssh"), {"on": ON}),
+    # the network's settings, each tried with the machine's own way back (hardware/net/managed.py,
+    # which checks every value); the trial's state is in the data folder, where the page reads it
+    "network.try_address": Operation(_net("start_trial"), {"changes": MAP}),
+    "network.try_bridge": Operation(_net("start_bridge_trial"), {"on": ON, "port": TEXT, "now": MAP}, max_len=32),
+    "network.keep": Operation(_net("keep"), {"key": MAYBE_TEXT}, max_len=128),
+    "network.go_back": Operation(_net("go_back"), {"key": MAYBE_TEXT}, max_len=128),
+    "network.settle": Operation(_net("settle"), {}),
+    "network.ensure_fallback": Operation(_net("ensure_fallback"), {}),
+    "firewall.apply": Operation(_firewall_apply, {"st": MAP}),
 }
 
 
@@ -68,11 +93,11 @@ def _checked(request: Any) -> tuple[Operation, dict[str, Any]]:
     args = request.get("args") or {}
     if not isinstance(args, dict) or set(args) != set(op.args):
         raise ValueError(f"{request['op']} takes {', '.join(sorted(op.args)) or 'nothing'}")
-    for name, kind in op.args.items():
+    for name, kinds in op.args.items():
         value = args[name]
-        if type(value) is not kind:  # bool is not int, int is not bool
-            raise ValueError(f"{name} must be {kind.__name__}")
-        if kind is str and (len(value) > op.max_len or "\x00" in value):
+        if type(value) not in kinds:  # bool is not int, int is not bool
+            raise ValueError(f"{name} must be {' or '.join(k.__name__ for k in kinds)}")
+        if type(value) is str and (len(value) > op.max_len or "\x00" in value):
             raise ValueError(f"{name} is too long")
     return op, args
 
@@ -90,7 +115,8 @@ def handle(request: Any, uid: int) -> dict[str, Any]:
     except (OSError, ValueError, RuntimeError, TypeError, LookupError) as e:  # told; the door keeps serving
         logger.warning("[Door] %s failed: %s", name, e)
         _audit(uid, name, "failed", str(e))
-        return {"ok": False, "error": f"{name} failed: {e}"}
+        kind = "value" if isinstance(e, ValueError) else "runtime" if isinstance(e, RuntimeError) else "other"
+        return {"ok": False, "error": str(e), "kind": kind, "text": getattr(e, "text", None)}
     _audit(uid, name, "done", "")
     return {"ok": True, "result": result}
 

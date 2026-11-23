@@ -536,8 +536,10 @@ def _start_app_names() -> None:
         if pool_copy.restored_at_this_start():  # the apps' files came back; their containers did not
             apps_back.start_soon()
         try:
-            managed.settle()
-            managed.ensure_fallback()  # reachable after a network card moved or was replaced
+            from backend import door
+
+            door.via("network.settle", managed.settle)  # through the host door where it runs (ADR 0006)
+            door.via("network.ensure_fallback", managed.ensure_fallback)  # reachable after a card moved
         except (OSError, ValueError) as e:
             logger.error("[Main] A trial of network settings could not be settled: %s", e)
         threading.Thread(target=_machine_at_start, name="MachineTools", daemon=True).start()
