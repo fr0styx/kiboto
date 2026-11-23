@@ -155,6 +155,7 @@ _IMAGE_DEFAULT_KEYS = ("Cmd", "Entrypoint", "Healthcheck", "WorkingDir", "User",
 HEALTH_TIMEOUT_SECS = 300
 STABLE_RUN_SECS = 20
 APP_OK_DWELL_SECS = 60  # the new version must report "ok" this long before the old one is removed (OPS-6)
+MIN_OK_DWELL_SECS = 10  # the least --ok-dwell may ask for (the CI update test waits less than 60 s)
 RESULT_FILE = "update_result.json"  # in the data folder: what the last update did (OPS-7)
 
 _HEALTH_PROBE = (
@@ -425,10 +426,12 @@ def build_recreate_plan(
     return body, extra
 
 
-def _wait_until_healthy(cid: str) -> tuple[bool, str]:
-    """Healthy once the app itself reports "ok" and keeps doing so for APP_OK_DWELL_SECS, without
-    the container exiting (OPS-6). "starting" doesn't count. If the app can't be asked at all
-    (no exec support), the image healthcheck or a steady run stands in, for the same dwell."""
+def _wait_until_healthy(cid: str, dwell: float | None = None) -> tuple[bool, str]:
+    """Healthy once the app itself reports "ok" and keeps doing so for APP_OK_DWELL_SECS (or
+    `dwell`), without the container exiting (OPS-6). "starting" doesn't count. If the app can't be
+    asked at all (no exec support), the image healthcheck or a steady run stands in, for the same
+    dwell."""
+    hold = APP_OK_DWELL_SECS if dwell is None else max(MIN_OK_DWELL_SECS, dwell)
     deadline = time.time() + HEALTH_TIMEOUT_SECS
     good_since: float | None = None
     while time.time() < deadline:
@@ -451,8 +454,8 @@ def _wait_until_healthy(cid: str) -> tuple[bool, str]:
                 good = app == "ok"
             if good:
                 good_since = good_since or time.time()
-                if time.time() - good_since >= APP_OK_DWELL_SECS:
-                    return True, f"ok for {APP_OK_DWELL_SECS} s" if app is not None else "running"
+                if time.time() - good_since >= hold:
+                    return True, f"ok for {hold:g} s" if app is not None else "running"
             else:
                 good_since = None
         time.sleep(3)
@@ -465,6 +468,7 @@ def apply_update_from_helper(
     delay: float = 2.5,
     data_dir: str | None = None,
     restore_from: str | None = None,
+    ok_dwell: float | None = None,
 ):
     """
     Executed inside the ephemeral helper container (started from the new image)
@@ -582,7 +586,7 @@ def apply_update_from_helper(
         write_update_result(data_dir, "rolled_back", "the new version did not start", to_image=image)
         sys.exit(1)
 
-    healthy, why = _wait_until_healthy(new_cid)
+    healthy, why = _wait_until_healthy(new_cid, ok_dwell)
     if not healthy:
         logger.error("[SelfUpdater Helper] Updated container is not healthy (%s). Rolling back...", why)
         _rollback_container(target, rollback_name, failed_id=new_cid, snapshot=snapshot, data_dir=data_dir)
@@ -597,7 +601,7 @@ def apply_update_from_helper(
     logger.info("[SelfUpdater Helper] OTA update complete for '%s'.", target)
 
 
-def main():
+def main(argv: list[str] | None = None):
     parser = argparse.ArgumentParser(description="Kiboto Ephemeral Self-Updater Helper")
     parser.add_argument("--apply", action="store_true", help="Execute container recreate sequence")
     parser.add_argument("--target", default="kiboto", help="Target container name")
@@ -605,11 +609,23 @@ def main():
     parser.add_argument("--delay", type=float, default=2.5, help="Delay seconds before stopping caller")
     parser.add_argument("--data-dir", default=None, help="Target's data folder mounted into the helper")
     parser.add_argument("--restore-from", default=None, help="Snapshot to restore before starting (revert)")
-    args = parser.parse_args()
+    parser.add_argument(
+        "--ok-dwell",
+        type=float,
+        default=None,
+        help=f"Seconds the new version must report ok (default {APP_OK_DWELL_SECS}, at least {MIN_OK_DWELL_SECS}); "
+        "the updater never passes it, the CI update test does",
+    )
+    args = parser.parse_args(argv)
 
     if args.apply:
         apply_update_from_helper(
-            args.target, args.image, args.delay, data_dir=args.data_dir, restore_from=args.restore_from
+            args.target,
+            args.image,
+            args.delay,
+            data_dir=args.data_dir,
+            restore_from=args.restore_from,
+            ok_dwell=args.ok_dwell,
         )
     else:
         print("Self-updater helper invoked without --apply. Exiting.")

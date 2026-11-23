@@ -79,7 +79,8 @@ has_seed() { in_data "cat /d/upgrade_marker.json" 2>/dev/null | grep -q '"seed":
 helper() {
   docker run --rm --name "$HELPER" \
     -v /var/run/docker.sock:/var/run/docker.sock -v "$DATA":/kiboto-data \
-    "$NEW" python3 -m backend.services.self_updater --apply --target "$NAME" --image "$1" --delay 1 --data-dir /kiboto-data
+    "$NEW" python3 -m backend.services.self_updater --apply --target "$NAME" --image "$1" --delay 1 --data-dir /kiboto-data \
+    --ok-dwell 15  # the real updater waits 60 s of "ok"; what is tested here is the switch and the rollback
 }
 
 docker pull -q "$BROKEN" >/dev/null

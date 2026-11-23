@@ -73,3 +73,21 @@ def test_last_result_endpoint(client, auth_headers, tmp_path, monkeypatch):
     su.write_update_result(str(tmp_path), "updated", "ok for 60 s", to_image="img:3")
     body = client.get("/api/system/updates/last-result", headers=auth_headers).json()
     assert body["result"] == "updated" and body["to_image"] == "img:3"
+
+
+def test_a_shorter_dwell_can_be_asked_for_but_not_below_the_floor(clock, monkeypatch):
+    monkeypatch.setattr(su, "_app_status", lambda cid: "ok")
+    t0 = clock.t
+    assert su._wait_until_healthy("c1", 15) == (True, "ok for 15 s")
+    assert 15 <= clock.t - t0 < su.APP_OK_DWELL_SECS
+    assert su._wait_until_healthy("c1", 1) == (True, f"ok for {su.MIN_OK_DWELL_SECS} s")
+
+
+def test_only_the_ci_test_passes_a_dwell(monkeypatch):
+    seen = []
+    monkeypatch.setattr(su, "apply_update_from_helper", lambda *a, **k: seen.append((a, k)))
+    su.main(["--apply", "--target", "t", "--image", "i", "--ok-dwell", "15"])
+    su.main(["--apply", "--target", "t", "--image", "i"])
+    assert seen[0][1]["ok_dwell"] == 15 and seen[1][1]["ok_dwell"] is None
+    su.main([])  # without --apply nothing happens
+    assert len(seen) == 2
