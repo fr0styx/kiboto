@@ -3,7 +3,7 @@
   "buttonClasses": 76,
   "inlineStyles": 1243,
   "emojiIcons": 4,
-  "colours": 3704,
+  "colours": 3711,
   "primitiveUses": 4,
   "importantPerFile": {
     "frontend/index.html": 64,
@@ -116,7 +116,7 @@
     "frontend/src/styles/09-drawer-cards.css": 47,
     "frontend/src/styles/11-fans-smart.css": 18,
     "frontend/src/styles/12-cloud-remote.css": 73,
-    "frontend/src/styles/16-dock.css": 11,
+    "frontend/src/styles/16-dock.css": 18,
     "frontend/src/styles/17-dock-preview.css": 29,
     "frontend/src/styles/18-toasts-dialogs.css": 21,
     "frontend/src/styles/19-management-window.css": 55,

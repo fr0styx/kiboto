@@ -30,6 +30,8 @@ Kiboto lists the third-party software it bundles and its licences at /third-part
 
 For a machine of its own: the install guide says what is promised during the beta, the security policy covers such a machine, and scripts/hardware_report.sh lists what a machine is made of (read-only, without serial numbers) for reports of hardware that works.
 
+Kib's face now floats in a corner of the desktop: click it to ask Kib, without going through Settings.
+
 #### Changes
 
 On a machine of its own, a separate system service (the host door) now changes the machine's name, time zone, clock and SSH setting for Kiboto, from a fixed list of operations: the first step towards Kiboto's web service running without full system rights (docs/adr/0006-web-without-root.md).

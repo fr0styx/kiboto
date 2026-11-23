@@ -78,6 +78,7 @@ import { installWindowFocus } from './window-focus.js';
 import { installStaleBuildGuard, watchServerBuild } from './stale-build.js';
 import { installDialogChrome } from './dialog-chrome.js';
 import { initDesktopContextMenu } from './components/desktop-context-menu.js';
+import { initKibBuddy } from './components/kib-buddy.js';
 import { initDesktopDragAndDrop } from './components/desktop-drag-drop.js';
 import { initScreensaverSystem } from './components/screensaver.js';
 import { initI18n } from './i18n.js';
@@ -443,6 +444,7 @@ document.addEventListener('DOMContentLoaded', () => {
     openGlobal: 'openContainersManager',
   });
   initDesktopContextMenu();
+  initKibBuddy(); // Kib's face in a desktop corner opens its window
   initDesktopDragAndDrop();
   initScreensaverSystem();
   initA11y();

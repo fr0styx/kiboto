@@ -308,3 +308,61 @@
   background: var(--lt-b-0a1113ff, #0a1113);
 }
 
+
+/* Kib on the desktop (components/kib-buddy.js): its face in the bottom-left corner, above the
+   desktop icons (z 30) and below every window (z 1000); the bottom-right when the dock is on the left */
+.kib-buddy {
+  position: fixed;
+  left: 24px;
+  bottom: 24px;
+  z-index: 40;
+  display: block;
+  padding: 6px;
+  border: 0;
+  border-radius: 16px;
+  background: transparent;
+  cursor: pointer;
+  color: var(--text, #e6f1f0);
+  font: inherit;
+}
+body:has(.os-dock-container.dock-pos-left) .kib-buddy { left: auto; right: 24px; }
+body:has(.os-dock-container.dock-pos-left) .kib-buddy-label { left: auto; right: calc(100% + 4px); transform: translateX(6px); }
+.kib-buddy-face {
+  display: block;
+  width: 80px;
+  height: 45px;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.45));
+  transition: transform 0.18s ease;
+  animation: kib-buddy-float 6s ease-in-out infinite;
+}
+.kib-buddy-tile { fill: #0e1c1e; stroke: #2b393d; stroke-width: 1.5; }
+.kib-buddy-eye {
+  fill: #4fd8c4;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: kib-buddy-blink 7s infinite;
+}
+.kib-buddy-label {
+  position: absolute;
+  left: calc(100% + 4px);
+  top: 50%;
+  margin-top: -14px;
+  opacity: 0;
+  transform: translateX(-6px);
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--lt-b-0e1c1ee0, rgba(14, 28, 30, 0.88));
+  font-size: var(--kb-fs-sm, 0.875rem);
+  white-space: nowrap;
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.kib-buddy:hover .kib-buddy-face, .kib-buddy:focus-visible .kib-buddy-face { transform: translateY(-3px) scale(1.06); }
+.kib-buddy:hover .kib-buddy-label, .kib-buddy:focus-visible .kib-buddy-label { opacity: 1; transform: none; }
+.kib-buddy:focus-visible { outline: 2px solid var(--accent, #4fd8c4); outline-offset: 2px; }
+@keyframes kib-buddy-blink { 0%, 94%, 100% { transform: scaleY(1); } 96% { transform: scaleY(0.12); } }
+@keyframes kib-buddy-float { 0%, 100% { translate: 0 0; } 50% { translate: 0 -3px; } }
+@media (prefers-reduced-motion: reduce) {
+  .kib-buddy-face, .kib-buddy-eye { animation: none; }
+}
+body.mobile-mode .kib-buddy, body.phone-shell .kib-buddy { display: none; }
