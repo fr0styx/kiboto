@@ -134,6 +134,48 @@ export function usbSettingsHtml(settings) {
   </div>`;
 }
 
+/** On a machine set up for Kiboto, the USB disks it opens and ejects itself (hardware/usb_mount.py). */
+export function usbDisksHtml(usb) {
+  if (!usb || !usb.opens_disks) return '';
+  const open = (usb.disks || []).map(
+    (
+      d
+    ) => `<li class="offsite-usb-disk"><span>${escapeHtml(d.name || d.path)} <span class="offsite-meta">${escapeHtml(d.path)}</span></span>
+      <button type="button" class="btn-pill-toggle is-small" data-usb-eject="${escapeHtml(d.path)}">${escapeHtml(t('usb.eject', 'Eject'))}</button></li>`
+  );
+  const closed = (usb.can_open || []).map(
+    (
+      d
+    ) => `<li class="offsite-usb-disk"><span>${escapeHtml(d.label || d.device)} <span class="offsite-meta">${escapeHtml(`${d.fs} · ${formatBytes(d.size_bytes)}`)}</span></span>
+      <button type="button" class="btn-pill-toggle is-small" data-usb-open="${escapeHtml(d.device)}">${escapeHtml(t('usb.open', 'Use this disk'))}</button></li>`
+  );
+  const none = !open.length && !closed.length;
+  return `<div class="offsite-usb-disks" data-usb-disks>
+    <div class="offsite-meta">${escapeHtml(none ? t('usb.none', 'No USB disk is plugged in.') : t('usb.disks_help', 'USB disks plugged into this machine. Eject a disk before you unplug it.'))}</div>
+    ${none ? '' : `<ul class="offsite-usb-list">${open.join('')}${closed.join('')}</ul>`}
+  </div>`;
+}
+
+/** Opens or ejects the disk a button names, then draws the backups again. */
+export async function usbDiskAction(btn, redraw) {
+  const device = btn.getAttribute('data-usb-open');
+  const path = btn.getAttribute('data-usb-eject');
+  btn.setAttribute('disabled', '');
+  try {
+    if (device) {
+      const res = await api.post('/api/usb/open', { device });
+      showToast(t('usb.opened', 'The disk is open at {path}.', { path: res.path }), 'success');
+    } else if (path) {
+      await api.post('/api/usb/eject', { path });
+      showToast(t('usb.ejected', 'The disk can be unplugged now.'), 'success');
+    }
+    await redraw();
+  } catch (err) {
+    btn.removeAttribute('disabled');
+    showToast(err.message || String(err), 'error');
+  }
+}
+
 export function isLockable(value) {
   return String(value || '')
     .trim()
@@ -250,7 +292,13 @@ export async function renderOffsite(mount) {
   }
   mount.innerHTML =
     reposHtml(data) +
-    (data.available ? connectKitHtml() + formHtml(shares) + usbSettingsHtml(usb && usb.settings) : '');
+    (data.available ? connectKitHtml() + formHtml(shares) + usbSettingsHtml(usb && usb.settings) : '') +
+    usbDisksHtml(usb);
+  mount
+    .querySelectorAll('[data-usb-open], [data-usb-eject]')
+    .forEach((btn) =>
+      btn.addEventListener('click', () => usbDiskAction(/** @type {HTMLElement} */ (btn), () => renderOffsite(mount)))
+    );
   import('./backup-needs.js').then((m) => m.applyNeeds(mount)).catch(() => {}); // rights (SET-21, B9)
   mount.querySelector('[data-off-usb]')?.addEventListener('change', async (e) => {
     const box = /** @type {HTMLInputElement} */ (e.target);

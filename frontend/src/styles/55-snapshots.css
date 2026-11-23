@@ -39,6 +39,11 @@
 .offsite-form fieldset { border: 1px solid var(--kb-line); border-radius: var(--kb-radius-sm); padding: var(--kb-space-1) var(--kb-space-2); display: flex; flex-wrap: wrap; gap: var(--kb-space-2); }
 .offsite-form legend { font-size: var(--kb-fs-xs); color: var(--muted); }
 .offsite-form .offsite-check { flex-direction: row; align-items: center; gap: 4px; color: var(--fg); }
+/* USB disks Kiboto opens itself on a machine set up for it */
+.offsite-usb-disks { margin-top: var(--kb-space-3); }
+.offsite-usb-list { list-style: none; margin: var(--kb-space-1) 0 0; padding: 0; display: flex; flex-direction: column; gap: var(--kb-space-1); }
+.offsite-usb-disk { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--kb-space-2); font-size: var(--kb-fs-sm); min-width: 0; }
+.offsite-usb-disk > span { min-width: 0; overflow-wrap: anywhere; }
 
 /* Invites (Batch 6) */
 .invite-card { margin-top: var(--kb-space-4); padding: var(--kb-space-3); border-radius: var(--kb-radius); border: 1px solid var(--kb-line-strong); }

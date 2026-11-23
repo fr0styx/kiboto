@@ -37,6 +37,7 @@ from backend.config import (
 from backend.confirmations import confirm_or_raise, require_confirmation
 from backend.db import query_copy_history
 from backend.fsutil import atomic_write_json, json_locked, read_json, resolve_within, root_for
+from backend.hardware import usb_mount
 from backend.hardware.disks import is_drive_asleep, locate_disk, read_smart_detail, run_disk_smart_test
 from backend.hardware.docker_stats import container_action, read_docker_containers
 from backend.hardware.memory import read_mem
@@ -413,7 +414,44 @@ def usb_disks():
     """USB disks mounted under /mnt/disks: space, the backups that go to each, camera media (FEAT-07)."""
     from backend.services import usb_copy
 
-    return {"disks": usb_copy.disks(), "settings": usb_copy.settings()}
+    managed = runtime.managed_host()  # there Kiboto opens USB disks itself (hardware/usb_mount.py)
+    return {
+        "disks": usb_copy.disks(),
+        "settings": usb_copy.settings(),
+        "can_open": usb_mount.unmounted() if managed else [],
+        "opens_disks": managed,
+    }
+
+
+class UsbDeviceRequest(BaseModel):
+    device: str = Field(..., min_length=6, max_length=64, pattern=r"^/dev/[A-Za-z0-9/_-]+$")
+
+
+@router.post("/usb/open", dependencies=[Depends(require_scope("storage:admin"))])
+def usb_open(req: UsbDeviceRequest):
+    """Mounts a plugged-in USB disk under /mnt/disks, on a machine set up for Kiboto."""
+    if not runtime.managed_host():
+        raise HTTPException(status_code=409, detail="The host opens USB disks here, not Kiboto.")
+    try:
+        return {"path": usb_mount.open_disk(req.device)}
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from None
+    except RuntimeError as e:
+        raise HTTPException(status_code=502, detail=str(e)) from None
+
+
+@router.post("/usb/eject", dependencies=[Depends(require_scope("storage:admin"))])
+def usb_eject(req: UsbDiskRequest):
+    """Unmounts a USB disk Kiboto opened, so it can be unplugged."""
+    if not runtime.managed_host():
+        raise HTTPException(status_code=409, detail="The host opens USB disks here, not Kiboto.")
+    try:
+        usb_mount.eject(req.path)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from None
+    except RuntimeError as e:
+        raise HTTPException(status_code=409, detail=str(e)) from None
+    return {"status": "ejected"}
 
 
 @router.put("/usb/settings", dependencies=[Depends(require_scope("system:config"))])

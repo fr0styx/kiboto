@@ -132,6 +132,8 @@ On a machine of its own, Kiboto can now update itself: the new version is made r
 
 - **Every release carries Kiboto's install image (preview)**: built from Debian's official installer, checked against Debian's signing key.
 
+On a machine set up for Kiboto, plugged-in USB disks are listed on the Backup page with Use this disk and Eject, so backups to a USB disk and the camera import work there.
+
 ## v2.0.5 (2026-11-20)
 ### 🏡 A second NAS that can take over, files you can change over the network, and 176 tested apps
 

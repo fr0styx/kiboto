@@ -195,7 +195,7 @@ must_be_signed() {
 
 service() {
   src=$1
-  mkdir -p "$DATA" "$ETC" /mnt/storage
+  mkdir -p "$DATA" "$ETC" /mnt/storage /mnt/disks
   chmod 700 "$DATA"
   [ -f "$ETC/kiboto.env" ] || printf '# Settings for Kiboto as a service, one NAME=value per line. Kept across updates.\n' > "$ETC/kiboto.env"
   date -u +%Y-%m-%dT%H:%M:%SZ > "$ETC/managed"

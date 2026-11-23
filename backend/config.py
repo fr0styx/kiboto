@@ -286,7 +286,9 @@ for _cand in (
     "/zettos",
     "/zettos/pool",
 ):
-    if os.path.exists(_cand) and _cand not in _roots_list:
+    # on a machine set up for Kiboto, USB disks are opened under /mnt/disks later (hardware/usb_mount.py)
+    _managed_disks = _cand == "/mnt/disks" and os.path.exists("/etc/kiboto/managed")
+    if (os.path.exists(_cand) or _managed_disks) and _cand not in _roots_list:
         _roots_list.append(_cand)
 ALLOWED_BROWSE_ROOTS = _roots_list
 

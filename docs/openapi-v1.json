@@ -40779,6 +40779,22 @@
     "title": "UsbBackupResponse",
     "type": "object"
    },
+   "UsbDeviceRequest": {
+    "properties": {
+     "device": {
+      "maxLength": 64,
+      "minLength": 6,
+      "pattern": "^/dev/[A-Za-z0-9/_-]+$",
+      "title": "Device",
+      "type": "string"
+     }
+    },
+    "required": [
+     "device"
+    ],
+    "title": "UsbDeviceRequest",
+    "type": "object"
+   },
    "UsbDiskRequest": {
     "properties": {
      "dest": {
@@ -73906,6 +73922,48 @@
     ]
    }
   },
+  "/api/v1/usb/eject": {
+   "post": {
+    "description": "Unmounts a USB disk Kiboto opened, so it can be unplugged.",
+    "operationId": "usb_eject_api_v1_usb_eject_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/UsbDiskRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Usb Eject",
+    "tags": [
+     "System & Storage"
+    ],
+    "x-required-scopes": [
+     "storage:admin"
+    ]
+   }
+  },
   "/api/v1/usb/import": {
    "post": {
     "description": "Copies a USB disk's photos and videos (its DCIM folder, else the whole disk) into dated\nfolders, verified file by file like the card reader (FEAT-07).",
@@ -73947,6 +74005,48 @@
     ],
     "x-required-scopes": [
      "storage:write",
+     "storage:admin"
+    ]
+   }
+  },
+  "/api/v1/usb/open": {
+   "post": {
+    "description": "Mounts a plugged-in USB disk under /mnt/disks, on a machine set up for Kiboto.",
+    "operationId": "usb_open_api_v1_usb_open_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/UsbDeviceRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Usb Open",
+    "tags": [
+     "System & Storage"
+    ],
+    "x-required-scopes": [
      "storage:admin"
     ]
    }
