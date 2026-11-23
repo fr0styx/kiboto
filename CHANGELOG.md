@@ -46,6 +46,8 @@ Kib on the desktop is now a small moving character, the Kiboto mark with Kib's e
 
 On a phone, messages such as "Last sign-in" now appear at the top of the screen, under the top bar.
 
+The Kib page in Settings starts with Kib itself: its face, its name, what it does and Open Kib. Each Settings page shows its own icon in the title bar.
+
 ## v2.0.6 (2026-11-23)
 ### 🖥️ Kiboto on a machine of its own (preview), with its settings kept safe on every pool
 

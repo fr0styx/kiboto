@@ -109,6 +109,16 @@ let _activeProfile = 'balanced';
 let _unbindMgmtTrap = null;
 
 // The deploy button: a soft tint of the accent with a thin border, like the dialog's other controls.
+
+/** The window's title icon: the page's own from the sidebar (Kib's face for Kib), Settings' on the
+ * overview. It showed Settings' grid on every page. */
+export function titleIconOf(targetId, doc = document) {
+  const use = doc.querySelector('#management-window-header .mgmt-title-ic use');
+  if (!use) return;
+  const item = targetId ? doc.querySelector(`.mgmt-sidebar-item[data-mgmt-target="${targetId}"] use`) : null;
+  use.setAttribute('href', item?.getAttribute('href') || '#i-management');
+}
+
 export function setDeployButtonTone(btn, tone) {
   const color = tone === 'danger' ? 'var(--err, #eb5757)' : 'var(--brand, #33cdb8)';
   btn.style.background = `color-mix(in srgb, ${color} 22%, transparent)`;
@@ -780,6 +790,7 @@ export function initManagement() {
     if (headerNav) headerNav.style.display = 'none';
     if (backBtn) backBtn.style.display = 'none';
     if (titleText) titleText.textContent = t('mgmt.title', 'Settings');
+    titleIconOf('');
     document.querySelectorAll('.mgmt-category-tab').forEach((t) => t.classList.remove('active'));
     document.querySelectorAll('.mgmt-sidebar-item').forEach((b) => {
       b.classList.toggle('active', b.dataset.mgmtTarget === 'management-hub-view');
@@ -1251,6 +1262,7 @@ export function initManagement() {
     }
 
     if (titleText) titleText.textContent = sectionName;
+    titleIconOf(targetId);
 
     const parentCard = document.getElementById(targetId);
     if (parentCard) {

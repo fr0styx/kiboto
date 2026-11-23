@@ -551,7 +551,13 @@
 .kibm-text > span { font-size: var(--kb-fs-xs); color: var(--kb-text-soft); }
 .kibm-text > small { font-size: var(--kb-fs-xs); color: var(--muted); }
 #kib-model-choice > [data-kibm-test] { align-self: flex-start; }
-.kib-open-row { display: flex; justify-content: flex-end; margin: 0 0 8px; }
+.kib-hero { display: flex; align-items: center; gap: var(--kb-space-3); margin: 0 0 var(--kb-space-3); padding: var(--kb-space-3); border: 1px solid var(--kb-line); border-radius: var(--kb-radius); background: var(--card); }
+.kib-hero-face { flex: 0 0 auto; width: 48px; height: 48px; }
+.kib-hero-art { display: block; width: 100%; height: 100%; }
+.kib-hero-text { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.kib-hero-text > strong { font-size: var(--kb-fs); color: var(--fg); }
+.kib-hero-text > span { font-size: var(--kb-fs-xs); color: var(--kb-text-soft); line-height: 1.4; }
+.kib-hero > [data-kib-open] { flex: 0 0 auto; }
 /* AI 4: the status line does Pause / Continue / Cancel and "See why"; "Start over" lives in Advanced.
    The old row's other buttons, the IDLE banner and the counters stay in the markup for the page code. */
 #mgmt-pane-ai-index :is(#btn-ai-index-pause, #btn-ai-index-resume, #btn-ai-index-stop, #btn-ai-learning-results, #btn-ai-in-place-reindex, #btn-ai-flush-index, #ai-sync-progress-banner, #ai-index-db-summary) { display: none !important; }

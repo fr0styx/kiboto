@@ -8503,6 +8503,7 @@ export default {
   "kibm.test_failed": "The speed test did not start: {error}",
   "kibw.title": "Kib",
   "kibw.open": "Open Kib",
+  "kibw.hero_line": "Kiboto's helper. Ask it about your files and your NAS.",
   "vmp.presets": "Start from",
   "vmp.p_linux": "Linux or another system",
   "vmp.p_linux_2": "2 cores, 4 GB, 32 GB disk",

@@ -8503,6 +8503,7 @@ export default {
   "kibm.test_failed": "速度测试未能开始：{error}",
   "kibw.title": "Kib",
   "kibw.open": "打开 Kib",
+  "kibw.hero_line": "Kiboto 的助手。你可以问它关于你的文件和 NAS 的问题。",
   "vmp.presets": "从预设开始",
   "vmp.p_linux": "Linux 或其他系统",
   "vmp.p_linux_2": "2 核，4 GB，32 GB 磁盘",

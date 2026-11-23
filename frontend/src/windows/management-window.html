@@ -3601,7 +3601,12 @@
 
             <!-- Tab 3: Dedicated Configuration (Service Switch, Scope/Schedule/Standby Rules, Watched Shares & NPU/GPU Models) -->
             <div id="mgmt-pane-ai-index" class="mgmt-tab-pane" style="display: block;">
-              <div class="kib-open-row"><button type="button" class="btn-pill-toggle is-small" data-kib-open data-i18n="kibw.open">Open Kib</button></div>
+              <!-- Kib itself first: its face, its name and what it does, with the way into its window -->
+              <div class="kib-hero">
+                <span class="kib-hero-face"><svg class="kib-hero-art" viewBox="6 6 52 52" aria-hidden="true" focusable="false"><path class="kib-buddy-case" d="M19 6H45A13 13 0 0 1 58 19V37.5A2.5 2.5 0 0 1 55.5 40H8.5A2.5 2.5 0 0 1 6 37.5V19A13 13 0 0 1 19 6ZM8.5 42.5H55.5A2.5 2.5 0 0 1 58 45V45A13 13 0 0 1 45 58H19A13 13 0 0 1 6 45V45A2.5 2.5 0 0 1 8.5 42.5Z"/><path class="kib-buddy-screen" d="M19 13H45A6.5 6.5 0 0 1 51.5 19.5V27A6.5 6.5 0 0 1 45 33.5H19A6.5 6.5 0 0 1 12.5 27V19.5A6.5 6.5 0 0 1 19 13Z"/><rect class="kib-buddy-eye" x="21.5" y="17.75" width="6.5" height="11" rx="3.25"/><rect class="kib-buddy-eye" x="36" y="17.75" width="6.5" height="11" rx="3.25"/><circle class="kib-buddy-light" cx="49.25" cy="50.25" r="3.2"/></svg></span>
+                <span class="kib-hero-text"><strong data-i18n="kibw.title">Kib</strong><span data-i18n="kibw.hero_line">Kiboto's helper. Ask it about your files and your NAS.</span></span>
+                <button type="button" class="btn-pill-toggle is-small" data-kib-open data-i18n="kibw.open">Open Kib</button>
+              </div>
               <div id="kib-status-mount"></div>
               <div class="ai-telemetry-ribbon" id="ai-telemetry-ribbon" hidden style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px; padding:10px 14px; margin-bottom:12px; background:var(--lt-b-0e1c1ea6, rgba(14,28,30,0.65)); border:1px solid rgba(51,205,184,0.3); border-radius:10px; box-sizing:border-box;">
                 <div class="aix-row">
