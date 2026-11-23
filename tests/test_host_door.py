@@ -642,3 +642,55 @@ def test_a_shared_folders_folder_and_limit_go_through_the_door(audit, monkeypatc
     for args in (("/etc",), (str(tmp_path / "boot-disk"),), (str(tmp_path / "x"), -1)):
         assert folder(*args)["ok"] is False, args
     assert len(made) == 1
+
+
+def test_self_tests_and_drive_sleep_go_through_the_door(audit, monkeypatch):
+    import subprocess
+
+    from backend.hardware import disks, drive_sleep
+
+    calls = []
+    monkeypatch.setattr(door, "available", lambda sock=door.SOCK: True)
+    monkeypatch.setattr(
+        door,
+        "call",
+        lambda op, **a: calls.append((op, a)) or ([0, "testing has begun", ""] if op.startswith("smart") else []),
+    )
+    assert disks.self_test("sdb", "short") == (0, "testing has begun", "")
+    assert drive_sleep.apply(20) == []
+    assert calls == [
+        ("smart.self_test", {"dev_name": "sdb", "action": "short"}),
+        ("drives.sleep_after", {"minutes": 20}),
+    ]
+    for op, args in calls:
+        host_door._checked({"op": op, "args": args})
+
+    monkeypatch.setattr(door, "available", lambda sock=door.SOCK: False)
+    ran = []
+    monkeypatch.setattr(disks, "_get_smart_device_type", lambda name, nvme: "sat")
+    monkeypatch.setattr(
+        disks.subprocess, "run", lambda cmd, **kw: ran.append(cmd) or subprocess.CompletedProcess(cmd, 4, "x", "busy")
+    )
+    code, out, err = disks.self_test("sdb", "abort")
+    assert code == 4 and err == "busy" and "busy" in out and ran[0][:2] == ["smartctl", "-X"]
+    with pytest.raises(ValueError):
+        disks.self_test("sdb", "-d")
+
+
+def test_the_door_starts_a_self_test_only_on_a_drive(audit, monkeypatch, tmp_path):
+    from backend.hardware import disks
+
+    started = []
+    monkeypatch.setattr(disks, "self_test", lambda name, action: started.append(name) or (0, "", ""))
+    monkeypatch.setattr(
+        disks, "_resolve_dev_path", lambda name: "/dev/null" if name == "notblk" else str(tmp_path / name)
+    )
+
+    def test(name):
+        return host_door.handle({"op": "smart.self_test", "args": {"dev_name": name, "action": "short"}}, 0)
+
+    for name in ("../sda", "-x", "/dev/sda", "notblk", "gone"):
+        assert test(name)["ok"] is False, name
+    assert started == []
+    monkeypatch.setattr(host_door.os, "stat", lambda p: os.stat_result((0o060660,) + (0,) * 9))
+    assert test("sdb")["ok"] is True and started == ["sdb"]

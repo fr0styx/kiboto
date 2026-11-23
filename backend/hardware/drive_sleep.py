@@ -90,7 +90,16 @@ def spinning_drives(do: Run | None = None) -> list[str]:
 
 def apply(minutes: int, do: Run | None = None, probe: Callable[[str], str] | None = None) -> list[dict[str, Any]]:
     """Sets every spinning data drive's timer to minutes (0 clears it). One row per drive: set,
-    asleep (left alone) or failed, with what hdparm said."""
+    asleep (left alone) or failed, with what hdparm said. Through the host door where it runs
+    (ADR 0006); `do` and `probe` (tests) keep it here."""
+    if do is None and probe is None:
+        from backend import door
+
+        return door.via("drives.sleep_after", _apply_here, minutes=minutes)
+    return _apply_here(minutes, do, probe)
+
+
+def _apply_here(minutes: int, do: Run | None = None, probe: Callable[[str], str] | None = None) -> list[dict[str, Any]]:
     if minutes not in CODES:
         raise ValueError(f"{minutes} minutes is not one of the choices")
     do = do or run

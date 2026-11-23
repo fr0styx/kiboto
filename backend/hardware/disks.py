@@ -1566,6 +1566,30 @@ def fetch_disk_smart_detail(dev_name: str, wake_if_standby: bool = False):
     }
 
 
+SELF_TEST_FLAGS = {"short": ["-t", "short"], "long": ["-t", "long"], "abort": ["-X"]}
+
+
+def self_test(dev_name: str, action: str) -> tuple[int, str, str]:
+    """Starts ("short", "long") or stops ("abort") a drive's self-test with smartctl: its exit
+    code, everything it said, and its error output. Through the host door where it runs (ADR
+    0006), which works the device and its type out from the name itself."""
+    from backend import door
+
+    code, out, err = door.via("smart.self_test", _self_test_here, dev_name=dev_name, action=action)
+    return int(code), str(out), str(err)
+
+
+def _self_test_here(dev_name: str, action: str) -> tuple[int, str, str]:
+    if action not in SELF_TEST_FLAGS:
+        raise ValueError("action is short, long or abort")
+    dev = _resolve_dev_path(dev_name)
+    dtype = _get_smart_device_type(dev_name, dev_name.startswith("nvme"))
+    r = subprocess.run(
+        ["smartctl", *SELF_TEST_FLAGS[action], "-d", dtype, dev], capture_output=True, text=True, timeout=15
+    )
+    return r.returncode, (r.stdout or "") + ("\n" + r.stderr if r.stderr else ""), r.stderr or ""
+
+
 def run_disk_smart_test(dev_name: str, test_type: str = "short", skip_if_standby: bool = False):
     """
     Triggers or aborts an active S.M.A.R.T. self-test on the target disk via smartctl.
@@ -1600,27 +1624,19 @@ def run_disk_smart_test(dev_name: str, test_type: str = "short", skip_if_standby
                 "output": f"Drive {dev_name} is in standby mode. Skipping self-test to preserve platter sleep.",
             }
 
-    dev = _resolve_dev_path(dev_name)
-    clean_name = dev_name.removeprefix("/dev/").removeprefix("/host/dev/")
     is_nvme = clean_name.startswith("nvme")
-    dtype = _get_smart_device_type(dev_name, is_nvme)
-
     test_type = (test_type or "short").lower().strip()
     if test_type in ("abort", "stop", "cancel"):
-        cmd = ["smartctl", "-X", "-d", dtype, dev]
         action_name = "abort"
     elif test_type in ("long", "extended"):
-        cmd = ["smartctl", "-t", "long", "-d", dtype, dev]
         action_name = "long"
     else:
-        cmd = ["smartctl", "-t", "short", "-d", dtype, dev]
         action_name = "short"
 
     try:
-        r = subprocess.run(cmd, capture_output=True, text=True, timeout=15)
-        out = (r.stdout or "") + ("\n" + r.stderr if r.stderr else "")
+        code, out, stderr = self_test(clean_name, action_name)
         success = (
-            (r.returncode == 0)
+            (code == 0)
             or ("testing has begun" in out.lower())
             or ("test routine started" in out.lower())
             or ("self-test has begun" in out.lower())
@@ -1696,7 +1712,7 @@ def run_disk_smart_test(dev_name: str, test_type: str = "short", skip_if_standby
                 and not line.startswith("Copyright")
                 and not line.startswith("===")
             ]
-            err_msg = filtered_lines[-1] if filtered_lines else (r.stderr or "Device self-test failed to initiate.")
+            err_msg = filtered_lines[-1] if filtered_lines else (stderr or "Device self-test failed to initiate.")
 
         return {
             "success": success,

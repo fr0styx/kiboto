@@ -154,6 +154,30 @@ def _share_folder(kw: dict[str, Any]) -> None:
         raise ValueError("quota_bytes must be a size in bytes")
 
 
+def _self_test(dev_name: str, action: str) -> tuple[int, str, str]:
+    """A self-test of a drive: the name must be a block device's (sda, nvme0n1), not a path."""
+    import stat
+
+    from backend.hardware import disks
+
+    if not re.match(r"^[a-z][a-z0-9]{1,15}$", dev_name):
+        raise ValueError("dev_name must be a drive's name")
+    real = os.path.realpath(disks._resolve_dev_path(dev_name))
+    try:
+        is_block = stat.S_ISBLK(os.stat(real).st_mode)
+    except OSError:
+        is_block = False
+    if not is_block:
+        raise ValueError(f"{dev_name} is not a drive here")
+    return disks.self_test(dev_name, action)
+
+
+def _sleep_after(minutes: int) -> list[dict[str, Any]]:
+    from backend.hardware import drive_sleep
+
+    return drive_sleep.apply(minutes)
+
+
 def _renamed(kw: dict[str, Any]) -> None:
     from backend.hardware.pal import pool_rules
 
@@ -228,6 +252,8 @@ OPERATIONS: dict[str, Operation] = {
     "storage.destroy_pool": Operation(_storage("destroy_pool"), {"pool_id": TEXT}, max_len=128),
     "storage.erase_pool": Operation(_storage("erase_pool"), {"pool_id": TEXT}, max_len=128),
     "storage.allow_changes": Operation(_storage("allow_changes"), {"pool_id": TEXT}, max_len=128),
+    "smart.self_test": Operation(_self_test, {"dev_name": TEXT, "action": TEXT}, max_len=32),
+    "drives.sleep_after": Operation(_sleep_after, {"minutes": NUMBER}),
     "storage.share_folder": Operation(
         _storage("make_share_folder", _share_folder), {"path": TEXT, "quota_bytes": NUMBER}, max_len=4096
     ),
