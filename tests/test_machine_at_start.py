@@ -7,10 +7,9 @@ from backend.services import drive_sleep, native_update
 def test_the_tools_come_first_then_the_timers(monkeypatch):
     done = []
     monkeypatch.setattr(native_update, "add_missing_tools", lambda rel: done.append(("tools", rel)) or [])
-    monkeypatch.setattr(native_update, "ensure_units", lambda rel: done.append(("units", rel)) or [])
     monkeypatch.setattr(drive_sleep, "at_start", lambda: done.append(("timers",)) or [{"drive": "sdb", "state": "set"}])
     main._machine_at_start()
-    assert done == [("tools", "/opt/kiboto/current"), ("units", "/opt/kiboto/current"), ("timers",)]
+    assert done == [("tools", "/opt/kiboto/current"), ("timers",)]
 
 
 def test_a_failure_of_either_is_said_and_the_other_still_runs(monkeypatch, caplog):
@@ -23,7 +22,20 @@ def test_a_failure_of_either_is_said_and_the_other_still_runs(monkeypatch, caplo
     main._machine_at_start()
     assert timers == [1] and "were not checked" in caplog.text
     monkeypatch.setattr(native_update, "add_missing_tools", lambda rel: [])
-    monkeypatch.setattr(native_update, "ensure_units", lambda rel: [])
     monkeypatch.setattr(drive_sleep, "at_start", lambda: (_ for _ in ()).throw(ValueError("x")))
     main._machine_at_start()
     assert "were not set" in caplog.text
+
+
+def test_the_door_runs_this_version_before_anything_asks_it(monkeypatch, caplog):
+    seen = []
+    monkeypatch.setattr(native_update, "ensure_units", lambda rel: seen.append(rel) or [])
+    main._door_of_this_version()
+    assert seen == ["/opt/kiboto/current"]
+
+    def broken(rel):
+        raise OSError("read-only /etc")
+
+    monkeypatch.setattr(native_update, "ensure_units", broken)
+    main._door_of_this_version()
+    assert "service files were not checked" in caplog.text

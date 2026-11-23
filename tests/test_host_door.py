@@ -283,3 +283,13 @@ def test_the_firewall_and_the_network_page_go_through_the_door(monkeypatch):
     ):
         page.apply("address", "", changes)
         assert calls[-1][0] == op
+
+
+def test_a_door_of_the_version_before_that_lacks_an_operation_means_doing_it_here(monkeypatch):
+    monkeypatch.setattr(door, "available", lambda sock=door.SOCK: True)
+
+    def older(op, **a):
+        raise door.DoorError(f"no such operation: {op}")  # what a door from before step 2 answers
+
+    monkeypatch.setattr(door, "call", older)
+    assert door.via("network.settle", lambda: "done here") == "done here"

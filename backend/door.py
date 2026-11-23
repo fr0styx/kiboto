@@ -81,6 +81,8 @@ def via(op: str, here: Callable[..., Any], **args: Any) -> Any:
     try:
         return call(op, **args)
     except DoorError as e:
+        if not e.kind and str(e).startswith("no such operation"):  # a door of the version before
+            return here(**args)
         raise e.as_error() from None
     except OSError:
         return here(**args)

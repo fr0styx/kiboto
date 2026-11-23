@@ -523,6 +523,8 @@ def _start_app_names() -> None:
         from backend.services import app_hosts
         from backend.services.supervisor import supervise
 
+        _door_of_this_version()  # before anything asks the door, it runs this version
+
         supervise("AppNames", app_hosts.keep_in_step)
         from backend.services import smb_signins
 
@@ -540,9 +542,21 @@ def _start_app_names() -> None:
 
             door.via("network.settle", managed.settle)  # through the host door where it runs (ADR 0006)
             door.via("network.ensure_fallback", managed.ensure_fallback)  # reachable after a card moved
-        except (OSError, ValueError) as e:
+        except (OSError, ValueError, RuntimeError) as e:
             logger.error("[Main] A trial of network settings could not be settled: %s", e)
         threading.Thread(target=_machine_at_start, name="MachineTools", daemon=True).start()
+
+
+def _door_of_this_version() -> None:
+    """This version's service files, and the host door started again on this version's code. An
+    update switches Kiboto, not the door, and a door of the version before does not know the
+    operations this one asks for (ADR 0006)."""
+    from backend.services import native_update
+
+    try:
+        native_update.ensure_units(os.path.join(native_update.PREFIX, "current"))
+    except OSError as e:
+        logger.warning("[Main] The service files were not checked: %s", e)
 
 
 def _machine_at_start() -> None:
@@ -551,12 +565,10 @@ def _machine_at_start() -> None:
     drive forgets its sleep timer when it loses power."""
     from backend.services import drive_sleep, native_update
 
-    current = os.path.join(native_update.PREFIX, "current")
     try:
-        native_update.add_missing_tools(current)
-        native_update.ensure_units(current)  # the host door's service and this version's files
+        native_update.add_missing_tools(os.path.join(native_update.PREFIX, "current"))
     except OSError as e:
-        logger.warning("[Main] The machine's tools and services were not checked: %s", e)
+        logger.warning("[Main] The machine's tools were not checked: %s", e)
     try:
         rows = drive_sleep.at_start()
     except (OSError, ValueError) as e:
