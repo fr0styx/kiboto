@@ -546,6 +546,10 @@ jobs:
 
       # Pushed by digest only: no tag points at it until the tests, smoke tests, scan and
       # signing pass (OPS-1)
+      - name: Which day's Debian packages
+        id: day
+        run: echo "day=$(date -u +%F)" >> "$GITHUB_OUTPUT"
+
       - name: Build and push Multi-Arch Docker image (by digest)
         id: build
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
@@ -558,6 +562,7 @@ jobs:
             VARIANT=${{ matrix.variant }}
             BUILD_COMMIT=${{ github.sha }}
             BUILD_DATE=${{ steps.meta.outputs.created }}
+            APT_DAY=${{ steps.day.outputs.day }}
           provenance: mode=max
           sbom: true
           cache-from: type=gha,scope=${{ matrix.variant }}

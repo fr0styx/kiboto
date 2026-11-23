@@ -46,8 +46,12 @@ RUN printf '%s\n' \
     'path-exclude=/usr/share/locale/*' 'path-include=/usr/share/locale/locale.alias' \
     > /etc/dpkg/dpkg.cfg.d/01-kiboto-nodoc
 
+# Debian's packages are fetched again once a day (CI passes the date): the build cache otherwise kept
+# a package Debian had fixed, and the image scan found a critical Chromium issue fixed that morning.
+# Every later layer is rebuilt with it, so the whole image takes the day's security fixes.
+ARG APT_DAY=""
 # Core: disks, SMART, UPS, USB, cloud remotes (OPS-11), btrfs and software RAID (REL-4, D2), XFS project quotas (FEAT-10)
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN echo "Debian packages of ${APT_DAY:-the cached day}" && apt-get update && apt-get install -y --no-install-recommends \
     smartmontools \
     btrfs-progs \
     xfsprogs \
