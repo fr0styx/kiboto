@@ -14,6 +14,8 @@ On a machine of its own, an update now also installs the system tools the new ve
 
 On a machine of its own, Macs now find its Time Machine folders by themselves; they were never announced there.
 
+Copying a folder from a Mac onto one of Kiboto's own shared folders no longer fails with "you don't have permission": the new folder was made, then nothing could be put in it. Folders a Mac made before this fix may need their permissions set again.
+
 #### Security
 
 On a machine of its own, failed sign-ins to shared folders over the network now count like web sign-ins: 20 in 15 minutes block the address for an hour, and they show under History, Sign-ins.

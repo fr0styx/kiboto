@@ -343,6 +343,10 @@ class SambaEngine:
    vfs objects = catia fruit streams_xattr
    fruit:metadata = netatalk
    fruit:model = MacPro
+   # Shared folders write as one user (force user); a Mac setting a folder's permissions through
+   # its NFS ACEs made each new folder that user's alone (700), and the Mac then refused to write
+   # into it (found copying a folder from a Mac). Without them new folders keep the share's masks.
+   fruit:nfs_aces = no
    fruit:posix_rename = yes
    fruit:veto_appledouble = no
    fruit:wipe_intentionally_left_blank_rfork = yes
