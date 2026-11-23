@@ -16,6 +16,7 @@ from typing import Any, Optional
 
 from pydantic import BaseModel, Field, field_validator
 
+from backend import door
 from backend.config import DATA_DIR, logger
 from backend.fsutil import atomic_write_json
 from backend.ignored_errors import ignored
@@ -239,8 +240,10 @@ class NfsEngine:
         clients = rule.clients.strip() or "*"
         return f'"{rule.path}" {clients}({opts})'
 
-    def generate_exports_file_content(self) -> str:
-        """Generates full /etc/exports.d/kiboto.exports content."""
+    def generate_exports_file_content(self, inside_storage_only: bool = False) -> str:
+        """Generates full /etc/exports.d/kiboto.exports content. With inside_storage_only (the host
+        door), a rule for a folder outside the storage roots, or for Kiboto's own data, is left out
+        whatever the rules file says."""
         lines = [
             "# ==============================================================================",
             "# Kiboto - Auto-Generated NFS Export Rules",
@@ -251,6 +254,9 @@ class NfsEngine:
         ]
 
         for rule in self._exports.values():
+            if inside_storage_only and not exportable(rule.path):
+                logger.warning("[NFS] %s is not exported: it is outside the storage folders", rule.path)
+                continue
             if rule.comment:
                 lines.append(f"# {rule.comment}")
             lines.append(self.generate_export_line(rule))
@@ -258,12 +264,19 @@ class NfsEngine:
 
         return "\n".join(lines)
 
-    def apply_exports(self) -> bool:
+    def apply_exports(self, inside_storage_only: bool = False) -> bool:
         """
         Writes export rules to /etc/exports.d/kiboto.exports (or /etc/exports) and runs exportfs -ra.
         True only when exportfs took them: a file that no NFS server reads is not an applied export.
+        Where the host door runs (ADR 0006) it does this from the saved rules (they are saved first).
         """
-        content = self.generate_exports_file_content()
+        if door.available():
+            try:
+                return bool(door.via("nfs.apply", lambda: self.apply_exports(inside_storage_only=True)))
+            except (ValueError, RuntimeError) as e:
+                logger.warning("[NFS] The exports were not applied: %s", e)
+                return False
+        content = self.generate_exports_file_content(inside_storage_only)
         written = False
 
         # 1. Try writing to /etc/exports.d/kiboto.exports
@@ -334,6 +347,15 @@ class NfsEngine:
             exports_file=self._exports_d_file,
             kernel_nfs_supported=kernel_supported,
         )
+
+
+def exportable(path: str) -> bool:
+    """A folder inside the storage roots that is not Kiboto's own data."""
+    from backend import config
+    from backend.fsutil import is_protected, resolve_within
+
+    inside = resolve_within(path, config.ALLOWED_BROWSE_ROOTS)
+    return bool(inside) and not is_protected(inside)
 
 
 _NFS_ENGINE_INSTANCE: NfsEngine | None = None

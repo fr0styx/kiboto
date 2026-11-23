@@ -1,7 +1,7 @@
 # ADR 0006: The web process without root, behind a host door
 
 - **Status:** Accepted (23 Nov 2026: the owner chose group and ACL access for people's files)
-- **Progress:** step 1 (the door) and step 2 (the machine's settings, the network, the firewall) built
+- **Progress:** steps 1 (the door), 2 (the machine's settings, the network, the firewall) and 3 (accounts, Samba, NFS) built
 - **Date:** 2026-11-23
 - **Decides:** how a machine Kiboto runs keeps a bug in the web app from becoming root on the machine
 

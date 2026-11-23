@@ -58,13 +58,43 @@ def _net(name: str) -> Callable[..., Any]:
     return run
 
 
+def _samba(name: str) -> Callable[..., Any]:
+    """samba_host's own function, after the account numbers are checked to be Kiboto's: a number
+    below its range (0 is root) would make a system account of someone."""
+
+    def run(**kw: Any) -> Any:
+        from backend.services import samba_host, smb_accounts
+
+        numbers = list((kw.get("numbers") or {}).values()) + ([kw["number"]] if "number" in kw else [])
+        for n in numbers:
+            if type(n) is not int or not smb_accounts.FIRST_UID <= n < LAST_UID:
+                raise ValueError("account numbers come from Kiboto's own range")
+        return getattr(samba_host, name)(**kw)
+
+    return run
+
+
+def _samba_point_here() -> bool:
+    from backend.services import samba_host
+    from backend.services.samba_engine import SAMBA_CONF_FILE
+
+    return samba_host.point_samba_here(SAMBA_CONF_FILE)  # the door's own path, not one it was sent
+
+
+def _nfs_apply() -> bool:
+    from backend.services import nfs_engine
+
+    return nfs_engine.NfsEngine().apply_exports(inside_storage_only=True)  # the saved rules, read again
+
+
 def _firewall_apply(st: dict[str, Any]) -> None:
     from backend.services import firewall
 
     firewall.apply(firewall.cleaned(st))  # only the settings the page offers, whatever was sent
 
 
-TEXT, ON, MAYBE_TEXT, MAP = (str,), (bool,), (str, type(None)), (dict,)
+TEXT, ON, MAYBE_TEXT, MAP, NUMBER = (str,), (bool,), (str, type(None)), (dict,), (int,)
+LAST_UID = 60000  # Kiboto's account numbers: smb_accounts.FIRST_UID up to here
 OPERATIONS: dict[str, Operation] = {
     "door.ping": Operation(lambda: "pong", {}),
     "host.set_name": Operation(_host("set_host_name"), {"name": TEXT}, max_len=63),
@@ -80,6 +110,15 @@ OPERATIONS: dict[str, Operation] = {
     "network.settle": Operation(_net("settle"), {}),
     "network.ensure_fallback": Operation(_net("ensure_fallback"), {}),
     "firewall.apply": Operation(_firewall_apply, {"st": MAP}),
+    # accounts and file servers (samba_host checks the names; the door checks the numbers)
+    "samba.point_here": Operation(_samba_point_here, {}),
+    "samba.reload": Operation(_samba("reload"), {"changed": (dict, type(None)), "numbers": MAP}),
+    "samba.set_password": Operation(
+        _samba("set_password"), {"name": TEXT, "number": NUMBER, "password": TEXT}, max_len=128
+    ),
+    "samba.remove": Operation(_samba("remove"), {"name": TEXT}, max_len=64),
+    "samba.set_enabled": Operation(_samba("set_enabled"), {"name": TEXT, "enabled": ON}, max_len=64),
+    "nfs.apply": Operation(_nfs_apply, {}),
 }
 
 

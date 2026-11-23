@@ -293,3 +293,78 @@ def test_a_door_of_the_version_before_that_lacks_an_operation_means_doing_it_her
 
     monkeypatch.setattr(door, "call", older)
     assert door.via("network.settle", lambda: "done here") == "done here"
+
+
+def test_account_numbers_must_be_kibotos_whatever_the_web_process_sends(audit, monkeypatch):
+    from backend.services import samba_host
+
+    seen = []
+    monkeypatch.setattr(samba_host, "reload", lambda changed, numbers: seen.append(numbers) or True)
+    monkeypatch.setattr(samba_host, "set_password", lambda name, number, password: seen.append(number) or True)
+    ok = host_door.handle({"op": "samba.reload", "args": {"changed": None, "numbers": {"ana": 20001}}}, 0)
+    assert ok["ok"] and seen == [{"ana": 20001}]
+    for bad in ({"ana": 0}, {"ana": 999}, {"ana": 60000}, {"ana": "20001"}, {"ana": True}):
+        reply = host_door.handle({"op": "samba.reload", "args": {"changed": {"shares": []}, "numbers": bad}}, 0)
+        assert reply["ok"] is False and "Kiboto's own range" in reply["error"], bad
+    reply = host_door.handle(
+        {"op": "samba.set_password", "args": {"name": "ana", "number": 0, "password": "x" * 12}}, 0
+    )
+    assert reply["ok"] is False
+    assert host_door.handle(
+        {"op": "samba.set_password", "args": {"name": "ana", "number": 20002, "password": "pw-1234567"}}, 0
+    )["ok"]
+    assert seen[-1] == 20002
+    assert not any("pw-1234567" in line for line in audit.read_text().splitlines())  # passwords never in the audit
+
+
+def test_the_door_points_samba_at_its_own_path_and_exports_only_storage(audit, monkeypatch, tmp_path):
+    from backend import config
+    from backend.services import nfs_engine, samba_host
+    from backend.services.samba_engine import SAMBA_CONF_FILE
+
+    pointed = []
+    monkeypatch.setattr(samba_host, "point_samba_here", lambda conf: pointed.append(conf) or True)
+    assert host_door.handle({"op": "samba.point_here", "args": {}}, 0)["ok"] and pointed == [SAMBA_CONF_FILE]
+    store = tmp_path / "storage"
+    (store / "photos").mkdir(parents=True)
+    monkeypatch.setattr(config, "ALLOWED_BROWSE_ROOTS", [str(store)])
+    assert nfs_engine.exportable(str(store / "photos"))
+    assert not nfs_engine.exportable("/etc") and not nfs_engine.exportable(str(tmp_path))
+    eng = nfs_engine.NfsEngine.__new__(nfs_engine.NfsEngine)
+    eng._exports = {
+        "photos": nfs_engine.NfsExportRule(name="photos", path=str(store / "photos"), clients="192.168.1.0/24"),
+        "etc": nfs_engine.NfsExportRule(name="etc", path="/etc", clients="*"),
+    }
+    full = eng.generate_exports_file_content()
+    safe = eng.generate_exports_file_content(inside_storage_only=True)
+    assert '"/etc"' in full and '"/etc"' not in safe and str(store / "photos") in safe
+
+
+def test_samba_and_nfs_go_through_the_door_where_it_runs(monkeypatch):
+    from backend.services import nfs_engine, samba_host
+
+    calls = []
+    monkeypatch.setattr(door, "available", lambda sock=door.SOCK: True)
+    monkeypatch.setattr(door, "call", lambda op, **a: calls.append((op, sorted(a))) or True)
+    assert samba_host.reload({"shares": ["a"]}, {"ana": 20001}) is True
+    assert samba_host.set_password("Ana", 20001, "secret-pw") is True
+    assert samba_host.remove("ana") is True and samba_host.set_enabled("ana", False) is True
+    assert samba_host.point_samba_here("/var/lib/kiboto/samba/smb.conf") is True
+    eng = nfs_engine.NfsEngine.__new__(nfs_engine.NfsEngine)
+    eng._exports = {}
+    assert eng.apply_exports() is True
+    assert [c[0] for c in calls] == [
+        "samba.reload",
+        "samba.set_password",
+        "samba.remove",
+        "samba.set_enabled",
+        "samba.point_here",
+        "nfs.apply",
+    ]
+
+    def refused(op, **a):
+        raise door.DoorError("account numbers come from Kiboto's own range", "value")
+
+    monkeypatch.setattr(door, "call", refused)
+    assert samba_host.reload(None, {"ana": 5}) is False  # said in the log, answered as a failed run
+    assert eng.apply_exports() is False

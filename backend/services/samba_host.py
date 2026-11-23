@@ -14,7 +14,7 @@ import subprocess
 from collections.abc import Callable
 from typing import Any
 
-from backend import runtime
+from backend import door, runtime
 from backend.config import logger
 from backend.settings import test_mode
 
@@ -72,6 +72,16 @@ def _runner(do: "Run | None") -> "Run":
     return run
 
 
+def _through_door(op: str, here: Callable[..., Any], **args: Any) -> bool:
+    """`op` in the host door where it runs (ADR 0006), else `here` in this process. A refusal there
+    is said and answered False, as a failed run of the tool is."""
+    try:
+        return bool(door.via(op, here, **args))
+    except (ValueError, RuntimeError) as e:
+        logger.warning("[Samba] %s was refused: %s", op, e)
+        return False
+
+
 def global_lines(samba_dir: str) -> list[str]:
     """What the machine's smbd must be told that the container was given by its image: where the
     accounts are kept (in Kiboto's data folder, so they travel with a settings backup)."""
@@ -83,8 +93,11 @@ def global_lines(samba_dir: str) -> list[str]:
     ]
 
 
-def point_samba_here(conf: str, etc_conf: str = ETC_CONF) -> bool:
-    """Makes /etc/samba/smb.conf read Kiboto's settings. True when the file was written."""
+def point_samba_here(conf: str, etc_conf: str = ETC_CONF, door_ok: bool = True) -> bool:
+    """Makes /etc/samba/smb.conf read Kiboto's settings. True when the file was written. Through
+    the host door where it runs; the door points it at its own copy of Kiboto's settings path."""
+    if door_ok and etc_conf == ETC_CONF and door.available():
+        return _through_door("samba.point_here", lambda: point_samba_here(conf, etc_conf, door_ok=False))
     want = POINTER.format(conf=conf)
     try:
         with open(etc_conf, encoding="utf-8") as f:
@@ -129,6 +142,10 @@ def reload(changed: dict[str, Any] | None, numbers: dict[str, int], do: Run | No
     folders whose section changed are closed and blocked addresses' connections ended; everyone
     else stays connected. A change it cannot tell apart (`changed` is None), a change to the private
     folders, or a server that is not running: the server starts again."""
+    if do is None and door.available():
+        return _through_door(
+            "samba.reload", lambda changed, numbers: reload(changed, numbers, run), changed=changed, numbers=numbers
+        )
     do = _runner(do)
     ensure_accounts(numbers, do)
     if changed is None or changed.get("homes") or not running(do):
@@ -148,6 +165,9 @@ def reload(changed: dict[str, Any] | None, numbers: dict[str, int], do: Run | No
 
 
 def set_password(name: str, number: int, password: str, do: Run | None = None) -> bool:
+    if do is None and door.available():
+        here = lambda name, number, password: set_password(name, number, password, run)  # noqa: E731
+        return _through_door("samba.set_password", here, name=name, number=int(number), password=password)
     do = _runner(do)
     if not _account_ok(name.lower()):
         return False
@@ -159,6 +179,8 @@ def set_password(name: str, number: int, password: str, do: Run | None = None) -
 
 
 def remove(name: str, do: Run | None = None) -> bool:
+    if do is None and door.available():
+        return _through_door("samba.remove", lambda name: remove(name, run), name=name)
     do = _runner(do)
     if not _account_ok(name):
         return False
@@ -168,5 +190,8 @@ def remove(name: str, do: Run | None = None) -> bool:
 
 
 def set_enabled(name: str, enabled: bool, do: Run | None = None) -> bool:
+    if do is None and door.available():
+        here = lambda name, enabled: set_enabled(name, enabled, run)  # noqa: E731
+        return _through_door("samba.set_enabled", here, name=name, enabled=bool(enabled))
     do = _runner(do)
     return _account_ok(name) and do(["smbpasswd", "-e" if enabled else "-d", name])[0] == 0
