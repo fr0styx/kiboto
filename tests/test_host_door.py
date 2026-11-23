@@ -592,3 +592,53 @@ def test_pool_rules():
     assert pool_rules.import_mount("") is None and pool_rules.new_pool_mount(" ") == ""
     with pytest.raises(ValueError):
         pool_rules.import_mount("relative/x")
+
+
+def test_a_shared_folders_folder_and_limit_go_through_the_door(audit, monkeypatch, tmp_path):
+    from backend.hardware import pal_storage
+    from backend.hardware.pal import generic_linux
+    from backend.hardware.pal.generic_linux import GenericLinuxStorageAdapter
+    from backend.services import samba_engine
+
+    adapter = GenericLinuxStorageAdapter.__new__(GenericLinuxStorageAdapter)
+    calls = []
+    monkeypatch.setattr(door, "available", lambda sock=door.SOCK: True)
+    monkeypatch.setattr(door, "call", lambda op, **a: calls.append((op, a)) or {"made": "subvolume", "quota": None})
+    assert adapter.make_share_folder("/mnt/tank/media", 5 * 1024**3)["made"] == "subvolume"
+    assert calls == [("storage.share_folder", {"path": "/mnt/tank/media", "quota_bytes": 5 * 1024**3})]
+    host_door._checked({"op": calls[0][0], "args": calls[0][1]})
+
+    monkeypatch.setattr(door, "available", lambda sock=door.SOCK: False)
+    monkeypatch.setattr(adapter, "_make_share_dir", lambda p: "folder")
+    monkeypatch.setattr(generic_linux.fs_quota, "apply", lambda p, n: {"enforced": True, "bytes": n})
+    assert adapter.make_share_folder(str(tmp_path / "a")) == {"made": "folder", "quota": None}
+    assert adapter.make_share_folder(str(tmp_path / "a"), 10)["quota"] == {"enforced": True, "bytes": 10}
+
+    made = []
+
+    class Adapter:
+        @staticmethod
+        def _not_on_the_system_disk(p):
+            if p.endswith("/boot-disk"):
+                raise ValueError("on the system disk")
+            return p
+
+        def make_share_folder(self, **kw):
+            made.append(kw)
+            return {"made": "folder", "quota": None}
+
+    def inside(p):
+        if not p.startswith(str(tmp_path) + "/"):
+            raise ValueError("Share path must be inside the storage pool")
+        return p
+
+    monkeypatch.setattr(pal_storage, "get_storage_platform", lambda: Adapter())
+    monkeypatch.setattr(samba_engine, "validate_share_path", inside)
+
+    def folder(path, quota=0):
+        return host_door.handle({"op": "storage.share_folder", "args": {"path": path, "quota_bytes": quota}}, 0)
+
+    assert folder(str(tmp_path / "media"), 1024)["ok"] is True and made[-1]["quota_bytes"] == 1024
+    for args in (("/etc",), (str(tmp_path / "boot-disk"),), (str(tmp_path / "x"), -1)):
+        assert folder(*args)["ok"] is False, args
+    assert len(made) == 1

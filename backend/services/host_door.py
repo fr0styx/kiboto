@@ -140,6 +140,20 @@ def _imported(kw: dict[str, Any]) -> None:
     kw["target_mount"] = pool_rules.import_mount(kw["target_mount"])
 
 
+def _share_folder(kw: dict[str, Any]) -> None:
+    """A shared folder's folder: inside the storage roots and not Kiboto's own data folder
+    (validate_share_path), not on the system disk of a machine Kiboto runs, with a size limit
+    that is a number of bytes."""
+    from backend.hardware.pal_storage import get_storage_platform
+    from backend.services.samba_engine import validate_share_path
+
+    path = validate_share_path(kw["path"])
+    off_system = getattr(get_storage_platform(), "_not_on_the_system_disk", None)
+    kw["path"] = off_system(path) if off_system else path
+    if not 0 <= kw["quota_bytes"] < 1 << 60:
+        raise ValueError("quota_bytes must be a size in bytes")
+
+
 def _renamed(kw: dict[str, Any]) -> None:
     from backend.hardware.pal import pool_rules
 
@@ -214,6 +228,9 @@ OPERATIONS: dict[str, Operation] = {
     "storage.destroy_pool": Operation(_storage("destroy_pool"), {"pool_id": TEXT}, max_len=128),
     "storage.erase_pool": Operation(_storage("erase_pool"), {"pool_id": TEXT}, max_len=128),
     "storage.allow_changes": Operation(_storage("allow_changes"), {"pool_id": TEXT}, max_len=128),
+    "storage.share_folder": Operation(
+        _storage("make_share_folder", _share_folder), {"path": TEXT, "quota_bytes": NUMBER}, max_len=4096
+    ),
 }
 
 

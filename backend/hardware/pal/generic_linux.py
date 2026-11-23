@@ -1606,6 +1606,16 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
             raise SaidError(*problem)
         return full_path
 
+    def make_share_folder(self, path: str, quota_bytes: int = 0) -> dict[str, Any]:
+        """A new shared folder's own folder (_make_share_dir) and its size limit (fs_quota), as
+        {"made", "quota"}, "quota" None for no limit. Through the host door where it runs (ADR
+        0006); the door checks the folder is inside the storage roots and off the system disk."""
+        return _through_door("storage.share_folder", self._share_folder_here, path=path, quota_bytes=int(quota_bytes))
+
+    def _share_folder_here(self, path: str, quota_bytes: int = 0) -> dict[str, Any]:
+        made = self._make_share_dir(path)
+        return {"made": made, "quota": fs_quota.apply(path, quota_bytes) if quota_bytes > 0 else None}
+
     def create_share(
         self,
         name: str,
@@ -1648,8 +1658,7 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
                 )
             except Exception as e:
                 raise ValueError(f"Invalid NFS export settings: {e}") from e
-        self._make_share_dir(full_path)
-        quota = fs_quota.apply(full_path, quota_gb * 1024**3) if quota_gb > 0 else None  # FEAT-10
+        quota = self.make_share_folder(full_path, quota_gb * 1024**3 if quota_gb > 0 else 0)["quota"]  # FEAT-10
 
         # Shares R4: the people chosen go into share access (the route does it), not into lists of the share's own
         user_perms = user_permissions or {}
