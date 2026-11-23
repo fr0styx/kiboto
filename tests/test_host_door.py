@@ -789,3 +789,65 @@ def test_install_allowed(monkeypatch):
     monkeypatch.setattr(docker_client, "request", lambda *a, **k: (404, None))
     with pytest.raises(ValueError, match="downloaded"):
         image_signature.install_allowed("ghcr.io/fr0styx/kiboto:2.0.7")
+
+
+def test_the_data_key_is_opened_and_sealed_by_the_door_where_it_runs(monkeypatch):
+    from backend import machine_key, runtime
+
+    monkeypatch.setattr(runtime, "managed_host", lambda: True)
+    monkeypatch.setattr(machine_key, "_cache", {})
+    monkeypatch.setattr(machine_key, "_refused_until", [0.0])
+    answers = {
+        "keys.text": "k" * 64,
+        "keys.wanted": True,
+        "keys.ensure": "sealed",
+        "keys.status": {"managed": True, "on": True},
+        "keys.to_write_down": "",
+        "keys.written_down": False,
+        "keys.unlock": "chip",
+        "keys.adopt": "chip",
+        "keys.renew": True,
+    }
+    calls = []
+    monkeypatch.setattr(door, "available", lambda sock=door.SOCK: True)
+    monkeypatch.setattr(door, "call", lambda op, **a: calls.append((op, sorted(a))) or answers[op])
+    assert machine_key.key_text() == "k" * 64 and machine_key.key_text() == "k" * 64  # the second from memory
+    assert machine_key.wanted() is True and machine_key.ensure() == "sealed"
+    assert machine_key.status()["on"] is True and machine_key.recovery_key_to_write_down() == ""
+    assert machine_key.written_down() is False and machine_key.renew_recovery_key() is True
+    assert machine_key.unlock("ABCD-EFGH") == "chip" and machine_key._cache == {}  # sealed again: asked anew
+    assert machine_key.adopt("a" * 64, {"v": 1}) == "chip"
+    assert [c[0] for c in calls] == [
+        "keys.text",
+        "keys.wanted",
+        "keys.ensure",
+        "keys.status",
+        "keys.to_write_down",
+        "keys.written_down",
+        "keys.renew",
+        "keys.unlock",
+        "keys.adopt",
+    ]
+    assert calls[-2:] == [("keys.unlock", ["typed"]), ("keys.adopt", ["box", "data_key"])]
+
+    def locked(op, **a):
+        raise door.DoorError(machine_key.LOCKED, "runtime")
+
+    monkeypatch.setattr(door, "call", locked)
+    with pytest.raises(machine_key.MachineKeyError, match="could not open"):
+        machine_key.key_text()
+    with pytest.raises(machine_key.MachineKeyError):
+        machine_key.key_text()  # not asked again at once
+    assert machine_key._refused_until[0] > 0
+
+
+def test_the_door_keeps_the_key_to_a_machine_kiboto_runs(audit, monkeypatch):
+    from backend import machine_key, runtime
+
+    monkeypatch.setattr(machine_key, "unlock", lambda typed: "disk" if typed else "")
+    monkeypatch.setattr(runtime, "managed_host", lambda: False)
+    reply = host_door.handle({"op": "keys.unlock", "args": {"typed": "ABCD"}}, 0)
+    assert reply["ok"] is False and "no data key" in reply["error"]
+    monkeypatch.setattr(runtime, "managed_host", lambda: True)
+    assert host_door.handle({"op": "keys.unlock", "args": {"typed": "ABCD"}}, 0) == {"ok": True, "result": "disk"}
+    assert all("ABCD" not in line for line in audit.read_text().splitlines())  # never an argument in the log

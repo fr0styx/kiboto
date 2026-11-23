@@ -74,9 +74,32 @@ def active() -> bool:
     return runtime.managed_host()
 
 
+def _door(op: str, here: Callable[..., Any], **args: Any) -> Any:
+    """`op` in the host door where it runs (ADR 0006): the key's folder and the security chip are
+    root's. A refusal there is a MachineKeyError with the same words."""
+    from backend import door
+
+    try:
+        return door.via(op, here, **args)
+    except MachineKeyError:
+        raise
+    except RuntimeError as e:
+        raise MachineKeyError(str(e)) from None
+
+
+def _forget() -> None:
+    """This process's copy of the key, after the door sealed it again (_seal does it there)."""
+    _cache.clear()
+    _refused_until[0] = 0.0
+
+
 def wanted() -> bool:
     """This machine has a data key of its own, sealed or waiting for the recovery key."""
-    return active() and (os.path.exists(_path(CRED)) or os.path.exists(_path(WRAPPED)))
+    return active() and bool(_door("keys.wanted", _wanted_here))
+
+
+def _wanted_here() -> bool:
+    return os.path.exists(_path(CRED)) or os.path.exists(_path(WRAPPED))
 
 
 def has_chip(do: Run | None = None) -> bool:
@@ -160,19 +183,28 @@ def _seal(data_key: str, do: Run) -> str:
 
 
 def key_text(do: Run | None = None) -> str:
-    """The data key, opened by this machine. Raises MachineKeyError with LOCKED when it cannot."""
+    """The data key, opened by this machine (by the host door where it runs). Raises
+    MachineKeyError with LOCKED when it cannot."""
     if "key" in _cache:
         return _cache["key"]
     if time.monotonic() < _refused_until[0]:
         raise MachineKeyError(LOCKED)  # asked a moment ago: the chip is not asked for every page
+    try:
+        key = str(_door("keys.text", _opened)) if do is None else _opened(do)
+    except MachineKeyError:
+        _refused_until[0] = time.monotonic() + ASK_AGAIN_AFTER
+        raise
+    _cache["key"] = key
+    return key
+
+
+def _opened(do: Run | None = None) -> str:
     do = do or run
     code, out, said = do(["systemd-creds", "decrypt", f"--name={NAME}", _path(CRED), "-"])
     key = out.strip()
     if code != 0 or len(key) < 32:
-        _refused_until[0] = time.monotonic() + ASK_AGAIN_AFTER
         logger.error("[Key] The data key could not be opened: %s", (said or "no key came back").splitlines()[-1][:200])
         raise MachineKeyError(LOCKED)
-    _cache["key"] = key
     return key
 
 
@@ -180,9 +212,15 @@ def ensure(do: Run | None = None) -> str:
     """At start. 'off' where Kiboto is a guest; 'sealed' when the key is there; 'made' at the first
     start (key made, sealed, recovery key waiting to be written down); 'locked' when only the
     wrapped copy is there and the recovery key has to be typed."""
-    do = do or run
     if not active():
         return "off"
+    if do is None:
+        return str(_door("keys.ensure", _ensure_here))
+    return _ensure_here(do)
+
+
+def _ensure_here(do: Run | None = None) -> str:
+    do = do or run
     if os.path.exists(_path(CRED)):
         return "sealed"
     if os.path.exists(_path(WRAPPED)):
@@ -204,6 +242,10 @@ def ensure(do: Run | None = None) -> str:
 
 # --- for the page ------------------------------------------------------------------------------
 def recovery_key_to_write_down() -> str:
+    return str(_door("keys.to_write_down", _to_write_down_here))
+
+
+def _to_write_down_here() -> str:
     try:
         with open(_path(SHOWN), encoding="utf-8") as f:
             return tidy(f.read())
@@ -213,6 +255,10 @@ def recovery_key_to_write_down() -> str:
 
 def written_down() -> bool:
     """The person has the recovery key: Kiboto forgets it."""
+    return bool(_door("keys.written_down", _written_down_here))
+
+
+def _written_down_here() -> bool:
     if not os.path.exists(_path(SHOWN)):
         return False
     os.remove(_path(SHOWN))
@@ -222,6 +268,14 @@ def written_down() -> bool:
 
 def unlock(typed: str, do: Run | None = None) -> str:
     """Opens the wrapped copy with the recovery key and seals the key to the machine as it is now."""
+    if do is None:
+        where = str(_door("keys.unlock", lambda typed: _unlock_here(typed), typed=str(typed or "")))
+        _forget()
+        return where
+    return _unlock_here(typed, do)
+
+
+def _unlock_here(typed: str, do: Run | None = None) -> str:
     do = do or run
     recovery = tidy(typed)
     box = read_json(_path(WRAPPED), None) if os.path.exists(_path(WRAPPED)) else None
@@ -235,6 +289,14 @@ def unlock(typed: str, do: Run | None = None) -> str:
 def adopt(data_key: str, box: dict[str, Any], do: Run | None = None) -> str:
     """Takes the data key of the install whose settings are being brought back: sealed to this
     machine, and that install's recovery key stays the recovery key (the person just typed it)."""
+    if do is None:
+        where = str(_door("keys.adopt", lambda data_key, box: _adopt_here(data_key, box), data_key=data_key, box=box))
+        _forget()
+        return where
+    return _adopt_here(data_key, box, do)
+
+
+def _adopt_here(data_key: str, box: dict[str, Any], do: Run | None = None) -> str:
     do = do or run
     os.makedirs(DIR, mode=0o700, exist_ok=True)
     atomic_write_json(_path(WRAPPED), box)
@@ -248,6 +310,12 @@ def adopt(data_key: str, box: dict[str, Any], do: Run | None = None) -> str:
 
 def renew_recovery_key(do: Run | None = None) -> bool:
     """A new recovery key; the one before stops working. For a key that was lost or seen by someone."""
+    if do is None:
+        return bool(_door("keys.renew", _renew_here))
+    return _renew_here(do)
+
+
+def _renew_here(do: Run | None = None) -> bool:
     data_key = key_text(do)
     recovery = new_recovery_key()
     atomic_write_json(_path(WRAPPED), wrap(data_key, recovery))
@@ -262,6 +330,12 @@ def status(do: Run | None = None) -> dict[str, Any]:
     """What the page shows: never a key."""
     if not active():
         return {"managed": False}
+    if do is None:
+        return dict(_door("keys.status", _status_here))
+    return _status_here(do)
+
+
+def _status_here(do: Run | None = None) -> dict[str, Any]:
     there = os.path.exists(_path(CRED))
     locked = not there and os.path.exists(_path(WRAPPED))
     if there:

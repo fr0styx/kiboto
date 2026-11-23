@@ -210,6 +210,20 @@ def _packages(name: str) -> Callable[[], Any]:
     return run
 
 
+def _key(name: str) -> Callable[..., Any]:
+    """machine_key's own function: the data key's folder (/etc/kiboto/keys) and the security chip
+    are root's. "keys.text" hands the key to the web process, which encrypts with it."""
+
+    def run(**kw: Any) -> Any:
+        from backend import machine_key
+
+        if not machine_key.active():
+            raise ValueError("this machine keeps no data key of its own")
+        return getattr(machine_key, name)(**kw)
+
+    return run
+
+
 def _renamed(kw: dict[str, Any]) -> None:
     from backend.hardware.pal import pool_rules
 
@@ -284,6 +298,16 @@ OPERATIONS: dict[str, Operation] = {
     "storage.destroy_pool": Operation(_storage("destroy_pool"), {"pool_id": TEXT}, max_len=128),
     "storage.erase_pool": Operation(_storage("erase_pool"), {"pool_id": TEXT}, max_len=128),
     "storage.allow_changes": Operation(_storage("allow_changes"), {"pool_id": TEXT}, max_len=128),
+    # the data key (ADR 0006 step 6)
+    "keys.text": Operation(_key("key_text"), {}),
+    "keys.wanted": Operation(_key("wanted"), {}),
+    "keys.ensure": Operation(_key("ensure"), {}),
+    "keys.status": Operation(_key("status"), {}),
+    "keys.to_write_down": Operation(_key("recovery_key_to_write_down"), {}),
+    "keys.written_down": Operation(_key("written_down"), {}),
+    "keys.unlock": Operation(_key("unlock"), {"typed": TEXT}, max_len=64),
+    "keys.adopt": Operation(_key("adopt"), {"data_key": TEXT, "box": MAP}, max_len=128),
+    "keys.renew": Operation(_key("renew_recovery_key"), {}),
     # updates and packages (ADR 0006 step 5)
     "update.start": Operation(_update_start, {"image": TEXT, "version": TEXT}, max_len=320),
     "update.back": Operation(_update_back, {"snapshot_id": TEXT}, max_len=128),
