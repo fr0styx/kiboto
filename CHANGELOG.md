@@ -20,6 +20,8 @@ A Time Machine folder can no longer be given a size limit larger than its storag
 
 Kib's window looks like the other app windows: the wallpaper no longer shows through it.
 
+Importing a pool by a name no drive carries no longer leaves a locked, empty folder in the storage folder.
+
 #### Security
 
 On a machine of its own, failed sign-ins to shared folders over the network now count like web sign-ins: 20 in 15 minutes block the address for an hour, and they show under History, Sign-ins.

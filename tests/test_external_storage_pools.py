@@ -244,3 +244,22 @@ def test_storage_api_export_and_discover(client, auth_headers):
         )
         assert imp_res.status_code == 200
         assert imp_res.json()["status"] == "imported"
+
+
+def test_a_failed_import_leaves_no_locked_folder_behind(tmp_path, monkeypatch):
+    adapter = GenericLinuxStorageAdapter()
+    ran = []
+
+    def run(cmd, *a, **k):
+        ran.append(cmd[0])
+        return (32, "", "Can't lookup blockdev") if cmd[0] == "mount" else (0, "", "")
+
+    monkeypatch.setattr(adapter, "_run_cmd", run)
+    mnt = tmp_path / "storage" / "nopool"
+    res = adapter.import_pool("nopool", fs_type="ext4")
+    assert res["status"] == "error" and not mnt.exists() and ran.count("chattr") == 2
+
+    kept = tmp_path / "storage" / "kept"
+    kept.mkdir()
+    adapter.import_pool("kept", fs_type="ext4")
+    assert kept.is_dir()  # a folder that was there before stays

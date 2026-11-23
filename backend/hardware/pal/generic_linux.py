@@ -1534,11 +1534,16 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
         else:
             self._run_cmd(["btrfs", "device", "scan"])
             mnt = target_mount or os.path.join(self._pool_path, pool_id)
+            made = not os.path.isdir(mnt)
             os.makedirs(mnt, exist_ok=True)
             pool_registry.protect(mnt, self._run_cmd)
             code, out, err = self._run_cmd(["mount", "-L", pool_id, mnt])
             if code != 0:
                 code, out, err = self._run_cmd(["mount", f"/dev/disk/by-label/{pool_id}", mnt])
+            if code != 0 and made:  # no such pool: the folder made for it does not stay behind, locked
+                pool_registry.unprotect(mnt, self._run_cmd)
+                with contextlib.suppress(OSError):
+                    os.rmdir(mnt)
             if code == 0 and fs_lower in pool_registry.KINDS:
                 _c, uuid, _e = self._run_cmd(["findmnt", "-rno", "UUID", "-M", mnt])
                 _c, src, _e = self._run_cmd(["findmnt", "-rno", "SOURCE", "-M", mnt])
