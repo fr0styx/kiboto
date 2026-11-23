@@ -2,25 +2,47 @@
 
 Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep that name.
 
-## Unreleased
+## v2.0.6 (2026-11-23)
+### 🖥️ Kiboto on a machine of its own (preview), with its settings kept safe on every pool
+
+A first preview of Kiboto as a machine's own system: an install script, or Kiboto's own install
+image, turns a fresh Debian 13 into a NAS that Kiboto runs as its service, with no container. It
+serves shared folders with the machine's own file servers, is found by name, sets its own network,
+updates itself and goes back when an update fails, and holds the kernel, ZFS and Docker at the
+versions it was tested with. Shared folders, home folders, apps and virtual machines live on the
+pools, never on the system disk, and an encrypted copy of the settings on every pool brings the
+same Kiboto back on a new system disk. Storage pools are tested with the real tools on every
+change, a pool from another system opens read-only first, and spinning drives can sleep after a
+time you choose. On Unraid and in a container, Kiboto works as before, with many fixes.
+
+#### Before you upgrade
+
+- **Nothing to do for most installs.** Everything for a machine of its own is a preview, and
+  drive sleep is off until you turn it on.
+- **New storage pools are ZFS, btrfs or ext4.** XFS is no longer offered for new pools; XFS drives
+  you already have are still read and shown.
+- **A storage pool from another system** is opened read-only first. Choose **Allow changes** once
+  you have checked it.
+- **Kiboto's own file server:** each person now signs in to their private folder as a system
+  account of their own. Shared folders and existing NFS exports keep their settings.
 
 #### Changes
 
-Keyboard: while a window is open, the Tab key moves only through the windows, the top bar and the dock, not the desktop's icons and widgets behind them. The desktop comes back when no window is open; you can still click it beside a window.
+- Keyboard: while a window is open, the Tab key moves only through the windows, the top bar and the dock, not the desktop's icons and widgets behind them. The desktop comes back when no window is open; you can still click it beside a window.
 
-NFS on Kiboto's own file server: a new export lets the Linux computers it names write as the file server does, so what they save can be changed over SMB and the other way round. Existing exports keep their settings; the other choices stay on the folder's NFS settings.
+- NFS on Kiboto's own file server: a new export lets the Linux computers it names write as the file server does, so what they save can be changed over SMB and the other way round. Existing exports keep their settings; the other choices stay on the folder's NFS settings.
 
-Kiboto's own file server: each person signs in to their private folder as a system account of their own, and what they save there is theirs on disk. Shared folders work as before. Nothing changes on Unraid.
+- Kiboto's own file server: each person signs in to their private folder as a system account of their own, and what they save there is theirs on disk. Shared folders work as before. Nothing changes on Unraid.
 
-Files suggests the folders this server really has when you type a path, and the folder picker opens on its main folder, on Unraid and on any other system.
+- Files suggests the folders this server really has when you type a path, and the folder picker opens on its main folder, on Unraid and on any other system.
 
-Storage no longer has a "Destroy" button on a pool. It only disconnected the pool, while its question said the data would be lost. "Safely eject" disconnects a pool and "Delete and erase drives" deletes one.
+- Storage no longer has a "Destroy" button on a pool. It only disconnected the pool, while its question said the data would be lost. "Safely eject" disconnects a pool and "Delete and erase drives" deletes one.
 
-A new storage pool is ZFS, btrfs or ext4. XFS is no longer offered for new pools; XFS drives you already have are still read and shown.
+- A new storage pool is ZFS, btrfs or ext4. XFS is no longer offered for new pools; XFS drives you already have are still read and shown.
 
-Storage pools are now also tested with the real tools on every change: a pool of each kind is made, checked, ejected, imported, lost and deleted on pretend drives.
+- Storage pools are now also tested with the real tools on every change: a pool of each kind is made, checked, ejected, imported, lost and deleted on pretend drives.
 
-A storage pool from another system is now opened read-only first, so nothing on it changes until you choose "Allow changes". If the pool was last used by another system, Kiboto says what importing it risks and asks before it goes on.
+- A storage pool from another system is now opened read-only first, so nothing on it changes until you choose "Allow changes". If the pool was last used by another system, Kiboto says what importing it risks and asks before it goes on.
 
 - **Apps on a machine of its own keep their data on a pool (preview)**: on a Debian machine set up for Kiboto, apps store their data on the first pool instead of the system disk, so a failed system disk no longer takes it with it.
 
@@ -30,35 +52,35 @@ A storage pool from another system is now opened read-only first, so nothing on 
 
 - **Network settings also on a Debian installed with Debian's own installer (preview)**: the install script moves such a machine's network to systemd-networkd, so Kiboto can change its address. If the machine cannot reach its router afterwards, it goes back to its old settings by itself.
 
-On a machine set up for Kiboto, shared folders live only on pools: the system disk is no longer listed as a pool, a new shared folder goes on the first pool, and the first pool gets the starting "storage" folder.
+- On a machine set up for Kiboto, shared folders live only on pools: the system disk is no longer listed as a pool, a new shared folder goes on the first pool, and the first pool gets the starting "storage" folder.
 
-Setup on a machine set up for Kiboto asks for a storage pool before the first shared folder, a folder left on the system disk says its files are at risk, and This machine shows the system disk's space.
+- Setup on a machine set up for Kiboto asks for a storage pool before the first shared folder, a folder left on the system disk says its files are at risk, and This machine shows the system disk's space.
 
-On a machine set up for Kiboto, people's home folders are made on the first pool instead of the system disk; home folders that were never used move there once a pool exists.
+- On a machine set up for Kiboto, people's home folders are made on the first pool instead of the system disk; home folders that were never used move there once a pool exists.
 
-On a machine set up for Kiboto, new virtual machines and downloaded installer images are kept on the first pool instead of the system disk.
+- On a machine set up for Kiboto, new virtual machines and downloaded installer images are kept on the first pool instead of the system disk.
 
-Machines set up for Kiboto may move to Linux 6.12.118, tested with ZFS 2.4.4 and Docker 26.1.5.
+- Machines set up for Kiboto may move to Linux 6.12.118, tested with ZFS 2.4.4 and Docker 26.1.5.
 
 #### Fixes
 
-A person with a storage limit could go over it by sending several files at once. Files still arriving now count against the limit.
+- A person with a storage limit could go over it by sending several files at once. Files still arriving now count against the limit.
 
-The install guide and the Unraid template said the first password is shown in the container log. It is not: it is saved as a file only root can read, and the guide now says so. SECURITY.md names 2.0 as the supported version.
+- The install guide and the Unraid template said the first password is shown in the container log. It is not: it is saved as a file only root can read, and the guide now says so. SECURITY.md names 2.0 as the supported version.
 
-Deleting or bringing back a snapshot no longer says it worked when the file system's tool is missing or failed, and a restore that fails puts the folder back as it was.
+- Deleting or bringing back a snapshot no longer says it worked when the file system's tool is missing or failed, and a restore that fails puts the folder back as it was.
 
-An install that has no NFS server no longer shows a folder as shared over NFS. The NFS box in the new-folder dialog is greyed out there and says why, and a folder that already had NFS turned on shows it as not running.
+- An install that has no NFS server no longer shows a folder as shared over NFS. The NFS box in the new-folder dialog is greyed out there and says why, and a folder that already had NFS turned on shows it as not running.
 
-On a system where Kiboto makes the storage pools itself, a btrfs or ext4 pool is now listed after it is made, mounted again after a restart, and shown as "Not found", with an alert, when its drives are away. While a pool is away nothing can be written into its empty folder, and a btrfs mirror that lost a drive comes up read-only so its files stay readable.
+- On a system where Kiboto makes the storage pools itself, a btrfs or ext4 pool is now listed after it is made, mounted again after a restart, and shown as "Not found", with an alert, when its drives are away. While a pool is away nothing can be written into its empty folder, and a btrfs mirror that lost a drive comes up read-only so its files stay readable.
 
-An ext4 pool that Kiboto made can now be deleted with "Delete and erase drives", and after a ZFS pool is deleted its drives read as empty. A ZFS pool with parity (raidz) shows the space you can really store, and the main storage pool lists only the drives it is on.
+- An ext4 pool that Kiboto made can now be deleted with "Delete and erase drives", and after a ZFS pool is deleted its drives read as empty. A ZFS pool with parity (raidz) shows the space you can really store, and the main storage pool lists only the drives it is on.
 
-On systems with an older Linux kernel, a setting saved twice within a few thousandths of a second could be read back in its first form for a moment. Kiboto now notices such a change every time.
+- On systems with an older Linux kernel, a setting saved twice within a few thousandths of a second could be read back in its first form for a moment. Kiboto now notices such a change every time.
 
-Installing an app from the catalog failed with "invalid reference format" on systems with Docker 26 (Debian 13 and others). Apps now install there too.
+- Installing an app from the catalog failed with "invalid reference format" on systems with Docker 26 (Debian 13 and others). Apps now install there too.
 
-On a machine of its own, Kiboto can reach the apps it works with (its AI servers, the office suite, the camera recorder) by name, as it does inside a container.
+- On a machine of its own, Kiboto can reach the apps it works with (its AI servers, the office suite, the camera recorder) by name, as it does inside a container.
 
 - **Kiboto in a virtual machine no longer takes every drive for asleep**: virtual disks answered the "are you asleep?" question with nonsense, so file listings and the AI index waited for drives that were awake.
 
@@ -76,41 +98,41 @@ On a machine of its own, Kiboto can reach the apps it works with (its AI servers
 
 - **Apps on a machine of its own named like "cafe" or "bead"**: with such a name, some apps passed for Kiboto itself and could not be updated or removed.
 
-Nextcloud's Kiboto sign-in is set up with Kiboto's real address again, and on a machine of its own apps and the AI pack reach Kiboto too.
+- Nextcloud's Kiboto sign-in is set up with Kiboto's real address again, and on a machine of its own apps and the AI pack reach Kiboto too.
 
-On a machine of its own, a NAS named like the start of a container id no longer makes Kiboto mistake an app's container for itself.
+- On a machine of its own, a NAS named like the start of a container id no longer makes Kiboto mistake an app's container for itself.
 
-On a machine of its own, the malware scan and family sign-in can be turned on (they stopped with "Docker didn't answer").
+- On a machine of its own, the malware scan and family sign-in can be turned on (they stopped with "Docker didn't answer").
 
-On a machine set up for Kiboto, snapshots work for shared folders on its btrfs and ZFS pools, and a folder on an ext4 pool says it keeps no snapshots.
+- On a machine set up for Kiboto, snapshots work for shared folders on its btrfs and ZFS pools, and a folder on an ext4 pool says it keeps no snapshots.
 
-On a machine set up for Kiboto, the AI pages no longer wait about 25 seconds when no AI runtime is installed.
+- On a machine set up for Kiboto, the AI pages no longer wait about 25 seconds when no AI runtime is installed.
 
-A machine set up for Kiboto can still be reached after its network card moved to another slot or was replaced: the port gets an address by DHCP.
+- A machine set up for Kiboto can still be reached after its network card moved to another slot or was replaced: the port gets an address by DHCP.
 
-After a system disk was replaced, "Look on the drives" now finds the settings copy on ZFS pools too (it found only the ones on btrfs and ext4).
+- After a system disk was replaced, "Look on the drives" now finds the settings copy on ZFS pools too (it found only the ones on btrfs and ext4).
 
 #### Security
 
-Apps, Docker clean-up: deleting unused volumes now asks for a confirmation that Kiboto checks itself, so it can't happen without your say-so.
+- Apps, Docker clean-up: deleting unused volumes now asks for a confirmation that Kiboto checks itself, so it can't happen without your say-so.
 
-Virtual machines: a disk, an installer image or a shared folder can no longer reach Kiboto's own data (its people and keys) through the storage path.
+- Virtual machines: a disk, an installer image or a shared folder can no longer reach Kiboto's own data (its people and keys) through the storage path.
 
-Snapshots: a pool name sent to the snapshot pages can no longer point outside the storage folder.
+- Snapshots: a pool name sent to the snapshot pages can no longer point outside the storage folder.
 
-On a machine of its own, a username starting with a dash no longer reaches the machine's account tools, and the first-time sign-in code on its screen is readable only by the system.
+- On a machine of its own, a username starting with a dash no longer reaches the machine's account tools, and the first-time sign-in code on its screen is readable only by the system.
 
 #### New
 
-Eight more apps in Get apps, each tried on a real install: Homarr (a start page), Speedtest Tracker (your internet speed over time), Gatus (a status page), Monica (the people in your life), Lychee (a photo gallery), HortusFox (plant care), Zipline (file and screenshot sharing), and rsync over SSH, a place other computers can back up to with rsync. 184 apps in all.
+- Eight more apps in Get apps, each tried on a real install: Homarr (a start page), Speedtest Tracker (your internet speed over time), Gatus (a status page), Monica (the people in your life), Lychee (a photo gallery), HortusFox (plant care), Zipline (file and screenshot sharing), and rsync over SSH, a place other computers can back up to with rsync. 184 apps in all.
 
-A first step towards Kiboto on a machine of its own: an install script turns a fresh Debian 13 into a machine that Kiboto runs as its service, without a container. Storage pools are mounted before apps start. This is for trying in a virtual machine, not yet for real data.
+- A first step towards Kiboto on a machine of its own: an install script turns a fresh Debian 13 into a machine that Kiboto runs as its service, without a container. Storage pools are mounted before apps start. This is for trying in a virtual machine, not yet for real data.
 
-On a machine of its own, Kiboto now serves shared folders with the machine's own file servers: people sign in over the network with their own password, and folders shared over NFS are served by the system itself.
+- On a machine of its own, Kiboto now serves shared folders with the machine's own file servers: people sign in over the network with their own password, and folders shared over NFS are served by the system itself.
 
-On a machine of its own, Kiboto shows a setup code on the machine's screen (and when you sign in to it over SSH). You sign in with that code the first time and choose your own password. The sign-in page now says where the first password is found, on every kind of install.
+- On a machine of its own, Kiboto shows a setup code on the machine's screen (and when you sign in to it over SSH). You sign in with that code the first time and choose your own password. The sign-in page now says where the first password is found, on every kind of install.
 
-On a machine of its own, Kiboto can now update itself: the new version is made ready beside the running one, and if it does not start properly Kiboto goes back to the version before, with your settings as they were.
+- On a machine of its own, Kiboto can now update itself: the new version is made ready beside the running one, and if it does not start properly Kiboto goes back to the version before, with your settings as they were.
 
 - **Kiboto on a machine of its own (preview)**: the install script for a fresh Debian 13 now takes Kiboto from a published release, named by its digest, and every release from here on carries its own `install.sh`. The install guide says what it sets up, what it changes on the machine and what is not there yet.
 
@@ -140,9 +162,9 @@ On a machine of its own, Kiboto can now update itself: the new version is made r
 
 - **Every release carries Kiboto's install image (preview)**: built from Debian's official installer, checked against Debian's signing key.
 
-On a machine set up for Kiboto, plugged-in USB disks are listed on the Backup page with Use this disk and Eject, so backups to a USB disk and the camera import work there.
+- On a machine set up for Kiboto, plugged-in USB disks are listed on the Backup page with Use this disk and Eject, so backups to a USB disk and the camera import work there.
 
-On a machine Kiboto runs, the Power page can let spinning hard drives sleep after 10 minutes to 3 hours with nothing to do (off by default). A drive that is already asleep is never woken to set it.
+- On a machine Kiboto runs, the Power page can let spinning hard drives sleep after 10 minutes to 3 hours with nothing to do (off by default). A drive that is already asleep is never woken to set it.
 
 ## v2.0.5 (2026-11-20)
 ### 🏡 A second NAS that can take over, files you can change over the network, and 176 tested apps
