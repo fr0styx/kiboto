@@ -343,10 +343,12 @@ jobs:
 
       # The browser download and the system packages Playwright adds (on the runner image only
       # fonts: one slow mirror made them three of a run's four minutes) are kept between runs,
-      # keyed by the runner image and the locked Playwright version
-      - name: Which Playwright and runner image
+      # keyed by the runner OS and the locked Playwright version (not the image build: GitHub runs two
+      # builds side by side, and a key with the build missed every other run; packages the cache lacks
+      # make apt refuse, and the download below is used)
+      - name: Which Playwright and runner OS
         id: pw
-        run: echo "key=${ImageOS:-ubuntu}-${ImageVersion:-0}-$(grep -oE '^playwright==[0-9.]+' requirements.lock)" >> "$GITHUB_OUTPUT"
+        run: echo "key=${ImageOS:-ubuntu}-$(grep -oE '^playwright==[0-9.]+' requirements.lock)" >> "$GITHUB_OUTPUT"
 
       - name: Cache the Playwright browser and its packages
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
