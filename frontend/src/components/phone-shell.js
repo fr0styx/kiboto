@@ -385,10 +385,31 @@ export function setCompactBack(on) {
   }
 }
 
+let tabsSize = null;
+
+/** Messages sit above the tabs, which grow with the phone's text size: their real height, kept in
+ * --phone-tabs-h for the CSS (56-phone.css). */
+export function followTabsHeight(tabs) {
+  tabsSize?.disconnect();
+  tabsSize = null;
+  const root = document.documentElement;
+  if (!tabs) {
+    root.style.removeProperty('--phone-tabs-h');
+    return;
+  }
+  const set = () => root.style.setProperty('--phone-tabs-h', `${Math.ceil(tabs.getBoundingClientRect().height)}px`);
+  set();
+  if (typeof ResizeObserver === 'function') {
+    tabsSize = new ResizeObserver(set);
+    tabsSize.observe(tabs);
+  }
+}
+
 export function enablePhoneShell(on) {
   document.body.classList.toggle('phone-shell', on);
   let shell = document.getElementById('phone-shell');
   if (!on) {
+    followTabsHeight(null);
     adoptWidgets(false); // before the shell goes, or the widgets would go with it
     shell?.remove();
     unwatch?.();
@@ -407,6 +428,7 @@ export function enablePhoneShell(on) {
     <div id="phone-launcher" class="phone-launcher" data-view="home">${launcherHtml()}</div>
     <nav id="phone-tabs" class="phone-tabs" data-i18n-aria-label="phone.tabs" aria-label="${escapeHtml(t('phone.tabs', 'Main sections'))}">${tabsHtml()}</nav>`;
   document.body.appendChild(shell);
+  followTabsHeight(shell.querySelector('#phone-tabs'));
   adoptWidgets(true);
   import('./session.js') // the account may be known already
     .then((m) => hideUnusable(shell, m.getCurrentUser()))

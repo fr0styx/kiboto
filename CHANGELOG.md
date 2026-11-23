@@ -22,6 +22,8 @@ Kib's window looks like the other app windows: the wallpaper no longer shows thr
 
 Importing a pool by a name no drive carries no longer leaves a locked, empty folder in the storage folder.
 
+On a phone, messages such as "Last sign-in" are no longer half hidden under the tab bar.
+
 #### Security
 
 On a machine of its own, failed sign-ins to shared folders over the network now count like web sign-ins: 20 in 15 minutes block the address for an hour, and they show under History, Sign-ins.
