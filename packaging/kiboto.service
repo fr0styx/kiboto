@@ -4,8 +4,8 @@ Description=Kiboto
 Documentation=https://github.com/fr0styx/kiboto
 # the pools first (kiboto-pools mounts what nothing else does), then Docker, so no app and no
 # shared folder meets an empty folder
-After=network-online.target local-fs.target zfs-mount.service kiboto-pools.service docker.service
-Wants=network-online.target kiboto-pools.service
+After=network-online.target local-fs.target zfs-mount.service kiboto-pools.service docker.service kiboto-door.service
+Wants=network-online.target kiboto-pools.service kiboto-door.service
 
 [Service]
 Type=simple

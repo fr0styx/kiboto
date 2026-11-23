@@ -549,10 +549,12 @@ def _machine_at_start() -> None:
     drive forgets its sleep timer when it loses power."""
     from backend.services import drive_sleep, native_update
 
+    current = os.path.join(native_update.PREFIX, "current")
     try:
-        native_update.add_missing_tools(os.path.join(native_update.PREFIX, "current"))
+        native_update.add_missing_tools(current)
+        native_update.ensure_units(current)  # the host door's service and this version's files
     except OSError as e:
-        logger.warning("[Main] The machine's tools were not checked: %s", e)
+        logger.warning("[Main] The machine's tools and services were not checked: %s", e)
     try:
         rows = drive_sleep.at_start()
     except (OSError, ValueError) as e:

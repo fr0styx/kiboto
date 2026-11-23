@@ -13,7 +13,7 @@ import subprocess
 from collections.abc import Callable
 from typing import Any
 
-from backend import runtime
+from backend import door, runtime
 from backend.config import logger
 from backend.fsutil import atomic_write_text
 
@@ -54,8 +54,25 @@ def hosts_with_name(text: str, name: str) -> str:
     return "\n".join(out) + "\n"
 
 
+def _door(op: str, **args: Any) -> bool | None:
+    """The host door's answer where it runs (ADR 0006); None to do it here: no door, or it did not
+    answer (the web process is still root until the door has every operation)."""
+    if not door.available():
+        return None
+    try:
+        return bool(door.call(op, **args))
+    except door.DoorError as e:
+        logger.warning("[Machine] %s: %s", op, e)
+        return False
+    except OSError as e:
+        logger.warning("[Machine] The host door did not answer (%s); doing %s here", e, op)
+        return None
+
+
 def set_host_name(name: str, do: Run | None = None, hosts: str = HOSTS) -> bool:
     """The machine takes the name. False where Kiboto is a guest, or when the machine refused."""
+    if do is None and (via := _door("host.set_name", name=name)) is not None:
+        return via
     do = do or run
     if not runtime.managed_host() or not _NAME.match(name or ""):
         return False
@@ -88,6 +105,8 @@ def time_zone(link: str = "/etc/localtime") -> str:
 
 
 def set_time_zone(zone: str, do: Run | None = None) -> bool:
+    if do is None and (via := _door("host.set_time_zone", zone=zone)) is not None:
+        return via
     do = do or run
     if not runtime.managed_host() or not _ZONE.match(zone or ""):
         return False
@@ -118,6 +137,8 @@ def clock(do: Run | None = None) -> dict[str, bool]:
 
 
 def set_clock_automatic(on: bool, do: Run | None = None) -> bool:
+    if do is None and (via := _door("host.set_clock_automatic", on=bool(on))) is not None:
+        return via
     do = do or run
     if not runtime.managed_host():
         return False
@@ -148,6 +169,8 @@ def ssh(do: Run | None = None) -> dict[str, bool]:
 
 def set_ssh(on: bool, do: Run | None = None) -> bool:
     """Turns signing in over SSH on or off, now and at every start. Sessions that are open stay."""
+    if do is None and (via := _door("host.set_ssh", on=bool(on))) is not None:
+        return via
     do = do or run
     if not runtime.managed_host() or not os.path.exists(SSHD):
         return False

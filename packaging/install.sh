@@ -207,9 +207,10 @@ service() {
   chmod 700 "$DATA"
   [ -f "$ETC/kiboto.env" ] || printf '# Settings for Kiboto as a service, one NAME=value per line. Kept across updates.\n' > "$ETC/kiboto.env"
   date -u +%Y-%m-%dT%H:%M:%SZ > "$ETC/managed"
-  install -m 644 "$src/packaging/kiboto.service" "$src/packaging/kiboto-pools.service" /etc/systemd/system/
+  install -m 644 "$src/packaging/kiboto.service" "$src/packaging/kiboto-pools.service" "$src/packaging/kiboto-door.service" /etc/systemd/system/
   systemctl daemon-reload
-  systemctl enable -q kiboto-pools.service kiboto.service
+  systemctl enable -q kiboto-pools.service kiboto-door.service kiboto.service
+  systemctl restart kiboto-door.service
   systemctl restart kiboto.service
 }
 
@@ -318,8 +319,8 @@ BACK
 
 uninstall() {
   must_be_this_machine
-  systemctl disable -q --now kiboto.service kiboto-pools.service 2>/dev/null || true
-  rm -f /etc/systemd/system/kiboto.service /etc/systemd/system/kiboto-pools.service
+  systemctl disable -q --now kiboto.service kiboto-pools.service kiboto-door.service 2>/dev/null || true
+  rm -f /etc/systemd/system/kiboto.service /etc/systemd/system/kiboto-pools.service /etc/systemd/system/kiboto-door.service
   systemctl daemon-reload
   rm -rf "$PREFIX" "$ETC/managed"
   # shellcheck disable=SC2086

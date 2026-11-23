@@ -1,0 +1,26 @@
+# The host door (ADR 0006): the root service that changes the machine for Kiboto's web process,
+# from a fixed list of operations. Installed by packaging/install.sh and kept in step by Kiboto.
+[Unit]
+Description=Kiboto host door
+Documentation=https://github.com/fr0styx/kiboto/blob/main/docs/adr/0006-web-without-root.md
+Before=kiboto.service
+
+[Service]
+Type=simple
+Environment=DATA_DIR=/var/lib/kiboto
+Environment=HOST_PROC=/proc
+Environment=HOST_SYS=/sys
+Environment=HOST_DEV=/dev
+Environment=POOL_PATH=/mnt/storage
+Environment=PYTHONUNBUFFERED=1
+EnvironmentFile=-/opt/kiboto/current/build.env
+EnvironmentFile=-/etc/kiboto/kiboto.env
+WorkingDirectory=/opt/kiboto/current
+RuntimeDirectory=kiboto-door
+RuntimeDirectoryMode=0755
+ExecStart=/opt/kiboto/current/venv/bin/python -m backend.services.host_door
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target
