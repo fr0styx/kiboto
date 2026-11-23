@@ -236,6 +236,7 @@
     "_check_is_storage_busy_uncached": "(self) -> bool",
     "_convert_to_dataset": "(self, path: str) -> str",
     "_default_share_folder": "(self, name: str) -> str",
+    "_export_when_free": "(self, name: str, tries: int = 5) -> tuple[int, str, str]",
     "_fs_type_at": "(self, path: str) -> str",
     "_main_pool_facts": "(self) -> tuple[str, str]",
     "_main_pool_members": "(self, hal_disks: dict[str, PoolMember]) -> list[PoolMember]",

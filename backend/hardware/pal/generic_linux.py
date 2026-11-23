@@ -170,6 +170,9 @@ def btrfs_missing_members(members: list[PoolMember], shown: str) -> list[PoolMem
     ]
 
 
+_BUSY_WAIT_SECS = 1.0  # between tries of an export ZFS calls busy
+
+
 class GenericLinuxStorageAdapter(StoragePlatformAdapter):
     """
     Generic Linux Storage Platform Adapter.
@@ -1362,6 +1365,18 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
             "message": f"Storage pool '{pool_id}' safely exported and flushed. Safe to disconnect cable.",
         }
 
+    def _export_when_free(self, name: str, tries: int = 5) -> tuple[int, str, str]:
+        """zpool export, tried again while ZFS answers "busy": just after an import, udev and the
+        mounting of the pool's datasets can hold it for a moment (seen in the real-tools tests)."""
+        code, out, err = 1, "", ""
+        for attempt in range(tries):
+            code, out, err = self._run_cmd(["zpool", "export", name])
+            if code == 0 or "busy" not in (err or out) or attempt == tries - 1:
+                break
+            self._run_cmd(["udevadm", "settle", "--timeout=5"])
+            time.sleep(_BUSY_WAIT_SECS)
+        return code, out, err
+
     def allow_changes(self, pool_id: str) -> dict[str, Any]:
         """Opens for writing a ZFS pool that was imported read-only, and writes it down as one of
         this system's pools. The person answered the "used by another system" question at import,
@@ -1370,7 +1385,7 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
         if pool.fs_type != "zfs" or not pool.read_only:
             return {"status": "unchanged", "pool_id": pool.id}
         guid = pool_registry.read_uuid("zfs", pool.id, "", self._run_cmd) or pool.id
-        code, out, err = self._run_cmd(["zpool", "export", pool.id])
+        code, out, err = self._export_when_free(pool.id)
         if code != 0:
             raise RuntimeError(f"{pool.name} is in use and could not be reopened: {(err or out).strip()}")
         code, out, err = self._run_cmd(["zpool", "import", guid])

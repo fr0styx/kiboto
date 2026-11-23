@@ -122,7 +122,18 @@ def test_allowing_changes_passes_the_question_already_answered(nas, tools):
     assert tools.did("zpool import") == [["zpool", "import", "4711"], ["zpool", "import", "-f", "4711"]]
 
 
-def test_a_pool_that_cannot_be_reopened_stays_as_it_was(nas, tools):
+def test_a_pool_busy_for_a_moment_is_reopened_once_it_is_free(nas, tools, monkeypatch):
+    monkeypatch.setattr("backend.hardware.pal.generic_linux._BUSY_WAIT_SECS", 0)
+    _looked_at(nas)
+    tools.answers["zpool get -Hp -o value guid"] = (0, "4711\n", "")
+    answers = iter([(1, "", "cannot export 'tank': pool is busy")] * 2 + [(0, "", "")])
+    tools.answers["zpool export"] = lambda cmd: next(answers)
+    assert nas.allow_changes("tank")["status"] == "writable"
+    assert len(tools.did("zpool export")) == 3 and len(tools.did("udevadm settle")) == 2
+
+
+def test_a_pool_that_cannot_be_reopened_stays_as_it_was(nas, tools, monkeypatch):
+    monkeypatch.setattr("backend.hardware.pal.generic_linux._BUSY_WAIT_SECS", 0)
     _looked_at(nas)
     tools.answers["zpool get -Hp -o value guid"] = (0, "4711\n", "")
     tools.answers["zpool export"] = (1, "", "pool is busy")

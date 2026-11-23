@@ -10,6 +10,8 @@ Releases now carry the install image: it was built, but saved in a folder that w
 
 On a machine of its own, an update now also installs the system tools the new version needs, such as the one drive sleep uses.
 
+"Allow changes" on a storage pool brought in from another system no longer fails with "pool is busy" when it is pressed right after the pool was opened.
+
 #### Security
 
 On a machine of its own, failed sign-ins to shared folders over the network now count like web sign-ins: 20 in 15 minutes block the address for an hour, and they show under History, Sign-ins.
