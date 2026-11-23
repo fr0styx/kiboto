@@ -180,6 +180,12 @@ RUN if [ -n "$BUILD_COMMIT" ]; then echo "$BUILD_COMMIT" > /app/.git_commit; fi
 # Overlay freshly built frontend distribution
 COPY --from=frontend-builder /build/static/ ./static/
 
+# The third-party packages in this image and their licences, served at /third-party-licences.txt
+# (and copied to a machine Kiboto runs with the rest of static/)
+COPY scripts/third_party.py package-lock.json /tmp/licences/
+RUN python3 /tmp/licences/third_party.py /tmp/licences/package-lock.json > /app/static/third-party-licences.txt \
+    && rm -rf /tmp/licences
+
 # every 60 s with a bare interpreter (-S -I: no site packages to scan); the app caches its own
 # database check (PERF-30)
 HEALTHCHECK --interval=60s --timeout=5s --start-period=15s --retries=3 \

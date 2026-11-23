@@ -18,6 +18,9 @@ sh "$here/../../scripts/stamp_installer.sh" "$image" > "$work/install.sh"
 cp "$here/preseed.cfg" "$work/preseed.cfg"
 [ -n "$extra" ] && cat "$extra" >> "$work/preseed.cfg"
 cp "$here/late.sh" "$work/late.sh"
+debian=$(basename "$iso")
+version=$(echo "$debian" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+sed -e "s|@DEBIAN_IMAGE@|$debian|g" -e "s|@DEBIAN_VERSION@|${version:-13}|g" "$here/NOTICE.txt" > "$work/NOTICE.txt"
 xorriso -osirrox on -indev "$iso" \
   -extract /boot/grub/grub.cfg "$work/grub.cfg" \
   -extract /isolinux/txt.cfg "$work/txt.cfg" \
@@ -47,6 +50,7 @@ xorriso -indev "$iso" -outdev "$out" $keys \
   -map "$work/preseed.cfg" /kiboto/preseed.cfg \
   -map "$work/late.sh" /kiboto/late.sh \
   -map "$work/install.sh" /kiboto/install.sh \
+  -map "$work/NOTICE.txt" /kiboto/NOTICE.txt \
   -map "$work/grub.new" /boot/grub/grub.cfg \
   -map "$work/txt.new" /isolinux/txt.cfg \
   -map "$work/isolinux.new" /isolinux/isolinux.cfg \

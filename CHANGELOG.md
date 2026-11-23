@@ -14,6 +14,10 @@ On a machine of its own, an update now also installs the system tools the new ve
 
 On a machine of its own, failed sign-ins to shared folders over the network now count like web sign-ins: 20 in 15 minutes block the address for an hour, and they show under History, Sign-ins.
 
+#### New
+
+Kiboto lists the third-party software it bundles and its licences at /third-party-licences.txt, and the install image says which Debian image it is made from and where Debian publishes its sources.
+
 ## v2.0.6 (2026-11-23)
 ### 🖥️ Kiboto on a machine of its own (preview), with its settings kept safe on every pool
 

@@ -16,6 +16,7 @@
 !packaging/
 !frontend/
 !static/img/
+!scripts/third_party.py
 !static/manifest.json
 
 # Never, even inside allowed folders

@@ -65,6 +65,32 @@ or the apps you install.
   from acting on its own, but a model can still give a wrong answer based on a planted
   document.
 
+## A machine Kiboto runs (preview)
+
+On a machine set up from Kiboto's install image or `install.sh` on Debian 13, Kiboto is the
+machine's own service, not a container. What is above still holds; this is what changes.
+
+| Boundary | Defences |
+| -------- | -------- |
+| Install image → machine | Debian's official netinst image, unchanged, checked against Debian's CD signing key before Kiboto's files are added; it asks for the system disk and touches no other disk |
+| Release → machine | `install.sh` and every update install only an image signed by this project's CI, named by its digest; anything else is removed again and nothing changes. An update is tried beside the running version and goes back by itself when the new one does not stay healthy |
+| First sign-in | A one-time code on the machine's screen and SSH greeting, in files only root can read, removed once the admin chooses a password |
+| Network → shared folders | The machine's own Samba and NFS serve the folders; each person signs in to their private folder as their own system account. Failed SMB sign-ins count toward the block list like web ones (20 in 15 minutes block the address for an hour); blocked addresses are in Samba's `hosts deny` |
+| Account names → system tools | A Kiboto username that would read as an option (starting with a dash) never reaches `useradd`, `userdel` or `smbpasswd` |
+| System disk → your data | Shared folders, home folders, apps and virtual machines are kept on the pools, never on the system disk; an encrypted copy of the settings on every pool brings the same Kiboto back on a new system disk with its recovery key |
+| AI data at rest | Always encrypted, with a key sealed to the machine's TPM where it has one |
+
+What remains on such a machine:
+
+- **The web process runs as root**, as in the container, with no separate privileged helper yet.
+  A fixed list of operations for the host and an unprivileged web process are planned before
+  the image is offered for anyone's only copy of their data.
+- **Debian's packages are updated by Debian.** Kiboto holds the kernel, ZFS and Docker at the
+  versions it was tested with; everything else follows Debian's own security updates, which the
+  machine installs only when someone runs them.
+- **Physical access is trusted.** Whoever is at the machine sees the first-time code until a
+  password is chosen and can boot another system.
+
 ## Reviewing changes against this model
 
 A change needs a second look when it adds an endpoint without a scope, reads a path

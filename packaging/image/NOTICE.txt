@@ -1,0 +1,19 @@
+Kiboto install image
+
+This image is Debian's official installer image @DEBIAN_IMAGE@, unchanged, with Kiboto's files
+added in the kiboto folder (an answer file for the installer, a first-start script and Kiboto's
+install script) and a "Install Kiboto" entry added to the boot menus.
+
+Kiboto is free software under the MIT licence: https://github.com/fr0styx/kiboto
+
+Debian and the software in it are free software under their own licences, mostly the GNU General
+Public License. Each package's licence is in /usr/share/doc/<package>/copyright once installed.
+The source code of everything in this Debian image is published by Debian:
+
+  - the source images for Debian @DEBIAN_VERSION@: https://cdimage.debian.org/cdimage/release/@DEBIAN_VERSION@/source/
+    (under https://cdimage.debian.org/cdimage/archive/@DEBIAN_VERSION@/source/ once a newer release replaces it)
+  - every source package Debian has published, by date: https://snapshot.debian.org/
+
+The packages installed during and after the installation come from Debian's own servers.
+Kiboto itself is installed from its signed release image; the third-party software in that image
+and its licences are listed at /third-party-licences.txt on the installed machine's web page.

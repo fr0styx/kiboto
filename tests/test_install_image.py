@@ -71,6 +71,18 @@ def test_the_build_puts_kiboto_first_and_stamps_the_release():
     assert "preseed/file=/cdrom/kiboto/preseed.cfg" in build
 
 
+def test_the_image_says_what_it_is_made_of_and_where_debians_sources_are():
+    build = _read("build-image.sh")
+    assert '-map "$work/NOTICE.txt" /kiboto/NOTICE.txt' in build
+    notice = _read("NOTICE.txt")
+    assert "@DEBIAN_IMAGE@" in notice and "MIT licence" in notice
+    assert "https://cdimage.debian.org/cdimage/release/@DEBIAN_VERSION@/source/" in notice
+    assert "snapshot.debian.org" in notice and "/third-party-licences.txt" in notice
+    with open(os.path.join(ROOT, "Dockerfile"), encoding="utf-8") as f:
+        docker = f.read()
+    assert "third_party.py /tmp/licences/package-lock.json > /app/static/third-party-licences.txt" in docker
+
+
 @pytest.mark.skipif(not shutil.which("sh"), reason="no shell")
 def test_the_scripts_are_valid_shell():
     for name in ("build-image.sh", "late.sh"):
