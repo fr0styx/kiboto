@@ -88,6 +88,8 @@ On a machine set up for Kiboto, the AI pages no longer wait about 25 seconds whe
 
 A machine set up for Kiboto can still be reached after its network card moved to another slot or was replaced: the port gets an address by DHCP.
 
+After a system disk was replaced, "Look on the drives" now finds the settings copy on ZFS pools too (it found only the ones on btrfs and ext4).
+
 #### Security
 
 Apps, Docker clean-up: deleting unused volumes now asks for a confirmation that Kiboto checks itself, so it can't happen without your say-so.

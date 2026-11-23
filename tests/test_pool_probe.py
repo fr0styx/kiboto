@@ -53,6 +53,7 @@ LSBLK = {
 class Storage:
     def __init__(self):
         self.seen, self.fails, self.lsblk, self.zpool = [], set(), json.dumps(LSBLK), ZPOOL_IMPORT
+        self.altroot, self.prefixed = "", True
 
     def __call__(self, cmd):
         self.seen.append(cmd)
@@ -63,8 +64,10 @@ class Storage:
             return 0, self.zpool, ""
         if cmd[0] == "lsblk":
             return 0, self.lsblk, ""
-        if cmd[:2] == ["zfs", "get"]:
-            return 0, "/mnt/storage/tank\n", ""
+        if cmd[:2] == ["zpool", "import"] and "-R" in cmd:
+            self.altroot = cmd[cmd.index("-R") + 1]
+        if cmd[:2] == ["zfs", "get"]:  # as ZFS answers for a pool imported with -R: under that folder
+            return 0, (self.altroot if self.prefixed else "") + "/mnt/storage/tank\n", ""
         return 0, "", ""
 
 
@@ -118,6 +121,13 @@ def test_a_zfs_pool_is_opened_read_only_looked_at_and_closed(storage, tmp_path):
         ["zpool", "export", "tank"],
     ]
     assert not os.path.exists(spot)
+
+
+def test_a_mountpoint_without_the_folder_in_front_is_found_too(storage, tmp_path):
+    storage.prefixed = False
+    seen = []
+    got = pool_probe.look_into({"kind": "zfs", "name": "tank", "id": "7"}, storage, lambda r: seen.append(r) or "ok")
+    assert got == "ok" and seen == [os.path.join(str(tmp_path / "probe" / "7"), "mnt/storage/tank")]
 
 
 def test_a_zfs_pool_is_closed_even_when_reading_it_fails(storage):

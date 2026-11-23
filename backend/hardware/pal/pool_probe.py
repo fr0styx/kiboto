@@ -86,6 +86,15 @@ def look_into(found: dict[str, Any], run: Runner, read: Callable[[str], Any]) ->
         shutil.rmtree(spot, ignore_errors=True)  # an empty folder by now: everything below was closed
 
 
+def _under(spot: str, where: str) -> str:
+    """The root dataset's folder. Imported with -R, ZFS already gives its mountpoint under spot
+    (spot/mnt/storage/tank); joining spot again pointed at a folder that is not there, so a ZFS
+    pool's settings copy was never found."""
+    if where == spot or where.startswith(spot.rstrip("/") + "/"):
+        return where
+    return os.path.join(spot, where.lstrip("/"))
+
+
 def _look_into_zfs(found: dict[str, Any], spot: str, run: Runner, read: Callable[[str], Any]) -> Any:
     name = found["name"]
     # -f: the system that used it last is the one that is gone. Read-only, so forcing changes nothing on it.
@@ -99,7 +108,7 @@ def _look_into_zfs(found: dict[str, Any], spot: str, run: Runner, read: Callable
         code, where, _ = run(["zfs", "get", "-H", "-o", "value", "mountpoint", name])
         if code != 0 or not where.startswith("/") or run(["zfs", "mount", name])[0] != 0:
             return None
-        return read(os.path.join(spot, where.strip().lstrip("/")))
+        return read(_under(spot, where.strip()))
     finally:
         if run(["zpool", "export", name])[0] != 0:
             logger.warning("[Probe] The ZFS pool %s stayed open read-only after looking into it", name)
