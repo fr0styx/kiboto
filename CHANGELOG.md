@@ -38,6 +38,8 @@ On a machine set up for Kiboto, people's home folders are made on the first pool
 
 On a machine set up for Kiboto, new virtual machines and downloaded installer images are kept on the first pool instead of the system disk.
 
+Machines set up for Kiboto may move to Linux 6.12.118, tested with ZFS 2.4.4 and Docker 26.1.5.
+
 #### Fixes
 
 A person with a storage limit could go over it by sending several files at once. Files still arriving now count against the limit.
