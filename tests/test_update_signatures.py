@@ -228,3 +228,24 @@ def test_the_command_line_asks_for_a_release_when_told(monkeypatch, capsys):
     assert sig.main(["x", "--tags-only", DIGEST]) == 1 and seen[-1] == (DIGEST, True)
     assert sig.main(["x", DIGEST]) == 1 and seen[-1] == (DIGEST, False)
     assert sig.main(["x"]) == 2
+
+
+def test_a_machine_that_takes_only_releases_says_why_it_refused_a_main_build(update_env, monkeypatch):
+    from backend import config
+
+    client, headers = update_env
+    monkeypatch.setattr(config, "UPDATE_SIGNATURES", "enforce")
+    monkeypatch.setattr(sig, "releases_only", lambda: True)
+    reason = (
+        "the signature did not verify: signed for the main branch, not for a release: this machine takes only releases"
+    )
+
+    def fake_verify(digest, tags_only=False):
+        assert tags_only is True
+        return sig.SignatureResult(False, reason)
+
+    monkeypatch.setattr(sig, "verify_image", fake_verify)
+    r = client.post(
+        "/api/system/updates/apply", headers=headers, json={"target_image": "ghcr.io/fr0styx/kiboto@sha256:" + "b" * 64}
+    )
+    assert r.status_code == 502 and "only released versions" in r.text and "Try again" not in r.text

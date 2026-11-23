@@ -1385,6 +1385,12 @@ async def _check_update_signature(target_img: str, expected_digest: str | None, 
         )
         return {"checked": True, **result.as_dict()}
     logger.error("[System Update] Refusing %s: %s", one_line(digest), one_line(result.reason))
+    if tags_only and "not for a release" in result.reason:  # waiting would not change this
+        raise HTTPException(
+            status_code=502,
+            detail="Not updating: this machine installs only released versions of Kiboto, and this image "
+            "was built from the main branch.",
+        )
     raise HTTPException(
         status_code=502,
         detail=f"Not updating: the image's signature could not be verified ({result.reason}). "
