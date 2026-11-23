@@ -245,6 +245,7 @@
     "_nested_subvolumes": "(self, path: str) -> bool",
     "_no_merged_folder": "(self, pool: StoragePool) -> None",
     "_not_on_the_system_disk": "(full_path: str) -> str",
+    "_pool_fs": "(pool_id: str) -> str",
     "_read_worm": "(self, item: dict[str, typing.Any]) -> None",
     "_recorded_pool": "(self, row: dict[str, typing.Any], hal_disks: dict[str, PoolMember], there: bool | None = None) -> StoragePool",
     "_release_view": "(self, zfs_name: str) -> None",

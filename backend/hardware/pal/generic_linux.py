@@ -1649,13 +1649,18 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
         return best[0]
 
     def share_can_snapshot(self, share: str) -> bool:
-        """Whether the share's own folder is on btrfs or ZFS (an ext4 pool keeps no snapshots)."""
+        """Whether the pool the share is on keeps snapshots (an ext4 pool does not). A folder on none
+        of Kiboto's recorded pools: the main storage folder decides, as before."""
         from backend.hardware.pal.base import storage_tools
 
-        where = next((s.mountpoint for s in self.list_shares() if s.name == share and s.mountpoint), "")
-        if not where or not os.path.exists(where):
-            return True  # not made yet: the pool decides, as before
-        return bool(storage_tools().get(fs_of(where)))
+        fs = self._pool_fs(self.snapshot_pool_of(share))
+        return not fs or bool(storage_tools().get(fs))
+
+    @staticmethod
+    def _pool_fs(pool_id: str) -> str:
+        """The file system Kiboto recorded for a pool it made or took in ("" for any other)."""
+        row = pool_registry.find(pool_id) if pool_id else None
+        return str((row or {}).get("fs_type") or "")
 
     def _snap_roots(self, pool_id: str) -> list[tuple[str, str]]:
         """(pool, folder) pairs a snapshot listing covers: one pool; for the default pool the main
@@ -1717,8 +1722,8 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
                 "",
                 f"{subvol_name} is a folder, not a ZFS dataset of its own; it can't be snapshotted alone.",
             )
-        elif fs_of(src_path) not in ("btrfs", ""):
-            code, out, err = 1, "", f"{subvol_name} is on {fs_of(src_path)}, which keeps no snapshots."
+        elif self._pool_fs(pool_id) not in ("btrfs", "zfs", ""):
+            code, out, err = 1, "", f"{subvol_name} is on {self._pool_fs(pool_id)}, which keeps no snapshots."
         else:
             cmd = ["btrfs", "subvolume", "snapshot"]
             if readonly:

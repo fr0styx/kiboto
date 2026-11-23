@@ -42,6 +42,21 @@ def addresses(containers: list[dict[str, Any]]) -> dict[str, str]:
     return found
 
 
+def names(hosts: str = "") -> set[str]:
+    """The container names in Kiboto's block of the hosts file (the running containers)."""
+    try:
+        with open(hosts or HOSTS, encoding="utf-8") as f:
+            lines = f.read().splitlines()
+    except OSError:
+        return set()
+    if BEGIN not in lines or END not in lines:
+        return set()
+    found: set[str] = set()
+    for line in lines[lines.index(BEGIN) + 1 : lines.index(END)]:
+        found.update(line.split()[1:])
+    return found
+
+
 def with_block(text: str, names: dict[str, str]) -> str:
     """The hosts file with Kiboto's block replaced (or added at the end); every other line as it was."""
     lines = text.splitlines()

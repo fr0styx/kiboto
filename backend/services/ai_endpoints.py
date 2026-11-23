@@ -48,6 +48,14 @@ def _default_gateway() -> str | None:
 
 
 def _resolves(name: str) -> bool:
+    from backend import runtime
+
+    if runtime.managed_host():
+        # every running container is in the hosts file Kiboto keeps (app_hosts.py); asking the
+        # resolver for a name that is not there waits seconds for each one (LLMNR)
+        from backend.services import app_hosts
+
+        return name in app_hosts.names()
     try:
         socket.getaddrinfo(name, None)
         return True

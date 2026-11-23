@@ -78,6 +78,8 @@ On a machine of its own, the malware scan and family sign-in can be turned on (t
 
 On a machine set up for Kiboto, snapshots work for shared folders on its btrfs and ZFS pools, and a folder on an ext4 pool says it keeps no snapshots.
 
+On a machine set up for Kiboto, the AI pages no longer wait about 25 seconds when no AI runtime is installed.
+
 #### Security
 
 Apps, Docker clean-up: deleting unused volumes now asks for a confirmation that Kiboto checks itself, so it can't happen without your say-so.
