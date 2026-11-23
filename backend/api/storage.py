@@ -21,6 +21,8 @@ from backend.errors import ApiError, error_response, said
 from backend.fsutil import single_name
 from backend.hardware.pal import system_disk
 from backend.hardware.pal.base import PoolUsedElsewhere
+from backend.hardware.pal.pool_rules import POOL_ID_PATTERN, POOL_NAME_PATTERN
+from backend.hardware.pal.pool_rules import import_mount as _mount_point
 from backend.hardware.pal_storage import (
     PlatformCapabilityError,
     get_storage_platform,
@@ -35,27 +37,7 @@ router = APIRouter(prefix="/storage", tags=["Storage Subsystem & PAL"])
 
 # A pool's name as it reaches zpool/btrfs as an argument: no leading dash ("-a" would be an
 # option, export -a exports every pool), no spaces (CodeQL command-line injection)
-POOL_ID_PATTERN = r"^[A-Za-z0-9_/][A-Za-z0-9_./:-]{0,127}$"
 PoolId = Annotated[str, Path(pattern=POOL_ID_PATTERN)]
-
-
-# A pool's new name: one folder name under the pool root, no dash first (CodeQL path injection;
-# a new pool's name is checked in create_storage_pool)
-POOL_NAME_PATTERN = r"^[A-Za-z0-9_][A-Za-z0-9_.-]{0,63}$"
-
-
-def _mount_point(value: str | None) -> str | None:
-    """Where an imported pool may be mounted: under /mnt, /srv or /media and not Kiboto's own
-    folders (a filesystem mounted over /etc or the data folder would hide it)."""
-    v = (value or "").strip()
-    if not v:
-        return None
-    from backend.fsutil import is_protected
-
-    real = os.path.realpath(v)
-    if not os.path.isabs(v) or not real.startswith(("/mnt/", "/srv/", "/media/")) or is_protected(real):
-        raise ValueError("Mount an imported pool in a folder under /mnt, /srv or /media.")
-    return real
 
 
 class StorageScrubRequest(BaseModel):
@@ -341,9 +323,8 @@ def create_storage_pool(
     Creates a new storage pool. In Observer Mode (e.g. Unraid, TrueNAS),
     this operation is strictly rejected to protect host array parity.
     """
-    import re as _re
-
     from backend.hardware.disk_safety import check_disks
+    from backend.hardware.pal import pool_rules
     from backend.passwords import verify_password
     from backend.users_db import get_user_by_id
 
@@ -355,25 +336,18 @@ def create_storage_pool(
             detail=f"Forbidden in Observer Mode on {adapter.get_platform_type().value}. "
             "Storage pools and RAID arrays must be managed authoritatively by the host OS.",
         )
-    if not _re.match(r"^[A-Za-z][A-Za-z0-9_-]{0,31}$", req.name or ""):
-        raise HTTPException(
-            status_code=400, detail="Pool name: letters, digits, - and _ (max 32), starting with a letter."
-        )
-    if req.fs_type.lower() not in ("btrfs", "zfs", "ext4"):
+    try:
+        pool_rules.new_pool_name(req.name or "")
+        mountpoint = pool_rules.new_pool_mount(req.mountpoint)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    if req.fs_type.lower() not in pool_rules.KINDS_MADE:
         raise HTTPException(status_code=400, detail="Kiboto makes ZFS, btrfs and ext4 pools.")
     if req.confirm_name != req.name:
         raise HTTPException(status_code=400, detail="Type the pool name to confirm that the disks will be erased.")
     user = get_user_by_id(principal.user_id) if principal and principal.user_id else None
     if not user or not verify_password(req.current_password or "", user.get("password_hash", "")):
         raise HTTPException(status_code=403, detail="Current password is incorrect.")
-
-    mountpoint = (req.mountpoint or "").strip()
-    if mountpoint:
-        pool_root = os.path.realpath(getattr(config, "POOL_PATH", "") or "/mnt")
-        real_mp = os.path.realpath(mountpoint)
-        if not real_mp.startswith(pool_root.rstrip("/") + "/") or _re.search(r"[\x00-\x1f,]", mountpoint):
-            raise HTTPException(status_code=400, detail=f"The mount point must be inside {pool_root}.")
-        mountpoint = real_mp
 
     resolve = getattr(adapter, "_resolve_disk_path", None)
     disks = [resolve(d) if resolve else (d if d.startswith("/") else f"/dev/{d}") for d in req.disks]

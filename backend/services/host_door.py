@@ -17,6 +17,7 @@ import grp
 import json
 import os
 import pwd
+import re
 import socket
 import struct
 import threading
@@ -27,7 +28,7 @@ from typing import Any
 
 from backend import door
 from backend.config import DATA_DIR, logger
-from backend.hardware.pal.base import PlatformCapabilityError
+from backend.hardware.pal.base import PlatformCapabilityError, PoolUsedElsewhere
 
 AUDIT = os.path.join(DATA_DIR, "door-audit.log")
 MAX_REQUEST = 64 * 1024
@@ -88,20 +89,61 @@ def _nfs_apply() -> bool:
     return nfs_engine.NfsEngine().apply_exports(inside_storage_only=True)  # the saved rules, read again
 
 
-def _storage(name: str) -> Callable[..., Any]:
-    """The storage adapter's own method, for a pool named by its name: the adapter keeps every
-    snapshot and subvolume name to one folder name (fsutil.child_path) and the pool's folder to
-    its storage roots (get_pool_path)."""
+def _storage(name: str, check: Callable[[dict[str, Any]], None] | None = None) -> Callable[..., Any]:
+    """The storage adapter's own method, for a pool named by its name (pool_rules), after `check`
+    has looked at the rest. The adapter keeps every snapshot and subvolume name to one folder
+    name (fsutil.child_path) and the pool's folder to its storage roots (get_pool_path)."""
 
     def run(**kw: Any) -> Any:
+        from backend.hardware.pal import pool_rules
         from backend.hardware.pal_storage import get_storage_platform
 
-        pool = kw["pool_id"]
-        if not pool or pool.startswith("/") or ".." in pool.split("/"):
-            raise ValueError("pool_id must be a pool's name")
+        if "pool_id" in kw:
+            pool_rules.pool_id(kw["pool_id"])
+        if check is not None:
+            check(kw)
         return getattr(get_storage_platform(), name)(**kw)
 
     return run
+
+
+def _new_pool(kw: dict[str, Any]) -> None:
+    """A new pool: its name and kind, a mount point inside the pool root, and drives that are
+    whole, unmounted and in no pool or array (disk_safety). Whether a drive's old data may be
+    erased is the person's answer, asked by the page with their password; the door still never
+    formats a drive that is in use, the system disk among them."""
+    from backend.hardware.disk_safety import check_disks
+    from backend.hardware.pal import pool_rules
+    from backend.hardware.pal_storage import get_storage_platform
+
+    pool_rules.new_pool_name(kw["name"])
+    if kw["fs_type"].lower() not in pool_rules.KINDS_MADE or not re.match(r"^[A-Za-z0-9]{1,16}$", kw["profile"]):
+        raise ValueError("Kiboto makes ZFS, btrfs and ext4 pools.")
+    kw["mountpoint"] = pool_rules.new_pool_mount(kw["mountpoint"])
+    disks = kw["disks"]
+    if not disks or len(disks) > 64 or not all(type(d) is str and 0 < len(d) <= 256 for d in disks):
+        raise ValueError("disks: one to 64 drive names")
+    resolve = getattr(get_storage_platform(), "_resolve_disk_path", None)
+    problems = check_disks([resolve(d) if resolve else d for d in disks], allow_erase=True)
+    if problems:
+        raise ValueError(
+            "These disks can't be formatted: " + "; ".join(f"{p['disk']}: {p['reason']}" for p in problems)
+        )
+
+
+def _imported(kw: dict[str, Any]) -> None:
+    from backend.hardware.pal import pool_rules
+
+    pool_rules.pool_name(kw["pool_id"])
+    if not re.match(r"^[a-z0-9]{1,16}$", kw["fs_type"]) or not re.match(r"^[0-9]{0,24}$", kw["guid"]):
+        raise ValueError("fs_type and guid are as the pool list shows them")
+    kw["target_mount"] = pool_rules.import_mount(kw["target_mount"])
+
+
+def _renamed(kw: dict[str, Any]) -> None:
+    from backend.hardware.pal import pool_rules
+
+    pool_rules.pool_name(kw["new_name"])
 
 
 def _firewall_apply(st: dict[str, Any]) -> None:
@@ -110,7 +152,7 @@ def _firewall_apply(st: dict[str, Any]) -> None:
     firewall.apply(firewall.cleaned(st))  # only the settings the page offers, whatever was sent
 
 
-TEXT, ON, MAYBE_TEXT, MAP, NUMBER = (str,), (bool,), (str, type(None)), (dict,), (int,)
+TEXT, ON, MAYBE_TEXT, MAP, NUMBER, LIST = (str,), (bool,), (str, type(None)), (dict,), (int,), (list,)
 LAST_UID = 60000  # Kiboto's account numbers: smb_accounts.FIRST_UID up to here
 OPERATIONS: dict[str, Operation] = {
     "door.ping": Operation(lambda: "pong", {}),
@@ -155,6 +197,23 @@ OPERATIONS: dict[str, Operation] = {
         max_len=512,
     ),
     "storage.scrub": Operation(_storage("trigger_scrub"), {"pool_id": TEXT, "action": TEXT}, max_len=128),
+    "storage.create_pool": Operation(
+        _storage("create_pool", _new_pool),
+        {"name": TEXT, "fs_type": TEXT, "profile": TEXT, "disks": LIST, "mountpoint": TEXT},
+        max_len=256,
+    ),
+    "storage.import_pool": Operation(
+        _storage("import_pool", _imported),
+        {"pool_id": TEXT, "fs_type": TEXT, "target_mount": MAYBE_TEXT, "force": ON, "guid": TEXT},
+        max_len=256,
+    ),
+    "storage.rename_pool": Operation(
+        _storage("rename_pool", _renamed), {"pool_id": TEXT, "new_name": TEXT}, max_len=128
+    ),
+    "storage.export_pool": Operation(_storage("export_pool"), {"pool_id": TEXT, "force": ON}, max_len=128),
+    "storage.destroy_pool": Operation(_storage("destroy_pool"), {"pool_id": TEXT}, max_len=128),
+    "storage.erase_pool": Operation(_storage("erase_pool"), {"pool_id": TEXT}, max_len=128),
+    "storage.allow_changes": Operation(_storage("allow_changes"), {"pool_id": TEXT}, max_len=128),
 }
 
 
@@ -197,9 +256,14 @@ def handle(request: Any, uid: int) -> dict[str, Any]:
 
 
 def _kind(e: Exception) -> str:
-    """What the caller raises again on its side (door.DoorError.as_error)."""
+    """What the caller raises again on its side (door.DoorError.as_error, and the storage
+    adapter's own kinds in generic_linux._through_door)."""
     if isinstance(e, ValueError):
         return "value"
+    if isinstance(e, PoolUsedElsewhere):
+        return "used_elsewhere"
+    if isinstance(e, LookupError):
+        return "lookup"
     if isinstance(e, RuntimeError):
         return "runtime"
     return "capability" if isinstance(e, PlatformCapabilityError) else "other"

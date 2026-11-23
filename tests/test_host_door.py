@@ -440,3 +440,155 @@ def test_the_door_runs_the_adapters_own_storage_code_for_a_pool_name_only(audit,
     reply = host_door.handle({"op": "storage.delete_snapshot", "args": args}, 0)
     assert reply["ok"] is False and reply["kind"] == "capability" and "WORM" in reply["error"]
     assert door.DoorError(reply["error"], reply["kind"]).as_error().kind == "capability"
+
+
+def test_pools_go_through_the_door_where_it_runs(monkeypatch):
+    from backend.hardware.pal.base import PoolUsedElsewhere
+    from backend.hardware.pal.generic_linux import GenericLinuxStorageAdapter
+
+    adapter = GenericLinuxStorageAdapter.__new__(GenericLinuxStorageAdapter)
+    calls = []
+    monkeypatch.setattr(door, "available", lambda sock=door.SOCK: True)
+    monkeypatch.setattr(door, "call", lambda op, **a: calls.append((op, a)) or {"status": "ok"})
+    adapter.create_pool("tank", "zfs", "mirror", ("sdb", "sdc"), None)
+    adapter.import_pool("old", force=1, guid=None)
+    adapter.rename_pool("tank", "vault")
+    adapter.export_pool("vault", force=0)
+    adapter.destroy_pool("vault")
+    adapter.erase_pool("vault")
+    adapter.allow_changes("old")
+    assert [c[0] for c in calls] == [
+        "storage.create_pool",
+        "storage.import_pool",
+        "storage.rename_pool",
+        "storage.export_pool",
+        "storage.destroy_pool",
+        "storage.erase_pool",
+        "storage.allow_changes",
+    ]
+    assert calls[0][1]["disks"] == ["sdb", "sdc"] and calls[0][1]["mountpoint"] == ""
+    assert calls[1][1] == {"pool_id": "old", "fs_type": "zfs", "target_mount": None, "force": True, "guid": ""}
+    for op, args in calls:  # what the adapter sends is what the door takes
+        host_door._checked({"op": op, "args": args})
+
+    for kind, raised in (("used_elsewhere", PoolUsedElsewhere), ("lookup", LookupError)):
+
+        def failing(op, kind=kind, **a):
+            raise door.DoorError("old was last used by another system.", kind)
+
+        monkeypatch.setattr(door, "call", failing)
+        with pytest.raises(raised):
+            adapter.import_pool("old")
+
+
+def test_the_door_checks_a_new_pool_as_the_page_does(audit, monkeypatch, tmp_path):
+    from backend import config
+    from backend.hardware import disk_safety, pal_storage
+
+    made = []
+
+    class Adapter:
+        def _resolve_disk_path(self, d):
+            return "/dev/" + d
+
+        def create_pool(self, **kw):
+            made.append(kw)
+            return {"status": "provisioned"}
+
+        def import_pool(self, **kw):
+            made.append(kw)
+            return {"status": "imported"}
+
+        def rename_pool(self, **kw):
+            made.append(kw)
+            return {"status": "renamed"}
+
+    monkeypatch.setattr(pal_storage, "get_storage_platform", lambda: Adapter())
+    monkeypatch.setattr(config, "POOL_PATH", str(tmp_path))
+    in_use = {"/dev/sda": "in use: sda1 is mounted at /"}
+    seen = []
+
+    def check(disks, allow_erase=False):
+        seen.append(allow_erase)
+        return [{"disk": d, "reason": in_use[d]} for d in disks if d in in_use]
+
+    monkeypatch.setattr(disk_safety, "check_disks", check)
+    good = {"name": "tank", "fs_type": "btrfs", "profile": "raid1", "disks": ["sdb", "sdc"], "mountpoint": ""}
+
+    def create(**changes):
+        return host_door.handle({"op": "storage.create_pool", "args": {**good, **changes}}, 0)
+
+    assert create()["ok"] is True and made[-1]["disks"] == ["sdb", "sdc"] and seen == [True]
+    assert create(mountpoint=str(tmp_path / "tank"))["ok"] is True
+    assert made[-1]["mountpoint"] == os.path.realpath(tmp_path / "tank")
+    for changes, why in (
+        ({"disks": ["sda"]}, "can't be formatted"),
+        ({"disks": []}, "one to 64"),
+        ({"disks": [7]}, "one to 64"),
+        ({"name": "-x"}, "Pool name"),
+        ({"fs_type": "ntfs"}, "Kiboto makes"),
+        ({"profile": "raid1 -f"}, "Kiboto makes"),
+        ({"mountpoint": "/etc"}, "must be inside"),
+    ):
+        reply = create(**changes)
+        assert reply["ok"] is False and why in reply["error"], (changes, reply)
+    assert len(made) == 2
+
+    def imp(**changes):
+        args = {"pool_id": "old", "fs_type": "zfs", "target_mount": None, "force": False, "guid": "123", **changes}
+        return host_door.handle({"op": "storage.import_pool", "args": args}, 0)
+
+    assert imp()["ok"] is True and imp(target_mount="/mnt/old")["ok"] is True
+    for changes in ({"target_mount": "/etc"}, {"pool_id": "-o"}, {"guid": "x"}, {"fs_type": "Z FS"}):
+        assert imp(**changes)["ok"] is False, changes
+    reply = host_door.handle({"op": "storage.rename_pool", "args": {"pool_id": "tank", "new_name": "../x"}}, 0)
+    assert reply["ok"] is False
+    assert host_door.handle({"op": "storage.rename_pool", "args": {"pool_id": "tank", "new_name": "vault"}}, 0)["ok"]
+
+
+def test_a_request_the_door_got_is_not_run_again_here(monkeypatch):
+    timeouts = []
+
+    class Sock:
+        def __init__(self, *a):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            return False
+
+        def settimeout(self, t):
+            timeouts.append(t)
+
+        def connect(self, p):
+            pass
+
+        def sendall(self, b):
+            pass
+
+        def recv(self, n):
+            raise TimeoutError("timed out")
+
+    monkeypatch.setattr(door.socket, "socket", Sock)
+    monkeypatch.setattr(door, "available", lambda sock=door.SOCK: True)
+    here = []
+    with pytest.raises(RuntimeError, match="did not finish"):
+        door.via("storage.create_pool", lambda **a: here.append(a), name="tank")
+    assert here == [] and timeouts == [door.LONG["storage.create_pool"]]
+    with pytest.raises(door.DoorError):
+        door.call("door.ping")
+    assert timeouts[-1] == 120
+
+
+def test_pool_rules():
+    from backend.hardware.pal import pool_rules
+
+    assert pool_rules.pool_id("tank/media") == "tank/media"
+    for bad in ("", "/mnt/x", "a/../b", "-o"):
+        with pytest.raises(ValueError):
+            pool_rules.pool_id(bad)
+    assert pool_rules.import_mount("") is None and pool_rules.new_pool_mount(" ") == ""
+    with pytest.raises(ValueError):
+        pool_rules.import_mount("relative/x")

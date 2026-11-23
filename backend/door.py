@@ -18,6 +18,13 @@ from typing import Any
 SOCK = "/run/kiboto-door/door.sock"
 IN_DOOR = "KIBOTO_IN_DOOR"  # set in the door process itself
 MAX_REPLY = 1 << 20
+LONG = {  # seconds an operation may take, where the default is too short
+    "storage.create_pool": 900,
+    "storage.import_pool": 900,
+    "storage.export_pool": 600,
+    "storage.erase_pool": 900,
+    "storage.allow_changes": 600,
+}
 
 
 class DoorError(RuntimeError):
@@ -48,21 +55,17 @@ def available(sock: str = SOCK) -> bool:
     return not inside() and os.path.exists(sock)
 
 
-def call(op: str, *, timeout: float = 120, sock: str = SOCK, **args: Any) -> Any:
+def call(op: str, *, timeout: float | None = None, sock: str = SOCK, **args: Any) -> Any:
     """Runs one operation in the door and returns its result; DoorError when it was refused or
-    failed, OSError when the door could not be reached."""
+    failed, OSError when the door could not be reached. Once the door has the request, losing
+    it (a timeout, a door that stopped) is a DoorError too: the operation may be running."""
     with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as s:
-        s.settimeout(timeout)
+        s.settimeout(timeout or LONG.get(op, 120))
         s.connect(sock)
-        s.sendall(json.dumps({"op": op, "args": args}).encode() + b"\n")
-        data = b""
-        while not data.endswith(b"\n"):
-            chunk = s.recv(65536)
-            if not chunk:
-                break
-            data += chunk
-            if len(data) > MAX_REPLY:
-                raise DoorError("the door's answer was too long")
+        try:
+            data = _exchange(s, json.dumps({"op": op, "args": args}).encode() + b"\n")
+        except OSError as e:
+            raise DoorError(f"the door did not finish answering ({e.__class__.__name__})", "runtime") from e
     try:
         reply = json.loads(data or b"{}")
     except ValueError as e:
@@ -70,6 +73,19 @@ def call(op: str, *, timeout: float = 120, sock: str = SOCK, **args: Any) -> Any
     if reply.get("ok"):
         return reply.get("result")
     raise DoorError(str(reply.get("error") or "the door refused it"), str(reply.get("kind") or ""), reply.get("text"))
+
+
+def _exchange(s: socket.socket, request: bytes) -> bytes:
+    s.sendall(request)
+    data = b""
+    while not data.endswith(b"\n"):
+        chunk = s.recv(65536)
+        if not chunk:
+            break
+        data += chunk
+        if len(data) > MAX_REPLY:
+            raise DoorError("the door's answer was too long")
+    return data
 
 
 def via(op: str, here: Callable[..., Any], **args: Any) -> Any:

@@ -181,8 +181,13 @@ def _through_door(op: str, here: Any, **args: Any) -> Any:
     try:
         return door.via(op, here, **args)
     except door.DoorError as e:
-        if e.kind == "capability":
-            raise PlatformCapabilityError(str(e)) from None
+        kinds: dict[str, type[Exception]] = {
+            "capability": PlatformCapabilityError,
+            "used_elsewhere": PoolUsedElsewhere,
+            "lookup": LookupError,
+        }
+        if e.kind in kinds:
+            raise kinds[e.kind](str(e)) from None
         raise
 
 
@@ -1103,7 +1108,27 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
         disks: list[str],
         mountpoint: str,
     ) -> dict[str, Any]:
-        """Creates a multi-device Btrfs, OpenZFS, ext4, or XFS storage pool."""
+        """Creates a multi-device Btrfs, OpenZFS, ext4, or XFS storage pool.
+        Through the host door where it runs (ADR 0006)."""
+        return _through_door(
+            "storage.create_pool",
+            self._create_pool_here,
+            name=name,
+            fs_type=fs_type,
+            profile=profile,
+            disks=list(disks),
+            mountpoint=mountpoint or "",
+        )
+
+    def _create_pool_here(
+        self,
+        name: str,
+        fs_type: str,
+        profile: str,
+        disks: list[str],
+        mountpoint: str,
+    ) -> dict[str, Any]:
+        """create_pool's own work, in this process."""
         if not disks:
             raise ValueError("At least one disk must be specified to create a storage pool")
 
@@ -1197,7 +1222,12 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
         }
 
     def rename_pool(self, pool_id: str, new_name: str) -> dict[str, Any]:
-        """Renames a pool; its record takes the new name with it."""
+        """Renames a pool; its record takes the new name with it.
+        Through the host door where it runs (ADR 0006)."""
+        return _through_door("storage.rename_pool", self._rename_pool_here, pool_id=pool_id, new_name=new_name)
+
+    def _rename_pool_here(self, pool_id: str, new_name: str) -> dict[str, Any]:
+        """rename_pool's own work, in this process."""
         res = self._rename_pool(pool_id, new_name)
         if res.get("status") == "renamed":
             pool_registry.rename(str(res.get("pool_id") or pool_id), str(res.get("name") or new_name).strip())
@@ -1281,7 +1311,13 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
     def destroy_pool(self, pool_id: str) -> dict[str, Any]:
         """Disconnects the pool that is named, at once and without export_pool's open-file check.
         Nothing on its drives changes, so the answer is "disconnected", not "destroyed". A ZFS pool
-        is exported: an unmount alone leaves it imported, with its other datasets still mounted."""
+        is exported: an unmount alone leaves it imported, with its other datasets still mounted.
+
+        Through the host door where it runs (ADR 0006)."""
+        return _through_door("storage.destroy_pool", self._destroy_pool_here, pool_id=pool_id)
+
+    def _destroy_pool_here(self, pool_id: str) -> dict[str, Any]:
+        """destroy_pool's own work, in this process."""
         pool = self.resolve_pool(pool_id)
         self._no_merged_folder(pool)
         if pool.fs_type == "zfs":
@@ -1308,7 +1344,12 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
             raise RuntimeError(str(e)) from e
 
     def erase_pool(self, pool_id: str) -> dict[str, Any]:
-        """Deletes the pool and erases exactly the drives the plan confirmed (S29)."""
+        """Deletes the pool and erases exactly the drives the plan confirmed (S29).
+        Through the host door where it runs (ADR 0006)."""
+        return _through_door("storage.erase_pool", self._erase_pool_here, pool_id=pool_id)
+
+    def _erase_pool_here(self, pool_id: str) -> dict[str, Any]:
+        """erase_pool's own work, in this process."""
         from backend.hardware.pal import pool_erase
 
         self._no_merged_folder(self.resolve_pool(pool_id))
@@ -1329,7 +1370,12 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
         return {"status": "erased", "pool_id": p["pool"], "drives": erased, "whole_disks": p.get("whole_disks") or []}
 
     def export_pool(self, pool_id: str, force: bool = False) -> dict[str, Any]:
-        """Safely flushes dirty write cache, checks active file handles, and exports or unmounts a storage pool."""
+        """Safely flushes dirty write cache, checks active file handles, and exports or unmounts a storage pool.
+        Through the host door where it runs (ADR 0006)."""
+        return _through_door("storage.export_pool", self._export_pool_here, pool_id=pool_id, force=bool(force))
+
+    def _export_pool_here(self, pool_id: str, force: bool = False) -> dict[str, Any]:
+        """export_pool's own work, in this process."""
         pool = self.resolve_pool(pool_id)
         self._no_merged_folder(pool)
         pool_id = pool.id
@@ -1397,7 +1443,13 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
     def allow_changes(self, pool_id: str) -> dict[str, Any]:
         """Opens for writing a ZFS pool that was imported read-only, and writes it down as one of
         this system's pools. The person answered the "used by another system" question at import,
-        so that refusal is passed here."""
+        so that refusal is passed here.
+
+        Through the host door where it runs (ADR 0006)."""
+        return _through_door("storage.allow_changes", self._allow_changes_here, pool_id=pool_id)
+
+    def _allow_changes_here(self, pool_id: str) -> dict[str, Any]:
+        """allow_changes's own work, in this process."""
         pool = self.resolve_pool(pool_id)
         if pool.fs_type != "zfs" or not pool.read_only:
             return {"status": "unchanged", "pool_id": pool.id}
@@ -1420,7 +1472,22 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
     def import_pool(
         self, pool_id: str, fs_type: str = "zfs", target_mount: str | None = None, force: bool = False, guid: str = ""
     ) -> dict[str, Any]:
-        """Imports an external storage pool from an attached enclosure."""
+        """Imports an external storage pool from an attached enclosure.
+        Through the host door where it runs (ADR 0006)."""
+        return _through_door(
+            "storage.import_pool",
+            self._import_pool_here,
+            pool_id=pool_id,
+            fs_type=fs_type,
+            target_mount=target_mount,
+            force=bool(force),
+            guid=str(guid or ""),
+        )
+
+    def _import_pool_here(
+        self, pool_id: str, fs_type: str = "zfs", target_mount: str | None = None, force: bool = False, guid: str = ""
+    ) -> dict[str, Any]:
+        """import_pool's own work, in this process."""
         fs_lower = fs_type.lower()
         row = pool_registry.find(pool_id)
         if row and row["fs_type"] != "zfs":  # a pool Kiboto knows: mounted where and how it was
