@@ -440,6 +440,12 @@ Here Kiboto is the system of the machine instead of an app on another NAS system
 
 This is a preview. It is tested on a virtual machine with real disks handed to it, not yet on a range of real hardware. Use it on a machine whose disks hold nothing you need.
 
+**What we promise while it is in beta**
+
+- **Tested on one model, community elsewhere.** Kiboto is tested on its reference box and on a Debian 13 virtual machine. Other 64-bit PCs will most likely work, because the drivers are Debian's, and reports of what does and does not are welcome (`sh scripts/hardware_report.sh` makes one, read-only and without serial numbers). The fans, the front screen and the light bar are driven on the reference box only.
+- **Debian fixes the base, Kiboto fixes the app.** The kernel, the drivers and the system packages get their fixes from Debian, through `apt`. Kiboto fixes Kiboto, its install script and how it drives the machine, and holds the kernel, ZFS and Docker at the versions it was tested with until a release moves them together.
+- **No response time while in beta.** Issues are read and fixed as time allows. Security reports follow [SECURITY.md](../SECURITY.md).
+
 **What you need**
 
 - A 64-bit PC with a fresh, minimal Debian 13 on its own system disk (in the Debian installer, choose "SSH server" and "standard system utilities" only). 4 GB of memory or more.

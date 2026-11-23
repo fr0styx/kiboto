@@ -20,6 +20,8 @@ On a machine of its own, failed sign-ins to shared folders over the network now 
 
 Kiboto lists the third-party software it bundles and its licences at /third-party-licences.txt, and the install image says which Debian image it is made from and where Debian publishes its sources.
 
+For a machine of its own: the install guide says what is promised during the beta, the security policy covers such a machine, and scripts/hardware_report.sh lists what a machine is made of (read-only, without serial numbers) for reports of hardware that works.
+
 ## v2.0.6 (2026-11-23)
 ### 🖥️ Kiboto on a machine of its own (preview), with its settings kept safe on every pool
 

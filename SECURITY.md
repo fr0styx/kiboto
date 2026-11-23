@@ -26,9 +26,9 @@ What to expect:
 
 ## Scope
 
-In scope: the Kiboto web app and API, the WebDAV/SFTP services it runs, the in-app updater, and the published container images.
+In scope: the Kiboto web app and API, the WebDAV/SFTP services it runs, the in-app updater, and the published container images; on a machine Kiboto runs, also what is listed under "A machine Kiboto runs" below.
 
-Out of scope: vulnerabilities in the host OS, Docker itself, or third-party containers that Kiboto manages; issues that need an already-compromised admin account; denial of service from the local network by volume alone.
+Out of scope: vulnerabilities in the host OS (on a machine Kiboto runs, Debian's own packages), Docker itself, or third-party containers that Kiboto manages; issues that need an already-compromised admin account; denial of service from the local network by volume alone.
 
 ## Hardening recommendations
 
@@ -88,8 +88,8 @@ Unraid's job), blocks the source address for 24 hours, and sends a critical aler
 every notification channel. Unraid's own SMB shares aren't changed: use guard files
 for early warning there. An admin lifts the freeze under Security.
 
-**Blocked addresses.** An address with 20 failed sign-ins (web, the WebDAV portal or a
-WebDAV client) in 15 minutes is blocked for an hour. Blocked addresses get 403 from the web
+**Blocked addresses.** An address with 20 failed sign-ins (web, the WebDAV portal, a
+WebDAV client, or SMB on a machine Kiboto runs) in 15 minutes is blocked for an hour. Blocked addresses get 403 from the web
 app and from WebDAV (port 8084 and /webdav), their SFTP connections are closed before any
 sign-in, and Kiboto's Samba denies them. rclone serves WebDAV and SFTP on loopback ports
 only; Kiboto answers on 8084 and the SFTP port and passes each request on, so the
@@ -156,6 +156,43 @@ settings, with a confirmation, and its shared folder must be inside the storage 
 | 1.9.2 | Uploaded HTML/SVG files ran script in the app's origin (SEC-05) | High |
 | 1.9.2 | Default password change was not enforced; no re-authentication to change a password (SEC-23, SEC-13) | High |
 | 1.9.2 | The AI assistant could restart/stop containers and change fans without confirmation (AI-01) | Medium |
+
+## A machine Kiboto runs (preview)
+
+On a Debian 13 machine set up from Kiboto's install image or its `install.sh`, Kiboto is the
+machine's own service instead of a container. What changes for security:
+
+- **Supported:** the newest beta only, while this is a preview. Install it on a machine whose
+  disks hold nothing you need.
+- **In scope as well:** `install.sh`, the install image (`packaging/image`), the update and the way
+  back on such a machine, and the settings Kiboto writes to the machine (Samba, NFS, the network,
+  the firewall, its services). Bugs in Debian's own packages go to Debian.
+- **Who fixes what:** Debian fixes the base (kernel, drivers, system packages, through `apt`);
+  Kiboto fixes Kiboto and how it drives the machine. Kiboto holds the kernel, ZFS and Docker at
+  the versions it was tested with; everything else follows Debian's security updates, which the
+  machine installs when someone runs `apt upgrade` (or turns on Debian's `unattended-upgrades`,
+  which leaves the held packages alone).
+- **What is checked:** the install image is built from Debian's netinst image only after its
+  checksum file is verified against Debian's CD signing key. `install.sh` and every update
+  install only an image this project's CI signed, named by its digest; anything else is removed
+  again and nothing changes.
+
+Hardening on such a machine:
+
+- Choose your password at the first sign-in (the one-time code is on the machine's screen and in
+  its SSH greeting, readable only by root, until then), and write down the **recovery key**
+  under Settings, Security: it opens the encrypted AI data and the settings copies on the pools
+  if the machine's security chip or system disk is lost.
+- Turn **SSH** off under Network, This machine, once you no longer need it; the root password
+  typed at install signs in over SSH until then.
+- The firewall is **off** at first so that discovery and Windows sharing work; turn it on under
+  Network when the machine is set up.
+- Failed sign-ins to shared folders over SMB count toward the blocked addresses like web
+  sign-ins (20 in 15 minutes block the address for an hour).
+- Physical access is trusted: someone at the machine can start another system from a USB stick.
+
+What is not done yet is listed in [docs/THREAT_MODEL.md](docs/THREAT_MODEL.md) under "A machine
+Kiboto runs": the web process still runs as root.
 
 ## Verifying images
 
