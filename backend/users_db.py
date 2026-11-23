@@ -356,8 +356,31 @@ def _forget_first_time_password() -> None:
 
 
 def _default_home(username: str) -> str:
-    """Where a person's home folder is made: under the storage folder of this install."""
-    return f"{getattr(config, 'POOL_PATH', '/mnt/user')}/homes/{username}"
+    """Where a person's home folder is made: in the storage folder of this install, or where
+    places.py says (the first pool of a machine set up for Kiboto)."""
+    from backend import places
+
+    return f"{places.homes_root()}/{username}"
+
+
+def move_unused_homes(old_root: str, new_root: str, db_path: str | None = None) -> int:
+    """Home folder records at old_root/<name> whose folder was never used (missing or empty) are
+    moved to new_root/<name>. Returns how many."""
+    moved = 0
+    with users_db_session(db_path) as conn:
+        for row in conn.execute("SELECT id, username, home_directory FROM users").fetchall():
+            home = row["home_directory"] or ""
+            if home != os.path.join(old_root, row["username"]):
+                continue
+            try:
+                used = bool(os.listdir(home))
+            except OSError:  # not made yet
+                used = False
+            if not used:
+                new = os.path.join(new_root, row["username"])
+                conn.execute("UPDATE users SET home_directory = ? WHERE id = ?", (new, row["id"]))
+                moved += 1
+    return moved
 
 
 UNRAID_HOMES = "/mnt/user/homes/"

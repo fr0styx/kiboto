@@ -16,10 +16,10 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
-from backend import owned
+from backend import owned, places
 from backend.api.files.common import _contained, _observe, _safe_fs_target, _user_file_headers, record_activity
 from backend.auth import AuthenticatedPrincipal, get_current_principal, require_scope
-from backend.config import POOL_PATH, logger
+from backend.config import logger
 from backend.fsutil import move_to_free_name, resolve_within
 from backend.ignored_errors import ignored
 from backend.services import malware_scan, recycle_bin
@@ -45,7 +45,7 @@ def _inbox_dir(principal: AuthenticatedPrincipal) -> str:
     from backend.users_db import get_user_by_username
 
     rec = get_user_by_username(principal.username) or {}
-    home = rec.get("home_directory") or os.path.join(POOL_PATH or ALLOWED_BROWSE_ROOTS[0], "homes", principal.username)
+    home = rec.get("home_directory") or os.path.join(places.homes_root(), principal.username)
     inbox = os.path.join(home, "Inbox")
     canonical = resolve_within(inbox, ALLOWED_BROWSE_ROOTS)
     if canonical is None:

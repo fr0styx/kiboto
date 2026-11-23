@@ -406,9 +406,11 @@ def create_storage_pool(
 
 def _first_share_on_the_pool(adapter: Any) -> None:
     """On a machine set up for Kiboto the first pool gets the shared folder other installs start with."""
+    from backend.services import pool_places
     from backend.services.samba_engine import get_samba_engine
 
     try:
+        pool_places.settle()  # people's home folders go on the first pool too
         made = system_disk.default_share_after_pool(adapter, bool(get_samba_engine().list_shares()))
     except (ValueError, OSError, RuntimeError) as e:
         logger.warning("[Storage] The first shared folder was not made on the new pool: %s", one_line(e))

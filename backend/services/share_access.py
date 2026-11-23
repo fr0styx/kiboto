@@ -28,7 +28,7 @@ import threading
 import time
 from typing import Any, Optional
 
-from backend import config
+from backend import config, places
 from backend.fsutil import atomic_write_json, read_json
 from backend.ignored_errors import ignored
 
@@ -238,7 +238,7 @@ def _user(username: str) -> dict[str, Any]:
 def _home_for(username: str, user: dict[str, Any] | None = None) -> str | None:
     user = user if user is not None else _user(username)
     home = user.get("home_directory")
-    home = home or os.path.join(getattr(config, "POOL_PATH", "/mnt/user"), "homes", username)
+    home = home or os.path.join(places.homes_root(), username)
     return os.path.realpath(home)
 
 

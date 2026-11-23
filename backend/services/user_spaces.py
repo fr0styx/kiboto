@@ -40,7 +40,9 @@ def enforcement(home: str) -> dict[str, Any] | None:
 
 
 def homes_root() -> str:
-    return os.path.join(getattr(config, "POOL_PATH", "/mnt/user"), "homes")
+    from backend import places
+
+    return places.homes_root()
 
 
 def home_of(username: str) -> str:

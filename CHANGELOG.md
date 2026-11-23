@@ -34,6 +34,8 @@ On a machine set up for Kiboto, shared folders live only on pools: the system di
 
 Setup on a machine set up for Kiboto asks for a storage pool before the first shared folder, a folder left on the system disk says its files are at risk, and This machine shows the system disk's space.
 
+On a machine set up for Kiboto, people's home folders are made on the first pool instead of the system disk; home folders that were never used move there once a pool exists.
+
 #### Fixes
 
 A person with a storage limit could go over it by sending several files at once. Files still arriving now count against the limit.

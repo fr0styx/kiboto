@@ -524,8 +524,12 @@ def _start_app_names() -> None:
         from backend.services.supervisor import supervise
 
         supervise("AppNames", app_hosts.keep_in_step)
-        from backend.services import apps_back, pool_copy
+        from backend.services import apps_back, pool_copy, pool_places
 
+        try:
+            pool_places.settle()  # homes on the first pool, once there is one
+        except (OSError, ValueError, RuntimeError) as e:
+            logger.warning("[Main] Where home folders go was not settled: %s", e)
         if pool_copy.restored_at_this_start():  # the apps' files came back; their containers did not
             apps_back.start_soon()
         try:
