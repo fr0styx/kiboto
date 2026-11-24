@@ -11,6 +11,11 @@ something this process's own user owns is touched: what Kiboto made a moment ago
 someone else's that was there before.
 
 A filesystem without owners (exFAT or NTFS on a USB drive) refuses; that is not an error.
+
+Once Kiboto's web process no longer runs as root (ADR 0006), it cannot hand a file to anyone: the
+host door does it, confined to the storage folders, and takes what the web process's user made
+as Kiboto's own. While it is root it does it itself, as a door call per file would slow a copy
+of many files.
 """
 
 from __future__ import annotations
@@ -20,12 +25,41 @@ import os
 import pwd
 import stat
 from collections.abc import Callable
+from typing import Any
 
 from backend.config import logger
 
 
 def _me() -> int:
     return os.geteuid()
+
+
+WEB_USER = "kiboto"  # the web process's user once it gives up root (services/host_door.USER)
+
+
+def _ours() -> set[int]:
+    """Whose files "Kiboto made": this process's, and in the door the web process's user too."""
+    try:
+        return {_me(), pwd.getpwnam(WEB_USER).pw_uid}
+    except KeyError:  # no such user yet: the web process is root
+        return {_me()}
+
+
+def _through_door() -> bool:
+    from backend import door
+
+    return _me() != 0 and door.available()
+
+
+def _door(op: str, **args: Any) -> Any:
+    """`op` in the host door; None when it refused or could not be reached (said in the log)."""
+    from backend import door
+
+    try:
+        return door.call(op, **args)
+    except (OSError, door.DoorError) as e:
+        logger.debug("[Files] the door did not do %s: %s", op, e)
+        return None
 
 
 def _rights(folder_mode: int, own: int) -> int:
@@ -40,13 +74,15 @@ def _rights(folder_mode: int, own: int) -> int:
 def like_folder(path: str) -> bool:
     """Gives `path`, which Kiboto just made, the owner and group of the folder it is in, and that
     folder's right to write. False when nothing was changed."""
+    if _through_door():
+        return bool(_door("files.like_folder", path=path))
     try:
         st = os.lstat(path)
         folder = os.stat(os.path.dirname(os.path.abspath(path)))
     except OSError:
         return False
     me = _me()
-    if st.st_uid != me:
+    if st.st_uid not in _ours():
         return False  # not made by Kiboto: left as it is
     changed = False
     try:
@@ -66,6 +102,9 @@ def like_folder(path: str) -> bool:
 def rights_again(path: str) -> None:
     """The folder's right to write, once more, for something Kiboto made and handed over already:
     a copied folder gets its source's rights at the end of the copy, and loses this with them."""
+    if _through_door():
+        _door("files.rights_again", path=path)
+        return
     try:
         now = stat.S_IMODE(os.lstat(path).st_mode)
         want = _rights(stat.S_IMODE(os.stat(os.path.dirname(os.path.abspath(path))).st_mode), now)
@@ -94,6 +133,8 @@ def to_people(folder: str, user: str = "nobody", group: str = "users", mode: int
     user: nothing could be written to it over the network. The folder itself (not what is in it)
     goes to that user and group, while it is still root's and closed to others. A folder someone
     gave another owner, or opened to everyone, is left as it is. True when it was handed over."""
+    if _through_door():
+        return bool(_door("files.to_people", folder=folder, user=user, group=group, mode=mode))
     try:
         st = os.stat(folder)
     except OSError:
@@ -117,6 +158,8 @@ def to_person(folder: str, uid: int, gid: int = 100, mode: int = 0o700) -> bool:
     before each person had an account); a folder someone gave another owner is left as it is.
     What is inside is not changed: it stays readable and writable through the group. True when
     it was handed over."""
+    if _through_door():
+        return bool(_door("files.to_person", folder=folder, uid=uid, gid=gid, mode=mode))
     try:
         st = os.stat(folder)
     except OSError:
@@ -167,6 +210,9 @@ def like_source(src: str, dst: str) -> None:
     """A restored copy keeps the owner it had: `dst`, which Kiboto copied from `src`, gets the
     owner and group of `src`, and so does everything in it. Copying keeps rights and dates, and
     as root it makes root the owner."""
+    if _through_door():
+        _door("files.like_source", src=src, dst=dst)
+        return
     if _me() != 0:
         return
     try:
@@ -196,6 +242,8 @@ def like_before(path: str, before: os.stat_result | None) -> None:
     one that was not there is like the folder it is in."""
     if before is None:
         like_folder(path)
+    elif _through_door():
+        _door("files.hand_back", path=path, uid=before.st_uid, gid=before.st_gid)
     elif _me() == 0:
         _hand(path, before.st_uid, before.st_gid)
 
@@ -206,7 +254,11 @@ def give_back(top: str, keep_out: Callable[[str, list[str]], object] | None = No
     the owner and group of the folder it is in and that folder's right to write, from the top
     down, `top` itself first. What belongs to anyone else is left alone, and links are not
     followed. `keep_out(folder, names)` may take folders out of the walk (the protected ones).
-    Returns how many were looked at and how many were handed over."""
+    Returns how many were looked at and how many were handed over. Through the door, the
+    protected folders are always kept out (fsutil.prune_protected)."""
+    if _through_door():
+        got = _door("files.give_back", top=top)
+        return got if isinstance(got, dict) else {"seen": 0, "given": 0}
     seen = given = 0
     if _me() != 0:
         return {"seen": 0, "given": 0}

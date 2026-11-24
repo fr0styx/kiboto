@@ -1036,3 +1036,96 @@ def test_the_proxy_socket_goes_to_the_web_users_group(monkeypatch, tmp_path):
     monkeypatch.setattr(host_door, "USER", "kiboto")
     assert host_door._give_to_web_group(str(sock), wait=0) is True
     assert owned == [(str(sock), -1, 4242)]
+
+
+def test_files_are_handed_over_by_the_door_once_kiboto_is_not_root(monkeypatch):
+    from backend import owned
+
+    calls = []
+    monkeypatch.setattr(owned, "_me", lambda: 1000)
+    monkeypatch.setattr(door, "available", lambda sock=door.SOCK: True)
+    monkeypatch.setattr(
+        door,
+        "call",
+        lambda op, **a: calls.append((op, a)) or ({"seen": 2, "given": 1} if op == "files.give_back" else True),
+    )
+    before = os.stat_result((0o100644, 0, 0, 1, 20001, 100, 0, 0, 0, 0))
+    assert owned.like_folder("/mnt/storage/tank/a/b.txt") is True
+    owned.rights_again("/mnt/storage/tank/a")
+    assert owned.to_people("/mnt/storage/tank/a") is True
+    assert owned.to_person("/mnt/storage/tank/homes/ana", 20001) is True
+    owned.like_source("/mnt/storage/tank/a/x", "/mnt/storage/tank/b/x")
+    owned.like_before("/mnt/storage/tank/a/b.txt", before)
+    assert owned.give_back("/mnt/storage/tank/a") == {"seen": 2, "given": 1}
+    assert [c[0] for c in calls] == [
+        "files.like_folder",
+        "files.rights_again",
+        "files.to_people",
+        "files.to_person",
+        "files.like_source",
+        "files.hand_back",
+        "files.give_back",
+    ]
+    assert calls[5][1] == {"path": "/mnt/storage/tank/a/b.txt", "uid": 20001, "gid": 100}
+    for op, args in calls:
+        host_door._checked({"op": op, "args": args})
+
+    def gone(op, **a):
+        raise FileNotFoundError("no door")
+
+    monkeypatch.setattr(door, "call", gone)
+    assert owned.like_folder("/mnt/storage/tank/a/b.txt") is False
+    assert owned.give_back("/mnt/storage/tank/a") == {"seen": 0, "given": 0}
+
+
+def test_the_door_hands_files_over_only_in_the_storage_folders(audit, monkeypatch, tmp_path):
+    from backend import config, owned
+    from backend.services import smb_accounts
+
+    store = tmp_path / "storage"
+    (store / "a").mkdir(parents=True)
+    monkeypatch.setattr(config, "POOL_PATH", str(store))
+    monkeypatch.setattr(config, "ALLOWED_BROWSE_ROOTS", [])
+    done = []
+    for name in ("like_folder", "rights_again", "like_source", "to_people", "to_person", "_hand"):
+        monkeypatch.setattr(owned, name, lambda *a, name=name, **k: done.append(name) or True)
+    monkeypatch.setattr(owned, "give_back", lambda top, keep_out: done.append("give_back") or {"seen": 0, "given": 0})
+
+    def op(name, **args):
+        return host_door.handle({"op": f"files.{name}", "args": args}, 0)
+
+    inside, folder = str(store / "a" / "f.txt"), str(store / "a")
+    assert op("like_folder", path=inside)["ok"] and op("rights_again", path=inside)["ok"]
+    assert op("like_source", src=inside, dst=str(store / "a" / "g.txt"))["ok"]
+    assert op("give_back", top=folder)["result"] == {"seen": 0, "given": 0}
+    assert op("to_people", folder=folder, user="nobody", group="users", mode=0o775)["ok"]
+    assert op("to_person", folder=folder, uid=smb_accounts.FIRST_UID, gid=100, mode=0o700)["ok"]
+    assert op("hand_back", path=inside, uid=20001, gid=100)["ok"]
+    for name, args in (
+        ("like_folder", {"path": "/etc/passwd"}),
+        ("like_folder", {"path": "relative/x"}),
+        ("like_source", {"src": "/etc/shadow", "dst": inside}),
+        ("give_back", {"top": "/etc"}),
+        ("to_people", {"folder": folder, "user": "root", "group": "root", "mode": 0o775}),
+        ("to_people", {"folder": folder, "user": "nobody", "group": "users", "mode": 0o4775}),
+        ("to_person", {"folder": folder, "uid": 0, "gid": 100, "mode": 0o700}),
+        ("to_person", {"folder": folder, "uid": smb_accounts.FIRST_UID, "gid": 0, "mode": 0o700}),
+        ("hand_back", {"path": inside, "uid": 0, "gid": 100}),
+    ):
+        assert op(name, **args)["ok"] is False, (name, args)
+    assert done == ["like_folder", "rights_again", "like_source", "give_back", "to_people", "to_person", "_hand"]
+
+
+def test_what_the_web_user_made_counts_as_kibotos(monkeypatch):
+    import types
+
+    from backend import owned
+
+    monkeypatch.setattr(owned.pwd, "getpwnam", lambda n: types.SimpleNamespace(pw_uid=999))
+    assert owned._ours() == {os.geteuid(), 999}
+
+    def missing(n):
+        raise KeyError(n)
+
+    monkeypatch.setattr(owned.pwd, "getpwnam", missing)
+    assert owned._ours() == {os.geteuid()}

@@ -247,6 +247,57 @@ def _fan_register(channel: int, pwm_val: int) -> bool:
     return bool(mmio.write_pwm(channel, pwm_val))
 
 
+def _in_storage(path: str, *, leaf: bool = True) -> str:
+    """`path` when it is inside the storage folders and not Kiboto's own (validate_share_path); for
+    a `leaf` its folder is checked, so a link at the end is not followed (owners are set with
+    lchown)."""
+    from backend.services.samba_engine import validate_share_path
+
+    if not os.path.isabs(path or "") or "\x00" in path:
+        raise ValueError("an absolute path inside the storage folders")
+    validate_share_path(os.path.dirname(path) if leaf else path)
+    return path
+
+
+def _no_root(*ids: int) -> None:
+    if any(type(i) is not int or i <= 0 for i in ids):
+        raise ValueError("files go to a person or the file server, never to root")
+
+
+def _files(name: str) -> Callable[..., Any]:
+    """owned.py's own function for files and folders in the storage folders (ADR 0006 step 8): the
+    door hands what the web process made to the folder's people."""
+
+    def run(**kw: Any) -> Any:
+        from backend import owned
+        from backend.fsutil import prune_protected
+
+        for key in ("path", "dst", "src"):
+            if key in kw:
+                _in_storage(kw[key])
+        for key in ("folder", "top"):
+            if key in kw:
+                _in_storage(kw[key], leaf=False)
+        if name == "to_people":
+            _no_root(*owned._ids(kw["user"], kw["group"]))
+        if name in ("to_people", "to_person") and kw["mode"] & ~0o777:
+            raise ValueError("a folder's rights, without set-id bits")
+        if name == "to_person":
+            from backend.services import smb_accounts
+
+            if not smb_accounts.FIRST_UID <= kw["uid"] < LAST_UID:
+                raise ValueError("account numbers come from Kiboto's own range")
+            _no_root(kw["gid"])
+        if name == "hand_back":
+            _no_root(kw["uid"], kw["gid"])
+            return owned._hand(kw["path"], kw["uid"], kw["gid"])
+        if name == "give_back":
+            return owned.give_back(kw["top"], prune_protected)
+        return getattr(owned, name)(**kw)
+
+    return run
+
+
 def _renamed(kw: dict[str, Any]) -> None:
     from backend.hardware.pal import pool_rules
 
@@ -331,6 +382,18 @@ OPERATIONS: dict[str, Operation] = {
     "keys.unlock": Operation(_key("unlock"), {"typed": TEXT}, max_len=64),
     "keys.adopt": Operation(_key("adopt"), {"data_key": TEXT, "box": MAP}, max_len=128),
     "keys.renew": Operation(_key("renew_recovery_key"), {}),
+    # people's files (ADR 0006 step 8)
+    "files.like_folder": Operation(_files("like_folder"), {"path": TEXT}, max_len=4096),
+    "files.rights_again": Operation(_files("rights_again"), {"path": TEXT}, max_len=4096),
+    "files.like_source": Operation(_files("like_source"), {"src": TEXT, "dst": TEXT}, max_len=4096),
+    "files.hand_back": Operation(_files("hand_back"), {"path": TEXT, "uid": NUMBER, "gid": NUMBER}, max_len=4096),
+    "files.give_back": Operation(_files("give_back"), {"top": TEXT}, max_len=4096),
+    "files.to_people": Operation(
+        _files("to_people"), {"folder": TEXT, "user": TEXT, "group": TEXT, "mode": NUMBER}, max_len=4096
+    ),
+    "files.to_person": Operation(
+        _files("to_person"), {"folder": TEXT, "uid": NUMBER, "gid": NUMBER, "mode": NUMBER}, max_len=4096
+    ),
     # fans (ADR 0006 step 6)
     "fans.sysfs": Operation(_fan_file, {"path": TEXT, "value": NUMBER}, max_len=128),
     "fans.ec_pwm": Operation(_fan_register, {"channel": NUMBER, "pwm_val": NUMBER}),
