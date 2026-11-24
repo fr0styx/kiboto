@@ -43,6 +43,7 @@ def test_turning_it_on_makes_the_user_and_the_drop_in(tmp_path, monkeypatch):
     assert "CapabilityBoundingSet=CAP_NET_BIND_SERVICE" in text
     names = [c[0] for c in ran]
     assert names.index("useradd") < names.index("chown") < names.index("setfacl")
+    assert ["usermod", "--home", str(data), "kiboto"] in ran  # also when the user was made before
     assert ["chown", "root:root", str(data / "door-audit.log")] in ran  # what root wrote stays root's
     assert ["setfacl", "-R", "-m", "u:kiboto:rwX", str(homes)] in ran
     assert ["setfacl", "-R", "-d", "-m", "u:kiboto:rwX", str(homes)] in ran
@@ -142,3 +143,13 @@ def test_where_the_folders_come_from(monkeypatch):
     monkeypatch.setattr(apps_place, "root", broken)
     monkeypatch.setattr(pool_registry, "load", broken)
     assert web_user._vm_folders("/x") == [] and web_user._apps_root() == "" and web_user._pool_roots() == []
+
+
+def test_a_home_that_cannot_be_set_is_said(tmp_path, monkeypatch):
+    monkeypatch.setattr(web_user, "_homes", lambda: "")
+    monkeypatch.setattr(web_user, "_pool_roots", lambda: [])
+    monkeypatch.setattr(web_user, "_apps_root", lambda: "")
+    monkeypatch.setattr(web_user, "_vm_folders", lambda d: [])
+    ran, do = _runner({"usermod": (6, "usermod: user kiboto is currently used by process 1")})
+    problems = web_user.turn_on(do, str(tmp_path / "d.conf"), str(tmp_path))
+    assert any("home of kiboto" in p for p in problems)

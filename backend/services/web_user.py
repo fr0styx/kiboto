@@ -152,6 +152,9 @@ def turn_on(do: Run | None = None, drop_in: str = DROP_IN, data_dir: str = "") -
         )
         if code != 0:
             return [f"the user {USER} could not be made: {said.strip()[-200:]}"]
+    # its home is the data folder (Sigstore keeps its trust root there), also for a user made before
+    if do(["usermod", "--home", data_dir, USER])[0] != 0:
+        problems.append(f"the home of {USER} is not {data_dir}")
     for group in GROUPS:
         if do(["getent", "group", group])[0] == 0 and do(["usermod", "-aG", group, USER])[0] != 0:
             problems.append(f"{USER} is not in {group}")
