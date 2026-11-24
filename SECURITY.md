@@ -194,7 +194,13 @@ Hardening on such a machine:
 - Physical access is trusted: someone at the machine can start another system from a USB stick.
 
 What is not done yet is listed in [docs/THREAT_MODEL.md](docs/THREAT_MODEL.md) under "A machine
-Kiboto runs": the web process still runs as root.
+Kiboto runs": the web process still runs as root by default. Its root work goes through the host
+door, a separate service with a fixed list of checked operations (ADR 0006), and root can already
+run the web process as the user `kiboto` (`python -m backend.services.web_user on`).
+
+The install image is Debian's own netinst image with Kiboto's files added. Its `kiboto/NOTICE.txt`
+names where Debian publishes the source of everything in it and carries a written offer of that
+source for three years after each release.
 
 ## Verifying images
 

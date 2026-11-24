@@ -263,6 +263,14 @@ network_to_networkd() {
       sed -n 's/^nameserver[[:space:]]\{1,\}\([0-9.]\{7,15\}\)$/DNS=\1/p' /etc/resolv.conf.kiboto-before /etc/resolv.conf 2>/dev/null | grep -v '=127\.' | sort -u | head -3
     fi
   } > "$file"
+  # the port keeps its name in any slot (the same file Kiboto writes, managed.pin_text); Debian's
+  # start-up image names the ports first, from its own copy of the .link files
+  mac=$(cat "/sys/class/net/$iface/address" 2>/dev/null)
+  if [ -e "/sys/class/net/$iface/device" ] && [ -n "$mac" ]; then
+    printf '# Written by Kiboto: the network card %s keeps the name %s in any slot, so the\n# settings Kiboto keeps for that port still find it after the card moved.\n[Match]\nPermanentMACAddress=%s\n\n[Link]\nName=%s\n' \
+      "$mac" "$iface" "$mac" "$iface" > "/etc/systemd/network/10-kiboto-$iface.link"
+    update-initramfs -u >/dev/null 2>&1 || true
+  fi
   # a wired port no file names (the card moved to another slot, or was replaced) still gets an
   # address, so the machine can be reached; the same file Kiboto keeps (hardware/net/managed.py)
   cat > /etc/systemd/network/99-kiboto-any-wired.network <<'ANY'
@@ -286,7 +294,7 @@ ANY
 #!/bin/sh
 # Written by Kiboto's install script: ifupdown back, as it was before the move.
 systemctl disable -q --now systemd-networkd.service systemd-networkd.socket systemd-resolved.service 2>/dev/null
-rm -f "$file"
+rm -f "$file" "/etc/systemd/network/10-kiboto-$iface.link"
 cp /etc/network/interfaces.kiboto-before /etc/network/interfaces
 [ -f /etc/resolv.conf.kiboto-before ] && { rm -f /etc/resolv.conf; cp /etc/resolv.conf.kiboto-before /etc/resolv.conf; }
 ip addr flush dev "$iface" scope global

@@ -78,6 +78,9 @@ def test_the_image_says_what_it_is_made_of_and_where_debians_sources_are():
     assert "@DEBIAN_IMAGE@" in notice and "MIT licence" in notice
     assert "https://cdimage.debian.org/cdimage/release/@DEBIAN_VERSION@/source/" in notice
     assert "snapshot.debian.org" in notice and "/third-party-licences.txt" in notice
+    # the written offer: three years, at cost, asked for in the open, naming the release
+    assert "for three years after a Kiboto release" in notice and "no more than the cost" in notice
+    assert "https://github.com/fr0styx/kiboto/issues" in notice and "Source request" in notice
     with open(os.path.join(ROOT, "Dockerfile"), encoding="utf-8") as f:
         docker = f.read()
     assert "third_party.py /tmp/licences/package-lock.json > /app/static/third-party-licences.txt" in docker

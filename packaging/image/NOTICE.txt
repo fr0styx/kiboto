@@ -14,6 +14,12 @@ The source code of everything in this Debian image is published by Debian:
     (under https://cdimage.debian.org/cdimage/archive/@DEBIAN_VERSION@/source/ once a newer release replaces it)
   - every source package Debian has published, by date: https://snapshot.debian.org/
 
+Written offer: for three years after a Kiboto release carrying this image was published, the
+Kiboto project gives anyone who asks the complete corresponding source code of the GPL and LGPL
+software in this image, for no more than the cost of making and sending the copy. Ask in an issue
+titled "Source request" at https://github.com/fr0styx/kiboto/issues, naming the Kiboto release.
+Kiboto adds no change to any of that software.
+
 The packages installed during and after the installation come from Debian's own servers.
 Kiboto itself is installed from its signed release image; the third-party software in that image
 and its licences are listed at /third-party-licences.txt on the installed machine's web page.

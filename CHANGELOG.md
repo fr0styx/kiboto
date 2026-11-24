@@ -32,6 +32,8 @@ When the security chip is busy for a moment while the machine starts, the AI ind
 
 Answers in the Kib window are laid out as intended again: small photo previews, the model and time on one line, in the window colours. New chat titles keep your words as typed.
 
+On a machine Kiboto runs, a network card moved to another slot keeps its fixed address: the port keeps its name.
+
 #### Security
 
 On a machine of its own, failed sign-ins to shared folders over the network now count like web sign-ins: 20 in 15 minutes block the address for an hour, and they show under History, Sign-ins.

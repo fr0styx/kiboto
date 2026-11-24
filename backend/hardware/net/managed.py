@@ -26,6 +26,7 @@ from backend.hardware.net import ipv4
 
 DIR = "/etc/systemd/network"
 PREFIX = "05-kiboto-"  # networkd takes the first file that matches: before netplan's and Debian's
+LINK_PREFIX = "10-kiboto-"  # udev takes the first .link that matches: before the default naming (99-default.link)
 STATE = os.path.join(DATA_DIR, "network_trial.json")
 REVERT_UNIT = "kiboto-net-revert"
 UPSTREAM_DNS = "/run/systemd/resolve/resolv.conf"  # the servers resolved asks, not its own 127.0.0.53
@@ -82,11 +83,70 @@ RouteMetric=2048
 """
 
 
+def link_for(iface: str) -> str:
+    return os.path.join(DIR, f"{LINK_PREFIX}{iface}.link")
+
+
+def pin_text(iface: str, mac: str) -> str:
+    """The .link file that gives a network card the same port name in any slot."""
+    return (
+        f"# Written by Kiboto: the network card {mac} keeps the name {iface} in any slot, so the\n"
+        "# settings Kiboto keeps for that port still find it after the card moved.\n"
+        "[Match]\n"
+        f"PermanentMACAddress={mac}\n"
+        "\n"
+        "[Link]\n"
+        f"Name={iface}\n"
+    )
+
+
+def _write_pin(iface: str) -> bool:
+    """A port of a network card keeps its name (a bridge or other port without a card has no
+    device and no permanent address: never pinned). True when the file was written or changed."""
+    if not _IFACE.match(iface or "") or not os.path.exists(os.path.join(SYS_NET, iface, "device")):
+        return False
+    mac = _mac(iface)
+    if not mac or _text(link_for(iface)) == pin_text(iface, mac):
+        return False
+    os.makedirs(DIR, exist_ok=True)
+    atomic_write_text(link_for(iface), pin_text(iface, mac))
+    logger.info("[Network] %s keeps its name in any slot (%s)", iface, link_for(iface))
+    return True
+
+
+def _startup_image(do: Run) -> None:
+    """Debian's start-up image names the ports before the system does, from its own copy of the
+    .link files: it is made again after one changed."""
+    code, said = do(["update-initramfs", "-u"], timeout=300)
+    if code != 0:
+        logger.warning("[Network] The start-up image was not made again: %s", said.strip()[-200:])
+
+
+def pin(ifaces: list[str], do: Run | None = None) -> list[str]:
+    """Pins the name of each port a card has, so a fixed address stays on the right port after the
+    card moved to another slot (its new name no longer matched the settings). Returns those pinned."""
+    do = do or run
+    pinned = [iface for iface in ifaces if _write_pin(iface)]
+    if pinned:
+        _startup_image(do)
+    return pinned
+
+
+def ensure_pins(do: Run | None = None) -> list[str]:
+    """Pins every port Kiboto keeps settings for, also on a machine set up before pins existed."""
+    names = sorted(os.listdir(DIR)) if os.path.isdir(DIR) else []
+    return pin(
+        [n[len(PREFIX) : -len(".network")] for n in names if n.startswith(PREFIX) and n.endswith(".network")], do
+    )
+
+
 def ensure_fallback(do: Run | None = None) -> bool:
-    """Writes the fallback for wired ports (FALLBACK) where networkd runs the network. True when written."""
+    """Writes the fallback for wired ports (FALLBACK) where networkd runs the network, and pins the
+    names of the ports Kiboto keeps settings for (ensure_pins). True when the fallback was written."""
     do = do or run
     if not networkd_runs(do):
         return False
+    ensure_pins(do)
     try:
         with open(FALLBACK, encoding="utf-8") as f:
             if f.read() == FALLBACK_TEXT:
@@ -251,6 +311,7 @@ def _write_files(files: dict[str, str | None], ifaces: list[str], do: Run) -> No
     for link in filter(None, gone_links):
         do(["ip", "link", "delete", link])
     _reload(ifaces, do)
+    pin([iface for iface in ifaces if files.get(file_for(iface))], do)  # a port Kiboto gave settings to
 
 
 def _put_back(trial: dict[str, Any], do: Run) -> None:
