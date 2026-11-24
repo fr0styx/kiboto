@@ -190,3 +190,42 @@ def test_unreadable_key_file_is_an_error(tmp_path, monkeypatch):
     with pytest.raises(db_crypto.DataKeyError, match="Could not read"):
         db_crypto.prepare(str(tmp_path / "ai_conversations.db.x"))  # new file: no key needed
         db_crypto._key_sql()
+
+
+def test_a_key_the_chip_did_not_give_is_asked_for_again(tmp_path, monkeypatch):
+    path = str(tmp_path / "rag_index.db")
+    calls = []
+
+    def prepare(p):
+        calls.append(p)
+        if len(calls) == 1:
+            raise db_crypto.DataKeyError("This machine could not open its data key")
+
+    monkeypatch.setattr(db_crypto, "prepare", prepare)
+    clock = [1000.0]
+    monkeypatch.setattr(db_crypto, "_now", lambda: clock[0])
+    db_crypto.prepare_in_background(path)
+    assert db_crypto._ready[path].wait(5)
+    with pytest.raises(db_crypto.sqlite3.OperationalError, match="could not open its data key"):
+        db_crypto.wait_ready(path)
+    assert db_crypto.status(path) == "locked"
+    clock[0] += db_crypto.RETRY_KEY_AFTER
+    with pytest.raises(db_crypto.sqlite3.OperationalError, match="opened again"):
+        db_crypto.wait_ready(path)
+    db_crypto.wait_ready(path, timeout=5)  # the second ask gave the key
+    assert len(calls) == 2 and path not in db_crypto._failed
+    db_crypto._ready.pop(path, None)
+
+
+def test_any_other_failure_stays_said(tmp_path, monkeypatch):
+    path = str(tmp_path / "rag_index.db")
+    monkeypatch.setattr(db_crypto, "prepare", lambda p: (_ for _ in ()).throw(OSError("disk full")))
+    clock = [1000.0]
+    monkeypatch.setattr(db_crypto, "_now", lambda: clock[0])
+    db_crypto.prepare_in_background(path)
+    assert db_crypto._ready[path].wait(5)
+    clock[0] += 10 * db_crypto.RETRY_KEY_AFTER
+    with pytest.raises(db_crypto.sqlite3.OperationalError, match="disk full"):
+        db_crypto.wait_ready(path)
+    db_crypto._ready.pop(path, None)
+    db_crypto._failed.pop(path, None)

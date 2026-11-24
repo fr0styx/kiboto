@@ -26,6 +26,7 @@ import hashlib
 import logging
 import os
 import threading
+import time
 from collections.abc import Iterator
 from typing import TYPE_CHECKING, Any
 
@@ -60,6 +61,9 @@ _KDF_ROUNDS = 200_000
 _ready: dict[str, threading.Event] = {}
 _override = threading.local()  # key_for_this_thread
 _failed: dict[str, str] = {}
+_key_failed_at: dict[str, float] = {}  # when the key was not given: asked for again, not given up on
+RETRY_KEY_AFTER = 60.0  # seconds; machine_key asks the security chip again after the same time
+_now = time.monotonic
 _ready_lock = threading.Lock()
 
 
@@ -287,6 +291,8 @@ def prepare_in_background(path: str) -> None:
             prepare(path)
         except Exception as e:
             _failed[path] = str(e)
+            if isinstance(e, DataKeyError):  # the chip may only have been busy at the start
+                _key_failed_at[path] = _now()
             logger.error(f"[Encryption] {e}")
         finally:
             event.set()
@@ -300,7 +306,20 @@ def wait_ready(path: str, timeout: float = 0.0) -> None:
     if event is not None and not event.wait(timeout):
         raise sqlite3.OperationalError("The AI index is being encrypted; try again in a few minutes.")
     if path in _failed:
+        if _now() - _key_failed_at.get(path, float("inf")) >= RETRY_KEY_AFTER:
+            _open_again(path)
+            raise sqlite3.OperationalError("The AI index is being opened again; try again in a moment.")
         raise sqlite3.OperationalError(_failed[path])
+
+
+def _open_again(path: str) -> None:
+    """A key that could not be opened (the security chip was busy while the machine started) is
+    asked for again, so one refusal does not keep the index shut until Kiboto restarts."""
+    with _ready_lock:
+        _failed.pop(path, None)
+        _key_failed_at.pop(path, None)
+        _ready.pop(path, None)
+    prepare_in_background(path)
 
 
 def status(path: str) -> str:

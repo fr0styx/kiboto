@@ -28,6 +28,8 @@ A NAS with several network ports is found by its name on each of its networks, n
 
 An update now refuses a download that came out damaged (empty files after a power cut), removes it so the next try downloads it again, and goes back at once when the new version cannot start, instead of after four minutes.
 
+When the security chip is busy for a moment while the machine starts, the AI index now opens a minute later instead of staying shut until Kiboto restarts.
+
 #### Security
 
 On a machine of its own, failed sign-ins to shared folders over the network now count like web sign-ins: 20 in 15 minutes block the address for an hour, and they show under History, Sign-ins.
