@@ -38,6 +38,8 @@ def test_turning_it_on_makes_the_user_and_the_drop_in(tmp_path, monkeypatch):
     assert web_user.turn_on(do, str(drop_in), str(data)) == []
     text = drop_in.read_text()
     assert "User=kiboto" in text and "NoNewPrivileges=yes" in text
+    for hardening in ("ProtectKernelModules=yes", "ProtectKernelTunables=yes", "RestrictSUIDSGID=yes"):
+        assert hardening in text
     assert "CapabilityBoundingSet=CAP_NET_BIND_SERVICE" in text
     names = [c[0] for c in ran]
     assert names.index("useradd") < names.index("chown") < names.index("setfacl")

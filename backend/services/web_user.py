@@ -11,8 +11,9 @@ on (as root, or by the door), it
 - lets it into the private homes with an access list, the others still out, and into each
   pool's own folder (what it makes there, a Recycle Bin, stays open to it when it goes to the
   folder's owner) and the Recycle Bins already there;
-- writes a systemd drop-in that runs kiboto.service as that user with no new privileges and only
-  the right to use the low ports (HTTPS on 443).
+- writes a systemd drop-in that runs kiboto.service as that user with no new privileges, no
+  kernel modules, kernel settings or cgroups to change, no set-id files to make, and only the
+  right to use the low ports (HTTPS on 443).
 
 Turned off, the drop-in goes and Kiboto runs as root again at its next start; the user and the
 owners stay, which root does not mind.
@@ -46,6 +47,11 @@ User={USER}
 Group={USER}
 SupplementaryGroups={" ".join(GROUPS)}
 NoNewPrivileges=yes
+ProtectKernelModules=yes
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
 CapabilityBoundingSet=CAP_NET_BIND_SERVICE
 AmbientCapabilities=CAP_NET_BIND_SERVICE
 """
