@@ -315,13 +315,21 @@ def _ensure_service(cfg: dict[str, Any]) -> dict[str, Any]:
     return status(cfg, running=True, port=port)
 
 
+def _ensure_managed() -> dict[str, Any]:
+    """The service on a machine Kiboto runs, from the setting as saved (in the door, read there)."""
+    cfg = config()
+    with _lock:
+        return _ensure_service(cfg)
+
+
 def ensure() -> dict[str, Any]:
     """Makes the container match the setting (started, recreated after an update or a rename, or
     removed) and says how it stands."""
+    if runtime.managed_host():  # systemd-run and the host name are root's: the host door (ADR 0006)
+        from backend import door
+
+        return door.via("names.ensure", _ensure_managed)
     cfg = config()
-    if runtime.managed_host():
-        with _lock:
-            return _ensure_service(cfg)
     with _lock:
         _remove_old_container()
         code, info = _docker("GET", f"/containers/{CONTAINER}/json")

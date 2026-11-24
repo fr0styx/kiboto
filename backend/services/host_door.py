@@ -199,6 +199,12 @@ def _update_back(snapshot_id: str) -> None:
     native_update.start_back(snapshot_id, config.DATA_DIR, config.PORT)
 
 
+def _names() -> dict[str, Any]:
+    from backend.services import nas_name
+
+    return nas_name.ensure()  # from the saved setting; nothing the caller sent
+
+
 def _apps_hosts() -> bool:
     from backend.services import app_hosts
 
@@ -449,6 +455,7 @@ OPERATIONS: dict[str, Operation] = {
     "update.back": Operation(_update_back, {"snapshot_id": TEXT}, max_len=128),
     "packages.add_missing": Operation(_packages("add_missing"), {}),
     "hosts.apps": Operation(_apps_hosts, {}),
+    "names.ensure": Operation(_names, {}),
     "vm.tap": Operation(_vm_tap, {"name": TEXT, "bridge": TEXT}, max_len=32),
     "vm.tap_remove": Operation(_vm_tap_remove, {"name": TEXT}, max_len=32),
     "packages.check": Operation(_packages("check"), {}),

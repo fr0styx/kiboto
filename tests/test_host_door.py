@@ -1205,3 +1205,21 @@ def test_the_door_makes_only_a_machines_tap_on_a_bridge(audit, monkeypatch):
     )
     reply = op("vm.tap", name="kbt0123abcd", bridge="br0")
     assert reply["ok"] is False and "busy" in reply["error"]
+
+
+def test_the_name_service_is_started_by_the_door(audit, monkeypatch):
+    from backend import runtime
+    from backend.services import nas_name
+
+    monkeypatch.setattr(runtime, "managed_host", lambda: True)
+    calls = []
+    monkeypatch.setattr(door, "available", lambda sock=door.SOCK: True)
+    monkeypatch.setattr(door, "call", lambda op, **a: calls.append((op, a)) or {"running": True})
+    assert nas_name.ensure() == {"running": True} and calls == [("names.ensure", {})]
+    monkeypatch.setattr(door, "available", lambda sock=door.SOCK: False)
+    monkeypatch.setattr(nas_name, "config", lambda: {"enabled": False, "held": False})
+    monkeypatch.setattr(nas_name, "_ensure_service", lambda cfg: {"here": cfg["enabled"]})
+    assert nas_name.ensure() == {"here": False}
+    ensured = []
+    monkeypatch.setattr(nas_name, "ensure", lambda: ensured.append(1) or {"running": False})
+    assert host_door.handle({"op": "names.ensure", "args": {}}, 0)["result"] == {"running": False} and ensured == [1]
