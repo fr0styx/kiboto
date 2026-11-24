@@ -1446,3 +1446,101 @@ def test_looking_on_the_drives_is_done_by_the_door(audit, monkeypatch, tmp_path)
     owned.clear()
     monkeypatch.setattr(pwd, "getpwnam", missing)
     assert pool_copy.look_in_door("kiboto") == [{"key": "abc-tank"}] and owned == []  # root reads it as it is
+
+
+def test_the_copy_button_opens_a_card_through_the_door(audit, monkeypatch):
+    from backend.services import copy_engine
+
+    calls = []
+    monkeypatch.setattr(copy_engine.os, "geteuid", lambda: 999)
+    monkeypatch.setattr(door, "available", lambda sock=door.SOCK: True)
+    monkeypatch.setattr(door, "call", lambda op, **a: calls.append((op, a)) or copy_engine.CARD_MOUNT)
+    assert copy_engine.mount_card("/dev/sdc1") == copy_engine.CARD_MOUNT
+    copy_engine.unmount_card()
+    assert calls == [("copy.mount", {"device": "/dev/sdc1"}), ("copy.unmount", {})]
+
+    def refused(op, **a):
+        raise door.DoorError("only a card or stick that is not open anywhere", "value")
+
+    monkeypatch.setattr(door, "call", refused)
+    with pytest.raises(Exception, match="Failed to mount sdc1"):
+        copy_engine.mount_card("/dev/sdc1")
+    copy_engine.unmount_card()  # said in the log
+
+
+def test_the_door_opens_only_a_card_that_is_open_nowhere(audit, monkeypatch):
+    import json
+    import subprocess
+
+    from backend.services import copy_engine
+
+    tree = {
+        "blockdevices": [
+            {
+                "name": "sdc1",
+                "rm": False,
+                "hotplug": False,
+                "tran": None,
+                "mountpoints": [None],
+                "children": [{"name": "sdc", "rm": True, "hotplug": True, "tran": "usb"}],
+            }
+        ]
+    }
+    monkeypatch.setattr(copy_engine.os.path, "realpath", lambda p: p)
+    monkeypatch.setattr(copy_engine.os, "stat", lambda p: copy_engine.os.stat_result((0o060660,) + (0,) * 9))
+    monkeypatch.setattr(
+        copy_engine, "run_bounded", lambda cmd, **kw: subprocess.CompletedProcess(cmd, 0, json.dumps(tree), "")
+    )
+    mounted = []
+    monkeypatch.setattr(copy_engine, "_mount_card_here", lambda d: mounted.append(d) or copy_engine.CARD_MOUNT)
+
+    def card(device):
+        return host_door.handle({"op": "copy.mount", "args": {"device": device}}, 0)
+
+    assert card("/dev/sdc1")["result"] == copy_engine.CARD_MOUNT and mounted == ["/dev/sdc1"]
+    tree["blockdevices"][0]["mountpoints"] = ["/"]
+    assert card("/dev/sdc1")["ok"] is False  # open already
+    tree["blockdevices"][0]["mountpoints"] = [None]
+    tree["blockdevices"][0]["children"][0].update(rm=False, hotplug=False, tran="sata")
+    assert card("/dev/sdc1")["ok"] is False  # an inside drive
+    monkeypatch.setattr(copy_engine.os, "stat", lambda p: copy_engine.os.stat_result((0o100644,) + (0,) * 9))
+    assert card("/dev/sdc1")["ok"] is False  # not a drive
+    assert len(mounted) == 1
+    unmounted = []
+    monkeypatch.setattr(copy_engine.os.path, "ismount", lambda p: True)
+    monkeypatch.setattr(
+        copy_engine,
+        "run_bounded",
+        lambda cmd, **kw: unmounted.append(cmd) or subprocess.CompletedProcess(cmd, 0, "", ""),
+    )
+    assert host_door.handle({"op": "copy.unmount", "args": {}}, 0)["ok"] and unmounted == [
+        ["umount", copy_engine.CARD_MOUNT]
+    ]
+
+
+def test_as_root_the_copy_button_opens_the_card_itself(monkeypatch, tmp_path):
+    import subprocess
+
+    from backend.services import copy_engine
+
+    ran = []
+    monkeypatch.setattr(copy_engine.os, "geteuid", lambda: 0)
+    monkeypatch.setattr(copy_engine, "CARD_MOUNT", str(tmp_path / "card"))
+    monkeypatch.setattr(
+        copy_engine, "run_bounded", lambda cmd, **kw: ran.append(cmd) or subprocess.CompletedProcess(cmd, 0, b"", b"")
+    )
+    assert copy_engine.mount_card("/dev/sdc1") == str(tmp_path / "card")
+    copy_engine.unmount_card()
+    assert ran[0][0] == "mount" and "-r" in ran[0] and "nosuid,nodev,noexec" in ran[0][3] and ran[1][0] == "umount"
+    monkeypatch.setattr(copy_engine, "run_bounded", lambda cmd, **kw: subprocess.CompletedProcess(cmd, 32, b"", b""))
+    with pytest.raises(Exception, match="Failed to mount sdc1"):
+        copy_engine.mount_card("/dev/sdc1")
+    monkeypatch.setattr(copy_engine.os.path, "ismount", lambda p: False)
+    assert copy_engine.uncard_in_door() is True  # nothing open: nothing to close
+    monkeypatch.setattr(copy_engine.os.path, "realpath", lambda p: p)
+    monkeypatch.setattr(copy_engine.os, "stat", lambda p: copy_engine.os.stat_result((0o060660,) + (0,) * 9))
+    monkeypatch.setattr(
+        copy_engine, "run_bounded", lambda cmd, **kw: subprocess.CompletedProcess(cmd, 0, "not json", "")
+    )
+    with pytest.raises(ValueError):
+        copy_engine.card_in_door("/dev/sdc1")  # lsblk said nothing readable: not opened

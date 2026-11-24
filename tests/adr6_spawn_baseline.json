@@ -23,7 +23,7 @@
  "backend/machine_key.py": 1,
  "backend/main.py": 1,
  "backend/proc.py": 1,
- "backend/services/copy_engine.py": 5,
+ "backend/services/copy_engine.py": 7,
  "backend/services/encrypted_folders.py": 4,
  "backend/services/host_basics.py": 1,
  "backend/services/host_door.py": 3,

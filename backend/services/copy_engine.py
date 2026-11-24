@@ -517,15 +517,94 @@ def _slot_source(src_mode: str) -> tuple[str, bool]:
         pass
 
     if not mounted_path:
-        mounted_path = "/tmp/sd_copy_mount"
-        os.makedirs(mounted_path, exist_ok=True)
-        cmd = ["mount", "-r", "-o", "noatime,nodiratime", os.path.join(HOST_DEV, part_dev), mounted_path]
-        r = run_bounded(cmd, timeout=60, capture_output=True)
-        if r.returncode != 0:
-            raise Exception(f"Failed to mount {part_dev}")
+        mounted_path = mount_card(os.path.join(HOST_DEV, part_dev))
         tmp_mount = True
 
     return mounted_path, tmp_mount
+
+
+CARD_MOUNT = "/tmp/sd_copy_mount"  # where a card is opened read-only for a copy
+
+
+def _through_door() -> bool:
+    from backend import door
+
+    return os.geteuid() != 0 and door.available()
+
+
+def mount_card(device: str) -> str:
+    """The card or stick at `device`, opened read-only at CARD_MOUNT; through the host door when
+    Kiboto is not root (ADR 0006)."""
+    if _through_door():
+        from backend import door
+
+        try:
+            return str(door.call("copy.mount", device=device))
+        except door.DoorError as e:
+            raise Exception(f"Failed to mount {os.path.basename(device)}: {e}") from None
+    return _mount_card_here(device)
+
+
+def _mount_card_here(device: str) -> str:
+    os.makedirs(CARD_MOUNT, exist_ok=True)
+    cmd = ["mount", "-r", "-o", "noatime,nodiratime,nosuid,nodev,noexec", device, CARD_MOUNT]
+    if run_bounded(cmd, timeout=60, capture_output=True).returncode != 0:
+        raise Exception(f"Failed to mount {os.path.basename(device)}")
+    return CARD_MOUNT
+
+
+def unmount_card() -> None:
+    if _through_door():
+        from backend import door
+
+        try:
+            door.call("copy.unmount")
+        except (OSError, door.DoorError) as e:
+            logger.warning("[Copy] the card stays open: %s", e)
+        return
+    run_bounded(["umount", CARD_MOUNT], timeout=60)
+
+
+def card_in_door(device: str) -> str:
+    """The door's side (copy.mount): only a removable or USB drive that is mounted nowhere, read-only."""
+    import json
+    import stat
+
+    real = os.path.realpath(device)
+    try:
+        is_block = real.startswith("/dev/") and stat.S_ISBLK(os.stat(real).st_mode)
+    except OSError:
+        is_block = False
+    if not is_block:
+        raise ValueError("that is not a drive")
+    r = run_bounded(
+        ["lsblk", "-J", "-s", "-o", "NAME,RM,HOTPLUG,TRAN,MOUNTPOINTS", real],
+        timeout=15,
+        capture_output=True,
+        text=True,
+    )
+    try:
+        nodes = json.loads(r.stdout or "{}").get("blockdevices") or []
+    except ValueError:
+        nodes = []
+
+    def walk(ns: list) -> list:
+        return [x for n in ns for x in [n, *walk(n.get("children") or [])]]
+
+    every = walk(nodes)
+    removable = any(
+        n.get("rm") in (True, "1") or n.get("hotplug") in (True, "1") or n.get("tran") == "usb" for n in every
+    )
+    mounted = any(m for m in (nodes[0].get("mountpoints") or []) if m) if nodes else True
+    if not removable or mounted:
+        raise ValueError("only a card or stick that is not open anywhere")
+    return _mount_card_here(real)
+
+
+def uncard_in_door() -> bool:
+    if os.path.ismount(CARD_MOUNT):
+        run_bounded(["umount", CARD_MOUNT], timeout=60)
+    return True
 
 
 _DONE_ALERT = "copy_finished"  # one alert per kind, however often it happens
@@ -668,7 +747,7 @@ async def _do_copy(cfg):
             pass
     finally:
         if tmp_mount and mounted_path:
-            run_bounded(["umount", mounted_path], timeout=60)
+            unmount_card()
         # Record into copy history
         try:
             log_copy_event(

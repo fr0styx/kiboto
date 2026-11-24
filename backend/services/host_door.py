@@ -235,6 +235,18 @@ def _pools_look() -> list[dict[str, Any]]:
     return pool_copy.look_in_door(USER)
 
 
+def _card(device: str) -> str:
+    from backend.services import copy_engine
+
+    return copy_engine.card_in_door(device)
+
+
+def _uncard() -> bool:
+    from backend.services import copy_engine
+
+    return copy_engine.uncard_in_door()
+
+
 def _power(action: str) -> dict[str, Any]:
     from backend.services import host_power
 
@@ -501,6 +513,8 @@ OPERATIONS: dict[str, Operation] = {
     "hosts.apps": Operation(_apps_hosts, {}),
     "names.ensure": Operation(_names, {}),
     "power.run": Operation(_power, {"action": TEXT}, max_len=16),
+    "copy.mount": Operation(_card, {"device": TEXT}, max_len=128),
+    "copy.unmount": Operation(_uncard, {}),
     "pools.look": Operation(_pools_look, {}),
     "crypt.mount": Operation(
         _crypt_mount, {"cipher": TEXT, "plain": TEXT, "password": TEXT, "read_only": ON}, max_len=4096
