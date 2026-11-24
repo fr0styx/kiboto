@@ -3421,7 +3421,7 @@
                   <!-- Sidebar Header: + New Chat & Collapse Toggle -->
                   <div class="ai-sidebar-top-bar">
                     <button type="button" id="btn-ai-chat-new" class="btn-pill-toggle btn-ai-new-chat" title="Start a fresh conversation thread" data-i18n-title="ui.start_a_fresh_conversation_thread">
-                      <span aria-hidden="true">✨</span> <span data-i18n="ai.new_chat">+ New Chat</span>
+                      <span aria-hidden="true">✨</span> <span data-i18n="ai.new_chat">New chat</span>
                     </button>
                     <button type="button" id="btn-ai-chat-sidebar-toggle" class="btn-ai-icon-toggle" title="Collapse sidebar" data-i18n-title="ui.collapse_sidebar">
                       <span>◀</span>
@@ -3459,7 +3459,7 @@
                         <span id="ai-chat-active-title" class="ai-chat-active-title" title="Click pencil to rename" data-i18n-title="ui.click_pencil_to_rename" data-sample>New Conversation</span>
                         <button type="button" id="btn-ai-chat-rename" class="btn-ai-icon-action" title="Rename conversation" data-i18n-title="ui.rename_conversation">✏️</button>
                       </div>
-                      <span id="ai-chat-active-model-badge" style="padding:3px 10px; border-radius:999px; font-size:var(--kb-fs-xs); font-weight:700; background:rgba(16,185,129,0.16); color:var(--kb-text-ok); border:1px solid rgba(16,185,129,0.4); white-space:nowrap;" data-sample>
+                      <span id="ai-chat-active-model-badge" class="kib-model-badge" data-sample>
                         —
                       </span>
                     </div>
@@ -3467,7 +3467,7 @@
                     <div class="aic-row-3">
                       <!-- Export Menu -->
                       <div class="dropdown-wrapper aic-x">
-                        <button type="button" id="btn-ai-chat-export-toggle" class="btn-pill-toggle aic-soft" title="Export active conversation" data-i18n-title="ui.export_active_conversation">
+                        <button type="button" id="btn-ai-chat-export-toggle" class="btn-pill-toggle is-small aic-soft" title="Export active conversation" data-i18n-title="ui.export_active_conversation">
                           <span aria-hidden="true">📥</span> <span data-i18n="ai.export_chat">Export</span>
                         </button>
                         <div id="ai-chat-export-menu" class="ai-dropdown-menu" style="display:none; position:absolute; right:0; top:100%; margin-top:4px; z-index:100; min-width:180px; background:var(--card-solid, var(--lt-b-0e1c1eff, #0e1c1e)); border:1px solid var(--border, var(--kb-line-15)); border-radius:8px; box-shadow:0 10px 25px rgba(0,0,0,0.5); padding:4px 0;">
@@ -3480,14 +3480,20 @@
                         </div>
                       </div>
 
-                      <button type="button" id="btn-ai-chat-clear" class="btn-pill-toggle aic-muted" title="Clear conversation history" data-i18n-title="ui.clear_conversation_history">
+                      <button type="button" id="btn-ai-chat-clear" class="btn-pill-toggle is-small aic-muted" title="Clear conversation history" data-i18n-title="ui.clear_conversation_history">
                         <span aria-hidden="true">🗑️</span> <span data-i18n="ai.chat_clear_btn">Clear Chat</span>
                       </button>
                     </div>
                   </div>
 
                   <!-- Conversation Message Stream (Maintains exact test ID) -->
-                  <div id="ai-chat-messages-list" style="flex:1; min-height:180px; max-height:none; overflow-y:auto; display:flex; flex-direction:column; gap:10px; padding:12px; border-radius:8px; background:var(--lt-b-050b0c73, rgba(5,11,12,0.45)); border:1px solid var(--kb-line-6); box-sizing:border-box;"></div>
+                  <div id="ai-chat-messages-list"></div>
+                  <!-- shown while there is nothing in the conversation yet -->
+                  <div class="kib-chat-empty">
+                    <span class="kib-chat-empty-face"><svg class="kib-hero-art" viewBox="6 6 52 52" aria-hidden="true" focusable="false"><path class="kib-buddy-case" d="M19 6H45A13 13 0 0 1 58 19V37.5A2.5 2.5 0 0 1 55.5 40H8.5A2.5 2.5 0 0 1 6 37.5V19A13 13 0 0 1 19 6ZM8.5 42.5H55.5A2.5 2.5 0 0 1 58 45V45A13 13 0 0 1 45 58H19A13 13 0 0 1 6 45V45A2.5 2.5 0 0 1 8.5 42.5Z"/><path class="kib-buddy-screen" d="M19 13H45A6.5 6.5 0 0 1 51.5 19.5V27A6.5 6.5 0 0 1 45 33.5H19A6.5 6.5 0 0 1 12.5 27V19.5A6.5 6.5 0 0 1 19 13Z"/><rect class="kib-buddy-eye" x="21.5" y="17.75" width="6.5" height="11" rx="3.25"/><rect class="kib-buddy-eye" x="36" y="17.75" width="6.5" height="11" rx="3.25"/><circle class="kib-buddy-light" cx="49.25" cy="50.25" r="3.2"/></svg></span>
+                    <strong data-i18n="kibw.empty_title">Ask Kib</strong>
+                    <span data-i18n="kibw.empty_line">About your files, your drives or this NAS. Kib works on this NAS; with Web it may look things up online.</span>
+                  </div>
 
                   <!-- Chat Composer -->
                   <div class="ai-chat-composer-row aic-row-4">
@@ -3495,10 +3501,10 @@
                     <label class="aic-row-xs-bold-soft" id="ai-chat-web-toggle-wrap" title="Off: Kib stays on this NAS. On: it may search the web and fetch the weather, which sends your question to outside services." data-i18n-title="ui.off_kib_stays_on_this">
                       <input class="aic-x-2" type="checkbox" id="ai-chat-web-toggle"> 🌐 <span data-i18n="ai.web_toggle">Web</span>
                     </label>
-                    <button type="button" id="btn-ai-chat-send" class="btn-pill-toggle" style="height:38px; padding:0 18px; font-size:var(--kb-fs-xs); font-weight:700; background:linear-gradient(135deg, rgba(99,102,241,0.35), rgba(51,205,184,0.35)); border:1px solid rgba(99,102,241,0.6); color:var(--kb-text-strong); border-radius:8px; cursor:pointer; white-space:nowrap;">
+                    <button type="button" id="btn-ai-chat-send" class="btn-pill-toggle is-primary kib-send">
                       <span aria-hidden="true">🚀</span> <span data-i18n="ai.chat_send_btn">Ask Kib</span>
                     </button>
-                    <button type="button" id="btn-ai-chat-stop" class="btn-pill-toggle" hidden aria-label="Stop generating" data-i18n-aria-label="ui.stop_generating" style="height:38px; padding:0 14px; font-size:var(--kb-fs-xs); font-weight:700; background:rgba(239,68,68,0.18); border:1px solid rgba(248,113,113,0.55); color:var(--lt-t-fecacaff, #fecaca); border-radius:8px; cursor:pointer; white-space:nowrap;">
+                    <button type="button" id="btn-ai-chat-stop" class="btn-pill-toggle is-danger kib-send" hidden aria-label="Stop generating" data-i18n-aria-label="ui.stop_generating">
                       <span>■</span> <span data-i18n="ai.stop">Stop</span>
                     </button>
                   </div>

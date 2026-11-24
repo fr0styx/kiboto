@@ -106,7 +106,7 @@ describe('Kib Conversation History & Dual-Pane UI Suite', () => {
     await managementModule.createNewAiConversation();
 
     const titleEl = document.getElementById('ai-chat-active-title');
-    expect(titleEl.textContent).toBe('New Conversation');
+    expect(titleEl.textContent).toBe('New conversation');
 
     const msgList = document.getElementById('ai-chat-messages-list');
     expect(msgList.innerHTML).toBe('');

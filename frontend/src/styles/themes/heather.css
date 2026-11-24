@@ -47,7 +47,6 @@ body.kb-theme-heather:not(.theme-light):not(.lcd-direct) {
   --lt-b-030712ff: #090511;
   --lt-b-040809ff: #08060a;
   --lt-b-050b0c66: rgba(10, 9, 14, 0.4);
-  --lt-b-050b0c73: rgba(10, 9, 14, 0.451);
   --lt-b-050b0ce0: rgba(10, 9, 14, 0.878);
   --lt-b-050c0eff: #0b0910;
   --lt-b-060c0dff: #0b0a0f;
@@ -437,7 +436,6 @@ body.kb-theme-heather.theme-oled:not(.theme-light):not(.lcd-direct) {
     --lt-b-030712ff: oklch(0.1303 calc(0.0290 * var(--kb-tint, 1)) 300.1);
     --lt-b-040809ff: oklch(0.1278 calc(0.0110 * var(--kb-tint, 1)) 309.1);
     --lt-b-050b0c66: oklch(0.1437 calc(0.0109 * var(--kb-tint, 1)) 294.4 / 0.4);
-    --lt-b-050b0c73: oklch(0.1437 calc(0.0109 * var(--kb-tint, 1)) 294.4 / 0.451);
     --lt-b-050b0ce0: oklch(0.1437 calc(0.0109 * var(--kb-tint, 1)) 294.4 / 0.878);
     --lt-b-050c0eff: oklch(0.1461 calc(0.0153 * var(--kb-tint, 1)) 297.7);
     --lt-b-060c0dff: oklch(0.1485 calc(0.0108 * var(--kb-tint, 1)) 294.2);

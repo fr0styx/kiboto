@@ -292,3 +292,29 @@
 .ai-chat-composer-row #ai-chat-input { flex: 1 1 240px; min-width: 0; }
 /* Stop shows only while an answer is being written (the button class would override hidden) */
 .ai-chat-composer-row .btn-pill-toggle[hidden] { display: none; }
+
+
+/* Ask Kib in Kiboto's design language: the theme's own lines, cards and brand colour, the same
+   pill buttons as the rest of Settings, a brand focus ring, and Kib greeting an empty
+   conversation (it was a black box with purple edges and a purple-gradient button). */
+#mgmt-pane-ai-chat .ai-chat-main-stage { border: 1px solid var(--kb-line); border-radius: var(--kb-radius); padding: var(--kb-space-3); gap: var(--kb-space-3); }
+#mgmt-pane-ai-chat .aic-row-box { border-bottom-color: var(--kb-line); }
+#mgmt-pane-ai-chat .ai-chat-active-title { font-size: var(--kb-fs); font-weight: 700; color: var(--fg); }
+#mgmt-pane-ai-chat .btn-ai-icon-toggle { width: 36px; height: 36px; border-radius: var(--kb-radius); border-color: var(--kb-line); background: transparent; }
+.kib-model-badge { display: inline-flex; align-items: center; gap: 4px; max-width: 100%; padding: 2px 10px; border-radius: 999px; font-size: var(--kb-fs-xs); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--lt-ink-brand, var(--brand)); background: color-mix(in srgb, var(--brand) 12%, transparent); border: 1px solid color-mix(in srgb, var(--brand) 40%, transparent); }
+#ai-chat-messages-list { flex: 1; min-height: 180px; overflow-y: auto; display: flex; flex-direction: column; gap: var(--kb-space-2); padding: var(--kb-space-3); border-radius: var(--kb-radius); background: var(--kb-glaze-5, transparent); border: 1px solid var(--kb-line); box-sizing: border-box; }
+.kib-chat-empty { display: none; flex: 1; min-height: 180px; flex-direction: column; align-items: center; justify-content: center; gap: var(--kb-space-2); padding: var(--kb-space-4, 24px) var(--kb-space-3); text-align: center; border: 1px dashed var(--kb-line); border-radius: var(--kb-radius); }
+.kib-chat-empty-face { width: 56px; height: 56px; }
+.kib-chat-empty-face .kib-hero-art { display: block; width: 100%; height: 100%; }
+.kib-chat-empty > strong { font-size: var(--kb-fs); color: var(--fg); }
+.kib-chat-empty > span:last-child { max-width: 34em; font-size: var(--kb-fs-xs); color: var(--kb-text-soft); line-height: 1.5; }
+#ai-chat-main-stage:has(#ai-chat-messages-list:empty) #ai-chat-messages-list { display: none !important; } /* over 42-ai-workspace.css */
+#ai-chat-main-stage:has(#ai-chat-messages-list:empty) .kib-chat-empty { display: flex; }
+#mgmt-pane-ai-chat #ai-chat-input { height: 42px; border-radius: var(--kb-radius); border: 1px solid var(--kb-line-strong, var(--kb-line)); background: var(--kb-glaze-5, transparent); }
+#mgmt-pane-ai-chat #ai-chat-input:focus, #mgmt-pane-ai-chat #ai-chat-input:focus-visible { outline: none !important; border-color: var(--brand); box-shadow: 0 0 0 2px color-mix(in srgb, var(--brand) 35%, transparent); }
+#mgmt-pane-ai-chat #ai-chat-web-toggle-wrap { gap: 6px; height: 42px; padding: 0 var(--kb-space-3); border: 1px solid var(--kb-line); border-radius: 999px; font-weight: 600; }
+#mgmt-pane-ai-chat #ai-chat-web-toggle-wrap:has(input:checked) { color: var(--lt-ink-brand, var(--brand)); border-color: var(--brand); background: color-mix(in srgb, var(--brand) 10%, transparent); }
+#mgmt-pane-ai-chat #ai-chat-web-toggle { accent-color: var(--brand); width: 16px; height: 16px; }
+#mgmt-pane-ai-chat .kib-send { height: 42px; padding: 0 var(--kb-space-4, 20px); border-radius: 999px; white-space: nowrap; margin-left: auto; }
+body.phone-shell #mgmt-pane-ai-chat .aic-row-box { gap: var(--kb-space-2); }
+body.phone-shell #mgmt-pane-ai-chat .aic-row { flex-wrap: wrap; row-gap: var(--kb-space-1, 4px); }

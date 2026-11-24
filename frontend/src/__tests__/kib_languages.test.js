@@ -20,8 +20,8 @@ describe('Kib window in other languages', () => {
   });
 
   it("shows the stored default title in the reader's language, and real titles as they are", async () => {
-    expect(shownTitle('New Conversation')).toBe('New Conversation');
-    expect(shownTitle('')).toBe('New Conversation');
+    expect(shownTitle('New Conversation')).toBe('New conversation');
+    expect(shownTitle('')).toBe('New conversation');
     await setLanguage('de');
     expect(shownTitle('New Conversation')).toBe('Neue Unterhaltung');
     expect(shownTitle(null)).toBe('Neue Unterhaltung');

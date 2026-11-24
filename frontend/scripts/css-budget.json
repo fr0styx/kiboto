@@ -1,9 +1,9 @@
 {
-  "important": 3422,
+  "important": 3424,
   "buttonClasses": 76,
-  "inlineStyles": 1243,
+  "inlineStyles": 1239,
   "emojiIcons": 4,
-  "colours": 3713,
+  "colours": 3704,
   "primitiveUses": 4,
   "importantPerFile": {
     "frontend/index.html": 64,
@@ -46,7 +46,7 @@
     "frontend/src/styles/42-ai-workspace.css": 58,
     "frontend/src/styles/43-security-advisor.css": 4,
     "frontend/src/styles/44-file-explorer.css": 17,
-    "frontend/src/styles/45-ai-history.css": 19,
+    "frontend/src/styles/45-ai-history.css": 21,
     "frontend/src/styles/47-containers-bulk.css": 11,
     "frontend/src/styles/56-phone.css": 8,
     "frontend/src/styles/containers-lazy.css": 47,
@@ -171,6 +171,6 @@
     "frontend/src/utils.js": 1,
     "frontend/src/vm-console-direct.css": 2,
     "frontend/src/windows/drawer.html": 116,
-    "frontend/src/windows/management-window.html": 422
+    "frontend/src/windows/management-window.html": 413
   }
 }

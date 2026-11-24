@@ -48,6 +48,8 @@ On a phone, messages such as "Last sign-in" now appear at the top of the screen,
 
 The Kib page in Settings starts with Kib itself: its face, its name, what it does and Open Kib. Each Settings page shows its own icon in the title bar.
 
+Ask Kib looks like the rest of Kiboto: the theme's colours and buttons, and Kib greets an empty conversation.
+
 ## v2.0.6 (2026-11-23)
 ### 🖥️ Kiboto on a machine of its own (preview), with its settings kept safe on every pool
 

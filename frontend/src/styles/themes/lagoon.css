@@ -25,7 +25,6 @@
     --lt-b-030712ff: oklch(0.1296 calc(0.0274 * var(--kb-tint, 1)) 261.7);
     --lt-b-040809ff: oklch(0.1290 calc(0.0093 * var(--kb-tint, 1)) 211.4);
     --lt-b-050b0c66: oklch(0.1428 calc(0.0112 * var(--kb-tint, 1)) 207.1 / 0.4);
-    --lt-b-050b0c73: oklch(0.1428 calc(0.0112 * var(--kb-tint, 1)) 207.1 / 0.451);
     --lt-b-050b0ce0: oklch(0.1428 calc(0.0112 * var(--kb-tint, 1)) 207.1 / 0.878);
     --lt-b-050c0eff: oklch(0.1472 calc(0.0131 * var(--kb-tint, 1)) 215.1);
     --lt-b-060c0dff: oklch(0.1479 calc(0.0106 * var(--kb-tint, 1)) 207.7);
