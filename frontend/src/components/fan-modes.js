@@ -1,22 +1,22 @@
 /**
  * The fan modes in words, shared by the Host tab and the Fans tab (SET-15, Hardware 1). Quiet,
- * Balanced, Performance and Full are fixed speeds today (backend/services/fan_control.py: 67, 120,
- * 155 and 183 of 183): they do not follow the temperature, so choosing one asks first.
+ * Balanced and Performance follow the hottest drive on a curve (backend/hardware/fans.py:
+ * PRESET_CURVES; Hardware 1 Part B), Custom ("auto") follows the person's own points. Only Full
+ * and a speed set by hand are fixed: they do not follow the temperature, so choosing one asks first.
  */
 import { t } from '../i18n.js';
 import { showConfirmToast } from '../toast.js';
 
 /** What each fixed mode runs at, in percent of full speed. */
-export const FIXED_PCT = { quiet: 37, balanced: 66, performance: 85, full: 100 };
+export const FIXED_PCT = { full: 100 };
 
 /** A mode's name: "Automatic", "Quiet · fixed 37 %", "Fixed 50 %" (set by hand). */
 export function modeName(profile, manualPct) {
   const p = String(profile || '').toLowerCase();
-  if (p === 'auto') return t('hw.mode_auto', 'Automatic');
-  if (p === 'quiet') return t('hw.mode_quiet', 'Quiet · fixed {pct} %', { pct: FIXED_PCT.quiet });
-  if (p === 'balanced') return t('hw.mode_balanced', 'Balanced · fixed {pct} %', { pct: FIXED_PCT.balanced });
-  if (p === 'performance')
-    return t('hw.mode_performance', 'Performance · fixed {pct} %', { pct: FIXED_PCT.performance });
+  if (p === 'auto') return t('fan.mode_custom', 'Custom');
+  if (p === 'quiet') return t('fan.mode_quiet', 'Quiet');
+  if (p === 'balanced') return t('fan.mode_balanced', 'Balanced');
+  if (p === 'performance') return t('fan.mode_performance', 'Performance');
   if (p === 'full') return t('hw.mode_full', 'Full speed');
   const pct = Number(manualPct);
   return Number.isFinite(pct)

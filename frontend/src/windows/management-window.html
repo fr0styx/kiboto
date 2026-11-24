@@ -1674,21 +1674,21 @@
                   <div>
                     <label class="unr-xs-bold-muted" data-i18n="mgmt.acoustic_label">Noise and performance</label>
                     <div class="profile-switcher-row" role="radiogroup" aria-label="System Acoustic & Performance Profile" data-i18n-aria-label="ui.system_acoustic_performance_profile">
-                      <button class="profile-btn active" role="radio" aria-checked="true" data-profile="auto">
-                        <span class="profile-btn-title"><span aria-hidden="true">⚡</span> <span data-i18n="mgmt.profile_auto_title">Automatic</span></span>
-                        <span class="profile-btn-desc" data-i18n="mgmt.profile_auto_desc">Follows the temperature (recommended)</span>
-                      </button>
                       <button class="profile-btn" role="radio" aria-checked="false" data-profile="quiet">
                         <span class="profile-btn-title"><span aria-hidden="true">🤫</span> <span data-i18n="mgmt.profile_quiet_title">Quiet</span></span>
-                        <span class="profile-btn-desc" data-i18n="mgmt.profile_quiet_desc">Fixed 37 %</span>
+                        <span class="profile-btn-desc" data-i18n="fan.quiet_desc">Follows the hottest drive, 4 °C later</span>
                       </button>
                       <button class="profile-btn" role="radio" aria-checked="false" data-profile="balanced">
                         <span class="profile-btn-title"><span aria-hidden="true">⚖️</span> <span data-i18n="mgmt.profile_balanced_title">Balanced</span></span>
-                        <span class="profile-btn-desc" data-i18n="mgmt.profile_balanced_desc">Fixed 66 %</span>
+                        <span class="profile-btn-desc" data-i18n="fan.balanced_desc">Follows the hottest drive (recommended)</span>
                       </button>
                       <button class="profile-btn" role="radio" aria-checked="false" data-profile="performance">
                         <span class="profile-btn-title"><span aria-hidden="true">🚀</span> <span data-i18n="mgmt.profile_performance_title">Performance</span></span>
-                        <span class="profile-btn-desc" data-i18n="mgmt.profile_performance_desc">Fixed 85 %</span>
+                        <span class="profile-btn-desc" data-i18n="fan.performance_desc">Follows the hottest drive, 4 °C earlier</span>
+                      </button>
+                      <button class="profile-btn active" role="radio" aria-checked="true" data-profile="auto">
+                        <span class="profile-btn-title"><span aria-hidden="true">✏️</span> <span data-i18n="fan.mode_custom">Custom</span></span>
+                        <span class="profile-btn-desc" data-i18n="fan.custom_desc">Your own curve, under Fans</span>
                       </button>
                     </div>
                   </div>

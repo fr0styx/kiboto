@@ -85,7 +85,9 @@ def _run(monkeypatch, chassis, disks, cpu, zero_rpm, busy):
     clock = types.SimpleNamespace(time=lambda: 1_790_000_000.0, monotonic=lambda: 50_000.0, sleep=lambda s: None)
     monkeypatch.setattr(mod, "apply_zone_pwm", apply_zone_pwm)
     monkeypatch.setattr(mod, "set_fan_pwm", set_fan_pwm)
-    monkeypatch.setattr(mod, "detect_chassis_model", lambda *a, **k: chassis)
+    monkeypatch.setattr(
+        mod, "detect_chassis_model", lambda *a, **k: chassis, raising=False
+    )  # every zone follows the hottest drive since S28
     monkeypatch.setattr(mod, "read_unraid_status", lambda *a, **k: {"mover": {"active": busy}})
     monkeypatch.setattr(mod, "add_event", lambda *a, **k: calls.append(["event", a[0], a[1]]))
     monkeypatch.setattr(mod, "time", clock)

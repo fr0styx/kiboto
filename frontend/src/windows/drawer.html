@@ -577,12 +577,12 @@
         <div class="card-headline">
           <span class="card-head-title"><span class="drag-handle" title="Drag to reorder" data-i18n-title="ui.drag_to_reorder">⋮⋮</span> <span data-i18n="settings.cooling_duty_profiles">Cooling Duty Profiles</span><button class="btn-minimize" title="Minimize/Expand" data-i18n-title="ui.minimize_expand" aria-label="Minimize/Expand card" data-i18n-aria-label="ui.minimize_expand_card">▼</button></span>
         </div>
-        <div class="card-instruction" data-i18n="settings.cooling_duty_desc">Select dynamic thermal scaling or fixed duty presets mapped across disk fans.</div>
+        <div class="card-instruction" data-i18n="fan.modes_desc">Quiet, Balanced and Performance follow the hottest drive; Custom follows your own curve. With fan stop on, the fans stop while every drive sleeps.</div>
         <div class="profiles-grid drw-x-8">
-          <button class="profile-pill fan-profile-btn active" data-fan-profile="auto"><span aria-hidden="true">⚡</span> <span data-i18n="dr.auto_dynamic">Automatic</span></button>
-          <button class="profile-pill fan-profile-btn" data-fan-profile="quiet" data-i18n="dr.quiet_67">Quiet · 37 %</button>
-          <button class="profile-pill fan-profile-btn" data-fan-profile="balanced" data-i18n="dr.balanced_120">Balanced · 66 %</button>
-          <button class="profile-pill fan-profile-btn" data-fan-profile="performance" data-i18n="dr.perf_155">Performance · 85 %</button>
+          <button class="profile-pill fan-profile-btn" data-fan-profile="quiet" data-i18n="fan.mode_quiet">Quiet</button>
+          <button class="profile-pill fan-profile-btn" data-fan-profile="balanced" data-i18n="fan.mode_balanced">Balanced</button>
+          <button class="profile-pill fan-profile-btn" data-fan-profile="performance" data-i18n="fan.mode_performance">Performance</button>
+          <button class="profile-pill fan-profile-btn active" data-fan-profile="auto" data-i18n="fan.mode_custom">Custom</button>
           <button class="profile-pill fan-profile-btn" data-fan-profile="full" data-i18n="dr.full_183">Full · 100 %</button>
         </div>
         <div id="fan-presets-bar" class="fan-presets-bar">

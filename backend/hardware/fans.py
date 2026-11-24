@@ -595,6 +595,23 @@ def usable_fan_settings(saved, defaults: dict) -> dict:
     return cfg
 
 
+# The fan modes as curves (Hardware 1 Part B, S28; owner's decisions 12-14 Nov 2026): Balanced is
+# the owner's own curve, Quiet the same 4 °C later, Performance 4 °C earlier. (°C, % of full speed);
+# while a drive spins the fans never go below their lowest running speed, whatever a point says.
+PRESET_CURVES = {
+    "quiet": [[34, 0], [40, 32], [46, 60], [51, 84], [55, 100], [60, 100]],
+    "balanced": [[30, 0], [36, 32], [42, 60], [47, 84], [53, 100], [60, 100]],
+    "performance": [[26, 0], [32, 32], [38, 60], [43, 84], [49, 100], [60, 100]],
+}
+# the modes that follow a curve ("auto" is Custom: the person's own points); full and manual are fixed
+CURVE_PROFILES = ("auto", *PRESET_CURVES)
+
+
+def curve_of(profile, fan_cfg):
+    """The curve a mode follows: its preset, else the person's own points (Custom); None for none."""
+    return PRESET_CURVES.get(profile) or (fan_cfg or {}).get("curve_points")
+
+
 def sanitize_curve_points(points):
     """Normalize user curve points to a safe, monotonic, bounded curve.
 

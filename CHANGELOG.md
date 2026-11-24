@@ -68,6 +68,8 @@ Ask Kib looks like the rest of Kiboto: the theme's colours and buttons, and Kib 
 
 The Kib window now has the same colours and toolbar as the other app windows.
 
+Fans: Quiet, Balanced and Performance now follow the temperature of the hottest drive on a curve (Balanced is the recommended one), and fan stop while every drive sleeps works in each of them. Custom keeps your own curve; Full stays fixed.
+
 ## v2.0.6 (2026-11-23)
 ### 🖥️ Kiboto on a machine of its own (preview), with its settings kept safe on every pool
 

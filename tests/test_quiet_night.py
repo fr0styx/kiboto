@@ -62,7 +62,7 @@ def test_refusals_and_bad_stored_times(qn):
     assert qn.active(NIGHT) is True
 
 
-def test_the_fan_loop_reads_the_shifted_curve_only_in_automatic(qn, monkeypatch):
+def test_the_fan_loop_reads_the_shifted_curve_in_the_curve_modes(qn, monkeypatch):
     from backend.services import fan_control
 
     seen = []
@@ -74,7 +74,8 @@ def test_the_fan_loop_reads_the_shifted_curve_only_in_automatic(qn, monkeypatch)
     monkeypatch.setattr(fan_control, "calc_curve_pwm", fake_curve)
     qn.save(True, "00:00", "23:59")
     assert (fan_control._drive_curve_temp(40, "auto"), fan_control._drive_curve_temp(41, "auto")) == (36, 37)
-    assert fan_control._drive_curve_temp(40, "quiet") == 40
+    assert fan_control._drive_curve_temp(40, "quiet") == 36  # Quiet, Balanced, Performance are curves too
+    assert fan_control._drive_curve_temp(40, "full") == 40 and fan_control._drive_curve_temp(40, "manual") == 40
     qn.save(False, "00:00", "23:59")
     assert fan_control._drive_curve_temp(40, "auto") == 40
 

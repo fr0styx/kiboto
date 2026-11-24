@@ -22,8 +22,15 @@ from backend.config import (
     logger,
 )
 from backend.fsutil import SETTINGS_RECHECK_SECS, read_json_cached
-from backend.hardware.fans import apply_zone_pwm, calc_curve_pwm, set_fan_pwm, usable_fan_settings
-from backend.hardware.storage import detect_chassis_model
+from backend.hardware.fans import (
+    CURVE_PROFILES,
+    PRESET_CURVES,
+    apply_zone_pwm,
+    calc_curve_pwm,
+    curve_of,
+    set_fan_pwm,
+    usable_fan_settings,
+)
 from backend.hardware.unraid import read_unraid_status
 from backend.ignored_errors import ignored
 from backend.state import Z_STATE, add_event
@@ -84,9 +91,9 @@ CRITICAL_ALERT_GAP_SECS = 900  # a return within 15 minutes of the last alert is
 
 def _drive_curve_temp(temp, profile):
     """The temperature a drive zone's curve is read at: a few degrees lower at night when
-    "Quieter at night" is on, in Automatic only (backend/services/quiet_night.py). The full-speed
-    override, fan stop, the NVMe and processor fans keep the real temperatures."""
-    if profile != "auto":
+    "Quieter at night" is on, in the modes that follow a curve (backend/services/quiet_night.py).
+    The full-speed override, fan stop, the NVMe and processor fans keep the real temperatures."""
+    if profile not in CURVE_PROFILES:
         return temp
     from backend.services import quiet_night
 
@@ -153,34 +160,11 @@ def run_fan_control(
     zero_rpm_stop_temp,
 ):
     """Zones, zero-RPM, storage interlocks and the critical-temperature override; sets the fans."""
-    # Chassis Topology Resolution
-    chassis_model = detect_chassis_model()
     sata_disks = [d for d in disks if d.get("role") == "data" or d.get("dev", "").startswith("sd")]
-
-    if chassis_model == "d4":
-        # ZettLab D4: Single exhaust fan (pwm1) cools ALL 4 bays
-        zone1_disks = sata_disks
-        zone2_disks = []
-    else:
-        # ZettLab D6U / D8U or generic: Check if disks have physical bay numbers assigned
-        midpoint_bay = 4 if chassis_model == "d8u" else 3
-        z1_bays, z2_bays = [], []
-        has_bay_info = False
-        for d in sata_disks:
-            b = d.get("bay")
-            if b is not None and isinstance(b, int) and b > 0:
-                has_bay_info = True
-                if b <= midpoint_bay:
-                    z1_bays.append(d)
-                else:
-                    z2_bays.append(d)
-        if has_bay_info and (z1_bays or z2_bays):
-            zone1_disks = z1_bays
-            zone2_disks = z2_bays
-        else:
-            midpoint = max(1, len(sata_disks) // 2)
-            zone1_disks = sata_disks[:midpoint]
-            zone2_disks = sata_disks[midpoint:]
+    # Every zone follows the hottest drive (owner's choice, S28): one warm drive speeds up all the
+    # disk fans, and the fans stop only when every drive sleeps. Before, each fan followed only the
+    # bays next to it (by bay number, or half of the drives each).
+    zone1_disks = zone2_disks = sata_disks
 
     # Standby state per zone
     if not sata_disks:
@@ -224,9 +208,11 @@ def run_fan_control(
         ignored("backend.services.fan_control.run_fan_control")
     storage_busy = mover_active or parity_active or pal_busy
 
-    curve_points = fan_cfg.get("curve_points")
-    zone1_curve = fan_cfg.get("zone1_curve_points") or curve_points
-    zone2_curve = fan_cfg.get("zone2_curve_points") or curve_points
+    # a preset mode's curve is the same for every zone; Custom may give a zone its own points
+    preset = PRESET_CURVES.get(profile)
+    curve_points = curve_of(profile, fan_cfg)
+    zone1_curve = preset or fan_cfg.get("zone1_curve_points") or curve_points
+    zone2_curve = preset or fan_cfg.get("zone2_curve_points") or curve_points
     nvme_curve = fan_cfg.get("nvme_curve_points")
     cpu_curve = fan_cfg.get("cpu_curve_points")
 
@@ -299,7 +285,8 @@ def run_fan_control(
 
     # Continuous Anti-Flutter Gating for Zero RPM
     now = time.time()
-    zero_rpm_cfg_enabled = bool(zero_rpm_enabled and profile == "auto")
+    # fans may stop while every drive sleeps in every mode that follows a curve (owner, 24 Nov 2026)
+    zero_rpm_cfg_enabled = bool(zero_rpm_enabled and profile in CURVE_PROFILES)
 
     z1_eligible = bool(
         zero_rpm_cfg_enabled
@@ -386,7 +373,7 @@ def run_fan_control(
         else:
             active_pwm3 = 0
         set_fan_pwm("auto", custom_pwms=custom_pwms, ctrl_cpu_fan=ctrl_cpu_fan, zero_rpm_allowed=False)
-    elif profile == "auto":
+    elif profile in CURVE_PROFILES:
         # Standby and Zero-RPM target and hold resolution:
         # 1. If zero-RPM ready -> drop to 0 PWM with 0s hold
         # 2. If eligible for zero-RPM (cooldown phase) -> ramp directly down to FAN_MIN_PWM without being held at peak PWM

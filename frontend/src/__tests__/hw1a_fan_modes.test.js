@@ -16,12 +16,12 @@ describe('the fan modes say what they do (SET-15, Hardware 1)', () => {
     showToast.mockClear();
   });
 
-  it('names every mode with the speed the fans really get', () => {
-    expect(FIXED_PCT).toEqual({ quiet: 37, balanced: 66, performance: 85, full: 100 });
-    expect(modeName('auto')).toBe('Automatic');
-    expect(modeName('QUIET')).toBe('Quiet · fixed 37 %');
-    expect(modeName('balanced')).toBe('Balanced · fixed 66 %');
-    expect(modeName('performance')).toBe('Performance · fixed 85 %');
+  it('names every mode: three curves, Custom, and the fixed speeds', () => {
+    expect(FIXED_PCT).toEqual({ full: 100 }); // Quiet, Balanced, Performance follow a curve (Hardware 1 Part B)
+    expect(modeName('auto')).toBe('Custom');
+    expect(modeName('QUIET')).toBe('Quiet');
+    expect(modeName('balanced')).toBe('Balanced');
+    expect(modeName('performance')).toBe('Performance');
     expect(modeName('full')).toBe('Full speed');
     expect(modeName('manual', 52.4)).toBe('Fixed 52 %');
     expect(modeName('manual')).toBe('Set by hand');
@@ -58,8 +58,8 @@ describe('the fan modes say what they do (SET-15, Hardware 1)', () => {
     const btns = [...document.querySelectorAll('.profile-btn')];
     await chooseHostMode('quiet', btns[1], btns);
     expect(api.post).toHaveBeenCalledWith('/api/system/profile', { profile: 'quiet' });
-    expect(document.getElementById('unraid-profile-current-pill').textContent).toBe('Now: Quiet · fixed 37 %');
-    expect(showToast.mock.calls.at(-1)).toEqual(['Cooling: Quiet · fixed 37 %.', 'success']);
+    expect(document.getElementById('unraid-profile-current-pill').textContent).toBe('Now: Quiet');
+    expect(showToast.mock.calls.at(-1)).toEqual(['Cooling: Quiet.', 'success']);
     api.post.mockImplementationOnce(() => Promise.reject(new Error('Forbidden')));
     await chooseHostMode('auto', btns[0], btns);
     expect(showToast.mock.calls.at(-1)).toEqual(['The cooling mode was not changed: Forbidden', 'error']);

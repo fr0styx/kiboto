@@ -11,7 +11,7 @@ from backend.state import Z_STATE
 
 def _both(monkeypatch, name, value):
     """Fan control lives in fan_control (ARC-5); the loop keeps some of the same names."""
-    monkeypatch.setattr(fc, name, value)
+    monkeypatch.setattr(fc, name, value, raising=False)  # the chassis no longer splits the fans (S28)
     if hasattr(sc, name):
         monkeypatch.setattr(sc, name, value)
 
@@ -95,18 +95,23 @@ class TestFanControl:
         assert r["z1_all_standby"] and r["z2_all_standby"]
         assert hw["set"]
 
-    def test_bays_split_into_zones(self, hw):
+    def test_every_zone_follows_the_hottest_drive(self, hw):
+        # owner's choice (S28): one warm drive speeds up all the disk fans, whatever bay it is in
         r = run([hdd("sda", 41, bay=1), hdd("sdb", 35, bay=2), hdd("sdc", 47, bay=4), hdd("sdd", 30, bay=6)])
-        assert r["t_zone1"] == 41 and r["t_zone2"] == 47
-
-    def test_without_bay_numbers_disks_are_halved(self, hw):
+        assert r["t_zone1"] == 47 and r["t_zone2"] == 47
         r = run([hdd("sda", 30), hdd("sdb", 31), hdd("sdc", 44), hdd("sdd", 45)])
-        assert r["t_zone1"] == 31 and r["t_zone2"] == 45
+        assert r["t_zone1"] == r["t_zone2"] == 45
 
-    def test_d4_has_one_zone(self, hw, monkeypatch):
-        _both(monkeypatch, "detect_chassis_model", lambda: "d4")
-        r = run([hdd("sda", 30), hdd("sdb", 44)])
-        assert r["t_zone1"] == 44 and r["t_zone2"] == 30  # zone 2 has no disks: default
+    def test_the_fans_stop_only_when_every_drive_sleeps(self, hw):
+        one_awake = [hdd("sda", 30, bay=1, standby=True), hdd("sdb", 31, bay=5)]
+        r = run(one_awake, zero_rpm_enabled=True, zero_rpm_stop_delay=0)
+        assert not r["z1_eligible"] and not r["z2_eligible"]
+        r = run(
+            [hdd("sda", 30, bay=1, standby=True), hdd("sdb", 31, bay=5, standby=True)],
+            zero_rpm_enabled=True,
+            zero_rpm_stop_delay=0,
+        )
+        assert r["z1_eligible"] and r["z2_eligible"]
 
     def test_sleeping_disks_do_not_count(self, hw):
         r = run([hdd("sda", 48, bay=1, standby=True), hdd("sdb", 33, bay=2)])
@@ -194,11 +199,45 @@ class TestFanControl:
         )
         assert r["nvme_over_ceiling"] and not r["z1_eligible"]
 
-    @pytest.mark.parametrize("profile", ["quiet", "balanced", "performance", "full", "manual"])
-    def test_manual_profiles(self, hw, profile):
+    @pytest.mark.parametrize("profile", ["full", "manual"])
+    def test_fixed_profiles(self, hw, profile):
         run([hdd("sda", 30, bay=1)], profile=profile, ctrl_cpu_fan=True, fan_cfg={"manual_pct": 50})
         assert hw["set"][-1][0] == profile
         assert all(sc.FAN_MIN_PWM <= p <= sc.FAN_MAX_PWM for _, p, *_ in hw["zone"])
+
+    @pytest.mark.parametrize("profile", ["quiet", "balanced", "performance"])
+    def test_the_modes_follow_their_curve(self, hw, profile):
+        """Quiet, Balanced and Performance follow the temperature (Hardware 1 Part B, S28)."""
+        speeds = []
+        for temp in (30, 40, 48, 54):
+            hw["zone"].clear()
+            run([hdd("sda", temp, bay=1)], profile=profile, fan_cfg={"curve_points": [[30, 100], [60, 100]]})
+            speeds.append(hw["zone"][0][1])
+        assert speeds == sorted(speeds) and speeds[0] < speeds[-1]  # faster as it gets warmer, own points ignored
+        assert all(sc.FAN_MIN_PWM <= p <= sc.FAN_MAX_PWM for p in speeds)  # never below the lowest running speed
+        assert hw["set"][-1][0] == "auto"  # the loop writes the zones' speeds
+
+    def test_quiet_is_slower_and_performance_faster_than_balanced(self, hw):
+        speed = {}
+        for profile in ("quiet", "balanced", "performance"):
+            hw["zone"].clear()
+            run([hdd("sda", 44, bay=1)], profile=profile)
+            speed[profile] = hw["zone"][0][1]
+        assert speed["quiet"] < speed["balanced"] < speed["performance"]
+
+    def test_a_sleeping_nas_may_stop_its_fans_in_every_curve_mode(self, hw):
+        asleep = [hdd("sda", 30, bay=1, standby=True), hdd("sdb", 30, bay=5, standby=True)]
+        for profile in ("quiet", "balanced", "performance", "auto"):
+            r = run(asleep, profile=profile, zero_rpm_enabled=True, zero_rpm_stop_delay=0)
+            assert r["z1_eligible"] and r["z2_eligible"], profile
+        r = run(asleep, profile="full", zero_rpm_enabled=True, zero_rpm_stop_delay=0)
+        assert not r["z1_eligible"]  # a fixed speed stays fixed
+
+    def test_a_critical_drive_forces_full_speed_in_every_mode(self, hw):
+        for profile in ("quiet", "balanced", "performance", "auto"):
+            hw["zone"].clear()
+            run([hdd("sda", 58, bay=1), hdd("sdb", 30, bay=5)], profile=profile)
+            assert {p for _, p, *_ in hw["zone"]} == {sc.FAN_MAX_PWM}, profile
 
 
 class TestHealth:

@@ -15,6 +15,7 @@ from backend.config import (
 )
 from backend.fsutil import atomic_write_json, json_locked, read_json
 from backend.hardware.fans import (
+    PRESET_CURVES,
     get_acoustic_sweep_status,
     sanitize_curve_points,
     start_acoustic_sweep,
@@ -52,7 +53,7 @@ def _load_fans():
 
 @router.get("/fans", dependencies=[Depends(require_scope("hardware:read", "system:view"))])
 def get_fans():
-    return _load_fans()
+    return {**_load_fans(), "preset_curves": PRESET_CURVES}
 
 
 @router.post("/fans", dependencies=[Depends(require_scope("hardware:fans"))])
@@ -99,6 +100,9 @@ def post_fans(req: FanConfigRequest):
             data[curve_field] = sanitize_curve_points(data[curve_field])
 
     fan_cfg = _load_fans()
+    # a point moved while a preset mode runs: that curve becomes the person's own (Custom)
+    if data.get("curve_points") and "profile" not in data and fan_cfg.get("profile") in PRESET_CURVES:
+        data["profile"] = "auto"
     fan_cfg.update(data)
     if fan_cfg.get("temp_min", 0) >= fan_cfg.get("temp_max", 100):
         fan_cfg["temp_max"] = min(100, fan_cfg["temp_min"] + 1)

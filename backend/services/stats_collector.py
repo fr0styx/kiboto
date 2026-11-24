@@ -35,7 +35,14 @@ from backend.hardware.chassis import ChassisEngine
 from backend.hardware.cpu import read_cpu_temp, read_cpu_util
 from backend.hardware.disks import poll_all_disks_smart, read_disk_temps_and_io
 from backend.hardware.docker_stats import docker_state, read_docker_containers
-from backend.hardware.fans import apply_zone_pwm, calc_curve_pwm, get_hold_remaining, read_fans, set_fan_pwm
+from backend.hardware.fans import (
+    apply_zone_pwm,
+    calc_curve_pwm,
+    curve_of,
+    get_hold_remaining,
+    read_fans,
+    set_fan_pwm,
+)
 from backend.hardware.host_telemetry import (
     get_cpu_telemetry,
     get_dmi_telemetry,
@@ -431,7 +438,7 @@ def _build_payload(
             "zone2_zero_rpm": active_pwm2 == 0,
             "storage_busy": storage_busy,
             "nvme_over_ceiling": nvme_over_ceiling,
-            "curve_points": fan_cfg.get("curve_points"),
+            "curve_points": curve_of(profile, fan_cfg),  # the one the fans follow now: a preset's or the own
             "nvme_curve_points": fan_cfg.get("nvme_curve_points"),
             "cpu_curve_points": fan_cfg.get("cpu_curve_points"),
             "zone1_curve_points": fan_cfg.get("zone1_curve_points"),
