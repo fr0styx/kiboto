@@ -224,6 +224,29 @@ def _key(name: str) -> Callable[..., Any]:
     return run
 
 
+def _fan_file(path: str, value: int) -> bool:
+    """A fan's speed or mode: only a pwm file of a hwmon device, with a value such a file takes."""
+    from backend.config import HOST_SYS
+    from backend.hardware import fans
+
+    base = re.escape((HOST_SYS or "/sys").rstrip("/"))
+    if not re.fullmatch(base + r"/class/hwmon/hwmon\d{1,3}/pwm\d{1,2}(_enable)?", path) or not 0 <= value <= 255:
+        raise ValueError("only a fan's pwm file, with a value from 0 to 255")
+    return bool(fans._write_sysfs(path, value))
+
+
+def _fan_register(channel: int, pwm_val: int) -> bool:
+    """A fan of the embedded controller on the boards that have one (fans.ZettlabMmioFanController)."""
+    from backend.hardware import fans
+
+    if channel not in (1, 2, 3) or not 0 <= pwm_val <= 255:
+        raise ValueError("channel 1 to 3, a value from 0 to 255")
+    mmio = fans.get_mmio_fan_controller()
+    if mmio is None:
+        raise ValueError("this machine has no such fan controller")
+    return bool(mmio.write_pwm(channel, pwm_val))
+
+
 def _renamed(kw: dict[str, Any]) -> None:
     from backend.hardware.pal import pool_rules
 
@@ -308,6 +331,9 @@ OPERATIONS: dict[str, Operation] = {
     "keys.unlock": Operation(_key("unlock"), {"typed": TEXT}, max_len=64),
     "keys.adopt": Operation(_key("adopt"), {"data_key": TEXT, "box": MAP}, max_len=128),
     "keys.renew": Operation(_key("renew_recovery_key"), {}),
+    # fans (ADR 0006 step 6)
+    "fans.sysfs": Operation(_fan_file, {"path": TEXT, "value": NUMBER}, max_len=128),
+    "fans.ec_pwm": Operation(_fan_register, {"channel": NUMBER, "pwm_val": NUMBER}),
     # updates and packages (ADR 0006 step 5)
     "update.start": Operation(_update_start, {"image": TEXT, "version": TEXT}, max_len=320),
     "update.back": Operation(_update_back, {"snapshot_id": TEXT}, max_len=128),

@@ -334,6 +334,15 @@ class ZettlabMmioFanController:
                 logger.warning("[FANS] The hardware helper didn't set fan %s: %s", channel, e)
                 hw_client.forget()
                 return False
+        from backend import door
+
+        try:  # the controller's registers are root's: through the host door where it runs (ADR 0006)
+            return bool(door.via("fans.ec_pwm", self._write_mmio, channel=int(channel), pwm_val=int(pwm_val)))
+        except (RuntimeError, ValueError) as e:
+            logger.warning("[FANS] Fan %s was not set: %s", channel, e)
+            return False
+
+    def _write_mmio(self, channel: int, pwm_val: int) -> bool:
         if not self._ensure_mapped():
             return False
         with self._lock:
@@ -752,6 +761,17 @@ def get_hold_remaining(pwm_key, hold_secs=FAN_DISK_HOLD_SECS):
 
 
 def _write_sysfs(path, value):
+    """A fan's speed or mode in its hwmon file; through the host door where it runs (ADR 0006)."""
+    from backend import door
+
+    try:
+        return bool(door.via("fans.sysfs", _write_sysfs_here, path=str(path), value=int(value)))
+    except (RuntimeError, ValueError) as e:  # the door refused or failed it
+        logger.warning("[FANS] %s was not written to %s: %s", value, path, e)
+        return False
+
+
+def _write_sysfs_here(path, value):
     try:
         with open(path, "w") as f:
             f.write(f"{value}\n")

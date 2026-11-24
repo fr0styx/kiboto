@@ -905,3 +905,53 @@ def test_door_first_only_where_kiboto_runs_the_machine(monkeypatch):
     monkeypatch.setattr(runtime, "managed_host", lambda: True)
     main._door_first()
     assert done == [1]
+
+
+def test_fans_go_through_the_door_where_it_runs(monkeypatch):
+    from backend.hardware import fans
+
+    calls = []
+    monkeypatch.setattr(door, "available", lambda sock=door.SOCK: True)
+    monkeypatch.setattr(door, "call", lambda op, **a: calls.append((op, a)) or True)
+    assert fans._write_sysfs("/sys/class/hwmon/hwmon2/pwm1", "120") is True
+    mmio = fans.ZettlabMmioFanController.__new__(fans.ZettlabMmioFanController)
+    assert mmio.write_pwm(2, 90) is True
+    assert calls[0] == ("fans.sysfs", {"path": "/sys/class/hwmon/hwmon2/pwm1", "value": 120})
+    assert calls[1] == ("fans.ec_pwm", {"channel": 2, "pwm_val": 90})
+    for op, args in calls:
+        host_door._checked({"op": op, "args": args})
+
+    def refused(op, **a):
+        raise door.DoorError("only a fan's pwm file", "value")
+
+    monkeypatch.setattr(door, "call", refused)
+    assert fans._write_sysfs("/sys/class/hwmon/hwmon2/pwm1", 1) is False
+    assert mmio.write_pwm(1, 50) is False
+
+
+def test_the_door_writes_only_fan_files(audit, monkeypatch):
+    from backend import config
+    from backend.hardware import fans
+
+    written = []
+    monkeypatch.setattr(config, "HOST_SYS", "/sys")
+    monkeypatch.setattr(fans, "_write_sysfs", lambda path, value: written.append((path, value)) or True)
+
+    def fan(path, value=100):
+        return host_door.handle({"op": "fans.sysfs", "args": {"path": path, "value": value}}, 0)
+
+    assert fan("/sys/class/hwmon/hwmon3/pwm2")["ok"] and fan("/sys/class/hwmon/hwmon3/pwm2_enable", 1)["ok"]
+    for bad in (
+        "/sys/power/state",
+        "/sys/class/hwmon/hwmon3/../../../power/state",
+        "/etc/passwd",
+        "/sys/class/hwmon/hwmon3/temp1_max",
+    ):
+        assert fan(bad)["ok"] is False, bad
+    assert fan("/sys/class/hwmon/hwmon3/pwm2", 999)["ok"] is False
+    assert len(written) == 2
+
+    monkeypatch.setattr(fans, "get_mmio_fan_controller", lambda: None)
+    reply = host_door.handle({"op": "fans.ec_pwm", "args": {"channel": 1, "pwm_val": 10}}, 0)
+    assert reply["ok"] is False and "no such fan controller" in reply["error"]
+    assert host_door.handle({"op": "fans.ec_pwm", "args": {"channel": 9, "pwm_val": 10}}, 0)["ok"] is False
