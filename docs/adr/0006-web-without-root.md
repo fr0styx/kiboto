@@ -1,7 +1,7 @@
 # ADR 0006: The web process without root, behind a host door
 
 - **Status:** Accepted (23 Nov 2026: the owner chose group and ACL access for people's files)
-- **Progress:** steps 1 (the door), 2 (the machine's settings, the network, the firewall), 3 (accounts, Samba, NFS), 4 (snapshots, scrubs, pools, shared folders, SMART self-tests, drive sleep), 5 (updates, going back, packages; the door checks an image's signature itself), 6 (the data key, fans; the front screen gets its device by group at step 9), 7 (the Docker proxy runs in the door) and 8 (the door hands what Kiboto makes to the folder's people; the group and the ACL come with the kiboto user at step 9) built
+- **Progress:** steps 1 (the door), 2 (the machine's settings, the network, the firewall), 3 (accounts, Samba, NFS), 4 (snapshots, scrubs, pools, shared folders, SMART self-tests, drive sleep), 5 (updates, going back, packages; the door checks an image's signature itself), 6 (the data key, fans; the front screen gets its device by group at step 9), 7 (the Docker proxy runs in the door), 8 (the door hands what Kiboto makes to the folder's people) built; step 9 can be turned on by root (`python -m backend.services.web_user on`, off by default) and runs on the test machine: files, uploads, the Recycle Bin, shared folders, snapshots, the data key and drive health work, and the 251 GET routes without parameters answer
 - **Date:** 2026-11-23
 - **Decides:** how a machine Kiboto runs keeps a bug in the web app from becoming root on the machine
 
