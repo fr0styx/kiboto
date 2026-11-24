@@ -33,6 +33,15 @@ VALID_REMOTE_NAME = re.compile(r"^[a-zA-Z0-9_][a-zA-Z0-9_\-\.]{0,63}$")
 MASKED = "********"  # what list_remotes shows instead of a secret
 
 
+def _through_door() -> bool:
+    from backend import door
+
+    return os.geteuid() != 0 and door.available()
+
+
+VFS_CACHE_MODES = ("off", "minimal", "writes", "full")
+
+
 def check_remote_name(name: str) -> str:
     if not VALID_REMOTE_NAME.fullmatch(str(name or "")):
         raise ValueError(f"Invalid remote name: '{name}'.")
@@ -841,8 +850,22 @@ class RcloneEngine:
         vfs_cache: str = "writes",
         read_only: bool = False,
     ) -> dict[str, Any]:
-        """Mounts remote storage into /mnt/remotes/{name} via FUSE."""
+        """Mounts remote storage into /mnt/remotes/{name} via FUSE. Through the host door when Kiboto
+        is not root (ADR 0006): FUSE's fusermount3 is set-uid, which the web process cannot use."""
         check_remote_name(name)
+        if _through_door():
+            from backend import door
+
+            return dict(
+                door.call(
+                    "cloud.mount",
+                    name=name,
+                    remote_path=str(remote_path or ""),
+                    vfs_cache=vfs_cache,
+                    read_only=bool(read_only),
+                    timeout=120,
+                )
+            )
         with self._lock:
             ensure_fuse_device()
             mount_path = os.path.join(self.remotes_dir, name)
@@ -931,6 +954,10 @@ class RcloneEngine:
     def unmount_remote(self, name: str) -> dict[str, Any]:
         """Unmounts /mnt/remotes/{name} and cleans up mount directory."""
         check_remote_name(name)
+        if _through_door():
+            from backend import door
+
+            return dict(door.call("cloud.unmount", name=name))
         with self._lock:
             mount_path = os.path.join(self.remotes_dir, name)
             logger.info(f"[RCLONE] Unmounting remote '{name}' at {mount_path}...")

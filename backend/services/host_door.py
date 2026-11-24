@@ -247,6 +247,22 @@ def _uncard() -> bool:
     return copy_engine.uncard_in_door()
 
 
+def _cloud_mount(name: str, remote_path: str, vfs_cache: str, read_only: bool) -> dict[str, Any]:
+    """A cloud drive of Kiboto's own list as a folder under /mnt/remotes (rclone mount)."""
+    from backend.services import rclone_engine
+
+    rclone_engine.check_remote_name(name)
+    if vfs_cache not in rclone_engine.VFS_CACHE_MODES or remote_path.startswith("-") or "\n" in remote_path:
+        raise ValueError("a cache mode rclone knows, and a path in the drive")
+    return rclone_engine.get_rclone_engine().mount_remote(name, remote_path, vfs_cache, read_only)
+
+
+def _cloud_unmount(name: str) -> dict[str, Any]:
+    from backend.services import rclone_engine
+
+    return rclone_engine.get_rclone_engine().unmount_remote(name)
+
+
 def _power(action: str) -> dict[str, Any]:
     from backend.services import host_power
 
@@ -514,6 +530,10 @@ OPERATIONS: dict[str, Operation] = {
     "hosts.apps": Operation(_apps_hosts, {}),
     "names.ensure": Operation(_names, {}),
     "power.run": Operation(_power, {"action": TEXT}, max_len=16),
+    "cloud.mount": Operation(
+        _cloud_mount, {"name": TEXT, "remote_path": TEXT, "vfs_cache": TEXT, "read_only": ON}, max_len=1024
+    ),
+    "cloud.unmount": Operation(_cloud_unmount, {"name": TEXT}, max_len=128),
     "copy.mount": Operation(_card, {"device": TEXT}, max_len=128),
     "copy.unmount": Operation(_uncard, {}),
     "pools.look": Operation(_pools_look, {}),

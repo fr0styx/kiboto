@@ -1612,3 +1612,44 @@ def test_an_encrypted_folder_whose_gocryptfs_ended_is_not_open(monkeypatch, tmp_
     ef._clear_dead(str(tmp_path / "dead"))
     ef._clear_dead(str(plain))  # not listed: left alone
     assert ran == [["umount", "-l", str(tmp_path / "dead")]]
+
+
+def test_cloud_folders_are_mounted_by_the_door_once_kiboto_is_not_root(audit, monkeypatch):
+    from backend.services import rclone_engine
+
+    eng = rclone_engine.RcloneEngine.__new__(rclone_engine.RcloneEngine)
+    calls = []
+    monkeypatch.setattr(rclone_engine.os, "geteuid", lambda: 999)
+    monkeypatch.setattr(door, "available", lambda sock=door.SOCK: True)
+    monkeypatch.setattr(door, "call", lambda op, **a: calls.append((op, a)) or {"status": "mounted"})
+    assert eng.mount_remote("gdrive", "Photos", "writes", False) == {"status": "mounted"}
+    assert eng.unmount_remote("gdrive") == {"status": "mounted"}
+    assert calls[0] == (
+        "cloud.mount",
+        {"name": "gdrive", "remote_path": "Photos", "vfs_cache": "writes", "read_only": False, "timeout": 120},
+    )
+    assert calls[1] == ("cloud.unmount", {"name": "gdrive"})
+    host_door._checked({"op": "cloud.mount", "args": {k: v for k, v in calls[0][1].items() if k != "timeout"}})
+
+    done = []
+
+    class Engine:
+        def mount_remote(self, *a):
+            done.append(a)
+            return {"status": "mounted"}
+
+        def unmount_remote(self, name):
+            done.append(name)
+            return {"status": "unmounted"}
+
+    monkeypatch.setattr(rclone_engine, "get_rclone_engine", lambda: Engine())
+
+    def mount(**changes):
+        args = {"name": "gdrive", "remote_path": "", "vfs_cache": "writes", "read_only": True, **changes}
+        return host_door.handle({"op": "cloud.mount", "args": args}, 0)
+
+    assert mount()["ok"] and done[-1] == ("gdrive", "", "writes", True)
+    for bad in ({"name": "../etc"}, {"vfs_cache": "--rc"}, {"remote_path": "--config=/etc/x"}):
+        assert mount(**bad)["ok"] is False, bad
+    assert host_door.handle({"op": "cloud.unmount", "args": {"name": "gdrive"}}, 0)["result"] == {"status": "unmounted"}
+    assert len(done) == 2
