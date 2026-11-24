@@ -75,6 +75,8 @@ class FanState:
     thermal_watchdog_engaged: bool = False
     cpu_hot_since: float = 0.0  # when the processor reached its critical temperature (0: it is under it)
     nvme_fan_hold: bool = False  # NVMe drives started the fans again: no fan stop until they cooled down
+    drive_unread_since: dict[str, float] = field(default_factory=dict)  # spinning drive -> first time without a reading
+    drive_unread_alerted: set[str] = field(default_factory=set)  # drives already counted as hot and notified
 
 
 class WakeEvent(threading.Event):
@@ -204,6 +206,8 @@ class ZettState:
     thermal_watchdog_engaged = _Alias[bool]("fans", "thermal_watchdog_engaged")
     cpu_hot_since = _Alias[float]("fans", "cpu_hot_since")
     nvme_fan_hold = _Alias[bool]("fans", "nvme_fan_hold")
+    drive_unread_since = _Alias[dict]("fans", "drive_unread_since")
+    drive_unread_alerted = _Alias[set]("fans", "drive_unread_alerted")
     lcd_renderer_active = _Alias[bool]("lcd", "renderer_active")
     lcd_renderer_name = _Alias[str]("lcd", "renderer")
     current_lcd_page = _Alias[int]("lcd", "current_page")

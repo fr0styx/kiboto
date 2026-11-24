@@ -24,16 +24,18 @@ from backend.config import (
 from backend.fsutil import SETTINGS_RECHECK_SECS, read_json_cached
 from backend.hardware.fans import (
     CURVE_PROFILES,
+    FLOOR_FULL_C,
     PRESET_CURVES,
     apply_zone_pwm,
     calc_curve_pwm,
     curve_of,
+    floor_pwm,
     set_fan_pwm,
     usable_fan_settings,
 )
 from backend.hardware.unraid import read_unraid_status
 from backend.ignored_errors import ignored
-from backend.state import Z_STATE, add_event
+from backend.state import Z_STATE, add_event, event_text
 
 
 def fan_settings():
@@ -131,6 +133,43 @@ def nvme_too_warm(t_nvme, has_nvme: bool, ceiling) -> bool:
     return Z_STATE.nvme_fan_hold
 
 
+UNREAD_HOT_SECS = 180  # a spinning drive this long without a temperature counts as hot (owner, 24 Nov 2026)
+
+
+def _floor_temp(sata_disks, hottest):
+    """The temperature the safety floor is read at: the hottest spinning drive, or the floor's
+    full-speed temperature while a spinning drive has had no reading for UNREAD_HOT_SECS (the wait
+    also covers Kiboto's own start, before the first reading). One notification per drive."""
+    now = time.time()
+    since = Z_STATE.drive_unread_since
+    unread = set()
+    for d in sata_disks:
+        t = d.get("temp")
+        if not d.get("standby", False) and (t is None or t <= 0):
+            unread.add(d.get("dev") or d.get("name") or "?")
+    for dev in [k for k in since if k not in unread]:
+        del since[dev]
+        if dev in Z_STATE.drive_unread_alerted:
+            Z_STATE.drive_unread_alerted.discard(dev)
+            logger.info("[FANS] %s has a temperature reading again.", dev)
+    hot = sorted(dev for dev in unread if now - since.setdefault(dev, now) >= UNREAD_HOT_SECS)
+    new = [dev for dev in hot if dev not in Z_STATE.drive_unread_alerted]
+    if new:
+        Z_STATE.drive_unread_alerted.update(new)
+        names = ", ".join(new)
+        logger.warning(
+            "[FANS] %s spinning without a temperature reading for 3 minutes: disk fans at full speed.", names
+        )
+        add_event(
+            "warning",
+            "Drive temperature can't be read",
+            f"{names}: spinning, but no temperature reading for 3 minutes. "
+            "The disk fans run at full speed until a reading comes back.",
+            event_text("drive_temp_unread", drives=names),
+        )
+    return FLOOR_FULL_C if hot else hottest
+
+
 def _critical_override(cpu_temp, disks) -> bool:
     """Whether fans must run at 100%; alerts and logs when that starts and logs when it ends."""
     active = Z_STATE.critical_temp_active
@@ -216,6 +255,7 @@ def run_fan_control(
 
     t_zone1 = max(active_z1, default=30)
     t_zone2 = max(active_z2, default=30)
+    floor = floor_pwm(_floor_temp(sata_disks, max(t_zone1, t_zone2)))  # under every mode while a drive spins
 
     # NVMe Drives & Wind Tunnel Cooling Override
     nvme_disks = [d for d in disks if d.get("role") == "cache" or "nvme" in d.get("dev", "")]
@@ -416,7 +456,7 @@ def run_fan_control(
             target_pwm1 = FAN_MIN_PWM
             z1_hold = 0
         else:
-            target_pwm1 = max(FAN_MIN_PWM, raw_pwm1)
+            target_pwm1 = max(FAN_MIN_PWM, raw_pwm1, floor)
             z1_hold = disk_hold_secs
 
         if z2_zero_rpm_ready:
@@ -426,7 +466,7 @@ def run_fan_control(
             target_pwm2 = FAN_MIN_PWM
             z2_hold = 0
         else:
-            target_pwm2 = max(FAN_MIN_PWM, raw_pwm2)
+            target_pwm2 = max(FAN_MIN_PWM, raw_pwm2, floor)
             z2_hold = disk_hold_secs
 
         allow_zero_z1 = z1_zero_rpm_ready
@@ -454,7 +494,7 @@ def run_fan_control(
         man_pwm = pct_map.get(profile, int((fan_cfg.get("manual_pct", 60) / 100.0) * FAN_MAX_PWM))
         if critical_override:
             man_pwm = FAN_MAX_PWM
-        man_pwm = max(FAN_MIN_PWM, min(FAN_MAX_PWM, man_pwm))
+        man_pwm = max(FAN_MIN_PWM, floor, min(FAN_MAX_PWM, man_pwm))
         active_pwm1 = apply_zone_pwm(1, man_pwm, hold_secs=disk_hold_secs, allow_zero=False)
         active_pwm2 = apply_zone_pwm(2, man_pwm, hold_secs=disk_hold_secs, allow_zero=False)
         active_pwm3 = apply_zone_pwm(3, man_pwm, hold_secs=cpu_hold_secs, allow_zero=False) if ctrl_cpu_fan else 0

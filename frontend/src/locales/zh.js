@@ -7832,6 +7832,8 @@ export default {
   "fan.field_pct": "点 {n}：风扇转速（%）",
   "fan.fields_label": "曲线点",
   "fan.use_recommended": "使用推荐曲线（均衡）",
+  "ev.drive_temp_unread.msg": "{drives}：正在运转，但已 3 分钟没有温度读数。在恢复读数之前，硬盘风扇以全速运行。",
+  "ev.drive_temp_unread.title": "无法读取硬盘温度",
   "look.true_black": "纯黑（深色模式）",
   "look.theme": "主题",
   "look.theme_lagoon": "泻湖",

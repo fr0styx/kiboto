@@ -304,6 +304,8 @@
  "ev.drive_degrading.title": "磁盘正在老化",
  "ev.drive_no_answer.msg": "硬盘 {dev} 没有响应：无法打开或未能识别。请检查数据线和电源，它可能正在损坏。",
  "ev.drive_no_answer.title": "硬盘",
+ "ev.drive_temp_unread.msg": "{drives}：正在运转，但已 3 分钟没有温度读数。在恢复读数之前，硬盘风扇以全速运行。",
+ "ev.drive_temp_unread.title": "无法读取硬盘温度",
  "ev.family_shares_closed.msg": "Kiboto 2.0.2 关闭了让孩子和访客打开所有共享文件夹的默认设置。{people} 现在只能打开与他们共享的文件夹；请在“共享文件夹”中与他们共享文件夹。",
  "ev.family_shares_closed.title": "孩子和访客：只能打开你共享的文件夹",
  "ev.fan_mmio_denied.msg": "容器无法打开 /dev/mem。请在 Unraid 中把 {rule} 添加到容器的 Extra Parameters。",

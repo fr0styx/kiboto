@@ -304,6 +304,8 @@
  "ev.drive_degrading.title": "Disque en cours d’usure",
  "ev.drive_no_answer.msg": "Le disque {dev} ne répond pas : il n'a pas pu être ouvert ou ne s'est pas identifié. Vérifiez son câble et son alimentation ; il est peut-être en train de lâcher.",
  "ev.drive_no_answer.title": "Disques",
+ "ev.drive_temp_unread.msg": "{drives} : en rotation, mais aucune température lue depuis 3 minutes. Les ventilateurs des disques tournent à pleine vitesse jusqu'au retour d'une mesure.",
+ "ev.drive_temp_unread.title": "Température du disque illisible",
  "ev.family_shares_closed.msg": "Kiboto 2.0.2 a fermé le réglage par défaut qui permettait aux enfants et aux invités d'ouvrir tous les dossiers partagés. {people} n'ouvrent plus que les dossiers partagés avec eux ; partagez un dossier avec eux dans Dossiers partagés.",
  "ev.family_shares_closed.title": "Enfants et invités : seulement les dossiers que vous partagez",
  "ev.fan_mmio_denied.msg": "Le conteneur ne peut pas ouvrir /dev/mem. Ajoutez {rule} aux Extra Parameters du conteneur dans Unraid.",

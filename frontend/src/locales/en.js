@@ -7832,6 +7832,8 @@ export default {
   "fan.field_pct": "Point {n}: fan speed in %",
   "fan.fields_label": "Curve points",
   "fan.use_recommended": "Use the recommended curve (Balanced)",
+  "ev.drive_temp_unread.msg": "{drives}: spinning, but no temperature reading for 3 minutes. The disk fans run at full speed until a reading comes back.",
+  "ev.drive_temp_unread.title": "Drive temperature can't be read",
   "look.true_black": "True black (dark mode)",
   "look.theme": "Theme",
   "look.theme_lagoon": "Lagoon",

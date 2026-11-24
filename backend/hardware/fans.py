@@ -606,6 +606,23 @@ PRESET_CURVES = {
 # the modes that follow a curve ("auto" is Custom: the person's own points); full and manual are fixed
 CURVE_PROFILES = ("auto", *PRESET_CURVES)
 
+# The safety floor (owner, 24 Nov 2026): while any hard drive spins, the disk fans never run slower
+# than this, whatever the mode, the person's own curve or the fixed speed says: the lowest running
+# speed up to FLOOR_START_C, rising to full speed at FLOOR_FULL_C, under the 55 °C limit. The fans may
+# still stop while every drive sleeps (Zero RPM); the floor is read at spinning drives only.
+FLOOR_START_C = 45
+FLOOR_FULL_C = 52
+
+
+def floor_pwm(temp) -> int:
+    """The lowest disk-fan PWM at the hottest spinning drive's temperature."""
+    if temp is None or temp <= FLOOR_START_C:
+        return FAN_MIN_PWM
+    if temp >= FLOOR_FULL_C:
+        return FAN_MAX_PWM
+    ratio = (temp - FLOOR_START_C) / float(FLOOR_FULL_C - FLOOR_START_C)
+    return int(FAN_MIN_PWM + ratio * (FAN_MAX_PWM - FAN_MIN_PWM))
+
 
 def curve_of(profile, fan_cfg):
     """The curve a mode follows: its preset, else the person's own points (Custom); None for none."""

@@ -304,6 +304,8 @@
  "ev.drive_degrading.title": "Disco desgastándose",
  "ev.drive_no_answer.msg": "El disco {dev} no responde: no se pudo abrir o no se identificó. Revisa su cable y su alimentación; puede estar fallando.",
  "ev.drive_no_answer.title": "Discos",
+ "ev.drive_temp_unread.msg": "{drives}: gira, pero lleva 3 minutos sin lectura de temperatura. Los ventiladores de los discos van a toda velocidad hasta que vuelva una lectura.",
+ "ev.drive_temp_unread.title": "No se puede leer la temperatura del disco",
  "ev.family_shares_closed.msg": "Kiboto 2.0.2 cerró la opción por defecto que dejaba a niños e invitados abrir todas las carpetas compartidas. {people} ahora solo abren las carpetas compartidas con ellos; comparte una carpeta con ellos en Carpetas compartidas.",
  "ev.family_shares_closed.title": "Niños e invitados: solo las carpetas que compartas",
  "ev.fan_mmio_denied.msg": "El contenedor no puede abrir /dev/mem. Añade {rule} a los Extra Parameters del contenedor en Unraid.",

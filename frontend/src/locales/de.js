@@ -7832,6 +7832,8 @@ export default {
   "fan.field_pct": "Punkt {n}: Lüfterdrehzahl in %",
   "fan.fields_label": "Kurvenpunkte",
   "fan.use_recommended": "Die empfohlene Kurve verwenden (Ausgewogen)",
+  "ev.drive_temp_unread.msg": "{drives}: läuft, aber seit 3 Minuten ohne Temperaturwert. Die Laufwerkslüfter laufen mit voller Drehzahl, bis wieder ein Wert kommt.",
+  "ev.drive_temp_unread.title": "Laufwerkstemperatur nicht lesbar",
   "look.true_black": "Echtes Schwarz (dunkler Modus)",
   "look.theme": "Design",
   "look.theme_lagoon": "Lagune",

@@ -304,6 +304,8 @@
  "ev.drive_degrading.title": "Laufwerk verschleißt",
  "ev.drive_no_answer.msg": "Laufwerk {dev} antwortet nicht: Es ließ sich nicht öffnen oder hat sich nicht gemeldet. Prüfen Sie Kabel und Stromversorgung; es könnte ausfallen.",
  "ev.drive_no_answer.title": "Laufwerke",
+ "ev.drive_temp_unread.msg": "{drives}: läuft, aber seit 3 Minuten ohne Temperaturwert. Die Laufwerkslüfter laufen mit voller Drehzahl, bis wieder ein Wert kommt.",
+ "ev.drive_temp_unread.title": "Laufwerkstemperatur nicht lesbar",
  "ev.family_shares_closed.msg": "Kiboto 2.0.2 hat die Voreinstellung geschlossen, mit der Kinder und Gäste jeden freigegebenen Ordner öffnen konnten. {people} öffnen jetzt nur die Ordner, die mit ihnen geteilt sind; geben Sie unter Freigegebene Ordner einen Ordner für sie frei.",
  "ev.family_shares_closed.title": "Kinder und Gäste: nur die Ordner, die Sie freigeben",
  "ev.fan_mmio_denied.msg": "Der Container darf /dev/mem nicht öffnen. Fügen Sie {rule} in Unraid zu den Extra Parameters des Containers hinzu.",

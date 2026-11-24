@@ -7832,6 +7832,8 @@ export default {
   "fan.field_pct": "Point {n} : vitesse du ventilateur en %",
   "fan.fields_label": "Points de la courbe",
   "fan.use_recommended": "Utiliser la courbe recommandée (Équilibré)",
+  "ev.drive_temp_unread.msg": "{drives} : en rotation, mais aucune température lue depuis 3 minutes. Les ventilateurs des disques tournent à pleine vitesse jusqu'au retour d'une mesure.",
+  "ev.drive_temp_unread.title": "Température du disque illisible",
   "look.true_black": "Noir pur (mode sombre)",
   "look.theme": "Thème",
   "look.theme_lagoon": "Lagon",

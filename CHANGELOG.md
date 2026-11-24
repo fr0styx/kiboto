@@ -40,6 +40,8 @@ The Hardware page fits a phone: the screen theme buttons stay on the screen, sli
 
 On machines whose front screen runs through the graphics driver, Kiboto no longer makes the kernel log graphics-memory warnings each time it starts a helper process.
 
+A spinning drive whose temperature can't be read for 3 minutes now runs the disk fans at full speed and sends a notification, instead of counting as cool. Idle drives no longer lose their temperature between reads.
+
 #### Security
 
 On a machine of its own, failed sign-ins to shared folders over the network now count like web sign-ins: 20 in 15 minutes block the address for an hour, and they show under History, Sign-ins.
@@ -79,6 +81,8 @@ The Kib window now has the same colours and toolbar as the other app windows.
 Fans: Quiet, Balanced and Performance now follow the temperature of the hottest drive on a curve (Balanced is the recommended one), and fan stop while every drive sleeps works in each of them. Custom keeps your own curve; Full stays fixed.
 
 Hardware is one page: cooling, fans, lights, front screen and card copies one under the other, without tabs or the slide-out drawer.
+
+While a hard drive spins, the disk fans never run below a safety floor: lowest speed up to 45 °C, full speed at 52 °C, in every fan mode and under your own curve. Fans can still stop while every drive sleeps (Zero RPM).
 
 ## v2.0.6 (2026-11-23)
 ### 🖥️ Kiboto on a machine of its own (preview), with its settings kept safe on every pool

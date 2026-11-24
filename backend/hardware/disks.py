@@ -906,7 +906,10 @@ def read_disk_temps_and_io(allow_sync_poll: bool = False):
 
         prev_t, prev_h = Z_STATE.cached_smart_data.get(dev_name, (None, "ok"))
         last_ok = Z_STATE.cached_smart_time.get(dev_name, 0.0)
-        if prev_t is not None and (now - last_ok) > 180.0 and prev_h != "standby":
+        # a reading counts until the disk's next read is overdue by 3 minutes: an idle spinning
+        # disk is read every 30 minutes, and dropping its reading after 3 left it without one
+        read_every = SMART_POLL_INTERVAL_NVME if is_nvme else _hdd_interval(dev_name, now)
+        if prev_t is not None and (now - last_ok) > read_every + 180.0 and prev_h != "standby":
             temp = None
             health = "unknown"
         else:

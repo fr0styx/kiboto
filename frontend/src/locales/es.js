@@ -7832,6 +7832,8 @@ export default {
   "fan.field_pct": "Punto {n}: velocidad del ventilador en %",
   "fan.fields_label": "Puntos de la curva",
   "fan.use_recommended": "Usar la curva recomendada (Equilibrado)",
+  "ev.drive_temp_unread.msg": "{drives}: gira, pero lleva 3 minutos sin lectura de temperatura. Los ventiladores de los discos van a toda velocidad hasta que vuelva una lectura.",
+  "ev.drive_temp_unread.title": "No se puede leer la temperatura del disco",
   "look.true_black": "Negro puro (modo oscuro)",
   "look.theme": "Tema",
   "look.theme_lagoon": "Laguna",
