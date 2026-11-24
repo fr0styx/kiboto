@@ -137,11 +137,50 @@ def _master_key(cipher: str, password: str) -> str:
     return "-".join(raw[i : i + 8] for i in range(0, 64, 8))
 
 
+def _through_door() -> bool:
+    """Once Kiboto is not root (ADR 0006) it cannot mount: fusermount3 is set-uid and the web
+    process gets no new privileges. The host door mounts and unmounts the folders then."""
+    from backend import door
+
+    return os.geteuid() != 0 and door.available()
+
+
 def _mount(cipher: str, plain: str, password: str, read_only: bool = False) -> None:
+    if _through_door():
+        from backend import door
+
+        try:
+            door.call("crypt.mount", cipher=cipher, plain=plain, password=password, read_only=bool(read_only))
+        except door.DoorError as e:
+            raise EncryptedFolderError(str(e)) from None
+        return
+    _mount_here(cipher, plain, password, read_only)
+
+
+def mount_in_door(cipher: str, plain: str, password: str, read_only: bool) -> bool:
+    """The door's side (crypt.mount): an encrypted folder inside the storage folders onto Kiboto's
+    own mount point for it, open to the web user (-allow_other; gocryptfs as root gives new files
+    to whoever makes them)."""
+    from backend.services.samba_engine import validate_share_path
+
+    if os.path.dirname(os.path.normpath(plain)) != ei.ROOT or not os.path.basename(plain):
+        raise ValueError("an encrypted folder opens only in Kiboto's own place for it")
+    validate_share_path(cipher)
+    if not os.path.isfile(os.path.join(cipher, "gocryptfs.conf")):
+        raise ValueError("that is not an encrypted folder")
+    try:
+        _mount_here(cipher, plain, password, read_only, others=True)
+    except EncryptedFolderError as e:
+        raise RuntimeError(str(e)) from None
+    return True
+
+
+def _mount_here(cipher: str, plain: str, password: str, read_only: bool = False, others: bool = False) -> None:
     os.makedirs(plain, exist_ok=True)
     # no -nosyslog: the mount runs on in the background, and with it the background process would
     # keep our output pipes open, so this call would wait out its time limit (NREL-4)
-    code, out = _run(["-q", *(["-ro"] if read_only else []), cipher, plain], password)
+    flags = ["-q", *(["-ro"] if read_only else []), *(["-allow_other"] if others else [])]
+    code, out = _run([*flags, cipher, plain], password)
     if code == 12:
         raise EncryptedFolderError("That password is wrong.")
     if code != 0:
@@ -250,12 +289,43 @@ def lock(name: str) -> dict[str, Any]:
 
     if name not in _settings()["folders"]:
         raise KeyError(name)
-    if is_unlocked(name):
-        r = run_bounded(["fusermount3", "-u", plain_path(name)], timeout=30, capture_output=True, text=True)
-        if r.returncode != 0:
-            raise EncryptedFolderError("Something still has a file open in it. Close it and lock the folder again.")
+    if is_unlocked(name) and not _unmount(plain_path(name)):
+        raise EncryptedFolderError("Something still has a file open in it. Close it and lock the folder again.")
     _drop_mount_point(name)
     return {"name": name, "unlocked": False}
+
+
+def _unmount(path: str) -> bool:
+    """The folder at `path` closed: by the door when Kiboto is not root (it also removes the empty
+    mount point, which is root's), else here."""
+    if _through_door():
+        from backend import door
+
+        try:
+            return bool(door.call("crypt.unmount", path=path))
+        except door.DoorError as e:
+            logger.info("[Encrypted folders] %s stays open: %s", path, e)
+            return False
+    from backend.proc import run_bounded
+
+    return run_bounded(["fusermount3", "-u", path], timeout=30, capture_output=True, text=True).returncode == 0
+
+
+def unmount_in_door(path: str) -> bool:
+    """The door's side (crypt.unmount): only one of Kiboto's own mount points for these folders."""
+    from backend.fsutil import open_encrypted
+    from backend.proc import run_bounded
+
+    if os.path.dirname(os.path.normpath(path)) != ei.ROOT or not os.path.basename(path):
+        raise ValueError("only an encrypted folder's own mount point")
+    if path in open_encrypted():
+        if run_bounded(["umount", path], timeout=30, capture_output=True, text=True).returncode != 0:
+            raise RuntimeError("Something still has a file open in it.")
+    try:
+        os.rmdir(path)
+    except OSError:
+        logger.debug("encrypted_folders: %s left", path, exc_info=True)
+    return True
 
 
 def _drop_mount_point(name: str) -> None:
@@ -317,9 +387,7 @@ def set_people(name: str, people: list[str] | None) -> dict[str, Any]:
 
 
 def lock_path(path: str) -> None:
-    from backend.proc import run_bounded
-
-    run_bounded(["fusermount3", "-u", path], timeout=30, capture_output=True, text=True)
+    _unmount(path)
     try:
         os.rmdir(path)
     except OSError:

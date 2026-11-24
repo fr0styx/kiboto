@@ -1343,3 +1343,71 @@ def test_the_door_makes_a_home_only_for_someone_who_is_there(audit, monkeypatch)
     for bad in ("bob", "../root", ""):
         assert home(bad)["ok"] is False, bad
     assert home("ana", -1)["ok"] is False
+
+
+def test_encrypted_folders_are_mounted_by_the_door_once_kiboto_is_not_root(audit, monkeypatch):
+    from backend.services import encrypted_folders as ef
+
+    calls = []
+    monkeypatch.setattr(ef.os, "geteuid", lambda: 999)
+    monkeypatch.setattr(door, "available", lambda sock=door.SOCK: True)
+    monkeypatch.setattr(door, "call", lambda op, **a: calls.append((op, sorted(a))) or True)
+    ef._mount("/mnt/storage/tank/photos/.enc/fam", "/mnt/encrypted/fam", "a long pass phrase", read_only=True)
+    assert ef._unmount("/mnt/encrypted/fam") is True
+    assert calls == [("crypt.mount", ["cipher", "password", "plain", "read_only"]), ("crypt.unmount", ["path"])]
+
+    def wrong(op, **a):
+        raise door.DoorError("That password is wrong.", "runtime")
+
+    monkeypatch.setattr(door, "call", wrong)
+    with pytest.raises(ef.EncryptedFolderError, match="wrong"):
+        ef._mount("/c", "/mnt/encrypted/fam", "x")
+    assert ef._unmount("/mnt/encrypted/fam") is False
+
+
+def test_the_door_mounts_only_an_encrypted_folder_onto_kibotos_place(audit, monkeypatch, tmp_path):
+    from backend import config, fsutil, proc
+    from backend.services import encrypted_folders as ef
+
+    store = tmp_path / "storage"
+    cipher = store / "photos" / ".enc" / "fam"
+    cipher.mkdir(parents=True)
+    (cipher / "gocryptfs.conf").write_text("{}")
+    monkeypatch.setattr(config, "POOL_PATH", str(store))
+    monkeypatch.setattr(config, "ALLOWED_BROWSE_ROOTS", [])
+    mounted = []
+    monkeypatch.setattr(ef, "_mount_here", lambda c, p, pw, ro=False, others=False: mounted.append((c, p, ro, others)))
+    root = ef.ei.ROOT
+
+    def mount(c, p, ro=False):
+        return host_door.handle(
+            {"op": "crypt.mount", "args": {"cipher": c, "plain": p, "password": "pw pw pw pw", "read_only": ro}}, 0
+        )
+
+    assert mount(str(cipher), f"{root}/fam")["ok"] and mounted == [(str(cipher), f"{root}/fam", False, True)]
+    for c, p in (
+        (str(cipher), "/etc/fam"),
+        (str(cipher), f"{root}/a/b"),
+        ("/etc", f"{root}/fam"),
+        (str(store / "photos"), f"{root}/fam"),
+    ):
+        assert mount(c, p)["ok"] is False, (c, p)
+
+    def refused(c, p, pw, ro=False, others=False):
+        raise ef.EncryptedFolderError("That password is wrong.")
+
+    monkeypatch.setattr(ef, "_mount_here", refused)
+    reply = mount(str(cipher), f"{root}/fam")
+    assert reply["ok"] is False and reply["kind"] == "runtime" and "wrong" in reply["error"]
+
+    ran = []
+    import subprocess
+
+    monkeypatch.setattr(fsutil, "open_encrypted", lambda: {f"{root}/fam"})
+    monkeypatch.setattr(
+        proc, "run_bounded", lambda cmd, **kw: ran.append(cmd) or subprocess.CompletedProcess(cmd, 0, "", "")
+    )
+    assert host_door.handle({"op": "crypt.unmount", "args": {"path": f"{root}/fam"}}, 0)["ok"] and ran == [
+        ["umount", f"{root}/fam"]
+    ]
+    assert host_door.handle({"op": "crypt.unmount", "args": {"path": "/mnt/storage"}}, 0)["ok"] is False

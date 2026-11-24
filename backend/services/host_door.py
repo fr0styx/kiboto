@@ -217,6 +217,18 @@ def _home(username: str, quota_bytes: int, only_limit: bool = False) -> dict[str
     return user_spaces.home_in_door(username, quota_bytes, only_limit)
 
 
+def _crypt_mount(cipher: str, plain: str, password: str, read_only: bool) -> bool:
+    from backend.services import encrypted_folders
+
+    return encrypted_folders.mount_in_door(cipher, plain, password, read_only)
+
+
+def _crypt_unmount(path: str) -> bool:
+    from backend.services import encrypted_folders
+
+    return encrypted_folders.unmount_in_door(path)
+
+
 def _power(action: str) -> dict[str, Any]:
     from backend.services import host_power
 
@@ -483,6 +495,10 @@ OPERATIONS: dict[str, Operation] = {
     "hosts.apps": Operation(_apps_hosts, {}),
     "names.ensure": Operation(_names, {}),
     "power.run": Operation(_power, {"action": TEXT}, max_len=16),
+    "crypt.mount": Operation(
+        _crypt_mount, {"cipher": TEXT, "plain": TEXT, "password": TEXT, "read_only": ON}, max_len=4096
+    ),
+    "crypt.unmount": Operation(_crypt_unmount, {"path": TEXT}, max_len=4096),
     "files.home": Operation(_home, {"username": TEXT, "quota_bytes": NUMBER, "only_limit": ON}, max_len=64),
     "usb.open": Operation(_usb("open_disk"), {"device": TEXT}, max_len=128),
     "usb.eject": Operation(_usb("eject"), {"path": TEXT}, max_len=4096),
