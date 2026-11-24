@@ -98,6 +98,80 @@ export function expandTo6Points(pts) {
   return current;
 }
 
+/** A point typed into the curve fields, kept in order like a dragged one (Hardware 2): the first
+ *  and last stay at 30 and 60 °C, each point between its neighbours, a hotter point never slower. */
+export function applyTypedPoint(pts, i, temp, pct) {
+  const out = pts.map((p) => [...p]);
+  let tt = Math.round(Number(temp));
+  let pp = Math.round(Number(pct));
+  if (!Number.isFinite(tt)) tt = out[i][0];
+  if (!Number.isFinite(pp)) pp = out[i][1];
+  tt = Math.max(30, Math.min(60, tt));
+  pp = Math.max(0, Math.min(100, pp));
+  if (i > 0) tt = Math.max(tt, out[i - 1][0] + 1);
+  if (i < out.length - 1) tt = Math.min(tt, out[i + 1][0] - 1);
+  if (i === 0) tt = 30;
+  if (i === out.length - 1) tt = 60;
+  if (i > 0) pp = Math.max(pp, out[i - 1][1]);
+  if (i < out.length - 1) pp = Math.min(pp, out[i + 1][1]);
+  out[i] = [tt, pp];
+  return out;
+}
+
+function numberField(doc, i, part, max, label) {
+  const input = Object.assign(doc.createElement('input'), {
+    type: 'number',
+    min: part === 'temp' ? '30' : '0',
+    max,
+    step: '1',
+  });
+  input.dataset.point = String(i);
+  input.dataset.part = part;
+  input.setAttribute('aria-label', label);
+  return input;
+}
+
+function unit(doc, text) {
+  const span = doc.createElement('span');
+  span.className = 'curve-field-unit';
+  span.textContent = text;
+  return span;
+}
+
+/** The six points as number fields beside the graph (Hardware 2): typed values, or the graph's. */
+export function renderCurveFields(doc = document) {
+  const box = doc.getElementById('curve-fields');
+  if (!box) return;
+  const pts = state.curvePoints || [];
+  if (box.children.length !== pts.length) {
+    box.replaceChildren(
+      ...pts.map((_, i) => {
+        const row = doc.createElement('div');
+        row.className = 'curve-field';
+        const name = doc.createElement('span');
+        name.textContent = t('fan.field_point', 'Point {n}', { n: i + 1 });
+        const temp = numberField(
+          doc,
+          i,
+          'temp',
+          '60',
+          t('fan.field_temp', 'Point {n}: temperature in °C', { n: i + 1 })
+        );
+        temp.readOnly = i === 0 || i === pts.length - 1; // the curve always spans 30 to 60 °C
+        const pct = numberField(doc, i, 'pct', '100', t('fan.field_pct', 'Point {n}: fan speed in %', { n: i + 1 }));
+        row.append(name, temp, unit(doc, '°C'), pct, unit(doc, '%'));
+        return row;
+      })
+    );
+  }
+  box.querySelectorAll('input').forEach((node) => {
+    const input = /** @type {HTMLInputElement} */ (node);
+    if (doc.activeElement === input) return;
+    const point = pts[Number(input.dataset.point)] || [];
+    input.value = String(input.dataset.part === 'temp' ? point[0] : point[1]);
+  });
+}
+
 export function renderCurveLines() {
   const pts = state.curvePoints;
   const path = $('curve-svg-path') || $('fan-curve-path');
@@ -132,6 +206,7 @@ export function renderCurveLines() {
     }
   }
 
+  renderCurveFields();
   const rangeVal = $('fan-curve-range-val');
   if (rangeVal && pts.length >= 2) {
     rangeVal.textContent = t('fan.ramp', 'Ramp: {from}°C – {to}°C ({low}% – {high}%)', {
@@ -668,6 +743,21 @@ export function initFanControl() {
     window.addEventListener('mouseup', onCurveUp);
     window.addEventListener('touchend', onCurveUp);
   }
+
+  // the curve's points typed in (Hardware 2), saved like a dragged point; the recommended curve is Balanced
+  $('curve-fields')?.addEventListener('change', (e) => {
+    const input = /** @type {HTMLInputElement} */ (e.target);
+    if (!input?.dataset?.point) return;
+    const [temp, pct] = /** @type {NodeListOf<HTMLInputElement>} */ (
+      input.closest('.curve-field').querySelectorAll('input')
+    );
+    const pts = applyTypedPoint(state.curvePoints, Number(input.dataset.point), temp.value, pct.value);
+    state.setCurvePoints(pts);
+    renderCurveLines();
+    _lastCurveSaveTime = Date.now();
+    saveChange({ curve_points: pts.map((p) => [...p]) });
+  });
+  $('btn-curve-recommended')?.addEventListener('click', () => saveChange(modeChange('balanced')));
 
   const presetSelect = /** @type {HTMLSelectElement} */ ($('fan-preset-select'));
   const btnSavePreset = $('btn-save-fan-preset');

@@ -264,3 +264,10 @@
 .hw-power-row .front-panel-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px; border: 1px solid var(--kb-line-7); border-radius: 10px; font-weight: 600; color: var(--kb-text-strong); }
 #mgmt-sec-hardware #btn-toggle-led,
 #mgmt-sec-hardware #btn-toggle-screen-power { display: none; }
+/* the curve's points as number fields (Hardware 2) */
+.curve-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 6px 14px; margin: 10px 0; }
+.curve-field { display: flex; align-items: center; gap: 6px; font-size: var(--kb-fs-xs); color: var(--kb-text-soft); }
+.curve-field > span:first-child { min-width: 52px; }
+.curve-field input { width: 58px; padding: 4px 6px; border-radius: 6px; border: 1px solid var(--kb-line-12); background: var(--kb-shade-25); color: var(--kb-text-strong); font: inherit; }
+.curve-field input[readonly] { opacity: 0.7; }
+.curve-field-unit { margin-right: 6px; }
