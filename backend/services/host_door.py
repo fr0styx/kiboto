@@ -199,6 +199,18 @@ def _update_back(snapshot_id: str) -> None:
     native_update.start_back(snapshot_id, config.DATA_DIR, config.PORT)
 
 
+def _usb(name: str) -> Callable[..., Any]:
+    """usb_mount's own: it opens only a USB disk it lists itself, and ejects only a folder of
+    /mnt/disks with a disk mounted on it."""
+
+    def run(**kw: Any) -> Any:
+        from backend.hardware import usb_mount
+
+        return getattr(usb_mount, name)(**kw)
+
+    return run
+
+
 def _power(action: str) -> dict[str, Any]:
     from backend.services import host_power
 
@@ -465,6 +477,8 @@ OPERATIONS: dict[str, Operation] = {
     "hosts.apps": Operation(_apps_hosts, {}),
     "names.ensure": Operation(_names, {}),
     "power.run": Operation(_power, {"action": TEXT}, max_len=16),
+    "usb.open": Operation(_usb("open_disk"), {"device": TEXT}, max_len=128),
+    "usb.eject": Operation(_usb("eject"), {"path": TEXT}, max_len=4096),
     "vm.tap": Operation(_vm_tap, {"name": TEXT, "bridge": TEXT}, max_len=32),
     "vm.tap_remove": Operation(_vm_tap_remove, {"name": TEXT}, max_len=32),
     "packages.check": Operation(_packages("check"), {}),

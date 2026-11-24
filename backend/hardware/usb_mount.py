@@ -83,7 +83,16 @@ def _target(disk: dict[str, Any]) -> str:
 
 
 def open_disk(device: str, do: Runner | None = None) -> str:
-    """Mounts a listed USB disk under /mnt/disks and returns where."""
+    """Mounts a listed USB disk under /mnt/disks and returns where. Through the host door where it
+    runs (ADR 0006); the door lists the disks again itself."""
+    if do is None:
+        from backend import door
+
+        return str(door.via("usb.open", lambda device: _open_disk_here(device), device=device))
+    return _open_disk_here(device, do)
+
+
+def _open_disk_here(device: str, do: Runner | None = None) -> str:
     do = do or run
     disk = next((d for d in unmounted(do) if d["device"] == device), None)
     if disk is None:
@@ -102,7 +111,17 @@ def open_disk(device: str, do: Runner | None = None) -> str:
 
 
 def eject(path: str, do: Runner | None = None) -> None:
-    """Unmounts a USB disk opened under /mnt/disks, after everything is written to it."""
+    """Unmounts a USB disk opened under /mnt/disks, after everything is written to it. Through the
+    host door where it runs (ADR 0006)."""
+    if do is None:
+        from backend import door
+
+        door.via("usb.eject", lambda path: _eject_here(path), path=path)
+        return
+    _eject_here(path, do)
+
+
+def _eject_here(path: str, do: Runner | None = None) -> None:
     do = do or run
     real = _open_disk_folder(path)
     if not real:

@@ -1262,3 +1262,30 @@ def test_restart_and_shut_down_go_through_the_door(audit, monkeypatch):
     monkeypatch.setattr(host_power, "run", lambda action, cmds=None: ran.append(action) or {"started": True})
     assert host_door.handle({"op": "power.run", "args": {"action": "shutdown"}}, 0)["ok"] and ran == ["shutdown"]
     assert host_door.handle({"op": "power.run", "args": {"action": "halt -f"}}, 0)["ok"] is False
+
+
+def test_usb_disks_are_opened_and_ejected_by_the_door(audit, monkeypatch):
+    from backend.hardware import usb_mount
+
+    calls = []
+    monkeypatch.setattr(door, "available", lambda sock=door.SOCK: True)
+    monkeypatch.setattr(door, "call", lambda op, **a: calls.append((op, a)) or "/mnt/disks/STICK")
+    assert usb_mount.open_disk("/dev/sdb1") == "/mnt/disks/STICK"
+    usb_mount.eject("/mnt/disks/STICK")
+    assert calls == [("usb.open", {"device": "/dev/sdb1"}), ("usb.eject", {"path": "/mnt/disks/STICK"})]
+    for op, args in calls:
+        host_door._checked({"op": op, "args": args})
+
+    def refused(op, **a):
+        raise door.DoorError("That is not a USB disk Kiboto can open here.", "value")
+
+    monkeypatch.setattr(door, "call", refused)
+    with pytest.raises(ValueError, match="not a USB disk"):
+        usb_mount.open_disk("/dev/sda")
+
+    opened = []
+    monkeypatch.setattr(usb_mount, "open_disk", lambda device: opened.append(device) or "/mnt/disks/x")
+    monkeypatch.setattr(usb_mount, "eject", lambda path: opened.append(path))
+    assert host_door.handle({"op": "usb.open", "args": {"device": "/dev/sdb1"}}, 0)["result"] == "/mnt/disks/x"
+    assert host_door.handle({"op": "usb.eject", "args": {"path": "/mnt/disks/x"}}, 0)["ok"]
+    assert opened == ["/dev/sdb1", "/mnt/disks/x"]
