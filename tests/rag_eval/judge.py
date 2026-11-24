@@ -87,7 +87,8 @@ def grade_one(row: dict[str, Any], host: str, model: str, post: Post = _post, co
         "stream": False,
         "format": "json",
         "think": False,
-        "options": {"temperature": 0, "num_ctx": 8192},
+        # on the CPU: the iGPU already carries the model servers, and more on it froze the NAS
+        "options": {"temperature": 0, "num_ctx": 8192, "num_gpu": 0},
         "messages": [{"role": "system", "content": SYSTEM}, {"role": "user", "content": prompt(row, corpus)}],
     }
     try:

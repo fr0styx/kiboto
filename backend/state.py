@@ -73,6 +73,8 @@ class FanState:
     critical_temp_active: bool = False
     critical_alert_at: float = 0.0  # when the last critical-temperature alert was raised
     thermal_watchdog_engaged: bool = False
+    cpu_hot_since: float = 0.0  # when the processor reached its critical temperature (0: it is under it)
+    nvme_fan_hold: bool = False  # NVMe drives started the fans again: no fan stop until they cooled down
 
 
 class WakeEvent(threading.Event):
@@ -200,6 +202,8 @@ class ZettState:
     critical_temp_active = _Alias[bool]("fans", "critical_temp_active")
     critical_alert_at = _Alias[float]("fans", "critical_alert_at")
     thermal_watchdog_engaged = _Alias[bool]("fans", "thermal_watchdog_engaged")
+    cpu_hot_since = _Alias[float]("fans", "cpu_hot_since")
+    nvme_fan_hold = _Alias[bool]("fans", "nvme_fan_hold")
     lcd_renderer_active = _Alias[bool]("lcd", "renderer_active")
     lcd_renderer_name = _Alias[str]("lcd", "renderer")
     current_lcd_page = _Alias[int]("lcd", "current_page")

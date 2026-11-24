@@ -82,6 +82,12 @@ def fan_settings():
 
 
 CPU_CRITICAL_C = 80
+# the processor counts as critical once it has stayed at 80 °C this long: a spike of a second or two
+# (a busy moment) had sent the disk fans to full speed for their whole 30-second hold (fan run, 24 Nov)
+CPU_SUSTAIN_SECS = 6
+# NVMe drives that started the stopped fans again let them stop only this far under the ceiling:
+# without a gap the fans stopped and started every minute or two around it (fan run, 24 Nov)
+NVME_RELEASE_C = 8
 # once forced to 100%, fans stay there until the CPU is this far under 80 °C and every disk this far
 # under its limit: a CPU hovering at 80 had flipped the override (and raised an alert) every few seconds
 CPU_RELEASE_C = 5
@@ -100,6 +106,31 @@ def _drive_curve_temp(temp, profile):
     return quiet_night.curve_temp(temp)
 
 
+def _cpu_critical(cpu_temp, active) -> bool:
+    """The processor at its critical temperature for CPU_SUSTAIN_SECS (at once while the override
+    already runs: it then ends only CPU_RELEASE_C under it). A drive at its limit needs no wait."""
+    if cpu_temp is None or cpu_temp < CPU_CRITICAL_C - (CPU_RELEASE_C if active else 0):
+        Z_STATE.cpu_hot_since = 0.0
+        return False
+    now = time.time()
+    if not Z_STATE.cpu_hot_since:
+        Z_STATE.cpu_hot_since = now
+    return active or now - Z_STATE.cpu_hot_since >= CPU_SUSTAIN_SECS
+
+
+def nvme_too_warm(t_nvme, has_nvme: bool, ceiling) -> bool:
+    """Whether the NVMe drives keep the fans from stopping: at the ceiling (or unreadable), and,
+    once they made the fans start again, until they are NVME_RELEASE_C under it."""
+    if not has_nvme:
+        Z_STATE.nvme_fan_hold = False
+        return False
+    if t_nvme is None or t_nvme >= ceiling:
+        Z_STATE.nvme_fan_hold = True
+    elif t_nvme <= ceiling - NVME_RELEASE_C:
+        Z_STATE.nvme_fan_hold = False
+    return Z_STATE.nvme_fan_hold
+
+
 def _critical_override(cpu_temp, disks) -> bool:
     """Whether fans must run at 100%; alerts and logs when that starts and logs when it ends."""
     active = Z_STATE.critical_temp_active
@@ -113,7 +144,7 @@ def _critical_override(cpu_temp, disks) -> bool:
             crit_thresh = NVME_CRITICAL_TEMP if is_nvme else HDD_CRITICAL_TEMP
             if t >= crit_thresh - (DISK_RELEASE_C if active else 0):
                 hot_disks.append((d, crit_thresh))
-    cpu_critical = cpu_temp is not None and cpu_temp >= CPU_CRITICAL_C - (CPU_RELEASE_C if active else 0)
+    cpu_critical = _cpu_critical(cpu_temp, active)
     critical = bool(hot_disks) or cpu_critical
     if critical and not active:
         reasons = []
@@ -191,7 +222,7 @@ def run_fan_control(
     active_nvme = [d["temp"] for d in nvme_disks if d.get("temp") is not None and not d.get("standby", False)]
     t_nvme = max(active_nvme, default=None)
     # If NVMe disks are installed, their temperature must be readable and below ceiling to allow Zero RPM
-    nvme_over_ceiling = bool(nvme_disks and (t_nvme is None or t_nvme >= zero_rpm_nvme_ceiling))
+    nvme_over_ceiling = nvme_too_warm(t_nvme, bool(nvme_disks), zero_rpm_nvme_ceiling)
 
     # Universal Storage Subsystem Interlocks (Unraid Parity/Mover, Btrfs Scrub, ZFS Scrub)
     unraid_status = read_unraid_status()

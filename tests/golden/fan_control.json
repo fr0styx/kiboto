@@ -272,14 +272,9 @@
  "d4|all_asleep|cpu88|zero0|busy0": {
   "calls": [
    [
-    "event",
-    "error",
-    "Critical Temperature Threshold Reached"
-   ],
-   [
     "zone",
     1,
-    183,
+    58,
     [
      [
       "allow_zero",
@@ -294,7 +289,7 @@
    [
     "zone",
     2,
-    183,
+    58,
     [
      [
       "allow_zero",
@@ -334,8 +329,8 @@
      [
       "custom_pwms",
       {
-       "pwm1": 183,
-       "pwm2": 183,
+       "pwm1": 58,
+       "pwm2": 58,
        "pwm3": 183
       }
      ],
@@ -347,8 +342,8 @@
    ]
   ],
   "result": {
-   "active_pwm1": 183,
-   "active_pwm2": 183,
+   "active_pwm1": 58,
+   "active_pwm2": 58,
    "active_pwm3": 183,
    "now": 1790000000.0,
    "nvme_over_ceiling": false,
@@ -367,37 +362,32 @@
  "d4|all_asleep|cpu88|zero1|busy0": {
   "calls": [
    [
-    "event",
-    "error",
-    "Critical Temperature Threshold Reached"
-   ],
-   [
     "zone",
     1,
-    183,
+    0,
     [
      [
       "allow_zero",
-      false
+      true
      ],
      [
       "hold_secs",
-      60
+      0
      ]
     ]
    ],
    [
     "zone",
     2,
-    183,
+    0,
     [
      [
       "allow_zero",
-      false
+      true
      ],
      [
       "hold_secs",
-      60
+      0
      ]
     ]
    ],
@@ -429,21 +419,21 @@
      [
       "custom_pwms",
       {
-       "pwm1": 183,
-       "pwm2": 183,
+       "pwm1": 0,
+       "pwm2": 0,
        "pwm3": 183
       }
      ],
      [
       "zero_rpm_allowed",
-      false
+      true
      ]
     ]
    ]
   ],
   "result": {
-   "active_pwm1": 183,
-   "active_pwm2": 183,
+   "active_pwm1": 0,
+   "active_pwm2": 0,
    "active_pwm3": 183,
    "now": 1790000000.0,
    "nvme_over_ceiling": false,
@@ -452,24 +442,19 @@
    "t_zone1": 30,
    "t_zone2": 30,
    "z1_all_standby": true,
-   "z1_eligible": false,
+   "z1_eligible": true,
    "z1_rem": 0,
    "z2_all_standby": true,
-   "z2_eligible": false,
+   "z2_eligible": true,
    "z2_rem": 0
   }
  },
  "d4|all_asleep|cpu88|zero1|busy1": {
   "calls": [
    [
-    "event",
-    "error",
-    "Critical Temperature Threshold Reached"
-   ],
-   [
     "zone",
     1,
-    183,
+    58,
     [
      [
       "allow_zero",
@@ -484,7 +469,7 @@
    [
     "zone",
     2,
-    183,
+    58,
     [
      [
       "allow_zero",
@@ -524,8 +509,8 @@
      [
       "custom_pwms",
       {
-       "pwm1": 183,
-       "pwm2": 183,
+       "pwm1": 58,
+       "pwm2": 58,
        "pwm3": 183
       }
      ],
@@ -537,8 +522,8 @@
    ]
   ],
   "result": {
-   "active_pwm1": 183,
-   "active_pwm2": 183,
+   "active_pwm1": 58,
+   "active_pwm2": 58,
    "active_pwm3": 183,
    "now": 1790000000.0,
    "nvme_over_ceiling": false,
@@ -827,14 +812,9 @@
  "d4|all_flash_cold|cpu88|zero0|busy0": {
   "calls": [
    [
-    "event",
-    "error",
-    "Critical Temperature Threshold Reached"
-   ],
-   [
     "zone",
     1,
-    183,
+    58,
     [
      [
       "allow_zero",
@@ -849,7 +829,7 @@
    [
     "zone",
     2,
-    183,
+    58,
     [
      [
       "allow_zero",
@@ -889,8 +869,8 @@
      [
       "custom_pwms",
       {
-       "pwm1": 183,
-       "pwm2": 183,
+       "pwm1": 58,
+       "pwm2": 58,
        "pwm3": 183
       }
      ],
@@ -902,8 +882,8 @@
    ]
   ],
   "result": {
-   "active_pwm1": 183,
-   "active_pwm2": 183,
+   "active_pwm1": 58,
+   "active_pwm2": 58,
    "active_pwm3": 183,
    "now": 1790000000.0,
    "nvme_over_ceiling": false,
@@ -922,37 +902,32 @@
  "d4|all_flash_cold|cpu88|zero1|busy0": {
   "calls": [
    [
-    "event",
-    "error",
-    "Critical Temperature Threshold Reached"
-   ],
-   [
     "zone",
     1,
-    183,
+    0,
     [
      [
       "allow_zero",
-      false
+      true
      ],
      [
       "hold_secs",
-      60
+      0
      ]
     ]
    ],
    [
     "zone",
     2,
-    183,
+    0,
     [
      [
       "allow_zero",
-      false
+      true
      ],
      [
       "hold_secs",
-      60
+      0
      ]
     ]
    ],
@@ -984,21 +959,21 @@
      [
       "custom_pwms",
       {
-       "pwm1": 183,
-       "pwm2": 183,
+       "pwm1": 0,
+       "pwm2": 0,
        "pwm3": 183
       }
      ],
      [
       "zero_rpm_allowed",
-      false
+      true
      ]
     ]
    ]
   ],
   "result": {
-   "active_pwm1": 183,
-   "active_pwm2": 183,
+   "active_pwm1": 0,
+   "active_pwm2": 0,
    "active_pwm3": 183,
    "now": 1790000000.0,
    "nvme_over_ceiling": false,
@@ -1007,24 +982,19 @@
    "t_zone1": 30,
    "t_zone2": 30,
    "z1_all_standby": true,
-   "z1_eligible": false,
+   "z1_eligible": true,
    "z1_rem": 0,
    "z2_all_standby": true,
-   "z2_eligible": false,
+   "z2_eligible": true,
    "z2_rem": 0
   }
  },
  "d4|all_flash_cold|cpu88|zero1|busy1": {
   "calls": [
    [
-    "event",
-    "error",
-    "Critical Temperature Threshold Reached"
-   ],
-   [
     "zone",
     1,
-    183,
+    58,
     [
      [
       "allow_zero",
@@ -1039,7 +1009,7 @@
    [
     "zone",
     2,
-    183,
+    58,
     [
      [
       "allow_zero",
@@ -1079,8 +1049,8 @@
      [
       "custom_pwms",
       {
-       "pwm1": 183,
-       "pwm2": 183,
+       "pwm1": 58,
+       "pwm2": 58,
        "pwm3": 183
       }
      ],
@@ -1092,8 +1062,8 @@
    ]
   ],
   "result": {
-   "active_pwm1": 183,
-   "active_pwm2": 183,
+   "active_pwm1": 58,
+   "active_pwm2": 58,
    "active_pwm3": 183,
    "now": 1790000000.0,
    "nvme_over_ceiling": false,
@@ -1382,14 +1352,9 @@
  "d4|all_flash_hot|cpu88|zero0|busy0": {
   "calls": [
    [
-    "event",
-    "error",
-    "Critical Temperature Threshold Reached"
-   ],
-   [
     "zone",
     1,
-    183,
+    133,
     [
      [
       "allow_zero",
@@ -1404,7 +1369,7 @@
    [
     "zone",
     2,
-    183,
+    133,
     [
      [
       "allow_zero",
@@ -1444,8 +1409,8 @@
      [
       "custom_pwms",
       {
-       "pwm1": 183,
-       "pwm2": 183,
+       "pwm1": 133,
+       "pwm2": 133,
        "pwm3": 183
       }
      ],
@@ -1457,8 +1422,8 @@
    ]
   ],
   "result": {
-   "active_pwm1": 183,
-   "active_pwm2": 183,
+   "active_pwm1": 133,
+   "active_pwm2": 133,
    "active_pwm3": 183,
    "now": 1790000000.0,
    "nvme_over_ceiling": true,
@@ -1477,14 +1442,9 @@
  "d4|all_flash_hot|cpu88|zero1|busy0": {
   "calls": [
    [
-    "event",
-    "error",
-    "Critical Temperature Threshold Reached"
-   ],
-   [
     "zone",
     1,
-    183,
+    133,
     [
      [
       "allow_zero",
@@ -1499,7 +1459,7 @@
    [
     "zone",
     2,
-    183,
+    133,
     [
      [
       "allow_zero",
@@ -1539,8 +1499,8 @@
      [
       "custom_pwms",
       {
-       "pwm1": 183,
-       "pwm2": 183,
+       "pwm1": 133,
+       "pwm2": 133,
        "pwm3": 183
       }
      ],
@@ -1552,8 +1512,8 @@
    ]
   ],
   "result": {
-   "active_pwm1": 183,
-   "active_pwm2": 183,
+   "active_pwm1": 133,
+   "active_pwm2": 133,
    "active_pwm3": 183,
    "now": 1790000000.0,
    "nvme_over_ceiling": true,
@@ -1572,14 +1532,9 @@
  "d4|all_flash_hot|cpu88|zero1|busy1": {
   "calls": [
    [
-    "event",
-    "error",
-    "Critical Temperature Threshold Reached"
-   ],
-   [
     "zone",
     1,
-    183,
+    133,
     [
      [
       "allow_zero",
@@ -1594,7 +1549,7 @@
    [
     "zone",
     2,
-    183,
+    133,
     [
      [
       "allow_zero",
@@ -1634,8 +1589,8 @@
      [
       "custom_pwms",
       {
-       "pwm1": 183,
-       "pwm2": 183,
+       "pwm1": 133,
+       "pwm2": 133,
        "pwm3": 183
       }
      ],
@@ -1647,8 +1602,8 @@
    ]
   ],
   "result": {
-   "active_pwm1": 183,
-   "active_pwm2": 183,
+   "active_pwm1": 133,
+   "active_pwm2": 133,
    "active_pwm3": 183,
    "now": 1790000000.0,
    "nvme_over_ceiling": true,
@@ -2507,14 +2462,9 @@
  "d4|mixed_active|cpu88|zero0|busy0": {
   "calls": [
    [
-    "event",
-    "error",
-    "Critical Temperature Threshold Reached"
-   ],
-   [
     "zone",
     1,
-    183,
+    153,
     [
      [
       "allow_zero",
@@ -2529,7 +2479,7 @@
    [
     "zone",
     2,
-    183,
+    153,
     [
      [
       "allow_zero",
@@ -2569,8 +2519,8 @@
      [
       "custom_pwms",
       {
-       "pwm1": 183,
-       "pwm2": 183,
+       "pwm1": 153,
+       "pwm2": 153,
        "pwm3": 183
       }
      ],
@@ -2582,8 +2532,8 @@
    ]
   ],
   "result": {
-   "active_pwm1": 183,
-   "active_pwm2": 183,
+   "active_pwm1": 153,
+   "active_pwm2": 153,
    "active_pwm3": 183,
    "now": 1790000000.0,
    "nvme_over_ceiling": false,
@@ -2602,14 +2552,9 @@
  "d4|mixed_active|cpu88|zero1|busy0": {
   "calls": [
    [
-    "event",
-    "error",
-    "Critical Temperature Threshold Reached"
-   ],
-   [
     "zone",
     1,
-    183,
+    153,
     [
      [
       "allow_zero",
@@ -2624,7 +2569,7 @@
    [
     "zone",
     2,
-    183,
+    153,
     [
      [
       "allow_zero",
@@ -2664,8 +2609,8 @@
      [
       "custom_pwms",
       {
-       "pwm1": 183,
-       "pwm2": 183,
+       "pwm1": 153,
+       "pwm2": 153,
        "pwm3": 183
       }
      ],
@@ -2677,8 +2622,8 @@
    ]
   ],
   "result": {
-   "active_pwm1": 183,
-   "active_pwm2": 183,
+   "active_pwm1": 153,
+   "active_pwm2": 153,
    "active_pwm3": 183,
    "now": 1790000000.0,
    "nvme_over_ceiling": false,
@@ -2697,14 +2642,9 @@
  "d4|mixed_active|cpu88|zero1|busy1": {
   "calls": [
    [
-    "event",
-    "error",
-    "Critical Temperature Threshold Reached"
-   ],
-   [
     "zone",
     1,
-    183,
+    153,
     [
      [
       "allow_zero",
@@ -2719,7 +2659,7 @@
    [
     "zone",
     2,
-    183,
+    153,
     [
      [
       "allow_zero",
@@ -2759,8 +2699,8 @@
      [
       "custom_pwms",
       {
-       "pwm1": 183,
-       "pwm2": 183,
+       "pwm1": 153,
+       "pwm2": 153,
        "pwm3": 183
       }
      ],
@@ -2772,8 +2712,8 @@
    ]
   ],
   "result": {
-   "active_pwm1": 183,
-   "active_pwm2": 183,
+   "active_pwm1": 153,
+   "active_pwm2": 153,
    "active_pwm3": 183,
    "now": 1790000000.0,
    "nvme_over_ceiling": false,
@@ -3062,14 +3002,9 @@
  "d4|zone1_asleep|cpu88|zero0|busy0": {
   "calls": [
    [
-    "event",
-    "error",
-    "Critical Temperature Threshold Reached"
-   ],
-   [
     "zone",
     1,
-    183,
+    118,
     [
      [
       "allow_zero",
@@ -3084,7 +3019,7 @@
    [
     "zone",
     2,
-    183,
+    118,
     [
      [
       "allow_zero",
@@ -3124,8 +3059,8 @@
      [
       "custom_pwms",
       {
-       "pwm1": 183,
-       "pwm2": 183,
+       "pwm1": 118,
+       "pwm2": 118,
        "pwm3": 183
       }
      ],
@@ -3137,8 +3072,8 @@
    ]
   ],
   "result": {
-   "active_pwm1": 183,
-   "active_pwm2": 183,
+   "active_pwm1": 118,
+   "active_pwm2": 118,
    "active_pwm3": 183,
    "now": 1790000000.0,
    "nvme_over_ceiling": false,
@@ -3157,14 +3092,9 @@
  "d4|zone1_asleep|cpu88|zero1|busy0": {
   "calls": [
    [
-    "event",
-    "error",
-    "Critical Temperature Threshold Reached"
-   ],
-   [
     "zone",
     1,
-    183,
+    118,
     [
      [
       "allow_zero",
@@ -3179,7 +3109,7 @@
    [
     "zone",
     2,
-    183,
+    118,
     [
      [
       "allow_zero",
@@ -3219,8 +3149,8 @@
      [
       "custom_pwms",
       {
-       "pwm1": 183,
-       "pwm2": 183,
+       "pwm1": 118,
+       "pwm2": 118,
        "pwm3": 183
       }
      ],
@@ -3232,8 +3162,8 @@
    ]
   ],
   "result": {
-   "active_pwm1": 183,
-   "active_pwm2": 183,
+   "active_pwm1": 118,
+   "active_pwm2": 118,
    "active_pwm3": 183,
    "now": 1790000000.0,
    "nvme_over_ceiling": false,
@@ -3252,14 +3182,9 @@
  "d4|zone1_asleep|cpu88|zero1|busy1": {
   "calls": [
    [
-    "event",
-    "error",
-    "Critical Temperature Threshold Reached"
-   ],
-   [
     "zone",
     1,
-    183,
+    118,
     [
      [
       "allow_zero",
@@ -3274,7 +3199,7 @@
    [
     "zone",
     2,
-    183,
+    118,
     [
      [
       "allow_zero",
@@ -3314,8 +3239,8 @@
      [
       "custom_pwms",
       {
-       "pwm1": 183,
-       "pwm2": 183,
+       "pwm1": 118,
+       "pwm2": 118,
        "pwm3": 183
       }
      ],
@@ -3327,8 +3252,8 @@
    ]
   ],
   "result": {
-   "active_pwm1": 183,
-   "active_pwm2": 183,
+   "active_pwm1": 118,
+   "active_pwm2": 118,
    "active_pwm3": 183,
    "now": 1790000000.0,
    "nvme_over_ceiling": false,
@@ -3617,14 +3542,9 @@
  "d6u|all_asleep|cpu88|zero0|busy0": {
   "calls": [
    [
-    "event",
-    "error",
-    "Critical Temperature Threshold Reached"
-   ],
-   [
     "zone",
     1,
-    183,
+    58,
     [
      [
       "allow_zero",
@@ -3639,7 +3559,7 @@
    [
     "zone",
     2,
-    183,
+    58,
     [
      [
       "allow_zero",
@@ -3679,8 +3599,8 @@
      [
       "custom_pwms",
       {
-       "pwm1": 183,
-       "pwm2": 183,
+       "pwm1": 58,
+       "pwm2": 58,
        "pwm3": 183
       }
      ],
@@ -3692,8 +3612,8 @@
    ]
   ],
   "result": {
-   "active_pwm1": 183,
-   "active_pwm2": 183,
+   "active_pwm1": 58,
+   "active_pwm2": 58,
    "active_pwm3": 183,
    "now": 1790000000.0,
    "nvme_over_ceiling": false,
@@ -3712,37 +3632,32 @@
  "d6u|all_asleep|cpu88|zero1|busy0": {
   "calls": [
    [
-    "event",
-    "error",
-    "Critical Temperature Threshold Reached"
-   ],
-   [
     "zone",
     1,
-    183,
+    0,
     [
      [
       "allow_zero",
-      false
+      true
      ],
      [
       "hold_secs",
-      60
+      0
      ]
     ]
    ],
    [
     "zone",
     2,
-    183,
+    0,
     [
      [
       "allow_zero",
-      false
+      true
      ],
      [
       "hold_secs",
-      60
+      0
      ]
     ]
    ],
@@ -3774,21 +3689,21 @@
      [
       "custom_pwms",
       {
-       "pwm1": 183,
-       "pwm2": 183,
+       "pwm1": 0,
+       "pwm2": 0,
        "pwm3": 183
       }
      ],
      [
       "zero_rpm_allowed",
-      false
+      true
      ]
     ]
    ]
   ],
   "result": {
-   "active_pwm1": 183,
-   "active_pwm2": 183,
+   "active_pwm1": 0,
+   "active_pwm2": 0,
    "active_pwm3": 183,
    "now": 1790000000.0,
    "nvme_over_ceiling": false,
@@ -3797,24 +3712,19 @@
    "t_zone1": 30,
    "t_zone2": 30,
    "z1_all_standby": true,
-   "z1_eligible": false,
+   "z1_eligible": true,
    "z1_rem": 0,
    "z2_all_standby": true,
-   "z2_eligible": false,
+   "z2_eligible": true,
    "z2_rem": 0
   }
  },
  "d6u|all_asleep|cpu88|zero1|busy1": {
   "calls": [
    [
-    "event",
-    "error",
-    "Critical Temperature Threshold Reached"
-   ],
-   [
     "zone",
     1,
-    183,
+    58,
     [
      [
       "allow_zero",
@@ -3829,7 +3739,7 @@
    [
     "zone",
     2,
-    183,
+    58,
     [
      [
       "allow_zero",
@@ -3869,8 +3779,8 @@
      [
       "custom_pwms",
       {
-       "pwm1": 183,
-       "pwm2": 183,
+       "pwm1": 58,
+       "pwm2": 58,
        "pwm3": 183
       }
      ],
@@ -3882,8 +3792,8 @@
    ]
   ],
   "result": {
-   "active_pwm1": 183,
-   "active_pwm2": 183,
+   "active_pwm1": 58,
+   "active_pwm2": 58,
    "active_pwm3": 183,
    "now": 1790000000.0,
    "nvme_over_ceiling": false,
@@ -4172,14 +4082,9 @@
  "d6u|all_flash_cold|cpu88|zero0|busy0": {
   "calls": [
    [
-    "event",
-    "error",
-    "Critical Temperature Threshold Reached"
-   ],
-   [
     "zone",
     1,
-    183,
+    58,
     [
      [
       "allow_zero",
@@ -4194,7 +4099,7 @@
    [
     "zone",
     2,
-    183,
+    58,
     [
      [
       "allow_zero",
@@ -4234,8 +4139,8 @@
      [
       "custom_pwms",
       {
-       "pwm1": 183,
-       "pwm2": 183,
+       "pwm1": 58,
+       "pwm2": 58,
        "pwm3": 183
       }
      ],
@@ -4247,8 +4152,8 @@
    ]
   ],
   "result": {
-   "active_pwm1": 183,
-   "active_pwm2": 183,
+   "active_pwm1": 58,
+   "active_pwm2": 58,
    "active_pwm3": 183,
    "now": 1790000000.0,
    "nvme_over_ceiling": false,
@@ -4267,37 +4172,32 @@
  "d6u|all_flash_cold|cpu88|zero1|busy0": {
   "calls": [
    [
-    "event",
-    "error",
-    "Critical Temperature Threshold Reached"
-   ],
-   [
     "zone",
     1,
-    183,
+    0,
     [
      [
       "allow_zero",
-      false
+      true
      ],
      [
       "hold_secs",
-      60
+      0
      ]
     ]
    ],
    [
     "zone",
     2,
-    183,
+    0,
     [
      [
       "allow_zero",
-      false
+      true
      ],
      [
       "hold_secs",
-      60
+      0
      ]
     ]
    ],
@@ -4329,21 +4229,21 @@
      [
       "custom_pwms",
       {
-       "pwm1": 183,
-       "pwm2": 183,
+       "pwm1": 0,
+       "pwm2": 0,
        "pwm3": 183
       }
      ],
      [
       "zero_rpm_allowed",
-      false
+      true
      ]
     ]
    ]
   ],
   "result": {
-   "active_pwm1": 183,
-   "active_pwm2": 183,
+   "active_pwm1": 0,
+   "active_pwm2": 0,
    "active_pwm3": 183,
    "now": 1790000000.0,
    "nvme_over_ceiling": false,
@@ -4352,24 +4252,19 @@
    "t_zone1": 30,
    "t_zone2": 30,
    "z1_all_standby": true,
-   "z1_eligible": false,
+   "z1_eligible": true,
    "z1_rem": 0,
    "z2_all_standby": true,
-   "z2_eligible": false,
+   "z2_eligible": true,
    "z2_rem": 0
   }
  },
  "d6u|all_flash_cold|cpu88|zero1|busy1": {
   "calls": [
    [
-    "event",
-    "error",
-    "Critical Temperature Threshold Reached"
-   ],
-   [
     "zone",
     1,
-    183,
+    58,
     [
      [
       "allow_zero",
@@ -4384,7 +4279,7 @@
    [
     "zone",
     2,
-    183,
+    58,
     [
      [
       "allow_zero",
@@ -4424,8 +4319,8 @@
      [
       "custom_pwms",
       {
-       "pwm1": 183,
-       "pwm2": 183,
+       "pwm1": 58,
+       "pwm2": 58,
        "pwm3": 183
       }
      ],
@@ -4437,8 +4332,8 @@
    ]
   ],
   "result": {
-   "active_pwm1": 183,
-   "active_pwm2": 183,
+   "active_pwm1": 58,
+   "active_pwm2": 58,
    "active_pwm3": 183,
    "now": 1790000000.0,
    "nvme_over_ceiling": false,
@@ -4727,14 +4622,9 @@
  "d6u|all_flash_hot|cpu88|zero0|busy0": {
   "calls": [
    [
-    "event",
-    "error",
-    "Critical Temperature Threshold Reached"
-   ],
-   [
     "zone",
     1,
-    183,
+    133,
     [
      [
       "allow_zero",
@@ -4749,7 +4639,7 @@
    [
     "zone",
     2,
-    183,
+    133,
     [
      [
       "allow_zero",
@@ -4789,8 +4679,8 @@
      [
       "custom_pwms",
       {
-       "pwm1": 183,
-       "pwm2": 183,
+       "pwm1": 133,
+       "pwm2": 133,
        "pwm3": 183
       }
      ],
@@ -4802,8 +4692,8 @@
    ]
   ],
   "result": {
-   "active_pwm1": 183,
-   "active_pwm2": 183,
+   "active_pwm1": 133,
+   "active_pwm2": 133,
    "active_pwm3": 183,
    "now": 1790000000.0,
    "nvme_over_ceiling": true,
@@ -4822,14 +4712,9 @@
  "d6u|all_flash_hot|cpu88|zero1|busy0": {
   "calls": [
    [
-    "event",
-    "error",
-    "Critical Temperature Threshold Reached"
-   ],
-   [
     "zone",
     1,
-    183,
+    133,
     [
      [
       "allow_zero",
@@ -4844,7 +4729,7 @@
    [
     "zone",
     2,
-    183,
+    133,
     [
      [
       "allow_zero",
@@ -4884,8 +4769,8 @@
      [
       "custom_pwms",
       {
-       "pwm1": 183,
-       "pwm2": 183,
+       "pwm1": 133,
+       "pwm2": 133,
        "pwm3": 183
       }
      ],
@@ -4897,8 +4782,8 @@
    ]
   ],
   "result": {
-   "active_pwm1": 183,
-   "active_pwm2": 183,
+   "active_pwm1": 133,
+   "active_pwm2": 133,
    "active_pwm3": 183,
    "now": 1790000000.0,
    "nvme_over_ceiling": true,
@@ -4917,14 +4802,9 @@
  "d6u|all_flash_hot|cpu88|zero1|busy1": {
   "calls": [
    [
-    "event",
-    "error",
-    "Critical Temperature Threshold Reached"
-   ],
-   [
     "zone",
     1,
-    183,
+    133,
     [
      [
       "allow_zero",
@@ -4939,7 +4819,7 @@
    [
     "zone",
     2,
-    183,
+    133,
     [
      [
       "allow_zero",
@@ -4979,8 +4859,8 @@
      [
       "custom_pwms",
       {
-       "pwm1": 183,
-       "pwm2": 183,
+       "pwm1": 133,
+       "pwm2": 133,
        "pwm3": 183
       }
      ],
@@ -4992,8 +4872,8 @@
    ]
   ],
   "result": {
-   "active_pwm1": 183,
-   "active_pwm2": 183,
+   "active_pwm1": 133,
+   "active_pwm2": 133,
    "active_pwm3": 183,
    "now": 1790000000.0,
    "nvme_over_ceiling": true,
@@ -5852,14 +5732,9 @@
  "d6u|mixed_active|cpu88|zero0|busy0": {
   "calls": [
    [
-    "event",
-    "error",
-    "Critical Temperature Threshold Reached"
-   ],
-   [
     "zone",
     1,
-    183,
+    153,
     [
      [
       "allow_zero",
@@ -5874,7 +5749,7 @@
    [
     "zone",
     2,
-    183,
+    153,
     [
      [
       "allow_zero",
@@ -5914,8 +5789,8 @@
      [
       "custom_pwms",
       {
-       "pwm1": 183,
-       "pwm2": 183,
+       "pwm1": 153,
+       "pwm2": 153,
        "pwm3": 183
       }
      ],
@@ -5927,8 +5802,8 @@
    ]
   ],
   "result": {
-   "active_pwm1": 183,
-   "active_pwm2": 183,
+   "active_pwm1": 153,
+   "active_pwm2": 153,
    "active_pwm3": 183,
    "now": 1790000000.0,
    "nvme_over_ceiling": false,
@@ -5947,14 +5822,9 @@
  "d6u|mixed_active|cpu88|zero1|busy0": {
   "calls": [
    [
-    "event",
-    "error",
-    "Critical Temperature Threshold Reached"
-   ],
-   [
     "zone",
     1,
-    183,
+    153,
     [
      [
       "allow_zero",
@@ -5969,7 +5839,7 @@
    [
     "zone",
     2,
-    183,
+    153,
     [
      [
       "allow_zero",
@@ -6009,8 +5879,8 @@
      [
       "custom_pwms",
       {
-       "pwm1": 183,
-       "pwm2": 183,
+       "pwm1": 153,
+       "pwm2": 153,
        "pwm3": 183
       }
      ],
@@ -6022,8 +5892,8 @@
    ]
   ],
   "result": {
-   "active_pwm1": 183,
-   "active_pwm2": 183,
+   "active_pwm1": 153,
+   "active_pwm2": 153,
    "active_pwm3": 183,
    "now": 1790000000.0,
    "nvme_over_ceiling": false,
@@ -6042,14 +5912,9 @@
  "d6u|mixed_active|cpu88|zero1|busy1": {
   "calls": [
    [
-    "event",
-    "error",
-    "Critical Temperature Threshold Reached"
-   ],
-   [
     "zone",
     1,
-    183,
+    153,
     [
      [
       "allow_zero",
@@ -6064,7 +5929,7 @@
    [
     "zone",
     2,
-    183,
+    153,
     [
      [
       "allow_zero",
@@ -6104,8 +5969,8 @@
      [
       "custom_pwms",
       {
-       "pwm1": 183,
-       "pwm2": 183,
+       "pwm1": 153,
+       "pwm2": 153,
        "pwm3": 183
       }
      ],
@@ -6117,8 +5982,8 @@
    ]
   ],
   "result": {
-   "active_pwm1": 183,
-   "active_pwm2": 183,
+   "active_pwm1": 153,
+   "active_pwm2": 153,
    "active_pwm3": 183,
    "now": 1790000000.0,
    "nvme_over_ceiling": false,
@@ -6407,14 +6272,9 @@
  "d6u|zone1_asleep|cpu88|zero0|busy0": {
   "calls": [
    [
-    "event",
-    "error",
-    "Critical Temperature Threshold Reached"
-   ],
-   [
     "zone",
     1,
-    183,
+    118,
     [
      [
       "allow_zero",
@@ -6429,7 +6289,7 @@
    [
     "zone",
     2,
-    183,
+    118,
     [
      [
       "allow_zero",
@@ -6469,8 +6329,8 @@
      [
       "custom_pwms",
       {
-       "pwm1": 183,
-       "pwm2": 183,
+       "pwm1": 118,
+       "pwm2": 118,
        "pwm3": 183
       }
      ],
@@ -6482,8 +6342,8 @@
    ]
   ],
   "result": {
-   "active_pwm1": 183,
-   "active_pwm2": 183,
+   "active_pwm1": 118,
+   "active_pwm2": 118,
    "active_pwm3": 183,
    "now": 1790000000.0,
    "nvme_over_ceiling": false,
@@ -6502,14 +6362,9 @@
  "d6u|zone1_asleep|cpu88|zero1|busy0": {
   "calls": [
    [
-    "event",
-    "error",
-    "Critical Temperature Threshold Reached"
-   ],
-   [
     "zone",
     1,
-    183,
+    118,
     [
      [
       "allow_zero",
@@ -6524,7 +6379,7 @@
    [
     "zone",
     2,
-    183,
+    118,
     [
      [
       "allow_zero",
@@ -6564,8 +6419,8 @@
      [
       "custom_pwms",
       {
-       "pwm1": 183,
-       "pwm2": 183,
+       "pwm1": 118,
+       "pwm2": 118,
        "pwm3": 183
       }
      ],
@@ -6577,8 +6432,8 @@
    ]
   ],
   "result": {
-   "active_pwm1": 183,
-   "active_pwm2": 183,
+   "active_pwm1": 118,
+   "active_pwm2": 118,
    "active_pwm3": 183,
    "now": 1790000000.0,
    "nvme_over_ceiling": false,
@@ -6597,14 +6452,9 @@
  "d6u|zone1_asleep|cpu88|zero1|busy1": {
   "calls": [
    [
-    "event",
-    "error",
-    "Critical Temperature Threshold Reached"
-   ],
-   [
     "zone",
     1,
-    183,
+    118,
     [
      [
       "allow_zero",
@@ -6619,7 +6469,7 @@
    [
     "zone",
     2,
-    183,
+    118,
     [
      [
       "allow_zero",
@@ -6659,8 +6509,8 @@
      [
       "custom_pwms",
       {
-       "pwm1": 183,
-       "pwm2": 183,
+       "pwm1": 118,
+       "pwm2": 118,
        "pwm3": 183
       }
      ],
@@ -6672,8 +6522,8 @@
    ]
   ],
   "result": {
-   "active_pwm1": 183,
-   "active_pwm2": 183,
+   "active_pwm1": 118,
+   "active_pwm2": 118,
    "active_pwm3": 183,
    "now": 1790000000.0,
    "nvme_over_ceiling": false,
@@ -6962,14 +6812,9 @@
  "d8u|all_asleep|cpu88|zero0|busy0": {
   "calls": [
    [
-    "event",
-    "error",
-    "Critical Temperature Threshold Reached"
-   ],
-   [
     "zone",
     1,
-    183,
+    58,
     [
      [
       "allow_zero",
@@ -6984,7 +6829,7 @@
    [
     "zone",
     2,
-    183,
+    58,
     [
      [
       "allow_zero",
@@ -7024,8 +6869,8 @@
      [
       "custom_pwms",
       {
-       "pwm1": 183,
-       "pwm2": 183,
+       "pwm1": 58,
+       "pwm2": 58,
        "pwm3": 183
       }
      ],
@@ -7037,8 +6882,8 @@
    ]
   ],
   "result": {
-   "active_pwm1": 183,
-   "active_pwm2": 183,
+   "active_pwm1": 58,
+   "active_pwm2": 58,
    "active_pwm3": 183,
    "now": 1790000000.0,
    "nvme_over_ceiling": false,
@@ -7057,37 +6902,32 @@
  "d8u|all_asleep|cpu88|zero1|busy0": {
   "calls": [
    [
-    "event",
-    "error",
-    "Critical Temperature Threshold Reached"
-   ],
-   [
     "zone",
     1,
-    183,
+    0,
     [
      [
       "allow_zero",
-      false
+      true
      ],
      [
       "hold_secs",
-      60
+      0
      ]
     ]
    ],
    [
     "zone",
     2,
-    183,
+    0,
     [
      [
       "allow_zero",
-      false
+      true
      ],
      [
       "hold_secs",
-      60
+      0
      ]
     ]
    ],
@@ -7119,21 +6959,21 @@
      [
       "custom_pwms",
       {
-       "pwm1": 183,
-       "pwm2": 183,
+       "pwm1": 0,
+       "pwm2": 0,
        "pwm3": 183
       }
      ],
      [
       "zero_rpm_allowed",
-      false
+      true
      ]
     ]
    ]
   ],
   "result": {
-   "active_pwm1": 183,
-   "active_pwm2": 183,
+   "active_pwm1": 0,
+   "active_pwm2": 0,
    "active_pwm3": 183,
    "now": 1790000000.0,
    "nvme_over_ceiling": false,
@@ -7142,24 +6982,19 @@
    "t_zone1": 30,
    "t_zone2": 30,
    "z1_all_standby": true,
-   "z1_eligible": false,
+   "z1_eligible": true,
    "z1_rem": 0,
    "z2_all_standby": true,
-   "z2_eligible": false,
+   "z2_eligible": true,
    "z2_rem": 0
   }
  },
  "d8u|all_asleep|cpu88|zero1|busy1": {
   "calls": [
    [
-    "event",
-    "error",
-    "Critical Temperature Threshold Reached"
-   ],
-   [
     "zone",
     1,
-    183,
+    58,
     [
      [
       "allow_zero",
@@ -7174,7 +7009,7 @@
    [
     "zone",
     2,
-    183,
+    58,
     [
      [
       "allow_zero",
@@ -7214,8 +7049,8 @@
      [
       "custom_pwms",
       {
-       "pwm1": 183,
-       "pwm2": 183,
+       "pwm1": 58,
+       "pwm2": 58,
        "pwm3": 183
       }
      ],
@@ -7227,8 +7062,8 @@
    ]
   ],
   "result": {
-   "active_pwm1": 183,
-   "active_pwm2": 183,
+   "active_pwm1": 58,
+   "active_pwm2": 58,
    "active_pwm3": 183,
    "now": 1790000000.0,
    "nvme_over_ceiling": false,
@@ -7517,14 +7352,9 @@
  "d8u|all_flash_cold|cpu88|zero0|busy0": {
   "calls": [
    [
-    "event",
-    "error",
-    "Critical Temperature Threshold Reached"
-   ],
-   [
     "zone",
     1,
-    183,
+    58,
     [
      [
       "allow_zero",
@@ -7539,7 +7369,7 @@
    [
     "zone",
     2,
-    183,
+    58,
     [
      [
       "allow_zero",
@@ -7579,8 +7409,8 @@
      [
       "custom_pwms",
       {
-       "pwm1": 183,
-       "pwm2": 183,
+       "pwm1": 58,
+       "pwm2": 58,
        "pwm3": 183
       }
      ],
@@ -7592,8 +7422,8 @@
    ]
   ],
   "result": {
-   "active_pwm1": 183,
-   "active_pwm2": 183,
+   "active_pwm1": 58,
+   "active_pwm2": 58,
    "active_pwm3": 183,
    "now": 1790000000.0,
    "nvme_over_ceiling": false,
@@ -7612,37 +7442,32 @@
  "d8u|all_flash_cold|cpu88|zero1|busy0": {
   "calls": [
    [
-    "event",
-    "error",
-    "Critical Temperature Threshold Reached"
-   ],
-   [
     "zone",
     1,
-    183,
+    0,
     [
      [
       "allow_zero",
-      false
+      true
      ],
      [
       "hold_secs",
-      60
+      0
      ]
     ]
    ],
    [
     "zone",
     2,
-    183,
+    0,
     [
      [
       "allow_zero",
-      false
+      true
      ],
      [
       "hold_secs",
-      60
+      0
      ]
     ]
    ],
@@ -7674,21 +7499,21 @@
      [
       "custom_pwms",
       {
-       "pwm1": 183,
-       "pwm2": 183,
+       "pwm1": 0,
+       "pwm2": 0,
        "pwm3": 183
       }
      ],
      [
       "zero_rpm_allowed",
-      false
+      true
      ]
     ]
    ]
   ],
   "result": {
-   "active_pwm1": 183,
-   "active_pwm2": 183,
+   "active_pwm1": 0,
+   "active_pwm2": 0,
    "active_pwm3": 183,
    "now": 1790000000.0,
    "nvme_over_ceiling": false,
@@ -7697,24 +7522,19 @@
    "t_zone1": 30,
    "t_zone2": 30,
    "z1_all_standby": true,
-   "z1_eligible": false,
+   "z1_eligible": true,
    "z1_rem": 0,
    "z2_all_standby": true,
-   "z2_eligible": false,
+   "z2_eligible": true,
    "z2_rem": 0
   }
  },
  "d8u|all_flash_cold|cpu88|zero1|busy1": {
   "calls": [
    [
-    "event",
-    "error",
-    "Critical Temperature Threshold Reached"
-   ],
-   [
     "zone",
     1,
-    183,
+    58,
     [
      [
       "allow_zero",
@@ -7729,7 +7549,7 @@
    [
     "zone",
     2,
-    183,
+    58,
     [
      [
       "allow_zero",
@@ -7769,8 +7589,8 @@
      [
       "custom_pwms",
       {
-       "pwm1": 183,
-       "pwm2": 183,
+       "pwm1": 58,
+       "pwm2": 58,
        "pwm3": 183
       }
      ],
@@ -7782,8 +7602,8 @@
    ]
   ],
   "result": {
-   "active_pwm1": 183,
-   "active_pwm2": 183,
+   "active_pwm1": 58,
+   "active_pwm2": 58,
    "active_pwm3": 183,
    "now": 1790000000.0,
    "nvme_over_ceiling": false,
@@ -8072,14 +7892,9 @@
  "d8u|all_flash_hot|cpu88|zero0|busy0": {
   "calls": [
    [
-    "event",
-    "error",
-    "Critical Temperature Threshold Reached"
-   ],
-   [
     "zone",
     1,
-    183,
+    133,
     [
      [
       "allow_zero",
@@ -8094,7 +7909,7 @@
    [
     "zone",
     2,
-    183,
+    133,
     [
      [
       "allow_zero",
@@ -8134,8 +7949,8 @@
      [
       "custom_pwms",
       {
-       "pwm1": 183,
-       "pwm2": 183,
+       "pwm1": 133,
+       "pwm2": 133,
        "pwm3": 183
       }
      ],
@@ -8147,8 +7962,8 @@
    ]
   ],
   "result": {
-   "active_pwm1": 183,
-   "active_pwm2": 183,
+   "active_pwm1": 133,
+   "active_pwm2": 133,
    "active_pwm3": 183,
    "now": 1790000000.0,
    "nvme_over_ceiling": true,
@@ -8167,14 +7982,9 @@
  "d8u|all_flash_hot|cpu88|zero1|busy0": {
   "calls": [
    [
-    "event",
-    "error",
-    "Critical Temperature Threshold Reached"
-   ],
-   [
     "zone",
     1,
-    183,
+    133,
     [
      [
       "allow_zero",
@@ -8189,7 +7999,7 @@
    [
     "zone",
     2,
-    183,
+    133,
     [
      [
       "allow_zero",
@@ -8229,8 +8039,8 @@
      [
       "custom_pwms",
       {
-       "pwm1": 183,
-       "pwm2": 183,
+       "pwm1": 133,
+       "pwm2": 133,
        "pwm3": 183
       }
      ],
@@ -8242,8 +8052,8 @@
    ]
   ],
   "result": {
-   "active_pwm1": 183,
-   "active_pwm2": 183,
+   "active_pwm1": 133,
+   "active_pwm2": 133,
    "active_pwm3": 183,
    "now": 1790000000.0,
    "nvme_over_ceiling": true,
@@ -8262,14 +8072,9 @@
  "d8u|all_flash_hot|cpu88|zero1|busy1": {
   "calls": [
    [
-    "event",
-    "error",
-    "Critical Temperature Threshold Reached"
-   ],
-   [
     "zone",
     1,
-    183,
+    133,
     [
      [
       "allow_zero",
@@ -8284,7 +8089,7 @@
    [
     "zone",
     2,
-    183,
+    133,
     [
      [
       "allow_zero",
@@ -8324,8 +8129,8 @@
      [
       "custom_pwms",
       {
-       "pwm1": 183,
-       "pwm2": 183,
+       "pwm1": 133,
+       "pwm2": 133,
        "pwm3": 183
       }
      ],
@@ -8337,8 +8142,8 @@
    ]
   ],
   "result": {
-   "active_pwm1": 183,
-   "active_pwm2": 183,
+   "active_pwm1": 133,
+   "active_pwm2": 133,
    "active_pwm3": 183,
    "now": 1790000000.0,
    "nvme_over_ceiling": true,
@@ -9197,14 +9002,9 @@
  "d8u|mixed_active|cpu88|zero0|busy0": {
   "calls": [
    [
-    "event",
-    "error",
-    "Critical Temperature Threshold Reached"
-   ],
-   [
     "zone",
     1,
-    183,
+    153,
     [
      [
       "allow_zero",
@@ -9219,7 +9019,7 @@
    [
     "zone",
     2,
-    183,
+    153,
     [
      [
       "allow_zero",
@@ -9259,8 +9059,8 @@
      [
       "custom_pwms",
       {
-       "pwm1": 183,
-       "pwm2": 183,
+       "pwm1": 153,
+       "pwm2": 153,
        "pwm3": 183
       }
      ],
@@ -9272,8 +9072,8 @@
    ]
   ],
   "result": {
-   "active_pwm1": 183,
-   "active_pwm2": 183,
+   "active_pwm1": 153,
+   "active_pwm2": 153,
    "active_pwm3": 183,
    "now": 1790000000.0,
    "nvme_over_ceiling": false,
@@ -9292,14 +9092,9 @@
  "d8u|mixed_active|cpu88|zero1|busy0": {
   "calls": [
    [
-    "event",
-    "error",
-    "Critical Temperature Threshold Reached"
-   ],
-   [
     "zone",
     1,
-    183,
+    153,
     [
      [
       "allow_zero",
@@ -9314,7 +9109,7 @@
    [
     "zone",
     2,
-    183,
+    153,
     [
      [
       "allow_zero",
@@ -9354,8 +9149,8 @@
      [
       "custom_pwms",
       {
-       "pwm1": 183,
-       "pwm2": 183,
+       "pwm1": 153,
+       "pwm2": 153,
        "pwm3": 183
       }
      ],
@@ -9367,8 +9162,8 @@
    ]
   ],
   "result": {
-   "active_pwm1": 183,
-   "active_pwm2": 183,
+   "active_pwm1": 153,
+   "active_pwm2": 153,
    "active_pwm3": 183,
    "now": 1790000000.0,
    "nvme_over_ceiling": false,
@@ -9387,14 +9182,9 @@
  "d8u|mixed_active|cpu88|zero1|busy1": {
   "calls": [
    [
-    "event",
-    "error",
-    "Critical Temperature Threshold Reached"
-   ],
-   [
     "zone",
     1,
-    183,
+    153,
     [
      [
       "allow_zero",
@@ -9409,7 +9199,7 @@
    [
     "zone",
     2,
-    183,
+    153,
     [
      [
       "allow_zero",
@@ -9449,8 +9239,8 @@
      [
       "custom_pwms",
       {
-       "pwm1": 183,
-       "pwm2": 183,
+       "pwm1": 153,
+       "pwm2": 153,
        "pwm3": 183
       }
      ],
@@ -9462,8 +9252,8 @@
    ]
   ],
   "result": {
-   "active_pwm1": 183,
-   "active_pwm2": 183,
+   "active_pwm1": 153,
+   "active_pwm2": 153,
    "active_pwm3": 183,
    "now": 1790000000.0,
    "nvme_over_ceiling": false,
@@ -9752,14 +9542,9 @@
  "d8u|zone1_asleep|cpu88|zero0|busy0": {
   "calls": [
    [
-    "event",
-    "error",
-    "Critical Temperature Threshold Reached"
-   ],
-   [
     "zone",
     1,
-    183,
+    118,
     [
      [
       "allow_zero",
@@ -9774,7 +9559,7 @@
    [
     "zone",
     2,
-    183,
+    118,
     [
      [
       "allow_zero",
@@ -9814,8 +9599,8 @@
      [
       "custom_pwms",
       {
-       "pwm1": 183,
-       "pwm2": 183,
+       "pwm1": 118,
+       "pwm2": 118,
        "pwm3": 183
       }
      ],
@@ -9827,8 +9612,8 @@
    ]
   ],
   "result": {
-   "active_pwm1": 183,
-   "active_pwm2": 183,
+   "active_pwm1": 118,
+   "active_pwm2": 118,
    "active_pwm3": 183,
    "now": 1790000000.0,
    "nvme_over_ceiling": false,
@@ -9847,14 +9632,9 @@
  "d8u|zone1_asleep|cpu88|zero1|busy0": {
   "calls": [
    [
-    "event",
-    "error",
-    "Critical Temperature Threshold Reached"
-   ],
-   [
     "zone",
     1,
-    183,
+    118,
     [
      [
       "allow_zero",
@@ -9869,7 +9649,7 @@
    [
     "zone",
     2,
-    183,
+    118,
     [
      [
       "allow_zero",
@@ -9909,8 +9689,8 @@
      [
       "custom_pwms",
       {
-       "pwm1": 183,
-       "pwm2": 183,
+       "pwm1": 118,
+       "pwm2": 118,
        "pwm3": 183
       }
      ],
@@ -9922,8 +9702,8 @@
    ]
   ],
   "result": {
-   "active_pwm1": 183,
-   "active_pwm2": 183,
+   "active_pwm1": 118,
+   "active_pwm2": 118,
    "active_pwm3": 183,
    "now": 1790000000.0,
    "nvme_over_ceiling": false,
@@ -9942,14 +9722,9 @@
  "d8u|zone1_asleep|cpu88|zero1|busy1": {
   "calls": [
    [
-    "event",
-    "error",
-    "Critical Temperature Threshold Reached"
-   ],
-   [
     "zone",
     1,
-    183,
+    118,
     [
      [
       "allow_zero",
@@ -9964,7 +9739,7 @@
    [
     "zone",
     2,
-    183,
+    118,
     [
      [
       "allow_zero",
@@ -10004,8 +9779,8 @@
      [
       "custom_pwms",
       {
-       "pwm1": 183,
-       "pwm2": 183,
+       "pwm1": 118,
+       "pwm2": 118,
        "pwm3": 183
       }
      ],
@@ -10017,8 +9792,8 @@
    ]
   ],
   "result": {
-   "active_pwm1": 183,
-   "active_pwm2": 183,
+   "active_pwm1": 118,
+   "active_pwm2": 118,
    "active_pwm3": 183,
    "now": 1790000000.0,
    "nvme_over_ceiling": false,

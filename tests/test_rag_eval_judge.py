@@ -69,6 +69,7 @@ def test_grades_sit_next_to_the_rules_and_disagreements_are_listed():
     url, body = server.asked[0]
     assert url == "http://ollama:11434/api/chat" and body["format"] == "json" and body["think"] is False
     assert body["options"]["temperature"] == 0 and body["messages"][0]["content"] == j.SYSTEM
+    assert body["options"]["num_gpu"] == 0  # the judge runs on the CPU, never on the iGPU
 
 
 def test_an_answer_the_judge_could_not_grade_is_left_out_and_time_is_bounded():

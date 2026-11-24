@@ -146,13 +146,15 @@ class TestFanControl:
         assert ("error", "Critical Temperature Threshold Reached") in hw["events"]
         assert Z_STATE.critical_temp_active
 
-    def test_a_critical_cpu_forces_full_speed_and_recovers(self, hw):
+    def test_a_critical_cpu_forces_full_speed_and_recovers(self, hw, monkeypatch):
+        monkeypatch.setattr(fc, "CPU_SUSTAIN_SECS", 0)  # the wait itself: tests/test_fan_run_fixes.py
         run([hdd("sda", 30, bay=1)], cpu_temp=90)
         assert Z_STATE.critical_temp_active
         run([hdd("sda", 30, bay=1)], cpu_temp=45)
         assert not Z_STATE.critical_temp_active
 
-    def test_a_cpu_hovering_at_80_does_not_flap_or_alert_again(self, hw):
+    def test_a_cpu_hovering_at_80_does_not_flap_or_alert_again(self, hw, monkeypatch):
+        monkeypatch.setattr(fc, "CPU_SUSTAIN_SECS", 0)  # the wait itself: tests/test_fan_run_fixes.py
         crit = ("error", "Critical Temperature Threshold Reached")
         run([hdd("sda", 30, bay=1)], cpu_temp=84)
         run([hdd("sda", 30, bay=1)], cpu_temp=78)  # under 80 but not 5 °C under: still forced
