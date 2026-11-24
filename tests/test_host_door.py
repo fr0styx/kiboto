@@ -1289,3 +1289,57 @@ def test_usb_disks_are_opened_and_ejected_by_the_door(audit, monkeypatch):
     assert host_door.handle({"op": "usb.open", "args": {"device": "/dev/sdb1"}}, 0)["result"] == "/mnt/disks/x"
     assert host_door.handle({"op": "usb.eject", "args": {"path": "/mnt/disks/x"}}, 0)["ok"]
     assert opened == ["/dev/sdb1", "/mnt/disks/x"]
+
+
+def test_a_home_and_its_limit_are_made_by_the_door(audit, monkeypatch):
+    from backend.services import user_spaces
+
+    calls, noted = [], []
+    monkeypatch.setattr(user_spaces.os, "geteuid", lambda: 999)
+    monkeypatch.setattr(door, "available", lambda sock=door.SOCK: True)
+    monkeypatch.setattr(
+        door,
+        "call",
+        lambda op, **a: (
+            calls.append((op, a))
+            or {"home": "/mnt/storage/tank/homes/ana", "subvolume": True, "quota": {"enforced": True, "reason": ""}}
+        ),
+    )
+    monkeypatch.setattr(user_spaces, "_record", lambda home, result: noted.append((home, result["quota_bytes"])))
+    got = user_spaces.ensure_home("ana", 10)
+    assert got == {"home": "/mnt/storage/tank/homes/ana", "subvolume": True, "fs_quota": True}
+    monkeypatch.setattr(user_spaces, "home_of", lambda u: "/")  # a folder that is there
+    assert user_spaces.set_quota("ana", 20) is True
+    assert calls == [
+        ("files.home", {"username": "ana", "quota_bytes": 10, "only_limit": False}),
+        ("files.home", {"username": "ana", "quota_bytes": 20, "only_limit": True}),
+    ]
+    assert noted == [("/mnt/storage/tank/homes/ana", 10), ("/mnt/storage/tank/homes/ana", 20)]  # recorded here
+    for op, args in calls:
+        host_door._checked({"op": op, "args": args})
+
+
+def test_the_door_makes_a_home_only_for_someone_who_is_there(audit, monkeypatch):
+    from backend import users_db
+    from backend.services import user_spaces
+
+    monkeypatch.setattr(users_db, "get_user_by_username", lambda u: {"username": u} if u == "ana" else None)
+    monkeypatch.setattr(user_spaces, "make_home", lambda u: (f"/homes/{u}", True))
+    monkeypatch.setattr(user_spaces, "home_of", lambda u: f"/homes/{u}")
+    monkeypatch.setattr(user_spaces.fs_quota, "apply", lambda home, n: {"enforced": n > 0, "reason": ""})
+
+    def home(username, quota=0, only=False):
+        return host_door.handle(
+            {"op": "files.home", "args": {"username": username, "quota_bytes": quota, "only_limit": only}}, 0
+        )
+
+    assert home("ana")["result"] == {"home": "/homes/ana", "subvolume": True, "quota": None}
+    assert home("ana", 5)["result"]["quota"] == {"enforced": True, "reason": ""}
+    assert home("ana", 0, True)["result"] == {
+        "home": "/homes/ana",
+        "subvolume": False,
+        "quota": {"enforced": False, "reason": ""},
+    }
+    for bad in ("bob", "../root", ""):
+        assert home(bad)["ok"] is False, bad
+    assert home("ana", -1)["ok"] is False

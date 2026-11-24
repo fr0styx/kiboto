@@ -162,8 +162,29 @@ def _serves_files() -> bool:
         return False
 
 
+def _through_door() -> bool:
+    """Once Kiboto is not root (ADR 0006), the host door makes a home (a dataset needs root) and
+    sets its limit; the record of the limit stays the web process's (_record)."""
+    from backend import door
+
+    return os.geteuid() != 0 and door.available()
+
+
 def ensure_home(username: str, quota_bytes: int = 0) -> dict[str, Any]:
     """Creates the person's folder (a Btrfs subvolume when the pool is Btrfs) and applies the quota."""
+    if _through_door():
+        from backend import door
+
+        got = door.call("files.home", username=username, quota_bytes=int(quota_bytes or 0), only_limit=False)
+        held = _noted(got["home"], got.get("quota"), quota_bytes)
+        return {"home": got["home"], "subvolume": got["subvolume"], "fs_quota": held}
+    home, created = make_home(username)
+    held = apply_fs_quota(home, quota_bytes) if quota_bytes else False
+    return {"home": home, "subvolume": created, "fs_quota": held}
+
+
+def make_home(username: str) -> tuple[str, bool]:
+    """The person's folder, made when it is not there; (where, whether a subvolume or dataset)."""
     home = home_of(username)
     created = False
     if not os.path.isdir(home):
@@ -181,13 +202,17 @@ def ensure_home(username: str, quota_bytes: int = 0) -> dict[str, Any]:
             from backend.services import smb_accounts
 
             owned.to_person(home, smb_accounts.uid_of(username))
-    held = apply_fs_quota(home, quota_bytes) if quota_bytes else False
-    return {"home": home, "subvolume": created, "fs_quota": held}
+    return home, bool(created)
 
 
 def apply_fs_quota(home: str, quota_bytes: int) -> bool:
     """The filesystem's own limit on the home (btrfs, ZFS or XFS); True when it holds there."""
-    result = fs_quota.apply(home, quota_bytes)
+    return _noted(home, fs_quota.apply(home, quota_bytes), quota_bytes)
+
+
+def _noted(home: str, result: dict[str, Any] | None, quota_bytes: int) -> bool:
+    if result is None:
+        return False
     _record(home, {**result, "quota_bytes": int(quota_bytes or 0)})
     if not result["enforced"] and quota_bytes:
         logger.info("[Spaces] %s: limit checked on uploads only (%s)", home, result["reason"])
@@ -206,7 +231,28 @@ def set_quota(username: str, quota_bytes: int) -> bool:
     home = home_of(username)
     if not os.path.isdir(home):
         return bool(ensure_home(username, quota_bytes)["fs_quota"])
+    if _through_door():
+        from backend import door
+
+        got = door.call("files.home", username=username, quota_bytes=int(quota_bytes or 0), only_limit=True)
+        return _noted(got["home"], got.get("quota"), quota_bytes)
     return apply_fs_quota(home, quota_bytes)
+
+
+def home_in_door(username: str, quota_bytes: int, only_limit: bool = False) -> dict[str, Any]:
+    """The door's side (files.home): the home of a person who is there, made unless `only_limit`,
+    and its limit set; the result, not the record, goes back."""
+    import re
+
+    from backend.users_db import get_user_by_username
+
+    if not re.fullmatch(r"[A-Za-z0-9_][A-Za-z0-9_.-]{0,63}", username or "") or not get_user_by_username(username):
+        raise ValueError("files.home is for a person who has an account here")
+    if not 0 <= quota_bytes < 1 << 60:
+        raise ValueError("quota_bytes must be a size in bytes")
+    home, created = (home_of(username), False) if only_limit else make_home(username)
+    quota = fs_quota.apply(home, quota_bytes) if quota_bytes or only_limit else None
+    return {"home": home, "subvolume": created, "quota": quota}
 
 
 def usage(username: str, fresh: bool = False) -> int:
