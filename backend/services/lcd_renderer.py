@@ -119,6 +119,24 @@ def _fb_sysfs_info() -> dict:
     return info
 
 
+def map_framebuffer(fileno: int, size: int) -> mmap.mmap:
+    """The framebuffer mapped for writing, left out of every child process.
+
+    On machines whose screen belongs to the graphics driver, /dev/fb0 is graphics memory.
+    A child process (any helper Kiboto starts) would get a copy of that mapping, which the
+    kernel's graphics memory manager reports as a warning with a stack trace each time.
+    No child draws on the screen, so the mapping is not copied at all.
+    """
+    fb_mem = mmap.mmap(fileno, size, mmap.MAP_SHARED, mmap.PROT_WRITE)
+    dontfork = getattr(mmap, "MADV_DONTFORK", None)
+    if dontfork is not None:
+        try:
+            fb_mem.madvise(dontfork)
+        except OSError:
+            ignored("backend.services.lcd_renderer.map_framebuffer")
+    return fb_mem
+
+
 def fb_layout(fb_path: str) -> FbLayout | None:
     """The framebuffer layout to draw into, or None when it does not add up.
 
@@ -267,7 +285,7 @@ def render_lcd_loop():
                 retry_delay = 2.0
 
                 with open(fb_path, "r+b") as fb_file:
-                    fb_mem = mmap.mmap(fb_file.fileno(), total_fb_bytes, mmap.MAP_SHARED, mmap.PROT_WRITE)
+                    fb_mem = map_framebuffer(fb_file.fileno(), total_fb_bytes)
                     try:
                         fb = _Framebuffer(fb_mem, total_fb_bytes, stride, bpp)
                         fb.clear()
@@ -324,7 +342,7 @@ def _run_pil(fb_path: str) -> None:
     while not Z_STATE.shutting_down:
         try:
             with open(fb_path, "r+b") as fb_file:
-                fb_mem = mmap.mmap(fb_file.fileno(), total_fb_bytes, mmap.MAP_SHARED, mmap.PROT_WRITE)
+                fb_mem = map_framebuffer(fb_file.fileno(), total_fb_bytes)
                 try:
                     fb = _Framebuffer(fb_mem, total_fb_bytes, stride, bpp)
                     fb.clear()

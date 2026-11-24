@@ -38,6 +38,8 @@ Fans: a short spike of processor heat no longer sends the disk fans to full spee
 
 The Hardware page fits a phone: the screen theme buttons stay on the screen, sliders and size buttons are easier to tap, and the card copies table shows that it scrolls sideways.
 
+On machines whose front screen runs through the graphics driver, Kiboto no longer makes the kernel log graphics-memory warnings each time it starts a helper process.
+
 #### Security
 
 On a machine of its own, failed sign-ins to shared folders over the network now count like web sign-ins: 20 in 15 minutes block the address for an hour, and they show under History, Sign-ins.
