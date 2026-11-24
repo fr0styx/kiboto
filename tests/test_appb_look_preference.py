@@ -17,6 +17,7 @@ def test_a_look_is_kept_as_sent():
         "tint": 0.4,
         "trueBlack": True,
         "accent": "#33cdb8",
+        "wallpaperAccent": False,
     }
 
 
@@ -27,6 +28,7 @@ def test_missing_fields_take_the_default_look():
         "tint": 0,
         "trueBlack": False,
         "accent": "",
+        "wallpaperAccent": False,
     }
 
 
@@ -57,4 +59,5 @@ def test_the_look_is_saved_on_the_account(client):
         "tint": 0.25,
         "trueBlack": False,
         "accent": "",
+        "wallpaperAccent": False,
     }

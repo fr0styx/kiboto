@@ -42,6 +42,8 @@ On a machine of its own, Kiboto installs only release versions, and a release is
 
 Pool names sent to the storage and snapshot settings are checked the same way everywhere: a name, never a path.
 
+On a machine Kiboto runs, Kiboto itself now runs without root by default; only its small host service changes the machine, from a fixed list of checked operations.
+
 #### New
 
 Kiboto lists the third-party software it bundles and its licences at /third-party-licences.txt, and the install image says which Debian image it is made from and where Debian publishes its sources.
@@ -49,6 +51,8 @@ Kiboto lists the third-party software it bundles and its licences at /third-part
 For a machine of its own: the install guide says what is promised during the beta, the security policy covers such a machine, and scripts/hardware_report.sh lists what a machine is made of (read-only, without serial numbers) for reports of hardware that works.
 
 Kib's face now floats in a corner of the desktop: click it to ask Kib, without going through Settings.
+
+Appearance: a By sunset mode (light by day where the NAS is), Match my wallpaper (the accent follows your wallpaper), and the sign-in screen shows the look of the person signing in on this browser.
 
 #### Changes
 

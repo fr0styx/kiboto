@@ -16,6 +16,7 @@ ANY_SIGNED_IN = {
     "/api/v1/users/{user_id}": "their own profile; others need users:read (checked in the route)",
     "/api/v1/users/{user_id}/export": "their own data; others need users:write and a confirmation",
     "/api/v1/ai/access/me": "what they may ask Kib",
+    "/api/v1/system/sun": "when it gets dark where the NAS is, for their own look (APP-D)",
     "/api/v1/ai/actions/{action_id}": "an action they started",
     "/api/v1/notifications/notifications/me": "their own alert route",
     "/api/v1/network/speedtest/ping": "the speed of their own link to the NAS",

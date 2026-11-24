@@ -13,6 +13,8 @@ import {
   loadLook,
   lookColour,
   lookFromAccount,
+  rememberLookFor,
+  setLookOwner,
   normalizeLook,
   storeLook,
 } from '../look.js';
@@ -392,13 +394,20 @@ export function applyLcdTheme(themeName, customAccent = null, textClarity = null
 
 /** At sign-in: the look saved on the person's account, on this device too (APP-B). */
 export function adoptAccountLook(user) {
+  setLookOwner(user?.username || '');
   const look = lookFromAccount(user);
   if (!look || state.desktopTheme === 'yak') return false;
+  rememberLookFor(user?.username || '', look); // the sign-in screen shows it next time (APP-D)
   storeLook(look);
   applyDesktopTheme(look.theme, look.accent);
   return true;
 }
 ZettEventBus.on?.('session:user', adoptAccountLook);
+// APP-D: with "Match my wallpaper" the accent follows a new wallpaper (that code loads only then)
+ZettEventBus.on?.('wallpaper:set', (e) => {
+  if (loadLook().wallpaperAccent)
+    import('./wallpaper-accent.js').then((m) => m.followWallpaper(e?.url)).catch(() => {});
+});
 
 // Backward-compatible alias
 export function applyTheme(themeName, customAccent = null, textClarity = null) {

@@ -82,12 +82,12 @@ machine's own service, not a container. What is above still holds; this is what 
 
 What remains on such a machine:
 
-- **The web process runs as root by default.** Everything it does as root on the machine already
-  goes through the host door (ADR 0006): a separate root service that takes only a fixed list of
-  operations, checks each one's arguments and logs it to `door-audit.log`. Root can turn on the
-  web process as the unprivileged user `kiboto` (`python -m backend.services.web_user on` in
-  `/opt/kiboto/current`); it is tried on the test machine and becomes the default before the
-  image is offered for anyone's only copy of their data.
+- **The web process runs as the unprivileged user `kiboto`** (ADR 0006). Everything it does as
+  root on the machine goes through the host door: a separate root service that takes only a fixed
+  list of operations, checks each one's arguments and logs it to `door-audit.log`. Root can run it
+  as root again (`python -m backend.services.web_user off` in `/opt/kiboto/current`); that choice
+  is kept across updates. Anyone who takes over the web process can still ask the door for what
+  the door allows, and for every file the user `kiboto` may open.
 - **Debian's packages are updated by Debian.** Kiboto holds the kernel, ZFS and Docker at the
   versions it was tested with; everything else follows Debian's own security updates, which the
   machine installs only when someone runs them.

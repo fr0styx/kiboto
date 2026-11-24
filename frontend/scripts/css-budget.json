@@ -3,7 +3,7 @@
   "buttonClasses": 76,
   "inlineStyles": 1236,
   "emojiIcons": 4,
-  "colours": 3673,
+  "colours": 3661,
   "primitiveUses": 4,
   "importantPerFile": {
     "frontend/index.html": 64,
@@ -91,7 +91,7 @@
     "frontend/src/components/phone-backup.js": 2,
     "frontend/src/components/remote-access.js": 2,
     "frontend/src/components/screensaver.js": 6,
-    "frontend/src/components/settings.js": 48,
+    "frontend/src/components/settings.js": 36,
     "frontend/src/components/setup-wizard.js": 4,
     "frontend/src/components/stack-modal.js": 45,
     "frontend/src/components/terminal-view.js": 22,

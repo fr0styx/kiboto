@@ -38,7 +38,7 @@ request and response schemas.
 
 <!-- BEGIN generated endpoints: python scripts/api_reference.py --update -->
 
-826 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
+827 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
 
 ### AI Conversation History
 
@@ -969,6 +969,7 @@ request and response schemas.
 | `POST` | `/api/v1/system/security-posture/fix/{fix_id}` | `system:config` | Applies one Security Advisor fix (B11): tightens a setting an upgraded install kept |
 | `POST` | `/api/v1/system/shutdown` | `system:power` | Trigger system poweroff (requires system:power scope) |
 | `GET` | `/api/v1/system/status-summary` | `system:view` | What needs attention, for the Overview (UX-1), as this person can act on it (NUX-5) |
+| `GET` | `/api/v1/system/sun` | signed in | Today's and tomorrow's sunrise and sunset where the NAS is, from its time zone: the look's "By sunset" mode (APP-D) |
 | `GET` | `/api/v1/system/updates` | `system:view` | Release/commit check, then a registry digest check (OPS-18) |
 | `POST` | `/api/v1/system/updates/apply` | any of `system:power`, `system:manage` | Pulls the latest Kiboto image and initiates a graceful self-update |
 | `GET` | `/api/v1/system/updates/last-result` | any of `system:view`, `system:manage` | How the last in-app update or revert ended (OPS-7) |

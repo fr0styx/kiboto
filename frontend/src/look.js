@@ -8,11 +8,19 @@
 import { api } from './api.js';
 
 export const THEMES = ['lagoon', 'fjord', 'moss', 'heather', 'canyon'];
-export const MODES = ['dark', 'light', 'auto'];
-/** @typedef {{ mode: string, theme: string, tint: number, trueBlack: boolean, accent: string }} Look */
+// sun (APP-D): light from sunrise to sunset where the NAS is, dark after
+export const MODES = ['dark', 'light', 'auto', 'sun'];
+/** @typedef {{ mode: string, theme: string, tint: number, trueBlack: boolean, accent: string, wallpaperAccent: boolean }} Look */
 
 /** @type {Readonly<Look>} */
-export const DEFAULT_LOOK = Object.freeze({ mode: 'dark', theme: 'lagoon', tint: 0, trueBlack: false, accent: '' });
+export const DEFAULT_LOOK = Object.freeze({
+  mode: 'dark',
+  theme: 'lagoon',
+  tint: 0,
+  trueBlack: false,
+  accent: '',
+  wallpaperAccent: false, // APP-D: the accent follows the wallpaper
+});
 /** How far the slider raises each theme's neutral colour (scripts/themes.py: TINT_MAX). */
 const TINT_MAX = { lagoon: 3, fjord: 3, moss: 3, heather: 3, canyon: 2 };
 /** The page colour per theme, for the phone's status bar (theme-color). */
@@ -74,6 +82,7 @@ export function normalizeLook(raw) {
     tint: Number.isFinite(tint) ? Math.min(1, Math.max(0, Math.round(tint * 100) / 100)) : 0,
     trueBlack: r.trueBlack === true,
     accent,
+    wallpaperAccent: r.wallpaperAccent === true,
   };
 }
 
@@ -132,6 +141,54 @@ export function tintFactor(look) {
 
 let _darkQuery = null;
 let _applied = null;
+let _sun = null; // GET /api/system/sun, with when it was asked
+let _sunTimer = null;
+
+/** Whether it is night where the NAS is ("By sunset"); null while that is not known. */
+export function nightBySun(sun, nowMs = Date.now()) {
+  const day = sun?.days?.[0];
+  if (!day) return null;
+  if (day.polar) return day.polar === 'night';
+  const now = nowMs / 1000;
+  return now < day.sunrise || now >= day.sunset;
+}
+
+/** The next sunrise or sunset after now, in milliseconds, or null. */
+export function nextSunChange(sun, nowMs = Date.now()) {
+  for (const day of sun?.days || []) {
+    for (const at of [day.sunrise, day.sunset]) if (at && at * 1000 > nowMs) return at * 1000;
+  }
+  return null;
+}
+
+/** Asks for today's sunrise and sunset (once, and again after midnight) and switches at each. */
+function _followSun(win) {
+  const fresh = _sun && Date.now() - _sun.at < 12 * 3600 * 1000;
+  if (fresh || _sun?.asking) return;
+  _sun = { ...(_sun || {}), asking: true, at: _sun?.at || 0 };
+  api
+    .get('/api/system/sun')
+    .then((answer) => {
+      _sun = { ...answer, at: Date.now() };
+      if (_applied?.look.mode === 'sun') applyLook(_applied.look, _applied.doc, win);
+    })
+    .catch(() => {
+      _sun = null; // the sign-in screen: the device's own preference until someone signs in
+    });
+}
+
+function _scheduleSun(win) {
+  clearTimeout(_sunTimer);
+  const next = nextSunChange(_sun);
+  const wait = next ? next - Date.now() + 5000 : 6 * 3600 * 1000;
+  _sunTimer = setTimeout(
+    () => {
+      if (!next && _sun) _sun.at = 0; // after the last known change: ask again
+      if (_applied?.look.mode === 'sun') applyLook(_applied.look, _applied.doc, win);
+    },
+    Math.min(wait, 2 ** 31 - 1)
+  );
+}
 
 function _prefersDark(win) {
   if (!win?.matchMedia) return true;
@@ -155,7 +212,16 @@ export function applyLook(
   win = typeof window === 'undefined' ? null : window
 ) {
   const l = normalizeLook(look);
-  const dark = l.mode === 'dark' || (l.mode === 'auto' && _prefersDark(win));
+  let night = null;
+  if (l.mode === 'sun') {
+    _followSun(win);
+    night = nightBySun(_sun);
+    _scheduleSun(win);
+  }
+  const dark =
+    l.mode === 'dark' ||
+    night === true ||
+    ((l.mode === 'auto' || (l.mode === 'sun' && night === null)) && _prefersDark(win));
   _applied = { look: l, doc };
   const body = doc?.body;
   if (body) {
@@ -183,9 +249,78 @@ export function clearLook(doc = typeof document === 'undefined' ? null : documen
   body.style.removeProperty('--kb-tint');
 }
 
+// The sign-in screen in the look of the person signing in (APP-D): each person's look is kept in
+// this browser, under a hash of their name, when they sign in or change it; nothing is asked of the
+// server, so the screen tells nobody which names have accounts.
+const PEOPLE_KEY = 'kiboto_looks_by_person';
+const PEOPLE_KEPT = 8;
+let _owner = '';
+
+/** A short hash of a name (FNV-1a), so the browser does not list who signed in on it. */
+export function personKey(name) {
+  let h = 0x811c9dc5;
+  for (const ch of String(name || '')
+    .trim()
+    .toLowerCase()) {
+    h ^= ch.codePointAt(0) || 0;
+    h = Math.imul(h, 0x01000193) >>> 0;
+  }
+  return h.toString(16);
+}
+
+/** Keeps a person's look in this browser (the last eight people). */
+export function rememberLookFor(name, look, storage = _storage()) {
+  if (!name) return;
+  try {
+    const all = JSON.parse(storage?.getItem(PEOPLE_KEY) || '{}');
+    const key = personKey(name);
+    delete all[key];
+    all[key] = normalizeLook(look);
+    const keys = Object.keys(all);
+    for (const old of keys.slice(0, Math.max(0, keys.length - PEOPLE_KEPT))) delete all[old];
+    storage?.setItem(PEOPLE_KEY, JSON.stringify(all));
+  } catch {}
+}
+
+/** The look this browser keeps for a name, or null. */
+export function lookFor(name, storage = _storage()) {
+  try {
+    const found = JSON.parse(storage?.getItem(PEOPLE_KEY) || '{}')[personKey(name)];
+    return found ? normalizeLook(found) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Who is signed in: their look changes are kept for the sign-in screen too. */
+export function setLookOwner(name) {
+  _owner = String(name || '');
+}
+
+/** The sign-in screen takes the look of a name that signed in here before, as it is typed. */
+export function bindSigninLook(
+  input,
+  doc = typeof document === 'undefined' ? null : document,
+  win = typeof window === 'undefined' ? null : window
+) {
+  if (!input || input.dataset.lookBound) return;
+  input.dataset.lookBound = '1';
+  let timer = null;
+  const show = () => {
+    if (doc?.body?.classList.contains('theme-yak')) return;
+    applyLook(lookFor(input.value) || loadLook(), doc, win);
+  };
+  input.addEventListener('input', () => {
+    clearTimeout(timer);
+    timer = setTimeout(show, 250);
+  });
+  input.addEventListener('change', show);
+}
+
 let _saveTimer = null;
 /** Saves the look on the person's account (a moment later, once the slider stops). Never throws. */
 export function saveLookToAccount(look, delay = 400) {
+  rememberLookFor(_owner, look);
   clearTimeout(_saveTimer);
   return new Promise((resolve) => {
     _saveTimer = setTimeout(() => {
@@ -203,5 +338,8 @@ export function lookFromAccount(user) {
 export function _resetForTests() {
   _darkQuery = null;
   _applied = null;
+  _sun = null;
+  _owner = '';
+  clearTimeout(_sunTimer);
   clearTimeout(_saveTimer);
 }

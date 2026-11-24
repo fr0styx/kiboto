@@ -60,7 +60,8 @@ jobs:
     needs: [spindown, vector-bench]
     if: always() && github.repository == 'fr0styx/kiboto' && github.ref == 'refs/heads/main'
     runs-on: [kiboto-hardware]
-    timeout-minutes: 60
+    # the eval, then the judge's grades (up to 30 minutes for each of the two sets)
+    timeout-minutes: 150
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7

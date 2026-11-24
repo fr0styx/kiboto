@@ -471,7 +471,7 @@ It installs the tools Kiboto drives (ZFS, btrfs and ext4 tools, Samba, the NFS s
 - A Debian installed with Debian's own installer runs its network with ifupdown. At the end of the install the script moves the same settings to systemd-networkd, so Kiboto can change the address under Network. If the machine cannot reach its router afterwards, it goes back to ifupdown by itself after 90 seconds; ifupdown's file is kept as `/etc/network/interfaces.kiboto-before`.
 
 - Kiboto's files are in `/opt/kiboto`, its settings in `/var/lib/kiboto`, and `/etc/kiboto/kiboto.env` takes extra settings (one `NAME=value` per line).
-- Two services: `kiboto` and `kiboto-pools`, which brings your pools back at start before anything that uses them.
+- Three services: `kiboto`, `kiboto-pools`, which brings your pools back at start before anything that uses them, and `kiboto-door`, the only part that runs as root: it changes the machine for Kiboto from a fixed list of operations. Kiboto itself runs as the user `kiboto` (`python -m backend.services.web_user off` in `/opt/kiboto/current` runs it as root again).
 - Pools are mounted under `/mnt/storage`.
 - The kernel, ZFS and Docker are held at the versions Kiboto was tested with (`apt-mark showhold` lists them). Everything else updates with `apt` as on any Debian, and you can install your own packages.
 - `/etc/samba/smb.conf` is replaced by a line that points at Kiboto's own settings; the file Debian shipped is kept beside it as `smb.conf.debian`.

@@ -44,6 +44,7 @@ describe('the look (APP-B)', () => {
       tint: 0.33,
       trueBlack: true,
       accent: '#aabbcc',
+      wallpaperAccent: false,
     });
     expect(normalizeLook({ mode: 'sepia', theme: 'sapphire', tint: 7, trueBlack: 'yes', accent: 'red' })).toEqual({
       mode: 'dark',
@@ -51,6 +52,7 @@ describe('the look (APP-B)', () => {
       tint: 1,
       trueBlack: false,
       accent: '',
+      wallpaperAccent: false,
     });
     expect(normalizeLook(null)).toEqual({ ...DEFAULT_LOOK });
   });

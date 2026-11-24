@@ -1,8 +1,10 @@
 """Kiboto's web process as the unprivileged user `kiboto` (ADR 0006 step 9), on a machine Kiboto runs.
 
-Off by default, and for now only for trying it out: everything that changes the machine goes
-through the host door (steps 1 to 8), and running without root shows what still does not. Turned
-on (as root, or by the door), it
+On by default on a machine Kiboto runs (the owner's go-ahead, 24 Nov 2026): everything that
+changes the machine goes through the host door (steps 1 to 8). `default` turns it on while
+Kiboto is stopped: the door's unit runs it before the door starts (ExecStartPre), which is before
+Kiboto starts at boot, after an install and after an update. Root's `off` is kept: it leaves a mark
+(OFF_MARK) that `default` respects, and `on` takes it away. Turned on, it
 
 - makes the system user `kiboto`, in the file server's group `users` (shared folders),
   `dialout` (the front screen's serial port) and `kvm` (virtual machines);
@@ -18,7 +20,7 @@ on (as root, or by the door), it
 Turned off, the drop-in goes and Kiboto runs as root again at its next start; the user and the
 owners stay, which root does not mind.
 
-    python -m backend.services.web_user on|off|status
+    python -m backend.services.web_user on|off|status|default
 """
 
 from __future__ import annotations
@@ -38,6 +40,8 @@ DATA = "/var/lib/kiboto"  # kiboto.service's DATA_DIR
 USER = "kiboto"
 GROUPS = ("users", "dialout", "kvm")  # shared folders, the front screen, virtual machines
 DROP_IN = "/etc/systemd/system/kiboto.service.d/web-user.conf"
+OFF_MARK = "/etc/kiboto/web-user.off"  # root chose root: the default leaves it so
+MANAGED = "/etc/kiboto/managed"  # written by install.sh: a machine Kiboto runs
 ROOTS_LOGS = ("door-audit.log", "docker-proxy-audit.log")  # written by root, read by people
 ACL = f"u:{USER}:rwX"
 BIN = ".RecycleBin"  # services/recycle_bin.BIN
@@ -140,8 +144,10 @@ def _let_in(do: Run, folder: str, recursive: bool = False) -> bool:
     return all(do(["setfacl", *deep, *acl, folder])[0] == 0 for acl in (["-m", ACL], ["-d", "-m", ACL]))
 
 
-def turn_on(do: Run | None = None, drop_in: str = DROP_IN, data_dir: str = "") -> list[str]:
+def turn_on(do: Run | None = None, drop_in: str = DROP_IN, data_dir: str = "", mark: str = OFF_MARK) -> list[str]:
     """Everything above; returns what could not be done (empty when all went well)."""
+    if os.path.exists(mark):  # root asked for it again
+        os.remove(mark)
     do = do or run
     data_dir = data_dir or os.environ.get("DATA_DIR") or DATA
     if not os.path.isdir(data_dir):
@@ -189,8 +195,11 @@ def turn_on(do: Run | None = None, drop_in: str = DROP_IN, data_dir: str = "") -
     return problems
 
 
-def turn_off(do: Run | None = None, drop_in: str = DROP_IN) -> list[str]:
+def turn_off(do: Run | None = None, drop_in: str = DROP_IN, mark: str = OFF_MARK) -> list[str]:
     do = do or run
+    os.makedirs(os.path.dirname(mark), exist_ok=True)
+    with open(mark, "w", encoding="utf-8") as f:
+        f.write("Kiboto's web process runs as root: chosen with `web_user off`; `web_user on` undoes it.\n")
     if os.path.exists(drop_in):
         os.remove(drop_in)
         do(["systemctl", "daemon-reload"], timeout=60)
@@ -198,19 +207,43 @@ def turn_off(do: Run | None = None, drop_in: str = DROP_IN) -> list[str]:
     return []
 
 
-def status(drop_in: str = DROP_IN) -> dict[str, Any]:
-    return {"on": is_on(drop_in), "user": USER}
+def status(drop_in: str = DROP_IN, mark: str = OFF_MARK) -> dict[str, Any]:
+    return {"on": is_on(drop_in), "user": USER, "kept_off": os.path.exists(mark)}
+
+
+def default(
+    do: Run | None = None, drop_in: str = DROP_IN, mark: str = OFF_MARK, managed: str = MANAGED, data_dir: str = ""
+) -> str:
+    """Turns it on unless it is on, root turned it off, this is not a machine Kiboto runs, or
+    Kiboto is running (its files would be written as root after the hand-over: the next start
+    of the door, with Kiboto stopped, does it). Returns which of these it was."""
+    do = do or run
+    if is_on(drop_in):
+        return "already on"
+    if os.path.exists(mark):
+        return "kept off by root"
+    if not os.path.exists(managed):
+        return "not a machine Kiboto runs"
+    if do(["systemctl", "is-active", "kiboto.service"], timeout=30)[1].strip() == "active":
+        return "Kiboto is running: at the next start"
+    problems = turn_on(do, drop_in, data_dir, mark)
+    for p in problems:
+        logger.warning("[WebUser] %s", p)
+    return "turned on" + (f" ({len(problems)} problems)" if problems else "")
 
 
 def main(argv: list[str]) -> int:
     os.environ.setdefault("DATA_DIR", DATA)
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     what = argv[1] if len(argv) > 1 else "status"
-    if what not in ("on", "off", "status"):
-        print("usage: python -m backend.services.web_user on|off|status")
+    if what not in ("on", "off", "status", "default"):
+        print("usage: python -m backend.services.web_user on|off|status|default")
         return 2
     if what == "status":
         print(status())
+        return 0
+    if what == "default":  # before the door starts, Kiboto stopped: nothing to stop or start here
+        print("[WebUser] " + default())
         return 0
     # Kiboto stopped first: running as root it would write files into the data folder after it
     # was handed over, and the new user could not open them

@@ -1092,6 +1092,15 @@ class IdentityIn(BaseModel):
     timezone: str | None = Field(default=None, max_length=64)
 
 
+@router.get("/system/sun")
+def get_sun_times(principal: AuthenticatedPrincipal = Depends(get_current_principal)):
+    """Today's and tomorrow's sunrise and sunset where the NAS is, from its time zone: the look's
+    "By sunset" mode (APP-D). Nothing is asked of the internet."""
+    from backend.services import sun
+
+    return sun.today()
+
+
 @router.get("/system/identity")
 def get_server_identity(principal: AuthenticatedPrincipal = Depends(get_current_principal)):
     """The server's name and time zone (UX-17)."""

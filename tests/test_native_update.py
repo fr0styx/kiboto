@@ -658,3 +658,18 @@ def test_the_result_goes_to_the_data_folders_owner(tmp_path, monkeypatch):
     assert given == []  # a folder that is root's: nothing changes
     monkeypatch.setattr(nu.os, "stat", lambda p, *a, **k: (_ for _ in ()).throw(OSError("gone")))
     nu._record(str(data), "updated")  # said in the log, nothing more
+
+
+def test_going_back_to_a_version_before_kiboto_without_root_runs_it_as_root(tmp_path):
+    drop_in = tmp_path / "web-user.conf"
+    drop_in.write_text("[Service]\nUser=kiboto\n")
+    new, old = tmp_path / "new", tmp_path / "old"
+    (new / "backend" / "services").mkdir(parents=True)
+    (new / "backend" / "services" / "web_user.py").write_text("")
+    (old / "backend" / "services").mkdir(parents=True)
+    run = Runs()
+    nu._root_for_older(str(new), run, str(drop_in))
+    assert drop_in.exists() and run.ran == []  # a version that knows the user kiboto keeps it
+    nu._root_for_older(str(old), run, str(drop_in))
+    assert not drop_in.exists() and run.ran == [["systemctl", "daemon-reload"]]
+    nu._root_for_older(str(old), run, str(drop_in))  # nothing left to take away

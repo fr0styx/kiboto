@@ -991,11 +991,12 @@ def advanced_for(user: dict[str, Any]) -> bool:
 class LookPreference(BaseModel):
     """The person's look (APP-B): it follows their account to every device."""
 
-    mode: Literal["dark", "light", "auto"] = "dark"
+    mode: Literal["dark", "light", "auto", "sun"] = "dark"  # sun: light from sunrise to sunset (APP-D)
     theme: Literal["lagoon", "fjord", "moss", "heather", "canyon"] = "lagoon"
     tint: float = Field(default=0, ge=0, le=1)  # 0 = Subtle, 1 = Strong
     trueBlack: bool = False  # noqa: N815 (the browser's own name for it)
     accent: str = Field(default="", pattern=r"^(#[0-9a-fA-F]{6})?$")  # '' = the theme's own colour
+    wallpaperAccent: bool = False  # noqa: N815 (APP-D: the accent follows the wallpaper)
 
 
 class FilesView(BaseModel):

@@ -49,6 +49,7 @@ import {
   setWindowRestorationComplete,
 } from './components/dock.js';
 import { initAuth } from './components/auth.js';
+import { bindSigninLook } from './look.js';
 import { applyDesktopTheme, applyLcdTheme } from './components/desktop-theme.js';
 // the telemetry dashboard (~20 kB) loads with the first stats or click wiring, not with the page
 let _dashboard = null;
@@ -452,6 +453,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   applyDesktopTheme(state.desktopTheme, state.desktopCustomAccent);
   applyLcdTheme(state.lcdTheme, state.lcdCustomAccent, state.lcdTextClarity);
+  bindSigninLook(document.getElementById('login-username')); // the look of the person signing in (APP-D)
 
   const hasAuth = auth.hasToken() || state.isLcdDirect;
   if (hasAuth) {

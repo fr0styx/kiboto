@@ -59,12 +59,15 @@ def test_turning_it_on_makes_the_user_and_the_drop_in(tmp_path, monkeypatch):
     assert ["setfacl", "-R", "-d", "-m", "u:kiboto:rwX", str(vms)] in ran
     assert "SupplementaryGroups=users dialout kvm" in text
     assert ran[-1] == ["systemctl", "daemon-reload"]
-    assert web_user.is_on(str(drop_in)) and web_user.status(str(drop_in)) == {"on": True, "user": "kiboto"}
+    off = tmp_path / "web-user.off"
+    assert web_user.is_on(str(drop_in))
+    assert web_user.status(str(drop_in), str(off)) == {"on": True, "user": "kiboto", "kept_off": False}
 
     ran, do = _runner()
-    assert web_user.turn_off(do, str(drop_in)) == [] and not drop_in.exists()
+    assert web_user.turn_off(do, str(drop_in), str(off)) == [] and not drop_in.exists()
     assert ran == [["systemctl", "daemon-reload"]]
-    assert web_user.turn_off(do, str(drop_in)) == []
+    assert off.exists() and web_user.status(str(drop_in), str(off))["kept_off"]  # root's choice is kept
+    assert web_user.turn_off(do, str(drop_in), str(off)) == []
 
 
 def test_what_could_not_be_done_is_said(tmp_path, monkeypatch):
@@ -155,3 +158,48 @@ def test_a_home_that_cannot_be_set_is_said(tmp_path, monkeypatch):
     ran, do = _runner({"usermod": (6, "usermod: user kiboto is currently used by process 1")})
     problems = web_user.turn_on(do, str(tmp_path / "d.conf"), str(tmp_path))
     assert any("home of kiboto" in p for p in problems)
+
+
+def test_on_by_default_where_kiboto_runs_the_machine_unless_root_chose_root(tmp_path, monkeypatch):
+    monkeypatch.setattr(web_user, "_homes", lambda: "")
+    monkeypatch.setattr(web_user, "_pool_roots", lambda: [])
+    monkeypatch.setattr(web_user, "_apps_root", lambda: "")
+    monkeypatch.setattr(web_user, "_vm_folders", lambda data_dir: [])
+    data, drop_in, off, managed = tmp_path / "data", tmp_path / "web-user.conf", tmp_path / "off", tmp_path / "managed"
+    data.mkdir()
+    ran, do = _runner()
+    args = (do, str(drop_in), str(off), str(managed), str(data))
+    assert web_user.default(*args) == "not a machine Kiboto runs" and not drop_in.exists()  # a container, a guest
+    managed.write_text("2026-11-24\n")
+    _, running = _runner({"systemctl": (0, "active\n")})
+    assert web_user.default(running, *args[1:]) == "Kiboto is running: at the next start"
+    assert web_user.default(*args) == "turned on" and drop_in.exists()
+    assert web_user.default(*args) == "already on"
+    web_user.turn_off(do, str(drop_in), str(off))
+    assert web_user.default(*args) == "kept off by root" and not drop_in.exists()
+    assert web_user.turn_on(do, str(drop_in), str(data), str(off)) == [] and not off.exists()  # root asked again
+    _, fails = _runner({"chown": (1, "")})
+    drop_in.unlink()
+    assert web_user.default(fails, *args[1:]) == "turned on (1 problems)"
+
+
+def test_the_door_turns_it_on_before_it_starts(monkeypatch, capsys):
+    import pathlib
+
+    root = pathlib.Path(__file__).resolve().parents[1]
+    unit = (root / "packaging" / "kiboto-door.service").read_text()
+    assert "ExecStartPre=-/opt/kiboto/current/venv/bin/python -m backend.services.web_user default" in unit
+    assert "TimeoutStartSec=1800" in unit and "Before=kiboto.service" in unit
+    install = (root / "packaging" / "install.sh").read_text()
+    stop, door, start = (
+        install.index(x)
+        for x in (
+            "systemctl stop kiboto.service",
+            "systemctl restart kiboto-door.service",
+            "systemctl start kiboto.service",
+        )
+    )
+    assert stop < door < start  # Kiboto stopped while the door hands the folder over
+    monkeypatch.setattr(web_user, "default", lambda: "turned on")
+    monkeypatch.setattr(web_user, "run", lambda cmd, timeout=600: (_ for _ in ()).throw(AssertionError(cmd)))
+    assert web_user.main(["", "default"]) == 0 and "turned on" in capsys.readouterr().out  # nothing stopped or started

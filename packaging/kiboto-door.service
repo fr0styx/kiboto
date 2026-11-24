@@ -19,6 +19,11 @@ EnvironmentFile=-/etc/kiboto/kiboto.env
 WorkingDirectory=/opt/kiboto/current
 RuntimeDirectory=kiboto-door
 RuntimeDirectoryMode=0755
+# Kiboto's web process as the user kiboto (ADR 0006 step 9), on by default: done here, before the
+# door and Kiboto start, while nothing writes the data folder; never stops the door ("-")
+ExecStartPre=-/opt/kiboto/current/venv/bin/python -m backend.services.web_user default
+# the first hand-over goes through the whole data folder
+TimeoutStartSec=1800
 ExecStart=/opt/kiboto/current/venv/bin/python -m backend.services.host_door
 Restart=on-failure
 RestartSec=2

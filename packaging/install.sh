@@ -210,8 +210,11 @@ service() {
   install -m 644 "$src/packaging/kiboto.service" "$src/packaging/kiboto-pools.service" "$src/packaging/kiboto-door.service" /etc/systemd/system/
   systemctl daemon-reload
   systemctl enable -q kiboto-pools.service kiboto-door.service kiboto.service
+  # Kiboto stopped while the door starts: the door's unit hands the data folder to the user
+  # kiboto then (web_user default), which it skips while Kiboto runs
+  systemctl stop kiboto.service 2>/dev/null || true
   systemctl restart kiboto-door.service
-  systemctl restart kiboto.service
+  systemctl start kiboto.service
 }
 
 wait_up() {

@@ -339,9 +339,22 @@ def _hand_back(data_dir: str) -> None:
                 logger.warning("[Update] %s stays root's: %s", name, e)
 
 
+WEB_USER_DROP_IN = "/etc/systemd/system/kiboto.service.d/web-user.conf"  # services/web_user.DROP_IN
+
+
+def _root_for_older(rel: str, run: Any, drop_in: str = WEB_USER_DROP_IN) -> None:
+    """A version from before ADR 0006 step 9 cannot run as the user kiboto (it does root's work
+    itself): going back to one, Kiboto runs as root again."""
+    if os.path.exists(drop_in) and not os.path.exists(os.path.join(rel, "backend", "services", "web_user.py")):
+        os.remove(drop_in)
+        run(["systemctl", "daemon-reload"], timeout=60)
+        logger.warning("[Update] %s runs as root: it is older than Kiboto without root", os.path.basename(rel))
+
+
 def _door_follows(rel: str, run: Any) -> None:
     """The helper (root) puts this version's service files in place and starts the host door again
     on its code before Kiboto starts: once Kiboto is not root (ADR 0006) it cannot do that itself."""
+    _root_for_older(rel, run)
     try:
         ensure_units(rel, run)  # no door_current: the door is started again whatever it runs
     except OSError as e:

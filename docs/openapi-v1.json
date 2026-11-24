@@ -26697,7 +26697,8 @@
       "enum": [
        "dark",
        "light",
-       "auto"
+       "auto",
+       "sun"
       ],
       "title": "Mode",
       "type": "string"
@@ -26724,6 +26725,11 @@
      "trueBlack": {
       "default": false,
       "title": "Trueblack",
+      "type": "boolean"
+     },
+     "wallpaperAccent": {
+      "default": false,
+      "title": "Wallpaperaccent",
       "type": "boolean"
      }
     },
@@ -72709,6 +72715,32 @@
     ],
     "x-required-scopes": [
      "system:view"
+    ]
+   }
+  },
+  "/api/v1/system/sun": {
+   "get": {
+    "description": "Today's and tomorrow's sunrise and sunset where the NAS is, from its time zone: the look's\n\"By sunset\" mode (APP-D). Nothing is asked of the internet.",
+    "operationId": "get_sun_times_api_v1_system_sun_get",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Get Sun Times",
+    "tags": [
+     "System & Storage"
     ]
    }
   },

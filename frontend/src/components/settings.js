@@ -1093,7 +1093,7 @@ export async function saveThemeToServer(theme, customAccent, textClarity) {
 }
 
 const THEME_NAMES = { lagoon: 'Lagoon', fjord: 'Fjord', moss: 'Moss', heather: 'Heather', canyon: 'Canyon' };
-const MODE_NAMES = { dark: 'Dark', light: 'Light', auto: 'Auto' };
+const MODE_NAMES = { dark: 'Dark', light: 'Light', auto: 'Auto', sun: 'By sunset' };
 
 /** "Dark · Fjord": what the Appearance pane says the look is. */
 export function lookCaption(look) {
@@ -1137,6 +1137,8 @@ export function syncDesktopThemeUI() {
   }
   const tint = /** @type {HTMLInputElement | null} */ ($('look-tint'));
   if (tint && document.activeElement !== tint) tint.value = String(Math.round(look.tint * 100));
+  const follow = /** @type {HTMLInputElement | null} */ ($('look-wallpaper-accent'));
+  if (follow) follow.checked = look.wallpaperAccent;
 
   document.querySelectorAll('.desktop-theme-preset').forEach((card) => {
     const isThis = card.dataset.themeId === curTheme;
@@ -1204,6 +1206,7 @@ export function renderExtractedChips(colors) {
       btn.classList.add('active');
     }
     btn.addEventListener('click', () => {
+      ownAccent();
       applyDesktopTheme(state.desktopTheme, hex);
       saveDesktopThemeToServer(state.desktopTheme, hex);
       syncDesktopThemeUI();
@@ -1217,96 +1220,24 @@ export function renderExtractedChips(colors) {
 export async function sampleWallpaperPalette() {
   const container = $('wallpaper-extracted-chips');
   if (!container) return;
-
-  let imgUrl = null;
-  const wpLayer = document.getElementById('desktop-wallpaper');
-  if (wpLayer && wpLayer.style.backgroundImage) {
-    const match = wpLayer.style.backgroundImage.match(/url\(["']?([^"']+)["']?\)/);
-    if (match) imgUrl = match[1];
-  }
-  if (!imgUrl && typeof localStorage !== 'undefined') {
-    const savedName = localStorage.getItem('kiboto_active_wallpaper');
-    if (savedName) {
-      imgUrl = `/api/wallpapers/download/${encodeURIComponent(savedName)}`;
-    }
-  }
-
-  if (!imgUrl) {
-    const fallbackPalette = ['#33cdb8', '#38bdf8', '#3bf58b', '#ffbe40', '#c084fc', '#f43f5e'];
-    renderExtractedChips(fallbackPalette);
+  const fallback = ['#33cdb8', '#38bdf8', '#3bf58b', '#ffbe40', '#c084fc', '#f43f5e'];
+  container.innerHTML = `<span style="font-size:var(--kb-fs-xs); color:var(--lt-ink-brand, var(--brand)); display:flex; align-items:center; gap:6px;"><span class="spinner-inline" style="width:12px; height:12px; border-width:2px;"></span> ${t('stg.sampling', 'Sampling wallpaper pixels...')}</span>`;
+  const accent = await import('./wallpaper-accent.js');
+  const url = accent.currentWallpaperUrl();
+  const found = url ? await accent.wallpaperColours(url) : [];
+  if (!found.length) {
+    renderExtractedChips(fallback);
     showToast(t('settings.palette_sampled_default', 'Sampled default theme accents'), 'info');
     return;
   }
+  renderExtractedChips([...found, ...fallback.filter((f) => !found.includes(f))].slice(0, 6));
+  showToast(t('settings.palette_extracted_success', 'Extracted 6 vibrant wallpaper accents!'), 'success');
+}
 
-  try {
-    container.innerHTML = `<span style="font-size:var(--kb-fs-xs); color:var(--lt-ink-brand, var(--brand)); display:flex; align-items:center; gap:6px;"><span class="spinner-inline" style="width:12px; height:12px; border-width:2px;"></span> ${t('stg.sampling', 'Sampling wallpaper pixels...')}</span>`;
-
-    const img = new Image();
-    img.crossOrigin = 'Anonymous';
-    img.src = imgUrl;
-    await new Promise((resolve, reject) => {
-      img.onload = resolve;
-      img.onerror = reject;
-      setTimeout(resolve, 2500);
-    });
-
-    if (!img.naturalWidth) {
-      throw new Error('Image could not be rendered to canvas');
-    }
-
-    const canvas = document.createElement('canvas');
-    canvas.width = 64;
-    canvas.height = 64;
-    const ctx = canvas.getContext('2d', { willReadFrequently: true });
-    if (!ctx) throw new Error('Canvas 2D context unavailable');
-
-    ctx.drawImage(img, 0, 0, 64, 64);
-    const imgData = ctx.getImageData(0, 0, 64, 64).data;
-
-    const colorMap = new Map();
-    for (let i = 0; i < imgData.length; i += 16) {
-      const r = imgData[i];
-      const g = imgData[i + 1];
-      const b = imgData[i + 2];
-      const a = imgData[i + 3];
-      if (a < 128) continue;
-
-      const qr = Math.round(r / 32) * 32;
-      const qg = Math.round(g / 32) * 32;
-      const qb = Math.round(b / 32) * 32;
-
-      const maxVal = Math.max(qr, qg, qb);
-      const minVal = Math.min(qr, qg, qb);
-      const sat = maxVal === 0 ? 0 : (maxVal - minVal) / maxVal;
-      const lum = 0.2126 * (qr / 255) + 0.7152 * (qg / 255) + 0.0722 * (qb / 255);
-
-      if (lum < 0.15 || lum > 0.85 || sat < 0.2) continue;
-
-      const hex = '#' + [qr, qg, qb].map((x) => Math.min(255, Math.max(0, x)).toString(16).padStart(2, '0')).join('');
-      colorMap.set(hex, (colorMap.get(hex) || 0) + 1);
-    }
-
-    let sorted = Array.from(colorMap.entries())
-      .sort((a, b) => b[1] - a[1])
-      .map((entry) => entry[0]);
-    if (sorted.length < 5) {
-      const fillers = ['#33cdb8', '#38bdf8', '#3bf58b', '#ffbe40', '#c084fc', '#f43f5e'];
-      for (const f of fillers) {
-        if (!sorted.includes(f)) sorted.push(f);
-        if (sorted.length >= 6) break;
-      }
-    } else {
-      sorted = sorted.slice(0, 6);
-    }
-
-    renderExtractedChips(sorted);
-    showToast(t('settings.palette_extracted_success', 'Extracted 6 vibrant wallpaper accents!'), 'success');
-  } catch (err) {
-    console.warn('[PALETTE] Extraction fallback:', err);
-    const fallbackPalette = ['#33cdb8', '#38bdf8', '#3bf58b', '#ffbe40', '#c084fc', '#f43f5e'];
-    renderExtractedChips(fallbackPalette);
-    showToast(t('settings.palette_sampled_default', 'Sampled default theme accents'), 'info');
-  }
+/** A colour chosen by hand: the accent no longer follows the wallpaper (APP-D). */
+function ownAccent() {
+  const look = loadLook();
+  if (look.wallpaperAccent) storeLook({ ...look, wallpaperAccent: false });
 }
 
 let _appearanceUndoSnapshot = null;
@@ -1651,6 +1582,7 @@ export function initDesktopThemeControls() {
     });
     picker.addEventListener('change', (e) => {
       const hex = /** @type {HTMLInputElement} */ (e.target).value;
+      ownAccent();
       applyDesktopTheme(state.desktopTheme, hex);
       saveDesktopThemeToServer(state.desktopTheme, hex);
       syncDesktopThemeUI();
@@ -1661,6 +1593,7 @@ export function initDesktopThemeControls() {
     chip.addEventListener('click', () => {
       const color = chip.dataset.color;
       if (!color) return;
+      ownAccent();
       applyDesktopTheme(state.desktopTheme, color);
       saveDesktopThemeToServer(state.desktopTheme, color);
       syncDesktopThemeUI();
@@ -1670,11 +1603,20 @@ export function initDesktopThemeControls() {
   const resetBtn = $('desktop-theme-reset-accent-btn');
   if (resetBtn) {
     resetBtn.addEventListener('click', () => {
+      ownAccent();
       applyDesktopTheme(state.desktopTheme, '');
       saveDesktopThemeToServer(state.desktopTheme, '');
       syncDesktopThemeUI();
     });
   }
+
+  // "Match my wallpaper" (APP-D): on, the wallpaper's colour becomes the accent now and at each change
+  const follow = /** @type {HTMLInputElement | null} */ ($('look-wallpaper-accent'));
+  follow?.addEventListener('change', () => {
+    updateLook({ wallpaperAccent: follow.checked });
+    if (follow.checked)
+      import('./wallpaper-accent.js').then((m) => m.followWallpaper()).then(() => syncDesktopThemeUI());
+  });
 
   // Hook Palette Extractor
   const extractBtn = $('extract-palette-btn');
