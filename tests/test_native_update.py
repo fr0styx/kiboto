@@ -544,3 +544,40 @@ def test_door_follows_puts_the_units_in_place_and_restarts_the_door(monkeypatch)
 
     monkeypatch.setattr(nu, "ensure_units", broken)
     nu._door_follows("/opt/kiboto/releases/x", None)  # said in the log; the update goes on
+
+
+def test_the_helper_hands_the_data_folder_back_to_its_owner(tmp_path, monkeypatch):
+    data = tmp_path / "data"
+    (data / "backups" / "pre-update").mkdir(parents=True)
+    (data / "secret.key").write_text("x")
+    (data / "door-audit.log").write_text("")
+    given = []
+    monkeypatch.setattr(nu.os, "lchown", lambda p, u, g: given.append((os.path.relpath(p, data), u, g)))
+    real_stat = os.stat
+    monkeypatch.setattr(
+        nu.os,
+        "stat",
+        lambda p, *a, **k: (
+            os.stat_result((0o40700, 0, 0, 1, 999, 987, 0, 0, 0, 0)) if str(p) == str(data) else real_stat(p, *a, **k)
+        ),
+    )
+    nu._hand_back(str(data))
+    names = {g[0] for g in given}
+    assert {"secret.key", "backups", os.path.join("backups", "pre-update")} <= names
+    assert "door-audit.log" not in names  # root's log stays root's
+    assert all(g[1:] == (999, 987) for g in given)
+    given.clear()
+    monkeypatch.setattr(nu.os, "stat", lambda p, *a, **k: os.stat_result((0o40700, 0, 0, 1, 0, 0, 0, 0, 0, 0)))
+    nu._hand_back(str(data))
+    assert given == []  # a folder that is root's: nothing changes
+    nu._hand_back(str(tmp_path / "missing"))
+
+
+def test_the_helper_hands_back_before_each_start(machine, monkeypatch):
+    monkeypatch.setattr(nu, "_hand_back", lambda d: machine["steps"].append("hand back"))
+    monkeypatch.setattr(nu, "healthy", lambda port, **k: (False, "no"))
+    nu.apply(machine["b"], machine["data"], 8082, "img", machine["prefix"], machine["run"])
+    steps = machine["steps"]
+    for i, step in enumerate(steps):
+        if step.startswith("systemctl start"):
+            assert steps[i - 1] == "hand back", steps

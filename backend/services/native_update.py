@@ -258,6 +258,29 @@ def _named_by_its_build(rel: str) -> str:
     return named
 
 
+ROOTS_LOGS = ("door-audit.log", "docker-proxy-audit.log")  # written by root: they stay root's
+
+
+def _hand_back(data_dir: str) -> None:
+    """What the helper (root) made or put back in the data folder (snapshots, restored files)
+    goes to the folder's owner before Kiboto starts: the user kiboto when Kiboto is not root
+    (ADR 0006), which could not open them otherwise. Nothing changes where the folder is root's."""
+    try:
+        st = os.stat(data_dir)
+    except OSError:
+        return
+    if st.st_uid == 0:
+        return
+    for folder, dirs, files in os.walk(data_dir):
+        for name in [*dirs, *files]:
+            if folder == data_dir and name in ROOTS_LOGS:
+                continue
+            try:
+                os.lchown(os.path.join(folder, name), st.st_uid, st.st_gid)
+            except OSError as e:
+                logger.warning("[Update] %s stays root's: %s", name, e)
+
+
 def _door_follows(rel: str, run: Any) -> None:
     """The helper (root) puts this version's service files in place and starts the host door again
     on its code before Kiboto starts: once Kiboto is not root (ADR 0006) it cannot do that itself."""
@@ -369,12 +392,14 @@ def apply(rel: str, data_dir: str, port: int, image: str = "", prefix: str = PRE
             extra={"kind": "update", "to": os.path.basename(rel), "from_release": os.path.basename(running)},
         )
     except OSError as e:
+        _hand_back(data_dir)
         run(["systemctl", "start", SERVICE], timeout=120)
         write_update_result(data_dir, "not_applied", f"could not snapshot the data folder: {e}", to_image=image)
         return "not_applied"
     earlier = _previous(prefix)
     before = point_at(rel, prefix)
     _door_follows(rel, run)
+    _hand_back(data_dir)
     run(["systemctl", "start", SERVICE], timeout=120)
     ok, why = healthy(port, stopped=lambda: restarts(run))
     if ok:
@@ -393,6 +418,7 @@ def apply(rel: str, data_dir: str, port: int, image: str = "", prefix: str = PRE
         _set_previous(prefix, earlier)  # the version that failed is nobody's "previous"
         shutil.rmtree(rel, ignore_errors=True)
     run(["systemctl", "reset-failed", SERVICE], timeout=30)  # a crash loop may have used up its starts
+    _hand_back(data_dir)
     run(["systemctl", "start", SERVICE], timeout=120)
     write_update_result(data_dir, "rolled_back", why, to_image=image)
     return "rolled_back"
@@ -449,12 +475,14 @@ def back(snapshot: str, data_dir: str, port: int, prefix: str = PREFIX, run: Any
         take_snapshot(data_dir, label="before-revert", extra={"kind": "revert"})
         restore_snapshot(snapshot, data_dir)
     except (OSError, ValueError) as e:
+        _hand_back(data_dir)
         run(["systemctl", "start", SERVICE], timeout=120)
         write_update_result(data_dir, "not_reverted", f"the earlier data could not be put back: {e}")
         return "not_reverted"
     point_at(rel, prefix)
     _door_follows(rel, run)
     run(["systemctl", "reset-failed", SERVICE], timeout=30)
+    _hand_back(data_dir)
     run(["systemctl", "start", SERVICE], timeout=120)
     ok, why = healthy(port, stopped=lambda: restarts(run))
     write_update_result(data_dir, "reverted" if ok else "not_reverted", why)

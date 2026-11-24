@@ -1673,3 +1673,22 @@ def test_the_door_version_follows_any_backend_file(tmp_path, monkeypatch):
     second = door.version(str(tmp_path))
     os.utime(tmp_path / "__pycache__" / "z.py", (1, 1))
     assert door.version(str(tmp_path)) == second  # compiled files do not count
+
+
+def test_the_wrapped_key_comes_through_the_door(audit, monkeypatch):
+    from backend import machine_key
+
+    monkeypatch.setattr(door, "available", lambda sock=door.SOCK: True)
+    monkeypatch.setattr(door, "call", lambda op, **a: '{"v": 1}' if op == "keys.wrapped" else None)
+    assert machine_key.wrapped_text() == '{"v": 1}'
+    monkeypatch.setattr(door, "available", lambda sock=door.SOCK: False)
+    import builtins
+    import io
+
+    real_open = builtins.open
+    monkeypatch.setattr(
+        builtins,
+        "open",
+        lambda p, *a, **k: io.StringIO('{"v": 2}') if str(p).endswith("data-key.recovery") else real_open(p, *a, **k),
+    )
+    assert machine_key.wrapped_text() == '{"v": 2}'

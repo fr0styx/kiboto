@@ -253,6 +253,17 @@ def _to_write_down_here() -> str:
         return ""
 
 
+def wrapped_text() -> str:
+    """The data key wrapped under the recovery key (what the settings copy on the pools carries):
+    through the door where it runs, the key's folder being root's."""
+    return str(_door("keys.wrapped", _wrapped_here))
+
+
+def _wrapped_here() -> str:
+    with open(_path(WRAPPED), encoding="utf-8") as f:
+        return f.read()
+
+
 def written_down() -> bool:
     """The person has the recovery key: Kiboto forgets it."""
     return bool(_door("keys.written_down", _written_down_here))

@@ -164,8 +164,7 @@ def copy_if_due(now: float | None = None, force: bool = False) -> dict[str, str]
             try:
                 if made is None:  # one archive for every pool of this round
                     data_key = machine_key.key_text()
-                    with open(os.path.join(machine_key.DIR, machine_key.WRAPPED), "rb") as f:
-                        wrapped = f.read()
+                    wrapped = machine_key.wrapped_text().encode("utf-8")
                     from backend import __version__
 
                     about = {

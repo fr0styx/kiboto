@@ -509,6 +509,7 @@ OPERATIONS: dict[str, Operation] = {
     "keys.unlock": Operation(_key("unlock"), {"typed": TEXT}, max_len=64),
     "keys.adopt": Operation(_key("adopt"), {"data_key": TEXT, "box": MAP}, max_len=128),
     "keys.renew": Operation(_key("renew_recovery_key"), {}),
+    "keys.wrapped": Operation(_key("wrapped_text"), {}),
     # people's files (ADR 0006 step 8)
     "files.like_folder": Operation(_files("like_folder"), {"path": TEXT}, max_len=4096),
     "files.rights_again": Operation(_files("rights_again"), {"path": TEXT}, max_len=4096),
