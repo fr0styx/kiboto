@@ -199,6 +199,14 @@ def _update_back(snapshot_id: str) -> None:
     native_update.start_back(snapshot_id, config.DATA_DIR, config.PORT)
 
 
+def _power(action: str) -> dict[str, Any]:
+    from backend.services import host_power
+
+    if action not in ("reboot", "shutdown"):
+        raise ValueError("action is reboot or shutdown")
+    return host_power.run(action)  # the door's own list of commands, never one it was sent
+
+
 def _names() -> dict[str, Any]:
     from backend.services import nas_name
 
@@ -456,6 +464,7 @@ OPERATIONS: dict[str, Operation] = {
     "packages.add_missing": Operation(_packages("add_missing"), {}),
     "hosts.apps": Operation(_apps_hosts, {}),
     "names.ensure": Operation(_names, {}),
+    "power.run": Operation(_power, {"action": TEXT}, max_len=16),
     "vm.tap": Operation(_vm_tap, {"name": TEXT, "bridge": TEXT}, max_len=32),
     "vm.tap_remove": Operation(_vm_tap_remove, {"name": TEXT}, max_len=32),
     "packages.check": Operation(_packages("check"), {}),

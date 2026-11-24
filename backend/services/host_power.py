@@ -68,10 +68,26 @@ def can(action: str) -> dict[str, Any]:
 
 def run(action: str, cmds: list[str] | None = None) -> dict[str, Any]:
     """Runs the first command that answers (of cmds, or of commands(action)); {started, how, error}.
-    Never the kernel's emergency keys."""
+    Never the kernel's emergency keys. On a machine Kiboto runs the host door does it (ADR 0006),
+    with its own list of commands."""
     if test_mode():
         logger.info("[Power] Test mode: %s not run", action)
         return {"started": True, "how": "test", "error": ""}
+    from backend import door
+
+    if action in HOST_COMMANDS and door.available():
+        try:
+            return dict(door.call("power.run", action=action))
+        except door.DoorError as e:
+            if str(e).startswith("the door did not finish"):  # it took the request: the machine is going down
+                return {"started": True, "how": "door", "error": ""}
+            return {"started": False, "how": "", "error": str(e)}
+        except OSError:
+            logger.debug("[Power] no door to ask; done here")
+    return _run_here(action, cmds)
+
+
+def _run_here(action: str, cmds: list[str] | None = None) -> dict[str, Any]:
     error = ""
     for cmd in commands(action) if cmds is None else cmds:
         try:

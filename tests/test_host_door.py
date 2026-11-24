@@ -1223,3 +1223,42 @@ def test_the_name_service_is_started_by_the_door(audit, monkeypatch):
     ensured = []
     monkeypatch.setattr(nas_name, "ensure", lambda: ensured.append(1) or {"running": False})
     assert host_door.handle({"op": "names.ensure", "args": {}}, 0)["result"] == {"running": False} and ensured == [1]
+
+
+def test_restart_and_shut_down_go_through_the_door(audit, monkeypatch):
+    from backend.services import host_power
+
+    monkeypatch.setattr(host_power, "test_mode", lambda: False)
+    calls = []
+    monkeypatch.setattr(door, "available", lambda sock=door.SOCK: True)
+    monkeypatch.setattr(
+        door, "call", lambda op, **a: calls.append((op, a)) or {"started": True, "how": "/sbin/reboot", "error": ""}
+    )
+    assert host_power.run("reboot")["started"] and calls == [("power.run", {"action": "reboot"})]
+    host_door._checked({"op": "power.run", "args": {"action": "reboot"}})
+
+    def gone_down(op, **a):
+        raise door.DoorError("the door did not finish answering (ConnectionResetError)", "runtime")
+
+    monkeypatch.setattr(door, "call", gone_down)
+    assert host_power.run("shutdown") == {"started": True, "how": "door", "error": ""}
+
+    def failed(op, **a):
+        raise door.DoorError("/sbin/poweroff failed (exit 1)", "runtime")
+
+    monkeypatch.setattr(door, "call", failed)
+    assert host_power.run("shutdown")["started"] is False
+
+    def no_door(op, **a):
+        raise FileNotFoundError("no socket")
+
+    monkeypatch.setattr(door, "call", no_door)
+    monkeypatch.setattr(
+        host_power, "_run_here", lambda action, cmds=None: {"started": False, "how": "", "error": "here"}
+    )
+    assert host_power.run("shutdown")["error"] == "here"
+
+    ran = []
+    monkeypatch.setattr(host_power, "run", lambda action, cmds=None: ran.append(action) or {"started": True})
+    assert host_door.handle({"op": "power.run", "args": {"action": "shutdown"}}, 0)["ok"] and ran == ["shutdown"]
+    assert host_door.handle({"op": "power.run", "args": {"action": "halt -f"}}, 0)["ok"] is False
