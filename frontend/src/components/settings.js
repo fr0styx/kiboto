@@ -413,14 +413,9 @@ export function initSettings() {
     idAttr: 'cardId',
   });
 
-  // 3. Fans Control Cards
-  setupCardContainerReordering({
-    containerId: 'fan-cards-container',
-    lockBtnId: 'fan-cards-lock-btn',
-    storageOrderKey: 'lcd_fans_card_order',
-    storageLockKey: 'lcd_fans_cards_locked',
-    idAttr: 'fanCardId',
-  });
+  // 3. Fans: no longer rearranged (Hardware 2): fan status, fan stop and the modes first, the rest in
+  // the Advanced fold. The curve is drawn again when the fold opens (it had no width while closed).
+  document.getElementById('fan-advanced')?.addEventListener('toggle', () => window.dispatchEvent(new Event('resize')));
 
   // 4. Front Panel COPY Button Cards
   setupCardContainerReordering({

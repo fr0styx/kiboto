@@ -130,11 +130,10 @@ describe('Yak Wallpaper Switch, Card Reordering, and Dynamic Hardware Settings S
       expect(ledContainer.classList.contains('locked')).toBe(false);
       expect(localStorage.getItem('lcd_led_cards_locked')).toBe('false');
 
-      // Unlock Fans tab
+      // the fans are no longer rearranged (Hardware 2): their order is fixed, the rest folds away
       fanLockBtn.click();
-      expect(fanLockBtn.textContent).toContain('Reorder');
-      expect(fanContainer.classList.contains('locked')).toBe(false);
-      expect(localStorage.getItem('lcd_fans_cards_locked')).toBe('false');
+      expect(fanContainer.classList.contains('locked')).toBe(true);
+      expect(localStorage.getItem('lcd_fans_cards_locked')).toBe(null);
 
       // Unlock Copy tab
       copyLockBtn.click();
@@ -161,7 +160,7 @@ describe('Yak Wallpaper Switch, Card Reordering, and Dynamic Hardware Settings S
       const fanCards = Array.from(document.querySelectorAll('#fan-cards-container .draggable-card')).map(
         (c) => c.dataset.fanCardId
       );
-      expect(fanCards).toEqual(['fan-card-zones', 'fan-card-tach']);
+      expect(fanCards).toEqual(['fan-card-tach', 'fan-card-zones']); // a saved fan order no longer applies (Hardware 2)
 
       const copyCards = Array.from(document.querySelectorAll('#btn-sections-container .draggable-card')).map(
         (c) => c.dataset.btnCardId

@@ -450,6 +450,74 @@
         </div>
       </div>
 
+      <div class="draggable-card drawer-card" data-fan-card-id="fan-card-zero-rpm">
+        <div class="card-headline">
+          <span class="card-head-title"><span class="drag-handle" title="Drag to reorder" data-i18n-title="ui.drag_to_reorder">⋮⋮</span> <span data-i18n="settings.zero_rpm_title">Zero RPM Fan Mode (HDD Standby)</span><button class="btn-minimize" title="Minimize/Expand" data-i18n-title="ui.minimize_expand" aria-label="Minimize/Expand card" data-i18n-aria-label="ui.minimize_expand_card">▼</button></span>
+          <label class="switch">
+            <input type="checkbox" id="zero-rpm-toggle" aria-label="Stop the disk fans while every drive sleeps" data-i18n-aria-label="fan.zero_rpm_label">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="card-instruction" data-i18n="settings.zero_rpm_desc">
+          Allows HDD bay fans to stop completely when all bay hard drives are spun down in standby and thermal conditions are safe. CPU fan is never stopped.
+        </div>
+        <div class="zero-rpm-status-row drw-row-6">
+          <span id="zero-rpm-badge-z1" class="zero-rpm-badge drw-xs-semi-box" data-sample>Zone 1: Active</span>
+          <span id="zero-rpm-badge-z2" class="zero-rpm-badge drw-xs-semi-box" data-sample>Zone 2: Active</span>
+        </div>
+        <div class="slider-row drw-row-7">
+          <label for="zero-rpm-delay-slider" class="slider-label drw-xs-bold-2" data-i18n="settings.zero_rpm_stop_delay_label">Standby Cooldown Delay</label>
+          <span class="drw-xs-bold-ok-mono" id="zero-rpm-delay-val-display">30s</span>
+        </div>
+        <div class="slider-row drw-x-7">
+          <input type="range" id="zero-rpm-delay-slider" min="10" max="180" value="30" step="5" class="custom-slider" aria-label="Standby Cooldown Delay" data-i18n-aria-label="settings.zero_rpm_stop_delay_label">
+        </div>
+      </div>
+
+      <div class="draggable-card drawer-card" data-fan-card-id="fan-card-profiles">
+        <div class="card-headline">
+          <span class="card-head-title"><span class="drag-handle" title="Drag to reorder" data-i18n-title="ui.drag_to_reorder">⋮⋮</span> <span data-i18n="settings.cooling_duty_profiles">Cooling Duty Profiles</span><button class="btn-minimize" title="Minimize/Expand" data-i18n-title="ui.minimize_expand" aria-label="Minimize/Expand card" data-i18n-aria-label="ui.minimize_expand_card">▼</button></span>
+        </div>
+        <div class="card-instruction" data-i18n="fan.modes_desc">Quiet, Balanced and Performance follow the hottest drive; Custom follows your own curve. With fan stop on, the fans stop while every drive sleeps.</div>
+        <div class="profiles-grid drw-x-8">
+          <button class="profile-pill fan-profile-btn" data-fan-profile="quiet" data-i18n="fan.mode_quiet">Quiet</button>
+          <button class="profile-pill fan-profile-btn" data-fan-profile="balanced" data-i18n="fan.mode_balanced">Balanced</button>
+          <button class="profile-pill fan-profile-btn" data-fan-profile="performance" data-i18n="fan.mode_performance">Performance</button>
+          <button class="profile-pill fan-profile-btn active" data-fan-profile="auto" data-i18n="fan.mode_custom">Custom</button>
+          <button class="profile-pill fan-profile-btn" data-fan-profile="full" data-i18n="dr.full_183">Full · 100 %</button>
+        </div>
+        <div id="fan-presets-bar" class="fan-presets-bar">
+          <div class="fan-presets-header">
+            <span class="fan-presets-title">
+              <svg class="ic ic-xs"><use href="#i-sliders"/></svg>
+              <span data-i18n="fan.presets_title">Custom Presets</span>
+            </span>
+            <button id="btn-save-fan-preset" class="btn-fan-action btn-fan-save" type="button" title="Save current curve as preset" data-i18n-title="ui.save_current_curve_as_preset">
+              <svg class="ic ic-xs"><use href="#i-save"/></svg>
+              <span data-i18n="fan.save_preset">Save Preset</span>
+            </button>
+          </div>
+          <div class="fan-presets-controls">
+            <div class="fan-preset-select-wrap">
+              <select id="fan-preset-select" class="tz-select-input fan-preset-select" aria-label="Saved curves" data-i18n-aria-label="fan.presets_label">
+                <option value="" data-i18n="fan.select_preset">-- Select Preset --</option>
+              </select>
+            </div>
+            <button id="btn-apply-fan-preset" class="btn-fan-action btn-fan-apply" type="button" disabled title="Apply selected preset" data-i18n-title="ui.apply_selected_preset">
+              <svg class="ic ic-xs"><use href="#i-bolt"/></svg>
+              <span data-i18n="fan.apply_preset">Apply</span>
+            </button>
+            <button id="btn-delete-fan-preset" class="btn-fan-action btn-fan-delete" type="button" style="display: none;" title="Delete selected preset" data-i18n-title="ui.delete_selected_preset">
+              <svg class="ic ic-xs"><use href="#i-trash"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- Hardware 2: what enthusiasts change, folded away (decision 7a keeps all of it) -->
+      <details class="hw-advanced" id="fan-advanced">
+        <summary data-i18n="hw.fans_advanced">Advanced: the curve, the processor fan, a fixed speed and the noise test</summary>
       <div class="draggable-card drawer-card" data-fan-card-id="fan-card-curve">
         <div class="card-headline">
           <span class="card-head-title"><span class="drag-handle" title="Drag to reorder" data-i18n-title="ui.drag_to_reorder">⋮⋮</span> <span data-i18n="settings.fan_curve_title">Dynamic Fan Curve • Thermal Map</span><button class="btn-minimize" title="Minimize/Expand" data-i18n-title="ui.minimize_expand" aria-label="Minimize/Expand card" data-i18n-aria-label="ui.minimize_expand_card">▼</button></span>
@@ -533,7 +601,7 @@
         <div class="card-headline">
           <span class="card-head-title"><span class="drag-handle" title="Drag to reorder" data-i18n-title="ui.drag_to_reorder">⋮⋮</span> <span data-i18n="settings.control_cpu_fan">Control CPU Fan</span><button class="btn-minimize" title="Minimize/Expand" data-i18n-title="ui.minimize_expand" aria-label="Minimize/Expand card" data-i18n-aria-label="ui.minimize_expand_card">▼</button></span>
           <label class="switch">
-            <input type="checkbox" id="cpu-fan-toggle">
+            <input type="checkbox" id="cpu-fan-toggle" aria-label="Let Kiboto control the processor fan" data-i18n-aria-label="fan.cpu_toggle_label">
             <span class="toggle-slider"></span>
           </label>
         </div>
@@ -549,71 +617,6 @@
         </div>
       </div>
 
-      <div class="draggable-card drawer-card" data-fan-card-id="fan-card-zero-rpm">
-        <div class="card-headline">
-          <span class="card-head-title"><span class="drag-handle" title="Drag to reorder" data-i18n-title="ui.drag_to_reorder">⋮⋮</span> <span data-i18n="settings.zero_rpm_title">Zero RPM Fan Mode (HDD Standby)</span><button class="btn-minimize" title="Minimize/Expand" data-i18n-title="ui.minimize_expand" aria-label="Minimize/Expand card" data-i18n-aria-label="ui.minimize_expand_card">▼</button></span>
-          <label class="switch">
-            <input type="checkbox" id="zero-rpm-toggle">
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-        <div class="card-instruction" data-i18n="settings.zero_rpm_desc">
-          Allows HDD bay fans to stop completely when all bay hard drives are spun down in standby and thermal conditions are safe. CPU fan is never stopped.
-        </div>
-        <div class="zero-rpm-status-row drw-row-6">
-          <span id="zero-rpm-badge-z1" class="zero-rpm-badge drw-xs-semi-box" data-sample>Zone 1: Active</span>
-          <span id="zero-rpm-badge-z2" class="zero-rpm-badge drw-xs-semi-box" data-sample>Zone 2: Active</span>
-        </div>
-        <div class="slider-row drw-row-7">
-          <label for="zero-rpm-delay-slider" class="slider-label drw-xs-bold-2" data-i18n="settings.zero_rpm_stop_delay_label">Standby Cooldown Delay</label>
-          <span class="drw-xs-bold-ok-mono" id="zero-rpm-delay-val-display">30s</span>
-        </div>
-        <div class="slider-row drw-x-7">
-          <input type="range" id="zero-rpm-delay-slider" min="10" max="180" value="30" step="5" class="custom-slider" aria-label="Standby Cooldown Delay" data-i18n-aria-label="settings.zero_rpm_stop_delay_label">
-        </div>
-      </div>
-
-      <div class="draggable-card drawer-card" data-fan-card-id="fan-card-profiles">
-        <div class="card-headline">
-          <span class="card-head-title"><span class="drag-handle" title="Drag to reorder" data-i18n-title="ui.drag_to_reorder">⋮⋮</span> <span data-i18n="settings.cooling_duty_profiles">Cooling Duty Profiles</span><button class="btn-minimize" title="Minimize/Expand" data-i18n-title="ui.minimize_expand" aria-label="Minimize/Expand card" data-i18n-aria-label="ui.minimize_expand_card">▼</button></span>
-        </div>
-        <div class="card-instruction" data-i18n="fan.modes_desc">Quiet, Balanced and Performance follow the hottest drive; Custom follows your own curve. With fan stop on, the fans stop while every drive sleeps.</div>
-        <div class="profiles-grid drw-x-8">
-          <button class="profile-pill fan-profile-btn" data-fan-profile="quiet" data-i18n="fan.mode_quiet">Quiet</button>
-          <button class="profile-pill fan-profile-btn" data-fan-profile="balanced" data-i18n="fan.mode_balanced">Balanced</button>
-          <button class="profile-pill fan-profile-btn" data-fan-profile="performance" data-i18n="fan.mode_performance">Performance</button>
-          <button class="profile-pill fan-profile-btn active" data-fan-profile="auto" data-i18n="fan.mode_custom">Custom</button>
-          <button class="profile-pill fan-profile-btn" data-fan-profile="full" data-i18n="dr.full_183">Full · 100 %</button>
-        </div>
-        <div id="fan-presets-bar" class="fan-presets-bar">
-          <div class="fan-presets-header">
-            <span class="fan-presets-title">
-              <svg class="ic ic-xs"><use href="#i-sliders"/></svg>
-              <span data-i18n="fan.presets_title">Custom Presets</span>
-            </span>
-            <button id="btn-save-fan-preset" class="btn-fan-action btn-fan-save" type="button" title="Save current curve as preset" data-i18n-title="ui.save_current_curve_as_preset">
-              <svg class="ic ic-xs"><use href="#i-save"/></svg>
-              <span data-i18n="fan.save_preset">Save Preset</span>
-            </button>
-          </div>
-          <div class="fan-presets-controls">
-            <div class="fan-preset-select-wrap">
-              <select id="fan-preset-select" class="tz-select-input fan-preset-select">
-                <option value="" data-i18n="fan.select_preset">-- Select Preset --</option>
-              </select>
-            </div>
-            <button id="btn-apply-fan-preset" class="btn-fan-action btn-fan-apply" type="button" disabled title="Apply selected preset" data-i18n-title="ui.apply_selected_preset">
-              <svg class="ic ic-xs"><use href="#i-bolt"/></svg>
-              <span data-i18n="fan.apply_preset">Apply</span>
-            </button>
-            <button id="btn-delete-fan-preset" class="btn-fan-action btn-fan-delete" type="button" style="display: none;" title="Delete selected preset" data-i18n-title="ui.delete_selected_preset">
-              <svg class="ic ic-xs"><use href="#i-trash"/></svg>
-            </button>
-          </div>
-        </div>
-      </div>
-
-
       <div class="draggable-card drawer-card" id="manual-pwm-card" data-fan-card-id="fan-card-override">
         <div class="card-headline">
           <span class="card-head-title"><span class="drag-handle" title="Drag to reorder" data-i18n-title="ui.drag_to_reorder">⋮⋮</span> <span data-i18n="settings.manual_pwm_override">Manual PWM Override</span><button class="btn-minimize" title="Minimize/Expand" data-i18n-title="ui.minimize_expand" aria-label="Minimize/Expand card" data-i18n-aria-label="ui.minimize_expand_card">▼</button></span>
@@ -621,7 +624,7 @@
         </div>
         <div class="card-instruction" data-i18n="settings.manual_pwm_desc">Directly commands pwmX_enable = 1 and sets duty cycles 0-183.</div>
         <div class="slider-row">
-          <input type="range" id="fan-pwm-slider" min="32" max="100" value="60" step="1" class="custom-slider">
+          <input type="range" id="fan-pwm-slider" min="32" max="100" value="60" step="1" class="custom-slider" aria-label="Fixed fan speed, in percent" data-i18n-aria-label="fan.fixed_speed_label">
         </div>
       </div>
 
@@ -680,6 +683,7 @@
           </div>
         </div>
       </div>
+      </details>
     </div>
   </div>
 

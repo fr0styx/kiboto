@@ -244,3 +244,8 @@
 #mgmt-sec-hardware .tab-sub-header { display: none; } /* "Fan control cards" and its order lock */
 #mgmt-sec-hardware .mgmt-tab-pane + .mgmt-tab-pane { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--kb-line-7); }
 .hw-safety-line { margin: 0 0 10px; font-size: var(--kb-fs-xs); color: var(--kb-text-soft); line-height: 1.5; }
+.hw-advanced { border: 1px solid var(--kb-line-7); border-radius: 10px; padding: 0 12px; }
+.hw-advanced > summary { cursor: pointer; padding: 12px 0; font-size: var(--kb-fs-xs); font-weight: 700; color: var(--kb-text-strong); }
+.hw-advanced[open] { padding-bottom: 12px; }
+.hw-advanced[open] > summary { margin-bottom: 4px; }
+.hw-advanced > .drawer-card + .drawer-card { margin-top: 12px; }

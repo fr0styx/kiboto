@@ -245,11 +245,8 @@ def test_e2e_live_desktop_session_and_badge():
         assert badge is not None
         assert "BETA" in badge.inner_text().upper()  # the words, whatever the case
 
-        # The hardware settings button is in the page, but only shown on supported
-        # appliance hardware, which a CI runner doesn't have.
-        btn = page.wait_for_selector("#drawer-toggle-btn", state="attached", timeout=5000)
-        assert btn is not None
-        assert "HARDWARE SETTINGS" in (btn.text_content() or "").upper()
+        # The top-bar "Hardware settings" button is gone (Hardware 2): the Hardware page is the way in
+        assert page.query_selector("#drawer-toggle-btn") is None
 
         # Check dock container exists
         dock = _wait("#os-dock-container")

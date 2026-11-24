@@ -206,8 +206,8 @@ def test_main_views_have_no_serious_accessibility_issues():
         results["login"] = _login(page)
         for name, opener, selector in VIEWS:
             _open(page, results, name, opener, selector)
-        # the hardware-settings drawer loads after the first paint: checked open, every time
-        _open(page, results, "settings-drawer", "window.openDrawer && window.openDrawer()", "#led-drawer")
+        # the old hardware drawer is no longer shown (Hardware 2): its cards are on the Hardware page,
+        # checked with mgmt-pane-unraid above
         page.keyboard.press("Escape")
         page.evaluate("() => document.getElementById('drawer-close-btn')?.click()")
         page.wait_for_timeout(400)
