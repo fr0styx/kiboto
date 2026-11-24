@@ -1239,6 +1239,7 @@ export function initManagement() {
         sectionName = t('mgmt.sidebar_hardware', 'Hardware'); // the page's name, as in the sidebar
         if (typeof restoreHardwareTabsToManagement === 'function') restoreHardwareTabsToManagement();
         import('./quiet-night-card.js').then((m) => m.renderQuietNightCard()).catch(() => {}); // hardware extra
+        import('./front-panel.js').then((m) => m.renderHardwarePower()).catch(() => {}); // On/Off first (Hardware 2)
         if (state.lastStats || state.latestStats) updateManagementTelemetry(state.lastStats || state.latestStats);
       } else if (targetId === 'mgmt-sec-away') {
         sectionName = t('mgmt.sidebar_away', 'Away from home');

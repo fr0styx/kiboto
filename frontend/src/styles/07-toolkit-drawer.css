@@ -258,3 +258,9 @@
 .hw-st-dot { width: 8px; height: 8px; border-radius: 50%; flex: 0 0 auto; background: var(--ok2); }
 .hw-status-rows li[data-level="warm"] .hw-st-dot { background: var(--warn, #f5b942); }
 .hw-status-rows li[data-level="hot"] .hw-st-dot { background: var(--crit, #ef4444); }
+/* On/Off first in Lights and Front screen; the old switches further down are not shown there */
+.hw-power-row:empty { display: none; }
+.hw-power-row { margin-bottom: 12px; }
+.hw-power-row .front-panel-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px; border: 1px solid var(--kb-line-7); border-radius: 10px; font-weight: 600; color: var(--kb-text-strong); }
+#mgmt-sec-hardware #btn-toggle-led,
+#mgmt-sec-hardware #btn-toggle-screen-power { display: none; }

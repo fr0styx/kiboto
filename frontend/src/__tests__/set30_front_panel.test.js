@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { api } from '../api.js';
 import { ROUTES } from '../router.js';
-import { frontPanelParts, renderFrontPanel } from '../components/front-panel.js';
+import { frontPanelParts, renderFrontPanel, renderHardwarePower } from '../components/front-panel.js';
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -50,5 +50,25 @@ describe('General -> Front panel (SET-30, Hardware decision 2 a)', () => {
     await renderFrontPanel(mount, { hardware: { has_mcu: true, has_lcd: true } });
     expect(/** @type {HTMLInputElement} */ (mount.querySelector('#front-light-on')).checked).toBe(true);
     expect(/** @type {HTMLInputElement} */ (mount.querySelector('#front-screen-on')).checked).toBe(true);
+  });
+
+  it('puts On/Off first in the Hardware page Lights and Front screen sections (Hardware 2)', async () => {
+    vi.spyOn(api, 'get').mockImplementation(async (url) => (url === '/api/led' ? { power: 'off' } : { power: true }));
+    const post = vi.spyOn(api, 'post').mockResolvedValue({ status: 'ok' });
+    document.body.innerHTML = '<div id="hw-light-power"></div><div id="hw-screen-power"></div>';
+    await renderHardwarePower(document, { hardware: { has_mcu: true, has_lcd: true } });
+    await renderHardwarePower(document, { hardware: { has_mcu: true, has_lcd: true } }); // once each
+    const light = /** @type {HTMLInputElement} */ (document.querySelector('#hw-light-on'));
+    expect(document.querySelectorAll('#hw-light-power input')).toHaveLength(1);
+    expect(light.checked).toBe(false);
+    expect(/** @type {HTMLInputElement} */ (document.querySelector('#hw-screen-on')).checked).toBe(true);
+    light.checked = true;
+    light.dispatchEvent(new Event('change'));
+    await Promise.resolve();
+    expect(post).toHaveBeenCalledWith('/api/led', { power: 'on' });
+    document.body.innerHTML = '<div id="hw-light-power"></div><div id="hw-screen-power"></div>';
+    await renderHardwarePower(document, { hardware: {} }); // a machine without them: nothing shown
+    expect(document.querySelector('#hw-light-on')).toBe(null);
+    document.body.innerHTML = '';
   });
 });

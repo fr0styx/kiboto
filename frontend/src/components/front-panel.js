@@ -37,6 +37,37 @@ function row(id, label, on, onChange) {
   return wrap;
 }
 
+/** The front light's On/Off row (POST /api/led {power}). */
+export async function lightRow(id) {
+  let on = true;
+  try {
+    on = ((await api.get('/api/led')) || {}).power !== 'off';
+  } catch {
+    /* not readable: shown as on, as the light usually is */
+  }
+  return row(id, t('front.light', 'Front light'), on, (v) => api.post('/api/led', { power: v ? 'on' : 'off' }));
+}
+
+/** The front screen's On/Off row (POST /api/screen {power}). */
+export async function screenRow(id) {
+  let on = true;
+  try {
+    on = ((await api.get('/api/screen')) || {}).power !== false;
+  } catch {
+    /* as above */
+  }
+  return row(id, t('front.screen', 'Front screen'), on, (v) => api.post('/api/screen', { power: v }));
+}
+
+/** On/Off first in the Hardware page's Lights and Front screen sections (Hardware 2), once each. */
+export async function renderHardwarePower(doc = document, stats = state.latestStats) {
+  const parts = frontPanelParts(stats);
+  const light = doc.getElementById('hw-light-power');
+  const screen = doc.getElementById('hw-screen-power');
+  if (light && parts.light && !light.firstChild) light.append(await lightRow('hw-light-on'));
+  if (screen && parts.screen && !screen.firstChild) screen.append(await screenRow('hw-screen-on'));
+}
+
 export async function renderFrontPanel(
   mount = document.getElementById('general-front-panel'),
   stats = state.latestStats
@@ -51,30 +82,8 @@ export async function renderFrontPanel(
   title.textContent = t('front.title', 'Front panel');
   /** @type {HTMLElement[]} */
   const kids = [title];
-  if (parts.light) {
-    let on = true;
-    try {
-      on = ((await api.get('/api/led')) || {}).power !== 'off';
-    } catch {
-      /* not readable: shown as on, as the light usually is */
-    }
-    kids.push(
-      row('front-light-on', t('front.light', 'Front light'), on, (v) =>
-        api.post('/api/led', { power: v ? 'on' : 'off' })
-      )
-    );
-  }
-  if (parts.screen) {
-    let on = true;
-    try {
-      on = ((await api.get('/api/screen')) || {}).power !== false;
-    } catch {
-      /* as above */
-    }
-    kids.push(
-      row('front-screen-on', t('front.screen', 'Front screen'), on, (v) => api.post('/api/screen', { power: v }))
-    );
-  }
+  if (parts.light) kids.push(await lightRow('front-light-on'));
+  if (parts.screen) kids.push(await screenRow('front-screen-on'));
   const more = Object.assign(document.createElement('button'), {
     type: 'button',
     className: 'btn-pill-toggle front-panel-more',
