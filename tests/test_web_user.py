@@ -30,11 +30,14 @@ def test_turning_it_on_makes_the_user_and_the_drop_in(tmp_path, monkeypatch):
     (apps / "it-tools" / "data").mkdir(parents=True)
     (apps / "it-tools" / "docker-compose.yml").write_text("services: {}\n")
     monkeypatch.setattr(web_user, "_apps_root", lambda: str(apps))
+    vms = pool / "vms"
+    vms.mkdir()
+    monkeypatch.setattr(web_user, "_vm_folders", lambda data_dir: [str(vms), str(tmp_path / "no-isos")])
     drop_in = tmp_path / "kiboto.service.d" / "web-user.conf"
     ran, do = _runner({"id": (1, "no such user")})
     assert web_user.turn_on(do, str(drop_in), str(data)) == []
     text = drop_in.read_text()
-    assert "User=kiboto" in text and "NoNewPrivileges=yes" in text and "SupplementaryGroups=users dialout" in text
+    assert "User=kiboto" in text and "NoNewPrivileges=yes" in text
     assert "CapabilityBoundingSet=CAP_NET_BIND_SERVICE" in text
     names = [c[0] for c in ran]
     assert names.index("useradd") < names.index("chown") < names.index("setfacl")
@@ -48,6 +51,8 @@ def test_turning_it_on_makes_the_user_and_the_drop_in(tmp_path, monkeypatch):
     assert ["setfacl", "-d", "-m", "u:kiboto:rwX", str(apps / "it-tools")] in ran
     assert ["setfacl", "-m", "u:kiboto:rwX", str(apps / "it-tools" / "docker-compose.yml")] in ran
     assert not [c for c in ran if c[-1] == str(apps / "it-tools" / "data")]  # the app's own data: left alone
+    assert ["setfacl", "-R", "-d", "-m", "u:kiboto:rwX", str(vms)] in ran
+    assert "SupplementaryGroups=users dialout kvm" in text
     assert ran[-1] == ["systemctl", "daemon-reload"]
     assert web_user.is_on(str(drop_in)) and web_user.status(str(drop_in)) == {"on": True, "user": "kiboto"}
 
@@ -114,3 +119,24 @@ def test_the_door_lets_in_a_web_user_made_after_it_started(monkeypatch, tmp_path
     host_door._serve_one(a, {0})
     assert b'"pong"' in b.recv(4096)
     b.close()
+
+
+def test_where_the_folders_come_from(monkeypatch):
+    from backend.hardware.pal import pool_registry
+    from backend.services import apps_place, pool_places
+
+    monkeypatch.setattr(pool_places, "vms_root", lambda data_dir: "/mnt/storage/tank/vms")
+    monkeypatch.setattr(pool_places, "iso_dir", lambda data_dir: "")
+    assert web_user._vm_folders("/var/lib/kiboto") == ["/mnt/storage/tank/vms"]
+    monkeypatch.setattr(apps_place, "root", lambda: ("/mnt/storage/tank/appdata", True))
+    assert web_user._apps_root() == "/mnt/storage/tank/appdata"
+    monkeypatch.setattr(pool_registry, "load", lambda: [{"mountpoint": "/mnt/storage/tank"}, {"mountpoint": ""}])
+    assert web_user._pool_roots() == ["/mnt/storage/tank"]
+
+    def broken(*a):
+        raise OSError("gone")
+
+    monkeypatch.setattr(pool_places, "vms_root", broken)
+    monkeypatch.setattr(apps_place, "root", broken)
+    monkeypatch.setattr(pool_registry, "load", broken)
+    assert web_user._vm_folders("/x") == [] and web_user._apps_root() == "" and web_user._pool_roots() == []

@@ -4,8 +4,8 @@ Off by default, and for now only for trying it out: everything that changes the 
 through the host door (steps 1 to 8), and running without root shows what still does not. Turned
 on (as root, or by the door), it
 
-- makes the system user `kiboto`, in the file server's group `users` (shared folders) and
-  `dialout` (the front screen's serial port);
+- makes the system user `kiboto`, in the file server's group `users` (shared folders),
+  `dialout` (the front screen's serial port) and `kvm` (virtual machines);
 - gives it Kiboto's data folder, except the logs the door and the Docker proxy write, which stay
   root's so the web process cannot change what they recorded;
 - lets it into the private homes with an access list, the others still out, and into each
@@ -35,7 +35,7 @@ logger = logging.getLogger("Kiboto")
 DATA = "/var/lib/kiboto"  # kiboto.service's DATA_DIR
 
 USER = "kiboto"
-GROUPS = ("users", "dialout")
+GROUPS = ("users", "dialout", "kvm")  # shared folders, the front screen, virtual machines
 DROP_IN = "/etc/systemd/system/kiboto.service.d/web-user.conf"
 ROOTS_LOGS = ("door-audit.log", "docker-proxy-audit.log")  # written by root, read by people
 ACL = f"u:{USER}:rwX"
@@ -101,6 +101,15 @@ def _apps_root() -> str:
         return ""
 
 
+def _vm_folders(data_dir: str) -> list[str]:
+    try:
+        from backend.services import pool_places
+
+        return sorted({pool_places.vms_root(data_dir), pool_places.iso_dir(data_dir)} - {""})
+    except (OSError, ValueError, ImportError):
+        return []
+
+
 def _let_into_apps(do: Run, root: str) -> None:
     """The apps' folder, each app's folder and the files directly in it (its compose file and
     settings, which Kiboto writes); not the apps' own data further down."""
@@ -156,6 +165,9 @@ def turn_on(do: Run | None = None, drop_in: str = DROP_IN, data_dir: str = "") -
         for recycle in _bins(root):
             _let_in(do, recycle, recursive=True)
     _let_into_apps(do, _apps_root())
+    for folder in _vm_folders(data_dir):  # a few large disk images: all of it
+        if os.path.isdir(folder) and not _let_in(do, folder, recursive=True):
+            problems.append(f"{USER} could not be let into {folder} (setfacl)")
     os.makedirs(os.path.dirname(drop_in), exist_ok=True)
     with open(drop_in + ".new", "w", encoding="utf-8") as f:
         f.write(UNIT)
