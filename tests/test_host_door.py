@@ -1130,3 +1130,24 @@ def test_what_the_web_user_made_counts_as_kibotos(monkeypatch):
 
     monkeypatch.setattr(owned.pwd, "getpwnam", missing)
     assert owned._ours() == {os.geteuid()}
+
+
+def test_the_apps_names_are_written_by_the_door(audit, monkeypatch):
+    from backend import runtime
+    from backend.services import app_hosts
+
+    monkeypatch.setattr(runtime, "managed_host", lambda: True)
+    calls = []
+    monkeypatch.setattr(door, "available", lambda sock=door.SOCK: True)
+    monkeypatch.setattr(door, "call", lambda op, **a: calls.append((op, a)) or True)
+    assert app_hosts.sync() is True and calls == [("hosts.apps", {})]
+
+    def refused(op, **a):
+        raise door.DoorError("no", "runtime")
+
+    monkeypatch.setattr(door, "call", refused)
+    assert app_hosts.sync() is False
+
+    synced = []
+    monkeypatch.setattr(app_hosts, "sync", lambda: synced.append(1) or True)
+    assert host_door.handle({"op": "hosts.apps", "args": {}}, 0) == {"ok": True, "result": True} and synced == [1]

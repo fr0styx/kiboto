@@ -26,6 +26,10 @@ def test_turning_it_on_makes_the_user_and_the_drop_in(tmp_path, monkeypatch):
     (pool / ".RecycleBin").mkdir(parents=True)
     (pool / "photos" / ".RecycleBin").mkdir(parents=True)
     monkeypatch.setattr(web_user, "_pool_roots", lambda: [str(pool), str(tmp_path / "away")])
+    apps = pool / "appdata"
+    (apps / "it-tools" / "data").mkdir(parents=True)
+    (apps / "it-tools" / "docker-compose.yml").write_text("services: {}\n")
+    monkeypatch.setattr(web_user, "_apps_root", lambda: str(apps))
     drop_in = tmp_path / "kiboto.service.d" / "web-user.conf"
     ran, do = _runner({"id": (1, "no such user")})
     assert web_user.turn_on(do, str(drop_in), str(data)) == []
@@ -41,6 +45,9 @@ def test_turning_it_on_makes_the_user_and_the_drop_in(tmp_path, monkeypatch):
     assert ["setfacl", "-R", "-m", "u:kiboto:rwX", str(pool / ".RecycleBin")] in ran
     assert ["setfacl", "-R", "-m", "u:kiboto:rwX", str(pool / "photos" / ".RecycleBin")] in ran
     assert not [c for c in ran if c[0] == "setfacl" and c[-1] == str(tmp_path / "away")]
+    assert ["setfacl", "-d", "-m", "u:kiboto:rwX", str(apps / "it-tools")] in ran
+    assert ["setfacl", "-m", "u:kiboto:rwX", str(apps / "it-tools" / "docker-compose.yml")] in ran
+    assert not [c for c in ran if c[-1] == str(apps / "it-tools" / "data")]  # the app's own data: left alone
     assert ran[-1] == ["systemctl", "daemon-reload"]
     assert web_user.is_on(str(drop_in)) and web_user.status(str(drop_in)) == {"on": True, "user": "kiboto"}
 

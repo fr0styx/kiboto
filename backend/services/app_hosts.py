@@ -71,9 +71,22 @@ def with_block(text: str, names: dict[str, str]) -> str:
 
 def sync(hosts: str = HOSTS) -> bool:
     """Brings the block up to date. True when the file was written. Only on a managed host: the
-    hosts file of any other machine is not Kiboto's to write."""
+    hosts file of any other machine is not Kiboto's to write. The host door writes it where it runs
+    (ADR 0006), reading the containers from Docker itself."""
     if not runtime.managed_host():
         return False
+    if hosts == HOSTS:
+        from backend import door
+
+        try:
+            return bool(door.via("hosts.apps", _sync_here))
+        except (RuntimeError, ValueError) as e:
+            logger.warning("[Apps] The door did not write the apps' names: %s", e)
+            return False
+    return _sync_here(hosts)
+
+
+def _sync_here(hosts: str = HOSTS) -> bool:
     try:
         status, containers = docker_client.request("GET", "/containers/json", timeout=5.0)
     except docker_client.DockerUnavailable:

@@ -92,6 +92,32 @@ def _bins(root: str) -> list[str]:
     return found + [os.path.join(root, n, BIN) for n in names if os.path.isdir(os.path.join(root, n, BIN))]
 
 
+def _apps_root() -> str:
+    try:
+        from backend.services import apps_place
+
+        return apps_place.root()[0]
+    except (OSError, ValueError, ImportError):
+        return ""
+
+
+def _let_into_apps(do: Run, root: str) -> None:
+    """The apps' folder, each app's folder and the files directly in it (its compose file and
+    settings, which Kiboto writes); not the apps' own data further down."""
+    if not root or not os.path.isdir(root):
+        return
+    _let_in(do, root)
+    for name in sorted(os.listdir(root)):
+        app = os.path.join(root, name)
+        if not os.path.isdir(app) or os.path.islink(app):
+            continue
+        _let_in(do, app)
+        for f in sorted(os.listdir(app)):
+            path = os.path.join(app, f)
+            if os.path.isfile(path) and not os.path.islink(path):
+                do(["setfacl", "-m", ACL, path])
+
+
 def _let_in(do: Run, folder: str, recursive: bool = False) -> bool:
     """An access list for the web user on `folder`: what is there, and what is made in it later."""
     deep = ["-R"] if recursive else []
@@ -129,6 +155,7 @@ def turn_on(do: Run | None = None, drop_in: str = DROP_IN, data_dir: str = "") -
             problems.append(f"{USER} could not be let into {root} (setfacl)")
         for recycle in _bins(root):
             _let_in(do, recycle, recursive=True)
+    _let_into_apps(do, _apps_root())
     os.makedirs(os.path.dirname(drop_in), exist_ok=True)
     with open(drop_in + ".new", "w", encoding="utf-8") as f:
         f.write(UNIT)

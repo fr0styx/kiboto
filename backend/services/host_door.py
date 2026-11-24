@@ -199,6 +199,12 @@ def _update_back(snapshot_id: str) -> None:
     native_update.start_back(snapshot_id, config.DATA_DIR, config.PORT)
 
 
+def _apps_hosts() -> bool:
+    from backend.services import app_hosts
+
+    return app_hosts.sync()  # the block from Docker's own list; nothing the caller sent
+
+
 def _packages(name: str) -> Callable[[], Any]:
     def run() -> Any:
         from backend.services import host_set, native_update
@@ -407,6 +413,7 @@ OPERATIONS: dict[str, Operation] = {
     "update.start": Operation(_update_start, {"image": TEXT, "version": TEXT}, max_len=320),
     "update.back": Operation(_update_back, {"snapshot_id": TEXT}, max_len=128),
     "packages.add_missing": Operation(_packages("add_missing"), {}),
+    "hosts.apps": Operation(_apps_hosts, {}),
     "packages.check": Operation(_packages("check"), {}),
     "packages.host_set": Operation(_packages("host_set"), {}),
     "disks.smartctl": Operation(_smartctl, {"args": LIST, "limit": (int, float)}, max_len=64),
