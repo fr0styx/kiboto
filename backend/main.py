@@ -356,6 +356,8 @@ def startup_system():
     setup_structured_logging()
     from backend import users_db
 
+    _door_first()
+
     users_db.on_status_change(_family_signin_follows_status)  # sign-in to other apps follows a person's status
     users_db.on_people_change(_family_signin_follows_people)  # ... and every other change to the people (SET-19)
     from backend.services.supervisor import install_os_thread_names
@@ -526,8 +528,6 @@ def _start_app_names() -> None:
         from backend.services import app_hosts
         from backend.services.supervisor import supervise
 
-        _door_of_this_version()  # before anything asks the door, it runs this version
-
         supervise("AppNames", app_hosts.keep_in_step)
         from backend.services import smb_signins
 
@@ -548,6 +548,15 @@ def _start_app_names() -> None:
         except (OSError, ValueError, RuntimeError) as e:
             logger.error("[Main] A trial of network settings could not be settled: %s", e)
         threading.Thread(target=_machine_at_start, name="MachineTools", daemon=True).start()
+
+
+def _door_first() -> None:
+    """On a machine Kiboto runs, the host door on this version before anything asks it: the data
+    key does, early in startup_system."""
+    from backend import runtime
+
+    if runtime.managed_host():
+        _door_of_this_version()
 
 
 def _door_of_this_version() -> None:

@@ -882,3 +882,26 @@ def test_wait_open_asks_until_the_door_answers(monkeypatch):
     assert door.wait_open(timeout=5) is True and answers == []
     monkeypatch.setattr(door, "call", lambda op, **kw: (_ for _ in ()).throw(OSError("gone")))
     assert door.wait_open(timeout=0) is False
+
+
+def test_the_door_is_restarted_before_the_data_key_asks_it():
+    import inspect
+
+    from backend import main
+
+    src = inspect.getsource(main.startup_system)
+    assert "_door_first()" in src
+    assert src.index("_door_first()") < src.index("_make_machine_key()")
+    assert "_door_of_this_version()" not in inspect.getsource(main._start_app_names)
+
+
+def test_door_first_only_where_kiboto_runs_the_machine(monkeypatch):
+    from backend import main, runtime
+
+    done = []
+    monkeypatch.setattr(main, "_door_of_this_version", lambda: done.append(1))
+    monkeypatch.setattr(runtime, "managed_host", lambda: False)
+    main._door_first()
+    monkeypatch.setattr(runtime, "managed_host", lambda: True)
+    main._door_first()
+    assert done == [1]
