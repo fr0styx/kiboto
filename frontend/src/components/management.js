@@ -90,6 +90,7 @@ import { formatFixed } from '../format.js';
 import { watchSideScrollIn } from '../side-scroll.js';
 import { slowNoteHtml } from './vm/slow-mode.js';
 import { FIXED_PCT, askFixedSpeed, modeName } from './fan-modes.js';
+import { renderCoolingStatus } from './hw-status.js';
 
 export * from './management/docker.js';
 export * from './management/ups.js';
@@ -579,6 +580,7 @@ export function updateManagementTelemetry(stats) {
     Boolean(stats?.hardware?.has_mcu) ||
     Boolean(stats?.peripherals?.led_port);
 
+  renderCoolingStatus(stats); // the Hardware page's "Now" list (Hardware 2, the status sentence)
   // a section is hidden on a machine without that hardware (Hardware 2: one page, no tabs)
   document.getElementById('mgmt-pane-hardware-led')?.classList.toggle('hw-absent', !hasLed);
   document.getElementById('mgmt-pane-hardware-lcd')?.classList.toggle('hw-absent', !hasLcd);
@@ -1234,7 +1236,7 @@ export function initManagement() {
       fetchAndRenderMgmtVms();
     } else {
       if (targetId === 'mgmt-sec-hardware' || targetId === 'mgmt-sec-services') {
-        sectionName = t('mgmt.hardware_title', 'Hardware & Profiles');
+        sectionName = t('mgmt.sidebar_hardware', 'Hardware'); // the page's name, as in the sidebar
         if (typeof restoreHardwareTabsToManagement === 'function') restoreHardwareTabsToManagement();
         import('./quiet-night-card.js').then((m) => m.renderQuietNightCard()).catch(() => {}); // hardware extra
         if (state.lastStats || state.latestStats) updateManagementTelemetry(state.lastStats || state.latestStats);

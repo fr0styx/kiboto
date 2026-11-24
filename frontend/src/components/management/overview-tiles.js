@@ -9,6 +9,7 @@ import { ZettEventBus } from '../../event-bus.js';
 import { formatDateTime } from '../../format.js';
 import { t } from '../../i18n.js';
 import { state } from '../../state.js';
+import { coolingLine } from '../hw-status.js';
 
 const HEALTHY = new Set(['', 'ok', 'passed', 'healthy', 'good', 'standby']);
 const STOPPED = new Set(['exited', 'dead']);
@@ -73,6 +74,10 @@ export function updateHubTiles(stats, root = document) {
   if (!stats) return;
   setLine(root, 'mgmt-hub-storage-line', storageLine(stats));
   setLine(root, 'mgmt-hub-apps-line', appsLine(stats));
+  const cooling = coolingLine(stats);
+  const tile = root.getElementById('mgmt-hub-cooling-tile');
+  if (tile) tile.hidden = !cooling; // a machine whose fans Kiboto does not drive has no Cooling tile
+  setLine(root, 'mgmt-hub-cooling-line', cooling);
 }
 
 let _listening = false;

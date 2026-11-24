@@ -249,3 +249,12 @@
 .hw-advanced[open] { padding-bottom: 12px; }
 .hw-advanced[open] > summary { margin-bottom: 4px; }
 .hw-advanced > .drawer-card + .drawer-card { margin-top: 12px; }
+/* the Hardware page's "Now" list: a word and a dot per row (Hardware 2) */
+.hw-status { display: flex; flex-direction: column; gap: 6px; }
+.hw-status h3 { margin: 0; }
+.hw-status-rows { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 6px 14px; }
+.hw-status-rows li { display: flex; align-items: center; gap: 8px; font-size: var(--kb-fs-xs); color: var(--kb-text-soft); }
+.hw-status-rows li strong { color: var(--kb-text-strong); font-weight: 600; margin-left: auto; text-align: right; }
+.hw-st-dot { width: 8px; height: 8px; border-radius: 50%; flex: 0 0 auto; background: var(--ok2); }
+.hw-status-rows li[data-level="warm"] .hw-st-dot { background: var(--warn, #f5b942); }
+.hw-status-rows li[data-level="hot"] .hw-st-dot { background: var(--crit, #ef4444); }

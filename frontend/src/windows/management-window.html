@@ -137,6 +137,12 @@
               <span class="mgmt-hub-tile-title" data-i18n="mgmt.sidebar_backup">Backup</span>
               <span class="mgmt-hub-tile-line" id="mgmt-hub-backup-line"></span>
             </div>
+            <!-- only on a machine whose fans Kiboto drives (Hardware 2, the status sentence) -->
+            <div class="mgmt-app-card mgmt-hub-tile" id="mgmt-hub-cooling-tile" data-mgmt-target="mgmt-sec-hardware" data-route="hardware" role="button" tabindex="0" hidden>
+              <svg class="mgmt-app-svg" aria-hidden="true"><use href="#i-fan"/></svg>
+              <span class="mgmt-hub-tile-title" data-i18n="ov.tile_cooling">Cooling</span>
+              <span class="mgmt-hub-tile-line" id="mgmt-hub-cooling-line"></span>
+            </div>
           </div>
           <section id="mgmt-hub-getting-started" class="mgmt-hub-gs getting-started-card" aria-labelledby="gs-hub-heading" hidden></section>
         </div>
@@ -1647,13 +1653,18 @@
             <div id="mgmt-pane-unraid" class="mgmt-tab-pane" style="display: block;">
               <div class="mgmt-card-intro">
                 <div class="unr-row">
-                  <div class="mgmt-card-intro-title"><svg class="ic"><use href="#i-sliders"/></svg> <span data-i18n="mgmt.hardware_sec_title">Hardware & Acoustic Profiles</span></div>
+                  <div class="mgmt-card-intro-title"><svg class="ic"><use href="#i-fan"/></svg> <span data-i18n="hw.sec_cooling">Cooling</span></div>
                   <span class="mgmt-app-pill" id="unraid-profile-current-pill" style="background:rgba(51,205,184,0.15); color:var(--ok2);" data-sample>—</span>
                 </div>
-                <div class="mgmt-card-intro-desc" data-i18n="mgmt.hardware_sec_desc">Choose a cooling profile, watch hardware health and tune temperatures.</div>
+                <div class="mgmt-card-intro-desc" data-i18n="hw.sec_cooling_desc">What the temperatures and fans are doing now, and how the fans follow the temperature.</div>
               </div>
               <div class="mgmt-detail-body">
                 <div class="unr-col">
+                  <!-- Hardware 2: what the temperatures and fans are doing now, in words (hw-status.js) -->
+                  <section id="hw-status" class="hw-status" aria-labelledby="hw-status-title" hidden>
+                    <h3 id="hw-status-title" class="unr-xs-bold-muted" data-i18n="hw.st_title">Now</h3>
+                    <ul id="hw-status-rows" class="hw-status-rows"></ul>
+                  </section>
                   <div>
                     <label class="unr-xs-bold-muted" data-i18n="mgmt.acoustic_label">Noise and performance</label>
                     <div class="profile-switcher-row" role="radiogroup" aria-label="System Acoustic & Performance Profile" data-i18n-aria-label="ui.system_acoustic_performance_profile">

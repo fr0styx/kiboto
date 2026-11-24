@@ -3,7 +3,7 @@
   "buttonClasses": 76,
   "inlineStyles": 1216,
   "emojiIcons": 4,
-  "colours": 3655,
+  "colours": 3657,
   "primitiveUses": 4,
   "importantPerFile": {
     "frontend/index.html": 64,
@@ -111,7 +111,7 @@
     "frontend/src/modals.js": 16,
     "frontend/src/styles/03-performance-a11y.css": 95,
     "frontend/src/styles/05-studio-stage.css": 84,
-    "frontend/src/styles/07-toolkit-drawer.css": 20,
+    "frontend/src/styles/07-toolkit-drawer.css": 22,
     "frontend/src/styles/08-theme-picker.css": 7,
     "frontend/src/styles/09-drawer-cards.css": 47,
     "frontend/src/styles/11-fans-smart.css": 18,

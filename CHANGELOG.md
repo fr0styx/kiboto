@@ -56,6 +56,8 @@ Kib's face now floats in a corner of the desktop: click it to ask Kib, without g
 
 Appearance: a By sunset mode (light by day where the NAS is), Match my wallpaper (the accent follows your wallpaper), and the sign-in screen shows the look of the person signing in on this browser.
 
+Hardware opens with what the temperatures and fans are doing now, in words, and the Overview shows a Cooling tile on machines whose fans Kiboto drives.
+
 #### Changes
 
 On a machine of its own, a separate system service (the host door) now changes the machine's name, time zone, clock and SSH setting for Kiboto, from a fixed list of operations: the first step towards Kiboto's web service running without full system rights (docs/adr/0006-web-without-root.md).

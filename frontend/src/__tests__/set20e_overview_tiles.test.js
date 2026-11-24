@@ -29,7 +29,9 @@ describe('the Overview (SET-20, Overview 5)', () => {
   it('has a heading, three tiles and no old cards', () => {
     const hub = html.slice(html.indexOf('id="management-hub-view"'), html.indexOf('<!-- DETAIL CONTAINER'));
     expect(hub).toContain('class="mgmt-hub-heading"');
-    expect((hub.match(/mgmt-hub-tile"/g) || []).length).toBe(3);
+    expect((hub.match(/mgmt-hub-tile"/g) || []).length).toBe(4);
+    // the fourth, Cooling, shows only where Kiboto drives the fans (Hardware 2)
+    expect(hub).toMatch(/id="mgmt-hub-cooling-tile"[^>]* hidden>/);
     for (const target of ['mgmt-sec-storage', 'mgmt-sec-docker', 'mgmt-pane-backups'])
       expect(hub).toContain(`data-mgmt-target="${target}"`);
     for (const gone of [
