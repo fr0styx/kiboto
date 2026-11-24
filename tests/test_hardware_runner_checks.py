@@ -104,3 +104,18 @@ def test_spindown_watches_the_largest_backend_process(tmp_path):
         (d / "cmdline").write_bytes(b"python3\0-m\0backend.main\0")
         (d / "status").write_text(f"VmRSS:\t{rss} kB\n")
     assert sd.backend_pid(str(proc)) == "11"
+
+
+def test_the_judge_grades_next_to_the_scores_and_logs_no_numbers(tmp_path, monkeypatch):
+    from tests.rag_eval import judge
+
+    out = tmp_path / "judge.json"
+    assert ai.second_opinion({}, str(out), "http://o", "qwen3:8b", 1).startswith("SKIP ai-judge (no answers")
+    rows = {"answer_rows": [{"id": "qa-001"}]}
+    monkeypatch.setattr(judge, "judge_available", lambda host, model: False)
+    assert "is not on the runner's Ollama" in ai.second_opinion(rows, str(out), "http://o", "qwen3:8b", 1)
+    monkeypatch.setattr(judge, "judge_available", lambda host, model: True)
+    monkeypatch.setattr(judge, "judge", lambda rows, host, model, minutes: {"graded": 1, "of": 1, "right": 0.9})
+    line = ai.second_opinion(rows, str(out), "http://o", "qwen3:8b", 1)
+    assert line == "PASS ai-judge (1 of 1 answers graded)" and "0.9" not in line  # the log stays free of scores
+    assert '"right": 0.9' in out.read_text()

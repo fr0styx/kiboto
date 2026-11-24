@@ -8,6 +8,10 @@ changed on them) and compares with the last recorded result of this machine.
         --embedder http://kiboto-eg2:11434 --embedding-model embeddinggemma-2-ov --dim 768 \\
         --chat http://kiboto-ovms:8000/v1 --chat-model Qwen3-4B
 
+With the judge's model on the runner's Ollama (--judge-model, never pulled from here), a larger
+local model also grades every answer (tests/rag_eval/judge.py, AI-28); its grades are written next
+to the scores, not compared against a baseline.
+
 The public log says only PASS, FAIL or SKIP per set (the repository's Actions logs are public
 and must not carry numbers from a private server). Results and baselines are written to
 --results/ai on the machine: the first run of a set, or a run with another model, records the
@@ -83,6 +87,22 @@ def verdict(now: dict, base: dict | None, chat_model: str, tolerance: float) -> 
     return ("FAIL" if found else "PASS"), found
 
 
+def second_opinion(result: dict, out_path: str, host: str, model: str, minutes: float) -> str:
+    """The judge's grades for a set's answers, written to `out_path`. Returns the public log line
+    (no numbers: the repository's Actions logs are public)."""
+    from tests.rag_eval import judge
+
+    rows = result.get("answer_rows") or []
+    if not rows:
+        return "SKIP ai-judge (no answers to grade)"
+    if not judge.judge_available(host, model):
+        return f"SKIP ai-judge (the judge's model {model} is not on the runner's Ollama)"
+    graded = judge.judge(rows, host, model, minutes=minutes)
+    with open(out_path, "w", encoding="utf-8") as f:
+        json.dump(graded, f, ensure_ascii=False, indent=1)
+    return f"PASS ai-judge ({graded['graded']} of {graded['of']} answers graded)"
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--embedder", default="http://kiboto-eg2:11434")
@@ -93,6 +113,9 @@ def main(argv=None) -> int:
     ap.add_argument("--results", default=os.environ.get("HW_RESULTS_DIR", "/results"))
     ap.add_argument("--tolerance", type=float, default=0.03)
     ap.add_argument("--sets", default=",".join(SETS))
+    ap.add_argument("--judge", default="http://kiboto-ollama:11434")
+    ap.add_argument("--judge-model", default="qwen3:8b")
+    ap.add_argument("--judge-minutes", type=float, default=30.0)
     args = ap.parse_args(argv)
 
     if not lock_matches(os.path.join(ROOT, "requirements.lock")):
@@ -129,6 +152,15 @@ def main(argv=None) -> int:
         now = scores(result)
         with open(os.path.join(out_dir, f"{stamp}-{name}.json"), "w", encoding="utf-8") as f:
             json.dump(result, f, ensure_ascii=False, indent=1)
+        print(
+            second_opinion(
+                result,
+                os.path.join(out_dir, f"{stamp}-{name}-judge.json"),
+                args.judge,
+                args.judge_model,
+                args.judge_minutes,
+            )
+        )
         base_path = os.path.join(out_dir, f"baseline_{name}.json")
         try:
             with open(base_path, encoding="utf-8") as f:
