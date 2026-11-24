@@ -1,9 +1,9 @@
 {
   "important": 3424,
   "buttonClasses": 76,
-  "inlineStyles": 1239,
+  "inlineStyles": 1236,
   "emojiIcons": 4,
-  "colours": 3701,
+  "colours": 3673,
   "primitiveUses": 4,
   "importantPerFile": {
     "frontend/index.html": 64,
@@ -76,7 +76,7 @@
     "frontend/src/components/file-preview-modal.js": 6,
     "frontend/src/components/led-control.js": 10,
     "frontend/src/components/management.js": 15,
-    "frontend/src/components/management/ai.js": 306,
+    "frontend/src/components/management/ai.js": 278,
     "frontend/src/components/management/disks.js": 1,
     "frontend/src/components/management/docker.js": 101,
     "frontend/src/components/management/network.js": 17,

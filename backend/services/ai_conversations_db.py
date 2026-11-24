@@ -588,8 +588,8 @@ def generate_auto_title_heuristic(prompt: str) -> str:
     if not selected:
         return "New Conversation"
 
-    title = " ".join(selected).title()
-    title = title[:45].strip()
+    title = " ".join(selected)
+    title = (title[:1].upper() + title[1:])[:45].strip()  # sentence case, the rest as typed (NAS, who's)
     return title or "New Conversation"
 
 

@@ -10,3 +10,5 @@ body.theme-yak .kib-window-body { background: var(--lt-b-130f0cff, #130f0c); }
 @media (max-width: 600px) { .kib-window { width: 100vw; height: calc(100vh - 36px - 72px); left: 0; top: 36px; } }
 .kib-off-note { margin: 0 0 10px; padding: 10px 12px; border: 1px solid var(--kb-line-10); border-radius: 8px; font-size: var(--kb-fs-xs); color: var(--kb-text); }
 /* the window itself is the standard solid app window (25-mobile-ergonomics.css), like Files and Drive Health */
+/* the title bar keeps its height however long the conversation below grows (a flex item shrinks by default) */
+.kib-window > .os-window-header { flex: 0 0 auto; }

@@ -318,3 +318,7 @@
 #mgmt-pane-ai-chat .kib-send { height: 42px; padding: 0 var(--kb-space-4, 20px); border-radius: 999px; white-space: nowrap; margin-left: auto; }
 body.phone-shell #mgmt-pane-ai-chat .aic-row-box { gap: var(--kb-space-2); }
 body.phone-shell #mgmt-pane-ai-chat .aic-row { flex-wrap: wrap; row-gap: var(--kb-space-1, 4px); }
+
+/* an answer's model and accelerator, in the window's own colours */
+.ai-chat-model-pill { font-size: var(--kb-fs-xs); font-weight: 700; color: var(--kb-text-accent); padding: 1px 8px; border-radius: 999px; background: rgba(var(--c-primary-rgb), 0.12); border: 1px solid rgba(var(--c-primary-rgb), 0.35); }
+.ai-chat-accel { font-size: var(--kb-fs-xs); font-weight: 600; color: var(--kb-text-soft); }

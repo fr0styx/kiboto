@@ -2733,7 +2733,7 @@ export async function runAiRagAsk(rawQuestion, options = {}) {
           <div class="airg-row-2">
             <span class="airg-fs15">🧠</span>
             <span class="airg-xs-bold-strong">${t('aiq.synthesis', 'Kib Grounded Synthesis')}</span>
-            <span class="ai-llm-proof-badge" style="font-size: var(--kb-fs-xs); font-weight: 700; padding: 2px 8px; border-radius: 999px; background: rgba(168,85,247,0.16); border: 1px solid rgba(192,132,252,0.45); color: var(--lt-t-e9d5ffff, #e9d5ff);" title="${escapeHtml(llmTel.runtime_mode || 'No AI model (built-in tools only)')}">🤖 ${escapeHtml(activeLlmId)}</span>
+            <span class="ai-llm-proof-badge" style="font-size: var(--kb-fs-xs); font-weight: 700; padding: 2px 8px; border-radius: 999px; background: rgba(var(--c-primary-rgb), 0.16); border: 1px solid rgba(var(--c-primary-rgb), 0.45); color: var(--kb-text-accent);" title="${escapeHtml(llmTel.runtime_mode || 'No AI model (built-in tools only)')}">🤖 ${escapeHtml(activeLlmId)}</span>
           </div>
           <div class="airg-row-xs-muted">
             <span style="color: var(--lt-t-3bf58bff, #3bf58b); font-weight: 700;">⚡ ${escapeHtml(hwTierLabel)}</span>
@@ -3410,6 +3410,12 @@ if (typeof document !== 'undefined') {
   else _initAiWebToggle();
 }
 
+/** How long an answer took: seconds from one second up (45.8 s), else milliseconds. */
+export function answerTime(ms) {
+  const n = Number(ms) || 0;
+  return n >= 1000 ? `${formatFixed(n / 1000, 1)} s` : `${Math.round(n)} ms`;
+}
+
 function _buildAiAssistantMessageHtml(res, defaultModel) {
   const replyMd = res.reply || res.answer || 'No response generated.';
   const llmTel = res.llm_telemetry || {};
@@ -3422,7 +3428,7 @@ function _buildAiAssistantMessageHtml(res, defaultModel) {
   const groundingScore = res.grounding_confidence_score != null ? res.grounding_confidence_score : null;
   const cragGrade = res.crag_grade || '';
   const usedModel = llmTel.active_model || res.active_model || defaultModel;
-  const accelLabel = llmTel.accelerator_label || '—';
+  const accelLabel = llmTel.accelerator_tier ? llmTel.accelerator_label || '' : ''; // not reported: not shown
   const runtimeMode = llmTel.runtime_mode || 'No AI model (built-in tools only)';
   const tokSec = llmTel.tokens_per_sec || null;
   const elapsedMs = res.elapsed_ms || llmTel.elapsed_ms || 0;
@@ -3446,7 +3452,7 @@ function _buildAiAssistantMessageHtml(res, defaultModel) {
                 : isWeb
                   ? 'rgba(56,189,248,0.16)'
                   : isRag
-                    ? 'rgba(168,85,247,0.16)'
+                    ? 'rgba(79,216,196,0.12)'
                     : isNet
                       ? 'rgba(14,165,233,0.16)'
                       : 'rgba(16,185,129,0.16)';
@@ -3457,7 +3463,7 @@ function _buildAiAssistantMessageHtml(res, defaultModel) {
                 : isWeb
                   ? 'rgba(56,189,248,0.42)'
                   : isRag
-                    ? 'rgba(168,85,247,0.42)'
+                    ? 'rgba(79,216,196,0.32)'
                     : isNet
                       ? 'rgba(56,189,248,0.42)'
                       : 'rgba(52,211,153,0.42)';
@@ -3468,7 +3474,7 @@ function _buildAiAssistantMessageHtml(res, defaultModel) {
                 : isWeb
                   ? '#7dd3fc'
                   : isRag
-                    ? '#d8b4fe'
+                    ? 'var(--kb-text-accent)'
                     : isNet
                       ? '#7dd3fc'
                       : '#6ee7b7';
@@ -3618,15 +3624,15 @@ function _buildAiAssistantMessageHtml(res, defaultModel) {
   return `
     <div class="ai-chat-llm-proof-bar aicm-row-box">
       <div class="aicm-row-6">
-        <span class="ai-chat-model-pill" style="font-size: var(--kb-fs-xs); font-weight: 800; color: var(--lt-t-e9d5ffff, #e9d5ff); padding: 1px 8px; border-radius: 999px; background: rgba(168,85,247,0.18); border: 1px solid rgba(192,132,252,0.45);">🤖 ${escapeHtml(usedModel)}</span>
-        <span style="font-size: var(--kb-fs-xs); font-weight: 700; color: var(--lt-t-3bf58bff, #3bf58b);">⚡ ${escapeHtml(accelLabel)}</span>
-        <span class="aicm-xs-muted">(${escapeHtml(runtimeMode)})</span>
+        <span class="ai-chat-model-pill">${escapeHtml(usedModel)}</span>
+        ${accelLabel ? `<span class="ai-chat-accel">⚡ ${escapeHtml(accelLabel)}</span>` : ''}
+        <span class="aicm-xs-muted">${escapeHtml(runtimeMode)}</span>
       </div>
       <div class="aicm-row-xs-muted">
         ${!folderPath && groundingScore !== null ? `<span style="font-size: var(--kb-fs-xs); font-weight: 700; color: var(--kb-text-ok); padding: 0 5px; border-radius: 999px; background: rgba(52,211,153,0.12); border: 1px solid rgba(52,211,153,0.3);">🎯 ${t('aiq.grounded', '{pct}% Grounded', { pct: groundingScore })}</span><span>•</span>` : ''}
         ${tokSec ? `<span style="color: var(--lt-t-fde68aff, #fde68a);">🚀 ${tokSec} tok/s</span>` : ''}
         <span>•</span>
-        <span>${elapsedMs} ms</span>
+        <span>${escapeHtml(answerTime(elapsedMs))}</span>
       </div>
     </div>
     ${toolsBadgesHtml}
@@ -4210,12 +4216,12 @@ export function _formatChatMarkdown(rawText, sources = null) {
     const thoughtContent = escapeHtml(thinkMatch[1].trim());
     text = text.replace(/<think>[\s\S]*?<\/think>/i, '').trim();
     thoughtHtml = `
-      <details class="ai-thought-disclosure" style="margin: 4px 0 10px; border-radius: 8px; background: rgba(147, 51, 234, 0.08); border: 1px solid rgba(168, 85, 247, 0.28); padding: 7px 10px; font-size: var(--kb-fs-xs);">
+      <details class="ai-thought-disclosure" style="margin: 4px 0 10px; border-radius: 8px; background: rgba(var(--c-primary-rgb), 0.08); border: 1px solid rgba(var(--c-primary-rgb), 0.28); padding: 7px 10px; font-size: var(--kb-fs-xs);">
         <summary class="aimd-row-bold">
           <span>🧠 ${t('aiq.thoughts', 'Thought Process')}</span>
           <span class="aimd-xs-muted">${t('aiq.thoughts_hint', '(click to view chain of thought)')}</span>
         </summary>
-        <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(168, 85, 247, 0.2); color: var(--kb-text-soft); font-size: var(--kb-fs-xs); line-height: 1.5; font-style: italic;">
+        <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(var(--c-primary-rgb), 0.2); color: var(--kb-text-soft); font-size: var(--kb-fs-xs); line-height: 1.5; font-style: italic;">
           ${thoughtContent.replace(/\n/g, '<br/>')}
         </div>
       </details>
@@ -4276,7 +4282,7 @@ export function _formatChatMarkdown(rawText, sources = null) {
     .replace(/^###\s+(.+)$/gm, '<div class="aimd-xs-bold-accent">$1</div>')
     .replace(
       /^&gt;\s?(.*)$/gm,
-      '<div style="border-left:2px solid rgba(168,85,247,0.55); padding-left:8px; margin:3px 0; color:var(--kb-text-soft); font-size:var(--kb-fs-xs); background:rgba(168,85,247,0.07); border-radius:0 4px 4px 0;">$1</div>'
+      '<div style="border-left:2px solid rgba(var(--c-primary-rgb), 0.55); padding-left:8px; margin:3px 0; color:var(--kb-text-soft); font-size:var(--kb-fs-xs); background:rgba(var(--c-primary-rgb), 0.07); border-radius:0 4px 4px 0;">$1</div>'
     )
     .replace(
       /^[-*]\s+(.+)$/gm,
@@ -4425,14 +4431,14 @@ export async function sendAiChatMessage(rawMessage = null) {
     pendingEl.dataset.isThinking = isThinking ? '1' : '0';
     if (isThinking) {
       pendingEl.style.cssText =
-        'align-self: flex-start; max-width: 85%; padding: 10px 14px; border-radius: 10px; background: rgba(30, 20, 50, 0.75); border: 1px solid rgba(192, 132, 252, 0.4); display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(168, 85, 247, 0.15);';
+        'align-self: flex-start; max-width: 85%; padding: 10px 14px; border-radius: 10px; background: var(--lt-b-0e1c1ed9, rgba(14, 28, 30, 0.85)); border: 1px solid rgba(var(--c-primary-rgb), 0.4); display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(var(--c-primary-rgb), 0.15);';
       pendingEl.innerHTML = `
         <span class="ai-thinking-brain aik-fs15">🧠</span>
-        <span style="font-size: var(--kb-fs-xs); font-weight: 700; color: var(--lt-t-e9d5ffff, #e9d5ff);">${t('aiq.thinking', 'Thinking')}</span>
+        <span style="font-size: var(--kb-fs-xs); font-weight: 700; color: var(--kb-text-accent);">${t('aiq.thinking', 'Thinking')}</span>
         <span class="ai-thinking-dots aik-bold">
           <span class="ai-dot-1">.</span><span class="ai-dot-2">.</span><span class="ai-dot-3">.</span>
         </span>
-        <span style="font-size: var(--kb-fs-xs); color: var(--lt-t-d8b4feff, #d8b4fe); margin-left: 6px; padding: 1px 7px; border-radius: 999px; background: rgba(168, 85, 247, 0.2); border: 1px solid rgba(192, 132, 252, 0.35);">${escapeHtml(activeModel)}</span>
+        <span style="font-size: var(--kb-fs-xs); color: var(--kb-text-accent); margin-left: 6px; padding: 1px 7px; border-radius: 999px; background: rgba(var(--c-primary-rgb), 0.2); border: 1px solid rgba(var(--c-primary-rgb), 0.35);">${escapeHtml(activeModel)}</span>
       `;
     } else {
       pendingEl.style.cssText =
@@ -4551,7 +4557,7 @@ export async function sendAiChatMessage(rawMessage = null) {
           streamBotMsgEl.innerHTML = `
             <div class="ai-chat-llm-proof-bar aik-row-box-4">
               <div class="aik-row-9">
-                <span class="ai-chat-model-pill" style="font-size: var(--kb-fs-xs); font-weight: 800; color: var(--lt-t-e9d5ffff, #e9d5ff); padding: 1px 8px; border-radius: 999px; background: rgba(168,85,247,0.18); border: 1px solid rgba(192,132,252,0.45);">🤖 ${escapeHtml(activeModel)}</span>
+                <span class="ai-chat-model-pill">${escapeHtml(activeModel)}</span>
                 <span class="aik-row-xs-bold-accent">
                   <span class="ai-typing-dot aik-size-3"></span> ${t('aiq.streaming', 'Streaming')}
                 </span>
@@ -4642,7 +4648,7 @@ export async function sendAiChatMessage(rawMessage = null) {
                       : isWeb
                         ? 'rgba(56,189,248,0.16)'
                         : isRag
-                          ? 'rgba(168,85,247,0.16)'
+                          ? 'rgba(var(--c-primary-rgb), 0.16)'
                           : isNet
                             ? 'rgba(14,165,233,0.16)'
                             : 'rgba(16,185,129,0.16)';
@@ -4653,7 +4659,7 @@ export async function sendAiChatMessage(rawMessage = null) {
                       : isWeb
                         ? 'rgba(56,189,248,0.42)'
                         : isRag
-                          ? 'rgba(168,85,247,0.42)'
+                          ? 'rgba(var(--c-primary-rgb), 0.42)'
                           : isNet
                             ? 'rgba(56,189,248,0.42)'
                             : 'rgba(52,211,153,0.42)';
@@ -4664,7 +4670,7 @@ export async function sendAiChatMessage(rawMessage = null) {
                       : isWeb
                         ? '#7dd3fc'
                         : isRag
-                          ? '#d8b4fe'
+                          ? 'var(--kb-text-accent)'
                           : isNet
                             ? '#7dd3fc'
                             : '#6ee7b7';
@@ -4706,13 +4712,13 @@ export async function sendAiChatMessage(rawMessage = null) {
                   thoughtDetailsEl.className = 'ai-thought-disclosure';
                   thoughtDetailsEl.open = true;
                   thoughtDetailsEl.style.cssText =
-                    'margin: 4px 0 10px; border-radius: 8px; background: rgba(147, 51, 234, 0.08); border: 1px solid rgba(168, 85, 247, 0.28); padding: 7px 10px; font-size: var(--kb-fs-xs);';
+                    'margin: 4px 0 10px; border-radius: 8px; background: rgba(var(--c-primary-rgb), 0.08); border: 1px solid rgba(var(--c-primary-rgb), 0.28); padding: 7px 10px; font-size: var(--kb-fs-xs);';
                   thoughtDetailsEl.innerHTML = `
                     <summary class="aik-row-bold">
                       <span>🧠 ${t('aiq.thoughts', 'Thought Process')}</span>
                       <span class="aik-xs-muted-4">${t('aiq.thoughts_live', '(reasoning in real time...)')}</span>
                     </summary>
-                    <div class="ai-thought-content" style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(168, 85, 247, 0.2); color: var(--kb-text-soft); font-size: var(--kb-fs-xs); line-height: 1.5; font-style: italic;"></div>
+                    <div class="ai-thought-content" style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(var(--c-primary-rgb), 0.2); color: var(--kb-text-soft); font-size: var(--kb-fs-xs); line-height: 1.5; font-style: italic;"></div>
                   `;
                   if (replyBodyEl) streamBotMsgEl.insertBefore(thoughtDetailsEl, replyBodyEl);
                   thoughtBodyEl = thoughtDetailsEl.querySelector('.ai-thought-content');

@@ -242,7 +242,7 @@
  "frontend/src/components/management/ai.js": {
   "buttons": 0,
   "globals": 2,
-  "styles": 93,
+  "styles": 90,
   "templates": 23
  },
  "frontend/src/components/management/backup.js": {

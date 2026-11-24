@@ -166,7 +166,9 @@ def test_auto_title_heuristic_and_customization_guard(temp_conv_db):
     assert "Hard drives are sleeping in" in t1 or "Hard Drives" in t1
 
     t2 = generate_auto_title_heuristic("How do I configure fan curve for quiet profile?")
-    assert "Configure Fan Curve" in t2 or "Fan Curve" in t2
+    assert t2 == "Configure fan curve for quiet"  # sentence case
+    assert generate_auto_title_heuristic("who's the president of the United States") == "Who's the president of the"
+    assert generate_auto_title_heuristic("is my NAS backed up?") == "Is my NAS backed up"
 
     # 2. Test auto-titler updates thread when title_customized == 0
     c = create_conversation(user_id="eve", title="New Conversation")
