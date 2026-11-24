@@ -56,6 +56,8 @@ The Kib page in Settings starts with Kib itself: its face, its name, what it doe
 
 Ask Kib looks like the rest of Kiboto: the theme's colours and buttons, and Kib greets an empty conversation.
 
+The Kib window now has the same colours and toolbar as the other app windows.
+
 ## v2.0.6 (2026-11-23)
 ### 🖥️ Kiboto on a machine of its own (preview), with its settings kept safe on every pool
 

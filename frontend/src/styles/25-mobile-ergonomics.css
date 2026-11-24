@@ -695,8 +695,7 @@ body.mobile-mode #vm-grid .glassmorphic-card {
 /* File Manager Window - Solid, Premium Dark Explorer Surface */
 #file-manager-window.file-manager-window,
 .file-manager-window,
-.os-window.drive-health-window,
-.os-window.kib-window {
+.os-window.drive-health-window {
   display: flex;
   flex-direction: column;
   background: var(--lt-b-0e1c1efa, rgba(14, 28, 30, 0.98)) !important;
@@ -706,8 +705,7 @@ body.mobile-mode #vm-grid .glassmorphic-card {
   box-shadow: 0 25px 65px rgba(0, 0, 0, 0.85) !important;
 }
 .file-manager-window .os-window-header,
-.drive-health-window .os-window-header,
-.kib-window .os-window-header {
+.drive-health-window .os-window-header {
   background: var(--lt-b-17292dfa, rgba(23, 41, 45, 0.98)) !important;
   border-bottom: 1px solid var(--kb-line-8);
 }
@@ -2033,7 +2031,8 @@ body.theme-yak #vm-manager-window .vm-content-body {
 
 /* Dedicated Containers & Services Window - Solid, Premium Opaque Glass Surface */
 #containers-manager-window.containers-manager-window,
-.containers-manager-window {
+.containers-manager-window,
+.os-window.kib-window {
   display: flex;
   flex-direction: column;
   background: var(--lt-b-101e21ff, #101e21) !important;
@@ -2043,7 +2042,8 @@ body.theme-yak #vm-manager-window .vm-content-body {
   box-shadow: 0 25px 65px rgba(0, 0, 0, 0.92) !important;
 }
 
-#containers-manager-window .os-window-header {
+#containers-manager-window .os-window-header,
+.kib-window .os-window-header {
   background: var(--lt-b-15272bff, #15272b) !important;
   border-bottom: 1px solid var(--kb-line-8) !important;
 }
@@ -2057,10 +2057,12 @@ body.theme-yak #vm-manager-window .vm-content-body {
   background: var(--lt-b-0c1618ff, #0c1618) !important;
 }
 
-body.theme-yak #containers-manager-window.containers-manager-window {
+body.theme-yak #containers-manager-window.containers-manager-window,
+body.theme-yak .os-window.kib-window {
   background: var(--lt-b-191410ff, #191410) !important;
 }
-body.theme-yak #containers-manager-window .os-window-header {
+body.theme-yak #containers-manager-window .os-window-header,
+body.theme-yak .kib-window .os-window-header {
   background: var(--lt-b-241c16ff, #241c16) !important;
 }
 body.theme-yak #containers-manager-window .containers-telemetry-header {

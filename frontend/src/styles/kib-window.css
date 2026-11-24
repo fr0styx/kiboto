@@ -1,8 +1,11 @@
 /* The Kib window (SET-26, AI 5): Ask and Search as an app of their own */
 .kib-window { width: 900px; height: 640px; min-width: 360px; min-height: 420px; max-width: 100vw; flex-direction: column; overflow: hidden; }
 .kib-window.is-maximized { left: 0 !important; top: 36px !important; width: 100vw !important; height: calc(100vh - 36px - 72px) !important; }
-.kib-window-tabs { padding: 8px 12px 0; flex: 0 0 auto; }
-.kib-window-body { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 10px 14px 14px; display: flex; flex-direction: column; }
+/* the tabs sit in a toolbar band under the title, as the Apps and Virtual Machines windows have theirs */
+.kib-window .kib-window-tabs { display: flex; flex: 0 0 auto; margin: 0; padding: 10px 16px; border: 0; border-bottom: 1px solid var(--kb-line-8); border-radius: 0; background: var(--lt-b-112023ff, #112023); }
+.kib-window-body { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 16px; display: flex; flex-direction: column; background: var(--lt-b-0c1618ff, #0c1618); }
+body.theme-yak .kib-window .kib-window-tabs { background: var(--lt-b-1e1713ff, #1e1713); }
+body.theme-yak .kib-window-body { background: var(--lt-b-130f0cff, #130f0c); }
 .kib-window-body > .mgmt-tab-pane { flex: 1 1 auto; min-height: 0; }
 @media (max-width: 600px) { .kib-window { width: 100vw; height: calc(100vh - 36px - 72px); left: 0; top: 36px; } }
 .kib-off-note { margin: 0 0 10px; padding: 10px 12px; border: 1px solid var(--kb-line-10); border-radius: 8px; font-size: var(--kb-fs-xs); color: var(--kb-text); }
