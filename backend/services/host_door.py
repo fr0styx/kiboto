@@ -310,6 +310,41 @@ def _smartctl(args: list[Any], limit: float) -> dict[str, Any]:
     return smart_read.read_in_door(args, limit)
 
 
+_TAP = re.compile(r"kbt[0-9a-f]{8}")
+
+
+def _vm_tap(name: str, bridge: str) -> bool:
+    """A virtual machine's tap device on a bridge, owned by the web user (vm_qemu.tap_name): only a
+    name of that form, only on a bridge that is there."""
+    from backend.proc import run_bounded
+
+    if not _TAP.fullmatch(name) or not re.fullmatch(r"[A-Za-z0-9_.-]{1,15}", bridge):
+        raise ValueError("a machine's tap device on a bridge")
+    if not os.path.isdir(f"/sys/class/net/{bridge}/bridge"):
+        raise ValueError(f"{bridge} is not a bridge here")
+    steps = (
+        []
+        if os.path.exists(f"/sys/class/net/{name}")
+        else [["tuntap", "add", "dev", name, "mode", "tap", "user", USER]]
+    )
+    steps += [["link", "set", "dev", name, "master", bridge], ["link", "set", "dev", name, "up"]]
+    for step in steps:
+        r = run_bounded(["ip", *step], timeout=15, capture_output=True, text=True)
+        if r.returncode != 0:
+            raise RuntimeError(f"ip {' '.join(step[:2])}: {(r.stderr or '').strip()[-200:]}")
+    return True
+
+
+def _vm_tap_remove(name: str) -> bool:
+    from backend.proc import run_bounded
+
+    if not _TAP.fullmatch(name):
+        raise ValueError("a machine's tap device")
+    if os.path.exists(f"/sys/class/net/{name}"):
+        run_bounded(["ip", "link", "del", "dev", name], timeout=15, capture_output=True, text=True)
+    return True
+
+
 def _renamed(kw: dict[str, Any]) -> None:
     from backend.hardware.pal import pool_rules
 
@@ -414,6 +449,8 @@ OPERATIONS: dict[str, Operation] = {
     "update.back": Operation(_update_back, {"snapshot_id": TEXT}, max_len=128),
     "packages.add_missing": Operation(_packages("add_missing"), {}),
     "hosts.apps": Operation(_apps_hosts, {}),
+    "vm.tap": Operation(_vm_tap, {"name": TEXT, "bridge": TEXT}, max_len=32),
+    "vm.tap_remove": Operation(_vm_tap_remove, {"name": TEXT}, max_len=32),
     "packages.check": Operation(_packages("check"), {}),
     "packages.host_set": Operation(_packages("host_set"), {}),
     "disks.smartctl": Operation(_smartctl, {"args": LIST, "limit": (int, float)}, max_len=64),

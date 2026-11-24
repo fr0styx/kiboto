@@ -153,6 +153,36 @@ def _qmp_command(
     return _QMP_ENGINE.execute(vm_id, command, arguments, timeout)
 
 
+def tap_name(vm_id: str) -> str:
+    """The tap device the host door makes for a machine on a bridge (ADR 0006): one per machine."""
+    return "kbt" + hashlib.sha256(vm_id.encode()).hexdigest()[:8]
+
+
+def _door_tap(vm_id: str, bridge: str) -> str:
+    """Once Kiboto is not root, qemu-bridge-helper (set-uid) cannot put a machine on a bridge; the
+    host door makes the machine a tap device on it, owned by Kiboto's user. "" where it does not."""
+    from backend import door
+
+    if os.geteuid() == 0 or not door.available():
+        return ""
+    try:
+        door.call("vm.tap", name=tap_name(vm_id), bridge=bridge)
+    except (OSError, door.DoorError) as e:
+        logger.warning("[VM-%s] no tap device on %s: %s", vm_id, bridge, e)
+        return ""
+    return tap_name(vm_id)
+
+
+def _door_tap_gone(vm_id: str) -> None:
+    from backend import door
+
+    if os.geteuid() != 0 and door.available():
+        try:
+            door.call("vm.tap_remove", name=tap_name(vm_id))
+        except (OSError, door.DoorError) as e:
+            logger.debug("[VM-%s] tap device left: %s", vm_id, e)
+
+
 def _drain_stderr(proc: subprocess.Popen, log_path: str, err_log_path: str, vm_id: str):
     """Background daemon thread to drain QEMU stderr, prevent pipe stall, and log unexpected termination."""
     try:
@@ -164,6 +194,7 @@ def _drain_stderr(proc: subprocess.Popen, log_path: str, err_log_path: str, vm_i
                 lf.write(text)
                 lf.flush()
         proc.wait()
+        _door_tap_gone(vm_id)
         rc = proc.returncode
         if rc not in (0, None, -signal.SIGTERM, -signal.SIGKILL):
             err_msg = f"QEMU process exited abnormally with return code {rc}."
@@ -484,7 +515,8 @@ def _start_qemu(target_vm: dict[str, Any], vnc_port: int) -> tuple[bool, str | N
     bridge_helper = shutil.which("qemu-bridge-helper") or "/usr/lib/qemu/qemu-bridge-helper"
     has_bridge_helper = os.path.exists(bridge_helper) and os.access(bridge_helper, os.X_OK)
     active_bridges = vm_host.scan_bridges()
-    use_bridge = (bridge_name in active_bridges) and tun_writable and has_bridge_helper
+    tap = _door_tap(vm_id, bridge_name) if bridge_name in active_bridges and tun_writable else ""
+    use_bridge = (bridge_name in active_bridges) and tun_writable and (has_bridge_helper or bool(tap))
 
     # No port of the NAS leads into the machine. One used to be opened on every network of the NAS
     # for each machine that is not on the home network, without saying so (SET-07).
@@ -590,14 +622,12 @@ def _start_qemu(target_vm: dict[str, Any], vnc_port: int) -> tuple[bool, str | N
         if use_bridge and not force_slirp:
             target_vm["network_mode"] = "bridge"
             target_vm["network_note"] = f"Bridged to {bridge_name}"
-            c.extend(
-                [
-                    "-netdev",
-                    f"bridge,id=net0,br={bridge_name},helper={bridge_helper}",
-                    "-device",
-                    f"virtio-net-pci,netdev=net0,mac={mac}",
-                ]
+            netdev = (
+                f"tap,id=net0,ifname={tap},script=no,downscript=no"
+                if tap
+                else f"bridge,id=net0,br={bridge_name},helper={bridge_helper}"
             )
+            c.extend(["-netdev", netdev, "-device", f"virtio-net-pci,netdev=net0,mac={mac}"])
         else:
             target_vm["network_mode"] = "slirp"
             target_vm["network_note"] = "Private network: the machine reaches out, nothing reaches it"

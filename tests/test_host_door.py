@@ -1151,3 +1151,57 @@ def test_the_apps_names_are_written_by_the_door(audit, monkeypatch):
     synced = []
     monkeypatch.setattr(app_hosts, "sync", lambda: synced.append(1) or True)
     assert host_door.handle({"op": "hosts.apps", "args": {}}, 0) == {"ok": True, "result": True} and synced == [1]
+
+
+def test_a_machine_on_a_bridge_gets_a_tap_from_the_door(monkeypatch):
+    from backend.services import vm_qemu
+
+    calls = []
+    monkeypatch.setattr(vm_qemu.os, "geteuid", lambda: 999)
+    monkeypatch.setattr(door, "available", lambda sock=door.SOCK: True)
+    monkeypatch.setattr(door, "call", lambda op, **a: calls.append((op, a)) or True)
+    name = vm_qemu.tap_name("vm-1")
+    assert name.startswith("kbt") and len(name) == 11 and vm_qemu._door_tap("vm-1", "br0") == name
+    vm_qemu._door_tap_gone("vm-1")
+    assert calls == [("vm.tap", {"name": name, "bridge": "br0"}), ("vm.tap_remove", {"name": name})]
+    for op, args in calls:
+        host_door._checked({"op": op, "args": args})
+
+    def refused(op, **a):
+        raise door.DoorError("br0 is not a bridge here", "value")
+
+    monkeypatch.setattr(door, "call", refused)
+    assert vm_qemu._door_tap("vm-1", "br0") == ""
+    vm_qemu._door_tap_gone("vm-1")  # said in the log only
+    monkeypatch.setattr(vm_qemu.os, "geteuid", lambda: 0)
+    assert vm_qemu._door_tap("vm-1", "br0") == ""  # as root qemu-bridge-helper does it
+
+
+def test_the_door_makes_only_a_machines_tap_on_a_bridge(audit, monkeypatch):
+    import subprocess
+
+    from backend import proc
+
+    ran = []
+    monkeypatch.setattr(
+        proc, "run_bounded", lambda cmd, **kw: ran.append(cmd) or subprocess.CompletedProcess(cmd, 0, "", "")
+    )
+    there = {"/sys/class/net/br0/bridge"}
+    monkeypatch.setattr(host_door.os.path, "isdir", lambda p: p in there)
+    monkeypatch.setattr(host_door.os.path, "exists", lambda p: False)
+
+    def op(which, **args):
+        return host_door.handle({"op": which, "args": args}, 0)
+
+    assert op("vm.tap", name="kbt0123abcd", bridge="br0")["ok"]
+    assert ran[0] == ["ip", "tuntap", "add", "dev", "kbt0123abcd", "mode", "tap", "user", host_door.USER]
+    assert ran[1][-2:] == ["master", "br0"] and ran[2][-1] == "up"
+    for name, bridge in (("eth0", "br0"), ("kbt0123abcd", "eth0"), ("kbt0123abcd", "br0; reboot")):
+        assert op("vm.tap", name=name, bridge=bridge)["ok"] is False
+    assert op("vm.tap_remove", name="eth0")["ok"] is False
+    assert op("vm.tap_remove", name="kbt0123abcd")["ok"] and len(ran) == 3  # not there: nothing to remove
+    monkeypatch.setattr(
+        proc, "run_bounded", lambda cmd, **kw: subprocess.CompletedProcess(cmd, 2, "", "RTNETLINK: busy")
+    )
+    reply = op("vm.tap", name="kbt0123abcd", bridge="br0")
+    assert reply["ok"] is False and "busy" in reply["error"]
