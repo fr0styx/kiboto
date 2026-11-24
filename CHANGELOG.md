@@ -36,6 +36,8 @@ On a machine Kiboto runs, a network card moved to another slot keeps its fixed a
 
 Fans: a short spike of processor heat no longer sends the disk fans to full speed for half a minute, and fan stop no longer switches the fans on and off every minute or two when NVMe drives are near their limit.
 
+The Hardware page fits a phone: the screen theme buttons stay on the screen, sliders and size buttons are easier to tap, and the card copies table shows that it scrolls sideways.
+
 #### Security
 
 On a machine of its own, failed sign-ins to shared folders over the network now count like web sign-ins: 20 in 15 minutes block the address for an hour, and they show under History, Sign-ins.

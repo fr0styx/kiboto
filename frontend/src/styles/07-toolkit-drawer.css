@@ -271,3 +271,10 @@
 .curve-field input { width: 58px; padding: 4px 6px; border-radius: 6px; border: 1px solid var(--kb-line-12); background: var(--kb-shade-25); color: var(--kb-text-strong); font: inherit; }
 .curve-field input[readonly] { opacity: 0.7; }
 .curve-field-unit { margin-right: 6px; }
+
+/* Hardware page on phones: chips shrink to the screen, sliders and size buttons are easy to hit */
+#mgmt-sec-hardware .lcd-theme-picker-row { grid-template-columns: repeat(auto-fill, minmax(min(100%, 120px), 1fr)); }
+#mgmt-sec-hardware .lcd-theme-chip { min-width: 0; min-height: 32px; }
+#mgmt-sec-hardware .lcd-chip-label { min-width: 0; }
+#mgmt-sec-hardware .custom-slider { height: 24px; }
+#mgmt-sec-hardware .seg-size-btn { min-height: 28px; }
