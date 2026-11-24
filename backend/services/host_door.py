@@ -492,6 +492,8 @@ def _serve_one(conn: socket.socket, uids: set[int]) -> None:
     with conn:
         uid = peer_uid(conn)
         if uid not in uids:
+            uids = allowed_uids()  # the web user may have been made since the door started
+        if uid not in uids:
             _audit(uid, "?", "refused", "not an allowed user")
             conn.sendall(b'{"ok": false, "error": "not allowed"}\n')
             return

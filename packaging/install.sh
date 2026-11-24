@@ -25,7 +25,7 @@ HELD="linux-image-amd64 linux-headers-amd64 zfs-dkms zfsutils-linux docker.io"
 TOOLS="smartmontools hdparm nvme-cli sg3-utils usbutils btrfs-progs e2fsprogs parted gdisk fuse3 gocryptfs mergerfs \
 rclone restic samba nfs-kernel-server docker.io docker-cli qemu-system-x86 qemu-utils ovmf swtpm \
 systemd-timesyncd tgt libtss2-esys-3.0.2-0t64 libtss2-rc0t64 libtss2-mu-4.0.1-0t64 \
-python3-venv ca-certificates curl"
+python3-venv ca-certificates curl acl"
 
 say() { printf '%s\n' "$*"; }
 die() { printf 'Kiboto was not installed: %s\n' "$*" >&2; exit 1; }

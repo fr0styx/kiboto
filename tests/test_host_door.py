@@ -83,7 +83,8 @@ def test_a_call_goes_through_the_socket_and_back(running_door):
         door.call("format.everything", sock=running_door)
 
 
-def test_someone_else_is_turned_away(tmp_path, audit):
+def test_someone_else_is_turned_away(tmp_path, audit, monkeypatch):
+    monkeypatch.setattr(host_door, "allowed_uids", lambda: {12345678})  # looked up again: still not this test
     a, b = socket.socketpair(socket.AF_UNIX, socket.SOCK_STREAM)
     with b:
         host_door._serve_one(a, {12345678})  # this test's uid is not among them
