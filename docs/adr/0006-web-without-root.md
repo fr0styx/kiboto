@@ -1,7 +1,7 @@
 # ADR 0006: The web process without root, behind a host door
 
 - **Status:** Accepted (23 Nov 2026: the owner chose group and ACL access for people's files)
-- **Progress:** steps 1 (the door), 2 (the machine's settings, the network, the firewall), 3 (accounts, Samba, NFS), 4 (snapshots, scrubs, pools, shared folders, SMART self-tests, drive sleep) and 5 (updates, going back, packages; the door checks an image's signature itself) built
+- **Progress:** steps 1 (the door), 2 (the machine's settings, the network, the firewall), 3 (accounts, Samba, NFS), 4 (snapshots, scrubs, pools, shared folders, SMART self-tests, drive sleep), 5 (updates, going back, packages; the door checks an image's signature itself), 6 (the data key, fans; the front screen gets its device by group at step 9) and 7 (the Docker proxy runs in the door) built
 - **Date:** 2026-11-23
 - **Decides:** how a machine Kiboto runs keeps a bug in the web app from becoming root on the machine
 
@@ -98,6 +98,11 @@ the last step:
 - The door's operation list becomes the security boundary, so each operation needs the same
   validation tests the API has (path traversal, option-like names), and a ratchet test that no
   system program is run outside it.
+- The Docker proxy still trusts the web process's word that a person confirmed an elevated
+  container (`X-Kiboto-Elevated`, sent after the security review of an app or a recreate): an
+  admin may install such apps, so the door cannot refuse them, only write each one to
+  `docker-proxy-audit.log`. A bug in the web app could ask for one. Closing that needs a
+  confirmation the web process cannot make by itself, which is not designed yet.
 - Some features read root-only files (`/dev/mem`, kernel logs, other processes in `/proc`); each
   needs a door operation or loses that detail on a machine Kiboto runs.
 - Nine steps of about a week each, at our pace: the largest item left before strangers.

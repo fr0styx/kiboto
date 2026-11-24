@@ -474,8 +474,47 @@ def serve(path: str = door.SOCK, rounds: int | None = None) -> None:
             rounds = None if rounds is None else rounds - 1
 
 
+def _give_to_web_group(path: str, wait: float = 5.0) -> bool:
+    """The proxy's socket, once it is there, in the web user's group: it may connect, others not."""
+    end = time.monotonic() + wait
+    while not os.path.exists(path):
+        if time.monotonic() >= end:
+            return False
+        time.sleep(0.1)
+    try:
+        os.chown(path, -1, grp.getgrnam(USER).gr_gid)
+    except (KeyError, OSError):  # no such user yet: root alone, which the web process still is
+        return False
+    return True
+
+
+def keep_docker_proxy(path: str = door.DOCKER_SOCK, rounds: int | None = None) -> None:
+    """Runs the Docker allow-list proxy (backend.docker_proxy) as a child of the door, started again
+    when it stops (ADR 0006 step 7): the Docker socket is root's, so the proxy is too. Its socket is
+    in the door's own run folder, which a restart of Kiboto does not remove; the web process's
+    group may use it."""
+    import subprocess
+    import sys
+
+    env = {**os.environ, "KIBOTO_DOCKER_PROXY_SOCK": path}
+    wait = 1.0
+    while rounds is None or rounds > 0:
+        started = time.monotonic()
+        proc = subprocess.Popen([sys.executable, "-m", "backend.docker_proxy"], env=env)
+        _give_to_web_group(path)
+        code = proc.wait()  # runs until stopped
+        logger.warning("[Door] the Docker proxy stopped (%s); starting it again", code)
+        wait = 1.0 if time.monotonic() - started > 60 else min(wait * 2, 30.0)
+        time.sleep(wait)
+        rounds = None if rounds is None else rounds - 1
+
+
 def main() -> int:
     os.environ[door.IN_DOOR] = "1"  # an operation run here does not ask the door again
+    from backend.config import RAW_DOCKER_SOCK
+
+    if os.path.exists(RAW_DOCKER_SOCK):
+        threading.Thread(target=keep_docker_proxy, name="DockerProxy", daemon=True).start()
     serve()
     return 0
 

@@ -17,6 +17,7 @@ from collections.abc import Callable
 from typing import Any
 
 SOCK = "/run/kiboto-door/door.sock"
+DOCKER_SOCK = "/run/kiboto-door/docker.sock"  # the Docker allow-list proxy the door runs (ADR 0006 step 7)
 IN_DOOR = "KIBOTO_IN_DOOR"  # set in the door process itself
 MAX_REPLY = 1 << 20
 LONG = {  # seconds an operation may take, where the default is too short

@@ -955,3 +955,84 @@ def test_the_door_writes_only_fan_files(audit, monkeypatch):
     reply = host_door.handle({"op": "fans.ec_pwm", "args": {"channel": 1, "pwm_val": 10}}, 0)
     assert reply["ok"] is False and "no such fan controller" in reply["error"]
     assert host_door.handle({"op": "fans.ec_pwm", "args": {"channel": 9, "pwm_val": 10}}, 0)["ok"] is False
+
+
+def test_kiboto_uses_the_doors_docker_proxy(monkeypatch, tmp_path):
+    from backend import main, runtime
+    from backend.services import native_update
+
+    sock = tmp_path / "docker.sock"
+    monkeypatch.setattr(door, "DOCKER_SOCK", str(sock))
+    monkeypatch.setattr(native_update, "UNIT_DIR", str(tmp_path))
+    monkeypatch.delenv("KIBOTO_DOCKER_SOCK", raising=False)
+    monkeypatch.setattr(runtime, "managed_host", lambda: False)
+    assert main._proxy_of_the_door(wait=0) is False
+    monkeypatch.setattr(runtime, "managed_host", lambda: True)
+    assert main._proxy_of_the_door(wait=0) is False  # no door here
+    (tmp_path / "kiboto-door.service").write_text("[Unit]\n")
+    assert main._proxy_of_the_door(wait=0) is False  # the door's proxy is not up
+    sock.write_text("")
+    assert main._proxy_of_the_door(wait=0) is True
+    assert os.environ["KIBOTO_DOCKER_SOCK"] == str(sock)
+
+
+def test_the_door_keeps_the_docker_proxy_running(monkeypatch, tmp_path):
+    import subprocess
+
+    from backend import config
+
+    runs = []
+
+    class Proc:
+        def __init__(self, cmd, env):
+            runs.append((cmd, env))
+
+        def wait(self):
+            return 1
+
+    monkeypatch.setattr(subprocess, "Popen", Proc)
+    monkeypatch.setattr(host_door, "_give_to_web_group", lambda path: True)
+    monkeypatch.setattr(host_door.time, "sleep", lambda s: None)
+    host_door.keep_docker_proxy(str(tmp_path / "d.sock"), rounds=2)
+    assert len(runs) == 2 and runs[0][0][-1] == "backend.docker_proxy"
+    assert runs[0][1]["KIBOTO_DOCKER_PROXY_SOCK"] == str(tmp_path / "d.sock")
+
+    started, served = [], []
+    raw = tmp_path / "docker-raw.sock"
+    raw.write_text("")
+    monkeypatch.setattr(config, "RAW_DOCKER_SOCK", str(raw))
+    monkeypatch.setattr(host_door, "keep_docker_proxy", lambda: started.append(1))
+    monkeypatch.setattr(host_door, "serve", lambda: served.append(1))
+    monkeypatch.delenv(door.IN_DOOR, raising=False)
+
+    class Now:  # the thread's work, done at once
+        def __init__(self, target, name, daemon):
+            self.target = target
+
+        def start(self):
+            self.target()
+
+    monkeypatch.setattr(host_door.threading, "Thread", Now)
+    assert host_door.main() == 0
+    assert started == [1] and served == [1]
+
+
+def test_the_proxy_socket_goes_to_the_web_users_group(monkeypatch, tmp_path):
+    import types
+
+    owned = []
+    sock = tmp_path / "s"
+    groups = {"kiboto": types.SimpleNamespace(gr_gid=4242)}
+
+    def getgrnam(name):
+        return groups[name]  # KeyError for a group that is not there, as grp does
+
+    monkeypatch.setattr(host_door.grp, "getgrnam", getgrnam)
+    monkeypatch.setattr(host_door.os, "chown", lambda p, u, g: owned.append((p, u, g)))
+    assert host_door._give_to_web_group(str(sock), wait=0) is False  # not there yet
+    sock.write_text("")
+    monkeypatch.setattr(host_door, "USER", "nobody-here")
+    assert host_door._give_to_web_group(str(sock), wait=0) is False and owned == []
+    monkeypatch.setattr(host_door, "USER", "kiboto")
+    assert host_door._give_to_web_group(str(sock), wait=0) is True
+    assert owned == [(str(sock), -1, 4242)]

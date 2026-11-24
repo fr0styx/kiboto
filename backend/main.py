@@ -57,6 +57,25 @@ from backend.settings import test_mode
 from backend.state import Z_STATE, _load_events, add_event, event_text
 
 
+def _proxy_of_the_door(wait: float = 5.0) -> bool:
+    """On a machine Kiboto runs the host door runs the Docker proxy (ADR 0006 step 7): Kiboto uses
+    its socket and starts none of its own. False where there is no door, or its proxy is not up."""
+    from backend import door, runtime
+    from backend.services.native_update import UNIT_DIR
+
+    if not runtime.managed_host() or not os.path.exists(os.path.join(UNIT_DIR, "kiboto-door.service")):
+        return False
+    end = time.monotonic() + wait
+    while not os.path.exists(door.DOCKER_SOCK):
+        if time.monotonic() >= end:
+            logger.warning("[Main] The host door's Docker proxy is not there; Kiboto starts its own")
+            return False
+        time.sleep(0.1)
+    os.environ["KIBOTO_DOCKER_SOCK"] = door.DOCKER_SOCK
+    logger.info("[Main] Docker API calls go through the host door's allow-list proxy at %s", door.DOCKER_SOCK)
+    return True
+
+
 def _start_docker_proxy(supervise) -> None:
     """Runs the Docker API allow-list proxy as its own process and points the app at it (SEC-09)."""
     import subprocess
@@ -67,6 +86,8 @@ def _start_docker_proxy(supervise) -> None:
     if legacy_names.getenv("KIBOTO_DOCKER_PROXY", "on") == "off" or test_mode():
         return
     if not os.path.exists(RAW_DOCKER_SOCK):
+        return
+    if _proxy_of_the_door():
         return
     sock = legacy_names.getenv("KIBOTO_DOCKER_PROXY_SOCK", "/run/kiboto/docker.sock")
 
