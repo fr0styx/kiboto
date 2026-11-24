@@ -37444,7 +37444,6 @@
      },
      "pool_id": {
       "default": "unraid_array",
-      "pattern": "^[A-Za-z0-9_/][A-Za-z0-9_./:-]{0,127}$",
       "title": "Pool Id",
       "type": "string"
      }

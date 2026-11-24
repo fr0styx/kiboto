@@ -19,7 +19,7 @@ from backend.auth import AuthenticatedPrincipal, get_current_principal, require_
 from backend.confirmations import require_confirmation
 from backend.errors import ApiError, error_response, said
 from backend.fsutil import single_name
-from backend.hardware.pal import system_disk
+from backend.hardware.pal import pool_rules, system_disk
 from backend.hardware.pal.base import PoolUsedElsewhere
 from backend.hardware.pal.pool_rules import POOL_ID_PATTERN, POOL_NAME_PATTERN
 from backend.hardware.pal.pool_rules import import_mount as _mount_point
@@ -37,12 +37,14 @@ router = APIRouter(prefix="/storage", tags=["Storage Subsystem & PAL"])
 
 # A pool's name as it reaches zpool/btrfs as an argument: no leading dash ("-a" would be an
 # option, export -a exports every pool), no spaces (CodeQL command-line injection)
-PoolId = Annotated[str, Path(pattern=POOL_ID_PATTERN)]
+# a pool's id as the storage tools take it: also no leading / and no .. (pool_rules.pool_id), here
+# as in the host door, for a Kiboto that runs the tools itself
+PoolId = Annotated[str, Path(pattern=POOL_ID_PATTERN), AfterValidator(pool_rules.pool_id)]
 
 
 class StorageScrubRequest(BaseModel):
     # pool names go to zpool/btrfs as arguments: no leading dash, no spaces
-    pool_id: str = Field("unraid_array", pattern=r"^[A-Za-z0-9_/][A-Za-z0-9_./:-]{0,127}$")
+    pool_id: Annotated[str, AfterValidator(pool_rules.pool_id)] = "unraid_array"
     action: str = Field("start", pattern=r"^[a-z_]{1,16}$")
 
 

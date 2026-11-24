@@ -36,6 +36,8 @@ On a machine of its own, failed sign-ins to shared folders over the network now 
 
 On a machine of its own, Kiboto installs only release versions, and a release is signed only after the project owner approves it, so a change pushed to the main branch alone can no longer reach those machines.
 
+Pool names sent to the storage and snapshot settings are checked the same way everywhere: a name, never a path.
+
 #### New
 
 Kiboto lists the third-party software it bundles and its licences at /third-party-licences.txt, and the install image says which Debian image it is made from and where Debian publishes its sources.

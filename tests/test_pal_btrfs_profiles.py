@@ -151,7 +151,7 @@ def test_zfs_scrub_commands(monkeypatch):
     assert ran == [["zpool", "scrub", "tank"], ["zpool", "scrub", "-s", "tank"], ["zpool", "status", "tank"]]
 
 
-@pytest.mark.parametrize("pool_id", ["-s", "tank -s", "a;b", ""])
+@pytest.mark.parametrize("pool_id", ["-s", "tank -s", "a;b", "", "/etc", "tank/../../etc"])
 def test_scrub_route_refuses_odd_pool_names(client, auth_headers, pool_id):
     r = client.post("/api/storage/scrub", json={"pool_id": pool_id, "action": "start"}, headers=auth_headers)
     assert r.status_code == 422

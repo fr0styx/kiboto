@@ -15,6 +15,7 @@ from backend.config import CLIENT_PREFS_FILE, DATA_DIR, logger
 from backend.confirmations import require_confirmation
 from backend.errors import ApiError
 from backend.fsutil import atomic_write_json, read_json, single_name
+from backend.hardware.pal import pool_rules
 from backend.hardware.pal_storage import PlatformCapabilityError, get_storage_platform
 from backend.logging_config import in_this_request
 from backend.paging import PageParams
@@ -59,7 +60,7 @@ SingleName = Annotated[str, AfterValidator(single_name)]
 
 
 class SnapshotCreateModel(BaseModel):
-    pool_id: str = "default"
+    pool_id: Annotated[str, AfterValidator(pool_rules.pool_id)] = "default"  # a name, never a path
     subvol_name: SingleName
     snapshot_name: SingleName | None = None
     readonly: bool = True

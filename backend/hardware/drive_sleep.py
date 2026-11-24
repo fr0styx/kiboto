@@ -11,10 +11,12 @@ On other hosts (Unraid, TrueNAS and the rest) the host's own spin-down setting d
 from __future__ import annotations
 
 import json
+import os
 import re
 from collections.abc import Callable
 from typing import Any
 
+from backend.config import logger
 from backend.hardware import power_state
 from backend.proc import TIMED_OUT, run_bounded
 
@@ -32,8 +34,9 @@ SENSE = re.compile(r"sb\[\]:\s*([0-9a-f]{2}) ([0-9a-f]{2}) ([0-9a-f]{2})", re.I)
 def run(cmd: list[str]) -> tuple[int, str]:
     try:
         r = run_bounded(cmd, timeout=15, capture_output=True, text=True)
-    except OSError as e:
-        return 127, str(e)
+    except OSError as e:  # the detail goes to the log; what is shown names only the tool
+        logger.warning("[DriveSleep] %s could not be started: %s", cmd[0], e)
+        return 127, f"{os.path.basename(cmd[0])} could not be started"
     if r.returncode == TIMED_OUT:
         return 124, "timed out"
     return r.returncode, (r.stdout or "") + (r.stderr or "")
