@@ -29,11 +29,11 @@ def test_a_failure_of_either_is_said_and_the_other_still_runs(monkeypatch, caplo
 
 def test_the_door_runs_this_version_before_anything_asks_it(monkeypatch, caplog):
     seen = []
-    monkeypatch.setattr(native_update, "ensure_units", lambda rel: seen.append(rel) or [])
+    monkeypatch.setattr(native_update, "ensure_units", lambda rel, **k: seen.append(rel) or [])
     main._door_of_this_version()
     assert seen == ["/opt/kiboto/current"]
 
-    def broken(rel):
+    def broken(rel, **k):
         raise OSError("read-only /etc")
 
     monkeypatch.setattr(native_update, "ensure_units", broken)

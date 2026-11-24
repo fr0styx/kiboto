@@ -858,7 +858,7 @@ def test_kiboto_waits_for_the_door_it_restarted(monkeypatch, tmp_path):
     from backend import main
     from backend.services import native_update
 
-    monkeypatch.setattr(native_update, "ensure_units", lambda rel: [])
+    monkeypatch.setattr(native_update, "ensure_units", lambda rel, **k: [])
     monkeypatch.setattr(native_update, "UNIT_DIR", str(tmp_path))
     waited = []
     monkeypatch.setattr(door, "wait_open", lambda: waited.append(1) or False)
@@ -1544,3 +1544,71 @@ def test_as_root_the_copy_button_opens_the_card_itself(monkeypatch, tmp_path):
     )
     with pytest.raises(ValueError):
         copy_engine.card_in_door("/dev/sdc1")  # lsblk said nothing readable: not opened
+
+
+def test_the_door_is_restarted_only_when_it_runs_other_code(monkeypatch, tmp_path):
+    from backend.services import native_update
+
+    rel = tmp_path / "rel"
+    (rel / "packaging").mkdir(parents=True)
+    units = tmp_path / "units"
+    units.mkdir()
+    for name in native_update.UNITS:
+        (rel / "packaging" / name).write_text(f"[Unit]\n# {name}\n")
+        (units / name).write_text(f"[Unit]\n# {name}\n")
+    ran = []
+
+    def run(cmd, timeout=60):
+        ran.append(cmd)
+        return 0, ""
+
+    native_update.ensure_units(str(rel), run, str(units), door_current=lambda: True)
+    assert ran == []  # the same code: the door and what it opened stay
+    native_update.ensure_units(str(rel), run, str(units), door_current=lambda: False)
+    assert ran == [["systemctl", "restart", "kiboto-door.service"]]
+    ran.clear()
+    (rel / "packaging" / "kiboto-door.service").write_text("[Unit]\n# new\n")
+    native_update.ensure_units(str(rel), run, str(units), door_current=lambda: True)
+    assert ["systemctl", "restart", "kiboto-door.service"] in ran  # its unit changed
+
+
+def test_door_version_and_current(monkeypatch):
+    from backend import settings
+
+    monkeypatch.setattr(settings, "current", lambda key: "abc123" if key == "build_commit" else "")
+    mine = door.version()
+    assert mine.startswith("abc123:") and len(mine.split(":")[1]) == 12
+    assert host_door.handle({"op": "door.version", "args": {}}, 0)["result"] == mine
+    monkeypatch.setattr(door, "call", lambda op, **a: mine)
+    assert door.current() is True
+    monkeypatch.setattr(door, "call", lambda op, **a: "other:000000000000")
+    assert door.current() is False
+
+    def gone(op, **a):
+        raise FileNotFoundError("no door")
+
+    monkeypatch.setattr(door, "call", gone)
+    assert door.current() is False
+
+
+def test_an_encrypted_folder_whose_gocryptfs_ended_is_not_open(monkeypatch, tmp_path):
+    import subprocess
+
+    from backend import fsutil, proc
+    from backend.services import encrypted_folders as ef
+
+    plain = tmp_path / "fam"
+    monkeypatch.setattr(ef, "plain_path", lambda name: str(plain))
+    monkeypatch.setattr(ef, "_mounted", lambda: {str(plain)})
+    assert ef.is_unlocked("fam") is False  # listed, but there is nothing at it
+    plain.mkdir()
+    assert ef.is_unlocked("fam") is True
+
+    ran = []
+    monkeypatch.setattr(fsutil, "open_encrypted", lambda: {str(tmp_path / "dead")})
+    monkeypatch.setattr(
+        proc, "run_bounded", lambda cmd, **kw: ran.append(cmd) or subprocess.CompletedProcess(cmd, 0, "", "")
+    )
+    ef._clear_dead(str(tmp_path / "dead"))
+    ef._clear_dead(str(plain))  # not listed: left alone
+    assert ran == [["umount", "-l", str(tmp_path / "dead")]]

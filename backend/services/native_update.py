@@ -169,7 +169,7 @@ def add_missing_tools(rel: str, run: Any = None) -> list[str]:
     return missing
 
 
-def ensure_units(rel: str, run: Any = None, unit_dir: str = UNIT_DIR) -> list[str]:
+def ensure_units(rel: str, run: Any = None, unit_dir: str = UNIT_DIR, door_current: Any = None) -> list[str]:
     """The service files of the running version where an update made by an older one left older
     ones, or none (the host door's came after install.sh had run). The door is (re)started at each
     start of Kiboto, so it runs the same version; Kiboto's own service takes a new file at its
@@ -198,7 +198,10 @@ def ensure_units(rel: str, run: Any = None, unit_dir: str = UNIT_DIR) -> list[st
         run(["systemctl", "daemon-reload"], timeout=60)
         run(["systemctl", "enable", "-q", *changed], timeout=60)
         logger.info("[Update] service files of this version put in place: %s", " ".join(changed))
-    if os.path.exists(os.path.join(unit_dir, "kiboto-door.service")):
+    # the door again only when it runs other code: a restart also ends what it started (the
+    # encrypted folders and cloud folders it opened)
+    stale = "kiboto-door.service" in changed or door_current is None or not door_current()
+    if os.path.exists(os.path.join(unit_dir, "kiboto-door.service")) and stale:
         run(["systemctl", "restart", "kiboto-door.service"], timeout=60)
     return changed
 

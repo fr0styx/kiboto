@@ -93,6 +93,30 @@ def _exchange(s: socket.socket, request: bytes) -> bytes:
     return data
 
 
+def version() -> str:
+    """Which door code this is: the build, and the door's own file (a change to it without a new
+    build, on a test machine, counts too). The door answers door.version with its own."""
+    import hashlib
+
+    from backend import settings
+
+    here = os.path.join(os.path.dirname(os.path.abspath(__file__)), "services", "host_door.py")
+    try:
+        with open(here, "rb") as f:
+            mine = hashlib.sha256(f.read()).hexdigest()[:12]
+    except OSError:
+        mine = ""
+    return f"{settings.current('build_commit') or ''}:{mine}"
+
+
+def current(sock: str = SOCK) -> bool:
+    """Whether the door that answers runs this same code; False when it does not answer."""
+    try:
+        return call("door.version", timeout=5, sock=sock) == version()
+    except (OSError, DoorError):
+        return False
+
+
 def wait_open(timeout: float = 10.0, sock: str = SOCK) -> bool:
     """Whether the door answers within `timeout` seconds. Right after it was (re)started its socket
     comes a moment later, and an operation asked in that moment would be done here instead."""

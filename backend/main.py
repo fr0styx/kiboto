@@ -587,7 +587,9 @@ def _door_of_this_version() -> None:
     from backend.services import native_update
 
     try:
-        native_update.ensure_units(os.path.join(native_update.PREFIX, "current"))
+        from backend import door
+
+        native_update.ensure_units(os.path.join(native_update.PREFIX, "current"), door_current=door.current)
     except OSError as e:
         logger.warning("[Main] The service files were not checked: %s", e)
     from backend import door

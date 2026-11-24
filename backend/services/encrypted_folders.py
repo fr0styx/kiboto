@@ -67,7 +67,16 @@ def _mounted() -> set[str]:
 
 
 def is_unlocked(name: str) -> bool:
-    return plain_path(name) in _mounted()
+    """Open, and answering: one whose gocryptfs ended (a restart of what started it) is listed as
+    mounted still, but is not open."""
+    path = plain_path(name)
+    if path not in _mounted():
+        return False
+    try:
+        os.stat(path)
+    except OSError:
+        return False
+    return True
 
 
 def _share_path(share: str) -> str:
@@ -168,6 +177,7 @@ def mount_in_door(cipher: str, plain: str, password: str, read_only: bool) -> bo
     validate_share_path(cipher)
     if not os.path.isfile(os.path.join(cipher, "gocryptfs.conf")):
         raise ValueError("that is not an encrypted folder")
+    _clear_dead(plain)
     try:
         _mount_here(cipher, plain, password, read_only, others=True)
     except EncryptedFolderError as e:
@@ -309,6 +319,19 @@ def _unmount(path: str) -> bool:
     from backend.proc import run_bounded
 
     return run_bounded(["fusermount3", "-u", path], timeout=30, capture_output=True, text=True).returncode == 0
+
+
+def _clear_dead(plain: str) -> None:
+    """A mount point left by a gocryptfs that ended answers "not connected": it is let go first."""
+    from backend.fsutil import open_encrypted
+    from backend.proc import run_bounded
+
+    if plain not in open_encrypted():
+        return
+    try:
+        os.stat(plain)
+    except OSError:
+        run_bounded(["umount", "-l", plain], timeout=30, capture_output=True, text=True)
 
 
 def unmount_in_door(path: str) -> bool:
