@@ -24,6 +24,8 @@ Importing a pool by a name no drive carries no longer leaves a locked, empty fol
 
 On a phone, messages such as "Last sign-in" are no longer half hidden under the tab bar.
 
+A NAS with several network ports is found by its name on each of its networks, not only on the main one.
+
 #### Security
 
 On a machine of its own, failed sign-ins to shared folders over the network now count like web sign-ins: 20 in 15 minutes block the address for an hour, and they show under History, Sign-ins.

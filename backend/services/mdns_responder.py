@@ -268,11 +268,67 @@ def wait_for_ip(pause: float = 5.0, sleep: Any = time.sleep) -> str:
         sleep(pause)
 
 
+# interfaces that are not a home network: the machine itself, containers, virtual machines, VPNs
+NOT_LAN = ("lo", "docker", "br-", "veth", "virbr", "vnet", "kbt", "tap", "tun", "tailscale", "zt", "wg")
+SIOCGIFADDR, SIOCGIFFLAGS, IFF_UP = 0x8915, 0x8913, 0x1
+
+
+def _if_ip(name: str) -> str | None:
+    """The IPv4 address of an interface that is up, or None (standard library only)."""
+    import fcntl
+
+    packed = struct.pack("256s", name.encode()[:15])
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+        try:
+            flags = struct.unpack("H", fcntl.ioctl(s.fileno(), SIOCGIFFLAGS, packed)[16:18])[0]
+            if not flags & IFF_UP:
+                return None
+            return socket.inet_ntoa(fcntl.ioctl(s.fileno(), SIOCGIFADDR, packed)[20:24])
+        except OSError:
+            return None
+
+
+def lan_ips(names: list[str] | None = None, ip_of: Any = None) -> list[str]:
+    """The addresses of the NAS on its home networks: each port that is up and has one."""
+    ip_of = ip_of or _if_ip
+    names = names if names is not None else [n for _, n in socket.if_nameindex()]
+    found = []
+    for name in names:
+        if name.startswith(NOT_LAN):
+            continue
+        ip = ip_of(name)
+        if ip and not ip.startswith("127.") and ip not in found:
+            found.append(ip)
+    return found
+
+
+def other_ports(main_ip: str, args: Any, names: list[str], label: str, port: int) -> list[str]:
+    """Answers on each other port of the NAS with that port's own address, each on a thread of its
+    own (a NAS on two networks is found by name on both). Returns the addresses it answers on."""
+    import threading
+
+    started = []
+    for ip in lan_ips():
+        if ip == main_ip:
+            continue
+        try:
+            sock = open_socket(ip)
+        except OSError as e:
+            print(f"[mdns] not answering on {ip}: {e}", flush=True)
+            continue
+        r = Responder(names, ip, port, label, smb=smb_open(ip), timemachine=args.timemachine)
+        sock.settimeout(None)
+        sock.sendto(r.announcement(), (GROUP, PORT))
+        threading.Thread(target=serve, args=(sock, r, ip, False), daemon=True, name=f"mdns-{ip}").start()
+        started.append(ip)
+    return started
+
+
 ADDRESS_CHECK_SECS = 60.0
 ADDRESS_CHANGED = 3  # the exit code: the container starts again and announces the new address
 
 
-def serve(sock: Any, r: "Responder", ip: str, follow: bool, clock: Any = time.time) -> int:
+def serve(sock: Any, r: "Responder", ip: str, follow: bool, clock: Any = time.time, ports: Any = None) -> int:
     """Answers questions for the name. When the router gives the NAS another address, it stops
     (ADDRESS_CHANGED), so the name does not keep pointing at the old one. An address given by
     hand (--ip) is not followed."""
@@ -292,6 +348,9 @@ def serve(sock: Any, r: "Responder", ip: str, follow: bool, clock: Any = time.ti
             now_ip = current_ip()
             if now_ip and now_ip != ip:
                 print(f"[mdns] the address changed from {ip} to {now_ip}; starting again", flush=True)
+                return ADDRESS_CHANGED
+            if ports is not None and sorted(lan_ips()) != ports:
+                print("[mdns] the NAS's ports changed; starting again", flush=True)
                 return ADDRESS_CHANGED
 
 
@@ -324,6 +383,10 @@ class Link:
     def __init__(self, ip: str):
         self.rx = _shared((GROUP, PORT))
         self.rx.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, socket.inet_aton(GROUP) + socket.inet_aton(ip))
+        try:  # only this port's questions, also when another port of the NAS has joined the group too
+            self.rx.setsockopt(socket.IPPROTO_IP, getattr(socket, "IP_MULTICAST_ALL", 49), 0)
+        except OSError:
+            print("[mdns] hearing every port's questions on each socket", flush=True)
         self.tx = _shared((ip, PORT))
         self.tx.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_IF, socket.inet_aton(ip))
         self.tx.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 255)
@@ -375,6 +438,9 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--label", default="Kiboto", help="how Finder lists the NAS")
     ap.add_argument("--http-port", type=int, default=80)
     ap.add_argument("--ip", default="")
+    ap.add_argument(
+        "--every-port", action="store_true", help="answer on every home network port, each with its own address"
+    )
     ap.add_argument("--timemachine", action="append", default=[], help="a Time Machine share (repeat for more)")
     ap.add_argument("--windows", action="store_true", help="also answer Windows' search (WS-Discovery)")
     ap.add_argument("--workgroup", default="WORKGROUP")
@@ -395,6 +461,11 @@ def main(argv: list[str] | None = None) -> int:
         sock.sendto(r.announcement(), (GROUP, PORT))
         time.sleep(1)
     print(f"[mdns] {', '.join(n + '.local' for n in r.names)} -> {ip}, web on port {port}, smb={r.smb}", flush=True)
+    ports = None
+    if args.every_port and not args.ip:
+        for other in other_ports(ip, args, r.names, args.label, port):
+            print(f"[mdns] and -> {other} on that port", flush=True)
+        ports = sorted(lan_ips())
     # Windows lists a computer, so only where files are served over SMB; a host that has its own
     # answerer keeps it (the port is taken, and this one says so and stays out)
     windows = None
@@ -411,7 +482,7 @@ def main(argv: list[str] | None = None) -> int:
 
     signal.signal(signal.SIGTERM, bye)
     signal.signal(signal.SIGINT, bye)
-    return serve(sock, r, ip, follow=not args.ip)
+    return serve(sock, r, ip, follow=not args.ip, ports=ports)
 
 
 if __name__ == "__main__":

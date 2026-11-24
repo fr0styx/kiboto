@@ -260,9 +260,10 @@ def _unit_running() -> bool:
 
 def service_command(cfg: dict[str, Any]) -> list[str]:
     """The responder as a short-lived user of its own that can write nowhere: it only answers
-    name lookups. It is restarted when it ends, and made again at every start of Kiboto."""
+    name lookups. It is restarted when it ends, and made again at every start of Kiboto. On a
+    machine Kiboto runs it answers on every home network port, each with that port's address."""
     here = os.path.join(os.path.dirname(os.path.realpath(__file__)), "mdns_responder.py")
-    responder = [sys.executable, here, *responder_args(cfg, _own_port())]
+    responder = [sys.executable, here, *responder_args(cfg, _own_port()), "--every-port"]
     mark = hashlib.sha256(json.dumps(responder).encode()).hexdigest()[:16]
     return [
         "systemd-run",

@@ -650,7 +650,7 @@ def test_the_responder_starts_the_windows_answerer_when_asked_and_stops_it(monke
     monkeypatch.setattr(m, "windows_answerer", lambda: fake)
     monkeypatch.setattr(m, "open_socket", lambda ip: Sock())
     monkeypatch.setattr(m, "probe", lambda sock, r: True)
-    monkeypatch.setattr(m, "serve", lambda sock, r, ip, follow: 0)
+    monkeypatch.setattr(m, "serve", lambda sock, r, ip, follow, ports=None: 0)
     monkeypatch.setattr(m.time, "sleep", lambda s: None)
     monkeypatch.setattr(m.signal, "signal", lambda sig, fn: handlers.__setitem__(sig, fn))
     monkeypatch.setattr(m, "smb_open", lambda ip: True)

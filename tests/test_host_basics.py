@@ -151,7 +151,7 @@ def test_a_machine_of_its_own_is_found_by_name_from_the_start(name_service):
     assert started[at - 1].endswith("mdns_responder.py") and os.path.exists(started[at - 1])
     assert started[at:] == [
         "--names", "kiboto", "--label", "Kiboto", "--http-port", "8082", "--timemachine", "backups",
-        "--windows", "--workgroup", "WORKGROUP", "--device", "seed",
+        "--windows", "--workgroup", "WORKGROUP", "--device", "seed", "--every-port",
     ]  # fmt: skip
 
 
