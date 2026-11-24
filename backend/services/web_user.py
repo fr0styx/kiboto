@@ -41,6 +41,7 @@ DROP_IN = "/etc/systemd/system/kiboto.service.d/web-user.conf"
 ROOTS_LOGS = ("door-audit.log", "docker-proxy-audit.log")  # written by root, read by people
 ACL = f"u:{USER}:rwX"
 BIN = ".RecycleBin"  # services/recycle_bin.BIN
+POOL_COPY = ".kiboto"  # services/pool_copy.FOLDER: the settings copy on each pool
 UNIT = f"""# ADR 0006 step 9: Kiboto's web process without root (backend/services/web_user.py)
 [Service]
 User={USER}
@@ -173,6 +174,8 @@ def turn_on(do: Run | None = None, drop_in: str = DROP_IN, data_dir: str = "") -
             problems.append(f"{USER} could not be let into {root} (setfacl)")
         for recycle in _bins(root):
             _let_in(do, recycle, recursive=True)
+        if os.path.isdir(os.path.join(root, POOL_COPY)):  # made by root before: Kiboto writes its copy there
+            _let_in(do, os.path.join(root, POOL_COPY), recursive=True)
     _let_into_apps(do, _apps_root())
     for folder in _vm_folders(data_dir):  # a few large disk images: all of it
         if os.path.isdir(folder) and not _let_in(do, folder, recursive=True):

@@ -25,6 +25,7 @@ def test_turning_it_on_makes_the_user_and_the_drop_in(tmp_path, monkeypatch):
     pool = tmp_path / "tank"
     (pool / ".RecycleBin").mkdir(parents=True)
     (pool / "photos" / ".RecycleBin").mkdir(parents=True)
+    (pool / ".kiboto").mkdir()
     monkeypatch.setattr(web_user, "_pool_roots", lambda: [str(pool), str(tmp_path / "away")])
     apps = pool / "appdata"
     (apps / "it-tools" / "data").mkdir(parents=True)
@@ -50,6 +51,7 @@ def test_turning_it_on_makes_the_user_and_the_drop_in(tmp_path, monkeypatch):
     assert ["setfacl", "-d", "-m", "u:kiboto:rwX", str(pool)] in ran  # the pool's own folder, not all of it
     assert ["setfacl", "-R", "-m", "u:kiboto:rwX", str(pool / ".RecycleBin")] in ran
     assert ["setfacl", "-R", "-m", "u:kiboto:rwX", str(pool / "photos" / ".RecycleBin")] in ran
+    assert ["setfacl", "-R", "-m", "u:kiboto:rwX", str(pool / ".kiboto")] in ran  # the settings copy root made before
     assert not [c for c in ran if c[0] == "setfacl" and c[-1] == str(tmp_path / "away")]
     assert ["setfacl", "-d", "-m", "u:kiboto:rwX", str(apps / "it-tools")] in ran
     assert ["setfacl", "-m", "u:kiboto:rwX", str(apps / "it-tools" / "docker-compose.yml")] in ran

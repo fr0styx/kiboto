@@ -45,6 +45,10 @@ class UpdateFailed(RuntimeError):
     """The new version could not be made ready; nothing was switched."""
 
 
+class Damaged(UpdateFailed):
+    """The download is there but its files are empty: a power cut while Docker saved it."""
+
+
 def _run(
     cmd: list[str], timeout: float = 60, cwd: str | None = None, env: dict[str, str] | None = None
 ) -> tuple[int, str]:
@@ -183,6 +187,9 @@ def ensure_units(rel: str, run: Any = None, unit_dir: str = UNIT_DIR, door_curre
                 want = f.read()
         except OSError:
             continue
+        if not want.strip():  # an empty unit file is a masked service to systemd: never put one in place
+            logger.warning("[Update] %s of %s is empty: the one in place stays", name, os.path.basename(rel))
+            continue
         dst = os.path.join(unit_dir, name)
         try:
             with open(dst, encoding="utf-8") as f:
@@ -212,6 +219,7 @@ def prepare(image: str, version: str, prefix: str = PREFIX, run: Any = None) -> 
     rel = os.path.join(prefix, "releases", f"{version or 'new'}-{time.strftime('%Y%m%d%H%M%S')}")
     try:
         extract(image, rel)
+        _whole(rel)
         venv_for(rel, prefix, run)
         add_missing_tools(rel, run)
         code, said = run(
@@ -230,8 +238,34 @@ def prepare(image: str, version: str, prefix: str = PREFIX, run: Any = None) -> 
         rel = _named_by_its_build(rel)
     except (UpdateFailed, OSError, tarfile.TarError, docker_client.DockerError) as e:
         shutil.rmtree(rel, ignore_errors=True)
+        if isinstance(e, Damaged):
+            _forget(image)
         raise UpdateFailed(str(e)) from e
     return rel
+
+
+def _whole(rel: str) -> None:
+    """A download cut short (the machine lost power while Docker saved the image) can leave all of
+    the image's files in place but empty, and Docker serves them as they are. Such a version is
+    refused before anything is switched: its service files would read as masked services."""
+    try:
+        with open(os.path.join(rel, "backend", "__init__.py"), encoding="utf-8") as f:
+            named = "__version__" in f.read()
+    except OSError:
+        named = False
+    units = [os.path.join(rel, "packaging", name) for name in UNITS]
+    if not named or any(os.path.isfile(u) and os.path.getsize(u) == 0 for u in units):
+        raise Damaged("the downloaded version is damaged (its files are empty); it is downloaded again next time")
+
+
+def _forget(image: str) -> None:
+    """The damaged image goes, so the next try downloads it again instead of reading the same."""
+    try:
+        status, said = docker_client.request("DELETE", f"/images/{image}")
+    except docker_client.DockerError as e:
+        status, said = 0, str(e)
+    if status not in (200, 404):
+        logger.warning("[Update] the damaged download %s stays: %s", image, said)
 
 
 def _named_by_its_build(rel: str) -> str:
@@ -259,6 +293,30 @@ def _named_by_its_build(rel: str) -> str:
 
 
 ROOTS_LOGS = ("door-audit.log", "docker-proxy-audit.log")  # written by root: they stay root's
+
+
+def _start_and_check(port: int, run: Any) -> tuple[bool, str]:
+    """Starts the service and waits for it to hold; a start systemd refuses (a masked or broken
+    unit) is an answer at once, not after the whole wait."""
+    code, said = run(["systemctl", "start", SERVICE], timeout=120)
+    if code != 0:
+        return False, f"the new version could not be started: {said.strip()[-200:] or code}"
+    return healthy(port, stopped=lambda: restarts(run))
+
+
+def _record(data_dir: str, result: str, why: str = "", **extra: Any) -> None:
+    """How the update ended, for Kiboto to say after its start; written by the helper (root), so
+    the file goes to the data folder's owner, who must read it and mark it reported."""
+    from backend.services import self_updater
+
+    self_updater.write_update_result(data_dir, result, why, **extra)
+    path = os.path.join(data_dir, self_updater.RESULT_FILE)
+    try:
+        st = os.stat(data_dir)
+        if st.st_uid != 0 and os.path.exists(path):
+            os.lchown(path, st.st_uid, st.st_gid)
+    except OSError as e:
+        logger.warning("[Update] %s stays root's: %s", self_updater.RESULT_FILE, e)
 
 
 def _hand_back(data_dir: str) -> None:
@@ -379,7 +437,6 @@ def apply(rel: str, data_dir: str, port: int, image: str = "", prefix: str = PRE
     """The helper's work, run outside the service: switch to `rel`, and back if it does not hold.
     Returns "updated", "rolled_back" or "not_applied"."""
     from backend.services.data_snapshot import restore_snapshot, take_snapshot
-    from backend.services.self_updater import write_update_result
 
     run = run or _run
     run(["systemctl", "stop", SERVICE], timeout=180)
@@ -394,16 +451,15 @@ def apply(rel: str, data_dir: str, port: int, image: str = "", prefix: str = PRE
     except OSError as e:
         _hand_back(data_dir)
         run(["systemctl", "start", SERVICE], timeout=120)
-        write_update_result(data_dir, "not_applied", f"could not snapshot the data folder: {e}", to_image=image)
+        _record(data_dir, "not_applied", f"could not snapshot the data folder: {e}", to_image=image)
         return "not_applied"
     earlier = _previous(prefix)
     before = point_at(rel, prefix)
     _door_follows(rel, run)
     _hand_back(data_dir)
-    run(["systemctl", "start", SERVICE], timeout=120)
-    ok, why = healthy(port, stopped=lambda: restarts(run))
+    ok, why = _start_and_check(port, run)
     if ok:
-        write_update_result(data_dir, "updated", why, to_image=image)
+        _record(data_dir, "updated", why, to_image=image)
         prune(prefix)
         return "updated"
     logger.error("[Update] The new version did not hold (%s): going back", why)
@@ -420,7 +476,7 @@ def apply(rel: str, data_dir: str, port: int, image: str = "", prefix: str = PRE
     run(["systemctl", "reset-failed", SERVICE], timeout=30)  # a crash loop may have used up its starts
     _hand_back(data_dir)
     run(["systemctl", "start", SERVICE], timeout=120)
-    write_update_result(data_dir, "rolled_back", why, to_image=image)
+    _record(data_dir, "rolled_back", why, to_image=image)
     return "rolled_back"
 
 
@@ -461,14 +517,13 @@ def back(snapshot: str, data_dir: str, port: int, prefix: str = PREFIX, run: Any
     """The helper's work for going back: the release the snapshot belongs to and the data as it
     was, together. The data of now is saved first. Returns "reverted" or "not_reverted"."""
     from backend.services.data_snapshot import restore_snapshot, take_snapshot
-    from backend.services.self_updater import write_update_result
 
     run = run or _run
     with open(os.path.join(snapshot, "manifest.json"), encoding="utf-8") as f:
         name = str(json.load(f).get("from_release") or "")
     rel = os.path.join(prefix, "releases", name)
     if not name or "/" in name or not os.path.isdir(rel):
-        write_update_result(data_dir, "not_reverted", "the version to go back to is no longer here")
+        _record(data_dir, "not_reverted", "the version to go back to is no longer here")
         return "not_reverted"
     run(["systemctl", "stop", SERVICE], timeout=180)
     try:
@@ -477,15 +532,14 @@ def back(snapshot: str, data_dir: str, port: int, prefix: str = PREFIX, run: Any
     except (OSError, ValueError) as e:
         _hand_back(data_dir)
         run(["systemctl", "start", SERVICE], timeout=120)
-        write_update_result(data_dir, "not_reverted", f"the earlier data could not be put back: {e}")
+        _record(data_dir, "not_reverted", f"the earlier data could not be put back: {e}")
         return "not_reverted"
     point_at(rel, prefix)
     _door_follows(rel, run)
     run(["systemctl", "reset-failed", SERVICE], timeout=30)
     _hand_back(data_dir)
-    run(["systemctl", "start", SERVICE], timeout=120)
-    ok, why = healthy(port, stopped=lambda: restarts(run))
-    write_update_result(data_dir, "reverted" if ok else "not_reverted", why)
+    ok, why = _start_and_check(port, run)
+    _record(data_dir, "reverted" if ok else "not_reverted", why)
     return "reverted" if ok else "not_reverted"
 
 

@@ -581,3 +581,80 @@ def test_the_helper_hands_back_before_each_start(machine, monkeypatch):
     for i, step in enumerate(steps):
         if step.startswith("systemctl start"):
             assert steps[i - 1] == "hand back", steps
+
+
+def test_a_download_with_empty_files_is_refused_and_downloaded_again(tmp_path, monkeypatch):
+    empty = {
+        **IMAGE,
+        "backend": tar_of({"backend/__init__.py": b"", "backend/main.py": b""}),
+        "packaging": tar_of({"packaging/kiboto.service": b""}),
+    }
+    docker = Docker(monkeypatch, parts=empty)
+    with pytest.raises(nu.UpdateFailed, match="damaged"):
+        nu.prepare("ghcr.io/x/kiboto@sha256:ab", "9.9.9", str(tmp_path), Runs())
+    assert ("DELETE", "/images/ghcr.io/x/kiboto@sha256:ab") in docker.asked  # the next try downloads it again
+    assert os.listdir(tmp_path / "releases") == []
+    docker = Docker(monkeypatch, parts={**IMAGE, "packaging": tar_of({"packaging/kiboto.service": b""})})
+    with pytest.raises(nu.UpdateFailed, match="damaged"):  # a version is there, but a service file is empty
+        nu.prepare("img", "9.9.9", str(tmp_path), Runs())
+    monkeypatch.setattr(docker_client, "request", lambda *a, **k: (409, "image is in use"))
+    nu._forget("img")  # one that cannot go is said, nothing more
+
+
+def test_an_empty_service_file_is_never_put_in_place(tmp_path):
+    rel = tmp_path / "rel"
+    (rel / "packaging").mkdir(parents=True)
+    (rel / "packaging" / "kiboto.service").write_text("")
+    (rel / "packaging" / "kiboto-door.service").write_text("[Unit]\n")
+    units = tmp_path / "units"
+    units.mkdir()
+    (units / "kiboto.service").write_text("[Unit]\nDescription=Kiboto\n")
+    assert nu.ensure_units(str(rel), Runs(), str(units), door_current=lambda: True) == ["kiboto-door.service"]
+    assert (units / "kiboto.service").read_text() == "[Unit]\nDescription=Kiboto\n"  # an empty one would mask it
+
+
+def test_a_start_systemd_refuses_is_an_answer_at_once(machine, monkeypatch):
+    def run(cmd, timeout=60, cwd=None, env=None):
+        if cmd[1] == "start" and os.path.realpath(os.path.join(machine["prefix"], "current")) == os.path.realpath(
+            machine["b"]
+        ):
+            return 1, "Failed to start kiboto.service: Unit kiboto.service is masked.\n"
+        return machine["run"](cmd, timeout, cwd, env)
+
+    monkeypatch.setattr(nu, "healthy", lambda port, **k: (True, "ok"))  # not asked for the version that did not start
+    assert nu.apply(machine["b"], machine["data"], 8082, "img", machine["prefix"], run) == "rolled_back"
+    assert machine["results"] == [
+        (
+            "rolled_back",
+            "the new version could not be started: Failed to start kiboto.service: Unit kiboto.service is masked.",
+        )
+    ]
+
+
+def test_the_result_goes_to_the_data_folders_owner(tmp_path, monkeypatch):
+    from backend.services import self_updater
+
+    data = tmp_path / "data"
+    data.mkdir()
+    given = []
+    monkeypatch.setattr(nu.os, "lchown", lambda p, u, g: given.append((os.path.basename(p), u, g)))
+    real_stat = os.stat
+    owner = {"uid": 999}
+    monkeypatch.setattr(
+        nu.os,
+        "stat",
+        lambda p, *a, **k: (
+            os.stat_result((0o40700, 0, 0, 1, owner["uid"], 987, 0, 0, 0, 0))
+            if str(p) == str(data)
+            else real_stat(p, *a, **k)
+        ),
+    )
+    nu._record(str(data), "rolled_back", "it did not hold", to_image="img")
+    assert given == [(self_updater.RESULT_FILE, 999, 987)]
+    assert json.loads((data / self_updater.RESULT_FILE).read_text())["result"] == "rolled_back"
+    given.clear()
+    owner["uid"] = 0
+    nu._record(str(data), "updated")
+    assert given == []  # a folder that is root's: nothing changes
+    monkeypatch.setattr(nu.os, "stat", lambda p, *a, **k: (_ for _ in ()).throw(OSError("gone")))
+    nu._record(str(data), "updated")  # said in the log, nothing more
