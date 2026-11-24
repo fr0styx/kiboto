@@ -139,8 +139,8 @@ def to_people(folder: str, user: str = "nobody", group: str = "users", mode: int
         st = os.stat(folder)
     except OSError:
         return False
-    if _me() != 0 or st.st_uid != 0 or not stat.S_ISDIR(st.st_mode) or stat.S_IMODE(st.st_mode) & 0o002:
-        return False
+    if _me() != 0 or st.st_uid not in _ours() or not stat.S_ISDIR(st.st_mode) or stat.S_IMODE(st.st_mode) & 0o002:
+        return False  # made by someone else than Kiboto (root, or its web user), or open to everyone
     uid, gid = _ids(user, group)
     try:
         os.chown(folder, uid, gid)
@@ -165,7 +165,7 @@ def to_person(folder: str, uid: int, gid: int = 100, mode: int = 0o700) -> bool:
     except OSError:
         return False
     file_server_uid, _ = _ids("nobody", "users")
-    if _me() != 0 or not stat.S_ISDIR(st.st_mode) or st.st_uid not in (0, file_server_uid, uid):
+    if _me() != 0 or not stat.S_ISDIR(st.st_mode) or st.st_uid not in {file_server_uid, uid} | _ours():
         return False
     if (st.st_uid, st.st_gid, stat.S_IMODE(st.st_mode)) == (uid, gid, mode):
         return False

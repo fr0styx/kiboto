@@ -284,3 +284,23 @@ def test_what_is_still_the_systems_in_a_folder_goes_to_its_people(tmp_path, monk
     assert out == {"seen": 6, "given": 5}  # theirs.txt was seen and left alone; apps was not entered
     assert "theirs.txt" not in given and not [g for g in given if g.startswith("apps")]
     assert owned.give_back(str(share), keep_out)["given"] == 0  # nothing left to hand over
+
+
+def test_a_folder_the_web_user_made_is_handed_over_by_the_door(tmp_path, monkeypatch):
+    """Once Kiboto's web process is the user kiboto (ADR 0006 step 9), the door hands over what
+    that user made: a new person's home, a new shared folder."""
+    home = tmp_path / "ana"
+    home.mkdir()
+    os.chmod(home, 0o755)
+    given = []
+    real = os.stat
+    monkeypatch.setattr(owned.os, "stat", lambda path, *a, **k: _as(real(path, *a, **k), 999, 999))
+    monkeypatch.setattr(owned.os, "chown", lambda path, uid, gid: given.append((path, uid, gid)))
+    monkeypatch.setattr(owned, "_ids", lambda user, group: (65534, 100))
+    monkeypatch.setattr(owned, "_me", lambda: 0)
+    monkeypatch.setattr(owned, "_ours", lambda: {0, 999})
+    assert owned.to_person(str(home), 20001) is True and given[-1] == (str(home), 20001, 100)
+    assert owned.to_people(str(home)) is True and given[-1] == (str(home), 65534, 100)
+    monkeypatch.setattr(owned, "_ours", lambda: {0})  # someone else's folder: left alone
+    os.chmod(home, 0o755)
+    assert owned.to_people(str(home)) is False
