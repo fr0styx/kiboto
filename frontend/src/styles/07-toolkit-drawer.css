@@ -235,3 +235,12 @@
   box-shadow: 0 0 8px rgba(249, 115, 22, 0.35);
 }
 
+
+/* Hardware 2: one page. A section without its hardware is hidden; the cards' drag handles and
+   fold buttons, which only rearranged the drawer, are not shown on the page */
+.mgmt-tab-pane.hw-absent { display: none !important; }
+#mgmt-sec-hardware .drag-handle,
+#mgmt-sec-hardware .btn-minimize,
+#mgmt-sec-hardware .tab-sub-header { display: none; } /* "Fan control cards" and its order lock */
+#mgmt-sec-hardware .mgmt-tab-pane + .mgmt-tab-pane { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--kb-line-7); }
+.hw-safety-line { margin: 0 0 10px; font-size: var(--kb-fs-xs); color: var(--kb-text-soft); line-height: 1.5; }

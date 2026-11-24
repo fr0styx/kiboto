@@ -80,57 +80,38 @@ describe('Mission Control 6-Pillar Information Architecture & Hardware Agnostici
     });
   });
 
-  it('openDrawer opens sliding drawer with tabs and falls back gracefully when drawer is missing', () => {
+  it('openDrawer opens the matching Hardware section, never the old drawer (Hardware 2)', () => {
     const drawer = document.getElementById('led-drawer');
-    const overlay = document.getElementById('drawer-overlay');
-
-    openDrawer('tab-fans');
-    expect(drawer.classList.contains('open')).toBe(true);
-    expect(overlay.classList.contains('open')).toBe(true);
-    expect(document.body.classList.contains('drawer-is-open')).toBe(true);
-
-    // Fallback when drawer is removed
-    drawer.remove();
-    overlay.remove();
     window.openManagementWindow = vi.fn();
     window.openPersonalizationWindow = vi.fn();
-
     openDrawer('tab-fans');
+    expect(drawer.classList.contains('open')).toBe(false);
     expect(window.openManagementWindow).toHaveBeenCalledWith('mgmt-pane-hardware-fans');
-
     openDrawer('tab-led');
     expect(window.openManagementWindow).toHaveBeenCalledWith('mgmt-pane-hardware-led');
-
     openDrawer('tab-buttons');
     expect(window.openManagementWindow).toHaveBeenCalledWith('mgmt-pane-copy');
-
     openDrawer('tab-layout');
     expect(window.openPersonalizationWindow).toHaveBeenCalledWith('console');
   });
 
-  it('automatically hides appliance-only LED & LCD hardware tabs on headless hosts (AGENTS.md §1.1)', () => {
-    const ledTab = document.querySelector('.mgmt-inner-tab[data-tab-target="mgmt-pane-hardware-led"]');
-    const lcdTab = document.querySelector('.mgmt-inner-tab[data-tab-target="mgmt-pane-hardware-lcd"]');
-
-    // Scenario A: Headless host (No LCD, No LED)
-    const headlessStats = {
+  it('hides the light and screen sections on a machine without them (AGENTS.md §1.1)', () => {
+    document.body.insertAdjacentHTML(
+      'beforeend',
+      '<div id="mgmt-pane-hardware-led" class="mgmt-tab-pane"></div><div id="mgmt-pane-hardware-lcd" class="mgmt-tab-pane"></div>'
+    );
+    const led = document.getElementById('mgmt-pane-hardware-led');
+    const lcd = document.getElementById('mgmt-pane-hardware-lcd');
+    updateManagementTelemetry({
       peripherals: { fb_active: false, led_ready: false, led_port: null },
       hardware: { has_lcd: false, has_mcu: false },
-    };
-    updateManagementTelemetry(headlessStats);
-
-    expect(ledTab.style.display).toBe('none');
-    expect(lcdTab.style.display).toBe('none');
-
-    // Scenario B: Appliance hardware detected
-    const applianceStats = {
+    });
+    expect(led.classList.contains('hw-absent') && lcd.classList.contains('hw-absent')).toBe(true);
+    updateManagementTelemetry({
       peripherals: { fb_active: true, led_ready: true, led_port: '/dev/ttyACM0' },
       hardware: { has_lcd: true, has_mcu: true },
-    };
-    updateManagementTelemetry(applianceStats);
-
-    expect(ledTab.style.display).toBe('');
-    expect(lcdTab.style.display).toBe('');
+    });
+    expect(led.classList.contains('hw-absent') || lcd.classList.contains('hw-absent')).toBe(false);
   });
 
   it('dedicated Personalization window opens and switches sub-tabs correctly', () => {

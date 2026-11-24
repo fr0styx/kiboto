@@ -1636,28 +1636,11 @@
 
           <!-- Pillar 6: Hardware & Power (Formerly Services / Unraid) -->
           <div id="mgmt-sec-hardware" class="mgmt-detail-card" style="display: none;">
-            <div class="mgmt-sticky-subnav">
+            <!-- Hardware 2 (SET-30): one page, no tabs. A single hidden tab shows every section, so a link to
+                 any of them opens the page there (management.js: tabForPane). -->
+            <div class="mgmt-sticky-subnav" hidden>
               <div class="mgmt-inner-tabs" role="tablist">
-                <button class="mgmt-inner-tab active" role="tab" aria-selected="true" data-tab-target="mgmt-pane-unraid">
-                  <svg class="ic" style="width: 14px; height: 14px;"><use href="#i-sliders"/></svg>
-                  <span data-i18n="mgmt.subtab_hardware_profiles">Host & Profiles</span>
-                </button>
-                <button class="mgmt-inner-tab" role="tab" aria-selected="false" data-tab-target="mgmt-pane-hardware-lcd">
-                  <svg class="ic" style="width: 14px; height: 14px;"><use href="#i-screen"/></svg>
-                  <span data-i18n="settings.tab_layout">Dashboard Layout</span>
-                </button>
-                <button class="mgmt-inner-tab" role="tab" aria-selected="false" data-tab-target="mgmt-pane-hardware-led">
-                  <svg class="ic" style="width: 14px; height: 14px;"><use href="#i-bolt"/></svg>
-                  <span data-i18n="settings.tab_led">LED Strip bar</span>
-                </button>
-                <button class="mgmt-inner-tab" role="tab" aria-selected="false" data-tab-target="mgmt-pane-hardware-fans">
-                  <svg class="ic" style="width: 14px; height: 14px;"><use href="#i-fan"/></svg>
-                  <span data-i18n="settings.tab_fans">Fans</span>
-                </button>
-                <button class="mgmt-inner-tab" role="tab" aria-selected="false" data-tab-target="mgmt-pane-hardware-copy" data-tab-panes="mgmt-pane-hardware-copy mgmt-pane-copy">
-                  <svg class="ic" style="width: 14px; height: 14px;"><use href="#i-storage"/></svg>
-                  <span data-i18n="hw.tab_card_copies">Card copies</span>
-                </button>
+                <button class="mgmt-inner-tab active" role="tab" aria-selected="true" data-tab-target="mgmt-pane-unraid" data-tab-panes="mgmt-pane-unraid mgmt-pane-hardware-fans mgmt-pane-hardware-led mgmt-pane-hardware-lcd mgmt-pane-hardware-copy mgmt-pane-copy" data-i18n="mgmt.sidebar_hardware">Hardware</button>
               </div>
             </div>
 
@@ -1708,74 +1691,43 @@
               </div>
             </div>
 
-            <!-- Sub-tab 2: Front-panel LCD / Dashboard Layout -->
-            <div id="mgmt-pane-hardware-lcd" class="mgmt-tab-pane" style="display: none;">
-              <div class="mgmt-card-intro" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-                <div>
-                  <div class="mgmt-card-intro-title"><svg class="ic"><use href="#i-screen"/></svg> <span data-i18n="settings.tab_layout_title">Dashboard Layout</span></div>
-                  <div class="mgmt-card-intro-desc" data-i18n="settings.tab_layout_desc">Configure dashboard sizes, visibility, and layout presets.</div>
-                </div>
-                <button class="btn-pill-toggle" id="btn-open-lcd-drawer" title="Open LCD Settings Drawer" data-i18n-title="ui.open_lcd_settings_drawer">🖥️ <span data-i18n="mgmt.open_drawer">Open Drawer</span></button>
-              </div>
-              <div class="mgmt-detail-body">
-                <div id="mgmt-pane-hardware-lcd-slot" class="mgmt-hardware-tab-slot"></div>
-                <div style="background: var(--kb-glaze-3); border: 1px solid var(--kb-line-7); border-radius: 8px; padding: 14px; display: flex; flex-direction: column; gap: 8px; margin-top: 14px;">
-                  <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <div style="font-weight: 700; font-size: var(--kb-fs-xs); color: var(--kb-text-strong);" data-i18n="mw.physical_framebuffer_display">Physical Framebuffer Display</div>
-                    <span class="ci-badge" style="background: rgba(51,205,184,0.15); color: var(--ok2); border: 1px solid rgba(51,205,184,0.3); font-size: var(--kb-fs-xs); font-weight: 700;" data-i18n="mw.isolated_palette">ISOLATED PALETTE</span>
-                  </div>
-                  <div style="font-size: var(--kb-fs-xs); color: var(--muted); line-height: 1.5;" data-i18n="mw.frame_rendering_is_strictly_scoped_to">
-                    Frame rendering is strictly scoped to #screen and #mini-lcd-canvas. Web desktop theme alterations never cascade into or corrupt the physical appliance display.
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Sub-tab 3: ARGB LED Lighting -->
-            <div id="mgmt-pane-hardware-led" class="mgmt-tab-pane" style="display: none;">
-              <div class="mgmt-card-intro" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-                <div>
-                  <div class="mgmt-card-intro-title"><svg class="ic"><use href="#i-bolt"/></svg> <span data-i18n="settings.tab_led_title">LED Strip bar</span></div>
-                  <div class="mgmt-card-intro-desc" data-i18n="settings.tab_led_desc">Adjust physical lighting and reactive hardware alerts.</div>
-                </div>
-                <button class="btn-pill-toggle" id="btn-open-led-drawer" title="Open LED Strip Settings Drawer" data-i18n-title="ui.open_led_strip_settings_drawer">✨ <span data-i18n="mgmt.open_drawer">Open Drawer</span></button>
-              </div>
-              <div class="mgmt-detail-body">
-                <div id="mgmt-pane-hardware-led-slot" class="mgmt-hardware-tab-slot"></div>
-                <div style="background: var(--kb-glaze-3); border: 1px solid var(--kb-line-7); border-radius: 8px; padding: 14px; display: flex; flex-direction: column; gap: 8px; margin-top: 14px;">
-                  <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <div style="font-weight: 700; font-size: var(--kb-fs-xs); color: var(--kb-text-strong);" data-i18n="mw.chassis_lightbar_controller">Chassis Lightbar Controller</div>
-                    <span class="ci-badge" style="background: var(--lt-b-33cdb826, rgba(51,205,184,0.15)); color: var(--lt-ink-brand, var(--accent-cyan)); border: 1px solid var(--lt-r-33cdb84c, rgba(51,205,184,0.3)); font-size: var(--kb-fs-xs); font-weight: 700;" data-i18n="mw.synced_mcu">SYNCED MCU</span>
-                  </div>
-                  <div style="font-size: var(--kb-fs-xs); color: var(--muted); line-height: 1.5;" data-i18n="mw.dynamic_lighting_effects_synchronize_across_syst">
-                    Dynamic lighting effects synchronize across system power states, CPU thermal loads, disk rebuild activity, and silent night modes.
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Sub-tab 4: Fans & Acoustics -->
+            <!-- Cooling details: the fans, the curve, fan stop (Hardware 2) -->
             <div id="mgmt-pane-hardware-fans" class="mgmt-tab-pane" style="display: none;">
               <div class="mgmt-card-intro" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
                 <div>
-                  <div class="mgmt-card-intro-title"><svg class="ic"><use href="#i-fan"/></svg> <span data-i18n="settings.tab_fans_title">Fans</span></div>
-                  <div class="mgmt-card-intro-desc" data-i18n="settings.tab_fans_desc">Configure cooling thresholds and dynamic thermal curves.</div>
+                  <div class="mgmt-card-intro-title"><svg class="ic"><use href="#i-fan"/></svg> <span data-i18n="hw.sec_fans">Fans</span></div>
+                  <div class="mgmt-card-intro-desc" data-i18n="hw.sec_fans_desc">How fast the fans run now, the curve they follow and fan stop while the drives sleep.</div>
                 </div>
-                <button class="btn-pill-toggle" id="btn-open-fans-drawer" title="Open Fan Curve Editor Drawer" data-i18n-title="ui.open_fan_curve_editor_drawer">⚙️ <span data-i18n="mgmt.open_drawer">Open Drawer</span></button>
               </div>
               <div class="mgmt-detail-body">
+                <p class="hw-safety-line" data-i18n="hw.safety_line">Whatever the mode, a drive at 55 °C, or the processor at 80 °C for six seconds, runs every fan at full speed.</p>
                 <div id="mgmt-pane-hardware-fans-slot" class="mgmt-hardware-tab-slot"></div>
-                <div style="background: var(--kb-glaze-3); border: 1px solid var(--kb-line-7); border-radius: 8px; padding: 14px; display: flex; flex-direction: column; gap: 10px; margin-top: 14px;">
-                  <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <div style="font-weight: 700; font-size: var(--kb-fs-xs); color: var(--kb-text-strong);" data-i18n="mw.acoustic_fan_safety_guardrails">Acoustic Fan Safety Guardrails</div>
-                    <span class="ci-badge" style="background: rgba(51,205,184,0.15); color: var(--ok2); border: 1px solid rgba(51,205,184,0.3); font-size: var(--kb-fs-xs); font-weight: 700;" data-i18n="mw.active_safeguard">ACTIVE SAFEGUARD</span>
-                  </div>
-                  <div style="font-size: var(--kb-fs-xs); color: var(--muted); line-height: 1.5;">
-                    • <strong data-i18n="mw.cpu_fan_pwm3_inviolability">CPU Fan (pwm3) Inviolability:</strong> <span data-i18n="mw.cpu_cooling_fan_runs_continuously_and">CPU cooling fan runs continuously and is strictly forbidden from zero RPM shutdown under all conditions.</span><br>
-                    • <strong data-i18n="mw.emergency_thermal_clamp">Emergency Thermal Clamp:</strong> <span data-i18n="mw.if_any_drive_cpu_or_motherboard">If any drive, CPU, or motherboard zone reaches ≥ 80°C, fan speeds unconditionally clamp to 100% PWM (183 max).</span><br>
-                    • <strong data-i18n="mw.zero_rpm_standby_safety">Zero RPM Standby Safety:</strong> <span data-i18n="mw.bay_exhaust_fans_enter_zero_rpm">Bay exhaust fans enter zero RPM mode only when all mechanical hard drives in the bay zone are in standby.</span>
-                  </div>
+              </div>
+            </div>
+
+            <!-- Lights (Hardware 2) -->
+            <div id="mgmt-pane-hardware-led" class="mgmt-tab-pane" style="display: none;">
+              <div class="mgmt-card-intro" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                <div>
+                  <div class="mgmt-card-intro-title"><svg class="ic"><use href="#i-bolt"/></svg> <span data-i18n="hw.sec_lights">Lights</span></div>
+                  <div class="mgmt-card-intro-desc" data-i18n="hw.sec_lights_desc">The light bar on the front: on or off, brightness, colour and when it flashes.</div>
                 </div>
+              </div>
+              <div class="mgmt-detail-body">
+                <div id="mgmt-pane-hardware-led-slot" class="mgmt-hardware-tab-slot"></div>
+              </div>
+            </div>
+
+            <!-- Front screen (Hardware 2) -->
+            <div id="mgmt-pane-hardware-lcd" class="mgmt-tab-pane" style="display: none;">
+              <div class="mgmt-card-intro" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                <div>
+                  <div class="mgmt-card-intro-title"><svg class="ic"><use href="#i-screen"/></svg> <span data-i18n="hw.sec_screen">Front screen</span></div>
+                  <div class="mgmt-card-intro-desc" data-i18n="hw.sec_screen_desc">The small screen on the front: brightness, dimming at night and what it shows.</div>
+                </div>
+              </div>
+              <div class="mgmt-detail-body">
+                <div id="mgmt-pane-hardware-lcd-slot" class="mgmt-hardware-tab-slot"></div>
               </div>
             </div>
 

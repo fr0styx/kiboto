@@ -143,7 +143,7 @@ describe('Hardware 3: facts on their own pages', () => {
   });
 
   it('the window markup: each fact once, on its new page', () => {
-    const host = pane('mgmt-pane-unraid', '<!-- Sub-tab 2: Front-panel LCD');
+    const host = pane('mgmt-pane-unraid', '<!-- Cooling details');
     expect(host).toContain('id="hw-facts-moved"');
     expect(host).not.toMatch(/id="mgmt-(unraid|generic|board|bios|cpu|gpu|npu)-/);
     const about = pane('mgmt-pane-about', '<!-- Observability');

@@ -72,6 +72,8 @@ The Kib window now has the same colours and toolbar as the other app windows.
 
 Fans: Quiet, Balanced and Performance now follow the temperature of the hottest drive on a curve (Balanced is the recommended one), and fan stop while every drive sleeps works in each of them. Custom keeps your own curve; Full stays fixed.
 
+Hardware is one page: cooling, fans, lights, front screen and card copies one under the other, without tabs or the slide-out drawer.
+
 ## v2.0.6 (2026-11-23)
 ### 🖥️ Kiboto on a machine of its own (preview), with its settings kept safe on every pool
 

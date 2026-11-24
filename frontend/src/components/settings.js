@@ -119,44 +119,23 @@ export function mountTabsInDrawer(requestedTabId = null) {
 }
 window.mountTabsInDrawer = mountTabsInDrawer;
 
+/**
+ * Opens the Hardware page where a drawer tab used to open (Hardware 2, decision 5a): the slide-out
+ * drawer is no longer shown. The name stays for the links, keys and notifications that call it.
+ */
 export function openDrawer(tabId = null) {
-  const safeTabId = typeof tabId === 'string' && tabId.trim() ? tabId.trim() : null;
-  const drawer = $('led-drawer') || document.querySelector('.slide-drawer');
-  const overlay = $('drawer-overlay') || document.querySelector('.drawer-backdrop');
-  if (drawer && overlay) {
-    mountTabsInDrawer(safeTabId);
-    drawer.classList.add('open');
-    overlay.classList.add('open');
-    document.body.classList.add('drawer-is-open');
-
-    const activeBtn = document.querySelector('.drawer-tab-btn.active');
-    const targetTabId = safeTabId || (activeBtn ? activeBtn.dataset.tab : 'tab-layout');
-    const tabBtn = document.querySelector(`.drawer-tab-btn[data-tab="${targetTabId}"]`);
-    if (tabBtn) {
-      tabBtn.click();
-    } else {
-      const targetContent = $(targetTabId);
-      if (targetContent) targetContent.classList.add('active');
-    }
-
-    setTimeout(() => {
-      fitMiniPreviewScale();
-      syncMiniPreviewTelemetry();
-    }, 100);
-  } else if (typeof window.openManagementWindow === 'function') {
-    const targetTab = safeTabId || 'tab-layout';
-    if (targetTab === 'tab-fans') {
-      window.openManagementWindow('mgmt-pane-hardware-fans');
-    } else if (targetTab === 'tab-led') {
-      window.openManagementWindow('mgmt-pane-hardware-led');
-    } else if (targetTab === 'tab-buttons') {
-      window.openManagementWindow('mgmt-pane-copy');
-    } else if (targetTab === 'tab-layout' && typeof window.openPersonalizationWindow === 'function') {
-      window.openPersonalizationWindow('console');
-    } else {
-      window.openManagementWindow('mgmt-sec-hardware');
-    }
+  const target = typeof tabId === 'string' && tabId.trim() ? tabId.trim() : 'tab-fans';
+  if (target === 'tab-layout' && typeof window.openPersonalizationWindow === 'function') {
+    window.openPersonalizationWindow('console'); // what the front screen shows
+    return;
   }
+  if (typeof window.openManagementWindow !== 'function') return;
+  const pane = {
+    'tab-fans': 'mgmt-pane-hardware-fans',
+    'tab-led': 'mgmt-pane-hardware-led',
+    'tab-buttons': 'mgmt-pane-copy',
+  };
+  window.openManagementWindow(pane[target] || 'mgmt-sec-hardware');
 }
 window.openDrawer = openDrawer;
 

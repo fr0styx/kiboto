@@ -31,8 +31,10 @@ describe('Storage keeps the drives; Shared folders and Card copies move (SET-22 
     const hw = /** @type {HTMLElement} */ (doc().getElementById('mgmt-sec-hardware'));
     expect(hw.querySelector('#mgmt-pane-copy')).not.toBeNull();
     const tab = tabForPane(hw, 'mgmt-pane-copy');
-    expect(tab?.dataset.tabTarget).toBe('mgmt-pane-hardware-copy');
-    expect(tab?.textContent).toContain('Card copies');
+    // Hardware 2: one page; the one tab shows every section, the copies with the Copy button
+    expect(tab?.dataset.tabPanes?.split(' ')).toEqual(
+      expect.arrayContaining(['mgmt-pane-hardware-copy', 'mgmt-pane-copy'])
+    );
     expect(SUBPANE_MAP['mgmt-pane-copy'].section).toBe('mgmt-sec-hardware');
   });
 });

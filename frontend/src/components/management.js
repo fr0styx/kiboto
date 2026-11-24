@@ -579,11 +579,9 @@ export function updateManagementTelemetry(stats) {
     Boolean(stats?.hardware?.has_mcu) ||
     Boolean(stats?.peripherals?.led_port);
 
-  const ledTab = document.querySelector('.mgmt-inner-tab[data-tab-target="mgmt-pane-hardware-led"]');
-  if (ledTab) ledTab.style.display = hasLed ? '' : 'none';
-
-  const lcdTab = document.querySelector('.mgmt-inner-tab[data-tab-target="mgmt-pane-hardware-lcd"]');
-  if (lcdTab) lcdTab.style.display = hasLcd ? '' : 'none';
+  // a section is hidden on a machine without that hardware (Hardware 2: one page, no tabs)
+  document.getElementById('mgmt-pane-hardware-led')?.classList.toggle('hw-absent', !hasLed);
+  document.getElementById('mgmt-pane-hardware-lcd')?.classList.toggle('hw-absent', !hasLcd);
 }
 
 /** The Host tab's cooling mode: shown at once, saved, and put back to the real mode if refused. */

@@ -113,32 +113,16 @@ describe('Hardware Settings Mission Control Portal & Bi-Directional Reparenting'
     expect(tabButtons.parentElement).toBe(copySlot);
   });
 
-  it('openDrawer reparents tabs back into drawer and closeDrawer restores them to Mission Control', () => {
+  it('openDrawer opens the Hardware page and the cards stay on it (Hardware 2, decision 5a)', () => {
     const drawer = document.getElementById('led-drawer');
-    const overlay = document.getElementById('drawer-overlay');
     const fansSlot = document.getElementById('mgmt-pane-hardware-fans-slot');
     const tabFans = document.getElementById('tab-fans');
-
-    // Move to Mission Control
+    window.openManagementWindow = vi.fn();
     restoreHardwareTabsToManagement();
-    expect(tabFans.parentElement).toBe(fansSlot);
-
-    // Open drawer to Fans tab
     openDrawer('tab-fans');
-    expect(drawer.classList.contains('open')).toBe(true);
-    expect(overlay.classList.contains('open')).toBe(true);
-    expect(tabFans.parentElement.id).toBe('drawer-tabs-container');
-    expect(tabFans.classList.contains('active')).toBe(true);
-
-    // While drawer is open, calling restoreHardwareTabsToManagement does not prematurely steal tabs
-    restoreHardwareTabsToManagement();
-    expect(tabFans.parentElement.id).toBe('drawer-tabs-container');
-
-    // Close drawer
-    closeDrawer();
-    expect(drawer.classList.contains('open')).toBe(false);
-    expect(overlay.classList.contains('open')).toBe(false);
+    expect(drawer.classList.contains('open')).toBe(false); // the slide-out drawer is no longer shown
     expect(tabFans.parentElement).toBe(fansSlot);
+    expect(window.openManagementWindow).toHaveBeenCalledWith('mgmt-pane-hardware-fans');
   });
 
   it('mountTabsInDrawer sets active class on the currently selected drawer tab', () => {
@@ -161,22 +145,12 @@ describe('Hardware Settings Mission Control Portal & Bi-Directional Reparenting'
     expect(tabButtons.classList.contains('active')).toBe(false);
   });
 
-  it('openDrawer opens to Dashboard Layout tab by default and marks #tab-layout as active even when invoked by MouseEvent', () => {
-    const tabLayout = document.getElementById('tab-layout');
-    const layoutTabBtn = document.querySelector('.drawer-tab-btn[data-tab="tab-layout"]');
-
-    restoreHardwareTabsToManagement();
-    expect(tabLayout.parentElement.id).not.toBe('drawer-tabs-container');
-
-    // Simulate clicking toggleBtn which passes a MouseEvent to openDrawer
-    const fakeMouseEvent = new MouseEvent('click');
-    openDrawer(fakeMouseEvent);
-
-    expect(tabLayout.parentElement.id).toBe('drawer-tabs-container');
-    expect(tabLayout.classList.contains('active')).toBe(true);
-    expect(layoutTabBtn.classList.contains('active')).toBe(true);
-
-    closeDrawer();
+  it('a click on an old drawer link opens the fans on the Hardware page', () => {
+    window.openManagementWindow = vi.fn();
+    openDrawer(new MouseEvent('click')); // listeners pass the click event
+    expect(window.openManagementWindow).toHaveBeenCalledWith('mgmt-pane-hardware-fans');
+    openDrawer('tab-unknown');
+    expect(window.openManagementWindow).toHaveBeenLastCalledWith('mgmt-sec-hardware');
   });
 
   it('preserves tab activation when switching to another tab and back to Dashboard Layout', () => {

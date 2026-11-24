@@ -1,9 +1,9 @@
 {
-  "important": 3424,
+  "important": 3425,
   "buttonClasses": 76,
-  "inlineStyles": 1236,
+  "inlineStyles": 1216,
   "emojiIcons": 4,
-  "colours": 3661,
+  "colours": 3655,
   "primitiveUses": 4,
   "importantPerFile": {
     "frontend/index.html": 64,
@@ -14,7 +14,7 @@
     "frontend/src/styles/04-yak-theme.css": 11,
     "frontend/src/styles/05-studio-stage.css": 24,
     "frontend/src/styles/06-lcd-bigip-layout.css": 8,
-    "frontend/src/styles/07-toolkit-drawer.css": 1,
+    "frontend/src/styles/07-toolkit-drawer.css": 2,
     "frontend/src/styles/09-drawer-cards.css": 4,
     "frontend/src/styles/10-lcd-preview.css": 1,
     "frontend/src/styles/11-fans-smart.css": 57,
@@ -172,6 +172,6 @@
     "frontend/src/utils.js": 1,
     "frontend/src/vm-console-direct.css": 2,
     "frontend/src/windows/drawer.html": 116,
-    "frontend/src/windows/management-window.html": 413
+    "frontend/src/windows/management-window.html": 407
   }
 }
