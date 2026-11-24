@@ -1411,3 +1411,38 @@ def test_the_door_mounts_only_an_encrypted_folder_onto_kibotos_place(audit, monk
         ["umount", f"{root}/fam"]
     ]
     assert host_door.handle({"op": "crypt.unmount", "args": {"path": "/mnt/storage"}}, 0)["ok"] is False
+
+
+def test_looking_on_the_drives_is_done_by_the_door(audit, monkeypatch, tmp_path):
+    import types
+
+    from backend import runtime
+    from backend.services import pool_copy
+
+    monkeypatch.setattr(runtime, "managed_host", lambda: True)
+    monkeypatch.setattr(pool_copy.os, "geteuid", lambda: 999)
+    monkeypatch.setattr(door, "available", lambda sock=door.SOCK: True)
+    calls = []
+    monkeypatch.setattr(door, "call", lambda op, **a: calls.append((op, a)) or [{"key": "abc-tank"}])
+    assert pool_copy.look() == [{"key": "abc-tank"}] and calls == [("pools.look", {"timeout": 1800})]
+
+    found = tmp_path / "found"
+    (found / "abc-tank").mkdir(parents=True)
+    (found / "abc-tank" / "about.json").write_text("{}")
+    monkeypatch.setattr(pool_copy, "FOUND", str(found))
+    monkeypatch.setattr(pool_copy, "look", lambda run=None: [{"key": "abc-tank"}])
+    owned = []
+    monkeypatch.setattr(pool_copy.os, "chown", lambda p, u, g: owned.append((p, u, g)))
+    import pwd
+
+    monkeypatch.setattr(pwd, "getpwnam", lambda n: types.SimpleNamespace(pw_uid=999, pw_gid=987))
+    assert host_door.handle({"op": "pools.look", "args": {}}, 0)["result"] == [{"key": "abc-tank"}]
+    assert {o[0] for o in owned} == {str(found), str(found / "abc-tank"), str(found / "abc-tank" / "about.json")}
+    assert all(o[1:] == (999, 987) for o in owned)
+
+    def missing(n):
+        raise KeyError(n)
+
+    owned.clear()
+    monkeypatch.setattr(pwd, "getpwnam", missing)
+    assert pool_copy.look_in_door("kiboto") == [{"key": "abc-tank"}] and owned == []  # root reads it as it is

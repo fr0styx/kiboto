@@ -229,6 +229,12 @@ def _crypt_unmount(path: str) -> bool:
     return encrypted_folders.unmount_in_door(path)
 
 
+def _pools_look() -> list[dict[str, Any]]:
+    from backend.services import pool_copy
+
+    return pool_copy.look_in_door(USER)
+
+
 def _power(action: str) -> dict[str, Any]:
     from backend.services import host_power
 
@@ -495,6 +501,7 @@ OPERATIONS: dict[str, Operation] = {
     "hosts.apps": Operation(_apps_hosts, {}),
     "names.ensure": Operation(_names, {}),
     "power.run": Operation(_power, {"action": TEXT}, max_len=16),
+    "pools.look": Operation(_pools_look, {}),
     "crypt.mount": Operation(
         _crypt_mount, {"cipher": TEXT, "plain": TEXT, "password": TEXT, "read_only": ON}, max_len=4096
     ),

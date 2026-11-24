@@ -278,6 +278,11 @@ def look(run: Any = None) -> list[dict[str, Any]]:
     opened read-only and closed again (hardware/pal/pool_probe.py)."""
     if not runtime.managed_host():
         return []
+    if run is None and os.geteuid() != 0:  # opening pools is root's: the host door (ADR 0006)
+        from backend import door
+
+        if door.available():
+            return list(door.call("pools.look", timeout=1800))
     from backend.hardware.pal import pool_probe
 
     if run is None:
@@ -296,6 +301,22 @@ def look(run: Any = None) -> list[dict[str, Any]]:
             except OSError as e:
                 logger.warning("[PoolCopy] %s could not be looked into: %s", candidate["name"], e)
     return found()
+
+
+def look_in_door(user: str) -> list[dict[str, Any]]:
+    """The door's side (pools.look): the look, then what it found handed to the web user, who
+    reads it to offer and bring back the settings."""
+    import pwd
+
+    got = look()
+    try:
+        who = pwd.getpwnam(user)
+    except KeyError:
+        return got  # no such user yet: the web process is root
+    for folder, dirs, files in os.walk(FOUND):
+        for name in [folder, *(os.path.join(folder, n) for n in dirs + files)]:
+            os.chown(name, who.pw_uid, who.pw_gid)
+    return got
 
 
 def drop_index_after_restore(data_dir: str = "") -> bool:
