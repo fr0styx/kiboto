@@ -13,6 +13,7 @@ from typing import Any, Optional
 
 from backend.config import HDD_CRITICAL_TEMP, HDD_WARN_TEMP, NVME_CRITICAL_TEMP, NVME_WARN_TEMP, logger
 from backend.db import log_smart_metrics
+from backend.hardware import smart_read
 from backend.hardware.smart_power import is_standby as is_standby_out
 from backend.ignored_errors import ignored
 from backend.state import Z_STATE
@@ -237,7 +238,7 @@ class SmartTelemetryEngine:
             cmd.append(dev_path)
 
             try:
-                r = subprocess.run(cmd, capture_output=True, text=True, timeout=8)
+                r = smart_read.run(cmd[1:], timeout=8)
                 combined = (r.stdout or "") + " " + (r.stderr or "")
 
                 is_standby = (not is_nvme) and is_standby_out(r.returncode, combined)

@@ -298,6 +298,12 @@ def _files(name: str) -> Callable[..., Any]:
     return run
 
 
+def _smartctl(args: list[Any], limit: float) -> dict[str, Any]:
+    from backend.hardware import smart_read
+
+    return smart_read.read_in_door(args, limit)
+
+
 def _renamed(kw: dict[str, Any]) -> None:
     from backend.hardware.pal import pool_rules
 
@@ -403,6 +409,7 @@ OPERATIONS: dict[str, Operation] = {
     "packages.add_missing": Operation(_packages("add_missing"), {}),
     "packages.check": Operation(_packages("check"), {}),
     "packages.host_set": Operation(_packages("host_set"), {}),
+    "disks.smartctl": Operation(_smartctl, {"args": LIST, "limit": (int, float)}, max_len=64),
     "smart.self_test": Operation(_self_test, {"dev_name": TEXT, "action": TEXT}, max_len=32),
     "drives.sleep_after": Operation(_sleep_after, {"minutes": NUMBER}),
     "storage.share_folder": Operation(

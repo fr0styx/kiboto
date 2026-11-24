@@ -34,6 +34,7 @@ from backend.db import (
     query_smart_velocity,
 )
 from backend.fsutil import atomic_write_json
+from backend.hardware import smart_read
 from backend.hardware.smart_power import is_standby as is_standby_out
 from backend.hardware.smart_power import smartctl_power
 from backend.ignored_errors import ignored
@@ -723,7 +724,7 @@ def poll_disk_smart(dev_name: str, is_nvme: bool):
             cmd.extend(["-n", "standby"])
         cmd.extend(["-H", "-A", "-d", dtype, dev])
 
-        r = subprocess.run(cmd, capture_output=True, text=True, timeout=8)
+        r = smart_read.run(cmd[1:], timeout=8)
         combined_out = ((r.stdout or "") + " " + (r.stderr or "")).upper()
 
         power = "active" if is_nvme else smartctl_power(r.returncode, combined_out)
@@ -1326,12 +1327,7 @@ def fetch_disk_smart_detail(dev_name: str, wake_if_standby: bool = False):
     cached_temp, cached_health = Z_STATE.cached_smart_data.get(dev_name, (None, None))
     if not is_nvme and not wake_if_standby:
         try:
-            r_sb = subprocess.run(
-                ["smartctl", "-n", "standby", "-i", "-d", dtype, dev],
-                capture_output=True,
-                text=True,
-                timeout=6,
-            )
+            r_sb = smart_read.run(["-n", "standby", "-i", "-d", dtype, dev], timeout=6)
             sb_out = ((r_sb.stdout or "") + " " + (r_sb.stderr or "")).upper()
             if is_standby_out(r_sb.returncode, sb_out):
                 Z_STATE.smart.set_reading(dev_name, cached_temp, "standby")
@@ -1411,7 +1407,7 @@ def fetch_disk_smart_detail(dev_name: str, wake_if_standby: bool = False):
     cmd_j.append(dev)
 
     try:
-        rj = subprocess.run(cmd_j, capture_output=True, text=True, timeout=25)
+        rj = smart_read.run(cmd_j[1:], timeout=25)
         if not is_nvme and not wake_if_standby:
             out_sb = ((rj.stdout or "") + " " + (rj.stderr or "")).upper()
             if is_standby_out(rj.returncode, out_sb):
@@ -1452,7 +1448,7 @@ def fetch_disk_smart_detail(dev_name: str, wake_if_standby: bool = False):
         cmd_raw.extend(["-n", "standby"])
     cmd_raw.append(dev)
     try:
-        r = subprocess.run(cmd_raw, capture_output=True, text=True, timeout=25)
+        r = smart_read.run(cmd_raw[1:], timeout=25)
         raw_text = (r.stdout or "") + ("\n" + r.stderr if r.stderr else "")
     except Exception as e:
         raw_text = f"Error querying device: {e}"
@@ -1834,12 +1830,7 @@ def check_active_smart_tests():
                 if not is_nvme:
                     cmd_j.extend(["-n", "standby"])
                 cmd_j.append(dev)
-                rj = subprocess.run(
-                    cmd_j,
-                    capture_output=True,
-                    text=True,
-                    timeout=20,
-                )
+                rj = smart_read.run(cmd_j[1:], timeout=20)
                 if not is_nvme and is_standby_out(rj.returncode, (rj.stdout or "") + (rj.stderr or "")):
                     continue
                 if rj.stdout and rj.stdout.strip().startswith("{"):
@@ -1852,12 +1843,7 @@ def check_active_smart_tests():
                 if not is_nvme:
                     cmd_raw.extend(["-n", "standby"])
                 cmd_raw.append(dev)
-                r = subprocess.run(
-                    cmd_raw,
-                    capture_output=True,
-                    text=True,
-                    timeout=20,
-                )
+                r = smart_read.run(cmd_raw[1:], timeout=20)
                 if not is_nvme and is_standby_out(r.returncode, (r.stdout or "") + (r.stderr or "")):
                     continue
                 raw_text = (r.stdout or "") + ("\n" + r.stderr if r.stderr else "")

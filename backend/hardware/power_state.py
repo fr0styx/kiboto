@@ -19,8 +19,9 @@ from __future__ import annotations
 import os
 import time
 
+from backend.hardware import smart_read
 from backend.hardware.smart_power import smartctl_power
-from backend.proc import TIMED_OUT, run_bounded
+from backend.proc import TIMED_OUT
 from backend.state import Z_STATE
 
 STANDBY, ACTIVE, UNREACHABLE, UNKNOWN = "standby", "active", "unreachable", "unknown"
@@ -58,7 +59,7 @@ def probe(dev: str, device_type: str | None = None, max_age: float = PROBE_TTL_S
         return hit[1]
     cmd = ["smartctl", "-n", "standby", "-i"] + (["-d", device_type] if device_type else []) + [path or dev_path(name)]
     try:
-        r = run_bounded(cmd, timeout=6, capture_output=True, text=True)
+        r = smart_read.run(cmd[1:], timeout=6)  # through the host door once Kiboto is not root
     except OSError:
         return UNKNOWN
     if r.returncode == TIMED_OUT:

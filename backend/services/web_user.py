@@ -8,7 +8,9 @@ on (as root, or by the door), it
   `dialout` (the front screen's serial port);
 - gives it Kiboto's data folder, except the logs the door and the Docker proxy write, which stay
   root's so the web process cannot change what they recorded;
-- lets it into the private homes with an access list, the others still out;
+- lets it into the private homes with an access list, the others still out, and into each
+  pool's own folder (what it makes there, a Recycle Bin, stays open to it when it goes to the
+  folder's owner) and the Recycle Bins already there;
 - writes a systemd drop-in that runs kiboto.service as that user with no new privileges and only
   the right to use the low ports (HTTPS on 443).
 
@@ -20,18 +22,24 @@ owners stay, which root does not mind.
 
 from __future__ import annotations
 
+import logging
 import os
 import subprocess
 import sys
 from collections.abc import Callable
 from typing import Any
 
-from backend.config import DATA_DIR, logger
+# nothing of Kiboto's at the top: importing its settings without DATA_DIR makes a data folder
+# beside the code, and this is run by hand (main sets the service's folder first)
+logger = logging.getLogger("Kiboto")
+DATA = "/var/lib/kiboto"  # kiboto.service's DATA_DIR
 
 USER = "kiboto"
 GROUPS = ("users", "dialout")
 DROP_IN = "/etc/systemd/system/kiboto.service.d/web-user.conf"
 ROOTS_LOGS = ("door-audit.log", "docker-proxy-audit.log")  # written by root, read by people
+ACL = f"u:{USER}:rwX"
+BIN = ".RecycleBin"  # services/recycle_bin.BIN
 UNIT = f"""# ADR 0006 step 9: Kiboto's web process without root (backend/services/web_user.py)
 [Service]
 User={USER}
@@ -66,9 +74,36 @@ def _homes() -> str:
         return ""
 
 
-def turn_on(do: Run | None = None, drop_in: str = DROP_IN, data_dir: str = DATA_DIR) -> list[str]:
+def _pool_roots() -> list[str]:
+    try:
+        from backend.hardware.pal import pool_registry
+
+        return sorted({str(r.get("mountpoint") or "") for r in pool_registry.load()} - {""})
+    except (OSError, ValueError, ImportError):
+        return []
+
+
+def _bins(root: str) -> list[str]:
+    found = [os.path.join(root, BIN)] if os.path.isdir(os.path.join(root, BIN)) else []
+    try:
+        names = sorted(os.listdir(root))
+    except OSError:
+        return found
+    return found + [os.path.join(root, n, BIN) for n in names if os.path.isdir(os.path.join(root, n, BIN))]
+
+
+def _let_in(do: Run, folder: str, recursive: bool = False) -> bool:
+    """An access list for the web user on `folder`: what is there, and what is made in it later."""
+    deep = ["-R"] if recursive else []
+    return all(do(["setfacl", *deep, *acl, folder])[0] == 0 for acl in (["-m", ACL], ["-d", "-m", ACL]))
+
+
+def turn_on(do: Run | None = None, drop_in: str = DROP_IN, data_dir: str = "") -> list[str]:
     """Everything above; returns what could not be done (empty when all went well)."""
     do = do or run
+    data_dir = data_dir or os.environ.get("DATA_DIR") or DATA
+    if not os.path.isdir(data_dir):
+        return [f"there is no data folder at {data_dir}"]
     problems = []
     if do(["id", "-u", USER])[0] != 0:
         code, said = do(
@@ -87,11 +122,13 @@ def turn_on(do: Run | None = None, drop_in: str = DROP_IN, data_dir: str = DATA_
             do(["chown", "root:root", path])
             do(["chmod", "644", path])
     homes = _homes()
-    if homes and os.path.isdir(homes):
-        for acl in ([f"u:{USER}:rwX"], ["-d", f"u:{USER}:rwX"]):
-            if do(["setfacl", "-R", "-m", *acl, homes])[0] != 0:
-                problems.append(f"{USER} could not be let into {homes} (setfacl)")
-                break
+    if homes and os.path.isdir(homes) and not _let_in(do, homes, recursive=True):
+        problems.append(f"{USER} could not be let into {homes} (setfacl)")
+    for root in _pool_roots():
+        if os.path.isdir(root) and not _let_in(do, root):
+            problems.append(f"{USER} could not be let into {root} (setfacl)")
+        for recycle in _bins(root):
+            _let_in(do, recycle, recursive=True)
     os.makedirs(os.path.dirname(drop_in), exist_ok=True)
     with open(drop_in + ".new", "w", encoding="utf-8") as f:
         f.write(UNIT)
@@ -115,6 +152,8 @@ def status(drop_in: str = DROP_IN) -> dict[str, Any]:
 
 
 def main(argv: list[str]) -> int:
+    os.environ.setdefault("DATA_DIR", DATA)
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
     what = argv[1] if len(argv) > 1 else "status"
     if what not in ("on", "off", "status"):
         print("usage: python -m backend.services.web_user on|off|status")
@@ -122,10 +161,14 @@ def main(argv: list[str]) -> int:
     if what == "status":
         print(status())
         return 0
+    # Kiboto stopped first: running as root it would write files into the data folder after it
+    # was handed over, and the new user could not open them
+    run(["systemctl", "stop", "kiboto.service"], timeout=180)
     problems = turn_on() if what == "on" else turn_off()
+    run(["systemctl", "start", "kiboto.service"], timeout=120)
     for p in problems:
         print(p)
-    print("restart Kiboto (systemctl restart kiboto) for it to take effect")
+    print("Kiboto was started again as " + (USER if what == "on" else "root"))
     return 1 if problems else 0
 
 
