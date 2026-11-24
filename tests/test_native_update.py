@@ -520,3 +520,27 @@ def test_out_of_date_package_lists_are_read_again_and_a_failure_does_not_stop_th
     run = Dpkg(set(), apt_fails=2)
     assert nu.add_missing_tools(rel, run) == ["smartmontools", "hdparm", "nvme-cli", "samba", "python3-venv"]
     assert not run.installed  # said in the log; the update goes on
+
+
+def test_the_helper_starts_the_door_on_the_version_it_switches_to(machine, monkeypatch):
+    followed = []
+    monkeypatch.setattr(nu, "_door_follows", lambda rel, run: machine["steps"].append("door:" + os.path.basename(rel)))
+    monkeypatch.setattr(nu, "healthy", lambda port, **k: (False, "the new version did not answer"))
+    nu.apply(machine["b"], machine["data"], 8082, "img", machine["prefix"], machine["run"])
+    steps = machine["steps"]
+    assert steps.index("door:b") < steps.index("systemctl start:b")  # before Kiboto starts on it
+    assert steps.index("door:a") < steps.index("systemctl start:a")  # and back with the version before
+    assert followed == []
+
+
+def test_door_follows_puts_the_units_in_place_and_restarts_the_door(monkeypatch):
+    seen = []
+    monkeypatch.setattr(nu, "ensure_units", lambda rel, run, **k: seen.append((rel, k)) or [])
+    nu._door_follows("/opt/kiboto/releases/x", None)
+    assert seen == [("/opt/kiboto/releases/x", {})]  # no door_current: started again whatever it runs
+
+    def broken(rel, run, **k):
+        raise OSError("read-only /etc")
+
+    monkeypatch.setattr(nu, "ensure_units", broken)
+    nu._door_follows("/opt/kiboto/releases/x", None)  # said in the log; the update goes on

@@ -1578,7 +1578,7 @@ def test_door_version_and_current(monkeypatch):
     monkeypatch.setattr(settings, "current", lambda key: "abc123" if key == "build_commit" else "")
     mine = door.version()
     assert mine.startswith("abc123:") and len(mine.split(":")[1]) == 12
-    assert host_door.handle({"op": "door.version", "args": {}}, 0)["result"] == mine
+    assert host_door.handle({"op": "door.version", "args": {}}, 0)["result"] == host_door.LOADED  # as it started
     monkeypatch.setattr(door, "call", lambda op, **a: mine)
     assert door.current() is True
     monkeypatch.setattr(door, "call", lambda op, **a: "other:000000000000")
@@ -1653,3 +1653,23 @@ def test_cloud_folders_are_mounted_by_the_door_once_kiboto_is_not_root(audit, mo
         assert mount(**bad)["ok"] is False, bad
     assert host_door.handle({"op": "cloud.unmount", "args": {"name": "gdrive"}}, 0)["result"] == {"status": "unmounted"}
     assert len(done) == 2
+
+
+def test_the_door_version_follows_any_backend_file(tmp_path, monkeypatch):
+    import os
+
+    from backend import settings
+
+    monkeypatch.setattr(settings, "current", lambda key: "abc" if key == "build_commit" else "")
+    (tmp_path / "services").mkdir()
+    (tmp_path / "services" / "nas_name.py").write_text("x = 1\n")
+    (tmp_path / "door.py").write_text("y = 1\n")
+    first = door.version(str(tmp_path))
+    assert first.startswith("abc:") and door.version(str(tmp_path)) == first
+    (tmp_path / "services" / "nas_name.py").write_text("x = 22\n")  # another file than the door's own
+    assert door.version(str(tmp_path)) != first
+    (tmp_path / "__pycache__").mkdir()
+    (tmp_path / "__pycache__" / "z.py").write_text("")
+    second = door.version(str(tmp_path))
+    os.utime(tmp_path / "__pycache__" / "z.py", (1, 1))
+    assert door.version(str(tmp_path)) == second  # compiled files do not count

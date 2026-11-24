@@ -435,11 +435,12 @@ def _firewall_apply(st: dict[str, Any]) -> None:
     firewall.apply(firewall.cleaned(st))  # only the settings the page offers, whatever was sent
 
 
+LOADED = door.version()  # the code this door started with; Kiboto compares the files of now with it
 TEXT, ON, MAYBE_TEXT, MAP, NUMBER, LIST = (str,), (bool,), (str, type(None)), (dict,), (int,), (list,)
 LAST_UID = 60000  # Kiboto's account numbers: smb_accounts.FIRST_UID up to here
 OPERATIONS: dict[str, Operation] = {
     "door.ping": Operation(lambda: "pong", {}),
-    "door.version": Operation(lambda: door.version(), {}),
+    "door.version": Operation(lambda: LOADED, {}),
     "host.set_name": Operation(_host("set_host_name"), {"name": TEXT}, max_len=63),
     "host.set_time_zone": Operation(_host("set_time_zone"), {"zone": TEXT}, max_len=64),
     "host.set_clock_automatic": Operation(_host("set_clock_automatic"), {"on": ON}),

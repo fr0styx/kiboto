@@ -258,6 +258,15 @@ def _named_by_its_build(rel: str) -> str:
     return named
 
 
+def _door_follows(rel: str, run: Any) -> None:
+    """The helper (root) puts this version's service files in place and starts the host door again
+    on its code before Kiboto starts: once Kiboto is not root (ADR 0006) it cannot do that itself."""
+    try:
+        ensure_units(rel, run)  # no door_current: the door is started again whatever it runs
+    except OSError as e:
+        logger.warning("[Update] the service files of %s were not put in place: %s", os.path.basename(rel), e)
+
+
 def point_at(rel: str, prefix: str = PREFIX) -> str:
     """Makes `rel` the version the service starts. Returns the folder it started before ('' if none)."""
     current = os.path.join(prefix, "current")
@@ -365,6 +374,7 @@ def apply(rel: str, data_dir: str, port: int, image: str = "", prefix: str = PRE
         return "not_applied"
     earlier = _previous(prefix)
     before = point_at(rel, prefix)
+    _door_follows(rel, run)
     run(["systemctl", "start", SERVICE], timeout=120)
     ok, why = healthy(port, stopped=lambda: restarts(run))
     if ok:
@@ -379,6 +389,7 @@ def apply(rel: str, data_dir: str, port: int, image: str = "", prefix: str = PRE
         why = f"{why}; the earlier data could not be put back: {e}"
     if before:
         point_at(before, prefix)
+        _door_follows(before, run)
         _set_previous(prefix, earlier)  # the version that failed is nobody's "previous"
         shutil.rmtree(rel, ignore_errors=True)
     run(["systemctl", "reset-failed", SERVICE], timeout=30)  # a crash loop may have used up its starts
@@ -442,6 +453,7 @@ def back(snapshot: str, data_dir: str, port: int, prefix: str = PREFIX, run: Any
         write_update_result(data_dir, "not_reverted", f"the earlier data could not be put back: {e}")
         return "not_reverted"
     point_at(rel, prefix)
+    _door_follows(rel, run)
     run(["systemctl", "reset-failed", SERVICE], timeout=30)
     run(["systemctl", "start", SERVICE], timeout=120)
     ok, why = healthy(port, stopped=lambda: restarts(run))

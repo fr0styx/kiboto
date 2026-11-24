@@ -93,20 +93,27 @@ def _exchange(s: socket.socket, request: bytes) -> bytes:
     return data
 
 
-def version() -> str:
-    """Which door code this is: the build, and the door's own file (a change to it without a new
-    build, on a test machine, counts too). The door answers door.version with its own."""
+def version(root: str = "") -> str:
+    """Which code the door runs: the build, and the size and time of every file of the backend
+    (the door runs many of them; a change without a new build, on a test machine, counts too). Only
+    file facts are read, not the files. The door answers door.version with its own."""
     import hashlib
 
     from backend import settings
 
-    here = os.path.join(os.path.dirname(os.path.abspath(__file__)), "services", "host_door.py")
-    try:
-        with open(here, "rb") as f:
-            mine = hashlib.sha256(f.read()).hexdigest()[:12]
-    except OSError:
-        mine = ""
-    return f"{settings.current('build_commit') or ''}:{mine}"
+    root = root or os.path.dirname(os.path.abspath(__file__))
+    facts = hashlib.sha256()
+    for folder, dirs, files in os.walk(root):
+        dirs[:] = sorted(d for d in dirs if d != "__pycache__")
+        for name in sorted(f for f in files if f.endswith(".py")):
+            try:
+                st = os.stat(os.path.join(folder, name))
+            except OSError:
+                continue
+            facts.update(
+                f"{os.path.relpath(os.path.join(folder, name), root)}:{st.st_size}:{st.st_mtime_ns}\n".encode()
+            )
+    return f"{settings.current('build_commit') or ''}:{facts.hexdigest()[:12]}"
 
 
 def current(sock: str = SOCK) -> bool:
