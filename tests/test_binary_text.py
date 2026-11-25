@@ -33,10 +33,7 @@ def test_vobsub_style_sub_file_gives_no_text(tmp_path):
     assert "Hello there" in extract_document_text(str(text_sub), ".sub")
 
 
-def test_pdf_fallback_keeps_text_and_drops_binary_strings(tmp_path, monkeypatch):
-    import sys
-
-    monkeypatch.setitem(sys.modules, "pypdf", None)  # force the built-in stream parser
+def test_pdf_fallback_keeps_text_and_drops_binary_strings(tmp_path):
     junk = bytes(b for b in os.urandom(3000) if b not in b"()\\")
     page = b"BT (Hello world from the manual) Tj ET (" + junk[:200] + b") Tj"
     font = b"(" + junk[200:400] + b")"
@@ -60,3 +57,18 @@ def test_subtitles_are_embedded_without_cue_numbers_and_timings():
     assert text_for_embedding(".sub", "{1}{50}Hello|there\n{60}{90}Bye") == "Hello|there\n Bye"
     plain = "Invoice 741\n00:45 meeting"
     assert text_for_embedding(".txt", plain) == plain
+
+
+def test_a_pdf_without_text_is_not_an_ignored_error(tmp_path):
+    """A scan has no text layer: PDFium returns nothing and the stream parser finds nothing. That is
+    normal (the OCR path takes it), so it must not count as an ignored error in Diagnostics."""
+    from backend import ignored_errors
+
+    def count():
+        return (ignored_errors._SITES.get("backend.services.rag_engine.extract_document_text") or {}).get("count", 0)
+
+    before = count()
+    p = tmp_path / "scan.pdf"
+    p.write_bytes(b"%PDF-1.4\n1 0 obj\n<< /Type /Page >>\nendobj\n%%EOF\n")
+    assert extract_document_text(str(p), ".pdf").strip() == ""
+    assert count() == before

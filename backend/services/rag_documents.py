@@ -199,17 +199,6 @@ def extract_document_text(file_path: str, file_ext: str) -> str:
         except Exception:
             logger.debug("backend.services.rag_documents: PDFium could not read %s", file_path, exc_info=True)
         try:
-            import pypdf  # type: ignore
-
-            reader = pypdf.PdfReader(file_path)
-            pages = [page.extract_text() or "" for page in reader.pages[:100]]
-            extracted = "\n\n".join(p for p in pages if p.strip())
-            if extracted.strip():
-                return extracted
-        except Exception:
-            ignored("backend.services.rag_engine.extract_document_text")
-
-        try:
             with open(file_path, "rb") as f:
                 raw = f.read(min(MAX_INDEX_FILE_BYTES, 16 * 1024 * 1024))
             text_fragments: list[str] = []

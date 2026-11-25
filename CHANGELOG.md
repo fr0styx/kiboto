@@ -64,6 +64,8 @@ Kiboto OS from the USB stick: when the install on the first start stops (no netw
 
 No more "app data on a spinning disk" notification for virtual machine disks, or on Kiboto OS, where the data folder belongs on the system disk.
 
+Indexing a scanned PDF no longer adds an ignored error to Diagnostics.
+
 #### Security
 
 On a machine of its own, failed sign-ins to shared folders over the network now count like web sign-ins: 20 in 15 minutes block the address for an hour, and they show under History, Sign-ins.
