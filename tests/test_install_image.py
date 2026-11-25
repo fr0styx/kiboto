@@ -121,3 +121,11 @@ def test_the_first_start_says_on_the_screen_what_happens():
 def test_the_ssh_generator_does_not_bury_the_code():
     late = _read("late.sh")
     assert "ln -sf /dev/null /target/etc/systemd/system-generators/systemd-ssh-generator" in late
+
+
+def test_a_finished_first_start_draws_the_code_again_below_its_last_lines():
+    late = _read("late.sh")
+    run = late[late.index("<<'RUN'") : late.index("\nRUN\n")]
+    tail = run[run.index('if [ "$rc" != 0 ]; then') :]
+    ok = tail[tail.index("\nelse\n") : tail.index("\nfi\n")]
+    assert "agetty --reload" in ok

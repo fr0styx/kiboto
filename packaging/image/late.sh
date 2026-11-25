@@ -44,6 +44,9 @@ if [ "$rc" != 0 ]; then
   show "Kiboto could not install itself.
 $why
 Put that right, then restart the machine to try again (if something could not be downloaded, check the network cable). The whole log is in $LOG."
+else
+  # the install's last lines were printed over the login prompt: draw the prompt and the code again below them
+  agetty --reload 2>/dev/null || true
 fi
 exit "$rc"
 RUN

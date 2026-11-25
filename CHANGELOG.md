@@ -70,6 +70,8 @@ Kiboto OS: the first start no longer shows a ZFS failure or a screenful of virtu
 
 Kiboto OS: fresh installs from the main branch stopped at "Unable to locate package zfs-dkms"; fixed. The first start also waits for the network, and an unreachable package server is now named as such.
 
+Kiboto OS: when the first start finishes, the sign-in code is drawn again at the bottom of the screen, below the install's last message.
+
 #### Security
 
 On a machine of its own, failed sign-ins to shared folders over the network now count like web sign-ins: 20 in 15 minutes block the address for an hour, and they show under History, Sign-ins.
