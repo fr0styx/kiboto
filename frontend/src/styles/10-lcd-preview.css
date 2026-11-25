@@ -149,3 +149,16 @@ select.tz-select-input option, select.tz-select option {
 .backup-row { display: flex; gap: 6px; align-items: center; }
 .backup-row button, .backup-row label { flex: 1; text-align: center; padding: 6px; display: inline-flex; align-items: center; justify-content: center; }
 
+
+/* Light theme: the card around the front screen's preview follows the page (the preview itself
+   stays dark, 58-light-palette.css); the style and theme chips get readable text */
+body.theme-light .mini-preview-box {
+  background: var(--c-raised);
+}
+body.theme-light .lcd-theme-chip {
+  color: var(--c-text);
+}
+body.theme-light .lcd-style-chip.active,
+body.theme-light .lcd-theme-chip.active {
+  color: var(--c-primary-text);
+}

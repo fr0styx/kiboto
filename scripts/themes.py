@@ -245,7 +245,7 @@ def light_wrapped() -> dict[str, tuple[str, str]]:
     keeps it (saturated fills)."""
     light = {}
     for sel, body in _blocks(LIGHT_PALETTE):
-        if "theme-light" in sel:
+        if "theme-light" in sel and "#mini-lcd-canvas" not in sel:  # not the preview's reset (all initial)
             light.update({n: v.strip() for n, v in DECL.findall(body)})
     names = set()
     for f in _sources():

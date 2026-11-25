@@ -499,6 +499,12 @@ def palette_text() -> str:
         ),
         "}",
         "",
+        "/* The front screen's preview is a picture of that screen, which is dark whatever the page's",
+        "   theme: inside it each of these falls back to its dark colour (initial = no value). */",
+        "body.theme-light:not(.lcd-direct) #mini-lcd-canvas {",
+        *(f"  {k}: initial;" for k in ["--lt-ink-brand", "--lt-text-shadow", *sorted(found)]),
+        "}",
+        "",
     ]
     return "\n".join(lines)
 

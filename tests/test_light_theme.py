@@ -104,7 +104,19 @@ def test_text_glows_are_off_in_the_light_theme():
 def test_palette_applies_to_the_light_theme_only():
     text = lt.palette_text()
     assert "body.theme-light:not(.lcd-direct) {" in text
-    assert text.count("{") == 1
+    assert text.count("{") == 2
+
+
+def test_the_front_screen_preview_keeps_its_dark_colours():
+    """The preview is a picture of a dark screen: inside it every --lt-* token is reset, so each
+    var(--lt-..., dark) falls back to its dark colour (axe found it grey on near-black in light mode)."""
+    text = lt.palette_text()
+    reset = text.split("body.theme-light:not(.lcd-direct) #mini-lcd-canvas {", 1)[1].split("}", 1)[0]
+    lines = [line.strip() for line in reset.strip().splitlines()]
+    assert lines and all(line.startswith("--lt-") and line.endswith(": initial;") for line in lines)
+    page = text.split("body.theme-light:not(.lcd-direct) {", 1)[1].split("}", 1)[0]
+    lt_names = {line.split(":")[0].strip() for line in page.splitlines() if line.strip().startswith("--lt-")}
+    assert lt_names == {line.split(":")[0] for line in lines}
 
 
 # --- UX-10: semantic colour tokens --------------------------------------------------------

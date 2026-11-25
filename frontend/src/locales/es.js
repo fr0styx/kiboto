@@ -7864,6 +7864,8 @@ export default {
   "fp.title": "Portal familiar",
   "fp.withdraw": "Retirar el enlace",
   "aipack.state_no_docker": "Docker no está disponible en este NAS: el paquete de IA lo necesita para instalarse y funcionar.",
+  "metrics.devices_label": "Dispositivos",
+  "metrics.range_label": "Periodo",
   "look.true_black": "Negro puro (modo oscuro)",
   "look.theme": "Tema",
   "look.theme_lagoon": "Laguna",

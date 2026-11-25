@@ -224,7 +224,6 @@
   font-size: var(--kb-fs-xs);
   color: var(--lt-t-ef4444ff, #ef4444);
   cursor: pointer;
-  opacity: 0.8;
   display: flex;
   align-items: center;
   gap: 4px;
