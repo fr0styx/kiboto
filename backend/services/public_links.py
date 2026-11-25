@@ -178,8 +178,9 @@ def _links_served(handlers: dict[str, Any]) -> bool:
 
 
 def _others(handlers: dict[str, Any]) -> list[str]:
-    """The paths on the port that are not the share links'."""
-    return sorted(p for p in handlers if p.rstrip("/") != PATH)
+    """The paths on the port that are neither the share links' nor the family portal's (the two
+    that are meant to be on the internet there)."""
+    return sorted(p for p in handlers if p.rstrip("/") not in tailnet_ports.PUBLIC_PATHS)
 
 
 def live(dns: str) -> bool:
@@ -231,17 +232,10 @@ def enable(web_port: int, move_immich: bool = False) -> dict[str, Any]:
         return status()
     handlers, _public, _read = _port_state(dns)
     if move_immich and immich_to_move(dns):
-        from backend.services import remote_access
-
-        try:
-            new_port = remote_access.move_immich()
-        except remote_access.RemoteAccessError as e:
-            atomic_write_json(STATE_FILE, {"enabled": False, "error": f"Immich could not be moved: {e}"})
+        moved = move_immich_off(dns)
+        if moved:
+            atomic_write_json(STATE_FILE, {"enabled": False, "error": moved})
             return status()
-        if new_port:
-            from backend.services import immich_sso
-
-            immich_sso.follow_move(f"https://{dns}:{new_port}")  # its family sign-in follows (B6)
         handlers, _public, _read = _port_state(dns)
     if _others(handlers):
         atomic_write_json(STATE_FILE, {"enabled": False, "error": OTHERS_ON_PORT})
@@ -262,6 +256,30 @@ def enable(web_port: int, move_immich: bool = False) -> dict[str, Any]:
     )
     logger.info("[PublicLinks] Funnel on %s:%s for %s: %s", dns, FUNNEL_PORT, PATH, error or "ok")
     return status()
+
+
+def move_immich_off(dns: str) -> str:
+    """Moves Immich's HTTPS address off the share links' port (its family sign-in follows, B6);
+    "" when done, else why not."""
+    from backend.services import remote_access
+
+    try:
+        new_port = remote_access.move_immich()
+    except remote_access.RemoteAccessError as e:
+        return f"Immich could not be moved: {e}"
+    if new_port:
+        from backend.services import immich_sso
+
+        immich_sso.follow_move(f"https://{dns}:{new_port}")
+    return ""
+
+
+# shared with the family portal, published on the same port (backend/services/family_portal.py)
+dns_name = _dns_name
+port_state = _port_state
+others_on_port = _others
+tailscale = _ts
+APPROVAL = _APPROVAL
 
 
 def disable() -> dict[str, Any]:

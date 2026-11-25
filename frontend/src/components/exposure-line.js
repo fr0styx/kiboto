@@ -14,6 +14,7 @@ const ICON = { off: '🔒', private: '🔐', public: '🌐' };
 export function publicParts(x) {
   const parts = [];
   if (x.share_links) parts.push(t('exposure.part_links', 'share links'));
+  if (x.family_portal) parts.push(t('exposure.part_portal', 'the family portal'));
   if (x.apps) parts.push(t('exposure.part_apps', '{count, plural, one {# app} other {# apps}}', { count: x.apps }));
   const other = (x.unexpected || []).length;
   if (other)

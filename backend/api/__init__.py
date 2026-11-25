@@ -50,6 +50,7 @@ from backend.api.oidc import ldap_router
 from backend.api.oidc import router as oidc_router
 from backend.api.passkeys import router as passkeys_router  # noqa: E402
 from backend.api.photo_import import router as photo_import_router
+from backend.api.portal_admin import router as portal_admin_router
 from backend.api.power_schedule import router as power_schedule_router
 from backend.api.protection import router as protection_router
 from backend.api.public_links import router as public_links_router
@@ -120,6 +121,7 @@ api_router.include_router(photo_import_router)  # NFEAT-3
 api_router.include_router(nas_name_router)  # NFEAT-8
 api_router.include_router(machine_router)  # a machine of its own: clock and SSH
 api_router.include_router(public_links_router)  # NFEAT-2
+api_router.include_router(portal_admin_router)  # the family portal, owner side (ADR 0007)
 api_router.include_router(family_access_router)  # NFEAT-1
 api_router.include_router(fleet_router)  # RES-9
 api_router.include_router(ha_router)  # high availability: the link between two boxes
@@ -165,6 +167,7 @@ __all__ = [
     "machine_router",
     "nas_name_router",
     "public_links_router",
+    "portal_admin_router",
     "family_access_router",
     "fleet_router",
     "family_signin_router",

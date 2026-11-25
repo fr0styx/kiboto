@@ -36,6 +36,9 @@ describe('SET-24: what reaches the NAS from outside', () => {
   it('counts one and many, and says why it is amber', () => {
     expect(ex.publicParts({ apps: 1, unexpected: [1, 2] })).toBe('1 app, 2 other ports');
     expect(ex.publicParts({})).toBe('');
+    // the family portal is named on its own, apart from share links (ADR 0007)
+    expect(ex.publicParts({ family_portal: true })).toBe('the family portal');
+    expect(ex.publicParts({ share_links: true, family_portal: true })).toBe('share links, the family portal');
     expect(ex.exposureText({ level: 'private', via: ['tailscale'], reason: 'sign_in' }).notes[0]).toBe(
       'Tailscale needs you to sign in again.'
     );

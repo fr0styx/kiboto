@@ -43,14 +43,34 @@ def judge(
     links_on: bool,
     app_ports: set[int],
     key_days: int | None,
+    portal_on: bool = False,
 ) -> dict[str, Any]:
-    """The summary from its facts (pure, so every case is tested)."""
+    """The summary from its facts (pure, so every case is tested). The share links' port carries
+    the share links and the family portal (ADR 0007): each path there is expected only while
+    Kiboto turned it on."""
+    from backend.services.tailnet_ports import PORTAL_PATH, SHARE_PATH
+
     rows = rows or []
-    links = any(r["owner"] == "share_links" for r in rows)
+
+    def has(row: dict[str, Any], path: str) -> bool:
+        return any(str(p).rstrip("/") == path for p in row.get("paths") or [])
+
+    def expected(row: dict[str, Any]) -> bool:
+        if row["port"] in app_ports:
+            return True
+        if row["owner"] != "share_links":
+            return False
+        if "paths" not in row:
+            return links_on or portal_on
+        on = {SHARE_PATH: links_on, PORTAL_PATH: portal_on}
+        served = [p for p in on if has(row, p)]
+        return bool(served) and all(on[p] for p in served)
+
+    shared = [r for r in rows if r["owner"] == "share_links"]
+    links = any("paths" not in r or has(r, SHARE_PATH) for r in shared)
+    portal = any(has(r, PORTAL_PATH) for r in shared)
     apps = [r["port"] for r in rows if r["port"] in app_ports]
-    unexpected = sorted(
-        r["port"] for r in rows if not ((r["owner"] == "share_links" and links_on) or r["port"] in app_ports)
-    )
+    unexpected = sorted(r["port"] for r in rows if not expected(r))
     via = [name for name, on in (("tailscale", state == "Running"), ("netbird", netbird_on)) if on]
     level = "public" if rows else ("private" if via else "off")
     reason = ""
@@ -67,6 +87,7 @@ def judge(
         "reason": reason,
         "via": via,
         "share_links": links,
+        "family_portal": portal,
         "apps": len(apps),
         "unexpected": unexpected,
         "key_days": key_days if state == "Running" else None,
@@ -74,7 +95,7 @@ def judge(
 
 
 def summary() -> dict[str, Any]:
-    from backend.services import public_apps, public_links, remote_access, tailnet_ports
+    from backend.services import family_portal, public_apps, public_links, remote_access, tailnet_ports
 
     state = remote_access.status()["state"]
     running = state == "Running"
@@ -86,6 +107,7 @@ def summary() -> dict[str, Any]:
         public_links.recorded_on(),
         public_apps.recorded_ports(),
         _key_days() if running else None,
+        family_portal.is_on(),
     )
     out["checked"] = rows is not None  # False: Tailscale runs but could not say what is public
     return out

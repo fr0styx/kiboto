@@ -201,3 +201,123 @@ def principal_for(user: dict[str, Any]):
     from backend.auth import AuthenticatedPrincipal
 
     return AuthenticatedPrincipal(user_id=user["id"], username=user["username"], role_id="portal", scopes=[])
+
+
+# --- publishing through Funnel (step 2): /portal on the share links' port, nothing else ---------
+
+NOT_CONNECTED = "Tailscale isn't connected on this NAS."
+NOT_OFF = "Tailscale did not confirm that the family portal is off the internet. Try again."
+
+
+def _served(handlers: dict[str, Any]) -> bool:
+    from backend.services import tailnet_ports
+
+    return any(p.rstrip("/") == tailnet_ports.PORTAL_PATH for p in handlers)
+
+
+def address(dns: str = "") -> str:
+    from backend.services import public_links, tailnet_ports
+
+    dns = dns or public_links.dns_name()
+    return f"https://{dns}:{tailnet_ports.SHARE_LINKS}{tailnet_ports.PORTAL_PATH}/" if dns else ""
+
+
+def live(dns: str = "") -> bool:
+    """Whether Funnel puts the portal on the internet right now."""
+    from backend.services import public_links
+
+    dns = dns or public_links.dns_name()
+    if not dns:
+        return False
+    handlers, public, _read = public_links.port_state(dns)
+    return public and _served(handlers)
+
+
+def publish(web_port: int, move_immich: bool = False) -> dict[str, Any]:
+    """Puts /portal on the internet through Funnel and turns the portal on. {ok, error, approval_url,
+    funnel}: until the tailnet's owner allowed Funnel and HTTPS certificates, nothing is published
+    and `funnel` says which step is missing."""
+    from backend.services import public_links, tailnet_ports
+
+    dns = public_links.dns_name()
+    if not dns:
+        return {"ok": False, "error": NOT_CONNECTED}
+    ready = public_links.funnel_readiness()
+    if not ready["ready"]:
+        return {"ok": False, "error": "", "funnel": ready}
+    handlers, _public, _read = public_links.port_state(dns)
+    if move_immich and public_links.immich_to_move(dns):
+        moved = public_links.move_immich_off(dns)
+        if moved:
+            return {"ok": False, "error": moved}
+        handlers, _public, _read = public_links.port_state(dns)
+    if public_links.others_on_port(handlers):
+        return {"ok": False, "error": public_links.OTHERS_ON_PORT}
+    target = f"http://127.0.0.1:{int(web_port)}{tailnet_ports.PORTAL_PATH}"
+    code, out = public_links.tailscale(
+        [
+            "funnel",
+            "--bg",
+            "--yes",
+            f"--https={tailnet_ports.SHARE_LINKS}",
+            f"--set-path={tailnet_ports.PORTAL_PATH}",
+            target,
+        ]
+    )
+    approval = public_links.APPROVAL.search(out or "") if out else None
+    if code != 0 and not approval:
+        return {"ok": False, "error": (out or "Tailscale did not publish the portal.").strip()[:300]}
+    set_on(True)
+    logger.info("[Portal] published at %s", address(dns))
+    return {"ok": True, "error": "", "approval_url": approval.group(0) if approval else ""}
+
+
+def unpublish() -> dict[str, Any]:
+    """Takes /portal off the internet and turns the portal off; "off" only once Tailscale shows it."""
+    from backend.services import public_links, tailnet_ports
+
+    set_on(False)
+    dns = public_links.dns_name()
+    if not dns:
+        return {"ok": True, "error": ""}
+    public_links.tailscale(
+        ["funnel", f"--https={tailnet_ports.SHARE_LINKS}", f"--set-path={tailnet_ports.PORTAL_PATH}", "off"]
+    )
+    handlers, public, read = public_links.port_state(dns)
+    if not read or (public and _served(handlers)):
+        logger.warning("[Portal] taking it off the internet was not confirmed by Tailscale")
+        return {"ok": False, "error": NOT_OFF}
+    return {"ok": True, "error": ""}
+
+
+def owner_view() -> dict[str, Any]:
+    """The owner's card: on, live, the address, Funnel's steps, and each person with what they have."""
+    from backend.services import passkeys, public_links
+    from backend.users_db import list_users
+
+    dns = public_links.dns_name()
+    st = status()
+    rows = []
+    for u in list_users():
+        if u.get("status") != "active":
+            continue
+        rows.append(
+            {
+                "id": u["id"],
+                "username": u["username"],
+                "name": u.get("display_name") or u["username"],
+                "allowed": u["id"] in st["people"],
+                "passkey": any(p["portal_only"] for p in passkeys.list_for(u["id"])),
+                "invite_until": st["invites"].get(u["id"], 0),
+                "signed_in": u["id"] in st["signed_in"],
+            }
+        )
+    return {
+        "on": st["on"],
+        "live": live(dns),
+        "address": address(dns),
+        "tailscale": bool(dns),
+        "funnel": public_links.funnel_readiness(),
+        "immich_moves_to": public_links.immich_to_move(dns) if dns else "",
+        "people": rows,
+    }

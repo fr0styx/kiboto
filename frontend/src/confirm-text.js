@@ -286,6 +286,15 @@ const ACTIONS = {
     'Publish and move Immich',
     'Publish share links, and move Immich to {target}? Share links need the port Immich’s secure address uses now, and a port on the internet must carry nothing else. Phones and browsers that open Immich at the old address need the new one. If the family signs in to Immich with one account, Kiboto connects it again at the new address and shows the addresses to add in your sign-in provider.',
   ],
+  'network.family_portal': [
+    'Put the family portal online',
+    'Put the family portal on the internet at {target}? People you allow can open their own files and photos there with a passkey. Nothing else of the NAS is reachable that way.',
+    false,
+  ],
+  'network.family_portal_move_immich': [
+    'Put it online and move Immich',
+    'Put the family portal on the internet, and move Immich to {target}? The portal needs the port Immich’s secure address uses now, and a port on the internet must carry nothing else. Phones and browsers that open Immich at the old address need the new one.',
+  ],
   'network.netbird_install': [
     'Start NetBird',
     'Start NetBird in {target}, a container on this NAS’s own network that may change its network settings? NetBird needs that to connect your devices. Nothing is opened on your router.',

@@ -38,7 +38,7 @@ request and response schemas.
 
 <!-- BEGIN generated endpoints: python scripts/api_reference.py --update -->
 
-827 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
+832 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
 
 ### AI Conversation History
 
@@ -469,6 +469,11 @@ request and response schemas.
 | `DELETE` | `/api/v1/network/family-access/invites/{user_id}` | `system:config` | Withdraws the person's invite; for one already accepted, says where to remove the share in Tailscale |
 | `DELETE` | `/api/v1/network/family-access/key` | `system:config` | Forgets the Tailscale API key; invites already made keep working |
 | `PUT` | `/api/v1/network/family-access/key` | `system:config` | Checks a Tailscale API access key against this machine, then keeps it sealed |
+| `GET` | `/api/v1/network/family-portal` | `system:view` | Get Portal |
+| `PUT` | `/api/v1/network/family-portal` | `system:config` | On (confirmed first: 428 until then) publishes /portal through Funnel; off takes it down |
+| `PUT` | `/api/v1/network/family-portal/people/{user_id}` | `system:config` | Put Person |
+| `DELETE` | `/api/v1/network/family-portal/people/{user_id}/invite` | `system:config` | Delete Invite |
+| `POST` | `/api/v1/network/family-portal/people/{user_id}/invite` | `system:config` | A single-use join link (7 days) |
 | `GET` | `/api/v1/network/nas-name` | `system:view` | Whether the NAS answers to <name>.local, the name, the older names that still answer and the web address |
 | `PUT` | `/api/v1/network/nas-name` | `system:config` | Turns the name on or off or changes it; the previous name keeps answering |
 | `GET` | `/api/v1/network/public-apps` | `system:view` | The apps on the internet, the Funnel ports still free and the apps that could go (RES-6) |

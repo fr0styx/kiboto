@@ -30614,6 +30614,19 @@
     "title": "PersonIn",
     "type": "object"
    },
+   "PersonUpdate": {
+    "properties": {
+     "allowed": {
+      "title": "Allowed",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "allowed"
+    ],
+    "title": "PersonUpdate",
+    "type": "object"
+   },
    "PhoneIn": {
     "properties": {
      "done": {
@@ -30777,6 +30790,19 @@
      "container_port"
     ],
     "title": "PortMappingItem",
+    "type": "object"
+   },
+   "PortalUpdate": {
+    "properties": {
+     "on": {
+      "title": "On",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "on"
+    ],
+    "title": "PortalUpdate",
     "type": "object"
    },
    "PostApplySystemUpdateResponse": {
@@ -62112,6 +62138,238 @@
      }
     },
     "summary": "Put Family Key",
+    "tags": [
+     "Network"
+    ],
+    "x-required-scopes": [
+     "system:config"
+    ]
+   }
+  },
+  "/api/v1/network/family-portal": {
+   "get": {
+    "operationId": "get_portal_api_v1_network_family_portal_get",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Get Portal Api V1 Network Family Portal Get",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Get Portal",
+    "tags": [
+     "Network"
+    ],
+    "x-required-scopes": [
+     "system:view"
+    ]
+   },
+   "put": {
+    "description": "On (confirmed first: 428 until then) publishes /portal through Funnel; off takes it down.",
+    "operationId": "put_portal_api_v1_network_family_portal_put",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/PortalUpdate"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Put Portal Api V1 Network Family Portal Put",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Put Portal",
+    "tags": [
+     "Network"
+    ],
+    "x-required-scopes": [
+     "system:config"
+    ]
+   }
+  },
+  "/api/v1/network/family-portal/people/{user_id}": {
+   "put": {
+    "operationId": "put_person_api_v1_network_family_portal_people__user_id__put",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "user_id",
+      "required": true,
+      "schema": {
+       "title": "User Id",
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/PersonUpdate"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Put Person Api V1 Network Family Portal People  User Id  Put",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "404": {
+      "$ref": "#/components/responses/NotFound"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Put Person",
+    "tags": [
+     "Network"
+    ],
+    "x-required-scopes": [
+     "system:config"
+    ]
+   }
+  },
+  "/api/v1/network/family-portal/people/{user_id}/invite": {
+   "delete": {
+    "operationId": "delete_invite_api_v1_network_family_portal_people__user_id__invite_delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "user_id",
+      "required": true,
+      "schema": {
+       "title": "User Id",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Delete Invite Api V1 Network Family Portal People  User Id  Invite Delete",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "404": {
+      "$ref": "#/components/responses/NotFound"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Delete Invite",
+    "tags": [
+     "Network"
+    ],
+    "x-required-scopes": [
+     "system:config"
+    ]
+   },
+   "post": {
+    "description": "A single-use join link (7 days). The token travels after # so it never reaches a server log.",
+    "operationId": "post_invite_api_v1_network_family_portal_people__user_id__invite_post",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "user_id",
+      "required": true,
+      "schema": {
+       "title": "User Id",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Post Invite Api V1 Network Family Portal People  User Id  Invite Post",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "404": {
+      "$ref": "#/components/responses/NotFound"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Post Invite",
     "tags": [
      "Network"
     ],

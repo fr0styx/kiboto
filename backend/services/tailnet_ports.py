@@ -26,6 +26,8 @@ APP_OFFSET = 10000  # an app on host port 8096 is served at https://<name>:18096
 FUNNEL_ALLOWS = (KIBOTO, SHARE_LINKS, PUBLIC_APP)
 PUBLIC_APP_PORTS = (PUBLIC_APP, KIBOTO)  # 443 only when remote access doesn't serve Kiboto there
 SHARE_PATH = "/api/fs/shared"
+PORTAL_PATH = "/portal"  # the family portal (ADR 0007), on the share links' port too
+PUBLIC_PATHS = (SHARE_PATH, PORTAL_PATH)  # what may be on the internet on that port
 
 
 def owner(port: int) -> str:
