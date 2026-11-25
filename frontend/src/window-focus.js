@@ -38,6 +38,33 @@ function shown(el) {
   return true;
 }
 
+const WINDOWS = '.os-window, .smart-modal-window, .file-manager-window, .mgmt-app-window, .chassis-front-panel';
+// panels that stack with the desktop windows without being dock windows; each closes itself on Esc
+// when it is on top (the notification centre: dock/shortcuts.js)
+const FLOATING = '#notif-center-panel';
+
+/** The z-index an element is drawn at: its own, else that of the nearest ancestor that sets one. */
+function stackZ(el) {
+  for (let n = el; n && n !== document.body && n !== document.documentElement; n = n.parentElement) {
+    const z = getComputedStyle(n).zIndex;
+    if (z && z !== 'auto') return parseInt(z, 10) || 0;
+  }
+  return 0;
+}
+
+/**
+ * Whether a panel is on screen above every open desktop window. The notification centre stacks
+ * with the windows but is not one of the dock's: Esc is the window's when a window is above it, and
+ * the panel's when it is above them all.
+ */
+export function aboveWindows(el) {
+  if (!el || !shown(el)) return false;
+  const z = stackZ(el);
+  return Array.from(document.querySelectorAll(WINDOWS)).every(
+    (w) => w === el || w.contains(el) || el.contains(w) || !shown(w) || stackZ(w) < z
+  );
+}
+
 /** Changes that mean a handler used the Escape key: something opened, closed, hid or showed. */
 const ESC_WATCH = ['class', 'style', 'hidden', 'open', 'aria-hidden', 'aria-expanded'];
 
@@ -210,6 +237,7 @@ export function installWindowFocus(dock) {
     // Escape closed nothing, Settings included (SET-12)
     const frames = new Set(Object.values(dock.windows || {}).map((w) => w && w.el));
     if (Array.from(document.querySelectorAll(DIALOGS)).some((el) => shown(el) && !frames.has(el))) return;
+    if (Array.from(document.querySelectorAll(FLOATING)).some(aboveWindows)) return; // that panel's own Esc
     const id = topWindowId(dock);
     if (!id || id !== escTop) return;
     e.preventDefault();

@@ -42,6 +42,8 @@ On machines whose front screen runs through the graphics driver, Kiboto no longe
 
 A spinning drive whose temperature can't be read for 3 minutes now runs the disk fans at full speed and sends a notification, instead of counting as cool. Idle drives no longer lose their temperature between reads.
 
+Escape closes only what is on top: with a window above the notification centre it no longer closes both, and with the notification centre in front it no longer closes the window underneath.
+
 #### Security
 
 On a machine of its own, failed sign-ins to shared folders over the network now count like web sign-ins: 20 in 15 minutes block the address for an hour, and they show under History, Sign-ins.

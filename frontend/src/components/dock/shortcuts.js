@@ -4,6 +4,7 @@
 import { applyWindowSnap, getActiveWindowElement, getSnapGeometry, restoreWindowSnap } from './snap.js';
 import { getOrCreateSnapGhost } from './window-drag.js';
 import { saveOpenWindowsState } from './window-state.js';
+import { aboveWindows } from '../../window-focus.js';
 
 export const WORKSPACES = [];
 
@@ -73,8 +74,11 @@ export function initWindowKeyboardShortcuts() {
         if (window.closeEventDetailModal) window.closeEventDetailModal();
         return;
       }
+      // the notification centre closes only when it is on top: with a window above it, Esc closes
+      // that window (window-focus.js), and one press used to close both
       const panel = document.getElementById('notif-center-panel');
-      if (panel && panel.style.display !== 'none') {
+      if (panel && panel.style.display !== 'none' && aboveWindows(panel)) {
+        e.preventDefault();
         panel.style.display = 'none';
         saveOpenWindowsState();
       }
