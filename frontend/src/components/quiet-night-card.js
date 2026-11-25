@@ -15,21 +15,23 @@ export function quietStatus(st) {
 }
 
 function html(st) {
+  // the parts of the other hardware cards: a title with its switch, a line of help, the times in one row
   return `
-    <div class="fw-head">
-      <div>
-        <h3 class="account-h" id="qn-title">${escapeHtml(t('qn.title', 'Quieter at night'))}</h3>
-        <p class="fw-status" id="qn-status" aria-live="polite">${escapeHtml(quietStatus(st))}</p>
+    <div class="drawer-card qn-card">
+      <div class="card-headline">
+        <span class="card-head-title" id="qn-title">${escapeHtml(t('qn.title', 'Quieter at night'))}</span>
+        <label class="switch"><input type="checkbox" id="qn-toggle" aria-labelledby="qn-title"${st.enabled ? ' checked' : ''}><span class="toggle-slider"></span></label>
       </div>
-      <button type="button" class="btn-pill-toggle" id="qn-toggle" aria-pressed="${st.enabled ? 'true' : 'false'}" aria-labelledby="qn-title qn-toggle">${escapeHtml(st.enabled ? t('nas_name.btn_on', 'On') : t('nas_name.btn_off', 'Off'))}</button>
-    </div>
-    <p class="fw-why">${escapeHtml(t('qn.help', 'In Automatic, the drive fans turn a little slower at night: they act as if the drives were {shift} °C cooler. From {warm} °C they follow the normal curve, and at the safety limits they still run at full speed.', { shift: st.shift_c, warm: st.warm_c }))}</p>
-    <div class="ps-times">
-      <label class="ddns-field"><span>${escapeHtml(t('qn.start', 'From'))}</span><input type="time" id="qn-start" value="${escapeHtml(st.start)}"></label>
-      <label class="ddns-field"><span>${escapeHtml(t('qn.end', 'Until'))}</span><input type="time" id="qn-end" value="${escapeHtml(st.end)}"></label>
-    </div>
-    <div class="ddns-actions"><button type="button" class="btn-pill-toggle is-primary" id="qn-save">${escapeHtml(t('ddns.save', 'Save'))}</button></div>
-    <div class="fw-error" id="qn-error" role="alert" hidden></div>`;
+      <div class="card-instruction fw-why">${escapeHtml(t('qn.help', 'In Automatic, the drive fans turn a little slower at night: they act as if the drives were {shift} °C cooler. From {warm} °C they follow the normal curve, and at the safety limits they still run at full speed.', { shift: st.shift_c, warm: st.warm_c }))}</div>
+      <div class="schedule-controls-row drw-row-xs-2">
+        <span class="drw-xs-bold-muted-2" data-i18n="qn.start">${escapeHtml(t('qn.start', 'From'))}</span>
+        <input type="time" id="qn-start" class="tz-text-input drw-size" aria-label="${escapeHtml(t('qn.start', 'From'))}" data-i18n-aria-label="qn.start" value="${escapeHtml(st.start)}">
+        <span class="drw-xs-muted-2" data-i18n="settings.to">${escapeHtml(t('settings.to', 'to'))}</span>
+        <input type="time" id="qn-end" class="tz-text-input drw-size" aria-label="${escapeHtml(t('qn.end', 'Until'))}" data-i18n-aria-label="qn.end" value="${escapeHtml(st.end)}">
+      </div>
+      <p class="card-instruction qn-status" id="qn-status" aria-live="polite">${escapeHtml(quietStatus(st))}</p>
+      <div class="fw-error" id="qn-error" role="alert" hidden></div>
+    </div>`;
 }
 
 export async function renderQuietNightCard(mount = document.getElementById('quiet-night-card')) {
@@ -58,7 +60,11 @@ export async function renderQuietNightCard(mount = document.getElementById('quie
       err.hidden = false;
     }
   };
-  mount.querySelector('#qn-toggle')?.addEventListener('click', () => send(!st.enabled));
-  mount.querySelector('#qn-save')?.addEventListener('click', () => send(st.enabled));
+  // like the light's night schedule: the switch and the times take effect as they change
+  const toggle = /** @type {HTMLInputElement} */ (mount.querySelector('#qn-toggle'));
+  toggle.addEventListener('change', () => send(toggle.checked));
+  for (const id of ['#qn-start', '#qn-end']) {
+    /** @type {HTMLElement} */ (mount.querySelector(id)).addEventListener('change', () => send(st.enabled));
+  }
   return st;
 }

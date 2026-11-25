@@ -72,3 +72,44 @@ describe('General -> Front panel (SET-30, Hardware decision 2 a)', () => {
     document.body.innerHTML = '';
   });
 });
+
+describe('The On/Off rows say what they control', () => {
+  it('name the part, say what the switch does, and show its state', async () => {
+    const { lightRow } = await import('../components/front-panel.js');
+    const { api } = await import('../api.js');
+    vi.spyOn(api, 'get').mockResolvedValue({ power: 'off' });
+    const post = vi.spyOn(api, 'post').mockResolvedValue({});
+    const row = await lightRow('x-light');
+    document.body.replaceChildren(row);
+    const box = /** @type {HTMLInputElement} */ (row.querySelector('#x-light'));
+    expect(row.querySelector('.front-panel-name').textContent).toBe('Front light');
+    expect(row.querySelector('.front-panel-desc').textContent).toMatch(
+      /light bar on the front of the server on or off/
+    );
+    expect(box.getAttribute('role')).toBe('switch');
+    expect(box.getAttribute('aria-describedby')).toBe('x-light-desc');
+    expect(row.querySelector('.front-panel-state').textContent).toBe('Off');
+    expect(row.classList.contains('is-off')).toBe(true);
+    box.click();
+    await vi.waitFor(() => expect(post).toHaveBeenCalledWith('/api/led', { power: 'on' }));
+    expect(row.querySelector('.front-panel-state').textContent).toBe('On');
+    expect(row.classList.contains('is-off')).toBe(false);
+    vi.restoreAllMocks();
+  });
+
+  it('put the state back when the change is refused', async () => {
+    const { screenRow } = await import('../components/front-panel.js');
+    const { api } = await import('../api.js');
+    vi.spyOn(api, 'get').mockResolvedValue({ power: true });
+    vi.spyOn(api, 'post').mockRejectedValue(new Error('no'));
+    const row = await screenRow('x-screen');
+    document.body.replaceChildren(row);
+    const box = /** @type {HTMLInputElement} */ (row.querySelector('#x-screen'));
+    expect(row.querySelector('.front-panel-desc').textContent).toMatch(/small screen on the front/);
+    box.click();
+    await vi.waitFor(() => expect(box.disabled).toBe(false));
+    expect(box.checked).toBe(true);
+    expect(row.querySelector('.front-panel-state').textContent).toBe('On');
+    vi.restoreAllMocks();
+  });
+});

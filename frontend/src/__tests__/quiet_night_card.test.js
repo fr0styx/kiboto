@@ -30,11 +30,16 @@ describe('quieter at night', () => {
     });
     await renderQuietNightCard();
     expect(document.querySelector('.fw-why').textContent).toMatch(/4 °C cooler\. From 50 °C/);
-    document.getElementById('qn-toggle').click();
-    await vi.waitFor(() => expect(document.getElementById('qn-toggle').getAttribute('aria-pressed')).toBe('true'));
+    // the card is built as the other hardware cards are: a switch, not an On/Off button
+    expect(document.querySelector('#quiet-night-card .drawer-card .card-headline .switch')).not.toBeNull();
+    document.getElementById('qn-toggle').click(); // a checkbox: its change event saves
+    // the card is drawn again from the saved state
+    await vi.waitFor(() => expect(document.getElementById('qn-status').textContent).toMatch(/On from 23:00/));
+    expect(document.getElementById('qn-toggle').checked).toBe(true);
     expect(put).toHaveBeenLastCalledWith('/api/fans/quiet-night', { enabled: true, start: '23:00', end: '07:00' });
-    document.getElementById('qn-start').value = '22:00';
-    document.getElementById('qn-save').click();
+    const start = document.getElementById('qn-start');
+    start.value = '22:00';
+    start.dispatchEvent(new Event('change')); // new times save as they change
     await vi.waitFor(() =>
       expect(put).toHaveBeenLastCalledWith('/api/fans/quiet-night', { enabled: true, start: '22:00', end: '07:00' })
     );
@@ -45,7 +50,7 @@ describe('quieter at night', () => {
     vi.spyOn(api, 'get').mockResolvedValue(ST);
     vi.spyOn(api, 'put').mockRejectedValue(new Error('Use times like 23:00 and 07:00.'));
     await renderQuietNightCard();
-    document.getElementById('qn-save').click();
+    document.getElementById('qn-end').dispatchEvent(new Event('change'));
     await vi.waitFor(() => expect(document.getElementById('qn-error').hidden).toBe(false));
     vi.spyOn(api, 'get').mockRejectedValue(new Error('x'));
     expect(await renderQuietNightCard()).toBeNull();

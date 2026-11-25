@@ -15,25 +15,47 @@ export function frontPanelParts(stats = state.latestStats) {
   return { light: Boolean(hw.has_mcu || hw.is_zettlabs), screen: Boolean(hw.has_lcd) };
 }
 
-function row(id, label, on, onChange) {
-  const wrap = document.createElement('label');
-  wrap.className = 'front-panel-row';
-  wrap.htmlFor = id;
-  const text = document.createElement('span');
-  text.textContent = label;
+/** Says On or Off beside the switch, so the row reads as a sentence. */
+function stateWord(on) {
+  return on ? t('front.state_on', 'On') : t('front.state_off', 'Off');
+}
+
+function row(id, label, help, on, onChange) {
+  const wrap = Object.assign(document.createElement('div'), { className: 'front-panel-row' });
+  const text = Object.assign(document.createElement('div'), { className: 'front-panel-text' });
+  const name = Object.assign(document.createElement('span'), { className: 'front-panel-name', id: `${id}-name` });
+  name.textContent = label;
+  const desc = Object.assign(document.createElement('span'), { className: 'front-panel-desc', id: `${id}-desc` });
+  desc.textContent = help;
+  text.append(name, desc);
+  const word = Object.assign(document.createElement('span'), { className: 'front-panel-state', id: `${id}-state` });
+  word.textContent = stateWord(on);
+  word.setAttribute('aria-hidden', 'true'); // the switch itself says on or off
+  const sw = Object.assign(document.createElement('label'), { className: 'switch' });
   const box = Object.assign(document.createElement('input'), { type: 'checkbox', id, checked: on });
+  box.setAttribute('role', 'switch');
+  box.setAttribute('aria-labelledby', name.id);
+  box.setAttribute('aria-describedby', desc.id);
+  sw.append(box, Object.assign(document.createElement('span'), { className: 'toggle-slider' }));
+  const show = () => {
+    word.textContent = stateWord(box.checked);
+    wrap.classList.toggle('is-off', !box.checked);
+  };
   box.addEventListener('change', async () => {
     box.disabled = true;
+    show();
     try {
       await onChange(box.checked);
     } catch (e) {
       box.checked = !box.checked;
+      show();
       showToast(t('front.failed', "That wasn't changed: {error}", { error: e?.message || '' }), 'error');
     } finally {
       box.disabled = false;
     }
   });
-  wrap.append(text, box);
+  wrap.classList.toggle('is-off', !on);
+  wrap.append(text, word, sw);
   return wrap;
 }
 
@@ -45,7 +67,13 @@ export async function lightRow(id) {
   } catch {
     /* not readable: shown as on, as the light usually is */
   }
-  return row(id, t('front.light', 'Front light'), on, (v) => api.post('/api/led', { power: v ? 'on' : 'off' }));
+  return row(
+    id,
+    t('front.light', 'Front light'),
+    t('front.light_help', 'Turns the light bar on the front of the server on or off.'),
+    on,
+    (v) => api.post('/api/led', { power: v ? 'on' : 'off' })
+  );
 }
 
 /** The front screen's On/Off row (POST /api/screen {power}). */
@@ -56,7 +84,13 @@ export async function screenRow(id) {
   } catch {
     /* as above */
   }
-  return row(id, t('front.screen', 'Front screen'), on, (v) => api.post('/api/screen', { power: v }));
+  return row(
+    id,
+    t('front.screen', 'Front screen'),
+    t('front.screen_help', 'Turns the small screen on the front of the server on or off.'),
+    on,
+    (v) => api.post('/api/screen', { power: v })
+  );
 }
 
 /** On/Off first in the Hardware page's Lights and Front screen sections (Hardware 2), once each. */

@@ -140,6 +140,8 @@ The Yak themes are gone: the hidden desktop theme with its top-bar button, and t
 
 The Hardware panel looks like the drawer it replaces again, with its header and tab bar, and its status follows the live readings.
 
+The hardware cards look alike again: Card copies and the other sections get their labels and descriptions back, Quieter at night matches the other cards, and the Front light and Front screen switches say what they turn on or off.
+
 ## v2.0.6 (2026-11-23)
 ### 🖥️ Kiboto on a machine of its own (preview), with its settings kept safe on every pool
 
