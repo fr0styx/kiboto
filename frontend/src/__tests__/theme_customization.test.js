@@ -59,8 +59,9 @@ describe('Desktop Theme & LCD Screen Themer Isolation Suite', () => {
     expect(html).toContain('id="sec-lcd-theme"');
     expect(html).toContain('id="lcd-theme-active-badge"');
 
-    // 8 LCD Theme chips
-    const themes = ['cyber', 'amber', 'emerald', 'sapphire', 'amethyst', 'crimson', 'light', 'yak'];
+    // 7 LCD Theme chips (the Yak theme was removed)
+    const themes = ['cyber', 'amber', 'emerald', 'sapphire', 'amethyst', 'crimson', 'light'];
+    expect(html).not.toContain('data-lcd-theme="yak"');
     themes.forEach((tId) => {
       expect(html).toContain(`class="lcd-theme-chip`);
       expect(html).toContain(`data-lcd-theme="${tId}"`);
@@ -126,18 +127,9 @@ describe('Desktop Theme & LCD Screen Themer Isolation Suite', () => {
     expect(engraved.textContent).toBe('KIBOTO • SYSTEM CONSOLE');
     expect(storageTitle.textContent).toBe('STORAGE');
 
-    // 2. Apply Yak Desktop Theme
-    applyDesktopTheme('yak');
-    expect(document.body.classList.contains('theme-yak')).toBe(true);
-    // Console window and screen MUST NOT have Yak freight changes
-    expect(consoleWin.classList.contains('lcd-theme-yak')).toBe(false);
-    expect(engraved.textContent).toBe('KIBOTO • SYSTEM CONSOLE');
-    expect(storageTitle.textContent).toBe('STORAGE');
-    expect(lightbar.style.background).toBe('');
-
-    // Remembered on its own (APP-B); the theme saved before APP-B is left as it was
-    expect(localStorage.getItem('kiboto_yak')).toBe('1');
-    expect(localStorage.getItem('desktop_theme')).not.toBe('canyon');
+    // The hidden Yak theme is gone: nothing draws it or remembers it
+    expect(document.body.classList.contains('theme-yak')).toBe(false);
+    expect(localStorage.getItem('kiboto_yak')).toBe(null);
   });
 
   it('strictly isolates LCD Screen Theme: applyLcdTheme modifies screen/mini canvas/console window, NEVER touches body', () => {
@@ -182,19 +174,12 @@ describe('Desktop Theme & LCD Screen Themer Isolation Suite', () => {
     expect(document.body.classList.contains('theme-sapphire')).toBe(false);
     expect(document.body.classList.contains('lcd-theme-sapphire')).toBe(false);
 
-    // Now test Yak LCD Theme
-    applyLcdTheme('yak');
-    expect(screenEl.classList.contains('lcd-theme-yak')).toBe(true);
-    expect(consoleWin.classList.contains('lcd-theme-yak')).toBe(true);
-    expect(engraved.textContent).toBe('YAK EXPRESS • TOASTIE LOGISTICS LAB');
-    expect(storageTitle.textContent).toBe('CARGO HOLD');
-    expect(lightbar.style.background).toContain('linear-gradient');
-    // Body is still emerald!
+    // The screen's words and light bar keep their own look whatever the theme
+    expect(engraved.textContent).toBe('KIBOTO • SYSTEM CONSOLE');
+    expect(storageTitle.textContent).toBe('STORAGE');
+    expect(lightbar.style.background).toBe('');
     expect(document.body.classList.contains('theme-emerald')).toBe(true);
-    expect(document.body.classList.contains('theme-yak')).toBe(false);
-
-    // Stored in LCD preference
-    expect(localStorage.getItem('lcd_theme')).toBe('yak');
+    expect(localStorage.getItem('lcd_theme')).toBe('sapphire');
   });
 
   it('backward compatibility: applyTheme updates both state representations', () => {
@@ -286,7 +271,6 @@ describe('Desktop Theme & LCD Screen Themer Isolation Suite', () => {
       'settings.theme_chip_amethyst',
       'settings.theme_chip_crimson',
       'settings.theme_chip_light',
-      'settings.theme_chip_yak',
       'settings.text_clarity_title',
       'settings.text_clarity_desc',
     ];

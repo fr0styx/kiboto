@@ -96,9 +96,8 @@ describe('the look (APP-B)', () => {
     expect(document.body.style.getPropertyValue('--kb-tint')).toBe('2');
     expect(document.querySelector('meta[name="theme-color"]').getAttribute('content')).toBe('#f2f6fa');
 
-    document.body.classList.add('theme-yak');
     expect(applyLook({ theme: 'canyon', mode: 'dark', tint: 1, trueBlack: true })).toBe('dark');
-    expect(c.contains('kb-theme-fjord') || c.contains('theme-yak') || c.contains('theme-light')).toBe(false);
+    expect(c.contains('kb-theme-fjord') || c.contains('theme-light')).toBe(false);
     expect(c.contains('kb-theme-canyon') && c.contains('theme-oled')).toBe(true);
     expect(document.body.style.getPropertyValue('--kb-tint')).toBe('2'); // Canyon stops at Medium
 

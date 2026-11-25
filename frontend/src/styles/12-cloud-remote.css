@@ -228,26 +228,10 @@
 }
 
 /* Theme variations for Cloud Remote dialog */
-body.theme-yak #modal-new-cloud-remote #cloud-remote-window,
-body.theme-yak .cloud-remote-window {
-  background: var(--lt-b-191410ff, #191410) !important;
-}
-body.theme-yak #cloud-remote-window .smart-modal-header,
-body.theme-yak #cloud-remote-window #cloud-remote-window-header,
-body.theme-yak #cloud-remote-window .cloud-remote-footer {
-  background: var(--lt-b-241d17ff, #241d17) !important;
-}
-body.theme-yak #cloud-remote-window #new-remote-form {
-  background: var(--lt-b-140f0cff, #140f0c) !important;
-}
-body.theme-yak #cloud-remote-window .tz-select-input,
-body.theme-yak #cloud-remote-window select,
-body.theme-yak #cloud-remote-window input[type="text"],
-body.theme-yak #cloud-remote-window input[type="password"],
-body.theme-yak #cloud-remote-window textarea,
-body.theme-yak #cloud-remote-window select option {
-  background: var(--lt-b-241d17ff, #241d17) !important;
-}
+
+
+
+
 
 body.theme-oled #modal-new-cloud-remote #cloud-remote-window,
 body.theme-oled .cloud-remote-window {

@@ -280,7 +280,6 @@ export function renderDisks(disks) {
     const groups = order
       .map((r) => ({ role: r, items: disks.filter((d) => d.role === r) }))
       .filter((g) => g.items.length);
-    const isYak = state.lcdTheme === 'yak';
 
     groups.forEach((g, gi) => {
       const meta = ROLE_META[g.role] || ROLE_META.data;
@@ -291,15 +290,7 @@ export function renderDisks(disks) {
 
       const lab = document.createElement('div');
       lab.className = 'group-label';
-      let roleLabel = meta.label;
-      if (isYak) {
-        if (g.role === 'parity') roleLabel = 'ESCORT';
-        else if (g.role === 'data') roleLabel = 'PARCELS';
-        else if (g.role === 'cache') roleLabel = 'EXPRESS';
-        else if (g.role === 'os') roleLabel = 'LOGISTICS';
-      } else {
-        roleLabel = t(`console.role_${g.role}`, meta.label);
-      }
+      const roleLabel = t(`console.role_${g.role}`, meta.label);
       lab.innerHTML = `<svg class="grp-ic"><use href="${meta.icon}"/></svg>${roleLabel}`;
       grp.appendChild(lab);
 
@@ -673,8 +664,7 @@ export function applyStats(raw) {
       return;
     }
     // the console's light bar shows what the real one does: the settings, or an alert, a copy or the night
-    if (s.lightbar && state.lcdTheme !== 'yak')
-      renderLightbar($('virtual-chassis-lightbar'), s.lightbar, { offOpacity: 0.15 });
+    if (s.lightbar) renderLightbar($('virtual-chassis-lightbar'), s.lightbar, { offOpacity: 0.15 });
     // Always refresh the clock to keep time accurate to the minute
     setText($('clock'), getLocalClock(state.currentTimezone, state.clockFormat));
 
@@ -750,8 +740,7 @@ export function applyStats(raw) {
     setText($('drawer-nas-name'), s.name ? s.name.toUpperCase() : '');
 
     if ($('statusText')) {
-      const statusVal =
-        state.lcdTheme === 'yak' && !s.status.includes('ALERT') && !s.status.includes('WARN') ? 'YAK OK' : s.status;
+      const statusVal = s.status;
       setText($('statusText'), statusVal);
     }
 

@@ -120,6 +120,7 @@ export function loadLook(storage = _storage()) {
     if (saved) return normalizeLook(JSON.parse(saved));
     const legacy = storage && storage.getItem('desktop_theme');
     const accent = (storage && storage.getItem('desktop_custom_accent')) || '';
+    // a saved "yak" (a hidden theme, removed) becomes the default look
     return normalizeLook({ ...fromLegacy(legacy && legacy !== 'yak' ? legacy : 'cyber'), accent });
   } catch {
     return { ...DEFAULT_LOOK };
@@ -226,7 +227,6 @@ export function applyLook(
   const body = doc?.body;
   if (body) {
     for (const c of [...body.classList]) if (c.startsWith('kb-theme-')) body.classList.remove(c);
-    body.classList.remove('theme-yak');
     body.classList.add(`kb-theme-${l.theme}`);
     body.classList.toggle('theme-light', !dark);
     body.classList.toggle('theme-oled', dark && l.trueBlack);
@@ -240,7 +240,7 @@ export function applyLook(
   return dark ? 'dark' : 'light';
 }
 
-/** Takes the look classes off the page (the hidden Yak theme draws on its own). */
+/** Takes the look classes off the page. */
 export function clearLook(doc = typeof document === 'undefined' ? null : document) {
   const body = doc?.body;
   if (!body) return;
@@ -307,7 +307,6 @@ export function bindSigninLook(
   input.dataset.lookBound = '1';
   let timer = null;
   const show = () => {
-    if (doc?.body?.classList.contains('theme-yak')) return;
     applyLook(lookFor(input.value) || loadLook(), doc, win);
   };
   input.addEventListener('input', () => {

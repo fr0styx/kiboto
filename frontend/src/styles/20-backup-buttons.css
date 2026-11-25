@@ -728,43 +728,19 @@
   margin-top: 4px;
 }
 
-/* Yak Theme Overrides for Management Window */
-body.theme-yak #management-modal-overlay #management-window {
-  background: var(--lt-b-111a14ff, #111a14);
-  border-color: rgba(212, 138, 55, 0.45);
-  box-shadow: 0 25px 65px rgba(0, 0, 0, 0.9), 0 0 24px rgba(212, 138, 55, 0.18);
-}
 
-body.theme-yak .management-window-header {
-  background: linear-gradient(180deg, var(--lt-b-1e2e22ff, #1e2e22) 0%, var(--lt-b-152219ff, #152219) 100%);
-  border-bottom-color: rgba(212, 138, 55, 0.25);
-}
 
-body.theme-yak .mgmt-title-ic {
-  color: var(--lt-t-e6ad65ff, #e6ad65);
-}
 
-body.theme-yak .mgmt-category-tab.active {
-  background: rgba(212, 138, 55, 0.25);
-  border-color: rgba(212, 138, 55, 0.6);
-  color: var(--lt-t-fef08aff, #fef08a);
-  box-shadow: 0 0 10px rgba(212, 138, 55, 0.25);
-}
 
-body.theme-yak .mgmt-app-card {
-  background: var(--lt-b-16241ab2, rgba(22, 36, 26, 0.7));
-  border-color: rgba(212, 138, 55, 0.2);
-}
 
-body.theme-yak .mgmt-app-card:hover {
-  background: var(--lt-b-1c2f22d9, rgba(28, 47, 34, 0.85));
-  border-color: rgba(212, 138, 55, 0.55);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.5), 0 0 16px rgba(212, 138, 55, 0.25);
-}
 
-body.theme-yak .mgmt-app-action {
-  color: var(--lt-t-e6ad65ff, #e6ad65);
-}
+
+
+
+
+
+
+
 
 @media (max-width: 600px) {
   .management-hub-grid {

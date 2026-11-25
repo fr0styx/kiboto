@@ -8,14 +8,7 @@ import { onManagementDom } from '../management-dom.js';
 import { api, auth, ApiError, apiFetch } from '../api.js';
 import { state, ZOOM_PROFILES } from '../state.js';
 import { ZettEventBus } from '../event-bus.js';
-import {
-  applyTheme,
-  applyDesktopTheme,
-  applyLcdTheme,
-  setScreenLayoutStyle,
-  hexToRgb,
-  getContrastRatio,
-} from './dashboard.js';
+import { applyDesktopTheme, applyLcdTheme, setScreenLayoutStyle, hexToRgb, getContrastRatio } from './dashboard.js';
 import { fitMiniPreviewScale, syncMiniPreviewTelemetry } from './mini-preview.js';
 import { t } from '../i18n.js';
 import { formatDateTime, formatFixed } from '../format.js';
@@ -265,13 +258,6 @@ export function initSettings() {
     },
     { passive: true }
   );
-
-  const yakEggBtn = $('yak-easter-egg-btn');
-  if (yakEggBtn) {
-    yakEggBtn.addEventListener('click', () => {
-      applyTheme(state.currentTheme === 'yak' ? loadLook().theme : 'yak');
-    });
-  }
 
   // --- Theme & Color Scheme Controls ---
   initThemeControls();
@@ -1014,8 +1000,6 @@ export function initSettings() {
     if (e.key === 'Escape') {
       ZettEventBus.emit('modal:smart:close');
       closeDrawer();
-    } else if (e.key === 'y' || e.key === 'Y') {
-      applyTheme(state.currentTheme === 'yak' ? loadLook().theme : 'yak');
     } else if (e.key === 't' || e.key === 'T' || e.key === 'd' || e.key === 'D') {
       if (toggleBtn && (toggleBtn.classList.contains('hidden') || toggleBtn.style.display === 'none')) {
         return;
@@ -1683,9 +1667,7 @@ export function syncLcdThemeUI() {
               ? '#c084fc'
               : curTheme === 'crimson'
                 ? '#fb7185'
-                : curTheme === 'yak'
-                  ? '#d48a37'
-                  : '#33cdb8')
+                : '#33cdb8')
     ).toUpperCase();
   }
 

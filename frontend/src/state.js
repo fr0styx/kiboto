@@ -5,12 +5,14 @@
 import { ZettEventBus } from './event-bus.js';
 import { loadLook } from './look.js';
 
-/** Whether the hidden Yak theme is on (kept across reloads, apart from the look). */
-function _yakOn() {
+/** The front screen's theme saved on this device; the removed Yak theme becomes the default. */
+function _lcdTheme() {
   try {
-    return localStorage.getItem('kiboto_yak') === '1' || localStorage.getItem('desktop_theme') === 'yak';
+    localStorage.removeItem('kiboto_yak'); // the removed hidden desktop theme's own mark
+    const saved = localStorage.getItem('lcd_theme');
+    return saved && saved !== 'yak' ? saved : 'cyber';
   } catch {
-    return false;
+    return 'cyber';
   }
 }
 
@@ -107,10 +109,10 @@ export const state = {
     typeof window !== 'undefined' &&
     (window.location.search.includes('mode=vm-console') ||
       (typeof document !== 'undefined' && document.body && document.body.classList.contains('vm-console-direct'))),
-  // APP-B: the person's look (look.js); the hidden Yak theme is kept on its own
-  desktopTheme: _yakOn() ? 'yak' : loadLook().theme,
+  // APP-B: the person's look (look.js)
+  desktopTheme: loadLook().theme,
   desktopCustomAccent: loadLook().accent,
-  lcdTheme: (typeof localStorage !== 'undefined' && localStorage.getItem('lcd_theme')) || 'cyber',
+  lcdTheme: _lcdTheme(),
   lcdCustomAccent: (typeof localStorage !== 'undefined' && localStorage.getItem('lcd_custom_accent')) || '',
   lcdTextClarity: typeof localStorage !== 'undefined' ? localStorage.getItem('lcd_text_clarity') !== 'false' : true,
 
@@ -194,10 +196,6 @@ export const state = {
     this.desktopTheme = theme;
     // the look itself is saved by look.js; desktop_theme and desktop_custom_accent, saved before
     // APP-B, are left as they were so an older cached page keeps working
-    try {
-      if (theme === 'yak') localStorage.setItem('kiboto_yak', '1');
-      else localStorage.removeItem('kiboto_yak');
-    } catch {}
     if (customAccent !== null) {
       this.desktopCustomAccent = customAccent;
     }

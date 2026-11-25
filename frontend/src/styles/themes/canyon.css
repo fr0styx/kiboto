@@ -528,7 +528,6 @@ body.kb-theme-canyon.theme-oled:not(.theme-light):not(.lcd-direct) {
     --lt-b-122023ff: oklch(0.2313 calc(0.0225 * var(--kb-tint, 1)) 78.6);
     --lt-b-122225ff: oklch(0.2405 calc(0.0259 * var(--kb-tint, 1)) 79.2);
     --lt-b-122326ff: oklch(0.2418 calc(0.0266 * var(--kb-tint, 1)) 76.1);
-    --lt-b-130f0cff: oklch(0.1723 calc(0.0091 * var(--kb-tint, 1)) 59.0);
     --lt-b-131f21ff: oklch(0.2302 calc(0.0203 * var(--kb-tint, 1)) 80.2);
     --lt-b-132022a6: oklch(0.2315 calc(0.0211 * var(--kb-tint, 1)) 76.3 / 0.651);
     --lt-b-132023e0: oklch(0.2315 calc(0.0211 * var(--kb-tint, 1)) 76.3 / 0.878);
@@ -538,7 +537,6 @@ body.kb-theme-canyon.theme-oled:not(.theme-light):not(.lcd-direct) {
     --lt-b-132225a6: oklch(0.2408 calc(0.0245 * var(--kb-tint, 1)) 77.3 / 0.651);
     --lt-b-132225fa: oklch(0.2408 calc(0.0245 * var(--kb-tint, 1)) 77.3 / 0.98);
     --lt-b-132326b2: oklch(0.2447 calc(0.0258 * var(--kb-tint, 1)) 79.2 / 0.698);
-    --lt-b-140f0cff: oklch(0.1737 calc(0.0104 * var(--kb-tint, 1)) 52.8);
     --lt-b-141e2eff: oklch(0.2333 calc(0.0395 * var(--kb-tint, 1)) 77.2);
     --lt-b-142326ff: oklch(0.2450 calc(0.0245 * var(--kb-tint, 1)) 77.3);
     --lt-b-14292dff: oklch(0.2645 calc(0.0317 * var(--kb-tint, 1)) 76.0);
@@ -556,7 +554,6 @@ body.kb-theme-canyon.theme-oled:not(.theme-light):not(.lcd-direct) {
     --lt-b-17292dfa: oklch(0.2665 calc(0.0276 * var(--kb-tint, 1)) 78.2 / 0.98);
     --lt-b-172c31ff: oklch(0.2765 calc(0.0328 * var(--kb-tint, 1)) 77.6);
     --lt-b-182d31d9: oklch(0.2808 calc(0.0315 * var(--kb-tint, 1)) 76.3 / 0.851);
-    --lt-b-191410ff: oklch(0.1959 calc(0.0113 * var(--kb-tint, 1)) 60.7);
     --lt-b-192d31ff: oklch(0.2835 calc(0.0307 * var(--kb-tint, 1)) 78.8);
     --lt-b-193034ff: oklch(0.2924 calc(0.0338 * var(--kb-tint, 1)) 79.2);
     --lt-b-1a2629f2: oklch(0.2597 calc(0.0199 * var(--kb-tint, 1)) 80.3 / 0.949);
@@ -566,12 +563,9 @@ body.kb-theme-canyon.theme-oled:not(.theme-light):not(.lcd-direct) {
     --lt-b-1c2c2fff: oklch(0.2792 calc(0.0247 * var(--kb-tint, 1)) 74.5);
     --lt-b-1d3135ff: oklch(0.2968 calc(0.0312 * var(--kb-tint, 1)) 76.4);
     --lt-b-1d363bff: oklch(0.3143 calc(0.0374 * var(--kb-tint, 1)) 77.5);
-    --lt-b-1e1713ff: oklch(0.2118 calc(0.0137 * var(--kb-tint, 1)) 51.4);
     --lt-b-1f3337ff: oklch(0.3048 calc(0.0311 * var(--kb-tint, 1)) 76.5);
     --lt-b-20373bff: oklch(0.3199 calc(0.0347 * var(--kb-tint, 1)) 80.7);
     --lt-b-213337ff: oklch(0.3077 calc(0.0290 * var(--kb-tint, 1)) 77.4);
-    --lt-b-241c16ff: oklch(0.2339 calc(0.0168 * var(--kb-tint, 1)) 58.7);
-    --lt-b-241d17ff: oklch(0.2369 calc(0.0156 * var(--kb-tint, 1)) 62.6);
     --lt-b-251c14ff: oklch(0.2347 calc(0.0204 * var(--kb-tint, 1)) 63.2);
     --lt-b-253c40ff: oklch(0.3393 calc(0.0344 * var(--kb-tint, 1)) 80.8);
     --lt-b-274045ff: oklch(0.3530 calc(0.0368 * var(--kb-tint, 1)) 77.9);

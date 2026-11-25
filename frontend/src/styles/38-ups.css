@@ -372,10 +372,7 @@ body.theme-emerald .input-modern:focus {
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
 }
 
-body.theme-yak .input-modern:focus {
-  border-color: var(--accent-yak, #d48a37);
-  box-shadow: 0 0 0 3px rgba(212, 138, 55, 0.25);
-}
+
 
 .ups-save-badge {
   font-size: var(--kb-fs-xs);

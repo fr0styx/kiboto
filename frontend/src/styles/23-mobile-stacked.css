@@ -671,14 +671,7 @@
     margin-right: 4px !important;
   }
 
-  #console-window.lcd-theme-yak.chassis-front-panel::before {
-    font-size: 7px !important;
-    padding: 2px 8px !important;
-    letter-spacing: 0.5px !important;
-    max-width: 88vw !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-  }
+  
 
   #console-window #screen {
     width: 100% !important;
@@ -1373,23 +1366,9 @@
     background: rgba(37, 194, 160, 0.9) !important;
   }
 
-  body.theme-yak #management-modal-overlay .mgmt-content-pane,
-  body.theme-yak .fm-viewport,
-  #console-window.lcd-theme-yak.chassis-front-panel,
-  body.theme-yak .smart-modal-window,
-  body.theme-yak .smart-modal-body,
-  body.theme-yak .slide-drawer {
-    scrollbar-color: rgba(212, 138, 55, 0.6) rgba(0, 0, 0, 0.25) !important;
-  }
+  
 
-  body.theme-yak #management-modal-overlay .mgmt-content-pane::-webkit-scrollbar-thumb,
-  body.theme-yak .fm-viewport::-webkit-scrollbar-thumb,
-  #console-window.lcd-theme-yak.chassis-front-panel::-webkit-scrollbar-thumb,
-  body.theme-yak .smart-modal-window::-webkit-scrollbar-thumb,
-  body.theme-yak .smart-modal-body::-webkit-scrollbar-thumb,
-  body.theme-yak .slide-drawer::-webkit-scrollbar-thumb {
-    background: rgba(212, 138, 55, 0.6) !important;
-  }
+  
 
   /* Mobile Stacked Responsive Cards for Tables (Batch 3) */
   .docker-table thead,

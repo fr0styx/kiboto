@@ -121,19 +121,6 @@ THEMES: dict[str, dict[str, str]] = {
         "track": "#94a3b8",
         "brand": "#0284c7",
     },
-    "yak": {
-        "bg": "#09130d",
-        "card": "#122116",
-        "card_hi": "#192e20",
-        "fg": "#eaf1f8",
-        "muted": "#7b9483",
-        "ok": "#e6a254",
-        "ok2": "#d48a37",
-        "warn": "#e07a38",
-        "crit": "#e63946",
-        "track": "#17291c",
-        "brand": "#d48a37",
-    },
 }
 
 _FONT_DIRS = (

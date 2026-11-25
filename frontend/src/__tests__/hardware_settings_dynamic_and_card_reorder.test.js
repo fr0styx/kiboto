@@ -1,4 +1,3 @@
-import { readFileSync } from 'node:fs';
 import { readIndexHtml } from './helpers/read-index-html.js';
 import { readStyleCss } from './helpers/read-style-css.js';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
@@ -9,47 +8,13 @@ import { initSettings } from '../components/settings.js';
 import fs from 'fs';
 import path from 'path';
 
-describe('Yak Wallpaper Switch, Card Reordering, and Dynamic Hardware Settings Suite', () => {
+describe('Card Reordering and Dynamic Hardware Settings Suite', () => {
   beforeEach(() => {
     localStorage.clear();
     document.body.className = '';
     document.body.style.cssText = '';
     document.documentElement.style.cssText = '';
     state.isLcdDirect = false;
-  });
-
-  describe('Requirement 1: Yak Theme Background Image Immediate Switch', () => {
-    it('immediately sets desktop wallpaper to Yak artwork when Yak theme is selected, and restores previous on switch', () => {
-      document.body.innerHTML = `
-        <div id="desktop">
-          <div id="desktop-wallpaper" style="background-image: url('/wallpapers/bahia.jpg');"></div>
-        </div>
-      `;
-      const wp = document.getElementById('desktop-wallpaper');
-      expect(wp.style.backgroundImage).toContain('/wallpapers/bahia.jpg');
-
-      // 1. Apply Yak Theme
-      applyDesktopTheme('yak');
-      expect(document.body.classList.contains('theme-yak')).toBe(true);
-      expect(wp.style.backgroundImage).toContain('/img/yak.webp');
-      expect(wp.style.backgroundSize).toBe('contain');
-      expect(wp.style.display).toBe('block');
-
-      // 2. Switch away from Yak Theme to Canyon
-      applyDesktopTheme('canyon');
-      expect(document.body.classList.contains('theme-yak')).toBe(false);
-      expect(document.body.classList.contains('kb-theme-canyon')).toBe(true);
-      expect(wp.style.backgroundImage).toContain('/wallpapers/bahia.jpg');
-      expect(wp.style.backgroundSize).toBe('');
-    });
-
-    it('verifies CSS rules in style.css for body.theme-yak #desktop-wallpaper', () => {
-      const css = readStyleCss() + readFileSync('frontend/src/styles/04-yak-theme.css', 'utf8'); // the Yak sheet loads on demand
-
-      expect(css).toContain('body.theme-yak #desktop-wallpaper');
-      expect(css).toContain('url("/img/yak.webp")');
-      expect(css).toContain('background-size: contain !important;');
-    });
   });
 
   describe('Requirement 2: Hardware Settings Card Lock & Re-arrangement across Layout, LED, Fans, and Copy tabs', () => {

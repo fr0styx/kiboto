@@ -1,4 +1,3 @@
-import { readFileSync } from 'node:fs';
 import { readStyleCss } from './helpers/read-style-css.js';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { ALL_TRANSLATIONS as TRANSLATIONS } from '../locales/all.js';
@@ -162,16 +161,16 @@ describe('Batch 5: Performance, WAI-ARIA, Keyboard Ergonomics & i18n Verificatio
   });
 
   it('6. Theme Contrast & CSS Compositing Rules: verify CSS tokens in style.css', () => {
-    const css = readStyleCss() + readFileSync('frontend/src/styles/04-yak-theme.css', 'utf8'); // the Yak sheet loads on demand
+    const css = readStyleCss();
 
     // Root contrast & fonts
     expect(css).toContain('--muted:#95a8ab;');
     expect(css).toContain('--font-sans:');
     expect(css).toContain('--font-mono:');
 
-    // UX-33: accent themes keep the standard status colours; the Yak theme has its own
+    // UX-33: accent themes keep the standard status colours
     expect(css).not.toMatch(/body\.theme-amber\s*\{[^}]*?--crit:/);
-    expect(css).toMatch(/body\.theme-yak\s*\{[^}]*?--crit:\s*#ff6b6b;/);
+    expect(css).not.toContain('theme-yak'); // the Yak theme was removed
 
     // .window-dragging compositing rules
     expect(css).toContain('.window-dragging');

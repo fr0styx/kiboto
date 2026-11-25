@@ -77,7 +77,7 @@ describe('Emoji drawn as icons (UX-14)', () => {
     const sprite = readFileSync(join(__dirname, '..', '..', 'public', 'zi-sprite.svg'), 'utf8');
     for (const name of new Set(Object.values(EMOJI_ICONS))) {
       if (name.startsWith('@dot-')) continue;
-      if (name.startsWith('@')) continue; // the page's own sprite (i-yak)
+      if (name.startsWith('@')) continue; // the page's own sprite
       expect(sprite, name).toContain(`id="zi-${name}"`);
     }
   });

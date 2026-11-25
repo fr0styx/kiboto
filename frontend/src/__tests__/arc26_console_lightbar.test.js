@@ -52,7 +52,7 @@ describe('light bar picture', () => {
     renderLightbar(el, null);
   });
 
-  it('follows the stats, but not under the Yak theme', () => {
+  it('follows the stats', () => {
     state.lcdTheme = 'cyber';
     applyStats({
       lightbar: { power: 'on', mode: 'flashing', color: 'ff0000', brightness: 100, speed: 90, why: 'alert' },
@@ -60,10 +60,5 @@ describe('light bar picture', () => {
     expect(bar().style.animation).toContain('barFlash');
     applyStats({ lightbar: { power: 'off', why: 'night' } });
     expect(bar().style.opacity).toBe('0.15');
-    state.lcdTheme = 'yak';
-    bar().style.background = 'rgb(1, 2, 3)';
-    applyStats({ lightbar: { power: 'on', mode: 'solid', color: '25c2a0', brightness: 50, why: 'settings' } });
-    expect(bar().style.background).toBe('rgb(1, 2, 3)');
-    state.lcdTheme = 'cyber';
   });
 });

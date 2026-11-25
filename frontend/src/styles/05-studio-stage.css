@@ -80,7 +80,7 @@
   animation: pulse 1.6s infinite;
 }
 
-.yak-egg-btn {
+.topbar-icon-btn {
   background: var(--lt-b-15282cff, #15282c);
   border: 1px solid var(--kb-line-12);
   color: var(--kb-text-soft);
@@ -94,16 +94,12 @@
   justify-content: center;
   line-height: 1;
 }
-.yak-egg-btn:hover {
+.topbar-icon-btn:hover {
   background: var(--lt-b-251c14ff, #251c14);
   border-color: #d48a37;
   transform: scale(1.08);
 }
-body.theme-yak .yak-egg-btn {
-  background: rgba(212, 138, 55, 0.2);
-  border-color: #d48a37;
-  box-shadow: 0 0 10px rgba(212, 138, 55, 0.4);
-}
+
 
 .suite-toolkit-btn {
   background: linear-gradient(135deg, var(--lt-b-20373bff, #20373b), var(--lt-b-15282cff, #15282c));
@@ -124,10 +120,7 @@ body.theme-yak .yak-egg-btn {
   color: var(--kb-text-strong);
   transform: translateY(-1px);
 }
-body.theme-yak .suite-toolkit-btn {
-  border-color: rgba(212, 138, 55, 0.4);
-  color: var(--lt-t-e6ad65ff, #e6ad65);
-}
+
 
 /* =========================================================================
    DYNAMIC SCALING WORKBENCH STAGE & FOCUS SHIFT

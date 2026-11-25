@@ -62,7 +62,7 @@ describe('Batch 9: Frontend Hardening & Architecture', () => {
   });
 
   describe('Multi-Theme Switching Engine', () => {
-    it('correctly toggles themes, light mode and the yak theme', () => {
+    it('correctly toggles themes and light mode', () => {
       applyTheme('fjord');
       expect(document.body.classList.contains('kb-theme-fjord')).toBe(true);
       expect(document.body.classList.contains('theme-yak')).toBe(false);
@@ -76,9 +76,8 @@ describe('Batch 9: Frontend Hardening & Architecture', () => {
       expect(document.body.classList.contains('kb-theme-lagoon')).toBe(true);
       expect(document.body.classList.contains('kb-theme-moss')).toBe(false);
 
-      applyTheme('yak');
-      expect(document.body.classList.contains('theme-yak')).toBe(true);
-      expect(document.body.classList.contains('theme-light')).toBe(false);
+      applyTheme('yak'); // a hidden theme, removed: no class of its own
+      expect(document.body.classList.contains('theme-yak')).toBe(false);
     });
   });
 

@@ -199,30 +199,15 @@ select.fan-preset-select:focus {
   color: currentColor;
 }
 
-body.theme-yak .btn-fan-save:hover {
-  border-color: rgba(212, 138, 55, 0.5);
-}
 
-body.theme-yak .btn-fan-save .ic {
-  color: var(--accent-yak, var(--lt-t-d48a37ff, #d48a37));
-}
 
-body.theme-yak .btn-fan-apply {
-  background: rgba(212, 138, 55, 0.16);
-  color: var(--accent-yak, var(--lt-t-d48a37ff, #d48a37));
-  border-color: rgba(212, 138, 55, 0.4);
-}
 
-body.theme-yak .btn-fan-apply:hover:not(:disabled) {
-  background: rgba(212, 138, 55, 0.28);
-  border-color: var(--accent-yak, #d48a37);
-  box-shadow: 0 0 10px rgba(212, 138, 55, 0.35);
-}
 
-body.theme-yak select.fan-preset-select:focus {
-  border-color: var(--accent-yak, #d48a37);
-  box-shadow: 0 0 8px rgba(212, 138, 55, 0.35);
-}
+
+
+
+
+
 
 
 .drawer-card { background: var(--lt-b-16272aff, #16272a); border: 1px solid var(--kb-line-6); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 10px; transition: opacity 0.25s ease, filter 0.25s ease; width: 100%; }

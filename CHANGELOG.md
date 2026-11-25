@@ -136,6 +136,8 @@ The Hardware page's Cooling list says when a spinning drive has no temperature r
 
 Kiboto OS has a guide of its own: what hardware it runs on, writing and checking the USB stick, the first sign-in, updates and what to do with a new system disk.
 
+The Yak themes are gone: the hidden desktop theme with its top-bar button, and the Yak Bronze front-screen theme. Anyone who had one chosen gets the default look.
+
 ## v2.0.6 (2026-11-23)
 ### 🖥️ Kiboto on a machine of its own (preview), with its settings kept safe on every pool
 

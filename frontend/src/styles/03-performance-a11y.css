@@ -148,21 +148,7 @@ body.lcd-direct.lcd-theme-light {
   --brand: #0284c7;
 }
 
-#screen.lcd-theme-yak,
-#mini-lcd-canvas.lcd-theme-yak,
-#console-window.lcd-theme-yak,
-body.lcd-direct.lcd-theme-yak {
-  --bg: #09130d;
-  --card: #122116;
-  --card-hi: #192e20;
-  --fg: #eaf1f8;
-  --muted: #7b9483;
-  --ok: #e6a254;
-  --warn: #e07a38;
-  --crit: #e63946;
-  --track: #17291c;
-  --brand: #d48a37;
-}
+
 
 #screen .card,
 #mini-lcd-canvas .card,

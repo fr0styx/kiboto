@@ -14,8 +14,7 @@
   .os-window:not(.maximized) {
     max-width: calc(100vw - 48px) !important;
   }
-  .suite-navbar #drawer-toggle-btn .btn-txt,
-  .suite-navbar #yak-easter-egg-btn {
+  .suite-navbar #drawer-toggle-btn .btn-txt {
     display: none;
   }
 }

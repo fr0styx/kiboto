@@ -75,7 +75,7 @@ body.phone-page-open .suite-navbar .suite-brand { visibility: hidden; }
 body.theme-light .phone-tabs, body.theme-light .phone-back { background: rgba(255, 255, 255, 0.96); }
 
 /* A quieter top bar: the stacked-layout switch and the easter egg are desktop things */
-body.phone-shell #mobile-view-toggle-btn, body.phone-shell #yak-easter-egg-btn, body.phone-shell .suite-badge { display: none; }
+body.phone-shell #mobile-view-toggle-btn, body.phone-shell .suite-badge { display: none; }
 
 /* Messages come in at the top, just under the top bar (phone-shell.js measures where it ends), in
    front of everything; the stacked layout's "66px from the bottom" put them under the tabs */

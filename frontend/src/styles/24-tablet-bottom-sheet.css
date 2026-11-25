@@ -779,14 +779,7 @@ body.mobile-mode #desktop-widgets-container .cal-glance-bar {
     margin-right: 4px !important;
   }
 
-  body.mobile-mode #console-window.lcd-theme-yak.chassis-front-panel::before {
-    font-size: 7px !important;
-    padding: 2px 8px !important;
-    letter-spacing: 0.5px !important;
-    max-width: 88vw !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-  }
+  
 
   body.mobile-mode #console-window #screen {
     width: 100% !important;
@@ -1461,23 +1454,9 @@ body.mobile-mode .slide-drawer::-webkit-scrollbar-thumb:active {
   background: rgba(37, 194, 160, 0.9) !important;
 }
 
-body.mobile-mode.theme-yak #management-modal-overlay .mgmt-content-pane,
-body.mobile-mode.theme-yak .fm-viewport,
-body.mobile-mode #console-window.lcd-theme-yak.chassis-front-panel,
-body.mobile-mode.theme-yak .smart-modal-window,
-body.mobile-mode.theme-yak .smart-modal-body,
-body.mobile-mode.theme-yak .slide-drawer {
-  scrollbar-color: rgba(212, 138, 55, 0.6) rgba(0, 0, 0, 0.25) !important;
-}
 
-body.mobile-mode.theme-yak #management-modal-overlay .mgmt-content-pane::-webkit-scrollbar-thumb,
-body.mobile-mode.theme-yak .fm-viewport::-webkit-scrollbar-thumb,
-body.mobile-mode #console-window.lcd-theme-yak.chassis-front-panel::-webkit-scrollbar-thumb,
-body.mobile-mode.theme-yak .smart-modal-window::-webkit-scrollbar-thumb,
-body.mobile-mode.theme-yak .smart-modal-body::-webkit-scrollbar-thumb,
-body.mobile-mode.theme-yak .slide-drawer::-webkit-scrollbar-thumb {
-  background: rgba(212, 138, 55, 0.6) !important;
-}
+
+
 
 /* Mobile Stacked Responsive Cards for Tables (body.mobile-mode) */
 body.mobile-mode .docker-table thead,

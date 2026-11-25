@@ -2016,18 +2016,10 @@ body.mobile-mode #vm-grid .glassmorphic-card {
   background: var(--lt-b-0c1618ff, #0c1618) !important;
 }
 
-body.theme-yak #vm-manager-window.vm-manager-window {
-  background: var(--lt-b-191410ff, #191410) !important;
-}
-body.theme-yak #vm-manager-window .os-window-header {
-  background: var(--lt-b-241c16ff, #241c16) !important;
-}
-body.theme-yak #vm-manager-window .vm-telemetry-header {
-  background: var(--lt-b-1e1713ff, #1e1713) !important;
-}
-body.theme-yak #vm-manager-window .vm-content-body {
-  background: var(--lt-b-130f0cff, #130f0c) !important;
-}
+
+
+
+
 
 /* Dedicated Containers & Services Window - Solid, Premium Opaque Glass Surface */
 #containers-manager-window.containers-manager-window,
@@ -2057,20 +2049,10 @@ body.theme-yak #vm-manager-window .vm-content-body {
   background: var(--lt-b-0c1618ff, #0c1618) !important;
 }
 
-body.theme-yak #containers-manager-window.containers-manager-window,
-body.theme-yak .os-window.kib-window {
-  background: var(--lt-b-191410ff, #191410) !important;
-}
-body.theme-yak #containers-manager-window .os-window-header,
-body.theme-yak .kib-window .os-window-header {
-  background: var(--lt-b-241c16ff, #241c16) !important;
-}
-body.theme-yak #containers-manager-window .containers-telemetry-header {
-  background: var(--lt-b-1e1713ff, #1e1713) !important;
-}
-body.theme-yak #containers-manager-window .containers-content-body {
-  background: var(--lt-b-130f0cff, #130f0c) !important;
-}
+
+
+
+
 
 /* Virtual Machine Action Buttons */
 .btn-vm-action,
@@ -2465,15 +2447,9 @@ body.theme-oled .mgmt-sticky-subnav {
   color: var(--ok2);
 }
 
-body.theme-yak .mgmt-inner-tab.active {
-  background: rgba(212, 138, 55, 0.2);
-  border-color: rgba(212, 138, 55, 0.5);
-  box-shadow: 0 0 12px rgba(212, 138, 55, 0.2);
-}
 
-body.theme-yak .mgmt-inner-tab.active .ic {
-  color: var(--accent-yak, var(--lt-t-d48a37ff, #d48a37));
-}
+
+
 
 .mgmt-tab-pane {
   animation: fadeIn 0.15s ease;

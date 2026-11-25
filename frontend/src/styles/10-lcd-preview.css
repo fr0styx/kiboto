@@ -30,9 +30,7 @@
   align-items: center;
   justify-content: center;
 }
-#mini-lcd-canvas.lcd-theme-yak {
-  border-color: rgba(212, 138, 55, 0.45);
-}
+
 .mini-preview-inner {
   width: 640px; 
   height: 172px; 

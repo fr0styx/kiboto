@@ -8,7 +8,6 @@ import { ZettEventBus } from '../event-bus.js';
 import { t } from '../i18n.js';
 import {
   applyLook,
-  clearLook,
   fromLegacy,
   loadLook,
   lookColour,
@@ -24,77 +23,24 @@ const $ = (id) => document.getElementById(id);
 const updateChassisImageForTheme = () =>
   import('./dashboard.js').then((m) => m.updateChassisImageForTheme()).catch(() => {});
 
-function _restoreNonYakWallpaper(wpLayer) {
-  if (!wpLayer) return;
-  if (wpLayer.dataset.previousWallpaper) {
-    wpLayer.style.setProperty('background-image', wpLayer.dataset.previousWallpaper);
-    delete wpLayer.dataset.previousWallpaper;
-  } else if (wpLayer.style.backgroundImage && wpLayer.style.backgroundImage.includes('yak.webp')) {
-    const savedWp = typeof localStorage !== 'undefined' ? localStorage.getItem('kiboto_active_wallpaper') : null;
-    if (savedWp) {
-      const wpUrl =
-        savedWp.startsWith('/') || savedWp.startsWith('http')
-          ? savedWp
-          : `/api/wallpapers/download/${encodeURIComponent(savedWp)}`;
-      wpLayer.style.setProperty('background-image', `url('${wpUrl}')`);
-    } else {
-      wpLayer.style.removeProperty('background-image');
-    }
-  }
-  wpLayer.style.removeProperty('background-size');
-  wpLayer.style.removeProperty('background-position');
-  wpLayer.style.removeProperty('background-repeat');
-  wpLayer.style.removeProperty('background-color');
-}
-
 /**
  * The desktop's look (APP-B). themeName is one of the five themes (lagoon, fjord, moss, heather,
  * canyon), a name saved before APP-B (cyber, sapphire, light, oled, auto, …: translated, keeping
- * the rest of the look), or "yak", the hidden theme. customAccent: a colour, '' for the theme's
+ * the rest of the look). customAccent: a colour, '' for the theme's
  * own, or null to keep the current one.
  */
 export function applyDesktopTheme(themeName, customAccent = null) {
   const current = loadLook();
-  const look =
-    themeName === 'yak'
-      ? current
-      : normalizeLook({
-          ...fromLegacy(themeName, current),
-          accent: customAccent === undefined || customAccent === null ? current.accent : customAccent,
-        });
+  const look = normalizeLook({
+    ...fromLegacy(themeName, current),
+    accent: customAccent === undefined || customAccent === null ? current.accent : customAccent,
+  });
   customAccent = look.accent;
-  if (themeName !== 'yak') storeLook(look);
+  storeLook(look);
 
-  state.setDesktopTheme(themeName === 'yak' ? 'yak' : look.theme, customAccent);
+  state.setDesktopTheme(look.theme, customAccent);
 
-  if (typeof document !== 'undefined' && document.body) {
-    const wpLayer = document.getElementById('desktop-wallpaper');
-
-    if (themeName === 'yak') {
-      clearLook(document);
-      // the hidden Yak theme loads only when it is chosen (first-load budget)
-      import('../styles/04-yak-theme.css').catch(() => null);
-      document.body.classList.add('theme-yak');
-      if (wpLayer) {
-        if (
-          !wpLayer.dataset.previousWallpaper &&
-          wpLayer.style.backgroundImage &&
-          !wpLayer.style.backgroundImage.includes('yak.webp')
-        ) {
-          wpLayer.dataset.previousWallpaper = wpLayer.style.backgroundImage;
-        }
-        wpLayer.style.setProperty('background-image', 'url("/img/yak.webp")', 'important');
-        wpLayer.style.setProperty('background-size', 'contain', 'important');
-        wpLayer.style.setProperty('background-position', 'center center', 'important');
-        wpLayer.style.setProperty('background-repeat', 'no-repeat', 'important');
-        wpLayer.style.setProperty('background-color', '#060b09', 'important');
-        wpLayer.style.display = 'block';
-      }
-    } else {
-      applyLook(look, document);
-      if (wpLayer) _restoreNonYakWallpaper(wpLayer);
-    }
-  }
+  if (typeof document !== 'undefined' && document.body) applyLook(look, document);
 
   // Helper to parse hex to RGB with strict sanitization
   const hexToRgb = (hex) => {
@@ -176,23 +122,15 @@ export function applyDesktopTheme(themeName, customAccent = null) {
     }
   }
 
-  const isYak = themeName === 'yak';
-  const yakEggBtn = $('yak-easter-egg-btn');
-  if (yakEggBtn) {
-    yakEggBtn.title = isYak
-      ? 'Yak Express Active! [Press Y or click to toggle]'
-      : 'Trust in the Yak [Easter Egg Hot-key: Y]';
-  }
-
   const title = $('suite-brand-title');
   const badge = $('suite-brand-badge');
   const drawerSub = $('drawer-sub-badge');
   const icon = $('suite-brand-icon');
 
-  if (title) title.textContent = isYak ? 'YAK EXPRESS' : 'KIBOTO';
-  if (badge) badge.textContent = isYak ? 'RELIABILITY CULT' : t('nav.badge', 'Beta');
-  if (drawerSub) drawerSub.textContent = isYak ? 'LOGISTICS LAB' : t('settings.drawer_badge', 'Beta');
-  if (icon) icon.innerHTML = isYak ? '<use href="#i-yak"/>' : '<use href="#i-chip"/>';
+  if (title) title.textContent = 'KIBOTO';
+  if (badge) badge.textContent = t('nav.badge', 'Beta');
+  if (drawerSub) drawerSub.textContent = t('settings.drawer_badge', 'Beta');
+  if (icon) icon.innerHTML = '<use href="#i-chip"/>';
 
   updateChassisImageForTheme();
   syncDesktopTwinPreview({ theme: themeName, accent: customAccent });
@@ -205,8 +143,7 @@ export function syncDesktopTwinPreview(overrides = {}) {
 
   const curTheme = overrides.theme || state.desktopTheme || 'lagoon';
   const curAccent = overrides.accent !== undefined ? overrides.accent : state.desktopCustomAccent || '';
-  const activeColor =
-    curTheme === 'yak' ? '#d48a37' : lookColour({ ...loadLook(), theme: curTheme, accent: curAccent });
+  const activeColor = lookColour({ ...loadLook(), theme: curTheme, accent: curAccent });
   const rgb = hexToRgb(activeColor);
 
   const badge = document.getElementById('dt-theme-badge');
@@ -306,7 +243,6 @@ export function applyLcdTheme(themeName, customAccent = null, textClarity = null
     'lcd-theme-amethyst',
     'lcd-theme-crimson',
     'lcd-theme-light',
-    'lcd-theme-yak',
   ];
 
   targets.forEach((el) => {
@@ -335,58 +271,40 @@ export function applyLcdTheme(themeName, customAccent = null, textClarity = null
     el.classList.toggle('text-clarity-off', !textClarity);
   });
 
-  const isYak = themeName === 'yak';
   const engraved = $('chassis-panel-engraved');
-  if (engraved)
-    engraved.textContent = isYak
-      ? 'YAK EXPRESS • TOASTIE LOGISTICS LAB'
-      : t('console.engraved_title', 'KIBOTO • SYSTEM CONSOLE');
+  if (engraved) engraved.textContent = t('console.engraved_title', 'KIBOTO • SYSTEM CONSOLE');
 
   // Update module card titles inside #screen and #mini-lcd-canvas
   document.querySelectorAll('.card-storage .card-title-txt').forEach((el) => {
-    el.textContent = isYak ? 'CARGO HOLD' : t('console.storage', 'STORAGE');
+    el.textContent = t('console.storage', 'STORAGE');
   });
   document.querySelectorAll('.card-cpu .card-title-txt').forEach((el) => {
-    el.textContent = isYak ? 'YAK64 CPU' : t('console.cpu', 'CPU');
+    el.textContent = t('console.cpu', 'CPU');
   });
   document.querySelectorAll('.card-fans .card-title-txt').forEach((el) => {
-    el.textContent = isYak ? 'YAK AIRFLOW' : t('console.fans', 'FANS');
+    el.textContent = t('console.fans', 'FANS');
   });
   document.querySelectorAll('.card-net .card-title-txt').forEach((el) => {
-    el.textContent = isYak ? 'TRANSIT I/O' : t('console.net', 'NETWORK I/O');
+    el.textContent = t('console.net', 'NETWORK I/O');
   });
 
   if ($('lbl-module-storage'))
-    $('lbl-module-storage').textContent = isYak
-      ? 'Cargo Hold (Capacity & Donut)'
-      : t('settings.mod_storage', 'Storage (Donut & Capacity)');
-  if ($('lbl-module-cpu'))
-    $('lbl-module-cpu').textContent = isYak ? 'YAK64 Toastie CPU' : t('settings.mod_cpu', 'CPU Gauge');
-  if ($('lbl-module-fans'))
-    $('lbl-module-fans').textContent = isYak ? 'Asthmatic Yak Airflow & Fans' : t('settings.mod_fans', 'Fans & Uptime');
+    $('lbl-module-storage').textContent = t('settings.mod_storage', 'Storage (Donut & Capacity)');
+  if ($('lbl-module-cpu')) $('lbl-module-cpu').textContent = t('settings.mod_cpu', 'CPU Gauge');
+  if ($('lbl-module-fans')) $('lbl-module-fans').textContent = t('settings.mod_fans', 'Fans & Uptime');
   if ($('lbl-module-disks'))
-    $('lbl-module-disks').textContent = isYak
-      ? 'Yak Parcel Bays (OS, Data, Cache)'
-      : t('settings.mod_disks', 'Drives Tray (OS, Data, Cache)');
-  if ($('lbl-module-net'))
-    $('lbl-module-net').textContent = isYak
-      ? 'Transit Courier Throughput'
-      : t('settings.mod_net', 'Network Throughput');
+    $('lbl-module-disks').textContent = t('settings.mod_disks', 'Drives Tray (OS, Data, Cache)');
+  if ($('lbl-module-net')) $('lbl-module-net').textContent = t('settings.mod_net', 'Network Throughput');
 
   const stageGlow = $('virtual-chassis-lightbar');
   if (stageGlow) {
-    if (isYak) {
-      stageGlow.style.background = 'linear-gradient(90deg, #1b68b8 0%, #e07a38 50%, #1b68b8 100%)';
-      stageGlow.style.boxShadow = '0 0 16px rgba(224, 122, 56, 0.5)';
-    } else {
-      stageGlow.style.removeProperty('background');
-      stageGlow.style.removeProperty('box-shadow');
-      delete stageGlow.dataset.look;
-      // what the bar shows; the light bar's code loads when there is a bar to draw
-      import('./led-control.js')
-        .then((m) => m.renderLightbar(stageGlow, state.latestStats?.lightbar, { offOpacity: 0.15 }))
-        .catch(() => {});
-    }
+    stageGlow.style.removeProperty('background');
+    stageGlow.style.removeProperty('box-shadow');
+    delete stageGlow.dataset.look;
+    // what the bar shows; the light bar's code loads when there is a bar to draw
+    import('./led-control.js')
+      .then((m) => m.renderLightbar(stageGlow, state.latestStats?.lightbar, { offOpacity: 0.15 }))
+      .catch(() => {});
   }
 
   if (state.latestStats && state.latestStats.disks) updateChassisImageForTheme();
@@ -396,7 +314,7 @@ export function applyLcdTheme(themeName, customAccent = null, textClarity = null
 export function adoptAccountLook(user) {
   setLookOwner(user?.username || '');
   const look = lookFromAccount(user);
-  if (!look || state.desktopTheme === 'yak') return false;
+  if (!look) return false;
   rememberLookFor(user?.username || '', look); // the sign-in screen shows it next time (APP-D)
   storeLook(look);
   applyDesktopTheme(look.theme, look.accent);

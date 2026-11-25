@@ -41,12 +41,7 @@
   box-shadow: 0 0 8px rgba(37, 194, 160, 0.5);
 }
 
-body.theme-yak .lcd-dot.active {
-  background: #d48a37;
-  border-color: #d48a37;
-  color: #0b131a;
-  box-shadow: 0 0 8px rgba(212, 138, 55, 0.5);
-}
+
 
 .lcd-viewport {
   position: relative;
@@ -593,15 +588,9 @@ body.theme-yak .lcd-dot.active {
   cursor: grabbing;
 }
 
-body.theme-yak .docker-table-top-scroll::-webkit-scrollbar-thumb,
-body.theme-yak .docker-table-sticky-scroll::-webkit-scrollbar-thumb {
-  background: rgba(212, 138, 55, 0.75) !important;
-}
 
-body.theme-yak .docker-table-top-scroll::-webkit-scrollbar-thumb:hover,
-body.theme-yak .docker-table-sticky-scroll::-webkit-scrollbar-thumb:hover {
-  background: rgba(212, 138, 55, 1) !important;
-}
+
+
 
 .docker-table-top-scroll-inner,
 .docker-table-sticky-scroll-inner {
