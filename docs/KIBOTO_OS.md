@@ -25,7 +25,7 @@ nothing you need.
 | --- | --- | --- |
 | Processor | A 64-bit PC (amd64: Intel or AMD) | ARM boards are not supported as a machine of their own; the container runs on them. Virtual machines need Intel VT-x or AMD-V turned on in the firmware. |
 | Memory | 4 GB or more | 8 GB or more for apps, virtual machines or local AI. ZFS uses free memory as a read cache and gives it back when apps need it. |
-| System disk | A disk of its own, 32 GB or more; an SSD is best | Only Debian and Kiboto live there. It never holds your files, and setup never offers it as storage. |
+| System disk | A disk of its own, 32 GB or more; an SSD is best | Only Debian and Kiboto live there: a fresh install uses about 5 GB. It never holds your files, and setup never offers it as storage. |
 | Storage drives | SATA or NVMe drives on the board, or on a controller in HBA (IT) mode | ZFS, btrfs and ext4 want to see each drive as it is: a RAID card that hides the drives behind its own volumes is the wrong kind. USB drives are fine for backups; in a pool they are slow and can drop off, so they are not recommended there. |
 | Network | A wired Ethernet port Debian has a driver for | Wi-Fi is not set up by the installer or by Kiboto. Bonds and VLANs are not there yet. |
 | Firmware | UEFI or the older BIOS mode, Secure Boot off | Kiboto builds ZFS on the machine, and Secure Boot refuses to load what is built there. The install stops at the start and says so. |
@@ -71,6 +71,8 @@ beside `install.sh`.
    with size and model, then asks before writing) and a root password. No other disk is touched.
 6. When the machine starts again, Kiboto installs itself (about ten minutes, most of it building
    ZFS) and the screen shows the code for the first sign-in.
+   If it stops, for example without a network, the screen says why. Put it right and restart the
+   machine: the install tries again. The whole log is in `/var/log/kiboto-install.log`.
 
 Root may sign in over SSH with that password until you turn SSH off in Kiboto (Network, This
 machine).

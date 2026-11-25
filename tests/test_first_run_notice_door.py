@@ -46,3 +46,32 @@ def test_the_door_side_writes_the_code_from_the_file_and_removes_it_after(tmp_pa
     code_file.unlink()
     first_run.refresh_here()
     assert not (tmp_path / "issue.d" / "kiboto.issue").exists() and not (tmp_path / "motd.d" / "kiboto").exists()
+
+
+def test_the_console_draws_the_notice_again(monkeypatch, tmp_path):
+    from backend import first_run
+
+    calls = []
+    monkeypatch.setattr(first_run, "ISSUE", str(tmp_path / "issue.d" / "kiboto.issue"))
+    monkeypatch.setattr(first_run, "MOTD", str(tmp_path / "motd.d" / "kiboto"))
+    monkeypatch.setattr(first_run.shutil, "which", lambda name: "/sbin/agetty")
+    monkeypatch.setattr(first_run.os, "geteuid", lambda: 0)
+    monkeypatch.setattr(first_run.runtime, "managed_host", lambda: True)
+    monkeypatch.setattr(first_run.subprocess, "run", lambda cmd, **kw: calls.append(cmd))
+    first_run.write_notice("ABCD-EFGH-JKLM")
+    first_run.clear_here()
+    assert calls == [["/sbin/agetty", "--reload"], ["/sbin/agetty", "--reload"]]
+
+
+def test_no_redraw_off_a_managed_host(monkeypatch, tmp_path):
+    from backend import first_run
+
+    calls = []
+    monkeypatch.setattr(first_run, "ISSUE", str(tmp_path / "kiboto.issue"))
+    monkeypatch.setattr(first_run, "MOTD", str(tmp_path / "kiboto.motd"))
+    monkeypatch.setattr(first_run.shutil, "which", lambda name: "/sbin/agetty")
+    monkeypatch.setattr(first_run.os, "geteuid", lambda: 0)
+    monkeypatch.setattr(first_run.runtime, "managed_host", lambda: False)
+    monkeypatch.setattr(first_run.subprocess, "run", lambda cmd, **kw: calls.append(cmd))
+    first_run.write_notice("ABCD-EFGH-JKLM")
+    assert calls == []

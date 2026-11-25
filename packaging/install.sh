@@ -13,6 +13,8 @@
 # the kernel, ZFS and Docker (`apt-mark showhold` lists them; `apt-mark unhold` gives them back).
 # Storage pools and what is on them are never touched by this script, in either direction.
 set -eu
+# Kiboto runs as its own user and reads what this script puts in place, whatever umask called it
+umask 022
 
 # The version this script installs when it is given none: written in when a version is released,
 # with its digest, so what is installed is exactly what the release named.
@@ -56,6 +58,9 @@ must_be_this_machine() {
 # A machine that already serves files or runs containers has settings Kiboto would write over.
 must_be_fresh() {
   [ -e "$ETC/managed" ] && return 0   # Kiboto's own earlier install: this run updates it
+  # an earlier run of this script stopped part way (no network, an unsigned version): the Samba,
+  # Docker and NFS here are what it installed, and the first start of the install image tries again
+  [ -e "$ETC/install-started" ] && return 0
   if [ -s /etc/samba/smb.conf ] && dpkg -s samba >/dev/null 2>&1; then
     die "Samba is already set up here (/etc/samba/smb.conf). Kiboto writes that file itself; install on a fresh Debian."
   fi
@@ -66,6 +71,10 @@ must_be_fresh() {
     die "NFS exports are already set up here (/etc/exports). Install on a fresh Debian."
   fi
 }
+
+# Written once the machine passed must_be_fresh, removed when Kiboto runs: a second run after a
+# failure is then not taken for a machine someone else set up.
+mark_started() { mkdir -p "$ETC"; : > "$ETC/install-started"; }
 
 # the packages of a list that are not installed
 missing() {
@@ -361,14 +370,16 @@ uninstall() {
 case "${1:-}" in
   --from)
     [ -n "${2:-}" ] || die "say where Kiboto's code is: --from <folder>"
-    must_be_this_machine; must_be_fresh
-    packages; docker_setup; code "$2"; service "$PREFIX/current"; wait_up; network_to_networkd ;;
+    must_be_this_machine; must_be_fresh; mark_started
+    packages; docker_setup; code "$2"; service "$PREFIX/current"; wait_up; network_to_networkd
+    rm -f "$ETC/install-started" ;;
   --image | "")
     image=${2:-$KIBOTO_IMAGE}
     [ -n "$image" ] || { sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//'; exit 2; }
-    must_be_a_digest "$image"; must_be_this_machine; must_be_fresh
+    must_be_a_digest "$image"; must_be_this_machine; must_be_fresh; mark_started
     packages; docker_setup; code_from_image "$image"; must_be_signed "$image" "${3:-}"
-    service "$PREFIX/current"; wait_up; network_to_networkd ;;
+    service "$PREFIX/current"; wait_up; network_to_networkd
+    rm -f "$ETC/install-started" ;;
   --uninstall) uninstall "${2:-}" ;;
   *) sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;
 esac

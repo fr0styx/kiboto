@@ -8,6 +8,8 @@ whoever signs in to it over SSH. Both notices go when the person has chosen thei
 
 import os
 import secrets
+import shutil
+import subprocess
 
 from backend import config, runtime
 from backend.config import logger
@@ -69,6 +71,19 @@ def write_notice(code: str) -> None:
                 f.write(_TEXT.format(where=place, code=code))
         except OSError as e:
             logger.warning("The first-time code could not be shown in %s: %s", path, e)
+    _redraw()
+
+
+def _redraw() -> None:
+    """The console prints its banner when it draws the login prompt, which may have been before the
+    notice changed: agetty --reload draws it again (as root, on a managed host only)."""
+    agetty = shutil.which("agetty")
+    if not agetty or os.geteuid() != 0 or not runtime.managed_host():
+        return
+    try:
+        subprocess.run([agetty, "--reload"], capture_output=True, timeout=5, check=False)
+    except (OSError, subprocess.SubprocessError) as e:
+        logger.info("The console could not draw its banner again: %s", e)
 
 
 def clear() -> None:
@@ -86,6 +101,7 @@ def clear_here() -> None:
                 os.remove(path)
         except OSError as e:
             logger.warning("The first-time notice %s could not be removed: %s", path, e)
+    _redraw()
 
 
 def refresh() -> None:

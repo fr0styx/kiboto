@@ -58,7 +58,7 @@ def test_everything_else_is_answered():
 def test_kiboto_is_installed_once_at_the_first_start():
     late = _read("late.sh")
     assert "cp /cdrom/kiboto/install.sh /target/root/kiboto-install.sh" in late
-    assert "ConditionPathExists=!/etc/kiboto/managed" in late and "ExecStart=/bin/sh /root/kiboto-install.sh" in late
+    assert "ConditionPathExists=!/etc/kiboto/managed" in late and "ExecStart=/bin/sh /root/kiboto-firstboot.sh" in late
     assert "in-target systemctl enable kiboto-firstboot.service" in late
     assert "PermitRootLogin yes" in late  # the password typed at install signs in over SSH, until SSH is off
     assert "/cdrom/kiboto/authorized_keys" in late
@@ -104,3 +104,15 @@ def test_a_release_builds_the_install_image_from_checked_debian_files():
     step = ci[ci.index("- name: Build the install image") : ci.index("- name: Create Release")]
     assert "continue-on-error: true" in step and "scripts/build_release_image.sh" in step
     assert "gh release upload" in ci
+
+
+def test_the_first_start_says_on_the_screen_what_happens():
+    late = _read("late.sh")
+    run = late[late.index("<<'RUN'") : late.index("\nRUN\n")]
+    assert "sh /root/kiboto-install.sh" in run and 'exit "$rc"' in run  # a failure fails the service: it tries again
+    assert "Kiboto is installing itself" in run and "Kiboto could not install itself" in run
+    assert "restart the machine: it tries again" in run and "agetty --reload" in run
+    assert (
+        'install -m 600 /dev/null "$LOG"' in run and "umask" not in run
+    )  # the log holds the code; install.sh keeps its own umask
+    assert "KIBOTO_ACCEPT_MAIN_BUILDS" in run and ". /etc/kiboto/kiboto.env" not in run  # read, never run

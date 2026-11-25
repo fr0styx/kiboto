@@ -3,6 +3,7 @@
  "backend/api/remotes.py": 1,
  "backend/api/system.py": 1,
  "backend/api/vms.py": 3,
+ "backend/first_run.py": 1,
  "backend/hardware/disk_safety.py": 2,
  "backend/hardware/disks.py": 3,
  "backend/hardware/drive_sleep.py": 1,
