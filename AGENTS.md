@@ -225,6 +225,7 @@ docker exec -i kiboto python3 -m pytest -v /app/tests/test_docker_updates.py
 - **Errors you carry on after**: `logger.debug("<module.function>: ignored error", exc_info=True)` (or `ignored("<where>")` from `backend/ignored_errors.py`) is counted, warned about once and shown in diagnostics. Do not add new ones where the error should be handled or reported.
 - **Imports**: lower layers (`fsutil`, `state`, `config`) never import higher ones, not even inside functions; pass a callback instead (see `fsutil.CORRUPT_LISTENERS`).
 - **Tests**: each test starts with a clean data folder and fresh hardware state (`tests/conftest.py`). A test that changes module globals restores them (use `monkeypatch`), so the suite passes in any order.
+- **Feature matrix**: `docs/feature-matrix.json` is the one list of what Kiboto Companion (beside another NAS system, or on plain Linux) and Kiboto OS can each do. A change that adds, removes, repairs or breaks a feature on any of the three changes that file in the same commit; then run `python scripts/feature_matrix.py write`, which writes `docs/FEATURES.md` for GitHub and `docs/features.html` for the website (`tests/test_feature_matrix.py` fails when they are behind).
 - **Fans**: the host-side fan watchdog (docs/FAN_WATCHDOG.md) reads the heartbeat the stats loop writes; keep `fan_heartbeat.beat()` in that loop.
 
 ---

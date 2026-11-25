@@ -8,6 +8,9 @@ Kiboto OS is in beta. It is tested on its reference box and on a Debian 13 virtu
 real disks handed to it, not yet on a range of real hardware. Use it on a machine whose disks hold
 nothing you need.
 
+What it can do today, beside what Kiboto Companion (the container) can do, is in the
+[feature list](FEATURES.md).
+
 1. [What it runs on](#what-it-runs-on)
 2. [What we promise while it is in beta](#what-we-promise-while-it-is-in-beta)
 3. [Install from the USB image](#install-from-the-usb-image)

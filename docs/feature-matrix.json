@@ -1,0 +1,64 @@
+{
+ "_about": "What each way of running Kiboto can do. This file is the one source: docs/FEATURES.md and docs/features.html are written from it by scripts/feature_matrix.py, and a test fails when they are behind. A change that adds, removes, repairs or breaks a feature on any of the three columns changes this file in the same commit.",
+ "columns": [
+  {"id": "beside", "name": "Kiboto Companion beside another NAS system", "short": "Companion, beside a NAS system", "about": "The container on Unraid, TrueNAS SCALE, Proxmox, FygoOS, UGOS or ZettOS. That system keeps running the drives and the machine."},
+  {"id": "linux", "name": "Kiboto Companion on plain Linux", "short": "Companion, on plain Linux", "about": "The container on Debian, Ubuntu or any Docker host with no NAS system of its own."},
+  {"id": "os", "name": "Kiboto OS", "short": "Kiboto OS", "about": "A machine of its own: Debian 13 set up by the Kiboto OS install image. Kiboto runs the drives and the machine. In beta."}
+ ],
+ "states": {
+  "yes": "Yes",
+  "partly": "Partly",
+  "view": "View only",
+  "host": "Your NAS system does this",
+  "soon": "Not yet",
+  "check": "Being checked",
+  "no": "No"
+ },
+ "groups": [
+  {"name": "Storage", "features": [
+   {"name": "Storage pools: create, grow, see their health", "beside": "view", "linux": "partly", "os": "yes", "note": "On plain Linux Kiboto makes new pools but does not take over pools that already exist."},
+   {"name": "Replace a failed drive from the app", "beside": "host", "linux": "no", "os": "soon", "note": "Kiboto OS has a written guide today; replacing in the app is planned before it leaves beta."},
+   {"name": "Windows and Mac shares (SMB)", "beside": "view", "linux": "yes", "os": "yes"},
+   {"name": "NFS shares", "beside": "host", "linux": "no", "os": "yes"},
+   {"name": "A private folder for each person", "beside": "yes", "linux": "yes", "os": "yes"},
+   {"name": "USB drives: open and eject", "beside": "host", "linux": "no", "os": "yes"},
+   {"name": "Drive sleep", "beside": "host", "linux": "no", "os": "yes"},
+   {"name": "Drive Health: checks, warnings, history", "beside": "yes", "linux": "yes", "os": "yes"},
+   {"name": "Settings copy on the pools, to rebuild after a new system disk", "beside": "no", "linux": "no", "os": "yes"},
+   {"name": "iSCSI targets", "beside": "yes", "linux": "yes", "os": "soon"},
+   {"name": "Merged folders across fast and large drives", "beside": "host", "linux": "yes", "os": "soon"},
+   {"name": "Copies of a pool to another machine (replication)", "beside": "host", "linux": "yes", "os": "soon"}
+  ]},
+  {"name": "Files, apps and Kib", "features": [
+   {"name": "File Explorer, previews and share links", "beside": "yes", "linux": "yes", "os": "yes"},
+   {"name": "Apps from the catalog (Docker)", "beside": "yes", "linux": "yes", "os": "yes"},
+   {"name": "Virtual machines", "beside": "yes", "linux": "yes", "os": "yes", "note": "Not in the smaller -core image."},
+   {"name": "Backups and restore", "beside": "yes", "linux": "yes", "os": "yes"},
+   {"name": "SFTP", "beside": "yes", "linux": "yes", "os": "soon"},
+   {"name": "Kib: answers from your own files, on your own hardware", "beside": "yes", "linux": "yes", "os": "yes"},
+   {"name": "People, roles and sign-in with a second step", "beside": "yes", "linux": "yes", "os": "yes"}
+  ]},
+  {"name": "The machine", "features": [
+   {"name": "Kiboto updates with a way back", "beside": "yes", "linux": "yes", "os": "yes", "note": "Kiboto OS follows the Stable and Beta channels; the container can also follow Edge."},
+   {"name": "System updates: kernel, ZFS, Docker", "beside": "host", "linux": "host", "os": "partly", "note": "Kiboto OS moves these to versions a release was tested with. Automatic security updates are being added."},
+   {"name": "Network settings", "beside": "view", "linux": "view", "os": "partly", "note": "Kiboto OS changes the address and the bridge for virtual machines, with a way back."},
+   {"name": "Firewall", "beside": "host", "linux": "host", "os": "soon"},
+   {"name": "Restart and shut down", "beside": "yes", "linux": "yes", "os": "yes"},
+   {"name": "Power schedule: wake and sleep at set times", "beside": "yes", "linux": "yes", "os": "soon"},
+   {"name": "Battery backup (UPS)", "beside": "yes", "linux": "yes", "os": "soon"},
+   {"name": "Server name, time zone and the SSH switch", "beside": "host", "linux": "host", "os": "yes"},
+   {"name": "Dynamic DNS, HTTPS certificates, access from away", "beside": "yes", "linux": "yes", "os": "check"}
+  ]},
+  {"name": "Front panel hardware (Zettlab D6 and D8 Ultra)", "features": [
+   {"name": "Fans: curves, quiet at night, fan stop while drives sleep", "beside": "yes", "linux": "yes", "os": "yes"},
+   {"name": "Light bar", "beside": "yes", "linux": "yes", "os": "check"},
+   {"name": "Front screen", "beside": "yes", "linux": "yes", "os": "partly", "note": "Kiboto OS draws the screen with the plain renderer."},
+   {"name": "Card copies from the SD and microSD slots", "beside": "yes", "linux": "yes", "os": "partly", "note": "On Kiboto OS copies start from the app; the front COPY button is not read yet."},
+   {"name": "Fan watchdog beside the app", "beside": "yes", "linux": "yes", "os": "soon"}
+  ]},
+  {"name": "Where it runs", "features": [
+   {"name": "Processors", "beside": "amd64 and arm64", "linux": "amd64 and arm64", "os": "amd64"},
+   {"name": "Installed as", "beside": "A container", "linux": "A container", "os": "An install image for a USB stick, or a script on Debian 13"}
+  ]}
+ ]
+}

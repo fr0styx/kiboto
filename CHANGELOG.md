@@ -116,6 +116,8 @@ Family portal (off until you turn it on, in Away from home): family members who 
 
 The Hardware button is back in the top bar for the people who may change the hardware. It opens a panel with a tab for each kind of hardware the machine has (cooling and fans, lights, front screen, card copies), with the same controls as the Hardware page.
 
+A feature list by edition (docs/FEATURES.md): what Kiboto Companion beside another NAS system, Kiboto Companion on plain Linux and Kiboto OS can each do today, and what is not there yet.
+
 #### Changes
 
 On a machine of its own, a separate system service (the host door) now changes the machine's name, time zone, clock and SSH setting for Kiboto, from a fixed list of operations: the first step towards Kiboto's web service running without full system rights (docs/adr/0006-web-without-root.md).

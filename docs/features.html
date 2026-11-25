@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kiboto: what each edition can do</title>
+<meta name="description" content="Kiboto Companion and Kiboto OS compared, feature by feature.">
+<!-- Written by scripts/feature_matrix.py from docs/feature-matrix.json. Do not edit by hand. -->
+<style>:root{--bg:#f4f8f8;--card:#ffffff;--ink:#12292c;--soft:#4a6165;--line:#d5e2e3;--brand:#0f7f73;
+--yes:#0f7f73;--partly:#8a5a00;--view:#3b5bb5;--host:#4a6165;--soon:#a2420f;--check:#6b4bb0;--no:#7a8789}
+@media (prefers-color-scheme:dark){:root{--bg:#0d1a1c;--card:#122326;--ink:#e6f1f1;--soft:#9db3b6;--line:#23393c;
+--brand:#33cdb8;--yes:#33cdb8;--partly:#f2c14e;--view:#8fb0ff;--host:#9db3b6;--soon:#ff9d6c;--check:#c3a6ff;--no:#7f9396}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);
+font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:1060px;margin:0 auto;padding:32px 16px 64px}a{color:var(--brand)}
+h1{font-size:1.9rem;line-height:1.2;margin:8px 0 12px}h2{font-size:1.2rem;margin:36px 0 10px}
+.lead{color:var(--soft);max-width:70ch}.cols{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));margin:20px 0}
+.col{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.col b{display:block;margin-bottom:4px}.col span{color:var(--soft);font-size:.92rem}
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--card)}
+table{border-collapse:collapse;width:100%;min-width:640px}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}thead th{font-size:.85rem;color:var(--soft);font-weight:600}
+th[scope=row]{font-weight:600;width:40%}small{display:block;font-weight:400;color:var(--soft);margin-top:2px}
+.s{font-weight:600;white-space:nowrap}.s::before{content:"";display:inline-block;width:.6em;height:.6em;border-radius:50%;
+background:currentColor;margin-right:.45em}.yes{color:var(--yes)}.partly{color:var(--partly)}.view{color:var(--view)}
+.host{color:var(--host)}.soon{color:var(--soon)}.check{color:var(--check)}.no{color:var(--no)}
+.key{display:flex;flex-wrap:wrap;gap:6px 18px;margin:8px 0 0;padding:0;list-style:none;font-size:.92rem;color:var(--soft)}
+footer{margin-top:40px;color:var(--soft);font-size:.92rem}</style>
+</head>
+<body>
+<main>
+<p><a href="/">Kiboto</a></p>
+<h1>What each edition can do</h1>
+<p class="lead">Kiboto runs in three ways. This page says what each can do today, and what is still on its way.</p>
+<div class="cols">
+<div class="col"><b>Kiboto Companion beside another NAS system</b><span>The container on Unraid, TrueNAS SCALE, Proxmox, FygoOS, UGOS or ZettOS. That system keeps running the drives and the machine.</span></div>
+<div class="col"><b>Kiboto Companion on plain Linux</b><span>The container on Debian, Ubuntu or any Docker host with no NAS system of its own.</span></div>
+<div class="col"><b>Kiboto OS</b><span>A machine of its own: Debian 13 set up by the Kiboto OS install image. Kiboto runs the drives and the machine. In beta.</span></div>
+</div>
+<ul class="key" aria-label="What the words mean">
+<li><span class="s yes">Yes</span></li>
+<li><span class="s partly">Partly</span></li>
+<li><span class="s view">View only</span></li>
+<li><span class="s host">Your NAS system does this</span></li>
+<li><span class="s soon">Not yet</span></li>
+<li><span class="s check">Being checked</span></li>
+<li><span class="s no">No</span></li>
+</ul>
+<h2>Storage</h2>
+<div class="scroll" tabindex="0" role="region" aria-label="Storage">
+<table>
+<thead><tr><th></th><th scope="col">Companion, beside a NAS system</th><th scope="col">Companion, on plain Linux</th><th scope="col">Kiboto OS</th></tr></thead>
+<tbody>
+<tr><th scope="row">Storage pools: create, grow, see their health<small>On plain Linux Kiboto makes new pools but does not take over pools that already exist.</small></th><td><span class="s view">View only</span></td><td><span class="s partly">Partly</span></td><td><span class="s yes">Yes</span></td></tr>
+<tr><th scope="row">Replace a failed drive from the app<small>Kiboto OS has a written guide today; replacing in the app is planned before it leaves beta.</small></th><td><span class="s host">Your NAS system does this</span></td><td><span class="s no">No</span></td><td><span class="s soon">Not yet</span></td></tr>
+<tr><th scope="row">Windows and Mac shares (SMB)</th><td><span class="s view">View only</span></td><td><span class="s yes">Yes</span></td><td><span class="s yes">Yes</span></td></tr>
+<tr><th scope="row">NFS shares</th><td><span class="s host">Your NAS system does this</span></td><td><span class="s no">No</span></td><td><span class="s yes">Yes</span></td></tr>
+<tr><th scope="row">A private folder for each person</th><td><span class="s yes">Yes</span></td><td><span class="s yes">Yes</span></td><td><span class="s yes">Yes</span></td></tr>
+<tr><th scope="row">USB drives: open and eject</th><td><span class="s host">Your NAS system does this</span></td><td><span class="s no">No</span></td><td><span class="s yes">Yes</span></td></tr>
+<tr><th scope="row">Drive sleep</th><td><span class="s host">Your NAS system does this</span></td><td><span class="s no">No</span></td><td><span class="s yes">Yes</span></td></tr>
+<tr><th scope="row">Drive Health: checks, warnings, history</th><td><span class="s yes">Yes</span></td><td><span class="s yes">Yes</span></td><td><span class="s yes">Yes</span></td></tr>
+<tr><th scope="row">Settings copy on the pools, to rebuild after a new system disk</th><td><span class="s no">No</span></td><td><span class="s no">No</span></td><td><span class="s yes">Yes</span></td></tr>
+<tr><th scope="row">iSCSI targets</th><td><span class="s yes">Yes</span></td><td><span class="s yes">Yes</span></td><td><span class="s soon">Not yet</span></td></tr>
+<tr><th scope="row">Merged folders across fast and large drives</th><td><span class="s host">Your NAS system does this</span></td><td><span class="s yes">Yes</span></td><td><span class="s soon">Not yet</span></td></tr>
+<tr><th scope="row">Copies of a pool to another machine (replication)</th><td><span class="s host">Your NAS system does this</span></td><td><span class="s yes">Yes</span></td><td><span class="s soon">Not yet</span></td></tr>
+</tbody>
+</table>
+</div>
+<h2>Files, apps and Kib</h2>
+<div class="scroll" tabindex="0" role="region" aria-label="Files, apps and Kib">
+<table>
+<thead><tr><th></th><th scope="col">Companion, beside a NAS system</th><th scope="col">Companion, on plain Linux</th><th scope="col">Kiboto OS</th></tr></thead>
+<tbody>
+<tr><th scope="row">File Explorer, previews and share links</th><td><span class="s yes">Yes</span></td><td><span class="s yes">Yes</span></td><td><span class="s yes">Yes</span></td></tr>
+<tr><th scope="row">Apps from the catalog (Docker)</th><td><span class="s yes">Yes</span></td><td><span class="s yes">Yes</span></td><td><span class="s yes">Yes</span></td></tr>
+<tr><th scope="row">Virtual machines<small>Not in the smaller -core image.</small></th><td><span class="s yes">Yes</span></td><td><span class="s yes">Yes</span></td><td><span class="s yes">Yes</span></td></tr>
+<tr><th scope="row">Backups and restore</th><td><span class="s yes">Yes</span></td><td><span class="s yes">Yes</span></td><td><span class="s yes">Yes</span></td></tr>
+<tr><th scope="row">SFTP</th><td><span class="s yes">Yes</span></td><td><span class="s yes">Yes</span></td><td><span class="s soon">Not yet</span></td></tr>
+<tr><th scope="row">Kib: answers from your own files, on your own hardware</th><td><span class="s yes">Yes</span></td><td><span class="s yes">Yes</span></td><td><span class="s yes">Yes</span></td></tr>
+<tr><th scope="row">People, roles and sign-in with a second step</th><td><span class="s yes">Yes</span></td><td><span class="s yes">Yes</span></td><td><span class="s yes">Yes</span></td></tr>
+</tbody>
+</table>
+</div>
+<h2>The machine</h2>
+<div class="scroll" tabindex="0" role="region" aria-label="The machine">
+<table>
+<thead><tr><th></th><th scope="col">Companion, beside a NAS system</th><th scope="col">Companion, on plain Linux</th><th scope="col">Kiboto OS</th></tr></thead>
+<tbody>
+<tr><th scope="row">Kiboto updates with a way back<small>Kiboto OS follows the Stable and Beta channels; the container can also follow Edge.</small></th><td><span class="s yes">Yes</span></td><td><span class="s yes">Yes</span></td><td><span class="s yes">Yes</span></td></tr>
+<tr><th scope="row">System updates: kernel, ZFS, Docker<small>Kiboto OS moves these to versions a release was tested with. Automatic security updates are being added.</small></th><td><span class="s host">Your NAS system does this</span></td><td><span class="s host">Your NAS system does this</span></td><td><span class="s partly">Partly</span></td></tr>
+<tr><th scope="row">Network settings<small>Kiboto OS changes the address and the bridge for virtual machines, with a way back.</small></th><td><span class="s view">View only</span></td><td><span class="s view">View only</span></td><td><span class="s partly">Partly</span></td></tr>
+<tr><th scope="row">Firewall</th><td><span class="s host">Your NAS system does this</span></td><td><span class="s host">Your NAS system does this</span></td><td><span class="s soon">Not yet</span></td></tr>
+<tr><th scope="row">Restart and shut down</th><td><span class="s yes">Yes</span></td><td><span class="s yes">Yes</span></td><td><span class="s yes">Yes</span></td></tr>
+<tr><th scope="row">Power schedule: wake and sleep at set times</th><td><span class="s yes">Yes</span></td><td><span class="s yes">Yes</span></td><td><span class="s soon">Not yet</span></td></tr>
+<tr><th scope="row">Battery backup (UPS)</th><td><span class="s yes">Yes</span></td><td><span class="s yes">Yes</span></td><td><span class="s soon">Not yet</span></td></tr>
+<tr><th scope="row">Server name, time zone and the SSH switch</th><td><span class="s host">Your NAS system does this</span></td><td><span class="s host">Your NAS system does this</span></td><td><span class="s yes">Yes</span></td></tr>
+<tr><th scope="row">Dynamic DNS, HTTPS certificates, access from away</th><td><span class="s yes">Yes</span></td><td><span class="s yes">Yes</span></td><td><span class="s check">Being checked</span></td></tr>
+</tbody>
+</table>
+</div>
+<h2>Front panel hardware (Zettlab D6 and D8 Ultra)</h2>
+<div class="scroll" tabindex="0" role="region" aria-label="Front panel hardware (Zettlab D6 and D8 Ultra)">
+<table>
+<thead><tr><th></th><th scope="col">Companion, beside a NAS system</th><th scope="col">Companion, on plain Linux</th><th scope="col">Kiboto OS</th></tr></thead>
+<tbody>
+<tr><th scope="row">Fans: curves, quiet at night, fan stop while drives sleep</th><td><span class="s yes">Yes</span></td><td><span class="s yes">Yes</span></td><td><span class="s yes">Yes</span></td></tr>
+<tr><th scope="row">Light bar</th><td><span class="s yes">Yes</span></td><td><span class="s yes">Yes</span></td><td><span class="s check">Being checked</span></td></tr>
+<tr><th scope="row">Front screen<small>Kiboto OS draws the screen with the plain renderer.</small></th><td><span class="s yes">Yes</span></td><td><span class="s yes">Yes</span></td><td><span class="s partly">Partly</span></td></tr>
+<tr><th scope="row">Card copies from the SD and microSD slots<small>On Kiboto OS copies start from the app; the front COPY button is not read yet.</small></th><td><span class="s yes">Yes</span></td><td><span class="s yes">Yes</span></td><td><span class="s partly">Partly</span></td></tr>
+<tr><th scope="row">Fan watchdog beside the app</th><td><span class="s yes">Yes</span></td><td><span class="s yes">Yes</span></td><td><span class="s soon">Not yet</span></td></tr>
+</tbody>
+</table>
+</div>
+<h2>Where it runs</h2>
+<div class="scroll" tabindex="0" role="region" aria-label="Where it runs">
+<table>
+<thead><tr><th></th><th scope="col">Companion, beside a NAS system</th><th scope="col">Companion, on plain Linux</th><th scope="col">Kiboto OS</th></tr></thead>
+<tbody>
+<tr><th scope="row">Processors</th><td>amd64 and arm64</td><td>amd64 and arm64</td><td>amd64</td></tr>
+<tr><th scope="row">Installed as</th><td>A container</td><td>A container</td><td>An install image for a USB stick, or a script on Debian 13</td></tr>
+</tbody>
+</table>
+</div>
+<footer>This page is written from the same file as the list on GitHub, and is kept in step with every change. Kiboto OS is in beta.</footer>
+</main>
+</body>
+</html>
