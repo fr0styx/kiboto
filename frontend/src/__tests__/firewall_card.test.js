@@ -85,10 +85,13 @@ describe('firewall card (audit A13)', () => {
     await renderFirewallCard();
     const box = /** @type {HTMLElement} */ (document.getElementById('firewall-card'));
     expect(box.querySelector('#fw-why')).toBeNull();
+    expect(box.querySelector('#fw-toggle')?.classList.contains('active')).toBe(false);
     /** @type {HTMLButtonElement} */ (box.querySelector('#fw-toggle')).click();
     await flush();
     expect(put).toHaveBeenLastCalledWith('/api/security/firewall', { enabled: true, outside: NONE });
     expect(box.querySelector('#fw-status')?.textContent).toContain('On: devices at home reach everything');
+    // the switch looks on when it is on, as the other cards' switches do
+    expect(box.querySelector('#fw-toggle')?.classList.contains('active')).toBe(true);
     const web = /** @type {HTMLInputElement} */ (box.querySelector('[data-fw-svc="web"]'));
     web.checked = true;
     web.dispatchEvent(new Event('change'));

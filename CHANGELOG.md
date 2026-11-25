@@ -92,6 +92,8 @@ A release can no longer look complete when its Kiboto OS install image is missin
 
 Kiboto OS: the Edge update channel is no longer offered there, because such a machine installs only releases and Edge was always refused.
 
+Firewall: the switch now looks on when the firewall is on.
+
 #### Security
 
 On a machine of its own, failed sign-ins to shared folders over the network now count like web sign-ins: 20 in 15 minutes block the address for an hour, and they show under History, Sign-ins.
