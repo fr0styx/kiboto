@@ -17,6 +17,7 @@ One small JSON object a week, for example:
   "platform": "unraid",
   "arch": "x86_64",
   "variant": "full",
+  "edition": "companion",
   "drives": "5-8",
   "features": ["containers", "ups"]
 }
@@ -29,6 +30,7 @@ One small JSON object a week, for example:
 | `platform` | the storage platform: `unraid`, `truenas`, `proxmox`, `generic_linux`, … |
 | `arch` | the processor type, e.g. `x86_64`, `aarch64` |
 | `variant` | `full` or `core` image |
+| `edition` | `os` on Kiboto OS, `companion` for the container, `other` for anything else |
 | `drives` | a range: `0`, `1-2`, `3-4`, `5-8`, `9-16`, `17+` |
 | `features` | from a fixed list: `containers`, `backups`, `ups`, `lcd`, `leds`, `ai`, `vms`, `sso` |
 
@@ -51,6 +53,9 @@ npx wrangler d1 create zettnas-health          # copy the database_id into wrang
 npx wrangler d1 execute zettnas-health --remote --file schema.sql
 npx wrangler deploy                            # prints the https://zettnas-health.<you>.workers.dev address
 ```
+
+A receiver whose database was made before the `edition` field needs the column once:
+`npx wrangler d1 execute <your database> --remote --command "ALTER TABLE reports ADD COLUMN edition TEXT NOT NULL DEFAULT 'unknown'"`.
 
 Then set `DEFAULT_ENDPOINT` in `backend/services/health_signal.py` to
 `https://zettnas-health.<you>.workers.dev/v1/report` and release. Until then the switch says

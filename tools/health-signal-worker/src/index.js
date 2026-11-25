@@ -18,6 +18,8 @@ const FIELDS = {
   variant: /^(full|core)$/,
   drives: /^(0|1-2|3-4|5-8|9-16|17\+)$/,
 };
+// Sent since 2.0.7; a report from a version before has none, and is kept as "unknown"
+const EDITION = /^(os|companion|other)$/;
 export const FEATURES = new Set(['containers', 'backups', 'ups', 'lcd', 'leds', 'ai', 'vms', 'sso']);
 
 /** "2026-W43" for a date (ISO 8601 week, weeks start on Monday). */
@@ -34,13 +36,17 @@ export function isoWeek(date) {
 export function validate(body) {
   if (!body || typeof body !== 'object' || Array.isArray(body)) return { error: 'not an object' };
   if (body.schema !== 1) return { error: 'unknown schema' };
-  const allowed = new Set([...Object.keys(FIELDS), 'schema', 'features']);
+  const allowed = new Set([...Object.keys(FIELDS), 'schema', 'features', 'edition']);
   for (const key of Object.keys(body)) if (!allowed.has(key)) return { error: `unknown field ${key}` };
   const row = {};
   for (const [key, pattern] of Object.entries(FIELDS)) {
     if (typeof body[key] !== 'string' || !pattern.test(body[key])) return { error: `bad ${key}` };
     row[key] = body[key];
   }
+  if (body.edition !== undefined && (typeof body.edition !== 'string' || !EDITION.test(body.edition))) {
+    return { error: 'bad edition' };
+  }
+  row.edition = body.edition ?? 'unknown';
   const features = body.features ?? [];
   if (!Array.isArray(features) || features.length > FEATURES.size || !features.every((f) => FEATURES.has(f))) {
     return { error: 'bad features' };
@@ -66,10 +72,10 @@ async function handleReport(request, env, now) {
   const { row, error } = validate(body);
   if (error) return json({ error }, 400);
   await env.DB.prepare(
-    `INSERT OR REPLACE INTO reports (id, week, version, platform, arch, variant, drives, features)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+    `INSERT OR REPLACE INTO reports (id, week, version, platform, arch, variant, drives, features, edition)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
   )
-    .bind(row.id, isoWeek(now), row.version, row.platform, row.arch, row.variant, row.drives, row.features)
+    .bind(row.id, isoWeek(now), row.version, row.platform, row.arch, row.variant, row.drives, row.features, row.edition)
     .run();
   return new Response(null, { status: 204 });
 }
@@ -77,7 +83,7 @@ async function handleReport(request, env, now) {
 async function handleStats(env, now) {
   const lastWeek = isoWeek(new Date(now.getTime() - 7 * 86400000));
   const { results } = await env.DB.prepare(
-    'SELECT version, platform, arch, variant, drives, features FROM reports WHERE week = ?'
+    'SELECT version, platform, arch, variant, drives, features, edition FROM reports WHERE week = ?'
   )
     .bind(lastWeek)
     .all();
@@ -96,6 +102,7 @@ async function handleStats(env, now) {
       platform: count('platform'),
       arch: count('arch'),
       variant: count('variant'),
+      edition: count('edition'),
       drives: count('drives'),
       features,
     },

@@ -90,6 +90,8 @@ Install image: a first start that stopped late (after Kiboto was set up but befo
 
 A release can no longer look complete when its Kiboto OS install image is missing (v2.0.6 had none): the release job now checks the release for it.
 
+Kiboto OS: the Edge update channel is no longer offered there, because such a machine installs only releases and Edge was always refused.
+
 #### Security
 
 On a machine of its own, failed sign-ins to shared folders over the network now count like web sign-ins: 20 in 15 minutes block the address for an hour, and they show under History, Sign-ins.
@@ -157,6 +159,8 @@ The Hardware panel looks like the drawer it replaces again, with its header and 
 The hardware cards look alike again: Card copies and the other sections get their labels and descriptions back, Quieter at night matches the other cards, and the Front light and Front screen switches say what they turn on or off.
 
 The test suite also runs on Debian 13's own Python, the one Kiboto OS uses, before anything is published.
+
+The opt-in health report (off by default) now also says which edition is running: Kiboto OS or the container. The card shows the exact report before you turn it on, as before.
 
 ## v2.0.6 (2026-11-23)
 ### 🖥️ Kiboto on a machine of its own (preview), with its settings kept safe on every pool

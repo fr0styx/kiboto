@@ -125,6 +125,10 @@ export async function fetchAndRenderSystemAbout(force = false, channelOverride =
   try {
     const about = await api.get('/api/system/about');
     if (about) {
+      const edge = document.getElementById('btn-channel-edge');
+      if (edge) edge.hidden = about.releases_only === true;
+      // Kiboto OS installs only releases; a channel choice kept from before goes back to Stable
+      if (about.releases_only === true && channel === 'edge') return setUpdateChannel('stable');
       const commitTag = about.commit ? ` (${about.commit})` : '';
       const channelLabel =
         channel === 'edge'

@@ -48,6 +48,30 @@ describe('System About & Software Updates Frontend Component', () => {
     vi.restoreAllMocks();
   });
 
+  it('does not offer Edge where only releases are installed, and leaves a kept Edge choice', async () => {
+    const asked = [];
+    vi.spyOn(api, 'get').mockImplementation(async (url) => {
+      asked.push(url);
+      if (url === '/api/system/about') return { version: '2.0.7', tag: 'v2.0.7', releases_only: true };
+      return { channel: 'stable', current_version: '2.0.7', latest_version: '2.0.7', update_available: false };
+    });
+    await setUpdateChannel('edge');
+    expect(document.getElementById('btn-channel-edge').hidden).toBe(true);
+    expect(localStorage.getItem('kiboto_update_channel')).toBe('stable');
+    expect(asked.some((url) => url.includes('channel=edge'))).toBe(false);
+    expect(asked.some((url) => url.startsWith('/api/system/updates') && url.includes('channel=stable'))).toBe(true);
+  });
+
+  it('offers Edge everywhere else', async () => {
+    vi.spyOn(api, 'get').mockImplementation(async (url) =>
+      url === '/api/system/about'
+        ? { version: '2.0.7', tag: 'v2.0.7', releases_only: false }
+        : { channel: 'stable', current_version: '2.0.7', latest_version: '2.0.7', update_available: false }
+    );
+    await fetchAndRenderSystemAbout(true);
+    expect(document.getElementById('btn-channel-edge').hidden).toBe(false);
+  });
+
   it('renders system telemetry and up-to-date status cleanly on stable channel', async () => {
     vi.spyOn(api, 'get').mockImplementation(async (url) => {
       if (url === '/api/system/about') {

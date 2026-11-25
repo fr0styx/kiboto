@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS reports (
   variant TEXT NOT NULL,
   drives TEXT NOT NULL,      -- a range: 0, 1-2, 3-4, 5-8, 9-16, 17+
   features TEXT NOT NULL,    -- comma-separated, from a fixed list
+  edition TEXT NOT NULL DEFAULT 'unknown',  -- os, companion, other; unknown from versions before 2.0.7
   PRIMARY KEY (id, week)
 );
 CREATE INDEX IF NOT EXISTS idx_reports_week ON reports (week);

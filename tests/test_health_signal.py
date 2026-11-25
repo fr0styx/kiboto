@@ -37,7 +37,8 @@ def test_the_report_holds_only_the_listed_fields(monkeypatch):
         },
     )
     r = hs.report("a" * 32)
-    assert set(r) == {"schema", "id", "version", "platform", "arch", "variant", "drives", "features"}
+    assert set(r) == {"schema", "id", "version", "platform", "arch", "variant", "edition", "drives", "features"}
+    assert r["edition"] == "companion"  # the tests run as the container does
     assert r["drives"] == "5-8" and r["features"] == ["containers", "lcd", "ups"]
     text = json.dumps(r)
     for private in ("my-secret-nas", "192.0.2.10", "WD-123", "plex", "sda"):
@@ -129,3 +130,17 @@ def test_the_api(client, auth_headers, monkeypatch):
         client.put("/api/system/health-signal", headers=auth_headers, json={"enabled": False}).json()["enabled"]
         is False
     )
+
+
+def test_the_edition_is_kiboto_os_the_container_or_neither(monkeypatch, tmp_path):
+    from backend import runtime
+
+    assert hs._edition() == "companion"
+    monkeypatch.setattr(runtime, "CONTAINER_MARKS", (str(tmp_path / "none"),))
+    monkeypatch.setattr(runtime, "SETTINGS", type("S", (), {"containerized": False})())
+    assert hs._edition() == "other"  # started by hand on some Linux
+    mark = tmp_path / "managed"
+    mark.write_text("x")
+    monkeypatch.setattr(runtime, "MANAGED_MARK", str(mark))
+    assert hs._edition() == "os"
+    assert hs.report("a" * 32)["edition"] == "os"

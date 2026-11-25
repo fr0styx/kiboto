@@ -112,6 +112,15 @@ def _platform() -> str:
     return "".join(c for c in str(name).lower() if c.isalnum() or c == "_")[:24] or "unknown"
 
 
+def _edition() -> str:
+    """Kiboto OS (a machine Kiboto runs), Kiboto Companion (the container), or neither."""
+    from backend import runtime
+
+    if runtime.managed_host():
+        return "os"
+    return "companion" if runtime.in_container() else "other"
+
+
 def report(install_id: str) -> dict[str, Any]:
     """Exactly what is sent (the settings card shows it before you turn this on)."""
     from backend import config
@@ -125,6 +134,7 @@ def report(install_id: str) -> dict[str, Any]:
         "platform": _platform(),
         "arch": platform.machine() or "unknown",
         "variant": getattr(config, "IMAGE_VARIANT", "full"),
+        "edition": _edition(),
         "drives": drive_bucket(len(disks)),
         "features": _features(),
     }

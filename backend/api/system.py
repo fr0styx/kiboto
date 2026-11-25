@@ -1237,6 +1237,12 @@ def get_status_summary(principal: AuthenticatedPrincipal = Depends(get_current_p
     return summary(principal.has_scope)
 
 
+def _releases_only() -> bool:
+    from backend.services.image_signature import releases_only
+
+    return releases_only()
+
+
 @router.get("/system/about")
 def get_system_about():
     """Returns high-level system information, current version, chassis twin, and runtime stats."""
@@ -1264,6 +1270,8 @@ def get_system_about():
         "python_version": sys.version.split()[0],
         "uptime_secs": uptime_secs,
         "containerized": runtime.in_container(),
+        # a machine Kiboto runs installs only releases: the page does not offer Edge there
+        "releases_only": _releases_only(),
         "github_repo": "https://github.com/fr0styx/kiboto",
     }
 

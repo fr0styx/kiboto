@@ -22,8 +22,8 @@ function fakeDb() {
           return {
             async run() {
               if (sql.startsWith('INSERT')) {
-                const [id, week, version, platform, arch, variant, drives, features] = args;
-                rows.set(`${id}|${week}`, { id, week, version, platform, arch, variant, drives, features });
+                const [id, week, version, platform, arch, variant, drives, features, edition] = args;
+                rows.set(`${id}|${week}`, { id, week, version, platform, arch, variant, drives, features, edition });
               } else if (sql.startsWith('DELETE')) {
                 for (const [k, r] of rows) if (r.week < args[0]) rows.delete(k);
               }
@@ -60,6 +60,14 @@ describe('health signal receiver', () => {
     expect(validate([1]).error).toBe('not an object');
   });
 
+  it('takes the edition, and a report from a version that does not send one', () => {
+    expect(validate(GOOD).row.edition).toBe('unknown');
+    for (const edition of ['os', 'companion', 'other'])
+      expect(validate({ ...GOOD, edition }).row.edition).toBe(edition);
+    expect(validate({ ...GOOD, edition: 'windows' }).error).toBe('bad edition');
+    expect(validate({ ...GOOD, edition: 7 }).error).toBe('bad edition');
+  });
+
   it('stores one row per install per week and reports last week', async () => {
     const env = { DB: fakeDb() };
     const monday = new Date(Date.UTC(2026, 9, 19));
@@ -71,6 +79,15 @@ describe('health signal receiver', () => {
     const stats = await res.json();
     expect(stats.installs).toBe(2);
     expect(stats.platform).toEqual({ unraid: 1, truenas: 1 });
+    expect(stats.edition).toEqual({ unknown: 2 });
+    await worker.fetch(post({ ...GOOD, id: 'd'.repeat(32), edition: 'os' }), env, {}, monday);
+    const later = await worker.fetch(
+      new Request('https://h.example/v1/stats'),
+      env,
+      {},
+      new Date(Date.UTC(2026, 9, 27))
+    );
+    expect((await later.json()).edition).toEqual({ unknown: 2, os: 1 });
     expect(stats.features).toEqual({ containers: 2, ups: 2 });
   });
 

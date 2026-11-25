@@ -194,3 +194,10 @@ def test_get_current_build_info_authoritative_image_inspect(monkeypatch):
         assert info["commit"] == "authori"
         assert info["full_commit"] == "authoritative_new_commit_40char_long_sha"
         assert info["build_date"] == "2026-10-15T18:00:00Z"
+
+
+def test_about_says_whether_only_releases_are_installed_here(client, auth_headers, monkeypatch):
+    """Kiboto OS installs only images signed for a release, so the page does not offer Edge there."""
+    assert client.get("/api/system/about", headers=auth_headers).json()["releases_only"] is False
+    monkeypatch.setattr("backend.services.image_signature.releases_only", lambda: True)
+    assert client.get("/api/system/about", headers=auth_headers).json()["releases_only"] is True
