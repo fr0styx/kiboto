@@ -101,6 +101,7 @@ work and goes up one patch number at a time: see [releasing](docs/RELEASING.md).
 | Topic | Guide |
 |---|---|
 | Install on Unraid, Linux, TrueNAS, FygoOS or Docker | [INSTALLATION.md](docs/INSTALLATION.md) |
+| Kiboto OS: a machine of its own, from a USB stick; what it runs on | [KIBOTO_OS.md](docs/KIBOTO_OS.md) |
 | Every setting | [CONFIGURATION.md](docs/CONFIGURATION.md) |
 | HTTPS with Nginx, Caddy, Traefik | [REVERSE_PROXY.md](docs/REVERSE_PROXY.md) |
 | Using Kiboto away from home; the family's own way in | [REMOTE_ACCESS.md](docs/REMOTE_ACCESS.md) |

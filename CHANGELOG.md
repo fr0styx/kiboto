@@ -58,6 +58,8 @@ A fresh install on a machine of its own starts again and shows the code for the 
 
 On a machine of its own, bringing the settings back from the pools after a new system disk works again: the pools come back and Kiboto restarts by itself. The install stops at once on a machine with Secure Boot on and says what to change, instead of failing after a quarter of an hour.
 
+A fresh install no longer warns that the password is "admin" while it waits for the first sign-in.
+
 #### Security
 
 On a machine of its own, failed sign-ins to shared folders over the network now count like web sign-ins: 20 in 15 minutes block the address for an hour, and they show under History, Sign-ins.
@@ -107,6 +109,8 @@ Hardware is one page: cooling, fans, lights, front screen and card copies one un
 While a hard drive spins, the disk fans never run below a safety floor: lowest speed up to 45 °C, full speed at 52 °C, in every fan mode and under your own curve. Fans can still stop while every drive sleeps (Zero RPM).
 
 The Hardware page's Cooling list says when a spinning drive has no temperature reading and when that runs the fans at full speed. Drives show as too hot from 52 °C, where the fans reach full speed.
+
+Kiboto OS has a guide of its own: what hardware it runs on, writing and checking the USB stick, the first sign-in, updates and what to do with a new system disk.
 
 ## v2.0.6 (2026-11-23)
 ### 🖥️ Kiboto on a machine of its own (preview), with its settings kept safe on every pool

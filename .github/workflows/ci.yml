@@ -929,7 +929,7 @@ jobs:
           sh scripts/build_release_image.sh "${{ env.IMAGE }}@$d" "kiboto-${GITHUB_REF_NAME}-install.iso"
 
       # What a release carries can be checked: SHA256SUMS lists install.sh and the install image,
-      # and is signed keyless by this workflow (docs/INSTALLATION.md, "Check the download")
+      # and is signed keyless by this workflow (docs/KIBOTO_OS.md, "Check the download")
       - name: Checksums of what the release carries
         run: |
           files="install.sh"

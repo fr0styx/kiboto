@@ -21,7 +21,7 @@ import uvicorn
 from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.staticfiles import StaticFiles
 
-from backend import __version__, legacy_names
+from backend import __version__, config, legacy_names
 from backend.api import api_router
 from backend.api.webdav import proxy_router as webdav_proxy_router
 from backend.auth import auth_middleware, purge_legacy_session_files
@@ -167,7 +167,7 @@ def _start_network_services() -> None:
 def _warn_default_password() -> None:
     logger.warning("=" * 60)
     logger.warning("[SECURITY WARNING] Default password ('admin') is active!")
-    logger.warning("[SECURITY WARNING] Change password in Toolkit Settings.")
+    logger.warning("[SECURITY WARNING] Change it in Settings, People.")
     logger.warning("=" * 60)
     add_event(
         "warning",
@@ -271,7 +271,9 @@ def _startup_device_links() -> Any:
             except OSError as e:
                 logger.debug(f"[DEV] Could not link {target_node}: {e}")
 
-    if is_using_default_password():
+    # A fresh install's first-time password is announced where it is made; only a literal 'admin'
+    # left from an older install earns the warning and the lasting event.
+    if is_using_default_password() and config.password_is_admin():
         _warn_default_password()
 
     led_cfg = read_json(LED_STATE_FILE, None)

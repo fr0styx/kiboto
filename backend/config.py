@@ -374,6 +374,13 @@ def is_using_default_password() -> bool:
     return bool(_default_pw_cache["value"]) or bool(_default_pw_cache["file"])
 
 
+def password_is_admin() -> bool:
+    """True only while the admin's password is literally 'admin' (an install from before first-time
+    passwords). A fresh install's generated first-time password is not that: it is announced on its own."""
+    is_using_default_password()
+    return bool(_default_pw_cache["value"])
+
+
 def _load_security():
     global STORED_PASSWORD_HASH, ADMIN_USERNAME, ADMIN_EMAIL
     if os.path.exists(SECURITY_FILE):

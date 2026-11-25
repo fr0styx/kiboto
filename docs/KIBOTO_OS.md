@@ -1,0 +1,177 @@
+# Kiboto OS: a machine of its own
+
+Here Kiboto is the system of the machine instead of an app on another NAS system: it makes the
+storage pools, shares the folders, runs the apps and updates itself. Underneath is a plain
+Debian 13, which keeps doing what it does (boot, drivers, its own updates with `apt`).
+
+Kiboto OS is in beta. It is tested on its reference box and on a Debian 13 virtual machine with
+real disks handed to it, not yet on a range of real hardware. Use it on a machine whose disks hold
+nothing you need.
+
+1. [What it runs on](#what-it-runs-on)
+2. [What we promise while it is in beta](#what-we-promise-while-it-is-in-beta)
+3. [Install from the USB image](#install-from-the-usb-image)
+4. [Check the download](#check-the-download)
+5. [Install on a Debian you set up yourself](#install-on-a-debian-you-set-up-yourself)
+6. [The first sign-in](#the-first-sign-in)
+7. [What it changes on the machine](#what-it-changes-on-the-machine)
+8. [Updates](#updates)
+9. [A new system disk](#a-new-system-disk)
+10. [Taking it off again](#taking-it-off-again)
+
+## What it runs on
+
+| Part | What Kiboto needs | Good to know |
+| --- | --- | --- |
+| Processor | A 64-bit PC (amd64: Intel or AMD) | ARM boards are not supported as a machine of their own; the container runs on them. Virtual machines need Intel VT-x or AMD-V turned on in the firmware. |
+| Memory | 4 GB or more | 8 GB or more for apps, virtual machines or local AI. ZFS uses free memory as a read cache and gives it back when apps need it. |
+| System disk | A disk of its own, 32 GB or more; an SSD is best | Only Debian and Kiboto live there. It never holds your files, and setup never offers it as storage. |
+| Storage drives | SATA or NVMe drives on the board, or on a controller in HBA (IT) mode | ZFS, btrfs and ext4 want to see each drive as it is: a RAID card that hides the drives behind its own volumes is the wrong kind. USB drives are fine for backups; in a pool they are slow and can drop off, so they are not recommended there. |
+| Network | A wired Ethernet port Debian has a driver for | Wi-Fi is not set up by the installer or by Kiboto. Bonds and VLANs are not there yet. |
+| Firmware | UEFI or the older BIOS mode, Secure Boot off | Kiboto builds ZFS on the machine, and Secure Boot refuses to load what is built there. The install stops at the start and says so. |
+| Security chip | Optional: a TPM 2.0 | With one, the key for the AI chats and search index is sealed to the machine; without one, to its system disk. |
+| Fans, front screen, light bar | Driven on the reference box only | Elsewhere Kiboto shows the temperatures and the fans stay with the firmware. |
+
+**Before you buy or wipe anything**, start the machine from any Debian 13 live USB and run
+`sh hardware_report.sh > report.txt` (it is in `scripts/` in this repository). It only reads: nothing
+is mounted, written, installed or sent, no drive is asked anything, and serial numbers and network
+addresses are left out, so you can share the report. It lists the processor, memory, firmware mode,
+TPM, every drive controller and network port with its driver. Reports of what does and does not
+work are welcome as an issue.
+
+## What we promise while it is in beta
+
+- **Tested on one model, community elsewhere.** Other 64-bit PCs will most likely work, because the
+  drivers are Debian's.
+- **Debian fixes the base, Kiboto fixes the app.** The kernel, the drivers and the system packages
+  get their fixes from Debian, through `apt`. Kiboto fixes Kiboto, its install script and how it
+  drives the machine, and holds the kernel, ZFS and Docker at the versions it was tested with until
+  a release moves them together.
+- **No response time while in beta.** Issues are read and fixed as time allows. Security reports
+  follow [SECURITY.md](../SECURITY.md).
+- **The source of everything on the image.** The install image is Debian's own netinst image with
+  Kiboto's files added; `kiboto/NOTICE.txt` on it says where Debian publishes the source of its
+  software and offers that source on request for three years after each release.
+
+## Install from the USB image
+
+From 2.0.7 on, each release carries the image as `kiboto-<version>-install.iso` (about 800 MB)
+beside `install.sh`.
+
+1. Download the image, `SHA256SUMS` and `SHA256SUMS.sigstore.json` from the release page, and
+   [check them](#check-the-download).
+2. Write the image to a USB stick of 1 GB or more. balenaEtcher (Windows, Mac, Linux) or Rufus in
+   "DD image" mode (Windows) do it in a few clicks. On Linux:
+   `sudo dd if=kiboto-<version>-install.iso of=/dev/sdX bs=4M conv=fsync status=progress`, where
+   `/dev/sdX` is the stick (everything on it is lost).
+3. Turn Secure Boot off in the machine's firmware settings (often under Boot or Security).
+4. Start the machine from the stick (the firmware's boot menu, often F12, F11 or Esc at power-on).
+   "Install Kiboto" is chosen after ten seconds.
+5. Debian's own installer asks two things only: which disk becomes the system disk (it shows them
+   with size and model, then asks before writing) and a root password. No other disk is touched.
+6. When the machine starts again, Kiboto installs itself (about ten minutes, most of it building
+   ZFS) and the screen shows the code for the first sign-in.
+
+Root may sign in over SSH with that password until you turn SSH off in Kiboto (Network, This
+machine).
+
+To build the image yourself: `sh packaging/image/build-image.sh debian-13-netinst.iso <kiboto
+image>@sha256:<digest> kiboto.iso` turns Debian's official 13 netinst image into Kiboto's install
+image (needs `xorriso`). `KIBOTO_ROOT_KEYS=<file>` puts SSH keys on the image that may sign in as
+root too.
+
+## Check the download
+
+Each release lists the SHA-256 of `install.sh` and of the install image in `SHA256SUMS`, signed by
+this project's build service with Sigstore (no key to trust by hand). In the folder you downloaded
+them to:
+
+```sh
+sha256sum -c SHA256SUMS --ignore-missing
+cosign verify-blob SHA256SUMS --bundle SHA256SUMS.sigstore.json \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+  --certificate-identity-regexp '^https://github\.com/fr0styx/kiboto/\.github/workflows/ci\.yml@refs/tags/v'
+```
+
+The first says each file you have is the one the release made; the second that `SHA256SUMS` was
+made by this repository's release workflow for a version tag, which waits for the maintainer's
+approval.
+
+## Install on a Debian you set up yourself
+
+You need a fresh, minimal Debian 13 on the machine's own system disk: in the Debian installer,
+choose "SSH server" and "standard system utilities" only. No Samba, NFS server or containers set
+up on it yet: the install script stops if it finds them, because Kiboto writes those settings
+itself.
+
+Every release from 2.0.6 on carries an `install.sh` that names that release's image by its digest.
+Download it from the release page, [check it](#check-the-download), read it if you like, then run it
+as root:
+
+```bash
+sh install.sh
+```
+
+It installs the tools Kiboto drives (ZFS, btrfs and ext4 tools, Samba, the NFS server, Docker,
+QEMU), takes Kiboto's own files out of the release image, checks that Kiboto's own build service
+signed that image (against the public Sigstore log), and starts Kiboto as a service. A version that
+is not signed is taken out again and nothing changes; `--unsigned` after the image installs a build
+of your own without that check. On a small machine this takes about ten minutes, most of it
+building the ZFS module.
+
+## The first sign-in
+
+At the end of the install the script prints the address to open and a one-time code. The same code
+is on the machine's own screen and in its SSH greeting until you have chosen your password. Open the
+address from another computer, enter the code, and choose the administrator's password. Setup then
+helps you make a pool from the other drives; the system disk is never offered.
+
+Write down the recovery key under Settings, Security: with it a new system disk can open the
+encrypted AI chats and search index again.
+
+## What it changes on the machine
+
+- A Debian installed with Debian's own installer runs its network with ifupdown. At the end of the
+  install the script moves the same settings to systemd-networkd, so Kiboto can change the address
+  under Network. If the machine cannot reach its router afterwards, it goes back to ifupdown by
+  itself after 90 seconds; ifupdown's file is kept as `/etc/network/interfaces.kiboto-before`.
+- Kiboto's files are in `/opt/kiboto`, its settings in `/var/lib/kiboto`, and
+  `/etc/kiboto/kiboto.env` takes extra settings (one `NAME=value` per line).
+- Three services: `kiboto`, `kiboto-pools`, which brings your pools back at start before anything
+  that uses them, and `kiboto-door`, the only part that runs as root: it changes the machine for
+  Kiboto from a fixed list of operations. Kiboto itself runs as the user `kiboto`
+  (`python -m backend.services.web_user off` in `/opt/kiboto/current` runs it as root again).
+- Pools are mounted under `/mnt/storage`.
+- The kernel, ZFS and Docker are held at the versions Kiboto was tested with (`apt-mark showhold`
+  lists them). Everything else updates with `apt` as on any Debian, and you can install your own
+  packages.
+- `/etc/samba/smb.conf` is replaced by a line that points at Kiboto's own settings; the file Debian
+  shipped is kept beside it as `smb.conf.debian`.
+- The key that encrypts the AI chats and search index is made at the first start and sealed to the
+  machine's security chip (or its system disk without one), in `/etc/kiboto/keys`.
+- A copy of the settings, encrypted, is kept on every pool (`.kiboto` at the pool's root), and apps
+  keep their data on the first pool.
+
+## Updates
+
+Kiboto updates itself from the Updates page as it does elsewhere. A new version is put beside the
+running one and switched to; if it does not start, the machine goes back to the version before and
+says so. "Revert" goes back to the version before the last update, with the settings as they were
+then. The kernel, ZFS and Docker move only when a Kiboto release was tested with newer ones: Updates
+then offers them.
+
+## A new system disk
+
+The system disk holds nothing you cannot get back. If it dies, put in a new one, install again from
+the USB image, and choose "Look on this machine's drives" in setup: Kiboto finds the settings copy
+on your pools, asks for the recovery key, brings the pools back and restarts with your people,
+shares and apps as they were.
+
+## Taking it off again
+
+```bash
+sh /opt/kiboto/current/packaging/install.sh --uninstall
+```
+
+Kiboto's service and files go; your pools, shared folders and apps are not touched, and the packages
+stay installed. Add `--purge` to remove Kiboto's settings as well.

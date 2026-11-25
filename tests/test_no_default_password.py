@@ -23,3 +23,14 @@ def test_docs_and_templates_do_not_publish_admin_admin():
             text = f.read()
         assert "Password `admin`" not in text, rel
         assert "WEB_PASSWORD=admin" not in text and "WEB_PASSWORD:-admin" not in text, rel
+
+
+def test_only_a_literal_admin_counts_as_admin(monkeypatch, tmp_path):
+    monkeypatch.setattr(config, "DATA_DIR", str(tmp_path))
+    monkeypatch.setattr(config, "STORED_PASSWORD_HASH", config.hash_password("Chosen-Pass-1"))
+    (tmp_path / "initial-admin-password").write_text("x")
+    config._default_pw_cache["hash"] = None
+    assert config.is_using_default_password() is True
+    assert config.password_is_admin() is False
+    monkeypatch.setattr(config, "STORED_PASSWORD_HASH", config.hash_password("admin"))
+    assert config.password_is_admin() is True

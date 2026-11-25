@@ -118,8 +118,15 @@ class TestStartup:
 
     def test_default_password_warning(self, quiet, monkeypatch):
         monkeypatch.setattr(main, "is_using_default_password", lambda: True)
+        monkeypatch.setattr(main.config, "password_is_admin", lambda: True)
         main.startup_system()
         assert "Default Password In Use" in quiet["events"]
+
+    def test_a_first_time_password_is_not_called_admin(self, quiet, monkeypatch):
+        monkeypatch.setattr(main, "is_using_default_password", lambda: True)
+        monkeypatch.setattr(main.config, "password_is_admin", lambda: False)
+        main.startup_system()
+        assert "Default Password In Use" not in quiet["events"]
 
     def test_failing_services_do_not_stop_the_start(self, quiet, monkeypatch):
         def boom():

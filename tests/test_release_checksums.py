@@ -29,5 +29,5 @@ def test_checksums_are_made_signed_and_attached_before_the_release():
 
 
 def test_the_guide_says_how_to_check():
-    guide = (CI.parents[2] / "docs" / "INSTALLATION.md").read_text(encoding="utf-8")
+    guide = (CI.parents[2] / "docs" / "KIBOTO_OS.md").read_text(encoding="utf-8")
     assert "sha256sum -c SHA256SUMS --ignore-missing" in guide and "cosign verify-blob" in guide
