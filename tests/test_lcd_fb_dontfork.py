@@ -2,6 +2,8 @@
 
 import mmap
 import os
+import subprocess
+import sys
 
 import pytest
 
@@ -61,27 +63,42 @@ def test_no_advice_on_systems_without_it(monkeypatch):
     assert isinstance(lcd_renderer.map_framebuffer(3, 4096), FakeMap)
 
 
+# The fork runs in a fresh, single-threaded Python: forking the test runner itself (which has
+# threads) makes Python warn that the child may deadlock.
+_CHILD_CHECK = """
+import mmap, os, sys
+from backend.services.lcd_renderer import map_framebuffer
+kept, plain = sys.argv[1], sys.argv[2]
+with open(kept, "r+b") as a, open(plain, "r+b") as b:
+    ma = map_framebuffer(a.fileno(), 4096)
+    mb = mmap.mmap(b.fileno(), 4096, mmap.MAP_SHARED, mmap.PROT_WRITE)
+    r, w = os.pipe()
+    pid = os.fork()
+    if pid == 0:
+        with open("/proc/self/maps") as m:
+            maps = m.read()
+        os.write(w, (("K" if kept in maps else "-") + ("P" if plain in maps else "-")).encode())
+        os._exit(0)
+    os.close(w)
+    print(os.read(r, 2).decode())
+    os.waitpid(pid, 0)
+"""
+
+
 @pytest.mark.skipif(not hasattr(os, "fork") or not hasattr(mmap, "MADV_DONTFORK"), reason="Linux only")
 def test_child_does_not_get_the_mapping(tmp_path):
-    f = tmp_path / "fb0"
-    f.write_bytes(bytes(4096))
-    with open(f, "r+b") as fh:
-        mem = lcd_renderer.map_framebuffer(fh.fileno(), 4096)
-        path = str(f)
-        r, w = os.pipe()
-        pid = os.fork()
-        if pid == 0:  # child: is the framebuffer file still mapped here?
-            os.close(r)
-            try:
-                with open("/proc/self/maps") as m:
-                    seen = any(path in line for line in m)
-            except Exception:
-                seen = True
-            os.write(w, b"1" if seen else b"0")
-            os._exit(0)
-        os.close(w)
-        got = os.read(r, 1)
-        os.close(r)
-        os.waitpid(pid, 0)
-        mem.close()
-    assert got == b"0"
+    kept, plain = tmp_path / "fb0", tmp_path / "plain"
+    kept.write_bytes(bytes(4096))
+    plain.write_bytes(bytes(4096))
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    out = subprocess.run(
+        [sys.executable, "-c", _CHILD_CHECK, str(kept), str(plain)],
+        capture_output=True,
+        text=True,
+        timeout=60,
+        cwd=root,
+        env={**os.environ, "PYTHONPATH": root},
+    )
+    assert out.returncode == 0, out.stderr
+    # the plain mapping reaches the child (the check can see mappings); the framebuffer's does not
+    assert out.stdout.strip() == "-P"
