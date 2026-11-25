@@ -91,6 +91,11 @@ packages() {
     [ -f "$f" ] && sed -i 's/^Components: main$/Components: main contrib non-free-firmware/' "$f"
   done
   apt-get update -qq
+  # apt-get update reports a server it could not reach as a warning only; without the contrib list
+  # ZFS is then "not found" further down, which says nothing about the network
+  if [ -n "$(missing zfs-dkms)" ] && ! apt-cache policy zfs-dkms 2>/dev/null | grep -q 'Candidate: [0-9]'; then
+    die "Debian's package servers could not be reached, or the contrib part is missing from the package sources (ZFS is in contrib). Check the network, then run this again."
+  fi
   # Only what is not there yet is installed: a second run of this script leaves the held
   # packages at the version they have, as the hold promises.
   # ZFS is built against the headers of the kernel that is running, not of the newest one.
@@ -109,10 +114,13 @@ packages() {
   for pkg in zfs-dkms zfsutils-linux; do
     need=$(missing "$pkg")
     [ -n "$need" ] || continue
+    # unquoted: missing() ends each name with a space, and "zfs-dkms " is no package
     if grep -rqs 'trixie-backports' /etc/apt/sources.list /etc/apt/sources.list.d; then
-      apt-get install -y -qq --no-install-recommends -t trixie-backports "$need" >/dev/null
+      # shellcheck disable=SC2086
+      apt-get install -y -qq --no-install-recommends -t trixie-backports $need >/dev/null
     else
-      apt-get install -y -qq --no-install-recommends "$need" >/dev/null
+      # shellcheck disable=SC2086
+      apt-get install -y -qq --no-install-recommends $need >/dev/null
     fi
   done
   modprobe zfs || die "ZFS was built but does not load on this kernel."

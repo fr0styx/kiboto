@@ -31,6 +31,10 @@ show "Kiboto is installing itself. This takes about ten minutes; the address and
 # a test image may take builds of the main branch (KIBOTO_ACCEPT_MAIN_BUILDS in kiboto.env)
 main=$(sed -n 's/^KIBOTO_ACCEPT_MAIN_BUILDS=//p' /etc/kiboto/kiboto.env 2>/dev/null | tail -1)
 [ -n "$main" ] && export KIBOTO_ACCEPT_MAIN_BUILDS="$main"
+# ifupdown marks the network online before DHCP has answered, so the install could ask Debian's
+# servers for packages before the machine has an address: wait up to two minutes for a name to resolve
+i=0
+until getent ahosts deb.debian.org >/dev/null 2>&1 || [ "$i" -ge 60 ]; do i=$((i + 1)); sleep 2; done
 rm -f /run/kiboto-install.rc
 install -m 600 /dev/null "$LOG"
 { sh /root/kiboto-install.sh 2>&1; echo $? > /run/kiboto-install.rc; } | tee -a "$LOG"
