@@ -28,7 +28,8 @@ def test_the_step_says_what_it_did_and_fails_when_a_pool_is_away(monkeypatch, ca
 
 
 def test_its_command_runner_answers_for_a_missing_or_stuck_tool(monkeypatch):
-    assert pools_at_boot._run(["true"]) == (0, "", "")
+    assert pools_at_boot._run(["true"])[0] == 126  # not a program for bringing pools back
+    monkeypatch.setattr(pools_at_boot, "_PROGRAMS", frozenset({"no-such-tool-kb", "mount"}))
     assert pools_at_boot._run(["no-such-tool-kb"])[0] == 127
 
     def stuck(cmd, **kw):

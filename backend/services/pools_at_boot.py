@@ -8,8 +8,13 @@ import sys
 
 from backend.hardware.pal import pool_registry
 
+# What bringing pools back runs, as root: nothing else, whatever a record says
+_PROGRAMS = frozenset({"zpool", "mount", "findmnt", "btrfs", "chattr", "blkid"})
+
 
 def _run(cmd: list[str]) -> tuple[int, str, str]:
+    if not cmd or cmd[0] not in _PROGRAMS:
+        return 126, "", "not a program for bringing pools back"
     try:
         res = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
     except FileNotFoundError:

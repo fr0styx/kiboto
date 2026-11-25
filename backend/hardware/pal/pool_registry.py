@@ -11,6 +11,7 @@ writing there when the pool is away fails at once and does not fill the system d
 
 import json
 import os
+import re
 import time
 from collections.abc import Callable
 from typing import Any
@@ -21,6 +22,53 @@ from backend.fsutil import atomic_write_json
 Runner = Callable[[list[str]], tuple[int, str, str]]
 KINDS = ("zfs", "btrfs", "ext4", "xfs")  # xfs: only ever imported, never made
 BTRFS_SURVIVES_A_DRIVE = ("raid1", "raid1c3", "raid1c4", "raid10")
+
+# The record is a file in the data folder, which the web process can write; bring_back runs as root
+# in the host door (ADR 0006). So a record is checked before anything of it reaches a command: a
+# name or id cannot be an option, a mount cannot cover a system folder or allow set-user-ID files
+# or devices. Kiboto's own records always pass (generic_linux.py writes them).
+_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.:-]{0,254}")
+_UUID = re.compile(r"[0-9A-Za-z][0-9A-Za-z-]{0,63}")  # a guid or UUID: never an option
+_OPTION = re.compile(r"[a-z0-9_]+(=[A-Za-z0-9_:./-]+)?")
+_UNSAFE_OPTIONS = {"suid", "dev", "exec"}  # the defaults: never asked for by name in a record
+_SYSTEM_DIRS = (
+    "/bin",
+    "/boot",
+    "/dev",
+    "/etc",
+    "/lib",
+    "/lib32",
+    "/lib64",
+    "/opt",
+    "/proc",
+    "/root",
+    "/run",
+    "/sbin",
+    "/sys",
+    "/usr",
+    "/var",
+)
+
+
+def unsafe(row: dict[str, Any]) -> str:
+    """Why this record must not be acted on as root ("" when it may): see the note above."""
+    if not _NAME.fullmatch(str(row.get("name") or "")):
+        return "its name is not a pool name"
+    uuid = str(row.get("uuid") or "")
+    if uuid and not _UUID.fullmatch(uuid):
+        return "its id is not a pool id"
+    if row.get("fs_type") != "zfs":
+        mp = str(row.get("mountpoint") or "")
+        if not mp.startswith("/") or os.path.normpath(mp) != mp or mp.count("/") < 2:
+            return "its folder is not a folder for a pool"
+        if any(mp == d or mp.startswith(d + "/") for d in _SYSTEM_DIRS):
+            return "its folder is a system folder"
+        for opt in filter(None, str(row.get("options") or "").split(",")):
+            if not _OPTION.fullmatch(opt) or opt in _UNSAFE_OPTIONS:
+                return f"its mount option {opt!r} is not one Kiboto uses"
+    return ""
+
+
 ADOPT_FLAG = ".adopt-restored-pools"  # left in the data folder by a settings restore; read once at the next start
 
 
@@ -115,6 +163,8 @@ def read_uuid(fs_type: str, name: str, device: str, run: Runner) -> str:
 
 def is_there(row: dict[str, Any], run: Runner) -> bool:
     """True when this very pool is in use now: imported (ZFS) or mounted on its folder."""
+    if unsafe(row):
+        return False
     if row["fs_type"] == "zfs":
         code, out, _ = run(["zpool", "get", "-Hp", "-o", "value", "guid", row["name"]])
         return code == 0 and (not row.get("uuid") or out.strip() == row["uuid"])
@@ -156,6 +206,9 @@ def unprotect(mountpoint: str, run: Runner) -> None:
 def bring_back(row: dict[str, Any], run: Runner, force: bool = False) -> str:
     """Imports or mounts one recorded pool. "" when it is there afterwards, else why not. `force`
     takes a ZFS pool that another system used last: right after that system's settings were restored."""
+    why = unsafe(row)
+    if why:
+        return f"its record was changed outside Kiboto: {why}"
     if is_there(row, run):
         return ""
     if not row.get("uuid"):
