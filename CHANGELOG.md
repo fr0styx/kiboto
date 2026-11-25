@@ -56,6 +56,8 @@ Light mode: the front screen's preview stays readable, and its card, theme butto
 
 A fresh install on a machine of its own starts again and shows the code for the first sign-in on the machine's screen and in its SSH greeting; with Kiboto running without root, neither worked.
 
+On a machine of its own, bringing the settings back from the pools after a new system disk works again: the pools come back and Kiboto restarts by itself. The install stops at once on a machine with Secure Boot on and says what to change, instead of failing after a quarter of an hour.
+
 #### Security
 
 On a machine of its own, failed sign-ins to shared folders over the network now count like web sign-ins: 20 in 15 minutes block the address for an hour, and they show under History, Sign-ins.

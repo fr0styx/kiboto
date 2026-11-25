@@ -19,6 +19,15 @@ def _run(cmd: list[str]) -> tuple[int, str, str]:
     return res.returncode, res.stdout.strip(), res.stderr.strip()
 
 
+def bring_back() -> dict[str, str]:
+    """bring_back_all as root, in this process: the boot unit, or the host door when Kiboto starts
+    (the web user cannot import a pool or mount it; found by the OS audit's drill, where after a
+    restore from the pools none came back)."""
+    if not pool_registry.load():
+        return {}
+    return pool_registry.bring_back_all(_run)
+
+
 def main() -> int:
     done = pool_registry.bring_back_all(_run)
     for name, why in done.items():

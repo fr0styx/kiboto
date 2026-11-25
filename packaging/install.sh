@@ -30,6 +30,13 @@ python3-venv ca-certificates curl acl"
 say() { printf '%s\n' "$*"; }
 die() { printf 'Kiboto was not installed: %s\n' "$*" >&2; exit 1; }
 
+# Secure Boot: the firmware's own switch (an EFI variable whose last byte is 1 when it is on)
+secure_boot_on() {
+  v=$(ls "${KIBOTO_EFIVARS:-/sys/firmware/efi/efivars}"/SecureBoot-* 2>/dev/null | head -1)
+  [ -n "$v" ] || return 1
+  [ "$(od -An -t u1 "$v" 2>/dev/null | awk '{print $NF}')" = 1 ]
+}
+
 must_be_this_machine() {
   [ "$(id -u)" = 0 ] || die "run this as root."
   [ -f /etc/os-release ] || die "this is not a Debian system."
@@ -38,6 +45,12 @@ must_be_this_machine() {
   [ "$(dpkg --print-architecture)" = amd64 ] || die "this machine is not a 64-bit PC (amd64)."
   [ ! -e /.dockerenv ] && [ ! -e /run/.containerenv ] || die "this is a container; Kiboto needs the machine itself."
   command -v systemctl >/dev/null || die "systemd is not running here."
+  # ZFS is built on this machine and not signed: with Secure Boot on, the kernel refuses to load it,
+  # which showed only after a quarter of an hour of building. KIBOTO_ALLOW_SECURE_BOOT=1 for someone
+  # who signs DKMS modules with a key of their own (mokutil).
+  if [ "${KIBOTO_ALLOW_SECURE_BOOT:-}" != 1 ] && secure_boot_on; then
+    die "Secure Boot is on in this machine's firmware. Kiboto builds ZFS on the machine, and Secure Boot refuses to load what is built here. Turn Secure Boot off in the firmware settings (often under Boot or Security), start Debian again and run this again."
+  fi
 }
 
 # A machine that already serves files or runs containers has settings Kiboto would write over.

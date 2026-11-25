@@ -229,6 +229,18 @@ def _crypt_unmount(path: str) -> bool:
     return encrypted_folders.unmount_in_door(path)
 
 
+def _pools_bring_back() -> dict[str, str]:
+    from backend.services import pools_at_boot
+
+    return pools_at_boot.bring_back()
+
+
+def _restart_kiboto(delay: int) -> bool:
+    from backend.services import host_basics
+
+    return host_basics.restart_here(delay)
+
+
 def _pools_look() -> list[dict[str, Any]]:
     from backend.services import pool_copy
 
@@ -551,6 +563,8 @@ OPERATIONS: dict[str, Operation] = {
     "copy.mount": Operation(_card, {"device": TEXT}, max_len=128),
     "copy.unmount": Operation(_uncard, {}),
     "pools.look": Operation(_pools_look, {}),
+    "pools.bring_back": Operation(_pools_bring_back, {}),
+    "kiboto.restart": Operation(_restart_kiboto, {"delay": (int,)}),
     "crypt.mount": Operation(
         _crypt_mount, {"cipher": TEXT, "plain": TEXT, "password": TEXT, "read_only": ON}, max_len=4096
     ),

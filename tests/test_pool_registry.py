@@ -302,21 +302,21 @@ def test_disconnect_erase_and_rename_keep_the_record_true(nas, tools, tmp_path, 
 
 
 def test_start_up_step(monkeypatch, tools, tmp_path):
+    """Start brings the recorded pools back with the boot unit's own runner, as root: through the
+    host door on a machine Kiboto runs, here in the tests where there is no door."""
     from backend import main
+    from backend.services import pools_at_boot
 
     seen = []
     monkeypatch.setattr(reg, "bring_back_all", lambda run: seen.append(run) or {})
     main._bring_pools_back()
-    assert seen == []  # no recorded pools: the storage platform is not even asked
+    assert seen == []  # no recorded pools: nothing is asked
     _row(tmp_path)
-    adapter = GenericLinuxStorageAdapter(pool_path=str(tmp_path / "pools"))
-    adapter._run_cmd = tools
-    monkeypatch.setattr("backend.hardware.pal_storage.get_storage_platform", lambda: adapter)
     main._bring_pools_back()
-    assert seen == [tools]
+    assert seen == [pools_at_boot._run]
 
-    def broken():
-        raise RuntimeError("no platform")
+    def broken(run):
+        raise RuntimeError("no zpool")
 
-    monkeypatch.setattr("backend.hardware.pal_storage.get_storage_platform", broken)
+    monkeypatch.setattr(reg, "bring_back_all", broken)
     main._bring_pools_back()  # logged, and the start goes on

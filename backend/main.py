@@ -515,16 +515,14 @@ def _make_machine_key() -> None:
 def _bring_pools_back() -> None:
     """The pools Kiboto made are imported or mounted again after a restart; nothing else mounts a
     btrfs or ext4 pool. Before shares and apps are looked at, so none of them sees an empty folder."""
+    from backend import door
     from backend.hardware.pal import pool_registry
+    from backend.services import pools_at_boot
 
     if not pool_registry.load():
         return
     try:
-        from backend.hardware.pal_storage import get_storage_platform
-
-        run = getattr(get_storage_platform(), "_run_cmd", None)
-        if run:
-            pool_registry.bring_back_all(run)
+        door.via("pools.bring_back", pools_at_boot.bring_back)  # root's work (ADR 0006)
     except (OSError, RuntimeError, ValueError) as e:
         logger.error("[Main] The recorded pools could not be brought back: %s", e)
 

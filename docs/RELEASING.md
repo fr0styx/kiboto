@@ -11,8 +11,8 @@ notes. Security fixes don't wait for the train (see below).
 | Image tag | What it is | Who gets it |
 |---|---|---|
 | `:edge`, `:main` | every commit on `main` that passes CI | `UPDATE_CHANNEL=edge` |
-| `:beta`, `:1.9.3` | the newest version tag, from the moment CI passes | `UPDATE_CHANNEL=beta` |
-| `:latest`, `:stable`, `:1.9` | the newest release that finished its soak | `UPDATE_CHANNEL=stable` (default) and Compose files that pin `:latest` |
+| `:beta`, `:2.0.7` | the newest version tag, from the moment CI passes | `UPDATE_CHANNEL=beta` |
+| `:latest`, `:stable`, `:2.0` | the newest release that finished its soak | `UPDATE_CHANNEL=stable` (default) and Compose files that pin `:latest` |
 
 Each tag also exists with `-core` for the core image.
 
@@ -32,12 +32,12 @@ Each tag also exists with `-core` for the core image.
 ## Cutting a release
 
 1. Refresh the app catalog's image pins (`python scripts/pin_catalog_images.py`, which writes
-   `backend/services/catalog_digests.json`), then update `CHANGELOG.md` and the version, commit, and push a tag such as `v1.9.3`. Only
+   `backend/services/catalog_digests.json`), then update `CHANGELOG.md` and the version, commit, and push a tag such as `v2.0.7`. Only
    repository admins can create `v*` tags, and tags can't be moved or deleted (GitHub
    rulesets).
 2. CI builds, scans and tests the images, then waits for the owner's approval (the `release`
    environment: Actions, the run, **Review deployments**). Once approved it signs them for the
-   tag and publishes `:beta` and `:1.9.3`. The GitHub release is created as a pre-release named
+   tag and publishes `:beta` and `:2.0.7`. The GitHub release is created as a pre-release named
    "… (beta)". A machine Kiboto runs installs only images signed for a version tag, so a push
    to main alone cannot sign what it installs (`KIBOTO_ACCEPT_MAIN_BUILDS=1` lets a test machine
    take main builds).
@@ -45,14 +45,14 @@ Each tag also exists with `-core` for the core image.
    `UPDATE_CHANNEL=beta`).
 4. Every Tuesday (06:00 UTC), the **Promote release** workflow takes the
    newest release that is at least three days old, verifies its image signature, moves
-   `:latest`, `:stable` and `:1.9` to it, and marks the GitHub release as the latest, so the
+   `:latest`, `:stable` and `:2.0` to it, and marks the GitHub release as the latest, so the
    app's Stable channel offers it. On other days the scheduled run only names the next train
    date in its summary. It warns when nothing has reached Stable for 21 days.
 
 ## Stopping a release
 
 Set the repository variable `HOLD_RELEASES` (Settings > Secrets and variables > Actions >
-Variables) to the version, for example `v1.9.3`, or to `all`. Promotion skips it and says so
+Variables) to the version, for example `v2.0.7`, or to `all`. Promotion skips it and says so
 in the workflow summary. Remove the variable to let it continue; fix forward with a new tag.
 
 ## Skipping the wait (security fixes)

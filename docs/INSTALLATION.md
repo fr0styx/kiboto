@@ -449,10 +449,15 @@ This is a preview. It is tested on a virtual machine with real disks handed to i
 
 **What you need**
 
+- Secure Boot turned off in the machine's firmware settings: ZFS is built on the machine and Secure Boot would refuse to load it (the install stops at the start and says so).
 - A 64-bit PC with a fresh, minimal Debian 13 on its own system disk (in the Debian installer, choose "SSH server" and "standard system utilities" only). 4 GB of memory or more.
 - No Samba, NFS server or containers set up on it yet. The install script stops if it finds them, because Kiboto writes those settings itself.
 
 **Install from Kiboto's image**
+
+`packaging/image/build-image.sh` turns Debian's official 13 netinst image into Kiboto's install image (`sh packaging/image/build-image.sh debian-13-netinst.iso <kiboto image>@sha256:<digest> kiboto.iso`, needs `xorriso`). Write it to a USB stick and start the machine from it. "Install Kiboto" is chosen after ten seconds: Debian's own installer, which asks two things only, which disk becomes the system disk (it shows them with size and model, then asks before writing) and a root password. No other disk is touched. When the machine starts again, Kiboto installs itself (about ten minutes) and the screen shows the code for the first sign-in. Root may sign in over SSH with that password until you turn SSH off in Kiboto (Network, This machine). `KIBOTO_ROOT_KEYS=<file>` puts SSH keys on the image that may sign in as root too.
+
+From 2.0.7 on, each release carries the image as `kiboto-<version>-install.iso` (about 800 MB) beside `install.sh`. Check it (below), then write it to a USB stick of 1 GB or more: balenaEtcher (Windows, Mac, Linux) or Rufus in "DD image" mode (Windows) do it in a few clicks; on Linux `sudo dd if=kiboto-<version>-install.iso of=/dev/sdX bs=4M conv=fsync status=progress`, where `/dev/sdX` is the stick (everything on it is lost). Start the machine from the stick (the firmware's boot menu, often F12, F11 or Esc at power-on). It boots with UEFI or the older BIOS mode; Secure Boot must be off (see "What you need").
 
 ### Check the download
 
@@ -466,8 +471,6 @@ cosign verify-blob SHA256SUMS --bundle SHA256SUMS.sigstore.json \
 ```
 
 The first says each file you have is the one the release made; the second that `SHA256SUMS` was made by this repository's release workflow for a version tag, which waits for the maintainer's approval.
-
-`packaging/image/build-image.sh` turns Debian's official 13 netinst image into Kiboto's install image (`sh packaging/image/build-image.sh debian-13-netinst.iso <kiboto image>@sha256:<digest> kiboto.iso`, needs `xorriso`). Write it to a USB stick and start the machine from it. "Install Kiboto" is chosen after ten seconds: Debian's own installer, which asks two things only, which disk becomes the system disk (it shows them with size and model, then asks before writing) and a root password. No other disk is touched. When the machine starts again, Kiboto installs itself (about ten minutes) and the screen shows the code for the first sign-in. Root may sign in over SSH with that password until you turn SSH off in Kiboto (Network, This machine). `KIBOTO_ROOT_KEYS=<file>` puts SSH keys on the image that may sign in as root too.
 
 **Install on a Debian you set up yourself**
 

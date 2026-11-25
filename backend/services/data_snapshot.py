@@ -122,6 +122,13 @@ def snapshot_root(data_dir: str) -> str:
     return os.path.join(data_dir, SNAPSHOT_SUBDIR)
 
 
+def _unreadable(path: str) -> bool:
+    """A file Kiboto can't read because it isn't Kiboto's: Samba keeps its password databases as root
+    in samba/private, inside the data folder. Only without root (the web user, ADR 0006 step 9): as
+    root every error still fails the snapshot."""
+    return hasattr(os, "geteuid") and os.geteuid() != 0 and not os.access(path, os.R_OK)
+
+
 def _skip_special_files(directory: str, names: list[str]) -> list[str]:
     """Sockets, FIFOs and device nodes can't be copied (e.g. Samba's msg.sock); they hold no data.
     Half-written files of an atomic save (.tmp-*, *.tmp) are skipped too: they vanish when the save
@@ -137,7 +144,13 @@ def _skip_special_files(directory: str, names: list[str]) -> list[str]:
             continue
         if stat.S_ISSOCK(mode) or stat.S_ISFIFO(mode) or stat.S_ISCHR(mode) or stat.S_ISBLK(mode):
             skip.append(n)
+        elif _unreadable(os.path.join(directory, n)):
+            skip.append(n)
+            _LEFT_OUT.append(os.path.join(directory, n))
     return skip
+
+
+_LEFT_OUT: list[str] = []  # files left out of the snapshot being taken because they aren't Kiboto's
 
 
 def _copytree_settled(src: str, dst: str) -> None:
@@ -169,9 +182,13 @@ def take_snapshot(
     os.chmod(root, 0o700)
 
     files: list[str] = []
+    _LEFT_OUT.clear()
     for name in sorted(os.listdir(data_dir)):
         src = os.path.join(data_dir, name)
         if os.path.islink(src) or not os.path.isfile(src) or not _wanted_file(name):
+            continue
+        if _unreadable(src):
+            _LEFT_OUT.append(src)
             continue
         dst = os.path.join(dest, name)
         if name.endswith(".db"):
@@ -188,7 +205,11 @@ def take_snapshot(
             _copytree_settled(src, os.path.join(dest, name))
             files.append(name + "/")
 
-    manifest = {"created_at": time.time(), "label": label, "files": files, **(extra or {})}
+    left_out = sorted(os.path.relpath(f, data_dir) for f in _LEFT_OUT)
+    if left_out:
+        # a restore leaves these in place, so nothing is lost by not copying them
+        logger.info("[Snapshot] Left out %s file(s) that aren't Kiboto's: %s", len(left_out), ", ".join(left_out))
+    manifest = {"created_at": time.time(), "label": label, "files": files, "left_out": left_out, **(extra or {})}
     atomic_write_json(os.path.join(dest, MANIFEST), manifest, indent=2)
     _prune(root, protect, keep)
     logger.info("[Snapshot] Saved %s item(s) to %s", len(files), dest)

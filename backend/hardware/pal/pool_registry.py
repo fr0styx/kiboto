@@ -192,8 +192,6 @@ def bring_back_all(run: Runner) -> dict[str, str]:
     done: dict[str, str] = {}
     flag = os.path.join(DATA_DIR, ADOPT_FLAG)
     adopting = os.path.exists(flag)  # settings were brought back from a copy on the pools (services/pool_copy.py)
-    if adopting:
-        os.remove(flag)
     for row in load():
         if row.get("ejected"):
             continue
@@ -203,4 +201,8 @@ def bring_back_all(run: Runner) -> dict[str, str]:
             logger.error("[Storage] Pool %s is not there and could not be brought back: %s", row["name"], why)
         else:
             logger.info("[Storage] Pool %s is there", row["name"])
+    # the mark stays until every pool came back: one failed start (the door not there yet, a drive
+    # not powered) must not leave a restored pool refused as "in use from another system"
+    if adopting and not any(done.values()):
+        os.remove(flag)
     return done

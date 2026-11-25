@@ -213,10 +213,20 @@ def _bridge() -> dict[str, Any]:
 
 def restart_kiboto(delay: int = 2, do: Run | None = None) -> bool:
     """Kiboto is started again by the machine, a moment after the answer has left. False where
-    Kiboto is a guest: there its container's restart policy decides."""
-    do = do or run
+    Kiboto is a guest: there its container's restart policy decides. Through the host door where
+    it runs: the web user may not ask systemd for it (the restore from the pools said so)."""
     if not runtime.managed_host():
         return False
+    if do is None:
+        from backend import door
+
+        return bool(door.via("kiboto.restart", restart_here, delay=int(delay)))
+    return restart_here(delay, do)
+
+
+def restart_here(delay: int = 2, do: Run | None = None) -> bool:
+    do = do or run
+    delay = max(1, min(30, int(delay)))
     code, said = do(
         ["systemd-run", "--quiet", "--collect", f"--on-active={delay}", "systemctl", "restart", "kiboto.service"]
     )
