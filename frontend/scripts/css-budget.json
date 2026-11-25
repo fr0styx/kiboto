@@ -3,7 +3,7 @@
   "buttonClasses": 76,
   "inlineStyles": 1215,
   "emojiIcons": 5,
-  "colours": 3556,
+  "colours": 3557,
   "primitiveUses": 4,
   "importantPerFile": {
     "frontend/index.html": 64,
@@ -164,7 +164,7 @@
     "frontend/src/styles/80-public-apps.css": 1,
     "frontend/src/styles/containers-lazy.css": 1,
     "frontend/src/styles/files-lazy.css": 1,
-    "frontend/src/styles/hardware-drawer.css": 1,
+    "frontend/src/styles/hardware-drawer.css": 2,
     "frontend/src/styles/kib-window.css": 2,
     "frontend/src/styles/management-lazy.css": 15,
     "frontend/src/styles/users-lazy.css": 2,

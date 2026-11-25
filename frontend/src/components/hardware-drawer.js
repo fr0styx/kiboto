@@ -32,11 +32,17 @@ function shell() {
   if (drawer) return drawer;
   const backdrop = el('div', { id: 'hw-drawer-backdrop', className: 'hwd-backdrop' });
   backdrop.addEventListener('click', () => closeHardwareDrawer());
-  const title = el('h2', { id: 'hwd-title', className: 'hwd-title', textContent: t('hwd.title', 'Hardware') });
-  const close = el('button', { type: 'button', className: 'hwd-close', textContent: '×' });
+  const sub = el('div', { className: 'drawer-sub hwd-sub' }, [
+    el('span', { id: 'hwd-nas', textContent: nasName() }),
+    ' • ',
+    el('span', { textContent: t('hwd.title', 'Hardware') }),
+  ]);
+  const title = el('h2', { id: 'hwd-title', className: 'drawer-title', textContent: t('hwd.title', 'Hardware') });
+  const desc = el('p', { id: 'hwd-desc', className: 'drawer-subdesc' });
+  const close = el('button', { type: 'button', className: 'btn-icon hwd-close', textContent: '✕' });
   close.setAttribute('aria-label', t('hwd.close', 'Close'));
   close.addEventListener('click', () => closeHardwareDrawer());
-  const tablist = el('div', { className: 'hwd-tabs' });
+  const tablist = el('div', { className: 'drawer-tabs-nav hwd-tabs' });
   tablist.setAttribute('role', 'tablist');
   tablist.setAttribute('aria-labelledby', 'hwd-title');
   tablist.addEventListener('keydown', onTabKeys);
@@ -44,7 +50,7 @@ function shell() {
   body.setAttribute('role', 'tabpanel');
   body.tabIndex = -1;
   drawer = el('aside', { id: 'hw-drawer', className: 'hwd' }, [
-    el('div', { className: 'hwd-head' }, [title, close]),
+    el('div', { className: 'drawer-header hwd-head' }, [el('div', {}, [sub, title, desc]), close]),
     tablist,
     body,
   ]);
@@ -57,10 +63,22 @@ function shell() {
   return drawer;
 }
 
+/** The server's name, as the old drawer showed it; "NAS" until it is known. */
+function nasName() {
+  const known = document.getElementById('drawer-nas-name');
+  return (known && known.textContent.trim()) || 'NAS';
+}
+
 function showTab(id) {
   if (!_open || !_open.tabs.includes(id)) return;
   _open.active = id;
   const drawer = document.getElementById('hw-drawer');
+  // the header says what the tab is, in the words of its first section (whose own heading is hidden)
+  const first = document.getElementById(TABS[id].panes[0]);
+  document.getElementById('hwd-title').textContent = t(...TABS[id].label);
+  const words = first && first.querySelector('.mgmt-card-intro-desc');
+  document.getElementById('hwd-desc').textContent = words ? words.textContent.trim() : '';
+  document.getElementById('hwd-nas').textContent = nasName();
   for (const btn of drawer.querySelectorAll('.hwd-tab')) {
     const on = btn.dataset.tab === id;
     btn.setAttribute('aria-selected', String(on));

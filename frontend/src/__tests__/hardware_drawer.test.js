@@ -9,7 +9,7 @@ vi.mock('../management-dom.js', async (importOriginal) => ({
 
 import { hardwareSections, mayChangeHardware, showHardwareButton } from '../components/dashboard.js';
 import { openHardwareDrawer, closeHardwareDrawer, isOpen } from '../components/hardware-drawer.js';
-import { showSystemFans, prepareHardwarePage } from '../components/management.js';
+import { showSystemFans, prepareHardwarePage, updateManagementTelemetry } from '../components/management.js';
 import { state } from '../state.js';
 
 const ZETTLAB = {
@@ -98,6 +98,9 @@ describe('The panel', () => {
     // only the active tab's sections show
     // a section the page hides inline shows in the panel
     expect(document.getElementById('mgmt-pane-hardware-led').style.display).toBe('');
+    // the header names the tab, as the old drawer did
+    expect(document.getElementById('hwd-title').textContent).toBe('Cooling and fans');
+    expect(document.getElementById('hwd-nas').textContent).toBe('NAS');
     const groups = [...drawer.querySelectorAll('.hwd-group')];
     expect(groups.map((g) => g.hidden)).toEqual([false, true, true]);
 
@@ -115,6 +118,7 @@ describe('The panel', () => {
     await openHardwareDrawer(['cooling', 'lights', 'copies'], 'lights');
     const sel = () => document.querySelector('.hwd-tab[aria-selected="true"]').dataset.tab;
     expect(sel()).toBe('lights');
+    expect(document.getElementById('hwd-title').textContent).toBe('Lights');
     document.getElementById('hwd-tab-copies').click();
     expect(sel()).toBe('copies');
     const list = document.querySelector('.hwd-tabs');
@@ -206,5 +210,67 @@ describe('The Hardware page opening (page and panel)', () => {
     state.latestStats = null;
     prepareHardwarePage();
     expect(document.getElementById('hw-fans-system-note').hidden).toBe(true); // left as the page has it
+  });
+});
+
+describe('Live readings in the panel', () => {
+  beforeEach(() => {
+    page();
+    const overlay = document.createElement('div');
+    overlay.id = 'management-modal-overlay'; // the Settings window, closed
+    document.body.prepend(overlay);
+  });
+  afterEach(() => document.body.classList.remove('hwd-is-open'));
+
+  it('follow the readings while the panel is open, though the Settings window is closed', () => {
+    const d4 = { fans: [2500, 3000], fan_control: { driver_mode: 'none' } };
+    updateManagementTelemetry(d4);
+    expect(document.getElementById('hw-fans-system-note').hidden).toBe(true); // nothing open: left alone
+    document.body.classList.add('hwd-is-open');
+    updateManagementTelemetry(d4);
+    expect(document.getElementById('hw-fans-system-note').hidden).toBe(false);
+  });
+
+  it('leave a minimised or hidden Settings window alone when the panel is closed', () => {
+    const d4 = { fans: [2500, 3000], fan_control: { driver_mode: 'none' } };
+    const overlay = document.getElementById('management-modal-overlay');
+    overlay.className = 'open window-minimized';
+    updateManagementTelemetry(d4);
+    expect(document.getElementById('hw-fans-system-note').hidden).toBe(true);
+    overlay.className = 'open';
+    overlay.style.display = 'none';
+    updateManagementTelemetry(d4);
+    expect(document.getElementById('hw-fans-system-note').hidden).toBe(true);
+    overlay.style.display = '';
+    updateManagementTelemetry(d4); // open and shown: the page follows the readings
+    expect(document.getElementById('hw-fans-system-note').hidden).toBe(false);
+  });
+});
+
+describe('The panel header', () => {
+  beforeEach(page);
+  afterEach(() => closeHardwareDrawer());
+
+  it('shows the server name, and each tab in the words of its first section', async () => {
+    const name = document.createElement('span');
+    name.id = 'drawer-nas-name';
+    name.textContent = 'Basement';
+    document.body.append(name);
+    const intro = document.createElement('div');
+    intro.className = 'mgmt-card-intro';
+    intro.innerHTML = '<div class="mgmt-card-intro-desc"> The light bar on the front. </div>';
+    document.getElementById('mgmt-pane-hardware-led').prepend(intro);
+    await openHardwareDrawer(['cooling', 'lights', 'screen'], 'lights');
+    expect(document.getElementById('hwd-nas').textContent).toBe('Basement');
+    expect(document.getElementById('hwd-desc').textContent).toBe('The light bar on the front.');
+    document.getElementById('hwd-tab-cooling').click();
+    expect(document.getElementById('hwd-desc').textContent).toBe(''); // a section without words
+  });
+
+  it('copes with a section that is not on the page', async () => {
+    document.getElementById('mgmt-pane-hardware-lcd').remove();
+    await openHardwareDrawer(['screen']);
+    expect(document.getElementById('hwd-title').textContent).toBe('Front screen');
+    expect(document.getElementById('hwd-desc').textContent).toBe('');
   });
 });

@@ -138,6 +138,8 @@ Kiboto OS has a guide of its own: what hardware it runs on, writing and checking
 
 The Yak themes are gone: the hidden desktop theme with its top-bar button, and the Yak Bronze front-screen theme. Anyone who had one chosen gets the default look.
 
+The Hardware panel looks like the drawer it replaces again, with its header and tab bar, and its status follows the live readings.
+
 ## v2.0.6 (2026-11-23)
 ### 🖥️ Kiboto on a machine of its own (preview), with its settings kept safe on every pool
 

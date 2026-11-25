@@ -315,14 +315,13 @@ document.addEventListener('click', (e) => {
 export function updateManagementTelemetry(stats) {
   if (!stats) return;
   const overlay = document.getElementById('management-modal-overlay');
-  if (
+  const shut =
     overlay &&
     (!overlay.classList.contains('open') ||
       overlay.classList.contains('window-minimized') ||
-      overlay.style.display === 'none')
-  ) {
-    return;
-  }
+      overlay.style.display === 'none');
+  // the Hardware panel holds the Hardware page's sections: they follow the readings while it is open
+  if (shut && !document.body.classList.contains('hwd-is-open')) return;
   const unraid = stats.unraid;
   // Hardware 3: the facts live on About, Storage and Kib; rows for the other kind of host stay hidden
   const hostKind = unraid && unraid.available ? 'unraid' : 'generic';

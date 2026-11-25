@@ -17,14 +17,17 @@
   position: fixed;
   top: 0;
   right: 0;
-  width: min(760px, 94vw);
+  width: 520px;
+  max-width: 95vw;
   height: 100vh;
   height: 100dvh;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
+  gap: 14px;
+  padding: 24px 22px 0;
   background: var(--lt-b-101d1fff);
-  border-left: 1px solid var(--c-border);
-  box-shadow: -10px 0 40px rgba(0, 0, 0, 0.5);
+  box-shadow: -10px 0 40px rgba(0, 0, 0, 0.88);
   transform: translateX(100%);
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   z-index: var(--z-drawer, 7100);
@@ -33,64 +36,54 @@
   transform: translateX(0);
 }
 
+/* the old drawer's header: drawer-header, drawer-sub, drawer-title and drawer-subdesc carry the look */
 .hwd-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   gap: 12px;
-  padding: 18px 22px 10px;
-}
-.hwd-title {
-  margin: 0;
-  font-size: 1.1rem;
-  font-weight: 700;
 }
 .hwd-close {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  border: 1px solid var(--c-border);
-  background: transparent;
-  color: inherit;
-  font-size: 1.4rem;
-  line-height: 1;
-  cursor: pointer;
+  min-width: 36px;
+  min-height: 36px;
+  border-radius: 8px;
 }
 
-.hwd-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  padding: 0 22px 12px;
-  border-bottom: 1px solid var(--c-border);
-}
+/* the old drawer's tab bar (drawer-tabs-nav), its buttons styled as drawer-tab-btn was */
 .hwd-tab {
-  min-height: 36px;
-  padding: 6px 14px;
-  border-radius: 999px;
-  border: 1px solid var(--c-border);
+  flex: 1;
+  min-height: 34px;
   background: transparent;
-  color: inherit;
-  font-weight: 600;
+  border: none;
+  color: var(--muted);
+  font-size: var(--kb-fs-xs);
+  font-weight: 700;
+  padding: 8px 10px;
+  border-radius: 8px;
   cursor: pointer;
+  transition: all 0.2s ease;
+}
+.hwd-tab:hover {
+  color: var(--kb-text-strong);
 }
 .hwd-tab[aria-selected='true'] {
-  border-color: var(--brand);
-  color: var(--lt-ink-brand, var(--brand));
-  background: rgba(var(--brand-rgb), 0.12);
+  background: var(--lt-b-1f3337ff);
+  color: var(--ok2);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
 }
 .hwd-close:focus-visible,
 .hwd-tab:focus-visible {
   box-shadow: var(--focus-ring);
   outline: none;
-  outline-offset: 2px;
 }
 
 .hwd-body {
   flex: 1;
   overflow-y: auto;
-  padding: 8px 22px 28px;
+  margin: 0 -22px;
+  padding: 0 22px 28px;
   scrollbar-gutter: stable;
+}
+/* the header names the tab: its first section's own heading would say it twice */
+.hwd-group > .mgmt-tab-pane:first-child > .mgmt-card-intro {
+  display: none;
 }
 /* the sections keep the page's look; the page shows each by its own display style, the panel by group */
 .hwd-group > .mgmt-tab-pane {
@@ -128,21 +121,23 @@ body.hwd-is-open #os-dock-container {
 @media (max-width: 768px) {
   .hwd {
     width: 100%;
-    border-left: 0;
+    max-width: 100%;
+    padding: 18px 16px 0;
     transform: translateY(100%);
+  }
+  .hwd-body {
+    margin: 0 -16px;
   }
   .hwd.open {
     transform: translateY(0);
   }
-  .hwd-head,
-  .hwd-tabs,
   .hwd-body {
     padding-left: 16px;
     padding-right: 16px;
   }
   .hwd-close {
-    width: 44px;
-    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
   }
   .hwd-tab {
     min-height: 44px;
