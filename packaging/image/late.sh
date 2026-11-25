@@ -58,12 +58,16 @@ chmod 700 /target/root/kiboto-firstboot.sh
 mkdir -p /target/etc/systemd/system-generators
 ln -sf /dev/null /target/etc/systemd/system-generators/systemd-ssh-generator
 
+# It runs when Kiboto is not installed yet, or when an install started and did not finish: the install
+# script marks the machine as Kiboto's before it waits for Kiboto to answer and moves the network, so
+# a stop after that mark must still be tried again at the next start ("|": either condition is enough).
 cat > /target/etc/systemd/system/kiboto-firstboot.service <<'UNIT'
 [Unit]
 Description=Install Kiboto (first start)
 Wants=network-online.target
 After=network-online.target
-ConditionPathExists=!/etc/kiboto/managed
+ConditionPathExists=|!/etc/kiboto/managed
+ConditionPathExists=|/etc/kiboto/install-started
 
 [Service]
 Type=oneshot

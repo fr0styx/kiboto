@@ -2330,6 +2330,7 @@ export default {
   "srv.sched_same_times": "L'heure d'extinction et l'heure de réveil doivent être différentes.",
   "srv.sched_no_night": "Choisissez au moins une nuit.",
   "srv.sched_no_clock": "L'horloge de réveil de ce NAS ne peut pas être réglée depuis Kiboto ; il ne se rallumerait pas tout seul.",
+  "srv.os_not_yet": "Ce n'est pas encore disponible sur Kiboto OS.",
   "srv.ddns_provider": "Choisissez DuckDNS ou Cloudflare.",
   "srv.ddns_name": "Ce nom ne peut pas être utilisé. Utilisez des lettres, des chiffres et des tirets, comme home.duckdns.org ou nas.example.com.",
   "srv.ddns_fill_in": "Remplissez le nom et le jeton avant de l'activer.",

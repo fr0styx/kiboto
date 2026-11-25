@@ -146,22 +146,28 @@ Match Group sftpusers
             f.write(content)
         return content
 
-    def _check_port(self, port: int) -> bool:
-        """Checks if SFTP port is actively listening locally, on host, or container gateway."""
-        candidates = ["127.0.0.1"]
-        # Check container default gateway
+    @staticmethod
+    def _gateway() -> str:
+        """In a container the default gateway is the host, where the service may run. On a machine
+        of Kiboto's own it is the home router, whose ports say nothing about this machine."""
+        if runtime.managed_host():
+            return ""
         try:
             with open("/proc/net/route") as f:
                 for line in f:
                     fields = line.strip().split()
                     if len(fields) >= 3 and fields[1] == "00000000":
-                        gw_hex = fields[2]
-                        gw_ip = socket.inet_ntoa(bytes.fromhex(gw_hex)[::-1])
-                        if gw_ip and gw_ip not in candidates:
-                            candidates.append(gw_ip)
-                        break
+                        return socket.inet_ntoa(bytes.fromhex(fields[2])[::-1])
         except Exception:
             ignored("backend.services.sftp_engine.SFTPEngine._check_port")
+        return ""
+
+    def _check_port(self, port: int) -> bool:
+        """Checks if SFTP port is actively listening locally, on host, or container gateway."""
+        candidates = ["127.0.0.1"]
+        gateway = self._gateway()
+        if gateway and gateway not in candidates:
+            candidates.append(gateway)
 
         # Check primary host IP
         try:
@@ -535,6 +541,10 @@ Match Group sftpusers
         )
 
     def start(self) -> SFTPStatus:
+        if runtime.without_root():  # the service is root's, and the host door does not start it yet
+            from backend.errors import not_on_os_yet
+
+            raise not_on_os_yet()
         cfg = self.save_config({"enabled": True})
         port = cfg.get("port", 2222)
         logger.info(f"[SFTP] Starting SFTP service on port {port}...")
@@ -542,8 +552,6 @@ Match Group sftpusers
         # 1. Try Docker sidecar first if Docker socket exists
         started_sidecar = False
         sock_path = docker_sock()
-        from backend import runtime
-
         if runtime.managed_host():  # the machine is Kiboto's: a service of its own, not a container
             started_sidecar = self._start_unit(port)
         elif os.path.exists(sock_path):
@@ -582,7 +590,7 @@ Match Group sftpusers
         """At Kiboto's start: SFTP that is on is serving again (a machine that restarted has lost
         its service; the fallback process went with the Kiboto before)."""
         cfg = self.get_config()
-        if not cfg.get("enabled") or self._check_port(int(cfg.get("port", 2222))):
+        if not cfg.get("enabled") or runtime.without_root() or self._check_port(int(cfg.get("port", 2222))):
             return False
         self.start()
         return True

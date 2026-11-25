@@ -284,6 +284,12 @@ def _power(action: str) -> dict[str, Any]:
     return host_power.run(action)  # the door's own list of commands, never one it was sent
 
 
+def _wake(epoch: int) -> bool:
+    from backend.services import power_schedule
+
+    return power_schedule.wake_at(epoch)  # the machine's own clock file; only the time is sent
+
+
 def _names() -> dict[str, Any]:
     from backend.services import nas_name
 
@@ -558,6 +564,7 @@ OPERATIONS: dict[str, Operation] = {
     "hosts.apps": Operation(_apps_hosts, {}),
     "names.ensure": Operation(_names, {}),
     "power.run": Operation(_power, {"action": TEXT}, max_len=16),
+    "power.wake": Operation(_wake, {"epoch": NUMBER}),
     "cloud.mount": Operation(
         _cloud_mount, {"name": TEXT, "remote_path": TEXT, "vfs_cache": TEXT, "read_only": ON}, max_len=1024
     ),

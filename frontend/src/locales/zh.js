@@ -2330,6 +2330,7 @@ export default {
   "srv.sched_same_times": "关机时间和唤醒时间不能相同。",
   "srv.sched_no_night": "请至少选择一个晚上。",
   "srv.sched_no_clock": "Kiboto 无法设置这台 NAS 的唤醒时钟，因此它不会自动重新开机。",
+  "srv.os_not_yet": "Kiboto OS 目前还不支持此功能。",
   "srv.ddns_provider": "请选择 DuckDNS 或 Cloudflare。",
   "srv.ddns_name": "这个名称无法使用。请使用字母、数字和连字符，例如 home.duckdns.org 或 nas.example.com。",
   "srv.ddns_fill_in": "开启前请填写名称和令牌。",

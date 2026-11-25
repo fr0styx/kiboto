@@ -19,6 +19,7 @@ const el = (tag, props = {}, ...kids) => {
 
 /** The status line: off, answering, waiting for a first disk, or not running. */
 export function iscsiStatus(v) {
+  if (v?.why === 'not_yet') return t('srv.os_not_yet', 'This is not available on Kiboto OS yet.');
   if (!v || !v.enabled) return t('iscsi.st_off', 'Off.');
   if (!(v.disks || []).length) return t('iscsi.st_nodisk', 'On. Add a disk to start the service.');
   if (v.running) return t('iscsi.st_on', 'Answers on port {port}.', { port: v.port });
@@ -209,6 +210,7 @@ function draw() {
     textContent: on ? t('nas_name.btn_on', 'On') : t('nas_name.btn_off', 'Off'),
   });
   toggle.setAttribute('aria-pressed', on ? 'true' : 'false');
+  toggle.disabled = _view.why === 'not_yet';
   toggle.setAttribute('aria-labelledby', 'iscsi-title iscsi-toggle');
   const parts = [
     el(

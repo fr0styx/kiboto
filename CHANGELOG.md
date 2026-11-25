@@ -82,6 +82,12 @@ The Hardware panel shows every section with its controls, and the dock no longer
 
 The Hardware panel no longer shows a tab's name twice.
 
+Kiboto OS: the power schedule can be turned on (the wake-up clock is now set through the root service).
+
+Kiboto OS: iSCSI, SFTP, replication and merged folders now say they are not available there yet, instead of failing with a misleading reason; SFTP no longer shows "running" when nothing is listening.
+
+Install image: a first start that stopped late (after Kiboto was set up but before it answered) is tried again at the next start.
+
 #### Security
 
 On a machine of its own, failed sign-ins to shared folders over the network now count like web sign-ins: 20 in 15 minutes block the address for an hour, and they show under History, Sign-ins.

@@ -90,6 +90,11 @@ def button_listener_daemon():
         mem = mmap.mmap(fd, 4096, offset=MMIO_BASE)
         logger.info(f"[Kiboto] Successfully initialized MMIO hardware copy button listener on chassis {model}")
     except PermissionError as pe:
+        from backend import runtime
+
+        if runtime.without_root():
+            logger.info("[Kiboto] The front COPY button is not read on Kiboto OS yet; copies start from the app.")
+            return
         logger.warning(
             f"[Kiboto] Hardware button mapping failed: {pe}. "
             "Docker container lacks cgroup access to /dev/mem. "

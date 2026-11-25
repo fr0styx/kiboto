@@ -7,17 +7,22 @@ virtual machine still running) waits up to two hours."""
 from __future__ import annotations
 
 import datetime as dt
+import logging
 import os
 import re
 import time
 from collections.abc import Callable
 from typing import Any
 
+from backend import door
 from backend.config import DATA_DIR
 from backend.fsutil import atomic_write_json, read_json
 
+logger = logging.getLogger(__name__)
+
 STATE_FILE = os.path.join(DATA_DIR, "power_schedule.json")
 RTC_PATHS = ("/host/sys/class/rtc/rtc0/wakealarm", "/sys/class/rtc/rtc0/wakealarm")
+WAKE_WITHIN = 2 * 86400  # a night off only ever needs the next morning; the door sets nothing later
 WAIT_STEP_MIN = 30
 WAIT_MAX_MIN = 120
 HHMM = re.compile(r"^([01]\d|2[0-3]):[0-5]\d$")
@@ -40,8 +45,19 @@ def state() -> dict[str, Any]:
     return {**_defaults(), **(data if isinstance(data, dict) else {})}
 
 
+def _clock() -> str:
+    return next((p for p in RTC_PATHS if os.path.exists(p)), "")
+
+
+def _mine(path: str) -> bool:
+    return os.access(path, os.W_OK)
+
+
 def rtc_path() -> str:
-    return next((p for p in RTC_PATHS if os.path.exists(p) and os.access(p, os.W_OK)), "")
+    """The wake-up clock Kiboto can set, or "": the file this process may write, or the one the host
+    door writes where the web process is not root (ADR 0006)."""
+    mine = next((p for p in RTC_PATHS if os.path.exists(p) and _mine(p)), "")
+    return mine or (_clock() if door.available() else "")
 
 
 def public_state() -> dict[str, Any]:
@@ -78,8 +94,28 @@ def next_wake(now: dt.datetime, wake_at: str) -> dt.datetime:
 
 
 def set_wake(when: dt.datetime, path: str) -> bool:
-    """Writes the RTC alarm (cleared first, as the kernel asks) and reads it back."""
+    """Sets the wake-up clock and says whether it took: here when this process may write the
+    file, else through the host door."""
     epoch = int(when.timestamp())
+    if _mine(path):
+        return write_wake(epoch, path)
+    return bool(door.via("power.wake", lambda epoch: write_wake(epoch, path), epoch=epoch))
+
+
+def wake_at(epoch: int) -> bool:
+    """The door's side of set_wake: the machine's own clock file, and only a time in the next two
+    days, so nothing else can be written and the machine cannot be told to stay off for long."""
+    now = int(time.time())
+    if not now < epoch <= now + WAKE_WITHIN:
+        raise ValueError("a wake-up time is within the next two days")
+    path = _clock()
+    if not path:
+        raise ValueError("this machine has no wake-up clock")
+    return write_wake(epoch, path)
+
+
+def write_wake(epoch: int, path: str) -> bool:
+    """Writes the RTC alarm (cleared first, as the kernel asks) and reads it back."""
     with open(path, "w", encoding="ascii") as f:
         f.write("0")
     with open(path, "w", encoding="ascii") as f:
@@ -135,7 +171,8 @@ def tick(
     path = rtc()
     try:
         ok = bool(path) and wake(next_wake(now, st["wake_at"]), path)
-    except OSError:
+    except (OSError, ValueError, RuntimeError) as e:  # the file, or the door, would not take it
+        logger.warning("[Power schedule] the wake-up clock could not be set: %s", e)
         ok = False
     if not ok:
         st["last_note"] = "no_wake"

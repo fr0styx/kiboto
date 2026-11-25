@@ -57,7 +57,7 @@ What the words mean:
 | Network settings<br><sub>Kiboto OS changes the address and the bridge for virtual machines, with a way back.</sub> | View only | View only | Partly |
 | Firewall | Your NAS system does this | Your NAS system does this | Not yet |
 | Restart and shut down | Yes | Yes | Yes |
-| Power schedule: wake and sleep at set times | Yes | Yes | Not yet |
+| Power schedule: wake and sleep at set times<br><sub>On Kiboto OS it is tried on a virtual machine, not yet for a night on a real one.</sub> | Yes | Yes | Being checked |
 | Battery backup (UPS) | Yes | Yes | Not yet |
 | Server name, time zone and the SSH switch | Your NAS system does this | Your NAS system does this | Yes |
 | Dynamic DNS, HTTPS certificates, access from away | Yes | Yes | Being checked |

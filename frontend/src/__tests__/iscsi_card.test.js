@@ -64,6 +64,21 @@ describe('disks for other computers', () => {
     expect(iscsiStatus(view({ running: false, why: 'down' }))).toMatch(/Port 3260 may be in use/);
   });
 
+  it('says it is not on Kiboto OS yet, and the switch cannot be pressed', async () => {
+    const notYet = view({ enabled: false, running: false, disks: [], why: 'not_yet' });
+    expect(iscsiStatus(notYet)).toBe('This is not available on Kiboto OS yet.');
+    vi.spyOn(api, 'get').mockResolvedValue(notYet);
+    await renderIscsiCard();
+    expect(card().querySelector('#iscsi-status').textContent).toBe('This is not available on Kiboto OS yet.');
+    expect(card().querySelector('#iscsi-toggle').disabled).toBe(true);
+  });
+
+  it('leaves the switch usable everywhere else', async () => {
+    vi.spyOn(api, 'get').mockResolvedValue(view({ enabled: false, disks: [] }));
+    await renderIscsiCard();
+    expect(card().querySelector('#iscsi-toggle').disabled).toBe(false);
+  });
+
   it('is hidden from anyone the server refuses, and needs its place on the page', async () => {
     vi.spyOn(api, 'get').mockRejectedValue(new Error('403'));
     expect(await renderIscsiCard()).toBe(false);

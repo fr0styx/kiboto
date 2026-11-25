@@ -11,6 +11,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 from backend.auth import require_scope
+from backend.errors import ApiError, SaidError
 from backend.services.sftp_engine import SFTPConfig, SFTPStatus, SFTPUser, get_sftp_engine
 
 logger = logging.getLogger("Kiboto.SFTPApi")
@@ -51,7 +52,10 @@ async def toggle_sftp(req: SFTPToggleRequest):
     """Enables or disables the inbound SFTP service."""
     engine = get_sftp_engine()
     if req.enabled:
-        return await asyncio.to_thread(engine.start)
+        try:
+            return await asyncio.to_thread(engine.start)
+        except SaidError as e:  # not on Kiboto OS yet
+            raise ApiError(409, str(e), "not_on_kiboto_os", text=e.text) from e
     else:
         return await asyncio.to_thread(engine.stop)
 

@@ -294,6 +294,8 @@ def _in_a_container_everywhere(monkeypatch):
 
     monkeypatch.setattr(runtime, "CONTAINER_MARKS", (ROOT,))  # a path that is there on every machine
     monkeypatch.setattr(runtime, "MANAGED_MARK", os.path.join(ROOT, "no-such-mark"))
+    # root in the test image, not on CI's runner: the tests about a web process without root say so
+    monkeypatch.setattr(runtime, "is_root", lambda: True)
 
 
 @pytest.fixture(autouse=True)

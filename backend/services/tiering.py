@@ -140,6 +140,8 @@ def _own_pools_fit(share: Any, pools: list[Any]) -> dict[str, Any]:
         return {"why": "nfs"}  # a merged folder is not offered over NFS yet
     if not os.path.isdir(path) or os.path.islink(path) or os.path.ismount(path):
         return {"why": "own_mount"}
+    if runtime.without_root():  # the merge is mounted by a root service the host door does not start yet
+        return {"why": "not_yet"}
     why = tier_merge.missing(path)
     if why:
         return {"why": "needs_shared_mounts" if why in ("not_shared", "smb_not_shared") else "no_merge_tool"}

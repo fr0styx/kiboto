@@ -29,6 +29,16 @@ def managed_host() -> bool:
     return native() and os.path.exists(MANAGED_MARK)
 
 
+def is_root() -> bool:
+    return not hasattr(os, "geteuid") or os.geteuid() == 0
+
+
+def without_root() -> bool:
+    """On a machine Kiboto runs, the web process is not root (ADR 0006). What still needs root and
+    has no operation in the host door cannot be done there yet, and says so instead of failing."""
+    return managed_host() and not is_root()
+
+
 def own_container_hostname() -> str:
     """The start of Kiboto's own container id, as Docker sets it for the host name; "" when Kiboto runs
     natively. There the host name is the NAS's name (a name like "cafe" is also the start of container

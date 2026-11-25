@@ -9,6 +9,7 @@ import { initNetworkPortsInspector, fetchListeningPorts } from '../network-manag
 import { showToast, showConfirmToast } from '../../toast.js';
 import { escapeHtml, copyText } from '../../utils.js';
 import { t } from '../../i18n.js';
+import { serverSaid } from '../../server-text.js';
 import { stateBlock } from '../state-block.js';
 import { showNetDialog, hideNetDialog } from './net-dialog.js';
 import { renderHome, renderPortRows, showTailscaleOptions } from './network-home.js';
@@ -98,7 +99,7 @@ export async function fetchAndRenderReplication() {
       const cell = document.createElement('td');
       cell.colSpan = 8;
       cell.className = 'repl-note';
-      cell.textContent = jobsRes.reason;
+      cell.textContent = serverSaid(jobsRes, jobsRes.reason);
       const row = document.createElement('tr');
       row.appendChild(cell);
       tbody.replaceChildren(row);

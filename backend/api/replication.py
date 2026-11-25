@@ -9,6 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 from backend.auth import require_scope
+from backend.errors import NOT_ON_OS_YET, said
 from backend.paging import PageParams
 from backend.services.replication_engine import availability, get_replication_engine, validate
 
@@ -36,7 +37,8 @@ class ReplicationJobCreateRequest(BaseModel):
 def list_replication_jobs() -> dict[str, Any]:
     engine = get_replication_engine()
     ok, reason = availability()
-    return {"jobs": engine.list_jobs(), "available": ok, "reason": reason}
+    said_how = said("os_not_yet") if reason == NOT_ON_OS_YET else None  # the page shows it in the reader's language
+    return {"jobs": engine.list_jobs(), "available": ok, "reason": reason, "text": said_how}
 
 
 def _available() -> None:

@@ -17,6 +17,7 @@ const el = (tag, props = {}, ...kids) => {
 };
 
 const WHY = {
+  not_yet: ['srv.os_not_yet', 'This is not available on Kiboto OS yet.'],
   unraid_moves_all: [
     'tier.why.unraid_moves_all',
     "Unraid already moves all of this folder's files to the array each night.",

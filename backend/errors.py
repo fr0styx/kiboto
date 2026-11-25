@@ -101,6 +101,14 @@ class SaidError(ValueError):
         self.text = said(key, **params)
 
 
+NOT_ON_OS_YET = "This is not available on Kiboto OS yet."
+
+
+def not_on_os_yet() -> SaidError:
+    """What a feature answers on Kiboto OS while it needs root work the host door does not do yet."""
+    return SaidError(NOT_ON_OS_YET, "os_not_yet")
+
+
 def error_body(status: int, detail: str, error: str | None = None, shown: bool = False, **extra: Any) -> dict[str, Any]:
     detail = _hide_internal(status, detail, extra, shown)
     body = {"error": error or ERROR_SLUGS.get(status, "error"), "detail": detail, "code": status}

@@ -108,3 +108,78 @@ def test_without_a_shutdown_passed_in_it_does_not_switch_off():
     ps.save(True, "01:00", "07:00", list(range(7)))
     assert ps.tick(NIGHT, busy=lambda: "") == "failed"
     assert ps.state()["last_note"] == "failed"
+
+
+# ── Kiboto OS: the web process is not root, so the host door sets the clock (ADR 0006) ──
+
+
+@pytest.fixture
+def not_root(monkeypatch):
+    """The clock file is there but this process may not write it, and a door answers."""
+    asked = []
+    monkeypatch.setattr(ps, "_mine", lambda path: False)
+    monkeypatch.setattr(ps.door, "available", lambda *a: True)
+    monkeypatch.setattr(ps.door, "call", lambda op, **args: asked.append((op, args)) or True)
+    return asked
+
+
+def test_without_a_door_a_clock_this_process_cannot_write_is_no_clock(_state, monkeypatch):
+    monkeypatch.setattr(ps, "_mine", lambda path: False)
+    monkeypatch.setattr(ps.door, "available", lambda *a: False)
+    assert ps.rtc_path() == "" and ps.public_state()["wake_possible"] is False
+
+
+def test_with_a_door_the_schedule_can_be_turned_on_and_the_door_sets_the_clock(_state, not_root):
+    assert ps.rtc_path() == str(_state) and ps.public_state()["wake_possible"] is True
+    ps.save(True, "01:00", "07:00", list(range(7)))
+    assert ps.tick(NIGHT, busy=lambda: "", power_off=lambda: True) == "off"
+    wake = int(dt.datetime(2026, 11, 16, 7, 0).timestamp())
+    assert not_root == [("power.wake", {"epoch": wake})]
+    assert _state.read_text() == ""  # this process wrote nothing itself
+
+
+def test_a_door_that_refuses_means_no_switch_off(_state, not_root, monkeypatch):
+    def refuse(op, **args):
+        raise ps.door.DoorError("a wake-up time is within the next two days", "value")
+
+    monkeypatch.setattr(ps.door, "call", refuse)
+    ps.save(True, "01:00", "07:00", list(range(7)))
+    offs = []
+    assert ps.tick(NIGHT, busy=lambda: "", power_off=lambda: offs.append(1) or True) == "no_wake"
+    assert offs == []
+
+
+def test_a_clock_that_did_not_take_the_time_means_no_switch_off(_state, not_root, monkeypatch):
+    monkeypatch.setattr(ps.door, "call", lambda op, **args: False)
+    ps.save(True, "01:00", "07:00", list(range(7)))
+    assert ps.tick(NIGHT, busy=lambda: "", power_off=lambda: True) == "no_wake"
+
+
+def test_the_door_sets_only_a_time_in_the_next_two_days(_state, monkeypatch):
+    monkeypatch.setattr(ps.time, "time", lambda: 1_000_000)
+    assert ps.wake_at(1_000_000 + 6 * 3600) is True
+    assert _state.read_text() == str(1_000_000 + 6 * 3600)
+    for bad in (999_999, 1_000_000, 1_000_000 + ps.WAKE_WITHIN + 1):
+        with pytest.raises(ValueError, match="next two days"):
+            ps.wake_at(bad)
+    assert _state.read_text() == str(1_000_000 + 6 * 3600)
+
+
+def test_the_door_refuses_where_there_is_no_clock(monkeypatch):
+    monkeypatch.setattr(ps.time, "time", lambda: 1_000_000)
+    monkeypatch.setattr(ps, "RTC_PATHS", ("/nonexistent/wakealarm",))
+    with pytest.raises(ValueError, match="no wake-up clock"):
+        ps.wake_at(1_003_600)
+
+
+def test_the_door_has_the_operation_and_takes_only_a_number(_state, monkeypatch):
+    from backend.services import host_door
+
+    assert host_door.OPERATIONS["power.wake"].args == {"epoch": (int,)}
+    monkeypatch.setattr(ps.time, "time", lambda: 1_000_000)
+    assert host_door.handle({"op": "power.wake", "args": {"epoch": 1_003_600}}, 0) == {"ok": True, "result": True}
+    assert _state.read_text() == "1003600"
+    for bad in ("1003600", "/etc/passwd", 1.5, None):
+        assert host_door.handle({"op": "power.wake", "args": {"epoch": bad}}, 0)["ok"] is False
+    assert host_door.handle({"op": "power.wake", "args": {"epoch": 1_003_600, "path": "/etc/x"}}, 0)["ok"] is False
+    assert _state.read_text() == "1003600"

@@ -58,10 +58,33 @@ def test_everything_else_is_answered():
 def test_kiboto_is_installed_once_at_the_first_start():
     late = _read("late.sh")
     assert "cp /cdrom/kiboto/install.sh /target/root/kiboto-install.sh" in late
-    assert "ConditionPathExists=!/etc/kiboto/managed" in late and "ExecStart=/bin/sh /root/kiboto-firstboot.sh" in late
+    assert "ConditionPathExists=|!/etc/kiboto/managed" in late and "ExecStart=/bin/sh /root/kiboto-firstboot.sh" in late
     assert "in-target systemctl enable kiboto-firstboot.service" in late
     assert "PermitRootLogin yes" in late  # the password typed at install signs in over SSH, until SSH is off
     assert "/cdrom/kiboto/authorized_keys" in late
+
+
+def test_a_first_start_that_stopped_late_runs_again_at_the_next_start():
+    """install.sh marks the machine as Kiboto's before it waits for Kiboto and moves the network. A
+    stop after that used to leave the first-start service skipped for good; the started mark,
+    which install.sh removes as its last step, now starts it again."""
+    late = _read("late.sh")
+    unit = late[late.index("[Unit]\nDescription=Install Kiboto") : late.index("[Service]")]
+    conditions = [line for line in unit.splitlines() if line.startswith("Condition")]
+    assert conditions == [
+        "ConditionPathExists=|!/etc/kiboto/managed",  # "|": either one is enough
+        "ConditionPathExists=|/etc/kiboto/install-started",
+    ]
+    with open(os.path.join(ROOT, "packaging", "install.sh"), encoding="utf-8") as f:
+        install = f.read()
+    assert "ETC=/etc/kiboto\n" in install
+    assert 'mark_started() { mkdir -p "$ETC"; : > "$ETC/install-started"; }' in install
+    service = install[install.index("\nservice() {") : install.index("\nwait_up() {")]
+    assert '> "$ETC/managed"' in service  # the mark that used to end the retries is written this early
+    for branch in ("--from)", '--image | "")'):
+        part = install[install.index(branch) :]
+        part = part[: part.index(";;")]
+        assert part.index("service ") < part.index("wait_up") < part.index('rm -f "$ETC/install-started"')
 
 
 def test_the_build_puts_kiboto_first_and_stamps_the_release():

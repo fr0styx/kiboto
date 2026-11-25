@@ -98,6 +98,7 @@ describe('old files move to the slower drives', () => {
       /nothing moved, because no drive of the array has room for this folder\.$/
     );
     expect(tieringWhy('no_slow_drive')).toBe('The array has no drive this folder may use.');
+    expect(tieringWhy('not_yet')).toBe('This is not available on Kiboto OS yet.');
     expect(tieringLastRun(run({ why: 'not_watching', moved: 0 }))).toMatch(/was not seeing which files are opened\.$/);
     expect(tieringLastRun(run({ errors: [{ file: 'a', why: 'x' }], more: true }))).toMatch(
       /1 file could not be moved\. More files are old than one night moves; the rest follows\.$/

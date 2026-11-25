@@ -382,6 +382,10 @@ def unit_command(conf_hash: str) -> list[str]:
 
 
 def _ensure_unit(state: dict[str, Any]) -> dict[str, Any]:
+    from backend import runtime
+
+    if runtime.without_root():
+        return status()
     running = _unit_running()
     if not state["enabled"] or not state["disks"]:
         if running:
@@ -451,6 +455,10 @@ def status(running: bool | None = None, error: str = "", why: str = "") -> dict[
     state = _read()
     from backend import runtime
 
+    if runtime.without_root():  # tgtd is root's, and the host door does not start it yet
+        from backend.errors import NOT_ON_OS_YET
+
+        running, error, why = False, NOT_ON_OS_YET, "not_yet"
     if running is None and runtime.managed_host():  # a service of the machine, not a container
         running = _unit_running()
         if state["enabled"] and state["disks"] and not running:

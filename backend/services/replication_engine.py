@@ -86,6 +86,12 @@ def availability(adapter: Any = None) -> tuple[bool, str]:
         return False, "Unraid's pools are replicated with an off-site backup to another NAS."
     if platform not in OWNED:
         return False, "Replication runs only where Kiboto manages the pools."
+    from backend import runtime
+
+    if runtime.without_root():  # snapshots, send and receive are root's; the host door has no operation yet
+        from backend.errors import NOT_ON_OS_YET
+
+        return False, NOT_ON_OS_YET
     tools = base.storage_tools()
     if not (tools.get("zfs") or tools.get("btrfs")):
         return False, base.storage_tools_problem() or "This image has neither the ZFS nor the btrfs tools."

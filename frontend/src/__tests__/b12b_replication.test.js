@@ -47,6 +47,16 @@ describe('B12b (REL-5): replication shows where it can run', () => {
     );
     await fetchAndRenderReplication();
     expect(document.getElementById('replication-jobs-tbody').textContent).toContain('TrueNAS replicates its own pools');
+    // a reason the server also sends as a key is shown from the page's own words (the reader's language)
+    api.get.mockImplementation(async (url) =>
+      url.endsWith('/jobs')
+        ? { jobs: [], available: false, reason: 'server words', text: { msg_key: 'srv.os_not_yet', params: {} } }
+        : { history: [] }
+    );
+    await fetchAndRenderReplication();
+    expect(document.getElementById('replication-jobs-tbody').textContent).toBe(
+      'This is not available on Kiboto OS yet.'
+    );
     const job = {
       id: 'j1',
       name: 'DR',
