@@ -251,11 +251,11 @@ def test_the_network_and_firewall_operations_run_kibotos_own_code(audit, monkeyp
     assert host_door.handle({"op": "network.go_back", "args": {"key": None}}, 0)["ok"]
     assert host_door.handle({"op": "network.settle", "args": {}}, 0)["ok"]
     assert host_door.handle({"op": "network.ensure_fallback", "args": {}}, 0)["ok"]
-    sent = {"enabled": True, "allow_from": "everywhere; drop table", "services": {"smb": False, "evil": True}, "x": 1}
+    sent = {"enabled": True, "outside": {"smb": True, "ssh": "yes; drop table", "evil": True}, "x": 1}
     assert host_door.handle({"op": "firewall.apply", "args": {"st": sent}}, 0)["ok"]
     fw = seen[-1][1]
-    assert fw["enabled"] is True and fw["allow_from"] == "lan" and "evil" not in fw["services"] and "x" not in fw
-    assert fw["services"]["smb"] is False and fw["services"]["web"] is True
+    assert fw["enabled"] is True and set(fw) == {"enabled", "outside"} and "evil" not in fw["outside"]
+    assert fw["outside"]["smb"] is True and fw["outside"]["ssh"] is False and fw["outside"]["web"] is False
     assert [x[0] for x in seen] == ["trial", "bridge", "back", "settle", "fallback", "fw"]
 
 
@@ -271,7 +271,7 @@ def test_the_firewall_and_the_network_page_go_through_the_door(monkeypatch):
     assert calls[-1] == ("firewall.apply", ["st"])
     loaded = []
     firewall.apply(
-        {"enabled": False, "allow_from": "lan", "services": {}},
+        {"enabled": False, "outside": {}},
         run=lambda *a, **k: loaded.append(1) or subprocess.CompletedProcess(a, 0, "", ""),
     )
     assert loaded == [1] and len(calls) == 1  # a test's runner: never the door

@@ -625,6 +625,7 @@ def _reapply_firewall() -> None:
         firewall.reapply_at_start()
     except (OSError, RuntimeError) as e:
         logger.warning("Firewall rules not reloaded: %s", e)
+    firewall.watch()  # this thread's own loop: the rules follow a change of the home network
 
 
 def _reapply_tailscale_options() -> None:

@@ -90,7 +90,7 @@ class Settings:
     owns_firewall: bool = _s(
         "KIBOTO_OWNS_FIREWALL",
         False,
-        "Kiboto manages the host firewall (set by Kiboto's own system images; leave off in a container).",
+        "Kiboto manages the host firewall. Kiboto OS needs no setting for this; leave it off in a container.",
         group="Host",
     )
     remotes_path: str = _s("REMOTES_PATH", "/mnt/remotes", "Where cloud and network remotes are mounted.", group="Host")

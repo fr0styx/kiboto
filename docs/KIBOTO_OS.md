@@ -18,9 +18,10 @@ What it can do today, beside what Kiboto Companion (the container) can do, is in
 5. [Install on a Debian you set up yourself](#install-on-a-debian-you-set-up-yourself)
 6. [The first sign-in](#the-first-sign-in)
 7. [What it changes on the machine](#what-it-changes-on-the-machine)
-8. [Updates](#updates)
-9. [A new system disk](#a-new-system-disk)
-10. [Taking it off again](#taking-it-off-again)
+8. [The firewall](#the-firewall)
+9. [Updates](#updates)
+10. [A new system disk](#a-new-system-disk)
+11. [Taking it off again](#taking-it-off-again)
 
 ## What it runs on
 
@@ -156,6 +157,28 @@ encrypted AI chats and search index again.
   machine's security chip (or its system disk without one), in `/etc/kiboto/keys`.
 - A copy of the settings, encrypted, is kept on every pool (`.kiboto` at the pool's root), and apps
   keep their data on the first pool.
+
+## The firewall
+
+Off until you turn it on (Settings, Security, **Firewall**). When it is on:
+
+- **Your home network reaches everything on the machine**, whatever is ticked: this page, shared
+  folders, every app. Nothing at home stops working because a port was missing from a list.
+- **The outside reaches only what you tick**: this page, SSH, shared folders (Windows and Mac, or
+  NFS), WebDAV, SFTP, Tailscale, and **Apps** for the ports apps publish. Nothing is ticked at first.
+
+The home network is the private address ranges (10.x, 172.16 to 172.31, 192.168.x), Tailscale's
+addresses, and the IPv6 network the machine is on. Kiboto looks at that IPv6 network again every
+quarter of an hour, because an internet provider changes it now and then.
+
+Turning the firewall on while you are connected from outside the home network is refused unless
+this page is ticked, so you cannot shut yourself out. Kiboto keeps one table of its own
+(`inet kiboto`) and leaves every other rule on the machine alone, Docker's included; the page shows
+the exact rules under **Show the rules**.
+
+Most homes sit behind a router that already lets nothing in from the internet. The firewall matters
+when the machine has an address the internet can reach: a public IPv6 address, a port forwarded on
+the router, or a network you share with people you do not know.
 
 ## Updates
 

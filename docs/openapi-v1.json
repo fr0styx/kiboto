@@ -7932,23 +7932,17 @@
    },
    "FirewallIn": {
     "properties": {
-     "allow_from": {
-      "default": "lan",
-      "pattern": "^(lan|anywhere)$",
-      "title": "Allow From",
-      "type": "string"
-     },
      "enabled": {
       "default": false,
       "title": "Enabled",
       "type": "boolean"
      },
-     "services": {
+     "outside": {
       "additionalProperties": {
        "type": "boolean"
       },
       "default": {},
-      "title": "Services",
+      "title": "Outside",
       "type": "object"
      }
     },

@@ -128,6 +128,8 @@ The Hardware button is back in the top bar for the people who may change the har
 
 A feature list by edition (docs/FEATURES.md): what Kiboto Companion beside another NAS system, Kiboto Companion on plain Linux and Kiboto OS can each do today, and what is not there yet.
 
+Kiboto OS: the firewall can be turned on (Settings, Security). When it is on, your home network reaches everything on the machine and the outside reaches only what you tick, apps included. It is off until you turn it on.
+
 #### Changes
 
 On a machine of its own, a separate system service (the host door) now changes the machine's name, time zone, clock and SSH setting for Kiboto, from a fixed list of operations: the first step towards Kiboto's web service running without full system rights (docs/adr/0006-web-without-root.md).
@@ -161,6 +163,8 @@ The hardware cards look alike again: Card copies and the other sections get thei
 The test suite also runs on Debian 13's own Python, the one Kiboto OS uses, before anything is published.
 
 The opt-in health report (off by default) now also says which edition is running: Kiboto OS or the container. The card shows the exact report before you turn it on, as before.
+
+Firewall: the choice "only devices at home" or "any address" is gone. The home network always reaches everything; the ticks say what the outside may reach, and nothing is ticked at first.
 
 ## v2.0.6 (2026-11-23)
 ### 🖥️ Kiboto on a machine of its own (preview), with its settings kept safe on every pool

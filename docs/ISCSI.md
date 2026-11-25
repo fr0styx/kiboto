@@ -59,7 +59,7 @@ are sure.
 - The service is a small program in a container of its own beside Kiboto (`kiboto-iscsi`). It
   needs nothing loaded into the system's kernel and has no special rights; it sees only the
   folders your disks are in.
-- If Kiboto's firewall is on, allow port 3260 for the computers that connect.
+- Kiboto's firewall, when it is on, lets every device on your home network connect. A computer outside your home network cannot reach port 3260 through it.
 - If the card says the service is not running, another program on the NAS is probably using
   port 3260 already.
 - Back the file up like any other: it is in a folder, so your backup jobs cover it. A copy

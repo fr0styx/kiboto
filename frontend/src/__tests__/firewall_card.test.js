@@ -1,10 +1,19 @@
 /** Audit A13: the firewall card on the Security page. */
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { api } from '../api.js';
-import { renderFirewallCard, whyNot } from '../components/firewall-card.js';
+import { api, ApiError } from '../api.js';
+import { renderFirewallCard, whyNot, firewallStatus } from '../components/firewall-card.js';
 
 const flush = () => new Promise((r) => setTimeout(r, 10));
-const SVC = { web: true, ssh: true, smb: true, nfs: false, webdav: false, sftp: false, tailscale: true, mdns: true };
+const NONE = {
+  web: false,
+  ssh: false,
+  smb: false,
+  nfs: false,
+  webdav: false,
+  sftp: false,
+  tailscale: false,
+  apps: false,
+};
 
 describe('firewall card (audit A13)', () => {
   afterEach(() => {
@@ -19,12 +28,21 @@ describe('firewall card (audit A13)', () => {
     expect(whyNot('')).toBe('');
   });
 
+  it('says what on and off mean', () => {
+    expect(firewallStatus({ enabled: true })).toBe(
+      'On: devices at home reach everything on this NAS. From outside your home, only what is ticked below.'
+    );
+    expect(firewallStatus({ enabled: false })).toBe(
+      'Off: anything that can reach this NAS can reach every service on it.'
+    );
+    expect(firewallStatus(null)).toContain('Off:');
+  });
+
   it('in a container: the reason shown, the switch and choices locked', async () => {
     document.body.innerHTML = '<section id="firewall-card" hidden></section>';
     vi.spyOn(api, 'get').mockResolvedValue({
       enabled: false,
-      allow_from: 'lan',
-      services: SVC,
+      outside: NONE,
       possible: false,
       why_not: 'host',
       rules: 'table inet kiboto',
@@ -32,43 +50,70 @@ describe('firewall card (audit A13)', () => {
     await renderFirewallCard();
     const box = /** @type {HTMLElement} */ (document.getElementById('firewall-card'));
     expect(box.hidden).toBe(false);
-    expect(box.textContent).toContain('Off: every service on this NAS can be reached.');
+    expect(box.querySelector('#fw-status')?.textContent).toContain('Off: anything that can reach this NAS');
     expect(box.querySelector('#fw-why')?.textContent).toContain('Kiboto runs in a container');
     expect(/** @type {HTMLButtonElement} */ (box.querySelector('#fw-toggle')).disabled).toBe(true);
-    expect(box.querySelectorAll('fieldset[disabled]').length).toBe(2);
+    expect(box.querySelectorAll('fieldset[disabled]').length).toBe(1);
     expect(box.querySelector('pre')?.textContent).toBe('table inet kiboto');
   });
 
-  it('where it can: turns on, changes who and what, and shows a refusal', async () => {
+  it('offers only what the outside may reach, nothing ticked at first, and no choice about home', async () => {
     document.body.innerHTML = '<section id="firewall-card" hidden></section>';
-    let st = { enabled: false, allow_from: 'lan', services: { ...SVC }, possible: true, why_not: '', rules: '' };
+    vi.spyOn(api, 'get').mockResolvedValue({ enabled: true, outside: NONE, possible: true, why_not: '', rules: '' });
+    await renderFirewallCard();
+    const box = /** @type {HTMLElement} */ (document.getElementById('firewall-card'));
+    expect(box.querySelector('legend')?.textContent).toBe('Reachable from outside your home');
+    const ticks = [...box.querySelectorAll('[data-fw-svc]')];
+    expect(ticks.map((b) => /** @type {HTMLElement} */ (b).dataset.fwSvc)).toEqual(Object.keys(NONE));
+    expect(ticks.some((b) => /** @type {HTMLInputElement} */ (b).checked)).toBe(false);
+    expect(ticks.some((b) => /** @type {HTMLInputElement} */ (b).disabled)).toBe(false);
+    expect(box.querySelector('input[type="radio"]')).toBeNull();
+    expect(box.querySelector('#fw-home-note')?.textContent).toContain('Your home network is');
+    expect(box.querySelector('[data-fw-svc="apps"]')?.parentElement?.textContent).toContain(
+      'Apps (the ports they publish)'
+    );
+  });
+
+  it('where it can: turns on, ticks a service for the outside, and shows a refusal', async () => {
+    document.body.innerHTML = '<section id="firewall-card" hidden></section>';
+    let st = { enabled: false, outside: { ...NONE }, possible: true, why_not: '', rules: '' };
     vi.spyOn(api, 'get').mockImplementation(async () => st);
     const put = vi.spyOn(api, 'put').mockImplementation(async (_u, body) => {
-      st = { ...st, ...body, services: { ...st.services, ...body.services } };
+      st = { ...st, ...body, outside: { ...st.outside, ...body.outside } };
       return st;
     });
     await renderFirewallCard();
     const box = /** @type {HTMLElement} */ (document.getElementById('firewall-card'));
     expect(box.querySelector('#fw-why')).toBeNull();
-    expect(/** @type {HTMLInputElement} */ (box.querySelector('[data-fw-svc="web"]')).disabled).toBe(true);
     /** @type {HTMLButtonElement} */ (box.querySelector('#fw-toggle')).click();
     await flush();
-    expect(put).toHaveBeenLastCalledWith('/api/security/firewall', { enabled: true, allow_from: 'lan', services: SVC });
-    expect(box.textContent).toContain('On: only the services below can be reached.');
-    const nfs = /** @type {HTMLInputElement} */ (box.querySelector('[data-fw-svc="nfs"]'));
-    nfs.checked = true;
-    nfs.dispatchEvent(new Event('change'));
+    expect(put).toHaveBeenLastCalledWith('/api/security/firewall', { enabled: true, outside: NONE });
+    expect(box.querySelector('#fw-status')?.textContent).toContain('On: devices at home reach everything');
+    const web = /** @type {HTMLInputElement} */ (box.querySelector('[data-fw-svc="web"]'));
+    web.checked = true;
+    web.dispatchEvent(new Event('change'));
     await flush();
-    expect(put.mock.calls.at(-1)?.[1].services.nfs).toBe(true);
-    const any = /** @type {HTMLInputElement} */ (box.querySelector('input[value="anywhere"]'));
-    any.checked = true;
-    any.dispatchEvent(new Event('change'));
-    await flush();
-    expect(put.mock.calls.at(-1)?.[1].allow_from).toBe('anywhere');
+    expect(put.mock.calls.at(-1)?.[1]).toEqual({ enabled: true, outside: { ...NONE, web: true } });
     put.mockRejectedValueOnce(new Error('The firewall rules could not be loaded: bad'));
     /** @type {HTMLButtonElement} */ (box.querySelector('#fw-toggle')).click();
     await flush();
     expect(box.querySelector('#fw-error')?.textContent).toContain('could not be loaded');
+  });
+
+  it('shows a refusal in the page’s own words when the server says how it was made', async () => {
+    document.body.innerHTML = '<section id="firewall-card" hidden></section>';
+    const st = { enabled: false, outside: { ...NONE }, possible: true, why_not: '', rules: '' };
+    vi.spyOn(api, 'get').mockResolvedValue(st);
+    vi.spyOn(api, 'put').mockRejectedValue(
+      new ApiError('server words', { status: 400, body: { detail: 'server words', text: { msg_key: 'fw.title' } } })
+    );
+    await renderFirewallCard();
+    const box = /** @type {HTMLElement} */ (document.getElementById('firewall-card'));
+    /** @type {HTMLButtonElement} */ (box.querySelector('#fw-toggle')).click();
+    await flush();
+    const err = /** @type {HTMLElement} */ (box.querySelector('#fw-error'));
+    expect(err.hidden).toBe(false);
+    expect(err.textContent).toBe('Firewall');
   });
 
   it('stays hidden for someone who may not see it', async () => {

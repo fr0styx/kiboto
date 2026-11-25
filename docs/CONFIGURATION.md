@@ -27,7 +27,7 @@ name set beside an old one wins.
 
 | Variable | Default | Meaning |
 |---|---|---|
-| `KIBOTO_OWNS_FIREWALL` | `off` | Kiboto manages the host firewall (set by Kiboto's own system images; leave off in a container). |
+| `KIBOTO_OWNS_FIREWALL` | `off` | Kiboto manages the host firewall. Kiboto OS needs no setting for this; leave it off in a container. |
 | `REMOTES_PATH` | `/mnt/remotes` | Where cloud and network remotes are mounted. |
 | `HOST_ETC` | `/host/etc` | Where the host's /etc is mounted. |
 | `KIBOTO_OBSERVER_MODE` | `off` | Only watch the host on an unknown system: read-only telemetry, no changes. |

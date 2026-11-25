@@ -1,10 +1,12 @@
 /**
- * Firewall on the Security page (audit A13): off by default; which services stay reachable, from
- * the home network or from anywhere. Where Kiboto can't manage the NAS's firewall (in a container
- * on Unraid or TrueNAS) it says why and the switch stays off.
+ * Firewall on the Security page (audit A13): off by default. When it is on, the home network
+ * reaches everything on this NAS and the outside reaches only what is ticked here. Where Kiboto
+ * can't manage the NAS's firewall (in a container on Unraid or TrueNAS) it says why and the
+ * switch stays off.
  */
 import { api } from '../api.js';
 import { t } from '../i18n.js';
+import { serverSaid } from '../server-text.js';
 import { escapeHtml } from '../utils.js';
 
 const NAMES = () => ({
@@ -15,7 +17,7 @@ const NAMES = () => ({
   webdav: 'WebDAV',
   sftp: 'SFTP',
   tailscale: 'Tailscale',
-  mdns: t('fw.s_mdns', 'Finding this NAS by name on the network'),
+  apps: t('fw.s_apps', 'Apps (the ports they publish)'),
 });
 
 /** Why the switch is off here, in words, or "" where Kiboto can manage the firewall. */
@@ -31,33 +33,40 @@ export function whyNot(code) {
   return '';
 }
 
+/** The one line under the title: what on and off mean. */
+export function firewallStatus(st) {
+  return st?.enabled
+    ? t(
+        'fw.on_home',
+        'On: devices at home reach everything on this NAS. From outside your home, only what is ticked below.'
+      )
+    : t('fw.off_all', 'Off: anything that can reach this NAS can reach every service on it.');
+}
+
 function html(st) {
   const names = NAMES();
   const lock = !st.possible;
+  const outside = st.outside || {};
   const rows = Object.keys(names)
     .map(
       (id) => `
-      <label class="fw-row"><input type="checkbox" data-fw-svc="${id}"${st.services[id] ? ' checked' : ''}${id === 'web' ? ' disabled' : ''}>
-        <span>${escapeHtml(names[id])}${id === 'web' ? ` <span class="fw-note">${escapeHtml(t('fw.web_always', "always reachable from home, so you can't lock yourself out"))}</span>` : ''}</span></label>`
+      <label class="fw-row"><input type="checkbox" data-fw-svc="${id}"${outside[id] ? ' checked' : ''}>
+        <span>${escapeHtml(names[id])}</span></label>`
     )
     .join('');
   return `
     <div class="fw-head">
       <div>
         <h3 class="account-h" id="fw-title">${escapeHtml(t('fw.title', 'Firewall'))}</h3>
-        <p class="fw-status" id="fw-status">${escapeHtml(st.enabled ? t('fw.on', 'On: only the services below can be reached.') : t('fw.off', 'Off: every service on this NAS can be reached.'))}</p>
+        <p class="fw-status" id="fw-status">${escapeHtml(firewallStatus(st))}</p>
       </div>
       <button type="button" class="btn-pill-toggle" id="fw-toggle" aria-pressed="${st.enabled ? 'true' : 'false'}" aria-labelledby="fw-title fw-toggle"${lock ? ' disabled' : ''}>${escapeHtml(st.enabled ? t('nas_name.btn_on', 'On') : t('nas_name.btn_off', 'Off'))}</button>
     </div>
     ${lock ? `<p class="fw-why" id="fw-why">${escapeHtml(whyNot(st.why_not))}</p>` : ''}
     <fieldset class="fw-set"${lock ? ' disabled' : ''}>
-      <legend>${escapeHtml(t('fw.who', 'Who can connect'))}</legend>
-      <label class="fw-row"><input type="radio" name="fw-from" value="lan"${st.allow_from !== 'anywhere' ? ' checked' : ''}> ${escapeHtml(t('fw.lan', 'Only devices at home (and Tailscale)'))}</label>
-      <label class="fw-row"><input type="radio" name="fw-from" value="anywhere"${st.allow_from === 'anywhere' ? ' checked' : ''}> ${escapeHtml(t('fw.anywhere', 'Any address'))}</label>
+      <legend>${escapeHtml(t('fw.outside', 'Reachable from outside your home'))}</legend>${rows}
     </fieldset>
-    <fieldset class="fw-set"${lock ? ' disabled' : ''}>
-      <legend>${escapeHtml(t('fw.services', 'Services that stay reachable'))}</legend>${rows}
-    </fieldset>
+    <p class="fw-note" id="fw-home-note">${escapeHtml(t('fw.home_note', 'Your home network is: private addresses, Tailscale, and the IPv6 network this NAS is on.'))}</p>
     <details class="fw-rules" data-advanced-only><summary>${escapeHtml(t('fw.show_rules', 'Show the rules'))}</summary><pre translate="no">${escapeHtml(st.rules || '')}</pre></details>
     <div class="fw-error" id="fw-error" role="alert" hidden></div>`;
 }
@@ -77,16 +86,16 @@ export async function renderFirewallCard(mount = document.getElementById('firewa
   const err = /** @type {HTMLElement} */ (mount.querySelector('#fw-error'));
   const send = async (enabled) => {
     err.hidden = true;
-    const services = {};
+    const outside = {};
     mount.querySelectorAll('[data-fw-svc]').forEach((b) => {
-      services[/** @type {HTMLInputElement} */ (b).dataset.fwSvc] = /** @type {HTMLInputElement} */ (b).checked;
+      outside[/** @type {HTMLInputElement} */ (b).dataset.fwSvc] = /** @type {HTMLInputElement} */ (b).checked;
     });
-    const from = /** @type {HTMLInputElement | null} */ (mount.querySelector('input[name="fw-from"]:checked'));
     try {
-      await api.put('/api/security/firewall', { enabled, allow_from: from ? from.value : 'lan', services });
+      await api.put('/api/security/firewall', { enabled, outside });
       await renderFirewallCard(mount);
     } catch (e) {
-      err.textContent = e instanceof Error ? e.message : String(e);
+      // a refusal comes in the reader's language where the server said how it was made
+      err.textContent = serverSaid(e?.body, e instanceof Error ? e.message : String(e));
       err.hidden = false;
     }
   };
