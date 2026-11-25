@@ -237,6 +237,18 @@ def _get_or_create_secret_key() -> str:
     return new_key
 
 
+def _hand_to_folder_owner(path: str, folder: str) -> None:
+    """A file root makes in a data folder that belongs to someone else goes to that folder's owner.
+    On a machine Kiboto runs, the host door (root) imports this module first, and made secret.key
+    root's own in the kiboto user's folder: Kiboto could not read it and never started (found by
+    the disaster drill on a fresh install, 25 Nov 2026)."""
+    if not hasattr(os, "geteuid") or os.geteuid() != 0:
+        return
+    st = os.stat(folder)
+    if st.st_uid != 0:
+        os.chown(path, st.st_uid, st.st_gid)
+
+
 def _persist_key(key: str, replace: bool) -> None:
     """Written to a temporary file, synced, then put in place and the folder synced, so a power cut
     right after the first start can't leave an empty key behind (NARC-7). Never over a key that
@@ -249,6 +261,7 @@ def _persist_key(key: str, replace: bool) -> None:
             f.write(key)
             f.flush()
             os.fsync(f.fileno())
+        _hand_to_folder_owner(tmp, DATA_DIR)
         if replace:
             os.replace(tmp, SECRET_KEY_FILE)
         else:

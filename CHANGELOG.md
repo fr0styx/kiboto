@@ -54,6 +54,8 @@ The list of folders Kib has indexed shows them again; it was always empty.
 
 Light mode: the front screen's preview stays readable, and its card, theme buttons and Kib's Clear All have enough contrast. The metrics page's time range and device strip work with a keyboard and screen reader.
 
+A fresh install on a machine of its own starts again and shows the code for the first sign-in on the machine's screen and in its SSH greeting; with Kiboto running without root, neither worked.
+
 #### Security
 
 On a machine of its own, failed sign-ins to shared folders over the network now count like web sign-ins: 20 in 15 minutes block the address for an hour, and they show under History, Sign-ins.

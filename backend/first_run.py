@@ -47,9 +47,19 @@ def where() -> str:
 
 
 def show(code: str) -> bool:
-    """Puts the code on the machine's screen and in its SSH greeting. Only on a managed host."""
+    """Puts the code on the machine's screen and in its SSH greeting. Only on a managed host. The
+    host door writes it (/etc is root's; Kiboto runs as the user kiboto, ADR 0006 step 9), from the
+    code file it reads itself, so nothing else can be written there."""
     if not runtime.managed_host():
         return False
+    from backend import door
+
+    door.via("firstrun.notice", refresh_here)
+    return True
+
+
+def write_notice(code: str) -> None:
+    """The notice files with this code (as root: the door, or Kiboto before step 9)."""
     for path, place in ((ISSUE, "\\4"), (MOTD, "this machine's address")):
         try:
             os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -59,12 +69,17 @@ def show(code: str) -> bool:
                 f.write(_TEXT.format(where=place, code=code))
         except OSError as e:
             logger.warning("The first-time code could not be shown in %s: %s", path, e)
-    return True
 
 
 def clear() -> None:
     if not runtime.managed_host():
         return
+    from backend import door
+
+    door.via("firstrun.clear", clear_here)
+
+
+def clear_here() -> None:
     for path in (ISSUE, MOTD):
         try:
             if os.path.exists(path):
@@ -77,12 +92,19 @@ def refresh() -> None:
     """At start: the notice is there while the first sign-in is waiting, and gone afterwards."""
     if not runtime.managed_host():
         return
+    from backend import door
+
+    door.via("firstrun.notice", refresh_here)
+
+
+def refresh_here() -> None:
+    """The notice from the code file: written while it is there, removed once it is gone."""
     try:
         with open(config.initial_password_file(), encoding="utf-8") as f:
             code = f.read().strip()
     except OSError:
         code = ""
     if code:
-        show(code)
+        write_notice(code)
     else:
-        clear()
+        clear_here()

@@ -283,6 +283,18 @@ def _apps_hosts() -> bool:
     return app_hosts.sync()  # the block from Docker's own list; nothing the caller sent
 
 
+def _firstrun(name: str) -> Callable[[], Any]:
+    """The first-time code's notice on the machine's screen and SSH greeting: written from the code
+    file the door reads itself, or removed. No argument: nothing else can be put in /etc."""
+
+    def run() -> Any:
+        from backend import first_run
+
+        return first_run.refresh_here() if name == "notice" else first_run.clear_here()
+
+    return run
+
+
 def _packages(name: str) -> Callable[[], Any]:
     def run() -> Any:
         from backend.services import host_set, native_update
@@ -548,6 +560,8 @@ OPERATIONS: dict[str, Operation] = {
     "usb.eject": Operation(_usb("eject"), {"path": TEXT}, max_len=4096),
     "vm.tap": Operation(_vm_tap, {"name": TEXT, "bridge": TEXT}, max_len=32),
     "vm.tap_remove": Operation(_vm_tap_remove, {"name": TEXT}, max_len=32),
+    "firstrun.notice": Operation(_firstrun("notice"), {}),
+    "firstrun.clear": Operation(_firstrun("clear"), {}),
     "packages.check": Operation(_packages("check"), {}),
     "packages.host_set": Operation(_packages("host_set"), {}),
     "disks.smartctl": Operation(_smartctl, {"args": LIST, "limit": (int, float)}, max_len=64),

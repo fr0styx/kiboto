@@ -49,7 +49,15 @@ def test_what_was_typed_is_read_as_a_code_is_written(typed, means):
     assert first_run.tidy(typed) == means
 
 
+def _waiting(code):
+    """The code file the door reads (users_db writes it before showing the code)."""
+    os.makedirs(os.path.dirname(config.initial_password_file()), exist_ok=True)
+    with open(config.initial_password_file(), "w", encoding="utf-8") as f:
+        f.write(code + "\n")
+
+
 def test_the_machine_shows_the_code_until_a_password_is_chosen(machine):
+    _waiting("ABCD-EFGH-JKMN")
     assert first_run.show("ABCD-EFGH-JKMN") is True
     issue = _text(first_run.ISSUE)
     assert "ABCD-EFGH-JKMN" in issue and "http://\\4:8082" in issue  # \4: the console writes the address there
@@ -86,6 +94,7 @@ def test_a_notice_that_cannot_be_written_does_not_stop_the_start(machine, monkey
     blocked = machine / "a-file"
     blocked.write_text("")
     monkeypatch.setattr(first_run, "ISSUE", str(blocked / "kiboto.issue"))
+    _waiting("ABCD-EFGH-JKMN")
     assert first_run.show("ABCD-EFGH-JKMN") is True  # the other notice is still written
     assert os.path.exists(first_run.MOTD)
 
@@ -132,6 +141,7 @@ def test_only_root_reads_the_code_on_the_machine(machine):
     with open(first_run.ISSUE, "w", encoding="utf-8") as f:
         f.write("old")
     os.chmod(first_run.ISSUE, 0o644)
+    _waiting("ABCD-EFGH-JKMN")
     assert first_run.show("ABCD-EFGH-JKMN") is True
     for path in (first_run.ISSUE, first_run.MOTD):
         assert os.stat(path).st_mode & 0o777 == 0o600
