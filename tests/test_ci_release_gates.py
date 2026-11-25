@@ -107,3 +107,7 @@ def test_the_unit_suite_also_runs_on_the_python_kiboto_os_uses():
     assert "pip install --require-hashes -r requirements.lock" in steps
     assert "-m pytest" in steps and "continue-on-error" not in str(job)
     assert "unit-debian13" in jobs["publish"]["needs"] and "unit-debian13" in jobs["still-latest"]["needs"]
+    # a timing test among parallel workers fails by chance: it is timed alone, in the other job
+    assert "--deselect tests/test_rag_eval_baseline.py::test_search_stays_fast" in steps
+    other = "\n".join(str(step.get("run", "")) for step in jobs["lint-and-test"]["steps"])
+    assert "tests/test_rag_eval_baseline.py::test_search_stays_fast" in other

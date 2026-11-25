@@ -206,13 +206,15 @@ jobs:
 
       - name: Run Pytest Suite
         # No coverage here: the Python 3.12 job measures it. The end-to-end tests need a browser and
-        # run in their own job.
+        # run in their own job. The search speed test is left out: it must run alone to be timed
+        # fairly, which the Python 3.12 job does in a step of its own (there coverage keeps it out
+        # of the parallel run; here nothing would).
         shell: bash
         env:
           TESTING: "1"
         run: |
           set -o pipefail
-          if ! /venv/bin/python -m pytest -n 4 --dist loadgroup -p no:cacheprovider -q -rfE -o addopts= --ignore-glob='tests/test_e2e_*' 2>&1 | tee /tmp/kb-unit-debian.log; then
+          if ! /venv/bin/python -m pytest -n 4 --dist loadgroup -p no:cacheprovider -q -rfE -o addopts= --ignore-glob='tests/test_e2e_*' --deselect tests/test_rag_eval_baseline.py::test_search_stays_fast 2>&1 | tee /tmp/kb-unit-debian.log; then
             body=$( (grep -E '^(FAILED|ERROR)|^E  ' /tmp/kb-unit-debian.log | tail -n 40) | sed 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
             echo "::error title=Unit tests on Debian 13's Python::$body"
             exit 1
