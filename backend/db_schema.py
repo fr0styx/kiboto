@@ -49,6 +49,7 @@ REBUILDABLE = {"rag_index.db"}
 # adds the missing ones; a table that does not exist yet is skipped (its CREATE has them all).
 COLUMN_UPGRADES: dict[str, list[tuple[str, str, str]]] = {
     "users.db": [
+        ("passkeys", "portal_only", "INTEGER NOT NULL DEFAULT 0"),  # family portal passkeys (ADR 0007)
         ("users", "mfa_enabled", "INTEGER DEFAULT 0"),
         ("users", "mfa_secret", "TEXT DEFAULT ''"),
         ("users", "mfa_recovery_codes_json", "TEXT DEFAULT '[]'"),

@@ -277,7 +277,8 @@ def init_users_db(db_path: str | None = None) -> None:
                 rp_id TEXT NOT NULL,
                 name TEXT NOT NULL DEFAULT '',
                 created_at REAL NOT NULL,
-                last_used_at REAL
+                last_used_at REAL,
+                portal_only INTEGER NOT NULL DEFAULT 0
             );
         """)
         conn.execute("CREATE INDEX IF NOT EXISTS idx_passkeys_user ON passkeys(user_id)")

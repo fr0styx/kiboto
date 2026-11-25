@@ -117,6 +117,7 @@ def list_for(user_id: str) -> list[dict[str, Any]]:
             "rp_id": r["rp_id"],
             "created_at": r["created_at"],
             "last_used_at": r["last_used_at"],
+            "portal_only": bool(r["portal_only"]),
         }
         for r in _rows(user_id)
     ]
@@ -124,13 +125,14 @@ def list_for(user_id: str) -> list[dict[str, Any]]:
 
 def has_passkeys(user_id: str) -> bool:
     with _db() as conn:
-        return conn.execute("SELECT 1 FROM passkeys WHERE user_id = ? LIMIT 1", (user_id,)).fetchone() is not None
+        found = conn.execute("SELECT 1 FROM passkeys WHERE user_id = ? AND portal_only = 0 LIMIT 1", (user_id,))
+        return found.fetchone() is not None
 
 
 def users_with_passkeys() -> set[str]:
     """Everyone who has at least one passkey (for the "without two-step sign-in" counts)."""
     with _db() as conn:
-        return {r[0] for r in conn.execute("SELECT DISTINCT user_id FROM passkeys").fetchall()}
+        return {r[0] for r in conn.execute("SELECT DISTINCT user_id FROM passkeys WHERE portal_only = 0").fetchall()}
 
 
 def count_for(user_id: str) -> int:
@@ -156,7 +158,11 @@ def register_options(user: dict[str, Any], host: str) -> dict[str, Any]:
     return {"ticket": _put("register", state, rp_id, user["id"]), "options": dict(options)}
 
 
-def register_finish(user: dict[str, Any], ticket: str, response: dict[str, Any], name: str = "") -> dict[str, Any]:
+def register_finish(
+    user: dict[str, Any], ticket: str, response: dict[str, Any], name: str = "", portal_only: bool = False
+) -> dict[str, Any]:
+    """Adds the passkey the device made. One made through a family portal join link is marked
+    portal_only: the portal accepts it and Kiboto's own sign-in doesn't (ADR 0007)."""
     entry = _take(ticket, "register")
     if entry["user_id"] != user["id"]:
         raise PasskeyError("This passkey request belongs to someone else.")
@@ -173,9 +179,18 @@ def register_finish(user: dict[str, Any], ticket: str, response: dict[str, Any],
         if conn.execute("SELECT 1 FROM passkeys WHERE credential_id = ?", (bytes(cred.credential_id),)).fetchone():
             raise PasskeyError("This passkey is already added.")
         conn.execute(
-            "INSERT INTO passkeys (id, user_id, credential_id, credential, rp_id, name, created_at) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (pk_id, user["id"], bytes(cred.credential_id), bytes(cred), entry["rp_id"], clean, time.time()),
+            "INSERT INTO passkeys (id, user_id, credential_id, credential, rp_id, name, created_at, portal_only) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            (
+                pk_id,
+                user["id"],
+                bytes(cred.credential_id),
+                bytes(cred),
+                entry["rp_id"],
+                clean,
+                time.time(),
+                1 if portal_only else 0,
+            ),
         )
     logger.info("[Passkeys] %s added a passkey (%s) for %s", user["username"], clean, entry["rp_id"])
     return {"id": pk_id, "name": clean}
@@ -196,8 +211,9 @@ def _b64(value: str) -> bytes:
     return base64.urlsafe_b64decode(value + "=" * (-len(value) % 4))
 
 
-def login_finish(ticket: str, response: dict[str, Any]) -> tuple[str, dict[str, Any]]:
-    """Checks a signed challenge; returns the person's id and what the ticket carried."""
+def login_finish(ticket: str, response: dict[str, Any], portal: bool = False) -> tuple[str, dict[str, Any]]:
+    """Checks a signed challenge; returns the person's id and what the ticket carried. A passkey
+    made for the family portal signs in there only (portal=True)."""
     entry = _take(ticket, "login")
     try:
         raw_id = _b64(str(response.get("rawId") or response.get("id") or ""))
@@ -209,6 +225,8 @@ def login_finish(ticket: str, response: dict[str, Any]) -> tuple[str, dict[str, 
         ).fetchone()
     if not row or (entry["user_id"] and row["user_id"] != entry["user_id"]):
         raise PasskeyError("This passkey isn't known here.")
+    if row["portal_only"] and not portal:
+        raise PasskeyError("This passkey is for the family portal only.")
     try:
         _server(entry["rp_id"]).authenticate_complete(
             entry["state"], [AttestedCredentialData(row["credential"])], response

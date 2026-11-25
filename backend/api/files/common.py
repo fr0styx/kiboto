@@ -56,6 +56,11 @@ def _user_file_headers(media_type: str | None) -> dict[str, str]:
     return headers
 
 
+# shared with the family portal's routes (backend/api/portal.py)
+contained = _contained
+user_file_headers = _user_file_headers
+
+
 def _observe(kind: str, path: str, principal: Any, new_path: str = "") -> None:
     """Feeds file-manager changes to the ransomware guard (M4)."""
     from backend.auth import CLIENT_IP_CTX

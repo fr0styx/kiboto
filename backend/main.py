@@ -895,6 +895,11 @@ app.add_middleware(BodySizeLimit)
 # WebDAV streaming reverse proxy
 app.include_router(webdav_proxy_router)
 
+# The family portal: everything under /portal, its own sessions (ADR 0007)
+from backend.api.portal import router as portal_router  # noqa: E402
+
+app.include_router(portal_router)
+
 # DMTF Redfish Scalable Platforms Management API
 import logging
 

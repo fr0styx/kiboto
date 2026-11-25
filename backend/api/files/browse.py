@@ -130,6 +130,9 @@ def _handle_browse_logic(path: str, dirs_only: bool, principal: AuthenticatedPri
     return result
 
 
+browse_folder = _handle_browse_logic  # the family portal lists folders the same way
+
+
 def _handle_browse_logic_unfiltered(path: str, dirs_only: bool, principal: AuthenticatedPrincipal | None = None):
     real = _contained(path or ALLOWED_BROWSE_ROOTS[0])
     if not os.path.isdir(real):

@@ -93,6 +93,10 @@ def get_current_session(token: str) -> dict[str, Any] | None:
         # VM console tickets open that VM's console WebSocket only (vms._validate_console_ticket).
         return None
 
+    if token.startswith("zpt_"):
+        # Family portal sessions work under /portal only (ADR 0007, backend/api/portal.py).
+        return None
+
     if token.startswith("zat_"):
         tok = validate_scoped_api_token(token)
         if tok and tok.get("signin_hours"):
@@ -385,6 +389,8 @@ def _origin_matches_host(request: Request) -> bool:
             return _origin_in(value, allowed)
     return False
 
+
+same_origin = _origin_matches_host  # the portal checks its own writes the same way (ADR 0007)
 
 _PUBLIC_API_PATHS = {
     "/api/auth/login",
