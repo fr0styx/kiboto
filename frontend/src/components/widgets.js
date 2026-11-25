@@ -2359,6 +2359,7 @@ export function initWidgets() {
     const gpuVal = document.getElementById('w-ai-gpu-val');
     const gpuFreq = document.getElementById('w-ai-gpu-freq');
     const gpuState = document.getElementById('w-ai-gpu-state');
+    const gpuName = document.getElementById('w-ai-gpu-name');
 
     const aiBadge = document.getElementById('w-ai-accel-badge');
     const aiEngineStatus = document.getElementById('w-ai-engine-status');
@@ -2383,6 +2384,9 @@ export function initWidgets() {
         if (!npu.present) {
           npuState.textContent = t('ui.none', 'None');
           npuState.className = 'ai-metric-pill';
+        } else if (npu.usable === false) {
+          npuState.textContent = t('wai.not_used', 'Not used');
+          npuState.className = 'ai-metric-pill';
         } else if (
           nUtil > 5 ||
           (npu.cur_freq_mhz && npu.cur_freq_mhz > 400) ||
@@ -2404,9 +2408,13 @@ export function initWidgets() {
         const curG = gpu.cur_freq_mhz || 0;
         gpuFreq.textContent = curG > 0 ? `${curG} MHz` : gpu.present ? '0 MHz' : 'N/A';
       }
+      if (gpuName) gpuName.textContent = gpu.short_name || 'GPU';
       if (gpuState) {
         if (!gpu.present) {
           gpuState.textContent = t('ui.none', 'None');
+          gpuState.className = 'ai-metric-pill';
+        } else if (gpu.usable === false) {
+          gpuState.textContent = t('wai.not_used', 'Not used');
           gpuState.className = 'ai-metric-pill';
         } else if (
           gUtil > 5 ||
@@ -2462,7 +2470,7 @@ export function initWidgets() {
         ) {
           aiEngineStatus.innerHTML =
             '<span class="ai-status-dot active-gpu"></span> <strong style="color:var(--kb-text-ai);">' +
-            escapeHtml(t('wai.gpu_active', 'Intel Arc GPU Active')) +
+            escapeHtml(t('wai.gpu_active_named', '{name} active', { name: gpu.short_name || 'GPU' })) +
             '</strong>';
         } else if (npu.present && gpu.present) {
           aiEngineStatus.innerHTML =

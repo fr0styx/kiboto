@@ -129,7 +129,7 @@ describe('AI Accelerator Desktop Widget (NPU + GPU Real-Time Gauges)', () => {
     expect(gpuState.textContent).toBe('Compute');
     expect(gpuState.classList.contains('active-gpu')).toBe(true);
     expect(aiBadge.textContent).toBe('GPU RUN');
-    expect(engineStatus.innerHTML).toContain('Intel Arc GPU Active');
+    expect(engineStatus.innerHTML).toContain('GPU active');
   });
 
   it('shows the measured NPU load (no invented figure) while the NPU is in D0', async () => {
@@ -188,5 +188,39 @@ describe('AI Accelerator Desktop Widget (NPU + GPU Real-Time Gauges)', () => {
     await new Promise((r) => setTimeout(r, 50));
     expect(document.getElementById('w-ai-gpu-val').textContent).toBe('–');
     expect(document.getElementById('w-ai-npu-val').textContent).toBe('–');
+  });
+});
+
+describe('AI chips widget on a board whose chips Kiboto does not use (#68)', () => {
+  beforeEach(() => {
+    document.body.innerHTML = `
+      <div id="desktop-widgets-container">
+        <div class="desktop-widget" id="widget-ai-accelerator">
+          <span class="widget-badge" id="w-ai-accel-badge">—</span>
+          <path id="w-ai-npu-arc" stroke-dasharray="0, 100" />
+          <div id="w-ai-npu-val">—</div>
+          <div id="w-ai-npu-freq">—</div>
+          <span id="w-ai-npu-state" class="ai-metric-pill sleep">—</span>
+          <span id="w-ai-gpu-name">—</span>
+          <path id="w-ai-gpu-arc" stroke-dasharray="0, 100" />
+          <div id="w-ai-gpu-val">—</div>
+          <div id="w-ai-gpu-freq">—</div>
+          <span id="w-ai-gpu-state" class="ai-metric-pill sleep">—</span>
+          <div id="w-ai-engine-status"></div>
+        </div>
+      </div>`;
+  });
+
+  it('names the Mali GPU and says the GPU and the Rockchip NPU are not used', async () => {
+    initWidgets();
+    ZettEventBus.emit('stats:updated', {
+      npu: { present: true, usable: false, vendor: 'Rockchip', model: 'Rockchip NPU (RKNPU)' },
+      gpu: { present: true, usable: false, vendor: 'Arm', short_name: 'Mali GPU', model: 'Arm Mali GPU' },
+    });
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(document.getElementById('w-ai-gpu-name').textContent).toBe('Mali GPU');
+    expect(document.getElementById('w-ai-gpu-state').textContent).toBe('Not used');
+    expect(document.getElementById('w-ai-npu-state').textContent).toBe('Not used');
+    expect(document.getElementById('w-ai-npu-state').classList.contains('sleep')).toBe(false);
   });
 });

@@ -72,6 +72,8 @@ Kiboto OS: fresh installs from the main branch stopped at "Unable to locate pack
 
 Kiboto OS: when the first start finishes, the sign-in code is drawn again at the bottom of the screen, below the install's last message.
 
+Zettlab D4 and other ARM boards: fans the kernel already controls are left to it and both are shown, the storage pool is no longer counted twice, the Mali GPU and Rockchip NPU are named correctly, and KIBOTO_OBSERVER_ADAPTER=generic works as documented.
+
 #### Security
 
 On a machine of its own, failed sign-ins to shared folders over the network now count like web sign-ins: 20 in 15 minutes block the address for an hour, and they show under History, Sign-ins.

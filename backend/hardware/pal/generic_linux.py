@@ -191,6 +191,36 @@ def _through_door(op: str, here: Any, **args: Any) -> Any:
         raise
 
 
+def _md_mounts(md_dev: str, mounts: list[dict[str, str]]) -> tuple[set[str], list[str]]:
+    """The names an md array goes by (itself and what stands on it: bcache, dm) and the mounts of
+    those. The host's mounts are listed too (/proc/1/mounts), with paths this container may not
+    see: a mount it can measure comes first, so the size and use are the filesystem's."""
+    md_devices = {md_dev, f"/dev/{md_dev}"}
+    for s_base in (pal_base.HOST_SYS, "/sys", "/host/sys"):
+        if not s_base:
+            continue
+        holders_dir = os.path.join(s_base, "block", md_dev, "holders")
+        if os.path.isdir(holders_dir):
+            try:
+                for h in os.listdir(holders_dir):
+                    md_devices.update((h, f"/dev/{h}", f"/dev/mapper/{h}"))
+            except Exception:
+                ignored("backend.hardware.pal_storage.GenericLinuxStorageAdapter.list_pools")
+    md_mounts = [m.get("mountpoint", "") for m in mounts if any(t in m.get("device", "") for t in md_devices)]
+    md_mounts.sort(key=lambda mp: not os.path.ismount(mp))
+    return md_devices, md_mounts
+
+
+def _mount_device(mounts: list[dict[str, str]], path: str) -> str:
+    """The device of the mount `path` is on (the longest mountpoint that holds it); "" if none."""
+    best, device = "", ""
+    for m in mounts:
+        mp = m.get("mountpoint", "")
+        if mp and (path == mp or path.startswith(mp.rstrip("/") + "/")) and len(mp) > len(best):
+            best, device = mp, m.get("device", "")
+    return device
+
+
 class GenericLinuxStorageAdapter(StoragePlatformAdapter):
     """
     Generic Linux Storage Platform Adapter.
@@ -759,6 +789,7 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
         hal_disks = {d.name: d for d in self._discover_hal_disks()}
         mounts = self._parse_mounts()
         claimed_mount_paths: set = set()
+        claimed_devices: set = set()  # the block devices a listed pool stands on
 
         # 1. Discover mdadm Linux Software RAID arrays if present
         mdstats = self._parse_mdstat()
@@ -793,27 +824,11 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
                     )
 
             mount_path = None
-            md_devices = {md_dev, f"/dev/{md_dev}"}
-            for s_base in (pal_base.HOST_SYS, "/sys", "/host/sys"):
-                if not s_base:
-                    continue
-                holders_dir = os.path.join(s_base, "block", md_dev, "holders")
-                if os.path.isdir(holders_dir):
-                    try:
-                        for h in os.listdir(holders_dir):
-                            md_devices.add(h)
-                            md_devices.add(f"/dev/{h}")
-                            md_devices.add(f"/dev/mapper/{h}")
-                    except Exception:
-                        ignored("backend.hardware.pal_storage.GenericLinuxStorageAdapter.list_pools")
-
-            for m in mounts:
-                dev = m.get("device", "")
-                mp = m.get("mountpoint", "")
-                if any(target in dev for target in md_devices):
-                    mount_path = mp
-                    claimed_mount_paths.add(mp)
-                    break
+            md_devices, md_mounts = _md_mounts(md_dev, mounts)
+            if md_mounts:
+                mount_path = md_mounts[0]
+                claimed_mount_paths.update(md_mounts)
+                claimed_devices.update(d for d in md_devices if d.startswith("/dev/"))
 
             size_b, used_b, free_b, pct, resolved_fstype = self._get_mount_or_device_usage(
                 mount_path=mount_path,
@@ -873,7 +888,7 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
             ):
                 if self._is_os_overlay_or_emmc(mp) or mp in claimed_mount_paths:
                     continue
-                if any(p.id == os.path.basename(dev) or p.mountpoint == mp for p in pools):
+                if any(p.id == os.path.basename(dev) or p.mountpoint == mp for p in pools) or dev in claimed_devices:
                     continue
 
                 try:
@@ -900,6 +915,7 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
                     if "bcache" in dev or "nvme" in dev
                     else f"{dev_base} ({fstype.upper()})"
                 )
+                claimed_devices.add(dev)
                 pools.append(
                     StoragePool(
                         id=dev_base,
@@ -941,7 +957,8 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
             fs_type, profile = self._main_pool_facts()
             parity_protected = profile in ("raid1", "raid10", "raid5", "raid6")
 
-            if not any(p.mountpoint == self._pool_path for p in pools):
+            same_device = _mount_device(mounts, self._pool_path) in claimed_devices
+            if not same_device and not any(p.mountpoint == self._pool_path for p in pools):
                 pools.insert(
                     0,
                     StoragePool(

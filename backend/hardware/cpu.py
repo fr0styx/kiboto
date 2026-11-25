@@ -23,20 +23,36 @@ def read_cpu_util():
         return 0
 
 
+def kernel_cooled(h: str) -> bool:
+    """The kernel's thermal governor drives this fan: its device is also a thermal cooling device
+    (a pwm-fan with cooling-levels, as on the Zettlab D4). Writing its pwm would fight the kernel,
+    which writes its own level back, so Kiboto only reads such a fan (#68)."""
+    link = os.path.join(h, "device")
+    if not os.path.exists(link):
+        return False
+    dev = os.path.realpath(link)
+    for cd in glob.glob(os.path.join(HOST_SYS, "class/thermal/cooling_device*")):
+        cd_link = os.path.join(cd, "device")
+        if os.path.exists(cd_link) and os.path.realpath(cd_link) == dev:
+            return True
+    return False
+
+
 def _find_hwmon():
+    """The hwmon device whose fans Kiboto drives; None when there is none it may write."""
     if Z_STATE.cached_hwmon and os.path.exists(Z_STATE.cached_hwmon):
         return Z_STATE.cached_hwmon
     for h in sorted(glob.glob(os.path.join(HOST_SYS, "class/hwmon/hwmon*"))):
         try:
             with open(os.path.join(h, "name")) as f:
                 n = f.read().strip()
-                if n in ("zettlab_d8_fans", "zettos_pwm_fan", "nct6775", "it87"):
-                    Z_STATE.cached_hwmon = h
-                    return h
         except Exception:
             continue
+        if n in ("zettlab_d8_fans", "zettos_pwm_fan", "nct6775", "it87") and not kernel_cooled(h):
+            Z_STATE.cached_hwmon = h
+            return h
     for h in sorted(glob.glob(os.path.join(HOST_SYS, "class/hwmon/hwmon*"))):
-        if glob.glob(os.path.join(h, "pwm*")):
+        if glob.glob(os.path.join(h, "pwm*")) and not kernel_cooled(h):
             Z_STATE.cached_hwmon = h
             return h
     return None

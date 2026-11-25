@@ -165,6 +165,43 @@ def get_os_telemetry() -> dict[str, Any]:
     }
 
 
+def _drm_drivers() -> dict[str, str]:
+    """Each DRM card's driver name, lower case (platform devices have no PCI vendor file)."""
+    out = {}
+    for c in glob.glob(os.path.join(HOST_SYS, "class/drm/card[0-9]*")):
+        if "-" in os.path.basename(c):
+            continue  # a connector (card0-DSI-1), not a card
+        link = os.path.join(c, "device/driver")
+        if os.path.islink(link):
+            out[os.path.basename(c)] = os.path.basename(os.readlink(link)).lower()
+    return out
+
+
+def _rockchip_mali() -> str:
+    """The Arm Mali GPU of a Rockchip board (its own /dev/mali0, no DRM render node); "" if none."""
+    for path in (os.path.join(HOST_DEV, "mali0"), "/dev/mali0"):
+        if os.path.exists(path):
+            return "/dev/mali0"
+    if any("mali" in d or d == "panfrost" or d == "panthor" for d in _drm_drivers().values()):
+        return "mali"
+    return ""
+
+
+def _rockchip_npu() -> str:
+    """The Rockchip NPU (vendor RKNPU driver, a DRM card of its own, or /dev/rknpu); "" if none."""
+    for card, drv in _drm_drivers().items():
+        if "rknpu" in drv:
+            return f"/dev/dri/{card}"
+    for path in (os.path.join(HOST_DEV, "rknpu"), "/dev/rknpu"):
+        if os.path.exists(path):
+            return "/dev/rknpu"
+    return ""
+
+
+def _short_gpu_name(vendor: str) -> str:
+    return {"Intel": "Intel GPU", "AMD": "AMD GPU", "NVIDIA": "NVIDIA GPU", "Arm": "Mali GPU"}.get(vendor, "GPU")
+
+
 def get_gpu_telemetry() -> dict[str, Any]:
     """
     Detects hardware video transcode capabilities (Intel QuickSync, AMD VA-API, NVIDIA NVENC).
@@ -205,7 +242,13 @@ def get_gpu_telemetry() -> dict[str, Any]:
             except Exception:
                 ignored("backend.hardware.host_telemetry.get_gpu_telemetry")
 
-    if vendor_id == "0x8086":
+    mali = _rockchip_mali()
+    if mali and not vendor_id:
+        vendor_name = "Arm"
+        model_name = "Arm Mali GPU"
+        acceleration = "Not used by Kiboto"
+        codecs = []
+    elif vendor_id == "0x8086":
         vendor_name = "Intel"
         model_name = "Intel Arc / QuickSync Video"
         if device_id in ("0x7d55", "0x7d45", "0x7d65"):
@@ -236,9 +279,13 @@ def get_gpu_telemetry() -> dict[str, Any]:
 
     has_render = len(render_nodes) > 0
     active_node = render_nodes[0] if render_nodes else ""
+    if mali and not vendor_id:
+        has_render, active_node = False, mali  # renderD128 there is the display, not the Mali
 
     _GPU_CACHE = {
-        "present": has_render or bool(vendor_id),
+        "present": has_render or bool(vendor_id) or bool(mali and not vendor_id),
+        "short_name": _short_gpu_name(vendor_name),
+        "usable": not (mali and not vendor_id),
         "vendor": vendor_name,
         "model": model_name,
         "driver": driver or "i915",
@@ -530,7 +577,13 @@ def get_npu_telemetry() -> dict[str, Any]:
         acceleration = "N/A"
         frameworks = []
 
-    present = bool(accel_nodes or accel_sys or (vendor_id and vendor_id != "None"))
+    rknpu = "" if (vendor_id or driver) else _rockchip_npu()
+    if rknpu:
+        vendor_name = "Rockchip"
+        model_name = "Rockchip NPU (RKNPU)"
+        acceleration = "Not used by Kiboto yet (RKNN)"
+        frameworks = []
+    present = bool(accel_nodes or accel_sys or (vendor_id and vendor_id != "None") or rknpu)
     active_node = (
         accel_nodes[0] if accel_nodes else (f"/dev/accel/{os.path.basename(accel_sys[0])}" if accel_sys else "")
     )
@@ -539,14 +592,15 @@ def get_npu_telemetry() -> dict[str, Any]:
         "present": present,
         "vendor": vendor_name if present else "None",
         "model": model_name,
-        "driver": driver or ("intel_vpu" if vendor_name == "Intel" else ""),
+        "driver": driver or ("intel_vpu" if vendor_name == "Intel" else ("rknpu" if rknpu else "")),
         "acceleration": acceleration,
-        "render_node": active_node,
+        "render_node": active_node or rknpu,
         "max_freq_mhz": max_freq,
         "cur_freq_mhz": cur_freq,
         "sched_mode": sched_mode,
         "frameworks": frameworks,
-        "ready": present,
+        "ready": present and not rknpu,
+        "usable": not rknpu,
     }
     _NPU_CACHE_TS = now
     dyn = _sample_npu_dynamic()

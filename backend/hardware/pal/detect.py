@@ -26,6 +26,30 @@ from backend.hardware.pal.base import (
 from backend.hardware.unraid import _find_emhttp_dir, read_unraid_status
 from backend.ignored_errors import ignored
 
+# The names a person may give in KIBOTO_PLATFORM, KIBOTO_OBSERVER_ADAPTER or KIBOTO_PAL_MODE
+_NAMED = {
+    **dict.fromkeys(("unraid",), PlatformType.UNRAID),
+    **dict.fromkeys(("truenas", "scale"), PlatformType.TRUENAS),
+    **dict.fromkeys(("proxmox", "pve"), PlatformType.PROXMOX),
+    **dict.fromkeys(("fygoos", "fyde", "fydeos"), PlatformType.FYGOOS),
+    **dict.fromkeys(("zettos", "zettlab", "zettlabs"), PlatformType.ZETTOS),
+    **dict.fromkeys(("ugos", "ugreen"), PlatformType.UGOS),
+    **dict.fromkeys(("generic_observer", "observer", "readonly", "telemetry"), PlatformType.GENERIC_OBSERVER),
+    **dict.fromkeys(("generic", "generic_linux", "linux"), PlatformType.GENERIC_LINUX),  # "generic": the docs' name
+}
+_WARNED: set[str] = set()
+
+
+def _warn_unknown(value: str) -> None:
+    """A setting that names no adapter falls back to detection; say so once per value (#69)."""
+    if value not in _WARNED:
+        _WARNED.add(value)
+        logger.warning(
+            "The storage platform setting %r names no known adapter (auto, generic, fygoos, zettos, ugos,"
+            " truenas, proxmox, unraid); detecting the platform instead",
+            value,
+        )
+
 
 class StoragePlatformDetector:
     """Detects the underlying NAS host OS and runtime environment."""
@@ -40,22 +64,9 @@ class StoragePlatformDetector:
             pal_mode = ""
         env_platform = _settings.current("platform").lower() or obs_adapter or pal_mode
         if env_platform:
-            if env_platform in ("unraid",):
-                return PlatformType.UNRAID
-            if env_platform in ("truenas", "scale"):
-                return PlatformType.TRUENAS
-            if env_platform in ("proxmox", "pve"):
-                return PlatformType.PROXMOX
-            if env_platform in ("fygoos", "fyde", "fydeos"):
-                return PlatformType.FYGOOS
-            if env_platform in ("zettos", "zettlab", "zettlabs"):
-                return PlatformType.ZETTOS
-            if env_platform in ("ugos", "ugreen"):
-                return PlatformType.UGOS
-            if env_platform in ("generic_observer", "observer", "readonly", "telemetry"):
-                return PlatformType.GENERIC_OBSERVER
-            if env_platform in ("generic_linux", "linux"):
-                return PlatformType.GENERIC_LINUX
+            if env_platform in _NAMED:
+                return _NAMED[env_platform]
+            _warn_unknown(env_platform)
 
         # 1. Unraid Detection
         if pal_base._find_emhttp_dir() is not None:
