@@ -44,6 +44,8 @@ A spinning drive whose temperature can't be read for 3 minutes now runs the disk
 
 Escape closes only what is on top: with a window above the notification centre it no longer closes both, and with the notification centre in front it no longer closes the window underneath.
 
+Kiboto notices within a minute when a hard drive goes to sleep or wakes up, instead of up to half an hour later, so the fans stop sooner when every drive sleeps (Zero RPM).
+
 #### Security
 
 On a machine of its own, failed sign-ins to shared folders over the network now count like web sign-ins: 20 in 15 minutes block the address for an hour, and they show under History, Sign-ins.

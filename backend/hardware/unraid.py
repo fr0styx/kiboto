@@ -208,6 +208,33 @@ _LAST_UNRAID_ROLES_POLL = 0.0
 _ROLES_CACHE_TTL = 5.0
 
 
+def read_spin_states() -> dict[str, bool] | None:
+    """{device: spun down} from Unraid's own disks.ini, which emhttp keeps as it spins drives down
+    and up: no drive is asked. None when this is not Unraid or the file can't be read."""
+    emhttp_dir = _find_emhttp_dir()
+    if not emhttp_dir:
+        return None
+    out: dict[str, bool] = {}
+    device, spundown = "", False
+    try:
+        with open(os.path.join(emhttp_dir, "disks.ini"), encoding="utf-8", errors="replace") as f:
+            for raw in [*f, "[end]"]:
+                line = raw.strip()
+                if line.startswith("[") and line.endswith("]"):
+                    if device:
+                        out[device] = spundown
+                    device, spundown = "", False
+                elif "=" in line:
+                    key, val = (p.strip().strip('"') for p in line.split("=", 1))
+                    if key == "device":
+                        device = val
+                    elif key == "spundown":
+                        spundown = val == "1"
+    except OSError:
+        return None
+    return out
+
+
 def get_unraid_disk_roles(force: bool = False) -> dict[str, dict[str, Any]]:
     """
     Parses Unraid /var/local/emhttp/disks.ini to extract authoritative disk roles

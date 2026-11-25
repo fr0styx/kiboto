@@ -795,6 +795,42 @@ def _hdd_interval(dev_name: str, now: float) -> float:
     return float(SMART_POLL_INTERVAL_HDD)
 
 
+# A drive read only every SMART_IDLE_POLL seconds (idle, or asleep) is checked for falling asleep or
+# waking every SLEEP_CHECK_SECS: the fans stop only once every drive sleeps, and a drive that slept
+# between two reads passed for awake for up to half an hour (an hour on the real machine once).
+SLEEP_CHECK_SECS = 60.0
+_SLEEP_CHECKED: dict[str, float] = {}
+
+
+def _sleep_checks(due: list[tuple[str, bool]], idle: list[str], now: float) -> list[tuple[str, bool]]:
+    """The drives to read now besides `due`, from the slowly read spinning drives in `idle`.
+
+    On Unraid its own spin state decides, without asking any drive: asleep there marks the drive
+    asleep here at once, awake there after asleep here reads it. Elsewhere only a drive that is
+    asleep here is read again (`smartctl -n standby` answers that without waking it): an awake
+    drive is not asked every minute, as a drive's own sleep timer may count that as use."""
+    from backend.hardware.unraid import read_spin_states
+
+    checks = [dev for dev in idle if now - _SLEEP_CHECKED.get(dev, 0.0) >= SLEEP_CHECK_SECS]
+    if not checks:
+        return []
+    spun = read_spin_states()
+    more = []
+    for dev in checks:
+        _SLEEP_CHECKED[dev] = now
+        prev_t, prev_h = Z_STATE.cached_smart_data.get(dev, (None, "ok"))
+        asleep_here = prev_h == "standby"
+        if spun is not None and dev in spun:
+            if spun[dev] and not asleep_here:
+                Z_STATE.smart.set_reading(dev, prev_t, "standby")
+                logger.debug("disks: %s spun down (Unraid)", dev)
+            elif not spun[dev] and asleep_here:
+                more.append((dev, False))
+        elif asleep_here:
+            more.append((dev, False))
+    return [t for t in more if t not in due]
+
+
 # One pool for every SMART round (PERF-2): its threads wait idle between rounds instead of being
 # started and stopped every time, and a disk whose read is still running isn't queued again.
 _SMART_POOL: concurrent.futures.ThreadPoolExecutor | None = None
@@ -823,6 +859,7 @@ def poll_all_disks_smart(force: bool = False):
     now = time.time()
     show_os = SHOW_OS_DISK
     targets = []
+    idle = []
     for d in _discover_disks():
         dev_name = d["dev"]
         role = d["role"]
@@ -833,6 +870,9 @@ def poll_all_disks_smart(force: bool = False):
         last_scan = Z_STATE.last_smart_scan.get(dev_name, 0.0)
         if force or (now - last_scan) >= poll_interval or dev_name not in Z_STATE.cached_smart_data:
             targets.append((dev_name, is_nvme))
+        elif not is_nvme and poll_interval > SLEEP_CHECK_SECS:
+            idle.append(dev_name)
+    targets += _sleep_checks(targets, idle, now)
 
     with _SMART_POOL_LOCK:
         targets = [(dev, is_nv) for dev, is_nv in targets if dev not in _SMART_IN_FLIGHT]
