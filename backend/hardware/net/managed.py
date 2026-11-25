@@ -28,6 +28,10 @@ DIR = "/etc/systemd/network"
 PREFIX = "05-kiboto-"  # networkd takes the first file that matches: before netplan's and Debian's
 LINK_PREFIX = "10-kiboto-"  # udev takes the first .link that matches: before the default naming (99-default.link)
 STATE = os.path.join(DATA_DIR, "network_trial.json")
+# On a machine Kiboto runs, the root service keeps the record here instead: the web process owns the
+# data folder, and what the record names is written as root when a trial is put back (ADR 0006).
+ROOT_STATE = "/var/lib/kiboto-door/network_trial.json"
+_IFACE = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.:-]{0,14}")
 REVERT_UNIT = "kiboto-net-revert"
 UPSTREAM_DNS = "/run/systemd/resolve/resolv.conf"  # the servers resolved asks, not its own 127.0.0.53
 LEASES = "/run/systemd/netif/leases"
@@ -264,9 +268,71 @@ def dns_servers() -> list[str]:
 
 
 # --- a trial ---------------------------------------------------------------------------------------
-def _trial() -> dict[str, Any] | None:
-    data = read_json(STATE, None) if os.path.exists(STATE) else None
+def _record() -> str:
+    """Where the trial's record is kept: root's own folder when this is root on a machine Kiboto runs."""
+    from backend import runtime
+
+    return ROOT_STATE if os.geteuid() == 0 and runtime.managed_host() else STATE
+
+
+def _ours(path: str) -> bool:
+    """A file Kiboto itself writes for networkd or udev: nothing else is put back by a trial."""
+    folder, name = os.path.split(str(path))
+    return (
+        os.path.normpath(str(path)) == path
+        and folder == DIR
+        and (
+            (name.startswith(PREFIX) and name.endswith((".network", ".netdev")))
+            or (name.startswith(LINK_PREFIX) and name.endswith(".link"))
+        )
+    )
+
+
+def unsafe(trial: dict[str, Any]) -> str:
+    """Why this record must not be acted on ("" when it may): it is put back as root, so every path
+    is one of Kiboto's own network files, every text is text, and every interface is a name."""
+    files = trial.get("files")
+    if files is None:
+        files = {trial.get("path"): trial.get("before")}  # a trial from before several files
+    if not isinstance(files, dict) or not files:
+        return "it names no files"
+    for path, text in files.items():
+        if not isinstance(path, str) or not _ours(path):
+            return f"{path!r} is not one of Kiboto's network files"
+        if text is not None and (not isinstance(text, str) or len(text) > 65536 or "\0" in text):
+            return f"what was in {os.path.basename(path)} is not a network file's text"
+    ifaces = trial.get("ifaces") or [trial.get("iface")]
+    if not isinstance(ifaces, list) or not all(isinstance(i, str) and _IFACE.fullmatch(i) for i in ifaces):
+        return "it names something that is not a network interface"
+    for key in ("started", "timeout"):
+        if not isinstance(trial.get(key), (int, float)) or isinstance(trial.get(key), bool):
+            return f"its {key} is not a number"
+    return ""
+
+
+def _read(path: str) -> dict[str, Any] | None:
+    data = read_json(path, None) if os.path.exists(path) else None
     return data if isinstance(data, dict) and data.get("id") else None
+
+
+def _trial() -> dict[str, Any] | None:
+    here = _record()
+    data = _read(here)
+    if data is None and here != STATE:
+        # a trial begun by a version that kept the record in the data folder: taken only when root
+        # wrote that file (the web process cannot make a file root's)
+        try:
+            if os.lstat(STATE).st_uid == 0 and not os.path.islink(STATE):
+                data = _read(STATE)
+        except OSError:
+            data = None
+    if data is None:
+        return None
+    why = unsafe(data)
+    if why:
+        logger.error("[Network] The record of the settings on trial is not used: %s", why)
+        return None
+    return data
 
 
 def trial_status() -> dict[str, Any] | None:
@@ -279,8 +345,12 @@ def trial_status() -> dict[str, Any] | None:
 
 
 def _forget() -> None:
-    if os.path.exists(STATE):
-        os.remove(STATE)
+    for path in {_record(), STATE}:
+        try:
+            if os.path.lexists(path):
+                os.remove(path)
+        except OSError as e:
+            logger.warning("[Network] %s could not be removed: %s", path, e)
 
 
 def _reload(ifaces: list[str], do: Run) -> None:
@@ -370,9 +440,10 @@ def _begin(
             "timeout": timeout,
             "plain_url": plain,
         }
-        os.makedirs(os.path.dirname(STATE), exist_ok=True)
-        atomic_write_json(STATE, trial)
-        os.chmod(STATE, 0o600)
+        record = _record()
+        os.makedirs(os.path.dirname(record), mode=0o700, exist_ok=True)
+        atomic_write_json(record, trial)
+        os.chmod(record, 0o600)
         root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__)))))
         code, said = do(
             [

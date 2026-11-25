@@ -30,7 +30,7 @@
  "backend/services/host_door.py": 3,
  "backend/services/host_power.py": 1,
  "backend/services/host_set.py": 1,
- "backend/services/native_update.py": 1,
+ "backend/services/native_update.py": 2,
  "backend/services/nfs_engine.py": 1,
  "backend/services/notifications.py": 1,
  "backend/services/offsite_backup.py": 1,

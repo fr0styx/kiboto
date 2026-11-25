@@ -96,6 +96,8 @@ Each release lists the checksums of install.sh and the install image, signed by 
 
 Bringing storage pools back at start checks each pool record before acting on it as root, so a changed record cannot mount a pool over a system folder or with unsafe options.
 
+Kiboto OS: the root service no longer acts on unchecked files in the web process's folder (the network trial record, a snapshot's file list, its own log), which could have let a fault in the web process become root.
+
 #### New
 
 Kiboto lists the third-party software it bundles and its licences at /third-party-licences.txt, and the install image says which Debian image it is made from and where Debian publishes its sources.

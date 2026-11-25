@@ -13,6 +13,7 @@ returned by `current_host()` for its platform.
 
 from typing import Any
 
+from backend import door
 from backend.hardware.pal.base import PlatformType
 
 SETTINGS = ("address", "mtu", "speed", "wake_on_lan", "bond", "bridge", "vlan")
@@ -82,7 +83,8 @@ class ManagedHostNetwork(HostNetwork):
             "managed": True,
             "where": self.where(),
             "can_change": {name: (can and name == "address") for name in SETTINGS},
-            "trial": managed.trial_status(),  # a change being tried, so a page opened in the middle shows it
+            # a change being tried, so a page opened in the middle shows it (root keeps its record)
+            "trial": door.via("network.trial_status", managed.trial_status),
         }
 
     def apply(self, setting: str, target: str, changes: dict[str, Any]) -> dict[str, Any]:

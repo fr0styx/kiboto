@@ -343,6 +343,38 @@ def _hand_back(data_dir: str) -> None:
 WEB_USER_DROP_IN = "/etc/systemd/system/kiboto.service.d/web-user.conf"  # services/web_user.DROP_IN
 
 
+def _in_the_owners_name(data_dir: str, what: list[str]) -> str:
+    """Takes or puts back a snapshot (data_snapshot's `take` or `restore`). Where this is root and the
+    data folder is someone else's (the web user's, ADR 0006), it is done as that user in a process of
+    its own: root following that folder's links and file lists could be made to write anywhere.
+    Returns what was printed (a new snapshot's folder); an OSError says why it failed."""
+    from backend.services import data_snapshot
+
+    st = os.stat(data_dir)
+    if os.geteuid() != 0 or st.st_uid == 0:
+        if what[0] == "take":
+            return data_snapshot.take_snapshot(what[1], label=what[2], extra=json.loads(what[3]))
+        data_snapshot.restore_snapshot(what[1], what[2])
+        return ""
+    _hand_back(data_dir)  # what root left there earlier is the owner's to replace
+    code_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    res = subprocess.run(
+        [sys.executable, "-m", "backend.services.data_snapshot", *what],
+        user=st.st_uid,
+        group=st.st_gid,
+        extra_groups=[],
+        cwd=code_root,
+        env={**os.environ, "DATA_DIR": data_dir, "HOME": data_dir},
+        capture_output=True,
+        text=True,
+        timeout=3600,
+        check=False,
+    )
+    if res.returncode != 0:
+        raise OSError((res.stderr or res.stdout or "it did not finish").strip()[-400:])
+    return (res.stdout.strip().splitlines() or [""])[-1]
+
+
 def _root_for_older(rel: str, run: Any, drop_in: str = WEB_USER_DROP_IN) -> None:
     """A version from before ADR 0006 step 9 cannot run as the user kiboto (it does root's work
     itself): going back to one, Kiboto runs as root again."""
@@ -450,18 +482,13 @@ def prune(prefix: str = PREFIX, keep: int = KEEP_RELEASES) -> None:
 def apply(rel: str, data_dir: str, port: int, image: str = "", prefix: str = PREFIX, run: Any = None) -> str:
     """The helper's work, run outside the service: switch to `rel`, and back if it does not hold.
     Returns "updated", "rolled_back" or "not_applied"."""
-    from backend.services.data_snapshot import restore_snapshot, take_snapshot
-
     run = run or _run
     run(["systemctl", "stop", SERVICE], timeout=180)
     running = os.path.realpath(os.path.join(prefix, "current"))
     try:
-        snapshot = take_snapshot(
-            data_dir,
-            label="before-update",
-            # the version this data belongs to: going back takes both together
-            extra={"kind": "update", "to": os.path.basename(rel), "from_release": os.path.basename(running)},
-        )
+        # the version this data belongs to: going back takes both together
+        extra = {"kind": "update", "to": os.path.basename(rel), "from_release": os.path.basename(running)}
+        snapshot = _in_the_owners_name(data_dir, ["take", data_dir, "before-update", json.dumps(extra)])
     except OSError as e:
         _hand_back(data_dir)
         run(["systemctl", "start", SERVICE], timeout=120)
@@ -479,7 +506,7 @@ def apply(rel: str, data_dir: str, port: int, image: str = "", prefix: str = PRE
     logger.error("[Update] The new version did not hold (%s): going back", why)
     run(["systemctl", "stop", SERVICE], timeout=180)
     try:
-        restore_snapshot(snapshot, data_dir)
+        _in_the_owners_name(data_dir, ["restore", snapshot, data_dir])
     except (OSError, ValueError) as e:
         why = f"{why}; the earlier data could not be put back: {e}"
     if before:
@@ -530,8 +557,6 @@ def _shown(name: str) -> str:
 def back(snapshot: str, data_dir: str, port: int, prefix: str = PREFIX, run: Any = None) -> str:
     """The helper's work for going back: the release the snapshot belongs to and the data as it
     was, together. The data of now is saved first. Returns "reverted" or "not_reverted"."""
-    from backend.services.data_snapshot import restore_snapshot, take_snapshot
-
     run = run or _run
     with open(os.path.join(snapshot, "manifest.json"), encoding="utf-8") as f:
         name = str(json.load(f).get("from_release") or "")
@@ -541,8 +566,8 @@ def back(snapshot: str, data_dir: str, port: int, prefix: str = PREFIX, run: Any
         return "not_reverted"
     run(["systemctl", "stop", SERVICE], timeout=180)
     try:
-        take_snapshot(data_dir, label="before-revert", extra={"kind": "revert"})
-        restore_snapshot(snapshot, data_dir)
+        _in_the_owners_name(data_dir, ["take", data_dir, "before-revert", json.dumps({"kind": "revert"})])
+        _in_the_owners_name(data_dir, ["restore", snapshot, data_dir])
     except (OSError, ValueError) as e:
         _hand_back(data_dir)
         run(["systemctl", "start", SERVICE], timeout=120)

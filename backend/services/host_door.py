@@ -19,6 +19,7 @@ import os
 import pwd
 import re
 import socket
+import stat
 import struct
 import threading
 import time
@@ -476,6 +477,7 @@ OPERATIONS: dict[str, Operation] = {
     "network.keep": Operation(_net("keep"), {"key": MAYBE_TEXT}, max_len=128),
     "network.go_back": Operation(_net("go_back"), {"key": MAYBE_TEXT}, max_len=128),
     "network.settle": Operation(_net("settle"), {}),
+    "network.trial_status": Operation(_net("trial_status"), {}),
     "network.ensure_fallback": Operation(_net("ensure_fallback"), {}),
     "firewall.apply": Operation(_firewall_apply, {"st": MAP}),
     # accounts and file servers (samba_host checks the names; the door checks the numbers)
@@ -642,10 +644,33 @@ def _kind(e: Exception) -> str:
 def _audit(uid: int, op: str, outcome: str, why: str) -> None:
     line = json.dumps({"at": round(time.time()), "uid": uid, "op": op, "outcome": outcome, "why": why[:200]})
     try:
-        with open(AUDIT, "a", encoding="utf-8") as f:
+        with os.fdopen(_audit_file(AUDIT), "a", encoding="utf-8") as f:
             f.write(line + "\n")
     except OSError as e:
         logger.warning("[Door] the audit line was not written: %s", e)
+
+
+def _audit_file(path: str) -> int:
+    """The log, opened for appending. It is in the data folder, which the web process owns: a link
+    put in its place, or a file that is not root's own, is moved aside and a new log begun, so root
+    never writes through a link or into a file someone else chose."""
+    flags = os.O_WRONLY | os.O_APPEND | os.O_CREAT | os.O_NOFOLLOW | os.O_CLOEXEC
+    for attempt in (0, 1):
+        try:
+            fd = os.open(path, flags, 0o644)
+        except OSError:
+            if attempt:
+                raise
+            os.unlink(path)  # a link: taken away (the name, not what it points at)
+            continue
+        st = os.fstat(fd)
+        if st.st_uid == os.geteuid() and st.st_nlink == 1 and stat.S_ISREG(st.st_mode):
+            return fd
+        os.close(fd)
+        if attempt:
+            raise OSError(f"{path} is not a file of this service's own")
+        os.unlink(path)
+    raise OSError(f"{path} could not be opened")
 
 
 def allowed_uids() -> set[int]:

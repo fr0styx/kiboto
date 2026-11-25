@@ -246,6 +246,11 @@ def restore_snapshot(snapshot_dir: str, data_dir: str) -> list[str]:
     """Copies a snapshot back over data_dir. Run only while Kiboto is stopped."""
     with open(os.path.join(snapshot_dir, MANIFEST), encoding="utf-8") as f:
         files = json.load(f).get("files") or []
+    for item in files:
+        # the list is a file in the data folder: a name that leaves the folder is never followed
+        name = item.rstrip("/") if isinstance(item, str) else ""
+        if not name or os.path.isabs(name) or ".." in name.split("/"):
+            raise ValueError(f"the snapshot lists {item!r}, which is not a file of the data folder")
     restored = []
     for item in files:
         src = os.path.join(snapshot_dir, item.rstrip("/"))
@@ -264,3 +269,27 @@ def restore_snapshot(snapshot_dir: str, data_dir: str) -> list[str]:
         restored.append(item)
     logger.warning("[Snapshot] Restored %s item(s) from %s", len(restored), snapshot_dir)
     return restored
+
+
+def main(argv: list[str]) -> int:
+    """`take <data folder> <label> <extra as JSON>` prints the snapshot's folder; `restore <snapshot>
+    <data folder>` puts one back. For the updater, which runs this as the data folder's owner."""
+    import sys
+
+    try:
+        if argv[1:2] == ["take"] and len(argv) == 5:
+            print(take_snapshot(argv[2], label=argv[3], extra=json.loads(argv[4])))
+            return 0
+        if argv[1:2] == ["restore"] and len(argv) == 4:
+            restore_snapshot(argv[2], argv[3])
+            return 0
+    except (OSError, ValueError) as e:
+        print(str(e), file=sys.stderr)
+        return 1
+    return 2
+
+
+if __name__ == "__main__":
+    import sys
+
+    raise SystemExit(main(sys.argv))

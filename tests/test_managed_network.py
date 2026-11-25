@@ -62,6 +62,8 @@ def box(tmp_path, monkeypatch):
     monkeypatch.setattr(managed, "LEASES", str(tmp_path / "leases"))
     monkeypatch.setattr(managed, "UPSTREAM_DNS", str(tmp_path / "resolv.conf"))
     monkeypatch.setattr(managed, "STATE", str(tmp_path / "data" / "network_trial.json"))
+    # root's own copy on a machine Kiboto runs (the tests run as root)
+    monkeypatch.setattr(managed, "ROOT_STATE", str(tmp_path / "door" / "network_trial.json"))
     made = Box(tmp_path)
     monkeypatch.setattr(managed, "run", made)
     monkeypatch.setattr(managed, "after", made.later)
@@ -190,7 +192,7 @@ def test_the_way_back_is_armed_before_anything_changes(box):
     assert armed[armed.index("--unit") + 1] == "kiboto-net-revert" and "--on-active=62" in armed
     assert armed[-3:] == ["-m", "backend.hardware.net.managed", "revert"]
     assert key not in " ".join(armed)  # the key is in no command line
-    assert stat.S_IMODE(os.stat(managed.STATE).st_mode) == 0o600
+    assert stat.S_IMODE(os.stat(managed._record()).st_mode) == 0o600
     assert not box.asked("networkctl")
     box.a_moment_passes()
     assert box.file() == managed.network_file(managed.checked(STATIC))
@@ -217,9 +219,9 @@ def test_keeping_needs_the_trials_own_key_and_stops_the_timer(box):
     box.a_moment_passes()
     with pytest.raises(ValueError, match="not the change being tried"):
         managed.keep("x" * 32)
-    assert box.timer is True and os.path.exists(managed.STATE)
+    assert box.timer is True and os.path.exists(managed._record())
     assert managed.keep(key) == {"status": "ok", "kept": True, "interface": "enp1s0"}
-    assert box.timer is False and not os.path.exists(managed.STATE)
+    assert box.timer is False and not os.path.exists(managed._record())
     assert "Address=192.168.1.50/24" in box.file()
     assert managed.keep(key) == {"status": "ok", "kept": False}  # nothing is being tried any more
 
@@ -240,7 +242,7 @@ def test_going_back_from_a_first_change_removes_kibotos_file(box):
         "reverted": True,
         "interface": "enp1s0",
     }
-    assert box.file() is None and box.timer is False and not os.path.exists(managed.STATE)
+    assert box.file() is None and box.timer is False and not os.path.exists(managed._record())
     assert box.asked("networkctl", "reconfigure")[-1] == ["networkctl", "reconfigure", "enp1s0"]
     assert managed.go_back(None) == {"status": "ok", "reverted": False}
 
@@ -271,14 +273,14 @@ def test_without_a_way_back_nothing_is_changed(box):
     box.refuse = ("systemd-run",)
     with pytest.raises(RuntimeError, match="nothing was changed"):
         managed.start_trial(STATIC)
-    assert not os.path.exists(managed.STATE) and box.waiting == [] and box.file() is None
+    assert not os.path.exists(managed._record()) and box.waiting == [] and box.file() is None
 
 
 def test_the_machines_timer_puts_the_settings_back(box):
     managed.start_trial(STATIC)
     box.a_moment_passes()
     assert managed.main(["managed", "revert"]) == 0
-    assert box.file() is None and not os.path.exists(managed.STATE)
+    assert box.file() is None and not os.path.exists(managed._record())
     assert not box.asked("systemctl", "stop")  # the timer is that very run
     assert managed.main(["managed"]) == 2 and managed.main(["managed", "keep"]) == 2
 
@@ -290,7 +292,7 @@ def test_a_trial_cut_short_by_a_restart_is_put_back(box, monkeypatch):
     assert managed.settle() is False  # the timer is still running
     box.timer = False  # as a restart of the machine leaves it
     assert managed.settle() is True
-    assert box.file() is None and not os.path.exists(managed.STATE)
+    assert box.file() is None and not os.path.exists(managed._record())
 
 
 def test_a_trial_long_past_its_time_is_put_back_and_does_not_block_the_next(box, monkeypatch):

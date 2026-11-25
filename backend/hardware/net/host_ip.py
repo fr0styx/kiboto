@@ -63,7 +63,9 @@ def get_host_ip_config() -> dict[str, Any]:
 
         mode = managed.mode_of(primary_iface)
         dns_servers = managed.dns_servers() or dns_servers
-        trial = managed.trial_status()
+        from backend import door
+
+        trial = door.via("network.trial_status", managed.trial_status)  # root keeps the trial's record
 
     dns1 = dns_servers[0] if len(dns_servers) > 0 else ""
     dns2 = dns_servers[1] if len(dns_servers) > 1 else ""
