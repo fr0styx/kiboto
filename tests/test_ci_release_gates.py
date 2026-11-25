@@ -93,3 +93,17 @@ def test_changed_backend_lines_must_be_tested():
     assert job["steps"][0]["with"]["fetch-depth"] == 0
     with open(os.path.join(root, "requirements-dev.txt"), encoding="utf-8") as f:
         assert "diff-cover==" in f.read()
+
+
+def test_the_unit_suite_also_runs_on_the_python_kiboto_os_uses():
+    """Kiboto OS makes its environment from Debian 13's python3, not the image's Python. The suite
+    runs there too, before anything is signed, tagged or deployed."""
+    jobs = _jobs()
+    job = jobs["unit-debian13"]
+    assert job["container"] == "debian:13"  # Debian 13's current Python, as the machines get it
+    steps = "\n".join(str(step.get("run", "")) for step in job["steps"])
+    assert "apt-get install" in steps and "python3 python3-venv" in steps
+    assert "setup-python" not in str(job["steps"])  # never a Python from elsewhere
+    assert "pip install --require-hashes -r requirements.lock" in steps
+    assert "-m pytest" in steps and "continue-on-error" not in str(job)
+    assert "unit-debian13" in jobs["publish"]["needs"] and "unit-debian13" in jobs["still-latest"]["needs"]

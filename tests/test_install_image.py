@@ -129,6 +129,22 @@ def test_a_release_builds_the_install_image_from_checked_debian_files():
     assert "gh release upload" in ci
 
 
+def test_a_release_without_its_install_image_is_red():
+    """v2.0.6 went out green with no install image: the two steps that make and attach it may fail
+    without failing the job. The last step asks the release itself, and has no way to pass quietly."""
+    with open(os.path.join(ROOT, ".github", "workflows", "ci.yml"), encoding="utf-8") as f:
+        ci = f.read()
+    attach = ci[
+        ci.index("- name: Attach the install image") : ci.index("- name: The release carries the install image")
+    ]
+    assert "--clobber" in attach  # a second run replaces what a first one left
+    check = ci[ci.index("- name: The release carries the install image") :]
+    assert "continue-on-error" not in check and "\n        if:" not in check
+    assert "gh release view" in check and ".assets[].name" in check
+    assert 'grep -qxF "$iso"' in check and "exit 1" in check
+    assert check.index("exit 0") < check.index("::error title=No install image::") < check.index("exit 1")
+
+
 def test_the_first_start_says_on_the_screen_what_happens():
     late = _read("late.sh")
     run = late[late.index("<<'RUN'") : late.index("\nRUN\n")]

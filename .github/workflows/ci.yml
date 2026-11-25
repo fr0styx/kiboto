@@ -176,6 +176,48 @@ jobs:
             exit 1
           fi
 
+  # Kiboto OS does not run the image's Python: it makes its own environment from Debian 13's
+  # python3 (3.13) on the machine. The same unit suite runs on that Python here, so what only
+  # breaks there is seen at the push and not on a machine. The image is not pinned by digest on
+  # purpose: this follows the Python that Debian 13 hands out today, as those machines do.
+  unit-debian13:
+    name: Pytest Unit Suite on Debian 13's Python
+    runs-on: ubuntu-latest
+    container: debian:13
+    timeout-minutes: 25  # ARC-26: a hung step fails the run instead of holding a runner for 6 hours
+    steps:
+      - name: Install Python and git from Debian
+        run: |
+          apt-get update -qq
+          apt-get install -y -qq --no-install-recommends -o Acquire::Retries=3 python3 python3-venv ca-certificates git
+
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Install dependencies
+        run: |
+          python3 --version
+          python3 -m venv /venv
+          # the same hash-checked set Kiboto OS installs (packaging/install.sh), then the test tools
+          /venv/bin/pip install --require-hashes -r requirements.lock
+          /venv/bin/pip install --require-hashes -r requirements-dev.lock
+
+      - name: Run Pytest Suite
+        # No coverage here: the Python 3.12 job measures it. The end-to-end tests need a browser and
+        # run in their own job.
+        shell: bash
+        env:
+          TESTING: "1"
+        run: |
+          set -o pipefail
+          if ! /venv/bin/python -m pytest -n 4 --dist loadgroup -p no:cacheprovider -q -rfE -o addopts= --ignore-glob='tests/test_e2e_*' 2>&1 | tee /tmp/kb-unit-debian.log; then
+            body=$( (grep -E '^(FAILED|ERROR)|^E  ' /tmp/kb-unit-debian.log | tail -n 40) | sed 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
+            echo "::error title=Unit tests on Debian 13's Python::$body"
+            exit 1
+          fi
+
   storage-real:
     name: Real storage tools (ZFS, btrfs, ext4)
     # Every other storage test hands the adapter a pretend command runner. This one makes real pools
@@ -442,7 +484,7 @@ jobs:
   # publish the images, so this one skips publishing (skipped, not failed).
   still-latest:
     name: Still the latest commit?
-    needs: [lint, lint-and-test, frontend, e2e-integration]
+    needs: [lint, lint-and-test, unit-debian13, frontend, e2e-integration]
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 5  # ARC-26: a hung step fails the run instead of holding a runner for 6 hours
@@ -794,7 +836,7 @@ jobs:
 
   publish:
     name: Sign & publish image tags (${{ matrix.variant }})
-    needs: [lint, lint-and-test, storage-real, frontend, e2e-integration, still-latest, build-image, check-image, update-test, smoke-arm64]
+    needs: [lint, lint-and-test, unit-debian13, storage-real, frontend, e2e-integration, still-latest, build-image, check-image, update-test, smoke-arm64]
     strategy:
       fail-fast: false
       matrix:
@@ -966,4 +1008,23 @@ jobs:
         continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload "$GITHUB_REF_NAME" "kiboto-${GITHUB_REF_NAME}-install.iso" --repo "$GITHUB_REPOSITORY"
+        run: gh release upload "$GITHUB_REF_NAME" "kiboto-${GITHUB_REF_NAME}-install.iso" --repo "$GITHUB_REPOSITORY" --clobber
+
+      # v2.0.6 went out green with no install image: the build wrote it where the upload did not
+      # look, and neither step may fail the job (Debian's servers being down must not stop the
+      # container's release). So the release itself is asked. Without the image the release stays,
+      # but this job is red and says why; running the job again builds and attaches it.
+      - name: The release carries the install image
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          iso="kiboto-${GITHUB_REF_NAME}-install.iso"
+          for try in 1 2 3; do
+            if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --json assets -q '.assets[].name' | grep -qxF "$iso"; then
+              echo "$iso is on the release"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::error title=No install image::The release $GITHUB_REF_NAME has no $iso, so Kiboto OS cannot be installed from it. Run this job again: it builds the image and attaches it."
+          exit 1

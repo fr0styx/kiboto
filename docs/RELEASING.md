@@ -49,6 +49,15 @@ Each tag also exists with `-core` for the core image.
    app's Stable channel offers it. On other days the scheduled run only names the next train
    date in its summary. It warns when nothing has reached Stable for 21 days.
 
+## What a release carries
+
+Beside the images, the GitHub release has `install.sh` (the install script for a machine of its
+own, naming this release's image by its digest), the install image `kiboto-vX.Y.Z-install.iso`,
+and `SHA256SUMS` with its signature for both. The release job's last step asks the release
+whether the install image is there. If it is not (Debian's servers were down, or the upload
+failed), the release stays, because the container does not need the image, but the job is red:
+run that job again, and it builds and attaches the image.
+
 ## Stopping a release
 
 Set the repository variable `HOLD_RELEASES` (Settings > Secrets and variables > Actions >
