@@ -1,7 +1,7 @@
 # ADR 0007: The family portal, a public way in for people who can't install an app
 
 - **Status:** Accepted (the owner's decision D12 part 2, 10 Nov 2026: opt-in; a person's own files and photos only, never the admin pages; passkey sign-in required)
-- **Progress:** step 1 (the portal's own sessions, sign-in by passkey, the join link, reading files) built; step 2 (publishing it through Funnel and the owner's card) and step 3 (the page) to come
+- **Progress:** step 1 (the portal's own sessions, sign-in by passkey, the join link, reading files), step 2 (publishing through Funnel, the owner's routes, the outside summary) and step 3 (the owner's card in Away from home, the page at /portal) built; a live run on a real tailnet waits for the owner
 - **Date:** 2026-11-25
 - **Decides:** how part of Kiboto is reachable from the internet for family members, and what stops it from being more than that
 

@@ -475,6 +475,7 @@ export function loadAwayCards(doc = document) {
   import('./management/public-links.js').then((m) => m.loadPublicLinksCard()).catch(() => {});
   import('./management/public-apps.js').then((m) => m.loadPublicAppsCard()).catch(() => {});
   import('./management/family-access.js').then((m) => m.loadFamilyAccessCard()).catch(() => {});
+  import('./management/family-portal.js').then((m) => m.loadFamilyPortalCard()).catch(() => {}); // ADR 0007
   return true;
 }
 

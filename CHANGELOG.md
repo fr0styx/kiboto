@@ -70,6 +70,8 @@ Hardware opens with what the temperatures and fans are doing now, in words, and 
 
 The installed app: long-press its icon for Files, Ask Kib, Drive health and Settings; the icon shows how many notifications are unread; when Kiboto can't be reached, a page in your language says so and opens Kiboto again by itself once it answers.
 
+Family portal (off until you turn it on, in Away from home): family members who can't install Tailscale open their own files and photos in a browser from anywhere, signed in with a passkey made from a one-time join link. Nothing else of the NAS is reachable there.
+
 #### Changes
 
 On a machine of its own, a separate system service (the host door) now changes the machine's name, time zone, clock and SSH setting for Kiboto, from a fixed list of operations: the first step towards Kiboto's web service running without full system rights (docs/adr/0006-web-without-root.md).

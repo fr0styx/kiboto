@@ -176,7 +176,8 @@ async def list_folder(request: Request, path: str = "") -> Any:
     await asyncio.to_thread(check_user_path_access, path, principal, allow_list=True)
     if path and await asyncio.to_thread(folder_asleep, path):
         raise HTTPException(status_code=409, detail="This folder is on a drive that is asleep.")
-    return await asyncio.to_thread(browse_folder, path, False, principal)
+    found = await asyncio.to_thread(browse_folder, path, False, principal)
+    return {"current": found.get("current", ""), "dirs": found.get("dirs", [])}  # not the server's roots
 
 
 @router.get("/api/picture")
