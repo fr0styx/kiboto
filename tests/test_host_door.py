@@ -1455,9 +1455,10 @@ def test_the_copy_button_opens_a_card_through_the_door(audit, monkeypatch):
     monkeypatch.setattr(copy_engine.os, "geteuid", lambda: 999)
     monkeypatch.setattr(door, "available", lambda sock=door.SOCK: True)
     monkeypatch.setattr(door, "call", lambda op, **a: calls.append((op, a)) or copy_engine.CARD_MOUNT)
+    monkeypatch.setattr(copy_engine, "local_offset_minutes", lambda: 660)  # the card clock zone goes along
     assert copy_engine.mount_card("/dev/sdc1") == copy_engine.CARD_MOUNT
     copy_engine.unmount_card()
-    assert calls == [("copy.mount", {"device": "/dev/sdc1"}), ("copy.unmount", {})]
+    assert calls == [("copy.mount", {"device": "/dev/sdc1", "offset": 660}), ("copy.unmount", {})]
 
     def refused(op, **a):
         raise door.DoorError("only a card or stick that is not open anywhere", "value")
@@ -1492,10 +1493,12 @@ def test_the_door_opens_only_a_card_that_is_open_nowhere(audit, monkeypatch):
         copy_engine, "run_bounded", lambda cmd, **kw: subprocess.CompletedProcess(cmd, 0, json.dumps(tree), "")
     )
     mounted = []
-    monkeypatch.setattr(copy_engine, "_mount_card_here", lambda d: mounted.append(d) or copy_engine.CARD_MOUNT)
+    monkeypatch.setattr(
+        copy_engine, "_mount_card_here", lambda d, offset=0: mounted.append(d) or copy_engine.CARD_MOUNT
+    )
 
     def card(device):
-        return host_door.handle({"op": "copy.mount", "args": {"device": device}}, 0)
+        return host_door.handle({"op": "copy.mount", "args": {"device": device, "offset": 660}}, 0)
 
     assert card("/dev/sdc1")["result"] == copy_engine.CARD_MOUNT and mounted == ["/dev/sdc1"]
     tree["blockdevices"][0]["mountpoints"] = ["/"]

@@ -31,6 +31,7 @@ from backend.config import (
     DASH_LAYOUT_FILE,
     EVENTS_FILE,
     FAN_STATE_FILE,
+    POOL_PATH,
     docker_sock,
     logger,
 )
@@ -64,7 +65,7 @@ from backend.models.schemas import (
 )
 from backend.paging import PageParams
 from backend.services.broadcaster import broadcaster
-from backend.services.copy_engine import _do_copy
+from backend.services.copy_engine import _do_copy, copy_dest
 from backend.services.notifications import DEFAULT_NOTIFICATION_CONFIG, NOTIFICATIONS_FILE
 from backend.settings import test_mode
 from backend.state import Z_STATE, add_event, event_text
@@ -320,7 +321,7 @@ BUTTON_DEFAULTS = {
     "auto_ingest": False,
     "require_confirmation": True,
     "source": "sd",
-    "dest": "/mnt/user/",
+    "dest": POOL_PATH,
     "use_exif": True,
     "verify_checksum": True,
     "on_collision": "skip",
@@ -332,6 +333,7 @@ def _load_buttons():
     saved = read_json(BUTTON_CFG_FILE, {})
     if isinstance(saved, dict):
         state.update(saved)
+    state["dest"] = copy_dest(state.get("dest"))
     return state
 
 

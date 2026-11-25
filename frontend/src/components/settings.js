@@ -616,7 +616,7 @@ export function initSettings() {
       const data = await api.get('/api/buttons');
       if (btnCopyToggle) btnCopyToggle.checked = !!data.enabled;
       if (btnCopySrc) btnCopySrc.value = data.source || 'sd';
-      if (btnCopyDst) btnCopyDst.value = data.dest || '/mnt/user/';
+      if (btnCopyDst) btnCopyDst.value = data.dest || '';
       if (btnCopyExif) btnCopyExif.checked = data.use_exif !== false;
       if (btnCopyAutoIngest) btnCopyAutoIngest.checked = !!data.auto_ingest;
       if (btnCopyRequireConfirm) btnCopyRequireConfirm.checked = data.require_confirmation !== false;
@@ -640,7 +640,7 @@ export function initSettings() {
         enabled: btnCopyToggle ? btnCopyToggle.checked : false,
         action: 'copy',
         source: btnCopySrc ? btnCopySrc.value : 'sd',
-        dest: btnCopyDst ? btnCopyDst.value : '/mnt/user/',
+        dest: (btnCopyDst && btnCopyDst.value.trim()) || undefined,
         use_exif: btnCopyExif ? btnCopyExif.checked : true,
         auto_ingest: btnCopyAutoIngest ? btnCopyAutoIngest.checked : false,
         require_confirmation: btnCopyRequireConfirm ? btnCopyRequireConfirm.checked : true,
@@ -2116,7 +2116,14 @@ export function initSystemTab() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+// This module loads after the first paint, often after DOMContentLoaded has fired: a listener
+// added then never runs (the API token Generate button did nothing in Safari)
+function whenDomReady(fn) {
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn, { once: true });
+  else fn();
+}
+
+whenDomReady(() => {
   onManagementDom(initSystemTab);
 });
 
@@ -2277,7 +2284,7 @@ function showCreatedToken(box, token) {
 }
 
 // The API token form is in Mission Control, inserted when first needed (FE-04)
-document.addEventListener('DOMContentLoaded', () =>
+whenDomReady(() =>
   onManagementDom(() => {
     const btnGen = document.getElementById('btn-generate-token');
     const inputName = /** @type {HTMLInputElement | null} */ (document.getElementById('new-token-name'));

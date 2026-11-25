@@ -8,7 +8,7 @@ import time
 
 from backend.config import BUTTON_CFG_FILE, HOST_DEV, logger
 from backend.ignored_errors import ignored
-from backend.services.copy_engine import _do_copy
+from backend.services.copy_engine import _do_copy, copy_dest
 from backend.state import Z_STATE, add_event, event_text
 
 BUTTON_POLL_SECS = 0.25  # PERF-5: was 0.1; the register has no interrupt, so it is read
@@ -113,7 +113,7 @@ def _poll_button(read_value) -> None:
                 cfg = {
                     "enabled": False,
                     "source": "sd",
-                    "dest": "/mnt/user/",
+                    "dest": copy_dest(None),
                     "use_exif": True,
                     "verify_checksum": True,
                     "on_collision": "skip",
@@ -153,7 +153,7 @@ def _poll_button(read_value) -> None:
                         Z_STATE.copy_status = "copying"
                         Z_STATE.ui_wake.set()
                         slot_label = "SD Card" if src_slot == "sd" else "TF Card (MicroSD)"
-                        target_dir = cfg.get("dest", "/mnt/user/")
+                        target_dir = copy_dest(cfg.get("dest"))
                         add_event(
                             "info",
                             "Copy Started",

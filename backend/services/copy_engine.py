@@ -12,7 +12,7 @@ import time
 import aiofiles
 import exifread
 
-from backend.config import ALLOWED_BROWSE_ROOTS, HOST_DEV, HOST_PROC, HOST_SYS, logger
+from backend.config import ALLOWED_BROWSE_ROOTS, HOST_DEV, HOST_PROC, HOST_SYS, POOL_PATH, logger
 from backend.db import log_copy_event
 from backend.fsutil import prune_protected, resolve_within
 from backend.hardware.led import send_led_packet
@@ -149,7 +149,7 @@ def _maybe_trigger_auto_ingest(slot: str, dev: str | None = None, size: int | No
 
         job_cfg = {
             "source": slot,
-            "dest": cfg.get("dest", "/mnt/user/"),
+            "dest": copy_dest(cfg.get("dest")),
             "use_exif": cfg.get("use_exif", True),
             "verify_checksum": cfg.get("verify_checksum", True),
             "on_collision": cfg.get("on_collision", "skip"),
@@ -344,6 +344,46 @@ def resolve_copy_destination(dst):
     return real
 
 
+# What a camera, a computer or the card itself leaves next to the photos and videos (a GoPro's
+# .url, .db, .log and .bk files; macOS and Windows folders): the copy is for photos and videos.
+_NOT_MEDIA = {".url", ".db", ".log", ".bk", ".ini", ".dat", ".bin", ".sys", ".tmp", ".lnk"}
+_NOT_MEDIA_DIRS = {"system volume information", "$recycle.bin", "found.000", "lost+found"}
+
+
+def _housekeeping(name: str) -> bool:
+    return name.startswith(".") or os.path.splitext(name)[1].lower() in _NOT_MEDIA
+
+
+def _housekeeping_dir(name: str) -> bool:
+    return name.startswith(".") or name.lower() in _NOT_MEDIA_DIRS
+
+
+def copy_dest(dest) -> str:
+    """The copy button's folder: the saved one, or the pool. Unraid's /mnt/user was the default
+    everywhere, and on another host it does not exist, so the setting could not be saved past it."""
+    dest = str(dest or "").strip()
+    if not dest or (dest.rstrip("/") == "/mnt/user" and not os.path.isdir("/mnt/user")):
+        return POOL_PATH
+    return dest
+
+
+def _card_partition(dev: str) -> str:
+    """The partition with the photos: the largest one (a Mac formats a card with a 200 MB EFI
+    partition first and the photos on the second); the card itself when it has no partitions."""
+    best, best_size = dev, -1
+    for part in glob.glob(os.path.join(HOST_SYS, f"block/{dev}/{dev}*")):
+        if not os.path.exists(os.path.join(part, "partition")):
+            continue
+        try:
+            with open(os.path.join(part, "size")) as f:
+                size = int(f.read().strip())
+        except (OSError, ValueError):
+            continue
+        if size > best_size:
+            best, best_size = os.path.basename(part), size
+    return best
+
+
 def build_copy_plan(src_path, dst_path, use_exif, date_func=None):
     """Map every regular file under `src_path` to its destination.
 
@@ -358,8 +398,11 @@ def build_copy_plan(src_path, dst_path, use_exif, date_func=None):
     planned: set[str] = set()
     for dirpath, dirnames, filenames in os.walk(src_path):
         prune_protected(dirpath, dirnames)
+        dirnames[:] = [d for d in dirnames if not _housekeeping_dir(d)]
         dirnames.sort()  # the same card gives the same names on every import
         for name in sorted(filenames):
+            if _housekeeping(name):
+                continue
             src_file = os.path.join(dirpath, name)
             if os.path.islink(src_file):
                 continue  # never follow symlinks off the card
@@ -503,7 +546,7 @@ def _slot_source(src_mode: str) -> tuple[str, bool]:
     if not found_dev:
         raise Exception(f"No media detected in {src_mode.upper()} slot.")
 
-    part_dev = f"{found_dev}1"
+    part_dev = _card_partition(found_dev)
     if not os.path.exists(os.path.join(HOST_DEV, part_dev)):
         part_dev = found_dev
 
@@ -539,15 +582,40 @@ def mount_card(device: str) -> str:
         from backend import door
 
         try:
-            return str(door.call("copy.mount", device=device))
+            return str(door.call("copy.mount", device=device, offset=local_offset_minutes()))
         except door.DoorError as e:
             raise Exception(f"Failed to mount {os.path.basename(device)}: {e}") from None
-    return _mount_card_here(device)
+    return _mount_card_here(device, local_offset_minutes())
 
 
-def _mount_card_here(device: str) -> str:
+def local_offset_minutes() -> int:
+    """Minutes this server's time zone is ahead of UTC, now (the app keeps the NAS's zone in TZ)."""
+    return int(time.localtime().tm_gmtoff // 60)
+
+
+def _fat_kind(device: str) -> str:
+    """'vfat' or 'exfat' from the card's boot sector; "" for anything else or when unreadable."""
+    try:
+        with open(device, "rb") as f:
+            boot = f.read(512)
+    except OSError:
+        return ""
+    if boot[3:11] == b"EXFAT   ":
+        return "exfat"
+    if boot[82:87] == b"FAT32" or boot[54:59] in (b"FAT12", b"FAT16"):
+        return "vfat"
+    return ""
+
+
+def _mount_card_here(device: str, offset: int = 0) -> str:
     os.makedirs(CARD_MOUNT, exist_ok=True)
-    cmd = ["mount", "-r", "-o", "noatime,nodiratime,nosuid,nodev,noexec", device, CARD_MOUNT]
+    opts = "noatime,nodiratime,nosuid,nodev,noexec"
+    # A camera writes FAT and exFAT file times in its local time without a zone, and Linux reads
+    # them as UTC: a video shot at 17:13 in Sydney landed in the next day's folder. time_offset
+    # tells the driver the zone (exFAT entries that carry their own offset keep it).
+    if offset and _fat_kind(device):
+        opts += f",time_offset={max(-720, min(840, int(offset)))}"
+    cmd = ["mount", "-r", "-o", opts, device, CARD_MOUNT]
     if run_bounded(cmd, timeout=60, capture_output=True).returncode != 0:
         raise Exception(f"Failed to mount {os.path.basename(device)}")
     return CARD_MOUNT
@@ -565,7 +633,7 @@ def unmount_card() -> None:
     run_bounded(["umount", CARD_MOUNT], timeout=60)
 
 
-def card_in_door(device: str) -> str:
+def card_in_door(device: str, offset: int = 0) -> str:
     """The door's side (copy.mount): only a removable or USB drive that is mounted nowhere, read-only."""
     import json
     import stat
@@ -598,7 +666,7 @@ def card_in_door(device: str) -> str:
     mounted = any(m for m in (nodes[0].get("mountpoints") or []) if m) if nodes else True
     if not removable or mounted:
         raise ValueError("only a card or stick that is not open anywhere")
-    return _mount_card_here(real)
+    return _mount_card_here(real, offset)
 
 
 def uncard_in_door() -> bool:
@@ -637,7 +705,7 @@ def _tell_copy_failed(e: BaseException) -> None:
 
 async def _do_copy(cfg):
     src_mode = cfg.get("source", "sd").strip()
-    dst = cfg.get("dest", "/mnt/user/").strip()
+    dst = copy_dest(cfg.get("dest")).strip()
     use_exif = cfg.get("use_exif", True)
     verify_checksum = cfg.get("verify_checksum", True)
 

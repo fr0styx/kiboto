@@ -81,7 +81,9 @@ def import_dest() -> str:
     """Where an import copies photos to: the copy button's destination (NUX-24)."""
     saved = read_json(BUTTON_CFG_FILE, {})
     dest = saved.get("dest") if isinstance(saved, dict) else ""
-    return str(dest or "/mnt/user/")  # the button's own default (api/system.py BUTTON_DEFAULTS)
+    from backend.services.copy_engine import copy_dest
+
+    return copy_dest(dest)  # the button's own default (api/system.py BUTTON_DEFAULTS)
 
 
 def disks() -> list[dict[str, Any]]:

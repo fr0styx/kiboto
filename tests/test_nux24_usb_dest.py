@@ -8,7 +8,9 @@ from backend.services import usb_copy
 def test_the_import_names_its_destination(tmp_path, monkeypatch):
     cfg = tmp_path / "buttons.json"
     monkeypatch.setattr(usb_copy, "BUTTON_CFG_FILE", str(cfg))
-    assert usb_copy.import_dest() == "/mnt/user/"
+    from backend.services.copy_engine import copy_dest
+
+    assert usb_copy.import_dest() == copy_dest("")  # the pool, or /mnt/user where it exists
     cfg.write_text(json.dumps({"dest": "/mnt/user/Photos/"}))
     assert usb_copy.import_dest() == "/mnt/user/Photos/"
     disk = tmp_path / "cam"

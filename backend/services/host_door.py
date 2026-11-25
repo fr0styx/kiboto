@@ -247,10 +247,10 @@ def _pools_look() -> list[dict[str, Any]]:
     return pool_copy.look_in_door(USER)
 
 
-def _card(device: str) -> str:
+def _card(device: str, offset: int) -> str:
     from backend.services import copy_engine
 
-    return copy_engine.card_in_door(device)
+    return copy_engine.card_in_door(device, offset)
 
 
 def _uncard() -> bool:
@@ -560,7 +560,7 @@ OPERATIONS: dict[str, Operation] = {
         _cloud_mount, {"name": TEXT, "remote_path": TEXT, "vfs_cache": TEXT, "read_only": ON}, max_len=1024
     ),
     "cloud.unmount": Operation(_cloud_unmount, {"name": TEXT}, max_len=128),
-    "copy.mount": Operation(_card, {"device": TEXT}, max_len=128),
+    "copy.mount": Operation(_card, {"device": TEXT, "offset": (int,)}, max_len=128),
     "copy.unmount": Operation(_uncard, {}),
     "pools.look": Operation(_pools_look, {}),
     "pools.bring_back": Operation(_pools_bring_back, {}),
