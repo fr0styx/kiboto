@@ -1,0 +1,140 @@
+/* The Hardware panel behind the top-bar button (hardware-drawer.js). It holds the Hardware page's own
+   sections while it is open. Desktop: slides in from the right. Phone: covers the screen. */
+.hwd-backdrop {
+  position: fixed;
+  inset: 0;
+  background: var(--lt-b-000000b2);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  z-index: var(--z-drawer-backdrop, 7000);
+}
+.hwd-backdrop.open {
+  opacity: 1;
+}
+
+.hwd {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: min(760px, 94vw);
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--lt-b-101d1fff);
+  border-left: 1px solid var(--c-border);
+  box-shadow: -10px 0 40px rgba(0, 0, 0, 0.5);
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: var(--z-drawer, 7100);
+}
+.hwd.open {
+  transform: translateX(0);
+}
+
+.hwd-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 22px 10px;
+}
+.hwd-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+.hwd-close {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid var(--c-border);
+  background: transparent;
+  color: inherit;
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.hwd-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0 22px 12px;
+  border-bottom: 1px solid var(--c-border);
+}
+.hwd-tab {
+  min-height: 36px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--c-border);
+  background: transparent;
+  color: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.hwd-tab[aria-selected='true'] {
+  border-color: var(--brand);
+  color: var(--lt-ink-brand, var(--brand));
+  background: rgba(var(--brand-rgb), 0.12);
+}
+.hwd-close:focus-visible,
+.hwd-tab:focus-visible {
+  box-shadow: var(--focus-ring);
+  outline: none;
+  outline-offset: 2px;
+}
+
+.hwd-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 22px 28px;
+  scrollbar-gutter: stable;
+}
+/* the sections keep the page's look; the page shows each by its own display style, the panel by group */
+.hwd-group > .mgmt-tab-pane {
+  display: block;
+}
+.hwd-group > .mgmt-tab-pane.hw-absent {
+  display: none;
+}
+
+.hwd-page-note {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+}
+
+@media (max-width: 768px) {
+  .hwd {
+    width: 100%;
+    border-left: 0;
+    transform: translateY(100%);
+  }
+  .hwd.open {
+    transform: translateY(0);
+  }
+  .hwd-head,
+  .hwd-tabs,
+  .hwd-body {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .hwd-close {
+    width: 44px;
+    height: 44px;
+  }
+  .hwd-tab {
+    min-height: 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hwd,
+  .hwd-backdrop {
+    transition: none;
+  }
+}

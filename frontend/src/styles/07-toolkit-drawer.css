@@ -278,3 +278,10 @@
 #mgmt-sec-hardware .lcd-chip-label { min-width: 0; }
 #mgmt-sec-hardware .custom-slider { height: 24px; }
 #mgmt-sec-hardware .seg-size-btn { min-height: 28px; }
+
+/* Fans the system drives: the Hardware page says so above its (resting) controls (management.js) */
+.hwd-system-note {
+  margin: 0 0 10px;
+  font-size: var(--kb-fs-sm);
+  color: var(--kb-text-muted);
+}

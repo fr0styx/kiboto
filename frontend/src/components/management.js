@@ -584,6 +584,19 @@ export function updateManagementTelemetry(stats) {
   // a section is hidden on a machine without that hardware (Hardware 2: one page, no tabs)
   document.getElementById('mgmt-pane-hardware-led')?.classList.toggle('hw-absent', !hasLed);
   document.getElementById('mgmt-pane-hardware-lcd')?.classList.toggle('hw-absent', !hasLcd);
+  showSystemFans(stats);
+}
+
+/** Fans the system drives (a kernel thermal governor, as on the Zettlab D4): readings only. */
+export function showSystemFans(stats) {
+  const fans = Array.isArray(stats?.fans) ? stats.fans : [];
+  const system = stats?.fan_control?.driver_mode === 'none' && fans.some((rpm) => rpm > 0);
+  const note = document.getElementById('hw-fans-system-note');
+  if (note) note.hidden = !system;
+  for (const sel of ['#mgmt-pane-unraid .profile-switcher-row', '#quiet-night-card', '#mgmt-pane-hardware-fans-slot']) {
+    const el = document.querySelector(sel);
+    if (el) el.inert = system;
+  }
 }
 
 /** The Host tab's cooling mode: shown at once, saved, and put back to the real mode if refused. */

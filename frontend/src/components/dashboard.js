@@ -1103,6 +1103,43 @@ export function updateHardwareTelemetry(s) {
       drawerBtn.style.display = 'none';
     }
   }
+  showHardwareButton(s);
+}
+
+/**
+ * The tabs of the Hardware panel this machine has (hardware-drawer.js TABS): fans Kiboto can see, a
+ * light bar, a front screen, a card reader. The same tests the Hardware page uses to hide a section.
+ */
+export function hardwareSections(s) {
+  const p = s?.peripherals || {};
+  const h = s?.hardware || {};
+  const fans = Array.isArray(s?.fans) ? s.fans : [];
+  const slots = s?.media_slots || {};
+  const out = [];
+  if (fans.length && (s?.fan_control?.driver_mode !== 'none' || fans.some((rpm) => rpm > 0))) out.push('cooling');
+  if (p.led_ready || h.has_mcu || p.led_port) out.push('lights');
+  if (p.fb_active || h.has_lcd || s?.lcd?.page !== undefined) out.push('screen');
+  if (slots.sd?.dev || slots.tf?.dev || h.has_copy_button) out.push('copies');
+  return out;
+}
+
+/** People who may change the fans or the light (the owner role today) see the Hardware button. */
+export function mayChangeHardware(user = /** @type {any} */ (globalThis).kibotoUser) {
+  const scopes = user?.scopes || [];
+  return ['*', 'hardware:*', 'hardware:fans', 'hardware:rgb'].some((need) => scopes.includes(need));
+}
+
+/** The top-bar Hardware button (owner, 25 Nov): only with some hardware, for people who may change it. */
+export function showHardwareButton(s) {
+  const btn = $('hw-drawer-btn');
+  if (!btn) return;
+  btn.hidden = !(mayChangeHardware() && hardwareSections(s).length);
+  if (!btn.dataset.wired) {
+    btn.dataset.wired = '1';
+    btn.addEventListener('click', () =>
+      import('./hardware-drawer.js').then((m) => m.openHardwareDrawer(hardwareSections(state.lastStats || s)))
+    );
+  }
 }
 
 export function switchLcdPage(targetIndex, pushToServer = true) {
