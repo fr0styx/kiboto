@@ -111,8 +111,13 @@ def test_the_first_start_says_on_the_screen_what_happens():
     run = late[late.index("<<'RUN'") : late.index("\nRUN\n")]
     assert "sh /root/kiboto-install.sh" in run and 'exit "$rc"' in run  # a failure fails the service: it tries again
     assert "Kiboto is installing itself" in run and "Kiboto could not install itself" in run
-    assert "restart the machine: it tries again" in run and "agetty --reload" in run
+    assert "restart the machine to try again" in run and "agetty --reload" in run
     assert (
         'install -m 600 /dev/null "$LOG"' in run and "umask" not in run
     )  # the log holds the code; install.sh keeps its own umask
     assert "KIBOTO_ACCEPT_MAIN_BUILDS" in run and ". /etc/kiboto/kiboto.env" not in run  # read, never run
+
+
+def test_the_ssh_generator_does_not_bury_the_code():
+    late = _read("late.sh")
+    assert "ln -sf /dev/null /target/etc/systemd/system-generators/systemd-ssh-generator" in late

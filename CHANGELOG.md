@@ -66,6 +66,8 @@ No more "app data on a spinning disk" notification for virtual machine disks, or
 
 Indexing a scanned PDF no longer adds an ignored error to Diagnostics.
 
+Kiboto OS: the first start no longer shows a ZFS failure or a screenful of virtual-machine messages over the sign-in code, and a failed first start gives advice that fits the reason.
+
 #### Security
 
 On a machine of its own, failed sign-ins to shared folders over the network now count like web sign-ins: 20 in 15 minutes block the address for an hour, and they show under History, Sign-ins.

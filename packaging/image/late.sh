@@ -39,11 +39,17 @@ if [ "$rc" != 0 ]; then
   why=$(grep -v '^[[:space:]]*$' "$LOG" | tail -1 | cut -c1-300)
   show "Kiboto could not install itself.
 $why
-Check the network cable, then restart the machine: it tries again. The whole log is in $LOG."
+Put that right, then restart the machine to try again (if something could not be downloaded, check the network cable). The whole log is in $LOG."
 fi
 exit "$rc"
 RUN
 chmod 700 /target/root/kiboto-firstboot.sh
+
+# systemd's ssh generator looks for a virtual machine socket at every reload; in a VM without one it
+# prints an error line to the screen each time, burying the first-sign-in code. Kiboto does not offer
+# SSH over that socket (plain sshd is unaffected), so the generator is turned off.
+mkdir -p /target/etc/systemd/system-generators
+ln -sf /dev/null /target/etc/systemd/system-generators/systemd-ssh-generator
 
 cat > /target/etc/systemd/system/kiboto-firstboot.service <<'UNIT'
 [Unit]

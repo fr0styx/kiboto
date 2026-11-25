@@ -72,7 +72,7 @@ beside `install.sh`.
 6. When the machine starts again, Kiboto installs itself (about ten minutes, most of it building
    ZFS) and the screen shows the code for the first sign-in.
    If it stops, for example without a network, the screen says why. Put it right and restart the
-   machine: the install tries again. The whole log is in `/var/log/kiboto-install.log`.
+   machine to try again. The whole log is in `/var/log/kiboto-install.log`.
 
 Root may sign in over SSH with that password until you turn SSH off in Kiboto (Network, This
 machine).
