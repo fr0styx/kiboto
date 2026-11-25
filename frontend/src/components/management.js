@@ -587,6 +587,17 @@ export function updateManagementTelemetry(stats) {
   showSystemFans(stats);
 }
 
+/**
+ * What the Hardware page draws when it opens: the fan, light and copy controls in their sections, the
+ * night card, the On/Off rows and the live status. The Hardware panel (hardware-drawer.js) runs it too.
+ */
+export function prepareHardwarePage() {
+  restoreHardwareTabsToManagement();
+  import('./quiet-night-card.js').then((m) => m.renderQuietNightCard()).catch(() => {}); // hardware extra
+  import('./front-panel.js').then((m) => m.renderHardwarePower()).catch(() => {}); // On/Off first (Hardware 2)
+  if (state.lastStats || state.latestStats) updateManagementTelemetry(state.lastStats || state.latestStats);
+}
+
 /** Fans the system drives (a kernel thermal governor, as on the Zettlab D4): readings only. */
 export function showSystemFans(stats) {
   const fans = Array.isArray(stats?.fans) ? stats.fans : [];
@@ -1250,10 +1261,7 @@ export function initManagement() {
     } else {
       if (targetId === 'mgmt-sec-hardware' || targetId === 'mgmt-sec-services') {
         sectionName = t('mgmt.sidebar_hardware', 'Hardware'); // the page's name, as in the sidebar
-        if (typeof restoreHardwareTabsToManagement === 'function') restoreHardwareTabsToManagement();
-        import('./quiet-night-card.js').then((m) => m.renderQuietNightCard()).catch(() => {}); // hardware extra
-        import('./front-panel.js').then((m) => m.renderHardwarePower()).catch(() => {}); // On/Off first (Hardware 2)
-        if (state.lastStats || state.latestStats) updateManagementTelemetry(state.lastStats || state.latestStats);
+        prepareHardwarePage();
       } else if (targetId === 'mgmt-sec-away') {
         sectionName = t('mgmt.sidebar_away', 'Away from home');
       } else if (targetId === 'mgmt-sec-storage') {

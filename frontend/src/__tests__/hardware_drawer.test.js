@@ -9,7 +9,8 @@ vi.mock('../management-dom.js', async (importOriginal) => ({
 
 import { hardwareSections, mayChangeHardware, showHardwareButton } from '../components/dashboard.js';
 import { openHardwareDrawer, closeHardwareDrawer, isOpen } from '../components/hardware-drawer.js';
-import { showSystemFans } from '../components/management.js';
+import { showSystemFans, prepareHardwarePage } from '../components/management.js';
+import { state } from '../state.js';
 
 const ZETTLAB = {
   fans: [0, 0, 3100],
@@ -30,7 +31,7 @@ function page() {
         <section id="quiet-night-card"></section>
       </div>
       <div id="mgmt-pane-hardware-fans" class="mgmt-tab-pane" style="display: block;"><div id="mgmt-pane-hardware-fans-slot"><input id="fan-x"></div></div>
-      <div id="mgmt-pane-hardware-led" class="mgmt-tab-pane" style="display: block;"><button id="led-on">On</button></div>
+      <div id="mgmt-pane-hardware-led" class="mgmt-tab-pane" style="display: none;"><button id="led-on">On</button></div>
       <div id="mgmt-pane-hardware-lcd" class="mgmt-tab-pane hw-absent" style="display: block;"></div>
       <div id="mgmt-pane-hardware-copy" class="mgmt-tab-pane" style="display: block;"></div>
       <div id="mgmt-pane-copy" class="mgmt-tab-pane" style="display: block;"></div>
@@ -95,6 +96,8 @@ describe('The panel', () => {
     expect(document.getElementById('hwd-page-note')).not.toBeNull();
     expect(document.activeElement.id).toBe('hwd-tab-cooling');
     // only the active tab's sections show
+    // a section the page hides inline shows in the panel
+    expect(document.getElementById('mgmt-pane-hardware-led').style.display).toBe('');
     const groups = [...drawer.querySelectorAll('.hwd-group')];
     expect(groups.map((g) => g.hidden)).toEqual([false, true, true]);
 
@@ -102,6 +105,7 @@ describe('The panel', () => {
     expect(isOpen()).toBe(false);
     expect(order()).toEqual(before); // every section back in its place
     expect(document.getElementById('mgmt-pane-unraid').style.display).toBe('block');
+    expect(document.getElementById('mgmt-pane-hardware-led').style.display).toBe('none'); // as the page had it
     expect(document.getElementById('hwd-page-note')).toBeNull();
     expect(document.getElementById('hw-drawer').hidden).toBe(true);
     expect(document.activeElement.id).toBe('elsewhere');
@@ -146,6 +150,16 @@ describe('The panel', () => {
     expect(isOpen()).toBe(false);
   });
 
+  it('fills the sections as the Hardware page does when it opens', async () => {
+    // the fan controls live in the old drawer's markup until the page (or now the panel) places them
+    const fans = document.createElement('div');
+    fans.id = 'tab-fans';
+    document.body.append(fans);
+    await openHardwareDrawer(['cooling']);
+    expect(document.getElementById('mgmt-pane-hardware-fans-slot').contains(fans)).toBe(true);
+    expect(document.getElementById('hw-drawer').contains(fans)).toBe(true);
+  });
+
   it('opens nothing without hardware', async () => {
     expect(await openHardwareDrawer([])).toBe(false);
     expect(isOpen()).toBe(false);
@@ -163,5 +177,34 @@ describe('Fans the system drives', () => {
     showSystemFans({ fans: [0, 0, 3100], fan_control: { driver_mode: 'mmio' } });
     expect(document.getElementById('hw-fans-system-note').hidden).toBe(true);
     expect(document.querySelector('.profile-switcher-row').inert).toBe(false);
+  });
+});
+
+describe('The Hardware page opening (page and panel)', () => {
+  beforeEach(page);
+  afterEach(() => {
+    state.lastStats = null;
+    state.latestStats = null;
+  });
+
+  it('places the controls and draws the live status from the last readings', () => {
+    const fans = document.createElement('div');
+    fans.id = 'tab-fans';
+    document.body.append(fans);
+    state.lastStats = { fans: [2500, 3000], fan_control: { driver_mode: 'none' } };
+    prepareHardwarePage();
+    expect(document.getElementById('mgmt-pane-hardware-fans-slot').contains(fans)).toBe(true);
+    expect(document.getElementById('hw-fans-system-note').hidden).toBe(false); // the D4's fans
+  });
+
+  it('falls back to the latest readings, and draws nothing without any', () => {
+    state.lastStats = null;
+    state.latestStats = { fans: [2500], fan_control: { driver_mode: 'none' } };
+    prepareHardwarePage();
+    expect(document.getElementById('hw-fans-system-note').hidden).toBe(false);
+    page();
+    state.latestStats = null;
+    prepareHardwarePage();
+    expect(document.getElementById('hw-fans-system-note').hidden).toBe(true); // left as the page has it
   });
 });

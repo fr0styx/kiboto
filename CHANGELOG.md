@@ -78,6 +78,8 @@ Card copies: the default folder is the storage pool on every kind of host, a car
 
 Zettlab D4: the front COPY button starts a card copy.
 
+The Hardware panel shows every section with its controls, and the dock no longer covers it on a tablet or phone.
+
 #### Security
 
 On a machine of its own, failed sign-ins to shared folders over the network now count like web sign-ins: 20 in 15 minutes block the address for an hour, and they show under History, Sign-ins.

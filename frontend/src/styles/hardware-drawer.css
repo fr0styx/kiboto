@@ -99,6 +99,23 @@
 .hwd-group > .mgmt-tab-pane.hw-absent {
   display: none;
 }
+/* as on the page: the old drawer's drag handles, fold buttons and card-order lock are not shown */
+.hwd .drag-handle,
+.hwd .btn-minimize,
+.hwd .tab-sub-header,
+.hwd #hw-facts-moved {
+  display: none; /* the facts links lead to other Settings pages: they belong on the page */
+}
+.hwd-group > .mgmt-tab-pane + .mgmt-tab-pane {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--kb-line-7);
+}
+
+/* the dock is drawn above dialogs at narrow widths; the panel covers that part of the screen */
+body.hwd-is-open #os-dock-container {
+  visibility: hidden;
+}
 
 .hwd-page-note {
   display: flex;

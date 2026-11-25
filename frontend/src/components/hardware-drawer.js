@@ -140,6 +140,8 @@ export async function openHardwareDrawer(sections, tab = null) {
   if (!tabs.length) return false;
   if (_open) closeHardwareDrawer();
   await ensureManagementDom();
+  // the sections are filled as when the Hardware page opens (the fan and light controls, the status)
+  await import('./management.js').then((m) => m.prepareHardwarePage()).catch(() => {});
   const drawer = shell();
   const tablist = drawer.querySelector('.hwd-tabs');
   const body = document.getElementById('hwd-panel');
@@ -163,6 +165,7 @@ export async function openHardwareDrawer(sections, tab = null) {
       pane.before(marker);
       moved.push({ pane, marker, display: pane.style.display });
       group.append(pane);
+      pane.style.display = ''; // the page hides a section inline; in the panel its group decides
     }
     body.append(group);
   }
