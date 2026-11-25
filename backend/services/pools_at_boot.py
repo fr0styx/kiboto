@@ -8,15 +8,17 @@ import sys
 
 from backend.hardware.pal import pool_registry
 
-# What bringing pools back runs, as root: nothing else, whatever a record says
-_PROGRAMS = frozenset({"zpool", "mount", "findmnt", "btrfs", "chattr", "blkid"})
+# What bringing pools back runs, as root: nothing else, whatever a record says. The program that
+# runs is this table's own name, never the caller's string.
+_PROGRAMS = {name: name for name in ("zpool", "mount", "findmnt", "btrfs", "chattr", "blkid")}
 
 
 def _run(cmd: list[str]) -> tuple[int, str, str]:
-    if not cmd or cmd[0] not in _PROGRAMS:
+    program = _PROGRAMS.get(cmd[0]) if cmd else None
+    if program is None:
         return 126, "", "not a program for bringing pools back"
     try:
-        res = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
+        res = subprocess.run([program, *cmd[1:]], capture_output=True, text=True, timeout=120)
     except FileNotFoundError:
         return 127, "", f"Command not found: {cmd[0]}"
     except subprocess.TimeoutExpired:

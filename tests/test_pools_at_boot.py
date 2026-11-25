@@ -29,7 +29,7 @@ def test_the_step_says_what_it_did_and_fails_when_a_pool_is_away(monkeypatch, ca
 
 def test_its_command_runner_answers_for_a_missing_or_stuck_tool(monkeypatch):
     assert pools_at_boot._run(["true"])[0] == 126  # not a program for bringing pools back
-    monkeypatch.setattr(pools_at_boot, "_PROGRAMS", frozenset({"no-such-tool-kb", "mount"}))
+    monkeypatch.setattr(pools_at_boot, "_PROGRAMS", {"no-such-tool-kb": "no-such-tool-kb", "mount": "mount"})
     assert pools_at_boot._run(["no-such-tool-kb"])[0] == 127
 
     def stuck(cmd, **kw):
@@ -179,3 +179,14 @@ def test_a_machine_on_ifupdown_moves_to_networkd_with_a_timed_way_back():
     assert sh.count("wait_up; network_to_networkd") == 2  # after both kinds of install
     assert 'ifup "$iface"' in step  # the way back brings an allow-hotplug port up again
     assert step.index("resolv.conf.kiboto-before") < step.index("apt-get install")  # kept before resolved replaces it
+
+
+def test_the_runner_runs_its_own_program_name(monkeypatch):
+    ran = []
+    monkeypatch.setattr(
+        pools_at_boot.subprocess,
+        "run",
+        lambda cmd, **kw: ran.append(cmd) or subprocess.CompletedProcess(cmd, 0, " ok \n", ""),
+    )
+    assert pools_at_boot._run(["findmnt", "-rno", "UUID"]) == (0, "ok", "")
+    assert ran == [["findmnt", "-rno", "UUID"]] and ran[0][0] is pools_at_boot._PROGRAMS["findmnt"]

@@ -76,6 +76,8 @@ Zettlab D4 and other ARM boards: fans the kernel already controls are left to it
 
 Card copies: the default folder is the storage pool on every kind of host, a card formatted on a Mac copies from its photos partition, videos land in the right date folder, and only photos, videos and their side files are copied. The Generate button for API tokens works again.
 
+Zettlab D4: the front COPY button starts a card copy.
+
 #### Security
 
 On a machine of its own, failed sign-ins to shared folders over the network now count like web sign-ins: 20 in 15 minutes block the address for an hour, and they show under History, Sign-ins.
