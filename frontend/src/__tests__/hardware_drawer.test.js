@@ -274,3 +274,24 @@ describe('The panel header', () => {
     expect(document.getElementById('hwd-desc').textContent).toBe('');
   });
 });
+
+describe('One title per tab', () => {
+  beforeEach(page);
+  afterEach(() => closeHardwareDrawer());
+
+  it('rests the first section heading while in the panel, even one shown inline, and gives it back', async () => {
+    const intro = document.createElement('div');
+    intro.className = 'mgmt-card-intro';
+    intro.style.display = 'flex';
+    intro.innerHTML = '<div class="mgmt-card-intro-desc">The light bar.</div>';
+    document.getElementById('mgmt-pane-hardware-led').prepend(intro);
+    const second = document.createElement('div');
+    second.className = 'mgmt-card-intro';
+    document.getElementById('mgmt-pane-copy').prepend(second); // a later section keeps its heading
+    await openHardwareDrawer(['lights', 'copies']);
+    expect(intro.style.display).toBe('none');
+    expect(second.style.display).toBe('');
+    closeHardwareDrawer();
+    expect(intro.style.display).toBe('flex');
+  });
+});

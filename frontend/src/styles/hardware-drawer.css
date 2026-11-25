@@ -81,10 +81,6 @@
   padding: 0 22px 28px;
   scrollbar-gutter: stable;
 }
-/* the header names the tab: its first section's own heading would say it twice */
-.hwd-group > .mgmt-tab-pane:first-child > .mgmt-card-intro {
-  display: none;
-}
 /* the sections keep the page's look; the page shows each by its own display style, the panel by group */
 .hwd-group > .mgmt-tab-pane {
   display: block;

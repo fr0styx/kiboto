@@ -181,9 +181,12 @@ export async function openHardwareDrawer(sections, tab = null) {
       if (!pane) continue;
       const marker = document.createComment(`hw-drawer: ${paneId}`);
       pane.before(marker);
-      moved.push({ pane, marker, display: pane.style.display });
+      // the header names the tab: its first section's own heading (some set display inline) rests
+      const intro = paneId === TABS[id].panes[0] ? pane.querySelector(':scope > .mgmt-card-intro') : null;
+      moved.push({ pane, marker, display: pane.style.display, intro, introDisplay: intro ? intro.style.display : '' });
       group.append(pane);
       pane.style.display = ''; // the page hides a section inline; in the panel its group decides
+      if (intro) intro.style.display = 'none';
     }
     body.append(group);
   }
@@ -209,9 +212,10 @@ export function closeHardwareDrawer() {
   const { moved, returnFocus } = _open;
   _open = null;
   document.removeEventListener('keydown', onKey, true);
-  for (const { pane, marker, display } of moved) {
+  for (const { pane, marker, display, intro, introDisplay } of moved) {
     marker.replaceWith(pane);
     pane.style.display = display;
+    if (intro) intro.style.display = introDisplay;
   }
   document.getElementById('hwd-page-note')?.remove();
   const drawer = document.getElementById('hw-drawer');
