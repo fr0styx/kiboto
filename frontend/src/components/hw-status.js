@@ -8,8 +8,9 @@ import { t } from '../i18n.js';
 import { modeName } from './fan-modes.js';
 
 const FULL_PWM = 183; // backend/config.py FAN_MAX_PWM
-// [warm, too hot] in °C; too hot is where Kiboto runs the fans at full speed
-const LIMITS = { cpu: [70, 80], hdd: [45, 55], nvme: [60, 75] };
+// [warm, too hot] in °C; too hot is where Kiboto runs the fans at full speed (drives: the safety
+// floor, backend/hardware/fans.py FLOOR_START_C and FLOOR_FULL_C)
+const LIMITS = { cpu: [70, 80], hdd: [45, 52], nvme: [60, 75] };
 const ORDER = { ok: 0, warm: 1, hot: 2 };
 
 function levelOf(temp, [warm, hot]) {
@@ -32,10 +33,15 @@ function tempRow(id, label, temp, limits) {
   };
 }
 
-/** The hard drives that are awake, and whether there are hard drives at all. */
+/** The hard drives that are awake (with a reading, and without one), and whether there are any. */
 function spinning(stats) {
   const hdd = (stats?.disks || []).filter((d) => String(d.dev || '').startsWith('sd'));
-  return { hdd, awake: hdd.filter((d) => !d.standby && typeof d.temp === 'number') };
+  const up = hdd.filter((d) => !d.standby);
+  return {
+    hdd,
+    awake: up.filter((d) => typeof d.temp === 'number'),
+    unread: up.filter((d) => typeof d.temp !== 'number'),
+  };
 }
 
 /**
@@ -48,10 +54,27 @@ export function coolingStatus(stats) {
   const rows = [];
   const cpu = stats.cpu?.temp;
   if (typeof cpu === 'number') rows.push(tempRow('cpu', t('hw.st_cpu', 'Processor'), cpu, LIMITS.cpu));
-  const { hdd, awake } = spinning(stats);
+  const { hdd, awake, unread } = spinning(stats);
   if (awake.length) {
     const hottest = Math.max(...awake.map((d) => d.temp));
-    rows.push(tempRow('drives', t('hw.st_drives', 'Drives'), hottest, LIMITS.hdd));
+    const row = tempRow('drives', t('hw.st_drives', 'Drives'), hottest, LIMITS.hdd);
+    if (unread.length) {
+      // a spinning drive without a reading counts as hot after 3 minutes (fan_control._floor_temp)
+      row.value = t('hw.st_temp_unread', '{temp} °C · {word} · {n} without a reading', {
+        temp: Math.round(hottest),
+        word: word(row.level),
+        n: unread.length,
+      });
+      if (row.level === 'ok') row.level = 'warm';
+    }
+    rows.push(row);
+  } else if (unread.length) {
+    rows.push({
+      id: 'drives',
+      label: t('hw.st_drives', 'Drives'),
+      level: 'warm',
+      value: t('hw.st_unread', 'no temperature reading'),
+    });
   } else if (hdd.length) {
     rows.push({ id: 'drives', label: t('hw.st_drives', 'Drives'), level: 'ok', value: t('hw.st_asleep', 'asleep') });
   }
@@ -67,6 +90,8 @@ export function coolingStatus(stats) {
       value = t('hw.st_fans_full', 'full speed: {what} is hot', {
         what: hot.id === 'cpu' ? t('hw.st_what_cpu', 'the processor') : t('hw.st_what_drive', 'a drive'),
       });
+    else if (pwm >= FULL_PWM && unread.length)
+      value = t('hw.st_fans_unread', "full speed: a drive's temperature can't be read");
     else
       value = t('hw.st_fans_speed', '{pct} % · {rpm} rpm', {
         pct: Math.round((pwm / FULL_PWM) * 100),

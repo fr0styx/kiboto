@@ -86,6 +86,8 @@ Hardware is one page: cooling, fans, lights, front screen and card copies one un
 
 While a hard drive spins, the disk fans never run below a safety floor: lowest speed up to 45 °C, full speed at 52 °C, in every fan mode and under your own curve. Fans can still stop while every drive sleeps (Zero RPM).
 
+The Hardware page's Cooling list says when a spinning drive has no temperature reading and when that runs the fans at full speed. Drives show as too hot from 52 °C, where the fans reach full speed.
+
 ## v2.0.6 (2026-11-23)
 ### 🖥️ Kiboto on a machine of its own (preview), with its settings kept safe on every pool
 

@@ -70,4 +70,24 @@ describe('cooling in plain words (Hardware 2, the status sentence)', () => {
     document.body.innerHTML = '';
     renderCoolingStatus(base()); // no list on the page: nothing happens
   });
+
+  it('a spinning drive without a reading is named, and so is the full speed it causes', () => {
+    const none = { dev: 'sdc', temp: null, standby: false };
+    const mixed = coolingStatus(base({ disks: [awake(38), none] }));
+    const row = mixed.rows.find((r) => r.id === 'drives');
+    expect(row.value).toBe('38 °C · fine · 1 without a reading');
+    expect(row.level).toBe('warm');
+    const only = coolingStatus(base({ disks: [none], fan_control: { driver_mode: 'mmio', zone1_pwm: 183 } }));
+    expect(only.rows.find((r) => r.id === 'drives').value).toBe('no temperature reading');
+    expect(only.rows.find((r) => r.id === 'fans').value).toBe("full speed: a drive's temperature can't be read");
+  });
+
+  it('drives count as too hot from 52 °C, where the safety floor runs the fans at full speed', () => {
+    expect(coolingStatus(base({ disks: [awake(51)] })).rows.find((r) => r.id === 'drives').value).toBe(
+      '51 °C · running warm'
+    );
+    expect(coolingStatus(base({ disks: [awake(52)] })).rows.find((r) => r.id === 'drives').value).toBe(
+      '52 °C · too hot'
+    );
+  });
 });
