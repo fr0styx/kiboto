@@ -1,5 +1,5 @@
 """
-Unraid companion mode (D5): read the array through the Unraid API (Unraid 7, GraphQL)
+The Unraid API link (D5): read the array through the Unraid API (Unraid 7, GraphQL)
 and post Kiboto alerts into Unraid's notification centre.
 
 Set UNRAID_API_URL and UNRAID_API_KEY. With HTTPS on (Unraid's default), the URL is

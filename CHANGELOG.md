@@ -168,6 +168,10 @@ The opt-in health report (off by default) now also says which edition is running
 
 Firewall: the choice "only devices at home" or "any address" is gone. The home network always reaches everything; the ticks say what the outside may reach, and nothing is ticked at first.
 
+The compose files, the Unraid templates and the guides now use the image name `ghcr.io/fr0styx/kiboto`. The old name keeps working until Kiboto 2.2; where Unraid or your own Compose file does the updating, change the image name there before then.
+
+The guides name the two editions, Kiboto Companion (the container) and Kiboto OS, and call the connection to Unraid's or TrueNAS's API "the API link" instead of "companion mode".
+
 ## v2.0.6 (2026-11-23)
 ### 🖥️ Kiboto on a machine of its own (preview), with its settings kept safe on every pool
 

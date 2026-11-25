@@ -587,7 +587,7 @@ def _dispatch_shared(cfg: dict[str, Any], title: str, message: str, level: str, 
         return {"dispatched": any(results.values()), "channels": results}
 
     # 1. Unraid native notification: the local notify script, or the Unraid API when
-    #    Kiboto runs elsewhere (companion mode, D5)
+    #    Kiboto runs elsewhere (the Unraid API link, D5)
     if cfg.get("unraid_notify", True):
         unraid_script = _find_unraid_notify()
         if unraid_script:

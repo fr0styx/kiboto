@@ -70881,7 +70881,7 @@
   },
   "/api/v1/storage/unraid-api/status": {
    "get": {
-    "description": "Array, disks, shares and parity check from the Unraid API (companion mode, D5).",
+    "description": "Array, disks, shares and parity check from the Unraid API (the API link, D5).",
     "operationId": "unraid_api_status_api_v1_storage_unraid_api_status_get",
     "responses": {
      "200": {

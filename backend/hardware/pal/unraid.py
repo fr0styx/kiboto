@@ -56,7 +56,7 @@ def _flat_ini(path: str) -> dict[str, str]:
 class UnraidStorageAdapter(StoragePlatformAdapter):
     """
     Unraid OS Storage Platform Adapter.
-    Operates in 100% Observer / Companion Mode.
+    Operates in 100% observer mode: Unraid runs the array.
     Audits array status, parity protection, cache pools, and user shares via emhttp state files.
     Strictly forbids array tampering or destructive block operations.
     """

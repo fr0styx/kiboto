@@ -1,5 +1,5 @@
 """
-TrueNAS companion mode (D5): talk to the TrueNAS middleware with an API key instead of
+The TrueNAS API link (D5): talk to the TrueNAS middleware with an API key instead of
 only reading `zpool`.
 
 Set TRUENAS_URL (for example https://truenas.local) and TRUENAS_API_KEY (TrueNAS:

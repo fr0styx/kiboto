@@ -24,7 +24,7 @@ Add a second container from the template `unraid/kiboto-fan-watchdog.xml` (Docke
 docker run -d --name kiboto-fan-watchdog --restart unless-stopped --no-healthcheck --network none \
   --cap-add SYS_RAWIO -v /sys:/host/sys:rw -v /dev:/host/dev:rw --device-cgroup-rule='c 1:1 rwm' \
   -e HOST_SYS=/host/sys -e HOST_DEV=/host/dev -e DATA_DIR=/tmp/kiboto-watchdog \
-  --memory 128m ghcr.io/fr0styx/zettnas-toolkit:latest python3 -m backend.fan_watchdog
+  --memory 128m ghcr.io/fr0styx/kiboto:latest python3 -m backend.fan_watchdog
 ```
 
 After a reboot or an array stop:

@@ -892,7 +892,7 @@ request and response schemas.
 | `GET` | `/api/v1/storage/smart/schedule` | any of `storage:read`, `system:view` | Returns current SMART test schedule, intervals, and last execution timestamps |
 | `POST` | `/api/v1/storage/smart/schedule` | `storage:admin` | Configures automated Short and Extended SMART test schedules |
 | `GET` | `/api/v1/storage/time-machine` | `shares:manage` | Shares R3: the folders Macs back up to, with their size limits, where Kiboto runs the shares |
-| `GET` | `/api/v1/storage/unraid-api/status` | any of `storage:read`, `system:view` | Array, disks, shares and parity check from the Unraid API (companion mode, D5) |
+| `GET` | `/api/v1/storage/unraid-api/status` | any of `storage:read`, `system:view` | Array, disks, shares and parity check from the Unraid API (the API link, D5) |
 
 ### System
 

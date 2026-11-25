@@ -26,6 +26,18 @@ This document provides complete, step-by-step instructions for installing and ru
 
 ---
 
+## Which Kiboto this guide installs
+
+Kiboto comes in two editions, and each release carries both.
+
+- **Kiboto Companion** is the container. It runs beside the system you already have (Unraid, TrueNAS
+  SCALE, Proxmox, FygoOS, UGOS, or any Linux with Docker), and that system keeps running the drives
+  and the machine. Options A to G below install it.
+- **Kiboto OS** makes Kiboto the system of the machine itself. It is in beta: see option H and
+  [KIBOTO_OS.md](KIBOTO_OS.md).
+
+What each can do today is in the [feature list](FEATURES.md).
+
 ## Prerequisites & System Requirements
 
 - **Architecture**: `linux/amd64` (x86_64) or `linux/arm64` (aarch64).
@@ -34,7 +46,7 @@ This document provides complete, step-by-step instructions for installing and ru
 - **Virtualization (Optional for VMs)**: Intel VT-x or AMD-V hardware virtualization enabled in host BIOS/UEFI with `/dev/kvm` accessible.
 - **Port Availability**: Port `8082` (Web Desktop & REST API) and optionally Port `8084` (WebDAV Server).
 
-### Unraid companion mode
+### Linking to the Unraid API
 
 Kiboto reads Unraid's status files when it runs on the Unraid box itself. When it runs
 elsewhere (or to post alerts into Unraid's bell), point it at the Unraid API (Unraid 7):
@@ -52,7 +64,7 @@ reads the array, disks (including which are spun down), shares and parity-check 
 and posts its alerts to Unraid's notification centre. It never starts, stops or changes
 the array through the API.
 
-### TrueNAS companion mode
+### Linking to the TrueNAS API
 
 On TrueNAS SCALE, set `TRUENAS_URL` (for example `https://truenas.local`) and
 `TRUENAS_API_KEY` (TrueNAS: user menu → API Keys) in the container environment. Kiboto
@@ -65,10 +77,10 @@ belongs to; TrueNAS 28 needs it to sign in, and earlier versions accept it too.
 
 ### Image variants
 
-The image is `ghcr.io/fr0styx/kiboto`, published under its name before the rebrand,
-`ghcr.io/fr0styx/zettnas-toolkit`, as well until Kiboto 2.2 (the same image). The examples below use the
-old name for `:latest` until 2.0.0 reaches the stable channel (17 November 2026); every other tag is under
-both names already.
+The image is `ghcr.io/fr0styx/kiboto`. Its name before the rebrand, `ghcr.io/fr0styx/zettnas-toolkit`,
+carries the same signed images until Kiboto 2.2 and stops then. An install that still uses the old name
+is moved to the new one by Kiboto's own updater. Where the system beside Kiboto does the updating
+(Unraid's Docker page, a Compose file you keep), change the image name there before 2.2.
 
 | Tag | Size | Includes |
 | --- | ---- | -------- |
@@ -154,7 +166,7 @@ Recommended for custom DIY homelab builds (Jonsbo N1/N2/N3/N4, Fractal Node 804,
    ```yaml
    services:
      kiboto:
-       image: ghcr.io/fr0styx/zettnas-toolkit:latest
+       image: ghcr.io/fr0styx/kiboto:latest
        container_name: kiboto
        restart: unless-stopped
        network_mode: bridge
@@ -237,7 +249,7 @@ FygoOS provides a modern, turnkey private cloud OS with native Docker support.
    ```yaml
    services:
      kiboto:
-       image: ghcr.io/fr0styx/zettnas-toolkit:latest
+       image: ghcr.io/fr0styx/kiboto:latest
        container_name: kiboto
        restart: unless-stopped
        ports:
@@ -293,7 +305,7 @@ TrueNAS SCALE (Dragonfish & Electric Eel) supports custom Docker Compose applica
 
 1. In the TrueNAS WebUI, navigate to **Apps** → **Discover Apps** → **Custom App** (or Docker Compose).
 2. Configure App Name: `kiboto`.
-3. Image Repository: `ghcr.io/fr0styx/zettnas-toolkit`, Tag: `latest`.
+3. Image Repository: `ghcr.io/fr0styx/kiboto`, Tag: `latest`.
 4. Add Host Paths:
    - `/mnt/tank` → `/mnt/storage`
    - `/mnt/tank/appdata/kiboto/data` → `/app/data`
@@ -316,7 +328,7 @@ For **UGOS (Ugreen NAS OS)**, **FygoOS**, **ZettOS**, or **Proxmox VE**, Kiboto 
    ```yaml
    services:
      kiboto:
-       image: ghcr.io/fr0styx/zettnas-toolkit:latest
+       image: ghcr.io/fr0styx/kiboto:latest
        container_name: kiboto
        restart: unless-stopped
        ports:
@@ -395,7 +407,7 @@ docker run -d \
   --device-cgroup-rule='b 259:* rwm' \
   --device-cgroup-rule='b 9:* rwm' \
   --device-cgroup-rule='b 253:* rwm' \
-  ghcr.io/fr0styx/zettnas-toolkit:latest
+  ghcr.io/fr0styx/kiboto:latest
 ```
 
 ---
@@ -591,7 +603,7 @@ docker compose up -d
 ```
 
 ### Upgrading via Unraid
-In the Unraid WebUI, navigate to **Docker**, click **Check for Updates**, and click **Update** next to `kiboto` (`zettnas-toolkit` on an install made before the rebrand: it keeps its name and updates the same way).
+In the Unraid WebUI, navigate to **Docker**, click **Check for Updates**, and click **Update** next to `kiboto` (`zettnas-toolkit` on an install made before the rebrand: it keeps its name and updates the same way). On such an install, edit the container once and change **Repository** to `ghcr.io/fr0styx/kiboto:latest`: the old image name stops with Kiboto 2.2, and Unraid would then find no more updates.
 
 ### Snapshots, pinning a version and going back by hand
 - **Every update is snapshotted.** Before the data is touched, Kiboto copies its settings and databases (not the AI index) to `data/backups/pre-update/<date>-from-<version+commit>/`. The in-app updater does this when it stops the old version; an update from the Unraid Docker tab or `docker compose pull` gets one when the new version first starts. The newest three are kept, plus the newest one taken from a Stable build.

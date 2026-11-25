@@ -2,7 +2,7 @@
 <Container version="2">
   <Name>kiboto-fan-watchdog</Name>
   <!-- ghcr.io/fr0styx/kiboto gets :latest when 2.0.0 reaches stable; until then the old name carries it -->
-  <Repository>ghcr.io/fr0styx/zettnas-toolkit:latest</Repository>
+  <Repository>ghcr.io/fr0styx/kiboto:latest</Repository>
   <Registry>https://github.com/fr0styx/kiboto/pkgs/container/kiboto</Registry>
   <Network>none</Network>
   <Privileged>false</Privileged>

@@ -14,10 +14,11 @@
   <img src="docs/img/ui-screenshot.png" width="90%" alt="The Kiboto web desktop">
 </div>
 
-Kiboto is an operating system for a home NAS. Today it runs as one container on the system you already
-have (Unraid, Debian, Ubuntu, TrueNAS SCALE, Proxmox, FygoOS or plain Docker); full Kiboto OS images
-for NAS boxes are on the way. It works on any NAS or homelab server, and drives the front screen, the
-fans and the light bar on Zettlab and Aoostar boxes.
+Kiboto is an operating system for a home NAS, in two editions. **Kiboto Companion** is one container on
+the system you already have (Unraid, Debian, Ubuntu, TrueNAS SCALE, Proxmox, FygoOS or plain Docker).
+**Kiboto OS**, in beta, makes Kiboto the system of the machine itself, from a USB stick. It works on any
+NAS or homelab server, and drives the front screen, the fans and the light bar on Zettlab and Aoostar
+boxes. [What each edition can do](docs/FEATURES.md).
 
 <img src="docs/img/kib-found.svg" width="64" align="right" alt="Kib">
 
@@ -63,6 +64,8 @@ is written down and tested ([safe AI](docs/SAFE_AI.md)).
 
 ## Quick start
 
+This installs Kiboto Companion, the container. For Kiboto OS see [KIBOTO_OS.md](docs/KIBOTO_OS.md).
+
 ```bash
 mkdir -p kiboto && cd kiboto
 curl -fsSLO https://raw.githubusercontent.com/fr0styx/kiboto/main/docker-compose.linux.yml
@@ -80,9 +83,10 @@ before the rename updates in place and keeps its settings.
 
 ## Images and updates
 
-The image is `ghcr.io/fr0styx/kiboto`. Until 2.0.0 turns stable on 17 November its `latest` tag is
-published under the old name, `ghcr.io/fr0styx/zettnas-toolkit`, which the compose files and the
-Unraid template still use; both names carry the same signed images until Kiboto 2.2.
+The image is `ghcr.io/fr0styx/kiboto`. Its name before the rebrand, `ghcr.io/fr0styx/zettnas-toolkit`,
+carries the same signed images until Kiboto 2.2 and stops then; Kiboto's own updater moves an install
+to the new name, and the [installation guide](docs/INSTALLATION.md#image-variants) says what to change
+where Unraid or a Compose file does the updating.
 
 | Image tag | What it is |
 |---|---|
