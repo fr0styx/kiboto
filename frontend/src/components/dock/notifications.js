@@ -2,6 +2,7 @@
 // Part of dock.js, split out by ARC-5.
 
 import { eventView, eventWhen, needsALook } from '../../event-view.js';
+import { setAppBadge } from '../../pwa.js';
 import { api } from '../../api.js';
 import { ROUTES } from '../../router.js';
 import { escapeHtml } from '../../utils.js';
@@ -206,6 +207,7 @@ export function updateNotificationBadge() {
   if (!badge || !state.latestStats || !state.latestStats.events) return;
 
   const unreadCount = bellEvents().filter((e) => !isEventChecked(e)).length;
+  setAppBadge(unreadCount); // the installed app's icon shows it too (COMP-02)
 
   if (unreadCount > 0) {
     badge.textContent = unreadCount > 99 ? '99+' : String(unreadCount);

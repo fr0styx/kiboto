@@ -68,6 +68,8 @@ Appearance: a By sunset mode (light by day where the NAS is), Match my wallpaper
 
 Hardware opens with what the temperatures and fans are doing now, in words, and the Overview shows a Cooling tile on machines whose fans Kiboto drives.
 
+The installed app: long-press its icon for Files, Ask Kib, Drive health and Settings; the icon shows how many notifications are unread; when Kiboto can't be reached, a page in your language says so and opens Kiboto again by itself once it answers.
+
 #### Changes
 
 On a machine of its own, a separate system service (the host door) now changes the machine's name, time zone, clock and SSH setting for Kiboto, from a fixed list of operations: the first step towards Kiboto's web service running without full system rights (docs/adr/0006-web-without-root.md).
