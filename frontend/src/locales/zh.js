@@ -7801,7 +7801,7 @@ export default {
   "hw.sec_lights_desc": "前面板灯条：开关、亮度、颜色以及何时闪烁。",
   "hw.sec_screen": "前面板屏幕",
   "hw.sec_screen_desc": "前面的小屏幕：亮度、夜间调暗以及显示的内容。",
-  "hw.safety_line": "无论哪种模式，硬盘达到 55 °C，或处理器在 80 °C 持续六秒，所有风扇都会全速运转。",
+  "hw.safety_line": "无论哪种模式，只要有硬盘达到 52 °C，或处理器接近其自身极限持续六秒，所有风扇都会全速运转。",
   "hw.fans_advanced": "高级：曲线、处理器风扇、固定转速和噪音测试",
   "fan.zero_rpm_label": "所有硬盘休眠时停止硬盘风扇",
   "fan.presets_label": "已保存的曲线",

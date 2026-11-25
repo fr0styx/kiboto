@@ -7801,7 +7801,7 @@ export default {
   "hw.sec_lights_desc": "La barre lumineuse en façade : allumée ou éteinte, luminosité, couleur et quand elle clignote.",
   "hw.sec_screen": "Écran en façade",
   "hw.sec_screen_desc": "Le petit écran en façade : luminosité, atténuation la nuit et ce qu'il affiche.",
-  "hw.safety_line": "Quel que soit le mode, un disque à 55 °C, ou le processeur à 80 °C pendant six secondes, fait tourner tous les ventilateurs à pleine vitesse.",
+  "hw.safety_line": "Quel que soit le mode, un disque à 52 °C, ou le processeur proche de sa propre limite pendant six secondes, fait tourner tous les ventilateurs à pleine vitesse.",
   "hw.fans_advanced": "Avancé : la courbe, le ventilateur du processeur, une vitesse fixe et le test de bruit",
   "fan.zero_rpm_label": "Arrêter les ventilateurs des disques pendant que tous les disques dorment",
   "fan.presets_label": "Courbes enregistrées",

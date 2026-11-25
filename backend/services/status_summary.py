@@ -175,10 +175,10 @@ def _nothing_switches_off() -> bool:
 
 def _hot_parts() -> dict[str, Any]:
     """What is too hot right now, from the last readings the fans used (no drive is asked): awake
-    drives at their limit (55 °C, NVMe 75 °C) and the processor at 80 °C (Hardware 3, the status
+    drives at their limit (55 °C, NVMe 75 °C) and the processor near its own limit (Hardware 3, the status
     sentence: "too hot" said nothing about what)."""
     from backend.config import HDD_CRITICAL_TEMP, NVME_CRITICAL_TEMP
-    from backend.services.fan_control import CPU_CRITICAL_C
+    from backend.services.fan_control import cpu_critical_c
     from backend.state import Z_STATE
 
     stats = getattr(Z_STATE, "cached_stats", None) or {}
@@ -191,7 +191,7 @@ def _hot_parts() -> dict[str, Any]:
         if temp >= (NVME_CRITICAL_TEMP if nvme else HDD_CRITICAL_TEMP):
             drives.append({"name": str(d.get("name") or d.get("dev") or "?"), "temp": round(temp)})
     cpu = (stats.get("cpu") or {}).get("temp")
-    return {"drives": drives, "cpu": round(cpu) if cpu is not None and cpu >= CPU_CRITICAL_C else None}
+    return {"drives": drives, "cpu": round(cpu) if cpu is not None and cpu >= cpu_critical_c() else None}
 
 
 def _power() -> list[dict[str, Any]]:

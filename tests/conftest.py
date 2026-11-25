@@ -272,6 +272,9 @@ def _never_the_real_machine(monkeypatch):
     from backend.services import native_update
 
     monkeypatch.setattr(native_update, "UNIT_DIR", os.path.join(ROOT, "no-such-units"))  # not the machine's systemd
+    from backend.hardware import cpu
+
+    monkeypatch.setattr(cpu, "read_cpu_limit", lambda: None)  # not the machine's processor: 80 °C everywhere
     start = subprocess.Popen._execute_child  # type: ignore[attr-defined]  # where every command starts
 
     def _guarded(self, args, *a, **k):

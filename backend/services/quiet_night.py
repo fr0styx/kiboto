@@ -3,7 +3,7 @@
 Between two times the automatic fan curve reads the drives as a few degrees cooler than they are, so
 the fans turn a little slower while the household sleeps. The shift fades out between 45 and 50 °C:
 a warm drive gets the normal curve. Nothing else changes: the full-speed override at 55 °C (NVMe 75 °C,
-processor 80 °C), the NVMe and processor fans, fan stop and the fixed modes are as they were. It only
+the processor near its limit), the NVMe and processor fans, fan stop and the fixed modes are as they were. It only
 acts in the Automatic mode, and only once turned on.
 """
 

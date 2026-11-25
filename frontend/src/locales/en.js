@@ -7801,7 +7801,7 @@ export default {
   "hw.sec_lights_desc": "The light bar on the front: on or off, brightness, colour and when it flashes.",
   "hw.sec_screen": "Front screen",
   "hw.sec_screen_desc": "The small screen on the front: brightness, dimming at night and what it shows.",
-  "hw.safety_line": "Whatever the mode, a drive at 55 °C, or the processor at 80 °C for six seconds, runs every fan at full speed.",
+  "hw.safety_line": "Whatever the mode, a drive at 52 °C, or the processor near its own limit for six seconds, runs every fan at full speed.",
   "hw.fans_advanced": "Advanced: the curve, the processor fan, a fixed speed and the noise test",
   "fan.zero_rpm_label": "Stop the disk fans while every drive sleeps",
   "fan.presets_label": "Saved curves",

@@ -83,7 +83,20 @@ def fan_settings():
     }
 
 
-CPU_CRITICAL_C = 80
+CPU_CRITICAL_C = 80  # when the processor reports no limit of its own
+CPU_LIMIT_MARGIN_C = 15  # otherwise critical this far under its limit (owner, 25 Nov 2026): 95 °C at 110
+
+
+def cpu_critical_c() -> float:
+    """Where the processor counts as critical: 15 °C under the limit it reports, else 80 °C. A
+    Core Ultra 5 125H is made for 110 °C and idles near 76: at 80 °C every disk fan went to full
+    speed and an alert was raised 72 times in 30 hours."""
+    from backend.hardware.cpu import read_cpu_limit
+
+    limit = read_cpu_limit()
+    return limit - CPU_LIMIT_MARGIN_C if limit else CPU_CRITICAL_C
+
+
 # the processor counts as critical once it has stayed at 80 °C this long: a spike of a second or two
 # (a busy moment) had sent the disk fans to full speed for their whole 30-second hold (fan run, 24 Nov)
 CPU_SUSTAIN_SECS = 6
@@ -111,7 +124,7 @@ def _drive_curve_temp(temp, profile):
 def _cpu_critical(cpu_temp, active) -> bool:
     """The processor at its critical temperature for CPU_SUSTAIN_SECS (at once while the override
     already runs: it then ends only CPU_RELEASE_C under it). A drive at its limit needs no wait."""
-    if cpu_temp is None or cpu_temp < CPU_CRITICAL_C - (CPU_RELEASE_C if active else 0):
+    if cpu_temp is None or cpu_temp < cpu_critical_c() - (CPU_RELEASE_C if active else 0):
         Z_STATE.cpu_hot_since = 0.0
         return False
     now = time.time()
@@ -194,7 +207,7 @@ def _critical_override(cpu_temp, disks) -> bool:
                 )
             )
         if cpu_critical:
-            reasons.append(f"CPU ({cpu_temp}°C >= {CPU_CRITICAL_C}°C)")
+            reasons.append(f"CPU ({cpu_temp}°C >= {round(cpu_critical_c())}°C)")
         names = "; ".join(reasons)
         now = time.time()
         if now - Z_STATE.critical_alert_at >= CRITICAL_ALERT_GAP_SECS:
@@ -351,7 +364,7 @@ def run_fan_control(
     else:
         raw_pwm3 = 85
 
-    # Safety override: a disk at its critical temperature or the CPU at 80 °C forces fans to 100%
+    # Safety override: a disk at its critical temperature or the CPU near its own limit forces fans to 100%
     critical_override = _critical_override(cpu_temp, disks)
 
     # Continuous Anti-Flutter Gating for Zero RPM

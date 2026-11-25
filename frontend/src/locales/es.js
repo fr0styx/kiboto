@@ -7801,7 +7801,7 @@ export default {
   "hw.sec_lights_desc": "La barra de luz delantera: encendida o apagada, brillo, color y cuándo parpadea.",
   "hw.sec_screen": "Pantalla frontal",
   "hw.sec_screen_desc": "La pequeña pantalla delantera: brillo, atenuación por la noche y lo que muestra.",
-  "hw.safety_line": "Sea cual sea el modo, un disco a 55 °C, o el procesador a 80 °C durante seis segundos, pone todos los ventiladores a máxima velocidad.",
+  "hw.safety_line": "En cualquier modo, un disco a 52 °C, o el procesador cerca de su propio límite durante seis segundos, pone todos los ventiladores a toda velocidad.",
   "hw.fans_advanced": "Avanzado: la curva, el ventilador del procesador, una velocidad fija y la prueba de ruido",
   "fan.zero_rpm_label": "Detener los ventiladores de los discos mientras todos los discos duermen",
   "fan.presets_label": "Curvas guardadas",

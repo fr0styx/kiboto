@@ -53,7 +53,9 @@ export function coolingStatus(stats) {
   const fc = stats.fan_control || {};
   const rows = [];
   const cpu = stats.cpu?.temp;
-  if (typeof cpu === 'number') rows.push(tempRow('cpu', t('hw.st_cpu', 'Processor'), cpu, LIMITS.cpu));
+  // the processor counts as too hot near its own limit (backend fan_control.cpu_critical_c)
+  const crit = Number(stats.cpu?.critical) || LIMITS.cpu[1];
+  if (typeof cpu === 'number') rows.push(tempRow('cpu', t('hw.st_cpu', 'Processor'), cpu, [crit - 10, crit]));
   const { hdd, awake, unread } = spinning(stats);
   if (awake.length) {
     const hottest = Math.max(...awake.map((d) => d.temp));

@@ -318,6 +318,21 @@ def _pending_offers() -> dict:
     }
 
 
+def _cpu_block(cpu_temp, cpu_telemetry: dict) -> dict:
+    """The processor's readings, and where it counts as critical (its own limit less 15 °C)."""
+    from backend.services.fan_control import cpu_critical_c
+
+    return {
+        "temp": cpu_temp,
+        "util": read_cpu_util(),
+        "model": cpu_telemetry.get("model", ""),
+        "cores": cpu_telemetry.get("cores", 1),
+        "governor": cpu_telemetry.get("governor", "performance"),
+        "load_avg": cpu_telemetry.get("load_avg", [0.0, 0.0, 0.0]),
+        "critical": round(cpu_critical_c()),
+    }
+
+
 def _build_payload(
     active_pwm1,
     active_pwm2,
@@ -381,14 +396,7 @@ def _build_payload(
         "status": status,
         "ip": read_ip(),
         "storage": read_storage(),
-        "cpu": {
-            "temp": cpu_temp,
-            "util": read_cpu_util(),
-            "model": cpu_telemetry.get("model", ""),
-            "cores": cpu_telemetry.get("cores", 1),
-            "governor": cpu_telemetry.get("governor", "performance"),
-            "load_avg": cpu_telemetry.get("load_avg", [0.0, 0.0, 0.0]),
-        },
+        "cpu": _cpu_block(cpu_temp, cpu_telemetry),
         "system": os_telemetry,
         "motherboard": dmi_telemetry,
         "gpu": gpu_telemetry,

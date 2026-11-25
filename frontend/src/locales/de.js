@@ -7801,7 +7801,7 @@ export default {
   "hw.sec_lights_desc": "Die Lichtleiste vorne: an oder aus, Helligkeit, Farbe und wann sie blinkt.",
   "hw.sec_screen": "Frontdisplay",
   "hw.sec_screen_desc": "Das kleine Display vorne: Helligkeit, Abdunkeln in der Nacht und was es zeigt.",
-  "hw.safety_line": "In jedem Modus lässt ein Laufwerk mit 55 °C oder ein Prozessor, der sechs Sekunden lang 80 °C hat, alle Lüfter mit voller Drehzahl laufen.",
+  "hw.safety_line": "In jedem Modus lässt ein Laufwerk mit 52 °C oder ein Prozessor, der sechs Sekunden lang nahe an seiner eigenen Grenze ist, alle Lüfter mit voller Drehzahl laufen.",
   "hw.fans_advanced": "Erweitert: die Kurve, der Prozessorlüfter, eine feste Drehzahl und der Geräuschtest",
   "fan.zero_rpm_label": "Die Laufwerkslüfter anhalten, solange alle Laufwerke schlafen",
   "fan.presets_label": "Gespeicherte Kurven",

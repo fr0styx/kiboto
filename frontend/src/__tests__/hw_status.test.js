@@ -90,4 +90,12 @@ describe('cooling in plain words (Hardware 2, the status sentence)', () => {
       '52 °C · too hot'
     );
   });
+
+  it('the processor counts as too hot near the limit it reports, else at 80 °C', () => {
+    const at = (temp, critical) =>
+      coolingStatus(base({ cpu: { temp, critical } })).rows.find((r) => r.id === 'cpu').value;
+    expect(at(88, 95)).toBe('88 °C · running warm');
+    expect(at(95, 95)).toBe('95 °C · too hot');
+    expect(at(80, undefined)).toBe('80 °C · too hot');
+  });
 });

@@ -46,6 +46,8 @@ Escape closes only what is on top: with a window above the notification centre i
 
 Kiboto notices within a minute when a hard drive goes to sleep or wakes up, instead of up to half an hour later, so the fans stop sooner when every drive sleeps (Zero RPM).
 
+The processor counts as too hot 15 °C under the limit it is made for (95 °C for a chip made for 110 °C), not at a fixed 80 °C, so the fans no longer race and alerts no longer pile up while the processor is merely busy.
+
 #### Security
 
 On a machine of its own, failed sign-ins to shared folders over the network now count like web sign-ins: 20 in 15 minutes block the address for an hour, and they show under History, Sign-ins.
