@@ -62,6 +62,8 @@ def test_is_zettlab_appliance_accepts_genuine_hardware(monkeypatch):
     ]
 
     monkeypatch.setattr("backend.hardware.unraid.read_unraid_status", lambda: None)
+    # not the drives of the machine the tests run on: more than six there read as an 8-bay model
+    monkeypatch.setattr("backend.hardware.chassis.DiskDiscoveryHAL.discover_physical_disks", lambda *a, **k: [])
 
     for vendor, product, board, expected_model in test_cases:
         Z_STATE.cached_chassis_model = None

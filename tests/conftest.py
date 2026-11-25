@@ -10,10 +10,17 @@ import os
 import shutil
 import sys
 import tempfile
+import time
 
 import pytest
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# Every test runs in UTC, whatever the machine's time zone (the test machine is UTC-4; days and
+# "a day from now" came out four hours off there). A test about time zones sets its own.
+os.environ["TZ"] = "UTC"
+if hasattr(time, "tzset"):
+    time.tzset()
 if ROOT not in sys.path:
     sys.path.insert(0, ROOT)
 
@@ -247,6 +254,32 @@ def _no_host_storage_tools(request, monkeypatch):
     if request.node.get_closest_marker("real_storage_tools"):
         return
     monkeypatch.setattr(base, "storage_tools", lambda: {"btrfs": False, "zfs": False, "zpool": False, "mdadm": False})
+
+
+@pytest.fixture(autouse=True)
+def _never_the_real_machine(monkeypatch):
+    """No test reaches the machine it runs on: not its host door (a test machine that runs Kiboto
+    has one, and a test once asked it to power the machine off), and no command that switches the
+    machine off or restarts it; a test that tries fails. Fakes made in the temporary folder still run.
+    Tests about the door point door.SOCK at a socket of their own."""
+    import subprocess
+
+    from backend import door
+    from tests.machine_guard import powers_off
+
+    monkeypatch.setattr(door, "SOCK", os.path.join(ROOT, "no-such-door", "door.sock"))
+    monkeypatch.setattr(door, "DOCKER_SOCK", os.path.join(ROOT, "no-such-door", "docker.sock"))
+    from backend.services import native_update
+
+    monkeypatch.setattr(native_update, "UNIT_DIR", os.path.join(ROOT, "no-such-units"))  # not the machine's systemd
+    start = subprocess.Popen._execute_child  # type: ignore[attr-defined]  # where every command starts
+
+    def _guarded(self, args, *a, **k):
+        if powers_off(args):
+            raise AssertionError(f"a test tried to switch off or restart this machine: {args!r}")
+        return start(self, args, *a, **k)
+
+    monkeypatch.setattr(subprocess.Popen, "_execute_child", _guarded)
 
 
 @pytest.fixture(autouse=True)

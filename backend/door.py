@@ -55,18 +55,18 @@ def inside() -> bool:
     return os.environ.get(IN_DOOR) == "1"
 
 
-def available(sock: str = SOCK) -> bool:
+def available(sock: str | None = None) -> bool:
     """Whether operations go through the door here."""
-    return not inside() and os.path.exists(sock)
+    return not inside() and os.path.exists(sock or SOCK)
 
 
-def call(op: str, *, timeout: float | None = None, sock: str = SOCK, **args: Any) -> Any:
+def call(op: str, *, timeout: float | None = None, sock: str | None = None, **args: Any) -> Any:
     """Runs one operation in the door and returns its result; DoorError when it was refused or
     failed, OSError when the door could not be reached. Once the door has the request, losing
     it (a timeout, a door that stopped) is a DoorError too: the operation may be running."""
     with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as s:
         s.settimeout(timeout or LONG.get(op, 120))
-        s.connect(sock)
+        s.connect(sock or SOCK)  # read now, not when the module was loaded
         try:
             data = _exchange(s, json.dumps({"op": op, "args": args}).encode() + b"\n")
         except OSError as e:
@@ -116,7 +116,7 @@ def version(root: str = "") -> str:
     return f"{settings.current('build_commit') or ''}:{facts.hexdigest()[:12]}"
 
 
-def current(sock: str = SOCK) -> bool:
+def current(sock: str | None = None) -> bool:
     """Whether the door that answers runs this same code; False when it does not answer."""
     try:
         return call("door.version", timeout=5, sock=sock) == version()
@@ -124,7 +124,7 @@ def current(sock: str = SOCK) -> bool:
         return False
 
 
-def wait_open(timeout: float = 10.0, sock: str = SOCK) -> bool:
+def wait_open(timeout: float = 10.0, sock: str | None = None) -> bool:
     """Whether the door answers within `timeout` seconds. Right after it was (re)started its socket
     comes a moment later, and an operation asked in that moment would be done here instead."""
     end = time.monotonic() + timeout
@@ -135,7 +135,7 @@ def wait_open(timeout: float = 10.0, sock: str = SOCK) -> bool:
     return True
 
 
-def _answers(sock: str) -> bool:
+def _answers(sock: str | None) -> bool:
     try:
         return call("door.ping", timeout=2, sock=sock) == "pong"
     except (OSError, DoorError):  # not open yet

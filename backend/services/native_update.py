@@ -173,11 +173,12 @@ def add_missing_tools(rel: str, run: Any = None) -> list[str]:
     return missing
 
 
-def ensure_units(rel: str, run: Any = None, unit_dir: str = UNIT_DIR, door_current: Any = None) -> list[str]:
+def ensure_units(rel: str, run: Any = None, unit_dir: str | None = None, door_current: Any = None) -> list[str]:
     """The service files of the running version where an update made by an older one left older
     ones, or none (the host door's came after install.sh had run). The door is (re)started at each
     start of Kiboto, so it runs the same version; Kiboto's own service takes a new file at its
     next start. Returns the files that changed."""
+    unit_dir = unit_dir or UNIT_DIR  # read now, not when the module was loaded
     run = run or _run
     changed = []
     for name in UNITS:

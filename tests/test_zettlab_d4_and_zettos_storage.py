@@ -206,7 +206,9 @@ def test_zettlab_d6_and_d6u_detection():
     dt_content = "Zettlab D6 Ultra Hex-Bay NAS\0"
     with patch("backend.hardware.storage._read_dt_text", return_value=dt_content):
         with patch("backend.hardware.storage._read_dmi_text", return_value=""):
-            result = detect_chassis_model(force=True)
+            # not the drives of the machine the tests run on (more than six read as an 8-bay model)
+            with patch("backend.hardware.chassis.DiskDiscoveryHAL.discover_physical_disks", return_value=[]):
+                result = detect_chassis_model(force=True)
             assert result == "d6u"
 
     # 2. Drive count check: 6 SATA HDDs + 1 eMMC flash chip -> exactly 6 bay drives -> d6u
