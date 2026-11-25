@@ -51,4 +51,12 @@ describe('AI pack settings (AI-40)', () => {
     expect(card.hidden).toBe(true);
     expect(api.get).not.toHaveBeenCalled();
   });
+
+  it('says when Docker is not reachable and offers no install then', () => {
+    const s = { state: 'no-docker', installed: false, box: { ram_gb: 32 }, recommendation: { preset: 'standard' } };
+    expect(stateText(s)).toContain('Docker isn');
+    const html = packHtml(s);
+    expect(html).toContain('data-ai-pack-state');
+    expect(html).not.toContain('data-ai-pack-install');
+  });
 });

@@ -7863,6 +7863,7 @@ export default {
   "fp.stop": "Beenden",
   "fp.title": "Familienportal",
   "fp.withdraw": "Link zurückziehen",
+  "aipack.state_no_docker": "Docker ist auf diesem NAS nicht erreichbar: Das KI-Paket braucht es zum Installieren und Ausführen.",
   "look.true_black": "Echtes Schwarz (dunkler Modus)",
   "look.theme": "Design",
   "look.theme_lagoon": "Lagune",

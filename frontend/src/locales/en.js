@@ -7863,6 +7863,7 @@ export default {
   "fp.stop": "Stop",
   "fp.title": "Family portal",
   "fp.withdraw": "Withdraw link",
+  "aipack.state_no_docker": "Docker isn't reachable on this NAS: the AI pack needs it to install and run.",
   "look.true_black": "True black (dark mode)",
   "look.theme": "Theme",
   "look.theme_lagoon": "Lagoon",

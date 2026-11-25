@@ -7863,6 +7863,7 @@ export default {
   "fp.stop": "停止",
   "fp.title": "家庭门户",
   "fp.withdraw": "撤回链接",
+  "aipack.state_no_docker": "此 NAS 上无法访问 Docker：AI 套件需要它来安装和运行。",
   "look.true_black": "纯黑（深色模式）",
   "look.theme": "主题",
   "look.theme_lagoon": "泻湖",

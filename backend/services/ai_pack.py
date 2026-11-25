@@ -313,8 +313,14 @@ def status(cfg: dict[str, Any]) -> dict[str, Any]:
     """cfg: the AI settings (passed in: this module doesn't import the AI engine, which calls it)."""
     b = box()
     out: dict[str, Any] = {"box": b, "recommendation": recommend(b), "installed": False, "state": "absent"}
-    name = pack_name()
-    st, info = _docker("GET", f"/containers/{name}/json")
+    try:
+        name = pack_name()  # asks Docker too
+        st, info = _docker("GET", f"/containers/{name}/json")
+    except RuntimeError as e:
+        if "Docker socket not reachable" not in str(e):
+            raise
+        out["state"] = "no-docker"  # the page says so; this used to answer 500
+        return out
     if st != 200 or not isinstance(info, dict):
         return out
     labels = (info.get("Config") or {}).get("Labels") or {}

@@ -48,6 +48,8 @@ Kiboto notices within a minute when a hard drive goes to sleep or wakes up, inst
 
 The processor counts as too hot 15 °C under the limit it is made for (95 °C for a chip made for 110 °C), not at a fixed 80 °C, so the fans no longer race and alerts no longer pile up while the processor is merely busy.
 
+Kib's settings say when Docker can't be reached, instead of failing to load the AI pack card.
+
 #### Security
 
 On a machine of its own, failed sign-ins to shared folders over the network now count like web sign-ins: 20 in 15 minutes block the address for an hour, and they show under History, Sign-ins.

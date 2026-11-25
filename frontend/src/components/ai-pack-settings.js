@@ -23,8 +23,13 @@ export function stateText(s) {
       'aipack.state_not_ours',
       "A container named kiboto-ai exists that the AI pack didn't make; it is left alone."
     );
+  if (s.state === 'no-docker')
+    return t('aipack.state_no_docker', "Docker isn't reachable on this NAS: the AI pack needs it to install and run.");
   return '';
 }
+
+/** States in which nothing can be installed here: the state line says why. */
+const blocked = (s) => s.installed || s.state === 'not-ours' || s.state === 'no-docker';
 
 export function packHtml(s) {
   const r = s.recommendation || {};
@@ -34,10 +39,9 @@ export function packHtml(s) {
     .map(([k, v]) => `<option value="${k}"${k === r.preset ? ' selected' : ''}>${escapeHtml(v)}</option>`)
     .join('');
   const facts = `${escapeHtml(String(b.ram_gb ?? '?'))} GB · ${b.gpu ? 'Intel GPU' : 'CPU'}${b.npu ? ' · NPU' : ''}`;
-  const install =
-    s.installed || s.state === 'not-ours'
-      ? ''
-      : `<form class="immich-form" data-ai-pack-install><label>${escapeHtml(t('aiapps.app', 'App'))}<select name="preset">${options}</select></label>
+  const install = blocked(s)
+    ? ''
+    : `<form class="immich-form" data-ai-pack-install><label>${escapeHtml(t('aiapps.app', 'App'))}<select name="preset">${options}</select></label>
       <button type="submit" class="btn-pill-toggle is-primary">${escapeHtml(t('aipack.install', 'Install the AI pack'))}</button></form>`;
   const use =
     s.state === 'ready' && !s.in_use
@@ -45,7 +49,7 @@ export function packHtml(s) {
       : '';
   return `<p class="immich-note">${escapeHtml(t('aipack.desc', "Chat and search on this server's Intel GPU in one OpenVINO Model Server, chosen for its memory. Nothing you set up yourself is changed."))}</p>
     <p class="immich-note">${facts} · ${escapeHtml(t('aipack.recommended', 'Recommended: {preset}, because {why}.', { preset, why: r.why || '' }))}</p>
-    ${s.installed || s.state === 'not-ours' ? `<p class="immich-note" data-ai-pack-state>${escapeHtml(stateText(s))}</p>` : ''}
+    ${blocked(s) ? `<p class="immich-note" data-ai-pack-state>${escapeHtml(stateText(s))}</p>` : ''}
     ${install}${use}`;
 }
 
