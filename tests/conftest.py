@@ -261,7 +261,7 @@ def _never_the_real_machine(monkeypatch):
     """No test reaches the machine it runs on: not its host door (a test machine that runs Kiboto
     has one, and a test once asked it to power the machine off), and no command that switches the
     machine off or restarts it; a test that tries fails. Fakes made in the temporary folder still run.
-    Tests about the door point door.SOCK at a socket of their own."""
+    Tests about the door point door.SOCK at a socket of their own; tests about Docker give their own answers."""
     import subprocess
 
     from backend import door
@@ -269,6 +269,13 @@ def _never_the_real_machine(monkeypatch):
 
     monkeypatch.setattr(door, "SOCK", os.path.join(ROOT, "no-such-door", "door.sock"))
     monkeypatch.setattr(door, "DOCKER_SOCK", os.path.join(ROOT, "no-such-door", "docker.sock"))
+    # nor its Docker: a CI job that runs in a container has the runner's socket, and the container's
+    # host name finds that very container, so "Kiboto's own container" was the job itself there
+    from backend import config
+
+    monkeypatch.setattr(config, "RAW_DOCKER_SOCK", os.path.join(ROOT, "no-such-door", "raw-docker.sock"))
+    for name in ("KIBOTO_DOCKER_SOCK", "ZETTNAS_DOCKER_SOCK"):
+        monkeypatch.delenv(name, raising=False)
     from backend.services import native_update
 
     monkeypatch.setattr(native_update, "UNIT_DIR", os.path.join(ROOT, "no-such-units"))  # not the machine's systemd
@@ -296,6 +303,16 @@ def _in_a_container_everywhere(monkeypatch):
     monkeypatch.setattr(runtime, "MANAGED_MARK", os.path.join(ROOT, "no-such-mark"))
     # root in the test image, not on CI's runner: the tests about a web process without root say so
     monkeypatch.setattr(runtime, "is_root", lambda: True)
+
+
+@pytest.fixture(autouse=True)
+def _a_trial_record_of_its_own(monkeypatch, tmp_path):
+    """Root keeps the record of a network trial in one fixed file of the machine. Where the tests
+    run as root (the test image, CI's Debian job) every worker would write that same file, and one
+    test's trial would end another's."""
+    from backend.hardware.net import managed
+
+    monkeypatch.setattr(managed, "ROOT_STATE", str(tmp_path / "door-state" / "network_trial.json"))
 
 
 @pytest.fixture(autouse=True)
