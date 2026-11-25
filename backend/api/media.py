@@ -1290,7 +1290,8 @@ async def list_folder_manifests_endpoint(
 ) -> dict[str, Any]:
     """Lists all indexed folder manifests and tree summaries across watched storage shares."""
     rag = get_rag_engine()
-    manifests = await asyncio.to_thread(rag.list_folder_manifests, limit=limit)
+    # the search answers only for someone (SEC-37): without the person this list was always empty
+    manifests = await asyncio.to_thread(rag.list_folder_manifests, principal=principal, limit=limit)
     from backend.api.fs import user_can_access_path
 
     accessible = [m for m in manifests if user_can_access_path(m.get("folder_path", ""), principal)]
