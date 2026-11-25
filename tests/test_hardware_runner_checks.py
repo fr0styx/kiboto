@@ -90,6 +90,43 @@ def test_the_ai_check_records_then_compares():
     assert "wrong" not in ai.scores({**now, "answers": {**now["answers"], "wrong": [1]}})["answers"]
 
 
+def test_other_questions_record_a_new_baseline():
+    now = {
+        "model": "embeddinggemma-2-ov",
+        "overall": {"recall@1": 0.8, "recall@5": 0.9, "mrr@10": 0.85},
+        "answers": {"model": "Qwen3-4B", "accuracy": 0.8},
+        "questions": "new",
+    }
+    harder_before = {**now, "overall": {"recall@1": 0.95, "recall@5": 0.99, "mrr@10": 0.97}}
+    assert ai.verdict(now, {**harder_before, "questions": "old"}, "Qwen3-4B", 0.03) == (
+        "RECORDED",
+        ["the questions changed"],
+    )
+    old_baseline = {k: v for k, v in harder_before.items() if k != "questions"}  # written before the fingerprint
+    assert ai.verdict(now, old_baseline, "Qwen3-4B", 0.03)[0] == "RECORDED"
+    assert ai.verdict(now, harder_before, "Qwen3-4B", 0.03)[0] == "FAIL"  # same questions: compared
+
+
+def test_the_question_fingerprint_follows_the_questions_not_the_app(tmp_path):
+    ev = tmp_path / "tests" / "rag_eval"
+    (ev / "corpus" / "en").mkdir(parents=True)
+    for n in ai.QUESTION_FILES:
+        (ev / n).write_text("code")
+    (ev / "queries.json").write_text("[]")
+    (ev / "baseline_nightly.json").write_text("{}")
+    (ev / "corpus" / "en" / "a.txt").write_text("boiler")
+    (tmp_path / "backend").mkdir()
+    first = ai.questions_id(str(tmp_path))
+    (tmp_path / "backend" / "rag.py").write_text("changed")
+    (ev / "baseline_nightly.json").write_text('{"x": 1}')
+    assert ai.questions_id(str(tmp_path)) == first  # the app and the recorded baselines are not questions
+    (ev / "corpus" / "en" / "a.txt").write_text("boiler, harder")
+    assert ai.questions_id(str(tmp_path)) != first
+    second = ai.questions_id(str(tmp_path))
+    (ev / "queries.json").write_text("[1]")
+    assert ai.questions_id(str(tmp_path)) != second
+
+
 def test_the_ai_check_skips_when_the_image_is_behind(monkeypatch, capsys):
     monkeypatch.setattr(ai, "lock_matches", lambda path: False)
     assert ai.main([]) == 0

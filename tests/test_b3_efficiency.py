@@ -181,3 +181,23 @@ def test_the_data_guard_checks_the_disk_once_at_start(monkeypatch, tmp_path):
     except KeyboardInterrupt:
         pass
     assert seen == [str(tmp_path)]  # a failing check never stops the snapshots
+
+
+def test_virtual_disks_say_nothing_about_spinning(tmp_path):
+    from backend.services import data_health
+
+    base = _fake_sys(tmp_path, {"sda": 1, "vda": 1, "xvdb": 1})
+    assert data_health._spinning("vda", str(base)) is None
+    assert data_health._spinning("xvdb", str(base)) is None
+    assert data_health._spinning("sda", str(base)) is True
+
+
+def test_no_warning_on_a_machine_set_up_for_kiboto(tmp_path, monkeypatch):
+    import os
+
+    from backend import runtime
+    from backend.services import data_health
+
+    base = _fake_sys(tmp_path, {"sda": 1, "nvme0n1": 0})
+    monkeypatch.setattr(runtime, "managed_host", lambda: True)
+    assert data_health.warn_if_on_spinning_disk("/x", str(base), st_dev=os.makedev(8, 1)) is False

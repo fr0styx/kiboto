@@ -14,8 +14,9 @@ to the scores, not compared against a baseline.
 
 The public log says only PASS, FAIL or SKIP per set (the repository's Actions logs are public
 and must not carry numbers from a private server). Results and baselines are written to
---results/ai on the machine: the first run of a set, or a run with another model, records the
-baseline. A set fails when a score drops by more than --tolerance.
+--results/ai on the machine: the first run of a set, a run with another model, or a run on other
+questions (the eval's files and scoring code changed, questions_id) records the baseline. A set
+fails when a score drops by more than --tolerance.
 """
 
 import argparse
@@ -61,6 +62,29 @@ def lock_matches(lock_path: str, recorded_path: str = "/opt/kb-eval/lock.sha256"
         return False
 
 
+# What is measured: the questions, the files they are asked about and how answers are scored. The
+# app's own code is not in it, so a change there is compared with the baseline.
+QUESTION_FILES = ("run_eval.py", "documents.py", "id_docs.py")
+
+
+def questions_id(root: str = ROOT) -> str:
+    """A fingerprint of the eval's questions, files and scoring code: scores taken on other questions
+    are not comparable (a harder set, a new held-out split), so a change records a new baseline."""
+    base = os.path.join(root, "tests", "rag_eval")
+    paths = [os.path.join(base, n) for n in QUESTION_FILES]
+    paths += [
+        os.path.join(base, n) for n in os.listdir(base) if n.endswith(".json") and n.startswith(("queries", "qa"))
+    ]
+    for top, _dirs, files in os.walk(os.path.join(base, "corpus")):
+        paths += [os.path.join(top, n) for n in files]
+    h = hashlib.sha256()
+    for p in sorted(paths):
+        h.update(os.path.relpath(p, base).encode() + b"\0")
+        with open(p, "rb") as fh:
+            h.update(hashlib.sha256(fh.read()).digest())
+    return h.hexdigest()[:16]
+
+
 def reachable(url: str, timeout: float = 5.0) -> bool:
     try:
         with urllib.request.urlopen(url, timeout=timeout) as r:
@@ -78,11 +102,14 @@ def scores(result: dict) -> dict:
 
 
 def verdict(now: dict, base: dict | None, chat_model: str, tolerance: float) -> tuple[str, list[str]]:
-    """('PASS' | 'FAIL' | 'RECORDED', reasons). A first run or another model records a baseline."""
+    """('PASS' | 'FAIL' | 'RECORDED', reasons). A first run, another model or other questions record
+    a baseline."""
     from tests.rag_eval.compare import drops
 
     if not base or base.get("model") != now.get("model") or (base.get("answers") or {}).get("model") != chat_model:
         return "RECORDED", []
+    if base.get("questions") != now.get("questions"):
+        return "RECORDED", ["the questions changed"]
     found = drops(now, base, tolerance)
     return ("FAIL" if found else "PASS"), found
 
@@ -133,6 +160,7 @@ def main(argv=None) -> int:
     os.makedirs(out_dir, exist_ok=True)
     stamp = time.strftime("%Y-%m-%d-%H%M")
     failed = False
+    asked = questions_id()
     for name in [s for s in args.sets.split(",") if s]:
         try:
             result = evaluate(
@@ -149,7 +177,7 @@ def main(argv=None) -> int:
             print(f"FAIL ai-eval {name} (the eval did not finish)")
             failed = True
             continue
-        now = scores(result)
+        now = {**scores(result), "questions": asked}
         with open(os.path.join(out_dir, f"{stamp}-{name}.json"), "w", encoding="utf-8") as f:
             json.dump(result, f, ensure_ascii=False, indent=1)
         print(
@@ -171,7 +199,8 @@ def main(argv=None) -> int:
         if state == "RECORDED":
             with open(base_path, "w", encoding="utf-8") as f:
                 json.dump(now, f, ensure_ascii=False, indent=1)
-            print(f"PASS ai-eval {name} (baseline recorded)")
+            why = "the questions changed: " if reasons else ""
+            print(f"PASS ai-eval {name} ({why}baseline recorded)")
         else:
             print(f"{state} ai-eval {name}")
             if reasons:

@@ -62,6 +62,8 @@ A fresh install no longer warns that the password is "admin" while it waits for 
 
 Kiboto OS from the USB stick: when the install on the first start stops (no network, for example), the screen says why, and restarting the machine tries again instead of refusing it as already set up. The sign-in code shows on the screen without pressing a key.
 
+No more "app data on a spinning disk" notification for virtual machine disks, or on Kiboto OS, where the data folder belongs on the system disk.
+
 #### Security
 
 On a machine of its own, failed sign-ins to shared folders over the network now count like web sign-ins: 20 in 15 minutes block the address for an hour, and they show under History, Sign-ins.

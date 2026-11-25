@@ -260,6 +260,8 @@ def _spinning(disk: str, sysbase: str, depth: int = 0) -> bool | None:
         ]
         known = [a for a in answers if a is not None]
         return any(known) if known else None
+    if disk.startswith(("vd", "xvd")):
+        return None  # virtio and Xen disks say "rotational" whatever the host's own disk is
     try:
         with open(os.path.join(block, "queue", "rotational"), encoding="ascii") as f:
             return f.read().strip() == "1"
@@ -295,6 +297,12 @@ def data_disk(folder: str, sysbase: str | None = None, st_dev: int | None = None
 
 def warn_if_on_spinning_disk(folder: str, sysbase: str | None = None, st_dev: int | None = None) -> bool:
     """PERF-15: the data folder is written every few seconds, so a spinning disk under it never sleeps."""
+    from backend import runtime
+
+    # On a machine set up for Kiboto the data folder is on the system disk by design, which Debian
+    # writes to anyway and which never holds storage: there is nothing to move (its guide asks for an SSD).
+    if runtime.managed_host():
+        return False
     disk, spinning = data_disk(folder, sysbase, st_dev)
     if not spinning:
         return False
