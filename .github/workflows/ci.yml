@@ -896,6 +896,7 @@ jobs:
     timeout-minutes: 10  # ARC-26: a hung step fails the run instead of holding a runner for 6 hours
     permissions:
       contents: write # create the GitHub release
+      id-token: write # sign the release's checksums keyless (Sigstore), as the images are
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -927,12 +928,31 @@ jobs:
           d=$(cat digest.txt)
           sh scripts/build_release_image.sh "${{ env.IMAGE }}@$d" "kiboto-${GITHUB_REF_NAME}-install.iso"
 
+      # What a release carries can be checked: SHA256SUMS lists install.sh and the install image,
+      # and is signed keyless by this workflow (docs/INSTALLATION.md, "Check the download")
+      - name: Checksums of what the release carries
+        run: |
+          files="install.sh"
+          iso="kiboto-${GITHUB_REF_NAME}-install.iso"
+          if [ -f "$iso" ]; then files="$files $iso"; fi
+          sha256sum $files > SHA256SUMS
+          cat SHA256SUMS
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@881c63bd87e38389154debd8331404ce7ca8a3ab # v4.1.4
+
+      - name: Sign the checksums
+        run: cosign sign-blob --yes --bundle SHA256SUMS.sigstore.json SHA256SUMS
+
       - name: Create Release
         uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3
         with:
           name: ${{ steps.extract_notes.outputs.title }} (beta)
           body_path: RELEASE_NOTES.md
-          files: install.sh
+          files: |
+            install.sh
+            SHA256SUMS
+            SHA256SUMS.sigstore.json
           fail_on_unmatched_files: true
           generate_release_notes: true
           draft: false

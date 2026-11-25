@@ -64,6 +64,8 @@ Pool names sent to the storage and snapshot settings are checked the same way ev
 
 On a machine Kiboto runs, Kiboto itself now runs without root by default; only its small host service changes the machine, from a fixed list of checked operations.
 
+Each release lists the checksums of install.sh and the install image, signed by the project's build service, and the install guide shows how to check a download.
+
 #### New
 
 Kiboto lists the third-party software it bundles and its licences at /third-party-licences.txt, and the install image says which Debian image it is made from and where Debian publishes its sources.

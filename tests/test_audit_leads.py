@@ -150,4 +150,5 @@ def test_ci_jobs_get_least_privilege():
     for name in ("check-image", "update-test", "smoke-arm64"):
         assert jobs[name]["permissions"] == {"contents": "read", "packages": "read"}, name
     assert jobs["publish"]["permissions"] == {"contents": "read", "packages": "write", "id-token": "write"}
-    assert jobs["create-release"]["permissions"] == {"contents": "write"}
+    # id-token: the release signs its checksums keyless, as publish signs the images
+    assert jobs["create-release"]["permissions"] == {"contents": "write", "id-token": "write"}

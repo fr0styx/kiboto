@@ -109,7 +109,7 @@ def test_a_release_carries_an_install_script_that_names_its_own_image():
     ]
     with open(os.path.join(ROOT, ".github", "workflows", "ci.yml"), encoding="utf-8") as f:
         ci = f.read()
-    assert "sh scripts/stamp_installer.sh" in ci and "files: install.sh" in ci
+    assert "sh scripts/stamp_installer.sh" in ci and "files: |\n            install.sh\n" in ci
 
 
 def test_an_image_named_by_a_tag_or_with_odd_characters_is_not_stamped():

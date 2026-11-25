@@ -454,6 +454,19 @@ This is a preview. It is tested on a virtual machine with real disks handed to i
 
 **Install from Kiboto's image**
 
+### Check the download
+
+Each release lists the SHA-256 of `install.sh` and of the install image in `SHA256SUMS`, signed by this project's build service with Sigstore (no key to trust by hand). In the folder you downloaded them to:
+
+```sh
+sha256sum -c SHA256SUMS --ignore-missing
+cosign verify-blob SHA256SUMS --bundle SHA256SUMS.sigstore.json \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+  --certificate-identity-regexp '^https://github\.com/fr0styx/kiboto/\.github/workflows/ci\.yml@refs/tags/v'
+```
+
+The first says each file you have is the one the release made; the second that `SHA256SUMS` was made by this repository's release workflow for a version tag, which waits for the maintainer's approval.
+
 `packaging/image/build-image.sh` turns Debian's official 13 netinst image into Kiboto's install image (`sh packaging/image/build-image.sh debian-13-netinst.iso <kiboto image>@sha256:<digest> kiboto.iso`, needs `xorriso`). Write it to a USB stick and start the machine from it. "Install Kiboto" is chosen after ten seconds: Debian's own installer, which asks two things only, which disk becomes the system disk (it shows them with size and model, then asks before writing) and a root password. No other disk is touched. When the machine starts again, Kiboto installs itself (about ten minutes) and the screen shows the code for the first sign-in. Root may sign in over SSH with that password until you turn SSH off in Kiboto (Network, This machine). `KIBOTO_ROOT_KEYS=<file>` puts SSH keys on the image that may sign in as root too.
 
 **Install on a Debian you set up yourself**
