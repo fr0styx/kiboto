@@ -73,7 +73,7 @@ def test_updating_on_beta_installs_the_beta_image(client, auth_headers):
 
 def test_version_tags_publish_beta_not_latest():
     ci = (ROOT / ".github" / "workflows" / "ci.yml").read_text()
-    meta = ci[ci.index("Extract Docker metadata") : ci.index("Build and push Multi-Arch")]
+    meta = ci[ci.index("Extract Docker metadata") : ci.index("Build and push the image for one architecture")]
     assert "value=beta,enable=${{ startsWith(github.ref, 'refs/tags/v') }}" in meta
     assert "value=latest" not in meta and "value=stable" not in meta and "{{major}}.{{minor}}" not in meta
     assert "prerelease: true" in ci

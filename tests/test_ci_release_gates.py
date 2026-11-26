@@ -60,7 +60,12 @@ def test_every_gate_runs_before_the_image_is_signed_and_tagged():
             continue
         for s in job.get("steps", []):
             run = str(s.get("run", ""))
-            assert "cosign sign" not in run and "imagetools create" not in run, (name, s.get("name"))
+            assert "cosign sign" not in run, (name, s.get("name"))
+            # the join prints the two architectures' index with --dry-run and stores it by digest:
+            # a tag is pushed only by publish
+            for line in run.splitlines():
+                if "imagetools create" in line:
+                    assert "--dry-run" in line, (name, s.get("name"), line)
     assert jobs["create-release"]["needs"] == ["publish"]
     # a release is signed only after the owner's approval; main keeps publishing without one
     assert jobs["publish"]["environment"] == "${{ startsWith(github.ref, 'refs/tags/v') && 'release' || '' }}"

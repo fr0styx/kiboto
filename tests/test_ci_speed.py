@@ -94,19 +94,46 @@ def test_a_prepared_disk_belongs_to_one_installer_one_check_and_one_debian():
     assert steps["Keep the prepared disk"]["with"]["key"] == "${{ steps.key.outputs.key }}"
 
 
-def test_the_arm64_trial_tags_nothing_and_runs_only_by_hand():
-    wf = _wf("image-build-trial.yml")
-    on = wf.get("on") or wf.get(True)
-    assert list(on) == ["workflow_dispatch"]
-    build = wf["jobs"]["build-arch"]
+def test_each_architecture_is_built_on_its_own_runner_without_emulation():
+    jobs = _wf("ci.yml")["jobs"]
+    build = jobs["build-arch"]
     assert build["runs-on"] == "${{ matrix.runner }}"
     runners = {i["arch"]: i["runner"] for i in build["strategy"]["matrix"]["include"]}
-    assert runners == {"amd64": "ubuntu-24.04", "arm64": "ubuntu-24.04-arm"}  # no emulation
+    assert runners == {"amd64": "ubuntu-24.04", "arm64": "ubuntu-24.04-arm"}
+    assert build["strategy"]["matrix"]["variant"] == ["full", "core"]
     step = next(s for s in build["steps"] if s.get("id") == "build")
     assert step["with"]["platforms"] == "linux/${{ matrix.arch }}"
-    assert "push-by-digest=true" in step["with"]["outputs"]
-    assert step["with"]["cache-from"].startswith("type=registry,")
-    join = "\n".join(str(s.get("run", "")) for s in wf["jobs"]["join"]["steps"])
-    assert "imagetools create --dry-run" in join  # prints the index; nothing tagged
-    assert re.search(r"manifests/\$digest", join)  # pushed by its digest only
-    assert "setup-qemu" not in _read(".github", "workflows", "image-build-trial.yml")
+    assert "setup-qemu" not in _read(".github", "workflows", "ci.yml")
+
+
+def test_the_two_halves_are_joined_by_digest_and_both_must_be_there():
+    jobs = _wf("ci.yml")["jobs"]
+    join = jobs["build-image"]
+    assert join["needs"] == ["build-arch"] and join["permissions"] == {"contents": "read", "packages": "write"}
+    run = next(s for s in join["steps"] if s.get("id") == "build")["run"]
+    assert 'imagetools create --dry-run -t "${IMAGE}:not-pushed"' in run  # printed, never pushed
+    assert '/manifests/$digest" -o /dev/null' in run  # stored under its digest only
+    assert 'index("amd64") != null and index("arm64") != null' in run  # refused with one half missing
+    upload = next(s for s in join["steps"] if str(s.get("uses", "")).startswith("actions/upload-artifact"))
+    assert upload["with"]["name"] == "digest-${{ matrix.variant }}"  # what every later job reads
+
+
+def test_the_build_cache_is_in_the_registry_and_warmed_each_night():
+    ci_step = next(s for s in _wf("ci.yml")["jobs"]["build-arch"]["steps"] if s.get("id") == "build")
+    ref = "ref=${{ env.IMAGE }}:buildcache-${{ matrix.variant }}-${{ matrix.arch }}"
+    assert ci_step["with"]["cache-from"] == "type=registry," + ref
+    assert ci_step["with"]["cache-to"].startswith("type=registry," + ref + ",mode=max")
+    warm = _wf("warm-image-cache.yml")
+    on = warm.get("on") or warm.get(True)
+    assert on["schedule"] == [{"cron": "20 0 * * *"}]  # just after the day's new Debian packages
+    step = next(
+        s for s in warm["jobs"]["warm"]["steps"] if str(s.get("uses", "")).startswith("docker/build-push-action")
+    )
+    assert step["with"]["outputs"] == "type=cacheonly"  # it pushes no image
+    assert step["with"]["cache-to"] == ci_step["with"]["cache-to"]
+    assert step["with"]["cache-from"] == ci_step["with"]["cache-from"]
+
+
+def test_main_takes_the_os_fast_path_and_a_version_tag_never_does():
+    job = _wf("ci.yml")["jobs"]["os-install"]
+    assert job["with"] == {"fast": "${{ github.ref == 'refs/heads/main' }}"}

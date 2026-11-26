@@ -508,23 +508,30 @@ jobs:
   # then check-image (amd64 start, Trivy), update-test and smoke-arm64 (a native arm64 runner)
   # side by side. Nothing is tagged or signed until all of those and every test job have passed
   # (publish). An untagged digest of a build that failed stays unreachable: no tag points at it.
-  build-image:
-    name: Build multi-arch image (${{ matrix.variant }})
+  # Each architecture on a runner of its own: arm64 on GitHub's arm64 runners rather than under
+  # emulation on an x86 one, which took up to 14 minutes on a day the cache was cold. Docker's build
+  # cache is kept in the registry (buildcache-* references, never pulled by anything that installs):
+  # the Actions cache is 10 GB and was full, so layers were evicted. A nightly run warms it
+  # (.github/workflows/warm-image-cache.yml).
+  build-arch:
+    name: Build image (${{ matrix.variant }}, ${{ matrix.arch }})
     # full: the default image. core: no VMs or LCD renderer, published as -core tags (OPS-11)
     strategy:
       fail-fast: false
       matrix:
+        variant: [full, core]
+        arch: [amd64, arm64]
         include:
-          - variant: full
-            suffix: ""
-          - variant: core
-            suffix: "-core"
+          - arch: amd64
+            runner: ubuntu-24.04
+          - arch: arm64
+            runner: ubuntu-24.04-arm
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/tags/stable')
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.runner }}
     timeout-minutes: 45  # ARC-26: a hung step fails the run instead of holding a runner for 6 hours
     permissions:
       contents: read
-      packages: write # push the image to GHCR (by digest, no tag)
+      packages: write # push the image to GHCR (by digest, no tag) and the build cache
     env:
       DOCKER_CLIENT_TIMEOUT: "120"
       COMPOSE_HTTP_TIMEOUT: "120"
@@ -555,8 +562,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4
       - name: Pre-pull BuildKit with retry
         run: |
           for i in 1 2 3 4 5; do
@@ -578,7 +583,7 @@ jobs:
           images: ${{ env.IMAGE }}
           flavor: |
             latest=false
-            suffix=${{ matrix.suffix }},onlatest=true
+            suffix=${{ matrix.variant == 'core' && '-core' || '' }},onlatest=true
           tags: |
             type=raw,value=edge,enable=${{ github.ref == 'refs/heads/main' }}
             type=raw,value=main,enable=${{ github.ref == 'refs/heads/main' }}
@@ -594,12 +599,12 @@ jobs:
         id: day
         run: echo "day=$(date -u +%F)" >> "$GITHUB_OUTPUT"
 
-      - name: Build and push Multi-Arch Docker image (by digest)
+      - name: Build and push the image for one architecture (by digest)
         id: build
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
         with:
           context: .
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/${{ matrix.arch }}
           outputs: type=image,name=${{ env.IMAGE }},push-by-digest=true,name-canonical=true,push=true
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
@@ -609,8 +614,75 @@ jobs:
             APT_DAY=${{ steps.day.outputs.day }}
           provenance: mode=max
           sbom: true
-          cache-from: type=gha,scope=${{ matrix.variant }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.variant }}
+          cache-from: type=registry,ref=${{ env.IMAGE }}:buildcache-${{ matrix.variant }}-${{ matrix.arch }}
+          cache-to: type=registry,ref=${{ env.IMAGE }}:buildcache-${{ matrix.variant }}-${{ matrix.arch }},mode=max,image-manifest=true,oci-mediatypes=true
+
+      - name: Keep this architecture's digest
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+          ARCH: ${{ matrix.arch }}
+        run: |
+          case "$DIGEST" in sha256:*) ;; *) echo "::error::no image digest from the build"; exit 1;; esac
+          mkdir -p part && echo "$DIGEST" > "part/$ARCH.txt"
+      - name: Upload this architecture's digest
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: part-${{ matrix.variant }}-${{ matrix.arch }}
+          path: part/
+          retention-days: 3
+
+  # The two architectures joined into one image, pushed by its digest through the registry API, so
+  # no tag points at it until publish (OPS-1): the joined index is printed with --dry-run (its tag
+  # is never pushed) and stored under its own digest.
+  build-image:
+    name: Build multi-arch image (${{ matrix.variant }})
+    needs: [build-arch]
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [full, core]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/tags/stable')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15  # ARC-26: a hung step fails the run instead of holding a runner for 6 hours
+    permissions:
+      contents: read
+      packages: write # push the joined index to GHCR (by digest, no tag)
+    steps:
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
+      - name: Download the two architectures' digests
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: part-${{ matrix.variant }}-*
+          merge-multiple: true
+          path: part
+      - name: Join them into one image, pushed by digest
+        id: build
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ACTOR: ${{ github.actor }}
+        run: |
+          set -euo pipefail
+          refs=""
+          for arch in amd64 arm64; do refs="$refs ${IMAGE}@$(cat "part/$arch.txt")"; done
+          # the tag is never pushed: --dry-run only prints the index this would push
+          # shellcheck disable=SC2086
+          docker buildx imagetools create --dry-run -t "${IMAGE}:not-pushed" $refs > index.json
+          digest="sha256:$(sha256sum index.json | cut -d' ' -f1)"
+          media=$(jq -r .mediaType index.json)
+          repo=${IMAGE#ghcr.io/}
+          token=$(curl -fsS -u "$ACTOR:$GH_TOKEN" "https://ghcr.io/token?service=ghcr.io&scope=repository:$repo:pull,push" | jq -r .token)
+          curl -fsS --retry 3 -X PUT -H "Authorization: Bearer $token" -H "Content-Type: $media" \
+            --data-binary @index.json "https://ghcr.io/v2/$repo/manifests/$digest" -o /dev/null
+          docker buildx imagetools inspect --raw "${IMAGE}@$digest" \
+            | jq -e '[.manifests[] | select(.platform.os == "linux") | .platform.architecture] | (index("amd64") != null and index("arm64") != null)' >/dev/null
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
 
       # The next jobs read the digest from this small file
       - name: Hand the digest to the checks
@@ -858,6 +930,10 @@ jobs:
       contents: read
       packages: read # the image is pulled by its digest
     uses: ./.github/workflows/os-install.yml
+    with:
+      # main: start from a disk with ZFS already built, when one fits this install.sh; a version tag
+      # always installs from a fresh Debian (and so does any run after install.sh changed)
+      fast: ${{ github.ref == 'refs/heads/main' }}
 
   publish:
     name: Sign & publish image tags (${{ matrix.variant }})

@@ -113,7 +113,7 @@ def test_no_build_is_signed_or_tagged_unless_kiboto_os_installs_from_it():
     job = jobs["os-install"]
     assert job["uses"] == "./.github/workflows/os-install.yml" and job["needs"] == ["build-image"]
     assert "if" not in job and "continue-on-error" not in str(job)
-    assert "with" not in job  # no build named: it installs the one this run built
+    assert "image" not in job.get("with", {})  # no build named: it installs the one this run built
     assert job["permissions"] == {"contents": "read", "packages": "read"}
     assert "os-install" in jobs["publish"]["needs"]
     # and the workflow takes that build from the run when it is given none

@@ -34,8 +34,11 @@ def test_images_get_tags_only_after_the_gates():
     # The image is built and checked in its own jobs while the tests run; the tags are added in
     # the publish job, which needs every check (CI speed-up, 12 Nov 2026)
     jobs = yaml.safe_load(_read(".github/workflows/ci.yml"))["jobs"]
-    build = next(s for s in jobs["build-image"]["steps"] if s.get("id") == "build")
+    build = next(s for s in jobs["build-arch"]["steps"] if s.get("id") == "build")
     assert "push-by-digest=true" in build["with"]["outputs"] and "tags" not in build["with"]
+    # the join pushes the two architectures' index by its digest; its tag is never pushed
+    join = next(s for s in jobs["build-image"]["steps"] if s.get("id") == "build")["run"]
+    assert "imagetools create --dry-run" in join and "/manifests/$digest" in join
     names = [s.get("name", "") for s in jobs["publish"]["steps"]]
     publish = next(i for i, n in enumerate(names) if n.startswith("Publish tags"))
     assert next(i for i, n in enumerate(names) if n.startswith("Sign image digest")) < publish
