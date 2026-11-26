@@ -250,7 +250,8 @@ def test_main_views_have_no_serious_accessibility_issues():
                 {"id": "view-did-not-open", "impact": "critical", "count": 1, "sample": ["#setup-wizard-modal"]}
             ]
         page.wait_for_timeout(400)
-        _panes(page, results, "")
+        # the Settings pages are checked by their own test (dark below, light after it), so CI can
+        # run them on other runners at the same time
         # the cloud drive dialog: a form built from each provider's fields
         _open(
             page,
@@ -278,6 +279,24 @@ def test_main_views_have_no_serious_accessibility_issues():
         phone.close()
         browser.close()
 
+    _check(results)
+
+
+def test_settings_in_the_dark_theme_have_no_serious_accessibility_issues():
+    """Every Settings page in the dark theme. Its own test so CI can run it beside the main views
+    and the light theme."""
+    if not os.path.exists(AXE):
+        _skip_or_fail("axe-core is not installed (npm ci)")
+    from playwright.sync_api import sync_playwright
+
+    results = {}
+    with sync_playwright() as p:
+        browser = _browser(p)
+        context, page = _desktop(browser)
+        _login(page)  # the sign-in page is checked by the main views
+        _panes(page, results, "")
+        context.close()
+        browser.close()
     _check(results)
 
 

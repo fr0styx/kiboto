@@ -298,6 +298,27 @@ jobs:
             exit 1
           fi
 
+  # The frontend's build, size budget and lints, beside its tests (they waited about 30 s behind
+  # the tests in one job)
+  frontend-checks:
+    name: Frontend build & lints
+    runs-on: ubuntu-latest
+    timeout-minutes: 10  # ARC-26: a hung step fails the run instead of holding a runner for 6 hours
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js (version from .nvmrc)
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version-file: ".nvmrc"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
       - name: Build frontend
         run: npm run build
 
@@ -328,29 +349,33 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Three parts of about equal length plus the idle minute, each on its own runner (about 80 s
-        # of setup each): the journeys' three slowest tests and the light theme's check make the
-        # third, so no part waits on another's leftovers (tests/test_ci_release_gates.py checks that
-        # every browser test runs in exactly one part)
+        # Four parts of about 100 s of tests each plus the idle minute, each on its own runner (about
+        # 80 s of setup each), balanced by the tests' own times on CI
+        # (tests/test_ci_release_gates.py checks that every browser test runs in exactly one part)
         include:
-          - shard: "1 of 3"
+          - shard: "1 of 4"
             tests: >-
               tests/test_e2e_journeys.py
               --deselect tests/test_e2e_journeys.py::test_hidden_controls_stay_hidden_on_a_phone
               --deselect tests/test_e2e_journeys.py::test_settings_navigation_at_every_width
               --deselect tests/test_e2e_journeys.py::test_the_first_seconds_stay_within_their_byte_budget
             idle: false
-          - shard: "2 of 3"
+          - shard: "2 of 4"
             tests: >-
-              tests/test_e2e_integration.py tests/test_e2e_keyboard_german.py
+              tests/test_e2e_integration.py tests/test_e2e_keyboard_german.py::test_a_keyboard_only_journey
               tests/test_e2e_a11y.py::test_main_views_have_no_serious_accessibility_issues
             idle: false
-          - shard: "3 of 3"
+          - shard: "3 of 4"
             tests: >-
               tests/test_e2e_journeys.py::test_hidden_controls_stay_hidden_on_a_phone
-              tests/test_e2e_journeys.py::test_settings_navigation_at_every_width
               tests/test_e2e_journeys.py::test_the_first_seconds_stay_within_their_byte_budget
               tests/test_e2e_a11y.py::test_settings_in_the_light_theme_have_no_serious_accessibility_issues
+            idle: false
+          - shard: "4 of 4"
+            tests: >-
+              tests/test_e2e_journeys.py::test_settings_navigation_at_every_width
+              tests/test_e2e_keyboard_german.py::test_german_text_fits
+              tests/test_e2e_a11y.py::test_settings_in_the_dark_theme_have_no_serious_accessibility_issues
             idle: false
           # the idle minute (PERF-10, 90 s) on a server no test has touched, and nothing after it
           - shard: "idle minute"
@@ -502,7 +527,7 @@ jobs:
   # publish the images, so this one skips publishing (skipped, not failed).
   still-latest:
     name: Still the latest commit?
-    needs: [lint, lint-and-test, unit-debian13, frontend, e2e-integration]
+    needs: [lint, lint-and-test, unit-debian13, frontend, frontend-checks, e2e-integration]
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 5  # ARC-26: a hung step fails the run instead of holding a runner for 6 hours
@@ -978,7 +1003,7 @@ jobs:
 
   publish:
     name: Sign & publish image tags (${{ matrix.variant }})
-    needs: [lint, lint-and-test, unit-debian13, storage-real, frontend, e2e-integration, still-latest, build-image, check-image, update-test, smoke-arm64, os-install]
+    needs: [lint, lint-and-test, unit-debian13, storage-real, frontend, frontend-checks, e2e-integration, still-latest, build-image, check-image, update-test, smoke-arm64, os-install]
     strategy:
       fail-fast: false
       matrix:

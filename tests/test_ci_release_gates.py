@@ -45,7 +45,16 @@ def test_every_gate_runs_before_the_image_is_signed_and_tagged():
     assert _index(steps, "Sign image digest") < _index(steps, "Publish tags")
     needs = set(jobs["publish"]["needs"])
     # every test job and every image check must pass before anything is signed or tagged
-    assert {"lint", "lint-and-test", "frontend", "e2e-integration", "still-latest", "build-image"} <= needs
+    assert {
+        "lint",
+        "lint-and-test",
+        "frontend",
+        "frontend-checks",
+        "e2e-integration",
+        "still-latest",
+        "build-image",
+    } <= needs
+    assert "frontend-checks" in jobs["still-latest"]["needs"]
     assert "lint" in jobs["still-latest"]["needs"]
     # the idle minute (PERF-10) is still one of the browser-test jobs
     e2e = jobs["e2e-integration"]["strategy"]["matrix"]["include"]

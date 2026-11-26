@@ -140,9 +140,9 @@ def test_ci_jobs_get_least_privilege():
         wf = yaml.safe_load(f)
     assert wf["permissions"] == {"contents": "read"}
     jobs = wf["jobs"]
-    for name in ("lint", "lint-and-test", "frontend", "e2e-integration", "still-latest"):
+    for name in ("lint", "lint-and-test", "frontend", "frontend-checks", "e2e-integration", "still-latest"):
         assert "permissions" not in jobs[name], name
-    for name in ("lint", "lint-and-test", "frontend", "e2e-integration"):
+    for name in ("lint", "lint-and-test", "frontend", "frontend-checks", "e2e-integration"):
         checkouts = [s for s in jobs[name]["steps"] if str(s.get("uses", "")).startswith("actions/checkout")]
         assert checkouts and all(s.get("with", {}).get("persist-credentials") is False for s in checkouts), name
     # only the build pushes (by digest) and only publish signs; the checks only read the image

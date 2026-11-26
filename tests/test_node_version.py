@@ -30,5 +30,7 @@ def test_node_versions_agree_and_are_patched():
 def test_ci_uses_nvmrc():
     ci = (ROOT / ".github" / "workflows" / "ci.yml").read_text()
     assert "node-version: 24" not in ci
-    assert ci.count('node-version-file: ".nvmrc"') == 2
+    # every job that sets up Node takes the version from .nvmrc
+    setups = ci.count("uses: actions/setup-node@")
+    assert setups >= 2 and ci.count('node-version-file: ".nvmrc"') == setups
     assert "PLAYWRIGHT_NODEJS_PATH" in ci
