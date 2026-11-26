@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field
 from backend.auth import require_scope
 from backend.errors import NOT_ON_OS_YET, said
 from backend.paging import PageParams
-from backend.services.replication_engine import availability, get_replication_engine, validate
+from backend.services.replication_engine import availability, get_replication_engine, public_key, validate
 
 router = APIRouter(prefix="/storage/replication", tags=["Storage Replication"])
 
@@ -39,6 +39,15 @@ def list_replication_jobs() -> dict[str, Any]:
     ok, reason = availability()
     said_how = said("os_not_yet") if reason == NOT_ON_OS_YET else None  # the page shows it in the reader's language
     return {"jobs": engine.list_jobs(), "available": ok, "reason": reason, "text": said_how}
+
+
+@router.get("/key", dependencies=[Depends(require_scope("storage:admin"))])
+def replication_key() -> dict[str, Any]:
+    """The public key a copy to another machine signs in with: added to that machine's user."""
+    try:
+        return {"public_key": public_key()}
+    except (OSError, RuntimeError) as e:
+        raise HTTPException(status_code=503, detail=str(e)) from None
 
 
 def _available() -> None:

@@ -351,6 +351,12 @@ def _iscsi(name: str) -> Callable[..., Any]:
     return run
 
 
+def _replication_key() -> Any:
+    from backend.services import replication_engine
+
+    return replication_engine.key_here()
+
+
 def _replicate(job: dict[str, Any]) -> Any:
     from backend.services import replication_engine
 
@@ -633,6 +639,7 @@ OPERATIONS: dict[str, Operation] = {
     ),
     "iscsi.remove_file": Operation(_iscsi("remove_file_here"), {"path": TEXT}, max_len=4096),
     "replication.run": Operation(_replicate, {"job": MAP}, max_len=512),
+    "replication.key": Operation(_replication_key, {}),
     "button.wait": Operation(_button_wait, {"seconds": NUMBER}),
     "merge.add": Operation(
         _merge("add_here"), {"name": TEXT, "path": TEXT, "slow_mount": TEXT, "slow_pool": TEXT}, max_len=4096

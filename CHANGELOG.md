@@ -10,6 +10,8 @@ Replace a drive from the app (Kiboto OS, and Kiboto on plain Linux): on a ZFS or
 
 Kiboto OS: merged folders and data tiering work (off until you turn them on for a shared folder). Making the merge, the nightly move to the slower pool and the watch on which files are opened run in the machine's root service or under Kiboto's own user with only the rights they need.
 
+Kiboto OS: replication to another machine over SSH works. It signs in with a key of its own, which the job form shows so you can add it to the user on the other machine; the other machine's identity is remembered the first time.
+
 #### Changes
 
 Kiboto OS installs Debian 13's own ZFS (2.3) instead of the newer one from Debian's backports, and new ZFS pools are limited to ZFS 2.3's features, so a pool opens on any Debian 13 and on every later ZFS. A machine installed by an earlier version keeps its ZFS.

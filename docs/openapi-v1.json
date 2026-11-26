@@ -70341,6 +70341,39 @@
     ]
    }
   },
+  "/api/v1/storage/replication/key": {
+   "get": {
+    "description": "The public key a copy to another machine signs in with: added to that machine's user.",
+    "operationId": "replication_key_api_v1_storage_replication_key_get",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Replication Key Api V1 Storage Replication Key Get",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "summary": "Replication Key",
+    "tags": [
+     "Storage Replication"
+    ],
+    "x-required-scopes": [
+     "storage:admin"
+    ]
+   }
+  },
   "/api/v1/storage/schedule": {
    "get": {
     "description": "Retrieves current automated SMART self-test and storage scrub schedule.",

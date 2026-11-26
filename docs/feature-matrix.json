@@ -27,7 +27,7 @@
    {"name": "Settings copy on the pools, to rebuild after a new system disk", "beside": "no", "linux": "no", "os": "yes"},
    {"name": "iSCSI targets", "beside": "yes", "linux": "yes", "os": "yes"},
    {"name": "Merged folders across fast and large drives", "beside": "host", "linux": "yes", "os": "check", "note": "On Kiboto OS the merge, the nightly move and the watch on opened files are tried on a virtual machine, not yet over weeks on a real one."},
-   {"name": "Copies of a pool to another machine (replication)", "beside": "host", "linux": "yes", "os": "partly", "note": "Kiboto OS copies to another pool of the same machine; copies to another machine over SSH come later."}
+   {"name": "Copies of a pool to another machine (replication)", "beside": "host", "linux": "yes", "os": "yes", "note": "On Kiboto OS a copy to another machine signs in with a key of its own, shown when you make the job."}
   ]},
   {"name": "Files, apps and Kib", "features": [
    {"name": "File Explorer, previews and share links", "beside": "yes", "linux": "yes", "os": "yes"},

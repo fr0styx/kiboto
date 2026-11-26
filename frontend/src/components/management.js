@@ -1813,6 +1813,7 @@ export function initManagement() {
     if (replTargetType && replRemoteFields) {
       replTargetType.addEventListener('change', () => {
         replRemoteFields.style.display = replTargetType.value === 'local' ? 'none' : 'flex';
+        if (replTargetType.value !== 'local') import('./replication-key.js').then((m) => m.showReplicationKey());
       });
     }
 

@@ -7413,6 +7413,7 @@ export default {
   "mw.remote_endpoint_via_wireguard_mesh_vpn": "通过 WireGuard 网状 VPN 的远程端点",
   "mw.remote_host_ip": "远程主机 / IP",
   "mw.ssh_user": "SSH 用户",
+  "mw.repl_key_help": "把这个密钥添加给另一台机器上的这个用户（它的 ~/.ssh/authorized_keys）：",
   "mw.target_pool": "目标存储池",
   "mw.target_dataset": "目标数据集",
   "mw.daily": "每天",

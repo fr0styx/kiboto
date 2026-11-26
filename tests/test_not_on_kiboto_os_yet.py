@@ -376,12 +376,47 @@ def test_replication_is_offered_and_runs_in_the_host_door(kiboto_os, monkeypatch
     assert engine.get_job(job["id"])["last_status"] == "success"
 
 
-def test_on_kiboto_os_a_copy_stays_on_this_machine(kiboto_os):
+def test_on_kiboto_os_a_copy_to_another_machine_uses_the_doors_own_key(kiboto_os, monkeypatch, tmp_path):
+    from backend.hardware import pal_storage
+
     remote = {"source_pool": "fast", "target_pool": "big", "target_type": "ssh", "target_host": "h", "target_user": "u"}
-    with pytest.raises(ValueError, match="not available on Kiboto OS yet"):
-        replication_engine.validate(remote)
-    with pytest.raises(ValueError, match="not available on Kiboto OS yet"):
-        replication_engine.run_here(remote)
+    replication_engine.validate(remote)  # accepted when the job is made
+    pools = [SimpleNamespace(id="fast")]
+    monkeypatch.setattr(pal_storage, "get_storage_platform", lambda: SimpleNamespace(list_pools=lambda: pools))
+    monkeypatch.setattr(replication_engine, "key_here", lambda: "ssh-ed25519 AAAA kiboto-replication")
+    ran = []
+    monkeypatch.setattr(replication_engine, "replicate", lambda job, adapter=None, key="": ran.append(key) or {})
+    replication_engine.run_here(remote)
+    assert ran == [replication_engine.KEY]
+    side = replication_engine._Side(remote, replication_engine.KEY)
+    assert side.ssh[:3] == ["ssh", "-i", replication_engine.KEY] and "IdentitiesOnly=yes" in side.ssh
+    assert f"UserKnownHostsFile={replication_engine.KEY_DIR}/known_hosts" in side.ssh
+    assert replication_engine._Side(remote).ssh[1:3] == ["-o", "BatchMode=yes"]  # elsewhere: as before
+
+
+def test_the_replication_key_is_made_once(tmp_path, monkeypatch):
+    monkeypatch.setattr(replication_engine, "KEY_DIR", str(tmp_path / "repl"))
+    monkeypatch.setattr(replication_engine, "KEY", str(tmp_path / "repl" / "id_ed25519"))
+    made = []
+
+    def keygen(cmd, **kw):
+        made.append(cmd)
+        (tmp_path / "repl" / "id_ed25519").write_text("private")
+        (tmp_path / "repl" / "id_ed25519.pub").write_text("ssh-ed25519 AAAA kiboto-replication\n")
+        return SimpleNamespace(returncode=0, stderr="")
+
+    monkeypatch.setattr("subprocess.run", keygen)
+    assert replication_engine.key_here() == "ssh-ed25519 AAAA kiboto-replication"
+    assert replication_engine.key_here() == "ssh-ed25519 AAAA kiboto-replication" and len(made) == 1
+    assert made[0][:4] == ["ssh-keygen", "-q", "-t", "ed25519"]
+
+
+def test_the_page_gets_the_key_through_the_door_on_kiboto_os(kiboto_os, client, auth_headers, monkeypatch):
+    from backend import door
+
+    monkeypatch.setattr(door, "via", lambda op, here, **kw: "ssh-ed25519 AAAA kiboto-replication")
+    res = client.get("/api/storage/replication/key", headers=auth_headers)
+    assert res.status_code == 200 and res.json() == {"public_key": "ssh-ed25519 AAAA kiboto-replication"}
 
 
 def test_the_door_copies_only_between_this_machines_pools(monkeypatch):
@@ -403,6 +438,7 @@ def test_the_door_has_the_replication_operation():
     from backend.services import host_door
 
     assert host_door.OPERATIONS["replication.run"].args == {"job": (dict,)}
+    assert host_door.OPERATIONS["replication.key"].args == {}
     assert door.LONG["replication.run"] >= 86400
 
 
@@ -470,3 +506,35 @@ def test_the_door_waits_only_on_a_zettlab_and_for_a_sane_time(monkeypatch):
     with pytest.raises(ValueError, match="no front COPY button"):
         bl.wait_here(10)
     assert host_door.OPERATIONS["button.wait"].args == {"seconds": (int,)}
+
+
+def test_elsewhere_the_key_is_that_of_the_user_kiboto_runs_as(tmp_path, monkeypatch):
+    monkeypatch.setenv("HOME", str(tmp_path))
+    assert replication_engine.public_key() == ""  # none yet
+    (tmp_path / ".ssh").mkdir()
+    (tmp_path / ".ssh" / "id_ed25519.pub").write_text("ssh-ed25519 BBBB root@nas\n")
+    assert replication_engine.public_key() == "ssh-ed25519 BBBB root@nas"
+
+
+def test_the_door_hands_out_the_replication_key(monkeypatch):
+    from backend.services import host_door
+
+    monkeypatch.setattr(replication_engine, "key_here", lambda: "ssh-ed25519 AAAA kiboto-replication")
+    assert host_door.OPERATIONS["replication.key"].run() == "ssh-ed25519 AAAA kiboto-replication"
+
+
+def test_a_key_that_cannot_be_made_is_said(client, auth_headers, monkeypatch):
+    def broken():
+        raise RuntimeError("The replication key could not be made: no ssh-keygen")
+
+    monkeypatch.setattr("backend.api.replication.public_key", broken)
+    res = client.get("/api/storage/replication/key", headers=auth_headers)
+    assert res.status_code == 503 and "no ssh-keygen" in res.json()["detail"]
+
+
+def test_a_failed_ssh_keygen_is_said(tmp_path, monkeypatch):
+    monkeypatch.setattr(replication_engine, "KEY_DIR", str(tmp_path / "repl"))
+    monkeypatch.setattr(replication_engine, "KEY", str(tmp_path / "repl" / "id_ed25519"))
+    monkeypatch.setattr("subprocess.run", lambda cmd, **kw: SimpleNamespace(returncode=1, stderr="no entropy"))
+    with pytest.raises(RuntimeError, match="no entropy"):
+        replication_engine.key_here()

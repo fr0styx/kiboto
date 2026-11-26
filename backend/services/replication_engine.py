@@ -36,10 +36,10 @@ _NAME = re.compile(r"^[A-Za-z0-9_\-./]{1,256}$")
 _HOST = re.compile(r"^[A-Za-z0-9_\-.:]{1,256}$")
 _USER = re.compile(r"^[A-Za-z_][A-Za-z0-9_.-]{0,31}$")
 _CHUNK = 1 << 20
-REMOTE_NOT_YET = (
-    "On Kiboto OS a copy goes to another pool of this machine; copies to another machine over SSH are not "
-    "available on Kiboto OS yet."
-)
+# Kiboto OS: the host door signs in to the other machine with a key of its own for replication, never
+# root's, and remembers that machine's host key the first time (known_hosts beside it)
+KEY_DIR = "/etc/kiboto/replication"
+KEY = KEY_DIR + "/id_ed25519"
 
 
 class ReplicationError(RuntimeError):
@@ -105,10 +105,6 @@ def validate(job: dict[str, Any]) -> None:
     if not job.get("source_pool") or not job.get("target_pool"):
         raise ValueError("Pick a source pool and a target.")
     if job.get("target_type", "local") != "local":
-        from backend import runtime
-
-        if runtime.without_root():  # the host door would sign in to the other machine with root's key
-            raise ValueError(REMOTE_NOT_YET)
         if not _HOST.match(str(job.get("target_host") or "")):
             raise ValueError("A remote target needs a host name or address.")
         if not _USER.match(str(job.get("target_user") or "")):
@@ -133,10 +129,14 @@ def _run(cmd: list[str], timeout: int = 600) -> str:
 class _Side:
     """Where commands for the target run: here, or on the other machine over SSH."""
 
-    def __init__(self, job: dict[str, Any]):
+    def __init__(self, job: dict[str, Any], key: str = ""):
         self.remote = job.get("target_type", "local") != "local"
+        own_key = ["-i", key, "-o", "IdentitiesOnly=yes"] if key else []
+        own_key += ["-o", f"UserKnownHostsFile={os.path.dirname(key)}/known_hosts"] if key else []
+        own_key += ["-o", "StrictHostKeyChecking=accept-new"] if key else []
         self.ssh = [
             "ssh",
+            *own_key,
             "-o",
             "BatchMode=yes",
             "-o",
@@ -318,14 +318,14 @@ def _fs_type(adapter: Any, pool_id: str) -> str:
     raise ReplicationError(f"There is no pool {pool_id}")
 
 
-def replicate(job: dict[str, Any], adapter: Any = None) -> dict[str, Any]:
+def replicate(job: dict[str, Any], adapter: Any = None, key: str = "") -> dict[str, Any]:
     """One run of a job: snapshot, send what changed, prune. Returns the snapshot and bytes."""
     validate(job)
     if adapter is None:
         from backend.hardware.pal_storage import get_storage_platform
 
         adapter = get_storage_platform()
-    side = _Side(job)
+    side = _Side(job, key)
     kind = _fs_type(adapter, str(job["source_pool"]))
     engine = _Zfs(job, side) if kind == "zfs" else _Btrfs(job, side, adapter)
     snap = _tag(job) + _stamp()
@@ -339,18 +339,60 @@ def replicate(job: dict[str, Any], adapter: Any = None) -> dict[str, Any]:
 
 
 def run_here(job: dict[str, Any]) -> dict[str, Any]:
-    """The host door's operation (ADR 0006): one run of a job, as root. Only to a pool of this
-    machine, between pools Kiboto knows; names are checked as everywhere (validate)."""
-    if not isinstance(job, dict) or job.get("target_type", "local") != "local":
-        raise ValueError(REMOTE_NOT_YET)
+    """The host door's operation (ADR 0006): one run of a job, as root, from a pool Kiboto knows;
+    names are checked as everywhere (validate). To this machine only between its own pools; to
+    another machine with the door's own replication key (key_here), never root's."""
+    if not isinstance(job, dict):
+        raise ValueError("Not copying: that is not a replication job.")
     validate(job)
     from backend.hardware.pal_storage import get_storage_platform
 
     adapter = get_storage_platform()
     known = {p.id for p in adapter.list_pools()}
-    if job["source_pool"] not in known or job["target_pool"] not in known:
+    remote = job.get("target_type", "local") != "local"
+    if job["source_pool"] not in known or (not remote and job["target_pool"] not in known):
         raise ValueError("Not copying: the source or the target is not one of this machine's pools.")
+    if remote:
+        key_here()
+        return replicate(job, adapter, KEY)
     return replicate(job, adapter)
+
+
+def key_here() -> str:
+    """The host door's operation: the public half of its replication key, made the first time.
+    The person adds it to the other machine (the user's authorized_keys there)."""
+    import subprocess
+
+    if not os.path.isfile(KEY):
+        os.makedirs(KEY_DIR, mode=0o700, exist_ok=True)
+        done = subprocess.run(  # noqa: S603
+            ["ssh-keygen", "-q", "-t", "ed25519", "-N", "", "-C", "kiboto-replication", "-f", KEY],
+            capture_output=True,
+            text=True,
+            timeout=60,
+            check=False,
+        )
+        if done.returncode != 0:
+            raise RuntimeError("The replication key could not be made: " + (done.stderr or "").strip()[-200:])
+    with open(KEY + ".pub", encoding="utf-8") as f:
+        return f.read().strip()
+
+
+def public_key() -> str:
+    """The key the other machine must accept: the host door's own on Kiboto OS, elsewhere the one
+    of the user Kiboto runs as (empty when it has none yet)."""
+    from backend import runtime
+
+    if runtime.without_root():
+        from backend import door
+
+        return str(door.via("replication.key", key_here) or "")
+    for name in ("id_ed25519.pub", "id_ecdsa.pub", "id_rsa.pub"):
+        path = os.path.join(os.path.expanduser("~"), ".ssh", name)
+        if os.path.isfile(path):
+            with open(path, encoding="utf-8") as f:
+                return f.read().strip()
+    return ""
 
 
 class ReplicationEngine:

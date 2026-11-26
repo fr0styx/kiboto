@@ -7413,6 +7413,7 @@ export default {
   "mw.remote_endpoint_via_wireguard_mesh_vpn": "Cible distante via le VPN WireGuard",
   "mw.remote_host_ip": "Hôte distant / IP",
   "mw.ssh_user": "Utilisateur SSH",
+  "mw.repl_key_help": "Ajoutez cette clé à cet utilisateur sur l'autre machine (dans son ~/.ssh/authorized_keys) :",
   "mw.target_pool": "Pool cible",
   "mw.target_dataset": "Jeu de données cible",
   "mw.daily": "Quotidien",

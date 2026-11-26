@@ -34,7 +34,7 @@ What the words mean:
 | Settings copy on the pools, to rebuild after a new system disk | No | No | Yes |
 | iSCSI targets | Yes | Yes | Yes |
 | Merged folders across fast and large drives<br><sub>On Kiboto OS the merge, the nightly move and the watch on opened files are tried on a virtual machine, not yet over weeks on a real one.</sub> | Your NAS system does this | Yes | Being checked |
-| Copies of a pool to another machine (replication)<br><sub>Kiboto OS copies to another pool of the same machine; copies to another machine over SSH come later.</sub> | Your NAS system does this | Yes | Partly |
+| Copies of a pool to another machine (replication)<br><sub>On Kiboto OS a copy to another machine signs in with a key of its own, shown when you make the job.</sub> | Your NAS system does this | Yes | Yes |
 
 ## Files, apps and Kib
 

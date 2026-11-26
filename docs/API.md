@@ -38,7 +38,7 @@ request and response schemas.
 
 <!-- BEGIN generated endpoints: python scripts/api_reference.py --update -->
 
-834 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
+835 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
 
 ### AI Conversation History
 
@@ -850,6 +850,7 @@ request and response schemas.
 | `DELETE` | `/api/v1/storage/replication/jobs/{job_id}` | `storage:admin` | Delete Replication Job |
 | `GET` | `/api/v1/storage/replication/jobs/{job_id}` | `storage:read` | Get Replication Job |
 | `POST` | `/api/v1/storage/replication/jobs/{job_id}/run` | `storage:admin` | Run Replication Job |
+| `GET` | `/api/v1/storage/replication/key` | `storage:admin` | The public key a copy to another machine signs in with: added to that machine's user |
 
 ### Storage Subsystem & PAL
 
