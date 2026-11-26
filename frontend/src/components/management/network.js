@@ -525,8 +525,10 @@ async function loadNetworkTopology() {
                 <span class="switch-speed-pill speed-10g" title="${escapeHtml(b.mode_title || b.mode_name || b.mode)}">${escapeHtml(b.mode_title || b.mode_name || b.mode || 'Bonding')}</span>
                 <span class="nw-xs-muted-mono-2">${b.miimon || 100}ms</span>
               </div>
-              <button class="btn-pill-toggle btn-config-bond is-small" data-bond="${escapeHtml(b.name)}" style="color: var(--lt-ink-brand, var(--accent-cyan-hi, #4fd8c4)); border-color: rgba(79,216,196,0.3);">${t('net.configure_bond', 'Configure')}</button>
-              ${canChange('bond') ? `<button class="btn-pill-toggle btn-remove-bond is-small" data-bond="${escapeHtml(b.name)}">${escapeHtml(t('net.take_apart_bond', 'Take apart'))}</button>` : ''}
+              <div class="network-card-actions">
+                <button class="btn-pill-toggle btn-config-bond is-small" data-bond="${escapeHtml(b.name)}" style="color: var(--lt-ink-brand, var(--accent-cyan-hi, #4fd8c4)); border-color: rgba(79,216,196,0.3);">${t('net.configure_bond', 'Configure')}</button>
+                ${canChange('bond') ? `<button class="btn-pill-toggle btn-remove-bond is-small" data-bond="${escapeHtml(b.name)}">${escapeHtml(t('net.take_apart_bond', 'Take apart'))}</button>` : ''}
+              </div>
             </div>
             <div class="nw-xs-muted-2">${t('net.active_port', 'Active port:')} <strong style="color:var(--ok2, #3bf58b);">${escapeHtml(b.active_slave || t('ci.none', 'None'))}</strong></div>
             <div class="network-bridge-members">
@@ -540,8 +542,8 @@ async function loadNetworkTopology() {
       if (canChange('bond') && !bonds.length) {
         items.push(`
           <div class="network-bridge-card">
-            <div class="network-bridge-header">
-              <span class="nw-xs-muted-2">${escapeHtml(t('net.make_bond_hint', 'Two or more ports as one: if a cable or switch port fails, the others carry on.'))}</span>
+            <p class="nw-xs-muted-2">${escapeHtml(t('net.make_bond_hint', 'Two or more ports as one: if a cable or switch port fails, the others carry on.'))}</p>
+            <div class="network-card-actions">
               <button class="btn-pill-toggle is-small" id="btn-net-make-bond">${escapeHtml(t('net.make_bond', 'Make a bond'))}</button>
             </div>
           </div>

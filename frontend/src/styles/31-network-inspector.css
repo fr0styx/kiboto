@@ -337,9 +337,17 @@
 
 .network-bridge-header {
   display: flex;
+  flex-wrap: wrap; /* on a phone the buttons go under the name instead of squeezing it */
   justify-content: space-between;
   align-items: center;
+  gap: 8px;
   margin-bottom: 8px;
+}
+
+.network-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
 .network-bridge-name {
