@@ -257,6 +257,34 @@ def ensure_units(rel: str, run: Any = None, unit_dir: str | None = None, door_cu
     return changed
 
 
+# The lowest version this machine installs (security review finding 9): an older release, signed
+# as it is, may have a known bug in the root service, and a taken-over web process could ask for it.
+# Raised by a release that fixes the root service (docs/RELEASING.md); never above __version__.
+# Going back to a version kept on the machine (Revert) is not an install and is not limited.
+LOWEST_VERSION = "2.0.6"
+_VERSION_LINE = re.compile(r'^__version__ = "([0-9]+)\.([0-9]+)\.([0-9]+)[^"]*"$', re.M)
+
+
+def version_of(rel: str) -> tuple[int, int, int] | None:
+    """The version an unpacked image says it is, from its own code, not from what was asked for."""
+    try:
+        with open(os.path.join(rel, "backend", "__init__.py"), encoding="utf-8") as f:
+            m = _VERSION_LINE.search(f.read())
+    except OSError:
+        return None
+    return (int(m.group(1)), int(m.group(2)), int(m.group(3))) if m else None
+
+
+def _not_too_old(rel: str) -> None:
+    found = version_of(rel)
+    lowest = tuple(int(x) for x in LOWEST_VERSION.split("."))
+    if found is None:
+        raise UpdateFailed("the image does not say which version it is, so it is not installed")
+    if found < lowest:
+        shown = ".".join(str(x) for x in found)
+        raise UpdateFailed(f"this machine installs Kiboto {LOWEST_VERSION} or newer, and the image is {shown}")
+
+
 def prepare(image: str, version: str, prefix: str = PREFIX, run: Any = None) -> str:
     """Makes the new version ready beside the running one. Returns its folder."""
     run = run or _run
@@ -264,6 +292,7 @@ def prepare(image: str, version: str, prefix: str = PREFIX, run: Any = None) -> 
     try:
         extract(image, rel)
         _whole(rel)
+        _not_too_old(rel)  # before its Python packages are installed or any of its code runs
         venv_for(rel, prefix, run)
         add_missing_tools(rel, run)
         code, said = run(

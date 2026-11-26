@@ -116,6 +116,8 @@ Kiboto OS: the root service no longer acts on unchecked files in the web process
 
 Kiboto OS: updates always check the image's signature there; the UPDATE_SIGNATURES setting can no longer switch that off on a machine that takes only releases.
 
+Kiboto OS: an update no longer installs a version older than the lowest one the running release allows, read from the downloaded image itself. Revert to a version kept on the machine still works.
+
 #### New
 
 Kiboto lists the third-party software it bundles and its licences at /third-party-licences.txt, and the install image says which Debian image it is made from and where Debian publishes its sources.

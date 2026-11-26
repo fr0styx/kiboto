@@ -692,3 +692,44 @@ def test_python_environments_no_kept_version_uses_go_with_the_versions(tmp_path)
     left = set(os.listdir(tmp_path / "venvs"))
     assert left == {os.path.basename(venvs[1]), os.path.basename(venvs[3]), "being-made"}
     assert nu.prune_venvs(str(tmp_path / "nothing-here")) == []
+
+
+def test_an_image_older_than_the_lowest_version_is_not_installed(tmp_path, monkeypatch):
+    """Read from the image's own code: the version the caller names does not count."""
+    old = {**IMAGE, "backend": tar_of({"backend/__init__.py": b'__version__ = "2.0.5"\n', "backend/main.py": b"x\n"})}
+    Docker(monkeypatch, parts=old)
+    run = Runs()
+    with pytest.raises(nu.UpdateFailed, match=r"installs Kiboto 2\.0\.6 or newer, and the image is 2\.0\.5"):
+        nu.prepare("img", "9.9.9", str(tmp_path), run)  # named as a new version: still refused
+    assert not os.listdir(tmp_path / "releases") and not run.did("pip")  # nothing of it ran
+    nameless = {
+        **IMAGE,
+        "backend": tar_of({"backend/__init__.py": b'__version__ = "dev"\n', "backend/main.py": b"x\n"}),
+    }
+    Docker(monkeypatch, parts=nameless)
+    with pytest.raises(nu.UpdateFailed, match="does not say which version"):
+        nu.prepare("img", "9.9.9", str(tmp_path), Runs())
+
+
+@pytest.mark.parametrize(
+    "line, found",
+    [
+        ('__version__ = "2.0.6"', (2, 0, 6)),
+        ('__version__ = "2.0.7-rc1"', (2, 0, 7)),
+        ('__version__ = "10.2.30"', (10, 2, 30)),
+        ("__version__ = 'x'", None),
+        ('version = "2.0.7"', None),
+    ],
+)
+def test_the_version_is_read_from_the_image(tmp_path, line, found):
+    (tmp_path / "backend").mkdir()
+    (tmp_path / "backend" / "__init__.py").write_text('"""Kiboto."""\n' + line + "\n")
+    assert nu.version_of(str(tmp_path)) == found
+    assert nu.version_of(str(tmp_path / "nothing")) is None
+
+
+def test_the_lowest_version_is_never_above_this_one():
+    from backend import __version__
+
+    lowest = tuple(int(x) for x in nu.LOWEST_VERSION.split("."))
+    assert lowest <= tuple(int(x) for x in __version__.split("-")[0].split("."))

@@ -51,6 +51,15 @@ Each tag also exists with `-core` for the core image.
    app's Stable channel offers it. On other days the scheduled run only names the next train
    date in its summary. It warns when nothing has reached Stable for 21 days.
 
+## The lowest version Kiboto OS installs
+
+`LOWEST_VERSION` in `backend/services/native_update.py` is the oldest version a Kiboto OS machine
+installs as an update; the root service reads the version from inside the downloaded image. When a
+release fixes something in the root service, raise it to that release's version in the release
+commit, so no machine can be talked into installing the version with the bug again. It may never be
+higher than the version being released (a test checks). Revert, which goes back to a version kept on
+the machine, is not limited by it.
+
 ## What a release carries
 
 Beside the images, the GitHub release has `install.sh` (the install script for a machine of its
