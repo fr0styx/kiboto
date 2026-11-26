@@ -263,13 +263,16 @@
 
 /* SET-17: 13 entries and four headings fit the default window (586 px of sidebar) */
 @media (min-width: 769px) {
+  .mgmt-sidebar-nav {
+    gap: 2px; /* with 14 px entries, all of them and the four headings still fit 586 px */
+  }
   .mgmt-sidebar-nav .mgmt-sidebar-item {
     padding-top: 3px; /* 26 px rows: above the 24 px pointer target, and Calendar fits too */
     padding-bottom: 3px;
     line-height: 1.25; /* Chinese fonts set taller lines on "normal" */
   }
   .mgmt-sidebar-nav .mgmt-sidebar-category {
-    padding-top: 8px;
+    padding-top: 9px; /* room above each group: the headings are plain words now, not capitals */
     padding-bottom: 2px;
     margin-top: 2px;
     line-height: 1.25;

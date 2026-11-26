@@ -99,8 +99,8 @@
 
 /* LEFT SIDEBAR */
 .mgmt-sidebar {
-  width: 215px;
-  min-width: 215px;
+  width: 236px; /* the longest entry with its badge (Spanish "Almacenamiento", "5 discos") fits */
+  min-width: 236px;
   height: 100%;
   background: var(--lt-b-0b1517f2, rgba(11, 21, 23, 0.95));
   border-right: 1px solid var(--kb-line-8);
@@ -118,11 +118,14 @@
   gap: 3px;
 }
 
+/* Section headings in sentence case: a step under the entries (13 px, the smallest text, against the
+   entries' 14 px), plain weight and muted, with room above each group, so the groups read apart
+   without capitals */
 .mgmt-sidebar-category {
   font-size: var(--kb-fs-xs);
-  font-weight: 800;
+  font-weight: 500;
   color: var(--kb-text-muted);
-  padding: 10px 10px 4px 10px;
+  padding: 14px 10px 4px 10px;
   margin-top: 6px;
   display: flex;
   align-items: center;
@@ -136,13 +139,13 @@
 .mgmt-sidebar-item {
   display: flex;
   align-items: center;
-  gap: 9px;
-  padding: 8px 10px;
+  gap: 6px;
+  padding: 8px 8px; /* with the 14 px entries, "Speicher" and its "5 Laufwerke" still fit */
   border-radius: 6px;
   background: transparent;
   border: 1px solid transparent;
   color: var(--kb-text-muted);
-  font-size: var(--kb-fs-xs);
+  font-size: var(--kb-fs);
   font-weight: 600;
   cursor: pointer;
   text-align: left;
@@ -193,7 +196,7 @@
 
 .mgmt-sidebar-badge {
   font-size: var(--kb-fs-xs);
-  font-weight: 700;
+  font-weight: 600;
   padding: 1px 5px;
   border-radius: 4px;
   background: var(--kb-glaze-8);
