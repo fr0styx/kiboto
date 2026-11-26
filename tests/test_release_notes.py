@@ -32,3 +32,40 @@ def test_changelog_mentions_nobody():
     prose = re.sub(r"`[^`\n]*`", "", re.sub(r"```.*?```", "", text, flags=re.S))
     mentions = sorted(set(re.findall(r"(?<![\w/])@([A-Za-z0-9][A-Za-z0-9-]*)", prose)))
     assert mentions == [], f"put these in `code`: {mentions}"
+
+
+def test_kiboto_os_entries_come_last_in_each_section():
+    notes = """### Title
+
+Intro.
+
+#### Fixes
+
+- Kiboto OS: the firewall keeps its rules.
+- A share's name may hold a dot.
+  It wraps here.
+- On a machine of its own, updates check the image.
+
+#### New
+
+- Kib floats in a corner.
+
+#### Before you upgrade
+
+- **Kiboto OS:** the kernel follows Debian.
+- **The image name** changed."""
+    out = ern.by_edition(notes)
+    fixes = out[out.index("#### Fixes") : out.index("#### New")]
+    assert fixes.index("A share's name") < fixes.index("##### Kiboto OS only") < fixes.index("Kiboto OS: the firewall")
+    assert "  It wraps here." in fixes.split("##### Kiboto OS only")[0]  # an entry keeps its own lines
+    assert "On a machine of its own" in fixes.split("##### Kiboto OS only")[1]
+    new = out[out.index("#### New") : out.index("#### Before")]
+    assert "Kiboto OS only" not in new  # nothing to split
+    before = out[out.index("#### Before") :]
+    assert before.index("**Kiboto OS:**") < before.index("**The image name**")  # left as written
+    assert out.startswith("### Title\n\nIntro.")
+
+
+def test_a_section_of_only_kiboto_os_entries_needs_no_subheading():
+    out = ern.by_edition("#### Fixes\n\n- Kiboto OS: one.\n- Kiboto OS: two.")
+    assert "##### Kiboto OS only" not in out and out.count("- Kiboto OS") == 2
