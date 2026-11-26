@@ -199,7 +199,9 @@ Kiboto updates itself from the Updates page as it does elsewhere. A new version 
 running one and switched to; if it does not start, the machine goes back to the version before and
 says so. "Revert" goes back to the version before the last update, with the settings as they were
 then. ZFS and Docker move only when a Kiboto release was tested with newer ones: Updates then offers
-them.
+them. A version's Python packages come out of its own image, the one whose signature was checked, so
+an update downloads nothing from the Python package index; only a version whose image has none for
+the machine's Python installs them with `pip`, from the hashes the version names.
 
 Debian's security fixes are installed by themselves every day (Debian's `unattended-upgrades`, set
 to Debian's security archive only, in `/etc/apt/apt.conf.d/52kiboto-security`), the kernel included.
