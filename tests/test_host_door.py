@@ -1004,6 +1004,8 @@ def test_the_door_keeps_the_docker_proxy_running(monkeypatch, tmp_path):
     monkeypatch.setattr(config, "RAW_DOCKER_SOCK", str(raw))
     monkeypatch.setattr(host_door, "keep_docker_proxy", lambda: started.append(1))
     monkeypatch.setattr(host_door, "serve", lambda: served.append(1))
+    watched = []
+    monkeypatch.setattr(host_door, "fan_watchdog", lambda: watched.append(1))  # it would watch for ever
     monkeypatch.delenv(door.IN_DOOR, raising=False)
 
     class Now:  # the thread's work, done at once
@@ -1015,7 +1017,7 @@ def test_the_door_keeps_the_docker_proxy_running(monkeypatch, tmp_path):
 
     monkeypatch.setattr(host_door.threading, "Thread", Now)
     assert host_door.main() == 0
-    assert started == [1] and served == [1]
+    assert started == [1] and served == [1] and watched == [1]
 
 
 def test_the_proxy_socket_goes_to_the_web_users_group(monkeypatch, tmp_path):

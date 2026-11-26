@@ -872,12 +872,27 @@ def keep_docker_proxy(path: str = door.DOCKER_SOCK, rounds: int | None = None) -
         rounds = None if rounds is None else rounds - 1
 
 
+def fan_watchdog(watch: Callable[..., Any] | None = None) -> bool:
+    """Kiboto OS: the fan watchdog beside the app runs here. When the web process controlled the
+    fans and its heartbeat stops without a release, the fans go to their safe state (firmware
+    control, or a fixed safe speed). Only on a box with a fan controller Kiboto can drive; it
+    never touches fans the app did not take. Returns whether it watches."""
+    from backend import fan_watchdog as fw
+    from backend.services.fan_heartbeat import heartbeat_path
+
+    if fw.controller() == "none":
+        return False
+    (watch or fw.watch)(heartbeat_path(), log=lambda m: logger.warning("%s", m))
+    return True
+
+
 def main() -> int:
     os.environ[door.IN_DOOR] = "1"  # an operation run here does not ask the door again
     from backend.config import RAW_DOCKER_SOCK
 
     if os.path.exists(RAW_DOCKER_SOCK):
         threading.Thread(target=keep_docker_proxy, name="DockerProxy", daemon=True).start()
+    threading.Thread(target=fan_watchdog, name="FanWatchdog", daemon=True).start()
     serve()
     return 0
 

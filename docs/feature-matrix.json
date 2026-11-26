@@ -54,7 +54,7 @@
    {"name": "Light bar", "beside": "yes", "linux": "yes", "os": "check", "note": "The Zettlab D4's too, without the rainbow effect."},
    {"name": "Front screen", "beside": "yes", "linux": "yes", "os": "partly", "note": "Kiboto OS draws the screen with the plain renderer. The D4's screen is not drawn yet."},
    {"name": "Card copies from the SD and microSD slots", "beside": "yes", "linux": "yes", "os": "yes"},
-   {"name": "Fan watchdog beside the app", "beside": "yes", "linux": "yes", "os": "soon"}
+   {"name": "Fan watchdog beside the app", "beside": "yes", "linux": "yes", "os": "yes", "note": "On Kiboto OS it runs in the machine's root service, which outlives a web process that hangs."}
   ]},
   {"name": "Where it runs", "features": [
    {"name": "Processors", "beside": "amd64 and arm64", "linux": "amd64 and arm64", "os": "amd64"},

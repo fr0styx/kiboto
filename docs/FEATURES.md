@@ -70,7 +70,7 @@ What the words mean:
 | Light bar<br><sub>The Zettlab D4's too, without the rainbow effect.</sub> | Yes | Yes | Being checked |
 | Front screen<br><sub>Kiboto OS draws the screen with the plain renderer. The D4's screen is not drawn yet.</sub> | Yes | Yes | Partly |
 | Card copies from the SD and microSD slots | Yes | Yes | Yes |
-| Fan watchdog beside the app | Yes | Yes | Not yet |
+| Fan watchdog beside the app<br><sub>On Kiboto OS it runs in the machine's root service, which outlives a web process that hangs.</sub> | Yes | Yes | Yes |
 
 ## Where it runs
 

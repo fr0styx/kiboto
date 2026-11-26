@@ -1,6 +1,7 @@
 """Host fan watchdog: keeps the fans safe when the Kiboto app can't.
 
-Runs in its own small container next to the app (see docs/FAN_WATCHDOG.md):
+Runs in its own small container next to the app (see docs/FAN_WATCHDOG.md), and on Kiboto OS in
+the host door (host_door.fan_watchdog), which outlives a web process that hangs:
 
     python -m backend.fan_watchdog
 
@@ -12,6 +13,7 @@ acts once per outage and starts watching again when the beats come back."""
 
 import json
 import os
+import stat
 import time
 from collections.abc import Callable
 from typing import Any
@@ -21,12 +23,25 @@ CHECK_EVERY = float(os.environ.get("FAN_WATCHDOG_CHECK_SECS", "5"))
 DRY_RUN = os.environ.get("FAN_WATCHDOG_DRY_RUN") == "1"  # log instead of touching the fans
 
 
+MAX_BEAT_BYTES = 4096
+
+
 def read_heartbeat(path: str) -> dict[str, Any] | None:
+    """The app's last beat. Only a small file reached through no link: on Kiboto OS the root service
+    reads it from the web process's folder."""
     try:
-        with open(path, encoding="utf-8") as f:
-            data = json.load(f)
+        fd = os.open(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0))
+    except OSError:
+        return None
+    try:
+        st = os.fstat(fd)
+        if not stat.S_ISREG(st.st_mode) or st.st_size > MAX_BEAT_BYTES:
+            return None
+        data = json.loads(os.read(fd, MAX_BEAT_BYTES).decode("utf-8"))
     except (OSError, ValueError):
         return None
+    finally:
+        os.close(fd)
     return data if isinstance(data, dict) and "ts" in data else None
 
 
