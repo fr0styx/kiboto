@@ -8,6 +8,10 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 
 Where a feature is still being checked on your edition, or your NAS system does it, its card says so in the same words as the feature list on kiboto.net: on Kiboto OS, drive replacement and merged folders say they are still being checked.
 
+#### Security
+
+Kiboto OS: when Kiboto hands files and folders in a shared folder to their people, a link put in their place over the network is never followed, so a system file's owner or rights can never be changed that way.
+
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container
 

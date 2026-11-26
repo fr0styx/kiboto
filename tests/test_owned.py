@@ -22,7 +22,7 @@ def as_root(monkeypatch):
     monkeypatch.setattr(owned, "_me", lambda: 0)
     monkeypatch.setattr(owned.os, "lstat", lambda path, *a, **k: _as(real_lstat(path, *a, **k), 0, 0))
     monkeypatch.setattr(owned.os, "stat", lambda path, *a, **k: _as(real_stat(path, *a, **k), 99, 100))
-    monkeypatch.setattr(owned.os, "lchown", lambda path, uid, gid: given.append((path, uid, gid)))
+    monkeypatch.setattr(owned, "_give", lambda path, uid, gid, expect=None: given.append((path, uid, gid)))
     return given
 
 
@@ -61,10 +61,10 @@ def test_a_filesystem_without_owners_refuses_and_that_is_not_an_error(tmp_path, 
     made = share / "a.mkv"
     made.write_text("a")
 
-    def refuses(path, uid, gid):
+    def refuses(path, uid, gid, expect=None):
         raise PermissionError(1, "Operation not permitted")
 
-    monkeypatch.setattr(owned.os, "lchown", refuses)
+    monkeypatch.setattr(owned, "_give", refuses)
     assert owned.like_folder(str(made)) is False
 
 
@@ -77,7 +77,7 @@ def test_a_file_of_someone_elses_is_never_touched(tmp_path, monkeypatch):
     os.chmod(theirs, 0o600)
     monkeypatch.setattr(owned, "_me", lambda: os.lstat(theirs).st_uid + 1)  # Kiboto is another user than its owner
     given = []
-    monkeypatch.setattr(owned.os, "lchown", lambda *a: given.append(a))
+    monkeypatch.setattr(owned, "_give", lambda *a: given.append(a))
     assert owned.like_folder(str(theirs)) is False and given == [] and _mode(theirs) == "0o600"
 
 
@@ -96,7 +96,7 @@ def test_a_link_is_handed_over_and_not_followed(tmp_path, as_root):
 
 def test_folders_made_on_the_way_are_seen_to_from_the_top_down(tmp_path, monkeypatch):
     monkeypatch.setattr(owned, "_me", lambda: os.lstat(tmp_path).st_uid)  # the test's files are Kiboto's own
-    monkeypatch.setattr(owned.os, "lchown", lambda *a: None)
+    monkeypatch.setattr(owned, "_give", lambda *a: None)
     share = tmp_path / "Films"
     share.mkdir()
     os.chmod(share, 0o775)
@@ -145,13 +145,13 @@ def test_a_restored_copy_keeps_the_owners_it_had(tmp_path, monkeypatch):
     def lstat(path, *a, **k):
         return _as(real(path, *a, **k), *owners[os.path.basename(str(path))])
 
-    def lchown(path, uid, gid):
+    def lchown(path, uid, gid, expect=None):
         if not os.path.lexists(path):
             raise FileNotFoundError(2, "No such file", path)
         given.append((os.path.relpath(path, tmp_path / "live"), uid, gid))
 
     monkeypatch.setattr(owned.os, "lstat", lstat)
-    monkeypatch.setattr(owned.os, "lchown", lchown)
+    monkeypatch.setattr(owned, "_give", lchown)
     monkeypatch.setattr(owned, "_me", lambda: 1000)
     owned.like_source(str(src), str(dst))
     assert given == []  # only root can hand a file to someone
@@ -188,7 +188,7 @@ def test_a_shared_folder_goes_to_the_file_servers_user(tmp_path, monkeypatch):
     real = os.stat
     owner = {"uid": 0}
     monkeypatch.setattr(owned.os, "stat", lambda path, *a, **k: _as(real(path, *a, **k), owner["uid"], 0))
-    monkeypatch.setattr(owned.os, "chown", lambda path, uid, gid: given.append((path, uid, gid)))
+    monkeypatch.setattr(owned, "_give", lambda path, uid, gid, expect=None: given.append((path, uid, gid)))
     monkeypatch.setattr(owned, "_ids", lambda user, group: (65534, 100))
     monkeypatch.setattr(owned, "_me", lambda: 1000)
     assert owned.to_people(str(share)) is False and given == []  # only root can hand a folder over
@@ -210,11 +210,11 @@ def test_a_shared_folder_goes_to_the_file_servers_user(tmp_path, monkeypatch):
     assert owned.to_people(str(a_file)) is False and owned.to_people(str(tmp_path / "missing")) is False
     assert given == []
 
-    def refuses(path, uid, gid):
+    def refuses(path, uid, gid, expect=None):
         raise PermissionError(1, "Operation not permitted")
 
     os.chmod(share, 0o755)
-    monkeypatch.setattr(owned.os, "chown", refuses)
+    monkeypatch.setattr(owned, "_give", refuses)
     assert owned.to_people(str(share)) is False and _mode(share) == "0o755"
 
 
@@ -260,13 +260,13 @@ def test_what_is_still_the_systems_in_a_folder_goes_to_its_people(tmp_path, monk
     def uid_of(path):
         return owner.get(str(path), 0)
 
-    def lchown(path, uid, gid):
+    def lchown(path, uid, gid, expect=None):
         owner[str(path)] = uid
         given.append(os.path.relpath(path, share))
 
     monkeypatch.setattr(owned.os, "lstat", lambda p, *a, **k: _as(real_lstat(p, *a, **k), uid_of(p), 100))
     monkeypatch.setattr(owned.os, "stat", lambda p, *a, **k: _as(real_stat(p, *a, **k), uid_of(p), 100))
-    monkeypatch.setattr(owned.os, "lchown", lchown)
+    monkeypatch.setattr(owned, "_give", lchown)
     monkeypatch.setattr(owned, "_me", lambda: 1000)
     assert owned.give_back(str(share)) == {"seen": 0, "given": 0}  # only root can hand anything over
     monkeypatch.setattr(owned, "_me", lambda: 0)
@@ -295,7 +295,7 @@ def test_a_folder_the_web_user_made_is_handed_over_by_the_door(tmp_path, monkeyp
     given = []
     real = os.stat
     monkeypatch.setattr(owned.os, "stat", lambda path, *a, **k: _as(real(path, *a, **k), 999, 999))
-    monkeypatch.setattr(owned.os, "chown", lambda path, uid, gid: given.append((path, uid, gid)))
+    monkeypatch.setattr(owned, "_give", lambda path, uid, gid, expect=None: given.append((path, uid, gid)))
     monkeypatch.setattr(owned, "_ids", lambda user, group: (65534, 100))
     monkeypatch.setattr(owned, "_me", lambda: 0)
     monkeypatch.setattr(owned, "_ours", lambda: {0, 999})
@@ -304,3 +304,61 @@ def test_a_folder_the_web_user_made_is_handed_over_by_the_door(tmp_path, monkeyp
     monkeypatch.setattr(owned, "_ours", lambda: {0})  # someone else's folder: left alone
     os.chmod(home, 0o755)
     assert owned.to_people(str(home)) is False
+
+
+def test_rights_are_never_changed_through_a_link_swapped_in_after_the_look(tmp_path, monkeypatch):
+    """On Kiboto OS root sets rights in shared folders that people write to over the network: a file
+    swapped for a link to a system file after it was looked at must not change that file."""
+    share = tmp_path / "Films"
+    share.mkdir()
+    os.chmod(share, 0o777)
+    made = share / "a.mkv"
+    made.write_text("a")
+    os.chmod(made, 0o600)
+    system = tmp_path / "shadow"
+    system.write_text("root only")
+    os.chmod(system, 0o600)
+    monkeypatch.setattr(owned, "_me", lambda: os.lstat(made).st_uid)
+    real, swapped = os.lstat, []
+
+    def look_then_swap(path, *a, **k):
+        st = real(path, *a, **k)
+        if str(path) == str(made) and not swapped:
+            swapped.append(1)
+            os.rename(made, share / "a.old")
+            os.symlink(system, made)
+        return st
+
+    monkeypatch.setattr(owned.os, "lstat", look_then_swap)
+    assert owned.like_folder(str(made)) is False
+    assert _mode(system) == "0o600"  # the system file keeps its rights
+
+
+def test_nothing_is_changed_through_a_folder_on_the_way_that_is_a_link(tmp_path, monkeypatch):
+    share = tmp_path / "Films"
+    share.mkdir()
+    elsewhere = tmp_path / "etc"
+    elsewhere.mkdir()
+    (elsewhere / "passwd").write_text("x")
+    os.chmod(elsewhere / "passwd", 0o600)
+    (share / "sub").symlink_to(elsewhere)
+    with pytest.raises(OSError):
+        owned._mode(str(share / "sub" / "passwd"), 0o666)
+    with pytest.raises(OSError):
+        owned._give(str(share / "sub" / "passwd"), os.getuid(), os.getgid())
+    assert _mode(elsewhere / "passwd") == "0o600"
+
+
+def test_the_change_helpers_set_rights_and_owner_on_the_file_itself(tmp_path):
+    f = tmp_path / "a.txt"
+    f.write_text("a")
+    os.chmod(f, 0o600)
+    owned._mode(str(f), 0o664, os.lstat(f))
+    assert _mode(f) == "0o664"
+    owned._give(str(f), os.getuid(), os.getgid(), os.lstat(f))  # to its own owner: allowed to anyone
+    other = tmp_path / "b.txt"
+    other.write_text("b")
+    with pytest.raises(OSError):
+        owned._mode(str(f), 0o600, os.lstat(other))  # not the file that was looked at
+    os.mkfifo(tmp_path / "pipe")
+    owned._mode(str(tmp_path / "pipe"), 0o666)  # a pipe is never opened: nothing happens

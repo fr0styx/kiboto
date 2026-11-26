@@ -20,6 +20,8 @@ of many files.
 
 from __future__ import annotations
 
+import contextlib
+import errno
 import grp
 import os
 import pwd
@@ -62,6 +64,65 @@ def _door(op: str, **args: Any) -> Any:
         return None
 
 
+# --- changing an owner or rights without following a link ---------------------------------------
+# On Kiboto OS this runs as root in the host door, inside shared folders that people write to over
+# the network. Between looking at a file and changing it, someone could put a link in its place, or
+# in the place of a folder on the way to it, and have root change a system file instead. So every
+# change is made by name in a folder reached from the top one folder at a time without following a
+# link, after checking it is still the file that was looked at; rights are set on an open handle.
+_DIR = os.O_RDONLY | os.O_DIRECTORY | getattr(os, "O_NOFOLLOW", 0)
+
+
+def _open_folder(folder: str) -> int:
+    fd = os.open(os.sep, os.O_RDONLY | os.O_DIRECTORY)
+    try:
+        for part in [p for p in os.path.abspath(folder).split(os.sep) if p]:
+            nxt = os.open(part, _DIR, dir_fd=fd)
+            os.close(fd)
+            fd = nxt
+    except OSError:
+        os.close(fd)
+        raise
+    return fd
+
+
+@contextlib.contextmanager
+def _entry(path: str, expect: os.stat_result | None):
+    """The folder `path` is in (open) and its name there; refused (OSError) when a link is on the
+    way or the file is no longer the one that was looked at (`expect`)."""
+    parent, name = os.path.split(os.path.abspath(path))
+    pfd = _open_folder(parent)
+    try:
+        st = os.stat(name, dir_fd=pfd, follow_symlinks=False)
+        if expect is not None and (st.st_dev, st.st_ino) != (expect.st_dev, expect.st_ino):
+            raise FileNotFoundError(errno.ENOENT, "replaced while it was looked at", path)
+        yield pfd, name, st
+    finally:
+        os.close(pfd)
+
+
+def _give(path: str, uid: int, gid: int, expect: os.stat_result | None = None) -> None:
+    """lchown, with no link followed on the way to `path` either."""
+    with _entry(path, expect) as (pfd, name, _):
+        os.chown(name, uid, gid, dir_fd=pfd, follow_symlinks=False)
+
+
+def _mode(path: str, mode: int, expect: os.stat_result | None = None) -> None:
+    """chmod of a plain file or folder, on an open handle of it: never through a link, and never a
+    device or a pipe (opening those can have effects of their own)."""
+    with _entry(path, expect) as (pfd, name, st):
+        if not (stat.S_ISREG(st.st_mode) or stat.S_ISDIR(st.st_mode)):
+            return
+        fd = os.open(name, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0), dir_fd=pfd)
+        try:
+            now = os.fstat(fd)
+            if (now.st_dev, now.st_ino) != (st.st_dev, st.st_ino):
+                raise FileNotFoundError(errno.ENOENT, "replaced while it was opened", path)
+            os.fchmod(fd, mode)
+        finally:
+            os.close(fd)
+
+
 def _rights(folder_mode: int, own: int) -> int:
     """`own` with the right to write added for the group and for everyone, where the folder gives
     it to them and they may read here."""
@@ -89,10 +150,10 @@ def like_folder(path: str) -> bool:
         if not stat.S_ISLNK(st.st_mode):
             now, want = stat.S_IMODE(st.st_mode), _rights(stat.S_IMODE(folder.st_mode), stat.S_IMODE(st.st_mode))
             if want != now:
-                os.chmod(path, want)
+                _mode(path, want, st)
                 changed = True
         if me == 0 and (st.st_uid, st.st_gid) != (folder.st_uid, folder.st_gid):
-            os.lchown(path, folder.st_uid, folder.st_gid)
+            _give(path, folder.st_uid, folder.st_gid, st)
             changed = True
     except OSError as e:
         logger.debug("[Files] %s keeps the owner it was made with: %s", path, e)
@@ -106,10 +167,11 @@ def rights_again(path: str) -> None:
         _door("files.rights_again", path=path)
         return
     try:
-        now = stat.S_IMODE(os.lstat(path).st_mode)
+        st = os.lstat(path)
+        now = stat.S_IMODE(st.st_mode)
         want = _rights(stat.S_IMODE(os.stat(os.path.dirname(os.path.abspath(path))).st_mode), now)
-        if want != now:
-            os.chmod(path, want)
+        if want != now and not stat.S_ISLNK(st.st_mode):
+            _mode(path, want, st)
     except OSError as e:
         logger.debug("[Files] %s keeps the rights it was made with: %s", path, e)
 
@@ -143,8 +205,8 @@ def to_people(folder: str, user: str = "nobody", group: str = "users", mode: int
         return False  # made by someone else than Kiboto (root, or its web user), or open to everyone
     uid, gid = _ids(user, group)
     try:
-        os.chown(folder, uid, gid)
-        os.chmod(folder, mode)
+        _give(folder, uid, gid, st)
+        _mode(folder, mode, st)
     except OSError as e:
         logger.warning("[Files] the shared folder %s stays the system's: %s", folder, e)
         return False
@@ -170,8 +232,8 @@ def to_person(folder: str, uid: int, gid: int = 100, mode: int = 0o700) -> bool:
     if (st.st_uid, st.st_gid, stat.S_IMODE(st.st_mode)) == (uid, gid, mode):
         return False
     try:
-        os.chown(folder, uid, gid)
-        os.chmod(folder, mode)
+        _give(folder, uid, gid, st)
+        _mode(folder, mode, st)
     except OSError as e:
         logger.warning("[Files] the private folder %s keeps its owner: %s", folder, e)
         return False
@@ -201,7 +263,7 @@ def for_helper(folder: str, ours: bool) -> dict[str, int]:
 
 def _hand(path: str, uid: int, gid: int) -> None:
     try:
-        os.lchown(path, uid, gid)
+        _give(path, uid, gid)
     except OSError as e:
         logger.debug("[Files] %s keeps the owner it was made with: %s", path, e)
 
@@ -222,7 +284,7 @@ def like_source(src: str, dst: str) -> None:
     _hand(dst, st.st_uid, st.st_gid)
     if not stat.S_ISLNK(st.st_mode):
         try:
-            os.chmod(dst, stat.S_IMODE(st.st_mode))  # and its rights, where the copy was first made like its folder
+            _mode(dst, stat.S_IMODE(st.st_mode))  # and its rights, where the copy was first made like its folder
         except OSError as e:
             logger.debug("[Files] %s keeps the rights it was made with: %s", dst, e)
     if not stat.S_ISDIR(st.st_mode):

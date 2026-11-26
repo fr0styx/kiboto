@@ -33,7 +33,7 @@ def test_a_private_folder_goes_to_its_person(tmp_path, monkeypatch):
     home.mkdir()
     chowned = []
     monkeypatch.setattr(owned, "_me", lambda: 0)
-    monkeypatch.setattr(owned.os, "chown", lambda p, u, g: chowned.append((p, u, g)))
+    monkeypatch.setattr(owned, "_give", lambda p, u, g, expect=None: chowned.append((p, u, g)))
     monkeypatch.setattr(owned, "_ids", lambda user, group: (65534, 100))
     real = os.stat
 

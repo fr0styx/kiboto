@@ -96,7 +96,7 @@ def test_what_a_copy_brings_here_is_the_destinations(tmp_path, monkeypatch):
         os.chmod(folder, 0o755)
     os.chmod(dst, 0o777)  # as a shared folder on Unraid is
     monkeypatch.setattr(owned, "_me", lambda: os.lstat(dst).st_uid)
-    monkeypatch.setattr(owned.os, "lchown", lambda *a: None)
+    monkeypatch.setattr(owned, "_give", lambda *a: None)
     monkeypatch.setattr(rclone_engine, "_tell_sync_done", lambda *a, **k: None)
     lines = [
         json.dumps({"level": "info", "msg": "Copied (new)", "object": "album/deep/b.txt"}),

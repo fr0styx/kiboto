@@ -13,7 +13,7 @@ from backend.services import fs_transfer as ft
 @pytest.fixture
 def share(tmp_path, monkeypatch):
     monkeypatch.setattr(owned, "_me", lambda: os.lstat(tmp_path).st_uid)  # the test's files are Kiboto's own
-    monkeypatch.setattr(owned.os, "lchown", lambda *a: None)
+    monkeypatch.setattr(owned, "_give", lambda *a: None)
     old = os.umask(0o022)  # as the server runs
     folder = tmp_path / "Films"
     folder.mkdir()
