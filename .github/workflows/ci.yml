@@ -446,12 +446,14 @@ jobs:
           python3 -m backend.main > /tmp/kb-server.log 2>&1 &
           SERVER_PID=$!
 
-          # Poll health endpoint until server is ready
+          # Poll health endpoint until server is ready: a minute, as a shared runner can be slow to
+          # start it (15 s were too few once, while the Docker proxy retried on a runner without root)
           python3 -c "
           import urllib.request, time
-          for _ in range(30):
+          deadline = time.monotonic() + 60
+          while time.monotonic() < deadline:
               try:
-                  with urllib.request.urlopen('http://127.0.0.1:8082/api/health', timeout=1) as r:
+                  with urllib.request.urlopen('http://127.0.0.1:8082/api/health', timeout=2) as r:
                       if r.status == 200:
                           print('Kiboto test server is ready and responding on port 8082.')
                           break

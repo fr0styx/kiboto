@@ -404,10 +404,13 @@ class RcloneEngine:
         self._ensure_directories()
 
     def _ensure_directories(self):
+        from backend import runtime
+
         try:
             os.makedirs(os.path.dirname(self.config_file), exist_ok=True)
             os.makedirs(self.cache_dir, exist_ok=True)
-            os.makedirs(self.remotes_dir, exist_ok=True)
+            if not runtime.without_root():  # Kiboto OS: the host door makes it when it mounts a remote
+                os.makedirs(self.remotes_dir, exist_ok=True)
         except OSError as e:
             logger.warning("[RCLONE] Failed creating directories: %s", e)
 
