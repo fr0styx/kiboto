@@ -155,6 +155,24 @@ def _used_elsewhere(said: str) -> bool:
     return "another system" in said or "import -f" in said
 
 
+def btrfs_busy(sys_root: str = "") -> bool:
+    """Whether a mounted btrfs pool is replacing a drive, balancing or resizing: the kernel tells
+    anyone, where Kiboto OS's web process may not ask btrfs itself."""
+    base = os.path.join(sys_root or (HOST_SYS or "/sys"), "fs", "btrfs")
+    try:
+        pools = [p for p in os.listdir(base) if re.fullmatch(r"[0-9a-f-]{36}", p)]
+    except OSError:
+        return False
+    for uuid in pools:
+        try:
+            with open(os.path.join(base, uuid, "exclusive_operation"), encoding="utf-8") as f:
+                if f.read().strip() not in ("", "none", "balance paused"):
+                    return True
+        except OSError:
+            continue
+    return False
+
+
 def btrfs_sysfs(uuid: str, sys_root: str = "") -> tuple[list[str], bool] | None:
     """What the kernel says of a mounted btrfs pool, readable without root (Kiboto OS's web process
     cannot run `btrfs filesystem show`): its present drives, and whether one of its drives is missing.
@@ -580,6 +598,8 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
         code, out, _ = self._run_cmd(["btrfs", "balance", "status", self._pool_path])
         out_l = out.lower()
         if code == 0 and ("is running" in out_l or "balance running" in out_l):
+            return True
+        if btrfs_busy():
             return True
         # Check OpenZFS scrub/resilver
         code, out, _ = self._run_cmd(["zpool", "status"])

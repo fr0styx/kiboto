@@ -30,3 +30,14 @@ def test_no_word_from_the_kernel_is_no_answer(tmp_path):
     base = tmp_path / "fs" / "btrfs" / UUID / "devinfo" / "1"
     base.mkdir(parents=True)  # a kernel that does not say which drive is missing
     assert gl.btrfs_sysfs(UUID, str(tmp_path)) is None
+
+
+def test_a_pool_replacing_a_drive_is_busy(tmp_path):
+    base = tmp_path / "fs" / "btrfs"
+    (base / UUID).mkdir(parents=True)
+    (base / "features").mkdir()
+    (base / UUID / "exclusive_operation").write_text("none\n")
+    assert gl.btrfs_busy(str(tmp_path)) is False
+    (base / UUID / "exclusive_operation").write_text("device replace\n")
+    assert gl.btrfs_busy(str(tmp_path)) is True
+    assert gl.btrfs_busy(str(tmp_path / "nothing")) is False
