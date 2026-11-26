@@ -163,6 +163,28 @@ class TestZpoolMembers:
         assert members["nvme1n1"].role == "cache" and members["sdd"].role == "spare"
         assert members["nvme2n1"].role == "metadata"
 
+    def test_a_drive_that_is_gone_is_listed_by_the_path_it_was_at(self, adapter):
+        """After a start without one of its drives, ZFS names that drive by a number: it is a member
+        of the pool all the same, shown as missing, not left out of the list."""
+        gone = """  pool: tank
+ state: DEGRADED
+config:
+
+\tNAME                                          STATE     READ WRITE CKSUM
+\ttank                                          DEGRADED     0     0     0
+\t  mirror-0                                    DEGRADED     0     0     0
+\t    /dev/disk/by-id/virtio-KBTESTDISK1-part1  ONLINE       0     0     0
+\t    8371550876015488909                       UNAVAIL      0     0     0  was /dev/disk/by-id/virtio-KBTESTDISK4-part1
+
+errors: No known data errors
+"""
+        adapter._run_cmd.answers["zpool status -P tank"] = (0, gone, "")
+        members = adapter._parse_zpool_members("tank")
+        assert len(members) == 2
+        missing = members[1]
+        assert missing.status == "UNAVAIL" and missing.type == "Mirror Member"
+        assert missing.id == "virtio-KBTESTDISK4-part1"
+
     def test_no_pool(self, adapter):
         assert adapter._parse_zpool_members("none") == []
 

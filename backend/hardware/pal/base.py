@@ -914,6 +914,10 @@ class StoragePlatformAdapter(ABC):
                     current_vdev = name_token
                     continue
 
+                was = parts[parts.index("was") + 1] if "was" in parts[1:-1] else ""
+                if name_token.isdigit() and was.startswith("/dev/"):
+                    # a drive that is gone: ZFS names it by its number and the path it was at
+                    name_token = was
                 if (
                     name_token.startswith("/dev/")
                     or name_token.startswith("sd")
@@ -922,7 +926,7 @@ class StoragePlatformAdapter(ABC):
                 ):
                     dev_basename = os.path.basename(name_token)
                     real_dev = dev_basename
-                    if os.path.exists(name_token):
+                    if os.path.exists(name_token) and not was:
                         try:
                             real_dev = os.path.basename(os.path.realpath(name_token))
                         except Exception:

@@ -18,6 +18,8 @@ A btrfs mirror that started without one of its drives can now have that drive re
 
 After a drive is replaced from the app, Storage lists the new drive as part of the pool, not the one it replaced.
 
+Storage shows a drive that is missing from a ZFS pool as missing, instead of leaving it out of the pool's drives.
+
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container
 
