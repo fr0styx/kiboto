@@ -32,6 +32,8 @@ Kiboto OS: after restoring a settings backup (a move from the container, a new s
 
 Apps: the action bar for selected containers no longer runs off the left edge of the screen on phones, and Resume shows its icon.
 
+Apps: the sentence above the list (how many apps run, which stopped unexpectedly) changes as soon as an app stops or starts, not only when the list is reloaded.
+
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container
 

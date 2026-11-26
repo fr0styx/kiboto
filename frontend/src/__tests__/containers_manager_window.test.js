@@ -394,6 +394,26 @@ describe('Dedicated Containers Window & Desktop Icon Suite', () => {
     vi.useRealTimers();
   });
 
+  it('the sentence above the list follows the live stats, not only the full reloads', async () => {
+    _resetCwAutoRefreshForTesting();
+    initContainersManager();
+    vi.spyOn(api, 'get').mockResolvedValue([]);
+    openContainersManager();
+    await Promise.resolve();
+    const app = (id, state) => ({ id, name: id, image: `example/${id}`, state, status: state, ports: [] });
+    // stats events arrive on the next animation frame (event-bus.js)
+    const frame = () => new Promise((r) => requestAnimationFrame(() => r(undefined)));
+    ZettEventBus.emit('stats:updated', { docker: [app('a', 'running'), app('b', 'running')] });
+    await frame();
+    const before = document.getElementById('cw-stat-daemon')?.textContent;
+    ZettEventBus.emit('stats:updated', { docker: [app('a', 'running'), app('b', 'exited')] });
+    await frame();
+    const after = document.getElementById('cw-stat-daemon')?.textContent;
+    expect(before).not.toBe('Loading…');
+    expect(after).not.toBe(before);
+    stopCwAutoRefresh();
+  });
+
   it('fetches update status on open and then about once a minute', async () => {
     vi.useFakeTimers();
     _resetCwAutoRefreshForTesting();

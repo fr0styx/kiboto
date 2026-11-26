@@ -582,6 +582,7 @@ export function initContainersManager() {
       return;
     }
     _cwContainersList = stats.docker;
+    renderAppsSummary(); // the sentence above the list follows the same live data (it stayed as it was)
     renderContainersWindowTable(_cwContainersList);
   });
 
