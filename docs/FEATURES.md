@@ -33,7 +33,7 @@ What the words mean:
 | Drive Health: checks, warnings, history | Yes | Yes | Yes |
 | Settings copy on the pools, to rebuild after a new system disk | No | No | Yes |
 | iSCSI targets | Yes | Yes | Yes |
-| Merged folders across fast and large drives | Your NAS system does this | Yes | Not yet |
+| Merged folders across fast and large drives<br><sub>On Kiboto OS the merge, the nightly move and the watch on opened files are tried on a virtual machine, not yet over weeks on a real one.</sub> | Your NAS system does this | Yes | Being checked |
 | Copies of a pool to another machine (replication)<br><sub>Kiboto OS copies to another pool of the same machine; copies to another machine over SSH come later.</sub> | Your NAS system does this | Yes | Partly |
 
 ## Files, apps and Kib

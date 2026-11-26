@@ -140,8 +140,6 @@ def _own_pools_fit(share: Any, pools: list[Any]) -> dict[str, Any]:
         return {"why": "nfs"}  # a merged folder is not offered over NFS yet
     if not os.path.isdir(path) or os.path.islink(path) or os.path.ismount(path):
         return {"why": "own_mount"}
-    if runtime.without_root():  # the merge is mounted by a root service the host door does not start yet
-        return {"why": "not_yet"}
     why = tier_merge.missing(path)
     if why:
         return {"why": "needs_shared_mounts" if why in ("not_shared", "smb_not_shared") else "no_merge_tool"}
@@ -315,7 +313,7 @@ def _merged_slow_side(folder: dict[str, Any]) -> tuple[str, int] | None:
         free = shutil.disk_usage(slow).free
     except OSError:
         return None
-    host = host_path(_self(), slow)
+    host = slow if runtime.managed_host() else host_path(_self(), slow)  # no container there
     return (host, ROOM_KEPT) if host and free > ROOM_KEPT else None
 
 
@@ -406,6 +404,16 @@ def _hand_to_mover(folder: dict[str, Any], job_dir: str, files: list[str], slow:
     for leftover in ("job.json", "result.json"):
         if os.path.exists(os.path.join(job_dir, leftover)):
             os.remove(os.path.join(job_dir, leftover))
+    if runtime.without_root():  # Kiboto OS: the host door runs the mover, for a folder it merged itself
+        from backend import door
+
+        try:
+            done = door.via("tier.move", move_here, fast=folder["fast"], slow=slow[0], keep_free=slow[1], files=files)
+        except (OSError, RuntimeError, ValueError) as e:
+            logger.warning("[Tiering] the host door did not move the files of %s: %s", folder["name"], e)
+            return "no_start"
+        atomic_write_json(os.path.join(job_dir, "result.json"), done if isinstance(done, dict) else {})
+        return str(done.get("why") or "") if isinstance(done, dict) else "no_result"
     job = {"fast": "/fast", "slow": "/slow", "keep_free": slow[1], "files": files}
     atomic_write_json(os.path.join(job_dir, "job.json"), job)
     me = _self()
@@ -563,6 +571,11 @@ def watch(now: float | None = None) -> None:
             event_text("tiering_relearn", hours=int(missed // 3600)),
         )
     kept = folders()
+    if runtime.without_root():  # Kiboto OS: a listener of the machine's own, started by the host door
+        from backend import door
+
+        door.via("opens.watch", open_watch.watch_here, folders=[f["fast"] for f in kept if os.path.isdir(f["fast"])])
+        return
     me = _self() if kept else {}
     fast = [f["fast"] for f in kept if os.path.isdir(f["fast"])]
     on_host = {p: h for p in fast if (h := host_path(me, p)) and h != p}
@@ -612,3 +625,51 @@ def view(now: float | None = None) -> dict[str, Any]:
         "moving": busy,
         "watch_error": watched["error"],
     }
+
+
+MOVE_DIR = "/var/lib/kiboto-door/tier-move"
+
+
+def move_here(fast: str, slow: str, keep_free: int, files: list[Any]) -> dict[str, Any]:
+    """The host door's operation (ADR 0006): moves one run's files from a merged folder's fast side
+    to its slow side with the mover (tier_mover.py), as root. Only a pair the door merged itself,
+    and only file names inside it."""
+    import subprocess
+    import sys
+
+    from backend.services import tier_mover
+
+    if not any(m["fast"] == fast and m["slow"] == slow for m in tier_merge.door_merges()):
+        raise ValueError("Not moving: that is not a merged folder this machine keeps.")
+    if not isinstance(files, list) or len(files) > MAX_FILES_PER_RUN:
+        raise ValueError("Not moving: too many files for one run.")
+    for rel in files:
+        norm = os.path.normpath(rel) if isinstance(rel, str) else ""
+        if not norm or norm != rel or norm.startswith(("/", "..")) or "\0" in norm:
+            raise ValueError("Not moving: a file name points outside the folder.")
+    if isinstance(keep_free, bool) or not isinstance(keep_free, int) or keep_free < 0:
+        raise ValueError("Not moving: that is not an amount of free space.")
+    os.makedirs(MOVE_DIR, mode=0o700, exist_ok=True)
+    for leftover in ("job.json", "result.json"):
+        if os.path.lexists(os.path.join(MOVE_DIR, leftover)):
+            os.remove(os.path.join(MOVE_DIR, leftover))
+    _write_job({"fast": fast, "slow": slow, "keep_free": keep_free, "files": files})
+    try:
+        subprocess.run(  # noqa: S603
+            [sys.executable, tier_mover.__file__, os.path.join(MOVE_DIR, "job.json")],
+            timeout=RUN_LIMIT_SECS,
+            check=False,
+            capture_output=True,
+        )
+    except subprocess.TimeoutExpired:
+        return {"why": "too_long"}
+    return _move_result()
+
+
+def _write_job(job: dict[str, Any]) -> None:
+    atomic_write_json(os.path.join(MOVE_DIR, "job.json"), job)
+
+
+def _move_result() -> dict[str, Any]:
+    done = read_json(os.path.join(MOVE_DIR, "result.json"), None)
+    return done if isinstance(done, dict) else {"why": "no_result"}

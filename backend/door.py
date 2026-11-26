@@ -31,6 +31,10 @@ LONG = {  # seconds an operation may take, where the default is too short
     "packages.check": 360,
     "replication.run": 2 * 86400,  # a first copy of a large pool takes hours
     "button.wait": 3700,  # waits for a press of the COPY button, up to an hour
+    "merge.add": 300,  # moves the folder aside and waits for the merge to come up
+    "merge.remove": 300,
+    "merge.ensure": 300,
+    "tier.move": 6 * 3600 + 120,  # one night's run, at most RUN_LIMIT_SECS
 }
 
 

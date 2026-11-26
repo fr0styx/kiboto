@@ -143,7 +143,25 @@ def wanted(path: str, prefixes: tuple[tuple[str, str], ...]) -> str | None:
     return None
 
 
-def read_events(data: bytes, prefixes: tuple[tuple[str, str], ...]) -> list[str]:
+def outside_kiboto(pid: int) -> bool:
+    """On a machine of Kiboto's own every process is visible: an open counts unless the process is
+    Kiboto's own user (its search index, its backups), which this listener runs as too."""
+    try:
+        with open(f"/proc/{pid}/status", encoding="ascii", errors="replace") as f:
+            for line in f:
+                if line.startswith("Uid:"):
+                    return int(line.split()[1]) != os.getuid()
+    except (OSError, ValueError, IndexError):
+        return True  # gone already: someone opened it
+    return True
+
+
+def in_container(pid: int) -> bool:
+    """In Kiboto's container: a process of its own has a number here; one outside shows as 0."""
+    return pid == 0
+
+
+def read_events(data: bytes, prefixes: tuple[tuple[str, str], ...], counts: Any = in_container) -> list[str]:
     """The files of the watched folders that these events say were opened by someone outside Kiboto.
     Each event carries an open handle to its file, which is closed here."""
     out = []
@@ -156,8 +174,7 @@ def read_events(data: bytes, prefixes: tuple[tuple[str, str], ...]) -> list[str]
         if fd < 0:
             continue
         try:
-            # a process of Kiboto's own has a number here; one outside its container shows as 0
-            if pid == 0:
+            if counts(pid):
                 known = wanted(os.readlink(f"/proc/self/fd/{fd}"), prefixes)
                 if known:
                     out.append(known)
@@ -168,7 +185,9 @@ def read_events(data: bytes, prefixes: tuple[tuple[str, str], ...]) -> list[str]
     return out
 
 
-def _listen(stop: threading.Event, roots: tuple[str, ...], prefixes: tuple[tuple[str, str], ...]) -> None:
+def _listen(
+    stop: threading.Event, roots: tuple[str, ...], prefixes: tuple[tuple[str, str], ...], counts: Any = in_container
+) -> None:
     libc = ctypes.CDLL("libc.so.6", use_errno=True)
     libc.fanotify_mark.argtypes = [ctypes.c_int, ctypes.c_uint, ctypes.c_uint64, ctypes.c_int, ctypes.c_char_p]
     fd = libc.fanotify_init(FAN_CLASS_NOTIF | FAN_CLOEXEC | FAN_NONBLOCK, os.O_RDONLY | os.O_LARGEFILE)
@@ -193,7 +212,7 @@ def _listen(stop: threading.Event, roots: tuple[str, ...], prefixes: tuple[tuple
                 except BlockingIOError:
                     data = b""
                 day = today()
-                for path in read_events(data, prefixes):
+                for path in read_events(data, prefixes, counts):
                     note(path, day)
             if time.time() - flushed >= FLUSH_SECS:
                 flushed = time.time()
@@ -214,7 +233,9 @@ def _keep(with_opens: bool) -> None:
         logger.warning("[Tiering] the record of opens could not be written", exc_info=True)
 
 
-def watch(folders: list[str], roots: list[str], on_host: dict[str, str] | None = None) -> None:
+def watch(
+    folders: list[str], roots: list[str], on_host: dict[str, str] | None = None, counts: Any = in_container
+) -> None:
     """Listens for opens under `folders` (their paths on the fast pool); `roots` are the filesystems
     to listen on; `on_host` gives a folder's path as the host knows it, where that differs. Called
     again with other folders, it starts over. With none, it stops."""
@@ -231,7 +252,7 @@ def watch(folders: list[str], roots: list[str], on_host: dict[str, str] | None =
         return
     stop = threading.Event()
     thread = threading.Thread(
-        target=_listen, args=(stop, tuple(sorted(set(roots))), prefixes), daemon=True, name="tiering-opens"
+        target=_listen, args=(stop, tuple(sorted(set(roots))), prefixes, counts), daemon=True, name="tiering-opens"
     )
     _state.update(thread=thread, stop=stop, prefixes=prefixes, roots=tuple(sorted(set(roots))), error="")
     thread.start()
@@ -246,10 +267,79 @@ def stop_watching() -> None:
     _state.update(thread=None, stop=None, prefixes=(), roots=())
 
 
+UNIT = "kiboto-open-watch"
+ALIVE_SECS = 3 * FLUSH_SECS
+
+
+def serve(folders: list[str]) -> int:
+    """Kiboto OS: the listener as a service of the machine (started by the host door), until stopped."""
+    import signal
+
+    stopped = threading.Event()
+    signal.signal(signal.SIGTERM, lambda *_: stopped.set())
+    watch(folders, folders, counts=outside_kiboto)
+    while not stopped.wait(5.0):
+        thread = _state.get("thread")
+        if thread is None or not thread.is_alive():
+            return 1  # it could not listen: the unit starts it again
+    stop_watching()
+    return 0
+
+
+def watch_here(folders: list[Any]) -> bool:
+    """The host door's operation (ADR 0006): runs the listener as a service of the machine, as
+    Kiboto's own user with only the rights to listen and to read the files it is told about
+    (fanotify), over the given folders of the storage folder; none stops it."""
+    from backend.config import POOL_PATH
+    from backend.services.host_basics import run
+    from backend.services.web_user import USER
+
+    root = os.path.realpath(POOL_PATH).rstrip(os.sep) + os.sep
+    if not isinstance(folders, list) or len(folders) > 64:
+        raise ValueError("Not watching: too many folders.")
+    checked = []
+    for f in folders:
+        real = os.path.realpath(f) if isinstance(f, str) and f.startswith("/") else ""
+        if not real or real != os.path.normpath(f) or not real.startswith(root) or not os.path.isdir(real):
+            raise ValueError("Not watching: that is not a folder in the storage folder.")
+        checked.append(real)
+    run(["systemctl", "stop", UNIT], timeout=30)
+    run(["systemctl", "reset-failed", UNIT], timeout=30)
+    if not checked:
+        return True
+    import sys
+
+    caps = "CAP_SYS_ADMIN CAP_DAC_READ_SEARCH"
+    release = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    cmd = ["systemd-run", "--quiet", "--collect", "--unit", UNIT, "--description", "Kiboto: which files are opened"]
+    cmd += ["--working-directory", release]  # where `python -m backend...` finds Kiboto's code
+    cmd += ["-p", f"User={USER}", "-p", f"Group={USER}", "-p", f"AmbientCapabilities={caps}"]
+    cmd += ["-p", f"CapabilityBoundingSet={caps}", "-p", "Restart=on-failure", "-p", "RestartSec=30"]
+    cmd += ["--setenv", f"DATA_DIR={DATA_DIR}", sys.executable, "-m", "backend.services.open_watch", "serve", *checked]
+    code, said = run(cmd, timeout=30)
+    if code != 0:
+        logger.warning("[Tiering] the listener for opens did not start: %s", said)
+    return code == 0
+
+
 def status() -> dict[str, Any]:
+    from backend import runtime
+
+    if runtime.without_root():  # a service of the machine: it marks itself alive every minute
+        alive = last_alive()
+        return {"watching": bool(alive and time.time() - alive < ALIVE_SECS), "folders": [], "error": ""}
     thread = _state.get("thread")
     return {
         "watching": bool(thread is not None and thread.is_alive() and _state.get("listening")),
         "folders": sorted({known.rstrip("/") for _seen_as, known in _state.get("prefixes") or ()}),
         "error": _state.get("error") or "",
     }
+
+
+if __name__ == "__main__":
+    import sys
+
+    if sys.argv[1:2] != ["serve"]:
+        print("usage: python -m backend.services.open_watch serve <folder>...", file=sys.stderr)
+        sys.exit(2)
+    sys.exit(serve(sys.argv[2:]))

@@ -332,7 +332,7 @@ def test_the_sftp_api_turns_it_on_through_the_door(client, auth_headers, kiboto_
 # ── merged folders ──
 
 
-def test_a_folder_that_would_fit_is_not_offered_a_merge_yet(kiboto_os, tmp_path, monkeypatch):
+def test_a_folder_that_would_fit_is_offered_a_merge(kiboto_os, tmp_path, monkeypatch):
     fast, slow = tmp_path / "fast", tmp_path / "slow"
     (fast / "films").mkdir(parents=True)
     slow.mkdir()
@@ -342,9 +342,9 @@ def test_a_folder_that_would_fit_is_not_offered_a_merge_yet(kiboto_os, tmp_path,
     ]
     share = SimpleNamespace(mountpoint=str(fast / "films"), export_nfs=False)
     monkeypatch.setattr(tiering.tier_merge, "of", lambda path: None)
-    monkeypatch.setattr(tiering.tier_merge, "missing", lambda path: pytest.fail("not asked on Kiboto OS"))
-    assert tiering._own_pools_fit(share, pools) == {"why": "not_yet"}
-    monkeypatch.setattr(runtime, "is_root", lambda: True)
+    monkeypatch.setattr(tiering.tier_merge, "missing", lambda path: "")
+    fit = tiering._own_pools_fit(share, pools)  # offered on Kiboto OS too: the host door merges it
+    assert fit["why"] == "" and fit["kind"] == "merged" and [c["id"] for c in fit["slow_choices"]] == ["slow"]
     monkeypatch.setattr(tiering.tier_merge, "missing", lambda path: "no_tool")
     assert tiering._own_pools_fit(share, pools) == {"why": "no_merge_tool"}
 

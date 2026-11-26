@@ -363,6 +363,27 @@ def _button_wait(seconds: int) -> Any:
     return button_listener.wait_here(seconds)
 
 
+def _merge(name: str) -> Callable[..., Any]:
+    def run(**kw: Any) -> Any:
+        from backend.services import tier_merge
+
+        return getattr(tier_merge, name)(**kw)
+
+    return run
+
+
+def _tier_move(**kw: Any) -> Any:
+    from backend.services import tiering
+
+    return tiering.move_here(**kw)
+
+
+def _opens_watch(folders: list[Any]) -> Any:
+    from backend.services import open_watch
+
+    return open_watch.watch_here(folders)
+
+
 def _key(name: str) -> Callable[..., Any]:
     """machine_key's own function: the data key's folder (/etc/kiboto/keys) and the security chip
     are root's. "keys.text" hands the key to the web process, which encrypts with it."""
@@ -613,6 +634,13 @@ OPERATIONS: dict[str, Operation] = {
     "iscsi.remove_file": Operation(_iscsi("remove_file_here"), {"path": TEXT}, max_len=4096),
     "replication.run": Operation(_replicate, {"job": MAP}, max_len=512),
     "button.wait": Operation(_button_wait, {"seconds": NUMBER}),
+    "merge.add": Operation(
+        _merge("add_here"), {"name": TEXT, "path": TEXT, "slow_mount": TEXT, "slow_pool": TEXT}, max_len=4096
+    ),
+    "merge.remove": Operation(_merge("remove_here"), {"path": TEXT}, max_len=4096),
+    "merge.ensure": Operation(_merge("ensure_here"), {}),
+    "tier.move": Operation(_tier_move, {"fast": TEXT, "slow": TEXT, "keep_free": NUMBER, "files": LIST}, max_len=4096),
+    "opens.watch": Operation(_opens_watch, {"folders": LIST}, max_len=4096),
     "hosts.apps": Operation(_apps_hosts, {}),
     "names.ensure": Operation(_names, {}),
     "power.run": Operation(_power, {"action": TEXT}, max_len=16),

@@ -8,6 +8,8 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 
 Replace a drive from the app (Kiboto OS, and Kiboto on plain Linux): on a ZFS or btrfs pool that keeps a second copy, Storage offers "Replace a drive". Choose the drive to replace and an empty one at least as large; the pool rebuilds onto it while it stays in use, and the dialog shows how far it is.
 
+Kiboto OS: merged folders and data tiering work (off until you turn them on for a shared folder). Making the merge, the nightly move to the slower pool and the watch on which files are opened run in the machine's root service or under Kiboto's own user with only the rights they need.
+
 #### Changes
 
 Kiboto OS installs Debian 13's own ZFS (2.3) instead of the newer one from Debian's backports, and new ZFS pools are limited to ZFS 2.3's features, so a pool opens on any Debian 13 and on every later ZFS. A machine installed by an earlier version keeps its ZFS.

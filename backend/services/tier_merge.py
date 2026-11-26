@@ -29,7 +29,7 @@ from typing import Any
 
 from backend import legacy_names, merged_folders, product, runtime
 from backend.config import DATA_DIR, logger
-from backend.fsutil import atomic_write_json, json_locked
+from backend.fsutil import atomic_write_json, json_locked, read_json
 from backend.merged_folders import merges, of
 
 CONF_DIR = os.path.join(DATA_DIR, "merge")
@@ -48,6 +48,10 @@ FUSE = "/dev/fuse"
 SMB_CONTAINERS = ("kiboto-samba", legacy_names.OLD_SAMBA)  # the one that serves SMB, by either name
 ASK_EVERY_SECS = 30.0
 
+# Kiboto OS (ADR 0006): the host door keeps its own record of the merges and its own script here,
+# and builds the mounts only from those; Kiboto's record beside its data is its copy for the page
+DOOR_DIR = "/etc/kiboto/merge"
+
 _lock = threading.Lock()
 _asked: dict[str, Any] = {"at": 0.0, "said": None}
 
@@ -61,6 +65,24 @@ class MergeError(RuntimeError):
 
 
 # --- what is kept: backend/merged_folders.py reads the list, for snapshots and pools too -------------
+def _record_file(where: str = "") -> str:
+    return os.path.join(where, "merges.json") if where else merged_folders.STATE_FILE
+
+
+def _kept(where: str = "") -> list[dict[str, Any]]:
+    """The merges kept by Kiboto (where="") or by the host door (where=DOOR_DIR)."""
+    if not where:
+        return merges()
+    data = read_json(_record_file(where), {})
+    kept = data.get("merges") if isinstance(data, dict) else None
+    return [m for m in kept or [] if isinstance(m, dict) and m.get("path") and m.get("fast") and m.get("slow")]
+
+
+def _of(path: str, where: str = "") -> dict[str, Any] | None:
+    path = path.rstrip("/")
+    return next((m for m in _kept(where) if m["path"] == path), None)
+
+
 def sides(path: str, slow_mount: str) -> tuple[str, str]:
     """The fast and the slow side of a shared folder: hidden folders on its own pool and on the slower one."""
     path = path.rstrip("/")
@@ -260,9 +282,10 @@ def _unit(*args: str) -> tuple[int, str]:
     return run(list(args), timeout=60)
 
 
-def _write_script(text: str) -> str:
-    os.makedirs(CONF_DIR, mode=0o700, exist_ok=True)
-    target = os.path.join(CONF_DIR, CONF_NAME)
+def _write_script(text: str, where: str = "") -> str:
+    folder = where or CONF_DIR
+    os.makedirs(folder, mode=0o700, exist_ok=True)
+    target = os.path.join(folder, CONF_NAME)
     with open(target + ".new", "w", encoding="utf-8") as f:
         f.write(text)
     os.chmod(target + ".new", 0o700)
@@ -270,7 +293,7 @@ def _write_script(text: str) -> str:
     return target
 
 
-def _ensure_unit(kept: list[dict[str, Any]], text: str, conf_hash: str) -> str:
+def _ensure_unit(kept: list[dict[str, Any]], text: str, conf_hash: str, where: str = "") -> str:
     """The merges as a unit of the machine: they outlive a restart of Kiboto, and the unit starts
     again when one of them ends (the script then exits with an error)."""
     running = _unit("systemctl", "is-active", UNIT)[1] == "active"
@@ -281,7 +304,7 @@ def _ensure_unit(kept: list[dict[str, Any]], text: str, conf_hash: str) -> str:
     described = f"Kiboto merged folders {conf_hash}"
     if running and _unit("systemctl", "show", UNIT, "-p", "Description", "--value")[1] == described:
         return ""
-    target = _write_script(text)
+    target = _write_script(text, where)
     _unit("systemctl", "stop", UNIT)
     _unit("systemctl", "reset-failed", UNIT)
     code, said = _unit(
@@ -295,15 +318,17 @@ def _ensure_unit(kept: list[dict[str, Any]], text: str, conf_hash: str) -> str:
     return ""
 
 
-def ensure() -> str:
+def ensure(where: str = "") -> str:
     """Makes the container match the merges that are kept: none, no container. Returns "" or why not."""
-    kept = merges()
+    if not where and runtime.without_root():  # Kiboto OS: the host door mounts them, from its own record
+        from backend import door
+
+        return str(door.via("merge.ensure", ensure_here) or "")
+    kept = _kept(where)
     text = script(kept)
     conf_hash = hashlib.sha256((text + OPTIONS).encode()).hexdigest()[:16]
-    from backend import runtime
-
     if runtime.managed_host():  # the machine is Kiboto's: a unit of it, not a container
-        return _ensure_unit(kept, text, conf_hash)
+        return _ensure_unit(kept, text, conf_hash, where)
     code, info = _docker("GET", f"/containers/{CONTAINER}/json")
     there = code == 200 and isinstance(info, dict)
     if not kept:
@@ -358,20 +383,33 @@ def _wait(path: str, want: bool, seconds: float) -> bool:
 
 
 # --- making a folder a merged one, and back --------------------------------------------------------
-@json_locked(lambda *a, **k: merged_folders.STATE_FILE)
-def _keep(merge: dict[str, Any], there: bool) -> None:
+@json_locked(lambda merge, there, where="": _record_file(where))
+def _keep(merge: dict[str, Any], there: bool, where: str = "") -> None:
     """Writes the list with this merge in it, or without it."""
-    kept = [m for m in merges() if m["path"] != merge["path"]]
-    atomic_write_json(merged_folders.STATE_FILE, {"merges": [*kept, merge] if there else kept})
+    kept = [m for m in _kept(where) if m["path"] != merge["path"]]
+    if where:
+        os.makedirs(where, mode=0o700, exist_ok=True)
+    atomic_write_json(_record_file(where), {"merges": [*kept, merge] if there else kept})
 
 
-def add(name: str, path: str, slow_mount: str, slow_pool: str) -> dict[str, Any]:
+def add(name: str, path: str, slow_mount: str, slow_pool: str, where: str = "") -> dict[str, Any]:
     """Makes the shared folder at `path` a merged one with a slow side on the pool mounted at
     `slow_mount`. The folder is away for a few seconds. On any failure it is put back as it was."""
     path = path.rstrip("/")
+    if not where and runtime.without_root():  # Kiboto OS: the folders are root's, the host door does it
+        from backend import door
+
+        made = door.via("merge.add", add_here, name=name, path=path, slow_mount=slow_mount, slow_pool=slow_pool)
+        if not isinstance(made, dict) or made.get("error"):
+            said = made if isinstance(made, dict) else {}
+            raise MergeError(
+                str(said.get("error") or "failed"), str(said.get("message") or "The folder could not be merged.")
+            )
+        _keep(made, True)  # Kiboto's copy, for the page, snapshots and pools
+        return made
     with _lock:
-        if of(path) is not None:
-            return of(path) or {}
+        if _of(path, where) is not None:
+            return _of(path, where) or {}
         fast, slow = sides(path, slow_mount)
         if ":" in fast + slow + path:
             raise MergeError("bad_name", "A folder with a colon in its path cannot be merged.")
@@ -395,12 +433,12 @@ def add(name: str, path: str, slow_mount: str, slow_pool: str) -> dict[str, Any]
         try:
             os.mkdir(path, 0o000)  # nobody writes here while the merge is not mounted
             os.chown(path, like.st_uid, like.st_gid)
-            _keep(merge, True)
-            why = ensure()
+            _keep(merge, True, where)
+            why = ensure(where)
             if why or not _wait(path, True, MOUNT_WAIT_SECS):
                 raise MergeError(why or "no_mount", "The merged folder did not come up.")
         except (OSError, MergeError) as e:
-            _undo(merge)
+            _undo(merge, where)
             if isinstance(e, MergeError):
                 raise
             raise MergeError("failed", f"The folder could not be merged: {e.strerror or e}") from e
@@ -408,15 +446,15 @@ def add(name: str, path: str, slow_mount: str, slow_pool: str) -> dict[str, Any]
         return merge
 
 
-def _undo(merge: dict[str, Any]) -> bool:
+def _undo(merge: dict[str, Any], where: str = "") -> bool:
     """Puts a folder back as it was: the merge gone, its own files at its path again. Only when the
     path can be freed; otherwise everything stays recorded as merged. Returns whether it was undone."""
     path, fast = merge["path"], merge["fast"]
-    _keep(merge, False)
-    ensure()
+    _keep(merge, False, where)
+    ensure(where)
     if not _wait(path, False, UNMOUNT_WAIT_SECS):
-        _keep(merge, True)  # still mounted: it stays a merged folder
-        ensure()
+        _keep(merge, True, where)  # still mounted: it stays a merged folder
+        ensure(where)
         return False
     try:
         if os.path.isdir(path):
@@ -438,11 +476,20 @@ def _tidy(hidden: str) -> None:
         logger.debug("[Merge] %s was left in place", hidden, exc_info=True)
 
 
-def remove_if_empty(path: str) -> bool:
+def remove_if_empty(path: str, where: str = "") -> bool:
     """Tiering was turned off for the folder: when nothing is on its slow side, it becomes an
     ordinary folder again. With files there it stays merged, so they keep showing."""
-    with _lock:
+    if not where and runtime.without_root():
+        from backend import door
+
         merge = of(path)
+        if not door.via("merge.remove", remove_here, path=path.rstrip("/")):
+            return False
+        if merge is not None:
+            _keep(merge, False)
+        return True
+    with _lock:
+        merge = _of(path, where)
         if merge is None:
             return True
         try:
@@ -450,7 +497,7 @@ def remove_if_empty(path: str) -> bool:
                 return False
         except OSError:
             return False
-        if not _undo(merge):
+        if not _undo(merge, where):
             return False
         try:
             os.rmdir(merge["slow"])
@@ -463,3 +510,60 @@ def remove_if_empty(path: str) -> bool:
 def status() -> list[dict[str, Any]]:
     """Each merged folder, and whether its merge is mounted right now."""
     return [{**m, "mounted": mounted(m["path"])} for m in merges()]
+
+
+# --- the host door's operations (ADR 0006): nothing is taken from the web process unchecked --------
+def _checked_folder(path: Any) -> str:
+    """A shared folder the door may merge: a real folder in the storage folder, reached through no
+    link, at least one level inside a pool, never Kiboto's own folder."""
+    from backend.config import POOL_PATH
+
+    text = path if isinstance(path, str) else ""
+    real = os.path.realpath(text) if text.startswith("/") else ""
+    root = os.path.realpath(POOL_PATH).rstrip(os.sep) + os.sep
+    data = os.path.realpath(DATA_DIR).rstrip(os.sep) + os.sep
+    inside = real[len(root) :] if real.startswith(root) else ""
+    if (
+        not real
+        or real != os.path.normpath(text)
+        or inside.count(os.sep) < 1
+        or (real + os.sep).startswith(data)
+        or "\n" in text
+        or not os.path.isdir(real)
+    ):
+        raise ValueError("Not merging: that is not one of the NAS's shared folders.")
+    return real
+
+
+def add_here(name: str, path: str, slow_mount: str, slow_pool: str) -> dict[str, Any]:
+    """The host door's operation: makes a shared folder a merged one, kept in the door's own record.
+    The slower pool must be one of this machine's pools, at the place it is mounted."""
+    from backend.hardware.pal_storage import get_storage_platform
+
+    real = _checked_folder(path)
+    if not isinstance(name, str) or not name or "/" in name or "\n" in name:
+        raise ValueError("Not merging: that is not a shared folder's name.")
+    mounts = {p.id: (p.mountpoint or "").rstrip("/") for p in get_storage_platform().list_pools()}
+    if not slow_mount or mounts.get(slow_pool) != str(slow_mount).rstrip("/"):
+        raise ValueError("Not merging: the slower pool is not one of this machine's pools.")
+    try:
+        return add(name, real, slow_mount, slow_pool, where=DOOR_DIR)
+    except MergeError as e:
+        return {"error": e.key, "message": str(e)}
+
+
+def remove_here(path: str) -> bool:
+    """The host door's operation: an ordinary folder again, when its slow side is empty."""
+    if _of(str(path or ""), DOOR_DIR) is None:
+        return True  # the door never merged it: nothing of it to undo
+    return remove_if_empty(str(path), where=DOOR_DIR)
+
+
+def ensure_here() -> str:
+    """The host door's operation: the merges of its own record mounted (at Kiboto's start)."""
+    return ensure(where=DOOR_DIR)
+
+
+def door_merges() -> list[dict[str, Any]]:
+    """The merges the host door keeps (its own record), for its other operations."""
+    return _kept(DOOR_DIR)
