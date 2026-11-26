@@ -41,3 +41,20 @@ def test_a_pool_replacing_a_drive_is_busy(tmp_path):
     (base / UUID / "exclusive_operation").write_text("device replace\n")
     assert gl.btrfs_busy(str(tmp_path)) is True
     assert gl.btrfs_busy(str(tmp_path / "nothing")) is False
+
+
+def test_without_root_btrfs_is_not_asked_for_what_it_answers_root_only(monkeypatch):
+    from backend import runtime
+
+    ran = []
+    adapter = gl.GenericLinuxStorageAdapter.__new__(gl.GenericLinuxStorageAdapter)
+    adapter._pool_path = "/mnt/storage"
+    monkeypatch.setattr(adapter, "_run_cmd", lambda cmd: ran.append(cmd[:3]) or (1, "", ""), raising=False)
+    monkeypatch.setattr(gl, "btrfs_busy", lambda: False)
+    monkeypatch.setattr(runtime, "without_root", lambda: True)
+    assert adapter._check_is_storage_busy_uncached() is False
+    assert ran == [["zpool", "status"]]
+    ran.clear()
+    monkeypatch.setattr(runtime, "without_root", lambda: False)
+    adapter._check_is_storage_busy_uncached()
+    assert ["btrfs", "scrub", "status"] in ran and ["btrfs", "balance", "status"] in ran

@@ -589,16 +589,21 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
         return val
 
     def _check_is_storage_busy_uncached(self) -> bool:
-        # Check Btrfs scrub (e.g. "scrub status for ...: running" vs "no scrub running")
-        code, out, _ = self._run_cmd(["btrfs", "scrub", "status", self._pool_path])
-        out_l = out.lower()
-        if code == 0 and ("running" in out_l and "no scrub" not in out_l and "not running" not in out_l):
-            return True
-        # Check Btrfs balance (e.g. "Balance on ... is running" vs "No balance found on ...")
-        code, out, _ = self._run_cmd(["btrfs", "balance", "status", self._pool_path])
-        out_l = out.lower()
-        if code == 0 and ("is running" in out_l or "balance running" in out_l):
-            return True
+        from backend import runtime
+
+        # btrfs answers these for root only: without root (Kiboto OS) they failed once a minute, two
+        # programs started for nothing; the kernel's own word (btrfs_busy) is read instead
+        if not runtime.without_root():
+            # Check Btrfs scrub (e.g. "scrub status for ...: running" vs "no scrub running")
+            code, out, _ = self._run_cmd(["btrfs", "scrub", "status", self._pool_path])
+            out_l = out.lower()
+            if code == 0 and ("running" in out_l and "no scrub" not in out_l and "not running" not in out_l):
+                return True
+            # Check Btrfs balance (e.g. "Balance on ... is running" vs "No balance found on ...")
+            code, out, _ = self._run_cmd(["btrfs", "balance", "status", self._pool_path])
+            out_l = out.lower()
+            if code == 0 and ("is running" in out_l or "balance running" in out_l):
+                return True
         if btrfs_busy():
             return True
         # Check OpenZFS scrub/resilver
