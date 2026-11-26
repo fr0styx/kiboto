@@ -29,6 +29,8 @@ LONG = {  # seconds an operation may take, where the default is too short
     "update.start": 900,  # downloads nothing (the image is there) but makes a Python environment
     "packages.add_missing": 1800,
     "packages.check": 360,
+    "replication.run": 2 * 86400,  # a first copy of a large pool takes hours
+    "button.wait": 3700,  # waits for a press of the COPY button, up to an hour
 }
 
 

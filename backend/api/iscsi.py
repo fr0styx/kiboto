@@ -35,15 +35,6 @@ def _refused(e: iscsi_target.DiskError) -> ApiError:
     return ApiError(400, str(e), f"iscsi_{e.key}", text=said(f"iscsi_{e.key}", **e.params))
 
 
-def _offered_here() -> None:
-    """Kiboto OS has no iSCSI yet: its service is root's, and the host door does not start it."""
-    from backend import runtime
-    from backend.errors import NOT_ON_OS_YET
-
-    if runtime.without_root():
-        raise ApiError(409, NOT_ON_OS_YET, "not_on_kiboto_os", text=said("os_not_yet"))
-
-
 def _missing() -> ApiError:
     return ApiError(404, "There is no such disk.", "iscsi_not_found", text=said("iscsi_not_found"))
 
@@ -72,8 +63,6 @@ async def iscsi_switch(
     req: SwitchIn, request: Request, principal: AuthenticatedPrincipal = Depends(get_current_principal)
 ) -> dict[str, Any]:
     """Turns the service on or off. Turning it on asks for confirmation; off never does."""
-    if req.enabled:
-        _offered_here()
     if req.enabled and not iscsi_target.enabled():
         confirm_or_raise(request, principal, "iscsi.enable")
     iscsi_target.set_enabled(req.enabled)
@@ -86,7 +75,6 @@ async def iscsi_add(
     req: DiskIn, request: Request, principal: AuthenticatedPrincipal = Depends(get_current_principal)
 ) -> dict[str, Any]:
     """Adds a disk: makes its file in the folder (it takes no space until it is written to)."""
-    _offered_here()
     try:
         made = await asyncio.to_thread(iscsi_target.save, req.model_dump())
     except iscsi_target.DiskError as e:

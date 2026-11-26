@@ -152,6 +152,14 @@ Kiboto OS: the firewall can be turned on (Settings, Security). When it is on, yo
 
 Zettlab D4: the front light bar works (it is on the board's serial port /dev/ttyS7, which the container needs). Its effects work, without the rainbow: that bar keeps each effect in its own memory, so Kiboto writes it only when the effect changes.
 
+Kiboto OS: SFTP works. It runs as a service of the machine under Kiboto's own user, never as root, and what arrives over SFTP can be changed over the network share too.
+
+Kiboto OS: iSCSI disks work. The machine's root service checks each disk before it serves it and writes the service's settings itself, so nothing Kiboto's web service writes is run as root.
+
+Kiboto OS: replication works between the machine's own pools (ZFS or btrfs snapshots, only what changed after the first copy). Copies to another machine over SSH are not available on Kiboto OS yet.
+
+Kiboto OS on a Zettlab D6 or D8: the front COPY button works (it copies the card, or turns the front screen's page, as set).
+
 #### Changes
 
 On a machine of its own, a separate system service (the host door) now changes the machine's name, time zone, clock and SSH setting for Kiboto, from a fixed list of operations: the first step towards Kiboto's web service running without full system rights (docs/adr/0006-web-without-root.md).

@@ -333,6 +333,36 @@ def _packages(name: str) -> Callable[[], Any]:
     return run
 
 
+def _sftp(name: str) -> Callable[..., Any]:
+    def run(**kw: Any) -> Any:
+        from backend.services import sftp_engine
+
+        return getattr(sftp_engine, name)(**kw)
+
+    return run
+
+
+def _iscsi(name: str) -> Callable[..., Any]:
+    def run(**kw: Any) -> Any:
+        from backend.services import iscsi_target
+
+        return getattr(iscsi_target, name)(**kw)
+
+    return run
+
+
+def _replicate(job: dict[str, Any]) -> Any:
+    from backend.services import replication_engine
+
+    return replication_engine.run_here(job)
+
+
+def _button_wait(seconds: int) -> Any:
+    from backend.services import button_listener
+
+    return button_listener.wait_here(seconds)
+
+
 def _key(name: str) -> Callable[..., Any]:
     """machine_key's own function: the data key's folder (/etc/kiboto/keys) and the security chip
     are root's. "keys.text" hands the key to the web process, which encrypts with it."""
@@ -570,6 +600,15 @@ OPERATIONS: dict[str, Operation] = {
     "update.start": Operation(_update_start, {"image": TEXT, "version": TEXT}, max_len=320),
     "update.back": Operation(_update_back, {"snapshot_id": TEXT}, max_len=128),
     "packages.add_missing": Operation(_packages("add_missing"), {}),
+    "sftp.start": Operation(_sftp("start_unit_here"), {"port": NUMBER}),
+    "sftp.stop": Operation(_sftp("stop_unit_here"), {}),
+    "iscsi.apply": Operation(_iscsi("apply_here"), {"disks": LIST}, max_len=4096),
+    "iscsi.make_file": Operation(
+        _iscsi("make_file_here"), {"path": TEXT, "size_gb": NUMBER, "fresh": ON}, max_len=4096
+    ),
+    "iscsi.remove_file": Operation(_iscsi("remove_file_here"), {"path": TEXT}, max_len=4096),
+    "replication.run": Operation(_replicate, {"job": MAP}, max_len=512),
+    "button.wait": Operation(_button_wait, {"seconds": NUMBER}),
     "hosts.apps": Operation(_apps_hosts, {}),
     "names.ensure": Operation(_names, {}),
     "power.run": Operation(_power, {"action": TEXT}, max_len=16),

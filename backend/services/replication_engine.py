@@ -36,6 +36,10 @@ _NAME = re.compile(r"^[A-Za-z0-9_\-./]{1,256}$")
 _HOST = re.compile(r"^[A-Za-z0-9_\-.:]{1,256}$")
 _USER = re.compile(r"^[A-Za-z_][A-Za-z0-9_.-]{0,31}$")
 _CHUNK = 1 << 20
+REMOTE_NOT_YET = (
+    "On Kiboto OS a copy goes to another pool of this machine; copies to another machine over SSH are not "
+    "available on Kiboto OS yet."
+)
 
 
 class ReplicationError(RuntimeError):
@@ -86,12 +90,6 @@ def availability(adapter: Any = None) -> tuple[bool, str]:
         return False, "Unraid's pools are replicated with an off-site backup to another NAS."
     if platform not in OWNED:
         return False, "Replication runs only where Kiboto manages the pools."
-    from backend import runtime
-
-    if runtime.without_root():  # snapshots, send and receive are root's; the host door has no operation yet
-        from backend.errors import NOT_ON_OS_YET
-
-        return False, NOT_ON_OS_YET
     tools = base.storage_tools()
     if not (tools.get("zfs") or tools.get("btrfs")):
         return False, base.storage_tools_problem() or "This image has neither the ZFS nor the btrfs tools."
@@ -107,6 +105,10 @@ def validate(job: dict[str, Any]) -> None:
     if not job.get("source_pool") or not job.get("target_pool"):
         raise ValueError("Pick a source pool and a target.")
     if job.get("target_type", "local") != "local":
+        from backend import runtime
+
+        if runtime.without_root():  # the host door would sign in to the other machine with root's key
+            raise ValueError(REMOTE_NOT_YET)
         if not _HOST.match(str(job.get("target_host") or "")):
             raise ValueError("A remote target needs a host name or address.")
         if not _USER.match(str(job.get("target_user") or "")):
@@ -336,6 +338,21 @@ def replicate(job: dict[str, Any], adapter: Any = None) -> dict[str, Any]:
     return {"snapshot": snap, "bytes": sent, "pruned": pruned, "fs": kind}
 
 
+def run_here(job: dict[str, Any]) -> dict[str, Any]:
+    """The host door's operation (ADR 0006): one run of a job, as root. Only to a pool of this
+    machine, between pools Kiboto knows; names are checked as everywhere (validate)."""
+    if not isinstance(job, dict) or job.get("target_type", "local") != "local":
+        raise ValueError(REMOTE_NOT_YET)
+    validate(job)
+    from backend.hardware.pal_storage import get_storage_platform
+
+    adapter = get_storage_platform()
+    known = {p.id for p in adapter.list_pools()}
+    if job["source_pool"] not in known or job["target_pool"] not in known:
+        raise ValueError("Not copying: the source or the target is not one of this machine's pools.")
+    return replicate(job, adapter)
+
+
 class ReplicationEngine:
     """Keeps the replication jobs, runs them in the background and on their schedule."""
 
@@ -466,7 +483,14 @@ class ReplicationEngine:
         )  # NJOB-2
         self.update_job_status(job_id, "running")
         try:
-            res = replicate(job)
+            from backend import runtime
+
+            if runtime.without_root():  # Kiboto OS: snapshots, send and receive are the host door's
+                from backend import door
+
+                res = door.via("replication.run", run_here, job=job)
+            else:
+                res = replicate(job)
         except Exception as e:
             err = str(e)[:300]
             logger.error("[Replication] %s failed: %s", name, err)

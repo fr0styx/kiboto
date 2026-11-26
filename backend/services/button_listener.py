@@ -12,6 +12,9 @@ from backend.services.copy_engine import _do_copy, copy_dest
 from backend.state import Z_STATE, add_event, event_text
 
 BUTTON_POLL_SECS = 0.25  # PERF-5: was 0.1; the register has no interrupt, so it is read
+MMIO_BASE = 0xE0D20000  # the D6/D8 board's register page; the COPY button is bit 1 at COPY_OFFSET
+COPY_OFFSET = 0x6C0
+DOOR_WAIT_SECS = 600  # one question to the host door covers this long, so its log gets a line per press or per 10 min
 
 
 def _next_lcd_page() -> None:
@@ -57,10 +60,13 @@ def button_listener_daemon():
         logger.debug("[button_listener] Non-x86_64 architecture detected; skipping MMIO hardware button mapping.")
         return
 
-    MMIO_BASE = 0xE0D20000
-    COPY_OFFSET = 0x6C0
-
+    from backend import runtime
     from backend.hardware import hw_client
+
+    if runtime.without_root():  # Kiboto OS: /dev/mem is root's, the host door reads the button
+        logger.info("[Kiboto] The copy button on chassis %s is read through the host door", model)
+        through_door()
+        return
 
     if hw_client.available(force=True):  # SEC-24: the helper holds /dev/mem
         logger.info("[Kiboto] The copy button on chassis %s is read through the hardware helper", model)
@@ -90,11 +96,6 @@ def button_listener_daemon():
         mem = mmap.mmap(fd, 4096, offset=MMIO_BASE)
         logger.info(f"[Kiboto] Successfully initialized MMIO hardware copy button listener on chassis {model}")
     except PermissionError as pe:
-        from backend import runtime
-
-        if runtime.without_root():
-            logger.info("[Kiboto] The front COPY button is not read on Kiboto OS yet; copies start from the app.")
-            return
         logger.warning(
             f"[Kiboto] Hardware button mapping failed: {pe}. "
             "Docker container lacks cgroup access to /dev/mem. "
@@ -106,6 +107,58 @@ def button_listener_daemon():
         return
 
     _poll_button(lambda: struct.unpack("<I", mem[COPY_OFFSET : COPY_OFFSET + 4])[0])
+
+
+def wait_press(read_value, seconds: float, sleep=time.sleep, clock=time.monotonic) -> bool:
+    """Reads the register until the button goes down (and is still down 50 ms later) or `seconds`
+    pass. True for a press."""
+    end, last_state = clock() + seconds, 1
+    while clock() < end:
+        state = (read_value() & 2) >> 1
+        if state == 0 and last_state == 1:
+            sleep(0.05)
+            if (read_value() & 2) >> 1 == 0:
+                return True
+        last_state = state
+        sleep(BUTTON_POLL_SECS)
+    return False
+
+
+def wait_here(seconds: int) -> bool:
+    """The host door's operation (ADR 0006): waits up to `seconds` for a press of the COPY button,
+    reading its register from /dev/mem as root. Nothing is written."""
+    from backend.hardware.fans import is_zettlab_appliance
+
+    if isinstance(seconds, bool) or not isinstance(seconds, int) or not 1 <= seconds <= 3600:
+        raise ValueError("Not waiting: that is not a number of seconds from 1 to 3600.")
+    if not is_zettlab_appliance():
+        raise ValueError("This machine has no front COPY button.")
+    fd = os.open("/dev/mem", os.O_RDONLY | os.O_SYNC)
+    try:
+        mem = mmap.mmap(fd, 4096, mmap.MAP_SHARED, mmap.PROT_READ, offset=MMIO_BASE)
+    finally:
+        os.close(fd)
+    try:
+        return wait_press(lambda: struct.unpack("<I", mem[COPY_OFFSET : COPY_OFFSET + 4])[0], seconds)
+    finally:
+        mem.close()
+
+
+def through_door(rounds: int | None = None, pause=time.sleep) -> None:
+    """Kiboto OS: asks the host door to wait for a press, again and again; each press is handled
+    here as anywhere. A door that cannot read the button is asked again after a minute."""
+    from backend import door
+
+    n = 0
+    while rounds is None or n < rounds:
+        n += 1
+        try:
+            if door.call("button.wait", seconds=DOOR_WAIT_SECS, timeout=DOOR_WAIT_SECS + 60):
+                handle_press()
+                pause(0.3)
+        except (door.DoorError, OSError) as e:
+            logger.debug("[ButtonListener] The host door did not read the button: %s", e)
+            pause(60)
 
 
 def _poll_button(read_value) -> None:

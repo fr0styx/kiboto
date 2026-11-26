@@ -173,23 +173,44 @@ def _same_password(disk: dict[str, Any], others: list[dict[str, Any]]) -> None:
             )
 
 
-def _make_file(disk: dict[str, Any], grow_only: bool) -> None:
-    """The disk's file at its size. A new one must not replace a file that is already there; it takes
-    no space until the other computer writes to it."""
-    path, size = file_of(disk), disk["size_gb"] * 1024**3
-    if not grow_only:
-        try:
-            fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
-        except FileExistsError:
-            raise DiskError("file_exists", "There is already a file by that name in the folder.") from None
-        except OSError as e:
-            raise DiskError("no_file", "The disk's file could not be made in that folder.") from e
-        os.close(fd)
+FILE_ERRORS = {
+    "file_exists": "There is already a file by that name in the folder.",
+    "no_file": "The disk's file could not be made in that folder.",
+}
+
+
+def _make_file_at(path: str, size_gb: int, fresh: bool) -> str:
+    """Makes or grows a disk's file. "" when done, else the key of what went wrong. A new one never
+    replaces a file that is already there, and it takes no space until the other computer writes."""
+    flags = os.O_WRONLY | getattr(os, "O_NOFOLLOW", 0) | (os.O_CREAT | os.O_EXCL if fresh else 0)
     try:
-        if os.path.getsize(path) < size:
-            os.truncate(path, size)
-    except OSError as e:
-        raise DiskError("no_file", "The disk's file could not be made in that folder.") from e
+        fd = os.open(path, flags, 0o600)
+    except FileExistsError:
+        return "file_exists"
+    except OSError:
+        return "no_file"
+    try:
+        if os.fstat(fd).st_size < size_gb * 1024**3:
+            os.ftruncate(fd, size_gb * 1024**3)
+    except OSError:
+        return "no_file"
+    finally:
+        os.close(fd)
+    return ""
+
+
+def _make_file(disk: dict[str, Any], grow_only: bool) -> None:
+    """The disk's file at its size; on Kiboto OS the host door makes it (the folders are root's)."""
+    if runtime.without_root():
+        from backend import door
+
+        key = door.via(
+            "iscsi.make_file", make_file_here, path=file_of(disk), size_gb=disk["size_gb"], fresh=not grow_only
+        )
+    else:
+        key = _make_file_at(file_of(disk), disk["size_gb"], not grow_only)
+    if key:
+        raise DiskError(key, FILE_ERRORS.get(key, FILE_ERRORS["no_file"]))
 
 
 @json_locked(lambda *a, **k: STATE_FILE)
@@ -238,32 +259,50 @@ def delete(disk_id: str, with_file: bool = False) -> dict[str, Any] | None:
     atomic_write_json(STATE_FILE, data)
     if with_file:
         try:
-            os.remove(file_of(gone))
-        except OSError:
+            if runtime.without_root():
+                from backend import door
+
+                door.via("iscsi.remove_file", remove_file_here, path=file_of(gone))
+            else:
+                os.remove(file_of(gone))
+        except (OSError, ValueError):
             logger.warning("[iSCSI] the file of %s could not be removed", gone["name"], exc_info=True)
     return gone
 
 
 # --- the service's own file -----------------------------------------------------------------------
-def conf_text(kept: list[dict[str, Any]]) -> str:
+def entry(disk: dict[str, Any]) -> dict[str, str]:
+    """A disk as the service needs it, with its password in the clear."""
+    return {
+        "iqn": iqn(disk["name"]),
+        "file": file_of(disk),
+        "user": disk["user"],
+        "secret": unseal(disk["secret"]),
+        "allow": disk.get("allow") or "",
+    }
+
+
+def script_text(entries: list[dict[str, str]]) -> str:
     """What the service is told when it starts: one tgtadm command after another. Each disk, its
     file (written through to the drive before the other computer is told it is saved), who may
     open it and from where. Every value is quoted for the shell."""
     q = shlex.quote
     out = ["#!/bin/sh", "# written by Kiboto; changes made here are lost", "set -e", "t='tgtadm --lld iscsi'"]
     accounts: dict[str, str] = {}
-    for tid, d in enumerate(kept, start=1):
-        user, secret = d["user"], unseal(d["secret"])
-        out.append(f"$t --mode target --op new --tid {tid} --targetname {q(iqn(d['name']))}")
-        out.append(
-            f"$t --mode logicalunit --op new --tid {tid} --lun 1 --backing-store {q(file_of(d))} --bsoflags sync"
-        )
+    for tid, e in enumerate(entries, start=1):
+        user, secret = e["user"], e["secret"]
+        out.append(f"$t --mode target --op new --tid {tid} --targetname {q(e['iqn'])}")
+        out.append(f"$t --mode logicalunit --op new --tid {tid} --lun 1 --backing-store {q(e['file'])} --bsoflags sync")
         if user not in accounts:
             accounts[user] = secret
             out.append(f"$t --mode account --op new --user {q(user)} --password {q(secret)}")
         out.append(f"$t --mode account --op bind --tid {tid} --user {q(user)}")
-        out.append(f"$t --mode target --op bind --tid {tid} --initiator-address {q(d.get('allow') or 'ALL')}")
+        out.append(f"$t --mode target --op bind --tid {tid} --initiator-address {q(e.get('allow') or 'ALL')}")
     return "\n".join(out) + "\n"
+
+
+def conf_text(kept: list[dict[str, Any]]) -> str:
+    return script_text([entry(d) for d in kept])
 
 
 def write_conf() -> str:
@@ -359,10 +398,11 @@ def _unit_running() -> bool:
     return _unit("systemctl", "is-active", UNIT)[1] == "active"
 
 
-def unit_command(conf_hash: str) -> list[str]:
-    """tgtd as a unit of the machine, reading the service's file where Kiboto keeps it. The file's
-    hash is in the description, so a change of disks or passwords starts it anew."""
-    start = START.replace(SETUP, os.path.join(CONF_DIR, CONF_NAME))
+def unit_command(conf_hash: str, conf: str = "") -> list[str]:
+    """tgtd as a unit of the machine, reading the service's file where Kiboto keeps it (on Kiboto OS
+    the host door's own copy). The file's hash is in the description, so a change of disks or
+    passwords starts it anew."""
+    start = START.replace(SETUP, conf or os.path.join(CONF_DIR, CONF_NAME))
     return [
         "systemd-run",
         "--quiet",
@@ -381,29 +421,114 @@ def unit_command(conf_hash: str) -> list[str]:
     ]
 
 
-def _ensure_unit(state: dict[str, Any]) -> dict[str, Any]:
-    from backend import runtime
-
-    if runtime.without_root():
-        return status()
+def _run_unit(cmd: list[str] | None, count: int) -> dict[str, Any]:
+    """Starts the unit with `cmd` unless it already runs that very command; stops it for None."""
     running = _unit_running()
-    if not state["enabled"] or not state["disks"]:
+    if cmd is None:
         if running:
             _unit("systemctl", "stop", UNIT)
             logger.info("[iSCSI] %s stopped: turned off, or no disk is left", UNIT)
-        return status(running=False)
-    cmd = unit_command(write_conf())
+        return {"running": False, "why": ""}
     described = cmd[cmd.index("--description") + 1]
     if running and _unit("systemctl", "show", UNIT, "-p", "Description", "--value")[1] == described:
-        return status(running=True)
+        return {"running": True, "why": ""}
     _unit("systemctl", "stop", UNIT)
     _unit("systemctl", "reset-failed", UNIT)
     code, said = _unit(*cmd)
     if code != 0:
         logger.warning("[iSCSI] %s could not be started: %s", UNIT, said)
-        return status(running=False, error="The iSCSI service could not be started.", why="start")
-    logger.info("[iSCSI] %s serves %d disk(s) on port %d", UNIT, len(state["disks"]), PORT)
-    return status(running=True)
+        return {"running": False, "why": "start"}
+    logger.info("[iSCSI] %s serves %d disk(s) on port %d", UNIT, count, PORT)
+    return {"running": True, "why": ""}
+
+
+def _ensure_unit(state: dict[str, Any]) -> dict[str, Any]:
+    wanted = state["enabled"] and state["disks"]
+    if runtime.without_root():  # Kiboto OS: the host door writes the service's file and starts it
+        from backend import door
+
+        entries = [entry(d) for d in state["disks"]] if wanted else []
+        got = door.via("iscsi.apply", apply_here, disks=entries)
+    else:
+        got = _run_unit(unit_command(write_conf()) if wanted else None, len(state["disks"]))
+    if got.get("why"):
+        return status(running=False, error="The iSCSI service could not be started.", why=got["why"])
+    return status(running=bool(got.get("running")))
+
+
+# --- the host door's operations (ADR 0006): nothing is taken from the web process unchecked --------
+ROOT_SETUP = "/etc/kiboto/iscsi/" + CONF_NAME  # the door's own copy: root's, and only root reads it
+_IQN = re.compile(rf"^{re.escape(IQN_PREFIX)}:[a-z0-9-]{{1,40}}:[a-z0-9][a-z0-9-]{{0,30}}$")
+
+
+def disk_file(path: Any) -> str:
+    """A disk's file as the host door may touch it: in the storage folder, named as Kiboto names
+    disk files, reached through no link, never in Kiboto's own folder. ValueError otherwise."""
+    from backend.config import POOL_PATH
+
+    text = path if isinstance(path, str) else ""
+    name = os.path.basename(text)[: -len(FILE_SUFFIX)] if text.endswith(FILE_SUFFIX) else ""
+    real = os.path.realpath(text) if text else ""
+    data = os.path.realpath(DATA_DIR).rstrip(os.sep) + os.sep
+    if (
+        not NAME.match(name)
+        or "\n" in text
+        or real != os.path.normpath(text)
+        or not real.startswith(os.path.realpath(POOL_PATH).rstrip(os.sep) + os.sep)
+        or real.startswith(data)
+        or (os.path.lexists(real) and not os.path.isfile(real))
+    ):
+        raise ValueError("Not touching that file: it is not one of Kiboto's iSCSI disk files.")
+    return real
+
+
+def make_file_here(path: str, size_gb: int, fresh: bool) -> str:
+    """The host door's operation: makes or grows a disk's file. "" or the key of what went wrong."""
+    if isinstance(size_gb, bool) or not isinstance(size_gb, int) or not MIN_GB <= size_gb <= MAX_GB:
+        raise ValueError("Not making that file: the size is not one a disk may have.")
+    return _make_file_at(disk_file(path), size_gb, bool(fresh))
+
+
+def remove_file_here(path: str) -> bool:
+    """The host door's operation: removes a disk's file (asked for when the disk is deleted)."""
+    real = disk_file(path)
+    if os.path.lexists(real):
+        os.remove(real)
+    return True
+
+
+def _checked(raw: Any) -> dict[str, str]:
+    e = raw if isinstance(raw, dict) else {}
+    raw_values = {k: e.get(k) for k in ("iqn", "file", "user", "secret", "allow")}
+    if not all(isinstance(v, str) for v in raw_values.values()):
+        raise ValueError("Not serving: a disk is not described as Kiboto describes it.")
+    values: dict[str, str] = {k: str(v) for k, v in raw_values.items()}
+    if not _IQN.match(values["iqn"]) or not USER.match(values["user"]) or not SECRET.match(values["secret"]):
+        raise ValueError("Not serving: a disk's name, user or password is not one Kiboto allows.")
+    try:
+        values["allow"] = _clean_allow(values["allow"])
+    except DiskError:
+        raise ValueError("Not serving: a disk's allowed address is not an address.") from None
+    values["file"] = disk_file(values["file"])
+    return values
+
+
+def apply_here(disks: list[Any]) -> dict[str, Any]:
+    """The host door's operation: writes its own copy of the service's file from the disks sent,
+    each checked, and starts tgtd with it (or stops it when none is sent)."""
+    if not isinstance(disks, list) or len(disks) > MAX_DISKS:
+        raise ValueError(f"Not serving: there can be up to {MAX_DISKS} disks.")
+    entries = [_checked(d) for d in disks]
+    if not entries:
+        return _run_unit(None, 0)
+    text = script_text(entries)
+    os.makedirs(os.path.dirname(ROOT_SETUP), mode=0o700, exist_ok=True)
+    fd = os.open(ROOT_SETUP + ".new", os.O_WRONLY | os.O_CREAT | os.O_TRUNC | getattr(os, "O_NOFOLLOW", 0), 0o600)
+    with os.fdopen(fd, "w", encoding="utf-8") as f:
+        f.write(text)
+    os.replace(ROOT_SETUP + ".new", ROOT_SETUP)
+    conf_hash = hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
+    return _run_unit(unit_command(conf_hash, ROOT_SETUP), len(entries))
 
 
 def _remove() -> None:
@@ -455,10 +580,6 @@ def status(running: bool | None = None, error: str = "", why: str = "") -> dict[
     state = _read()
     from backend import runtime
 
-    if runtime.without_root():  # tgtd is root's, and the host door does not start it yet
-        from backend.errors import NOT_ON_OS_YET
-
-        running, error, why = False, NOT_ON_OS_YET, "not_yet"
     if running is None and runtime.managed_host():  # a service of the machine, not a container
         running = _unit_running()
         if state["enabled"] and state["disks"] and not running:

@@ -32,9 +32,9 @@ What the words mean:
 | Drive sleep | Your NAS system does this | No | Yes |
 | Drive Health: checks, warnings, history | Yes | Yes | Yes |
 | Settings copy on the pools, to rebuild after a new system disk | No | No | Yes |
-| iSCSI targets | Yes | Yes | Not yet |
+| iSCSI targets | Yes | Yes | Yes |
 | Merged folders across fast and large drives | Your NAS system does this | Yes | Not yet |
-| Copies of a pool to another machine (replication) | Your NAS system does this | Yes | Not yet |
+| Copies of a pool to another machine (replication)<br><sub>Kiboto OS copies to another pool of the same machine; copies to another machine over SSH come later.</sub> | Your NAS system does this | Yes | Partly |
 
 ## Files, apps and Kib
 
@@ -44,7 +44,7 @@ What the words mean:
 | Apps from the catalog (Docker) | Yes | Yes | Yes |
 | Virtual machines<br><sub>Not in the smaller -core image.</sub> | Yes | Yes | Yes |
 | Backups and restore | Yes | Yes | Yes |
-| SFTP | Yes | Yes | Not yet |
+| SFTP | Yes | Yes | Yes |
 | Kib: answers from your own files, on your own hardware | Yes | Yes | Yes |
 | People, roles and sign-in with a second step | Yes | Yes | Yes |
 
@@ -69,7 +69,7 @@ What the words mean:
 | Fans: curves, quiet at night, fan stop while drives sleep<br><sub>On the D4 the kernel keeps the fans, and Kiboto shows them.</sub> | Yes | Yes | Yes |
 | Light bar<br><sub>The Zettlab D4's too, without the rainbow effect.</sub> | Yes | Yes | Being checked |
 | Front screen<br><sub>Kiboto OS draws the screen with the plain renderer. The D4's screen is not drawn yet.</sub> | Yes | Yes | Partly |
-| Card copies from the SD and microSD slots<br><sub>On Kiboto OS copies start from the app; the front COPY button is not read yet.</sub> | Yes | Yes | Partly |
+| Card copies from the SD and microSD slots | Yes | Yes | Yes |
 | Fan watchdog beside the app | Yes | Yes | Not yet |
 
 ## Where it runs

@@ -25,16 +25,16 @@
    {"name": "Drive sleep", "beside": "host", "linux": "no", "os": "yes"},
    {"name": "Drive Health: checks, warnings, history", "beside": "yes", "linux": "yes", "os": "yes"},
    {"name": "Settings copy on the pools, to rebuild after a new system disk", "beside": "no", "linux": "no", "os": "yes"},
-   {"name": "iSCSI targets", "beside": "yes", "linux": "yes", "os": "soon"},
+   {"name": "iSCSI targets", "beside": "yes", "linux": "yes", "os": "yes"},
    {"name": "Merged folders across fast and large drives", "beside": "host", "linux": "yes", "os": "soon"},
-   {"name": "Copies of a pool to another machine (replication)", "beside": "host", "linux": "yes", "os": "soon"}
+   {"name": "Copies of a pool to another machine (replication)", "beside": "host", "linux": "yes", "os": "partly", "note": "Kiboto OS copies to another pool of the same machine; copies to another machine over SSH come later."}
   ]},
   {"name": "Files, apps and Kib", "features": [
    {"name": "File Explorer, previews and share links", "beside": "yes", "linux": "yes", "os": "yes"},
    {"name": "Apps from the catalog (Docker)", "beside": "yes", "linux": "yes", "os": "yes"},
    {"name": "Virtual machines", "beside": "yes", "linux": "yes", "os": "yes", "note": "Not in the smaller -core image."},
    {"name": "Backups and restore", "beside": "yes", "linux": "yes", "os": "yes"},
-   {"name": "SFTP", "beside": "yes", "linux": "yes", "os": "soon"},
+   {"name": "SFTP", "beside": "yes", "linux": "yes", "os": "yes"},
    {"name": "Kib: answers from your own files, on your own hardware", "beside": "yes", "linux": "yes", "os": "yes"},
    {"name": "People, roles and sign-in with a second step", "beside": "yes", "linux": "yes", "os": "yes"}
   ]},
@@ -53,7 +53,7 @@
    {"name": "Fans: curves, quiet at night, fan stop while drives sleep", "beside": "yes", "linux": "yes", "os": "yes", "note": "On the D4 the kernel keeps the fans, and Kiboto shows them."},
    {"name": "Light bar", "beside": "yes", "linux": "yes", "os": "check", "note": "The Zettlab D4's too, without the rainbow effect."},
    {"name": "Front screen", "beside": "yes", "linux": "yes", "os": "partly", "note": "Kiboto OS draws the screen with the plain renderer. The D4's screen is not drawn yet."},
-   {"name": "Card copies from the SD and microSD slots", "beside": "yes", "linux": "yes", "os": "partly", "note": "On Kiboto OS copies start from the app; the front COPY button is not read yet."},
+   {"name": "Card copies from the SD and microSD slots", "beside": "yes", "linux": "yes", "os": "yes"},
    {"name": "Fan watchdog beside the app", "beside": "yes", "linux": "yes", "os": "soon"}
   ]},
   {"name": "Where it runs", "features": [
