@@ -1026,7 +1026,7 @@ export function initManagement() {
 
         strip.innerHTML = `
           <div class="mgx-box">
-            <div class="mgx-xs-bold-muted">${t('mvm.engine', 'HYPERVISOR ENGINE')}</div>
+            <div class="mgx-xs-bold-muted">${t('mvm.engine', 'Hypervisor')}</div>
             <div style="font-size: 13px; font-weight: 700; color: ${kvmColor}; margin-top: 4px; display: flex; align-items: center; gap: 6px;">
               <span aria-hidden="true">⚡</span> <span>${escapeHtml(kvmBadge)}</span>
             </div>

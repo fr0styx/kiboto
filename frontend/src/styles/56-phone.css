@@ -55,7 +55,7 @@ html.has-auth-session body.phone-shell #phone-widgets #desktop-widgets-container
 .phone-health .ov-item .btn-pill-toggle { flex-shrink: 0; }
 .phone-status { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--kb-space-2); margin-bottom: var(--kb-space-3); }
 .phone-stat { display: flex; flex-direction: column; gap: 2px; padding: var(--kb-space-2) var(--kb-space-3); border-radius: var(--kb-radius); border: 1px solid var(--kb-line); background: var(--card); }
-.phone-stat-label { font-size: var(--kb-fs-xs); color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+.phone-stat-label { font-size: var(--kb-fs-xs); color: var(--muted); }
 .phone-stat-val { font-size: var(--kb-fs); font-weight: 700; color: var(--fg); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .phone-tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10050; display: grid; grid-template-columns: repeat(5, 1fr); padding-bottom: env(safe-area-inset-bottom); background: var(--lt-b-0a1113f5, rgba(10, 17, 19, 0.96)); border-top: 1px solid var(--kb-line-strong); }

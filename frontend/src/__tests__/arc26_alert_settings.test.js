@@ -260,7 +260,7 @@ describe('alert settings pane', () => {
     expect($('cfg-apprise-raw').value).toBe('a://1\nb://2');
     n.openChannelConfigModal('email');
     expect($('cfg-smtp-port').value).toBe('587');
-    expect($('notif-modal-body').textContent).toContain('PORT');
+    expect($('notif-modal-body').textContent).toContain('Port');
   });
 
   it('a dialog for an unknown channel shows nothing to fill in; missing dialogs are ignored', async () => {

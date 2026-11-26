@@ -170,8 +170,6 @@
   font-size: var(--kb-fs-xs);
   font-weight: 700;
   color: var(--kb-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -851,7 +849,7 @@
    inline style it replaced (NUX-15) */
 :is(#dock-item-ctx-menu, #desktop-ctx-menu) .cxm-ico { font-size:var(--kb-fs-xs); margin-right:6px; }
 :is(#dock-item-ctx-menu, #desktop-ctx-menu) .cxm-sep { height:1px; background:var(--kb-glaze-8); margin:4px 0; }
-:is(#dock-item-ctx-menu, #desktop-ctx-menu) .cxm-head { font-size:var(--kb-fs-xs); color:var(--muted); padding:3px 10px; font-weight:700; text-transform:uppercase; }
+:is(#dock-item-ctx-menu, #desktop-ctx-menu) .cxm-head { font-size:var(--kb-fs-xs); color:var(--muted); padding:3px 10px; font-weight:700; }
 :is(#dock-item-ctx-menu, #desktop-ctx-menu) .cxm-row { display:flex; align-items:center; justify-content:space-between; }
 :is(#dock-item-ctx-menu, #desktop-ctx-menu) .cxm-row-main { display:flex; align-items:center; gap:6px; min-width:0; overflow:hidden; }
 :is(#dock-item-ctx-menu, #desktop-ctx-menu) .cxm-ico-plain { font-size:var(--kb-fs-xs); }

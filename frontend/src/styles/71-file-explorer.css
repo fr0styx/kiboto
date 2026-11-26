@@ -16,7 +16,7 @@
 :is(#file-manager-window, .file-manager-window, #fm-locations-menu, #fm-breadcrumbs-dropdown, #modal-fm-collision, #modal-fm-share-link, #modal-media-organizer) .fmx-row-5 { display: flex; flex: 1; min-height: 0; width: 100%; position: relative; overflow: hidden; }
 :is(#file-manager-window, .file-manager-window, #fm-locations-menu, #fm-breadcrumbs-dropdown, #modal-fm-collision, #modal-fm-share-link, #modal-media-organizer) .fmx-col-2 { display: flex; flex-direction: column; flex: 1; min-width: 0; position: relative; overflow: hidden; }
 :is(#file-manager-window, .file-manager-window, #fm-locations-menu, #fm-breadcrumbs-dropdown, #modal-fm-collision, #modal-fm-share-link, #modal-media-organizer) .fmx-row-box { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border-bottom: 1px solid var(--kb-line-6); }
-:is(#file-manager-window, .file-manager-window, #fm-locations-menu, #fm-breadcrumbs-dropdown, #modal-fm-collision, #modal-fm-share-link, #modal-media-organizer) .fmx-xs-bold { font-size: var(--kb-fs-xs); font-weight: 700; color: var(--fg); text-transform: uppercase; letter-spacing: 0.5px; }
+:is(#file-manager-window, .file-manager-window, #fm-locations-menu, #fm-breadcrumbs-dropdown, #modal-fm-collision, #modal-fm-share-link, #modal-media-organizer) .fmx-xs-bold { font-size: var(--kb-fs-xs); font-weight: 700; color: var(--fg); }
 :is(#file-manager-window, .file-manager-window, #fm-locations-menu, #fm-breadcrumbs-dropdown, #modal-fm-collision, #modal-fm-share-link, #modal-media-organizer) .fmx-grow { flex: 1; overflow-y: auto; padding: 12px; }
 :is(#file-manager-window, .file-manager-window, #fm-locations-menu, #fm-breadcrumbs-dropdown, #modal-fm-collision, #modal-fm-share-link, #modal-media-organizer) .fmx-row-6 { position: absolute; left: 0; top: 0; bottom: 0; right: 30px; display: flex; align-items: center; padding-left: 8px; cursor: text; overflow: hidden; pointer-events: auto; }
 :is(#file-manager-window, .file-manager-window, #fm-locations-menu, #fm-breadcrumbs-dropdown, #modal-fm-collision, #modal-fm-share-link, #modal-media-organizer) .fmx-x-2 { opacity: 0.2; }
@@ -94,7 +94,7 @@
 #modal-media-organizer .mor-col { display: flex; flex-direction: column; gap: 14px; padding: 20px; }
 #modal-media-organizer .mor-xs-muted { font-size: var(--kb-fs-xs); color: var(--muted); }
 #modal-media-organizer .mor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-#modal-media-organizer .mor-xs-bold-muted { display: block; font-size: var(--kb-fs-xs); font-weight: 800; color: var(--muted); text-transform: uppercase; margin-bottom: 6px; }
+#modal-media-organizer .mor-xs-bold-muted { display: block; font-size: var(--kb-fs-xs); font-weight: 800; color: var(--muted); margin-bottom: 6px; }
 #modal-media-organizer .mor-xs-strong-box { width: 100%; border: 1px solid var(--kb-line-12); background: var(--kb-shade-30); padding: 7px 10px; color: var(--kb-text-strong); border-radius: 6px; font-size: var(--kb-fs-xs); }
 #modal-media-organizer .mor-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
 #modal-media-organizer .mor-row-2 { display: flex; align-items: center; gap: 8px; }

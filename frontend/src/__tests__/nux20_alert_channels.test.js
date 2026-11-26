@@ -41,21 +41,14 @@ describe('alert channel words (NUX-20)', () => {
   it('labels every channel dialog', () => {
     const labels = {
       discord: [
-        'DISCORD WEBHOOK URL',
+        'Discord webhook URL',
         'Paste the Webhook URL created in your Discord channel settings -> Integrations.',
       ],
-      telegram: ['TELEGRAM BOT TOKEN', 'TELEGRAM CHAT ID', 'Obtained from @userinfobot'],
-      email: [
-        'SMTP HOST',
-        'SMTP USER',
-        'SMTP PASSWORD',
-        'FROM EMAIL',
-        'TO RECIPIENT(S)',
-        'Use TLS / STARTTLS Encryption',
-      ],
-      ntfy: ['NTFY SERVER URL', 'TOPIC NAME', 'ACCESS TOKEN (Optional)'],
-      webhook: ['WEBHOOK URL', 'Receives POST requests with JSON payload'],
-      apprise_raw: ['APPRISE TARGET URLS (One per line)', 'Apprise supports 100+ notification targets.'],
+      telegram: ['Telegram bot token', 'Telegram chat ID', 'Obtained from @userinfobot'],
+      email: ['SMTP server', 'SMTP user', 'SMTP password', 'From address', 'Send to', 'Use TLS / STARTTLS Encryption'],
+      ntfy: ['ntfy server URL', 'Topic', 'Access token (optional)'],
+      webhook: ['Webhook URL', 'Receives POST requests with JSON payload'],
+      apprise_raw: ['Apprise target URLs (one per line)', 'Apprise supports 100+ notification targets.'],
     };
     for (const [channel, words] of Object.entries(labels)) {
       openChannelConfigModal(channel);

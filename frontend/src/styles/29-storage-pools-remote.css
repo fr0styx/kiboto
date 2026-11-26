@@ -534,8 +534,6 @@
   font-size: var(--kb-fs-xs);
   font-weight: 800;
   color: var(--muted);
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
   display: flex;
   justify-content: space-between;
   align-items: center;

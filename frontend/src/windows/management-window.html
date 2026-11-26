@@ -758,7 +758,7 @@
 
                   <div class="wdg-grid-box">
                     <div>
-                      <label class="wdg-xs-bold-muted" for="widget-pos-select" data-i18n="mw.desktop_position">DESKTOP POSITION</label>
+                      <label class="wdg-xs-bold-muted" for="widget-pos-select" data-i18n="mw.desktop_position">Desktop position</label>
                       <select id="widget-pos-select" class="tz-select-input wdg-xs-strong-box">
                         <option value="pos-top-right" data-i18n="mw.top_right_default">Top Right (Default)</option>
                         <option value="pos-top-left" data-i18n="mw.top_left">Top Left</option>
@@ -768,7 +768,7 @@
                     </div>
 
                     <div>
-                      <label class="wdg-xs-bold-muted" for="widget-opacity-select" data-i18n="mw.glass_transparency">GLASS TRANSPARENCY</label>
+                      <label class="wdg-xs-bold-muted" for="widget-opacity-select" data-i18n="mw.glass_transparency">Glass transparency</label>
                       <select id="widget-opacity-select" class="tz-select-input wdg-xs-strong-box">
                         <option value="glass-subtle" data-i18n="mw.subtle_glass_40">Subtle Glass (40%)</option>
                         <option value="glass-standard" selected data-i18n="mw.standard_glass_65">Standard Glass (65%)</option>
@@ -777,7 +777,7 @@
                     </div>
 
                     <div>
-                      <label class="wdg-xs-bold-muted" for="widget-scale-select" data-i18n="mw.scale_size">SCALE / SIZE</label>
+                      <label class="wdg-xs-bold-muted" for="widget-scale-select" data-i18n="mw.scale_size">Size</label>
                       <select id="widget-scale-select" class="tz-select-input wdg-xs-strong-box">
                         <option value="scale-compact" data-i18n="mw.compact_88">Compact (88%)</option>
                         <option value="scale-normal" selected data-i18n="mw.normal_100">Normal (100%)</option>
@@ -1386,7 +1386,7 @@
                   <p class="mgmt-card-intro-desc" data-i18n="net.wiring_desc">Bonds, bridges and VLANs, as the NAS has them.</p>
                 <!-- Virtual Switches, Bonds & Bridges -->
                 <div class="network-section-header net-x">
-                  <span class="network-section-title" data-i18n="mw.host_bridges_and_bonding_groups">HOST BRIDGES & BONDING GROUPS</span>
+                  <span class="network-section-title" data-i18n="mw.host_bridges_and_bonding_groups">Host bridges and bonds</span>
                 </div>
                 <div class="network-grid-two-col" id="network-bridges-container">
                   <!-- Populated dynamically with bridge cards and bond cards -->
@@ -1394,7 +1394,7 @@
 
                 <!-- 802.1Q VLAN Sub-Interfaces -->
                 <div class="network-section-header net-row-4">
-                  <span class="network-section-title" data-i18n="mw.vlan_sub_interfaces_802_1q_tagging">VLAN SUB-INTERFACES (802.1Q TAGGING)</span>
+                  <span class="network-section-title" data-i18n="mw.vlan_sub_interfaces_802_1q_tagging">VLAN sub-interfaces (802.1Q tagging)</span>
                   <button class="btn-pill-toggle is-small" id="btn-open-create-vlan-modal" data-net-edit="vlan" style="color: var(--lt-ink-brand, var(--accent-cyan-hi, #4fd8c4)); border-color: rgba(79, 216, 196, 0.4);" data-i18n="net.create_vlan_btn">+ Add VLAN</button>
                 </div>
                 <div class="network-table-wrap" id="network-vlan-table-wrap" tabindex="0">
@@ -2970,7 +2970,7 @@
               </div>
               <div class="mgmt-detail-body">
                 <div class="network-section-header srep-x">
-                  <span class="network-section-title" data-i18n="mw.active_replication_pipelines">ACTIVE REPLICATION PIPELINES</span>
+                  <span class="network-section-title" data-i18n="mw.active_replication_pipelines">Active replications</span>
                 </div>
                 <div class="srep-box">
                   <table class="copy-history-table">
@@ -2993,7 +2993,7 @@
                 </div>
 
                 <div class="network-section-header">
-                  <span class="network-section-title" data-i18n="mw.replication_transfer_history">REPLICATION TRANSFER HISTORY</span>
+                  <span class="network-section-title" data-i18n="mw.replication_transfer_history">Replication history</span>
                 </div>
                 <div class="srep-box-2">
                   <table class="copy-history-table">
@@ -4624,22 +4624,22 @@
     <form id="webdav-config-form" class="smart-modal-body wdv-col">
       <div class="wdv-grid">
         <div>
-          <label class="wdv-xs-bold-muted" for="webdav-cfg-port" data-i18n="mw.line_rate_port">LINE-RATE PORT</label>
+          <label class="wdv-xs-bold-muted" for="webdav-cfg-port" data-i18n="mw.line_rate_port">Port</label>
           <input type="number" id="webdav-cfg-port" min="1024" max="65535" class="tz-select-input wdv-xs-strong-box" required />
         </div>
         <div>
-          <label class="wdv-xs-bold-muted" for="webdav-cfg-root" data-i18n="mw.root_storage_path">ROOT STORAGE PATH</label>
+          <label class="wdv-xs-bold-muted" for="webdav-cfg-root" data-i18n="mw.root_storage_path">Root folder</label>
           <input type="text" id="webdav-cfg-root" class="tz-select-input wdv-xs-strong-box" required />
         </div>
       </div>
 
       <div class="wdv-grid-box">
         <div>
-          <label class="wdv-xs-bold-muted" for="webdav-cfg-user" data-i18n="mw.username">USERNAME</label>
+          <label class="wdv-xs-bold-muted" for="webdav-cfg-user" data-i18n="mw.username">Username</label>
           <input type="text" id="webdav-cfg-user" class="tz-select-input wdv-xs-strong-box" />
         </div>
         <div>
-          <label class="wdv-xs-bold-muted" for="webdav-cfg-pass" data-i18n="mw.new_pw">NEW PASSWORD</label>
+          <label class="wdv-xs-bold-muted" for="webdav-cfg-pass" data-i18n="mw.new_pw">New password</label>
           <input type="password" id="webdav-cfg-pass" class="tz-select-input wdv-xs-strong-box" placeholder="(Leave blank to keep)" data-i18n-placeholder="ui.leave_blank_to_keep" />
         </div>
       </div>
@@ -4674,11 +4674,11 @@
     <form id="create-pool-form" class="smart-modal-body cpool-col">
       <div class="cpool-grid">
         <div>
-          <label class="cpool-xs-bold-muted" for="create-pool-name" data-i18n="mw.pool_name">POOL NAME</label>
+          <label class="cpool-xs-bold-muted" for="create-pool-name" data-i18n="mw.pool_name">Pool name</label>
           <input type="text" id="create-pool-name" class="tz-select-input cpool-xs-strong-box" placeholder="e.g. vault, archive, data" data-i18n-placeholder="ph.pool_name" required pattern="^[a-zA-Z0-9_\-\.]{1,32}$" />
         </div>
         <div>
-          <label class="cpool-xs-bold-muted" for="create-pool-fs" data-i18n="mw.filesystem">FILESYSTEM</label>
+          <label class="cpool-xs-bold-muted" for="create-pool-fs" data-i18n="mw.filesystem">File system</label>
           <select id="create-pool-fs" class="tz-select-input cpool-xs-strong-box">
             <option value="btrfs" selected data-i18n="mw.btrfs_bitrot_protection_snapshots">Btrfs (Bitrot Protection + Snapshots)</option>
             <option value="zfs" data-i18n="mw.openzfs_enterprise_raidz_and_arc_cache">OpenZFS (Enterprise RAIDZ & ARC Cache)</option>
@@ -4689,7 +4689,7 @@
 
       <div class="cpool-grid-box">
         <div>
-          <label class="cpool-xs-bold-muted" for="create-pool-profile" data-i18n="mw.raid_profile">RAID PROFILE</label>
+          <label class="cpool-xs-bold-muted" for="create-pool-profile" data-i18n="mw.raid_profile">RAID profile</label>
           <select id="create-pool-profile" class="tz-select-input cpool-xs-strong-box">
             <option value="raid1" selected data-i18n="mw.raid_1_mirroring_2_drives">RAID 1 (Mirroring - 2+ Drives)</option>
             <option value="raid10" data-i18n="mw.raid_10_striped_mirrors_4_drives">RAID 10 (Striped Mirrors - 4+ Drives)</option>
@@ -4698,7 +4698,7 @@
           </select>
         </div>
         <div>
-          <label class="cpool-xs-bold-muted" for="create-pool-compression" data-i18n="mw.transparent_compression">TRANSPARENT COMPRESSION</label>
+          <label class="cpool-xs-bold-muted" for="create-pool-compression" data-i18n="mw.transparent_compression">Compression</label>
           <select id="create-pool-compression" class="tz-select-input cpool-xs-strong-box">
             <option value="zstd:1" selected data-i18n="mw.zstandard_zstd_1_recommended">Zstandard (zstd:1 - Recommended)</option>
             <option value="lzo" data-i18n="mw.lzo_fastest_cpu">LZO (Fastest CPU)</option>
@@ -4708,14 +4708,14 @@
       </div>
 
       <div class="cpool-box">
-        <label class="cpool-xs-bold-muted-2" data-i18n="mw.select_member_disks">SELECT MEMBER DISKS</label>
+        <label class="cpool-xs-bold-muted-2" data-i18n="mw.select_member_disks">Drives to use</label>
         <div class="cpool-col-box" id="create-pool-disks-container">
           <!-- Injected via JS -->
         </div>
       </div>
 
       <div class="cpool-box">
-        <label class="cpool-xs-bold-muted" for="create-pool-mountpoint" data-i18n="mw.mountpoint">MOUNTPOINT</label>
+        <label class="cpool-xs-bold-muted" for="create-pool-mountpoint" data-i18n="mw.mountpoint">Mount point</label>
         <input type="text" id="create-pool-mountpoint" class="tz-select-input cpool-xs-strong-box" placeholder="/mnt/storage/vault" />
       </div>
 
@@ -4743,12 +4743,12 @@
     </div>
     <form id="rename-pool-form" class="smart-modal-body rpool-col">
       <div>
-        <label class="rpool-xs-bold-muted" for="rename-pool-current-name" data-i18n="storage.current_pool_name">CURRENT POOL NAME</label>
+        <label class="rpool-xs-bold-muted" for="rename-pool-current-name" data-i18n="storage.current_pool_name">Current name</label>
         <input type="text" id="rename-pool-current-name" class="tz-select-input rpool-xs-muted-box" disabled />
       </div>
 
       <div>
-        <label class="rpool-xs-bold-muted" for="rename-pool-new-name" data-i18n="storage.new_pool_name">NEW POOL NAME</label>
+        <label class="rpool-xs-bold-muted" for="rename-pool-new-name" data-i18n="storage.new_pool_name">New name</label>
         <input type="text" id="rename-pool-new-name" class="tz-select-input rpool-xs-strong-box" placeholder="e.g. storage2, vault_fast" data-i18n-placeholder="ph.new_pool_name" required pattern="^[a-zA-Z0-9_\-\.]{1,32}$" />
       </div>
 
@@ -4786,11 +4786,11 @@
     <form id="create-share-form" class="smart-modal-body nshare-col">
       <div class="nshare-grid">
         <div>
-          <label class="nshare-xs-bold-muted" for="create-share-name" data-i18n="mw.share_name">SHARE NAME</label>
+          <label class="nshare-xs-bold-muted" for="create-share-name" data-i18n="mw.share_name">Share name</label>
           <input type="text" id="create-share-name" class="tz-select-input nshare-xs-strong-box" placeholder="e.g. vault, media, photos" data-i18n-placeholder="ph.dataset_name" required pattern="^[a-zA-Z0-9_\-\.]{1,32}$" />
         </div>
         <div>
-          <label class="nshare-xs-bold-muted" for="create-share-security" data-i18n="mw.security_access">SECURITY ACCESS</label>
+          <label class="nshare-xs-bold-muted" for="create-share-security" data-i18n="mw.security_access">Access</label>
           <select id="create-share-security" class="tz-select-input nshare-xs-strong-box">
             <option value="private" selected data-i18n="mw.private_people_sign_in">Private (people sign in)</option>
             <option value="public" data-i18n="mw.anyone_on_my_network_no_pw">Anyone on my network, no password (not recommended)</option>
@@ -4799,7 +4799,7 @@
       </div>
 
       <div>
-        <label class="nshare-xs-bold-muted" for="create-share-path" data-i18n="mw.path_on_disk">PATH ON DISK</label>
+        <label class="nshare-xs-bold-muted" for="create-share-path" data-i18n="mw.path_on_disk">Path on disk</label>
         <div class="share-path-row">
           <input type="text" id="create-share-path" class="tz-select-input nshare-xs-strong-box" placeholder="/mnt/storage/vault" />
           <button type="button" class="btn-pill-toggle" id="create-share-pick" data-i18n="shr1.choose">Choose…</button>
@@ -4808,12 +4808,12 @@
 
       <div class="nshare-grid">
         <div>
-          <label class="nshare-xs-bold-muted" for="create-share-comment" data-i18n="mw.description_comment">DESCRIPTION / COMMENT</label>
+          <label class="nshare-xs-bold-muted" for="create-share-comment" data-i18n="mw.description_comment">Description</label>
           <input type="text" id="create-share-comment" class="tz-select-input nshare-xs-strong-box" placeholder="Kiboto Managed Share" data-i18n-placeholder="ui.kiboto_managed_share" />
         </div>
         <div>
           <label class="nshare-row-xs-bold-muted" for="create-share-quota-gb">
-            <span data-i18n="mw.storage_quota">STORAGE QUOTA</span>
+            <span data-i18n="mw.storage_quota">Storage quota</span>
             <span class="nshare-x-2" data-sample>0 = Unlimited</span>
           </label>
           <input type="number" id="create-share-quota-gb" class="tz-select-input nshare-xs-strong-box" min="0" max="1000000" placeholder="0 (GB)" />

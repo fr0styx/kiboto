@@ -132,8 +132,6 @@
 .ai-thread-group-header {
   font-size: var(--kb-fs-xs);
   font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
   color: var(--kb-text-muted);
   padding: 8px 6px 3px;
   user-select: none;

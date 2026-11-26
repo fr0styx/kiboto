@@ -41,7 +41,7 @@ describe('Mission Control VM pane (NUX-20)', () => {
     expect(document.getElementById('mgmt-hub-vms-pill').textContent).toBe('1 Running');
     expect(document.getElementById('mgmt-sidebar-vms-badge').textContent).toBe('2 VMs');
     for (const w of [
-      'HYPERVISOR ENGINE',
+      'Hypervisor',
       'Memory left for machines',
       '20.5 GB',
       'Processor threads in use',

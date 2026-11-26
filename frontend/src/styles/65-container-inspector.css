@@ -30,7 +30,7 @@
 :is(#container-inspector-overlay, #container-delete-modal-overlay) .ci-xs-4 { font-size: var(--kb-fs-xs); opacity: 0.8; }
 :is(#container-inspector-overlay, #container-delete-modal-overlay) .ci-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-bottom: 16px; }
 :is(#container-inspector-overlay, #container-delete-modal-overlay) .ci-box { background: var(--kb-shade-30); border: 1px solid var(--kb-line-6); padding: 10px; border-radius: 6px; }
-:is(#container-inspector-overlay, #container-delete-modal-overlay) .ci-xs-bold-muted { font-size: var(--kb-fs-xs); color: var(--muted); text-transform: uppercase; font-weight: 700; }
+:is(#container-inspector-overlay, #container-delete-modal-overlay) .ci-xs-bold-muted { font-size: var(--kb-fs-xs); color: var(--muted); font-weight: 700; }
 :is(#container-inspector-overlay, #container-delete-modal-overlay) .ci-fs13-bold-strong-2 { font-size: 13px; font-weight: 700; color: var(--kb-text-strong); margin-top: 3px; }
 :is(#container-inspector-overlay, #container-delete-modal-overlay) .ci-xs-muted-3 { font-size: var(--kb-fs-xs); color: var(--muted); margin-top: 2px; }
 :is(#container-inspector-overlay, #container-delete-modal-overlay) .ci-x-4 { margin-top: 4px; }
@@ -43,7 +43,7 @@
 :is(#container-inspector-overlay, #container-delete-modal-overlay) .ci-xs-soft-mono { font-family: var(--font-mono); font-size: var(--kb-fs-xs); color: var(--kb-text-soft); word-break: break-all; }
 :is(#container-inspector-overlay, #container-delete-modal-overlay) .ci-box-3 { background: var(--kb-shade-35); border: 1px solid var(--kb-line-8); padding: 12px; border-radius: 8px; }
 :is(#container-inspector-overlay, #container-delete-modal-overlay) .ci-row-6 { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-:is(#container-inspector-overlay, #container-delete-modal-overlay) .ci-xs-bold-strong { font-size: var(--kb-fs-xs); font-weight: 700; color: var(--kb-text-strong); text-transform: uppercase; letter-spacing: 0.5px; }
+:is(#container-inspector-overlay, #container-delete-modal-overlay) .ci-xs-bold-strong { font-size: var(--kb-fs-xs); font-weight: 700; color: var(--kb-text-strong); }
 :is(#container-inspector-overlay, #container-delete-modal-overlay) .ci-grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; align-items: end; }
 :is(#container-inspector-overlay, #container-delete-modal-overlay) .ci-xs-muted-4 { font-size: var(--kb-fs-xs); color: var(--muted); display: block; margin-bottom: 4px; }
 :is(#container-inspector-overlay, #container-delete-modal-overlay) .ci-xs-5 { width: 100%; box-sizing: border-box; font-size: var(--kb-fs-xs); padding: 4px 8px; }
@@ -62,9 +62,9 @@
 :is(#container-inspector-overlay, #container-delete-modal-overlay) .ci-muted { color: var(--muted); }
 :is(#container-inspector-overlay, #container-delete-modal-overlay) .ci-xs-mono-2 { font-family: var(--font-mono); font-size: var(--kb-fs-xs); }
 :is(#container-inspector-overlay, #container-delete-modal-overlay) .ci-mono { font-family: var(--font-mono); }
-:is(#container-inspector-overlay, #container-delete-modal-overlay) .ci-xs-box { padding: 1px 5px; border-radius: 3px; background: var(--kb-glaze-8); font-size: var(--kb-fs-xs); text-transform: uppercase; }
+:is(#container-inspector-overlay, #container-delete-modal-overlay) .ci-xs-box { padding: 1px 5px; border-radius: 3px; background: var(--kb-glaze-8); font-size: var(--kb-fs-xs); }
 :is(#container-inspector-overlay, #container-delete-modal-overlay) .ci-xs-bold-ok { color: var(--ok2); font-weight: 700; font-size: var(--kb-fs-xs); }
-:is(#container-inspector-overlay, #container-delete-modal-overlay) .ci-xs-bold-accent-2 { font-size: var(--kb-fs-xs); font-weight: 700; color: var(--kb-text-accent); text-transform: uppercase; letter-spacing: 0.5px; }
+:is(#container-inspector-overlay, #container-delete-modal-overlay) .ci-xs-bold-accent-2 { font-size: var(--kb-fs-xs); font-weight: 700; color: var(--kb-text-accent); }
 :is(#container-inspector-overlay, #container-delete-modal-overlay) .ci-xs-soft-2 { font-size: var(--kb-fs-xs); color: var(--kb-text-soft); margin: 4px 0 0 0; line-height: 1.4; }
 :is(#container-inspector-overlay, #container-delete-modal-overlay) .ci-box-5 { margin-top: 14px; background: var(--kb-shade-35); border: 1px solid var(--kb-line-8); padding: 12px; border-radius: 8px; }
 :is(#container-inspector-overlay, #container-delete-modal-overlay) .ci-row-8 { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
@@ -94,9 +94,9 @@
 :is(#container-inspector-overlay, #container-delete-modal-overlay) .ci-crit-2 { color: var(--crit); padding: 20px; }
 :is(#container-inspector-overlay, #container-delete-modal-overlay) .ci-x-8 { padding: 4px 2px; }
 :is(#container-inspector-overlay, #container-delete-modal-overlay) .ci-box-6 { background: var(--kb-shade-35); border: 1px solid var(--kb-line-8); padding: 12px; border-radius: 8px; margin-bottom: 14px; }
-:is(#container-inspector-overlay, #container-delete-modal-overlay) .ci-xs-bold-strong-3 { font-size: var(--kb-fs-xs); font-weight: 700; color: var(--kb-text-strong); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+:is(#container-inspector-overlay, #container-delete-modal-overlay) .ci-xs-bold-strong-3 { font-size: var(--kb-fs-xs); font-weight: 700; color: var(--kb-text-strong); margin-bottom: 10px; }
 :is(#container-inspector-overlay, #container-delete-modal-overlay) .ci-grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
-:is(#container-inspector-overlay, #container-delete-modal-overlay) .ci-xs-semi-muted { font-size: var(--kb-fs-xs); color: var(--muted); display: block; margin-bottom: 4px; font-weight: 600; text-transform: uppercase; }
+:is(#container-inspector-overlay, #container-delete-modal-overlay) .ci-xs-semi-muted { font-size: var(--kb-fs-xs); color: var(--muted); display: block; margin-bottom: 4px; font-weight: 600; }
 :is(#container-inspector-overlay, #container-delete-modal-overlay) .ci-xs-9 { width: 100%; box-sizing: border-box; font-size: var(--kb-fs-xs); padding: 5px 8px; }
 :is(#container-inspector-overlay, #container-delete-modal-overlay) .ci-x-9 { margin-top: 10px; }
 :is(#container-inspector-overlay, #container-delete-modal-overlay) .ci-row-xs-soft { display: flex; align-items: center; gap: 6px; font-size: var(--kb-fs-xs); color: var(--kb-text-soft); cursor: pointer; }

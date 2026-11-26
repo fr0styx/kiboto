@@ -318,7 +318,7 @@ export function openChannelConfigModal(channel) {
     if (enableChk) enableChk.checked = !!cfg.discord_enabled;
     formHtml = `
       <div class="ntf-x">
-        <label class="ntf-xs-bold-muted" for="cfg-discord-url">${t('ntf.discord_url', 'DISCORD WEBHOOK URL')}</label>
+        <label class="ntf-xs-bold-muted" for="cfg-discord-url">${t('ntf.discord_url', 'Discord webhook URL')}</label>
         <input type="url" id="cfg-discord-url" class="tz-select-input ntf-strong-box" placeholder="https://discord.com/api/webhooks/..." value="${escapeHtml(cfg.discord_webhook_url || '')}">
         <div class="ntf-xs-muted">${t('ntf.discord_hint', 'Paste the Webhook URL created in your Discord channel settings -> Integrations.')}</div>
       </div>
@@ -327,11 +327,11 @@ export function openChannelConfigModal(channel) {
     if (enableChk) enableChk.checked = !!cfg.telegram_enabled;
     formHtml = `
       <div class="ntf-x">
-        <label class="ntf-xs-bold-muted" for="cfg-telegram-token">${t('ntf.tg_bot', 'TELEGRAM BOT TOKEN')}</label>
+        <label class="ntf-xs-bold-muted" for="cfg-telegram-token">${t('ntf.tg_bot', 'Telegram bot token')}</label>
         <input type="password" id="cfg-telegram-token" class="tz-select-input ntf-strong-box" placeholder="123456789:ABCDefgh…" data-sample value="${escapeHtml(cfg.telegram_bot_token || '')}">
       </div>
       <div class="ntf-x">
-        <label class="ntf-xs-bold-muted" for="cfg-telegram-chat">${t('ntf.tg_chat', 'TELEGRAM CHAT ID')}</label>
+        <label class="ntf-xs-bold-muted" for="cfg-telegram-chat">${t('ntf.tg_chat', 'Telegram chat ID')}</label>
         <input type="text" id="cfg-telegram-chat" class="tz-select-input ntf-strong-box" placeholder="-100123456789" value="${escapeHtml(cfg.telegram_chat_id || '')}">
         <div class="ntf-xs-muted">${t('ntf.tg_hint', 'Obtained from @userinfobot or your Telegram channel/group chat ID.')}</div>
       </div>
@@ -341,31 +341,31 @@ export function openChannelConfigModal(channel) {
     formHtml = `
       <div class="ntf-grid">
         <div>
-          <label class="ntf-xs-bold-muted" for="cfg-smtp-host">${t('ntf.smtp_host', 'SMTP HOST')}</label>
+          <label class="ntf-xs-bold-muted" for="cfg-smtp-host">${t('ntf.smtp_host', 'SMTP server')}</label>
           <input type="text" id="cfg-smtp-host" class="tz-select-input ntf-strong-box" placeholder="smtp.gmail.com" value="${escapeHtml(cfg.smtp_host || '')}">
         </div>
         <div>
-          <label class="ntf-xs-bold-muted" for="cfg-smtp-port">${t('ntf.port', 'PORT')}</label>
+          <label class="ntf-xs-bold-muted" for="cfg-smtp-port">${t('ntf.port', 'Port')}</label>
           <input type="number" id="cfg-smtp-port" class="tz-select-input ntf-strong-box" value="${cfg.smtp_port || 587}">
         </div>
       </div>
       <div class="ntf-grid-2">
         <div>
-          <label class="ntf-xs-bold-muted" for="cfg-smtp-user">${t('ntf.smtp_user', 'SMTP USER')}</label>
+          <label class="ntf-xs-bold-muted" for="cfg-smtp-user">${t('ntf.smtp_user', 'SMTP user')}</label>
           <input type="text" id="cfg-smtp-user" class="tz-select-input ntf-strong-box" placeholder="user@domain.com" value="${escapeHtml(cfg.smtp_user || '')}">
         </div>
         <div>
-          <label class="ntf-xs-bold-muted" for="cfg-smtp-pass">${t('ntf.smtp_pw', 'SMTP PASSWORD')}</label>
+          <label class="ntf-xs-bold-muted" for="cfg-smtp-pass">${t('ntf.smtp_pw', 'SMTP password')}</label>
           <input type="password" id="cfg-smtp-pass" class="tz-select-input ntf-strong-box" placeholder="••••••••" value="${escapeHtml(cfg.smtp_pass || '')}">
         </div>
       </div>
       <div class="ntf-grid-2">
         <div>
-          <label class="ntf-xs-bold-muted" for="cfg-email-from">${t('ntf.from', 'FROM EMAIL')}</label>
+          <label class="ntf-xs-bold-muted" for="cfg-email-from">${t('ntf.from', 'From address')}</label>
           <input type="email" id="cfg-email-from" class="tz-select-input ntf-strong-box" placeholder="nas@domain.com" value="${escapeHtml(cfg.email_from || '')}">
         </div>
         <div>
-          <label class="ntf-xs-bold-muted" for="cfg-email-to">${t('ntf.to', 'TO RECIPIENT(S)')}</label>
+          <label class="ntf-xs-bold-muted" for="cfg-email-to">${t('ntf.to', 'Send to')}</label>
           <input type="email" id="cfg-email-to" class="tz-select-input ntf-strong-box" placeholder="admin@domain.com" value="${escapeHtml(cfg.email_to || '')}">
         </div>
       </div>
@@ -377,15 +377,15 @@ export function openChannelConfigModal(channel) {
     if (enableChk) enableChk.checked = !!cfg.ntfy_enabled;
     formHtml = `
       <div class="ntf-x">
-        <label class="ntf-xs-bold-muted" for="cfg-ntfy-url">${t('ntf.ntfy_url', 'NTFY SERVER URL')}</label>
+        <label class="ntf-xs-bold-muted" for="cfg-ntfy-url">${t('ntf.ntfy_url', 'ntfy server URL')}</label>
         <input type="url" id="cfg-ntfy-url" class="tz-select-input ntf-strong-box" placeholder="https://ntfy.sh" value="${escapeHtml(cfg.ntfy_url || 'https://ntfy.sh')}">
       </div>
       <div class="ntf-x">
-        <label class="ntf-xs-bold-muted" for="cfg-ntfy-topic">${t('ntf.topic', 'TOPIC NAME')}</label>
+        <label class="ntf-xs-bold-muted" for="cfg-ntfy-topic">${t('ntf.topic', 'Topic')}</label>
         <input type="text" id="cfg-ntfy-topic" class="tz-select-input ntf-strong-box" placeholder="my_nas_alerts" value="${escapeHtml(cfg.ntfy_topic || '')}">
       </div>
       <div class="ntf-x">
-        <label class="ntf-xs-bold-muted" for="cfg-ntfy-token">${t('ntf.ntfy_login', 'ACCESS TOKEN (Optional)')}</label>
+        <label class="ntf-xs-bold-muted" for="cfg-ntfy-token">${t('ntf.ntfy_login', 'Access token (optional)')}</label>
         <input type="password" id="cfg-ntfy-token" class="tz-select-input ntf-strong-box" placeholder="tk_••••••••" data-sample value="${escapeHtml(cfg.ntfy_token || '')}">
       </div>
     `;
@@ -393,7 +393,7 @@ export function openChannelConfigModal(channel) {
     if (enableChk) enableChk.checked = !!cfg.webhook_enabled;
     formHtml = `
       <div class="ntf-x">
-        <label class="ntf-xs-bold-muted" for="cfg-webhook-url">${t('ntf.webhook_url', 'WEBHOOK URL')}</label>
+        <label class="ntf-xs-bold-muted" for="cfg-webhook-url">${t('ntf.webhook_url', 'Webhook URL')}</label>
         <input type="url" id="cfg-webhook-url" class="tz-select-input ntf-strong-box" placeholder="https://..." value="${escapeHtml(cfg.webhook_url || '')}">
         <div class="ntf-xs-muted">${t('ntf.webhook_hint', 'Receives POST requests with JSON payload: { event, title, message, level, timestamp }')}</div>
       </div>
@@ -403,7 +403,7 @@ export function openChannelConfigModal(channel) {
     const rawVal = Array.isArray(cfg.apprise_urls) ? cfg.apprise_urls.join('\n') : '';
     formHtml = `
       <div class="ntf-x">
-        <label class="ntf-xs-bold-muted" for="cfg-apprise-raw">${t('ntf.apprise_urls', 'APPRISE TARGET URLS (One per line)')}</label>
+        <label class="ntf-xs-bold-muted" for="cfg-apprise-raw">${t('ntf.apprise_urls', 'Apprise target URLs (one per line)')}</label>
         <textarea id="cfg-apprise-raw" class="tz-select-input ntf-xs-strong-mono-box" placeholder="pover://userkey@token&#10;slack://TokenA/TokenB/TokenC&#10;gotify://gotify.server/token">${escapeHtml(rawVal)}</textarea>
         <div class="ntf-xs-muted">${t('ntf.apprise_hint', 'Apprise supports 100+ notification targets. See Apprise documentation for syntax.')}</div>
       </div>

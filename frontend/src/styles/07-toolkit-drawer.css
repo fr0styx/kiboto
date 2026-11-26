@@ -100,7 +100,7 @@
 }
 
 .tab-sub-header { display: flex; justify-content: space-between; align-items: center; padding: 2px 2px; }
-.tab-sub-header .sub-title { font-size: var(--kb-fs-xs); font-weight: 800; letter-spacing: 1px; color: var(--muted); text-transform: uppercase; }
+.tab-sub-header .sub-title { font-size: var(--kb-fs-xs); font-weight: 800; color: var(--muted); }
 
 /* =========================================================================
    STATIC SCREEN MODULES

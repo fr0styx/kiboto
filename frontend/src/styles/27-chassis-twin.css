@@ -351,13 +351,11 @@
 .m2-twin-header {
   font-size: 10px;
   font-weight: 800;
-  letter-spacing: 0.08em;
   color: var(--muted, #78838f);
   display: flex;
   align-items: center;
   gap: 6px;
   margin-bottom: 8px;
-  text-transform: uppercase;
 }
 
 .m2-slots-grid {

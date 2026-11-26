@@ -57,8 +57,6 @@
   font-size: var(--kb-fs-xs);
   font-weight: 700;
   color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
 }
 
 .fan-presets-title .ic {

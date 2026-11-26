@@ -1157,8 +1157,6 @@ body.mobile-mode #vm-grid .glassmorphic-card {
   font-size: var(--kb-fs-xs);
   font-weight: 700;
   color: var(--kb-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 .dock-switcher-item {
   display: flex;
@@ -1582,8 +1580,6 @@ body.mobile-mode #vm-grid .glassmorphic-card {
 .quicklook-exif-label {
   font-size: var(--kb-fs-xs);
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
   color: var(--lt-t-6c8084ff, #6c8084);
 }
 .quicklook-exif-val {
@@ -1593,7 +1589,7 @@ body.mobile-mode #vm-grid .glassmorphic-card {
 }
 .quicklook-section { display: flex; flex-direction: column; }
 .quicklook-section-title {
-  font-size: var(--kb-fs-xs); font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+  font-size: var(--kb-fs-xs); font-weight: 700;
   color: var(--lt-ink-brand, var(--accent-cyan, #33cdb8)); margin-bottom: 6px;
 }
 .quicklook-section .quicklook-exif-grid { margin-bottom: 6px; }

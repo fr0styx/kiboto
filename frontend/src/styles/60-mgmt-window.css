@@ -150,7 +150,7 @@
 #mgmt-pane-network-wireguard .wgd-xs-muted { font-size: var(--kb-fs-xs); color: var(--muted); margin-left: auto; }
 #mgmt-pane-network-wireguard .wgd-col { display: flex; flex-direction: column; gap: 10px; }
 #mgmt-pane-network-wireguard .wgd-xs-muted-2 { color: var(--muted); font-size: var(--kb-fs-xs); }
-#mgmt-pane-network-wireguard .wgd-xs-bold-muted { display: block; font-size: var(--kb-fs-xs); font-weight: 700; color: var(--muted); margin-bottom: 4px; text-transform: uppercase; }
+#mgmt-pane-network-wireguard .wgd-xs-bold-muted { display: block; font-size: var(--kb-fs-xs); font-weight: 700; color: var(--muted); margin-bottom: 4px; }
 #mgmt-pane-network-wireguard .wgd-xs-strong-box { width: 100%; border: 1px solid var(--kb-line-12); background: var(--kb-shade-30); padding: 6px 10px; color: var(--kb-text-strong); border-radius: 6px; font-size: var(--kb-fs-xs); font-family: monospace; }
 #mgmt-pane-network-wireguard .wgd-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 #mgmt-pane-network-wireguard .wgd-xs-strong-box-2 { width: 100%; border: 1px solid var(--kb-line-12); background: var(--kb-shade-30); padding: 6px 10px; color: var(--kb-text-strong); border-radius: 6px; font-size: var(--kb-fs-xs); }
@@ -181,7 +181,7 @@
 #mgmt-pane-network-wireguard .wgd-xs-strong-box-4 { font-size: var(--kb-fs-xs); padding: 3px 8px; width: 220px; border: 1px solid var(--kb-line-12); background: var(--kb-shade-30); color: var(--kb-text-strong); border-radius: 5px; }
 #mgmt-pane-network-wireguard .wgd-x-4 { padding: 0; overflow-x: auto; }
 #mgmt-pane-network-wireguard .wgd-xs-box { width: 100%; border-collapse: collapse; font-size: var(--kb-fs-xs); }
-#mgmt-pane-network-wireguard .wgd-xs-muted-box { border-bottom: 1px solid var(--kb-line-8); text-align: left; color: var(--muted); font-size: var(--kb-fs-xs); text-transform: uppercase; }
+#mgmt-pane-network-wireguard .wgd-xs-muted-box { border-bottom: 1px solid var(--kb-line-8); text-align: left; color: var(--muted); font-size: var(--kb-fs-xs); }
 #mgmt-pane-network-wireguard .wgd-x-5 { padding: 8px 12px; }
 #mgmt-pane-network-wireguard .wgd-x-6 { padding: 8px 12px; text-align: right; }
 #mgmt-pane-network-wireguard .wgd-muted-2 { text-align: center; padding: 16px; color: var(--muted); }

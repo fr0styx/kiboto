@@ -19,7 +19,7 @@
 .clock-one-place { display: flex; align-items: center; justify-content: space-between; gap: var(--kb-space-2); flex-wrap: wrap; }
 .clock-summary { font-family: var(--font-mono); font-size: var(--kb-fs-sm); color: var(--kb-text-strong); }
 .tz-server-row { display: flex; align-items: center; gap: var(--kb-space-2); margin: 0 0 var(--kb-space-3); font-size: var(--kb-fs-xs); color: var(--kb-text-soft); }
-.snap-subhead { margin: var(--kb-space-3) 0 var(--kb-space-2); font-size: var(--kb-fs-sm); color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.snap-subhead { margin: var(--kb-space-3) 0 var(--kb-space-2); font-size: var(--kb-fs-sm); color: var(--muted); }
 
 /* Offsite backup (Batch 6) */
 .offsite-card { margin-bottom: var(--kb-space-5); padding: var(--kb-space-4); border-radius: var(--kb-radius); border: 1px solid var(--kb-line-strong); background: var(--kb-glaze-3); }

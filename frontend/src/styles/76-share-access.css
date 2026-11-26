@@ -8,7 +8,7 @@
 #share-access-modal .sha-row-xs { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: var(--kb-fs-xs); }
 #share-access-modal .sha-x-2 { overflow-x: auto; }
 #share-access-modal .sha-xs-box { border-collapse: collapse; min-width: 420px; font-size: var(--kb-fs-xs); }
-#share-access-modal .sha-muted { color: var(--muted); text-transform: uppercase; }
+#share-access-modal .sha-muted { color: var(--muted); }
 #share-access-modal .sha-x-3 { padding: 6px 8px; text-align: left; }
 #share-access-modal .sha-x-4 { padding: 6px 8px; }
 #share-access-modal .sha-muted-2 { padding: 10px; color: var(--muted); }

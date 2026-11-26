@@ -83,8 +83,6 @@
   font-size: var(--kb-fs-xs);
   font-weight: 800;
   color: var(--kb-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
 }
 
 #cloud-remote-window .cloud-remote-footer {
