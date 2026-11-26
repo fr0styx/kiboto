@@ -6846,6 +6846,28 @@
     "title": "DriveNotes",
     "type": "object"
    },
+   "DriveReplaceRequest": {
+    "properties": {
+     "new": {
+      "maxLength": 256,
+      "minLength": 1,
+      "title": "New",
+      "type": "string"
+     },
+     "old": {
+      "maxLength": 256,
+      "minLength": 1,
+      "title": "Old",
+      "type": "string"
+     }
+    },
+    "required": [
+     "old",
+     "new"
+    ],
+    "title": "DriveReplaceRequest",
+    "type": "object"
+   },
    "DriveSleepIn": {
     "properties": {
      "minutes": {
@@ -69681,6 +69703,116 @@
      }
     },
     "summary": "Rename Storage Pool",
+    "tags": [
+     "Storage Subsystem & PAL"
+    ],
+    "x-required-scopes": [
+     "storage:admin"
+    ]
+   }
+  },
+  "/api/v1/storage/pools/{pool_id}/replace": {
+   "get": {
+    "description": "Whether the pool can rebuild onto a new drive, its drives, the empty drives that fit, and a\nrebuild that is running now.",
+    "operationId": "get_drive_replace_plan_api_v1_storage_pools__pool_id__replace_get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "pool_id",
+      "required": true,
+      "schema": {
+       "pattern": "^[A-Za-z0-9_/][A-Za-z0-9_./:-]{0,127}$",
+       "title": "Pool Id",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Get Drive Replace Plan Api V1 Storage Pools  Pool Id  Replace Get",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "404": {
+      "$ref": "#/components/responses/NotFound"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Get Drive Replace Plan",
+    "tags": [
+     "Storage Subsystem & PAL"
+    ],
+    "x-required-scopes": [
+     "storage:admin"
+    ]
+   },
+   "post": {
+    "description": "Starts rebuilding one of the pool's drives onto an empty one. Nothing is erased: the new drive\nmust hold nothing, and the pool's own tool refuses one that is too small.",
+    "operationId": "replace_pool_drive_api_v1_storage_pools__pool_id__replace_post",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "pool_id",
+      "required": true,
+      "schema": {
+       "pattern": "^[A-Za-z0-9_/][A-Za-z0-9_./:-]{0,127}$",
+       "title": "Pool Id",
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/DriveReplaceRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Replace Pool Drive Api V1 Storage Pools  Pool Id  Replace Post",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "404": {
+      "$ref": "#/components/responses/NotFound"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Replace Pool Drive",
     "tags": [
      "Storage Subsystem & PAL"
     ],

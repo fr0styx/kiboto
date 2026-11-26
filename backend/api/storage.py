@@ -10,7 +10,7 @@ import os
 import shutil
 from typing import Annotated, Any, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Path
+from fastapi import APIRouter, Depends, HTTPException, Path, Request
 from fastapi.responses import JSONResponse
 from pydantic import AfterValidator, BaseModel, Field
 
@@ -183,6 +183,10 @@ def _with_erasable(row: dict[str, Any], pool: Any, adapter: Any) -> dict[str, An
 
     caps = adapter.get_capabilities()
     row["erasable"] = bool(caps.can_destroy_pools and not caps.is_observer_mode and pool_erase.kind_of(pool))
+    # "Replace a drive": a pool Kiboto manages whose own tool rebuilds onto a new drive
+    row["replaceable"] = bool(
+        caps.can_destroy_pools and not caps.is_observer_mode and pool.fs_type in ("zfs", "btrfs") and not pool.read_only
+    )
     return row
 
 
@@ -738,6 +742,56 @@ def delete_storage_pool(pool_id: PoolId) -> dict[str, Any]:
         raise HTTPException(status_code=404, detail=str(e)) from e
     except RuntimeError as e:
         raise HTTPException(status_code=409, detail=str(e)) from e
+
+
+class DriveReplaceRequest(BaseModel):
+    old: str = Field(..., min_length=1, max_length=256)
+    new: str = Field(..., min_length=1, max_length=256)
+
+
+@router.get("/pools/{pool_id}/replace", dependencies=[Depends(require_scope("storage:admin"))])
+def get_drive_replace_plan(pool_id: PoolId) -> dict[str, Any]:
+    """Whether the pool can rebuild onto a new drive, its drives, the empty drives that fit, and a
+    rebuild that is running now."""
+    try:
+        return get_storage_platform().replace_plan(pool_id)
+    except PlatformCapabilityError as e:
+        raise HTTPException(status_code=403, detail=str(e)) from e
+    except LookupError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
+
+
+@router.post(
+    "/pools/{pool_id}/replace",
+    dependencies=[Depends(require_scope("storage:admin")), Depends(require_confirmation("storage.drive.replace"))],
+)
+def replace_pool_drive(
+    pool_id: PoolId,
+    req: DriveReplaceRequest,
+    request: Request,
+    principal: AuthenticatedPrincipal = Depends(get_current_principal),
+) -> dict[str, Any]:
+    """Starts rebuilding one of the pool's drives onto an empty one. Nothing is erased: the new drive
+    must hold nothing, and the pool's own tool refuses one that is too small."""
+    try:
+        res = get_storage_platform().replace_drive(pool_id, req.old, req.new)
+    except PlatformCapabilityError as e:
+        raise HTTPException(status_code=403, detail=str(e)) from e
+    except LookupError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
+    if not res.get("started"):
+        raise HTTPException(status_code=409, detail=str(res.get("message") or "The drive could not be replaced."))
+    from backend.users_db import log_security_event
+
+    log_security_event(
+        "storage.drive_replace",
+        "success",
+        actor_id=getattr(principal, "user_id", None),
+        actor_username=principal.username,
+        actor_ip=request.client.host if request.client else "",
+        details={"pool": pool_id, "old": res.get("old", ""), "new": res.get("new", "")},
+    )
+    return res
 
 
 class PoolEraseRequest(BaseModel):

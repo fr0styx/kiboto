@@ -73,7 +73,7 @@ export function guideSteps(kind, platform, drive = {}, place = '') {
       steps.push(
         t(
           'dg.other_kind',
-          'How the pool rebuilds depends on how it was made (btrfs, mdadm or ZFS); Storage, Advanced shows its type. Kiboto does not rebuild pools by itself yet.'
+          'How the pool rebuilds depends on how it was made; Storage, Advanced shows its type. A ZFS or btrfs pool that keeps a second copy rebuilds from the app: Replace a drive on the pool.'
         )
       );
       steps.push(
@@ -82,7 +82,7 @@ export function guideSteps(kind, platform, drive = {}, place = '') {
       steps.push(
         t(
           'dg.other_rebuild',
-          "Rebuild with the pool's own tool (btrfs replace, mdadm --add, or zpool replace). Don't erase the old drive until the new one holds the data."
+          "Choose the missing drive and the new one; the pool rebuilds while it stays in use. Another kind of pool rebuilds with its own tool (mdadm --add). Don't erase the old drive until the new one holds the data."
         )
       );
     }

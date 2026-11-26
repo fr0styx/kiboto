@@ -28,7 +28,7 @@ describe('drive replacement guide (audit A11)', () => {
   it('replace on TrueNAS and elsewhere; add a drive on each system', () => {
     expect(guideSteps('replace', 'truenas', DRIVE, 'Bay 1').join(' ')).toContain('TrueNAS resilvers the pool');
     const other = guideSteps('replace', 'generic_linux', { model: 'X' }, 'Bay 3').join(' ');
-    expect(other).toContain('Kiboto does not rebuild pools by itself yet');
+    expect(other).toContain('rebuilds from the app: Replace a drive on the pool');
     expect(other).toContain("Don't erase the old drive");
     expect(other).toContain('The drive: X in Bay 3.');
     expect(guideSteps('replace', '', {}, 'Bay 1').join(' ')).toContain('at least as large (?)');

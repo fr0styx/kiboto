@@ -570,6 +570,10 @@ OPERATIONS: dict[str, Operation] = {
     "storage.destroy_pool": Operation(_storage("destroy_pool"), {"pool_id": TEXT}, max_len=128),
     "storage.erase_pool": Operation(_storage("erase_pool"), {"pool_id": TEXT}, max_len=128),
     "storage.allow_changes": Operation(_storage("allow_changes"), {"pool_id": TEXT}, max_len=128),
+    "storage.replace_plan": Operation(_storage("replace_plan"), {"pool_id": TEXT}, max_len=128),
+    "storage.replace_drive": Operation(
+        _storage("replace_drive"), {"pool_id": TEXT, "old": TEXT, "new": TEXT}, max_len=256
+    ),
     # the data key (ADR 0006 step 6)
     "keys.text": Operation(_key("key_text"), {}),
     "keys.wanted": Operation(_key("wanted"), {}),

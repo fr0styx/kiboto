@@ -35,6 +35,7 @@ ACTIONS: dict[str, str] = {
     "storage.pool.create": "Create a storage pool, erasing the selected disks",
     "storage.pool.delete": "Disconnect storage pool {target}",
     "storage.pool.erase": "Delete storage pool {target} and erase its drives. Everything on them is lost",
+    "storage.drive.replace": "Replace a drive of storage pool {target}. The pool rebuilds onto the new drive",
     "storage.snapshot.delete": "Delete snapshot {target}",
     "share.delete": "Delete share {target}",
     "users.delete": "Delete user {target}",

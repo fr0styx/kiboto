@@ -285,6 +285,15 @@ class StoragePlatformAdapter(ABC):
         """Deletes the pool and erases its confirmed drives (S29)."""
         raise PlatformCapabilityError("Delete this pool in the host system's own storage settings.")
 
+    def replace_plan(self, pool_id: str) -> dict[str, Any]:
+        """What "Replace a drive" offers for a pool (drive_replace). Only where Kiboto manages the
+        pools; elsewhere the host system rebuilds its own pools."""
+        raise PlatformCapabilityError("Replace drives in the host system's own storage settings.")
+
+    def replace_drive(self, pool_id: str, old: str, new: str) -> dict[str, Any]:
+        """Starts rebuilding a pool's drive onto an empty one (drive_replace)."""
+        raise PlatformCapabilityError("Replace drives in the host system's own storage settings.")
+
     @abstractmethod
     def create_share(
         self,

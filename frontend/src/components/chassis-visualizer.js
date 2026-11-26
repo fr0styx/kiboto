@@ -833,6 +833,7 @@ function buildPoolBlockInner(pool, isObserver, can = { scrub: true }) {
       ${!isObserver ? `<button class="btn-pool-rename btn-pill-toggle" data-pool-id="${escapeHtml(pool.id)}" data-pool-name="${escapeHtml(pool.name)}" title="${t('ui.rename_storage_pool', 'Rename storage pool')}" data-i18n-title="ui.rename_storage_pool">${ico('✏️')} ${t('chassis.rename', 'Rename')}</button>` : ''}
       ${pool.read_only ? `<button class="btn-pool-writable btn-pill-toggle" data-pool-id="${escapeHtml(pool.id)}">${escapeHtml(t('chassis.allow_changes', 'Allow changes'))}</button>` : ''}
       ${(!isObserver || pool.fs_type === 'zfs') && pool.id !== 'unraid_array' && pool.id !== 'default_pool' ? `<button class="btn-pool-export btn-pill-toggle" data-pool-id="${escapeHtml(pool.id)}" style="background: rgba(245,158,11,0.15); border-color: rgba(245,158,11,0.3); color: var(--kb-text-warn);" title="${t('ui.safely_flush_dirty_cache_and', 'Safely flush dirty cache and detach pool')}" data-i18n-title="ui.safely_flush_dirty_cache_and">${ico('⏏️')} ${t('chassis.eject', 'Safely eject')}</button>` : ''}
+      ${replaceButtonHtml(pool)}
       ${eraseButtonHtml(pool)}
     </div>
   `;
@@ -891,6 +892,16 @@ function bindTopologyTreeEvents(tree, container) {
       const pid = renameBtn.dataset.poolId;
       const pname = renameBtn.dataset.poolName || pid;
       openRenameStoragePoolModal(pid, pname, () => fetchAndRenderStorageTopology(container));
+      return;
+    }
+
+    const replaceBtn = e.target.closest('.btn-pool-replace');
+    if (replaceBtn) {
+      e.stopPropagation();
+      const { openDriveReplace } = await import('./drive-replace.js');
+      openDriveReplace(replaceBtn.dataset.poolId, replaceBtn.dataset.poolName, () =>
+        fetchAndRenderStorageTopology(container)
+      );
       return;
     }
 
@@ -3778,6 +3789,12 @@ export function openRenameStoragePoolModal(poolId, currentName, onSuccess) {
       }
     };
   }
+}
+
+/** "Replace a drive": a ZFS or btrfs pool Kiboto manages (the dialog says when it cannot rebuild). */
+export function replaceButtonHtml(pool) {
+  if (!pool || !pool.replaceable) return '';
+  return `<button class="btn-pool-replace btn-pill-toggle" data-pool-id="${escapeHtml(pool.id)}" data-pool-name="${escapeHtml(poolName(pool.name) || pool.id)}">${escapeHtml(t('chassis.replace_drive', 'Replace a drive'))}</button>`;
 }
 
 /** "Delete pool and erase its drives" (S29): only where the server can confirm the pool's drives. */

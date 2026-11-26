@@ -1351,6 +1351,32 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
             pool_registry.protect(pool.mountpoint, self._run_cmd)
         return {"status": "disconnected", "pool_id": pool.id, "mountpoint": pool.mountpoint}
 
+    def replace_plan(self, pool_id: str) -> dict[str, Any]:
+        """What "Replace a drive" offers for this pool. Through the host door where it runs: reading
+        a btrfs pool's devices is root's."""
+        return _through_door("storage.replace_plan", self._replace_plan_here, pool_id=pool_id)
+
+    def _replace_plan_here(self, pool_id: str) -> dict[str, Any]:
+        from backend.hardware.pal import drive_replace
+
+        return drive_replace.plan(self.resolve_pool(pool_id), self._run_cmd)
+
+    def replace_drive(self, pool_id: str, old: str, new: str) -> dict[str, Any]:
+        """Starts rebuilding `old` onto the empty drive `new`. Through the host door where it runs.
+        Answers {"started": True, ...} or {"started": False, "why": key, "message": ...}."""
+        return _through_door("storage.replace_drive", self._replace_drive_here, pool_id=pool_id, old=old, new=new)
+
+    def _replace_drive_here(self, pool_id: str, old: str, new: str) -> dict[str, Any]:
+        from backend.hardware.pal import drive_replace
+
+        pool = self.resolve_pool(pool_id)
+        if pool.read_only:
+            return {"started": False, "why": "read_only", "message": "Allow changes to this pool first."}
+        try:
+            return drive_replace.start(pool, old, new, self._run_cmd)
+        except drive_replace.ReplaceError as e:
+            return {"started": False, "why": e.key, "message": str(e)}
+
     def erase_plan(self, pool_id: str) -> dict[str, Any]:
         """The drives a pool's own tool lists, each confirmed by its on-disk label (S29)."""
         from backend.hardware.pal import pool_erase

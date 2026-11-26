@@ -21,6 +21,11 @@ const ACTIONS = {
     'Delete the storage pool {target} and erase its drives? Everything on them is lost.',
     true,
   ],
+  'storage.drive.replace': [
+    'Replace the drive',
+    'Rebuild storage pool {target} onto the new drive? Keep the server on until it has finished.',
+    true,
+  ],
   'storage.snapshot.delete': ['Delete the snapshot', 'Delete the snapshot {target}?', true],
   'share.delete': ['Delete the share', 'Delete the share {target}?', true],
   'users.delete': ['Delete the account', 'Delete the account {target}?', true],

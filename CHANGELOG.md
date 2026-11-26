@@ -2,6 +2,12 @@
 
 Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep that name.
 
+## Unreleased
+
+#### New
+
+Replace a drive from the app (Kiboto OS, and Kiboto on plain Linux): on a ZFS or btrfs pool that keeps a second copy, Storage offers "Replace a drive". Choose the drive to replace and an empty one at least as large; the pool rebuilds onto it while it stays in use, and the dialog shows how far it is.
+
 ## v2.0.7 (2026-11-26)
 ### 🛡️ Kiboto OS without root, on signed releases only, with Debian's security fixes
 

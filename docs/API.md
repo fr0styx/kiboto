@@ -38,7 +38,7 @@ request and response schemas.
 
 <!-- BEGIN generated endpoints: python scripts/api_reference.py --update -->
 
-832 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
+834 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
 
 ### AI Conversation History
 
@@ -872,6 +872,8 @@ request and response schemas.
 | `GET` | `/api/v1/storage/pools/{pool_id}/erase-plan` | `storage:admin` | Which drives "Delete pool and erase its drives" would erase, each confirmed on disk (S29) |
 | `POST` | `/api/v1/storage/pools/{pool_id}/export` | `storage:admin` | Gracefully flushes dirty write cache, terminates active handles, and exports/unmounts a storage pool for safe physical detachment |
 | `POST` | `/api/v1/storage/pools/{pool_id}/rename` | `storage:admin` | Renames an existing storage pool (OpenZFS or Btrfs) and creates an atomic backwards-compatibility symlink to preserve Docker container vo… |
+| `GET` | `/api/v1/storage/pools/{pool_id}/replace` | `storage:admin` | Whether the pool can rebuild onto a new drive, its drives, the empty drives that fit, and a rebuild that is running now |
+| `POST` | `/api/v1/storage/pools/{pool_id}/replace` | `storage:admin` | Starts rebuilding one of the pool's drives onto an empty one |
 | `GET` | `/api/v1/storage/pools/{pool_id}/snapshots` | any of `storage:read`, `storage:admin` | Lists filesystem subvolume snapshots for a storage pool |
 | `POST` | `/api/v1/storage/pools/{pool_id}/snapshots` | `storage:admin` | Creates an atomic Btrfs subvolume snapshot |
 | `POST` | `/api/v1/storage/pools/{pool_id}/snapshots/break-glass-delete` | `storage:admin` | Overrides Governance-mode WORM lock to delete a snapshot with mandatory audit logging |

@@ -24,7 +24,7 @@ What the words mean:
 | | Companion, beside a NAS system | Companion, on plain Linux | Kiboto OS |
 | --- | --- | --- | --- |
 | Storage pools: create, grow, see their health<br><sub>On plain Linux Kiboto makes new pools but does not take over pools that already exist.</sub> | View only | Partly | Yes |
-| Replace a failed drive from the app<br><sub>Kiboto OS has a written guide today; replacing in the app is planned before it leaves beta.</sub> | Your NAS system does this | No | Not yet |
+| Replace a failed drive from the app<br><sub>ZFS and btrfs pools that keep a second copy rebuild onto an empty drive from the app. Tried on a virtual machine, not yet with a real drive.</sub> | Your NAS system does this | Yes | Being checked |
 | Windows and Mac shares (SMB) | View only | Yes | Yes |
 | NFS shares | Your NAS system does this | No | Yes |
 | A private folder for each person | Yes | Yes | Yes |

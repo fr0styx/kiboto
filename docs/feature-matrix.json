@@ -17,7 +17,7 @@
  "groups": [
   {"name": "Storage", "features": [
    {"name": "Storage pools: create, grow, see their health", "beside": "view", "linux": "partly", "os": "yes", "note": "On plain Linux Kiboto makes new pools but does not take over pools that already exist."},
-   {"name": "Replace a failed drive from the app", "beside": "host", "linux": "no", "os": "soon", "note": "Kiboto OS has a written guide today; replacing in the app is planned before it leaves beta."},
+   {"name": "Replace a failed drive from the app", "beside": "host", "linux": "yes", "os": "check", "note": "ZFS and btrfs pools that keep a second copy rebuild onto an empty drive from the app. Tried on a virtual machine, not yet with a real drive."},
    {"name": "Windows and Mac shares (SMB)", "beside": "view", "linux": "yes", "os": "yes"},
    {"name": "NFS shares", "beside": "host", "linux": "no", "os": "yes"},
    {"name": "A private folder for each person", "beside": "yes", "linux": "yes", "os": "yes"},
