@@ -63,8 +63,9 @@ work are welcome as an issue.
 
 ## Install from the USB image
 
-From 2.0.7 on, each release carries the image as `kiboto-<version>-install.iso` (about 800 MB)
-beside `install.sh`.
+From 2.0.8 on, each release carries the image as `kiboto-<version>-install.iso` (about 800 MB)
+beside `install.sh`, while Kiboto OS is in beta on the
+[releases page](https://github.com/fr0styx/kiboto/releases) (2.0.7 was not published).
 
 1. Download the image, `SHA256SUMS` and `SHA256SUMS.sigstore.json` from the release page, and
    [check them](#check-the-download).
