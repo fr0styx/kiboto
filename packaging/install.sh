@@ -226,6 +226,45 @@ code_from_image() {
   rm -rf "$tmp"
 }
 
+# An image this script does not name is checked before anything of it is unpacked, with a cosign
+# release pinned here by version and checksum: the check after unpacking runs the image's own code,
+# which an image from somewhere else could have changed to say yes.
+COSIGN_VERSION=v3.1.4
+COSIGN_SHA256_AMD64=424e2c97d0b45fd7a6b608a87f090f35633f4c23ece5f092d48bba11aaf4bbfa
+COSIGN_SHA256_ARM64=ade83b7aac62e131cacfe96d958948b2150cc9efec46a570a2649b8e27dedad2
+SIGNER='^https://github\.com/fr0styx/(kiboto|zettnas-toolkit)/\.github/workflows/ci\.yml@refs/'
+must_be_signed_before_unpacking() {
+  image=$1
+  [ "${2:-}" = "--unsigned" ] && return 0
+  [ -n "$KIBOTO_IMAGE" ] && [ "$image" = "$KIBOTO_IMAGE" ] && return 0  # released with this script
+  case "$(dpkg --print-architecture)" in
+    amd64) arch=amd64 sum=$COSIGN_SHA256_AMD64 ;;
+    arm64) arch=arm64 sum=$COSIGN_SHA256_ARM64 ;;
+    *) die "this machine's kind of processor has no cosign to check the signature with; use --unsigned for a build of your own." ;;
+  esac
+  say "Checking that Kiboto's own build service signed $image..."
+  cdir=$(mktemp -d)
+  curl -fsSL --proto '=https' --retry 3 -o "$cdir/cosign" \
+    "https://github.com/sigstore/cosign/releases/download/$COSIGN_VERSION/cosign-linux-$arch" \
+    || { rm -rf "$cdir"; die "cosign, to check the signature with, could not be downloaded. Kiboto was not installed."; }
+  if ! printf '%s  %s\n' "$sum" "$cdir/cosign" | sha256sum -c --status; then
+    rm -rf "$cdir"
+    die "the cosign downloaded is not the one this script names. Kiboto was not installed."
+  fi
+  chmod 755 "$cdir/cosign"
+  # a release only, signed for its version tag; KIBOTO_ACCEPT_MAIN_BUILDS=1 takes a main build too
+  ref='tags/v[0-9][^/]*$'
+  [ "${KIBOTO_ACCEPT_MAIN_BUILDS:-0}" = "1" ] && ref='(heads/main|tags/v[0-9][^/]*)$'
+  if ! "$cdir/cosign" verify "$image" --certificate-identity-regexp "$SIGNER$ref" \
+    --certificate-oidc-issuer https://token.actions.githubusercontent.com > /dev/null 2> "$cdir/said"; then
+    said=$(grep -m1 -i 'error' "$cdir/said" | cut -c1-300)
+    rm -rf "$cdir"
+    die "this version is not signed by Kiboto's build service for a release (${said:-no answer}). Kiboto was not installed."
+  fi
+  rm -rf "$cdir"
+  say "  signed by Kiboto's build service"
+}
+
 # The version just unpacked must be signed by Kiboto's own CI (checked with its own code, against the
 # public Sigstore log). If it is not, it is taken out again and the machine stays as it was.
 must_be_signed() {
@@ -411,7 +450,8 @@ case "${1:-}" in
     image=${2:-$KIBOTO_IMAGE}
     [ -n "$image" ] || { sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//'; exit 2; }
     must_be_a_digest "$image"; must_be_this_machine; must_be_fresh; mark_started; stay_on_debian13
-    packages; docker_setup; code_from_image "$image"; must_be_signed "$image" "${3:-}"
+    packages; docker_setup; must_be_signed_before_unpacking "$image" "${3:-}"
+    code_from_image "$image"; must_be_signed "$image" "${3:-}"
     service "$PREFIX/current"; wait_up; network_to_networkd
     # Kiboto runs from the files copied out of the image: the image itself (about 1.9 GB) can go
     docker rmi "$image" >/dev/null 2>&1 || true

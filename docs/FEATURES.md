@@ -55,7 +55,7 @@ What the words mean:
 | Kiboto updates with a way back<br><sub>Kiboto OS follows the Stable and Beta channels; the container can also follow Edge.</sub> | Yes | Yes | Yes |
 | System updates: kernel, ZFS, Docker<br><sub>Kiboto OS moves these to versions a release was tested with. Automatic security updates are being added.</sub> | Your NAS system does this | Your NAS system does this | Partly |
 | Network settings<br><sub>Kiboto OS changes the address and the bridge for virtual machines, with a way back.</sub> | View only | View only | Partly |
-| Firewall<br><sub>Off until you turn it on. Then your home network reaches everything, and the outside only what you tick, apps included.</sub> | Your NAS system does this | Your NAS system does this | Yes |
+| Firewall<br><sub>On after an install from Kiboto's USB image; on other installs off until you turn it on. Your home network reaches everything, and the outside only what you tick, apps included.</sub> | Your NAS system does this | Your NAS system does this | Yes |
 | Restart and shut down | Yes | Yes | Yes |
 | Power schedule: wake and sleep at set times<br><sub>On Kiboto OS it is tried on a virtual machine, not yet for a night on a real one.</sub> | Yes | Yes | Being checked |
 | Battery backup (UPS) | Yes | Yes | Not yet |

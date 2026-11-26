@@ -168,3 +168,69 @@ def test_a_finished_first_start_draws_the_code_again_below_its_last_lines():
     tail = run[run.index('if [ "$rc" != 0 ]; then') :]
     ok = tail[tail.index("\nelse\n") : tail.index("\nfi\n")]
     assert "agetty --reload" in ok
+
+
+def _installer():
+    with open(os.path.join(ROOT, "packaging", "install.sh"), encoding="utf-8") as f:
+        return f.read()
+
+
+def _install_functions(tmp_path, arch="amd64", cosign_body="#!/bin/sh\nexit 0\n", verify_rc=0):
+    """install.sh's functions with dpkg, curl and the downloaded cosign replaced by stand-ins."""
+    sh = _installer()
+    funcs = tmp_path / "f.sh"
+    funcs.write_text(sh[: sh.index('case "${1:-}" in\n')])
+    bin_ = tmp_path / "bin"
+    bin_.mkdir()
+    (bin_ / "dpkg").write_text(f"#!/bin/sh\necho {arch}\n")
+    body = tmp_path / "body"
+    body.write_text(cosign_body.replace("RC", str(verify_rc)))
+    # curl writes the stand-in cosign where -o says, and notes what it was asked for
+    (bin_ / "curl").write_text(
+        f'#!/bin/sh\nwhile [ $# -gt 0 ]; do case $1 in -o) out=$2; shift;; https*) echo "$1" >> {tmp_path}/asked;; esac; shift; done\n'
+        f'cp {body} "$out"\n'
+    )
+    for f in ("dpkg", "curl"):
+        os.chmod(bin_ / f, 0o755)
+    return funcs, bin_
+
+
+def _run(tmp_path, funcs, bin_, script):
+    env = {"PATH": f"{bin_}:/usr/bin:/bin", "HOME": str(tmp_path)}
+    return subprocess.run(["sh", "-c", f". {funcs}; {script}"], env=env, capture_output=True, text=True)
+
+
+@pytest.mark.skipif(shutil.which("sha256sum") is None, reason="needs sha256sum")
+def test_an_image_the_script_does_not_name_needs_the_pinned_cosign(tmp_path):
+    funcs, bin_ = _install_functions(tmp_path)
+    r = _run(tmp_path, funcs, bin_, "must_be_signed_before_unpacking ghcr.io/x/y@sha256:" + "a" * 64)
+    # the stand-in is not the cosign the script names: nothing of the image is looked at
+    assert r.returncode != 0 and "is not the one this script names" in r.stderr + r.stdout
+    asked = (tmp_path / "asked").read_text()
+    assert asked.strip() == "https://github.com/sigstore/cosign/releases/download/v3.1.4/cosign-linux-amd64"
+
+
+def test_the_named_image_and_an_unsigned_build_skip_it(tmp_path):
+    funcs, bin_ = _install_functions(tmp_path)
+    image = "ghcr.io/x/y@sha256:" + "b" * 64
+    r = _run(tmp_path, funcs, bin_, f"KIBOTO_IMAGE={image}; must_be_signed_before_unpacking {image}; echo went-on")
+    assert r.returncode == 0 and "went-on" in r.stdout and not (tmp_path / "asked").exists()
+    r = _run(tmp_path, funcs, bin_, f"must_be_signed_before_unpacking {image} --unsigned; echo went-on")
+    assert r.returncode == 0 and "went-on" in r.stdout and not (tmp_path / "asked").exists()
+
+
+def test_a_processor_without_a_pinned_cosign_is_refused(tmp_path):
+    funcs, bin_ = _install_functions(tmp_path, arch="riscv64")
+    r = _run(tmp_path, funcs, bin_, "must_be_signed_before_unpacking ghcr.io/x/y@sha256:" + "c" * 64)
+    assert r.returncode != 0 and "--unsigned" in r.stderr + r.stdout and not (tmp_path / "asked").exists()
+
+
+def test_the_check_comes_before_anything_is_unpacked():
+    sh = _installer()
+    order = sh[sh.index('--image | "")') :]
+    assert order.index("must_be_signed_before_unpacking") < order.index('code_from_image "$image"')
+    step = sh[sh.index("must_be_signed_before_unpacking() {") : sh.index("must_be_signed() {")]
+    # a release only, unless main builds are asked for; the signer is this project's CI
+    assert "tags/v[0-9][^/]*$" in step and "KIBOTO_ACCEPT_MAIN_BUILDS:-0" in step
+    assert "--certificate-oidc-issuer https://token.actions.githubusercontent.com" in step
+    assert len(set(sh.split("COSIGN_SHA256_AMD64=")[1][:64])) > 4  # a real checksum, written in

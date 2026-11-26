@@ -124,6 +124,8 @@ The light bar no longer sends an error's internal text to the page, and the root
 
 Kiboto OS from the USB image: the first sign-in to Kiboto turns password sign-in over SSH off (keys keep working; Network, This machine has the switch to turn it back on), and the firewall starts on, with the home network open and nothing open to the outside.
 
+Kiboto OS's install script checks the signature of a version it does not name (`--image`) with its own pinned copy of cosign before anything of that version is unpacked. Before, the check ran the code of the version being installed.
+
 #### New
 
 Kiboto lists the third-party software it bundles and its licences at /third-party-licences.txt, and the install image says which Debian image it is made from and where Debian publishes its sources.
