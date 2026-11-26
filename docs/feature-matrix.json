@@ -58,7 +58,8 @@
   ]},
   {"name": "Where it runs", "features": [
    {"name": "Processors", "beside": "amd64 and arm64", "linux": "amd64 and arm64", "os": "amd64"},
-   {"name": "Installed as", "beside": "A container", "linux": "A container", "os": "An install image for a USB stick, or a script on Debian 13"}
+   {"name": "Installed as", "beside": "A container", "linux": "A container", "os": "An install image for a USB stick, or a script on Debian 13"},
+   {"name": "Move to Kiboto OS from the container", "beside": "no", "linux": "no", "os": "check", "note": "Import the pools, then restore a settings backup made in the container: people, passwords and shares come along, and each share is pointed at the pool that holds its folder. Drilled on a virtual machine, not yet on a real one."}
   ]}
  ]
 }

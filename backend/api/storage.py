@@ -935,7 +935,11 @@ def import_storage_pool(req: StoragePoolImportRequest) -> dict[str, Any]:
         )
     more: dict[str, Any] = {k: v for k, v in (("guid", req.guid), ("force", req.force)) if v}
     try:
-        return adapter.import_pool(pool_id=req.pool_id, fs_type=req.fs_type, target_mount=req.target_mount, **more)
+        done = adapter.import_pool(pool_id=req.pool_id, fs_type=req.fs_type, target_mount=req.target_mount, **more)
+        from backend.services import moved_in
+
+        moved_in.fit_if_pending()  # shares from another install that wait for this pool
+        return done
     except PoolUsedElsewhere as e:
         raise ApiError(409, str(e), "pool_used_elsewhere", text=said("pool_used_elsewhere", pool=req.pool_id)) from e
     except PlatformCapabilityError as e:

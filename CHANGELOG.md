@@ -26,6 +26,8 @@ About says when Kiboto's container was started from the image's old name (ghcr.i
 
 Kiboto OS install image: on a machine that starts in BIOS mode, "Install Kiboto" now starts by itself after ten seconds. Before, Debian's own graphical installer or its speech installer started instead. Machines that start in UEFI mode were not affected.
 
+Kiboto OS: after restoring a settings backup made in the container, shared folders are pointed at the pool that holds them, and each person's shares open again once they have signed in.
+
 #### Security
 
 Kiboto OS: the nightly mover of a merged folder no longer follows a link put in a share while it moves a file, so it can never copy a system file into the share or hand a system folder to someone.

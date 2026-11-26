@@ -411,6 +411,9 @@ def startup_system():
     except OSError as e:
         logger.error("[Main] The search index of the install before could not be dropped: %s", e)
     _bring_pools_back()
+    from backend.services import moved_in
+
+    moved_in.fit_if_pending(DATA_DIR)  # settings from another install: shares pointed at this machine's pools
 
     # Refuse databases written by a newer Kiboto before touching them (OPS-03).
     from backend.db_schema import NewerDatabaseError, check_versions, stamp_versions

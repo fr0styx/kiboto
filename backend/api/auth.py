@@ -401,11 +401,15 @@ def _outside_signin_hours(user: dict[str, Any]) -> JSONResponse | None:
 
 
 def _build_session_response(
-    user: dict[str, Any], remember_me: bool, request: Request, method: str = "password"
+    user: dict[str, Any], remember_me: bool, request: Request, method: str = "password", typed: str = ""
 ) -> JSONResponse:
     refused = _outside_signin_hours(user)
     if refused is not None:
         return refused
+    if typed:  # moved from another install: the password just typed opens this person's shares again, once
+        from backend.services import moved_in
+
+        moved_in.smb_at_sign_in(user["username"], typed)
     ip = _client_ip(request)
     ua = request.headers.get("user-agent", "")
     from backend.services import known_devices
@@ -625,8 +629,8 @@ async def login(req: LoginRequest, request: Request):
             }
         )
 
-    # 6. MFA not required, issue full session
-    return _build_session_response(user, req.remember_me, request, method="password")
+    # 6. MFA not required, issue full session (moved from another install: the password opens the shares again)
+    return _build_session_response(user, req.remember_me, request, method="password", typed=req.password)
 
 
 @router.post("/auth/mfa/challenge")

@@ -337,6 +337,13 @@ def apply_staged_restore(data_dir: str) -> list[str]:
             logger.warning(f"[BACKUP] Could not reset sessions after restore: {e}")
     shutil.rmtree(staged, ignore_errors=True)
     logger.warning("[BACKUP] Applied a staged settings restore: %s file(s)", len(moved))
+    if moved:
+        from backend.services import moved_in
+
+        try:
+            moved_in.mark(data_dir)  # Kiboto OS: shares from another install are fitted to its pools
+        except OSError as e:
+            logger.warning("[BACKUP] The shares will not be fitted to this machine's pools: %s", e)
     try:
         from backend.state import add_event, event_text
 

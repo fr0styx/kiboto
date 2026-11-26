@@ -78,6 +78,7 @@ What the words mean:
 | --- | --- | --- | --- |
 | Processors | amd64 and arm64 | amd64 and arm64 | amd64 |
 | Installed as | A container | A container | An install image for a USB stick, or a script on Debian 13 |
+| Move to Kiboto OS from the container<br><sub>Import the pools, then restore a settings backup made in the container: people, passwords and shares come along, and each share is pointed at the pool that holds its folder. Drilled on a virtual machine, not yet on a real one.</sub> | No | No | Being checked |
 
 Something here does not match what you see? Please open an issue: the page is kept in step with every
 change, and a wrong line is a bug.
