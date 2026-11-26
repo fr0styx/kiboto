@@ -9,6 +9,8 @@ Kiboto runs in three ways. This page says what each can do today.
 - **Kiboto Companion on plain Linux.** The container on Debian, Ubuntu or any Docker host with no NAS system of its own.
 - **Kiboto OS.** A machine of its own: Debian 13 set up by the Kiboto OS install image. Kiboto runs the drives and the machine. In beta.
 
+Keep your NAS system: Companion beside it. A Linux machine with Docker and no NAS system: Companion on plain Linux. A machine you give to Kiboto entirely, with a system disk of its own: Kiboto OS. Companion can move to Kiboto OS later, with its pools and a settings backup. [How to choose, and how to move](CHOOSE_AND_MOVE.md).
+
 What the words mean:
 
 - **Yes**: Kiboto does it.

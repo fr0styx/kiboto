@@ -18,6 +18,12 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SOURCE = os.path.join(ROOT, "docs", "feature-matrix.json")
 MARKDOWN = os.path.join(ROOT, "docs", "FEATURES.md")
+GUIDE = "https://github.com/fr0styx/kiboto/blob/main/docs/CHOOSE_AND_MOVE.md"
+CHOOSE = (
+    "Keep your NAS system: Companion beside it. A Linux machine with Docker and no NAS system: Companion"
+    " on plain Linux. A machine you give to Kiboto entirely, with a system disk of its own: Kiboto OS."
+    " Companion can move to Kiboto OS later, with its pools and a settings backup."
+)
 PAGE = os.path.join(ROOT, "docs", "features.html")
 
 
@@ -65,7 +71,8 @@ def markdown(matrix: dict) -> str:
         "",
     ]
     lines += [f"- **{c['name']}.** {c['about']}" for c in cols]
-    lines += ["", "What the words mean:", ""]
+    lines += ["", f"{CHOOSE} [How to choose, and how to move](CHOOSE_AND_MOVE.md).", ""]
+    lines += ["What the words mean:", ""]
     meaning = {
         "yes": "Kiboto does it.",
         "partly": "Kiboto does part of it; the note says which part.",
@@ -141,7 +148,8 @@ def page(matrix: dict) -> str:
         '<div class="cols">',
     ]
     out += [f'<div class="col"><b>{e(c["name"])}</b><span>{e(c["about"])}</span></div>' for c in cols]
-    out += ["</div>", '<ul class="key" aria-label="What the words mean">']
+    out += ["</div>", f'<p class="lead">{e(CHOOSE)} <a href="{GUIDE}">How to choose, and how to move</a>.</p>']
+    out += ['<ul class="key" aria-label="What the words mean">']
     out += [f'<li><span class="s {key}">{e(word)}</span></li>' for key, word in matrix["states"].items()]
     out.append("</ul>")
     for group in matrix["groups"]:

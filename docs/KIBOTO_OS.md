@@ -24,6 +24,9 @@ What it can do today, beside what Kiboto Companion (the container) can do, is in
 10. [A new system disk](#a-new-system-disk)
 11. [Taking it off again](#taking-it-off-again)
 
+Already running Kiboto Companion? [CHOOSE_AND_MOVE.md](CHOOSE_AND_MOVE.md) says how to move, with your pools
+and a settings backup.
+
 ## What it runs on
 
 | Part | What Kiboto needs | Good to know |

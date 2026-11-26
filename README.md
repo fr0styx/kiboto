@@ -107,6 +107,7 @@ work and goes up one patch number at a time: see [releasing](docs/RELEASING.md).
 | Install Kiboto Companion on Unraid, TrueNAS SCALE, Proxmox, FygoOS, UGOS, ZettOS or any Linux with Docker | [INSTALLATION.md](docs/INSTALLATION.md) |
 | Kiboto OS: a machine of its own, from a USB stick; what it runs on | [KIBOTO_OS.md](docs/KIBOTO_OS.md) |
 | What Kiboto Companion and Kiboto OS can each do, feature by feature | [FEATURES.md](docs/FEATURES.md) |
+| Which edition to choose, and moving from Companion to Kiboto OS | [CHOOSE_AND_MOVE.md](docs/CHOOSE_AND_MOVE.md) |
 | Every setting | [CONFIGURATION.md](docs/CONFIGURATION.md) |
 | HTTPS with Nginx, Caddy, Traefik | [REVERSE_PROXY.md](docs/REVERSE_PROXY.md) |
 | Using Kiboto away from home; the family's own way in | [REMOTE_ACCESS.md](docs/REMOTE_ACCESS.md) |
