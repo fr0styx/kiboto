@@ -29,6 +29,16 @@ export function bridgeStatus(bridge) {
 }
 
 /** The line under "Command line over the network (SSH)". */
+/** Whether a password signs in over SSH (a machine installed from Kiboto's image only). */
+export function sshPasswordsStatus(on) {
+  return on
+    ? t('machine.ssh_passwords_on', "On: a password signs in over SSH, root's too.")
+    : t(
+        'machine.ssh_passwords_off',
+        'Off: only a key signs in over SSH. Kiboto turned password sign-in off at its first sign-in.'
+      );
+}
+
 export function sshStatus(ssh) {
   if (!ssh || !ssh.installed) return t('machine.ssh_missing', 'SSH is not installed on this machine.');
   return ssh.on
@@ -90,6 +100,7 @@ function html(st) {
     }
     ${row('machine-clock', '🕒', t('machine.clock', 'Set the clock from the internet'), clockStatus(clock), Boolean(clock.automatic), Boolean(clock.can))}
     ${row('machine-ssh', '⌨️', t('machine.ssh', 'Command line over the network (SSH)'), sshStatus(ssh), Boolean(ssh.on), Boolean(ssh.installed))}
+    ${typeof st.ssh_passwords === 'boolean' ? row('machine-ssh-passwords', '🔑', t('machine.ssh_passwords', 'Sign in over SSH with a password'), sshPasswordsStatus(st.ssh_passwords), st.ssh_passwords, Boolean(ssh.installed)) : ''}
     ${row('machine-bridge', '🖧', t('machine.bridge', 'Virtual machines on the home network'), bridgeStatus(st.bridge), Boolean(st.bridge?.on), Boolean(st.bridge?.can))}
     <div class="ddns-error" id="machine-error" role="alert" hidden></div>`;
 }
@@ -126,6 +137,7 @@ export async function renderMachineCard(mount = document.getElementById('machine
   };
   $('machine-clock-toggle').addEventListener('click', () => send({ clock_automatic: !st.clock.automatic }));
   $('machine-ssh-toggle').addEventListener('click', () => send({ ssh: !st.ssh.on }));
+  $('machine-ssh-passwords-toggle')?.addEventListener('click', () => send({ ssh_passwords: !st.ssh_passwords }));
   // a bridge changes where the machine's address lives: a trial, kept or undone like an address change
   $('machine-bridge-toggle').addEventListener('click', async () => {
     try {

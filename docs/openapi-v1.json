@@ -26775,6 +26775,17 @@
        }
       ],
       "title": "Ssh"
+     },
+     "ssh_passwords": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Ssh Passwords"
      }
     },
     "title": "MachineUpdate",

@@ -282,6 +282,11 @@ def _never_the_real_machine(monkeypatch):
     monkeypatch.setattr(
         native_update, "APT_PIN", os.path.join(ROOT, "no-such-apt", "kiboto-debian13.pref")
     )  # nor its apt
+    from backend.services import firewall, host_basics
+
+    # nor whether it came from Kiboto's install image (a test machine may have)
+    monkeypatch.setattr(firewall, "FROM_IMAGE", os.path.join(ROOT, "no-such-mark", "from-install-image"))
+    monkeypatch.setattr(host_basics, "SSHD_DIR", os.path.join(ROOT, "no-such-sshd"))
     from backend.hardware import cpu
 
     monkeypatch.setattr(cpu, "read_cpu_limit", lambda: None)  # not the machine's processor: 80 °C everywhere

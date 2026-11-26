@@ -195,3 +195,59 @@ def test_a_unit_that_does_not_start_is_said(name_service):
     do.answers = {"systemctl is-active": (3, "inactive"), "systemd-run": (1, "Failed to start")}
     st = nas_name.ensure()
     assert st["running"] is False and st["error"] == "The name service could not be started."
+
+
+@pytest.fixture
+def image_ssh(managed, tmp_path, monkeypatch):
+    """A machine installed from Kiboto's image: its sshd settings folder holds the image's file."""
+    d = tmp_path / "sshd_config.d"
+    d.mkdir()
+    (d / host_basics.IMAGE_SSH).write_text("PermitRootLogin yes\n")
+    monkeypatch.setattr(host_basics, "SSHD_DIR", str(d))
+    return d
+
+
+def test_password_sign_in_goes_off_at_the_first_sign_in_and_can_come_back(image_ssh):
+    m = Calls()
+    assert host_basics.ssh_passwords() is True
+    assert host_basics.keys_only_after_first_sign_in(m) is True
+    keys_only = image_ssh / host_basics.SIGN_IN_FILE
+    text = keys_only.read_text()
+    assert "PasswordAuthentication no" in text and "PermitRootLogin prohibit-password" in text
+    # sshd takes the first value it reads, and reads this before the image's own file
+    assert sorted(p.name for p in image_ssh.iterdir()) == [host_basics.SIGN_IN_FILE, host_basics.IMAGE_SSH]
+    assert ["systemctl", "try-reload-or-restart", "ssh.service"] in m.seen
+    assert host_basics.ssh_passwords() is False
+    assert host_basics.keys_only_after_first_sign_in(m) is False  # once only
+    assert host_basics.set_ssh_passwords(True, m) is True and not keys_only.exists()
+    assert host_basics.ssh_passwords() is True
+
+
+def test_a_debian_set_up_by_hand_keeps_its_own_ssh_settings(managed, tmp_path, monkeypatch):
+    monkeypatch.setattr(host_basics, "SSHD_DIR", str(tmp_path / "no-image-file"))
+    m = Calls()
+    assert host_basics.ssh_passwords() is None
+    assert host_basics.keys_only_after_first_sign_in(m) is False and m.seen == []
+    assert host_basics.set_ssh_passwords(False, m) is False
+
+
+def test_only_the_first_sign_in_turns_it_off(image_ssh, monkeypatch, tmp_path):
+    from backend import config, users_db
+
+    first = tmp_path / "initial-admin-password"
+    monkeypatch.setattr(config, "initial_password_file", lambda: str(first))
+    asked = []
+    monkeypatch.setattr(host_basics, "keys_only_after_first_sign_in", lambda do=None: asked.append(1) or True)
+    assert host_basics._after_first_sign_in in users_db.FIRST_SIGN_IN_LISTENERS
+    monkeypatch.setattr("backend.first_run.clear", lambda: None)
+    users_db._forget_first_time_password()  # a later change of the password: no first-time code
+    assert asked == []
+    first.write_text("AB12-CD34-EF56\n")
+    users_db._forget_first_time_password()
+    assert asked == [1] and not first.exists()
+
+
+def test_the_root_service_has_the_switch():
+    from backend.services import host_door
+
+    assert host_door.OPERATIONS["host.ssh_passwords"].args == {"on": (bool,)}

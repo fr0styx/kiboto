@@ -186,6 +186,11 @@ const ACTIONS = {
     'Make a new recovery key for {target}? The recovery key you wrote down before stops working.',
     false,
   ],
+  'system.ssh_passwords_on': [
+    'Turn on',
+    "Let a password sign in to {target} over SSH again, root's too? Anyone on the network who knows or guesses a password can then try it.",
+    false,
+  ],
   'system.ssh_on': [
     'Turn on',
     'Let people sign in to the command line of {target} over the network (SSH)? Anyone with an account on the machine and its password or key gets in.',

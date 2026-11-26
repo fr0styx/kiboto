@@ -71,6 +71,7 @@ def test_the_machine_says_how_it_stands(managed, client, auth_headers, monkeypat
         "time_zone": "Europe/Berlin",
         "clock": {"can": True, "automatic": True, "in_step": False},
         "ssh": {"installed": True, "on": True},
+        "ssh_passwords": None,  # not a machine from Kiboto's install image
         "bridge": {"on": False, "port": "", "name": "br0", "can": False},
         "system_disk": {"total_bytes": 100, "free_bytes": 40},
     }
@@ -129,3 +130,27 @@ def test_a_change_the_machine_refuses_is_said(managed, client, auth_headers, mon
 def test_only_an_administrator_changes_the_machine(managed, client, monkeypatch):
     monkeypatch.setattr(host_basics, "run", Machine())
     assert client.put("/api/system/machine", json={"ssh": False}).status_code in (401, 403)
+
+
+@pytest.mark.real_confirmations
+def test_turning_password_sign_in_back_on_is_asked_first(managed, client, auth_headers, monkeypatch, tmp_path):
+    d = tmp_path / "sshd_config.d"
+    d.mkdir()
+    (d / host_basics.IMAGE_SSH).write_text("PermitRootLogin yes\n")
+    (d / host_basics.SIGN_IN_FILE).write_text(host_basics.SIGN_IN_TEXT)
+    monkeypatch.setattr(host_basics, "SSHD_DIR", str(d))
+    monkeypatch.setattr(host_basics, "run", Machine(ssh=True, ntp=True, in_step=False))
+    assert client.get("/api/system/machine", headers=auth_headers).json()["ssh_passwords"] is False
+    r = client.put("/api/system/machine", headers=auth_headers, json={"ssh_passwords": True})
+    assert r.status_code == 428 and r.json()["action"] == "system.ssh_passwords_on"
+    assert (d / host_basics.SIGN_IN_FILE).exists()
+    token = client.post(
+        "/api/confirmations", headers=auth_headers, json={"action": "system.ssh_passwords_on", "target": "attic"}
+    ).json()["token"]
+    r = client.put(
+        "/api/system/machine", headers={**auth_headers, "X-Confirm-Token": token}, json={"ssh_passwords": True}
+    )
+    assert r.status_code == 200 and r.json()["ssh_passwords"] is True and not (d / host_basics.SIGN_IN_FILE).exists()
+    # turning it off again is never asked
+    r = client.put("/api/system/machine", headers=auth_headers, json={"ssh_passwords": False})
+    assert r.status_code == 200 and r.json()["ssh_passwords"] is False

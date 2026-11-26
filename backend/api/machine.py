@@ -16,6 +16,7 @@ router = APIRouter(tags=["System"])
 
 class MachineUpdate(BaseModel):
     ssh: bool | None = None
+    ssh_passwords: bool | None = None
     clock_automatic: bool | None = None
 
 
@@ -38,9 +39,13 @@ async def put_machine(
         raise HTTPException(status_code=409, detail="These settings belong to the system Kiboto runs on.")
     if req.ssh and not now["ssh"]["on"]:
         confirm_or_raise(request, principal, "system.ssh_on", str(now["host_name"]))
+    if req.ssh_passwords and now.get("ssh_passwords") is False:
+        confirm_or_raise(request, principal, "system.ssh_passwords_on", str(now["host_name"]))
     done = True
     if req.ssh is not None:
         done = await asyncio.to_thread(host_basics.set_ssh, req.ssh) and done
+    if req.ssh_passwords is not None:
+        done = await asyncio.to_thread(host_basics.set_ssh_passwords, req.ssh_passwords) and done
     if req.clock_automatic is not None:
         done = await asyncio.to_thread(host_basics.set_clock_automatic, req.clock_automatic) and done
     if not done:

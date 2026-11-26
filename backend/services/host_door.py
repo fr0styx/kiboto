@@ -478,6 +478,7 @@ OPERATIONS: dict[str, Operation] = {
     "host.set_time_zone": Operation(_host("set_time_zone"), {"zone": TEXT}, max_len=64),
     "host.set_clock_automatic": Operation(_host("set_clock_automatic"), {"on": ON}),
     "host.set_ssh": Operation(_host("set_ssh"), {"on": ON}),
+    "host.ssh_passwords": Operation(_host("set_ssh_passwords"), {"on": ON}),
     # the network's settings, each tried with the machine's own way back (hardware/net/managed.py,
     # which checks every value); the trial's state is in the data folder, where the page reads it
     "network.try_address": Operation(_net("start_trial"), {"changes": MAP}),

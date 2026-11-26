@@ -103,6 +103,7 @@ ACTIONS: dict[str, str] = {
     "network.snmp": "Let monitoring tools read how the NAS is doing over SNMP v3 on {target}. Only someone with the user name and both passwords gets an answer",
     "system.host_set": "Bring the kernel, ZFS and Docker of {target} to the versions this Kiboto was tested with. Apps keep running; a new kernel takes effect at the next restart",
     "system.new_recovery_key": "Make a new recovery key for {target}. The recovery key you wrote down before stops working",
+    "system.ssh_passwords_on": "Let a password sign in to {target} over SSH again, root's too. Anyone on the network who knows or guesses a password can then try it",
     "system.ssh_on": "Let people sign in to the command line of {target} over the network (SSH). Anyone with an account on the machine and its password or key gets in",
     "network.nas_name": "Let the NAS answer to {target} on the home network. A small helper on the host's network does it and only answers name lookups",
 }

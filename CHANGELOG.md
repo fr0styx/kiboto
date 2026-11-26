@@ -122,6 +122,8 @@ Kiboto OS: an update no longer installs a version older than the lowest one the 
 
 The light bar no longer sends an error's internal text to the page, and the root service's audit log is no longer readable by every user of the machine.
 
+Kiboto OS from the USB image: the first sign-in to Kiboto turns password sign-in over SSH off (keys keep working; Network, This machine has the switch to turn it back on), and the firewall starts on, with the home network open and nothing open to the outside.
+
 #### New
 
 Kiboto lists the third-party software it bundles and its licences at /third-party-licences.txt, and the install image says which Debian image it is made from and where Debian publishes its sources.

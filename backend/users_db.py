@@ -343,11 +343,23 @@ def _first_time_password() -> str:
     return password
 
 
+# Called once, when the first-time password is used up. Higher layers add to it (host_basics turns
+# password sign-in over SSH off), so this module never imports them.
+FIRST_SIGN_IN_LISTENERS: list = []
+
+
 def _forget_first_time_password() -> None:
     from backend import first_run
 
-    first_run.clear()  # the code on the machine's screen is of no use any more
     path = config.initial_password_file()
+    first = os.path.exists(path)  # the first sign-in: later changes of the password are not
+    first_run.clear()  # the code on the machine's screen is of no use any more
+    if first:
+        for listener in list(FIRST_SIGN_IN_LISTENERS):
+            try:
+                listener()
+            except OSError as e:
+                logger.warning("A step after the first sign-in failed: %s", e)
     if not os.path.exists(path):
         return
     try:

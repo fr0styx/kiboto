@@ -323,3 +323,24 @@ def test_the_installer_brings_nft():
         text = f.read()
     tools = text[text.index('TOOLS="') : text.index('"\n', text.index('TOOLS="'))]
     assert " nftables " in tools.replace("\\\n", " ") + " "
+
+
+def test_a_machine_from_the_install_image_starts_with_it_on_and_nothing_open_outside(tmp_path, monkeypatch):
+    mark = tmp_path / "from-install-image"
+    monkeypatch.setattr(firewall, "FROM_IMAGE", str(mark))
+    assert firewall.state()["enabled"] is False  # set up by hand: off
+    mark.write_text("")
+    st = firewall.state()
+    assert st["enabled"] is True and not any(st["outside"].values())
+    firewall.save(False, {})  # once the person chose, their choice stands
+    assert firewall.state()["enabled"] is False
+
+
+def test_the_install_image_leaves_the_mark():
+    import os
+
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    with open(os.path.join(root, "packaging", "image", "late.sh"), encoding="utf-8") as f:
+        late = f.read()
+    assert ": > /target/etc/kiboto/from-install-image" in late
+    assert firewall.FROM_IMAGE.endswith("from-install-image")

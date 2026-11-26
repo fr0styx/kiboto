@@ -19,13 +19,14 @@ vi.mock('../api.js', () => ({
       puts.push([url, body]);
       if (putFails) throw putFails;
       if ('ssh' in body) state = { ...state, ssh: { ...state.ssh, on: body.ssh } };
+      if ('ssh_passwords' in body) state = { ...state, ssh_passwords: body.ssh_passwords };
       if ('clock_automatic' in body) state = { ...state, clock: { ...state.clock, automatic: body.clock_automatic } };
       return state;
     },
   },
 }));
 
-const { renderMachineCard, clockStatus, sshStatus, bridgeStatus, systemDiskStatus } =
+const { renderMachineCard, clockStatus, sshStatus, sshPasswordsStatus, bridgeStatus, systemDiskStatus } =
   await import('../components/management/machine-card.js');
 const trial = vi.hoisted(() => ({ showNetTrial: vi.fn() }));
 vi.mock('../components/management/net-trial.js', () => trial);
@@ -49,6 +50,21 @@ beforeEach(() => {
 });
 
 describe('This machine', () => {
+  it('shows password sign-in only on a machine from the install image, and switches it', async () => {
+    await renderMachineCard();
+    expect(el('machine-ssh-passwords-toggle')).toBeNull(); // set up by hand: its own SSH settings
+    state = { ...state, ssh_passwords: false };
+    await renderMachineCard();
+    expect(mount().querySelector('#machine-ssh-passwords-status')?.textContent).toBe(
+      'Off: only a key signs in over SSH. Kiboto turned password sign-in off at its first sign-in.'
+    );
+    el('machine-ssh-passwords-toggle').click();
+    await flush();
+    expect(puts.at(-1)).toEqual(['/api/system/machine', { ssh_passwords: true }]);
+    expect(el('machine-ssh-passwords-toggle').getAttribute('aria-pressed')).toBe('true');
+    expect(sshPasswordsStatus(true)).toBe("On: a password signs in over SSH, root's too.");
+  });
+
   it('says how the clock stands', () => {
     expect(clockStatus(null)).toBe('This machine has nothing that sets its clock.');
     expect(clockStatus({ can: false })).toBe('This machine has nothing that sets its clock.');

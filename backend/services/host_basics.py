@@ -13,7 +13,7 @@ import subprocess
 from collections.abc import Callable
 from typing import Any
 
-from backend import door, runtime
+from backend import door, runtime, users_db
 from backend.config import logger
 from backend.fsutil import atomic_write_text
 
@@ -152,6 +152,17 @@ def set_clock_automatic(on: bool, do: Run | None = None) -> bool:
 
 SSHD = "/usr/sbin/sshd"
 SSH_UNITS = ("ssh.service", "ssh.socket")  # Debian starts it as a service, or on demand by the socket
+SSHD_DIR = "/etc/ssh/sshd_config.d"
+IMAGE_SSH = "kiboto.conf"  # written by Kiboto's install image (packaging/image/late.sh): root may sign in
+# sorts before the image's file: sshd takes the first value it reads for each setting
+SIGN_IN_FILE = "00-kiboto-sign-in.conf"
+SIGN_IN_TEXT = (
+    "# Written by Kiboto at the first sign-in to its page: signing in over SSH takes a key, not a password.\n"
+    "# Turn passwords back on in Kiboto (Network, This machine).\n"
+    "PasswordAuthentication no\n"
+    "KbdInteractiveAuthentication no\n"
+    "PermitRootLogin prohibit-password\n"
+)
 
 
 def _word(on: bool) -> str:
@@ -183,6 +194,44 @@ def set_ssh(on: bool, do: Run | None = None) -> bool:
     return True
 
 
+def ssh_passwords() -> bool | None:
+    """Whether a password signs in over SSH, on a machine installed from Kiboto's image; None
+    elsewhere (someone who set up their own Debian keeps their own SSH settings)."""
+    if not os.path.exists(os.path.join(SSHD_DIR, IMAGE_SSH)):
+        return None
+    return not os.path.exists(os.path.join(SSHD_DIR, SIGN_IN_FILE))
+
+
+def set_ssh_passwords(on: bool, do: Run | None = None) -> bool:
+    """Lets a password sign in over SSH again, or only a key. Sessions that are open stay."""
+    if do is None and (via := _door("host.ssh_passwords", on=bool(on))) is not None:
+        return via
+    do = do or run
+    if not runtime.managed_host() or ssh_passwords() is None:
+        return False
+    path = os.path.join(SSHD_DIR, SIGN_IN_FILE)
+    if on:
+        if os.path.exists(path):
+            os.remove(path)
+    else:
+        with open(path + ".new", "w", encoding="utf-8") as f:
+            f.write(SIGN_IN_TEXT)
+        os.chmod(path + ".new", 0o644)  # sshd's own settings, as every file beside it
+        os.replace(path + ".new", path)
+    # a running sshd reads it again; one started by the socket reads it at each sign-in anyway
+    do(["systemctl", "try-reload-or-restart", SSH_UNITS[0]])
+    logger.info("[Machine] Signing in over SSH with a password is %s", _word(on))
+    return True
+
+
+def keys_only_after_first_sign_in(do: Run | None = None) -> bool:
+    """Once, when the first sign-in to Kiboto's page is done: on a machine installed from Kiboto's image, the root password typed at the install no
+    longer signs in over SSH. Keys still do, and the page has the switch to turn passwords back on."""
+    if ssh_passwords() is not True:
+        return False
+    return set_ssh_passwords(False, do)
+
+
 def status(do: Run | None = None) -> dict[str, Any]:
     """What the page shows. A guest says only that these belong to its host."""
     if not runtime.managed_host():
@@ -193,6 +242,7 @@ def status(do: Run | None = None) -> dict[str, Any]:
         "time_zone": time_zone(),
         "clock": clock(do),
         "ssh": ssh(do),
+        "ssh_passwords": ssh_passwords(),
         "bridge": _bridge(),
         "system_disk": _system_disk(),
     }
@@ -233,3 +283,10 @@ def restart_here(delay: int = 2, do: Run | None = None) -> bool:
     if code != 0:
         logger.warning("[Machine] Kiboto could not be restarted by the machine: %s", said)
     return code == 0
+
+
+def _after_first_sign_in() -> None:
+    keys_only_after_first_sign_in()
+
+
+users_db.FIRST_SIGN_IN_LISTENERS.append(_after_first_sign_in)

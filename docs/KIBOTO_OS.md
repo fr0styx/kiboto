@@ -79,8 +79,10 @@ beside `install.sh`.
    If it stops, for example without a network, the screen says why. Put it right and restart the
    machine to try again. The whole log is in `/var/log/kiboto-install.log`.
 
-Root may sign in over SSH with that password until you turn SSH off in Kiboto (Network, This
-machine).
+Root may sign in over SSH with that password until the first sign-in to Kiboto's page. That turns
+password sign-in over SSH off; keys put on the image still sign in, and Network, This machine has
+the switch to turn passwords back on. The firewall starts on: devices at home reach everything,
+the outside reaches nothing until you tick it (see [the firewall](#the-firewall)).
 
 To build the image yourself: `sh packaging/image/build-image.sh debian-13-netinst.iso <kiboto
 image>@sha256:<digest> kiboto.iso` turns Debian's official 13 netinst image into Kiboto's install
@@ -161,7 +163,8 @@ encrypted AI chats and search index again.
 
 ## The firewall
 
-Off until you turn it on (Settings, Security, **Firewall**). When it is on:
+On a machine installed from the USB image it starts on; on one set up with `install.sh` it is off
+until you turn it on (Settings, Security, **Firewall**). When it is on:
 
 - **Your home network reaches everything on the machine**, whatever is ticked: this page, shared
   folders, every app. Nothing at home stops working because a port was missing from a list.
@@ -176,6 +179,10 @@ Turning the firewall on while you are connected from outside the home network is
 this page is ticked, so you cannot shut yourself out. Kiboto keeps one table of its own
 (`inet kiboto`) and leaves every other rule on the machine alone, Docker's included; the page shows
 the exact rules under **Show the rules**.
+
+If the machine's network uses public addresses rather than the home ranges (some offices do), its
+page cannot be reached with the firewall on. At the machine itself, `nft delete table inet kiboto`
+opens it until the next start; then tick **Kiboto (this page)** or turn the firewall off.
 
 Most homes sit behind a router that already lets nothing in from the internet. The firewall matters
 when the machine has an address the internet can reach: a public IPv6 address, a port forwarded on

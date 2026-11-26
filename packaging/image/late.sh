@@ -6,8 +6,14 @@ set -e
 cp /cdrom/kiboto/install.sh /target/root/kiboto-install.sh
 chmod 700 /target/root/kiboto-install.sh
 
-# root may sign in over SSH with the password typed during the install, until SSH is turned off
-# in Kiboto (Network, This machine)
+# root may sign in over SSH with the password typed during the install until the first sign-in to
+# Kiboto's page, which turns password sign-in off (keys keep working; Network, This machine has the
+# switch). This file also tells Kiboto the machine came from its install image.
+# Kiboto starts with its firewall on when the machine came from this image (home open, nothing
+# open to the outside); a machine set up by hand keeps it off until it is turned on
+mkdir -p /target/etc/kiboto
+: > /target/etc/kiboto/from-install-image
+
 mkdir -p /target/etc/ssh/sshd_config.d
 printf '# Written by Kiboto'"'"'s install image\nPermitRootLogin yes\n' > /target/etc/ssh/sshd_config.d/kiboto.conf
 

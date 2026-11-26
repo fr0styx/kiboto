@@ -25,6 +25,9 @@ from backend.config import DATA_DIR
 from backend.fsutil import atomic_write_json, read_json
 
 STATE_FILE = os.path.join(DATA_DIR, "firewall.json")
+# Left by Kiboto's install image (packaging/image/late.sh): a machine installed from it starts with
+# the firewall on, home open and nothing open to the outside (the owner's decision of 26 Nov 2026)
+FROM_IMAGE = "/etc/kiboto/from-install-image"
 TABLE = "kiboto"
 LAN4 = ("10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "100.64.0.0/10")
 LAN6 = ("fc00::/7", "fe80::/10")
@@ -63,7 +66,9 @@ def cleaned(st: dict[str, Any]) -> dict[str, Any]:
 
 
 def state() -> dict[str, Any]:
-    data = read_json(STATE_FILE, {})
+    data = read_json(STATE_FILE, None)
+    if data is None and os.path.exists(FROM_IMAGE):
+        data = {"enabled": True}  # never set on this machine yet: on, as the install image starts it
     data = data if isinstance(data, dict) else {}
     if "outside" not in data and "services" in data:
         # Kept by a version before: the ticked services were open to the home network only, or to
