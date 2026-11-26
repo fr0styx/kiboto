@@ -25,7 +25,8 @@
   border-radius: 10px;
   padding: 10px;
   box-sizing: border-box;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-property: background-color, border-color, border-width, color, box-shadow, opacity, transform, width, max-width, min-width, padding;
   overflow: hidden;
   z-index: 10;
 }
@@ -63,7 +64,8 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  transition: all 0.15s ease;
+  transition: 0.15s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform;
 }
 
 .btn-ai-new-chat:hover {
@@ -83,7 +85,8 @@
   color: var(--kb-text-muted);
   cursor: pointer;
   font-size: var(--kb-fs-xs);
-  transition: all 0.15s ease;
+  transition: 0.15s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform;
   flex-shrink: 0;
 }
 

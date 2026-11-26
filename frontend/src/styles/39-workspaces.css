@@ -20,7 +20,8 @@
   background: var(--kb-glaze-3);
   border: 1px solid var(--kb-line-6);
   font-family: var(--font-mono);
-  transition: all 0.2s ease;
+  transition: 0.2s ease;
+  transition-property: background-color, border-color, color, box-shadow, opacity, transform;
   cursor: pointer;
 }
 

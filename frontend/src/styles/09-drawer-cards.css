@@ -22,7 +22,7 @@
 
 .profiles-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 4px; }
 .profile-pill {
-  background: var(--lt-b-1f3337ff, #1f3337); color: var(--kb-text-muted); border: 1px solid var(--kb-line-8); border-radius: 8px; height: 34px; font-size: var(--kb-fs-xs); font-weight: 700; cursor: pointer; transition: all 0.15s ease;
+  background: var(--lt-b-1f3337ff, #1f3337); color: var(--kb-text-muted); border: 1px solid var(--kb-line-8); border-radius: 8px; height: 34px; font-size: var(--kb-fs-xs); font-weight: 700; cursor: pointer; transition: 0.15s ease; transition-property: background, border-color, color, box-shadow, opacity, transform;
 }
 .profile-pill:hover { background: var(--lt-b-274045ff, #274045); color: var(--kb-text-strong); }
 
@@ -89,7 +89,8 @@ select.fan-preset-select {
   font-weight: 600;
   padding: 0 28px 0 10px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: 0.2s ease;
+  transition-property: background-color, border-color, color, box-shadow, opacity, transform, outline-color, outline-offset;
 }
 
 select.fan-preset-select:hover {
@@ -115,7 +116,8 @@ select.fan-preset-select:focus {
   gap: 6px;
   cursor: pointer;
   white-space: nowrap;
-  transition: all 0.18s ease;
+  transition: 0.18s ease;
+  transition-property: background-color, border-color, color, box-shadow, opacity, transform, filter, width, height, max-height, left, right, top, bottom;
   user-select: none;
   font-family: inherit;
 }
@@ -229,7 +231,7 @@ select.fan-preset-select:focus {
 
 .effects-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 4px; }
 .effect-btn {
-  background: var(--lt-b-1f3337ff, #1f3337); color: var(--kb-text-muted); border: 1px solid var(--kb-line-8); border-radius: 8px; height: 34px; font-size: var(--kb-fs-xs); font-weight: 700; cursor: pointer; transition: all 0.15s ease;
+  background: var(--lt-b-1f3337ff, #1f3337); color: var(--kb-text-muted); border: 1px solid var(--kb-line-8); border-radius: 8px; height: 34px; font-size: var(--kb-fs-xs); font-weight: 700; cursor: pointer; transition: 0.15s ease; transition-property: background, border-color, color, box-shadow, opacity, transform;
 }
 .effect-btn:hover { background: var(--lt-b-274045ff, #274045); color: var(--kb-text-strong); }
 .effect-btn.active { background: rgba(var(--c-primary-rgb), 0.15); color: var(--ok2); border-color: var(--ok2); box-shadow: 0 0 8px rgba(var(--c-primary-rgb), 0.25); }

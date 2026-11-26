@@ -328,7 +328,7 @@ export async function renderLoginChooser(options = {}) {
       .map((u) => {
         const letter = (u.display_name?.[0] || u.username?.[0] || 'U').toUpperCase();
         return `
-        <div class="login-user-card" data-username="${escapeHtml(u.username)}" data-display="${escapeHtml(u.display_name || u.username)}" style="cursor:pointer; background:var(--kb-glaze-4); border:1px solid var(--kb-line-10); border-radius:10px; padding:12px 14px; display:flex; align-items:center; gap:12px; transition:all 0.2s ease;">
+        <div class="login-user-card" data-username="${escapeHtml(u.username)}" data-display="${escapeHtml(u.display_name || u.username)}" style="cursor:pointer; background:var(--kb-glaze-4); border:1px solid var(--kb-line-10); border-radius:10px; padding:12px 14px; display:flex; align-items:center; gap:12px; transition: 0.2s ease; transition-property: background-color, border-color, color, box-shadow, opacity, transform;">
           <div style="width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg, #0a7a70, #08695f); display:flex; align-items:center; justify-content:center; font-weight:800; color:#fff; font-size:14px; border:1px solid var(--kb-line-20);">
             ${escapeHtml(letter)}
           </div>

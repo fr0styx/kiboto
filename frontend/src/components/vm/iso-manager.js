@@ -169,7 +169,7 @@ export async function openIsoManagerModal(initialTab = 'catalog') {
         <!-- Tab 2: Local Storage ISOs & Drag-and-Drop Upload -->
         <div id="tab-content-local" style="display: none;">
           <!-- Dropzone -->
-          <div id="iso-dropzone" class="iso-dropzone" style="border: 2px dashed rgba(51,205,184,0.4); border-radius: 8px; padding: 24px; text-align: center; background: rgba(51,205,184,0.03); cursor: pointer; transition: all 0.2s;">
+          <div id="iso-dropzone" class="iso-dropzone" style="border: 2px dashed rgba(51,205,184,0.4); border-radius: 8px; padding: 24px; text-align: center; background: rgba(51,205,184,0.03); cursor: pointer; transition: 0.2s; transition-property: background-color, border-color, color, box-shadow, opacity, transform;">
             <div class="vmi-fs28">💿</div>
             <div class="vmi-fs13-bold-strong">${t('viso.drop', 'Drag ISO files here to upload them')}</div>
             <div class="vmi-xs-muted-2">${t('viso.dest', 'Saved to:')} <code class="vmi-accent">/mnt/user/isos</code> • ${t('viso.types', '.iso and .img files up to 50 GB')}</div>

@@ -20,7 +20,8 @@
   font-size: var(--kb-fs-xs);
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s ease-out;
+  transition: 0.15s ease-out;
+  transition-property: background, border-color, color, box-shadow, opacity, transform, outline-color, outline-offset;
   user-select: none;
   box-sizing: border-box;
   vertical-align: middle;
@@ -126,7 +127,8 @@
   border: 1px solid var(--kb-line-10);
   color: var(--kb-text-soft);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: 0.15s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform;
 }
 
 .gtp-preset-btn:hover {
@@ -193,7 +195,8 @@
   font-weight: 600;
   border-radius: 4px;
   cursor: pointer;
-  transition: all 0.1s ease;
+  transition: 0.1s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform;
 }
 
 .gtp-item-btn:hover {
@@ -227,7 +230,8 @@
   font-size: var(--kb-fs-xs);
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: 0.15s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform;
 }
 
 .gtp-period-btn:hover {
@@ -260,7 +264,8 @@
   cursor: pointer;
   padding: 3px 6px;
   border-radius: 4px;
-  transition: all 0.15s ease;
+  transition: 0.15s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform;
 }
 
 .gtp-now-btn:hover {
@@ -277,7 +282,8 @@
   color: var(--accent-contrast-fg);
   border: none;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: 0.15s ease;
+  transition-property: background-color, border-color, color, box-shadow, opacity, transform, filter;
 }
 
 .gtp-done-btn:hover {

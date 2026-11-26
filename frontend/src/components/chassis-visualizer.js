@@ -2552,7 +2552,7 @@ export async function openNewCloudRemoteModal(onSuccess) {
 
               <!-- Auth Mode Switcher (Tabs) -->
               <div class="cv-row-box-3">
-                <button type="button" id="tab-oauth-desktop" style="flex: 1; padding: 6px 10px; font-size: var(--kb-fs-xs); font-weight: 700; border-radius: 4px; border: none; cursor: pointer; background: #0a7a70; color: #fff; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.15s;">
+                <button type="button" id="tab-oauth-desktop" style="flex: 1; padding: 6px 10px; font-size: var(--kb-fs-xs); font-weight: 700; border-radius: 4px; border: none; cursor: pointer; background: #0a7a70; color: #fff; display: flex; align-items: center; justify-content: center; gap: 6px; transition: 0.15s; transition-property: background-color, border-color, color, box-shadow, opacity, transform;">
                   <span>${ico('💻')} ${t('chassis.oauth_tab_desktop', 'On this computer')}</span>
                 </button>
                 <button type="button" id="tab-oauth-qr" class="btn-pill-toggle is-ghost is-small cv-grow" style="display: flex;">
@@ -2562,7 +2562,7 @@ export async function openNewCloudRemoteModal(onSuccess) {
 
               <!-- Step 1: Desktop Panel -->
               <div id="oauth-desktop-panel">
-                <button type="button" id="btn-oauth-browser" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 16px; background: linear-gradient(135deg, #0a7a70 0%, #08695f 100%); border: 1px solid var(--kb-line-20); color: #fff; border-radius: 7px; font-size: var(--kb-fs-xs); font-weight: 700; cursor: pointer; box-shadow: 0 4px 14px rgba(10, 122, 112, 0.35); transition: all 0.2s;">
+                <button type="button" id="btn-oauth-browser" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 16px; background: linear-gradient(135deg, #0a7a70 0%, #08695f 100%); border: 1px solid var(--kb-line-20); color: #fff; border-radius: 7px; font-size: var(--kb-fs-xs); font-weight: 700; cursor: pointer; box-shadow: 0 4px 14px rgba(10, 122, 112, 0.35); transition: 0.2s; transition-property: background-color, border-color, color, box-shadow, opacity, transform;">
                   <span>🌐 ${escapeHtml(brandBtnLabel)}</span>
                 </button>
 

@@ -26,7 +26,8 @@
   justify-content: center;
   color: var(--muted);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: 0.2s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform;
   user-select: none;
 }
 .lcd-dot:hover {
@@ -367,7 +368,8 @@
   align-items: center;
   gap: 4px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: 0.2s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform, outline-color, outline-offset;
   color: var(--text);
 }
 .profile-btn:hover {

@@ -177,7 +177,8 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  transition: all 0.2s ease;
+  transition: 0.2s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform;
 }
 
 .topo-disk-card:hover {
@@ -267,7 +268,8 @@
   padding: 3px 8px;
   border-radius: 4px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: 0.2s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform;
 }
 
 .btn-locate-topo:hover {
@@ -291,7 +293,8 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  transition: all 0.2s ease;
+  transition: 0.2s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform;
 }
 
 .storage-share-card:hover {
@@ -429,7 +432,8 @@
   padding: 5px 12px;
   border-radius: 6px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: 0.2s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform;
 }
 
 .btn-share-reveal:hover {
@@ -559,7 +563,8 @@
   cursor: pointer;
   padding: 2px 4px;
   border-radius: 4px;
-  transition: all 0.15s ease;
+  transition: 0.15s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform;
 }
 
 .btn-qc-copy:hover {

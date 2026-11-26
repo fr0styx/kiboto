@@ -139,7 +139,8 @@
 }
 
 .btn-delete-vlan {
-  transition: all 0.2s ease;
+  transition: 0.2s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform;
 }
 
 .btn-delete-vlan:hover {

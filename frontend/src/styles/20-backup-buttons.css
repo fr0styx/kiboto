@@ -15,7 +15,8 @@
   border: 1px solid var(--kb-line-12);
   background: var(--kb-glaze-6);
   color: var(--kb-text-soft);
-  transition: all 0.15s ease;
+  transition: 0.15s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform, width, min-height, padding, font-size;
   line-height: 1.2;
 }
 .btn-rect:hover:not(:disabled) {
@@ -58,7 +59,8 @@
   font-weight: 600 !important;
   padding: 4px 9px !important;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: 0.15s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform;
 }
 .btn-download-app-backup:hover:not(:disabled) {
   background: rgba(var(--c-primary-text-rgb), 0.28) !important;
@@ -80,7 +82,8 @@
   font-weight: 600 !important;
   padding: 4px 9px !important;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: 0.15s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform;
 }
 .btn-restore-app-backup:hover:not(:disabled) {
   background: rgba(var(--c-primary-rgb), 0.28) !important;
@@ -103,7 +106,8 @@
   font-size: var(--kb-fs-xs) !important;
   padding: 4px 8px !important;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: 0.15s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform;
 }
 .btn-delete-app-backup:hover:not(:disabled),
 .btn-delete-backup-job:hover:not(:disabled),
@@ -127,7 +131,8 @@
   font-weight: 600 !important;
   padding: 4px 10px !important;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: 0.15s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform;
 }
 .btn-run-backup-job:hover:not(:disabled) {
   background: rgba(var(--c-primary-rgb), 0.28) !important;
@@ -174,7 +179,8 @@
   background: var(--kb-glaze-5);
   border: 1px solid var(--kb-line-10);
   color: var(--muted);
-  transition: all 0.15s ease;
+  transition: 0.15s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform;
 }
 .docker-filter-btn:hover {
   background: var(--kb-glaze-10);
@@ -238,7 +244,8 @@
   background: var(--lt-b-33cdb81a, rgba(51, 205, 184, 0.1));
   border: 1px solid var(--lt-r-33cdb859, rgba(51, 205, 184, 0.35));
   text-decoration: none;
-  transition: all 0.15s ease;
+  transition: 0.15s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform;
   cursor: pointer;
   white-space: nowrap;
 }
@@ -392,7 +399,8 @@
   padding: 5px 12px;
   border-radius: 6px;
   font-weight: 600;
-  transition: all 0.15s ease;
+  transition: 0.15s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform;
   color: var(--muted);
   background: transparent;
   border: 1px solid transparent;
@@ -448,7 +456,8 @@
   border: 1px solid rgba(var(--c-primary-rgb), 0.3);
   border-radius: 4px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: 0.15s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform;
 }
 
 .btn-reveal-fm:hover {
@@ -472,7 +481,8 @@
   background: var(--lt-b-33cdb81a, rgba(51, 205, 184, 0.1));
   border: 1px solid var(--lt-r-33cdb84c, rgba(51, 205, 184, 0.3));
   color: var(--lt-ink-brand, var(--accent-cyan, #33cdb8));
-  transition: all 0.15s ease;
+  transition: 0.15s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform;
 }
 
 .btn-docker-inspect:hover {
@@ -506,7 +516,8 @@
   font-size: var(--kb-fs-xs);
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: 0.15s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform;
 }
 .metrics-device-btn:hover {
   background: var(--kb-glaze-10);

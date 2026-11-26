@@ -37,7 +37,8 @@
   color: var(--lt-t-d8b4feff, #d8b4fe) !important;
 }
 .ai-chat-tool-pill {
-  transition: all 0.2s ease;
+  transition: 0.2s ease;
+  transition-property: background-color, border-color, color, box-shadow, opacity, transform, filter, width, height, max-height, left, right, top, bottom;
 }
 .ai-chat-tool-running {
   animation: aiToolPulse 1.2s infinite ease-in-out;

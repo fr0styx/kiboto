@@ -229,7 +229,8 @@
   border-radius: 4px;
   color: var(--kb-text);
   user-select: none;
-  transition: all 0.15s ease;
+  transition: 0.15s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform;
 }
 .cal-day:hover {
   background: var(--kb-glaze-8);
@@ -263,7 +264,8 @@
   border-radius: 50%;
   background: #f6ad55;
   box-shadow: 0 0 5px rgba(246, 173, 85, 0.85);
-  transition: all 0.15s ease;
+  transition: 0.15s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform;
 }
 .cal-day.cal-holiday:hover {
   background: rgba(246, 173, 85, 0.22);
@@ -427,7 +429,8 @@
   color: var(--kb-text);
   cursor: pointer;
   position: relative;
-  transition: all 0.15s ease;
+  transition: 0.15s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform;
   background: var(--kb-glaze-3);
   border: 1px solid transparent;
 }
@@ -467,7 +470,8 @@
   background: var(--kb-glaze-5);
   color: var(--kb-text-muted);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: 0.15s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform;
 }
 .tz-region-pill:hover {
   background: var(--kb-glaze-10);
@@ -486,7 +490,8 @@
   padding: 8px 12px;
   border-radius: 6px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: 0.15s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform;
   border: 1px solid transparent;
 }
 .tz-item-row:hover {
@@ -508,7 +513,8 @@
   background: var(--kb-glaze-4);
   color: var(--kb-text-muted);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: 0.15s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform;
 }
 .cal-filter-pill:hover {
   color: var(--kb-text-strong);
@@ -530,7 +536,8 @@
   background: var(--kb-shade-25);
   border: 1px solid var(--kb-line-8);
   border-radius: 8px;
-  transition: all 0.15s ease;
+  transition: 0.15s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform;
 }
 .cal-agenda-card:hover {
   background: var(--kb-glaze-4);
@@ -731,7 +738,8 @@
 }
 
 #notif-center-panel .notif-filter-btn {
-  transition: all 0.15s ease;
+  transition: 0.15s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform, filter;
 }
 
 #notif-center-panel .notif-filter-btn:hover {

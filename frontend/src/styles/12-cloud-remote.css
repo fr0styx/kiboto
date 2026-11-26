@@ -138,7 +138,8 @@
   color: var(--kb-text);
   border-radius: 6px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: 0.15s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform;
 }
 .btn-cloud-cancel:hover {
   background: var(--kb-glaze-15);
@@ -157,7 +158,8 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  transition: all 0.15s ease;
+  transition: 0.15s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform;
 }
 .btn-cloud-test:hover:not(:disabled) {
   background: rgba(var(--c-primary-text-rgb), 0.28);
@@ -215,7 +217,8 @@
   border-radius: 6px;
   cursor: pointer;
   box-shadow: 0 0 14px rgba(var(--c-primary-rgb), 0.4);
-  transition: all 0.15s ease;
+  transition: 0.15s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform;
 }
 .btn-cloud-submit:hover:not(:disabled) {
   background: #0a7a70;
@@ -287,7 +290,8 @@ body.theme-oled #cloud-remote-window select option {
 }
 
 #modal-fm-collision .btn-pill-toggle {
-  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-property: background, border-color, border-width, color, box-shadow, opacity, transform, filter, outline-color, outline-offset, width, min-height, padding, margin-left, gap, border-radius, font-size;
 }
 #modal-fm-collision .btn-pill-toggle:hover {
   filter: brightness(1.18);
@@ -396,7 +400,8 @@ body.theme-oled #cloud-remote-window select option {
   display: flex;
   align-items: center;
   gap: 6px;
-  transition: all 0.15s ease;
+  transition: 0.15s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform;
 }
 .smart-tab-btn:hover {
   color: var(--kb-text-strong);
@@ -654,7 +659,8 @@ body.theme-oled #cloud-remote-window select option {
   display: flex;
   align-items: center;
   gap: 5px;
-  transition: all 0.2s ease;
+  transition: 0.2s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform;
 }
 .smart-btn-copy-report:hover {
   background: rgba(var(--c-primary-text-rgb), 0.22);

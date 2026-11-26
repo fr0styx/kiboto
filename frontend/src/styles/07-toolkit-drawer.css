@@ -51,7 +51,7 @@
 }
 .btn-lock-toggle {
   background: var(--lt-b-1f3337ff, #1f3337); color: var(--kb-text-soft); border: 1px solid var(--kb-line-10);
-  border-radius: 6px; font-size: var(--kb-fs-xs); font-weight: 700; padding: 4px 9px; cursor: pointer; transition: all 0.15s ease;
+  border-radius: 6px; font-size: var(--kb-fs-xs); font-weight: 700; padding: 4px 9px; cursor: pointer; transition: 0.15s ease; transition-property: background, border-color, color, box-shadow, opacity, transform;
 }
 .btn-lock-toggle:hover { background: var(--lt-b-2a4247ff, #2a4247); color: var(--kb-text-strong); }
 .btn-lock-toggle.unlocked { background: rgba(var(--c-primary-rgb), 0.15); color: var(--ok2); border-color: var(--ok2); }
@@ -68,7 +68,7 @@
 }
 .drawer-tab-btn {
   flex: 1; background: transparent; border: none; color: var(--muted); font-size: var(--kb-fs-xs);
-  font-weight: 700; padding: 8px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s ease;
+  font-weight: 700; padding: 8px 12px; border-radius: 8px; cursor: pointer; transition: 0.2s ease; transition-property: background, border-color, color, box-shadow, opacity, transform;
 }
 .drawer-tab-btn:hover { color: var(--kb-text-strong); }
 .drawer-tab-btn.active { background: var(--lt-b-1f3337ff, #1f3337); color: var(--ok2); box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
@@ -153,7 +153,8 @@
   padding: 4px 9px;
   border-radius: 5px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: 0.15s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform;
 }
 .seg-size-btn.active {
   background: var(--lt-b-20373bff, #20373b);
@@ -182,7 +183,8 @@
   align-items: center;
   gap: 10px;
   cursor: pointer;
-  transition: all 0.18s ease;
+  transition: 0.18s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform, outline-color, outline-offset;
 }
 .preset-btn-card:hover {
   background: var(--lt-b-1d363bff, #1d363b);
@@ -226,7 +228,8 @@
   font-weight: 800;
   padding: 4px 10px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: 0.15s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform;
 }
 .btn-save-preset:hover {
   background: var(--lt-b-274045ff, #274045);

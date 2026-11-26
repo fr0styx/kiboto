@@ -674,7 +674,8 @@ body.mobile-mode #vm-grid .glassmorphic-card {
   cursor: pointer;
   border-radius: 8px;
   color: var(--muted);
-  transition: all 0.15s ease;
+  transition: 0.15s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform;
 }
 
 .cmd-palette-item.selected {
@@ -825,7 +826,8 @@ body.mobile-mode #vm-grid .glassmorphic-card {
   background: var(--kb-shade-35);
   cursor: pointer;
   position: relative;
-  transition: all 0.15s ease;
+  transition: 0.15s ease;
+  transition-property: background, border-color, border-width, color, box-shadow, opacity, transform, outline-color, outline-offset, width, height, left, top;
   opacity: 0.35;
   margin: 0;
 }
@@ -935,7 +937,8 @@ body.mobile-mode #vm-grid .glassmorphic-card {
   align-items: center;
   justify-content: center;
   color: var(--muted);
-  transition: all 0.15s ease;
+  transition: 0.15s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform;
   line-height: 1;
 }
 .fm-view-mode-group .fm-tool-btn:hover {
@@ -1166,7 +1169,8 @@ body.mobile-mode #vm-grid .glassmorphic-card {
   border: 1px solid transparent;
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: 0.15s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform;
 }
 .dock-switcher-item:hover {
   background: var(--kb-glaze-10);
@@ -1316,7 +1320,8 @@ body.mobile-mode #vm-grid .glassmorphic-card {
   flex-direction: column;
   overflow: hidden;
   position: relative;
-  transition: all 0.25s cubic-bezier(0.2, 0, 0, 1);
+  transition: 0.25s cubic-bezier(0.2, 0, 0, 1);
+  transition-property: background-color, border-color, color, box-shadow, opacity, transform, filter, width, height, max-height, left, right, top, bottom;
   transform: scale(0.97);
   animation: quicklookScaleIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
@@ -1414,7 +1419,8 @@ body.mobile-mode #vm-grid .glassmorphic-card {
   align-items: center;
   justify-content: center;
   line-height: 1;
-  transition: all 0.15s ease;
+  transition: 0.15s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform, outline-color, outline-offset;
   user-select: none;
 }
 .quicklook-btn:hover {
@@ -1450,7 +1456,8 @@ body.mobile-mode #vm-grid .glassmorphic-card {
   cursor: pointer;
   padding: 4px 8px;
   border-radius: 6px;
-  transition: all 0.15s ease;
+  transition: 0.15s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform, outline-color, outline-offset;
 }
 .quicklook-close-btn:hover {
   color: var(--kb-text-strong);
@@ -1503,7 +1510,8 @@ body.mobile-mode #vm-grid .glassmorphic-card {
   justify-content: center;
   cursor: pointer;
   z-index: 12;
-  transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+  transition: 0.2s cubic-bezier(0.2, 0, 0, 1);
+  transition-property: background, border-color, color, box-shadow, opacity, transform, outline-color, outline-offset;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
   opacity: 0.85;
   user-select: none;
@@ -1662,7 +1670,8 @@ body.mobile-mode #vm-grid .glassmorphic-card {
   flex-shrink: 0;
   background: var(--lt-b-000000ff, #000);
   position: relative;
-  transition: all 0.15s ease;
+  transition: 0.15s ease;
+  transition-property: background-color, border-color, color, box-shadow, opacity, transform;
 }
 .quicklook-thumb-item:hover {
   transform: scale(1.08);
@@ -1722,7 +1731,8 @@ body.mobile-mode #vm-grid .glassmorphic-card {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-property: background, border-color, color, box-shadow, opacity, transform;
   box-shadow: 0 8px 32px rgba(var(--c-primary-rgb), 0.5);
   z-index: 10;
 }
@@ -1884,7 +1894,8 @@ body.mobile-mode #vm-grid .glassmorphic-card {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.15s ease;
+  transition: 0.15s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform;
   line-height: 1;
 }
 .quicklook-vctrl-btn:hover {
@@ -1910,7 +1921,8 @@ body.mobile-mode #vm-grid .glassmorphic-card {
   border-radius: 2px;
   outline: none;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: 0.15s ease;
+  transition-property: background-color, border-color, color, box-shadow, opacity, transform, filter, width, height, max-height, left, right, top, bottom;
 }
 .quicklook-video-vol-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
@@ -1948,7 +1960,8 @@ body.mobile-mode #vm-grid .glassmorphic-card {
   padding: 3px 8px;
   border-radius: 12px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: 0.15s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform;
   min-width: 38px;
   text-align: center;
 }
@@ -2070,7 +2083,8 @@ body.mobile-mode #vm-grid .glassmorphic-card {
   font-weight: 700;
   border-radius: 6px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: 0.15s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform;
   border: 1px solid transparent;
 }
 
@@ -2416,7 +2430,8 @@ body.theme-oled .mgmt-sticky-subnav {
   padding: 6px 14px;
   border-radius: 6px;
   cursor: pointer;
-  transition: all 0.18s ease;
+  transition: 0.18s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform, outline-color, outline-offset;
   display: inline-flex;
   align-items: center;
   gap: 6px;

@@ -116,7 +116,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-property: background-color, border-color, color, box-shadow, opacity, transform, filter, width, height, max-height, left, right, top, bottom;
   pointer-events: none;
 }
 
@@ -194,7 +195,8 @@
   background: var(--kb-glaze-4);
   color: var(--muted);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: 0.15s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform;
 }
 
 .wallpaper-cat-pill:hover {

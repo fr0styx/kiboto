@@ -17,7 +17,8 @@
   gap: 9px;
   cursor: pointer;
   text-align: left;
-  transition: all 0.18s ease;
+  transition: 0.18s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform;
   user-select: none;
 }
 .theme-preset-card:hover {

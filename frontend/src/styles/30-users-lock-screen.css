@@ -15,7 +15,8 @@
   color: var(--kb-text);
   cursor: pointer;
   user-select: none;
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-property: background, border-color, color, box-shadow, opacity, transform, outline-color, outline-offset;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
   margin-left: 2px;
 }
@@ -219,7 +220,7 @@ body.desktop-locked #os-dock-container {
    sign-in code can switch (on an element with an id, or none) stays inline (NUX-15) */
 #login-overlay { position: fixed; inset: 0; z-index: 999999; background: var(--lt-b-080e10ff, #080e10); align-items: center; justify-content: center; }
 #login-overlay .lgn-div1 { background: var(--card); padding: 36px 32px; border-radius: 14px; text-align: center; border: 1px solid var(--kb-line-12); width: 340px; box-shadow: 0 25px 60px rgba(0,0,0,0.85); position: relative; }
-#login-overlay .lgn-user-selected-card { align-items: center; gap: 12px; background: rgba(var(--c-primary-rgb), 0.1); border: 1px solid rgba(var(--c-primary-text-rgb), 0.3); border-radius: 8px; padding: 10px 12px; margin-bottom: 16px; cursor: pointer; transition: all 0.18s ease; user-select: none; }
+#login-overlay .lgn-user-selected-card { align-items: center; gap: 12px; background: rgba(var(--c-primary-rgb), 0.1); border: 1px solid rgba(var(--c-primary-text-rgb), 0.3); border-radius: 8px; padding: 10px 12px; margin-bottom: 16px; cursor: pointer; transition: 0.18s ease; transition-property: background-color, border-color, color, box-shadow, opacity, transform, filter, width, height, max-height, left, right, top, bottom; user-select: none; }
 #login-overlay .lgn-selected-initial { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #0a7a70, #08695f); align-items: center; justify-content: center; font-weight: 800; color: #fff; font-size: 13px; }
 #login-overlay .lgn-div2 { font-size: var(--kb-fs-xs); color: var(--lt-ink-brand, var(--accent-cyan-hi, #4fd8c4)); display: flex; align-items: center; gap: 4px; }
 #login-overlay .lgn-username { width: 100%; padding: 11px 12px; background: var(--lt-b-00000080, rgba(0,0,0,0.5)); border: 1px solid var(--kb-line-15); color: var(--kb-text-strong); border-radius: 6px; box-sizing: border-box; text-align: center; font-size: 14px; outline: none; margin-bottom: 10px; }

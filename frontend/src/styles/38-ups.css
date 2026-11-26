@@ -14,7 +14,8 @@
   border: 1px solid var(--kb-line-8);
   backdrop-filter: blur(16px);
   position: relative;
-  transition: all 0.3s ease;
+  transition: 0.3s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform, filter, stroke;
 }
 
 .ups-flow-card {
@@ -26,7 +27,8 @@
   border: 1px solid var(--kb-line-7);
   text-align: center;
   position: relative;
-  transition: all 0.25s ease;
+  transition: 0.25s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -281,7 +283,8 @@
   background: var(--kb-glaze-4);
   border: 1px solid var(--kb-line-8);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: 0.2s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform;
 }
 
 .ups-mode-box strong {

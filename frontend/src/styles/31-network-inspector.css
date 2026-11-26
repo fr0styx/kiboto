@@ -153,7 +153,8 @@
   padding: 3px 6px;
   font-size: var(--kb-fs-xs);
   line-height: 1;
-  transition: all 0.15s ease;
+  transition: 0.15s ease;
+  transition-property: background, border-color, color, box-shadow, opacity, transform;
 }
 
 .net-docker-delete-btn:hover {
@@ -203,7 +204,8 @@
   height: 8px;
   border-radius: 50%;
   background: var(--lt-b-33464aff, #33464a);
-  transition: all 0.3s;
+  transition: 0.3s;
+  transition-property: background-color, border-color, color, box-shadow, opacity, transform, filter, width, height, max-height, left, right, top, bottom;
 }
 
 .switch-led-dot.led-link-on {

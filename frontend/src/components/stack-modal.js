@@ -747,7 +747,7 @@ export async function openStackPickerModal(stacksInput = null) {
         const pathStr = s.working_dir || s.config_files || t('stk.daemon', 'Managed by Docker');
 
         return `
-        <div class="stack-picker-card" data-stack="${escapeHtml(s.name)}" style="background:var(--kb-glaze-3); border:1px solid var(--lt-r-ffffff17, rgba(255,255,255,0.09)); border-radius:8px; padding:10px 14px; cursor:pointer; transition:all 0.16s cubic-bezier(0.16, 1, 0.3, 1); display:flex; flex-direction:column; gap:6px;">
+        <div class="stack-picker-card" data-stack="${escapeHtml(s.name)}" style="background:var(--kb-glaze-3); border:1px solid var(--lt-r-ffffff17, rgba(255,255,255,0.09)); border-radius:8px; padding:10px 14px; cursor:pointer; transition: 0.16s cubic-bezier(0.16, 1, 0.3, 1); transition-property: background-color, border-color, color, box-shadow, opacity, transform; display:flex; flex-direction:column; gap:6px;">
           <div class="stk-row-11">
             <div class="stk-row">
               <span class="stk-fs14">📁</span>
