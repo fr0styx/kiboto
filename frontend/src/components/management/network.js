@@ -869,12 +869,14 @@ export async function saveNetworkPortConfig() {
 
   try {
     // the nickname always; packet size, speed and Wake-on-LAN only where this host lets Kiboto change them
-    await api.post(
+    const res = await api.post(
       `/api/network/port/${encodeURIComponent(_currentPortIface)}`,
       portPayload({ alias, mtu, wol_enabled, autoneg, speed })
     );
-    showToast(t('net.port_saved_toast', 'Port configuration saved successfully'), 'success');
     closeNetworkPortModal();
+    // a new packet size is a trial on a machine Kiboto runs: keep it or go back
+    if (res?.status === 'trial') showTrial(res);
+    else showToast(t('net.port_saved_toast', 'Port configuration saved successfully'), 'success');
     fetchAndRenderNetworkTopology();
   } catch (err) {
     showToast(err.message || 'Failed to save port config', 'error');
@@ -1364,9 +1366,11 @@ export async function submitCreateVlan() {
   }
 
   try {
-    await api.post('/api/network/vlan/create', { parent, vlan_id: vid, alias });
-    showToast(t('net.vlan_created_toast', 'VLAN sub-interface created successfully'), 'success');
+    const res = await api.post('/api/network/vlan/create', { parent, vlan_id: vid, alias });
     closeCreateVlanModal();
+    // on a machine Kiboto runs, a new VLAN is a trial like an address change: keep it or go back
+    if (res?.status === 'trial') showTrial(res);
+    else showToast(t('net.vlan_created_toast', 'VLAN sub-interface created successfully'), 'success');
     fetchAndRenderNetworkTopology();
   } catch (err) {
     showToast(err.message || 'Failed to create VLAN sub-interface', 'error');
@@ -1384,8 +1388,9 @@ export async function deleteVlanSubinterface(vlanName) {
     `${t('net.delete_vlan_confirm', 'Are you sure you want to delete VLAN sub-interface')} "${vlanName}"?`,
     async () => {
       try {
-        await api.delete(`/api/network/vlan/${encodeURIComponent(vlanName)}`);
-        showToast(t('net.vlan_deleted_toast', 'VLAN sub-interface removed successfully'), 'success');
+        const res = await api.delete(`/api/network/vlan/${encodeURIComponent(vlanName)}`);
+        if (res?.status === 'trial') showTrial(res);
+        else showToast(t('net.vlan_deleted_toast', 'VLAN sub-interface removed successfully'), 'success');
         fetchAndRenderNetworkTopology();
       } catch (err) {
         showToast(err.message || 'Failed to delete VLAN sub-interface', 'error');

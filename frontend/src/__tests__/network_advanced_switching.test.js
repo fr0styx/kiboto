@@ -293,6 +293,25 @@ describe('Tier 3: Advanced Virtual Switching, Bonding & 802.1Q VLAN Tagging', ()
       expect(document.getElementById('network-vlan-create-overlay').style.display).toBe('none');
     });
 
+    it('on a machine Kiboto runs, a new VLAN is a trial: keep it or go back', async () => {
+      vi.spyOn(api, 'get').mockResolvedValue(mockTopology);
+      vi.spyOn(api, 'post').mockResolvedValueOnce({
+        status: 'trial',
+        canary_id: 'k'.repeat(24),
+        timeout_sec: 60,
+        url: '',
+      });
+      const toastSpy = vi.spyOn(toast, 'showToast').mockImplementation(() => {});
+
+      await openCreateVlanModal();
+      document.getElementById('net-vlan-parent-select').value = 'eth0';
+      document.getElementById('net-vlan-id-input').value = '20';
+      await submitCreateVlan();
+      await vi.waitFor(() => expect(document.getElementById('net-trial-title')).not.toBeNull());
+      expect(toastSpy).not.toHaveBeenCalledWith(expect.stringContaining('successfully'), 'success');
+      document.querySelectorAll('.smart-modal-backdrop').forEach((el) => el.remove());
+    });
+
     it('deletes VLAN sub-interface after confirmation', async () => {
       const delSpy = vi.spyOn(api, 'delete').mockResolvedValueOnce({ status: 'ok' });
       const toastSpy = vi.spyOn(toast, 'showToast').mockImplementation(() => {});

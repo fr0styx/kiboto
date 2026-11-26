@@ -67,8 +67,23 @@ class HostNetwork:
         raise NotOnThisHost(setting, self.where())
 
 
+# what a machine set up for Kiboto changes itself, each as a trial (managed.py); bonds, speed and
+# Wake-on-LAN follow later
+MANAGED_SETTINGS = ("address", "vlan", "mtu")
+
+
+def _address_now() -> dict[str, Any]:
+    """The address the machine shows, for a port whose settings are not in Kiboto's own file yet."""
+    from backend.hardware.net import host_ip
+
+    try:
+        return host_ip.get_host_ip_config()
+    except (OSError, ValueError, KeyError):  # unreadable: a port with Kiboto's own file does not need it
+        return {}
+
+
 class ManagedHostNetwork(HostNetwork):
-    """A machine set up for Kiboto (managed.py): the address is Kiboto's to change. The rest follows later."""
+    """A machine set up for Kiboto (managed.py): its address, VLANs and packet sizes are Kiboto's."""
 
     managed = True
 
@@ -82,7 +97,7 @@ class ManagedHostNetwork(HostNetwork):
         return {
             "managed": True,
             "where": self.where(),
-            "can_change": {name: (can and name == "address") for name in SETTINGS},
+            "can_change": {name: (can and name in MANAGED_SETTINGS) for name in SETTINGS},
             # a change being tried, so a page opened in the middle shows it (root keeps its record)
             "trial": door.via("network.trial_status", managed.trial_status),
         }
@@ -90,9 +105,28 @@ class ManagedHostNetwork(HostNetwork):
     def apply(self, setting: str, target: str, changes: dict[str, Any]) -> dict[str, Any]:
         from backend.hardware.net import managed
 
-        if setting != "address" or not managed.networkd_runs():
+        if setting not in ("address", "vlan", "port") or not managed.networkd_runs():
             raise NotOnThisHost(setting, self.where())
         from backend import door
+
+        if setting == "vlan":
+            if changes.get("delete"):
+                return door.via("network.remove_vlan", managed.start_vlan_removal, name=target)
+            vlan_id = changes.get("vlan_id")
+            if not isinstance(vlan_id, int) or isinstance(vlan_id, bool):
+                raise ValueError("A VLAN number is between 1 and 4094.")
+            return door.via(
+                "network.try_vlan", managed.start_vlan_trial, parent=target, vlan_id=vlan_id, now=_address_now()
+            )
+        if setting == "port":
+            other = sorted(set(changes) - {"mtu"})
+            if other:  # speed and Wake-on-LAN are not Kiboto's here yet
+                raise NotOnThisHost(other[0], self.where())
+            if changes.get("mtu") is None:
+                return {"status": "ok"}
+            return door.via(
+                "network.try_mtu", managed.start_mtu_trial, port=target, mtu=int(changes["mtu"]), now=_address_now()
+            )
 
         # through the host door where it runs (ADR 0006)
         if "confirm" in changes:

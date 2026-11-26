@@ -155,19 +155,19 @@ def test_a_guest_reads_its_hosts_network_and_changes_none(tmp_path):
         there.apply("address", "", STATIC)
 
 
-def test_a_machine_of_its_own_lets_kiboto_change_the_address(box):
+def test_a_machine_of_its_own_lets_kiboto_change_the_address_vlans_and_packet_sizes(box):
     there = host.current_host()
     assert isinstance(there, host.ManagedHostNetwork)
     caps = there.capabilities()
     assert caps["managed"] is True and caps["where"] == "debian" and caps["trial"] is None
     assert caps["can_change"] == {
         "address": True,
-        "mtu": False,
+        "mtu": True,
         "speed": False,
         "wake_on_lan": False,
         "bond": False,
         "bridge": False,
-        "vlan": False,
+        "vlan": True,
     }
     with pytest.raises(host.NotOnThisHost, match="Debian's own network settings"):
         there.apply("bond", "bond0", {})

@@ -557,6 +557,11 @@ OPERATIONS: dict[str, Operation] = {
     # which checks every value); the trial's state is in the data folder, where the page reads it
     "network.try_address": Operation(_net("start_trial"), {"changes": MAP}),
     "network.try_bridge": Operation(_net("start_bridge_trial"), {"on": ON, "port": TEXT, "now": MAP}, max_len=32),
+    "network.try_vlan": Operation(
+        _net("start_vlan_trial"), {"parent": TEXT, "vlan_id": NUMBER, "now": MAP}, max_len=32
+    ),
+    "network.remove_vlan": Operation(_net("start_vlan_removal"), {"name": TEXT}, max_len=32),
+    "network.try_mtu": Operation(_net("start_mtu_trial"), {"port": TEXT, "mtu": NUMBER, "now": MAP}, max_len=32),
     "network.keep": Operation(_net("keep"), {"key": MAYBE_TEXT}, max_len=128),
     "network.go_back": Operation(_net("go_back"), {"key": MAYBE_TEXT}, max_len=128),
     "network.settle": Operation(_net("settle"), {}),

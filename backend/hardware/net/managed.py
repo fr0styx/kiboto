@@ -592,6 +592,154 @@ def start_bridge_trial(
     return _begin(files, [port], timeout, "", do, later)
 
 
+# --- VLANs and packet size: a port's other settings ----------------------------------------------
+MTU_RANGE = (576, 9216)  # IPv4's smallest a router must take, to jumbo frames
+
+
+def _port_settings(port: str, now: dict[str, Any] | None = None) -> str:
+    """The port's settings as a file of Kiboto's own: its file if Kiboto wrote one, else what the port
+    has now (an address from the router, or the fixed one the machine shows in `now`)."""
+    own = _text(file_for(port))
+    if own is not None:
+        return own
+    want = {"iface": port, "mode": mode_of(port), "address": "", "prefix": 0, "gateway": "", "dns": []}
+    if want["mode"] == "static":
+        now = now or {}
+        if not now.get("ip_address"):
+            raise ValueError(f"The address of {port} could not be read; set it on this page first.")
+        want.update(address=now["ip_address"], prefix=int(now.get("cidr") or 24), gateway=now.get("gateway") or "")
+        want["dns"] = [d for d in (now.get("dns1"), now.get("dns2")) if d]
+    return network_file(want)
+
+
+def _section_lines(text: str, section: str, key: str, values: list[str]) -> str:
+    """The file with every `key=` line of `section` replaced by one line per value (none: removed)."""
+    lines = text.rstrip("\n").split("\n")
+    out: list[str] = []
+    current, placed = "", False
+    for line in lines:
+        head = re.fullmatch(r"\[(\w+)\]", line.strip())
+        if head:
+            if current == section and not placed:
+                while out and not out[-1]:
+                    out.pop()
+                out += [f"{key}={v}" for v in values] + [""]
+                placed = True
+            current = head.group(1)
+            out.append(line)
+            continue
+        if current == section and line.startswith(f"{key}="):
+            continue
+        out.append(line)
+    if current == section and not placed:
+        out += [f"{key}={v}" for v in values]
+        placed = True
+    if not placed and values:
+        out += ["", f"[{section}]", *[f"{key}={v}" for v in values]]
+    return "\n".join(out).rstrip("\n") + "\n"
+
+
+def _vlans_of(text: str) -> list[str]:
+    return re.findall(r"^VLAN=(\S+)$", text or "", re.M)
+
+
+def vlan_link(parent: str, vlan_id: int) -> str:
+    name = f"{parent}.{vlan_id}"
+    if len(name) > 15:
+        raise ValueError(f"The name {name} is longer than Linux allows (15 characters).")
+    return name
+
+
+def start_vlan_trial(
+    parent: str,
+    vlan_id: int,
+    now: dict[str, Any] | None = None,
+    timeout: int = DEFAULT_TRIAL,
+    do: Run | None = None,
+    later: Callable[[float, Callable[[], None]], None] | None = None,
+) -> dict[str, Any]:
+    """A tagged sub-port (802.1Q) on a port, as a trial: the port keeps its address and names the
+    VLAN; the VLAN starts with no address (it is given one like any port, on this page)."""
+    if not networkd_runs(do):
+        raise RuntimeError("This machine's network is not run by systemd-networkd.")
+    if not is_a_port(parent) or "." in parent:
+        raise ValueError(f"{parent or 'That'} is not a network port a VLAN can be added to.")
+    if not isinstance(vlan_id, int) or isinstance(vlan_id, bool) or not 1 <= vlan_id <= 4094:
+        raise ValueError("A VLAN number is between 1 and 4094.")
+    name = vlan_link(parent, vlan_id)
+    if os.path.exists(os.path.join(SYS_NET, name)) or os.path.exists(netdev_for(name)):
+        raise ValueError(f"The VLAN {name} is already there.")
+    settings = _port_settings(parent, now)
+    if "Bridge=" in settings or "Bond=" in settings:
+        raise ValueError(f"{parent} belongs to a bridge or bond; add the VLAN to that instead.")
+    netdev = "\n".join(
+        [
+            f"# Written by Kiboto: VLAN {vlan_id} on {parent} (Network, This machine).",
+            "[NetDev]",
+            f"Name={name}",
+            "Kind=vlan",
+            "",
+            "[VLAN]",
+            f"Id={vlan_id}",
+            "",
+        ]
+    )
+    files: dict[str, str | None] = {
+        netdev_for(name): netdev,
+        file_for(name): (
+            f"# Written by Kiboto: VLAN {vlan_id} on {parent}, with no address of its own yet.\n"
+            f"[Match]\nName={name}\n\n[Network]\nLinkLocalAddressing=no\nConfigureWithoutCarrier=yes\n"
+        ),
+        file_for(parent): _section_lines(settings, "Network", "VLAN", sorted({*_vlans_of(settings), name})),
+    }
+    return _begin(files, [parent, name], timeout, "", do, later)
+
+
+def start_vlan_removal(
+    name: str,
+    timeout: int = DEFAULT_TRIAL,
+    do: Run | None = None,
+    later: Callable[[float, Callable[[], None]], None] | None = None,
+) -> dict[str, Any]:
+    """Takes away a VLAN Kiboto made, as a trial (the port it was on stays as it is)."""
+    if not networkd_runs(do):
+        raise RuntimeError("This machine's network is not run by systemd-networkd.")
+    netdev = _text(netdev_for(name)) if _IFACE.match(name or "") else None
+    if not netdev or "Kind=vlan" not in netdev:
+        raise ValueError(f"{name or 'That'} is not a VLAN Kiboto made.")
+    parent = name.rsplit(".", 1)[0]
+    settings = _text(file_for(parent)) or ""
+    files: dict[str, str | None] = {netdev_for(name): None, file_for(name): None}
+    if settings:
+        files[file_for(parent)] = _section_lines(
+            settings, "Network", "VLAN", [v for v in _vlans_of(settings) if v != name]
+        )
+    return _begin(files, [parent], timeout, "", do, later)
+
+
+def start_mtu_trial(
+    port: str,
+    mtu: int,
+    now: dict[str, Any] | None = None,
+    timeout: int = DEFAULT_TRIAL,
+    do: Run | None = None,
+    later: Callable[[float, Callable[[], None]], None] | None = None,
+) -> dict[str, Any]:
+    """A port's packet size (MTU), as a trial. The size it has already: nothing to try."""
+    if not networkd_runs(do):
+        raise RuntimeError("This machine's network is not run by systemd-networkd.")
+    if not is_a_port(port):
+        raise ValueError(f"{port or 'That'} is not a network port of this machine.")
+    if not isinstance(mtu, int) or isinstance(mtu, bool) or not MTU_RANGE[0] <= mtu <= MTU_RANGE[1]:
+        raise ValueError(f"The packet size is between {MTU_RANGE[0]} and {MTU_RANGE[1]} bytes.")
+    have = (_text(os.path.join(SYS_NET, port, "mtu")) or "").strip()
+    if have == str(mtu):
+        return {"status": "ok", "interface": port, "mtu": mtu, "changed": False}
+    settings = _port_settings(port, now)
+    files: dict[str, str | None] = {file_for(port): _section_lines(settings, "Link", "MTUBytes", [str(mtu)])}
+    return _begin(files, [port], timeout, "", do, later)
+
+
 def keep(key: str | None, do: Run | None = None) -> dict[str, Any]:
     """The trial's settings stay. `key` None is the administrator on the page that made the change."""
     do = do or run

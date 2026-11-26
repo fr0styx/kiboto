@@ -14,6 +14,8 @@ Apps: with Docker details on, the box next to a stack's name selects every conta
 
 Apps: how long an app has run or been stopped is shown in your language ("Started 9 minutes ago"), not as Docker's English text.
 
+Kiboto OS: VLANs and a port's packet size (MTU) can be set on the Network page. Each change is tried first and goes back by itself unless you keep it.
+
 #### Security
 
 Kiboto OS: when Kiboto hands files and folders in a shared folder to their people, a link put in their place over the network is never followed, so a system file's owner or rights can never be changed that way.
