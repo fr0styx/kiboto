@@ -834,7 +834,7 @@ jobs:
           case "$d" in sha256:*) ;; *) echo "::error::bad digest file"; exit 1;; esac
           echo "digest=$d" >> "$GITHUB_OUTPUT"
 
-      # The real update path, end to end: Stable and the two newest releases, each on fresh data
+      # The real update path, end to end: Stable and the newest releases before this one, each on fresh data
       # with an account and a backup job made through its own API, updated to this build by its
       # own update helper (data must survive), then to an image that can't start (must roll
       # back). Blocking, and run before any tag is published, so a build that breaks updating or
@@ -845,8 +845,12 @@ jobs:
           NEW="${{ env.IMAGE }}@${{ steps.build.outputs.digest }}"
           docker pull -q "$NEW"
           docker pull -q busybox:1.37.0 >/dev/null
+          # the three newest versions before this one: a tag's run never takes itself as a base, and
+          # a version whose release was never published has no image and is skipped, so two stay
+          THIS="${GITHUB_REF_NAME#v}"
           RECENT=$(git ls-remote --tags --refs "https://github.com/${{ github.repository }}" 'v*' \
-            | sed 's#.*refs/tags/v##' | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | sort -t. -k1,1n -k2,2n -k3,3n | tail -2)
+            | sed 's#.*refs/tags/v##' | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | grep -vxF "$THIS" \
+            | sort -t. -k1,1n -k2,2n -k3,3n | tail -3)
           i=0
           started=""
           for tag in latest $RECENT; do
