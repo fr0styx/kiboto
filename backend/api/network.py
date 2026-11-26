@@ -258,6 +258,12 @@ async def update_bond_config_endpoint(bond_name: str, req: BondConfigUpdateReque
     return await asyncio.to_thread(_change, "bond", bond_name, req.model_dump(exclude_unset=True))
 
 
+@router.delete("/network/bond/{bond_name}", dependencies=[Depends(require_scope("system:config"))])
+async def delete_bond_endpoint(bond_name: str):
+    """Take a bond apart: only on a host Kiboto manages (409 not_on_this_host elsewhere)."""
+    return await asyncio.to_thread(_change, "bond", bond_name, {"delete": True})
+
+
 @router.get("/network/bridge/{br_name}", dependencies=[Depends(require_scope("system:view", "system:config"))])
 async def get_bridge_config_endpoint(br_name: str):
     """Retrieve configuration, STP state, forward delay, and members for a virtual bridge."""

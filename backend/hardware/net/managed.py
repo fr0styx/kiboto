@@ -513,13 +513,14 @@ def _mac(iface: str) -> str:
     return mac if re.fullmatch(r"[0-9a-f]{2}(:[0-9a-f]{2}){5}", mac) else ""
 
 
-def _address_settings_of(port: str, now: dict[str, Any]) -> str:
-    """The [Network] settings the port has now, as a file for the bridge: Kiboto's own file if there
-    is one, else what the machine shows (`now`: an address from the router, or the fixed one it has)."""
+def _address_settings_of(port: str, now: dict[str, Any], to: str = BRIDGE) -> str:
+    """The [Network] settings the port has now, as a file for the bridge (or bond `to`): Kiboto's own
+    file if there is one, else what the machine shows (`now`: an address from the router, or the fixed
+    one it has)."""
     own = _text(file_for(port))
-    if own and "Bridge=" not in own:
-        return re.sub(r"^Name=\S+$", f"Name={BRIDGE}", own, count=1, flags=re.M)
-    want = {"iface": BRIDGE, "mode": mode_of(port), "address": "", "prefix": 0, "gateway": "", "dns": []}
+    if own and "Bridge=" not in own and "Bond=" not in own:
+        return re.sub(r"^Name=\S+$", f"Name={to}", own, count=1, flags=re.M)
+    want = {"iface": to, "mode": mode_of(port), "address": "", "prefix": 0, "gateway": "", "dns": []}
     if want["mode"] == "static":
         if not now.get("ip_address"):
             raise ValueError("The address of this machine could not be read, so it cannot be moved to a bridge.")
@@ -738,6 +739,120 @@ def start_mtu_trial(
     settings = _port_settings(port, now)
     files: dict[str, str | None] = {file_for(port): _section_lines(settings, "Link", "MTUBytes", [str(mtu)])}
     return _begin(files, [port], timeout, "", do, later)
+
+
+# --- a bond: ports as one --------------------------------------------------------------------------
+BOND = "bond0"
+# the page's numbers (Linux's bonding modes) and networkd's names
+BOND_MODES = {"0": "balance-rr", "1": "active-backup", "2": "balance-xor", "4": "802.3ad", "6": "balance-alb"}
+
+
+def bond_status() -> dict[str, Any]:
+    """Whether Kiboto's bond is there, and which ports it holds (the first carried the address)."""
+    netdev = _text(netdev_for(BOND))
+    members = []
+    for name in sorted(os.listdir(DIR)) if os.path.isdir(DIR) else []:
+        text = _text(os.path.join(DIR, name)) or ""
+        if name.startswith(PREFIX) and name.endswith(".network") and f"Bond={BOND}" in text:
+            found = re.search(r"^Name=(\S+)", text, re.M)
+            if found:
+                members.append(found.group(1))
+    first = re.search(r"^# first: (\S+)$", netdev or "", re.M)
+    return {"on": netdev is not None, "members": members, "first": first.group(1) if first else "", "name": BOND}
+
+
+def start_bond_trial(
+    members: list[str],
+    mode: str = "1",
+    miimon: int = 100,
+    now: dict[str, Any] | None = None,
+    timeout: int = DEFAULT_TRIAL,
+    do: Run | None = None,
+    later: Callable[[float, Callable[[], None]], None] | None = None,
+) -> dict[str, Any]:
+    """Two or more ports as one (bond0), as a trial: the address of the port the machine is reached on
+    (else the first listed) moves to the bond, with that port's hardware address, so the router hands
+    out the same one. A bond that is there already gets the new ports and mode."""
+    if not networkd_runs(do):
+        raise RuntimeError("This machine's network is not run by systemd-networkd.")
+    members = [str(m) for m in members] if isinstance(members, list) else []
+    if len(members) < 2 or len(set(members)) != len(members):
+        raise ValueError("A bond needs two or more different ports.")
+    for port in members:
+        if not is_a_port(port) or "." in port or port in (BOND, BRIDGE):
+            raise ValueError(f"{port or 'That'} is not a network port that can join a bond.")
+        settings = _text(file_for(port)) or ""
+        if "Bridge=" in settings or "VLAN=" in settings:
+            raise ValueError(f"{port} carries a bridge or VLANs; take those away first.")
+    if str(mode) not in BOND_MODES:
+        raise ValueError("Choose one of the bonding modes offered.")
+    if not isinstance(miimon, int) or isinstance(miimon, bool) or not 10 <= miimon <= 1000:
+        raise ValueError("The link check runs every 10 to 1000 milliseconds.")
+    if bridge_status()["on"]:
+        raise ValueError("Take the bridge for virtual machines away first; a bond and that bridge do not mix yet.")
+    there = bond_status()
+    # the port the machine is reached on carries on as the bond's first: its address and hardware address
+    main = str((now or {}).get("interface") or "")
+    first = there["first"] if there["on"] and there["first"] in members else (main if main in members else members[0])
+    mac = _mac(first)
+    netdev = "\n".join(
+        [
+            "# Written by Kiboto: ports as one (Network, This machine).",
+            f"# first: {first}",
+            "[NetDev]",
+            f"Name={BOND}",
+            "Kind=bond",
+            *([f"MACAddress={mac}"] if mac else []),
+            "",
+            "[Bond]",
+            f"Mode={BOND_MODES[str(mode)]}",
+            f"MIIMonitorSec={miimon}ms",
+            *(["LACPTransmitRate=fast"] if str(mode) == "4" else []),
+            "",
+        ]
+    )
+    files: dict[str, str | None] = {netdev_for(BOND): netdev}
+    if not there["on"]:
+        files[file_for(BOND)] = _address_settings_of(first, now or {}, to=BOND)
+    for port in members:
+        # the port that had the address is the one used while it has a link (active-backup)
+        primary = "PrimarySlave=true\n" if port == first else ""
+        files[file_for(port)] = (
+            f"# Written by Kiboto: this port belongs to the bond {BOND}.\n[Match]\nName={port}\n\n[Network]\nBond={BOND}\n{primary}"
+        )
+    for port in there["members"]:
+        if port not in members:  # left the bond: back on an address from the router
+            files[file_for(port)] = None
+    return _begin(files, [*members, BOND], timeout, "", do, later)
+
+
+def start_bond_removal(
+    timeout: int = DEFAULT_TRIAL,
+    do: Run | None = None,
+    later: Callable[[float, Callable[[], None]], None] | None = None,
+) -> dict[str, Any]:
+    """Takes Kiboto's bond apart, as a trial: its address goes back to the port that had it first,
+    and the other ports get an address from the router again."""
+    if not networkd_runs(do):
+        raise RuntimeError("This machine's network is not run by systemd-networkd.")
+    there = bond_status()
+    if not there["on"]:
+        raise ValueError("There is no bond of Kiboto's to take apart.")
+    first = there["first"] or (there["members"][0] if there["members"] else "")
+    if not first:
+        raise ValueError("The bond's ports could not be found.")
+    settings = _text(file_for(BOND)) or network_file(
+        {"iface": first, "mode": "dhcp", "address": "", "prefix": 0, "gateway": "", "dns": []}
+    )
+    files: dict[str, str | None] = {
+        file_for(first): re.sub(rf"^Name={BOND}$", f"Name={first}", settings, count=1, flags=re.M),
+        file_for(BOND): None,
+        netdev_for(BOND): None,
+    }
+    for port in there["members"]:
+        if port != first:
+            files[file_for(port)] = None
+    return _begin(files, [first, *[p for p in there["members"] if p != first]], timeout, "", do, later)
 
 
 def keep(key: str | None, do: Run | None = None) -> dict[str, Any]:

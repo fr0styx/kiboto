@@ -67,9 +67,9 @@ class HostNetwork:
         raise NotOnThisHost(setting, self.where())
 
 
-# what a machine set up for Kiboto changes itself, each as a trial (managed.py); bonds, speed and
-# Wake-on-LAN follow later
-MANAGED_SETTINGS = ("address", "vlan", "mtu")
+# what a machine set up for Kiboto changes itself, each as a trial (managed.py); speed and Wake-on-LAN
+# follow later
+MANAGED_SETTINGS = ("address", "vlan", "mtu", "bond")
 
 
 def _address_now() -> dict[str, Any]:
@@ -83,7 +83,7 @@ def _address_now() -> dict[str, Any]:
 
 
 class ManagedHostNetwork(HostNetwork):
-    """A machine set up for Kiboto (managed.py): its address, VLANs and packet sizes are Kiboto's."""
+    """A machine set up for Kiboto (managed.py): its address, VLANs, packet sizes and bond are Kiboto's."""
 
     managed = True
 
@@ -105,7 +105,7 @@ class ManagedHostNetwork(HostNetwork):
     def apply(self, setting: str, target: str, changes: dict[str, Any]) -> dict[str, Any]:
         from backend.hardware.net import managed
 
-        if setting not in ("address", "vlan", "port") or not managed.networkd_runs():
+        if setting not in ("address", "vlan", "port", "bond") or not managed.networkd_runs():
             raise NotOnThisHost(setting, self.where())
         from backend import door
 
@@ -117,6 +117,20 @@ class ManagedHostNetwork(HostNetwork):
                 raise ValueError("A VLAN number is between 1 and 4094.")
             return door.via(
                 "network.try_vlan", managed.start_vlan_trial, parent=target, vlan_id=vlan_id, now=_address_now()
+            )
+        if setting == "bond":
+            if target != managed.BOND:
+                raise ValueError(f"Kiboto makes one bond here, {managed.BOND}.")
+            if changes.get("delete"):
+                return door.via("network.remove_bond", managed.start_bond_removal)
+            miimon = changes.get("miimon")
+            return door.via(
+                "network.try_bond",
+                managed.start_bond_trial,
+                members=list(changes.get("slaves") or []),
+                mode=str(changes.get("mode") or "1"),
+                miimon=miimon if isinstance(miimon, int) and not isinstance(miimon, bool) else 100,
+                now=_address_now(),
             )
         if setting == "port":
             other = sorted(set(changes) - {"mtu"})

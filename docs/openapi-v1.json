@@ -61500,6 +61500,50 @@
    }
   },
   "/api/v1/network/bond/{bond_name}": {
+   "delete": {
+    "description": "Take a bond apart: only on a host Kiboto manages (409 not_on_this_host elsewhere).",
+    "operationId": "delete_bond_endpoint_api_v1_network_bond__bond_name__delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "bond_name",
+      "required": true,
+      "schema": {
+       "title": "Bond Name",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "404": {
+      "$ref": "#/components/responses/NotFound"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Delete Bond Endpoint",
+    "tags": [
+     "Network & Switching"
+    ],
+    "x-required-scopes": [
+     "system:config"
+    ]
+   },
    "get": {
     "description": "Retrieve configuration, operational mode, active slave, and candidates for a bonding group.",
     "operationId": "get_bond_config_endpoint_api_v1_network_bond__bond_name__get",

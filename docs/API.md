@@ -38,7 +38,7 @@ request and response schemas.
 
 <!-- BEGIN generated endpoints: python scripts/api_reference.py --update -->
 
-835 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
+836 operations. **Access** is what the session or token needs: `public` needs nothing, `signed in` any valid session or token, otherwise one of the listed scopes. ⏱ marks operations that can answer 429.
 
 ### AI Conversation History
 
@@ -487,6 +487,7 @@ request and response schemas.
 
 | Method | Path | Access | What it does |
 | :--- | :--- | :--- | :--- |
+| `DELETE` | `/api/v1/network/bond/{bond_name}` | `system:config` | Take a bond apart: only on a host Kiboto manages (409 not_on_this_host elsewhere) |
 | `GET` | `/api/v1/network/bond/{bond_name}` | any of `system:view`, `system:config` | Retrieve configuration, operational mode, active slave, and candidates for a bonding group |
 | `POST` | `/api/v1/network/bond/{bond_name}` | `system:config` | Change a bond: only on a host Kiboto manages (409 not_on_this_host elsewhere) |
 | `GET` | `/api/v1/network/bridge/{br_name}` | any of `system:view`, `system:config` | Retrieve configuration, STP state, forward delay, and members for a virtual bridge |

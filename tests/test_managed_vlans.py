@@ -144,14 +144,14 @@ def test_a_packet_size_is_a_trial_and_the_size_it_has_is_nothing_to_try(box):
     assert net(box, "05-kiboto-enp1s0.network") == STATIC
 
 
-def test_the_page_may_change_vlans_and_packet_sizes_here_and_nothing_else_new(box, monkeypatch):
+def test_the_page_may_change_vlans_packet_sizes_and_the_bond_here(box, monkeypatch):
     caps = host.ManagedHostNetwork().capabilities()["can_change"]
     assert caps == {
         "address": True,
         "mtu": True,
         "speed": False,
         "wake_on_lan": False,
-        "bond": False,
+        "bond": True,
         "bridge": False,
         "vlan": True,
     }
@@ -168,6 +168,88 @@ def test_the_page_may_change_vlans_and_packet_sizes_here_and_nothing_else_new(bo
     with pytest.raises(host.NotOnThisHost):
         h.apply("port", "enp1s0", {"mtu": 9000, "wol_enabled": True})
     with pytest.raises(host.NotOnThisHost):
-        h.apply("bond", "bond0", {"mode": "1", "slaves": ["enp1s0"]})
+        h.apply("bridge", "br0", {"members": ["enp1s0"]})
     with pytest.raises(ValueError, match="between 1 and 4094"):
         h.apply("vlan", "enp1s0", {"vlan_id": "20"})
+
+
+def second_port(box):
+    port = box.root / "sys" / "enp2s0"
+    port.mkdir(parents=True, exist_ok=True)
+    (port / "address").write_text("52:54:00:12:34:57\n")
+    (port / "mtu").write_text("1500\n")
+
+
+def test_a_bond_takes_the_first_ports_address_and_hardware_address(box):
+    second_port(box)
+    (box.root / "network" / "05-kiboto-enp1s0.network").write_text(STATIC)
+    answer = managed.start_bond_trial(["enp1s0", "enp2s0"], "1", 100)
+    assert answer["status"] == "trial"
+    box.a_moment_passes()
+    netdev = net(box, "05-kiboto-bond0.netdev")
+    assert "Kind=bond\nMACAddress=52:54:00:12:34:56" in netdev and "Mode=active-backup" in netdev
+    assert "MIIMonitorSec=100ms" in netdev and "# first: enp1s0" in netdev
+    assert net(box, "05-kiboto-bond0.network") == STATIC.replace("Name=enp1s0", "Name=bond0")
+    assert net(box, "05-kiboto-enp1s0.network").endswith("Name=enp1s0\n\n[Network]\nBond=bond0\nPrimarySlave=true\n")
+    assert net(box, "05-kiboto-enp2s0.network").endswith("Name=enp2s0\n\n[Network]\nBond=bond0\n")
+    assert managed.bond_status() == {"on": True, "members": ["enp1s0", "enp2s0"], "first": "enp1s0", "name": "bond0"}
+    managed.keep(None)
+    # taken apart: the address back on the first port, the other back on the router's address
+    managed.start_bond_removal()
+    box.a_moment_passes()
+    assert net(box, "05-kiboto-enp1s0.network") == STATIC
+    assert net(box, "05-kiboto-enp2s0.network") is None and net(box, "05-kiboto-bond0.netdev") is None
+    assert ["ip", "link", "delete", "bond0"] in box.seen
+
+
+def test_802_3ad_asks_the_switch_quickly_and_going_back_undoes_a_bond(box):
+    second_port(box)
+    (box.root / "network" / "05-kiboto-enp1s0.network").write_text(STATIC)
+    managed.start_bond_trial(["enp1s0", "enp2s0"], "4", 200)
+    box.a_moment_passes()
+    assert "Mode=802.3ad\nMIIMonitorSec=200ms\nLACPTransmitRate=fast" in net(box, "05-kiboto-bond0.netdev")
+    managed.go_back(None)
+    assert net(box, "05-kiboto-enp1s0.network") == STATIC and net(box, "05-kiboto-bond0.netdev") is None
+
+
+def test_what_a_bond_cannot_be(box):
+    second_port(box)
+    for members, mode, miimon, said in [
+        (["enp1s0"], "1", 100, "two or more"),
+        (["enp1s0", "enp1s0"], "1", 100, "two or more"),
+        (["enp1s0", "eth9"], "1", 100, "cannot join a bond|can join a bond"),
+        (["enp1s0", "enp2s0"], "3", 100, "bonding modes"),
+        (["enp1s0", "enp2s0"], "1", 5, "10 to 1000"),
+        ("enp1s0", "1", 100, "two or more"),
+    ]:
+        with pytest.raises(ValueError, match=said):
+            managed.start_bond_trial(members, mode, miimon)
+    (box.root / "network" / "05-kiboto-enp1s0.network").write_text(STATIC + "VLAN=enp1s0.20\n")
+    with pytest.raises(ValueError, match="bridge or VLANs"):
+        managed.start_bond_trial(["enp1s0", "enp2s0"])
+    with pytest.raises(ValueError, match="no bond"):
+        managed.start_bond_removal()
+    assert not any(c[0] == "systemd-run" for c in box.seen)
+
+
+def test_the_page_makes_one_bond_here(box):
+    second_port(box)
+    (box.root / "network" / "05-kiboto-enp1s0.network").write_text(STATIC)
+    h = host.ManagedHostNetwork()
+    assert h.capabilities()["can_change"]["bond"] is True
+    with pytest.raises(ValueError, match="one bond here, bond0"):
+        h.apply("bond", "bond1", {"mode": "1", "slaves": ["enp1s0", "enp2s0"]})
+    assert h.apply("bond", "bond0", {"mode": "1", "slaves": ["enp1s0", "enp2s0"], "miimon": 100})["status"] == "trial"
+    box.a_moment_passes()
+    managed.keep(None)
+    assert h.apply("bond", "bond0", {"delete": True})["status"] == "trial"
+
+
+def test_the_port_the_machine_is_reached_on_leads_the_bond(box):
+    second_port(box)
+    managed.start_bond_trial(["enp1s0", "enp2s0"], "1", 100, now={"interface": "enp2s0"})
+    box.a_moment_passes()
+    assert "# first: enp2s0" in net(box, "05-kiboto-bond0.netdev")
+    assert "MACAddress=52:54:00:12:34:57" in net(box, "05-kiboto-bond0.netdev")
+    assert "PrimarySlave=true" in net(box, "05-kiboto-enp2s0.network")
+    assert "PrimarySlave" not in net(box, "05-kiboto-enp1s0.network")

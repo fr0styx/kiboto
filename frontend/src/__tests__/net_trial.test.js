@@ -136,4 +136,42 @@ describe('the trial of new address settings', () => {
     expect(document.querySelectorAll('#net-trial-overlay')).toHaveLength(1);
     expect(toast.showToast).not.toHaveBeenCalledWith('Saved!', 'success');
   });
+
+  it('a machine of its own offers to make a bond, and to take it apart as a trial', async () => {
+    document.body.innerHTML =
+      '<div id="network-bridges-container"></div><div id="network-bond-config-overlay" style="display:none"></div>';
+    const topo = (bonds) => ({
+      status: 'ok',
+      summary: {},
+      physical_interfaces: [],
+      bonds,
+      bridges: [],
+      docker_networks: [],
+      host: { managed: true, where: 'debian', can_change: { address: true, bond: true }, trial: null },
+    });
+    const get = vi.spyOn(api, 'get').mockResolvedValue(topo([]));
+    await net.fetchAndRenderNetworkTopology();
+    await flush();
+    const make = el('btn-net-make-bond');
+    expect(make.textContent).toBe('Make a bond');
+    make.click();
+    await flush();
+    expect(get).toHaveBeenCalledWith('/api/network/bond/bond0');
+
+    get.mockResolvedValue(topo([{ name: 'bond0', mode: '1', slaves: ['enp1s0', 'enp2s0'], active_slave: 'enp1s0' }]));
+    await net.fetchAndRenderNetworkTopology();
+    await flush();
+    expect(document.getElementById('btn-net-make-bond')).toBeNull(); // one bond here
+    const del = vi
+      .spyOn(api, 'delete')
+      .mockResolvedValue({ status: 'trial', canary_id: KEY, timeout_sec: 60, url: '' });
+    /** @type {HTMLButtonElement} */ (document.querySelector('.btn-remove-bond')).click();
+    const [title, , confirm] = /** @type {any} */ (toast.showConfirmToast).mock.calls.at(-1);
+    expect(title).toBe('Take the bond apart?');
+    await confirm();
+    await flush();
+    await new Promise((r) => setTimeout(r, 0));
+    expect(del).toHaveBeenCalledWith('/api/network/bond/bond0');
+    expect(document.querySelectorAll('#net-trial-overlay')).toHaveLength(1);
+  });
 });

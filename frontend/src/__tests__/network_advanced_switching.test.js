@@ -179,6 +179,26 @@ describe('Tier 3: Advanced Virtual Switching, Bonding & 802.1Q VLAN Tagging', ()
       expect(document.getElementById('network-bond-config-overlay').style.display).toBe('none');
     });
 
+    it('on a machine Kiboto runs, a bond is a trial: keep it or go back', async () => {
+      vi.spyOn(api, 'get').mockResolvedValue(mockBondData);
+      vi.spyOn(api, 'post').mockResolvedValueOnce({
+        status: 'trial',
+        canary_id: 'b'.repeat(24),
+        timeout_sec: 60,
+        url: '',
+      });
+      const toastSpy = vi.spyOn(toast, 'showToast').mockImplementation(() => {});
+
+      await openBondConfigModal('bond0');
+      document.querySelectorAll('.net-bond-slave-checkbox').forEach((cb) => {
+        cb.checked = true;
+      });
+      await saveBondConfig();
+      await vi.waitFor(() => expect(document.getElementById('net-trial-title')).not.toBeNull());
+      expect(toastSpy).not.toHaveBeenCalledWith(expect.stringContaining('successfully'), 'success');
+      document.querySelectorAll('.smart-modal-backdrop').forEach((el) => el.remove());
+    });
+
     it('prevents saving bond with zero selected slaves', async () => {
       vi.spyOn(api, 'get').mockResolvedValueOnce(mockBondData);
       const postSpy = vi.spyOn(api, 'post');

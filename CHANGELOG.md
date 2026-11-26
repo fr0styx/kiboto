@@ -16,6 +16,8 @@ Apps: how long an app has run or been stopped is shown in your language ("Starte
 
 Kiboto OS: VLANs and a port's packet size (MTU) can be set on the Network page. Each change is tried first and goes back by itself unless you keep it.
 
+Kiboto OS: two or more network ports can be bonded into one on the Network page, so a failed cable or switch port does not cut the machine off. Like other network changes it is tried first and goes back by itself unless you keep it.
+
 #### Security
 
 Kiboto OS: when Kiboto hands files and folders in a shared folder to their people, a link put in their place over the network is never followed, so a system file's owner or rights can never be changed that way.

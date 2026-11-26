@@ -165,12 +165,12 @@ def test_a_machine_of_its_own_lets_kiboto_change_the_address_vlans_and_packet_si
         "mtu": True,
         "speed": False,
         "wake_on_lan": False,
-        "bond": False,
+        "bond": True,
         "bridge": False,
         "vlan": True,
     }
     with pytest.raises(host.NotOnThisHost, match="Debian's own network settings"):
-        there.apply("bond", "bond0", {})
+        there.apply("bridge", "br0", {})
 
 
 def test_a_machine_whose_network_something_else_runs_is_left_alone(box):

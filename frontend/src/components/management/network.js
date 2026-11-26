@@ -526,6 +526,7 @@ async function loadNetworkTopology() {
                 <span class="nw-xs-muted-mono-2">${b.miimon || 100}ms</span>
               </div>
               <button class="btn-pill-toggle btn-config-bond is-small" data-bond="${escapeHtml(b.name)}" style="color: var(--lt-ink-brand, var(--accent-cyan-hi, #4fd8c4)); border-color: rgba(79,216,196,0.3);">${t('net.configure_bond', 'Configure')}</button>
+              ${canChange('bond') ? `<button class="btn-pill-toggle btn-remove-bond is-small" data-bond="${escapeHtml(b.name)}">${escapeHtml(t('net.take_apart_bond', 'Take apart'))}</button>` : ''}
             </div>
             <div class="nw-xs-muted-2">${t('net.active_port', 'Active port:')} <strong style="color:var(--ok2, #3bf58b);">${escapeHtml(b.active_slave || t('ci.none', 'None'))}</strong></div>
             <div class="network-bridge-members">
@@ -534,6 +535,18 @@ async function loadNetworkTopology() {
           </div>
         `);
       });
+
+      // on a machine Kiboto runs: two or more ports as one, tried first like an address change
+      if (canChange('bond') && !bonds.length) {
+        items.push(`
+          <div class="network-bridge-card">
+            <div class="network-bridge-header">
+              <span class="nw-xs-muted-2">${escapeHtml(t('net.make_bond_hint', 'Two or more ports as one: if a cable or switch port fails, the others carry on.'))}</span>
+              <button class="btn-pill-toggle is-small" id="btn-net-make-bond">${escapeHtml(t('net.make_bond', 'Make a bond'))}</button>
+            </div>
+          </div>
+        `);
+      }
 
       bridgesContainer.innerHTML =
         items.length > 0
@@ -545,6 +558,16 @@ async function loadNetworkTopology() {
           e.stopPropagation();
           const br = btn.dataset.bridge;
           if (br) openBridgeConfigModal(br);
+        });
+      });
+
+      bridgesContainer
+        .querySelector('#btn-net-make-bond')
+        ?.addEventListener('click', () => openBondConfigModal('bond0'));
+      bridgesContainer.querySelectorAll('.btn-remove-bond').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          takeBondApart(btn.dataset.bond || 'bond0');
         });
       });
 
@@ -1176,13 +1199,15 @@ export async function saveBondConfig() {
   }
 
   try {
-    await api.post(`/api/network/bond/${encodeURIComponent(_currentBondName)}`, {
+    const res = await api.post(`/api/network/bond/${encodeURIComponent(_currentBondName)}`, {
       mode,
       slaves,
       miimon,
     });
-    showToast(t('net.bond_saved_toast', 'Bonding configuration saved successfully'), 'success');
     closeBondConfigModal();
+    // on a machine Kiboto runs, a bond is a trial: keep it or go back
+    if (res?.status === 'trial') showTrial(res);
+    else showToast(t('net.bond_saved_toast', 'Bonding configuration saved successfully'), 'success');
     fetchAndRenderNetworkTopology();
   } catch (err) {
     showToast(err.message || 'Failed to save bond configuration', 'error');
@@ -1192,6 +1217,26 @@ export async function saveBondConfig() {
       saveBtn.textContent = t('net.save_bond_btn', 'Save Bonding Config');
     }
   }
+}
+
+/** Takes Kiboto's bond apart (a trial): its address goes back to the port that had it first. */
+export function takeBondApart(bondName) {
+  showConfirmToast(
+    t('net.take_apart_title', 'Take the bond apart?'),
+    t(
+      'net.take_apart_text',
+      'Its address goes back to the port that had it first; the other ports get an address from the router again. It is tried first and goes back by itself unless you keep it.'
+    ),
+    async () => {
+      try {
+        const res = await api.delete(`/api/network/bond/${encodeURIComponent(bondName)}`);
+        if (res?.status === 'trial') showTrial(res);
+        fetchAndRenderNetworkTopology();
+      } catch (err) {
+        showToast(err.message || String(err), 'error');
+      }
+    }
+  );
 }
 
 export async function openBridgeConfigModal(brName) {
