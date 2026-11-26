@@ -836,9 +836,22 @@ jobs:
           case "$d" in sha256:*) ;; *) echo "::error::bad digest file"; exit 1;; esac
           sh scripts/smoke_test.sh "${{ env.IMAGE }}@$d" linux/arm64 18083 180
 
+  # Kiboto OS installed for real, from the build this run made: a fresh Debian 13 virtual machine
+  # on the runner, the install script, then a look at the machine before and after a restart
+  # (.github/workflows/os-install.yml, scripts/os_install_check.sh). The other tests about Kiboto OS
+  # read its scripts as text, and a change that broke every fresh install passed them on
+  # 25 November 2026. A build Kiboto OS cannot be installed from is not signed, tagged or deployed.
+  os-install:
+    name: Kiboto OS
+    needs: [build-image]
+    permissions:
+      contents: read
+      packages: read # the image is pulled by its digest
+    uses: ./.github/workflows/os-install.yml
+
   publish:
     name: Sign & publish image tags (${{ matrix.variant }})
-    needs: [lint, lint-and-test, unit-debian13, storage-real, frontend, e2e-integration, still-latest, build-image, check-image, update-test, smoke-arm64]
+    needs: [lint, lint-and-test, unit-debian13, storage-real, frontend, e2e-integration, still-latest, build-image, check-image, update-test, smoke-arm64, os-install]
     strategy:
       fail-fast: false
       matrix:

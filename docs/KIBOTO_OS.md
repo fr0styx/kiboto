@@ -6,7 +6,8 @@ Debian 13, which keeps doing what it does (boot, drivers, its own updates with `
 
 Kiboto OS is in beta. It is tested on its reference box and on a Debian 13 virtual machine with
 real disks handed to it, not yet on a range of real hardware. Use it on a machine whose disks hold
-nothing you need.
+nothing you need. Every build is also installed in a fresh Debian 13 virtual machine, and looked at
+before and after a restart, before it is signed or published.
 
 What it can do today, beside what Kiboto Companion (the container) can do, is in the
 [feature list](FEATURES.md).

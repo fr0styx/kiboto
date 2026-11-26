@@ -105,3 +105,18 @@ def test_the_workflow_runs_it_for_one_of_kibotos_own_builds_only():
     for step in steps:
         if "uses" in step:
             assert re.search(r"@[0-9a-f]{40}$", step["uses"]), step["uses"]  # pinned by commit
+
+
+def test_no_build_is_signed_or_tagged_unless_kiboto_os_installs_from_it():
+    with open(os.path.join(ROOT, ".github", "workflows", "ci.yml"), encoding="utf-8") as f:
+        jobs = yaml.safe_load(f)["jobs"]
+    job = jobs["os-install"]
+    assert job["uses"] == "./.github/workflows/os-install.yml" and job["needs"] == ["build-image"]
+    assert "if" not in job and "continue-on-error" not in str(job)
+    assert "with" not in job  # no build named: it installs the one this run built
+    assert job["permissions"] == {"contents": "read", "packages": "read"}
+    assert "os-install" in jobs["publish"]["needs"]
+    # and the workflow takes that build from the run when it is given none
+    steps = _workflow()["jobs"]["install"]["steps"]
+    fetch = next(s for s in steps if s.get("name") == "Download the digest")
+    assert fetch["if"] == "inputs.image == ''" and fetch["with"]["name"] == "digest-full"

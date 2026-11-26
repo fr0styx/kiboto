@@ -35,7 +35,9 @@ Each tag also exists with `-core` for the core image.
    `backend/services/catalog_digests.json`), then update `CHANGELOG.md` and the version, commit, and push a tag such as `v2.0.7`. Only
    repository admins can create `v*` tags, and tags can't be moved or deleted (GitHub
    rulesets).
-2. CI builds, scans and tests the images, then waits for the owner's approval (the `release`
+2. CI builds, scans and tests the images, and installs Kiboto OS from the build in a fresh
+   Debian 13 virtual machine (`scripts/os_install_check.sh`, which also runs by hand: Actions,
+   **Kiboto OS install check**, with a build's digest). Then it waits for the owner's approval (the `release`
    environment: Actions, the run, **Review deployments**). Once approved it signs them for the
    tag and publishes `:beta` and `:2.0.7`. The GitHub release is created as a pre-release named
    "… (beta)". A machine Kiboto runs installs only images signed for a version tag, so a push

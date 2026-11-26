@@ -172,6 +172,8 @@ The compose files, the Unraid templates and the guides now use the image name `g
 
 The guides name the two editions, Kiboto Companion (the container) and Kiboto OS, and call the connection to Unraid's or TrueNAS's API "the API link" instead of "companion mode".
 
+Every build is now installed as Kiboto OS in a fresh Debian 13 virtual machine, and checked before and after a restart, before it is signed or published.
+
 ## v2.0.6 (2026-11-23)
 ### 🖥️ Kiboto on a machine of its own (preview), with its settings kept safe on every pool
 
