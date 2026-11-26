@@ -204,7 +204,7 @@ export function initContainersManager() {
               <button class="btn-bulk-action" data-bulk="stop" title="${t('ui.stop_selected_containers', 'Stop selected containers')}" data-i18n-title="ui.stop_selected_containers">${ico('⏹')} ${t('stk.stop', 'Stop')}</button>
               <button class="btn-bulk-action" data-bulk="restart" title="${t('ui.restart_selected_containers', 'Restart selected containers')}" data-i18n-title="ui.restart_selected_containers">${ico('🔄')} ${t('vmm.restart', 'Restart')}</button>
               <button class="btn-bulk-action" data-bulk="pause" title="${t('ui.pause_selected_containers', 'Pause selected containers')}" data-i18n-title="ui.pause_selected_containers">${ico('⏸')} ${t('cw.pause', 'Pause')}</button>
-              <button class="btn-bulk-action" data-bulk="unpause" title="${t('ui.resume_selected_containers', 'Resume selected containers')}" data-i18n-title="ui.resume_selected_containers">${ico('⏵')} ${t('cw.resume', 'Resume')}</button>
+              <button class="btn-bulk-action" data-bulk="unpause" title="${t('ui.resume_selected_containers', 'Resume selected containers')}" data-i18n-title="ui.resume_selected_containers">${ico('▶')} ${t('cw.resume', 'Resume')}</button>
               <button class="btn-bulk-action btn-bulk-delete" data-bulk="delete" title="${t('ui.delete_selected_containers', 'Delete selected containers')}" data-i18n-title="ui.delete_selected_containers">${ico('🗑️')} ${t('vm.delete', 'Delete')}</button>
               <button class="btn-bulk-action btn-bulk-cancel" data-bulk="cancel" title="${t('ui.deselect_all', 'Deselect all')}" data-i18n-title="ui.deselect_all">✕</button>
             </div>
@@ -1066,7 +1066,56 @@ export function withStackHeads(list) {
 
 function updateCwStackHead(tr, item) {
   const th = tr.firstElementChild;
-  if (th) th.textContent = item.__stack || t('apps.other_apps', 'Other apps');
+  if (!th) return;
+  const name = item.__stack || t('apps.other_apps', 'Other apps');
+  let box = /** @type {HTMLInputElement|null} */ (th.querySelector('.cw-stack-select'));
+  if (!box) {
+    th.textContent = '';
+    const label = document.createElement('label');
+    label.className = 'cw-stack-label';
+    box = document.createElement('input');
+    box.type = 'checkbox';
+    box.className = 'cw-stack-select';
+    const span = document.createElement('span');
+    span.className = 'cw-stack-name';
+    label.append(box, span);
+    th.append(label);
+  }
+  box.dataset.stack = item.__stack || '';
+  box.setAttribute('aria-label', t('apps.select_stack', 'Select everything in {stack}', { stack: name }));
+  const span = th.querySelector('.cw-stack-name');
+  if (span) span.textContent = name;
+  syncCwStackBox(box);
+}
+
+/** The ids of the shown containers in one stack ('' = the apps in no stack). */
+function cwStackIds(stack) {
+  return _cwFilteredList.filter((c) => c && !c.__stack && (c.stack || '') === stack && c.id).map((c) => c.id);
+}
+
+/** A stack's box: ticked when all its shown containers are selected, a dash when some are. */
+function syncCwStackBox(box) {
+  const ids = cwStackIds(box.dataset.stack || '');
+  const picked = ids.filter((id) => isContainerSelected(id)).length;
+  box.checked = ids.length > 0 && picked === ids.length;
+  box.indeterminate = picked > 0 && picked < ids.length;
+  box.disabled = ids.length === 0;
+}
+
+/** Selects or clears every shown container of a stack, rows included. */
+export function selectCwStack(stack, on) {
+  const ids = cwStackIds(stack);
+  for (const id of ids) toggleContainerSelected(id, on);
+  const tbody = document.getElementById('cw-docker-containers-tbody');
+  if (tbody) {
+    const want = new Set(ids);
+    for (const cb of /** @type {NodeListOf<HTMLInputElement>} */ (tbody.querySelectorAll('.docker-row-select'))) {
+      if (!want.has(cb.dataset.id || '')) continue;
+      cb.checked = on;
+      cb.closest('tr')?.classList.toggle('docker-row-selected', on);
+    }
+  }
+  updateCwBulkBar();
 }
 
 function createCwStackHead(item) {
@@ -1212,6 +1261,10 @@ function bindCwTableEvents(tbody) {
   tbody._cwTableEventsBound = true;
 
   tbody.addEventListener('change', (e) => {
+    if (e.target.classList.contains('cw-stack-select')) {
+      selectCwStack(e.target.dataset.stack || '', e.target.checked);
+      return;
+    }
     if (e.target.classList.contains('docker-row-select')) {
       const cid = e.target.dataset.id;
       toggleContainerSelected(cid, e.target.checked);
@@ -1458,6 +1511,13 @@ export function updateCwBulkBar() {
     } else {
       bar.style.display = 'none';
     }
+  }
+
+  // each stack's box follows the rows under it
+  for (const box of /** @type {NodeListOf<HTMLInputElement>} */ (
+    document.querySelectorAll('#cw-docker-containers-tbody .cw-stack-select')
+  )) {
+    syncCwStackBox(box);
   }
 
   if (selectAll) {

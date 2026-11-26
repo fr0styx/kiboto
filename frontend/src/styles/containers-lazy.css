@@ -29,6 +29,9 @@
 .cw-simple .cw-stack-note { display: block; }
 /* stack header rows in the simple view (SET-25); the per-row "In {stack}" note is then not needed */
 .cw-stack-head-cell { text-align: left; padding: 14px 10px 4px; font-size: var(--kb-fs-xs); font-weight: 700; color: var(--muted); border-bottom: 1px solid var(--kb-line-8); }
+.cw-stack-label { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; min-height: 32px; text-transform: none; letter-spacing: normal; }
+.cw-stack-select { margin: 0; cursor: pointer; accent-color: var(--brand); flex-shrink: 0; }
+.cw-simple .cw-stack-select { display: none; }
 .cw-has-heads .cw-stack-note { display: none !important; }
 .docker-table tbody tr.cw-stack-head, .docker-table tbody tr.cw-stack-head:hover { background: transparent !important; border: 0 !important; box-shadow: none !important; }
 .docker-table tbody tr.cw-stack-head th.cw-stack-head-cell { display: block; justify-content: flex-start !important; text-align: left !important; width: auto; }

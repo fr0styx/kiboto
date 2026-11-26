@@ -8396,6 +8396,7 @@ export default {
   "notif.nothing_to_look_at": "Nothing needs a look. Everything that happened is in Activity.",
   "vmd.running_locked": "This machine is running. Shut it down to change its processors or memory. Other changes are used from its next start.",
   "apps.other_apps": "Other apps",
+  "apps.select_stack": "Select everything in {stack}",
   "mvm.not_checked": "Could not be checked",
   "mvm.load_failed": "The virtual machines could not be loaded.",
   "mvm.try_again": "Try again",

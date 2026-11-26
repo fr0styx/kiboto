@@ -9,8 +9,6 @@ tr.docker-row-selected {
 .docker-floating-bulk-bar {
   position: sticky;
   bottom: 12px;
-  left: 50%;
-  transform: translateX(-50%);
   display: flex;
   align-items: center;
   gap: 12px;
@@ -29,8 +27,8 @@ tr.docker-row-selected {
 }
 
 @keyframes bulkBarSlideUp {
-  from { opacity: 0; transform: translate(-50%, 10px); }
-  to { opacity: 1; transform: translate(-50%, 0); }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .docker-floating-bulk-bar .bulk-bar-info {
@@ -96,6 +94,45 @@ tr.docker-row-selected {
 .docker-floating-bulk-bar .btn-bulk-cancel {
   padding: 4px 8px;
   color: var(--kb-text-muted);
+}
+
+/* Phones: the bar spans the list, the count on its own line and the buttons in an even grid,
+   so no button sits off the edge or under another */
+@media (max-width: 768px) {
+  .docker-floating-bulk-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    width: auto;
+    max-width: none;
+    margin: 12px 0 4px;
+    padding: 10px;
+    border-radius: 16px;
+  }
+  .docker-floating-bulk-bar .bulk-bar-info {
+    padding: 0 2px;
+    border-right: 0;
+  }
+  .docker-floating-bulk-bar .bulk-bar-actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+  .docker-floating-bulk-bar .btn-bulk-action {
+    justify-content: center;
+    min-height: 44px;
+    padding: 6px 8px;
+    min-width: 0;
+    white-space: nowrap;
+  }
+  /* clear the selection: top right, beside the count, not alone on a row of its own */
+  .docker-floating-bulk-bar .btn-bulk-cancel {
+    position: absolute;
+    top: 4px;
+    right: 8px;
+    width: 44px;
+    min-height: 36px;
+  }
 }
 
 

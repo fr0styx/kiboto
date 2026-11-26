@@ -8396,6 +8396,7 @@ export default {
   "notif.nothing_to_look_at": "Nichts braucht Ihre Aufmerksamkeit. Alles, was passiert ist, steht unter Aktivität.",
   "vmd.running_locked": "Diese Maschine läuft. Fahren Sie sie herunter, um Prozessoren oder Speicher zu ändern. Andere Änderungen gelten ab dem nächsten Start.",
   "apps.other_apps": "Weitere Apps",
+  "apps.select_stack": "Alles in {stack} auswählen",
   "mvm.not_checked": "Konnte nicht geprüft werden",
   "mvm.load_failed": "Die virtuellen Maschinen konnten nicht geladen werden.",
   "mvm.try_again": "Erneut versuchen",

@@ -10,6 +10,8 @@ Where a feature is still being checked on your edition, or your NAS system does 
 
 The container image is now built on Debian 13 with Debian's own Python 3.13, the same as Kiboto OS, and is about 30 MB smaller. On Kiboto OS an install or update takes its Python packages from the signed image instead of downloading them.
 
+Apps: with Docker details on, the box next to a stack's name selects every container in that stack.
+
 #### Security
 
 Kiboto OS: when Kiboto hands files and folders in a shared folder to their people, a link put in their place over the network is never followed, so a system file's owner or rights can never be changed that way.
@@ -27,6 +29,8 @@ Kiboto OS: errors found by a scrub of a btrfs pool become an alert again; Kiboto
 Kiboto OS: Storage lists the pools that can be imported (the list was always empty there), and the diagnostics include the kernel's warnings and errors again.
 
 Kiboto OS: after restoring a settings backup (a move from the container, a new system disk), apps whose folders are in Kiboto OS's apps folder start again by themselves, as they do after a restore from the copy on the pools.
+
+Apps: the action bar for selected containers no longer runs off the left edge of the screen on phones, and Resume shows its icon.
 
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container

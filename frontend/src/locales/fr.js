@@ -8396,6 +8396,7 @@ export default {
   "notif.nothing_to_look_at": "Rien à vérifier. Tout ce qui s'est passé est dans Activité.",
   "vmd.running_locked": "Cette machine est en marche. Arrêtez-la pour changer ses processeurs ou sa mémoire. Les autres changements s'appliquent au prochain démarrage.",
   "apps.other_apps": "Autres apps",
+  "apps.select_stack": "Tout sélectionner dans {stack}",
   "mvm.not_checked": "Vérification impossible",
   "mvm.load_failed": "Les machines virtuelles n'ont pas pu être chargées.",
   "mvm.try_again": "Réessayer",
