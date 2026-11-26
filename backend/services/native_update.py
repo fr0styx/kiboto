@@ -261,7 +261,7 @@ def ensure_units(rel: str, run: Any = None, unit_dir: str | None = None, door_cu
 # as it is, may have a known bug in the root service, and a taken-over web process could ask for it.
 # Raised by a release that fixes the root service (docs/RELEASING.md); never above __version__.
 # Going back to a version kept on the machine (Revert) is not an install and is not limited.
-LOWEST_VERSION = "2.0.7"
+LOWEST_VERSION = "2.0.8"
 _VERSION_LINE = re.compile(r'^__version__ = "([0-9]+)\.([0-9]+)\.([0-9]+)[^"]*"$', re.M)
 
 
