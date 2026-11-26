@@ -5,6 +5,7 @@ with the data as it was, when the new version does not hold."""
 import io
 import json
 import os
+import re
 import tarfile
 
 import pytest
@@ -699,7 +700,10 @@ def test_an_image_older_than_the_lowest_version_is_not_installed(tmp_path, monke
     old = {**IMAGE, "backend": tar_of({"backend/__init__.py": b'__version__ = "2.0.5"\n', "backend/main.py": b"x\n"})}
     Docker(monkeypatch, parts=old)
     run = Runs()
-    with pytest.raises(nu.UpdateFailed, match=r"installs Kiboto 2\.0\.6 or newer, and the image is 2\.0\.5"):
+    with pytest.raises(
+        nu.UpdateFailed,
+        match=r"installs Kiboto " + re.escape(nu.LOWEST_VERSION) + r" or newer, and the image is 2\.0\.5",
+    ):
         nu.prepare("img", "9.9.9", str(tmp_path), run)  # named as a new version: still refused
     assert not os.listdir(tmp_path / "releases") and not run.did("pip")  # nothing of it ran
     nameless = {

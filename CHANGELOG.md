@@ -2,213 +2,237 @@
 
 Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep that name.
 
-## Unreleased
+## v2.0.7 (2026-11-26)
+### 🛡️ Kiboto OS without root, on signed releases only, with Debian's security fixes
+
+Kiboto OS, Kiboto on a machine of its own, moves towards leaving its preview. Kiboto itself now
+runs as an ordinary user: only a small host service changes the machine, from a fixed list of
+checked operations. The machine installs only versions the project's build service signed for a
+release, never older than the lowest one the running release allows, and its install script
+checks a version's signature before unpacking it. Debian's security fixes are installed by
+themselves, the kernel included, and Kiboto never restarts the machine for them. SFTP, iSCSI
+disks, replication between its pools and the front COPY button now work there too. The firewall
+can be turned on, with the home network open and the outside reaching only what you tick, and
+every build is installed as Kiboto OS in a fresh virtual machine before it is published. In the
+container nothing changes in how you run Kiboto; there are many fixes, a moving Kib on the
+desktop, and fans that follow the hottest drive.
+
+#### Before you upgrade
+
+- **The image is now `ghcr.io/fr0styx/kiboto`.** Kiboto's own updater already moved to it. Where
+  Unraid or your own Compose file does the updating, change the image name there; the old name
+  keeps working until Kiboto 2.2.
+- **Firewall (Kiboto OS):** the choice between "only devices at home" and "any address" is gone.
+  Your home network reaches everything; the outside reaches only what you tick, and nothing is
+  ticked at first. If you reached the machine from outside, tick what it needs.
+- **Kiboto OS:** after this update the kernel takes Debian's security fixes by itself. The machine
+  is never restarted for them: Updates says when a restart finishes one.
 
 #### Fixes
 
-Releases now carry the install image: it was built, but saved in a folder that was removed before the upload, so v2.0.6 went out without it.
+- Releases now carry the install image: it was built, but saved in a folder that was removed before the upload, so v2.0.6 went out without it.
 
-On a machine of its own, an update now also installs the system tools the new version needs, such as the one drive sleep uses.
+- On a machine of its own, an update now also installs the system tools the new version needs, such as the one drive sleep uses.
 
-"Allow changes" on a storage pool brought in from another system no longer fails with "pool is busy" when it is pressed right after the pool was opened.
+- "Allow changes" on a storage pool brought in from another system no longer fails with "pool is busy" when it is pressed right after the pool was opened.
 
-On a machine of its own, Macs now find its Time Machine folders by themselves; they were never announced there.
+- On a machine of its own, Macs now find its Time Machine folders by themselves; they were never announced there.
 
-Copying a folder from a Mac onto one of Kiboto's own shared folders no longer fails with "you don't have permission": the new folder was made, then nothing could be put in it. Folders a Mac made before this fix may need their permissions set again.
+- Copying a folder from a Mac onto one of Kiboto's own shared folders no longer fails with "you don't have permission": the new folder was made, then nothing could be put in it. Folders a Mac made before this fix may need their permissions set again.
 
-A Time Machine folder can no longer be given a size limit larger than its storage pool (Time Machine filled the whole pool first), and a new Time Machine folder no longer gets automatic snapshots, which would have kept the old backups Time Machine deletes.
+- A Time Machine folder can no longer be given a size limit larger than its storage pool (Time Machine filled the whole pool first), and a new Time Machine folder no longer gets automatic snapshots, which would have kept the old backups Time Machine deletes.
 
-Kib's window looks like the other app windows: the wallpaper no longer shows through it.
+- Kib's window looks like the other app windows: the wallpaper no longer shows through it.
 
-Importing a pool by a name no drive carries no longer leaves a locked, empty folder in the storage folder.
+- Importing a pool by a name no drive carries no longer leaves a locked, empty folder in the storage folder.
 
-On a phone, messages such as "Last sign-in" are no longer half hidden under the tab bar.
+- On a phone, messages such as "Last sign-in" are no longer half hidden under the tab bar.
 
-A NAS with several network ports is found by its name on each of its networks, not only on the main one.
+- A NAS with several network ports is found by its name on each of its networks, not only on the main one.
 
-An update now refuses a download that came out damaged (empty files after a power cut), removes it so the next try downloads it again, and goes back at once when the new version cannot start, instead of after four minutes.
+- An update now refuses a download that came out damaged (empty files after a power cut), removes it so the next try downloads it again, and goes back at once when the new version cannot start, instead of after four minutes.
 
-When the security chip is busy for a moment while the machine starts, the AI index now opens a minute later instead of staying shut until Kiboto restarts.
+- When the security chip is busy for a moment while the machine starts, the AI index now opens a minute later instead of staying shut until Kiboto restarts.
 
-Answers in the Kib window are laid out as intended again: small photo previews, the model and time on one line, in the window colours. New chat titles keep your words as typed.
+- Answers in the Kib window are laid out as intended again: small photo previews, the model and time on one line, in the window colours. New chat titles keep your words as typed.
 
-On a machine Kiboto runs, a network card moved to another slot keeps its fixed address: the port keeps its name.
+- On a machine Kiboto runs, a network card moved to another slot keeps its fixed address: the port keeps its name.
 
-Fans: a short spike of processor heat no longer sends the disk fans to full speed for half a minute, and fan stop no longer switches the fans on and off every minute or two when NVMe drives are near their limit.
+- Fans: a short spike of processor heat no longer sends the disk fans to full speed for half a minute, and fan stop no longer switches the fans on and off every minute or two when NVMe drives are near their limit.
 
-The Hardware page fits a phone: the screen theme buttons stay on the screen, sliders and size buttons are easier to tap, and the card copies table shows that it scrolls sideways.
+- The Hardware page fits a phone: the screen theme buttons stay on the screen, sliders and size buttons are easier to tap, and the card copies table shows that it scrolls sideways.
 
-On machines whose front screen runs through the graphics driver, Kiboto no longer makes the kernel log graphics-memory warnings each time it starts a helper process.
+- On machines whose front screen runs through the graphics driver, Kiboto no longer makes the kernel log graphics-memory warnings each time it starts a helper process.
 
-A spinning drive whose temperature can't be read for 3 minutes now runs the disk fans at full speed and sends a notification, instead of counting as cool. Idle drives no longer lose their temperature between reads.
+- A spinning drive whose temperature can't be read for 3 minutes now runs the disk fans at full speed and sends a notification, instead of counting as cool. Idle drives no longer lose their temperature between reads.
 
-Escape closes only what is on top: with a window above the notification centre it no longer closes both, and with the notification centre in front it no longer closes the window underneath.
+- Escape closes only what is on top: with a window above the notification centre it no longer closes both, and with the notification centre in front it no longer closes the window underneath.
 
-Kiboto notices within a minute when a hard drive goes to sleep or wakes up, instead of up to half an hour later, so the fans stop sooner when every drive sleeps (Zero RPM).
+- Kiboto notices within a minute when a hard drive goes to sleep or wakes up, instead of up to half an hour later, so the fans stop sooner when every drive sleeps (Zero RPM).
 
-The processor counts as too hot 15 °C under the limit it is made for (95 °C for a chip made for 110 °C), not at a fixed 80 °C, so the fans no longer race and alerts no longer pile up while the processor is merely busy.
+- The processor counts as too hot 15 °C under the limit it is made for (95 °C for a chip made for 110 °C), not at a fixed 80 °C, so the fans no longer race and alerts no longer pile up while the processor is merely busy.
 
-Kib's settings say when Docker can't be reached, instead of failing to load the AI pack card.
+- Kib's settings say when Docker can't be reached, instead of failing to load the AI pack card.
 
-The list of folders Kib has indexed shows them again; it was always empty.
+- The list of folders Kib has indexed shows them again; it was always empty.
 
-Light mode: the front screen's preview stays readable, and its card, theme buttons and Kib's Clear All have enough contrast. The metrics page's time range and device strip work with a keyboard and screen reader.
+- Light mode: the front screen's preview stays readable, and its card, theme buttons and Kib's Clear All have enough contrast. The metrics page's time range and device strip work with a keyboard and screen reader.
 
-A fresh install on a machine of its own starts again and shows the code for the first sign-in on the machine's screen and in its SSH greeting; with Kiboto running without root, neither worked.
+- A fresh install on a machine of its own starts again and shows the code for the first sign-in on the machine's screen and in its SSH greeting; with Kiboto running without root, neither worked.
 
-On a machine of its own, bringing the settings back from the pools after a new system disk works again: the pools come back and Kiboto restarts by itself. The install stops at once on a machine with Secure Boot on and says what to change, instead of failing after a quarter of an hour.
+- On a machine of its own, bringing the settings back from the pools after a new system disk works again: the pools come back and Kiboto restarts by itself. The install stops at once on a machine with Secure Boot on and says what to change, instead of failing after a quarter of an hour.
 
-A fresh install no longer warns that the password is "admin" while it waits for the first sign-in.
+- A fresh install no longer warns that the password is "admin" while it waits for the first sign-in.
 
-Kiboto OS from the USB stick: when the install on the first start stops (no network, for example), the screen says why, and restarting the machine tries again instead of refusing it as already set up. The sign-in code shows on the screen without pressing a key.
+- Kiboto OS from the USB stick: when the install on the first start stops (no network, for example), the screen says why, and restarting the machine tries again instead of refusing it as already set up. The sign-in code shows on the screen without pressing a key.
 
-No more "app data on a spinning disk" notification for virtual machine disks, or on Kiboto OS, where the data folder belongs on the system disk.
+- No more "app data on a spinning disk" notification for virtual machine disks, or on Kiboto OS, where the data folder belongs on the system disk.
 
-Indexing a scanned PDF no longer adds an ignored error to Diagnostics.
+- Indexing a scanned PDF no longer adds an ignored error to Diagnostics.
 
-Kiboto OS: the first start no longer shows a ZFS failure or a screenful of virtual-machine messages over the sign-in code, and a failed first start gives advice that fits the reason.
+- Kiboto OS: the first start no longer shows a ZFS failure or a screenful of virtual-machine messages over the sign-in code, and a failed first start gives advice that fits the reason.
 
-Kiboto OS: fresh installs from the main branch stopped at "Unable to locate package zfs-dkms"; fixed. The first start also waits for the network, and an unreachable package server is now named as such.
+- Kiboto OS: fresh installs from the main branch stopped at "Unable to locate package zfs-dkms"; fixed. The first start also waits for the network, and an unreachable package server is now named as such.
 
-Kiboto OS: when the first start finishes, the sign-in code is drawn again at the bottom of the screen, below the install's last message.
+- Kiboto OS: when the first start finishes, the sign-in code is drawn again at the bottom of the screen, below the install's last message.
 
-Zettlab D4 and other ARM boards: fans the kernel already controls are left to it and both are shown, the storage pool is no longer counted twice, the Mali GPU and Rockchip NPU are named correctly, and KIBOTO_OBSERVER_ADAPTER=generic works as documented.
+- Zettlab D4 and other ARM boards: fans the kernel already controls are left to it and both are shown, the storage pool is no longer counted twice, the Mali GPU and Rockchip NPU are named correctly, and KIBOTO_OBSERVER_ADAPTER=generic works as documented.
 
-Card copies: the default folder is the storage pool on every kind of host, a card formatted on a Mac copies from its photos partition, videos land in the right date folder, and only photos, videos and their side files are copied. The Generate button for API tokens works again.
+- Card copies: the default folder is the storage pool on every kind of host, a card formatted on a Mac copies from its photos partition, videos land in the right date folder, and only photos, videos and their side files are copied. The Generate button for API tokens works again.
 
-Zettlab D4: the front COPY button starts a card copy.
+- Zettlab D4: the front COPY button starts a card copy.
 
-The Hardware panel shows every section with its controls, and the dock no longer covers it on a tablet or phone.
+- The Hardware panel shows every section with its controls, and the dock no longer covers it on a tablet or phone.
 
-The Hardware panel no longer shows a tab's name twice.
+- The Hardware panel no longer shows a tab's name twice.
 
-Kiboto OS: the power schedule can be turned on (the wake-up clock is now set through the root service).
+- Kiboto OS: the power schedule can be turned on (the wake-up clock is now set through the root service).
 
-Kiboto OS: iSCSI, SFTP, replication and merged folders now say they are not available there yet, instead of failing with a misleading reason; SFTP no longer shows "running" when nothing is listening.
+- Kiboto OS: iSCSI, SFTP, replication and merged folders now say they are not available there yet, instead of failing with a misleading reason; SFTP no longer shows "running" when nothing is listening.
 
-Install image: a first start that stopped late (after Kiboto was set up but before it answered) is tried again at the next start.
+- Install image: a first start that stopped late (after Kiboto was set up but before it answered) is tried again at the next start.
 
-A release can no longer look complete when its Kiboto OS install image is missing (v2.0.6 had none): the release job now checks the release for it.
+- A release can no longer look complete when its Kiboto OS install image is missing (v2.0.6 had none): the release job now checks the release for it.
 
-Kiboto OS: the Edge update channel is no longer offered there, because such a machine installs only releases and Edge was always refused.
+- Kiboto OS: the Edge update channel is no longer offered there, because such a machine installs only releases and Edge was always refused.
 
-Firewall: the switch now looks on when the firewall is on.
+- Firewall: the switch now looks on when the firewall is on.
 
-Guides: the image sizes, where the first-time password is kept, the arm64 testing, ZettOS and the list of systems Kiboto runs on now match what Kiboto does.
+- Guides: the image sizes, where the first-time password is kept, the arm64 testing, ZettOS and the list of systems Kiboto runs on now match what Kiboto does.
 
-Kiboto OS: an update now also removes the Python environments no kept version uses (about 460 MB each).
+- Kiboto OS: an update now also removes the Python environments no kept version uses (about 460 MB each).
 
-Kiboto OS: an update now removes Kiboto's old images from Docker (about 1.9 GB each), and the install no longer keeps the image it copied Kiboto out of.
+- Kiboto OS: an update now removes Kiboto's old images from Docker (about 1.9 GB each), and the install no longer keeps the image it copied Kiboto out of.
 
 #### Security
 
-On a machine of its own, failed sign-ins to shared folders over the network now count like web sign-ins: 20 in 15 minutes block the address for an hour, and they show under History, Sign-ins.
+- On a machine of its own, failed sign-ins to shared folders over the network now count like web sign-ins: 20 in 15 minutes block the address for an hour, and they show under History, Sign-ins.
 
-On a machine of its own, Kiboto installs only release versions, and a release is signed only after the project owner approves it, so a change pushed to the main branch alone can no longer reach those machines.
+- On a machine of its own, Kiboto installs only release versions, and a release is signed only after the project owner approves it, so a change pushed to the main branch alone can no longer reach those machines.
 
-Pool names sent to the storage and snapshot settings are checked the same way everywhere: a name, never a path.
+- Pool names sent to the storage and snapshot settings are checked the same way everywhere: a name, never a path.
 
-On a machine Kiboto runs, Kiboto itself now runs without root by default; only its small host service changes the machine, from a fixed list of checked operations.
+- On a machine Kiboto runs, Kiboto itself now runs without root by default; only its small host service changes the machine, from a fixed list of checked operations.
 
-Each release lists the checksums of install.sh and the install image, signed by the project's build service, and the install guide shows how to check a download.
+- Each release lists the checksums of install.sh and the install image, signed by the project's build service, and the install guide shows how to check a download.
 
-Bringing storage pools back at start checks each pool record before acting on it as root, so a changed record cannot mount a pool over a system folder or with unsafe options.
+- Bringing storage pools back at start checks each pool record before acting on it as root, so a changed record cannot mount a pool over a system folder or with unsafe options.
 
-Kiboto OS: the root service no longer acts on unchecked files in the web process's folder (the network trial record, a snapshot's file list, its own log), which could have let a fault in the web process become root.
+- Kiboto OS: the root service no longer acts on unchecked files in the web process's folder (the network trial record, a snapshot's file list, its own log), which could have let a fault in the web process become root.
 
-Kiboto OS: updates always check the image's signature there; the UPDATE_SIGNATURES setting can no longer switch that off on a machine that takes only releases.
+- Kiboto OS: updates always check the image's signature there; the UPDATE_SIGNATURES setting can no longer switch that off on a machine that takes only releases.
 
-Kiboto OS: an update no longer installs a version older than the lowest one the running release allows, read from the downloaded image itself. Revert to a version kept on the machine still works.
+- Kiboto OS: an update no longer installs a version older than the lowest one the running release allows, read from the downloaded image itself. Revert to a version kept on the machine still works.
 
-The light bar no longer sends an error's internal text to the page, and the root service's audit log is no longer readable by every user of the machine.
+- The light bar no longer sends an error's internal text to the page, and the root service's audit log is no longer readable by every user of the machine.
 
-Kiboto OS from the USB image: the first sign-in to Kiboto turns password sign-in over SSH off (keys keep working; Network, This machine has the switch to turn it back on), and the firewall starts on, with the home network open and nothing open to the outside.
+- Kiboto OS from the USB image: the first sign-in to Kiboto turns password sign-in over SSH off (keys keep working; Network, This machine has the switch to turn it back on), and the firewall starts on, with the home network open and nothing open to the outside.
 
-Kiboto OS's install script checks the signature of a version it does not name (`--image`) with its own pinned copy of cosign before anything of that version is unpacked. Before, the check ran the code of the version being installed.
+- Kiboto OS's install script checks the signature of a version it does not name (`--image`) with its own pinned copy of cosign before anything of that version is unpacked. Before, the check ran the code of the version being installed.
 
-Kiboto OS installs Debian's security fixes by itself every day, the kernel included, and never restarts the machine for them: Updates says when a restart finishes one. A new kernel starts only once ZFS is built for it; until then the machine keeps starting the kernel it runs, and Updates names the kernel that waits. ZFS and Docker still move only to versions a Kiboto release was tested with. KIBOTO_SECURITY_UPDATES=0 turns the automatic fixes off.
+- Kiboto OS installs Debian's security fixes by itself every day, the kernel included, and never restarts the machine for them: Updates says when a restart finishes one. A new kernel starts only once ZFS is built for it; until then the machine keeps starting the kernel it runs, and Updates names the kernel that waits. ZFS and Docker still move only to versions a Kiboto release was tested with. KIBOTO_SECURITY_UPDATES=0 turns the automatic fixes off.
 
 #### New
 
-Kiboto lists the third-party software it bundles and its licences at /third-party-licences.txt, and the install image says which Debian image it is made from and where Debian publishes its sources.
+- Kiboto lists the third-party software it bundles and its licences at /third-party-licences.txt, and the install image says which Debian image it is made from and where Debian publishes its sources.
 
-For a machine of its own: the install guide says what is promised during the beta, the security policy covers such a machine, and scripts/hardware_report.sh lists what a machine is made of (read-only, without serial numbers) for reports of hardware that works.
+- For a machine of its own: the install guide says what is promised during the beta, the security policy covers such a machine, and scripts/hardware_report.sh lists what a machine is made of (read-only, without serial numbers) for reports of hardware that works.
 
-Kib's face now floats in a corner of the desktop: click it to ask Kib, without going through Settings.
+- Kib's face now floats in a corner of the desktop: click it to ask Kib, without going through Settings.
 
-Appearance: a By sunset mode (light by day where the NAS is), Match my wallpaper (the accent follows your wallpaper), and the sign-in screen shows the look of the person signing in on this browser.
+- Appearance: a By sunset mode (light by day where the NAS is), Match my wallpaper (the accent follows your wallpaper), and the sign-in screen shows the look of the person signing in on this browser.
 
-Hardware opens with what the temperatures and fans are doing now, in words, and the Overview shows a Cooling tile on machines whose fans Kiboto drives.
+- Hardware opens with what the temperatures and fans are doing now, in words, and the Overview shows a Cooling tile on machines whose fans Kiboto drives.
 
-The installed app: long-press its icon for Files, Ask Kib, Drive health and Settings; the icon shows how many notifications are unread; when Kiboto can't be reached, a page in your language says so and opens Kiboto again by itself once it answers.
+- The installed app: long-press its icon for Files, Ask Kib, Drive health and Settings; the icon shows how many notifications are unread; when Kiboto can't be reached, a page in your language says so and opens Kiboto again by itself once it answers.
 
-Family portal (off until you turn it on, in Away from home): family members who can't install Tailscale open their own files and photos in a browser from anywhere, signed in with a passkey made from a one-time join link. Nothing else of the NAS is reachable there.
+- Family portal (off until you turn it on, in Away from home): family members who can't install Tailscale open their own files and photos in a browser from anywhere, signed in with a passkey made from a one-time join link. Nothing else of the NAS is reachable there.
 
-The Hardware button is back in the top bar for the people who may change the hardware. It opens a panel with a tab for each kind of hardware the machine has (cooling and fans, lights, front screen, card copies), with the same controls as the Hardware page.
+- The Hardware button is back in the top bar for the people who may change the hardware. It opens a panel with a tab for each kind of hardware the machine has (cooling and fans, lights, front screen, card copies), with the same controls as the Hardware page.
 
-A feature list by edition (docs/FEATURES.md): what Kiboto Companion beside another NAS system, Kiboto Companion on plain Linux and Kiboto OS can each do today, and what is not there yet.
+- A feature list by edition (docs/FEATURES.md): what Kiboto Companion beside another NAS system, Kiboto Companion on plain Linux and Kiboto OS can each do today, and what is not there yet.
 
-Kiboto OS: the firewall can be turned on (Settings, Security). When it is on, your home network reaches everything on the machine and the outside reaches only what you tick, apps included. It is off until you turn it on.
+- Kiboto OS: the firewall can be turned on (Settings, Security). When it is on, your home network reaches everything on the machine and the outside reaches only what you tick, apps included. It is off until you turn it on.
 
-Zettlab D4: the front light bar works (it is on the board's serial port /dev/ttyS7, which the container needs). Its effects work, without the rainbow: that bar keeps each effect in its own memory, so Kiboto writes it only when the effect changes.
+- Zettlab D4: the front light bar works (it is on the board's serial port /dev/ttyS7, which the container needs). Its effects work, without the rainbow: that bar keeps each effect in its own memory, so Kiboto writes it only when the effect changes.
 
-Kiboto OS: SFTP works. It runs as a service of the machine under Kiboto's own user, never as root, and what arrives over SFTP can be changed over the network share too.
+- Kiboto OS: SFTP works. It runs as a service of the machine under Kiboto's own user, never as root, and what arrives over SFTP can be changed over the network share too.
 
-Kiboto OS: iSCSI disks work. The machine's root service checks each disk before it serves it and writes the service's settings itself, so nothing Kiboto's web service writes is run as root.
+- Kiboto OS: iSCSI disks work. The machine's root service checks each disk before it serves it and writes the service's settings itself, so nothing Kiboto's web service writes is run as root.
 
-Kiboto OS: replication works between the machine's own pools (ZFS or btrfs snapshots, only what changed after the first copy). Copies to another machine over SSH are not available on Kiboto OS yet.
+- Kiboto OS: replication works between the machine's own pools (ZFS or btrfs snapshots, only what changed after the first copy). Copies to another machine over SSH are not available on Kiboto OS yet.
 
-Kiboto OS on a Zettlab D6 or D8: the front COPY button works (it copies the card, or turns the front screen's page, as set).
+- Kiboto OS on a Zettlab D6 or D8: the front COPY button works (it copies the card, or turns the front screen's page, as set).
 
 #### Changes
 
-On a machine of its own, a separate system service (the host door) now changes the machine's name, time zone, clock and SSH setting for Kiboto, from a fixed list of operations: the first step towards Kiboto's web service running without full system rights (docs/adr/0006-web-without-root.md).
+- On a machine of its own, a separate system service (the host door) now changes the machine's name, time zone, clock and SSH setting for Kiboto, from a fixed list of operations: the first step towards Kiboto's web service running without full system rights (docs/adr/0006-web-without-root.md).
 
-Kib on the desktop is now a small moving character, the Kiboto mark with Kib's eyes, that perks up when you point at it; Kib's window is no longer see-through.
+- Kib on the desktop is now a small moving character, the Kiboto mark with Kib's eyes, that perks up when you point at it; Kib's window is no longer see-through.
 
-On a phone, messages such as "Last sign-in" now appear at the top of the screen, under the top bar.
+- On a phone, messages such as "Last sign-in" now appear at the top of the screen, under the top bar.
 
-The Kib page in Settings starts with Kib itself: its face, its name, what it does and Open Kib. Each Settings page shows its own icon in the title bar.
+- The Kib page in Settings starts with Kib itself: its face, its name, what it does and Open Kib. Each Settings page shows its own icon in the title bar.
 
-Ask Kib looks like the rest of Kiboto: the theme's colours and buttons, and Kib greets an empty conversation.
+- Ask Kib looks like the rest of Kiboto: the theme's colours and buttons, and Kib greets an empty conversation.
 
-The Kib window now has the same colours and toolbar as the other app windows.
+- The Kib window now has the same colours and toolbar as the other app windows.
 
-Fans: Quiet, Balanced and Performance now follow the temperature of the hottest drive on a curve (Balanced is the recommended one), and fan stop while every drive sleeps works in each of them. Custom keeps your own curve; Full stays fixed.
+- Fans: Quiet, Balanced and Performance now follow the temperature of the hottest drive on a curve (Balanced is the recommended one), and fan stop while every drive sleeps works in each of them. Custom keeps your own curve; Full stays fixed.
 
-Hardware is one page: cooling, fans, lights, front screen and card copies one under the other, without tabs or the slide-out drawer.
+- Hardware is one page: cooling, fans, lights, front screen and card copies one under the other, without tabs or the slide-out drawer.
 
-While a hard drive spins, the disk fans never run below a safety floor: lowest speed up to 45 °C, full speed at 52 °C, in every fan mode and under your own curve. Fans can still stop while every drive sleeps (Zero RPM).
+- While a hard drive spins, the disk fans never run below a safety floor: lowest speed up to 45 °C, full speed at 52 °C, in every fan mode and under your own curve. Fans can still stop while every drive sleeps (Zero RPM).
 
-The Hardware page's Cooling list says when a spinning drive has no temperature reading and when that runs the fans at full speed. Drives show as too hot from 52 °C, where the fans reach full speed.
+- The Hardware page's Cooling list says when a spinning drive has no temperature reading and when that runs the fans at full speed. Drives show as too hot from 52 °C, where the fans reach full speed.
 
-Kiboto OS has a guide of its own: what hardware it runs on, writing and checking the USB stick, the first sign-in, updates and what to do with a new system disk.
+- Kiboto OS has a guide of its own: what hardware it runs on, writing and checking the USB stick, the first sign-in, updates and what to do with a new system disk.
 
-The Yak themes are gone: the hidden desktop theme with its top-bar button, and the Yak Bronze front-screen theme. Anyone who had one chosen gets the default look.
+- The Yak themes are gone: the hidden desktop theme with its top-bar button, and the Yak Bronze front-screen theme. Anyone who had one chosen gets the default look.
 
-The Hardware panel looks like the drawer it replaces again, with its header and tab bar, and its status follows the live readings.
+- The Hardware panel looks like the drawer it replaces again, with its header and tab bar, and its status follows the live readings.
 
-The hardware cards look alike again: Card copies and the other sections get their labels and descriptions back, Quieter at night matches the other cards, and the Front light and Front screen switches say what they turn on or off.
+- The hardware cards look alike again: Card copies and the other sections get their labels and descriptions back, Quieter at night matches the other cards, and the Front light and Front screen switches say what they turn on or off.
 
-The test suite also runs on Debian 13's own Python, the one Kiboto OS uses, before anything is published.
+- The test suite also runs on Debian 13's own Python, the one Kiboto OS uses, before anything is published.
 
-The opt-in health report (off by default) now also says which edition is running: Kiboto OS or the container. The card shows the exact report before you turn it on, as before.
+- The opt-in health report (off by default) now also says which edition is running: Kiboto OS or the container. The card shows the exact report before you turn it on, as before.
 
-Firewall: the choice "only devices at home" or "any address" is gone. The home network always reaches everything; the ticks say what the outside may reach, and nothing is ticked at first.
+- Firewall: the choice "only devices at home" or "any address" is gone. The home network always reaches everything; the ticks say what the outside may reach, and nothing is ticked at first.
 
-The compose files, the Unraid templates and the guides now use the image name `ghcr.io/fr0styx/kiboto`. The old name keeps working until Kiboto 2.2; where Unraid or your own Compose file does the updating, change the image name there before then.
+- The compose files, the Unraid templates and the guides now use the image name `ghcr.io/fr0styx/kiboto`. The old name keeps working until Kiboto 2.2; where Unraid or your own Compose file does the updating, change the image name there before then.
 
-The guides name the two editions, Kiboto Companion (the container) and Kiboto OS, and call the connection to Unraid's or TrueNAS's API "the API link" instead of "companion mode".
+- The guides name the two editions, Kiboto Companion (the container) and Kiboto OS, and call the connection to Unraid's or TrueNAS's API "the API link" instead of "companion mode".
 
-Every build is now installed as Kiboto OS in a fresh Debian 13 virtual machine, and checked before and after a restart, before it is signed or published.
+- Every build is now installed as Kiboto OS in a fresh Debian 13 virtual machine, and checked before and after a restart, before it is signed or published.
 
-Releases: Stable now takes only an image signed for that exact version, and the update test fails instead of passing when it could not try enough older versions.
+- Releases: Stable now takes only an image signed for that exact version, and the update test fails instead of passing when it could not try enough older versions.
 
-Kiboto OS: the machine stays on Debian 13. apt no longer installs packages of another Debian release, since a move to Debian 14 would stop Kiboto; KIBOTO_KEEP_DEBIAN=0 allows it.
+- Kiboto OS: the machine stays on Debian 13. apt no longer installs packages of another Debian release, since a move to Debian 14 would stop Kiboto; KIBOTO_KEEP_DEBIAN=0 allows it.
 
-About says which edition is running: Kiboto OS or Kiboto Companion.
+- About says which edition is running: Kiboto OS or Kiboto Companion.
 
-The list of third-party software in the image (/third-party-licences.txt) now also names its Debian packages, where their source is published, and the offer of GPL source code.
+- The list of third-party software in the image (/third-party-licences.txt) now also names its Debian packages, where their source is published, and the offer of GPL source code.
 
 ## v2.0.6 (2026-11-23)
 ### 🖥️ Kiboto on a machine of its own (preview), with its settings kept safe on every pool
