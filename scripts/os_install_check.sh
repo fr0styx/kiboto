@@ -216,6 +216,7 @@ look() {
   check "Debian's security fixes are set to install by themselves" "grep -q Debian-Security /etc/apt/apt.conf.d/52kiboto-security"
   check "Kiboto waits for its first sign-in" "curl -fs -m 10 http://127.0.0.1:8082/api/auth/first-run | grep -q '\"waiting\": *true'"
   check "the page itself is served" "curl -fs -m 10 http://127.0.0.1:8082/ | grep -qi '<title'"
+  check "its Python packages came from the image, nothing downloaded" "grep -q 'Python packages: taken from the image' /root/install.log"
 }
 
 stage "The installed machine"

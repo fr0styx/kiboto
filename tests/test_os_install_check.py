@@ -133,3 +133,12 @@ def test_a_tag_also_tries_an_update_and_revert_through_the_root_service():
     with open(WORKFLOW, encoding="utf-8") as f:
         wf = f.read()
     assert "KB_OS_UPDATE: ${{ inputs.fast && '0' || '1' }}" in wf
+
+
+def test_a_fresh_install_takes_its_python_packages_from_the_image():
+    with open(os.path.join(ROOT, "scripts", "os_install_check.sh"), encoding="utf-8") as f:
+        check = f.read()
+    with open(os.path.join(ROOT, "packaging", "install.sh"), encoding="utf-8") as f:
+        install = f.read()
+    assert "Python packages: taken from the image" in install
+    assert "grep -q 'Python packages: taken from the image' /root/install.log" in check

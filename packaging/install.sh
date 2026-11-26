@@ -190,9 +190,11 @@ code() {
     python3 -m venv "$venv"
     pyv=$(python3 -c 'import sys; print(f"{sys.version_info[0]}.{sys.version_info[1]}")')
     if [ -d "$src/site-packages" ]; then  # from the image: the packages it was built and checked with
+      say "Python packages: taken from the image."
       rm -rf "$venv/lib/python$pyv/site-packages"
       cp -a "$src/site-packages" "$venv/lib/python$pyv/site-packages"
     else
+      say "Python packages: downloading them (the image has none for this machine's Python)..."
       "$venv/bin/python" -m pip -q install --no-compile --require-hashes -r "$rel/requirements.lock"
     fi
     date > "$venv/.ready"
