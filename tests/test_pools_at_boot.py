@@ -61,10 +61,11 @@ def test_the_install_script_keeps_its_promises():
     # it refuses a machine that already serves files or runs containers
     for said in ("Samba is already set up", "Docker already has containers", "NFS exports are already set up"):
         assert said in sh
-    # kernel, ZFS and Docker are held, and given back on uninstall
+    # ZFS and Docker are held, and given back on uninstall with the kernel an older version held
     held = re.search(r'^HELD="(.*)"$', sh, re.M).group(1).split()
-    assert held == ["linux-image-amd64", "linux-headers-amd64", "zfs-dkms", "zfsutils-linux", "docker.io"]
-    assert "apt-mark hold $HELD" in sh and "apt-mark unhold $HELD" in sh
+    assert held == ["zfs-dkms", "zfsutils-linux", "docker.io"]
+    assert "apt-mark hold $HELD" in sh and "apt-mark unhold $HELD $KERNEL" in sh
+    assert 'KERNEL="linux-image-amd64 linux-headers-amd64"' in sh
     # Docker gets an address range that cannot clash with a home network or an outer Docker
     assert '"bip": "10.212.0.1/24"' in sh and '"base": "10.213.0.0/16"' in sh and '"max-size": "10m"' in sh
     # pools and settings are not removed by an uninstall without --purge

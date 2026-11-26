@@ -49,9 +49,9 @@ work are welcome as an issue.
 - **Tested on one model, community elsewhere.** Other 64-bit PCs will most likely work, because the
   drivers are Debian's.
 - **Debian fixes the base, Kiboto fixes the app.** The kernel, the drivers and the system packages
-  get their fixes from Debian, through `apt`. Kiboto fixes Kiboto, its install script and how it
-  drives the machine, and holds the kernel, ZFS and Docker at the versions it was tested with until
-  a release moves them together.
+  get their fixes from Debian, through `apt`: its security fixes are installed by themselves every
+  day, the kernel included. Kiboto fixes Kiboto, its install script and how it drives the machine,
+  and holds ZFS and Docker at the versions it was tested with until a release moves them.
 - **No response time while in beta.** Issues are read and fixed as time allows. Security reports
   follow [SECURITY.md](../SECURITY.md).
 - **The source of everything on the image.** The install image is Debian's own netinst image with
@@ -151,9 +151,8 @@ encrypted AI chats and search index again.
   Kiboto from a fixed list of operations. Kiboto itself runs as the user `kiboto`
   (`python -m backend.services.web_user off` in `/opt/kiboto/current` runs it as root again).
 - Pools are mounted under `/mnt/storage`.
-- The kernel, ZFS and Docker are held at the versions Kiboto was tested with (`apt-mark showhold`
-  lists them). Everything else updates with `apt` as on any Debian, and you can install your own
-  packages.
+- ZFS and Docker are held at the versions Kiboto was tested with (`apt-mark showhold` lists them).
+  Everything else updates with `apt` as on any Debian, and you can install your own packages.
 - `/etc/samba/smb.conf` is replaced by a line that points at Kiboto's own settings; the file Debian
   shipped is kept beside it as `smb.conf.debian`.
 - The key that encrypts the AI chats and search index is made at the first start and sealed to the
@@ -193,8 +192,16 @@ the router, or a network you share with people you do not know.
 Kiboto updates itself from the Updates page as it does elsewhere. A new version is put beside the
 running one and switched to; if it does not start, the machine goes back to the version before and
 says so. "Revert" goes back to the version before the last update, with the settings as they were
-then. The kernel, ZFS and Docker move only when a Kiboto release was tested with newer ones: Updates
-then offers them.
+then. ZFS and Docker move only when a Kiboto release was tested with newer ones: Updates then offers
+them.
+
+Debian's security fixes are installed by themselves every day (Debian's `unattended-upgrades`, set
+to Debian's security archive only, in `/etc/apt/apt.conf.d/52kiboto-security`), the kernel included.
+Kiboto never restarts the machine for them; Updates says when a restart finishes one. A new kernel
+starts only once ZFS is built for it: until then a hook (`/etc/kernel/postinst.d/zzz-kiboto-zfs`)
+keeps GRUB on the kernel that runs now, and Updates says which kernel waits. `KIBOTO_SECURITY_UPDATES=0`
+turns the automatic fixes off and holds the kernel again. Debian's point releases come when you
+update with `apt`, as on any Debian.
 
 The machine stays on Debian 13. Kiboto's Python environment, its root service and its updater are
 made for Debian 13's Python, and a move to Debian 14 would stop all three at once, with nothing left

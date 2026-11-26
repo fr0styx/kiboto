@@ -39,6 +39,7 @@
  "backend/services/replication_engine.py": 3,
  "backend/services/samba_engine.py": 5,
  "backend/services/samba_host.py": 1,
+ "backend/services/security_updates.py": 1,
  "backend/services/sftp_engine.py": 1,
  "backend/services/sftp_front.py": 1,
  "backend/services/user_scripts.py": 2,

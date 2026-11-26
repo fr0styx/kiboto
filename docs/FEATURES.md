@@ -53,7 +53,7 @@ What the words mean:
 | | Companion, beside a NAS system | Companion, on plain Linux | Kiboto OS |
 | --- | --- | --- | --- |
 | Kiboto updates with a way back<br><sub>Kiboto OS follows the Stable and Beta channels; the container can also follow Edge.</sub> | Yes | Yes | Yes |
-| System updates: kernel, ZFS, Docker<br><sub>Kiboto OS moves these to versions a release was tested with. Automatic security updates are being added.</sub> | Your NAS system does this | Your NAS system does this | Partly |
+| System updates: kernel, ZFS, Docker<br><sub>Kiboto OS installs Debian's security fixes by itself, the kernel included, and never restarts the machine for them. ZFS and Docker move to versions a release was tested with.</sub> | Your NAS system does this | Your NAS system does this | Yes |
 | Network settings<br><sub>Kiboto OS changes the address and the bridge for virtual machines, with a way back.</sub> | View only | View only | Partly |
 | Firewall<br><sub>On after an install from Kiboto's USB image; on other installs off until you turn it on. Your home network reaches everything, and the outside only what you tick, apps included.</sub> | Your NAS system does this | Your NAS system does this | Yes |
 | Restart and shut down | Yes | Yes | Yes |

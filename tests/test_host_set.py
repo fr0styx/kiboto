@@ -74,6 +74,7 @@ def managed(tmp_path, monkeypatch):
     monkeypatch.setattr(host_set, "DATA_DIR", str(tmp_path / "data"))
     os.makedirs(tmp_path / "data")
     monkeypatch.setattr(host_set, "tested_with", lambda root="": dict(TESTED))
+    monkeypatch.setattr(host_set, "kernel_follows_debian", lambda: False)  # as before 2.0.7; see below
     monkeypatch.setattr(host_set, "REBOOT_FLAG", str(tmp_path / "reboot-required"))
     modules = tmp_path / "modules"
     monkeypatch.setattr(host_set, "MODULES", str(modules))
@@ -233,3 +234,28 @@ def test_checking_debian_through_the_page(managed, client, auth_headers, monkeyp
     m.refuse = {"apt-get"}
     r = client.post("/api/system/host-set/check", headers=auth_headers)
     assert r.status_code == 502 and "package lists" in r.json()["detail"]
+
+
+def test_with_debians_security_fixes_the_kernel_follows_debian(managed, monkeypatch):
+    monkeypatch.setattr(host_set, "kernel_follows_debian", lambda: True)
+    m = Machine(
+        {**OLD_DOCKER, "linux-image-amd64": "6.12.107-1"},
+        offered={**TESTED, "linux-image-amd64": "6.12.120-1"},
+        available={"docker.io": [TESTED["docker.io"]], "linux-image-amd64": ["6.12.120-1", "6.12.117-1"]},
+    )
+    st = host_set.status(m)
+    # no tested kernel is offered and no newer one waits: Debian's security fixes move it
+    assert st["move"] == ["docker.io"] and st["waiting"] == []
+    assert st["follows_debian"] == ["linux-image-amd64", "linux-headers-amd64"] and st["security"]["on"] is True
+    host_set.apply(m)
+    assert ["apt-mark", "hold", "zfs-dkms", "zfsutils-linux", "docker.io"] in m.seen  # the kernel is not held again
+
+
+def test_the_kernel_follows_debian_unless_the_setting_says_no(monkeypatch):
+    import dataclasses
+
+    from backend import config
+
+    assert host_set.kernel_follows_debian() is True and host_set.held() == ["zfs-dkms", "zfsutils-linux", "docker.io"]
+    monkeypatch.setattr(config, "SETTINGS", dataclasses.replace(config.SETTINGS, security_updates=False))
+    assert host_set.kernel_follows_debian() is False and host_set.held() == list(host_set.PACKAGES)

@@ -225,6 +225,14 @@ class Settings:
         "until it is installed again.",
         group="Updates",
     )
+    security_updates: bool = _s(
+        "KIBOTO_SECURITY_UPDATES",
+        True,
+        "Kiboto OS: Debian's security fixes are installed by themselves every day, the kernel "
+        "included; the machine is never restarted for them, and a new kernel starts only once ZFS "
+        "is built for it. Off holds the kernel again and leaves updating to you.",
+        group="Updates",
+    )
     accept_main_builds: bool = _s(
         "KIBOTO_ACCEPT_MAIN_BUILDS",
         False,

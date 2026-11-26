@@ -117,3 +117,29 @@ describe('Kernel, ZFS and Docker', () => {
     expect(el('hset-status').textContent).toContain('Apps keep running');
   });
 });
+
+describe('a kernel that takes Debian security fixes', () => {
+  const follows = ['linux-image-amd64', 'linux-headers-amd64'];
+
+  it('says so on the kernel row and under the title', async () => {
+    state = { ...state, move: [], follows_debian: follows, security: { on: true, last: null, kernel_without_zfs: '' } };
+    await renderHostSetCard();
+    expect(el('hset-help').textContent).toContain('installs its security fixes by itself');
+    expect(el('hset-kernel').textContent).toContain("takes Debian's security fixes");
+    expect(el('hset-zfs').textContent).not.toContain('security');
+  });
+
+  it('names the new kernel that waits for ZFS', () => {
+    expect(hostSetStatus({ security: { on: true, kernel_without_zfs: '6.12.120+deb13-amd64' } })).toBe(
+      'ZFS is not built for the new kernel 6.12.120+deb13-amd64 yet, so this machine keeps starting the kernel it runs now.'
+    );
+    expect(hostSetStatus({ running: true, security: { kernel_without_zfs: 'x' } })).toContain('Apps keep running');
+  });
+
+  it('says when the automatic fixes are off', async () => {
+    state = { ...state, security: { on: false, last: null, kernel_without_zfs: '' } };
+    await renderHostSetCard();
+    expect(el('hset-help').textContent).toContain('KIBOTO_SECURITY_UPDATES=0');
+    expect(el('hset-kernel').textContent).not.toContain('security');
+  });
+});

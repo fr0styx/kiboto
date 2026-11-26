@@ -1,6 +1,8 @@
 /**
- * Kernel, ZFS and Docker (Updates), on a machine set up for Kiboto. Those three are held: they
- * move only to the versions a Kiboto release was tested with. The card shows what is installed,
+ * Kernel, ZFS and Docker (Updates), on a machine set up for Kiboto. ZFS and Docker are held: they
+ * move only to the versions a Kiboto release was tested with. The kernel takes Debian's security
+ * fixes by itself (held too when KIBOTO_SECURITY_UPDATES is off), and keeps starting the running
+ * one until ZFS is built for a new one. The card shows what is installed,
  * whether the tested versions can be brought in, and when a restart finishes a new kernel. Where
  * Kiboto is a guest the card stays hidden: the host updates itself.
  */
@@ -14,9 +16,18 @@ const GROUPS = [
   { id: 'docker', pkg: 'docker.io', name: () => 'Docker' },
 ];
 
+const follows = (st) => (st.follows_debian || []).includes('linux-image-amd64');
+
 /** The sentence under the title. */
 export function hostSetStatus(st) {
   if (st.running) return t('hset.running', 'Bringing them up to date… Apps keep running.');
+  const waits = st.security?.kernel_without_zfs;
+  if (waits)
+    return t(
+      'hset.kernel_waits',
+      'ZFS is not built for the new kernel {version} yet, so this machine keeps starting the kernel it runs now.',
+      { version: waits }
+    );
   const last = st.last || {};
   if (last.result === 'failed') return t('hset.failed', 'The last try did not work: {error}', { error: last.error });
   if (last.result === 'zfs_missing') return last.error;
@@ -25,6 +36,24 @@ export function hostSetStatus(st) {
   if (st.waiting?.length)
     return t('hset.waiting', 'Debian offers newer versions. They come with a Kiboto update once they are tested.');
   return t('hset.ok', 'As tested with this Kiboto.');
+}
+
+/** What moves how: the paragraph under the status. */
+export function hostSetHelp(st) {
+  if (st.security && !st.security.on)
+    return t(
+      'hset.security_off',
+      "Debian's security fixes are not installed by themselves on this machine (KIBOTO_SECURITY_UPDATES=0)."
+    );
+  if (follows(st))
+    return t(
+      'hset.help_follows',
+      'Debian updates everything else on this machine and installs its security fixes by itself, the kernel included; Kiboto never restarts the machine for them. A new kernel starts only once ZFS is built for it. ZFS and Docker move only to versions a Kiboto release was tested with.'
+    );
+  return t(
+    'hset.help',
+    'Debian updates everything else on this machine. These three move only to versions a Kiboto release was tested with, so a new kernel never comes up without your pools.'
+  );
 }
 
 function rows(st) {
@@ -36,6 +65,7 @@ function rows(st) {
       <strong>${name()}</strong>
       <span translate="no">${p.installed || '-'}</span>
       ${moves ? html`<span>${t('hset.to', 'to {version}', { version: p.tested })}</span>` : ''}
+      ${id === 'kernel' && follows(st) ? html`<span>${t('hset.follows', "takes Debian's security fixes")}</span>` : ''}
     </li>`;
   });
 }
@@ -63,12 +93,7 @@ export async function renderHostSetCard(mount = document.getElementById('host-se
         <p class="fw-status" id="hset-status" aria-live="polite">${hostSetStatus(st)}</p>
       </div>
     </div>
-    <p class="fw-why">
-      ${t(
-        'hset.help',
-        'Debian updates everything else on this machine. These three move only to versions a Kiboto release was tested with, so a new kernel never comes up without your pools.'
-      )}
-    </p>
+    <p class="fw-why" id="hset-help">${hostSetHelp(st)}</p>
     <ul class="pcopy-list" aria-labelledby="hset-title">
       ${rows(st)}
     </ul>

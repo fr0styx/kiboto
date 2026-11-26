@@ -9,8 +9,9 @@
 #
 # Debian keeps doing what it does: boot, drivers, and its own updates through apt, which stays yours
 # to use. Kiboto adds its service, the storage and sharing tools it drives, and Docker for apps.
-# Three things are held at the version Kiboto was tested with and move only with a Kiboto update:
-# the kernel, ZFS and Docker (`apt-mark showhold` lists them; `apt-mark unhold` gives them back).
+# Debian's security fixes are installed by themselves, the kernel included, and Kiboto never restarts
+# the machine for them. ZFS and Docker are held at the version Kiboto was tested with and move only with
+# a Kiboto update (`apt-mark showhold` lists them; `apt-mark unhold` gives them back).
 # Storage pools and what is on them are never touched by this script, in either direction.
 set -eu
 # Kiboto runs as its own user and reads what this script puts in place, whatever umask called it
@@ -22,12 +23,14 @@ KIBOTO_IMAGE=""
 PREFIX=/opt/kiboto
 DATA=/var/lib/kiboto
 ETC=/etc/kiboto
-HELD="linux-image-amd64 linux-headers-amd64 zfs-dkms zfsutils-linux docker.io"
+HELD="zfs-dkms zfsutils-linux docker.io"
+# held by versions before 2.0.7, and again with KIBOTO_SECURITY_UPDATES=0: given back on uninstall
+KERNEL="linux-image-amd64 linux-headers-amd64"
 # what Kiboto drives: disks and SMART, the three kinds of pool, sharing, apps, virtual machines
 TOOLS="smartmontools hdparm nvme-cli sg3-utils usbutils btrfs-progs e2fsprogs parted gdisk fuse3 gocryptfs mergerfs \
 rclone restic samba nfs-kernel-server docker.io docker-cli qemu-system-x86 qemu-utils ovmf swtpm \
 systemd-timesyncd tgt nftables libtss2-esys-3.0.2-0t64 libtss2-rc0t64 libtss2-mu-4.0.1-0t64 \
-python3-venv ca-certificates curl acl"
+python3-venv ca-certificates curl acl unattended-upgrades"
 
 say() { printf '%s\n' "$*"; }
 die() { printf 'Kiboto was not installed: %s\n' "$*" >&2; exit 1; }
@@ -430,7 +433,7 @@ uninstall() {
   systemctl daemon-reload
   rm -rf "$PREFIX" "$ETC/managed"
   # shellcheck disable=SC2086
-  apt-mark unhold $HELD >/dev/null 2>&1 || true
+  apt-mark unhold $HELD $KERNEL >/dev/null 2>&1 || true
   if [ "${1:-}" = "--purge" ]; then
     rm -rf "$DATA" "$ETC"
     say "Kiboto and its settings are gone."

@@ -40,7 +40,7 @@
   ]},
   {"name": "The machine", "features": [
    {"name": "Kiboto updates with a way back", "beside": "yes", "linux": "yes", "os": "yes", "note": "Kiboto OS follows the Stable and Beta channels; the container can also follow Edge."},
-   {"name": "System updates: kernel, ZFS, Docker", "beside": "host", "linux": "host", "os": "partly", "note": "Kiboto OS moves these to versions a release was tested with. Automatic security updates are being added."},
+   {"name": "System updates: kernel, ZFS, Docker", "beside": "host", "linux": "host", "os": "yes", "note": "Kiboto OS installs Debian's security fixes by itself, the kernel included, and never restarts the machine for them. ZFS and Docker move to versions a release was tested with."},
    {"name": "Network settings", "beside": "view", "linux": "view", "os": "partly", "note": "Kiboto OS changes the address and the bridge for virtual machines, with a way back."},
    {"name": "Firewall", "beside": "host", "linux": "host", "os": "yes", "note": "On after an install from Kiboto's USB image; on other installs off until you turn it on. Your home network reaches everything, and the outside only what you tick, apps included."},
    {"name": "Restart and shut down", "beside": "yes", "linux": "yes", "os": "yes"},

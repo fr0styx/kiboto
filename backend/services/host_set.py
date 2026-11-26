@@ -1,8 +1,10 @@
-"""The kernel, ZFS and Docker of a machine set up for Kiboto: held, and moved with Kiboto.
+"""The kernel, ZFS and Docker of a machine set up for Kiboto.
 
-Debian updates everything else through apt as on any Debian. These three are held
-(packaging/install.sh), because a new kernel that ZFS has not been built for comes up without the
-pools, and a new Docker can change how apps run. Each Kiboto release carries the versions it was
+Debian updates everything else through apt as on any Debian, and installs its security fixes by
+itself, the kernel included (security_updates; a kernel hook keeps the machine on the running kernel
+until ZFS is built for a new one). ZFS and Docker are held (packaging/install.sh), because a new ZFS
+may not build for the kernel, and a new Docker can change how apps run. With KIBOTO_SECURITY_UPDATES
+off the kernel is held too. Each Kiboto release carries the versions it was
 tested with (packaging/host-set.json). When the machine's versions differ and Debian offers exactly
 the tested ones, Updates offers to bring them there. Never past them: a version Debian offers that
 no release was tested with waits.
@@ -93,12 +95,34 @@ def lower(do: Run) -> Callable[[str, str], bool]:
     return lambda a, b: do(["dpkg", "--compare-versions", a, "lt", b])[0] == 0
 
 
-def plan(found: dict[str, dict[str, Any]], tested: dict[str, str], older: Callable[[str, str], bool]) -> dict[str, Any]:
+def kernel_follows_debian() -> bool:
+    from backend.services import security_updates
+
+    return security_updates.on()
+
+
+def following() -> tuple[str, ...]:
+    """The packages that take Debian's own fixes instead of the tested versions."""
+    return GROUPS["kernel"] if kernel_follows_debian() else ()
+
+
+def held() -> list[str]:
+    return [p for p in PACKAGES if p not in following()]
+
+
+def plan(
+    found: dict[str, dict[str, Any]],
+    tested: dict[str, str],
+    older: Callable[[str, str], bool],
+    follows: tuple[str, ...] = (),
+) -> dict[str, Any]:
     """`move`: the tested version is on offer and newer than the installed one. `waiting`: Debian
     offers something newer than both, that no release was tested with yet. `ahead`: installed is
     already newer than tested (a fresh install takes what Debian has); it is left alone, never moved back."""
     move, waiting, ahead = [], [], []
     for pkg, v in found.items():
+        if pkg in follows:
+            continue  # Debian's security fixes move it, not a tested version
         want, have = tested.get(pkg, ""), v["installed"]
         if want and have and have != want:
             if not older(have, want):
@@ -120,6 +144,8 @@ def status(do: Run | None = None) -> dict[str, Any]:
     do = do or run
     if not runtime.managed_host():
         return {"managed": False}
+    from backend.services import security_updates
+
     tested = tested_with()
     found = versions(do)
     last = read_json(_result_file(), None) if os.path.exists(_result_file()) else None
@@ -130,7 +156,9 @@ def status(do: Run | None = None) -> dict[str, Any]:
             {"name": p, "installed": found[p]["installed"], "offered": found[p]["offered"], "tested": tested.get(p, "")}
             for p in PACKAGES
         ],
-        **plan(found, tested, lower(do)),
+        **plan(found, tested, lower(do), following()),
+        "follows_debian": list(following()),
+        "security": security_updates.status(),
         "running": busy(do),
         "restart_needed": os.path.exists(REBOOT_FLAG),
         "last": last if isinstance(last, dict) else None,
@@ -205,7 +233,7 @@ def apply(do: Run | None = None) -> dict[str, Any]:
     """The unit's work. Moves the held packages to the tested versions and holds them again."""
     do = do or run
     tested = tested_with()
-    moving = plan(versions(do), tested, lower(do))["move"]
+    moving = plan(versions(do), tested, lower(do), following())["move"]
     result: dict[str, Any] = {"at": time.time(), "moved": moving, "result": "nothing", "error": ""}
     if moving:
         do(["apt-mark", "unhold", *moving])
@@ -213,7 +241,7 @@ def apply(do: Run | None = None) -> dict[str, Any]:
             ["apt-get", "install", "-y", "-qq", "--no-install-recommends", *[f"{p}={tested[p]}" for p in moving]],
             timeout=3600,
         )
-        do(["apt-mark", "hold", *PACKAGES])  # held again whatever happened
+        do(["apt-mark", "hold", *held()])  # held again whatever happened
         if code != 0:
             result.update(result="failed", error=said.splitlines()[-1][:300] if said else "apt-get failed")
         else:
