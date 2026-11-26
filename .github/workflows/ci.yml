@@ -624,7 +624,8 @@ jobs:
         with:
           name: digest-${{ matrix.variant }}
           path: digest.txt
-          retention-days: 3
+          # the release job reads it after the owner's approval, which may come days later
+          retention-days: 30
 
   check-image:
     name: Check image (amd64, ${{ matrix.variant }})
@@ -777,19 +778,23 @@ jobs:
           i=0
           started=""
           for tag in latest $RECENT; do
-            OLD="${{ env.OLD_IMAGE }}:$tag${{ matrix.suffix }}"  # core images end in -core (NARC-10)
             i=$((i + 1))
-            # each run pulls its own old image, so the three downloads overlap too
-            ( docker pull -q "$OLD" >/dev/null || exit 77
+            # each run pulls its own old image, so the three downloads overlap too. The image name
+            # since the rebrand first; a version from before it is only under the old name, which
+            # stops at 2.2. Core images end in -core (NARC-10).
+            ( OLD="${{ env.IMAGE }}:$tag${{ matrix.suffix }}"
+              docker pull -q "$OLD" >/dev/null 2>&1 || { OLD="${{ env.OLD_IMAGE }}:$tag${{ matrix.suffix }}"; docker pull -q "$OLD" >/dev/null 2>&1; } || exit 77
+              echo "from $OLD"
               KIBOTO_TEST_NAME="kb-upgrade-$i" KIBOTO_TEST_PORT=$((18090 + i)) \
                 sh scripts/upgrade_rollback_test.sh "$OLD" "$NEW" ) > "/tmp/upgrade-$i.log" 2>&1 &
             started="$started $i:$!:$tag"
           done
           failed=""
+          passed=0
           for run in $started; do
             n=${run%%:*}; rest=${run#*:}; pid=${rest%%:*}; tag=${rest#*:}
             rc=0; wait "$pid" || rc=$?
-            if [ "$rc" = 0 ]; then status=passed
+            if [ "$rc" = 0 ]; then status=passed; passed=$((passed + 1))
             elif [ "$rc" = 77 ]; then status="skipped (no image for $tag)"
             else status=FAILED; failed="$failed $tag"; fi
             echo "::group::from $tag ($status)"
@@ -798,6 +803,11 @@ jobs:
           done
           if [ -n "$failed" ]; then
             echo "::error title=Upgrade and rollback test::failed from$failed, see the step log"
+            exit 1
+          fi
+          # a skipped base tests nothing: green with one base or none would only look like a pass
+          if [ "$passed" -lt 2 ]; then
+            echo "::error title=Upgrade and rollback test::only $passed of the older versions could be updated from (at least 2 must be)"
             exit 1
           fi
 

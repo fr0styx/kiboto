@@ -15,7 +15,7 @@ This document provides complete, step-by-step instructions for installing and ru
    - [Option E: UGOS (Ugreen NAS) & Observer Platforms](#option-e-ugos-ugreen-nas--observer-platforms)
    - [Option F: Standalone Docker CLI (`docker run`)](#option-f-standalone-docker-cli-docker-run)
    - [Option G: Building the Production Image from Source](#option-g-building-the-production-image-from-source)
-   - [Option H: A machine of its own (Debian 13, preview)](#option-h-a-machine-of-its-own-debian-13-preview)
+   - [Option H: Kiboto OS, a machine of its own (beta)](#option-h-kiboto-os-a-machine-of-its-own-beta)
 4. [Hardware Device & Capability Mappings](#hardware-device--capability-mappings)
 5. [Headless Server Deployments (No LCD / ARGB)](#headless-server-deployments-no-lcd--argb)
 6. [Environment Variables Reference](#environment-variables-reference)
@@ -31,7 +31,7 @@ This document provides complete, step-by-step instructions for installing and ru
 Kiboto comes in two editions, and each release carries both.
 
 - **Kiboto Companion** is the container. It runs beside the system you already have (Unraid, TrueNAS
-  SCALE, Proxmox, FygoOS, UGOS, or any Linux with Docker), and that system keeps running the drives
+  SCALE, Proxmox, FygoOS, UGOS, ZettOS, or any Linux with Docker), and that system keeps running the drives
   and the machine. Options A to G below install it.
 - **Kiboto OS** makes Kiboto the system of the machine itself. It is in beta: see option H and
   [KIBOTO_OS.md](KIBOTO_OS.md).
@@ -84,12 +84,13 @@ is moved to the new one by Kiboto's own updater. Where the system beside Kiboto 
 
 | Tag | Size | Includes |
 | --- | ---- | -------- |
-| `latest`, `edge` | about 1.8 GB | Everything: virtual machines (QEMU, UEFI, vTPM), Chromium for the front-panel LCD, and the ZFS tools |
-| `latest-core`, `edge-core` | about 500 MB | Everything except virtual machines, Chromium and ZFS; the front LCD uses the built-in renderer |
+| `latest`, `edge` | about 1.9 GB on disk, a 700 MB download | Everything: virtual machines (QEMU, UEFI, vTPM), Chromium for the front-panel LCD, and the ZFS tools |
+| `latest-core`, `edge-core` | about 1 GB on disk, a 350 MB download | Everything except virtual machines, Chromium and ZFS; the front LCD uses the built-in renderer |
 
 Both images carry the btrfs and software-RAID (mdadm) tools. The full image also carries
-Debian's ZFS 2.4 tools for servers where Kiboto runs the pools itself (plain Linux, ZettOS).
-On Unraid, TrueNAS and Proxmox the host runs its own ZFS and Kiboto leaves it to the host.
+Debian's ZFS 2.4 tools for servers where Kiboto runs the pools itself (plain Linux). On Unraid,
+TrueNAS, Proxmox and ZettOS the host runs its own pools and Kiboto only watches them (on ZettOS it
+can also start a scrub).
 
 **Snapshots and scrubs where Kiboto runs the pools** need the pool's folder mounted into the
 container at the same path (for example `-v /mnt/tank:/mnt/tank`). ZFS also needs the host's
@@ -106,7 +107,7 @@ your compose file or Unraid template and recreate the container.
 | Architecture | Built | Tested |
 | --- | --- | --- |
 | `amd64` (x86-64) | every release | CI starts every image and runs the test suites; used on real servers |
-| `arm64` | every release | CI starts every image under emulation and checks it serves the app; not yet tested on real arm64 hardware |
+| `arm64` | every release | CI starts every image on an arm64 runner and checks it serves the app; not yet tested on real arm64 NAS hardware |
 
 ---
 
@@ -321,7 +322,7 @@ TrueNAS SCALE (Dragonfish & Electric Eel) supports custom Docker Compose applica
 
 ### Option E: UGOS (Ugreen NAS) & Observer Platforms
 
-For **UGOS (Ugreen NAS OS)**, **FygoOS**, **ZettOS**, or **Proxmox VE**, Kiboto operates in **Non-Intrusive Observer Mode (`is_observer_mode = True`)**. It monitors storage pools, drive temperatures, S.M.A.R.T. health, and host metrics without modifying host configuration files or competing with native storage daemons.
+On **UGOS (Ugreen NAS OS)**, **FygoOS**, **ZettOS** and **Proxmox VE**, Kiboto watches: it shows the storage pools, drive temperatures, SMART health and the machine's load, and leaves the host's own storage settings and services alone.
 
 1. **Deploy Compose Stack**:
    In UGOS Docker Manager or via SSH:
@@ -446,7 +447,7 @@ For developers, homelab maintainers, and air-gapped homelabs building custom ima
 
 ---
 
-### Option H: A machine of its own (Debian 13, preview)
+### Option H: Kiboto OS, a machine of its own (beta)
 
 Here Kiboto is the system of the machine instead of an app on another NAS system: it makes the storage pools, shares the folders, runs the apps and updates itself, on a plain Debian 13. It installs from a USB image or from `install.sh` on a Debian you set up yourself.
 

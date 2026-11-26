@@ -14,15 +14,13 @@ def _read(rel):
 
 
 def test_promotion_verifies_the_ci_workflow_identity():
+    """Promotion verifies who signed: Kiboto's own CI workflow, for the version tag being promoted.
+    tests/test_release_traps.py tries the pattern itself against right and wrong identities."""
     text = _read(".github/workflows/promote.yml")
-    m = re.search(r"--certificate-identity-regexp '([^']+)'", text)
-    assert m, "promotion must verify a pinned identity"
-    pattern = m.group(1).replace("${{ github.repository }}", "fr0styx/zettnas-toolkit")
-    base = "https://github.com/fr0styx/kiboto/.github/workflows/"
-    assert re.fullmatch(pattern, base + "ci.yml@refs/tags/v1.9.4")
-    assert re.fullmatch(pattern, base + "ci.yml@refs/heads/main")
-    assert not re.fullmatch(pattern, base + "other.yml@refs/heads/main")
-    assert not re.fullmatch(pattern, base + "ci.yml@refs/heads/feature")
+    line = next(x for x in text.splitlines() if "--certificate-identity-regexp" in x)
+    assert "/\\\\.github/workflows/ci\\\\.yml@refs/tags/v${VERSION" in line
+    assert "heads/main" not in text  # a main-branch signature does not make an image a release
+    assert "--certificate-oidc-issuer https://token.actions.githubusercontent.com" in text
 
 
 def test_linux_compose_caps_container_logs():

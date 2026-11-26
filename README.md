@@ -15,7 +15,7 @@
 </div>
 
 Kiboto is an operating system for a home NAS, in two editions. **Kiboto Companion** is one container on
-the system you already have (Unraid, Debian, Ubuntu, TrueNAS SCALE, Proxmox, FygoOS or plain Docker).
+the system you already have (Unraid, TrueNAS SCALE, Proxmox, FygoOS, UGOS, ZettOS, or any Linux with Docker).
 **Kiboto OS**, in beta, makes Kiboto the system of the machine itself, from a USB stick. It works on any
 NAS or homelab server, and drives the front screen, the fans and the light bar on Zettlab and Aoostar
 boxes. [What each edition can do](docs/FEATURES.md).
@@ -73,8 +73,8 @@ docker compose -f docker-compose.linux.yml up -d
 ```
 
 Open `http://<server-ip>:8082` and sign in as `admin`. There is no default password: Kiboto creates a
-first-time password, prints it in the container log (`docker logs kiboto`) and saves it as
-`initial-admin-password` in the data folder, unless you set `WEB_PASSWORD`. You pick your own at
+first-time password and saves it as `initial-admin-password` in the data folder, readable by root
+only (the container log names the file, never the password), unless you set `WEB_PASSWORD`. You pick your own at
 first sign-in.
 
 On Unraid, use the template in [`unraid/kiboto.xml`](unraid/kiboto.xml). Every platform, the device
@@ -93,7 +93,7 @@ where Unraid or a Compose file does the updating.
 | `latest` | Stable: a weekly train every Tuesday, with the newest release that has had 3 days on beta. The default. |
 | `beta` | A new release as soon as its tests pass. |
 | `edge` | Every commit on `main` that passes CI. |
-| `…-core` | Any of the above without virtual machines or Chromium, about 500 MB instead of 1.7 GB. |
+| `…-core` | Any of the above without virtual machines, Chromium or ZFS: about 1 GB on disk instead of 1.9 GB. |
 
 Images are signed in CI; Kiboto verifies the signature before it installs an update, and keeps the
 previous version until the new one is healthy. Choose the channel with `UPDATE_CHANNEL` (`stable`,
@@ -104,7 +104,7 @@ work and goes up one patch number at a time: see [releasing](docs/RELEASING.md).
 
 | Topic | Guide |
 |---|---|
-| Install on Unraid, Linux, TrueNAS, FygoOS or Docker | [INSTALLATION.md](docs/INSTALLATION.md) |
+| Install Kiboto Companion on Unraid, TrueNAS SCALE, Proxmox, FygoOS, UGOS, ZettOS or any Linux with Docker | [INSTALLATION.md](docs/INSTALLATION.md) |
 | Kiboto OS: a machine of its own, from a USB stick; what it runs on | [KIBOTO_OS.md](docs/KIBOTO_OS.md) |
 | What Kiboto Companion and Kiboto OS can each do, feature by feature | [FEATURES.md](docs/FEATURES.md) |
 | Every setting | [CONFIGURATION.md](docs/CONFIGURATION.md) |

@@ -212,7 +212,8 @@ class Settings:
         "UPDATE_SIGNATURES",
         "enforce",
         "In-app updates check the image's signature from this project's CI first: enforce (refuse "
-        "an unsigned or wrongly signed image), warn (log it and install anyway) or off.",
+        "an unsigned or wrongly signed image), warn (log it and install anyway) or off. Kiboto OS "
+        "always enforces it, unless KIBOTO_ACCEPT_MAIN_BUILDS is set.",
         choices=("enforce", "warn", "off"),
         group="Updates",
     )

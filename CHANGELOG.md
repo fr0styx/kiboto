@@ -94,6 +94,8 @@ Kiboto OS: the Edge update channel is no longer offered there, because such a ma
 
 Firewall: the switch now looks on when the firewall is on.
 
+Guides: the image sizes, where the first-time password is kept, the arm64 testing, ZettOS and the list of systems Kiboto runs on now match what Kiboto does.
+
 #### Security
 
 On a machine of its own, failed sign-ins to shared folders over the network now count like web sign-ins: 20 in 15 minutes block the address for an hour, and they show under History, Sign-ins.
@@ -109,6 +111,8 @@ Each release lists the checksums of install.sh and the install image, signed by 
 Bringing storage pools back at start checks each pool record before acting on it as root, so a changed record cannot mount a pool over a system folder or with unsafe options.
 
 Kiboto OS: the root service no longer acts on unchecked files in the web process's folder (the network trial record, a snapshot's file list, its own log), which could have let a fault in the web process become root.
+
+Kiboto OS: updates always check the image's signature there; the UPDATE_SIGNATURES setting can no longer switch that off on a machine that takes only releases.
 
 #### New
 
@@ -173,6 +177,8 @@ The compose files, the Unraid templates and the guides now use the image name `g
 The guides name the two editions, Kiboto Companion (the container) and Kiboto OS, and call the connection to Unraid's or TrueNAS's API "the API link" instead of "companion mode".
 
 Every build is now installed as Kiboto OS in a fresh Debian 13 virtual machine, and checked before and after a restart, before it is signed or published.
+
+Releases: Stable now takes only an image signed for that exact version, and the update test fails instead of passing when it could not try enough older versions.
 
 ## v2.0.6 (2026-11-23)
 ### 🖥️ Kiboto on a machine of its own (preview), with its settings kept safe on every pool

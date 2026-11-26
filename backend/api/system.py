@@ -1375,8 +1375,11 @@ def _local_repo_digests(image_ref: str) -> list[str]:
 
 
 async def _check_update_signature(target_img: str, expected_digest: str | None, pulled: list[str]) -> dict:
-    """Verifies the CI signature of the image about to be installed (UPDATE_SIGNATURES)."""
-    mode = config.UPDATE_SIGNATURES
+    """Verifies the CI signature of the image about to be installed (UPDATE_SIGNATURES; always on a
+    machine that takes only releases, image_signature.signature_mode)."""
+    from backend.services.image_signature import signature_mode
+
+    mode = signature_mode()
     if mode == "off":
         return {"checked": False}
     from backend.services.image_signature import SignatureResult, verify_image
@@ -1410,10 +1413,11 @@ async def _check_update_signature(target_img: str, expected_digest: str | None, 
             detail="Not updating: this machine installs only released versions of Kiboto, and this image "
             "was built from the main branch.",
         )
+    # where the setting can let it through, say so; on a machine that takes only releases it cannot
+    anyway = "" if tags_only else " Try again later; UPDATE_SIGNATURES=warn installs it anyway."
     raise HTTPException(
         status_code=502,
-        detail=f"Not updating: the image's signature could not be verified ({result.reason}). "
-        "Try again later; UPDATE_SIGNATURES=warn installs it anyway.",
+        detail=f"Not updating: the image's signature could not be verified ({result.reason}).{anyway}",
     )
 
 

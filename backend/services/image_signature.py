@@ -287,12 +287,22 @@ def install_allowed(image: str) -> str:
     digest = image.split("@", 1)[1] if "@" in image else digests[0]
     if digest not in digests:
         raise ValueError("Not updating: the image is not from Kiboto's repository.")
-    if config.UPDATE_SIGNATURES in ("off", "warn"):
+    if signature_mode() in ("off", "warn"):
         return digest
     result = verify_image(digest, releases_only())
     if not result.ok:
         raise ValueError(f"Not updating: the image's signature could not be verified ({result.reason}).")
     return digest
+
+
+def signature_mode() -> str:
+    """How an update's signature is checked here: UPDATE_SIGNATURES, except on a machine that takes
+    only releases. There a setting of "warn" or "off" would let one line in a settings file make the
+    root service install any image of the repository, so it is not taken (a test machine says
+    KIBOTO_ACCEPT_MAIN_BUILDS, and is then not such a machine)."""
+    from backend import config
+
+    return "enforce" if releases_only() else config.UPDATE_SIGNATURES
 
 
 def releases_only() -> bool:
