@@ -179,6 +179,14 @@ export function initLedControl() {
       if (ledNightEnd && data.night_end) ledNightEnd.value = data.night_end;
       initGlassTimePickers($('tab-led') || document);
 
+      // a bar that keeps each effect in its own memory (the D4's) is not sent a rainbow
+      const noRainbow = data.rainbow_offered === false;
+      effectBtns.forEach((b) => {
+        if (b.dataset.effect === 'rainbow') b.hidden = noRainbow;
+      });
+      profilePills.forEach((p) => {
+        if (p.dataset.profile === 'rainbow') p.hidden = noRainbow;
+      });
       effectBtns.forEach((b) => b.classList.toggle('active', b.dataset.effect === currentMode));
       colorChips1.forEach((c) =>
         c.classList.toggle('active', c.dataset.hex.toLowerCase() === currentColor.toLowerCase())

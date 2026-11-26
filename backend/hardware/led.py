@@ -14,6 +14,11 @@ from backend.state import Z_STATE
 logger = logging.getLogger("Kiboto")
 
 LED_PORT = _settings.current("led_port")
+# The Zettlab D4's light bar hangs on a UART of the board (uart7), not on USB; its frames are the
+# same as the D6/D8 bar's (issue #68, captured from ZettOS and checked by the reporter)
+D4_UARTS = ("/dev/ttyS7", "/host/dev/ttyS7")
+_d4 = {"known": False, "value": False}
+_last_frame: dict[str, bytes] = {}  # what a bar that keeps its effect was last sent, by port
 
 CRC_TABLE = [
     0x00,
@@ -289,6 +294,7 @@ except ImportError:
 
 def _close_serial_connection():
     global _serial_handle, _serial_port
+    _last_frame.clear()  # after a reconnect the bar is told its effect again
     if _serial_handle is not None:
         try:
             _serial_handle.close()
@@ -333,6 +339,25 @@ def _get_serial_connection(port: str):
         return None
 
 
+def _is_d4() -> bool:
+    """Whether this is a Zettlab D4: asked once, the board does not change while Kiboto runs."""
+    if not _d4["known"]:
+        try:
+            from backend.hardware.storage import detect_chassis_model
+
+            _d4["value"] = detect_chassis_model(allow_fallback=False) == "d4"
+        except (OSError, ValueError, ImportError):
+            _d4["value"] = False
+        _d4["known"] = True
+    return _d4["value"]
+
+
+def keeps_its_effect(port) -> bool:
+    """A bar that keeps the last effect in its own memory, even across a restart (the D4's): it is
+    written only when the effect changes, and never many times a second."""
+    return bool(port) and port in D4_UARTS
+
+
 def find_led_port():
     env_port = _settings.current("led_port")
     if env_port and os.path.exists(env_port):
@@ -347,6 +372,9 @@ def find_led_port():
             except Exception:
                 ignored("backend.hardware.led.find_led_port")
             return b
+
+    if _is_d4():  # its bar is on the board's uart7; a USB serial device there is someone else's
+        return next((p for p in D4_UARTS if os.path.exists(p)), None)
 
     # Avoid capturing arbitrary serial devices (Zigbee dongles, 3D printers) on generic PCs
     from backend.hardware.fans import is_zettlab_appliance
@@ -383,8 +411,11 @@ def send_led_packet(mode, r1, g1, b1, r2=0, g2=0, b2=0, speed=5):
     for byte in payload:
         crc = CRC_TABLE[crc ^ byte]
     frame = bytes([0xFF, 0xFF]) + payload + bytes([crc])
+    keeps = keeps_its_effect(port)
 
     with _serial_lock:
+        if keeps and _last_frame.get(port) == frame:
+            return True, "OK"  # it shows this already, and keeps it by itself
         handle = _get_serial_connection(port)
         if handle is None:
             return False, f"Serial connection unavailable for {port}"
@@ -392,6 +423,8 @@ def send_led_packet(mode, r1, g1, b1, r2=0, g2=0, b2=0, speed=5):
             handle.write(frame)
             if hasattr(handle, "flush"):
                 handle.flush()
+            if keeps:
+                _last_frame[port] = frame
             return True, "OK"
         except Exception as e:
             _close_serial_connection()
@@ -399,6 +432,12 @@ def send_led_packet(mode, r1, g1, b1, r2=0, g2=0, b2=0, speed=5):
             global _last_connect_fail_time
             _last_connect_fail_time = time.time()
             return False, str(e)
+
+
+RAINBOW_NOT_HERE = (
+    "The rainbow isn't offered on this light bar: it keeps each effect in its own memory, and a "
+    "rainbow would rewrite it many times a second. Its own effects work."
+)
 
 
 def _rainbow_worker(brightness, slider_speed):
@@ -434,6 +473,8 @@ def apply_led_state(data):
         return send_led_packet(0, 0, 0, 0, 0, 0, 0, 0)
 
     if effect == "rainbow":
+        if keeps_its_effect(find_led_port()):
+            return False, RAINBOW_NOT_HERE
         Z_STATE.rainbow_stop.clear()
         Z_STATE.rainbow_thread = threading.Thread(target=_rainbow_worker, args=(brightness, slider_speed), daemon=True)
         Z_STATE.rainbow_thread.start()

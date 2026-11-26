@@ -485,6 +485,7 @@ Kiboto accesses physical hardware through Linux device nodes and `cgroup` rules:
 | `/dev/dri/*` | `c 226:* rwm` | GPU hardware acceleration (Intel QuickSync, AMD ROCm) | Optional |
 | `/dev/kvm` | `c 10:232 rwm` | Hardware-assisted virtual machine acceleration (KVM) | Optional |
 | `/dev/ttyACM0` | `c 166:* rwm` | WS2812B ARGB chassis lightbar USB microcontroller | Optional |
+| `/dev/ttyS7` | `--device /dev/ttyS7` | The Zettlab D4's light bar, on a serial port of the board | Optional |
 | `/dev/ttyUSB*` | `c 188:* rwm` | Alternative USB serial LED / MCU controllers | Optional |
 | `/dev/bus/usb/*` | `c 189:* rwm` | USB character devices and USB bus discovery | Optional / USB |
 | `/dev/usb/hiddev*` | `c 180:* rwm` | Legacy USB HID power devices | Optional / UPS |

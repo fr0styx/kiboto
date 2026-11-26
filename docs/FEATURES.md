@@ -62,13 +62,13 @@ What the words mean:
 | Server name, time zone and the SSH switch | Your NAS system does this | Your NAS system does this | Yes |
 | Dynamic DNS, HTTPS certificates, access from away | Yes | Yes | Being checked |
 
-## Front panel hardware (Zettlab D6 and D8 Ultra)
+## Front panel hardware (Zettlab D4, D6 and D8 Ultra)
 
 | | Companion, beside a NAS system | Companion, on plain Linux | Kiboto OS |
 | --- | --- | --- | --- |
-| Fans: curves, quiet at night, fan stop while drives sleep | Yes | Yes | Yes |
-| Light bar | Yes | Yes | Being checked |
-| Front screen<br><sub>Kiboto OS draws the screen with the plain renderer.</sub> | Yes | Yes | Partly |
+| Fans: curves, quiet at night, fan stop while drives sleep<br><sub>On the D4 the kernel keeps the fans, and Kiboto shows them.</sub> | Yes | Yes | Yes |
+| Light bar<br><sub>The Zettlab D4's too, without the rainbow effect.</sub> | Yes | Yes | Being checked |
+| Front screen<br><sub>Kiboto OS draws the screen with the plain renderer. The D4's screen is not drawn yet.</sub> | Yes | Yes | Partly |
 | Card copies from the SD and microSD slots<br><sub>On Kiboto OS copies start from the app; the front COPY button is not read yet.</sub> | Yes | Yes | Partly |
 | Fan watchdog beside the app | Yes | Yes | Not yet |
 

@@ -136,6 +136,8 @@ A feature list by edition (docs/FEATURES.md): what Kiboto Companion beside anoth
 
 Kiboto OS: the firewall can be turned on (Settings, Security). When it is on, your home network reaches everything on the machine and the outside reaches only what you tick, apps included. It is off until you turn it on.
 
+Zettlab D4: the front light bar works (it is on the board's serial port /dev/ttyS7, which the container needs). Its effects work, without the rainbow: that bar keeps each effect in its own memory, so Kiboto writes it only when the effect changes.
+
 #### Changes
 
 On a machine of its own, a separate system service (the host door) now changes the machine's name, time zone, clock and SSH setting for Kiboto, from a fixed list of operations: the first step towards Kiboto's web service running without full system rights (docs/adr/0006-web-without-root.md).
