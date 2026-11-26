@@ -26,6 +26,8 @@ Kiboto OS: errors found by a scrub of a btrfs pool become an alert again; Kiboto
 
 Kiboto OS: Storage lists the pools that can be imported (the list was always empty there), and the diagnostics include the kernel's warnings and errors again.
 
+Kiboto OS: after restoring a settings backup (a move from the container, a new system disk), apps whose folders are in Kiboto OS's apps folder start again by themselves, as they do after a restore from the copy on the pools.
+
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container
 

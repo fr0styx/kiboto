@@ -140,3 +140,24 @@ def test_after_a_move_each_person_gets_their_share_password_at_their_first_sign_
     assert moved_in.smb_at_sign_in("bob", "pw", str(tmp_path), Samba(ok="broken")) is False
     assert moved_in.smb_at_sign_in("bob", "pw", str(tmp_path), samba) is True
     assert samba.set == ["ann", "bob"]
+
+
+def test_a_settings_backup_put_in_place_brings_the_apps_back(tmp_path, monkeypatch):
+    """After a move from the container the apps' Compose folders are on the pool and their containers
+    are not: the same start that brings apps back after a restore from the pools does it here too."""
+    monkeypatch.setattr(moved_in, "_restored_at_start", [False])
+    monkeypatch.setattr(runtime, "managed_host", lambda: False)
+    moved_in.mark(str(tmp_path))
+    assert moved_in.restored_at_this_start() is False  # not on a machine Kiboto runs: nothing to do
+    monkeypatch.setattr(runtime, "managed_host", lambda: True)
+    moved_in.mark(str(tmp_path))
+    assert moved_in.restored_at_this_start() is True
+
+
+def test_kibotos_start_asks_for_the_apps_after_either_restore():
+    with open(
+        os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "backend", "main.py"),
+        encoding="utf-8",
+    ) as f:
+        main = f.read()
+    assert "if pool_copy.restored_at_this_start() or moved_in.restored_at_this_start():" in main

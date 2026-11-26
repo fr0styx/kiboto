@@ -556,13 +556,15 @@ def _start_app_names() -> None:
         from backend.services import smb_signins
 
         supervise("SmbSignIns", smb_signins.keep_watching)  # failed SMB sign-ins count like the web ones
-        from backend.services import apps_back, pool_copy, pool_places
+        from backend.services import apps_back, moved_in, pool_copy, pool_places
 
         try:
             pool_places.settle()  # homes on the first pool, once there is one
         except (OSError, ValueError, RuntimeError) as e:
             logger.warning("[Main] Where home folders go was not settled: %s", e)
-        if pool_copy.restored_at_this_start():  # the apps' files came back; their containers did not
+        # the apps' files are there, their containers are not: after settings came back from the copy
+        # on the pools, or from a settings backup (a move from the container, a new system disk)
+        if pool_copy.restored_at_this_start() or moved_in.restored_at_this_start():
             apps_back.start_soon()
         try:
             from backend import door

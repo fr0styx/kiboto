@@ -24,6 +24,7 @@ from backend.fsutil import atomic_write_json, locked_json, read_json
 
 FLAG = ".fit-shares-after-restore"
 SMB_AT_SIGN_IN = ".smb-at-sign-in.json"  # who has had their share password set since the move
+_restored_at_start = [False]  # settings from a backup were put in place at this start
 
 
 def mark(data_dir: str = "") -> bool:
@@ -33,7 +34,14 @@ def mark(data_dir: str = "") -> bool:
     with open(os.path.join(data_dir or DATA_DIR, FLAG), "w", encoding="utf-8") as f:
         f.write("1\n")
     atomic_write_json(os.path.join(data_dir or DATA_DIR, SMB_AT_SIGN_IN), {"done": []})
+    _restored_at_start[0] = True
     return True
+
+
+def restored_at_this_start() -> bool:
+    """Whether settings from a backup were put in place at this start on Kiboto OS: the apps whose
+    folders are in the apps' folder then come back, as after a restore from the copy on the pools."""
+    return _restored_at_start[0]
 
 
 def pending(data_dir: str = "") -> bool:

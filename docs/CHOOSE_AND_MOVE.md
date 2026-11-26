@@ -47,8 +47,11 @@ You can start with Companion and move later. Kiboto OS is in beta: read
 6. **Each person signs in once.** The backup keeps passwords only in a form the file server cannot
    use, so a person's Windows and Mac shares open again after their first sign-in to Kiboto OS. A
    person with two-step sign-in makes a share password in their profile, as before.
-7. **Check the apps.** Their folders on the pools stay. Install again from the App Catalog any app
-   that does not run.
+7. **Apps.** Kiboto OS keeps apps in the `appdata` folder of its first pool. An app whose folder
+   Companion kept there starts again by itself after the restart; one that asks for host-level
+   access (its own network, a device, privileged mode) waits for your OK, named in the activity log.
+   Install again from the App Catalog any app whose folder was somewhere else; its data on the pools
+   stays.
 
 ## What does not come along
 
