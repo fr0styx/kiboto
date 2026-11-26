@@ -10,7 +10,7 @@ import { t } from '../i18n.js';
 import { api } from '../api.js';
 import { showToast, showConfirmToast, showDangerConfirm } from '../toast.js';
 import { formatFixed } from '../format.js';
-import { bulkSaid, canResume, canStop, conditionView } from './app-condition.js';
+import { bulkSaid, canResume, canStop, conditionView, statusText as dockerStatus } from './app-condition.js';
 let _selectedContainerIds = new Set();
 
 export function getSelectedContainerIds() {
@@ -131,7 +131,7 @@ export function buildContainerRowInner(c, currentHost, updateInfo = null) {
   const statusHtml = `
     <div class="docker-condition is-${view.look}" title="${escapeHtml(c.status || '')}">
       <span class="docker-state-badge"><span aria-hidden="true">${view.icon}</span> ${escapeHtml(view.word)}</span>
-      <span class="docker-status-text">${escapeHtml(view.why || c.status || '')}</span>
+      <span class="docker-status-text">${escapeHtml(view.why || dockerStatus(c.status))}</span>
     </div>
   `;
 
@@ -282,7 +282,7 @@ export function updateContainerRow(tr, c, currentHost, updateInfo = null) {
   }
 
   const statusText = tr.querySelector('.docker-status-text');
-  const said = conditionView(c).why || c.status || '';
+  const said = conditionView(c).why || dockerStatus(c.status);
   if (statusText && statusText.textContent !== said) statusText.textContent = said;
   const condition = tr.querySelector('.docker-condition');
   if (condition && condition.getAttribute('title') !== (c.status || ''))

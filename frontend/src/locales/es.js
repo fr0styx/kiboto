@@ -449,6 +449,8 @@ export default {
   "appst.created": "Aún no iniciada",
   "appst.removing": "Quitándose",
   "appst.unknown": "Desconocido",
+  "dks.started": "Iniciada {ago}",
+  "dks.healthy": "comprobación de estado correcta",
   "appst.why_unhealthy": "Está en marcha, pero su propia comprobación de estado falla.",
   "appst.why_restarting": "Se detiene y se vuelve a iniciar, {count, plural, one {# vez} other {# veces}} hasta ahora.",
   "appst.why_memory": "Se cerró por usar más memoria de la permitida.",

@@ -12,6 +12,8 @@ The container image is now built on Debian 13 with Debian's own Python 3.13, the
 
 Apps: with Docker details on, the box next to a stack's name selects every container in that stack.
 
+Apps: how long an app has run or been stopped is shown in your language ("Started 9 minutes ago"), not as Docker's English text.
+
 #### Security
 
 Kiboto OS: when Kiboto hands files and folders in a shared folder to their people, a link put in their place over the network is never followed, so a system file's owner or rights can never be changed that way.

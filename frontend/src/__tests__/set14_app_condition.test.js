@@ -139,7 +139,8 @@ describe('the state of one app', () => {
     expect(draw(LOOP).querySelector('[data-action="stop"]')).toBeTruthy();
     expect(draw(DEAD).querySelector('[data-action="start"]')).toBeTruthy();
     expect(row.querySelector('[data-action="stop"]')).toBeNull();
-    expect(draw(app('fine')).querySelector('.docker-status-text').textContent).toBe('Up 2 days');
+    // Docker's "Up 2 days" in the person's words (apps_status_text.test.js)
+    expect(draw(app('fine')).querySelector('.docker-status-text').textContent).toBe('Started 2 days ago');
     expect(computeContainerRowSignature(app('plex'))).not.toBe(computeContainerRowSignature(PLEX));
   });
 });

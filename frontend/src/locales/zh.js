@@ -449,6 +449,8 @@ export default {
   "appst.created": "尚未启动",
   "appst.removing": "正在移除",
   "appst.unknown": "未知",
+  "dks.started": "{ago}启动",
+  "dks.healthy": "健康检查正常",
   "appst.why_unhealthy": "它在运行，但自身的健康检查失败。",
   "appst.why_restarting": "它停止后又被重新启动，目前已 {count} 次。",
   "appst.why_memory": "它因使用的内存超过限制而被终止。",

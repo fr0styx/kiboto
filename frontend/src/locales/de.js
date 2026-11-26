@@ -449,6 +449,8 @@ export default {
   "appst.created": "Noch nicht gestartet",
   "appst.removing": "Wird entfernt",
   "appst.unknown": "Unbekannt",
+  "dks.started": "Gestartet {ago}",
+  "dks.healthy": "Zustandsprüfung OK",
   "appst.why_unhealthy": "Sie läuft, aber ihre eigene Zustandsprüfung schlägt fehl.",
   "appst.why_restarting": "Sie endet und wird wieder gestartet, bisher {count, plural, one {#-mal} other {#-mal}}.",
   "appst.why_memory": "Sie wurde beendet, weil sie mehr Arbeitsspeicher belegte, als sie darf.",

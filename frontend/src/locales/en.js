@@ -421,6 +421,8 @@ export default {
   "appst.created": "Not started yet",
   "appst.removing": "Being removed",
   "appst.unknown": "Unknown",
+  "dks.started": "Started {ago}",
+  "dks.healthy": "health check OK",
   "appst.why_unhealthy": "It runs, but its own health check fails.",
   "appst.why_restarting": "It stops and is started again, {count, plural, one {# time} other {# times}} so far.",
   "appst.why_memory": "It was ended for using more memory than it may.",

@@ -6,7 +6,7 @@
  * text. The server now says what state each app is in (backend/hardware/docker_condition.py)
  * and whether the list can be trusted; this module turns both into words.
  */
-import { t } from '../i18n.js';
+import { t, getLanguage } from '../i18n.js';
 import { formatTime } from '../format.js';
 
 // condition -> [look, icon, key, English]
@@ -60,6 +60,62 @@ function reasonOf(c, condition) {
   if (condition === 'stopped' && c.reason === 'stopped_outside')
     return t('appst.why_outside', 'It was stopped outside Kiboto.');
   return '';
+}
+
+const DOCKER_UNITS = {
+  second: 'second',
+  minute: 'minute',
+  hour: 'hour',
+  day: 'day',
+  week: 'week',
+  month: 'month',
+  year: 'year',
+};
+
+/** Docker's own duration ("9 minutes", "About an hour", "Less than a second") as [n, unit], or null. */
+function dockerDuration(text) {
+  const s = String(text || '')
+    .trim()
+    .toLowerCase();
+  if (s === 'less than a second') return [1, 'second'];
+  let m = s.match(/^about an? (\w+?)s?$/);
+  if (m && DOCKER_UNITS[m[1]]) return [1, DOCKER_UNITS[m[1]]];
+  m = s.match(/^(\d+) (\w+?)s?$/);
+  if (m && DOCKER_UNITS[m[2]]) return [Number(m[1]), DOCKER_UNITS[m[2]]];
+  return null;
+}
+
+/** "9 minutes ago" in the person's language (German "vor 9 Minuten"). */
+function agoIn(n, unit) {
+  try {
+    return new Intl.RelativeTimeFormat(getLanguage(), { numeric: 'always' }).format(-n, unit);
+  } catch {
+    return `${n} ${unit}s ago`;
+  }
+}
+
+/** Docker's status line ("Up 9 minutes (healthy)", "Exited (1) 2 hours ago", "Created") in the
+ *  person's language. It was shown as Docker wrote it, English on every page. Anything Docker
+ *  words differently is shown as it came. */
+export function statusText(raw) {
+  const s = String(raw || '').trim();
+  if (!s) return '';
+  if (/^created$/i.test(s)) return ''; // the word beside it already says "Not started yet"
+  const healthy = /\(healthy\)\s*$/i.test(s);
+  const body = s.replace(/\s*\((healthy|unhealthy|health: starting|paused)\)\s*$/i, '');
+  let m = body.match(/^up (.+)$/i);
+  if (m) {
+    const d = dockerDuration(m[1]);
+    if (!d) return s;
+    const started = t('dks.started', 'Started {ago}', { ago: agoIn(d[0], d[1]) });
+    return healthy ? `${started} · ${t('dks.healthy', 'health check OK')}` : started;
+  }
+  m = body.match(/^exited \((-?\d+)\) (.+) ago$/i);
+  if (m) {
+    const d = dockerDuration(m[2]);
+    return d ? agoIn(d[0], d[1]) : s; // the word beside it already says how it stopped
+  }
+  return s;
 }
 
 /** One app as the list draws it: {condition, look, icon, word, why}. */

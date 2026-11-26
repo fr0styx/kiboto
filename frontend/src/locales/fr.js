@@ -459,6 +459,8 @@ export default {
   "appst.created": "Pas encore démarrée",
   "appst.removing": "En cours de suppression",
   "appst.unknown": "Inconnu",
+  "dks.started": "Démarrée {ago}",
+  "dks.healthy": "contrôle de santé OK",
   "appst.why_unhealthy": "Elle tourne, mais son propre contrôle d’état échoue.",
   "appst.why_restarting": "Elle s’arrête et est relancée, {count, plural, one {# fois} other {# fois}} jusqu’ici.",
   "appst.why_memory": "Elle a été arrêtée pour avoir utilisé plus de mémoire qu’autorisé.",
