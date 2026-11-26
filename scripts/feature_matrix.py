@@ -81,15 +81,7 @@ def markdown(matrix: dict) -> str:
     lines += [f"- **{c['name']}.** {c['about']}" for c in cols]
     lines += ["", f"{CHOOSE} [How to choose, and how to move](CHOOSE_AND_MOVE.md).", ""]
     lines += ["What the words mean:", ""]
-    meaning = {
-        "yes": "Kiboto does it.",
-        "partly": "Kiboto does part of it; the note says which part.",
-        "view": "Kiboto shows it; the NAS system changes it.",
-        "host": "The NAS system or the Linux beside Kiboto does it, in its own settings.",
-        "soon": "Not there yet on this edition; it is being built.",
-        "check": "Built, and still being checked on this edition.",
-        "no": "Not offered here.",
-    }
+    meaning = MEANING
     lines += [f"- **{word}**: {meaning[key]}" for key, word in matrix["states"].items()]
     for group in matrix["groups"]:
         lines += ["", f"## {group['name']}", ""]
@@ -109,80 +101,175 @@ def markdown(matrix: dict) -> str:
     return "\n".join(lines)
 
 
+MEANING = {
+    "yes": "Kiboto does it.",
+    "partly": "Kiboto does part of it; the note says which part.",
+    "view": "Kiboto shows it; the NAS system changes it.",
+    "host": "The NAS system or the Linux beside Kiboto does it, in its own settings.",
+    "soon": "Not there yet on this edition; it is being built.",
+    "check": "Built, and still being checked on this edition.",
+    "no": "Not offered here.",
+}
+
+
+LOGO = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 4 236 56" aria-hidden="true"><g transform="translate(-6 0)"><path d="M19 6H45A13 13 0 0 1 58 19V37.5A2.5 2.5 0 0 1 55.5 40H8.5A2.5 2.5 0 0 1 6 37.5V19A13 13 0 0 1 19 6ZM8.5 42.5H55.5A2.5 2.5 0 0 1 58 45.0V45.0A13 13 0 0 1 45 58.0H19A13 13 0 0 1 6 45.0V45.0A2.5 2.5 0 0 1 8.5 42.5Z" style="fill:var(--mk-body)"/><path d="M19.0 13H45.0A6.5 6.5 0 0 1 51.5 19.5V27.0A6.5 6.5 0 0 1 45.0 33.5H19.0A6.5 6.5 0 0 1 12.5 27.0V19.5A6.5 6.5 0 0 1 19.0 13Z" style="fill:var(--mk-disp)"/><path d="M24.75 17.75H24.75A3.25 3.25 0 0 1 28.0 21.0V25.5A3.25 3.25 0 0 1 24.75 28.75H24.75A3.25 3.25 0 0 1 21.5 25.5V21.0A3.25 3.25 0 0 1 24.75 17.75Z" style="fill:var(--mk-eye)"/><path d="M39.25 17.75H39.25A3.25 3.25 0 0 1 42.5 21.0V25.5A3.25 3.25 0 0 1 39.25 28.75H39.25A3.25 3.25 0 0 1 36 25.5V21.0A3.25 3.25 0 0 1 39.25 17.75Z" style="fill:var(--mk-eye)"/><path d="M46.05 50.25A3.2 3.2 0 1 0 52.45 50.25A3.2 3.2 0 1 0 46.05 50.25Z" style="fill:var(--mk-led)"/></g><g transform="translate(70 16.5)"><g fill="none" style="stroke:var(--mk-ink)" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2V38M3 29.5L17.5 15M9.2 23.3L19 38M29.5 16V38M40 2V38M114.5 6.5V31Q114.5 38 121.5 38H123.5M108 16H123.5"/><circle cx="52" cy="26.25" r="12.25"/><circle cx="87.5" cy="26.25" r="12.25"/><circle cx="147" cy="26.25" r="12.25"/></g><circle cx="29.5" cy="5.2" r="4.1" style="fill:var(--mk-dot)"/></g></svg>"""
+
+# The page is a page of kiboto.net: the site's own header, footer, type and colours come from its
+# /site.css (kept with the site, beside index.html); only the table's own look is here.
 STYLE = """
-:root{--bg:#f4f8f8;--card:#ffffff;--ink:#12292c;--soft:#4a6165;--line:#d5e2e3;--brand:#0f7f73;
---yes:#0f7f73;--partly:#8a5a00;--view:#3b5bb5;--host:#4a6165;--soon:#a2420f;--check:#6b4bb0;--no:#7a8789}
-@media (prefers-color-scheme:dark){:root{--bg:#0d1a1c;--card:#122326;--ink:#e6f1f1;--soft:#9db3b6;--line:#23393c;
---brand:#33cdb8;--yes:#33cdb8;--partly:#f2c14e;--view:#8fb0ff;--host:#9db3b6;--soon:#ff9d6c;--check:#c3a6ff;--no:#7f9396}}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);
-font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-main{max-width:1060px;margin:0 auto;padding:32px 16px 64px}a{color:var(--brand)}
-h1{font-size:1.9rem;line-height:1.2;margin:8px 0 12px}h2{font-size:1.2rem;margin:36px 0 10px}
-.lead{color:var(--soft);max-width:70ch}.cols{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));margin:20px 0}
-.col{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
-.col b{display:block;margin-bottom:4px}.col span{color:var(--soft);font-size:.92rem}
-.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--card)}
-table{border-collapse:collapse;width:100%;min-width:640px}
-th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
-tr:last-child td{border-bottom:0}thead th{font-size:.85rem;color:var(--soft);font-weight:600}
-th[scope=row]{font-weight:600;width:40%}small{display:block;font-weight:400;color:var(--soft);margin-top:2px}
-.s{font-weight:600;white-space:nowrap}.s::before{content:"";display:inline-block;width:.6em;height:.6em;border-radius:50%;
-background:currentColor;margin-right:.45em}.yes{color:var(--yes)}.partly{color:var(--partly)}.view{color:var(--view)}
-.host{color:var(--host)}.soon{color:var(--soon)}.check{color:var(--check)}.no{color:var(--no)}
-.key{display:flex;flex-wrap:wrap;gap:6px 18px;margin:8px 0 0;padding:0;list-style:none;font-size:.92rem;color:var(--soft)}
-footer{margin-top:40px;color:var(--soft);font-size:.92rem}
-""".strip()
+:root{--st-view:#3b5bb5;--st-soon:#a2420f;--st-check:#6b4bb0}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--st-view:#8fb0ff;--st-soon:#ff9d6c;--st-check:#c3a6ff}}
+:root[data-theme="dark"]{--st-view:#8fb0ff;--st-soon:#ff9d6c;--st-check:#c3a6ff}
+.page-head{padding-block:64px 8px}
+.page-head h1{font-size:clamp(34px,4.4vw,52px);line-height:1.08}
+.page-head .head p{font-size:18px}
+.choose{margin-top:28px;max-width:46em;color:var(--muted)}
+.key{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px 32px;margin:28px 0 0;padding:0;list-style:none}
+.key li{display:flex;flex-direction:column;gap:2px;font-size:15px;color:var(--muted)}
+.st{font-family:var(--font-mono);font-size:13.5px;display:inline-flex;gap:8px;align-items:center;white-space:nowrap}
+.st::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor;flex:none}
+.s-yes{color:var(--primary-text)}.s-partly{color:var(--accent-text)}.s-view{color:var(--st-view)}
+.s-host,.s-no{color:var(--muted)}.s-soon{color:var(--st-soon)}.s-check{color:var(--st-check)}
+.group{padding-block:44px}
+.group h2{font-size:clamp(24px,2.6vw,30px)}
+.fm{width:100%;border-collapse:collapse;margin-top:18px;font-size:16px;font-variant-numeric:tabular-nums}
+.fm th,.fm td{text-align:left;vertical-align:top;padding:14px 12px 14px 0;border-top:1px solid var(--line)}
+.fm thead th{font-family:var(--font-mono);font-weight:400;font-size:13px;color:var(--muted);border-top:0;padding-top:0}
+.fm tbody th{font-weight:700;width:42%}
+.fm tbody th small{display:block;font-weight:400;font-size:14.5px;color:var(--muted);margin-top:4px;max-width:34em}
+@media (max-width:760px){
+.fm thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.fm,.fm tbody,.fm tr,.fm th,.fm td{display:block;width:auto}
+.fm tr{border-top:1px solid var(--line);padding:14px 0}
+.fm th,.fm td{border:0;padding:3px 0}
+.fm td{display:flex;justify-content:space-between;align-items:baseline;gap:16px}
+.fm td::before{content:attr(data-col);color:var(--muted);font-size:14.5px;flex:1}
+.fm tbody th{width:auto}
+.fm td .st{white-space:normal;text-align:right}
+}
+"""
+
+
+def _header(e) -> list[str]:
+    return [
+        '<header class="top">',
+        '  <div class="in">',
+        f'    <a class="logo" href="/" aria-label="Kiboto home">{LOGO}</a>',
+        '    <span class="stage-tag">Beta</span>',
+        '    <nav aria-label="Main">',
+        '      <a href="/#what">What it is</a>',
+        '      <a href="/#features">Features</a>',
+        '      <a href="/features/" aria-current="page">Editions</a>',
+        '      <a href="/#kib">Kib</a>',
+        '      <a href="/#download" class="keep">Get Kiboto</a>',
+        "    </nav>",
+        "  </div>",
+        "</header>",
+    ]
+
+
+def _footer() -> list[str]:
+    return [
+        "<footer>",
+        '  <div class="in">',
+        f'    <a class="logo" href="/" aria-label="Kiboto home">{LOGO}</a>',
+        "    <p>kiboto.net · MIT license</p>",
+        '    <nav aria-label="Footer">',
+        '      <a href="https://github.com/fr0styx/kiboto">GitHub</a>',
+        '      <a href="/features/" aria-current="page">What each edition can do</a>',
+        '      <a href="https://github.com/fr0styx/kiboto/releases">Releases</a>',
+        '      <a href="https://github.com/fr0styx/kiboto/blob/main/docs/PRIVACY.md">Privacy</a>',
+        "    </nav>",
+        "  </div>",
+        "</footer>",
+    ]
 
 
 def page(matrix: dict) -> str:
     cols = matrix["columns"]
     e = html.escape
+    fonts = (
+        "https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;700"
+        "&family=Atkinson+Hyperlegible+Mono:wght@400;700&family=M+PLUS+Rounded+1c:wght@800&display=swap"
+    )
     out = [
         "<!doctype html>",
         '<html lang="en">',
         "<head>",
         '<meta charset="utf-8">',
-        '<meta name="viewport" content="width=device-width,initial-scale=1">',
+        '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">',
+        "<!-- Written by scripts/feature_matrix.py from docs/feature-matrix.json. Do not edit by hand. -->",
+        '<meta name="theme-color" content="#0a7a70">',
         "<title>Kiboto: what each edition can do</title>",
         '<meta name="description" content="Kiboto Companion and Kiboto OS compared, feature by feature.">',
-        "<!-- Written by scripts/feature_matrix.py from docs/feature-matrix.json. Do not edit by hand. -->",
+        '<link rel="canonical" href="https://kiboto.net/features/">',
+        '<link rel="icon" href="/favicon.ico" sizes="48x48">',
+        '<link rel="icon" href="/icons/favicon.svg" type="image/svg+xml">',
+        '<link rel="preconnect" href="https://fonts.googleapis.com">',
+        '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>',
+        f'<link rel="stylesheet" href="{e(fonts)}">',
+        '<link rel="stylesheet" href="/site.css">',
         f"<style>{STYLE}</style>",
         "</head>",
         "<body>",
+        *_header(e),
         "<main>",
-        '<p><a href="/">Kiboto</a></p>',
-        "<h1>What each edition can do</h1>",
-        '<p class="lead">Kiboto runs in three ways. This page says what each can do today, and what is still on its way.</p>',
-        '<div class="cols">',
+        '<section class="page-head">',
+        '  <div class="in">',
+        '    <div class="head">',
+        "      <h1>What each edition can do</h1>",
+        "      <p>Kiboto runs in three ways. This page says what each can do today, and what is still on its way.</p>",
+        "    </div>",
+        '    <div class="eds">',
     ]
-    out += [f'<div class="col"><b>{e(c["name"])}</b><span>{e(c["about"])}</span></div>' for c in cols]
-    out += ["</div>", f'<p class="lead">{e(CHOOSE)} <a href="{GUIDE}">How to choose, and how to move</a>.</p>']
-    out += ['<ul class="key" aria-label="What the words mean">']
-    out += [f'<li><span class="s {key}">{e(word)}</span></li>' for key, word in matrix["states"].items()]
-    out.append("</ul>")
-    for group in matrix["groups"]:
+    for c in cols:
         out += [
-            f"<h2>{e(group['name'])}</h2>",
-            '<div class="scroll" tabindex="0" role="region" aria-label="' + e(group["name"]) + '">',
-            "<table>",
-            "<thead><tr><th></th>" + "".join(f'<th scope="col">{e(c["short"])}</th>' for c in cols) + "</tr></thead>",
-            "<tbody>",
+            '      <div class="ed">',
+            f"        <h3>{e(c['name'])}</h3>",
+            f"        <p>{e(c['about'])}</p>",
+            "      </div>",
+        ]
+    out += [
+        "    </div>",
+        f'    <p class="choose">{e(CHOOSE)} <a href="{GUIDE}">How to choose, and how to move</a>.</p>',
+        '    <ul class="key" aria-label="What the words mean">',
+    ]
+    out += [
+        f'      <li><span class="st s-{key}">{e(word)}</span> {e(MEANING[key])}</li>'
+        for key, word in matrix["states"].items()
+    ]
+    out += ["    </ul>", "  </div>", "</section>"]
+    for n, group in enumerate(matrix["groups"]):
+        out += [
+            f'<section class="group{" alt" if n % 2 == 0 else ""}">',
+            '  <div class="in">',
+            f"    <h2>{e(group['name'])}</h2>",
+            '    <table class="fm">',
+            '      <thead><tr><th scope="col">Feature</th>'
+            + "".join(f'<th scope="col">{e(c["short"])}</th>' for c in cols)
+            + "</tr></thead>",
+            "      <tbody>",
         ]
         for feature in group["features"]:
             note = f"<small>{e(feature['note'])}</small>" if feature.get("note") else ""
             cells = ""
             for c in cols:
                 value = feature[c["id"]]
+                label = f' data-col="{e(c["short"])}"'
                 if value in matrix["states"]:
-                    cells += f'<td><span class="s {value}">{e(matrix["states"][value])}</span></td>'
+                    cells += f'<td{label}><span class="st s-{value}">{e(matrix["states"][value])}</span></td>'
                 else:
-                    cells += f"<td>{e(value)}</td>"
-            out.append(f'<tr><th scope="row">{e(feature["name"])}{note}</th>{cells}</tr>')
-        out += ["</tbody>", "</table>", "</div>"]
+                    cells += f"<td{label}>{e(value)}</td>"
+            out.append(f'        <tr><th scope="row">{e(feature["name"])}{note}</th>{cells}</tr>')
+        out += ["      </tbody>", "    </table>", "  </div>", "</section>"]
     out += [
-        "<footer>This page is written from the same file as the list on GitHub, and is kept in step with every change. "
-        "Kiboto OS is in beta.</footer>",
+        '<section class="band">',
+        '  <div class="in">',
+        '    <p class="choose">This page is written from the same file as the list on GitHub, and kept in step with every change. Kiboto OS is in beta. Something here does not match what you see? <a href="https://github.com/fr0styx/kiboto/issues">Open an issue</a>: a wrong line is a bug.</p>',
+        "  </div>",
+        "</section>",
         "</main>",
+        *_footer(),
         "</body>",
         "</html>",
         "",
