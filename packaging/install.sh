@@ -137,17 +137,14 @@ packages() {
   # The module first, then the tools: neither package needs the other, so in one go dpkg may set up
   # the tools first, and their service tries to load a module that is not built yet (a red FAILED
   # on the screen during the first start).
+  # ZFS is Debian 13's own (2.3), not the backport: Kiboto makes pools limited to its features, so a
+  # pool opens on any Debian 13 and on every later ZFS.
   for pkg in zfs-dkms zfsutils-linux; do
     need=$(missing "$pkg")
     [ -n "$need" ] || continue
     # unquoted: missing() ends each name with a space, and "zfs-dkms " is no package
-    if grep -rqs 'trixie-backports' /etc/apt/sources.list /etc/apt/sources.list.d; then
-      # shellcheck disable=SC2086
-      apt-get install -y -qq --no-install-recommends -t trixie-backports $need >/dev/null
-    else
-      # shellcheck disable=SC2086
-      apt-get install -y -qq --no-install-recommends $need >/dev/null
-    fi
+    # shellcheck disable=SC2086
+    apt-get install -y -qq --no-install-recommends $need >/dev/null
   done
   modprobe zfs || die "ZFS was built but does not load on this kernel."
   systemctl reset-failed zfs-load-module.service 2>/dev/null || true

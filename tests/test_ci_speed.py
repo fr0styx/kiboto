@@ -49,13 +49,12 @@ def test_preparing_builds_zfs_the_way_install_sh_does():
     prep = _prep()
     for line in (
         "for pkg in zfs-dkms zfsutils-linux; do",
-        "if grep -rqs 'trixie-backports' /etc/apt/sources.list /etc/apt/sources.list.d; then",
-        "-t trixie-backports",
         "sed -i 's/^Components: main$/Components: main contrib non-free-firmware/'",
         "linux-headers-$(uname -r)",
     ):
         assert line in prep, line
         assert line in INSTALL, line  # the same as the installer, so a drift shows here
+    assert "trixie-backports" not in prep and "-t trixie-backports" not in INSTALL
 
 
 def test_preparing_installs_nothing_the_installer_would_refuse():

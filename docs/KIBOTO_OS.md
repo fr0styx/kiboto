@@ -151,6 +151,9 @@ encrypted AI chats and search index again.
   Kiboto from a fixed list of operations. Kiboto itself runs as the user `kiboto`
   (`python -m backend.services.web_user off` in `/opt/kiboto/current` runs it as root again).
 - Pools are mounted under `/mnt/storage`.
+- ZFS is Debian 13's own (2.3), and Kiboto makes ZFS pools limited to its features
+  (`compatibility=openzfs-2.3-linux`), so a pool opens on any Debian 13 and on every later ZFS. A
+  machine installed by an earlier version keeps the newer ZFS from Debian's backports.
 - ZFS and Docker are held at the versions Kiboto was tested with (`apt-mark showhold` lists them).
   Everything else updates with `apt` as on any Debian, and you can install your own packages.
 - `/etc/samba/smb.conf` is replaced by a line that points at Kiboto's own settings; the file Debian

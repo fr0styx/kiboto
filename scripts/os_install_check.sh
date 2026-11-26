@@ -144,13 +144,9 @@ for f in /etc/apt/sources.list.d/*.sources; do
 done
 apt-get update -qq
 apt-get install -y -qq --no-install-recommends "linux-headers-$(uname -r)" >/dev/null
-# the module first, then the tools, from backports where they are listed: as install.sh does
+# the module first, then the tools, Debian 13's own: as install.sh does
 for pkg in zfs-dkms zfsutils-linux; do
-  if grep -rqs 'trixie-backports' /etc/apt/sources.list /etc/apt/sources.list.d; then
-    apt-get install -y -qq --no-install-recommends -t trixie-backports "$pkg" >/dev/null
-  else
-    apt-get install -y -qq --no-install-recommends "$pkg" >/dev/null
-  fi
+  apt-get install -y -qq --no-install-recommends "$pkg" >/dev/null
 done
 modprobe zfs
 # shellcheck disable=SC2086

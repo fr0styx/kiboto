@@ -173,6 +173,19 @@ def btrfs_missing_members(members: list[PoolMember], shown: str) -> list[PoolMem
 _BUSY_WAIT_SECS = 1.0  # between tries of an export ZFS calls busy
 
 
+ZFS_COMPAT = "openzfs-2.3-linux"  # Debian 13's own ZFS
+ZFS_COMPAT_DIRS = ("/usr/share/zfs/compatibility.d", "/etc/zfs/compatibility.d")
+
+
+def zfs_compat_args() -> list[str]:
+    """A new ZFS pool keeps to the features of ZFS 2.3, Debian 13's own, so it opens there and on
+    every later ZFS. A ZFS without that feature list (older than 2.3) makes the pool as it can."""
+    for folder in ZFS_COMPAT_DIRS:
+        if os.path.isfile(os.path.join(folder, ZFS_COMPAT)):
+            return ["-o", f"compatibility={ZFS_COMPAT}"]
+    return []
+
+
 def _through_door(op: str, here: Any, **args: Any) -> Any:
     """`here(**args)`, or the same in the host door where it runs (ADR 0006). The door runs this
     adapter too, so what it answers is what `here` would; a platform refusal comes back as one."""
@@ -1189,6 +1202,7 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
                 "-f",
                 "-o",
                 "ashift=12",
+                *zfs_compat_args(),
                 "-O",
                 "compression=zstd",
                 "-O",

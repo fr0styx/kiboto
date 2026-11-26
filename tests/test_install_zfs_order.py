@@ -20,9 +20,9 @@ def test_the_module_comes_before_the_tools_one_call_each():
     assert "missing zfs-dkms zfsutils-linux" not in body
     loop = body[body.index("for pkg in zfs-dkms") : body.index("done", body.index("for pkg in zfs-dkms"))]
     installs = [ln for ln in loop.splitlines() if "apt-get install" in ln]
-    assert len(installs) == 2 and all(ln.rstrip().endswith("$need >/dev/null") for ln in installs)
+    assert len(installs) == 1 and all(ln.rstrip().endswith("$need >/dev/null") for ln in installs)
     assert 'missing "$pkg"' in loop
-    assert "-t trixie-backports" in loop
+    assert "trixie-backports" not in loop  # Debian 13's own ZFS (2.3), whatever sources are listed
 
 
 def test_a_failed_early_load_is_cleared_once_zfs_loads():
@@ -56,5 +56,5 @@ def test_the_loop_asks_apt_for_the_real_package_names(tmp_path, backports):
     subprocess.run(["sh", "-c", missing + loop], check=True, env=env)
     calls = log.read_text().splitlines()
     assert len(calls) == 2
-    assert ("[trixie-backports]" in calls[0]) is backports
+    assert "[trixie-backports]" not in calls[0]  # the same ZFS with or without backports listed
     assert calls[0].endswith("[zfs-dkms]") and calls[1].endswith("[zfsutils-linux]"), calls
