@@ -202,3 +202,13 @@ def test_a_download_cut_off_part_way_is_tried_again(monkeypatch):
     except ConnectionResetError:
         pass
     assert len(calls) == 2
+
+
+def test_the_download_artifact_deprecation_is_accepted_as_node_prints_it():
+    """Node prints the second line with backticks; the issue shows them as quotes (issue #70)."""
+    ignore = cn.load_ignore(ROOT / ".github" / "ci-notices-ignore")
+    printed = [
+        "(node:2318) [DEP0005] DeprecationWarning: Buffer() is deprecated due to security and usability issues.",
+        "(Use `node --trace-deprecation ...` to show where the warning was created)",
+    ]
+    assert cn.find_notices(printed, ignore) == []
