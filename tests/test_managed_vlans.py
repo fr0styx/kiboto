@@ -253,3 +253,12 @@ def test_the_port_the_machine_is_reached_on_leads_the_bond(box):
     assert "MACAddress=52:54:00:12:34:57" in net(box, "05-kiboto-bond0.netdev")
     assert "PrimarySlave=true" in net(box, "05-kiboto-enp2s0.network")
     assert "PrimarySlave" not in net(box, "05-kiboto-enp1s0.network")
+
+
+def test_a_name_from_a_request_never_leaves_the_networkd_folder(box):
+    folder = str(box.root / "network")
+    assert managed.file_for("enp1s0.20") == f"{folder}/05-kiboto-enp1s0.20.network"
+    for name in ("../etc/passwd", "a/b", "", "..", "x" * 16, "/etc"):
+        for make in (managed.file_for, managed.netdev_for, managed.link_for):
+            with pytest.raises(ValueError, match="not a network port name"):
+                make(name)

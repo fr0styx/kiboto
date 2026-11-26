@@ -87,8 +87,20 @@ RouteMetric=2048
 """
 
 
+def _own_file(prefix: str, name: str, suffix: str) -> str:
+    """The path of one of Kiboto's own networkd files: only for a port name (letters, digits, _ . -,
+    no slash), and always inside DIR. Names reach here from requests (VLANs, bonds, ports)."""
+    if not _IFACE.match(name or ""):
+        raise ValueError(f"{name or 'That'} is not a network port name.")
+    base = os.path.normpath(DIR)
+    path = os.path.normpath(os.path.join(base, f"{prefix}{name}{suffix}"))
+    if not path.startswith(base + os.sep):
+        raise ValueError(f"{name} is not a network port name.")
+    return path
+
+
 def link_for(iface: str) -> str:
-    return os.path.join(DIR, f"{LINK_PREFIX}{iface}.link")
+    return _own_file(LINK_PREFIX, iface, ".link")
 
 
 def pin_text(iface: str, mac: str) -> str:
@@ -165,7 +177,7 @@ def ensure_fallback(do: Run | None = None) -> bool:
 
 
 def file_for(iface: str) -> str:
-    return os.path.join(DIR, f"{PREFIX}{iface}.network")
+    return _own_file(PREFIX, iface, ".network")
 
 
 def network_file(want: dict[str, Any]) -> str:
@@ -494,7 +506,7 @@ QEMU_BRIDGES = "/etc/qemu/bridge.conf"
 
 
 def netdev_for(link: str) -> str:
-    return os.path.join(DIR, f"{PREFIX}{link}.netdev")
+    return _own_file(PREFIX, link, ".netdev")
 
 
 def bridge_status() -> dict[str, Any]:
