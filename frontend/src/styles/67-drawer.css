@@ -29,7 +29,7 @@
 :is(#led-drawer, #mgmt-sec-hardware, #hw-drawer) .drw-x-6 { cursor: pointer; }
 :is(#led-drawer, #mgmt-sec-hardware, #hw-drawer) .drw-xs-bold-ok { font-size: var(--kb-fs-xs); font-weight: 800; color: var(--ok2); }
 :is(#led-drawer, #mgmt-sec-hardware, #hw-drawer) .drw-row-5 { margin-top: 10px; display: flex; justify-content: space-between; align-items: center; }
-:is(#led-drawer, #mgmt-sec-hardware, #hw-drawer) .drw-xs-bold-2 { opacity: 0.8; font-size: var(--kb-fs-xs); text-transform: uppercase; font-weight: 700; cursor: pointer; }
+:is(#led-drawer, #mgmt-sec-hardware, #hw-drawer) .drw-xs-bold-2 { opacity: 0.8; font-size: var(--kb-fs-xs); font-weight: 700; cursor: pointer; }
 :is(#led-drawer, #mgmt-sec-hardware, #hw-drawer) .drw-xs-bold-ok-mono { font-family: monospace; font-size: var(--kb-fs-xs); font-weight: 700; color: var(--ok2); }
 :is(#led-drawer, #mgmt-sec-hardware, #hw-drawer) .drw-x-7 { margin-top: 4px; }
 :is(#led-drawer, #mgmt-sec-hardware, #hw-drawer) .drw-row-6 { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
@@ -48,19 +48,19 @@
 :is(#led-drawer, #mgmt-sec-hardware, #hw-drawer) .drw-size-4 { width: 100%; height: 80px; }
 :is(#led-drawer, #mgmt-sec-hardware, #hw-drawer) .drw-xs-muted-center { font-size: var(--kb-fs-xs); color: var(--text-dim, var(--kb-text-muted)); margin-top: 4px; text-align: center; }
 :is(#led-drawer, #mgmt-sec-hardware, #hw-drawer) .drw-x-9 { cursor: default; }
-:is(#led-drawer, #mgmt-sec-hardware, #hw-drawer) .drw-xs-bold-3 { font-size: var(--kb-fs-xs); font-weight: 700; text-transform: uppercase; opacity: 0.8; }
+:is(#led-drawer, #mgmt-sec-hardware, #hw-drawer) .drw-xs-bold-3 { font-size: var(--kb-fs-xs); font-weight: 700; opacity: 0.8; }
 :is(#led-drawer, #mgmt-sec-hardware, #hw-drawer) .drw-box-4 { margin-top: 15px; border-top: 1px solid var(--kb-line-5); padding-top: 15px; }
 :is(#led-drawer, #mgmt-sec-hardware, #hw-drawer) .drw-x-10 { flex-direction: column; align-items: flex-start; gap: 6px; }
 :is(#led-drawer, #mgmt-sec-hardware, #hw-drawer) .drw-row-10 { display: flex; justify-content: space-between; width: 100%; align-items: center; }
-:is(#led-drawer, #mgmt-sec-hardware, #hw-drawer) .drw-xs-bold-4 { opacity: 0.8; font-size: var(--kb-fs-xs); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
-:is(#led-drawer, #mgmt-sec-hardware, #hw-drawer) .drw-row-11 { display: flex; gap: 6px; align-items: center; }
+:is(#led-drawer, #mgmt-sec-hardware, #hw-drawer) .drw-xs-bold-4 { opacity: 0.8; font-size: var(--kb-fs-xs); font-weight: 700; }
+:is(#led-drawer, #mgmt-sec-hardware, #hw-drawer) .drw-row-11 { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 :is(#led-drawer, #mgmt-sec-hardware, #hw-drawer) .drw-xs-2 { font-size: var(--kb-fs-xs); }
 :is(#led-drawer, #mgmt-sec-hardware, #hw-drawer) .drw-x-11 { margin: 0; }
 :is(#led-drawer, #mgmt-sec-hardware, #hw-drawer) .drw-size-5 { width: 100%; box-sizing: border-box; appearance: auto; }
 :is(#led-drawer, #mgmt-sec-hardware, #hw-drawer) .drw-x-12 { flex-direction: column; align-items: flex-start; gap: 6px; margin-top: 12px; }
 :is(#led-drawer, #mgmt-sec-hardware, #hw-drawer) .drw-row-12 { display: flex; gap: 8px; width: 100%; }
 :is(#led-drawer, #mgmt-sec-hardware, #hw-drawer) .drw-mono { width: 100%; box-sizing: border-box; font-family: monospace; }
-:is(#led-drawer, #mgmt-sec-hardware, #hw-drawer) .drw-size-6 { text-transform: uppercase; margin: 0; height: auto; }
+:is(#led-drawer, #mgmt-sec-hardware, #hw-drawer) .drw-size-6 { margin: 0; height: auto; }
 :is(#led-drawer, #mgmt-sec-hardware, #hw-drawer) .drw-row-13 { margin-top: 15px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 :is(#led-drawer, #mgmt-sec-hardware, #hw-drawer) .drw-col-3 { display: flex; flex-direction: column; }
 :is(#led-drawer, #mgmt-sec-hardware, #hw-drawer) .drw-xs-muted-3 { font-size: var(--kb-fs-xs); color: var(--muted); margin-top: 3px; }

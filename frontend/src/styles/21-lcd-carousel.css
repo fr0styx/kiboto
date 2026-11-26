@@ -358,7 +358,7 @@
   margin: 12px 0 16px 0;
 }
 .profile-btn {
-  flex: 1;
+  flex: 1 1 140px; /* two to a row on a phone, four on a wide screen: the sentences got squeezed */
   padding: 10px 14px;
   background: var(--kb-glaze-4);
   border: 1px solid var(--kb-line-12);
