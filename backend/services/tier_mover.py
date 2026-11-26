@@ -62,61 +62,149 @@ def _same(a: os.stat_result, b: os.stat_result) -> bool:
     return a.st_size == b.st_size and a.st_mtime_ns == b.st_mtime_ns
 
 
-def _folders_like(fast_root: str, slow_root: str, rel_dir: str) -> None:
-    """The folders on the slow side that lead to the file, made to belong to who the fast ones belong to."""
-    walked = ""
-    for part in [p for p in rel_dir.split("/") if p]:
-        walked = os.path.join(walked, part)
-        target = os.path.join(slow_root, walked)
-        if not os.path.isdir(target):
-            os.mkdir(target)
-            like = os.stat(os.path.join(fast_root, walked))
-            os.chown(target, like.st_uid, like.st_gid)
-            os.chmod(target, stat.S_IMODE(like.st_mode))
+DIR_FLAGS = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
+
+
+def _walk(root: str, parts: list[str]) -> int:
+    """An open folder at root/parts..., each step opened without following a link: a link anywhere
+    on the way is refused (OSError), so nothing outside the folder is reached. On Kiboto OS this
+    runs as root on the machine itself, where a link in a shared folder could point anywhere."""
+    fd = os.open(root, os.O_RDONLY | os.O_DIRECTORY)
+    try:
+        for part in parts:
+            nxt = os.open(part, DIR_FLAGS, dir_fd=fd)
+            os.close(fd)
+            fd = nxt
+    except OSError:
+        os.close(fd)
+        raise
+    return fd
+
+
+def _folders_like(fast_root: str, slow_root: str, parts: list[str]) -> int:
+    """The folders on the slow side that lead to the file, made where missing to belong to who the
+    fast ones belong to, with their rights. Returns the last one open. Each step is opened without
+    following a link, and owner and rights are set on the open folder, never by its name."""
+    fast = os.open(fast_root, os.O_RDONLY | os.O_DIRECTORY)
+    slow = os.open(slow_root, os.O_RDONLY | os.O_DIRECTORY)
+    try:
+        for part in parts:
+            nfast = os.open(part, DIR_FLAGS, dir_fd=fast)
+            os.close(fast)
+            fast = nfast
+            try:
+                nslow = os.open(part, DIR_FLAGS, dir_fd=slow)
+            except FileNotFoundError:
+                os.mkdir(part, 0o700, dir_fd=slow)
+                nslow = os.open(part, DIR_FLAGS, dir_fd=slow)
+                like = os.fstat(fast)
+                os.fchown(nslow, like.st_uid, like.st_gid)
+                os.fchmod(nslow, stat.S_IMODE(like.st_mode))
+            os.close(slow)
+            slow = nslow
+    except OSError:
+        os.close(slow)
+        raise
+    finally:
+        os.close(fast)
+    return slow
+
+
+def _copy_xattrs(src: int, dst: int) -> None:
+    """Extended attributes (ACLs among them), as shutil.copystat would; one that cannot be set stays behind."""
+    try:
+        names = os.listxattr(src)
+    except OSError:
+        return
+    for name in names:
+        try:
+            os.setxattr(dst, name, os.getxattr(src, name))
+        except OSError as e:
+            if e.errno not in (errno.ENOTSUP, errno.EPERM, errno.EACCES):
+                raise
 
 
 def move_one(fast_root: str, slow_root: str, rel: str, keep_free: int = ROOM_KEPT) -> tuple[str, int]:
-    """Moves one file; returns how it went ("moved", or why not) and the bytes moved."""
-    src, dst = os.path.join(fast_root, rel), os.path.join(slow_root, rel)
-    real_fast = os.path.realpath(fast_root)
-    real_dir = os.path.realpath(os.path.dirname(src))
-    if (real_dir != real_fast and not real_dir.startswith(real_fast + "/")) or ".." in rel.split("/"):
+    """Moves one file; returns how it went ("moved", or why not) and the bytes moved. Every name is
+    taken relative to an open folder and opened without following a link, so a file or a folder
+    swapped for a link while it is looked at cannot send the copy, the owner or the rights anywhere."""
+    parts = rel.split("/")
+    if not rel or rel.startswith("/") or any(p in ("", ".", "..") for p in parts):
         return "outside", 0
+    name, dirs = parts[-1], parts[:-1]
     try:
-        before = os.lstat(src)
-    except OSError:
+        sdir = _walk(fast_root, dirs)
+    except FileNotFoundError:
         return "gone", 0
-    if not stat.S_ISREG(before.st_mode) or before.st_nlink > 1:
-        return "not_plain", 0  # a link, or a file with a second name: moving it would break the other
-    if os.path.lexists(dst):
-        return "already_there", 0
-    if in_use(src):
-        return "in_use", 0
-    room = os.statvfs(slow_root)
-    if room.f_bavail * room.f_frsize < before.st_size + max(keep_free, ROOM_KEPT):
-        return "no_room", 0
-    part = dst + PART
+    except OSError:
+        return "outside", 0  # a link on the way, or not a folder
+    ddir = -1
     try:
-        _folders_like(fast_root, slow_root, os.path.dirname(rel))
-        with open(src, "rb") as fin, open(part, "wb") as fout:
-            shutil.copyfileobj(fin, fout, 8 * 1024 * 1024)
-            fout.flush()
-            os.fsync(fout.fileno())
-        shutil.copystat(src, part)
-        os.chown(part, before.st_uid, before.st_gid)
-        if not _same(before, os.lstat(src)) or os.path.getsize(part) != before.st_size:
-            os.unlink(part)
-            return "changed", 0  # someone wrote to it while it was copied: it stays, and is tried another night
-        os.replace(part, dst)
-        fd = os.open(os.path.dirname(dst), os.O_RDONLY)
         try:
-            os.fsync(fd)
-        finally:
-            os.close(fd)
-        os.unlink(src)
+            before = os.stat(name, dir_fd=sdir, follow_symlinks=False)
+        except FileNotFoundError:
+            return "gone", 0
+        if not stat.S_ISREG(before.st_mode) or before.st_nlink > 1:
+            return "not_plain", 0  # a link, or a file with a second name: moving it would break the other
+        if in_use(os.path.join(fast_root, rel)):
+            return "in_use", 0
+        room = os.statvfs(slow_root)
+        if room.f_bavail * room.f_frsize < before.st_size + max(keep_free, ROOM_KEPT):
+            return "no_room", 0
+        ddir = _folders_like(fast_root, slow_root, dirs)
+        if _there(name, ddir):
+            return "already_there", 0
+        return _copy_and_swap(sdir, ddir, name, before)
+    finally:
+        os.close(sdir)
+        if ddir >= 0:
+            os.close(ddir)
+
+
+def _there(name: str, dir_fd: int) -> bool:
+    try:
+        os.stat(name, dir_fd=dir_fd, follow_symlinks=False)
+    except FileNotFoundError:
+        return False
+    return True
+
+
+def _copy_and_swap(sdir: int, ddir: int, name: str, before: os.stat_result) -> tuple[str, int]:
+    part = name + PART
+    made = False
+    try:
+        # opened by name in the open folder, never following a link (and the file keeps its name)
+        with open(name, "rb", opener=lambda n, f: os.open(n, f | os.O_NOFOLLOW, dir_fd=sdir)) as src:
+            opened = os.fstat(src.fileno())
+            if (opened.st_dev, opened.st_ino) != (before.st_dev, before.st_ino):
+                return "changed", 0  # another file took its name meanwhile
+            new_file = os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW
+            with open(part, "wb", opener=lambda n, f: os.open(n, new_file, 0o600, dir_fd=ddir)) as dst:
+                made = True
+                shutil.copyfileobj(src, dst, 8 * 1024 * 1024)
+                dst.flush()
+                os.fsync(dst.fileno())
+                _copy_xattrs(src.fileno(), dst.fileno())
+                os.fchown(dst.fileno(), before.st_uid, before.st_gid)
+                os.fchmod(dst.fileno(), stat.S_IMODE(before.st_mode))
+                os.utime(dst.fileno(), ns=(before.st_atime_ns, before.st_mtime_ns))
+                copied = os.fstat(dst.fileno()).st_size
+        after = os.stat(name, dir_fd=sdir, follow_symlinks=False)
+        if (
+            not _same(before, after)
+            or (after.st_dev, after.st_ino) != (before.st_dev, before.st_ino)
+            or copied != before.st_size
+        ):
+            os.unlink(part, dir_fd=ddir)
+            made = False
+            return "changed", 0  # someone wrote to it while it was copied: it stays, and is tried another night
+        os.replace(part, name, src_dir_fd=ddir, dst_dir_fd=ddir)
+        made = False
+        os.fsync(ddir)
+        os.unlink(name, dir_fd=sdir)
     except (OSError, Stopped):
-        if os.path.lexists(part):
-            os.unlink(part)
+        if made and _there(part, ddir):
+            os.unlink(part, dir_fd=ddir)
         raise
     return "moved", before.st_size
 

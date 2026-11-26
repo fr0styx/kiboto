@@ -187,3 +187,44 @@ def test_the_free_space_the_share_asks_for_is_left_on_the_drive(sides, monkeypat
     out = tm.run({**job, "keep_free": 6 * gib})  # the share keeps 6 GiB free; the drive has 5
     assert out["counts"] == {"no_room": 1} and out["stopped"] == "full" and (fast / "a.bin").exists()
     assert tm.run({**job, "keep_free": 4 * gib})["moved"] == ["a.bin"]
+
+
+def test_a_folder_on_the_way_swapped_for_a_link_is_refused(sides, tmp_path, monkeypatch):
+    """On Kiboto OS the mover runs as root on the machine: a folder of the file swapped for a link
+    to a system folder while it is looked at must not send the copy or the owner there."""
+    fast, slow = sides
+    _put(fast, "docs/a.txt", "data")
+    secret = tmp_path / "system"
+    secret.mkdir()
+    (secret / "a.txt").write_text("root only")
+    real = tm.os.statvfs
+
+    def swap_then_statvfs(path):  # after the file was checked, before it is opened
+        if (fast / "docs").is_dir() and not (fast / "docs").is_symlink():
+            (fast / "docs").rename(fast / "docs.old")
+            (fast / "docs").symlink_to(secret)
+        return real(path)
+
+    monkeypatch.setattr(tm.os, "statvfs", swap_then_statvfs)
+    try:
+        how = tm.move_one(str(fast), str(slow), "docs/a.txt")[0]
+    except OSError:
+        how = "refused"  # the link on the way is not followed
+    assert how in ("changed", "moved", "refused")  # the file opened is the one checked, never the system one
+    copied = list(slow.rglob("a.txt"))
+    assert all(p.read_text() == "data" for p in copied)
+    assert (secret / "a.txt").read_text() == "root only"
+
+
+def test_a_slow_side_folder_swapped_for_a_link_is_never_given_away(sides, tmp_path):
+    fast, slow = sides
+    _put(fast, "docs/a.txt", "data")
+    elsewhere = tmp_path / "etc"
+    elsewhere.mkdir()
+    (slow / "docs").symlink_to(elsewhere)  # someone put a link where the folder will be made
+    before = os.stat(elsewhere)
+    with pytest.raises(OSError):  # refused: the link is not followed
+        tm.move_one(str(fast), str(slow), "docs/a.txt")
+    after = os.stat(elsewhere)
+    assert (before.st_uid, before.st_mode) == (after.st_uid, after.st_mode) and not list(elsewhere.iterdir())
+    assert (fast / "docs" / "a.txt").read_text() == "data"
