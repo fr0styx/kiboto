@@ -96,6 +96,8 @@ Firewall: the switch now looks on when the firewall is on.
 
 Guides: the image sizes, where the first-time password is kept, the arm64 testing, ZettOS and the list of systems Kiboto runs on now match what Kiboto does.
 
+Kiboto OS: an update now also removes the Python environments no kept version uses (about 460 MB each).
+
 #### Security
 
 On a machine of its own, failed sign-ins to shared folders over the network now count like web sign-ins: 20 in 15 minutes block the address for an hour, and they show under History, Sign-ins.
@@ -181,6 +183,10 @@ The guides name the two editions, Kiboto Companion (the container) and Kiboto OS
 Every build is now installed as Kiboto OS in a fresh Debian 13 virtual machine, and checked before and after a restart, before it is signed or published.
 
 Releases: Stable now takes only an image signed for that exact version, and the update test fails instead of passing when it could not try enough older versions.
+
+Kiboto OS: the machine stays on Debian 13. apt no longer installs packages of another Debian release, since a move to Debian 14 would stop Kiboto; KIBOTO_KEEP_DEBIAN=0 allows it.
+
+About says which edition is running: Kiboto OS or Kiboto Companion.
 
 ## v2.0.6 (2026-11-23)
 ### 🖥️ Kiboto on a machine of its own (preview), with its settings kept safe on every pool

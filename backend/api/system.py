@@ -1270,6 +1270,7 @@ def get_system_about():
         "python_version": sys.version.split()[0],
         "uptime_secs": uptime_secs,
         "containerized": runtime.in_container(),
+        "edition": runtime.edition(),  # Kiboto OS, Kiboto Companion, or neither
         # a machine Kiboto runs installs only releases: the page does not offer Edge there
         "releases_only": _releases_only(),
         "github_repo": "https://github.com/fr0styx/kiboto",

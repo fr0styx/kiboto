@@ -319,7 +319,9 @@ def _packages(name: str) -> Callable[[], Any]:
         from backend.services import host_set, native_update
 
         if name == "add_missing":
-            return native_update.add_missing_tools(os.path.join(native_update.PREFIX, "current"))
+            current = os.path.join(native_update.PREFIX, "current")
+            native_update.keep_debian(current)  # at every start, before anything is installed
+            return native_update.add_missing_tools(current)
         return host_set.check() if name == "check" else host_set.start()
 
     return run

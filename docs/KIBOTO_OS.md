@@ -189,6 +189,15 @@ says so. "Revert" goes back to the version before the last update, with the sett
 then. The kernel, ZFS and Docker move only when a Kiboto release was tested with newer ones: Updates
 then offers them.
 
+The machine stays on Debian 13. Kiboto's Python environment, its root service and its updater are
+made for Debian 13's Python, and a move to Debian 14 would stop all three at once, with nothing left
+in the browser to repair it. So a file of apt's, `/etc/apt/preferences.d/kiboto-debian13.pref`,
+keeps apt from installing packages of any other Debian release; Debian 13's own updates, backports
+and other sources are not affected. A Kiboto release made for Debian 14 will move the machine
+itself. To let apt move it anyway, set `KIBOTO_KEEP_DEBIAN=0` in `/etc/kiboto/kiboto.env` and
+restart Kiboto: the file is then taken away. If the machine was moved and Kiboto no longer starts,
+running the install script again puts Kiboto back on the new Python.
+
 ## A new system disk
 
 The system disk holds nothing you cannot get back. If it dies, put in a new one, install again from

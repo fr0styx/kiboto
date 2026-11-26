@@ -84,6 +84,14 @@ export function showServerName(el = document.getElementById('about-server-name')
     .catch(() => null);
 }
 
+/** Which edition this is, for the About line: Kiboto OS, Kiboto Companion, or a native host. */
+export function whereItRuns(about) {
+  if (about?.edition === 'os') return t('sysu.kiboto_os', 'Kiboto OS');
+  if (about?.edition === 'companion' || about?.containerized)
+    return t('sysu.companion', 'Kiboto Companion (container)');
+  return t('sysu.native', 'Native Host');
+}
+
 export async function fetchAndRenderSystemAbout(force = false, channelOverride = null) {
   showServerName();
   const versionBadge = document.getElementById('about-version-badge');
@@ -141,7 +149,7 @@ export async function fetchAndRenderSystemAbout(force = false, channelOverride =
       if (hostEl) hostEl.textContent = `${about.hostname || 'NAS'} (${about.platform || 'Linux'})`;
       if (runtimeEl)
         runtimeEl.textContent = t('sysu.runtime', '{where} (Python {version})', {
-          where: about.containerized ? t('sysu.in_docker', 'Docker Container') : t('sysu.native', 'Native Host'),
+          where: whereItRuns(about),
           version: about.python_version || '3.12',
         });
       if (uptimeEl && about.uptime_secs != null) uptimeEl.textContent = formatUptime(about.uptime_secs);

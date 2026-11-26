@@ -673,3 +673,22 @@ def test_going_back_to_a_version_before_kiboto_without_root_runs_it_as_root(tmp_
     nu._root_for_older(str(old), run, str(drop_in))
     assert not drop_in.exists() and run.ran == [["systemctl", "daemon-reload"]]
     nu._root_for_older(str(old), run, str(drop_in))  # nothing left to take away
+
+
+def test_python_environments_no_kept_version_uses_go_with_the_versions(tmp_path):
+    run = Runs()
+    rels = [_release(tmp_path, f"v{i}", lock=f"x=={i}\n") for i in range(4)]
+    venvs = [nu.venv_for(r, str(tmp_path), run) for r in rels]
+    shared = _release(tmp_path, "v4", lock="x==3\n")  # the newest shares its environment with v3
+    nu.venv_for(shared, str(tmp_path), run)
+    building = tmp_path / "venvs" / "being-made"
+    building.mkdir()  # no .ready yet: an update is making it right now
+    for i, r in enumerate([*rels, shared]):
+        os.utime(r, (1000 + i, 1000 + i))
+    nu.point_at(rels[1], str(tmp_path))  # an old one is still the previous version
+    nu.point_at(shared, str(tmp_path))
+    nu.prune(str(tmp_path), keep=2)
+    assert sorted(os.listdir(tmp_path / "releases")) == ["v1", "v3", "v4"]
+    left = set(os.listdir(tmp_path / "venvs"))
+    assert left == {os.path.basename(venvs[1]), os.path.basename(venvs[3]), "being-made"}
+    assert nu.prune_venvs(str(tmp_path / "nothing-here")) == []

@@ -113,12 +113,9 @@ def _platform() -> str:
 
 
 def _edition() -> str:
-    """Kiboto OS (a machine Kiboto runs), Kiboto Companion (the container), or neither."""
     from backend import runtime
 
-    if runtime.managed_host():
-        return "os"
-    return "companion" if runtime.in_container() else "other"
+    return runtime.edition()
 
 
 def report(install_id: str) -> dict[str, Any]:

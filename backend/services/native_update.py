@@ -173,6 +173,49 @@ def add_missing_tools(rel: str, run: Any = None) -> list[str]:
     return missing
 
 
+APT_PIN = "/etc/apt/preferences.d/kiboto-debian13.pref"
+
+
+def _same_text(path: str, text: str) -> bool:
+    if not os.path.isfile(path):
+        return False
+    with open(path, encoding="utf-8") as f:
+        return f.read() == text
+
+
+def keep_debian(rel: str, path: str | None = None) -> str:
+    """Keeps this machine on Debian 13: apt installs no package of another Debian release while the
+    release's packaging/kiboto-debian13.pref is in apt's preferences, since Kiboto's Python
+    environment, the root service and the updater would stop together on Debian 14's Python.
+    KIBOTO_KEEP_DEBIAN=0 takes the file away. Returns "written", "kept", "removed" or "" (no apt
+    here, or a version without the file)."""
+    from backend.config import SETTINGS
+
+    path = path or APT_PIN
+    if not os.path.isdir(os.path.dirname(path)):
+        return ""
+    if not getattr(SETTINGS, "keep_debian", True):
+        if os.path.exists(path):
+            os.remove(path)
+            logger.warning("[Update] KIBOTO_KEEP_DEBIAN=0: apt may now move this machine to another Debian release")
+            return "removed"
+        return ""
+    try:
+        with open(os.path.join(rel, "packaging", "kiboto-debian13.pref"), encoding="utf-8") as f:
+            text = f.read()
+    except OSError:
+        return ""
+    if _same_text(path, text):
+        return "kept"
+    tmp = path + ".new"
+    with open(tmp, "w", encoding="utf-8") as f:
+        f.write(text)
+    os.chmod(tmp, 0o644)
+    os.replace(tmp, path)
+    logger.info("[Update] This machine stays on Debian 13 (%s)", path)
+    return "written"
+
+
 def ensure_units(rel: str, run: Any = None, unit_dir: str | None = None, door_current: Any = None) -> list[str]:
     """The service files of the running version where an update made by an older one left older
     ones, or none (the host door's came after install.sh had run). The door is (re)started at each
@@ -477,6 +520,32 @@ def prune(prefix: str = PREFIX, keep: int = KEEP_RELEASES) -> None:
     for old in rels[keep:]:
         if os.path.realpath(old) not in (current, os.path.realpath(previous) if previous else ""):
             shutil.rmtree(old, ignore_errors=True)
+    prune_venvs(prefix)
+
+
+def prune_venvs(prefix: str = PREFIX) -> list[str]:
+    """Removes the Python environments no kept version uses (about 460 MB each). One that is not
+    finished (no .ready in it) is left: it may be being made for a version right now."""
+    root, venvs = os.path.join(prefix, "releases"), os.path.join(prefix, "venvs")
+    try:
+        names = os.listdir(venvs)
+    except OSError:
+        return []
+    used = set()
+    for rel in os.listdir(root) if os.path.isdir(root) else []:
+        link = os.path.join(root, rel, "venv")
+        if os.path.islink(link):
+            used.add(os.path.realpath(link))
+    gone = []
+    for name in names:
+        venv = os.path.join(venvs, name)
+        if os.path.realpath(venv) in used or not os.path.exists(os.path.join(venv, ".ready")):
+            continue
+        shutil.rmtree(venv, ignore_errors=True)
+        gone.append(name)
+    if gone:
+        logger.info("[Update] Removed %d Python environment(s) no kept version uses", len(gone))
+    return gone
 
 
 def apply(rel: str, data_dir: str, port: int, image: str = "", prefix: str = PREFIX, run: Any = None) -> str:

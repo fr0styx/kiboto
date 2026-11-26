@@ -1,0 +1,14 @@
+Explanation: Written by Kiboto. This machine stays on Debian 13 (trixie): Kiboto's Python environment,
+Explanation: its root service and its updater are made for Debian 13's Python, and a move to another
+Explanation: Debian release would stop all three at once. Debian 13's own packages and updates install
+Explanation: as usual; backports and other sources are not touched by this file. To let apt move the
+Explanation: machine anyway, set KIBOTO_KEEP_DEBIAN=0 in /etc/kiboto/kiboto.env and restart Kiboto, which
+Explanation: then removes this file.
+Package: *
+Pin: release o=Debian, n=/^trixie(-.*)?$/
+Pin-Priority: 500
+
+Explanation: Every other Debian release (Debian 14 and later, testing, unstable) is never installed.
+Package: *
+Pin: release o=Debian
+Pin-Priority: -1

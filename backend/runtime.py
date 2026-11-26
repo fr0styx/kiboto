@@ -39,6 +39,14 @@ def without_root() -> bool:
     return managed_host() and not is_root()
 
 
+def edition() -> str:
+    """Which Kiboto this is: "os" on a machine Kiboto runs (Kiboto OS), "companion" in a container
+    beside another system (Kiboto Companion), "other" when started by hand on some Linux."""
+    if managed_host():
+        return "os"
+    return "companion" if in_container() else "other"
+
+
 def own_container_hostname() -> str:
     """The start of Kiboto's own container id, as Docker sets it for the host name; "" when Kiboto runs
     natively. There the host name is the NAS's name (a name like "cafe" is also the start of container

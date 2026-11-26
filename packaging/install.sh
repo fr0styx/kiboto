@@ -83,6 +83,29 @@ missing() {
   done
 }
 
+# This machine stays on Debian 13: the same file as packaging/kiboto-debian13.pref (a test keeps the
+# two alike), which Kiboto then keeps at each start (native_update.keep_debian)
+stay_on_debian13() {
+  mkdir -p /etc/apt/preferences.d
+  cat > /etc/apt/preferences.d/kiboto-debian13.pref <<'PIN'
+Explanation: Written by Kiboto. This machine stays on Debian 13 (trixie): Kiboto's Python environment,
+Explanation: its root service and its updater are made for Debian 13's Python, and a move to another
+Explanation: Debian release would stop all three at once. Debian 13's own packages and updates install
+Explanation: as usual; backports and other sources are not touched by this file. To let apt move the
+Explanation: machine anyway, set KIBOTO_KEEP_DEBIAN=0 in /etc/kiboto/kiboto.env and restart Kiboto, which
+Explanation: then removes this file.
+Package: *
+Pin: release o=Debian, n=/^trixie(-.*)?$/
+Pin-Priority: 500
+
+Explanation: Every other Debian release (Debian 14 and later, testing, unstable) is never installed.
+Package: *
+Pin: release o=Debian
+Pin-Priority: -1
+PIN
+  chmod 644 /etc/apt/preferences.d/kiboto-debian13.pref
+}
+
 packages() {
   say "Installing the tools Kiboto drives (this takes a few minutes; ZFS is built for this kernel)..."
   export DEBIAN_FRONTEND=noninteractive
@@ -381,13 +404,13 @@ uninstall() {
 case "${1:-}" in
   --from)
     [ -n "${2:-}" ] || die "say where Kiboto's code is: --from <folder>"
-    must_be_this_machine; must_be_fresh; mark_started
+    must_be_this_machine; must_be_fresh; mark_started; stay_on_debian13
     packages; docker_setup; code "$2"; service "$PREFIX/current"; wait_up; network_to_networkd
     rm -f "$ETC/install-started" ;;
   --image | "")
     image=${2:-$KIBOTO_IMAGE}
     [ -n "$image" ] || { sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//'; exit 2; }
-    must_be_a_digest "$image"; must_be_this_machine; must_be_fresh; mark_started
+    must_be_a_digest "$image"; must_be_this_machine; must_be_fresh; mark_started; stay_on_debian13
     packages; docker_setup; code_from_image "$image"; must_be_signed "$image" "${3:-}"
     service "$PREFIX/current"; wait_up; network_to_networkd
     rm -f "$ETC/install-started" ;;

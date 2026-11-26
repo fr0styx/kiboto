@@ -201,3 +201,14 @@ def test_about_says_whether_only_releases_are_installed_here(client, auth_header
     assert client.get("/api/system/about", headers=auth_headers).json()["releases_only"] is False
     monkeypatch.setattr("backend.services.image_signature.releases_only", lambda: True)
     assert client.get("/api/system/about", headers=auth_headers).json()["releases_only"] is True
+
+
+def test_about_names_the_edition(client, auth_headers, monkeypatch):
+    from backend import runtime
+
+    assert client.get("/api/system/about", headers=auth_headers).json()["edition"] == "companion"
+    monkeypatch.setattr(runtime, "managed_host", lambda: True)
+    assert client.get("/api/system/about", headers=auth_headers).json()["edition"] == "os"
+    monkeypatch.setattr(runtime, "managed_host", lambda: False)
+    monkeypatch.setattr(runtime, "in_container", lambda: False)
+    assert runtime.edition() == "other"

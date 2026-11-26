@@ -70,6 +70,7 @@ name set beside an old one wins.
 |---|---|---|
 | `UPDATE_CHANNEL` | `stable` | Release channel to follow. (one of `stable`, `beta`, `edge`) |
 | `UPDATE_SIGNATURES` | `enforce` | In-app updates check the image's signature from this project's CI first: enforce (refuse an unsigned or wrongly signed image), warn (log it and install anyway) or off. Kiboto OS always enforces it, unless KIBOTO_ACCEPT_MAIN_BUILDS is set. (one of `enforce`, `warn`, `off`) |
+| `KIBOTO_KEEP_DEBIAN` | `on` | Kiboto OS: apt installs no package of another Debian release, so the machine stays on Debian 13, the release Kiboto runs on. Off lets apt move it; Kiboto then stops working until it is installed again. |
 | `KIBOTO_ACCEPT_MAIN_BUILDS` | `off` | On a machine Kiboto runs, also take images signed for the main branch, not only releases (a test machine). Elsewhere main builds are taken anyway. |
 | `KIBOTO_IMAGE_VARIANT` | `full` | full ships VMs and the LCD renderer; core leaves them out. (one of `full`, `core`) |
 | `HEALTH_SIGNAL_URL` | `(empty)` | Where the opt-in anonymous health report goes; empty uses the project's receiver. |

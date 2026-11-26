@@ -217,6 +217,14 @@ class Settings:
         choices=("enforce", "warn", "off"),
         group="Updates",
     )
+    keep_debian: bool = _s(
+        "KIBOTO_KEEP_DEBIAN",
+        True,
+        "Kiboto OS: apt installs no package of another Debian release, so the machine stays on "
+        "Debian 13, the release Kiboto runs on. Off lets apt move it; Kiboto then stops working "
+        "until it is installed again.",
+        group="Updates",
+    )
     accept_main_builds: bool = _s(
         "KIBOTO_ACCEPT_MAIN_BUILDS",
         False,

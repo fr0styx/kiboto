@@ -279,6 +279,9 @@ def _never_the_real_machine(monkeypatch):
     from backend.services import native_update
 
     monkeypatch.setattr(native_update, "UNIT_DIR", os.path.join(ROOT, "no-such-units"))  # not the machine's systemd
+    monkeypatch.setattr(
+        native_update, "APT_PIN", os.path.join(ROOT, "no-such-apt", "kiboto-debian13.pref")
+    )  # nor its apt
     from backend.hardware import cpu
 
     monkeypatch.setattr(cpu, "read_cpu_limit", lambda: None)  # not the machine's processor: 80 °C everywhere

@@ -64,13 +64,25 @@ describe('updates panel words (NUX-20)', () => {
     expect(text('btn-apply-update-text')).toBe('Install Release v1.1.0');
   });
 
+  it('names the edition on the About line', async () => {
+    serve({ edition: 'os', python_version: '3.13' }, { channel: 'stable', update_available: false });
+    await fetchAndRenderSystemAbout(false, 'stable');
+    expect(text('about-runtime-env')).toBe('Kiboto OS (Python 3.13)');
+    serve({ edition: 'companion', python_version: '3.12' }, { channel: 'stable', update_available: false });
+    await fetchAndRenderSystemAbout(false, 'stable');
+    expect(text('about-runtime-env')).toBe('Kiboto Companion (container) (Python 3.12)');
+    serve({ edition: 'other', python_version: '3.12' }, { channel: 'stable', update_available: false });
+    await fetchAndRenderSystemAbout(false, 'stable');
+    expect(text('about-runtime-env')).toBe('Native Host (Python 3.12)');
+  });
+
   it('describes a tagged release, an up-to-date edge build and a failed check', async () => {
     serve(
       { containerized: true, python_version: '3.13', chassis_model: 'D8' },
       { channel: 'stable', update_available: true, latest_tag: 'v2.0.0', release_name: 'Two', release_notes: 'Notes' }
     );
     await fetchAndRenderSystemAbout(false, 'stable');
-    expect(text('about-runtime-env')).toBe('Docker Container (Python 3.13)');
+    expect(text('about-runtime-env')).toBe('Kiboto Companion (container) (Python 3.13)');
     expect(text('update-status-title')).toBe('Update Available: v2.0.0');
     expect(text('btn-apply-update-text')).toBe('Install Release v2.0.0');
 
