@@ -12,6 +12,10 @@ Where a feature is still being checked on your edition, or your NAS system does 
 
 Kiboto OS: when Kiboto hands files and folders in a shared folder to their people, a link put in their place over the network is never followed, so a system file's owner or rights can never be changed that way.
 
+#### Fixes
+
+A btrfs mirror that started without one of its drives can now have that drive replaced from the app: the missing drive is named as missing, the pool is opened for writing for the rebuild, and Storage shows it as degraded until then. Afterwards everything on it is mirrored again.
+
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container
 

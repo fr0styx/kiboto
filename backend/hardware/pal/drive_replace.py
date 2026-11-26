@@ -13,8 +13,11 @@ and at least as large as the one it replaces. Nothing is erased to make room.
 import json
 import os
 import re
+import time
 from collections.abc import Callable
 from typing import Any
+
+from backend.config import logger
 
 Run = Callable[[list[str]], tuple[int, str, str]]
 REDUNDANT_ZFS = re.compile(r"^(mirror|raidz[123]?)(-\d+)?$")
@@ -127,24 +130,51 @@ def btrfs_devices(show: str) -> list[dict[str, Any]]:
     """The devices of a btrfs pool from `btrfs filesystem show --raw`; a missing one has no path."""
     out = []
     for line in show.splitlines():
-        m = re.search(r"devid\s+(\d+)\s+size\s+(\d+)\s+used\s+\d+\s+path\s+(\S+)(.*)$", line)
+        # a missing drive prints "path  MISSING" (no path at all) or "path <missing disk #2> MISSING"
+        m = re.search(r"devid\s+(\d+)\s+size\s+(\d+)\s+used\s+\d+\s+path(.*)$", line)
         if m:
-            missing = "MISSING" in m.group(4) or m.group(3).startswith("<")
+            words = m.group(3).split()
+            missing = not words or "MISSING" in words or words[0].startswith("<")
             out.append(
                 {
                     "devid": int(m.group(1)),
                     "size_bytes": int(m.group(2)),
-                    "path": "" if missing else m.group(3),
+                    "path": "" if missing else words[0],
                     "missing": missing,
                 }
             )
     return out
 
 
+def btrfs_profiles(df: str, kind: str = "Data") -> list[str]:
+    """The profiles one kind of block group has in `btrfs filesystem df` ("Data", "Metadata", "System")."""
+    return [m.lower() for m in re.findall(rf"^{kind},\s*([A-Za-z0-9]+)", df, re.M)]
+
+
 def btrfs_profile(df: str) -> str:
-    """The data profile from `btrfs filesystem df`: "raid1", "single", ..."""
-    m = re.search(r"^Data,\s*([A-Za-z0-9]+)", df, re.M)
-    return m.group(1).lower() if m else ""
+    """The data profile from `btrfs filesystem df`: "raid1", "single", ... A mirror that was written to
+    while a drive was missing also has single block groups: it is still the mirror it was made as."""
+    found = btrfs_profiles(df)
+    return next((p for p in found if p in REDUNDANT_BTRFS), found[0] if found else "")
+
+
+def mirror_again(mount: str, df: str, run: Run) -> bool:
+    """Block groups btrfs wrote as single while a drive was missing are made like the rest of their
+    kind again (a soft balance: only those, at once when they are empty). True when one was started."""
+    args = []
+    for kind, flag in (("Data", "-dconvert"), ("Metadata", "-mconvert"), ("System", "-sconvert")):
+        found = btrfs_profiles(df, kind)
+        want = next((p for p in found if p in REDUNDANT_BTRFS), "")
+        if want and "single" in found:
+            args.append(f"{flag}={want},soft")
+    if not args:
+        return False
+    code, out, err = run(["btrfs", "balance", "start", "--bg", "-f", *args, mount])
+    if code != 0:
+        logger.warning(
+            "[Storage] The single block groups of %s were not mirrored again: %s", mount, (err or out).strip()[:200]
+        )
+    return code == 0
 
 
 # --- the plan, the start, the progress ------------------------------------------------------------
@@ -210,12 +240,48 @@ def plan(pool: Any, run: Run) -> dict[str, Any]:
             for d in btrfs_devices(out)
         ]
         progress = btrfs_progress(run(["btrfs", "replace", "status", "-1", mount])[1])
+        if copies and not progress["running"] and all(not d["missing"] for d in btrfs_devices(out)):
+            mirror_again(mount, df, run)  # after a rebuild onto a new drive, all mirrored again
     else:
         return {**base, "why": "one_drive"}  # ext4 and the like: one drive, no copy to rebuild from
     if not copies:
         return {**base, "members": members, "why": "no_copy"}
     smallest = min((m["size_bytes"] for m in members if m["size_bytes"]), default=0)
     return {**base, "can": True, "members": members, "drives": free_drives(run, smallest), "progress": progress}
+
+
+START_WAIT = 6.0  # seconds a btrfs replacement has to show that it runs
+
+
+def _read_only(mount: str) -> bool:
+    try:
+        return bool(os.statvfs(mount).f_flag & os.ST_RDONLY)
+    except OSError:
+        return False
+
+
+def _btrfs_started(mount: str, devid: str, before: str, run: Run) -> None:
+    """`btrfs replace start` goes on in the background and returns at once, also when the kernel then
+    refuses: it is checked here that the replacement runs, or is already done (the drive with that
+    number is there now, on another path)."""
+    end = time.monotonic() + START_WAIT
+    while True:
+        said = run(["btrfs", "replace", "status", "-1", mount])[1]
+        if btrfs_progress(said)["running"]:
+            return
+        now = next(
+            (
+                d
+                for d in btrfs_devices(run(["btrfs", "filesystem", "show", "--raw", mount])[1])
+                if str(d["devid"]) == devid
+            ),
+            None,
+        )
+        if now and not now["missing"] and now["path"] != before:
+            return
+        if time.monotonic() >= end:
+            raise ReplaceError("failed", f"btrfs did not start the replacement. {said.strip()[:200]}".strip())
+        time.sleep(0.5)
 
 
 def start(pool: Any, old: str, new: str, run: Run) -> dict[str, Any]:
@@ -232,14 +298,25 @@ def start(pool: Any, old: str, new: str, run: Run) -> dict[str, Any]:
     if drive is None:
         raise ReplaceError("not_free", "That drive is not an empty drive large enough for this pool.")
     target = by_id(drive["path"])
+    mount = str(pool.mountpoint)
     if p["fs"] == "zfs":
         cmd = ["zpool", "replace", _zfs_name(pool), old, target]
     else:
-        cmd = ["btrfs", "replace", "start", "-f", old, target, str(pool.mountpoint)]
+        if member["state"] == "MISSING" and _read_only(mount):
+            # a mirror that started without a drive is mounted read-only (pool_registry.bring_back); btrfs
+            # replaces a drive only in a pool it can write to, so it is opened for writing for the rebuild
+            code, out, err = run(["mount", "-o", "remount,rw,degraded", mount])
+            if code != 0:
+                raise ReplaceError(
+                    "read_only", f"The pool could not be opened for writing: {(err or out).strip()[:200]}"
+                )
+        cmd = ["btrfs", "replace", "start", "-f", old, target, mount]
     code, out, err = run(cmd)
     if code != 0:
         lines = (err or out or "").strip().splitlines()
         raise ReplaceError("failed", lines[-1][:300] if lines else "The pool's tool refused the replacement.")
+    if p["fs"] == "btrfs":
+        _btrfs_started(mount, old, member["label"] if member["state"] != "MISSING" else "", run)
     return {"started": True, "pool": pool.id, "old": member["label"], "new": target}
 
 

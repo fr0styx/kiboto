@@ -122,6 +122,16 @@ def test_btrfs_names_its_devices_and_a_missing_one():
     assert dr.btrfs_profile("Data, RAID10: total=1\n") == "raid10"
 
 
+class Starts(Machine):
+    """btrfs that says the replacement runs once it was started."""
+
+    def __call__(self, cmd):
+        out = super().__call__(cmd)
+        if cmd[:3] == ["btrfs", "replace", "start"]:
+            self.replace_status = "0.0% done, 0 write errs, 0 uncorr. read errs"
+        return out
+
+
 def test_the_rebuild_starts_with_the_pools_own_tool(monkeypatch):
     monkeypatch.setattr(dr, "by_id", lambda path: "/dev/disk/by-id/virtio-KBTESTDISK6")
     m = Machine()
@@ -129,9 +139,9 @@ def test_the_rebuild_starts_with_the_pools_own_tool(monkeypatch):
     assert m.seen[-1] == ["zpool", "replace", "tank", "1234567890123", "/dev/disk/by-id/virtio-KBTESTDISK6"]
     assert done["started"] is True and done["old"].endswith("KBTESTDISK2-part1")
     show = "\tdevid    1 size 8589934592 used 1 path /dev/vdd\n\tdevid    2 size 8589934592 used 1 path /dev/vde\n"
-    b = Machine(show=show)
+    b = Starts(show=show)
     dr.start(BTRFS_POOL, "2", "/dev/vdg", b)
-    assert b.seen[-1] == [
+    assert next(c for c in b.seen if c[:3] == ["btrfs", "replace", "start"]) == [
         "btrfs",
         "replace",
         "start",
@@ -242,3 +252,109 @@ def test_a_refused_replacement_is_a_conflict_with_its_reason(client, auth_header
     monkeypatch.setattr("backend.api.storage.get_storage_platform", lambda: adapter)
     res = client.post("/api/storage/pools/tank/replace", json={"old": "x", "new": "/dev/vdb"}, headers=auth_headers)
     assert res.status_code == 409 and "not an empty drive" in res.json()["detail"]
+
+
+MISSING_SHOW = (
+    "Label: 'media'\n\tdevid    1 size 8589934592 used 1 path /dev/vdd\n\tdevid    2 size 0 used 0 path  MISSING\n"
+)
+
+
+def test_a_drive_btrfs_lists_with_no_path_is_missing():
+    """As btrfs prints a drive that is gone: "path" and then nothing but MISSING."""
+    assert dr.btrfs_devices(MISSING_SHOW)[1] == {"devid": 2, "size_bytes": 0, "path": "", "missing": True}
+    assert dr.btrfs_devices("devid 3 size 1 used 1 path <missing disk #3> MISSING")[0]["missing"] is True
+    p = dr.plan(BTRFS_POOL, Machine(show=MISSING_SHOW))
+    assert [(m["label"], m["state"]) for m in p["members"]] == [("/dev/vdd", "ONLINE"), ("missing drive 2", "MISSING")]
+
+
+class Rebuilt(Machine):
+    """btrfs that has replaced devid 2 by the time it is asked again."""
+
+    def __call__(self, cmd):
+        out = super().__call__(cmd)
+        if cmd[:3] == ["btrfs", "replace", "start"]:
+            self.show = self.show.replace("size 0 used 0 path  MISSING", "size 8589934592 used 1 path /dev/vdg")
+        return out
+
+
+def test_a_mirror_mounted_read_only_without_a_drive_is_opened_for_the_rebuild(monkeypatch):
+    monkeypatch.setattr(dr, "by_id", lambda path: "/dev/disk/by-id/virtio-KBTESTDISK6")
+    monkeypatch.setattr(dr, "_read_only", lambda mount: True)
+    m = Rebuilt(show=MISSING_SHOW)
+    assert dr.start(BTRFS_POOL, "2", "/dev/vdg", m)["started"] is True
+    remount = m.seen.index(["mount", "-o", "remount,rw,degraded", "/mnt/storage/media"])
+    assert remount < next(i for i, c in enumerate(m.seen) if c[:3] == ["btrfs", "replace", "start"])
+
+
+def test_a_replacement_btrfs_did_not_start_is_said(monkeypatch):
+    """btrfs goes on in the background and its own command says nothing when the kernel refuses."""
+    monkeypatch.setattr(dr, "by_id", lambda path: "/dev/disk/by-id/virtio-KBTESTDISK6")
+    monkeypatch.setattr(dr, "_read_only", lambda mount: False)
+    monkeypatch.setattr(dr, "START_WAIT", 0.0)
+    m = Machine(show=MISSING_SHOW, replace_status="Started on 26.Nov 02:13:30, finished on 26.Nov 02:13:30")
+    with pytest.raises(dr.ReplaceError) as e:
+        dr.start(BTRFS_POOL, "2", "/dev/vdg", m)
+    assert e.value.key == "failed" and "did not start" in str(e.value)
+
+
+def test_a_pool_that_cannot_be_opened_for_writing_is_said(monkeypatch):
+    assert dr._read_only("/no/such/folder") is False
+    monkeypatch.setattr(dr, "by_id", lambda path: path)
+    monkeypatch.setattr(dr, "_read_only", lambda mount: True)
+
+    class Refuses(Machine):
+        def __call__(self, cmd):
+            self.seen.append(cmd)
+            return (32, "", "mount: wrong fs type") if cmd[0] == "mount" else super().__call__(cmd)
+
+    with pytest.raises(dr.ReplaceError) as e:
+        dr.start(BTRFS_POOL, "2", "/dev/vdg", Refuses(show=MISSING_SHOW))
+    assert e.value.key == "read_only"
+
+
+MIXED = """Data, single: total=1.62GiB, used=0.00B
+Data, RAID1: total=2.00GiB, used=48.37MiB
+System, single: total=32.00MiB, used=0.00B
+System, RAID1: total=32.00MiB, used=16.00KiB
+Metadata, single: total=256.00MiB, used=0.00B
+Metadata, RAID1: total=256.00MiB, used=736.00KiB
+GlobalReserve, single: total=5.50MiB, used=0.00B
+"""
+
+
+def test_a_mirror_written_to_without_a_drive_is_still_a_mirror_and_is_mirrored_again():
+    assert dr.btrfs_profile(MIXED) == "raid1"
+    whole = "\tdevid    1 size 8589934592 used 1 path /dev/vdd\n\tdevid    2 size 8589934592 used 1 path /dev/vdg\n"
+    m = Machine(show=whole, df=MIXED)
+    assert dr.plan(BTRFS_POOL, m)["can"] is True
+    balance = [c for c in m.seen if c[:3] == ["btrfs", "balance", "start"]]
+    assert balance == [
+        [
+            "btrfs",
+            "balance",
+            "start",
+            "--bg",
+            "-f",
+            "-dconvert=raid1,soft",
+            "-mconvert=raid1,soft",
+            "-sconvert=raid1,soft",
+            "/mnt/storage/media",
+        ]
+    ]
+    # not while a drive is still missing, not while a rebuild runs, and not when all is mirrored
+    for machine in (
+        Machine(show=MISSING_SHOW, df=MIXED),
+        Machine(show=whole, df=MIXED, replace_status="40.0% done, 0 write errs"),
+        Machine(show=whole),
+    ):
+        dr.plan(BTRFS_POOL, machine)
+        assert not [c for c in machine.seen if c[:3] == ["btrfs", "balance", "start"]]
+
+
+def test_a_refused_balance_is_only_noted():
+    class Refuses(Machine):
+        def __call__(self, cmd):
+            self.seen.append(cmd)
+            return (1, "", "balance: in progress") if cmd[:2] == ["btrfs", "balance"] else super().__call__(cmd)
+
+    assert dr.mirror_again("/mnt/storage/media", MIXED, Refuses()) is False

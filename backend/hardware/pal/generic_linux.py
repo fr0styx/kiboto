@@ -155,6 +155,27 @@ def _used_elsewhere(said: str) -> bool:
     return "another system" in said or "import -f" in said
 
 
+def btrfs_sysfs(uuid: str, sys_root: str = "") -> tuple[list[str], bool] | None:
+    """What the kernel says of a mounted btrfs pool, readable without root (Kiboto OS's web process
+    cannot run `btrfs filesystem show`): its present drives, and whether one of its drives is missing.
+    None when it is not mounted here or the kernel is too old to say."""
+    base = os.path.join(sys_root or (HOST_SYS or "/sys"), "fs", "btrfs", uuid)
+    if not re.fullmatch(r"[0-9a-f-]{36}", uuid or "") or not os.path.isdir(os.path.join(base, "devinfo")):
+        return None
+    missing = False
+    for devid in os.listdir(os.path.join(base, "devinfo")):
+        try:
+            with open(os.path.join(base, "devinfo", devid, "missing"), encoding="utf-8") as f:
+                missing = missing or f.read().strip() == "1"
+        except OSError:
+            return None
+    try:
+        present = sorted(os.listdir(os.path.join(base, "devices")))
+    except OSError:
+        present = []
+    return present, missing
+
+
 def btrfs_missing_members(members: list[PoolMember], shown: str) -> list[PoolMember]:
     """The members, with the ones `btrfs filesystem show` does not list as present marked MISSING.
     A missing drive shows as "devid 2 size 0 used 0 path  MISSING"; present ones by their path."""
@@ -698,10 +719,21 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
             ignored("backend.hardware.pal_storage.GenericLinuxStorageAdapter._recorded_pool")
         gone = any(m.status == "MISSING" for m in members)
         if fs == "btrfs" and not gone:  # a pool mounted without one of its drives says so itself
-            _code, shown, _err = self._run_cmd(["btrfs", "filesystem", "show", row["mountpoint"]])
-            gone = "missing" in shown.lower()
-            if gone:  # which one: a drive of the record that btrfs no longer lists
-                pool.members = members = btrfs_missing_members(members, shown)
+            kernel = btrfs_sysfs(str(row.get("uuid") or ""))
+            if kernel is not None:
+                present, gone = kernel
+                if gone:  # which one: a drive of the record that is not among the pool's own now
+                    pool.members = members = [
+                        m
+                        if (m.device and _whole_disk(m.device) in present)
+                        else m.model_copy(update={"status": "MISSING"})
+                        for m in members
+                    ]
+            else:
+                _code, shown, _err = self._run_cmd(["btrfs", "filesystem", "show", row["mountpoint"]])
+                gone = "missing" in shown.lower()
+                if gone:  # which one: a drive of the record that btrfs no longer lists
+                    pool.members = members = btrfs_missing_members(members, shown)
         pool.status = "DEGRADED" if gone else "HEALTHY"
         pool.compression = pool_compression(fs, row["mountpoint"])
         return pool
