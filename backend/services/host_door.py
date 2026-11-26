@@ -408,6 +408,13 @@ def _key(name: str) -> Callable[..., Any]:
     return run
 
 
+def _dmesg(max_lines: int) -> dict[str, Any]:
+    """The kernel's own log for the diagnostics, which Debian gives to root only (dmesg_restrict)."""
+    from backend.hardware import kernel_telemetry
+
+    return kernel_telemetry.dmesg_here(max(1, min(int(max_lines), 1000)))
+
+
 def _fan_file(path: str, value: int) -> bool:
     """A fan's speed or mode: only a pwm file of a hwmon device, with a value such a file takes."""
     from backend.config import HOST_SYS
@@ -603,6 +610,8 @@ OPERATIONS: dict[str, Operation] = {
     "storage.allow_changes": Operation(_storage("allow_changes"), {"pool_id": TEXT}, max_len=128),
     "storage.replace_plan": Operation(_storage("replace_plan"), {"pool_id": TEXT}, max_len=128),
     "storage.scrub_result": Operation(_storage("scrub_result_of"), {"pool_id": TEXT}, max_len=128),
+    "storage.discover_pools": Operation(_storage("discover_external_pools"), {}),
+    "diagnostics.dmesg": Operation(_dmesg, {"max_lines": NUMBER}),
     "storage.replace_drive": Operation(
         _storage("replace_drive"), {"pool_id": TEXT, "old": TEXT, "new": TEXT}, max_len=256
     ),

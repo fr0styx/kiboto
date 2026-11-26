@@ -16,6 +16,20 @@ from backend.ignored_errors import ignored
 
 
 def get_categorized_dmesg(max_lines: int = 300) -> dict[str, Any]:
+    """The kernel's warnings and errors. Debian gives the kernel's log to root only: on Kiboto OS it
+    is read in the host door (diagnostics.dmesg)."""
+    from backend import door
+
+    try:
+        got = door.via("diagnostics.dmesg", dmesg_here, max_lines=int(max_lines))
+    except (OSError, RuntimeError, ValueError) as e:
+        return {"available": False, "error": str(e), "alerts": [], "recent_lines": []}
+    return (
+        got if isinstance(got, dict) else {"available": False, "error": "no answer", "alerts": [], "recent_lines": []}
+    )
+
+
+def dmesg_here(max_lines: int = 300) -> dict[str, Any]:
     """
     Executes dmesg with a strict timeout and extracts hardware-critical alerts:
     thermal throttling, PCIe AER, I/O errors, memory faults, and crash logs.

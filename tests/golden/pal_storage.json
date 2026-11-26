@@ -241,6 +241,7 @@
     "_default_share_folder": "(self, name: str) -> str",
     "_delete_snapshot_here": "(self, pool_id: str, snapshot_name: str, break_glass: bool = False, reason: str = '') -> dict[str, typing.Any]",
     "_destroy_pool_here": "(self, pool_id: str) -> dict[str, typing.Any]",
+    "_discover_here": "(self) -> list[dict[str, typing.Any]]",
     "_erase_pool_here": "(self, pool_id: str) -> dict[str, typing.Any]",
     "_export_pool_here": "(self, pool_id: str, force: bool = False) -> dict[str, typing.Any]",
     "_export_when_free": "(self, name: str, tries: int = 5) -> tuple[int, str, str]",

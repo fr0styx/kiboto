@@ -1708,7 +1708,12 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
             }
 
     def discover_external_pools(self) -> list[dict[str, Any]]:
-        """Scans for unmounted external storage pools available to import."""
+        """Scans for unmounted external storage pools available to import. `zpool import` lists them
+        for root only (Kiboto OS's web process got "permission denied" and an empty list): through
+        the host door where it runs."""
+        return _through_door("storage.discover_pools", self._discover_here)
+
+    def _discover_here(self) -> list[dict[str, Any]]:
         discovered = []
         code, out, _ = self._run_cmd(["zpool", "import"])
         if code == 0 and out.strip():
