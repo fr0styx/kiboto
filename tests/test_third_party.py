@@ -59,3 +59,27 @@ def test_it_writes_the_list(tmp_path, capsys):
     assert tp.main(["third_party.py", str(lock)]) == 0
     assert "qrcode 1.5.4: MIT" in capsys.readouterr().out
     assert tp.main(["third_party.py"]) == 0 and "Frontend packages (0)" in capsys.readouterr().out
+
+
+def test_the_os_packages_their_source_and_the_written_offer_are_named():
+    text = tp.render([], [], [("bash", "5.2.37-2+b5"), ("zfsutils-linux", "2.4.4-1~bpo13+1")])
+    assert "Debian packages (2)" in text and "bash 5.2.37-2+b5" in text and "zfsutils-linux 2.4.4-1~bpo13+1" in text
+    assert "https://snapshot.debian.org/" in text and "/usr/share/doc/<package>/copyright" in text
+    assert "Written offer" in text and '"Source request"' in text  # as the USB image's NOTICE.txt
+    assert "intel-media-va-driver-non-free" in text and "CDDL" in text
+
+
+def test_the_debian_packages_are_read_from_dpkg(monkeypatch):
+    monkeypatch.setattr(tp.shutil, "which", lambda name: "/usr/bin/dpkg-query")
+    done = type("Done", (), {"stdout": "zlib1g:amd64 1:1.3.dfsg-3\nbash 5.2.37-2+b5\nbroken\n"})()
+    monkeypatch.setattr(tp.subprocess, "run", lambda *a, **k: done)
+    assert tp.debian_packages() == [("bash", "5.2.37-2+b5"), ("zlib1g:amd64", "1:1.3.dfsg-3")]
+    monkeypatch.setattr(tp.shutil, "which", lambda name: None)
+    assert tp.debian_packages() == []
+
+
+def test_the_written_offer_is_the_one_the_usb_image_makes():
+    notice = (ROOT / "packaging" / "image" / "NOTICE.txt").read_text(encoding="utf-8")
+    offer = " ".join(notice[notice.index("Written offer") : notice.index("Kiboto adds no change")].split())
+    ours = " ".join("\n".join(tp.OS_NOTICE).split())
+    assert offer in ours

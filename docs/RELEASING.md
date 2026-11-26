@@ -75,6 +75,37 @@ Set the repository variable `HOLD_RELEASES` (Settings > Secrets and variables > 
 Variables) to the version, for example `v2.0.7`, or to `all`. Promotion skips it and says so
 in the workflow summary. Remove the variable to let it continue; fix forward with a new tag.
 
+## Withdrawing a bad release
+
+Tags cannot be moved or deleted, and promotion only goes forward, so a bad release is withdrawn by
+pointing the channels back at the release before it and fixing forward. Every image keeps its
+signature: moving a tag to an older digest needs no new signing, and Kiboto checks the digest it is
+given. `vBAD` is the bad release, `vGOOD` the one before it; run the image commands for both
+images (`ghcr.io/fr0styx/kiboto` and, until 2.2, the name from before the rebrand, `OLD_IMAGE_REPO` in
+`backend/legacy_names.py`) and both
+variants (no suffix and `-core`).
+
+1. **Stop it going further.** Set the repository variable `HOLD_RELEASES` to `vBAD` (see above),
+   so promotion skips it.
+2. **Point the channel back.** Find the good digest and move the channel's tag to it:
+
+   ```bash
+   docker buildx imagetools inspect ghcr.io/fr0styx/kiboto:GOOD --format '{{json .Manifest}}' | jq -r .digest
+   docker buildx imagetools create -t ghcr.io/fr0styx/kiboto:beta ghcr.io/fr0styx/kiboto@sha256:<good digest>
+   ```
+
+   For a release that already reached Stable, move `:latest`, `:stable` and `:MAJOR.MINOR` the same
+   way, and make the good release the latest on GitHub again:
+   `gh release edit vGOOD --latest` and `gh release edit vBAD --prerelease`.
+3. **Say so.** Begin the bad release's title on GitHub with "Withdrawn:" and say why in its notes;
+   take its install image off the release page (`gh release delete-asset vBAD kiboto-vBAD-install.iso`).
+4. **Fix forward** with the next patch version. If the bad release has a bug in the root service,
+   raise `LOWEST_VERSION` to the fixed version in that release, so no Kiboto OS machine can be
+   asked to install the bad one again.
+
+Machines that already updated stay on the bad version until the fixed one reaches their channel.
+Revert, in the app, takes one back to the version it had before the last update.
+
 ## Skipping the wait (security fixes)
 
 Actions > **Promote release** > Run workflow: enter the version and tick **skip_soak**. The

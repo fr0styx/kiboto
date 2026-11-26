@@ -331,6 +331,43 @@ def _whole(rel: str) -> None:
         raise Damaged("the downloaded version is damaged (its files are empty); it is downloaded again next time")
 
 
+def _image_repo(ref: str) -> str:
+    """ghcr.io/fr0styx/kiboto from ghcr.io/fr0styx/kiboto:2.0.7 or ...@sha256:..."""
+    repo = ref.split("@", 1)[0]
+    head, _, tail = repo.rpartition("/")
+    return f"{head}/{tail.split(':', 1)[0]}" if head else tail.split(":", 1)[0]
+
+
+def forget_images() -> list[str]:
+    """After an update held: Kiboto's images left in Docker go (about 1.9 GB each). A machine Kiboto
+    runs uses the files copied out of them, and going back uses the versions kept on disk, never an
+    image. One a container still uses is left (Docker refuses). Returns the image ids removed."""
+    from backend.services.image_signature import IMAGE_REPOS
+
+    try:
+        status, images = docker_client.request("GET", "/images/json")
+    except docker_client.DockerError as e:
+        logger.warning("[Update] Kiboto's old images could not be listed: %s", e)
+        return []
+    gone = []
+    for img in images if status == 200 and isinstance(images, list) else []:
+        refs = [*(img.get("RepoTags") or []), *(img.get("RepoDigests") or [])]
+        if not any(_image_repo(str(r)) in IMAGE_REPOS for r in refs):
+            continue
+        image_id = str(img.get("Id") or "")
+        try:
+            st, said = docker_client.request("DELETE", f"/images/{image_id}?noprune=false")
+        except docker_client.DockerError as e:
+            st, said = 0, str(e)
+        if st == 200:
+            gone.append(image_id)
+        else:
+            logger.info("[Update] Kiboto's image %s stays: %s", image_id[:19], said)
+    if gone:
+        logger.info("[Update] Removed %d of Kiboto's images no version needs", len(gone))
+    return gone
+
+
 def _forget(image: str) -> None:
     """The damaged image goes, so the next try downloads it again instead of reading the same."""
     try:
@@ -600,6 +637,7 @@ def apply(rel: str, data_dir: str, port: int, image: str = "", prefix: str = PRE
     if ok:
         _record(data_dir, "updated", why, to_image=image)
         prune(prefix)
+        forget_images()
         return "updated"
     logger.error("[Update] The new version did not hold (%s): going back", why)
     run(["systemctl", "stop", SERVICE], timeout=180)

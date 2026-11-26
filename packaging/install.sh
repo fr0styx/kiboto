@@ -413,6 +413,8 @@ case "${1:-}" in
     must_be_a_digest "$image"; must_be_this_machine; must_be_fresh; mark_started; stay_on_debian13
     packages; docker_setup; code_from_image "$image"; must_be_signed "$image" "${3:-}"
     service "$PREFIX/current"; wait_up; network_to_networkd
+    # Kiboto runs from the files copied out of the image: the image itself (about 1.9 GB) can go
+    docker rmi "$image" >/dev/null 2>&1 || true
     rm -f "$ETC/install-started" ;;
   --uninstall) uninstall "${2:-}" ;;
   *) sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;

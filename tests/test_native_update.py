@@ -733,3 +733,71 @@ def test_the_lowest_version_is_never_above_this_one():
 
     lowest = tuple(int(x) for x in nu.LOWEST_VERSION.split("."))
     assert lowest <= tuple(int(x) for x in __version__.split("-")[0].split("."))
+
+
+class Images:
+    """Docker's image list, and what was asked to be removed."""
+
+    def __init__(self, monkeypatch, images, refuse=()):
+        self.images, self.refuse, self.deleted = images, set(refuse), []
+        monkeypatch.setattr(nu.docker_client, "request", self.request)
+
+    def request(self, method, path, body=None, **k):
+        if method == "GET" and path == "/images/json":
+            return 200, self.images
+        if method == "DELETE" and path.startswith("/images/"):
+            image_id = path.split("/images/", 1)[1].split("?", 1)[0]
+            self.deleted.append(image_id)
+            return (409, "image is being used by a container") if image_id in self.refuse else (200, [])
+        return 404, None
+
+
+def test_after_an_update_holds_kibotos_images_go_and_nothing_else(monkeypatch):
+    from backend import legacy_names
+
+    images = Images(
+        monkeypatch,
+        [
+            {"Id": "sha256:new", "RepoTags": ["ghcr.io/fr0styx/kiboto:2.0.7"], "RepoDigests": []},
+            {"Id": "sha256:digest-only", "RepoTags": None, "RepoDigests": ["ghcr.io/fr0styx/kiboto@sha256:ab"]},
+            {"Id": "sha256:old-name", "RepoTags": [f"ghcr.io/{legacy_names.OLD_IMAGE_REPO}:latest"]},
+            {"Id": "sha256:app", "RepoTags": ["lscr.io/linuxserver/jellyfin:latest"], "RepoDigests": []},
+            {"Id": "sha256:lookalike", "RepoTags": ["ghcr.io/fr0styx/kiboto-evil:1"], "RepoDigests": []},
+            {"Id": "sha256:in-use", "RepoTags": ["ghcr.io/fr0styx/kiboto:edge"]},
+        ],
+        refuse={"sha256:in-use"},
+    )
+    assert nu.forget_images() == ["sha256:new", "sha256:digest-only", "sha256:old-name"]
+    assert "sha256:app" not in images.deleted and "sha256:lookalike" not in images.deleted
+
+
+def test_a_docker_that_does_not_answer_is_not_an_update_failure(monkeypatch):
+    def broken(*a, **k):
+        raise nu.docker_client.DockerError(0, "no socket")
+
+    monkeypatch.setattr(nu.docker_client, "request", broken)
+    assert nu.forget_images() == []
+
+
+@pytest.mark.parametrize(
+    "ref, repo",
+    [
+        ("ghcr.io/fr0styx/kiboto:2.0.7", "ghcr.io/fr0styx/kiboto"),
+        ("ghcr.io/fr0styx/kiboto@sha256:ab", "ghcr.io/fr0styx/kiboto"),
+        ("localhost:5000/fr0styx/kiboto:x", "localhost:5000/fr0styx/kiboto"),
+        ("busybox:1.37", "busybox"),
+    ],
+)
+def test_the_repository_of_an_image_reference(ref, repo):
+    assert nu._image_repo(ref) == repo
+
+
+def test_the_installer_removes_the_image_it_copied_kiboto_out_of():
+    with open(
+        os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "packaging", "install.sh"),
+        encoding="utf-8",
+    ) as f:
+        text = f.read()
+    part = text[text.index('--image | "")') :]
+    part = part[: part.index(";;")]
+    assert part.index("wait_up") < part.index('docker rmi "$image"') < part.index('rm -f "$ETC/install-started"')

@@ -3,14 +3,17 @@
     python scripts/third_party.py [package-lock.json] > third-party-licences.txt
 
 Run at image build time (Dockerfile), so the list is always that image's: the Python packages
-installed in it (from their metadata) and the frontend packages compiled into its pages (from
-package-lock.json, those that are not development tools). The operating system packages of the
-image keep their licences in /usr/share/doc/<package>/copyright."""
+installed in it (from their metadata), the frontend packages compiled into its pages (from
+package-lock.json, those that are not development tools), and the operating system's Debian
+packages with their versions (dpkg), with where Debian publishes their source and the project's
+written offer for the GPL source, as the install USB image's NOTICE.txt makes it."""
 
 from __future__ import annotations
 
 import importlib.metadata
 import json
+import shutil
+import subprocess
 import sys
 
 UNKNOWN = "see the package"
@@ -49,24 +52,65 @@ def frontend_packages(lock_path: str) -> list[tuple[str, str, str]]:
     return sorted(set(rows), key=lambda r: r[0].lower())
 
 
-def render(python: list[tuple[str, str, str]], frontend: list[tuple[str, str, str]]) -> str:
+def debian_packages() -> list[tuple[str, str]]:
+    """The image's Debian packages and their versions; none where there is no dpkg (a test)."""
+    if not shutil.which("dpkg-query"):
+        return []
+    done = subprocess.run(  # noqa: S603,S607
+        ["dpkg-query", "-W", "-f=${binary:Package} ${Version}\\n"], capture_output=True, text=True, check=False
+    )
+    rows = [tuple(line.split(" ", 1)) for line in done.stdout.splitlines() if " " in line]
+    return sorted((name, version) for name, version in rows)
+
+
+OS_NOTICE = [
+    "The operating system in this image is Debian 13. Debian and the software in it are free",
+    "software under their own licences, mostly the GNU General Public License; each package's",
+    "licence is in /usr/share/doc/<package>/copyright inside the image. Debian publishes the source",
+    "code of every package it has published, by version: https://snapshot.debian.org/",
+    "",
+    "Two parts come from outside Debian's main section:",
+    "- the ZFS tools (zfsutils-linux and its libraries, full image only), from Debian's",
+    "  trixie-backports, under the CDDL;",
+    "- Intel's media driver (intel-media-va-driver-non-free, amd64 only), for converting videos",
+    "  with Intel Quick Sync. Its own licence is Expat (MIT-style); Debian files it as non-free",
+    "  because its GPU kernels come without source. It is used only when /dev/dri is passed in.",
+    "",
+    "Written offer: for three years after a Kiboto release carrying this image was published, the",
+    "Kiboto project gives anyone who asks the complete corresponding source code of the GPL and LGPL",
+    "software in this image, for no more than the cost of making and sending the copy. Ask in an",
+    'issue titled "Source request" at https://github.com/fr0styx/kiboto/issues, naming the Kiboto',
+    "release. Kiboto adds no change to any of that software.",
+    "",
+]
+
+
+def render(
+    python: list[tuple[str, str, str]],
+    frontend: list[tuple[str, str, str]],
+    debian: list[tuple[str, str]] | None = None,
+) -> str:
     out = [
         "Third-party software in this Kiboto image",
         "",
         "Kiboto itself is under the MIT licence (LICENSE in its repository).",
-        "The operating system packages keep their licences in /usr/share/doc/<package>/copyright.",
         "",
+        *OS_NOTICE,
     ]
     for title, rows in (("Python packages", python), ("Frontend packages", frontend)):
         out += [f"{title} ({len(rows)})", ""]
         out += [f"{name} {version}: {licence}" for name, version, licence in rows]
         out.append("")
+    debian = debian or []
+    out += [f"Debian packages ({len(debian)}), with the versions to find their source by", ""]
+    out += [f"{name} {version}" for name, version in debian]
+    out.append("")
     return "\n".join(out)
 
 
 def main(argv: list[str]) -> int:
     frontend = frontend_packages(argv[1]) if len(argv) > 1 else []
-    sys.stdout.write(render(python_packages(), frontend))
+    sys.stdout.write(render(python_packages(), frontend, debian_packages()))
     return 0
 
 

@@ -98,6 +98,8 @@ Guides: the image sizes, where the first-time password is kept, the arm64 testin
 
 Kiboto OS: an update now also removes the Python environments no kept version uses (about 460 MB each).
 
+Kiboto OS: an update now removes Kiboto's old images from Docker (about 1.9 GB each), and the install no longer keeps the image it copied Kiboto out of.
+
 #### Security
 
 On a machine of its own, failed sign-ins to shared folders over the network now count like web sign-ins: 20 in 15 minutes block the address for an hour, and they show under History, Sign-ins.
@@ -191,6 +193,8 @@ Releases: Stable now takes only an image signed for that exact version, and the 
 Kiboto OS: the machine stays on Debian 13. apt no longer installs packages of another Debian release, since a move to Debian 14 would stop Kiboto; KIBOTO_KEEP_DEBIAN=0 allows it.
 
 About says which edition is running: Kiboto OS or Kiboto Companion.
+
+The list of third-party software in the image (/third-party-licences.txt) now also names its Debian packages, where their source is published, and the offer of GPL source code.
 
 ## v2.0.6 (2026-11-23)
 ### 🖥️ Kiboto on a machine of its own (preview), with its settings kept safe on every pool
