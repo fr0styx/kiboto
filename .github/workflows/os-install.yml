@@ -12,6 +12,11 @@ on:
         description: "The build to install: ghcr.io/fr0styx/kiboto@sha256:..."
         required: true
         type: string
+      fast:
+        description: "Start from a prepared disk with ZFS already built, when one for this install.sh exists"
+        required: false
+        type: boolean
+        default: false
   workflow_call:
     inputs:
       image:
@@ -19,6 +24,11 @@ on:
         required: false
         type: string
         default: ""
+      fast:
+        description: "Start from a prepared disk with ZFS already built, when one for this install.sh exists"
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -71,7 +81,45 @@ jobs:
           fi
           echo "image=$image" >> "$GITHUB_OUTPUT"
 
+      # The fast path: a disk on which ZFS is already built (the slowest part of an install) and the
+      # installer's other packages are downloaded. It belongs to one install.sh, one version of this
+      # check and one Debian cloud image: a change to any of them makes a new one, and that run does
+      # the full fresh install, which is how an installer change is always tried from nothing.
+      - name: Which prepared disk fits
+        if: inputs.fast
+        id: key
+        run: |
+          set -euo pipefail
+          debian=$(curl -fsSL --retry 5 --retry-delay 10 https://cloud.debian.org/images/cloud/trixie/latest/SHA512SUMS \
+            | grep ' debian-13-generic-amd64.qcow2$' | cut -c1-16)
+          [ -n "$debian" ]
+          ours=$(cat packaging/install.sh scripts/os_install_check.sh | sha256sum | cut -c1-16)
+          echo "key=kb-os-prepared-v1-$ours-$debian" >> "$GITHUB_OUTPUT"
+
+      - name: A prepared disk from an earlier run
+        if: inputs.fast
+        id: prepared
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: prepared.qcow2
+          key: ${{ steps.key.outputs.key }}
+
       - name: Install Kiboto OS in a fresh Debian 13 and check it
         env:
           IMAGE_REF: ${{ steps.build.outputs.image }}
+          KB_OS_PREPARED: ${{ steps.prepared.outputs.cache-hit == 'true' && format('{0}/prepared.qcow2', github.workspace) || '' }}
         run: sh scripts/os_install_check.sh "$IMAGE_REF"
+
+      - name: Prepare a disk for the next runs
+        if: inputs.fast && steps.prepared.outputs.cache-hit != 'true'
+        env:
+          IMAGE_REF: ${{ steps.build.outputs.image }}
+          KB_OS_PREPARE: ${{ github.workspace }}/prepared.qcow2
+        run: sh scripts/os_install_check.sh "$IMAGE_REF"
+
+      - name: Keep the prepared disk
+        if: inputs.fast && steps.prepared.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: prepared.qcow2
+          key: ${{ steps.key.outputs.key }}

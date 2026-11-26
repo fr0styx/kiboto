@@ -15,6 +15,12 @@
 #   KB_OS_PORT    the port on this machine's loopback for SSH into the virtual machine (default 2230)
 #   KB_OS_KEEP=1  leave the virtual machine running at the end, to look at it
 #   KB_OS_INSTALLER  another install script than this checkout's (to try the check itself against a broken one)
+#   KB_OS_PREPARE=<file>  make a prepared disk instead of checking: a fresh Debian 13 in which ZFS is
+#                 built and the installer's other packages are downloaded (not installed: Debian's Samba
+#                 would write a config, and the installer then refuses the machine), saved to <file>
+#   KB_OS_PREPARED  such a disk, used instead of a fresh Debian: the install then skips building ZFS,
+#                 the slow part. It belongs to one install.sh and one Debian image (the workflow keys
+#                 it by both); anything else gets a fresh Debian.
 set -eu
 IMAGE=${1:-}
 case "$IMAGE" in *@sha256:*) ;; *) echo "usage: os_install_check.sh <image>@sha256:<digest>" >&2; exit 2 ;; esac
@@ -50,7 +56,11 @@ T0=$(date +%s)
 [ -e /dev/kvm ] || { say "This machine has no /dev/kvm: a virtual machine cannot be started here."; exit 1; }
 
 stage "A fresh Debian 13"
-if [ -n "${KB_OS_BASE:-}" ]; then
+if [ -n "${KB_OS_PREPARED:-}" ]; then
+  BASE=$KB_OS_PREPARED
+  [ -f "$BASE" ] || { say "$BASE is not there"; exit 1; }
+  say "using the prepared disk $(basename "$BASE"): ZFS is already built in it"
+elif [ -n "${KB_OS_BASE:-}" ]; then
   BASE=$KB_OS_BASE
   [ -f "$BASE" ] || { say "$BASE is not there"; exit 1; }
   say "using $BASE"
@@ -119,6 +129,53 @@ wait_ssh() {  # wait_ssh <minutes>: until the machine answers
 }
 wait_ssh 6
 say "up: Debian $($SSH 'cat /etc/debian_version; uname -r' | tr '\n' ' ')"
+
+if [ -n "${KB_OS_PREPARE:-}" ]; then
+  stage "Preparing a disk: ZFS built and the other packages downloaded, as install.sh would"
+  $SSH "cat > /root/install.sh" < "$HERE/packaging/install.sh"
+  # install.sh's own variables and functions (TOOLS, missing), without running it
+  $SSH "sh -s" <<'PREP'
+set -eu
+sed '/^case "${1:-}" in$/,$d' /root/install.sh > /root/install-functions.sh
+. /root/install-functions.sh
+export DEBIAN_FRONTEND=noninteractive
+for f in /etc/apt/sources.list.d/*.sources; do
+  [ -f "$f" ] && sed -i 's/^Components: main$/Components: main contrib non-free-firmware/' "$f"
+done
+apt-get update -qq
+apt-get install -y -qq --no-install-recommends "linux-headers-$(uname -r)" >/dev/null
+# the module first, then the tools, from backports where they are listed: as install.sh does
+for pkg in zfs-dkms zfsutils-linux; do
+  if grep -rqs 'trixie-backports' /etc/apt/sources.list /etc/apt/sources.list.d; then
+    apt-get install -y -qq --no-install-recommends -t trixie-backports "$pkg" >/dev/null
+  else
+    apt-get install -y -qq --no-install-recommends "$pkg" >/dev/null
+  fi
+done
+modprobe zfs
+# shellcheck disable=SC2086
+need=$(missing linux-headers-amd64 $TOOLS)
+# shellcheck disable=SC2086
+[ -z "$need" ] || apt-get install -y -qq --no-install-recommends --download-only $need >/dev/null
+echo "ZFS $(zfs version | head -1); $(ls /var/cache/apt/archives/*.deb | wc -l) packages downloaded"
+# the next start is a first start again: a new machine id, and cloud-init reads its settings anew
+cloud-init clean --logs >/dev/null 2>&1 || true
+truncate -s 0 /etc/machine-id
+rm -f /root/install.sh /root/install-functions.sh
+sync
+PREP
+  $SSH "systemctl poweroff" 2>/dev/null || true
+  i=0
+  while docker inspect "$NAME" --format '{{.State.Running}}' 2>/dev/null | grep -q true; do
+    i=$((i + 1)); [ "$i" -gt 60 ] && { say "the machine did not shut down"; exit 1; }; sleep 3
+  done
+  out_dir=$(cd "$(dirname "$KB_OS_PREPARE")" && pwd); out_name=$(basename "$KB_OS_PREPARE")
+  docker run --rm -v "$WORK":/vm -v "$BASE":/base.qcow2:ro -v "$out_dir":/out --entrypoint qemu-img "$IMAGE" \
+    convert -c -O qcow2 /vm/os.qcow2 "/out/$out_name"
+  chmod 644 "$KB_OS_PREPARE" 2>/dev/null || true
+  say "prepared disk: $KB_OS_PREPARE ($(du -h "$KB_OS_PREPARE" | cut -f1))"
+  exit 0
+fi
 
 stage "Kiboto installs itself"
 $SSH "cat > /root/install.sh" < "${KB_OS_INSTALLER:-$HERE/packaging/install.sh}"
