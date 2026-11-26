@@ -602,6 +602,7 @@ OPERATIONS: dict[str, Operation] = {
     "storage.erase_pool": Operation(_storage("erase_pool"), {"pool_id": TEXT}, max_len=128),
     "storage.allow_changes": Operation(_storage("allow_changes"), {"pool_id": TEXT}, max_len=128),
     "storage.replace_plan": Operation(_storage("replace_plan"), {"pool_id": TEXT}, max_len=128),
+    "storage.scrub_result": Operation(_storage("scrub_result_of"), {"pool_id": TEXT}, max_len=128),
     "storage.replace_drive": Operation(
         _storage("replace_drive"), {"pool_id": TEXT, "old": TEXT, "new": TEXT}, max_len=256
     ),

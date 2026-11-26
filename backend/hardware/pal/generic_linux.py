@@ -1438,6 +1438,22 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
             pool_registry.protect(pool.mountpoint, self._run_cmd)
         return {"status": "disconnected", "pool_id": pool.id, "mountpoint": pool.mountpoint}
 
+    def scrub_result(self, pool: StoragePool) -> dict[str, Any] | None:
+        """btrfs gives its last scrub only to root (Kiboto OS's web process is refused): there it is
+        read through the host door. ZFS's is open to anyone."""
+        from backend import runtime
+
+        if pool.fs_type == "btrfs" and runtime.without_root():
+            return _through_door("storage.scrub_result", self._scrub_result_here, pool_id=pool.id)
+        return super().scrub_result(pool)
+
+    def scrub_result_of(self, pool_id: str) -> dict[str, Any] | None:
+        """scrub_result for a pool named by its id (the host door's operation)."""
+        return self.scrub_result(self.resolve_pool(pool_id))
+
+    def _scrub_result_here(self, pool_id: str) -> dict[str, Any] | None:
+        return super().scrub_result(self.resolve_pool(pool_id))
+
     def replace_plan(self, pool_id: str) -> dict[str, Any]:
         """What "Replace a drive" offers for this pool. Through the host door where it runs: reading
         a btrfs pool's devices is root's."""

@@ -20,6 +20,8 @@ After a drive is replaced from the app, Storage lists the new drive as part of t
 
 Storage shows a drive that is missing from a ZFS pool as missing, instead of leaving it out of the pool's drives.
 
+Kiboto OS: errors found by a scrub of a btrfs pool become an alert again; Kiboto could not read the scrub's result there.
+
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container
 
