@@ -1,0 +1,25 @@
+# Kiboto OS: a UPS on a USB cable (a HID power device) may be read and told to switch its sockets
+# off by Kiboto's own user. Only devices of UPS makers: a keyboard or a mouse stays root's.
+# Written by Kiboto at each start (backend/services/udev_rules.py).
+# APC
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="051d", GROUP="kiboto", MODE="0660"
+# CyberPower
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="0764", GROUP="kiboto", MODE="0660"
+# Eaton / MGE
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="0463", GROUP="kiboto", MODE="0660"
+# Tripp Lite
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="09ae", GROUP="kiboto", MODE="0660"
+# Powercom
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="0d9f", GROUP="kiboto", MODE="0660"
+# Phoenixtec
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="06da", GROUP="kiboto", MODE="0660"
+# Powerware
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="0592", GROUP="kiboto", MODE="0660"
+# Delta
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1d40", GROUP="kiboto", MODE="0660"
+# Mustek
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="2e51", GROUP="kiboto", MODE="0660"
+# SOCA
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="14b0", GROUP="kiboto", MODE="0660"
+# Unitek
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="0f03", GROUP="kiboto", MODE="0660"

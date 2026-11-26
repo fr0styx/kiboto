@@ -321,12 +321,16 @@ def _packages(name: str) -> Callable[[], Any]:
         if name == "add_missing":
             current = os.path.join(native_update.PREFIX, "current")
             native_update.keep_debian(current)  # at every start, before anything is installed
-            from backend.services import security_updates
+            from backend.services import security_updates, udev_rules
 
             try:
                 security_updates.keep_current(current)
             except OSError as e:
                 logger.warning("[Door] Debian's security fixes could not be set up: %s", e)
+            try:
+                udev_rules.keep_current(current)
+            except OSError as e:
+                logger.warning("[Door] the udev rules could not be written: %s", e)
             return native_update.add_missing_tools(current)
         return host_set.check() if name == "check" else host_set.start()
 

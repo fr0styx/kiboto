@@ -43,6 +43,7 @@
  "backend/services/sftp_engine.py": 1,
  "backend/services/sftp_front.py": 1,
  "backend/services/tiering.py": 1,
+ "backend/services/udev_rules.py": 1,
  "backend/services/user_scripts.py": 2,
  "backend/services/user_spaces.py": 2,
  "backend/services/vm_qemu.py": 4,

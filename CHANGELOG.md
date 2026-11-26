@@ -14,6 +14,8 @@ Kiboto OS: replication to another machine over SSH works. It signs in with a key
 
 Kiboto OS: the fan watchdog works there too. If Kiboto stops answering while it controls the fans, the machine's root service puts them in their safe state. It does nothing while fan control is off, the default.
 
+Kiboto OS: a UPS on a USB cable can be read without root, so battery backup works there too (not yet tried with a real UPS on Kiboto OS).
+
 #### Changes
 
 Kiboto OS installs Debian 13's own ZFS (2.3) instead of the newer one from Debian's backports, and new ZFS pools are limited to ZFS 2.3's features, so a pool opens on any Debian 13 and on every later ZFS. A machine installed by an earlier version keeps its ZFS.
