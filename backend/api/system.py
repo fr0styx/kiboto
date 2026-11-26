@@ -1273,8 +1273,19 @@ def get_system_about():
         "edition": runtime.edition(),  # Kiboto OS, Kiboto Companion, or neither
         # a machine Kiboto runs installs only releases: the page does not offer Edge there
         "releases_only": _releases_only(),
+        # still started from the image's name before the rebrand, which Kiboto 2.2 stops publishing
+        "old_image_name": _old_image_name(),
         "github_repo": "https://github.com/fr0styx/kiboto",
     }
+
+
+def _old_image_name() -> str:
+    """The image's old name when Kiboto's container was started from it, else "". Kiboto's own updater
+    moves to the new name; where Unraid or a Compose file does the updating, the person changes it there."""
+    if not runtime.in_container():
+        return ""
+    image = str(((_own_container_info() or {}).get("Config") or {}).get("Image") or "")
+    return "ghcr.io/" + legacy_names.OLD_IMAGE_REPO if legacy_names.OLD_IMAGE_REPO in image else ""
 
 
 _IMAGE_REPO = "ghcr.io/" + product.IMAGE_REPO

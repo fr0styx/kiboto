@@ -92,6 +92,26 @@ export function whereItRuns(about) {
   return t('sysu.native', 'Native Host');
 }
 
+/** The words for a container started from the image's old name, or "" for any other install. */
+export function oldImageNotice(about) {
+  if (!about?.old_image_name) return '';
+  return t(
+    'sysu.old_image',
+    "This Kiboto was started from the image's old name. Kiboto 2.2 stops publishing it: change {old} to {new} in Unraid's template or in your Compose file.",
+    { old: String(about.old_image_name), new: 'ghcr.io/fr0styx/kiboto' }
+  );
+}
+
+/** Shows or hides the old image name's line in About. */
+export function showOldImageNotice(about) {
+  const box = document.getElementById('about-old-image-box');
+  const text = document.getElementById('about-old-image');
+  const said = oldImageNotice(about);
+  if (text) text.textContent = said;
+  if (box) box.hidden = !said;
+  return said;
+}
+
 export async function fetchAndRenderSystemAbout(force = false, channelOverride = null) {
   showServerName();
   const versionBadge = document.getElementById('about-version-badge');
@@ -153,6 +173,7 @@ export async function fetchAndRenderSystemAbout(force = false, channelOverride =
           version: about.python_version || '3.12',
         });
       if (uptimeEl && about.uptime_secs != null) uptimeEl.textContent = formatUptime(about.uptime_secs);
+      showOldImageNotice(about);
     }
   } catch (err) {
     console.warn('[Kiboto] Failed to fetch system about info:', err);

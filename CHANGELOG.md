@@ -16,6 +16,8 @@ Kiboto OS: replication to another machine over SSH works. It signs in with a key
 
 Kiboto OS installs Debian 13's own ZFS (2.3) instead of the newer one from Debian's backports, and new ZFS pools are limited to ZFS 2.3's features, so a pool opens on any Debian 13 and on every later ZFS. A machine installed by an earlier version keeps its ZFS.
 
+About says when Kiboto's container was started from the image's old name (ghcr.io/fr0styx/zettnas-toolkit), which Kiboto 2.2 stops publishing, and what to change in Unraid's template or your Compose file.
+
 ## v2.0.7 (2026-11-26)
 ### 🛡️ Kiboto OS without root, on signed releases only, with Debian's security fixes
 
