@@ -128,6 +128,14 @@ describe('old files move to the slower drives', () => {
     expect(unfit.textContent).toContain(`Games: ${tieringWhy('unraid_moves_back')}`);
   });
 
+  it('says when merged folders are still being checked on this edition', async () => {
+    vi.spyOn(api, 'get').mockResolvedValue(view([FILMS], { edition: 'check' }));
+    await renderTieringCard();
+    expect(card().querySelector('#tiering-edition').textContent).toBe(
+      'Built for this edition, and still being checked.'
+    );
+  });
+
   it('says so in one sentence where no folder can fit', async () => {
     vi.spyOn(api, 'get').mockResolvedValue(
       view([

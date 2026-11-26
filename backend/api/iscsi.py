@@ -54,8 +54,11 @@ def _note(principal: AuthenticatedPrincipal, request: Request, what: str, **deta
 
 @router.get("/iscsi", dependencies=[ADMIN])
 async def iscsi_view() -> dict[str, Any]:
-    """Whether the service is on and running, and the disks (never their passwords)."""
-    return await asyncio.to_thread(iscsi_target.status)
+    """Whether the service is on and running, and the disks (never their passwords), and what the
+    feature table says of iSCSI on this edition."""
+    from backend.services import edition_features
+
+    return {**await asyncio.to_thread(iscsi_target.status), "edition": edition_features.state("iscsi")}
 
 
 @router.put("/iscsi/enabled", dependencies=[ADMIN])

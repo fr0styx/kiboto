@@ -2,7 +2,8 @@
 
 docs/feature-matrix.json is the one source. This writes the two things people read from it:
 
-    python scripts/feature_matrix.py write    docs/FEATURES.md (GitHub) and docs/features.html (the website)
+    python scripts/feature_matrix.py write    docs/FEATURES.md (GitHub), docs/features.html (the website)
+                                              and backend/edition_features.json (the app's cards)
     python scripts/feature_matrix.py check    exits 1 when either is behind the source
 
 A test runs `check`, so a change to the source without `write` fails the build.
@@ -13,6 +14,7 @@ from __future__ import annotations
 import html
 import json
 import os
+import re
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -25,6 +27,8 @@ CHOOSE = (
     " Companion can move to Kiboto OS later, with its pools and a settings backup."
 )
 PAGE = os.path.join(ROOT, "docs", "features.html")
+APP = os.path.join(ROOT, "backend", "edition_features.json")
+ID = re.compile(r"^[a-z][a-z0-9_]{1,31}$")
 
 
 def load(path: str | None = None) -> dict:
@@ -34,7 +38,7 @@ def load(path: str | None = None) -> dict:
 
 def problems(matrix: dict) -> list[str]:
     """What is wrong with the source: a missing column, an unknown state, a name used twice."""
-    out, seen = [], set()
+    out, seen, ids = [], set(), set()
     cols = [c["id"] for c in matrix.get("columns", [])]
     states = matrix.get("states", {})
     if len(cols) != 3:
@@ -46,6 +50,10 @@ def problems(matrix: dict) -> list[str]:
             if not name or name in seen:
                 out.append(f"{name or 'a feature'}: no name, or the name is used twice")
             seen.add(name)
+            fid = feature.get("id")
+            if fid is not None and (not isinstance(fid, str) or not ID.match(fid) or fid in ids):
+                out.append(f"{name}: the id {fid!r} is not a short lower-case name, or is used twice")
+            ids.add(fid)
             for col in cols:
                 value = feature.get(col)
                 if not value:
@@ -182,11 +190,23 @@ def page(matrix: dict) -> str:
     return "\n".join(out)
 
 
+def app(matrix: dict) -> str:
+    """What the app reads: each feature with an id, and its state on each of the three columns."""
+    cols = [c["id"] for c in matrix["columns"]]
+    table = {f["id"]: {c: f[c] for c in cols} for g in matrix["groups"] for f in g["features"] if f.get("id")}
+    about = "Written by scripts/feature_matrix.py from docs/feature-matrix.json. Do not edit by hand."
+    return json.dumps({"_about": about, "features": table}, indent=1, sort_keys=True) + "\n"
+
+
+def written(matrix: dict) -> tuple[tuple[str, str], ...]:
+    return ((MARKDOWN, markdown(matrix)), (PAGE, page(matrix)), (APP, app(matrix)))
+
+
 def behind(matrix: dict | None = None) -> list[str]:
     """The written files that do not match the source."""
     matrix = matrix or load()
     out = []
-    for path, text in ((MARKDOWN, markdown(matrix)), (PAGE, page(matrix))):
+    for path, text in written(matrix):
         try:
             with open(path, encoding="utf-8") as f:
                 if f.read() != text:
@@ -203,7 +223,7 @@ def main(argv: list[str]) -> int:
         print("\n".join(wrong), file=sys.stderr)
         return 1
     if argv[1:2] == ["write"]:
-        for path, text in ((MARKDOWN, markdown(matrix)), (PAGE, page(matrix))):
+        for path, text in written(matrix):
             with open(path, "w", encoding="utf-8") as f:
                 f.write(text)
             print("wrote", os.path.relpath(path, ROOT))

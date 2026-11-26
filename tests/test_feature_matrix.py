@@ -100,6 +100,7 @@ def elsewhere(tmp_path, monkeypatch):
     monkeypatch.setattr(feature_matrix, "SOURCE", str(source))
     monkeypatch.setattr(feature_matrix, "MARKDOWN", str(tmp_path / "FEATURES.md"))
     monkeypatch.setattr(feature_matrix, "PAGE", str(tmp_path / "features.html"))
+    monkeypatch.setattr(feature_matrix, "APP", str(tmp_path / "edition_features.json"))
     monkeypatch.setattr(feature_matrix, "ROOT", str(tmp_path))
     return tmp_path
 

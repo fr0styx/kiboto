@@ -753,8 +753,10 @@ class DriveReplaceRequest(BaseModel):
 def get_drive_replace_plan(pool_id: PoolId) -> dict[str, Any]:
     """Whether the pool can rebuild onto a new drive, its drives, the empty drives that fit, and a
     rebuild that is running now."""
+    from backend.services import edition_features
+
     try:
-        return get_storage_platform().replace_plan(pool_id)
+        return {**get_storage_platform().replace_plan(pool_id), "edition": edition_features.state("drive_replace")}
     except PlatformCapabilityError as e:
         raise HTTPException(status_code=403, detail=str(e)) from e
     except LookupError as e:

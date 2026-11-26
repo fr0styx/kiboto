@@ -89,6 +89,15 @@ describe('Replace a drive', () => {
     expect(dlg.querySelector('#dr-error').hidden).toBe(true);
   });
 
+  it('says when the feature table still has drive replacement as being checked here', async () => {
+    plans = [{ ...PLAN, edition: 'check' }];
+    let dlg = await openDriveReplace('tank');
+    expect(dlg.querySelector('.dr-edition').textContent).toBe('Built for this edition, and still being checked.');
+    plans = [{ ...PLAN, edition: 'yes' }];
+    dlg = await openDriveReplace('tank');
+    expect(dlg.querySelector('.dr-edition')).toBeNull();
+  });
+
   it('a pool that cannot rebuild offers no start', async () => {
     plans = [{ ...PLAN, can: false, why: 'no_copy', drives: [] }];
     const dlg = await openDriveReplace('fast');

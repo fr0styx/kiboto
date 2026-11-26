@@ -223,7 +223,8 @@ class _Adapter:
 def test_replacing_is_confirmed_first_then_started(client, auth_headers, monkeypatch):
     adapter = _Adapter({"started": True, "pool": "tank", "old": "a", "new": "b"})
     monkeypatch.setattr("backend.api.storage.get_storage_platform", lambda: adapter)
-    assert client.get("/api/storage/pools/tank/replace", headers=auth_headers).json() == {"pool": "tank", "can": True}
+    plan = client.get("/api/storage/pools/tank/replace", headers=auth_headers).json()
+    assert plan.pop("edition") in ("yes", "check", "host") and plan == {"pool": "tank", "can": True}
     body = {"old": "1234567890123", "new": "/dev/vdg"}
     first = client.post("/api/storage/pools/tank/replace", json=body, headers=auth_headers)
     assert first.status_code == 428 and adapter.asked == []

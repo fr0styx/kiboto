@@ -58,6 +58,16 @@ describe('disks for other computers', () => {
     );
   });
 
+  it('says what the feature table says of iSCSI on this edition', async () => {
+    vi.spyOn(api, 'get').mockResolvedValue(view({ edition: 'host' }));
+    await renderIscsiCard();
+    expect(card().querySelector('#iscsi-edition').textContent).toBe('Your NAS system does this here.');
+    resetIscsiCardForTesting();
+    vi.spyOn(api, 'get').mockResolvedValue(view({ edition: 'yes' }));
+    await renderIscsiCard();
+    expect(card().querySelector('#iscsi-edition')).toBeNull();
+  });
+
   it('says the real reason when the service cannot run', () => {
     expect(iscsiStatus(view({ running: false, why: 'engine' }))).toMatch(/cannot reach the app engine/);
     expect(iscsiStatus(view({ running: false, why: 'folder' }))).toMatch(/folder is not one the service can be given/);

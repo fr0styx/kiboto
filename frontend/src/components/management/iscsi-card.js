@@ -6,6 +6,7 @@
 import { api } from '../../api.js';
 import { showToast } from '../../toast.js';
 import { t } from '../../i18n.js';
+import { editionLine } from '../../edition-line.js';
 import { formatBytes } from '../../format.js';
 
 let _view = null;
@@ -236,6 +237,8 @@ function draw() {
       ),
     }),
   ];
+  if (editionLine(_view.edition))
+    parts.push(el('p', { className: 'immich-note', id: 'iscsi-edition', textContent: editionLine(_view.edition) }));
   if (on) {
     if (disks.length) {
       const list = el('ul', { className: 'scr-list' });

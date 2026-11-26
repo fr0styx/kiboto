@@ -44,8 +44,11 @@ def _note(principal: AuthenticatedPrincipal, request: Request, what: str, **deta
 
 @router.get("/tiering", dependencies=[ADMIN])
 async def tiering_view() -> dict[str, Any]:
-    """Each shared folder: whether tiering fits it, whether it is on, and how its last run went."""
-    return await asyncio.to_thread(tiering.view)
+    """Each shared folder: whether tiering fits it, whether it is on, and how its last run went; and
+    what the feature table says of merged folders on this edition."""
+    from backend.services import edition_features
+
+    return {**await asyncio.to_thread(tiering.view), "edition": edition_features.state("merged_folders")}
 
 
 @router.put("/tiering/folders/{name}", dependencies=[ADMIN])

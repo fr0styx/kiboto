@@ -1032,7 +1032,7 @@ request and response schemas.
 
 | Method | Path | Access | What it does |
 | :--- | :--- | :--- | :--- |
-| `GET` | `/api/v1/tiering` | `storage:admin` | Each shared folder: whether tiering fits it, whether it is on, and how its last run went |
+| `GET` | `/api/v1/tiering` | `storage:admin` | Each shared folder: whether tiering fits it, whether it is on, and how its last run went; and what the feature table says of merged folde… |
 | `PUT` | `/api/v1/tiering/folders/{name}` | `storage:admin` | Turns tiering on for a shared folder (confirmed), changes its days, or turns it off |
 | `POST` | `/api/v1/tiering/folders/{name}/run` | `storage:admin` | Moves the folder's old files now |
 
@@ -1147,7 +1147,7 @@ request and response schemas.
 
 | Method | Path | Access | What it does |
 | :--- | :--- | :--- | :--- |
-| `GET` | `/api/v1/iscsi` | `storage:admin` | Whether the service is on and running, and the disks (never their passwords) |
+| `GET` | `/api/v1/iscsi` | `storage:admin` | Whether the service is on and running, and the disks (never their passwords), and what the feature table says of iSCSI on this edition |
 | `POST` | `/api/v1/iscsi/disks` | `storage:admin` | Adds a disk: makes its file in the folder (it takes no space until it is written to) |
 | `DELETE` | `/api/v1/iscsi/disks/{disk_id}` | `storage:admin` | Takes a disk off the list |
 | `PUT` | `/api/v1/iscsi/disks/{disk_id}` | `storage:admin` | Changes a disk: a larger size, another user name or password, another allowed address |

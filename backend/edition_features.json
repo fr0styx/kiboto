@@ -1,0 +1,100 @@
+{
+ "_about": "Written by scripts/feature_matrix.py from docs/feature-matrix.json. Do not edit by hand.",
+ "features": {
+  "drive_replace": {
+   "beside": "host",
+   "linux": "yes",
+   "os": "check"
+  },
+  "drive_sleep": {
+   "beside": "host",
+   "linux": "no",
+   "os": "yes"
+  },
+  "firewall": {
+   "beside": "host",
+   "linux": "host",
+   "os": "yes"
+  },
+  "front_screen": {
+   "beside": "yes",
+   "linux": "yes",
+   "os": "partly"
+  },
+  "iscsi": {
+   "beside": "yes",
+   "linux": "yes",
+   "os": "yes"
+  },
+  "light_bar": {
+   "beside": "yes",
+   "linux": "yes",
+   "os": "check"
+  },
+  "merged_folders": {
+   "beside": "host",
+   "linux": "yes",
+   "os": "check"
+  },
+  "move_to_os": {
+   "beside": "no",
+   "linux": "no",
+   "os": "check"
+  },
+  "network": {
+   "beside": "view",
+   "linux": "view",
+   "os": "partly"
+  },
+  "nfs": {
+   "beside": "host",
+   "linux": "no",
+   "os": "yes"
+  },
+  "pool_copy": {
+   "beside": "no",
+   "linux": "no",
+   "os": "yes"
+  },
+  "power_schedule": {
+   "beside": "yes",
+   "linux": "yes",
+   "os": "check"
+  },
+  "remote_access": {
+   "beside": "yes",
+   "linux": "yes",
+   "os": "check"
+  },
+  "replication": {
+   "beside": "host",
+   "linux": "yes",
+   "os": "yes"
+  },
+  "server_ssh": {
+   "beside": "host",
+   "linux": "host",
+   "os": "yes"
+  },
+  "sftp": {
+   "beside": "yes",
+   "linux": "yes",
+   "os": "yes"
+  },
+  "system_updates": {
+   "beside": "host",
+   "linux": "host",
+   "os": "yes"
+  },
+  "ups": {
+   "beside": "yes",
+   "linux": "yes",
+   "os": "check"
+  },
+  "usb": {
+   "beside": "host",
+   "linux": "no",
+   "os": "yes"
+  }
+ }
+}

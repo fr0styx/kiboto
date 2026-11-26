@@ -8,6 +8,12 @@ from backend.services import tiering as tr
 VIEW = {"folders": [], "run_at": "03:00"}
 
 
+def _view(answer):
+    """The view, without what the feature table says of merged folders on this edition."""
+    assert answer.pop("edition") in ("yes", "check", "host", "no")
+    return answer
+
+
 @pytest.fixture(autouse=True)
 def service(monkeypatch):
     calls = []
@@ -57,7 +63,7 @@ def test_a_folder_is_turned_on_changed_run_and_turned_off(client, auth_headers, 
     monkeypatch.setattr(
         "backend.users_db.log_security_event", lambda event, *a, **k: logged.append((event, k.get("details")))
     )
-    assert client.get("/api/tiering", headers=auth_headers).json() == VIEW
+    assert _view(client.get("/api/tiering", headers=auth_headers).json()) == VIEW
     res = client.put("/api/tiering/folders/Films", json={"enabled": True, "days": 30}, headers=auth_headers)
     assert res.status_code == 200 and res.json() == VIEW
     assert client.put("/api/tiering/folders/Films", json={"enabled": True}, headers=auth_headers).status_code == 200

@@ -7,6 +7,7 @@ import { api } from '../api.js';
 import { formatFixed, formatNumber } from '../format.js';
 import { html } from '../html.js';
 import { t } from '../i18n.js';
+import { editionLine } from '../edition-line.js';
 
 const POLL_MS = 5000;
 
@@ -99,6 +100,7 @@ export async function openDriveReplace(poolId, poolName = '', done = () => {}) {
     dlg.innerHTML = html`<h2 id="dr-title" class="drive-guide-title">
         ${t('dr.title', 'Replace a drive of {pool}', { pool: poolName || poolId })}
       </h2>
+      ${plan && editionLine(plan.edition) ? html`<p class="dr-edition">${editionLine(plan.edition)}</p>` : ''}
       ${plan ? bodyHtml(plan) : ''}
       <p class="fw-error" id="dr-error" role="alert" ${error ? '' : 'hidden'}>${error}</p>
       <div class="drive-guide-actions">

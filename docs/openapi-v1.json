@@ -58001,7 +58001,7 @@
   },
   "/api/v1/iscsi": {
    "get": {
-    "description": "Whether the service is on and running, and the disks (never their passwords).",
+    "description": "Whether the service is on and running, and the disks (never their passwords), and what the\nfeature table says of iSCSI on this edition.",
     "operationId": "iscsi_view_api_v1_iscsi_get",
     "responses": {
      "200": {
@@ -73459,7 +73459,7 @@
   },
   "/api/v1/tiering": {
    "get": {
-    "description": "Each shared folder: whether tiering fits it, whether it is on, and how its last run went.",
+    "description": "Each shared folder: whether tiering fits it, whether it is on, and how its last run went; and\nwhat the feature table says of merged folders on this edition.",
     "operationId": "tiering_view_api_v1_tiering_get",
     "responses": {
      "200": {
