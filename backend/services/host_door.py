@@ -566,6 +566,7 @@ OPERATIONS: dict[str, Operation] = {
         _net("start_bond_trial"), {"members": LIST, "mode": TEXT, "miimon": NUMBER, "now": MAP}, max_len=32
     ),
     "network.remove_bond": Operation(_net("start_bond_removal"), {}),
+    "network.set_wol": Operation(_net("set_wake_on_lan"), {"port": TEXT, "on": ON}, max_len=32),
     "network.keep": Operation(_net("keep"), {"key": MAYBE_TEXT}, max_len=128),
     "network.go_back": Operation(_net("go_back"), {"key": MAYBE_TEXT}, max_len=128),
     "network.settle": Operation(_net("settle"), {}),

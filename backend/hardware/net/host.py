@@ -67,9 +67,9 @@ class HostNetwork:
         raise NotOnThisHost(setting, self.where())
 
 
-# what a machine set up for Kiboto changes itself, each as a trial (managed.py); speed and Wake-on-LAN
-# follow later
-MANAGED_SETTINGS = ("address", "vlan", "mtu", "bond")
+# what a machine set up for Kiboto changes itself (managed.py), the wiring each as a trial; the link
+# speed stays the card's own
+MANAGED_SETTINGS = ("address", "vlan", "mtu", "bond", "wake_on_lan")
 
 
 def _address_now() -> dict[str, Any]:
@@ -133,11 +133,14 @@ class ManagedHostNetwork(HostNetwork):
                 now=_address_now(),
             )
         if setting == "port":
-            other = sorted(set(changes) - {"mtu"})
-            if other:  # speed and Wake-on-LAN are not Kiboto's here yet
+            other = sorted(set(changes) - {"mtu", "wol_enabled"})
+            if other:  # the link speed is not Kiboto's here
                 raise NotOnThisHost(other[0], self.where())
+            done: dict[str, Any] = {"status": "ok"}
+            if isinstance(changes.get("wol_enabled"), bool):
+                done = door.via("network.set_wol", managed.set_wake_on_lan, port=target, on=changes["wol_enabled"])
             if changes.get("mtu") is None:
-                return {"status": "ok"}
+                return done
             return door.via(
                 "network.try_mtu", managed.start_mtu_trial, port=target, mtu=int(changes["mtu"]), now=_address_now()
             )

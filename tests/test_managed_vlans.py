@@ -150,7 +150,7 @@ def test_the_page_may_change_vlans_packet_sizes_and_the_bond_here(box, monkeypat
         "address": True,
         "mtu": True,
         "speed": False,
-        "wake_on_lan": False,
+        "wake_on_lan": True,
         "bond": True,
         "bridge": False,
         "vlan": True,
@@ -166,7 +166,7 @@ def test_the_page_may_change_vlans_packet_sizes_and_the_bond_here(box, monkeypat
         "changed": False,
     }
     with pytest.raises(host.NotOnThisHost):
-        h.apply("port", "enp1s0", {"mtu": 9000, "wol_enabled": True})
+        h.apply("port", "enp1s0", {"mtu": 9000, "speed": 1000})
     with pytest.raises(host.NotOnThisHost):
         h.apply("bridge", "br0", {"members": ["enp1s0"]})
     with pytest.raises(ValueError, match="between 1 and 4094"):
@@ -262,3 +262,43 @@ def test_a_name_from_a_request_never_leaves_the_networkd_folder(box):
         for make in (managed.file_for, managed.netdev_for, managed.link_for):
             with pytest.raises(ValueError, match="not a network port name"):
                 make(name)
+
+
+def card(box, name="enp1s0"):
+    (box.root / "sys" / name / "device").mkdir(exist_ok=True)  # a port of a real network card
+
+
+def test_wake_on_lan_is_kept_in_the_ports_link_file_and_set_at_once(box):
+    card(box)
+    answer = managed.set_wake_on_lan("enp1s0", True)
+    assert answer == {"status": "ok", "interface": "enp1s0", "wol_enabled": True, "now": True}
+    link = net(box, "10-kiboto-enp1s0.link")
+    assert "PermanentMACAddress=52:54:00:12:34:56" in link and link.endswith("Name=enp1s0\nWakeOnLan=magic\n")
+    assert ["ethtool", "-s", "enp1s0", "wol", "g"] in box.seen
+    assert not any(c[0] == "systemd-run" for c in box.seen)  # not a trial: it cannot cut the machine off
+    # the pin written at every start keeps it
+    assert managed._write_pin("enp1s0") is False and "WakeOnLan=magic" in net(box, "10-kiboto-enp1s0.link")
+    managed.set_wake_on_lan("enp1s0", False)
+    assert net(box, "10-kiboto-enp1s0.link").endswith("WakeOnLan=off\n")
+    assert ["ethtool", "-s", "enp1s0", "wol", "d"] in box.seen
+
+
+def test_wake_on_lan_needs_a_network_card(box):
+    for port, on, said in [
+        ("enp1s0", True, "not a port of a network card"),
+        ("eth9", True, "not a port"),
+        ("enp1s0", "yes", "on or off"),
+    ]:
+        with pytest.raises(ValueError, match=said):
+            managed.set_wake_on_lan(port, on)
+    assert net(box, "10-kiboto-enp1s0.link") is None
+
+
+def test_the_port_dialog_sets_wake_on_lan_and_an_unchanged_size_starts_nothing(box):
+    card(box)
+    (box.root / "network" / "05-kiboto-enp1s0.network").write_text(STATIC)
+    h = host.ManagedHostNetwork()
+    answer = h.apply("port", "enp1s0", {"wol_enabled": True})
+    assert answer["wol_enabled"] is True and "WakeOnLan=magic" in net(box, "10-kiboto-enp1s0.link")
+    assert h.apply("port", "enp1s0", {"wol_enabled": True, "mtu": 1500})["changed"] is False
+    assert not any(c[0] == "systemd-run" for c in box.seen)

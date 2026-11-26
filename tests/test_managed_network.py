@@ -164,7 +164,7 @@ def test_a_machine_of_its_own_lets_kiboto_change_the_address_vlans_and_packet_si
         "address": True,
         "mtu": True,
         "speed": False,
-        "wake_on_lan": False,
+        "wake_on_lan": True,
         "bond": True,
         "bridge": False,
         "vlan": True,

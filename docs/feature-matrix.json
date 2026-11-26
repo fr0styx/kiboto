@@ -41,7 +41,7 @@
   {"name": "The machine", "features": [
    {"name": "Kiboto updates with a way back", "beside": "yes", "linux": "yes", "os": "yes", "note": "Kiboto OS follows the Stable and Beta channels; the container can also follow Edge."},
    {"id": "system_updates", "name": "System updates: kernel, ZFS, Docker", "beside": "host", "linux": "host", "os": "yes", "note": "Kiboto OS installs Debian's security fixes by itself, the kernel included, and never restarts the machine for them. ZFS and Docker move to versions a release was tested with."},
-   {"id": "network", "name": "Network settings", "beside": "view", "linux": "view", "os": "partly", "note": "Kiboto OS changes the address, the DNS servers, VLANs, the packet size, a bond of ports and the bridge for virtual machines, each with a way back."},
+   {"id": "network", "name": "Network settings", "beside": "view", "linux": "view", "os": "partly", "note": "Kiboto OS changes the address, the DNS servers, VLANs, the packet size, a bond of ports and the bridge for virtual machines, each with a way back, and Wake-on-LAN."},
    {"id": "firewall", "name": "Firewall", "beside": "host", "linux": "host", "os": "yes", "note": "On after an install from Kiboto's USB image; on other installs off until you turn it on. Your home network reaches everything, and the outside only what you tick, apps included."},
    {"name": "Restart and shut down", "beside": "yes", "linux": "yes", "os": "yes"},
    {"id": "power_schedule", "name": "Power schedule: wake and sleep at set times", "beside": "yes", "linux": "yes", "os": "check", "note": "On Kiboto OS it is tried on a virtual machine, not yet for a night on a real one."},

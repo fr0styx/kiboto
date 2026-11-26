@@ -103,8 +103,9 @@ def link_for(iface: str) -> str:
     return _own_file(LINK_PREFIX, iface, ".link")
 
 
-def pin_text(iface: str, mac: str) -> str:
-    """The .link file that gives a network card the same port name in any slot."""
+def pin_text(iface: str, mac: str, wol: str | None = None) -> str:
+    """The .link file that gives a network card the same port name in any slot, and keeps its
+    Wake-on-LAN setting (`wol`: "magic" or "off"; None leaves the card's own)."""
     return (
         f"# Written by Kiboto: the network card {mac} keeps the name {iface} in any slot, so the\n"
         "# settings Kiboto keeps for that port still find it after the card moved.\n"
@@ -112,8 +113,13 @@ def pin_text(iface: str, mac: str) -> str:
         f"PermanentMACAddress={mac}\n"
         "\n"
         "[Link]\n"
-        f"Name={iface}\n"
+        f"Name={iface}\n" + (f"WakeOnLan={wol}\n" if wol else "")
     )
+
+
+def _wol_of(text: str | None) -> str | None:
+    found = re.search(r"^WakeOnLan=(magic|off)$", text or "", re.M)
+    return found.group(1) if found else None
 
 
 def _write_pin(iface: str) -> bool:
@@ -122,10 +128,12 @@ def _write_pin(iface: str) -> bool:
     if not _IFACE.match(iface or "") or not os.path.exists(os.path.join(SYS_NET, iface, "device")):
         return False
     mac = _mac(iface)
-    if not mac or _text(link_for(iface)) == pin_text(iface, mac):
+    have = _text(link_for(iface))
+    want = pin_text(iface, mac, _wol_of(have))  # a Wake-on-LAN setting in the file stays
+    if not mac or have == want:
         return False
     os.makedirs(DIR, exist_ok=True)
-    atomic_write_text(link_for(iface), pin_text(iface, mac))
+    atomic_write_text(link_for(iface), want)
     logger.info("[Network] %s keeps its name in any slot (%s)", iface, link_for(iface))
     return True
 
@@ -603,6 +611,29 @@ def start_bridge_trial(
         netdev_for(BRIDGE): None,
     }
     return _begin(files, [port], timeout, "", do, later)
+
+
+# --- Wake-on-LAN ------------------------------------------------------------------------------------
+def set_wake_on_lan(port: str, on: bool, do: Run | None = None) -> dict[str, Any]:
+    """Wake-on-LAN (a magic packet) for a port's network card: kept in the port's .link file, so it
+    survives a restart, and set at once with ethtool. Not a trial: it cannot cut the machine off."""
+    do = do or run
+    if not isinstance(on, bool):
+        raise ValueError("Wake-on-LAN is on or off.")
+    if not is_a_port(port) or not os.path.exists(os.path.join(SYS_NET, port, "device")):
+        raise ValueError(f"{port or 'That'} is not a port of a network card.")
+    mac = _mac(port)
+    if not mac:
+        raise ValueError(f"The hardware address of {port} could not be read.")
+    wol = "magic" if on else "off"
+    os.makedirs(DIR, exist_ok=True)
+    atomic_write_text(link_for(port), pin_text(port, mac, wol))
+    code, said = do(["ethtool", "-s", port, "wol", "g" if on else "d"])
+    if code != 0:
+        logger.warning("[Network] Wake-on-LAN for %s is kept for the next start; ethtool said: %s", port, said.strip())
+        return {"status": "ok", "interface": port, "wol_enabled": on, "now": False}
+    logger.info("[Network] Wake-on-LAN for %s is %s", port, "on" if on else "off")
+    return {"status": "ok", "interface": port, "wol_enabled": on, "now": True}
 
 
 # --- VLANs and packet size: a port's other settings ----------------------------------------------
