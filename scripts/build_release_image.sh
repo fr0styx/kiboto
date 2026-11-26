@@ -26,5 +26,6 @@ name=$(grep -oE 'debian-13\.[0-9]+\.[0-9]+-amd64-netinst\.iso' SHA256SUMS | head
 [ -n "$name" ] || { echo "no Debian 13 netinst image is listed" >&2; exit 1; }
 curl -fsSL -o "$name" "$BASE/$name"
 grep " $name\$" SHA256SUMS | sha256sum -c --quiet
-sh "$here/packaging/image/build-image.sh" "$work/$name" "$image" "$out"
+# KIBOTO_EXTRA_PRESEED: answers added for a test (scripts/iso_install_check.sh); never for a release
+sh "$here/packaging/image/build-image.sh" "$work/$name" "$image" "$out" "${KIBOTO_EXTRA_PRESEED:-}"
 echo "built $out from $name"

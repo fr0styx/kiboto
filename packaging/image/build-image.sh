@@ -7,7 +7,8 @@
 # which asks only for the system disk and the root password. The release's install.sh, stamped with
 # the given image digest, goes on the image and runs at the first start. Debian's other menu entries
 # stay as they were. KIBOTO_ROOT_KEYS=<file> puts SSH public keys on the image that may sign in as
-# root on the installed machine. Needs xorriso.
+# root on the installed machine; KIBOTO_EXTRA_ARGS adds to the installer's kernel line (a test sends
+# its screen to the serial console). Needs xorriso.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 iso=$1 image=$2 out=$3 extra=${4:-}
@@ -24,9 +25,11 @@ sed -e "s|@DEBIAN_IMAGE@|$debian|g" -e "s|@DEBIAN_VERSION@|${version:-13}|g" "$h
 xorriso -osirrox on -indev "$iso" \
   -extract /boot/grub/grub.cfg "$work/grub.cfg" \
   -extract /isolinux/txt.cfg "$work/txt.cfg" \
-  -extract /isolinux/isolinux.cfg "$work/isolinux.cfg" >/dev/null 2>&1
+  -extract /isolinux/isolinux.cfg "$work/isolinux.cfg" \
+  -extract /isolinux/gtk.cfg "$work/gtk.cfg" \
+  -extract /isolinux/spkgtk.cfg "$work/spkgtk.cfg" >/dev/null 2>&1
 chmod u+w "$work"/*.cfg
-args="auto=true priority=high preseed/file=/cdrom/kiboto/preseed.cfg"
+args="auto=true priority=high preseed/file=/cdrom/kiboto/preseed.cfg${KIBOTO_EXTRA_ARGS:+ $KIBOTO_EXTRA_ARGS}"
 # UEFI: Kiboto first, chosen after 10 seconds
 {
   printf 'set default=0\nset timeout=10\n'
@@ -42,6 +45,10 @@ args="auto=true priority=high preseed/file=/cdrom/kiboto/preseed.cfg"
   cat "$work/txt.cfg"
 } > "$work/txt.new"
 sed 's/^timeout 0$/timeout 100/' "$work/isolinux.cfg" > "$work/isolinux.new"
+# Debian's graphical entry stays in the menu, but no longer as the one started by itself
+sed -e '/^default /d' -e '/menu default/d' "$work/gtk.cfg" > "$work/gtk.new"
+# and Debian's speech entry no longer starts by itself after its own 30 seconds
+sed -e '/^timeout /d' -e '/^ontimeout /d' -e '/^menu autoboot/d' -e '/^# timeout to speech/d' "$work/spkgtk.cfg" > "$work/spkgtk.new"
 keys=""
 [ -n "${KIBOTO_ROOT_KEYS:-}" ] && keys="-map $KIBOTO_ROOT_KEYS /kiboto/authorized_keys"
 rm -f "$out"
@@ -53,6 +60,8 @@ xorriso -indev "$iso" -outdev "$out" $keys \
   -map "$work/NOTICE.txt" /kiboto/NOTICE.txt \
   -map "$work/grub.new" /boot/grub/grub.cfg \
   -map "$work/txt.new" /isolinux/txt.cfg \
+  -map "$work/spkgtk.new" /isolinux/spkgtk.cfg \
   -map "$work/isolinux.new" /isolinux/isolinux.cfg \
+  -map "$work/gtk.new" /isolinux/gtk.cfg \
   -boot_image any replay >/dev/null 2>&1
 echo "$out"

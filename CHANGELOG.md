@@ -22,6 +22,10 @@ Kiboto OS installs Debian 13's own ZFS (2.3) instead of the newer one from Debia
 
 About says when Kiboto's container was started from the image's old name (ghcr.io/fr0styx/zettnas-toolkit), which Kiboto 2.2 stops publishing, and what to change in Unraid's template or your Compose file.
 
+#### Fixes
+
+Kiboto OS install image: on a machine that starts in BIOS mode, "Install Kiboto" now starts by itself after ten seconds. Before, Debian's own graphical installer or its speech installer started instead. Machines that start in UEFI mode were not affected.
+
 ## v2.0.7 (2026-11-26)
 ### 🛡️ Kiboto OS without root, on signed releases only, with Debian's security fixes
 

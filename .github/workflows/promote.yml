@@ -122,6 +122,32 @@ jobs:
       - name: Set up Docker Buildx
         if: steps.pick.outputs.go == 'true'
         uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
+
+      - name: Checkout the tools
+        if: steps.pick.outputs.go == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Checkout the release
+        if: steps.pick.outputs.go == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ steps.pick.outputs.tag }}
+          path: release
+          persist-credentials: false
+
+      # Stable gets only a release whose install image was installed for real: the release's own
+      # install script and installer files, built with these tools, in a fresh virtual machine
+      # (scripts/iso_install_check.sh). Nothing is retagged when it fails.
+      - name: Install Kiboto OS from the release's install image
+        if: steps.pick.outputs.go == 'true'
+        env:
+          VERSION: ${{ steps.pick.outputs.version }}
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq && sudo apt-get install -y -qq xorriso
+          digest=$(docker buildx imagetools inspect "$IMAGE:$VERSION" --format '{{json .Manifest}}' | jq -r .digest)
+          KB_ISO_FROM="$GITHUB_WORKSPACE/release" sh scripts/iso_install_check.sh "$IMAGE@$digest" | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Install cosign
         if: steps.pick.outputs.go == 'true'
         uses: sigstore/cosign-installer@881c63bd87e38389154debd8331404ce7ca8a3ab # v4.1.4
