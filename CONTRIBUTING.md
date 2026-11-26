@@ -10,7 +10,7 @@ git clone https://github.com/fr0styx/kiboto.git && cd kiboto
 # Run it with your working copy mounted
 docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build -d
 
-# Or natively: Python 3.12 and the Node version in .nvmrc
+# Or natively: Python 3.12 or newer (the image and Kiboto OS use 3.13) and the Node version in .nvmrc
 python3.12 -m venv .venv && . .venv/bin/activate
 pip install --require-hashes -r requirements-dev.lock   # the tools CI uses, hash-checked
 npm ci

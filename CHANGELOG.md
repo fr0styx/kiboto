@@ -8,6 +8,8 @@ Kiboto was called ZettNAS before 2.0; the sections for earlier releases keep tha
 
 Where a feature is still being checked on your edition, or your NAS system does it, its card says so in the same words as the feature list on kiboto.net: on Kiboto OS, drive replacement and merged folders say they are still being checked.
 
+The container image is now built on Debian 13 with Debian's own Python 3.13, the same as Kiboto OS, and is about 30 MB smaller. On Kiboto OS an install or update takes its Python packages from the signed image instead of downloading them.
+
 #### Security
 
 Kiboto OS: when Kiboto hands files and folders in a shared folder to their people, a link put in their place over the network is never followed, so a system file's owner or rights can never be changed that way.

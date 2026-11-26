@@ -805,3 +805,51 @@ def test_the_installer_removes_the_image_it_copied_kiboto_out_of():
     part = text[text.index('--image | "")') :]
     part = part[: part.index(";;")]
     assert part.index("wait_up") < part.index('docker rmi "$image"') < part.index('rm -f "$ETC/install-started"')
+
+
+def test_the_images_own_python_packages_come_along_when_they_fit_this_python(tmp_path, monkeypatch):
+    here = f"python{nu.sys.version_info[0]}.{nu.sys.version_info[1]}"
+    site = f"/opt/kiboto/venv/lib/{here}/site-packages"
+    docker = Docker(monkeypatch)
+    real = docker.request
+
+    def with_site(method, path, body=None, **k):
+        if method == "GET" and path.endswith("/json"):
+            return 200, {"Config": {"Env": ["BUILD_COMMIT=abc1234", f"KIBOTO_SITE={site}"]}}
+        return real(method, path, body, **k)
+
+    monkeypatch.setattr(docker_client, "request", with_site)
+    copied = []
+
+    def run(cmd, timeout=60, cwd=None, env=None):
+        copied.append(cmd)
+        os.makedirs(os.path.join(cmd[-1], "fastapi"))
+        return 0, ""
+
+    rel = tmp_path / "rel"
+    nu.extract("img", str(rel), str(tmp_path), run)
+    assert copied == [["docker", "cp", f"c1:{site}", str(rel / "site-packages")]]
+    # the environment takes them: no pip, nothing downloaded
+    runs = Runs()
+    venv = nu.venv_for(str(rel), str(tmp_path), runs)
+    assert not runs.did("pip") and os.path.isdir(os.path.join(venv, "lib", here, "site-packages", "fastapi"))
+    assert not (rel / "site-packages").exists()
+    # a second version with the same requirements copies nothing: the environment is there
+    copied.clear()
+    nu.extract("img", str(tmp_path / "rel2"), str(tmp_path), run)
+    assert copied == []
+
+
+def test_packages_for_another_python_or_place_are_never_copied(tmp_path, monkeypatch):
+    rel = tmp_path / "rel"
+    rel.mkdir()
+    (rel / "requirements.lock").write_text("x==1\n")
+    ran = []
+    run = lambda cmd, timeout=60, cwd=None, env=None: ran.append(cmd) or (0, "")  # noqa: E731
+    for site in ("/opt/kiboto/venv/lib/python2.7/site-packages", "/etc/x/python3.13/site-packages", ""):
+        assert nu._site_from_image("c1", site, str(rel), str(tmp_path), run) is False
+    here = f"python{nu.sys.version_info[0]}.{nu.sys.version_info[1]}"
+    failing = lambda cmd, timeout=60, cwd=None, env=None: (1, "no such path")  # noqa: E731
+    good = f"/opt/kiboto/venv/lib/{here}/site-packages"
+    assert nu._site_from_image("c1", good, str(rel), str(tmp_path), failing) is False  # pip makes it then
+    assert ran == []

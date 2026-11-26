@@ -68,9 +68,30 @@ def lock_key(lock_path: str) -> str:
     return digest[:16]
 
 
-def extract(image: str, dest: str) -> dict[str, str]:
-    """Copies Kiboto's own files out of the image into `dest`. Returns the image's build values.
-    Nothing of the image runs: a container is made from it, read and removed."""
+SITE = "site-packages"  # in a release folder: the image's Python packages, until they go into place
+
+
+def _site_from_image(cid: str, site: str, dest: str, prefix: str, run: Any) -> bool:
+    """The image's own Python packages, copied out when they are for this machine's Python and no
+    version has an environment for these requirements yet. False when pip has to make it."""
+    here = f"/python{sys.version_info[0]}.{sys.version_info[1]}/site-packages"
+    lock = os.path.join(dest, "requirements.lock")
+    if not site.startswith("/opt/kiboto/") or not site.endswith(here) or ".." in site or not os.path.isfile(lock):
+        return False
+    if os.path.exists(os.path.join(prefix, "venvs", lock_key(lock), ".ready")):
+        return False  # another version already has it
+    code, said = run(["docker", "cp", f"{cid}:{site}", os.path.join(dest, SITE)], timeout=900)
+    if code != 0:
+        logger.warning("[Update] The image's Python packages could not be copied (%s); pip makes them", said)
+        shutil.rmtree(os.path.join(dest, SITE), ignore_errors=True)
+        return False
+    return True
+
+
+def extract(image: str, dest: str, prefix: str = PREFIX, run: Any = None) -> dict[str, str]:
+    """Copies Kiboto's own files out of the image into `dest`, and its Python packages when this
+    machine can use them. Returns the image's build values. Nothing of the image runs: a container
+    is made from it, read and removed."""
     status, made = docker_client.request(
         "POST", "/containers/create", body={"Image": image, "Cmd": ["true"], "NetworkDisabled": True}
     )
@@ -91,7 +112,9 @@ def extract(image: str, dest: str) -> dict[str, str]:
                 tar.extractall(dest, filter="data")  # no absolute paths, links out of dest or devices
         st, info = docker_client.request("GET", f"/containers/{cid}/json")
         env = ((info or {}).get("Config") or {}).get("Env") or [] if st == 200 and isinstance(info, dict) else []
-        build = {k: v for k, v in (str(e).split("=", 1) for e in env if "=" in str(e)) if k in BUILD_ENV}
+        values = dict(str(e).split("=", 1) for e in env if "=" in str(e))
+        build = {k: v for k, v in values.items() if k in BUILD_ENV}
+        _site_from_image(cid, values.get("KIBOTO_SITE", ""), dest, prefix, run or _run)
         with open(os.path.join(dest, "build.env"), "w", encoding="utf-8") as f:
             f.write("".join(f"{k}={v}\n" for k, v in sorted(build.items())))
         return build
@@ -110,7 +133,13 @@ def venv_for(rel: str, prefix: str = PREFIX, run: Any = None) -> str:
         shutil.rmtree(venv, ignore_errors=True)
         os.makedirs(os.path.dirname(venv), exist_ok=True)
         code, said = run([sys.executable, "-m", "venv", venv], timeout=120)
-        if code == 0:
+        from_image = os.path.join(rel, SITE)
+        if code == 0 and os.path.isdir(from_image):  # the image's own packages: nothing downloaded
+            site = os.path.join(venv, "lib", f"python{sys.version_info[0]}.{sys.version_info[1]}", SITE)
+            shutil.rmtree(site, ignore_errors=True)
+            os.makedirs(os.path.dirname(site), exist_ok=True)
+            shutil.move(from_image, site)
+        elif code == 0:
             pip = [os.path.join(venv, "bin", "python"), "-m", "pip", "-q", "install", "--no-compile"]
             code, said = run([*pip, "--require-hashes", "-r", lock], timeout=1200)
         if code != 0:
@@ -118,6 +147,7 @@ def venv_for(rel: str, prefix: str = PREFIX, run: Any = None) -> str:
             raise UpdateFailed(f"its Python packages could not be installed: {said}")
         with open(ready, "w", encoding="utf-8") as f:
             f.write(time.strftime("%Y-%m-%d %H:%M:%S\n"))
+    shutil.rmtree(os.path.join(rel, SITE), ignore_errors=True)  # not needed: the environment was there
     link = os.path.join(rel, "venv")
     if os.path.islink(link) or os.path.exists(link):
         os.remove(link)

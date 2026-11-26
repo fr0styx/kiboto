@@ -17,7 +17,10 @@ RUN npm run build
 # =========================================================================
 # Stage 2: Production runtime image
 # =========================================================================
-FROM python:3.12-slim@sha256:a0f57064cbdcd6285fa45f51237ab0b35ea8ebaed06a1f5973e89e19dfb86704
+# Debian 13, the system Kiboto OS runs on, with Debian's own Python (3.13): the Python environment in
+# this image is the one a machine of its own takes as it is (native_update.extract), so an update
+# downloads nothing from the Python package index and builds nothing on the machine.
+FROM debian:13-slim@sha256:8aa5a7bf5a1955bddbe7d74fcdd0b91ab30e74362a8b73af672b0481b35b44a0
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1
@@ -27,6 +30,11 @@ ENV PYTHONUNBUFFERED=1
 ENV MALLOC_ARENA_MAX=2
 # Without /dev/zfs, zpool and zfs wait 10 s for a kernel module a container can't load
 ENV ZFS_MODULE_TIMEOUT=0
+# Kiboto's own Python environment, at the path a machine of its own keeps it under
+ENV VIRTUAL_ENV=/opt/kiboto/venv
+ENV PATH=/opt/kiboto/venv/bin:$PATH
+# where its packages are: a machine of its own on the same Python copies them from here
+ENV KIBOTO_SITE=/opt/kiboto/venv/lib/python3.13/site-packages
 
 LABEL org.opencontainers.image.source="https://github.com/fr0styx/kiboto"
 LABEL org.opencontainers.image.description="Kiboto: Hardware telemetry, custom fan curves, ARGB lightbar, and LCD dashboard"
@@ -50,6 +58,12 @@ RUN printf '%s\n' \
 # a package Debian had fixed, and the image scan found a critical Chromium issue fixed that morning.
 # Every later layer is rebuilt with it, so the whole image takes the day's security fixes.
 ARG APT_DAY=""
+# Debian's Python and what the slim Python images brought besides it (certificates, time zones, the
+# network names list)
+RUN echo "Debian packages of ${APT_DAY:-the cached day}" && apt-get update && apt-get install -y --no-install-recommends python3 python3-venv ca-certificates tzdata netbase \
+    && rm -rf /var/lib/apt/lists/* \
+    && python3 -m venv /opt/kiboto/venv \
+    && test -d "$KIBOTO_SITE"
 # Core: disks, SMART, UPS, USB, cloud remotes (OPS-11), btrfs and software RAID (REL-4, D2), XFS project quotas (FEAT-10)
 RUN echo "Debian packages of ${APT_DAY:-the cached day}" && apt-get update && apt-get install -y --no-install-recommends \
     smartmontools \
@@ -162,7 +176,7 @@ RUN if [ "$DEV_BUILD" != "1" ]; then echo "release image: test switches are off"
 
 # Playwright (LCD renderer) ships its own Node.js, which lags behind security releases.
 # Replace it with the patched official build so no vulnerable copy stays in the image.
-COPY --from=node:26.13.1-trixie-slim@sha256:e6bedef217677b276c591795e169840edd9096dbf13f29df8ef8d1856b8820bc /usr/local/bin/node /usr/local/lib/python3.12/site-packages/playwright/driver/node
+COPY --from=node:26.13.1-trixie-slim@sha256:e6bedef217677b276c591795e169840edd9096dbf13f29df8ef8d1856b8820bc /usr/local/bin/node /opt/kiboto/venv/lib/python3.13/site-packages/playwright/driver/node
 
 # Build metadata arguments injected by CI
 ARG BUILD_COMMIT=""

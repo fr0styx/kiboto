@@ -188,7 +188,13 @@ code() {
   if [ ! -f "$venv/.ready" ]; then
     rm -rf "$venv"
     python3 -m venv "$venv"
-    "$venv/bin/python" -m pip -q install --no-compile --require-hashes -r "$rel/requirements.lock"
+    pyv=$(python3 -c 'import sys; print(f"{sys.version_info[0]}.{sys.version_info[1]}")')
+    if [ -d "$src/site-packages" ]; then  # from the image: the packages it was built and checked with
+      rm -rf "$venv/lib/python$pyv/site-packages"
+      cp -a "$src/site-packages" "$venv/lib/python$pyv/site-packages"
+    else
+      "$venv/bin/python" -m pip -q install --no-compile --require-hashes -r "$rel/requirements.lock"
+    fi
     date > "$venv/.ready"
   fi
   ln -sfn "$venv" "$rel/venv"
@@ -221,6 +227,12 @@ code_from_image() {
   done
   docker inspect "$cid" --format '{{range .Config.Env}}{{println .}}{{end}}' \
     | grep -E '^(BUILD_COMMIT|BUILD_DATE|KIBOTO_IMAGE_VARIANT)=' > "$tmp/build.env" || true
+  # the image's own Python packages, when they are for this machine's Python: nothing is downloaded
+  site=$(docker inspect "$cid" --format '{{range .Config.Env}}{{println .}}{{end}}' | sed -n 's/^KIBOTO_SITE=//p')
+  pyv=$(python3 -c 'import sys; print(f"{sys.version_info[0]}.{sys.version_info[1]}")')
+  case "$site" in
+    /opt/kiboto/*/python"$pyv"/site-packages) docker cp "$cid:$site" "$tmp/site-packages" 2>/dev/null || rm -rf "$tmp/site-packages" ;;
+  esac
   docker rm "$cid" >/dev/null
   code "$tmp"
   rm -rf "$tmp"
