@@ -170,8 +170,8 @@ def turn_on(do: Run | None = None, drop_in: str = DROP_IN, data_dir: str = "", m
     for name in ROOTS_LOGS:
         path = os.path.join(data_dir, name)
         if os.path.exists(path):
-            do(["chown", "root:root", path])
-            do(["chmod", "644", path])
+            do(["chown", f"root:{USER}", path])  # root's, read by the web process's group only
+            do(["chmod", "640", path])
     homes = _homes()
     if homes and os.path.isdir(homes) and not _let_in(do, homes, recursive=True):
         problems.append(f"{USER} could not be let into {homes} (setfacl)")

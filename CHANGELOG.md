@@ -118,6 +118,8 @@ Kiboto OS: updates always check the image's signature there; the UPDATE_SIGNATUR
 
 Kiboto OS: an update no longer installs a version older than the lowest one the running release allows, read from the downloaded image itself. Revert to a version kept on the machine still works.
 
+The light bar no longer sends an error's internal text to the page, and the root service's audit log is no longer readable by every user of the machine.
+
 #### New
 
 Kiboto lists the third-party software it bundles and its licences at /third-party-licences.txt, and the install image says which Debian image it is made from and where Debian publishes its sources.

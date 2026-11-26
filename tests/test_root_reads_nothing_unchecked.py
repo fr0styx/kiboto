@@ -199,7 +199,8 @@ def test_the_doors_log_is_never_written_through_a_link(tmp_path):
     os.write(fd, b"again\n")
     os.close(fd)
     assert victim.read_text() == "keep\n" and log.read_text() == "again\n"
-    assert stat.S_IMODE(os.stat(log).st_mode) == 0o644
+    assert stat.S_IMODE(os.stat(log).st_mode) == 0o640  # not world readable (code scanning #589)
+    assert os.stat(log).st_gid == os.stat(tmp_path).st_gid  # the folder's group: the web process's
 
 
 def test_a_log_of_someone_elses_is_begun_again(tmp_path, monkeypatch):

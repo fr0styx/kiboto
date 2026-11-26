@@ -431,9 +431,11 @@ def send_led_packet(mode, r1, g1, b1, r2=0, g2=0, b2=0, speed=5):
             _configured_ports.discard(port)
             global _last_connect_fail_time
             _last_connect_fail_time = time.time()
-            return False, str(e)
+            logger.warning("[LED] writing to %s failed: %s", port, e)  # the reason stays in the log
+            return False, WRITE_FAILED
 
 
+WRITE_FAILED = "The light bar could not be written to. The log says why."
 RAINBOW_NOT_HERE = (
     "The rainbow isn't offered on this light bar: it keeps each effect in its own memory, and a "
     "rainbow would rewrite it many times a second. Its own effects work."

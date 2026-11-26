@@ -666,7 +666,7 @@ def _audit_file(path: str) -> int:
     flags = os.O_WRONLY | os.O_APPEND | os.O_CREAT | os.O_NOFOLLOW | os.O_CLOEXEC
     for attempt in (0, 1):
         try:
-            fd = os.open(path, flags, 0o644)
+            fd = os.open(path, flags, 0o640)
         except OSError:
             if attempt:
                 raise
@@ -674,6 +674,9 @@ def _audit_file(path: str) -> int:
             continue
         st = os.fstat(fd)
         if st.st_uid == os.geteuid() and st.st_nlink == 1 and stat.S_ISREG(st.st_mode):
+            # root's own file, readable by the folder's group (the web process's, which shows it)
+            os.fchown(fd, -1, os.stat(os.path.dirname(path) or ".").st_gid)
+            os.fchmod(fd, 0o640)
             return fd
         os.close(fd)
         if attempt:

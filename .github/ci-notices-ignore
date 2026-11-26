@@ -4,5 +4,10 @@
 # ldap3 is unmaintained (2.9.1) and calls a pyasn1 API that pyasn1 deprecated; nothing to update.
 ldap3/utils/asn1\.py:\d+: DeprecationWarning: (tagMap|typeMap) is deprecated
 
+# actions/download-artifact (v8.0.2, its newest release on 26 Nov 2026) calls Node's old Buffer();
+# the warning is printed by the action's own code, and a new release of it will take it away.
+\[DEP0005\] DeprecationWarning: Buffer\(\) is deprecated
+Use 'node --trace-deprecation \.\.\.' to show where the warning was created
+
 # GitHub moves ubuntu-latest to Ubuntu 26 (Oct 2026); CI follows it on purpose.
 The ubuntu-latest label will migrate to Ubuntu \d+

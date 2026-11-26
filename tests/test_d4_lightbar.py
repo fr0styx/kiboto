@@ -80,8 +80,10 @@ def test_a_failed_write_is_not_taken_for_a_sent_one(d4, monkeypatch):
             raise OSError("the port went away")
 
     monkeypatch.setattr(led, "_get_serial_connection", lambda port: Broken())
-    assert led.send_led_packet(6, 255, 0, 0, 255, 0, 0, speed=0x67)[0] is False
-    assert led._last_frame == {}
+    ok, message = led.send_led_packet(6, 255, 0, 0, 255, 0, 0, speed=0x67)
+    assert ok is False and led._last_frame == {}
+    # the page is told a sentence; the exception's own text stays in the log (code scanning #590)
+    assert message == led.WRITE_FAILED and "went away" not in message
 
 
 def test_the_rainbow_is_not_sent_to_a_bar_that_keeps_its_effect(d4):

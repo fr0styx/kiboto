@@ -171,7 +171,7 @@ def test_persistent_serial_reuse_and_backoff(monkeypatch):
     mock_file.write.side_effect = OSError("Broken pipe")
     ok, msg = send_led_packet(6, 0, 0, 255)
     assert ok is False
-    assert "Broken pipe" in msg
+    assert msg == "The light bar could not be written to. The log says why."  # not the exception's text
 
     # Immediate next attempt should be throttled by backoff interval
     ok2, msg2 = send_led_packet(6, 255, 255, 255)

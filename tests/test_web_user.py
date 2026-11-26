@@ -45,7 +45,8 @@ def test_turning_it_on_makes_the_user_and_the_drop_in(tmp_path, monkeypatch):
     names = [c[0] for c in ran]
     assert names.index("useradd") < names.index("chown") < names.index("setfacl")
     assert ["usermod", "--home", str(data), "kiboto"] in ran  # also when the user was made before
-    assert ["chown", "root:root", str(data / "door-audit.log")] in ran  # what root wrote stays root's
+    assert ["chown", "root:kiboto", str(data / "door-audit.log")] in ran  # what root wrote stays root's
+    assert ["chmod", "640", str(data / "door-audit.log")] in ran  # and nobody else reads it
     assert ["setfacl", "-R", "-m", "u:kiboto:rwX", str(homes)] in ran
     assert ["setfacl", "-R", "-d", "-m", "u:kiboto:rwX", str(homes)] in ran
     assert ["setfacl", "-d", "-m", "u:kiboto:rwX", str(pool)] in ran  # the pool's own folder, not all of it
