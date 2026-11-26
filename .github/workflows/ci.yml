@@ -929,14 +929,19 @@ jobs:
   # (.github/workflows/os-install.yml, scripts/os_install_check.sh). The other tests about Kiboto OS
   # read its scripts as text, and a change that broke every fresh install passed them on
   # 25 November 2026. A build Kiboto OS cannot be installed from is not signed, tagged or deployed.
+  # It starts with the run rather than after the build: the virtual machine boots with the QEMU of
+  # the last :main build while this run's image is made, then the check waits for that digest
+  # (early). About a minute of every push's path to deploy was runner start, image pull and boot.
   os-install:
     name: Kiboto OS
-    needs: [build-image]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/tags/stable')
     permissions:
       contents: read
       packages: read # the image is pulled by its digest
+      actions: read # the check reads this run's build job and its digest artifact
     uses: ./.github/workflows/os-install.yml
     with:
+      early: true
       # main: start from a disk with ZFS already built, when one fits this install.sh; a version tag
       # always installs from a fresh Debian (and so does any run after install.sh changed)
       fast: ${{ github.ref == 'refs/heads/main' }}

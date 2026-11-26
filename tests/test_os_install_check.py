@@ -95,7 +95,7 @@ def test_the_workflow_runs_it_for_one_of_kibotos_own_builds_only():
     assert "workflow_dispatch" in on and "workflow_call" in on
     job = wf["jobs"]["install"]
     assert job["runs-on"] == "ubuntu-latest" and "continue-on-error" not in str(job)
-    assert job["permissions"] == {"contents": "read", "packages": "read"}
+    assert job["permissions"] == {"contents": "read", "packages": "read", "actions": "read"}
     steps = job["steps"]
     runs = "\n".join(str(s.get("run", "")) for s in steps)
     assert r"^ghcr\.io/fr0styx/kiboto@sha256:[0-9a-f]{64}$" in runs
@@ -111,15 +111,52 @@ def test_no_build_is_signed_or_tagged_unless_kiboto_os_installs_from_it():
     with open(os.path.join(ROOT, ".github", "workflows", "ci.yml"), encoding="utf-8") as f:
         jobs = yaml.safe_load(f)["jobs"]
     job = jobs["os-install"]
-    assert job["uses"] == "./.github/workflows/os-install.yml" and job["needs"] == ["build-image"]
-    assert "if" not in job and "continue-on-error" not in str(job)
+    assert job["uses"] == "./.github/workflows/os-install.yml"
+    # it starts with the run (early) and so runs exactly when the image is built
+    assert "needs" not in job and job["if"] == jobs["build-image"]["if"]
+    assert job["with"]["early"] is True and "continue-on-error" not in str(job)
     assert "image" not in job.get("with", {})  # no build named: it installs the one this run built
-    assert job["permissions"] == {"contents": "read", "packages": "read"}
+    assert job["permissions"] == {"contents": "read", "packages": "read", "actions": "read"}
     assert "os-install" in jobs["publish"]["needs"]
     # and the workflow takes that build from the run when it is given none
     steps = _workflow()["jobs"]["install"]["steps"]
     fetch = next(s for s in steps if s.get("name") == "Download the digest")
-    assert fetch["if"] == "inputs.image == ''" and fetch["with"]["name"] == "digest-full"
+    assert fetch["if"] == "inputs.image == '' && !inputs.early" and fetch["with"]["name"] == "digest-full"
+
+
+def test_early_waits_for_this_runs_full_build_and_boots_with_the_last_main_build():
+    steps = _workflow()["jobs"]["install"]["steps"]
+    for name in ("Install Kiboto OS in a fresh Debian 13 and check it", "Prepare a disk for the next runs"):
+        env = next(s for s in steps if s.get("name") == name)["env"]
+        # QEMU from :main only while waiting; a build given by digest boots with its own
+        assert (
+            env["KB_OS_VM_IMAGE"]
+            == "${{ steps.build.outputs.image == '--wait' && 'ghcr.io/fr0styx/kiboto:main' || '' }}"
+        )
+        assert env["KB_OS_IMAGE_CMD"] == 'sh scripts/ci_wait_build.sh digest-full "Build multi-arch image (full)"'
+    with open(os.path.join(ROOT, ".github", "workflows", "ci.yml"), encoding="utf-8") as f:
+        ci = yaml.safe_load(f)["jobs"]["build-image"]
+    assert ci["name"] == "Build multi-arch image (${{ matrix.variant }})"  # the job the check waits for
+
+
+def test_the_waiter_installs_only_a_digest_and_stops_when_the_build_fails():
+    with open(os.path.join(ROOT, "scripts", "ci_wait_build.sh"), encoding="utf-8") as f:
+        src = f.read()
+    assert "^sha256:[0-9a-f]{64}$" in src
+    assert "completed*) echo" in src and "exit 1" in src  # failed, cancelled or skipped: no long wait
+    assert "KB_WAIT_MINUTES:-40" in src
+
+
+def test_wait_needs_a_command_and_a_vm_image(tmp_path):
+    env = {k: v for k, v in os.environ.items() if not k.startswith("KB_OS_")}
+    r = subprocess.run(
+        ["sh", os.path.join(ROOT, "scripts", "os_install_check.sh"), "--wait"],
+        env=env,
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    assert r.returncode == 2 and "KB_OS_IMAGE_CMD" in r.stderr
 
 
 def test_a_tag_also_tries_an_update_and_revert_through_the_root_service():

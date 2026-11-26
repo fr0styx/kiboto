@@ -21,12 +21,23 @@
 #   KB_OS_UPDATE=1  after the restart, also update the machine to the same build through the root
 #                 service and go back with Revert, checking it after each (the machine is then a test
 #                 machine: it takes main builds and unsigned images, which a real one never does)
+#   KB_OS_VM_IMAGE  start the virtual machine with the QEMU of this image instead of the one to install
+#                 (CI boots with the last published build while the new one is still being made)
+#   KB_OS_IMAGE_CMD with "--wait" in place of the image: a command that prints the image to install.
+#                 It runs once the machine is up, so the boot overlaps whatever the command waits for.
 #   KB_OS_PREPARED  such a disk, used instead of a fresh Debian: the install then skips building ZFS,
 #                 the slow part. It belongs to one install.sh and one Debian image (the workflow keys
 #                 it by both); anything else gets a fresh Debian.
 set -eu
 IMAGE=${1:-}
-case "$IMAGE" in *@sha256:*) ;; *) echo "usage: os_install_check.sh <image>@sha256:<digest>" >&2; exit 2 ;; esac
+usage() { echo "usage: os_install_check.sh <image>@sha256:<digest> | --wait (with KB_OS_IMAGE_CMD and KB_OS_VM_IMAGE)" >&2; exit 2; }
+if [ "$IMAGE" = --wait ]; then
+  [ -n "${KB_OS_IMAGE_CMD:-}" ] && [ -n "${KB_OS_VM_IMAGE:-}" ] || usage
+else
+  case "$IMAGE" in *@sha256:*) ;; *) usage ;; esac
+fi
+# the image whose QEMU and qemu-img run the machine; the one installed in it is $IMAGE
+VM_IMAGE=${KB_OS_VM_IMAGE:-$IMAGE}
 HERE=$(cd "$(dirname "$0")/.." && pwd)
 PORT=${KB_OS_PORT:-2230}
 SEED_PORT=$((PORT + 5000))  # where the new machine reads its first-start settings from this one
@@ -49,7 +60,7 @@ end() {
     say "left running: $SSH"
   else
     docker rm -f "$NAME" >/dev/null 2>&1 || true
-    [ -n "$made" ] && docker run --rm -v "$WORK":/vm --entrypoint sh "$IMAGE" -c 'rm -rf /vm/* /vm/.[!.]*' >/dev/null 2>&1 && rmdir "$WORK" 2>/dev/null
+    [ -n "$made" ] && docker run --rm -v "$WORK":/vm --entrypoint sh "$VM_IMAGE" -c 'rm -rf /vm/* /vm/.[!.]*' >/dev/null 2>&1 && rmdir "$WORK" 2>/dev/null
   fi
   exit "$rc"
 }
@@ -98,13 +109,13 @@ users:
 growpart: {mode: auto, devices: ['/']}
 UD
 
-docker pull -q "$IMAGE" >/dev/null
+docker pull -q "$VM_IMAGE" >/dev/null
 docker rm -f "$NAME" >/dev/null 2>&1 || true
 # The machine's own network view: QEMU's forward then listens on this machine's loopback, and the
 # guest sees SSH come from its own gateway (through a Docker network it would see that network's
 # address, which is the range the Docker inside the guest takes, and its answers would go nowhere).
 docker run -d --name "$NAME" --no-healthcheck --network host --device /dev/kvm \
-  -v "$WORK":/vm -v "$BASE":/base.qcow2:ro --entrypoint sh "$IMAGE" -c "
+  -v "$WORK":/vm -v "$BASE":/base.qcow2:ro --entrypoint sh "$VM_IMAGE" -c "
     cd /vm/seed && python3 -m http.server $SEED_PORT --bind 127.0.0.1 >/vm/seed.log 2>&1 &
     rm -f /vm/os.qcow2 && qemu-img create -q -f qcow2 -F qcow2 -b /base.qcow2 /vm/os.qcow2 24G
     cp /usr/share/OVMF/OVMF_VARS_4M.fd /vm/vars.fd
@@ -169,11 +180,18 @@ PREP
     i=$((i + 1)); [ "$i" -gt 60 ] && { say "the machine did not shut down"; exit 1; }; sleep 3
   done
   out_dir=$(cd "$(dirname "$KB_OS_PREPARE")" && pwd); out_name=$(basename "$KB_OS_PREPARE")
-  docker run --rm -v "$WORK":/vm -v "$BASE":/base.qcow2:ro -v "$out_dir":/out --entrypoint qemu-img "$IMAGE" \
+  docker run --rm -v "$WORK":/vm -v "$BASE":/base.qcow2:ro -v "$out_dir":/out --entrypoint qemu-img "$VM_IMAGE" \
     convert -c -O qcow2 /vm/os.qcow2 "/out/$out_name"
   chmod 644 "$KB_OS_PREPARE" 2>/dev/null || true
   say "prepared disk: $KB_OS_PREPARE ($(du -h "$KB_OS_PREPARE" | cut -f1))"
   exit 0
+fi
+
+if [ "$IMAGE" = --wait ]; then
+  stage "Waiting for the build to install"
+  IMAGE=$(sh -c "$KB_OS_IMAGE_CMD") || { say "no build to install"; exit 1; }
+  case "$IMAGE" in *@sha256:*) ;; *) say "not an image by digest: $IMAGE"; exit 1 ;; esac
+  say "$IMAGE"
 fi
 
 stage "Kiboto installs itself"

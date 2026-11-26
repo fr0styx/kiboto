@@ -135,4 +135,4 @@ def test_the_build_cache_is_in_the_registry_and_warmed_each_night():
 
 def test_main_takes_the_os_fast_path_and_a_version_tag_never_does():
     job = _wf("ci.yml")["jobs"]["os-install"]
-    assert job["with"] == {"fast": "${{ github.ref == 'refs/heads/main' }}"}
+    assert job["with"] == {"fast": "${{ github.ref == 'refs/heads/main' }}", "early": True}
