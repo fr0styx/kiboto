@@ -147,8 +147,10 @@ def test_ci_jobs_get_least_privilege():
         assert checkouts and all(s.get("with", {}).get("persist-credentials") is False for s in checkouts), name
     # only the build pushes (by digest) and only publish signs; the checks only read the image
     assert jobs["build-image"]["permissions"] == {"contents": "read", "packages": "write"}
-    for name in ("check-image", "update-test", "smoke-arm64"):
+    for name in ("check-image", "smoke-arm64"):
         assert jobs[name]["permissions"] == {"contents": "read", "packages": "read"}, name
+    # the update test starts with the run and reads the run's own build job and digest artifact
+    assert jobs["update-test"]["permissions"] == {"contents": "read", "packages": "read", "actions": "read"}
     assert jobs["publish"]["permissions"] == {"contents": "read", "packages": "write", "id-token": "write"}
     # id-token: the release signs its checksums keyless, as publish signs the images
     assert jobs["create-release"]["permissions"] == {"contents": "write", "id-token": "write"}

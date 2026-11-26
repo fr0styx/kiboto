@@ -53,7 +53,8 @@ def test_every_gate_runs_before_the_image_is_signed_and_tagged():
     for prefix, job in GATES.items():
         assert job in needs, prefix
         _index(jobs[job]["steps"], prefix)  # the gate is really in that job
-        assert not jobs[job].get("if"), job  # and is not skipped while the build runs
+        # and is not skipped while the build runs: no condition, or exactly the build's own
+        assert jobs[job].get("if") in (None, jobs["build-image"]["if"]), job
     # nothing before the publish job tags or signs the image
     for name, job in jobs.items():
         if name in ("publish", "create-release"):
@@ -116,3 +117,31 @@ def test_the_unit_suite_also_runs_on_the_python_kiboto_os_uses():
     assert "--deselect tests/test_rag_eval_baseline.py::test_search_stays_fast" in steps
     other = "\n".join(str(step.get("run", "")) for step in jobs["lint-and-test"]["steps"])
     assert "tests/test_rag_eval_baseline.py::test_search_stays_fast" in other
+
+
+def test_every_browser_test_runs_in_exactly_one_part():
+    """The browser tests are split across runners by name; one left out would never run."""
+    import ast
+    import glob
+
+    root = os.path.dirname(os.path.dirname(__file__))
+    every = set()
+    for path in glob.glob(os.path.join(root, "tests", "test_e2e_*.py")):
+        with open(path, encoding="utf-8") as f:
+            tree = ast.parse(f.read())
+        rel = "tests/" + os.path.basename(path)
+        every |= {
+            f"{rel}::{n.name}" for n in tree.body if isinstance(n, ast.FunctionDef) and n.name.startswith("test_")
+        }
+    seen = []
+    for part in _jobs()["e2e-integration"]["strategy"]["matrix"]["include"]:
+        words = str(part["tests"]).split()
+        dropped = {words[i + 1] for i, w in enumerate(words) if w == "--deselect"}
+        for w in words:
+            if w == "--deselect" or w in dropped:
+                continue
+            if "::" in w:
+                seen.append(w)
+            else:
+                seen += [t for t in every if t.startswith(w + "::") and t not in dropped]
+    assert sorted(seen) == sorted(every), "a browser test runs twice or never"

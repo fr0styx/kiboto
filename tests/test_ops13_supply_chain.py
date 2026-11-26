@@ -70,6 +70,12 @@ def test_the_update_path_is_exercised_before_publishing():
     test = names.index("Upgrade and rollback test")
     assert "update-test" in jobs["publish"]["needs"]  # runs before any tag is published
     assert "scripts/upgrade_rollback_test.sh" in steps[test]["run"]
+    # the older versions are fetched while the image builds, then the run waits for its digest
+    fetch = names.index("Download the older versions")
+    wait = names.index("Wait for this run's build")
+    assert fetch < wait < test
+    assert "scripts/ci_wait_build.sh" in steps[wait]["run"]
     # a tag's run is never its own base, and a never-published version (no image) still leaves two
-    assert 'grep -vxF "$THIS"' in steps[test]["run"] and "tail -3)" in steps[test]["run"]
+    assert 'grep -vxF "$THIS"' in steps[fetch]["run"] and "tail -3)" in steps[fetch]["run"]
+    assert "done < /tmp/bases.txt" in steps[test]["run"]
     assert os.path.isfile(os.path.join(ROOT, "scripts", "upgrade_rollback_test.sh"))

@@ -28,10 +28,9 @@ def _update_test() -> str:
 
 
 def test_the_update_test_starts_from_the_image_name_since_the_rebrand():
-    run = _update_test()
-    new = run.index('OLD="${{ env.IMAGE }}:$tag${{ matrix.suffix }}"')
-    old = run.index('OLD="${{ env.OLD_IMAGE }}:$tag${{ matrix.suffix }}"')
-    assert new < old  # the old name only for a version from before the rebrand (it stops at 2.2)
+    run = _step(_wf("ci.yml")["jobs"]["update-test"], "Download the older versions")["run"]
+    # the old name only for a version from before the rebrand (it stops at 2.2)
+    assert 'for name in "${{ env.IMAGE }}" "${{ env.OLD_IMAGE }}"; do' in run
 
 
 def test_the_update_test_fails_when_fewer_than_two_older_versions_were_tried():

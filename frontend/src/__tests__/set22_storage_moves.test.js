@@ -2,7 +2,9 @@ import { describe, it, expect } from 'vitest';
 import markup from '../windows/management-window.html?raw';
 import { SUBPANE_MAP, tabForPane } from '../components/management.js';
 
-const doc = () => new DOMParser().parseFromString(markup, 'text/html');
+// the markup is large (about 400 kB): parse it once, the tests only read it
+let parsed;
+const doc = () => (parsed ??= new DOMParser().parseFromString(markup, 'text/html'));
 
 describe('Storage keeps the drives; Shared folders and Card copies move (SET-22 Storage 2)', () => {
   it('Storage has Drives and Cloud drives, no Shares or Card copies tab', () => {

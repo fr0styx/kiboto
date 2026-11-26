@@ -6,6 +6,11 @@ export default defineConfig({
     globals: true,
     pool: 'vmThreads',
     setupFiles: ['./frontend/src/__tests__/setup.js'],
+    // A limit against hangs, not a speed check. Tests that parse the whole Settings markup or draw
+    // the full time-zone list ran past vitest's 5 s default on a busy machine (gate beside other
+    // jobs, CI under load) and failed at random while they pass alone in under a second.
+    testTimeout: 20000,
+    hookTimeout: 20000,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],

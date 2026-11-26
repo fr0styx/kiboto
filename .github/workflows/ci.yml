@@ -328,19 +328,33 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # Three parts of about equal length plus the idle minute, each on its own runner (about 80 s
+        # of setup each): the journeys' three slowest tests and the light theme's check make the
+        # third, so no part waits on another's leftovers (tests/test_ci_release_gates.py checks that
+        # every browser test runs in exactly one part)
         include:
-          - shard: "1 of 2"
-            tests: tests/test_e2e_journeys.py
+          - shard: "1 of 3"
+            tests: >-
+              tests/test_e2e_journeys.py
+              --deselect tests/test_e2e_journeys.py::test_hidden_controls_stay_hidden_on_a_phone
+              --deselect tests/test_e2e_journeys.py::test_settings_navigation_at_every_width
+              --deselect tests/test_e2e_journeys.py::test_the_first_seconds_stay_within_their_byte_budget
             idle: false
-          - shard: "2 of 2"
+          - shard: "2 of 3"
             tests: >-
               tests/test_e2e_integration.py tests/test_e2e_keyboard_german.py
               tests/test_e2e_a11y.py::test_main_views_have_no_serious_accessibility_issues
             idle: false
-          # the idle minute (PERF-10, 90 s) beside the two halves, on the same server setup; the
-          # accessibility check of the light theme runs after it, so the three take about as long
+          - shard: "3 of 3"
+            tests: >-
+              tests/test_e2e_journeys.py::test_hidden_controls_stay_hidden_on_a_phone
+              tests/test_e2e_journeys.py::test_settings_navigation_at_every_width
+              tests/test_e2e_journeys.py::test_the_first_seconds_stay_within_their_byte_budget
+              tests/test_e2e_a11y.py::test_settings_in_the_light_theme_have_no_serious_accessibility_issues
+            idle: false
+          # the idle minute (PERF-10, 90 s) on a server no test has touched, and nothing after it
           - shard: "idle minute"
-            tests: tests/test_e2e_a11y.py::test_settings_in_the_light_theme_have_no_serious_accessibility_issues
+            tests: ""
             idle: true
     runs-on: ubuntu-latest
     timeout-minutes: 25  # ARC-26: a hung step fails the run instead of holding a runner for 6 hours
@@ -785,10 +799,13 @@ jobs:
           exit-code: "0"
           format: table
 
-  # The update and rollback test in its own job, beside the smoke test and the scan (CI speed-up)
+  # The update and rollback test in its own job, beside the smoke test and the scan (CI speed-up).
+  # It starts with the run, not after the build: the older versions are downloaded while the image
+  # is made, then it waits for this run's digest (scripts/ci_wait_build.sh, which fails as soon as
+  # the build job fails, is cancelled or skipped).
   update-test:
     name: Update and rollback test (${{ matrix.variant }})
-    needs: [build-image]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/tags/stable')
     strategy:
       fail-fast: false
       matrix:
@@ -802,6 +819,7 @@ jobs:
     permissions:
       contents: read
       packages: read
+      actions: read # this run's build job and its digest artifact
     env:
       DOCKER_CLIENT_TIMEOUT: "120"
       COMPOSE_HTTP_TIMEOUT: "120"
@@ -825,15 +843,37 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Download the digest
-        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
-        with:
-          name: digest-${{ matrix.variant }}
-      - name: Read the digest
-        id: build
+      # while the image builds: the older versions to update from, side by side. The image name
+      # since the rebrand first; a version from before it is only under the old name, which stops
+      # at 2.2. Core images end in -core (NARC-10). A version whose release was never published has
+      # no image and is left out.
+      - name: Download the older versions
         run: |
-          d=$(cat digest.txt)
-          case "$d" in sha256:*) ;; *) echo "::error::bad digest file"; exit 1;; esac
+          # the three newest versions before this one: a tag's run never takes itself as a base
+          THIS="${GITHUB_REF_NAME#v}"
+          RECENT=$(git ls-remote --tags --refs "https://github.com/${{ github.repository }}" 'v*' \
+            | sed 's#.*refs/tags/v##' | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | grep -vxF "$THIS" \
+            | sort -t. -k1,1n -k2,2n -k3,3n | tail -3)
+          docker pull -q busybox:1.37.0 >/dev/null &
+          for tag in latest $RECENT; do
+            ( for name in "${{ env.IMAGE }}" "${{ env.OLD_IMAGE }}"; do
+                if docker pull -q "$name:$tag${{ matrix.suffix }}" >/dev/null 2>&1; then
+                  echo "$tag $name:$tag${{ matrix.suffix }}" > "/tmp/base-$tag"; exit 0
+                fi
+              done
+              echo "$tag -" > "/tmp/base-$tag" ) &
+          done
+          wait
+          cat /tmp/base-* > /tmp/bases.txt
+          cat /tmp/bases.txt
+      - name: Wait for this run's build
+        id: build
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          image=$(sh scripts/ci_wait_build.sh "digest-${{ matrix.variant }}" "Build multi-arch image (${{ matrix.variant }})")
+          d=${image#*@}
+          case "$d" in sha256:*) ;; *) echo "::error::bad digest: $image"; exit 1;; esac
           echo "digest=$d" >> "$GITHUB_OUTPUT"
 
       # The real update path, end to end: Stable and the newest releases before this one, each on fresh data
@@ -846,27 +886,17 @@ jobs:
         run: |
           NEW="${{ env.IMAGE }}@${{ steps.build.outputs.digest }}"
           docker pull -q "$NEW"
-          docker pull -q busybox:1.37.0 >/dev/null
-          # the three newest versions before this one: a tag's run never takes itself as a base, and
-          # a version whose release was never published has no image and is skipped, so two stay
-          THIS="${GITHUB_REF_NAME#v}"
-          RECENT=$(git ls-remote --tags --refs "https://github.com/${{ github.repository }}" 'v*' \
-            | sed 's#.*refs/tags/v##' | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | grep -vxF "$THIS" \
-            | sort -t. -k1,1n -k2,2n -k3,3n | tail -3)
           i=0
           started=""
-          for tag in latest $RECENT; do
+          # the bases the step before downloaded ("-": that version has no image)
+          while read -r tag OLD; do
             i=$((i + 1))
-            # each run pulls its own old image, so the three downloads overlap too. The image name
-            # since the rebrand first; a version from before it is only under the old name, which
-            # stops at 2.2. Core images end in -core (NARC-10).
-            ( OLD="${{ env.IMAGE }}:$tag${{ matrix.suffix }}"
-              docker pull -q "$OLD" >/dev/null 2>&1 || { OLD="${{ env.OLD_IMAGE }}:$tag${{ matrix.suffix }}"; docker pull -q "$OLD" >/dev/null 2>&1; } || exit 77
+            ( [ "$OLD" != "-" ] || exit 77
               echo "from $OLD"
               KIBOTO_TEST_NAME="kb-upgrade-$i" KIBOTO_TEST_PORT=$((18090 + i)) \
                 sh scripts/upgrade_rollback_test.sh "$OLD" "$NEW" ) > "/tmp/upgrade-$i.log" 2>&1 &
             started="$started $i:$!:$tag"
-          done
+          done < /tmp/bases.txt
           failed=""
           passed=0
           for run in $started; do
