@@ -16,6 +16,8 @@ Kiboto OS: when Kiboto hands files and folders in a shared folder to their peopl
 
 A btrfs mirror that started without one of its drives can now have that drive replaced from the app: the missing drive is named as missing, the pool is opened for writing for the rebuild, and Storage shows it as degraded until then. Afterwards everything on it is mirrored again.
 
+After a drive is replaced from the app, Storage lists the new drive as part of the pool, not the one it replaced.
+
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container
 

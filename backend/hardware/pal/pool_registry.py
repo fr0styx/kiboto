@@ -143,6 +143,16 @@ def set_ejected(name: str, ejected: bool) -> None:
             return
 
 
+def set_members(name: str, members: list[str]) -> None:
+    """The drives a pool is on now: after one was replaced from the app."""
+    rows = load()
+    for r in rows:
+        if r["name"] == name and r.get("members") != members:
+            r["members"] = list(members)
+            _save(rows)
+            return
+
+
 def rename(old: str, new: str) -> None:
     rows = load()
     for r in rows:

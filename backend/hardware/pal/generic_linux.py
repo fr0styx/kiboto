@@ -176,6 +176,27 @@ def btrfs_sysfs(uuid: str, sys_root: str = "") -> tuple[list[str], bool] | None:
     return present, missing
 
 
+def members_after_replace(name: str, old: str, new: str) -> list[str] | None:
+    """The record of a pool Kiboto made follows a replacement: the drive replaced goes, the new one
+    comes. A btrfs drive that was missing has no name: the record keeps the drives the kernel still
+    lists for the pool. Written here, by Kiboto's own process, so the record stays its own file."""
+    row = pool_registry.find(name)
+    if row is None or not new:
+        return None
+
+    def disk(path: str) -> str:
+        return re.sub(r"-part\d+$", "", path)
+
+    kept = [m for m in row.get("members") or [] if disk(m) != disk(old)]
+    if row["fs_type"] == "btrfs" and len(kept) == len(row.get("members") or []):
+        kernel = btrfs_sysfs(str(row.get("uuid") or ""))
+        if kernel is not None:
+            kept = [m for m in kept if _whole_disk(os.path.basename(os.path.realpath(m))) in kernel[0]]
+    members = kept if new in kept else [*kept, new]
+    pool_registry.set_members(name, members)
+    return members
+
+
 def btrfs_missing_members(members: list[PoolMember], shown: str) -> list[PoolMember]:
     """The members, with the ones `btrfs filesystem show` does not list as present marked MISSING.
     A missing drive shows as "devid 2 size 0 used 0 path  MISSING"; present ones by their path."""
@@ -1410,7 +1431,10 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
     def replace_drive(self, pool_id: str, old: str, new: str) -> dict[str, Any]:
         """Starts rebuilding `old` onto the empty drive `new`. Through the host door where it runs.
         Answers {"started": True, ...} or {"started": False, "why": key, "message": ...}."""
-        return _through_door("storage.replace_drive", self._replace_drive_here, pool_id=pool_id, old=old, new=new)
+        done = _through_door("storage.replace_drive", self._replace_drive_here, pool_id=pool_id, old=old, new=new)
+        if isinstance(done, dict) and done.get("started"):
+            members_after_replace(pool_id, str(done.get("old") or ""), str(done.get("new") or ""))
+        return done
 
     def _replace_drive_here(self, pool_id: str, old: str, new: str) -> dict[str, Any]:
         from backend.hardware.pal import drive_replace
