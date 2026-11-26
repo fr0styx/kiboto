@@ -108,6 +108,8 @@ jobs:
         env:
           IMAGE_REF: ${{ steps.build.outputs.image }}
           KB_OS_PREPARED: ${{ steps.prepared.outputs.cache-hit == 'true' && format('{0}/prepared.qcow2', github.workspace) || '' }}
+          # a version tag and a run by hand also try an update and Revert; main stays fast
+          KB_OS_UPDATE: ${{ inputs.fast && '0' || '1' }}
         run: sh scripts/os_install_check.sh "$IMAGE_REF"
 
       - name: Prepare a disk for the next runs

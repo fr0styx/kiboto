@@ -18,6 +18,9 @@
 #   KB_OS_PREPARE=<file>  make a prepared disk instead of checking: a fresh Debian 13 in which ZFS is
 #                 built and the installer's other packages are downloaded (not installed: Debian's Samba
 #                 would write a config, and the installer then refuses the machine), saved to <file>
+#   KB_OS_UPDATE=1  after the restart, also update the machine to the same build through the root
+#                 service and go back with Revert, checking it after each (the machine is then a test
+#                 machine: it takes main builds and unsigned images, which a real one never does)
 #   KB_OS_PREPARED  such a disk, used instead of a fresh Debian: the install then skips building ZFS,
 #                 the slow part. It belongs to one install.sh and one Debian image (the workflow keys
 #                 it by both); anything else gets a fresh Debian.
@@ -208,7 +211,9 @@ look() {
   check "btrfs, ext4 and the drive tools are there" "for t in mkfs.btrfs mkfs.ext4 smartctl hdparm nft; do command -v \$t >/dev/null || { echo \"missing: \$t\"; exit 1; }; done"
   check "Docker runs" "docker info >/dev/null"
   check "Samba and NFS are installed" "command -v smbd >/dev/null && command -v exportfs >/dev/null"
-  check "the kernel, ZFS and Docker are held at the tested versions" "apt-mark showhold | grep -q zfs && apt-mark showhold | grep -q docker"
+  check "ZFS and Docker are held at the tested versions" "apt-mark showhold | grep -q zfs && apt-mark showhold | grep -q docker"
+  check "the kernel takes Debian's security fixes (it is not held)" "! apt-mark showhold | grep -q linux-image"
+  check "Debian's security fixes are set to install by themselves" "grep -q Debian-Security /etc/apt/apt.conf.d/52kiboto-security"
   check "Kiboto waits for its first sign-in" "curl -fs -m 10 http://127.0.0.1:8082/api/auth/first-run | grep -q '\"waiting\": *true'"
   check "the page itself is served" "curl -fs -m 10 http://127.0.0.1:8082/ | grep -qi '<title'"
 }
@@ -226,6 +231,38 @@ until $SSH "curl -fs -m 5 -o /dev/null http://127.0.0.1:8082/api/health" 2>/dev/
   i=$((i + 1)); [ "$i" -gt 36 ] && break; sleep 5
 done
 look
+
+# until Kiboto answers again after a switch (up to three minutes)
+healthy() {
+  i=0
+  until $SSH "curl -fs -m 5 -o /dev/null http://127.0.0.1:8082/api/health" 2>/dev/null; do
+    i=$((i + 1)); [ "$i" -gt 36 ] && return 1; sleep 5
+  done
+}
+# a command of Kiboto's own, as its web process would ask the root service
+as_kiboto() {
+  $SSH "cd /opt/kiboto/current && sudo -u kiboto env DATA_DIR=/var/lib/kiboto ./venv/bin/python -c '$1' ${2:-}"
+}
+
+if [ "${KB_OS_UPDATE:-0}" = 1 ]; then
+  stage "An update to the same build through the root service, and Revert"
+  $SSH "printf 'KIBOTO_ACCEPT_MAIN_BUILDS=1\nUPDATE_SIGNATURES=off\n' >> /etc/kiboto/kiboto.env && systemctl restart kiboto-door kiboto"
+  healthy || say "  Kiboto did not answer after its settings changed"
+  before=$($SSH "readlink /opt/kiboto/current")
+  $SSH "docker pull -q '$IMAGE' >/dev/null" || say "  the build could not be downloaded again"
+  as_kiboto 'import sys; from backend import door, __version__; door.call("update.start", image=sys.argv[1], version=__version__, timeout=900)' "'$IMAGE'" \
+    || say "  the root service refused or failed the update"
+  sleep 10
+  healthy || say "  Kiboto did not answer after the update"
+  check "the update switched to a new release folder" "test \"\$(readlink /opt/kiboto/current)\" != '$before'"
+  look
+  as_kiboto 'from backend import door; from backend.services import native_update as nu; v = nu.versions_to_go_back_to("/var/lib/kiboto"); door.call("update.back", snapshot_id=v[0]["id"], timeout=600)' \
+    || say "  the root service refused or failed Revert"
+  sleep 10
+  healthy || say "  Kiboto did not answer after Revert"
+  check "Revert went back to the release folder from before" "test \"\$(readlink /opt/kiboto/current)\" = '$before'"
+  look
+fi
 
 stage "Result"
 if [ "$failed" != 0 ]; then

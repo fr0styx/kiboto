@@ -120,3 +120,16 @@ def test_no_build_is_signed_or_tagged_unless_kiboto_os_installs_from_it():
     steps = _workflow()["jobs"]["install"]["steps"]
     fetch = next(s for s in steps if s.get("name") == "Download the digest")
     assert fetch["if"] == "inputs.image == ''" and fetch["with"]["name"] == "digest-full"
+
+
+def test_a_tag_also_tries_an_update_and_revert_through_the_root_service():
+    with open(SCRIPT, encoding="utf-8") as f:
+        sh = f.read()
+    step = sh[sh.index('if [ "${KB_OS_UPDATE:-0}" = 1 ]; then') : sh.index('stage "Result"')]
+    assert 'door.call("update.start"' in step and 'door.call("update.back"' in step
+    assert step.index("update.start") < step.index("update.back")
+    assert step.count("look") == 2  # the whole check after each switch
+    assert "KIBOTO_ACCEPT_MAIN_BUILDS=1" in step and "UPDATE_SIGNATURES=off" in step  # a test machine only
+    with open(WORKFLOW, encoding="utf-8") as f:
+        wf = f.read()
+    assert "KB_OS_UPDATE: ${{ inputs.fast && '0' || '1' }}" in wf
