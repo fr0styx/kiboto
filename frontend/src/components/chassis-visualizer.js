@@ -926,7 +926,7 @@ function bindTopologyTreeEvents(tree, container) {
         async () => {
           try {
             exportBtn.disabled = true;
-            setIconLabel(exportBtn, '⏳', t('ui.ejecting', 'Ejecting...'));
+            setIconLabel(exportBtn, '⏳', t('ui.ejecting', 'Ejecting…'));
             await api.post(`/api/storage/pools/${encodeURIComponent(pid)}/export`, { force: false });
             showToast(
               t('chassis.pool_ejected_unplug', 'Pool "{pool}" was ejected. You can unplug it now.', { pool: pid }),
@@ -1091,7 +1091,7 @@ export async function importFoundPool(container, importBtn) {
   };
   const run = async (force) => {
     importBtn.disabled = true;
-    setIconLabel(importBtn, '⏳', t('ui.importing', 'Importing...'));
+    setIconLabel(importBtn, '⏳', t('ui.importing', 'Importing…'));
     const res = await api.post('/api/storage/pools/import', force ? { ...body, force: true } : body);
     showToast(
       res?.read_only
@@ -2187,7 +2187,7 @@ export async function fetchAndRenderRemoteStorage(container) {
     container.querySelectorAll('.btn-remote-mount').forEach((btn) => {
       btn.addEventListener('click', async () => {
         const name = btn.dataset.name;
-        btn.textContent = t('ui.mounting', 'Mounting...');
+        btn.textContent = t('ui.mounting', 'Mounting…');
         btn.disabled = true;
         try {
           await api.post(`/api/remotes/${name}/mount`, {});
@@ -2212,7 +2212,7 @@ export async function fetchAndRenderRemoteStorage(container) {
     container.querySelectorAll('.btn-remote-unmount').forEach((btn) => {
       btn.addEventListener('click', async () => {
         const name = btn.dataset.name;
-        btn.textContent = t('ui.unmounting', 'Unmounting...');
+        btn.textContent = t('ui.unmounting', 'Unmounting…');
         btn.disabled = true;
         try {
           await api.post(`/api/remotes/${name}/unmount`);
@@ -2597,7 +2597,7 @@ export async function openNewCloudRemoteModal(onSuccess) {
                   ${t('chassis.step2_desc', 'When the sign-in finishes, copy the full address from the browser’s address bar and paste it below:')}
                 </div>
                 <div class="cv-row-8">
-                  <input type="text" id="oauth-redirect-url" class="tz-select-input cv-xs-mono-grow" placeholder="http://localhost:53682/?code=M.R3_... or full redirect URL" />
+                  <input type="text" id="oauth-redirect-url" class="tz-select-input cv-xs-mono-grow" placeholder="http://localhost:53682/?code=M.R3_… or full redirect URL" />
                   <button type="button" id="btn-oauth-paste" class="btn-pill-toggle is-small cv-x-8">
                     ${ico('📋')} ${t('chassis.paste', 'Paste')}
                   </button>
@@ -3117,7 +3117,7 @@ export async function openNewCloudRemoteModal(onSuccess) {
 
         testBtn.disabled = true;
         testBtn.classList.remove('tested-green');
-        testBtn.innerHTML = `<span><span aria-hidden="true">⏳</span> ${t('remotes.test_btn_testing', 'Testing Connection...')}</span>`;
+        testBtn.innerHTML = `<span><span aria-hidden="true">⏳</span> ${t('remotes.test_btn_testing', 'Testing Connection…')}</span>`;
         showNote(testResult, 'info', '🔄', '', t('chassis.testing', 'Checking the sign-in details and connecting…'));
 
         try {
@@ -3223,7 +3223,7 @@ export async function openNewCloudRemoteModal(onSuccess) {
         const submitBtn = /** @type {HTMLButtonElement} */ (document.getElementById('new-remote-submit-btn'));
         if (submitBtn) {
           submitBtn.disabled = true;
-          submitBtn.textContent = t('ui.connecting', 'Connecting...');
+          submitBtn.textContent = t('ui.connecting', 'Connecting…');
         }
 
         try {
@@ -3446,7 +3446,7 @@ export async function openCreateStoragePoolModal(onSuccess) {
 
       if (submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.textContent = t('ui.provisioning', 'Provisioning...');
+        submitBtn.textContent = t('ui.provisioning', 'Provisioning…');
       }
 
       const body = {
@@ -3641,7 +3641,7 @@ export function openCreateNetworkShareModal(onSuccess) {
 
       if (submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.textContent = t('ui.provisioning', 'Provisioning...');
+        submitBtn.textContent = t('ui.provisioning', 'Provisioning…');
       }
 
       try {
@@ -3758,7 +3758,7 @@ export function openRenameStoragePoolModal(poolId, currentName, onSuccess) {
 
       if (submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.textContent = t('ui.renaming', 'Renaming...');
+        submitBtn.textContent = t('ui.renaming', 'Renaming…');
       }
 
       try {

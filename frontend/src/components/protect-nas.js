@@ -175,7 +175,7 @@ export async function openProtectGuide(preselect = '') {
   const host = guideWindow();
   let names = {};
   const body = host.querySelector('.smart-modal-body');
-  body.textContent = t('ui.loading', 'Loading...');
+  body.textContent = t('ui.loading', 'Loading…');
   host.style.display = '';
   host.classList.add('open');
   host.querySelector('[data-close]').focus();

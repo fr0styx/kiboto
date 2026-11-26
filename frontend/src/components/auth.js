@@ -459,7 +459,7 @@ async function doLogin() {
   const isRemembered = rememberMe ? rememberMe.checked : true;
 
   _showLoginError('');
-  if (loginBtn) loginBtn.textContent = t('login.authenticating', 'Signing in...');
+  if (loginBtn) loginBtn.textContent = t('login.authenticating', 'Signing in…');
 
   try {
     const res = await window.fetch('/api/auth/login', {

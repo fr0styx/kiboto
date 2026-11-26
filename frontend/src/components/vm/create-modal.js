@@ -783,7 +783,7 @@ export function openVmCreateModal() {
       });
 
       btnSubmit.disabled = true;
-      btnSubmit.textContent = t('ui.provisioning_vm', 'Provisioning VM...');
+      btnSubmit.textContent = t('ui.provisioning_vm', 'Provisioning VM…');
 
       try {
         await api.post('/api/vms', {

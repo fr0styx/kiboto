@@ -96,7 +96,7 @@ export async function openRestoreBox(repoId = null, onDone = null) {
   let state = { repo: null, versions: [], settings: [] };
   dlg.innerHTML = `<header class="snap-head"><h2>${escapeHtml(t('restorebox.title', 'Restore from a recovery kit'))}</h2>
     <button type="button" class="btn-pill-toggle is-ghost is-small" data-close>${escapeHtml(t('diagnostics.close_btn', 'Close'))}</button></header>
-    <div class="snap-body">${repoId ? escapeHtml(t('ui.loading', 'Loading...')) : kitHtml()}</div>`;
+    <div class="snap-body">${repoId ? escapeHtml(t('ui.loading', 'Loading…')) : kitHtml()}</div>`;
   const body = () => /** @type {HTMLElement} */ (dlg.querySelector('.snap-body'));
   const show = () => {
     body().innerHTML = planHtml(state);

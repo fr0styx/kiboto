@@ -34,7 +34,7 @@ function toggleHtml(j) {
 }
 
 /** The reason under a state, said once and in the page's language: the server's English reason for a
- *  monthly check that is off repeated the word ("Off off: a scrub spins up...", Backup B12). */
+ *  monthly check that is off repeated the word ("Off off: a scrub spins up…", Backup B12). */
 export function whyText(j) {
   if (j.kind === 'scrub' && j.status === 'off') {
     return j.why && j.why !== 'off' ? t('prot.scrub_off_why', 'Turning it on wakes the disks once a month.') : '';

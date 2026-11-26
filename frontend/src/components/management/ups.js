@@ -664,7 +664,7 @@ export function initUpsDrawerControls() {
   btnRefresh?.addEventListener('click', async () => {
     try {
       btnRefresh.disabled = true;
-      btnRefresh.textContent = t('ui.refreshing', 'Refreshing...');
+      btnRefresh.textContent = t('ui.refreshing', 'Refreshing…');
       await fetchAndRenderUpsTelemetry();
       await loadUpsConfigToDrawer();
       showToast(t('toast.ups_telemetry_refreshed', 'UPS readings refreshed.'), 'info'); // nothing was saved (SET-15, Power B8)
@@ -840,7 +840,7 @@ export function initUpsDrawerControls() {
   btnDiscover?.addEventListener('click', async () => {
     try {
       btnDiscover.disabled = true;
-      btnDiscover.textContent = t('ui.scanning', 'Scanning...');
+      btnDiscover.textContent = t('ui.scanning', 'Scanning…');
       const res = await api.post('/api/ups/discover');
       const candidates = res && Array.isArray(res.candidates) ? res.candidates : [];
       if (!discoverContainer) return;
@@ -925,7 +925,7 @@ export function initUpsDrawerControls() {
   btnTest?.addEventListener('click', async () => {
     try {
       btnTest.disabled = true;
-      btnTest.textContent = t('ui.testing', 'Testing...');
+      btnTest.textContent = t('ui.testing', 'Testing…');
       const mode = document.querySelector('input[name="ups-mode"]:checked')?.value || 'auto';
       const host =
         /** @type {HTMLInputElement} */ (document.getElementById('ups-cfg-host'))?.value.trim() || '127.0.0.1';
@@ -993,7 +993,7 @@ export function initUpsDrawerControls() {
       t('ups.selftest_msg', 'The UPS runs on its battery for about 10 seconds under the current load to check it.'),
       async () => {
         try {
-          showToast(t('toast.initiating_battery_self_test', 'Initiating battery self-test...'), 'info');
+          showToast(t('toast.initiating_battery_self_test', 'Initiating battery self-test…'), 'info');
           await api.post('/api/ups/self-test');
           showToast(
             t('upx.selftest_accepted', 'The UPS accepted the battery test. Its result shows on the UPS itself.'),

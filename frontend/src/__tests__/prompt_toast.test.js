@@ -19,7 +19,7 @@ describe('showPromptToast - Glassmorphic Prompt & Multiline Modal', () => {
       icon: '🏷️',
       okText: 'Save',
       cancelText: 'Abort',
-      placeholder: 'Enter filename...',
+      placeholder: 'Enter filename…',
     });
 
     const modal = document.getElementById('confirm-toast-modal');
@@ -36,7 +36,7 @@ describe('showPromptToast - Glassmorphic Prompt & Multiline Modal', () => {
     expect(input).not.toBeNull();
     expect(input.tagName).toBe('INPUT');
     expect(input.value).toBe('file.txt');
-    expect(input.placeholder).toBe('Enter filename...');
+    expect(input.placeholder).toBe('Enter filename…');
 
     const okBtn = document.getElementById('confirm-toast-ok');
     expect(okBtn.textContent).toBe('Save');
@@ -50,14 +50,14 @@ describe('showPromptToast - Glassmorphic Prompt & Multiline Modal', () => {
       inputType: 'textarea',
       icon: '📋',
       okText: '📋 Paste into VM',
-      placeholder: 'Type or paste commands here...',
+      placeholder: 'Type or paste commands here…',
     });
 
     const input = document.getElementById('prompt-toast-input');
     expect(input).not.toBeNull();
     expect(input.tagName).toBe('TEXTAREA');
     expect(input.value).toBe('echo "hello"');
-    expect(input.placeholder).toBe('Type or paste commands here...');
+    expect(input.placeholder).toBe('Type or paste commands here…');
 
     // Regular Enter on textarea should NOT submit
     const enterEvt = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true });

@@ -29,7 +29,7 @@ describe('the Kib page when its status cannot be loaded (SET-04)', () => {
         <span id="ai-active-llm-label">qwen2.5:3b</span>
         <span id="ai-standby-guard-text" data-i18n="ai.standby_guard_active">Standby Guard: Active</span>
         <span id="ai-watched-dropdown-count-badge" data-sample>1 Checked</span>
-        <div id="ai-hw-tier1-status" data-sample>Probing NPU...</div>
+        <div id="ai-hw-tier1-status" data-sample>Probing NPU…</div>
         <input id="ai-some-input" data-sample value="kept" />
       </div>`;
   });

@@ -961,7 +961,7 @@ export class FmInspector {
             return;
           }
           applyBtn.disabled = true;
-          applyBtn.textContent = t('ui.applying', 'Applying...');
+          applyBtn.textContent = t('ui.applying', 'Applying…');
           const modeVal = octInput ? octInput.value.trim() : '0755';
           const ownerVal = content.querySelector('#fm-insp-owner-input')?.value.trim() || null;
           const groupVal = content.querySelector('#fm-insp-group-input')?.value.trim() || null;
@@ -1119,7 +1119,7 @@ export class FmInspector {
     const shaBtn = content.querySelector('#fm-btn-calc-sha');
     if (shaBtn) {
       shaBtn.addEventListener('click', async () => {
-        shaBtn.textContent = t('ui.calculating', 'Calculating...');
+        shaBtn.textContent = t('ui.calculating', 'Calculating…');
         shaBtn.disabled = true;
         try {
           const cRes = await fetch('/api/fs/checksum', {

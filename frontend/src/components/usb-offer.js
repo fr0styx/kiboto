@@ -78,7 +78,7 @@ function ask(disk, kind, rest) {
           showToast(t('usb.backup_started', 'Backing up to {name}; it shows in Jobs.', { name: disk.name }), 'info');
         } else {
           await api.post('/api/usb/import', { path: disk.path });
-          showToast(t('usb.import_started', 'Importing from {name}...', { name: disk.name }), 'info');
+          showToast(t('usb.import_started', 'Importing from {name}…', { name: disk.name }), 'info');
         }
       } catch (err) {
         showToast(err.message || String(err), 'error');

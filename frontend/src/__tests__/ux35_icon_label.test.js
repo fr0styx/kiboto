@@ -5,11 +5,11 @@ describe('setIconLabel keeps icons out of the words (UX-35)', () => {
   it('puts the icon in an aria-hidden span and keeps the visible text', () => {
     const btn = document.createElement('button');
     btn.textContent = 'old';
-    setIconLabel(btn, '⏳', 'Backing up...');
-    expect(btn.textContent).toBe('⏳ Backing up...');
+    setIconLabel(btn, '⏳', 'Backing up…');
+    expect(btn.textContent).toBe('⏳ Backing up…');
     const mark = btn.querySelector('span[aria-hidden="true"]');
     expect(mark.textContent).toBe('⏳');
-    expect(btn.childNodes[1].nodeValue).toBe(' Backing up...');
+    expect(btn.childNodes[1].nodeValue).toBe(' Backing up…');
   });
 
   it('does nothing without an element', () => {

@@ -751,7 +751,7 @@ describe('Kib — Multi-Modal Local RAG & Visual Search Frontend Suite', () => {
     vi.spyOn(api, 'post').mockResolvedValueOnce({
       status: 'ok',
       reply:
-        '<think>\nAnalyzing request and computing solution...\n</think>\nHere is the implementation:\n```rust\nfn main() {\n    println!("Hello Kiboto!");\n}\n```\nSources:\n[1] Rust Documentation\n',
+        '<think>\nAnalyzing request and computing solution…\n</think>\nHere is the implementation:\n```rust\nfn main() {\n    println!("Hello Kiboto!");\n}\n```\nSources:\n[1] Rust Documentation\n',
       active_model: 'DeepSeek-R1-Distill-Qwen-1.5B',
       elapsed_ms: 35.2,
       tools_called: [],
@@ -771,7 +771,7 @@ describe('Kib — Multi-Modal Local RAG & Visual Search Frontend Suite', () => {
     // Verify thinking disclosure rendered
     expect(chatList.innerHTML).toContain('ai-thought-disclosure');
     expect(chatList.innerHTML).toContain('Thought Process');
-    expect(chatList.innerHTML).toContain('Analyzing request and computing solution...');
+    expect(chatList.innerHTML).toContain('Analyzing request and computing solution…');
 
     // Verify code block formatted with language and copy button
     expect(chatList.innerHTML).toContain('ai-chat-code-block');

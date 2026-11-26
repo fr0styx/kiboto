@@ -332,7 +332,7 @@ export async function openIsoManagerModal(initialTab = 'catalog') {
     if (progCard) progCard.style.display = 'block';
     if (progFilename) progFilename.textContent = file.name;
     if (progBar) progBar.style.width = '0%';
-    if (progRate) progRate.textContent = t('ui.starting_upload', 'Starting upload...');
+    if (progRate) progRate.textContent = t('ui.starting_upload', 'Starting upload…');
 
     const xhr = new XMLHttpRequest();
     let lastTime = Date.now();
@@ -489,7 +489,7 @@ export async function openIsoManagerModal(initialTab = 'catalog') {
           }
           if (btn) {
             btn.disabled = true;
-            setIconLabel(btn, '⏳', t('ui.downloading', 'Downloading...'));
+            setIconLabel(btn, '⏳', t('ui.downloading', 'Downloading…'));
           }
         } else if (task.status === 'completed') {
           clearInterval(_isoPollTimers[catalogId]);
@@ -605,13 +605,13 @@ export async function openIsoManagerModal(initialTab = 'catalog') {
       btn.onclick = async () => {
         const id = btn.dataset.id;
         btn.disabled = true;
-        setIconLabel(btn, '⏳', t('ui.connecting_2', 'Connecting...'));
+        setIconLabel(btn, '⏳', t('ui.connecting_2', 'Connecting…'));
 
         const targetProg = modal.querySelector(`#prog-wrap-${id}`);
         const targetStat = modal.querySelector(`#prog-stat-${id}`);
         if (targetProg) targetProg.style.display = 'block';
         if (targetStat) {
-          targetStat.textContent = t('ui.contacting_download_mirror', 'Contacting download mirror...');
+          targetStat.textContent = t('ui.contacting_download_mirror', 'Contacting download mirror…');
           targetStat.style.color = '#4fd8c4';
         }
 

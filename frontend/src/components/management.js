@@ -1846,7 +1846,7 @@ export function initManagement() {
         try {
           if (submitBtn) {
             submitBtn.disabled = true;
-            submitBtn.textContent = t('ui.saving', 'Saving...');
+            submitBtn.textContent = t('ui.saving', 'Saving…');
           }
           const tType =
             /** @type {HTMLSelectElement} */ (document.getElementById('repl-target-type'))?.value || 'local';

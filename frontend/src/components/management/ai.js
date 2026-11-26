@@ -590,7 +590,7 @@ export async function searchHuggingFaceModels(query = '') {
   const cleanQ = String(query || '').trim();
   if (statusEl) {
     statusEl.style.display = 'block';
-    statusEl.textContent = `🤗 Searching https://huggingface.co release models${cleanQ ? ` for "${cleanQ}"` : ''}...`;
+    statusEl.textContent = `🤗 Searching https://huggingface.co release models${cleanQ ? ` for "${cleanQ}"` : ''}…`;
   }
   try {
     const res = await api.get(`/api/media/models/huggingface/search?q=${encodeURIComponent(cleanQ)}&limit=18`);
@@ -642,7 +642,7 @@ export async function pullHuggingFaceModel(repoId, activate = false) {
   const statusEl = document.getElementById('ai-hf-search-status');
   if (statusEl) {
     statusEl.style.display = 'block';
-    statusEl.textContent = `⬇️ Pulling release model metadata from https://huggingface.co/${cleanRepo.replace(/^https?:\/\/huggingface\.co\//i, '')}...`;
+    statusEl.textContent = `⬇️ Pulling release model metadata from https://huggingface.co/${cleanRepo.replace(/^https?:\/\/huggingface\.co\//i, '')}…`;
   }
   try {
     const res = await api.post('/api/media/models/huggingface/pull', {
@@ -1185,8 +1185,8 @@ export async function flushAiIndex() {
     async () => {
       const feedbackEl = document.getElementById('ai-index-run-feedback');
       if (feedbackEl)
-        setIconLabel(feedbackEl, '⏳', t('ui.flushing_rag_index_database', 'Emptying the AI search index...'));
-      showToast(t('toast.flushing_rag_index_database', 'Emptying the AI search index...'), 'info');
+        setIconLabel(feedbackEl, '⏳', t('ui.flushing_rag_index_database', 'Emptying the AI search index…'));
+      showToast(t('toast.flushing_rag_index_database', 'Emptying the AI search index…'), 'info');
       try {
         const res = await api.post('/api/ai/index/flush', {}, { confirmed: true }); // asked just above
         await fetchAndRenderAiStatus();
@@ -1317,7 +1317,7 @@ export async function syncAiWatchedFolders(respectStandby = true, background = t
   const pathsToSync = Array.isArray(_aiWatchedPaths) ? _aiWatchedPaths : [];
   if (pathsToSync.length === 0) return _noFolderChosen(feedbackEl);
   if (feedbackEl) {
-    feedbackEl.textContent = `⏳ ${t('ait.sync_start', 'Starting spindown-safe sync across {count, plural, one {# watched folder} other {# watched folders}}...', { count: pathsToSync.length })}`;
+    feedbackEl.textContent = `⏳ ${t('ait.sync_start', 'Starting spindown-safe sync across {count, plural, one {# watched folder} other {# watched folders}}…', { count: pathsToSync.length })}`;
   }
   try {
     const res = await api.post('/api/media/index', {
@@ -1586,7 +1586,7 @@ export function initAiKnowledgeEngine() {
       syncBtn.disabled = true;
       const origHtml = syncBtn.innerHTML;
       syncBtn.innerHTML =
-        '<span aria-hidden="true">⏳</span> <span>' + escapeHtml(t('ait.syncing', 'Syncing Shares...')) + '</span>';
+        '<span aria-hidden="true">⏳</span> <span>' + escapeHtml(t('ait.syncing', 'Syncing Shares…')) + '</span>';
       try {
         await syncAiWatchedFolders(respect, true);
       } finally {
@@ -2266,7 +2266,7 @@ export async function fetchAndRenderAiStatus() {
       btnBenchmark.addEventListener('click', async () => {
         btnBenchmark.disabled = true;
         const origHtml = btnBenchmark.innerHTML;
-        btnBenchmark.innerHTML = `<span aria-hidden="true">⏳</span> <span>${t('ai.benchmark_running') || 'Benchmarking Hardware...'}</span>`;
+        btnBenchmark.innerHTML = `<span aria-hidden="true">⏳</span> <span>${t('ai.benchmark_running') || 'Benchmarking Hardware…'}</span>`;
         try {
           const bRes = await api.post('/api/ai/benchmark');
           if (bRes && bRes.status === 'ok') {
@@ -2537,7 +2537,7 @@ const _AI_STAND_INS = ['ai-active-llm-label', 'ai-standby-guard-text', 'ai-chat-
 
 /**
  * The status could not be loaded: say so. The page's markup ships stand-in texts (a hardware
- * tier, a model name, "Standby Guard: Active", "1 Checked", "Probing NPU..."), which stayed on
+ * tier, a model name, "Standby Guard: Active", "1 Checked", "Probing NPU…"), which stayed on
  * screen as if they were measured (SET-04). Until a first answer arrives they become a dash.
  * @param {unknown} err
  */
@@ -2635,11 +2635,11 @@ export async function runAiRagAsk(rawQuestion, options = {}) {
   if (askBtn) {
     askBtn.disabled = true;
     askBtn.innerHTML =
-      '<span aria-hidden="true">⏳</span> <span>' + escapeHtml(t('ait.thinking', 'Thinking...')) + '</span>';
+      '<span aria-hidden="true">⏳</span> <span>' + escapeHtml(t('ait.thinking', 'Thinking…')) + '</span>';
   }
   const loadingHtml = `
     <div class="airg-xs-muted-center">
-      ✨ ${escapeHtml(t('aiq.searching', 'Searching local vector & FTS5 index (Zero Disk Spindown Wake)...'))}
+      ✨ ${escapeHtml(t('aiq.searching', 'Searching local vector & FTS5 index (Zero Disk Spindown Wake)…'))}
     </div>
   `;
   if (outTest) outTest.innerHTML = loadingHtml;
@@ -3149,7 +3149,7 @@ export async function runAiVisualSearch(rawQuery = null) {
 
   if (q) _recordAiSearchHistory(q);
 
-  grid.innerHTML = `<div class="aik-xs-muted-center">🔍 ${escapeHtml(t('aiq.visual_searching', 'Searching visual & multi-modal index...'))}</div>`;
+  grid.innerHTML = `<div class="aik-xs-muted-center">🔍 ${escapeHtml(t('aiq.visual_searching', 'Searching visual & multi-modal index…'))}</div>`;
 
   const modalityParam = _aiSelectedFileType === 'all' ? 'photo' : _aiSelectedFileType;
 
@@ -3261,8 +3261,7 @@ export async function runAiPathIndex(targetPath = null, respectStandby = true) {
   if (!named && !(_aiWatchedPaths && _aiWatchedPaths.length > 0)) return _noFolderChosen(feedbackEl);
   runBtns.forEach((b) => {
     b.disabled = true;
-    b.innerHTML =
-      '<span aria-hidden="true">⏳</span> <span>' + escapeHtml(t('aiq.indexing', 'Indexing...')) + '</span>';
+    b.innerHTML = '<span aria-hidden="true">⏳</span> <span>' + escapeHtml(t('aiq.indexing', 'Indexing…')) + '</span>';
   });
 
   let targets;
@@ -3276,7 +3275,7 @@ export async function runAiPathIndex(targetPath = null, respectStandby = true) {
 
   const displayTarget = targets.length === 1 ? targets[0] : `${targets.length} watched folder(s)`;
   if (feedbackEl) {
-    feedbackEl.textContent = `⏳ ${t('aiq.scanning', 'Scanning {target} (Spindown-Safe Incremental Indexer)...', { target: displayTarget })}`;
+    feedbackEl.textContent = `⏳ ${t('aiq.scanning', 'Scanning {target} (Spindown-Safe Incremental Indexer)…', { target: displayTarget })}`;
   }
   try {
     const res = await api.post('/api/media/index', {
@@ -3329,7 +3328,7 @@ function _bindAiConfirmHandler() {
       if (status) status.textContent = t('jobs.status_cancelled', 'Cancelled');
       return;
     }
-    if (status) status.textContent = t('ui.running', 'Running...');
+    if (status) status.textContent = t('ui.running', 'Running…');
     try {
       const out = await api.post(`/api/ai/actions/${encodeURIComponent(actionId)}/confirm`, {});
       const ok = out && out.status === 'ok';
@@ -4204,7 +4203,7 @@ export function _formatChatMarkdown(rawText, sources = null) {
   let text = String(rawText || '').replace(/\[(?:doc(?:ument)?|source)\s*(\d+)\]/gi, '[$1]');
   // Strip out any trailing verbose "Verified Web Sources" section
   text = text.replace(/#{2,4}\s*🌐?\s*Verified\s+Web\s+Sources[\s\S]*$/i, '').trim();
-  // Strip out duplicate trailing text-based "Sources:\n[1] ... \n[2] ..." list
+  // Strip out duplicate trailing text-based "Sources:\n[1] … \n[2] …" list
   text = text
     .replace(/(?:\r?\n)+\s*(?:\*\*)?Sources:?(?:\*\*)?\s*(?:\r?\n)+(?:\s*\[\d+\][^\n]*(?:\n|$))+$/i, '')
     .trim();
@@ -4406,7 +4405,7 @@ export async function sendAiChatMessage(rawMessage = null) {
     sendBtn.disabled = true;
     sendBtn.innerHTML =
       '<span><span class="ai-typing-dot aik-size-2"></span></span> <span>' +
-      escapeHtml(t('aiq.generating', 'Generating...')) +
+      escapeHtml(t('aiq.generating', 'Generating…')) +
       '</span>';
   }
 
@@ -4449,7 +4448,7 @@ export async function sendAiChatMessage(rawMessage = null) {
           <span class="ai-typing-dot"></span>
           <span class="ai-typing-dot"></span>
         </div>
-        <span class="aik-xs-soft-2">${escapeHtml(t('aiq.processing', 'Processing with {model}...', { model: '\u0001' })).replace('\u0001', () => `<strong class="aik-accent-2">${escapeHtml(activeModel)}</strong>`)}</span>
+        <span class="aik-xs-soft-2">${escapeHtml(t('aiq.processing', 'Processing with {model}…', { model: '\u0001' })).replace('\u0001', () => `<strong class="aik-accent-2">${escapeHtml(activeModel)}</strong>`)}</span>
       `;
     }
     listEl.appendChild(pendingEl);
@@ -4624,7 +4623,7 @@ export async function sendAiChatMessage(rawMessage = null) {
                   pill.dataset.toolName = toolName;
                   pill.style.cssText =
                     'font-size: var(--kb-fs-xs); font-weight: 700; padding: 2px 8px; border-radius: 999px; background: rgba(79,216,196,0.16); border: 1px solid rgba(79,216,196,0.42); color: #93e6d9;';
-                  pill.textContent = `⚡ ${t('aiq.running_tool', 'Running {tool}...', { tool: toolName })}`;
+                  pill.textContent = `⚡ ${t('aiq.running_tool', 'Running {tool}…', { tool: toolName })}`;
                   toolsTraceEl.appendChild(pill);
                 }
               } else if (currentEvent === 'tool_done') {
@@ -4716,7 +4715,7 @@ export async function sendAiChatMessage(rawMessage = null) {
                   thoughtDetailsEl.innerHTML = `
                     <summary class="aik-row-bold">
                       <span>🧠 ${t('aiq.thoughts', 'Thought Process')}</span>
-                      <span class="aik-xs-muted-4">${t('aiq.thoughts_live', '(reasoning in real time...)')}</span>
+                      <span class="aik-xs-muted-4">${t('aiq.thoughts_live', '(reasoning in real time…)')}</span>
                     </summary>
                     <div class="ai-thought-content" style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(var(--c-primary-rgb), 0.2); color: var(--kb-text-soft); font-size: var(--kb-fs-xs); line-height: 1.5; font-style: italic;"></div>
                   `;

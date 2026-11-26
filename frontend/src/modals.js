@@ -7,7 +7,7 @@ import { DockManager, bringToFront, makeDraggable } from './components/dock.js';
 import { copyText, trapFocus } from './utils.js';
 import { t } from './i18n.js';
 import { formatDateTime, formatFixed } from './format.js';
-// Metric detail windows (CPU, memory, network...) and the event detail window. Drives have
+// Metric detail windows (CPU, memory, network…) and the event detail window. Drives have
 // their own app, Drive Health (components/drive-health.js).
 
 let activeModalType = null;

@@ -294,7 +294,7 @@ window.addEventListener('DOMContentLoaded', () => {
         });
         if (res.ok) {
           fbNewFolderName.value = '';
-          fbNewFolderName.placeholder = t('modal.fb_new_folder', 'New folder name...');
+          fbNewFolderName.placeholder = t('modal.fb_new_folder', 'New folder name…');
           loadBrowsePath(currentBrowsePath); // Reload current path to show the new folder in the list
         } else {
           const errData = await res.json().catch(() => ({}));

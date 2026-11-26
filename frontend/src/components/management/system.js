@@ -143,7 +143,7 @@ export async function fetchAndRenderSystemAbout(force = false, channelOverride =
 
   if (btnIcon && btnText) {
     btnIcon.textContent = '⏳';
-    btnText.textContent = t('ui.checking', 'Checking...');
+    btnText.textContent = t('ui.checking', 'Checking…');
   }
   if (btnCheck) {
     btnCheck.disabled = true;
@@ -385,8 +385,8 @@ export async function revertSystemUpdate() {
           { confirmed: true }
         );
         if (overlay) overlay.style.display = 'block';
-        if (title) title.textContent = t('sysu.reverting', 'Reverting to {name}...', { name });
-        if (desc) desc.textContent = t('sysu.restoring', 'Restoring the previous version and reconnecting...');
+        if (title) title.textContent = t('sysu.reverting', 'Reverting to {name}…', { name });
+        if (desc) desc.textContent = t('sysu.restoring', 'Restoring the previous version and reconnecting…');
         let attempts = 0;
         let wentDown = false;
         const timer = setInterval(async () => {
@@ -436,11 +436,11 @@ export async function applySystemUpdate() {
     async () => {
       if (applyBtn) applyBtn.disabled = true;
       if (progressOverlay) progressOverlay.style.display = 'block';
-      if (progressTitle) progressTitle.textContent = t('updates.installing', 'Downloading & Applying Update...');
+      if (progressTitle) progressTitle.textContent = t('updates.installing', 'Downloading & Applying Update…');
       if (progressDesc)
         progressDesc.textContent = t(
           'ui.pulling_container_image_layers_from',
-          'Pulling container image layers from GHCR...'
+          'Pulling container image layers from GHCR…'
         );
 
       try {
@@ -456,7 +456,7 @@ export async function applySystemUpdate() {
           return;
         }
 
-        if (progressDesc) progressDesc.textContent = t('sysu.restarting', 'Restarting container and reconnecting...');
+        if (progressDesc) progressDesc.textContent = t('sysu.restarting', 'Restarting container and reconnecting…');
 
         // Poll health endpoint until back online
         let attempts = 0;
@@ -479,7 +479,7 @@ export async function applySystemUpdate() {
             if (progressDesc)
               progressDesc.textContent = t(
                 'ui.container_restarting_with_updated_image',
-                'Container restarting with updated image...'
+                'Container restarting with updated image…'
               );
             if (attempts >= maxAttempts) {
               clearInterval(interval);
@@ -510,9 +510,9 @@ export async function downloadDiagnosticsBundle() {
 
   if (btn) btn.disabled = true;
   if (btnIcon) btnIcon.textContent = '⏳';
-  if (btnText) btnText.textContent = t('diagnostics.generating', 'Generating Archive...');
+  if (btnText) btnText.textContent = t('diagnostics.generating', 'Generating Archive…');
 
-  showToast(t('diagnostics.toast_generating', 'Generating diagnostics bundle (scrubbing secrets)...'), 'info');
+  showToast(t('diagnostics.toast_generating', 'Generating diagnostics bundle (scrubbing secrets)…'), 'info');
 
   try {
     const clientEnv = collectClientEnvironment();
@@ -691,7 +691,7 @@ export async function previewDiagnosticsSummary() {
   try {
     if (btn) {
       btn.disabled = true;
-      btn.innerHTML = `<span class="ci-spinner" style="display:inline-block; width:12px; height:12px; border:2px solid var(--lt-r-ffffff4c, rgba(255,255,255,0.3)); border-top-color:#fff; border-radius:50%; animation:spin 0.8s linear infinite;"></span> <span>${t('diagnostics.loading_preview', 'Loading Preview...')}</span>`;
+      btn.innerHTML = `<span class="ci-spinner" style="display:inline-block; width:12px; height:12px; border:2px solid var(--lt-r-ffffff4c, rgba(255,255,255,0.3)); border-top-color:#fff; border-radius:50%; animation:spin 0.8s linear infinite;"></span> <span>${t('diagnostics.loading_preview', 'Loading Preview…')}</span>`;
     }
     const data = await api.get('/api/system/diagnostics-summary');
     openDiagnosticsPreviewModal(data);
@@ -728,7 +728,7 @@ export async function copySupportMarkdown() {
     } else {
       if (targetBtn) {
         targetBtn.disabled = true;
-        targetBtn.innerHTML = `<span class="ci-spinner" style="display:inline-block; width:12px; height:12px; border:2px solid var(--lt-r-ffffff4c, rgba(255,255,255,0.3)); border-top-color:#fff; border-radius:50%; animation:spin 0.8s linear infinite;"></span> <span>${t('diagnostics.copying_md', 'Copying...')}</span>`;
+        targetBtn.innerHTML = `<span class="ci-spinner" style="display:inline-block; width:12px; height:12px; border:2px solid var(--lt-r-ffffff4c, rgba(255,255,255,0.3)); border-top-color:#fff; border-radius:50%; animation:spin 0.8s linear infinite;"></span> <span>${t('diagnostics.copying_md', 'Copying…')}</span>`;
       }
       const data = await api.get('/api/system/diagnostics-summary');
       md = data?.support_markdown || '';

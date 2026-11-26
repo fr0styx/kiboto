@@ -485,7 +485,7 @@ export function openAddDesktopShortcutModal() {
         <div id="pane-custom-shortcut" class="asd-pane-custom" style="display:none;">
           <div>
             <label for="input-custom-shortcut-name" class="asd-label">${escapeHtml(t('ds.name', 'Name'))}</label>
-            <input type="text" id="input-custom-shortcut-name" class="tz-text-input asd-input" placeholder="${t('ui.e_g_plex_home_assistant', 'e.g. Plex, Home Assistant, Pi-hole, Proxmox...')}">
+            <input type="text" id="input-custom-shortcut-name" class="tz-text-input asd-input" placeholder="${t('ui.e_g_plex_home_assistant', 'e.g. Plex, Home Assistant, Pi-hole, Proxmox…')}">
           </div>
           <div>
             <label for="input-custom-shortcut-url" class="asd-label">${escapeHtml(t('ds.url', 'Web address'))}</label>

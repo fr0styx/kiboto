@@ -3661,7 +3661,7 @@ export function setupCalendarModalEvents() {
 
       try {
         submitFeedBtn.disabled = true;
-        submitFeedBtn.textContent = t('ui.connecting', 'Connecting...');
+        submitFeedBtn.textContent = t('ui.connecting', 'Connecting…');
         const res = await api.post('/api/calendar/feeds', {
           name,
           url,
@@ -3721,7 +3721,7 @@ export function setupCalendarModalEvents() {
     syncBtn.addEventListener('click', async () => {
       try {
         syncBtn.disabled = true;
-        syncBtn.textContent = t('ui.syncing', 'Syncing...');
+        syncBtn.textContent = t('ui.syncing', 'Syncing…');
         const res = await api.post('/api/calendar/sync');
         if (res && res.status === 'ok') {
           showToast(

@@ -22,8 +22,8 @@ describe('System About & Software Updates Frontend Component', () => {
         <button id="btn-channel-edge">Edge</button>
 
         <span id="update-status-icon">🔄</span>
-        <div id="update-status-title">Checking for updates...</div>
-        <div id="update-status-desc">Connecting...</div>
+        <div id="update-status-title">Checking for updates…</div>
+        <div id="update-status-desc">Connecting…</div>
         <span id="update-last-checked">Never</span>
 
         <div id="update-details-box" style="display: none;">
@@ -224,7 +224,7 @@ describe('System About & Software Updates Frontend Component', () => {
     const postSpy = vi.spyOn(api, 'post').mockResolvedValue({
       status: 'restarting',
       auto_restarting: true,
-      message: 'Container recreating...',
+      message: 'Container recreating…',
     });
 
     // Provide mock last update data

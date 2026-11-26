@@ -164,8 +164,8 @@ export async function openAppDeployModal(appId) {
               <div class="dkd-row-6">
                 <span class="dkd-fs22" id="adm-progress-spinner" style="display: inline-block;">⚙️</span>
                 <div>
-                  <div class="dkd-fs13-bold-strong-2" id="adm-progress-title">${t('catalog.installing', 'Installing the app...')}</div>
-                  <div class="dkd-xs-muted" id="adm-progress-status-text">${t('catalog.preparing', 'Getting its folders ready...')}</div>
+                  <div class="dkd-fs13-bold-strong-2" id="adm-progress-title">${t('catalog.installing', 'Installing the app…')}</div>
+                  <div class="dkd-xs-muted" id="adm-progress-status-text">${t('catalog.preparing', 'Getting its folders ready…')}</div>
                 </div>
               </div>
               <div id="adm-progress-pct-badge" style="font-size:13px; font-weight:800; font-family:var(--font-mono, monospace); color:var(--lt-ink-brand, var(--accent-cyan, #33cdb8)); background:var(--lt-b-33cdb814, rgba(51,205,184,0.08)); padding:3px 9px; border-radius:6px; border:1px solid var(--lt-r-33cdb833, rgba(51,205,184,0.2));">0%</div>
@@ -180,7 +180,7 @@ export async function openAppDeployModal(appId) {
             <div class="dkd-x-3">
               <div class="dkd-xs-bold-muted">${t('catalog.install_log', 'What is happening')}</div>
               <div id="adm-deploy-logs" style="background:var(--lt-b-060d0eff, #060d0e); border:1px solid var(--kb-line-10); border-radius:6px; height:160px; overflow-y:auto; padding:10px; font-family:var(--font-mono, monospace); font-size:var(--kb-fs-xs); line-height:1.5; color:var(--kb-text-soft);">
-                <div class="dkd-muted">${t('catalog.waiting', 'Starting...')}</div>
+                <div class="dkd-muted">${t('catalog.waiting', 'Starting…')}</div>
               </div>
             </div>
 
@@ -417,7 +417,7 @@ export async function openAppDeployModal(appId) {
   banner.replaceChildren(
     Object.assign(document.createElement('span'), {
       className: 'muted',
-      textContent: t('catalog.checking', 'Checking the ports and apps already here...'),
+      textContent: t('catalog.checking', 'Checking the ports and apps already here…'),
     })
   );
   banner.style.background = 'rgba(255,255,255,0.04)';
@@ -969,10 +969,9 @@ export async function openAppDeployModal(appId) {
       progressPct.textContent = '0%';
       progressPct.style.color = 'var(--accent-cyan, #33cdb8)';
     }
-    if (progressTitle)
-      progressTitle.textContent = t('catalog.installing_name', 'Installing {name}...', { name: cName });
+    if (progressTitle) progressTitle.textContent = t('catalog.installing_name', 'Installing {name}…', { name: cName });
     if (progressStatus) {
-      progressStatus.textContent = t('ui.connecting_to_docker_daemon', 'Connecting to the app service...');
+      progressStatus.textContent = t('ui.connecting_to_docker_daemon', 'Connecting to the app service…');
       progressStatus.style.color = 'var(--muted)';
     }
     if (progressSpinner) {
@@ -985,7 +984,7 @@ export async function openAppDeployModal(appId) {
     if (backConfigBtn) backConfigBtn.style.display = 'none';
 
     logDeployLine(
-      `Initiating deployment request for ${cName} (Port :${p}, Storage: ${s}, Replace: ${replaceExisting})...`
+      `Initiating deployment request for ${cName} (Port :${p}, Storage: ${s}, Replace: ${replaceExisting})…`
     );
 
     try {

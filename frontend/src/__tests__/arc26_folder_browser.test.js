@@ -194,7 +194,7 @@ describe('folder picker', () => {
       expect.objectContaining({ method: 'POST', body: { path: '/mnt/user/media/Holiday' } })
     );
     expect(name.value).toBe('');
-    expect(name.placeholder).toBe('New folder name...');
+    expect(name.placeholder).toBe('New folder name…');
   });
 
   it("says why a new folder failed, in the reader's language", async () => {

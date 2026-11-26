@@ -1072,7 +1072,7 @@ export function initAcousticCalibration() {
         badge.style.color = '#eab308';
         badge.style.borderColor = 'rgba(234,179,8,0.35)';
       }
-      if (statusEl) statusEl.textContent = t('settings.sweep_running', 'Sweep Running...');
+      if (statusEl) statusEl.textContent = t('settings.sweep_running', 'Sweep Running…');
       if (stepEl)
         stepEl.textContent = t('fan.step', 'Step {step}/{total} ({pwm} PWM)', {
           step: data.step || 0,

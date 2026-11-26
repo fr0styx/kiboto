@@ -111,7 +111,7 @@ describe('Batch 2: High-Performance Keyed Table Reconciler (Zero-Flicker Telemet
 
       const input = container.children[0].querySelector('.row-input');
       input.focus();
-      input.value = 'User Typing Something...';
+      input.value = 'User Typing Something…';
       expect(document.activeElement).toBe(input);
 
       // Incoming telemetry update with same keys
@@ -127,7 +127,7 @@ describe('Batch 2: High-Performance Keyed Table Reconciler (Zero-Flicker Telemet
 
       // Focus must remain on the user's active input and not be stolen or reset
       expect(document.activeElement).toBe(input);
-      expect(input.value).toBe('User Typing Something...');
+      expect(input.value).toBe('User Typing Something…');
     });
 
     it('reorders existing nodes in-place when sort order changes', () => {

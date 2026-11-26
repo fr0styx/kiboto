@@ -482,7 +482,7 @@ async function loadCurrentItem() {
   const filmstripBtn = _activePreviewModal.querySelector('#ql-filmstrip-toggle');
 
   if (titleEl) titleEl.textContent = _currentName;
-  if (metaEl) metaEl.textContent = t('ui.loading', 'Loading...');
+  if (metaEl) metaEl.textContent = t('ui.loading', 'Loading…');
 
   // Update gallery counter
   if (_gallery.length > 1 && counterPill) {

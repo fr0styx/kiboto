@@ -103,7 +103,7 @@ describe('icons apart from the words', () => {
     await cm.openContainerInspector('c1', 'pihole');
     const btn = document.getElementById('ci-btn-backup-action');
     btn.click();
-    expect(iconAndWords(btn)).toEqual(['⏳', '⏳ Backing up...']);
+    expect(iconAndWords(btn)).toEqual(['⏳', '⏳ Backing up…']);
     done({ backup: { archive_file: 'pihole.tar.gz' } });
     await vi.waitFor(() => expect(iconAndWords(btn)).toEqual(['💾', '💾 Back up the app now']));
     await cm.switchContainerTab('compose');

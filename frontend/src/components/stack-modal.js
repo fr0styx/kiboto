@@ -322,7 +322,7 @@ export async function openStackModal(stackName, initialYaml = null) {
     'Loading the stack…'
   );
   /** @type {HTMLTextAreaElement} */ (document.getElementById('stack-env-editor')).value = '';
-  document.getElementById('stack-modal-msg').textContent = t('ui.fetching_stack_setup', 'Fetching stack setup...');
+  document.getElementById('stack-modal-msg').textContent = t('ui.fetching_stack_setup', 'Fetching stack setup…');
 
   try {
     const data = await api.get(`/api/docker/stacks/${encodeURIComponent(_activeStackName)}`);
@@ -565,7 +565,7 @@ async function saveStack(redeployAfterSave = false) {
     }
   }
 
-  if (msgEl) msgEl.textContent = t('ui.saving_configuration', 'Saving configuration...');
+  if (msgEl) msgEl.textContent = t('ui.saving_configuration', 'Saving configuration…');
 
   try {
     const res = await api.post(`/api/docker/stacks/${encodeURIComponent(_activeStackName)}/save`, {
@@ -655,7 +655,7 @@ export async function openStackPickerModal(stacksInput = null) {
           <div class="stk-xs-muted">${t('stk.picker_hint', 'Pick a stack to see its services, edit its Compose file, or start and stop it:')}</div>
           <div class="stk-row-10">
             <span class="stk-xs-muted-4">🔍</span>
-            <input type="text" id="stack-picker-search" placeholder="${t('ui.filter_stacks_by_name_service', 'Filter stacks by name, service, or path...')}" class="tz-text-input stk-xs-strong-box">
+            <input type="text" id="stack-picker-search" placeholder="${t('ui.filter_stacks_by_name_service', 'Filter stacks by name, service, or path…')}" class="tz-text-input stk-xs-strong-box">
           </div>
         </div>
 

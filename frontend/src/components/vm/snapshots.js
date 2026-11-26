@@ -442,7 +442,7 @@ export async function openVmSnapshotsModal(vmId, vmObj = null) {
   if (btnCreateBackup) {
     btnCreateBackup.onclick = async () => {
       btnCreateBackup.disabled = true;
-      btnCreateBackup.textContent = t('ui.archiving', 'Archiving...');
+      btnCreateBackup.textContent = t('ui.archiving', 'Archiving…');
       try {
         await api.post(`/api/vms/${vmId}/backup`, { reason: 'on-demand' });
         showToast(
@@ -484,7 +484,7 @@ export async function openVmSnapshotsModal(vmId, vmObj = null) {
         return;
       }
       btnSubmit.disabled = true;
-      btnSubmit.textContent = t('ui.saving', 'Saving...');
+      btnSubmit.textContent = t('ui.saving', 'Saving…');
       try {
         await api.post(`/api/vms/${vmId}/snapshots`, { name, description });
         showToast(

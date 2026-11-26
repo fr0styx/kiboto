@@ -443,7 +443,7 @@ async function openVersions(repoId) {
   dlg.innerHTML = `<header class="snap-head"><h2>${escapeHtml(t('offsite.versions_title', 'Backup versions'))}</h2>
     <button type="button" class="btn-pill-toggle is-ghost is-small" data-close>${escapeHtml(t('diagnostics.close_btn', 'Close'))}</button></header>
     <p class="snap-help">${escapeHtml(t('offsite.restore_help', 'Restored files go into a "Restored from backup" folder next to the originals; nothing is overwritten.'))}</p>
-    <div class="snap-body">${escapeHtml(t('ui.loading', 'Loading...'))}</div>`;
+    <div class="snap-body">${escapeHtml(t('ui.loading', 'Loading…'))}</div>`;
   const body = () => dlg.querySelector('.snap-body');
   const showFiles = async (path) => {
     const { entries } = await api.get(

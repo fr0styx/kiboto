@@ -39,9 +39,9 @@ describe('Emoji drawn as icons (UX-14)', () => {
   });
 
   it('removes emoji from tooltips and placeholders', () => {
-    document.body.innerHTML = '<input id="i" placeholder="🔍 Filter folders..."><a id="a" title="⚡ Wake">x</a>';
+    document.body.innerHTML = '<input id="i" placeholder="🔍 Filter folders…"><a id="a" title="⚡ Wake">x</a>';
     iconizeTree(document.body);
-    expect(document.getElementById('i').placeholder).toBe('Filter folders...');
+    expect(document.getElementById('i').placeholder).toBe('Filter folders…');
     expect(document.getElementById('a').title).toBe('Wake');
   });
 

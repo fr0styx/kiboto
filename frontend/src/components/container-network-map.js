@@ -215,7 +215,7 @@ export async function openNetworkMap() {
   overlay.style.display = 'flex';
   overlay.classList.add('open');
   _highlight = null;
-  body.innerHTML = `<div style="padding:24px; text-align:center; color:var(--muted); font-size:var(--kb-fs-xs);">${escapeHtml(t('cw.netmap_loading', 'Loading networks...'))}</div>`;
+  body.innerHTML = `<div style="padding:24px; text-align:center; color:var(--muted); font-size:var(--kb-fs-xs);">${escapeHtml(t('cw.netmap_loading', 'Loading networks…'))}</div>`;
   try {
     _topology = await api.get('/api/docker/networks/topology');
     renderBody(overlay);

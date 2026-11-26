@@ -671,7 +671,7 @@ export function initSettings() {
   const btnMediaRescan = $('btn-media-rescan');
   if (btnMediaRescan) {
     btnMediaRescan.addEventListener('click', async () => {
-      btnMediaRescan.textContent = t('ui.scanning', 'Scanning...');
+      btnMediaRescan.textContent = t('ui.scanning', 'Scanning…');
       try {
         await api.post('/api/copy/rescan');
         ZettEventBus.emit('media:slots_rescanned');
@@ -693,14 +693,14 @@ export function initSettings() {
       const dstPath = btnCopyDst ? btnCopyDst.value : '/mnt/user/';
       btnMediaCopyNow.disabled = true;
       const origText = btnMediaCopyNow.textContent;
-      btnMediaCopyNow.textContent = t('ui.starting', 'Starting...');
+      btnMediaCopyNow.textContent = t('ui.starting', 'Starting…');
       try {
         await api.post('/api/copy/start', {
           source: srcSlot,
           dest: dstPath,
           use_exif: btnCopyExif ? btnCopyExif.checked : true,
         });
-        showToast(t('media.copy_started', 'Starting ingest from media slot...'), 'success');
+        showToast(t('media.copy_started', 'Starting ingest from media slot…'), 'success');
       } catch (err) {
         showToast(t('toast.copy_failed', 'Copy failed: {error}', { error: err.message || err }), 'error');
       } finally {
@@ -900,7 +900,7 @@ export function initSettings() {
           return;
         }
 
-        secSaveBtn.textContent = t('setup.saving', 'Saving...');
+        secSaveBtn.textContent = t('setup.saving', 'Saving…');
         try {
           await changeOwnPassword(curPwd, newPwd);
           showToast(t('mgmt.sec_saved', 'Security settings updated successfully.'), 'success');
@@ -1179,7 +1179,7 @@ export async function sampleWallpaperPalette() {
   const container = $('wallpaper-extracted-chips');
   if (!container) return;
   const fallback = ['#33cdb8', '#38bdf8', '#3bf58b', '#ffbe40', '#c084fc', '#f43f5e'];
-  container.innerHTML = `<span style="font-size:var(--kb-fs-xs); color:var(--lt-ink-brand, var(--brand)); display:flex; align-items:center; gap:6px;"><span class="spinner-inline" style="width:12px; height:12px; border-width:2px;"></span> ${t('stg.sampling', 'Sampling wallpaper pixels...')}</span>`;
+  container.innerHTML = `<span style="font-size:var(--kb-fs-xs); color:var(--lt-ink-brand, var(--brand)); display:flex; align-items:center; gap:6px;"><span class="spinner-inline" style="width:12px; height:12px; border-width:2px;"></span> ${t('stg.sampling', 'Sampling wallpaper pixels…')}</span>`;
   const accent = await import('./wallpaper-accent.js');
   const url = accent.currentWallpaperUrl();
   const found = url ? await accent.wallpaperColours(url) : [];
@@ -1984,7 +1984,7 @@ export function initSystemTab() {
       if (!passphrase) return;
       try {
         btnDownload.disabled = true;
-        btnDownload.innerHTML = `<span class="spinner-inline"></span> ${t('settings.generating_backup', 'Generating Backup...')}`;
+        btnDownload.innerHTML = `<span class="spinner-inline"></span> ${t('settings.generating_backup', 'Generating Backup…')}`;
 
         // 1. Gather all client settings from localStorage and sync to server
         const prefs = gatherClientPreferences();

@@ -324,7 +324,7 @@ export class FileManagerWindow {
                 <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
               </button>
               <div class="fm-search-wrap fmx-row-3">
-                <input type="text" class="fm-search-input fmx-xs-box" placeholder="${t('fm.search_placeholder', 'Search...')}" />
+                <input type="text" class="fm-search-input fmx-xs-box" placeholder="${t('fm.search_placeholder', 'Search…')}" />
                 <svg class="fmx-muted" viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                 <button type="button" class="fm-tool-btn fm-ai-search-toggle fmx-xs-box-2" title="${t('ui.toggle_kib_semantic_visual_rag', 'Turn AI search on or off (it never wakes sleeping drives)')}" data-i18n-title="ui.toggle_kib_semantic_visual_rag" aria-label="${t('ui.ai_semantic_search', 'AI Semantic Search')}" data-i18n-aria-label="ui.ai_semantic_search">✨ AI</button>
               </div>
@@ -441,7 +441,7 @@ export class FileManagerWindow {
               <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
             </button>
             <div class="fm-search-wrap fmx-row-3">
-              <input type="text" class="fm-search-input fmx-xs-box" placeholder="${t('fm.search_placeholder', 'Search...')}" />
+              <input type="text" class="fm-search-input fmx-xs-box" placeholder="${t('fm.search_placeholder', 'Search…')}" />
               <svg class="fmx-muted" viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
               <button type="button" class="fm-tool-btn fm-ai-search-toggle fmx-xs-box-2" title="${t('ui.toggle_kib_semantic_visual_rag', 'Turn AI search on or off (it never wakes sleeping drives)')}" data-i18n-title="ui.toggle_kib_semantic_visual_rag" aria-label="${t('ui.ai_semantic_search', 'AI Semantic Search')}" data-i18n-aria-label="ui.ai_semantic_search">✨ AI</button>
             </div>
@@ -936,8 +936,8 @@ export class FileManagerWindow {
         this.aiSearchToggle.style.borderColor = this.aiSearchMode ? 'rgba(59,245,139,0.4)' : '';
         if (this.searchInput) {
           this.searchInput.placeholder = this.aiSearchMode
-            ? t('ai.fm_placeholder', 'Ask AI (recipe, red car...)')
-            : t('fm.search_placeholder', 'Search...');
+            ? t('ai.fm_placeholder', 'Ask AI (recipe, red car…)')
+            : t('fm.search_placeholder', 'Search…');
           if (this.searchInput.value.trim()) {
             this.executeBackendSearch(this.searchInput.value);
           }
@@ -4285,7 +4285,7 @@ export function openMediaOrganizerModal(initialPath = '') {
       }
 
       btnPreview.disabled = true;
-      setIconLabel(btnPreview, '⏳', t('media.org_analyzing', 'Analyzing...'));
+      setIconLabel(btnPreview, '⏳', t('media.org_analyzing', 'Analyzing…'));
       if (previewWrap) {
         previewWrap.innerHTML =
           '<div class="fmx-xs-muted-center"><div class="loader-spinner fmx-x-5"></div>' +
@@ -4372,7 +4372,7 @@ export function openMediaOrganizerModal(initialPath = '') {
       const hardlink = mode === 'hardlink';
 
       btnApply.disabled = true;
-      setIconLabel(btnApply, '⏳', t('media.org_running', 'Organizing...'));
+      setIconLabel(btnApply, '⏳', t('media.org_running', 'Organizing…'));
 
       try {
         const res = await api.post('/api/media/organize/apply', {
@@ -4607,7 +4607,7 @@ export function openShareLinkModal(path, fileName, anchorEl = null) {
         return;
       }
       submitBtn.disabled = true;
-      submitBtn.textContent = t('ui.generating', 'Generating...');
+      submitBtn.textContent = t('ui.generating', 'Generating…');
       const maxDlInput = /** @type {HTMLInputElement} */ (modal.querySelector('#fm-share-max-dl'));
       const maxDl = maxDlInput ? parseInt(maxDlInput.value, 10) : 0;
       const upload = Boolean(/** @type {HTMLInputElement | null} */ (modal.querySelector('#fm-share-upload'))?.checked);

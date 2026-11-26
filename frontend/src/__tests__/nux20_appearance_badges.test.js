@@ -27,6 +27,6 @@ describe('appearance badges (NUX-20)', () => {
     expect(document.querySelector('.desktop-color-chip').title).toBe('Extracted: #00F0FF');
     byId('desktop-wallpaper').style.backgroundImage = 'url("/wp/a.jpg")';
     sampleWallpaperPalette();
-    expect(byId('wallpaper-extracted-chips').textContent.trim()).toBe('Sampling wallpaper pixels...');
+    expect(byId('wallpaper-extracted-chips').textContent.trim()).toBe('Sampling wallpaper pixels…');
   });
 });

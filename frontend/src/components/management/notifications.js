@@ -225,7 +225,7 @@ export async function testAllNotificationChannels() {
   const btn = /** @type {HTMLButtonElement} */ (document.getElementById('btn-send-test-alert'));
   if (btn) {
     btn.disabled = true;
-    btn.textContent = t('ui.testing_2', 'Testing...');
+    btn.textContent = t('ui.testing_2', 'Testing…');
   }
   try {
     const res = await api.post('/api/notifications/test', {});
@@ -328,7 +328,7 @@ export function openChannelConfigModal(channel) {
     formHtml = `
       <div class="ntf-x">
         <label class="ntf-xs-bold-muted" for="cfg-telegram-token">${t('ntf.tg_bot', 'TELEGRAM BOT TOKEN')}</label>
-        <input type="password" id="cfg-telegram-token" class="tz-select-input ntf-strong-box" placeholder="123456789:ABCDefgh..." data-sample value="${escapeHtml(cfg.telegram_bot_token || '')}">
+        <input type="password" id="cfg-telegram-token" class="tz-select-input ntf-strong-box" placeholder="123456789:ABCDefgh…" data-sample value="${escapeHtml(cfg.telegram_bot_token || '')}">
       </div>
       <div class="ntf-x">
         <label class="ntf-xs-bold-muted" for="cfg-telegram-chat">${t('ntf.tg_chat', 'TELEGRAM CHAT ID')}</label>

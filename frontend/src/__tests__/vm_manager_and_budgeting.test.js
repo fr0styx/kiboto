@@ -862,7 +862,7 @@ describe('VM Manager & Dynamic Elastic Headroom Budgeting', () => {
 
   describe('Extended Terminal ANSI & 256 Colors', () => {
     it('handles stripped ESC codes [33m and 256-color sequences without corrupting bracketed text', () => {
-      const stripped = '[33m[Kiboto Serial Console] [0mWaiting for serial socket...';
+      const stripped = '[33m[Kiboto Serial Console] [0mWaiting for serial socket…';
       const parsed = parseAnsiToHtml(stripped);
       expect(parsed).toContain('color: #f59e0b');
       expect(parsed).toContain('[Kiboto Serial Console]');
@@ -893,11 +893,11 @@ describe('VM Manager & Dynamic Elastic Headroom Budgeting', () => {
 
     it('displays connecting and connected banners with auto-fade', () => {
       vi.useFakeTimers();
-      showConsoleBanner('connecting', 'Connecting to KVM display socket...');
+      showConsoleBanner('connecting', 'Connecting to KVM display socket…');
       const banner = document.getElementById('vm-console-banner');
       expect(banner.style.display).toBe('flex');
       expect(banner.className).toContain('banner-connecting');
-      expect(banner.textContent).toContain('Connecting to KVM display socket...');
+      expect(banner.textContent).toContain('Connecting to KVM display socket…');
 
       showConsoleBanner('connected', 'Connected to KVM Display (VirtIO-GPU)');
       expect(banner.className).toContain('banner-connected');

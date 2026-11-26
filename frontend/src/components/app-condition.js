@@ -189,7 +189,7 @@ const BULK = {
   ],
 };
 
-/** The message for an action on several apps: 'Executing bulk stop on 3 containers...' pasted the
+/** The message for an action on several apps: 'Executing bulk stop on 3 containers…' pasted the
  *  action word into every language. */
 export function bulkSaid(action, phase, values = {}) {
   if (phase === 'failed') return t('appbulk.failed', 'That did not work: {error}', values);

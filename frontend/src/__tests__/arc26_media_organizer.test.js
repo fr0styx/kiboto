@@ -66,7 +66,7 @@ describe('media organizer', () => {
         })
     );
     byId('btn-media-org-preview').click();
-    expect(byId('btn-media-org-preview').textContent).toBe('⏳ Analyzing...');
+    expect(byId('btn-media-org-preview').textContent).toBe('⏳ Analyzing…');
     expect(byId('media-org-preview-wrap').textContent).toContain('Reading the file names');
     release({ items: ITEMS });
     await vi.waitFor(() => expect(byId('btn-media-org-preview').disabled).toBe(false));
@@ -80,7 +80,7 @@ describe('media organizer', () => {
     post.mockResolvedValueOnce({ processed: 2 });
     byId('media-org-mode-select').value = 'move';
     byId('btn-media-org-apply').click();
-    expect(byId('btn-media-org-apply').textContent).toBe('⏳ Organizing...');
+    expect(byId('btn-media-org-apply').textContent).toBe('⏳ Organizing…');
     await vi.waitFor(() => expect(showToast).toHaveBeenCalledWith('Media sorted: 2 files.', 'success'));
     expect(post.mock.calls.at(-1)[1]).toMatchObject({ action: 'move', hardlink: false });
     expect(byId('btn-media-org-apply').textContent).toBe('Execute Reorganization');

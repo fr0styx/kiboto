@@ -26,7 +26,7 @@ describe('network panel icons (UX-35)', () => {
     expect(byId('ts-key-expiry-display').dataset.tone).toBe('crit');
   });
 
-  it('a replication job: Running..., then Run again', async () => {
+  it('a replication job: Running…, then Run again', async () => {
     document.body.innerHTML =
       "<table><tbody id='replication-jobs-tbody'></tbody></table><table><tbody id='replication-history-tbody'></tbody></table>";
     vi.spyOn(api, 'get').mockImplementation(async (url) =>
@@ -44,7 +44,7 @@ describe('network panel icons (UX-35)', () => {
     await fetchAndRenderReplication();
     const btn = document.querySelector('.btn-run-repl');
     btn.click();
-    await vi.waitFor(() => expect(btn.textContent).toBe('⏳ Running...'));
+    await vi.waitFor(() => expect(btn.textContent).toBe('⏳ Running…'));
     release({});
     await vi.waitFor(() => expect(btn.textContent).toBe('▶ Run'));
     expect(icon(btn)).toBe('▶');

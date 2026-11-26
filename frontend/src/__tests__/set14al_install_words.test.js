@@ -11,7 +11,7 @@ describe("install progress in the reader's language (SET-14, Apps)", () => {
     await setLanguage('de');
     const ev = {
       step: 'pull',
-      message: 'Pulling x from registry (downloading layers)...',
+      message: 'Pulling x from registry (downloading layers)…',
       text: { msg_key: 'install.pulling', params: { image: 'jellyfin:10' } },
     };
     expect(serverSaid(ev, ev.message)).toBe('jellyfin:10 wird heruntergeladen…');

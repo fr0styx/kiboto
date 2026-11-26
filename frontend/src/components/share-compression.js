@@ -154,7 +154,7 @@ export async function openShareCompression(name) {
   const host = dialogHost();
   host.querySelector('#share-compression-title').textContent = t('compress.title', 'Compression: {name}', { name });
   const slot = host.querySelector('.smart-modal-body');
-  slot.textContent = t('ui.loading', 'Loading...');
+  slot.textContent = t('ui.loading', 'Loading…');
   returnFocus = /** @type {HTMLElement | null} */ (document.activeElement);
   host.style.display = '';
   host.classList.add('open');

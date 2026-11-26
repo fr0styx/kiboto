@@ -92,7 +92,7 @@ export function initContainerModal() {
           <!-- 4. Environment Tab -->
           <div id="ci-pane-env" class="ci-pane" style="display:none;">
             <div class="ci-row-3">
-              <input type="text" id="ci-env-search" placeholder="${t('ui.filter_variables', 'Filter variables...')}" class="tz-text-input ci-xs">
+              <input type="text" id="ci-env-search" placeholder="${t('ui.filter_variables', 'Filter variables…')}" class="tz-text-input ci-xs">
               <span class="ci-xs-muted" id="ci-env-stats"></span>
             </div>
             <div id="ci-env-content"></div>
@@ -114,7 +114,7 @@ export function initContainerModal() {
               </div>
             </div>
             <div style="position:relative; background:var(--lt-b-091213ff, #091213); border:1px solid var(--kb-line-10); border-radius:6px; overflow:hidden;">
-              <pre class="ci-xs-mono"><code id="ci-compose-code">Generating Docker Compose definition...</code></pre>
+              <pre class="ci-xs-mono"><code id="ci-compose-code">Generating Docker Compose definition…</code></pre>
             </div>
           </div>
 
@@ -125,7 +125,7 @@ export function initContainerModal() {
                 <select id="ci-logs-tail-select" class="tz-select-input ci-xs-2">
                   ${[50, 100, 200, 500, 1000].map((n) => `<option value="${n}" ${n === 200 ? 'selected' : ''}>${t('ci.last_lines', '{n, plural, one {Last # line} other {Last # lines}}', { n })}</option>`).join('')}
                 </select>
-                <input type="text" id="ci-logs-filter-input" placeholder="${t('ui.filter_output', 'Filter output...')}" class="tz-text-input ci-xs-3">
+                <input type="text" id="ci-logs-filter-input" placeholder="${t('ui.filter_output', 'Filter output…')}" class="tz-text-input ci-xs-3">
                 <label class="ci-row-xs-muted-2">
                   <input type="checkbox" id="ci-logs-autoscroll" checked> ${t('ci.autoscroll', 'Auto-scroll')}
                 </label>
@@ -163,7 +163,7 @@ export function initContainerModal() {
             </div>
             <div style="display:flex; background:var(--lt-b-0e1c1eff, #0e1c1e); border:1px solid var(--kb-line-12); border-top:none; border-radius:0 0 6px 6px; padding:6px 10px; gap:8px; align-items:center;">
               <span style="color:var(--lt-t-10b981ff, #10b981); font-family:var(--font-mono, monospace); font-weight:bold; font-size:var(--kb-fs-xs);">$</span>
-              <input type="text" id="ci-term-input" placeholder="${t('ui.type_a_command_and_press', 'Type a command and press Enter...')}" style="flex:1; background:transparent; border:none; outline:none; color:var(--lt-t-f5f9f9ff, #f5f9f9); font-family:var(--font-mono, monospace); font-size:var(--kb-fs-xs);" autocomplete="off" spellcheck="false">
+              <input type="text" id="ci-term-input" placeholder="${t('ui.type_a_command_and_press', 'Type a command and press Enter…')}" style="flex:1; background:transparent; border:none; outline:none; color:var(--lt-t-f5f9f9ff, #f5f9f9); font-family:var(--font-mono, monospace); font-size:var(--kb-fs-xs);" autocomplete="off" spellcheck="false">
               <button class="btn-pill-toggle is-small" id="ci-term-send-btn">${t('ci.run', 'Run')}</button>
             </div>
           </div>
@@ -793,9 +793,9 @@ async function loadContainerDetails(cid) {
     if (backupActionBtn) {
       backupActionBtn.addEventListener('click', async () => {
         backupActionBtn.disabled = true;
-        setIconLabel(backupActionBtn, '⏳', t('ui.backing_up', 'Backing up...'));
+        setIconLabel(backupActionBtn, '⏳', t('ui.backing_up', 'Backing up…'));
         showToast(
-          t('toast.creating_backup_for', 'Creating backup for {activeCname}...', { activeCname: _activeCname }),
+          t('toast.creating_backup_for', 'Creating backup for {activeCname}…', { activeCname: _activeCname }),
           'info'
         );
         try {
@@ -831,7 +831,7 @@ async function loadContainerDetails(cid) {
         const restartVal = restartInput ? restartInput.value : null;
 
         applyResBtn.disabled = true;
-        applyResBtn.textContent = t('ui.applying', 'Applying...');
+        applyResBtn.textContent = t('ui.applying', 'Applying…');
         try {
           await api.post(`/api/docker/containers/${encodeURIComponent(cid)}/resources`, {
             memory_mb: isNaN(memVal) ? 0 : memVal,
@@ -869,7 +869,7 @@ async function loadContainerDetails(cid) {
     if (restartActionBtn) {
       restartActionBtn.addEventListener('click', async () => {
         restartActionBtn.disabled = true;
-        showToast(t('toast.restarting', 'Restarting {activeCname}...', { activeCname: _activeCname }), 'info');
+        showToast(t('toast.restarting', 'Restarting {activeCname}…', { activeCname: _activeCname }), 'info');
         try {
           await api.post(`/api/docker/containers/${encodeURIComponent(cid)}/action`, { action: 'restart' });
           showToast(
@@ -1095,9 +1095,9 @@ function renderPortsTab(details) {
           });
 
           applyPortsBtn.disabled = true;
-          applyPortsBtn.textContent = t('ui.recreating_container', 'Recreating container...');
+          applyPortsBtn.textContent = t('ui.recreating_container', 'Recreating container…');
           showToast(
-            t('toast.recreating_container_with_new_ports', 'Recreating container "{cname}" with new ports...', {
+            t('toast.recreating_container_with_new_ports', 'Recreating container "{cname}" with new ports…', {
               cname: cname,
             }),
             'info'
@@ -1329,7 +1329,7 @@ function renderEnvTab(details) {
 async function loadContainerCompose(cid) {
   const codeEl = document.getElementById('ci-compose-code');
   if (codeEl)
-    codeEl.textContent = t('ui.generating_docker_compose_definition', 'Generating Docker Compose definition...');
+    codeEl.textContent = t('ui.generating_docker_compose_definition', 'Generating Docker Compose definition…');
 
   try {
     const data = await api.get(`/api/docker/containers/${encodeURIComponent(cid)}/compose`);
@@ -1659,7 +1659,7 @@ export function openContainerDeleteModal(cid, cname, imageRef = '', onDeleted = 
     const removeImage = /** @type {HTMLInputElement} */ (document.getElementById('cdm-image')).checked;
 
     confirmBtn.disabled = true;
-    confirmBtn.textContent = t('ui.destroying', 'Destroying...');
+    confirmBtn.textContent = t('ui.destroying', 'Destroying…');
 
     try {
       const url = `/api/docker/containers/${encodeURIComponent(cid)}?force=${force}&remove_volumes=${removeVolumes}&remove_image=${removeImage}&archive_data=${archiveData}`;
@@ -1817,7 +1817,7 @@ async function renderContainerEditTab(cid) {
         <div class="ci-row-10">
           <div class="ci-xs-bold-strong">${t('ci.env_title', 'Environment variables')}</div>
           <div class="ci-row-2">
-            <input type="text" id="cie-env-filter" placeholder="${t('ui.filter_variables', 'Filter variables...')}" class="tz-text-input ci-xs-11">
+            <input type="text" id="cie-env-filter" placeholder="${t('ui.filter_variables', 'Filter variables…')}" class="tz-text-input ci-xs-11">
             <button class="btn-pill-toggle ci-xs-10" id="cie-btn-add-env" ${isToolkit ? `disabled title="${escapeHtml(t('container.why_self', 'Kiboto cannot rebuild its own container; change it in Docker Compose'))}" data-i18n-title="container.why_self"` : ''}>+ ${t('ci.add_var', 'Add variable')}</button>
           </div>
         </div>
@@ -1989,13 +1989,13 @@ async function renderContainerEditTab(cid) {
         });
 
         saveBtn.disabled = true;
-        setIconLabel(saveBtn, '⏳', t('ui.recreating_container_2', 'Recreating Container...'));
+        setIconLabel(saveBtn, '⏳', t('ui.recreating_container_2', 'Recreating Container…'));
         statusMsg.style.display = 'block';
         statusMsg.style.background = 'rgba(51,205,184,0.15)';
         statusMsg.style.color = '#4fd8c4';
         statusMsg.textContent = t(
           'ui.validating_configuration_creating_backup_and',
-          'Validating configuration, creating backup, and recreating container...'
+          'Validating configuration, creating backup, and recreating container…'
         );
 
         try {

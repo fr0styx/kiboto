@@ -181,10 +181,10 @@ describe('what an action says', () => {
     expect(actionSaid('unpause', 'doing', 'jellyfin')).toBe('Resuming jellyfin…');
     expect(actionSaid('start', 'failed', 'jellyfin', 'port in use')).toBe('jellyfin could not be started: port in use');
     expect(actionSaid('something', 'done', 'x')).toBe('x was restarted.');
-    expect(bulkSaid('stop', 'doing', { count: 3 })).toBe('Stopping 3 apps…'); // "Executing bulk stop on 3 containers..."
+    expect(bulkSaid('stop', 'doing', { count: 3 })).toBe('Stopping 3 apps…'); // "Executing bulk stop on 3 containers…"
     expect(bulkSaid('pause', 'done', { successful: 2, total: 3 })).toBe('2 of 3 paused.');
     expect(bulkSaid('stop', 'failed', { error: 'no' })).toBe('That did not work: no');
-    expect(stackSaid('stop', 'doing')).toBe('Stopping the apps of this stack…'); // "Executing stack stop..."
+    expect(stackSaid('stop', 'doing')).toBe('Stopping the apps of this stack…'); // "Executing stack stop…"
     expect(stackSaid('restart', 'done')).toBe('The apps of this stack were restarted.'); // "Stack action 'redeploy' completed!"
     expect(stackSaid('start', 'failed', 'port in use')).toBe(
       'The apps of this stack could not be started: port in use'

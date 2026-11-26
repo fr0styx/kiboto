@@ -155,7 +155,7 @@ export function initContainersManager() {
               <button class="btn-pill-toggle cw-filter-btn" data-filter="standalone"><span data-i18n="mgmt.docker_filter_standalone">${t('mgmt.docker_filter_standalone', 'Standalone')}</span> <span id="cw-pill-standalone" class="docker-count-badge">0</span></button>
             </div>
             <div class="cw-docker-search-wrap cwm-x-2">
-              <input type="text" id="cw-docker-search-input" placeholder="${t('mgmt.docker_search_placeholder', 'Search containers, images, ports...')}" class="tz-text-input cwm-xs-box">
+              <input type="text" id="cw-docker-search-input" placeholder="${t('mgmt.docker_search_placeholder', 'Search containers, images, ports…')}" class="tz-text-input cwm-xs-box">
             </div>
           </div>
         </div>
@@ -339,7 +339,7 @@ export function initContainersManager() {
         t('cw.update_all_msg', 'This pulls the latest images and updates every container that has an update.'),
         async () => {
           btnUpdateAll.disabled = true;
-          showToast(t('toast.batch_container_update_initiated', 'Batch container update initiated...'), 'info');
+          showToast(t('toast.batch_container_update_initiated', 'Batch container update initiated…'), 'info');
           try {
             const done = await api.post('/api/docker/updates/apply-all');
             showToast(...updateAllSaid(done)); // what was updated and what was not
@@ -1350,7 +1350,7 @@ function bindCwTableEvents(tbody) {
             const originalContent = actBtn.innerHTML;
             actBtn.innerHTML = '⏳';
             showToast(
-              t('toast.updating_to_latest_image', 'Updating "{cname}" to latest image...', { cname: cname }),
+              t('toast.updating_to_latest_image', 'Updating "{cname}" to latest image…', { cname: cname }),
               'info'
             );
             try {
@@ -1387,7 +1387,7 @@ function bindCwTableEvents(tbody) {
         actBtn.disabled = true;
         const originalContent = actBtn.innerHTML;
         actBtn.innerHTML = '⏳';
-        showToast(t('toast.creating_backup_for_2', 'Creating backup for {cname}...', { cname: cname }), 'info');
+        showToast(t('toast.creating_backup_for_2', 'Creating backup for {cname}…', { cname: cname }), 'info');
         try {
           const res = await api.post(`/api/docker/containers/${encodeURIComponent(cid)}/backup`);
           // the server names the file `filename` and its size `size_human`: every message said "archive.tar.gz" (SET-14)

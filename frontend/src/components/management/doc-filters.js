@@ -1,4 +1,4 @@
-// Document filters (B8): chips for the auto-tags search knows (a bill, a payslip, a year...),
+// Document filters (B8): chips for the auto-tags search knows (a bill, a payslip, a year…),
 // each with how many of the files you may see carry it. Choosing chips narrows the results to
 // documents that carry all of them. The tags are made as files are indexed (backend/services/rag_tags.py).
 import { api } from '../../api.js';

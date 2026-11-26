@@ -121,9 +121,7 @@ describe('AI settings words (NUX-20)', () => {
 
     renderAiWatchedFoldersAndShares(['/mnt/user/docs', '/mnt/user/photos'], []);
     const run = syncAiWatchedFolders(true, true);
-    expect(byId('ai-index-run-feedback').textContent).toBe(
-      '⏳ Starting spindown-safe sync across 2 watched folders...'
-    );
+    expect(byId('ai-index-run-feedback').textContent).toBe('⏳ Starting spindown-safe sync across 2 watched folders…');
     await run;
     await flush();
     expect(byId('ai-index-run-feedback').textContent).toBe('⚠️ Sync failed: locked');
@@ -147,9 +145,9 @@ describe('AI settings words (NUX-20)', () => {
     const post = vi.spyOn(api, 'post').mockRejectedValueOnce(new Error('busy'));
     const run = runAiPathIndex('/mnt/user/docs');
     expect(byId('ai-index-run-feedback').textContent).toBe(
-      '⏳ Scanning /mnt/user/docs (Spindown-Safe Incremental Indexer)...'
+      '⏳ Scanning /mnt/user/docs (Spindown-Safe Incremental Indexer)…'
     );
-    expect(byId('btn-ai-run-index').textContent.trim()).toBe('⏳ Indexing...');
+    expect(byId('btn-ai-run-index').textContent.trim()).toBe('⏳ Indexing…');
     await run;
     expect(byId('ai-index-run-feedback').textContent).toBe('⚠️ Indexing failed: busy');
     post.mockResolvedValueOnce(null);
@@ -193,7 +191,7 @@ describe('AI settings words (NUX-20)', () => {
       .spyOn(api, 'post')
       .mockResolvedValueOnce({ results: [], parsed_intent: { auto_colors: ['red'], auto_scenes: ['beach'] } });
     const run = runAiVisualSearch('red beach');
-    expect(byId('ai-visual-results-grid').textContent).toBe('🔍 Searching visual & multi-modal index...');
+    expect(byId('ai-visual-results-grid').textContent).toBe('🔍 Searching visual & multi-modal index…');
     await run;
     const banner = byId('ai-visual-intent-banner').textContent;
     for (const w of ['Parsed Visual Intent:', 'Color:', 'red', 'Scene:', 'beach', 'Mode:']) expect(banner).toContain(w);
@@ -231,7 +229,7 @@ describe('AI settings words (NUX-20)', () => {
       ],
     });
     const run = runAiRagAsk('pasta');
-    expect(byId('btn-ai-rag-ask').textContent.trim()).toBe('⏳ Thinking...');
+    expect(byId('btn-ai-rag-ask').textContent.trim()).toBe('⏳ Thinking…');
     await run;
     const out = byId('ai-rag-answer-container').textContent;
     for (const w of [

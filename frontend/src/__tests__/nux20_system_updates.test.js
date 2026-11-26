@@ -122,11 +122,11 @@ describe('updates panel words (NUX-20)', () => {
     expect(opts).toMatchObject({ okText: 'Revert', placeholder: 'Your password' });
     const post = vi.spyOn(api, 'post').mockResolvedValueOnce(undefined);
     await onOk('pw');
-    expect(text('update-progress-title')).toBe('Reverting to the previous version...');
-    expect(text('update-progress-desc')).toBe('Restoring the previous version and reconnecting...');
+    expect(text('update-progress-title')).toBe('Reverting to the previous version…');
+    expect(text('update-progress-desc')).toBe('Restoring the previous version and reconnecting…');
     post.mockResolvedValueOnce({ message: 'Going back' });
     await onOk('pw');
-    expect(text('update-progress-desc')).toBe('Restoring the previous version and reconnecting...'); // the page's words, in the reader's language
+    expect(text('update-progress-desc')).toBe('Restoring the previous version and reconnecting…'); // the page's words, in the reader's language
     vi.clearAllTimers();
     vi.unstubAllGlobals();
   });
@@ -146,10 +146,10 @@ describe('updates panel words (NUX-20)', () => {
     expect(byId('update-progress-desc').textContent).not.toContain('Pulled.'); // not the server's English
     post.mockResolvedValue({});
     await onOk();
-    expect(text('update-progress-desc')).toBe('Restarting container and reconnecting...');
+    expect(text('update-progress-desc')).toBe('Restarting container and reconnecting…');
     post.mockResolvedValue({ message: 'Restarting now' });
     await onOk();
-    expect(text('update-progress-desc')).toBe('Restarting container and reconnecting...');
+    expect(text('update-progress-desc')).toBe('Restarting container and reconnecting…');
     vi.clearAllTimers();
     vi.unstubAllGlobals();
   });

@@ -1502,7 +1502,7 @@ export function handlePendingIngest(pendingIngest) {
       _activeIngestPromptTs = null;
       try {
         await api.post('/api/copy/start', { source: pendingIngest.slot, dest: destPath });
-        showToast(t('media.ingest_started', `Importing media from ${slotName}...`), 'info');
+        showToast(t('media.ingest_started', `Importing media from ${slotName}…`), 'info');
       } catch (err) {
         showToast(
           t('toast.failed_to_start_ingest', 'Could not start copying: {error}', { error: err.message || err }),
@@ -1581,10 +1581,10 @@ export function updateCopyToast(copyState) {
           ? t('modal.copy_finished', 'Finished successfully.')
           : t('dash.preparing', 'Preparing files…'));
 
-    let statusText = 'COPYING...';
+    let statusText = 'COPYING…';
     let barColor = 'var(--ok2)';
     if (copyState.status === 'copying') {
-      statusText = 'COPYING...';
+      statusText = 'COPYING…';
       barColor = 'var(--ok2)';
       if ($('copy-toast-pause')) $('copy-toast-pause').textContent = '⏸';
     } else if (copyState.status === 'paused') {
@@ -1629,7 +1629,7 @@ export function updateCopyToast(copyState) {
           $('copy-toast-time').textContent =
             filesLeftStr + t('dash.eta', '{rate} MB/s • ~{mins} min {secs} s', { rate: mbps, mins, secs });
       } else {
-        if ($('copy-toast-time')) $('copy-toast-time').textContent = t('ui.estimating_time', 'Estimating time...');
+        if ($('copy-toast-time')) $('copy-toast-time').textContent = t('ui.estimating_time', 'Estimating time…');
       }
     } else {
       if ($('copy-toast-time')) $('copy-toast-time').textContent = '';

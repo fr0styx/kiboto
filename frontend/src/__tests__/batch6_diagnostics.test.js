@@ -45,7 +45,7 @@ describe('Batch 6: Observability, Structured Logging & Diagnostics Export', () =
       const text = document.getElementById('btn-download-diagnostics-text');
       expect(btn.disabled).toBe(true);
       expect(icon.textContent).toBe('⏳');
-      expect(text.textContent).toBe('Generating Archive...');
+      expect(text.textContent).toBe('Generating Archive…');
       return mockFilename;
     });
 
@@ -56,7 +56,7 @@ describe('Batch 6: Observability, Structured Logging & Diagnostics Export', () =
       'kiboto_diagnostics.zip',
       expect.objectContaining({ method: 'POST' })
     );
-    expect(toast.showToast).toHaveBeenCalledWith('Generating diagnostics bundle (scrubbing secrets)...', 'info');
+    expect(toast.showToast).toHaveBeenCalledWith('Generating diagnostics bundle (scrubbing secrets)…', 'info');
     expect(toast.showToast).toHaveBeenCalledWith(
       `Diagnostics bundle downloaded successfully (${mockFilename}).`,
       'success'

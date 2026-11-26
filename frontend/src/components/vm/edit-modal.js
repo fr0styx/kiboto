@@ -752,7 +752,7 @@ export function openVmEditModal(vmId, vmObj = null) {
       });
     };
     if (pciList) {
-      pciList.innerHTML = pciNote(t('vm.pci_scanning', 'Scanning host PCI devices...'));
+      pciList.innerHTML = pciNote(t('vm.pci_scanning', 'Scanning host PCI devices…'));
       api
         .get('/api/vms/iommu-groups')
         .then(renderPciList)
@@ -999,7 +999,7 @@ export function openVmEditModal(vmId, vmObj = null) {
 
         try {
           submitBtn.disabled = true;
-          submitBtn.textContent = t('ui.saving', 'Saving...');
+          submitBtn.textContent = t('ui.saving', 'Saving…');
 
           await api.put(`/api/vms/${vmId}`, payload);
 

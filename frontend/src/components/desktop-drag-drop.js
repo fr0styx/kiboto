@@ -79,7 +79,7 @@ export function initDesktopDragAndDrop() {
       return;
     }
 
-    showToast(t('toast.uploading_wallpaper', 'Uploading wallpaper: {name}...', { name: imageFile.name }), 'info');
+    showToast(t('toast.uploading_wallpaper', 'Uploading wallpaper: {name}…', { name: imageFile.name }), 'info');
     try {
       const { uploadAndApplyWallpaper } = await import('./wallpaper-pane.js'); // not in the first load
       await uploadAndApplyWallpaper(imageFile);

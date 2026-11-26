@@ -799,7 +799,7 @@ async function initRealSerialTerminal(container, vmId, vmName) {
     if (view) view.write(chunk);
   };
   if (!(_serialBuffers.get(vmId) || []).length) {
-    appendOutput(`\x1b[36m[Kiboto Serial Terminal - Connecting to ${vmName}...]\x1b[0m\r\n`);
+    appendOutput(`\x1b[36m[Kiboto Serial Terminal - Connecting to ${vmName}…]\x1b[0m\r\n`);
   }
 
   try {
@@ -1295,7 +1295,7 @@ export function openVmConsole(vmId, vmName = 'Virtual Machine', initialMode = 'g
     const btnRec = consoleWin.querySelector('#btn-vnc-reconnect');
     if (btnRec) {
       btnRec.onclick = () => {
-        showToast(t('toast.reconnecting_console_stream', 'Reconnecting console stream...'), 'info');
+        showToast(t('toast.reconnecting_console_stream', 'Reconnecting console stream…'), 'info');
         const mode = consoleWin._activeMode || 'gui';
         if (mode === 'gui') {
           const vncWrap = consoleWin.querySelector('#vm-vnc-container');
@@ -1353,7 +1353,7 @@ export function openVmConsole(vmId, vmName = 'Virtual Machine', initialMode = 'g
               okText: t('vm.paste_btn_action', 'Paste into VM'),
               placeholder: t(
                 'vm.paste_placeholder',
-                'Type or paste commands, keys, or text here... (Ctrl+Enter to send)'
+                'Type or paste commands, keys, or text here… (Ctrl+Enter to send)'
               ),
             }
           );

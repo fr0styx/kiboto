@@ -156,7 +156,7 @@ export async function fetchAndRenderBackupJobs(mountEl) {
           btn.disabled = true;
           btn.innerHTML = `<span class="spinner-inline kb-spinner-xs"></span>`;
           showToast(
-            t('toast.triggering_backup_pipeline', 'Triggering backup pipeline {jobId}...', { jobId: jobId }),
+            t('toast.triggering_backup_pipeline', 'Triggering backup pipeline {jobId}…', { jobId: jobId }),
             'info'
           );
           await api.post(`/api/backup/schedule/${jobId}/run`);
@@ -517,7 +517,7 @@ export async function fetchAndRenderAppBackups(mountEl, filterApp = '') {
           ),
           async () => {
             try {
-              showToast(t('toast.restoring', 'Restoring {appName}...', { appName: appName }), 'info');
+              showToast(t('toast.restoring', 'Restoring {appName}…', { appName: appName }), 'info');
               const res = await api.post(`/api/backup/apps/${encodeURIComponent(backupId)}/restore`);
               showToast(...restoredSaid(res?.result || res, appName));
               fetchAndRenderAppBackups(

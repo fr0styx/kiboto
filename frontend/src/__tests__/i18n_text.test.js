@@ -14,12 +14,12 @@ describe('i18n text nodes (UX-21)', () => {
 
   it('finds text in JS templates and markup strings, holes included', () => {
     const js = [
-      "el.innerHTML = `<td>Loading users...</td><td>${n} files selected</td><td>${escapeHtml(t('k', 'ok'))}</td>`;",
+      "el.innerHTML = `<td>Loading users…</td><td>${n} files selected</td><td>${escapeHtml(t('k', 'ok'))}</td>`;",
       "el.innerHTML = '<span>THIS DEVICE</span>';",
       "el.innerHTML = '<!-- Header --><b>' + name + '</b>';",
       'const x = a > b && c < d;',
     ].join('\n');
-    expect(textNodes(js, 'a.js')).toEqual(['Loading users...', '${…} files selected', 'THIS DEVICE']);
+    expect(textNodes(js, 'a.js')).toEqual(['Loading users…', '${…} files selected', 'THIS DEVICE']);
   });
 
   it('finds text in code: UI properties, ternaries, fallbacks and setAttribute (NUX-20)', () => {

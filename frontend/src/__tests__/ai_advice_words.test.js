@@ -69,7 +69,7 @@ describe("Kib's model advice", () => {
       warning_text: { msg_key: 'srv.ai_warn_no_fit', params: { model: ram(40), host: 64, ram: ram(32) } },
       warning_message: 'Hardware Warning: ...',
       why_recommended_text: { msg_key: 'srv.ai_why_fits', params: { ram: ram(32), model: ram(2) } },
-      why_recommended: 'Fits comfortably ...',
+      why_recommended: 'Fits comfortably …',
       use_case_text: { msg_key: 'srv.ai_role.llama3_2_3b_npu', params: {} },
       use_case: 'Quick conversation and file tagging',
       target_device_text: { msg_key: 'srv.ai_needs_dgpu', params: { gb: 24 } },

@@ -135,7 +135,7 @@ export async function fetchAndRenderReplication() {
           const id = btn.dataset.id;
           try {
             btn.disabled = true;
-            setIconLabel(btn, '⏳', t('ui.running_2', 'Running...'));
+            setIconLabel(btn, '⏳', t('ui.running_2', 'Running…'));
             await api.post(`/api/storage/replication/jobs/${encodeURIComponent(id)}/run`);
             showToast(
               t('toast.replication_pipeline_dispatched', "Replication pipeline '{id}' dispatched.", { id: id }),
@@ -864,7 +864,7 @@ export async function saveNetworkPortConfig() {
 
   if (saveBtn) {
     saveBtn.disabled = true;
-    saveBtn.textContent = t('ui.saving', 'Saving...');
+    saveBtn.textContent = t('ui.saving', 'Saving…');
   }
 
   try {
@@ -932,7 +932,7 @@ export async function submitDockerNetworkCreate() {
 
   if (submitBtn) {
     submitBtn.disabled = true;
-    submitBtn.textContent = t('ui.creating', 'Creating...');
+    submitBtn.textContent = t('ui.creating', 'Creating…');
   }
 
   try {
@@ -1050,7 +1050,7 @@ export async function applyHostIpConfig() {
 
   if (applyBtn) {
     applyBtn.disabled = true;
-    applyBtn.textContent = t('ui.saving', 'Saving...');
+    applyBtn.textContent = t('ui.saving', 'Saving…');
   }
 
   try {
@@ -1170,7 +1170,7 @@ export async function saveBondConfig() {
 
   if (saveBtn) {
     saveBtn.disabled = true;
-    saveBtn.textContent = t('ui.saving', 'Saving...');
+    saveBtn.textContent = t('ui.saving', 'Saving…');
   }
 
   try {
@@ -1274,7 +1274,7 @@ export async function saveBridgeConfig() {
 
   if (saveBtn) {
     saveBtn.disabled = true;
-    saveBtn.textContent = t('ui.saving', 'Saving...');
+    saveBtn.textContent = t('ui.saving', 'Saving…');
   }
 
   try {
@@ -1360,7 +1360,7 @@ export async function submitCreateVlan() {
 
   if (submitBtn) {
     submitBtn.disabled = true;
-    submitBtn.textContent = t('ui.creating', 'Creating...');
+    submitBtn.textContent = t('ui.creating', 'Creating…');
   }
 
   try {
