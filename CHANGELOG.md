@@ -30,6 +30,8 @@ Kiboto OS install image: on a machine that starts in BIOS mode, "Install Kiboto"
 
 Kiboto OS: the nightly mover of a merged folder no longer follows a link put in a share while it moves a file, so it can never copy a system file into the share or hand a system folder to someone.
 
+Kiboto OS: making or removing an iSCSI disk's file no longer follows a link put in a shared folder, so it can never create or delete a file outside the storage folder.
+
 ## v2.0.7 (2026-11-26)
 ### 🛡️ Kiboto OS without root, on signed releases only, with Debian's security fixes
 

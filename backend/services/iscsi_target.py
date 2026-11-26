@@ -16,6 +16,7 @@ import os
 import re
 import shlex
 import socket
+import stat
 import threading
 import time
 import uuid
@@ -179,17 +180,21 @@ FILE_ERRORS = {
 }
 
 
-def _make_file_at(path: str, size_gb: int, fresh: bool) -> str:
-    """Makes or grows a disk's file. "" when done, else the key of what went wrong. A new one never
-    replaces a file that is already there, and it takes no space until the other computer writes."""
-    flags = os.O_WRONLY | getattr(os, "O_NOFOLLOW", 0) | (os.O_CREAT | os.O_EXCL if fresh else 0)
+def _make_file_at(path: str, size_gb: int, fresh: bool, dir_fd: int | None = None) -> str:
+    """Makes or grows a disk's file (by its name in the open folder `dir_fd` when given). "" when
+    done, else the key of what went wrong. A new one never replaces a file that is already there,
+    and it takes no space until the other computer writes. Never a link, and never waits on a pipe."""
+    flags = os.O_WRONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0)
+    flags |= os.O_CREAT | os.O_EXCL if fresh else 0
     try:
-        fd = os.open(path, flags, 0o600)
+        fd = os.open(path, flags, 0o600, dir_fd=dir_fd)
     except FileExistsError:
         return "file_exists"
     except OSError:
         return "no_file"
     try:
+        if not stat.S_ISREG(os.fstat(fd).st_mode):
+            return "no_file"
         if os.fstat(fd).st_size < size_gb * 1024**3:
             os.ftruncate(fd, size_gb * 1024**3)
     except OSError:
@@ -482,18 +487,54 @@ def disk_file(path: Any) -> str:
     return real
 
 
+def _open_folder(real: str) -> tuple[int, str]:
+    """The disk file's folder, opened from the top one folder at a time without following a link,
+    and the file's name in it. A folder swapped for a link after disk_file looked is refused
+    (OSError): the root service never reaches a file outside the storage folder by a link."""
+    folder, name = os.path.split(real)
+    fd = os.open(os.sep, os.O_RDONLY | os.O_DIRECTORY)
+    try:
+        for part in [p for p in folder.split(os.sep) if p]:
+            nxt = os.open(part, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=fd)
+            os.close(fd)
+            fd = nxt
+    except OSError:
+        os.close(fd)
+        raise
+    return fd, name
+
+
 def make_file_here(path: str, size_gb: int, fresh: bool) -> str:
     """The host door's operation: makes or grows a disk's file. "" or the key of what went wrong."""
     if isinstance(size_gb, bool) or not isinstance(size_gb, int) or not MIN_GB <= size_gb <= MAX_GB:
         raise ValueError("Not making that file: the size is not one a disk may have.")
-    return _make_file_at(disk_file(path), size_gb, bool(fresh))
+    try:
+        folder, name = _open_folder(disk_file(path))
+    except OSError:
+        return "no_file"
+    try:
+        return _make_file_at(name, size_gb, bool(fresh), folder)
+    finally:
+        os.close(folder)
 
 
 def remove_file_here(path: str) -> bool:
-    """The host door's operation: removes a disk's file (asked for when the disk is deleted)."""
-    real = disk_file(path)
-    if os.path.lexists(real):
-        os.remove(real)
+    """The host door's operation: removes a disk's file (asked for when the disk is deleted), by its
+    name in its open folder; a link or anything but a plain file is left alone."""
+    try:
+        folder, name = _open_folder(disk_file(path))
+    except FileNotFoundError:
+        return True  # its folder is gone, and the file with it
+    try:
+        try:
+            st = os.stat(name, dir_fd=folder, follow_symlinks=False)
+        except FileNotFoundError:
+            return True
+        if not stat.S_ISREG(st.st_mode):
+            raise ValueError("Not removing that: it is not a disk's file.")
+        os.unlink(name, dir_fd=folder)
+    finally:
+        os.close(folder)
     return True
 
 

@@ -6,6 +6,7 @@ Found by trying them on the test machine: iSCSI and SFTP could not start their s
 authentication required"), replication could not snapshot, and SFTP's status still said "running"
 because the router answered on its port."""
 
+import os
 from types import SimpleNamespace
 
 import pytest
@@ -205,6 +206,47 @@ def test_the_door_touches_only_kibotos_disk_files(door_side, tmp_path):
         iscsi_target.apply_here([_sent(pool)] * (iscsi_target.MAX_DISKS + 1))
     assert iscsi_target.remove_file_here(good) is True and not (pool / "games.iscsi.img").exists()
     assert iscsi_target.remove_file_here(good) is True  # already gone
+
+
+def test_a_folder_swapped_for_a_link_after_the_check_is_never_followed(door_side, tmp_path, monkeypatch):
+    """The root service checks the path, then opens it: a share's folder swapped for a link in
+    between must not let it make or remove a file elsewhere."""
+    pool, _ = door_side
+    (pool / "vm").mkdir()
+    (pool / "vm2").mkdir()
+    elsewhere = tmp_path / "etc"
+    elsewhere.mkdir()
+    victim = elsewhere / "games.iscsi.img"
+    victim.write_text("not a disk")
+    good = str(pool / "vm" / "games.iscsi.img")
+    real_check = iscsi_target.disk_file
+
+    def check_then_swap(path):
+        checked = real_check(path)
+        folder = os.path.dirname(checked)
+        os.rename(folder, folder + ".old")
+        os.symlink(elsewhere, folder)
+        return checked
+
+    monkeypatch.setattr(iscsi_target, "disk_file", check_then_swap)
+    with pytest.raises(OSError):
+        iscsi_target.remove_file_here(good)
+    assert victim.read_text() == "not a disk"
+    assert iscsi_target.make_file_here(str(pool / "vm2" / "other.iscsi.img"), 1, True) == "no_file"
+    assert not (elsewhere / "other.iscsi.img").exists()
+
+
+def test_a_pipe_or_a_folder_by_a_disks_name_is_left_alone(door_side, tmp_path):
+    pool, _ = door_side
+    os.mkfifo(pool / "pipe.iscsi.img")
+    assert iscsi_target._make_file_at(str(pool / "pipe.iscsi.img"), 1, False) == "no_file"  # never waits on it
+    folder, name = iscsi_target._open_folder(str(pool / "pipe.iscsi.img"))
+    os.close(folder)
+    assert name == "pipe.iscsi.img"
+    with pytest.raises(ValueError):
+        iscsi_target.remove_file_here(str(pool / "pipe.iscsi.img"))
+    assert (pool / "pipe.iscsi.img").exists()
+    assert iscsi_target.remove_file_here(str(pool / "gone" / "x.iscsi.img")) is True  # no such folder
 
 
 def test_the_door_has_the_iscsi_operations():
