@@ -20,7 +20,7 @@
    {"id": "drive_replace", "name": "Replace a failed drive from the app", "beside": "host", "linux": "yes", "os": "check", "note": "ZFS and btrfs pools that keep a second copy rebuild onto an empty drive from the app. Tried on a virtual machine, not yet with a real drive."},
    {"name": "Windows and Mac shares (SMB)", "beside": "view", "linux": "yes", "os": "yes"},
    {"id": "nfs", "name": "NFS shares", "beside": "host", "linux": "no", "os": "yes"},
-   {"name": "A private folder for each person", "beside": "yes", "linux": "yes", "os": "yes"},
+   {"name": "A private folder for each person", "beside": "yes", "linux": "yes", "os": "yes", "note": "On Kiboto OS each person's folder belongs to their own account: shut to everyone else, open to them in the page and over the network, and its storage limit holds over the network too (ZFS and btrfs)."},
    {"id": "usb", "name": "USB drives: open and eject", "beside": "host", "linux": "no", "os": "yes"},
    {"id": "drive_sleep", "name": "Drive sleep", "beside": "host", "linux": "no", "os": "yes"},
    {"name": "Drive Health: checks, warnings, history", "beside": "yes", "linux": "yes", "os": "yes"},

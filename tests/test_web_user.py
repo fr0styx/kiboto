@@ -204,3 +204,26 @@ def test_the_door_turns_it_on_before_it_starts(monkeypatch, capsys):
     monkeypatch.setattr(web_user, "default", lambda: "turned on")
     monkeypatch.setattr(web_user, "run", lambda cmd, timeout=600: (_ for _ in ()).throw(AssertionError(cmd)))
     assert web_user.main(["", "default"]) == 0 and "turned on" in capsys.readouterr().out  # nothing stopped or started
+
+
+def test_a_pool_made_later_is_let_into_too(tmp_path, monkeypatch):
+    """turn_on lets Kiboto's user into the pools there when it runs; a pool made or imported later
+    had no access list, and Kiboto could not make its Recycle Bin (the update check in CI)."""
+    drop_in = tmp_path / "web-user.conf"
+    pool = tmp_path / "fresh"
+    (pool / ".RecycleBin" / "info").mkdir(parents=True)
+    (pool / ".kiboto").mkdir()
+    ran, do = _runner()
+    assert web_user.let_into_pools([str(pool)], do, str(drop_in)) == 0 and ran == []  # the web user is off
+    drop_in.write_text("[Service]\\nUser=kiboto\\n")
+    assert web_user.let_into_pools([str(pool), str(tmp_path / "away"), ""], do, str(drop_in)) == 1
+    let_in = [c[-1] for c in ran if c[0] == "setfacl"]
+    assert str(pool) in let_in and str(pool / ".RecycleBin") in let_in and str(pool / ".RecycleBin" / "info") in let_in
+    assert str(pool / ".kiboto") in let_in and not any("-R" in c for c in ran)  # the folders, not all in them
+
+
+def test_the_door_lets_kiboto_into_a_pool_it_made(monkeypatch):
+    called = []
+    monkeypatch.setattr(web_user, "let_into_pools", lambda *a, **k: called.append(True) or 1)
+    op = host_door._let_in_after(lambda **kw: {"status": "provisioned", **kw})
+    assert op(name="fresh") == {"status": "provisioned", "name": "fresh"} and called == [True]

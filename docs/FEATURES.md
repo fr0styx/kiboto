@@ -29,7 +29,7 @@ What the words mean:
 | Replace a failed drive from the app<br><sub>ZFS and btrfs pools that keep a second copy rebuild onto an empty drive from the app. Tried on a virtual machine, not yet with a real drive.</sub> | Your NAS system does this | Yes | Being checked |
 | Windows and Mac shares (SMB) | View only | Yes | Yes |
 | NFS shares | Your NAS system does this | No | Yes |
-| A private folder for each person | Yes | Yes | Yes |
+| A private folder for each person<br><sub>On Kiboto OS each person's folder belongs to their own account: shut to everyone else, open to them in the page and over the network, and its storage limit holds over the network too (ZFS and btrfs).</sub> | Yes | Yes | Yes |
 | USB drives: open and eject | Your NAS system does this | No | Yes |
 | Drive sleep | Your NAS system does this | No | Yes |
 | Drive Health: checks, warnings, history | Yes | Yes | Yes |

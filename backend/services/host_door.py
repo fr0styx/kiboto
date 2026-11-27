@@ -108,6 +108,20 @@ def _storage(name: str, check: Callable[[dict[str, Any]], None] | None = None) -
     return run
 
 
+def _let_in_after(op: Callable[..., Any]) -> Callable[..., Any]:
+    """A pool made or imported: Kiboto's own user is let into it then, as into the pools there when
+    it took that user (web_user.let_into_pools), or it could not make the pool's Recycle Bin."""
+
+    def run(**kw: Any) -> Any:
+        done = op(**kw)
+        from backend.services import web_user
+
+        web_user.let_into_pools()
+        return done
+
+    return run
+
+
 def _new_pool(kw: dict[str, Any]) -> None:
     """A new pool: its name and kind, a mount point inside the pool root, and drives that are
     whole, unmounted and in no pool or array (disk_safety). Whether a drive's old data may be
@@ -636,12 +650,12 @@ OPERATIONS: dict[str, Operation] = {
     ),
     "storage.scrub": Operation(_storage("trigger_scrub"), {"pool_id": TEXT, "action": TEXT}, max_len=128),
     "storage.create_pool": Operation(
-        _storage("create_pool", _new_pool),
+        _let_in_after(_storage("create_pool", _new_pool)),
         {"name": TEXT, "fs_type": TEXT, "profile": TEXT, "disks": LIST, "mountpoint": TEXT},
         max_len=256,
     ),
     "storage.import_pool": Operation(
-        _storage("import_pool", _imported),
+        _let_in_after(_storage("import_pool", _imported)),
         {"pool_id": TEXT, "fs_type": TEXT, "target_mount": MAYBE_TEXT, "force": ON, "guid": TEXT},
         max_len=256,
     ),

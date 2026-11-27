@@ -90,6 +90,8 @@ Kiboto OS: a person's storage limit also holds for what they save over the netwo
 
 Kiboto OS: a shared folder exported over NFS only can be written to; it refused every write until SMB was on too.
 
+Kiboto OS: deleting a file on a pool made after the install puts it in the Recycle Bin; it failed with a server error.
+
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container
 

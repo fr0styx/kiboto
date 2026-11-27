@@ -42,6 +42,9 @@ def main() -> int:
     # a Secure Boot key enrolled at the screen just now: ZFS loads for the pools that come back next
     secure_boot.settle(lambda cmd: (lambda r: (r[0], f"{r[1]}\n{r[2]}"))(_run(cmd)))
     done = pool_registry.bring_back_all(_run)
+    from backend.services import web_user
+
+    web_user.let_into_pools()  # a pool made or imported since Kiboto took its own user, too
     for name, why in done.items():
         print(f"{name}: {'there' if not why else 'NOT there: ' + why}")
     return 1 if any(done.values()) else 0

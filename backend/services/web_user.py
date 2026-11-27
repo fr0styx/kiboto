@@ -144,6 +144,32 @@ def _let_in(do: Run, folder: str, recursive: bool = False) -> bool:
     return all(do(["setfacl", *deep, *acl, folder])[0] == 0 for acl in (["-m", ACL], ["-d", "-m", ACL]))
 
 
+def let_into_pools(roots: list[str] | None = None, do: Run | None = None, drop_in: str = DROP_IN) -> int:
+    """The web user's access list on each pool's top folder, its Recycle Bin and its settings copy,
+    as turn_on gives the pools there when it runs. A pool made or imported afterwards had none: Kiboto
+    could not make its Recycle Bin, and a delete there could only be for good. Only while the web user
+    is on; the folders themselves, not what is in them (their default list covers what comes later).
+    Returns how many pools were let into."""
+    if not is_on(drop_in):
+        return 0
+    do = do or run
+    done = 0
+    for root in _pool_roots() if roots is None else roots:
+        if not root or not os.path.isdir(root):
+            continue
+        done += bool(_let_in(do, root))
+        bin_dir = os.path.join(root, BIN)
+        for folder in (
+            bin_dir,
+            os.path.join(bin_dir, "files"),
+            os.path.join(bin_dir, "info"),
+            os.path.join(root, POOL_COPY),
+        ):
+            if os.path.isdir(folder):
+                _let_in(do, folder)
+    return done
+
+
 def turn_on(do: Run | None = None, drop_in: str = DROP_IN, data_dir: str = "", mark: str = OFF_MARK) -> list[str]:
     """Everything above; returns what could not be done (empty when all went well)."""
     if os.path.exists(mark):  # root asked for it again
