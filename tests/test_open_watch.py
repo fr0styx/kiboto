@@ -3,6 +3,7 @@ listening itself was tried on a real pool in a throwaway container; here the rec
 of the kernel's events are checked, with events built the way the kernel writes them."""
 
 import os
+import time
 
 import pytest
 
@@ -89,3 +90,43 @@ def test_when_kiboto_was_last_listening_is_kept():
     ow.mark_alive(1000.0)
     ow.mark_alive(2000.5)
     assert ow.last_alive() == 2000.5
+
+
+def test_on_kiboto_os_the_folders_the_service_listens_on_are_known(monkeypatch):
+    """The listener runs as a service of the machine there; status() named no folder, so every
+    merged folder counted as not watched and its old files never moved."""
+    from backend import runtime
+
+    monkeypatch.setattr(runtime, "without_root", lambda: True)
+    assert ow.status() == {"watching": False, "folders": [], "error": ""}
+    ow.mark_watched(["/mnt/storage/docs/.kiboto-tier/photos/", "/mnt/storage/docs/.kiboto-tier/films"])
+    ow.mark_alive()
+    assert ow.status()["folders"] == ["/mnt/storage/docs/.kiboto-tier/films", "/mnt/storage/docs/.kiboto-tier/photos"]
+    ow.mark_watched(["/mnt/storage/docs/.kiboto-tier/films"])  # started again with fewer folders
+    assert ow.status()["folders"] == ["/mnt/storage/docs/.kiboto-tier/films"]
+    ow.mark_alive(time.time() - 10 * ow.FLUSH_SECS)  # the service stopped long ago
+    assert ow.status() == {"watching": False, "folders": [], "error": ""}
+
+
+def test_the_service_notes_its_folders_and_a_record_it_cannot_write_is_only_noted(monkeypatch):
+    import signal
+    import sqlite3
+
+    class Stopped:
+        def set(self):
+            pass
+
+        def wait(self, seconds):
+            return True  # stopped at once
+
+    monkeypatch.setattr(signal, "signal", lambda *a: None)
+    monkeypatch.setattr(ow, "watch", lambda *a, **k: None)
+    monkeypatch.setattr(ow.threading, "Event", Stopped)
+    assert ow.serve(["/mnt/storage/docs/.kiboto-tier/films"]) == 0
+    assert ow.watched_by_service() == ["/mnt/storage/docs/.kiboto-tier/films"]
+
+    def locked(folders):
+        raise sqlite3.OperationalError("database is locked")
+
+    monkeypatch.setattr(ow, "mark_watched", locked)
+    assert ow.serve(["/mnt/storage/docs/.kiboto-tier/films"]) == 0

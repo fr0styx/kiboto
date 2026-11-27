@@ -96,6 +96,8 @@ A ZFS pool asked for as RAID 1 is made as a mirror. Layouts a kind of pool does 
 
 After a drive of a btrfs mirror is replaced, files written while the drive was missing get their second copy back, even when the Replace dialog was closed during the rebuild.
 
+Kiboto OS: a merged folder moves its old files to the slower pool once Kiboto has learnt which files are used. Before, every run said Kiboto was not watching the folder.
+
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container
 

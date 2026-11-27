@@ -42,6 +42,7 @@ def _db() -> sqlite3.Connection:
     conn = sqlite3.connect(DB_FILE, timeout=10)
     conn.execute("CREATE TABLE IF NOT EXISTS opens (path TEXT PRIMARY KEY, day INTEGER NOT NULL) WITHOUT ROWID")
     conn.execute("CREATE TABLE IF NOT EXISTS kept (name TEXT PRIMARY KEY, value REAL NOT NULL) WITHOUT ROWID")
+    conn.execute("CREATE TABLE IF NOT EXISTS watched (path TEXT PRIMARY KEY) WITHOUT ROWID")
     return conn
 
 
@@ -54,6 +55,26 @@ def mark_alive(now: float | None = None) -> None:
                 "INSERT INTO kept (name, value) VALUES ('alive', ?) ON CONFLICT(name) DO UPDATE SET value = excluded.value",
                 (time.time() if now is None else now,),
             )
+    finally:
+        conn.close()
+
+
+def mark_watched(folders: list[str]) -> None:
+    """The service of the machine (Kiboto OS) notes the folders it listens on. The page and the
+    mover read them: without them every merged folder counted as not watched, and nothing moved."""
+    conn = _db()
+    try:
+        with conn:
+            conn.execute("DELETE FROM watched")
+            conn.executemany("INSERT OR IGNORE INTO watched (path) VALUES (?)", [(f.rstrip("/"),) for f in folders])
+    finally:
+        conn.close()
+
+
+def watched_by_service() -> list[str]:
+    conn = _db()
+    try:
+        return sorted(row[0] for row in conn.execute("SELECT path FROM watched"))
     finally:
         conn.close()
 
@@ -278,6 +299,10 @@ def serve(folders: list[str]) -> int:
     stopped = threading.Event()
     signal.signal(signal.SIGTERM, lambda *_: stopped.set())
     watch(folders, folders, counts=outside_kiboto)
+    try:
+        mark_watched(folders)
+    except sqlite3.Error:
+        logger.warning("[Tiering] the folders listened on could not be noted", exc_info=True)
     while not stopped.wait(5.0):
         thread = _state.get("thread")
         if thread is None or not thread.is_alive():
@@ -327,7 +352,8 @@ def status() -> dict[str, Any]:
 
     if runtime.without_root():  # a service of the machine: it marks itself alive every minute
         alive = last_alive()
-        return {"watching": bool(alive and time.time() - alive < ALIVE_SECS), "folders": [], "error": ""}
+        on = bool(alive and time.time() - alive < ALIVE_SECS)
+        return {"watching": on, "folders": watched_by_service() if on else [], "error": ""}
     thread = _state.get("thread")
     return {
         "watching": bool(thread is not None and thread.is_alive() and _state.get("listening")),
