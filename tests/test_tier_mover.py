@@ -228,3 +228,40 @@ def test_a_slow_side_folder_swapped_for_a_link_is_never_given_away(sides, tmp_pa
     after = os.stat(elsewhere)
     assert (before.st_uid, before.st_mode) == (after.st_uid, after.st_mode) and not list(elsewhere.iterdir())
     assert (fast / "docs" / "a.txt").read_text() == "data"
+
+
+def _acl(*entries):
+    import struct
+
+    return struct.pack("<I", 2) + b"".join(struct.pack("<HHI", tag, perm, who) for tag, perm, who in entries)
+
+
+NOBODY_ID = 0xFFFFFFFF
+
+
+def test_a_moved_file_keeps_the_rights_it_had_not_the_ones_the_slow_folder_hands_down(sides):
+    """The slow side's folder hands down group::r-x (it lets Kiboto's own user in). A moved file
+    took that, keeping its mode only lowered the mask, and Samba (which writes as the folder's
+    group) could no longer change it."""
+    fast, slow = sides
+    me = os.getuid()
+    hand_down = _acl(
+        (0x01, 7, NOBODY_ID), (0x02, 7, me), (0x04, 5, NOBODY_ID), (0x10, 7, NOBODY_ID), (0x20, 5, NOBODY_ID)
+    )
+    try:
+        os.setxattr(slow, tm.ACL_DEFAULT_XATTR, hand_down)
+    except OSError as e:
+        pytest.skip(f"no access lists here: {e}")
+    _put(fast, "Films/a.mkv", mode=0o664)
+    assert tm.move_one(str(fast), str(slow), "Films/a.mkv")[0] == "moved"
+    for made in (slow / "Films", slow / "Films" / "a.mkv"):
+        assert tm.ACL_XATTR not in os.listxattr(made), made
+    assert tm.ACL_DEFAULT_XATTR not in os.listxattr(slow / "Films")
+    assert oct(os.stat(slow / "Films" / "a.mkv").st_mode & 0o777) == "0o664"
+
+    # a file that has a list of its own keeps exactly that one
+    own = _acl((0x01, 6, NOBODY_ID), (0x02, 6, me), (0x04, 6, NOBODY_ID), (0x10, 6, NOBODY_ID), (0x20, 4, NOBODY_ID))
+    b = _put(fast, "Films/b.mkv", mode=0o664)
+    os.setxattr(b, tm.ACL_XATTR, own)
+    assert tm.move_one(str(fast), str(slow), "Films/b.mkv")[0] == "moved"
+    assert os.getxattr(slow / "Films" / "b.mkv", tm.ACL_XATTR) == own

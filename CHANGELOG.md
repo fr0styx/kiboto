@@ -30,6 +30,8 @@ Network: "This NAS at home" lists the NAS's IPv6 addresses under Details.
 
 Storage: "Add a drive" grows a ZFS or btrfs pool with its own tool: a single drive becomes a mirror, mirrors take another mirror, a RAIDZ group is widened, a btrfs pool gets more space. The drives must be empty; the pool stays in use while it copies.
 
+Kiboto OS: a shared folder on a ZFS or btrfs pool can be a merged folder, not only one on an ext4 pool.
+
 #### Security
 
 Kiboto OS: when Kiboto hands files and folders in a shared folder to their people, a link put in their place over the network is never followed, so a system file's owner or rights can never be changed that way.
@@ -97,6 +99,8 @@ A ZFS pool asked for as RAID 1 is made as a mirror. Layouts a kind of pool does 
 After a drive of a btrfs mirror is replaced, files written while the drive was missing get their second copy back, even when the Replace dialog was closed during the rebuild.
 
 Kiboto OS: a merged folder moves its old files to the slower pool once Kiboto has learnt which files are used. Before, every run said Kiboto was not watching the folder.
+
+A file a merged folder moved to the slower pool can be changed over SMB again. A merged folder turned off becomes an ordinary folder again once nothing is left on the slower pool.
 
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container

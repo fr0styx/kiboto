@@ -138,7 +138,7 @@ def _own_pools_fit(share: Any, pools: list[Any]) -> dict[str, Any]:
         return {"why": "one_pool"}
     if share.export_nfs:
         return {"why": "nfs"}  # a merged folder is not offered over NFS yet
-    if not os.path.isdir(path) or os.path.islink(path) or os.path.ismount(path):
+    if not tier_merge.own_kind(path):
         return {"why": "own_mount"}
     why = tier_merge.missing(path)
     if why:
@@ -500,6 +500,10 @@ def run_due(now: float | None = None) -> list[str]:
     day = timing.day_of(RUN_AT, now)
     if not day:
         return []
+    left = _left_merged()
+    if left and _ran.get("unmerge") != day:
+        _ran["unmerge"] = day
+        threading.Thread(target=_unmerge, args=(left,), name="tiering-unmerge", daemon=True).start()
     due = []
     for folder in folders():
         if _ran.get(folder["id"]) != day:
@@ -508,6 +512,23 @@ def run_due(now: float | None = None) -> list[str]:
     if due:
         threading.Thread(target=_run_all, args=(due, now), name="tiering-night", daemon=True).start()
     return due
+
+
+def _left_merged() -> list[str]:
+    """Merged folders whose tiering was turned off while files were on their slow side: they stay
+    merged so those files keep showing. Before, nothing ever made them ordinary folders again."""
+    on = {f.get("merged") for f in folders()}
+    return [m["path"] for m in tier_merge.merges() if m["path"] not in on]
+
+
+def _unmerge(paths: list[str]) -> None:
+    """Each one becomes an ordinary folder again once nothing is left on its slow side."""
+    for path in paths:
+        try:
+            if tier_merge.remove_if_empty(path):
+                logger.info("[Tiering] %s is an ordinary folder again: nothing was left on the slower pool", path)
+        except (OSError, ValueError, tier_merge.MergeError):
+            logger.warning("[Tiering] %s could not be made an ordinary folder again", path, exc_info=True)
 
 
 def _run_all(names: list[str], now: float) -> None:

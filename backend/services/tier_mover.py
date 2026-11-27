@@ -32,6 +32,10 @@ F_UNLCK = 2
 F_WRLCK = 1
 
 
+ACL_XATTR = "system.posix_acl_access"
+ACL_DEFAULT_XATTR = "system.posix_acl_default"  # what files made in a folder start with
+
+
 class Stopped(Exception):
     """Kiboto asked the run to end: the file in hand is left where it was."""
 
@@ -98,6 +102,7 @@ def _folders_like(fast_root: str, slow_root: str, parts: list[str]) -> int:
                 os.mkdir(part, 0o700, dir_fd=slow)
                 nslow = os.open(part, DIR_FLAGS, dir_fd=slow)
                 like = os.fstat(fast)
+                acls_like(fast, nslow, folder=True)
                 os.fchown(nslow, like.st_uid, like.st_gid)
                 os.fchmod(nslow, stat.S_IMODE(like.st_mode))
             os.close(slow)
@@ -169,6 +174,26 @@ def _there(name: str, dir_fd: int) -> bool:
     return True
 
 
+def acls_like(src: int, dst: int, folder: bool = False) -> None:
+    """The copy gets the access lists the original has, and no other. A list the copy took from
+    the folder it was made in goes: the slow side's folder hands down group::r-x (it lets
+    Kiboto's own user in), keeping the mode then only lowers the mask, and Samba, which writes
+    as the folder's group, could no longer change a file once it had moved."""
+    _copy_xattrs(src, dst)
+    try:
+        have = set(os.listxattr(src))
+    except OSError:
+        return
+    for name in (ACL_XATTR, ACL_DEFAULT_XATTR) if folder else (ACL_XATTR,):
+        if name in have:
+            continue
+        try:
+            os.removexattr(dst, name)
+        except OSError as e:
+            if e.errno not in (errno.ENODATA, errno.ENOTSUP, errno.EPERM, errno.EACCES):
+                raise
+
+
 def _copy_and_swap(sdir: int, ddir: int, name: str, before: os.stat_result) -> tuple[str, int]:
     part = name + PART
     made = False
@@ -184,7 +209,7 @@ def _copy_and_swap(sdir: int, ddir: int, name: str, before: os.stat_result) -> t
                 shutil.copyfileobj(src, dst, 8 * 1024 * 1024)
                 dst.flush()
                 os.fsync(dst.fileno())
-                _copy_xattrs(src.fileno(), dst.fileno())
+                acls_like(src.fileno(), dst.fileno())
                 os.fchown(dst.fileno(), before.st_uid, before.st_gid)
                 os.fchmod(dst.fileno(), stat.S_IMODE(before.st_mode))
                 os.utime(dst.fileno(), ns=(before.st_atime_ns, before.st_mtime_ns))

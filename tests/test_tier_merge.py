@@ -238,3 +238,15 @@ def test_a_merge_that_is_listed_but_dead_is_not_mounted(box, monkeypatch):
 
     monkeypatch.setattr(tm.os, "stat", dead)
     assert tm.mounted(str(share)) is False and tm.status()[0]["mounted"] is False
+
+
+def test_folders_emptied_by_hand_on_the_slow_side_do_not_keep_it_merged(box):
+    share = box["share"]
+    made = tm.add("Films", str(box["share"]), str(box["storage"] / "hdd"), "pool-hdd")
+    os.makedirs(os.path.join(made["slow"], "2019", "summer"))
+    with open(os.path.join(made["slow"], "2019", "summer", "old.mkv"), "w") as f:
+        f.write("old")
+    assert tm.remove_if_empty(str(share)) is False
+    os.remove(os.path.join(made["slow"], "2019", "summer", "old.mkv"))  # the folders it was in stay
+    assert tm.remove_if_empty(str(share)) is True
+    assert merged_folders.merges() == [] and not os.path.exists(made["slow"])

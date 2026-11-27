@@ -18,6 +18,8 @@ While the merge is not running the folder's path is an empty folder nobody can w
 files are safe in the two hidden folders. Tried with throwaway containers only: there is no
 Kiboto-managed machine to try it on."""
 
+import contextlib
+import errno
 import hashlib
 import os
 import shlex
@@ -100,10 +102,94 @@ def _mounts() -> list[dict[str, str]]:
                 fields, kind = left.split(), right.split()
                 if len(fields) >= 6 and kind:
                     place = fields[4].replace("\\040", " ")
-                    out.append({"at": place, "tags": " ".join(fields[6:]), "fs": kind[0]})
+                    source = kind[1] if len(kind) > 1 else ""
+                    out.append({"at": place, "tags": " ".join(fields[6:]), "fs": kind[0], "source": source})
     except OSError:
         logger.debug("[Merge] the mounts could not be read", exc_info=True)
     return out
+
+
+def own_kind(path: str) -> str:
+    """How a shared folder sits on its pool, which decides how its own files move to the fast side:
+    "folder" and "subvolume" (btrfs) by one rename on the same pool, "dataset" (ZFS) by giving the
+    dataset the fast side as its mount point; nothing is copied. "" for a link, a mount of another
+    kind, or a folder with a mount inside it: not merged. Before, any folder that was a dataset or
+    a subvolume was refused, and Kiboto makes every new shared folder on ZFS and btrfs as one."""
+    if not os.path.isdir(path) or os.path.islink(path):
+        return ""
+    real = os.path.realpath(path).rstrip("/")
+    mounts = _mounts()
+    if any(m["at"].startswith(real + "/") for m in mounts):
+        return ""
+    here = [m for m in mounts if m["at"].rstrip("/") == real]
+    if here:
+        return "dataset" if here[-1]["fs"] == "zfs" and here[-1]["source"] else ""
+    if not os.path.ismount(real):
+        return "folder"
+    try:
+        top_of_subvolume = os.stat(real).st_ino == 256
+    except OSError:
+        return ""
+    parent = os.path.dirname(real)
+    under = [m for m in mounts if parent == m["at"].rstrip("/") or parent.startswith(m["at"].rstrip("/") + "/")]
+    fs = max(under, key=lambda m: len(m["at"]))["fs"] if under else ""
+    return "subvolume" if top_of_subvolume and fs == "btrfs" else ""
+
+
+def _rights_like(path: str, made: str) -> None:
+    """The slow side starts with the shared folder's own access lists, not the ones its pool's
+    folder hands down."""
+    from backend.services import tier_mover
+
+    src = os.open(path, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+    try:
+        dst = os.open(made, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+        try:
+            tier_mover.acls_like(src, dst, folder=True)
+        finally:
+            os.close(dst)
+    finally:
+        os.close(src)
+
+
+def _dataset_at(path: str) -> str:
+    real = os.path.realpath(path).rstrip("/")
+    return next((m["source"] for m in _mounts() if m["at"].rstrip("/") == real and m["fs"] == "zfs"), "")
+
+
+def _zfs(*args: str) -> tuple[int, str]:
+    from backend.services.host_basics import run
+
+    return run(["zfs", *args], timeout=120)
+
+
+def _move_away(merge: dict[str, Any], path: str, fast: str) -> None:
+    """The folder's own files go to the fast side. OSError when they cannot."""
+    if merge["own"] != "dataset":
+        os.rename(path, fast)
+        return
+    code, source = _zfs("get", "-H", "-o", "source", "mountpoint", merge["dataset"])
+    merge["mount_was"] = "local" if code == 0 and source.strip() == "local" else "inherited"
+    code, said = _zfs("set", f"mountpoint={fast}", merge["dataset"])
+    if code != 0:
+        raise OSError(errno.EBUSY, said.strip()[:200] or "the dataset was not moved")
+
+
+def _move_back(merge: dict[str, Any], path: str, fast: str) -> None:
+    """The folder's own files at its path again. OSError when they cannot be."""
+    if os.path.isdir(path):
+        os.rmdir(path)
+    if merge.get("own") != "dataset":
+        os.rename(fast, path)
+        return
+    ds = merge["dataset"]
+    code, said = _zfs(
+        *(("inherit", "mountpoint", ds) if merge.get("mount_was") == "inherited" else ("set", f"mountpoint={path}", ds))
+    )
+    if code != 0:
+        raise OSError(errno.EBUSY, said.strip()[:200] or "the dataset was not moved back")
+    with contextlib.suppress(OSError):
+        os.rmdir(fast)  # the empty folder ZFS was mounted on
 
 
 def receives_mounts(path: str) -> bool:
@@ -413,7 +499,8 @@ def add(name: str, path: str, slow_mount: str, slow_pool: str, where: str = "") 
         fast, slow = sides(path, slow_mount)
         if ":" in fast + slow + path:
             raise MergeError("bad_name", "A folder with a colon in its path cannot be merged.")
-        if not os.path.isdir(path) or os.path.islink(path) or os.path.ismount(path):
+        own = own_kind(path)
+        if not own:
             raise MergeError("not_plain", "This shared folder is a mount of its own or a link: it cannot be merged.")
         same_pool = path.startswith(slow_mount.rstrip("/") + "/")
         if not os.path.isdir(slow_mount) or os.path.lexists(fast) or same_pool:
@@ -426,12 +513,20 @@ def add(name: str, path: str, slow_mount: str, slow_pool: str, where: str = "") 
         os.makedirs(os.path.dirname(slow), mode=0o755, exist_ok=True)
         if not os.path.isdir(slow):
             os.mkdir(slow)
+            _rights_like(path, slow)
             os.chown(slow, like.st_uid, like.st_gid)
             os.chmod(slow, like.st_mode & 0o7777)
         merge = {"name": name, "path": path, "fast": fast, "slow": slow, "slow_pool": slow_pool, "made": time.time()}
-        os.rename(path, fast)  # the folder's own files: one rename on the same pool
+        merge.update(own=own, **({"dataset": _dataset_at(path)} if own == "dataset" else {}))
         try:
-            os.mkdir(path, 0o000)  # nobody writes here while the merge is not mounted
+            _move_away(merge, path, fast)
+        except OSError as e:
+            raise MergeError("failed", f"The folder could not be merged: {e.strerror or e}") from e
+        try:
+            if os.path.isdir(path):  # ZFS leaves the folder the dataset was mounted on
+                os.chmod(path, 0o000)
+            else:
+                os.mkdir(path, 0o000)  # nobody writes here while the merge is not mounted
             os.chown(path, like.st_uid, like.st_gid)
             _keep(merge, True, where)
             why = ensure(where)
@@ -457,9 +552,7 @@ def _undo(merge: dict[str, Any], where: str = "") -> bool:
         ensure(where)
         return False
     try:
-        if os.path.isdir(path):
-            os.rmdir(path)
-        os.rename(fast, path)
+        _move_back(merge, path, fast)
     except OSError:
         logger.warning("[Merge] %s could not be put back; its files are in %s", path, fast, exc_info=True)
         return False
@@ -474,6 +567,28 @@ def _tidy(hidden: str) -> None:
             os.rmdir(hidden)
     except OSError:
         logger.debug("[Merge] %s was left in place", hidden, exc_info=True)
+
+
+def _holds_files(root: str) -> bool:
+    """Whether anything but empty folders is under root (stops at the first; unreadable counts as yes)."""
+    try:
+        for _here, _dirs, names in os.walk(root, onerror=_raise):
+            if names:
+                return True
+    except OSError:
+        return True
+    return False
+
+
+def _raise(e: OSError) -> None:
+    raise e
+
+
+def _drop_empty(root: str) -> None:
+    """Removes root and the empty folders in it, deepest first."""
+    for here, _dirs, _names in os.walk(root, topdown=False):
+        with contextlib.suppress(OSError):
+            os.rmdir(here)
 
 
 def remove_if_empty(path: str, where: str = "") -> bool:
@@ -492,17 +607,11 @@ def remove_if_empty(path: str, where: str = "") -> bool:
         merge = _of(path, where)
         if merge is None:
             return True
-        try:
-            if any(os.scandir(merge["slow"])):
-                return False
-        except OSError:
+        if _holds_files(merge["slow"]):  # folders emptied by hand do not keep it merged
             return False
         if not _undo(merge, where):
             return False
-        try:
-            os.rmdir(merge["slow"])
-        except OSError:
-            logger.debug("[Merge] %s was left in place", merge["slow"], exc_info=True)
+        _drop_empty(merge["slow"])
         _tidy(os.path.dirname(merge["slow"]))
         return True
 

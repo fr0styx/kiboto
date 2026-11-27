@@ -527,3 +527,34 @@ def test_a_merged_folders_snapshot_takes_its_own_files_and_its_pools_stay(own_po
         with pytest.raises(RuntimeError, match="holds part of the merged folder Films"):
             adapter._no_merged_folder(pool)
     adapter._no_merged_folder(StoragePool(id="x", name="Other", pool_type="single", mountpoint="/mnt/other"))
+
+
+def test_a_folder_left_merged_becomes_ordinary_again_at_the_night_run(nas, monkeypatch):
+    """Turned off while files were on its slow side, a folder stays merged; once those are gone,
+    the night run makes it an ordinary folder again (before, nothing ever did)."""
+    left = [{"path": "/mnt/storage/tank/films", "fast": "/f", "slow": "/s"}]
+    monkeypatch.setattr(tr.tier_merge, "merges", lambda: left)
+    tried = []
+
+    def remove(path):
+        tried.append(path)
+        if len(tried) > 1:
+            raise tr.tier_merge.MergeError("failed", "busy")
+        return True
+
+    monkeypatch.setattr(tr.tier_merge, "remove_if_empty", remove)
+    at = time.mktime((2026, 11, 20, 3, 0, 5, 0, 0, -1))
+
+    def night(t):
+        tr.run_due(t)
+        for thread in threading.enumerate():
+            if thread.name == "tiering-unmerge":
+                thread.join(5)
+
+    night(at - 120)
+    assert tried == []
+    night(at)
+    night(at + 20)  # once a night
+    assert tried == ["/mnt/storage/tank/films"]
+    night(at + DAY)  # a refusal the next night is only noted
+    assert tried == ["/mnt/storage/tank/films"] * 2
