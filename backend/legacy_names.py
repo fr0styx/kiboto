@@ -3,8 +3,8 @@
 Accepted until Kiboto 2.2 (REMOVE_IN), then removed with this file: the ZETTNAS_* environment
 variables existing installs set, and the other old names added here as the rename goes on.
 
-Kept for good, elsewhere and on purpose, because data made before depends on them: the data key's
-salt (db_crypto._KDF_SALT), the two-factor secret box's key and associated data (secret_box), the
+Kept here because data made before depends on them, each with its one-time move: the data key's
+salt (db_crypto re-encrypts), the secret box's key and associated data (key_rotation re-seals), the
 backup manifest name and config-export prefix that restores still read (backup_engine), and the
 restic tag on off-site snapshots (offsite_backup). Changing those would make that data unreadable.
 The same goes for names stored outside Kiboto's data: replication's ZFS snapshot names
@@ -68,6 +68,11 @@ OLD_REPL_DIR = ".zettnas-repl"  # btrfs: the folder of a job's local snapshots: 
 OLD_LEXICAL_MODEL = "zett_lexical_384d"  # the search index's own embedding id: renamed in its rows
 OLD_UNIFIED_MODEL = "zettnas-unified-384-v2"  # the same, an older default for chunks
 OLD_VM_SOCK_DIR = "zettnas-vms"  # /tmp/<it>/<vm>/serial.sock: a VM started before
+OLD_KDF_SALT = b"zettnas-data-key-v1"  # the AI databases' key salt: re-encrypted once under the new one
+OLD_CREDENTIAL_NAME = "zettnas-data-key"  # systemd credential holding the data key, read if the new one is not there
+OLD_BOX_KEY_START = b"zettnas-secret-box-v1:"  # sealed values ("enc1:"): re-sealed once as "enc2:"
+OLD_BOX_AAD = b"zettnas:mfa_secret:v1"
+OLD_RECOVERY_START = "zettnas:recovery:"  # recovery codes made before: accepted until used or made again
 OLD_BACKUP_TAG = "zettnas"  # the restic tag on off-site file backups made before: retagged once per repo
 OLD_RESTIC_HOST_START = "zettnas-"  # the restic host of backups made before: kept hex, moved once per repo
 OLD_LOG_FILE = "zettnas.log"  # the log file and its rotations carry on under the new name

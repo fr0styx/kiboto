@@ -51,11 +51,10 @@ logger = logging.getLogger("Kiboto")
 KEY_ENV = "KIBOTO_DATA_KEY"
 KEY_FILE_ENV = "KIBOTO_DATA_KEY_FILE"  # a file holding the key, e.g. a Docker secret
 CREDENTIAL_NAME = "kiboto-data-key"  # systemd: LoadCredentialEncrypted=kiboto-data-key:...
-OLD_CREDENTIAL_NAME = "zettnas-data-key"  # its name before the rebrand (legacy_names)
 ENCRYPTED_NAMES = ("rag_index.db", "ai_conversations.db")
 SQLITE_HEADER = b"SQLite format 3\x00"
 MIN_KEY_CHARS = 16
-_KDF_SALT = b"zettnas-data-key-v1"  # never changes: existing databases were keyed with it
+_KDF_SALT = b"kiboto-data-key-v1"  # a database keyed with the salt of before is re-encrypted once (prepare)
 _KDF_ROUNDS = 200_000
 
 _ready: dict[str, threading.Event] = {}
@@ -84,7 +83,7 @@ def key_for_this_thread(text: str) -> Iterator[None]:
 
 def _key_text() -> str:
     """The key from KIBOTO_DATA_KEY, else the file KIBOTO_DATA_KEY_FILE names, else the systemd
-    credential `zettnas-data-key` ($CREDENTIALS_DIRECTORY, e.g. sealed to the TPM with systemd-creds)."""
+    credential `kiboto-data-key` ($CREDENTIALS_DIRECTORY, e.g. sealed to the TPM with systemd-creds)."""
     if getattr(_override, "text", ""):
         return _override.text
     value = legacy_names.getenv(KEY_ENV, "")
@@ -123,7 +122,7 @@ def _own_key_wanted() -> bool:
 def _credential_path() -> str:
     """The systemd credential holding the key, under its name or its pre-rebrand one; '' if none."""
     folder = os.environ.get("CREDENTIALS_DIRECTORY")
-    for name in (CREDENTIAL_NAME, OLD_CREDENTIAL_NAME):
+    for name in (CREDENTIAL_NAME, legacy_names.OLD_CREDENTIAL_NAME):
         candidate = os.path.join(folder, name) if folder else ""
         if candidate and os.path.exists(candidate):
             return candidate
@@ -140,18 +139,31 @@ def enabled() -> bool:
     )
 
 
-@functools.lru_cache(maxsize=4)
-def _raw_key(text: str) -> str:
+@functools.lru_cache(maxsize=8)
+def _raw_key(text: str, salt: bytes = _KDF_SALT) -> str:
     if len(text) < MIN_KEY_CHARS:
         raise DataKeyError(f"{KEY_ENV} must be at least {MIN_KEY_CHARS} characters")
     # One slow derivation per process; every connection then uses the raw key (no KDF cost)
-    return hashlib.pbkdf2_hmac("sha256", text.encode("utf-8"), _KDF_SALT, _KDF_ROUNDS).hex()
+    return hashlib.pbkdf2_hmac("sha256", text.encode("utf-8"), salt, _KDF_ROUNDS).hex()
 
 
-def _key_sql() -> str:
+def _key_sql(salt: bytes = _KDF_SALT) -> str:
     if not HAVE_SQLCIPHER:
         raise DataKeyError(f"{KEY_ENV} is set, but this build has no SQLCipher support")
-    return "\"x'" + _raw_key(_key_text()) + "'\""
+    return "\"x'" + _raw_key(_key_text(), salt) + "'\""
+
+
+def _opens_with(path: str, salt: bytes) -> bool:
+    try:
+        conn = sqlite3.connect(f"file:{path}?mode=ro", uri=True, timeout=15.0)
+        try:
+            conn.execute(f"PRAGMA key = {_key_sql(salt)}")
+            conn.execute("SELECT count(*) FROM sqlite_master").fetchone()
+        finally:
+            conn.close()
+        return True
+    except sqlite3.DatabaseError:
+        return False
 
 
 def is_plaintext(path: str) -> bool:
@@ -223,13 +235,17 @@ def _fsync_dir(path: str) -> None:
         logger.debug(f"[Encryption] could not sync the folder of {path}: {e}")
 
 
-def _encrypt_in_place(path: str) -> None:
+def _encrypt_in_place(path: str, old_salt: bytes | None = None) -> None:
+    """A plain file encrypted under the key, or with `old_salt` a file keyed with an older salt
+    encrypted again under the current one: copied into a new file, checked, then swapped in."""
     tmp = path + ".encrypting"
     for stale in (tmp, tmp + "-wal", tmp + "-shm"):
         if os.path.exists(stale):
             os.remove(stale)
     src = sqlite3.connect(path, timeout=60.0)
     try:
+        if old_salt is not None:
+            src.execute(f"PRAGMA key = {_key_sql(old_salt)}")
         src.execute("PRAGMA wal_checkpoint(TRUNCATE)")
         version = int(src.execute("PRAGMA user_version").fetchone()[0])
         quoted = tmp.replace("'", "''")
@@ -270,6 +286,10 @@ def prepare(path: str) -> str:
             )
         return "plain"
     if is_encrypted(path):
+        if not _opens_with(path, _KDF_SALT) and _opens_with(path, legacy_names.OLD_KDF_SALT):
+            logger.info("[Encryption] %s takes the current key salt…", os.path.basename(path))
+            _encrypt_in_place(path, old_salt=legacy_names.OLD_KDF_SALT)
+            return "converted"
         _verify(path)
         return "encrypted"
     size_mb = os.path.getsize(path) / 1e6
@@ -363,7 +383,8 @@ def connect_encrypted(path: str, readonly: bool = True, **kwargs: Any) -> Any:
     else:
         conn = sqlite3.connect(path, **kwargs)
     try:
-        conn.execute(f"PRAGMA key = {_key_sql()}")
+        salt = _KDF_SALT if _opens_with(path, _KDF_SALT) or not _opens_with(path, legacy_names.OLD_KDF_SALT) else None
+        conn.execute(f"PRAGMA key = {_key_sql(salt or legacy_names.OLD_KDF_SALT)}")  # a copy made before the new salt
     except Exception:
         conn.close()
         raise

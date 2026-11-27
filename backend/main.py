@@ -240,6 +240,12 @@ def _startup_databases(_data_key_problem: Any) -> Any:
     if _data_key_problem:
         add_event("error", "AI data locked", _data_key_problem, event_text("ai_data_locked", problem=_data_key_problem))
     try:
+        from backend.services.key_rotation import reseal_old_values
+
+        reseal_old_values()  # values sealed before the rebrand, sealed again once
+    except (OSError, ValueError, RuntimeError) as e:
+        logger.error("[Main] Could not seal stored secrets again: %s", e)
+    try:
         from backend.secret_box import migrate_plaintext_mfa_secrets
 
         migrate_plaintext_mfa_secrets()

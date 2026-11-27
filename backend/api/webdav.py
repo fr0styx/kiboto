@@ -42,12 +42,15 @@ def _request_is_https(request) -> bool:
     return request_is_https(request)
 
 
+_UNSET_FALLBACK = "kiboto-webdav-fallback"  # only while no install key exists yet
+
+
 def _cookie_key(username: str) -> bytes:
     """Signing key for one user's portal cookie. It includes the account's password hash,
     so changing the password ends existing portal cookies."""
     from backend.users_db import get_user_by_username
 
-    secret = getattr(config, "SECRET_KEY", "zettnas-webdav-fallback-secret")
+    secret = getattr(config, "SECRET_KEY", _UNSET_FALLBACK)
     pw_hash = (get_user_by_username(username) or {}).get("password_hash") or ""
     return f"{secret}:{pw_hash}".encode()
 

@@ -356,3 +356,90 @@ def test_an_install_without_old_backups_renames_nothing(tmp_path, monkeypatch):
     monkeypatch.setattr(ob, "DATA_DIR", str(tmp_path))
     monkeypatch.setattr(ob, "run_restic", lambda *a, **k: (_ for _ in ()).throw(AssertionError("no restic")))
     assert ob.rename_old_marks({"id": "r1", "name": "Cloud"}) is True
+
+
+def _old_seal(plain, secret):
+    """A value sealed the way of before the rebrand ("enc1:")."""
+    import base64
+    import hashlib
+
+    from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+
+    key = hashlib.sha256(legacy_names.OLD_BOX_KEY_START + secret.encode()).digest()
+    nonce = os.urandom(12)
+    ct = AESGCM(key).encrypt(nonce, plain.encode(), legacy_names.OLD_BOX_AAD)
+    return "enc1:" + base64.urlsafe_b64encode(nonce + ct).decode()
+
+
+def test_a_value_sealed_before_opens_and_new_ones_use_the_new_box(monkeypatch):
+    from backend import config, secret_box
+
+    monkeypatch.setattr(config, "SECRET_KEY", "k" * 40)
+    old = _old_seal("JBSWY3DPEHPK3PXP", "k" * 40)
+    assert secret_box.is_sealed(old) and secret_box.is_old(old)
+    assert secret_box.unseal(old) == "JBSWY3DPEHPK3PXP"
+    assert secret_box.unseal_with(old, "k" * 40) == "JBSWY3DPEHPK3PXP"
+    new = secret_box.seal("JBSWY3DPEHPK3PXP")
+    assert new.startswith("enc2:") and not secret_box.is_old(new) and secret_box.unseal(new) == "JBSWY3DPEHPK3PXP"
+
+
+def test_every_settings_file_and_the_users_database_are_sealed_again_once(tmp_path, monkeypatch):
+    from backend import config, secret_box
+    from backend.services import key_rotation
+
+    monkeypatch.setattr(config, "SECRET_KEY", "k" * 40)
+    monkeypatch.setattr(config, "DATA_DIR", str(tmp_path))
+    old = _old_seal("pw", "k" * 40)
+    (tmp_path / "snmp.json").write_text(json.dumps({"auth": old, "nested": [{"secret": old}], "n": 1}))
+    (tmp_path / "plain.json").write_text(json.dumps({"x": "nothing sealed"}))
+    (tmp_path / "theirs.json").write_text(json.dumps({"v": _old_seal("pw", "other-install-key-xxxxxxxxxxxx")}))
+    # the users database and the services' own stores are left out here: the settings files only
+    monkeypatch.setattr(
+        key_rotation, "reseal_everything", lambda: {"mfa": 0, "other": key_rotation._reseal_json_files()}
+    )
+    assert key_rotation.reseal_old_values() is True
+    data = json.loads((tmp_path / "snmp.json").read_text())
+    assert data["auth"].startswith("enc2:") and data["nested"][0]["secret"].startswith("enc2:") and data["n"] == 1
+    assert secret_box.unseal(data["auth"]) == "pw"
+    assert json.loads((tmp_path / "theirs.json").read_text())["v"].startswith("enc1:")  # not ours to open: left
+    assert key_rotation.reseal_old_values() is False  # once
+
+
+def test_a_recovery_code_made_before_is_still_accepted():
+    from backend import totp
+    from backend.passwords import hash_password
+
+    code = "abcd-efgh"
+    old_hash = hash_password(f"{legacy_names.OLD_RECOVERY_START}abcdefgh")
+    ok, left = totp.verify_and_consume_recovery_code([old_hash, totp.hash_recovery_code("zzzz-zzzz")], code)
+    assert ok and len(left) == 1
+    assert totp.verify_and_consume_recovery_code([totp.hash_recovery_code(code)], code)[0]
+    assert totp.verify_and_consume_recovery_code([totp._legacy_recovery_hash(code)], code)[0]
+
+
+def test_an_ai_database_keyed_with_the_salt_of_before_is_encrypted_again(tmp_path, monkeypatch):
+    import pytest
+
+    from backend import db_crypto
+
+    if not db_crypto.HAVE_SQLCIPHER:
+        pytest.skip("no SQLCipher here")
+    monkeypatch.setenv("KIBOTO_DATA_KEY", "a-data-key-of-enough-length")
+    db_crypto._raw_key.cache_clear()
+    path = str(tmp_path / "rag_index.db")
+    conn = db_crypto.sqlite3.connect(path)
+    conn.execute(f"PRAGMA key = {db_crypto._key_sql(legacy_names.OLD_KDF_SALT)}")
+    conn.execute("CREATE TABLE t (v TEXT)")
+    conn.execute("INSERT INTO t VALUES ('kept')")
+    conn.commit()
+    conn.close()
+    assert not db_crypto._opens_with(path, db_crypto._KDF_SALT)
+    copy = str(tmp_path / "copy.db")
+    import shutil
+
+    shutil.copy(path, copy)  # a backup's copy made before
+    assert db_crypto.connect_encrypted(copy).execute("SELECT v FROM t").fetchone()[0] == "kept"
+    assert db_crypto.prepare(path) == "converted"
+    assert db_crypto._opens_with(path, db_crypto._KDF_SALT)
+    assert db_crypto.connect(path).execute("SELECT v FROM t").fetchone()[0] == "kept"
+    assert db_crypto.prepare(path) == "encrypted"

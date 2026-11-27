@@ -12,16 +12,18 @@ import base64
 import hashlib
 import logging
 import os
+from collections.abc import Callable
 
 from cryptography.exceptions import InvalidTag
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
-from backend import config
+from backend import config, legacy_names
 
 logger = logging.getLogger("Kiboto")
 
-PREFIX = "enc1:"
-_AAD = b"zettnas:mfa_secret:v1"
+PREFIX = "enc2:"
+OLD_PREFIX = "enc1:"  # sealed before the rebrand, under the old key derivation: read, and re-sealed once
+_AAD = b"kiboto:secret:v2"
 
 
 class SecretBoxError(ValueError):
@@ -32,7 +34,21 @@ def _key(secret: str | None = None) -> bytes:
     secret = str(secret if secret is not None else (getattr(config, "SECRET_KEY", "") or ""))
     if not secret:
         raise SecretBoxError("SECRET_KEY is not set")
-    return hashlib.sha256(b"zettnas-secret-box-v1:" + secret.encode("utf-8")).digest()
+    return hashlib.sha256(b"kiboto-secret-box-v2:" + secret.encode("utf-8")).digest()
+
+
+def _derived_before(secret: str | None = None) -> bytes:
+    secret = str(secret if secret is not None else (getattr(config, "SECRET_KEY", "") or ""))
+    if not secret:
+        raise SecretBoxError("SECRET_KEY is not set")
+    return hashlib.sha256(legacy_names.OLD_BOX_KEY_START + secret.encode("utf-8")).digest()
+
+
+def _box_for(value: str) -> tuple[int, Callable[[str | None], bytes], bytes]:
+    """How a sealed value was sealed: (prefix length, key function, associated data)."""
+    if value.startswith(OLD_PREFIX):
+        return len(OLD_PREFIX), _derived_before, legacy_names.OLD_BOX_AAD
+    return len(PREFIX), _key, _AAD
 
 
 def _previous_secret() -> str:
@@ -45,7 +61,12 @@ def _previous_secret() -> str:
 
 
 def is_sealed(value: str) -> bool:
-    return bool(value) and value.startswith(PREFIX)
+    return bool(value) and value.startswith((PREFIX, OLD_PREFIX))
+
+
+def is_old(value: str) -> bool:
+    """Sealed the way of before the rebrand: re-sealed by key_rotation.reseal_everything."""
+    return bool(value) and value.startswith(OLD_PREFIX)
 
 
 def seal(plain: str) -> str:
@@ -59,15 +80,16 @@ def seal(plain: str) -> str:
 def unseal(value: str) -> str:
     if not value or not is_sealed(value):
         return value or ""
+    head, key, aad = _box_for(value)
     try:
-        raw = base64.urlsafe_b64decode(value[len(PREFIX) :].encode("ascii"))
+        raw = base64.urlsafe_b64decode(value[head:].encode("ascii"))
     except ValueError as e:
         raise SecretBoxError("A stored secret is damaged") from e
     for secret in (None, _previous_secret()):
         if secret == "":
             continue
         try:
-            return AESGCM(_key(secret)).decrypt(raw[:12], raw[12:], _AAD).decode("utf-8")
+            return AESGCM(key(secret)).decrypt(raw[:12], raw[12:], aad).decode("utf-8")
         except (InvalidTag, ValueError):
             continue
     raise SecretBoxError("Could not decrypt a stored secret (was SECRET_KEY changed?)")
@@ -78,9 +100,10 @@ def unseal_with(value: str, secret: str) -> str:
     over reads the first one's two-factor secrets this way. Plain values pass, as in unseal()."""
     if not value or not is_sealed(value):
         return value or ""
+    head, key, aad = _box_for(value)
     try:
-        raw = base64.urlsafe_b64decode(value[len(PREFIX) :].encode("ascii"))
-        return AESGCM(_key(secret)).decrypt(raw[:12], raw[12:], _AAD).decode("utf-8")
+        raw = base64.urlsafe_b64decode(value[head:].encode("ascii"))
+        return AESGCM(key(secret)).decrypt(raw[:12], raw[12:], aad).decode("utf-8")
     except (InvalidTag, ValueError) as e:
         raise SecretBoxError("A secret from the other NAS could not be opened") from e
 

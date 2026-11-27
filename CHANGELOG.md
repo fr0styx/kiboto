@@ -54,6 +54,8 @@ Off-site backups made before the rename take Kiboto's name once, before their ne
 
 Compose files name the service kiboto. The Unraid templates under the product's old name are gone; use the Kiboto template.
 
+Encrypted databases and stored secrets made before the product's rename are encrypted again once, at the next start.
+
 #### Security
 
 Kiboto OS: when Kiboto hands files and folders in a shared folder to their people, a link put in their place over the network is never followed, so a system file's owner or rights can never be changed that way.
@@ -171,6 +173,8 @@ Cloud drives on Kiboto OS: a mounted drive stays mounted when Kiboto restarts or
 Alerts: with email, Discord or Telegram on as well, each alert reached ntfy twice. It now arrives once.
 
 Alerts: an ntfy alert whose title has a letter outside plain English (a degree sign, an umlaut, a name in another script) is sent; before, it was lost.
+
+Rotating the secret key also re-encrypts the passwords kept for SNMP, Dynamic DNS, NUT, iSCSI and Home Assistant; before, they could no longer be read afterwards.
 
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container

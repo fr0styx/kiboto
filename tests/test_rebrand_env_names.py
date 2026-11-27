@@ -49,7 +49,7 @@ def test_the_data_key_from_either_name_or_credential(monkeypatch, tmp_path):
     (tmp_path / "zettnas-data-key").write_text("a-sealed-key-of-enough-length\n")
     monkeypatch.setenv("CREDENTIALS_DIRECTORY", str(tmp_path))
     assert db_crypto.enabled() and db_crypto._key_text() == "a-sealed-key-of-enough-length"
-    assert db_crypto._KDF_SALT == b"zettnas-data-key-v1"  # old databases were keyed with it
+    assert db_crypto._KDF_SALT == b"kiboto-data-key-v1"  # a database keyed with the salt of before is re-encrypted
     os.remove(tmp_path / "zettnas-data-key")
     assert not db_crypto.enabled()
 

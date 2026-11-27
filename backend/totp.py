@@ -21,6 +21,7 @@ import time
 import urllib.parse
 from typing import Optional
 
+from backend import legacy_names
 from backend.config import logger
 
 # Anti-replay cache: (user_id_or_secret, timestep) -> expiration_timestamp
@@ -125,8 +126,8 @@ def normalize_recovery_code(code: str) -> str:
     return code.strip().replace("-", "").replace(" ", "").lower()
 
 
-def _recovery_material(code: str) -> str:
-    return f"zettnas:recovery:{normalize_recovery_code(code)}"
+def _recovery_material(code: str, start: str = "kiboto:recovery:") -> str:
+    return f"{start}{normalize_recovery_code(code)}"
 
 
 def hash_recovery_code(code: str) -> str:
@@ -139,15 +140,19 @@ def hash_recovery_code(code: str) -> str:
 
 def _legacy_recovery_hash(code: str) -> str:
     """How codes made before were stored (SHA-256); still accepted, and replaced when used."""
-    return hashlib.sha256(_recovery_material(code).encode()).hexdigest()
+    return hashlib.sha256(_recovery_material(code, legacy_names.OLD_RECOVERY_START).encode()).hexdigest()
 
 
 def _recovery_matches(stored: str, code: str) -> bool:
+    """A code made now, or one made before the rebrand (whose hash holds the words of then: a hash
+    can't be made again without the code, so those stay accepted until used or made anew)."""
     from backend.passwords import verify_password
 
     if len(stored) == 64 and all(ch in "0123456789abcdef" for ch in stored):
         return hmac.compare_digest(stored, _legacy_recovery_hash(code))
-    return verify_password(_recovery_material(code), stored)
+    return verify_password(_recovery_material(code), stored) or verify_password(
+        _recovery_material(code, legacy_names.OLD_RECOVERY_START), stored
+    )
 
 
 def verify_and_consume_recovery_code(

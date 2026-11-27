@@ -28,7 +28,7 @@ def test_new_seeds_are_sealed_and_read_back(db):
     path, uid = db
     enable_user_mfa(uid, SEED, [], db_path=path)
     stored = _stored(path, uid)
-    assert stored.startswith("enc1:") and SEED not in stored
+    assert stored.startswith("enc2:") and SEED not in stored
     assert get_user_mfa(uid, db_path=path)["mfa_secret"] == SEED
 
 
@@ -38,7 +38,7 @@ def test_legacy_plaintext_is_migrated(db):
         conn.execute("UPDATE users SET mfa_enabled = 1, mfa_secret = ? WHERE id = ?", (SEED, uid))
     assert get_user_mfa(uid, db_path=path)["mfa_secret"] == SEED  # readable before migration
     assert secret_box.migrate_plaintext_mfa_secrets(path) == 1
-    assert _stored(path, uid).startswith("enc1:")
+    assert _stored(path, uid).startswith("enc2:")
     assert get_user_mfa(uid, db_path=path)["mfa_secret"] == SEED
     assert secret_box.migrate_plaintext_mfa_secrets(path) == 0
 

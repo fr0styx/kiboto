@@ -32,7 +32,7 @@ def test_off_by_default_and_the_token_is_never_shown():
     assert saved["hostname"] == "home.duckdns.org" and saved["token_set"] is True and "token" not in saved
     with open(ddns.STATE_FILE, encoding="utf-8") as f:
         raw = json.load(f)
-    assert raw["token"].startswith("enc1:") and "secret-token" not in raw["token"]
+    assert raw["token"].startswith("enc2:") and "secret-token" not in raw["token"]
     assert ddns.save(False, "duckdns", "home", None)["token_set"] is True  # None keeps it
     assert ddns.save(False, "duckdns", "home", "")["token_set"] is False  # "" clears it
 
