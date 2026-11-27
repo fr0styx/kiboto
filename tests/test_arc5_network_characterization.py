@@ -144,6 +144,13 @@ STATS = {
     "rx_dropped": 2,
     "tx_dropped": 0,
 }
+# br0's own global address, a privacy address (left out), its link-local one, and another port's
+IF_INET6 = (
+    "20010db8000000000000000000000050 05 40 00 80      br0\n"
+    "20010db80000000012345678abcdef01 05 40 00 01      br0\n"
+    "fe800000000000000000000000000001 05 40 20 80      br0\n"
+    "20010db8000000010000000000000001 02 40 00 80     eth9\n"
+)
 ROUTE = (
     "Iface\tDestination\tGateway\tFlags\tRefCnt\tUse\tMetric\tMask\t\tMTU\tWindow\tIRTT\n"
     "br0\t00000000\t0101A8C0\t0003\t0\t0\t0\t00000000\t0\t0\t0\n"
@@ -259,6 +266,7 @@ def _build_host(root):
         ("tcp6", TCP6),
         ("udp", UDP),
         ("udp6", "  sl  local_address\n"),
+        ("if_inet6", IF_INET6),
     ):
         _write(os.path.join(proc, "net", name), text)
         if name in ("tcp", "tcp6", "udp", "udp6"):  # the host's own sockets (process 1's network)

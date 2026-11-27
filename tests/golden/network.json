@@ -1199,6 +1199,9 @@
      ],
      "docker_containers_count": 0,
      "docker_networks_count": 3,
+     "ipv6_addresses": [
+      "2001:db8::50/64"
+     ],
      "max_speed": "2.5 Gbps",
      "primary_interface": "br0",
      "primary_ip": "192.168.1.10",

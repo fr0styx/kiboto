@@ -26,6 +26,8 @@ Kiboto OS: the Network page's address dialog sets IPv6 (automatic, off or a fixe
 
 Kiboto OS: the address dialog's DNS servers may be IPv6 addresses.
 
+Network: "This NAS at home" lists the NAS's IPv6 addresses under Details.
+
 #### Security
 
 Kiboto OS: when Kiboto hands files and folders in a shared folder to their people, a link put in their place over the network is never followed, so a system file's owner or rights can never be changed that way.

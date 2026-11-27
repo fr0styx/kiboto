@@ -7975,6 +7975,7 @@ export default {
   "net.home_router": "路由器",
   "net.home_dns": "域名服务器",
   "net.home_port": "经由",
+  "net.home_ipv6": "IPv6",
   "net.home_settings": "地址设置",
   "net.port_connected": "已连接",
   "net.port_not_connected": "未连接",

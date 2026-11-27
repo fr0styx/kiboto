@@ -19,6 +19,7 @@ export function homeHtml(summary = {}) {
   if (!ip)
     return `<p class="net-home-line">${escapeHtml(t('net.home_unknown', "Kiboto could not read this NAS's address."))}</p>`;
   const dns = (summary.dns_servers || []).filter(Boolean).join(', ');
+  const v6 = (summary.ipv6_addresses || []).filter(Boolean);
   return `<p class="net-home-line"><span>${withValue('net.home_at', 'At home, this NAS answers at {address}.', 'address', ip)}</span>
       <button type="button" class="btn-pill-toggle is-small" data-copy="${escapeHtml(ip)}">${escapeHtml(t('net.home_copy', 'Copy'))}</button></p>
     <p class="net-home-hint">${escapeHtml(t('net.home_reserve', 'To keep this address, reserve it for the NAS in your router.'))}</p>
@@ -28,6 +29,7 @@ export function homeHtml(summary = {}) {
         <dt>${escapeHtml(t('net.home_router', 'Router'))}</dt><dd>${escapeHtml(known(summary.default_gateway))}</dd>
         <dt>${escapeHtml(t('net.home_dns', 'Name servers'))}</dt><dd>${escapeHtml(known(dns))}</dd>
         <dt>${escapeHtml(t('net.home_port', 'Through'))}</dt><dd>${escapeHtml(known(summary.primary_interface))}</dd>
+        ${v6.length ? `<dt>${escapeHtml(t('net.home_ipv6', 'IPv6'))}</dt><dd translate="no">${v6.map((a) => escapeHtml(String(a))).join('<br>')}</dd>` : ''}
       </dl>
       <button type="button" class="btn-pill-toggle is-small" id="btn-open-host-ip-modal">${escapeHtml(t('net.home_settings', 'Address settings'))}</button>
     </details>`;

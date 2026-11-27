@@ -2,6 +2,7 @@
 
 Part of backend/hardware/network.py, split out by ARC-5."""
 
+import ipaddress
 import os
 import re
 import socket
@@ -144,6 +145,36 @@ def _parse_routes() -> list[dict[str, Any]]:
         logger.debug(f"Error parsing routes: {e}")
 
     return routes
+
+
+# /proc/net/if_inet6 flags: a temporary (privacy), deprecated, still being checked or refused address
+_V6_NOT_SHOWN = 0x01 | 0x08 | 0x20 | 0x40
+
+
+def _ipv6_addresses(iface: str) -> list[str]:
+    """The port's IPv6 addresses that work beyond the local link, as address/prefix, from
+    /proc/net/if_inet6 (no program run). Temporary privacy addresses are left out."""
+    path = _find_proc_net_path("if_inet6")
+    if not path or not iface:
+        return []
+    out: list[str] = []
+    try:
+        with open(path, encoding="utf-8", errors="replace") as f:
+            for line in f:
+                parts = line.split()
+                if len(parts) != 6 or parts[5] != iface or not re.fullmatch(r"[0-9a-fA-F]{32}", parts[0]):
+                    continue
+                try:
+                    prefix, scope, flags = int(parts[2], 16), int(parts[3], 16), int(parts[4], 16)
+                except ValueError:
+                    continue
+                if scope != 0 or flags & _V6_NOT_SHOWN:
+                    continue  # link-local, site-local or loopback; or an address not to give out
+                address = ipaddress.IPv6Address(bytes.fromhex(parts[0]))
+                out.append(f"{address}/{prefix}")
+    except OSError:
+        return []
+    return out
 
 
 def _get_dns_servers() -> list[str]:

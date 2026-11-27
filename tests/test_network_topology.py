@@ -4,6 +4,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from fastapi.testclient import TestClient
 
+from backend.hardware.net import common
 from backend.hardware.network import (
     _format_speed,
     _hex_to_ip,
@@ -546,3 +547,24 @@ def test_the_address_shown_is_the_host_s_not_a_saved_trial(tmp_path):
 def test_only_bridge_docker_networks_are_created():
     res = create_docker_network("cams", "macvlan")
     assert res["status"] == "error" and "bridge" in res["message"]
+
+
+def test_ipv6_addresses_are_read_without_running_a_program(tmp_path):
+    f = tmp_path / "if_inet6"
+    f.write_text(
+        "fd00000000000000000000000000abcd 03 40 00 80 enp1s0\n"  # a home (ULA) address: shown
+        "20010db8000000000000000000000001 03 40 00 a0 enp1s0\n"  # deprecated: not given out
+        "20010db8000000000000000000000002 03 40 00 c0 enp1s0\n"  # still being checked
+        "fec00000000000000000000000000001 03 40 40 80 enp1s0\n"  # site-local scope
+        "zz010db8000000000000000000000001 03 40 00 80 enp1s0\n"  # not an address
+        "20010db8000000000000000000000003 03 zz 00 80 enp1s0\n"  # not a number
+        "short line\n"
+    )
+    with patch("backend.hardware.net.common._find_proc_net_path", return_value=str(f)):
+        assert common._ipv6_addresses("enp1s0") == ["fd00::abcd/64"]
+        assert common._ipv6_addresses("eth9") == []
+        assert common._ipv6_addresses("") == []
+    with patch("backend.hardware.net.common._find_proc_net_path", return_value=None):
+        assert common._ipv6_addresses("enp1s0") == []
+    with patch("backend.hardware.net.common._find_proc_net_path", return_value=str(tmp_path / "gone")):
+        assert common._ipv6_addresses("enp1s0") == []

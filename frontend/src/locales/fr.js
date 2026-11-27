@@ -7975,6 +7975,7 @@ export default {
   "net.home_router": "Routeur",
   "net.home_dns": "Serveurs de noms",
   "net.home_port": "Via",
+  "net.home_ipv6": "IPv6",
   "net.home_settings": "Réglages de l'adresse",
   "net.port_connected": "Connecté",
   "net.port_not_connected": "Non connecté",

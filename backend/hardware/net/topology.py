@@ -348,13 +348,13 @@ def get_network_topology() -> dict[str, Any]:
     max_speed_mbps = max(active_speeds) if active_speeds else 0
     max_speed_str = common._format_speed(max_speed_mbps, is_up=bool(max_speed_mbps))
 
-    primary_ip = read_ip()
-
+    port = primary_iface or ("br0" if bridges else "eth0")
     summary = {
-        "primary_ip": primary_ip,
+        "primary_ip": read_ip(),
         "default_gateway": default_gw,
         "dns_servers": dns_servers,
-        "primary_interface": primary_iface or ("br0" if bridges else "eth0"),
+        "primary_interface": port,
+        "ipv6_addresses": common._ipv6_addresses(port),
         "total_physical": len(physical_interfaces),
         "active_physical": sum(1 for p in physical_interfaces if p["is_up"]),
         "max_speed": max_speed_str,

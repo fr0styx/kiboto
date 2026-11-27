@@ -32,6 +32,12 @@ describe('SET-24 m: This NAS at home and the port rows', () => {
     );
   });
 
+  it('lists IPv6 addresses under Details only when the NAS has some', () => {
+    expect(homeHtml({ primary_ip: '10.0.0.5' })).not.toContain('IPv6');
+    const html = homeHtml({ primary_ip: '10.0.0.5', ipv6_addresses: ['2001:db8::50/64', '<i>fd00::5/64</i>'] });
+    expect(html).toContain('<dt>IPv6</dt><dd translate="no">2001:db8::50/64<br>&lt;i&gt;fd00::5/64&lt;/i&gt;</dd>');
+  });
+
   it('Copy copies the address and says so; a failed copy says what to do', async () => {
     const box = /** @type {HTMLElement} */ (document.getElementById('home'));
     renderHome(box, { primary_ip: '10.0.0.5' });
