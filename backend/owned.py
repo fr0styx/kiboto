@@ -26,6 +26,7 @@ import grp
 import os
 import pwd
 import stat
+import struct
 from collections.abc import Callable
 from typing import Any
 
@@ -214,6 +215,63 @@ def to_people(folder: str, user: str = "nobody", group: str = "users", mode: int
     return True
 
 
+ACL_XATTR = "system.posix_acl_access"
+ACL_DEFAULT_XATTR = "system.posix_acl_default"  # what files made inside the folder start with
+_ACL_USER, _ACL_GROUP_OBJ, _ACL_GROUP, _ACL_MASK, _ACL_OTHER = 0x02, 0x04, 0x08, 0x10, 0x20
+
+
+def private_acl(raw: bytes) -> bytes | None:
+    """A private folder's access list that keeps the grants it names (Kiboto's own user, on Kiboto
+    OS): the group and everyone else get nothing, and the mask lets the named users in. None when
+    the list names no user (then mode 700 makes the folder private, as before). A home made
+    private by 700 alone had its mask cut to nothing, and the web process could not open a person's
+    own folder."""
+    if len(raw) < 4 or (len(raw) - 4) % 8:
+        return None
+    entries = [struct.unpack_from("<HHI", raw, 4 + 8 * i) for i in range((len(raw) - 4) // 8)]
+    if not any(tag == _ACL_USER for tag, _perm, _id in entries):
+        return None
+    out = []
+    for tag, perm, uid in entries:
+        if tag in (_ACL_GROUP_OBJ, _ACL_GROUP, _ACL_OTHER):
+            perm = 0
+        elif tag == _ACL_MASK:
+            perm = 7
+        out.append(struct.pack("<HHI", tag, perm, uid))
+    if not any(tag == _ACL_MASK for tag, _perm, _id in entries):
+        out.append(struct.pack("<HHI", _ACL_MASK, 7, 0xFFFFFFFF))
+    return raw[:4] + b"".join(out)
+
+
+def _make_private(folder: str, mode: int, st: os.stat_result) -> None:
+    """Mode `mode`, or on a folder whose access list names a user, that list made private
+    (private_acl), written on an open handle of the folder: never through a link."""
+    try:
+        raw = os.getxattr(folder, ACL_XATTR, follow_symlinks=False) if mode == 0o700 else b""
+    except OSError:
+        raw = b""
+    closed = private_acl(raw) if raw else None
+    if closed is None:
+        _mode(folder, mode, st)
+        return
+    fd = os.open(folder, os.O_RDONLY | os.O_DIRECTORY | getattr(os, "O_NOFOLLOW", 0))
+    try:
+        now = os.fstat(fd)
+        if (now.st_dev, now.st_ino) != (st.st_dev, st.st_ino):
+            raise FileNotFoundError(errno.ENOENT, "replaced while it was opened", folder)
+        if closed != raw:
+            os.setxattr(fd, ACL_XATTR, closed)
+        try:  # files made inside start private too: nothing for the group or anyone else, the mask open
+            inherited = os.getxattr(fd, ACL_DEFAULT_XATTR)
+        except OSError:
+            inherited = b""
+        made_private = private_acl(inherited) if inherited else None
+        if made_private is not None and made_private != inherited:
+            os.setxattr(fd, ACL_DEFAULT_XATTR, made_private)
+    finally:
+        os.close(fd)
+
+
 def to_person(folder: str, uid: int, gid: int = 100, mode: int = 0o700) -> bool:
     """A person's private folder on Kiboto's own file server goes to their own account. Handed
     over while it is root's or still the file server's user's (how private folders were written
@@ -229,11 +287,25 @@ def to_person(folder: str, uid: int, gid: int = 100, mode: int = 0o700) -> bool:
     file_server_uid, _ = _ids("nobody", "users")
     if _me() != 0 or not stat.S_ISDIR(st.st_mode) or st.st_uid not in {file_server_uid, uid} | _ours():
         return False
-    if (st.st_uid, st.st_gid, stat.S_IMODE(st.st_mode)) == (uid, gid, mode):
+    try:
+        raw = os.getxattr(folder, ACL_XATTR, follow_symlinks=False)
+    except OSError:
+        raw = b""
+    try:
+        inherited = os.getxattr(folder, ACL_DEFAULT_XATTR, follow_symlinks=False)
+    except OSError:
+        inherited = b""
+    settled = (
+        raw
+        and private_acl(raw) == raw
+        and stat.S_IMODE(st.st_mode) == 0o770
+        and (not inherited or private_acl(inherited) in (None, inherited))
+    )
+    if (st.st_uid, st.st_gid) == (uid, gid) and (settled or (not raw and stat.S_IMODE(st.st_mode) == mode)):
         return False
     try:
         _give(folder, uid, gid, st)
-        _mode(folder, mode, st)
+        _make_private(folder, mode, st)
     except OSError as e:
         logger.warning("[Files] the private folder %s keeps its owner: %s", folder, e)
         return False

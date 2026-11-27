@@ -362,3 +362,54 @@ def test_the_change_helpers_set_rights_and_owner_on_the_file_itself(tmp_path):
         owned._mode(str(f), 0o600, os.lstat(other))  # not the file that was looked at
     os.mkfifo(tmp_path / "pipe")
     owned._mode(str(tmp_path / "pipe"), 0o666)  # a pipe is never opened: nothing happens
+
+
+def _acl(*entries):
+    """A system.posix_acl_access value: version 2, then (tag, perm, id) entries."""
+    import struct
+
+    return struct.pack("<I", 2) + b"".join(struct.pack("<HHI", tag, perm, uid) for tag, perm, uid in entries)
+
+
+USER_OBJ, USER, GROUP_OBJ, GROUP, MASK, OTHER = 0x01, 0x02, 0x04, 0x08, 0x10, 0x20
+
+
+def test_a_private_folder_keeps_the_grants_it_names_and_shuts_everyone_else_out():
+    inherited = _acl((USER_OBJ, 7, 0), (USER, 7, 999), (GROUP_OBJ, 5, 0), (GROUP, 5, 100), (MASK, 7, 0), (OTHER, 5, 0))
+    assert owned.private_acl(inherited) == _acl(
+        (USER_OBJ, 7, 0), (USER, 7, 999), (GROUP_OBJ, 0, 0), (GROUP, 0, 100), (MASK, 7, 0), (OTHER, 0, 0)
+    )
+    cut = _acl((USER_OBJ, 7, 0), (USER, 7, 999), (GROUP_OBJ, 5, 0), (MASK, 0, 0), (OTHER, 0, 0))  # made private by 700
+    assert owned.private_acl(cut) == _acl(
+        (USER_OBJ, 7, 0), (USER, 7, 999), (GROUP_OBJ, 0, 0), (MASK, 7, 0), (OTHER, 0, 0)
+    )
+    assert (
+        owned.private_acl(_acl((USER_OBJ, 7, 0), (GROUP_OBJ, 5, 0), (OTHER, 5, 0))) is None
+    )  # names nobody: 700 does it
+    assert owned.private_acl(b"\x02\x00") is None
+    no_mask = owned.private_acl(_acl((USER_OBJ, 7, 0), (USER, 7, 999), (GROUP_OBJ, 5, 0), (OTHER, 5, 0)))
+    assert no_mask.endswith(_acl((MASK, 7, 0xFFFFFFFF))[4:])
+
+
+def test_handing_a_home_over_writes_the_private_list_or_the_mode(tmp_path, monkeypatch):
+    home = tmp_path / "anna"
+    home.mkdir()
+    os.chmod(home, 0o700)
+    inherited = _acl((USER_OBJ, 7, 0), (USER, 7, 999), (GROUP_OBJ, 5, 0), (MASK, 7, 0), (OTHER, 5, 0))
+    written, modes = [], []
+    monkeypatch.setattr(owned, "_through_door", lambda: False)
+    monkeypatch.setattr(owned, "_ids", lambda user, group: (65534, 100))
+    monkeypatch.setattr(owned, "_me", lambda: 0)
+    monkeypatch.setattr(owned, "_ours", lambda: {os.getuid()})
+    monkeypatch.setattr(owned, "_give", lambda path, uid, gid, st=None: None)
+    monkeypatch.setattr(owned, "_mode", lambda path, mode, st=None: modes.append(mode))
+    monkeypatch.setattr(owned.os, "getxattr", lambda p, attr, follow_symlinks=True: inherited)
+    monkeypatch.setattr(owned.os, "setxattr", lambda fd, attr, value: written.append(value))
+    assert owned.to_person(str(home), os.getuid(), os.getgid()) is True
+    assert written == [owned.private_acl(inherited)] * 2 and modes == []  # the folder, and what is made in it
+
+    def none(*a, **k):
+        raise OSError(61, "No data available")
+
+    monkeypatch.setattr(owned.os, "getxattr", none)
+    assert owned.to_person(str(home), os.getuid(), os.getgid() + 1) is True and modes == [0o700]

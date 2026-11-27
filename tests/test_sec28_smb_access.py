@@ -232,7 +232,7 @@ def test_a_shared_folder_kiboto_made_goes_to_the_file_servers_user(people, tmp_p
     # a private folder is its person's: they sign in as their own account, and the folder is theirs
     homes_section = conf.split("[homes]", 1)[1].split("[", 1)[0]
     assert "force user" not in homes_section and "force group" not in homes_section
-    assert "valid users = %S" in homes_section and "directory mask = 0700" in homes_section
+    assert "valid users = %S" in homes_section and "directory mask = 0770" in homes_section
     assert given == [(str(homes / "kim"), smb_accounts.FIRST_UID)]
     # on Unraid or another host that serves the files itself, nothing is handed over
     handed.clear()

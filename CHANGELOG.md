@@ -78,6 +78,8 @@ Snapshots: a schedule for a share on ext4 is refused when saved, with the reason
 
 Kiboto OS install: waits for Debian's own package updates that run right after a machine starts, instead of failing on their lock.
 
+Kiboto OS: people can open their own private folder in Kiboto, and the files they save there over the network; the folder stays shut to everyone else.
+
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container
 

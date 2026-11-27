@@ -534,8 +534,11 @@ class SambaEngine:
                         "   valid users = %S",
                         "   browseable = no",
                         f"   read only = {'yes' if frozen else 'no'}",
-                        "   create mask = 0600",
-                        "   directory mask = 0700",
+                        # on Kiboto's own file server each home's access list keeps the group and
+                        # everyone else out, and these group bits are its mask: Kiboto's own user
+                        # (the web page) can still open what a person saves over the network
+                        f"   create mask = {'0660' if ours else '0600'}",
+                        f"   directory mask = {'0770' if ours else '0700'}",
                         "",
                     ]
                 )
