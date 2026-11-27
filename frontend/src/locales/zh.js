@@ -8230,6 +8230,8 @@ export default {
   "sc.host_sign_in": "使用你在 {host} 上使用的名称和密码。",
   "sc.two_step": "你开启了两步登录，因此共享文件夹需要单独的密码。请用你的 Kiboto 名称和这个密码登录。",
   "sc.sign_in": "使用你的 Kiboto 名称和密码登录。",
+  "sc.sign_in_as": "请以 {name} 的身份，用你的 Kiboto 密码登录。",
+  "sc.two_step_as": "你开启了两步登录，因此共享文件夹需要单独的密码。请以 {name} 的身份用这个密码登录。",
   "sc.title": "连接到“{share}”",
   "sc.windows": "Windows：在文件资源管理器中输入",
   "sc.mac": "Mac：在访达中选择 前往 → 连接服务器",

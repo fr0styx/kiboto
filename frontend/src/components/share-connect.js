@@ -12,17 +12,25 @@ export function addresses(share, address) {
   return { windows: `\\\\${host}\\${share}`, mac: `smb://${host}/${encodeURIComponent(share)}` };
 }
 
-export function connectHtml(share, a, { twoStep = false, host = '' } = {}) {
+export function connectHtml(share, a, { twoStep = false, host = '', name = '' } = {}) {
   const row = (label, value, key) =>
     `<div class="sc-row"><span class="sc-label">${escapeHtml(label)}</span><code class="sc-value">${escapeHtml(value)}</code><button type="button" class="btn-pill-toggle is-small" data-sc-copy="${key}">${escapeHtml(t('smb.copy', 'Copy'))}</button></div>`;
   const signIn = host
     ? t('sc.host_sign_in', 'Use the name and password you use for {host}.', { host })
-    : twoStep
-      ? t(
-          'sc.two_step',
-          'You have two-step sign-in, so you need a separate password for shared folders. Sign in with your Kiboto name and that password.'
-        )
-      : t('sc.sign_in', 'Sign in with your Kiboto name and password.');
+    : name // the login name, not the name shown on People: "Administrator" was tried and refused (#71)
+      ? twoStep
+        ? t(
+            'sc.two_step_as',
+            'You have two-step sign-in, so you need a separate password for shared folders. Sign in as {name} with that password.',
+            { name }
+          )
+        : t('sc.sign_in_as', 'Sign in as {name} with your Kiboto password.', { name })
+      : twoStep
+        ? t(
+            'sc.two_step',
+            'You have two-step sign-in, so you need a separate password for shared folders. Sign in with your Kiboto name and that password.'
+          )
+        : t('sc.sign_in', 'Sign in with your Kiboto name and password.');
   return `<h2 id="sc-title" class="account-h">${escapeHtml(t('sc.title', 'Connect to "{share}"', { share }))}</h2>
     ${row(t('sc.windows', 'Windows: in File Explorer, type'), a.windows, 'windows')}
     ${row(t('sc.mac', 'Mac: in Finder, Go → Connect to Server'), a.mac, 'mac')}
@@ -33,21 +41,25 @@ export function connectHtml(share, a, { twoStep = false, host = '' } = {}) {
 
 /** The window for one folder. */
 export async function openConnect(share, host = '') {
-  const [where, mfa] = await Promise.all([
+  const [where, mfa, me] = await Promise.all([
     Promise.resolve()
       .then(() => api.get('/api/storage/connect'))
       .catch(() => ({ address: '' })),
     Promise.resolve()
       .then(() => api.get('/api/auth/mfa/status'))
       .catch(() => ({})),
+    Promise.resolve()
+      .then(() => api.get('/api/auth/me'))
+      .catch(() => ({})),
   ]);
+  const name = String((me?.user || me)?.username || '');
   const a = addresses(share, where?.address || '');
   document.getElementById('share-connect')?.remove();
   const dlg = document.createElement('dialog');
   dlg.id = 'share-connect';
   dlg.className = 'who-window';
   dlg.setAttribute('aria-labelledby', 'sc-title');
-  dlg.innerHTML = connectHtml(share, a, { twoStep: Boolean(mfa?.mfa_enabled), host });
+  dlg.innerHTML = connectHtml(share, a, { twoStep: Boolean(mfa?.mfa_enabled), host, name });
   document.body.appendChild(dlg);
   dlg.addEventListener('cancel', () => dlg.remove());
   dlg.onclick = async (e) => {

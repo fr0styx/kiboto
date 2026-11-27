@@ -158,12 +158,16 @@ export async function copyTextToClipboard(text) {
   textArea.style.position = 'fixed';
   textArea.style.left = '-999999px';
   textArea.style.top = '-999999px';
-  document.body.appendChild(textArea);
+  // inside the dialog that is open, if one is: outside a modal dialog the page is inert, the box
+  // could not be selected and "Copied" was shown with nothing copied (#71)
+  const open =
+    document.activeElement?.closest?.('dialog[open]') || [...document.querySelectorAll('dialog[open]')].pop();
+  (open || document.body).appendChild(textArea);
   textArea.focus();
   textArea.select();
   let success = false;
   try {
-    success = document.execCommand('copy');
+    success = document.execCommand('copy') && document.activeElement === textArea;
   } catch (err) {
     console.error('Fallback clipboard copy failed:', err);
   }

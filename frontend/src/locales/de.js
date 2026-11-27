@@ -8230,6 +8230,8 @@ export default {
   "sc.host_sign_in": "Verwenden Sie den Namen und das Passwort, die Sie für {host} verwenden.",
   "sc.two_step": "Sie haben die zweistufige Anmeldung, daher brauchen Sie ein eigenes Passwort für freigegebene Ordner. Melden Sie sich mit Ihrem Kiboto-Namen und diesem Passwort an.",
   "sc.sign_in": "Melden Sie sich mit Ihrem Kiboto-Namen und Passwort an.",
+  "sc.sign_in_as": "Melden Sie sich als {name} mit Ihrem Kiboto-Passwort an.",
+  "sc.two_step_as": "Sie haben die zweistufige Anmeldung, daher brauchen Sie ein eigenes Passwort für freigegebene Ordner. Melden Sie sich als {name} mit diesem Passwort an.",
   "sc.title": "Mit „{share}“ verbinden",
   "sc.windows": "Windows: im Explorer eingeben",
   "sc.mac": "Mac: im Finder Gehe zu → Mit Server verbinden",

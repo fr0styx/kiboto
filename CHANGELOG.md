@@ -34,6 +34,8 @@ Kiboto OS: a shared folder on a ZFS or btrfs pool can be a merged folder, not on
 
 Replication: when the other machine of a copy was reinstalled and shows a new identity, the job says so in words and offers to forget its old key. The reason a copy failed is shown under its status, also on phones.
 
+Create Pool is shown without advanced tools while there is no pool yet.
+
 #### Security
 
 Kiboto OS: when Kiboto hands files and folders in a shared folder to their people, a link put in their place over the network is never followed, so a system file's owner or rights can never be changed that way.
@@ -119,6 +121,8 @@ Kiboto OS: the ransomware guard's files in shared folders now notice ransomware 
 Kiboto OS: the file manager lists the storage pools, not every folder in /mnt.
 
 Kiboto OS: files a two-way sync brings into a shared folder can be changed by that folder's people over the network.
+
+Card copies: the Browse button opens the folder picker again. How to connect: Copy works on plain http or says it could not copy, and it names the account to sign in with.
 
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container

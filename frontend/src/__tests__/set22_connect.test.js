@@ -31,12 +31,22 @@ describe('how to connect (SET-22, Shares 3)', () => {
     expect(two).toContain('separate password for shared folders');
     expect(two).toContain('data-sc-make');
     expect(sc.connectHtml('photos', a, { host: 'Unraid' })).toContain('Use the name and password you use for Unraid.');
+    // the login name, not the name People shows: "Administrator" was tried and refused (#71)
+    expect(sc.connectHtml('photos', a, { name: 'admin' })).toContain('Sign in as admin with your Kiboto password.');
+    expect(sc.connectHtml('photos', a, { name: 'ana', twoStep: true })).toContain('Sign in as ana with that password.');
   });
 
   it('the window copies an address and makes the separate password', async () => {
-    get.mockImplementation(async (url) => (url.includes('mfa') ? { mfa_enabled: true } : { address: '10.0.0.2' }));
+    get.mockImplementation(async (url) =>
+      url.includes('mfa')
+        ? { mfa_enabled: true }
+        : url.includes('/me')
+          ? { user: { username: 'ana' } }
+          : { address: '10.0.0.2' }
+    );
     copyText.mockResolvedValue(undefined);
     const dlg = await sc.openConnect('photos');
+    expect(dlg.textContent).toContain('Sign in as ana with that password.');
     /** @type {HTMLElement} */ (dlg.querySelector('[data-sc-copy="mac"]')).click();
     await vi.waitFor(() => expect(copyText).toHaveBeenCalledWith('smb://10.0.0.2/photos'));
     /** @type {HTMLElement} */ (dlg.querySelector('[data-sc-make]')).click();

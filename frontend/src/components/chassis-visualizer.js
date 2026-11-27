@@ -1034,6 +1034,8 @@ export async function fetchAndRenderStorageTopology(container) {
     const btnCreatePool = document.getElementById('btn-create-storage-pool');
     if (btnCreatePool) {
       btnCreatePool.style.display = canCreatePools ? 'inline-flex' : 'none';
+      // with no pool yet it is the first thing to do, not an advanced tool (#71)
+      btnCreatePool.toggleAttribute('data-advanced-only', Array.isArray(data?.pools) && data.pools.length > 0);
       btnCreatePool.onclick = () => openCreateStoragePoolModal(() => fetchAndRenderStorageTopology(container));
     }
 

@@ -9,8 +9,9 @@ import { t } from './i18n.js';
 window.addEventListener('DOMContentLoaded', () => {
   const $ = (id) => document.getElementById(id);
   // Folder Browser Modal Logic
-  const btnBrowseDst = $('btn-browse-dst');
-  const btnCopyDst = /** @type {HTMLInputElement} */ ($('btn-copy-dst'));
+  // the card-copy drawer's Browse button and folder field: the drawer is loaded later than this
+  // page (drawer-dom.js), so they are looked up when used, never kept from now (#71)
+  const copyDst = () => /** @type {HTMLInputElement | null} */ ($('btn-copy-dst'));
   const fbModal = $('folder-browser-modal');
   const fbCurrentPath = $('fb-current-path');
   const fbList = $('fb-list');
@@ -217,15 +218,13 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  if (btnBrowseDst) {
-    const handleBrowse = (e) => {
-      if (e) e.preventDefault();
-      const currentDst = btnCopyDst && btnCopyDst.value ? btnCopyDst.value : home();
-      openFbModal(currentDst, null);
-    };
-    btnBrowseDst.addEventListener('click', handleBrowse);
-    btnBrowseDst.addEventListener('touchend', handleBrowse);
-  }
+  document.addEventListener('click', (e) => {
+    const target = /** @type {HTMLElement | null} */ (e.target);
+    if (!target?.closest?.('#btn-browse-dst')) return;
+    e.preventDefault();
+    const field = copyDst();
+    openFbModal(field && field.value ? field.value : home(), null);
+  });
 
   if (fbCancel) {
     fbCancel.addEventListener('click', closeFbModal);
@@ -270,8 +269,9 @@ window.addEventListener('DOMContentLoaded', () => {
         ZettEventBus.dispatchEvent(new CustomEvent('folder_selected', { detail: selected }));
         return;
       }
-      if (btnCopyDst) {
-        btnCopyDst.value = selected;
+      const field = copyDst();
+      if (field) {
+        field.value = selected;
       }
       closeFbModal();
       ZettEventBus.dispatchEvent(new CustomEvent('folder_selected', { detail: selected }));

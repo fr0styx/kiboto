@@ -97,9 +97,12 @@ describe('Sprint 5: Generic Linux Active Provisioner & Samba Engine (Frontend)',
       return Promise.resolve({});
     });
 
+    btnCreatePool.setAttribute('data-advanced-only', '');
     await fetchAndRenderStorageTopology(container);
 
     expect(btnCreatePool.style.display).toBe('inline-flex');
+    // no pool yet: creating one is the first thing to do, not an advanced tool (#71)
+    expect(btnCreatePool.hasAttribute('data-advanced-only')).toBe(false);
 
     btnCreatePool.remove();
   });

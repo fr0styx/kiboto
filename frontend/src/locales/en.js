@@ -8230,6 +8230,8 @@ export default {
   "sc.host_sign_in": "Use the name and password you use for {host}.",
   "sc.two_step": "You have two-step sign-in, so you need a separate password for shared folders. Sign in with your Kiboto name and that password.",
   "sc.sign_in": "Sign in with your Kiboto name and password.",
+  "sc.sign_in_as": "Sign in as {name} with your Kiboto password.",
+  "sc.two_step_as": "You have two-step sign-in, so you need a separate password for shared folders. Sign in as {name} with that password.",
   "sc.title": "Connect to \"{share}\"",
   "sc.windows": "Windows: in File Explorer, type",
   "sc.mac": "Mac: in Finder, Go → Connect to Server",

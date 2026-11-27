@@ -8230,6 +8230,8 @@ export default {
   "sc.host_sign_in": "Utilisez le nom et le mot de passe que vous utilisez pour {host}.",
   "sc.two_step": "Vous avez la connexion en deux étapes : il vous faut un mot de passe à part pour les dossiers partagés. Connectez-vous avec votre nom Kiboto et ce mot de passe.",
   "sc.sign_in": "Connectez-vous avec votre nom et votre mot de passe Kiboto.",
+  "sc.sign_in_as": "Connectez-vous en tant que {name} avec votre mot de passe Kiboto.",
+  "sc.two_step_as": "Vous avez la connexion en deux étapes : il vous faut un mot de passe à part pour les dossiers partagés. Connectez-vous en tant que {name} avec ce mot de passe.",
   "sc.title": "Se connecter à « {share} »",
   "sc.windows": "Windows : dans l'Explorateur de fichiers, tapez",
   "sc.mac": "Mac : dans le Finder, Aller → Se connecter au serveur",
