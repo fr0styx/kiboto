@@ -176,6 +176,8 @@ Alerts: an ntfy alert whose title has a letter outside plain English (a degree s
 
 Rotating the secret key also re-encrypts the passwords kept for SNMP, Dynamic DNS, NUT, iSCSI and Home Assistant; before, they could no longer be read afterwards.
 
+SNMP on Kiboto OS reports each storage pool; before, it reported the system disk as the storage.
+
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container
 

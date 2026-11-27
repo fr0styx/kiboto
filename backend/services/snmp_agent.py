@@ -3,10 +3,10 @@ LibreNMS, Zabbix or PRTG read how the NAS is doing. Off by default; version 3 on
 authentication (SHA-256) and encryption (AES-128), so nothing answers without the user name and
 both passwords; v1 and v2c requests get no answer. Read-only: nothing can be changed over SNMP.
 
-What it answers: the system group (SNMPv2-MIB), uptime, memory, the storage pool and processor
+What it answers: the system group (SNMPv2-MIB), uptime, memory, each storage pool and processor
 load (HOST-RESOURCES-MIB), interfaces with 64-bit counters (IF-MIB) and the load average and
 memory figures of UCD-SNMP-MIB that most tools graph. Figures are read from the host's /proc at
-most every few seconds; the storage pool is read with statfs, which does not wake sleeping drives.
+most every few seconds; the pools are read with statfs, which does not wake sleeping drives.
 """
 
 from __future__ import annotations
@@ -178,6 +178,26 @@ class _Cpu:
 _cpu = _Cpu()
 
 
+def pool_mounts(pool: str, mounts: str) -> list[str]:
+    """The pools to report: each filesystem mounted right under the storage folder (on Kiboto OS a
+    pool is /mnt/storage/<name>), or the storage folder itself where it is the mount (a container's
+    bind mount, Unraid's array). Deeper mounts (a ZFS pool's datasets, merged folders) belong to a
+    pool already. On Kiboto OS the storage folder lies on the system disk, which was reported as the
+    storage pool."""
+    pool = pool.rstrip("/") or "/"
+    points = []
+    for line in _read(mounts).splitlines():
+        parts = line.split()
+        if len(parts) < 3:
+            continue
+        point = parts[1].replace("\\040", " ")
+        if point == pool or os.path.dirname(point) == pool:
+            if point not in points:
+                points.append(point)
+    children = sorted(p for p in points if p != pool)
+    return children or ([pool] if pool in points else [pool])
+
+
 def mib(
     proc: str = HOST_PROC, pool: str = POOL_PATH, started: float | None = None, host_root: str = "/host"
 ) -> dict[OID, Any]:
@@ -209,17 +229,18 @@ def mib(
         t[UCD + (4, 6, 0)] = v2c.Integer(min(mem.get("MemAvailable", mem.get("MemFree", 0)), 2**31 - 1))
         t[UCD + (4, 3, 0)] = v2c.Integer(min(mem.get("SwapTotal", 0), 2**31 - 1))
         t[UCD + (4, 4, 0)] = v2c.Integer(min(mem.get("SwapFree", 0), 2**31 - 1))
-    # hrStorageTable: 1 physical memory, 2 the storage pool
+    # hrStorageTable: 1 physical memory, then each storage pool
     rows: list[tuple[OID, str, int, int, int]] = []
     if mem:
         used = mem.get("MemTotal", 0) - mem.get("MemAvailable", mem.get("MemFree", 0))
         rows.append((HR_STORAGE_RAM, "Physical memory", 1024, mem.get("MemTotal", 0), used))
-    try:
-        du = shutil.disk_usage(pool)
+    for path in pool_mounts(pool, os.path.join(proc, "self", "mounts")):
+        try:
+            du = shutil.disk_usage(path)
+        except OSError:
+            continue
         unit = 4096
-        rows.append((HR_STORAGE_FIXED, pool, unit, du.total // unit, du.used // unit))
-    except OSError:
-        pass
+        rows.append((HR_STORAGE_FIXED, path, unit, du.total // unit, du.used // unit))
     for i, (kind, descr, unit, size, used) in enumerate(rows, start=1):
         base = HR + (2, 3, 1)
         t[base + (1, i)] = v2c.Integer(i)
