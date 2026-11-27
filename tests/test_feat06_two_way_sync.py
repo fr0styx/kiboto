@@ -239,3 +239,30 @@ def test_what_the_sync_brings_here_follows_the_folder(store, tmp_path, monkeypat
     for _name, how in ran:
         assert (how["umask"], how["group"], how["for"]) == (0o002, 100, str(local))
     assert oct(os.stat(tmp_path / "bisync").st_mode & 0o777) == "0o700"
+
+
+def test_on_kiboto_os_what_the_sync_brought_goes_to_the_folders_people(monkeypatch, tmp_path):
+    """There rclone runs as Kiboto's own user: what it brought kept that user's group, and the
+    folder's people could only read it."""
+    from types import SimpleNamespace
+
+    from backend import owned, runtime
+    from backend.services import two_way_sync as tws
+
+    handed = []
+    monkeypatch.setattr(owned, "give_back", lambda top, keep_out=None: handed.append(top) or {"seen": 1, "given": 1})
+    monkeypatch.setattr(tws, "WORKDIR", str(tmp_path / "work"))
+    monkeypatch.setattr(tws, "command", lambda pair, dry_run: ["rclone"])
+
+    def ran(cmd, **kw):
+        return SimpleNamespace(returncode=0, stdout="", stderr="")
+
+    pair = {"local": str(tmp_path / "family"), "baseline": True}
+    monkeypatch.setattr(runtime, "without_root", lambda: True)
+    tws._run(pair, True, ran)  # a preview changes nothing
+    assert handed == []
+    tws._run(pair, False, ran)
+    assert handed == [str(tmp_path / "family")]
+    monkeypatch.setattr(runtime, "without_root", lambda: False)
+    tws._run(pair, False, ran)
+    assert handed == [str(tmp_path / "family")]

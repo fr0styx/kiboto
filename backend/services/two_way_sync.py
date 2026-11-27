@@ -217,6 +217,18 @@ def _as_the_folder(pair: dict[str, Any]) -> dict[str, Any]:
     return dict(owned.for_helper(pair["local"], ours=False))
 
 
+def _to_the_folders_people(pair: dict[str, Any]) -> None:
+    """On Kiboto OS rclone runs as Kiboto's own user and only the umask can be chosen, so what the
+    sync brought kept that user's own group: the folder's people could only read it. After each run
+    the root service hands what Kiboto made in the local folder to that folder, as uploads are."""
+    from backend import runtime
+
+    if runtime.without_root():
+        from backend.fsutil import prune_protected
+
+        owned.give_back(pair["local"], prune_protected)
+
+
 def _run(pair: dict[str, Any], dry_run: bool, run: Callable = run_bounded) -> dict[str, Any]:
     os.makedirs(WORKDIR, exist_ok=True)
     os.chmod(WORKDIR, 0o700)  # rclone's own notes on the pair: nobody else's, whatever its umask
@@ -228,6 +240,8 @@ def _run(pair: dict[str, Any], dry_run: bool, run: Callable = run_bounded) -> di
     res = run(
         command(pair, dry_run), timeout=RUN_TIMEOUT if not dry_run else 1800, capture_output=True, text=True, **how
     )
+    if not dry_run:
+        _to_the_folders_people(pair)
     text = (res.stdout or "") + (res.stderr or "")
     summary = parse(text)
     summary["ok"] = res.returncode == 0

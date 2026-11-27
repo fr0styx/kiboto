@@ -118,6 +118,8 @@ Kiboto OS: the ransomware guard's files in shared folders now notice ransomware 
 
 Kiboto OS: the file manager lists the storage pools, not every folder in /mnt.
 
+Kiboto OS: files a two-way sync brings into a shared folder can be changed by that folder's people over the network.
+
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container
 
