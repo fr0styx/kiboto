@@ -34,6 +34,18 @@ python3-venv ca-certificates curl acl unattended-upgrades"
 
 say() { printf '%s\n' "$*"; }
 die() { printf 'Kiboto was not installed: %s\n' "$*" >&2; exit 1; }
+# Debian runs its own package jobs right after a machine starts (apt-daily, unattended-upgrades):
+# apt waits up to 10 minutes for their lock instead of failing
+apt_get() { apt-get -o DPkg::Lock::Timeout=600 "$@"; }
+# apt-mark hands its work to dpkg, which does not wait for a lock another apt holds: tried again
+apt_mark() {
+  n=0
+  until apt-mark "$@" >/dev/null 2>&1; do
+    n=$((n + 1))
+    [ "$n" -lt 60 ] || { apt-mark "$@" >/dev/null; return; }
+    sleep 10
+  done
+}
 
 # Secure Boot: the firmware's own switch (an EFI variable whose last byte is 1 when it is on)
 secure_boot_on() {
@@ -146,7 +158,7 @@ packages() {
   for f in /etc/apt/sources.list.d/*.sources; do
     [ -f "$f" ] && sed -i 's/^Components: main$/Components: main contrib non-free-firmware/' "$f"
   done
-  apt-get update -qq
+  apt_get update -qq
   # apt-get update reports a server it could not reach as a warning only; without the contrib list
   # ZFS is then "not found" further down, which says nothing about the network
   if [ -n "$(missing zfs-dkms)" ] && ! apt-cache policy zfs-dkms 2>/dev/null | grep -q 'Candidate: [0-9]'; then
@@ -157,13 +169,13 @@ packages() {
   # ZFS is built against the headers of the kernel that is running, not of the newest one.
   headers="linux-headers-$(uname -r)"
   if ! dpkg -s "$headers" >/dev/null 2>&1; then
-    apt-get install -y -qq --no-install-recommends "$headers" >/dev/null 2>&1 \
+    apt_get install -y -qq --no-install-recommends "$headers" >/dev/null 2>&1 \
       || die "Debian no longer offers the files for the kernel this machine is running ($(uname -r)). Update Debian (apt full-upgrade), restart, and run this again."
   fi
   # shellcheck disable=SC2086
   need=$(missing linux-headers-amd64 $TOOLS)
   # shellcheck disable=SC2086
-  [ -z "$need" ] || apt-get install -y -qq --no-install-recommends $need >/dev/null
+  [ -z "$need" ] || apt_get install -y -qq --no-install-recommends $need >/dev/null
   # The module first, then the tools: neither package needs the other, so in one go dpkg may set up
   # the tools first, and their service tries to load a module that is not built yet (a red FAILED
   # on the screen during the first start).
@@ -174,7 +186,7 @@ packages() {
     [ -n "$need" ] || continue
     # unquoted: missing() ends each name with a space, and "zfs-dkms " is no package
     # shellcheck disable=SC2086
-    apt-get install -y -qq --no-install-recommends $need >/dev/null
+    apt_get install -y -qq --no-install-recommends $need >/dev/null
   done
   if ! modprobe zfs 2>/dev/null; then
     secure_boot_on || die "ZFS was built but does not load on this kernel."
@@ -184,7 +196,7 @@ packages() {
   # Debian starts its own iSCSI service with the package; Kiboto starts tgtd itself, only when turned on
   systemctl disable -q --now tgt.service 2>/dev/null || true
   # shellcheck disable=SC2086
-  apt-mark hold $HELD >/dev/null
+  apt_mark hold $HELD
 }
 
 docker_setup() {
@@ -394,7 +406,7 @@ network_to_networkd() {
   # what ifupdown has, kept before anything changes: installing systemd-resolved replaces resolv.conf
   cp -L /etc/network/interfaces /etc/network/interfaces.kiboto-before
   [ -f /etc/resolv.conf.kiboto-before ] || cp -L /etc/resolv.conf /etc/resolv.conf.kiboto-before 2>/dev/null || true
-  apt-get install -y -qq --no-install-recommends systemd-resolved >/dev/null 2>&1 \
+  apt_get install -y -qq --no-install-recommends systemd-resolved >/dev/null 2>&1 \
     || { say "  systemd-resolved could not be installed; the network stays with ifupdown."; return 0; }
   file="/etc/systemd/network/05-kiboto-$iface.network"
   mkdir -p /etc/systemd/network "$ETC"

@@ -64,7 +64,7 @@ def test_the_install_script_keeps_its_promises():
     # ZFS and Docker are held, and given back on uninstall with the kernel an older version held
     held = re.search(r'^HELD="(.*)"$', sh, re.M).group(1).split()
     assert held == ["zfs-dkms", "zfsutils-linux", "docker.io"]
-    assert "apt-mark hold $HELD" in sh and "apt-mark unhold $HELD $KERNEL" in sh
+    assert "apt_mark hold $HELD" in sh and "apt-mark unhold $HELD $KERNEL" in sh
     assert 'KERNEL="linux-image-amd64 linux-headers-amd64"' in sh
     # Docker gets an address range that cannot clash with a home network or an outer Docker
     assert '"bip": "10.212.0.1/24"' in sh and '"base": "10.213.0.0/16"' in sh and '"max-size": "10m"' in sh
@@ -131,7 +131,7 @@ def test_a_second_run_leaves_the_held_packages_as_they_are():
     sh = _read("install.sh")
     step = sh[sh.index("packages() {") : sh.index("docker_setup() {")]
     # every install line takes only what is missing: none names a held package outright
-    installs = [ln for ln in step.splitlines() if "apt-get install" in ln]
+    installs = [ln for ln in step.splitlines() if "apt_get install" in ln]
     assert installs and all(("$need" in ln or '"$headers"' in ln) for ln in installs), installs
     assert 'headers="linux-headers-$(uname -r)"' in step  # ZFS is built for the kernel that runs
 
@@ -179,7 +179,7 @@ def test_a_machine_on_ifupdown_moves_to_networkd_with_a_timed_way_back():
     )
     assert sh.count("wait_up; network_to_networkd") == 2  # after both kinds of install
     assert 'ifup "$iface"' in step  # the way back brings an allow-hotplug port up again
-    assert step.index("resolv.conf.kiboto-before") < step.index("apt-get install")  # kept before resolved replaces it
+    assert step.index("resolv.conf.kiboto-before") < step.index("apt_get install")  # kept before resolved replaces it
 
 
 def test_the_runner_runs_its_own_program_name(monkeypatch):

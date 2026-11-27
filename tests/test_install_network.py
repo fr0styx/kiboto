@@ -55,4 +55,4 @@ def test_a_candidate_or_an_installed_zfs_goes_on(tmp_path):
 
 def test_the_check_comes_after_the_update_and_before_any_install():
     body = INSTALL[INSTALL.index("packages() {") :]
-    assert body.index("apt-get update -qq") < body.index("Candidate: [0-9]") < body.index("apt-get install")
+    assert body.index("apt_get update -qq") < body.index("Candidate: [0-9]") < body.index("apt_get install")

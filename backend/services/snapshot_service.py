@@ -59,9 +59,12 @@ def _keeps_snapshots(share: str, pool_id: str | None) -> None:
     pal = _pal()
     pid = pool_id or _pool_of(share, pal)
     try:
-        pools = pal.list_pools()
+        listed = {str(getattr(s, "name", "") or "") for s in pal.list_shares()}
+        pools = pal.list_pools() if share in listed else []
     except (OSError, RuntimeError, ValueError):
         return  # unreadable now: the run says why, as before
+    if share not in listed:
+        return  # a share this machine does not list is left to the run
     fs = next((str(getattr(p, "fs_type", "") or "") for p in pools if getattr(p, "id", None) == pid), "")
     if fs in NO_SNAPSHOTS:  # a kind not known here (a test pool, a new one) is left to the run
         raise ValueError(f"{share} is on {fs}, which keeps no snapshots.")

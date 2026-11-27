@@ -19,7 +19,7 @@ def test_the_module_comes_before_the_tools_one_call_each():
     assert "for pkg in zfs-dkms zfsutils-linux; do" in body
     assert "missing zfs-dkms zfsutils-linux" not in body
     loop = body[body.index("for pkg in zfs-dkms") : body.index("done", body.index("for pkg in zfs-dkms"))]
-    installs = [ln for ln in loop.splitlines() if "apt-get install" in ln]
+    installs = [ln for ln in loop.splitlines() if "apt_get install" in ln]
     assert len(installs) == 1 and all(ln.rstrip().endswith("$need >/dev/null") for ln in installs)
     assert 'missing "$pkg"' in loop
     assert "trixie-backports" not in loop  # Debian 13's own ZFS (2.3), whatever sources are listed
@@ -53,8 +53,18 @@ def test_the_loop_asks_apt_for_the_real_package_names(tmp_path, backports):
     for f in bin_.iterdir():
         f.chmod(0o755)
     env = {**os.environ, "PATH": f"{bin_}:/usr/bin:/bin"}
-    subprocess.run(["sh", "-c", missing + loop], check=True, env=env)
+    apt_get = next(ln for ln in TEXT.splitlines() if ln.startswith("apt_get() {")) + "\n"  # waits for apt's lock
+    subprocess.run(["sh", "-c", missing + apt_get + loop], check=True, env=env)
     calls = log.read_text().splitlines()
     assert len(calls) == 2
     assert "[trixie-backports]" not in calls[0]  # the same ZFS with or without backports listed
     assert calls[0].endswith("[zfs-dkms]") and calls[1].endswith("[zfsutils-linux]"), calls
+
+
+def test_apt_waits_for_debians_own_jobs_and_apt_mark_tries_again():
+    """A fresh Debian runs apt-daily and unattended-upgrades right after it starts: apt-mark failed at
+    once on dpkg's lock (the Secure Boot check in CI); apt now waits and apt-mark tries again."""
+    assert 'apt_get() { apt-get -o DPkg::Lock::Timeout=600 "$@"; }' in TEXT
+    body = _packages()
+    assert "apt-get install" not in body and "apt-get update -qq" not in body and "apt_mark hold $HELD" in body
+    assert 'until apt-mark "$@" >/dev/null 2>&1; do' in TEXT
