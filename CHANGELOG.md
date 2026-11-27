@@ -32,6 +32,8 @@ Storage: "Add a drive" grows a ZFS or btrfs pool with its own tool: a single dri
 
 Kiboto OS: a shared folder on a ZFS or btrfs pool can be a merged folder, not only one on an ext4 pool.
 
+Replication: when the other machine of a copy was reinstalled and shows a new identity, the job says so in words and offers to forget its old key. The reason a copy failed is shown under its status, also on phones.
+
 #### Security
 
 Kiboto OS: when Kiboto hands files and folders in a shared folder to their people, a link put in their place over the network is never followed, so a system file's owner or rights can never be changed that way.
@@ -105,6 +107,8 @@ A file a merged folder moved to the slower pool can be changed over SMB again. A
 Kiboto OS: a file a person puts in their own folder over SFTP can be opened, changed and deleted by them over the network share too.
 
 SFTP and WebDAV take a new password at once and stop taking the old one. Before, they kept an earlier sign-in for up to five minutes, renewed with every use; a removed or turned-off person could keep signing in the same way.
+
+A first copy from the container to a machine Kiboto has not met before no longer fails on its host key.
 
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container

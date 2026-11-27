@@ -433,7 +433,13 @@ def test_on_kiboto_os_a_copy_to_another_machine_uses_the_doors_own_key(kiboto_os
     side = replication_engine._Side(remote, replication_engine.KEY)
     assert side.ssh[:3] == ["ssh", "-i", replication_engine.KEY] and "IdentitiesOnly=yes" in side.ssh
     assert f"UserKnownHostsFile={replication_engine.KEY_DIR}/known_hosts" in side.ssh
-    assert replication_engine._Side(remote).ssh[1:3] == ["-o", "BatchMode=yes"]  # elsewhere: as before
+    # elsewhere: the key of the user Kiboto runs as, and a machine met for the first time is remembered too
+    assert replication_engine._Side(remote).ssh[1:5] == [
+        "-o",
+        "StrictHostKeyChecking=accept-new",
+        "-o",
+        "BatchMode=yes",
+    ]
 
 
 def test_the_replication_key_is_made_once(tmp_path, monkeypatch):

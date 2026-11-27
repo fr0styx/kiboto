@@ -9,6 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 from backend.auth import require_scope
+from backend.confirmations import require_confirmation
 from backend.errors import NOT_ON_OS_YET, said
 from backend.paging import PageParams
 from backend.services.replication_engine import availability, get_replication_engine, public_key, validate
@@ -94,6 +95,27 @@ def run_replication_job(job_id: str) -> dict[str, Any]:
         return get_replication_engine().run_job_async(job_id)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
+
+
+@router.post(
+    "/jobs/{job_id}/forget-host-key",
+    dependencies=[Depends(require_scope("storage:admin")), Depends(require_confirmation("replication.forget_host"))],
+)
+def forget_job_host_key(job_id: str) -> dict[str, Any]:
+    """The other machine was reinstalled: the identity Kiboto remembered for it is forgotten, and the
+    next run trusts the one it shows then."""
+    from backend.services.replication_engine import forget_host
+
+    job = get_replication_engine().get_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="Replication job not found")
+    if job.get("target_type", "local") == "local" or not job.get("target_host"):
+        raise HTTPException(status_code=400, detail="A copy on this machine signs in to no other machine.")
+    try:
+        forgotten = forget_host(str(job["target_host"]), int(job.get("target_port") or 22))
+    except (ValueError, OSError, RuntimeError) as e:
+        raise HTTPException(status_code=400, detail=str(e)) from None
+    return {"forgotten": forgotten, "job_id": job_id}
 
 
 @router.get("/history", dependencies=[Depends(require_scope("storage:read"))])

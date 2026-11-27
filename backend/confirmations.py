@@ -58,6 +58,7 @@ ACTIONS: dict[str, str] = {
     "ai.index.forget": "Delete what the AI index learned from a folder",
     "ai.index.flush": "Make Kib forget everything it knows about your files. The files are not touched",
     "webdav.config": "Change who can reach files over WebDAV and which folder it shares",
+    "replication.forget_host": "Forget the identity Kiboto remembered for the other machine of copy {target}. The next run trusts the key that machine shows then: do this only when you know it was reinstalled",
     "iscsi.enable": "Offer disks to other computers on your network over iSCSI. Each disk needs its user name and password",
     "iscsi.save": "Save this disk. The iSCSI service restarts, so a computer that is using a disk is cut off for a moment",
     "iscsi.delete": "Remove this disk from the list. Its file stays in its folder, and the computer that uses it can no longer reach it",

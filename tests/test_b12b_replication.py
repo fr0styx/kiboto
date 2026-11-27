@@ -187,8 +187,13 @@ def test_over_ssh_the_target_side_runs_there(fakes):
     job = _job(target_type="remote_ssh", target_host="backup.lan", target_user="zn", target_port=2222)
     re_.replicate(job, fakes.adapter)
     ssh = fakes.calls("ssh")
-    assert ssh and all(
-        c[1:8] == ["-o", "BatchMode=yes", "-o", "ConnectTimeout=15", "-p", "2222", "zn@backup.lan"] for c in ssh
+    assert (
+        ssh
+        and all(
+            c[1:3] == ["-o", "StrictHostKeyChecking=accept-new"]  # a machine met for the first time is remembered
+            and c[3:10] == ["-o", "BatchMode=yes", "-o", "ConnectTimeout=15", "-p", "2222", "zn@backup.lan"]
+            for c in ssh
+        )
     )
     assert any(c[-1] == "zfs receive -u -o readonly=on -- backup/family" for c in ssh)
 

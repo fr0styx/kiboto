@@ -70532,6 +70532,56 @@
     ]
    }
   },
+  "/api/v1/storage/replication/jobs/{job_id}/forget-host-key": {
+   "post": {
+    "description": "The other machine was reinstalled: the identity Kiboto remembered for it is forgotten, and the\nnext run trusts the one it shows then.",
+    "operationId": "forget_job_host_key_api_v1_storage_replication_jobs__job_id__forget_host_key_post",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "job_id",
+      "required": true,
+      "schema": {
+       "title": "Job Id",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Forget Job Host Key Api V1 Storage Replication Jobs  Job Id  Forget Host Key Post",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "404": {
+      "$ref": "#/components/responses/NotFound"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Forget Job Host Key",
+    "tags": [
+     "Storage Replication"
+    ],
+    "x-required-scopes": [
+     "storage:admin"
+    ]
+   }
+  },
   "/api/v1/storage/replication/jobs/{job_id}/run": {
    "post": {
     "operationId": "run_replication_job_api_v1_storage_replication_jobs__job_id__run_post",

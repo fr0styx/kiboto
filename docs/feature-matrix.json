@@ -27,7 +27,7 @@
    {"id": "pool_copy", "name": "Settings copy on the pools, to rebuild after a new system disk", "beside": "no", "linux": "no", "os": "yes"},
    {"id": "iscsi", "name": "iSCSI targets", "beside": "yes", "linux": "yes", "os": "yes"},
    {"id": "merged_folders", "name": "Merged folders across fast and large drives", "beside": "host", "linux": "yes", "os": "check", "note": "On Kiboto OS a shared folder on a ZFS, btrfs or ext4 pool can be merged. Merging, the nightly move, the watch on opened files and turning it off were tried on a virtual machine, not yet over weeks on a real one. Not for folders shared over NFS."},
-   {"id": "replication", "name": "Copies of a pool to another machine (replication)", "beside": "host", "linux": "yes", "os": "yes", "note": "On Kiboto OS a copy to another machine signs in with a key of its own, shown when you make the job."}
+   {"id": "replication", "name": "Copies of a pool to another machine (replication)", "beside": "host", "linux": "yes", "os": "yes", "note": "On Kiboto OS a copy to another machine signs in with a key of its own, shown when you make the job. When that machine is reinstalled, the job offers to forget its old identity."}
   ]},
   {"name": "Files, apps and Kib", "features": [
    {"name": "File Explorer, previews and share links", "beside": "yes", "linux": "yes", "os": "yes"},

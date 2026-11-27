@@ -90,6 +90,11 @@ const ACTIONS = {
     "Delete every Docker volume that no app uses? What is in them is lost. This can't be undone.",
     true,
   ],
+  'replication.forget_host': [
+    'Forget the old key',
+    'Forget the identity Kiboto remembered for the other machine of copy {target}? The next run trusts the key that machine shows then. Do this only when you know it was reinstalled.',
+    true,
+  ],
   'iscsi.enable': [
     'Turn on iSCSI',
     'Offer disks to other computers on your network? Each disk needs its user name and password.',

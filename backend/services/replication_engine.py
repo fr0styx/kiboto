@@ -42,6 +42,16 @@ KEY_DIR = "/etc/kiboto/replication"
 KEY = KEY_DIR + "/id_ed25519"
 
 
+# ssh could not tell the other machine is the one it was before (its host key changed, or this is the
+# first copy where no key is accepted on first contact): said in words, with a key the page acts on
+CHANGED_HOST = "host_key_changed"
+HOST_KEY_SAID = (
+    "Kiboto does not recognise the other machine: its identity (SSH host key) is not the one Kiboto "
+    "remembered. If that machine was reinstalled, forget its old key and run the copy again; if not, "
+    "someone may be in between."
+)
+
+
 class ReplicationError(RuntimeError):
     pass
 
@@ -67,6 +77,7 @@ class ReplicationJob:
     last_run: float | None = None
     last_status: str = "idle"  # "idle", "running", "success", "error"
     last_error: str | None = None
+    last_error_key: str | None = None  # host_key_changed: the page offers to forget the old key
     last_success: float | None = None
     last_snapshot: str | None = None  # the snapshot both sides have: the next incremental base
     bytes_transferred: int = 0
@@ -133,7 +144,7 @@ class _Side:
         self.remote = job.get("target_type", "local") != "local"
         own_key = ["-i", key, "-o", "IdentitiesOnly=yes"] if key else []
         own_key += ["-o", f"UserKnownHostsFile={os.path.dirname(key)}/known_hosts"] if key else []
-        own_key += ["-o", "StrictHostKeyChecking=accept-new"] if key else []
+        own_key += ["-o", "StrictHostKeyChecking=accept-new"]  # a machine met for the first time is remembered
         self.ssh = [
             "ssh",
             *own_key,
@@ -378,6 +389,37 @@ def key_here() -> str:
         return f.read().strip()
 
 
+def forget_host_here(host: Any, port: Any) -> bool:
+    """The host door's operation: forgets the key it remembered for the other machine, so the next
+    run takes the one that machine shows then (it was reinstalled). True when one was forgotten."""
+    if not isinstance(host, str) or not _HOST.match(host) or host.startswith("-"):
+        raise ValueError("Not forgetting: that is not the name of a machine.")
+    if isinstance(port, bool) or not isinstance(port, int) or not 1 <= port <= 65535:
+        raise ValueError("Not forgetting: that is not a port.")
+    return _forget_in(host, port, os.path.join(KEY_DIR, "known_hosts"))
+
+
+def _forget_in(host: str, port: int, known: str) -> bool:
+    from backend.services.host_basics import run
+
+    if not os.path.isfile(known):
+        return False
+    code, said = run(["ssh-keygen", "-R", host if port == 22 else f"[{host}]:{port}", "-f", known], timeout=30)
+    return code == 0 and "not found" not in said
+
+
+def forget_host(host: str, port: int) -> bool:
+    """Forgets the other machine's remembered key: the host door's file on Kiboto OS, elsewhere the
+    known hosts of the user Kiboto runs as."""
+    from backend import runtime
+
+    if runtime.without_root():
+        from backend import door
+
+        return bool(door.via("replication.forget_host", forget_host_here, host=host, port=port))
+    return _forget_in(host, port, os.path.join(os.path.expanduser("~"), ".ssh", "known_hosts"))
+
+
 def public_key() -> str:
     """The key the other machine must accept: the host door's own on Kiboto OS, elsewhere the one
     of the user Kiboto runs as (empty when it has none yet)."""
@@ -462,9 +504,11 @@ class ReplicationEngine:
             jobs = self.list_jobs()
             for j in jobs:
                 if j.get("id") == job_id:
+                    changed = bool(error) and "Host key verification failed" in str(error)
                     j["last_status"] = status
                     j["last_run"] = time.time()
-                    j["last_error"] = error
+                    j["last_error"] = HOST_KEY_SAID if changed else error
+                    j["last_error_key"] = CHANGED_HOST if changed else None
                     if bytes_transferred > 0:
                         j["bytes_transferred"] = bytes_transferred
                     j.update(fields)

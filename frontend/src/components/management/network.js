@@ -84,6 +84,55 @@ export async function revealReplicationTab() {
   return replicationShown;
 }
 
+/** What the server names a copy whose other machine shows another identity than it remembered. */
+const CHANGED_HOST = 'host_key_changed';
+
+/**
+ * Why the last run of a job failed, in words under its status (the status's tooltip alone is not
+ * seen on a phone). A key the server sends is said in the reader's language.
+ * @param {{last_status?: string, last_error?: string | null, last_error_key?: string | null}} j
+ */
+export function replError(j) {
+  if (j.last_status !== 'error' || !(j.last_error || j.last_error_key)) return '';
+  const said =
+    CHANGED_HOST === j.last_error_key
+      ? t('net.repl_host_key_changed', String(j.last_error || ''))
+      : String(j.last_error || '');
+  return `<div class="nw-xs text-muted">${escapeHtml(said)}</div>`;
+}
+
+/**
+ * The other machine of a copy was reinstalled: the key Kiboto remembered for it is forgotten (asked
+ * first), and the next run trusts the one it shows then.
+ * @param {HTMLButtonElement} btn
+ */
+export async function forgetHostKey(btn) {
+  const id = btn.dataset.id || '';
+  btn.disabled = true;
+  try {
+    await api.post(`/api/storage/replication/jobs/${encodeURIComponent(id)}/forget-host-key`, {}, { confirmed: true });
+    showToast(
+      t(
+        'toast.repl_key_forgotten',
+        'The old key is forgotten. Run the copy again: it trusts the key the machine shows now.'
+      ),
+      'success'
+    );
+    await fetchAndRenderReplication();
+  } catch (e) {
+    if (/** @type {any} */ (e)?.error !== 'cancelled') {
+      showToast(
+        t('toast.replication_failed', 'Replication failed: {message}', {
+          message: e instanceof Error ? e.message : String(e),
+        }),
+        'error'
+      );
+    }
+  } finally {
+    btn.disabled = false;
+  }
+}
+
 export async function fetchAndRenderReplication() {
   const tbody = document.getElementById('replication-jobs-tbody');
   const histTbody = document.getElementById('replication-history-tbody');
@@ -121,9 +170,10 @@ export async function fetchAndRenderReplication() {
             <td><span class="mgmt-app-pill nw-xs">${escapeHtml(j.schedule || 'manual')}</span></td>
             <td>${j.bandwidth_limit_kbps ? `${Math.round(j.bandwidth_limit_kbps / 1024)} MB/s` : 'Unlimited'}</td>
             <td>${j.retention_count || 14} snaps</td>
-            <td><span class="mgmt-app-pill ${j.last_status === 'error' ? 'text-crit' : j.last_status === 'success' ? 'text-emerald' : 'text-muted'}" title="${escapeHtml(j.last_error || '')}">${escapeHtml(j.last_status || 'idle')}</span></td>
+            <td><span class="mgmt-app-pill ${j.last_status === 'error' ? 'text-crit' : j.last_status === 'success' ? 'text-emerald' : 'text-muted'}" title="${escapeHtml(j.last_error || '')}">${escapeHtml(j.last_status || 'idle')}</span>${replError(j)}</td>
             <td class="nw-x-2">
               <button class="btn-pill-toggle btn-run-repl is-small nw-x-3" data-id="${escapeHtml(j.id)}" title="${t('ui.execute_replication_now', 'Execute Replication Now')}" data-i18n-title="ui.execute_replication_now">${ico('▶')} ${t('ci.run', 'Run')}</button>
+              ${CHANGED_HOST === j.last_error_key ? `<button class="btn-pill-toggle btn-forget-host is-small nw-x-3" data-id="${escapeHtml(j.id)}">${t('net.repl_forget_key', 'Forget its old key')}</button>` : ''}
               <button class="btn-pill-toggle btn-del-repl is-danger is-small" data-id="${escapeHtml(j.id)}" title="${t('ui.delete_pipeline', 'Delete Pipeline')}" data-i18n-title="ui.delete_pipeline">🗑️</button>
             </td>
           </tr>
@@ -150,6 +200,10 @@ export async function fetchAndRenderReplication() {
             setIconLabel(btn, '▶', t('ui.run', 'Run'));
           }
         });
+      });
+
+      tbody.querySelectorAll('.btn-forget-host').forEach((btn) => {
+        btn.addEventListener('click', () => forgetHostKey(/** @type {HTMLButtonElement} */ (btn)));
       });
 
       tbody.querySelectorAll('.btn-del-repl').forEach((btn) => {
