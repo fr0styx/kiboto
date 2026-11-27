@@ -35,7 +35,7 @@ and a settings backup.
 | Memory | 4 GB or more | 8 GB or more for apps, virtual machines or local AI. ZFS uses free memory as a read cache and gives it back when apps need it. |
 | System disk | A disk of its own, 32 GB or more; an SSD is best | Only Debian and Kiboto live there: a fresh install uses about 5 GB. It never holds your files, and setup never offers it as storage. |
 | Storage drives | SATA or NVMe drives on the board, or on a controller in HBA (IT) mode | ZFS, btrfs and ext4 want to see each drive as it is: a RAID card that hides the drives behind its own volumes is the wrong kind. USB drives are fine for backups; in a pool they are slow and can drop off, so they are not recommended there. |
-| Network | A wired Ethernet port Debian has a driver for | Wi-Fi is not set up by the installer or by Kiboto. Bonds and VLANs are not there yet. |
+| Network | A wired Ethernet port Debian has a driver for | Wi-Fi is not set up by the installer or by Kiboto. VLANs, bonds, packet size, IPv6 and further routes are set under Network. |
 | Firmware | UEFI or the older BIOS mode, Secure Boot on or off | With Secure Boot on, ZFS is signed with a key of the machine's own, which the firmware learns once: at the next start after the install, at the machine's screen (see below). |
 | Security chip | Optional: a TPM 2.0 | With one, the key for the AI chats and search index is sealed to the machine; without one, to its system disk. |
 | Fans, front screen, light bar | Driven on the reference box only | Elsewhere Kiboto shows the temperatures and the fans stay with the firmware. |
@@ -152,6 +152,12 @@ encrypted AI chats and search index again.
   install the script moves the same settings to systemd-networkd, so Kiboto can change the address
   under Network. If the machine cannot reach its router afterwards, it goes back to ifupdown by
   itself after 90 seconds; ifupdown's file is kept as `/etc/network/interfaces.kiboto-before`.
+- Under Network, Kiboto changes each port's address (from the router or fixed), its DNS servers
+  (IPv4 or IPv6), IPv6 (from the router, off or fixed), further routes through other routers, VLANs,
+  the packet size, a bond of ports, Wake-on-LAN and a bridge for virtual machines. Each change is a
+  trial: unless you keep it within the time shown, the machine puts the old settings back by itself.
+  Kiboto writes only its own systemd-networkd files (`/etc/systemd/network/05-kiboto-*` and
+  `10-kiboto-*.link`); a port run by any other file is shown and left alone.
 - Kiboto's files are in `/opt/kiboto`, its settings in `/var/lib/kiboto`, and
   `/etc/kiboto/kiboto.env` takes extra settings (one `NAME=value` per line).
 - Three services: `kiboto`, `kiboto-pools`, which brings your pools back at start before anything
