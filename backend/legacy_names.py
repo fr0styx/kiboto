@@ -1,21 +1,16 @@
-"""Names from before the Kiboto rebrand (ZettNAS) that the code still has to know.
+"""The product's name before the rebrand, here and nowhere else in the backend: only what the
+one-time moves and the compatibility of installs made before still need. Goes in Kiboto 2.2
+(REMOVE_IN), with frontend/src/legacy-names.js and index.html's early move.
 
-Accepted until Kiboto 2.2 (REMOVE_IN), then removed with this file: the ZETTNAS_* environment
-variables existing installs set, and the other old names added here as the rename goes on.
-
-Kept here because data made before depends on them, each with its one-time move: the data key's
-salt (db_crypto re-encrypts), the secret box's key and associated data (key_rotation re-seals), the
-backup manifest name and config-export prefix that restores still read (backup_engine), and the
-restic tag on off-site snapshots (offsite_backup). Changing those would make that data unreadable.
-The same goes for names stored outside Kiboto's data: replication's ZFS snapshot names
-(zettnas-repl-, the next incremental send's base), the encrypted-dataset and data-id properties,
-the snapshot views, WORM and version folders, the NFS exports file, the fan watchdog's heartbeat
-file (its own contract), the secrets file, the restic location backup_migration made
-(zettnas-restic), the family calendar's DAV identity, the RAG schema's embedding id, the WebDAV
-fallback secret (tokens signed with it), the recovery-code hash prefix, the restic host id, VM serial
-sockets in saved VM definitions, the apps' .zettnas-secrets.json, the backup versions and dump names,
-and outside the app: the hardware runner's label (set on the runner) and the deployed health worker's
-names.
+Two kinds of names:
+- what installs made before still use and Kiboto still accepts until 2.2: the environment
+  variables, the image's and repository's earlier name, container labels (new containers carry
+  both, for a rollback), sidecar and app container names, the session cookie;
+- what was stored under the old name and is renamed where it is, the first time Kiboto meets it:
+  files and folders on disk, app definitions, ZFS marks, replication snapshots on both sides,
+  restic tags and hosts, the search index's ids, and the encryption constants (databases encrypted
+  again, secrets sealed again). Some data can't be moved by Kiboto (a settings backup someone
+  downloaded, a recovery code's hash), so it is read here too until 2.2.
 """
 
 import os
@@ -48,7 +43,6 @@ OLD_CANARY_NAME = "!ZettNAS-guard-file.docx"  # the ransomware guard's file befo
 OLD_NAS_NAME = "zettnas"  # a saved name from before becomes kiboto; zettnas.local no longer answers
 OLD_NAME_CONTAINER = "zettnas-name"  # the name responder's container before the rebrand: replaced
 OLD_PART_SUFFIX = ".zettnas-part"  # a half-copied file left by a transfer before the rebrand: swept
-OLD_STAGE_INFIX = ".zettnas-stage-"  # a move's staging folder from before the rebrand: swept
 OLD_STAGE_NAME = "zettnas"  # the same staging folder's name part, for the sweep's pattern
 OLD_UPLOAD_INFIX = ".zettnas_"  # an upload's part file from before the rebrand: swept
 OLD_EXPORTS_NAME = "zettnas.exports"  # NFS: the file from before, removed once the new one is written
@@ -62,7 +56,6 @@ OLD_ENCRYPTED_MAGIC = b"ZETTBAK2"  # a settings backup made before starts with i
 OLD_SETTINGS_EXT = ".zettbak"  # a settings backup made before
 OLD_EXPORT_PREFIX = "zettnas_backup_"  # a settings backup job's files made before: kept by count
 OLD_OFFSITE_SETTINGS_FILE = "kiboto-settings.zettbak"  # settings in an off-site version made before
-OLD_SNAPSHOT_VIEWS = "zettnas-snapshot-views"  # a temporary folder of read-only snapshot views
 OLD_REPL_PREFIX = "zettnas-repl-"  # a replication job's snapshots on both sides: renamed before a run
 OLD_REPL_DIR = ".zettnas-repl"  # btrfs: the folder of a job's local snapshots: renamed
 OLD_LEXICAL_MODEL = "zett_lexical_384d"  # the search index's own embedding id: renamed in its rows
