@@ -480,6 +480,31 @@ def _build_session_response(
 # ==============================================================================
 
 
+def _password_was_right(user: dict, password: str, ip: str, target_username: str) -> None:
+    """The password was right: the failures counted against this address end, and a network
+    password Samba did not take is handed over again (not for two-step or directory accounts, nor
+    while a first-time password must be changed)."""
+    _clear_failures(ip)
+    _clear_failures(f"user:{target_username}@{ip}")
+    if user.get("idp_type") != "ldap" and not user.get("mfa_enabled") and not user.get("must_change_password"):
+        _hand_password_to_samba_again(user["username"], password)
+
+
+def _hand_password_to_samba_again(username: str, password: str) -> None:
+    """Samba did not take this person's password when it was set: the one just typed, and found
+    right, is handed over again, in the background so signing in does not wait for it (#71)."""
+    from backend.services import samba_engine
+
+    if not samba_engine.waiting_for_password(username):
+        return
+
+    def again() -> None:
+        if samba_engine.get_samba_engine().sync_samba_user(username=username, password=password):
+            logger.info("[Samba] the network password of %s was handed over at sign-in", username)
+
+    threading.Thread(target=again, name="SambaAgain", daemon=True).start()
+
+
 @router.post("/auth/login")
 async def login(req: LoginRequest, request: Request):
     ip = _client_ip(request)
@@ -569,8 +594,7 @@ async def login(req: LoginRequest, request: Request):
         )
         return error_response(403, "Account is disabled or locked.", error="account_disabled")
 
-    _clear_failures(ip)
-    _clear_failures(f"user:{target_username}@{ip}")
+    _password_was_right(user, req.password, ip, target_username)
 
     # 4. Transparent zero-downtime hash upgrade to modern Argon2id (never for directory accounts:
     # their password must not be stored here)

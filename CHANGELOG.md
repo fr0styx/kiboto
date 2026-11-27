@@ -132,6 +132,8 @@ Pools: a mounted pool no longer shows as Not found when Kiboto runs in a contain
 
 Front screen: the layout presets and Save as My Preset work, and a saved preset is kept as its own card.
 
+Network shares: when the file server missed a person's password (it was not up yet), signing in to Kiboto once hands it over, instead of every network sign-in failing until the password is changed.
+
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container
 

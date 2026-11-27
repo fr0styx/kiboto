@@ -21,7 +21,7 @@ from backend import settings as _settings
 from backend.config import DATA_DIR, POOL_PATH, docker_sock, logger
 from backend.config import docker_sock as _docker_sock_path
 from backend.errors import SaidError
-from backend.fsutil import atomic_write_json, atomic_write_text
+from backend.fsutil import atomic_write_json, atomic_write_text, json_locked, read_json
 from backend.ignored_errors import ignored
 from backend.services import samba_host
 
@@ -316,6 +316,28 @@ def _serves_files() -> bool:
         return bool(get_storage_platform().get_capabilities().can_manage_shares)
     except (OSError, RuntimeError, ValueError):
         return False
+
+
+SMB_WAITING_FILE = os.path.join(DATA_DIR, "smb_waiting.json")
+
+
+@json_locked(lambda username, ok: SMB_WAITING_FILE)
+def note_password_handed(username: str, ok: bool) -> None:
+    """Whether Samba took this person's password. Kept only where Kiboto's own Samba serves files."""
+    waiting = read_json(SMB_WAITING_FILE, [])
+    waiting = [w for w in waiting if isinstance(w, str)] if isinstance(waiting, list) else []
+    name = username.lower()
+    if ok and name not in waiting:
+        return
+    if not ok and (name in waiting or not _serves_files()):
+        return
+    atomic_write_json(SMB_WAITING_FILE, sorted({*waiting, name} if not ok else set(waiting) - {name}))
+
+
+def waiting_for_password(username: str) -> bool:
+    """Whether Samba still waits for this person's password (it did not take the last one)."""
+    waiting = read_json(SMB_WAITING_FILE, [])
+    return isinstance(waiting, list) and username.lower() in waiting
 
 
 def serves_files() -> bool:
@@ -759,6 +781,16 @@ class SambaEngine:
         return False
 
     def sync_samba_user(self, username: str, password: str | None = None, delete: bool = False) -> bool:
+        """Puts a person's password into Samba (or takes them out with delete=True). Samba gets a
+        password only when Kiboto knows it in plain words, so one it did not take (its service not
+        up yet) is kept in mind and handed over again at the person's next sign-in (#71: the admin
+        was missing from Samba, and every network sign-in failed until the password was changed)."""
+        ok = self._sync_samba_user(username, password=password, delete=delete)
+        if delete or password:
+            note_password_handed(username, ok or delete)
+        return ok
+
+    def _sync_samba_user(self, username: str, password: str | None = None, delete: bool = False) -> bool:
         """
         Synchronizes a user into the Samba passdb database.
         When delete=True, removes the user from passdb.
