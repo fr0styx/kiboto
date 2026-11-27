@@ -409,7 +409,7 @@ def _own_pools() -> list[dict] | None:
         {
             "name": str(r.get("name") or os.path.basename(r["mountpoint"])),
             "path": r["mountpoint"],
-            "available": os.path.isdir(r["mountpoint"]),
+            "available": True,  # by the record (not ejected): looking would touch, and wake, every pool
         }
         for r in rows
     ]

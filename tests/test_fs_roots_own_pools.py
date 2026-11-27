@@ -24,7 +24,7 @@ def test_on_kiboto_os_the_pools_are_kibotos_own(client, auth_headers, monkeypatc
     own = [p for p in pools if not p["path"].startswith("/mnt/disks")]
     assert own == [
         {"name": "tank", "path": str(tank), "available": True},
-        {"name": "away", "path": str(tmp_path / "away"), "available": False},
+        {"name": "away", "path": str(tmp_path / "away"), "available": True},  # by the record: no folder is looked at
     ]
 
 
