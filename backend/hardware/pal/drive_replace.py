@@ -13,6 +13,7 @@ and at least as large as the one it replaces. Nothing is erased to make room.
 import json
 import os
 import re
+import threading
 import time
 from collections.abc import Callable
 from typing import Any
@@ -22,6 +23,8 @@ from backend.config import logger
 Run = Callable[[list[str]], tuple[int, str, str]]
 REDUNDANT_ZFS = re.compile(r"^(mirror|raidz[123]?)(-\d+)?$")
 REDUNDANT_BTRFS = {"raid1", "raid1c3", "raid1c4", "raid10", "raid5", "raid6"}
+# groups ZFS makes for a while around drives: one being replaced, a spare standing in. Not drives.
+PASSING_ZFS = re.compile(r"^(replacing|spare)-\d+$")
 _POOL_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.:-]{0,254}$")
 
 
@@ -118,6 +121,8 @@ def zfs_leaves(status: str) -> tuple[list[dict[str, Any]], bool]:
             group = ""
             if section == "data":
                 groups.append("")
+        if PASSING_ZFS.match(name):  # the drives in it follow, each with its own state
+            continue
         was = re.search(r"was (\S+)", line)
         leaves.append(
             {"name": name, "state": state, "group": group, "section": section, "was": was.group(1) if was else ""}
@@ -317,7 +322,37 @@ def start(pool: Any, old: str, new: str, run: Run) -> dict[str, Any]:
         raise ReplaceError("failed", lines[-1][:300] if lines else "The pool's tool refused the replacement.")
     if p["fs"] == "btrfs":
         _btrfs_started(mount, old, member["label"] if member["state"] != "MISSING" else "", run)
+        _watch_rebuild(mount, run)
     return {"started": True, "pool": pool.id, "old": member["label"], "new": target}
+
+
+REBUILD_POLL = 15.0  # seconds between looks at a running btrfs replacement
+REBUILD_LIMIT = 14 * 24 * 3600  # a rebuild that runs longer than this is left to the plan's own look
+
+
+def after_rebuild(mount: str, run: Run, sleep: Callable[[float], None] = time.sleep) -> bool:
+    """Waits for a btrfs replacement to end, then mirrors again what btrfs wrote as single while the
+    drive was missing. The dialog does this too when it reads the plan after the end, but a rebuild
+    takes hours and the dialog is closed long before: files written in the meantime kept one copy
+    while the page called the pool protected. True when a balance was started."""
+    waited = 0.0
+    while btrfs_progress(run(["btrfs", "replace", "status", "-1", mount])[1])["running"]:
+        if waited >= REBUILD_LIMIT:
+            return False
+        sleep(REBUILD_POLL)
+        waited += REBUILD_POLL
+    sleep(REBUILD_POLL)  # block groups made at the very end show a moment later
+    return mirror_again(mount, run(["btrfs", "filesystem", "df", mount])[1], run)
+
+
+def _watch_rebuild(mount: str, run: Run) -> None:
+    def watch() -> None:
+        try:
+            after_rebuild(mount, run)
+        except (OSError, ValueError) as e:
+            logger.warning("[Storage] The rebuild of %s was not followed to its end: %s", mount, e)
+
+    threading.Thread(target=watch, name="RebuildWatch", daemon=True).start()
 
 
 def _zfs_name(pool: Any) -> str:

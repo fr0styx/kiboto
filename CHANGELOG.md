@@ -94,6 +94,8 @@ Kiboto OS: deleting a file on a pool made after the install puts it in the Recyc
 
 A ZFS pool asked for as RAID 1 is made as a mirror. Layouts a kind of pool does not have, such as RAID 5 on ZFS, are refused. Before, those made a pool with no second copy that the pool list called protected.
 
+After a drive of a btrfs mirror is replaced, files written while the drive was missing get their second copy back, even when the Replace dialog was closed during the rebuild.
+
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container
 

@@ -1,6 +1,7 @@
 """Replacing a drive of a pool from the app: the pool's own tool rebuilds onto an empty drive."""
 
 import json
+import threading
 from types import SimpleNamespace
 
 import pytest
@@ -78,8 +79,17 @@ class Machine:
         return 0, "", ""
 
 
+WATCH_REBUILD = dr._watch_rebuild  # kept before the fixture below stands in for it
 ZFS_POOL = SimpleNamespace(id="tank", fs_type="zfs", mountpoint="/mnt/storage/tank")
 BTRFS_POOL = SimpleNamespace(id="vdd", fs_type="btrfs", mountpoint="/mnt/storage/media")
+
+
+@pytest.fixture(autouse=True)
+def watched(monkeypatch):
+    """A btrfs rebuild is followed to its end on a thread; here it is only noted."""
+    seen = []
+    monkeypatch.setattr(dr, "_watch_rebuild", lambda mount, run: seen.append(mount))
+    return seen
 
 
 def test_only_empty_whole_drives_large_enough_are_offered():
@@ -358,3 +368,74 @@ def test_a_refused_balance_is_only_noted():
             return (1, "", "balance: in progress") if cmd[:2] == ["btrfs", "balance"] else super().__call__(cmd)
 
     assert dr.mirror_again("/mnt/storage/media", MIXED, Refuses()) is False
+
+
+REPLACING = """config:
+
+\tNAME                                          STATE     READ WRITE CKSUM
+\ttank                                          DEGRADED     0     0     0
+\t  mirror-0                                    DEGRADED     0     0     0
+\t    /dev/disk/by-id/virtio-KBTESTDISK1-part1  ONLINE       0     0     0
+\t    replacing-1                               DEGRADED     0     0     0
+\t      /dev/disk/by-id/virtio-KBTESTDISK2-part1  REMOVED      0     0     0
+\t      /dev/disk/by-id/virtio-KBTESTDISK6-part1  ONLINE       0     0     0  (resilvering)
+
+errors: No known data errors
+"""
+
+
+def test_a_drive_being_replaced_is_shown_with_the_new_one_and_their_group_is_not_a_drive():
+    leaves, copies = dr.zfs_leaves(REPLACING)
+    assert copies is True
+    assert [(leaf["name"].rsplit("/", 1)[-1], leaf["state"], leaf["group"]) for leaf in leaves] == [
+        ("virtio-KBTESTDISK1-part1", "ONLINE", "mirror-0"),
+        ("virtio-KBTESTDISK2-part1", "REMOVED", "mirror-0"),
+        ("virtio-KBTESTDISK6-part1", "ONLINE", "mirror-0"),
+    ]
+
+
+def test_a_btrfs_rebuild_is_followed_to_its_end_and_mirrored_again(watched, monkeypatch):
+    """The dialog is closed long before a rebuild of hours ends: what btrfs wrote as single while
+    the drive was missing is mirrored again when the rebuild ends, dialog or not."""
+    monkeypatch.setattr(dr, "by_id", lambda path: "/dev/disk/by-id/virtio-KBTESTDISK6")
+    monkeypatch.setattr(dr, "_read_only", lambda mount: False)
+    assert dr.start(BTRFS_POOL, "2", "/dev/vdg", Rebuilt(show=MISSING_SHOW))["started"] is True
+    assert watched == ["/mnt/storage/media"]
+
+    class Rebuilding(Machine):
+        said = ["40.0% done, 0 write errs", "99.0% done, 0 write errs", "Started on 26.Nov, finished on 26.Nov"]
+
+        def __call__(self, cmd):
+            if cmd[:3] == ["btrfs", "replace", "status"]:
+                self.seen.append(cmd)
+                return 0, self.said.pop(0) if len(self.said) > 1 else self.said[0], ""
+            return super().__call__(cmd)
+
+    slept = []
+    m = Rebuilding(df=MIXED)
+    assert dr.after_rebuild("/mnt/storage/media", m, slept.append) is True
+    assert len(slept) == 3  # twice while it ran, once for the last block groups to show
+    assert [c for c in m.seen if c[:3] == ["btrfs", "balance", "start"]][0][-1] == "/mnt/storage/media"
+    assert dr.after_rebuild("/mnt/storage/media", Machine(), slept.append) is False  # all mirrored
+
+
+def test_a_rebuild_that_never_ends_is_left_to_the_plan(monkeypatch):
+    monkeypatch.setattr(dr, "REBUILD_LIMIT", 30.0)
+    m = Machine(df=MIXED, replace_status="10.0% done, 0 write errs")
+    assert dr.after_rebuild("/mnt/storage/media", m, lambda s: None) is False
+    assert not [c for c in m.seen if c[:3] == ["btrfs", "balance", "start"]]
+
+
+def test_the_rebuild_is_followed_on_a_thread_and_a_failure_there_is_only_noted(monkeypatch):
+    seen = []
+
+    def after(mount, run):
+        seen.append(mount)
+        raise OSError("the drive went away")
+
+    monkeypatch.setattr(dr, "after_rebuild", after)
+    WATCH_REBUILD("/mnt/storage/media", Machine())
+    for thread in threading.enumerate():
+        if thread.name == "RebuildWatch":
+            thread.join(timeout=5)
+    assert seen == ["/mnt/storage/media"]
