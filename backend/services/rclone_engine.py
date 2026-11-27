@@ -42,6 +42,17 @@ def _through_door() -> bool:
 VFS_CACHE_MODES = ("off", "minimal", "writes", "full")
 
 
+def _as_unit() -> bool:
+    """Whether a cloud drive's rclone runs as a unit of its own: as root on a machine systemd runs
+    (Kiboto OS, where the host door mounts it). As the door's child it ended with every restart of
+    the door (each update), leaving a dead mount ("Transport endpoint is not connected")."""
+    return os.geteuid() == 0 and os.path.isdir("/run/systemd/system") and shutil.which("systemd-run") is not None
+
+
+def mount_unit(name: str) -> str:
+    return f"kiboto-cloud-{name}"
+
+
 def check_remote_name(name: str) -> str:
     if not VALID_REMOTE_NAME.fullmatch(str(name or "")):
         raise ValueError(f"Invalid remote name: '{name}'.")
@@ -915,6 +926,8 @@ class RcloneEngine:
             ]
             if read_only:
                 cmd.append("--read-only")
+            if _as_unit():
+                return self._mount_as_unit(name, cmd, mount_path, log_file)
 
             logger.info(f"[RCLONE] Mounting {target_spec} -> {mount_path} (cache={vfs_cache})...")
             try:
@@ -979,7 +992,9 @@ class RcloneEngine:
                 if res.returncode == 0:
                     unmounted = True
 
-            # 3. Terminate background process if tracked
+            # 3. Stop its unit, or terminate the background process if tracked
+            if _as_unit():
+                run_bounded(["systemctl", "stop", mount_unit(name)], timeout=30, capture_output=True)
             tracked = self._active_mounts.pop(name, None)
             if tracked and tracked.get("proc"):
                 proc = tracked["proc"]
@@ -1000,6 +1015,46 @@ class RcloneEngine:
                 return {"status": "unmounted", "name": name}
             else:
                 raise RuntimeError(f"Could not unmount {mount_path}; resource may be busy.")
+
+    def _mount_as_unit(self, name: str, cmd: list[str], mount_path: str, log_file: str) -> dict[str, Any]:
+        """rclone as a unit of its own, which outlives the process that started it. rclone tells
+        systemd when the folder is mounted, so a failure is known before this returns."""
+        unit = mount_unit(name)
+        run_bounded(["systemctl", "stop", unit], timeout=30, capture_output=True)  # a hung earlier one
+        res = run_bounded(
+            [
+                "systemd-run",
+                "--quiet",
+                "--collect",
+                "--unit",
+                unit,
+                "--description",
+                f"Kiboto cloud drive {name}",
+                "-p",
+                "Type=notify",
+                "-p",
+                "TimeoutStartSec=60",
+                *cmd,
+            ],
+            timeout=90,
+            capture_output=True,
+            text=True,
+        )
+        if res.returncode != 0:
+            err = (res.stderr or "").strip()
+            try:
+                with open(log_file) as lf:
+                    err = "".join(lf.readlines()[-15:]).strip() or err
+            except OSError:
+                ignored("backend.services.rclone_engine.RcloneEngine._mount_as_unit.log")
+            try:
+                os.rmdir(mount_path)
+            except OSError:
+                ignored("backend.services.rclone_engine.RcloneEngine._mount_as_unit.rmdir")
+            raise RuntimeError(f"Mount failed: {err or 'code ' + str(res.returncode)}")
+        self._active_mounts[name] = {"unit": unit, "started_at": time.time(), "mount_path": mount_path}
+        logger.info("[RCLONE] Remote '%s' mounted as %s", name, unit)
+        return {"status": "mounted", "name": name, "path": mount_path, "unit": unit}
 
     def list_remote_files(self, name: str, path: str = "") -> list[dict[str, Any]]:
         """Files and folders one level inside a remote (rclone lsjson), folders first."""
