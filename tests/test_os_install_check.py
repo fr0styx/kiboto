@@ -40,8 +40,10 @@ def test_the_script_is_valid_shell_and_names_its_use():
 
 def test_it_installs_this_checkouts_script_from_a_checked_debian():
     text = _script()
-    assert '"${KB_OS_INSTALLER:-$HERE/packaging/install.sh}"' in text
-    assert "sh /root/install.sh --image '$IMAGE' --unsigned" in text  # before a build is signed
+    assert "INSTALLER=${KB_OS_INSTALLER:-$HERE/packaging/install.sh}" in text
+    assert "sh /root/install.sh --image '$FIRST' --unsigned" in text  # before a build is signed
+    # an update run installs the earlier release with the installer inside that release's image
+    assert 'docker run --rm --entrypoint cat "$KB_OS_FROM" /app/packaging/install.sh' in text
     assert "cloud.debian.org/images/cloud/trixie/latest" in text and "SHA512SUMS" in text
     check = text.index('= "$want" ] || { say "the Debian image does not match')
     assert check < text.index("docker run -d --name")  # nothing starts from an unchecked image
@@ -169,7 +171,7 @@ def test_a_tag_also_tries_an_update_and_revert_through_the_root_service():
     assert "KIBOTO_ACCEPT_MAIN_BUILDS=1" in step and "UPDATE_SIGNATURES=off" in step  # a test machine only
     with open(WORKFLOW, encoding="utf-8") as f:
         wf = f.read()
-    assert "KB_OS_UPDATE: ${{ inputs.fast && '0' || '1' }}" in wf
+    assert "KB_OS_UPDATE: ${{ (inputs.fast || inputs.from_last_release) && '0' || '1' }}" in wf
 
 
 def test_a_fresh_install_takes_its_python_packages_from_the_image():
@@ -179,3 +181,41 @@ def test_a_fresh_install_takes_its_python_packages_from_the_image():
         install = f.read()
     assert "Python packages: taken from the image" in install
     assert "grep -q 'Python packages: taken from the image' /root/install.log" in check
+
+
+def test_an_update_from_the_last_release_keeps_a_pool_a_shared_folder_and_a_file():
+    sh = _script()
+    step = sh[
+        sh.index('if [ -n "${KB_OS_FROM:-}" ]; then\n  stage "A pool') : sh.index('stage "The same after a restart"')
+    ]
+    assert "os_upgrade_data.py make /dev/disk/by-id/virtio-KBUPGRADE1 /dev/disk/by-id/virtio-KBUPGRADE2" in step
+    # this run's build is waited for only after the earlier release was installed and filled
+    assert (
+        step.index("os_upgrade_data.py make")
+        < step.index("wait_for_build")
+        < step.index('door.call(\\"update.start\\"')
+    )
+    assert step.index('door.call(\\"update.start\\"') < step.index("os_upgrade_data.py look")
+    assert sh.count("os_upgrade_data.py look") == 2  # after the update, and again after a restart
+    # this build then makes a new pool with a shared folder at once, on a drive of its own
+    assert step.index("os_upgrade_data.py look") < step.index(
+        "os_upgrade_data.py after /dev/disk/by-id/virtio-KBUPGRADE3"
+    )
+    assert "for n in 1 2 3; do" in sh
+    assert "serial=KBUPGRADE$n" in sh  # two drives of their own, named by serial
+    with open(os.path.join(ROOT, "scripts", "os_upgrade_data.py"), encoding="utf-8") as f:
+        data = f.read()
+    assert "/root/upgrade-admin" in data and "0o600" in data  # the chosen password stays on the machine
+    # only the earlier release may need a restart before a share goes on its new pool
+    assert "restart_once=True" in data and data.count("restart_once=True") == 1
+    assert "print(password" not in data and "print(codes" not in data
+    with open(os.path.join(ROOT, ".github", "workflows", "ci.yml"), encoding="utf-8") as f:
+        job = yaml.safe_load(f)["jobs"]["os-upgrade"]
+    assert job["uses"] == "./.github/workflows/os-install.yml"
+    assert job["with"] == {"early": True, "fast": True, "from_last_release": True}
+    steps = {s.get("name"): s for s in _workflow()["jobs"]["install"]["steps"]}
+    assert 'grep -vxF "$THIS"' in steps["Which earlier release"]["run"]  # never the version being made
+    assert (
+        steps["Install Kiboto OS in a fresh Debian 13 and check it"]["env"]["KB_OS_FROM"]
+        == "${{ steps.from.outputs.image }}"
+    )

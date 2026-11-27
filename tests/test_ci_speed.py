@@ -89,7 +89,11 @@ def test_a_prepared_disk_belongs_to_one_installer_one_check_and_one_debian():
     check = steps["Install Kiboto OS in a fresh Debian 13 and check it"]
     assert "cache-hit == 'true'" in check["env"]["KB_OS_PREPARED"]
     for name in ("Prepare a disk for the next runs", "Keep the prepared disk"):
-        assert steps[name]["if"] == "inputs.fast && steps.prepared.outputs.cache-hit != 'true'"
+        # an update run installs an earlier release with its own installer: it makes no disk for today's
+        assert (
+            steps[name]["if"]
+            == "inputs.fast && !inputs.from_last_release && steps.prepared.outputs.cache-hit != 'true'"
+        )
     assert steps["Keep the prepared disk"]["with"]["key"] == "${{ steps.key.outputs.key }}"
 
 

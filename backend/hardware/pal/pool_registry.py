@@ -92,6 +92,27 @@ def load() -> list[dict[str, Any]]:
 def _save(rows: list[dict[str, Any]]) -> None:
     os.makedirs(os.path.dirname(_file()), exist_ok=True)
     atomic_write_json(_file(), rows, indent=1)
+    _to_the_data_owner()
+
+
+def _to_the_data_owner() -> None:
+    """The record belongs to whoever owns Kiboto's data folder. The root service writes it when it
+    makes a pool; as root's file, a web process under its own user could not read it until the next
+    start handed the data folder over, so a new pool looked like the system disk and no shared
+    folder could go on it. The root service checks every row before it acts on one (_problem)."""
+    if os.geteuid() != 0:
+        return
+    try:
+        owner = os.stat(DATA_DIR)
+    except OSError:
+        return
+    if owner.st_uid == 0:
+        return
+    for path in (os.path.dirname(_file()), _file()):
+        try:
+            os.chown(path, owner.st_uid, owner.st_gid, follow_symlinks=False)
+        except OSError as e:
+            logger.warning("[Storage] %s could not be given to the data folder's owner: %s", path, e)
 
 
 def find(name: str) -> dict[str, Any] | None:

@@ -34,13 +34,18 @@ on:
         required: false
         type: boolean
         default: false
+      from_last_release:
+        description: "Install the newest release before this one first, make a pool, a shared folder and a file, then update to the build and check they stayed"
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
 
 jobs:
   install:
-    name: Kiboto OS installs and runs
+    name: ${{ inputs.from_last_release && 'Kiboto OS updates from the last release' || 'Kiboto OS installs and runs' }}
     runs-on: ubuntu-latest
     timeout-minutes: 45  # ARC-26: a hung step fails the run instead of holding a runner for 6 hours
     permissions:
@@ -97,6 +102,24 @@ jobs:
       # installer's other packages are downloaded. It belongs to one install.sh, one version of this
       # check and one Debian cloud image: a change to any of them makes a new one, and that run does
       # the full fresh install, which is how an installer change is always tried from nothing.
+      # the update a real machine takes: the newest published release before this one, by digest
+      - name: Which earlier release
+        if: inputs.from_last_release
+        id: from
+        run: |
+          set -eu
+          THIS="${GITHUB_REF_NAME#v}"
+          tag=$(git ls-remote --tags --refs "https://github.com/${{ github.repository }}" 'v*' \
+            | sed 's#.*refs/tags/v##' | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | grep -vxF "$THIS" \
+            | sort -t. -k1,1n -k2,2n -k3,3n | while read -r v; do
+                docker buildx imagetools inspect "ghcr.io/fr0styx/kiboto:$v" >/dev/null 2>&1 && echo "$v"
+              done | tail -1)
+          [ -n "$tag" ] || { echo "::error title=No earlier release::no published release image to update from"; exit 1; }
+          digest=$(docker buildx imagetools inspect "ghcr.io/fr0styx/kiboto:$tag" | awk '/^Digest:/ {print $2; exit}')
+          case "$digest" in sha256:*) ;; *) echo "::error::no digest for $tag"; exit 1 ;; esac
+          echo "updating from $tag ($digest)"
+          echo "image=ghcr.io/fr0styx/kiboto@$digest" >> "$GITHUB_OUTPUT"
+
       - name: Which prepared disk fits
         if: inputs.fast
         id: key
@@ -121,7 +144,8 @@ jobs:
           IMAGE_REF: ${{ steps.build.outputs.image }}
           KB_OS_PREPARED: ${{ steps.prepared.outputs.cache-hit == 'true' && format('{0}/prepared.qcow2', github.workspace) || '' }}
           # a version tag and a run by hand also try an update and Revert; main stays fast
-          KB_OS_UPDATE: ${{ inputs.fast && '0' || '1' }}
+          KB_OS_UPDATE: ${{ (inputs.fast || inputs.from_last_release) && '0' || '1' }}
+          KB_OS_FROM: ${{ steps.from.outputs.image }}
           # early: QEMU from the last published main build; the build to install is waited for once
           # the machine is up (scripts/ci_wait_build.sh fails as soon as the build job fails)
           KB_OS_VM_IMAGE: ${{ steps.build.outputs.image == '--wait' && 'ghcr.io/fr0styx/kiboto:main' || '' }}
@@ -130,7 +154,7 @@ jobs:
         run: sh scripts/os_install_check.sh "$IMAGE_REF"
 
       - name: Prepare a disk for the next runs
-        if: inputs.fast && steps.prepared.outputs.cache-hit != 'true'
+        if: inputs.fast && !inputs.from_last_release && steps.prepared.outputs.cache-hit != 'true'
         env:
           IMAGE_REF: ${{ steps.build.outputs.image }}
           KB_OS_PREPARE: ${{ github.workspace }}/prepared.qcow2
@@ -140,7 +164,7 @@ jobs:
         run: sh scripts/os_install_check.sh "$IMAGE_REF"
 
       - name: Keep the prepared disk
-        if: inputs.fast && steps.prepared.outputs.cache-hit != 'true'
+        if: inputs.fast && !inputs.from_last_release && steps.prepared.outputs.cache-hit != 'true'
         uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: prepared.qcow2

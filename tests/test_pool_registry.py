@@ -320,3 +320,65 @@ def test_start_up_step(monkeypatch, tools, tmp_path):
 
     monkeypatch.setattr(reg, "bring_back_all", broken)
     main._bring_pools_back()  # logged, and the start goes on
+
+
+def test_the_root_service_gives_the_record_to_the_data_folders_owner(tmp_path, monkeypatch):
+    """Found by the Kiboto OS update check: on a fresh machine the root service wrote the record as
+    root's, the web process (its own user) could not read it, and a new pool looked like the system
+    disk until the next start, so no shared folder could go on it."""
+    monkeypatch.setattr(reg, "DATA_DIR", str(tmp_path))
+    given = []
+    monkeypatch.setattr(
+        reg.os, "chown", lambda path, uid, gid, follow_symlinks=True: given.append((path, uid, gid, follow_symlinks))
+    )
+    real_stat = os.stat
+    monkeypatch.setattr(
+        reg.os,
+        "stat",
+        lambda path, *a, **k: (
+            type("S", (), {"st_uid": 999, "st_gid": 998})() if path == str(tmp_path) else real_stat(path, *a, **k)
+        ),
+    )
+    monkeypatch.setattr(reg.os, "geteuid", lambda: 0)
+    reg.record("tank", "zfs", "mirror", "1", ["/dev/vdb", "/dev/vdc"], "/mnt/storage/tank")
+    record = reg._file()
+    assert given == [(os.path.dirname(record), 999, 998, False), (record, 999, 998, False)]
+    # the web process writing it itself, or a data folder that is root's: nothing to hand over
+    given.clear()
+    monkeypatch.setattr(reg.os, "geteuid", lambda: 999)
+    reg.record("tank", "zfs", "mirror", "1", ["/dev/vdb", "/dev/vdc"], "/mnt/storage/tank")
+    monkeypatch.setattr(reg.os, "geteuid", lambda: 0)
+    monkeypatch.setattr(
+        reg.os,
+        "stat",
+        lambda path, *a, **k: (
+            type("S", (), {"st_uid": 0, "st_gid": 0})() if path == str(tmp_path) else real_stat(path, *a, **k)
+        ),
+    )
+    reg.record("tank", "zfs", "mirror", "1", ["/dev/vdb", "/dev/vdc"], "/mnt/storage/tank")
+    assert given == []
+
+
+def test_handing_the_record_over_never_stops_the_pool_being_recorded(tmp_path, monkeypatch, caplog):
+    monkeypatch.setattr(reg, "DATA_DIR", str(tmp_path / "gone"))  # a data folder that cannot be read
+    monkeypatch.setattr(reg.os, "geteuid", lambda: 0)
+    tried = []
+    monkeypatch.setattr(reg.os, "chown", lambda *a, **k: tried.append(a))
+    reg.record("tank", "zfs", "mirror", "1", ["/dev/vdb", "/dev/vdc"], "/mnt/storage/tank")
+    assert tried == [] and reg.find("tank")
+
+    def refuse(*a, **k):
+        raise PermissionError("no")
+
+    monkeypatch.setattr(reg, "DATA_DIR", str(tmp_path))
+    real_stat = os.stat
+    monkeypatch.setattr(
+        reg.os,
+        "stat",
+        lambda path, *a, **k: (
+            type("S", (), {"st_uid": 999, "st_gid": 998})() if path == str(tmp_path) else real_stat(path, *a, **k)
+        ),
+    )
+    monkeypatch.setattr(reg.os, "chown", refuse)
+    reg.record("media", "zfs", "single", "2", ["/dev/vdd"], "/mnt/storage/media")
+    assert reg.find("media") and "could not be given to the data folder's owner" in caplog.text

@@ -25,6 +25,12 @@
 #                 (CI boots with the last published build while the new one is still being made)
 #   KB_OS_IMAGE_CMD with "--wait" in place of the image: a command that prints the image to install.
 #                 It runs once the machine is up, so the boot overlaps whatever the command waits for.
+#   KB_OS_FROM    an earlier release (image@sha256): it is installed first, a ZFS mirror, a shared folder
+#                 and a file are made through Kiboto's API (scripts/os_upgrade_data.py) on two extra
+#                 drives, then the machine updates to <image> through the root service and all three
+#                 are checked again; this build then makes a new pool with a shared folder on a third
+#                 drive, and everything is checked once more after a restart. The update a real
+#                 machine takes.
 #   KB_OS_PREPARED  such a disk, used instead of a fresh Debian: the install then skips building ZFS,
 #                 the slow part. It belongs to one install.sh and one Debian image (the workflow keys
 #                 it by both); anything else gets a fresh Debian.
@@ -110,6 +116,13 @@ growpart: {mode: auto, devices: ['/']}
 UD
 
 docker pull -q "$VM_IMAGE" >/dev/null
+DATA_DRIVES=""
+if [ -n "${KB_OS_FROM:-}" ]; then  # empty 2 GB drives: two for the pool the update must keep, one for a new pool after
+  for n in 1 2 3; do
+    truncate -s 2G "$WORK/data$n.raw"
+    DATA_DRIVES="$DATA_DRIVES -drive file=/vm/data$n.raw,if=none,id=data$n,format=raw -device virtio-blk-pci,drive=data$n,serial=KBUPGRADE$n"
+  done
+fi
 docker rm -f "$NAME" >/dev/null 2>&1 || true
 # The machine's own network view: QEMU's forward then listens on this machine's loopback, and the
 # guest sees SSH come from its own gateway (through a Docker network it would see that network's
@@ -125,7 +138,7 @@ docker run -d --name "$NAME" --no-healthcheck --network host --device /dev/kvm \
       -drive if=pflash,format=raw,file=/vm/vars.fd \
       -drive file=/vm/os.qcow2,if=none,id=os,format=qcow2 -device virtio-blk-pci,drive=os,serial=KBCHECKOS,bootindex=0 \
       -netdev user,id=n0,hostfwd=tcp:127.0.0.1:$PORT-:22 -device virtio-net-pci,netdev=n0,addr=0x9 \
-      -smbios 'type=1,serial=ds=nocloud;s=http://10.0.2.2:$SEED_PORT/' -device virtio-rng-pci" >/dev/null
+      -smbios 'type=1,serial=ds=nocloud;s=http://10.0.2.2:$SEED_PORT/' -device virtio-rng-pci $DATA_DRIVES" >/dev/null
 
 wait_ssh() {  # wait_ssh <minutes>: until the machine answers
   i=0
@@ -187,17 +200,35 @@ PREP
   exit 0
 fi
 
-if [ "$IMAGE" = --wait ]; then
-  stage "Waiting for the build to install"
-  IMAGE=$(sh -c "$KB_OS_IMAGE_CMD") || { say "no build to install"; exit 1; }
-  case "$IMAGE" in *@sha256:*) ;; *) say "not an image by digest: $IMAGE"; exit 1 ;; esac
-  say "$IMAGE"
+wait_for_build() {
+  if [ "$IMAGE" = --wait ]; then
+    stage "Waiting for the build to install"
+    IMAGE=$(sh -c "$KB_OS_IMAGE_CMD") || { say "no build to install"; exit 1; }
+    case "$IMAGE" in *@sha256:*) ;; *) say "not an image by digest: $IMAGE"; exit 1 ;; esac
+    say "$IMAGE"
+  fi
+}
+FIRST=$IMAGE
+if [ -n "${KB_OS_FROM:-}" ]; then
+  case "$KB_OS_FROM" in *@sha256:*) ;; *) say "KB_OS_FROM must name an image by digest"; exit 2 ;; esac
+  FIRST=$KB_OS_FROM  # the earlier release first; this run's build is the update
+else
+  wait_for_build
+  FIRST=$IMAGE
 fi
 
 stage "Kiboto installs itself"
-$SSH "cat > /root/install.sh" < "${KB_OS_INSTALLER:-$HERE/packaging/install.sh}"
+INSTALLER=${KB_OS_INSTALLER:-$HERE/packaging/install.sh}
+if [ -n "${KB_OS_FROM:-}" ] && [ -z "${KB_OS_INSTALLER:-}" ]; then
+  # an earlier release is installed with its own installer, as a machine of that time was
+  docker pull -q "$KB_OS_FROM" >/dev/null
+  docker run --rm --entrypoint cat "$KB_OS_FROM" /app/packaging/install.sh > "$WORK/install-from.sh"
+  INSTALLER=$WORK/install-from.sh
+  say "with the installer of $(docker run --rm --entrypoint python3 "$KB_OS_FROM" -c 'from backend import __version__; print(__version__)' 2>/dev/null || echo 'that release')"
+fi
+$SSH "cat > /root/install.sh" < "$INSTALLER"
 rc=0
-$SSH "sh /root/install.sh --image '$IMAGE' --unsigned > /root/install.log 2>&1" || rc=$?
+$SSH "sh /root/install.sh --image '$FIRST' --unsigned > /root/install.log 2>&1" || rc=$?
 $SSH "tail -25 /root/install.log" | hide
 if [ "$rc" != 0 ]; then
   say ""
@@ -232,14 +263,43 @@ look() {
   check "ZFS and Docker are held at the tested versions" "apt-mark showhold | grep -q zfs && apt-mark showhold | grep -q docker"
   check "the kernel takes Debian's security fixes (it is not held)" "! apt-mark showhold | grep -q linux-image"
   check "Debian's security fixes are set to install by themselves" "grep -q Debian-Security /etc/apt/apt.conf.d/52kiboto-security"
-  check "Kiboto waits for its first sign-in" "curl -fs -m 10 http://127.0.0.1:8082/api/auth/first-run | grep -q '\"waiting\": *true'"
+  # in an update run the administrator has signed in, and the install log is the earlier release's
+  [ -n "${KB_OS_FROM:-}" ] || check "Kiboto waits for its first sign-in" "curl -fs -m 10 http://127.0.0.1:8082/api/auth/first-run | grep -q '\"waiting\": *true'"
   check "the page itself is served" "curl -fs -m 10 http://127.0.0.1:8082/ | grep -qi '<title'"
-  check "its Python packages came from the image, nothing downloaded" "grep -q 'Python packages: taken from the image' /root/install.log"
+  # an earlier release may still build them on the machine; this build must not
+  [ -n "${KB_OS_FROM:-}" ] || check "its Python packages came from the image, nothing downloaded" "grep -q 'Python packages: taken from the image' /root/install.log"
 }
 
 stage "The installed machine"
 look
 $SSH "readlink /opt/kiboto/current; /opt/kiboto/current/venv/bin/python --version; df -h / | tail -1" | sed 's/^/  /'
+
+if [ -n "${KB_OS_FROM:-}" ]; then
+  stage "A pool, a shared folder and a file on the earlier release"
+  $SSH "cat > /root/os_upgrade_data.py" < "$HERE/scripts/os_upgrade_data.py"
+  $SSH "python3 /root/os_upgrade_data.py make /dev/disk/by-id/virtio-KBUPGRADE1 /dev/disk/by-id/virtio-KBUPGRADE2" || failed=$((failed + 1))
+  wait_for_build
+  stage "The update to this build through the root service"
+  $SSH "printf 'KIBOTO_ACCEPT_MAIN_BUILDS=1\nUPDATE_SIGNATURES=off\n' >> /etc/kiboto/kiboto.env && systemctl restart kiboto-door kiboto"
+  i=0
+  until $SSH "curl -fs -m 5 -o /dev/null http://127.0.0.1:8082/api/health" 2>/dev/null; do
+    i=$((i + 1)); [ "$i" -gt 36 ] && break; sleep 5
+  done
+  before=$($SSH "readlink /opt/kiboto/current")
+  $SSH "docker pull -q '$IMAGE' >/dev/null" || say "  the build could not be downloaded"
+  $SSH "cd /opt/kiboto/current && sudo -u kiboto env DATA_DIR=/var/lib/kiboto ./venv/bin/python -c 'import sys; from backend import door, __version__; door.call(\"update.start\", image=sys.argv[1], version=__version__, timeout=900)' '$IMAGE'" \
+    || say "  the root service refused or failed the update"
+  sleep 10
+  i=0
+  until $SSH "curl -fs -m 5 -o /dev/null http://127.0.0.1:8082/api/health" 2>/dev/null; do
+    i=$((i + 1)); [ "$i" -gt 36 ] && break; sleep 5
+  done
+  check "the update switched to a new release folder" "test \"\$(readlink /opt/kiboto/current)\" != '$before'"
+  look
+  $SSH "python3 /root/os_upgrade_data.py look" || failed=$((failed + 1))
+  stage "A new pool and shared folder on this build, without a restart"
+  $SSH "python3 /root/os_upgrade_data.py after /dev/disk/by-id/virtio-KBUPGRADE3" || failed=$((failed + 1))
+fi
 
 stage "The same after a restart"
 $SSH "systemctl reboot" 2>/dev/null || true
@@ -250,6 +310,9 @@ until $SSH "curl -fs -m 5 -o /dev/null http://127.0.0.1:8082/api/health" 2>/dev/
   i=$((i + 1)); [ "$i" -gt 36 ] && break; sleep 5
 done
 look
+if [ -n "${KB_OS_FROM:-}" ]; then
+  $SSH "python3 /root/os_upgrade_data.py look" || failed=$((failed + 1))
+fi
 
 # until Kiboto answers again after a switch (up to three minutes)
 healthy() {

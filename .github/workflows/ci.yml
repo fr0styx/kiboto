@@ -1001,6 +1001,23 @@ jobs:
       # always installs from a fresh Debian (and so does any run after install.sh changed)
       fast: ${{ github.ref == 'refs/heads/main' }}
 
+  # The update a real Kiboto OS machine takes: the newest release before this one is installed, a
+  # pool, a shared folder and a file are made through Kiboto's API, the machine updates to this
+  # build through its root service, and all three must stay, also after a restart. On main it
+  # reports beside the publish (a red one makes main red); a version tag's release waits for it.
+  os-upgrade:
+    name: Kiboto OS update
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/tags/stable')
+    permissions:
+      contents: read
+      packages: read # the images are pulled by their digests
+      actions: read # this run's build job and its digest artifact
+    uses: ./.github/workflows/os-install.yml
+    with:
+      early: true
+      fast: true
+      from_last_release: true
+
   publish:
     name: Sign & publish image tags (${{ matrix.variant }})
     needs: [lint, lint-and-test, unit-debian13, storage-real, frontend, frontend-checks, e2e-integration, still-latest, build-image, check-image, update-test, smoke-arm64, os-install]
@@ -1099,7 +1116,7 @@ jobs:
 
   create-release:
     name: GitHub Release & Release Notes
-    needs: [publish]
+    needs: [publish, os-upgrade]
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     timeout-minutes: 10  # ARC-26: a hung step fails the run instead of holding a runner for 6 hours

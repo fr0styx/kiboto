@@ -44,6 +44,8 @@ Apps: the sentence above the list (how many apps run, which stopped unexpectedly
 
 German, Spanish and French: 82 labels that still showed old wording in capitals now match the English (for example "Save", "Sign out", "Wrong password").
 
+Kiboto OS: a shared folder can go on a newly made pool straight away. Before, it was refused as being on the system disk until the machine had restarted.
+
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container
 
