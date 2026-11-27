@@ -31,7 +31,7 @@ REPOS_FILE = os.path.join(DATA_DIR, "offsite_repos.json")
 KEY_DIR = os.path.join(DATA_DIR, "offsite_keys")
 DEFAULT_KEEP = {"daily": 7, "weekly": 4, "monthly": 12}
 _LOCK = threading.Lock()
-_RUNNING: dict[str, subprocess.Popen] = {}
+_RUNNING: dict[str, Any] = {}  # a restic Popen, or offsite_reader's stand-in: each has terminate()
 _ID = re.compile(r"^[a-z0-9][a-z0-9-]{0,40}$")
 _BUSY: set[str] = set()  # repos with a backup or restore started, before restic itself runs
 WARN_EXIT = 3  # restic backup: the snapshot was made, but some files could not be read
@@ -417,8 +417,27 @@ def init(repo_id: str) -> dict[str, Any]:
     except ResticError as e:
         if "already" not in str(e) and "exists" not in str(e):
             raise
+        _opens_with_this_key(repo)  # a backup already there must be this one, not one made with another key
     _update(repo_id, initialized=True)
     return {"initialized": True}
+
+
+ANOTHER_KEY = (
+    "A backup made with another key is already in this place. To use it, add it from its recovery kit "
+    "(Backup, Off-site, Connect from a recovery kit); otherwise choose another folder."
+)
+
+
+def _opens_with_this_key(repo: dict[str, Any]) -> None:
+    """Reads the backup's settings with this backup's key. A folder that already held a backup from
+    another machine or an older setup was taken as ready, and every run, list and restore then failed
+    with restic's "wrong password or no key found"."""
+    try:
+        run_restic(repo, ["cat", "config"], timeout=300)
+    except ResticError as e:
+        if "wrong password" in str(e) or "no key found" in str(e):
+            raise ResticError(ANOTHER_KEY) from e
+        raise
 
 
 def recovery_key(repo_id: str) -> str:
@@ -561,12 +580,10 @@ def backup(repo_id: str, owner: str | None = None, job: Any = None) -> dict[str,
         job_manager.update(job.id, detail="Writing database dumps")
         dumps = backup_hooks.run_dumps(repo["paths"])  # a consistent copy of each database (REL-20)
         _unlock(repo)
-        code, _out = _run(
+        code, _out = _read_all(
             repo,
             ["backup", "--json", "--host", host_id(), "--tag", FILE_TAG, "--exclude", ".RecycleBin", *repo["paths"]],
-            track=True,
-            ok=(0, WARN_EXIT),
-            on_line=line,
+            line,
         )
         if code == WARN_EXIT and not count[0]:
             count[0] = 1
@@ -603,6 +620,35 @@ def backup(repo_id: str, owner: str | None = None, job: Any = None) -> dict[str,
         _update(repo_id, last_result=f"failed: {e}"[:300])
         job_manager.finish(job.id, "error", error=str(e))
         raise
+
+
+def _read_all(repo: dict[str, Any], args: list[str], line: Callable[[str], Any]) -> tuple[int, str]:
+    """restic backup. On Kiboto OS through the root service, which lets it read every file of the
+    folders (people's private folders belong to their own accounts); elsewhere, or for a location
+    the root service leaves to Kiboto, by this process as before."""
+    from backend import door
+    from backend.services import offsite_reader
+
+    try:
+        code, out, err = offsite_reader.run(repo, line, _RUNNING)
+    except offsite_reader.NotHere as e:
+        if str(e) != "no root service here":
+            logger.info("[Offsite] %s is backed up by Kiboto itself: %s", repo["id"], e)
+        return _run(repo, args, track=True, ok=(0, WARN_EXIT), on_line=line)
+    except (door.DoorError, OSError) as e:
+        raise ResticError(f"The backup could not be started: {e}") from None
+    if code not in (0, WARN_EXIT):
+        raise ResticError((err or out or f"restic exited with {code}").strip().splitlines()[-1][:300])
+    return code, out
+
+
+def read_here(repo_id: str, run: Callable[..., tuple[int, str]] | None = None) -> dict[str, Any]:
+    """The root service's operation "offsite.read": this backup's restic with the right to read every
+    file of its folders (offsite_reader checks them and builds the command)."""
+    from backend.services import offsite_reader
+
+    repo = get_repo(repo_id)  # an unknown backup raises KeyError
+    return offsite_reader.read_with(repo_id, repo, _env(repo), _key_file(repo_id), (host_id(), FILE_TAG), run=run)
 
 
 def _forget(repo: dict[str, Any], k: dict[str, int]) -> None:

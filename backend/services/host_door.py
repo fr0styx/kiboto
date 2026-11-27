@@ -388,6 +388,20 @@ def _tier_move(**kw: Any) -> Any:
     return tiering.move_here(**kw)
 
 
+def _offsite_read(repo_id: str) -> Any:
+    """restic for one off-site backup, with the right to read every file of its folders, which must
+    be in the storage folder (offsite_reader checks)."""
+    from backend.services import offsite_backup
+
+    return offsite_backup.read_here(repo_id)
+
+
+def _offsite_stop(repo_id: str) -> Any:
+    from backend.services import offsite_reader
+
+    return offsite_reader.stop_here(repo_id)
+
+
 def _opens_watch(folders: list[Any]) -> Any:
     from backend.services import open_watch
 
@@ -676,6 +690,8 @@ OPERATIONS: dict[str, Operation] = {
     "merge.ensure": Operation(_merge("ensure_here"), {}),
     "tier.move": Operation(_tier_move, {"fast": TEXT, "slow": TEXT, "keep_free": NUMBER, "files": LIST}, max_len=4096),
     "opens.watch": Operation(_opens_watch, {"folders": LIST}, max_len=4096),
+    "offsite.read": Operation(_offsite_read, {"repo_id": TEXT}, max_len=64),
+    "offsite.stop_read": Operation(_offsite_stop, {"repo_id": TEXT}, max_len=64),
     "hosts.apps": Operation(_apps_hosts, {}),
     "names.ensure": Operation(_names, {}),
     "power.run": Operation(_power, {"action": TEXT}, max_len=16),

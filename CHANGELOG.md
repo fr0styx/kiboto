@@ -66,6 +66,10 @@ UPS: with the automatic setting, a UPS on a USB cable or behind a NUT server is 
 
 Fans: a USB drive no longer holds the disk fans at full speed when its temperature can't be read, nor speeds them up when it is warm.
 
+Kiboto OS: off-site backups include people's private folders; they were left out ("files could not be read").
+
+Off-site backup: a folder that already holds a backup made with another key is said at once, instead of every backup failing later with "wrong password".
+
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container
 

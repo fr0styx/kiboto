@@ -96,3 +96,45 @@ def test_plain_restic_restores_the_files_with_only_the_kit(env, tmp_path):
     restored = list(target.rglob("letter.txt"))
     assert restored and restored[0].read_text() == "Dear Grandma"
     assert where == loc
+
+
+def test_a_place_that_holds_a_backup_with_another_key_is_said_not_taken(env, monkeypatch):
+    _repo(env)
+    ob._update("usb", initialized=False)
+    said = []
+
+    def restic(repo, args, timeout=0, track=False):
+        said.append(args[0])
+        if args[0] == "init":
+            raise ob.ResticError(
+                "Fatal: create key in repository at x failed: repository master key and config already initialized"
+            )
+        raise ob.ResticError(
+            '{"message_type":"exit_error","code":12,"message":"Fatal: wrong password or no key found"}'
+        )
+
+    monkeypatch.setattr(ob, "run_restic", restic)
+    with pytest.raises(ob.ResticError, match="another key"):
+        ob.init("usb")
+    assert said == ["init", "cat"] and not ob.get_repo("usb")["initialized"]
+
+
+def test_the_same_backup_again_is_fine_and_other_errors_are_said(env, monkeypatch):
+    _repo(env)
+
+    def again(repo, args, timeout=0, track=False):
+        if args[0] == "init":
+            raise ob.ResticError("config file already exists")
+        return "{}"
+
+    monkeypatch.setattr(ob, "run_restic", again)
+    assert ob.init("usb") == {"initialized": True}
+
+    def unreadable(repo, args, timeout=0, track=False):
+        if args[0] == "init":
+            raise ob.ResticError("config file already exists")
+        raise ob.ResticError("Fatal: unable to open config file: permission denied")
+
+    monkeypatch.setattr(ob, "run_restic", unreadable)
+    with pytest.raises(ob.ResticError, match="permission denied"):
+        ob.init("usb")
