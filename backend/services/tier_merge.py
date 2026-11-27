@@ -92,6 +92,14 @@ def sides(path: str, slow_mount: str) -> tuple[str, str]:
     return os.path.join(os.path.dirname(path), HIDDEN, name), os.path.join(slow_mount.rstrip("/"), HIDDEN, name)
 
 
+def _inside(top: str, path: str) -> bool:
+    """`path` below `top` is reached through no link on the way. The hidden folders sit at a pool's
+    top, where anyone who may write to a share of the whole pool could leave a link in their place,
+    and the merge (root's work) would make its folders wherever that led."""
+    rest = os.path.relpath(path, top)
+    return not rest.startswith("..") and os.path.realpath(path) == os.path.join(os.path.realpath(top), rest)
+
+
 # --- what the system has to offer ------------------------------------------------------------------
 def _mounts() -> list[dict[str, str]]:
     out = []
@@ -503,7 +511,8 @@ def add(name: str, path: str, slow_mount: str, slow_pool: str, where: str = "") 
         if not own:
             raise MergeError("not_plain", "This shared folder is a mount of its own or a link: it cannot be merged.")
         same_pool = path.startswith(slow_mount.rstrip("/") + "/")
-        if not os.path.isdir(slow_mount) or os.path.lexists(fast) or same_pool:
+        through_link = not _inside(os.path.dirname(path), fast) or not _inside(slow_mount, slow)
+        if not os.path.isdir(slow_mount) or os.path.lexists(fast) or same_pool or through_link:
             raise MergeError("bad_sides", "The slower pool cannot be used for this folder.")
         why = missing(path)
         if why:

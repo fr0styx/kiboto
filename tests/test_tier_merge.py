@@ -250,3 +250,24 @@ def test_folders_emptied_by_hand_on_the_slow_side_do_not_keep_it_merged(box):
     os.remove(os.path.join(made["slow"], "2019", "summer", "old.mkv"))  # the folders it was in stay
     assert tm.remove_if_empty(str(share)) is True
     assert merged_folders.merges() == [] and not os.path.exists(made["slow"])
+
+
+@pytest.mark.parametrize("side", ["fast", "slow"])
+def test_a_link_left_in_place_of_a_hidden_folder_is_refused(box, tmp_path, side):
+    share, hdd = box["share"], box["storage"] / "hdd"
+    outside = tmp_path / "etc"
+    outside.mkdir()
+    top = box["storage"] / "ssd" if side == "fast" else hdd
+    os.symlink(outside, top / tm.HIDDEN)
+    with pytest.raises(tm.MergeError) as e:
+        tm.add("Films", str(share), str(hdd), "p")
+    assert e.value.key == "bad_sides"
+    assert os.listdir(outside) == [] and (share / "a.mkv").exists() and merged_folders.merges() == []
+
+
+def test_inside_follows_no_link_on_the_way(tmp_path):
+    (tmp_path / "pool" / ".kiboto-tier").mkdir(parents=True)
+    os.symlink(tmp_path / "pool", tmp_path / "linked-pool")
+    assert tm._inside(str(tmp_path / "pool"), str(tmp_path / "pool" / ".kiboto-tier" / "Films"))
+    assert tm._inside(str(tmp_path / "linked-pool"), str(tmp_path / "linked-pool" / ".kiboto-tier" / "Films"))
+    assert not tm._inside(str(tmp_path / "pool"), str(tmp_path / "elsewhere"))

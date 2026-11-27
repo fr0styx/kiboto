@@ -180,6 +180,8 @@ SNMP on Kiboto OS reports each storage pool; before, it reported the system disk
 
 Encrypted folders never follow a link put in place of the share's hidden folder for encrypted files.
 
+Merged folders: a link left in place of the hidden folder on either pool is refused before anything moves.
+
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container
 
