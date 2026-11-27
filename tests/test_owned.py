@@ -3,6 +3,7 @@ the folder's right to write. Kiboto runs as root, so without this a file uploade
 could not be changed over the network share."""
 
 import os
+import struct
 import types
 
 import pytest
@@ -480,3 +481,61 @@ def test_the_person_is_named_in_their_own_folder_so_what_kibotos_user_makes_ther
     named = owned.private_acl(kiboto_only, 20001)
     assert owned.private_acl(named, 20001) == named  # settled: written once
     assert owned.private_acl(_acl((USER_OBJ, 7, 0), (GROUP_OBJ, 5, 0), (OTHER, 5, 0)), 20001) is None  # 700 does it
+
+
+def _acl(*entries):
+    return struct.pack("<I", 2) + b"".join(struct.pack("<HHI", *e) for e in entries)
+
+
+ANY = 0xFFFFFFFF
+# a folder made inside one whose default access list gave the group r-x, Kiboto's own user named
+INHERITED = _acl((0x01, 7, ANY), (0x02, 7, 999), (0x04, 5, ANY), (0x10, 7, ANY), (0x20, 5, ANY))
+
+
+def test_the_group_entry_follows_the_mode():
+    fixed = owned.group_entry(INHERITED, 7)
+    assert fixed == _acl((0x01, 7, ANY), (0x02, 7, 999), (0x04, 7, ANY), (0x10, 7, ANY), (0x20, 5, ANY))
+    shut = _acl((0x01, 7, ANY), (0x04, 0, ANY), (0x10, 0, ANY), (0x20, 0, ANY))
+    assert owned.group_entry(shut, 5) == _acl((0x01, 7, ANY), (0x04, 5, ANY), (0x10, 5, ANY), (0x20, 0, ANY))
+    assert owned.group_entry(b"\x02\x00", 7) is None
+
+
+def test_a_shared_folders_group_may_write_whatever_its_access_list_said(tmp_path, monkeypatch):
+    """A guest over SMB is let in through the share's group: a share folder whose inherited access
+    list kept the group at r-x refused every guest write, though its mode showed rwx."""
+    share = tmp_path / "Guests"
+    share.mkdir()
+    os.chmod(share, 0o755)
+    lists = {owned.ACL_XATTR: INHERITED, owned.ACL_DEFAULT_XATTR: INHERITED}
+    written = {}
+    monkeypatch.setattr(owned.os, "getxattr", lambda fd, attr: lists[attr])
+    monkeypatch.setattr(owned.os, "setxattr", lambda fd, attr, raw: written.__setitem__(attr, raw))
+    real = os.stat
+    owner = {"uid": 0, "gid": 0}
+    monkeypatch.setattr(owned.os, "stat", lambda path, *a, **k: _as(real(path, *a, **k), owner["uid"], owner["gid"]))
+    monkeypatch.setattr(owned, "_give", lambda path, uid, gid, expect=None: owner.update(uid=uid, gid=gid))
+    monkeypatch.setattr(owned, "_ids", lambda user, group: (65534, 100))
+    monkeypatch.setattr(owned, "_me", lambda: 0)
+    assert owned.to_people(str(share)) is True
+    group_rwx = owned.group_entry(INHERITED, 7)
+    assert written == {owned.ACL_XATTR: group_rwx, owned.ACL_DEFAULT_XATTR: group_rwx}
+    # one handed over before this was known: put right when the file server's settings are written
+    written.clear()
+    assert owned.to_people(str(share)) is False
+    assert written == {owned.ACL_XATTR: group_rwx, owned.ACL_DEFAULT_XATTR: group_rwx}
+    lists.update({owned.ACL_XATTR: group_rwx, owned.ACL_DEFAULT_XATTR: group_rwx})
+    written.clear()
+    assert owned.to_people(str(share)) is False and written == {}  # nothing to change: nothing written
+
+    def no_list(fd, attr):
+        raise OSError(61, "No data available")
+
+    monkeypatch.setattr(owned.os, "getxattr", no_list)
+    assert owned.to_people(str(share)) is False and written == {}  # no access list: the mode is all
+
+    def refused(fd, attr, raw):
+        raise PermissionError(1, "Operation not permitted")
+
+    monkeypatch.setattr(owned.os, "getxattr", lambda fd, attr: INHERITED)
+    monkeypatch.setattr(owned.os, "setxattr", refused)
+    assert owned.to_people(str(share)) is False  # said in the log, nothing raised

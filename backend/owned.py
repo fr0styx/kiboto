@@ -202,12 +202,18 @@ def to_people(folder: str, user: str = "nobody", group: str = "users", mode: int
         st = os.stat(folder)
     except OSError:
         return False
-    if _me() != 0 or st.st_uid not in _ours() or not stat.S_ISDIR(st.st_mode) or stat.S_IMODE(st.st_mode) & 0o002:
-        return False  # made by someone else than Kiboto (root, or its web user), or open to everyone
+    if _me() != 0 or not stat.S_ISDIR(st.st_mode) or stat.S_IMODE(st.st_mode) & 0o002:
+        return False  # only root hands a folder over; a file, or a folder open to everyone, stays as it is
     uid, gid = _ids(user, group)
+    if (st.st_uid, st.st_gid) == (uid, gid):  # handed over before: its group may still be shut out
+        _group_like_mode(folder, mode, st)
+        return False
+    if st.st_uid not in _ours():
+        return False  # made by someone else than Kiboto (root, or its web user)
     try:
         _give(folder, uid, gid, st)
         _mode(folder, mode, st)
+        _group_like_mode(folder, mode, os.stat(folder))
     except OSError as e:
         logger.warning("[Files] the shared folder %s stays the system's: %s", folder, e)
         return False
@@ -218,6 +224,47 @@ def to_people(folder: str, user: str = "nobody", group: str = "users", mode: int
 ACL_XATTR = "system.posix_acl_access"
 ACL_DEFAULT_XATTR = "system.posix_acl_default"  # what files made inside the folder start with
 _ACL_USER, _ACL_GROUP_OBJ, _ACL_GROUP, _ACL_MASK, _ACL_OTHER = 0x02, 0x04, 0x08, 0x10, 0x20
+
+
+def group_entry(raw: bytes, perm: int) -> bytes | None:
+    """An access list whose group entry is `perm`, its mask letting that through. None when `raw`
+    is not an access list."""
+    if len(raw) < 4 or (len(raw) - 4) % 8:
+        return None
+    out = []
+    for i in range((len(raw) - 4) // 8):
+        tag, now, who = struct.unpack_from("<HHI", raw, 4 + 8 * i)
+        if tag == _ACL_GROUP_OBJ:
+            now = perm
+        elif tag == _ACL_MASK:
+            now |= perm
+        out.append(struct.pack("<HHI", tag, now, who))
+    return raw[:4] + b"".join(out)
+
+
+def _group_like_mode(folder: str, mode: int, st: os.stat_result) -> None:
+    """The group's entry in a folder's access lists as `mode` says. With an access list, chmod
+    moves only the mask: a share folder made inside one whose list gave the group r-x stayed shut
+    to the group whatever its mode showed, and a guest over SMB (let in through the share's group,
+    not as its owner) could write nothing. The default list too, so folders made in it are alike."""
+    want = (mode >> 3) & 7
+    fd = os.open(folder, os.O_RDONLY | os.O_DIRECTORY | getattr(os, "O_NOFOLLOW", 0))
+    try:
+        now = os.fstat(fd)
+        if (now.st_dev, now.st_ino) != (st.st_dev, st.st_ino):
+            return
+        for attr in (ACL_XATTR, ACL_DEFAULT_XATTR):
+            try:
+                raw = os.getxattr(fd, attr)
+            except OSError:
+                continue  # no access list: the mode is all there is
+            fixed = group_entry(raw, want)
+            if fixed is not None and fixed != raw:
+                os.setxattr(fd, attr, fixed)
+    except OSError as e:
+        logger.warning("[Files] the group of %s keeps its access: %s", folder, e)
+    finally:
+        os.close(fd)
 
 
 def private_acl(raw: bytes, person: int | None = None) -> bytes | None:

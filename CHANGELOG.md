@@ -144,6 +144,8 @@ Front screen without a browser: the overview shows the modules chosen in Setting
 
 Network sign-in: an account whose password never reached the file server (set by an earlier release, or brought back from a backup) opens network shares again after its next sign-in to Kiboto, without changing the password.
 
+Shares on Kiboto OS: guests can write to a share that allows guests. Its folder had kept the group read-only from the folder it was made in.
+
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container
 
