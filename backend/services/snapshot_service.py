@@ -50,6 +50,23 @@ def _pool_of(share_or_snapshot: str, pal: Any) -> str:
     return str(found or "") or _default_pool_id(pal)
 
 
+NO_SNAPSHOTS = ("ext4", "ext3", "ext2", "xfs", "vfat", "exfat", "ntfs", "ntfs3", "f2fs")
+
+
+def _keeps_snapshots(share: str, pool_id: str | None) -> None:
+    """A schedule for a share on a pool that keeps no snapshots (ext4) is refused when it is saved,
+    not every time it runs."""
+    pal = _pal()
+    pid = pool_id or _pool_of(share, pal)
+    try:
+        pools = pal.list_pools()
+    except (OSError, RuntimeError, ValueError):
+        return  # unreadable now: the run says why, as before
+    fs = next((str(getattr(p, "fs_type", "") or "") for p in pools if getattr(p, "id", None) == pid), "")
+    if fs in NO_SNAPSHOTS:  # a kind not known here (a test pool, a new one) is left to the run
+        raise ValueError(f"{share} is on {fs}, which keeps no snapshots.")
+
+
 def availability(pal: Any = None) -> tuple[bool, str]:
     """Whether this host can take snapshots, and why not (REL-4)."""
     try:
@@ -93,6 +110,7 @@ def save_schedule(
     ok, why = availability()
     if not ok:
         raise ValueError(why)
+    _keeps_snapshots(share, pool_id)
     keep = max(1, min(int(keep), 1000))
     with _LOCK:
         data = read_json(SCHEDULES_FILE, {}) or {}
@@ -259,31 +277,31 @@ def _live_root(name: str, pal: Any, pool_id: str) -> str:
     return pal.get_pool_path(pool_id)
 
 
-def browse(
-    name: str, rel: str = "", pal: Any = None, pool_id: str | None = None, principal: Any = None
-) -> dict[str, Any]:
-    """A folder of a snapshot. With a principal, only what that person may open today is listed
-    (REL-23): a snapshot is no back door to someone else's folder."""
+def _through_door() -> bool:
+    """On Kiboto OS a snapshot's folders are read and restored by the root service: people's private
+    folders belong to their own system accounts, which Kiboto's web user cannot open."""
+    from backend import door, runtime
+
+    return runtime.without_root() and door.available()
+
+
+def _door(op: str, **args: Any) -> Any:
+    from backend import door
+
+    try:
+        return door.call(op, **args)
+    except door.DoorError as e:
+        raise e.as_error() from None
+
+
+def listing_here(name: str, rel: str = "", pool_id: str = "", pal: Any = None) -> dict[str, Any]:
+    """A folder of a snapshot as it is, every entry (the root service's operation "snapshots.list")."""
     pal = pal or _pal()
-    snap = _snapshot(name, pal, pool_id)
+    snap = _snapshot(name, pal, pool_id or None)
     root = os.path.realpath(snap["path"])
     target = resolve_within(os.path.join(root, (rel or "").lstrip("/")), root)
     if target is None or not os.path.isdir(target):
         raise FileNotFoundError("No such folder in this snapshot.")
-    visible: Callable[[str, bool], bool] | None = None
-    if principal is not None:
-        from backend.services.path_access import user_can_access_path
-
-        live = _live_root(name, pal, pool_id or _pool_of(name, pal))
-        here = os.path.join(live, os.path.relpath(target, root))
-        if not user_can_access_path(here, principal, allow_list=True):
-            raise PermissionError("You don't have access to this folder.")
-
-        def _visible(entry_name: str, is_dir: bool) -> bool:
-            return user_can_access_path(os.path.join(here, entry_name), principal, allow_list=is_dir)
-
-        visible = _visible
-
     entries = []
     with os.scandir(target) as it:
         for e in it:
@@ -291,16 +309,35 @@ def browse(
                 st = e.stat(follow_symlinks=False)
             except OSError:
                 continue
-            is_dir = e.is_dir(follow_symlinks=False)
-            if visible is not None and not visible(e.name, is_dir):
-                continue
-            entries.append({"name": e.name, "is_dir": is_dir, "size": st.st_size, "mtime": st.st_mtime})
+            entries.append(
+                {"name": e.name, "is_dir": e.is_dir(follow_symlinks=False), "size": st.st_size, "mtime": st.st_mtime}
+            )
     entries.sort(key=lambda x: (not x["is_dir"], x["name"].lower()))
-    return {
-        "snapshot": name,
-        "path": os.path.relpath(target, root).replace(os.sep, "/").lstrip("."),
-        "entries": entries[:5000],
-    }
+    inside = os.path.relpath(target, root).replace(os.sep, "/")
+    return {"path": "" if inside == "." else inside, "entries": entries}
+
+
+def browse(
+    name: str, rel: str = "", pal: Any = None, pool_id: str | None = None, principal: Any = None
+) -> dict[str, Any]:
+    """A folder of a snapshot. With a principal, only what that person may open today is listed
+    (REL-23): a snapshot is no back door to someone else's folder."""
+    if pal is None and _through_door():
+        listing = _door("snapshots.list", name=name, rel=rel or "", pool_id=pool_id or "")
+    else:
+        listing = listing_here(name, rel, pool_id or "", pal=pal)
+    entries = listing["entries"]
+    if principal is not None:
+        from backend.services.path_access import user_can_access_path
+
+        pal = pal or _pal()
+        here = os.path.join(_live_root(name, pal, pool_id or _pool_of(name, pal)), listing["path"])
+        if not user_can_access_path(here, principal, allow_list=True):
+            raise PermissionError("You don't have access to this folder.")
+        entries = [
+            e for e in entries if user_can_access_path(os.path.join(here, e["name"]), principal, allow_list=e["is_dir"])
+        ]
+    return {"snapshot": name, "path": listing["path"], "entries": entries[:5000]}
 
 
 def restore(
@@ -308,6 +345,13 @@ def restore(
 ) -> dict[str, Any]:
     """Copies a file or folder out of a snapshot. By default it lands beside the original as
     "<name> (restored YYYY-MM-DD HHMM)"; overwrite=True replaces the current version."""
+    if pal is None and _through_door():
+        return _door("snapshots.restore", name=name, rel=rel, overwrite=bool(overwrite), pool_id=pool_id or "")
+    return restore_here(name, rel, overwrite, pool_id or "", pal=pal)
+
+
+def restore_here(name: str, rel: str, overwrite: bool = False, pool_id: str = "", pal: Any = None) -> dict[str, Any]:
+    """restore's own work (the root service's operation "snapshots.restore" on Kiboto OS)."""
     pal = pal or _pal()
     pool_id = pool_id or _pool_of(name, pal)
     snap = _snapshot(name, pal, pool_id)
@@ -322,7 +366,7 @@ def restore(
     if os.path.lexists(dest) and not overwrite:
         stem, ext = os.path.splitext(dest) if os.path.isfile(src) else (dest, "")
         dest = f"{stem} (restored {time.strftime('%Y-%m-%d %H%M')}){ext}"
-    owned.make_dirs(os.path.dirname(dest))
+    _parents_as_they_were(os.path.dirname(dest), live_root, src_root)
     if overwrite and os.path.lexists(dest):
         from backend.services.fs_transfer import replace_with_copy
 
@@ -334,6 +378,21 @@ def restore(
         shutil.copy2(src, dest, follow_symlinks=False)
         owned.like_source(src, dest)
     return {"restored": os.path.relpath(dest, live_root).replace(os.sep, "/"), "overwrote": overwrite}
+
+
+def _parents_as_they_were(folder: str, live_root: str, src_root: str) -> None:
+    """Makes the folders a restored file goes into; one that is gone gets the owner and rights it
+    had in the snapshot (a person's deleted private folder comes back private, not open to all)."""
+    missing = []
+    here = folder
+    while here.startswith(live_root + os.sep) and not os.path.isdir(here):
+        missing.append(here)
+        here = os.path.dirname(here)
+    owned.make_dirs(folder)
+    for made in reversed(missing):  # from the top down: a folder's owner first, then what is in it
+        was = os.path.join(src_root, os.path.relpath(made, live_root))
+        if os.path.isdir(was) and not os.path.islink(was):
+            owned.like_source(was, made)
 
 
 # Never deleted or replaced by a rollback (NREL-7): the Recycle Bin, and the encrypted folders'

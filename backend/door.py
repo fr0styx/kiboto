@@ -56,6 +56,10 @@ class DoorError(RuntimeError):
             return err
         if self.kind == "runtime":
             return RuntimeError(str(self))
+        if self.kind == "not_found":
+            return FileNotFoundError(str(self))
+        if self.kind == "permission":
+            return PermissionError(str(self))
         return self
 
 

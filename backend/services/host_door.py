@@ -403,6 +403,19 @@ def _offsite_restore(**kw: Any) -> Any:
     return offsite_backup.restore_here(**kw)
 
 
+def _snapshots(name: str) -> Callable[..., Any]:
+    """snapshot_service's own function: a snapshot's folder listed, or a file restored from it, as
+    root (people's private folders belong to their own accounts); the paths stay inside the snapshot
+    and its share (resolve_within)."""
+
+    def run(**kw: Any) -> Any:
+        from backend.services import snapshot_service
+
+        return getattr(snapshot_service, name)(**kw)
+
+    return run
+
+
 def _offsite_stop(repo_id: str) -> Any:
     from backend.services import offsite_reader
 
@@ -699,6 +712,10 @@ OPERATIONS: dict[str, Operation] = {
     "opens.watch": Operation(_opens_watch, {"folders": LIST}, max_len=4096),
     "offsite.read": Operation(_offsite_read, {"repo_id": TEXT}, max_len=64),
     "offsite.stop_read": Operation(_offsite_stop, {"repo_id": TEXT}, max_len=64),
+    "snapshots.list": Operation(_snapshots("listing_here"), {"name": TEXT, "rel": TEXT, "pool_id": TEXT}, max_len=8192),
+    "snapshots.restore": Operation(
+        _snapshots("restore_here"), {"name": TEXT, "rel": TEXT, "overwrite": ON, "pool_id": TEXT}, max_len=8192
+    ),
     "offsite.restore": Operation(
         _offsite_restore, {"repo_id": TEXT, "snapshot_id": TEXT, "path": TEXT, "target": TEXT}, max_len=8192
     ),
@@ -780,6 +797,10 @@ def _kind(e: Exception) -> str:
     adapter's own kinds in generic_linux._through_door)."""
     if isinstance(e, ValueError):
         return "value"
+    if isinstance(e, FileNotFoundError):
+        return "not_found"
+    if isinstance(e, PermissionError):
+        return "permission"
     if isinstance(e, PoolUsedElsewhere):
         return "used_elsewhere"
     if isinstance(e, LookupError):

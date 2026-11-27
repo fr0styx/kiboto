@@ -132,3 +132,63 @@ def test_previous_versions_in_samba(tmp_path):
     assert _snapshot_dir_for("/mnt/pool/@shares/family") == "/mnt/pool/@snapshots"
     cfg = SambaShareConfig(name="family", path="/mnt/pool/@shares/family", previous_versions=True)
     assert cfg.previous_versions
+
+
+def test_a_deleted_folder_comes_back_like_it_was_in_the_snapshot(pal, monkeypatch):
+    os.makedirs(_live(pal, "private", "deep"))
+    with open(_live(pal, "private", "deep", "note.txt"), "w") as f:
+        f.write("mine")
+    snaps.save_schedule("family", "daily", keep=5)
+    name = snaps.run_due(now=time.time())[0]["name"]
+    shutil.rmtree(_live(pal, "private"))
+    like = []
+    monkeypatch.setattr(
+        snaps.owned,
+        "like_source",
+        lambda src, dst: like.append((os.path.relpath(src, pal.pool), os.path.relpath(dst, pal.pool))),
+    )
+    snaps.restore(name, "private/deep/note.txt")
+    assert _read(_live(pal, "private", "deep", "note.txt")) == "mine"
+    snap_dir = os.path.join("@snapshots", name)
+    assert like[:2] == [
+        (os.path.join(snap_dir, "private"), os.path.join("@shares", "family", "private")),
+        (os.path.join(snap_dir, "private", "deep"), os.path.join("@shares", "family", "private", "deep")),
+    ]
+
+
+def test_a_schedule_for_a_pool_without_snapshots_is_refused(pal, monkeypatch):
+    monkeypatch.setattr(pal, "list_pools", lambda: [SimpleNamespace(id="pool1", fs_type="ext4")])
+    with pytest.raises(ValueError, match="keeps no snapshots"):
+        snaps.save_schedule("family", "daily", keep=5)
+
+    def unreadable():
+        raise RuntimeError("zpool not answering")
+
+    monkeypatch.setattr(pal, "list_pools", unreadable)
+    snaps.save_schedule("family", "daily", keep=5)  # unknown now: the run says why later
+
+
+def test_on_kiboto_os_the_root_service_lists_and_restores(pal, monkeypatch):
+    from backend import door
+
+    monkeypatch.setattr(snaps, "_through_door", lambda: True)
+    asked = []
+
+    def call(op, **args):
+        asked.append((op, args))
+        if op == "snapshots.list":
+            return {"path": "", "entries": [{"name": "private", "is_dir": True, "size": 3, "mtime": 1.0}]}
+        if args.get("rel") == "gone.txt":
+            raise door.DoorError("No such file in this snapshot.", kind="not_found")
+        return {"restored": "x", "overwrote": False}
+
+    monkeypatch.setattr(door, "call", call)
+    assert snaps.browse("family@auto-1")["entries"][0]["name"] == "private"
+    assert snaps.restore("family@auto-1", "note.txt") == {"restored": "x", "overwrote": False}
+    with pytest.raises(FileNotFoundError):
+        snaps.restore("family@auto-1", "gone.txt")
+    assert [a[0] for a in asked] == ["snapshots.list", "snapshots.restore", "snapshots.restore"]
+    from backend.services import host_door
+
+    assert set(host_door.OPERATIONS["snapshots.restore"].args) == {"name", "rel", "overwrite", "pool_id"}
+    assert door.DoorError("x", kind="permission").as_error().__class__ is PermissionError

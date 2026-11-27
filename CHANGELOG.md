@@ -72,6 +72,10 @@ Off-site backup: a folder that already holds a backup made with another key is s
 
 Kiboto OS: files restored from an off-site backup keep their owner; a person's restored private files are theirs again.
 
+Kiboto OS: people's private files can be browsed and restored from snapshots, and a restored private folder stays private.
+
+Snapshots: a schedule for a share on ext4 is refused when saved, with the reason.
+
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container
 
