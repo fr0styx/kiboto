@@ -112,6 +112,8 @@ A first copy from the container to a machine Kiboto has not met before no longer
 
 Kiboto OS: importing photos from a card or a USB disk no longer fails with Permission denied when no folder was chosen; they go to a shared folder, and its people can change them over the network.
 
+Kiboto OS: on the second NAS of a pair, the shared folders it keeps a copy of can be changed by their people over the network.
+
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container
 

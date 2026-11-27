@@ -346,6 +346,7 @@ def _fetch_file(
             os.chown(part, like.st_uid, like.st_gid)
         os.utime(part, ns=(mtime_ns, mtime_ns))
         os.replace(part, local)
+        _to_the_folder(local)
     finally:
         if os.path.lexists(part):
             os.remove(part)
@@ -364,6 +365,19 @@ def _make_folders(root: str, folder: str, like: os.stat_result) -> None:
         os.chmod(path, stat.S_IMODE(like.st_mode) & 0o2777)
         if os.geteuid() == 0:
             os.chown(path, like.st_uid, like.st_gid)
+        _to_the_folder(path)
+
+
+def _to_the_folder(path: str) -> None:
+    """Where Kiboto does not run as root (Kiboto OS), what it fetched or made is handed to the folder
+    it is in through the root service, as uploads are: it stayed Kiboto's own user's, and the shared
+    folder's people could not change their files on this NAS, also after it took over."""
+    from backend import runtime
+
+    if runtime.without_root():
+        from backend import owned
+
+        owned.like_folder(path)
 
 
 def _put_away(root: str, rel: str, day: str) -> None:

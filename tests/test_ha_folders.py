@@ -323,3 +323,18 @@ def test_choosing_folders_asks_first_and_names_them(client, auth_headers, tmp_pa
         "/api/confirmations", json={"action": "ha.folders", "target": "Films, Photos"}, headers=auth_headers
     )
     assert made.status_code == 200 and "Films, Photos" in made.json()["summary"]
+
+
+def test_on_kiboto_os_what_is_fetched_goes_to_the_shared_folders_people(net, monkeypatch):
+    """There Kiboto does not run as root: fetched files and the folders made for them stayed Kiboto's
+    own user's, and the shared folder's people could not change them on this NAS."""
+    from backend import owned, runtime
+
+    net.put(A, "Films", "2019/summer/a.mkv", "a")
+    handed = []
+    monkeypatch.setattr(runtime, "without_root", lambda: True)
+    monkeypatch.setattr(owned, "like_folder", lambda path: handed.append(path) or True)
+    hf.choose(["Films"], send=net.send)
+    assert hf.fetch_folder("Films", send=net.send)["fetched"] == 1
+    there = net.shares[B]["Films"]
+    assert [os.path.relpath(p, there) for p in handed] == ["2019", "2019/summer", "2019/summer/a.mkv"]
