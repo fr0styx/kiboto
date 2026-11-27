@@ -136,6 +136,8 @@ Network shares: when the file server missed a person's password (it was not up y
 
 Apps: in a container, the suggested data folder is one the host and Kiboto both see, so an app's folders and starter files land where the app uses them.
 
+Front screen: the drive bays page shows the chassis's own bays (four on a Zettlab D4) and puts M.2 drives after them; USB sticks no longer take a bay.
+
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container
 

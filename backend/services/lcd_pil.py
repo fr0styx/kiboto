@@ -498,25 +498,42 @@ def _drive_strip(draw, disks, c, top):
         _text(draw, (x0 + 10, top + 30), label, font("bold", 9), color, anchor="lm")
 
 
+def _bay_slots(stats: dict, disks: list[dict]) -> list[tuple[str, dict | None]]:
+    """The tiles of the bays page: each bay of the chassis with its disk, then the M.2 drives when
+    there is room (#71). Without the chassis's map, the plain list of disks as before."""
+    plan = stats.get("drive_bays") or {}
+    bays = plan.get("bays") if isinstance(plan, dict) else None
+    if not isinstance(bays, list) or not bays or len(bays) > 8:
+        return [(f"BAY {i + 1}", disks[i] if i < len(disks) else None) for i in range(max(6, min(8, len(disks))))]
+    by_dev = {d.get("dev"): d for d in disks}
+    tiles: list[tuple[str, dict | None]] = [
+        (f"BAY {i + 1}", by_dev.get(dev) if dev else None) for i, dev in enumerate(bays)
+    ]
+    for dev in plan.get("m2") or []:
+        if len(tiles) < 8 and dev in by_dev:
+            tiles.append(("M.2", by_dev[dev]))
+    return tiles
+
+
 def _page_bays(draw, stats, c):
     disks = [d for d in (stats.get("disks") or []) if isinstance(d, dict)]
-    bad = [d for d in disks if _disk_state(d, c)[0] in ("FAIL", "WARN")]
+    tiles = _bay_slots(stats, disks)
+    bad = [d for _label, d in tiles if d and _disk_state(d, c)[0] in ("FAIL", "WARN")]
     if bad:
         _section_title(draw, "Drive bays & SMART", f"{len(bad)} need attention", c["warn"], c)
     else:
         _section_title(draw, "Drive bays & SMART", "All drives healthy", c["ok2"], c)
-    slots = max(6, min(8, len(disks)))
+    slots = len(tiles)
     gap = 6
     w = (WIDTH - 24 - gap * (slots - 1)) / slots
     top = 68
-    for i in range(slots):
+    for i, (label, disk) in enumerate(tiles):
         x0 = 12 + i * (w + gap)
-        disk = disks[i] if i < len(disks) else None
         _card(draw, (x0, top, x0 + w, HEIGHT - 6), c)
         _text(
             draw,
             (x0 + w / 2, top + 12),
-            f"BAY {i + 1}",
+            label,
             font("bold", 10),
             c["muted"] if disk else c["track"],
             anchor="mm",

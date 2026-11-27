@@ -455,6 +455,7 @@ def _build_payload(
         "net": net,
         "uptime": read_uptime(),
         "disks": disks,
+        "drive_bays": drive_bays(),
         "chassis": detect_chassis_model(),
         "chassis_label": get_chassis_friendly_name(detect_chassis_model()),
         "layout": get_current_layout(),
@@ -680,6 +681,30 @@ def stats_collector_daemon():
 
         if Z_STATE.ui_wake.wait(2.0):
             Z_STATE.ui_wake.clear()
+
+
+BAYS_SECS = 60.0
+_BAYS: dict[str, Any] = {"at": -BAYS_SECS, "value": None}
+
+
+def drive_bays(now: float | None = None) -> dict[str, Any] | None:
+    """Which disk is in which bay of the chassis, and the M.2 drives, as the chassis page maps them
+    (its own number of bays, a person's mapping first): {"bays": [dev or None, ...], "m2": [dev, ...]}.
+    Read at most once a minute. The front screen numbered the plain list of disks as bays, so USB
+    sticks and NVMe drives took SATA bays, and a four-bay D4 showed six (#71)."""
+    now = time.monotonic() if now is None else now
+    if now - _BAYS["at"] < BAYS_SECS:
+        return _BAYS["value"]
+    _BAYS["at"] = now
+    try:
+        status = ChassisEngine.get_chassis_status()
+    except (OSError, ValueError, RuntimeError, KeyError):
+        logger.debug("drive bays could not be read", exc_info=True)
+        return _BAYS["value"]
+    bays = [((b.get("disk") or {}).get("dev") or None) for b in status.get("bays") or []]
+    m2 = [str((n.get("disk") or {}).get("dev") or "") for n in status.get("nvme_slots") or []]
+    _BAYS["value"] = {"bays": bays, "m2": [d for d in m2 if d]} if bays else None
+    return _BAYS["value"]
 
 
 def collect():
