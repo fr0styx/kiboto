@@ -119,6 +119,28 @@ def test_sleeping_drive_without_a_reading_is_not_hot(rig):
     assert not rig.events
 
 
+def test_a_usb_drive_does_not_drive_the_disk_fans(rig):
+    """A USB backup drive is outside the case: no reading (many USB bridges give none) must not hold the
+    disk fans at full speed, and a warm one does not speed them up."""
+    drives = [{"dev": "sdc", "role": "data", "temp": None, "usb": True}, {"dev": "sda", "role": "data", "temp": 38}]
+    rig.run([dict(d) for d in drives])
+    rig.now += 600
+    assert rig.run([dict(d) for d in drives])[0] < FAN_MAX_PWM and not rig.events
+    calm = rig.run([{"dev": "sda", "role": "data", "temp": 38}])
+    warm_usb = [{"dev": "sdc", "role": "data", "temp": 45, "usb": True}, {"dev": "sda", "role": "data", "temp": 38}]
+    assert rig.run(warm_usb) == calm
+
+
+def test_the_reading_says_which_drives_are_on_usb(monkeypatch, one_disk):
+    monkeypatch.setattr(
+        disks_mod,
+        "_discover_disks",
+        lambda: [{"dev": "sda", "role": "data"}, {"dev": "sdc", "role": "data", "transport": "usb"}],
+    )
+    _reading_age(10)
+    assert [d["usb"] for d in disks_mod.read_disk_temps_and_io()] == [False, True]
+
+
 @pytest.fixture
 def one_disk(monkeypatch):
     monkeypatch.setattr(disks_mod, "_discover_disks", lambda: [{"dev": "sda", "role": "data"}])

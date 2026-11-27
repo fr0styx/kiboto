@@ -412,3 +412,40 @@ def test_self_test_over_nut(monkeypatch):
         r["success"] and "accepted" in r["message"] and logged[0]["status"] == "SENT"
     )  # sent, its result is not read (SET-15)
     assert any(c.startswith("INSTCMD myups test.battery.start.quick") for c in srv.received)
+
+
+def test_auto_looks_past_apcupsd_to_usb_and_nut_with_the_default_port(monkeypatch, tmp_path):
+    """ "auto" with the default settings (port 3551, apcupsd\x27s) used to ask apcupsd only: a UPS on
+    USB or behind a local NUT server (Kiboto OS) was never found."""
+    import backend.hardware.ups as ups
+
+    asked = []
+    monkeypatch.setattr(ups, "load_ups_config", lambda: dict(ups.DEFAULT_UPS_CONFIG))
+    monkeypatch.setattr(ups, "_query_direct_usb", lambda *a, **k: asked.append("usb") or {})
+    monkeypatch.setattr(ups, "_query_apcupsd_socket", lambda *a, **k: asked.append("apcupsd") or {})
+    monkeypatch.setattr(ups, "_get_docker_gateway", lambda: None)
+    monkeypatch.setattr(
+        ups,
+        "_query_nut_socket",
+        lambda host, port, **k: (
+            asked.append(f"nut:{port}") or {"STATUS": "OL", "BCHARGE": "100", "MODEL": "Pretend UPS"}
+        ),
+    )
+    monkeypatch.setattr(ups, "_CACHED_UPS", {})
+    got = ups.read_ups_status(force=True)
+    assert asked[:3] == ["usb", "apcupsd", "nut:3493"]
+    assert got["available"] is True
+
+
+def test_a_chosen_mode_still_follows_its_port(monkeypatch):
+    import backend.hardware.ups as ups
+
+    asked = []
+    monkeypatch.setattr(ups, "load_ups_config", lambda: {**ups.DEFAULT_UPS_CONFIG, "mode": "snmp", "port": 3493})
+    monkeypatch.setattr(ups, "_query_direct_usb", lambda *a, **k: asked.append("usb") or {})
+    monkeypatch.setattr(ups, "_query_nut_socket", lambda *a, **k: asked.append("nut") or {})
+    monkeypatch.setattr(ups, "_query_nut_cli", lambda *a, **k: asked.append("upsc") or {})
+    monkeypatch.setattr(ups, "_get_docker_gateway", lambda: None)
+    monkeypatch.setattr(ups, "_CACHED_UPS", {})
+    ups.read_ups_status(force=True)
+    assert asked == ["nut", "upsc"]  # not the automatic search

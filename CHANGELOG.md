@@ -62,6 +62,10 @@ Network: the address dialog's "fixed address" and "from the router" buttons are 
 
 Kiboto OS: DNS servers chosen in the address dialog are no longer joined by the ones the router announces over IPv6.
 
+UPS: with the automatic setting, a UPS on a USB cable or behind a NUT server is found again (the default settings only ever asked apcupsd).
+
+Fans: a USB drive no longer holds the disk fans at full speed when its temperature can't be read, nor speeds them up when it is warm.
+
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container
 

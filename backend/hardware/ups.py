@@ -1469,8 +1469,8 @@ def read_ups_status(force: bool = False, reprobe: bool = False) -> dict[str, Any
         if raw:
             protocol = raw.get("PROTOCOL", "direct_usb_hid")
 
-    # 1. If configured for NUT mode or NUT port 3493
-    elif ups_mode in ("nut_client", "nut") or ups_port == 3493:
+    # 1. NUT chosen, or its port 3493 with a mode other than "auto" (whose default port is apcupsd's)
+    elif ups_mode in ("nut_client", "nut") or (ups_mode != "auto" and ups_port == 3493):
         target_port = ups_port if ups_port > 0 else 3493
         raw = _query_nut_socket(ups_host, target_port, ups_name=ups_name, username=ups_user, password=ups_pass)
         if raw:
@@ -1487,7 +1487,7 @@ def read_ups_status(force: bool = False, reprobe: bool = False) -> dict[str, Any
                 protocol = "upsc_cli"
 
     # 2. If configured for APCUPSD mode or port 3551
-    elif ups_mode in ("apcupsd_client", "apcupsd") or ups_port == 3551:
+    elif ups_mode in ("apcupsd_client", "apcupsd") or (ups_mode != "auto" and ups_port == 3551):
         target_port = ups_port if ups_port > 0 else 3551
         raw = _query_apcupsd_socket(ups_host, target_port)
         if raw:

@@ -60,7 +60,7 @@ What the words mean:
 | Firewall<br><sub>On after an install from Kiboto's USB image; on other installs off until you turn it on. Your home network reaches everything, and the outside only what you tick, apps included.</sub> | Your NAS system does this | Your NAS system does this | Yes |
 | Restart and shut down | Yes | Yes | Yes |
 | Power schedule: wake and sleep at set times<br><sub>On Kiboto OS it is tried on a virtual machine, not yet for a night on a real one.</sub> | Yes | Yes | Being checked |
-| Battery backup (UPS)<br><sub>On Kiboto OS a UPS on a USB cable is read without root; not yet tried with a real UPS on Kiboto OS.</sub> | Yes | Yes | Being checked |
+| Battery backup (UPS)<br><sub>On Kiboto OS a UPS on a USB cable or behind a NUT server is found by itself. Tried on a virtual machine with a pretend UPS: on battery it warns, at low battery it stops the apps and shuts the machine down, and the apps start again at the next start. Not yet tried with a real UPS on Kiboto OS.</sub> | Yes | Yes | Being checked |
 | Server name, time zone and the SSH switch | Your NAS system does this | Your NAS system does this | Yes |
 | Dynamic DNS, HTTPS certificates, access from away | Yes | Yes | Being checked |
 

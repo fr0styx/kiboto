@@ -45,7 +45,7 @@
    {"id": "firewall", "name": "Firewall", "beside": "host", "linux": "host", "os": "yes", "note": "On after an install from Kiboto's USB image; on other installs off until you turn it on. Your home network reaches everything, and the outside only what you tick, apps included."},
    {"name": "Restart and shut down", "beside": "yes", "linux": "yes", "os": "yes"},
    {"id": "power_schedule", "name": "Power schedule: wake and sleep at set times", "beside": "yes", "linux": "yes", "os": "check", "note": "On Kiboto OS it is tried on a virtual machine, not yet for a night on a real one."},
-   {"id": "ups", "name": "Battery backup (UPS)", "beside": "yes", "linux": "yes", "os": "check", "note": "On Kiboto OS a UPS on a USB cable is read without root; not yet tried with a real UPS on Kiboto OS."},
+   {"id": "ups", "name": "Battery backup (UPS)", "beside": "yes", "linux": "yes", "os": "check", "note": "On Kiboto OS a UPS on a USB cable or behind a NUT server is found by itself. Tried on a virtual machine with a pretend UPS: on battery it warns, at low battery it stops the apps and shuts the machine down, and the apps start again at the next start. Not yet tried with a real UPS on Kiboto OS."},
    {"id": "server_ssh", "name": "Server name, time zone and the SSH switch", "beside": "host", "linux": "host", "os": "yes"},
    {"id": "remote_access", "name": "Dynamic DNS, HTTPS certificates, access from away", "beside": "yes", "linux": "yes", "os": "check"}
   ]},

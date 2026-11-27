@@ -243,7 +243,11 @@ def run_fan_control(
     zero_rpm_stop_temp,
 ):
     """Zones, zero-RPM, storage interlocks and the critical-temperature override; sets the fans."""
-    sata_disks = [d for d in disks if d.get("role") == "data" or d.get("dev", "").startswith("sd")]
+    # the drives in the bays; a USB drive is sd* too, but sits outside the case (a backup drive whose
+    # bridge gives no temperature held the disk fans at full speed while it was plugged in)
+    sata_disks = [
+        d for d in disks if not d.get("usb") and (d.get("role") == "data" or d.get("dev", "").startswith("sd"))
+    ]
     # Every zone follows the hottest drive (owner's choice, S28): one warm drive speeds up all the
     # disk fans, and the fans stop only when every drive sleeps. Before, each fan followed only the
     # bays next to it (by bay number, or half of the drives each).
@@ -271,7 +275,7 @@ def run_fan_control(
     floor = floor_pwm(_floor_temp(sata_disks, max(t_zone1, t_zone2)))  # under every mode while a drive spins
 
     # NVMe Drives & Wind Tunnel Cooling Override
-    nvme_disks = [d for d in disks if d.get("role") == "cache" or "nvme" in d.get("dev", "")]
+    nvme_disks = [d for d in disks if not d.get("usb") and (d.get("role") == "cache" or "nvme" in d.get("dev", ""))]
     active_nvme = [d["temp"] for d in nvme_disks if d.get("temp") is not None and not d.get("standby", False)]
     t_nvme = max(active_nvme, default=None)
     # If NVMe disks are installed, their temperature must be readable and below ceiling to allow Zero RPM

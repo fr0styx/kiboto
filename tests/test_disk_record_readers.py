@@ -29,6 +29,7 @@ RECORD_FIELDS = {
     "is_nvme",
     "is_parity",
     "parity_label",
+    "usb",
 }
 
 

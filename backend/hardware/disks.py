@@ -986,6 +986,7 @@ def read_disk_temps_and_io(allow_sync_poll: bool = False):
                 "is_nvme": is_nvme,
                 "is_parity": is_parity,
                 "parity_label": parity_label,
+                "usb": d.get("transport") == "usb",  # outside the case: not cooled by the disk fans
             }
         )
 

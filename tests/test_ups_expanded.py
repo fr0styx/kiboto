@@ -26,7 +26,9 @@ from backend.hardware.ups import (
 
 
 @pytest.fixture(autouse=True)
-def clean_ups_state():
+def clean_ups_state(monkeypatch):
+    # "auto" looks for a UPS on USB first: never this machine's own
+    monkeypatch.setattr("backend.hardware.ups._query_direct_usb", lambda *a, **k: {})
     init_db()
     try:
         set_app_config_value("ups_config", None)
