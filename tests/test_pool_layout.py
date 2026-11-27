@@ -47,6 +47,7 @@ def test_other_layouts_are_refused(fs, asked, drives, says):
 
 def test_zfs_raid1_is_made_as_a_mirror_and_recorded_as_one(tmp_path, monkeypatch):
     adapter = GenericLinuxStorageAdapter()
+    adapter._resolve_disk_path = lambda d: "/dev/" + d  # never the machine running the tests
     ran = []
     adapter._run_cmd = lambda cmd: (ran.append(cmd), (0, "", ""))[1]
     recorded = {}
@@ -64,6 +65,7 @@ def test_zfs_raid1_is_made_as_a_mirror_and_recorded_as_one(tmp_path, monkeypatch
 
 def test_a_zfs_stripe_is_named_single_and_has_no_layout_word(tmp_path, monkeypatch):
     adapter = GenericLinuxStorageAdapter()
+    adapter._resolve_disk_path = lambda d: "/dev/" + d  # never the machine running the tests
     ran = []
     adapter._run_cmd = lambda cmd: (ran.append(cmd), (0, "", ""))[1]
     monkeypatch.setattr("backend.hardware.pal.pool_registry.record", lambda *a, **k: None)
