@@ -54,6 +54,14 @@ class HostIpConfigApplyRequest(BaseModel):
     dns1: str | None = Field(default=None, description="Primary upstream DNS server")
     dns2: str | None = Field(default=None, description="Secondary upstream DNS server")
     timeout_sec: int | None = Field(default=60, ge=10, le=300, description="Canary rollback safety timeout in seconds")
+    ipv6_mode: str | None = Field(default=None, description="Kiboto OS: 'auto', 'off' or 'static'")
+    ipv6_address: str | None = Field(default=None, description="Kiboto OS: a fixed IPv6 address with its prefix")
+    ipv6_gateway: str | None = Field(
+        default=None, description="Kiboto OS: the IPv6 router (in the prefix, or link-local)"
+    )
+    routes: list[dict[str, str]] | None = Field(
+        default=None, max_length=16, description="Kiboto OS: further networks, each {destination, gateway}"
+    )
 
 
 class HostIpConfirmRequest(BaseModel):

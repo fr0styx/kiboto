@@ -38,6 +38,7 @@ LEASES = "/run/systemd/netif/leases"
 SYS_NET = "/sys/class/net"
 APPLY_DELAY = 2.0  # the answer leaves before the address changes
 DEFAULT_TRIAL, SHORTEST, LONGEST = 60, 10, 300
+MAX_ROUTES = 16
 GRACE = 20  # the timer may run a little late
 _IFACE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,14}$")
 _NOT_A_PORT = ("lo", "docker", "veth", "br-", "virbr", "tailscale", "wg")
@@ -198,16 +199,95 @@ def network_file(want: dict[str, Any]) -> str:
         "",
         "[Network]",
     ]
+    v6 = want.get("ipv6_mode") or "auto"
     if want["mode"] == "dhcp":
-        out.append("DHCP=yes")
+        # an address from the router; IPv6 from the router too unless it is off or fixed here
+        out.append("DHCP=yes" if v6 == "auto" else "DHCP=ipv4")
     else:
         out.append(f"Address={want['address']}/{want['prefix']}")
         if want["gateway"]:
             out.append(f"Gateway={want['gateway']}")
+    if v6 == "off":
+        out += ["LinkLocalAddressing=ipv4", "IPv6AcceptRA=no"]
+    elif v6 == "static":
+        out.append(f"Address={want['ipv6_address']}")
+        if want.get("ipv6_gateway"):
+            out.append(f"Gateway={want['ipv6_gateway']}")
+        out.append("IPv6AcceptRA=no")
     out += [f"DNS={server}" for server in want["dns"]]
     if want["mode"] == "dhcp" and want["dns"]:
         out += ["", "[DHCPv4]", "UseDNS=no"]  # the servers chosen here, not the router's
+    for route in want.get("routes") or []:  # further networks, each through its own router
+        out += ["", "[Route]", f"Destination={route['destination']}", f"Gateway={route['gateway']}"]
     return "\n".join(out) + "\n"
+
+
+def _ipv6_and_routes(changes: dict[str, Any], want: dict[str, Any]) -> None:
+    """IPv6 (automatic, off, or a fixed address) and further routes, checked into `want`."""
+    v6 = str(changes.get("ipv6_mode") or "auto").strip().lower()
+    if v6 not in ("auto", "off", "static"):
+        raise ValueError("Choose automatic IPv6, IPv6 off, or a fixed IPv6 address.")
+    want["ipv6_mode"], want["ipv6_address"], want["ipv6_gateway"] = v6, "", ""
+    if v6 == "static":
+        try:
+            iface = ipaddress.IPv6Interface(str(changes.get("ipv6_address") or "").strip())
+        except ValueError:
+            raise ValueError("The IPv6 address needs its prefix length, for example 2001:db8::50/64.") from None
+        if iface.network.prefixlen == 128 and "/" not in str(changes.get("ipv6_address")):
+            raise ValueError("The IPv6 address needs its prefix length, for example 2001:db8::50/64.")
+        if iface.ip.is_link_local or iface.ip.is_multicast or iface.ip.is_unspecified or iface.ip.is_loopback:
+            raise ValueError(f"{iface.ip} cannot be this machine's IPv6 address.")
+        want["ipv6_address"] = str(iface)
+        gw = str(changes.get("ipv6_gateway") or "").strip()
+        if gw:
+            try:
+                router = ipaddress.IPv6Address(gw)
+            except ValueError:
+                raise ValueError(f"{gw} is not an IPv6 address.") from None
+            if not (router.is_link_local or router in iface.network):
+                raise ValueError(f"The IPv6 router {router} is not in {iface.network}, nor a link-local address.")
+            want["ipv6_gateway"] = str(router)
+    routes = changes.get("routes") or []
+    if not isinstance(routes, list) or len(routes) > MAX_ROUTES:
+        raise ValueError(f"Up to {MAX_ROUTES} further routes.")
+    checked_routes = []
+    for row in routes:
+        if not isinstance(row, dict):
+            raise ValueError("A route is a network and the router it is reached through.")
+        dest, gw = str(row.get("destination") or "").strip(), str(row.get("gateway") or "").strip()
+        try:
+            net = ipaddress.ip_network(dest, strict=False)
+            router = ipaddress.ip_address(gw)
+        except ValueError:
+            raise ValueError(f"{dest or '?'} through {gw or '?'} is not a network and a router address.") from None
+        if net.prefixlen == 0:
+            raise ValueError("The way to everywhere else is the router field above, not a further route.")
+        if net.version != router.version:
+            raise ValueError(f"{net} and its router {router} are not the same kind of address (IPv4 and IPv6).")
+        if net.version == 4 and want["mode"] == "static":
+            own = ipaddress.IPv4Network(f"{want['address']}/{want['prefix']}", strict=False)
+            if router not in own:
+                raise ValueError(f"The router {router} for {net} is not in this machine's network {own}.")
+        checked_routes.append({"destination": str(net), "gateway": str(router)})
+    want["routes"] = checked_routes
+
+
+def settings_of(iface: str) -> dict[str, Any]:
+    """IPv6 and further routes as Kiboto's own file for the port has them, for the page's dialog."""
+    text = _text(file_for(iface)) or ""
+    v6_addresses = [a for a in re.findall(r"^Address=(\S+)$", text, re.M) if ":" in a]
+    v6_gateways = [g for g in re.findall(r"^Gateway=(\S+)$", text, re.M) if ":" in g]
+    off = "IPv6AcceptRA=no" in text and "LinkLocalAddressing=ipv4" in text
+    routes = [
+        {"destination": d, "gateway": g}
+        for d, g in re.findall(r"^\[Route\]\nDestination=(\S+)\nGateway=(\S+)$", text, re.M)
+    ]
+    return {
+        "ipv6_mode": "static" if v6_addresses else ("off" if off else "auto"),
+        "ipv6_address": v6_addresses[0] if v6_addresses else "",
+        "ipv6_gateway": v6_gateways[0] if v6_gateways else "",
+        "routes": routes,
+    }
 
 
 def is_a_port(iface: str) -> bool:
@@ -249,6 +329,7 @@ def checked(changes: dict[str, Any]) -> dict[str, Any]:
             if ipaddress.IPv4Address(gateway) not in net:
                 raise ValueError(f"The router {gateway} is not in the same network as {address}/{net.prefixlen}.")
         want.update(address=address, prefix=net.prefixlen, gateway=gateway)
+    _ipv6_and_routes(changes, want)
     seconds = changes.get("timeout_sec")
     want["timeout"] = min(LONGEST, max(SHORTEST, int(seconds))) if seconds else DEFAULT_TRIAL
     return want
@@ -433,7 +514,15 @@ def start_trial(
 
     port = int(settings.current("port") or 8082)
     plain = f"http://{want['address']}:{port}" if want["mode"] == "static" else ""
-    return _begin({file_for(want["iface"]): network_file(want)}, [want["iface"]], want["timeout"], plain, do, later)
+    text = network_file(want)
+    # the port's VLANs and packet size stay: they are set elsewhere on the page, not in this dialog
+    old = _text(file_for(want["iface"])) or ""
+    if _vlans_of(old):
+        text = _section_lines(text, "Network", "VLAN", _vlans_of(old))
+    mtu = re.search(r"^MTUBytes=(\d+)$", old, re.M)
+    if mtu:
+        text = _section_lines(text, "Link", "MTUBytes", [mtu.group(1)])
+    return _begin({file_for(want["iface"]): text}, [want["iface"]], want["timeout"], plain, do, later)
 
 
 def _begin(

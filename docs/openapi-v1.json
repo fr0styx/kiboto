@@ -23331,6 +23331,42 @@
       "description": "Static IPv4 address (e.g. 192.168.1.50)",
       "title": "Ip Address"
      },
+     "ipv6_address": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "Kiboto OS: a fixed IPv6 address with its prefix",
+      "title": "Ipv6 Address"
+     },
+     "ipv6_gateway": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "Kiboto OS: the IPv6 router (in the prefix, or link-local)",
+      "title": "Ipv6 Gateway"
+     },
+     "ipv6_mode": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "Kiboto OS: 'auto', 'off' or 'static'",
+      "title": "Ipv6 Mode"
+     },
      "mode": {
       "default": "static",
       "description": "Protocol mode: 'dhcp' or 'static'",
@@ -23349,6 +23385,25 @@
       "default": "255.255.255.0",
       "description": "Subnet mask or CIDR prefix",
       "title": "Netmask"
+     },
+     "routes": {
+      "anyOf": [
+       {
+        "items": {
+         "additionalProperties": {
+          "type": "string"
+         },
+         "type": "object"
+        },
+        "maxItems": 16,
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "Kiboto OS: further networks, each {destination, gateway}",
+      "title": "Routes"
      },
      "timeout_sec": {
       "anyOf": [

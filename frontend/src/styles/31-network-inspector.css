@@ -344,6 +344,24 @@
   margin-bottom: 8px;
 }
 
+.net-routes {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.net-route-row {
+  display: flex;
+  flex-wrap: wrap; /* the two fields and Remove stack on a phone */
+  gap: 6px;
+  align-items: center;
+}
+
+.net-route-row .tz-text-input {
+  flex: 1 1 160px;
+  min-width: 0;
+}
+
 .network-card-actions {
   display: flex;
   flex-wrap: wrap;

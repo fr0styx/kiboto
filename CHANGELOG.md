@@ -22,6 +22,8 @@ Kiboto OS: Wake-on-LAN can be turned on or off for a network port in its setting
 
 Kiboto OS: Secure Boot can stay on. ZFS is signed with a key of the machine's own, and after the install one step is left at the machine's screen: at the next start choose Enroll MOK and type the code shown. About says while that step is open.
 
+Kiboto OS: the Network page's address dialog sets IPv6 (automatic, off or a fixed address) and further routes through other routers, tried first with a way back like any address change.
+
 #### Security
 
 Kiboto OS: when Kiboto hands files and folders in a shared folder to their people, a link put in their place over the network is never followed, so a system file's owner or rights can never be changed that way.
@@ -47,6 +49,8 @@ Apps: the sentence above the list (how many apps run, which stopped unexpectedly
 German, Spanish and French: 82 labels that still showed old wording in capitals now match the English (for example "Save", "Sign out", "Wrong password").
 
 Kiboto OS: a shared folder can go on a newly made pool straight away. Before, it was refused as being on the system disk until the machine had restarted.
+
+Kiboto OS: changing a port's address no longer drops its VLANs and packet size.
 
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container

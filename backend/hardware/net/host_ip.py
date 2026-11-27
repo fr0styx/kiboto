@@ -83,4 +83,15 @@ def get_host_ip_config() -> dict[str, Any]:
         "dns1": dns1,
         "dns2": dns2,
         "dns_servers": dns_servers,
+        # a machine Kiboto runs: IPv6 and further routes as its own file for the port has them
+        **(_managed_extras(primary_iface) if runtime.managed_host() else {}),
     }
+
+
+def _managed_extras(iface: str) -> dict[str, Any]:
+    from backend.hardware.net import managed
+
+    try:
+        return managed.settings_of(iface)
+    except ValueError:  # not a port name Kiboto keeps a file for
+        return {}

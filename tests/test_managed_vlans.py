@@ -302,3 +302,83 @@ def test_the_port_dialog_sets_wake_on_lan_and_an_unchanged_size_starts_nothing(b
     assert answer["wol_enabled"] is True and "WakeOnLan=magic" in net(box, "10-kiboto-enp1s0.link")
     assert h.apply("port", "enp1s0", {"wol_enabled": True, "mtu": 1500})["changed"] is False
     assert not any(c[0] == "systemd-run" for c in box.seen)
+
+
+FIXED = {
+    "interface": "enp1s0",
+    "mode": "static",
+    "ip_address": "192.168.1.50",
+    "netmask": "255.255.255.0",
+    "gateway": "192.168.1.1",
+}
+
+
+def test_ipv6_automatic_off_or_fixed_and_further_routes_go_in_the_ports_file(box):
+    auto = managed.network_file(managed.checked(dict(FIXED)))
+    assert "IPv6AcceptRA" not in auto and "[Route]" not in auto  # as before: the router's IPv6
+    off = managed.network_file(managed.checked({**FIXED, "ipv6_mode": "off"}))
+    assert "LinkLocalAddressing=ipv4\nIPv6AcceptRA=no" in off
+    dhcp_off = managed.network_file(managed.checked({"interface": "enp1s0", "mode": "dhcp", "ipv6_mode": "off"}))
+    assert "DHCP=ipv4" in dhcp_off and "DHCP=yes" not in dhcp_off
+    fixed = managed.checked(
+        {
+            **FIXED,
+            "ipv6_mode": "static",
+            "ipv6_address": "2001:db8::50/64",
+            "ipv6_gateway": "fe80::1",
+            "routes": [
+                {"destination": "10.20.0.5/16", "gateway": "192.168.1.254"},
+                {"destination": "2001:db8:1::/48", "gateway": "2001:db8::1"},
+            ],
+        }
+    )
+    text = managed.network_file(fixed)
+    assert (
+        "Address=192.168.1.50/24\nGateway=192.168.1.1\nAddress=2001:db8::50/64\nGateway=fe80::1\nIPv6AcceptRA=no"
+        in text
+    )
+    assert "[Route]\nDestination=10.20.0.0/16\nGateway=192.168.1.254" in text  # the network, not the host given
+    assert "[Route]\nDestination=2001:db8:1::/48\nGateway=2001:db8::1" in text
+    # what the dialog reads back is what was written
+    (box.root / "network" / "05-kiboto-enp1s0.network").write_text(text)
+    assert managed.settings_of("enp1s0") == {
+        "ipv6_mode": "static",
+        "ipv6_address": "2001:db8::50/64",
+        "ipv6_gateway": "fe80::1",
+        "routes": [
+            {"destination": "10.20.0.0/16", "gateway": "192.168.1.254"},
+            {"destination": "2001:db8:1::/48", "gateway": "2001:db8::1"},
+        ],
+    }
+    (box.root / "network" / "05-kiboto-enp1s0.network").write_text(off)
+    assert managed.settings_of("enp1s0")["ipv6_mode"] == "off"
+
+
+def test_what_ipv6_and_routes_cannot_be(box):
+    for extra, said in [
+        ({"ipv6_mode": "maybe"}, "automatic IPv6"),
+        ({"ipv6_mode": "static", "ipv6_address": "2001:db8::50"}, "prefix length"),
+        ({"ipv6_mode": "static", "ipv6_address": "nonsense"}, "prefix length"),
+        ({"ipv6_mode": "static", "ipv6_address": "fe80::5/64"}, "cannot be this machine"),
+        (
+            {"ipv6_mode": "static", "ipv6_address": "2001:db8::50/64", "ipv6_gateway": "2001:db9::1"},
+            "not in 2001:db8::/64",
+        ),
+        ({"ipv6_mode": "static", "ipv6_address": "2001:db8::50/64", "ipv6_gateway": "x"}, "not an IPv6 address"),
+        ({"routes": [{"destination": "0.0.0.0/0", "gateway": "192.168.1.254"}]}, "router field above"),
+        ({"routes": [{"destination": "10.0.0.0/8", "gateway": "10.0.0.1"}]}, "not in this machine's network"),
+        ({"routes": [{"destination": "10.0.0.0/8", "gateway": "2001:db8::1"}]}, "not the same kind"),
+        ({"routes": [{"destination": "nope", "gateway": "1.2.3.4"}]}, "not a network and a router"),
+        ({"routes": ["10.0.0.0/8"]}, "a network and the router"),
+        ({"routes": [{"destination": "10.0.0.0/8", "gateway": "192.168.1.9"}] * 17}, "Up to 16"),
+    ]:
+        with pytest.raises(ValueError, match=said):
+            managed.checked({**FIXED, **extra})
+
+
+def test_an_address_change_keeps_the_ports_vlans_and_packet_size(box):
+    (box.root / "network" / "05-kiboto-enp1s0.network").write_text(STATIC + "VLAN=enp1s0.20\n\n[Link]\nMTUBytes=9000\n")
+    managed.start_trial({**FIXED, "ip_address": "192.168.1.60"})
+    box.a_moment_passes()
+    text = net(box, "05-kiboto-enp1s0.network")
+    assert "Address=192.168.1.60/24" in text and "VLAN=enp1s0.20" in text and "MTUBytes=9000" in text

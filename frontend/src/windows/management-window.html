@@ -4399,6 +4399,26 @@
         </div>
       </div>
 
+      <!-- Kiboto OS: IPv6 and further routes (net-extras.js); hidden where the host owns them -->
+      <div class="hcfg-col-2" id="net-host-extras" hidden>
+        <label class="hcfg-xs-bold-muted" for="net-host-ipv6-mode" data-i18n="net.ipv6_label">IPv6</label>
+        <select id="net-host-ipv6-mode" data-net-setting="address" class="tz-select-input hcfg-size">
+          <option value="auto" data-i18n="net.ipv6_auto">From the router (automatic)</option>
+          <option value="off" data-i18n="net.ipv6_off">Off</option>
+          <option value="static" data-i18n="net.ipv6_static">A fixed address</option>
+        </select>
+        <div class="hcfg-col-2" id="net-host-ipv6-static" hidden>
+          <label class="hcfg-xs-muted-2" for="net-host-ipv6-address" data-i18n="net.ipv6_address">IPv6 address with its prefix</label>
+          <input type="text" id="net-host-ipv6-address" data-net-setting="address" class="tz-text-input hcfg-size" placeholder="2001:db8::50/64" maxlength="64" autocomplete="off" spellcheck="false">
+          <label class="hcfg-xs-muted-2" for="net-host-ipv6-gateway" data-i18n="net.ipv6_gateway">IPv6 router (optional)</label>
+          <input type="text" id="net-host-ipv6-gateway" data-net-setting="address" class="tz-text-input hcfg-size" placeholder="fe80::1" maxlength="64" autocomplete="off" spellcheck="false">
+        </div>
+        <label class="hcfg-xs-bold-muted" data-i18n="net.routes_label">Further routes</label>
+        <div class="hcfg-xs-muted" data-i18n="net.routes_hint">Networks this machine reaches through a router other than the main one.</div>
+        <div id="net-host-routes" class="net-routes"></div>
+        <button type="button" id="net-host-route-add" data-net-setting="address" class="btn-pill-toggle is-small" data-i18n="net.route_add">+ Add a route</button>
+      </div>
+
       <!-- Safety Notice Callout -->
       <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 6px; padding: 10px 12px; display: flex; gap: 10px; align-items: flex-start;">
         <span class="hcfg-fs16">🛡️</span>

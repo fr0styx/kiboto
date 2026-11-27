@@ -140,6 +140,10 @@ def test_what_was_asked_is_put_in_one_form(box):
         "prefix": 24,
         "gateway": "",
         "dns": ["192.168.1.1"],
+        "ipv6_mode": "auto",  # as before: IPv6 from the router, no further routes
+        "ipv6_address": "",
+        "ipv6_gateway": "",
+        "routes": [],
         "timeout": 10,
     }
     assert managed.checked({**DHCP, "timeout_sec": 9999})["timeout"] == 300

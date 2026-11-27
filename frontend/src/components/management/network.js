@@ -2,7 +2,8 @@
  * Mission Control: Copy history, replication, VPNs, topology, ports, bonds, bridges, VLANs, host IP.
  * Split out of management.js (ARCH-1); management.js re-exports everything here.
  */
-import { applyNetCaps, canChange, portPayload, setNetCaps } from './net-host.js';
+import { applyNetCaps, canChange, netCaps, portPayload, setNetCaps } from './net-host.js';
+import { fillHostExtras, hostExtras } from './net-extras.js';
 import { installNeedsTailscale } from './needs-tailscale.js';
 import { api } from '../../api.js';
 import { initNetworkPortsInspector, fetchListeningPorts } from '../network-manager.js';
@@ -1026,6 +1027,7 @@ export async function openHostIpConfigModal() {
     if (gwInput) gwInput.value = data.gateway || '';
     if (dns1Input) dns1Input.value = data.dns1 || (data.dns_servers && data.dns_servers[0]) || '';
     if (dns2Input) dns2Input.value = data.dns2 || (data.dns_servers && data.dns_servers[1]) || '';
+    fillHostExtras(data, Boolean(netCaps().managed)); // IPv6 and further routes, on a machine Kiboto runs
 
     // Set active CIDR preset
     document.querySelectorAll('.net-cidr-preset').forEach((btn) => {
@@ -1089,6 +1091,7 @@ export async function applyHostIpConfig() {
       gateway,
       dns1,
       dns2,
+      ...hostExtras(),
     });
 
     // only a host Kiboto manages takes the change (SET-16, D2); elsewhere the server says where to make it
