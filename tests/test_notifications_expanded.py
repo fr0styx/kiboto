@@ -138,3 +138,23 @@ def test_api_test_channel_endpoint(client, auth_headers):
         assert data["status"] == "ok"
         assert data["success"] is True
         assert "latency_ms" in data
+
+
+def test_an_ntfy_title_in_any_language_is_sent(monkeypatch):
+    """httpx sends headers as ASCII: a title with a degree sign, an umlaut or Chinese failed whole."""
+    from backend.services import notifications as n
+
+    sent = []
+
+    class Client:
+        def post(self, url, content, headers, params=None):
+            for v in headers.values():
+                v.encode("ascii")  # as httpx does
+            sent.append((headers.get("Title"), params))
+            return type("R", (), {"status_code": 200})()
+
+    monkeypatch.setattr(n, "get_http_client", lambda: Client())
+    cfg = {"ntfy_topic": "house"}
+    assert n._dispatch_ntfy(cfg, "Fan stopped", "x", "warning") is True
+    assert n._dispatch_ntfy(cfg, "L\u00fcfter 55 \u00b0C\n\u98ce\u6247", "x", "warning") is True
+    assert sent == [("Fan stopped", None), (None, {"title": "L\u00fcfter 55 \u00b0C \u98ce\u6247"})]

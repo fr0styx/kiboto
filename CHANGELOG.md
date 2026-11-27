@@ -156,6 +156,8 @@ Cloud drives on Kiboto OS: a mounted drive stays mounted when Kiboto restarts or
 
 Alerts: with email, Discord or Telegram on as well, each alert reached ntfy twice. It now arrives once.
 
+Alerts: an ntfy alert whose title has a letter outside plain English (a degree sign, an umlaut, a name in another script) is sent; before, it was lost.
+
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container
 

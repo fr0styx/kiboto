@@ -315,18 +315,22 @@ def _dispatch_ntfy(cfg: dict[str, Any], title: str, message: str, level: str) ->
     }
     tags = tags_map.get(level, "bell")
 
-    headers = {
-        "Title": title,
-        "Priority": priority,
-        "Tags": tags,
-    }
+    # httpx sends headers as ASCII: a title with any other letter (a degree sign, an umlaut, a
+    # share's Chinese name) failed whole and the alert was lost. ntfy takes it as ?title= too.
+    title = " ".join(str(title).split())
+    headers = {"Priority": priority, "Tags": tags}
+    params = None
+    if title.isascii():
+        headers["Title"] = title
+    else:
+        params = {"title": title}
     token = cfg.get("ntfy_token", "").strip()
     if token:
         headers["Authorization"] = f"Bearer {token}"
 
     try:
         client = get_http_client()
-        resp = client.post(url, content=message.encode("utf-8"), headers=headers)
+        resp = client.post(url, content=message.encode("utf-8"), headers=headers, params=params)
         return resp.status_code in (200, 201, 204)
     except Exception as e:
         logger.warning(f"[NOTIFY] ntfy push failed: {e}")
