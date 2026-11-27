@@ -184,6 +184,8 @@ Merged folders: a link left in place of the hidden folder on either pool is refu
 
 Ransomware guard: a link left in place of a guard file is never written through, and is not used as a guard file.
 
+Recycle Bin: a link left in place of a share's Recycle Bin is never moved into, listed or emptied.
+
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container
 

@@ -14,6 +14,7 @@ no sleeping disk is woken for it. A small index in
 the data folder keeps each bin's size for the Overview.
 """
 
+import errno
 import os
 import shutil
 import threading
@@ -92,6 +93,26 @@ def same_disk_bin(path: str) -> str | None:
     return os.path.join(top, BIN)
 
 
+def plain_bin(recycle_dir: str) -> bool:
+    """The bin, and its files and info folders where they are there, reached through no link. The
+    bin sits in its share, where anyone who may write there could leave a link of its name (an NFS
+    client can make links): Kiboto would then move deleted items, and empty old ones, wherever it
+    led."""
+    if any(
+        os.path.islink(p) for p in (recycle_dir, os.path.join(recycle_dir, "files"), os.path.join(recycle_dir, "info"))
+    ):
+        return False
+    top = os.path.dirname(recycle_dir.rstrip("/"))
+    return os.path.realpath(recycle_dir) == os.path.join(
+        os.path.realpath(top), os.path.basename(recycle_dir.rstrip("/"))
+    )
+
+
+def _refuse_linked(recycle_dir: str) -> None:
+    if not plain_bin(recycle_dir):
+        raise OSError(errno.ELOOP, "The Recycle Bin folder is a link; Kiboto does not follow it", recycle_dir)
+
+
 def all_bins() -> list[str]:
     """Every bin that exists: each root's, each share's, and those the index knows."""
     found: list[str] = []
@@ -106,9 +127,9 @@ def all_bins() -> list[str]:
                 ]
         except OSError:
             logger.debug(f"[Recycle Bin] {root} unreadable", exc_info=True)
-        found += [c for c in candidates if os.path.isdir(c)]
+        found += [c for c in candidates if os.path.isdir(c) and plain_bin(c)]
     for known in _index().get("bins") or {}:
-        if known not in found and os.path.isdir(known):
+        if known not in found and os.path.isdir(known) and plain_bin(known):
             found.append(known)
     return found
 
@@ -176,8 +197,10 @@ def _deleted_at(recycle_dir: str, name: str, path: str) -> float:
 
 
 def items(recycle_dir: str) -> list[dict[str, Any]]:
-    """What a bin holds: name, path, when it was deleted, size."""
+    """What a bin holds: name, path, when it was deleted, size. Nothing for a bin reached through a link."""
     out = []
+    if not plain_bin(recycle_dir):
+        return out
     for folder in (os.path.join(recycle_dir, "files"), recycle_dir):
         try:
             entries = list(os.scandir(folder))
@@ -368,6 +391,7 @@ def move_to_bin(
     if not recycle_dir:
         return None
     files_dir, info_dir = os.path.join(recycle_dir, "files"), os.path.join(recycle_dir, "info")
+    _refuse_linked(recycle_dir)
     owned.make_dirs(files_dir)  # like the shared folder: the file server puts what it deletes there too
     owned.make_dirs(info_dir)
     name = _slot(files_dir, os.path.basename(path.rstrip("/")), time.time())
@@ -383,6 +407,7 @@ def move_to_bin(
         logger.warning(f"[Recycle Bin] Could not write {info}: {err}")
     dest = os.path.join(files_dir, name)
     try:
+        _refuse_linked(recycle_dir)  # once more, now that its folders are there
         if rename_only:
             os.rename(path, dest)
         else:
