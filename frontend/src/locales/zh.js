@@ -2162,6 +2162,7 @@ export default {
   "settings.primary_color_desc": "选择预置颜色芯片或选取任意 Hex 自定义颜色。",
   "settings.secondary_color": "副色调 (渐变过渡色)",
   "settings.secondary_color_desc": "选择主颜色渐变过渡的目标色彩。",
+  "led.blend": "渐变到这个颜色",
   "settings.fan_control_cards": "风扇控制功能卡片",
   "settings.fan_tachometers": "实时风扇转速计",
   "settings.fan_tach_desc": "点击下方任一温区列，可在上方动态温控曲线中精准高亮跟踪该温区。",

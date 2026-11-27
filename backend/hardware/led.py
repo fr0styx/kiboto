@@ -504,15 +504,18 @@ def apply_led_state(data):
     g2 = max(0, min(255, int(g2_raw * scale)))
     b2 = max(0, min(255, int(b2_raw * scale)))
 
+    # the frame has a second colour for every effect; the bar's firmware moves into it when it is
+    # set, as ZettOS offers (#71). Off unless chosen: those effects stay one colour as before
+    second = (r2, g2, b2) if data.get("blend") else (0, 0, 0)
     if effect == "breathe":
-        return send_led_packet(1, r, g, b, 0, 0, 0, speed=hw_delay)
+        return send_led_packet(1, r, g, b, *second, speed=hw_delay)
     elif effect == "flow":
-        return send_led_packet(2, r, g, b, 0, 0, 0, speed=hw_delay)
+        return send_led_packet(2, r, g, b, *second, speed=hw_delay)
     elif effect == "chase":
-        return send_led_packet(3, r, g, b, 0, 0, 0, speed=hw_delay)
+        return send_led_packet(3, r, g, b, *second, speed=hw_delay)
     elif effect == "gradient":
         return send_led_packet(4, r, g, b, r2, g2, b2, speed=hw_delay)
     elif effect == "flashing":
-        return send_led_packet(5, r, g, b, 0, 0, 0, speed=hw_delay)
+        return send_led_packet(5, r, g, b, *second, speed=hw_delay)
     else:
         return send_led_packet(6, r, g, b, r, g, b, speed=5)

@@ -2162,6 +2162,7 @@ export default {
   "settings.primary_color_desc": "Farbvoreinstellung wählen oder eigene Hex-Farbe bestimmen.",
   "settings.secondary_color": "Zweitfarbe (Farbverlauf-Ende)",
   "settings.secondary_color_desc": "Zielfarbton für den Übergang der Hauptfarbe wählen.",
+  "led.blend": "In diese Farbe übergehen",
   "settings.fan_control_cards": "Lüftersteuerung",
   "settings.fan_tachometers": "Aktive Lüfterdrehzahlmesser",
   "settings.fan_tach_desc": "Zone anklicken, um sie auf der dynamischen Lüfterkurve hervorzuheben.",

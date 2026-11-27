@@ -24149,6 +24149,17 @@
    },
    "LedConfigRequest": {
     "properties": {
+     "blend": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Blend"
+     },
      "brightness": {
       "anyOf": [
        {

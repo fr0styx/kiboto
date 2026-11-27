@@ -2162,6 +2162,7 @@ export default {
   "settings.primary_color_desc": "Choisissez une couleur prédéfinie ou une couleur hex personnalisée.",
   "settings.secondary_color": "Couleur secondaire (Fin du dégradé)",
   "settings.secondary_color_desc": "Sélectionnez la nuance cible vers laquelle la couleur primaire transitionne.",
+  "led.blend": "Passer à cette couleur",
   "settings.fan_control_cards": "Cartes de contrôle ventilateurs",
   "settings.fan_tachometers": "Tachymètres actifs des ventilateurs",
   "settings.fan_tach_desc": "Cliquez sur une zone pour l’isoler sur la courbe de ventilation dynamique.",

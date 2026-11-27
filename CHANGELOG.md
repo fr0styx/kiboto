@@ -38,6 +38,8 @@ Create Pool is shown without advanced tools while there is no pool yet.
 
 Fans the machine runs itself (KIBOTO_EXTERNAL_FAN_CONTROL=1, or fans on a read-only /sys) are only read; Kiboto shows them as run by your system.
 
+Light bar: Breathe, Flow, Chase and Flashing can blend into a second colour, when chosen in the light bar settings. Off unless chosen.
+
 #### Security
 
 Kiboto OS: when Kiboto hands files and folders in a shared folder to their people, a link put in their place over the network is never followed, so a system file's owner or rights can never be changed that way.

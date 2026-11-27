@@ -149,3 +149,25 @@ def test_the_d4_is_asked_for_once(monkeypatch):
     monkeypatch.setattr(led, "_d4", {"known": False, "value": False})
     monkeypatch.setattr("backend.hardware.storage.detect_chassis_model", broken)
     assert led._is_d4() is False
+
+
+def test_the_second_colour_is_sent_only_when_blending_is_chosen(d4):
+    """ZettOS's effects can move into a second colour (#71). Off by default, Breathe, Flow, Chase
+    and Flashing keep sending black there as before; chosen, they send the second colour."""
+    for mode, number in (("breathe", 1), ("flow", 2), ("chase", 3), ("flashing", 5)):
+        state = {"power": "on", "mode": mode, "color": "0000ff", "color2": "ff0000", "brightness": 100}
+        led.apply_led_state(state)
+        assert _written(d4)[-11:][2:9] == bytes([number, 0, 0, 255, 0, 0, 0]), mode
+        led.apply_led_state({**state, "blend": True})
+        assert _written(d4)[-11:][2:9] == bytes([number, 0, 0, 255, 255, 0, 0]), mode
+
+
+def test_the_choice_is_kept_with_the_light_bar(client, auth_headers, monkeypatch, tmp_path):
+    from backend.api import led as led_api
+
+    sent = []
+    monkeypatch.setattr(led_api, "LED_STATE_FILE", str(tmp_path / "led.json"))
+    monkeypatch.setattr(led_api, "apply_led_state", lambda data: sent.append(dict(data)) or (True, "ok"))
+    r = client.post("/api/led", json={"mode": "chase", "blend": True}, headers=auth_headers)
+    assert r.status_code == 200 and r.json()["blend"] is True and sent[-1]["blend"] is True
+    assert client.get("/api/led", headers=auth_headers).json()["blend"] is True

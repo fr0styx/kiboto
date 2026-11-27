@@ -69,7 +69,7 @@ What the words mean:
 | | Companion, beside a NAS system | Companion, on plain Linux | Kiboto OS |
 | --- | --- | --- | --- |
 | Fans: curves, quiet at night, fan stop while drives sleep<br><sub>On the D4 the kernel keeps the fans, and Kiboto shows them.</sub> | Yes | Yes | Yes |
-| Light bar<br><sub>The Zettlab D4's too, without the rainbow effect.</sub> | Yes | Yes | Being checked |
+| Light bar<br><sub>The Zettlab D4's too, without the rainbow effect. Breathe, Flow, Chase and Flashing can blend into a second colour.</sub> | Yes | Yes | Being checked |
 | Front screen<br><sub>Kiboto OS draws the screen with the plain renderer. The D4's screen is not drawn yet.</sub> | Yes | Yes | Partly |
 | Card copies from the SD and microSD slots | Yes | Yes | Yes |
 | Fan watchdog beside the app<br><sub>On Kiboto OS it runs in the machine's root service, which outlives a web process that hangs.</sub> | Yes | Yes | Yes |

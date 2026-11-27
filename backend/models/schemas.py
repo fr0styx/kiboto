@@ -105,6 +105,7 @@ class LedConfigRequest(BaseModel):
     color2: str | None = None
     mode: str | None = None
     speed: int | None = None
+    blend: bool | None = None  # Breathe, Flow, Chase and Flashing move into the second colour
     reactive: bool | None = None
     night_mode: bool | None = None
     night_start: str | None = None

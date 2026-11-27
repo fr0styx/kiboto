@@ -2162,6 +2162,7 @@ export default {
   "settings.primary_color_desc": "Select illumination preset or pick a custom hex color.",
   "settings.secondary_color": "Secondary Color (Gradient End)",
   "settings.secondary_color_desc": "Select the target tone that the primary color transitions toward.",
+  "led.blend": "Blend into this color",
   "settings.fan_control_cards": "Fan Control Cards",
   "settings.fan_tachometers": "Active Fan Tachometers",
   "settings.fan_tach_desc": "Click any zone column below to isolate and track that zone on the Dynamic Fan Curve above.",

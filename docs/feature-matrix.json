@@ -51,7 +51,7 @@
   ]},
   {"name": "Front panel hardware (Zettlab D4, D6 and D8 Ultra)", "features": [
    {"name": "Fans: curves, quiet at night, fan stop while drives sleep", "beside": "yes", "linux": "yes", "os": "yes", "note": "On the D4 the kernel keeps the fans, and Kiboto shows them."},
-   {"id": "light_bar", "name": "Light bar", "beside": "yes", "linux": "yes", "os": "check", "note": "The Zettlab D4's too, without the rainbow effect."},
+   {"id": "light_bar", "name": "Light bar", "beside": "yes", "linux": "yes", "os": "check", "note": "The Zettlab D4's too, without the rainbow effect. Breathe, Flow, Chase and Flashing can blend into a second colour."},
    {"id": "front_screen", "name": "Front screen", "beside": "yes", "linux": "yes", "os": "partly", "note": "Kiboto OS draws the screen with the plain renderer. The D4's screen is not drawn yet."},
    {"name": "Card copies from the SD and microSD slots", "beside": "yes", "linux": "yes", "os": "yes"},
    {"name": "Fan watchdog beside the app", "beside": "yes", "linux": "yes", "os": "yes", "note": "On Kiboto OS it runs in the machine's root service, which outlives a web process that hangs."}

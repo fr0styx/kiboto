@@ -91,6 +91,11 @@ export function initLedControl() {
   const priColorCard = $('primary-color-card') || $('led-card-color');
   const secColorCard = $('secondary-color-card') || $('led-card-color2');
 
+  // effects the bar can move into the second colour, when chosen (#71); Gradient always does
+  const BLEND_MODES = ['breathe', 'flow', 'chase', 'flashing'];
+  const blendRow = $('led-blend-row');
+  const blendToggle = /** @type {HTMLInputElement | null} */ ($('led-blend-toggle'));
+  let currentBlend = false;
   let currentPower = 'on';
   let currentColor = '25c2a0';
   let currentColor2 = 'ff0055';
@@ -129,10 +134,17 @@ export function initLedControl() {
 
   function updateDynamicCards() {
     if (speedCard) speedCard.style.display = currentMode === 'solid' ? 'none' : 'flex';
-    if (secColorCard) secColorCard.style.display = currentMode === 'gradient' ? 'flex' : 'none';
+    const blends = BLEND_MODES.includes(currentMode);
+    if (secColorCard) secColorCard.style.display = currentMode === 'gradient' || blends ? 'flex' : 'none';
+    if (blendRow) blendRow.style.display = blends ? 'flex' : 'none';
     if (priColorCard) priColorCard.style.display = currentMode === 'rainbow' ? 'none' : 'flex';
     updateLivePreview();
   }
+
+  blendToggle?.addEventListener('change', () => {
+    currentBlend = blendToggle.checked;
+    postLed(currentPower);
+  });
 
   async function postLed(powerState) {
     updateLivePreview();
@@ -143,6 +155,7 @@ export function initLedControl() {
       color2: currentColor2,
       mode: currentMode,
       speed: parseInt(speedSlider ? speedSlider.value : '50', 10),
+      blend: currentBlend,
       reactive: reactiveToggle ? reactiveToggle.checked : true,
       night_mode: ledNightToggle ? ledNightToggle.checked : false,
       night_start: ledNightStart ? ledNightStart.value : '23:00',
@@ -165,6 +178,8 @@ export function initLedControl() {
       currentColor = (data.color || '25c2a0').replace('#', '');
       currentColor2 = (data.color2 || 'ff0055').replace('#', '');
       currentMode = data.mode || 'solid';
+      currentBlend = Boolean(data.blend);
+      if (blendToggle) blendToggle.checked = currentBlend;
 
       if (slider) slider.value = data.brightness !== undefined ? data.brightness : 25;
       if (valDisplay && slider) valDisplay.textContent = slider.value + '%';

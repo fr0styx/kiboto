@@ -51,7 +51,23 @@ describe('drawer controls are wired when the drawer arrives', () => {
     document.querySelector('#tab-led .effect-btn[data-effect="breathe"]').click();
     await settle();
     const led = api.post.mock.calls.filter(([url]) => url === '/api/led').map(([, body]) => body);
-    expect(led.at(-1)).toMatchObject({ power: 'on', color: 'ff0000', mode: 'breathe' });
+    expect(led.at(-1)).toMatchObject({ power: 'on', color: 'ff0000', mode: 'breathe', blend: false });
+
+    // Breathe may move into the second colour, when chosen (#71); Solid offers neither
+    const blendRow = document.getElementById('led-blend-row');
+    expect(document.getElementById('secondary-color-card').style.display).toBe('flex');
+    expect(blendRow.style.display).toBe('flex');
+    const blend = document.getElementById('led-blend-toggle');
+    blend.checked = true;
+    blend.dispatchEvent(new Event('change'));
+    await settle();
+    expect(api.post.mock.calls.at(-1)[1]).toMatchObject({ mode: 'breathe', blend: true });
+    document.querySelector('#tab-led .effect-btn[data-effect="solid"]').click();
+    expect(document.getElementById('secondary-color-card').style.display).toBe('none');
+    expect(blendRow.style.display).toBe('none');
+    document.querySelector('#tab-led .effect-btn[data-effect="gradient"]').click();
+    expect(document.getElementById('secondary-color-card').style.display).toBe('flex');
+    expect(blendRow.style.display).toBe('none');
 
     // a profile sets mode, colours and brightness in one go
     api.post.mockClear();
