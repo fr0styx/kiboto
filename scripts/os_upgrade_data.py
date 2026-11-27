@@ -40,6 +40,8 @@ def call(method, path, body=None, token="", extra=None, timeout=300):
             return e.code, json.loads(e.read() or b"{}")
         except ValueError:
             return e.code, {}
+    except (urllib.error.URLError, OSError):  # not answering yet, as while Kiboto restarts
+        return 0, {}
 
 
 def confirmed(method, path, body, token):
