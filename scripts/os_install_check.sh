@@ -316,6 +316,9 @@ if [ -n "${KB_OS_FROM:-}" ]; then
   $SSH "python3 /root/os_upgrade_data.py look" || failed=$((failed + 1))
   stage "A new pool and shared folder on this build, without a restart"
   $SSH "python3 /root/os_upgrade_data.py after /dev/disk/by-id/virtio-KBUPGRADE3" || failed=$((failed + 1))
+  stage "People, their own folders and shared folders (SMB, NFS, the page, a limit, the Recycle Bin)"
+  $SSH "cat > /root/os_people_trials.py" < "$HERE/scripts/os_people_trials.py"
+  $SSH "python3 /root/os_people_trials.py" || failed=$((failed + 1))
 fi
 
 # keys for the firmware's key manager, through QEMU's monitor, as a person at the screen types them

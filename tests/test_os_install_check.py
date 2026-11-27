@@ -221,3 +221,16 @@ def test_an_update_from_the_last_release_keeps_a_pool_a_shared_folder_and_a_file
         steps["Install Kiboto OS in a fresh Debian 13 and check it"]["env"]["KB_OS_FROM"]
         == "${{ steps.from.outputs.image }}"
     )
+
+
+def test_after_the_update_people_use_their_folders_and_shared_folders():
+    """The checks that failed on Kiboto OS on 27 Nov run on every update check: a person's own folder,
+    SMB and the page, shared-folder rights, an NFS-only share, a storage limit, the Recycle Bin."""
+    sh = _script()
+    step = sh[sh.index("os_upgrade_data.py after") : sh.index('stage "The same after a restart"')]
+    assert '$SSH "python3 /root/os_people_trials.py" || failed=$((failed + 1))' in step
+    with open(os.path.join(ROOT, "scripts", "os_people_trials.py"), encoding="utf-8") as f:
+        trials = f.read()
+    for check in ("opens her own folder", "over SMB", "NFS only", "1 MB limit holds over SMB", "Recycle Bin"):
+        assert check in trials, check
+    assert "secrets.token_urlsafe" in trials and "print(p" not in trials and "print(pw" not in trials
