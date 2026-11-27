@@ -45,9 +45,10 @@ def _self_signed(name):
 class FakeAcme:
     D = "https://acme.test/dir"
 
-    def __init__(self, bad_challenge=False):
+    def __init__(self, bad_challenge=False, bad_nonces=0, proved=False):
         self.pem = _self_signed("home.duckdns.org")
-        self.challenged = False
+        self.bad_nonces = bad_nonces  # how many requests are refused for their nonce first
+        self.challenged = proved  # the name was proved lately: its authorization is valid already
         self.bad = bad_challenge
         self.posts = []
         self.account_jwk = None
@@ -88,6 +89,9 @@ class FakeAcme:
             return 200, "", h
         prot, payload = self._verify(body)
         self.posts.append((url, payload, "kid" in prot))
+        if self.bad_nonces:
+            self.bad_nonces -= 1
+            return 400, json.dumps({"type": "urn:ietf:params:acme:error:badNonce", "detail": "old nonce"}), h
         if url.endswith("/acct"):
             assert payload == {"termsOfServiceAgreed": True}
             return 201, "{}", {**h, "location": "https://acme.test/acct/1"}
@@ -240,3 +244,52 @@ def test_the_listener_starts_only_with_https_on_and_a_certificate(tmp_path):
     assert tls_server.serving() is False
     tls_server.stop(wait=0.1)
     assert tls_server.restart(enabled=False) is False
+
+
+def test_a_refused_nonce_is_tried_again(monkeypatch):
+    """Servers turn nonces down now and then (RFC 8555 6.5): one such answer failed the certificate."""
+    monkeypatch.setattr(acme_dns, "LE", FakeAcme.D)
+    ddns.save(True, "duckdns", "home", "duck-token")
+    acme_dns.save(True, False)
+    http, _calls = _dns_ok()
+    fake = FakeAcme(bad_nonces=2)
+    st = acme_dns.issue(now=100.0, http3=fake, http=http, sleep=lambda s: None)
+    assert st["last_error"] == "" and st["has_cert"] is True
+    assert [u for (u, _p, _k) in fake.posts[:3]] == ["https://acme.test/acct"] * 3
+    st = acme_dns.issue(now=200.0, http3=FakeAcme(bad_nonces=3), http=http, sleep=lambda s: None)
+    assert st["last_error"] == "Let's Encrypt refused: old nonce"  # not for ever
+
+
+def test_a_name_proved_lately_is_not_proved_again(monkeypatch):
+    """Asked again soon after, the server says the name is valid already and refuses an answer to
+    its check: no TXT record, no answer, and the certificate comes."""
+    monkeypatch.setattr(acme_dns, "LE", FakeAcme.D)
+    ddns.save(True, "duckdns", "home", "duck-token")
+    acme_dns.save(True, False)
+    http, calls = _dns_ok()
+    fake = FakeAcme(proved=True)
+    st = acme_dns.issue(now=100.0, http3=fake, http=http, sleep=lambda s: None)
+    assert st["last_error"] == "" and st["has_cert"] is True
+    assert calls == [] and not any(u.endswith("/ch/1") for (u, _p, _k) in fake.posts)
+
+
+def test_a_check_already_under_way_is_not_answered_twice(monkeypatch):
+    monkeypatch.setattr(acme_dns, "LE", FakeAcme.D)
+    ddns.save(True, "duckdns", "home", "duck-token")
+    acme_dns.save(True, False)
+    http, calls = _dns_ok()
+    fake = FakeAcme()
+    real = fake.__call__
+
+    def looking(method, url, headers, body):
+        status, text, h = real(method, url, headers, body)
+        if url.endswith("/authz/1") and not fake.challenged:
+            data = json.loads(text)
+            data["challenges"][1]["status"] = "processing"
+            fake.challenged = True  # the server is looking already
+            text = json.dumps(data)
+        return status, text, h
+
+    st = acme_dns.issue(now=100.0, http3=looking, http=http, sleep=lambda s: None)
+    assert st["last_error"] == "" and "clear=true" in calls[-1]
+    assert not any(u.endswith("/ch/1") for (u, _p, _k) in fake.posts)

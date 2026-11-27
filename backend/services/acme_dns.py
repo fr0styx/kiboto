@@ -37,6 +37,8 @@ LE_STAGING = "https://acme-staging-v02.api.letsencrypt.org/directory"
 TERMS = "https://letsencrypt.org/repository/"
 RENEW_DAYS = 30
 DNS_WAIT_SECS = 45
+BAD_NONCE = "urn:ietf:params:acme:error:badNonce"
+NONCE_TRIES = 3
 
 Http = ddns.Http  # (method, url, headers, body) -> (status, text); headers come back via _last_headers
 
@@ -126,6 +128,21 @@ class Acme:
         return h.get("replay-nonce", "")
 
     def post(self, url: str, payload: Any) -> tuple[int, Any, dict[str, str]]:
+        """A signed request. A refused nonce is tried again with the fresh one the refusal carries,
+        as RFC 8555 6.5 asks: servers turn nonces down now and then, and one such answer failed the
+        whole certificate."""
+        for _ in range(NONCE_TRIES - 1):
+            status, data, headers = self._post_once(url, payload)
+            if not (status == 400 and isinstance(data, dict) and data.get("type") == BAD_NONCE):
+                break
+        else:
+            status, data, headers = self._post_once(url, payload)
+        if status >= 400:
+            detail = data.get("detail") if isinstance(data, dict) else ""
+            raise RuntimeError(f"Let's Encrypt refused: {detail or status}")
+        return status, data, headers
+
+    def _post_once(self, url: str, payload: Any) -> tuple[int, Any, dict[str, str]]:
         protected: dict[str, Any] = {"alg": "ES256", "nonce": self._nonce(), "url": url}
         protected.update({"kid": self.kid} if self.kid else {"jwk": self.jwk()})
         p64 = _b64(json.dumps(protected).encode())
@@ -140,9 +157,6 @@ class Acme:
             data: Any = json.loads(text) if text and text.lstrip().startswith("{") else text
         except ValueError:
             data = text
-        if status >= 400:
-            detail = data.get("detail") if isinstance(data, dict) else ""
-            raise RuntimeError(f"Let's Encrypt refused: {detail or status}")
         return status, data, headers
 
     def account(self) -> None:
@@ -224,6 +238,20 @@ def set_txt(hostname: str, value: str, http: Http = ddns._http) -> Callable[[], 
     return lambda: http("DELETE", f"{ddns.CF_API}/zones/{zone['id']}/dns_records/{rid}", auth, None)
 
 
+def _prove(acme: Acme, authz: dict[str, Any], hostname: str, http: Http, sleep) -> Callable[[], Any]:
+    """Answers the DNS check: the TXT record through the Dynamic DNS provider, then the server is told
+    to look (unless it is already looking). Returns how to remove the record."""
+    ch = next((c for c in authz["challenges"] if c["type"] == "dns-01"), None)
+    if ch is None:
+        raise RuntimeError("Let's Encrypt offered no DNS check for this name.")
+    txt = _b64(hashlib.sha256(f"{ch['token']}.{acme.thumbprint()}".encode()).digest())
+    remove = set_txt(hostname, txt, http=http)
+    sleep(DNS_WAIT_SECS)  # time for the TXT record to reach the name servers
+    if ch.get("status", "pending") == "pending":
+        acme.post(ch["url"], {})
+    return remove
+
+
 def issue(now: float | None = None, http3=_http3, http: Http = ddns._http, sleep=time.sleep) -> dict[str, Any]:
     """Gets (or renews) the certificate for the Dynamic DNS name. Records the outcome; never raises."""
     now = time.time() if now is None else now
@@ -239,14 +267,11 @@ def issue(now: float | None = None, http3=_http3, http: Http = ddns._http, sleep
         _s, order, h = acme.post(acme.dir["newOrder"], {"identifiers": [{"type": "dns", "value": hostname}]})
         order_url = h.get("location", "")
         _s, authz, _h = acme.post(order["authorizations"][0], None)
-        ch = next((c for c in authz["challenges"] if c["type"] == "dns-01"), None)
-        if ch is None:
-            raise RuntimeError("Let's Encrypt offered no DNS check for this name.")
-        txt = _b64(hashlib.sha256(f"{ch['token']}.{acme.thumbprint()}".encode()).digest())
-        remove = set_txt(hostname, txt, http=http)
-        sleep(DNS_WAIT_SECS)  # time for the TXT record to reach the name servers
-        acme.post(ch["url"], {})
-        acme.poll(order["authorizations"][0], "valid", sleep=sleep)
+        # a name this account proved lately comes back already valid (asked again after a failure,
+        # or a renewal soon after): its check is not answered again, which the server refuses
+        if authz.get("status") != "valid":
+            remove = _prove(acme, authz, hostname, http, sleep)
+            acme.poll(order["authorizations"][0], "valid", sleep=sleep)
         cert_key = ec.generate_private_key(ec.SECP256R1())
         csr = (
             x509.CertificateSigningRequestBuilder()

@@ -148,6 +148,8 @@ Shares on Kiboto OS: guests can write to a share that allows guests. Its folder 
 
 Shares on ZFS: Windows Previous Versions list the share's scheduled snapshots. Samba had been looking for them where btrfs keeps them.
 
+HTTPS certificates: getting a certificate no longer fails now and then on a refused request, nor when it is asked for again soon after.
+
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container
 
