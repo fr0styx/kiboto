@@ -86,3 +86,9 @@
 
 
 
+
+/* A narrow tablet (769 to 900 px wide): the top bar ran 28 px past the edge and cut off its last
+   button; the UPS and AI pills give way there, as they do on a phone (their state is on Home) */
+@media (min-width: 769px) and (max-width: 900px) {
+  .suite-navbar .suite-telemetry-pills .suite-pill:not(#unraid-array-pill) { display: none; }
+}
