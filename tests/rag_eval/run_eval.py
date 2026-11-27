@@ -541,7 +541,7 @@ def _index_tree(engine, root: str) -> None:
 
 
 def evaluate(
-    model: str = "zett_lexical_384d",
+    model: str = "kiboto_lexical_384d",
     dim: int | None = None,
     which: str = "base",
     distractors: int = 0,
@@ -581,7 +581,7 @@ def evaluate(
         cfg["llm_endpoint"] = llm_host
     cfg.update(extra_cfg or {})  # the reranker (AI-12)
     docs_root = os.path.join(tmp, "documents")
-    neural = model != "zett_lexical_384d"
+    neural = model != "kiboto_lexical_384d"
     measured_patch = patch.object(rag_calibration, "measured", return_value=None)
     if neural and measure_cut_off:
         rag_calibration.reset()
@@ -775,7 +775,7 @@ def evaluate(
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--model", default="zett_lexical_384d")
+    ap.add_argument("--model", default="kiboto_lexical_384d")
     ap.add_argument("--dim", type=int, default=None)
     ap.add_argument("--set", default="base", choices=["base", "extended", "all", "documents", "ids"])
     ap.add_argument("--distractors", type=int, default=0, help="extra generated files to search through")

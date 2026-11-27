@@ -121,7 +121,7 @@ def ios_profile(host: str, port: int | None) -> bytes:
     import plistlib
     import uuid
 
-    ident = f"zettnas.family.{host}"
+    ident = f"kiboto.family.{host}"
 
     def account(kind: str, prefix: str, label: str) -> dict[str, Any]:
         return {

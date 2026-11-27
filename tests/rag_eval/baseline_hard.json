@@ -1,6 +1,6 @@
 {
  "note": "built-in lexical vectors; corpus under neutral names (Scan_0001.md ...) beside 3 near-topic files per corpus file (NAI-9)",
- "model": "zett_lexical_384d",
+ "model": "kiboto_lexical_384d",
  "set": "base",
  "neutral_names": true,
  "hard_distractors": 120,

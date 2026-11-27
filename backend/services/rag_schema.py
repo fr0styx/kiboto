@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS indexed_files (
     chunk_count INTEGER NOT NULL DEFAULT 0,
     indexed_at REAL NOT NULL,
     last_verified_at REAL NOT NULL,
-    embedding_model TEXT NOT NULL DEFAULT 'zett_lexical_384d'
+    embedding_model TEXT NOT NULL DEFAULT 'kiboto_lexical_384d'
 );
 
 CREATE INDEX IF NOT EXISTS idx_files_lookup ON indexed_files(canonical_path, mtime_ns, size_bytes);
@@ -52,7 +52,7 @@ CREATE INDEX IF NOT EXISTS idx_doc_tags_tag ON doc_tags(tag, file_id);
 CREATE TABLE IF NOT EXISTS doc_tags_done (file_id INTEGER PRIMARY KEY);
 -- the fallback re-embed check runs every 5 minutes; without this it scanned every file (PERF-5)
 CREATE INDEX IF NOT EXISTS idx_files_fallback_vectors ON indexed_files(file_id)
-    WHERE parse_status = 'ok' AND embedding_model = 'zett_lexical_384d';
+    WHERE parse_status = 'ok' AND embedding_model = 'kiboto_lexical_384d';
 
 CREATE TABLE IF NOT EXISTS document_chunks (
     chunk_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -74,7 +74,7 @@ CREATE TABLE IF NOT EXISTS document_chunks (
     line_end INTEGER NOT NULL DEFAULT 1,
     page INTEGER NOT NULL DEFAULT 0,
     token_count INTEGER NOT NULL DEFAULT 0,
-    embedding_model TEXT NOT NULL DEFAULT 'zettnas-unified-384-v2',
+    embedding_model TEXT NOT NULL DEFAULT 'kiboto-unified-384-v2',
     embedding_dim INTEGER NOT NULL DEFAULT 384,
     embedding_f32 BLOB NOT NULL,
     visibility_tier TEXT NOT NULL DEFAULT 'public_share',

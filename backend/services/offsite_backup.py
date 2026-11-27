@@ -21,10 +21,9 @@ import time
 from collections.abc import Callable
 from typing import Any
 
-from backend import config
+from backend import config, legacy_names
 from backend.config import DATA_DIR, RCLONE_CONFIG_FILE, logger
 from backend.fsutil import atomic_write_json, atomic_write_text, read_json, resolve_within
-from backend.legacy_names import OLD_BACKUP_TAG as FILE_TAG
 from backend.services import object_lock
 
 REPOS_FILE = os.path.join(DATA_DIR, "offsite_repos.json")
@@ -36,7 +35,11 @@ _ID = re.compile(r"^[a-z0-9][a-z0-9-]{0,40}$")
 _BUSY: set[str] = set()  # repos with a backup or restore started, before restic itself runs
 WARN_EXIT = 3  # restic backup: the snapshot was made, but some files could not be read
 OFF_BOX_ROOTS = ("/mnt/disks/", "/mnt/remotes/", "/mnt/addons/")  # USB and network disks
-_HOST = re.compile(r"^zettnas-[0-9a-f]{8}$")
+_HOST = re.compile(r"^kiboto-[0-9a-f]{8}$")
+FILE_TAG = "kiboto"  # restic's tag on every off-site file backup
+# what lists, restores and prunes the file backups: also those made before the rebrand, until each
+# repo has been retagged (rename_old_marks); restic takes several --tag as "any of them"
+FILE_TAGS = ["--tag", FILE_TAG, "--tag", legacy_names.OLD_BACKUP_TAG]
 # rest:http(s)://host[:port][/path]; user and password go in their own fields, never the address
 _REST = re.compile(r"^rest:https?://[A-Za-z0-9.\-\[\]:]+(/[A-Za-z0-9._~\-/]*)?$")
 
@@ -59,10 +62,37 @@ def host_id() -> str:
             value = f.read().strip()
         if _HOST.match(value):
             return value
-    value = f"zettnas-{secrets.token_hex(4)}"
+        old = legacy_names.OLD_RESTIC_HOST_START
+        if value.startswith(old) and _HOST.match("kiboto-" + value[len(old) :]):
+            value = "kiboto-" + value[len(old) :]  # the same mark in Kiboto's name (rename_old_marks)
+            atomic_write_text(path, value + "\n")
+            atomic_write_text(os.path.join(DATA_DIR, "offsite_host_renamed"), "1\n")
+            return value
+    value = f"kiboto-{secrets.token_hex(4)}"
     os.makedirs(DATA_DIR, exist_ok=True)
     atomic_write_text(path, value + "\n")
     return value
+
+
+def rename_old_marks(repo: dict[str, Any]) -> bool:
+    """Once per repo, before a backup: its snapshots made before the rebrand take Kiboto's tag and
+    host, so they are pruned with the rest and the next backup finds its parent (restic looks for it
+    by host). A failure is logged and tried again next time; the backup goes on either way.
+    True when the repo is done."""
+    host_id()  # an old host is renamed first, which says there are old names to rename
+    mark = os.path.join(DATA_DIR, "offsite_renamed", str(repo["id"]))
+    if os.path.exists(mark) or not os.path.exists(os.path.join(DATA_DIR, "offsite_host_renamed")):
+        return True
+    old_tag, old_host = legacy_names.OLD_BACKUP_TAG, legacy_names.OLD_RESTIC_HOST_START + host_id()[len("kiboto-") :]
+    try:
+        run_restic(repo, ["tag", "--tag", old_tag, "--add", FILE_TAG, "--remove", old_tag], timeout=1800)
+        run_restic(repo, ["rewrite", "--host", old_host, "--new-host", host_id(), "--forget"], timeout=3600)
+    except ResticError as e:
+        logger.warning("[Offsite] %s: the old names of earlier backups stay for now: %s", repo.get("name"), e)
+        return False
+    os.makedirs(os.path.dirname(mark), exist_ok=True)
+    atomic_write_text(mark, "done\n")
+    return True
 
 
 def _device(path: str) -> int | None:
@@ -580,6 +610,7 @@ def backup(repo_id: str, owner: str | None = None, job: Any = None) -> dict[str,
         job_manager.update(job.id, detail="Writing database dumps")
         dumps = backup_hooks.run_dumps(repo["paths"])  # a consistent copy of each database (REL-20)
         _unlock(repo)
+        rename_old_marks(repo)
         code, _out = _read_all(
             repo,
             ["backup", "--json", "--host", host_id(), "--tag", FILE_TAG, "--exclude", ".RecycleBin", *repo["paths"]],
@@ -676,8 +707,7 @@ def _forget_args(k: dict[str, int], lock_days: int = 0) -> list[str]:
     return within + [
         "forget",
         "--prune",
-        "--tag",
-        "zettnas",
+        *FILE_TAGS,
         "--group-by",
         "paths,tags",
         "--keep-daily",
@@ -728,7 +758,7 @@ def cancel(repo_id: str) -> bool:
 
 def snapshots(repo_id: str) -> list[dict[str, Any]]:
     repo = get_repo(repo_id)
-    out = run_restic(repo, ["snapshots", "--json", "--tag", FILE_TAG], timeout=600)  # not the settings copies
+    out = run_restic(repo, ["snapshots", "--json", *FILE_TAGS], timeout=600)  # not the settings copies
     snaps = json.loads(out or "[]")
     return [
         {
@@ -952,7 +982,7 @@ def drill(repo_id: str) -> dict[str, Any]:
     import tempfile
 
     repo = get_repo(repo_id)
-    out = run_restic(repo, ["ls", "--json", "latest", "--tag", FILE_TAG], timeout=900)
+    out = run_restic(repo, ["ls", "--json", "latest", *FILE_TAGS], timeout=900)
     pick = _pick_file(out)
     if not pick:
         _update(repo_id, last_drill=time.time(), last_drill_result="no file small enough to test")
@@ -961,7 +991,7 @@ def drill(repo_id: str) -> dict[str, Any]:
     try:
         run_restic(
             repo,
-            ["restore", "latest", "--tag", FILE_TAG, "--target", scratch, "--include", pick["path"]],
+            ["restore", "latest", *FILE_TAGS, "--target", scratch, "--include", pick["path"]],
             timeout=1800,
         )
         restored = os.path.join(scratch, pick["path"].lstrip("/"))

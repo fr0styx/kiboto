@@ -75,7 +75,7 @@ def test_a_model_is_measured_once_and_search_uses_its_cut_off(monkeypatch, store
     assert prof["ranker"] == SIMILARITY_PROFILES["neural"]["ranker"]
     # another size of the same model is another model; the lexical vectors keep their profile
     assert similarity_profile("nomic-embed-text", 256) is SIMILARITY_PROFILES["neural"]
-    assert similarity_profile("zett_lexical_384d") is SIMILARITY_PROFILES["lexical"]
+    assert similarity_profile("kiboto_lexical_384d") is SIMILARITY_PROFILES["lexical"]
     # measured once: a second call does nothing
     monkeypatch.setattr(cal, "measure", lambda *a: pytest.fail("measured twice"))
     cal.ensure_measured("nomic-embed-text", 768, None, background=False)
@@ -98,7 +98,7 @@ def test_searches_in_tests_never_measure_as_a_side_effect(monkeypatch):
     monkeypatch.setenv("TESTING", "1")
     monkeypatch.setattr(cal, "measure", lambda *a: pytest.fail("measured during a test search"))
     cal.ensure_measured("embeddinggemma", 768, None)  # background, as search calls it
-    cal.ensure_measured("zett_lexical_384d", None, None, background=False)
+    cal.ensure_measured("kiboto_lexical_384d", None, None, background=False)
 
 
 def test_an_old_or_broken_store_is_ignored(store):

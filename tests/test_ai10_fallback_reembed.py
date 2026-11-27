@@ -37,9 +37,9 @@ def test_fallback_files_get_neural_vectors_once_the_model_is_back(tmp_path):
         eng = _engine(tmp_path)
         with patch.object(rag_engine, "compute_neural_embeddings_batch", return_value=None):
             eng.index_directory(str(docs), respect_standby=False)
-            assert _models(eng)[0] == ["zett_lexical_384d"]
+            assert _models(eng)[0] == ["kiboto_lexical_384d"]
             assert eng.reembed_fallback_files()["status"] == "embedder_unavailable"
-            assert _models(eng)[0] == ["zett_lexical_384d"]  # nothing half-done
+            assert _models(eng)[0] == ["kiboto_lexical_384d"]  # nothing half-done
         with patch.object(rag_engine, "compute_neural_embeddings_batch", side_effect=_fake_vectors):
             assert eng.reembed_fallback_files() == {"status": "ok", "files": 1}
         files, chunks = _models(eng)
@@ -49,7 +49,7 @@ def test_fallback_files_get_neural_vectors_once_the_model_is_back(tmp_path):
 def test_nothing_runs_with_the_built_in_model_or_during_a_full_reembed(tmp_path):
     with patch.object(rag_engine, "RAG_CONFIG_PATH", str(tmp_path / "cfg.json")):
         eng = _engine(tmp_path)
-        eng.update_config({"embedding_model": "zett_lexical_384d"})
+        eng.update_config({"embedding_model": "kiboto_lexical_384d"})
         assert eng.reembed_fallback_files()["status"] == "lexical_model"
         eng.update_config({"embedding_model": "embeddinggemma"})
         w = eng._get_conn(readonly=False)
@@ -71,7 +71,7 @@ def test_the_fallback_check_uses_its_index_not_a_full_scan(tmp_path):
                 str(r[-1])
                 for r in conn.execute(
                     "EXPLAIN QUERY PLAN SELECT file_id, file_name, file_ext, doc_title FROM indexed_files "
-                    "WHERE parse_status = 'ok' AND embedding_model = 'zett_lexical_384d' ORDER BY file_id LIMIT 20"
+                    "WHERE parse_status = 'ok' AND embedding_model = 'kiboto_lexical_384d' ORDER BY file_id LIMIT 20"
                 )
             )
         finally:

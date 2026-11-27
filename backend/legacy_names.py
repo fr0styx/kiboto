@@ -65,7 +65,11 @@ OLD_OFFSITE_SETTINGS_FILE = "kiboto-settings.zettbak"  # settings in an off-site
 OLD_SNAPSHOT_VIEWS = "zettnas-snapshot-views"  # a temporary folder of read-only snapshot views
 OLD_REPL_PREFIX = "zettnas-repl-"  # a replication job's snapshots on both sides: renamed before a run
 OLD_REPL_DIR = ".zettnas-repl"  # btrfs: the folder of a job's local snapshots: renamed
-OLD_BACKUP_TAG = "zettnas"  # the restic tag on every off-site file backup: existing ones carry it, so it stays
+OLD_LEXICAL_MODEL = "zett_lexical_384d"  # the search index's own embedding id: renamed in its rows
+OLD_UNIFIED_MODEL = "zettnas-unified-384-v2"  # the same, an older default for chunks
+OLD_VM_SOCK_DIR = "zettnas-vms"  # /tmp/<it>/<vm>/serial.sock: a VM started before
+OLD_BACKUP_TAG = "zettnas"  # the restic tag on off-site file backups made before: retagged once per repo
+OLD_RESTIC_HOST_START = "zettnas-"  # the restic host of backups made before: kept hex, moved once per repo
 OLD_LOG_FILE = "zettnas.log"  # the log file and its rotations carry on under the new name
 
 
@@ -198,3 +202,24 @@ def moved(folder: str, name: str, old_name: str) -> str:
 
 def is_old_settings_export(name: str) -> bool:
     return name.startswith(OLD_EXPORT_PREFIX) and name.endswith(OLD_SETTINGS_EXT)
+
+
+def rename_index_models(conn, lexical: str, unified: str) -> int:
+    """The search index's model ids from before the rebrand, renamed in its rows; the partial index
+    whose condition named the old id is dropped, so the schema makes it again with the new one.
+    Tables are looked up first (the index may be SQLCipher, whose errors are its own). Returns
+    how many rows changed."""
+    tables = {r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type = 'table'")}
+    changed = 0
+    for table in ("indexed_files", "document_chunks"):
+        if table not in tables:
+            continue
+        for old, new in ((OLD_LEXICAL_MODEL, lexical), (OLD_UNIFIED_MODEL, unified)):
+            cur = conn.execute(f"UPDATE {table} SET embedding_model = ? WHERE embedding_model = ?", (new, old))  # noqa: S608
+            changed += max(cur.rowcount, 0)
+    row = conn.execute(
+        "SELECT sql FROM sqlite_master WHERE type = 'index' AND name = 'idx_files_fallback_vectors'"
+    ).fetchone()
+    if row and OLD_LEXICAL_MODEL in str(row[0] or ""):
+        conn.execute("DROP INDEX idx_files_fallback_vectors")
+    return changed

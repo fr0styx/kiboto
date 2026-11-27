@@ -129,7 +129,7 @@ def degraded_text() -> str:
 class _SystemPrincipal:
     """Kiboto itself, for its own background work (indexing checks, maintenance): sees every file."""
 
-    username = "zettnas-system"
+    username = "kiboto-system"
     role_id = "superadmin"
 
     @staticmethod
@@ -246,7 +246,7 @@ def order_by_relevance(query: str, items: list[dict[str, Any]], limit: int, mode
     neural model's right and wrong files differ by a few hundredths, so they decided the order and
     are left out for it (AI-41)."""
     items.sort(key=lambda x: float(x.get("score") or 0.0), reverse=True)
-    if model == "zett_lexical_384d":
+    if model == "kiboto_lexical_384d":
         return late_interaction_rerank(query, items, top_k=limit)
     return items
 
@@ -526,7 +526,7 @@ class RagSearchMixin:
         if not (query or "").strip():
             # browsing by a filter chip: no words to embed, so no model to wait for and no
             # "the model didn't answer" banner (AI-37)
-            chosen_emb_model = "zett_lexical_384d"
+            chosen_emb_model = "kiboto_lexical_384d"
         target_dim = cfg.get("embedding_dim")
         intent_type, task_prefix = classify_query_task_intent(query, modality_hint=effective_mode)
         effective_emb_model, query_vec = compute_multimodal_query_embedding(
@@ -538,7 +538,7 @@ class RagSearchMixin:
             req_colors=req_colors,
             task_prompt=task_prefix,
         )
-        if effective_emb_model != "zett_lexical_384d":
+        if effective_emb_model != "kiboto_lexical_384d":
             # the first search with a model measures its similarity cut-off, in the background (AI-17)
             from backend.services import rag_calibration
 
@@ -546,7 +546,7 @@ class RagSearchMixin:
         fts_query = build_safe_fts5_query(query)
         target_hist = build_target_color_histogram(req_colors) if req_colors else []
         # The embedder didn't answer: results come from keywords only, and the person is told (AI-4)
-        search_degraded = chosen_emb_model != "zett_lexical_384d" and effective_emb_model == "zett_lexical_384d"
+        search_degraded = chosen_emb_model != "kiboto_lexical_384d" and effective_emb_model == "kiboto_lexical_384d"
 
         conn = self._search_conn()
         try:
@@ -560,7 +560,7 @@ class RagSearchMixin:
                 or bool(query.strip() or req_colors or req_scenes)
             ):
                 photo_vec = query_vec
-                if effective_emb_model != "zett_lexical_384d" or len(query_vec) != 384:
+                if effective_emb_model != "kiboto_lexical_384d" or len(query_vec) != 384:
                     _, photo_vec = compute_384d_embedding(
                         text=query or " ".join(req_scenes + req_colors),
                         scene_tags=req_scenes,
@@ -1062,7 +1062,7 @@ class RagSearchMixin:
         principal: Any,
         modality_hint: str = "all",
         only_docs: bool = False,
-        query_embedding_model: str = "zett_lexical_384d",
+        query_embedding_model: str = "kiboto_lexical_384d",
         query_embedding_dim: int | None = None,
         intent_type: str = "search",
         tags: list[str] | None = None,
@@ -1251,7 +1251,7 @@ class RagSearchMixin:
         mismatched_chunks: set[int] = set()
         for r in rows:
             emb = unpack_vector(r["embedding_f32"])
-            file_emb_model = r["embedding_model"] if "embedding_model" in r.keys() else "zett_lexical_384d"
+            file_emb_model = r["embedding_model"] if "embedding_model" in r.keys() else "kiboto_lexical_384d"
             # the exact model: EmbeddingGemma 1 and 2 vectors live in different spaces (AI-17)
             q_norm = (query_embedding_model or "").lower().removesuffix(":latest")
             f_norm = (file_emb_model or "").lower().removesuffix(":latest")

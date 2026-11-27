@@ -141,7 +141,7 @@ def test_the_engine_hands_back_one_files_text_in_order(tmp_path, monkeypatch):
     big = root / "big.txt"
     big.write_text("\n".join(f"Line {i} of a very long manual." for i in range(4000)))
     try:
-        cfg = dict(eng.get_config(), embedding_model="zett_lexical_384d", respect_standby=False)
+        cfg = dict(eng.get_config(), embedding_model="kiboto_lexical_384d", respect_standby=False)
         monkeypatch.setattr(eng, "get_config", lambda: cfg)
         for f in (lease, big):
             eng._index_single_file(

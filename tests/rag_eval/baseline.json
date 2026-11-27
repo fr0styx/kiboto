@@ -1,5 +1,5 @@
 {
- "model": "zett_lexical_384d",
+ "model": "kiboto_lexical_384d",
  "overall": {
   "recall@1": 0.84,
   "recall@5": 0.865,

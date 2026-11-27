@@ -759,7 +759,7 @@ def compute_multimodal_query_embedding(
     falling back to deterministic 384d lexical vector if Ollama is unreachable.
     Returns (effective_model_name, vector_list).
     """
-    if model and model != "zett_lexical_384d":
+    if model and model != "kiboto_lexical_384d":
         key = (model, target_dim, task_prompt or "", query)
         cached = _QUERY_VEC_CACHE.get(key)
         if cached is not None:
@@ -806,7 +806,7 @@ def compute_multimodal_query_embedding(
         frame_colors={c: 0.8 for c in req_colors},
         color_hist_64=build_target_color_histogram(req_colors) if req_colors else None,
     )
-    return "zett_lexical_384d", vec
+    return "kiboto_lexical_384d", vec
 
 
 _sumprod = getattr(math, "sumprod", None)  # Python 3.12+: dot product in C, extended precision

@@ -24,13 +24,13 @@ def test_a_stuck_embedder_costs_one_deadline_then_is_skipped(monkeypatch):
     monkeypatch.setattr(rag_embeddings, "compute_neural_embedding_via_ollama", stuck)
     rag_embeddings._QUERY_VEC_CACHE.clear()
     model, _vec = rag_embeddings.compute_multimodal_query_embedding("where is the lease", model="embeddinggemma")
-    assert model == "zett_lexical_384d" and 1 <= len(calls) <= 2
+    assert model == "kiboto_lexical_384d" and 1 <= len(calls) <= 2
     assert all(d is not None and t <= rag_embeddings.QUERY_EMBED_TIMEOUT for t, d in calls)
     assert rag_embeddings._EMBED_BREAKER["until"] > time.time()
     calls.clear()
     assert (
         rag_embeddings.compute_multimodal_query_embedding("and the deposit", model="embeddinggemma")[0]
-        == "zett_lexical_384d"
+        == "kiboto_lexical_384d"
     )
     assert calls == []  # the breaker: no second wait
 

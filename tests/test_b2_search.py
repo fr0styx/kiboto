@@ -70,7 +70,7 @@ def test_no_embedder_falls_back_to_keywords(monkeypatch):
     monkeypatch.setattr(rag_embeddings, "compute_neural_embedding_via_ollama", lambda *a, **k: None)
     rag_embeddings._QUERY_VEC_CACHE.clear()
     model, vec = rag_embeddings.compute_multimodal_query_embedding("tax return 2025", model="embeddinggemma")
-    assert model == "zett_lexical_384d" and len(vec) == 384
+    assert model == "kiboto_lexical_384d" and len(vec) == 384
 
 
 def test_grounding_reads_the_whole_source():

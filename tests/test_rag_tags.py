@@ -114,7 +114,7 @@ def test_search_filters_and_the_api_lists_the_chips(tmp_path, monkeypatch):
     (root / "invoice_may.txt").write_text("Invoice number 7. Amount due 40 EUR. Subtotal 33. May 2025.")
     (root / "garden.txt").write_text("Plant the tomatoes in May when the soil is warm.")
     try:
-        cfg = dict(eng.get_config(), embedding_model="zett_lexical_384d", respect_standby=False)
+        cfg = dict(eng.get_config(), embedding_model="kiboto_lexical_384d", respect_standby=False)
         monkeypatch.setattr(eng, "get_config", lambda: cfg)
         for name in ("invoice_may.txt", "garden.txt"):
             p = str(root / name)
@@ -142,7 +142,7 @@ def test_the_engine_tags_older_documents_in_the_background(tmp_path, monkeypatch
     p = tmp_path / "invoice_june.txt"
     p.write_text("Invoice number 9. Amount due 12 EUR. Subtotal 10. June 2025.")
     try:
-        cfg = dict(eng.get_config(), embedding_model="zett_lexical_384d", respect_standby=False)
+        cfg = dict(eng.get_config(), embedding_model="kiboto_lexical_384d", respect_standby=False)
         monkeypatch.setattr(eng, "get_config", lambda: cfg)
         eng._index_single_file(
             str(p), p.name, ".txt", p.stat().st_size, 1, None, respect_standby=False, force_wake=True

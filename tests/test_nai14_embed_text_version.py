@@ -21,7 +21,7 @@ def _recorded(conn):
 
 
 def test_a_keyword_only_index_is_stamped():
-    conn = _db("zettnas-unified-384-v2")
+    conn = _db("kiboto-unified-384-v2")
     re_mod.stamp_new_index(conn)
     assert _recorded(conn) == re_mod.EMBED_TEXT_VERSION
     # an embedder turned on later writes current vectors: the record still holds

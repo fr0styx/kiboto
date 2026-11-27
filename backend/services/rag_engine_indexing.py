@@ -988,7 +988,7 @@ class RagIndexingMixin:
         """The index entry for this content, if one exists (AI-35). When its old path is gone the
         entry is moved here (a move or rename); otherwise it is cloned with its chunks, vectors,
         photo analysis and tags (a copy). None when there is nothing to reuse."""
-        model = str(self.get_config().get("embedding_model") or "zett_lexical_384d")
+        model = str(self.get_config().get("embedding_model") or "kiboto_lexical_384d")
         now = time.time()
         with self._write_lock:
             conn = self._get_conn(readonly=False)
@@ -1000,7 +1000,14 @@ class RagIndexingMixin:
                       AND canonical_path != ? AND embedding_model IN (?, ?)
                     ORDER BY last_verified_at DESC LIMIT 1
                     """,
-                    (sha256_hex, size_bytes, _core().CURRENT_INDEX_VERSION, canonical_path, model, "zett_lexical_384d"),
+                    (
+                        sha256_hex,
+                        size_bytes,
+                        _core().CURRENT_INDEX_VERSION,
+                        canonical_path,
+                        model,
+                        "kiboto_lexical_384d",
+                    ),
                 ).fetchone()
                 if src is None:
                     return None
@@ -1089,7 +1096,7 @@ class RagIndexingMixin:
             dim = int(row.get("embedding_dim") or 0)
             if (
                 row.get("chunk_level") != "parent"
-                and row.get("embedding_model") != "zett_lexical_384d"
+                and row.get("embedding_model") != "kiboto_lexical_384d"
                 and dim == self._vec_table_dim
             ):
                 self.sync_vector_chunk(
@@ -1363,11 +1370,11 @@ class RagIndexingMixin:
             ocr_model = cfg.get("embedding_model") or "embeddinggemma"
             ocr_texts = [chunk_embedding_text(doc_title, file_name, ch, ".txt") for ch in ocr_chunks]
             ocr_blobs = None
-            if ocr_texts and ocr_model != "zett_lexical_384d":
+            if ocr_texts and ocr_model != "kiboto_lexical_384d":
                 ocr_blobs = _core().compute_neural_embeddings_batch(
                     ocr_texts, ocr_model, target_dim=cfg.get("embedding_dim"), host=embedding_host(cfg)
                 )
-            ocr_file_model = ocr_model if ocr_blobs is not None else "zett_lexical_384d"
+            ocr_file_model = ocr_model if ocr_blobs is not None else "kiboto_lexical_384d"
 
             with self._write_lock:
                 conn = self._get_conn(readonly=False)
@@ -1597,7 +1604,7 @@ class RagIndexingMixin:
         cfg = self.get_config()
         configured_emb_model = cfg.get("embedding_model") or "embeddinggemma"
         target_dim = cfg.get("embedding_dim")
-        effective_file_emb_model = "zett_lexical_384d"
+        effective_file_emb_model = "kiboto_lexical_384d"
 
         effective_title = doc_title or file_name
         lexical_tags = (
@@ -1608,7 +1615,7 @@ class RagIndexingMixin:
         child_texts = [chunk_embedding_text(effective_title, file_name, ch, file_ext) for ch in child_chunks]
         # One batched call per file; every vector of a file comes from the same model (AI-15).
         neural_blobs = None
-        if configured_emb_model != "zett_lexical_384d":
+        if configured_emb_model != "kiboto_lexical_384d":
             neural_blobs = _core().compute_neural_embeddings_batch(
                 child_texts, configured_emb_model, target_dim=target_dim, host=embedding_host(cfg)
             )
@@ -1769,7 +1776,7 @@ class RagIndexingMixin:
                             allowed_csv,
                         ),
                     )
-                    if effective_file_emb_model != "zett_lexical_384d" and ch_dim == self._vec_table_dim:
+                    if effective_file_emb_model != "kiboto_lexical_384d" and ch_dim == self._vec_table_dim:
                         self.sync_vector_chunk(conn, int(cur_c.lastrowid or 0), emb_blob, file_id, vis_tier, dim=ch_dim)
                 rag_cjk.sync_file(conn, file_id)  # CJK keyword rows (AI-13)
                 conn.commit()

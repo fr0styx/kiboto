@@ -40,7 +40,7 @@ def indexed(tmp_path, monkeypatch):
 
     monkeypatch.setattr(rag_engine, "RAG_CONFIG_PATH", str(tmp_path / "rag_config.json"))
     eng = rag_engine.RagSearchEngine(db_path=str(tmp_path / "rag.db"))
-    cfg = dict(eng.get_config(), embedding_model="zett_lexical_384d", respect_standby=False)
+    cfg = dict(eng.get_config(), embedding_model="kiboto_lexical_384d", respect_standby=False)
     monkeypatch.setattr(eng, "get_config", lambda: cfg)
     root = tmp_path / "pool"
     root.mkdir()

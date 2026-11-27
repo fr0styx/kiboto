@@ -275,7 +275,7 @@ def test_browsing_by_a_tag_needs_no_embedding_and_is_not_degraded(tmp_path, monk
     engine = RagSearchEngine(db_path=str(tmp_path / "rag.db"))
     try:
         res = engine.search(query="", tags=["bill"])
-        assert seen == ["zett_lexical_384d"]
+        assert seen == ["kiboto_lexical_384d"]
         assert not res.get("degraded")
     finally:
         engine.close()

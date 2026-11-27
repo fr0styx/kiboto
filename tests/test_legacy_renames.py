@@ -267,3 +267,92 @@ def test_a_btrfs_jobs_snapshots_take_kibotos_name(tmp_path, monkeypatch):
     assert (pool / ".kiboto-repl" / "abcdef12" / "kiboto-repl-abcdef12-1").is_dir()
     assert not (pool / legacy_names.OLD_REPL_DIR / "abcdef12").exists()
     assert job["last_snapshot"] == "kiboto-repl-abcdef12-1"
+
+
+def test_the_offsite_host_keeps_its_mark_in_kibotos_name(tmp_path, monkeypatch):
+    from backend.services import offsite_backup as ob
+
+    monkeypatch.setattr(ob, "DATA_DIR", str(tmp_path))
+    (tmp_path / "offsite_host").write_text(legacy_names.OLD_RESTIC_HOST_START + "0a1b2c3d\n")
+    assert ob.host_id() == "kiboto-0a1b2c3d"
+    assert (tmp_path / "offsite_host").read_text().strip() == "kiboto-0a1b2c3d"
+    (tmp_path / "offsite_host").write_text("something else\n")
+    assert ob.host_id().startswith("kiboto-") and ob.host_id() != "kiboto-0a1b2c3d"
+
+
+def test_a_repos_old_snapshots_are_retagged_and_moved_once(tmp_path, monkeypatch):
+    from backend.services import offsite_backup as ob
+
+    monkeypatch.setattr(ob, "DATA_DIR", str(tmp_path))
+    (tmp_path / "offsite_host").write_text(legacy_names.OLD_RESTIC_HOST_START + "0a1b2c3d\n")  # from before
+    ran = []
+    answers = {"fail": True}
+
+    def restic(repo, args, timeout=0):
+        ran.append(args)
+        if answers["fail"]:
+            raise ob.ResticError("repository is already locked")
+        return ""
+
+    monkeypatch.setattr(ob, "run_restic", restic)
+    repo = {"id": "r1", "name": "Cloud"}
+    assert ob.rename_old_marks(repo) is False  # tried again next time
+    assert (tmp_path / "offsite_host").read_text().strip() == "kiboto-0a1b2c3d"
+    answers["fail"] = False
+    assert ob.rename_old_marks(repo) is True
+    old_tag, old_host = legacy_names.OLD_BACKUP_TAG, legacy_names.OLD_RESTIC_HOST_START + "0a1b2c3d"
+    assert ran[-2:] == [
+        ["tag", "--tag", old_tag, "--add", "kiboto", "--remove", old_tag],
+        ["rewrite", "--host", old_host, "--new-host", "kiboto-0a1b2c3d", "--forget"],
+    ]
+    ran.clear()
+    assert ob.rename_old_marks(repo) is True and ran == []  # done once
+
+
+def test_old_and_new_file_backups_are_listed_restored_and_pruned_alike():
+    from backend.services import offsite_backup as ob
+
+    assert ob.FILE_TAGS == ["--tag", "kiboto", "--tag", legacy_names.OLD_BACKUP_TAG]
+    args = ob._forget_args({"daily": 7, "weekly": 4, "monthly": 6})
+    assert args[args.index("forget") + 2 : args.index("forget") + 6] == ob.FILE_TAGS
+
+
+def test_the_search_indexs_model_ids_take_kibotos_name():
+    import sqlite3
+
+    conn = sqlite3.connect(":memory:")
+    old = legacy_names.OLD_LEXICAL_MODEL
+    conn.executescript(
+        "CREATE TABLE indexed_files (file_id INTEGER PRIMARY KEY, parse_status TEXT, embedding_model TEXT);"
+        "CREATE TABLE document_chunks (chunk_id INTEGER PRIMARY KEY, embedding_model TEXT);"
+        f"CREATE INDEX idx_files_fallback_vectors ON indexed_files(file_id) WHERE embedding_model = '{old}';"
+    )
+    conn.execute("INSERT INTO indexed_files (parse_status, embedding_model) VALUES ('ok', ?), ('ok', 'eg2')", (old,))
+    conn.execute("INSERT INTO document_chunks (embedding_model) VALUES (?), (?)", (old, legacy_names.OLD_UNIFIED_MODEL))
+    assert legacy_names.rename_index_models(conn, "kiboto_lexical_384d", "kiboto-unified-384-v2") == 3
+    assert [r[0] for r in conn.execute("SELECT embedding_model FROM indexed_files")] == ["kiboto_lexical_384d", "eg2"]
+    assert [r[0] for r in conn.execute("SELECT embedding_model FROM document_chunks")] == [
+        "kiboto_lexical_384d",
+        "kiboto-unified-384-v2",
+    ]
+    assert not conn.execute("SELECT 1 FROM sqlite_master WHERE name = 'idx_files_fallback_vectors'").fetchone()
+    assert legacy_names.rename_index_models(conn, "kiboto_lexical_384d", "kiboto-unified-384-v2") == 0
+    assert legacy_names.rename_index_models(sqlite3.connect(":memory:"), "a", "b") == 0  # no tables yet
+
+
+def test_the_search_settings_name_the_own_embedding_by_its_new_id(tmp_path, monkeypatch):
+    from backend.services import rag_engine
+
+    cfg = tmp_path / "rag_config.json"
+    cfg.write_text(json.dumps({"embedding_model": legacy_names.OLD_LEXICAL_MODEL, "enabled": True}))
+    monkeypatch.setattr(rag_engine, "RAG_CONFIG_PATH", str(cfg))
+    rag_engine._rename_old_config_model()
+    assert json.loads(cfg.read_text()) == {"embedding_model": "kiboto_lexical_384d", "enabled": True}
+
+
+def test_an_install_without_old_backups_renames_nothing(tmp_path, monkeypatch):
+    from backend.services import offsite_backup as ob
+
+    monkeypatch.setattr(ob, "DATA_DIR", str(tmp_path))
+    monkeypatch.setattr(ob, "run_restic", lambda *a, **k: (_ for _ in ()).throw(AssertionError("no restic")))
+    assert ob.rename_old_marks({"id": "r1", "name": "Cloud"}) is True

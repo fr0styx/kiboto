@@ -1051,7 +1051,7 @@ class RagLearningMixin:
         """
         cfg = self.get_config()
         model = cfg.get("embedding_model") or "embeddinggemma"
-        if model == "zett_lexical_384d":
+        if model == "kiboto_lexical_384d":
             return {"status": "lexical_model", "files": 0}
         if self._is_indexing:
             return {"status": "busy", "files": 0}
@@ -1065,7 +1065,7 @@ class RagLearningMixin:
                 logger.debug("[RAG] no re-embed staging table: no full re-embed has run")
             files = conn.execute(
                 """SELECT file_id, file_name, file_ext, doc_title FROM indexed_files
-                   WHERE parse_status = 'ok' AND embedding_model = 'zett_lexical_384d' ORDER BY file_id LIMIT ?""",
+                   WHERE parse_status = 'ok' AND embedding_model = 'kiboto_lexical_384d' ORDER BY file_id LIMIT ?""",
                 (int(max_files),),
             ).fetchall()
         finally:
@@ -1246,7 +1246,7 @@ class RagLearningMixin:
             return False
         cfg = self.get_config()
         model = str(cfg.get("embedding_model") or "")
-        if not model or model == "zett_lexical_384d" or not upgrade_window_open():
+        if not model or model == "kiboto_lexical_384d" or not upgrade_window_open():
             return False
         if self.embed_text_version() >= _core().EMBED_TEXT_VERSION:
             return False

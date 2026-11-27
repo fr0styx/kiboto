@@ -29,11 +29,11 @@ from typing import Any, Optional, Union
 
 from PIL import Image, ImageFile
 
-from backend import db_crypto
+from backend import db_crypto, legacy_names
 from backend.ai_defaults import DEFAULT_CHAT_MODEL
 from backend.config import ALLOWED_BROWSE_ROOTS, DATA_DIR, HOST_DEV, HOST_PROC, HOST_SYS, logger
 from backend.db_crypto import sqlite3  # SQLCipher module: the index can be encrypted at rest (AI-20)
-from backend.fsutil import atomic_write_json, read_json, resolve_within
+from backend.fsutil import atomic_write_json, json_locked, read_json, resolve_within
 from backend.ignored_errors import ignored
 from backend.logging_config import sanitize_string
 from backend.state import Z_STATE, add_event
@@ -164,10 +164,18 @@ def read_embed_text_version(conn: Any) -> int:
 def _has_neural_vectors(conn: Any) -> bool:
     return bool(
         conn.execute(
-            "SELECT 1 FROM document_chunks WHERE embedding_model != '' AND embedding_model NOT LIKE 'zett%' "
+            "SELECT 1 FROM document_chunks WHERE embedding_model NOT IN ('', 'kiboto_lexical_384d', 'kiboto-unified-384-v2') "
             "AND chunk_level != 'parent' LIMIT 1"
         ).fetchone()
     )
+
+
+@json_locked(lambda: RAG_CONFIG_PATH)
+def _rename_old_config_model() -> None:
+    """The settings saved before the rebrand name the index's own embedding by its old id: renamed there."""
+    saved = read_json(RAG_CONFIG_PATH, {})
+    if isinstance(saved, dict) and saved.get("embedding_model") == legacy_names.OLD_LEXICAL_MODEL:
+        atomic_write_json(RAG_CONFIG_PATH, {**saved, "embedding_model": "kiboto_lexical_384d"})
 
 
 def stamp_new_index(conn: Any) -> None:
@@ -789,6 +797,9 @@ class RagSearchEngine(RagSearchMixin, RagManifestMixin, RagLearningMixin, RagInd
                     conn.execute("PRAGMA auto_vacuum = INCREMENTAL")
                     conn.execute("VACUUM")  # the connection is already in WAL mode: this applies it (no data yet)
                 ensure_columns(conn, "rag_index.db")
+                if legacy_names.rename_index_models(conn, "kiboto_lexical_384d", "kiboto-unified-384-v2"):
+                    logger.info("[RAG] the index's model ids from before the rebrand took Kiboto's name")
+                _rename_old_config_model()
 
                 conn.executescript(rag_schema.INDEX)
                 conn.commit()
@@ -1045,6 +1056,8 @@ class RagSearchEngine(RagSearchMixin, RagManifestMixin, RagLearningMixin, RagInd
         saved = read_json(RAG_CONFIG_PATH, {})
         if isinstance(saved, dict):
             default_cfg.update(saved)
+            if default_cfg.get("embedding_model") == legacy_names.OLD_LEXICAL_MODEL:
+                default_cfg["embedding_model"] = "kiboto_lexical_384d"  # saved before the rebrand
             if "watched_paths" not in saved:
                 default_cfg["watched_paths"] = self._keep_watched_paths_of_an_earlier_install(saved)
         # Clean up empty or duplicate watched_paths

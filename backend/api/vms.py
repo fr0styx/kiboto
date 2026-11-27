@@ -22,6 +22,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Request, Response, 
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
+from backend import legacy_names
 from backend.auth import AuthenticatedPrincipal, get_current_principal, require_scope
 from backend.config import DATA_DIR, HOST_PROC, POOL_PATH, VM_ISO_DIR, logger
 from backend.confirmations import require_confirmation
@@ -1186,7 +1187,7 @@ async def websocket_vm_serial(websocket: WebSocket, vm_id: VmId):
     sock_candidates = [
         f"/tmp/{vm_id}-serial.sock",
         f"/var/run/qemu/{vm_id}-serial.sock",
-        f"/tmp/zettnas-vms/{vm_id}/serial.sock",
+        f"/tmp/{legacy_names.OLD_VM_SOCK_DIR}/{vm_id}/serial.sock",  # a VM started before the rebrand
     ]
     sock_path = next((p for p in sock_candidates if os.path.exists(p)), None)
     if not sock_path:

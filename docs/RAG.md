@@ -47,7 +47,7 @@ Two kinds, and a file never mixes them:
 
 | | Built-in lexical | Neural (Ollama) |
 |---|---|---|
-| Model | `zett_lexical_384d`, a hashed word/character vector computed in Kiboto | an embedding model you install, e.g. `embeddinggemma` or `nomic-embed-text` |
+| Model | `kiboto_lexical_384d`, a hashed word/character vector computed in Kiboto | an embedding model you install, e.g. `embeddinggemma` or `nomic-embed-text` |
 | Needs | nothing | Ollama running and the model installed |
 | Good at | exact words, names, numbers | paraphrases and synonyms |
 | Weak at | wording that doesn't appear in the file | short exact codes |

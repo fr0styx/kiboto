@@ -260,7 +260,7 @@ def test_compute_multimodal_query_embedding_fallback():
             query="unraid docker cache pools",
             model="nomic-embed-text",
         )
-        assert model_name == "zett_lexical_384d"
+        assert model_name == "kiboto_lexical_384d"
         assert len(vec) == EMBEDDING_DIM
 
 
@@ -278,7 +278,7 @@ def test_embedding_model_column_and_isolation(temp_rag_engine):
             canonical_path, parent_dir, file_name, file_ext, modality, doc_type,
             size_bytes, mtime_ns, sha256_hash, embedding_model, chunk_count, indexed_at, last_verified_at
         ) VALUES ('/mnt/user/docs/file1.txt', '/mnt/user/docs', 'file1.txt', '.txt', 'document', 'generic',
-                 100, 1000, 'hash1', 'zett_lexical_384d', 1, ?, ?)
+                 100, 1000, 'hash1', 'kiboto_lexical_384d', 1, ?, ?)
         """,
         (now, now),
     )
@@ -330,7 +330,7 @@ def test_embedding_model_column_and_isolation(temp_rag_engine):
         path_prefix=None,
         limit=10,
         principal=None,
-        query_embedding_model="zett_lexical_384d",
+        query_embedding_model="kiboto_lexical_384d",
     )
     # File 2 (nomic-embed-text) should not have its vector compared against 384d query vector
     matched_f1 = [r for r in res384 if r["canonical_path"].endswith("file1.txt")]
@@ -356,7 +356,7 @@ def test_rag_candidate_selection_includes_all_fts_hits(temp_rag_engine):
                 canonical_path, parent_dir, file_name, file_ext, modality, doc_type,
                 size_bytes, mtime_ns, sha256_hash, embedding_model, chunk_count, indexed_at, last_verified_at
             ) VALUES (?, '/mnt/user/docs', ?, '.txt', 'document', 'generic',
-                     100, ?, ?, 'zett_lexical_384d', 1, ?, ?)
+                     100, ?, ?, 'kiboto_lexical_384d', 1, ?, ?)
             """,
             (cpath, f"doc_{i}.txt", 1000 + i, f"hash_{i}", now, now),
         )

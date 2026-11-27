@@ -124,7 +124,7 @@ def test_neural_results_keep_their_order_and_keyword_vectors_get_the_late_pass(m
     monkeypatch.setattr(rs, "late_interaction_rerank", lambda q, c, top_k: called.append(top_k) or c[:top_k])
     out = rs.order_by_relevance("q", list(items), 10, "embeddinggemma-2-ov")
     assert [i["name"] for i in out] == ["a", "b"] and not called
-    rs.order_by_relevance("q", list(items), 10, "zett_lexical_384d")
+    rs.order_by_relevance("q", list(items), 10, "kiboto_lexical_384d")
     assert called == [10]
 
 
@@ -251,7 +251,7 @@ def _add_chunks(eng, model):
 
 def test_a_new_index_is_current_and_an_old_one_is_not(engine):
     assert engine.embed_text_version() == re_mod.EMBED_TEXT_VERSION  # created empty: stamped
-    _add_chunks(engine, "zettnas-unified-384-v2")
+    _add_chunks(engine, "kiboto-unified-384-v2")
     assert engine.embed_text_version() == re_mod.EMBED_TEXT_VERSION  # keyword vectors: nothing to do
     _add_chunks(engine, "eg2")
     assert engine.embed_text_version() == 1  # neural vectors from before AI-41
@@ -281,7 +281,7 @@ def test_the_upgrade_waits_for_the_night_and_a_neural_model(engine, monkeypatch)
     monkeypatch.setattr("backend.services.rag_engine_learning.upgrade_window_open", lambda: False)
     assert engine._maybe_upgrade_embedding_text() is False
     monkeypatch.setattr("backend.services.rag_engine_learning.upgrade_window_open", lambda: True)
-    engine.update_config({"embedding_model": "zett_lexical_384d"})
+    engine.update_config({"embedding_model": "kiboto_lexical_384d"})
     assert engine._maybe_upgrade_embedding_text() is False
 
 

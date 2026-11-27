@@ -1,5 +1,5 @@
 {
- "model": "zett_lexical_384d",
+ "model": "kiboto_lexical_384d",
  "set": "extended",
  "distractors": 0,
  "overall": {
