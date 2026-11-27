@@ -1454,7 +1454,6 @@ class MediaEngine:
             "status": "ok",
             "enabled": bool(rag_cfg.get("enabled", True)),
             "kib_status": learning_results.get("kib_status", "Idle"),
-            "zettai_status": learning_results.get("kib_status", "Idle"),  # its name before the rebrand (until 2.2)
             "is_gated": is_gated,
             "total_ram_bytes": ram_bytes,
             "total_ram_gb": ram_gb,

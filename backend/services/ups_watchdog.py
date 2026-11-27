@@ -19,6 +19,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor, wait
 from typing import Any, Optional
 
+from backend import legacy_names
 from backend.config import logger
 from backend.db import log_ups_event
 from backend.errors import said
@@ -107,9 +108,9 @@ def kiboto_containers(containers: list[dict[str, Any]]) -> list[dict[str, Any]]:
         if c.get("state") != "running":
             continue
         name = (c.get("name") or "").lower().lstrip("/")
-        if name.startswith(("kiboto", "zettnas")):  # Kiboto itself, under either name
+        if name.startswith("kiboto") or legacy_names.made_before(name):  # Kiboto itself
             continue
-        if c.get("kiboto_app") or c.get("zettnas_app") or (c.get("stack") and c["stack"] in ids):
+        if c.get("kiboto_app") or (c.get("stack") and c["stack"] in ids):
             out.append(c)
     return out
 

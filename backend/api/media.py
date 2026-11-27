@@ -22,7 +22,6 @@ from backend.ignored_errors import ignored
 
 logger = logging.getLogger(__name__)
 
-from backend import legacy_names
 from backend.api.system import check_user_path_access
 from backend.auth import KIB_MANAGE, AuthenticatedPrincipal, get_current_principal, require_scope
 from backend.config import ALLOWED_BROWSE_ROOTS, POOL_PATH
@@ -351,7 +350,6 @@ _STATUS_FOR_EVERYONE = (
     "status",
     "enabled",
     "kib_status",
-    legacy_names.OLD_KIB_STATUS_KEY,
     "is_gated",
     "gate_reason",
     "learning_results",  # already only the files the person may open

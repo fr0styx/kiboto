@@ -256,10 +256,10 @@ def test_ups_watchdog_preserves_orchestrator():
     """graceful_docker_teardown stops the apps Kiboto installed, never Kiboto itself or its helpers,
     and leaves other people's containers to the host (REL-10)."""
     mock_containers = [
-        {"id": "c1", "name": "plex", "state": "running", "zettnas_app": True},
-        {"id": "c2", "name": "zettnas-toolkit", "state": "running"},
-        {"id": "c3", "name": "zettnas-samba", "state": "running", "zettnas_app": True},
-        {"id": "c4", "name": "vaultwarden", "state": "running", "zettnas_app": True},
+        {"id": "c1", "name": "plex", "state": "running", "kiboto_app": True},
+        {"id": "c2", "name": "kiboto", "state": "running"},
+        {"id": "c3", "name": "kiboto-samba", "state": "running", "kiboto_app": True},
+        {"id": "c4", "name": "vaultwarden", "state": "running", "kiboto_app": True},
         {"id": "c5", "name": "their-own", "state": "running"},
     ]
 

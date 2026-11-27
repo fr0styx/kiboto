@@ -95,7 +95,6 @@ def _detect_zettlab_appliance() -> bool:
             for k in (
                 "zettlab",
                 "zettos",
-                "zettnas",
                 "zettbox",
                 "wy110",
                 "wy120",

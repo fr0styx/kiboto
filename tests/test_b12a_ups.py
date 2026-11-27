@@ -12,15 +12,15 @@ from backend.state import Z_STATE
 
 def _containers():
     return [
-        {"id": "a1", "name": "immich", "state": "running", "zettnas_app": True},
+        {"id": "a1", "name": "immich", "state": "running", "kiboto_app": True},
         {"id": "b1", "name": "jellyfin", "state": "running", "stack": "jellyfin"},
         {"id": "c1", "name": "someone-elses", "state": "running", "stack": "their-project"},
-        {"id": "d1", "name": "zettnas-ollama", "state": "running", "zettnas_app": True},
-        {"id": "e1", "name": "paperless", "state": "exited", "zettnas_app": True},
+        {"id": "d1", "name": "kiboto-ollama", "state": "running", "kiboto_app": True},
+        {"id": "e1", "name": "paperless", "state": "exited", "kiboto_app": True},
     ]
 
 
-def test_only_zettnas_apps_are_stopped(monkeypatch):
+def test_only_kiboto_apps_are_stopped(monkeypatch):
     monkeypatch.setattr(uw, "_catalog_ids", lambda: {"jellyfin", "immich"})
     assert [c["name"] for c in uw.kiboto_containers(_containers())] == ["immich", "jellyfin"]
 
@@ -66,7 +66,7 @@ def test_on_unraid_and_truenas_the_host_shuts_down(failsafe, monkeypatch, host):
     assert "UPS: handed to the host" in failsafe["events"]
 
 
-def test_elsewhere_zettnas_shuts_down_and_only_then_cuts(failsafe, monkeypatch):
+def test_elsewhere_kiboto_shuts_down_and_only_then_cuts(failsafe, monkeypatch):
     monkeypatch.setattr(uw, "shutdown_owner", lambda: "kiboto")
     uw.execute_atomic_failsafe_shutdown(5, 2, "battery low")
     assert failsafe["powerdown"] == 1 and failsafe["cut"] == 1
@@ -169,7 +169,7 @@ def test_a_container_that_fails_to_stop_is_reported(monkeypatch):
 
     monkeypatch.setattr(uw, "_catalog_ids", lambda: set())
     monkeypatch.setattr(
-        ds, "read_docker_containers", lambda: [{"id": "x", "name": "app", "state": "running", "zettnas_app": True}]
+        ds, "read_docker_containers", lambda: [{"id": "x", "name": "app", "state": "running", "kiboto_app": True}]
     )
     monkeypatch.setattr(ds, "container_action", lambda cid, action: 1 / 0)
     assert uw.graceful_docker_teardown(1)["failed"] == ["app"]

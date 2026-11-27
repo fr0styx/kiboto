@@ -4,6 +4,7 @@ system itself, with where to do it."""
 from collections.abc import Callable
 from typing import Any
 
+from backend import legacy_names
 from backend.config import logger
 
 
@@ -43,7 +44,10 @@ def _has_share() -> bool:
 def _has_app() -> bool:
     from backend.hardware.docker_stats import read_docker_containers
 
-    return any(not str(c.get("name") or "").startswith(("kiboto", "zettnas")) for c in read_docker_containers())
+    return any(
+        not (str(c.get("name") or "").startswith("kiboto") or legacy_names.made_before(c.get("name")))
+        for c in read_docker_containers()
+    )
 
 
 def _off_box(where: str) -> bool:

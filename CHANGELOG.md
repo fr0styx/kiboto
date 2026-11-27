@@ -40,6 +40,10 @@ Fans the machine runs itself (KIBOTO_EXTERNAL_FAN_CONTROL=1, or fans on a read-o
 
 Light bar: Breathe, Flow, Chase and Flashing can blend into a second colour, when chosen in the light bar settings. Off unless chosen.
 
+Alerts sent to a webhook carry the event name kiboto_alert. Automations that matched the old name need the new one.
+
+Metrics, the container list, Kib's status, remote access addresses and AI for apps no longer repeat their values under the product's old name.
+
 #### Security
 
 Kiboto OS: when Kiboto hands files and folders in a shared folder to their people, a link put in their place over the network is never followed, so a system file's owner or rights can never be changed that way.

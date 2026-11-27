@@ -11,6 +11,7 @@ import socket
 import time
 from typing import Any, Optional
 
+from backend import legacy_names
 from backend.config import docker_sock, logger
 from backend.ignored_errors import ignored
 from backend.logging_config import sanitize_dict, sanitize_string
@@ -110,7 +111,7 @@ def _diag_containers(result: Any) -> Any:
                 result["containers_summary"]["oom_killed"] += 1
 
             is_troubled = status in ("restarting", "dead") or is_oom
-            if is_troubled and name in ("kiboto-samba", "zettnas-samba"):
+            if is_troubled and name in ("kiboto-samba", legacy_names.OLD_SAMBA):
                 try:
                     from backend.hardware.pal_storage import PlatformType, StoragePlatformDetector
 

@@ -1025,7 +1025,7 @@ export function updateHardwareTelemetry(s) {
   const isZettlabs = Boolean(
     hardware.is_zettlabs ||
     vendor.includes('zettlab') ||
-    ['d4', 'd6', 'd6u', 'd8u', 'd8 ultra', 'zettbox', 'zettnas'].some((k) => product.includes(k)) ||
+    ['d4', 'd6', 'd6u', 'd8u', 'd8 ultra', 'zettbox'].some((k) => product.includes(k)) ||
     (hardware.is_custom_appliance && !vendor.includes('aoostar'))
   );
 

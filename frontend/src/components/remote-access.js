@@ -279,7 +279,7 @@ export function portLabel(url) {
 }
 
 /** Kiboto's address (under its name before the rebrand on older servers). */
-const kibotoAddress = (addresses) => addresses.kiboto || addresses.zettnas || '';
+const kibotoAddress = (addresses) => addresses.kiboto || '';
 
 const link = (url, text) => el('a', { href: url, target: '_blank', rel: 'noopener noreferrer', title: url, text });
 

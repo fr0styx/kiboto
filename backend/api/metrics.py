@@ -4,7 +4,6 @@ from fastapi import APIRouter, Depends
 from fastapi.responses import PlainTextResponse
 from pydantic import BaseModel
 
-from backend import legacy_names
 from backend.auth import require_scope
 from backend.state import Z_STATE
 
@@ -85,9 +84,7 @@ def prometheus_metrics():
     from backend.request_metrics import REQUEST_METRICS
 
     if not Z_STATE.cached_stats:
-        return legacy_names.with_old_metric_names(
-            "# Kiboto metrics not ready yet\n" + REQUEST_METRICS.prometheus() + spawns.prometheus()
-        )
+        return "# Kiboto metrics not ready yet\n" + REQUEST_METRICS.prometheus() + spawns.prometheus()
 
     stats = Z_STATE.cached_stats
     lines = []
@@ -195,9 +192,7 @@ def prometheus_metrics():
     for _metric_name, metric_lines in lines_by_metric.items():
         out.extend(metric_lines)
 
-    return legacy_names.with_old_metric_names(
-        "\n".join(out) + "\n" + REQUEST_METRICS.prometheus() + spawns.prometheus()
-    )
+    return "\n".join(out) + "\n" + REQUEST_METRICS.prometheus() + spawns.prometheus()
 
 
 @router.get("/metrics/network-topology", dependencies=[Depends(require_scope("system:view"))])

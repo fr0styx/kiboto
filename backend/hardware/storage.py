@@ -265,7 +265,7 @@ def detect_chassis_model(force: bool = False, allow_fallback: bool = True):
             return "d6u"
 
     # Identify whether vendor is an explicit appliance builder
-    is_appliance_vendor = any(k in combined_dmi for k in ("zettlab", "zettos", "aoostar", "zettbox", "zettnas"))
+    is_appliance_vendor = any(k in combined_dmi for k in ("zettlab", "zettos", "aoostar", "zettbox"))
 
     # D4 Motherboard (WY110 / N100 4-bay / Aoostar WTR) check
     if any(k in combined_dmi for k in ("wy110", "d4 ultra", "d4 pro", "d4u", "nas-4", "wtr pro", "wtr-pro")) or (

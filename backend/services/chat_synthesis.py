@@ -127,8 +127,6 @@ def _is_self_identity_question(msg_lower: str) -> bool:
         "what can you do",
         "what is kib",
         "who is kib",
-        "what is zettai",  # its name before the rebrand
-        "who is zettai",
     ]
     if any(t in joined for t in identity_triggers):
         return True

@@ -9,11 +9,11 @@ const ra = await import('../components/remote-access.js');
 
 const RUNNING = {
   state: 'Running',
-  name: 'zettnas.tail1234.ts.net',
+  name: 'kiboto.tail1234.ts.net',
   ips: ['100.101.102.103'],
   https: true,
   login_server: '',
-  addresses: { zettnas: 'http://zettnas.tail1234.ts.net:8082/', immich: 'http://zettnas.tail1234.ts.net:2283/' },
+  addresses: { kiboto: 'http://kiboto.tail1234.ts.net:8082/', immich: 'http://kiboto.tail1234.ts.net:2283/' },
 };
 
 async function mounted(status) {
@@ -57,8 +57,8 @@ describe('COMP-01: use from anywhere', () => {
     expect(mount.querySelector('a[target="_blank"]').getAttribute('href')).toBe(login.auth_url);
     api.get.mockResolvedValue(RUNNING);
     await vi.advanceTimersByTimeAsync(3100);
-    await vi.waitFor(() => expect(mount.textContent).toContain('zettnas.tail1234.ts.net:8082'));
-    expect(mount.querySelector('.remote-qr svg').getAttribute('data-text')).toBe(RUNNING.addresses.zettnas);
+    await vi.waitFor(() => expect(mount.textContent).toContain('kiboto.tail1234.ts.net:8082'));
+    expect(mount.querySelector('.remote-qr svg').getAttribute('data-text')).toBe(RUNNING.addresses.kiboto);
     expect(mount.textContent).toContain(RUNNING.addresses.immich);
   });
 
@@ -75,7 +75,7 @@ describe('COMP-01: use from anywhere', () => {
   });
 
   it('hides "Turn on HTTPS" once the address is https, and explains Headscale', async () => {
-    let mount = await mounted({ ...RUNNING, addresses: { zettnas: 'https://zettnas.tail1234.ts.net/' } });
+    let mount = await mounted({ ...RUNNING, addresses: { kiboto: 'https://kiboto.tail1234.ts.net/' } });
     expect(mount.querySelector('[data-remote="publish"]')).toBeNull();
     document.body.innerHTML = '';
     mount = await mounted({ ...RUNNING, https: false, login_server: 'https://hs.example.com' });
@@ -86,19 +86,19 @@ describe('COMP-01: use from anywhere', () => {
   });
 
   it('lists every app and offers HTTPS for one installed later (NFEAT-5)', async () => {
-    const zettnas = 'https://zettnas.tail1234.ts.net/';
+    const kiboto = 'https://kiboto.tail1234.ts.net/';
     const apps = [
-      { name: 'jellyfin', url: 'https://zettnas.tail1234.ts.net:18096/' },
-      { name: 'paperless', url: 'http://zettnas.tail1234.ts.net:8000/' },
+      { name: 'jellyfin', url: 'https://kiboto.tail1234.ts.net:18096/' },
+      { name: 'paperless', url: 'http://kiboto.tail1234.ts.net:8000/' },
     ];
-    let mount = await mounted({ ...RUNNING, addresses: { zettnas, apps } });
+    let mount = await mounted({ ...RUNNING, addresses: { kiboto, apps } });
     // the apps are folded away under one line, as links named after the app with their port
     const fold = mount.querySelector('details.remote-apps');
     expect(fold.querySelector('summary').textContent).toBe('2 apps on your tailnet');
     const links = [...fold.querySelectorAll('a')].map((a) => [a.textContent, a.getAttribute('href')]);
     expect(links).toEqual([
-      ['jellyfin', 'https://zettnas.tail1234.ts.net:18096/'],
-      ['paperless', 'http://zettnas.tail1234.ts.net:8000/'],
+      ['jellyfin', 'https://kiboto.tail1234.ts.net:18096/'],
+      ['paperless', 'http://kiboto.tail1234.ts.net:8000/'],
     ]);
     expect(fold.textContent).toContain(':18096');
     fold.open = true;
@@ -106,7 +106,7 @@ describe('COMP-01: use from anywhere', () => {
     expect(localStorage.getItem('kiboto_remote_apps_open')).toBe('1');
     expect(mount.querySelector('[data-remote="publish"]').textContent).toBe('Turn on HTTPS for new apps');
     document.body.innerHTML = '';
-    mount = await mounted({ ...RUNNING, addresses: { zettnas, apps: apps.slice(0, 1) } });
+    mount = await mounted({ ...RUNNING, addresses: { kiboto, apps: apps.slice(0, 1) } });
     expect(mount.querySelector('[data-remote="publish"]')).toBeNull();
   });
 

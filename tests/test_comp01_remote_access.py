@@ -11,7 +11,7 @@ import pytest
 from backend.hardware.net import tailscale, tailscale_setup
 from backend.services import remote_access
 
-NAME = "zettnas.tail1234.ts.net"
+NAME = "kiboto.tail1234.ts.net"
 REAL_WEB_APPS = remote_access.web_apps
 
 # A stand-in for the tailscale CLI: what it is asked goes to calls.log, its state to state.json.
@@ -40,9 +40,9 @@ if args[:1] == ["up"]:
 if args == ["status", "--json"]:
     doc = {"BackendState": state["BackendState"], "AuthURL": state.get("AuthURL", "")}
     if state["BackendState"] == "Running":
-        doc["Self"] = {"DNSName": "zettnas.tail1234.ts.net.", "TailscaleIPs": ["100.101.102.103", "fd7a:115c::3"]}
+        doc["Self"] = {"DNSName": "kiboto.tail1234.ts.net.", "TailscaleIPs": ["100.101.102.103", "fd7a:115c::3"]}
         doc["CurrentTailnet"] = {"MagicDNSEnabled": True}
-        doc["CertDomains"] = None if state.get("login_server") or state.get("no_certs") else ["zettnas.tail1234.ts.net"]
+        doc["CertDomains"] = None if state.get("login_server") or state.get("no_certs") else ["kiboto.tail1234.ts.net"]
     print(json.dumps(doc))
     sys.exit(0)
 if args == ["serve", "status", "--json"]:
@@ -131,7 +131,6 @@ def test_tailscale_sign_in_then_https_for_kiboto_and_immich(cli, monkeypatch):
     )
     assert s["addresses"] == {
         "kiboto": f"http://{NAME}:8082/",
-        "zettnas": f"http://{NAME}:8082/",
     }  # until HTTPS is turned on
     monkeypatch.setattr(remote_access, "immich_port", lambda: 2283)
     s = remote_access.publish(app_port=8443 + 1)
@@ -142,7 +141,6 @@ def test_tailscale_sign_in_then_https_for_kiboto_and_immich(cli, monkeypatch):
     ]
     assert s["addresses"] == {
         "kiboto": f"https://{NAME}/",
-        "zettnas": f"https://{NAME}/",
         "immich": f"https://{NAME}:8443/",
     }
     assert s["approval_url"] == ""
@@ -161,7 +159,6 @@ def test_headscale_is_kept_on_every_sign_in_and_has_no_https(cli):
     s = remote_access.publish()
     assert s["https"] is False and s["addresses"] == {
         "kiboto": f"http://{NAME}:8082/",
-        "zettnas": f"http://{NAME}:8082/",
     }
     assert not [c for c in cli.calls() if c[:2] == ["serve", "--bg"]]
 
@@ -268,7 +265,7 @@ def test_the_container_carries_the_login_server(tmp_path, monkeypatch):
     monkeypatch.setattr(
         tailscale_setup, "execute_tailscale_up", lambda **kw: {"status": "needs_login", "auth_url": "u"}
     )
-    tailscale_setup.deploy_tailscale_container(hostname="zettnas", state_dir=str(tmp_path / "ts"))
+    tailscale_setup.deploy_tailscale_container(hostname="kiboto", state_dir=str(tmp_path / "ts"))
     env = next(body for method, path, body in calls if path.startswith("/containers/create"))["Env"]
     # never --accept-routes in the container: it would come back at every start, unchecked
     assert "TS_EXTRA_ARGS=--reset --login-server=https://hs.example.com" in env
@@ -347,7 +344,7 @@ def test_which_apps_have_a_web_page(cli, monkeypatch):
         {"name": "jellyfin-copy", "state": "running", "primary_port": 8096, "webui_url": "http://[HOST]:8096/"},
         {"name": "stopped", "state": "exited", "primary_port": 8989, "webui_url": "http://[HOST]:8989/"},
         {"name": "speaks-https", "state": "running", "primary_port": 9443, "webui_url": "https://[HOST]:9443/"},
-        {"name": "zettnas", "state": "running", "primary_port": 8082, "webui_url": "http://[HOST]:8082/"},
+        {"name": "kiboto", "state": "running", "primary_port": 8082, "webui_url": "http://[HOST]:8082/"},
         {"name": "immich", "state": "running", "primary_port": 2283, "webui_url": "http://[HOST]:2283/"},
         {"name": "too-high", "state": "running", "primary_port": 60000, "webui_url": "http://[HOST]:60000/"},
         {"name": "no-port", "state": "running", "primary_port": None, "webui_url": ""},

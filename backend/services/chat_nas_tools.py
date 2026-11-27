@@ -10,6 +10,7 @@ from typing import (  # noqa: F401
     Any,
 )
 
+from backend import legacy_names
 from backend.ai_defaults import DEFAULT_CHAT_MODEL
 from backend.config import (  # noqa: F401
     FAN_STATE_FILE,
@@ -416,15 +417,14 @@ def tool_control_docker_container(
         return {"tool": "control_docker_container", "status": "error", "error": f"Invalid action '{action}'."}
     if not clean_name:
         return {"tool": "control_docker_container", "status": "error", "error": "Container name is required."}
-    if clean_name.lower() in (
-        "kiboto",
-        "kiboto-db",
-        "kiboto-ollama",
-        "zettnas-toolkit",
-        "zettnas-db",
-        "zettnas-ollama",
-        "zettnas-mariadb",
-        "zettnas-postgres",
+    if (
+        clean_name.lower()
+        in (
+            "kiboto",
+            "kiboto-db",
+            "kiboto-ollama",
+        )
+        or legacy_names.made_before(clean_name)
     ) and clean_action in ("stop", "restart"):
         return {
             "tool": "control_docker_container",

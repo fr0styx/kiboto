@@ -67,7 +67,7 @@ class TrueNASStorageAdapter(ObserverStorageAdapter):
         if not truenas_api.configured():
             return super().create_snapshot(pool_id, *args, **kwargs)
         share = kwargs.get("subvol_name") or (args[0] if args else "")
-        name = kwargs.get("snapshot_name") or (args[1] if len(args) > 1 else "") or "zettnas"
+        name = kwargs.get("snapshot_name") or (args[1] if len(args) > 1 else "") or "kiboto"
         if "@" in name:
             share, name = name.split("@", 1)
         dataset = (self._dataset_for(share) or {}).get("id") if share else None

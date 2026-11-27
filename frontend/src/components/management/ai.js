@@ -2515,7 +2515,7 @@ export async function fetchAndRenderAiStatus() {
         is_paused: Boolean(res.is_paused),
         enabled: res.enabled,
       };
-    updateAiSyncProgressUi(syncProg, res.standby_guard || {}, res.kib_status || res.zettai_status || '');
+    updateAiSyncProgressUi(syncProg, res.standby_guard || {}, res.kib_status || '');
 
     // Update Watched Folders & Discovered Shares
     const watchedList = res.watched_paths || res.config?.watched_paths || stats.watched_paths || [];

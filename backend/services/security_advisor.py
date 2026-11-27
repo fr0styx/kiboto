@@ -273,7 +273,7 @@ def _check_ai_runtimes(checks: list[dict[str, Any]], issues: list[dict[str, Any]
                 "description": "Ollama / OpenVINO Model Server answer anyone on your network: they can read your prompts' context, "
                 "use your hardware, and pull or delete models. " + ", ".join(exposed),
                 "remediation": "Remove the published ports and put the AI container on the same Docker network as Kiboto "
-                "(Kiboto finds kiboto-ollama / kiboto-ovms by name, or zettnas-ollama / zettnas-ovms from before), or publish to 127.0.0.1 only.",
+                "(Kiboto finds kiboto-ollama / kiboto-ovms by name), or publish to 127.0.0.1 only.",
                 "action_url": "https://github.com/fr0styx/kiboto/blob/main/docs/INSTALLATION.md#local-ai-runtimes",
             }
         )

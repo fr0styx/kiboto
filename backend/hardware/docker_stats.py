@@ -640,7 +640,6 @@ def read_docker_containers(force: bool = False) -> list[dict[str, Any]]:
                     "managed_by": managed_by,
                     "kiboto_app": legacy_names.is_managed(labels),  # installed by Kiboto (REL-10)
                     "kiboto_own": is_kiboto_own(cid_full, name),  # Kiboto itself: not a household app (SET-25)
-                    "zettnas_app": legacy_names.is_managed(labels),  # the same, for clients from before (until 2.2)
                     "network_mode": net_mode,
                     "ports": ports,
                     "primary_port": primary_port,

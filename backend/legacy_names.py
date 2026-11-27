@@ -14,8 +14,8 @@ file (its own contract), the secrets file, the restic location backup_migration 
 (zettnas-restic), the family calendar's DAV identity, the RAG schema's embedding id, the WebDAV
 fallback secret (tokens signed with it), the recovery-code hash prefix, the restic host id, VM serial
 sockets in saved VM definitions, the apps' .zettnas-secrets.json, the backup versions and dump names,
-and outside the app: the hardware runner's label (set on the runner), the deployed health worker's
-names, and the alert webhook's event name (zettnas_alert, which automations match on).
+and outside the app: the hardware runner's label (set on the runner) and the deployed health worker's
+names.
 """
 
 import os
@@ -33,12 +33,12 @@ OLD_FOLLOW_TAG_LABEL = "zettnas.image.follow-tag"
 OLD_AI_PACK = "zettnas-ai"  # an AI pack made before keeps its container, models folder and model names
 OLD_AI_PACK_LABEL = "zettnas.ai-pack"
 OLD_AI_PACK_MODELS = ("zettnas-chat", "zettnas-embed")
-OLD_AI_APP_MODELS = ("zettnas-chat", "zettnas-embed")  # "AI for apps" still answers to these ids
 OLD_SAMBA = "zettnas-samba"  # sidecars made before are found (Samba) or replaced (SFTP, the updater)
 OLD_SFTP = "zettnas-sftp"
 OLD_SELF_UPDATER = "zettnas-self-updater"
 OLD_APP_CONTAINER = "zettnas-toolkit"  # the app's own container on installs made before
 OLD_APP_CONTAINER_NAMES = ("zettnas-toolkit", "zettnas", "zettnas_toolkit")
+OLD_NAME_START = "zettnas"  # Kiboto's own containers made before (the app, sidecars, model servers)
 OLD_ROLLBACK_REPO = "zettnas-toolkit-rollback"  # rollback images tagged before keep their tag
 OLD_FAN_HEARTBEAT = "zettnas-fan-heartbeat.json"  # a fan watchdog from before reads this name (written too)
 OLD_HOST_APPDATA = "/mnt/user/appdata/zettnas-toolkit"  # Unraid's appdata folder on installs made before
@@ -49,9 +49,7 @@ OLD_NAS_NAME = "zettnas"  # a saved name from before becomes kiboto; zettnas.loc
 OLD_NAME_CONTAINER = "zettnas-name"  # the name responder's container before the rebrand: replaced
 OLD_PART_SUFFIX = ".zettnas-part"  # a half-copied file left by a transfer before the rebrand: swept
 OLD_STAGE_INFIX = ".zettnas-stage-"  # a move's staging folder from before the rebrand: swept
-OLD_METRIC_PREFIX = "zettnas_"  # /api/metrics repeats every kiboto_ series under this prefix
 OLD_BACKUP_TAG = "zettnas"  # the restic tag on every off-site file backup: existing ones carry it, so it stays
-OLD_KIB_STATUS_KEY = "zettai_status"  # the Kib status answer repeats "kib_status" under this key
 OLD_LOG_FILE = "zettnas.log"  # the log file and its rotations carry on under the new name
 
 
@@ -82,6 +80,11 @@ def follows_tag(labels: dict | None) -> bool:
     return labels.get(product.FOLLOW_TAG_LABEL) == "1" or labels.get(OLD_FOLLOW_TAG_LABEL) == "1"
 
 
+def made_before(name: str | None) -> bool:
+    """A container Kiboto made before the rebrand: the app itself, a sidecar or a model server."""
+    return str(name or "").lstrip("/").lower().startswith(OLD_NAME_START)
+
+
 def app_container_names() -> tuple[str, ...]:
     """Kiboto's own container: kiboto, or a name from before the rebrand."""
     from backend import product
@@ -91,18 +94,6 @@ def app_container_names() -> tuple[str, ...]:
 
 def is_app_container(name: str | None) -> bool:
     return str(name or "").lstrip("/").lower() in app_container_names()
-
-
-def with_old_metric_names(text: str) -> str:
-    """Prometheus text with every kiboto_ series (and its HELP/TYPE) repeated under zettnas_, so
-    dashboards and alerts made before the rebrand keep working until 2.2."""
-    old = []
-    for line in text.splitlines():
-        for head in ("kiboto_", "# HELP kiboto_", "# TYPE kiboto_"):
-            if line.startswith(head):
-                old.append(line.replace("kiboto_", OLD_METRIC_PREFIX, 1))
-                break
-    return text + ("\n".join(old) + "\n" if old else "")
 
 
 def old_env_name(name: str) -> str | None:

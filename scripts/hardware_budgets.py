@@ -114,14 +114,8 @@ def counted_spawns(url=None, token=None, fetch=None):
             text = fetch(url, token)
     except (OSError, ValueError):
         return None
-    for name in (
-        "kiboto_process_spawns_total{",
-        "zettnas_process_spawns_total{",
-    ):  # zettnas_: a version before the rebrand
-        values = [line.rsplit(" ", 1)[1] for line in text.splitlines() if line.startswith(name)]
-        if values:
-            return sum(int(float(v)) for v in values)
-    return None
+    values = [line.rsplit(" ", 1)[1] for line in text.splitlines() if line.startswith("kiboto_process_spawns_total{")]
+    return sum(int(float(v)) for v in values) if values else None
 
 
 def started(pid, proc=HOST_PROC):

@@ -9,7 +9,7 @@ http://<your server>:8082/api/v1/ai/openai
 
 | Path | What it does |
 |---|---|
-| `GET /models` | `kiboto-chat` and `kiboto-embed` (and `zettnas-chat`, `zettnas-embed`, the names before the rebrand, until 2.2) |
+| `GET /models` | `kiboto-chat` and `kiboto-embed` |
 | `POST /chat/completions` | a reply from the chat model; `"stream": true` streams it |
 | `POST /embeddings` | vectors from the embedder (up to 64 texts at a time) |
 

@@ -124,7 +124,6 @@ def addresses(name: str, ips: list[str], https: bool, served: set[int]) -> dict[
         return {}
     out: dict[str, Any] = {
         "kiboto": f"https://{name}/" if https and 443 in served else f"http://{host}:{_app_port()}/",
-        "zettnas": f"https://{name}/" if https and 443 in served else f"http://{host}:{_app_port()}/",  # until 2.2
     }
     port = immich_port()
     if port:

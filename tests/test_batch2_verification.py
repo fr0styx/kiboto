@@ -91,6 +91,6 @@ def test_prometheus_metrics_with_live_stats(monkeypatch):
     }
 
     metrics_text = prometheus_metrics()
-    assert "zettnas_cpu_usage_percent 12.5" in metrics_text
-    assert "zettnas_memory_usage_percent 25" in metrics_text
-    assert "zettnas_network_combined_rx_bytes_sec 1024.0" in metrics_text
+    assert "kiboto_cpu_usage_percent 12.5" in metrics_text
+    assert "kiboto_memory_usage_percent 25" in metrics_text
+    assert "kiboto_network_combined_rx_bytes_sec 1024.0" in metrics_text

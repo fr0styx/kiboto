@@ -367,7 +367,7 @@ def _dispatch_webhook(cfg: dict[str, Any], title: str, message: str, level: str)
         }
     else:
         payload = {
-            "event": "zettnas_alert",
+            "event": "kiboto_alert",
             "title": title,
             "message": message,
             "level": level,

@@ -107,7 +107,6 @@ class ChassisEngine:
                     "d8u",
                     "d8 ultra",
                     "zettbox",
-                    "zettnas",
                 )
             )
         )

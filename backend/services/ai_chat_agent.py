@@ -38,6 +38,7 @@ from typing import Any, Optional
 import httpx
 from pydantic import BaseModel, Field
 
+from backend import legacy_names
 from backend.ai_defaults import DEFAULT_CHAT_MODEL
 from backend.config import FAN_STATE_FILE, logger
 from backend.fsutil import atomic_write_json, read_json
@@ -1431,15 +1432,14 @@ def _turn_call_model(
                 if t_name == "control_docker_container":
                     c_target = str(t_args.get("container") or "").strip().lower()
                     c_act = str(t_args.get("action") or "restart").strip().lower()
-                    if c_target in (
-                        "kiboto",
-                        "kiboto-db",
-                        "kiboto-ollama",
-                        "zettnas-toolkit",
-                        "zettnas-db",
-                        "zettnas-ollama",
-                        "zettnas-mariadb",
-                        "zettnas-postgres",
+                    if (
+                        c_target
+                        in (
+                            "kiboto",
+                            "kiboto-db",
+                            "kiboto-ollama",
+                        )
+                        or legacy_names.made_before(c_target)
                     ) and c_act in ("stop", "restart"):
                         t_res = {
                             "tool": "control_docker_container",
