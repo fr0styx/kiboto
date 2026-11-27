@@ -194,7 +194,8 @@ def apply_key(conn: Any, path: str) -> None:
     Plain files that are still waiting for conversion are opened without a key; new and
     encrypted files get the key."""
     if enabled() and applies_to(path) and not is_plaintext(path):
-        conn.execute(f"PRAGMA key = {_key_sql()}")
+        salt = _salt_of(path) if is_encrypted(path) else _KDF_SALT  # a new file takes the current key
+        conn.execute(f"PRAGMA key = {_key_sql(salt)}")
 
 
 def connect(path: str, readonly: bool = False, **kwargs: Any) -> Any:
@@ -289,6 +290,7 @@ def prepare(path: str) -> str:
         if not _opens_with(path, _KDF_SALT) and _opens_with(path, legacy_names.OLD_KDF_SALT):
             logger.info("[Encryption] %s takes the current key salt…", os.path.basename(path))
             _encrypt_in_place(path, old_salt=legacy_names.OLD_KDF_SALT)
+            _salts[path] = _KDF_SALT
             return "converted"
         _verify(path)
         return "encrypted"
@@ -354,12 +356,22 @@ def status(path: str) -> str:
     return "plain" if enabled() else "off"
 
 
+_salts: dict[str, bytes] = {}  # path -> the salt it opens with, until prepare() encrypts it again
+
+
 def _salt_of(path: str) -> bytes:
     """The salt an encrypted file opens with: the current one, or the one of before the rebrand on a
-    file prepare() has not encrypted again yet (the snapshot before a new version's first start)."""
+    file prepare() has not encrypted again yet. Everything a new version's start does before that
+    (the snapshot, the schema migrations) opens such a file with its own key; with the current one
+    it read as damaged and the new version stopped at once."""
+    known = _salts.get(path)
+    if known is not None:
+        return known
+    salt = _KDF_SALT
     if not _opens_with(path, _KDF_SALT) and _opens_with(path, legacy_names.OLD_KDF_SALT):
-        return legacy_names.OLD_KDF_SALT
-    return _KDF_SALT
+        salt = legacy_names.OLD_KDF_SALT
+    _salts[path] = salt
+    return salt
 
 
 def copy(src: str, dst: str) -> None:

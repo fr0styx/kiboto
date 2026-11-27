@@ -470,3 +470,35 @@ def test_the_snapshot_before_an_update_copies_a_database_keyed_the_way_of_before
     assert db_crypto.prepare(path) == "converted"
     db_crypto.copy(path, copy + "2")
     assert db_crypto._opens_with(copy + "2", db_crypto._KDF_SALT)
+
+
+def test_a_new_versions_start_opens_a_database_keyed_the_way_of_before(tmp_path, monkeypatch):
+    """Before prepare() encrypts it again, a new version's start opens the AI databases (the schema
+    migrations): with the current key they read as damaged and the new version stopped at once."""
+    import pytest
+
+    from backend import db_crypto
+
+    if not db_crypto.HAVE_SQLCIPHER:
+        pytest.skip("no SQLCipher here")
+    monkeypatch.setenv("KIBOTO_DATA_KEY", "a-data-key-of-enough-length")
+    db_crypto._raw_key.cache_clear()
+    monkeypatch.setattr(db_crypto, "_salts", {})
+    path = str(tmp_path / "rag_index.db")
+    conn = db_crypto.sqlite3.connect(path)
+    conn.execute(f"PRAGMA key = {db_crypto._key_sql(legacy_names.OLD_KDF_SALT)}")
+    conn.execute("CREATE TABLE t (v TEXT)")
+    conn.execute("INSERT INTO t VALUES ('kept')")
+    conn.commit()
+    conn.close()
+    c = db_crypto.connect(path)
+    assert int(c.execute("PRAGMA user_version").fetchone()[0]) == 0  # what db_schema.migrate does first
+    c.execute("PRAGMA user_version = 3")
+    c.commit()
+    c.close()
+    assert db_crypto.prepare(path) == "converted"
+    c = db_crypto.connect(path)
+    assert c.execute("SELECT v FROM t").fetchone()[0] == "kept" and c.execute("PRAGMA user_version").fetchone()[0] == 3
+    new = str(tmp_path / "ai_conversations.db")  # a new file takes the current key
+    db_crypto.connect(new).execute("CREATE TABLE x (y)")
+    assert db_crypto._opens_with(new, db_crypto._KDF_SALT)
