@@ -491,11 +491,12 @@ def _password_was_right(user: dict, password: str, ip: str, target_username: str
 
 
 def _hand_password_to_samba_again(username: str, password: str) -> None:
-    """Samba did not take this person's password when it was set: the one just typed, and found
-    right, is handed over again, in the background so signing in does not wait for it (#71)."""
+    """Samba did not take this person's password when it was set, or it is the first sign-in since
+    Kiboto started: the one just typed, and found right, is handed over, in the background so
+    signing in does not wait for it (#71)."""
     from backend.services import samba_engine
 
-    if not samba_engine.waiting_for_password(username):
+    if not samba_engine.needs_password(username):
         return
 
     def again() -> None:

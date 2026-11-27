@@ -56,3 +56,33 @@ def test_the_next_sign_in_hands_the_password_over(client, waiting, monkeypatch):
     assert handed == []  # nothing waits: nothing is handed over
     monkeypatch.undo()
     users_db.delete_user(user["id"])
+
+
+def test_the_first_sign_in_after_a_start_hands_the_password_over_once(client, waiting, monkeypatch):
+    """A password out of step with Samba and no failure on record (set by an older release, or a
+    user list brought back from a backup) heals at the first sign-in after Kiboto starts."""
+    user = users_db.create_user("smbana", "Ana", "a-Long-unique-pw-73", role_id="share_user")
+    assert user
+    monkeypatch.setattr(se, "test_mode", lambda: False)
+    monkeypatch.setattr(se, "_HANDED_THIS_RUN", set())
+    engine = se.get_samba_engine()
+    handed = []
+
+    def took(username, password=None, delete=False):
+        handed.append(username)
+        return True
+
+    monkeypatch.setattr(engine, "_sync_samba_user", took)
+    for _ in range(2):
+        r = client.post("/api/auth/login", json={"username": "smbana", "password": "a-Long-unique-pw-73"})
+        assert r.status_code == 200
+        for thread in threading.enumerate():
+            if thread.name == "SambaAgain":
+                thread.join(5)
+    assert handed == ["smbana"]  # once, not at every sign-in
+    engine.sync_samba_user("smbana", delete=True)
+    assert se.needs_password("smbana") is True  # made again later: handed over again
+    monkeypatch.setattr(se, "_serves_files", lambda: False)  # not Kiboto's own Samba: left alone
+    assert se.needs_password("smbana") is False
+    monkeypatch.undo()
+    users_db.delete_user(user["id"])

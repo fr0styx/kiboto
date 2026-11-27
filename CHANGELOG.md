@@ -142,6 +142,8 @@ Front screen: the drive bays page shows the chassis's own bays (four on a Zettla
 
 Front screen without a browser: the overview shows the modules chosen in Settings, in their order and size.
 
+Network sign-in: an account whose password never reached the file server (set by an earlier release, or brought back from a backup) opens network shares again after its next sign-in to Kiboto, without changing the password.
+
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container
 

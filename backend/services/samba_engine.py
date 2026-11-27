@@ -24,6 +24,7 @@ from backend.errors import SaidError
 from backend.fsutil import atomic_write_json, atomic_write_text, json_locked, read_json
 from backend.ignored_errors import ignored
 from backend.services import samba_host
+from backend.settings import test_mode
 
 SAMBA_DIR = os.path.join(DATA_DIR, "samba")
 SAMBA_CONF_FILE = os.path.join(SAMBA_DIR, "smb.conf")
@@ -338,6 +339,21 @@ def waiting_for_password(username: str) -> bool:
     """Whether Samba still waits for this person's password (it did not take the last one)."""
     waiting = read_json(SMB_WAITING_FILE, [])
     return isinstance(waiting, list) and username.lower() in waiting
+
+
+# people whose password Samba took since Kiboto started
+_HANDED_THIS_RUN: set[str] = set()
+
+
+def needs_password(username: str) -> bool:
+    """Whether a right password typed at sign-in should be handed to Samba: one it did not take, and
+    once after each start for everyone. A password can be out of step with no failure on record:
+    set by a release whose web process could not run smbpasswd, or a user list brought back from
+    a backup while Samba kept its own."""
+    name = username.lower()
+    if waiting_for_password(name):
+        return True
+    return name not in _HANDED_THIS_RUN and not test_mode() and _serves_files()
 
 
 def serves_files() -> bool:
@@ -788,6 +804,10 @@ class SambaEngine:
         ok = self._sync_samba_user(username, password=password, delete=delete)
         if delete or password:
             note_password_handed(username, ok or delete)
+        if delete:
+            _HANDED_THIS_RUN.discard(username.lower())
+        elif ok and password:
+            _HANDED_THIS_RUN.add(username.lower())
         return ok
 
     def _sync_samba_user(self, username: str, password: str | None = None, delete: bool = False) -> bool:
