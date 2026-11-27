@@ -128,6 +128,33 @@ def test_previous_versions_and_the_bin_together(tmp_path, monkeypatch):
     monkeypatch.setattr(samba_engine, "_snapshot_dir_for", lambda path: "/pool/@snapshots")
     conf = _conf(tmp_path, monkeypatch, SambaShareConfig(name="photos", path=str(tmp_path), previous_versions=True))
     assert "vfs objects = catia fruit streams_xattr shadow_copy2 recycle" in conf
+    assert "shadow:snapdir = /pool/@snapshots" in conf and "shadow:format = photos@auto-%Y%m%d-%H%M" in conf
+
+
+def test_previous_versions_of_a_zfs_share_come_from_its_own_snapshots(tmp_path, monkeypatch):
+    """A ZFS share's snapshots are <dataset>@<share>-auto-<time>, seen in its .zfs/snapshot: Samba
+    was sent to the btrfs folder and Windows showed no previous versions."""
+    monkeypatch.setattr(samba_engine, "_own_dataset", lambda path: True)
+    conf = _conf(tmp_path, monkeypatch, SambaShareConfig(name="photos", path=str(tmp_path), previous_versions=True))
+    assert f"shadow:snapdir = {tmp_path}/.zfs/snapshot" in conf
+    assert "shadow:format = photos-auto-%Y%m%d-%H%M" in conf
+
+
+def test_a_share_is_its_own_dataset_only_when_one_is_mounted_there(tmp_path, monkeypatch):
+    from backend.hardware.pal import generic_linux
+
+    mounts = tmp_path / "mounts"
+    mounts.write_text(f"tank/photos {tmp_path} zfs rw 0 0\n")
+    real = generic_linux.zfs_dataset_at
+    monkeypatch.setattr(generic_linux, "zfs_dataset_at", lambda path: real(path, str(mounts)))
+    assert samba_engine._own_dataset(str(tmp_path)) is True
+    assert samba_engine._own_dataset(str(tmp_path / "inside")) is False
+
+    def unreadable(path):
+        raise PermissionError(13, "Permission denied")
+
+    monkeypatch.setattr(generic_linux, "zfs_dataset_at", unreadable)
+    assert samba_engine._own_dataset(str(tmp_path)) is False
 
 
 def test_the_overview_counts_what_the_bins_hold(root, monkeypatch):

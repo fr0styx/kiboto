@@ -43,6 +43,30 @@ def _snapshot_dir_for(share_path: str) -> str | None:
     return snapdir if pool else None
 
 
+def _own_dataset(share_path: str) -> bool:
+    """Whether the share is a ZFS dataset of its own (Kiboto snapshots a ZFS share only then)."""
+    from backend.hardware.pal.generic_linux import zfs_dataset_at
+
+    try:
+        return bool(zfs_dataset_at(share_path))
+    except OSError:
+        return False
+
+
+def shadow_settings(share_name: str, share_path: str) -> tuple[str, str] | None:
+    """Where Samba finds a share's scheduled snapshots, and their names (snapshot_service): on
+    btrfs <pool>/@snapshots/<share>@auto-<time>, and on a ZFS dataset its own
+    .zfs/snapshot/<share>-auto-<time> (a ZFS name takes no second "@"). Windows' Previous Versions
+    of a ZFS share were looked for in the btrfs folder and always came up empty."""
+    if _own_dataset(share_path):
+        from backend.hardware.pal.generic_linux import zfs_snapshot_part
+
+        prefix = zfs_snapshot_part(f"{share_name}@auto-")
+        return os.path.join(share_path, ".zfs", "snapshot"), f"{prefix}%Y%m%d-%H%M"
+    snapdir = _snapshot_dir_for(share_path)
+    return (snapdir, f"{share_name}@auto-%Y%m%d-%H%M") if snapdir else None
+
+
 class SambaShareConfig(BaseModel):
     name: str
     path: str
@@ -635,14 +659,13 @@ class SambaEngine:
 
             vfs = ["catia", "fruit", "streams_xattr"]
             if share.previous_versions:
-                # Windows "Previous Versions" from the scheduled snapshots
-                # (<pool>/@snapshots/<share>@auto-YYYYMMDD-HHMM, see snapshot_service)
-                snapdir = _snapshot_dir_for(share.path)
-                if snapdir:
+                # Windows "Previous Versions" from the scheduled snapshots (shadow_settings)
+                shadow = shadow_settings(share.name, share.path)
+                if shadow:
                     vfs.append("shadow_copy2")
-                    conf_lines.append(f"   shadow:snapdir = {snapdir}")
+                    conf_lines.append(f"   shadow:snapdir = {shadow[0]}")
                     conf_lines.append(f"   shadow:basedir = {share.path}")
-                    conf_lines.append(f"   shadow:format = {share.name}@auto-%Y%m%d-%H%M")
+                    conf_lines.append(f"   shadow:format = {shadow[1]}")
                     conf_lines.append("   shadow:sort = desc")
                     conf_lines.append("   shadow:localtime = no")  # snapshot names are UTC (NREL-15)
 

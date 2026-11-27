@@ -146,6 +146,8 @@ Network sign-in: an account whose password never reached the file server (set by
 
 Shares on Kiboto OS: guests can write to a share that allows guests. Its folder had kept the group read-only from the folder it was made in.
 
+Shares on ZFS: Windows Previous Versions list the share's scheduled snapshots. Samba had been looking for them where btrfs keeps them.
+
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container
 
