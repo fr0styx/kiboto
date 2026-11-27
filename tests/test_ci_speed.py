@@ -92,7 +92,7 @@ def test_a_prepared_disk_belongs_to_one_installer_one_check_and_one_debian():
         # an update run installs an earlier release with its own installer: it makes no disk for today's
         assert (
             steps[name]["if"]
-            == "inputs.fast && !inputs.from_last_release && steps.prepared.outputs.cache-hit != 'true'"
+            == "inputs.fast && !inputs.from_last_release && !inputs.secure_boot && steps.prepared.outputs.cache-hit != 'true'"
         )
     assert steps["Keep the prepared disk"]["with"]["key"] == "${{ steps.key.outputs.key }}"
 

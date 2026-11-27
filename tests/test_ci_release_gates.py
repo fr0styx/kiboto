@@ -78,8 +78,8 @@ def test_every_gate_runs_before_the_image_is_signed_and_tagged():
                     assert "--dry-run" in line, (name, s.get("name"), line)
     # a version's release also waits for the update from the release before (os-upgrade); main's
     # publishing does not, so a push deploys as fast as before
-    assert jobs["create-release"]["needs"] == ["publish", "os-upgrade"]
-    assert "os-upgrade" not in jobs["publish"]["needs"]
+    assert jobs["create-release"]["needs"] == ["publish", "os-upgrade", "os-secure-boot"]
+    assert "os-upgrade" not in jobs["publish"]["needs"] and "os-secure-boot" not in jobs["publish"]["needs"]
     # a release is signed only after the owner's approval; main keeps publishing without one
     assert jobs["publish"]["environment"] == "${{ startsWith(github.ref, 'refs/tags/v') && 'release' || '' }}"
 

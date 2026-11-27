@@ -39,13 +39,18 @@ on:
         required: false
         type: boolean
         default: false
+      secure_boot:
+        description: "Start the machine with Secure Boot on: the machine's ZFS key is queued at the install and enrolled at the firmware's key manager at the restart"
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
 
 jobs:
   install:
-    name: ${{ inputs.from_last_release && 'Kiboto OS updates from the last release' || 'Kiboto OS installs and runs' }}
+    name: ${{ inputs.from_last_release && 'Kiboto OS updates from the last release' || inputs.secure_boot && 'Kiboto OS with Secure Boot' || 'Kiboto OS installs and runs' }}
     runs-on: ubuntu-latest
     timeout-minutes: 45  # ARC-26: a hung step fails the run instead of holding a runner for 6 hours
     permissions:
@@ -146,6 +151,7 @@ jobs:
           # a version tag and a run by hand also try an update and Revert; main stays fast
           KB_OS_UPDATE: ${{ (inputs.fast || inputs.from_last_release) && '0' || '1' }}
           KB_OS_FROM: ${{ steps.from.outputs.image }}
+          KB_OS_SECURE_BOOT: ${{ inputs.secure_boot && '1' || '0' }}
           # early: QEMU from the last published main build; the build to install is waited for once
           # the machine is up (scripts/ci_wait_build.sh fails as soon as the build job fails)
           KB_OS_VM_IMAGE: ${{ steps.build.outputs.image == '--wait' && 'ghcr.io/fr0styx/kiboto:main' || '' }}
@@ -154,7 +160,7 @@ jobs:
         run: sh scripts/os_install_check.sh "$IMAGE_REF"
 
       - name: Prepare a disk for the next runs
-        if: inputs.fast && !inputs.from_last_release && steps.prepared.outputs.cache-hit != 'true'
+        if: inputs.fast && !inputs.from_last_release && !inputs.secure_boot && steps.prepared.outputs.cache-hit != 'true'
         env:
           IMAGE_REF: ${{ steps.build.outputs.image }}
           KB_OS_PREPARE: ${{ github.workspace }}/prepared.qcow2
@@ -164,7 +170,7 @@ jobs:
         run: sh scripts/os_install_check.sh "$IMAGE_REF"
 
       - name: Keep the prepared disk
-        if: inputs.fast && !inputs.from_last_release && steps.prepared.outputs.cache-hit != 'true'
+        if: inputs.fast && !inputs.from_last_release && !inputs.secure_boot && steps.prepared.outputs.cache-hit != 'true'
         uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: prepared.qcow2

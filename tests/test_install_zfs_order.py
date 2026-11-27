@@ -27,7 +27,7 @@ def test_the_module_comes_before_the_tools_one_call_each():
 
 def test_a_failed_early_load_is_cleared_once_zfs_loads():
     body = _packages()
-    assert body.index("modprobe zfs || die") < body.index("systemctl reset-failed zfs-load-module.service")
+    assert body.index("if ! modprobe zfs") < body.index("systemctl reset-failed zfs-load-module.service")
 
 
 @pytest.mark.parametrize("backports", [True, False])

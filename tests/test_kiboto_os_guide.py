@@ -16,7 +16,7 @@ def test_the_install_guide_and_readme_point_at_it():
 def test_it_names_what_the_script_refuses():
     assert "= amd64 ] || die" in INSTALL and "amd64" in GUIDE
     assert 'VERSION_ID:-}" = 13' in INSTALL and "Debian 13" in GUIDE
-    assert "secure_boot_on" in INSTALL and "Secure Boot off" in GUIDE
+    assert "secure_boot_on" in INSTALL and "Enroll MOK" in GUIDE and "Enroll MOK" in INSTALL
 
 
 def test_the_hardware_report_it_points_at_exists():

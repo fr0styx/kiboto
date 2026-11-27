@@ -59,6 +59,7 @@
   {"name": "Where it runs", "features": [
    {"name": "Processors", "beside": "amd64 and arm64", "linux": "amd64 and arm64", "os": "amd64"},
    {"name": "Installed as", "beside": "A container", "linux": "A container", "os": "An install image for a USB stick, or a script on Debian 13"},
+   {"id": "secure_boot", "name": "Secure Boot", "beside": "host", "linux": "host", "os": "check", "note": "May stay on: ZFS is signed with the machine’s own key, which the firmware learns once at the screen after the install. Tried on a virtual machine with Secure Boot, not yet on a real PC or from the USB image."},
    {"id": "move_to_os", "name": "Move to Kiboto OS from the container", "beside": "no", "linux": "no", "os": "check", "note": "Import the pools, then restore a settings backup made in the container: people, passwords and shares come along, and each share is pointed at the pool that holds its folder. Drilled on a virtual machine, not yet on a real one."}
   ]}
  ]

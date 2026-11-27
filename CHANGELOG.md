@@ -20,6 +20,8 @@ Kiboto OS: two or more network ports can be bonded into one on the Network page,
 
 Kiboto OS: Wake-on-LAN can be turned on or off for a network port in its settings, and stays set after a restart.
 
+Kiboto OS: Secure Boot can stay on. ZFS is signed with a key of the machine's own, and after the install one step is left at the machine's screen: at the next start choose Enroll MOK and type the code shown. About says while that step is open.
+
 #### Security
 
 Kiboto OS: when Kiboto hands files and folders in a shared folder to their people, a link put in their place over the network is never followed, so a system file's owner or rights can never be changed that way.

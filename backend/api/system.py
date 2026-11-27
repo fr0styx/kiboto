@@ -1275,8 +1275,19 @@ def get_system_about():
         "releases_only": _releases_only(),
         # still started from the image's name before the rebrand, which Kiboto 2.2 stops publishing
         "old_image_name": _old_image_name(),
+        # Kiboto OS with Secure Boot: "waiting" while the machine's key waits for the step at its screen
+        "secure_boot": _secure_boot(),
         "github_repo": "https://github.com/fr0styx/kiboto",
     }
+
+
+def _secure_boot() -> str:
+    """'waiting', 'on' or 'off' on a machine Kiboto runs; '' elsewhere (the host decides there)."""
+    if not runtime.managed_host():
+        return ""
+    from backend.services import secure_boot
+
+    return secure_boot.status()
 
 
 def _old_image_name() -> str:

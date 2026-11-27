@@ -71,6 +71,11 @@
    "linux": "yes",
    "os": "yes"
   },
+  "secure_boot": {
+   "beside": "host",
+   "linux": "host",
+   "os": "check"
+  },
   "server_ssh": {
    "beside": "host",
    "linux": "host",

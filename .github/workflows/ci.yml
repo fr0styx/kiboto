@@ -1018,6 +1018,22 @@ jobs:
       fast: true
       from_last_release: true
 
+  # Secure Boot on: the install queues the machine's ZFS key, ZFS waits for it, the firmware's key
+  # manager is answered at the restart (as the person at the screen would), and ZFS then loads.
+  # Reports on main like the update check; a version tag's release waits for it.
+  os-secure-boot:
+    name: Kiboto OS Secure Boot
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/tags/stable')
+    permissions:
+      contents: read
+      packages: read # the image is pulled by its digest
+      actions: read # this run's build job and its digest artifact
+    uses: ./.github/workflows/os-install.yml
+    with:
+      early: true
+      fast: true
+      secure_boot: true
+
   publish:
     name: Sign & publish image tags (${{ matrix.variant }})
     needs: [lint, lint-and-test, unit-debian13, storage-real, frontend, frontend-checks, e2e-integration, still-latest, build-image, check-image, update-test, smoke-arm64, os-install]
@@ -1116,7 +1132,7 @@ jobs:
 
   create-release:
     name: GitHub Release & Release Notes
-    needs: [publish, os-upgrade]
+    needs: [publish, os-upgrade, os-secure-boot]
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     timeout-minutes: 10  # ARC-26: a hung step fails the run instead of holding a runner for 6 hours

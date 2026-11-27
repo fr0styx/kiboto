@@ -102,6 +102,25 @@ export function oldImageNotice(about) {
   );
 }
 
+/** The words for Secure Boot's one step left at the machine's screen, or "" when nothing waits. */
+export function secureBootNotice(about) {
+  if (about?.secure_boot !== 'waiting') return '';
+  return t(
+    'sysu.secure_boot_waiting',
+    'One step is left at this machine\'s own screen: restart it, and when a blue screen asks to "Perform MOK management", choose Enroll MOK and type the code shown on that screen. Storage pools are ready after that.'
+  );
+}
+
+/** Shows or hides the Secure Boot line in About. */
+export function showSecureBootNotice(about) {
+  const box = document.getElementById('about-secure-boot-box');
+  const text = document.getElementById('about-secure-boot');
+  const said = secureBootNotice(about);
+  if (text) text.textContent = said;
+  if (box) box.hidden = !said;
+  return said;
+}
+
 /** Shows or hides the old image name's line in About. */
 export function showOldImageNotice(about) {
   const box = document.getElementById('about-old-image-box');
@@ -174,6 +193,7 @@ export async function fetchAndRenderSystemAbout(force = false, channelOverride =
         });
       if (uptimeEl && about.uptime_secs != null) uptimeEl.textContent = formatUptime(about.uptime_secs);
       showOldImageNotice(about);
+      showSecureBootNotice(about);
     }
   } catch (err) {
     console.warn('[Kiboto] Failed to fetch system about info:', err);

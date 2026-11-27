@@ -27,7 +27,7 @@ HELD="zfs-dkms zfsutils-linux docker.io"
 # held by versions before 2.0.7, and again with KIBOTO_SECURITY_UPDATES=0: given back on uninstall
 KERNEL="linux-image-amd64 linux-headers-amd64"
 # what Kiboto drives: disks and SMART, the three kinds of pool, sharing, apps, virtual machines
-TOOLS="smartmontools hdparm nvme-cli sg3-utils usbutils btrfs-progs e2fsprogs parted gdisk fuse3 gocryptfs mergerfs \
+TOOLS="mokutil smartmontools hdparm nvme-cli sg3-utils usbutils btrfs-progs e2fsprogs parted gdisk fuse3 gocryptfs mergerfs \
 rclone restic samba nfs-kernel-server docker.io docker-cli qemu-system-x86 qemu-utils ovmf swtpm \
 systemd-timesyncd tgt nftables libtss2-esys-3.0.2-0t64 libtss2-rc0t64 libtss2-mu-4.0.1-0t64 \
 python3-venv ca-certificates curl acl unattended-upgrades"
@@ -50,12 +50,42 @@ must_be_this_machine() {
   [ "$(dpkg --print-architecture)" = amd64 ] || die "this machine is not a 64-bit PC (amd64)."
   [ ! -e /.dockerenv ] && [ ! -e /run/.containerenv ] || die "this is a container; Kiboto needs the machine itself."
   command -v systemctl >/dev/null || die "systemd is not running here."
-  # ZFS is built on this machine and not signed: with Secure Boot on, the kernel refuses to load it,
-  # which showed only after a quarter of an hour of building. KIBOTO_ALLOW_SECURE_BOOT=1 for someone
-  # who signs DKMS modules with a key of their own (mokutil).
-  if [ "${KIBOTO_ALLOW_SECURE_BOOT:-}" != 1 ] && secure_boot_on; then
-    die "Secure Boot is on in this machine's firmware. Kiboto builds ZFS on the machine, and Secure Boot refuses to load what is built here. Turn Secure Boot off in the firmware settings (often under Boot or Security), start Debian again and run this again."
+  # Secure Boot on: ZFS is built here and signed with this machine's own key (DKMS makes one); the
+  # firmware learns that key once, from the person at the screen, at the next start (secure_boot_key)
+}
+
+# Secure Boot: ZFS is signed with this machine's DKMS key, which the firmware does not know yet. The
+# key is queued (mokutil) under a one-time code; at the next start the firmware's key manager asks
+# the person at the screen to enroll it with that code. Until then ZFS cannot load, so pools wait;
+# Kiboto itself runs. kiboto-pools.service tidies up once the key is known (services/secure_boot.py).
+SB_KEY=/var/lib/dkms/mok.pub
+secure_boot_key() {
+  [ -f "$SB_KEY" ] || dkms generate_mok >/dev/null 2>&1 || die "Secure Boot is on, and no key could be made to sign ZFS with (dkms generate_mok)."
+  if mokutil --test-key "$SB_KEY" 2>/dev/null | grep -q "already enrolled"; then
+    die "ZFS was built and signed with this machine's key, which the firmware knows, but it still does not load on this kernel."
   fi
+  sb_code=$(od -An -N8 -tu8 /dev/urandom | tr -dc 0-9 | cut -c1-8)
+  [ "${#sb_code}" = 8 ] || die "no code could be made for the Secure Boot key."
+  ( umask 077; mkdir -p "$ETC" && printf '%s\n' "$sb_code" > "$ETC/secure-boot-code" )
+  mokutil --generate-hash="$sb_code" > "$ETC/secure-boot.hash" 2>/dev/null \
+    && mokutil --import "$SB_KEY" --hash-file "$ETC/secure-boot.hash" >/dev/null 2>&1 \
+    || { rm -f "$ETC/secure-boot.hash" "$ETC/secure-boot-code"; die "Secure Boot is on, and the key ZFS is signed with could not be handed to the firmware (mokutil). Turn Secure Boot off in the firmware settings and run this again."; }
+  rm -f "$ETC/secure-boot.hash"
+  mkdir -p /etc/issue.d
+  cat > /etc/issue.d/kiboto-secure-boot.issue <<ISSUE
+
+  Kiboto: one step left for Secure Boot, at this screen.
+  Restart this machine. When a blue screen asks to "Perform MOK management",
+  press a key, choose "Enroll MOK", then "Continue", then "Yes", type $sb_code
+  and choose "Reboot". Storage pools are ready after that.
+
+ISSUE
+  say ""
+  say "Secure Boot is on. One step is left, at this machine's own screen:"
+  say "  restart it; when a blue screen asks to \"Perform MOK management\", press a key,"
+  say "  choose Enroll MOK, Continue, Yes, type $sb_code and choose Reboot."
+  say "  The code is also shown on this machine's screen until then. Pools are ready after that."
+  say ""
 }
 
 # A machine that already serves files or runs containers has settings Kiboto would write over.
@@ -146,7 +176,10 @@ packages() {
     # shellcheck disable=SC2086
     apt-get install -y -qq --no-install-recommends $need >/dev/null
   done
-  modprobe zfs || die "ZFS was built but does not load on this kernel."
+  if ! modprobe zfs 2>/dev/null; then
+    secure_boot_on || die "ZFS was built but does not load on this kernel."
+    secure_boot_key
+  fi
   systemctl reset-failed zfs-load-module.service 2>/dev/null || true
   # Debian starts its own iSCSI service with the package; Kiboto starts tgtd itself, only when turned on
   systemctl disable -q --now tgt.service 2>/dev/null || true

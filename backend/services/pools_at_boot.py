@@ -36,6 +36,10 @@ def bring_back() -> dict[str, str]:
 
 
 def main() -> int:
+    from backend.services import secure_boot
+
+    # a Secure Boot key enrolled at the screen just now: ZFS loads for the pools that come back next
+    secure_boot.settle(lambda cmd: (lambda r: (r[0], f"{r[1]}\n{r[2]}"))(_run(cmd)))
     done = pool_registry.bring_back_all(_run)
     for name, why in done.items():
         print(f"{name}: {'there' if not why else 'NOT there: ' + why}")

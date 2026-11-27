@@ -31,6 +31,9 @@
 #                 are checked again; this build then makes a new pool with a shared folder on a third
 #                 drive, and everything is checked once more after a restart. The update a real
 #                 machine takes.
+#   KB_OS_SECURE_BOOT=1  the machine starts with Secure Boot on (OVMF with Microsoft's keys): the
+#                 install queues the machine's key, ZFS waits for it, and at the restart the firmware's
+#                 key manager is answered through QEMU's monitor as a person at the screen would
 #   KB_OS_PREPARED  such a disk, used instead of a fresh Debian: the install then skips building ZFS,
 #                 the slow part. It belongs to one install.sh and one Debian image (the workflow keys
 #                 it by both); anything else gets a fresh Debian.
@@ -116,6 +119,12 @@ growpart: {mode: auto, devices: ['/']}
 UD
 
 docker pull -q "$VM_IMAGE" >/dev/null
+# the firmware: plain UEFI, or with Secure Boot on and Microsoft's keys (as a PC comes)
+CODE=OVMF_CODE_4M.fd VARS=OVMF_VARS_4M.fd MACHINE=q35 SECURE=""
+if [ "${KB_OS_SECURE_BOOT:-0}" = 1 ]; then
+  CODE=OVMF_CODE_4M.secboot.fd VARS=OVMF_VARS_4M.ms.fd MACHINE=q35,smm=on
+  SECURE="-global driver=cfi.pflash01,property=secure,value=on"
+fi
 DATA_DRIVES=""
 if [ -n "${KB_OS_FROM:-}" ]; then  # empty 2 GB drives: two for the pool the update must keep, one for a new pool after
   for n in 1 2 3; do
@@ -131,10 +140,10 @@ docker run -d --name "$NAME" --no-healthcheck --network host --device /dev/kvm \
   -v "$WORK":/vm -v "$BASE":/base.qcow2:ro --entrypoint sh "$VM_IMAGE" -c "
     cd /vm/seed && python3 -m http.server $SEED_PORT --bind 127.0.0.1 >/vm/seed.log 2>&1 &
     rm -f /vm/os.qcow2 && qemu-img create -q -f qcow2 -F qcow2 -b /base.qcow2 /vm/os.qcow2 24G
-    cp /usr/share/OVMF/OVMF_VARS_4M.fd /vm/vars.fd
-    exec qemu-system-x86_64 -enable-kvm -machine q35 -cpu host -smp ${KB_OS_CPUS:-4} -m ${KB_OS_MEM:-4096} -display none \
-      -serial file:/vm/console.log \
-      -drive if=pflash,format=raw,readonly=on,file=/usr/share/OVMF/OVMF_CODE_4M.fd \
+    cp /usr/share/OVMF/$VARS /vm/vars.fd
+    exec qemu-system-x86_64 -enable-kvm -machine $MACHINE -cpu host -smp ${KB_OS_CPUS:-4} -m ${KB_OS_MEM:-4096} -display none \
+      -serial file:/vm/console.log -monitor unix:/vm/monitor.sock,server,nowait $SECURE \
+      -drive if=pflash,format=raw,readonly=on,file=/usr/share/OVMF/$CODE \
       -drive if=pflash,format=raw,file=/vm/vars.fd \
       -drive file=/vm/os.qcow2,if=none,id=os,format=qcow2 -device virtio-blk-pci,drive=os,serial=KBCHECKOS,bootindex=0 \
       -netdev user,id=n0,hostfwd=tcp:127.0.0.1:$PORT-:22 -device virtio-net-pci,netdev=n0,addr=0x9 \
@@ -255,6 +264,13 @@ look() {
   check "the web process runs as its own user, not as root" "test \"\$(ps -o user= -p \$(systemctl show -p MainPID --value kiboto))\" = kiboto"
   check "the root service runs as root" "test \"\$(ps -o user= -p \$(systemctl show -p MainPID --value kiboto-door))\" = root"
   check "the machine is marked as Kiboto's, and the install as finished" "test -f /etc/kiboto/managed && test ! -e /etc/kiboto/install-started"
+  if [ "${SB_WAITING:-0}" = 1 ]; then
+    # Secure Boot, before the step at the screen: ZFS is built and signed but may not load yet
+    check "ZFS waits for the Secure Boot key: queued, code kept, not loaded" "mokutil --list-new | grep -q 'DKMS module signing key' && test -s /etc/kiboto/secure-boot-code && test \"\$(stat -c %a /etc/kiboto/secure-boot-code)\" = 600 && ! lsmod | grep -q '^zfs '"
+    check "the screen says what is left to do" "grep -q 'Enroll MOK' /etc/issue.d/kiboto-secure-boot.issue"
+    check "no other service of the machine has failed" "test -z \"\$(systemctl --failed --no-legend --plain | grep -v zfs)\" || { systemctl --failed --no-legend --plain; false; }"
+    return 0
+  fi
   check "no service of the machine has failed" "test -z \"\$(systemctl --failed --no-legend --plain)\" || { systemctl --failed --no-legend --plain; false; }"
   check "ZFS is loaded and its tools answer" "modprobe zfs && zpool list >/dev/null && zfs version | head -2"
   check "btrfs, ext4 and the drive tools are there" "for t in mkfs.btrfs mkfs.ext4 smartctl hdparm nft; do command -v \$t >/dev/null || { echo \"missing: \$t\"; exit 1; }; done"
@@ -271,6 +287,7 @@ look() {
 }
 
 stage "The installed machine"
+[ "${KB_OS_SECURE_BOOT:-0}" = 1 ] && SB_WAITING=1
 look
 $SSH "readlink /opt/kiboto/current; /opt/kiboto/current/venv/bin/python --version; df -h / | tail -1" | sed 's/^/  /'
 
@@ -301,8 +318,42 @@ if [ -n "${KB_OS_FROM:-}" ]; then
   $SSH "python3 /root/os_upgrade_data.py after /dev/disk/by-id/virtio-KBUPGRADE3" || failed=$((failed + 1))
 fi
 
+# keys for the firmware's key manager, through QEMU's monitor, as a person at the screen types them
+mok_keys() {
+  for k in "$@"; do
+    docker exec "$NAME" python3 -c "import socket,sys; s=socket.socket(socket.AF_UNIX); s.connect('/vm/monitor.sock'); s.recv(4096); s.sendall(('sendkey '+sys.argv[1]+'\\n').encode()); s.recv(4096)" "$k" >/dev/null 2>&1
+    sleep 1
+  done
+}
+# until the console shows these words (the key manager writes to the serial console too)
+console_says() {
+  i=0
+  until docker exec "$NAME" sh -c "tr -d '\\033' < /vm/console.log | grep -q '$1'" 2>/dev/null; do
+    i=$((i + 1)); [ "$i" -gt "${2:-60}" ] && return 1; sleep 1
+  done
+}
+
 stage "The same after a restart"
-$SSH "systemctl reboot" 2>/dev/null || true
+if [ "${SB_WAITING:-0}" = 1 ]; then
+  # the code the install showed on the screen, read inside the machine: never printed here
+  sb_code=$($SSH "cat /etc/kiboto/secure-boot-code" | tr -dc 0-9)
+  docker exec "$NAME" sh -c ': > /vm/console.log' 2>/dev/null || true
+  $SSH "systemctl reboot" 2>/dev/null || true
+  if console_says "Press any key to perform MOK management" 90; then
+    say "  the firmware's key manager asks: enrolling the machine's key as the person at the screen would"
+    mok_keys ret
+    console_says "Enroll MOK" 20 && mok_keys down ret       # Enroll MOK
+    console_says "Continue" 20 && mok_keys down ret          # past "View key 0" to Continue
+    console_says "Enroll the key" 20 && mok_keys down ret    # Yes
+    console_says "Password" 20 && mok_keys $(printf '%s' "$sb_code" | sed 's/./& /g') ret
+    console_says "Reboot" 20 && mok_keys ret
+  else
+    failed=$((failed + 1)); say "  FAILED  the firmware's key manager did not ask at the restart"
+  fi
+  SB_WAITING=0
+else
+  $SSH "systemctl reboot" 2>/dev/null || true
+fi
 sleep 20
 wait_ssh 6
 i=0
@@ -310,6 +361,10 @@ until $SSH "curl -fs -m 5 -o /dev/null http://127.0.0.1:8082/api/health" 2>/dev/
   i=$((i + 1)); [ "$i" -gt 36 ] && break; sleep 5
 done
 look
+if [ "${KB_OS_SECURE_BOOT:-0}" = 1 ]; then
+  check "Secure Boot is on, and the firmware knows the machine's key" "mokutil --sb-state | grep -q 'SecureBoot enabled' && mokutil --test-key /var/lib/dkms/mok.pub | grep -q 'already enrolled'"
+  check "the code and the note on the screen are gone" "test ! -e /etc/kiboto/secure-boot-code && test ! -e /etc/issue.d/kiboto-secure-boot.issue"
+fi
 if [ -n "${KB_OS_FROM:-}" ]; then
   $SSH "python3 /root/os_upgrade_data.py look" || failed=$((failed + 1))
 fi

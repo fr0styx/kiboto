@@ -36,7 +36,7 @@ and a settings backup.
 | System disk | A disk of its own, 32 GB or more; an SSD is best | Only Debian and Kiboto live there: a fresh install uses about 5 GB. It never holds your files, and setup never offers it as storage. |
 | Storage drives | SATA or NVMe drives on the board, or on a controller in HBA (IT) mode | ZFS, btrfs and ext4 want to see each drive as it is: a RAID card that hides the drives behind its own volumes is the wrong kind. USB drives are fine for backups; in a pool they are slow and can drop off, so they are not recommended there. |
 | Network | A wired Ethernet port Debian has a driver for | Wi-Fi is not set up by the installer or by Kiboto. Bonds and VLANs are not there yet. |
-| Firmware | UEFI or the older BIOS mode, Secure Boot off | Kiboto builds ZFS on the machine, and Secure Boot refuses to load what is built there. The install stops at the start and says so. |
+| Firmware | UEFI or the older BIOS mode, Secure Boot on or off | With Secure Boot on, ZFS is signed with a key of the machine's own, which the firmware learns once: at the next start after the install, at the machine's screen (see below). |
 | Security chip | Optional: a TPM 2.0 | With one, the key for the AI chats and search index is sealed to the machine; without one, to its system disk. |
 | Fans, front screen, light bar | Driven on the reference box only | Elsewhere Kiboto shows the temperatures and the fans stay with the firmware. |
 
@@ -73,7 +73,11 @@ beside `install.sh`, while Kiboto OS is in beta on the
    "DD image" mode (Windows) do it in a few clicks. On Linux:
    `sudo dd if=kiboto-<version>-install.iso of=/dev/sdX bs=4M conv=fsync status=progress`, where
    `/dev/sdX` is the stick (everything on it is lost).
-3. Turn Secure Boot off in the machine's firmware settings (often under Boot or Security).
+3. Secure Boot may stay on. Kiboto then signs ZFS with a key of the machine's own, and one step is
+   left after the install: at the next start a blue screen asks to "Perform MOK management"; press
+   a key, choose Enroll MOK, Continue, Yes, type the code the screen showed after the install (it is
+   also on the screen above the sign-in prompt) and choose Reboot. Storage pools are ready after
+   that, and About in Kiboto says when the step is still open.
 4. Start the machine from the stick (the firmware's boot menu, often F12, F11 or Esc at power-on).
    "Install Kiboto" is chosen after ten seconds.
 5. Debian's own installer asks two things only: which disk becomes the system disk (it shows them
