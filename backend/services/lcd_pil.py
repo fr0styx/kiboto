@@ -307,25 +307,13 @@ def _section_title(draw, title, badge, badge_color, c, y=48):
     draw.line((12, y + 12, WIDTH - 12, y + 12), fill=c["card_hi"])
 
 
-def _page_overview(draw, stats, c):
-    top, bottom = 40, 120
-    gap = 6
-    cw = (WIDTH - 24 - gap * 4) / 5
-    f_title = font("bold", 10)
-    f_big = font("bold", 15)
-    f_small = font("regular", 10)
-
-    def card(i, title):
-        x0 = 12 + i * (cw + gap)
-        _card(draw, (x0, top, x0 + cw, bottom), c)
-        _text(draw, (x0 + 8, top + 11), title, f_title, c["fg"], max_w=cw - 16, anchor="lm")
-        return x0
-
+def _mod_storage(draw, box, stats, c):
+    x0, top, cw, _bottom = box
     storage = stats.get("storage") or {}
     pct = _num(storage.get("pct"))
-    x0 = card(0, "STORAGE")
     _ring(draw, (x0 + 28, top + 50), 19, pct, _level_color(pct, c), c, width=6)
     draw.text((x0 + 28, top + 50), f"{pct:.0f}%", font=font("bold", 11), fill=c["fg"], anchor="mm")
+    f_big, f_small = font("bold", 15), font("regular", 10)
     _text(draw, (x0 + cw - 8, top + 42), str(storage.get("used", "")), f_big, c["fg"], max_w=cw - 60, anchor="rm")
     _text(
         draw,
@@ -337,27 +325,42 @@ def _page_overview(draw, stats, c):
         anchor="rm",
     )
 
+
+def _mod_cpu(draw, box, stats, c):
+    x0, top, cw, _bottom = box
     cpu = stats.get("cpu") or {}
     util = _num(cpu.get("util"))
     temp = cpu.get("temp")
-    x0 = card(1, "CPU")
     _ring(draw, (x0 + 28, top + 50), 19, util, _level_color(util, c), c, width=6)
     draw.text((x0 + 28, top + 50), f"{util:.0f}%", font=font("bold", 11), fill=c["fg"], anchor="mm")
     temp_txt = f"{_num(temp):.0f}°C" if temp is not None else "--°C"
     temp_color = _level_color(_num(temp), c, warn=75, crit=90) if temp is not None else c["muted"]
-    _text(draw, (x0 + cw - 8, top + 42), temp_txt, f_big, temp_color, anchor="rm")
+    _text(draw, (x0 + cw - 8, top + 42), temp_txt, font("bold", 15), temp_color, anchor="rm")
     load = cpu.get("load_avg") or []
     if load:
-        _text(draw, (x0 + cw - 8, top + 60), f"load {_num(load[0]):.2f}", f_small, c["muted"], anchor="rm")
+        _text(draw, (x0 + cw - 8, top + 60), f"load {_num(load[0]):.2f}", font("regular", 10), c["muted"], anchor="rm")
 
+
+def _mod_mem(draw, box, stats, c):
+    x0, top, cw, _bottom = box
     mem = stats.get("mem") or {}
     mpct = _num(mem.get("pct"))
-    x0 = card(2, "MEMORY")
     _ring(draw, (x0 + 28, top + 50), 19, mpct, _level_color(mpct, c), c, width=6)
     draw.text((x0 + 28, top + 50), f"{mpct:.0f}%", font=font("bold", 11), fill=c["fg"], anchor="mm")
-    _text(draw, (x0 + cw - 8, top + 42), f"{_num(mem.get('used_gb')):.1f}G", f_big, c["fg"], anchor="rm")
-    _text(draw, (x0 + cw - 8, top + 60), f"of {_num(mem.get('total_gb')):.0f}G", f_small, c["muted"], anchor="rm")
+    _text(draw, (x0 + cw - 8, top + 42), f"{_num(mem.get('used_gb')):.1f}G", font("bold", 15), c["fg"], anchor="rm")
+    _text(
+        draw,
+        (x0 + cw - 8, top + 60),
+        f"of {_num(mem.get('total_gb')):.0f}G",
+        font("regular", 10),
+        c["muted"],
+        anchor="rm",
+    )
 
+
+def _mod_fans(draw, box, stats, c):
+    x0, top, cw, bottom = box
+    f_small = font("regular", 10)
     # Fans arrive as RPM numbers (older payloads: {"label", "rpm"} objects)
     fans = []
     for j, fan in enumerate(stats.get("fans") or []):
@@ -365,11 +368,10 @@ def _page_overview(draw, stats, c):
             fans.append((str(fan.get("label") or fan.get("name") or f"Fan {j + 1}"), fan.get("rpm")))
         else:
             fans.append((f"Fan {j + 1}", fan))
-    x0 = card(3, "FANS")
     uptime = stats.get("uptime")
     show_uptime = bool(uptime) and uptime != "?"
     if not fans:
-        _text(draw, (x0 + 8, top + 46), "n/a", f_big, c["muted"], anchor="lm")
+        _text(draw, (x0 + 8, top + 46), "n/a", font("bold", 15), c["muted"], anchor="lm")
     for j, (label, rpm) in enumerate(fans[: 2 if show_uptime else 3]):
         y = top + 30 + j * 15
         _text(draw, (x0 + 8, y), label, f_small, c["muted"], max_w=cw - 60, anchor="lm")
@@ -378,14 +380,58 @@ def _page_overview(draw, stats, c):
     if show_uptime:
         _text(draw, (x0 + 8, bottom - 9), f"up {uptime}", f_small, c["muted"], max_w=cw - 16, anchor="lm")
 
+
+def _mod_net(draw, box, stats, c):
+    x0, top, cw, _bottom = box
     net = stats.get("net") or {}
-    x0 = card(4, "NETWORK I/O")
     for j, (label, key) in enumerate((("RX", "rx_bytes_sec"), ("TX", "tx_bytes_sec"))):
         y = top + 40 + j * 22
         _text(draw, (x0 + 8, y), label, font("bold", 10), c["muted"], anchor="lm")
-        _text(draw, (x0 + cw - 8, y), _rate(_num(net.get(key))), f_big, c["ok2"], max_w=cw - 34, anchor="rm")
+        _text(draw, (x0 + cw - 8, y), _rate(_num(net.get(key))), font("bold", 15), c["ok2"], max_w=cw - 34, anchor="rm")
 
-    _drive_strip(draw, stats.get("disks") or [], c, top=bottom + 6)
+
+# the overview's cards by the web layout's module names, with their titles
+_MODULES = {
+    "metric-storage": ("STORAGE", _mod_storage),
+    "metric-cpu": ("CPU", _mod_cpu),
+    "metric-mem": ("MEMORY", _mod_mem),
+    "metric-fans": ("FANS", _mod_fans),
+    "metric-net": ("NETWORK I/O", _mod_net),
+}
+_DEFAULT_ORDER = ("metric-storage", "metric-cpu", "metric-mem", "metric-fans", "metric-net", "metric-disks")
+
+
+def overview_plan(layout: dict | None) -> tuple[list[tuple[str, float]], bool]:
+    """The overview's cards as the layout chosen in Settings says: shown ones only, in its order,
+    a compact one narrower; and whether the drive strip is shown. The built-in renderer drew its
+    five cards and the strip whatever was chosen (#71)."""
+    layout = layout or {}
+    raw_vis, raw_sizes = layout.get("vis"), layout.get("sizes")
+    vis = raw_vis if isinstance(raw_vis, dict) else {}
+    sizes = raw_sizes if isinstance(raw_sizes, dict) else {}
+    order = [m for m in layout.get("order") or [] if m in _DEFAULT_ORDER]
+    order += [m for m in _DEFAULT_ORDER if m not in order]
+    cards = [(m, 0.6 if sizes.get(m) == "compact" else 1.0) for m in order if m in _MODULES and vis.get(m) is not False]
+    return cards, vis.get("metric-disks") is not False
+
+
+def _page_overview(draw, stats, c):
+    cards, disks = overview_plan(stats.get("layout"))
+    top, gap = 40, 6
+    bottom = 120 if disks else HEIGHT - 6
+    if cards:
+        units = sum(u for _m, u in cards)
+        room = WIDTH - 24 - gap * (len(cards) - 1)
+        x0 = 12.0
+        for metric, unit in cards:
+            cw = room * unit / units
+            title, draw_module = _MODULES[metric]
+            _card(draw, (x0, top, x0 + cw, bottom), c)
+            _text(draw, (x0 + 8, top + 11), title, font("bold", 10), c["fg"], max_w=cw - 16, anchor="lm")
+            draw_module(draw, (x0, top, cw, bottom), stats, c)
+            x0 += cw + gap
+    if disks:
+        _drive_strip(draw, stats.get("disks") or [], c, top=bottom + 6 if cards else top)
 
 
 def _page_streamline(draw, stats, c):

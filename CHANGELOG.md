@@ -138,6 +138,8 @@ Apps: in a container, the suggested data folder is one the host and Kiboto both 
 
 Front screen: the drive bays page shows the chassis's own bays (four on a Zettlab D4) and puts M.2 drives after them; USB sticks no longer take a bay.
 
+Front screen without a browser: the overview shows the modules chosen in Settings, in their order and size.
+
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container
 
