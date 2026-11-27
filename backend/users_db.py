@@ -943,6 +943,8 @@ def on_sign_in_change(hook: Any) -> None:
 
 
 def _sign_in_changed(username: str) -> None:
+    if test_mode():  # as the status hooks: the servers of the machine running the tests are left alone
+        return
     for hook in list(_SIGN_IN_HOOKS):
         try:
             hook(username)

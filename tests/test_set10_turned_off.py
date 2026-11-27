@@ -61,6 +61,7 @@ def test_the_switch_keeps_the_password_and_refuses_odd_names(monkeypatch):
 def test_services_above_follow_through_a_hook(monkeypatch):
     seen = []
     monkeypatch.setattr(users_db, "_STATUS_HOOKS", [])
+    monkeypatch.setattr(users_db, "_SIGN_IN_HOOKS", [])  # a test that ran the start may have left one
     monkeypatch.setattr(users_db, "test_mode", lambda: False)
     monkeypatch.setattr(users_db, "get_user_by_id", lambda uid, **kw: {"id": uid, "username": "otto"})
     monkeypatch.setattr(

@@ -84,6 +84,7 @@ def test_removing_an_sftp_account_forgets_its_sign_in(monkeypatch, tmp_path):
 def heard(monkeypatch):
     said = []
     monkeypatch.setattr(users_db, "_SIGN_IN_HOOKS", [])
+    monkeypatch.setattr(users_db, "test_mode", lambda: False)
     users_db.on_sign_in_change(said.append)
     users_db.on_sign_in_change(said.append)  # once only
     return said
