@@ -589,6 +589,20 @@ def similarity_profile(model: str | None, dim: int | None = None) -> dict[str, A
     return SIMILARITY_PROFILES["neural"]
 
 
+def _share_of(norm: str) -> str:
+    """The shared folder `norm` is in, by the folders the platform lists (the longest that holds it),
+    named as the search compares it (its folder's name). On Kiboto OS a share sits a level deeper
+    (/mnt/storage/<pool>/<share>) than the path's third part, which named the pool for every file."""
+    try:
+        from backend.services.share_access import known_shares
+
+        roots = [str(s.get("path") or "").rstrip("/") for s in known_shares()]
+    except (ImportError, OSError, RuntimeError, ValueError, KeyError, TypeError):
+        return ""
+    held = [r for r in roots if r and (norm == r or norm.startswith(r + "/"))]
+    return os.path.basename(max(held, key=len)).lower() if held else ""
+
+
 def classify_path_rbac(canonical_path: str) -> tuple[str, str, str, str]:
     """
     Classifies a file's canonical path into RBAC visibility tiers:
@@ -601,8 +615,10 @@ def classify_path_rbac(canonical_path: str) -> tuple[str, str, str, str]:
     if parts and parts[0] == "boot":
         return ("admin_boot", "", "boot", "")
 
-    share_name = ""
-    if (
+    share_name = _share_of(norm)
+    if share_name:
+        pass
+    elif (
         len(parts) >= 3
         and parts[0] == "mnt"
         and parts[1] in ("user", "storage", "cache", "fast", "ssd", "disk1", "disk2", "disk3", "disk4")

@@ -84,6 +84,8 @@ Kiboto OS: the file manager no longer offers the system's boot folder as "Flash 
 
 Kiboto OS in a virtual machine: its disks no longer pass for sleeping ones, which hid the Recycle Bin and asked to wake the disk for every folder.
 
+Kiboto OS: Kib's search finds files in the shared folders a person may read; it found none for people other than admins.
+
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container
 
