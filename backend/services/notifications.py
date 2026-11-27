@@ -943,6 +943,21 @@ def may_receive(username: str, event_type: str) -> bool:
         return False
 
 
+_MAIL_KEYS = ("smtp_host", "smtp_port", "smtp_user", "smtp_pass", "smtp_tls", "email_from")
+
+
+def mail_only(cfg: dict[str, Any], to: str) -> dict[str, Any]:
+    """The mail settings alone, sending to one address: a message meant for one person goes nowhere
+    else. Discord and Telegram were switched off for it, but the household's ntfy topic and webhook
+    were not, so they got each person's own alerts too."""
+    return {
+        **{k: cfg[k] for k in _MAIL_KEYS if k in cfg},
+        "email_enabled": True,
+        "email_to": to,
+        "apprise_enabled": False,
+    }
+
+
 def notify_person(username: str, title: str, message: str, level: str = "warning") -> bool:
     """Tells one person about something done to their account (B11, SEC-30): on their own alert
     route if they set one, else to their account email when mail is set up. False when neither."""
@@ -963,15 +978,7 @@ def notify_person(username: str, title: str, message: str, level: str = "warning
         if route.get("ntfy_topic"):
             sent = bool(_dispatch_ntfy({**cfg, "ntfy_topic": route["ntfy_topic"]}, title, message, level)) or sent
         if email and cfg.get("smtp_host"):
-            only_mail = {
-                **cfg,
-                "email_enabled": True,
-                "email_to": email,
-                "discord_enabled": False,
-                "telegram_enabled": False,
-                "apprise_urls": [],
-            }
-            sent = bool(_dispatch_apprise(only_mail, title, message, level)) or sent
+            sent = bool(_dispatch_apprise(mail_only(cfg, email), title, message, level)) or sent
     except Exception:
         logger.warning(f"[Notify] message for {username} failed", exc_info=True)
     return sent
@@ -990,19 +997,7 @@ def _route_to_people(cfg: dict[str, Any], title: str, message: str, level: str, 
             if r.get("ntfy_topic"):
                 _dispatch_ntfy({**cfg, "ntfy_topic": r["ntfy_topic"]}, title, message, level)
             if r.get("email") and cfg.get("smtp_host"):
-                _dispatch_apprise(
-                    {
-                        **cfg,
-                        "email_enabled": True,
-                        "email_to": r["email"],
-                        "discord_enabled": False,
-                        "telegram_enabled": False,
-                        "apprise_urls": [],
-                    },
-                    title,
-                    message,
-                    level,
-                )
+                _dispatch_apprise(mail_only(cfg, r["email"]), title, message, level)
             sent.append(username)
         except Exception:
             logger.warning(f"[Notify] personal alert for {username} failed", exc_info=True)

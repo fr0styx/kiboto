@@ -150,6 +150,8 @@ Shares on ZFS: Windows Previous Versions list the share's scheduled snapshots. S
 
 HTTPS certificates: getting a certificate no longer fails now and then on a refused request, nor when it is asked for again soon after.
 
+Alerts: a person's own alerts and notes about their account go only to their email, no longer also to the household's ntfy topic, webhook or other addresses.
+
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container
 
