@@ -47,7 +47,7 @@
    {"id": "power_schedule", "name": "Power schedule: wake and sleep at set times", "beside": "yes", "linux": "yes", "os": "check", "note": "On Kiboto OS it is tried on a virtual machine, not yet for a night on a real one."},
    {"id": "ups", "name": "Battery backup (UPS)", "beside": "yes", "linux": "yes", "os": "check", "note": "On Kiboto OS a UPS on a USB cable or behind a NUT server is found by itself. Tried on a virtual machine with a pretend UPS: on battery it warns, at low battery it stops the apps and shuts the machine down, and the apps start again at the next start. Not yet tried with a real UPS on Kiboto OS."},
    {"id": "server_ssh", "name": "Server name, time zone and the SSH switch", "beside": "host", "linux": "host", "os": "yes"},
-   {"id": "remote_access", "name": "Dynamic DNS, HTTPS certificates, access from away", "beside": "yes", "linux": "yes", "os": "check"}
+   {"id": "remote_access", "name": "Dynamic DNS, HTTPS certificates, access from away", "beside": "yes", "linux": "yes", "os": "check", "note": "Getting a certificate over DNS and the HTTPS listener were tried on a virtual machine against a test certificate authority, not yet with Let’s Encrypt and a real Dynamic DNS name."}
   ]},
   {"name": "Front panel hardware (Zettlab D4, D6 and D8 Ultra)", "features": [
    {"name": "Fans: curves, quiet at night, fan stop while drives sleep", "beside": "yes", "linux": "yes", "os": "yes", "note": "On the D4 the kernel keeps the fans, and Kiboto shows them."},

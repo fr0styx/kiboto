@@ -62,7 +62,7 @@ What the words mean:
 | Power schedule: wake and sleep at set times<br><sub>On Kiboto OS it is tried on a virtual machine, not yet for a night on a real one.</sub> | Yes | Yes | Being checked |
 | Battery backup (UPS)<br><sub>On Kiboto OS a UPS on a USB cable or behind a NUT server is found by itself. Tried on a virtual machine with a pretend UPS: on battery it warns, at low battery it stops the apps and shuts the machine down, and the apps start again at the next start. Not yet tried with a real UPS on Kiboto OS.</sub> | Yes | Yes | Being checked |
 | Server name, time zone and the SSH switch | Your NAS system does this | Your NAS system does this | Yes |
-| Dynamic DNS, HTTPS certificates, access from away | Yes | Yes | Being checked |
+| Dynamic DNS, HTTPS certificates, access from away<br><sub>Getting a certificate over DNS and the HTTPS listener were tried on a virtual machine against a test certificate authority, not yet with Let’s Encrypt and a real Dynamic DNS name.</sub> | Yes | Yes | Being checked |
 
 ## Front panel hardware (Zettlab D4, D6 and D8 Ultra)
 
