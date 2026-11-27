@@ -84,7 +84,6 @@ def test_removing_an_sftp_account_forgets_its_sign_in(monkeypatch, tmp_path):
 def heard(monkeypatch):
     said = []
     monkeypatch.setattr(users_db, "_SIGN_IN_HOOKS", [])
-    monkeypatch.setattr(users_db, "test_mode", lambda: False)
     users_db.on_sign_in_change(said.append)
     users_db.on_sign_in_change(said.append)  # once only
     return said
@@ -94,6 +93,9 @@ def test_a_new_password_a_second_step_and_removal_are_heard(tmp_path, heard, mon
     db = str(tmp_path / "users.db")
     users_db.init_users_db(db)
     user = users_db.create_user("kim", "Kim", "a-Long-unique-pw-91", role_id="share_user", db_path=db)
+    # only now: a database made outside test mode writes the first sign-in password into the shared
+    # data folder, and later tests could no longer sign in as admin with the test password
+    monkeypatch.setattr(users_db, "test_mode", lambda: False)
     assert users_db.update_user_password(user["id"], "another-Long-pw-27", db_path=db)
     assert heard == ["kim"]
     assert users_db.enable_user_mfa(user["id"], "JBSWY3DPEHPK3PXP", [], db_path=db)
@@ -108,6 +110,7 @@ def test_a_new_password_a_second_step_and_removal_are_heard(tmp_path, heard, mon
 
 def test_a_person_turned_off_is_heard_and_a_hook_that_fails_is_only_noted(heard, monkeypatch):
     monkeypatch.setattr(users_db, "get_user_by_id", lambda uid, db_path=None: {"username": "ana"})
+    monkeypatch.setattr(users_db, "test_mode", lambda: False)
     import backend.services.samba_engine as samba
 
     monkeypatch.setattr(samba.get_samba_engine(), "set_account_enabled", lambda name, active: None)
