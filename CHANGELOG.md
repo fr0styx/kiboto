@@ -70,6 +70,8 @@ Kiboto OS: off-site backups include people's private folders; they were left out
 
 Off-site backup: a folder that already holds a backup made with another key is said at once, instead of every backup failing later with "wrong password".
 
+Kiboto OS: files restored from an off-site backup keep their owner; a person's restored private files are theirs again.
+
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container
 

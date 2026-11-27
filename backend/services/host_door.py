@@ -396,6 +396,13 @@ def _offsite_read(repo_id: str) -> Any:
     return offsite_backup.read_here(repo_id)
 
 
+def _offsite_restore(**kw: Any) -> Any:
+    """A restore from an off-site backup that keeps owners, into a folder on the storage only."""
+    from backend.services import offsite_backup
+
+    return offsite_backup.restore_here(**kw)
+
+
 def _offsite_stop(repo_id: str) -> Any:
     from backend.services import offsite_reader
 
@@ -692,6 +699,9 @@ OPERATIONS: dict[str, Operation] = {
     "opens.watch": Operation(_opens_watch, {"folders": LIST}, max_len=4096),
     "offsite.read": Operation(_offsite_read, {"repo_id": TEXT}, max_len=64),
     "offsite.stop_read": Operation(_offsite_stop, {"repo_id": TEXT}, max_len=64),
+    "offsite.restore": Operation(
+        _offsite_restore, {"repo_id": TEXT, "snapshot_id": TEXT, "path": TEXT, "target": TEXT}, max_len=8192
+    ),
     "hosts.apps": Operation(_apps_hosts, {}),
     "names.ensure": Operation(_names, {}),
     "power.run": Operation(_power, {"action": TEXT}, max_len=16),

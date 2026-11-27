@@ -36,6 +36,7 @@ LONG = {  # seconds an operation may take, where the default is too short
     "merge.ensure": 300,
     "tier.move": 6 * 3600 + 120,  # one night's run, at most RUN_LIMIT_SECS
     "offsite.read": 6 * 3600 + 300,  # an off-site backup's restic, at most offsite_reader.LIMIT_SECS
+    "offsite.restore": 6 * 3600 + 300,
 }
 
 

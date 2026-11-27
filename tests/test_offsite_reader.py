@@ -100,7 +100,7 @@ def test_a_service_that_did_not_start_is_logged(box, caplog):
 def test_stop_asks_systemd_for_this_backup_only():
     seen = []
     assert rd.stop_here("usb", run=lambda cmd, timeout=0: seen.append(cmd) or (0, "")) is True
-    assert seen == [["systemctl", "stop", "kiboto-offsite-read-usb"]]
+    assert seen == [["systemctl", "stop", "kiboto-offsite-read-usb", "kiboto-offsite-restore-usb"]]
     with pytest.raises(ValueError):
         rd.stop_here("../etc", run=lambda cmd, timeout=0: (0, ""))
 
@@ -198,3 +198,113 @@ def test_the_door_has_the_reading_operations():
     assert host_door.OPERATIONS["offsite.read"].args == {"repo_id": (str,)}
     assert host_door.OPERATIONS["offsite.stop_read"].args == {"repo_id": (str,)}
     assert door.LONG["offsite.read"] > rd.LIMIT_SECS
+
+
+def _restore(box, target, run, in_storage=None):
+    inside = in_storage or (lambda p: p.startswith(str(box.storage)))
+    return rd.restore_with(
+        "usb",
+        box.repo,
+        {"RESTIC_REPOSITORY": box.repo["location"], "RESTIC_CACHE_DIR": "/c"},
+        str(box.keys / "usb"),
+        ("abc123", "/tank/family/note.txt", target),
+        inside,
+        run=run,
+    )
+
+
+def test_a_restore_keeps_owners_on_a_machine_read_only_but_for_its_folder(box):
+    seen = {}
+
+    def run(cmd, timeout=0):
+        seen["cmd"] = cmd
+        env_file = next(c.split("=", 1)[1] for c in cmd if c.startswith("EnvironmentFile="))
+        seen["env"] = Path(env_file).read_text()
+        return 0, ""
+
+    target = str(box.storage / "media" / "restored")
+    assert _restore(box, target, run) == {"done": True}
+    cmd = seen["cmd"]
+    assert "ProtectSystem=strict" in cmd and f"ReadWritePaths={target} {rd.RUN_DIR}" in cmd
+    assert f"CapabilityBoundingSet={rd.RESTORE_CAPS}" in cmd and "User=kiboto" not in " ".join(cmd)
+    assert cmd[-9:] == [
+        "--no-lock",
+        "--no-cache",
+        "restore",
+        "--json",
+        "abc123",
+        "--target",
+        target,
+        "--include",
+        "/tank/family/note.txt",
+    ]
+    assert "RESTIC_CACHE_DIR" not in seen["env"] and "RESTIC_PASSWORD=the-key" in seen["env"]
+    assert os.path.isdir(target) and not os.listdir(rd.ENV_DIR)
+
+
+def test_a_restore_goes_only_into_a_real_folder_on_the_storage(box):
+    never = lambda cmd, timeout=0: pytest.fail("restic must not run")  # noqa: E731
+    with pytest.raises(ValueError, match="on the storage"):
+        _restore(box, "/etc/restored", never)
+    (box.storage / "media").mkdir()
+    (box.storage / "media" / "out").symlink_to("/etc")
+    with pytest.raises(ValueError, match="on the storage"):
+        _restore(box, str(box.storage / "media" / "out" / "x"), never)
+    box.repo["location"] = "rclone:cloud:x"
+    with pytest.raises(ValueError, match="Kiboto restores"):
+        _restore(box, str(box.storage / "media" / "ok"), never)
+
+
+def test_a_restore_that_did_not_start_is_logged_and_stop_stops_both(box, caplog):
+    _restore(box, str(box.storage / "media" / "r2"), lambda cmd, timeout=0: (1, "Failed to start"))
+    assert "did not start" in caplog.text
+    seen = []
+    rd.stop_here("usb", run=lambda cmd, timeout=0: seen.append(cmd) or (0, ""))
+    assert seen == [["systemctl", "stop", "kiboto-offsite-read-usb", "kiboto-offsite-restore-usb"]]
+
+
+def test_the_restore_takes_the_root_service_or_its_own_restic(monkeypatch, tmp_path):
+    repo = {"id": "usb", "location": "/x", "paths": ["/y"]}
+    args = ["restore", "--json", "abc123", "--target", str(tmp_path / "t"), "--include", "/a/b"]
+    asked = {}
+
+    def through(r, line, running, op="offsite.read", **kw):
+        asked.update(op=op, **kw)
+        return 0, "", ""
+
+    monkeypatch.setattr(rd, "run", through)
+    ob._restore_all(repo, args, str(tmp_path / "t"), None)
+    assert asked == {"op": "offsite.restore", "snapshot_id": "abc123", "path": "/a/b", "target": str(tmp_path / "t")}
+    monkeypatch.setattr(rd, "run", lambda *a, **k: (1, "", "Fatal: no matching ID found"))
+    with pytest.raises(ob.ResticError, match="no matching"):
+        ob._restore_all(repo, args, str(tmp_path / "t"), None)
+
+    def here(*a, **k):
+        raise rd.NotHere("rclone")
+
+    ran = []
+    monkeypatch.setattr(rd, "run", here)
+    monkeypatch.setattr(ob, "_run", lambda repo, args, **kw: ran.append(args) or (0, ""))
+    ob._restore_all(repo, args, str(tmp_path / "t"), None)
+    assert ran == [args] and os.path.isdir(tmp_path / "t")
+
+    def gone(*a, **k):
+        raise OSError("no door")
+
+    monkeypatch.setattr(rd, "run", gone)
+    with pytest.raises(ob.ResticError, match="could not be started"):
+        ob._restore_all(repo, args, str(tmp_path / "t"), None)
+
+
+def test_the_door_restores_only_after_the_usual_checks(monkeypatch):
+    from backend.services import host_door
+
+    assert host_door.OPERATIONS["offsite.restore"].args == {
+        "repo_id": (str,),
+        "snapshot_id": (str,),
+        "path": (str,),
+        "target": (str,),
+    }
+    monkeypatch.setattr(ob, "get_repo", lambda repo_id: {"id": repo_id, "location": "/x", "paths": []})
+    with pytest.raises(ValueError, match="version"):
+        ob.restore_here("usb", "not-a-version; rm", "/a", "/mnt/storage/x")

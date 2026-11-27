@@ -29,6 +29,9 @@ RUN_DIR = os.path.join(DATA_DIR, "offsite_run")  # the web user's: restic's outp
 ENV_DIR = "/run/kiboto-offsite"  # root's: one environment file per running backup
 LIMIT_SECS = 6 * 3600
 CAPS = "CAP_DAC_READ_SEARCH"
+# a restore keeps each file's owner and mode: root, with only the rights over files, and a machine that
+# is read-only but for the restore folder (a link planted in it cannot lead a write anywhere else)
+RESTORE_CAPS = "CAP_CHOWN CAP_DAC_OVERRIDE CAP_DAC_READ_SEARCH CAP_FOWNER CAP_FSETID"
 ENV_KEYS = ("RESTIC_REPOSITORY", "RCLONE_CONFIG", "RESTIC_CACHE_DIR", "RESTIC_PROGRESS_FPS")
 SECRET_KEYS = ("RESTIC_REST_USERNAME", "RESTIC_REST_PASSWORD")
 _ID = re.compile(r"^[a-z0-9][a-z0-9-]{0,40}$")  # offsite_backup's names for a backup
@@ -39,8 +42,8 @@ class NotHere(RuntimeError):
     rclone location, no root service)."""
 
 
-def unit(repo_id: str) -> str:
-    return f"kiboto-offsite-read-{repo_id}"
+def unit(repo_id: str, what: str = "read") -> str:
+    return f"kiboto-offsite-{what}-{repo_id}"
 
 
 def out_base(repo_id: str) -> str:
@@ -139,7 +142,63 @@ def stop_here(repo_id: str, run: Callable[..., tuple[int, str]] | None = None) -
         from backend.services.host_basics import run
     if not _ID.match(repo_id or ""):
         raise ValueError("Not stopping: that is not a backup's name.")
-    return run(["systemctl", "stop", unit(repo_id)], timeout=60)[0] == 0
+    return run(["systemctl", "stop", unit(repo_id), unit(repo_id, "restore")], timeout=60)[0] == 0
+
+
+def restore_with(
+    repo_id: str,
+    repo: dict[str, Any],
+    restic_env: dict[str, str],
+    key_file: str,
+    restore: tuple[str, str, str],
+    in_storage: Callable[[str], bool],
+    run: Callable[..., tuple[int, str]] | None = None,
+) -> dict[str, Any]:
+    """The root service's operation (offsite_backup.restore_here hands it the checked restore: the
+    version, the path in it and the folder to restore into): restic restore as root with only the
+    rights over files, keeping owners and modes, on a machine read-only but for that folder."""
+    from backend.services.web_user import USER
+
+    if run is None:
+        from backend.services.host_basics import run
+    import pwd
+
+    snapshot, inside, target = restore
+    if not _ID.match(repo_id or "") or str(repo["location"]).startswith("rclone:"):
+        raise ValueError("Not restoring here: Kiboto restores this backup itself.")
+    real = os.path.realpath(target) if target.startswith("/") and "\0" not in target else ""
+    if not real or real != os.path.normpath(target) or not in_storage(real):
+        raise ValueError("Not restoring: restore into a folder on the storage.")
+    os.makedirs(real, exist_ok=True)
+    if os.path.realpath(real) != real:
+        raise ValueError("Not restoring: restore into a folder on the storage.")
+    who = pwd.getpwnam(USER)
+    restic = shutil.which("restic") or "/usr/bin/restic"
+    env = {k: v for k, v in restic_env.items() if k in ENV_KEYS or k in SECRET_KEYS}
+    env.pop("RESTIC_CACHE_DIR", None)
+    env["RESTIC_PASSWORD"] = _read_no_link(key_file, who.pw_uid)
+    env["KB_OUT"] = out_base(repo_id)
+    env["HOME"] = "/tmp"
+    os.makedirs(ENV_DIR, mode=0o700, exist_ok=True)
+    env_file = os.path.join(ENV_DIR, f"{repo_id}.restore.env")
+    fd = os.open(env_file, os.O_WRONLY | os.O_CREAT | os.O_TRUNC | os.O_NOFOLLOW, 0o600)
+    with os.fdopen(fd, "w") as f:
+        f.write(_env_text(env))
+    args = ["--no-lock", "--no-cache", "restore", "--json", snapshot, "--target", real, "--include", inside]
+    cmd = ["systemd-run", "--wait", "--quiet", "--collect", "--unit", unit(repo_id, "restore")]
+    cmd += ["--description", "Kiboto: restore from an off-site backup, keeping owners"]
+    cmd += ["-p", f"CapabilityBoundingSet={RESTORE_CAPS}", "-p", "NoNewPrivileges=yes", "-p", "ProtectSystem=strict"]
+    cmd += ["-p", f"ReadWritePaths={real} {RUN_DIR}", "-p", "PrivateTmp=yes", "-p", f"RuntimeMaxSec={LIMIT_SECS}"]
+    cmd += ["-p", f"EnvironmentFile={env_file}", "--working-directory", "/"]
+    cmd += ["/bin/sh", "-c", 'r="$1"; shift; "$r" "$@" >"$KB_OUT.out" 2>"$KB_OUT.err"; echo $? >"$KB_OUT.code"']
+    cmd += ["kiboto-offsite", restic, *args]
+    try:
+        code, said = run(cmd, timeout=LIMIT_SECS + 120)
+    finally:
+        os.remove(env_file)
+    if code != 0 and "code=exited" not in said:
+        logger.warning("[Offsite] the restore from %s did not start: %s", repo_id, said[:200])
+    return {"done": True}
 
 
 # --- the web process's side ------------------------------------------------------------------------
@@ -189,9 +248,12 @@ def _text(path: str) -> str:
         return ""
 
 
-def run(repo: dict[str, Any], on_line: Callable[[str], Any], running: dict[str, Any]) -> tuple[int, str, str]:
-    """Runs this backup's restic through the root service and follows its output. Raises NotHere
-    when the web process should run it itself."""
+def run(
+    repo: dict[str, Any], on_line: Callable[[str], Any], running: dict[str, Any], op: str = "offsite.read", **args: Any
+) -> tuple[int, str, str]:
+    """Runs this backup's restic through the root service (`op`: the backup's reading run, or
+    "offsite.restore" with its version, path and folder) and follows its output. Raises NotHere when
+    the web process should run it itself."""
     from backend import door, runtime
 
     if not runtime.without_root() or not door.available():
@@ -208,7 +270,7 @@ def run(repo: dict[str, Any], on_line: Callable[[str], Any], running: dict[str, 
     follower.start()
     running[repo["id"]] = _Running(repo["id"])
     try:
-        door.call("offsite.read", repo_id=repo["id"], timeout=LIMIT_SECS + 300)
+        door.call(op, repo_id=repo["id"], timeout=LIMIT_SECS + 300, **args)
     except door.DoorError as e:
         if e.kind == "value" or str(e).startswith("no such operation"):
             raise NotHere(str(e)) from None

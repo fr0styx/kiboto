@@ -796,15 +796,52 @@ def _restore_plan(repo_id: str, snapshot_id: str, path: str, target: str) -> tup
     return repo, args, os.path.join(target, path.strip("/"))
 
 
+def _restore_all(repo: dict[str, Any], args: list[str], target: str, line: Callable[[str], Any] | None) -> None:
+    """restic restore. On Kiboto OS through the root service, which keeps each file's owner and mode
+    (a person's restored private file stays theirs); elsewhere by this process as before."""
+    from backend import door
+    from backend.services import offsite_reader
+
+    try:
+        code, out, err = offsite_reader.run(
+            repo,
+            line or (lambda text: None),
+            _RUNNING,
+            "offsite.restore",
+            snapshot_id=args[2],
+            path=args[6],
+            target=target,
+        )
+    except offsite_reader.NotHere as e:
+        if str(e) != "no root service here":
+            logger.info("[Offsite] restore from %s by Kiboto itself: %s", repo["id"], e)
+        os.makedirs(target, exist_ok=True)
+        _run(repo, args, track=line is not None, on_line=line)
+        return
+    except (door.DoorError, OSError) as e:
+        raise ResticError(f"The restore could not be started: {e}") from None
+    if code != 0:
+        raise ResticError((err or out or f"restic exited with {code}").strip().splitlines()[-1][:300])
+
+
+def restore_here(repo_id: str, snapshot_id: str, path: str, target: str) -> dict[str, Any]:
+    """The root service's operation "offsite.restore": checked like any restore, then restic restore
+    keeping owners (offsite_reader)."""
+    from backend.services import offsite_reader
+
+    repo, args, _restored_to = _restore_plan(repo_id, snapshot_id, path, target)
+    restore = (args[2], args[6], target)
+    return offsite_reader.restore_with(repo_id, repo, _env(repo), _key_file(repo_id), restore, _in_storage)
+
+
 def _run_restore(repo: dict[str, Any], args: list[str], target: str, job: Any = None) -> None:
     from backend.services.jobs import job_manager
 
-    os.makedirs(target, exist_ok=True)
     if job is None:
-        _run(repo, args)
+        _restore_all(repo, args, target, None)
         return
     try:
-        _run(repo, args, track=True, on_line=lambda text: _progress(job.id, _message(text), "files_restored"))
+        _restore_all(repo, args, target, lambda text: _progress(job.id, _message(text), "files_restored"))
     except ResticError as e:
         job_manager.finish(job.id, "error", error=str(e))
         raise
