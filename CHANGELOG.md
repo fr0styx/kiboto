@@ -52,6 +52,8 @@ Kiboto OS: a shared folder can go on a newly made pool straight away. Before, it
 
 Kiboto OS: changing a port's address no longer drops its VLANs and packet size.
 
+Network: the address dialog's "fixed address" and "from the router" buttons are no longer cut off on a phone.
+
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container
 

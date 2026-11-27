@@ -71,6 +71,12 @@
   margin-top: 4px;
 }
 
+.net-proto-btn {
+  min-width: 0;
+  white-space: normal; /* a long word in another language wraps instead of being cut on a phone */
+  line-height: 1.25;
+}
+
 .net-proto-btn.active {
   background: var(--brand);
   color: var(--accent-contrast-fg);
