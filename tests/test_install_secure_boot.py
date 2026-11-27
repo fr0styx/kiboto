@@ -114,3 +114,22 @@ def test_the_boot_unit_also_runs_for_a_key_on_a_machine_with_no_pools_yet():
     assert "ConditionPathExists=|/var/lib/kiboto/storage/pools.json" in unit
     assert "ConditionPathExists=|/etc/kiboto/secure-boot-code" in unit
     assert "ConditionPathExists=/var" not in unit  # a plain condition would still demand the record
+
+
+def test_the_boot_unit_may_run_what_settling_the_key_needs(monkeypatch):
+    """Found by CI's Secure Boot check: the boot unit runs only the programs on its list, and mokutil
+    and modprobe were not on it, so settle() saw no answer and the code stayed (the test above fakes
+    the runner, so it could not see that)."""
+    from backend.services import pools_at_boot
+
+    ran = []
+
+    def fake_run(cmd, **kw):
+        ran.append(cmd)
+        return type("R", (), {"returncode": 0, "stdout": "/var/lib/dkms/mok.pub is already enrolled", "stderr": ""})()
+
+    monkeypatch.setattr(pools_at_boot.subprocess, "run", fake_run)
+    for cmd in (["mokutil", "--test-key", secure_boot.KEY], ["modprobe", "zfs"]):
+        assert pools_at_boot._run(cmd)[0] == 0
+    assert ran == [["mokutil", "--test-key", secure_boot.KEY], ["modprobe", "zfs"]]
+    assert pools_at_boot._run(["rm", "-rf", "/"])[0] == 126  # still nothing off the list

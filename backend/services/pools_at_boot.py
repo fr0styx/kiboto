@@ -10,7 +10,8 @@ from backend.hardware.pal import pool_registry
 
 # What bringing pools back runs, as root: nothing else, whatever a record says. The program that
 # runs is this table's own name, never the caller's string.
-_PROGRAMS = {name: name for name in ("zpool", "mount", "findmnt", "btrfs", "chattr", "blkid")}
+# mokutil and modprobe: a Secure Boot key enrolled at the screen, then ZFS loads (services/secure_boot.py)
+_PROGRAMS = {name: name for name in ("zpool", "mount", "findmnt", "btrfs", "chattr", "blkid", "mokutil", "modprobe")}
 
 
 def _run(cmd: list[str]) -> tuple[int, str, str]:
