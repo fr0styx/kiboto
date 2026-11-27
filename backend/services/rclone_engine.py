@@ -50,7 +50,9 @@ def _as_unit() -> bool:
 
 
 def mount_unit(name: str) -> str:
-    return f"kiboto-cloud-{name}"
+    """The mount's unit, always a service: a remote may be named like "photos.mount", which systemd
+    would otherwise take for a mount unit."""
+    return f"kiboto-cloud-{name}.service"
 
 
 def check_remote_name(name: str) -> str:

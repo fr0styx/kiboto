@@ -36,18 +36,18 @@ def engine(tmp_path, monkeypatch):
 
 def test_the_mount_runs_as_its_own_unit(engine):
     res = engine.mount_remote("box", "photos", "writes", True)
-    assert res["status"] == "mounted" and res["unit"] == "kiboto-cloud-box"
+    assert res["status"] == "mounted" and res["unit"] == "kiboto-cloud-box.service"
     start = engine.ran[-1]
-    assert start[:5] == ["systemd-run", "--quiet", "--collect", "--unit", "kiboto-cloud-box"]
+    assert start[:5] == ["systemd-run", "--quiet", "--collect", "--unit", "kiboto-cloud-box.service"]
     assert "Type=notify" in start and start[
         start.index("/usr/bin/rclone") + 1 : start.index("/usr/bin/rclone") + 3
     ] == [
         "mount",
         "box:photos",
     ]
-    assert "--read-only" in start and engine.ran[0] == ["systemctl", "stop", "kiboto-cloud-box"]
+    assert "--read-only" in start and engine.ran[0] == ["systemctl", "stop", "kiboto-cloud-box.service"]
     engine.unmount_remote("box")
-    assert ["systemctl", "stop", "kiboto-cloud-box"] in engine.ran[2:]
+    assert ["systemctl", "stop", "kiboto-cloud-box.service"] in engine.ran[2:]
 
 
 def test_a_mount_that_fails_says_why_and_leaves_no_folder(engine, tmp_path):
@@ -63,3 +63,8 @@ def test_a_mount_that_fails_says_why_and_leaves_no_folder(engine, tmp_path):
 def test_a_unit_only_as_root_where_systemd_runs(monkeypatch):
     monkeypatch.setattr(re_.os, "geteuid", lambda: 1000)
     assert re_._as_unit() is False
+
+
+def test_a_remote_named_like_a_unit_type_is_still_a_service(engine):
+    res = engine.mount_remote("photos.mount")
+    assert res["unit"] == "kiboto-cloud-photos.mount.service"
