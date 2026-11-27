@@ -5,8 +5,8 @@ Prompts and file excerpts go to whatever answers on the Ollama / OpenAI ports,
 so only places that are this NAS are tried:
 
 1. OLLAMA_HOST / LLM_HOST when set (the admin's explicit choice);
-2. AI containers by name on a shared Docker network (zettnas-ollama, ollama,
-   zettnas-ovms, ovms);
+2. AI containers by name on a shared Docker network (kiboto-ollama, ollama, kiboto-ovms, ovms,
+   and the names of before the rebrand, legacy_names.OLD_MODEL_SERVERS);
 3. this machine's own LAN address and the Docker host (docker0 172.17.0.1, or the
    container's gateway when that is a Docker bridge address);
 4. 127.0.0.1.
@@ -22,16 +22,16 @@ import socket
 import struct
 from typing import Optional
 
+from backend import legacy_names
 from backend import settings as _settings
 
 CONTAINER_NAMES = (
     "kiboto-ollama",
-    "zettnas-ollama",
     "ollama",
     "kiboto-ovms",
-    "zettnas-ovms",
     "ovms",
-)  # old names until 2.2
+    *legacy_names.OLD_MODEL_SERVERS,  # the names of before the rebrand, until those containers move
+)
 _DOCKER_BRIDGES = ipaddress.ip_network("172.16.0.0/12")
 
 

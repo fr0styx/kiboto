@@ -52,6 +52,8 @@ Files and folders Kiboto keeps on disk (encrypted folders' files, apps' password
 
 Off-site backups made before the rename take Kiboto's name once, before their next backup; the search index's own entries are renamed when it opens.
 
+Compose files name the service kiboto. The Unraid templates under the product's old name are gone; use the Kiboto template.
+
 #### Security
 
 Kiboto OS: when Kiboto hands files and folders in a shared folder to their people, a link put in their place over the network is never followed, so a system file's owner or rights can never be changed that way.

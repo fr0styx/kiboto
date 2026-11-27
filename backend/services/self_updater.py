@@ -15,6 +15,8 @@ import sys
 import time
 from typing import Any, Optional
 
+from backend import legacy_names
+
 logger = logging.getLogger("kiboto.self_updater")
 
 
@@ -185,7 +187,7 @@ def _app_status(cid: str) -> str | None:
 
 
 ROLLBACK_REPO = "kiboto-rollback"
-OLD_ROLLBACK_REPO = "zettnas-toolkit-rollback"  # tags made before the rebrand (legacy_names): still pruned
+OLD_ROLLBACK_REPO = legacy_names.OLD_ROLLBACK_REPO  # tags made before the rebrand: still pruned
 
 
 def _container_build(inspect_data: dict[str, Any], version: str) -> str:

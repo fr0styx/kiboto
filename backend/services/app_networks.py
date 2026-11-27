@@ -8,7 +8,7 @@ apps still reach the internet, and an app sees neither the model servers nor the
 
 An update recreates Kiboto's container on its main network only, so Kiboto rejoins every app
 network when it starts. Apps installed before this keep the network they were installed on,
-and one made before the rebrand keeps its zettnas-app- name.
+and one made before the rebrand keeps its name (legacy_names.OLD_APP_NETWORK_PREFIX).
 """
 
 from __future__ import annotations

@@ -93,7 +93,7 @@ def test_stable_takes_only_the_signature_made_for_that_version_tag():
     "identity, ok",
     [
         ("https://github.com/fr0styx/kiboto/.github/workflows/ci.yml@refs/tags/v2.0.7", True),
-        (f"https://github.com/{legacy_names.OLD_IMAGE_REPO}/.github/workflows/ci.yml@refs/tags/v2.0.7", True),
+        (f"https://github.com/{legacy_names.OLD_IMAGE_REPO}/.github/workflows/ci.yml@refs/tags/v2.0.7", False),
         ("https://github.com/fr0styx/kiboto/.github/workflows/ci.yml@refs/heads/main", False),
         ("https://github.com/fr0styx/kiboto/.github/workflows/ci.yml@refs/tags/v2.0.70", False),
         ("https://github.com/fr0styx/kiboto/.github/workflows/ci.yml@refs/tags/v2.0.6", False),

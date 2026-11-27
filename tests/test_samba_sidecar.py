@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parent.parent
 
 
 def _service():
-    return yaml.safe_load((ROOT / "docker-compose.linux.yml").read_text())["services"]["zettnas-samba"]
+    return yaml.safe_load((ROOT / "docker-compose.linux.yml").read_text())["services"]["kiboto-samba"]
 
 
 def test_sidecar_uses_a_maintained_pinned_image():

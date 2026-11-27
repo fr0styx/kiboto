@@ -232,7 +232,7 @@ def _remove() -> None:
 
 
 def _remove_old_container() -> None:
-    """The responder made before the rebrand (zettnas-name) goes, so only one container answers."""
+    """The responder made before the rebrand (legacy_names.OLD_NAME_CONTAINER) goes, so only one container answers."""
     old = legacy_names.OLD_NAME_CONTAINER
     code, _ = _docker("GET", f"/containers/{old}/json")
     if code == 200:

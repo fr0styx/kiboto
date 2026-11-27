@@ -49,16 +49,16 @@ install per week). Deploying it needs a Cloudflare account:
 ```bash
 cd tools/health-signal-worker
 npx wrangler login
-npx wrangler d1 create zettnas-health          # copy the database_id into wrangler.toml
-npx wrangler d1 execute zettnas-health --remote --file schema.sql
-npx wrangler deploy                            # prints the https://zettnas-health.<you>.workers.dev address
+npx wrangler d1 create kiboto-health          # copy the database_id into wrangler.toml
+npx wrangler d1 execute kiboto-health --remote --file schema.sql
+npx wrangler deploy                            # prints the https://kiboto-health.<you>.workers.dev address
 ```
 
 A receiver whose database was made before the `edition` field needs the column once:
 `npx wrangler d1 execute <your database> --remote --command "ALTER TABLE reports ADD COLUMN edition TEXT NOT NULL DEFAULT 'unknown'"`.
 
 Then set `DEFAULT_ENDPOINT` in `backend/services/health_signal.py` to
-`https://zettnas-health.<you>.workers.dev/v1/report` and release. Until then the switch says
+`https://kiboto-health.<you>.workers.dev/v1/report` and release. Until then the switch says
 it is not available. An install can also point at its own receiver with `HEALTH_SIGNAL_URL`.
 
 Worker logs are off in `wrangler.toml`, so request metadata is not kept either.

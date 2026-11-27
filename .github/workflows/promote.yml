@@ -169,7 +169,7 @@ jobs:
               # Stable takes only the signature made for this very version tag: one made for the
               # main branch, or for another version, does not make an image a release
               cosign verify "$image@$digest" \
-                --certificate-identity-regexp "^https://github\\.com/fr0styx/(kiboto|zettnas-toolkit)/\\.github/workflows/ci\\.yml@refs/tags/v${VERSION//./\\.}\$" \
+                --certificate-identity-regexp "^https://github\\.com/fr0styx/kiboto/\\.github/workflows/ci\\.yml@refs/tags/v${VERSION//./\\.}\$" \
                 --certificate-oidc-issuer https://token.actions.githubusercontent.com > /dev/null
               docker buildx imagetools create \
                 -t "$image:latest${suffix}" -t "$image:stable${suffix}" -t "$image:${MINOR}${suffix}" \

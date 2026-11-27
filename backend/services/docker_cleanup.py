@@ -38,7 +38,7 @@ def _format_bytes(num_bytes: int) -> str:
 
 def is_self_container(cid: str, name: str = "") -> bool:
     """
-    Checks if the container is Kiboto's own container (kiboto, or zettnas-toolkit from before)
+    Checks if the container is Kiboto's own container (kiboto, or its name from before the rebrand)
     to prevent accidental self-destruction.
     """
     from backend import runtime

@@ -83,10 +83,9 @@ before the rename updates in place and keeps its settings.
 
 ## Images and updates
 
-The image is `ghcr.io/fr0styx/kiboto`. Its name before the rebrand, `ghcr.io/fr0styx/zettnas-toolkit`,
-carries the same signed images until Kiboto 2.2 and stops then; Kiboto's own updater moves an install
-to the new name, and the [installation guide](docs/INSTALLATION.md#image-variants) says what to change
-where Unraid or a Compose file does the updating.
+The image is `ghcr.io/fr0styx/kiboto`. An install made before the product's rename still pulls the
+image under its earlier name until Kiboto 2.2; Kiboto's own updater moves it, and where Unraid or a
+Compose file does the updating, Kiboto's page says what to change.
 
 | Image tag | What it is |
 |---|---|

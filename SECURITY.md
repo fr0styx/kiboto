@@ -53,7 +53,7 @@ text of indexed files) and the AI chat history (`ai_conversations.db`) with SQLC
   drive, and with compose use `.env` or a secret store. Then a copy of the data folder
   (config backups, pre-update snapshots, the appdata share, a replicated or stolen cache
   drive) cannot be read without it.
-- Under systemd, a credential named `kiboto-data-key` (or `zettnas-data-key`, its name before the rebrand) is read as well, so on a dedicated
+- Under systemd, a credential named `kiboto-data-key` is read as well, so on a dedicated
   machine the key can be sealed to its TPM with `systemd-creds` and
   `LoadCredentialEncrypted=kiboto-data-key:...`; it then unlocks itself at boot.
 - Keep a copy in a password manager. Without it the chat history is lost and the index
@@ -119,7 +119,7 @@ with it, needs a superadmin and a confirmation. Each one is logged to
 
 **Kiboto's own data folder** (`users.db`, `secret.key`, backup settings) can't be
 opened, listed, copied, shared or served over WebDAV and SFTP by anyone, even when the
-host shows it inside a shared folder (on Unraid, `/mnt/user/appdata/kiboto`, or `/mnt/user/appdata/zettnas-toolkit` on an install made before the rebrand).
+host shows it inside a shared folder (on Unraid, `/mnt/user/appdata/kiboto`).
 
 The proxy narrows what a bug in the web app can do through Docker. It is not a
 sandbox: the web process itself still runs as root.
@@ -210,6 +210,6 @@ updater checks this signature before it installs an update (`UPDATE_SIGNATURES`,
 
 ```
 cosign verify ghcr.io/fr0styx/kiboto:<tag> \
-  --certificate-identity-regexp '^https://github\.com/fr0styx/(kiboto|zettnas-toolkit)/\.github/workflows/ci\.yml@refs/(heads/main|tags/v[0-9].*)$' \
+  --certificate-identity-regexp '^https://github\.com/fr0styx/kiboto/\.github/workflows/ci\.yml@refs/(heads/main|tags/v[0-9].*)$' \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com
 ```

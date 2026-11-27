@@ -191,7 +191,7 @@ def load_ups_config() -> dict[str, Any]:
     """The UPS settings: UPS_CONFIG_FILE, the one place they are kept (NARC-8). Without it, in order:
     a copy an older version kept (the app_config table, then ups_config.backup.json), which is then
     moved into the file; the host's NUT setup (/etc/nut, /host/etc/nut); the environment.
-    Older versions also kept a copy on the pool (POOL_PATH/.zettnas): it is no longer read, so a
+    Older versions also kept a copy on the pool (in a hidden folder): it is no longer read, so a
     stale copy can't come back and the array isn't touched.
     """
     cfg = dict(DEFAULT_UPS_CONFIG)

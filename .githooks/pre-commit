@@ -11,8 +11,8 @@ files=$(git diff --cached --name-only --diff-filter=ACMR -- '*.py')
 ruff_cmd() {
   if command -v ruff >/dev/null 2>&1; then
     ruff "$@"
-  elif command -v docker >/dev/null 2>&1 && docker ps --format '{{.Names}}' 2>/dev/null | grep -qx zettnas-toolkit; then
-    docker exec -i zettnas-toolkit ruff "$@"
+  elif command -v docker >/dev/null 2>&1 && docker ps --format '{{.Names}}' 2>/dev/null | grep -qx kiboto; then
+    docker exec -i kiboto ruff "$@"
   else
     return 127
   fi

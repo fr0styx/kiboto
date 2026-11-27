@@ -529,7 +529,7 @@ SESSION_COOKIE = "kiboto_session"
 
 def session_cookie(cookies) -> str:
     """The web session's token from a request's or websocket's cookies: kiboto_session, or the
-    zettnas_session a browser signed in before the rebrand still sends (legacy_names)."""
+    the session cookie of before the rebrand a browser still sends (legacy_names)."""
     from backend import legacy_names
 
     return cookies.get(SESSION_COOKIE) or cookies.get(legacy_names.OLD_SESSION_COOKIE) or ""

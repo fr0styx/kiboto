@@ -3,7 +3,7 @@
 Environment variables Kiboto reads at startup. Generated from `backend/settings.py`
 (`python -m backend.settings --markdown > docs/CONFIGURATION.md`); a value that can't be
 used keeps its default, and the log says which variable and why. Before Kiboto 2.0 the
-`KIBOTO_*` variables were named `ZETTNAS_*`; the old names still work until 2.2, and a new
+`KIBOTO_*` variables had other names; those still work until 2.2, and a new
 name set beside an old one wins.
 
 ## Host

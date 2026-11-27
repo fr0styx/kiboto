@@ -45,7 +45,7 @@ def test_docker_compose_no_wildcard_cgroups():
     """Verify that wildcard device cgroups (c *:* and b *:*) have been completely eliminated."""
     candidates = [
         os.path.join(os.path.dirname(__file__), "..", "docker-compose.yml"),
-        "/mnt/user/appdata/zettnas-toolkit/docker-compose.yml",
+        "/mnt/user/appdata/kiboto/docker-compose.yml",
     ]
     compose_path = next((p for p in candidates if os.path.exists(p)), None)
     if not compose_path:
@@ -53,7 +53,7 @@ def test_docker_compose_no_wildcard_cgroups():
     with open(compose_path) as f:
         data = yaml.safe_load(f)
 
-    cgroups = data["services"]["zettnas-toolkit"].get("device_cgroup_rules", [])
+    cgroups = data["services"]["kiboto"].get("device_cgroup_rules", [])
     for rule in cgroups:
         clean = rule.strip().strip("'").strip('"')
         assert "c *:* rwm" not in clean, f"Found dangerous wildcard character rule: {rule}"

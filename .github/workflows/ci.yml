@@ -1128,7 +1128,7 @@ jobs:
           docker buildx imagetools create "${old_args[@]}" "${IMAGE}@${DIGEST}"
           cosign sign --yes "${OLD_IMAGE}@${DIGEST}"
           echo "Also published and signed as ${OLD_IMAGE}@${DIGEST}" >> "$GITHUB_STEP_SUMMARY"
-          echo "Verify: cosign verify ${{ env.IMAGE }}@${DIGEST} --certificate-identity-regexp '^https://github\.com/fr0styx/(kiboto|zettnas-toolkit)/\.github/workflows/ci\.yml@refs/(heads/main|tags/v[0-9].*)$' --certificate-oidc-issuer https://token.actions.githubusercontent.com" >> "$GITHUB_STEP_SUMMARY"
+          echo "Verify: cosign verify ${{ env.IMAGE }}@${DIGEST} --certificate-identity-regexp '^https://github\.com/fr0styx/kiboto/\.github/workflows/ci\.yml@refs/(heads/main|tags/v[0-9].*)$' --certificate-oidc-issuer https://token.actions.githubusercontent.com" >> "$GITHUB_STEP_SUMMARY"
 
   create-release:
     name: GitHub Release & Release Notes

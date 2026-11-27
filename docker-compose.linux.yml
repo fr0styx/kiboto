@@ -7,12 +7,9 @@ version: "3.8"
 # ==============================================================================
 
 services:
-  zettnas-toolkit:
+  kiboto:
     image: ghcr.io/fr0styx/kiboto:latest
     container_name: kiboto
-    networks:
-      default:
-        aliases: [zettnas-toolkit] # apps set up before the rebrand know this name (until 2.2)
     restart: unless-stopped
     stop_grace_period: 150s  # running virtual machines are asked to shut down first and get two minutes
     logging:  # keep container logs from filling the disk (OPS-13)
@@ -54,10 +51,10 @@ services:
       - LCD_FPS=10
       - NAS_NAME=${NAS_NAME:-}
       - UPDATE_CHANNEL=${UPDATE_CHANNEL:-stable}
-      - KIBOTO_OBSERVER_ADAPTER=${KIBOTO_OBSERVER_ADAPTER:-${ZETTNAS_OBSERVER_ADAPTER:-auto}}
+      - KIBOTO_OBSERVER_ADAPTER=${KIBOTO_OBSERVER_ADAPTER:-auto}
       # Optional: encrypt the AI search index and chat history at rest (16+ characters).
       # Put it in the .env file next to this compose file (not in ./data) and in a password manager.
-      - KIBOTO_DATA_KEY=${KIBOTO_DATA_KEY:-${ZETTNAS_DATA_KEY:-}}
+      - KIBOTO_DATA_KEY=${KIBOTO_DATA_KEY:-}
     cap_add:
       - SYS_RAWIO
       - SYS_ADMIN
@@ -90,7 +87,7 @@ services:
       - /dev/fuse:/dev/fuse
       # - /dev/kvm:/dev/kvm  # Uncomment for direct /dev/kvm access if host has hardware virtualization
 
-  zettnas-samba:
+  kiboto-samba:
     # Maintained Samba on Alpine (github.com/crazy-max/docker-samba); dperson/samba stopped at 2021.
     # Kiboto writes the whole smb.conf; this container only runs it.
     image: crazymax/samba:4.23.8
@@ -129,4 +126,4 @@ services:
         wsdd2 -d -w -G "$${GROUP:-WORKGROUP}" || echo "[Kiboto Samba] wsdd2 did not start (Windows network discovery only)"
         exec smbd --foreground --no-process-group --debug-stdout --configfile="$$CONF"
     depends_on:
-      - zettnas-toolkit
+      - kiboto

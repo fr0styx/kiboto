@@ -456,7 +456,7 @@ class SambaEngine:
         return can_run, reason
 
     def can_run_sidecar(self) -> tuple[bool, str]:
-        """Pre-flight check to verify if zettnas-samba sidecar can bind port 445."""
+        """Pre-flight check to verify if the Samba sidecar can bind port 445."""
         if samba_host.active():
             return False, "This machine serves files itself."
         from backend.hardware.pal.base import PlatformType
@@ -743,7 +743,7 @@ class SambaEngine:
         return False
 
     def check_sidecar(self) -> dict[str, Any]:
-        """Inspects Docker for running zettnas-samba sidecar container if docker socket is accessible."""
+        """Inspects Docker for a running Samba sidecar container if the docker socket is accessible."""
         docker_sock = _docker_sock_path()
         if not os.path.exists(docker_sock):
             return {"detected": False, "status": "no_docker_socket"}
@@ -771,7 +771,7 @@ class SambaEngine:
         return {"detected": False, "status": "not_found"}
 
     def reload_service(self) -> bool:
-        """Attempts to signal smbd or restart the Samba sidecar (kiboto-samba, or zettnas-samba from before)."""
+        """Attempts to signal smbd or restart the Samba sidecar (kiboto-samba, or its name from before the rebrand)."""
         if samba_host.active():  # the machine's own file server, driven directly
             changed, self._changed, self._pending = getattr(self, "_changed", None), None, False
             if accounts_file_replaced() or samba_host.point_samba_here(SAMBA_CONF_FILE):
@@ -882,7 +882,7 @@ class SambaEngine:
         except (FileNotFoundError, subprocess.SubprocessError):
             pass
 
-        # 2. Try docker exec into zettnas-samba container
+        # 2. Try docker exec into the Samba sidecar
         if sidecar_info.get("detected") and os.path.exists(docker_sock):
             try:
                 import httpx

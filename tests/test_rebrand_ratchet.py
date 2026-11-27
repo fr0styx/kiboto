@@ -10,9 +10,9 @@ import re
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 OLD = re.compile(r"zettnas|zetty|zettai", re.I)
 # history and data that keep the old name: released changelog sections, the archive of old plans,
-# the generated API snapshot (it follows the code), and the old Unraid templates (until 2.2)
+# the generated API snapshot (it follows the code), and the one-time renames themselves
 SKIP = re.compile(
-    r"^(CHANGELOG\.md|docs/archive/|docs/openapi-v1\.json|unraid/zettnas-|backend/legacy_names\.py$"
+    r"^(CHANGELOG\.md|docs/archive/|docs/openapi-v1\.json|backend/legacy_names\.py$"
     r"|frontend/src/legacy-names\.js$|tests/test_legacy_renames\.py$"
     r"|tests/test_rebrand_ratchet\.py$|tests/rebrand_baseline\.json$)"
 )

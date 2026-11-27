@@ -196,7 +196,7 @@ def log_file_path() -> str:
 
 
 def _adopt_old_log(path: str) -> None:
-    """The log file before the rebrand was zettnas.log: it and its rotations carry on under the new
+    """The log file of before the rebrand (legacy_names.OLD_LOG_FILE): it and its rotations carry on under the new
     name, so what happened before the update stays in the log and the support bundle."""
     folder = os.path.dirname(path)
     for suffix in ["", *(f".{n}" for n in range(1, LOG_FILE_BACKUPS + 1))]:

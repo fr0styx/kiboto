@@ -28,7 +28,7 @@ def migrate_to_offsite(job_id: str) -> dict[str, Any]:
     if subvol and not os.path.isdir(source):
         source = os.path.join(pool_path, subvol)
     remote_path = str(job.get("remote_path") or "").strip().strip("/")
-    location = f"rclone:{remote}:{remote_path + '-restic' if remote_path else 'zettnas-restic'}"
+    location = f"rclone:{remote}:{remote_path + '-restic' if remote_path else 'kiboto-restic'}"
     repo_id = re.sub(r"[^a-z0-9-]+", "-", f"from-{job_id}".lower()).strip("-")[:41]
     hour = None if job.get("schedule") == "manual" else 2
     retention = max(1, int(job.get("retention_count") or 7))

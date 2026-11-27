@@ -291,7 +291,7 @@ code_from_image() {
 COSIGN_VERSION=v3.1.4
 COSIGN_SHA256_AMD64=424e2c97d0b45fd7a6b608a87f090f35633f4c23ece5f092d48bba11aaf4bbfa
 COSIGN_SHA256_ARM64=ade83b7aac62e131cacfe96d958948b2150cc9efec46a570a2649b8e27dedad2
-SIGNER='^https://github\.com/fr0styx/(kiboto|zettnas-toolkit)/\.github/workflows/ci\.yml@refs/'
+SIGNER='^https://github\.com/fr0styx/kiboto/\.github/workflows/ci\.yml@refs/'
 must_be_signed_before_unpacking() {
   image=$1
   [ "${2:-}" = "--unsigned" ] && return 0

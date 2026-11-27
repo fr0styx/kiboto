@@ -1,7 +1,7 @@
 """The AI pack (AI-40, PERF-1): chat and search embeddings on the Intel GPU in one OpenVINO
 Model Server, installed from the app catalog and set up for Kiboto.
 
-- One container, "kiboto-ai" ("zettnas-ai" when an install made it before the rebrand), on
+- One container, "kiboto-ai" (legacy_names.OLD_AI_PACK when an install made it before the rebrand), on
   Kiboto's own Docker network with no published port (OVMS has no sign-in),
   with a memory limit, the GPU (/dev/dri) and the NPU when there is one.
 - The image is pinned by digest (catalog_digests.json, inside the signed Kiboto image).

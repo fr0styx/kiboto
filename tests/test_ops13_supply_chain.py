@@ -25,7 +25,7 @@ def test_promotion_verifies_the_ci_workflow_identity():
 
 def test_linux_compose_caps_container_logs():
     services = yaml.safe_load(_read("docker-compose.linux.yml"))["services"]
-    for name in ("zettnas-toolkit", "zettnas-samba"):
+    for name in ("kiboto", "kiboto-samba"):
         opts = services[name]["logging"]["options"]
         assert opts["max-size"] and opts["max-file"], name
 

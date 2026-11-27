@@ -77,10 +77,10 @@ belongs to; TrueNAS 28 needs it to sign in, and earlier versions accept it too.
 
 ### Image variants
 
-The image is `ghcr.io/fr0styx/kiboto`. Its name before the rebrand, `ghcr.io/fr0styx/zettnas-toolkit`,
-carries the same signed images until Kiboto 2.2 and stops then. An install that still uses the old name
-is moved to the new one by Kiboto's own updater. Where the system beside Kiboto does the updating
-(Unraid's Docker page, a Compose file you keep), change the image name there before 2.2.
+The image is `ghcr.io/fr0styx/kiboto`. An install made before the product's rename still pulls the
+image under its earlier name until Kiboto 2.2. Kiboto's own updater moves it to this one; where the
+system beside Kiboto does the updating (Unraid's Docker page, a Compose file you keep), Kiboto's page
+says what to change there.
 
 | Tag | Size | Includes |
 | --- | ---- | -------- |
@@ -563,7 +563,7 @@ To expose Kiboto behind Nginx, Caddy, Traefik, or Cloudflare Tunnel:
 
 ## Local AI runtimes
 
-Kib talks to an Ollama or OpenVINO Model Server (OVMS) runtime. It looks for one only on this NAS: `OLLAMA_HOST` / `LLM_HOST` if you set them, containers named `kiboto-ollama`, `ollama`, `kiboto-ovms` or `ovms` (`zettnas-ollama` and `zettnas-ovms` from before still count) on a shared Docker network, then the Docker host itself. It never sends prompts to your router or other machines on the LAN unless you point `OLLAMA_HOST` there.
+Kib talks to an Ollama or OpenVINO Model Server (OVMS) runtime. It looks for one only on this NAS: `OLLAMA_HOST` / `LLM_HOST` if you set them, containers named `kiboto-ollama`, `ollama`, `kiboto-ovms` or `ovms` ( and from before still count) on a shared Docker network, then the Docker host itself. It never sends prompts to your router or other machines on the LAN unless you point `OLLAMA_HOST` there.
 
 Neither runtime has a password. Don't publish their ports (11434, 8000) to the LAN; attach them to the Kiboto network instead:
 
@@ -605,7 +605,7 @@ docker compose up -d
 ```
 
 ### Upgrading via Unraid
-In the Unraid WebUI, navigate to **Docker**, click **Check for Updates**, and click **Update** next to `kiboto` (`zettnas-toolkit` on an install made before the rebrand: it keeps its name and updates the same way). On such an install, edit the container once and change **Repository** to `ghcr.io/fr0styx/kiboto:latest`: the old image name stops with Kiboto 2.2, and Unraid would then find no more updates.
+In the Unraid WebUI, navigate to **Docker**, click **Check for Updates**, and click **Update** next to `kiboto`. On an install made before the product's rename, whose container keeps its earlier name, edit the container once and set **Repository** to `ghcr.io/fr0styx/kiboto:latest`: the earlier image name stops with Kiboto 2.2, and Unraid would then find no more updates.
 
 ### Snapshots, pinning a version and going back by hand
 - **Every update is snapshotted.** Before the data is touched, Kiboto copies its settings and databases (not the AI index) to `data/backups/pre-update/<date>-from-<version+commit>/`. The in-app updater does this when it stops the old version; an update from the Unraid Docker tab or `docker compose pull` gets one when the new version first starts. The newest three are kept, plus the newest one taken from a Stable build.

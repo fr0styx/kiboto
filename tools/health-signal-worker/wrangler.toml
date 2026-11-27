@@ -1,5 +1,5 @@
 # Deploy steps: docs/HEALTH_SIGNAL.md
-name = "zettnas-health"
+name = "kiboto-health"
 main = "src/index.js"
 compatibility_date = "2026-10-01"
 
@@ -13,5 +13,5 @@ crons = ["0 4 * * 1"]
 
 [[d1_databases]]
 binding = "DB"
-database_name = "zettnas-health"
+database_name = "kiboto-health"
 database_id = "REPLACE_WITH_THE_ID_FROM_wrangler_d1_create"
