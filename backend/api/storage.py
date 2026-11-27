@@ -187,6 +187,7 @@ def _with_erasable(row: dict[str, Any], pool: Any, adapter: Any) -> dict[str, An
     row["replaceable"] = bool(
         caps.can_destroy_pools and not caps.is_observer_mode and pool.fs_type in ("zfs", "btrfs") and not pool.read_only
     )
+    row["growable"] = row["replaceable"]  # "Add a drive": the same pools, each grown with its own tool
     return row
 
 
@@ -792,6 +793,55 @@ def replace_pool_drive(
         actor_username=principal.username,
         actor_ip=request.client.host if request.client else "",
         details={"pool": pool_id, "old": res.get("old", ""), "new": res.get("new", "")},
+    )
+    return res
+
+
+class PoolGrowRequest(BaseModel):
+    way: str = Field(..., min_length=1, max_length=32)
+    to: str = Field(default="", max_length=256)
+    drives: list[str] = Field(..., min_length=1, max_length=2)
+
+
+@router.get("/pools/{pool_id}/grow", dependencies=[Depends(require_scope("storage:admin"))])
+def get_pool_grow_plan(pool_id: PoolId) -> dict[str, Any]:
+    """The ways the pool can take another drive, the empty drives, and copying that runs now."""
+    try:
+        return get_storage_platform().grow_plan(pool_id)
+    except PlatformCapabilityError as e:
+        raise HTTPException(status_code=403, detail=str(e)) from e
+    except LookupError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
+
+
+@router.post(
+    "/pools/{pool_id}/grow",
+    dependencies=[Depends(require_scope("storage:admin")), Depends(require_confirmation("storage.pool.grow"))],
+)
+def grow_pool(
+    pool_id: PoolId,
+    req: PoolGrowRequest,
+    request: Request,
+    principal: AuthenticatedPrincipal = Depends(get_current_principal),
+) -> dict[str, Any]:
+    """Adds empty drives to the pool with its own tool. Nothing is erased: the drives must hold nothing."""
+    try:
+        res = get_storage_platform().grow_pool(pool_id, req.way, req.to, req.drives)
+    except PlatformCapabilityError as e:
+        raise HTTPException(status_code=403, detail=str(e)) from e
+    except LookupError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
+    if not res.get("started"):
+        raise HTTPException(status_code=409, detail=str(res.get("message") or "The drive could not be added."))
+    from backend.users_db import log_security_event
+
+    log_security_event(
+        "storage.pool_grow",
+        "success",
+        actor_id=getattr(principal, "user_id", None),
+        actor_username=principal.username,
+        actor_ip=request.client.host if request.client else "",
+        details={"pool": pool_id, "way": res.get("way", ""), "added": res.get("added", [])},
     )
     return res
 

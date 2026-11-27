@@ -164,12 +164,15 @@ def set_ejected(name: str, ejected: bool) -> None:
             return
 
 
-def set_members(name: str, members: list[str]) -> None:
-    """The drives a pool is on now: after one was replaced from the app."""
+def set_members(name: str, members: list[str], profile: str = "") -> None:
+    """The drives a pool is on now: after one was replaced or added from the app. `profile` when the
+    pool's kind changed with it (a btrfs drive made a mirror)."""
     rows = load()
     for r in rows:
-        if r["name"] == name and r.get("members") != members:
+        if r["name"] == name and (r.get("members") != members or (profile and r.get("profile") != profile)):
             r["members"] = list(members)
+            if profile:
+                r["profile"] = profile
             _save(rows)
             return
 

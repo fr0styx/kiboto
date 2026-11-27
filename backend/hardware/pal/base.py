@@ -294,6 +294,14 @@ class StoragePlatformAdapter(ABC):
         """Starts rebuilding a pool's drive onto an empty one (drive_replace)."""
         raise PlatformCapabilityError("Replace drives in the host system's own storage settings.")
 
+    def grow_plan(self, pool_id: str) -> dict[str, Any]:
+        """What "Add a drive" offers for a pool (pool_grow). Only where Kiboto manages the pools."""
+        raise PlatformCapabilityError("Add drives in the host system's own storage settings.")
+
+    def grow_pool(self, pool_id: str, way: str, to: str, drives: list[str]) -> dict[str, Any]:
+        """Adds empty drives to a pool the way the plan offers (pool_grow)."""
+        raise PlatformCapabilityError("Add drives in the host system's own storage settings.")
+
     @abstractmethod
     def create_share(
         self,

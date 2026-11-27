@@ -30758,6 +30758,37 @@
     "title": "PoolEraseRequest",
     "type": "object"
    },
+   "PoolGrowRequest": {
+    "properties": {
+     "drives": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 2,
+      "minItems": 1,
+      "title": "Drives",
+      "type": "array"
+     },
+     "to": {
+      "default": "",
+      "maxLength": 256,
+      "title": "To",
+      "type": "string"
+     },
+     "way": {
+      "maxLength": 32,
+      "minLength": 1,
+      "title": "Way",
+      "type": "string"
+     }
+    },
+    "required": [
+     "way",
+     "drives"
+    ],
+    "title": "PoolGrowRequest",
+    "type": "object"
+   },
    "PortConfigUpdateRequest": {
     "properties": {
      "alias": {
@@ -69741,6 +69772,116 @@
      }
     },
     "summary": "Export Storage Pool",
+    "tags": [
+     "Storage Subsystem & PAL"
+    ],
+    "x-required-scopes": [
+     "storage:admin"
+    ]
+   }
+  },
+  "/api/v1/storage/pools/{pool_id}/grow": {
+   "get": {
+    "description": "The ways the pool can take another drive, the empty drives, and copying that runs now.",
+    "operationId": "get_pool_grow_plan_api_v1_storage_pools__pool_id__grow_get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "pool_id",
+      "required": true,
+      "schema": {
+       "pattern": "^[A-Za-z0-9_/][A-Za-z0-9_./:-]{0,127}$",
+       "title": "Pool Id",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Get Pool Grow Plan Api V1 Storage Pools  Pool Id  Grow Get",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "404": {
+      "$ref": "#/components/responses/NotFound"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Get Pool Grow Plan",
+    "tags": [
+     "Storage Subsystem & PAL"
+    ],
+    "x-required-scopes": [
+     "storage:admin"
+    ]
+   },
+   "post": {
+    "description": "Adds empty drives to the pool with its own tool. Nothing is erased: the drives must hold nothing.",
+    "operationId": "grow_pool_api_v1_storage_pools__pool_id__grow_post",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "pool_id",
+      "required": true,
+      "schema": {
+       "pattern": "^[A-Za-z0-9_/][A-Za-z0-9_./:-]{0,127}$",
+       "title": "Pool Id",
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/PoolGrowRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Grow Pool Api V1 Storage Pools  Pool Id  Grow Post",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "404": {
+      "$ref": "#/components/responses/NotFound"
+     },
+     "422": {
+      "$ref": "#/components/responses/ValidationFailed"
+     }
+    },
+    "summary": "Grow Pool",
     "tags": [
      "Storage Subsystem & PAL"
     ],

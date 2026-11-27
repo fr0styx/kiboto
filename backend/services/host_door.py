@@ -625,6 +625,10 @@ OPERATIONS: dict[str, Operation] = {
     "storage.replace_drive": Operation(
         _storage("replace_drive"), {"pool_id": TEXT, "old": TEXT, "new": TEXT}, max_len=256
     ),
+    "storage.grow_plan": Operation(_storage("grow_plan"), {"pool_id": TEXT}, max_len=128),
+    "storage.grow_pool": Operation(
+        _storage("grow_pool"), {"pool_id": TEXT, "way": TEXT, "to": TEXT, "drives": LIST}, max_len=256
+    ),
     # the data key (ADR 0006 step 6)
     "keys.text": Operation(_key("key_text"), {}),
     "keys.wanted": Operation(_key("wanted"), {}),

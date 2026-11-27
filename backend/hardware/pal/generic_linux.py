@@ -215,6 +215,18 @@ def members_after_replace(name: str, old: str, new: str) -> list[str] | None:
     return members
 
 
+def members_after_grow(name: str, added: list[str], profile: str = "") -> list[str] | None:
+    """The record of a pool Kiboto made follows drives added from the app (and a btrfs pool made a
+    mirror). Written by Kiboto's own process, so the record stays its own file."""
+    row = pool_registry.find(name)
+    if row is None or not added:
+        return None
+    members = list(row.get("members") or [])
+    members += [d for d in added if d not in members]
+    pool_registry.set_members(name, members, profile)
+    return members
+
+
 def btrfs_missing_members(members: list[PoolMember], shown: str) -> list[PoolMember]:
     """The members, with the ones `btrfs filesystem show` does not list as present marked MISSING.
     A missing drive shows as "devid 2 size 0 used 0 path  MISSING"; present ones by their path."""
@@ -1486,6 +1498,34 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
         try:
             return drive_replace.start(pool, old, new, self._run_cmd)
         except drive_replace.ReplaceError as e:
+            return {"started": False, "why": e.key, "message": str(e)}
+
+    def grow_plan(self, pool_id: str) -> dict[str, Any]:
+        """What "Add a drive" offers for this pool. Through the host door where it runs: reading a
+        btrfs pool's devices is root's."""
+        return _through_door("storage.grow_plan", self._grow_plan_here, pool_id=pool_id)
+
+    def _grow_plan_here(self, pool_id: str) -> dict[str, Any]:
+        from backend.hardware.pal import pool_grow
+
+        return pool_grow.plan(self.resolve_pool(pool_id), self._run_cmd)
+
+    def grow_pool(self, pool_id: str, way: str, to: str, drives: list[str]) -> dict[str, Any]:
+        """Adds empty drives to the pool. Through the host door where it runs. Answers
+        {"started": True, ...} or {"started": False, "why": key, "message": ...}."""
+        done = _through_door(
+            "storage.grow_pool", self._grow_pool_here, pool_id=pool_id, way=way, to=to, drives=list(drives)
+        )
+        if isinstance(done, dict) and done.get("started"):
+            members_after_grow(pool_id, [str(d) for d in done.get("added") or []], str(done.get("profile") or ""))
+        return done
+
+    def _grow_pool_here(self, pool_id: str, way: str, to: str, drives: list[str]) -> dict[str, Any]:
+        from backend.hardware.pal import pool_grow
+
+        try:
+            return pool_grow.start(self.resolve_pool(pool_id), way, to, [str(d) for d in drives], self._run_cmd)
+        except pool_grow.GrowError as e:
             return {"started": False, "why": e.key, "message": str(e)}
 
     def erase_plan(self, pool_id: str) -> dict[str, Any]:

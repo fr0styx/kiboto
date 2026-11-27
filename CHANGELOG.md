@@ -28,6 +28,8 @@ Kiboto OS: the address dialog's DNS servers may be IPv6 addresses.
 
 Network: "This NAS at home" lists the NAS's IPv6 addresses under Details.
 
+Storage: "Add a drive" grows a ZFS or btrfs pool with its own tool: a single drive becomes a mirror, mirrors take another mirror, a RAIDZ group is widened, a btrfs pool gets more space. The drives must be empty; the pool stays in use while it copies.
+
 #### Security
 
 Kiboto OS: when Kiboto hands files and folders in a shared folder to their people, a link put in their place over the network is never followed, so a system file's owner or rights can never be changed that way.

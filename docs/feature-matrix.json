@@ -16,7 +16,7 @@
  },
  "groups": [
   {"name": "Storage", "features": [
-   {"name": "Storage pools: create, grow, see their health", "beside": "view", "linux": "partly", "os": "yes", "note": "On plain Linux Kiboto makes new pools but does not take over pools that already exist."},
+   {"name": "Storage pools: create, grow, see their health", "beside": "view", "linux": "partly", "os": "yes", "note": "Add a drive: a ZFS drive becomes a mirror, mirrors take one more mirror, a RAIDZ group is widened by a drive; a btrfs drive becomes a mirror or a pool gets more space. Adding is tried on a virtual machine. On plain Linux Kiboto makes new pools but does not take over pools that already exist."},
    {"id": "drive_replace", "name": "Replace a failed drive from the app", "beside": "host", "linux": "yes", "os": "check", "note": "ZFS and btrfs pools that keep a second copy rebuild onto an empty drive from the app. Tried on a virtual machine, not yet with a real drive."},
    {"name": "Windows and Mac shares (SMB)", "beside": "view", "linux": "yes", "os": "yes"},
    {"id": "nfs", "name": "NFS shares", "beside": "host", "linux": "no", "os": "yes"},
