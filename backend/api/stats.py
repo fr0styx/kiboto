@@ -11,6 +11,7 @@ from backend.config import ENABLE_FB, LCD_FPS, logger
 from backend.db import query_history
 from backend.fast_json import dumps as fast_dumps
 from backend.hardware.screen import (
+    backlight_writable,
     find_fb_device,
     get_effective_brightness,
     get_screen_state,
@@ -36,6 +37,7 @@ def get_lcd_status():
         "renderer": Z_STATE.lcd_renderer_name or None,
         "power": bool(scr.get("power", True)),
         "screen_off": eff_bri <= 0,
+        "brightness_possible": backlight_writable(),
     }
 
 

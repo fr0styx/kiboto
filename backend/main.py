@@ -696,7 +696,7 @@ def fan_watchdog_daemon():
     started = time.time()
     while not Z_STATE.shutting_down:
         beat("FanWatchdog")
-        driving = Z_STATE.fan_driver_mode != "none" or time.time() - started < FAN_WATCHDOG_IDLE_SECS
+        driving = Z_STATE.fan_driver_mode not in ("none", "host") or time.time() - started < FAN_WATCHDOG_IDLE_SECS
         time.sleep(5 if driving else FAN_WATCHDOG_IDLE_SECS)
         if Z_STATE.shutting_down:
             break

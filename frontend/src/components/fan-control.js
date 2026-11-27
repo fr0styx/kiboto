@@ -342,6 +342,12 @@ export function updateFanCurveWorkstation(s) {
       fanStatusBadge.style.background = 'rgba(79, 216, 196, 0.15)';
       fanStatusBadge.style.color = '#4fd8c4';
       fanStatusBadge.style.borderColor = 'rgba(79, 216, 196, 0.4)';
+    } else if (fc.driver_mode === 'host') {
+      fanStatusBadge.textContent = t('fan.host', 'RUN BY YOUR SYSTEM');
+      fanStatusBadge.title = t('fan.host_title', 'Your system runs the fans; Kiboto only shows their speed.');
+      fanStatusBadge.style.background = '';
+      fanStatusBadge.style.color = 'var(--muted)';
+      fanStatusBadge.style.borderColor = '';
     } else if (fc.driver_mode === 'hwmon') {
       fanStatusBadge.textContent = t('fan.hwmon', 'KERNEL HWMON');
       fanStatusBadge.title = t('ui.kernel_module_hwmon_driver_active', 'Kernel module hwmon driver active');

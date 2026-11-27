@@ -31,6 +31,34 @@ import {
 
 const $ = (id) => document.getElementById(id);
 
+/**
+ * Brightness and night dimming offered only where Kiboto can set the backlight: with the host's
+ * /sys read-only every change failed and the controls did nothing (#71).
+ * @param {boolean} possible
+ * @param {Document} [doc]
+ */
+export function brightnessPossible(possible, doc = document) {
+  for (const id of ['screen-bri-slider', 'screen-night-toggle', 'screen-night-bri']) {
+    const el = /** @type {HTMLInputElement | null} */ (doc.getElementById(id));
+    if (el) el.disabled = !possible;
+  }
+  const slider = doc.getElementById('screen-bri-slider');
+  const row = slider?.parentElement;
+  let note = doc.getElementById('screen-bri-unavailable');
+  if (!possible && row && !note) {
+    note = doc.createElement('div');
+    note.id = 'screen-bri-unavailable';
+    note.className = 'card-instruction';
+    note.textContent = t(
+      'settings.backlight_unavailable',
+      "This screen's brightness can't be changed from Kiboto here."
+    );
+    row.after(note);
+  } else if (possible && note) {
+    note.remove();
+  }
+}
+
 /** What the copy settings say under the existing-file rule: nothing, unless Overwrite is chosen. */
 export function overwriteWarning(cfg) {
   const c = cfg || {};
@@ -413,6 +441,10 @@ export function initSettings() {
   });
 
   // --- Screen Backlight & Night Dimming ---
+  api
+    .get('/api/lcd_status')
+    .then((st) => brightnessPossible(st?.brightness_possible !== false))
+    .catch(() => {});
   const screenBriSlider = /** @type {HTMLInputElement} */ ($('screen-bri-slider'));
   const screenBriVal = $('screen-bri-val');
   const screenPowerBtn = $('btn-toggle-screen-power');

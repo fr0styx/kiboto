@@ -36,6 +36,8 @@ Replication: when the other machine of a copy was reinstalled and shows a new id
 
 Create Pool is shown without advanced tools while there is no pool yet.
 
+Fans the machine runs itself (KIBOTO_EXTERNAL_FAN_CONTROL=1, or fans on a read-only /sys) are only read; Kiboto shows them as run by your system.
+
 #### Security
 
 Kiboto OS: when Kiboto hands files and folders in a shared folder to their people, a link put in their place over the network is never followed, so a system file's owner or rights can never be changed that way.
@@ -123,6 +125,8 @@ Kiboto OS: the file manager lists the storage pools, not every folder in /mnt.
 Kiboto OS: files a two-way sync brings into a shared folder can be changed by that folder's people over the network.
 
 Card copies: the Browse button opens the folder picker again. How to connect: Copy works on plain http or says it could not copy, and it names the account to sign in with.
+
+Boards with two fan devices (Zettlab D4) show both fans. A screen whose brightness can't be set says so instead of offering a slider that does nothing. ARM GPUs (Mali) show their clock.
 
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container

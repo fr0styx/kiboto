@@ -498,18 +498,58 @@ def clamp_fan_pwm(val: int, allow_zero: bool = False) -> int:
     return max(FAN_MIN_PWM, min(FAN_MAX_PWM, ival))
 
 
+FAN_HOST_ENV = "KIBOTO_EXTERNAL_FAN_CONTROL"
+
+
+def host_runs_fans(hw: str | None = None) -> bool:
+    """The machine runs its fans itself, so Kiboto only reads their speed and never writes a fan:
+    set with KIBOTO_EXTERNAL_FAN_CONTROL=1, or seen when the fan device is on a read-only file
+    system (the host's /sys mounted read-only). A host service drove a D4's fans and Kiboto, finding
+    them read-only, still tried every two seconds (#71)."""
+    if os.environ.get(FAN_HOST_ENV, "").strip().lower() in ("1", "true", "yes", "on"):
+        return True
+    if not hw:
+        return False
+    try:
+        return bool(os.statvfs(hw).f_flag & os.ST_RDONLY)
+    except OSError:
+        return False
+
+
+def _same_kind(hw: str) -> list[str]:
+    """Other fan devices of the same driver as `hw`, in order: a D4 has two pwm-fan devices with a
+    fan each, and only the first was read (#71)."""
+    try:
+        with open(os.path.join(hw, "name")) as f:
+            kind = f.read().strip()
+    except OSError:
+        return []
+    out = []
+    for h in sorted(glob.glob(os.path.join(os.path.dirname(hw), "hwmon*"))):
+        if h == hw or not glob.glob(os.path.join(h, "fan*_input")):
+            continue
+        try:
+            with open(os.path.join(h, "name")) as f:
+                if f.read().strip() == kind:
+                    out.append(h)
+        except OSError:
+            continue
+    return out
+
+
 def read_fans():
     hw = _find_hwmon()
     fans = []
     if hw:
-        Z_STATE.fan_driver_mode = "hwmon"
-        for f in sorted(glob.glob(os.path.join(hw, "fan*_input"))):
-            try:
-                with open(f) as fp:
-                    rpm = int(fp.read().strip() or 0)
-                fans.append(rpm)
-            except Exception:
-                fans.append(0)
+        Z_STATE.fan_driver_mode = "host" if host_runs_fans(hw) else "hwmon"
+        for dev in [hw, *_same_kind(hw)]:
+            for f in sorted(glob.glob(os.path.join(dev, "fan*_input"))):
+                try:
+                    with open(f) as fp:
+                        rpm = int(fp.read().strip() or 0)
+                    fans.append(rpm)
+                except (OSError, ValueError):
+                    fans.append(0)  # a missing reading keeps its place
     else:
         mmio = get_mmio_fan_controller()
         if mmio and mmio.is_available():
@@ -819,6 +859,9 @@ def set_fan_pwm(profile, manual_pct=60, custom_pwms=None, ctrl_cpu_fan=False, ze
     if Z_STATE.fans_locked:
         return False
     hw = _find_hwmon()
+    if host_runs_fans(hw):
+        Z_STATE.fan_driver_mode = "host"
+        return False
     if hw:
         Z_STATE.fan_driver_mode = "hwmon"
         applied = 0
@@ -939,6 +982,8 @@ def failsafe_release_fans(reason="shutdown", lock=False):
     if lock:
         Z_STATE.fans_locked = True
     hw = _find_hwmon()
+    if host_runs_fans(hw):
+        return False  # the machine's own fan service keeps them safe
     if hw:
         failsafe = max(FAN_MIN_PWM, min(FAN_MAX_PWM, FAN_FAILSAFE_PWM))
         logger.warning("[FANS] Failsafe engaged (%s): disk fans -> PWM %s, CPU fan -> firmware auto.", reason, failsafe)

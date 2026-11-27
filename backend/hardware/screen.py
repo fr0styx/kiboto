@@ -207,6 +207,23 @@ def _apply_bl_power(bl_dir: str, power_on: bool):
 
 
 _LAST_BRIGHTNESS = {"pct": None, "at": 0.0}
+_BACKLIGHT_SAID = {"read_only": False}
+
+
+def backlight_writable() -> bool:
+    """Whether Kiboto can set the screen's brightness here. With the host's /sys mounted read-only
+    every change failed and was logged, and the page still offered brightness and night dimming
+    (#71)."""
+    d = discover_backlight_dir()
+    if not d:
+        return False
+    path = os.path.join(d, "brightness")
+    try:
+        return os.access(path, os.W_OK) and not os.statvfs(path).f_flag & os.ST_RDONLY
+    except OSError:
+        return False
+
+
 BRIGHTNESS_REAPPLY_SECS = 60.0
 
 
@@ -224,6 +241,11 @@ def set_screen_brightness(pct, now=None, cached=False):
     set_fb_blank(pct > 0)
     backlight_dir = discover_backlight_dir()
     if not backlight_dir:
+        return False
+    if not backlight_writable():
+        if not _BACKLIGHT_SAID["read_only"]:
+            _BACKLIGHT_SAID["read_only"] = True
+            logger.info("[SCREEN] The backlight in %s can't be written here: brightness stays as it is", backlight_dir)
         return False
     try:
         max_val = 192000

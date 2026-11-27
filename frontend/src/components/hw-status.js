@@ -48,6 +48,15 @@ function spinning(stats) {
  * The rows of the Hardware page's "Now" list and the worst level among them, or null without
  * readings. Fans at full speed name what is hot; stopped fans say the drives sleep.
  */
+/**
+ * Whether Kiboto drives the fans: not when there is no fan control, nor when the machine runs them
+ * itself ("host"), where Kiboto's own speeds and labels would mislead (#71).
+ * @param {{driver_mode?: string} | null | undefined} fc
+ */
+export function kibotoRunsFans(fc) {
+  return Boolean(fc?.driver_mode) && fc?.driver_mode !== 'none' && fc?.driver_mode !== 'host';
+}
+
 export function coolingStatus(stats) {
   if (!stats) return null;
   const fc = stats.fan_control || {};
@@ -83,7 +92,7 @@ export function coolingStatus(stats) {
   if (typeof fc.nvme_temp === 'number')
     rows.push(tempRow('nvme', t('hw.st_nvme', 'Fast drives (NVMe)'), fc.nvme_temp, LIMITS.nvme));
   const pwm = fc.zone1_pwm;
-  if (typeof pwm === 'number' && fc.driver_mode && fc.driver_mode !== 'none') {
+  if (typeof pwm === 'number' && kibotoRunsFans(fc)) {
     const rpm = Array.isArray(stats.fans) ? Number(stats.fans[0]) || 0 : 0;
     const hot = rows.find((r) => r.level === 'hot' && r.id !== 'fans');
     let value;
@@ -109,7 +118,7 @@ export function coolingStatus(stats) {
 /** The Overview's Cooling tile: "Balanced · 38 °C", or that the drives sleep; '' without fan control. */
 export function coolingLine(stats) {
   const fc = stats?.fan_control;
-  if (!fc || !fc.driver_mode || fc.driver_mode === 'none') return '';
+  if (!kibotoRunsFans(fc)) return '';
   const mode = modeName(fc.profile, fc.manual_pct);
   const { hdd, awake } = spinning(stats);
   if (awake.length)

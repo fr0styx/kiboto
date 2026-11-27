@@ -308,6 +308,24 @@ _GPU_LAST_SAMPLE: dict[str, Any] = {"ts": 0.0, "rc6_ms": 0, "rc6_by_path": {}, "
 _NPU_LAST_SAMPLE: dict[str, Any] = {"ts": 0.0, "busy_us": 0, "util_pct": 0.0}
 
 
+def _devfreq_gpu_mhz() -> tuple[int, int]:
+    """A GPU's clock and its highest one, in MHz, from devfreq (0, 0 when there is none)."""
+    for base in dict.fromkeys((os.path.join(HOST_SYS, "class/devfreq"), "/sys/class/devfreq")):
+        for dev in sorted(glob.glob(os.path.join(base, "*gpu*"))):
+            try:
+                with open(os.path.join(dev, "cur_freq"), encoding="utf-8") as f:
+                    cur = int(f.read().strip()) // 1_000_000
+            except (OSError, ValueError):
+                continue
+            try:
+                with open(os.path.join(dev, "max_freq"), encoding="utf-8") as f:
+                    top = int(f.read().strip()) // 1_000_000
+            except (OSError, ValueError):
+                top = 0
+            return cur, top
+    return 0, 0
+
+
 def _sample_gpu_dynamic() -> dict[str, Any]:
     """Computes real-time GPU engine utilization % and active frequency from DRM sysfs."""
     global _GPU_LAST_SAMPLE
@@ -334,6 +352,10 @@ def _sample_gpu_dynamic() -> dict[str, Any]:
             except Exception:
                 ignored("backend.hardware.host_telemetry._sample_gpu_dynamic")
 
+    if not cur_freq:  # an ARM GPU (a Mali on the D4) tells its clock through devfreq, in Hz (#71)
+        cur_freq, devfreq_max = _devfreq_gpu_mhz()
+        if devfreq_max:
+            max_freq = devfreq_max
     max_freq_patterns = [
         os.path.join(HOST_SYS, "class/drm/card*/gt/gt*/rps_max_freq_mhz"),
         os.path.join(HOST_SYS, "class/drm/card*/gt_max_freq_mhz"),
