@@ -57,7 +57,14 @@ def _settings() -> dict[str, Any]:
 
 
 def cipher_path(share_path: str, name: str) -> str:
-    return os.path.join(legacy_names.existing(share_path, HIDDEN, legacy_names.OLD_ENCRYPTED_HIDDEN), name)
+    """Where a folder's encrypted files are: inside the share, never through a link. Anyone who may
+    write to the share (an NFS client can make links) could otherwise point the hidden folder
+    elsewhere, and Kiboto would make or open the encrypted files there."""
+    path = os.path.join(legacy_names.existing(share_path, HIDDEN, legacy_names.OLD_ENCRYPTED_HIDDEN), name)
+    top = os.path.realpath(share_path)
+    if os.path.realpath(path) != os.path.join(top, os.path.relpath(path, share_path)):
+        raise ValueError("The share's folder for encrypted files is a link; Kiboto does not follow it.")
+    return path
 
 
 def rename_hidden_folders() -> int:
@@ -73,7 +80,8 @@ def rename_hidden_folders() -> int:
             path = _share_path(share)
         except ValueError:
             continue  # the share is gone or not mounted now: next start
-        if os.path.isdir(os.path.join(path, legacy_names.OLD_ENCRYPTED_HIDDEN)):
+        old = os.path.join(path, legacy_names.OLD_ENCRYPTED_HIDDEN)
+        if os.path.isdir(old) and not os.path.islink(old):
             renamed += legacy_names.moved(path, HIDDEN, legacy_names.OLD_ENCRYPTED_HIDDEN) == os.path.join(path, HIDDEN)
     return renamed
 

@@ -178,6 +178,8 @@ Rotating the secret key also re-encrypts the passwords kept for SNMP, Dynamic DN
 
 SNMP on Kiboto OS reports each storage pool; before, it reported the system disk as the storage.
 
+Encrypted folders never follow a link put in place of the share's hidden folder for encrypted files.
+
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container
 
