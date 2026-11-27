@@ -318,6 +318,11 @@ def _serves_files() -> bool:
         return False
 
 
+def serves_files() -> bool:
+    """_serves_files for other modules (the NFS side hands folders over the same way)."""
+    return _serves_files()
+
+
 class SambaEngine:
     """
     Manages Samba daemon configuration, shares lifecycle, and sidecar integration.

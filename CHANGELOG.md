@@ -88,6 +88,8 @@ Kiboto OS: Kib's search finds files in the shared folders a person may read; it 
 
 Kiboto OS: a person's storage limit also holds for what they save over the network (on ZFS).
 
+Kiboto OS: a shared folder exported over NFS only can be written to; it refused every write until SMB was on too.
+
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container
 

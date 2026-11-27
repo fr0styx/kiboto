@@ -264,6 +264,19 @@ class NfsEngine:
 
         return "\n".join(lines)
 
+    def _folders_to_file_server(self) -> None:
+        """On Kiboto's own file server, a writable export whose clients all write as the file
+        server's user gets its folder handed to that user, as the SMB side does: a share exported
+        over NFS only kept a folder of root's (755), and nothing could be written to it."""
+        from backend import owned
+        from backend.services.samba_engine import serves_files
+
+        if not serves_files():
+            return
+        for rule in self._exports.values():
+            if rule.permission == "rw" and rule.squash == "all_squash" and rule.anonuid == FILE_SERVER_UID:
+                owned.to_people(rule.path, "nobody", "users")
+
     def apply_exports(self, inside_storage_only: bool = False) -> bool:
         """
         Writes export rules to /etc/exports.d/kiboto.exports (or /etc/exports) and runs exportfs -ra.
@@ -277,6 +290,7 @@ class NfsEngine:
                 logger.warning("[NFS] The exports were not applied: %s", e)
                 return False
         content = self.generate_exports_file_content(inside_storage_only)
+        self._folders_to_file_server()
         written = False
 
         # 1. Try writing to /etc/exports.d/kiboto.exports
