@@ -394,6 +394,27 @@ async def browse(
     return result
 
 
+def _own_pools() -> list[dict] | None:
+    """Where Kiboto manages the pools (Kiboto OS): each one it made or took in, where it is mounted.
+    None elsewhere. The list was guessed from the folders in /mnt, Unraid's way, which left Kiboto
+    OS's own pools out and called any folder there a pool."""
+    from backend import runtime
+
+    if not runtime.managed_host():
+        return None
+    from backend.hardware.pal import pool_registry
+
+    rows = [r for r in pool_registry.load() if r.get("mountpoint") and not r.get("ejected")]
+    return [
+        {
+            "name": str(r.get("name") or os.path.basename(r["mountpoint"])),
+            "path": r["mountpoint"],
+            "available": os.path.isdir(r["mountpoint"]),
+        }
+        for r in rows
+    ]
+
+
 @router.get("/fs/roots", dependencies=[Depends(require_scope("shares:read", "storage:read", "system:view"))])
 async def fs_roots(principal: AuthenticatedPrincipal = Depends(get_current_principal)):
     """Authoritative platform-aware storage hierarchy for File Explorer.
@@ -421,14 +442,16 @@ async def fs_roots(principal: AuthenticatedPrincipal = Depends(get_current_princ
             res["array"] = {"name": "Main Pool", "path": ALLOWED_BROWSE_ROOTS[0], "available": True}
 
         # 2. Additional Pools / Disks
+        managed = _own_pools()
         pool_candidates = [
             ("Cache Pool", "/mnt/cache"),
             ("Fast Pool", "/mnt/fast"),
             ("SSD Pool", "/mnt/ssd"),
         ]
-        for name, p in pool_candidates:
+        for name, p in [] if managed is not None else pool_candidates:
             if os.path.exists(p):
                 res["pools"].append({"name": name, "path": p, "available": True})
+        res["pools"] += managed or []
 
         # Disks under /mnt/disks (Unassigned Devices)
         if os.path.isdir("/mnt/disks"):
@@ -440,8 +463,8 @@ async def fs_roots(principal: AuthenticatedPrincipal = Depends(get_current_princ
             except OSError:
                 pass
 
-        # Custom Pools under /mnt (e.g. pool1, pool2, nvme)
-        if os.path.isdir("/mnt"):
+        # Custom Pools under /mnt (e.g. pool1, pool2, nvme): Unraid's way; Kiboto's own pools are listed above
+        if managed is None and os.path.isdir("/mnt"):
             try:
                 known_subdirs = {
                     "user",
