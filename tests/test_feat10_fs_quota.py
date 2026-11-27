@@ -43,7 +43,8 @@ def test_btrfs_plain_folder_and_refusal(tmp_path):
     assert "refused" in fq.apply(str(tmp_path), 1, Tools(["btrfs qgroup limit"]), mounts(tmp_path, "btrfs"))["reason"]
 
 
-def test_zfs_dataset_gets_refquota(tmp_path):
+def test_zfs_dataset_gets_refquota(tmp_path, monkeypatch):
+    monkeypatch.setattr(fq, "PERSON_UIDS", range(0))  # whoever runs the tests: not a person here
     t = Tools()
     res = fq.apply(str(tmp_path), 5 * 1024**3, t, mounts(tmp_path, "zfs"))
     assert res["method"] == "zfs-refquota" and ["zfs", "set", f"refquota={5 * 1024**3}", "tank/data"] in t.calls
@@ -145,6 +146,7 @@ def test_a_zfs_homes_folder_gives_each_person_a_dataset(spaces, monkeypatch):
         "zfs_child_dataset",
         lambda parent, name: made.append(name) or (spaces.os.makedirs(f"{parent}/{name}") or f"{parent}/{name}"),
     )
+    spaces.os.makedirs(spaces.homes_root(), exist_ok=True)  # the homes folder is there already
     monkeypatch.setattr(spaces, "home_of", lambda u: str(spaces.homes_root()) + "/" + u)
     assert spaces.ensure_home("teen", 0)["subvolume"] is True and made == ["teen"]
 
@@ -236,3 +238,44 @@ def test_a_private_folder_goes_to_its_persons_own_account_where_kiboto_serves_th
     assert handed == [(str(tmp_path / "homes" / "sam"), smb_accounts.FIRST_UID)]
     spaces.ensure_home("sam")  # there already: nothing is handed over again
     assert len(handed) == 1
+
+
+def test_a_persons_folder_inside_a_dataset_gets_their_own_zfs_limit(tmp_path, monkeypatch):
+    """A home in the pool's homes folder (no dataset of its own): ZFS limits what that person's
+    account writes in the dataset, which also holds over the network (it did only for uploads)."""
+    import os
+
+    home = tmp_path / "homes" / "ana"
+    home.mkdir(parents=True)
+    me = os.stat(home).st_uid
+    monkeypatch.setattr(fq, "PERSON_UIDS", range(me, me + 1))
+    t = Tools()
+    res = fq.apply(str(home), 1024**2, t, mounts(tmp_path, "zfs"))
+    assert res == {"enforced": True, "method": "zfs-userquota", "reason": ""}
+    assert t.calls[-1] == ["zfs", "set", f"userquota@{me}={1024**2}", "tank/data"]
+    fq.apply(str(home), 0, t, mounts(tmp_path, "zfs"))
+    assert t.calls[-1][2] == f"userquota@{me}=none"
+    assert "refused" in fq.apply(str(home), 1, Tools(["zfs set"]), mounts(tmp_path, "zfs"))["reason"]
+
+
+def test_a_new_homes_folder_on_zfs_is_a_dataset_of_its_own(spaces, monkeypatch):
+    """So each home under it can be one too, with its own limit (shares were datasets; homes was not)."""
+    import shutil
+
+    made = []
+    monkeypatch.setattr(
+        spaces.fs_quota,
+        "zfs_child_dataset",
+        lambda parent, name: made.append(name) or (spaces.os.makedirs(f"{parent}/{name}") or f"{parent}/{name}"),
+    )
+    shutil.rmtree(spaces.homes_root(), ignore_errors=True)
+    monkeypatch.setattr(spaces, "home_of", lambda u: str(spaces.homes_root()) + "/" + u)
+    assert spaces.ensure_home("teen", 0)["subvolume"] is True and made == ["homes", "teen"]
+
+
+def test_the_limit_is_said_in_a_size_a_person_reads():
+    from backend.services.user_spaces import QuotaExceeded
+
+    assert str(QuotaExceeded(9 * 1024, 1024**2, 1)) == "This would go over your 1 MB space (9 KB used)."
+    assert str(QuotaExceeded(3 * 1024**3 // 2, 5 * 1024**3, 1)) == "This would go over your 5 GB space (1.5 GB used)."
+    assert str(QuotaExceeded(0, 500, 1)) == "This would go over your 500 bytes space (0 bytes used)."

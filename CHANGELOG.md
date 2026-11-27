@@ -86,6 +86,8 @@ Kiboto OS in a virtual machine: its disks no longer pass for sleeping ones, whic
 
 Kiboto OS: Kib's search finds files in the shared folders a person may read; it found none for people other than admins.
 
+Kiboto OS: a person's storage limit also holds for what they save over the network (on ZFS).
+
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container
 

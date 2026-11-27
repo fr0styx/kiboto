@@ -1185,7 +1185,6 @@ class RagIndexingMixin:
         now = time.time()
         parent_dir = os.path.dirname(canonical_path)
         backing_dev = rag_standby.resolve_path_backing_dev(canonical_path)
-        vis_tier, owner_user, share_name, allowed_csv = _core().classify_path_rbac(canonical_path)
 
         cfg = self.get_config()
         effective_respect_standby = (
@@ -1199,6 +1198,7 @@ class RagIndexingMixin:
                     canonical_path,
                 )
                 return None
+        vis_tier, owner_user, share_name, allowed_csv = _core().classify_path_rbac(canonical_path)
 
         is_video = file_ext in VIDEO_EXTENSIONS
 

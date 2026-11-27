@@ -24,9 +24,18 @@ _usage_cache: dict[str, tuple[float, int]] = {}
 _lock = threading.Lock()
 
 
+def _size(n: int) -> str:
+    """A size as a person reads it: 1 MB showed as \"0 GB\"."""
+    for unit, step in (("GB", 1024**3), ("MB", 1024**2), ("KB", 1024)):
+        if n >= step:
+            value = n / step
+            return f"{value:.0f} {unit}" if value >= 10 or value == int(value) else f"{value:.1f} {unit}"
+    return f"{n} bytes"
+
+
 class QuotaExceeded(Exception):
     def __init__(self, used: int, quota: int, incoming: int) -> None:
-        super().__init__(f"This would go over your {quota // (1024**3)} GB space ({used // (1024**2)} MB used).")
+        super().__init__(f"This would go over your {_size(quota)} space ({_size(used)} used).")
         self.used, self.quota, self.incoming = used, quota, incoming
 
 
@@ -188,7 +197,11 @@ def make_home(username: str) -> tuple[str, bool]:
     home = home_of(username)
     created = False
     if not os.path.isdir(home):
-        os.makedirs(os.path.dirname(home), exist_ok=True)
+        homes = os.path.dirname(home)
+        if not os.path.isdir(homes):
+            # a dataset of its own on a ZFS pool: each home under it can then be one, with its own limit
+            fs_quota.zfs_child_dataset(os.path.dirname(homes), os.path.basename(homes))
+        os.makedirs(homes, exist_ok=True)
         created = _btrfs(["subvolume", "create", home]) or False
         if not created:  # a ZFS dataset of its own when the homes folder is one (FEAT-10)
             created = bool(fs_quota.zfs_child_dataset(os.path.dirname(home), os.path.basename(home)))
@@ -250,8 +263,10 @@ def home_in_door(username: str, quota_bytes: int, only_limit: bool = False) -> d
         raise ValueError("files.home is for a person who has an account here")
     if not 0 <= quota_bytes < 1 << 60:
         raise ValueError("quota_bytes must be a size in bytes")
+    fresh = not only_limit and not os.path.isdir(home_of(username))
     home, created = (home_of(username), False) if only_limit else make_home(username)
-    quota = fs_quota.apply(home, quota_bytes) if quota_bytes or only_limit else None
+    # a new home always gets its limit, 0 too: a ZFS limit kept for an account number reused is cleared
+    quota = fs_quota.apply(home, quota_bytes) if quota_bytes or only_limit or fresh else None
     return {"home": home, "subvolume": created, "quota": quota}
 
 

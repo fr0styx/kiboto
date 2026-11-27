@@ -1335,7 +1335,12 @@ def test_the_door_makes_a_home_only_for_someone_who_is_there(audit, monkeypatch)
             {"op": "files.home", "args": {"username": username, "quota_bytes": quota, "only_limit": only}}, 0
         )
 
-    assert home("ana")["result"] == {"home": "/homes/ana", "subvolume": True, "quota": None}
+    # a new home gets its limit set, 0 too (clears a limit kept for an account number used before)
+    assert home("ana")["result"] == {
+        "home": "/homes/ana",
+        "subvolume": True,
+        "quota": {"enforced": False, "reason": ""},
+    }
     assert home("ana", 5)["result"]["quota"] == {"enforced": True, "reason": ""}
     assert home("ana", 0, True)["result"] == {
         "home": "/homes/ana",

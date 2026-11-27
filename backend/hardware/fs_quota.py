@@ -52,9 +52,23 @@ def _btrfs(path: str, limit: int, run: Callable) -> dict[str, Any]:
     return _result(True, "btrfs-qgroup")
 
 
+PERSON_UIDS = range(1000, 60000)  # people's own accounts (Kiboto OS); not root, system or the file server's
+
+
 def _zfs(path: str, dataset: str, own: bool, limit: int, run: Callable) -> dict[str, Any]:
     if not own:
-        return _result(False, None, f"This folder is inside the ZFS dataset {dataset}; ZFS limits whole datasets.")
+        # a person's folder inside a larger dataset (a home in the pool's homes folder): ZFS limits what
+        # that person's account writes in the dataset, which also holds over the network
+        try:
+            uid = os.stat(path).st_uid
+        except OSError:
+            uid = -1
+        if uid not in PERSON_UIDS:
+            return _result(False, None, f"This folder is inside the ZFS dataset {dataset}; ZFS limits whole datasets.")
+        res = _call(run, ["zfs", "set", f"userquota@{uid}={limit if limit else 'none'}", dataset])
+        if res.returncode != 0:
+            return _result(False, None, f"ZFS refused the limit: {(res.stderr or '').strip()[:200]}")
+        return _result(True, "zfs-userquota")
     res = _call(run, ["zfs", "set", f"refquota={limit if limit else 'none'}", dataset])
     if res.returncode != 0:
         return _result(False, None, f"ZFS refused the limit: {(res.stderr or '').strip()[:200]}")
