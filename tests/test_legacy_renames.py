@@ -443,3 +443,30 @@ def test_an_ai_database_keyed_with_the_salt_of_before_is_encrypted_again(tmp_pat
     assert db_crypto._opens_with(path, db_crypto._KDF_SALT)
     assert db_crypto.connect(path).execute("SELECT v FROM t").fetchone()[0] == "kept"
     assert db_crypto.prepare(path) == "encrypted"
+
+
+def test_the_snapshot_before_an_update_copies_a_database_keyed_the_way_of_before(tmp_path, monkeypatch):
+    """The data snapshot a new version takes before its first start copies the AI databases; one
+    still keyed with the salt of before failed to copy, and the new version refused to start."""
+    import pytest
+
+    from backend import db_crypto
+
+    if not db_crypto.HAVE_SQLCIPHER:
+        pytest.skip("no SQLCipher here")
+    monkeypatch.setenv("KIBOTO_DATA_KEY", "a-data-key-of-enough-length")
+    db_crypto._raw_key.cache_clear()
+    path, copy = str(tmp_path / "ai_conversations.db"), str(tmp_path / "copy" / "ai_conversations.db")
+    os.makedirs(os.path.dirname(copy))
+    conn = db_crypto.sqlite3.connect(path)
+    conn.execute(f"PRAGMA key = {db_crypto._key_sql(legacy_names.OLD_KDF_SALT)}")
+    conn.execute("CREATE TABLE t (v TEXT)")
+    conn.execute("INSERT INTO t VALUES ('kept')")
+    conn.commit()
+    conn.close()
+    db_crypto.copy(path, copy)
+    assert db_crypto._opens_with(copy, legacy_names.OLD_KDF_SALT)  # as it was: a restore brings it back so
+    assert db_crypto.connect_encrypted(copy).execute("SELECT v FROM t").fetchone()[0] == "kept"
+    assert db_crypto.prepare(path) == "converted"
+    db_crypto.copy(path, copy + "2")
+    assert db_crypto._opens_with(copy + "2", db_crypto._KDF_SALT)

@@ -354,14 +354,29 @@ def status(path: str) -> str:
     return "plain" if enabled() else "off"
 
 
+def _salt_of(path: str) -> bytes:
+    """The salt an encrypted file opens with: the current one, or the one of before the rebrand on a
+    file prepare() has not encrypted again yet (the snapshot before a new version's first start)."""
+    if not _opens_with(path, _KDF_SALT) and _opens_with(path, legacy_names.OLD_KDF_SALT):
+        return legacy_names.OLD_KDF_SALT
+    return _KDF_SALT
+
+
 def copy(src: str, dst: str) -> None:
-    """Consistent copy of a SQLite file that keeps it encrypted when it is encrypted."""
-    s = connect(src, readonly=True, timeout=30.0)
+    """Consistent copy of a SQLite file that keeps it encrypted when it is encrypted, under the key it
+    has: the snapshot taken before an update copies files still keyed the way of before."""
+    keyed = enabled() and applies_to(src) and is_encrypted(src)
+    if keyed:
+        salt = _salt_of(src)
+        s = sqlite3.connect(f"file:{src}?mode=ro", uri=True, timeout=30.0)
+        s.execute(f"PRAGMA key = {_key_sql(salt)}")
+    else:
+        s = connect(src, readonly=True, timeout=30.0)
     try:
         d = sqlite3.connect(dst)
         try:
-            if enabled() and applies_to(src) and is_encrypted(src):
-                d.execute(f"PRAGMA key = {_key_sql()}")
+            if keyed:
+                d.execute(f"PRAGMA key = {_key_sql(salt)}")
             s.backup(d)
         finally:
             d.close()
