@@ -114,6 +114,8 @@ Kiboto OS: importing photos from a card or a USB disk no longer fails with Permi
 
 Kiboto OS: on the second NAS of a pair, the shared folders it keeps a copy of can be changed by their people over the network.
 
+Kiboto OS: the ransomware guard's files in shared folders now notice ransomware that works through a network share. Before, nothing written over SMB or NFS could reach them.
+
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container
 

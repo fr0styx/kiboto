@@ -31,6 +31,7 @@ import zipfile
 from collections import deque
 from typing import Any
 
+from backend import owned
 from backend.config import DATA_DIR, logger
 from backend.fsutil import atomic_write_json
 
@@ -273,6 +274,9 @@ class RansomwareGuard:
                 if not os.path.exists(p):
                     with open(p, "wb") as f:
                         f.write(data)
+                # the folder's people own it, as they would a file of theirs: on Kiboto OS it was Kiboto's
+                # own user's, nothing written over SMB or NFS could change it, and the guard never fired
+                owned.like_folder(p)
                 st = os.stat(p)
                 placed[p] = {"size": st.st_size, "mtime": st.st_mtime_ns}
             except OSError:

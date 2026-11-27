@@ -71,6 +71,21 @@ def test_guard_file_change_is_detected(_clean, tmp_path):
     assert guard.check_canaries() and hits[0].endswith(rg.CANARY_NAME)
 
 
+def test_a_guard_file_belongs_to_the_folders_people(_clean, tmp_path, monkeypatch):
+    """On Kiboto OS a guard file was Kiboto's own user's: nothing written over SMB or NFS could
+    change it, so ransomware working through a share never set the guard off."""
+    from backend import owned
+
+    handed = []
+    monkeypatch.setattr(owned, "like_folder", lambda path: handed.append(path) or True)
+    shares = [tmp_path / "family", tmp_path / "photos"]
+    for share in shares:
+        share.mkdir()
+    _clean.state["canaries"] = True
+    assert _clean.place_canaries([str(s) for s in shares]) == 2
+    assert handed == [str(s / rg.CANARY_NAME) for s in shares]
+
+
 def test_frozen_writes_are_refused_but_reads_work(client, auth_headers, _clean):
     h = auth_headers
     _clean.state["frozen"] = True
