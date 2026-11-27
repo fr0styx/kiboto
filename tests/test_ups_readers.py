@@ -449,3 +449,12 @@ def test_a_chosen_mode_still_follows_its_port(monkeypatch):
     monkeypatch.setattr(ups, "_CACHED_UPS", {})
     ups.read_ups_status(force=True)
     assert asked == ["nut", "upsc"]  # not the automatic search
+
+
+def test_nut_files_the_web_user_cannot_read_are_skipped_quietly(tmp_path, monkeypatch, caplog):
+    import backend.hardware.ups as ups
+
+    (tmp_path / "ups.conf").write_text("[ups]\n  driver = usbhid-ups\n")
+    monkeypatch.setattr(ups.os, "access", lambda path, mode: False)
+    assert ups._detect_host_nut_config([str(tmp_path)]) is None
+    assert "PermissionError" not in caplog.text

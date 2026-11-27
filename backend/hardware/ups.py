@@ -108,7 +108,7 @@ def _detect_host_nut_config(custom_dirs: list[str] | None = None) -> dict[str, A
         if not os.path.isdir(nd):
             continue
         ups_conf = os.path.join(nd, "ups.conf")
-        if os.path.isfile(ups_conf):
+        if os.path.isfile(ups_conf) and os.access(ups_conf, os.R_OK):  # root:nut 640 on a Debian with NUT
             try:
                 with open(ups_conf, encoding="utf-8", errors="replace") as f:
                     for line in f:
@@ -122,7 +122,7 @@ def _detect_host_nut_config(custom_dirs: list[str] | None = None) -> dict[str, A
                 ignored("backend.hardware.ups._detect_host_nut_config")
 
         upsmon_conf = os.path.join(nd, "upsmon.conf")
-        if os.path.isfile(upsmon_conf):
+        if os.path.isfile(upsmon_conf) and os.access(upsmon_conf, os.R_OK):
             try:
                 with open(upsmon_conf, encoding="utf-8", errors="replace") as f:
                     for line in f:
