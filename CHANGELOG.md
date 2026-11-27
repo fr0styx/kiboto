@@ -134,6 +134,8 @@ Front screen: the layout presets and Save as My Preset work, and a saved preset 
 
 Network shares: when the file server missed a person's password (it was not up yet), signing in to Kiboto once hands it over, instead of every network sign-in failing until the password is changed.
 
+Apps: in a container, the suggested data folder is one the host and Kiboto both see, so an app's folders and starter files land where the app uses them.
+
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container
 

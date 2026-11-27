@@ -77,3 +77,21 @@ def test_the_storage_root_falls_back_to_unraids(monkeypatch):
 def test_the_defaults_api(client, auth_headers, monkeypatch):
     monkeypatch.setattr(app_catalog, "default_storage_root", lambda: "/srv/apps")
     assert client.get("/api/docker/catalog/defaults", headers=auth_headers).json() == {"storage_root": "/srv/apps"}
+
+
+def test_in_a_container_the_apps_folder_is_one_the_host_and_kiboto_share(monkeypatch, tmp_path):
+    """#71: the folder that holds Kiboto's data folder on the host (/opt/kiboto) was suggested,
+    though only the host had it: Kiboto made the app's folders inside its own container."""
+    from backend import config
+
+    monkeypatch.setattr(config, "POOL_PATH", "/mnt/storage")
+    data_on_host = {"Destination": app_catalog.DATA_DIR, "Source": "/host-only/kiboto/data"}
+    shared = {"Destination": "/mnt/storage", "Source": "/mnt/storage"}
+    other = {"Destination": "/mnt/media", "Source": "/mnt/media"}
+    assert app_catalog._root_from_mounts([data_on_host, other, shared], "x") == "/mnt/storage/appdata"
+    assert app_catalog._root_from_mounts([data_on_host, other], "x") == "/mnt/media/appdata"
+    here = tmp_path / "apps"
+    (here / "kiboto").mkdir(parents=True)
+    mine = {"Destination": app_catalog.DATA_DIR, "Source": str(here / "kiboto")}
+    assert app_catalog._root_from_mounts([mine, other], "x") == str(here)  # there in here too: as before
+    assert app_catalog._root_from_mounts([{"Destination": "/srv", "Source": "/srv"}], "x") == "x"

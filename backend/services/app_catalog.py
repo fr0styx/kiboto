@@ -1396,13 +1396,37 @@ def default_storage_root() -> str:
         logger.debug("app_catalog: own mounts unknown", exc_info=True)
         st, me = 0, None
     if st == 200 and isinstance(me, dict):
-        for m in me.get("Mounts") or []:
-            src = str(m.get("Source") or "").rstrip("/")
-            if m.get("Destination") == DATA_DIR and src.startswith("/") and os.path.dirname(src) not in ("", "/"):
-                root = os.path.dirname(src)
-                break
+        root = _root_from_mounts(me.get("Mounts") or [], root)
     _STORAGE_ROOT["root"] = root
     return root
+
+
+def _root_from_mounts(mounts: list[Any], fallback: str) -> str:
+    """Where apps keep their data, from this container's own mounts. Kiboto makes the app's folders
+    and starter files itself, so the folder has to be the same on the host and in here: the storage
+    folder when it is mounted at its own path, else the folder that holds Kiboto's data folder when
+    it is also there in here, else another folder mounted at its own path. Taking the data folder's
+    parent alone suggested /opt/kiboto, which only the host had: the folders were made inside the
+    container and lost (#71)."""
+    from backend import config
+
+    same = []
+    parent = ""
+    for m in mounts:
+        src = str(m.get("Source") or "").rstrip("/")
+        dest = str(m.get("Destination") or "").rstrip("/")
+        if dest == DATA_DIR.rstrip("/") and src.startswith("/") and os.path.dirname(src) not in ("", "/"):
+            parent = os.path.dirname(src)
+        elif src and src == dest and src.startswith("/mnt/"):
+            same.append(src)
+    pool = config.POOL_PATH.rstrip("/")
+    if pool in same:
+        return os.path.join(pool, "appdata")
+    if parent and os.path.isdir(parent):
+        return parent
+    if same:
+        return os.path.join(sorted(same)[0], "appdata")
+    return parent or fallback
 
 
 def _apply_runtime_options(create_body: dict[str, Any], app: dict[str, Any]) -> None:
