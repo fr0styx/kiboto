@@ -37,9 +37,39 @@ def test_build_apprise_urls_synthesis():
     assert "https://discord.com/api/webhooks/12345/abcdef" in urls
     assert "tgram://123:TOKEN/-1009999" in urls
     assert any("mailtos://" in u and "smtp.example.com:587" in u and "to=admin%40example.com" in u for u in urls)
-    assert any("ntfys://ntfy.sh/my_nas_alerts?token=tk_123" in u for u in urls)
-    assert "https://hooks.slack.com/services/T00/B00/X00" in urls
+    # ntfy and the webhook have senders of their own: through Apprise too, they got every alert twice
+    assert not any(u.startswith(("ntfy", "https://hooks.slack.com")) for u in urls)
     assert "pover://userkey@apptoken" in urls
+
+
+def test_one_alert_reaches_ntfy_and_the_webhook_once(monkeypatch):
+    from backend.services import notifications as n
+
+    sent = []
+    monkeypatch.setattr(n, "_dispatch_ntfy", lambda cfg, *a: sent.append("ntfy") or True)
+    monkeypatch.setattr(n, "_dispatch_webhook", lambda cfg, *a: sent.append("webhook") or True)
+    monkeypatch.setattr(n, "_dispatch_apprise", lambda cfg, *a: sent.extend(n.build_apprise_urls(cfg)) or True)
+    cfg = {
+        "enabled": True,
+        "ntfy_enabled": True,
+        "ntfy_topic": "house",
+        "webhook_enabled": True,
+        "webhook_url": "https://hooks.test/x",
+        "email_enabled": True,
+        "smtp_host": "mail.test",
+        "email_to": "a@test.local",
+    }
+    n._dispatch_configured(cfg, "Disk", "warm", "warning")
+    assert sorted(sent) == ["mailtos://mail.test:587?to=a%40test.local", "ntfy", "webhook"]
+
+
+def test_ntfy_or_a_webhook_alone_count_as_alerts_set_up():
+    from backend.services.notifications import channels_set
+
+    assert channels_set({"ntfy_enabled": True, "ntfy_topic": "house"})
+    assert channels_set({"webhook_enabled": True, "webhook_url": "https://hooks.test/x"})
+    assert channels_set({"apprise_urls": ["pover://u@t"]})
+    assert not channels_set({"ntfy_enabled": True, "ntfy_topic": " ", "webhook_enabled": False})
 
 
 def test_mask_and_unmask_notification_config():

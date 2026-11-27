@@ -195,7 +195,9 @@ def save_notification_config(cfg: dict[str, Any]) -> None:
 
 
 def build_apprise_urls(cfg: dict[str, Any]) -> list[str]:
-    """Synthesize structured channel credentials into standard Apprise URL schemas."""
+    """Synthesize structured channel credentials into standard Apprise URL schemas. ntfy and the
+    webhook are left out: they have senders of their own (_dispatch_ntfy, _dispatch_webhook), and
+    with them here too every alert reached ntfy twice whenever mail, Discord or Telegram was on."""
     urls: list[str] = []
 
     # 1. Discord
@@ -232,26 +234,7 @@ def build_apprise_urls(cfg: dict[str, Any]) -> list[str]:
         query = f"?{'&'.join(params)}" if params else ""
         urls.append(f"{proto}://{auth}{host}:{port}{query}")
 
-    # 4. ntfy: ntfys://host/topic or ntfy://host/topic
-    if cfg.get("ntfy_enabled") and cfg.get("ntfy_topic"):
-        topic = cfg.get("ntfy_topic", "").strip()
-        base_url = (
-            cfg.get("ntfy_url", "https://ntfy.sh")
-            .rstrip("/")
-            .replace("https://", "ntfys://")
-            .replace("http://", "ntfy://")
-        )
-        token = cfg.get("ntfy_token", "").strip()
-        token_param = f"?token={token}" if token else ""
-        urls.append(f"{base_url}/{topic}{token_param}")
-
-    # 5. Generic Webhook
-    if cfg.get("webhook_enabled") and cfg.get("webhook_url"):
-        wb = cfg.get("webhook_url", "").strip()
-        if wb:
-            urls.append(wb)
-
-    # 6. Raw Apprise URLs: the dialog's "Enable this channel" was ignored and they always sent (SET-14)
+    # 4. Raw Apprise URLs: the dialog's "Enable this channel" was ignored and they always sent (SET-14)
     raw_urls = cfg.get("apprise_urls", []) if cfg.get("apprise_enabled", True) else []
     if isinstance(raw_urls, str):
         raw_urls = [raw_urls]
@@ -260,6 +243,15 @@ def build_apprise_urls(cfg: dict[str, Any]) -> list[str]:
             urls.append(r.strip())
 
     return urls
+
+
+def channels_set(cfg: dict[str, Any]) -> bool:
+    """Whether any channel would carry an alert: Apprise's, ntfy or the webhook."""
+    return bool(
+        build_apprise_urls(cfg)
+        or (cfg.get("ntfy_enabled") and str(cfg.get("ntfy_topic") or "").strip())
+        or (cfg.get("webhook_enabled") and str(cfg.get("webhook_url") or "").strip())
+    )
 
 
 def _find_unraid_notify() -> str | None:

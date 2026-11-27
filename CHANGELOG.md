@@ -154,6 +154,8 @@ Alerts: a person's own alerts and notes about their account go only to their ema
 
 Cloud drives on Kiboto OS: a mounted drive stays mounted when Kiboto restarts or updates.
 
+Alerts: with email, Discord or Telegram on as well, each alert reached ntfy twice. It now arrives once.
+
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container
 

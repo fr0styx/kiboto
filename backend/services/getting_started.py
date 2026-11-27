@@ -89,10 +89,10 @@ def _ai_has_files() -> bool:
 
 
 def _alerts_set_up() -> bool:
-    from backend.services.notifications import build_apprise_urls, load_notification_config
+    from backend.services.notifications import channels_set, load_notification_config
 
     cfg = load_notification_config()
-    return bool(cfg.get("enabled")) and bool(build_apprise_urls(cfg))
+    return bool(cfg.get("enabled")) and channels_set(cfg)
 
 
 def _invited_someone() -> bool:
