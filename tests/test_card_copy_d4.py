@@ -9,6 +9,7 @@ from backend.services import copy_engine as ce
 
 def test_the_folder_defaults_to_the_pool_where_unraids_is_missing(monkeypatch):
     monkeypatch.setattr(ce, "POOL_PATH", "/mnt/storage")
+    monkeypatch.setattr(ce.os, "access", lambda p, mode: True)  # Kiboto may write the pool: never the test machine's
     real_isdir = os.path.isdir
     monkeypatch.setattr(ce.os.path, "isdir", lambda p: False if p == "/mnt/user" else real_isdir(p))
     assert ce.copy_dest(None) == "/mnt/storage"
@@ -117,6 +118,41 @@ def test_the_saved_unraid_folder_is_replaced_on_a_host_without_it(tmp_path, monk
     cfg.write_text('{"enabled": false, "dest": "/mnt/user/"}')
     monkeypatch.setattr(system, "BUTTON_CFG_FILE", str(cfg))
     monkeypatch.setattr(ce, "POOL_PATH", "/mnt/storage")
+    monkeypatch.setattr(ce.os, "access", lambda p, mode: True)  # never the test machine: Kiboto may write the pool
     real_isdir = os.path.isdir
     monkeypatch.setattr(ce.os.path, "isdir", lambda p: False if p == "/mnt/user" else real_isdir(p))
     assert system._load_buttons()["dest"] == "/mnt/storage"
+
+
+def test_on_kiboto_os_photos_go_to_a_shared_folder_kiboto_may_write(monkeypatch, tmp_path):
+    """There the storage folder is root's: every import from a card or a USB disk failed with
+    "Permission denied: /mnt/storage/2026"."""
+    from backend.hardware import pal_storage
+
+    pool = tmp_path / "storage"
+    family, start = pool / "tank" / "family", pool / "tank" / "storage"
+    for folder in (family, start):
+        folder.mkdir(parents=True)
+    monkeypatch.setattr(ce, "POOL_PATH", str(pool))
+    writable = {str(family), str(start)}
+    monkeypatch.setattr(ce.os, "access", lambda p, mode: p in writable)
+    shares = [
+        types.SimpleNamespace(name="family", mountpoint=str(family)),
+        types.SimpleNamespace(name="storage", mountpoint=str(start)),
+    ]
+    monkeypatch.setattr(
+        pal_storage, "get_storage_platform", lambda: types.SimpleNamespace(list_shares=lambda: list(shares))
+    )
+    assert ce.copy_dest(None) == str(start)  # the shared folder every install starts with
+    assert ce.copy_dest(str(pool) + "/") == str(start)  # the pool, as saved by default
+    assert ce.copy_dest(str(family)) == str(family)  # a folder someone chose stays
+    writable.discard(str(start))
+    assert ce.copy_dest("") == str(family)  # else the first one Kiboto may write
+    writable.clear()
+    assert ce.copy_dest("") == str(pool)  # none: the pool, and the copy says why it failed
+    monkeypatch.setattr(
+        pal_storage,
+        "get_storage_platform",
+        lambda: types.SimpleNamespace(list_shares=lambda: (_ for _ in ()).throw(OSError("x"))),
+    )
+    assert ce.default_dest() == str(pool)

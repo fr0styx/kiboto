@@ -363,8 +363,32 @@ def copy_dest(dest) -> str:
     everywhere, and on another host it does not exist, so the setting could not be saved past it."""
     dest = str(dest or "").strip()
     if not dest or (dest.rstrip("/") == "/mnt/user" and not os.path.isdir("/mnt/user")):
-        return POOL_PATH
+        return default_dest()
+    if dest.rstrip("/") == POOL_PATH.rstrip("/"):
+        return default_dest()  # the pool itself, as saved by default: only where Kiboto may write it
     return dest
+
+
+def default_dest() -> str:
+    """Where photos go when no folder was chosen: the storage folder, where Kiboto may write in it
+    (a container, Unraid). On Kiboto OS that folder is root's, and every import from a card or a USB
+    disk failed with "Permission denied"; there they go to the shared folder every install starts
+    with, else to the first shared folder Kiboto may write."""
+    if os.access(POOL_PATH, os.W_OK | os.X_OK):
+        return POOL_PATH
+    from backend.hardware.pal.system_disk import DEFAULT_SHARE
+    from backend.hardware.pal_storage import get_storage_platform
+
+    try:
+        shares = list(get_storage_platform().list_shares())
+    except (OSError, RuntimeError, ValueError):
+        return POOL_PATH
+    shares.sort(key=lambda sh: sh.name != DEFAULT_SHARE)
+    for share in shares:
+        path = str(getattr(share, "mountpoint", "") or "")
+        if path and os.path.isdir(path) and os.access(path, os.W_OK | os.X_OK):
+            return path
+    return POOL_PATH
 
 
 def _card_partition(dev: str) -> str:
@@ -776,6 +800,9 @@ async def _do_copy(cfg):
         Z_STATE.copy_status = "copying"
         Z_STATE.ui_wake.set()
 
+        from backend import owned
+
+        handed: set[str] = set()  # dated folders already handed over
         for src_f, dst_f in files_to_copy:
             if Z_STATE.copy_abort_flag:
                 break
@@ -787,6 +814,9 @@ async def _do_copy(cfg):
             except Exception as e:
                 logger.info(f"[Kiboto] Error copying {src_f}: {e}")
                 raise
+            # the folder's people can change and delete it over the network too: on Kiboto OS a copy
+            # was Kiboto's own user's, and the shared folder's people could only read it
+            await asyncio.to_thread(owned.below, real_dst, dst_f, handed)
             Z_STATE.copy.add("files_done", 1)
 
         if Z_STATE.copy_abort_flag:

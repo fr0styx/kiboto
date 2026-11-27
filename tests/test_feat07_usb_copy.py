@@ -1,6 +1,7 @@
 """FEAT-07: a USB disk that is plugged in is offered for a backup or a photo import, and the
 photo import copies with the card reader's verified copy."""
 
+import os
 import threading
 
 import pytest
@@ -177,10 +178,15 @@ async def test_the_import_copies_and_verifies(tmp_path, monkeypatch):
     monkeypatch.setattr("time.sleep", lambda s: None)
     Z_STATE.copy_active = False
     Z_STATE.copy_abort_flag = False
+    from backend import owned
+
+    handed = []  # each copy goes to the folder's people (on Kiboto OS it was Kiboto's own user's)
+    monkeypatch.setattr(owned, "below", lambda top, path, done: handed.append((top, path)))
     await copy_engine._do_copy({"source": "usb", "source_path": str(root / "cam"), "dest": str(dst), "use_exif": False})
     assert Z_STATE.copy_progress["file"] == "Finished successfully."
     copied = list(dst.rglob("IMG_0001.JPG"))
     assert copied and copied[0].read_bytes() == photo.read_bytes()
+    assert (os.path.realpath(str(dst)), str(copied[0])) in [(os.path.realpath(t), p) for t, p in handed]
 
 
 def test_api(client, auth_headers, usb, monkeypatch):
