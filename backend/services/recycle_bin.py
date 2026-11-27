@@ -374,7 +374,10 @@ def move_to_bin(
     info = os.path.join(info_dir, f"{name}.trashinfo")
     stamp = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
     try:
-        with open(info, "w", encoding="utf-8") as f:
+        # only Kiboto reads it: it names the deleted item and where it was (a person's private file
+        # too), so it is not left for every account on the machine to read
+        fd = os.open(info, os.O_WRONLY | os.O_CREAT | os.O_TRUNC | getattr(os, "O_NOFOLLOW", 0), 0o600)
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
             f.write(f"[Trash Info]\nPath={original or path}\nDeletionDate={stamp}\n")
     except OSError as err:
         logger.warning(f"[Recycle Bin] Could not write {info}: {err}")
