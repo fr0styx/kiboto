@@ -84,7 +84,7 @@ def proofs():
         return {}
 
 
-def pool_and_share(token, password, pool, share, disks, profile, restart_once=False):
+def pool_and_share(token, password, pool, share, disks, profile, earlier_release=False):
     """A pool through the page's API, a shared folder on it and a file in that folder."""
     body = {
         "name": pool,
@@ -109,13 +109,16 @@ def pool_and_share(token, password, pool, share, disks, profile, restart_once=Fa
     folder = os.path.join(mount or "/nonexistent", share)
     body = {"name": share, "path": folder, "comment": "update check"}
     code, out = confirmed("POST", "/api/storage/shares", body, token)
-    if restart_once and code == 400 and "system disk" in str(out):
-        # Kiboto 2.0.8 and older left the pool record root's until the next start: a known fault of
-        # those releases (fixed after them), worked around here so the update itself can be checked
-        print(f"  note    the earlier release needed a restart before {share} could go on its new pool", flush=True)
-        subprocess.run(["systemctl", "restart", "kiboto-door", "kiboto"], check=False, timeout=180)
-        healthy()
-        code, token = sign_in(password)
+    if earlier_release and code == 400 and "system disk" in str(out):
+        # Kiboto 2.0.8 and older wrote the pool record as root's on a fresh machine, so the web
+        # process saw no pool (fixed after them). Handed over as the fix does, so the update itself
+        # can be checked; this build's own pool below needs no such help.
+        print(f"  note    the earlier release kept its pool record from Kiboto; handed over for {share}", flush=True)
+        subprocess.run(
+            ["chown", "--reference=/var/lib/kiboto", "/var/lib/kiboto/storage", "/var/lib/kiboto/storage/pools.json"],
+            check=False,
+            timeout=30,
+        )
         code, out = confirmed("POST", "/api/storage/shares", body, token)
     say(code in (200, 201), f"a shared folder {share} on {pool}", out)
     text = secrets.token_hex(16)
@@ -151,7 +154,7 @@ def make(disks):
         f.write(password)
     code, token = sign_in(password)
     say(code == 200, "and signs in with it", code)
-    pool_and_share(token, password, "tank", "family", disks, "mirror", restart_once=True)
+    pool_and_share(token, password, "tank", "family", disks, "mirror", earlier_release=True)
 
 
 def after(disks):

@@ -206,8 +206,8 @@ def test_an_update_from_the_last_release_keeps_a_pool_a_shared_folder_and_a_file
     with open(os.path.join(ROOT, "scripts", "os_upgrade_data.py"), encoding="utf-8") as f:
         data = f.read()
     assert "/root/upgrade-admin" in data and "0o600" in data  # the chosen password stays on the machine
-    # only the earlier release may need a restart before a share goes on its new pool
-    assert "restart_once=True" in data and data.count("restart_once=True") == 1
+    # only the earlier release gets its pool record handed over (its known fault)
+    assert "earlier_release=True" in data and data.count("earlier_release=True") == 1
     # while Kiboto restarts, a refused connection is "not up yet", not the end of the check (CI, r347)
     assert "except (urllib.error.URLError, OSError):" in data
     assert "print(password" not in data and "print(codes" not in data
