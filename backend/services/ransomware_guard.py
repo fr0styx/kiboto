@@ -25,6 +25,7 @@ import io
 import json
 import os
 import re
+import stat
 import threading
 import time
 import zipfile
@@ -37,6 +38,14 @@ from backend.fsutil import atomic_write_json
 
 STATE_FILE = os.path.join(DATA_DIR, "ransomware_guard.json")
 CANARY_NAME = "!Kiboto-guard-file.docx"
+
+
+def _write_new(path: str, data: bytes) -> None:
+    """A guard file made only where nothing is: never through a link of its name, which anyone who
+    may write to the share could leave there (an NFS client can make links)."""
+    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o644)
+    with os.fdopen(fd, "wb") as f:
+        f.write(data)
 
 
 def _rename_old_canary(root: str, new: str) -> None:
@@ -271,13 +280,15 @@ class RansomwareGuard:
             p = os.path.join(root, CANARY_NAME)
             try:
                 _rename_old_canary(root, p)
-                if not os.path.exists(p):
-                    with open(p, "wb") as f:
-                        f.write(data)
+                if not os.path.lexists(p):
+                    _write_new(p, data)
+                if not stat.S_ISREG(os.lstat(p).st_mode):
+                    logger.warning("[Guard] %s is not a plain file; it is not used as a guard file", p)
+                    continue
                 # the folder's people own it, as they would a file of theirs: on Kiboto OS it was Kiboto's
                 # own user's, nothing written over SMB or NFS could change it, and the guard never fired
                 owned.like_folder(p)
-                st = os.stat(p)
+                st = os.lstat(p)
                 placed[p] = {"size": st.st_size, "mtime": st.st_mtime_ns}
             except OSError:
                 logger.debug("ransomware_guard: could not place %s", p, exc_info=True)

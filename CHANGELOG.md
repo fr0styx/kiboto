@@ -182,6 +182,8 @@ Encrypted folders never follow a link put in place of the share's hidden folder 
 
 Merged folders: a link left in place of the hidden folder on either pool is refused before anything moves.
 
+Ransomware guard: a link left in place of a guard file is never written through, and is not used as a guard file.
+
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container
 
