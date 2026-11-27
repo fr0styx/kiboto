@@ -24,7 +24,7 @@ def _job(pool, **kw):
         "name": "settings",
         "kind": "config",
         "destination_type": "local_folder",
-        "local_path": str(pool / "zettnas"),
+        "local_path": str(pool / "kiboto"),
         "encryption_password": "correct-horse",
         "retention_count": 2,
     }
@@ -57,9 +57,9 @@ def test_runs_write_encrypted_copies_and_keep_the_newest(env, monkeypatch):
         rec = be.execute_backup_job(job["id"])
         assert rec["status"] == "success", rec.get("error")
         names.append(rec["snapshot_name"].rsplit("/", 1)[1])
-    files = sorted(p.name for p in (env / "zettnas").iterdir())
+    files = sorted(p.name for p in (env / "kiboto").iterdir())
     assert files == names[1:]  # the newest two (retention 2)
-    blob = (env / "zettnas" / files[-1]).read_bytes()
+    blob = (env / "kiboto" / files[-1]).read_bytes()
     with pytest.raises(ValueError):
         be.decrypt_backup(blob, "wrong-passphrase")
     with zipfile.ZipFile(io.BytesIO(be.decrypt_backup(blob, "correct-horse"))) as z:

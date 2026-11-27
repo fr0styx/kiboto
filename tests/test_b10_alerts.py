@@ -62,7 +62,7 @@ def test_temperature_alerts_once_per_crossing_with_hysteresis(sent):
 def test_the_wizard_address_is_saved_even_from_an_old_client(client, auth_headers):
     res = client.post(
         "/api/notifications/config",
-        json={"urls": ["https://ntfy.sh/zettnas-test-topic"], "enabled": True},
+        json={"urls": ["https://ntfy.sh/kiboto-test-topic"], "enabled": True},
         headers=auth_headers,
     )
     assert res.status_code == 200, res.text

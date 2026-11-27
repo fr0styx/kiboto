@@ -26,8 +26,8 @@ INSPECT = {
     "HostConfig": {"Binds": ["/mnt/user/appdata/z:/app/data"], "NetworkMode": "br0"},
     "NetworkSettings": {
         "Networks": {
-            "br0": {"IPAMConfig": {"IPv4Address": "192.168.1.20"}, "Aliases": ["abcdef123456", "zettnas"]},
-            "proxynet": {"Aliases": ["zettnas"]},
+            "br0": {"IPAMConfig": {"IPv4Address": "192.168.1.20"}, "Aliases": ["abcdef123456", "kiboto"]},
+            "proxynet": {"Aliases": ["kiboto"]},
         }
     },
 }
@@ -43,8 +43,8 @@ def test_recreate_plan_keeps_user_settings_only():
     assert body["HostConfig"]["Binds"] == ["/mnt/user/appdata/z:/app/data"]
     ep = body["NetworkingConfig"]["EndpointsConfig"]["br0"]
     assert ep["IPAMConfig"] == {"IPv4Address": "192.168.1.20"}
-    assert ep["Aliases"] == ["zettnas"]
-    assert extra == {"proxynet": {"Aliases": ["zettnas"]}}
+    assert ep["Aliases"] == ["kiboto"]
+    assert extra == {"proxynet": {"Aliases": ["kiboto"]}}
 
 
 def test_unraid_labels_stay_on_the_container_when_the_image_drops_them():
@@ -89,7 +89,7 @@ class FakeDocker:
 
     def __call__(self, method, path, body=None, timeout=30.0):
         self.calls.append((method, path, body))
-        if method == "GET" and path == "/containers/zettnas-toolkit/json":
+        if method == "GET" and path == "/containers/kiboto-toolkit/json":
             return 200, INSPECT
         if method == "GET" and path.startswith("/images/"):
             return 200, {"Config": OLD_IMAGE_CFG}
@@ -118,7 +118,7 @@ def no_sleep(monkeypatch):
 
 def _run(monkeypatch, fake):
     monkeypatch.setattr(self_updater, "_docker_request", fake)
-    self_updater.apply_update_from_helper("zettnas-toolkit", "ghcr.io/x:new", delay=0.0)
+    self_updater.apply_update_from_helper("kiboto-toolkit", "ghcr.io/x:new", delay=0.0)
 
 
 def test_success_waits_for_health_then_removes_rollback(monkeypatch):
@@ -127,7 +127,7 @@ def test_success_waits_for_health_then_removes_rollback(monkeypatch):
     paths = fake.paths()
     assert ("POST", "/networks/proxynet/connect") in paths
     health_checks = [i for i, p in enumerate(paths) if p == ("GET", "/containers/new123456789/json")]
-    delete_rollback = paths.index(("DELETE", "/containers/zettnas-toolkit-rollback?v=false"))
+    delete_rollback = paths.index(("DELETE", "/containers/kiboto-toolkit-rollback?v=false"))
     # two "starting" checks, then healthy for the whole dwell before the old container goes
     assert len(health_checks) >= 2 + self_updater.APP_OK_DWELL_SECS // 3 and delete_rollback > health_checks[-1]
 
@@ -139,15 +139,15 @@ def test_unhealthy_new_container_rolls_back(monkeypatch, state):
         _run(monkeypatch, fake)
     paths = fake.paths()
     assert ("DELETE", "/containers/new123456789?force=true") in paths
-    assert ("POST", "/containers/zettnas-toolkit-rollback/rename?name=zettnas-toolkit") in paths
-    assert ("DELETE", "/containers/zettnas-toolkit-rollback?v=false") not in paths
+    assert ("POST", "/containers/kiboto-toolkit-rollback/rename?name=kiboto-toolkit") in paths
+    assert ("DELETE", "/containers/kiboto-toolkit-rollback?v=false") not in paths
 
 
 def test_create_failure_rolls_back(monkeypatch):
     fake = FakeDocker(create_status=500)
     with pytest.raises(SystemExit):
         _run(monkeypatch, fake)
-    assert ("POST", "/containers/zettnas-toolkit-rollback/rename?name=zettnas-toolkit") in fake.paths()
+    assert ("POST", "/containers/kiboto-toolkit-rollback/rename?name=kiboto-toolkit") in fake.paths()
 
 
 def test_start_failure_rolls_back(monkeypatch):
@@ -156,4 +156,4 @@ def test_start_failure_rolls_back(monkeypatch):
         _run(monkeypatch, fake)
     paths = fake.paths()
     assert ("DELETE", "/containers/new123456789?force=true") in paths
-    assert ("POST", "/containers/zettnas-toolkit/start") in paths
+    assert ("POST", "/containers/kiboto-toolkit/start") in paths

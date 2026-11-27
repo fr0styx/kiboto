@@ -74,7 +74,7 @@ describe('Kib Conversation History & Dual-Pane UI Suite', () => {
       model: 'qwen2.5:3b',
       messages: [
         { role: 'user', content: 'List running containers' },
-        { role: 'assistant', content: 'Found 4 active containers: zettnas-toolkit, plex, traefik, nextcloud.' },
+        { role: 'assistant', content: 'Found 4 active containers: kiboto-toolkit, plex, traefik, nextcloud.' },
       ],
     };
 

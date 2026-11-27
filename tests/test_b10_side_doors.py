@@ -13,7 +13,7 @@ from backend.passwords import hash_password
 @pytest.fixture
 def pool(tmp_path, monkeypatch):
     pool = tmp_path / "pool"
-    install = pool / "appdata" / "zettnas-toolkit"
+    install = pool / "appdata" / "kiboto-toolkit"
     data = install / "data"
     data.mkdir(parents=True)
     (install / "docker-compose.yml").write_text("services: {}\n")
@@ -37,7 +37,7 @@ def test_serve_roots_never_include_the_data_folder(pool):
         pool["data"],  # the data folder itself
         pool["install"],  # the install folder (compose file, .env)
         os.path.join(p, "appdata"),  # a folder that holds it
-        os.path.join(p, "photos", "..", "appdata", "zettnas-toolkit", "data"),
+        os.path.join(p, "photos", "..", "appdata", "kiboto-toolkit", "data"),
         "/",
         "/etc",
         "",
@@ -50,7 +50,7 @@ def test_an_sftp_account_cannot_be_given_the_data_folder(pool, monkeypatch, tmp_
 
     monkeypatch.setattr(sftp_engine, "SFTP_USERS_FILE", str(tmp_path / "users.json"))
     engine = sftp_engine.SftpEngine() if hasattr(sftp_engine, "SftpEngine") else sftp_engine.get_sftp_engine()
-    for bad in (pool["data"], os.path.join(pool["pool"], "appdata"), "appdata/zettnas-toolkit"):
+    for bad in (pool["data"], os.path.join(pool["pool"], "appdata"), "appdata/kiboto-toolkit"):
         with pytest.raises(ValueError, match="cannot be shared"):
             engine.add_user({"username": "mallory", "password": "x" * 12, "shares": [bad]})
     ok = engine.add_user({"username": "aunt", "password": "x" * 12, "shares": ["photos"]})
@@ -113,5 +113,5 @@ def test_smb_shares_cannot_be_the_data_folder_and_hide_it_when_they_hold_it(pool
         samba_engine.validate_share_path(pool["install"])
     assert samba_engine.validate_share_path(os.path.join(pool["pool"], "photos"))
     # a share of the whole pool hides the install folder (and with it the data folder)
-    assert samba_engine.protected_veto_names(pool["pool"]) == ["zettnas-toolkit"]
+    assert samba_engine.protected_veto_names(pool["pool"]) == ["kiboto-toolkit"]
     assert samba_engine.protected_veto_names(os.path.join(pool["pool"], "photos")) == []

@@ -5,6 +5,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from backend import legacy_names
 from backend.services.compose_synthesizer import (
     get_container_logs_chunk,
     is_secret_key,
@@ -51,11 +52,11 @@ def test_check_port_available_detects_host_proc_tcp(tmp_path):
 
 
 def test_recreate_container_ports_self_protection():
-    """Verify container mutator rejects recreating zettnas-toolkit itself."""
+    """Verify container mutator rejects recreating Kiboto itself, under its name from before the rebrand."""
     mock_inspect = {
-        "Name": "/zettnas-toolkit",
+        "Name": "/" + legacy_names.OLD_APP_CONTAINER,
         "Id": "c12345678901234567890",
-        "Config": {"Image": "zettnas-toolkit:latest"},
+        "Config": {"Image": "kiboto:latest"},
         "HostConfig": {},
     }
 
@@ -116,7 +117,7 @@ def test_ci_workflow_has_valid_action_tags():
     """Verify .github/workflows/ci.yml has valid modern GitHub Action tags."""
     candidates = [
         os.path.join(os.path.dirname(__file__), "..", ".github", "workflows", "ci.yml"),
-        "/mnt/user/appdata/zettnas-toolkit/.github/workflows/ci.yml",
+        "/mnt/user/appdata/kiboto/.github/workflows/ci.yml",
     ]
     ci_path = next((p for p in candidates if os.path.exists(p)), None)
     if not ci_path:

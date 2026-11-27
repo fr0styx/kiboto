@@ -40,7 +40,7 @@ describe('find this NAS by name (NFEAT-8)', () => {
       name: 'smith-nas',
       address: 'smith-nas.local',
       url: 'http://smith-nas.local:8082',
-      also_answers: ['zettnas'],
+      also_answers: ['kiboto'],
     });
     await loadNasNameCard();
     expect(q('#nas-name-toggle').getAttribute('aria-pressed')).toBe('true');
@@ -51,9 +51,7 @@ describe('find this NAS by name (NFEAT-8)', () => {
     q('#nas-name-input').dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
     await vi.waitFor(() => expect(q('#nas-name-old').hidden).toBe(false));
     expect(put).toHaveBeenCalledWith('/api/network/nas-name', { name: 'smith-nas' });
-    expect(q('#nas-name-old').textContent).toBe(
-      'Also still answers to zettnas.local, so older bookmarks keep working.'
-    );
+    expect(q('#nas-name-old').textContent).toBe('Also still answers to kiboto.local, so older bookmarks keep working.');
     put.mockResolvedValue({ ...ON, enabled: false, running: false });
     q('#nas-name-toggle').click();
     await vi.waitFor(() => expect(q('#nas-name-toggle').getAttribute('aria-pressed')).toBe('false'));

@@ -92,8 +92,8 @@
    "containers": [
     {
      "created": 1729000000,
-     "image": "ghcr.io/fr0styx/zettnas-toolkit:latest",
-     "name": "zettnas-toolkit",
+     "image": "ghcr.io/fr0styx/kiboto-toolkit:latest",
+     "name": "kiboto-toolkit",
      "state": "running",
      "status": "Up 4 hours"
     },
@@ -1923,8 +1923,8 @@
       "containers": [
        {
         "created": 1729000000,
-        "image": "ghcr.io/fr0styx/zettnas-toolkit:latest",
-        "name": "zettnas-toolkit",
+        "image": "ghcr.io/fr0styx/kiboto-toolkit:latest",
+        "name": "kiboto-toolkit",
         "state": "running",
         "status": "Up 4 hours"
        },
@@ -3053,8 +3053,8 @@
       "containers": [
        {
         "created": 1729000000,
-        "image": "ghcr.io/fr0styx/zettnas-toolkit:latest",
-        "name": "zettnas-toolkit",
+        "image": "ghcr.io/fr0styx/kiboto-toolkit:latest",
+        "name": "kiboto-toolkit",
         "state": "running",
         "status": "Up 4 hours"
        },
@@ -5202,8 +5202,8 @@
       "containers": [
        {
         "created": 1729000000,
-        "image": "ghcr.io/fr0styx/zettnas-toolkit:latest",
-        "name": "zettnas-toolkit",
+        "image": "ghcr.io/fr0styx/kiboto-toolkit:latest",
+        "name": "kiboto-toolkit",
         "state": "running",
         "status": "Up 4 hours"
        },
@@ -6332,8 +6332,8 @@
       "containers": [
        {
         "created": 1729000000,
-        "image": "ghcr.io/fr0styx/zettnas-toolkit:latest",
-        "name": "zettnas-toolkit",
+        "image": "ghcr.io/fr0styx/kiboto-toolkit:latest",
+        "name": "kiboto-toolkit",
         "state": "running",
         "status": "Up 4 hours"
        },
@@ -8426,8 +8426,8 @@
     },
     "message": "restart plex",
     "photos": [],
-    "reply": "### \ud83d\udc33 Docker Container Action\n- \u2705 **None**\n\n### \ud83d\udc33 Docker Containers (3 Running / 3 Total)\n  - **`zettnas-toolkit`** (`running`) \u2014 `ghcr.io/fr0styx/zettnas-toolkit:latest` (Up 4 hours)\n  - **`sonarr`** (`running`) \u2014 `lscr.io/linuxserver/sonarr:latest` (Up 2 days)\n  - **`immich_server`** (`running`) \u2014 `ghcr.io/immich-app/immich-server:release` (Up 2 days)",
-    "reply_markdown": "### \ud83d\udc33 Docker Container Action\n- \u2705 **None**\n\n### \ud83d\udc33 Docker Containers (3 Running / 3 Total)\n  - **`zettnas-toolkit`** (`running`) \u2014 `ghcr.io/fr0styx/zettnas-toolkit:latest` (Up 4 hours)\n  - **`sonarr`** (`running`) \u2014 `lscr.io/linuxserver/sonarr:latest` (Up 2 days)\n  - **`immich_server`** (`running`) \u2014 `ghcr.io/immich-app/immich-server:release` (Up 2 days)",
+    "reply": "### \ud83d\udc33 Docker Container Action\n- \u2705 **None**\n\n### \ud83d\udc33 Docker Containers (3 Running / 3 Total)\n  - **`kiboto-toolkit`** (`running`) \u2014 `ghcr.io/fr0styx/kiboto-toolkit:latest` (Up 4 hours)\n  - **`sonarr`** (`running`) \u2014 `lscr.io/linuxserver/sonarr:latest` (Up 2 days)\n  - **`immich_server`** (`running`) \u2014 `ghcr.io/immich-app/immich-server:release` (Up 2 days)",
+    "reply_markdown": "### \ud83d\udc33 Docker Container Action\n- \u2705 **None**\n\n### \ud83d\udc33 Docker Containers (3 Running / 3 Total)\n  - **`kiboto-toolkit`** (`running`) \u2014 `ghcr.io/fr0styx/kiboto-toolkit:latest` (Up 4 hours)\n  - **`sonarr`** (`running`) \u2014 `lscr.io/linuxserver/sonarr:latest` (Up 2 days)\n  - **`immich_server`** (`running`) \u2014 `ghcr.io/immich-app/immich-server:release` (Up 2 days)",
     "status": "ok",
     "tool_names": [
      "control_docker_container",
@@ -8442,8 +8442,8 @@
       "containers": [
        {
         "created": 1729000000,
-        "image": "ghcr.io/fr0styx/zettnas-toolkit:latest",
-        "name": "zettnas-toolkit",
+        "image": "ghcr.io/fr0styx/kiboto-toolkit:latest",
+        "name": "kiboto-toolkit",
         "state": "running",
         "status": "Up 4 hours"
        },
@@ -9561,8 +9561,8 @@
     },
     "message": "which containers are running?",
     "photos": [],
-    "reply": "### \ud83d\udc33 Docker Containers (3 Running / 3 Total)\n  - **`zettnas-toolkit`** (`running`) \u2014 `ghcr.io/fr0styx/zettnas-toolkit:latest` (Up 4 hours)\n  - **`sonarr`** (`running`) \u2014 `lscr.io/linuxserver/sonarr:latest` (Up 2 days)\n  - **`immich_server`** (`running`) \u2014 `ghcr.io/immich-app/immich-server:release` (Up 2 days)",
-    "reply_markdown": "### \ud83d\udc33 Docker Containers (3 Running / 3 Total)\n  - **`zettnas-toolkit`** (`running`) \u2014 `ghcr.io/fr0styx/zettnas-toolkit:latest` (Up 4 hours)\n  - **`sonarr`** (`running`) \u2014 `lscr.io/linuxserver/sonarr:latest` (Up 2 days)\n  - **`immich_server`** (`running`) \u2014 `ghcr.io/immich-app/immich-server:release` (Up 2 days)",
+    "reply": "### \ud83d\udc33 Docker Containers (3 Running / 3 Total)\n  - **`kiboto-toolkit`** (`running`) \u2014 `ghcr.io/fr0styx/kiboto-toolkit:latest` (Up 4 hours)\n  - **`sonarr`** (`running`) \u2014 `lscr.io/linuxserver/sonarr:latest` (Up 2 days)\n  - **`immich_server`** (`running`) \u2014 `ghcr.io/immich-app/immich-server:release` (Up 2 days)",
+    "reply_markdown": "### \ud83d\udc33 Docker Containers (3 Running / 3 Total)\n  - **`kiboto-toolkit`** (`running`) \u2014 `ghcr.io/fr0styx/kiboto-toolkit:latest` (Up 4 hours)\n  - **`sonarr`** (`running`) \u2014 `lscr.io/linuxserver/sonarr:latest` (Up 2 days)\n  - **`immich_server`** (`running`) \u2014 `ghcr.io/immich-app/immich-server:release` (Up 2 days)",
     "status": "ok",
     "tool_names": [
      "list_docker_containers"
@@ -9572,8 +9572,8 @@
       "containers": [
        {
         "created": 1729000000,
-        "image": "ghcr.io/fr0styx/zettnas-toolkit:latest",
-        "name": "zettnas-toolkit",
+        "image": "ghcr.io/fr0styx/kiboto-toolkit:latest",
+        "name": "kiboto-toolkit",
         "state": "running",
         "status": "Up 4 hours"
        },
@@ -11666,8 +11666,8 @@
     },
     "message": "restart plex",
     "photos": [],
-    "reply": "### \ud83d\udc33 Docker Container Action\n- \u2705 **None**\n\n### \ud83d\udc33 Docker Containers (3 Running / 3 Total)\n  - **`zettnas-toolkit`** (`running`) \u2014 `ghcr.io/fr0styx/zettnas-toolkit:latest` (Up 4 hours)\n  - **`sonarr`** (`running`) \u2014 `lscr.io/linuxserver/sonarr:latest` (Up 2 days)\n  - **`immich_server`** (`running`) \u2014 `ghcr.io/immich-app/immich-server:release` (Up 2 days)",
-    "reply_markdown": "### \ud83d\udc33 Docker Container Action\n- \u2705 **None**\n\n### \ud83d\udc33 Docker Containers (3 Running / 3 Total)\n  - **`zettnas-toolkit`** (`running`) \u2014 `ghcr.io/fr0styx/zettnas-toolkit:latest` (Up 4 hours)\n  - **`sonarr`** (`running`) \u2014 `lscr.io/linuxserver/sonarr:latest` (Up 2 days)\n  - **`immich_server`** (`running`) \u2014 `ghcr.io/immich-app/immich-server:release` (Up 2 days)",
+    "reply": "### \ud83d\udc33 Docker Container Action\n- \u2705 **None**\n\n### \ud83d\udc33 Docker Containers (3 Running / 3 Total)\n  - **`kiboto-toolkit`** (`running`) \u2014 `ghcr.io/fr0styx/kiboto-toolkit:latest` (Up 4 hours)\n  - **`sonarr`** (`running`) \u2014 `lscr.io/linuxserver/sonarr:latest` (Up 2 days)\n  - **`immich_server`** (`running`) \u2014 `ghcr.io/immich-app/immich-server:release` (Up 2 days)",
+    "reply_markdown": "### \ud83d\udc33 Docker Container Action\n- \u2705 **None**\n\n### \ud83d\udc33 Docker Containers (3 Running / 3 Total)\n  - **`kiboto-toolkit`** (`running`) \u2014 `ghcr.io/fr0styx/kiboto-toolkit:latest` (Up 4 hours)\n  - **`sonarr`** (`running`) \u2014 `lscr.io/linuxserver/sonarr:latest` (Up 2 days)\n  - **`immich_server`** (`running`) \u2014 `ghcr.io/immich-app/immich-server:release` (Up 2 days)",
     "status": "ok",
     "tool_names": [
      "control_docker_container",
@@ -11682,8 +11682,8 @@
       "containers": [
        {
         "created": 1729000000,
-        "image": "ghcr.io/fr0styx/zettnas-toolkit:latest",
-        "name": "zettnas-toolkit",
+        "image": "ghcr.io/fr0styx/kiboto-toolkit:latest",
+        "name": "kiboto-toolkit",
         "state": "running",
         "status": "Up 4 hours"
        },
@@ -12801,8 +12801,8 @@
     },
     "message": "which containers are running?",
     "photos": [],
-    "reply": "### \ud83d\udc33 Docker Containers (3 Running / 3 Total)\n  - **`zettnas-toolkit`** (`running`) \u2014 `ghcr.io/fr0styx/zettnas-toolkit:latest` (Up 4 hours)\n  - **`sonarr`** (`running`) \u2014 `lscr.io/linuxserver/sonarr:latest` (Up 2 days)\n  - **`immich_server`** (`running`) \u2014 `ghcr.io/immich-app/immich-server:release` (Up 2 days)",
-    "reply_markdown": "### \ud83d\udc33 Docker Containers (3 Running / 3 Total)\n  - **`zettnas-toolkit`** (`running`) \u2014 `ghcr.io/fr0styx/zettnas-toolkit:latest` (Up 4 hours)\n  - **`sonarr`** (`running`) \u2014 `lscr.io/linuxserver/sonarr:latest` (Up 2 days)\n  - **`immich_server`** (`running`) \u2014 `ghcr.io/immich-app/immich-server:release` (Up 2 days)",
+    "reply": "### \ud83d\udc33 Docker Containers (3 Running / 3 Total)\n  - **`kiboto-toolkit`** (`running`) \u2014 `ghcr.io/fr0styx/kiboto-toolkit:latest` (Up 4 hours)\n  - **`sonarr`** (`running`) \u2014 `lscr.io/linuxserver/sonarr:latest` (Up 2 days)\n  - **`immich_server`** (`running`) \u2014 `ghcr.io/immich-app/immich-server:release` (Up 2 days)",
+    "reply_markdown": "### \ud83d\udc33 Docker Containers (3 Running / 3 Total)\n  - **`kiboto-toolkit`** (`running`) \u2014 `ghcr.io/fr0styx/kiboto-toolkit:latest` (Up 4 hours)\n  - **`sonarr`** (`running`) \u2014 `lscr.io/linuxserver/sonarr:latest` (Up 2 days)\n  - **`immich_server`** (`running`) \u2014 `ghcr.io/immich-app/immich-server:release` (Up 2 days)",
     "status": "ok",
     "tool_names": [
      "list_docker_containers"
@@ -12812,8 +12812,8 @@
       "containers": [
        {
         "created": 1729000000,
-        "image": "ghcr.io/fr0styx/zettnas-toolkit:latest",
-        "name": "zettnas-toolkit",
+        "image": "ghcr.io/fr0styx/kiboto-toolkit:latest",
+        "name": "kiboto-toolkit",
         "state": "running",
         "status": "Up 4 hours"
        },

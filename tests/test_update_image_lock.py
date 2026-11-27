@@ -2,19 +2,20 @@
 
 import pytest
 
+from backend import legacy_names
 from backend.api import system
 
 
 @pytest.mark.parametrize(
     "ref,ok",
     [
-        ("ghcr.io/fr0styx/zettnas-toolkit:latest", True),
-        ("ghcr.io/fr0styx/zettnas-toolkit:1.9.2", True),
-        ("ghcr.io/fr0styx/zettnas-toolkit@sha256:" + "a" * 64, True),
-        ("ghcr.io/fr0styx/zettnas-toolkit-evil:latest", False),
-        ("ghcr.io/attacker/zettnas-toolkit:latest", False),
+        (f"ghcr.io/{legacy_names.OLD_IMAGE_REPO}:latest", True),
+        (f"ghcr.io/{legacy_names.OLD_IMAGE_REPO}:1.9.2", True),
+        (f"ghcr.io/{legacy_names.OLD_IMAGE_REPO}@sha256:" + "a" * 64, True),
+        (f"ghcr.io/{legacy_names.OLD_IMAGE_REPO}-evil:latest", False),
+        ("ghcr.io/attacker/kiboto:latest", False),
         ("docker.io/library/alpine:latest", False),
-        ("ghcr.io/fr0styx/zettnas-toolkit:latest;rm -rf /", False),
+        (f"ghcr.io/{legacy_names.OLD_IMAGE_REPO}:latest;rm -rf /", False),
     ],
 )
 def test_official_image_refs(ref, ok):

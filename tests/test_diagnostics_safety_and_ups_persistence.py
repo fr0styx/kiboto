@@ -147,7 +147,7 @@ def test_ups_settings_are_saved_in_one_file_and_older_copies_go():
         backup_file = os.path.join(tmpdir, "ups_config.backup.json")
         pool_dir = os.path.join(tmpdir, "pool")
         os.makedirs(pool_dir, exist_ok=True)
-        pool_mirror = os.path.join(pool_dir, ".zettnas", "ups_config.json")
+        pool_mirror = os.path.join(pool_dir, ".kiboto", "ups_config.json")
         set_app_config_value("ups_config", {"mode": "nut_client", "host": "192.0.2.1"})  # an older copy
         with open(backup_file, "w") as f:
             json.dump({"mode": "nut_client", "host": "192.0.2.1"}, f)
@@ -181,8 +181,8 @@ def test_ups_settings_are_saved_in_one_file_and_older_copies_go():
 def test_a_copy_left_on_the_pool_is_not_read():
     with tempfile.TemporaryDirectory() as tmpdir:
         pool_dir = os.path.join(tmpdir, "pool")
-        os.makedirs(os.path.join(pool_dir, ".zettnas"))
-        with open(os.path.join(pool_dir, ".zettnas", "ups_config.json"), "w") as f:
+        os.makedirs(os.path.join(pool_dir, ".kiboto"))
+        with open(os.path.join(pool_dir, ".kiboto", "ups_config.json"), "w") as f:
             json.dump({"mode": "nut_client", "host": "192.0.2.9"}, f)
         set_app_config_value("ups_config", None)
         with (

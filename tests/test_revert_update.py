@@ -30,7 +30,7 @@ class FakeDocker:
 
     def __call__(self, method, path, body=None, timeout=30.0):
         self.calls.append((method, path, body))
-        if method == "GET" and path == "/containers/zettnas-toolkit/json":
+        if method == "GET" and path == "/containers/kiboto-toolkit/json":
             return 200, {
                 "Id": "cur123",
                 "Image": "sha256:new",
@@ -66,12 +66,10 @@ def test_revert_restores_old_data_and_keeps_a_safety_snapshot(tmp_path, monkeypa
     fake = FakeDocker()
     monkeypatch.setattr(self_updater, "_docker_request", fake)
 
-    self_updater.apply_update_from_helper(
-        "zettnas-toolkit", "sha256:old", 0.0, data_dir=str(tmp_path), restore_from=old
-    )
+    self_updater.apply_update_from_helper("kiboto-toolkit", "sha256:old", 0.0, data_dir=str(tmp_path), restore_from=old)
 
     assert _rows(tmp_path / "users.db") == ["v1.9.2 data"]
-    create = next(b for m, p, b in fake.calls if p == "/containers/create?name=zettnas-toolkit")
+    create = next(b for m, p, b in fake.calls if p == "/containers/create?name=kiboto-toolkit")
     assert create["Image"] == "sha256:old"
     kinds = [s.get("kind") for s in data_snapshot.list_snapshots(str(tmp_path))]
     assert "revert" in kinds  # the 1.9.3 data was saved before restoring
@@ -84,7 +82,7 @@ def test_failed_revert_puts_the_current_data_back(tmp_path, monkeypatch):
     monkeypatch.setattr(self_updater, "_docker_request", FakeDocker(health="unhealthy"))
     with pytest.raises(SystemExit):
         self_updater.apply_update_from_helper(
-            "zettnas-toolkit", "sha256:old", 0.0, data_dir=str(tmp_path), restore_from=old
+            "kiboto-toolkit", "sha256:old", 0.0, data_dir=str(tmp_path), restore_from=old
         )
     assert _rows(tmp_path / "users.db") == ["v1.9.3 data"]
 

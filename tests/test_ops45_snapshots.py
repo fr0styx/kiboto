@@ -48,11 +48,11 @@ def test_the_last_stable_snapshot_outlives_newer_ones(tmp_path, monkeypatch):
 
 
 def test_stable_tags():
-    assert ds.is_stable_tag("ghcr.io/fr0styx/zettnas-toolkit:latest")
-    assert ds.is_stable_tag("ghcr.io/fr0styx/zettnas-toolkit:1.9.4-core")
-    assert ds.is_stable_tag("ghcr.io/fr0styx/zettnas-toolkit")
-    assert not ds.is_stable_tag("ghcr.io/fr0styx/zettnas-toolkit:edge")
-    assert not ds.is_stable_tag("ghcr.io/fr0styx/zettnas-toolkit:sha-abc1234")
+    assert ds.is_stable_tag("ghcr.io/fr0styx/kiboto-toolkit:latest")
+    assert ds.is_stable_tag("ghcr.io/fr0styx/kiboto-toolkit:1.9.4-core")
+    assert ds.is_stable_tag("ghcr.io/fr0styx/kiboto-toolkit")
+    assert not ds.is_stable_tag("ghcr.io/fr0styx/kiboto-toolkit:edge")
+    assert not ds.is_stable_tag("ghcr.io/fr0styx/kiboto-toolkit:sha-abc1234")
 
 
 def test_rollback_image_is_tagged_and_stale_tags_dropped(tmp_path, monkeypatch):

@@ -33,9 +33,7 @@ def test_listening_ports_discovery():
         "   2: 0100007F:1F92 0100007F:CC56 01 00000000:00000000 00:00000000 00000000     0        0 1774437 1 00000000d58fed9e 100 0 0 10 0\n"
     )
 
-    fake_containers = [
-        {"id": "cid123456789", "name": "zettnas-toolkit", "ports": [{"host_port": 8082, "proto": "tcp"}]}
-    ]
+    fake_containers = [{"id": "cid123456789", "name": "kiboto-toolkit", "ports": [{"host_port": 8082, "proto": "tcp"}]}]
 
     def mock_file_open(path, *args, **kwargs):
         p_str = str(path)
@@ -56,7 +54,7 @@ def test_listening_ports_discovery():
         assert p_8082["protocol"] == "tcp"
         assert p_8082["bind_address"] == "0.0.0.0"
         assert p_8082["state"] == "LISTEN"
-        assert p_8082["container"] == "zettnas-toolkit"
+        assert p_8082["container"] == "kiboto-toolkit"
 
         p_22 = next((p for p in ports if p["port"] == 22), None)
         assert p_22 is not None
@@ -74,7 +72,7 @@ def test_samba_passdb_sync_lifecycle():
     mock_client.__enter__.return_value = mock_client
 
     with (
-        patch.object(engine, "check_sidecar", return_value={"detected": True, "id": "zettnas-samba"}),
+        patch.object(engine, "check_sidecar", return_value={"detected": True, "id": "kiboto-samba"}),
         patch("os.path.exists", return_value=True),
         patch("httpx.Client", return_value=mock_client),
     ):

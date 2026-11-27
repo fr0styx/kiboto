@@ -10,10 +10,10 @@ from backend.services import docker_cleanup as dc
 class FakeDocker:
     def __init__(self, slow=0.0):
         self.images = [
-            {"Id": "sha256:app", "RepoTags": ["ghcr.io/fr0styx/zettnas-toolkit:sha-new"], "Created": 50, "Size": 900},
+            {"Id": "sha256:app", "RepoTags": ["ghcr.io/fr0styx/kiboto-toolkit:sha-new"], "Created": 50, "Size": 900},
             {
                 "Id": "sha256:rollback",
-                "RepoTags": ["ghcr.io/fr0styx/zettnas-toolkit:sha-old"],
+                "RepoTags": ["ghcr.io/fr0styx/kiboto-toolkit:sha-old"],
                 "Created": 40,
                 "Size": 900,
             },
@@ -22,8 +22,8 @@ class FakeDocker:
             {"Id": "sha256:dangling", "RepoTags": [], "Created": 10, "Size": 100},
         ]
         self.containers = [
-            {"Image": "ghcr.io/fr0styx/zettnas-toolkit:sha-new", "ImageID": "sha256:app", "State": "running"},
-            {"Image": "ghcr.io/fr0styx/zettnas-toolkit:sha-old", "ImageID": "sha256:rollback", "State": "exited"},
+            {"Image": "ghcr.io/fr0styx/kiboto-toolkit:sha-new", "ImageID": "sha256:app", "State": "running"},
+            {"Image": "ghcr.io/fr0styx/kiboto-toolkit:sha-old", "ImageID": "sha256:rollback", "State": "exited"},
         ]
         self.deleted = []
         self.slow = slow

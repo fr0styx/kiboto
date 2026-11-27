@@ -27,7 +27,7 @@ if ROOT not in sys.path:
 worker_id = os.environ.get("PYTEST_XDIST_WORKER", "")
 # one length whether the tests run alone or on a parallel worker (gw0_ … gw99), so a recording
 # of sizes that include a path is the same everywhere (CI speed-up, pytest-xdist)
-prefix = f"zettnas-tests-{(worker_id or 'gw').ljust(4, '_')}-"
+prefix = f"kiboto-tests-{(worker_id or 'gw').ljust(4, '_')}-"
 SANDBOX = tempfile.mkdtemp(prefix=prefix)
 DATA_DIR = os.path.join(SANDBOX, "data")
 POOL_DIR = os.path.join(SANDBOX, "pool")
@@ -274,7 +274,7 @@ def _never_the_real_machine(monkeypatch):
     from backend import config
 
     monkeypatch.setattr(config, "RAW_DOCKER_SOCK", os.path.join(ROOT, "no-such-door", "raw-docker.sock"))
-    for name in ("KIBOTO_DOCKER_SOCK", "ZETTNAS_DOCKER_SOCK"):
+    for name in ("KIBOTO_DOCKER_SOCK", "KIBOTO_DOCKER_SOCK"):
         monkeypatch.delenv(name, raising=False)
     from backend.services import native_update
 

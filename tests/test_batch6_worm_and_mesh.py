@@ -107,7 +107,7 @@ def test_mesh_vpn_status_detection():
             "BackendState": "Running",
             "MagicDNSSuffix": "tail12345.ts.net",
             "Self": {
-                "HostName": "zettnas-appliance",
+                "HostName": "kiboto-appliance",
                 "TailscaleIPs": ["100.80.20.10", "fd7a:115c:a1e0::1"],
             },
             "Peer": {"peer1": {}, "peer2": {}},

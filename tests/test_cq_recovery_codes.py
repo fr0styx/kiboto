@@ -2,7 +2,7 @@
 
 import hashlib
 
-from backend import totp
+from backend import legacy_names, totp
 
 
 def test_new_codes_are_slow_hashed_and_verify():
@@ -15,7 +15,7 @@ def test_new_codes_are_slow_hashed_and_verify():
 
 
 def test_old_sha256_codes_still_work():
-    old = hashlib.sha256(b"zettnas:recovery:abcd2345").hexdigest()
+    old = hashlib.sha256((legacy_names.OLD_RECOVERY_START + "abcd2345").encode()).hexdigest()
     ok, left = totp.verify_and_consume_recovery_code([old, totp.hash_recovery_code("zzzz-zzzz")], "abcd-2345")
     assert ok and len(left) == 1
     assert totp.verify_and_consume_recovery_code([old], "wrong-code")[0] is False

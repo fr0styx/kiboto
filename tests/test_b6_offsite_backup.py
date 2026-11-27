@@ -38,7 +38,7 @@ def test_offsite_restore_drill(env):
     fam = env / "family"
     _write(str(fam / "taxes.txt"), "2025 return")
     _write(str(fam / "photos" / "beach.txt"), "sand")
-    repo_dir = env / "usb" / "zettnas-backup"
+    repo_dir = env / "usb" / "kiboto-backup"
     ob.save_repo("usb", "USB disk", str(repo_dir), [str(fam)], keep={"daily": 3}, hour=None)
     first = ob.backup("usb")
     assert first["files_new"] == 2

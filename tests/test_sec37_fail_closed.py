@@ -6,7 +6,7 @@ import pathlib
 
 import pytest
 
-from backend import __version__
+from backend import __version__, legacy_names
 from backend.services.rag_engine_search import SYSTEM_PRINCIPAL, RagSearchMixin
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -42,7 +42,7 @@ def test_older_than_running():
 
 
 def test_an_older_tag_needs_a_revert(client, auth_headers, update_env):
-    old = {"channel": "stable", "target_image": "ghcr.io/fr0styx/zettnas-toolkit:v0.0.1"}
+    old = {"channel": "stable", "target_image": f"ghcr.io/{legacy_names.OLD_IMAGE_REPO}:v0.0.1"}
     r = client.post("/api/system/updates/apply", json=old, headers=auth_headers)
     assert r.status_code == 409 and "revert" in r.json()["detail"]
     r = client.post("/api/system/updates/apply", json={**old, "revert": True}, headers=auth_headers)

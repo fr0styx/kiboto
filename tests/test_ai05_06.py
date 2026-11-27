@@ -16,10 +16,10 @@ def test_router_is_never_a_candidate(monkeypatch):
 def test_docker_bridge_gateway_and_named_containers_are_used(monkeypatch):
     monkeypatch.delenv("OLLAMA_HOST", raising=False)
     monkeypatch.delenv("LLM_HOST", raising=False)
-    monkeypatch.setattr(ai_endpoints, "_resolves", lambda name: name == "zettnas-ollama")
+    monkeypatch.setattr(ai_endpoints, "_resolves", lambda name: name == "kiboto-ollama")
     monkeypatch.setattr(ai_endpoints, "_default_gateway", lambda: "172.21.0.1")
     hosts = ai_endpoints.candidate_hosts(None)
-    assert hosts[0] == "zettnas-ollama" and "172.21.0.1" in hosts
+    assert hosts[0] == "kiboto-ollama" and "172.21.0.1" in hosts
 
 
 def test_explicit_host_wins(monkeypatch):
@@ -57,7 +57,7 @@ def test_advisor_flags_published_ai_runtimes(monkeypatch):
 
     containers = [
         {
-            "Names": ["/zettnas-ollama"],
+            "Names": ["/kiboto-ollama"],
             "Image": "ollama/ollama",
             "Ports": [{"IP": "0.0.0.0", "PrivatePort": 11434, "PublicPort": 11434}],
         },
@@ -69,4 +69,4 @@ def test_advisor_flags_published_ai_runtimes(monkeypatch):
         {"Names": ["/web"], "Image": "nginx", "Ports": [{"IP": "0.0.0.0", "PrivatePort": 80, "PublicPort": 80}]},
     ]
     monkeypatch.setattr("backend.services.container_mutator._docker_request", lambda *a, **k: (200, containers))
-    assert security_advisor.exposed_ai_runtimes() == ["zettnas-ollama:11434"]
+    assert security_advisor.exposed_ai_runtimes() == ["kiboto-ollama:11434"]

@@ -8,7 +8,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent / "frontend"
 
 def test_no_operating_mode_step():
     assert "setup-host-mode" not in (ROOT / "index.html").read_text(encoding="utf-8")
-    assert "zettnas_host_mode" not in (ROOT / "src" / "components" / "setup-wizard.js").read_text(encoding="utf-8")
+    assert "kiboto_host_mode" not in (ROOT / "src" / "components" / "setup-wizard.js").read_text(encoding="utf-8")
 
 
 def test_password_labels_name_their_fields():

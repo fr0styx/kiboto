@@ -76,7 +76,7 @@ def test_the_lists_reach_smb_conf(people, tmp_path, monkeypatch):
     assert "available = no" in engine.generate_and_save_conf().split("[media]", 1)[1]
 
 
-def test_changes_rewrite_and_reload_only_where_zettnas_runs_samba(monkeypatch):
+def test_changes_rewrite_and_reload_only_where_kiboto_runs_samba(monkeypatch):
     calls = []
 
     class Engine:

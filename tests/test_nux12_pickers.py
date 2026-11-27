@@ -15,7 +15,7 @@ def test_recent_devices_with_their_names(monkeypatch):
             {"name": "no address"},
             "junk",
         ],
-        "clients": [{"name": "zettnas-kid-lena", "ids": ["192.0.2.20"]}],
+        "clients": [{"name": "kiboto-kid-lena", "ids": ["192.0.2.20"]}],
     }
     monkeypatch.setattr(adguard_kids, "_settings", lambda: {"url": "http://ag", "user": "u", "password": "p"})
     monkeypatch.setattr(
@@ -46,11 +46,11 @@ def _fresh_root():
     app_catalog._STORAGE_ROOT.clear()
 
 
-def test_the_storage_root_follows_zettnas_own_data_folder(monkeypatch):
+def test_the_storage_root_follows_kiboto_own_data_folder(monkeypatch):
     me = {
         "Mounts": [
             {"Destination": "/other", "Source": "/x/y"},
-            {"Destination": app_catalog.DATA_DIR, "Source": "/mnt/tank/apps/zettnas/"},
+            {"Destination": app_catalog.DATA_DIR, "Source": "/mnt/tank/apps/kiboto/"},
         ]
     }
     monkeypatch.setattr(app_catalog, "_docker_request", lambda *a, **k: (200, me))

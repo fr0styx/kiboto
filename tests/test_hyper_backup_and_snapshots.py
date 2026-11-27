@@ -212,7 +212,7 @@ def test_execute_backup_job_local_and_remote(monkeypatch):
             "source_subvolume": "vault",
             "destination_type": "remote",
             "remote_name": "s3-aws",
-            "remote_path": "zettnas-backups/vault",
+            "remote_path": "kiboto-backups/vault",
             "schedule": "daily",
             "retention_count": 7,
         }

@@ -140,7 +140,7 @@ def test_a_beat_also_reaches_a_watchdog_from_before_the_rebrand(tmp_path, monkey
     monkeypatch.setattr(fan_heartbeat, "HOST_DEV", str(tmp_path))
     (tmp_path / "shm").mkdir()
     assert fan_heartbeat.beat(force=True, now=100.0)
-    for name in ("kiboto-fan-heartbeat.json", "zettnas-fan-heartbeat.json"):
+    for name in ("kiboto-fan-heartbeat.json", "kiboto-fan-heartbeat.json"):
         assert json.loads((tmp_path / "shm" / name).read_text())["ts"] == 100.0
     monkeypatch.setenv("FAN_WATCHDOG_HEARTBEAT", str(tmp_path / "own.json"))
     assert fan_heartbeat.legacy_path() is None

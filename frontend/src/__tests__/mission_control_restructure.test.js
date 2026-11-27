@@ -176,7 +176,7 @@ describe('Mission Control Navigation Restructure & Hardware Agnosticism', () => 
     const mockStats = {
       unraid: { available: false },
       os: { distro: 'Ubuntu 24.04 LTS' },
-      system: { hostname: 'zettnas-homelab', uptime_str: '14 days' },
+      system: { hostname: 'kiboto-homelab', uptime_str: '14 days' },
       cpu: { model: 'AMD Ryzen 7 5700X 8-Core', load_avg: ['0.42', '0.38', '0.29'] },
       storage: { engine: 'Btrfs Native Subvolumes' },
     };

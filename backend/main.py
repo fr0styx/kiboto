@@ -219,6 +219,12 @@ def _startup_databases(_data_key_problem: Any) -> Any:
         from backend.services.encrypted_folders import rename_hidden_folders
 
         rename_hidden_folders()  # before anything opens an encrypted folder
+        from backend import runtime
+
+        if not runtime.without_root():  # on Kiboto OS the boot unit does it, as root
+            from backend.services.pools_at_boot import adopt_zfs_marks
+
+            adopt_zfs_marks()
     except (OSError, ValueError, RuntimeError) as e:
         logger.error("[Main] Could not rename names stored before the rebrand: %s", e)
     try:

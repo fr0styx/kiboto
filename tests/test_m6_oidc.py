@@ -10,7 +10,7 @@ import pytest
 
 from backend.services import oidc
 
-ISSUER = "https://auth.example.test/application/o/zettnas"
+ISSUER = "https://auth.example.test/application/o/kiboto"
 
 
 def _jwt(claims):
@@ -27,7 +27,7 @@ def provider(tmp_path, monkeypatch):
         {
             "enabled": True,
             "issuer": ISSUER,
-            "client_id": "zettnas",
+            "client_id": "kiboto",
             "client_secret": "s3cret",
             "admin_groups": ["nas-admins"],
             "role_map": {"family": "share_user"},
@@ -56,7 +56,7 @@ def provider(tmp_path, monkeypatch):
         if req.url.path.endswith("/token"):
             form = dict(urllib.parse.parse_qsl(req.content.decode()))
             seen["token_form"] = form
-            idt = {**claims, "iss": ISSUER, "aud": "zettnas", "exp": time.time() + 300, "nonce": seen["nonce"]}
+            idt = {**claims, "iss": ISSUER, "aud": "kiboto", "exp": time.time() + 300, "nonce": seen["nonce"]}
             return httpx.Response(200, json={"id_token": _jwt(idt), "access_token": "at"})
         if req.url.path.endswith("/userinfo"):
             return httpx.Response(200, json={"sub": claims["sub"], "groups": claims["groups"]})

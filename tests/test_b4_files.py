@@ -134,7 +134,7 @@ def test_btrfs_share_snapshots_are_versions_too(tmp_path, monkeypatch):
     assert file_versions._btrfs_candidates(str(live / "cat.jpg")) == []
 
 
-def test_ask_zetty_about_a_file_scopes_the_search(monkeypatch):
+def test_ask_kib_about_a_file_scopes_the_search(monkeypatch):
     """The file in focus becomes the search scope for that turn only."""
     from backend.services import chat_nas_tools
     from backend.services.chat_nas_tools import FOCUS_PATH

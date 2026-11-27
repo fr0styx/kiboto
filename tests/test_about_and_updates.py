@@ -1,6 +1,6 @@
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from backend import __version__
+from backend import __version__, legacy_names
 from backend.api.system import _is_newer_version, _parse_version
 
 
@@ -113,16 +113,16 @@ def test_apply_system_update_endpoint(client, auth_headers):
     ):
         resp = client.post(
             "/api/system/updates/apply",
-            json={"channel": "edge", "target_image": "ghcr.io/fr0styx/zettnas-toolkit:edge"},
+            json={"channel": "edge", "target_image": f"ghcr.io/{legacy_names.OLD_IMAGE_REPO}:edge"},
             headers=auth_headers,
         )
         assert resp.status_code == 200
         data = resp.json()
         assert data["status"] == "restarting"
         assert data["auto_restarting"] is True
-        assert data["target_image"] == "ghcr.io/fr0styx/zettnas-toolkit:edge"
-        mock_pull.assert_called_once_with("ghcr.io/fr0styx/zettnas-toolkit:edge", 300.0)
-        mock_spawn.assert_called_once_with("ghcr.io/fr0styx/zettnas-toolkit:edge", "kiboto", 2.5)
+        assert data["target_image"] == f"ghcr.io/{legacy_names.OLD_IMAGE_REPO}:edge"
+        mock_pull.assert_called_once_with(f"ghcr.io/{legacy_names.OLD_IMAGE_REPO}:edge", 300.0)
+        mock_spawn.assert_called_once_with(f"ghcr.io/{legacy_names.OLD_IMAGE_REPO}:edge", "kiboto", 2.5)
 
 
 def test_apply_system_update_edge_channel_defaults_to_edge_tag(client, auth_headers):
@@ -139,9 +139,9 @@ def test_apply_system_update_edge_channel_defaults_to_edge_tag(client, auth_head
         )
         assert resp.status_code == 200
         data = resp.json()
-        assert data["target_image"] == "ghcr.io/fr0styx/zettnas-toolkit:edge"
-        mock_pull.assert_called_once_with("ghcr.io/fr0styx/zettnas-toolkit:edge", 300.0)
-        mock_spawn.assert_called_once_with("ghcr.io/fr0styx/zettnas-toolkit:edge", "kiboto", 2.5)
+        assert data["target_image"] == f"ghcr.io/{legacy_names.OLD_IMAGE_REPO}:edge"
+        mock_pull.assert_called_once_with(f"ghcr.io/{legacy_names.OLD_IMAGE_REPO}:edge", 300.0)
+        mock_spawn.assert_called_once_with(f"ghcr.io/{legacy_names.OLD_IMAGE_REPO}:edge", "kiboto", 2.5)
 
 
 def test_apply_system_update_stable_channel_defaults_to_latest_tag(client, auth_headers):
@@ -158,9 +158,9 @@ def test_apply_system_update_stable_channel_defaults_to_latest_tag(client, auth_
         )
         assert resp.status_code == 200
         data = resp.json()
-        assert data["target_image"] == "ghcr.io/fr0styx/zettnas-toolkit:latest"
-        mock_pull.assert_called_once_with("ghcr.io/fr0styx/zettnas-toolkit:latest", 300.0)
-        mock_spawn.assert_called_once_with("ghcr.io/fr0styx/zettnas-toolkit:latest", "kiboto", 2.5)
+        assert data["target_image"] == f"ghcr.io/{legacy_names.OLD_IMAGE_REPO}:latest"
+        mock_pull.assert_called_once_with(f"ghcr.io/{legacy_names.OLD_IMAGE_REPO}:latest", 300.0)
+        mock_spawn.assert_called_once_with(f"ghcr.io/{legacy_names.OLD_IMAGE_REPO}:latest", "kiboto", 2.5)
 
 
 def test_get_current_build_info_authoritative_image_inspect(monkeypatch):

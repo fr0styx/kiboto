@@ -63,7 +63,7 @@ def test_describe_lists_space_media_and_backups(usb, monkeypatch):
         ob,
         "list_repos",
         lambda: [
-            {"id": "usb1", "name": "USB", "location": f"{cam}/zettnas"},
+            {"id": "usb1", "name": "USB", "location": f"{cam}/kiboto"},
             {"id": "cloud", "location": "rclone:x:y"},
         ],
     )
@@ -78,7 +78,7 @@ def test_describe_lists_space_media_and_backups(usb, monkeypatch):
 def test_a_new_disk_is_offered_once(usb, monkeypatch):
     root, mounts = usb
     monkeypatch.setattr(
-        ob, "list_repos", lambda: [{"id": "nightly", "name": "Nightly", "location": f"{root}/backup/zettnas"}]
+        ob, "list_repos", lambda: [{"id": "nightly", "name": "Nightly", "location": f"{root}/backup/kiboto"}]
     )
     sent, state = [], _State()
     plug(root, mounts, "old")  # already there at start: not offered

@@ -20,7 +20,7 @@ def _sources(monkeypatch, repos=(), jobs=(), replication=()):
 
 def test_where_a_copy_is():
     assert ps.kind_of("rclone:b2:nas") == "cloud"
-    assert ps.kind_of("/mnt/disks/usb1/zettnas-backup") == "usb"
+    assert ps.kind_of("/mnt/disks/usb1/kiboto-backup") == "usb"
     assert ps.kind_of("/mnt/remotes/office_nas/backup") == "nas"
     assert ps.kind_of("/mnt/user/backups") == "here"
 

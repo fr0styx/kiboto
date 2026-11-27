@@ -1,6 +1,7 @@
 // NUX-15: the container inspector's markup uses classes from its own lazy sheet instead of
 // inline styles; every state it can show still renders, with the classes in place.
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { OLD_OWN_CONTAINERS } from '../legacy-names.js';
 import {
   initContainerModal,
   openContainerInspector,
@@ -104,7 +105,8 @@ describe('container inspector on classes (NUX-15)', () => {
   });
 
   it('builds the edit form, locked for Kiboto itself', async () => {
-    for (const name of ['jellyfin', 'zettnas-toolkit']) {
+    // Kiboto itself, under its name and under the one an install made before the rebrand kept
+    for (const name of ['jellyfin', 'kiboto', OLD_OWN_CONTAINERS[0]]) {
       _resetContainerModalForTesting();
       const d = details();
       d.overview.name = name;
@@ -114,9 +116,9 @@ describe('container inspector on classes (NUX-15)', () => {
       await switchContainerTab('edit');
       const input = byId('cie-input-name');
       expect(input.classList.contains('ci-xs-9')).toBe(true);
-      expect(input.disabled).toBe(name === 'zettnas-toolkit');
-      expect(byId('cie-select-restart').disabled).toBe(name === 'zettnas-toolkit');
-      expect(byId('cie-btn-add-port').disabled).toBe(name === 'zettnas-toolkit');
+      expect(input.disabled).toBe(name !== 'jellyfin');
+      expect(byId('cie-select-restart').disabled).toBe(name !== 'jellyfin');
+      expect(byId('cie-btn-add-port').disabled).toBe(name !== 'jellyfin');
     }
   });
 });

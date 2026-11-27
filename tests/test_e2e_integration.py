@@ -61,7 +61,7 @@ def get_live_server_auth_token(base_url="http://127.0.0.1:8082"):
     candidates = [
         os.environ.get("TEST_SERVER_DATA_DIR", ""),
         "/app/data",
-        "/mnt/user/appdata/zettnas-toolkit/data",
+        "/mnt/user/appdata/kiboto-toolkit/data",
         "data",
     ]
     for c in candidates:

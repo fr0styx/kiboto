@@ -141,7 +141,7 @@ describe('Batch 6: Observability, Structured Logging & Diagnostics Export', () =
 
     const mockData = {
       executive_status: 'ATTENTION_REQUIRED',
-      alerts: [{ level: 'warning', message: 'Containers requiring attention: zettnas-samba' }],
+      alerts: [{ level: 'warning', message: 'Containers requiring attention: kiboto-samba' }],
       platform: 'Linux 6.18.54-Unraid',
       chassis: 'Zettlab D6 Ultra (6-Bay)',
       uptime_hours: 4.2,
@@ -179,7 +179,7 @@ describe('Batch 6: Observability, Structured Logging & Diagnostics Export', () =
     expect(overlay.classList.contains('open')).toBe(true);
     expect(banner.style.display).toBe('block');
     expect(banner.textContent).toContain('Needs attention');
-    expect(banner.textContent).toContain('zettnas-samba');
+    expect(banner.textContent).toContain('kiboto-samba');
     expect(grid.innerHTML).toContain('12% Used');
     expect(grid.innerHTML).toContain('7.2 / 58.4 GB RAM');
     expect(md.textContent).toContain('Memory Usage: 12%');

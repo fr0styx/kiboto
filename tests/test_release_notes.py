@@ -15,7 +15,7 @@ def test_entry_keeps_subsections_and_stops_at_next_version():
     from backend import __version__
 
     tag = f"v{__version__}"
-    title, notes = ern.extract(text, tag, "fr0styx/zettnas-toolkit")
+    title, notes = ern.extract(text, tag, "fr0styx/kiboto-toolkit")
     assert title.startswith(f"{tag} - ")
     assert "#### " in notes  # subsections are kept
     assert "## v" not in notes and not notes.rstrip().endswith("---")

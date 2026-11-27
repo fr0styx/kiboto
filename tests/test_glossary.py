@@ -7,7 +7,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RETIRED = [
     r"hyper[- ]?backup",
     r"\bchatbot\b",
-    r"\bzettai studio\b",
+    r"\bkib studio\b",
     r"\bnas[- ](hardware[- ])?copilot\b",
     r"\bdigital twin\b",
     r"\bsystem trash\b",

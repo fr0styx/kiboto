@@ -16,10 +16,10 @@ def index(tmp_path, monkeypatch):
 
 
 def _parts(root, uid):
-    staging = root / f".zettnas_staging_{uid}_a.bin"
+    staging = root / f".kiboto_staging_{uid}_a.bin"
     staging.mkdir()
     (staging / "chunk_000000").write_bytes(b"x")
-    temp = root / f".zettnas_tmp_{uid}_a.bin"
+    temp = root / f".kiboto_tmp_{uid}_a.bin"
     temp.write_bytes(b"y")
     return str(staging), str(temp)
 
@@ -53,7 +53,7 @@ def test_sleeping_disks_and_other_files_are_left(index, monkeypatch):
     assert us.sweep(now=us.PROCESS_START + 60, force=True) == []
     monkeypatch.setattr(us, "_asleep", lambda p: False)
     assert us.sweep(now=us.PROCESS_START + 60, force=True) == ["zz"]
-    assert other.exists()  # only the upload's own .zettnas_ parts go
+    assert other.exists()  # only the upload's own .kiboto_ parts go
 
 
 def test_the_sweep_runs_at_most_hourly(index, monkeypatch):
@@ -91,7 +91,7 @@ def test_the_api_notes_and_forgets(client, auth_headers, index, monkeypatch, tmp
 def test_the_sleep_check_asks_about_the_folder(monkeypatch):
     seen = []
     monkeypatch.setattr("backend.services.rag_standby.is_backing_disk_in_standby", lambda p: seen.append(p) or True)
-    assert us._asleep("/mnt/user/photos/.zettnas_tmp_x") is True and seen == ["/mnt/user/photos"]
+    assert us._asleep("/mnt/user/photos/.kiboto_tmp_x") is True and seen == ["/mnt/user/photos"]
 
     def broken(p):
         raise OSError("no")

@@ -35,8 +35,8 @@ class FakeImmich:
 
 
 OIDC = {
-    "issuer": "https://auth.home.lan/application/o/zettnas",
-    "client_id": "zettnas",
+    "issuer": "https://auth.home.lan/application/o/kiboto",
+    "client_id": "kiboto",
     "client_secret": "s",
     "label": "Authentik",
 }
@@ -47,7 +47,7 @@ def test_fresh_immich_gets_admin_and_oauth(tmp_path):
     res = immich_sso.connect("http://nas:2283", "me@home.lan", str(tmp_path), OIDC, transport=httpx.MockTransport(fake))
     assert res["steps"] == ["admin created", "signed in", "oauth enabled"]
     o = fake.config["oauth"]
-    assert o["enabled"] and o["issuerUrl"] == OIDC["issuer"] and o["clientId"] == "zettnas" and o["autoRegister"]
+    assert o["enabled"] and o["issuerUrl"] == OIDC["issuer"] and o["clientId"] == "kiboto" and o["autoRegister"]
     assert o["buttonText"] == "Sign in with Authentik" and fake.config["ffmpeg"] == {"crf": 23}  # other settings kept
     assert "http://nas:2283/auth/login" in res["redirect_uris"]
     # running it again reuses the stored admin password

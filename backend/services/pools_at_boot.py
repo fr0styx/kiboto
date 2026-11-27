@@ -11,7 +11,10 @@ from backend.hardware.pal import pool_registry
 # What bringing pools back runs, as root: nothing else, whatever a record says. The program that
 # runs is this table's own name, never the caller's string.
 # mokutil and modprobe: a Secure Boot key enrolled at the screen, then ZFS loads (services/secure_boot.py)
-_PROGRAMS = {name: name for name in ("zpool", "mount", "findmnt", "btrfs", "chattr", "blkid", "mokutil", "modprobe")}
+# zfs: the snapshots' marks from before the rebrand take Kiboto's (legacy_names.adopt_zfs_marks)
+_PROGRAMS = {
+    name: name for name in ("zpool", "zfs", "mount", "findmnt", "btrfs", "chattr", "blkid", "mokutil", "modprobe")
+}
 
 
 def _run(cmd: list[str]) -> tuple[int, str, str]:
@@ -36,12 +39,25 @@ def bring_back() -> dict[str, str]:
     return pool_registry.bring_back_all(_run)
 
 
+def adopt_zfs_marks() -> int:
+    """ZFS snapshots marked before the rebrand take Kiboto's marks (as root; nothing without ZFS)."""
+    import shutil
+
+    from backend import legacy_names
+    from backend.hardware.pal.generic_linux import ZFS_HOLD_TAG, ZFS_NAME_PROP
+
+    if not shutil.which("zfs"):
+        return 0
+    return legacy_names.adopt_zfs_marks(_run, ZFS_NAME_PROP, ZFS_HOLD_TAG)
+
+
 def main() -> int:
     from backend.services import secure_boot
 
     # a Secure Boot key enrolled at the screen just now: ZFS loads for the pools that come back next
     secure_boot.settle(lambda cmd: (lambda r: (r[0], f"{r[1]}\n{r[2]}"))(_run(cmd)))
     done = pool_registry.bring_back_all(_run)
+    adopt_zfs_marks()
     from backend.services import web_user
 
     web_user.let_into_pools()  # a pool made or imported since Kiboto took its own user, too

@@ -6,6 +6,7 @@ import struct
 
 import pytest
 
+from backend import legacy_names
 from backend.services import mdns_responder as m
 from backend.services import nas_name
 
@@ -35,13 +36,13 @@ def records(packet):
 
 
 def responder(smb=True):
-    return m.Responder(["zettnas", "oldname"], IP, 8082, "Kiboto", smb=smb)
+    return m.Responder(["homenas", "oldname"], IP, 8082, "Kiboto", smb=smb)
 
 
 def test_names_round_trip_and_compression_is_followed():
-    assert m.read_name(m.encode_name("zettnas.local"), 0) == ("zettnas.local", 15)
-    packet = m.encode_name("zettnas.local") + b"\xc0\x00"  # a pointer back to the first name
-    assert m.read_name(packet, 15) == ("zettnas.local", 17)
+    assert m.read_name(m.encode_name("homenas.local"), 0) == ("homenas.local", 15)
+    packet = m.encode_name("homenas.local") + b"\xc0\x00"  # a pointer back to the first name
+    assert m.read_name(packet, 15) == ("homenas.local", 17)
     with pytest.raises(ValueError):
         m.read_name(b"\xc0\x00", 0)  # a pointer to itself
     assert m.parse_query(b"\x00\x01") is None and m.parse_query(b"\x00" * 4 + b"\x00\x05" + b"\x00" * 6) is None
@@ -49,7 +50,7 @@ def test_names_round_trip_and_compression_is_followed():
 
 def test_the_name_and_an_old_name_answer_with_the_address():
     r = responder()
-    for name in ("zettnas.local", "ZETTNAS.local", "oldname.local"):
+    for name in ("homenas.local", "HOMENAS.local", "oldname.local"):
         out = r.reply(query((name, m.A)), m.PORT)
         a = [x for x in records(out) if x[1] == m.A]
         assert a and socket.inet_ntoa(a[0][4]) == IP and a[0][2] == 0x8001  # cache-flush, multicast id 0
@@ -58,13 +59,13 @@ def test_the_name_and_an_old_name_answer_with_the_address():
 
 
 def test_ipv6_is_answered_with_none_at_once():
-    out = responder().reply(query(("zettnas.local", m.AAAA)), m.PORT)
+    out = responder().reply(query(("homenas.local", m.AAAA)), m.PORT)
     kinds = [x[1] for x in records(out)]
     assert kinds[0] == m.NSEC and m.A in kinds
 
 
 def test_a_one_shot_resolver_gets_its_id_question_and_short_ttls():
-    out = responder().reply(query(("zettnas.local", m.A), qid=4242), 51234)
+    out = responder().reply(query(("homenas.local", m.A), qid=4242), 51234)
     qid, flags, qd = struct.unpack("!HHH", out[:6])
     assert (qid, flags, qd) == (4242, 0x8400, 1)
     assert all(ttl <= 10 and cls == 1 for _n, _t, cls, ttl, _r in records(out))
@@ -80,7 +81,7 @@ def test_the_web_page_and_file_server_are_advertised():
     }
     out = records(r.reply(query(("_http._tcp.local", m.PTR)), m.PORT))
     srv = next(x for x in out if x[1] == m.SRV)
-    assert struct.unpack("!HHH", srv[4][:6])[2] == 8082 and m.read_name(srv[4], 6)[0] == "zettnas.local"
+    assert struct.unpack("!HHH", srv[4][:6])[2] == 8082 and m.read_name(srv[4], 6)[0] == "homenas.local"
     assert any(x[1] == m.A for x in out)  # the address comes along
     out = records(r.reply(query(("Kiboto._smb._tcp.local", m.SRV)), m.PORT))
     assert struct.unpack("!HHH", out[0][4][:6])[2] == 445
@@ -93,16 +94,16 @@ def test_the_web_page_and_file_server_are_advertised():
 def test_announcing_and_saying_goodbye():
     r = responder()
     hello, bye = records(r.announcement()), records(r.announcement(goodbye=True))
-    assert {x[0] for x in hello if x[1] == m.A} == {"zettnas.local", "oldname.local"}
+    assert {x[0] for x in hello if x[1] == m.A} == {"homenas.local", "oldname.local"}
     assert all(x[3] == 0 for x in bye) and len(bye) == len(hello)
 
 
 def test_another_device_with_the_name_is_noticed():
     r = responder()
     theirs = struct.pack("!HHHHHH", 0, 0x8400, 0, 1, 0, 0) + m.record(
-        "zettnas.local", m.A, 120, socket.inet_aton("192.168.1.99")
+        "homenas.local", m.A, 120, socket.inet_aton("192.168.1.99")
     )
-    mine = struct.pack("!HHHHHH", 0, 0x8400, 0, 1, 0, 0) + m.record("zettnas.local", m.A, 120, socket.inet_aton(IP))
+    mine = struct.pack("!HHHHHH", 0, 0x8400, 0, 1, 0, 0) + m.record("homenas.local", m.A, 120, socket.inet_aton(IP))
     assert r.taken_by_other(theirs) and not r.taken_by_other(mine) and not r.taken_by_other(b"junk")
 
 
@@ -110,18 +111,18 @@ def test_another_device_with_the_name_is_noticed():
 class FakeDocker:
     def __init__(self, me=None):
         self.me = me or {
-            "Config": {"Image": "ghcr.io/x/zettnas-toolkit:sha-abc"},
+            "Config": {"Image": "ghcr.io/x/kiboto:sha-abc"},
             "HostConfig": {"NetworkMode": "bridge", "PortBindings": {"8082/tcp": [{"HostPort": "8090"}]}},
         }
         self.box = None
-        self.old = None  # the zettnas-name container from before the rebrand
+        self.old = None  # the responder's container from before the rebrand
         self.calls = []
 
     def __call__(self, method, path, body=None, headers=None):
         self.calls.append((method, path.split("?")[0]))
         if path.startswith(f"/containers/{nas_name.CONTAINER}/json"):
             return (200, self.box) if self.box else (404, {})
-        if path.startswith("/containers/zettnas-name"):
+        if path.startswith(f"/containers/{legacy_names.OLD_NAME_CONTAINER}"):
             if path.endswith("/json"):
                 return (200, self.old) if self.old else (404, {})
             if method == "DELETE":
@@ -170,7 +171,7 @@ def test_off_until_turned_on_then_with_the_products_name(docker):
     }
     cmd = docker.box["Config"]["Cmd"]
     assert cmd == [nas_name.RESPONDER, "--names", "kiboto", "--label", "Kiboto", "--http-port", "8090"]
-    assert docker.box["Config"]["Image"] == "ghcr.io/x/zettnas-toolkit:sha-abc"
+    assert docker.box["Config"]["Image"] == "ghcr.io/x/kiboto:sha-abc"
     assert docker.box["Config"]["HostConfig"]["NetworkMode"] == "host"
     calls = len(docker.calls)
     assert nas_name.ensure()["running"] and not any(c[0] == "POST" for c in docker.calls[calls:])  # nothing to do
@@ -183,7 +184,7 @@ def test_a_rename_keeps_the_old_name_answering_and_an_update_recreates(docker):
     assert st["name"] == "smith-nas" and st["also_answers"] == ["kiboto"]
     cmd = docker.box["Config"]["Cmd"]
     assert cmd[cmd.index("--names") + 1] == "smith-nas,kiboto" and cmd[cmd.index("--label") + 1] == "smith-nas"
-    docker.me["Config"]["Image"] = "ghcr.io/x/zettnas-toolkit:sha-new"
+    docker.me["Config"]["Image"] = "ghcr.io/x/kiboto:sha-new"
     nas_name.ensure()
     assert (
         docker.box["Config"]["Image"].endswith("sha-new")
@@ -194,15 +195,19 @@ def test_a_rename_keeps_the_old_name_answering_and_an_update_recreates(docker):
 
 
 def test_after_the_rebrand_the_old_product_name_no_longer_answers(docker):
-    # turned on before the rebrand: the default "zettnas" was saved, and its container still runs
+    # turned on before the rebrand: the default name of then was saved, and its container still runs
     import json
 
     with open(nas_name.STATE_FILE, "w") as f:
-        json.dump({"enabled": True, "name": "zettnas", "previous": ["zettnas", "attic"]}, f)
+        json.dump(
+            {"enabled": True, "name": legacy_names.OLD_NAS_NAME, "previous": [legacy_names.OLD_NAS_NAME, "attic"]}, f
+        )
     docker.old = {"State": {"Running": True}}
     st = nas_name.ensure()
     assert st["name"] == "kiboto" and st["also_answers"] == ["attic"] and st["address"] == "kiboto.local"
-    assert docker.old is None and ("DELETE", "/containers/zettnas-name") in docker.calls  # one responder
+    assert (
+        docker.old is None and ("DELETE", f"/containers/{legacy_names.OLD_NAME_CONTAINER}") in docker.calls
+    )  # one responder
     cmd = docker.box["Config"]["Cmd"]
     assert cmd[cmd.index("--names") + 1] == "kiboto,attic" and cmd[cmd.index("--label") + 1] == "Kiboto"
     # a name the family chose stays theirs
@@ -393,9 +398,9 @@ def test_probing_finds_a_free_name_or_one_taken_by_another_device():
     r = responder()
     free = FakeSocket([])
     assert m.probe(free, r) is True and len(free.sent) == 3
-    assert m.parse_query(free.sent[0][0])[1][0] == ("zettnas.local", m.ANY, 0x8001)
+    assert m.parse_query(free.sent[0][0])[1][0] == ("homenas.local", m.ANY, 0x8001)
     theirs = struct.pack("!HHHHHH", 0, 0x8400, 0, 1, 0, 0) + m.record(
-        "zettnas.local", m.A, 120, socket.inet_aton("192.168.1.99")
+        "homenas.local", m.A, 120, socket.inet_aton("192.168.1.99")
     )
     assert m.probe(FakeSocket([theirs]), r) is False
 
@@ -503,7 +508,7 @@ def test_the_link_listens_on_the_group_and_sends_from_the_nas_address(monkeypatc
 
 
 def test_time_machine_shares_are_announced_as_backup_disks():
-    r = m.Responder(["zettnas"], IP, 8082, "Kiboto", smb=True, timemachine=["Backups", "Mac", ""])
+    r = m.Responder(["homenas"], IP, 8082, "Kiboto", smb=True, timemachine=["Backups", "Mac", ""])
     inst, port, text = r.services()["_adisk._tcp.local"]
     assert inst == "Kiboto._adisk._tcp.local" and port == 9
     assert b"sys=waMa=0,adVF=0x100" in text
@@ -511,12 +516,12 @@ def test_time_machine_shares_are_announced_as_backup_disks():
     out = records(r.reply(query(("_adisk._tcp.local", m.PTR)), 5353))
     assert any(name == "_adisk._tcp.local" and rtype == m.PTR for name, rtype, *_ in out)
     assert any(rtype == m.SRV and name == inst for name, rtype, *_ in out)
-    no_smb = m.Responder(["zettnas"], IP, 8082, "Kiboto", smb=False, timemachine=["Backups"])
+    no_smb = m.Responder(["homenas"], IP, 8082, "Kiboto", smb=False, timemachine=["Backups"])
     assert "_adisk._tcp.local" not in no_smb.services()
     assert "_adisk._tcp.local" not in responder().services()
 
 
-def test_only_zettnas_own_samba_counts_for_time_machine(monkeypatch):
+def test_only_kibotos_own_samba_counts_for_time_machine(monkeypatch):
     from backend.services import samba_engine
 
     class Share:
@@ -609,7 +614,7 @@ def test_windows_is_answered_only_where_kiboto_serves_the_files(tmp_path, monkey
     monkeypatch.setattr("backend.config.DATA_DIR", str(tmp_path))
     cmd = nas_name.desired({}, cfg)["Cmd"]
     assert cmd[-5:] == ["--windows", "--workgroup", "WORKGROUP", "--device", "familynas"]  # no mark yet: the name
-    (tmp_path / ".zettnas-data-id").write_text("box-1234\n")
+    (tmp_path / legacy_names.OLD_DATA_MARKER).write_text("box-1234\n")
     assert nas_name.device_seed() == "box-1234" and nas_name.desired({}, cfg)["Cmd"][-1] == "box-1234"
 
     def broken():

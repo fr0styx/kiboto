@@ -34,10 +34,10 @@ def test_default_notification_config():
 
 
 def test_save_and_load_notification_config():
-    save_notification_config({"enabled": True, "ntfy_topic": "zettnas-test"})
+    save_notification_config({"enabled": True, "ntfy_topic": "kiboto-test"})
     loaded = load_notification_config()
     assert loaded["enabled"] is True
-    assert loaded["ntfy_topic"] == "zettnas-test"
+    assert loaded["ntfy_topic"] == "kiboto-test"
     # Defaults preserved
     assert loaded["notify_on_fan"] is True
 

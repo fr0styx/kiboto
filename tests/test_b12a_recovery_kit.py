@@ -50,7 +50,7 @@ def test_a_cloud_kit_carries_its_rclone_settings(env, tmp_path, monkeypatch):
     conf = tmp_path / "rclone.conf"
     conf.write_text("[mycloud]\ntype = b2\naccount = abc\nkey = secret\n\n[other]\ntype = s3\n")
     monkeypatch.setattr(ob, "RCLONE_CONFIG_FILE", str(conf))
-    _repo(env, "cloud", "rclone:mycloud:zettnas")
+    _repo(env, "cloud", "rclone:mycloud:kiboto")
     kit = ob.recovery_kit("cloud")
     assert "[mycloud]" in kit and "account = abc" in kit and "[other]" not in kit
     assert "export RCLONE_CONFIG=./rclone.conf" in kit

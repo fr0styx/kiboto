@@ -189,9 +189,9 @@ def test_a_progress_line_it_cannot_read_is_skipped(fake):
 
 def test_a_backup_on_the_same_storage_is_flagged(env, monkeypatch):
     fam = str(env / "family")
-    assert ob.same_disk(str(env / "backups" / "zettnas"), [fam])  # not made yet: its parent counts
-    assert not ob.same_disk("/mnt/disks/usb/zettnas", [fam])
-    assert not ob.same_disk("rclone:cloud:zettnas", [fam])
+    assert ob.same_disk(str(env / "backups" / "kiboto"), [fam])  # not made yet: its parent counts
+    assert not ob.same_disk("/mnt/disks/usb/kiboto", [fam])
+    assert not ob.same_disk("rclone:cloud:kiboto", [fam])
     assert ob.save_repo("local", "x", str(env / "backups"), [fam], hour=None)["same_disk"] is True
     assert {r["id"]: r for r in ob.list_repos()}["local"]["same_disk"] is True
     monkeypatch.setattr(ob, "_device", lambda p: 1 if "backups" in p else 2)

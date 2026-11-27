@@ -14,6 +14,7 @@ import httpx
 import pytest
 from starlette.testclient import TestClient
 
+from backend import legacy_names
 from backend.services import ip_block, sftp_engine, sftp_front, webdav_engine, webdav_front
 
 CLIENT = ("203.0.113.9", 50000)
@@ -321,12 +322,12 @@ def test_an_old_sidecar_is_recreated_with_the_front(monkeypatch):
 
     def docker(method, path, body=None, **kw):
         calls.append((method, path, body))
-        if path == "/containers/zettnas-sftp/json":
+        if path == f"/containers/{legacy_names.OLD_SFTP}/json":
             return 404, {}
         if path == "/containers/kiboto-sftp/json":
             return 200, {"State": {"Running": True}, "Config": {"Cmd": ["rclone", "serve", "sftp", "--addr", ":2222"]}}
-        if path == "/containers/zettnas-toolkit/json":
-            return 200, {"Config": {"Image": "zettnas:test"}, "HostConfig": {"Binds": []}}
+        if path == f"/containers/{legacy_names.OLD_APP_CONTAINER}/json":
+            return 200, {"Config": {"Image": "kiboto:test"}, "HostConfig": {"Binds": []}}
         if path.endswith("/start"):
             return 204, {}
         return 201, {}
@@ -344,28 +345,28 @@ def test_a_current_sidecar_is_kept(monkeypatch):
 
     def docker(method, path, body=None, **kw):
         calls.append((method, path))
-        if path == "/containers/zettnas-sftp/json":
+        if path == f"/containers/{legacy_names.OLD_SFTP}/json":
             return 404, {}
         return 200, {"State": {"Running": True}, "Config": {"Cmd": sftp_engine._front_cmd(2222)}}
 
     monkeypatch.setattr("backend.services.container_mutator._docker_request", docker)
     monkeypatch.setattr(sftp_engine, "docker_sock", lambda: __file__)
     assert sftp_engine.get_sftp_engine()._start_sidecar(2222)
-    assert calls == [("GET", "/containers/zettnas-sftp/json"), ("GET", "/containers/kiboto-sftp/json")]
+    assert calls == [("GET", f"/containers/{legacy_names.OLD_SFTP}/json"), ("GET", "/containers/kiboto-sftp/json")]
 
 
 def test_a_sidecar_made_before_the_rebrand_is_replaced(monkeypatch):
-    """Until 2.2 (legacy_names): zettnas-sftp goes and kiboto-sftp takes its place."""
+    """Until 2.2 (legacy_names): the SFTP sidecar named before the rebrand goes and kiboto-sftp takes its place."""
     calls = []
 
     def docker(method, path, body=None, **kw):
         calls.append((method, path, body))
-        if path == "/containers/zettnas-sftp/json":
+        if path == f"/containers/{legacy_names.OLD_SFTP}/json":
             return 200, {"State": {"Running": True}}
         if path == "/containers/kiboto-sftp/json":
             return 404, {}
-        if path == "/containers/zettnas-toolkit/json":
-            return 200, {"Config": {"Image": "zettnas:test"}, "HostConfig": {"Binds": []}}
+        if path == f"/containers/{legacy_names.OLD_APP_CONTAINER}/json":
+            return 200, {"Config": {"Image": "kiboto:test"}, "HostConfig": {"Binds": []}}
         if path.endswith("/start"):
             return 204, {}
         return 201, {}
@@ -373,7 +374,7 @@ def test_a_sidecar_made_before_the_rebrand_is_replaced(monkeypatch):
     monkeypatch.setattr("backend.services.container_mutator._docker_request", docker)
     monkeypatch.setattr(sftp_engine, "docker_sock", lambda: __file__)
     assert sftp_engine.get_sftp_engine()._start_sidecar(2222)
-    assert ("DELETE", "/containers/zettnas-sftp?force=true", None) in calls
+    assert ("DELETE", f"/containers/{legacy_names.OLD_SFTP}?force=true", None) in calls
     assert any(p == "/containers/create?name=kiboto-sftp" for _, p, _ in calls)
 
 

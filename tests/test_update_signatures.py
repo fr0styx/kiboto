@@ -8,6 +8,7 @@ import os
 import httpx
 import pytest
 
+from backend import legacy_names
 from backend.services import image_signature as sig
 
 pytestmark = pytest.mark.real_signatures
@@ -32,7 +33,7 @@ def verifier():
 def test_a_real_ci_signature_verifies(verifier):
     identity = sig.verify_bundle(_bundle(), DIGEST, verifier)
     # a real bundle CI made before the repository was renamed: it names the old identity
-    assert identity == "https://github.com/fr0styx/zettnas-toolkit/.github/workflows/ci.yml@refs/heads/main"
+    assert identity == f"https://github.com/{legacy_names.OLD_GITHUB_REPO}/.github/workflows/ci.yml@refs/heads/main"
 
 
 def test_the_signature_must_name_this_digest(verifier):
@@ -57,7 +58,7 @@ def test_a_changed_statement_fails(verifier):
         ("https://github.com/fr0styx/kiboto/.github/workflows/ci.yml@refs/tags/v1.9.4", True),
         ("https://github.com/fr0styx/kiboto/.github/workflows/ci.yml@refs/heads/feature", False),
         ("https://github.com/fr0styx/kiboto/.github/workflows/promote.yml@refs/heads/main", False),
-        ("https://github.com/someone/zettnas-toolkit/.github/workflows/ci.yml@refs/heads/main", False),
+        ("https://github.com/someone/kiboto/.github/workflows/ci.yml@refs/heads/main", False),
         ("https://github.com/fr0styx/kiboto/.github/workflows/ci.yml@refs/heads/main/x", False),
     ],
 )

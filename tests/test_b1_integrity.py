@@ -92,7 +92,7 @@ def test_implausible_chunk_counts_and_full_disks_are_refused(client, auth_header
 async def test_abandoned_uploads_expire(updir):
     from backend.api import fs as fs_api
 
-    stage = os.path.join(updir, ".zettnas_staging_old")
+    stage = os.path.join(updir, ".kiboto_staging_old")
     os.makedirs(stage)
     fs_api._CHUNKED_UPLOADS["old"] = {"upload_id": "old", "staging_dir": stage, "created_at": 0}
     await fs_api._expire_uploads()

@@ -35,7 +35,7 @@ def test_get_mesh_vpn_status_container_running():
         {
             "BackendState": "Running",
             "Self": {
-                "HostName": "zettnas-box",
+                "HostName": "kiboto-box",
                 "TailscaleIPs": ["100.80.90.100", "fd7a:115c:a1e0::1"],
             },
             "MagicDNSSuffix": "custom.ts.net",
@@ -57,7 +57,7 @@ def test_get_mesh_vpn_status_container_running():
         assert status["tailscale"]["active"] is True
         assert status["tailscale"]["container_mode"] is True
         assert status["tailscale"]["container_id"] == "abc123def456"
-        assert status["tailscale"]["hostname"] == "zettnas-box"
+        assert status["tailscale"]["hostname"] == "kiboto-box"
         assert status["tailscale"]["ipv4"] == "100.80.90.100"
         assert status["tailscale"]["tailnet"] == "custom.ts.net"
         assert status["tailscale"]["peers_count"] == 2
@@ -86,7 +86,7 @@ def test_get_mesh_vpn_status_exit_node_and_routes_separation():
         {
             "BackendState": "Running",
             "Self": {
-                "HostName": "zettnas-box",
+                "HostName": "kiboto-box",
                 "TailscaleIPs": ["100.80.90.100"],
                 "ExitNodeOption": False,
                 "ExitNode": False,

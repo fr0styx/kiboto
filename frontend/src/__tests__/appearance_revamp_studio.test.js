@@ -223,7 +223,7 @@ describe('Appearance Studio & Desktop Personalization Revamp Suite', () => {
 
     // Test with valid theme bundle
     const validBundle = {
-      app: 'zettnas-toolkit',
+      app: 'kiboto-toolkit',
       format: 'kiboto-theme',
       version: 1,
       theme: 'emerald',

@@ -58,7 +58,7 @@ class Opener:
 
 def test_s3_bucket_lock(rclone_conf):
     o = Opener([(200, LOCKED_XML)])
-    res = ol.check("rclone:wasabi:family-backup/zettnas", o, rclone_conf)
+    res = ol.check("rclone:wasabi:family-backup/kiboto", o, rclone_conf)
     assert res == {"enabled": True, "mode": "COMPLIANCE", "days": 30, "bucket": "family-backup", "ok": True}
     req = o.requests[0]
     assert req.full_url == "https://s3.eu-central-1.wasabisys.com/family-backup?object-lock="
@@ -113,7 +113,7 @@ def test_b2_file_lock(rclone_conf):
         },
     }
     o = Opener(_b2(lock))
-    res = ol.check("rclone:b2cloud:photos-locked/zettnas", o, rclone_conf)
+    res = ol.check("rclone:b2cloud:photos-locked/kiboto", o, rclone_conf)
     assert res["ok"] and res["mode"] == "COMPLIANCE" and res["days"] == 30
     assert o.requests[0].full_url == ol.B2_AUTH_URL and o.requests[0].get_header("Authorization").startswith("Basic ")
     list_req = o.requests[1]
@@ -179,9 +179,9 @@ def offsite(tmp_path, monkeypatch):
 
 
 def test_a_cloud_backup_keeps_its_lock_period(offsite):
-    repo = offsite.save_repo("cloud", "Cloud", "rclone:b2cloud:locked/zettnas", ["/mnt/user/photos"], lock_days=30)
+    repo = offsite.save_repo("cloud", "Cloud", "rclone:b2cloud:locked/kiboto", ["/mnt/user/photos"], lock_days=30)
     assert repo["lock_days"] == 30 and repo["locked_until"] is None
-    usb = offsite.save_repo("usb", "USB", "/mnt/disks/usb/zettnas", ["/mnt/user/photos"], lock_days=30)
+    usb = offsite.save_repo("usb", "USB", "/mnt/disks/usb/kiboto", ["/mnt/user/photos"], lock_days=30)
     assert usb["lock_days"] == 0  # only a cloud bucket can lock
     assert offsite._forget_args(offsite.DEFAULT_KEEP, 30)[:2] == ["--keep-within", "30d"]
     assert "--keep-within" not in offsite._forget_args(offsite.DEFAULT_KEEP)
@@ -195,14 +195,14 @@ def test_forget_keeps_everything_inside_the_lock(offsite, monkeypatch):
 
 
 def test_check_lock_is_stored_and_survives_an_edit(offsite, monkeypatch):
-    offsite.save_repo("cloud", "Cloud", "rclone:b2cloud:locked/zettnas", ["/mnt/user/photos"], lock_days=30)
+    offsite.save_repo("cloud", "Cloud", "rclone:b2cloud:locked/kiboto", ["/mnt/user/photos"], lock_days=30)
     monkeypatch.setattr(ol, "check", lambda location: {"ok": True, "enabled": True, "mode": "COMPLIANCE", "days": 30})
     res = offsite.check_lock("cloud")
     assert res["ok"] and res["at"] <= time.time()
     assert offsite.get_repo("cloud")["lock_check"]["days"] == 30
-    offsite.save_repo("cloud", "Cloud 2", "rclone:b2cloud:locked/zettnas", ["/mnt/user/photos"], lock_days=30)
+    offsite.save_repo("cloud", "Cloud 2", "rclone:b2cloud:locked/kiboto", ["/mnt/user/photos"], lock_days=30)
     assert offsite.get_repo("cloud")["lock_check"]["mode"] == "COMPLIANCE"
-    offsite.save_repo("cloud", "Cloud", "rclone:b2cloud:other/zettnas", ["/mnt/user/photos"], lock_days=30)
+    offsite.save_repo("cloud", "Cloud", "rclone:b2cloud:other/kiboto", ["/mnt/user/photos"], lock_days=30)
     assert offsite.get_repo("cloud")["lock_check"] is None  # a new bucket is checked again
 
     def refuse(location):
@@ -220,7 +220,7 @@ def test_api(client, auth_headers, offsite, monkeypatch):
     body = {
         "id": "cloud",
         "name": "Cloud",
-        "location": "rclone:b2cloud:locked/zettnas",
+        "location": "rclone:b2cloud:locked/kiboto",
         "paths": ["/mnt/user/photos"],
         "lock_days": 30,
     }

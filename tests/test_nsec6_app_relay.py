@@ -5,7 +5,7 @@ import ipaddress
 from backend.services import ip_block
 
 
-def test_an_app_on_zettnas_network_isnt_blocked(monkeypatch):
+def test_an_app_on_kiboto_network_isnt_blocked(monkeypatch):
     ip_block._reset_for_tests()
     monkeypatch.setattr(ip_block, "_app_networks", lambda: (ipaddress.ip_network("172.20.0.0/16"),))
     for _ in range(ip_block.FAIL_LIMIT + 5):
@@ -15,7 +15,7 @@ def test_an_app_on_zettnas_network_isnt_blocked(monkeypatch):
     assert blocked[-1] is True  # a LAN address is still blocked as before
 
 
-def test_the_network_comes_from_zettnas_container(monkeypatch):
+def test_the_network_comes_from_kiboto_container(monkeypatch):
     from backend.services import docker_client
 
     monkeypatch.setattr(ip_block, "_app_net", {"at": -1e9, "net": ()})
@@ -23,7 +23,7 @@ def test_the_network_comes_from_zettnas_container(monkeypatch):
         "NetworkSettings": {
             "Networks": {
                 "bridge": {"IPAddress": "172.17.0.2", "IPPrefixLen": 16},
-                "zettnas_default": {"IPAddress": "172.20.0.3", "IPPrefixLen": 16},
+                "kiboto_default": {"IPAddress": "172.20.0.3", "IPPrefixLen": 16},
             }
         }
     }

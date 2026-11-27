@@ -653,7 +653,7 @@ describe('Notification Center Draggable Window & Event Detail Inspector', () => 
     });
   });
 
-  it('openManagementWindow applies desired section and cleans up zettnas-mgmt-early-style without flashing HUB', () => {
+  it('openManagementWindow applies desired section and cleans up kiboto-mgmt-early-style without flashing HUB', () => {
     // Set up minimal DOM for Management window
     document.body.innerHTML = `
       <style id="kiboto-mgmt-early-style">.test { color: red; }</style>

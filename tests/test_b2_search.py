@@ -155,8 +155,8 @@ def test_the_benchmark_finds_the_openai_compatible_endpoint(monkeypatch):
     from backend.services import model_benchmark, rag_engine
 
     eng = rag_engine.get_rag_engine()
-    monkeypatch.setattr(eng, "get_config", lambda: {"llm_endpoint": "http://zettnas-ovms:8000/v1/"})
-    assert model_benchmark._openai_endpoint() == "http://zettnas-ovms:8000/v1"
+    monkeypatch.setattr(eng, "get_config", lambda: {"llm_endpoint": "http://kiboto-ovms:8000/v1/"})
+    assert model_benchmark._openai_endpoint() == "http://kiboto-ovms:8000/v1"
     monkeypatch.setattr(eng, "get_config", lambda: {"llm_endpoint": "http://ollama:11434"})
     assert model_benchmark._openai_endpoint() == ""
 

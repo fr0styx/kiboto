@@ -10,7 +10,7 @@ import pytest
 from backend.services import ai_chat_agent
 from backend.services.chat_context import EndpointRegistry
 
-OVMS = "http://zettnas-ovms:8000/v1"
+OVMS = "http://kiboto-ovms:8000/v1"
 TOOLS = [{"type": "function", "function": {"name": "restart_container", "parameters": {"type": "object"}}}]
 
 
@@ -40,7 +40,7 @@ def net(monkeypatch):
     def urlopen(req, timeout=None):
         url = req.full_url if hasattr(req, "full_url") else str(req)
         body = json.loads(req.data) if getattr(req, "data", None) else None
-        if "zettnas-ovms" in url:
+        if "kiboto-ovms" in url:
             if not state["ovms_up"]:
                 raise urllib.error.URLError("connection refused")
             if url.endswith("/models"):

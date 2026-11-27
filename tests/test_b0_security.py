@@ -41,7 +41,7 @@ def data_alias(paths):
     """The data folder seen a second time inside the pool, as on Unraid (/mnt/user/appdata/...)."""
     fsutil.reset_protected_dirs()
     marker_id = fsutil._data_marker(os.path.realpath(paths["data"]))
-    app_dir = os.path.join(paths["pool"], "appdata", "zettnas-toolkit")
+    app_dir = os.path.join(paths["pool"], "appdata", "kiboto-toolkit")
     alias = os.path.join(app_dir, "data")
     os.makedirs(alias, exist_ok=True)
     with open(os.path.join(alias, fsutil.DATA_MARKER), "w") as f:
@@ -76,7 +76,7 @@ def test_walks_and_rclone_servers_skip_the_data_folder(data_alias, paths):
         seen += [os.path.join(root, f) for f in files]
     assert not any("users.db" in f for f in seen)
     flags = fsutil.protected_rclone_excludes(pool)
-    assert "/appdata/zettnas-toolkit/**" in flags and "/appdata/zettnas-toolkit/data/**" in flags
+    assert "/appdata/kiboto-toolkit/**" in flags and "/appdata/kiboto-toolkit/data/**" in flags
 
 
 def test_admins_cannot_open_or_list_the_data_folder(data_alias, paths, client, auth_headers):
@@ -84,7 +84,7 @@ def test_admins_cannot_open_or_list_the_data_folder(data_alias, paths, client, a
 
     listing = _handle_browse_logic_unfiltered(os.path.join(paths["pool"], "appdata"), dirs_only=False)
     names = [e["name"] for e in listing["dirs"]]
-    assert "plex" in names and "zettnas-toolkit" not in names
+    assert "plex" in names and "kiboto-toolkit" not in names
     r = client.get("/api/fs/download", params={"path": os.path.join(data_alias, "users.db")}, headers=auth_headers)
     assert r.status_code in (403, 404)
 

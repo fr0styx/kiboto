@@ -18,6 +18,7 @@ from typing import Any, Optional
 
 from pydantic import BaseModel, Field
 
+from backend import legacy_names
 from backend.config import HOST_DEV, HOST_PROC, HOST_SYS, POOL_PATH, logger
 from backend.fsutil import atomic_write_json, child_path
 from backend.hardware import fs_quota
@@ -124,8 +125,8 @@ def own_usage(path: str, run) -> tuple[int, int] | None:
     return None
 
 
-ZFS_NAME_PROP = "org.zettnas:name"  # the snapshot's own name: ZFS names can't hold its "@"
-ZFS_HOLD_TAG = "zettnas-worm"  # a hold stops zfs destroy, even by root, until released
+ZFS_NAME_PROP = "org.kiboto:name"  # the snapshot's own name: ZFS names can't hold its "@"
+ZFS_HOLD_TAG = "kiboto-worm"  # a hold stops zfs destroy, even by root, until released
 
 
 def zfs_snapshot_part(name: str) -> str:
@@ -2136,7 +2137,16 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
         if not storage_tools()["zfs"]:
             return []
         code, out, _ = self._run_cmd(
-            ["zfs", "list", "-H", "-p", "-t", "snapshot", "-o", f"name,creation,{ZFS_NAME_PROP}"]
+            [
+                "zfs",
+                "list",
+                "-H",
+                "-p",
+                "-t",
+                "snapshot",
+                "-o",
+                f"name,creation,{ZFS_NAME_PROP},{legacy_names.OLD_ZFS_NAME_PROP}",
+            ]
         )
         if code:
             return []
@@ -2152,8 +2162,10 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
             held = [(len(r), pid) for pid, r in where if mnt and (mnt == r or mnt.startswith(r + "/"))]
             if not held:
                 continue
+            # the snapshot's own name: its property, or the one of before the rebrand until moved
+            own = next((p for p in parts[2:4] if p not in ("", "-")), "")
             item = {
-                "name": parts[2] if parts[2] not in ("", "-") else part,
+                "name": own or part,
                 "path": os.path.join(mnt, ".zfs", "snapshot", part),
                 "created_at": float(parts[1]) if parts[1].isdigit() else 0.0,
                 "pool_id": max(held)[1],
@@ -2266,7 +2278,8 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
         zsnap = next((s for s in self._zfs_snapshots(pool_id) if s["name"] == snapshot_name), None)
         if zsnap:
             self._release_view(zsnap["zfs"])  # a mounted snapshot can't be destroyed
-            self._run_cmd(["zfs", "release", ZFS_HOLD_TAG, zsnap["zfs"]])  # fails when there was no hold
+            for tag in (ZFS_HOLD_TAG, legacy_names.OLD_ZFS_HOLD):  # fails when there was no hold
+                self._run_cmd(["zfs", "release", tag, zsnap["zfs"]])
             code, out, err = self._run_cmd(["zfs", "destroy", zsnap["zfs"]])
             target_path = zsnap["path"]
         else:

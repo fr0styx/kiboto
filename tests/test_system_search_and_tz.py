@@ -4,7 +4,7 @@ from backend.services import status_summary
 from backend.services.rag_engine_search import SYSTEM_PRINCIPAL, RagSearchMixin
 
 
-def test_zettnas_itself_reads_every_indexed_file():
+def test_kiboto_itself_reads_every_indexed_file():
     from backend.services.path_access import indexed_path_checker
 
     assert indexed_path_checker(SYSTEM_PRINCIPAL)("/mnt/user/Family/tax/2021.pdf") is True

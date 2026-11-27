@@ -123,9 +123,9 @@ def test_client_preferences_endpoints(tmp_path, monkeypatch):
     # Save preferences
     payload = {
         "lcd_theme": "cyber",
-        "zettnas_language": "de",
-        "zettnas_desktop_widgets_config": '{"widgets":{"clock":{"enabled":true}}}',
-        "zettnas_win_bounds": '{"console":{"x":100,"y":50}}',
+        "kiboto_language": "de",
+        "kiboto_desktop_widgets_config": '{"widgets":{"clock":{"enabled":true}}}',
+        "kiboto_win_bounds": '{"console":{"x":100,"y":50}}',
     }
     res_post = client.post("/api/system/client-preferences", json=payload, headers=headers)
     assert res_post.status_code == 200

@@ -141,7 +141,7 @@ def test_snapshot_list_and_delete_by_our_own_name(zfs):
         "zfs",
         "snapshot",
         "-o",
-        "org.zettnas:name=photos@auto-20261103T101500Z",
+        "org.kiboto:name=photos@auto-20261103T101500Z",
         "tank/photos@photos-auto-20261103T101500Z",
     ] in fake.calls
     snaps = a.list_snapshots("tank")
@@ -158,7 +158,7 @@ def test_a_locked_snapshot_is_held_until_it_may_go(zfs):
     a._make_share_dir(str(pool / "photos"))
     a.create_snapshot("tank", "photos", "photos@locked", worm_mode="governance", retention_days=7)
     full = "tank/photos@photos-locked"
-    assert ["zfs", "hold", "zettnas-worm", full] in fake.calls and fake.snaps[full][2]
+    assert ["zfs", "hold", "kiboto-worm", full] in fake.calls and fake.snaps[full][2]
     snap = a.list_snapshots("tank")[0]
     assert snap["worm_mode"] == "governance" and snap["is_immutable"]
     with pytest.raises(gl.PlatformCapabilityError):
@@ -168,7 +168,7 @@ def test_a_locked_snapshot_is_held_until_it_may_go(zfs):
     data["retention_until"] = 0
     meta.write_text(json.dumps(data))
     assert a.delete_snapshot("tank", "photos@locked")["status"] == "deleted"
-    assert ["zfs", "release", "zettnas-worm", full] in fake.calls and not fake.snaps and not meta.exists()
+    assert ["zfs", "release", "kiboto-worm", full] in fake.calls and not fake.snaps and not meta.exists()
 
 
 def test_a_hold_that_fails_still_keeps_the_snapshot(zfs):

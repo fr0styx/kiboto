@@ -46,7 +46,7 @@ def clean_ups_state(monkeypatch):
         except Exception:
             pass
     if POOL_PATH:
-        p_mirror = os.path.join(POOL_PATH, ".zettnas", "ups_config.json")
+        p_mirror = os.path.join(POOL_PATH, ".kiboto", "ups_config.json")
         if os.path.exists(p_mirror):
             try:
                 os.remove(p_mirror)
@@ -68,7 +68,7 @@ def clean_ups_state(monkeypatch):
         except Exception:
             pass
     if POOL_PATH:
-        p_mirror = os.path.join(POOL_PATH, ".zettnas", "ups_config.json")
+        p_mirror = os.path.join(POOL_PATH, ".kiboto", "ups_config.json")
         if os.path.exists(p_mirror):
             try:
                 os.remove(p_mirror)

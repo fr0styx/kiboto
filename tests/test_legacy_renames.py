@@ -502,3 +502,56 @@ def test_a_new_versions_start_opens_a_database_keyed_the_way_of_before(tmp_path,
     new = str(tmp_path / "ai_conversations.db")  # a new file takes the current key
     db_crypto.connect(new).execute("CREATE TABLE x (y)")
     assert db_crypto._opens_with(new, db_crypto._KDF_SALT)
+
+
+def test_zfs_snapshots_take_kibotos_marks_and_a_lock_is_never_lifted():
+    old_prop, old_hold = legacy_names.OLD_ZFS_NAME_PROP, legacy_names.OLD_ZFS_HOLD
+    calls = []
+    listing = "tank/a@x\tdaily@auto-1\t-\ntank/a@y\t-\t-\ntank/b@z\tkept\talready\n"
+
+    def run(argv):
+        calls.append(argv)
+        if argv[:2] == ["zfs", "list"]:
+            return 0, listing, ""
+        if argv[:2] == ["zfs", "holds"]:
+            return 0, f"tank/a@x\t{old_hold}\tThu Nov 27\ntank/b@z\tother\tThu\n", ""
+        return 0, "", ""
+
+    assert legacy_names.adopt_zfs_marks(run, "org.kiboto:name", "kiboto-worm") == 2
+    changes = [c for c in calls if c[1] in ("set", "inherit", "hold", "release")]
+    assert changes == [
+        ["zfs", "set", "org.kiboto:name=daily@auto-1", "tank/a@x"],
+        ["zfs", "inherit", old_prop, "tank/a@x"],
+        ["zfs", "hold", "kiboto-worm", "tank/a@x"],
+        ["zfs", "release", old_hold, "tank/a@x"],
+    ]
+
+
+def test_a_refused_new_hold_keeps_the_old_one():
+    calls = []
+
+    def run(argv):
+        calls.append(argv)
+        if argv[:2] == ["zfs", "list"]:
+            return 0, "tank/a@x\t-\t-\n", ""
+        if argv[:2] == ["zfs", "holds"]:
+            return 0, f"tank/a@x\t{legacy_names.OLD_ZFS_HOLD}\tThu\n", ""
+        return (1, "", "permission denied") if argv[1] == "hold" else (0, "", "")
+
+    assert legacy_names.adopt_zfs_marks(run, "org.kiboto:name", "kiboto-worm") == 0
+    assert not [c for c in calls if c[1] == "release"]
+    assert legacy_names.adopt_zfs_marks(lambda argv: (1, "", "no zfs"), "p", "h") == 0
+
+
+def test_the_boot_unit_moves_zfs_marks_only_where_zfs_is(monkeypatch):
+    import shutil
+
+    from backend.services import pools_at_boot
+
+    monkeypatch.setattr(shutil, "which", lambda name: None)
+    assert pools_at_boot.adopt_zfs_marks() == 0
+    seen = []
+    monkeypatch.setattr(shutil, "which", lambda name: "/sbin/zfs")
+    monkeypatch.setattr(legacy_names, "adopt_zfs_marks", lambda run, prop, hold: seen.append((prop, hold)) or 3)
+    assert pools_at_boot.adopt_zfs_marks() == 3 and seen == [("org.kiboto:name", "kiboto-worm")]
+    assert pools_at_boot._PROGRAMS["zfs"] == "zfs"

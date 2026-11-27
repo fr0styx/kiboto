@@ -73,6 +73,8 @@ OLD_CREDENTIAL_NAME = "zettnas-data-key"  # systemd credential holding the data 
 OLD_BOX_KEY_START = b"zettnas-secret-box-v1:"  # sealed values ("enc1:"): re-sealed once as "enc2:"
 OLD_BOX_AAD = b"zettnas:mfa_secret:v1"
 OLD_RECOVERY_START = "zettnas:recovery:"  # recovery codes made before: accepted until used or made again
+OLD_ZFS_NAME_PROP = "org.zettnas:name"  # a ZFS snapshot's own name: copied to the new property once, as root
+OLD_ZFS_HOLD = "zettnas-worm"  # a locked snapshot's hold: the new one is placed before this one is released
 OLD_BACKUP_TAG = "zettnas"  # the restic tag on off-site file backups made before: retagged once per repo
 OLD_RESTIC_HOST_START = "zettnas-"  # the restic host of backups made before: kept hex, moved once per repo
 OLD_LOG_FILE = "zettnas.log"  # the log file and its rotations carry on under the new name
@@ -228,3 +230,33 @@ def rename_index_models(conn, lexical: str, unified: str) -> int:
     if row and OLD_LEXICAL_MODEL in str(row[0] or ""):
         conn.execute("DROP INDEX idx_files_fallback_vectors")
     return changed
+
+
+def adopt_zfs_marks(run, name_prop: str, hold: str) -> int:
+    """ZFS snapshots marked before the rebrand take Kiboto's marks, as root (the boot unit on Kiboto
+    OS, Kiboto itself where it is root): the snapshot's own name moves to `name_prop`, and a locked
+    snapshot gets `hold` before the old hold is released, so it is never without one. `run(argv)`
+    returns (code, stdout, stderr). Returns how many marks moved."""
+    code, out, _ = run(["zfs", "list", "-H", "-t", "snapshot", "-o", f"name,{OLD_ZFS_NAME_PROP},{name_prop}"])
+    if code:
+        return 0
+    moved, snaps = 0, []
+    for line in out.splitlines():
+        parts = line.split("\t")
+        if len(parts) < 3:
+            continue
+        snaps.append(parts[0])
+        if parts[1] not in ("", "-") and parts[2] in ("", "-"):
+            if run(["zfs", "set", f"{name_prop}={parts[1]}", parts[0]])[0] == 0:
+                run(["zfs", "inherit", OLD_ZFS_NAME_PROP, parts[0]])
+                moved += 1
+    if not snaps:
+        return moved
+    code, out, _ = run(["zfs", "holds", "-H", *snaps])
+    for line in out.splitlines() if code == 0 else []:
+        parts = line.split("\t")
+        if len(parts) >= 2 and parts[1] == OLD_ZFS_HOLD:
+            if run(["zfs", "hold", hold, parts[0]])[0] == 0:  # never released before the new hold is there
+                run(["zfs", "release", OLD_ZFS_HOLD, parts[0]])
+                moved += 1
+    return moved

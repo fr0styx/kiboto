@@ -54,16 +54,16 @@ def test_a_new_sync_pair_never_replaces_another(tmp_path, monkeypatch):
     assert tws.save_pair("sync-2", "工作文件", "/mnt/user/Work", "gdrive:work2", check=ok)["id"] == "sync-2"
 
 
-def test_a_folder_that_contains_zettnas_data_is_host_access(monkeypatch):
+def test_a_folder_that_contains_kiboto_data_is_host_access(monkeypatch):
     from backend import docker_proxy
 
-    monkeypatch.setattr(docker_proxy, "_app_folders", lambda: ["/mnt/user/appdata/zettnas/data"])
+    monkeypatch.setattr(docker_proxy, "_app_folders", lambda: ["/mnt/user/appdata/kiboto/data"])
     assert docker_proxy._risky_host_path("/mnt/user/appdata") == "/mnt/user/appdata"
     assert docker_proxy._risky_host_path("/mnt/user") == "/mnt/user"
     assert docker_proxy._risky_host_path("/mnt/user/Family") is None
 
 
-def test_the_share_picker_leaves_out_system_shares_and_zettnas_data(tmp_path, monkeypatch):
+def test_the_share_picker_leaves_out_system_shares_and_kiboto_data(tmp_path, monkeypatch):
     from types import SimpleNamespace
 
     from backend.hardware import pal_storage
@@ -71,12 +71,12 @@ def test_the_share_picker_leaves_out_system_shares_and_zettnas_data(tmp_path, mo
 
     for n in ("Family", "appdata", "Everything", "system"):
         (tmp_path / n).mkdir()
-    (tmp_path / "Everything" / "zettnas-data").mkdir()
+    (tmp_path / "Everything" / "kiboto-data").mkdir()
     listed = [
         SimpleNamespace(name=n, mountpoint=str(tmp_path / n)) for n in ("Family", "appdata", "Everything", "system")
     ]
     monkeypatch.setattr(pal_storage, "get_storage_platform", lambda: SimpleNamespace(list_shares=lambda: listed))
-    monkeypatch.setattr("backend.fsutil.protected_dirs", lambda: [str(tmp_path / "Everything" / "zettnas-data")])
+    monkeypatch.setattr("backend.fsutil.protected_dirs", lambda: [str(tmp_path / "Everything" / "kiboto-data")])
     assert app_catalog.share_mounts() == {"Family": str(tmp_path / "Family")}
 
 
@@ -84,4 +84,4 @@ def test_webdav_and_sftp_hide_the_encrypted_files():
     from backend.fsutil import protected_rclone_excludes
 
     flags = protected_rclone_excludes("/mnt/user")
-    assert "**/.zettnas-encrypted/**" in flags and "**/.zettnas-encrypted" in flags
+    assert "**/.kiboto-encrypted/**" in flags and "**/.kiboto-encrypted" in flags

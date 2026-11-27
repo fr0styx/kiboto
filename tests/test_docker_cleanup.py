@@ -1,5 +1,6 @@
 from unittest.mock import patch
 
+from backend import legacy_names
 from backend.services.app_catalog import get_catalog_app
 from backend.services.docker_cleanup import (
     destroy_container,
@@ -19,9 +20,9 @@ def test_uptime_kuma_uses_the_v2_tag():
 
 
 def test_is_self_container():
-    assert is_self_container("abc123456789", "zettnas-toolkit") is True
-    assert is_self_container("abc123456789", "/zettnas-toolkit") is True
-    assert is_self_container("abc123456789", "zettnas") is True
+    assert is_self_container("abc123456789", legacy_names.OLD_APP_CONTAINER) is True
+    assert is_self_container("abc123456789", "/" + legacy_names.OLD_APP_CONTAINER) is True
+    assert is_self_container("abc123456789", legacy_names.OLD_APP_CONTAINER_NAMES[1]) is True
     assert is_self_container("abc123456789", "/kiboto") is True
     assert is_self_container("112233445566", "uptime-kuma") is False
     assert is_self_container("112233445566", "jellyfin") is False
@@ -30,7 +31,7 @@ def test_is_self_container():
 def test_destroy_container_self_protection():
     with patch(
         "backend.services.docker_cleanup._docker_request",
-        return_value=(200, {"Name": "/zettnas-toolkit", "Id": "self999", "Image": "zettnas:latest"}),
+        return_value=(200, {"Name": "/" + legacy_names.OLD_APP_CONTAINER, "Id": "self999", "Image": "kiboto:latest"}),
     ):
         try:
             destroy_container("self999")

@@ -7,7 +7,7 @@ import httpx
 from backend.services import ai_chat_agent as agent
 from backend.services import rag_rerank
 
-URL = "http://zettnas-xenc:8000/v3/rerank"
+URL = "http://kiboto-xenc:8000/v3/rerank"
 
 
 def _client(scores, seen=None):
@@ -68,7 +68,7 @@ RESULTS = [
 ]
 
 
-def test_zetty_says_not_found_when_no_document_answers(monkeypatch):
+def test_kib_says_not_found_when_no_document_answers(monkeypatch):
     asked = []
     monkeypatch.setattr(agent, "get_rag_engine", lambda: _Engine({"rerank_endpoint": URL}))
     monkeypatch.setattr(rag_rerank, "relevance", lambda q, texts, cfg: asked.append((q, texts)) or 0.0004)

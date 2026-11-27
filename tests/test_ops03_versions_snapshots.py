@@ -88,7 +88,7 @@ class FakeDocker:
 
     def __call__(self, method, path, body=None, timeout=30.0):
         self.calls.append((method, path, body))
-        if method == "GET" and path == "/containers/zettnas-toolkit/json":
+        if method == "GET" and path == "/containers/kiboto-toolkit/json":
             return 200, {
                 "Id": "old123",
                 "Image": "sha256:old",
@@ -108,7 +108,7 @@ class FakeDocker:
 def test_spawn_mounts_the_data_folder_into_the_helper(monkeypatch):
     fake = FakeDocker()
     monkeypatch.setattr(self_updater, "_docker_request", fake)
-    assert self_updater.spawn_self_updater("img:new", "zettnas-toolkit", 0.1)
+    assert self_updater.spawn_self_updater("img:new", "kiboto-toolkit", 0.1)
     create = next(b for m, p, b in fake.calls if p.startswith("/containers/create?name=kiboto-self-updater"))
     assert "/mnt/user/appdata/z/data:/kiboto-data" in create["HostConfig"]["Binds"]
     assert create["Cmd"][-2:] == ["--data-dir", "/kiboto-data"]
@@ -128,7 +128,7 @@ def test_unhealthy_update_restores_the_snapshot(monkeypatch, data):
 
     monkeypatch.setattr(self_updater, "_docker_request", docker)
     with pytest.raises(SystemExit):
-        self_updater.apply_update_from_helper("zettnas-toolkit", "img:new", delay=0.0, data_dir=str(data))
+        self_updater.apply_update_from_helper("kiboto-toolkit", "img:new", delay=0.0, data_dir=str(data))
     assert _rows(data / "users.db") == ["before"]
     snaps = data_snapshot.list_snapshots(str(data))
     assert snaps and snaps[0]["from_version"] == "1.9.1"

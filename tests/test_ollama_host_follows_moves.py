@@ -18,7 +18,7 @@ def test_a_moved_runtime_is_found_again(monkeypatch):
     monkeypatch.setattr(rag, "_CACHED_OLLAMA_HOST", None)
     monkeypatch.setattr(rag, "_CACHED_OLLAMA_UNTIL", 0.0)
     where = {"host": "192.0.2.10"}
-    monkeypatch.setattr("backend.services.ai_endpoints.candidate_hosts", lambda ip: ["zettnas-ollama", "192.0.2.10"])
+    monkeypatch.setattr("backend.services.ai_endpoints.candidate_hosts", lambda ip: ["kiboto-ollama", "192.0.2.10"])
 
     def fake_open(req, timeout=0):
         if where["host"] in req.full_url:
@@ -29,7 +29,7 @@ def test_a_moved_runtime_is_found_again(monkeypatch):
     clock = {"t": 1000.0}
     monkeypatch.setattr(rag.time, "time", lambda: clock["t"])
     assert rag._resolve_ollama_host() == "http://192.0.2.10:11434"
-    where["host"] = "zettnas-ollama"  # moved onto the Docker network
+    where["host"] = "kiboto-ollama"  # moved onto the Docker network
     assert rag._resolve_ollama_host() == "http://192.0.2.10:11434"  # still cached
     clock["t"] += rag.OLLAMA_HOST_RECHECK_SECS + 1
-    assert rag._resolve_ollama_host() == "http://zettnas-ollama:11434"
+    assert rag._resolve_ollama_host() == "http://kiboto-ollama:11434"

@@ -38,12 +38,12 @@ def test_the_preset_follows_the_box(tmp_path, ram_gb, gpu, preset):
 def test_the_container_has_no_port_a_memory_limit_and_its_own_label(tmp_path):
     _, dev = _box_files(tmp_path, 16 * 1048576, gpu=True, npu=True)
     body = ai_pack.create_body(
-        "standard", "/data/kiboto-ai/models", "zettnas_default", "img@sha256:" + "a" * 64, dev=dev
+        "standard", "/data/kiboto-ai/models", "kiboto_default", "img@sha256:" + "a" * 64, dev=dev
     )
     hc = body["HostConfig"]
     assert "PortBindings" not in hc and "ExposedPorts" not in body
-    assert hc["NetworkMode"] == "zettnas_default"
-    assert body["NetworkingConfig"]["EndpointsConfig"]["zettnas_default"]["Aliases"] == ["kiboto-ai"]
+    assert hc["NetworkMode"] == "kiboto_default"
+    assert body["NetworkingConfig"]["EndpointsConfig"]["kiboto_default"]["Aliases"] == ["kiboto-ai"]
     assert hc["Memory"] == 10240 * 1024 * 1024
     assert [d["PathOnHost"] for d in hc["Devices"]] == ["/dev/dri", "/dev/accel/accel0"]
     assert body["Labels"][ai_pack.LABEL] == "standard"
@@ -61,12 +61,12 @@ class FakeDocker:
 
     def __call__(self, method, path, body=None, headers=None):
         self.calls.append((method, path, body))
-        if path in ("/containers/kiboto-ai/json", "/containers/zettnas-ai/json"):
+        if path in ("/containers/kiboto-ai/json", "/containers/kiboto-ai/json"):
             if self.existing is None or path != f"/containers/{self.name}/json":
                 return 404, {}
             return 200, {"Config": {"Labels": self.existing}, "State": {"Running": self.running}}
         if path.startswith("/containers/") and path.endswith("/json"):  # Kiboto itself
-            return 200, {"NetworkSettings": {"Networks": {"zettnas_default": {}}}}
+            return 200, {"NetworkSettings": {"Networks": {"kiboto_default": {}}}}
         if path.startswith("/containers/create"):
             return 201, {"Id": "new"}
         return 204, {}
@@ -178,15 +178,15 @@ def test_the_api_reports_installs_and_uses(client, auth_headers, monkeypatch):
 
 
 def test_a_pack_made_before_the_rebrand_keeps_its_name_folder_and_models(monkeypatch):
-    """Until 2.2 (legacy_names): an existing zettnas-ai stays as it is, so its downloads and the
+    """Until 2.2 (legacy_names): an existing kiboto-ai stays as it is, so its downloads and the
     model names the AI settings point at keep working."""
-    old = FakeDocker(existing={"zettnas.ai-pack": "standard"}, name="zettnas-ai")
+    old = FakeDocker(existing={"kiboto.ai-pack": "standard"}, name="kiboto-ai")
     monkeypatch.setattr(ai_pack, "_docker", old)
-    assert ai_pack.pack_name() == "zettnas-ai"
-    assert ai_pack.reindex_request()["embedding_model"] == "zettnas-embed"
-    assert ai_pack.reindex_request()["embedding_host"] == "http://zettnas-ai:8000/v3"
-    assert ai_pack.is_pack_url("http://zettnas-ai:8000/v1") and ai_pack.is_pack_url("http://kiboto-ai:8000/v1")
+    assert ai_pack.pack_name() == "kiboto-ai"
+    assert ai_pack.reindex_request()["embedding_model"] == "kiboto-embed"
+    assert ai_pack.reindex_request()["embedding_host"] == "http://kiboto-ai:8000/v3"
+    assert ai_pack.is_pack_url("http://kiboto-ai:8000/v1") and ai_pack.is_pack_url("http://kiboto-ai:8000/v1")
     assert not ai_pack.is_pack_url("http://ollama:11434/v1")
-    # someone else's zettnas-ai isn't the pack: a new install is kiboto-ai
-    monkeypatch.setattr(ai_pack, "_docker", FakeDocker(existing={"maintainer": "me"}, name="zettnas-ai"))
+    # someone else's kiboto-ai isn't the pack: a new install is kiboto-ai
+    monkeypatch.setattr(ai_pack, "_docker", FakeDocker(existing={"maintainer": "me"}, name="kiboto-ai"))
     assert ai_pack.pack_name() == "kiboto-ai"

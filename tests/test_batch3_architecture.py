@@ -77,7 +77,7 @@ def test_hyper_backup_encryption_fields_and_snapshot_sourcing(tmp_path, monkeypa
         "source_subvolume": "appdata",
         "destination_type": "remote",
         "remote_name": "b2_vault",
-        "remote_path": "zettnas_backup",
+        "remote_path": "kiboto_backup",
         "encryption_enabled": True,
         "encryption_mode": "rclone_crypt",
         "bandwidth_limit_kbps": 10000,

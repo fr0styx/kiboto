@@ -18,8 +18,8 @@ describe('The reranker in AI settings', () => {
   });
 
   it('shows what is saved and empty fields for what is not', () => {
-    bindCheckersForm(document, { rerank_endpoint: 'http://zettnas-xenc:8000/v3/rerank', rerank_model: null });
-    expect(document.getElementById('ai-rerank-endpoint').value).toBe('http://zettnas-xenc:8000/v3/rerank');
+    bindCheckersForm(document, { rerank_endpoint: 'http://kiboto-xenc:8000/v3/rerank', rerank_model: null });
+    expect(document.getElementById('ai-rerank-endpoint').value).toBe('http://kiboto-xenc:8000/v3/rerank');
     expect(document.getElementById('ai-rerank-model').value).toBe('');
   });
 
@@ -27,12 +27,12 @@ describe('The reranker in AI settings', () => {
     api.post.mockResolvedValue({});
     bindCheckersForm(document, {});
     bindCheckersForm(document, {});
-    document.getElementById('ai-rerank-endpoint').value = ' http://zettnas-xenc:8000/v3/rerank ';
+    document.getElementById('ai-rerank-endpoint').value = ' http://kiboto-xenc:8000/v3/rerank ';
     document.getElementById('ai-rerank-form').dispatchEvent(new Event('submit', { cancelable: true }));
     await tick();
     expect(api.post).toHaveBeenCalledTimes(1);
     expect(api.post).toHaveBeenCalledWith('/api/ai/config', {
-      rerank_endpoint: 'http://zettnas-xenc:8000/v3/rerank',
+      rerank_endpoint: 'http://kiboto-xenc:8000/v3/rerank',
       rerank_model: '',
     });
     expect(showToast).toHaveBeenCalledWith('Reranker saved', 'success');

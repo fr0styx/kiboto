@@ -104,7 +104,7 @@ def test_a_backup_counts_once_it_reached_somewhere_else(monkeypatch):
     assert getting_started._has_backup() is False
     repos.append({"location": "/mnt/user/backups", "last_backup": 1, "last_result": "ok"})  # same pool
     assert getting_started._has_backup() is False
-    repos.append({"location": "/mnt/disks/usb/zettnas", "last_backup": 1, "last_result": "ok"})
+    repos.append({"location": "/mnt/disks/usb/kiboto", "last_backup": 1, "last_result": "ok"})
     assert getting_started._has_backup() is True
     repos.clear()
     jobs.append({"destination_type": "remote", "last_success_at": 2})

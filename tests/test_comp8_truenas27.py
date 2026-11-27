@@ -44,19 +44,19 @@ def test_a_plain_http_address_is_refused_before_the_key_is_sent(monkeypatch):
 def test_with_a_user_the_sign_in_is_login_ex(monkeypatch):
     monkeypatch.setenv("TRUENAS_URL", "https://truenas.local")
     monkeypatch.setenv("TRUENAS_API_KEY", "1-secret")
-    monkeypatch.setenv("TRUENAS_USER", "zettnas")
+    monkeypatch.setenv("TRUENAS_USER", "kiboto")
     ws = _WS({"response_type": "SUCCESS", "user_info": None})
     seen = []
     monkeypatch.setattr(truenas_api, "_open_ws", lambda url: seen.append(url) or ws)
     assert truenas_api._rpc("pool.query") == [{"name": "tank"}]
     assert seen == ["wss://truenas.local/api/current"]
     assert ws.sent[0]["method"] == "auth.login_ex"
-    assert ws.sent[0]["params"] == [{"mechanism": "API_KEY_PLAIN", "username": "zettnas", "api_key": "1-secret"}]
+    assert ws.sent[0]["params"] == [{"mechanism": "API_KEY_PLAIN", "username": "kiboto", "api_key": "1-secret"}]
 
 
 def test_login_ex_that_does_not_succeed_is_a_refusal(monkeypatch):
     monkeypatch.setenv("TRUENAS_URL", "https://truenas.local")
-    monkeypatch.setenv("TRUENAS_USER", "zettnas")
+    monkeypatch.setenv("TRUENAS_USER", "kiboto")
     monkeypatch.setattr(truenas_api, "_open_ws", lambda url: _WS({"response_type": "AUTH_ERR"}))
     with pytest.raises(truenas_api.TrueNASError, match="refused"):
         truenas_api._rpc("pool.query")

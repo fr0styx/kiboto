@@ -201,7 +201,7 @@ class TestFanWatchdog:
         main.fan_watchdog_daemon()
         assert released == []
 
-    def test_idles_where_zettnas_drives_no_fan(self, monkeypatch):
+    def test_idles_where_kiboto_drives_no_fan(self, monkeypatch):
         released, ticks = [], []
         calls = []
 

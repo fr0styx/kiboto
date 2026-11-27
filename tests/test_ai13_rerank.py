@@ -33,7 +33,7 @@ def test_cohere_style_scores_reorder(monkeypatch):
         )
 
     client = httpx.Client(transport=httpx.MockTransport(handler))
-    cfg = {"rerank_endpoint": "http://zettnas-ovms:8000/v3/rerank", "rerank_model": "bge-reranker-v2-m3"}
+    cfg = {"rerank_endpoint": "http://kiboto-ovms:8000/v3/rerank", "rerank_model": "bge-reranker-v2-m3"}
     out = rr.rerank_items("receipt from the hardware store", _items(), cfg, client)
     assert out[0]["title"] == "invoice.pdf" and out[0]["rerank_score"] == 0.97
     assert seen["truncate"] is True

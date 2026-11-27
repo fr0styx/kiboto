@@ -2,6 +2,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from backend import legacy_names
 from backend.services.docker_updates import (
     _check_container_image_update,
     check_all_container_updates,
@@ -92,7 +93,7 @@ def test_update_all_containers_skips_toolkit(mock_single_update, mock_check_all)
     mock_check_all.return_value = {
         "containers": {
             "immich_server": {"name": "immich_server", "has_update": True},
-            "zettnas-toolkit": {"name": "zettnas-toolkit", "has_update": True},
+            legacy_names.OLD_APP_CONTAINER: {"name": legacy_names.OLD_APP_CONTAINER, "has_update": True},
         }
     }
     mock_single_update.return_value = {"status": "success", "new_id": "new_immich"}
@@ -102,7 +103,7 @@ def test_update_all_containers_skips_toolkit(mock_single_update, mock_check_all)
     assert len(res["updated"]) == 1
     assert res["updated"][0]["name"] == "immich_server"
     assert len(res["skipped"]) == 1
-    assert res["skipped"][0]["name"] == "zettnas-toolkit"
+    assert res["skipped"][0]["name"] == legacy_names.OLD_APP_CONTAINER
     mock_single_update.assert_called_once_with("immich_server")
 
 

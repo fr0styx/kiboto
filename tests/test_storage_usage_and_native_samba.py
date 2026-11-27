@@ -256,12 +256,12 @@ def test_turnkey_native_samba_detection_and_sidecar_policy(tmp_path, monkeypatch
         assert "zettos" in reason.lower()
 
 
-def test_troubled_containers_suppresses_zettnas_samba_on_turnkey_os():
-    """Verifies that docker diagnostics does not report zettnas-samba as troubled container on Turnkey OS."""
+def test_troubled_containers_suppresses_kiboto_samba_on_turnkey_os():
+    """Verifies that docker diagnostics does not report kiboto-samba as troubled container on Turnkey OS."""
     mock_containers = [
         {
             "Id": "abc123samba",
-            "Names": ["/zettnas-samba"],
+            "Names": ["/kiboto-samba"],
             "State": "restarting",
             "Status": "Restarting (1) 5 seconds ago",
         },
@@ -290,7 +290,7 @@ def test_troubled_containers_suppresses_zettnas_samba_on_turnkey_os():
         with patch("backend.hardware.pal_storage.StoragePlatformDetector.detect", return_value=PlatformType.ZETTOS):
             diag = collect_docker_diagnostics()
             assert diag["daemon_connected"] is True
-            # crashed-app should be in troubled containers, but zettnas-samba should be suppressed
+            # crashed-app should be in troubled containers, but kiboto-samba should be suppressed
             troubled_names = [c["name"] for c in diag.get("troubled_containers", []) if isinstance(c, dict)]
             assert "crashed-app" in troubled_names
-            assert "zettnas-samba" not in troubled_names
+            assert "kiboto-samba" not in troubled_names

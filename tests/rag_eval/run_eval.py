@@ -566,7 +566,7 @@ def evaluate(
         # without a principal finds nothing, which made the command-line and nightly runs score 0)
         return real_rbac(search_mod.SYSTEM_PRINCIPAL if principal is None else principal, table_alias)
 
-    tmp = tempfile.mkdtemp(prefix="zettnas-rag-eval-")
+    tmp = tempfile.mkdtemp(prefix="kiboto-rag-eval-")
     engine = RagSearchEngine(db_path=os.path.join(tmp, "eval.db"))
     cfg = dict(engine.get_config())
     cfg.update({"embedding_model": model, "respect_standby": False})

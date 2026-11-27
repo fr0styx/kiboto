@@ -27,7 +27,7 @@ describe('Network Manager - Listening Ports Inspector', () => {
         protocol: 'tcp',
         bind_address: '0.0.0.0',
         service: 'Kiboto Web Desktop',
-        container: 'zettnas-toolkit',
+        container: 'kiboto-toolkit',
         state: 'LISTEN',
       },
       {
@@ -49,7 +49,7 @@ describe('Network Manager - Listening Ports Inspector', () => {
     expect(rows[0].textContent).toContain(':8082');
     expect(rows[0].textContent).toContain('TCP');
     expect(rows[0].textContent).toContain('Kiboto Web Desktop');
-    expect(rows[0].textContent).toContain('zettnas-toolkit');
+    expect(rows[0].textContent).toContain('kiboto-toolkit');
 
     expect(rows[1].textContent).toContain(':5353');
     expect(rows[1].textContent).toContain('UDP');
@@ -87,7 +87,7 @@ describe('Network Manager - Listening Ports Inspector', () => {
           protocol: 'tcp',
           bind_address: '0.0.0.0',
           service: 'SMB / CIFS',
-          container: 'zettnas-samba',
+          container: 'kiboto-samba',
           state: 'LISTEN',
         },
       ],

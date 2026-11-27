@@ -16,8 +16,8 @@ def _create(hc):
 @pytest.mark.parametrize(
     "hc, reason",
     [
-        ({"VolumesFrom": ["zettnas-toolkit"]}, "volumes-from"),
-        ({"PidMode": "container:zettnas-toolkit"}, "PidMode=container:"),
+        ({"VolumesFrom": ["kiboto-toolkit"]}, "volumes-from"),
+        ({"PidMode": "container:kiboto-toolkit"}, "PidMode=container:"),
         ({"NetworkMode": "container:abc"}, "NetworkMode=container:"),
         ({"CgroupnsMode": "host"}, "CgroupnsMode=host"),
         (
@@ -48,7 +48,7 @@ def test_ordinary_containers_pass():
 
 
 def test_writing_files_into_a_container_needs_confirmation():
-    ok, msg, _ = dp.check_request("PUT", "/v1.45/containers/zettnas-toolkit/archive?path=/app", {}, b"")
+    ok, msg, _ = dp.check_request("PUT", "/v1.45/containers/kiboto-toolkit/archive?path=/app", {}, b"")
     assert not ok and "confirmation" in msg
     ok, _, _ = dp.check_request("PUT", "/containers/abc/archive?path=/x", {dp.ELEVATED_HEADER: "1"}, b"")
     assert ok
