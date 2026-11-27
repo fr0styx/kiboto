@@ -192,6 +192,10 @@ def ensure_home(username: str, quota_bytes: int = 0) -> dict[str, Any]:
     return {"home": home, "subvolume": created, "fs_quota": held}
 
 
+def _kiboto_into(folder: str) -> None:
+    owned.grant_web_user(folder)
+
+
 def make_home(username: str) -> tuple[str, bool]:
     """The person's folder, made when it is not there; (where, whether a subvolume or dataset)."""
     home = home_of(username)
@@ -200,13 +204,16 @@ def make_home(username: str) -> tuple[str, bool]:
         homes = os.path.dirname(home)
         if not os.path.isdir(homes):
             # a dataset of its own on a ZFS pool: each home under it can then be one, with its own limit
-            fs_quota.zfs_child_dataset(os.path.dirname(homes), os.path.basename(homes))
+            if fs_quota.zfs_child_dataset(os.path.dirname(homes), os.path.basename(homes)):
+                _kiboto_into(homes)  # a new dataset takes no access list from the pool's folder
         os.makedirs(homes, exist_ok=True)
         created = _btrfs(["subvolume", "create", home]) or False
         if not created:  # a ZFS dataset of its own when the homes folder is one (FEAT-10)
             created = bool(fs_quota.zfs_child_dataset(os.path.dirname(home), os.path.basename(home)))
         if not created:
             os.makedirs(home, exist_ok=True)
+        else:
+            _kiboto_into(home)  # a dataset or subvolume of its own: nothing inherited from homes
         try:
             os.chmod(home, 0o770)
         except OSError:

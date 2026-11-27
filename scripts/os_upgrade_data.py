@@ -96,6 +96,14 @@ def pool_and_share(token, password, pool, share, disks, profile, earlier_release
         "erase_existing_data": True,
     }
     code, out = confirmed("POST", "/api/storage/pools", body, token)
+    for _ in range(5):
+        # Kiboto 2.0.8 can still ask for a new password right after it was chosen (seen once in CI):
+        # signed in again, the next request goes through
+        if not (code == 403 and out.get("error") == "password_change_required"):
+            break
+        time.sleep(3)
+        token = sign_in(password)[1] or token
+        code, out = confirmed("POST", "/api/storage/pools", body, token)
     say(code in (200, 201, 202), f"a ZFS pool {pool} on {' and '.join(disks)}", out)
     mount = ""
     for _ in range(60):  # a pool is made in the background on some machines

@@ -3,6 +3,7 @@ the folder's right to write. Kiboto runs as root, so without this a file uploade
 could not be changed over the network share."""
 
 import os
+import types
 
 import pytest
 
@@ -413,3 +414,50 @@ def test_handing_a_home_over_writes_the_private_list_or_the_mode(tmp_path, monke
 
     monkeypatch.setattr(owned.os, "getxattr", none)
     assert owned.to_person(str(home), os.getuid(), os.getgid() + 1) is True and modes == [0o700]
+
+
+def test_a_folder_kiboto_made_as_a_dataset_lets_kibotos_user_in():
+    """A new ZFS dataset or btrfs subvolume takes no access list from the folder it is in: a home made
+    as one was shut to the page (403). The grant is added to the list, or to the one the mode stands for."""
+    plain = owned.with_grant(b"", 0o750, 999)
+    assert plain == _acl(
+        (USER_OBJ, 7, 0xFFFFFFFF),
+        (USER, 7, 999),
+        (GROUP_OBJ, 5, 0xFFFFFFFF),
+        (MASK, 7, 0xFFFFFFFF),
+        (OTHER, 0, 0xFFFFFFFF),
+    )
+    existing = _acl(
+        (USER_OBJ, 7, 0xFFFFFFFF),
+        (USER, 5, 1001),
+        (GROUP_OBJ, 0, 0xFFFFFFFF),
+        (MASK, 0, 0xFFFFFFFF),
+        (OTHER, 0, 0xFFFFFFFF),
+    )
+    assert owned.with_grant(existing, 0o700, 999) == _acl(
+        (USER_OBJ, 7, 0xFFFFFFFF),
+        (USER, 7, 999),
+        (USER, 5, 1001),
+        (GROUP_OBJ, 0, 0xFFFFFFFF),
+        (MASK, 7, 0xFFFFFFFF),
+        (OTHER, 0, 0xFFFFFFFF),
+    )
+
+
+def test_granting_writes_both_lists_and_skips_a_machine_without_that_user(tmp_path, monkeypatch):
+    import pwd
+
+    folder = tmp_path / "homes"
+    folder.mkdir()
+    written = []
+    monkeypatch.setattr(pwd, "getpwnam", lambda name: types.SimpleNamespace(pw_uid=999))
+    monkeypatch.setattr(owned.os, "getxattr", lambda fd, attr: (_ for _ in ()).throw(OSError(61, "No data")))
+    monkeypatch.setattr(owned.os, "setxattr", lambda fd, attr, value: written.append(attr))
+    assert owned.grant_web_user(str(folder)) is True
+    assert written == [owned.ACL_XATTR, owned.ACL_DEFAULT_XATTR]
+
+    def nobody(name):
+        raise KeyError(name)
+
+    monkeypatch.setattr(pwd, "getpwnam", nobody)
+    assert owned.grant_web_user(str(folder)) is False

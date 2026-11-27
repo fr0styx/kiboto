@@ -270,7 +270,11 @@ def test_a_new_homes_folder_on_zfs_is_a_dataset_of_its_own(spaces, monkeypatch):
     )
     shutil.rmtree(spaces.homes_root(), ignore_errors=True)
     monkeypatch.setattr(spaces, "home_of", lambda u: str(spaces.homes_root()) + "/" + u)
+    let_in = []
+    monkeypatch.setattr(spaces, "_kiboto_into", lambda folder: let_in.append(spaces.os.path.basename(folder)))
     assert spaces.ensure_home("teen", 0)["subvolume"] is True and made == ["homes", "teen"]
+    # a new dataset takes no access list from the folder it is in: Kiboto's own user is let in to each
+    assert let_in == ["homes", "teen"]
 
 
 def test_the_limit_is_said_in_a_size_a_person_reads():

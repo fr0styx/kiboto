@@ -243,6 +243,56 @@ def private_acl(raw: bytes) -> bytes | None:
     return raw[:4] + b"".join(out)
 
 
+_ACL_USER_OBJ = 0x01
+WEB_USER = "kiboto"  # services/web_user.USER
+
+
+def with_grant(raw: bytes, mode: int, uid: int) -> bytes:
+    """An access list (or the one `mode` stands for, when there is none) that also lets user `uid`
+    read and write, with the mask open for it; entries in the order the kernel wants them."""
+    entries: dict[tuple[int, int], int] = {}
+    if len(raw) >= 4 and (len(raw) - 4) % 8 == 0:
+        for i in range((len(raw) - 4) // 8):
+            tag, perm, who = struct.unpack_from("<HHI", raw, 4 + 8 * i)
+            entries[(tag, who if tag in (_ACL_USER, _ACL_GROUP) else 0xFFFFFFFF)] = perm
+    else:
+        entries = {
+            (_ACL_USER_OBJ, 0xFFFFFFFF): (mode >> 6) & 7,
+            (_ACL_GROUP_OBJ, 0xFFFFFFFF): (mode >> 3) & 7,
+            (_ACL_OTHER, 0xFFFFFFFF): mode & 7,
+        }
+    entries[(_ACL_USER, uid)] = 7
+    entries[(_ACL_MASK, 0xFFFFFFFF)] = 7
+    body = b"".join(struct.pack("<HHI", tag, perm, who) for (tag, who), perm in sorted(entries.items()))
+    return struct.pack("<I", 2) + body
+
+
+def grant_web_user(folder: str) -> bool:
+    """Kiboto's own user may read and write `folder`, and what is made in it: for a folder Kiboto has
+    just made as a ZFS dataset or btrfs subvolume of its own (a homes folder, a person's home), which
+    takes no access list from the folder it is in, so a person's own home was shut to the page (403).
+    Written on an open handle, never through a link; nothing where that user does not exist."""
+    try:
+        uid = pwd.getpwnam(WEB_USER).pw_uid
+    except KeyError:
+        return False
+    fd = os.open(folder, os.O_RDONLY | os.O_DIRECTORY | getattr(os, "O_NOFOLLOW", 0))
+    try:
+        mode = stat.S_IMODE(os.fstat(fd).st_mode)
+        for attr in (ACL_XATTR, ACL_DEFAULT_XATTR):
+            try:
+                raw = os.getxattr(fd, attr)
+            except OSError:
+                raw = b""
+            os.setxattr(fd, attr, with_grant(raw, mode, uid))
+    except OSError as e:
+        logger.warning("[Files] %s keeps its access list: %s", folder, e)
+        return False
+    finally:
+        os.close(fd)
+    return True
+
+
 def _make_private(folder: str, mode: int, st: os.stat_result) -> None:
     """Mode `mode`, or on a folder whose access list names a user, that list made private
     (private_acl), written on an open handle of the folder: never through a link."""
