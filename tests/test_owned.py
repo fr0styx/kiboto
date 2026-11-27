@@ -407,7 +407,9 @@ def test_handing_a_home_over_writes_the_private_list_or_the_mode(tmp_path, monke
     monkeypatch.setattr(owned.os, "getxattr", lambda p, attr, follow_symlinks=True: inherited)
     monkeypatch.setattr(owned.os, "setxattr", lambda fd, attr, value: written.append(value))
     assert owned.to_person(str(home), os.getuid(), os.getgid()) is True
-    assert written == [owned.private_acl(inherited)] * 2 and modes == []  # the folder, and what is made in it
+    assert (
+        written == [owned.private_acl(inherited, os.getuid())] * 2 and modes == []
+    )  # the folder, and what is made in it
 
     def none(*a, **k):
         raise OSError(61, "No data available")
@@ -461,3 +463,20 @@ def test_granting_writes_both_lists_and_skips_a_machine_without_that_user(tmp_pa
 
     monkeypatch.setattr(pwd, "getpwnam", nobody)
     assert owned.grant_web_user(str(folder)) is False
+
+
+def test_the_person_is_named_in_their_own_folder_so_what_kibotos_user_makes_there_stays_theirs():
+    """On Kiboto OS rclone writes SFTP uploads as Kiboto's own user: in a home whose list named
+    only that user, the person could not open their own upload over SMB."""
+    kiboto_only = _acl((USER_OBJ, 7, 0), (USER, 7, 999), (GROUP_OBJ, 0, 0), (MASK, 7, 0), (OTHER, 0, 0))
+    assert owned.private_acl(kiboto_only, 20001) == _acl(
+        (USER_OBJ, 7, 0xFFFFFFFF),
+        (USER, 7, 999),
+        (USER, 7, 20001),
+        (GROUP_OBJ, 0, 0xFFFFFFFF),
+        (MASK, 7, 0xFFFFFFFF),
+        (OTHER, 0, 0xFFFFFFFF),
+    )
+    named = owned.private_acl(kiboto_only, 20001)
+    assert owned.private_acl(named, 20001) == named  # settled: written once
+    assert owned.private_acl(_acl((USER_OBJ, 7, 0), (GROUP_OBJ, 5, 0), (OTHER, 5, 0)), 20001) is None  # 700 does it

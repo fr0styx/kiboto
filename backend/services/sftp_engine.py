@@ -12,6 +12,7 @@ import re
 import socket
 import subprocess
 import sys
+import threading
 import time
 from typing import Any, Optional
 
@@ -324,6 +325,8 @@ Match Group sftpusers
         if len(filtered) == len(users):
             return False
         atomic_write_json(SFTP_USERS_FILE, filtered)
+        if self.get_config().get("enabled"):  # rclone keeps a sign-in for minutes: the account would still open
+            threading.Thread(target=self.forget_sign_ins, name="SftpForget", daemon=True).start()
         return True
 
     def _start_sidecar(self, port: int) -> bool:
@@ -561,7 +564,7 @@ Match Group sftpusers
             quick_connect=quick_connect,
         )
 
-    def start(self) -> SFTPStatus:
+    def _start(self) -> SFTPStatus:
         cfg = self.save_config({"enabled": True})
         port = cfg.get("port", 2222)
         logger.info(f"[SFTP] Starting SFTP service on port {port}...")
@@ -612,7 +615,7 @@ Match Group sftpusers
         self.start()
         return True
 
-    def stop(self) -> SFTPStatus:
+    def _stop(self) -> SFTPStatus:
         self.save_config({"enabled": False})
         logger.info("[SFTP] Stopping SFTP service...")
         from backend import runtime
@@ -651,6 +654,27 @@ Match Group sftpusers
 
         time.sleep(0.3)
         return self.get_status()
+
+    _switch = threading.RLock()  # start, stop and forgetting sign-ins, one at a time
+
+    def start(self) -> SFTPStatus:
+        with self._switch:
+            return self._start()
+
+    def stop(self) -> SFTPStatus:
+        with self._switch:
+            return self._stop()
+
+    def forget_sign_ins(self) -> bool:
+        """rclone keeps a sign-in for minutes, keyed on the name: a server that is on starts again,
+        which forgets them (file_sign_ins). Its setting stays, and turning it on or off waits for
+        this, so it never comes back on after someone turned it off."""
+        with self._switch:
+            if not self.get_config().get("enabled") or not self.get_status().running:
+                return False
+            self._stop()
+            self._start()
+            return True
 
     def restart(self) -> SFTPStatus:
         self.stop()

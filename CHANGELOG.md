@@ -102,6 +102,10 @@ Kiboto OS: a merged folder moves its old files to the slower pool once Kiboto ha
 
 A file a merged folder moved to the slower pool can be changed over SMB again. A merged folder turned off becomes an ordinary folder again once nothing is left on the slower pool.
 
+Kiboto OS: a file a person puts in their own folder over SFTP can be opened, changed and deleted by them over the network share too.
+
+SFTP and WebDAV take a new password at once and stop taking the old one. Before, they kept an earlier sign-in for up to five minutes, renewed with every use; a removed or turned-off person could keep signing in the same way.
+
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container
 

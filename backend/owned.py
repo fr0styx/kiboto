@@ -220,12 +220,16 @@ ACL_DEFAULT_XATTR = "system.posix_acl_default"  # what files made inside the fol
 _ACL_USER, _ACL_GROUP_OBJ, _ACL_GROUP, _ACL_MASK, _ACL_OTHER = 0x02, 0x04, 0x08, 0x10, 0x20
 
 
-def private_acl(raw: bytes) -> bytes | None:
+def private_acl(raw: bytes, person: int | None = None) -> bytes | None:
     """A private folder's access list that keeps the grants it names (Kiboto's own user, on Kiboto
     OS): the group and everyone else get nothing, and the mask lets the named users in. None when
     the list names no user (then mode 700 makes the folder private, as before). A home made
     private by 700 alone had its mask cut to nothing, and the web process could not open a person's
-    own folder."""
+    own folder.
+
+    `person`: the folder's owner is named too. What Kiboto's own user makes in it (a file put over
+    SFTP, which rclone writes as that user) then stays the person's to read, change and delete;
+    before, they could not even open it over SMB in their own folder."""
     if len(raw) < 4 or (len(raw) - 4) % 8:
         return None
     entries = [struct.unpack_from("<HHI", raw, 4 + 8 * i) for i in range((len(raw) - 4) // 8)]
@@ -240,7 +244,8 @@ def private_acl(raw: bytes) -> bytes | None:
         out.append(struct.pack("<HHI", tag, perm, uid))
     if not any(tag == _ACL_MASK for tag, _perm, _id in entries):
         out.append(struct.pack("<HHI", _ACL_MASK, 7, 0xFFFFFFFF))
-    return raw[:4] + b"".join(out)
+    closed = raw[:4] + b"".join(out)
+    return closed if person is None else with_grant(closed, 0o700, person)
 
 
 _ACL_USER_OBJ = 0x01
@@ -293,14 +298,14 @@ def grant_web_user(folder: str) -> bool:
     return True
 
 
-def _make_private(folder: str, mode: int, st: os.stat_result) -> None:
+def _make_private(folder: str, mode: int, st: os.stat_result, person: int | None = None) -> None:
     """Mode `mode`, or on a folder whose access list names a user, that list made private
     (private_acl), written on an open handle of the folder: never through a link."""
     try:
         raw = os.getxattr(folder, ACL_XATTR, follow_symlinks=False) if mode == 0o700 else b""
     except OSError:
         raw = b""
-    closed = private_acl(raw) if raw else None
+    closed = private_acl(raw, person) if raw else None
     if closed is None:
         _mode(folder, mode, st)
         return
@@ -315,7 +320,7 @@ def _make_private(folder: str, mode: int, st: os.stat_result) -> None:
             inherited = os.getxattr(fd, ACL_DEFAULT_XATTR)
         except OSError:
             inherited = b""
-        made_private = private_acl(inherited) if inherited else None
+        made_private = private_acl(inherited, person) if inherited else None
         if made_private is not None and made_private != inherited:
             os.setxattr(fd, ACL_DEFAULT_XATTR, made_private)
     finally:
@@ -347,15 +352,15 @@ def to_person(folder: str, uid: int, gid: int = 100, mode: int = 0o700) -> bool:
         inherited = b""
     settled = (
         raw
-        and private_acl(raw) == raw
+        and private_acl(raw, uid) == raw
         and stat.S_IMODE(st.st_mode) == 0o770
-        and (not inherited or private_acl(inherited) in (None, inherited))
+        and (not inherited or private_acl(inherited, uid) in (None, inherited))
     )
     if (st.st_uid, st.st_gid) == (uid, gid) and (settled or (not raw and stat.S_IMODE(st.st_mode) == mode)):
         return False
     try:
         _give(folder, uid, gid, st)
-        _make_private(folder, mode, st)
+        _make_private(folder, mode, st, uid)
     except OSError as e:
         logger.warning("[Files] the private folder %s keeps its owner: %s", folder, e)
         return False

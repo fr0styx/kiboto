@@ -383,6 +383,9 @@ def startup_system():
 
     users_db.on_status_change(_family_signin_follows_status)  # sign-in to other apps follows a person's status
     users_db.on_people_change(_family_signin_follows_people)  # ... and every other change to the people (SET-19)
+    from backend.services import file_sign_ins
+
+    users_db.on_sign_in_change(file_sign_ins.forget)  # SFTP and WebDAV forget the sign-ins rclone keeps
     from backend.services.supervisor import install_os_thread_names
 
     install_os_thread_names()  # threads show their names in top and /proc

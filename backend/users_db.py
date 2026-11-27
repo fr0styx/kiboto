@@ -751,6 +751,8 @@ def update_user_password(
     if res.rowcount > 0:
         try:
             user = get_user_by_id(user_id, db_path=db_path)
+            if user:
+                _sign_in_changed(user["username"])
             # a two-factor account's password never opens SMB: it has its own SMB password (SEC-28)
             if user and not user.get("mfa_enabled"):
                 from backend.services.samba_engine import get_samba_engine
@@ -900,6 +902,7 @@ def _network_follows_status(user_id: str, active: bool) -> None:
     name = str(user.get("username") or "")
     if not name:
         return
+    _sign_in_changed(name)
     try:
         from backend.services.samba_engine import get_samba_engine
 
@@ -926,6 +929,25 @@ def on_status_change(hook: Any) -> None:
     above this module (family sign-in for other apps), which it must not import."""
     if hook not in _STATUS_HOOKS:
         _STATUS_HOOKS.append(hook)
+
+
+_SIGN_IN_HOOKS: list[Any] = []
+
+
+def on_sign_in_change(hook: Any) -> None:
+    """Registers hook(username), called after a person's password, second step or status changes,
+    or the person is removed: for servers that keep sign-ins of their own (rclone's SFTP and
+    WebDAV), which this module must not import."""
+    if hook not in _SIGN_IN_HOOKS:
+        _SIGN_IN_HOOKS.append(hook)
+
+
+def _sign_in_changed(username: str) -> None:
+    for hook in list(_SIGN_IN_HOOKS):
+        try:
+            hook(username)
+        except (OSError, ValueError, RuntimeError, KeyError):
+            logger.warning("[Users] a server did not forget the sign-in of %s", username, exc_info=True)
 
 
 _people_rev = 0
@@ -996,6 +1018,8 @@ def delete_user(user_id: str, db_path: str | None = None) -> bool:
             except Exception:
                 ignored("backend.users_db.delete_user")
     _evict_user_caches(user_id)
+    if target_user:
+        _sign_in_changed(target_user["username"])
     from backend.services.samba_engine import refresh_access
 
     refresh_access()  # the network lists no longer name them (SET-01)
@@ -1649,7 +1673,10 @@ def enable_user_mfa(
         """,
             (_seal_secret(secret.strip()), json.dumps(recovery_code_hashes), time.time(), user_id),
         )
-        return res.rowcount > 0
+        changed = res.rowcount > 0
+    if changed:  # a two-factor account's password no longer opens SFTP or WebDAV
+        _sign_in_changed(str((get_user_by_id(user_id, db_path=db_path) or {}).get("username") or ""))
+    return changed
 
 
 def disable_user_mfa(user_id: str, db_path: str | None = None) -> bool:

@@ -175,7 +175,7 @@ class WebdavEngine:
                 self._started_at = None
         return False
 
-    def start(self) -> dict[str, Any]:
+    def _start(self) -> dict[str, Any]:
         """Starts the rclone serve webdav background process."""
         with self._lock:
             if self.is_running():
@@ -303,7 +303,7 @@ class WebdavEngine:
 
         return internal_port(int(self.load_config().get("port", config.WEBDAV_PORT)))
 
-    def stop(self) -> dict[str, Any]:
+    def _stop(self) -> dict[str, Any]:
         """Stops the rclone serve webdav background process."""
         with self._lock:
             self._front.stop()
@@ -320,6 +320,27 @@ class WebdavEngine:
                 self._proc = None
                 self._started_at = None
             return self.get_status()
+
+    _switch = threading.RLock()  # start, stop and forgetting sign-ins, one at a time
+
+    def start(self) -> dict[str, Any]:
+        with self._switch:
+            return self._start()
+
+    def stop(self) -> dict[str, Any]:
+        with self._switch:
+            return self._stop()
+
+    def forget_sign_ins(self) -> bool:
+        """rclone keeps a sign-in for minutes, keyed on the name: a server that is on starts again,
+        which forgets them (file_sign_ins). Its setting stays, and turning it on or off waits for
+        this, so it never comes back on after someone turned it off."""
+        with self._switch:
+            if not self.load_config().get("enabled") or not self.is_running():
+                return False
+            self._stop()
+            self._start()
+            return True
 
     def restart(self) -> dict[str, Any]:
         self.stop()
