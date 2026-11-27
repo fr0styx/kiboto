@@ -30,6 +30,7 @@ RECORD_FIELDS = {
     "is_parity",
     "parity_label",
     "usb",
+    "virtual",
 }
 
 

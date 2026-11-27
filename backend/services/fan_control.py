@@ -246,7 +246,9 @@ def run_fan_control(
     # the drives in the bays; a USB drive is sd* too, but sits outside the case (a backup drive whose
     # bridge gives no temperature held the disk fans at full speed while it was plugged in)
     sata_disks = [
-        d for d in disks if not d.get("usb") and (d.get("role") == "data" or d.get("dev", "").startswith("sd"))
+        d
+        for d in disks
+        if not d.get("usb") and not d.get("virtual") and (d.get("role") == "data" or d.get("dev", "").startswith("sd"))
     ]
     # Every zone follows the hottest drive (owner's choice, S28): one warm drive speeds up all the
     # disk fans, and the fans stop only when every drive sleeps. Before, each fan followed only the

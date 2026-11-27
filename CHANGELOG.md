@@ -82,6 +82,8 @@ Kiboto OS: people can open their own private folder in Kiboto, and the files the
 
 Kiboto OS: the file manager no longer offers the system's boot folder as "Flash Boot".
 
+Kiboto OS in a virtual machine: its disks no longer pass for sleeping ones, which hid the Recycle Bin and asked to wake the disk for every folder.
+
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container
 

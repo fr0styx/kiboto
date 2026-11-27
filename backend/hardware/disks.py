@@ -36,7 +36,7 @@ from backend.db import (
 from backend.fsutil import atomic_write_json
 from backend.hardware import smart_read
 from backend.hardware.smart_power import is_standby as is_standby_out
-from backend.hardware.smart_power import smartctl_power
+from backend.hardware.smart_power import smartctl_power, virtual_disk
 from backend.ignored_errors import ignored
 from backend.services.notifications import send_notification
 from backend.state import Z_STATE, add_event, event_text
@@ -713,7 +713,7 @@ def poll_disk_smart(dev_name: str, is_nvme: bool):
     except Exception:
         ignored("backend.hardware.disks.poll_disk_smart")
 
-    if is_removable:
+    if is_removable or virtual_disk(dev_name, HOST_SYS):  # a virtual machine's disk: no SMART, never asleep
         Z_STATE.smart.set_reading(dev_name, None, "ok")
         return
 
@@ -987,6 +987,7 @@ def read_disk_temps_and_io(allow_sync_poll: bool = False):
                 "is_parity": is_parity,
                 "parity_label": parity_label,
                 "usb": d.get("transport") == "usb",  # outside the case: not cooled by the disk fans
+                "virtual": virtual_disk(dev_name, HOST_SYS),  # a virtual machine's: no fans of its own
             }
         )
 
