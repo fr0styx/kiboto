@@ -218,8 +218,11 @@ class _Running:
 
 
 def _follow(path: str, on_line: Callable[[str], Any], done: threading.Event) -> list[str]:
-    """Hands each line restic writes to on_line, until `done` and nothing more is written."""
+    """Hands each line restic writes to on_line, until `done` and nothing more is written. Once
+    `done`, it looks one more time: lines written between its last look and the end were lost
+    before, with restic's summary among them (found by CI, now and then)."""
     kept: list[str] = []
+    last_look = False
     with open(path, encoding="utf-8", errors="replace") as f:
         part = ""
         while True:
@@ -235,8 +238,11 @@ def _follow(path: str, on_line: Callable[[str], Any], done: threading.Event) -> 
                         logger.debug("offsite: progress line not understood", exc_info=True)
                     part = ""
                 continue
-            if done.is_set():
+            if last_look:
                 return kept
+            if done.is_set():
+                last_look = True
+                continue
             time.sleep(0.5)
 
 

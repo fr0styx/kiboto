@@ -308,3 +308,20 @@ def test_the_door_restores_only_after_the_usual_checks(monkeypatch):
     monkeypatch.setattr(ob, "get_repo", lambda repo_id: {"id": repo_id, "location": "/x", "paths": []})
     with pytest.raises(ValueError, match="version"):
         ob.restore_here("usb", "not-a-version; rm", "/a", "/mnt/storage/x")
+
+
+def test_lines_written_just_before_the_end_are_still_read(tmp_path):
+    """The follower looked, found nothing, then saw the run had ended and stopped: restic's last
+    lines, written in between, were lost (a CI run caught it once)."""
+    out = tmp_path / "usb.out"
+    out.write_text("")
+
+    class EndsAsItLooks:
+        def is_set(self):
+            with open(out, "a") as f:  # written just before the end was noticed
+                f.write('{"message_type":"summary","snapshot_id":"abc"}\n')
+            return True
+
+    lines = []
+    assert rd._follow(str(out), lines.append, EndsAsItLooks()) == ['{"message_type":"summary","snapshot_id":"abc"}\n']
+    assert lines == ['{"message_type":"summary","snapshot_id":"abc"}\n']
