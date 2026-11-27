@@ -217,6 +217,8 @@ def network_file(want: dict[str, Any]) -> str:
     out += [f"DNS={server}" for server in want["dns"]]
     if want["mode"] == "dhcp" and want["dns"]:
         out += ["", "[DHCPv4]", "UseDNS=no"]  # the servers chosen here, not the router's
+    if v6 == "auto" and want["dns"]:
+        out += ["", "[IPv6AcceptRA]", "UseDNS=no"]  # nor the ones the router announces over IPv6
     for route in want.get("routes") or []:  # further networks, each through its own router
         out += ["", "[Route]", f"Destination={route['destination']}", f"Gateway={route['gateway']}"]
     return "\n".join(out) + "\n"
@@ -309,7 +311,7 @@ def checked(changes: dict[str, Any]) -> dict[str, Any]:
     dns = []
     for name, label in (("dns1", "The first DNS server"), ("dns2", "The second DNS server")):
         if str(changes.get(name) or "").strip():
-            server = ipv4.validate_ipv4(changes[name], label)
+            server = dns_server(changes[name], label)
             if server not in dns:
                 dns.append(server)
     want: dict[str, Any] = {"iface": iface, "mode": mode, "address": "", "prefix": 0, "gateway": "", "dns": dns}
@@ -356,16 +358,44 @@ def mode_of(iface: str) -> str:
 
 
 def dns_servers() -> list[str]:
-    out: list[str] = []
+    """The servers in use: IPv4 first, then IPv6 ones that work from anywhere (a router's own
+    link-local server only works through one port, so the dialog leaves it to the router)."""
+    v4: list[str] = []
+    v6: list[str] = []
     try:
         with open(UPSTREAM_DNS, encoding="utf-8") as f:
             for line in f:
                 parts = line.split()
-                if len(parts) >= 2 and parts[0] == "nameserver" and ":" not in parts[1] and parts[1] not in out:
-                    out.append(parts[1])
+                if len(parts) < 2 or parts[0] != "nameserver" or "%" in parts[1]:
+                    continue
+                try:
+                    server = ipaddress.ip_address(parts[1])
+                except ValueError:
+                    continue
+                into = v4 if server.version == 4 else v6
+                if server.version == 6 and server.is_link_local:
+                    continue
+                if str(server) not in into:
+                    into.append(str(server))
     except OSError:
         return []
-    return out
+    return v4 + v6
+
+
+def dns_server(value: str, label: str) -> str:
+    """One DNS server, IPv4 or IPv6, checked; raises ValueError with a sentence."""
+    text = str(value or "").strip()
+    if ":" not in text:
+        return ipv4.validate_ipv4(text, label)
+    try:
+        server = ipaddress.IPv6Address(text)
+    except ValueError:
+        raise ValueError(f"Invalid IPv4 or IPv6 address for {label}: {text}") from None
+    if server.is_link_local:
+        raise ValueError(f"{label} cannot be a link-local address (fe80::); use the router's own IPv6 address.")
+    if server.is_loopback or server.is_multicast or server.is_unspecified:
+        raise ValueError(f"{label} cannot be {server}.")
+    return str(server)
 
 
 # --- a trial ---------------------------------------------------------------------------------------

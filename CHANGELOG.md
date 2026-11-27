@@ -24,6 +24,8 @@ Kiboto OS: Secure Boot can stay on. ZFS is signed with a key of the machine's ow
 
 Kiboto OS: the Network page's address dialog sets IPv6 (automatic, off or a fixed address) and further routes through other routers, tried first with a way back like any address change.
 
+Kiboto OS: the address dialog's DNS servers may be IPv6 addresses.
+
 #### Security
 
 Kiboto OS: when Kiboto hands files and folders in a shared folder to their people, a link put in their place over the network is never followed, so a system file's owner or rights can never be changed that way.
@@ -53,6 +55,8 @@ Kiboto OS: a shared folder can go on a newly made pool straight away. Before, it
 Kiboto OS: changing a port's address no longer drops its VLANs and packet size.
 
 Network: the address dialog's "fixed address" and "from the router" buttons are no longer cut off on a phone.
+
+Kiboto OS: DNS servers chosen in the address dialog are no longer joined by the ones the router announces over IPv6.
 
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container

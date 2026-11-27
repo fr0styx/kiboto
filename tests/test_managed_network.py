@@ -94,6 +94,9 @@ def test_the_file_for_a_fixed_address():
         "Gateway=192.168.1.1",
         "DNS=192.168.1.1",
         "DNS=1.1.1.1",
+        "",
+        "[IPv6AcceptRA]",
+        "UseDNS=no",
     ]
     assert "Gateway" not in managed.network_file({**want, "gateway": "", "dns": []})
 
@@ -102,7 +105,29 @@ def test_the_file_for_an_address_from_the_router():
     want = {"iface": "enp1s0", "mode": "dhcp", "address": "", "prefix": 0, "gateway": ""}
     assert managed.network_file({**want, "dns": []}).splitlines()[5:] == ["[Network]", "DHCP=yes"]
     own = managed.network_file({**want, "dns": ["9.9.9.9"]}).splitlines()[5:]
-    assert own == ["[Network]", "DHCP=yes", "DNS=9.9.9.9", "", "[DHCPv4]", "UseDNS=no"]  # these, not the router's
+    assert own == [
+        "[Network]",
+        "DHCP=yes",
+        "DNS=9.9.9.9",
+        "",
+        "[DHCPv4]",
+        "UseDNS=no",
+        "",
+        "[IPv6AcceptRA]",
+        "UseDNS=no",
+    ]
+    fixed6 = managed.network_file(
+        {**want, "dns": ["2606:4700:4700::1111"], "ipv6_mode": "static", "ipv6_address": "2001:db8::5/64"}
+    )
+    assert "DNS=2606:4700:4700::1111" in fixed6 and "[IPv6AcceptRA]" not in fixed6  # no announcements are taken at all
+
+
+def test_a_dns_server_may_be_ipv6(box):
+    want = managed.checked({**DHCP, "dns1": "2606:4700:4700::1111", "dns2": "1.1.1.1"})
+    assert want["dns"] == ["2606:4700:4700::1111", "1.1.1.1"]
+    assert managed.checked({**DHCP, "dns1": "2606:4700:4700:0::1111", "dns2": "2606:4700:4700::1111"})["dns"] == [
+        "2606:4700:4700::1111"
+    ]  # the same server written twice counts once
 
 
 @pytest.mark.parametrize(
@@ -124,6 +149,10 @@ def test_the_file_for_an_address_from_the_router():
         ({**STATIC, "netmask": "banana"}, "Invalid netmask"),
         ({**STATIC, "dns1": "one.one.one.one"}, "first DNS server"),
         ({**DHCP, "dns2": "999.1.1.1"}, "second DNS server"),
+        ({**DHCP, "dns1": "fe80::1"}, "link-local"),
+        ({**DHCP, "dns1": "::1"}, "cannot be ::1"),
+        ({**DHCP, "dns1": "ff02::fb"}, "cannot be ff02::fb"),
+        ({**DHCP, "dns2": "2001:db8::zz"}, "IPv4 or IPv6 address for The second"),
     ],
 )
 def test_what_cannot_be_is_refused_with_a_sentence(box, changes, said):
@@ -324,10 +353,10 @@ def test_how_the_machine_gets_its_address_now(box, tmp_path):
 def test_the_dns_servers_are_the_ones_asked_not_the_local_stub(box, tmp_path):
     assert managed.dns_servers() == []
     (tmp_path / "resolv.conf").write_text(
-        "# made by systemd-resolved\nnameserver 192.168.1.1\nnameserver fe80::1%2\nnameserver 1.1.1.1\n"
-        "nameserver 192.168.1.1\nsearch lan\n"
+        "# made by systemd-resolved\nnameserver 2001:db8::53\nnameserver 192.168.1.1\nnameserver fe80::1%2\n"
+        "nameserver fe80::2\nnameserver 1.1.1.1\nnameserver 192.168.1.1\nnameserver nonsense\nsearch lan\n"
     )
-    assert managed.dns_servers() == ["192.168.1.1", "1.1.1.1"]
+    assert managed.dns_servers() == ["192.168.1.1", "1.1.1.1", "2001:db8::53"]  # IPv4 first, no link-local
 
 
 def test_the_page_is_told_about_a_trial_but_never_its_key(box):
