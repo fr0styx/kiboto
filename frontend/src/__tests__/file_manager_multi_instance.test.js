@@ -10,7 +10,7 @@ import {
   setFmStateForTesting,
   getActiveFmInstance,
 } from '../components/file-manager.js';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 
 vi.mock('../api.js', () => ({
   api: {
@@ -163,7 +163,7 @@ describe('File Manager Multi-Instance & Multi-Selection Protection', () => {
     await secInst.loadPath('/mnt/remotes/onedrive');
 
     const refreshSpy = vi.fn();
-    ZettEventBus.on('fm:refresh', refreshSpy);
+    KibotoEventBus.on('fm:refresh', refreshSpy);
 
     // Simulate dropping files from primary instance into secondary instance viewport
     const dropEvent = new Event('drop', { bubbles: true, cancelable: true });

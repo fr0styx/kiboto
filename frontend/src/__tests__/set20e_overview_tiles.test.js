@@ -5,7 +5,7 @@ import path from 'node:path';
 
 vi.mock('../api.js', () => ({ api: { get: vi.fn() } }));
 const { api } = await import('../api.js');
-const { ZettEventBus } = await import('../event-bus.js');
+const { KibotoEventBus } = await import('../event-bus.js');
 const { state } = await import('../state.js');
 const tiles = await import('../components/management/overview-tiles.js');
 const overview = await import('../components/management/overview.js');
@@ -77,7 +77,7 @@ describe('the Overview (SET-20, Overview 5)', () => {
     state.lastStats = { docker: [{ name: 'a', state: 'running' }] };
     tiles.installHubTiles();
     expect(document.getElementById('mgmt-hub-apps-line').textContent).toBe('1 app, 1 running');
-    ZettEventBus.emit('stats:updated', {
+    KibotoEventBus.emit('stats:updated', {
       docker: [
         { name: 'a', state: 'running' },
         { name: 'b', state: 'running' },

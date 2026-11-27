@@ -13,7 +13,7 @@
  *   <img data-img-fallback="hide-show-next[:display]">  hide, show the next sibling
  */
 import { copyText } from './utils.js';
-import { ZettEventBus } from './event-bus.js';
+import { KibotoEventBus } from './event-bus.js';
 const ACTIONS = {
   'click-target': (el) => document.getElementById(el.dataset.target)?.click(),
   'hide-target': (el) => {
@@ -21,7 +21,7 @@ const ACTIONS = {
     if (t) t.style.display = 'none';
   },
   'open-recycle-bin': () => window.openRecycleBin && window.openRecycleBin(),
-  'open-drive-health': () => ZettEventBus.emit('modal:smart:open', null),
+  'open-drive-health': () => KibotoEventBus.emit('modal:smart:open', null),
   'open-file-preview': (el) =>
     window.openFilePreviewModal && window.openFilePreviewModal(el.dataset.path || '', el.dataset.name || ''),
   'deploy-compose-code': (el) => {

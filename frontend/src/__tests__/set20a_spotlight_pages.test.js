@@ -1,7 +1,7 @@
 /** SET-20: "Search settings" finds the Settings pages by name and by everyday words. */
 import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';
 import { setLanguage } from '../i18n.js';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 import {
   initSpotlight,
   openSpotlight,
@@ -84,11 +84,11 @@ describe('Spotlight finds Settings pages (SET-20)', () => {
   });
 
   it('hides a page this account cannot open', () => {
-    ZettEventBus.emit('session:user', { username: 'kid', scopes: ['shares:read'] });
+    KibotoEventBus.emit('session:user', { username: 'kid', scopes: ['shares:read'] });
     openSpotlight();
     filterSpotlightResults('tailscale');
     expect(titles().some((x) => x.includes('Away from home'))).toBe(false);
-    ZettEventBus.emit('session:user', null);
+    KibotoEventBus.emit('session:user', null);
   });
 
   it('finds German words, and English ones still, after a change of language', async () => {

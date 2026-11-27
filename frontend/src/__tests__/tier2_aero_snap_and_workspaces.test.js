@@ -21,7 +21,7 @@ import {
   parseNaturalLanguageAction,
 } from '../components/spotlight.js';
 import { applyWidgetConfig, syncWidgetSettingsUI, initWidgets, loadWidgetConfig } from '../components/widgets.js';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 
 describe('Tier 2: Aero Snap 2.0, Single Desktop Invariant, Spotlight Actions & Modular Widgets', () => {
   beforeEach(() => {
@@ -344,7 +344,7 @@ describe('Tier 2: Aero Snap 2.0, Single Desktop Invariant, Spotlight Actions & M
         },
       };
 
-      ZettEventBus.emit('stats:updated', mockStats);
+      KibotoEventBus.emit('stats:updated', mockStats);
       await new Promise((resolve) => requestAnimationFrame(resolve));
 
       // Check Drive Heatmap

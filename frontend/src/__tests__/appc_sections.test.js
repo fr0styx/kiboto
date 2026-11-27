@@ -1,7 +1,7 @@
 /** Mission Control opens tabs that hold several panes, by link, by default and by click (APP-C). */
 import { describe, it, expect, vi, beforeAll } from 'vitest';
 import { initManagement } from '../components/management.js';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 import '../route-access.js';
 import { api } from '../api.js';
 
@@ -105,9 +105,9 @@ describe('Mission Control tab groups (APP-C)', () => {
     window.openManagementWindow('mgmt-sec-ai', 'mgmt-pane-ai-visual');
     expect(openKib).toHaveBeenLastCalledWith('mgmt-pane-ai-visual');
     // someone who may not change Kib's settings gets the window, not a page that is not theirs
-    ZettEventBus.emit('session:user', { username: 'kid', scopes: ['shares:read'] });
+    KibotoEventBus.emit('session:user', { username: 'kid', scopes: ['shares:read'] });
     window.openManagementWindow('mgmt-sec-ai');
     expect(openKib).toHaveBeenLastCalledWith('mgmt-pane-ai-chat');
-    ZettEventBus.emit('session:user', null);
+    KibotoEventBus.emit('session:user', null);
   });
 });

@@ -8,7 +8,7 @@ import { DockManager } from './dock-manager.js';
 import { getSnapGeometry } from './snap.js';
 import { bringToFront } from './window-drag.js';
 import { isCompact } from '../../device.js';
-import { ZettEventBus } from '../../event-bus.js';
+import { KibotoEventBus } from '../../event-bus.js';
 import { forgetWindows, isMine, ownerName } from './whose-windows.js';
 
 const WIN_BOUNDS_KEY = 'kiboto_window_bounds_v2'; // gitleaks:allow (a storage key name)
@@ -414,7 +414,7 @@ function storedWindows() {
 
 // SET-12: signing out closes every window; a session that ran out leaves them open behind the
 // sign-in page, so the next person's sign-in closes what is not theirs
-ZettEventBus.on?.('auth:logout', () => forgetWindows(DockManager, OPEN_WINDOWS_KEY));
-ZettEventBus.on?.('session:user', (user) => {
+KibotoEventBus.on?.('auth:logout', () => forgetWindows(DockManager, OPEN_WINDOWS_KEY));
+KibotoEventBus.on?.('session:user', (user) => {
   if (user && !isMine(storedWindows())) forgetWindows(DockManager, OPEN_WINDOWS_KEY);
 });

@@ -2,7 +2,7 @@
 // way, in the reader's language, and an entry leads to the page the server named.
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { setLanguage } from '../i18n.js';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 import { state } from '../state.js';
 import { agoText, eventPlace, eventView, eventWhen, needsALook, repeatedText } from '../event-view.js';
 import { ROUTES } from '../router.js';
@@ -158,10 +158,10 @@ describe('the bell', () => {
     expect(bell.bellEvents().every(bell.isEventChecked)).toBe(true);
     expect(bell.markAllRead([])).toBe(0);
     // another person signs in on this browser: they do not inherit the marks
-    ZettEventBus.emit('session:user', { username: 'ana', preferences: {} });
+    KibotoEventBus.emit('session:user', { username: 'ana', preferences: {} });
     expect(bell.isEventChecked(BACKUP)).toBe(false);
     // the same person on another device: what the account has seen is read here too
-    ZettEventBus.emit('session:user', { username: 'ana', preferences: { events_seen: 1791394150 } });
+    KibotoEventBus.emit('session:user', { username: 'ana', preferences: { events_seen: 1791394150 } });
     expect(bell.isEventChecked(BACKUP)).toBe(true);
     expect(bell.isEventChecked(BLOCKED)).toBe(false);
     bell.followReader(null);

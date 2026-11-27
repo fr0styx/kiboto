@@ -5,7 +5,7 @@ import { showReadError } from './refresh-say.js';
 import { locateSaid } from './locate-text.js';
 import { api } from '../api.js';
 import { t } from '../i18n.js';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 import { announceA11y } from '../a11y.js';
 import { showToast, showConfirmToast, showDangerConfirm, showPromptToast } from '../toast.js';
 import '../state.js';
@@ -445,7 +445,7 @@ export function renderChassisTwin(container, disks = [], options = {}) {
       const dev = slot.dataset.dev;
       if (!dev) return;
       // Drive Health shows a sleeping drive from its last reading and never wakes it on open
-      ZettEventBus.emit('modal:smart:open', dev);
+      KibotoEventBus.emit('modal:smart:open', dev);
     });
   });
 
@@ -1671,7 +1671,7 @@ function bindSharesGridEvents(grid, container) {
     const revealBtn = e.target.closest('.btn-share-reveal');
     if (revealBtn) {
       const path = revealBtn.dataset.path;
-      ZettEventBus.emit('window:open', { id: 'file-manager-window', path });
+      KibotoEventBus.emit('window:open', { id: 'file-manager-window', path });
       showToast(t('mgmt.opened_share', `Opened share in File Explorer: ${path}`), 'info');
       return;
     }
@@ -2188,8 +2188,8 @@ export async function fetchAndRenderRemoteStorage(container) {
     container.querySelectorAll('.btn-remote-reveal').forEach((btn) => {
       btn.addEventListener('click', () => {
         const path = btn.dataset.path || `/mnt/remotes/${btn.dataset.name || ''}`;
-        ZettEventBus.emit('window:open', { id: 'file-manager-window', path });
-        ZettEventBus.emit('fm:refresh');
+        KibotoEventBus.emit('window:open', { id: 'file-manager-window', path });
+        KibotoEventBus.emit('fm:refresh');
         showToast(t('toast.opened_in_file_explorer', 'Opened {path} in File Explorer', { path: path }), 'info');
       });
     });
@@ -2207,8 +2207,8 @@ export async function fetchAndRenderRemoteStorage(container) {
             'info'
           );
           fetchAndRenderRemoteStorage(container);
-          ZettEventBus.emit('fm:refresh');
-          ZettEventBus.emit('storage:mount_changed', { name, path: `/mnt/remotes/${name}`, action: 'mount' });
+          KibotoEventBus.emit('fm:refresh');
+          KibotoEventBus.emit('storage:mount_changed', { name, path: `/mnt/remotes/${name}`, action: 'mount' });
         } catch (e) {
           showToast(
             t('toast.mount_failed', 'Mount failed: {message}', { message: e.message || t('ui.error', 'Error') }),
@@ -2229,8 +2229,8 @@ export async function fetchAndRenderRemoteStorage(container) {
           await api.post(`/api/remotes/${name}/unmount`);
           showToast(t('toast.remote_unmounted', "Remote '{name}' unmounted.", { name: name }), 'info');
           fetchAndRenderRemoteStorage(container);
-          ZettEventBus.emit('fm:refresh');
-          ZettEventBus.emit('storage:mount_changed', { name, path: `/mnt/remotes/${name}`, action: 'unmount' });
+          KibotoEventBus.emit('fm:refresh');
+          KibotoEventBus.emit('storage:mount_changed', { name, path: `/mnt/remotes/${name}`, action: 'unmount' });
         } catch (e) {
           showToast(
             t('toast.unmount_failed', 'Unmount failed: {message}', { message: e.message || t('ui.error', 'Error') }),
@@ -2258,8 +2258,8 @@ export async function fetchAndRenderRemoteStorage(container) {
               await api.delete(`/api/remotes/${name}`);
               showToast(t('remotes.deleted', `Remote '${name}' deleted successfully.`), 'info');
               fetchAndRenderRemoteStorage(container);
-              ZettEventBus.emit('fm:refresh');
-              ZettEventBus.emit('storage:mount_changed', { name, path: `/mnt/remotes/${name}`, action: 'delete' });
+              KibotoEventBus.emit('fm:refresh');
+              KibotoEventBus.emit('storage:mount_changed', { name, path: `/mnt/remotes/${name}`, action: 'delete' });
             } catch (err) {
               showToast(t('remotes.delete_failed', `Failed to delete remote: ${err.message || 'Error'}`), 'error');
             }
@@ -3259,8 +3259,8 @@ export async function openNewCloudRemoteModal(onSuccess) {
             }),
             'info'
           );
-          ZettEventBus.emit('fm:refresh');
-          ZettEventBus.emit('storage:mount_changed', { name, path: `/mnt/remotes/${name}`, action: 'create' });
+          KibotoEventBus.emit('fm:refresh');
+          KibotoEventBus.emit('storage:mount_changed', { name, path: `/mnt/remotes/${name}`, action: 'create' });
           if (onSuccess) onSuccess();
         } catch (err) {
           if (errorBox) {

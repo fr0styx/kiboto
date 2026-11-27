@@ -15,7 +15,7 @@ import { escapeHtml } from '../utils.js';
 import { html } from '../html.js';
 import { t } from '../i18n.js';
 import { ROUTES } from '../router.js';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 import { watchDom } from '../dom-watch.js';
 import { COMPACT_QUERY, PHONE_QUERY } from '../device.js';
 import { api } from '../api.js';
@@ -474,7 +474,7 @@ export function initPhoneShell() {
   cq?.addEventListener?.('change', apply);
   // signing in or out switches the shell at once (the desktop never shows in between)
   new MutationObserver(apply).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-  ZettEventBus.on('stats:updated', (stats) => {
+  KibotoEventBus.on('stats:updated', (stats) => {
     if (!document.body.classList.contains('phone-shell')) return;
     updateStatus(stats);
     if (!document.body.classList.contains('phone-page-open')) refreshHealth();

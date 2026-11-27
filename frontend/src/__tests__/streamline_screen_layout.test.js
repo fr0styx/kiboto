@@ -2,7 +2,7 @@ import { readStyleCss } from './helpers/read-style-css.js';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { state } from '../state.js';
 import { api } from '../api.js';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 import * as toastModule from '../toast.js';
 import {
   setScreenLayoutStyle,
@@ -157,7 +157,7 @@ describe('Streamline Minimalist / Big IP Screen Layout Suite', () => {
     const screen = document.getElementById('screen');
     const mini = document.getElementById('mini-preview-inner');
     const eventSpy = vi.fn();
-    ZettEventBus.on('screen:layout_style_changed', eventSpy);
+    KibotoEventBus.on('screen:layout_style_changed', eventSpy);
 
     // Switch to streamline
     setScreenLayoutStyle('streamline', false);
@@ -278,7 +278,7 @@ describe('Streamline Minimalist / Big IP Screen Layout Suite', () => {
     const chips = document.getElementById('sl-bay-row').querySelectorAll('.sl-bay-chip');
     const confirmToastSpy = vi.spyOn(toastModule, 'showConfirmToast').mockImplementation(() => {});
     const smartEventSpy = vi.fn();
-    ZettEventBus.on('modal:smart:open', smartEventSpy);
+    KibotoEventBus.on('modal:smart:open', smartEventSpy);
 
     chips[0].click();
     chips[1].click();
@@ -290,7 +290,7 @@ describe('Streamline Minimalist / Big IP Screen Layout Suite', () => {
     initDashboardClicks();
 
     const metricEventSpy = vi.fn();
-    ZettEventBus.on('modal:metric:open', metricEventSpy);
+    KibotoEventBus.on('modal:metric:open', metricEventSpy);
 
     document.getElementById('sl-zone-storage').click();
     expect(metricEventSpy.mock.calls[0][0]).toBe('storage');

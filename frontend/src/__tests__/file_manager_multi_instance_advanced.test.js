@@ -8,7 +8,7 @@ import {
   handleFmKeydown,
 } from '../components/file-manager.js';
 import { DockManager, toggleFmWindowSwitcher, showDockItemContextMenu } from '../components/dock.js';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 
 vi.mock('../api.js', () => ({
   api: {

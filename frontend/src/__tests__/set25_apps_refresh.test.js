@@ -3,7 +3,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { openAppDeployModal } from '../components/management.js';
 import { api } from '../api.js';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 
 describe('an install refreshes the Apps window (SET-25)', () => {
   afterEach(() => {
@@ -34,10 +34,10 @@ describe('an install refreshes the Apps window (SET-25)', () => {
         ].join('\n'),
     });
     const heard = vi.fn();
-    ZettEventBus.on('docker:containers:refresh', heard);
+    KibotoEventBus.on('docker:containers:refresh', heard);
     await openAppDeployModal('uptime-kuma');
     await /** @type {any} */ (document.getElementById('adm-deploy-confirm-btn')).onclick();
     await vi.waitFor(() => expect(heard).toHaveBeenCalled());
-    ZettEventBus.off?.('docker:containers:refresh', heard);
+    KibotoEventBus.off?.('docker:containers:refresh', heard);
   });
 });

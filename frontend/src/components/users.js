@@ -14,7 +14,7 @@ import {
   formatRole,
 } from './session.js';
 import { escapeHtml, trapFocus, copyText } from '../utils.js';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 import { t } from '../i18n.js';
 import '../styles/users-lazy.css'; // the people dialogs' own sheet loads with this code (NUX-15)
 import { showToast, showConfirmToast, showPromptToast } from '../toast.js';
@@ -78,7 +78,7 @@ export function initUsersManagement() {
   import('./people-live.js')
     .then((m) =>
       m.installPeopleLive({
-        bus: ZettEventBus,
+        bus: KibotoEventBus,
         reload: () => {
           loadUsersList();
           loadSessionsList();

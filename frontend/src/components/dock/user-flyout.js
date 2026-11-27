@@ -1,7 +1,7 @@
 // The profile menu that opens from the top bar's user pill.
 // Part of dock.js, split out by ARC-5; loaded on the first click (user-pill.js), not at start.
 
-import { ZettEventBus } from '../../event-bus.js';
+import { KibotoEventBus } from '../../event-bus.js';
 import { escapeHtml } from '../../utils.js';
 import { t } from '../../i18n.js';
 
@@ -93,7 +93,7 @@ export function toggleUserProfileFlyout(anchorEl) {
             document.getElementById('management-desktop-icon')?.click();
           });
       }
-      ZettEventBus.emit('window:open', { id: 'management', pane: pane, subtab: subtab });
+      KibotoEventBus.emit('window:open', { id: 'management', pane: pane, subtab: subtab });
     };
 
     document.getElementById('btn-flyout-users').addEventListener('click', () => {

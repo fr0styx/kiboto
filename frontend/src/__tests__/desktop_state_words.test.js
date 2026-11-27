@@ -1,7 +1,7 @@
 // The storage card's state in the reader's language (bare-desktop sweep, 17 Nov).
 import { describe, it, expect, afterEach, vi } from 'vitest';
 import { poolStateWord, initWidgets } from '../components/widgets.js';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 import { setLanguage } from '../i18n.js';
 
 describe('storage card state', () => {
@@ -26,7 +26,7 @@ describe('storage card state', () => {
     document.body.innerHTML =
       '<div id="widget-storage"><span id="w-storage-val"></span><div id="w-storage-bar"></div><span id="w-storage-status"></span></div>';
     initWidgets();
-    ZettEventBus.emit('stats:updated', {
+    KibotoEventBus.emit('stats:updated', {
       storage: { used: '75GB', total: '97GB', pct: 77 },
       unraid: { state: 'STARTED' },
     });

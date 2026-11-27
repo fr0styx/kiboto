@@ -8,7 +8,7 @@ import {
   loadConnectionsPane,
 } from '../components/management/admin-panes.js';
 import '../route-access.js';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 import { fetchAndRenderSecurityPosture } from '../components/management/security.js';
 import { fetchAndRenderNotificationConfig } from '../components/management/notifications.js';
 import { renderApiTokens } from '../components/settings.js';
@@ -44,7 +44,7 @@ describe('the Security and Notifications tabs (SET-03)', () => {
   });
 
   it('a family member gets their own things and nothing of the set-up', async () => {
-    ZettEventBus.emit('session:user', { scopes: ['shares:read', 'shares:user_write', 'system:view'] });
+    KibotoEventBus.emit('session:user', { scopes: ['shares:read', 'shares:user_write', 'system:view'] });
     expect(loadSecurityPane()).toBe(false);
     expect(loadNotificationsPane()).toBe(false);
     await flush();
@@ -57,7 +57,7 @@ describe('the Security and Notifications tabs (SET-03)', () => {
   });
 
   it('an administrator gets both', async () => {
-    ZettEventBus.emit('session:user', { scopes: ['*'] });
+    KibotoEventBus.emit('session:user', { scopes: ['*'] });
     expect(loadSecurityPane()).toBe(true);
     expect(loadNotificationsPane()).toBe(true);
     await flush();
@@ -77,7 +77,7 @@ describe('My account (SET-19, decision X4)', () => {
 
   it('every role gets their own sign-in things and data; only an administrator the API keys', async () => {
     const { loadAccountParts } = await import('../components/users.js');
-    ZettEventBus.emit('session:user', { scopes: ['shares:read', 'system:view'] });
+    KibotoEventBus.emit('session:user', { scopes: ['shares:read', 'system:view'] });
     expect(loadAccountPane()).toBe(false);
     await flush();
     expect(loadAccountParts).toHaveBeenCalledTimes(1);
@@ -86,7 +86,7 @@ describe('My account (SET-19, decision X4)', () => {
     expect(document.getElementById('api').hidden).toBe(true);
     expect(document.getElementById('pwd').hidden).toBe(false);
     vi.clearAllMocks();
-    ZettEventBus.emit('session:user', { scopes: ['*'] });
+    KibotoEventBus.emit('session:user', { scopes: ['*'] });
     expect(loadAccountPane()).toBe(true);
     await flush();
     expect(renderApiTokens).not.toHaveBeenCalled(); // the keys live on Connections now (SET-23)
@@ -101,13 +101,13 @@ describe('cards moved from Network (SET-24)', () => {
     const { renderRedfishCard } = await import('../components/management/connections.js');
     document.body.innerHTML =
       '<div id="mgmt-pane-connections"><p class="conn-admins"></p><div id="notif-ha-grid" data-admin-only></div></div>';
-    ZettEventBus.emit('session:user', { scopes: ['system:view'] });
+    KibotoEventBus.emit('session:user', { scopes: ['system:view'] });
     expect(loadConnectionsPane()).toBe(false);
     await flush();
     for (const f of [loadHomeAssistantCard, renderApiTokens, renderSsoPanel, renderLdapPanel, renderRedfishCard])
       expect(f).not.toHaveBeenCalled();
     expect(/** @type {HTMLElement} */ (document.querySelector('.conn-admins')).hidden).toBe(false);
-    ZettEventBus.emit('session:user', { scopes: ['*'] });
+    KibotoEventBus.emit('session:user', { scopes: ['*'] });
     expect(loadConnectionsPane()).toBe(true);
     await flush();
     for (const f of [loadHomeAssistantCard, renderApiTokens, renderSsoPanel, renderLdapPanel, renderRedfishCard])

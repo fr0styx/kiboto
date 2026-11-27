@@ -6,7 +6,7 @@
  * (NUX-10), so a file's date, a backup's last run and the desktop clock agree.
  */
 import { getLanguage } from './i18n.js';
-import { ZettEventBus } from './event-bus.js';
+import { KibotoEventBus } from './event-bus.js';
 
 const LOCALES = { en: 'en', de: 'de-DE', zh: 'zh-CN', fr: 'fr-FR', es: 'es-ES' };
 const _cache = new Map();
@@ -34,7 +34,7 @@ export function clockPrefs() {
   return { ..._clock };
 }
 
-ZettEventBus.on?.('clock:changed', (d) => setClockPrefs(d && d.zone, d && d.format));
+KibotoEventBus.on?.('clock:changed', (d) => setClockPrefs(d && d.zone, d && d.format));
 
 function _withClock(options) {
   const o = { ...(options || {}) };

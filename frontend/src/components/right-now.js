@@ -6,7 +6,7 @@
 import { t } from '../i18n.js';
 import { formatFixed } from '../format.js';
 import { api } from '../api.js';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 import { state } from '../state.js';
 
 const BUSY_PCT = 25;
@@ -171,7 +171,7 @@ export function installRightNow(mount = document.getElementById('right-now')) {
     .catch(() => {});
   if (!_listening) {
     _listening = true;
-    ZettEventBus.on('stats:updated', (stats) => {
+    KibotoEventBus.on('stats:updated', (stats) => {
       const m = document.getElementById('right-now');
       if (!m || m.offsetParent === null) return;
       renderRightNow(m, stats);

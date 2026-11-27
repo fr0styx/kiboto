@@ -1,6 +1,6 @@
 // Which places an account can use (NUX-5): one map from a place to the rights that open it, so
 // kids, guests and family accounts aren't shown places that only answer "no permission".
-import { ZettEventBus } from './event-bus.js';
+import { KibotoEventBus } from './event-bus.js';
 import { onManagementDom } from './management-dom.js';
 import { NO_ACCESS, leavePage, mark, tidyHeadings } from './hide-marks.js';
 
@@ -111,7 +111,7 @@ export function routeOf(el) {
   );
 }
 
-ZettEventBus.on?.('session:user', (user) => {
+KibotoEventBus.on?.('session:user', (user) => {
   _user = user;
   /** @type {any} */ (globalThis).kibotoUser = user; // for windows that load later (remote-access)
   hideUnusable(document, user);

@@ -2,7 +2,7 @@ import { showToast } from './toast.js';
 import { eventLook } from './event-level.js';
 import { agoText, eventView } from './event-view.js';
 import { eventPlace } from './event-view.js';
-import { ZettEventBus } from './event-bus.js';
+import { KibotoEventBus } from './event-bus.js';
 import { DockManager, bringToFront, makeDraggable } from './components/dock.js';
 import { copyText, trapFocus } from './utils.js';
 import { t } from './i18n.js';
@@ -289,18 +289,18 @@ export function closeSmartModal() {
 
 // --- EVENT BUS BINDINGS ---
 let _latestStats = null;
-ZettEventBus.addEventListener('stats_tick', (e) => {
+KibotoEventBus.addEventListener('stats_tick', (e) => {
   _latestStats = /** @type {CustomEvent} */ (e).detail;
   if (typeof updateMetricModalLive === 'function') {
     updateMetricModalLive();
   }
 });
 
-ZettEventBus.addEventListener('modal:metric:open', (e) => {
+KibotoEventBus.addEventListener('modal:metric:open', (e) => {
   openMetricModal(/** @type {CustomEvent} */ (e).detail);
 });
 
-ZettEventBus.addEventListener('modal:smart:close', () => closeSmartModal());
+KibotoEventBus.addEventListener('modal:smart:close', () => closeSmartModal());
 
 export function closeEventDetailModal() {
   if (_unbindEventDetailTrap) {
@@ -431,11 +431,11 @@ export function openEventDetailModal(ev) {
 window.openEventDetailModal = openEventDetailModal;
 window.closeEventDetailModal = closeEventDetailModal;
 
-ZettEventBus.addEventListener('modal:event-detail:open', (e) => {
+KibotoEventBus.addEventListener('modal:event-detail:open', (e) => {
   openEventDetailModal(/** @type {CustomEvent} */ (e).detail);
 });
 
-ZettEventBus.addEventListener('modal:event-detail:close', () => closeEventDetailModal());
+KibotoEventBus.addEventListener('modal:event-detail:close', () => closeEventDetailModal());
 
 window.addEventListener('kiboto:lang-changed', () => {
   if (_eventDetailOverlay && _eventDetailOverlay.classList.contains('open') && _currentEventDetailData) {

@@ -10,7 +10,7 @@ import { state } from '../state.js';
 import { showToast, showConfirmToast } from '../toast.js';
 
 import { t } from '../i18n.js';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 import { ADVANCED_SPOTLIGHT, advancedOn } from '../advanced.js';
 import { canOpen, canRun, currentUser } from '../route-access.js';
 // Destructive actions always ask first (FE-07).
@@ -195,7 +195,7 @@ function _buildDefaultSpotlightItems() {
       icon: '💽',
       category: 'app',
       keywords: ['drive', 'disk', 'smart', 's.m.a.r.t', 'health', 'temperature', 'self-test', 'sectors', 'replace'],
-      run: () => ZettEventBus.emit('modal:smart:open', null),
+      run: () => KibotoEventBus.emit('modal:smart:open', null),
     },
     {
       id: 'app-catalog',

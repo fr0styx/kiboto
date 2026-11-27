@@ -6,7 +6,7 @@ import {
   openNewCloudRemoteModal,
   resetRemoteProvidersForTesting,
 } from '../components/chassis-visualizer.js';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 import { api } from '../api.js';
 import * as toast from '../toast.js';
 
@@ -105,7 +105,7 @@ describe('Sprint 4: Remote & Cloud Storage Subsystem (Frontend)', () => {
     });
 
     const eventSpy = vi.fn();
-    ZettEventBus.on('window:open', eventSpy);
+    KibotoEventBus.on('window:open', eventSpy);
 
     await fetchAndRenderRemoteStorage(container);
 
@@ -114,7 +114,7 @@ describe('Sprint 4: Remote & Cloud Storage Subsystem (Frontend)', () => {
     expect(container.textContent).toContain('backup-s3');
     expect(container.textContent).toContain('Not connected');
 
-    // Clicking "Open in File Explorer" triggers ZettEventBus
+    // Clicking "Open in File Explorer" triggers KibotoEventBus
     const revealBtn = container.querySelector('.btn-remote-reveal');
     expect(revealBtn).not.toBeNull();
     revealBtn.click();

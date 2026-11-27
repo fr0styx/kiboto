@@ -7,7 +7,7 @@
 
 import { showToast } from '../toast.js';
 import { escapeHtml } from '../utils.js';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 
 import { t } from '../i18n.js';
 import { advancedOn, isAdvancedSection } from '../advanced.js';
@@ -314,7 +314,7 @@ export function launchShortcut(shortcut) {
   } else if (typeof window.openManagementWindow === 'function') {
     window.openManagementWindow(targetPane || targetSection);
   } else {
-    ZettEventBus.emit('window:open', {
+    KibotoEventBus.emit('window:open', {
       id: 'management-window',
       section: targetSection,
       pane: targetPane,

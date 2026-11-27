@@ -32,12 +32,12 @@ describe('Files asks nothing before it opens (SET-28, Files 5)', () => {
       /** @type {any} */ ({ ok: true, json: async () => ({ roots: [] }) })
     );
     vi.spyOn(api, 'get').mockResolvedValue({ entries: [], favorites: [] });
-    const { ZettEventBus } = await import('../event-bus.js');
+    const { KibotoEventBus } = await import('../event-bus.js');
     const fmMod = await import('../components/file-manager.js');
     document.body.innerHTML =
       '<div id="fm-desktop-icon"></div><div id="file-manager-window" style="display:none"><div class="fm-sidebar-tree"></div></div>';
     const heard = vi.fn();
-    ZettEventBus.on('window:open', heard);
+    KibotoEventBus.on('window:open', heard);
     fmMod.openFileManager('/mnt/user'); // builds the window and opens it
     const inst = /** @type {any} */ (window).getActiveFmInstance();
     const open = vi.spyOn(inst, 'open');
@@ -45,9 +45,9 @@ describe('Files asks nothing before it opens (SET-28, Files 5)', () => {
     expect(open).toHaveBeenCalledTimes(1);
     expect(heard.mock.calls.some(([d]) => d && d.id === 'file-manager-window' && d.opened === true)).toBe(true); // handlers get (detail, event)
     open.mockClear();
-    ZettEventBus.emit('window:open', { id: 'file-manager-window', opened: true }); // as openFileManager announces it
+    KibotoEventBus.emit('window:open', { id: 'file-manager-window', opened: true }); // as openFileManager announces it
     expect(open).not.toHaveBeenCalled();
-    ZettEventBus.emit('window:open', { id: 'file-manager-window' }); // someone else asking for it
+    KibotoEventBus.emit('window:open', { id: 'file-manager-window' }); // someone else asking for it
     expect(open).toHaveBeenCalledTimes(1);
   });
 });

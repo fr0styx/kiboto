@@ -4,7 +4,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 vi.mock('../api.js', () => ({ api: { get: vi.fn(), post: vi.fn() } }));
 vi.mock('../toast.js', () => ({ showToast: vi.fn() }));
 vi.mock('qrcode', () => ({ default: { toString: vi.fn(async (text) => `<svg data-text="${text}"></svg>`) } }));
-const { ZettEventBus } = await import('../event-bus.js');
+const { KibotoEventBus } = await import('../event-bus.js');
 await import('../route-access.js');
 const ra = await import('../components/remote-access.js');
 
@@ -18,8 +18,8 @@ const RUNNING = {
 const viewer = { username: 'auditor', scopes: ['system:view', '*:read'] };
 
 describe('Away from home for someone who may only look', () => {
-  beforeEach(() => ZettEventBus.emit('session:user', viewer));
-  afterEach(() => ZettEventBus.emit('session:user', null));
+  beforeEach(() => KibotoEventBus.emit('session:user', viewer));
+  afterEach(() => KibotoEventBus.emit('session:user', null));
 
   it('shows the connection without its buttons, and a note', async () => {
     const body = await ra.remoteBody(RUNNING);

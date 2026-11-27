@@ -16,7 +16,7 @@ const { auth } = await import('../api.js');
 const { showToast } = await import('../toast.js');
 const { setCurrentUser } = await import('../components/session.js');
 const { openSetupWizard } = await import('../components/setup-wizard-gate.js');
-const { ZettEventBus } = await import('../event-bus.js');
+const { KibotoEventBus } = await import('../event-bus.js');
 const A = await import('../components/auth.js');
 
 const byId = (id) => document.getElementById(id);
@@ -201,7 +201,7 @@ describe('sign-in and lock screen (auth.js)', () => {
     code.value = 'abcd-efgh';
     fetchMock.mockResolvedValueOnce(res({ status: 'ok', token: 'T2', user: { id: 'u1' } }));
     const loggedIn = vi.fn();
-    ZettEventBus.on('auth:login', loggedIn);
+    KibotoEventBus.on('auth:login', loggedIn);
     form.dispatchEvent(new Event('submit', { cancelable: true }));
     await vi.waitFor(() => expect(loggedIn).toHaveBeenCalled());
     expect(JSON.parse(fetchMock.mock.calls.at(-1)[1].body)).toEqual({ mfa_token: 'M', recovery_code: 'abcd-efgh' });
@@ -220,7 +220,7 @@ describe('sign-in and lock screen (auth.js)', () => {
 
   it('locks, refuses a wrong password, and unlocks', async () => {
     const locked = vi.fn();
-    ZettEventBus.on('auth:locked', locked);
+    KibotoEventBus.on('auth:locked', locked);
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'L', ctrlKey: true, altKey: true }));
     expect(A.isDesktopLocked()).toBe(true);
     expect(shown('lock-overlay')).toBe('flex');
@@ -258,7 +258,7 @@ describe('sign-in and lock screen (auth.js)', () => {
     byId('mfa-challenge-code').value = '654321';
     fetchMock.mockResolvedValueOnce(res({ status: 'ok' }));
     const unlocked = vi.fn();
-    ZettEventBus.on('auth:unlocked', unlocked);
+    KibotoEventBus.on('auth:unlocked', unlocked);
     byId('form-mfa-challenge').dispatchEvent(new Event('submit', { cancelable: true }));
     await vi.waitFor(() => expect(unlocked).toHaveBeenCalled());
     expect(A.isDesktopLocked()).toBe(false);
@@ -303,7 +303,7 @@ describe('sign-in and lock screen (auth.js)', () => {
 
   it('logs out and shows the sign-in screen', async () => {
     const out = vi.fn();
-    ZettEventBus.on('auth:logout', out);
+    KibotoEventBus.on('auth:logout', out);
     fetchMock.mockRejectedValueOnce(new Error('offline')); // logging out works offline too
     await A.logout();
     expect(auth.clearToken).toHaveBeenCalled();
@@ -315,24 +315,24 @@ describe('sign-in and lock screen (auth.js)', () => {
 
   it('a request that needs sign-in brings the sign-in screen back', () => {
     byId('login-overlay').style.display = 'none';
-    ZettEventBus.emit('auth:required');
+    KibotoEventBus.emit('auth:required');
     expect(shown('login-overlay')).toBe('flex');
   });
 
   it('draws the sign-in form once, however many requests find nobody signed in', async () => {
     const asked = () => fetchMock.mock.calls.filter(([url]) => url === '/api/auth/users-list').length;
-    ZettEventBus.emit('auth:login'); // signed in: the next sign-out draws the form
+    KibotoEventBus.emit('auth:login'); // signed in: the next sign-out draws the form
     vi.clearAllMocks();
     byId('login-users-chooser').innerHTML = '';
-    ZettEventBus.emit('auth:required');
-    ZettEventBus.emit('auth:required');
-    ZettEventBus.emit('auth:required');
+    KibotoEventBus.emit('auth:required');
+    KibotoEventBus.emit('auth:required');
+    KibotoEventBus.emit('auth:required');
     await vi.waitFor(() => expect(byId('login-users-chooser').children.length).toBe(2));
     expect(asked()).toBe(1);
 
     byId('login-toggle-manual').click();
     byId('login-username').value = 'bob';
-    ZettEventBus.emit('auth:required'); // a late answer while the person types
+    KibotoEventBus.emit('auth:required'); // a late answer while the person types
     await new Promise((done) => setTimeout(done, 0));
     expect(asked()).toBe(1);
     expect(shown('login-manual-fields')).toBe('block');

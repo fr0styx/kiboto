@@ -185,7 +185,7 @@ class _Alias[T]:
         setattr(getattr(obj, self.domain), self.name, value)
 
 
-class ZettState:
+class KibotoState:
     # flat names kept for existing code (typed aliases of the domain fields)
     copy_active = _Alias[bool]("copy", "active")
     copy_status = _Alias[str]("copy", "status")
@@ -277,7 +277,7 @@ class ZettState:
         return self.lcd.current_page
 
 
-Z_STATE = ZettState()
+Z_STATE = KibotoState()
 
 
 def _read_events_file() -> list[dict[str, Any]]:

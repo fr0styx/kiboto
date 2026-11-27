@@ -5,7 +5,7 @@
 import { ensureManagementDom } from '../management-dom.js';
 import { api } from '../api.js';
 import { makeDraggable, bringToFront } from './dock.js';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 import { escapeHtml } from '../utils.js';
 import { t } from '../i18n.js';
 import '../styles/kib-window.css'; // the window's own sheet loads with this code
@@ -163,6 +163,6 @@ export async function openKibWindow(pane = 'mgmt-pane-ai-chat') {
     .get('/api/ai/access/me')
     .then(markKibAccess)
     .catch(() => {}); // unknown: leave it as it is
-  ZettEventBus.emit('window:open', { id: WIN_ID });
+  KibotoEventBus.emit('window:open', { id: WIN_ID });
   return win;
 }

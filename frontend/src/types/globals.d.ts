@@ -10,7 +10,7 @@ declare global {
     __kibotoClientLogger: any;
     __updateManagementTelemetry: any;
     __VITEST__: any;
-    __zettActiveFmDrag: any;
+    __kibotoActiveFmDrag: any;
     _activeDragPayload: any;
     _containersManagerInitialized: any;
     _fmInitialized: any;

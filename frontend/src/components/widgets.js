@@ -1,5 +1,5 @@
 import { ensureManagementDom, onManagementDom } from '../management-dom.js';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 import { state } from '../state.js';
 import { showToast } from '../toast.js';
 import { escapeHtml } from '../utils.js';
@@ -164,7 +164,7 @@ export function openWidgetSettings() {
   } else if (typeof window.openManagementSection === 'function') {
     window.openManagementSection('mgmt-sec-wallpaper', 'mgmt-pane-widgets');
   } else {
-    ZettEventBus.emit('window:open', {
+    KibotoEventBus.emit('window:open', {
       id: 'management-window',
       section: 'mgmt-sec-wallpaper',
       pane: 'mgmt-pane-widgets',
@@ -190,7 +190,7 @@ export function applyAdvancedToWidgets(on = advancedOn(), root = document) {
   }
 }
 
-ZettEventBus.on?.('advanced:changed', () => applyWidgetConfig());
+KibotoEventBus.on?.('advanced:changed', () => applyWidgetConfig());
 
 export function applyWidgetConfig() {
   const container = document.getElementById('desktop-widgets-container');
@@ -2158,7 +2158,7 @@ export function initWidgets() {
     _weatherInterval = setInterval(() => fetchWeather(), 20 * 60 * 1000);
   }
 
-  ZettEventBus.on('stats:updated', (stats) => {
+  KibotoEventBus.on('stats:updated', (stats) => {
     if (!stats) return;
     if (typeof document !== 'undefined' && document.hidden && typeof process === 'undefined') return;
     const container = document.getElementById('desktop-widgets-container');
@@ -2561,7 +2561,7 @@ export function applyClockEverywhere(tz, format) {
   const zone = resolveZone(tz);
   const fmt = format === '12' ? '12' : '24';
   const saved = savePersonZone(tz, fmt);
-  ZettEventBus.emit('clock:changed', { zone, format: fmt });
+  KibotoEventBus.emit('clock:changed', { zone, format: fmt });
   const row = document.getElementById('tz-server-row');
   const box = document.getElementById('tz-apply-server');
   if (row && !row.hidden && box?.checked) {
@@ -2600,9 +2600,9 @@ export function applyPersonClock(prefs) {
   if (!Object.keys(next).length) return;
   const merged = saveWidgetConfig(next);
   updateClock();
-  ZettEventBus.emit('clock:changed', { zone: resolveZone(merged.clockTimezone), format: merged.clockFormat || '24' });
+  KibotoEventBus.emit('clock:changed', { zone: resolveZone(merged.clockTimezone), format: merged.clockFormat || '24' });
 }
-ZettEventBus.on?.('session:user', (user) => applyPersonClock(user && user.preferences));
+KibotoEventBus.on?.('session:user', (user) => applyPersonClock(user && user.preferences));
 import('./session.js') // signed in before this module loaded
   .then((m) => {
     const user = m.getCurrentUser();

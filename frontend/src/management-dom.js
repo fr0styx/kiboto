@@ -2,7 +2,7 @@
 // It's inserted the first time it's needed: when Mission Control opens, when other code
 // asks for it, or when the browser is idle a few seconds after start.
 import { applyTranslations } from './i18n.js';
-import { ZettEventBus } from './event-bus.js';
+import { KibotoEventBus } from './event-bus.js';
 import { ensureDrawerDom } from './drawer-dom.js';
 
 const waiters = [];
@@ -38,7 +38,7 @@ export function ensureManagementDom() {
             console.error('Mission Control setup failed:', err);
           }
         }
-        ZettEventBus.emit('dom:management-ready');
+        KibotoEventBus.emit('dom:management-ready');
       }
     );
   }

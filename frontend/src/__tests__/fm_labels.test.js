@@ -166,7 +166,7 @@ describe('file labels', () => {
   });
 
   it('reads the labels again after a move, but only for someone who has labels', async () => {
-    const { ZettEventBus } = await import('../event-bus.js');
+    const { KibotoEventBus } = await import('../event-bus.js');
     const get = vi.spyOn(api, 'get').mockResolvedValue({ names: {}, items: {} });
     expect(await labelsMayHaveMoved()).toBe(null); // nothing loaded yet: nothing to refresh
     await loadLabels();
@@ -178,7 +178,7 @@ describe('file labels', () => {
     await loadLabels();
     get.mockClear();
     get.mockResolvedValue({ names: {}, items: { '/mnt/user/old/a.txt': 'red' } });
-    ZettEventBus.emit('fm:refresh'); // what a finished move or a rename sends
+    KibotoEventBus.emit('fm:refresh'); // what a finished move or a rename sends
     await vi.waitFor(() => expect(labelOf('/mnt/user/old/a.txt')).toBe('red'));
     expect(get).toHaveBeenCalledWith('/api/fs/labels');
     expect(labelOf('/mnt/user/a.txt')).toBeFalsy();

@@ -3,14 +3,14 @@
  * #/network, #/power, #/ai, #/vms, #/settings open the one place that does that job; the sidebar's
  * names since SET-18 too: #/people, #/folders, #/kib, #/away, #/notifications, #/security, #/general.
  */
-import { ZettEventBus } from './event-bus.js';
+import { KibotoEventBus } from './event-bus.js';
 
 export const ROUTES = {
   apps: () => window.openContainersManager?.(),
   'apps/catalog': () => window.openContainersManager?.({ view: 'catalog' }),
   files: () => window.openFileManager?.(),
   storage: () => window.openManagementSection?.('mgmt-sec-storage'),
-  drives: () => ZettEventBus.emit('modal:smart:open', null),
+  drives: () => KibotoEventBus.emit('modal:smart:open', null),
   shares: () => window.openManagementSection?.('mgmt-pane-storage-shares'),
   backup: () => window.openManagementSection?.('mgmt-pane-backups'),
   users: () => window.openManagementSection?.('mgmt-pane-users'),

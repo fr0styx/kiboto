@@ -3,7 +3,7 @@
  * Split out of management.js (ARCH-1); management.js re-exports everything here.
  */
 import { serverSaid } from '../../server-text.js';
-import { ZettEventBus } from '../../event-bus.js';
+import { KibotoEventBus } from '../../event-bus.js';
 import { bringToFront, DockManager, makeDraggable, showDockToast } from '../dock.js';
 import { api } from '../../api.js';
 import { showToast, showConfirmToast, showDangerConfirm } from '../../toast.js';
@@ -842,7 +842,7 @@ export async function openAppDeployModal(appId) {
         showDockToast(`🚀 ${appId.toUpperCase()} stack deployed and running! Click to open.`, 'app-deploy');
       }
 
-      ZettEventBus.emit('docker:containers:refresh'); // the Apps window reloads its list (SET-25)
+      KibotoEventBus.emit('docker:containers:refresh'); // the Apps window reloads its list (SET-25)
 
       showToast(
         t('toast.stack_deployed_and_running', '{appId} stack deployed and running!', { appId: appId }),
@@ -1512,5 +1512,5 @@ async function finishPruneJob(job) {
     btn.textContent = t('prune.close', 'Done');
   }
   if (cancel) cancel.hidden = true;
-  ZettEventBus.emit('docker:containers:refresh'); // the Apps window reloads its list (SET-25)
+  KibotoEventBus.emit('docker:containers:refresh'); // the Apps window reloads its list (SET-25)
 }

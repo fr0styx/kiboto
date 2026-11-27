@@ -2,7 +2,7 @@
  * Kiboto Reactive State Store
  * Centralizes UI configuration, hardware telemetry caches, and layout preferences.
  */
-import { ZettEventBus } from './event-bus.js';
+import { KibotoEventBus } from './event-bus.js';
 import { loadLook } from './look.js';
 
 /** The front screen's theme saved on this device; the removed Yak theme becomes the default. */
@@ -163,7 +163,7 @@ export const state = {
     s = mergeNewEvents(mergeDockerTelemetry(s, this.latestStats), this.latestStats);
     if (!this.latestStats) {
       this.latestStats = s;
-      ZettEventBus.emit('stats:updated', this.latestStats);
+      KibotoEventBus.emit('stats:updated', this.latestStats);
       return true;
     }
 
@@ -188,7 +188,7 @@ export const state = {
     if (!changed) return false;
 
     this.latestStats = { ...this.latestStats, ...s };
-    ZettEventBus.emit('stats:updated', this.latestStats);
+    KibotoEventBus.emit('stats:updated', this.latestStats);
     return true;
   },
 
@@ -199,11 +199,11 @@ export const state = {
     if (customAccent !== null) {
       this.desktopCustomAccent = customAccent;
     }
-    ZettEventBus.emit('desktop_theme:changed', {
+    KibotoEventBus.emit('desktop_theme:changed', {
       theme: this.desktopTheme,
       accent: this.desktopCustomAccent,
     });
-    ZettEventBus.emit('theme:changed', {
+    KibotoEventBus.emit('theme:changed', {
       theme: this.desktopTheme,
       accent: this.desktopCustomAccent,
     });
@@ -221,7 +221,7 @@ export const state = {
       if (typeof localStorage !== 'undefined')
         localStorage.setItem('lcd_text_clarity', this.lcdTextClarity ? 'true' : 'false');
     }
-    ZettEventBus.emit('lcd_theme:changed', {
+    KibotoEventBus.emit('lcd_theme:changed', {
       theme: this.lcdTheme,
       accent: this.lcdCustomAccent,
       textClarity: this.lcdTextClarity,
@@ -240,7 +240,7 @@ export const state = {
     if (vis) this.dashVis = { ...vis };
     if (sizes) this.dashSizes = { ...sizes };
     if (version !== null) this.activeLayoutVersion = version;
-    ZettEventBus.emit('layout:updated', {
+    KibotoEventBus.emit('layout:updated', {
       order: this.dashOrder,
       vis: this.dashVis,
       sizes: this.dashSizes,
@@ -253,18 +253,18 @@ export const state = {
     if (updateTimestamp) {
       this.lastCurveSaveTime = Date.now();
     }
-    ZettEventBus.emit('curve:updated', this.curvePoints);
+    KibotoEventBus.emit('curve:updated', this.curvePoints);
   },
 
   setZoneFilter(filter) {
     this.selectedZoneFilter = filter;
-    ZettEventBus.emit('zone_filter:changed', filter);
+    KibotoEventBus.emit('zone_filter:changed', filter);
   },
 
   setZoomIdx(idx) {
     if (idx >= 0 && idx < ZOOM_PROFILES.length) {
       this.currentZoomIdx = idx;
-      ZettEventBus.emit('zoom:changed', ZOOM_PROFILES[idx]);
+      KibotoEventBus.emit('zoom:changed', ZOOM_PROFILES[idx]);
     }
   },
 };

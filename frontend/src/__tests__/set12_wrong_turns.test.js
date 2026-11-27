@@ -1,7 +1,7 @@
 // SET-12, Overview stage 1: the wrong turns in Settings' navigation.
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import { setLanguage } from '../i18n.js';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 import { enablePhoneShell, onPhoneBack, launcherHtml, tabsHtml } from '../components/phone-shell.js';
 import { installWindowFocus } from '../window-focus.js';
 import { entryFor, highlightEntry, mayNotOpen } from '../components/management/sidebar-current.js';
@@ -133,14 +133,14 @@ describe('the sidebar entry of the open page', () => {
     highlightEntry('mgmt-sec-system', 'mgmt-pane-users');
     const overview = vi.fn();
     document.getElementById('e-overview').addEventListener('click', overview);
-    ZettEventBus.emit('session:user', { username: 'kim', scopes: ['files:read'] });
+    KibotoEventBus.emit('session:user', { username: 'kim', scopes: ['files:read'] });
     expect(mayNotOpen('mgmt-sec-system', 'mgmt-pane-users')).toBe(true);
     expect(mayNotOpen('mgmt-sec-system', 'mgmt-pane-security')).toBe(false); // their own password lives there
     expect(overview).toHaveBeenCalledTimes(1);
     expect(leavePage(NO_ACCESS)).toBe(true);
     highlightEntry('mgmt-sec-system', null);
     expect(leavePage(NO_ACCESS)).toBe(false);
-    ZettEventBus.emit('session:user', { username: 'ana', scopes: ['*'] });
+    KibotoEventBus.emit('session:user', { username: 'ana', scopes: ['*'] });
     expect(mayNotOpen('mgmt-sec-system', 'mgmt-pane-users')).toBe(false);
   });
 
@@ -158,14 +158,14 @@ describe('the sidebar entry of the open page', () => {
 describe('whose windows come back', () => {
   beforeEach(() => {
     localStorage.clear();
-    ZettEventBus.emit('session:user', null);
+    KibotoEventBus.emit('session:user', null);
     DockManager.windows = {};
   });
 
   it('a list with another name is not this person’s', () => {
     expect(ownerName()).toBe('');
     expect(isMine({ who: 'ana' })).toBe(true); // not known yet: a reload keeps the same session
-    ZettEventBus.emit('session:user', { username: 'ben', scopes: ['*'] });
+    KibotoEventBus.emit('session:user', { username: 'ben', scopes: ['*'] });
     expect(ownerName()).toBe('ben');
     expect(isMine({ who: 'ana' })).toBe(false);
     expect(isMine({ who: 'ben' })).toBe(true);
@@ -186,7 +186,7 @@ describe('whose windows come back', () => {
     };
     localStorage.setItem(OPEN_WINDOWS_KEY, '{"who":"ana","windows":{}}');
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    ZettEventBus.emit('auth:logout');
+    KibotoEventBus.emit('auth:logout');
     expect(closed).toHaveBeenCalledTimes(1);
     expect(warn).toHaveBeenCalled();
     expect(localStorage.getItem(OPEN_WINDOWS_KEY)).toBeNull();
@@ -205,9 +205,9 @@ describe('whose windows come back', () => {
       OPEN_WINDOWS_KEY,
       '{"who":"ana","windows":{"management":{"open":true,"activePane":"mgmt-pane-users"}}}'
     );
-    ZettEventBus.emit('session:user', { username: 'ana', scopes: ['*'] });
+    KibotoEventBus.emit('session:user', { username: 'ana', scopes: ['*'] });
     expect(closed).not.toHaveBeenCalled();
-    ZettEventBus.emit('session:user', { username: 'ben', scopes: ['*'] }); // the session ran out, ben signed in
+    KibotoEventBus.emit('session:user', { username: 'ben', scopes: ['*'] }); // the session ran out, ben signed in
     expect(closed).toHaveBeenCalledTimes(1);
     expect(localStorage.getItem(OPEN_WINDOWS_KEY)).toBeNull();
     localStorage.setItem(
@@ -219,7 +219,7 @@ describe('whose windows come back', () => {
     expect(window.openManagementWindow).not.toHaveBeenCalled();
     expect(localStorage.getItem(OPEN_WINDOWS_KEY)).toBeNull();
     localStorage.setItem(OPEN_WINDOWS_KEY, 'not json');
-    ZettEventBus.emit('session:user', { username: 'ben', scopes: ['*'] });
+    KibotoEventBus.emit('session:user', { username: 'ben', scopes: ['*'] });
   });
 });
 
@@ -263,9 +263,9 @@ describe('a change of language reaches what is built once', () => {
     expect(icon.hidden).toBe(true); // it was never hidden
     applyAdvancedEverywhere(true);
     expect(icon.hidden).toBe(false);
-    ZettEventBus.emit('session:user', { username: 'kim', scopes: ['files:read'] });
+    KibotoEventBus.emit('session:user', { username: 'kim', scopes: ['files:read'] });
     expect(icon.hidden).toBe(true);
-    ZettEventBus.emit('session:user', null);
+    KibotoEventBus.emit('session:user', null);
     expect(icon.hidden).toBe(false);
   });
 

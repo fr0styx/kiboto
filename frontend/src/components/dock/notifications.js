@@ -8,7 +8,7 @@ import { ROUTES } from '../../router.js';
 import { escapeHtml } from '../../utils.js';
 import { state } from '../../state.js';
 import { t, getLanguage } from '../../i18n.js';
-import { ZettEventBus } from '../../event-bus.js';
+import { KibotoEventBus } from '../../event-bus.js';
 import { formatDateTime } from '../../format.js';
 import { _dockPosition } from './dock-settings.js';
 import { initWindowKeyboardShortcuts } from './shortcuts.js';
@@ -43,7 +43,7 @@ export function followReader(user) {
   if (seen > lastReadEventTs) lastReadEventTs = seen;
   updateNotificationBadge();
 }
-ZettEventBus.on?.('session:user', followReader);
+KibotoEventBus.on?.('session:user', followReader);
 if (typeof window !== 'undefined') {
   window.addEventListener('kiboto:lang-changed', () => {
     updateNotificationBadge();
@@ -401,7 +401,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   initWindowKeyboardShortcuts();
 
-  ZettEventBus.on('stats:updated', () => {
+  KibotoEventBus.on('stats:updated', () => {
     updateNotificationBadge();
     const panel = document.getElementById('notif-center-panel');
     if (panel && panel.style.display !== 'none') {

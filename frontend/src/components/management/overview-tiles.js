@@ -5,7 +5,7 @@
  * links it replaces were 1,329 px tall for one link each (overview report B4, B7, B8).
  */
 import { api } from '../../api.js';
-import { ZettEventBus } from '../../event-bus.js';
+import { KibotoEventBus } from '../../event-bus.js';
 import { formatDateTime } from '../../format.js';
 import { t } from '../../i18n.js';
 import { state } from '../../state.js';
@@ -86,7 +86,7 @@ export function installHubTiles(root = document) {
   updateHubTiles(state.lastStats, root);
   if (_listening) return;
   _listening = true;
-  ZettEventBus.on('stats:updated', (stats) => updateHubTiles(stats, root));
+  KibotoEventBus.on('stats:updated', (stats) => updateHubTiles(stats, root));
 }
 
 /** Getting started on the Overview is for whoever sets the NAS up (overview decision 5). */

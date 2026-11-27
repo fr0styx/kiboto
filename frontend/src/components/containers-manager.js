@@ -15,7 +15,7 @@ import {
 } from './catalog-view.js';
 import { escapeHtml, reconcileKeyedTable } from '../utils.js';
 import { emptyStateHtml } from './empty-state.js';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 import { showToast, showConfirmToast, showBottomSheet } from '../toast.js';
 import { t } from '../i18n.js';
 import { actionSaid, appsSummary, canStop, canResume } from './app-condition.js';
@@ -558,16 +558,16 @@ export function initContainersManager() {
   }
 
   // Live Event Bus Subscriptions for instant reactive updates
-  ZettEventBus.on('docker:action', () => {
+  KibotoEventBus.on('docker:action', () => {
     loadContainersData(true);
   });
-  ZettEventBus.on('docker:containers:refresh', () => {
+  KibotoEventBus.on('docker:containers:refresh', () => {
     loadContainersData(true);
   });
-  ZettEventBus.on('docker:containers-updated', () => {
+  KibotoEventBus.on('docker:containers-updated', () => {
     loadContainersData(true);
   });
-  ZettEventBus.on('stats:updated', (stats) => {
+  KibotoEventBus.on('stats:updated', (stats) => {
     if (!stats || !Array.isArray(stats.docker)) return;
     _cwLastSseAt = Date.now();
     if (!containersWindow) {
@@ -712,7 +712,7 @@ export function openContainersManager(opts = {}) {
   containersWindow.style.removeProperty('display');
   containersWindow.style.display = 'flex';
   bringToFront(containersWindow);
-  ZettEventBus.emit('window:open', { id: 'containers-manager-window' });
+  KibotoEventBus.emit('window:open', { id: 'containers-manager-window' });
   startCwAutoRefresh();
   loadContainersData();
   if (opts && opts.view === 'family') openFamily(containersWindow, opts.part); // from People's link rows (SET-19)

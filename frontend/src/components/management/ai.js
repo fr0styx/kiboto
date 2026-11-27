@@ -3,7 +3,7 @@
  * Split out of management.js (ARCH-1); management.js re-exports everything here.
  */
 import { openStackModal } from '../stack-modal.js';
-import { ZettEventBus } from '../../event-bus.js';
+import { KibotoEventBus } from '../../event-bus.js';
 import { api, auth } from '../../api.js';
 import { showToast, showConfirmToast, showPromptToast } from '../../toast.js';
 import { escapeHtml, copyText } from '../../utils.js';
@@ -2941,7 +2941,7 @@ export function renderAiPreviewInspector(item) {
       if (typeof window.openFileManager === 'function') {
         window.openFileManager(parentDir);
       } else {
-        ZettEventBus.emit('window:open', { id: 'files', path: parentDir });
+        KibotoEventBus.emit('window:open', { id: 'files', path: parentDir });
       }
       showToast(
         t('toast.opened_folder_location', 'Opened folder location: {parentDir}', { parentDir: parentDir }),
@@ -3394,7 +3394,7 @@ function _aiWebOff() {
 }
 
 // Signing out leaves nothing of the chat behind for the next person at this browser.
-ZettEventBus.on?.('auth:logout', () => {
+KibotoEventBus.on?.('auth:logout', () => {
   if (_aiActiveAbortController) {
     _aiActiveAbortController.abort();
     _aiActiveAbortController = null;

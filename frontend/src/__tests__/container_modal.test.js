@@ -7,7 +7,7 @@ import {
   _resetContainerModalForTesting,
 } from '../components/container-modal.js';
 import { api } from '../api.js';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 
 describe('Container Inspector & Docker Compose Viewer - Phase 2', () => {
   const mockContainerDetails = {
@@ -175,7 +175,7 @@ describe('Container Inspector & Docker Compose Viewer - Phase 2', () => {
     expect(mountsContent.innerHTML).toContain('/mnt/user/media');
 
     // Test File Explorer event emission on click
-    const emitSpy = vi.spyOn(ZettEventBus, 'emit');
+    const emitSpy = vi.spyOn(KibotoEventBus, 'emit');
     const revealBtn = mountsContent.querySelector('.btn-reveal-fm[data-path="/mnt/user/appdata/jellyfin"]');
     expect(revealBtn).not.toBeNull();
     revealBtn.click();

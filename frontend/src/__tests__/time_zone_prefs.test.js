@@ -47,9 +47,9 @@ describe("each person's time zone, and a server zone from an administrator's bro
     const { api } = await import('../api.js');
     const put = vi.spyOn(api, 'put').mockResolvedValue({});
     const { applyPersonClock, loadWidgetConfig, saveWidgetConfig } = await import('../components/widgets.js');
-    const { ZettEventBus } = await import('../event-bus.js');
+    const { KibotoEventBus } = await import('../event-bus.js');
     const seen = vi.fn();
-    ZettEventBus.on('clock:changed', seen);
+    KibotoEventBus.on('clock:changed', seen);
 
     applyPersonClock({ timezone: 'Asia/Tokyo', clock_format: '12' });
     expect(loadWidgetConfig().clockTimezone).toBe('Asia/Tokyo');

@@ -3,7 +3,7 @@
  * Split out of management.js (ARCH-1); management.js re-exports everything here.
  */
 import { isNvmeDrive } from '../temp-rule.js';
-import { ZettEventBus } from '../../event-bus.js';
+import { KibotoEventBus } from '../../event-bus.js';
 import { triggerLocateDisk, getThermalLevel } from '../chassis-visualizer.js';
 import { state } from '../../state.js';
 import { api } from '../../api.js';
@@ -173,7 +173,7 @@ function bindDiskTableEvents(tbody) {
     if (smartBtn) {
       const dev = smartBtn.dataset.dev;
       // Drive Health shows a sleeping drive from its last reading and never wakes it on open
-      ZettEventBus.emit('modal:smart:open', dev);
+      KibotoEventBus.emit('modal:smart:open', dev);
     }
   });
 }

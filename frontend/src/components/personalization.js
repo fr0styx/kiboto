@@ -7,7 +7,7 @@
 import { ensureManagementDom } from '../management-dom.js';
 import '../api.js';
 import '../state.js';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 import '../toast.js';
 import { t } from '../i18n.js';
 import { makeDraggable, bringToFront } from './dock.js';
@@ -206,7 +206,7 @@ export function openPersonalizationWindow(tab = null) {
   personalizationWindow.style.removeProperty('display');
   personalizationWindow.style.display = 'flex';
   bringToFront(personalizationWindow);
-  ZettEventBus.emit('window:open', { id: 'personalization-window', tab: _activeTab });
+  KibotoEventBus.emit('window:open', { id: 'personalization-window', tab: _activeTab });
 }
 
 export function closePersonalizationWindow() {

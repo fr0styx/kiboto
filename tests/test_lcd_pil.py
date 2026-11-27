@@ -165,9 +165,9 @@ def test_rgb565_packing_and_row_padding():
 
 
 def test_ui_wake_also_wakes_the_lcd_and_clearing_it_does_not_take_that_away():
-    from backend.state import ZettState
+    from backend.state import KibotoState
 
-    st = ZettState()
+    st = KibotoState()
     st.lcd_wake.clear()
     st.ui_wake.set()
     st.ui_wake.clear()  # another loop (the stats collector) took the ui wake-up
@@ -175,9 +175,9 @@ def test_ui_wake_also_wakes_the_lcd_and_clearing_it_does_not_take_that_away():
 
 
 def test_page_change_wakes_the_lcd():
-    from backend.state import ZettState
+    from backend.state import KibotoState
 
-    st = ZettState()
+    st = KibotoState()
     st.lcd_wake.clear()
     st.set_lcd_page(2)
     assert st.lcd_wake.is_set()

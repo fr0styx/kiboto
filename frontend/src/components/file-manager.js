@@ -10,7 +10,7 @@ import {
 } from './file-manager-helpers.js';
 import { api } from '../api.js';
 import { escapeHtml, copyTextToClipboard } from '../utils.js';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 import { poolName } from './pool-names.js';
 import { fileKind, shownFolderName } from './file-kind.js';
 import {
@@ -909,7 +909,7 @@ export class FileManagerWindow {
             await executeTransferWithConflictCheck(_clipboard.items, this.currentPath, _clipboard.action || 'copy');
             if (_clipboard.action === 'move') _clipboard = { items: [], action: 'copy', sourceInstanceId: null };
             this.loadPath(this.currentPath);
-            ZettEventBus.emit('fm:refresh');
+            KibotoEventBus.emit('fm:refresh');
           },
         });
       }
@@ -974,7 +974,7 @@ export class FileManagerWindow {
             .post('/api/mkdir', { path: this.currentPath + '/' + name })
             .then(() => {
               this.loadPath(this.currentPath);
-              ZettEventBus.emit('fm:refresh');
+              KibotoEventBus.emit('fm:refresh');
             })
             .catch((err) => showToast(err.message, 'error'));
         }
@@ -1099,7 +1099,7 @@ export class FileManagerWindow {
       this.viewport.addEventListener('dragover', (e) => {
         e.preventDefault();
         e.dataTransfer.dropEffect =
-          e.altKey || window._activeDragPayload?.action === 'copy' || window.__zettActiveFmDrag?.action === 'copy'
+          e.altKey || window._activeDragPayload?.action === 'copy' || window.__kibotoActiveFmDrag?.action === 'copy'
             ? 'copy'
             : 'move';
 
@@ -1154,7 +1154,7 @@ export class FileManagerWindow {
         const destPath = file && file.is_dir && file.name !== '..' ? file.path : this.currentPath;
 
         // Extract payload with full multi-source fallback
-        let payload = window._activeDragPayload || window.__zettActiveFmDrag;
+        let payload = window._activeDragPayload || window.__kibotoActiveFmDrag;
         if (!payload || !payload.paths || payload.paths.length === 0) {
           try {
             const jsonStr = e.dataTransfer.getData('application/json');
@@ -1180,8 +1180,8 @@ export class FileManagerWindow {
           const action = e.altKey ? 'copy' : payload.action || 'move';
           await executeTransferWithConflictCheck(payload.paths, destPath, action);
           window._activeDragPayload = null;
-          window.__zettActiveFmDrag = null;
-          ZettEventBus.emit('fm:refresh');
+          window.__kibotoActiveFmDrag = null;
+          KibotoEventBus.emit('fm:refresh');
           return;
         }
 
@@ -1353,7 +1353,7 @@ export class FileManagerWindow {
           timestamp: Date.now(),
         };
         window._activeDragPayload = payload;
-        window.__zettActiveFmDrag = payload;
+        window.__kibotoActiveFmDrag = payload;
 
         try {
           e.dataTransfer.setData('application/json', JSON.stringify(payload));
@@ -1374,11 +1374,11 @@ export class FileManagerWindow {
       });
 
       this.list.addEventListener('dragend', () => {
-        const payload = window.__zettActiveFmDrag;
+        const payload = window.__kibotoActiveFmDrag;
         window._activeDragPayload = null;
         setTimeout(() => {
-          if (window.__zettActiveFmDrag === payload) {
-            window.__zettActiveFmDrag = null;
+          if (window.__kibotoActiveFmDrag === payload) {
+            window.__kibotoActiveFmDrag = null;
           }
         }, 2500);
         document.querySelectorAll('.fm-drop-hover, .fm-tree-drop-hover').forEach((el) => {
@@ -2053,7 +2053,7 @@ export class FileManagerWindow {
         span.classList.remove('fm-crumb-drop-hover');
         const targetPath = p.replace(/\/+$/, '') || '/';
 
-        let payload = window._activeDragPayload || window.__zettActiveFmDrag;
+        let payload = window._activeDragPayload || window.__kibotoActiveFmDrag;
         if (!payload || !payload.paths || payload.paths.length === 0) {
           try {
             const jsonStr = e.dataTransfer.getData('application/json');
@@ -2079,8 +2079,8 @@ export class FileManagerWindow {
           const action = e.altKey ? 'copy' : payload.action || 'move';
           await executeTransferWithConflictCheck(payload.paths, targetPath, action);
           window._activeDragPayload = null;
-          window.__zettActiveFmDrag = null;
-          ZettEventBus.emit('fm:refresh');
+          window.__kibotoActiveFmDrag = null;
+          KibotoEventBus.emit('fm:refresh');
           return;
         }
 
@@ -2751,7 +2751,7 @@ export class FileManagerWindow {
     const res = await uploadAll(Array.from(files).map((file) => ({ file, dir })));
     if (res.uploaded > 0) {
       this.loadPath(this.currentPath);
-      ZettEventBus.emit('fm:refresh');
+      KibotoEventBus.emit('fm:refresh');
     }
     return res;
   }
@@ -2876,7 +2876,7 @@ export class FileManagerWindow {
             try {
               await api.post('/api/fs/rename', renameBody(path, newName));
               this.loadPath(this.currentPath);
-              ZettEventBus.emit('fm:refresh');
+              KibotoEventBus.emit('fm:refresh');
             } catch (err) {
               showToast(err.message, 'error');
             }
@@ -3358,7 +3358,7 @@ export class FileManagerWindow {
         _clipboard = { items: [], action: 'copy', sourceInstanceId: null };
       }
       this.loadPath(this.currentPath);
-      ZettEventBus.emit('fm:refresh');
+      KibotoEventBus.emit('fm:refresh');
     }
   }
 
@@ -3440,7 +3440,7 @@ export class FileManagerWindow {
         try {
           await api.post('/api/fs/rename', renameBody(file.path, newName));
           this.loadPath(this.currentPath);
-          ZettEventBus.emit('fm:refresh');
+          KibotoEventBus.emit('fm:refresh');
         } catch (err) {
           showToast(err.message, 'error');
         }
@@ -3787,7 +3787,7 @@ export class FileManagerWindow {
     const res = await uploadAll(items);
     if (res.uploaded > 0 || dirs.length) {
       this.loadPath(this.currentPath);
-      ZettEventBus.emit('fm:refresh');
+      KibotoEventBus.emit('fm:refresh');
     }
     return res;
   }
@@ -3976,7 +3976,7 @@ export function openFileManager(path = null) {
     primary.open(path);
   }
   // others hear that it opened; it is not opened a second time (that read the folder and the roots twice: Files 5)
-  ZettEventBus.emit('window:open', { id: 'file-manager-window', path: path || undefined, opened: true });
+  KibotoEventBus.emit('window:open', { id: 'file-manager-window', path: path || undefined, opened: true });
 }
 window.openFileManager = openFileManager;
 
@@ -3984,13 +3984,13 @@ window.navigateToPath = (path = null) => {
   if (typeof window.openFileManager === 'function') {
     window.openFileManager(path);
   } else {
-    ZettEventBus.emit('window:open', { id: 'file-manager-window', path: path || undefined });
+    KibotoEventBus.emit('window:open', { id: 'file-manager-window', path: path || undefined });
   }
 };
 
 window.openRecycleBin = () => {
   const target = `${fmHome()}/.RecycleBin`; // the bin of the server's main pool (Files finding 28)
-  ZettEventBus.emit('window:open', { id: 'file-manager-window', path: target });
+  KibotoEventBus.emit('window:open', { id: 'file-manager-window', path: target });
 };
 
 export function initFileManager() {
@@ -4017,7 +4017,7 @@ export function initFileManager() {
     });
 
     primary.open();
-    ZettEventBus.emit('window:open', { id: 'file-manager-window', opened: true }); // already open: not twice (Files 5)
+    KibotoEventBus.emit('window:open', { id: 'file-manager-window', opened: true }); // already open: not twice (Files 5)
   };
 
   if (fmIcon) {
@@ -4041,14 +4041,14 @@ export function initFileManager() {
     });
   }
 
-  ZettEventBus.on('window:open', (payload) => {
+  KibotoEventBus.on('window:open', (payload) => {
     if (payload.id === 'file-manager-window' && !payload.opened) {
       primary.open(payload.path);
     }
   });
 
   // Cross-window sync: refresh all open File Explorer instances
-  ZettEventBus.on('fm:refresh', () => {
+  KibotoEventBus.on('fm:refresh', () => {
     const refreshAll = () => {
       _fmInstances.forEach((inst) => {
         if (inst.isOpen()) {
@@ -4111,7 +4111,7 @@ export async function executeTransferWithConflictCheck(sources, destinationDir, 
       action,
       conflicts: checkRes.conflicts,
       onResolved: () => {
-        ZettEventBus.emit('fm:refresh');
+        KibotoEventBus.emit('fm:refresh');
       },
     });
   } catch (err) {

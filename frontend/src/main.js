@@ -18,7 +18,7 @@ initClientLogger();
 // Emoji in the interface are drawn as icons from here on (UX-14)
 startIconizer();
 
-import { ZettEventBus } from './event-bus.js';
+import { KibotoEventBus } from './event-bus.js';
 import { auth, api, setConfirmationHandler } from './api.js';
 import { state } from './state.js';
 import { showConfirmToast } from './toast.js';
@@ -375,7 +375,7 @@ document.addEventListener('DOMContentLoaded', () => {
     openGlobal: 'openManagementWindow',
   });
   let managementReady = false;
-  ZettEventBus.on('window:open', (payload) => {
+  KibotoEventBus.on('window:open', (payload) => {
     if (managementReady || !payload || (payload.id !== 'management' && payload.id !== 'management-window')) return;
     ensureManagement().then(() => {
       if (!managementReady && window.openManagementWindow)
@@ -491,22 +491,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
   window.addEventListener('resize', fitMiniPreviewScale);
 
-  ZettEventBus.on('auth:required', () => {
+  KibotoEventBus.on('auth:required', () => {
     stopSSE();
   });
 
-  ZettEventBus.on('auth:locked', () => {
+  KibotoEventBus.on('auth:locked', () => {
     stopSSE();
   });
 
-  ZettEventBus.on('auth:unlocked', () => {
+  KibotoEventBus.on('auth:unlocked', () => {
     if (auth.hasToken() || state.isLcdDirect) {
       tick();
       startSSE();
     }
   });
 
-  ZettEventBus.on('auth:login', () => {
+  KibotoEventBus.on('auth:login', () => {
     fetchDashboardLayout();
     tick();
     startSSE();

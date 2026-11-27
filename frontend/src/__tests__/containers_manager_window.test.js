@@ -10,7 +10,7 @@ import {
   CW_WATCHDOG_MS,
 } from '../components/containers-manager.js';
 import { DockManager } from '../components/dock.js';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 import { api } from '../api.js';
 
 describe('Dedicated Containers Window & Desktop Icon Suite', () => {
@@ -57,7 +57,7 @@ describe('Dedicated Containers Window & Desktop Icon Suite', () => {
 
     // Desktop icon click launches window
     const openSpy = vi.fn();
-    ZettEventBus.on('window:open', (data) => openSpy(data));
+    KibotoEventBus.on('window:open', (data) => openSpy(data));
 
     const icon = document.getElementById('containers-desktop-icon');
     icon.click();
@@ -364,7 +364,7 @@ describe('Dedicated Containers Window & Desktop Icon Suite', () => {
 
     // Real SSE ticks every 1-2 s; simulate a minute of live stream.
     for (let i = 0; i < 30; i++) {
-      ZettEventBus.emit('stats:updated', { docker: [] });
+      KibotoEventBus.emit('stats:updated', { docker: [] });
       await vi.advanceTimersByTimeAsync(2000);
     }
     expect(containerCalls()).toBe(afterOpen);
@@ -403,10 +403,10 @@ describe('Dedicated Containers Window & Desktop Icon Suite', () => {
     const app = (id, state) => ({ id, name: id, image: `example/${id}`, state, status: state, ports: [] });
     // stats events arrive on the next animation frame (event-bus.js)
     const frame = () => new Promise((r) => requestAnimationFrame(() => r(undefined)));
-    ZettEventBus.emit('stats:updated', { docker: [app('a', 'running'), app('b', 'running')] });
+    KibotoEventBus.emit('stats:updated', { docker: [app('a', 'running'), app('b', 'running')] });
     await frame();
     const before = document.getElementById('cw-stat-daemon')?.textContent;
-    ZettEventBus.emit('stats:updated', { docker: [app('a', 'running'), app('b', 'exited')] });
+    KibotoEventBus.emit('stats:updated', { docker: [app('a', 'running'), app('b', 'exited')] });
     await frame();
     const after = document.getElementById('cw-stat-daemon')?.textContent;
     expect(before).not.toBe('Loading…');
@@ -424,7 +424,7 @@ describe('Dedicated Containers Window & Desktop Icon Suite', () => {
     expect(statusCalls()).toBe(1);
 
     for (let i = 0; i < 4; i++) {
-      ZettEventBus.emit('stats:updated', { docker: [] });
+      KibotoEventBus.emit('stats:updated', { docker: [] });
       await vi.advanceTimersByTimeAsync(CW_WATCHDOG_MS);
     }
     expect(statusCalls()).toBe(2);

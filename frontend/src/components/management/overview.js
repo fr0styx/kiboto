@@ -9,7 +9,7 @@ import { t } from '../../i18n.js';
 import { escapeHtml } from '../../utils.js';
 import { ROUTES } from '../../router.js';
 import { ADVANCED_SECTIONS, advancedOn, saveAdvanced, isAdvancedSection } from '../../advanced.js';
-import { ZettEventBus } from '../../event-bus.js';
+import { KibotoEventBus } from '../../event-bus.js';
 import { announceChange } from '../../a11y.js';
 import { currentUser } from '../../route-access.js';
 import { ADVANCED_OFF, leavePage, mark, tidyHeadings } from '../../hide-marks.js';
@@ -38,7 +38,7 @@ export function leaveAdvancedPage(root = document) {
   return leavePage(ADVANCED_OFF, root);
 }
 
-ZettEventBus.on?.('advanced:changed', (d) => applyAdvanced(d?.on));
+KibotoEventBus.on?.('advanced:changed', (d) => applyAdvanced(d?.on));
 
 /** Shows or hides the advanced places in the sidebar and on the Overview. */
 export function applyAdvanced(on = advancedOn(), root = document) {

@@ -22,7 +22,7 @@ document.body.innerHTML = `
 const { api } = await import('../api.js');
 const { showToast } = await import('../toast.js');
 const { DockManager } = await import('../components/dock.js');
-const { ZettEventBus } = await import('../event-bus.js');
+const { KibotoEventBus } = await import('../event-bus.js');
 const { setLanguage } = await import('../i18n.js');
 await import('../folder-browser.js');
 
@@ -149,9 +149,9 @@ describe('folder picker', () => {
       window.openFolderBrowser('/mnt/user/media/');
       await vi.waitFor(() => expect(rows().length).toBe(4));
       const seen = vi.fn();
-      ZettEventBus.addEventListener('folder_selected', seen);
+      KibotoEventBus.addEventListener('folder_selected', seen);
       $('fb-select').click();
-      ZettEventBus.removeEventListener('folder_selected', seen);
+      KibotoEventBus.removeEventListener('folder_selected', seen);
       expect($('btn-copy-dst').value).toBe('/mnt/user/media/');
       expect(seen.mock.calls[0][0].detail).toBe('/mnt/user/media/');
       expect($('folder-browser-modal').classList.contains('open')).toBe(false);

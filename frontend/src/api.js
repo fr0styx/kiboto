@@ -2,7 +2,7 @@
  * Kiboto Centralized API Client
  * Handles session tokens, HTTP requests, 401 handling, and response parsing.
  */
-import { ZettEventBus } from './event-bus.js';
+import { KibotoEventBus } from './event-bus.js';
 import { reportOffline, reportOnline } from './connection.js';
 import { explain } from './error-text.js';
 
@@ -21,14 +21,14 @@ export function setSessionUserProvider(fn) {
 function waitForSignIn(ms) {
   return new Promise((resolve) => {
     let done = false;
-    const off = ZettEventBus.on ? ZettEventBus.on('auth:login', () => finish(true)) : null;
+    const off = KibotoEventBus.on ? KibotoEventBus.on('auth:login', () => finish(true)) : null;
     const timer = setTimeout(() => finish(false), ms);
     function finish(ok) {
       if (done) return;
       done = true;
       clearTimeout(timer);
       if (typeof off === 'function') off();
-      else if (ZettEventBus.off) ZettEventBus.off('auth:login', finish);
+      else if (KibotoEventBus.off) KibotoEventBus.off('auth:login', finish);
       resolve(ok);
     }
   });
@@ -230,7 +230,7 @@ async function request(endpoint, options = {}) {
       auth.clearToken();
       document.documentElement.classList.remove('has-auth-session');
       document.documentElement.classList.add('auth-required');
-      ZettEventBus.emit('auth:required', { url });
+      KibotoEventBus.emit('auth:required', { url });
       const overlay = document.getElementById('login-overlay');
       if (overlay) {
         overlay.style.removeProperty('opacity');

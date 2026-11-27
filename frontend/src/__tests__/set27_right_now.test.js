@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 import { api } from '../api.js';
 import {
   topApps,
@@ -52,7 +52,7 @@ describe('Activity -> Right now (SET-27 Activity 3)', () => {
     expect(renderRightNow(null)).toBe(false);
     expect(installRightNow(mount)).toBe(true);
     Object.defineProperty(mount, 'offsetParent', { get: () => document.body });
-    ZettEventBus.emit('stats:updated', { cpu: { util: 1 } });
+    KibotoEventBus.emit('stats:updated', { cpu: { util: 1 } });
     expect(mount.textContent).toContain('Quiet.');
     expect(installRightNow(null)).toBe(false);
   });

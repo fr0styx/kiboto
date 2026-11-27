@@ -103,5 +103,5 @@ class EventBus extends EventTarget {
   }
 }
 
-export const ZettEventBus = new EventBus();
-export default ZettEventBus;
+export const KibotoEventBus = new EventBus();
+export default KibotoEventBus;

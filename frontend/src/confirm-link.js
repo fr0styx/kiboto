@@ -5,7 +5,7 @@
 import { api } from './api.js';
 import { t } from './i18n.js';
 import { showToast, showConfirmToast } from './toast.js';
-import { ZettEventBus } from './event-bus.js';
+import { KibotoEventBus } from './event-bus.js';
 
 async function ask(id) {
   const action = await api.get(`/api/ai/actions/${encodeURIComponent(id)}`);
@@ -38,7 +38,7 @@ export function initConfirmLink(win = window) {
   win.history.replaceState(null, '', win.location.pathname + (q ? `?${q}` : ''));
   ask(id).catch((err) => {
     if (err && err.status === 401) {
-      ZettEventBus.on('auth:login', () =>
+      KibotoEventBus.on('auth:login', () =>
         ask(id).catch(() =>
           showToast(t('ai.mcp_expired', 'That request expired or belongs to another account.'), 'warn')
         )

@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { state } from '../state.js';
 import { exportThemeBundle, importThemeBundle } from '../components/settings.js';
 import * as toastModule from '../toast.js';
+import { OLD_THEME_FORMAT } from '../legacy-names.js';
 
 const settle = () => new Promise((resolve) => setTimeout(resolve, 30));
 const file = (obj) => new Blob([JSON.stringify(obj)], { type: 'application/json' });
@@ -37,7 +38,7 @@ describe('Theme files after the Kiboto rebrand', () => {
     toast.mockClear();
     importThemeBundle(file({ format: 'kiboto-theme', theme: 'emerald' }));
     await settle();
-    importThemeBundle(file({ format: 'zett-theme', theme: 'amber' })); // saved before the rebrand
+    importThemeBundle(file({ format: OLD_THEME_FORMAT, theme: 'amber' })); // saved before the rebrand
     await settle();
     importThemeBundle(file({ format: 'kiboto-theme' }));
     await settle();

@@ -5,7 +5,7 @@
  * "fm:labels" event.
  */
 import { api } from '../api.js';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 import { showToast } from '../toast.js';
 import { t } from '../i18n.js';
 
@@ -54,7 +54,7 @@ export function labelsInUse() {
 
 function set(view) {
   _state = { names: (view && view.names) || {}, items: (view && view.items) || {} };
-  ZettEventBus.emit('fm:labels', _state);
+  KibotoEventBus.emit('fm:labels', _state);
   return _state;
 }
 
@@ -78,7 +78,7 @@ export function labelsMayHaveMoved() {
   if (!_state || !Object.keys(_state.items).length) return Promise.resolve(_state);
   return loadLabels(true);
 }
-ZettEventBus.on('fm:refresh', labelsMayHaveMoved);
+KibotoEventBus.on('fm:refresh', labelsMayHaveMoved);
 
 /** A folder was listed: when the server dropped labels of things that are gone from it (deleted
  *  over the network, outside these pages), the list is read again. */

@@ -6,7 +6,7 @@ import { state } from '../state.js';
  * in wallpaper-pane.js, loaded when Mission Control's pane opens or an image is dropped (NUX-15).
  */
 import { api } from '../api.js';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 
 let _loadPromise = null;
 let _currentFiles = [];
@@ -41,7 +41,7 @@ export function setWallpaper(url, filename = null) {
     document.body.style.setProperty('background-position', 'center center', 'important');
     document.body.style.setProperty('background-repeat', 'no-repeat', 'important');
     document.body.style.setProperty('background-attachment', 'fixed', 'important');
-    ZettEventBus.emit?.('wallpaper:set', { url }); // "Match my wallpaper" (APP-D) listens
+    KibotoEventBus.emit?.('wallpaper:set', { url }); // "Match my wallpaper" (APP-D) listens
   } else {
     try {
       localStorage.removeItem('kiboto_active_wallpaper');

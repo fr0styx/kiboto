@@ -2,13 +2,13 @@
  * Kiboto Settings & Preferences Controller
  * Handles settings drawer, tabs, screen backlight, timezone, hardware buttons, card layout locks, and security credentials.
  */
-import { OLD_BACKUP_MAGIC, OLD_SETTINGS_EXT, settingKey } from '../legacy-names.js';
+import { OLD_BACKUP_MAGIC, OLD_SETTINGS_EXT, OLD_THEME_FORMAT, settingKey } from '../legacy-names.js';
 import { changeOwnPassword } from './own-password.js';
 import { isAdministrator } from '../admin-only.js';
 import { onManagementDom } from '../management-dom.js';
 import { api, auth, ApiError, apiFetch } from '../api.js';
 import { state, ZOOM_PROFILES } from '../state.js';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 import { applyDesktopTheme, applyLcdTheme, setScreenLayoutStyle, hexToRgb, getContrastRatio } from './dashboard.js';
 import { fitMiniPreviewScale, syncMiniPreviewTelemetry } from './mini-preview.js';
 import { t } from '../i18n.js';
@@ -294,7 +294,7 @@ export function initSettings() {
 
   // --- Clock: shown here, changed in one place, Settings → Time & language (UX-25) ---
   renderClockSummary();
-  ZettEventBus.on?.('clock:changed', renderClockSummary);
+  KibotoEventBus.on?.('clock:changed', renderClockSummary);
   $('btn-clock-open-settings')?.addEventListener('click', () => {
     if (typeof window.openTimezoneModal === 'function') window.openTimezoneModal();
     else window.openManagementWindow?.('timezone');
@@ -707,7 +707,7 @@ export function initSettings() {
       btnMediaRescan.textContent = t('ui.scanning', 'Scanning…');
       try {
         await api.post('/api/copy/rescan');
-        ZettEventBus.emit('media:slots_rescanned');
+        KibotoEventBus.emit('media:slots_rescanned');
         showToast(t('media.scan_complete', 'Media slots rescanned.'), 'info');
       } catch (err) {
         showToast(t('toast.scan_failed', 'Scan failed: {error}', { error: err.message || err }), 'error');
@@ -753,7 +753,7 @@ export function initSettings() {
       const srcSlot = btnCopySrc ? btnCopySrc.value : 'sd';
       try {
         await api.post('/api/copy/eject', { slot: srcSlot });
-        ZettEventBus.emit('media:slot_ejected', srcSlot);
+        KibotoEventBus.emit('media:slot_ejected', srcSlot);
         showToast(t('media.ejected', 'Card safely unmounted and ejected. You can now remove it.'), 'info');
       } catch (err) {
         showToast(t('toast.eject_failed', 'Eject failed: {error}', { error: err.message || err }), 'error');
@@ -764,7 +764,7 @@ export function initSettings() {
   loadButtonConfig();
 
   // --- Folder Selection Integration ---
-  ZettEventBus.on('folder_selected', (path) => {
+  KibotoEventBus.on('folder_selected', (path) => {
     if (btnCopyDst) {
       btnCopyDst.value = path;
       saveButtonConfig();
@@ -1031,7 +1031,7 @@ export function initSettings() {
     }
 
     if (e.key === 'Escape') {
-      ZettEventBus.emit('modal:smart:close');
+      KibotoEventBus.emit('modal:smart:close');
       closeDrawer();
     } else if (e.key === 't' || e.key === 'T' || e.key === 'd' || e.key === 'D') {
       if (toggleBtn && (toggleBtn.classList.contains('hidden') || toggleBtn.style.display === 'none')) {
@@ -1324,8 +1324,7 @@ export function importThemeBundle(file) {
   reader.onload = (e) => {
     try {
       const data = JSON.parse(String(e.target.result));
-      if (!data || (!['kiboto-theme', 'zett-theme'].includes(data.format) && !data.theme)) {
-        // zett-theme: saved before the rebrand
+      if (!data || (!['kiboto-theme', OLD_THEME_FORMAT].includes(data.format) && !data.theme)) {
         throw new Error('Invalid theme file format. Expected a .kiboto-theme.json bundle.');
       }
 
@@ -1651,7 +1650,7 @@ export function initDesktopThemeControls() {
   }
   $('desktop-reset-btn')?.addEventListener('click', () => restoreDesktopDefaultsWithUndo());
 
-  ZettEventBus.on('desktop_theme:changed', () => {
+  KibotoEventBus.on('desktop_theme:changed', () => {
     syncDesktopThemeUI();
   });
 
@@ -1758,7 +1757,7 @@ export function initLcdThemeControls() {
     });
   }
 
-  ZettEventBus.on('lcd_theme:changed', () => {
+  KibotoEventBus.on('lcd_theme:changed', () => {
     syncLcdThemeUI();
   });
 
@@ -1795,7 +1794,7 @@ export function initLcdStyleControls() {
     });
   });
 
-  ZettEventBus.on('screen:layout_style_changed', () => {
+  KibotoEventBus.on('screen:layout_style_changed', () => {
     syncLcdStyleUI();
   });
 

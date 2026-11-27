@@ -224,7 +224,7 @@ describe('Appearance Studio & Desktop Personalization Revamp Suite', () => {
     // Test with valid theme bundle
     const validBundle = {
       app: 'zettnas-toolkit',
-      format: 'zett-theme',
+      format: 'kiboto-theme',
       version: 1,
       theme: 'emerald',
       custom_accent: '#3bf58b',

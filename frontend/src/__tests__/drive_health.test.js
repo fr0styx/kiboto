@@ -14,7 +14,7 @@ vi.mock('../components/dock.js', () => ({
 
 const { api } = await import('../api.js');
 const { showToast } = await import('../toast.js');
-const { ZettEventBus } = await import('../event-bus.js');
+const { KibotoEventBus } = await import('../event-bus.js');
 const dh = await import('../components/drive-health.js');
 const { statusHtml } = await import('../components/management/overview.js');
 const { setLanguage } = await import('../i18n.js');
@@ -218,7 +218,7 @@ describe('Drive Health', () => {
   it('opens from everything that opened the old S.M.A.R.T. window', async () => {
     routeGet();
     dh.initDriveHealth();
-    ZettEventBus.emit('modal:smart:open', { dev: '/dev/sdc', forceWake: true });
+    KibotoEventBus.emit('modal:smart:open', { dev: '/dev/sdc', forceWake: true });
     await flush();
     await flush();
     expect(api.get).toHaveBeenCalledWith('/api/disk_detail?dev=sdc');

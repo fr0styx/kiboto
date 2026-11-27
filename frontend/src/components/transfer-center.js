@@ -10,7 +10,7 @@
 import { api } from '../api.js';
 import { t } from '../i18n.js';
 import { showToast, showConfirmToast } from '../toast.js';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 import { escapeHtml } from '../utils.js';
 import { formatBytes } from '../format.js';
 
@@ -351,7 +351,7 @@ class TransferCenter {
     } else if (task.status === 'failed') {
       showToast(t('transfers.toast_failed', '{label} failed: {error}', { label, error: task.error || '?' }), 'error');
     }
-    ZettEventBus.emit('fm:refresh');
+    KibotoEventBus.emit('fm:refresh');
     if (typeof w.onDone === 'function') {
       try {
         w.onDone(task);

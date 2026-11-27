@@ -6,7 +6,7 @@ import {
   selectAiConversation,
   clearAiChatHistory,
 } from '../components/management/ai.js';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 import { api } from '../api.js';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -68,7 +68,7 @@ describe('the Web tick in Ask Kib (SET-04)', () => {
 
   it('is off, and the chat is gone from the window, after signing out', () => {
     tick();
-    ZettEventBus.emit('auth:logout');
+    KibotoEventBus.emit('auth:logout');
     expect(box().checked).toBe(false);
     expect(document.getElementById('ai-chat-messages-list').textContent).toBe('');
   });

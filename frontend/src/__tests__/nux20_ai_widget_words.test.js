@@ -1,6 +1,6 @@
 /** NUX-20: the desktop AI accelerator widget names each state in translatable words. */
 import { describe, it, expect, beforeEach } from 'vitest';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 import { initWidgets } from '../components/widgets.js';
 
 const tick = () => new Promise((r) => setTimeout(r, 30));
@@ -30,7 +30,7 @@ describe('AI accelerator widget words (NUX-20)', () => {
       [{ npu: { present: false }, gpu: { present: false } }, 'CPU ONLY', 'Neural Engine Ready'],
     ];
     for (const [stats, b, e] of cases) {
-      ZettEventBus.emit('stats:updated', stats);
+      KibotoEventBus.emit('stats:updated', stats);
       await tick();
       expect(badge()).toBe(b);
       expect(engine().replace(/\s+/g, ' ')).toBe(e);

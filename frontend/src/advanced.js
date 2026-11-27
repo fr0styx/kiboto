@@ -4,7 +4,7 @@
  * Mission Control, the desktop icons, the dock, the phone launcher and Spotlight.
  * Off for family roles and new accounts; on for accounts that had everything before.
  */
-import { ZettEventBus } from './event-bus.js';
+import { KibotoEventBus } from './event-bus.js';
 import { ADVANCED_OFF, mark } from './hide-marks.js';
 
 export const ADVANCED_SECTIONS = ['mgmt-sec-vms', 'mgmt-sec-network', 'mgmt-sec-hardware', 'mgmt-sec-ups']; // Activity's History is for everyone (SET-27)
@@ -89,5 +89,5 @@ export function applyAdvancedEverywhere(on = advancedOn(), root = document) {
     const r = el.dataset.phoneOpen;
     if (ADVANCED_ROUTES.includes(r)) mark(el, ADVANCED_OFF, !on && isAdvancedRoute(r)); // never over the person's rights
   });
-  ZettEventBus.emit('advanced:changed', { on });
+  KibotoEventBus.emit('advanced:changed', { on });
 }

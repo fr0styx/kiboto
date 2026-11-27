@@ -6,7 +6,7 @@ import { escapeHtml } from '../utils.js';
  */
 import { state } from '../state.js';
 import { api } from '../api.js';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 import { showConfirmToast, hideConfirmToast, showToast } from '../toast.js';
 import { updateFanCurveWorkstation } from './fan-control.js';
 import { syncMiniPreviewTelemetry, applyDashboardLayout, persistDashboardLayout } from './mini-preview.js';
@@ -261,7 +261,7 @@ export function renderDisks(disks) {
       if (!tile) return;
       const dev = tile.dataset.dev;
       // Drive Health shows a sleeping drive from its last reading and never wakes it on open
-      ZettEventBus.emit('modal:smart:open', dev);
+      KibotoEventBus.emit('modal:smart:open', dev);
     });
   }
 
@@ -428,7 +428,7 @@ export function setScreenLayoutStyle(style, persist = true) {
     persistDashboardLayout();
   }
 
-  ZettEventBus.emit('screen:layout_style_changed', normStyle);
+  KibotoEventBus.emit('screen:layout_style_changed', normStyle);
 }
 
 export function syncScreenLayoutStyle() {
@@ -542,7 +542,7 @@ export function updateStreamlineBayChips(disks) {
       if (!chip) return;
       const dev = chip.dataset.dev;
       // Drive Health shows a sleeping drive from its last reading and never wakes it on open
-      ZettEventBus.emit('modal:smart:open', dev);
+      KibotoEventBus.emit('modal:smart:open', dev);
     });
   }
 
@@ -654,8 +654,8 @@ export function applyStats(raw) {
     if (s && s.remotes_event) {
       if (!_lastRemotesEventTs || s.remotes_event.timestamp !== _lastRemotesEventTs) {
         _lastRemotesEventTs = s.remotes_event.timestamp;
-        ZettEventBus.emit('fm:refresh');
-        ZettEventBus.emit('storage:mount_changed', s.remotes_event);
+        KibotoEventBus.emit('fm:refresh');
+        KibotoEventBus.emit('storage:mount_changed', s.remotes_event);
       }
     }
     const changed = state.setStats(raw);
@@ -809,7 +809,7 @@ export function applyStats(raw) {
 
     if (!state.isLcdDirect) {
       if (typeof window.__updateManagementTelemetry === 'function') window.__updateManagementTelemetry(s); // set when Mission Control loads (FE-02)
-      ZettEventBus.emit('stats_tick', s);
+      KibotoEventBus.emit('stats_tick', s);
       updateRowTelemetryBadges(s);
       updateFanCurveWorkstation(s);
       if (document.body.classList.contains('drawer-is-open')) {
@@ -1827,28 +1827,28 @@ export function initDashboardClicks() {
   if (!screen) return;
   screen
     .querySelectorAll('.card-storage')
-    .forEach((el) => el.addEventListener('click', () => ZettEventBus.emit('modal:metric:open', 'storage')));
+    .forEach((el) => el.addEventListener('click', () => KibotoEventBus.emit('modal:metric:open', 'storage')));
   screen
     .querySelectorAll('.card-cpu')
-    .forEach((el) => el.addEventListener('click', () => ZettEventBus.emit('modal:metric:open', 'cpu')));
+    .forEach((el) => el.addEventListener('click', () => KibotoEventBus.emit('modal:metric:open', 'cpu')));
   screen
     .querySelectorAll('.card-mem')
-    .forEach((el) => el.addEventListener('click', () => ZettEventBus.emit('modal:metric:open', 'mem')));
+    .forEach((el) => el.addEventListener('click', () => KibotoEventBus.emit('modal:metric:open', 'mem')));
   screen
     .querySelectorAll('.card-fans')
-    .forEach((el) => el.addEventListener('click', () => ZettEventBus.emit('modal:metric:open', 'fans')));
+    .forEach((el) => el.addEventListener('click', () => KibotoEventBus.emit('modal:metric:open', 'fans')));
   screen
     .querySelectorAll('.card-net')
-    .forEach((el) => el.addEventListener('click', () => ZettEventBus.emit('modal:metric:open', 'net')));
+    .forEach((el) => el.addEventListener('click', () => KibotoEventBus.emit('modal:metric:open', 'net')));
 
   const slStorage = $('sl-zone-storage');
-  if (slStorage) slStorage.addEventListener('click', () => ZettEventBus.emit('modal:metric:open', 'storage'));
+  if (slStorage) slStorage.addEventListener('click', () => KibotoEventBus.emit('modal:metric:open', 'storage'));
   const slCpu = $('sl-cpu-row');
-  if (slCpu) slCpu.addEventListener('click', () => ZettEventBus.emit('modal:metric:open', 'cpu'));
+  if (slCpu) slCpu.addEventListener('click', () => KibotoEventBus.emit('modal:metric:open', 'cpu'));
   const slMem = $('sl-mem-row');
-  if (slMem) slMem.addEventListener('click', () => ZettEventBus.emit('modal:metric:open', 'mem'));
+  if (slMem) slMem.addEventListener('click', () => KibotoEventBus.emit('modal:metric:open', 'mem'));
   const slIp = $('sl-zone-ip');
-  if (slIp) slIp.addEventListener('click', () => ZettEventBus.emit('modal:metric:open', 'net'));
+  if (slIp) slIp.addEventListener('click', () => KibotoEventBus.emit('modal:metric:open', 'net'));
 
   syncScreenLayoutStyle();
 }
@@ -1861,11 +1861,11 @@ window.addEventListener('kiboto:lang-changed', () => {
 });
 
 // Sync ejected and scan events from other components
-ZettEventBus.on('media:slot_ejected', (slot) => {
+KibotoEventBus.on('media:slot_ejected', (slot) => {
   setSlotEjected(slot);
 });
 
-ZettEventBus.on('media:slots_rescanned', () => {
+KibotoEventBus.on('media:slots_rescanned', () => {
   clearSlotEjected();
 });
 

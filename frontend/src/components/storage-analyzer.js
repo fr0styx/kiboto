@@ -214,8 +214,8 @@ export async function openStorageAnalyzer(share, root = '') {
     if (show && root) {
       const rel = show.getAttribute('data-space-show') || '';
       const folder = rel.includes('/') ? `${root}/${rel.slice(0, rel.lastIndexOf('/'))}` : root;
-      const { ZettEventBus } = await import('../event-bus.js');
-      ZettEventBus.emit('window:open', { id: 'file-manager-window', path: folder });
+      const { KibotoEventBus } = await import('../event-bus.js');
+      KibotoEventBus.emit('window:open', { id: 'file-manager-window', path: folder });
       return;
     }
     if (target.closest('[data-space-dups]')) {

@@ -6,7 +6,7 @@ vi.mock('../i18n.js', () => ({
 }));
 
 const { formatDateTime, formatTime, setClockPrefs, clockPrefs } = await import('../format.js');
-const { ZettEventBus } = await import('../event-bus.js');
+const { KibotoEventBus } = await import('../event-bus.js');
 const { serverTimeHint } = await import('../components/signin-hours.js');
 
 const NOON_UTC = Date.UTC(2026, 0, 15, 12, 0);
@@ -25,7 +25,7 @@ describe("dates follow the person's clock (NUX-10)", () => {
   it('ignores an unknown zone and follows clock:changed', () => {
     setClockPrefs('Not/AZone', '24');
     expect(clockPrefs().timeZone).toBe('');
-    ZettEventBus.emit('clock:changed', { zone: 'Asia/Tokyo', format: '24' });
+    KibotoEventBus.emit('clock:changed', { zone: 'Asia/Tokyo', format: '24' });
     expect(clockPrefs()).toEqual({ timeZone: 'Asia/Tokyo', hour12: false });
   });
 

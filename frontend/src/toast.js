@@ -2,7 +2,7 @@
  * Kiboto Notification & Confirmation Toast System
  * Displays top-centered notifications below the top navbar (z-index 100000).
  */
-import { ZettEventBus } from './event-bus.js';
+import { KibotoEventBus } from './event-bus.js';
 import { state } from './state.js';
 import { t } from './i18n.js';
 import { detailsFor } from './error-text.js';
@@ -34,7 +34,7 @@ export function showToast(msg, type = 'error') {
     return;
   triggerHaptic(type === 'success' ? 'success' : type === 'warn' ? 'warning' : 'light');
   _showTopNotification(msg, type);
-  ZettEventBus.emit('toast:show', { msg, type });
+  KibotoEventBus.emit('toast:show', { msg, type });
 }
 
 export function showActionToast(msg, actionText, onAction, durationMs = 10000) {
@@ -138,7 +138,7 @@ export function showConfirmToast(title, msg, onConfirm, onCancel, options = {}) 
     return;
   triggerHaptic('warning');
   _showTopConfirm(title, msg, onConfirm, onCancel, options);
-  ZettEventBus.emit('toast:confirm', { title, msg, onConfirm, onCancel, options });
+  KibotoEventBus.emit('toast:confirm', { title, msg, onConfirm, onCancel, options });
 }
 
 /** A confirmation for an action that loses or overwrites something: red, with focus on Cancel,

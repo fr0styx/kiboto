@@ -9,7 +9,7 @@
 
 import { api } from '../api.js';
 import { escapeHtml, reconcileKeyedTable } from '../utils.js';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 import { showToast, showConfirmToast, showBottomSheet } from '../toast.js';
 import { t } from '../i18n.js';
 import { kvmWords, cpuShareWords } from './vm/host-words.js';
@@ -74,7 +74,7 @@ export function initVmManager() {
       }
       window.DockManager.restore('vm');
     }
-    ZettEventBus.emit('window:open', { id: 'vm-manager-window' });
+    KibotoEventBus.emit('window:open', { id: 'vm-manager-window' });
     loadVmDashboard();
   };
 

@@ -12,11 +12,11 @@ vi.mock('../utils.js', async (orig) => ({ ...(await orig()), copyText: vi.fn(asy
 const { DockManager } = await import('../components/dock.js');
 const { showToast } = await import('../toast.js');
 const { copyText } = await import('../utils.js');
-const { ZettEventBus } = await import('../event-bus.js');
+const { KibotoEventBus } = await import('../event-bus.js');
 
 const byId = (id) => document.getElementById(id);
 // stats_tick is coalesced to the next animation frame by emit(); dispatch it directly
-const tick = (detail) => ZettEventBus.dispatchEvent(new CustomEvent('stats_tick', { detail }));
+const tick = (detail) => KibotoEventBus.dispatchEvent(new CustomEvent('stats_tick', { detail }));
 const DOM = `
   <div id="smart-modal-overlay"><div class="smart-modal-window">
     <h2 id="smart-modal-title"></h2><button id="smart-modal-close"></button><button id="smart-modal-min"></button>
@@ -62,34 +62,34 @@ describe('detail windows (modals.js)', () => {
   afterEach(() => vi.useRealTimers());
 
   it('opens each metric window and keeps it live', () => {
-    ZettEventBus.emit('modal:smart:close'); // other tests leave a window open and numbers in
+    KibotoEventBus.emit('modal:smart:close'); // other tests leave a window open and numbers in
     tick(null);
-    ZettEventBus.emit('modal:metric:open', 'cpu'); // no stats yet: stays shut
+    KibotoEventBus.emit('modal:metric:open', 'cpu'); // no stats yet: stays shut
     expect(byId('smart-modal-overlay').classList.contains('open')).toBe(false);
     tick(STATS);
 
-    ZettEventBus.emit('modal:metric:open', 'storage');
+    KibotoEventBus.emit('modal:metric:open', 'storage');
     expect(byId('smart-modal-overlay').style.display).toBe('flex');
     expect(DockManager.register).toHaveBeenCalled();
     expect(byId('smart-meta-health').textContent).toBe('95%');
     expect(byId('smart-meta-health').style.color).toBe('var(--crit)');
 
-    ZettEventBus.emit('modal:metric:open', 'cpu');
+    KibotoEventBus.emit('modal:metric:open', 'cpu');
     expect(byId('smart-meta-health').textContent).toBe('High');
     expect(byId('smart-modal-raw-title').textContent).toBe('Processor details');
     expect(byId('smart-raw-output').textContent).toContain('IP: 10.0.0.9');
-    ZettEventBus.emit('modal:metric:open', 'mem');
+    KibotoEventBus.emit('modal:metric:open', 'mem');
     expect(byId('smart-meta-hours').textContent).toBe('10.0 GB');
     tick({ ...STATS, cpu: { temp: 40, util: 5 } });
-    ZettEventBus.emit('modal:metric:open', 'cpu');
+    KibotoEventBus.emit('modal:metric:open', 'cpu');
     expect(byId('smart-meta-health').textContent).toBe('Normal');
-    ZettEventBus.emit('modal:metric:open', 'mem');
+    KibotoEventBus.emit('modal:metric:open', 'mem');
     tick(STATS);
-    ZettEventBus.emit('modal:metric:open', 'fans');
+    KibotoEventBus.emit('modal:metric:open', 'fans');
     expect(byId('smart-meta-serial').textContent).toBe('N/A');
     expect(byId('smart-meta-health').textContent).toBe('1200 RPM');
     expect(byId('smart-raw-output').textContent).toContain('Fan 2 (disks): 0 RPM');
-    ZettEventBus.emit('modal:metric:open', 'net');
+    KibotoEventBus.emit('modal:metric:open', 'net');
     expect(byId('smart-meta-model').textContent).toBe('1 MB/s');
 
     tick({ ...STATS, net: null });
@@ -104,7 +104,7 @@ describe('detail windows (modals.js)', () => {
 
   it('closes, minimises and ignores clicks inside', () => {
     tick(STATS); // the windows open only once numbers have arrived
-    ZettEventBus.emit('modal:metric:open', 'cpu');
+    KibotoEventBus.emit('modal:metric:open', 'cpu');
     byId('smart-modal-min').click();
     expect(DockManager.minimize).toHaveBeenCalledWith('smart');
     byId('smart-modal-min').dispatchEvent(new Event('touchend', { cancelable: true }));
@@ -112,11 +112,11 @@ describe('detail windows (modals.js)', () => {
     expect(byId('smart-modal-overlay').classList.contains('open')).toBe(true);
     byId('smart-modal-overlay').click();
     expect(byId('smart-modal-overlay').classList.contains('open')).toBe(false);
-    ZettEventBus.emit('modal:metric:open', 'mem');
+    KibotoEventBus.emit('modal:metric:open', 'mem');
     byId('smart-modal-close').dispatchEvent(new Event('touchend', { cancelable: true }));
     expect(byId('smart-modal-overlay').style.display).toBe('none');
-    ZettEventBus.emit('modal:metric:open', 'mem');
-    ZettEventBus.emit('modal:smart:close');
+    KibotoEventBus.emit('modal:metric:open', 'mem');
+    KibotoEventBus.emit('modal:smart:close');
     expect(DockManager.unregister).toHaveBeenCalledWith('smart');
   });
 
@@ -167,7 +167,7 @@ describe('detail windows (modals.js)', () => {
     delete window.openContainersManager;
 
     const smart = vi.fn();
-    ZettEventBus.on('modal:smart:open', smart);
+    KibotoEventBus.on('modal:smart:open', smart);
     modals.openEventDetailModal({ title: 'Drive sdb: replace soon', link: 'drives' });
     expect(byId('event-detail-subsystem').textContent).toBe('Drive Health');
     byId('event-detail-context-btn').click();
@@ -233,9 +233,9 @@ describe('detail windows (modals.js)', () => {
       () => byId('event-detail-close').click(),
       () => byId('event-detail-close-btn').click(),
       () => byId('event-detail-modal-overlay').click(),
-      () => ZettEventBus.emit('modal:event-detail:close'),
+      () => KibotoEventBus.emit('modal:event-detail:close'),
     ]) {
-      ZettEventBus.emit('modal:event-detail:open', { title: 'x' });
+      KibotoEventBus.emit('modal:event-detail:open', { title: 'x' });
       expect(byId('event-detail-modal-overlay').classList.contains('open')).toBe(true);
       close();
       expect(byId('event-detail-modal-overlay').classList.contains('open')).toBe(false);

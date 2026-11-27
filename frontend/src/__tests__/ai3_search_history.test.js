@@ -1,7 +1,7 @@
 /** AI 3: recent Kib searches belong to the person who made them, not to the browser. */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { aiHistoryKey, renderAiSearchHistory, runAiRagAsk } from '../components/management/ai.js';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 import { api } from '../api.js';
 
 vi.mock('../toast.js', () => ({
@@ -15,7 +15,7 @@ const chips = () =>
   [...document.querySelectorAll('#ai-history-chips button, #ai-history-chips [data-q]')].map((c) =>
     c.textContent.trim()
   );
-const signIn = (user) => ZettEventBus.emit('session:user', user);
+const signIn = (user) => KibotoEventBus.emit('session:user', user);
 
 describe('Kib search history per person (AI 3)', () => {
   beforeEach(() => {

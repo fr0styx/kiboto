@@ -4,7 +4,7 @@
  */
 import { api } from '../api.js';
 import { state } from '../state.js';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 import { t } from '../i18n.js';
 
 const tr = t; // the curve drag handler has a local `t` (temperature)
@@ -846,12 +846,12 @@ export function initFanControl() {
       await loadFanPresets();
       if (presetSelect) presetSelect.value = cleanName;
       updatePresetButtons();
-      ZettEventBus.emit('toast', {
+      KibotoEventBus.emit('toast', {
         message: t('fan.preset_saved', 'Preset "{name}" saved', { name: cleanName }),
         type: 'success',
       });
     } catch (e) {
-      ZettEventBus.emit('toast', {
+      KibotoEventBus.emit('toast', {
         message: t('fan.preset_save_failed', 'Failed to save preset: {error}', { error: e.message || e }),
         type: 'error',
       });
@@ -882,12 +882,12 @@ export function initFanControl() {
       closeDeletePresetModal();
       await loadFanPresets();
       updatePresetButtons();
-      ZettEventBus.emit('toast', {
+      KibotoEventBus.emit('toast', {
         message: t('fan.preset_deleted', 'Preset "{name}" deleted', { name }),
         type: 'info',
       });
     } catch (e) {
-      ZettEventBus.emit('toast', {
+      KibotoEventBus.emit('toast', {
         message: t('fan.preset_delete_failed', 'Failed to delete preset: {error}', { error: e.message || e }),
         type: 'error',
       });
@@ -949,12 +949,12 @@ export function initFanControl() {
           }
           updateFanUiState(res.fan_config.profile || 'auto', res.fan_config.manual_pct);
         }
-        ZettEventBus.emit('toast', {
+        KibotoEventBus.emit('toast', {
           message: t('fan.preset_applied', 'Preset "{name}" applied', { name }),
           type: 'success',
         });
       } catch (e) {
-        ZettEventBus.emit('toast', {
+        KibotoEventBus.emit('toast', {
           message: t('fan.preset_apply_failed', 'Failed to apply preset: {error}', { error: e.message || e }),
           type: 'error',
         });

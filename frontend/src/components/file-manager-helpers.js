@@ -6,7 +6,7 @@
 
 import { t } from '../i18n.js';
 import { escapeHtml } from '../utils.js';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 import { formatBytes, executeTransferWithConflictCheck } from './file-manager.js';
 import { openFilePreview as openFilePreviewModal } from '../file-preview-loader.js';
 import { auth, api } from '../api.js';
@@ -302,15 +302,15 @@ export class FmSidebarTree {
     this.expandedPaths = new Set([fmHome()]);
     this._onMountChanged = () => this.refresh();
     this._onFavorites = () => this.render();
-    ZettEventBus.on('fm:favorites', this._onFavorites);
+    KibotoEventBus.on('fm:favorites', this._onFavorites);
     // a label put on or taken off: the sidebar's colours and the rows on screen follow
     this._onLabels = () => {
       this.render();
       this.fm.renderViewport?.();
     };
-    ZettEventBus.on('fm:labels', this._onLabels);
-    ZettEventBus.on('fm:refresh', this._onMountChanged);
-    ZettEventBus.on('storage:mount_changed', this._onMountChanged);
+    KibotoEventBus.on('fm:labels', this._onLabels);
+    KibotoEventBus.on('fm:refresh', this._onMountChanged);
+    KibotoEventBus.on('storage:mount_changed', this._onMountChanged);
     this.init();
   }
 
@@ -330,16 +330,16 @@ export class FmSidebarTree {
 
   destroy() {
     if (this._onFavorites) {
-      ZettEventBus.off('fm:favorites', this._onFavorites);
+      KibotoEventBus.off('fm:favorites', this._onFavorites);
       this._onFavorites = null;
     }
     if (this._onLabels) {
-      ZettEventBus.off('fm:labels', this._onLabels);
+      KibotoEventBus.off('fm:labels', this._onLabels);
       this._onLabels = null;
     }
     if (this._onMountChanged) {
-      ZettEventBus.off('fm:refresh', this._onMountChanged);
-      ZettEventBus.off('storage:mount_changed', this._onMountChanged);
+      KibotoEventBus.off('fm:refresh', this._onMountChanged);
+      KibotoEventBus.off('storage:mount_changed', this._onMountChanged);
       this._onMountChanged = null;
     }
   }
@@ -531,7 +531,7 @@ export class FmSidebarTree {
         const targetPath = item.dataset.path;
         if (!targetPath) return;
 
-        let payload = window._activeDragPayload || window.__zettActiveFmDrag;
+        let payload = window._activeDragPayload || window.__kibotoActiveFmDrag;
         if (!payload || !payload.paths || payload.paths.length === 0) {
           try {
             const jsonStr = e.dataTransfer.getData('application/json');
@@ -567,8 +567,8 @@ export class FmSidebarTree {
             await executeTransferWithConflictCheck(payload.paths, targetPath, action);
           }
           window._activeDragPayload = null;
-          window.__zettActiveFmDrag = null;
-          ZettEventBus.emit('fm:refresh');
+          window.__kibotoActiveFmDrag = null;
+          KibotoEventBus.emit('fm:refresh');
           return;
         }
 

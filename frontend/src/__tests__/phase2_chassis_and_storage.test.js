@@ -12,7 +12,7 @@ import {
   formatNumber,
 } from '../components/chassis-visualizer.js';
 
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 import { fetchAndRenderDisksInventory } from '../components/management.js';
 import { api } from '../api.js';
 
@@ -357,7 +357,7 @@ describe('Sprint 3: Storage Pools Topology & Network Shares', () => {
     });
 
     const eventSpy = vi.fn();
-    ZettEventBus.on('window:open', eventSpy);
+    KibotoEventBus.on('window:open', eventSpy);
 
     await fetchAndRenderNetworkShares(container);
 

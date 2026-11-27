@@ -5,7 +5,7 @@ import {
   handleFmKeydown,
   setFmStateForTesting,
 } from '../components/file-manager.js';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 
 vi.mock('../api.js', () => ({
   api: {
@@ -221,7 +221,7 @@ describe('File Explorer Revamp - SOTA Architecture & Advanced Features', () => {
     const loadSpy = vi.spyOn(inst, 'loadPath').mockResolvedValue();
     const treeRefreshSpy = vi.spyOn(inst.sidebarTree, 'refresh').mockResolvedValue();
 
-    ZettEventBus.emit('fm:refresh');
+    KibotoEventBus.emit('fm:refresh');
 
     expect(loadSpy).toHaveBeenCalledWith(inst.currentPath);
     expect(treeRefreshSpy).toHaveBeenCalled();

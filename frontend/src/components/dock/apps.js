@@ -3,7 +3,7 @@
 
 import { escapeHtml } from '../../utils.js';
 import { t } from '../../i18n.js';
-import { ZettEventBus } from '../../event-bus.js';
+import { KibotoEventBus } from '../../event-bus.js';
 import { openConsoleWindow } from './console-window.js';
 import { DockManager } from './dock-manager.js';
 import { bringToFront } from './window-drag.js';
@@ -23,7 +23,7 @@ export const KNOWN_APPS = {
             window.DockManager.register('fm', fmWin, '#i-storage', t('dock.file_manager', 'File Explorer'), false);
           }
           if (window.DockManager) window.DockManager.restore('fm');
-          ZettEventBus.emit('window:open', { id: 'file-manager-window', path: path || undefined });
+          KibotoEventBus.emit('window:open', { id: 'file-manager-window', path: path || undefined });
         } else {
           document.getElementById('fm-desktop-icon')?.click();
         }
@@ -54,7 +54,7 @@ export const KNOWN_APPS = {
     id: 'smart',
     icon: '#i-disk',
     getTitle: () => t('dh.title', 'Drive Health'),
-    launch: (devName = null) => ZettEventBus.emit('modal:smart:open', devName),
+    launch: (devName = null) => KibotoEventBus.emit('modal:smart:open', devName),
   },
   'container-inspector': {
     id: 'container-inspector',
@@ -82,7 +82,7 @@ export const KNOWN_APPS = {
             window.DockManager.register('containers', cWin, '#i-chip', t('dock.containers', 'Containers'), false);
           }
           if (window.DockManager) window.DockManager.restore('containers');
-          ZettEventBus.emit('window:open', { id: 'containers-manager-window' });
+          KibotoEventBus.emit('window:open', { id: 'containers-manager-window' });
         } else {
           document.getElementById('containers-desktop-icon')?.click();
         }
@@ -103,7 +103,7 @@ export const KNOWN_APPS = {
             window.DockManager.register('vm', vmWin, '#i-vm', t('dock.vm_manager', 'Virtual Machines'), false);
           }
           if (window.DockManager) window.DockManager.restore('vm');
-          ZettEventBus.emit('window:open', { id: 'vm-manager-window' });
+          KibotoEventBus.emit('window:open', { id: 'vm-manager-window' });
         } else {
           document.getElementById('vm-desktop-icon')?.click();
         }

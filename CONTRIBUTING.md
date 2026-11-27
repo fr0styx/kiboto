@@ -64,7 +64,7 @@ CI also requires:
 - **Paths**: anything that reads, writes or deletes files resolves the path with `backend.fsutil.resolve_within` and stays inside an allowed root.
 - **Settings files**: write `data/*.json` with `backend.fsutil.atomic_write_json`, never in place.
 - **Errors**: API errors use `backend.errors.error_response(status, detail, code)`; server errors show a reference, never exception text.
-- **Frontend**: no monkey-patching of browser functions such as `window.fetch`; use module imports or `ZettEventBus`. Text goes through `t()` with a key in every locale.
+- **Frontend**: no monkey-patching of browser functions such as `window.fetch`; use module imports or `KibotoEventBus`. Text goes through `t()` with a key in every locale.
 - **Docs**: a change to an API, a setting or a hardware interface updates the matching file in `docs/` (`docs/CONFIGURATION.md` is generated from `backend/settings.py`).
 
 ## Pull requests

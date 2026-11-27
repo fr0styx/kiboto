@@ -17,7 +17,7 @@ import { escapeHtml } from '../utils.js';
 import { formatBytes, formatDateTime } from '../format.js';
 import { lineChart } from './drive-charts.js';
 import { t } from '../i18n.js';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 
 const ROLES = {
   data: ['dh.role_data', 'data'],
@@ -505,7 +505,7 @@ export function closeDriveHealth() {
 export function initDriveHealth() {
   if (typeof window === 'undefined') return;
   // everything that opened the old S.M.A.R.T. window (the event, with a drive or null) opens this
-  ZettEventBus.addEventListener('modal:smart:open', (e) => {
+  KibotoEventBus.addEventListener('modal:smart:open', (e) => {
     const d = /** @type {CustomEvent} */ (e).detail;
     openDriveHealth(d && typeof d === 'object' ? d.dev : d);
   });

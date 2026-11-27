@@ -4,7 +4,7 @@
  * "fm:favorites" event.
  */
 import { api } from '../api.js';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 import { showToast } from '../toast.js';
 import { t } from '../i18n.js';
 
@@ -24,7 +24,7 @@ export function isFavorite(path) {
 
 function set(items) {
   _items = (items || []).map((f) => ({ available: true, ...f }));
-  ZettEventBus.emit('fm:favorites', _items);
+  KibotoEventBus.emit('fm:favorites', _items);
   return _items;
 }
 

@@ -1,4 +1,4 @@
-import { ZettEventBus } from './event-bus.js';
+import { KibotoEventBus } from './event-bus.js';
 import './ui/primitives.js';
 import { showToast } from './toast.js';
 import { api } from './api.js';
@@ -266,7 +266,7 @@ window.addEventListener('DOMContentLoaded', () => {
         } catch (err) {
           console.error(err);
         }
-        ZettEventBus.dispatchEvent(new CustomEvent('folder_selected', { detail: selected }));
+        KibotoEventBus.dispatchEvent(new CustomEvent('folder_selected', { detail: selected }));
         return;
       }
       const field = copyDst();
@@ -274,7 +274,7 @@ window.addEventListener('DOMContentLoaded', () => {
         field.value = selected;
       }
       closeFbModal();
-      ZettEventBus.dispatchEvent(new CustomEvent('folder_selected', { detail: selected }));
+      KibotoEventBus.dispatchEvent(new CustomEvent('folder_selected', { detail: selected }));
     });
   }
 

@@ -16,7 +16,7 @@ import {
 } from '../components/screensaver.js';
 import * as wallpapersModule from '../components/wallpaper-pane.js';
 import { SUBPANE_MAP } from '../components/management.js';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 
 describe('Batch 4: Desktop Context Menu, Drag & Drop Ingestion & Screensaver Engine', () => {
   let contextMenuEl;

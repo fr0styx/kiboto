@@ -18,7 +18,7 @@ const { KNOWN_APPS, toggleFmWindowSwitcher, showDockItemContextMenu } = await im
 const { DockManager } = await import('../components/dock/dock-manager.js');
 const { bringToFront } = await import('../components/dock/window-drag.js');
 const { openConsoleWindow } = await import('../components/dock/console-window.js');
-const { ZettEventBus } = await import('../event-bus.js');
+const { KibotoEventBus } = await import('../event-bus.js');
 const { setLanguage } = await import('../i18n.js');
 
 const $ = (id) => document.getElementById(id);
@@ -46,7 +46,7 @@ const fmWindow = (id, path) => {
 let emit;
 beforeEach(() => {
   document.body.innerHTML = '';
-  emit = vi.spyOn(ZettEventBus, 'emit');
+  emit = vi.spyOn(KibotoEventBus, 'emit');
   DockManager.activeId = null;
   DockManager.windows = {};
 });

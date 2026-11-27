@@ -4,7 +4,7 @@
  */
 import { serverSaid } from '../server-text.js';
 import { auth } from '../api.js';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 import { t } from '../i18n.js';
 import { state } from '../state.js';
 import { escapeHtml } from '../utils.js';
@@ -56,7 +56,7 @@ export function initAuth() {
   const loginUser = /** @type {HTMLInputElement} */ (document.getElementById('login-username'));
 
   // Handle auth:required
-  ZettEventBus.on('auth:required', () => {
+  KibotoEventBus.on('auth:required', () => {
     document.documentElement.classList.remove('has-auth-session');
     document.documentElement.classList.add('auth-required');
     if (overlay) {
@@ -71,7 +71,7 @@ export function initAuth() {
   });
 
   // Handle auth:login
-  ZettEventBus.on('auth:login', () => {
+  KibotoEventBus.on('auth:login', () => {
     _formDrawn = false;
     fetchCurrentProfile();
     resetInactivityTimer();
@@ -527,7 +527,7 @@ export function finishSignIn(data) {
       overlay.style.opacity = '1';
     }, 250);
   }
-  ZettEventBus.emit('auth:login');
+  KibotoEventBus.emit('auth:login');
   // the setup wizard, the own-password dialog or two-step setup (SET-19)
   setTimeout(
     () => afterSignIn(data, { wizard: () => openSetupWizard(null, false), mfa: (d) => promptRequiredMfa(d) }),
@@ -643,9 +643,9 @@ async function submitMfaChallenge() {
         document.body.classList.remove('desktop-locked');
         clearInterval(_clockInterval);
         resetInactivityTimer();
-        ZettEventBus.emit('auth:unlocked');
+        KibotoEventBus.emit('auth:unlocked');
       }
-      ZettEventBus.emit('auth:login');
+      KibotoEventBus.emit('auth:login');
     } else {
       showToast(
         t('toast.2fa_verification_failed', '2FA Verification Failed: {detail}', {
@@ -752,7 +752,7 @@ export function lockDesktop() {
     setTimeout(() => pwdInput.focus(), 100);
   }
 
-  ZettEventBus.emit('auth:locked');
+  KibotoEventBus.emit('auth:locked');
 }
 
 export async function unlockDesktop() {
@@ -816,7 +816,7 @@ export async function unlockDesktop() {
       }
       pwdInput.value = '';
       resetInactivityTimer();
-      ZettEventBus.emit('auth:unlocked');
+      KibotoEventBus.emit('auth:unlocked');
     } else {
       if (errorEl) {
         errorEl.textContent = t('ui.incorrect_password', 'Incorrect password');
@@ -905,8 +905,8 @@ export async function logout() {
   }
   if (dock) dock.style.display = 'none';
 
-  ZettEventBus.emit('auth:logout');
-  ZettEventBus.emit('auth:required');
+  KibotoEventBus.emit('auth:logout');
+  KibotoEventBus.emit('auth:required');
 }
 
 // Inactivity Idle Tracker

@@ -1,6 +1,6 @@
 import { readStyleCss } from './helpers/read-style-css.js';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 import { bringToFront } from '../components/dock.js';
 import { enhanceInteractiveElements } from '../a11y.js';
 import { trapFocus } from '../utils.js';
@@ -15,7 +15,7 @@ describe('Batch 5: Frontend Desktop OS & UX Excellence', () => {
 
   it('event-bus bypasses rAF and dispatches immediately when document.hidden is true', () => {
     const listener = vi.fn();
-    ZettEventBus.on('stats:updated', listener);
+    KibotoEventBus.on('stats:updated', listener);
 
     // Mock document.hidden = true
     Object.defineProperty(document, 'hidden', {
@@ -23,7 +23,7 @@ describe('Batch 5: Frontend Desktop OS & UX Excellence', () => {
       get: () => true,
     });
 
-    ZettEventBus.emit('stats:updated', { cpu: 45 });
+    KibotoEventBus.emit('stats:updated', { cpu: 45 });
     // In hidden tab, it should dispatch immediately without rAF queuing
     expect(listener).toHaveBeenCalledWith({ cpu: 45 }, expect.anything());
 

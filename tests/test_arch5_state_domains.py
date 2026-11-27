@@ -2,11 +2,11 @@
 
 import threading
 
-from backend.state import CopyState, ZettState
+from backend.state import CopyState, KibotoState
 
 
 def test_flat_names_read_and_write_the_domain():
-    s = ZettState()
+    s = KibotoState()
     s.copy_active = True
     s.copy_status = "copying"
     assert s.copy.active is True and s.copy.status == "copying"
@@ -17,19 +17,19 @@ def test_flat_names_read_and_write_the_domain():
 
 
 def test_each_domain_has_its_own_lock():
-    s = ZettState()
+    s = KibotoState()
     locks = {id(s.lock), id(s.copy.lock), id(s.fans.lock), id(s.lcd.lock), id(s.ai.lock), id(s.smart.lock)}
     assert len(locks) == 6
     assert isinstance(CopyState().lock, type(threading.RLock()))
 
 
 def test_lcd_paging_uses_the_lcd_lock():
-    s = ZettState()
+    s = KibotoState()
     assert s.cycle_lcd_page(count=3) == 1
     assert s.set_lcd_page(7, count=3) == 2 and s.current_lcd_page == 2
 
 
 def test_fan_tracker_has_all_channels():
-    s = ZettState()
+    s = KibotoState()
     assert set(s.fan_state_tracker) == {"pwm1", "pwm2", "pwm3"}
     assert s.fans.tracker is s.fan_state_tracker

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach, afterAll } from 'vitest';
 import { api, auth, setSessionUserProvider } from '../api.js';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 import { isOffline } from '../connection.js';
 import { loadLanguage } from '../i18n.js';
 
@@ -53,7 +53,7 @@ describe('API client resilience (FE-16)', () => {
     const p = api.post('/api/notes', { text: 'hi' });
     await vi.waitFor(() => expect(fetchSpy).toHaveBeenCalledTimes(1));
     auth.setToken('y'); // new sign-in
-    ZettEventBus.emit('auth:login');
+    KibotoEventBus.emit('auth:login');
     await expect(p).resolves.toEqual({ saved: true });
     expect(fetchSpy).toHaveBeenCalledTimes(2);
   });
@@ -67,7 +67,7 @@ describe('API client resilience (FE-16)', () => {
     await new Promise((r) => setTimeout(r, 0));
     who = 'bob';
     auth.setToken('z');
-    ZettEventBus.emit('auth:login');
+    KibotoEventBus.emit('auth:login');
     const err = await p;
     expect(err.status).toBe(401);
   });

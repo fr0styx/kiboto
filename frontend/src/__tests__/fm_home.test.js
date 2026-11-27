@@ -19,10 +19,10 @@ describe('the home folder of Files', () => {
   });
 
   it('opens the Recycle Bin of that pool', async () => {
-    const { ZettEventBus } = await import('../event-bus.js');
+    const { KibotoEventBus } = await import('../event-bus.js');
     await import('../components/file-manager.js');
     const seen = [];
-    const off = ZettEventBus.on('window:open', (d) => seen.push(d.path));
+    const off = KibotoEventBus.on('window:open', (d) => seen.push(d.path));
     /** @type {any} */ (window)._fmHome = '/mnt/storage';
     /** @type {any} */ (window).openRecycleBin();
     expect(seen.at(-1)).toBe('/mnt/storage/.RecycleBin');

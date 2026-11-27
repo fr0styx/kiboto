@@ -2,13 +2,13 @@
 import { describe, it, expect, vi, beforeAll, beforeEach } from 'vitest';
 
 const { api } = await import('../api.js');
-const { ZettEventBus } = await import('../event-bus.js');
+const { KibotoEventBus } = await import('../event-bus.js');
 const { setLanguage } = await import('../i18n.js');
 const { initFanControl } = await import('../components/fan-control.js');
 
 const byId = (id) => document.getElementById(id);
 const toasts = [];
-ZettEventBus.on('toast', (t) => toasts.push(t));
+KibotoEventBus.on('toast', (t) => toasts.push(t));
 const lastToast = () => toasts.at(-1);
 
 describe('fan presets', () => {

@@ -2,7 +2,7 @@
 // needed for the first paint. It is inserted with the drawer's code (and before Mission
 // Control, whose Hardware section borrows the drawer's tabs).
 import { applyTranslations } from './i18n.js';
-import { ZettEventBus } from './event-bus.js';
+import { KibotoEventBus } from './event-bus.js';
 
 let pending = null;
 
@@ -13,7 +13,7 @@ export function isDrawerDomReady() {
 /** Runs fn once the drawer's markup is in the page (now, if it already is). */
 export function whenDrawerDom(fn) {
   if (isDrawerDomReady()) fn();
-  else ZettEventBus.once('dom:drawer-ready', fn);
+  else KibotoEventBus.once('dom:drawer-ready', fn);
 }
 
 export function ensureDrawerDom() {
@@ -29,7 +29,7 @@ export function ensureDrawerDom() {
           slot?.remove();
         }
         applyTranslations();
-        ZettEventBus.emit('dom:drawer-ready');
+        KibotoEventBus.emit('dom:drawer-ready');
       }
     );
   }

@@ -13,7 +13,7 @@ import { kibPaneFor, loadKibExtras, mayManageKib } from './management/kib-access
 
 const KIB_WINDOW_PANES = new Set(['mgmt-pane-ai-chat', 'mgmt-pane-ai-rag', 'mgmt-pane-ai-visual']);
 import { syncDesktopThemeUI, openDrawer, restoreHardwareTabsToManagement } from './settings.js';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 import { fitMiniPreviewScale, syncMiniPreviewTelemetry } from './mini-preview.js';
 import {
   fetchAndRenderChassisTwin,
@@ -1506,7 +1506,7 @@ export function initManagement() {
   };
 
   // Support window:open event bus deep-linking
-  ZettEventBus.on('window:open', (payload) => {
+  KibotoEventBus.on('window:open', (payload) => {
     if (payload && (payload.id === 'management' || payload.id === 'management-window')) {
       window.openManagementWindow(payload.section || payload.pane, payload.pane, payload.subtab);
     }

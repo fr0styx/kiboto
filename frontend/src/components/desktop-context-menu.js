@@ -3,7 +3,7 @@
  * Provides consumer-grade macOS / Windows 11 style glassmorphic desktop context menu
  * with quick shortcuts to wallpaper styling, themes, widgets, dock, fullscreen, and lock.
  */
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 import { showToast } from '../toast.js';
 import { openAddDesktopShortcutModal } from './desktop-shortcuts.js';
 import { getWidgetKeyFromElement, getWidgetDisplayName } from './widget-names.js';
@@ -289,7 +289,7 @@ export function executeContextAction(action) {
       } else if (typeof window.openManagementSection === 'function') {
         window.openManagementSection('mgmt-sec-wallpaper', 'mgmt-pane-wallpaper');
       } else {
-        ZettEventBus.emit('window:open', {
+        KibotoEventBus.emit('window:open', {
           id: 'management-window',
           section: 'mgmt-sec-wallpaper',
           pane: 'mgmt-pane-wallpaper',
@@ -303,7 +303,7 @@ export function executeContextAction(action) {
       } else if (typeof window.openManagementSection === 'function') {
         window.openManagementSection('mgmt-sec-wallpaper', 'mgmt-pane-theme');
       } else {
-        ZettEventBus.emit('window:open', {
+        KibotoEventBus.emit('window:open', {
           id: 'management-window',
           section: 'mgmt-sec-wallpaper',
           pane: 'mgmt-pane-theme',
@@ -317,7 +317,7 @@ export function executeContextAction(action) {
       } else if (typeof window.openManagementSection === 'function') {
         window.openManagementSection('mgmt-sec-wallpaper', 'mgmt-pane-glass');
       } else {
-        ZettEventBus.emit('window:open', {
+        KibotoEventBus.emit('window:open', {
           id: 'management-window',
           section: 'mgmt-sec-wallpaper',
           pane: 'mgmt-pane-glass',
@@ -331,7 +331,7 @@ export function executeContextAction(action) {
       } else if (typeof window.openManagementSection === 'function') {
         window.openManagementSection('mgmt-sec-wallpaper', 'mgmt-pane-dock');
       } else {
-        ZettEventBus.emit('window:open', {
+        KibotoEventBus.emit('window:open', {
           id: 'management-window',
           section: 'mgmt-sec-wallpaper',
           pane: 'mgmt-pane-dock',
@@ -345,7 +345,7 @@ export function executeContextAction(action) {
       } else if (typeof window.openManagementSection === 'function') {
         window.openManagementSection('mgmt-sec-wallpaper', 'mgmt-pane-screensaver');
       } else {
-        ZettEventBus.emit('window:open', {
+        KibotoEventBus.emit('window:open', {
           id: 'management-window',
           section: 'mgmt-sec-wallpaper',
           pane: 'mgmt-pane-screensaver',
@@ -376,7 +376,7 @@ export function executeContextAction(action) {
       if (typeof window.openManagementSection === 'function') {
         window.openManagementSection('mgmt-sec-activity', 'mgmt-pane-metrics');
       } else {
-        ZettEventBus.emit('window:open', {
+        KibotoEventBus.emit('window:open', {
           id: 'management-window',
           section: 'mgmt-sec-activity',
           pane: 'mgmt-pane-metrics',

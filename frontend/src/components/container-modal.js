@@ -13,7 +13,7 @@ import '../styles/containers-lazy.css'; // the inspector's own sheet loads with 
 import { appsDetailsOn } from './apps-details-pref.js';
 import { t } from '../i18n.js';
 import { bringToFront, makeDraggable, DockManager } from './dock.js';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 import { openStackModal } from './stack-modal.js';
 import { createTerminalView } from './terminal-view.js';
 
@@ -1197,7 +1197,7 @@ function renderMountsTab(details) {
     btn.addEventListener('click', () => {
       const path = btn.dataset.path;
       if (!path) return;
-      ZettEventBus.emit('window:open', { id: 'file-manager-window', path: path });
+      KibotoEventBus.emit('window:open', { id: 'file-manager-window', path: path });
       showToast(t('toast.navigated_file_explorer_to', 'Navigated File Explorer to {path}', { path: path }), 'info');
     });
   });
@@ -2036,7 +2036,7 @@ async function renderContainerEditTab(cid) {
           }, 1200);
 
           // Notify parent list to refresh
-          ZettEventBus.emit('docker:containers:refresh');
+          KibotoEventBus.emit('docker:containers:refresh');
         } catch (err) {
           statusMsg.style.background = 'rgba(239,68,68,0.15)';
           statusMsg.style.color = '#fca5a5';

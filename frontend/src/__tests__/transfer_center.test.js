@@ -6,7 +6,7 @@ vi.mock('../api.js', () => ({ api: { post: vi.fn(), delete: vi.fn() } }));
 import { transferCenter, taskLabel, taskStatus, formatDuration } from '../components/transfer-center.js';
 import { showToast } from '../toast.js';
 import { api } from '../api.js';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 
 const running = {
   id: 'a',
@@ -50,7 +50,7 @@ describe('transfer center', () => {
   it('starts a background transfer, opens the panel if it takes a while, and reports the end', async () => {
     api.post.mockResolvedValue({ status: 'ok', task_id: 't1', task: { ...running, id: 't1', percent: 0 } });
     const refresh = vi.fn();
-    ZettEventBus.on('fm:refresh', refresh);
+    KibotoEventBus.on('fm:refresh', refresh);
     const onDone = vi.fn();
     await transferCenter.startTransfer({
       sources: ['/mnt/user/x'],

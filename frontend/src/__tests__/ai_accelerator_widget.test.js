@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 import { initWidgets, loadWidgetConfig, saveWidgetConfig, applyWidgetConfig } from '../components/widgets.js';
 import { ALL_TRANSLATIONS as TRANSLATIONS } from '../locales/all.js';
 
@@ -47,7 +47,7 @@ describe('AI Accelerator Desktop Widget (NPU + GPU Real-Time Gauges)', () => {
   it('updates live SVG gauges, frequencies, and status badge on stats:updated event', async () => {
     initWidgets();
 
-    ZettEventBus.emit('stats:updated', {
+    KibotoEventBus.emit('stats:updated', {
       npu: {
         present: true,
         vendor: 'Intel',
@@ -100,7 +100,7 @@ describe('AI Accelerator Desktop Widget (NPU + GPU Real-Time Gauges)', () => {
   it('shows the measured GPU load (no invented figure) while the clock is boosted', async () => {
     initWidgets();
 
-    ZettEventBus.emit('stats:updated', {
+    KibotoEventBus.emit('stats:updated', {
       ai_active: true,
       ai_accelerator: 'gpu',
       npu: {
@@ -135,7 +135,7 @@ describe('AI Accelerator Desktop Widget (NPU + GPU Real-Time Gauges)', () => {
   it('shows the measured NPU load (no invented figure) while the NPU is in D0', async () => {
     initWidgets();
 
-    ZettEventBus.emit('stats:updated', {
+    KibotoEventBus.emit('stats:updated', {
       ai_active: true,
       ai_accelerator: 'npu',
       npu: {
@@ -179,7 +179,7 @@ describe('AI Accelerator Desktop Widget (NPU + GPU Real-Time Gauges)', () => {
 
   it('shows a dash when the driver cannot measure the load', async () => {
     initWidgets();
-    ZettEventBus.emit('stats:updated', {
+    KibotoEventBus.emit('stats:updated', {
       ai_active: true,
       ai_accelerator: 'gpu',
       npu: { present: true, util_pct: null, cur_freq_mhz: 0, power_state: 'D3hot' },
@@ -213,7 +213,7 @@ describe('AI chips widget on a board whose chips Kiboto does not use (#68)', () 
 
   it('names the Mali GPU and says the GPU and the Rockchip NPU are not used', async () => {
     initWidgets();
-    ZettEventBus.emit('stats:updated', {
+    KibotoEventBus.emit('stats:updated', {
       npu: { present: true, usable: false, vendor: 'Rockchip', model: 'Rockchip NPU (RKNPU)' },
       gpu: { present: true, usable: false, vendor: 'Arm', short_name: 'Mali GPU', model: 'Arm Mali GPU' },
     });

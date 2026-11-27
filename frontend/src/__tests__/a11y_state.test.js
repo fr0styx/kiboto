@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { state } from '../state.js';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 import { enhanceInteractiveElements } from '../a11y.js';
 
 const nextFrame = () => new Promise((resolve) => requestAnimationFrame(resolve));
@@ -12,7 +12,7 @@ describe('Frontend Reactive State & EventBus', () => {
 
   it('diffs incoming telemetry and emits stats:updated only when changed', async () => {
     const handler = vi.fn();
-    ZettEventBus.on('stats:updated', handler);
+    KibotoEventBus.on('stats:updated', handler);
 
     const initial = { cpu: { util: 12, temp: 42 }, mem: { pct: 50 } };
     state.setStats(initial);

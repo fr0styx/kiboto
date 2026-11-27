@@ -4,7 +4,7 @@
  * keeps about 20 kB out of the first load.
  */
 import { state } from '../state.js';
-import { ZettEventBus } from '../event-bus.js';
+import { KibotoEventBus } from '../event-bus.js';
 import { t } from '../i18n.js';
 import {
   applyLook,
@@ -320,9 +320,9 @@ export function adoptAccountLook(user) {
   applyDesktopTheme(look.theme, look.accent);
   return true;
 }
-ZettEventBus.on?.('session:user', adoptAccountLook);
+KibotoEventBus.on?.('session:user', adoptAccountLook);
 // APP-D: with "Match my wallpaper" the accent follows a new wallpaper (that code loads only then)
-ZettEventBus.on?.('wallpaper:set', (e) => {
+KibotoEventBus.on?.('wallpaper:set', (e) => {
   if (loadLook().wallpaperAccent)
     import('./wallpaper-accent.js').then((m) => m.followWallpaper(e?.url)).catch(() => {});
 });
