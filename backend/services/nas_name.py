@@ -187,7 +187,7 @@ def device_seed() -> str:
     from backend.fsutil import DATA_MARKER
 
     try:
-        with open(os.path.join(DATA_DIR, DATA_MARKER), encoding="utf-8") as f:
+        with open(legacy_names.moved(DATA_DIR, DATA_MARKER, legacy_names.OLD_DATA_MARKER), encoding="utf-8") as f:
             return f.read().strip()[:80]
     except OSError:
         return ""

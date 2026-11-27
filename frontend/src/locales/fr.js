@@ -4480,7 +4480,7 @@ export default {
   "toast.permissions_updated_successfully": "Droits mis à jour !",
   "toast.pin_failed": "Échec de l'épinglage : {error}",
   "toast.pipeline_deleted": "Tâche « {id} » supprimée.",
-  "toast.please_choose_a_kiboto_backup_zip": "Choisissez une sauvegarde Kiboto (.zip ou .zettbak).",
+  "toast.please_choose_a_kiboto_backup_zip": "Choisissez une sauvegarde Kiboto (.zip ou .kibak).",
   "toast.please_drop_an_image_file_jpg": "Déposez une image (.jpg, .png, .webp)",
   "toast.please_enter_a_network_name": "Saisissez un nom de réseau",
   "toast.please_enter_a_title_for_the": "Saisissez un titre pour la note ou le rappel",

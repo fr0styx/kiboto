@@ -509,7 +509,7 @@ def _sweep_entry(dirpath: str, name: str, action: str, counts: dict[str, int]) -
         os.unlink(path)
         counts["removed"] += 1
         return True
-    m = re.match(r"^\.(.+)\.(?:kiboto|zettnas)-stage-[0-9a-f]{6}$", name)  # zettnas-: legacy_names
+    m = re.match(rf"^\.(.+)\.(?:kiboto|{legacy_names.OLD_STAGE_NAME})-stage-[0-9a-f]{{6}}$", name)
     if m and os.path.isdir(path) and not os.path.islink(path):
         if action == "move":
             os.rename(path, _generate_unique_target(os.path.join(dirpath, f"{m.group(1)} (incomplete move)")))
@@ -533,7 +533,7 @@ def sweep_leftovers(task: "TransferTask") -> dict[str, int]:
         logger.info("[FS Transfer] Nothing to sweep in %s: %s", task.destination, err)
         return counts
     for entry in entries:
-        if any(entry.startswith((f".{n}.kiboto-", f".{n}.zettnas-")) for n in names):  # zettnas-: legacy_names
+        if any(entry.startswith((f".{n}.kiboto-", f".{n}.{legacy_names.OLD_STAGE_NAME}-")) for n in names):
             _sweep_entry(task.destination, entry, task.action, counts)
     for n in names:
         top = os.path.join(task.destination, n)

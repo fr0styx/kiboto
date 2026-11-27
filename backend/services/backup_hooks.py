@@ -2,7 +2,7 @@
 
 A backup copies files as they are. A database that writes while its files are copied can leave a
 copy that won't start. So before a backup reads its folders, every running database container
-whose data lies in them writes a dump next to its own files (.zettnas-dump.*), finished and
+whose data lies in them writes a dump next to its own files (.kiboto-dump.*), finished and
 renamed into place before the copy starts: the backup then always holds one consistent copy of
 each database, besides the live files. PostgreSQL (pg_dumpall), MariaDB and MySQL
 (--single-transaction), Redis and Valkey (SAVE) and MongoDB (mongodump) are recognised by their
@@ -14,30 +14,34 @@ import os
 import re
 from typing import Any
 
+from backend import legacy_names
 from backend.config import logger
 
 DUMP_TIMEOUT = 3600
 
-_PART = '> "$D/{name}.part" && mv "$D/{name}.part" "$D/{name}"'
+# a finished dump replaces the one of the name from before the rebrand, which then goes
+_PART = '> "$D/{name}.part" && mv "$D/{name}.part" "$D/{name}" && rm -f "$D/{old}"'
 DUMPS: list[tuple[re.Pattern, str, str]] = [
     (
         re.compile(r"postgres|postgis|timescale|pgvecto", re.I),
         "postgres",
-        'pg_dumpall -U "${POSTGRES_USER:-postgres}" ' + _PART.format(name=".zettnas-dump.sql"),
+        'pg_dumpall -U "${POSTGRES_USER:-postgres}" '
+        + _PART.format(name=".kiboto-dump.sql", old=legacy_names.OLD_DUMP_NAMES[0]),
     ),
     (
         re.compile(r"mariadb|mysql|percona", re.I),
         "mysql",
         'B=$(command -v mariadb-dump || command -v mysqldump) && P="${MARIADB_ROOT_PASSWORD:-${MYSQL_ROOT_PASSWORD:-}}" '
         '&& "$B" --all-databases --single-transaction --routines -uroot ${P:+-p"$P"} '
-        + _PART.format(name=".zettnas-dump.sql"),
+        + _PART.format(name=".kiboto-dump.sql", old=legacy_names.OLD_DUMP_NAMES[0]),
     ),
     (re.compile(r"redis|valkey|keydb", re.I), "redis", "redis-cli SAVE >/dev/null"),
     (
         re.compile(r"mongo", re.I),
         "mongo",
-        'mongodump --quiet --archive="$D/.zettnas-dump.archive.part" '
-        '&& mv "$D/.zettnas-dump.archive.part" "$D/.zettnas-dump.archive"',
+        'mongodump --quiet --archive="$D/.kiboto-dump.archive.part" '
+        '&& mv "$D/.kiboto-dump.archive.part" "$D/.kiboto-dump.archive" '
+        f'&& rm -f "$D/{legacy_names.OLD_DUMP_NAMES[1]}"',
     ),
 ]
 

@@ -62,20 +62,20 @@ def engine(tmp_path, monkeypatch):
 
 
 def test_a_copy_keeps_what_it_replaces_as_a_version(engine):
-    engine.rclone.dirs["cloud:nas/.zettnas-versions"] = ["20261025-0200", "20261026-0200", "20261027-0200"]
+    engine.rclone.dirs["cloud:nas/.kiboto-versions"] = ["20261025-0200", "20261026-0200", "20261027-0200"]
     rec = be.execute_backup_job(engine.job["id"])
     flags = engine.rclone.syncs[0]["extra_flags"]
     backup_dir = flags[flags.index("--backup-dir") + 1]
     assert (
-        backup_dir.startswith("cloud:nas/.zettnas-versions/")
-        and flags[flags.index("--exclude") + 1] == "/.zettnas-versions/**"
+        backup_dir.startswith("cloud:nas/.kiboto-versions/")
+        and flags[flags.index("--exclude") + 1] == "/.kiboto-versions/**"
     )
-    assert rec["status"] == "success" and engine.rclone.purged == ["cloud:nas/.zettnas-versions/20261025-0200"]
+    assert rec["status"] == "success" and engine.rclone.purged == ["cloud:nas/.kiboto-versions/20261025-0200"]
 
 
 def test_versions_live_inside_an_encrypted_copy_too():
-    assert be._versions_of("crypt_ab12:") == "crypt_ab12:.zettnas-versions"
-    assert be._versions_of("cloud:nas/") == "cloud:nas/.zettnas-versions"
+    assert be._versions_of("crypt_ab12:") == "crypt_ab12:.kiboto-versions"
+    assert be._versions_of("cloud:nas/") == "cloud:nas/.kiboto-versions"
 
 
 def test_pruning_versions_that_fails_leaves_the_backup_done(engine):
@@ -222,9 +222,9 @@ def test_rclone_lists_and_purges_folders(monkeypatch):
         return SimpleNamespace(returncode=0, stdout="20261026-0200/\n20261027-0200/\n", stderr="")
 
     monkeypatch.setattr(rclone_engine.subprocess, "run", fake_run)
-    assert engine.list_dirs("cloud:nas/.zettnas-versions") == ["20261026-0200", "20261027-0200"]
+    assert engine.list_dirs("cloud:nas/.kiboto-versions") == ["20261026-0200", "20261027-0200"]
     assert runs[0][:4] == ["rclone", "lsf", "--config", "/tmp/rclone.conf"]
     assert engine.list_dirs("cloud:missing") == []
-    engine.purge("cloud:nas/.zettnas-versions/20261026-0200")
+    engine.purge("cloud:nas/.kiboto-versions/20261026-0200")
     with pytest.raises(RuntimeError, match="permission denied"):
         engine.purge("cloud:locked")

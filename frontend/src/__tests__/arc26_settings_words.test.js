@@ -72,7 +72,7 @@ describe('settings words', () => {
     expect(showPromptToast.mock.lastCall[5]).toMatchObject({ inputType: 'password', placeholder: 'Backup passphrase' });
     showPromptToast.mock.lastCall[4](); // cancel
     const upload = $('backup-upload-input');
-    const file = new File(['ZETTBAK2rest'], 'nas.zettbak');
+    const file = new File(['KIBOBAK2rest'], 'nas.kibak');
     Object.defineProperty(upload, 'files', { value: [file] });
     upload.dispatchEvent(new Event('change'));
     await vi.waitFor(() => expect(showPromptToast).toHaveBeenCalledTimes(2));

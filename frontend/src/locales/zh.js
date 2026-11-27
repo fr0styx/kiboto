@@ -4480,7 +4480,7 @@ export default {
   "toast.permissions_updated_successfully": "权限已更新！",
   "toast.pin_failed": "置顶失败：{error}",
   "toast.pipeline_deleted": "任务“{id}”已删除。",
-  "toast.please_choose_a_kiboto_backup_zip": "请选择 Kiboto 备份文件（.zip 或 .zettbak）。",
+  "toast.please_choose_a_kiboto_backup_zip": "请选择 Kiboto 备份文件（.zip 或 .kibak）。",
   "toast.please_drop_an_image_file_jpg": "请拖入图片文件（.jpg、.png、.webp）",
   "toast.please_enter_a_network_name": "请输入网络名称",
   "toast.please_enter_a_title_for_the": "请输入笔记或提醒的标题",

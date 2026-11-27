@@ -85,7 +85,7 @@ def is_mount_point(path: str, mounts: str = "/proc/mounts") -> bool:
 
 
 # Where ZFS snapshots are mounted to be read when .zfs/snapshot can't show them (in a container)
-SNAPSHOT_VIEWS = os.path.join(tempfile.gettempdir(), "zettnas-snapshot-views")
+SNAPSHOT_VIEWS = os.path.join(tempfile.gettempdir(), "kiboto-snapshot-views")
 
 
 def zfs_mounts(mounts: str = "/proc/mounts") -> dict[str, str]:

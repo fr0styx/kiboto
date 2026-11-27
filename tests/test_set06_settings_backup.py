@@ -98,6 +98,6 @@ def test_the_settings_file_is_always_encrypted(client, auth_headers, monkeypatch
     assert made == []
     r = client.post("/api/system/backup", json={"passphrase": "a long enough one"}, headers=auth_headers)
     assert r.status_code == 200 and made == ["a long enough one"]
-    assert r.headers["content-disposition"].endswith(".zettbak")
+    assert r.headers["content-disposition"].endswith(".kibak")
     # the plain download is gone
     assert client.get("/api/system/backup", headers=auth_headers).status_code in (404, 405)

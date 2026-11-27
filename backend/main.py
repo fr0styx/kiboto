@@ -216,7 +216,10 @@ def _startup_databases(_data_key_problem: Any) -> Any:
         from backend.fsutil import atomic_write_json
 
         legacy_names.rename_at_start(DATA_DIR, atomic_write_json)  # names stored before the rebrand, renamed once
-    except (OSError, ValueError) as e:
+        from backend.services.encrypted_folders import rename_hidden_folders
+
+        rename_hidden_folders()  # before anything opens an encrypted folder
+    except (OSError, ValueError, RuntimeError) as e:
         logger.error("[Main] Could not rename names stored before the rebrand: %s", e)
     try:
         from backend.api.auth import retire_admin_password_copy

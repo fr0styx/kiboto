@@ -19,6 +19,7 @@ import threading
 import time
 from typing import Any
 
+from backend import legacy_names
 from backend.config import RCLONE_CONFIG_FILE, logger
 from backend.fsutil import atomic_write_text
 from backend.services import offsite_backup as ob
@@ -190,7 +191,10 @@ def restore_settings(repo_id: str, snapshot_id: str = "latest") -> dict[str, Any
     scratch = tempfile.mkdtemp(prefix="kiboto-settings-")
     try:
         ob.run_restic(repo, ["restore", chosen["id"], "--target", scratch], timeout=1800)
-        found = os.path.join(scratch, folder.lstrip("/"), ob.SETTINGS_FILE)
+        # a version made before the rebrand holds the settings under the name of then
+        found = legacy_names.existing(
+            os.path.join(scratch, folder.lstrip("/")), ob.SETTINGS_FILE, legacy_names.OLD_OFFSITE_SETTINGS_FILE
+        )
         if not os.path.isfile(found):
             raise ValueError("The settings copy could not be read from the backup.")
         with open(found, "rb") as f:

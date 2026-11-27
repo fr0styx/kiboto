@@ -63,7 +63,7 @@ def box(tmp_path, monkeypatch):
 def test_make_lock_open_and_take_off(box):
     out = ef.create("Family", "Taxes", "correct horse battery staple")
     assert out == {"name": "Taxes", "path": ef.plain_path("Taxes"), "recovery_key": KEY}
-    assert os.path.isfile(box.family / ".zettnas-encrypted" / "Taxes" / "gocryptfs.conf")
+    assert os.path.isfile(box.family / ".kiboto-encrypted" / "Taxes" / "gocryptfs.conf")
     assert ef.listing() == [
         {
             "name": "Taxes",
@@ -323,7 +323,7 @@ def test_paths_into_locked_folders_and_encrypted_files_are_refused(monkeypatch):
     assert fsutil.encrypted_refused("/mnt/encrypted/new-folder")
     assert not fsutil.encrypted_refused("/mnt/encrypted/Open/x.txt")
     assert not fsutil.encrypted_refused("/mnt/encrypted/Open")
-    assert fsutil.encrypted_refused("/mnt/user/Family/.zettnas-encrypted/Taxes/gocryptfs.conf")
+    assert fsutil.encrypted_refused("/mnt/user/Family/.kiboto-encrypted/Taxes/gocryptfs.conf")
     assert not fsutil.encrypted_refused("/mnt/user/Family/Taxes.txt")
     assert fsutil.is_encrypted_mount("/mnt/encrypted/Open")
     assert not fsutil.is_encrypted_mount("/mnt/encrypted/Open/x.txt")
@@ -333,7 +333,7 @@ def test_paths_into_locked_folders_and_encrypted_files_are_refused(monkeypatch):
 def test_resolve_within_applies_the_guard(tmp_path, monkeypatch):
     from backend import fsutil
 
-    hidden = tmp_path / "Family" / ".zettnas-encrypted" / "Taxes"
+    hidden = tmp_path / "Family" / ".kiboto-encrypted" / "Taxes"
     hidden.mkdir(parents=True)
     (tmp_path / "Family" / "ok.txt").write_text("x")
     monkeypatch.setattr(fsutil, "protected_dirs", lambda: [])

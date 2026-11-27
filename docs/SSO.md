@@ -77,7 +77,7 @@ password.
 
 The one-click Immich app installs the whole stack: the server, machine learning, Valkey
 and Postgres on a private network, with a generated database password (kept in
-`appdata/immich/.zettnas-secrets.json`).
+`appdata/immich/.kiboto-secrets.json`).
 
 To sign in to Immich with the same provider, open **Security → Single sign-on** and click
 **Use this sign-in for Immich** right after installing it. Kiboto then, through Immich's

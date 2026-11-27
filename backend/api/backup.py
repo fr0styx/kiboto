@@ -118,7 +118,7 @@ class ConfigBackupRequest(BaseModel):
 
 def _backup_response(passphrase: str) -> StreamingResponse:
     buf = generate_backup_zip_stream(passphrase=passphrase)
-    name = f"kiboto_settings_{time.strftime('%Y%m%d_%H%M%S')}.zettbak"
+    name = f"kiboto_settings_{time.strftime('%Y%m%d_%H%M%S')}.kibak"
     return StreamingResponse(
         buf,
         media_type="application/octet-stream",

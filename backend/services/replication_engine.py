@@ -25,6 +25,7 @@ import uuid
 from dataclasses import asdict, dataclass, field
 from typing import Any
 
+from backend import legacy_names
 from backend.config import DATA_DIR, logger
 from backend.fsutil import atomic_write_json, json_locked, read_json
 
@@ -223,7 +224,22 @@ def _stamp() -> str:
 
 
 def _tag(job: dict[str, Any]) -> str:
-    return f"zettnas-repl-{str(job.get('id', ''))[:8]}-"
+    return f"kiboto-repl-{str(job.get('id', ''))[:8]}-"
+
+
+def _old_tag(job: dict[str, Any]) -> str:
+    return f"{legacy_names.OLD_REPL_PREFIX}{str(job.get('id', ''))[:8]}-"
+
+
+def _renamed(job: dict[str, Any], name: str) -> str:
+    """A snapshot name of this job from before the rebrand, in Kiboto's name."""
+    return _tag(job) + name[len(_old_tag(job)) :]
+
+
+def _adopt_base(job: dict[str, Any]) -> None:
+    base = str(job.get("last_snapshot") or "")
+    if base.startswith(_old_tag(job)):
+        job["last_snapshot"] = _renamed(job, base)
 
 
 def _prune(names: list[str], keep: int, newest: str) -> list[str]:
@@ -239,14 +255,27 @@ class _Zfs:
         self.src = "/".join(p for p in (job.get("source_pool"), job.get("source_dataset")) if p)
         self.tgt = "/".join(p for p in (job.get("target_pool"), job.get("target_dataset")) if p)
 
-    def _snaps(self, dataset: str, remote: bool) -> list[str]:
+    def _snaps(self, dataset: str, remote: bool, tag: str = "") -> list[str]:
         argv = ["zfs", "list", "-H", "-t", "snapshot", "-o", "name", "-d", "1", "--", dataset]
         try:
             out = self.side.run(argv) if remote else _run(argv)
         except ReplicationError:
             return []
-        tag = _tag(self.job)
+        tag = tag or _tag(self.job)
         return [n.split("@", 1)[1] for n in out.split() if "@" in n and n.split("@", 1)[1].startswith(tag)]
+
+    def adopt_old_names(self) -> int:
+        """This job's snapshots named before the rebrand take Kiboto's name: the target's first, so
+        a refusal there leaves both sides as they were. zfs rename keeps what an incremental send
+        needs. Returns how many were renamed."""
+        n = 0
+        for remote, dataset in ((True, self.tgt), (False, self.src)):
+            for name in self._snaps(dataset, remote, _old_tag(self.job)):
+                argv = ["zfs", "rename", "--", f"{dataset}@{name}", f"{dataset}@{_renamed(self.job, name)}"]
+                self.side.run(argv) if remote else _run(argv)
+                n += 1
+        _adopt_base(self.job)
+        return n
 
     def replicate(self, snap: str) -> int:
         base = self.job.get("last_snapshot")
@@ -278,7 +307,8 @@ class _Btrfs:
         self.job, self.side = job, side
         pool = adapter.get_pool_path(job["source_pool"])
         self.src = os.path.join(pool, job.get("source_dataset") or "")
-        self.snapdir = os.path.join(pool, ".zettnas-repl", str(job.get("id", ""))[:8])
+        self.snapdir = os.path.join(pool, ".kiboto-repl", str(job.get("id", ""))[:8])
+        self.old_snapdir = os.path.join(pool, legacy_names.OLD_REPL_DIR, str(job.get("id", ""))[:8])
         target = job.get("target_pool") or ""
         if not side.remote:
             target = adapter.get_pool_path(target)
@@ -290,12 +320,37 @@ class _Btrfs:
         except OSError:
             return []
 
-    def _remote(self) -> list[str]:
+    def _remote(self, tag: str = "") -> list[str]:
         try:
             out = self.side.run(["ls", "-1", "--", self.tgt])
         except ReplicationError:
             return []
-        return [n for n in out.split() if n.startswith(_tag(self.job))]
+        return [n for n in out.split() if n.startswith(tag or _tag(self.job))]
+
+    def adopt_old_names(self) -> int:
+        """This job's snapshots named before the rebrand take Kiboto's name: the received ones on
+        the target first, then the local folder and the snapshots in it. btrfs finds an incremental
+        send's parent by its id, not its name. Returns how many were renamed."""
+        n = 0
+        for name in self._remote(_old_tag(self.job)):
+            self.side.run(
+                ["mv", "-T", "--", os.path.join(self.tgt, name), os.path.join(self.tgt, _renamed(self.job, name))]
+            )
+            n += 1
+        if os.path.isdir(self.old_snapdir) and not os.path.exists(self.snapdir):
+            os.makedirs(os.path.dirname(self.snapdir), exist_ok=True)
+            os.rename(self.old_snapdir, self.snapdir)
+        for name in self._local_tagged(_old_tag(self.job)):
+            os.rename(os.path.join(self.snapdir, name), os.path.join(self.snapdir, _renamed(self.job, name)))
+            n += 1
+        _adopt_base(self.job)
+        return n
+
+    def _local_tagged(self, tag: str) -> list[str]:
+        try:
+            return [n for n in os.listdir(self.snapdir) if n.startswith(tag)]
+        except OSError:
+            return []
 
     def replicate(self, snap: str) -> int:
         base = self.job.get("last_snapshot")
@@ -340,6 +395,7 @@ def replicate(job: dict[str, Any], adapter: Any = None, key: str = "") -> dict[s
     kind = _fs_type(adapter, str(job["source_pool"]))
     engine = _Zfs(job, side) if kind == "zfs" else _Btrfs(job, side, adapter)
     snap = _tag(job) + _stamp()
+    engine.adopt_old_names()
     sent = engine.replicate(snap)
     pruned = 0
     try:

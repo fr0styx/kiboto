@@ -16,7 +16,7 @@ from typing import Any, Optional
 
 from pydantic import BaseModel, Field, field_validator
 
-from backend import door
+from backend import door, legacy_names
 from backend.config import DATA_DIR, logger
 from backend.fsutil import atomic_write_json
 from backend.ignored_errors import ignored
@@ -26,7 +26,6 @@ NFS_EXPORTS_FILE = os.path.join(NFS_DIR, "exports.json")
 SYSTEM_EXPORTS_D_DIR = "/etc/exports.d"
 SYSTEM_EXPORTS_FILE = "/etc/exports"
 EXPORTS_D_FILE = os.path.join(SYSTEM_EXPORTS_D_DIR, "kiboto.exports")
-OLD_EXPORTS_NAME = "zettnas.exports"  # the file from before the rebrand: removed once the new one is written
 
 
 def can_serve() -> bool:
@@ -301,7 +300,7 @@ class NfsEngine:
             with open(self._exports_d_file, "w", encoding="utf-8") as f:
                 f.write(content)
             written = True
-            old = os.path.join(os.path.dirname(self._exports_d_file), OLD_EXPORTS_NAME)
+            old = os.path.join(os.path.dirname(self._exports_d_file), legacy_names.OLD_EXPORTS_NAME)
             if old != self._exports_d_file and os.path.isfile(old):
                 os.remove(old)  # else every folder is exported twice, and a removed one stays exported
         except Exception as e:

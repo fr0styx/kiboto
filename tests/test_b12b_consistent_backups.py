@@ -91,7 +91,7 @@ def test_databases_in_the_backup_write_a_dump_first(docker):
     assert [r["ok"] for r in results] == [True, True]
     exec_pg = next(b for m, p, b in docker.calls if p == "/containers/pg1/exec")
     assert exec_pg["Env"] == ["D=/var/lib/postgresql/data"] and exec_pg["Cmd"][:2] == ["sh", "-c"]
-    assert "pg_dumpall" in exec_pg["Cmd"][2] and '.zettnas-dump.sql.part" && mv' in exec_pg["Cmd"][2]
+    assert "pg_dumpall" in exec_pg["Cmd"][2] and '.kiboto-dump.sql.part" && mv' in exec_pg["Cmd"][2]
     assert ("POST", "/exec/exec-pg1/start", {"Detach": False, "Tty": False}) in docker.calls
 
 

@@ -49,6 +49,22 @@ OLD_NAS_NAME = "zettnas"  # a saved name from before becomes kiboto; zettnas.loc
 OLD_NAME_CONTAINER = "zettnas-name"  # the name responder's container before the rebrand: replaced
 OLD_PART_SUFFIX = ".zettnas-part"  # a half-copied file left by a transfer before the rebrand: swept
 OLD_STAGE_INFIX = ".zettnas-stage-"  # a move's staging folder from before the rebrand: swept
+OLD_STAGE_NAME = "zettnas"  # the same staging folder's name part, for the sweep's pattern
+OLD_UPLOAD_INFIX = ".zettnas_"  # an upload's part file from before the rebrand: swept
+OLD_EXPORTS_NAME = "zettnas.exports"  # NFS: the file from before, removed once the new one is written
+OLD_DATA_MARKER = ".zettnas-data-id"  # the data folder's mark: renamed
+OLD_ENCRYPTED_HIDDEN = ".zettnas-encrypted"  # an encrypted folder's files in its share: renamed
+OLD_APP_MADE_FILE = ".zettnas-secrets.json"  # an app's generated passwords: renamed
+OLD_VERSIONS_DIR = ".zettnas-versions"  # a copy job's replaced files at its destination: renamed
+OLD_DUMP_NAMES = (".zettnas-dump.sql", ".zettnas-dump.archive")  # an app's database dump: removed
+OLD_MANIFEST_NAME = "zettnas-backup.json"  # inside a settings backup made before
+OLD_ENCRYPTED_MAGIC = b"ZETTBAK2"  # a settings backup made before starts with it (also its AAD)
+OLD_SETTINGS_EXT = ".zettbak"  # a settings backup made before
+OLD_EXPORT_PREFIX = "zettnas_backup_"  # a settings backup job's files made before: kept by count
+OLD_OFFSITE_SETTINGS_FILE = "kiboto-settings.zettbak"  # settings in an off-site version made before
+OLD_SNAPSHOT_VIEWS = "zettnas-snapshot-views"  # a temporary folder of read-only snapshot views
+OLD_REPL_PREFIX = "zettnas-repl-"  # a replication job's snapshots on both sides: renamed before a run
+OLD_REPL_DIR = ".zettnas-repl"  # btrfs: the folder of a job's local snapshots: renamed
 OLD_BACKUP_TAG = "zettnas"  # the restic tag on every off-site file backup: existing ones carry it, so it stays
 OLD_LOG_FILE = "zettnas.log"  # the log file and its rotations carry on under the new name
 
@@ -158,3 +174,27 @@ def rename_app_files(data_dir: str, write_json) -> int:
 def rename_at_start(data_dir: str, write_json) -> None:
     """The one-time renames of names stored before the rebrand; each finds nothing once done."""
     rename_app_files(data_dir, write_json)
+
+
+def existing(folder: str, name: str, old_name: str) -> str:
+    """`folder/name`, or `folder/old_name` while only the old one is there (not renamed yet)."""
+    new = os.path.join(folder, name)
+    old = os.path.join(folder, old_name)
+    return old if not os.path.lexists(new) and os.path.lexists(old) else new
+
+
+def moved(folder: str, name: str, old_name: str) -> str:
+    """`folder/name`, renaming a file or folder of the old name to it first when only that is there.
+    Where the rename is refused, the old one is used where it is."""
+    new = os.path.join(folder, name)
+    old = os.path.join(folder, old_name)
+    if not os.path.lexists(new) and os.path.lexists(old):
+        try:
+            os.rename(old, new)
+        except OSError:
+            return old
+    return new
+
+
+def is_old_settings_export(name: str) -> bool:
+    return name.startswith(OLD_EXPORT_PREFIX) and name.endswith(OLD_SETTINGS_EXT)

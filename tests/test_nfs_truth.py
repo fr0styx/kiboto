@@ -9,6 +9,7 @@ import subprocess
 
 import pytest
 
+from backend import legacy_names
 from backend.errors import SaidError
 from backend.hardware.pal_storage import GenericLinuxStorageAdapter
 from backend.services import nfs_engine
@@ -51,7 +52,7 @@ def test_a_file_nobody_reads_is_not_an_applied_export(engine, tmp_path, monkeypa
 
 def test_the_file_from_before_the_rebrand_is_removed(engine, tmp_path, monkeypatch):
     monkeypatch.setattr(nfs_engine.subprocess, "run", lambda cmd, **kw: subprocess.CompletedProcess(cmd, 0, "", ""))
-    old = tmp_path / "exports.d" / nfs_engine.OLD_EXPORTS_NAME
+    old = tmp_path / "exports.d" / legacy_names.OLD_EXPORTS_NAME
     old.parent.mkdir()
     old.write_text("/mnt/old 10.0.0.0/8(rw)\n")
     engine._exports["films"] = _rule(tmp_path)

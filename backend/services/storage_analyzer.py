@@ -71,7 +71,7 @@ KINDS: dict[str, set[str]] = {
     },
     "archive": {"zip", "7z", "rar", "tar", "gz", "tgz", "bz2", "xz", "zst"},
     "disk_image": {"iso", "img", "qcow2", "vmdk", "vdi", "vhd", "vhdx", "raw"},
-    "backup": {"zettbak", "tib", "bak", "sparsebundle", "backup"},
+    "backup": {"kibak", "tib", "bak", "sparsebundle", "backup"},
 }
 _EXT_KIND = {ext: kind for kind, exts in KINDS.items() for ext in exts}
 

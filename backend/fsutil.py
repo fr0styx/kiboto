@@ -264,12 +264,12 @@ def read_json_cached(path: str, default: Any = None, max_age: float = 3.0) -> An
 
 # --- The app's own folders (SEC-3) -------------------------------------------------------
 # The data folder holds users.db, secret.key and backup credentials. On many hosts it is also
-# visible inside a browse root (Unraid: /mnt/user/appdata/zettnas-toolkit/data), under another
+# visible inside a browse root (Unraid: /mnt/user/appdata/kiboto/data), under another
 # path than DATA_DIR. A marker file with a random id finds those aliases without guessing.
 
 logger = logging.getLogger("Kiboto")
 
-DATA_MARKER = ".zettnas-data-id"
+DATA_MARKER = ".kiboto-data-id"
 _PROTECTED: list[str] | None = None
 _PROTECTED_LOCK = threading.Lock()
 
@@ -306,7 +306,7 @@ def data_id(data_dir: str) -> str:
 
 
 def _data_marker(data_dir: str) -> str:
-    marker = os.path.join(data_dir, DATA_MARKER)
+    marker = legacy_names.moved(data_dir, DATA_MARKER, legacy_names.OLD_DATA_MARKER)
     try:
         with open(marker, encoding="utf-8") as f:
             value = f.read().strip()
@@ -409,7 +409,7 @@ def protected_rclone_excludes(base: str) -> list[str]:
     """rclone filter flags hiding the app folders that lie under `base` (an rclone serve root)."""
     base_real = os.path.realpath(base) if base else ""
     # the encrypted files of encrypted folders, wherever they are (NSEC-5)
-    flags: list[str] = ["--exclude", f"**/{ENCRYPTED_HIDDEN}/**", "--exclude", f"**/{ENCRYPTED_HIDDEN}"]
+    flags: list[str] = [x for n in ENCRYPTED_HIDDEN_NAMES for x in ("--exclude", f"**/{n}/**", "--exclude", f"**/{n}")]
     for d in protected_dirs():
         if base_real and _inside(d, base_real) and d != base_real:
             rel = os.path.relpath(d, base_real).replace(os.sep, "/")
@@ -438,7 +438,9 @@ def safe_serve_root(path: str, pool_path: str) -> str | None:
 
 
 ENCRYPTED_ROOT = "/mnt/encrypted"  # open encrypted folders (FEAT-13), inside the container only
-ENCRYPTED_HIDDEN = ".zettnas-encrypted"  # their encrypted files, in a share
+ENCRYPTED_HIDDEN = ".kiboto-encrypted"  # their encrypted files, in a share
+# the same, in a share whose folder was not renamed yet: refused and left out alike
+ENCRYPTED_HIDDEN_NAMES = (ENCRYPTED_HIDDEN, legacy_names.OLD_ENCRYPTED_HIDDEN)
 
 
 def open_encrypted() -> set[str]:
@@ -459,7 +461,7 @@ def encrypted_refused(real: str) -> bool:
     """The encrypted files themselves, and anything under /mnt/encrypted that isn't inside an open
     folder, are never reached through a path: a write there would land unencrypted in the
     container, and lost at the next update (NREL-2, NREL-3)."""
-    if ENCRYPTED_HIDDEN in real.split(os.sep):
+    if set(ENCRYPTED_HIDDEN_NAMES) & set(real.split(os.sep)):
         return True
     if real.startswith(ENCRYPTED_ROOT + os.sep):
         top = os.path.join(ENCRYPTED_ROOT, real[len(ENCRYPTED_ROOT) + 1 :].split(os.sep)[0])

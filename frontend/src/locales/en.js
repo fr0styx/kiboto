@@ -4480,7 +4480,7 @@ export default {
   "toast.permissions_updated_successfully": "Permissions updated successfully!",
   "toast.pin_failed": "Pin failed: {error}",
   "toast.pipeline_deleted": "Pipeline '{id}' deleted.",
-  "toast.please_choose_a_kiboto_backup_zip": "Please choose a Kiboto backup (.zip or .zettbak).",
+  "toast.please_choose_a_kiboto_backup_zip": "Please choose a Kiboto backup (.zip or .kibak).",
   "toast.please_drop_an_image_file_jpg": "Please drop an image file (.jpg, .png, .webp)",
   "toast.please_enter_a_network_name": "Please enter a network name",
   "toast.please_enter_a_title_for_the": "Please enter a title for the note/reminder",

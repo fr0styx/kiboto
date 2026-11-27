@@ -49,7 +49,7 @@ def test_immich_stack(tmp_path, monkeypatch):
     pw = _env(server)["DB_PASSWORD"]
     assert len(pw) >= 24 and _env(db)["POSTGRES_PASSWORD"] == pw and "{{" not in pw
     assert db["HostConfig"]["ShmSize"] == 134217728
-    with open(os.path.join(tmp_path, "immich", ".zettnas-secrets.json")) as f:
+    with open(os.path.join(tmp_path, "immich", ".kiboto-secrets.json")) as f:
         assert json.load(f)["db_password"] == pw
     # a redeploy keeps the database password
     fake2 = FakeDocker()

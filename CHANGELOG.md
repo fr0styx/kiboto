@@ -46,6 +46,10 @@ Metrics, the container list, Kib's status, remote access addresses and AI for ap
 
 Saved app definitions and dock layouts from before the rename take Kiboto's names once, by themselves.
 
+Settings backups are .kibak files. Backups made before (.zettbak) still restore.
+
+Files and folders Kiboto keeps on disk (encrypted folders' files, apps' passwords, copy versions, database dumps) take Kiboto's name the first time Kiboto meets them.
+
 #### Security
 
 Kiboto OS: when Kiboto hands files and folders in a shared folder to their people, a link put in their place over the network is never followed, so a system file's owner or rights can never be changed that way.

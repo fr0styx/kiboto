@@ -19,6 +19,7 @@ import uuid
 import zipfile
 from typing import Any, BinaryIO, Optional
 
+from backend import legacy_names
 from backend.config import DATA_DIR, logger
 from backend.fsutil import atomic_write_json, json_locked, read_json, read_json_cached, resolve_within
 from backend.hardware.pal_storage import PlatformCapabilityError, get_storage_platform
@@ -76,9 +77,10 @@ VM_MAX_FILE_BYTES = 16 * 1024 * 1024
 
 MAX_RESTORE_BYTES = 256 * 1024 * 1024
 MAX_MEMBER_COUNT = 1000
-MANIFEST_NAME = "zettnas-backup.json"
+MANIFEST_NAME = "kiboto-backup.json"
 FORMAT_VERSION = 2
-ENCRYPTED_MAGIC = b"ZETTBAK2"
+ENCRYPTED_MAGIC = b"KIBOBAK2"
+SETTINGS_EXT = ".kibak"
 
 BACKUP_JOBS_FILE = os.path.join(DATA_DIR, "backup_jobs.json")
 BACKUP_HISTORY_FILE = os.path.join(DATA_DIR, "backup_history.json")
@@ -145,14 +147,16 @@ def decrypt_backup(blob: bytes, passphrase: str) -> bytes:
 
     from backend.errors import SaidError
 
-    if not blob.startswith(ENCRYPTED_MAGIC):
+    # a backup made before the rebrand starts with the marker of then, which is also its AAD
+    magic = next((m for m in (ENCRYPTED_MAGIC, legacy_names.OLD_ENCRYPTED_MAGIC) if blob.startswith(m)), None)
+    if magic is None:
         raise SaidError("Not an encrypted Kiboto backup", "backup_not_encrypted")
     if not passphrase:
         raise SaidError("This backup is encrypted: enter its passphrase", "backup_needs_passphrase")
-    head = len(ENCRYPTED_MAGIC)
+    head = len(magic)
     salt, nonce, ct = blob[head : head + 16], blob[head + 16 : head + 28], blob[head + 28 :]
     try:
-        return AESGCM(_derive_key(passphrase, salt)).decrypt(nonce, ct, ENCRYPTED_MAGIC)
+        return AESGCM(_derive_key(passphrase, salt)).decrypt(nonce, ct, magic)
     except InvalidTag as e:
         raise SaidError("Wrong passphrase, or the backup file is damaged", "backup_wrong_passphrase") from e
 
@@ -375,7 +379,7 @@ def restore_backup_archive(
 
     head = archive_file.read(len(ENCRYPTED_MAGIC))
     archive_file.seek(0)
-    if head == ENCRYPTED_MAGIC:
+    if head in (ENCRYPTED_MAGIC, legacy_names.OLD_ENCRYPTED_MAGIC):
         blob = archive_file.read(MAX_RESTORE_BYTES + 1024)
         archive_file = io.BytesIO(decrypt_backup(blob, passphrase))
 
@@ -396,7 +400,7 @@ def restore_backup_archive(
             if not extracted_path.startswith(target_dir + os.sep) and extracted_path != target_dir:
                 raise ValueError(f"Illegal path in archive: {member.filename}")
             rel = os.path.relpath(extracted_path, target_dir)
-            if member.is_dir() or member.filename == MANIFEST_NAME:
+            if member.is_dir() or member.filename in (MANIFEST_NAME, legacy_names.OLD_MANIFEST_NAME):
                 continue
             if _wanted(rel, member.file_size):
                 selected.append(member)
@@ -463,7 +467,7 @@ def checked_subvolume(value: Any) -> str:
     return "/".join(parts)
 
 
-CONFIG_EXPORT_PREFIX = "zettnas_backup_"
+CONFIG_EXPORT_PREFIX = "kiboto_backup_"
 MIN_PASSPHRASE = 8
 
 
@@ -536,11 +540,28 @@ def _source_is_empty(path: str) -> bool:
         return True
 
 
-VERSIONS_DIR = ".zettnas-versions"  # files a copy replaced, by run, at the destination (REL-9)
+VERSIONS_DIR = ".kiboto-versions"  # files a copy replaced, by run, at the destination (REL-9)
 NO_NEW_COPY_JOBS = (
     "Folders now go to the cloud as an off-site backup (Backup, Off-site): it keeps versions and is "
     "encrypted. Copy jobs you already have keep running, and each can be moved there with one click."
 )
+
+
+def _copy_flags(versions: str) -> list[str]:
+    """rclone flags of a copy run: what it replaces goes to `versions`, and the versions folders
+    (also one named before the rebrand) and Recycle Bins are never copied over."""
+    return [
+        "--max-delete",
+        str(MAX_DELETE_PER_RUN),
+        "--backup-dir",
+        versions,
+        "--exclude",
+        f"/{VERSIONS_DIR}/**",
+        "--exclude",
+        f"/{legacy_names.OLD_VERSIONS_DIR}/**",
+        "--exclude",
+        ".RecycleBin/**",
+    ]
 
 
 def _versions_of(dest: str) -> str:
@@ -749,7 +770,7 @@ def _export_settings(job: dict[str, Any], retention: int) -> str:
     if len(password) < MIN_PASSPHRASE:
         raise ValueError("This settings backup has no passphrase; edit the job and set one.")
     ts = time.strftime("%Y%m%d_%H%M%S")
-    name = f"{CONFIG_EXPORT_PREFIX}{ts}.zettbak"
+    name = f"{CONFIG_EXPORT_PREFIX}{ts}{SETTINGS_EXT}"
     stream = generate_backup_zip_stream(passphrase=password)
     try:
         data = stream.read()
@@ -766,7 +787,12 @@ def _export_settings(job: dict[str, Any], retention: int) -> str:
             f.flush()
             os.fsync(f.fileno())
         os.replace(tmp, os.path.join(folder, name))
-        ours = sorted(n for n in os.listdir(folder) if n.startswith(CONFIG_EXPORT_PREFIX) and n.endswith(".zettbak"))
+        # the files a job made before the rebrand count too, oldest first, so they go by the same rule
+        ours = sorted(
+            (n for n in os.listdir(folder) if n.startswith(CONFIG_EXPORT_PREFIX) and n.endswith(SETTINGS_EXT)),
+            key=lambda n: n[len(CONFIG_EXPORT_PREFIX) :],
+        )
+        ours = sorted(n for n in os.listdir(folder) if legacy_names.is_old_settings_export(n)) + ours
         for old in ours[: -max(1, int(retention))]:
             os.remove(os.path.join(folder, old))
         return os.path.join(folder, name)
@@ -965,23 +991,14 @@ def _execute_backup_job(job: dict[str, Any]) -> dict[str, Any]:
 
                 # copy, never sync: a file deleted (or encrypted away) at home is never deleted
                 # from the backup. Versions of changed files are what offsite backup (restic) is for.
-                # A file the copy would replace is moved to .zettnas-versions/<run> first, so a file
+                # A file the copy would replace is moved to .kiboto-versions/<run> first, so a file
                 # encrypted at home never overwrites the good copy (REL-9)
                 versions = f"{_versions_of(dest_target)}/{time.strftime('%Y%m%d-%H%M%S')}"
                 sync_job = rclone.start_sync_job(
                     src=source_dir,
                     dst=dest_target,
                     action="copy",
-                    extra_flags=[
-                        "--max-delete",
-                        str(MAX_DELETE_PER_RUN),
-                        "--backup-dir",
-                        versions,
-                        "--exclude",
-                        f"/{VERSIONS_DIR}/**",
-                        "--exclude",
-                        ".RecycleBin/**",
-                    ],
+                    extra_flags=_copy_flags(versions),
                 )
                 history_record["rclone_job_id"] = sync_job.get("id")
                 logger.info(

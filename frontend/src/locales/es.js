@@ -4480,7 +4480,7 @@ export default {
   "toast.permissions_updated_successfully": "Permisos actualizados.",
   "toast.pin_failed": "No se pudo fijar: {error}",
   "toast.pipeline_deleted": "Tarea «{id}» eliminada.",
-  "toast.please_choose_a_kiboto_backup_zip": "Elige una copia de Kiboto (.zip o .zettbak).",
+  "toast.please_choose_a_kiboto_backup_zip": "Elige una copia de Kiboto (.zip o .kibak).",
   "toast.please_drop_an_image_file_jpg": "Suelta una imagen (.jpg, .png, .webp)",
   "toast.please_enter_a_network_name": "Escribe un nombre de red",
   "toast.please_enter_a_title_for_the": "Escribe un título para la nota o el recordatorio",

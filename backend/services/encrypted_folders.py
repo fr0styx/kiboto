@@ -1,6 +1,6 @@
 """Encrypted folders inside a share (FEAT-13), with gocryptfs.
 
-The encrypted files live in the share, in a hidden folder (".zettnas-encrypted/<name>"), so
+The encrypted files live in the share, in a hidden folder (".kiboto-encrypted/<name>"), so
 snapshots, backups and SMB from the host only ever see encrypted names and contents. When the
 folder is unlocked with its password, its readable files appear in Kiboto at
 /mnt/encrypted/<name>: in Files, WebDAV and SFTP, for the people who may use the share it is in.
@@ -20,6 +20,7 @@ import shutil
 import time
 from typing import Any
 
+from backend import legacy_names
 from backend.config import logger
 from backend.fsutil import ENCRYPTED_HIDDEN, atomic_write_json, json_locked
 from backend.services import encrypted_index as ei
@@ -56,7 +57,25 @@ def _settings() -> dict[str, Any]:
 
 
 def cipher_path(share_path: str, name: str) -> str:
-    return os.path.join(share_path, HIDDEN, name)
+    return os.path.join(legacy_names.existing(share_path, HIDDEN, legacy_names.OLD_ENCRYPTED_HIDDEN), name)
+
+
+def rename_hidden_folders() -> int:
+    """A share's hidden folder named before the rebrand takes Kiboto's name, at start and only while
+    none of that share's encrypted folders is open. Returns how many were renamed."""
+    renamed = 0
+    mounted = _mounted()
+    folders = ei.folders()
+    for share in {str(f.get("share") or "") for f in folders.values()} - {""}:
+        if any(plain_path(n) in mounted for n, f in folders.items() if f.get("share") == share):
+            continue
+        try:
+            path = _share_path(share)
+        except ValueError:
+            continue  # the share is gone or not mounted now: next start
+        if os.path.isdir(os.path.join(path, legacy_names.OLD_ENCRYPTED_HIDDEN)):
+            renamed += legacy_names.moved(path, HIDDEN, legacy_names.OLD_ENCRYPTED_HIDDEN) == os.path.join(path, HIDDEN)
+    return renamed
 
 
 def _mounted() -> set[str]:

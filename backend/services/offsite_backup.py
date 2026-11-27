@@ -1097,7 +1097,7 @@ def _safe(fn: Any, repo_or_id: Any, *args: Any, **kwargs: Any) -> None:
 
 SETTINGS_TAG = "kiboto-settings"
 SETTINGS_DIR = os.path.join(DATA_DIR, "backups", "offsite-settings")  # "backups" is never exported
-SETTINGS_FILE = "kiboto-settings.zettbak"
+SETTINGS_FILE = "kiboto-settings.kibak"
 KEEP_SETTINGS = 30
 
 

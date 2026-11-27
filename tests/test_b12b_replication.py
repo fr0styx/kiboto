@@ -160,7 +160,7 @@ def _snaps(state, ds):
 def test_zfs_sends_all_then_what_changed_then_prunes_both_sides(fakes):
     job = _job()
     first = re_.replicate(job, fakes.adapter)
-    assert first["snapshot"] == "zettnas-repl-abcdef12-20261027-0100" and first["bytes"] > 5000
+    assert first["snapshot"] == "kiboto-repl-abcdef12-20261027-0100" and first["bytes"] > 5000
     recv = [c for c in fakes.calls("zfs") if c[1] == "receive"][-1]
     assert recv == ["zfs", "receive", "-u", "-o", "readonly=on", "backup/family"]  # no -F, read-only
     job["last_snapshot"] = first["snapshot"]
@@ -180,7 +180,7 @@ def test_a_target_that_is_not_this_jobs_replica_is_never_overwritten(fakes):
         re_.replicate(_job(), fakes.adapter)
     assert _snaps(fakes.state, "tank/family") == []  # refused before anything was made
     with pytest.raises(re_.ReplicationError, match="not overwritten"):
-        re_.replicate(_job(last_snapshot="zettnas-repl-abcdef12-gone"), fakes.adapter)
+        re_.replicate(_job(last_snapshot="kiboto-repl-abcdef12-gone"), fakes.adapter)
 
 
 def test_over_ssh_the_target_side_runs_there(fakes):
@@ -228,7 +228,7 @@ def test_btrfs_sends_all_then_with_the_parent(fakes):
     job["last_snapshot"] = second["snapshot"]
     re_.replicate(job, fakes.adapter)
     assert len(os.listdir(replica)) == 2  # pruned to the newest two
-    (replica / "zettnas-repl-abcdef12-20261027-0400").mkdir()
+    (replica / "kiboto-repl-abcdef12-20261027-0400").mkdir()
     with pytest.raises(re_.ReplicationError, match="not overwritten"):
         re_.replicate(job, fakes.adapter)
 
@@ -280,10 +280,10 @@ def test_a_run_records_its_snapshot_and_a_failure_alerts(fakes, monkeypatch):
     job = engine.create_job(_job(id=None, hour=3))
     alerts = []
     monkeypatch.setattr(re_, "_notify", lambda *a: alerts.append(a))
-    monkeypatch.setattr(re_, "replicate", lambda j: {"snapshot": "zettnas-repl-x-1", "bytes": 10, "pruned": 0})
+    monkeypatch.setattr(re_, "replicate", lambda j: {"snapshot": "kiboto-repl-x-1", "bytes": 10, "pruned": 0})
     engine._execute(job)
     done = engine.get_job(job["id"])
-    assert done["last_status"] == "success" and done["last_snapshot"] == "zettnas-repl-x-1" and done["last_success"]
+    assert done["last_status"] == "success" and done["last_snapshot"] == "kiboto-repl-x-1" and done["last_success"]
 
     def boom(j):
         raise re_.ReplicationError("receive failed: out of space")
@@ -291,7 +291,7 @@ def test_a_run_records_its_snapshot_and_a_failure_alerts(fakes, monkeypatch):
     monkeypatch.setattr(re_, "replicate", boom)
     engine._execute(job)
     failed = engine.get_job(job["id"])
-    assert failed["last_status"] == "error" and failed["last_snapshot"] == "zettnas-repl-x-1"  # the base stays
+    assert failed["last_status"] == "error" and failed["last_snapshot"] == "kiboto-repl-x-1"  # the base stays
     assert alerts and "out of space" in alerts[0][1]
     assert [h["status"] for h in engine.get_history()] == ["success", "error"]
 

@@ -16,7 +16,7 @@ from typing import Any
 
 from backend import owned
 from backend.config import DATA_DIR, logger
-from backend.fsutil import ENCRYPTED_HIDDEN, atomic_write_json, child_path, json_locked, read_json, resolve_within
+from backend.fsutil import ENCRYPTED_HIDDEN_NAMES, atomic_write_json, child_path, json_locked, read_json, resolve_within
 
 SCHEDULES_FILE = os.path.join(DATA_DIR, "snapshot_schedules.json")
 EVERY = {"hourly": 3600, "daily": 86400, "weekly": 7 * 86400}
@@ -400,7 +400,7 @@ def _parents_as_they_were(folder: str, live_root: str, src_root: str) -> None:
 
 # Never deleted or replaced by a rollback (NREL-7): the Recycle Bin, and the encrypted folders'
 # store, whose files only make sense with the key they were written with
-KEEP_ON_ROLLBACK = (".RecycleBin", ENCRYPTED_HIDDEN)
+KEEP_ON_ROLLBACK = (".RecycleBin", *ENCRYPTED_HIDDEN_NAMES)
 
 
 def _tree_size(path: str) -> int:

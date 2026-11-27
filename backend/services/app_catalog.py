@@ -447,6 +447,7 @@ def toggle_catalog_source(source_id: str, enabled: bool) -> dict[str, Any]:
 
 
 SIDELOADED_APPS_FILE = os.path.join(DATA_DIR, "sideloaded_apps.json")
+APP_MADE_FILE = ".kiboto-secrets.json"  # in an app's folder: the passwords made for it
 
 
 def get_sideloaded_apps() -> list[dict[str, Any]]:
@@ -1061,7 +1062,7 @@ def app_for_install(app_id: str, browser_host: str = "", host_port: int | None =
 
 def _stack_secrets(app_dir: str) -> dict[str, str]:
     """Generated passwords for a stack, kept so a redeploy reuses them (M3)."""
-    path = os.path.join(app_dir, ".zettnas-secrets.json")
+    path = legacy_names.moved(app_dir, APP_MADE_FILE, legacy_names.OLD_APP_MADE_FILE)
     try:
         with open(path, encoding="utf-8") as f:
             data = json.load(f)
@@ -1093,7 +1094,7 @@ def _fill_secrets(value: str, secrets_map: dict[str, str]) -> str:
 def _save_stack_secrets(app_dir: str, secrets_map: dict[str, str]) -> None:
     if not secrets_map:
         return
-    path = os.path.join(app_dir, ".zettnas-secrets.json")
+    path = legacy_names.moved(app_dir, APP_MADE_FILE, legacy_names.OLD_APP_MADE_FILE)
     atomic_write_json(path, secrets_map)  # owner-only (0600)
 
 

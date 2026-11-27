@@ -14,6 +14,7 @@ import shutil
 import time
 from typing import Any
 
+from backend import legacy_names
 from backend.config import DATA_DIR, logger
 from backend.fsutil import atomic_write_json, locked_json, read_json
 
@@ -76,8 +77,8 @@ def sweep(now: float | None = None, force: bool = False) -> list[str]:
             paths = [
                 str(p)
                 for p in entry.get("paths") or []
-                if (".kiboto_" in os.path.basename(str(p)) or ".zettnas_" in os.path.basename(str(p)))
-            ]  # zettnas_: before the rebrand
+                if any(m in os.path.basename(str(p)) for m in (".kiboto_", legacy_names.OLD_UPLOAD_INFIX))
+            ]
             if any(_asleep(p) for p in paths):
                 continue  # next time, once the disk is awake
             try:

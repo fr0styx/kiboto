@@ -186,7 +186,7 @@ Your files live on the pool; Kiboto's own settings (users and their passwords an
 2. **Keep the passphrase off the server**, in a password manager. Without it a settings backup can't be opened.
 3. **If you set an AI data key** (`KIBOTO_DATA_KEY`), keep a copy with the passphrase. A settings backup holds the encrypted AI chat history as it is; it needs the same key to be read.
 
-To recover on a new install: install Kiboto with the same `KIBOTO_DATA_KEY` (if you used one), open Settings → System → Backups & Recovery → *System Configuration Backup & Restore* → *Upload & Restore Archive*, choose the newest `zettnas_backup_*.zettbak` and enter the passphrase. Users, shares and settings come back; the AI index is rebuilt from your files in the background.
+To recover on a new install: install Kiboto with the same `KIBOTO_DATA_KEY` (if you used one), open Settings → System → Backups & Recovery → *System Configuration Backup & Restore* → *Upload & Restore Archive*, choose the newest `kiboto_backup_*.kibak` and enter the passphrase. Users, shares and settings come back; the AI index is rebuilt from your files in the background.
 
 ## Recover on new hardware
 

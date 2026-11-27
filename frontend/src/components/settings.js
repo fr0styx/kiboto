@@ -2,7 +2,7 @@
  * Kiboto Settings & Preferences Controller
  * Handles settings drawer, tabs, screen backlight, timezone, hardware buttons, card layout locks, and security credentials.
  */
-import { settingKey } from '../legacy-names.js';
+import { OLD_BACKUP_MAGIC, OLD_SETTINGS_EXT, settingKey } from '../legacy-names.js';
 import { changeOwnPassword } from './own-password.js';
 import { isAdministrator } from '../admin-only.js';
 import { onManagementDom } from '../management-dom.js';
@@ -1929,12 +1929,12 @@ function askBackupPassphrase(title, msg, allowEmpty) {
   });
 }
 
-const BACKUP_MAGIC = 'ZETTBAK2';
+const BACKUP_MAGIC = 'KIBOBAK2';
 
 async function isEncryptedBackup(file) {
   try {
     const head = await file.slice(0, BACKUP_MAGIC.length).text();
-    return head === BACKUP_MAGIC;
+    return head === BACKUP_MAGIC || head === OLD_BACKUP_MAGIC;
   } catch (e) {
     return false;
   }
@@ -2046,7 +2046,7 @@ export function initSystemTab() {
         a.href = url;
 
         const disposition = res.headers.get('content-disposition');
-        let filename = `kiboto_settings_${new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)}.zettbak`;
+        let filename = `kiboto_settings_${new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)}.kibak`;
         if (disposition && disposition.includes('filename=')) {
           filename = disposition.split('filename=')[1].replace(/["']/g, '').trim();
         }
@@ -2070,9 +2070,9 @@ export function initSystemTab() {
     uploadInput.addEventListener('change', async (e) => {
       const file = /** @type {HTMLInputElement} */ (e.target).files[0];
       if (!file) return;
-      if (!file.name.endsWith('.zip') && !file.name.endsWith('.zettbak')) {
+      if (!['.zip', '.kibak', OLD_SETTINGS_EXT].some((ext) => file.name.endsWith(ext))) {
         showToast(
-          t('toast.please_choose_a_kiboto_backup_zip', 'Please choose a Kiboto backup (.zip or .zettbak).'),
+          t('toast.please_choose_a_kiboto_backup_zip', 'Please choose a Kiboto backup (.zip or .kibak).'),
           'error'
         );
         uploadInput.value = '';

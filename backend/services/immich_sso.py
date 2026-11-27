@@ -3,7 +3,7 @@ Connect Immich to the same sign-in provider as Kiboto (M3).
 
 Steps, through Immich's own API:
 1. If Immich has no admin yet, create one with the Kiboto user's email and a generated
-   password (kept in appdata/immich/.zettnas-secrets.json as immich_admin_password).
+   password (kept in appdata/immich/.kiboto-secrets.json as immich_admin_password).
 2. Sign in as that admin.
 3. Read the system config, turn on OAuth with Kiboto's OpenID Connect issuer and the
    client ID/secret (Kiboto's own client unless others are given), and write it back.
@@ -20,6 +20,7 @@ from typing import Any
 
 import httpx
 
+from backend import legacy_names
 from backend.config import logger
 from backend.fsutil import atomic_write_json
 
@@ -29,7 +30,9 @@ class ImmichSsoError(Exception):
 
 
 def _secret_file(app_dir: str) -> str:
-    return os.path.join(app_dir, ".zettnas-secrets.json")
+    from backend.services.app_catalog import APP_MADE_FILE
+
+    return legacy_names.moved(app_dir, APP_MADE_FILE, legacy_names.OLD_APP_MADE_FILE)
 
 
 def _admin_password(app_dir: str) -> str:
