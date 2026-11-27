@@ -363,7 +363,7 @@
   "buttons": 0,
   "globals": 3,
   "styles": 0,
-  "templates": 0
+  "templates": 1
  },
  "frontend/src/components/network-manager.js": {
   "buttons": 0,

@@ -130,6 +130,8 @@ Boards with two fan devices (Zettlab D4) show both fans. A screen whose brightne
 
 Pools: a mounted pool no longer shows as Not found when Kiboto runs in a container that knows its drives under other names.
 
+Front screen: the layout presets and Save as My Preset work, and a saved preset is kept as its own card.
+
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container
 

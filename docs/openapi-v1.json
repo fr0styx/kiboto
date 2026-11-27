@@ -23893,6 +23893,16 @@
       "title": "Clock Format",
       "type": "string"
      },
+     "my_preset": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/ScreenPreset"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
      "order": {
       "items": {
        "type": "string"
@@ -36496,6 +36506,35 @@
      }
     },
     "title": "ScreenConfigRequest",
+    "type": "object"
+   },
+   "ScreenPreset": {
+    "description": "A front-screen layout someone saved as their own preset (#71).",
+    "properties": {
+     "order": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 32,
+      "title": "Order",
+      "type": "array"
+     },
+     "sizes": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "title": "Sizes",
+      "type": "object"
+     },
+     "vis": {
+      "additionalProperties": {
+       "type": "boolean"
+      },
+      "title": "Vis",
+      "type": "object"
+     }
+    },
+    "title": "ScreenPreset",
     "type": "object"
    },
    "ScriptIn": {

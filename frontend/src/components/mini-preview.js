@@ -10,6 +10,94 @@ import { t } from '../i18n.js';
 const $ = (id) => document.getElementById(id);
 let isDraggingPreview = false;
 
+/** The front screen's ready-made layouts: which modules each shows. */
+export const PRESETS = {
+  default: defaultVis,
+  thermal: {
+    'metric-storage': false,
+    'metric-cpu': true,
+    'metric-mem': false,
+    'metric-fans': true,
+    'metric-net': false,
+    'metric-disks': true,
+  },
+  storage: {
+    'metric-storage': true,
+    'metric-cpu': false,
+    'metric-mem': false,
+    'metric-fans': false,
+    'metric-net': false,
+    'metric-disks': true,
+  },
+  'disks-only': {
+    'metric-storage': false,
+    'metric-cpu': false,
+    'metric-mem': false,
+    'metric-fans': false,
+    'metric-net': false,
+    'metric-disks': true,
+  },
+};
+
+/** The layout someone saved with "Save as My Preset" (kept with the layout on the server). */
+let myPreset = null;
+
+/**
+ * Puts a preset on the screen and saves it: the cards and "Save as My Preset" did nothing (#71).
+ * @param {string} key one of PRESETS, or "mine"
+ */
+export function applyScreenPreset(key) {
+  if (key === 'mine') {
+    if (!myPreset) return Promise.resolve();
+    state.dashVis = { ...state.dashVis, ...myPreset.vis };
+    if (myPreset.order?.length) state.dashOrder = [...myPreset.order];
+    state.dashSizes = { ...state.dashSizes, ...myPreset.sizes };
+  } else if (PRESETS[key]) {
+    state.dashVis = { ...state.dashVis, ...PRESETS[key] };
+  } else {
+    return Promise.resolve();
+  }
+  applyDashboardLayout();
+  evaluateActivePreset();
+  return persistDashboardLayout();
+}
+
+/** Keeps what the screen shows now as "My preset", with a card to bring it back. */
+export function saveMyPreset() {
+  myPreset = { vis: { ...state.dashVis }, order: [...state.dashOrder], sizes: { ...state.dashSizes } };
+  showMyPresetCard();
+  evaluateActivePreset();
+  return persistDashboardLayout({ withPreset: true });
+}
+
+function showMyPresetCard() {
+  const grid = document.querySelector('.preset-btn-card')?.parentElement;
+  if (!grid || !myPreset || grid.querySelector('[data-preset="mine"]')) return;
+  const card = document.createElement('button');
+  card.className = 'preset-btn-card';
+  card.dataset.preset = 'mine';
+  card.innerHTML = `<span class="preset-icon">⭐</span><div class="preset-info"><span class="preset-name"></span><span class="preset-desc"></span></div>`;
+  /** @type {HTMLElement} */ (card.querySelector('.preset-name')).textContent = t('settings.preset_mine', 'My preset');
+  /** @type {HTMLElement} */ (card.querySelector('.preset-desc')).textContent = t(
+    'settings.preset_mine_desc',
+    'The layout you saved'
+  );
+  grid.appendChild(card);
+}
+
+let presetClicks = false;
+/** The preset cards and the save button, heard at the page: the drawer is loaded later. */
+export function setupScreenPresets() {
+  if (presetClicks) return;
+  presetClicks = true;
+  document.addEventListener('click', (e) => {
+    const target = /** @type {HTMLElement | null} */ (e.target);
+    const card = /** @type {HTMLElement | null} */ (target?.closest?.('.preset-btn-card'));
+    if (card?.dataset.preset) applyScreenPreset(card.dataset.preset);
+    else if (target?.closest?.('#btn-save-custom-preset')) saveMyPreset();
+  });
+}
+
 export function applyDashboardLayout() {
   const screenCanvasEl = $('screen');
   const dashCardsContainer = $('dashboard-cards-container');
@@ -135,6 +223,19 @@ export function applyDashboardLayout() {
 export function evaluateActivePreset() {
   const presetBadge = $('preset-state-badge');
   const isVisMatch = (v) => Object.keys(v).every((k) => state.dashVis[k] === v[k]);
+  showMyPresetCard();
+  const known = Object.keys(PRESETS).find((k) => isVisMatch(PRESETS[k]));
+  if (known === 'disks-only' || (!known && myPreset && isVisMatch(myPreset.vis))) {
+    const key = known || 'mine';
+    document.querySelectorAll('.preset-btn-card').forEach((btn) => {
+      btn.classList.toggle('active', btn.dataset.preset === key);
+    });
+    if (presetBadge)
+      presetBadge.textContent = (
+        key === 'mine' ? t('settings.badge_mine', 'Mine') : t('settings.badge_disks_only', 'Disks only')
+      ).toUpperCase();
+    return;
+  }
 
   const isDefault = isVisMatch(defaultVis);
   const isThermal = isVisMatch({
@@ -170,7 +271,7 @@ export function evaluateActivePreset() {
   }
 }
 
-export async function persistDashboardLayout() {
+export async function persistDashboardLayout({ withPreset = false } = {}) {
   try {
     const resp = await api.post('/api/layout', {
       order: state.dashOrder,
@@ -179,6 +280,7 @@ export async function persistDashboardLayout() {
       clock_format: state.clockFormat,
       timezone: state.currentTimezone,
       style: state.screenLayoutStyle || 'classic',
+      ...(withPreset && myPreset ? { my_preset: myPreset } : {}),
     });
     if (resp.layout && resp.layout.version) {
       state.activeLayoutVersion = resp.layout.version;
@@ -195,6 +297,7 @@ export async function fetchDashboardLayout() {
     if (data.order) state.dashOrder = data.order;
     if (data.vis) state.dashVis = data.vis;
     if (data.sizes) state.dashSizes = data.sizes;
+    if (data.my_preset?.vis) myPreset = data.my_preset;
     if (data.clock_format) state.clockFormat = data.clock_format;
     if (data.timezone) state.currentTimezone = data.timezone;
     if (data.style) {
@@ -399,6 +502,7 @@ export function syncMiniPreviewTelemetry() {
 }
 
 export function setupMiniPreviewInteractivity() {
+  setupScreenPresets();
   const miniInner = $('mini-preview-inner');
   if (!miniInner) return;
 

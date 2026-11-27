@@ -571,6 +571,16 @@ def clear_events(principal: AuthenticatedPrincipal = Depends(get_current_princip
     return {"status": "ok"}
 
 
+@json_locked(lambda data: DASH_LAYOUT_FILE)
+def _save_layout(data: dict) -> None:
+    """Writes the front-screen layout. One that does not bring a preset of its own keeps the one
+    saved before, read from the file itself under its lock (the cached layout can be older)."""
+    if data.get("my_preset") is None:
+        before = read_json(DASH_LAYOUT_FILE, {})
+        data["my_preset"] = before.get("my_preset") if isinstance(before, dict) else None
+    atomic_write_json(DASH_LAYOUT_FILE, data)
+
+
 @router.get("/layout")
 def get_layout():
     return get_current_layout()
@@ -583,8 +593,11 @@ def get_layout():
 def post_layout(req: LayoutRequest):
     data = req.model_dump()
     data["sizes"] = {k: v for k, v in data["sizes"].items() if v in ("full", "compact")}
+    if data.get("my_preset") is not None:
+        mine = data["my_preset"]
+        mine["sizes"] = {k: v for k, v in mine["sizes"].items() if v in ("full", "compact")}
     data["version"] = int(time.time() * 1000)
-    atomic_write_json(DASH_LAYOUT_FILE, data)
+    _save_layout(data)
     with Z_STATE.lock:
         if Z_STATE.cached_stats:
             Z_STATE.cached_stats["layout"] = data
