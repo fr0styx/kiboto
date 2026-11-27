@@ -77,7 +77,9 @@ def btrfs():
 
 def test_a_zfs_drive_on_its_own_can_become_a_mirror():
     p = pg.plan(zfs(), Machine())
-    assert p["ways"] == [{"way": "mirror", "to": f"{D1}-part1", "label": f"{D1}-part1", "count": 1, "min": GIB8}]
+    assert p["ways"] == [
+        {"way": "mirror", "to": f"{D1}-part1", "label": f"{D1}-part1", "count": 1, "min": GIB8, "makes": "mirror"}
+    ]
     assert [d["path"] for d in p["drives"]] == ["/dev/vdh", "/dev/vdf", "/dev/vdg"]  # empty drives, by size
 
 
@@ -91,7 +93,7 @@ def test_making_a_mirror_attaches_the_drive_by_its_lasting_name(monkeypatch):
         "pool": "tank",
         "way": "mirror",
         "added": ["/dev/disk/by-id/virtio-KBTESTDISK6"],
-        "profile": "",
+        "profile": "mirror",
     }
 
 

@@ -95,7 +95,18 @@ def _zfs_ways(pool: Any, run: Run) -> tuple[list[dict[str, Any]], dict[str, Any]
     for g in groups:
         if g["kind"] == "lone":
             leaf = g["drives"][0]
-            ways.append({"way": "mirror", "to": leaf["name"], "label": leaf["name"], "count": 1, "min": size(leaf)})
+            # the pool's record says "mirror" afterwards when this drive was the whole pool
+            makes = "mirror" if len(groups) == 1 else ""
+            ways.append(
+                {
+                    "way": "mirror",
+                    "to": leaf["name"],
+                    "label": leaf["name"],
+                    "count": 1,
+                    "min": size(leaf),
+                    "makes": makes,
+                }
+            )
         elif g["kind"].startswith("raidz") and _raidz_can_widen(name, run):
             smallest = min((size(leaf) for leaf in g["drives"]), default=0)
             ways.append({"way": "widen", "to": g["name"], "label": g["name"], "count": 1, "min": smallest})
@@ -165,7 +176,7 @@ def start(pool: Any, way: str, to: str, drives: list[str], run: Run) -> dict[str
     targets = [dr.by_id(path) for path in drives]
     if p["fs"] == "zfs":
         _zfs_add(pool, chosen, targets, run)
-        profile = ""
+        profile = str(chosen.get("makes") or "")
     else:
         profile = _btrfs_add(pool, chosen, targets, run)
     return {"started": True, "pool": pool.id, "way": way, "added": targets, "profile": profile}

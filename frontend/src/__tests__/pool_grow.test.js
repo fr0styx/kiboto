@@ -48,11 +48,20 @@ describe('Add a drive', () => {
   });
 
   it('says what each way does', () => {
-    expect(wayText(PLAN.ways[0])).toContain('Make a mirror of /dev/disk/by-id/a-part1');
+    expect(wayText(PLAN.ways[0])).toContain('Make a mirror of a:');
     expect(wayText(PLAN.ways[1])).toContain('mirror of two drives');
     expect(wayText({ way: 'widen', label: 'raidz1-0' })).toContain('cannot be undone');
     expect(wayText({ way: 'add', profile: 'single' })).toContain('kept once');
     expect(wayText({ way: 'add', profile: 'raid1' })).toContain('spread over it');
+  });
+
+  it('names a drive as a person reads it', async () => {
+    const { driveName } = await import('../components/pool-grow.js');
+    expect(driveName('/dev/disk/by-id/ata-WDC_WD80EFZZ_7SGX1234-part1')).toBe('WDC WD80EFZZ 7SGX1234');
+    expect(driveName('/dev/disk/by-id/usb-QEMU_QEMU_HARDDISK_KBGROW1-0:0')).toBe('QEMU QEMU HARDDISK KBGROW1');
+    expect(driveName('raidz1-0')).toBe('raidz1-0');
+    expect(driveName('/dev/sdb')).toBe('/dev/sdb');
+    expect(driveName(undefined)).toBe('');
   });
 
   it('greys out drives too small, and is ready only with the right number ticked', () => {

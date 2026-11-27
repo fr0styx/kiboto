@@ -476,6 +476,8 @@
 .drive-guide { max-width: 560px; width: calc(100% - 32px); border: 1px solid var(--kb-line-10); border-radius: 12px; padding: 20px 22px; background: var(--card); color: var(--kb-text-strong); }
 .drive-guide::backdrop { background: var(--lt-b-0000008c, rgba(0, 0, 0, 0.55)); }
 .drive-guide-title { margin: 0 0 6px; font-size: 18px; }
+.dr-set { border: 1px solid var(--kb-line-10); border-radius: 8px; padding: 6px 12px 10px; margin: 10px 0; min-width: 0; }
+.dr-set legend { padding: 0 6px; color: var(--muted); font-size: var(--kb-fs-sm); }
 .pg-choice { display: flex; gap: 8px; align-items: flex-start; padding: 4px 0; line-height: 1.4; }
 .pg-choice input { margin-top: 3px; flex: none; }
 .pg-choice:has(input:disabled) { opacity: 0.5; }

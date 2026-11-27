@@ -28,9 +28,22 @@ export function progressText(progress) {
     : t('pg.running_unknown', 'Copying onto the new drive. The pool stays in use; keep the server on.');
 }
 
+/** A drive's lasting name as a person reads it: /dev/disk/by-id/ata-WDC_WD80EFZZ_7SGX1234-part1 ->
+ *  WDC WD80EFZZ 7SGX1234. A group (raidz1-0) or a plain path stays as it is. */
+export function driveName(label) {
+  const s = String(label || '');
+  if (!s.startsWith('/dev/disk/by-id/')) return s;
+  return s
+    .slice('/dev/disk/by-id/'.length)
+    .replace(/-part\d+$/, '')
+    .replace(/^(ata|nvme|scsi|usb|wwn|virtio)-/, '')
+    .replace(/-\d+:\d+$/, '')
+    .replace(/_/g, ' ');
+}
+
 /** What one way of growing does, in a sentence. */
 export function wayText(way) {
-  const drive = way.label || '';
+  const drive = driveName(way.label);
   if (way.way === 'mirror')
     return t('pg.way_mirror', 'Make a mirror of {drive}: every file is kept twice. It gives no more space.', { drive });
   if (way.way === 'add_mirror')
