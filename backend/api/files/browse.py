@@ -23,6 +23,8 @@ from backend.ignored_errors import ignored
 from backend.models.schemas import MkdirRequest
 from backend.services.path_access import ALLOWED_BROWSE_ROOTS, _is_files_admin, check_user_path_access
 
+FLASH_CONFIG = "/boot/config"  # Unraid's flash drive keeps its settings here
+
 router = APIRouter()
 
 
@@ -504,13 +506,14 @@ async def fs_roots(principal: AuthenticatedPrincipal = Depends(get_current_princ
                         }
                     )
 
-        # 4. System (/boot) - Flash Boot
+        # 4. System (/boot) - Unraid's flash drive (it keeps /boot/config); elsewhere /boot is the
+        # system's own kernel and boot loader, which the file manager does not offer
         is_admin = principal and (
             principal.role_id in ("superadmin", "storage_admin")
             or principal.has_scope("storage:admin")
             or principal.has_scope("*")
         )
-        if os.path.exists("/boot"):
+        if "/boot" in ALLOWED_BROWSE_ROOTS and os.path.isdir(FLASH_CONFIG):
             res["system"].append(
                 {
                     "name": "Flash Boot (/boot)",

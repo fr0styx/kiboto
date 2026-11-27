@@ -300,8 +300,12 @@ for _cand in (
     "/zettos",
     "/zettos/pool",
 ):
-    # on a machine set up for Kiboto, USB disks are opened under /mnt/disks later (hardware/usb_mount.py)
-    _managed_disks = _cand == "/mnt/disks" and os.path.exists("/etc/kiboto/managed")
+    # on a machine set up for Kiboto, USB disks are opened under /mnt/disks later (hardware/usb_mount.py),
+    # and /boot is Debian's kernel and boot loader, not Unraid's flash drive: never a folder to browse
+    _managed = os.path.exists("/etc/kiboto/managed")
+    _managed_disks = _cand == "/mnt/disks" and _managed
+    if _cand == "/boot" and _managed:
+        continue
     if (os.path.exists(_cand) or _managed_disks) and _cand not in _roots_list:
         _roots_list.append(_cand)
 ALLOWED_BROWSE_ROOTS = _roots_list
