@@ -382,3 +382,36 @@ def test_handing_the_record_over_never_stops_the_pool_being_recorded(tmp_path, m
     monkeypatch.setattr(reg.os, "chown", refuse)
     reg.record("media", "zfs", "single", "2", ["/dev/vdd"], "/mnt/storage/media")
     assert reg.find("media") and "could not be given to the data folder's owner" in caplog.text
+
+
+def test_a_pool_mounted_with_the_hosts_drive_name_is_there_inside_a_container(tmp_path, monkeypatch):
+    """findmnt gives no UUID when the mount's source is the host's name for the drive (/dev/nvme0n1),
+    which a container only has as /host/dev/nvme0n1: the mounted pool showed as Not found (#71)."""
+    from backend import config
+
+    monkeypatch.setattr(config, "HOST_SYS", str(tmp_path / "sys"))
+    monkeypatch.setattr(config, "HOST_DEV", "/host/dev")
+    (tmp_path / "sys" / "fs" / "btrfs" / "1234-abcd").mkdir(parents=True)
+    said = {"UUID": "", "FSTYPE": "btrfs", "SOURCE": "/dev/nvme0n1[/@shares]"}
+    asked = []
+
+    def run(cmd):
+        asked.append(cmd)
+        if cmd[0] == "findmnt":
+            return 0, said[cmd[2]] + "\n", ""
+        if cmd[0] == "blkid":
+            return 0, "9999-ext4\n", ""
+        return 1, "", ""
+
+    fast = {"name": "fast", "fs_type": "btrfs", "uuid": "1234-abcd", "mountpoint": "/mnt/storage/fast"}
+    assert reg.is_there(fast, run) is True
+    assert reg.is_there({**fast, "uuid": "other"}, run) is False
+    said["FSTYPE"] = ""  # nothing of btrfs mounted there: asked through the host's /dev
+    plain = {"name": "plain", "fs_type": "ext4", "uuid": "9999-ext4", "mountpoint": "/mnt/storage/plain"}
+    assert reg.is_there(plain, run) is True
+    assert asked[-1] == ["blkid", "-s", "UUID", "-o", "value", "/host/dev/nvme0n1"]
+    monkeypatch.setattr(config, "HOST_DEV", "/dev")  # not in a container: findmnt had it right
+    assert reg.is_there(plain, run) is False
+    said["SOURCE"] = "server:/export"
+    monkeypatch.setattr(config, "HOST_DEV", "/host/dev")
+    assert reg.is_there(plain, run) is False

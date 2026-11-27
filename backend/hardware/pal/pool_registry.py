@@ -203,7 +203,33 @@ def is_there(row: dict[str, Any], run: Runner) -> bool:
         code, out, _ = run(["zpool", "get", "-Hp", "-o", "value", "guid", row["name"]])
         return code == 0 and (not row.get("uuid") or out.strip() == row["uuid"])
     code, out, _ = run(["findmnt", "-rno", "UUID", "-M", row["mountpoint"]])
-    return code == 0 and bool(out.strip()) and (not row.get("uuid") or out.strip() == row["uuid"])
+    uuid = out.strip()
+    if code == 0 and not uuid:
+        uuid = _uuid_unseen(row, run)
+    return code == 0 and bool(uuid) and (not row.get("uuid") or uuid == row["uuid"])
+
+
+def _uuid_unseen(row: dict[str, Any], run: Runner) -> str:
+    """The UUID of what is mounted on the pool's folder when findmnt could not tell it: inside a
+    container the mount's source (/dev/nvme0n1) is the host's name for the drive, which is only
+    there as /host/dev/nvme0n1, and a mounted pool showed as Not found (#71). A btrfs pool: the
+    kernel lists every mounted btrfs by its UUID. Else the drive is asked through the host's /dev."""
+    from backend.config import HOST_DEV, HOST_SYS
+
+    mp = row["mountpoint"]
+    want = str(row.get("uuid") or "")
+    if row.get("fs_type") == "btrfs" and want:
+        _c, fstype, _e = run(["findmnt", "-rno", "FSTYPE", "-M", mp])
+        if fstype.strip() == "btrfs" and any(
+            os.path.isdir(os.path.join(base, "fs/btrfs", want)) for base in dict.fromkeys((HOST_SYS, "/sys"))
+        ):
+            return want
+    _c, source, _e = run(["findmnt", "-rno", "SOURCE", "-M", mp])
+    source = source.strip().split("[", 1)[0]  # btrfs adds the subvolume: /dev/sdb[/@shares]
+    if not source.startswith("/dev/") or HOST_DEV.rstrip("/") in ("", "/dev"):
+        return ""
+    code, uuid, _e = run(["blkid", "-s", "UUID", "-o", "value", os.path.join(HOST_DEV, source[len("/dev/") :])])
+    return uuid.strip() if code == 0 else ""
 
 
 def away_pool_of(path: str, rows: list[dict[str, Any]] | None = None) -> str:
