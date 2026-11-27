@@ -5,6 +5,7 @@
  * Dynamic Docker Compose Synthesizer, and Live Log Console.
  */
 
+import { OLD_OWN_CONTAINERS } from '../legacy-names.js';
 import { api } from '../api.js';
 import { showToast, showConfirmToast } from '../toast.js';
 import { escapeHtml, trapFocus, copyText } from '../utils.js';
@@ -1705,7 +1706,7 @@ async function renderContainerEditTab(cid) {
   const currentNetwork = ov.network_mode || 'bridge';
   const currentRestart = ov.restart_policy || 'unless-stopped';
   const isToolkit =
-    ['kiboto', 'zettnas-toolkit', 'zettnas'].includes(currentName) ||
+    ['kiboto', ...OLD_OWN_CONTAINERS].includes(currentName) ||
     (cid && window.location.hostname && cid.startsWith(window.location.hostname));
 
   const portsList = (details.ports || []).map((p) => ({

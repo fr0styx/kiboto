@@ -1,5 +1,6 @@
-"""R1-1: names from before the Kiboto rebrand live in backend/legacy_names.py, or stay on purpose
-(see its docstring). This ratchet fails when a file gains an old name; when one goes, lower its
+"""The product's name before the rebrand goes everywhere; it lives on only in the one-time renames
+(backend/legacy_names.py, frontend/src/legacy-names.js, their test, and index.html's early move),
+until those go too. This ratchet fails when a file gains an old name; when one goes, lower its
 count here (python tests/test_rebrand_ratchet.py prints the current counts)."""
 
 import json
@@ -12,6 +13,7 @@ OLD = re.compile(r"zettnas|zetty|zettai", re.I)
 # the generated API snapshot (it follows the code), and the old Unraid templates (until 2.2)
 SKIP = re.compile(
     r"^(CHANGELOG\.md|docs/archive/|docs/openapi-v1\.json|unraid/zettnas-|backend/legacy_names\.py$"
+    r"|frontend/src/legacy-names\.js$|tests/test_legacy_renames\.py$"
     r"|tests/test_rebrand_ratchet\.py$|tests/rebrand_baseline\.json$)"
 )
 BASELINE = ROOT / "tests" / "rebrand_baseline.json"

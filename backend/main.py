@@ -212,6 +212,13 @@ def _startup_databases(_data_key_problem: Any) -> Any:
     except Exception as e:
         logger.error(f"[Main] Security upgrade step failed: {e}")
     try:
+        from backend import legacy_names
+        from backend.fsutil import atomic_write_json
+
+        legacy_names.rename_at_start(DATA_DIR, atomic_write_json)  # names stored before the rebrand, renamed once
+    except (OSError, ValueError) as e:
+        logger.error("[Main] Could not rename names stored before the rebrand: %s", e)
+    try:
         from backend.api.auth import retire_admin_password_copy
 
         retire_admin_password_copy()  # ARC-9: one copy of the admin password, no SHA-256 hashes

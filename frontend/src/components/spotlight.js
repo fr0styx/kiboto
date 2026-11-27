@@ -219,7 +219,7 @@ function _buildDefaultSpotlightItems() {
       },
     },
     {
-      id: 'app-zettai',
+      id: 'app-kib',
       title: t('sp.ai', 'Ask Kib and photo search'),
       subtitle: t('sp.ai_sub', 'Ask about your recipes and documents, or find photos by scene or colour'),
       icon: '🧠',
@@ -459,7 +459,7 @@ export function filterSpotlightResults(query = '') {
     const cleanPrompt = query.replace(/^(\?|ask:|photo:|img:|doc:)\s*/i, '').trim();
     if (cleanPrompt) {
       const aiDynamicItem = {
-        id: `dyn-zettai-${isPhoto ? 'photo' : 'ask'}`,
+        id: `dyn-kib-${isPhoto ? 'photo' : 'ask'}`,
         title: isPhoto
           ? t('sp.photo_dyn', 'Photo search: “{q}”', { q: cleanPrompt })
           : t('sp.ask_dyn', 'Ask Kib: “{q}”', { q: cleanPrompt }),

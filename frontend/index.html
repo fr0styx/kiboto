@@ -14,7 +14,8 @@
 <title data-i18n="ix.kiboto_studio_hardware_suite">Kiboto Studio • Hardware Suite</title>
 <script>
   (function() {
-    // Kiboto rebrand: saved settings move from zettnas* keys to kiboto* keys before anything reads them
+    // Names from before the rebrand, moved once (with backend/legacy_names.py and src/legacy-names.js):
+    // saved settings move from the old key prefix to kiboto* keys before anything reads them
     try {
       [window.localStorage, window.sessionStorage].forEach(function(store) {
         var old = [];
@@ -28,6 +29,11 @@
           store.removeItem(k);
         });
       });
+      // Kib had the old name as its dock id: a pinned list saved before names it by its own
+      var pinned = window.localStorage.getItem('kiboto_dock_pinned_apps_v1');
+      if (pinned && pinned.indexOf('"zettai"') !== -1) {
+        window.localStorage.setItem('kiboto_dock_pinned_apps_v1', pinned.split('"zettai"').join('"kib"'));
+      }
     } catch (e) { /* storage off: nothing to move */ }
     try {
       var params = new URLSearchParams(window.location.search);

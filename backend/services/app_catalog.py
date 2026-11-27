@@ -1445,7 +1445,7 @@ def _apply_runtime_options(create_body: dict[str, Any], app: dict[str, Any]) -> 
         host["Sysctls"] = {str(k): str(v) for k, v in app["sysctls"].items()}
     if app.get("shm_size"):
         host["ShmSize"] = int(app["shm_size"])
-    if (app.get("join_kiboto_network") or app.get("join_zettnas_network")) and not host.get("NetworkMode"):
+    if app.get("join_kiboto_network") and not host.get("NetworkMode"):
         from backend.services.app_networks import private_network
 
         net = private_network(str(app.get("id") or "app"))  # Kiboto reaches it by name; nothing else does (NSEC-10)

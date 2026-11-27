@@ -161,8 +161,8 @@ export const KNOWN_APPS = {
       }
     },
   },
-  zettai: {
-    id: 'zettai',
+  kib: {
+    id: 'kib',
     icon: '#i-kib',
     getTitle: () => t('dock.kib', 'Ask Kib'),
     launch: () => {

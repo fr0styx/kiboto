@@ -126,8 +126,8 @@
    "id": "personalization",
    "icon": "#i-screen"
   },
-  "zettai": {
-   "id": "zettai",
+  "kib": {
+   "id": "kib",
    "icon": "#i-kib"
   }
  },

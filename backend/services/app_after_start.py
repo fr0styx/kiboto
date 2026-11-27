@@ -4,7 +4,7 @@ A template lists them under "after_start", each {"cmd": [...], "label": "...", "
 "tries": n, "every": secs, "expect": "text", "timeout": secs}. A step is retried until it exits 0
 (and prints `expect`, when given), so the first one can wait for the app to finish installing.
 Values may use {{secret:name}} (the app's generated secrets), {{host}} and {{port}} (where the
-browser reaches the app), {{kiboto}} (Kiboto's name on its Docker network; {{zettnas}} too, until 2.2) and {{arch}}
+browser reaches the app), {{kiboto}} (Kiboto's name on its Docker network) and {{arch}}
 ("" on x86, "_arm64" on ARM). Only built-in templates may have such steps.
 """
 
@@ -22,7 +22,7 @@ from backend import product
 from backend.config import logger
 
 HOST_RE = re.compile(r"^[A-Za-z0-9.-]{1,253}$|^\[[0-9A-Fa-f:]{2,45}\]$")
-PLACEHOLDER = re.compile(r"\{\{(secret:[a-z_]+|host|port|kiboto|zettnas|arch)\}\}")
+PLACEHOLDER = re.compile(r"\{\{(secret:[a-z_]+|host|port|kiboto|arch)\}\}")
 
 
 def valid_host(host: str | None) -> str:
@@ -112,7 +112,6 @@ def context(host: str, port: int, container: str = "") -> dict[str, str]:
         "host": valid_host(host) or "localhost",
         "port": str(port),
         "kiboto": kiboto,
-        "zettnas": kiboto,  # a template saved before the rebrand (legacy_names)
         "arch": "_arm64" if arm else "",
     }
 

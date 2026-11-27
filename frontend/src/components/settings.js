@@ -2,6 +2,7 @@
  * Kiboto Settings & Preferences Controller
  * Handles settings drawer, tabs, screen backlight, timezone, hardware buttons, card layout locks, and security credentials.
  */
+import { settingKey } from '../legacy-names.js';
 import { changeOwnPassword } from './own-password.js';
 import { isAdministrator } from '../admin-only.js';
 import { onManagementDom } from '../management-dom.js';
@@ -1839,7 +1840,7 @@ export function gatherClientPreferences() {
 export function applyClientPreferences(prefs) {
   if (!prefs || typeof prefs !== 'object' || typeof localStorage === 'undefined') return;
   Object.entries(prefs).forEach(([key, v]) => {
-    const k = key.replace(/^zettnas/, 'kiboto'); // saved before the Kiboto rebrand
+    const k = settingKey(key);
     if (k === 'kiboto_token' || k === 'kiboto_signed_in') return;
     try {
       localStorage.setItem(k, typeof v === 'string' ? v : JSON.stringify(v));

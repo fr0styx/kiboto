@@ -2893,7 +2893,7 @@ export function renderAiPreviewInspector(item) {
       <div><strong class="aik-muted">${t('aiq.match_mode', 'Match Mode:')}</strong> <span style="color:var(--lt-t-6ee7b7ff, #6ee7b7);">${escapeHtml(item.match_reason || t('aiq.semantic', 'Semantic Vector'))}</span></div>
       ${item.excerpt ? `<div class="aik-xs-box">${escapeHtml(item.excerpt)}</div>` : ''}
     </div>
-    <!-- 5 Official Kib File Actions (#apps/zettai/search) -->
+    <!-- 5 Official Kib File Actions (#apps/kib/search) -->
     <div class="aik-grid">
       <button type="button" id="btn-ai-inspector-open" class="btn-pill-toggle" style="background: rgba(51,205,184,0.22); border: 1px solid rgba(51,205,184,0.5); color: var(--kb-text-strong);">
         👁️ ${t('aiq.open_file', 'Open File')}

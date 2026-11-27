@@ -555,7 +555,7 @@ def test_hardware_aware_npu_gpu_llm_recommendations(tmp_path, monkeypatch):
         assert pull_edge["hardware_warning"] is False
 
 
-def test_zettai_learning_lifecycle_favorites_and_multimode_search(tmp_path):
+def test_kib_learning_lifecycle_favorites_and_multimode_search(tmp_path):
     """
     Verifies Kib official learning & search features:
       1. Master Switch (`enabled: False` pauses learning and sets kib_status to 'Disabled')
@@ -563,8 +563,8 @@ def test_zettai_learning_lifecycle_favorites_and_multimode_search(tmp_path):
       3. Multi-mode search (`match_tab='keyword'`, `sort_by='mtime'`, `category_groups`)
       4. Favorites toggle (`toggle_favorite`) reflected in search results
     """
-    db_file = str(tmp_path / "rag_zettai_lifecycle.db")
-    cfg_file = str(tmp_path / "rag_zettai_config.json")
+    db_file = str(tmp_path / "rag_kib_lifecycle.db")
+    cfg_file = str(tmp_path / "rag_kib_config.json")
     with patch("backend.services.rag_engine.RAG_CONFIG_PATH", cfg_file):
         engine = RagSearchEngine(db_path=db_file)
 

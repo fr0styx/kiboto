@@ -256,7 +256,6 @@ export const SUBPANE_MAP = {
   'chatbot': { section: 'mgmt-sec-ai', pane: 'mgmt-pane-ai-chat' },
   'chat': { section: 'mgmt-sec-ai', pane: 'mgmt-pane-ai-chat' },
   'rag': { section: 'mgmt-sec-ai', pane: 'mgmt-pane-ai-rag' },
-  'zettai': { section: 'mgmt-sec-ai', pane: 'mgmt-pane-ai-chat' },
   'ai-chat': { section: 'mgmt-sec-ai', pane: 'mgmt-pane-ai-chat' },
   'mgmt-sec-ai': { section: 'mgmt-sec-ai', pane: 'mgmt-pane-ai-index' },
   'mgmt-sec-ai-rag': { section: 'mgmt-sec-ai', pane: 'mgmt-pane-ai-rag' },

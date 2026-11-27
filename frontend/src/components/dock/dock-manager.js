@@ -427,7 +427,7 @@ export const DockManager = {
       smart: () => t('dock.desc_smart', 'S.M.A.R.T. Health & Diagnostics'),
       personalization: () => t('dock.desc_personalization', 'Appearance, Themes & Wallpapers'),
       'cloud-remote': () => t('dock.desc_remotes', 'Cloud Storage & Remote Mounts'),
-      zettai: () => t('dock.desc_kib', 'AI Knowledge & Visual Search'),
+      kib: () => t('dock.desc_kib', 'AI Knowledge & Visual Search'),
       'app-deploy': () => 'App Deployment & Compose Stacks',
     };
 

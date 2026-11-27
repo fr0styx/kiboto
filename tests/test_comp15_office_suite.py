@@ -23,7 +23,7 @@ class FakeDocker:
         if path.startswith("/exec/") and path.endswith("/json"):
             return 200, {"ExitCode": self._next[path.split("/")[2]][0]}
         if path.startswith("/containers/") and path.endswith("/json"):
-            return 200, {"Name": "/zettnas-toolkit"}
+            return 200, {"Name": "/kiboto"}
         return 404, {}
 
     def raw_request(self, method, path, body, timeout=0):
@@ -64,8 +64,7 @@ def test_placeholders_and_hosts(docker):
     assert ctx == {
         "host": "nas.local",
         "port": "8093",
-        "kiboto": "zettnas-toolkit",
-        "zettnas": "zettnas-toolkit",
+        "kiboto": "kiboto",
         "arch": ctx["arch"],
     }
     assert aas.fill("{{host}}:{{port}} {{secret:admin_password}} {{nope}}", ctx, {"admin_password": "pw"}) == (

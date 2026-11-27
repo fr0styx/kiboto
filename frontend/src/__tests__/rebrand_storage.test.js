@@ -31,6 +31,15 @@ describe('Rebrand storage move', () => {
     expect(localStorage.getItem('kiboto_dock_size')).toBe('large');
   });
 
+  it('names Kib by its own id in a dock list saved before', () => {
+    localStorage.clear();
+    localStorage.setItem('kiboto_dock_pinned_apps_v1', JSON.stringify(['files', 'zettai', 'storage']));
+    new Function(early)(); // eslint-disable-line no-new-func
+    expect(JSON.parse(localStorage.getItem('kiboto_dock_pinned_apps_v1'))).toEqual(['files', 'kib', 'storage']);
+    new Function(early)(); // eslint-disable-line no-new-func
+    expect(JSON.parse(localStorage.getItem('kiboto_dock_pinned_apps_v1'))).toEqual(['files', 'kib', 'storage']);
+  });
+
   it('restores a backup made before under the new names', async () => {
     localStorage.clear();
     const { applyClientPreferences } = await import('../components/settings.js');

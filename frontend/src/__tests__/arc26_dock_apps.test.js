@@ -87,7 +87,7 @@ describe('known apps', () => {
     KNOWN_APPS.management.launch('hub');
     KNOWN_APPS.management.launch('mgmt-pane-ups');
     expect(window.openManagementWindow.mock.calls).toEqual([[null], ['mgmt-pane-ups']]);
-    KNOWN_APPS.zettai.launch();
+    KNOWN_APPS.kib.launch();
     expect(window.openManagementWindow).toHaveBeenLastCalledWith('mgmt-sec-ai-rag', 'mgmt-pane-ai-rag');
     KNOWN_APPS.console.launch();
     expect(openConsoleWindow).toHaveBeenCalled();
@@ -145,7 +145,7 @@ describe('known apps', () => {
     document.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => clicks.push(b.id)));
     KNOWN_APPS.fm.launch();
     KNOWN_APPS.management.launch();
-    KNOWN_APPS.zettai.launch();
+    KNOWN_APPS.kib.launch();
     KNOWN_APPS.containers.launch();
     KNOWN_APPS.vm.launch();
     expect(clicks).toEqual([

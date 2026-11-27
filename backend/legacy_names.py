@@ -113,3 +113,48 @@ def getenv(name: str, default: str | None = None) -> str | None:
     if old and old in os.environ:
         return os.environ[old]
     return default
+
+
+OLD_APP_PLACEHOLDER = "{{zettnas}}"  # app definitions saved before: {{kiboto}}
+OLD_APP_NETWORK_FIELD = "join_zettnas_network"  # app definitions saved before: join_kiboto_network
+
+
+def renamed_app(value):
+    """An app definition (any JSON value) with the placeholder and key from before in Kiboto's names."""
+    if isinstance(value, dict):
+        return {("join_kiboto_network" if k == OLD_APP_NETWORK_FIELD else k): renamed_app(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [renamed_app(v) for v in value]
+    if isinstance(value, str):
+        return value.replace(OLD_APP_PLACEHOLDER, "{{kiboto}}")
+    return value
+
+
+def rename_app_files(data_dir: str, write_json) -> int:
+    """Sideloaded apps and cached catalogs saved before the rebrand, renamed where they are stored,
+    with `write_json` (fsutil.atomic_write_json: this module imports nothing of Kiboto's, since
+    settings imports it). Returns how many files changed."""
+    import glob
+    import json
+
+    changed = 0
+    paths = [
+        os.path.join(data_dir, "sideloaded_apps.json"),
+        *glob.glob(os.path.join(data_dir, "catalog_cache", "*.json")),
+    ]
+    for path in paths:
+        try:
+            with open(path, encoding="utf-8") as f:
+                data = json.load(f)
+        except (OSError, ValueError):
+            continue
+        new = renamed_app(data)
+        if new != data:
+            write_json(path, new)
+            changed += 1
+    return changed
+
+
+def rename_at_start(data_dir: str, write_json) -> None:
+    """The one-time renames of names stored before the rebrand; each finds nothing once done."""
+    rename_app_files(data_dir, write_json)
