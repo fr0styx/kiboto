@@ -4,7 +4,10 @@
 Description=Kiboto: storage pools
 After=local-fs.target zfs-import.target zfs-mount.service systemd-udev-settle.service
 Before=docker.service smbd.service nfs-server.service
-ConditionPathExists=/var/lib/kiboto/storage/pools.json
+# runs when there are pools to bring back, or a Secure Boot key to settle (services/secure_boot.py):
+# a fresh machine has no pools yet, and its key still needs settling after the step at the screen
+ConditionPathExists=|/var/lib/kiboto/storage/pools.json
+ConditionPathExists=|/etc/kiboto/secure-boot-code
 
 [Service]
 Type=oneshot

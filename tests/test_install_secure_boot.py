@@ -105,3 +105,12 @@ def test_the_boot_unit_hands_its_own_runner_to_secure_boot(monkeypatch):
     monkeypatch.setattr(pools_at_boot, "_run", lambda cmd: (0, "out of " + cmd[0], "err"))
     assert pools_at_boot.main() == 0
     assert seen["run"](["mokutil", "--test-key"]) == (0, "out of mokutil\nerr")
+
+
+def test_the_boot_unit_also_runs_for_a_key_on_a_machine_with_no_pools_yet():
+    """Found by CI's Secure Boot check: the unit ran only when a pool record existed, so on a fresh
+    machine the code and the note stayed after the key was enrolled."""
+    unit = (Path(__file__).resolve().parents[1] / "packaging" / "kiboto-pools.service").read_text()
+    assert "ConditionPathExists=|/var/lib/kiboto/storage/pools.json" in unit
+    assert "ConditionPathExists=|/etc/kiboto/secure-boot-code" in unit
+    assert "ConditionPathExists=/var" not in unit  # a plain condition would still demand the record
