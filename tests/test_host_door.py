@@ -528,7 +528,8 @@ def test_the_door_checks_a_new_pool_as_the_page_does(audit, monkeypatch, tmp_pat
         ({"disks": [7]}, "one to 64"),
         ({"name": "-x"}, "Pool name"),
         ({"fs_type": "ntfs"}, "Kiboto makes"),
-        ({"profile": "raid1 -f"}, "Kiboto makes"),
+        ({"profile": "raid1 -f"}, "made as one of"),
+        ({"profile": "raid1", "disks": ["sdb"]}, "RAID1 requires at least 2"),
         ({"mountpoint": "/etc"}, "must be inside"),
     ):
         reply = create(**changes)

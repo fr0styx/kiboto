@@ -92,6 +92,8 @@ Kiboto OS: a shared folder exported over NFS only can be written to; it refused 
 
 Kiboto OS: deleting a file on a pool made after the install puts it in the Recycle Bin; it failed with a server error.
 
+A ZFS pool asked for as RAID 1 is made as a mirror. Layouts a kind of pool does not have, such as RAID 5 on ZFS, are refused. Before, those made a pool with no second copy that the pool list called protected.
+
 ## v2.0.8 (2026-11-26)
 ### 🛡️ Kiboto OS without root and on signed releases, with drive replacement and a move from the container
 

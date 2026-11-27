@@ -348,8 +348,10 @@ def create_storage_pool(
         mountpoint = pool_rules.new_pool_mount(req.mountpoint)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
-    if req.fs_type.lower() not in pool_rules.KINDS_MADE:
-        raise HTTPException(status_code=400, detail="Kiboto makes ZFS, btrfs and ext4 pools.")
+    try:
+        layout = pool_rules.pool_layout(req.fs_type, req.profile, len(req.disks))
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
     if req.confirm_name != req.name:
         raise HTTPException(status_code=400, detail="Type the pool name to confirm that the disks will be erased.")
     user = get_user_by_id(principal.user_id) if principal and principal.user_id else None
@@ -374,7 +376,7 @@ def create_storage_pool(
         made = adapter.create_pool(
             name=req.name,
             fs_type=req.fs_type,
-            profile=req.profile,
+            profile=layout,
             disks=req.disks,
             mountpoint=mountpoint,
         )

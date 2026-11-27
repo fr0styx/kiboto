@@ -22,7 +22,7 @@ from backend.config import HOST_DEV, HOST_PROC, HOST_SYS, POOL_PATH, logger
 from backend.fsutil import atomic_write_json, child_path
 from backend.hardware import fs_quota
 from backend.hardware.pal import base as pal_base
-from backend.hardware.pal import pool_registry, system_disk
+from backend.hardware.pal import pool_registry, pool_rules, system_disk
 from backend.hardware.pal.base import (
     NetworkShare,
     PlatformCapabilities,
@@ -1258,21 +1258,7 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
         if fs_lower not in POOL_KINDS:  # also keeps an unknown kind from answering "provisioned" with nothing made
             raise ValueError(f"Kiboto makes {', '.join(POOL_KINDS)} pools, not {fs_type}.")
 
-        # Validate drive counts for RAID profiles
-        if fs_lower == "zfs":
-            if profile_lower == "raidz1" and len(resolved_disks) < 3:
-                raise ValueError("OpenZFS RAIDZ1 requires at least 3 disks (single parity)")
-            elif profile_lower == "raidz2" and len(resolved_disks) < 4:
-                raise ValueError("OpenZFS RAIDZ2 requires at least 4 disks (dual parity)")
-            elif profile_lower == "raidz3" and len(resolved_disks) < 5:
-                raise ValueError("OpenZFS RAIDZ3 requires at least 5 disks (triple parity)")
-            elif profile_lower in ("mirror", "raid1") and len(resolved_disks) < 2:
-                raise ValueError("OpenZFS Mirror requires at least 2 disks")
-        else:
-            if profile_lower in ("raid1", "raid0") and len(resolved_disks) < 2:
-                raise ValueError(f"{profile.upper()} requires at least 2 disks")
-            if profile_lower == "raid10" and len(resolved_disks) < 4:
-                raise ValueError("RAID10 requires at least 4 disks")
+        profile_lower = pool_rules.pool_layout(fs_lower, profile_lower, len(resolved_disks))
 
         target_mount = mountpoint.strip() or os.path.join(self._pool_path, name)
         try:
@@ -1284,7 +1270,7 @@ class GenericLinuxStorageAdapter(StoragePlatformAdapter):
 
         if fs_lower == "zfs":
             # ashift=12 (4Kn/512e modern sector alignment), zstd compression, posixacl, xattr=sa
-            vdev_type = profile_lower if profile_lower in ("raidz1", "raidz2", "raidz3", "mirror") else ""
+            vdev_type = "" if profile_lower == "single" else profile_lower
             vdev_args = [vdev_type] + resolved_disks if vdev_type else resolved_disks
             cmd = [
                 "zpool",

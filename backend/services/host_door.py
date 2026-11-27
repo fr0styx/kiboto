@@ -132,7 +132,7 @@ def _new_pool(kw: dict[str, Any]) -> None:
     from backend.hardware.pal_storage import get_storage_platform
 
     pool_rules.new_pool_name(kw["name"])
-    if kw["fs_type"].lower() not in pool_rules.KINDS_MADE or not re.match(r"^[A-Za-z0-9]{1,16}$", kw["profile"]):
+    if kw["fs_type"].lower() not in pool_rules.KINDS_MADE:
         raise ValueError("Kiboto makes ZFS, btrfs and ext4 pools.")
     kw["mountpoint"] = pool_rules.new_pool_mount(kw["mountpoint"])
     disks = kw["disks"]
@@ -144,6 +144,7 @@ def _new_pool(kw: dict[str, Any]) -> None:
         raise ValueError(
             "These disks can't be formatted: " + "; ".join(f"{p['disk']}: {p['reason']}" for p in problems)
         )
+    kw["profile"] = pool_rules.pool_layout(kw["fs_type"], kw["profile"], len(disks))
 
 
 def _imported(kw: dict[str, Any]) -> None:
